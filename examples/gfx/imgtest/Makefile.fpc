@@ -1,0 +1,15 @@
+#
+#   Makefile.fpc for fpGFX example "ImgTest"
+#
+
+[target]
+programs=imgtest
+
+[require]
+packages=fcl fpgfx
+packages_linux=fpgfx_x11
+packages_freebsd=fpgfx_x11
+packages_netbsd=fpgfx_x11
+
+[compiler]
+options=-S2h

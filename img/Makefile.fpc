@@ -1,0 +1,18 @@
+#
+#   Makefile.fpc for fpImg
+#
+
+[targets]
+units=imageio fpimg bmpreader
+rst=imageio
+
+[require]
+options=-S2h
+packages=fpgfx
+
+[libs]
+libname=fpimg
+
+[dirs]
+fpcdir=../../../fpc
+unitdir=../../fpgfx/src

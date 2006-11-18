@@ -1,0 +1,37 @@
+#
+#   Makefile.fpc for fpGFX
+#
+
+[package]
+name=fpgfx
+version=0.3
+
+[require]
+packages=fcl
+
+[target]
+units=gfxbase geldirty gelimage
+rsts=gfxbase
+dirs_linux=linux
+dirs_freebsd=linux
+dirs_netbsd=linux
+dirs_win32=win32
+
+[compiler]
+sourcedir=emulayer
+unittargetdir=units
+options=-S2h
+
+[install]
+buildunit=gfxbase
+fpcpackage=y
+
+[default]
+fpcdir=/opt/fpc/src
+
+[rules]
+fpgfx$(PPUEXT): $(wildcard *.pas *.inc)
+
+[libs]
+libname=libfpgfx.so
+libversion=0.3

@@ -1,0 +1,10 @@
+#
+#   Makefile.fpc for fpGUI WidgetTest example
+#
+
+[targets]
+programs=widgettest
+
+[require]
+options=-S2h
+packages=fcl fpgfx fpgui

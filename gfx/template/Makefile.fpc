@@ -1,0 +1,22 @@
+#
+#   Makefile.fpc for fpGFX target template
+#
+
+[targets]
+units=gfx_xxx
+# do not compile gfximpl for this dummy target
+rst=gfx_xxx
+
+[require]
+options=-S2h
+packages=
+
+[libs]
+libname=fpgfx_xxx
+
+[install]
+subdir=
+
+[dirs]
+fpcdir=../../../..
+unitdir=..

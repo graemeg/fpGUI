@@ -1,0 +1,10 @@
+#
+#   Makefile.fpc for fpGUI InterbaseTest example
+#
+
+[targets]
+programs=interbasetest
+
+[require]
+options=-S2h
+packages=fcl fpgfx fpgui

@@ -1,0 +1,10 @@
+#
+#   Makefile.fpc for fpGUI HelloWorld example
+#
+
+[targets]
+programs=helloworld
+
+[require]
+options=-S2h
+packages=fcl fpgfx fpgui

@@ -1,0 +1,27 @@
+#
+#   Makefile.fpc for fpGFX X11 target
+#
+
+[package]
+name=fpgfx
+version=0.3
+
+[require]
+packages=fcl
+unitdir=.. ../emulayer
+
+[target]
+units=gfx_x11 gfxinterface
+rst=gfx_x11
+
+[compiler]
+unitdir=.. ../emulayer
+unittargetdir=../units
+options=-S2h
+
+[install]
+fpcpackage=y
+
+[default]
+fpcdir=/opt/fpc/src
+

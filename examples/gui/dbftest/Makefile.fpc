@@ -1,0 +1,10 @@
+#
+#   Makefile.fpc for fpGUI DBFTest example
+#
+
+[targets]
+programs=dbftest
+
+[require]
+options=-S2h
+packages=fcl fpgfx fpgui

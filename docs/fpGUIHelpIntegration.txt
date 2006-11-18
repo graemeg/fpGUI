@@ -1,0 +1,15 @@
+Setup for Integrated Help under Lazarus
+---------------------------------------
+
+For the Integrated Help to work, the fpGUIHelpIntegration package has been 
+setup to find the help in the /docs/html directory.
+
+Installation:
+---------------
+1) Open fpGUIHelpIntegration.lpk package with Lazarus.
+2) Click Compile
+3) Click Install
+
+
+Regards,
+  - Graeme Geldenhuys -

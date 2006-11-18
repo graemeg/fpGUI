@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="2">
+    <Name Value="fpgfxpackage"/>
+    <Author Value="Graeme Geldenhuys"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="../;../emulayer/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="Free Pascal GFX Library - [Linux]
+"/>
+    <License Value="LGPL
+"/>
+    <Version Minor="3"/>
+    <Files Count="8">
+      <Item1>
+        <Filename Value="../gfxbase.pas"/>
+        <UnitName Value="GfxBase"/>
+      </Item1>
+      <Item2>
+        <Filename Value="../emulayer/geldirty.pas"/>
+        <UnitName Value="GELDirty"/>
+      </Item2>
+      <Item3>
+        <Filename Value="../emulayer/gelimage.pas"/>
+        <UnitName Value="GELImage"/>
+      </Item3>
+      <Item4>
+        <Filename Value="gfx_x11.pas"/>
+        <UnitName Value="GFX_X11"/>
+      </Item4>
+      <Item5>
+        <Filename Value="gfxinterface.pas"/>
+        <UnitName Value="gfxinterface"/>
+      </Item5>
+      <Item6>
+        <Filename Value="../schar16.pas"/>
+        <UnitName Value="schar16"/>
+      </Item6>
+      <Item7>
+        <Filename Value="../unitkeys.pas"/>
+        <UnitName Value="unitkeys"/>
+      </Item7>
+      <Item8>
+        <Filename Value="../fpgfx.pas"/>
+        <UnitName Value="fpgfx"/>
+      </Item8>
+    </Files>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)/"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

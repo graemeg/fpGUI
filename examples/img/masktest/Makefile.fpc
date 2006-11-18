@@ -1,0 +1,14 @@
+#
+#   Makefile.fpc for fpImg example "masktest"
+#
+
+[targets]
+programs=masktest
+
+[require]
+options=-S2h
+packages=fcl fpgfx
+
+[dirs]
+fpcdir=../../../../fpc
+unitdir=../../src

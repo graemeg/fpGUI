@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Script to create a table 'FPdev' and to fill it with data.
+# The script accepts an optional argument : 
+# A database to connect to. (default 'testdb')
+#
+# Collect  the database
+DATABASE=test.gdb
+# Choose one of the following:
+# ISQL=isql
+ISQL=/opt/interbase/bin/isql
+#
+# Don't edit after this.
+#
+echo -n "Creating and filling table FPdev in database $DATABASE..."
+# >/dev/null 2>&1
+${ISQL} << EOF
+set sql dialect 3;
+CREATE DATABASE "$DATABASE";
+create table FPDEV ( 
+id INT NOT NULL,
+UserName varchar(50),
+InstEmail CHAR(50),
+PRIMARY KEY (id));
+insert into FPdev values ('1','Michael Van Canneyt','Michael@tfdec1.fys.kuleuven.ac.be');
+insert into FPdev values ('2','Florian Klaempfl','ba2395@fen.baynet.de');
+insert into FPdev values ('3','Carl-Eric Codere','codc01@gel.usherb.ca');
+insert into FPdev values ('4','Daniel Mantione','d.s.p.mantione@twi.tudelft.nl');
+insert into FPdev values ('5','Pierre Muller','muller@europe.u-strasbg.fr');
+insert into FPdev values ('6','Jonas Maebe','jmaebe@mail.dma.be');
+insert into FPdev values ('7','Peter Vreman','pfv@worldonline.nl');
+insert into FPdev values ('8','Gerry Dubois','gerry@webworks.ml.org');
+insert into FPdev values ('9','name9','mail9');
+insert into FPdev values ('10','name10','mail10');
+insert into FPdev values ('11','name11','mail11');
+insert into FPdev values ('12','name12','mail12');
+create table test (
+timestamp_fld timestamp,
+smallint_fld smallint,
+integer_fld integer,
+float_fld float,
+double_fld double precision,
+char_fld char(10),
+varchar_fld varchar(50));
+insert into test values ('12.1.2000 00:30',10,70000,12.5,20.5,'testchar','testvarchar');
+commit;
+EOF
+if [ ! $? = 0 ]; then
+  echo "Failed."
+else
+  echo "Done."
+fi
+# Ready
