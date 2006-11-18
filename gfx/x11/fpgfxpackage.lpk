@@ -18,7 +18,7 @@
     </CompilerOptions>
     <Description Value="Free Pascal GFX Library - [Linux]
 "/>
-    <License Value="LGPL
+    <License Value="Modified LGPL
 "/>
     <Version Minor="3"/>
     <Files Count="8">
