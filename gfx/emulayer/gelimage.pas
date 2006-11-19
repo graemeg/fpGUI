@@ -285,29 +285,12 @@ begin
 	    ParamsS2I.Palette[0] := 0;
 	end;
       end;
-    ftPal4, ftPal4A:
-      begin
-        ConvertToInternal := @ConvertPal4ToInternal;
-	max := ConvertPalette(15, ParamsS2I);
-	for i := max + 1 to 15 do
-	  ParamsS2I.Palette[i] := 0;
-      end;
     ftPal8, ftPal8A:
       begin
         ConvertToInternal := @ConvertPal8ToInternal;
 	max := ConvertPalette(255, ParamsS2I);
 	for i := max + 1 to 255 do
 	  ParamsS2I.Palette[i] := i or (i shl 8) or (i shl 16);
-      end;
-    ftRGB24:
-      begin
-        ConvertToInternal := @ConvertRGB24ToInternal;
-	ParamsS2I.RedShiftR := 8 -
-	  GetBitShiftAndCount(ASourceFormat.RedMask, ParamsS2I.RedShiftL);
-	ParamsS2I.GreenShiftR := 16 -
-	  GetBitShiftAndCount(ASourceFormat.GreenMask, ParamsS2I.GreenShiftL);
-	ParamsS2I.BlueShiftR := 24 -
-	  GetBitShiftAndCount(ASourceFormat.BlueMask, ParamsS2I.BlueShiftL);
       end;
     ftRGB32:
       begin
@@ -327,11 +310,6 @@ begin
     ftRGB16:
       begin
         ConvertFromInternal := @ConvertInternalToRGB16;
-	SetupShifts(ADestFormat, ParamsI2D);
-      end;
-    ftRGB24:
-      begin
-        ConvertFromInternal := @ConvertInternalToRGB24;
 	SetupShifts(ADestFormat, ParamsI2D);
       end;
     ftRGB32:

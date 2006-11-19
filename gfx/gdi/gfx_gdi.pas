@@ -139,16 +139,11 @@ type
   TGDIBitmap = class(TFCustomBitmap)
   private
     IsLocked: Boolean;
-  protected
-    FStride: LongWord;
-    FData: Pointer;
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); override;
     destructor Destroy; override;
     procedure Lock(var AData: Pointer; var AStride: LongWord); override;
     procedure Unlock; override;
-    property Stride: LongWord read FStride;
-    property Data: Pointer read FData;
   end;
 
   { TGDIScreen }
@@ -912,12 +907,6 @@ begin
 	Color^.rgbGreen     := 255;
 	Color^.rgbBlue      := 255;
 	Color^.rgbReserved  := 0;
-      end;
-    ftPal4, ftPal4A:
-      begin
-        FStride := (AWidth + 1) shr 1;
-        GetMem(BitmapInfo, SizeOf(TBitmapInfoHeader) + 16 * SizeOf(RGBQUAD));
-        BitmapInfo^.bmiHeader.biClrUsed := 0;
       end;
     ftPal8, ftPal8A:
       begin

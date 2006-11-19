@@ -111,7 +111,7 @@ type
     procedure   DoTextOut(const APosition: TPoint; const AText: String); override;
     procedure   DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect; const ADestPos: TPoint); override;
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); override;
-    procedure   DoDrawImageRect(AImage: TFCustomImage; ASourceRect: TRect; const ADestPos: TPoint); override;
+    procedure   DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect; const ADestPos: TPoint); override;
   public
     constructor Create(AColormap: TColormap; AXDrawable: X.TDrawable; ADefaultFont: PXFontStruct);
     destructor  Destroy; override;
@@ -152,20 +152,16 @@ type
     constructor Create(AColormap: TColormap; AHandle: TPixmap);
   end;
 
+  { TX11Bitmap }
 
-  TX11Image = class(TFCustomImage)
+  TX11Bitmap = class(TFCustomBitmap)
   private
     IsLocked: Boolean;
-  protected
-    FStride: LongWord;
-    FData: Pointer;
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); override;
     destructor  Destroy; override;
     procedure   Lock(var AData: Pointer; var AStride: LongWord); override;
     procedure   Unlock; override;
-    property    Stride: LongWord read FStride;
-    property    Data: Pointer read FData;
   end;
 
   { TX11Screen }
@@ -777,7 +773,7 @@ begin
   XSetRegion(gApplication.Handle, GC, Region);
 end;
 
-procedure TX11Canvas.DoDrawImageRect(AImage: TFCustomImage; ASourceRect: TRect;
+procedure TX11Canvas.DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect;
   const ADestPos: TPoint);
 var
   Image: XLib.PXImage;
@@ -898,30 +894,28 @@ begin
   inherited Create(AColormap, AHandle, PixelFormatMono);
 end;
 
-{ TX11Image }
+{ TX11Bitmap }
 
-constructor TX11Image.Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat);
+constructor TX11Bitmap.Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat);
 begin
   inherited Create(AWidth, AHeight, APixelFormat);
 
   case APixelFormat.FormatType of
     ftMono:
       FStride := (AWidth + 7) shr 3;
-    ftPal4, ftPal4A:
-      FStride := (AWidth + 1) and not 1;
     else
       FStride := AWidth * (FormatTypeBPPTable[APixelFormat.FormatType] shr 3);
   end;
   GetMem(FData, FStride * Height);
 end;
 
-destructor TX11Image.Destroy;
+destructor TX11Bitmap.Destroy;
 begin
   FreeMem(FData);
   inherited Destroy;
 end;
 
-procedure TX11Image.Lock(var AData: Pointer; var AStride: LongWord);
+procedure TX11Bitmap.Lock(var AData: Pointer; var AStride: LongWord);
 begin
   ASSERT(not IsLocked);
   IsLocked := True;
@@ -930,7 +924,7 @@ begin
   AStride := Stride;
 end;
 
-procedure TX11Image.Unlock;
+procedure TX11Bitmap.Unlock;
 begin
   ASSERT(IsLocked);
   IsLocked := False;
