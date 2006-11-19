@@ -18,7 +18,7 @@
 
 program MaskTest;
 
-uses Classes, GFXBase, GFXImpl, fpImg, BMPReader;
+uses Classes, GFXBase, fpGFX, fpImg, BMPReader;
 
 type
   TMainWindow = class
@@ -127,7 +127,7 @@ var
   Display: TDefDisplay;
   MainWindow: TMainWindow;
 begin
-WriteLn('Version: ' + {$I %date%} + ' ' + {$I %time%});
+  WriteLn('Version: ' + {$I %date%} + ' ' + {$I %time%});
   Display := TDefDisplay.Create;
   MainWindow := TMainWindow.Create(Display);
   Display.Run;
@@ -135,16 +135,3 @@ WriteLn('Version: ' + {$I %date%} + ' ' + {$I %time%});
   Display.Free;
 end.
 
-
-{
-  $Log: masktest.pp,v $
-  Revision 1.3  2001/02/14 23:08:59  sg
-  * Adapted to changes in fpGFX interface
-
-  Revision 1.2  2001/02/09 20:49:03  sg
-  * Adapted to recent improvements in fpGFX interfaces
-
-  Revision 1.1  2001/01/11 23:21:53  sg
-  *** empty log message ***
-
-}

@@ -3,7 +3,7 @@
 
     GFXBase  -  Abstract declarations to be implemented on each platform
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -246,7 +246,7 @@ type
   end;
 
 
-  TFCustomImage = class;
+  TFCustomBitmap = class;
   TFCustomApplication = class;
   TFCustomWindow = class;
 
@@ -314,7 +314,7 @@ type
     procedure   DoTextOut(const APosition: TPoint; const AText: String); virtual; abstract;
     procedure   DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect; const ADestPos: TPoint); virtual; abstract;
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); virtual; abstract;
-    procedure   DoDrawImageRect(AImage: TFCustomImage; ASourceRect: TRect; const ADestPos: TPoint); virtual; abstract;
+    procedure   DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect; const ADestPos: TPoint); virtual; abstract;
   public
     constructor Create;
     // Transformations
@@ -362,8 +362,8 @@ type
     procedure   MaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint);
 
     // Image drawing
-    procedure   DrawImage(AImage: TFCustomImage; const ADestPos: TPoint);
-    procedure   DrawImageRect(AImage: TFCustomImage; ASourceRect: TRect; const ADestPos: TPoint);
+    procedure   DrawImage(AImage: TFCustomBitmap; const ADestPos: TPoint);
+    procedure   DrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect; const ADestPos: TPoint);
 
     // Properties
     property    Width: Integer read FWidth;
@@ -372,14 +372,16 @@ type
     property    Matrix: TGfxMatrix read FMatrix write FMatrix;
   end;
 
+  { TFCustomBitmap }
 
-  TFCustomImage = class(TObject)
+  TFCustomBitmap = class(TObject)
   private
     FWidth, FHeight: Integer;
     FPixelFormat: TGfxPixelFormat;
     FPalette: TGfxPalette;
     procedure   SetPalette(APalette: TGfxPalette);
   protected
+    FHandle: Cardinal;
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); virtual;
     destructor  Destroy; override;
@@ -390,6 +392,7 @@ type
     property    Height: Integer read FHeight;
     property    PixelFormat: TGfxPixelFormat read FPixelFormat;
     property    Palette: TGfxPalette read FPalette write SetPalette;
+    property    Handle: Cardinal read FHandle;
   end;
 
   { TFCustomScreen }
@@ -820,12 +823,12 @@ begin
     AMask.Transform(AMaskPos), Transform(ADestPos));
 end;
 
-procedure TFCustomCanvas.DrawImage(AImage: TFCustomImage; const ADestPos: TPoint);
+procedure TFCustomCanvas.DrawImage(AImage: TFCustomBitmap; const ADestPos: TPoint);
 begin
   DrawImageRect(AImage, Rect(0, 0, AImage.Width, AImage.Height), ADestPos);
 end;
 
-procedure TFCustomCanvas.DrawImageRect(AImage: TFCustomImage; ASourceRect: TRect;
+procedure TFCustomCanvas.DrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect;
   const ADestPos: TPoint);
 var
   SourceRect: TRect;
@@ -841,21 +844,21 @@ begin
     DoDrawImageRect(AImage, ASourceRect, Transform(ADestPos));
 end;
 
-{ TFCustomImage }
+{ TFCustomBitmap }
 
-destructor TFCustomImage.Destroy;
+destructor TFCustomBitmap.Destroy;
 begin
   if Assigned(Palette) then
     Palette.Release;
   inherited Destroy;
 end;
 
-procedure TFCustomImage.Unlock;
+procedure TFCustomBitmap.Unlock;
 begin
   // Default implementation: Do nothing...
 end;
 
-procedure TFCustomImage.SetPixelsFromData(AData: Pointer; AStride: LongWord);
+procedure TFCustomBitmap.SetPixelsFromData(AData: Pointer; AStride: LongWord);
 var
   DestData: Pointer;
   DestStride, BytesPerScanline: LongWord;
@@ -893,7 +896,7 @@ begin
   end;
 end;
 
-constructor TFCustomImage.Create(AWidth, AHeight: Integer;
+constructor TFCustomBitmap.Create(AWidth, AHeight: Integer;
   APixelFormat: TGfxPixelFormat);
 begin
   FWidth := AWidth;
@@ -901,7 +904,7 @@ begin
   FPixelFormat := APixelFormat;
 end;
 
-procedure TFCustomImage.SetPalette(APalette: TGfxPalette);
+procedure TFCustomBitmap.SetPalette(APalette: TGfxPalette);
 begin
   if APalette <> Palette then
   begin

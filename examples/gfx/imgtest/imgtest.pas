@@ -3,7 +3,7 @@
 
     Image Test example
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -25,7 +25,7 @@ type
   TMainWindow = class(TFWindow)
     procedure Paint(Sender: TObject; const Rect: TRect);
   private
-    Image: TFImage;
+    Bitmap: TFBitmap;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -45,17 +45,18 @@ begin
   SetClientSize(Size(256, 256));
   SetMinMaxClientSize(Size(256, 256), Size(256, 256));
 
-  Image := TFImage.Create(256, 256, PixelFormatRGB32);
-  Image.Lock(Data, Stride);
+  Bitmap := TFBitmap.Create(256, 256, PixelFormatRGB32);
+  Bitmap.Lock(Data, Stride);
   for j := 0 to 255 do
     for i := 0 to 255 do
       PLongWord(Data)[j * 256 + i] := (i shl 16) or (j shl 8);
-  Image.Unlock;
+  Bitmap.Unlock;
 end;
 
 destructor TMainWindow.Destroy;
 begin
-  Image.Free;
+  Bitmap.Free;
+  
   inherited Destroy;
 end;
 
@@ -69,7 +70,7 @@ begin
   r.Right   := Width;
   r.Bottom  := Height;
   Canvas.FillRect(r);
-  Canvas.DrawImage(Image, Point(0, 0));
+  Canvas.DrawImage(Bitmap, Point(0, 0));
 end;
 
 
@@ -77,11 +78,11 @@ var
   MainWindow: TMainWindow;
   
 begin
-  gApplication.Initialize;
+  GFApplication.Initialize;
   MainWindow := TMainWindow.Create;
-  gApplication.AddWindow(MainWindow);
+  GFApplication.AddWindow(MainWindow);
   MainWindow.Show;
-  gApplication.Run;
+  GFApplication.Run;
 end.
 
 

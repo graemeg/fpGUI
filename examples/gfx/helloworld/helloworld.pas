@@ -90,15 +90,10 @@ end;
 var
   MainWindow: TMainWindow;
 begin
-  gApplication.Initialize;
-  
+  GFApplication.Initialize;
   MainWindow := TMainWindow.Create;
-
-  gApplication.AddWindow(MainWindow);
-  
+  GFApplication.AddWindow(MainWindow);
   MainWindow.Show;
-
-  gApplication.Run;
+  GFApplication.Run;
 end.
-
 

@@ -3,7 +3,7 @@
 
     GFX_GDI  -  Windows GDI specific code
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -99,7 +99,7 @@ type
     procedure   DoTextOut(const APosition: TPoint; const AText: String); override;
     procedure   DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect; const ADestPos: TPoint); override;
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); override;
-    procedure   DoDrawImageRect(AImage: TFCustomImage; ASourceRect: TRect; const ADestPos: TPoint); override;
+    procedure   DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect; const ADestPos: TPoint); override;
   public
     constructor Create(AHandle: HDC);
     destructor  Destroy; override;
@@ -134,11 +134,10 @@ type
     property Bitmap: HBITMAP read FBitmap;
   end;
 
-  { TGDIImage }
+  { TGDIBitmap }
 
-  TGDIImage = class(TFCustomImage)
+  TGDIBitmap = class(TFCustomBitmap)
   private
-    FHandle: HBITMAP;
     IsLocked: Boolean;
   protected
     FStride: LongWord;
@@ -148,7 +147,6 @@ type
     destructor Destroy; override;
     procedure Lock(var AData: Pointer; var AStride: LongWord); override;
     procedure Unlock; override;
-    property Handle: HBITMAP read FHandle;
     property Stride: LongWord read FStride;
     property Data: Pointer read FData;
   end;
@@ -741,7 +739,7 @@ begin
 end;
 
 
-procedure TGDICanvas.DoDrawImageRect(AImage: TFCustomImage; ASourceRect: TRect;
+procedure TGDICanvas.DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect;
   const ADestPos: TPoint);
 var
   MemDC: HDC;
@@ -749,13 +747,13 @@ var
   GDIPal: array of PRGBQUAD;
   i: Integer;
 begin
-  ASSERT(AImage.InheritsFrom(TGDIImage));
+  ASSERT(AImage.InheritsFrom(TGDIBitmap));
   {$IFDEF Debug}
-  ASSERT(not TGDIImage(AImage).IsLocked);
+  ASSERT(not TGDIBitmap(AImage).IsLocked);
   {$ENDIF}
 
   MemDC := Windows.CreateCompatibleDC(Handle);
-  OldBitmap := Windows.SelectObject(MemDC, TGDIImage(AImage).Handle);
+  OldBitmap := Windows.SelectObject(MemDC, AImage.Handle);
 
   // Set the color palette, if present
   if Assigned(AImage.Palette) then
@@ -888,9 +886,9 @@ begin
 end;
 
 
-{ TGDIImage }
+{ TGDIBitmap }
 
-constructor TGDIImage.Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat);
+constructor TGDIBitmap.Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat);
 var
   BitmapInfo: PBitmapInfo;
   Color: PRGBQUAD;
@@ -961,7 +959,7 @@ begin
 end;
 
 
-destructor TGDIImage.Destroy;
+destructor TGDIBitmap.Destroy;
 begin
   if Handle <> 0 then
     Windows.DeleteObject(Handle);
@@ -969,7 +967,7 @@ begin
 end;
 
 
-procedure TGDIImage.Lock(var AData: Pointer; var AStride: LongWord);
+procedure TGDIBitmap.Lock(var AData: Pointer; var AStride: LongWord);
 begin
   ASSERT(not IsLocked);
   IsLocked := True;
@@ -978,7 +976,7 @@ begin
   Windows.GdiFlush;
 end;
 
-procedure TGDIImage.Unlock;
+procedure TGDIBitmap.Unlock;
 begin
   ASSERT(IsLocked);
   IsLocked := False;
@@ -1184,10 +1182,10 @@ begin
     Windows.DestroyWindow(OldHandle);
   end;
 
-  gApplication.Forms.Remove(Self);
+  GFApplication.Forms.Remove(Self);
 
   // Are we the last window for our owning display?
-  if gApplication.Forms.Count = 0 then
+  if GFApplication.Forms.Count = 0 then
     Windows.PostQuitMessage(0);
 
   inherited Destroy;

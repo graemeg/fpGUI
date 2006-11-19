@@ -3,7 +3,7 @@
     
     fpGFX  -  Main unit for the core drawing engine of fpGUI
     
-    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -37,9 +37,9 @@ type
   TFCanvas = class(TDefCanvas)
   end;
 
-  { TFImage }
+  { TFBitmap }
 
-  TFImage = class(TDefImage)
+  TFBitmap = class(TDefBitmap)
   end;
 
   { TFScreen }
@@ -69,8 +69,8 @@ type
 
 { Using the singleton pattern to hide instance variables and
   only instantiate them when they are referred to for the first time. }
-function gScreen: TFScreen;
-function gApplication: TFApplication;
+function GFScreen: TFScreen;
+function GFApplication: TFApplication;
 
 
 implementation
@@ -81,14 +81,14 @@ var
   uApplication: TFApplication;
 
 
-function gScreen: TFScreen;
+function GFScreen: TFScreen;
 begin
   if uScreen = nil then
     uScreen := TFScreen.Create;
   result := uScreen;
 end;
 
-function gApplication: TFApplication;
+function GFApplication: TFApplication;
 begin
   if uApplication = nil then
     uApplication := TFApplication.Create;
