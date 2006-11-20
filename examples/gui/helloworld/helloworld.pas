@@ -3,7 +3,7 @@ program HelloWorld;
 {$mode objfpc}{$h+}
 
 uses
-  fpGUI, fpGUI_laz;
+  fpGUI, fpguipackage;
 
 type
   TMainForm = class(TForm)

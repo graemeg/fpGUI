@@ -1075,52 +1075,55 @@ begin
   FParent := AParent;
 
   { Initialize a window class, if necessary }
-  if UnicodeEnabledOS then
+  if woWindow in WindowOptions then
   begin
-    if not Assigned(WindowClassW.lpfnWndProc) then
+    if UnicodeEnabledOS then
     begin
-      WindowClassW.style := CS_HREDRAW or CS_VREDRAW;
-      WindowClassW.lpfnWndProc := WndProc(@fpGFXWindowProc);
-      WindowClassW.hInstance := MainInstance;
-      WindowClassW.hIcon := LoadIcon(0, IDI_APPLICATION);
-      WindowClassW.hCursor := LoadCursor(0, IDC_ARROW);
-      WindowClassW.hbrBackground := 0;
-      WindowClassW.lpszClassName := 'fpGFX';
-    end;
-    Windows.RegisterClassW(@WindowClassW);
-  end
-  else
-  begin
-    if not Assigned(WindowClass.lpfnWndProc) then
+      if not Assigned(WindowClassW.lpfnWndProc) then
+      begin
+        WindowClassW.style := CS_HREDRAW or CS_VREDRAW;
+        WindowClassW.lpfnWndProc := WndProc(@fpGFXWindowProc);
+        WindowClassW.hInstance := MainInstance;
+        WindowClassW.hIcon := LoadIcon(0, IDI_APPLICATION);
+        WindowClassW.hCursor := LoadCursor(0, IDC_ARROW);
+        WindowClassW.hbrBackground := 0;
+        WindowClassW.lpszClassName := 'fpGFX';
+      end;
+      Windows.RegisterClassW(@WindowClassW);
+    end
+    else
     begin
-      WindowClass.style := CS_HREDRAW or CS_VREDRAW;
-      WindowClass.lpfnWndProc := WndProc(@fpGFXWindowProc);
-      WindowClass.hInstance := MainInstance;
-      WindowClass.hIcon := LoadIcon(0, IDI_APPLICATION);
-      WindowClass.hCursor := LoadCursor(0, IDC_ARROW);
-      WindowClass.hbrBackground := 0;
-      WindowClass.lpszClassName := 'fpGFX';
+      if not Assigned(WindowClass.lpfnWndProc) then
+      begin
+        WindowClass.style := CS_HREDRAW or CS_VREDRAW;
+        WindowClass.lpfnWndProc := WndProc(@fpGFXWindowProc);
+        WindowClass.hInstance := MainInstance;
+        WindowClass.hIcon := LoadIcon(0, IDI_APPLICATION);
+        WindowClass.hCursor := LoadCursor(0, IDC_ARROW);
+        WindowClass.hbrBackground := 0;
+        WindowClass.lpszClassName := 'fpGFX';
+      end;
+      Windows.RegisterClass(@WindowClass);
     end;
-    Windows.RegisterClass(@WindowClass);
   end;
-
+  
   if Assigned(AParent) then
     ParentHandle := AParent.Handle
   else
     ParentHandle := 0;
 
-  if (woBorderless in FWindowOptions) and (woPopUp in FWindowOptions) then FWindowStyle := WS_POPUP
+  if not (woWindow in FWindowOptions) then FWindowStyle := WS_CHILD
+  else if (woBorderless in FWindowOptions) and (woPopUp in FWindowOptions) then FWindowStyle := WS_POPUP
   else if woPopUp in FWindowOptions then FWindowStyle := WS_POPUPWINDOW
-  else if woToolWindow in FWindowOptions then FWindowStyle := WS_OVERLAPPED
+  else if woToolWindow in FWindowOptions then FWindowStyle := WS_OVERLAPPEDWINDOW
   else if woChildWindow in FWindowOptions then FWindowStyle := WS_CHILDWINDOW
   else if woBorderless in FWindowOptions then FWindowStyle := WS_OVERLAPPED
-  else if woWindow in FWindowOptions then FWindowStyle := WS_OVERLAPPEDWINDOW
-  else FWindowStyle := 0;
+  else FWindowStyle := WS_OVERLAPPEDWINDOW;
 
-  if woPopUp in FWindowOptions then FWindowStyleEx := WS_EX_TOOLWINDOW
+  if not (woWindow in FWindowOptions) then FWindowStyleEx := 0
+  else if woPopUp in FWindowOptions then FWindowStyleEx := WS_EX_TOOLWINDOW
   else if woToolWindow in FWindowOptions then FWindowStyleEx := WS_EX_TOOLWINDOW
-  else if woWindow in FWindowOptions then FWindowStyleEx := WS_EX_APPWINDOW
-  else FWindowStyleEx := 0;
+  else FWindowStyleEx := WS_EX_APPWINDOW;
 
   if UnicodeEnabledOS then
    FHandle := Windows.CreateWindowExW(

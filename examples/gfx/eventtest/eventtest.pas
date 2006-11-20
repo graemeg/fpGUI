@@ -17,12 +17,10 @@
 program EventTest;
 
 uses
-  SysUtils
-  ,Classes
-  ,GFXBase
-  ,fpGFX
-  ;
-
+  SysUtils,
+  Classes,
+  GFXBase,
+  fpGFX;
 
 const
   ButtonNames: array[TMouseButton] of PChar =
