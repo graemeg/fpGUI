@@ -285,7 +285,7 @@ const
 var
   PalData: array[0..7] of TGfxColor;
   Palette: TGfxPalette;
-  Image: TFImage;
+  Image: TFBitmap;
 begin
   inherited Create(ADisplay);
 
@@ -307,24 +307,26 @@ begin
 //  MaskCanvas := ADisplay.DefaultScreen.CreateMonoBitmap(12, 12);
 //  Palette := ADisplay.DefaultScreen.CreatePalette(8, @PalData);
 
-  Image := TFImage.Create(60, 12, PixelFormatPal4);
+
+  {$Note All data image formats was PixelFormatPal4, is 8bit going to work? }
+  Image := TFBitmap.Create(60, 12, PixelFormatPal8);
   Image.Palette := Palette;
   Image.SetPixelsFromData(@RadioBitmapData, 30);
   ImageCanvas.DrawImage(Image, Point(0, 0));
   Image.Free;
 
-  Image := TFImage.Create(12, 12, PixelFormatMono);
+  Image := TFBitmap.Create(12, 12, PixelFormatMono);
   Image.SetPixelsFromData(@RadioMaskData, 2);
   MaskCanvas.DrawImage(Image, Point(0, 0));
   Image.Free;
 
-  Image := TFImage.Create(66, 13, PixelFormatPal4); {!!!: width is 65, but fpGFX emulayer has a problem with odd widths}
+  Image := TFBitmap.Create(66, 13, PixelFormatPal8); {!!!: width is 65, but fpGFX emulayer has a problem with odd widths}
   Image.Palette := Palette;
   Image.SetPixelsFromData(@CheckBoxBitmapData, 33);
   ImageCanvas.DrawImage(Image, Point(0, 12));
   Image.Free;
 
-  Image := TFImage.Create(64, 8, PixelFormatPal4);
+  Image := TFBitmap.Create(64, 8, PixelFormatPal8);
   Image.Palette := Palette;
   Image.SetPixelsFromData(@ArrowBitmapData, 32);
   ImageCanvas.DrawImage(Image, Point(0, 25));

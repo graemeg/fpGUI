@@ -129,7 +129,7 @@ begin
     OnDestroy(Self);
   if Assigned(FWnd) then
     FWnd.Free;
-  gApplication.Forms.Remove(Self);
+  GFApplication.Forms.Remove(Self);
   inherited Destroy;
 end;
 
@@ -251,7 +251,7 @@ begin
   Wnd.OnShow            := @WndShow;
 
   if Length(Text) = 0 then
-    Wnd.Title := gApplication.Title
+    Wnd.Title := GFApplication.Title
   else
     Wnd.Title := Text;
 end;

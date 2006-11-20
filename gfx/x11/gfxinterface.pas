@@ -32,7 +32,7 @@ type
   
   TDefWindow = TX11Window;
   
-  TDefImage = TX11Image;
+  TDefBitmap = TX11Bitmap;
 
 
 implementation

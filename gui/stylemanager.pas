@@ -67,7 +67,7 @@ begin
   else
   begin
     if not Assigned(FDefaultStyle) then
-      FDefaultStyle := TDefaultStyle.Create(gApplication);
+      FDefaultStyle := TDefaultStyle.Create(GFApplication);
     Result := FDefaultStyle;
   end;
 end;

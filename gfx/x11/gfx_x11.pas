@@ -290,7 +290,7 @@ constructor TX11Font.Create(const Descriptor: String);
 begin
   inherited Create;
 
-  FFontStruct := XLoadQueryFont(gApplication.Handle, PChar(Descriptor));
+  FFontStruct := XLoadQueryFont(GFApplication.Handle, PChar(Descriptor));
   if not Assigned(FFontStruct) then
     raise EX11Error.CreateFmt(SFontCreationFailed, [Descriptor]);
 end;
@@ -300,7 +300,7 @@ begin
   if Assigned(FontStruct) then
   begin
     if FontStruct^.fid <> 0 then
-      XUnloadFont(gApplication.Handle, FontStruct^.fid);
+      XUnloadFont(GFApplication.Handle, FontStruct^.fid);
     XFreeFontInfo(nil, FontStruct, 0);
   end;
   inherited Destroy;
@@ -327,20 +327,20 @@ begin
   FColormap         := AColormap;
   FHandle           := AXDrawable;
   FDefaultFont      := ADefaultFont;
-  XGetGeometry(gApplication.Handle, Handle, @DummyWnd, @DummyInt, @DummyInt,
+  XGetGeometry(GFApplication.Handle, Handle, @DummyWnd, @DummyInt, @DummyInt,
     @FWidth, @FHeight, @DummyInt, @DummyInt);
 
   GCValues.graphics_exposures := False;
-  FGC := XCreateGC(gApplication.Handle, Handle, GCGraphicsExposures, @GCValues);
+  FGC := XCreateGC(GFApplication.Handle, Handle, GCGraphicsExposures, @GCValues);
   if not Assigned(GC) then
     raise EX11Error.Create(SGCCreationFailed);
 
-  XSetLineAttributes(gApplication.Handle, GC, 0,
+  XSetLineAttributes(GFApplication.Handle, GC, 0,
     LineSolid, CapNotLast, JoinMiter);
 
   FFontStruct := FDefaultFont;
   if Assigned(FFontStruct) then
-    XSetFont(gApplication.Handle, GC, FFontStruct^.FID);
+    XSetFont(GFApplication.Handle, GC, FFontStruct^.FID);
 
   FRegion := XCreateRegion;
   Resized(Width, Height);	// Set up a proper clipping region
@@ -370,7 +370,7 @@ begin
   {$ENDIF}
   XDestroyRegion(Region);
   if Assigned(GC) then
-    XFreeGC(gApplication.Handle, GC);
+    XFreeGC(GFApplication.Handle, GC);
   inherited Destroy;
 end;
 
@@ -401,7 +401,7 @@ begin
 
   XDestroyRegion(Region);
   FRegion := SavedState^.Region;
-  XSetRegion(gApplication.Handle, GC, Region);
+  XSetRegion(GFApplication.Handle, GC, Region);
 
   SetColor_(SavedState^.Color);
   SetFont(SavedState^.Font);
@@ -413,7 +413,7 @@ procedure TX11Canvas.EmptyClipRect;
 begin
   XDestroyRegion(Region);
   FRegion := XCreateRegion;
-  XSetRegion(gApplication.Handle, GC, Region);
+  XSetRegion(GFApplication.Handle, GC, Region);
 end;
 
 function TX11Canvas.DoExcludeClipRect(const ARect: TRect): Boolean;
@@ -426,7 +426,7 @@ begin
   XUnionRectWithRegion(@XRect, RectRegion, RectRegion);
   XSubtractRegion(Region, RectRegion, Region);
   XDestroyRegion(RectRegion);
-  XSetRegion(gApplication.Handle, GC, Region);
+  XSetRegion(GFApplication.Handle, GC, Region);
   Result := XEmptyRegion(Region) = 0;
 end;
 
@@ -440,7 +440,7 @@ begin
   XUnionRectWithRegion(@XRect, RectRegion, RectRegion);
   XIntersectRegion(Region, RectRegion, Region);
   XDestroyRegion(RectRegion);
-  XSetRegion(gApplication.Handle, GC, Region);
+  XSetRegion(GFApplication.Handle, GC, Region);
   Result := XEmptyRegion(Region) = 0;
 end;
 
@@ -450,7 +450,7 @@ var
 begin
   XRect := RectToXRect(ARect);
   XUnionRectWithRegion(@XRect, Region, Region);
-  XSetRegion(gApplication.Handle, GC, Region);
+  XSetRegion(GFApplication.Handle, GC, Region);
   Result := XEmptyRegion(Region) = 0;
 end;
 
@@ -470,7 +470,7 @@ begin
   Color.Red := AColor.Red;
   Color.Green := AColor.Green;
   Color.Blue := AColor.Blue;
-  XAllocColor(gApplication.Handle, Colormap, @Color);
+  XAllocColor(GFApplication.Handle, Colormap, @Color);
   Result := Color.Pixel;
 end;
 
@@ -478,7 +478,7 @@ procedure TX11Canvas.SetColor_(AColor: TGfxPixel);
 begin
   if AColor <> FCurColor then
   begin
-    XSetForeground(gApplication.Handle, GC, AColor);
+    XSetForeground(GFApplication.Handle, GC, AColor);
     FCurColor := AColor;
   end;
 end;
@@ -503,7 +503,7 @@ begin
       exit;
     FFontStruct := TX11Font(AFont).FontStruct;
   end;
-  XSetFont(gApplication.Handle, GC, FFontStruct^.FID);
+  XSetFont(GFApplication.Handle, GC, FFontStruct^.FID);
 end;
 
 procedure TX11Canvas.SetLineStyle(ALineStyle: TGfxLineStyle);
@@ -514,13 +514,13 @@ const
 begin
   case ALineStyle of
     lsSolid:
-      XSetLineAttributes(gApplication.Handle, GC, 0,
+      XSetLineAttributes(GFApplication.Handle, GC, 0,
         LineSolid, CapNotLast, JoinMiter);
     lsDot:
       begin
-        XSetLineAttributes(gApplication.Handle, GC, 0,
+        XSetLineAttributes(GFApplication.Handle, GC, 0,
           LineOnOffDash, CapNotLast, JoinMiter);
-        XSetDashes(gApplication.Handle, GC, 0, DotDashes, 2);
+        XSetDashes(GFApplication.Handle, GC, 0, DotDashes, 2);
       end;
   end;
 end;
@@ -529,7 +529,7 @@ end;
 procedure TX11Canvas.DoDrawArc(const ARect: TRect; StartAngle, EndAngle: Single);
 begin
   with ARect do
-    XDrawArc(gApplication.Handle, Handle, GC,
+    XDrawArc(GFApplication.Handle, Handle, GC,
       Left, Top, Right - Left - 1, Bottom - Top - 1,
       Round(StartAngle * 64), Round((EndAngle - StartAngle) * 64));
 end;
@@ -538,14 +538,14 @@ end;
 procedure TX11Canvas.DoDrawCircle(const ARect: TRect);
 begin
   with ARect do
-    XDrawArc(gApplication.Handle, Handle, GC,
+    XDrawArc(GFApplication.Handle, Handle, GC,
       Left, Top, Right - Left - 1, Bottom - Top - 1, 0, 23040);
 end;
 
 
 procedure TX11Canvas.DoDrawLine(const AFrom, ATo: TPoint);
 begin
-  XDrawLine(gApplication.Handle, Handle, GC, AFrom.x, AFrom.y, ATo.x, ATo.y);
+  XDrawLine(GFApplication.Handle, Handle, GC, AFrom.x, AFrom.y, ATo.x, ATo.y);
 end;
 
 
@@ -567,7 +567,7 @@ begin
     Inc(PointsIndex);
   end;
 
-  XDrawLines(gApplication.Handle, Handle, GC, Points, PointsIndex, CoordModeOrigin);
+  XDrawLines(GFApplication.Handle, Handle, GC, Points, PointsIndex, CoordModeOrigin);
 
   FreeMem(Points);
 end;
@@ -576,21 +576,21 @@ end;
 procedure TX11Canvas.DoDrawRect(const ARect: TRect);
 begin
   with ARect do
-    XDrawRectangle(gApplication.Handle, Handle, GC, Left, Top,
+    XDrawRectangle(GFApplication.Handle, Handle, GC, Left, Top,
       Right - Left - 1, Bottom - Top - 1);
 end;
 
 
 procedure TX11Canvas.DoDrawPoint(const APoint: TPoint);
 begin
-  XDrawPoint(gApplication.Handle, Handle, GC, APoint.x, APoint.y);
+  XDrawPoint(GFApplication.Handle, Handle, GC, APoint.x, APoint.y);
 end;
 
 
 procedure TX11Canvas.DoFillRect(const ARect: TRect);
 begin
   with ARect do
-    XFillRectangle(gApplication.Handle, Handle, GC, Left, Top,
+    XFillRectangle(GFApplication.Handle, Handle, GC, Left, Top,
       Right - Left, Bottom - Top);
 end;
 
@@ -614,7 +614,7 @@ begin
     Result.cy := 0;
   end else
   begin
-    XQueryTextExtents(gApplication.Handle, XGContextFromGC(GC),
+    XQueryTextExtents(GFApplication.Handle, XGContextFromGC(GC),
       PChar(AText), Length(AText),
       @Direction, @FontAscent, @FontDescent, @CharStruct);
     Result.cx := CharStruct.Width;
@@ -658,7 +658,7 @@ begin
   XftDrawString16(FXftDraw, fntColor, fnt, APosition.x, Aposition.y * 3, @s[1], Length16(s));
   XftFontClose(gApplication.Handle, fnt);
   {$ELSE}
-  XDrawString(gApplication.Handle, Handle, GC, APosition.x,
+  XDrawString(GFApplication.Handle, Handle, GC, APosition.x,
     APosition.y + FFontStruct^.ascent, PChar(AText), Length(AText));
 
 {   Size := Utf8ToUnicode(nil, PChar(AText), 0);
@@ -690,15 +690,15 @@ begin
     RealHeight := ASourceRect.Bottom - ASourceRect.Top;
     if DestPos.y + RealHeight > Height then
       RealHeight := Height - ADestPos.y;
-    XSetClipMask(gApplication.Handle, GC, TX11Canvas(ASource).Handle);
-    XSetClipOrigin(gApplication.Handle, GC, ADestPos.x, ADestPos.y);
-    XFillRectangle(gApplication.Handle, Handle, GC, ADestPos.x, ADestPos.y,
+    XSetClipMask(GFApplication.Handle, GC, TX11Canvas(ASource).Handle);
+    XSetClipOrigin(GFApplication.Handle, GC, ADestPos.x, ADestPos.y);
+    XFillRectangle(GFApplication.Handle, Handle, GC, ADestPos.x, ADestPos.y,
       ASource.Width, RealHeight);
     // Restore old clipping settings
-    XSetClipOrigin(gApplication.Handle, GC, 0, 0);
-    XSetRegion(gApplication.Handle, GC, Region);
+    XSetClipOrigin(GFApplication.Handle, GC, 0, 0);
+    XSetRegion(GFApplication.Handle, GC, Region);
   end else
-    XCopyArea(gApplication.Handle, TX11Canvas(ASource).Handle, Handle, GC,
+    XCopyArea(GFApplication.Handle, TX11Canvas(ASource).Handle, Handle, GC,
       ASourceRect.Left, ASourceRect.Top,
       ASourceRect.Right - ASourceRect.Left,
       ASourceRect.Bottom - ASourceRect.Top, ADestPos.x, ADestPos.y);
@@ -760,17 +760,17 @@ begin
     exit;
 
 
-  XSetClipMask(gApplication.Handle, GC, TX11Canvas(AMask).Handle);
-  XSetClipOrigin(gApplication.Handle, GC,
+  XSetClipMask(GFApplication.Handle, GC, TX11Canvas(AMask).Handle);
+  XSetClipOrigin(GFApplication.Handle, GC,
     DestPos.x - MaskPos.x, DestPos.y - MaskPos.y);
 
-  XCopyArea(gApplication.Handle, TX11Canvas(ASource).Handle, Handle, GC,
+  XCopyArea(GFApplication.Handle, TX11Canvas(ASource).Handle, Handle, GC,
     SourceRect.Left, SourceRect.Top, RectWidth, RectHeight,
     DestPos.x, DestPos.y);
 
   // Restore old clipping settings
-  XSetClipOrigin(gApplication.Handle, GC, 0, 0);
-  XSetRegion(gApplication.Handle, GC, Region);
+  XSetClipOrigin(GFApplication.Handle, GC, 0, 0);
+  XSetRegion(GFApplication.Handle, GC, Region);
 end;
 
 procedure TX11Canvas.DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect;
@@ -779,13 +779,13 @@ var
   Image: XLib.PXImage;
   ConvertFormat: TGfxPixelFormat;
 begin
-  ASSERT(AImage.InheritsFrom(TX11Image));
+  ASSERT(AImage.InheritsFrom(TX11Bitmap));
   {$IFDEF Debug}
   ASSERT(not TXImage(AImage).IsLocked);
   {$ENDIF}
 
   // !!!: Add support for XF86 4 and XShm etc. to speed this up!
-  Image := XCreateImage(gApplication.Handle, Visual,
+  Image := XCreateImage(GFApplication.Handle, Visual,
     FormatTypeBPPTable[PixelFormat.FormatType], ZPixmap, 0, nil,
     ASourceRect.Right - ASourceRect.Left,
     ASourceRect.Bottom - ASourceRect.Top, 8, 0);
@@ -797,23 +797,17 @@ begin
   if (AImage.PixelFormat.FormatType = ftMono) and
     Self.InheritsFrom(TX11MonoPixmapCanvas) then
     // mirror the bits within all image data bytes...:
-    FlipMonoImageBits(ASourceRect, TX11Image(AImage).Data,
-      TX11Image(AImage).Stride, 0, 0, Image^.data, Image^.bytes_per_line)
+    FlipMonoImageBits(ASourceRect, TX11Bitmap(AImage).Data,
+      TX11Bitmap(AImage).Stride, 0, 0, Image^.data, Image^.bytes_per_line)
   else
   begin
     ConvertFormat := PixelFormat;
-    { !!!: The following is a workaround: At least the XFree86 X server for
-      ATI graphics adapters uses 32 bit padding per pixel for 24 bpp
-      images...?!? To be checked: Is this always the case or only for ATI? }
-    if ConvertFormat.FormatType = ftRGB24 then
-      ConvertFormat.FormatType := ftRGB32;
-
     ConvertImage(ASourceRect, AImage.PixelFormat, AImage.Palette,
-      TX11Image(AImage).Data, TX11Image(AImage).Stride,
+      TX11Bitmap(AImage).Data, TX11Bitmap(AImage).Stride,
       0, 0, ConvertFormat, Image^.data, Image^.bytes_per_line);
   end;
 
-  XPutImage(gApplication.Handle, Handle, GC,
+  XPutImage(GFApplication.Handle, Handle, GC,
     Image, 0, 0, ADestPos.x, ADestPos.y, AImage.Width, AImage.Height);
     
   FreeMem(Image^.data);
@@ -848,15 +842,15 @@ var
 begin
   inherited Create(AColormap, AXDrawable, ADefaultFont);
 
-  XGetWindowAttributes(gApplication.Handle, Handle, @Attr);
+  XGetWindowAttributes(GFApplication.Handle, Handle, @Attr);
   FVisual := Attr.Visual;
 
   case Attr.Depth of
     1: PixelFormat.FormatType := ftMono;
-    4: PixelFormat.FormatType := ftPal4;
+//    4: PixelFormat.FormatType := ftPal4;
     8: PixelFormat.FormatType := ftPal8;
     16: PixelFormat.FormatType := ftRGB16;
-    24: PixelFormat.FormatType := ftRGB24;
+//    24: PixelFormat.FormatType := ftRGB24;
     32: PixelFormat.FormatType := ftRGB32;
     else
       raise EX11Error.CreateFmt(SWindowUnsupportedPixelFormat, [Attr.Depth]);
@@ -883,7 +877,7 @@ end;
 
 destructor TX11PixmapCanvas.Destroy;
 begin
-  XFreePixmap(gApplication.Handle, Handle);
+  XFreePixmap(GFApplication.Handle, Handle);
   inherited Destroy;
 end;
 
@@ -1120,20 +1114,20 @@ begin
   begin
     if LeaderWindow = 0 then
     begin
-      LeaderWindow := XCreateSimpleWindow(gApplication.Handle,
-        XDefaultRootWindow(gApplication.Handle), 10, 10, 10, 10, 0, 0, 0);
+      LeaderWindow := XCreateSimpleWindow(GFApplication.Handle,
+        XDefaultRootWindow(GFApplication.Handle), 10, 10, 10, 10, 0, 0, 0);
 
       ClassHint := XAllocClassHint;
       ClassHint^.res_name := 'fpGFX'; // !!! use app name
       ClassHint^.res_class := 'FpGFX';
-      XSetWMProperties(gApplication.Handle, LeaderWindow, nil, nil, nil, 0, nil, nil,
+      XSetWMProperties(GFApplication.Handle, LeaderWindow, nil, nil, nil, 0, nil, nil,
         ClassHint);
       XFree(ClassHint);
-      ClientLeaderAtom := XInternAtom(gApplication.Handle, 'WM_CLIENT_LEADER', False);
+      ClientLeaderAtom := XInternAtom(GFApplication.Handle, 'WM_CLIENT_LEADER', False);
     end;
   end;
 
-  Colormap := XDefaultColormap(gApplication.Handle, XDefaultScreen(gApplication.Handle));
+  Colormap := XDefaultColormap(GFApplication.Handle, XDefaultScreen(GFApplication.Handle));
   Attr.Colormap := Colormap;
 
   SizeHints.flags     := XUtil.PSize;
@@ -1146,7 +1140,7 @@ begin
   if FParent <> nil then
     lParentHandle := TX11Window(FParent).Handle
   else
-    lParentHandle := XDefaultRootWindow(gApplication.Handle);
+    lParentHandle := XDefaultRootWindow(GFApplication.Handle);
 
   { setup attributes and masks }
   if (woBorderless in WindowOptions) or (woToolWindow in WindowOptions) or
@@ -1165,43 +1159,43 @@ begin
     lParentHandle,                          // parent
     SizeHints.x, SizeHints.x,               // position (top, left)
     SizeHints.width, SizeHints.height,      // default size
-    XDefaultVisual(gApplication.Handle, XDefaultScreen(gApplication.Handle)),  // visual
+    XDefaultVisual(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)),  // visual
     mask,
     Attr);
 
   if FHandle = 0 then
     raise EX11Error.Create(SWindowCreationFailed);
 
-  XSelectInput(gApplication.Handle, FHandle, KeyPressMask or KeyReleaseMask
+  XSelectInput(GFApplication.Handle, FHandle, KeyPressMask or KeyReleaseMask
     or ButtonPressMask or ButtonReleaseMask or EnterWindowMask
     or LeaveWindowMask or PointerMotionMask or ExposureMask or FocusChangeMask
     or StructureNotifyMask);
     
   if (woX11SkipWMHints in WindowOptions) = False then
   begin
-    XSetStandardProperties(gApplication.Handle, Handle, nil, nil, 0,
+    XSetStandardProperties(GFApplication.Handle, Handle, nil, nil, 0,
      argv, argc, @SizeHints);
   
-    XSetWMNormalHints(gApplication.Handle, Handle, @SizeHints);
+    XSetWMNormalHints(GFApplication.Handle, Handle, @SizeHints);
   
     WindowHints.flags := WindowGroupHint;
     WindowHints.window_group := LeaderWindow;
-    XSetWMHints(gApplication.Handle, Handle, @WindowHints);
+    XSetWMHints(GFApplication.Handle, Handle, @WindowHints);
   
-    XChangeProperty(gApplication.Handle, Handle, ClientLeaderAtom, 33, 32,
+    XChangeProperty(GFApplication.Handle, Handle, ClientLeaderAtom, 33, 32,
      PropModeReplace, @LeaderWindow, 1);
   
      // We want to get a Client Message when the user tries to close this window
-    if gApplication.FWMProtocols = 0 then
-     gApplication.FWMProtocols := XInternAtom(gApplication.Handle, 'WM_PROTOCOLS', False);
-    if gApplication.FWMDeleteWindow = 0 then
-     gApplication.FWMDeleteWindow := XInternAtom(gApplication.Handle, 'WM_DELETE_WINDOW', False);
+    if GFApplication.FWMProtocols = 0 then
+     GFApplication.FWMProtocols := XInternAtom(GFApplication.Handle, 'WM_PROTOCOLS', False);
+    if GFApplication.FWMDeleteWindow = 0 then
+     GFApplication.FWMDeleteWindow := XInternAtom(GFApplication.Handle, 'WM_DELETE_WINDOW', False);
   
      // send close event instead of quitting the whole application...
-     XSetWMProtocols(gApplication.Handle, FHandle, @gApplication.FWMDeleteWindow, 1);
+     XSetWMProtocols(GFApplication.Handle, FHandle, @GFApplication.FWMDeleteWindow, 1);
    end;
 
-  FCanvas := TX11WindowCanvas.Create(Colormap, Handle, gApplication.FDefaultFont);
+  FCanvas := TX11WindowCanvas.Create(Colormap, Handle, GFApplication.FDefaultFont);
 end;
 
 
@@ -1210,15 +1204,15 @@ begin
   if Assigned(OnClose) then
     OnClose(Self);
 
-  gApplication.DirtyList.ClearQueueForWindow(Self);
+  GFApplication.DirtyList.ClearQueueForWindow(Self);
 
-  XDestroyWindow(gApplication.Handle, Handle);
+  XDestroyWindow(GFApplication.Handle, Handle);
   Canvas.Free;
 
-  gApplication.FindWindowByXID(Handle)^.GfxWindow := nil;
+  GFApplication.FindWindowByXID(Handle)^.GfxWindow := nil;
 
   if FCurCursorHandle <> 0 then
-    XFreeCursor(gApplication.Handle, FCurCursorHandle);
+    XFreeCursor(GFApplication.Handle, FCurCursorHandle);
 
   inherited Destroy;
 end;
@@ -1237,13 +1231,13 @@ var
   SizeHints: PXSizeHints;
 begin
   SizeHints := XAllocSizeHints;
-  XGetWMNormalHints(gApplication.Handle, Handle, SizeHints, @Supplied);
+  XGetWMNormalHints(GFApplication.Handle, Handle, SizeHints, @Supplied);
   SizeHints^.flags := SizeHints^.flags or PPosition;
   SizeHints^.x := APosition.x;
   SizeHints^.y := APosition.y;
-  XSetWMNormalHints(gApplication.Handle, Handle, SizeHints);
+  XSetWMNormalHints(GFApplication.Handle, Handle, SizeHints);
   XFree(SizeHints);
-  XMoveWindow(gApplication.Handle, Handle, APosition.x, APosition.y);
+  XMoveWindow(GFApplication.Handle, Handle, APosition.x, APosition.y);
 end;
 
 
@@ -1283,7 +1277,7 @@ begin
   end;
 
   if ChangeMask <> 0 then
-    XConfigureWindow(gApplication.Handle, Handle, ChangeMask, @Changes);
+    XConfigureWindow(GFApplication.Handle, Handle, ChangeMask, @Changes);
 end;
 
 
@@ -1297,7 +1291,7 @@ begin
   UpdateMotifWMHints;
 
   SizeHints := XAllocSizeHints;
-  XGetWMNormalHints(gApplication.Handle, Handle, SizeHints, @Supplied);
+  XGetWMNormalHints(GFApplication.Handle, Handle, SizeHints, @Supplied);
   with SizeHints^ do
   begin
     if (AMinSize.cx > 0) or (AMinSize.cy > 0) then
@@ -1323,7 +1317,7 @@ begin
       flags := flags and not PMaxSize;
   end;
 
-  XSetWMNormalHints(gApplication.Handle, Handle, SizeHints);
+  XSetWMNormalHints(GFApplication.Handle, Handle, SizeHints);
   XFree(SizeHints);
 end;
 
@@ -1331,25 +1325,25 @@ end;
 { Makes the window visible and raises it to the top of the stack. }
 procedure TX11Window.Show;
 begin
-  XMapRaised(gApplication.Handle, Handle);
+  XMapRaised(GFApplication.Handle, Handle);
 end;
 
 
 procedure TX11Window.Invalidate(const ARect: TRect);
 begin
-  gApplication.DirtyList.AddRect(Self, ARect);
+  GFApplication.DirtyList.AddRect(Self, ARect);
 end;
 
 
 procedure TX11Window.PaintInvalidRegion;
 begin
-  gApplication.DirtyList.PaintQueueForWindow(Self);
+  GFApplication.DirtyList.PaintQueueForWindow(Self);
 end;
 
 
 procedure TX11Window.CaptureMouse;
 begin
-  XGrabPointer(gApplication.Handle, Handle, False, ButtonPressMask or
+  XGrabPointer(GFApplication.Handle, Handle, False, ButtonPressMask or
     ButtonReleaseMask or EnterWindowMask or LeaveWindowMask or
     PointerMotionMask, GrabModeAsync, GrabModeAsync, 0, 0, CurrentTime);
 end;
@@ -1357,7 +1351,7 @@ end;
 
 procedure TX11Window.ReleaseMouse;
 begin
-  XUngrabPointer(gApplication.Handle, CurrentTime);
+  XUngrabPointer(GFApplication.Handle, CurrentTime);
 end;
 
 
@@ -1367,7 +1361,7 @@ function TX11Window.GetTitle: String;
 var
   s: PChar;
 begin
-  XFetchName(gApplication.Handle, Handle, @s);
+  XFetchName(GFApplication.Handle, Handle, @s);
   Result := s;
   XFree(s);
 end;
@@ -1375,7 +1369,7 @@ end;
 
 procedure TX11Window.SetTitle(const ATitle: String);
 begin
-  XStoreName(gApplication.Handle, Handle, PChar(ATitle));
+  XStoreName(GFApplication.Handle, Handle, PChar(ATitle));
 end;
 
 
@@ -1398,13 +1392,13 @@ var
   ID: Integer;
 begin
   if FCurCursorHandle <> 0 then
-    XFreeCursor(gApplication.Handle, FCurCursorHandle);
+    XFreeCursor(GFApplication.Handle, FCurCursorHandle);
   ID := CursorTable[Cursor];
   if ID = -1 then
     FCurCursorHandle := 0
   else
-    FCurCursorHandle := XCreateFontCursor(gApplication.Handle, ID);
-  XDefineCursor(gApplication.Handle, Handle, FCurCursorHandle);
+    FCurCursorHandle := XCreateFontCursor(GFApplication.Handle, ID);
+  XDefineCursor(GFApplication.Handle, Handle, FCurCursorHandle);
 end;
 
 
@@ -1535,12 +1529,12 @@ var
   Hints: PMotifWmHints;
   NewHints: TMotifWmHints;
 begin
-  if gApplication.FWMHints = 0 then
-    gApplication.FWMHints :=
-      XInternAtom(gApplication.Handle, '_MOTIF_WM_HINTS', False);
+  if GFApplication.FWMHints = 0 then
+    GFApplication.FWMHints :=
+      XInternAtom(GFApplication.Handle, '_MOTIF_WM_HINTS', False);
 
-  XGetWindowProperty(gApplication.Handle, Handle,
-    gApplication.FWMHints, 0, 5, False, AnyPropertyType, @PropType,
+  XGetWindowProperty(GFApplication.Handle, Handle,
+    GFApplication.FWMHints, 0, 5, False, AnyPropertyType, @PropType,
     @PropFormat, @PropItemCount, @PropBytesAfter, @Hints);
 
   NewHints.Flags := MWM_HINTS_FUNCTIONS or MWM_HINTS_DECORATIONS;
@@ -1565,8 +1559,8 @@ begin
   end else
     Hints := @NewHints;
 
-  XChangeProperty(gApplication.Handle, Handle,
-    gApplication.FWMHints, gApplication.FWMHints,
+  XChangeProperty(GFApplication.Handle, Handle,
+    GFApplication.FWMHints, GFApplication.FWMHints,
     32, PropModeReplace, Pointer(Hints), 5);
   if Hints <> @NewHints then
     XFree(Hints);
@@ -1640,7 +1634,7 @@ begin
           Sum := 1;
 
 	// Check for other mouse wheel messages in the queue
-	while XCheckTypedWindowEvent(gApplication.Handle, Handle,
+	while XCheckTypedWindowEvent(GFApplication.Handle, Handle,
 	  X.ButtonPress, @NewEvent) do
 	begin
 	  if NewEvent.xbutton.Button = 4 then
@@ -1649,7 +1643,7 @@ begin
 	    Inc(Sum)
 	  else
 	  begin
-	    XPutBackEvent(gApplication.Handle, @NewEvent);
+	    XPutBackEvent(GFApplication.Handle, @NewEvent);
 	    break;
 	  end;
 	end;
@@ -1721,7 +1715,7 @@ var
 begin
   with Event do
     r := Rect(x, y, x + Width, y + Height);
-  gApplication.DirtyList.AddRect(Self, r);
+  GFApplication.DirtyList.AddRect(Self, r);
 end;
 
 
@@ -1762,7 +1756,7 @@ end;
 
 procedure TX11Window.Configure(var Event: TXConfigureEvent);
 begin
-  while XCheckTypedWindowEvent(gApplication.Handle, Handle,
+  while XCheckTypedWindowEvent(GFApplication.Handle, Handle,
     X.ConfigureNotify, @Event) do;
 
   if (Event.x <> Left) or (Event.y <> Top) then
@@ -1788,8 +1782,8 @@ end;
 
 procedure TX11Window.ClientMessage(var Event: TXClientMessageEvent);
 begin
-  if Event.message_type = gApplication.FWMProtocols then
-    if Event.Data.l[0] = gApplication.FWMDeleteWindow then
+  if Event.message_type = GFApplication.FWMProtocols then
+    if Event.Data.l[0] = GFApplication.FWMDeleteWindow then
     begin
       if CanClose then
         Free;
@@ -1803,7 +1797,7 @@ function TX11Window.CreateXWindow(AParent: X.TWindow; ALeft, ATop: longint; AWid
   AVisual: PVisual; AValueMask: LongWord; const AAttr: TXSetWindowAttributes): X.TWindow;
 begin
   Result := XCreateWindow(
-    gApplication.Handle,
+    GFApplication.Handle,
     AParent,                      // parent
     ALeft, ATop,                  // position (top, left)
     AWidth, AHeight,              // size (width, height)
