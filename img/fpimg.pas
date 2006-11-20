@@ -1,14 +1,14 @@
 {
-    fpImg  -  Free Pascal Imaging Library
-    Copyright (C) 2000 by
-      Areca Systems GmbH / Sebastian Guenther, sg@freepascal.org
+    fpGUI  -  Free Pascal GUI Library
+    
+    fpIMG interface declarations. This is the main glue code between 
+    different fpIMG submodules such as ImageIO and fpGFX.
+    
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
-    fpImg interface declarations;
-    this is the main glue code between different fpImg submodules
-    such as ImageIO and fpGFX.
-
-    See the file COPYING, included in this distribution,
-    for details about the copyright.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of

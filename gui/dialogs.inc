@@ -1,20 +1,18 @@
 {
-    fpGUI  -  Free Pascal Graphical User Interface
-    Copyright (C) 2000 - 2001 by
-      Areca Systems GmbH / Sebastian Guenther
-    Copyright (C) 2006 by Graeme Geldenhuys 
-      member of the fpGUI development team.
+    fpGUI  -  Free Pascal GUI Library
+    
+    Dialogs class declarations
+    
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
-    Dialogs declarations
-
-    See the file COPYING.fpGUI, included in this distribution,
-    for details about the copyright.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
- **********************************************************************}
+}
 
 {%mainunit fpgui.pp}
 
