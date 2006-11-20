@@ -210,7 +210,7 @@ type
     procedure   UpdateWindowButtons;
     function    DoMouseEnterLeaveCheck(const Msg: TMessage): Boolean;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions);
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); override;
     destructor  Destroy; override;
     procedure   DefaultHandler(var Message); override;
     procedure   SetPosition(const APosition: TPoint); override;
@@ -1069,8 +1069,8 @@ constructor TGDIWindow.Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindo
 var
   ParentHandle: HWND;
 begin
-  inherited Create;
-  
+  inherited Create(AParent, AWindowOptions);
+
   FWindowOptions := AWindowOptions;
   FParent := AParent;
 

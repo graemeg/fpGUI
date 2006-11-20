@@ -449,10 +449,13 @@ type
     FClientWidth: Integer;
     FClientHeight: Integer;
     FWindowOptions: TGfxWindowOptions;
+    FChildWindows: TList;
     function  GetTitle: String; virtual;
     procedure SetTitle(const ATitle: String); virtual;
     procedure DoSetCursor; virtual; abstract;
   public
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); virtual;
+    destructor  Destroy; override;
     function  CanClose: Boolean; virtual;
     procedure SetPosition(const APosition: TPoint); virtual;
     procedure SetSize(const ASize: TSize); virtual;
@@ -470,6 +473,7 @@ type
     property WindowOptions: TGfxWindowOptions read FWindowOptions write SetWindowOptions;
     property Canvas: TFCustomCanvas read FCanvas;
     property Handle: Cardinal read FHandle;
+    property ChildWindows: TList read FChildWindows;
     // Window state
     property Left: Integer read FLeft;
     property Top: Integer read FTop;
@@ -949,6 +953,23 @@ end;
 procedure TFCustomWindow.SetTitle(const ATitle: String);
 begin
   // Empty
+end;
+
+constructor TFCustomWindow.Create(AParent: TFCustomWindow;
+        AWindowOptions: TGfxWindowOptions);
+begin
+  inherited Create;
+
+  FChildWindows := TList.Create;
+
+  if AParent <> nil then AParent.ChildWindows.Add(Self);
+end;
+
+destructor TFCustomWindow.Destroy;
+begin
+  FChildWindows.Free;
+
+  inherited Destroy;
 end;
 
 procedure TFCustomWindow.SetWidth(AWidth: Integer);

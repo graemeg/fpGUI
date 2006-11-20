@@ -177,16 +177,6 @@ type
   end;
 
 
-  TX11Window = class;
-
-
-  PXWindowListEntry = ^TXWindowListEntry;
-  TXWindowListEntry = record
-    GfxWindow: TFCustomWindow;
-    XWindowID: X.TWindow;
-  end;
-
-
   { TX11Application }
 
   TX11Application = class(TFCustomApplication)
@@ -201,7 +191,7 @@ type
     FWMDeleteWindow: TAtom;		// Atom for "WM_DELETE_WINDOW"
     FWMHints: TAtom;			    // Atom for "_MOTIF_WM_HINTS"
     property    DirtyList: TDirtyList read FDirtyList;
-    function    FindWindowByXID(XWindowID: X.TWindow): PXWindowListEntry;
+    function    FindWindowByXID(XWindowID: X.TWindow): TFCustomWindow;
   public
     { default methods }
     constructor Create; override;
@@ -243,7 +233,6 @@ type
   protected
     IsExposing: Boolean;
     CanMaximize: Boolean;
-    function    CreateXWindow(AParent: X.TWindow; ALeft, ATop: longint; AWidth, AHeight: longword; AVisual: PVisual; AValueMask: LongWord; const AAttr: TXSetWindowAttributes): X.TWindow; virtual;
     function    GetTitle: String; override;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
@@ -251,7 +240,7 @@ type
     procedure   DoSetCursor; override;
     procedure   UpdateMotifWMHints;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions);
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); override;
     destructor  Destroy; override;
     procedure   DefaultHandler(var Message); override;
     procedure   SetPosition(const APosition: TPoint); override;
@@ -949,16 +938,11 @@ end;
 destructor TX11Application.Destroy;
 var
   i: Integer;
-  WindowListEntry: PXWindowListEntry;
 begin
   if Assigned(Forms) then
   begin
     for i := 0 to Forms.Count - 1 do
-    begin
-      WindowListEntry := PXWindowListEntry(Forms[i]);
-      WindowListEntry^.GfxWindow.Free;
-      Dispose(WindowListEntry);
-    end;
+      TFCustomWindow(Forms[i]).Free;
   end;
 
   DirtyList.Free;
@@ -977,19 +961,14 @@ begin
 end;
 
 procedure TX11Application.AddWindow(AWindow: TFCustomWindow);
-var
-  WindowListEntry: PXWindowListEntry;
 begin
-  New(WindowListEntry);
-  WindowListEntry^.GfxWindow := AWindow;
-  WindowListEntry^.XWindowID := AWindow.Handle;
-  Forms.Add(WindowListEntry);
+  Forms.Add(AWindow);
 end;
 
 procedure TX11Application.Run;
 var
   Event: TXEvent;
-  WindowListEntry: PXWindowListEntry;
+  WindowEntry: TFCustomWindow;
 begin
   DoBreakRun := False;
   
@@ -1017,17 +996,15 @@ begin
     // According to a comment in X.h, the valid event types start with 2!
     if Event._type >= 2 then
     begin
-      WindowListEntry := FindWindowByXID(Event.XAny.Window);
+      WindowEntry := FindWindowByXID(Event.XAny.Window);
 
       if Event._type = X.DestroyNotify then
       begin
-	      Forms.Remove(WindowListEntry);
-        Dispose(WindowListEntry);
+	Forms.Remove(WindowEntry);
       end
-      else if Assigned(WindowListEntry) then
+      else if Assigned(WindowEntry) then
       begin
-        if Assigned(WindowListEntry^.GfxWindow) then
-          WindowListEntry^.GfxWindow.Dispatch(Event);
+        WindowEntry.Dispatch(Event);
       end
       else
         WriteLn('fpGFX/X11: Received X event "', GetXEventName(Event._type),
@@ -1044,15 +1021,44 @@ begin
 end;
 
 
-function TX11Application.FindWindowByXID(XWindowID: X.TWindow): PXWindowListEntry;
+function TX11Application.FindWindowByXID(XWindowID: X.TWindow): TFCustomWindow;
 var
   i: Integer;
+  EndSubSearch: Boolean;
+  
+  procedure SearchSubWindows(AForm: TFCustomWindow; var ATarget: TFCustomWindow);
+  var
+    j: Integer;
+  begin
+    for j := 0 to AForm.ChildWindows.Count - 1 do
+    begin
+      if EndSubSearch then Exit;
+    
+      if TFCustomWindow(AForm.ChildWindows[j]).Handle = XWindowID then
+      begin
+        ATarget := TFCustomWindow(Result.ChildWindows[j]);
+
+        EndSubSearch := True;
+        
+        Exit;
+      end;
+      
+      SearchSubWindows(TFCustomWindow(AForm.ChildWindows[j]), ATarget);
+    end;
+  end;
+  
 begin
   for i := 0 to Forms.Count - 1 do
   begin
-    Result := PXWindowListEntry(Forms[i]);
-    if Result^.XWindowID = XWindowID then
-      exit;
+    Result := TFCustomWindow(Forms[i]);
+    
+    if Result.Handle = XWindowID then exit;
+    
+    EndSubSearch := False;
+
+    SearchSubWindows(TFCustomWindow(Forms[i]), Result);
+
+    if Result.Handle = XWindowID then exit;
   end;
   Result := nil;
 end;
@@ -1104,13 +1110,12 @@ var
   lParentHandle: X.TWindow;
   mask: longword;
 begin
-  inherited Create;
+  inherited Create(AParent, AWindowOptions);
 
   WindowOptions   := AWindowOptions;
   FParent         := AParent;
 
-
-  if (woX11SkipWMHints in WindowOptions) = False then
+  if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
   begin
     if LeaderWindow = 0 then
     begin
@@ -1155,13 +1160,17 @@ begin
     mask := CWColormap;
   end;
 
-  FHandle := CreateXWindow(
-    lParentHandle,                          // parent
-    SizeHints.x, SizeHints.x,               // position (top, left)
-    SizeHints.width, SizeHints.height,      // default size
+  FHandle := XCreateWindow(
+    GFApplication.Handle,
+    lParentHandle,                      // parent
+    SizeHints.x, SizeHints.x,           // position (top, left)
+    SizeHints.width, SizeHints.height,  // default size (width, height)
+    0,                                  // border size
+    CopyFromParent,                     // depth
+    InputOutput,                        // class
     XDefaultVisual(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)),  // visual
     mask,
-    Attr);
+    @Attr);
 
   if FHandle = 0 then
     raise EX11Error.Create(SWindowCreationFailed);
@@ -1171,7 +1180,7 @@ begin
     or LeaveWindowMask or PointerMotionMask or ExposureMask or FocusChangeMask
     or StructureNotifyMask);
     
-  if (woX11SkipWMHints in WindowOptions) = False then
+  if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
   begin
     XSetStandardProperties(GFApplication.Handle, Handle, nil, nil, 0,
      argv, argc, @SizeHints);
@@ -1209,7 +1218,7 @@ begin
   XDestroyWindow(GFApplication.Handle, Handle);
   Canvas.Free;
 
-  GFApplication.FindWindowByXID(Handle)^.GfxWindow := nil;
+  GFApplication.Forms.Remove(Self);
 
   if FCurCursorHandle <> 0 then
     XFreeCursor(GFApplication.Handle, FCurCursorHandle);
@@ -1792,23 +1801,6 @@ begin
   else
     WriteLn('fpGFX/X11: Unknown client message: ', Event.message_type);
 end;
-
-function TX11Window.CreateXWindow(AParent: X.TWindow; ALeft, ATop: longint; AWidth, AHeight: longword;
-  AVisual: PVisual; AValueMask: LongWord; const AAttr: TXSetWindowAttributes): X.TWindow;
-begin
-  Result := XCreateWindow(
-    GFApplication.Handle,
-    AParent,                      // parent
-    ALeft, ATop,                  // position (top, left)
-    AWidth, AHeight,              // size (width, height)
-    0,                            // border size
-    CopyFromParent,               // depth
-    InputOutput,                  // class
-    AVisual,                      // visual
-    AValueMask,
-    @AAttr);
-end;
-
 
 { Global utility functions }
 
