@@ -3,7 +3,7 @@
 
     Event Test example
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -17,10 +17,11 @@
 program EventTest;
 
 uses
-  SysUtils,
-  Classes,
-  GFXBase,
-  fpGFX;
+  SysUtils
+  ,Classes
+  ,GFXBase
+  ,fpGFX
+  ;
 
 
 const
@@ -72,7 +73,6 @@ begin
   OnPaint         := @Paint;
   OnMove          := @Move;
   OnResize        := @Resize;
-  Show;
 end;
 
 

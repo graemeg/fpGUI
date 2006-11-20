@@ -3,7 +3,7 @@
 
     HelloWorld  -  GFX Hello World application
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -16,10 +16,9 @@
 program HelloWorld;
 
 uses
-  Classes,
-  Types,
-  fpGFX,
-  GFXBase
+  Classes
+  ,fpGFX
+  ,GFXBase
   ;
 
 const
