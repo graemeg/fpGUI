@@ -837,9 +837,11 @@ begin
   case Attr.Depth of
     1: PixelFormat.FormatType := ftMono;
 //    4: PixelFormat.FormatType := ftPal4;
+    4,
     8: PixelFormat.FormatType := ftPal8;
     16: PixelFormat.FormatType := ftRGB16;
 //    24: PixelFormat.FormatType := ftRGB24;
+    24,
     32: PixelFormat.FormatType := ftRGB32;
     else
       raise EX11Error.CreateFmt(SWindowUnsupportedPixelFormat, [Attr.Depth]);

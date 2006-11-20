@@ -36,6 +36,7 @@ type
   public
     ABox: TBoxWindow;
     constructor Create;
+    procedure Paint(Sender: TObject; const Rect: TRect);
     procedure MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
   end;
   
@@ -59,6 +60,7 @@ end;
 procedure TBoxWindow.Paint(Sender: TObject; const Rect: TRect);
 var
   r: TRect;
+  tw: integer;
 begin
   Canvas.SetColor(colBlue);
   r.Left    := 0;
@@ -66,6 +68,9 @@ begin
   r.Right   := Width;
   r.Bottom  := Height;
   Canvas.FillRect(r);
+  tw := Canvas.TextWidth('Window 2');
+  Canvas.SetColor(colWhite);
+  Canvas.TextOut(Point((Width div 2) - (tw div 2), Height - 20), 'Window 2');
 end;
 
 constructor TMainWindow.Create;
@@ -77,9 +82,26 @@ begin
   SetMinMaxClientSize(Size(256, 256), Size(256, 256));
 
   OnMouseReleased := @MouseReleased;
-
+  OnPaint := @Paint;
+  
   ABox := TBoxWindow.Create(Self);
   ABox.Show;
+end;
+
+procedure TMainWindow.Paint(Sender: TObject; const Rect: TRect);
+var
+  r: TRect;
+  tw: integer;
+begin
+  Canvas.SetColor(colLtGray);
+  r.Left    := 0;
+  r.Top     := 0;
+  r.Right   := Width;
+  r.Bottom  := Height;
+  Canvas.FillRect(r);
+  tw := Canvas.TextWidth('Window 1');
+  Canvas.SetColor(colBlack);
+  Canvas.TextOut(Point((Width div 2) - (tw div 2), Height - 20), 'Window 1');
 end;
 
 procedure TMainWindow.MouseReleased(Sender: TObject; AButton: TMouseButton;
