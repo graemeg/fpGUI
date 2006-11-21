@@ -209,7 +209,6 @@ type
 
   TX11Window = class(TFCustomWindow)
   private
-    FParent: TFCustomWindow;
     FComposeStatus: TXComposeStatus;
     FComposeBuffer: String[32];
     FCurCursorHandle: X.TCursor;
@@ -1113,9 +1112,6 @@ var
   mask: longword;
 begin
   inherited Create(AParent, AWindowOptions);
-
-  WindowOptions   := AWindowOptions;
-  FParent         := AParent;
 
   if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
   begin

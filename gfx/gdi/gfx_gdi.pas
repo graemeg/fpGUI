@@ -173,8 +173,6 @@ type
 
   TGDIWindow = class(TFCustomWindow)
   private
-    FMinSize, FMaxSize: TSize;
-    FParent: TFCustomWindow;
     { Messages }
     procedure WMCreate(var Msg: TMessage); message WM_CREATE;
     procedure WMDestroy(var Msg: TMessage); message WM_DESTROY;
@@ -1071,9 +1069,6 @@ var
 begin
   inherited Create(AParent, AWindowOptions);
 
-  FWindowOptions := AWindowOptions;
-  FParent := AParent;
-
   { Initialize a window class, if necessary }
   if woWindow in WindowOptions then
   begin
@@ -1176,7 +1171,7 @@ begin
 
   GFApplication.Forms.Remove(Self);
 
-  // Are we the last window for our owning display?
+  // Are we the last window for our owning application?
   if GFApplication.Forms.Count = 0 then
     Windows.PostQuitMessage(0);
 
@@ -1405,10 +1400,6 @@ begin
   end;
 end;
 
-
-function WindowFromPoint(x, y: Windows.LONG):Windows.HWND; external 'user32' name 'WindowFromPoint';
-
-
 function TGDIWindow.DoMouseEnterLeaveCheck(const Msg: TMessage): Boolean;
 
   function CursorInDifferentWindow: Boolean;
@@ -1422,8 +1413,7 @@ function TGDIWindow.DoMouseEnterLeaveCheck(const Msg: TMessage): Boolean;
     if Msg.Msg <> WM_MOUSEWHEEL then
       Windows.ClientToScreen(Handle, pt);
 
-    Result := WindowFromPoint(pt.x, pt.y) <> Handle;
-{!!!:    Result := Windows.WindowFromPoint(pt) <> Handle;}
+    Result := WindowFromPoint(pt) <> Handle;
   end;
 
 var
@@ -1517,13 +1507,11 @@ begin
   Windows.BeginPaint(Handle, @PaintStruct);
   if Assigned(OnPaint) then
   begin
-    with PaintStruct.rcPaint do
-    begin
-      r.Left    := Left;
-      r.Top     := Top;
-      r.Right   := Right;
-      r.Bottom  := Bottom;
-    end;
+    r.Left    := PaintStruct.rcPaint.Left;
+    r.Top     := PaintStruct.rcPaint.Top;
+    r.Right   := PaintStruct.rcPaint.Right;
+    r.Bottom  := PaintStruct.rcPaint.Bottom;
+
     OldCanvas := Canvas;
     FCanvas := TGDICanvas.Create(PaintStruct.hdc);
     OnPaint(Self, r);

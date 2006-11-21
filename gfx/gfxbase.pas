@@ -441,6 +441,7 @@ type
     procedure SetWindowOptions(const AValue: TGfxWindowOptions); virtual;
   protected
     FHandle: Cardinal;
+    FParent: TFCustomWindow;
     FCanvas: TFCustomCanvas;
     FLeft: Integer;
     FTop: Integer;
@@ -450,6 +451,7 @@ type
     FClientHeight: Integer;
     FWindowOptions: TGfxWindowOptions;
     FChildWindows: TList;
+    FMinSize, FMaxSize: TSize;
     function  GetTitle: String; virtual;
     procedure SetTitle(const ATitle: String); virtual;
     procedure DoSetCursor; virtual; abstract;
@@ -960,8 +962,11 @@ constructor TFCustomWindow.Create(AParent: TFCustomWindow;
 begin
   inherited Create;
 
-  FChildWindows := TList.Create;
+  FWindowOptions := AWindowOptions;
+  FParent := AParent;
 
+  FChildWindows := TList.Create;
+  
   if AParent <> nil then AParent.ChildWindows.Add(Self);
 end;
 
