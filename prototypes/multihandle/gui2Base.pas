@@ -201,8 +201,10 @@ end;
 
 procedure TLabel.Paint;
 begin
-  Color := FParent.Canvas.GetColor;
-  inherited Paint;
+//  Color := FParent.Canvas.GetColor;
+//  inherited Paint;
+  Canvas.SetColor(colWhite);
+  Canvas.FillRect(Rect(0,0,Width,Height));
   Canvas.SetColor(colBlack);
   Canvas.TextOut(Point(0, 0), FCaption);
 end;
