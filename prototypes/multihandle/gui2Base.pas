@@ -50,6 +50,7 @@ type
   TButton = class(TWidget)
   private
     FCaption: string;
+    procedure   EvOnPaint(Sender: TObject; const Rect: TRect); override;
     procedure   SetCaption(const AValue: string);
   protected
     procedure   Paint; override;
@@ -125,6 +126,12 @@ begin
 end;
 
 { TButton }
+
+procedure TButton.EvOnPaint(Sender: TObject; const Rect: TRect);
+begin
+  inherited EvOnPaint(Sender, Rect);
+  {$IFDEF DEBUG} Writeln('  - Painting ' + Caption); {$ENDIF}
+end;
 
 procedure TButton.SetCaption(const AValue: string);
 begin
