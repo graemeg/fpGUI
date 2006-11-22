@@ -28,6 +28,7 @@ type
   private
     btnClose: TButton;
     btnCancel: TButton;
+    lblWelcome: TLabel;
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -59,6 +60,9 @@ begin
   btnCancel := TButton.Create(self, Point(150, 150));
   btnCancel.Caption := 'Cancel';
   btnCancel.OnClick := @btnCancelClick;
+  
+  lblWelcome := TLabel.Create(self, Point(10, 10));
+  lblWelcome.Caption := 'So what do you think?';
 end;
 
 destructor TMainWindow.Destroy;

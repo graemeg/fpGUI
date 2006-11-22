@@ -24,14 +24,17 @@ type
 
   TWidget = class(TFWindow)
   private
+    FColor: TGfxColor;
     FOnClick: TNotifyEvent;
     FOnPainting: TNotifyEvent;
     procedure   EvOnPaint(Sender: TObject; const Rect: TRect); virtual;
     procedure   EvOnMousePress(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   SetColor(const AValue: TGfxColor);
   protected
     procedure   Paint; virtual;
     property    OnPainting: TNotifyEvent read FOnPainting write FOnPainting;
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
+    property    Color: TGfxColor read FColor write SetColor;
   public
     constructor Create(AParent: TFCustomWindow);
   end;
@@ -60,6 +63,19 @@ type
   published
     property    OnClick;
   end;
+  
+  { TLabel }
+
+  TLabel = class(TWidget)
+  private
+    FCaption: string;
+    procedure   SetCaption(const AValue: string);
+  protected
+    procedure   Paint; override;
+  public
+    constructor Create(AParent: TFCustomWindow; APosition: TPoint);
+    property    Caption: string read FCaption write SetCaption;
+  end;
 
 
 implementation
@@ -84,11 +100,18 @@ begin
   end;
 end;
 
+procedure TWidget.SetColor(const AValue: TGfxColor);
+begin
+  if FColor=AValue then exit;
+  FColor:=AValue;
+  Paint;
+end;
+
 procedure TWidget.Paint;
 var
   r: TRect;
 begin
-  Canvas.SetColor(colLtGray);
+  Canvas.SetColor(FColor);
   r.Left    := 0;
   r.Top     := 0;
   r.Right   := Width;
@@ -99,6 +122,7 @@ end;
 constructor TWidget.Create(AParent: TFCustomWindow);
 begin
   inherited Create(AParent, []);
+  FColor := colLtGray;
   OnPaint := @EvOnPaint;
   OnMouseReleased := @EvOnMousePress;
   Show;
@@ -158,7 +182,36 @@ begin
   inherited Create(AParent);
   SetPosition(APosition);
   SetClientSize(Size(75, 25));
-  SetMinMaxClientSize(Size(75, 25), Size(75, 25));
+end;
+
+{ TLabel }
+
+procedure TLabel.SetCaption(const AValue: string);
+var
+  w, h: integer;
+begin
+  if FCaption=AValue then exit;
+  FCaption := AValue;
+  Title := FCaption;
+  w := Canvas.TextWidth(FCaption) + 6;
+  h := Canvas.FontCellHeight + 4;
+  SetClientSize(Size(w, h));
+  Paint;
+end;
+
+procedure TLabel.Paint;
+begin
+  Color := FParent.Canvas.GetColor;
+  inherited Paint;
+  Canvas.SetColor(colBlack);
+  Canvas.TextOut(Point(0, 0), FCaption);
+end;
+
+constructor TLabel.Create(AParent: TFCustomWindow; APosition: TPoint);
+begin
+  inherited Create(AParent);
+  SetPosition(APosition);
+  SetClientSize(Size(75, 22));
 end;
 
 end.

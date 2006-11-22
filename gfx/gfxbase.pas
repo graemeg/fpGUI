@@ -270,6 +270,7 @@ type
     FWidth: Integer;
     FHeight: Integer;
     FPixelFormat: TGfxPixelFormat;
+    FColor: TGfxColor;
     function    DoExcludeClipRect(const ARect: TRect): Boolean; virtual; abstract;
     function    DoIntersectClipRect(const ARect: TRect): Boolean; virtual; abstract;
     function    DoUnionClipRect(const ARect: TRect): Boolean; virtual; abstract;
@@ -306,6 +307,7 @@ type
     function    UnionClipRect(const ARect: TRect): Boolean;
     function    GetClipRect: TRect;
     function    MapColor(const AColor: TGfxColor): TGfxPixel; virtual; abstract;
+    function    GetColor: TGfxColor;
 
     // Drawing functions
     procedure   DrawArc(const ARect: TRect; StartAngle, EndAngle: Single);
@@ -607,6 +609,7 @@ constructor TFCustomCanvas.Create;
 begin
   inherited Create;
   Matrix        := GfxIdentityMatrix;
+  FColor        := colBlack;
 end;
 
 function TFCustomCanvas.Transform(APoint: TPoint): TPoint;
@@ -688,8 +691,14 @@ begin
   Result := ReverseTransform(DoGetClipRect);
 end;
 
+function TFCustomCanvas.GetColor: TGfxColor;
+begin
+  result := FColor;
+end;
+
 procedure TFCustomCanvas.SetColor(AColor: TGfxColor);
 begin
+  FColor := AColor;
   SetColor_(MapColor(AColor));
 end;
 
