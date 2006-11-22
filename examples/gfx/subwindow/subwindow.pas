@@ -18,6 +18,11 @@ program subwindow;
 uses
   SysUtils, Classes,
   fpGFX, GFXBase, fpgfxpackage;
+  
+  { Disable this to hide Paint event writeln's. Move another Application over
+    SubWindow application, to see when Paint event fires for TBoxWindow or
+    TMainWindow. }
+  {$Define DEBUG}
 
 type
 
@@ -25,9 +30,9 @@ type
 
   TBoxWindow = class(TFWindow)
   public
-    procedure Paint(Sender: TObject; const Rect: TRect);
     constructor Create(AParent: TFCustomWindow);
-    procedure MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   Paint(Sender: TObject; const Rect: TRect);
+    procedure   MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
   end;
 
   { TMainWindow }
@@ -36,8 +41,8 @@ type
   public
     ABox: TBoxWindow;
     constructor Create;
-    procedure Paint(Sender: TObject; const Rect: TRect);
-    procedure MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   Paint(Sender: TObject; const Rect: TRect);
+    procedure   MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
   end;
   
 constructor TBoxWindow.Create(AParent: TFCustomWindow);
@@ -62,6 +67,7 @@ var
   r: TRect;
   tw: integer;
 begin
+  {$IFDEF DEBUG} Writeln(ClassName + '.Paint'); {$ENDIF}
   Canvas.SetColor(colBlue);
   r.Left    := 0;
   r.Top     := 0;
@@ -93,6 +99,7 @@ var
   r: TRect;
   tw: integer;
 begin
+  {$IFDEF DEBUG} Writeln(ClassName + '.Paint'); {$ENDIF}
   Canvas.SetColor(colLtGray);
   r.Left    := 0;
   r.Top     := 0;
