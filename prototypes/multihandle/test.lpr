@@ -31,6 +31,7 @@ type
     btnCancel: TButton;
     btnPopup: TButton;
     lblWelcome: TLabel;
+    edEdit: TEdit;
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -95,6 +96,9 @@ begin
 
   lblWelcome := TLabel.Create(self, Point(10, 10));
   lblWelcome.Caption := 'So what do you think?';
+  
+  edEdit := TEdit.Create(self, Point(65, 110));
+  edEdit.Text := 'Multi-Handle widgets';
 end;
 
 destructor TMainWindow.Destroy;

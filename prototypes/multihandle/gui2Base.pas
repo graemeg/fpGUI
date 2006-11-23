@@ -98,9 +98,70 @@ type
     constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload;
     property    Caption: string read FCaption write SetCaption;
   end;
+  
+  
+  { TCustomEdit }
+
+  TCustomEdit = class(TWidget)
+  private
+    FText: string;
+    procedure   SetText(const AValue: string);
+  protected
+    procedure   Paint; override;
+  public
+    constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload;
+    property    Text: string read FText write SetText;
+  end;
+  
+  TEdit = class(TCustomEdit)
+  public
+    property    Text;
+  end;
 
 
 implementation
+
+const
+  clDkWhite: TGfxColor      = (Red: $e000; Green: $e000; Blue: $e000; Alpha: 0);
+  cl3DShadow: TGfxColor     = (Red: $8000; Green: $8000; Blue: $8000; Alpha: 0);
+  cl3DDkShadow: TGfxColor   = (Red: $0000; Green: $0000; Blue: $0000; Alpha: 0);
+  cl3DHighlight: TGfxColor  = (Red: $FF00; Green: $FF00; Blue: $FF00; Alpha: 0);
+  cl3DFace: TGfxColor		    = (Red: $c000; Green: $c000; Blue: $c000; Alpha: 0);
+  clWindow: TGfxColor       = (Red: $FF00; Green: $FF00; Blue: $FF00; Alpha: 0);
+  cl3DLight: TGfxColor      = (Red: $e000; Green: $e000; Blue: $e000; Alpha: 0);
+
+
+// Helper functions, that will actually be in a style class.
+
+procedure Draw3DFrame(Canvas: TFCanvas; const ARect: TRect; Color1, Color2, Color3, Color4: TGfxColor);
+begin
+  with ARect do
+  begin
+    Canvas.SetColor(Color1);
+    Canvas.DrawLine(Point(Left, Bottom - 2), TopLeft);
+    Canvas.DrawLine(TopLeft, Point(Right - 1, Top));
+
+    Canvas.SetColor(Color2);
+    Canvas.DrawLine(Point(Left + 1, Bottom - 3), Point(Left + 1, Top + 1));
+    Canvas.DrawLine(Point(Left + 1, Top + 1), Point(Right - 2, Top + 1));
+
+    Canvas.SetColor(Color3);
+    Canvas.DrawLine(Point(Left, Bottom - 1), Point(Right - 1, Bottom - 1));
+    Canvas.DrawLine(Point(Right - 1, Bottom - 1), Point(Right - 1, Top - 1));
+
+    Canvas.SetColor(Color4);
+    Canvas.DrawLine(Point(Left + 1, Bottom - 2), Point(Right - 2, Bottom - 2));
+    Canvas.DrawLine(Point(Right - 2, Bottom - 2), Point(Right - 2, Top));
+  end;
+end;
+
+procedure DrawEditBox(Canvas: TFCanvas; const ARect: TRect);
+begin
+  Draw3DFrame(Canvas, ARect, cl3DShadow, cl3DDkShadow, cl3DHighlight, cl3DFace);
+  Canvas.SetColor(clWindow);
+  with ARect do
+    Canvas.FillRect(Rect(Left + 2, Top + 2, Right - 2, Bottom - 2));
+end;
 
 { TWidget }
 
@@ -223,11 +284,11 @@ var
   Pt: TPoint;
 begin
   inherited Paint;
+  Draw3DFrame(TFCanvas(Canvas), Rect(0, 0, Width, Height), cl3DHighlight, cl3DLight, cl3DDkShadow, cl3DShadow);
+  
   Canvas.SetColor(colBlack);
-  Canvas.DrawRect(Rect(0, 0, Width, Height));
-
   Pt.x := (Width - Canvas.TextWidth(FCaption)) div 2;
-  Pt.y := (Height - Canvas.FontCellHeight) div 2;
+  Pt.y := ((Height - Canvas.FontCellHeight) div 2) + 1;
   Canvas.TextOut(Pt, FCaption);
 end;
 
@@ -297,6 +358,35 @@ constructor TPopupWindow.Create;
 begin
 //  Create(nil, [woPopup]);
   Create(nil, [woWindow]);
+end;
+
+{ TCustomEdit }
+
+procedure TCustomEdit.SetText(const AValue: string);
+var
+  w: integer;
+begin
+  if FText=AValue then exit;
+  FText:=AValue;
+  w := Canvas.TextWidth(FText) + 6;
+  SetClientSize(Size(w, Height));
+  Paint;
+end;
+
+procedure TCustomEdit.Paint;
+begin
+  inherited Paint;
+  DrawEditBox(TFCanvas(Canvas), Rect(0, 0, Width, Height));
+  Canvas.SetColor(colBlack);
+  if FText <> '' then
+    Canvas.TextOut(Point(2, 2), FText);
+end;
+
+constructor TCustomEdit.Create(AParent: TFCustomWindow; APosition: TPoint);
+begin
+  inherited Create(AParent);
+  SetPosition(APosition);
+  SetClientSize(Size(100, 25));
 end;
 
 end.
