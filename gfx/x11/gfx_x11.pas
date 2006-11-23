@@ -1234,15 +1234,41 @@ procedure TX11Window.SetPosition(const APosition: TPoint);
 var
   Supplied: PtrInt;
   SizeHints: PXSizeHints;
+
+  dx, dy: integer;
+  lx, ly: integer;
+  cw : PWindow;
 begin
+  if FParent = nil then
+  begin
+    {$Note This doesn't work yet. I want to position a new window relative to
+      another window. Used for popup windows, like the TComboBox dropdown. }
+    {$IFDEF DEBUG} writeln('SetPosition with no Parent'); {$ENDIF}
+    lx := APosition.x;
+    ly := APosition.y;
+
+    XTranslateCoordinates(GFApplication.Handle, Handle,
+        XDefaultRootWindow(GFApplication.Handle),
+        lx, ly, @dx, @dy, @cw);
+    lx := dx;
+    ly := dy;
+  end
+  else
+  begin
+    {$IFDEF DEBUG} writeln('SetPosition inside parent'); {$ENDIF}
+    lx := APosition.x;
+    ly := APosition.y;
+  end;
+  {$IFDEF DEBUG} Writeln(Format('was (%d,%d) and is now (%d,%d)', [APosition.x, APosition.y, lx, ly])); {$ENDIF}
+
   SizeHints := XAllocSizeHints;
   XGetWMNormalHints(GFApplication.Handle, Handle, SizeHints, @Supplied);
   SizeHints^.flags := SizeHints^.flags or PPosition;
-  SizeHints^.x := APosition.x;
-  SizeHints^.y := APosition.y;
+  SizeHints^.x := lx;
+  SizeHints^.y := ly;
   XSetWMNormalHints(GFApplication.Handle, Handle, SizeHints);
   XFree(SizeHints);
-  XMoveWindow(GFApplication.Handle, Handle, APosition.x, APosition.y);
+  XMoveWindow(GFApplication.Handle, Handle, lx, ly);
 end;
 
 

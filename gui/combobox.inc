@@ -233,8 +233,8 @@ begin
     FDropDown.ListBox.OnClick     := @DropDownDeactivate;
   end;
 
-  FDropDown.SetPosition(ClientToScreen(Point(0, Height)));
   FDropDown.Show;
+  FDropDown.SetPosition(ClientToScreen(Point(0, Height)));
 end;
 
 

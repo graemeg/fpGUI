@@ -25,14 +25,30 @@ type
   TMainWindow = class(TForm)
     procedure btnCancelClick(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
+    procedure btnPopupClick(Sender: TObject);
   private
     btnClose: TButton;
     btnCancel: TButton;
+    btnPopup: TButton;
     lblWelcome: TLabel;
   public
     constructor Create; override;
     destructor  Destroy; override;
   end;
+  
+  
+  TMyPopup = class(TPopupWindow)
+  public
+    constructor Create; override;
+  end;
+
+{ TMyPopup }
+
+constructor TMyPopup.Create;
+begin
+  inherited Create;
+  SetClientSize(Size(150, 320));
+end;
 
 { TMainWindow }
 
@@ -45,6 +61,18 @@ procedure TMainWindow.btnCloseClick(Sender: TObject);
 begin
   Writeln('You click Close');
   GFApplication.Quit;
+end;
+
+procedure TMainWindow.btnPopupClick(Sender: TObject);
+var
+  frm: TMyPopup;
+begin
+  frm := TMyPopup.Create;
+  frm.FParent := self;
+
+  GFApplication.AddWindow(frm);
+  frm.Show;
+  frm.SetPosition(Point(0, btnPopup.Height));
 end;
 
 constructor TMainWindow.Create;
@@ -61,6 +89,10 @@ begin
   btnCancel.Caption := 'Cancel';
   btnCancel.OnClick := @btnCancelClick;
   
+  btnPopup := TButton.Create(self, Point(80, 80));
+  btnPopup.Caption := 'Popup';
+  btnPopup.OnClick := @btnPopupClick;
+
   lblWelcome := TLabel.Create(self, Point(10, 10));
   lblWelcome.Caption := 'So what do you think?';
 end;
@@ -69,6 +101,8 @@ destructor TMainWindow.Destroy;
 begin
   btnClose.Free;
   btnCancel.Free;
+  btnPopup.Free;
+  lblWelcome.Free;
   inherited Destroy;
 end;
 
