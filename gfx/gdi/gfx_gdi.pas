@@ -170,31 +170,6 @@ type
   { TGDIWindow }
 
   TGDIWindow = class(TFCustomWindow)
-  private
-    { Messages }
-    procedure WMCreate(var Msg: TMessage); message WM_CREATE;
-    procedure WMDestroy(var Msg: TMessage); message WM_DESTROY;
-    procedure WMGetMinMaxInfo(var Msg: TMessage); message WM_GETMINMAXINFO;
-    procedure WMActivate(var Msg: TMessage); message WM_ACTIVATE;
-    procedure WMPaint(var Msg: TMessage); message WM_PAINT;
-    procedure WMShowWindow(var Msg: TMessage); message WM_SHOWWINDOW;
-    procedure WMMove(var Msg: TMessage); message WM_MOVE;
-    procedure WMSize(var Msg: TMessage); message WM_SIZE;
-    { Input messages }
-    procedure WMLButtonDown(var Msg: TMessage); message WM_LBUTTONDOWN;
-    procedure WMLButtonUp(var Msg: TMessage); message WM_LBUTTONUP;
-    procedure WMRButtonDown(var Msg: TMessage); message WM_RBUTTONDOWN;
-    procedure WMRButtonUp(var Msg: TMessage); message WM_RBUTTONUP;
-    procedure WMMButtonDown(var Msg: TMessage); message WM_MBUTTONDOWN;
-    procedure WMMButtonUp(var Msg: TMessage); message WM_MBUTTONUP;
-    procedure WMMouseMove(var Msg: TMessage); message WM_MOUSEMOVE;
-    procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
-    procedure WMKeyDown(var Msg: TMessage); message WM_KEYDOWN;
-    procedure WMKeyUp(var Msg: TMessage); message WM_KEYUP;
-    procedure WMChar(var Msg: TMessage); message WM_CHAR;
-    procedure WMSysKeyDown(var Msg: TMessage); message WM_SYSKEYDOWN;
-    procedure WMSysKeyUp(var Msg: TMessage); message WM_SYSKEYUP;
-    procedure WMSysChar(var Msg: TMessage); message WM_SYSCHAR;
   protected
     WindowClass: TWndClass;
     WindowClassW: TWndClassW;
@@ -204,11 +179,10 @@ type
     procedure   SetTitle(const ATitle: String); override;
     procedure   DoSetCursor; override;
     procedure   UpdateWindowButtons;
-    function    DoMouseEnterLeaveCheck(const Msg: TMessage): Boolean;
+    function    DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); override;
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
-    procedure   DefaultHandler(var Message); override;
     procedure   SetPosition(const APosition: TPoint); override;
     procedure   SetSize(const ASize: TSize); override;
     procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
@@ -219,6 +193,7 @@ type
     procedure   PaintInvalidRegion; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
+    procedure   ProcessEvent(AEvent: TFEvent); override;
   end;
 
 
@@ -1036,8 +1011,13 @@ function fpGFXWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM;
   lParam: LPARAM): LRESULT; stdcall;
 var
   Window: TGDIWindow;
-  Msg: TMessage;
+  Event: TFEvent;
+  PaintStruct: TPaintStruct;
+  r: TRect;
+  OldCanvas: TFCustomCanvas;
 begin
+  Event := TFEvent.Create;
+
   if uMsg = WM_CREATE then
   begin
     Window := TGDIWindow(PCreateStruct(lParam)^.lpCreateParams);
@@ -1048,20 +1028,201 @@ begin
 
   if Assigned(Window) then
   begin
-    Msg.msg     := uMsg;
-    Msg.wParam  := wParam;
-    Msg.lParam  := lParam;
-    Msg.Result  := 0;
-    Window.Dispatch(Msg);
-    Result := Msg.Result;
+    Event.msg     := uMsg;
+    Event.wParam  := wParam;
+    Event.lParam  := lParam;
+    Event.Result  := 0;
+
+    case uMsg of
+     { Messages }
+     WM_CREATE:
+     begin
+       Event.EventType := etCreate;
+       Window.ProcessEvent(Event);
+     end;
+     WM_DESTROY:
+     begin
+       if Window.Handle <> 0 then Window.Free;
+     end;
+     WM_GetMinMaxInfo:
+     begin
+       if Window.FMinSize.cx > 0 then
+        PMinMaxInfo(lParam)^.ptMinTrackSize.x := Window.FMinSize.cx;
+       if Window.FMinSize.cy > 0 then
+        PMinMaxInfo(lParam)^.ptMinTrackSize.y := Window.FMinSize.cy;
+       if Window.FMaxSize.cx > 0 then
+        PMinMaxInfo(lParam)^.ptMaxTrackSize.x := Window.FMaxSize.cx;
+       if Window.FMaxSize.cy > 0 then
+        PMinMaxInfo(lParam)^.ptMaxTrackSize.y := Window.FMaxSize.cy;
+     end;
+     WM_Activate:
+     begin
+       if wParam = WA_INACTIVE then
+       begin
+         Event.EventType := etFocusOut;
+         Window.ProcessEvent(Event);
+       end
+       else
+       begin
+         Event.EventType := etFocusIn;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_Paint:
+     begin
+       Event.EventType := etPaint;
+       Window.ProcessEvent(Event);
+     end;
+     WM_ShowWindow:
+     begin
+       if wParam <> 0 then
+       begin
+         Event.EventType := etFocusIn;
+         Window.ProcessEvent(Event);
+
+         Event.EventType := etShow;
+         Window.ProcessEvent(Event);
+       end
+       else
+       begin
+          Event.EventType := etHide;
+          Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_Move:
+     begin
+       if (LoWord(lParam) <> Window.Left) or (HiWord(lParam) <> Window.Top) then
+       begin
+         Window.FLeft := LoWord(lParam);
+         Window.FTop := HiWord(lParam);
+
+         Event.EventType := etMove;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_Size:
+     begin
+       if (LoWord(lParam) <> Window.ClientWidth) or (HiWord(lParam) <> Window.ClientHeight) then
+       begin
+         Windows.GetWindowRect(Window.Handle, r);
+         Window.FWidth := r.Right - r.Left;
+         Window.FHeight := r.Bottom - r.Top;
+         Windows.GetClientRect(Window.Handle, r);
+         Window.FClientWidth := LoWord(lParam);
+         Window.FClientHeight := HiWord(lParam);
+         TGDICanvas(Window.Canvas).Resized(Window.FWidth, Window.FHeight);
+
+         Event.EventType := etResize;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     { Input messages }
+     WM_LButtonDown:
+     begin
+       if Window.FMouseInWindow and not Window.FHasFocus then
+        Windows.SetActiveWindow(Window.Handle);
+        
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMousePressed;
+         Event.MouseButton := mbLeft;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_LButtonUp:
+     begin
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMouseReleased;
+         Event.MouseButton := mbLeft;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_RButtonDown:
+     begin
+       if Window.FMouseInWindow and not Window.FHasFocus then
+        Windows.SetActiveWindow(Window.Handle);
+        
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMousePressed;
+         Event.MouseButton := mbRight;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_RButtonUp:
+     begin
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMouseReleased;
+         Event.MouseButton := mbRight;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_MButtonDown:
+     begin
+       if Window.FMouseInWindow and not Window.FHasFocus then
+        Windows.SetActiveWindow(Window.Handle);
+
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMousePressed;
+         Event.MouseButton := mbMiddle;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_MButtonUp:
+     begin
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMouseReleased;
+         Event.MouseButton := mbMiddle;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_MouseMove:
+     begin
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMouseMove;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_MouseWheel:
+     begin
+       if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
+       begin
+         Event.EventType := etMouseWheel;
+         Window.ProcessEvent(Event);
+       end;
+     end;
+     WM_KeyDown, WM_SysKeyDown:
+     begin
+       Event.EventType := etKeyPressed;
+       Window.ProcessEvent(Event);
+     end;
+     WM_KeyUp, WM_SysKeyUp:
+     begin
+     end;
+     WM_Char, WM_SysChar:
+     begin
+     end;
+    else
+      if UnicodeEnabledOS then Result := Windows.DefWindowProcW(hwnd, uMsg, wParam, lParam)
+      else Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+    end;
+    
+    if Result = 0 then Result := Event.Result;
   end
   else
     if UnicodeEnabledOS then Result := Windows.DefWindowProcW(hwnd, uMsg, wParam, lParam)
     else Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+
+  Event.Free;
 end;
 
 
-constructor TGDIWindow.Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions);
+constructor TGDIWindow.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
 var
   ParentHandle: HWND;
 begin
@@ -1174,17 +1335,6 @@ begin
     Windows.PostQuitMessage(0);
 
   inherited Destroy;
-end;
-
-
-procedure TGDIWindow.DefaultHandler(var Message);
-begin
-  if UnicodeEnabledOS then
-   TMessage(Message).Result := Windows.DefWindowProcW(Handle,
-    TMessage(Message).Msg, TMessage(Message).wParam, TMessage(Message).lParam)
-  else
-   TMessage(Message).Result := Windows.DefWindowProc(Handle,
-    TMessage(Message).Msg, TMessage(Message).wParam, TMessage(Message).lParam)
 end;
 
 
@@ -1315,6 +1465,133 @@ begin
   end;
 end;
 
+procedure TGDIWindow.ProcessEvent(AEvent: TFEvent);
+var
+  pt: Windows.POINT;
+  PaintStruct: TPaintStruct;
+  r: Windows.RECT;
+  OldCanvas: TFCustomCanvas;
+begin
+  case AEvent.EventType of
+   etCreate:
+   begin
+     if Assigned(OnCreate) then OnCreate(Self)
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etCanClose:
+   begin
+   end;
+   etClose:
+   begin
+   end;
+   etFocusIn:
+   begin
+     FHasFocus := True;
+     if Assigned(OnFocusIn) then OnFocusIn(Self);
+   end;
+   etFocusOut:
+   begin
+     FHasFocus := False;
+     if Assigned(OnFocusOut) then OnFocusOut(Self);
+   end;
+   etHide:
+   begin
+     if Assigned(OnHide) then OnHide(Self);
+   end;
+   etKeyPressed:
+   begin
+     if Assigned(OnKeyPressed) then OnKeyPressed(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+
+     if (AEvent.wParam = $2e {VK_DELETE}) then
+     begin
+       if Assigned(OnKeyChar) then OnKeyChar(Self, #127)
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   end;
+   etKeyReleased:
+   begin
+     if Assigned(OnKeyReleased) then OnKeyReleased(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etKeyChar:
+   begin
+     if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etMouseEnter:
+   begin
+     if Assigned(OnMouseEnter) then
+      OnMouseEnter(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lParam), HiWord(AEvent.lParam)))
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etMouseLeave:
+   begin
+     if Assigned(OnMouseLeave) then OnMouseLeave(Self)
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etMousePressed:
+   begin
+     if Assigned(OnMousePressed) then
+      OnMousePressed(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etMouseReleased:
+   begin
+     if Assigned(OnMouseReleased) then
+      OnMouseReleased(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etMouseMove:
+   begin
+     if Assigned(OnMouseMove) then
+      OnMouseMove(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etMouseWheel:
+   begin
+     if Assigned(OnMouseWheel) then
+     begin
+       pt.x := LoWord(AEvent.lparam);
+       pt.y := HiWord(AEvent.lparam);
+       Windows.ScreenToClient(Handle, pt);
+       OnMouseWheel(Self, GetKeyboardShiftState, SmallInt(HiWord(AEvent.wParam)) / -120.0,
+        Point(pt.x, pt.y));
+     end
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etPaint:
+   begin
+     Windows.BeginPaint(Handle, @PaintStruct);
+     if Assigned(OnPaint) then
+     begin
+       r.Left    := PaintStruct.rcPaint.Left;
+       r.Top     := PaintStruct.rcPaint.Top;
+       r.Right   := PaintStruct.rcPaint.Right;
+       r.Bottom  := PaintStruct.rcPaint.Bottom;
+
+       OldCanvas := Canvas;
+       FCanvas := TGDICanvas.Create(PaintStruct.hdc);
+       OnPaint(Self, r);
+       Canvas.Free;
+       FCanvas := OldCanvas;
+     end;
+     Windows.EndPaint(Handle, @PaintStruct);
+   end;
+   etMove:
+   begin
+     if Assigned(OnMove) then OnMove(Self);
+   end;
+   etResize:
+   begin
+     if Assigned(OnResize) then OnResize(Self);
+   end;
+   etShow:
+   begin
+     if Assigned(OnShow) then OnShow(Self);
+   end;
+  end;
+end;
 
 function TGDIWindow.GetTitle: String;
 var
@@ -1350,7 +1627,7 @@ end;
 
 procedure TGDIWindow.DoSetCursor;
 const
-  CursorTable: array[TGfxCursor] of Integer = (
+  CursorTable: array[TFCursor] of Integer = (
     32512,	// crDefault
     0,		  // crNone
     32512,	// crArrow
@@ -1398,17 +1675,17 @@ begin
   end;
 end;
 
-function TGDIWindow.DoMouseEnterLeaveCheck(const Msg: TMessage): Boolean;
+function TGDIWindow.DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
 
   function CursorInDifferentWindow: Boolean;
   var
     pt: Windows.POINT;
   begin
-    pt.x := Msg.lParamLo;
-    pt.y := Msg.lParamHi;
+    pt.x := LoWord(lParam);
+    pt.y := HiWord(lParam);
 
     // only WM_MOUSEWHEEL uses screen coordinates!!!
-    if Msg.Msg <> WM_MOUSEWHEEL then
+    if uMsg <> WM_MOUSEWHEEL then
       Windows.ClientToScreen(Handle, pt);
 
     Result := WindowFromPoint(pt) <> Handle;
@@ -1416,21 +1693,27 @@ function TGDIWindow.DoMouseEnterLeaveCheck(const Msg: TMessage): Boolean;
 
 var
   pt: Windows.POINT;
+  Event: TFEvent;
 begin
   if not FMouseInWindow then
   begin
     FMouseInWindow := True;
     DoSetCursor;
     Windows.SetCapture(Handle);
-    if Assigned(OnMouseEnter) then
-      OnMouseEnter(Self, GetKeyboardShiftState,
-        Point(Msg.lParamLo, Msg.lParamHi));
-    Result := Msg.Msg <> WM_MOUSEMOVE;
+    Event := TFEvent.Create;
+    try
+      Event.lParam := lParam;
+      Event.EventType := etMouseEnter;
+      ProcessEvent(Event);
+    finally
+      Event.Free;
+    end;
+    Result := uMsg <> WM_MOUSEMOVE;
   end else
   begin
-    pt.x := Msg.lParamLo;
-    pt.y := Msg.lParamHi;
-    if Msg.Msg = WM_MOUSEWHEEL then
+    pt.x := LoWord(lParam);
+    pt.y := HiWord(lParam);
+    if uMsg = WM_MOUSEWHEEL then
       Windows.ScreenToClient(Handle, pt);
     if (pt.x < 0) or (pt.y < 0) or (pt.x >= ClientWidth) or
       (pt.y >= ClientHeight) or CursorInDifferentWindow then
@@ -1439,239 +1722,18 @@ begin
     if (not FHasMouseCapture) and (not FMouseInWindow) then
     begin
       Windows.ReleaseCapture;
-      if Assigned(OnMouseLeave) then
-        OnMouseLeave(Self);
+      Event := TFEvent.Create;
+      try
+        Event.EventType := etMouseLeave;
+        ProcessEvent(Event);
+      finally
+        Event.Free;
+      end;
       Result := False;
     end else
       Result := True;
   end;
 end;
-
-
-// private methods
-
-procedure TGDIWindow.WMCreate(var Msg: TMessage);
-begin
-  if Assigned(OnCreate) then
-    OnCreate(Self);
-end;
-
-
-procedure TGDIWindow.WMDestroy(var Msg: TMessage);
-begin
-  if Handle <> 0 then
-    Self.Free;
-end;
-
-
-procedure TGDIWindow.WMGetMinMaxInfo(var Msg: TMessage);
-begin
-  with PMinMaxInfo(Msg.lParam)^ do
-  begin
-    if FMinSize.cx > 0 then
-      ptMinTrackSize.x := FMinSize.cx;
-    if FMinSize.cy > 0 then
-      ptMinTrackSize.y := FMinSize.cy;
-    if FMaxSize.cx > 0 then
-      ptMaxTrackSize.x := FMaxSize.cx;
-    if FMaxSize.cy > 0 then
-      ptMaxTrackSize.y := FMaxSize.cy;
-  end;
-end;
-
-
-procedure TGDIWindow.WMActivate(var Msg: TMessage);
-begin
-  if Msg.wParam = WA_INACTIVE then
-  begin
-    FHasFocus := False;
-    if Assigned(OnFocusOut) then
-      OnFocusOut(Self);
-  end else
-  begin
-    FHasFocus := True;
-    if Assigned(OnFocusIn) then
-      OnFocusIn(Self);
-  end;
-end;
-
-
-procedure TGDIWindow.WMPaint(var Msg: TMessage);
-var
-  PaintStruct: TPaintStruct;
-  r: TRect;
-  OldCanvas: TFCustomCanvas;
-begin
-  Windows.BeginPaint(Handle, @PaintStruct);
-  if Assigned(OnPaint) then
-  begin
-    r.Left    := PaintStruct.rcPaint.Left;
-    r.Top     := PaintStruct.rcPaint.Top;
-    r.Right   := PaintStruct.rcPaint.Right;
-    r.Bottom  := PaintStruct.rcPaint.Bottom;
-
-    OldCanvas := Canvas;
-    FCanvas := TGDICanvas.Create(PaintStruct.hdc);
-    OnPaint(Self, r);
-    Canvas.Free;
-    FCanvas := OldCanvas;
-  end;
-  Windows.EndPaint(Handle, @PaintStruct);
-end;
-
-
-procedure TGDIWindow.WMShowWindow(var Msg: TMessage);
-begin
-  if Msg.wParam <> 0 then
-  begin
-    if Assigned(OnFocusIn) then
-      OnFocusIn(Self);
-    if Assigned(OnShow) then
-      OnShow(Self);
-  end else
-    if Assigned(OnHide) then
-      OnHide(Self);
-end;
-
-
-procedure TGDIWindow.WMMove(var Msg: TMessage);
-begin
-  if (Msg.lParamLo <> Left) or (Msg.lParamHi <> Top) then
-  begin
-    FLeft := Msg.lParamLo;
-    FTop := Msg.lParamHi;
-    if Assigned(OnMove) then
-      OnMove(Self);
-  end;
-end;
-
-
-procedure TGDIWindow.WMSize(var Msg: TMessage);
-var
-  r: Windows.Rect;
-begin
-  if (Msg.lParamLo <> ClientWidth) or (Msg.lParamHi <> ClientHeight) then
-  begin
-    Windows.GetWindowRect(Handle, r);
-    FWidth := r.Right - r.Left;
-    FHeight := r.Bottom - r.Top;
-    Windows.GetClientRect(Handle, r);
-    FClientWidth := Msg.lParamLo;
-    FClientHeight := Msg.lParamHi;
-    TGDICanvas(Canvas).Resized(FWidth, FHeight);
-    if Assigned(OnResize) then
-      OnResize(Self);
-  end;
-end;
-
-
-procedure TGDIWindow.WMLButtonDown(var Msg: TMessage);
-begin
-  if FMouseInWindow and not FHasFocus then
-    Windows.SetActiveWindow(Handle);
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMousePressed) then
-    OnMousePressed(Self, mbLeft, GetKeyboardShiftState,
-      Point(Msg.lParamLo, Msg.lParamHi));
-end;
-
-
-procedure TGDIWindow.WMLButtonUp(var Msg: TMessage);
-begin
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMouseReleased) then
-    OnMouseReleased(Self, mbLeft, GetKeyboardShiftState,
-      Point(Msg.lParamLo, Msg.lParamHi));
-end;
-
-
-procedure TGDIWindow.WMRButtonDown(var Msg: TMessage);
-begin
-  if FMouseInWindow and not FHasFocus then
-    Windows.SetActiveWindow(Handle);
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMousePressed) then
-    OnMousePressed(Self, mbRight, GetKeyboardShiftState,
-      Point(Msg.lParamLo, Msg.lParamHi));
-end;
-
-
-procedure TGDIWindow.WMRButtonUp(var Msg: TMessage);
-begin
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMouseReleased) then
-    OnMouseReleased(Self, mbRight, GetKeyboardShiftState,
-      Point(Msg.lParamLo, Msg.lParamHi));
-end;
-
-
-procedure TGDIWindow.WMMButtonDown(var Msg: TMessage);
-begin
-  if FMouseInWindow and not FHasFocus then
-    Windows.SetActiveWindow(Handle);
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMousePressed) then
-    OnMousePressed(Self, mbMiddle, GetKeyboardShiftState,
-      Point(Msg.lParamLo, Msg.lParamHi));
-end;
-
-procedure TGDIWindow.WMMButtonUp(var Msg: TMessage);
-begin
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMouseReleased) then
-    OnMouseReleased(Self, mbMiddle, GetKeyboardShiftState,
-      Point(Msg.lParamLo, Msg.lParamHi));
-end;
-
-procedure TGDIWindow.WMMouseMove(var Msg: TMessage);
-begin
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMouseMove) then
-    OnMouseMove(Self, GetKeyboardShiftState, Point(Msg.lParamLo, Msg.lParamHi));
-end;
-
-procedure TGDIWindow.WMMouseWheel(var Msg: TMessage);
-var
-  pt: Windows.POINT;
-begin
-  if DoMouseEnterLeaveCheck(Msg) and Assigned(OnMouseWheel) then
-  begin
-    pt.x := Msg.lParamLo;
-    pt.y := Msg.lParamHi;
-    Windows.ScreenToClient(Handle, pt);
-    OnMouseWheel(Self, GetKeyboardShiftState, SmallInt(Msg.wParamHi) / -120.0,
-      Point(pt.x, pt.y));
-  end;
-end;
-
-procedure TGDIWindow.WMKeyDown(var Msg: TMessage);
-begin
-  if Assigned(OnKeyPressed) then
-    OnKeyPressed(Self, VirtKeyToKeycode(Msg.wParam), GetKeyboardShiftState);
-  if (Msg.wParam = $2e {VK_DELETE}) and Assigned(OnKeyChar) then
-    OnKeyChar(Self, #127);
-end;
-
-procedure TGDIWindow.WMKeyUp(var Msg: TMessage);
-begin
-  if Assigned(OnKeyReleased) then
-    OnKeyReleased(Self, VirtKeyToKeycode(Msg.wParam), GetKeyboardShiftState);
-end;
-
-procedure TGDIWindow.WMChar(var Msg: TMessage);
-begin
-  if Assigned(OnKeyChar) then
-    OnKeyChar(Self, Chr(Msg.wParam));
-end;
-
-procedure TGDIWindow.WMSysKeyDown(var Msg: TMessage);
-begin
-  WMKeyDown(Msg);
-end;
-
-procedure TGDIWindow.WMSysKeyUp(var Msg: TMessage);
-begin
-  WMKeyUp(Msg);
-end;
-
-procedure TGDIWindow.WMSysChar(var Msg: TMessage);
-begin
-  WMChar(Msg);
-end;
-
 
 { Helpers }
 

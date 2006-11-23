@@ -79,20 +79,20 @@ type
 
   TGfxFormatType = (
     ftInvalid,
-    ftMono,		  // Monochrome
-    ftPal8,		  // 8 bpp using palette
+    ftMono,		// Monochrome
+    ftPal8,		// 8 bpp using palette
     ftPal8A,		// 8 bpp using palette with alpha values > 0
     ftRGB16,		// 15/16 bpp RGB
     ftRGBA16,		// 16 bpp RGBA
     ftRGB32,		// 32 bpp RGB
-    ftRGBA32);	// 32 bpp RGBA
+    ftRGBA32);	        // 32 bpp RGBA
 
 
   TGfxPixelFormat = record
     case FormatType: TGfxFormatType of
       ftRGB16, ftRGBA16, ftRGB32, ftRGBA32: (
-	      RedMask: TGfxPixel;
-	      GreenMask: TGfxPixel;
+	RedMask: TGfxPixel;
+	GreenMask: TGfxPixel;
         BlueMask: TGfxPixel;
         AlphaMask: TGfxPixel);	// only used for RGBA types
     end;
@@ -219,14 +219,34 @@ type
   TFCustomApplication = class;
   TFCustomWindow = class;
 
-  TGfxWindowOption = (
+  TFWindowOption = (
     woWindow, woBorderless, woPopup, woToolWindow, woChildWindow,
     woX11SkipWMHints);
-  TGfxWindowOptions = set of TGfxWindowOption;
+  TFWindowOptions = set of TFWindowOption;
 
-  TGfxCursor = (crDefault, crNone, crArrow, crCross, crIBeam, crSize, crSizeNS,
+  TFCursor = (crDefault, crNone, crArrow, crCross, crIBeam, crSize, crSizeNS,
     crSizeWE, cpUpArrow, crHourGlass, crNoDrop, crHelp);
 
+  TMouseButton = (mbLeft, mbRight, mbMiddle);
+
+  { TFEvent }
+  
+  TFEventType = (etCreate, etCanClose, etClose, etFocusIn, etFocusOut,
+   etHide, etKeyPressed, etKeyReleased, etKeyChar,
+   etMouseEnter, etMouseLeave, etMousePressed, etMouseReleased,
+   etMouseMove, etMouseWheel, etPaint, etMove, etResize, etShow);
+
+  TFEvent = class
+  public
+    { Window Manager fields }
+    Msg: Cardinal;
+    wparam: Cardinal;
+    lparam: Cardinal;
+    Result: Cardinal;
+    MouseButton: TMouseButton;
+    { fpGUI fields }
+    EventType: TFEventType;
+  end;
 
   { TFCustomFont }
 
@@ -409,7 +429,6 @@ type
   TGfxKeyEvent = procedure(Sender: TObject; AKey: Word; AShift: TShiftState) of object;
   TGfxKeyCharEvent = procedure(Sender: TObject; AKeyChar: Char) of object;
   // Mouse
-  TMouseButton = (mbLeft, mbRight, mbMiddle);
   TGfxMouseButtonEvent = procedure(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint) of object;
   TGfxMouseMoveEvent = procedure(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint) of object;
   TGfxMouseWheelEvent = procedure(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint) of object;
@@ -419,7 +438,7 @@ type
 
   TFCustomWindow = class
   private
-    FCursor: TGfxCursor;
+    FCursor: TFCursor;
     FOnCreate: TNotifyEvent;
     FOnCanClose: TGfxCanCloseEvent;
     FOnClose: TNotifyEvent;
@@ -441,8 +460,8 @@ type
     FOnShow: TNotifyEvent;
     procedure SetWidth(AWidth: Integer);
     procedure SetHeight(AHeight: Integer);
-    procedure SetCursor(ACursor: TGfxCursor);
-    procedure SetWindowOptions(const AValue: TGfxWindowOptions); virtual;
+    procedure SetCursor(ACursor: TFCursor);
+    procedure SetWindowOptions(const AValue: TFWindowOptions); virtual;
   protected
     FHandle: Cardinal;
     FParent: TFCustomWindow;
@@ -453,14 +472,14 @@ type
     FHeight: Integer;
     FClientWidth: Integer;
     FClientHeight: Integer;
-    FWindowOptions: TGfxWindowOptions;
+    FWindowOptions: TFWindowOptions;
     FChildWindows: TList;
     FMinSize, FMaxSize: TSize;
     function  GetTitle: String; virtual;
     procedure SetTitle(const ATitle: String); virtual;
     procedure DoSetCursor; virtual; abstract;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); virtual;
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); virtual;
     destructor  Destroy; override;
     function  CanClose: Boolean; virtual;
     procedure SetPosition(const APosition: TPoint); virtual;
@@ -475,8 +494,9 @@ type
     procedure PaintInvalidRegion; virtual; abstract;
     procedure CaptureMouse; virtual; abstract;
     procedure ReleaseMouse; virtual; abstract;
+    procedure ProcessEvent(AEvent: TFEvent); virtual; abstract;
 
-    property WindowOptions: TGfxWindowOptions read FWindowOptions write SetWindowOptions;
+    property WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
     property Canvas: TFCustomCanvas read FCanvas;
     property Handle: Cardinal read FHandle;
     property ChildWindows: TList read FChildWindows;
@@ -487,8 +507,9 @@ type
     property Height: Integer read FHeight write SetHeight;
     property ClientWidth: Integer read FClientWidth;
     property ClientHeight: Integer read FClientHeight;
-    property Cursor: TGfxCursor read FCursor write SetCursor;
+    property Cursor: TFCursor read FCursor write SetCursor;
     property Title: String read GetTitle write SetTitle;
+    property Parent: TFCustomWindow read FParent;
     // Event handlers
     property OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property OnCanClose: TGfxCanCloseEvent read FOnCanClose write FOnCanClose;
@@ -969,7 +990,7 @@ begin
 end;
 
 constructor TFCustomWindow.Create(AParent: TFCustomWindow;
-        AWindowOptions: TGfxWindowOptions);
+        AWindowOptions: TFWindowOptions);
 begin
   inherited Create;
 
@@ -998,7 +1019,7 @@ begin
   SetSize(Size(Width, AHeight));
 end;
 
-procedure TFCustomWindow.SetCursor(ACursor: TGfxCursor);
+procedure TFCustomWindow.SetCursor(ACursor: TFCursor);
 begin
   if ACursor <> Cursor then
   begin
@@ -1007,7 +1028,7 @@ begin
   end;
 end;
 
-procedure TFCustomWindow.SetWindowOptions(const AValue: TGfxWindowOptions);
+procedure TFCustomWindow.SetWindowOptions(const AValue: TFWindowOptions);
 begin
   if FWindowOptions=AValue then exit;
   FWindowOptions:=AValue;

@@ -54,7 +54,7 @@ type
     property    OnPainting: TNotifyEvent read FOnPainting write FOnPainting;
     property    Color: TGfxColor read FColor write SetColor;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); override;
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     constructor Create; virtual;
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
   end;
@@ -66,7 +66,7 @@ type
     procedure   PopupWindowClick(Sender: TObject);
     procedure   Paint; override;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); override;
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     constructor Create; override;
   end;
   
@@ -251,8 +251,7 @@ begin
   Canvas.FillRect(r);
 end;
 
-constructor TForm.Create(AParent: TFCustomWindow;
-  AWindowOptions: TGfxWindowOptions);
+constructor TForm.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
 begin
   inherited Create(AParent, AWindowOptions);
   FColor := colWhite;
@@ -346,8 +345,7 @@ begin
   inherited Paint;
 end;
 
-constructor TPopupWindow.Create(AParent: TFCustomWindow;
-  AWindowOptions: TGfxWindowOptions);
+constructor TPopupWindow.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
 begin
   inherited Create(AParent, AWindowOptions);
 //  SetPosition();
