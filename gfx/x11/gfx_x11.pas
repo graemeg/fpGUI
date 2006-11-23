@@ -1,9 +1,10 @@
 {
-    fpGFX  -  Free Pascal Graphics Library
-    Copyright (C) 2000 - 2001 by
-      Areca Systems GmbH / Sebastian Guenther, sg@freepascal.org
+    fpGUI  -  Free Pascal Graphical User Interface
 
-    X11/XLib target implementation
+    GFX_X11  -  X11/XLib target implementation
+
+    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about the copyright.
@@ -12,8 +13,6 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-
-
 unit GFX_X11;
 
 {$IFDEF Debug}
