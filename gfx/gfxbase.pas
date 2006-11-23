@@ -244,6 +244,8 @@ type
     lparam: Cardinal;
     Result: Cardinal;
     MouseButton: TMouseButton;
+    EventPointer: Pointer;
+    State: Cardinal;
     { fpGUI fields }
     EventType: TFEventType;
   end;

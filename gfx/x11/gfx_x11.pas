@@ -237,7 +237,7 @@ type
     procedure   DoSetCursor; override;
     procedure   UpdateMotifWMHints;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); override;
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
     procedure   DefaultHandler(var Message); override;
     procedure   SetPosition(const APosition: TPoint); override;
@@ -250,6 +250,7 @@ type
     procedure   PaintInvalidRegion; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
+    procedure   ProcessEvent(AEvent: TFEvent); override;
   end;
 
 
@@ -966,8 +967,11 @@ end;
 
 procedure TX11Application.Run;
 var
-  Event: TXEvent;
+  XEvent: TXEvent;
   WindowEntry: TFCustomWindow;
+  Event: TFEvent;
+  Sum: Integer;
+  NewEvent: TXEvent;
 begin
   DoBreakRun := False;
   
@@ -976,7 +980,7 @@ begin
   begin
     if Assigned(OnIdle) or Assigned(DirtyList.First) then
     begin
-      if not XCheckMaskEvent(Handle, MaxInt, @Event) then
+      if not XCheckMaskEvent(Handle, MaxInt, @XEvent) then
       begin
         if Assigned(DirtyList.First) then DirtyList.PaintAll
         else if Assigned(OnIdle) then OnIdle(Self);
@@ -985,29 +989,47 @@ begin
       end;
     end
     else
-      XNextEvent(Handle, @Event);
+      XNextEvent(Handle, @XEvent);
 
     // if the event filter returns true then it ate the message
-    if Assigned(FEventFilter) and FEventFilter(Event) then continue;
+    if Assigned(FEventFilter) and FEventFilter(XEvent) then continue;
 
     if Forms.Count = 0 then continue;
 
     // According to a comment in X.h, the valid event types start with 2!
-    if Event._type >= 2 then
+    if XEvent._type >= 2 then
     begin
-      WindowEntry := FindWindowByXID(Event.XAny.Window);
+      WindowEntry := FindWindowByXID(XEvent.XAny.Window);
 
-      if Event._type = X.DestroyNotify then
+      if not Assigned(WindowEntry) then
       begin
-	Forms.Remove(WindowEntry);
-      end
-      else if Assigned(WindowEntry) then
-      begin
-        WindowEntry.Dispatch(Event);
-      end
+        WriteLn('fpGFX/X11: Received X event "', GetXEventName(XEvent._type), '" for unknown window');
+        continue;
+      end;
+      
+      Event := TFEvent.Create;
+      Event.EventPointer := @XEvent;
+
+      case XEvent._type of
+       X.DestroyNotify:
+       begin
+         Forms.Remove(WindowEntry);
+       end;
+{       X.KeyPress:
+       begin
+         Event.EventType := etKeyPressed;
+         Event.State := XEvent.xkey.state;
+         WindowEntry.ProcessEvent(Event);
+       end;
+       X.KeyRelease:
+       begin
+         Event.EventType := etKeyReleased;
+         Event.State := XEvent.xkey.state;
+         WindowEntry.ProcessEvent(Event);
+       end;}
       else
-        WriteLn('fpGFX/X11: Received X event "', GetXEventName(Event._type),
-	        '" for unknown window');
+        WindowEntry.Dispatch(XEvent);
+      end;
     end;
   end;
   DoBreakRun := False;
@@ -1023,8 +1045,9 @@ end;
 function TX11Application.FindWindowByXID(XWindowID: X.TWindow): TFCustomWindow;
 var
   i: Integer;
-  EndSubSearch: Boolean;
+  EndSubSearch: Boolean; { Necessary to quit the recursion }
   
+  { Recursively searches sub-windows }
   procedure SearchSubWindows(AForm: TFCustomWindow; var ATarget: TFCustomWindow);
   var
     j: Integer;
@@ -1047,6 +1070,7 @@ var
   end;
   
 begin
+  { Loops througth all windows on the application }
   for i := 0 to Forms.Count - 1 do
   begin
     Result := TFCustomWindow(Forms[i]);
@@ -1087,8 +1111,7 @@ end;
 
 { Note, this only creates a window, it doesn't actually show the window. It
   is still invisible. To make it visible, we need to call Show(). }
-constructor TX11Window.Create(AParent: TFCustomWindow;
-  AWindowOptions: TGfxWindowOptions);
+constructor TX11Window.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
 const
   WindowHints: TXWMHints = (
     flags: InputHint or StateHint or WindowGroupHint;
@@ -1385,6 +1408,92 @@ begin
   XUngrabPointer(GFApplication.Handle, CurrentTime);
 end;
 
+procedure TX11Window.ProcessEvent(AEvent: TFEvent);
+var
+  KeySym: TKeySym;
+begin
+  case AEvent.EventType of
+   etCreate:
+   begin
+     if Assigned(OnCreate) then OnCreate(Self)
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etCanClose:
+   begin
+   
+   end;
+   etClose:
+   begin
+   
+   end;
+   etFocusIn:
+   begin
+     if Assigned(OnFocusIn) then OnFocusIn(Self);
+   end;
+   etFocusOut:
+   begin
+     if Assigned(OnFocusOut) then OnFocusOut(Self);
+   end;
+   etHide:
+   begin
+     if Assigned(OnHide) then OnHide(Self);
+   end;
+   etKeyPressed:
+   begin
+
+   end;
+   etKeyReleased:
+   begin
+
+   end;
+   etKeyChar:
+   begin
+     if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
+     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+   end;
+   etMouseEnter:
+   begin
+
+   end;
+   etMouseLeave:
+   begin
+
+   end;
+   etMousePressed:
+   begin
+
+   end;
+   etMouseReleased:
+   begin
+
+   end;
+   etMouseMove:
+   begin
+
+   end;
+   etMouseWheel:
+   begin
+
+   end;
+   etPaint:
+   begin
+
+   end;
+   etMove:
+   begin
+     if Assigned(OnMove) then OnMove(Self);
+   end;
+   etResize:
+   begin
+     if Assigned(OnResize) then OnResize(Self);
+   end;
+   etShow:
+   begin
+     if Assigned(OnShow) then OnShow(Self);
+   end;
+  end;
+end;
+
 
 // protected methods
 
@@ -1406,7 +1515,7 @@ end;
 
 procedure TX11Window.DoSetCursor;
 const
-  CursorTable: array[TGfxCursor] of Integer = (
+  CursorTable: array[TFCursor] of Integer = (
     -1,			// crDefault
     -2,			// crNone	!!!: not implemented
     -1,			// crArrow
