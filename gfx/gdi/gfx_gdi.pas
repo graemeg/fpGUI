@@ -72,7 +72,6 @@ type
 
   TGDICanvas = class(TFCustomCanvas)
   private
-    FHandle: HDC;
     FColor, FBrushColor, FPenColor, FFontColor: TGfxPixel;
     FLineStyle, FPenLineStyle: TGfxLineStyle;
     FBrush, FOldBrush: HBRUSH;
@@ -112,7 +111,6 @@ type
     procedure   SetColor_(AColor: TGfxPixel); override;
     procedure   SetFont(AFont: TFCustomFont); override;
     procedure   SetLineStyle(ALineStyle: TGfxLineStyle); override;
-    property    Handle: HDC read FHandle;
   end;
 
 

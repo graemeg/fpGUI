@@ -269,6 +269,7 @@ type
   protected
     FWidth: Integer;
     FHeight: Integer;
+    FHandle: Cardinal;
     FPixelFormat: TGfxPixelFormat;
     FColor: TGfxColor;
     function    DoExcludeClipRect(const ARect: TRect): Boolean; virtual; abstract;
@@ -341,6 +342,7 @@ type
     property    Height: Integer read FHeight;
     property    PixelFormat: TGfxPixelFormat read FPixelFormat;
     property    Matrix: TGfxMatrix read FMatrix write FMatrix;
+    property    Handle: Cardinal read FHandle;
   end;
 
   { TFCustomBitmap }

@@ -1,46 +1,39 @@
 {
-    fpGFX  -  Free Pascal Graphics Library
-    Copyright (C) 2000 by
-      Areca Systems GmbH / Sebastian Guenther, sg@freepascal.org
-    Copyright (C) 2006 by Graeme Geldenhuys 
-      member of the fpGFX development team.
+    fpGUI  -  Free Pascal GUI Library
 
-    Default target selection unit for template unit
+    GFXInterface  -  Default target selection unit
 
-    See the file COPYING.fpGFX, included in this distribution,
-    for details about the copyright.
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
- **********************************************************************}
-
-
-unit GFXImpl;
+}
+unit GFXInterface;
 
 interface
 
 uses GFX_xxx;
 
-
 type
 
-  TDefDisplay = TxxxDisplay;
-  TDefWindow = TxxxWindow;
+  TDefFont = TxxxFont;
 
+  TDefCanvas = TxxxCanvas;
+
+  TDefBitmap = TxxxBitmap;
+
+  TDefScreen = TxxxScreen;
+
+  TDefApplication = TxxxApplication;
+
+  TDefWindow = TxxxWindow;
 
 implementation
 
 end.
 
-
-{
-  $Log: gfximpl.pp,v $
-  Revision 1.2  2000/10/28 20:28:27  sg
-  * First version
-
-  Revision 1.1  2000/08/04 21:05:53  sg
-  * First version in CVS
-
-}

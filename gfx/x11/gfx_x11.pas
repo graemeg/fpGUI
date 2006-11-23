@@ -83,7 +83,6 @@ type
 
   TX11Canvas = class(TFCustomCanvas)
   private
-    FHandle: X.TDrawable;
     FGC: TGC;
     FVisual: PVisual;
     FRegion: TRegion;
@@ -125,7 +124,6 @@ type
     procedure   SetFont(AFont: TFCustomFont); override;
     procedure   SetLineStyle(ALineStyle: TGfxLineStyle); override;
     procedure   DrawPolyLine(const Coords: array of TPoint); override;
-    property    Handle: X.TDrawable read FHandle;
     property    GC: TGC read FGC;
     property    Visual: PVisual read FVisual;
     property    Colormap: TColormap read FColormap;
