@@ -1,11 +1,10 @@
 {
-    fpGFX  -  Free Pascal Graphics Library
-    Copyright (C) 2000 - 2001 by
-      Areca Systems GmbH / Sebastian Guenther, sg@freepascal.org
-    Copyright (C) 2006 by Graeme Geldenhuys 
-      member of the fpGFX development team.
+    fpGUI  -  Free Pascal Graphical User Interface
 
-    Window dirty list (redrawing queue)
+    GelDirty  -  Window dirty list (redrawing queue)
+
+    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about the copyright.
@@ -13,9 +12,7 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
- **********************************************************************}
-
+}
 unit GELDirty;
 
 {$IFDEF Debug}

@@ -1,11 +1,10 @@
 {
-    fpGFX  -  Free Pascal Graphics Library
-    Copyright (C) 2000 - 2001 by
-      Areca Systems GmbH / Sebastian Guenther, sg@freepascal.org
-    Copyright (C) 2006 by Graeme Geldenhuys 
-      member of the fpGFX development team.
+    fpGUI  -  Free Pascal Graphical User Interface
 
-    Image conversion helpers
+    GelImage  -  X11 image conversion routines
+
+    Copyright (C) 2000 - 2006 See the file AUTHORS, included in this
+    distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
     for details about the copyright.
@@ -13,22 +12,20 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
- **********************************************************************}
-
-
+}
 unit GELImage;
 
 {$IFDEF Debug}
-{$ASSERTIONS On}
+  {$ASSERTIONS On}
 {$ENDIF}
+
 {$mode objfpc}{$H+}
 
 interface
 
 uses
   Classes,
-  GfxBase;		// fpGFX units
+  GfxBase;
 
 
 procedure ConvertImage(
@@ -82,26 +79,6 @@ begin
   end;
 end;
 
-procedure ConvertPal4ToInternal(Params: TConvertParams; Data: Pointer;
-  StartX, EndX: Integer; Dest: Pointer);
-var
-  b: Byte;
-begin
-  // !!!: Just works for even StartX and EndX values
-  ASSERT((StartX and 1) = 0);
-  ASSERT((EndX and 1) = 0);
-  Inc(Data, StartX shr 1);
-  while StartX < EndX do
-  begin
-    b := PByte(Data)^;
-    PLongWord(Dest)[0] := Params.Palette[b shr 4];
-    PLongWord(Dest)[1] := Params.Palette[b and 15];
-    Inc(StartX, 2);
-    Inc(Data);
-    Inc(Dest, 8);
-  end;
-end;
-
 procedure ConvertPal8ToInternal(Params: TConvertParams; Data: Pointer;
   StartX, EndX: Integer; Dest: Pointer);
 begin
@@ -111,26 +88,6 @@ begin
     PLongWord(Dest)^ := Params.Palette[PByte(Data)^];
     Inc(StartX);
     Inc(Data);
-    Inc(Dest, 4);
-  end;
-end;
-
-procedure ConvertRGB24ToInternal(Params: TConvertParams; Data: Pointer;
-  StartX, EndX: Integer; Dest: Pointer);
-var
-  PixelIn: LongWord;
-begin
-  Inc(Data, StartX * 3);
-  while StartX < EndX do
-  begin
-    PixelIn := 0;
-    Move(Data^, PixelIn, 3);
-    PLongWord(Dest)^ :=
-      (((PixelIn shr Params.RedShiftR) and $ff) shl Params.RedShiftL) or
-      (((PixelIn shr Params.GreenShiftR) and $ff) shl Params.GreenShiftL) or
-      (((PixelIn shr Params.BlueShiftR) and $ff) shl Params.BlueShiftL);
-    Inc(StartX);
-    Inc(Data, 3);
     Inc(Dest, 4);
   end;
 end;
@@ -169,26 +126,6 @@ begin
 
     Inc(Data, 4);
     Inc(Dest, 2);
-    Dec(Width);
-  until Width = 0;
-end;
-
-procedure ConvertInternalToRGB24(Params: TConvertParams; Data: Pointer;
-  Dest: Pointer; Width: Integer);
-var
-  PixelIn, PixelOut: LongWord;
-begin
-  repeat
-    PixelIn := PLongWord(Data)^;
-    PixelOut :=
-      (((PixelIn and $0000ff) shr Params.RedShiftR) shl Params.RedShiftL) or
-      (((PixelIn and $00ff00) shr Params.GreenShiftR) shl Params.GreenShiftL) or
-      (((PixelIn and $ff0000) shr Params.BlueShiftR) shl Params.BlueShiftL);
-    PWord(Dest)^ := Word(PixelOut);
-    PByte(Dest)[2] := PixelOut shr 16;
-
-    Inc(Data, 4);
-    Inc(Dest, 3);
     Dec(Width);
   until Width = 0;
 end;

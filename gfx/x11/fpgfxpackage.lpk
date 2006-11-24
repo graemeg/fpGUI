@@ -27,32 +27,32 @@
         <UnitName Value="GfxBase"/>
       </Item1>
       <Item2>
-        <Filename Value="../emulayer/geldirty.pas"/>
-        <UnitName Value="GELDirty"/>
-      </Item2>
-      <Item3>
-        <Filename Value="../emulayer/gelimage.pas"/>
-        <UnitName Value="GELImage"/>
-      </Item3>
-      <Item4>
         <Filename Value="gfx_x11.pas"/>
         <UnitName Value="GFX_X11"/>
-      </Item4>
-      <Item5>
+      </Item2>
+      <Item3>
         <Filename Value="gfxinterface.pas"/>
         <UnitName Value="gfxinterface"/>
-      </Item5>
-      <Item6>
+      </Item3>
+      <Item4>
         <Filename Value="../schar16.pas"/>
         <UnitName Value="schar16"/>
-      </Item6>
-      <Item7>
+      </Item4>
+      <Item5>
         <Filename Value="../unitkeys.pas"/>
         <UnitName Value="unitkeys"/>
-      </Item7>
-      <Item8>
+      </Item5>
+      <Item6>
         <Filename Value="../fpgfx.pas"/>
         <UnitName Value="fpgfx"/>
+      </Item6>
+      <Item7>
+        <Filename Value="geldirty.pas"/>
+        <UnitName Value="GELDirty"/>
+      </Item7>
+      <Item8>
+        <Filename Value="gelimage.pas"/>
+        <UnitName Value="GELImage"/>
       </Item8>
     </Files>
     <RequiredPkgs Count="1">
