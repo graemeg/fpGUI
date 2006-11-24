@@ -47,11 +47,11 @@
         <UnitName Value="fpgfx"/>
       </Item6>
       <Item7>
-        <Filename Value="geldirty.pas"/>
+        <Filename Value="../geldirty.pas"/>
         <UnitName Value="GELDirty"/>
       </Item7>
       <Item8>
-        <Filename Value="gelimage.pas"/>
+        <Filename Value="../gelimage.pas"/>
         <UnitName Value="GELImage"/>
       </Item8>
     </Files>
