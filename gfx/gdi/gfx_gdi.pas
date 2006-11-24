@@ -1474,122 +1474,122 @@ var
 begin
   case AEvent.EventType of
    etCreate:
-   begin
-     if Assigned(OnCreate) then OnCreate(Self)
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etCanClose:
-   begin
-   end;
-   etClose:
-   begin
-   end;
-   etFocusIn:
-   begin
-     FHasFocus := True;
-     if Assigned(OnFocusIn) then OnFocusIn(Self);
-   end;
-   etFocusOut:
-   begin
-     FHasFocus := False;
-     if Assigned(OnFocusOut) then OnFocusOut(Self);
-   end;
-   etHide:
-   begin
-     if Assigned(OnHide) then OnHide(Self);
-   end;
-   etKeyPressed:
-   begin
-     if Assigned(OnKeyPressed) then OnKeyPressed(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-
-     if (AEvent.wParam = $2e {VK_DELETE}) then
      begin
-       if Assigned(OnKeyChar) then OnKeyChar(Self, #127)
+       if Assigned(OnCreate) then OnCreate(Self)
        else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
      end;
-   end;
-   etKeyReleased:
-   begin
-     if Assigned(OnKeyReleased) then OnKeyReleased(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etKeyChar:
-   begin
-     if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etMouseEnter:
-   begin
-     if Assigned(OnMouseEnter) then
-      OnMouseEnter(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lParam), HiWord(AEvent.lParam)))
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etMouseLeave:
-   begin
-     if Assigned(OnMouseLeave) then OnMouseLeave(Self)
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etMousePressed:
-   begin
-     if Assigned(OnMousePressed) then
-      OnMousePressed(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etMouseReleased:
-   begin
-     if Assigned(OnMouseReleased) then
-      OnMouseReleased(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etMouseMove:
-   begin
-     if Assigned(OnMouseMove) then
-      OnMouseMove(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etMouseWheel:
-   begin
-     if Assigned(OnMouseWheel) then
+   etCanClose:
      begin
-       pt.x := LoWord(AEvent.lparam);
-       pt.y := HiWord(AEvent.lparam);
-       Windows.ScreenToClient(Handle, pt);
-       OnMouseWheel(Self, GetKeyboardShiftState, SmallInt(HiWord(AEvent.wParam)) / -120.0,
-        Point(pt.x, pt.y));
-     end
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
-   etPaint:
-   begin
-     Windows.BeginPaint(Handle, @PaintStruct);
-     if Assigned(OnPaint) then
-     begin
-       r.Left    := PaintStruct.rcPaint.Left;
-       r.Top     := PaintStruct.rcPaint.Top;
-       r.Right   := PaintStruct.rcPaint.Right;
-       r.Bottom  := PaintStruct.rcPaint.Bottom;
-
-       OldCanvas := Canvas;
-       FCanvas := TGDICanvas.Create(PaintStruct.hdc);
-       OnPaint(Self, r);
-       Canvas.Free;
-       FCanvas := OldCanvas;
      end;
-     Windows.EndPaint(Handle, @PaintStruct);
-   end;
+   etClose:
+     begin
+     end;
+   etFocusIn:
+     begin
+       FHasFocus := True;
+       if Assigned(OnFocusIn) then OnFocusIn(Self);
+     end;
+   etFocusOut:
+     begin
+       FHasFocus := False;
+       if Assigned(OnFocusOut) then OnFocusOut(Self);
+     end;
+   etHide:
+     begin
+       if Assigned(OnHide) then OnHide(Self);
+     end;
+   etKeyPressed:
+     begin
+       if Assigned(OnKeyPressed) then OnKeyPressed(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+
+       if (AEvent.wParam = $2e {VK_DELETE}) then
+       begin
+         if Assigned(OnKeyChar) then OnKeyChar(Self, #127)
+         else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+       end;
+     end;
+   etKeyReleased:
+     begin
+       if Assigned(OnKeyReleased) then OnKeyReleased(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etKeyChar:
+     begin
+       if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etMouseEnter:
+     begin
+       if Assigned(OnMouseEnter) then
+        OnMouseEnter(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lParam), HiWord(AEvent.lParam)))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etMouseLeave:
+     begin
+       if Assigned(OnMouseLeave) then OnMouseLeave(Self)
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etMousePressed:
+     begin
+       if Assigned(OnMousePressed) then
+        OnMousePressed(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etMouseReleased:
+     begin
+       if Assigned(OnMouseReleased) then
+        OnMouseReleased(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etMouseMove:
+     begin
+       if Assigned(OnMouseMove) then
+        OnMouseMove(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etMouseWheel:
+     begin
+       if Assigned(OnMouseWheel) then
+       begin
+         pt.x := LoWord(AEvent.lparam);
+         pt.y := HiWord(AEvent.lparam);
+         Windows.ScreenToClient(Handle, pt);
+         OnMouseWheel(Self, GetKeyboardShiftState, SmallInt(HiWord(AEvent.wParam)) / -120.0,
+          Point(pt.x, pt.y));
+       end
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
+   etPaint:
+     begin
+       Windows.BeginPaint(Handle, @PaintStruct);
+       if Assigned(OnPaint) then
+       begin
+         r.Left    := PaintStruct.rcPaint.Left;
+         r.Top     := PaintStruct.rcPaint.Top;
+         r.Right   := PaintStruct.rcPaint.Right;
+         r.Bottom  := PaintStruct.rcPaint.Bottom;
+
+         OldCanvas := Canvas;
+         FCanvas := TGDICanvas.Create(PaintStruct.hdc);
+         OnPaint(Self, r);
+         Canvas.Free;
+         FCanvas := OldCanvas;
+       end;
+       Windows.EndPaint(Handle, @PaintStruct);
+     end;
    etMove:
-   begin
-     if Assigned(OnMove) then OnMove(Self);
-   end;
+     begin
+       if Assigned(OnMove) then OnMove(Self);
+     end;
    etResize:
-   begin
-     if Assigned(OnResize) then OnResize(Self);
-   end;
+     begin
+       if Assigned(OnResize) then OnResize(Self);
+     end;
    etShow:
-   begin
-     if Assigned(OnShow) then OnShow(Self);
-   end;
+     begin
+       if Assigned(OnShow) then OnShow(Self);
+     end;
   end;
 end;
 

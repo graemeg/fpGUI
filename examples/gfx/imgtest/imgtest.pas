@@ -23,11 +23,11 @@ uses
 
 type
   TMainWindow = class(TFWindow)
-    procedure Paint(Sender: TObject; const Rect: TRect);
   private
     Bitmap: TFBitmap;
+    procedure   Paint(Sender: TObject; const Rect: TRect);
   public
-    constructor Create;
+    constructor Create; overload;
     destructor  Destroy; override;
   end;
 
@@ -39,6 +39,8 @@ var
   i, j: Integer;
 begin
   inherited Create(nil, [woWindow]);
+  Data := nil;
+  Stride := 0;
   
   Title := 'fpGFX Bitmap Test';
   OnPaint := @Paint;
@@ -56,20 +58,13 @@ end;
 destructor TMainWindow.Destroy;
 begin
   Bitmap.Free;
-  
   inherited Destroy;
 end;
 
 procedure TMainWindow.Paint(Sender: TObject; const Rect: TRect);
-var
-  r: TRect;
 begin
   Canvas.SetColor(colBlue);
-  r.Left    := 0;
-  r.Top     := 0;
-  r.Right   := Width;
-  r.Bottom  := Height;
-  Canvas.FillRect(r);
+  Canvas.FillRect(Rect);
   Canvas.DrawImage(Bitmap, Point(0, 0));
 end;
 

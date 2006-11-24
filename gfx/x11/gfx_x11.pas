@@ -610,11 +610,8 @@ end;
 
 
 procedure TX11Canvas.DoTextOut(const APosition: TPoint; const AText: String);
-var
-  WideText: PWideChar;
-  AnsiText: string;
-  Size: Integer;
   {$IFDEF XftSupport}
+var
   fnt: PXftFont;
   fntColor: TXftColor;
   s: String16;
@@ -646,16 +643,6 @@ begin
   {$ELSE}
   XDrawString(GFApplication.Handle, Handle, GC, APosition.x,
     APosition.y + FFontStruct^.ascent, PChar(AText), Length(AText));
-
-{   Size := Utf8ToUnicode(nil, PChar(AText), 0);
-    WideText := GetMem(Size * 2);
-    Utf8ToUnicode(WideText, PChar(AText), Size);
-
-  XwcDrawText(gApplication.Handle, Handle, GC, APosition.x,
-    APosition.y + FFontStruct^.ascent, PXwcTextItem(WideText), Length(WideText));
-
-    FreeMem(WideText);
-}
   {$ENDIF}
 end;
 
@@ -663,7 +650,6 @@ end;
 procedure TX11Canvas.DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect;
   const ADestPos: TPoint);
 var
-  DestPos: TPoint;
   RealHeight: Integer;
 begin
   if not ASource.InheritsFrom(TX11Canvas) then
@@ -674,7 +660,7 @@ begin
   begin
     // !!!: This case will probably be removed completely very soon
     RealHeight := ASourceRect.Bottom - ASourceRect.Top;
-    if DestPos.y + RealHeight > Height then
+    if ADestPos.y + RealHeight > Height then
       RealHeight := Height - ADestPos.y;
     XSetClipMask(GFApplication.Handle, GC, TX11Canvas(ASource).Handle);
     XSetClipOrigin(GFApplication.Handle, GC, ADestPos.x, ADestPos.y);
@@ -792,7 +778,6 @@ begin
       TX11Bitmap(AImage).Data, TX11Bitmap(AImage).Stride,
       0, 0, ConvertFormat, Image^.data, Image^.bytes_per_line);
   end;
-
   XPutImage(GFApplication.Handle, Handle, GC,
     Image, 0, 0, ADestPos.x, ADestPos.y, AImage.Width, AImage.Height);
     
@@ -969,8 +954,6 @@ var
   XEvent: TXEvent;
   WindowEntry: TFCustomWindow;
   Event: TFEvent;
-  Sum: Integer;
-  NewEvent: TXEvent;
 begin
   DoBreakRun := False;
   
@@ -1011,21 +994,23 @@ begin
 
       case XEvent._type of
        X.DestroyNotify:
-       begin
-         Forms.Remove(WindowEntry);
-       end;
-{       X.KeyPress:
-       begin
-         Event.EventType := etKeyPressed;
-         Event.State := XEvent.xkey.state;
-         WindowEntry.ProcessEvent(Event);
-       end;
+         begin
+           Forms.Remove(WindowEntry);
+         end;
+{
+       X.KeyPress:
+         begin
+           Event.EventType := etKeyPressed;
+           Event.State := XEvent.xkey.state;
+           WindowEntry.ProcessEvent(Event);
+         end;
        X.KeyRelease:
-       begin
-         Event.EventType := etKeyReleased;
-         Event.State := XEvent.xkey.state;
-         WindowEntry.ProcessEvent(Event);
-       end;}
+         begin
+           Event.EventType := etKeyReleased;
+           Event.State := XEvent.xkey.state;
+           WindowEntry.ProcessEvent(Event);
+         end;
+}
       else
         WindowEntry.Dispatch(XEvent);
       end;
@@ -1408,88 +1393,88 @@ begin
 end;
 
 procedure TX11Window.ProcessEvent(AEvent: TFEvent);
-var
-  KeySym: TKeySym;
+{var
+  KeySym: TKeySym;}
 begin
   case AEvent.EventType of
    etCreate:
-   begin
-     if Assigned(OnCreate) then OnCreate(Self)
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
+     begin
+       if Assigned(OnCreate) then OnCreate(Self)
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
    etCanClose:
-   begin
-   
-   end;
+     begin
+
+     end;
    etClose:
-   begin
-   
-   end;
+     begin
+
+     end;
    etFocusIn:
-   begin
-     if Assigned(OnFocusIn) then OnFocusIn(Self);
-   end;
+     begin
+       if Assigned(OnFocusIn) then OnFocusIn(Self);
+     end;
    etFocusOut:
-   begin
-     if Assigned(OnFocusOut) then OnFocusOut(Self);
-   end;
+     begin
+       if Assigned(OnFocusOut) then OnFocusOut(Self);
+     end;
    etHide:
-   begin
-     if Assigned(OnHide) then OnHide(Self);
-   end;
+     begin
+       if Assigned(OnHide) then OnHide(Self);
+     end;
    etKeyPressed:
-   begin
+     begin
 
-   end;
+     end;
    etKeyReleased:
-   begin
+     begin
 
-   end;
+     end;
    etKeyChar:
-   begin
-     if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
-     else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-   end;
+     begin
+       if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+     end;
    etMouseEnter:
-   begin
+     begin
 
-   end;
+     end;
    etMouseLeave:
-   begin
+     begin
 
-   end;
+     end;
    etMousePressed:
-   begin
+     begin
 
-   end;
+     end;
    etMouseReleased:
-   begin
+     begin
 
-   end;
+     end;
    etMouseMove:
-   begin
+     begin
 
-   end;
+     end;
    etMouseWheel:
-   begin
+     begin
 
-   end;
+     end;
    etPaint:
-   begin
+     begin
 
-   end;
+     end;
    etMove:
-   begin
-     if Assigned(OnMove) then OnMove(Self);
-   end;
+     begin
+       if Assigned(OnMove) then OnMove(Self);
+     end;
    etResize:
-   begin
-     if Assigned(OnResize) then OnResize(Self);
-   end;
+     begin
+       if Assigned(OnResize) then OnResize(Self);
+     end;
    etShow:
-   begin
-     if Assigned(OnShow) then OnShow(Self);
-   end;
+     begin
+       if Assigned(OnShow) then OnShow(Self);
+     end;
   end;
 end;
 

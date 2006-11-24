@@ -16,14 +16,14 @@
 unit fpgfx;
 
 {$ifdef fpc}
-  {$mode delphi}{$H+}
+  {$mode objfpc}{$H+}
 {$endif}
 
 interface
 
 uses
   Classes, SysUtils,
-  gfxinterface, gfxbase;
+  gfxinterface;
 
 type
 
@@ -55,16 +55,8 @@ type
   { TFApplication }
 
   TFApplication = class(TDefApplication)
-  private
-    FDisplayName: String;
-  protected
-    FTitle: String;
-    procedure   SetTitle(const ATitle: String);
   public
-    constructor Create; override;
-    destructor  Destroy; override;
 //    procedure   CreateForm(InstanceClass: TComponentClass; var Reference);
-    property    Title: String read FTitle write SetTitle;
   end;
 
 { Using the singleton pattern to hide instance variables and
@@ -96,69 +88,9 @@ begin
 end;
 
 
-
-{ TFApplication }
-
-constructor TFApplication.Create;
-begin
-  inherited Create;
-
-end;
-
-
-destructor TFApplication.Destroy;
-begin
-
-  inherited Destroy;
-end;
-
-{procedure TFApplication.CreateForm(AForm: TCustomForm);
-var
-  form: PForm;
-  Filename: String;
-  TextStream, BinStream: TStream;
-begin
-  form := @Reference;
-  form^ := TCustomForm(InstanceClass.Create(Self));
-
-  Filename := LowerCase(Copy(InstanceClass.ClassName, 2, 255)) + '.frm';
-
-  TextStream := TFileStream.Create(Filename, fmOpenRead);
-  BinStream := TMemoryStream.Create;
-  ObjectTextToBinary(TextStream, BinStream);
-  TextStream.Free;
-
-  BinStream.Position := 0;
-  BinStream.ReadComponent(Form^);
-  BinStream.Free;
-
-  Form^.Show;
-end;}
-
-
-procedure TFApplication.SetTitle(const ATitle: String);
-begin
-  if ATitle <> FTitle then FTitle := ATitle;
-end;
-
-{*******************************************************************
-*  Initialization section
-*
-*  DESCRIPTION:    Upon startup FApplication and FScreen objects are created
-*                  and memory for them allocated.
-*
-*******************************************************************}
-
 initialization
   uScreen := nil;
   uApplication := nil;
-
-{*******************************************************************
-*  Finalization section
-*
-*  DESCRIPTION:    Free memory allocated on the initialization section
-*
-*******************************************************************}
 
 finalization
   uApplication.Free;

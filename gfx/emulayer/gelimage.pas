@@ -64,7 +64,6 @@ type
 procedure ConvertMonoToInternal(Params: TConvertParams; Data: Pointer;
   StartX, EndX: Integer; Dest: Pointer);
 var
-  b: Byte;
   Mask: Byte;
 begin
   Inc(Data, StartX shr 3);
@@ -251,6 +250,7 @@ procedure ConvertImage(
   var
     i: Integer;
   begin
+    Assert(MaxIndex = MaxIndex);  // removes compiler warning
     if Assigned(ASourcePal) then
     begin
       Result := ASourcePal.EntryCount - 1;
@@ -273,6 +273,12 @@ var
   Scanline: Pointer;
   i, max, w, y: Integer;
 begin
+  Assert(ADestX = ADestX);  // removes compiler warning
+  Assert(ADestY = AdestY);
+  Scanline := nil;
+  ParamsI2D.BlueShiftL := 0;
+  ParamsS2I.BlueShiftL := 0;
+
   case ASourceFormat.FormatType of
     ftMono:
       begin
@@ -359,6 +365,9 @@ const
 var
   StartByte, EndByte, x, y: Integer;
 begin
+  Assert(ADestX = ADestX);  // removes compiler warning
+  Assert(ADestY = AdestY);
+
   StartByte := ASourceRect.Left shr 3;
   EndByte := (ASourceRect.Right + 7) shr 3;
   Inc(ASourceData, StartByte);

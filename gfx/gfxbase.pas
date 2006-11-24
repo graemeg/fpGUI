@@ -407,11 +407,14 @@ type
   private
     FOnIdle: TNotifyEvent;
     FQuitWhenLastWindowCloses: Boolean;
+    FDisplayName: String;
+  protected
+    FTitle: String;
+    procedure   SetTitle(const ATitle: String);
   public
     Forms: TList;
-  public
     { Default methods }
-    constructor Create; virtual;
+    constructor Create; virtual; overload;
     destructor  Destroy; override;
     procedure   AddWindow(AWindow: TFCustomWindow);  virtual; abstract;
     procedure   Initialize(ADisplayName: String = ''); virtual; abstract;
@@ -420,6 +423,7 @@ type
     { Properties }
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
     property    QuitWhenLastWindowCloses: Boolean read FQuitWhenLastWindowCloses write FQuitWhenLastWindowCloses;
+    property    Title: String read FTitle write SetTitle;
   end;
 
 
@@ -565,8 +569,8 @@ function KeycodeToText(Key: Word; ShiftState: TShiftState): String;
 
 implementation
 
-uses
-  GFXInterface;  { Just to get FPC to compile the TGfxCanvas descendants }
+//uses
+//  GFXInterface;  { Just to get FPC to compile the TGfxCanvas descendants }
 
 
 { Exceptions }
@@ -854,7 +858,7 @@ begin
 
   if (SourceRect.Right > SourceRect.Left) and
     (SourceRect.Bottom > SourceRect.Top) then
-    DoDrawImageRect(AImage, ASourceRect, Transform(ADestPos));
+    DoDrawImageRect(AImage, SourceRect, Transform(ADestPos));
 end;
 
 { TFCustomBitmap }
@@ -1294,21 +1298,47 @@ end;
 
 { TFCustomApplication }
 
+procedure TFCustomApplication.SetTitle(const ATitle: String);
+begin
+  if ATitle <> FTitle then FTitle := ATitle;
+end;
+
 constructor TFCustomApplication.Create;
 begin
   inherited Create(nil);
-  
+  FDisplayName := '';
   Forms := TList.Create;
-
   FQuitWhenLastWindowCloses := True;
 end;
 
 destructor TFCustomApplication.Destroy;
 begin
   Forms.Free;
-  
   inherited Destroy;
 end;
+
+{procedure TFCustomApplication.CreateForm(AForm: TCustomForm);
+var
+  form: PForm;
+  Filename: String;
+  TextStream, BinStream: TStream;
+begin
+  form := @Reference;
+  form^ := TCustomForm(InstanceClass.Create(Self));
+
+  Filename := LowerCase(Copy(InstanceClass.ClassName, 2, 255)) + '.frm';
+
+  TextStream := TFileStream.Create(Filename, fmOpenRead);
+  BinStream := TMemoryStream.Create;
+  ObjectTextToBinary(TextStream, BinStream);
+  TextStream.Free;
+
+  BinStream.Position := 0;
+  BinStream.ReadComponent(Form^);
+  BinStream.Free;
+
+  Form^.Show;
+end;}
 
 end.
 

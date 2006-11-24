@@ -254,7 +254,7 @@ end;
 constructor TForm.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
 begin
   inherited Create(AParent, AWindowOptions);
-  FColor := colWhite;
+  FColor := colLtGray;
   OnPaint := @EvOnPaint;
 end;
 
@@ -383,6 +383,7 @@ end;
 constructor TCustomEdit.Create(AParent: TFCustomWindow; APosition: TPoint);
 begin
   inherited Create(AParent);
+//  OnMouseEntered := @EvMouseEntered
   SetPosition(APosition);
   SetClientSize(Size(100, 25));
 end;
