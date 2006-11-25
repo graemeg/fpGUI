@@ -327,11 +327,6 @@ begin
   end;
 
   case ADestFormat.FormatType of
-    ftPal8, ftPal8A:
-      begin
-//        ConvertFromInternal := @ConvertInternalTo8Pal;
-//	SetupShifts(ADestFormat, ParamsI2D);
-      end;
     ftRGB16:
       begin
         ConvertFromInternal := @ConvertInternalToRGB16;
