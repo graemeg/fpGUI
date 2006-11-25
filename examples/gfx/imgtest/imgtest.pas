@@ -17,6 +17,7 @@
 program ImgTest;
 
 uses
+  cmem,
   Classes,
   GFXBase,
   fpGFX;

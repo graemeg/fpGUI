@@ -112,6 +112,26 @@ begin
   end;
 end;
 
+procedure ConvertRGB16ToInternal(Params: TConvertParams; Data: Pointer;
+  StartX, EndX: Integer; Dest: Pointer);
+var
+  PixelIn: LongWord;
+begin
+  Inc(Data, StartX * 2);
+  while StartX < EndX do
+  begin
+    PixelIn := 0;
+    Move(Data^, PixelIn, 2);
+    PLongWord(Dest)^ :=
+      (((PixelIn shr Params.RedShiftR) and $ff) shl Params.RedShiftL) or
+      (((PixelIn shr Params.GreenShiftR) and $ff) shl Params.GreenShiftL) or
+      (((PixelIn shr Params.BlueShiftR) and $ff) shl Params.BlueShiftL);
+    Inc(StartX);
+    Inc(Data, 2);
+    Inc(Dest, 2);
+  end;
+end;
+
 procedure ConvertRGB24ToInternal(Params: TConvertParams; Data: Pointer;
   StartX, EndX: Integer; Dest: Pointer);
 var
@@ -276,6 +296,12 @@ begin
   ParamsI2D.BlueShiftL := 0;
   ParamsS2I.BlueShiftL := 0;
   
+  if ASourceFormat.FormatType = ADestFormat.FormatType then
+  begin
+    Move( ASourceData^, ADestData^, ADestStride * (ASourceRect.Top - ASourceRect.Bottom) );
+    Exit;
+  end;
+  
   case ASourceFormat.FormatType of
     ftMono:
       begin
@@ -302,6 +328,16 @@ begin
 	for i := max + 1 to 255 do
 	  ParamsS2I.Palette[i] := i or (i shl 8) or (i shl 16);
       end;
+     ftRGB16:
+       begin
+         ConvertToInternal := @ConvertRGB16ToInternal;
+         ParamsS2I.RedShiftR := 5 -
+           GetBitShiftAndCount(ASourceFormat.RedMask, ParamsS2I.RedShiftL);
+         ParamsS2I.GreenShiftR := 11 -
+           GetBitShiftAndCount(ASourceFormat.GreenMask, ParamsS2I.GreenShiftL);
+         ParamsS2I.BlueShiftR := 16 -
+           GetBitShiftAndCount(ASourceFormat.BlueMask, ParamsS2I.BlueShiftL);
+       end;
      ftRGB24:
        begin
          ConvertToInternal := @ConvertRGB24ToInternal;

@@ -762,6 +762,8 @@ begin
     ASourceRect.Right - ASourceRect.Left,
     ASourceRect.Bottom - ASourceRect.Top, 8, 0);
 
+  WriteLn('Size allocated: ', Image^.bytes_per_line * (ASourceRect.Bottom - ASourceRect.Top) + 1);
+
   { Here its necessary to alloc an extra byte, otherwise it will fail on 32-bits
    machines, but still work on 64-bits machines. The cause of this is unknown. }
   Image^.data := GetMem(Image^.bytes_per_line * (ASourceRect.Bottom - ASourceRect.Top) + 1);

@@ -180,6 +180,14 @@ const
     BlueMask:	  0;
     AlphaMask:	0);
 
+  { 5-6-5 storage }
+  PixelFormatRGB16: TGfxPixelFormat = (
+    FormatType:	ftRGB16;
+    RedMask:	  $001F;
+    GreenMask:	$07E0;
+    BlueMask:	  $F800;
+    AlphaMask:	0);
+
   PixelFormatRGB24: TGfxPixelFormat = (
     FormatType:	ftRGB24;
     RedMask:	  $0000ff;
