@@ -818,12 +818,10 @@ begin
 
   case Attr.Depth of
     1: PixelFormat.FormatType := ftMono;
-//    4: PixelFormat.FormatType := ftPal4;
-    4,
+    4: PixelFormat.FormatType := ftPal4;
     8: PixelFormat.FormatType := ftPal8;
     16: PixelFormat.FormatType := ftRGB16;
-//    24: PixelFormat.FormatType := ftRGB24;
-    24,
+    24: PixelFormat.FormatType := ftRGB24;
     32: PixelFormat.FormatType := ftRGB32;
     else
       raise EX11Error.CreateFmt(SWindowUnsupportedPixelFormat, [Attr.Depth]);
@@ -870,6 +868,8 @@ begin
   case APixelFormat.FormatType of
     ftMono:
       FStride := (AWidth + 7) shr 3;
+    ftPal4, ftPal4A:
+      FStride := (AWidth + 1) and not 1;
     else
       FStride := AWidth * (FormatTypeBPPTable[APixelFormat.FormatType] shr 3);
   end;

@@ -879,6 +879,12 @@ begin
 	Color^.rgbBlue      := 255;
 	Color^.rgbReserved  := 0;
       end;
+    ftPal4, ftPal4A:
+      begin
+        FStride := (AWidth + 1) shr 1;
+        GetMem(BitmapInfo, SizeOf(TBitmapInfoHeader) + 16 * SizeOf(RGBQUAD));
+        BitmapInfo^.bmiHeader.biClrUsed := 0;
+      end;
     ftPal8, ftPal8A:
       begin
         FStride := AWidth;

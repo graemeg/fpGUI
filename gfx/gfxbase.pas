@@ -77,31 +77,33 @@ type
   TGfxPixel = LongWord;
 
 
-  TGfxFormatType = (
+  TGfxImageType = (
     ftInvalid,
     ftMono,		// Monochrome
+    ftPal4,		// 4 bpp using palette
+    ftPal4A,		// 4 bpp using palette with alpha values > 0
     ftPal8,		// 8 bpp using palette
     ftPal8A,		// 8 bpp using palette with alpha values > 0
     ftRGB16,		// 15/16 bpp RGB
     ftRGBA16,		// 16 bpp RGBA
+    ftRGB24,		// 24 bpp RGB
     ftRGB32,		// 32 bpp RGB
     ftRGBA32);	        // 32 bpp RGBA
 
 
   TGfxPixelFormat = record
-    case FormatType: TGfxFormatType of
-      ftRGB16, ftRGBA16, ftRGB32, ftRGBA32: (
-	RedMask: TGfxPixel;
-	GreenMask: TGfxPixel;
-        BlueMask: TGfxPixel;
-        AlphaMask: TGfxPixel);	// only used for RGBA types
-    end;
+    FormatType: TGfxImageType;
+    RedMask: TGfxPixel;
+    GreenMask: TGfxPixel;
+    BlueMask: TGfxPixel;
+    AlphaMask: TGfxPixel;
+  end;
 
 
 const
 
-  FormatTypeBPPTable: array[TGfxFormatType] of Integer =
-    (0, 1, 8, 8, 16, 16, 32, 32);
+  FormatTypeBPPTable: array[TGfxImageType] of Integer =
+    (0, 1, 4, 4, 8, 8, 16, 16, 24, 32, 32);
 
   { Predefined colors }
 
@@ -150,6 +152,20 @@ const
     BlueMask:	  0;
     AlphaMask:	0);
 
+  PixelFormatPal4: TGfxPixelFormat = (
+    FormatType: ftPal4;
+    RedMask:	  0;
+    GreenMask:	0;
+    BlueMask:	  0;
+    AlphaMask:	0);
+
+  PixelFormatPal4A: TGfxPixelFormat = (
+    FormatType: ftPal4A;
+    RedMask:	  0;
+    GreenMask:	0;
+    BlueMask:	  0;
+    AlphaMask:	0);
+
   PixelFormatPal8: TGfxPixelFormat = (
     FormatType: ftPal8;
     RedMask:	  0;
@@ -162,6 +178,20 @@ const
     RedMask:	  0;
     GreenMask:	0;
     BlueMask:	  0;
+    AlphaMask:	0);
+
+  PixelFormatRGB24: TGfxPixelFormat = (
+    FormatType:	ftRGB24;
+    RedMask:	  $0000ff;
+    GreenMask:	$00ff00;
+    BlueMask:	  $ff0000;
+    AlphaMask:	0);
+
+  PixelFormatBGR24: TGfxPixelFormat = (
+    FormatType:	ftRGB24;
+    RedMask:	  $ff0000;
+    GreenMask:	$00ff00;
+    BlueMask:	  $0000ff;
     AlphaMask:	0);
 
   PixelFormatRGB32: TGfxPixelFormat = (

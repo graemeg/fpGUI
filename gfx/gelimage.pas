@@ -79,6 +79,26 @@ begin
   end;
 end;
 
+procedure ConvertPal4ToInternal(Params: TConvertParams; Data: Pointer;
+  StartX, EndX: Integer; Dest: Pointer);
+var
+  b: Byte;
+begin
+  // !!!: Just works for even StartX and EndX values
+  ASSERT((StartX and 1) = 0);
+  ASSERT((EndX and 1) = 0);
+  Inc(Data, StartX shr 1);
+  while StartX < EndX do
+  begin
+    b := PByte(Data)^;
+    PLongWord(Dest)[0] := Params.Palette[b shr 4];
+    PLongWord(Dest)[1] := Params.Palette[b and 15];
+    Inc(StartX, 2);
+    Inc(Data);
+    Inc(Dest, 8);
+   end;
+end;
+
 procedure ConvertPal8ToInternal(Params: TConvertParams; Data: Pointer;
   StartX, EndX: Integer; Dest: Pointer);
 begin
@@ -88,6 +108,26 @@ begin
     PLongWord(Dest)^ := Params.Palette[PByte(Data)^];
     Inc(StartX);
     Inc(Data);
+    Inc(Dest, 4);
+  end;
+end;
+
+procedure ConvertRGB24ToInternal(Params: TConvertParams; Data: Pointer;
+  StartX, EndX: Integer; Dest: Pointer);
+var
+  PixelIn: LongWord;
+begin
+  Inc(Data, StartX * 3);
+  while StartX < EndX do
+  begin
+    PixelIn := 0;
+    Move(Data^, PixelIn, 3);
+    PLongWord(Dest)^ :=
+      (((PixelIn shr Params.RedShiftR) and $ff) shl Params.RedShiftL) or
+      (((PixelIn shr Params.GreenShiftR) and $ff) shl Params.GreenShiftL) or
+      (((PixelIn shr Params.BlueShiftR) and $ff) shl Params.BlueShiftL);
+    Inc(StartX);
+    Inc(Data, 3);
     Inc(Dest, 4);
   end;
 end;
@@ -126,6 +166,26 @@ begin
 
     Inc(Data, 4);
     Inc(Dest, 2);
+    Dec(Width);
+  until Width = 0;
+end;
+
+procedure ConvertInternalToRGB24(Params: TConvertParams; Data: Pointer;
+  Dest: Pointer; Width: Integer);
+var
+  PixelIn, PixelOut: LongWord;
+begin
+  repeat
+    PixelIn := PLongWord(Data)^;
+    PixelOut :=
+      (((PixelIn and $0000ff) shr Params.RedShiftR) shl Params.RedShiftL) or
+      (((PixelIn and $00ff00) shr Params.GreenShiftR) shl Params.GreenShiftL) or
+      (((PixelIn and $ff0000) shr Params.BlueShiftR) shl Params.BlueShiftL);
+    PWord(Dest)^ := Word(PixelOut);
+    PByte(Dest)[2] := PixelOut shr 16;
+
+    Inc(Data, 4);
+    Inc(Dest, 3);
     Dec(Width);
   until Width = 0;
 end;
@@ -215,7 +275,7 @@ begin
   Scanline := nil;
   ParamsI2D.BlueShiftL := 0;
   ParamsS2I.BlueShiftL := 0;
-
+  
   case ASourceFormat.FormatType of
     ftMono:
       begin
@@ -228,6 +288,13 @@ begin
 	    ParamsS2I.Palette[0] := 0;
 	end;
       end;
+     ftPal4, ftPal4A:
+       begin
+         ConvertToInternal := @ConvertPal4ToInternal;
+         max := ConvertPalette(15, ParamsS2I);
+         for i := max + 1 to 15 do
+           ParamsS2I.Palette[i] := 0;
+       end;
     ftPal8, ftPal8A:
       begin
         ConvertToInternal := @ConvertPal8ToInternal;
@@ -235,6 +302,16 @@ begin
 	for i := max + 1 to 255 do
 	  ParamsS2I.Palette[i] := i or (i shl 8) or (i shl 16);
       end;
+     ftRGB24:
+       begin
+         ConvertToInternal := @ConvertRGB24ToInternal;
+         ParamsS2I.RedShiftR := 8 -
+           GetBitShiftAndCount(ASourceFormat.RedMask, ParamsS2I.RedShiftL);
+         ParamsS2I.GreenShiftR := 16 -
+           GetBitShiftAndCount(ASourceFormat.GreenMask, ParamsS2I.GreenShiftL);
+         ParamsS2I.BlueShiftR := 24 -
+           GetBitShiftAndCount(ASourceFormat.BlueMask, ParamsS2I.BlueShiftL);
+       end;
     ftRGB32:
       begin
         ConvertToInternal := @ConvertRGB32ToInternal;
@@ -250,9 +327,19 @@ begin
   end;
 
   case ADestFormat.FormatType of
+    ftPal8, ftPal8A:
+      begin
+//        ConvertFromInternal := @ConvertInternalTo8Pal;
+//	SetupShifts(ADestFormat, ParamsI2D);
+      end;
     ftRGB16:
       begin
         ConvertFromInternal := @ConvertInternalToRGB16;
+	SetupShifts(ADestFormat, ParamsI2D);
+      end;
+    ftRGB24:
+      begin
+        ConvertFromInternal := @ConvertInternalToRGB24;
 	SetupShifts(ADestFormat, ParamsI2D);
       end;
     ftRGB32:
@@ -261,7 +348,7 @@ begin
 	SetupShifts(ADestFormat, ParamsI2D);
       end;
     else
-      raise EGfxUnsupportedPixelFormat.Create(ASourceFormat);
+      raise EGfxUnsupportedPixelFormat.Create(ADestFormat);
   end;
 
   w := ASourceRect.Right - ASourceRect.Left;
