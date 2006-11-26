@@ -127,7 +127,7 @@ begin
       (((PixelIn shr Params.GreenShiftR) and $ff) shl Params.GreenShiftL) or
       (((PixelIn shr Params.BlueShiftR) and $ff) shl Params.BlueShiftL);
     Inc(StartX);
-    Inc(Data, 2);
+    Inc(Data, 4);
     Inc(Dest, 2);
   end;
 end;
@@ -147,8 +147,8 @@ begin
       (((PixelIn shr Params.GreenShiftR) and $ff) shl Params.GreenShiftL) or
       (((PixelIn shr Params.BlueShiftR) and $ff) shl Params.BlueShiftL);
     Inc(StartX);
-    Inc(Data, 3);
-    Inc(Dest, 4);
+    Inc(Data, 4);
+    Inc(Dest, 3);
   end;
 end;
 

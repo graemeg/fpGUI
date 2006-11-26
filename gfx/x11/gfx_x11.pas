@@ -209,10 +209,8 @@ type
     FComposeStatus: TXComposeStatus;
     FComposeBuffer: String[32];
     FCurCursorHandle: X.TCursor;
-    function    StartComposing(const Event: TXKeyEvent): TKeySym;
+    function    StartComposing(const Event: TFEvent): TKeySym;
     procedure   EndComposing;
-    procedure   KeyPressed(var Event: TXKeyPressedEvent); message X.KeyPress;
-    procedure   KeyReleased(var Event: TXKeyReleasedEvent); message X.KeyRelease;
     procedure   ButtonPressed(var Event: TXButtonPressedEvent); message X.ButtonPress;
     procedure   ButtonReleased(var Event: TXButtonReleasedEvent); message X.ButtonRelease;
     procedure   EnterWindow(var Event :TXEnterWindowEvent); message X.EnterNotify;
@@ -999,7 +997,6 @@ begin
          begin
            Forms.Remove(WindowEntry);
          end;
-{
        X.KeyPress:
          begin
            Event.EventType := etKeyPressed;
@@ -1012,7 +1009,6 @@ begin
            Event.State := XEvent.xkey.state;
            WindowEntry.ProcessEvent(Event);
          end;
-}
       else
         WindowEntry.Dispatch(XEvent);
       end;
@@ -1395,8 +1391,8 @@ begin
 end;
 
 procedure TX11Window.ProcessEvent(AEvent: TFEvent);
-{var
-  KeySym: TKeySym;}
+var
+  KeySym: TKeySym;
 begin
   case AEvent.EventType of
    etCreate:
@@ -1426,11 +1422,23 @@ begin
      end;
    etKeyPressed:
      begin
+       KeySym := StartComposing(AEvent);
+       
+       if Assigned(OnKeyPressed) then
+        OnKeyPressed(Self, KeySymToKeycode(KeySym), ConvertShiftState(AEvent.State))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
 
+       if (AEvent.State and (ControlMask or Mod1Mask)) = 0 then EndComposing;
      end;
    etKeyReleased:
      begin
-
+       KeySym := StartComposing(AEvent);
+       
+       if Assigned(OnKeyReleased) then
+        OnKeyReleased(Self, KeySymToKeycode(KeySym), ConvertShiftState(AEvent.State))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+       
+       // Do not call EndComposing, as this would generate duplicate KeyChar events!
      end;
    etKeyChar:
      begin
@@ -1699,10 +1707,10 @@ const
   ButtonTable: array[1..3] of TMouseButton = (mbLeft, mbMiddle, mbRight);
 
 
-function TX11Window.StartComposing(const Event: TXKeyEvent): TKeySym;
+function TX11Window.StartComposing(const Event: TFEvent): TKeySym;
 begin
   SetLength(FComposeBuffer,
-    XLookupString(@Event, @FComposeBuffer[1],
+    XLookupString(Event.EventPointer, @FComposeBuffer[1],
       SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus));
 end;
 
@@ -1714,31 +1722,6 @@ begin
   if Assigned(OnKeyChar) then
     for i := 1 to Length(FComposeBuffer) do
       OnKeyChar(Self, FComposeBuffer[i]);
-end;
-
-
-procedure TX11Window.KeyPressed(var Event: TXKeyPressedEvent);
-var
-  KeySym: TKeySym;
-begin
-  KeySym := StartComposing(Event);
-  if Assigned(OnKeyPressed) then
-    OnKeyPressed(Self, KeySymToKeycode(KeySym), ConvertShiftState(Event.State));
-
-  if (Event.State and (ControlMask or Mod1Mask)) = 0 then
-    EndComposing;
-end;
-
-
-procedure TX11Window.KeyReleased(var Event: TXKeyReleasedEvent);
-var
-  KeySym: TKeySym;
-begin
-  KeySym := StartComposing(Event);
-  if Assigned(OnKeyReleased) then
-    OnKeyReleased(Self, KeySymToKeycode(KeySym),
-      ConvertShiftState(Event.State));
-  // Do not call EndComposing, as this would generate duplicate KeyChar events!
 end;
 
 
