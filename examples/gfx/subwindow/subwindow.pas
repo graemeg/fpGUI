@@ -108,7 +108,7 @@ begin
   Canvas.FillRect(r);
   tw := Canvas.TextWidth('Window 1');
   Canvas.SetColor(colBlack);
-  Canvas.TextOut(Point((Width div 2) - (tw div 2), Height - 20), 'Window 1');
+  Canvas.TextOut(Point((Width div 2) - (tw div 2), ClientHeight - 20), 'Window 1');
 end;
 
 procedure TMainWindow.MouseReleased(Sender: TObject; AButton: TMouseButton;

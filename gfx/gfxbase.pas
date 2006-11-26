@@ -529,10 +529,8 @@ type
     procedure SetPosition(const APosition: TPoint); virtual;
     procedure SetSize(const ASize: TSize); virtual;
     procedure SetMinMaxSize(const AMinSize, AMaxSize: TSize); virtual;
-    procedure SetFixedSize(const ASize: TSize);
     procedure SetClientSize(const ASize: TSize); virtual;
     procedure SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); virtual;
-    procedure SetFixedClientSize(const ASize: TSize);
     procedure Show; virtual; abstract;
     procedure Invalidate(const ARect: TRect); virtual; abstract;
     procedure PaintInvalidRegion; virtual; abstract;
@@ -1001,12 +999,6 @@ begin
   // Empty
 end;
 
-procedure TFCustomWindow.SetFixedSize(const ASize: TSize);
-begin
-  SetMinMaxSize(ASize, ASize);
-  SetSize(ASize);
-end;
-
 procedure TFCustomWindow.SetClientSize(const ASize: TSize);
 begin
   // Empty
@@ -1015,12 +1007,6 @@ end;
 procedure TFCustomWindow.SetMinMaxClientSize(const AMinSize, AMaxSize: TSize);
 begin
   // Empty
-end;
-
-procedure TFCustomWindow.SetFixedClientSize(const ASize: TSize);
-begin
-  SetMinMaxClientSize(ASize, ASize);
-  SetClientSize(ASize);
 end;
 
 function TFCustomWindow.GetTitle: String;
@@ -1078,11 +1064,10 @@ begin
   FWindowOptions:=AValue;
 end;
 
-// ===================================================================
-//   Global functions
-// ===================================================================
+{ Global functions }
 
-// Sizes, points etc.
+{ Sizes, points etc. }
+
 function Size(AWidth, AHeight: Integer): TSize;
 begin
   Result.cx := AWidth;
@@ -1100,6 +1085,8 @@ begin
   with ARect, APoint do
     Result := (x >= Left) and (y >= Top) and (x < Right) and (y < Bottom);
 end;
+
+{ Only Free Pascal supports operator overloading at the moment }
 
 {$ifdef fpc}
 
@@ -1169,7 +1156,8 @@ begin
 end;
 
 
-// Color functions
+{ Color functions }
+
 operator = (const AColor1, AColor2: TGfxColor) b: Boolean;
 begin
   b := (AColor1.Red = AColor2.Red) and (AColor1.Green = AColor2.Green) and
@@ -1185,7 +1173,8 @@ begin
   Result.Alpha := AColor1.Alpha + (AColor2.Alpha - AColor1.Alpha) div 2;
 end;
 
-// Keyboard functions
+{ Keyboard functions }
+
 function KeycodeToText(Key: Word; ShiftState: TShiftState): String;
 
   function GetASCIIText: String;
@@ -1344,6 +1333,7 @@ end;
 constructor TFCustomApplication.Create;
 begin
   inherited Create(nil);
+  
   FDisplayName := '';
   Forms := TList.Create;
   FQuitWhenLastWindowCloses := True;
@@ -1352,6 +1342,7 @@ end;
 destructor TFCustomApplication.Destroy;
 begin
   Forms.Free;
+  
   inherited Destroy;
 end;
 

@@ -1209,9 +1209,13 @@ begin
      end;
      WM_KeyUp, WM_SysKeyUp:
      begin
+       Event.EventType := etKeyReleased;
+       Window.ProcessEvent(Event);
      end;
      WM_Char, WM_SysChar:
      begin
+       Event.EventType := etKeyChar;
+       Window.ProcessEvent(Event);
      end;
     else
       if UnicodeEnabledOS then Result := Windows.DefWindowProcW(hwnd, uMsg, wParam, lParam)
