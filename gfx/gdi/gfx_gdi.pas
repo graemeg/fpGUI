@@ -147,6 +147,9 @@ type
   { TGDIScreen }
 
   TGDIScreen = class(TFCustomScreen)
+  protected
+    procedure   SetMousePos(const NewPos: TPoint); override;
+    function    GetMousePos: TPoint; override;
   public
     constructor Create; override;
   end;
@@ -950,6 +953,21 @@ end;
 
 
 { TGDIScreen }
+
+procedure TGDIScreen.SetMousePos(const NewPos: TPoint);
+begin
+  Windows.SetCursorPos(NewPos.x, NewPos.y);
+end;
+
+function TGDIScreen.GetMousePos: TPoint;
+var
+  Pos: Windows.TPoint;
+begin
+  Windows.GetCursorPos(Pos);
+  
+  Result.x := Pos.x;
+  Result.y := Pos.y;
+end;
 
 constructor TGDIScreen.Create;
 begin

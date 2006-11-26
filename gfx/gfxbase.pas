@@ -435,8 +435,12 @@ type
   { TFCustomScreen }
 
   TFCustomScreen = class(TObject)
+  protected
+    procedure   SetMousePos(const NewPos: TPoint); virtual; abstract;
+    function    GetMousePos: TPoint; virtual; abstract;
   public
     constructor Create; virtual;
+    property    MousePos: TPoint read GetMousePos write SetMousePos;
   end;
 
   { TFCustomApplication }
