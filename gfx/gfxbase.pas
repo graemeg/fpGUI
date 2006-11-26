@@ -276,14 +276,17 @@ type
 
   TFEvent = class
   public
-    { Window Manager fields }
+    { Windows Window Manager fields }
     Msg: Cardinal;
     wparam: Cardinal;
     lparam: Cardinal;
     Result: Cardinal;
     MouseButton: TMouseButton;
+    { X11 Window Manager fields }
     EventPointer: Pointer;
     State: Cardinal;
+    Button: Cardinal;
+    X, Y: Cardinal;
     { fpGUI fields }
     EventType: TFEventType;
   end;
@@ -506,6 +509,10 @@ type
     FOnMove: TNotifyEvent;
     FOnResize: TNotifyEvent;
     FOnShow: TNotifyEvent;
+    procedure SetClientHeight(const AValue: Integer);
+    procedure SetClientWidth(const AValue: Integer);
+    procedure SetLeft(const AValue: Integer);
+    procedure SetTop(const AValue: Integer);
     procedure SetWidth(AWidth: Integer);
     procedure SetHeight(AHeight: Integer);
     procedure SetCursor(ACursor: TFCursor);
@@ -547,12 +554,12 @@ type
     property Handle: Cardinal read FHandle;
     property ChildWindows: TList read FChildWindows;
     // Window state
-    property Left: Integer read FLeft;
-    property Top: Integer read FTop;
+    property Left: Integer read FLeft write SetLeft;
+    property Top: Integer read FTop write SetTop;
     property Width: Integer read FWidth write SetWidth;
     property Height: Integer read FHeight write SetHeight;
-    property ClientWidth: Integer read FClientWidth;
-    property ClientHeight: Integer read FClientHeight;
+    property ClientWidth: Integer read FClientWidth write SetClientWidth;
+    property ClientHeight: Integer read FClientHeight write SetClientHeight;
     property Cursor: TFCursor read FCursor write SetCursor;
     property Title: String read GetTitle write SetTitle;
     property Parent: TFCustomWindow read FParent;
@@ -1046,6 +1053,26 @@ end;
 procedure TFCustomWindow.SetWidth(AWidth: Integer);
 begin
   SetSize(Size(AWidth, Height));
+end;
+
+procedure TFCustomWindow.SetLeft(const AValue: Integer);
+begin
+  SetPosition(Point(AValue, FTop));
+end;
+
+procedure TFCustomWindow.SetClientHeight(const AValue: Integer);
+begin
+  SetClientSize(Size(Width, AValue));
+end;
+
+procedure TFCustomWindow.SetClientWidth(const AValue: Integer);
+begin
+  SetClientSize(Size(AValue, Height));
+end;
+
+procedure TFCustomWindow.SetTop(const AValue: Integer);
+begin
+  SetPosition(Point(FLeft, AValue));
 end;
 
 procedure TFCustomWindow.SetHeight(AHeight: Integer);

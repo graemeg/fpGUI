@@ -167,6 +167,9 @@ type
   private
     FScreenIndex: Integer;
     FScreenInfo: PScreen;
+  protected
+    procedure   SetMousePos(const NewPos: TPoint); override;
+    function    GetMousePos: TPoint; override;
   public
     constructor Create; override;
     property    ScreenIndex: Integer read FScreenIndex;
@@ -211,17 +214,7 @@ type
     FCurCursorHandle: X.TCursor;
     function    StartComposing(const Event: TFEvent): TKeySym;
     procedure   EndComposing;
-    procedure   ButtonPressed(var Event: TXButtonPressedEvent); message X.ButtonPress;
-    procedure   ButtonReleased(var Event: TXButtonReleasedEvent); message X.ButtonRelease;
-    procedure   EnterWindow(var Event :TXEnterWindowEvent); message X.EnterNotify;
-    procedure   LeaveWindow(var Event :TXLeaveWindowEvent); message X.LeaveNotify;
-    procedure   PointerMoved(var Event: TXPointerMovedEvent); message X.MotionNotify;
     procedure   Expose(var Event: TXExposeEvent); message X.Expose;
-    procedure   FocusIn(var Event: TXFocusInEvent); message X.FocusIn;
-    procedure   FocusOut(var Event: TXFocusOutEvent); message X.FocusOut;
-    procedure   Map(var Event: TXMapEvent); message X.MapNotify;
-    procedure   Unmap(var Event: TXUnmapEvent); message X.UnmapNotify;
-    procedure   Reparent(var Event: TXReparentEvent); message X.ReparentNotify;
     procedure   Configure(var Event: TXConfigureEvent); message X.ConfigureNotify;
     procedure   ClientMessage(var Event: TXClientMessageEvent); message X.ClientMessage;
   protected
@@ -236,7 +229,6 @@ type
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
-    procedure   DefaultHandler(var Message); override;
     procedure   SetPosition(const APosition: TPoint); override;
     procedure   SetSize(const ASize: TSize); override;
     procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
@@ -900,6 +892,16 @@ end;
 
 { TX11Screen }
 
+procedure TX11Screen.SetMousePos(const NewPos: TPoint);
+begin
+
+end;
+
+function TX11Screen.GetMousePos: TPoint;
+begin
+
+end;
+
 constructor TX11Screen.Create;
 begin
   inherited Create;
@@ -1009,9 +1011,93 @@ begin
            Event.State := XEvent.xkey.state;
            WindowEntry.ProcessEvent(Event);
          end;
+       X.ButtonPress:
+         begin
+           Event.EventType := etMousePressed;
+           Event.State := XEvent.xbutton.state;
+           Event.Button := XEvent.xbutton.button;
+           Event.X := XEvent.xbutton.x;
+           Event.Y := XEvent.xbutton.y;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.ButtonRelease:
+         begin
+           Event.EventType := etMouseReleased;
+           Event.State := XEvent.xbutton.state;
+           Event.Button := XEvent.xbutton.button;
+           Event.X := XEvent.xbutton.x;
+           Event.Y := XEvent.xbutton.y;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.EnterNotify:
+         begin
+           Event.EventType := etMouseEnter;
+           Event.State := XEvent.xbutton.state;
+           Event.Button := XEvent.xbutton.button;
+           Event.X := XEvent.xbutton.x;
+           Event.Y := XEvent.xbutton.y;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.LeaveNotify:
+         begin
+           Event.EventType := etMouseLeave;
+           Event.State := XEvent.xbutton.state;
+           Event.Button := XEvent.xbutton.button;
+           Event.X := XEvent.xbutton.x;
+           Event.Y := XEvent.xbutton.y;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.MotionNotify:
+         begin
+           Event.EventType := etMouseMove;
+           Event.State := XEvent.xbutton.state;
+           Event.Button := XEvent.xbutton.button;
+           Event.X := XEvent.xbutton.x;
+           Event.Y := XEvent.xbutton.y;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.FocusIn:
+         begin
+           Event.EventType := etFocusIn;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.FocusOut:
+         begin
+           Event.EventType := etFocusOut;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.MapNotify:
+         begin
+           Event.EventType := etShow;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.UnmapNotify:
+         begin
+           Event.EventType := etHide;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.ReparentNotify:
+         begin
+           Event.EventType := etCreate;
+           WindowEntry.ProcessEvent(Event);
+         end;
+       X.Expose:
+         begin
+           WindowEntry.Dispatch(XEvent);
+         end;
+       X.ConfigureNotify:
+         begin
+           WindowEntry.Dispatch(XEvent);
+         end;
+       X.ClientMessage:
+         begin
+           WindowEntry.Dispatch(XEvent);
+         end;
       else
-        WindowEntry.Dispatch(XEvent);
+        WriteLn('fpGFX/X11: Unhandled X11 event received: ', GetXEventName(XEvent._type));
       end;
+      
+      Event.Free;
     end;
   end;
   DoBreakRun := False;
@@ -1090,6 +1176,9 @@ begin
 end;
 
 { TX11Window }
+
+const
+  ButtonTable: array[1..3] of TMouseButton = (mbLeft, mbMiddle, mbRight);
 
 { Note, this only creates a window, it doesn't actually show the window. It
   is still invisible. To make it visible, we need to call Show(). }
@@ -1225,13 +1314,6 @@ begin
     XFreeCursor(GFApplication.Handle, FCurCursorHandle);
 
   inherited Destroy;
-end;
-
-
-procedure TX11Window.DefaultHandler(var Message);
-begin
-  WriteLn('fpGFX/X11: Unhandled X11 event received: ',
-    GetXEventName(TXEvent(Message)._type));
 end;
 
 
@@ -1393,6 +1475,8 @@ end;
 procedure TX11Window.ProcessEvent(AEvent: TFEvent);
 var
   KeySym: TKeySym;
+  Sum: Integer;
+  NewEvent: TXEvent;
 begin
   case AEvent.EventType of
    etCreate:
@@ -1447,23 +1531,64 @@ begin
      end;
    etMouseEnter:
      begin
-
+       if Assigned(OnMouseEnter) then
+        OnMouseEnter(Self, ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
      end;
    etMouseLeave:
      begin
-
+       if Assigned(OnMouseEnter) then OnMouseLeave(Self)
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
      end;
    etMousePressed:
      begin
+       case AEvent.Button of
+        Button1..Button3:
+        begin
+          if Assigned(OnMousePressed) then
+           OnMousePressed(Self, ButtonTable[AEvent.Button],
+            ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
+          else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+        end;
+        Button4, Button5:		// Mouse wheel message
+        begin
+          if AEvent.Button = Button4 then
+            Sum := -1
+          else
+            Sum := 1;
 
+  	  // Check for other mouse wheel messages in the queue
+          while XCheckTypedWindowEvent(GFApplication.Handle, Handle, X.ButtonPress, @NewEvent) do
+          begin
+	    if NewEvent.xbutton.Button = 4 then
+	      Dec(Sum)
+            else if NewEvent.xbutton.Button = 5 then
+	      Inc(Sum)
+            else
+	    begin
+	      XPutBackEvent(GFApplication.Handle, @NewEvent);
+              break;
+	    end;
+          end;
+
+          if Assigned(OnMouseWheel) then
+           OnMouseWheel(Self, ConvertShiftState(AEvent.State), Sum, Point(AEvent.x, AEvent.y))
+          else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+        end;
+       end;
      end;
    etMouseReleased:
      begin
-
+       if (AEvent.Button >= 1) and (AEvent.Button <= 3) and Assigned(OnMouseReleased) then
+        OnMouseReleased(Self, ButtonTable[AEvent.Button],
+         ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
      end;
    etMouseMove:
      begin
-
+       if Assigned(OnMouseMove) then
+        OnMouseMove(Self, ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
+       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
      end;
    etMouseWheel:
      begin
@@ -1701,10 +1826,7 @@ begin
 end;
 
 
-// private methods
-
-const
-  ButtonTable: array[1..3] of TMouseButton = (mbLeft, mbMiddle, mbRight);
+{ private methods }
 
 
 function TX11Window.StartComposing(const Event: TFEvent): TKeySym;
@@ -1722,76 +1844,6 @@ begin
   if Assigned(OnKeyChar) then
     for i := 1 to Length(FComposeBuffer) do
       OnKeyChar(Self, FComposeBuffer[i]);
-end;
-
-
-procedure TX11Window.ButtonPressed(var Event: TXButtonPressedEvent);
-var
-  Sum: Integer;
-  NewEvent: TXEvent;
-begin
-  case Event.Button of
-    Button1..Button3:
-      if Assigned(OnMousePressed) then
-        OnMousePressed(Self, ButtonTable[Event.Button],
-          ConvertShiftState(Event.State), Point(Event.x, Event.y));
-    Button4, Button5:		// Mouse wheel message
-      begin
-        if Event.Button = Button4 then
-          Sum := -1
-        else
-          Sum := 1;
-
-	// Check for other mouse wheel messages in the queue
-	while XCheckTypedWindowEvent(GFApplication.Handle, Handle,
-	  X.ButtonPress, @NewEvent) do
-	begin
-	  if NewEvent.xbutton.Button = 4 then
-	    Dec(Sum)
-	  else if NewEvent.xbutton.Button = 5 then
-	    Inc(Sum)
-	  else
-	  begin
-	    XPutBackEvent(GFApplication.Handle, @NewEvent);
-	    break;
-	  end;
-	end;
-
-        if Assigned(OnMouseWheel) then
-          OnMouseWheel(Self, ConvertShiftState(Event.State),
-	    Sum, Point(Event.x, Event.y));
-      end;
-  end;
-end;
-
-
-procedure TX11Window.ButtonReleased(var Event: TXButtonReleasedEvent);
-begin
-  if (Event.Button >= 1) and (Event.Button <= 3) and
-    Assigned(OnMouseReleased) then
-    OnMouseReleased(Self, ButtonTable[Event.Button],
-      ConvertShiftState(Event.State), Point(Event.x, Event.y));
-end;
-
-
-procedure TX11Window.EnterWindow(var Event: TXEnterWindowEvent);
-begin
-  if Assigned(OnMouseEnter) then
-    OnMouseEnter(Self, ConvertShiftState(Event.State), Point(Event.x, Event.y));
-end;
-
-
-procedure TX11Window.LeaveWindow(var Event: TXLeaveWindowEvent);
-begin
-  if Assigned(OnMouseEnter) then
-    OnMouseLeave(Self);
-end;
-
-
-procedure TX11Window.PointerMoved(var Event: TXPointerMovedEvent);
-begin
-  if Assigned(OnMouseMove) then
-    OnMouseMove(Self, ConvertShiftState(Event.State), Point(Event.x, Event.y));
 end;
 
 
@@ -1827,42 +1879,6 @@ begin
   GFApplication.DirtyList.AddRect(Self, r);
 end;
 
-
-procedure TX11Window.FocusIn(var Event: TXFocusInEvent);
-begin
-  if Assigned(OnFocusIn) then
-    OnFocusIn(Self);
-end;
-
-
-procedure TX11Window.FocusOut(var Event: TXFocusOutEvent);
-begin
-  if Assigned(OnFocusOut) then
-    OnFocusOut(Self);
-end;
-
-
-procedure TX11Window.Map(var Event: TXMapEvent);
-begin
-  if Assigned(OnShow) then
-    OnShow(Self);
-end;
-
-
-procedure TX11Window.Unmap(var Event: TXUnmapEvent);
-begin
-  if Assigned(OnHide) then
-    OnHide(Self);
-end;
-
-
-procedure TX11Window.Reparent(var Event: TXReparentEvent);
-begin
-  if Assigned(OnCreate) then
-    OnCreate(Self);
-end;
-
-
 procedure TX11Window.Configure(var Event: TXConfigureEvent);
 begin
   while XCheckTypedWindowEvent(GFApplication.Handle, Handle,
@@ -1877,7 +1893,7 @@ begin
   end;
   if (Event.Width <> Width) or (Event.Height <> Height) then
   begin
-  // !!!: The following 2 lines are _quite_ wrong... :)
+    // !!!: The following 2 lines are _quite_ wrong... :)
     FWidth := Event.Width;
     FHeight := Event.Height;
     FClientWidth := Event.Width;
