@@ -180,22 +180,17 @@ const
     BlueMask:	  0;
     AlphaMask:	0);
 
+  { Windows requires this particular order for RGB images }
+
   { 5-6-5 storage }
   PixelFormatRGB16: TGfxPixelFormat = (
     FormatType:	ftRGB16;
-    RedMask:	  $001F;
+    RedMask:	  $F800;
     GreenMask:	$07E0;
-    BlueMask:	  $F800;
+    BlueMask:	  $001F;
     AlphaMask:	0);
 
   PixelFormatRGB24: TGfxPixelFormat = (
-    FormatType:	ftRGB24;
-    RedMask:	  $0000ff;
-    GreenMask:	$00ff00;
-    BlueMask:	  $ff0000;
-    AlphaMask:	0);
-
-  PixelFormatBGR24: TGfxPixelFormat = (
     FormatType:	ftRGB24;
     RedMask:	  $ff0000;
     GreenMask:	$00ff00;
@@ -204,45 +199,17 @@ const
 
   PixelFormatRGB32: TGfxPixelFormat = (
     FormatType:	ftRGB32;
-    RedMask:	  $0000ff;
-    GreenMask:	$00ff00;
-    BlueMask:	  $ff0000;
-    AlphaMask:	0);
-
-  PixelFormatRGBA32: TGfxPixelFormat = (
-    FormatType: ftRGB32;
-    RedMask:	  $000000ff;
-    GreenMask:	$0000ff00;
-    BlueMask:	  $00ff0000;
-    AlphaMask:	$ff000000);
-
-  PixelFormatARGB32: TGfxPixelFormat = (
-    FormatType: ftRGB32;
-    RedMask:	  $0000ff00;
-    GreenMask:	$00ff0000;
-    BlueMask:	  $ff000000;
-    AlphaMask:	$000000ff);
-
-  PixelFormatBGR32: TGfxPixelFormat = (
-    FormatType:	ftRGB32;
     RedMask:	  $ff0000;
     GreenMask:	$00ff00;
     BlueMask:	  $0000ff;
     AlphaMask:	0);
 
-  PixelFormatBGRA32: TGfxPixelFormat = (
-    FormatType:	ftRGB32;
-    RedMask:	  $00ff0000;
+  PixelFormatRGBA32: TGfxPixelFormat = (
+    FormatType: ftRGB32;
+    RedMask:	  $00ff00ff;
     GreenMask:	$0000ff00;
     BlueMask:	  $000000ff;
     AlphaMask:	$ff000000);
-
-  PixelFormatABGR32: TGfxPixelFormat = (
-    FormatType:	ftRGB32;
-    RedMask:	  $ff000000;
-    GreenMask:	$00ff0000;
-    BlueMask:	  $0000ff00;
-    AlphaMask:	$000000ff);
 
 type
 
