@@ -23,7 +23,11 @@ unit ImageIO;
 
 interface
 
-uses SysUtils, Classes, GFXBase;
+uses
+  SysUtils
+  ,Classes
+  ,GFXBase
+  ;
 
 resourcestring
   SImgOutOfData = 'No more data available for image';
@@ -56,7 +60,6 @@ type
   TImageReader = class
   private
     FState: TImageReaderState;
-
     { Needed for reading of image data. These values must be initialized by
       the user via SetImageSegmentBuffer }
     FSegmentData: Pointer;
@@ -69,47 +72,42 @@ type
     FOnImage: TNotifyEvent;
   protected
     // Image properties, only available after OnHeaderRead event
-    FWidth, FHeight: Integer;
+    FWidth: Integer;
+    FHeight: Integer;
     FPixelFormat: TGfxPixelFormat;
     FPaletteSize: Integer;
     FPalette: PGfxColor;
-
-    procedure HeaderFinished;
-    procedure SegmentFinished(AStartY, AHeight: Integer);
-    procedure ImageFinished;
-
-    procedure DoProcessHeaderData(AStream: TStream); virtual; abstract;
-    function DoGetImageSegmentStartY(ASegmentHeight: Integer): Integer;
-      virtual; abstract;
-    procedure InitImageReading; virtual;
-    procedure DoProcessImageData(AStream: TStream); virtual; abstract;
-
+    procedure   HeaderFinished;
+    procedure   SegmentFinished(AStartY, AHeight: Integer);
+    procedure   ImageFinished;
+    procedure   DoProcessHeaderData(AStream: TStream); virtual; abstract;
+    function    DoGetImageSegmentStartY(ASegmentHeight: Integer): Integer; virtual; abstract;
+    procedure   InitImageReading; virtual;
+    procedure   DoProcessImageData(AStream: TStream); virtual; abstract;
   public
     constructor Create; virtual;
-    procedure ProcessHeaderData(AStream: TStream);
-    function GetImageSegmentStartY(ASegmentHeight: Integer): Integer;
-    procedure SetImageSegmentBuffer(AData: Pointer; AStride: LongWord;
-      ASegmentHeight: Integer);
-    procedure ProcessImageData(AStream: TStream);
-
-    property State: TImageReaderState read FState;
-    property Width: Integer read FWidth;
-    property Height: Integer read FHeight;
-    property PixelFormat: TGfxPixelFormat read FPixelFormat;
-    property PaletteSize: Integer read FPaletteSize;
-    property Palette: PGfxColor read FPalette;
-    property SegmentData: Pointer read FSegmentData;
-    property SegmentStride: LongWord read FSegmentStride;
-    property SegmentHeight: Integer read FSegmentHeight;
-    property SegmentSize: LongWord read FSegmentSize;
-
-    property OnHeader: TNotifyEvent read FOnHeader write FOnHeader;
-    property OnSegment: TSegmentEvent read FOnSegment write FOnSegment;
-    property OnImage: TNotifyEvent read FOnImage write FOnImage;
+    procedure   ProcessHeaderData(AStream: TStream);
+    function    GetImageSegmentStartY(ASegmentHeight: Integer): Integer;
+    procedure   SetImageSegmentBuffer(AData: Pointer; AStride: LongWord; ASegmentHeight: Integer);
+    procedure   ProcessImageData(AStream: TStream);
+    property    State: TImageReaderState read FState;
+    property    Width: Integer read FWidth;
+    property    Height: Integer read FHeight;
+    property    PixelFormat: TGfxPixelFormat read FPixelFormat;
+    property    PaletteSize: Integer read FPaletteSize;
+    property    Palette: PGfxColor read FPalette;
+    property    SegmentData: Pointer read FSegmentData;
+    property    SegmentStride: LongWord read FSegmentStride;
+    property    SegmentHeight: Integer read FSegmentHeight;
+    property    SegmentSize: LongWord read FSegmentSize;
+    property    OnHeader: TNotifyEvent read FOnHeader write FOnHeader;
+    property    OnSegment: TSegmentEvent read FOnSegment write FOnSegment;
+    property    OnImage: TNotifyEvent read FOnImage write FOnImage;
   end;
 
 
 implementation
+
 
 constructor EImgOutOfData.Create;
 begin
@@ -121,8 +119,7 @@ begin
   inherited Create(SImgUnsupportedPixelFormat);
 end;
 
-
-// TImageReader
+{ TImageReader }
 
 constructor TImageReader.Create;
 begin
@@ -147,10 +144,10 @@ procedure TImageReader.SetImageSegmentBuffer(AData: Pointer; AStride: LongWord;
   ASegmentHeight: Integer);
 begin
   ASSERT(State in [irsHeaderRead, irsInImage]);
-  FSegmentData := AData;
-  FSegmentStride := AStride;
-  FSegmentHeight := ASegmentHeight;
-  FSegmentSize := SegmentStride * SegmentHeight;
+  FSegmentData    := AData;
+  FSegmentStride  := AStride;
+  FSegmentHeight  := ASegmentHeight;
+  FSegmentSize    := SegmentStride * SegmentHeight;
 end;
 
 procedure TImageReader.ProcessImageData(AStream: TStream);
@@ -196,5 +193,5 @@ begin
   // Do nothing
 end;
 
-
 end.
+

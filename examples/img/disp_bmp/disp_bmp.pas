@@ -1,14 +1,13 @@
 {
-    $Id: disp_bmp.pp,v 1.6 2001/02/14 23:08:59 sg Exp $
+    fpGUI  -  Free Pascal GUI Library
 
-    fpImg  -  Free Pascal Imaging Library
-    Copyright (C) 2000 - 2001 by
-      Areca Systems GmbH / Sebastian Guenther, sg@freepascal.org
+    Example: Display BMP file using the fpImg - Free Pascal Imaging Library
 
-    Example: Display BMP file
+    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
-    See the file COPYING, included in this distribution,
-    for details about the copyright.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,7 +17,14 @@
 
 program Disp_BMP;
 
-uses Classes, GFXBase, GFXImpl, fpImg, BMPReader;
+uses
+  Classes
+  ,GFXBase
+  ,GFXImpl
+  ,fpImg
+  ,BMPReader
+  ,fpgfxpackage
+  ;
 
 type
   TMainWindow = class
@@ -29,17 +35,17 @@ type
     Image: TGfxImage;
   public
     constructor Create(ADisplay: TDefDisplay);
-    destructor Destroy; override;
+    destructor  Destroy; override;
   end;
 
 constructor TMainWindow.Create(ADisplay: TDefDisplay);
 begin
   inherited Create;
-  Display := ADisplay;
-  Image := CreateImageFromFile(Display.DefaultScreen, TBMPReader, ParamStr(1));
-  Window := ADisplay.DefaultScreen.CreateWindow;
-  Window.Title := 'fpImg Bitmap Test';
-  Window.OnPaint := @Paint;
+  Display         := ADisplay;
+  Image           := CreateImageFromFile(Display.DefaultScreen, TBMPReader, ParamStr(1));
+  Window          := ADisplay.DefaultScreen.CreateWindow;
+  Window.Title    := 'fpImg Bitmap Test';
+  Window.OnPaint  := @Paint;
   Window.SetFixedClientSize(Size(Image.Width, Image.Height));
   Window.Show;
 end;
@@ -68,23 +74,10 @@ begin
     Halt(2);
   end;
 
-  Display := TDefDisplay.Create;
-  MainWindow := TMainWindow.Create(Display);
+  Display     := TDefDisplay.Create;
+  MainWindow  := TMainWindow.Create(Display);
   Display.Run;
   MainWindow.Free;
   Display.Free;
 end.
 
-
-{
-  $Log: disp_bmp.pp,v $
-  Revision 1.6  2001/02/14 23:08:59  sg
-  * Adapted to changes in fpGFX interface
-
-  Revision 1.5  2001/02/09 20:49:03  sg
-  * Adapted to recent improvements in fpGFX interfaces
-
-  Revision 1.4  2001/01/11 23:21:53  sg
-  *** empty log message ***
-
-}

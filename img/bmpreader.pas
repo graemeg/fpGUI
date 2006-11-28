@@ -23,11 +23,16 @@ unit BMPReader;
 
 interface
 
-uses Classes, GFXBase, ImageIO;
+uses
+  Classes
+  ,GFXBase
+  ,ImageIO
+  ;
 
 type
   DWORD = LongWord;
   LONG = LongInt;
+
 
   TBitmapFileHeader = packed record
     bfType: WORD;
@@ -36,6 +41,7 @@ type
     bfReserved2: WORD;
     bfOffBits: DWORD;
   end;
+
 
   TBitmapInfoHeader = packed record
     biSize: DWORD;
@@ -51,6 +57,7 @@ type
     biClrImportant: DWORD;
   end;
 
+
   PRGBQuad = ^TRGBQuad;
   TRGBQuad = packed record
     rgbBlue, rgbGreen, rgbRed, rgbReserved: BYTE;
@@ -63,26 +70,23 @@ type
     FInfoHeader: TBitmapInfoHeader;
     FBMPPalette: PRGBQuad;
     FFileStride: LongWord;
-
     HeaderBytesRead, PalBytesRead: Integer;
     ScanlinesLeft: Integer;
     ThisSegmentHeight: Integer;
     ScanlinesLeftInSegment: Integer;
     ScanlineBytesDone: LongWord;
     CurScanline: Pointer;
-
-    procedure DoProcessHeaderData(AStream: TStream); override;
-    function DoGetImageSegmentStartY(ASegmentHeight: Integer): Integer;
-      override;
-    procedure InitImageReading; override;
-    procedure InitSegmentReading;
-    procedure DoProcessImageData(AStream: TStream); override;
+    procedure   DoProcessHeaderData(AStream: TStream); override;
+    function    DoGetImageSegmentStartY(ASegmentHeight: Integer): Integer; override;
+    procedure   InitImageReading; override;
+    procedure   InitSegmentReading;
+    procedure   DoProcessImageData(AStream: TStream); override;
   public
-    destructor Destroy; override;
-    property FileHeader: TBitmapFileHeader read FFileHeader;
-    property InfoHeader: TBitmapInfoHeader read FInfoHeader;
-    property BMPPalette: PRGBQuad read FBMPPalette;
-    property FileStride: LongWord read FFileStride;
+    destructor  Destroy; override;
+    property    FileHeader: TBitmapFileHeader read FFileHeader;
+    property    InfoHeader: TBitmapInfoHeader read FInfoHeader;
+    property    BMPPalette: PRGBQuad read FBMPPalette;
+    property    FileStride: LongWord read FFileStride;
   end;
 
 
@@ -113,7 +117,8 @@ begin
       raise EImgOutOfData.Create;
     Inc(HeaderBytesRead, HaveRead);
     IsFirstRead := False;
-  end else
+  end
+  else
     IsFirstRead := True;
 
   if HeaderBytesRead < SizeOf(FileHeader) + SizeOf(InfoHeader) then
@@ -154,10 +159,10 @@ begin
         BytesToSkip := SizeOf(SkipBuffer);
       HaveRead := AStream.Read(SkipBuffer, BytesToSkip);
       if HaveRead = 0 then
-	if IsFirstRead then
-	  raise EImgOutOfData.Create
-	else
-	  exit;
+	      if IsFirstRead then
+	        raise EImgOutOfData.Create
+	      else
+	        exit; //==>
       IsFirstRead := False;
       Inc(HeaderBytesRead, HaveRead);
       if PalBytesRead < PaletteSize * SizeOf(TGfxPixel) then
@@ -165,7 +170,7 @@ begin
         Move(SkipBuffer, PByte(FBMPPalette)[PalBytesRead], HaveRead);
         Inc(PalBytesRead, HaveRead);
       end;
-    end;
+    end;  { if }
 
     if HeaderBytesRead = DataOffset then
     begin
@@ -174,41 +179,41 @@ begin
 
       if PaletteSize > 0 then
         for i := 0 to PaletteSize - 1 do
-	begin
-	  Palette[i].Red := BMPPalette[i].rgbRed * 257;
-	  Palette[i].Green := BMPPalette[i].rgbGreen * 257;
-	  Palette[i].Blue := BMPPalette[i].rgbBlue * 257;
-	  Palette[i].Alpha := 0;
-	end;
+      	begin
+      	  Palette[i].Red := BMPPalette[i].rgbRed * 257;
+      	  Palette[i].Green := BMPPalette[i].rgbGreen * 257;
+      	  Palette[i].Blue := BMPPalette[i].rgbBlue * 257;
+      	  Palette[i].Alpha := 0;
+      	end;
 
       case InfoHeader.biBitCount of
-	1:
+      	1:
           begin
-	    FFileStride := ((Width + 31) shr 3) and not 3;
-	    FPixelFormat.FormatType := ftMono;
-	  end;
-	4:
+      	    FFileStride := ((Width + 31) shr 3) and not 3;
+      	    FPixelFormat.FormatType := ftMono;
+      	  end;
+      	4:
           begin
-	    FFileStride := ((Width + 7) shr 1) and not 3;
-	    FPixelFormat.FormatType := ftPal4;
-	  end;
-	8:
+      	    FFileStride := ((Width + 7) shr 1) and not 3;
+      	    FPixelFormat.FormatType := ftPal4;
+      	  end;
+      	8:
           begin
-	    FFileStride := (Width + 3) and not 3;
-	    FPixelFormat.FormatType := ftPal8;
-	  end;
+      	    FFileStride := (Width + 3) and not 3;
+      	    FPixelFormat.FormatType := ftPal8;
+      	  end;
         24:
           begin
             FFileStride := (Width * 3 + 3) and not 3;
-  	    FPixelFormat := PixelFormatBGR24;
+      	    FPixelFormat := PixelFormatBGR24;
           end;
         else
           raise EImgUnsupportedPixelFormat.Create;
-      end;
-    end;
+      end;  { case }
+    end;  { if }
 
     HeaderFinished;
-  end;
+  end;  { if }
 end;
 
 function TBMPReader.DoGetImageSegmentStartY(ASegmentHeight: Integer): Integer;
@@ -248,7 +253,8 @@ procedure TBMPReader.DoProcessImageData(AStream: TStream);
         ImageFinished
       else
         InitSegmentReading;
-    end else
+    end
+    else
       Dec(CurScanline, SegmentStride);
   end;
 
@@ -269,13 +275,15 @@ begin
     begin
       ScanlineBytesDone := 0;
       ScanlineDone
-    end else
+    end
+    else
     begin
       Inc(ScanlineBytesDone, HaveRead);
       exit;
     end;
     ReadMayFail := True;
-  end else
+  end
+  else
     ReadMayFail := False;
 
   while ScanlinesLeft > 0 do
@@ -288,7 +296,7 @@ begin
 
     if HaveRead = 0 then
       if ReadMayFail then
-        exit
+        exit  //==>
       else
         raise EImgOutOfData.Create;
 
@@ -303,7 +311,7 @@ begin
       AStream.Position := AStream.Position + FileStride - ToRead;
     ReadMayFail := True;
     ScanlineDone;
-  end;
+  end;  { while }
 end;
 
 end.

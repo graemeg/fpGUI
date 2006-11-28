@@ -24,7 +24,11 @@ unit fpImg;
 
 interface
 
-uses Classes, GFXBase, ImageIO;
+uses
+  Classes
+  ,GFXBase
+  ,ImageIO
+  ;
 
 
 function CreateImageFromFile(AScreen: TGfxScreen; AReader: TImageReaderClass;
@@ -63,12 +67,10 @@ begin
   Reader := AReader.Create;
   try
     Reader.ProcessHeaderData(AStream);
-    Result := AScreen.Display.CreateImage(Reader.Width, Reader.Height,
-      Reader.PixelFormat);
+    Result := AScreen.Display.CreateImage(Reader.Width, Reader.Height, Reader.PixelFormat);
     if Reader.PaletteSize > 0 then
     begin
-      Palette := AScreen.CreatePalette(Reader.PaletteSize,
-        Reader.Palette);
+      Palette := AScreen.CreatePalette(Reader.PaletteSize, Reader.Palette);
       try
         Result.Palette := Palette;
       finally

@@ -8,7 +8,8 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   gfxbase,
-  fpgui, fpGUI_laz;
+  fpGFX,
+  fpgui;
 
 type
 
@@ -59,10 +60,11 @@ end;
 var
   MainForm: TMainForm;
 begin
-  MainForm := TMainForm.Create(Application);
+  GFApplication.Initialize;
+  MainForm := TMainForm.Create(GFApplication);
   try
     MainForm.Show;
-    Application.Run;
+    GFApplication.Run;
   finally
     MainForm.Free;
   end;

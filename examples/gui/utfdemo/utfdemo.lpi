@@ -25,7 +25,7 @@
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="fpGUI_laz"/>
+        <PackageName Value="fpguipackage"/>
         <MinVersion Minor="3" Valid="True"/>
       </Item1>
     </RequiredPackages>
@@ -39,6 +39,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
+    <SearchPaths>
+      <OtherUnitFiles Value="../../../gui/"/>
+    </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>

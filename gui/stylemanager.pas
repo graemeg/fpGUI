@@ -32,6 +32,8 @@ type
     FUserStyle: TStyle;
     function    GetDefaultStyle: TStyle;
   public
+    constructor Create;
+    destructor  Destroy;override;
     property    DefaultStyle: TStyle read GetDefaultStyle;
     procedure   SetStyle(pNewStyle: TStyle);
   end;
@@ -70,6 +72,21 @@ begin
       FDefaultStyle := TDefaultStyle.Create(GFApplication);
     Result := FDefaultStyle;
   end;
+end;
+
+constructor TStyleManager.Create;
+begin
+  FUserStyle := nil;
+  FDefaultStyle := nil;
+end;
+
+destructor TStyleManager.Destroy;
+begin
+  if FUserStyle <> nil then
+    FUserStyle.Free;
+  if FDefaultStyle <> nil then
+    FDefaultStyle.Free;
+  inherited Destroy;
 end;
 
 procedure TStyleManager.SetStyle(pNewStyle: TStyle);
