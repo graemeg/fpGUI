@@ -24,8 +24,8 @@
   private
     FFocusedWidget: TWidget;
     FMouseCaptureWidget: TWidget;
-    FLastSetCursor: TGfxCursor;
-    FWindowOptions: TGfxWindowOptions;
+    FLastSetCursor: TFCursor;
+    FWindowOptions: TFWindowOptions;
     FWnd: TFCustomWindow;
     FOnCreate: TNotifyEvent;
     FOnDestroy: TNotifyEvent;
@@ -35,7 +35,7 @@
     function    GetWnd: TFCustomWindow;
     procedure   SetFocusedWidget(AWidget: TWidget);
     procedure   SetMouseCaptureWidget(AWidget: TWidget);
-    procedure   SetWindowOptions(const AValue: TGfxWindowOptions);
+    procedure   SetWindowOptions(const AValue: TFWindowOptions);
     // fpGFX event handling
     procedure   WndClose(Sender: TObject);
     procedure   WndFocusIn(Sender: TObject);
@@ -82,7 +82,7 @@
     property    FocusedWidget: TWidget read FFocusedWidget write SetFocusedWidget;
     property    IsActive: Boolean read FIsActive;
     property    MouseCaptureWidget: TWidget read FMouseCaptureWidget write SetMouseCaptureWidget;
-    property    WindowOptions: TGfxWindowOptions read FWindowOptions write SetWindowOptions;
+    property    WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
     property    Wnd: TFCustomWindow read GetWnd;
   end;
 
@@ -350,7 +350,7 @@ begin
   end;
 end;
 
-procedure TCustomForm.SetWindowOptions(const AValue: TGfxWindowOptions);
+procedure TCustomForm.SetWindowOptions(const AValue: TFWindowOptions);
 begin
   if FWindowOptions=AValue then exit;
   FWindowOptions:=AValue;

@@ -127,7 +127,7 @@
 
   TMouseEnterEventObj = class(TMouseEventObj)
   public
-    NewCursor: TGfxCursor;
+    NewCursor: TFCursor;
   end;
 
 
@@ -140,7 +140,7 @@
   TMouseLeaveCheckEventObj = class(TMouseEventObj)
   public
     function SendToChild(AChild: TWidget): Boolean; override;
-    NewCursor: TGfxCursor;
+    NewCursor: TFCursor;
   end;
 
 
@@ -188,7 +188,7 @@
     function  EvMouseLeave(Event: TMouseLeaveEventObj): Boolean;
     function  EvMouseLeaveCheck(Event: TMouseLeaveCheckEventObj): Boolean;
   protected
-    FCursor: TGfxCursor;
+    FCursor: TFCursor;
     FText: String;
     FStyle: TStyle;
     FCanExpandHeight: Boolean;
@@ -227,7 +227,7 @@
     procedure SetText(const AText: String); virtual;
     property  CanExpandWidth: Boolean read FCanExpandWidth write SetCanExpandWidth default False;
     property  CanExpandHeight: Boolean read FCanExpandHeight write SetCanExpandHeight default False;
-    property  Cursor: TGfxCursor read FCursor write FCursor default crDefault;
+    property  Cursor: TFCursor read FCursor write FCursor default crDefault;
     property  Text: String read FText write SetText;
     property  OnClick: TNotifyEvent read FOnClick write FOnClick;
   public
