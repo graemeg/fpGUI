@@ -1210,7 +1210,7 @@ begin
     if LeaderWindow = 0 then
     begin
       LeaderWindow := XCreateSimpleWindow(GFApplication.Handle,
-        XDefaultRootWindow(GFApplication.Handle), 10, 10, 10, 10, 0, 0, 0);
+        XDefaultRootWindow(GFApplication.Handle), 0, 0, 1, 1, 0, 0, 0);
 
       ClassHint := XAllocClassHint;
       ClassHint^.res_name := 'fpGFX'; // !!! use app name
@@ -1238,15 +1238,20 @@ begin
     lParentHandle := XDefaultRootWindow(GFApplication.Handle);
 
   { setup attributes and masks }
-  if (woBorderless in WindowOptions) or (woToolWindow in WindowOptions) or
-    (woPopup in WindowOptions) then
+  if (woBorderless in WindowOptions) or (woToolWindow in WindowOptions) then
   begin
-    Attr.Override_Redirect := longbool(1);    // this removes window borders
-    mask := CWOverrideRedirect or CWColormap;
+    Attr.Override_Redirect := True;    // this removes window borders
+    mask := CWOverrideRedirect;// or CWColormap;
+  end
+  else if (woPopup in WindowOptions) then
+  begin
+    Attr.Override_Redirect := True;    // this removes window borders
+    Attr.save_under := True;
+    mask := CWOverrideRedirect or CWSaveUnder;
   end
   else
   begin
-    Attr.Override_Redirect := longbool(0);
+    Attr.Override_Redirect := False;
     mask := CWColormap;
   end;
 
@@ -1266,9 +1271,14 @@ begin
     raise EX11Error.Create(SWindowCreationFailed);
 
   XSelectInput(GFApplication.Handle, FHandle, KeyPressMask or KeyReleaseMask
-    or ButtonPressMask or ButtonReleaseMask or EnterWindowMask
-    or LeaveWindowMask or PointerMotionMask or ExposureMask or FocusChangeMask
-    or StructureNotifyMask);
+    or ButtonPressMask or ButtonReleaseMask
+    or EnterWindowMask or LeaveWindowMask
+    or ButtonMotionMask or PointerMotionMask
+    or ExposureMask
+    or FocusChangeMask
+    or StructureNotifyMask
+//    or PropertyChangeMask
+    );
     
   if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
   begin
@@ -1293,6 +1303,10 @@ begin
      // send close event instead of quitting the whole application...
      XSetWMProtocols(GFApplication.Handle, FHandle, @GFApplication.FWMDeleteWindow, 1);
    end;
+   
+  { Child windows do not appear until parent (lParentHandle) is mapped }
+  if FParent <> nil then
+    XMapSubwindows(GFApplication.Handle, lParentHandle);
 
   FCanvas := TX11WindowCanvas.Create(Colormap, Handle, GFApplication.FDefaultFont);
 end;

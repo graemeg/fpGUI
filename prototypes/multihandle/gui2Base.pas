@@ -208,7 +208,6 @@ begin
   FColor := colLtGray;
   OnPaint := @EvOnPaint;
   OnMouseReleased := @EvOnMousePress;
-  Show;
 end;
 
 { TForm }
@@ -262,6 +261,7 @@ constructor TForm.Create;
 begin
   Create(nil, [woWindow]);
 end;
+
 
 { TButton }
 
