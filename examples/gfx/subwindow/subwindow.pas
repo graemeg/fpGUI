@@ -47,7 +47,7 @@ type
   
 constructor TBoxWindow.Create(AParent: TFCustomWindow);
 begin
-  inherited Create(AParent, []);
+  inherited Create(AParent, [woChildWindow]);
 
   OnMouseReleased := @MouseReleased;
   OnPaint := @Paint;

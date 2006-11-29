@@ -42,13 +42,18 @@ type
   public
     constructor Create; override;
   end;
+  
+const
+  clBlue: TGfxColor           = (Red: $0000; Green: $0000; Blue: $FF00; Alpha: 0);
+  clLightSteelBlue: TGfxColor = (Red: $B000; Green: $C400; Blue: $DE00; Alpha: 0);
 
 { TMyPopup }
 
 constructor TMyPopup.Create;
 begin
   inherited Create;
-  SetClientSize(Size(150, 320));
+  Title := 'My Popup';
+  SetClientSize(Size(180, 320));
 end;
 
 { TMainWindow }
@@ -69,11 +74,10 @@ var
   frm: TMyPopup;
 begin
   frm := TMyPopup.Create;
-  frm.FParent := self;
 
   GFApplication.AddWindow(frm);
+//  frm.SetPosition(Point(0, btnPopup.Height));
   frm.Show;
-  frm.SetPosition(Point(0, btnPopup.Height));
 end;
 
 constructor TMainWindow.Create;
@@ -81,6 +85,7 @@ begin
   inherited Create;
   Title := 'fpGUI multi-handle example';
   SetClientSize(Size(320, 200));
+  Color := clLightSteelBlue;
 
   btnClose := TButton.Create(self, Point(20, 150));
   btnClose.Caption := 'Close';

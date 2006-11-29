@@ -36,40 +36,26 @@ type
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    Color: TGfxColor read FColor write SetColor;
   public
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     constructor Create(AParent: TFCustomWindow); overload;
   end;
-  
+
   { TForm }
-  {$Note Can we get TForm descending from TWidget? Here is too much duplication. }
-  TForm = class(TFWindow)
-  private
-    FColor: TGfxColor;
-    FOnClick: TNotifyEvent;
-    FOnPainting: TNotifyEvent;
-    procedure   EvOnPaint(Sender: TObject; const Rect: TRect); virtual;
-    procedure   EvOnMousePress(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure   SetColor(const AValue: TGfxColor);
-  protected
-    procedure   Paint; virtual;
-    property    OnPainting: TNotifyEvent read FOnPainting write FOnPainting;
-    property    Color: TGfxColor read FColor write SetColor;
+  
+  TForm = class(TWidget)
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
-    constructor Create; virtual;
-    property    OnClick: TNotifyEvent read FOnClick write FOnClick;
+    constructor Create; virtual; reintroduce;
+    property    Color;
   end;
-  
+
   { TPopupWindow }
   {$Note TPopupWindow is still work in progess. }
   TPopupWindow = class(TForm)
-  protected
-    procedure   PopupWindowClick(Sender: TObject);
-    procedure   Paint; override;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     constructor Create; override;
   end;
-  
+
   { TButton }
 
   TButton = class(TWidget)
@@ -80,7 +66,7 @@ type
   protected
     procedure   Paint; override;
   public
-    constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload;
+    constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload; reintroduce;
     property    Caption: string read FCaption write SetCaption;
   published
     property    OnClick;
@@ -95,11 +81,10 @@ type
   protected
     procedure   Paint; override;
   public
-    constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload;
+    constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload; reintroduce;
     property    Caption: string read FCaption write SetCaption;
   end;
-  
-  
+
   { TCustomEdit }
 
   TCustomEdit = class(TWidget)
@@ -109,9 +94,11 @@ type
   protected
     procedure   Paint; override;
   public
-    constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload;
+    constructor Create(AParent: TFCustomWindow; APosition: TPoint); overload; reintroduce;
     property    Text: string read FText write SetText;
   end;
+
+  { TEdit }
   
   TEdit = class(TCustomEdit)
   public
@@ -202,66 +189,33 @@ begin
   Canvas.FillRect(r);
 end;
 
-constructor TWidget.Create(AParent: TFCustomWindow);
-begin
-  inherited Create(AParent, []);
-  FColor := colLtGray;
-  OnPaint := @EvOnPaint;
-  OnMouseReleased := @EvOnMousePress;
-end;
-
-{ TForm }
-
-procedure TForm.EvOnPaint(Sender: TObject; const Rect: TRect);
-begin
-  {$IFDEF DEBUG} Writeln(ClassName + '.Paint'); {$ENDIF}
-  if Assigned(OnPainting) then
-    OnPainting(self);
-  Paint;
-end;
-
-procedure TForm.EvOnMousePress(Sender: TObject; AButton: TMouseButton;
-  AShift: TShiftState; const AMousePos: TPoint);
-begin
-  if AButton = mbLeft then
-  begin
-    if Assigned(OnClick) then
-      OnClick(self);
-  end;
-end;
-
-procedure TForm.SetColor(const AValue: TGfxColor);
-begin
-  if FColor = AValue then exit;
-  FColor := AValue;
-  Paint;
-end;
-
-procedure TForm.Paint;
-var
-  r: TRect;
-begin
-  {$IFDEF DEBUG} Writeln(ClassName + '.Paint'); {$ENDIF}
-  Canvas.SetColor(FColor);
-  r.Left    := 0;
-  r.Top     := 0;
-  r.Right   := Width;
-  r.Bottom  := Height;
-  Canvas.FillRect(r);
-end;
-
-constructor TForm.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
+constructor TWidget.Create(AParent: TFCustomWindow;
+  AWindowOptions: TFWindowOptions);
 begin
   inherited Create(AParent, AWindowOptions);
   FColor := colLtGray;
   OnPaint := @EvOnPaint;
+  OnMouseReleased := @EvOnMousePress;
+  Title := ClassName;
+end;
+
+constructor TWidget.Create(AParent: TFCustomWindow);
+begin
+  Create(AParent, [woChildWindow]);
+end;
+
+{ TForm }
+
+constructor TForm.Create(AParent: TFCustomWindow;
+  AWindowOptions: TFWindowOptions);
+begin
+  inherited Create(AParent, AWindowOptions);
 end;
 
 constructor TForm.Create;
 begin
-  Create(nil, [woWindow]);
+  inherited Create(nil, [woWindow]);
 end;
-
 
 { TButton }
 
@@ -306,7 +260,7 @@ var
 begin
   if FCaption=AValue then exit;
   FCaption := AValue;
-  Title := FCaption;
+
   w := Canvas.TextWidth(FCaption) + 6;
   h := Canvas.FontCellHeight + 4;
   SetClientSize(Size(w, h));
@@ -332,30 +286,10 @@ end;
 
 { TPopupWindow }
 
-procedure TPopupWindow.PopupWindowClick(Sender: TObject);
-begin
-  Writeln(ClassName + '.HandleOnClick');
-//  GFApplication.Forms.Remove(self);
-//  Free;
-
-end;
-
-procedure TPopupWindow.Paint;
-begin
-  inherited Paint;
-end;
-
-constructor TPopupWindow.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
-begin
-  inherited Create(AParent, AWindowOptions);
-//  SetPosition();
-  OnClick :=@PopupWindowClick;
-end;
-
 constructor TPopupWindow.Create;
 begin
-//  Create(nil, [woPopup]);
-  Create(nil, [woWindow]);
+//  inherited Create(nil, [woPopup]);
+  inherited Create(nil, [woWindow]);
 end;
 
 { TCustomEdit }
