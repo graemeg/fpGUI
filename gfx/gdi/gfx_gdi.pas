@@ -1442,9 +1442,13 @@ end;
 
 
 procedure TGDIWindow.Show;
+var
+  i: integer;
 begin
   Windows.ShowWindow(Handle, SW_SHOWNORMAL);
   Windows.UpdateWindow(Handle);
+  for i := 0 to Pred(ChildWindows.Count) do
+    TGDIWindow(ChildWindows.Items[i]).Show;
 end;
 
 
