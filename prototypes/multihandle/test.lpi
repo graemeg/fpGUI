@@ -44,12 +44,9 @@
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <UseHeaptrc Value="True"/>
-      </Debugging>
-    </Linking>
     <Other>
+      <CustomOptions Value="-FUunits
+"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

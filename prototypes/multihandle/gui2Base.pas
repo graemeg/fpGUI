@@ -20,6 +20,33 @@ uses
   
 type
 
+  TWidgetStyle = set of (
+      wsCaptureMouse,
+      wsClickable,
+      wsOpaque
+      );
+      
+  
+  TWidgetState = set of (
+      wsEnabled,
+      wsIsVisible,
+      wsSizeIsForced,
+      wsHasFocus,
+      wsMouseInside,
+      wsClicked
+      );
+      
+  // The following flags are used for styles
+
+  TButtonFlags = set of (
+      btnIsEmbedded,
+      btnIsDefault,
+      btnIsPressed,
+      btnIsSelected,
+      btnHasFocus
+      );
+
+
   { TWidget }
 
   TWidget = class(TFWindow)
@@ -28,9 +55,13 @@ type
     FOnClick: TNotifyEvent;
     FOnPainting: TNotifyEvent;
     procedure   EvOnPaint(Sender: TObject; const Rect: TRect); virtual;
-    procedure   EvOnMousePress(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   EvOnMouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint); virtual;
+    procedure   EvOnMousePressed(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint); virtual;
+    procedure   EvOnMouseLeave(Sender: TObject); virtual;
     procedure   SetColor(const AValue: TGfxColor);
   protected
+    FWidgetStyle: TWidgetStyle;
+    FWidgetState: TWidgetState;
     procedure   Paint; virtual;
     property    OnPainting: TNotifyEvent read FOnPainting write FOnPainting;
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
@@ -38,6 +69,8 @@ type
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     constructor Create(AParent: TFCustomWindow); overload;
+    destructor  Destroy; override;
+    procedure   SetFocus;
   end;
 
   { TForm }
@@ -160,14 +193,38 @@ begin
   Paint;
 end;
 
-procedure TWidget.EvOnMousePress(Sender: TObject; AButton: TMouseButton;
+procedure TWidget.EvOnMouseReleased(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
-  if AButton = mbLeft then
+  if (wsClickable in FWidgetStyle) and (wsEnabled in FWidgetState) and
+    (AButton = mbLeft) then
   begin
-    if Assigned(OnClick) then
-      OnClick(self);
+    if wsClicked in FWidgetState then
+    begin
+      Exclude(FWidgetState, wsClicked);
+      Exclude(FWidgetState, wsHasFocus);
+      Paint;
+      if Assigned(OnClick) then
+        OnClick(self);
+    end;
   end;
+end;
+
+procedure TWidget.EvOnMousePressed(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+begin
+  if (wsClickable in FWidgetStyle) and (wsEnabled in FWidgetState) and
+    (AButton = mbLeft) then
+  begin
+    Include(FWidgetState, wsClicked);
+    SetFocus;
+    Paint;
+  end;
+end;
+
+procedure TWidget.EvOnMouseLeave(Sender: TObject);
+begin
+//  Exclude(FWidgetState, wsHasFocus);
 end;
 
 procedure TWidget.SetColor(const AValue: TGfxColor);
@@ -193,15 +250,35 @@ constructor TWidget.Create(AParent: TFCustomWindow;
   AWindowOptions: TFWindowOptions);
 begin
   inherited Create(AParent, AWindowOptions);
-  FColor := colLtGray;
-  OnPaint := @EvOnPaint;
-  OnMouseReleased := @EvOnMousePress;
-  Title := ClassName;
+
+  FWidgetState  := [wsEnabled];
+  FColor        := colLtGray;
+  Title         := ClassName;
+  
+  // Assign some event handlers
+  OnPaint           := @EvOnPaint;
+  OnMouseReleased   := @EvOnMouseReleased;
+  OnMousePressed    := @EvOnMousePressed;
+  OnMouseLeave      := @EvOnMouseLeave;
 end;
 
 constructor TWidget.Create(AParent: TFCustomWindow);
 begin
   Create(AParent, [woChildWindow]);
+end;
+
+destructor TWidget.Destroy;
+begin
+  OnPaint           := nil;
+  OnMouseReleased   := nil;
+  OnMousePressed    := nil;
+  inherited Destroy;
+end;
+
+procedure TWidget.SetFocus;
+begin
+  Include(FWidgetState, wsHasFocus);
+//  FindForm.FocusedWidget := Self;
 end;
 
 { TForm }
@@ -235,19 +312,54 @@ end;
 procedure TButton.Paint;
 var
   Pt: TPoint;
+  lFlags: TButtonFlags;
+  r: TRect;
 begin
   inherited Paint;
-  Draw3DFrame(TFCanvas(Canvas), Rect(0, 0, Width, Height), cl3DHighlight, cl3DLight, cl3DDkShadow, cl3DShadow);
+  lFlags := [];
+  r := Rect(0, 0, Width, Height);
+
+  if (wsClicked in FWidgetState) then
+    Include(lFlags, btnIsPressed);
+  if (wsHasFocus in FWidgetState) {and not Embedded} then
+  begin
+    Include(lFlags, btnIsSelected);
+  end;
+
+  if btnIsSelected in lFlags then
+  begin
+    Canvas.SetColor(cl3DDkShadow);
+    Canvas.DrawRect(r);
+    Inc(r.Left);
+    Inc(r.Top);
+    Dec(r.Right);
+    Dec(r.Bottom);
+  end;
+
+  if btnIsPressed in lFlags then
+  begin
+    Canvas.SetColor(cl3DShadow);
+    Canvas.DrawRect(r);
+    Inc(r.Left);
+    Inc(r.Top);
+    Dec(r.Right);
+    Dec(r.Bottom);
+  end
+  else
+    Draw3DFrame(TFCanvas(Canvas), r, cl3DHighlight, cl3DLight, cl3DDkShadow, cl3DShadow);
   
   Canvas.SetColor(colBlack);
   Pt.x := (Width - Canvas.TextWidth(FCaption)) div 2;
   Pt.y := ((Height - Canvas.FontCellHeight) div 2) + 1;
+  if (wsClicked in FWidgetState) {and (wsMouseInside in FWidgetState)} then
+    Pt := Pt + Point(1, 1);
   Canvas.TextOut(Pt, FCaption);
 end;
 
 constructor TButton.Create(AParent: TFCustomWindow; APosition: TPoint);
 begin
   inherited Create(AParent);
+  Include(FWidgetStyle, wsClickable);
   SetPosition(APosition);
   SetClientSize(Size(75, 25));
 end;

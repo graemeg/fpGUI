@@ -124,5 +124,6 @@ begin
   GFApplication.AddWindow(MainWindow);
   MainWindow.Show;
   GFApplication.Run;
+  MainWindow.Free;
 end.
 
