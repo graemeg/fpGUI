@@ -254,6 +254,7 @@ type
     State: Cardinal;
     Button: Cardinal;
     X, Y: Cardinal;
+    Width, Height: Cardinal;
     { fpGUI fields }
     EventType: TFEventType;
   end;

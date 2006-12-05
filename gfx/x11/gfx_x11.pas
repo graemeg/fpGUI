@@ -1083,7 +1083,17 @@ begin
          end;
        X.Expose:
          begin
-           WindowEntry.Dispatch(XEvent);
+           {$Note We can do performance tuning here by looking at Count.
+             For now we are just ignoring all expose messages where Count <> 0 }
+           if XEvent.xexpose.count = 0 then
+           begin
+             Event.EventType := etPaint;
+             Event.X := XEvent.xexpose.x;
+             Event.Y := XEvent.xexpose.y;
+             Event.Width := XEvent.xexpose.width;
+             Event.Height := Xevent.xexpose.height;
+             WindowEntry.ProcessEvent(Event);
+           end;
          end;
        X.ConfigureNotify:
          begin
@@ -1571,18 +1581,18 @@ begin
           else
             Sum := 1;
 
-  	  // Check for other mouse wheel messages in the queue
+  	      // Check for other mouse wheel messages in the queue
           while XCheckTypedWindowEvent(GFApplication.Handle, Handle, X.ButtonPress, @NewEvent) do
           begin
-	    if NewEvent.xbutton.Button = 4 then
-	      Dec(Sum)
+	          if NewEvent.xbutton.Button = 4 then
+	            Dec(Sum)
             else if NewEvent.xbutton.Button = 5 then
-	      Inc(Sum)
+	            Inc(Sum)
             else
-	    begin
-	      XPutBackEvent(GFApplication.Handle, @NewEvent);
+      	    begin
+      	      XPutBackEvent(GFApplication.Handle, @NewEvent);
               break;
-	    end;
+      	    end;
           end;
 
           if Assigned(OnMouseWheel) then
@@ -1610,7 +1620,7 @@ begin
      end;
    etPaint:
      begin
-
+       if Assigned(OnPaint) then OnPaint(Self, Rect(AEvent.X, AEvent.Y, AEvent.Width, AEvent.Height));
      end;
    etMove:
      begin

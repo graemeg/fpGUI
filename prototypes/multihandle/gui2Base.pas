@@ -53,8 +53,6 @@ type
   private
     FColor: TGfxColor;
     FOnClick: TNotifyEvent;
-    FOnPainting: TNotifyEvent;
-    procedure   EvOnPaint(Sender: TObject; const Rect: TRect); virtual;
     procedure   EvOnMouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint); virtual;
     procedure   EvOnMousePressed(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint); virtual;
     procedure   EvOnMouseLeave(Sender: TObject); virtual;
@@ -63,13 +61,13 @@ type
     FWidgetStyle: TWidgetStyle;
     FWidgetState: TWidgetState;
     procedure   Paint; virtual;
-    property    OnPainting: TNotifyEvent read FOnPainting write FOnPainting;
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    Color: TGfxColor read FColor write SetColor;
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     constructor Create(AParent: TFCustomWindow); overload;
     destructor  Destroy; override;
+    procedure   ProcessEvent(AEvent: TFEvent); override;
     procedure   SetFocus;
   end;
 
@@ -94,7 +92,6 @@ type
   TButton = class(TWidget)
   private
     FCaption: string;
-    procedure   EvOnPaint(Sender: TObject; const Rect: TRect); override;
     procedure   SetCaption(const AValue: string);
   protected
     procedure   Paint; override;
@@ -185,17 +182,10 @@ end;
 
 { TWidget }
 
-procedure TWidget.EvOnPaint(Sender: TObject; const Rect: TRect);
-begin
-  {$IFDEF DEBUG} Writeln(ClassName + '.Paint'); {$ENDIF}
-  if Assigned(OnPainting) then
-    OnPainting(self);
-  Paint;
-end;
-
 procedure TWidget.EvOnMouseReleased(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
+  {$IFDEF DEBUG} Writeln(ClassName + '.EvOnMouseReleased'); {$ENDIF}
   if (wsClickable in FWidgetStyle) and (wsEnabled in FWidgetState) and
     (AButton = mbLeft) then
   begin
@@ -213,6 +203,7 @@ end;
 procedure TWidget.EvOnMousePressed(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
+  {$IFDEF DEBUG} Writeln(ClassName + '.EvOnMousePressed'); {$ENDIF}
   if (wsClickable in FWidgetStyle) and (wsEnabled in FWidgetState) and
     (AButton = mbLeft) then
   begin
@@ -238,6 +229,7 @@ procedure TWidget.Paint;
 var
   r: TRect;
 begin
+  {$IFDEF DEBUG} Writeln(ClassName + '.Paint'); {$ENDIF}
   Canvas.SetColor(FColor);
   r.Left    := 0;
   r.Top     := 0;
@@ -256,7 +248,6 @@ begin
   Title         := ClassName;
   
   // Assign some event handlers
-  OnPaint           := @EvOnPaint;
   OnMouseReleased   := @EvOnMouseReleased;
   OnMousePressed    := @EvOnMousePressed;
   OnMouseLeave      := @EvOnMouseLeave;
@@ -269,10 +260,21 @@ end;
 
 destructor TWidget.Destroy;
 begin
-  OnPaint           := nil;
   OnMouseReleased   := nil;
   OnMousePressed    := nil;
   inherited Destroy;
+end;
+
+procedure TWidget.ProcessEvent(AEvent: TFEvent);
+begin
+  case AEvent.EventType of
+   etPaint:
+     begin
+       Paint;
+     end;
+  end;  { case }
+
+  inherited ProcessEvent(AEvent);
 end;
 
 procedure TWidget.SetFocus;
@@ -296,12 +298,6 @@ end;
 
 { TButton }
 
-procedure TButton.EvOnPaint(Sender: TObject; const Rect: TRect);
-begin
-  inherited EvOnPaint(Sender, Rect);
-  {$IFDEF DEBUG} Writeln('  - Painting ' + Caption); {$ENDIF}
-end;
-
 procedure TButton.SetCaption(const AValue: string);
 begin
   if FCaption=AValue then exit;
@@ -316,6 +312,7 @@ var
   r: TRect;
 begin
   inherited Paint;
+  {$IFDEF DEBUG} Writeln('  - Painting ' + Caption); {$ENDIF}
   lFlags := [];
   r := Rect(0, 0, Width, Height);
 
