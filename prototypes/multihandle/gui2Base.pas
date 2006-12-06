@@ -267,6 +267,7 @@ end;
 
 procedure TWidget.ProcessEvent(AEvent: TFEvent);
 begin
+  inherited ProcessEvent(AEvent);
   case AEvent.EventType of
    etPaint:
      begin
@@ -274,7 +275,6 @@ begin
      end;
   end;  { case }
 
-  inherited ProcessEvent(AEvent);
 end;
 
 procedure TWidget.SetFocus;
