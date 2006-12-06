@@ -6,10 +6,11 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes,
-  gfxbase,
-  fpGFX,
-  fpgui;
+  Classes
+  ,GFXBase
+  ,fpGFX
+  ,fpGUI
+  ;
 
 type
 
@@ -18,7 +19,7 @@ type
   TMainForm = class(TForm)
   private
     FLayout: TBoxLayout;
-    procedure MainFormActivate(Sender: TObject);
+    procedure   MainFormActivate(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -43,7 +44,6 @@ begin
   inherited Create(AOwner);
   Name            := 'frmMain';
   BorderWidth     := 8;
-//  WindowType      := wtWindow;
   Text            := 'UTF Demo';
   OnActivate      := @MainFormActivate;
 
@@ -63,6 +63,7 @@ begin
   GFApplication.Initialize;
   MainForm := TMainForm.Create(GFApplication);
   try
+    GFApplication.AddWindow(MainForm.Wnd);  { I don't like this! }
     MainForm.Show;
     GFApplication.Run;
   finally

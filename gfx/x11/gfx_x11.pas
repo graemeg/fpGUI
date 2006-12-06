@@ -172,6 +172,8 @@ type
     function    GetMousePos: TPoint; override;
   public
     constructor Create; override;
+    function    CreateBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas; override;
+    function    CreateMonoBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas; override;
     property    ScreenIndex: Integer read FScreenIndex;
     property    ScreenInfo: PScreen read FScreenInfo;
   end;
@@ -905,9 +907,47 @@ end;
 constructor TX11Screen.Create;
 begin
   inherited Create;
-  
-//  FScreenIndex    := AScreenIndex;
-//  FScreenInfo     := XScreenOfDisplay(gApplication.Handle, ScreenIndex);
+  FScreenIndex  := 0;
+  FScreenInfo   := XScreenOfDisplay(GFApplication.Handle, ScreenIndex);
+end;
+
+function TX11Screen.CreateBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas;
+var
+  Depth: Integer;
+  PixelFormat: TGfxPixelFormat;
+begin
+  Depth := XDefaultDepthOfScreen(ScreenInfo);
+  case Depth of
+     1: PixelFormat.FormatType := ftMono;
+     4: PixelFormat.FormatType := ftPal4;
+     8: PixelFormat.FormatType := ftPal8;
+    16: PixelFormat.FormatType := ftRGB16;
+    24: PixelFormat.FormatType := ftRGB24;
+    32: PixelFormat.FormatType := ftRGB32;
+    else
+      raise EX11Error.CreateFmt(SWindowUnsupportedPixelFormat, [Depth]);
+  end;
+
+  if Depth >= 16 then
+    with XDefaultVisualOfScreen(ScreenInfo)^ do
+    begin
+      PixelFormat.RedMask   := red_mask;
+      PixelFormat.GreenMask := green_mask;
+      PixelFormat.BlueMask  := blue_mask;
+    end;
+
+  Result := TX11PixmapCanvas.Create(
+    XDefaultColormapOfScreen(ScreenInfo),
+    XCreatePixmap(GFApplication.Handle, XRootWindowOfScreen(ScreenInfo), AWidth, AHeight, Depth),
+    PixelFormat);
+end;
+
+function TX11Screen.CreateMonoBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas;
+begin
+  Result := TX11MonoPixmapCanvas.Create(
+    XDefaultColormap(GFApplication.Handle, ScreenIndex),
+    XCreatePixmap(GFApplication.Handle, XRootWindowOfScreen(ScreenInfo),
+      AWidth, AHeight, 1));
 end;
 
 

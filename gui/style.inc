@@ -29,11 +29,11 @@
   TArrowDirection = (arrowUp, arrowDown, arrowLeft, arrowRight);
 
   { Style declarations }
-  TStyle = class
+  TStyle = class(TObject)
   protected
     UIColorCache: array[0..$18] of TGfxColor;
   public
-    constructor Create(ADisplay: TFCustomApplication); virtual;
+    constructor Create; virtual;
     // Colors
     procedure   UpdateUIColorCache;
     function    GetGUIColor(Color: TColor): TGfxColor; virtual; abstract;
@@ -91,10 +91,11 @@
 
   TDefaultStyle = class(TStyle)
   protected
-    ImageCanvas, MaskCanvas: TFCanvas;
+    ImageCanvas: TFCustomCanvas;
+    MaskCanvas: TFCustomCanvas;
 //    ArrowBitmaps: array[TArrowDirection] of TGfxImage;
   public
-    constructor Create(ADisplay: TFCustomApplication); override;
+    constructor Create; override;
     destructor  Destroy; override;
     // Colors
     function    GetGUIColor(Color: TColor): TGfxColor; override;
@@ -167,7 +168,7 @@
 
 { TStyle }
 
-constructor TStyle.Create(ADisplay: TFCustomApplication);
+constructor TStyle.Create;
 begin
   inherited Create;
   UpdateUIColorCache;
@@ -230,7 +231,7 @@ const
 {$ENDIF}
 
 
-constructor TDefaultStyle.Create(ADisplay: TFCustomApplication);
+constructor TDefaultStyle.Create;
 const
   // 60x12 pixel 4bpp bitmap
   RadioBitmapData: array[0..359] of Byte = (
@@ -287,7 +288,7 @@ var
   Palette: TGfxPalette;
   Image: TFBitmap;
 begin
-  inherited Create(ADisplay);
+  inherited Create;
 
   PalData[0] := colMagenta;
   PalData[1] := GetGUIColor(cl3DDkShadow);
@@ -307,6 +308,10 @@ begin
 //  MaskCanvas := ADisplay.DefaultScreen.CreateMonoBitmap(12, 12);
 //  Palette := ADisplay.DefaultScreen.CreatePalette(8, @PalData);
 
+  ImageCanvas := GFScreen.CreateBitmapCanvas(65, 33);
+  MaskCanvas  := GFScreen.CreateMonoBitmapCanvas(12, 12);
+  Palette     := TGfxPalette.Create(8, @PalData);
+  
 
   Image := TFBitmap.Create(60, 12, PixelFormatPal4);
   Image.Palette := Palette;

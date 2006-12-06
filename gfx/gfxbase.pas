@@ -411,6 +411,8 @@ type
     function    GetMousePos: TPoint; virtual; abstract;
   public
     constructor Create; virtual;
+    function    CreateBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas; virtual; abstract;
+    function    CreateMonoBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas; virtual; abstract;
     property    MousePos: TPoint read GetMousePos write SetMousePos;
   end;
 

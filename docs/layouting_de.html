@@ -1,0 +1,129 @@
+<html><head><title>fpGUI Layouting</title>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="Generator" content="LaTeX2HTML v2K.1beta"></head><body>
+
+<h1><a name="SECTION00010000000000000000">
+Der fpGUI Layouting-Algorithmus</a>
+</h1>
+
+Sebastian Günther, 2001-02-12
+
+<p>
+
+</p><h2><a name="SECTION00011000000000000000">
+Initialisierung eines Fensters (Forms)</a>
+</h2>
+
+<p>
+Wenn sich ein Fenster zum ersten Mal darstellt, und keine Standardgröße vorgegeben
+wurde, dann muß es diese selbst berechnen. Dies ist ein rekursiver Prozeß, bei
+dem allen Kindern des Fensters das Ereignis <tt>TCalcSizesEventObj</tt> von
+oben nach unten im Widget-Baum zugestellt wird (beginnend beim Fenster selbst).
+<tt>TWidget</tt> reagiert auf den Empfang dieses Ereignisses folgendermaßen
+(in <tt>TWidget.EvCalcSizes</tt>):
+
+</p><p>
+
+</p><ol>
+<li>Das Ereignis wird mit <tt>TWidget.DistributeEvent</tt> an alle Kinder weitergeleitet
+</li>
+<li>Die virtuelle geschützte Methode <tt>TWidget.DoCalcSizes</tt> wird aufgerufen.
+Abgeleitete Widgets überschreiben diese Methode, um ihre Größen (Minimum, Maximum,
+Optimum) neu zu berechnen.
+</li>
+<li>Die Ergebnisse von <tt>DoCalcSizes</tt> werden ggf. korrigiert, z.B. darf die
+Maximalgröße nicht kleiner als die Minimalgröße sein.
+</li>
+</ol>
+Wenn der Code für das Fenster den Versand dieses Ereignisses fertiggestellt
+hat, haben alle Widgets im Fenster gültige Größenangaben. Nun kann es seine
+eigene, initiale Größe setzen (dies ist die vorher berechnete Optimum-Größe
+des Fensters). Dies wird per <tt>TWidget.SetBounds</tt> durchgeführt.
+
+<p>
+
+</p><h2><a name="SECTION00012000000000000000">
+Zuweisung einer neuen Position und Größe mit <tt>TWidget.SetBounds</tt></a>
+</h2>
+
+<p>
+<tt>SetBounds</tt> dient zwei Zwecken: Dem Setzen einer neuen Position, und
+dem Setzen einer neuen Größe für ein Widget. Zunächst werden die neuen Daten
+ins Widget übernommen. <tt>SetBounds</tt> überprüft anschließend, ob eine Größenänderung
+vorliegt - wenn ja, wird ein <tt>TApplySizeEventObj</tt>-Ereignis ausgelöst.
+Der Default-Handler in TWidget führt nun zwei einfache Schritte durch:
+
+</p><p>
+
+</p><ol>
+<li>Aufruf der virtuellen geschützten Methode <tt>TWidget.DoApplySize</tt>
+</li>
+<li>Weiterleitung des Ereignisses an alle Kinder per <tt>TWidget.DistributeEvent</tt>
+</li>
+</ol>
+<tt>DoApplySize</tt> dürfte von allen Widgets überschrieben werden, die Kinder
+besitzen - denn dies ist der einzig richtige Ort, um die Kinder zu layouten
+(also ihre Position und Größe festzulegen.)
+
+<p>
+Das <tt>TApplySizeEventObj</tt>-Ereignis führt ein wichtiges Flag mit: <tt>ForcedSize</tt>
+gibt an, ob die nun folgende Größenänderung 'erzwungen' ist oder nicht. Erzwungen
+bedeutet, daß Änderungen an untergeordneten Widgets (s.u.) <i>keinen</i> erneuten
+Layout-Vorgang auslösen sollen. Dies wird beispielsweise in folgenden Fällen
+genutzt:
+
+</p><p>
+
+</p><ul>
+<li>Der Anwender hat ein Fenster manuell auf eine bestimmte Größe gebracht
+</li>
+<li>Eine ScrollBox löscht üblicherweise dieses Flag für ihre Kinder auf jeden Fall,
+da der Inhalt der ScrollBox meist unabhängig von dem 'Drumherum' ist.
+</li>
+</ul>
+Der aktuelle 'Gezwungenheits-Zustand' wird über das Flag <tt>wsSizeIsForced</tt>
+in <tt>TWidget.WidgetState</tt> angezeigt.
+
+<p>
+Forms behandeln dieses Ereignis auf etwas andere Art und Weise: Der Wunsch nach
+einer Größenänderung wird an das unterliegende fpGFX-Fenster weitergeleitet;
+dieses liefert irgendwann die Nachricht, daß nun die neue Größe aktiv ist. Als
+Reaktion ruft es nun <tt>TWidget.SetBounds</tt> <i>für sich selbst</i> auf -
+also die geerbte Methode. Diese sorgt dann, wie bei anderen Widgets auch, für
+ein korrektes Layouting.
+
+</p><p>
+
+</p><h2><a name="SECTION00013000000000000000">
+Änderungen eines Widgets</a>
+</h2>
+
+<p>
+Wenn sich bestimmte Eigenschaften eines Widgets ändern, kann sich dadurch auch
+dessen Größe ändern. Bei Verdacht auf Größenänderung sollten Widgets intern
+immer die Methode <tt>TWidget.Update</tt> aufrufen. Ist die Größe des aktuellen
+Widgets erzwungen, so bricht diese Methode sofort ab. Ansonsten wird zunächst
+eine neue Berechnung der Größen per <tt>TCalcSizesEventObj</tt>-Ereignis veranlaßt.
+Sollten diese nun von den alten Größen abweichen, so wird das Ereignis <tt>TUpdateEventObj</tt>
+ausgelöst. Dieses wird <tt>nicht</tt> an Kinder weitergeleitet, stattdessen
+ruft der Default-Handler in <tt>TWidget</tt> die <tt>Update</tt>-Methode des
+Eltern-Widgets auf. Der Handler für Forms reagiert auf dieses Ereignis allerdings
+mit einer Anpassung der Fenstergröße mit Hilfe der <tt>SetBounds</tt>-Methode.
+
+</p><p>
+
+</p><h2><a name="SECTION00014000000000000000">
+Widget ändert seine Sichtbarkeit</a>
+</h2>
+
+<p>
+Wenn ein normales Widget sichtbar oder unsichtbar wird, und diese Änderung vom
+Widget selbst (und nicht seinem Eltern-Widget) ausgelöst wurde, dann wird für
+das Eltern-Widget die <tt>TWidget.Update</tt>-Methode aufgerufen. Dieses prüft
+nun den Einfluß dieser Änderung auf das Layout, und löst ggf. ein Relayouting
+aus.
+
+
+</p></body></html>

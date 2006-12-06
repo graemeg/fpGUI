@@ -152,6 +152,8 @@ type
     function    GetMousePos: TPoint; override;
   public
     constructor Create; override;
+    function    CreateBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas; override;
+    function    CreateMonoBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas; override;
   end;
 
 
@@ -973,6 +975,28 @@ constructor TGDIScreen.Create;
 begin
   inherited Create;
   
+end;
+
+function TGDIScreen.CreateBitmapCanvas(AWidth, AHeight: Integer
+  ): TFCustomCanvas;
+var
+  TempDC: HDC;
+begin
+  TempDC := Windows.GetDC(0);
+  Result := TGDIBitmapCanvas.Create(
+    Windows.CreateCompatibleBitmap(TempDC, AWidth, AHeight), AWidth, AHeight);
+  Windows.ReleaseDC(0, TempDC);
+end;
+
+function TGDIScreen.CreateMonoBitmapCanvas(AWidth, AHeight: Integer
+  ): TFCustomCanvas;
+var
+  TempDC: HDC;
+begin
+  TempDC := Windows.CreateCompatibleDC(0);
+  Result := TGDIBitmapCanvas.Create(
+    Windows.CreateCompatibleBitmap(TempDC, AWidth, AHeight), AWidth, AHeight);
+  Windows.DeleteDC(TempDC);
 end;
 
 { TGDIApplication }

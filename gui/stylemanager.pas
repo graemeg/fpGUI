@@ -69,14 +69,14 @@ begin
   else
   begin
     if not Assigned(FDefaultStyle) then
-      FDefaultStyle := TDefaultStyle.Create(GFApplication);
+      FDefaultStyle := TDefaultStyle.Create;
     Result := FDefaultStyle;
   end;
 end;
 
 constructor TStyleManager.Create;
 begin
-  FUserStyle := nil;
+  FUserStyle    := nil;
   FDefaultStyle := nil;
 end;
 

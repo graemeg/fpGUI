@@ -189,7 +189,7 @@
     function  EvMouseLeaveCheck(Event: TMouseLeaveCheckEventObj): Boolean;
   protected
     FCursor: TFCursor;
-    FText: String;
+    FText: string;
     FStyle: TStyle;
     FCanExpandHeight: Boolean;
     FCanExpandWidth: Boolean;
@@ -198,7 +198,9 @@
     FOrigin: TPoint;
     FBoundsSize: TSize;
     FClientRect: TRect;
-    FMinSize, FMaxSize, FDefSize: TSize;
+    FMinSize: TSize;
+    FMaxSize: TSize;
+    FDefSize: TSize;
     WidgetStyle: TWidgetStyle;
     WidgetState: TWidgetState;
     procedure Loaded; override;
@@ -451,10 +453,10 @@ constructor TWidget.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetState := [wsEnabled];
-  FCanExpandWidth := False;
-  FCanExpandHeight := False;
-  FEnabled := True;
-  FVisible := True;
+  FCanExpandWidth   := False;
+  FCanExpandHeight  := False;
+  FEnabled          := True;
+  FVisible          := True;
 end;
 
 destructor TWidget.Destroy;

@@ -56,7 +56,9 @@
     procedure   WndShow(Sender: TObject);
   protected
     FBorderWidth: Integer;
-    FIsActive, FResizedByUser, FPositionSpecified: Boolean;
+    FIsActive: Boolean;
+    FResizedByUser: Boolean;
+    FPositionSpecified: Boolean;
     procedure   Loaded; override;
     procedure   Paint(Canvas: TFCanvas); override;
     procedure   Resized; override;
