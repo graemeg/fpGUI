@@ -611,10 +611,15 @@ end;
 procedure TGDICanvas.DoFillTriangle(const P1, P2, P3: TPoint);
 var
   pts : array[1..3] of windows.TPoint;
+  pt: TPoint;
 begin
-  pts[1].X := P1.X;   pts[1].Y := P1.Y;
-  pts[2].X := P2.X;   pts[2].Y := P2.Y;
-  pts[3].X := P3.X;   pts[3].Y := P3.Y;
+  pt := Transform(P1);
+  pts[1].X := pt.X;   pts[1].Y := pt.Y;
+  pt := Transform(P2);
+  pts[2].X := pt.X;   pts[2].Y := pt.Y;
+  pt := Transform(P3);
+  pts[3].X := pt.X;   pts[3].Y := pt.Y;
+
 
   Windows.Polygon(Handle, pts, 3);
 end;

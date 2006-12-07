@@ -231,7 +231,7 @@ const
   {$I defimpl/defstyle.inc}
 {$ENDIF}
 
-{ ADirection values: 1 - down, 2 - up, 3 - right, 4 - left }
+{ ADirection values: 0 - down, 1 - up, 2 - right, 3 - left }
 procedure TDefaultStyle.DrawDirectionArrows(ACanvas: TFCanvas;
   const ARect: TRect; ADirection: integer);
 var
@@ -239,10 +239,8 @@ var
   basex, basey: Cardinal;
   side, margin: Cardinal;
 begin
-  ACanvas.SetColor(GetGUIColor(clWindowText));
-
   side := (ARect.Right div 4) + 1;
-  margin := side + 1;
+  margin := side;// + 1;
 
   if ADirection < 2 then  // vertical
   begin
@@ -257,6 +255,9 @@ begin
       peeky := ARect.Top+margin;
       basey := peeky+side;
     end;
+    LAYOUTTRACE('Triangle Points (%d,%d)(%d,%d)(%d,%d)',
+      [peekx, peeky, peekx+side, basey, peekx-side, basey]);
+
     ACanvas.FillTriangle(Point(peekx, peeky), Point(peekx+side, basey), Point(peekx-side, basey));
   end
   else // horizontal
@@ -272,6 +273,8 @@ begin
       peekx := ARect.Left + margin;
       basex := peekx + side;
     end;
+    LAYOUTTRACE('Triangle Points (%d,%d)(%d,%d)(%d,%d)',
+      [peekx, peeky, basex, peeky-side, basex, peeky+side]);
     ACanvas.FillTriangle(Point(peekx, peeky), Point(basex, peeky-side), Point(basex, peeky+side));
   end;
 end;
@@ -776,14 +779,22 @@ procedure TDefaultStyle.DrawScrollBarButton(Canvas: TFCanvas;
 var
   Index: Integer;
 begin
-  Index := Ord(Direction) + Ord(not IsEnabled) * 4;
+  { This uses a internal image }
+{  Index := Ord(Direction) + Ord(not IsEnabled) * 4;
   with ARect do
     Canvas.CopyRect(
       ImageCanvas,
       Rect(Index * 8, 25, (Index + 1) * 8, 33),
       TopLeft + Point((Right - Left - 8) div 2, (Bottom - Top - 8) div 2));
+}
+  { This draws the rectangle directly }
+  if IsEnabled then
+    Canvas.SetColor(GetGUIColor(clWindowText))
+  else
+    Canvas.SetColor(GetGUIColor(clGrayText));
 
-//  DrawDirectionArrows(Canvas, ARect, Ord(Direction));
+
+  DrawDirectionArrows(Canvas, ARect, Ord(Direction));
 end;
 
 
