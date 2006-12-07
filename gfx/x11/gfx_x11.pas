@@ -106,6 +106,7 @@ type
     procedure   DoDrawRect(const ARect: TRect); override;
     procedure   DoDrawPoint(const APoint: TPoint); override;
     procedure   DoFillRect(const ARect: TRect); override;
+    procedure   DoFillTriangle(const P1, P2, P3: TPoint); override;
     procedure   DoTextOut(const APosition: TPoint; const AText: String); override;
     procedure   DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect; const ADestPos: TPoint); override;
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); override;
@@ -569,6 +570,17 @@ begin
   with ARect do
     XFillRectangle(GFApplication.Handle, Handle, GC, Left, Top,
       Right - Left, Bottom - Top);
+end;
+
+procedure TX11Canvas.DoFillTriangle(const P1, P2, P3: TPoint);
+var
+  pts : array[1..3] of TXPoint;
+begin
+  pts[1].X := P1.X;   pts[1].Y := P1.Y;
+  pts[2].X := P2.X;   pts[2].Y := P2.Y;
+  pts[3].X := P3.X;   pts[3].Y := P3.Y;
+
+  XFillPolygon(GFApplication.Handle, Handle, GC, @pts, 3, 0, 0);
 end;
 
 

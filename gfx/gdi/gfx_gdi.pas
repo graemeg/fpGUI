@@ -95,6 +95,7 @@ type
     procedure   DoDrawLine(const AFrom, ATo: TPoint); override;
     procedure   DoDrawPoint(const APoint: TPoint); override;
     procedure   DoFillRect(const ARect: TRect); override;
+    procedure   DoFillTriangle(const P1, P2, P3: TPoint); override;
     procedure   DoTextOut(const APosition: TPoint; const AText: String); override;
     procedure   DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect; const ADestPos: TPoint); override;
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); override;
@@ -605,6 +606,17 @@ begin
   NeedBrush;
   r := RectToWinRect(ARect);
   Windows.FillRect(Handle, r, FBrush);
+end;
+
+procedure TGDICanvas.DoFillTriangle(const P1, P2, P3: TPoint);
+var
+  pts : array[1..3] of windows.TPoint;
+begin
+  pts[1].X := P1.X;   pts[1].Y := P1.Y;
+  pts[2].X := P2.X;   pts[2].Y := P2.Y;
+  pts[3].X := P3.X;   pts[3].Y := P3.Y;
+
+  Windows.Polygon(Handle, pts, 3);
 end;
 
 

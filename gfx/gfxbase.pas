@@ -313,6 +313,7 @@ type
     procedure   DoDrawRect(const ARect: TRect); virtual;
     procedure   DoDrawPoint(const APoint: TPoint); virtual; abstract;
     procedure   DoFillRect(const ARect: TRect); virtual; abstract;
+    procedure   DoFillTriangle(const P1, P2, P3: TPoint); virtual; abstract;
     procedure   DoTextOut(const APosition: TPoint; const AText: String); virtual; abstract;
     procedure   DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect; const ADestPos: TPoint); virtual; abstract;
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); virtual; abstract;
@@ -349,6 +350,7 @@ type
     procedure   DrawRect(const ARect: TRect);
     procedure   DrawPoint(const APoint: TPoint);
     procedure   FillRect(const ARect: TRect);
+    procedure   FillTriangle(const P1, P2, P3: TPoint);
 
     // Fonts
     function    FontCellHeight: Integer; virtual; abstract;
@@ -807,6 +809,11 @@ begin
   r := Transform(ARect);
   if (r.Right > r.Left) and (r.Bottom > r.Top) then
     DoFillRect(r);
+end;
+
+procedure TFCustomCanvas.FillTriangle(const P1, P2, P3: TPoint);
+begin
+  DoFillTriangle(P1, P2, P3);
 end;
 
 function TFCustomCanvas.TextExtent(const AText: String): TSize;

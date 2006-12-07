@@ -94,6 +94,7 @@
     ImageCanvas: TFCustomCanvas;
     MaskCanvas: TFCustomCanvas;
 //    ArrowBitmaps: array[TArrowDirection] of TGfxImage;
+    procedure   DrawDirectionArrows(ACanvas: TFCanvas; const ARect: TRect; ADirection: integer);
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -230,6 +231,50 @@ const
   {$I defimpl/defstyle.inc}
 {$ENDIF}
 
+{ ADirection values: 1 - down, 2 - up, 3 - right, 4 - left }
+procedure TDefaultStyle.DrawDirectionArrows(ACanvas: TFCanvas;
+  const ARect: TRect; ADirection: integer);
+var
+  peekx, peeky: Cardinal;
+  basex, basey: Cardinal;
+  side, margin: Cardinal;
+begin
+  ACanvas.SetColor(GetGUIColor(clWindowText));
+
+  side := (ARect.Right div 4) + 1;
+  margin := side + 1;
+
+  if ADirection < 2 then  // vertical
+  begin
+    peekx := ARect.Left+(ARect.Right div 2);
+    if ADirection = 1 then  // down
+    begin
+      peeky := ARect.Top + ARect.Bottom - margin;
+      basey := peeky-side;
+    end
+    else
+    begin                  // up
+      peeky := ARect.Top+margin;
+      basey := peeky+side;
+    end;
+    ACanvas.FillTriangle(Point(peekx, peeky), Point(peekx+side, basey), Point(peekx-side, basey));
+  end
+  else // horizontal
+  begin
+    peeky := ARect.Top + (ARect.Bottom div 2);
+    if ADirection = 3 then  // right
+    begin
+      peekx := ARect.Left + ARect.Right - margin;
+      basex := peekx - side;
+    end
+    else                   // left
+    begin
+      peekx := ARect.Left + margin;
+      basex := peekx + side;
+    end;
+    ACanvas.FillTriangle(Point(peekx, peeky), Point(basex, peeky-side), Point(basex, peeky+side));
+  end;
+end;
 
 constructor TDefaultStyle.Create;
 const
@@ -335,7 +380,7 @@ begin
   Image.SetPixelsFromData(@ArrowBitmapData, 32);
   ImageCanvas.DrawImage(Image, Point(0, 25));
   Image.Free;
-
+  
   Palette.Release;
 end;
 
@@ -737,6 +782,8 @@ begin
       ImageCanvas,
       Rect(Index * 8, 25, (Index + 1) * 8, 33),
       TopLeft + Point((Right - Left - 8) div 2, (Bottom - Top - 8) div 2));
+
+//  DrawDirectionArrows(Canvas, ARect, Ord(Direction));
 end;
 
 
