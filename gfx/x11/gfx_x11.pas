@@ -198,7 +198,6 @@ type
     { default methods }
     constructor Create; override;
     destructor  Destroy; override;
-    procedure   AddWindow(AWindow: TFCustomWindow); override;
     procedure   Initialize(ADisplayName: String = ''); override;
     procedure   Run; override;
     procedure   Quit; override;
@@ -984,11 +983,6 @@ begin
     XCloseDisplay(Handle);
 
   inherited Destroy;
-end;
-
-procedure TX11Application.AddWindow(AWindow: TFCustomWindow);
-begin
-  Forms.Add(AWindow);
 end;
 
 procedure TX11Application.Run;

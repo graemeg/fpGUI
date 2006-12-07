@@ -431,7 +431,8 @@ type
     { Default methods }
     constructor Create; virtual; overload;
     destructor  Destroy; override;
-    procedure   AddWindow(AWindow: TFCustomWindow);  virtual; abstract;
+    procedure   AddWindow(AWindow: TFCustomWindow); virtual;
+    procedure   RemoveWindow(AWindow: TFCustomWindow); virtual;
     procedure   Initialize(ADisplayName: String = ''); virtual; abstract;
     procedure   Run; virtual; abstract;
     procedure   Quit; virtual; abstract;
@@ -1334,7 +1335,6 @@ end;
 constructor TFCustomApplication.Create;
 begin
   inherited Create(nil);
-  
   FDisplayName := '';
   Forms := TList.Create;
   FQuitWhenLastWindowCloses := True;
@@ -1343,8 +1343,17 @@ end;
 destructor TFCustomApplication.Destroy;
 begin
   Forms.Free;
-  
   inherited Destroy;
+end;
+
+procedure TFCustomApplication.AddWindow(AWindow: TFCustomWindow);
+begin
+  Forms.Add(AWindow);
+end;
+
+procedure TFCustomApplication.RemoveWindow(AWindow: TFCustomWindow);
+begin
+  Forms.Remove(AWindow);
 end;
 
 {procedure TFCustomApplication.CreateForm(AForm: TCustomForm);

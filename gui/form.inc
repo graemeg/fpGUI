@@ -140,15 +140,17 @@ procedure TCustomForm.Show;
 begin
   LAYOUTTRACE('TCustomForm.Show for %s:%s', [Name, ClassName]);
 
-  if Assigned(Wnd) then ; // this makes sure that wnd is created
+//  if Assigned(Wnd) then ; // this makes sure that wnd is created
 
   FVisible := True;
-  FWnd.Show;
+  GFApplication.AddWindow(Wnd);
+  Wnd.Show;
 end;
 
 
 procedure TCustomForm.Close;
 begin
+  GFApplication.RemoveWindow(FWnd);
   FVisible := False;
   FWnd.Free;
   FWnd := nil;

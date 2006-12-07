@@ -1,6 +1,11 @@
 program LayoutTest;
 
-uses Classes, fpGUI;
+uses
+  Classes
+  ,fpGUI
+  ,fpguipackage
+  ,fpGFX
+  ;
 
 type
   TDockingForm = class;
@@ -16,19 +21,21 @@ type
     GridForm: TGridForm;
     BoxForm: TBoxForm;
     SimpleForm: TSimpleForm;
+    procedure   BuildGUI;
   public
-    destructor Destroy; override;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
   published
     Box: TBoxLayout;
     Title: TLabel;
     SimpleBtn, FixedBtn, BoxBtn, GridBtn, DockingBtn, ExitBtn: TButton;
     //Separator: TSeparator;
-    procedure SimpleBtnClicked(Sender: TObject);
-    procedure FixedBtnClicked(Sender: TObject);
-    procedure DockingBtnClicked(Sender: TObject);
-    procedure GridBtnClicked(Sender: TObject);
-    procedure BoxBtnClicked(Sender: TObject);
-    procedure ExitBtnClicked(Sender: TObject);
+    procedure   SimpleBtnClicked(Sender: TObject);
+    procedure   FixedBtnClicked(Sender: TObject);
+    procedure   DockingBtnClicked(Sender: TObject);
+    procedure   GridBtnClicked(Sender: TObject);
+    procedure   BoxBtnClicked(Sender: TObject);
+    procedure   ExitBtnClicked(Sender: TObject);
   end;
 
   TSimpleForm = class(TForm)
@@ -62,13 +69,65 @@ type
   TBoxForm = Class(TForm)
     Layout, BoxLayout: TBoxLayout;
     Button1, Button2, Button3, FlipButton: TButton;
-    procedure FlipOrientation(Sender: TObject);
+    procedure   FlipOrientation(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
 // -------------------------------------------------------------------
 //   TMainForm
 // -------------------------------------------------------------------
+
+procedure TMainForm.BuildGUI;
+begin
+  Name := 'MainForm';
+  BorderWidth := 8;
+  Text := 'Layout Demo';
+
+  Box := TBoxLayout.Create(self);
+  Box.Spacing := 8;
+  Box.Orientation := Vertical;
+  Box.VertAlign := vertFill;
+  InsertChild(Box);
+
+  Title := TLabel.Create('Choose a test Window:', self);
+  Box.InsertChild(Title);
+  
+  SimpleBtn := TButton.Create('Simple layout', self);
+  SimpleBtn.OnClick := @SimpleBtnClicked;
+  Box.InsertChild(SimpleBtn);
+  
+  FixedBtn := TButton.Create('Fixed layout', self);
+  FixedBtn.OnClick := @FixedBtnClicked;
+  FixedBtn.Enabled := False;
+  Box.InsertChild(FixedBtn);
+
+  BoxBtn := TButton.Create('Boxed layout', self);
+  BoxBtn.OnClick := @BoxBtnClicked;
+  Box.InsertChild(BoxBtn);
+  
+  GridBtn := TButton.Create('Grid layout', self);
+  GridBtn.OnClick := @GridBtnClicked;
+  GridBtn.Enabled := False;
+  Box.InsertChild(GridBtn);
+  
+  DockingBtn := TButton.Create('Docking layout', self);
+  DockingBtn.OnClick := @DockingBtnClicked;
+  DockingBtn.Enabled := False;
+  Box.InsertChild(DockingBtn);
+  
+  ExitBtn := TButton.Create('Exit', self);
+  ExitBtn.OnClick := @ExitBtnClicked;
+  Box.InsertChild(ExitBtn);
+  
+end;
+
+constructor TMainForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  BuildGUI;
+end;
 
 destructor TMainForm.Destroy;
 begin
@@ -84,6 +143,7 @@ procedure TMainForm.SimpleBtnClicked(Sender: TObject);
 begin
   if not Assigned(SimpleForm) then
     SimpleForm := TSimpleForm.Create(self);
+//  GFApplication.AddWindow(SimpleForm.Wnd);
   SimpleForm.Show;
 end;
 
@@ -102,7 +162,7 @@ begin
     DockingForm := TDockingForm.Create(self);
   DockingForm.Show;
 }
-  Application.AddForm(TDockingForm.Create(self));
+//  Application.AddForm(TDockingForm.Create(self));
 end;
 
 
@@ -127,7 +187,7 @@ end;
 procedure TMainForm.BoxBtnClicked(Sender: TObject);
 begin
   if not Assigned(BoxForm) then
-    Application.CreateForm(TBoxForm, BoxForm);
+    BoxForm := TBoxForm.Create(self);
   BoxForm.Show;
 end;
 
@@ -271,6 +331,7 @@ end;
 procedure TBoxForm.FlipOrientation (Sender : TObject);
 begin
   with BoxLayout do
+  begin
     if Orientation = Horizontal then
     begin
       Orientation := Vertical;
@@ -281,14 +342,48 @@ begin
       Orientation := Horizontal;
       FlipButton.text:='Switch to vertical';
     end;
+  end;  { with }
+end;
+
+constructor TBoxForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Text := 'Box Layout';
+  BorderWidth := 8;
+  
+  Layout := TBoxLayout.Create(self);
+  Layout.Spacing := 8;
+  Layout.Orientation := Vertical;
+  InsertChild(Layout);
+  
+  BoxLayout := TBoxLayout.Create(self);
+  BoxLayout.Spacing := 4;
+  Layout.InsertChild(BoxLayout);
+  
+    Button1 := TButton.Create('Button 1', self);
+    BoxLayout.InsertChild(Button1);
+
+    Button2 := TButton.Create('Button 2', self);
+    BoxLayout.InsertChild(Button2);
+
+    Button3 := TButton.Create('Button 3', self);
+    BoxLayout.InsertChild(Button3);
+
+  FlipButton := TButton.Create('Switch to vertical', self);
+  FlipButton.OnClick := @FlipOrientation;
+  Layout.InsertChild(FlipButton);
 end;
 
 
 var
   MainForm: TMainForm;
 begin
-  MainForm := nil;
-  Application.CreateForm(TMainForm, MainForm);
-  Application.Run;
-  MainForm.Free;
+  GFApplication.Initialize;
+  MainForm := TMainForm.Create(GFApplication);
+  try
+    MainForm.Show;
+    GFApplication.Run;
+  finally
+    MainForm.Free;
+  end;
 end.

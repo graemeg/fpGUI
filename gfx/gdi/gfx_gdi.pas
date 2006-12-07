@@ -166,7 +166,6 @@ type
     { default methods }
     constructor Create; override;
     destructor  Destroy; override;
-    procedure   AddWindow(AWindow: TFCustomWindow); override;
     procedure   Initialize(ADisplayName: String = ''); override;
     procedure   Run; override;
     procedure   Quit; override;
@@ -1017,12 +1016,6 @@ begin
 
   inherited Destroy;
 end;
-
-procedure TGDIApplication.AddWindow(AWindow: TFCustomWindow);
-begin
-  Forms.Add(AWindow);
-end;
-
 
 procedure TGDIApplication.Initialize(ADisplayName: String);
 begin

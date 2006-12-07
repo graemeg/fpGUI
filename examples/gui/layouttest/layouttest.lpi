@@ -14,7 +14,6 @@
     </General>
     <PublishOptions>
       <Version Value="2"/>
-      <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
@@ -26,11 +25,12 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="fpguipackage"/>
+        <MinVersion Minor="3" Valid="True"/>
       </Item1>
       <Item2>
-        <PackageName Value="fpGUI_laz"/>
+        <PackageName Value="LCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
     </RequiredPackages>
     <Units Count="1">
