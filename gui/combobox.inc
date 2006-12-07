@@ -214,8 +214,6 @@ end;
 
 
 procedure TCustomComboBox.ButtonClick(Sender: TObject);
-var
-  l: TCustomListBox;
 begin
   if Assigned(FDropDown) and FDropDown.Visible then
   begin

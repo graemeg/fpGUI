@@ -256,7 +256,7 @@ function GetXEventName(Event: LongInt): String;
 implementation
 
 uses
-  GELImage, fpgfx;
+  GELImage, fpGFX;
 
 resourcestring
   SFontCreationFailed = 'Could not create font with descriptor "%s"';

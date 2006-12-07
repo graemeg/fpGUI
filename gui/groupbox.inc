@@ -61,6 +61,7 @@ var
   Borders: TRect;
   LabelWidth: Integer;
 begin
+  LabelWidth := 0;
   Borders := Style.GetGroupBoxBorders(TFCanvas(FindForm.Wnd.Canvas), Text, LabelWidth);
   FMinSize.cx := Borders.Left + Borders.Right + LabelWidth;
   FMinSize.cy := Borders.Top + Borders.Bottom;
@@ -84,6 +85,7 @@ var
   LabelWidth: Integer;
   Borders: TRect;
 begin
+  LabelWidth := 0;
   if Assigned(Child) then
   begin
     Borders := Style.GetGroupBoxBorders(TFCanvas(FindForm.Wnd.Canvas), Text, LabelWidth);

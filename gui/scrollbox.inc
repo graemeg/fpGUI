@@ -353,6 +353,7 @@ end;
 
 procedure TCustomScrollBox.Paint(Canvas: TFCanvas);
 begin
+  Assert(Canvas = Canvas);
 {
   Style.DrawWindowBackground(Canvas, Rect(HorzScrollBar.Left,
     VertScrollBar.Top, HorzScrollBar.Left + HorzScrollBar.Width,

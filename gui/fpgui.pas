@@ -12,9 +12,7 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-}
 
-{
     Description:
       It is fully object-oriented; its main goal is to provide its services
       independent of any operating system or graphics environment. All painting
@@ -41,12 +39,9 @@ uses
 {$ENDIF}
   SysUtils
   ,Classes
-//  ,DOM
   ,GFXBase
-//  ,GFXInterface
-  ,fpgfx
+  ,fpGFX
 //  ,Types    { used for OffsetRect() }
-//  ,Contnrs
   ;
 
 type
@@ -142,14 +137,9 @@ type
 {$I combobox.inc}
 {$I grid.inc}
 {$I dialogs.inc}
-{.$I application.inc}
 {$I panel.inc}
 {$I menus.inc}
 {$I progressbar.inc}
-
-
-//var
-//  Application: TApplication;
 
 
 function Min(a, b: Integer): Integer; inline;
@@ -159,9 +149,9 @@ function ClipMinMax(val, min, max: Integer): Integer; inline;
 { This will change at a later date! }
 procedure LoadForm(AForm: TComponent);
 
+
 implementation
 uses
-//  XMLRead {!!!:, XMLStreaming}
   Math
   ,StyleManager
   ;
@@ -274,7 +264,6 @@ end;
 {$I combobox.inc}
 {$I grid.inc}
 {$I dialogs.inc}
-{.$I application.inc}
 {$I panel.inc}
 {$I menus.inc}
 {$I progressbar.inc}
@@ -303,11 +292,5 @@ initialization
   RegisterIntegerConsts(TypeInfo(TOrientation),
     @IdentToOrientation, @OrientationToIdent);
 
-//  Application := TApplication.Create;
-
-
-finalization
-//  Application.Free;
-  
 end.
 

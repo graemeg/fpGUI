@@ -27,8 +27,8 @@
   TGridDrawState = set of (gdSelected, gdFocused, gdFixed);
 
 
-  PIntegerArray = ^TIntegerArray;
-  TIntegerArray = array[0..(MAXINT div SizeOf(Integer))-1] of Integer;
+//  PIntegerArray = ^TIntegerArray;
+//  TIntegerArray = array[0..(MAXINT div SizeOf(Integer))-1] of Integer;
 
 
   TCustomGrid = class(TWidget)
@@ -389,6 +389,8 @@ end;
 
 procedure TCustomGrid.SizeChanged(OldColCount, OldRowCount: Integer);
 begin
+  Assert(OldColCount = OldColCount);
+  Assert(OldRowCount = OldRowCount);
   // This dynamic method is only used for descendants of TCustomGrid
 end;
 
