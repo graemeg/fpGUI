@@ -24,14 +24,11 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="LCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="fpguipackage"/>
+        <MinVersion Minor="3" Valid="True"/>
       </Item1>
-      <Item2>
-        <PackageName Value="fpGUI_laz"/>
-      </Item2>
     </RequiredPackages>
     <Units Count="1">
       <Unit0>

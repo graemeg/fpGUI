@@ -70,12 +70,6 @@ object MainForm: TMainForm
       Text = 'Progress Bar'
       OnClick = ProgressBarBtnClick
     end
-    object StdDialogBtn: TButton
-      CanExpandWidth = True
-      Text = 'Std Dialog'
-      OnClick = StdDialogBtnClick
-      Enabled = False
-    end
     object Separator: TSeparator
     end
     object ExitBtn: TButton

@@ -156,6 +156,8 @@ function Min(a, b: Integer): Integer; inline;
 function Max(a, b: Integer): Integer; inline;
 function ClipMinMax(val, min, max: Integer): Integer; inline;
 
+{ This will change at a later date! }
+procedure LoadForm(AForm: TComponent);
 
 implementation
 uses
@@ -206,6 +208,25 @@ begin
     Result := val;
 end;
 
+procedure LoadForm(AForm: TComponent);
+type
+  PForm = ^TCustomForm;
+var
+  lForm: PForm;
+  Filename: string;
+  TextStream, BinStream: TStream;
+begin
+  Filename    := LowerCase(Copy(AForm.ClassName, 2, 255)) + '.frm';
+  TextStream  := TFileStream.Create(Filename, fmOpenRead);
+  BinStream   := TMemoryStream.Create;
+  ObjectTextToBinary(TextStream, BinStream);
+  TextStream.Free;
+
+  lForm := @AForm;
+  BinStream.Position := 0;
+  BinStream.ReadComponent(lForm^);
+  BinStream.Free;
+end;
 
 {$IFDEF LAYOUTTRACES}
 procedure LAYOUTTRACE(const Position: String; const args: array of const);

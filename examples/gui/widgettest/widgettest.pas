@@ -3,25 +3,25 @@ program WidgetTest;
 uses
   SysUtils
   ,Classes
-  ,gfxbase
-  ,fpgui
+  ,fpGFX
+  ,fpGUI
   ;
 
 type
 
   // forward declarations
-  TCheckBoxForm = class;
-  TRadioButtonForm = class;
-  TGroupBoxForm = class;
-  TEditForm = class;
-  TScrollBarForm = class;
-  TScrollBoxForm = class;
-  TListBoxForm = class;
-  TComboBoxForm = class;
-  TGridForm = class;
-  TMenuForm = class;
-  TPanelForm = class;
-  TProgressBarForm = class;
+  TCheckBoxForm       = class;
+  TRadioButtonForm    = class;
+  TGroupBoxForm       = class;
+  TEditForm           = class;
+  TScrollBarForm      = class;
+  TScrollBoxForm      = class;
+  TListBoxForm        = class;
+  TComboBoxForm       = class;
+  TGridForm           = class;
+  TMenuForm           = class;
+  TPanelForm          = class;
+  TProgressBarForm    = class;
 
   { TMainForm }
 
@@ -40,7 +40,8 @@ type
     _frmPanel: TPanelForm;
     _frmProgressBar: TProgressBarForm;
   public
-    destructor Destroy; override;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
   published
     Box: TBoxLayout;
     Title: TLabel;
@@ -56,7 +57,6 @@ type
     MenuBtn: TButton;
     PanelBtn: TButton;
     ProgressBarBtn: TButton;
-    StdDialogBtn: TButton;
     Separator: TSeparator;
     ExitBtn: TButton;
     procedure CheckBoxBtnClick(Sender: TObject);
@@ -69,7 +69,6 @@ type
     procedure ComboBoxBtnClick(Sender: TObject);
     procedure GridBtnClick(Sender: TObject);
     procedure ExitBtnClick(Sender: TObject);
-    procedure StdDialogBtnClick(Sender: TObject);
     procedure MenuBtnClick(Sender: TObject);
     procedure PanelBtnClick(Sender: TObject);
     procedure ProgressBarBtnClick(Sender: TObject);
@@ -84,6 +83,8 @@ type
     Box: TBoxLayout;
     GrayCheckBox, CheckBox1, CheckBox2: TCheckBox;
     procedure GrayCheckBoxClick(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -92,6 +93,8 @@ type
     GrayCheckBox: TCheckBox;
     Radio1a, Radio1b, Radio2a, Radio2b: TRadioButton;
     procedure GrayCheckBoxClick(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -104,6 +107,8 @@ type
     procedure GrayCheckBoxClick(Sender: TObject);
     procedure ButtonClick(Sender: TObject);
     procedure RadioButtonClick(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -117,6 +122,8 @@ type
     procedure GrayCheckBox1Click(Sender: TObject);
     procedure GrayCheckBox2Click(Sender: TObject);
     procedure Edit2Change(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -136,6 +143,8 @@ type
     procedure ScrollBar3Change(Sender: TObject);
     procedure ScrollBar4Change(Sender: TObject);
     procedure ScrollBar5Change(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -143,11 +152,15 @@ type
     VertLayout: TBoxLayout;
     Label1: TLabel;
     ScrollBox: TScrollBox;
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
   TListBoxForm = class(TTestForm)
     ListBox: TListBox;
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -160,12 +173,16 @@ type
     ComboBox2: TComboBox;
     procedure GrayCheckBoxClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
   TGridForm = class(TTestForm)
     StringGrid: TStringGrid;
     procedure FormCreate(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
   
 
@@ -220,6 +237,22 @@ type
     Separator: TSeparator;
     btnRandom: TButton;
   end;
+
+{ TListBoxForm }
+
+constructor TListBoxForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
+{ TScrollBoxForm }
+
+constructor TScrollBoxForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
 
 
 { TMenuForm }
@@ -431,6 +464,12 @@ end;
 //   TMainForm
 // -------------------------------------------------------------------
 
+constructor TMainForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
 destructor TMainForm.Destroy;
 begin
   _frmCheckBox.Free;
@@ -451,82 +490,73 @@ end;
 
 procedure TMainForm.CheckBoxBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmCheckBox) then
-    _frmCheckBox.Show
-  else
-    Application.CreateForm(TCheckBoxForm, _frmCheckBox);
+  if not Assigned(_frmCheckBox) then
+    _frmCheckBox := TCheckBoxForm.Create(self);
+  _frmCheckBox.Show;
 end;
 
 
 procedure TMainForm.RadioButtonBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmRadioButton) then
-    _frmRadioButton.Show
-  else
-    Application.CreateForm(TRadioButtonForm, _frmRadioButton);
+  if not Assigned(_frmRadioButton) then
+    _frmRadioButton := TRadioButtonForm.Create(self);
+  _frmRadioButton.Show;
 end;
 
 
 procedure TMainForm.GroupBoxBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmGroupBox) then
-    _frmGroupBox.Show
-  else
-    Application.CreateForm(TGroupBoxForm, _frmGroupBox);
+  if not Assigned(_frmGroupBox) then
+    _frmGroupBox := TGroupBoxForm.Create(self);
+  _frmGroupBox.Show;
 end;
 
 
 procedure TMainForm.EditBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmEdit) then
-    _frmEdit.Show
-  else
-    Application.CreateForm(TEditForm, _frmEdit);
+  if not Assigned(_frmEdit) then
+    _frmEdit := TEditForm.Create(self);
+  _frmEdit.Show;
 end;
 
 
 procedure TMainForm.ScrollBarBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmScrollBar) then
-    _frmScrollBar.Show
-  else
-    Application.CreateForm(TScrollBarForm, _frmScrollBar);
+  if not Assigned(_frmScrollBar) then
+    _frmScrollBar := TScrollBarForm.Create(self);
+  _frmScrollBar.Show;
 end;
 
 
 procedure TMainForm.ScrollBoxBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmScrollBox) then
-    _frmScrollBox.Show
-  else
-    Application.CreateForm(TScrollBoxForm, _frmScrollBox);
+  if not Assigned(_frmScrollBox) then
+    _frmScrollBox := TScrollBoxForm.Create(self);
+  _frmScrollBox.Show;
 end;
 
 
 procedure TMainForm.ListBoxBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmListBox) then
-    _frmListBox.Show
-  else
-    Application.CreateForm(TListBoxForm, _frmListBox);
+  if not Assigned(_frmListBox) then
+    _frmListBox := TListBoxForm.Create(self);
+  _frmListBox.Show;
 end;
 
 
 procedure TMainForm.ComboBoxBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmComboBox) then
-    _frmComboBox.Show
-  else
-    Application.CreateForm(TComboBoxForm, _frmComboBox);
+  if not Assigned(_frmComboBox) then
+    _frmComboBox := TComboBoxForm.Create(self);
+  _frmComboBox.Show;
 end;
 
 
 procedure TMainForm.GridBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmGrid) then
-    _frmGrid.Show
-  else
-    Application.CreateForm(TGridForm, _frmGrid);
+  if not Assigned(_frmGrid) then
+    _frmGrid := TGridForm.Create(self);
+  _frmGrid.Show;
 end;
 
 
@@ -536,56 +566,27 @@ begin
 end;
 
 
-procedure TMainForm.StdDialogBtnClick(Sender: TObject);
-var
-  dlg: TStandardDialog;
-begin
-  {$Note This needs to be reworked completely! }
-  if Assigned(dlg) then
-    dlg.Show
-  else
-    Application.CreateForm(TStandardDialog, dlg);
-//    dlg := TStandardDialog.Create(self);
-    
-//  dlg.Text := 'This is a single line of text.';
-//  dlg.Show;
-end;
-
-
 procedure TMainForm.MenuBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmMenu) then
-    _frmMenu.Show
-  else
-  begin
+  if not Assigned(_frmMenu) then
     _frmMenu := TMenuForm.Create(self);
-//    Application.AddForm(_frmMenu);
-    _frmMenu.Show;
-  end;
+  _frmMenu.Show;
   _frmMenu.SetPosition(Point(Left + Width + 5, FindForm.Top));
 end;
 
 procedure TMainForm.PanelBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmPanel) then
-    _frmPanel.Show
-  else
-  begin
+  if not Assigned(_frmPanel) then
     _frmPanel := TPanelForm.Create(self);
-    _frmPanel.Show;
-  end;
+  _frmPanel.Show;
   _frmPanel.SetPosition(Point(Left + Width + 5, FindForm.Top));
 end;
 
 procedure TMainForm.ProgressBarBtnClick(Sender: TObject);
 begin
-  if Assigned(_frmProgressBar) then
-    _frmProgressBar.Show
-  else
-  begin
+  if not Assigned(_frmProgressBar) then
     _frmProgressBar := TProgressBarForm.Create(self);
-    _frmProgressBar.Show;
-  end;
+  _frmProgressBar.Show;
   _frmProgressBar.SetPosition(Point(Left + Width + 5, FindForm.Top));
 end;
 
@@ -600,6 +601,12 @@ begin
   CheckBox2.Enabled := not GrayCheckBox.Checked;
 end;
 
+constructor TCheckBoxForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
 
 // -------------------------------------------------------------------
 //   TRadioButtonForm
@@ -608,6 +615,12 @@ end;
 procedure TRadioButtonForm.GrayCheckBoxClick(Sender: TObject);
 begin
   HorzBox.Enabled := not GrayCheckBox.Checked;
+end;
+
+constructor TRadioButtonForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
 end;
 
 
@@ -633,6 +646,12 @@ begin
   Button.Enabled := not Radio1.Checked;
 end;
 
+constructor TGroupBoxForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
 
 // -------------------------------------------------------------------
 //   TEditForm
@@ -653,6 +672,12 @@ end;
 procedure TEditForm.Edit2Change(Sender: TObject);
 begin
   PasswordDisplay.Text := '(= ' + Edit2.Text + ')';
+end;
+
+constructor TEditForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
 end;
 
 
@@ -695,6 +720,12 @@ begin
   PosLabel5.Text := IntToStr(ScrollBar5.Position);
 end;
 
+constructor TScrollBarForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
 
 // -------------------------------------------------------------------
 //   TComboBoxForm
@@ -719,6 +750,12 @@ begin
   BetaLabel.FontColor := clBlue;
 end;
 
+constructor TComboBoxForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
 
 // -------------------------------------------------------------------
 //   TGridForm
@@ -733,16 +770,23 @@ begin
       StringGrid.Cells[x, y] := Format('%d, %d', [x, y]);
 end;
 
+constructor TGridForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
 
 var
   MainForm: TMainForm;
 begin
-  MainForm := nil;
   WriteLn('Version: ' + {$I %date%} + ' ' + {$I %time%});
-
-  Application.CreateForm(TMainForm, MainForm);
+  GFApplication.Initialize;
+  
+  MainForm := TMainForm.Create(GFApplication);
   try
-    Application.Run;
+    MainForm.Show;
+    GFApplication.Run;
   finally
     MainForm.Free;
   end;

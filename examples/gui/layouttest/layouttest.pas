@@ -29,7 +29,7 @@ type
     Box: TBoxLayout;
     Title: TLabel;
     SimpleBtn, FixedBtn, BoxBtn, GridBtn, DockingBtn, ExitBtn: TButton;
-    //Separator: TSeparator;
+    Separator: TSeparator;
     procedure   SimpleBtnClicked(Sender: TObject);
     procedure   FixedBtnClicked(Sender: TObject);
     procedure   DockingBtnClicked(Sender: TObject);
@@ -116,6 +116,9 @@ begin
   DockingBtn.OnClick := @DockingBtnClicked;
   DockingBtn.Enabled := False;
   Box.InsertChild(DockingBtn);
+  
+  Separator := TSeparator.Create(self);
+  Box.InsertChild(Separator);
   
   ExitBtn := TButton.Create('Exit', self);
   ExitBtn.OnClick := @ExitBtnClicked;
