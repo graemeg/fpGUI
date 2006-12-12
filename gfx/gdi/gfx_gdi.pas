@@ -620,7 +620,7 @@ begin
   pt := Transform(P3);
   pts[3].X := pt.X;   pts[3].Y := pt.Y;
 
-
+  NeedBrush;
   Windows.Polygon(Handle, pts, 3);
 end;
 
