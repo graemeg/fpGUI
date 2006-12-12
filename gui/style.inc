@@ -94,7 +94,7 @@
     ImageCanvas: TFCustomCanvas;
     MaskCanvas: TFCustomCanvas;
 //    ArrowBitmaps: array[TArrowDirection] of TGfxImage;
-    procedure   DrawDirectionArrows(ACanvas: TFCanvas; const ARect: TRect; ADirection: integer);
+    procedure   DrawDirectionArrows(ACanvas: TFCanvas; const ARect: TRect; ADirection: TArrowDirection);
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -231,9 +231,8 @@ const
   {$I defimpl/defstyle.inc}
 {$ENDIF}
 
-{ ADirection values: 0 - down, 1 - up, 2 - right, 3 - left }
 procedure TDefaultStyle.DrawDirectionArrows(ACanvas: TFCanvas;
-  const ARect: TRect; ADirection: integer);
+  const ARect: TRect; ADirection: TArrowDirection);
 var
   peekx, peeky: Cardinal;
   basex, basey: Cardinal;
@@ -242,16 +241,16 @@ begin
   side := (ARect.Right div 4) + 1;
   margin := side;// + 1;
 
-  if ADirection < 2 then  // vertical
+  if ADirection in [arrowUp, arrowDown] then
   begin
     peekx := ARect.Left+(ARect.Right div 2);
-    if ADirection = 1 then  // down
+    if ADirection = arrowDown then
     begin
       peeky := ARect.Top + ARect.Bottom - margin;
       basey := peeky-side;
     end
     else
-    begin                  // up
+    begin  // up
       peeky := ARect.Top+margin;
       basey := peeky+side;
     end;
@@ -263,12 +262,12 @@ begin
   else // horizontal
   begin
     peeky := ARect.Top + (ARect.Bottom div 2);
-    if ADirection = 3 then  // right
+    if ADirection = arrowRight then
     begin
       peekx := ARect.Left + ARect.Right - margin;
       basex := peekx - side;
     end
-    else                   // left
+    else    // left
     begin
       peekx := ARect.Left + margin;
       basex := peekx + side;
@@ -712,24 +711,29 @@ end;
 
 function TDefaultStyle.GetComboBoxArrowSize: TSize;
 begin
-  Result := gfxbase.Size(16, 17);
+  Result := Size(16, 17);
 end;
 
 
 procedure TDefaultStyle.DrawComboBoxArrow(Canvas: TFCanvas;
   const ARect: TRect; IsPressed, IsEnabled: Boolean);
 var
-  Pt: TPoint;
-  Index: Integer;
+  r: TRect;
 begin
-  with ARect do
-    Pt := TopLeft + Point((Right - Left - 8) div 2, (Bottom - Top - 8) div 2);
+  r := ARect;
+  if IsEnabled then
+  begin
+    Canvas.SetColor(GetGUIColor(clWindowText));
+    if IsPressed then
+    begin
+      r.Top   := ARect.Top + 1;
+      r.Left  := ARect.Left + 1;
+    end;
+  end
+  else
+    Canvas.SetColor(GetGUIColor(clGrayText));
 
-  if IsPressed then
-    Pt := Pt + Point(1, 1);
-
-  Index := 1 + Ord(not IsEnabled) * 4;
-  Canvas.CopyRect(ImageCanvas, Rect(Index * 8, 25, (Index + 1) * 8, 33), Pt);
+  DrawDirectionArrows(Canvas, r, arrowDown);
 end;
 
 
@@ -777,24 +781,22 @@ procedure TDefaultStyle.DrawScrollBarButton(Canvas: TFCanvas;
   const ARect: TRect; Direction: TArrowDirection;
   IsPressed, IsEnabled: Boolean);
 var
-  Index: Integer;
+  r: TRect;
 begin
-  { This uses a internal image }
-{  Index := Ord(Direction) + Ord(not IsEnabled) * 4;
-  with ARect do
-    Canvas.CopyRect(
-      ImageCanvas,
-      Rect(Index * 8, 25, (Index + 1) * 8, 33),
-      TopLeft + Point((Right - Left - 8) div 2, (Bottom - Top - 8) div 2));
-}
-  { This draws the rectangle directly }
+  r := ARect;
   if IsEnabled then
-    Canvas.SetColor(GetGUIColor(clWindowText))
+  begin
+    Canvas.SetColor(GetGUIColor(clWindowText));
+    if IsPressed then
+    begin
+      r.Top   := ARect.Top + 1;
+      r.Left  := ARect.Left + 1;
+    end;
+  end
   else
     Canvas.SetColor(GetGUIColor(clGrayText));
 
-
-  DrawDirectionArrows(Canvas, ARect, Ord(Direction));
+  DrawDirectionArrows(Canvas, r, Direction);
 end;
 
 
