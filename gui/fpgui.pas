@@ -41,7 +41,7 @@ uses
   ,Classes
   ,GFXBase
   ,fpGFX
-//  ,Types    { used for OffsetRect() }
+//  ,Types
   ;
 
 type
@@ -237,6 +237,48 @@ begin
 end;
 {$ENDIF}
 
+function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
+begin
+  if Assigned(@Rect) then
+  begin
+    with Rect do
+    begin
+      dec(Left, dx);
+      dec(Top, dy);
+      inc(Right, dx);
+      inc(Bottom, dy);
+    end;
+    Result := True;
+  end
+  else
+    Result := False;
+end;
+
+function OffsetRect(var Rect : TRect;DX : Integer;DY : Integer) : Boolean;
+begin
+  if assigned(@Rect) then
+  begin
+    with Rect do
+    begin
+      inc(Left,dx);
+      inc(Top,dy);
+      inc(Right,dx);
+      inc(Bottom,dy);
+    end;
+    OffsetRect := True;
+  end
+  else
+    OffsetRect := False;
+end;
+
+function CenterPoint(const Rect: TRect): TPoint;
+begin
+  with Rect do
+  begin
+    Result.X := (Left+Right) div 2;
+    Result.Y := (Top+Bottom) div 2;
+  end;
+end;
 
 { This lets us use a single include file for both the Interface and
   Implementation sections. }

@@ -24,8 +24,8 @@
   
   TComboBoxPopup = class(TPopupWindow)
   private
+    FLayout: TBoxLayout;
     FListBox: TListBox;
-    procedure   ItemSelected(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     property    ListBox: TListBox read FListBox;
@@ -43,7 +43,6 @@
     procedure   SetItemIndex(const AValue: Integer);
   protected
     FButton: TGenericButton;
-//    FDropDown: TCustomForm;
     FDropDown: TComboBoxPopup;
     lbl: TLabel;
     procedure   Click; override;
@@ -97,29 +96,28 @@ begin
     wsEnabled in WidgetState);
 end;
 
-
 procedure TArrowButton.CalcSizes;
 begin
   FMinSize := Style.GetComboBoxArrowSize;
 end;
 
-
-procedure TComboBoxPopup.ItemSelected(Sender: TObject);
-begin
-  Close;
-end;
-
-
 constructor TComboBoxPopup.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
+  BorderWidth := 1;
+  Color       := clBlack;
+
+  FLayout := TBoxLayout.Create(self);
+  FLayout.Name        := 'VBox';
+  FLayout.Orientation := Vertical;
+  FLayout.Spacing     := 0;
+  InsertChild(FLayout);
 
   FListBox := TListBox.Create(self);
-  FListBox.Name       := 'listbox';
-  FListBox.Parent     := self;
+  FListBox.Name       := 'Listbox';
   FListBox.HotTrack   := True;
-//  FListBox.OnClick    := @ItemSelected;   // Listbox needs OnSelect event
+  FLayout.InsertChild(FListBox);
 end;
 
 
@@ -143,13 +141,11 @@ begin
   FButton.Parent          := Self;
 end;
 
-
 destructor TCustomComboBox.Destroy;
 begin
   FDropDown.Free;
   inherited Destroy;
 end;
-
 
 procedure TCustomComboBox.Paint(Canvas: TFCanvas);
 var
@@ -188,7 +184,6 @@ begin
   end;
 end;
 
-
 procedure TCustomComboBox.CalcSizes;
 begin
   with Style.GetEditBoxBorders do
@@ -197,7 +192,6 @@ begin
       TopLeft + BottomRight;
 end;
 
-
 procedure TCustomComboBox.Resized;
 begin
   with Style.GetEditBoxBorders do
@@ -205,13 +199,11 @@ begin
       FButton.MinSize);
 end;
 
-
 function TCustomComboBox.DistributeEvent(Event: TEventObj): Boolean;
 begin
   Result := Event.SendToChild(FButton) or
     inherited DistributeEvent(Event);
 end;
-
 
 procedure TCustomComboBox.ButtonClick(Sender: TObject);
 begin
@@ -224,17 +216,16 @@ begin
   if not Assigned(FDropDown) then
   begin
     FDropDown := TComboBoxPopup.Create(Self);
-    FDropDown.OnDeactivate        := @DropDownDeactivate;
     FDropDown.OnDestroy           := @DropDownDestroy;
     FDropDown.ListBox.Items.Text  := FItems.Text;
     FDropDown.ListBox.FItemIndex  := FItemIndex;
     FDropDown.ListBox.OnClick     := @DropDownDeactivate;
   end;
 
-  FDropDown.Show;
   FDropDown.SetPosition(ClientToScreen(Point(0, Height)));
+  FDropDown.Show;
+  FDropDown.Wnd.SetMinMaxClientSize(MaxSize, MaxSize);
 end;
-
 
 procedure TCustomComboBox.DropDownDeactivate(Sender: TObject);
 begin
@@ -244,13 +235,11 @@ begin
   SetFocus;
 end;
 
-
 procedure TCustomComboBox.DropDownDestroy(Sender: TObject);
 begin
   LAYOUTTRACE('TCustomComboBox.DropDownDestroy for %s:%s', [Name, ClassName]);
   FDropDown := nil;
 end;
-
 
 procedure TCustomComboBox.SetItemIndex(const AValue: Integer);
 begin
@@ -268,7 +257,6 @@ begin
       OnChange(Self);
   end;
 end;
-
 
 { This event causes the combobox to drop open when you click anywhere in the
   component, or press the spacebar key. }

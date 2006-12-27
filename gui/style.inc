@@ -395,7 +395,7 @@ end;
 procedure TDefaultStyle.DrawWindowBackground(Canvas: TFCanvas;
   const ARect: TRect);
 begin
-  SetUIColor(Canvas, cl3DFace);
+//  SetUIColor(Canvas, cl3DFace);
   Canvas.FillRect(ARect);
 end;
 
@@ -565,6 +565,7 @@ procedure TDefaultStyle.DrawRadioButton(Canvas: TFCanvas;
   const ARect, LabelRect: TRect; Flags: TCheckboxFlags);
 var
   Index, BtnY: Integer;
+  r: TRect;
 begin
 {
   with ARect do
@@ -582,6 +583,36 @@ begin
       Point(0, 0), Point(Left, BtnY));
   end;
 }
+// cl3DLight, cl3DHighlight, cl3DDkShadow, cl3DShadow
+  SetUIColor(Canvas, clLtGray);
+  r.Left    := ARect.Left;
+  r.Top     := ARect.Top + (ARect.Bottom - ARect.Top - 13) div 2;
+  r.Right   := 13;
+  r.Bottom  := r.Top + 13;
+  Canvas.DrawCircle(r);
+  
+  SetUIColor(Canvas, cl3DShadow);
+  InflateRect(r, -2, -2);
+  Canvas.DrawCircle(r);
+
+  SetUIColor(Canvas, cl3DDkShadow);
+  InflateRect(r, 1, 1);
+  Canvas.DrawCircle(r);
+  
+  if cbIsChecked in Flags then
+  begin
+    SetUIColor(Canvas, clNavy);
+    InflateRect(r, -3, -3);
+    Canvas.DrawCircle(r);
+    InflateRect(r, -1, -1);
+    Canvas.FillRect(r);
+    InflateRect(r, 1, 1);
+    SetUIColor(Canvas, clSkyBlue);
+    InflateRect(r, -2, -2);
+    OffsetRect(r, -1, -1);
+    Canvas.FillRect(r);
+  end;
+
   if cbHasFocus in Flags then
     with LabelRect do
       DrawFocusRect(Canvas, Rect(Left - 2, Top - 2, Right + 2, Bottom + 2));

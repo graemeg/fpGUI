@@ -1355,7 +1355,8 @@ end;
 
 procedure TFCustomApplication.AddWindow(AWindow: TFCustomWindow);
 begin
-  Forms.Add(AWindow);
+  if Forms.IndexOf(AWindow) = -1 then
+    Forms.Add(AWindow);
 end;
 
 procedure TFCustomApplication.RemoveWindow(AWindow: TFCustomWindow);

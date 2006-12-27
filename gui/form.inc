@@ -73,8 +73,8 @@
     property    BorderWidth: Integer read FBorderWidth write FBorderWidth;
     property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
-    property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
-    property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
+    property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;        // Get focus
+    property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;  // Loose focus
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -91,10 +91,11 @@
 
   TForm = class(TCustomForm)
   published
-    property Enabled;
     property BorderWidth;
-    property WindowOptions;
+    property Color;
+    property Enabled;
     property Text;
+    property WindowOptions;
     property OnCreate;
     property OnDestroy;
     property OnActivate;
@@ -190,6 +191,7 @@ end;
 
 procedure TCustomForm.Paint(Canvas: TFCanvas);
 begin
+  inherited Paint(Canvas);
   Style.DrawWindowBackground(Canvas, Rect(0, 0, Width, Height));
 end;
 
@@ -231,8 +233,8 @@ begin
   else
     ParentWnd := nil;
 
-  FWnd :=  TFWindow.Create(ParentWnd, [woWindow]);
-//  FWnd := Application.DefaultScreen.CreateWindow(ParentWnd, [woWindow]);
+  FWnd :=  TFWindow.Create(ParentWnd, WindowOptions);
+
   if FPositionSpecified then
     Wnd.SetPosition(Origin);
 

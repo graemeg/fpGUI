@@ -64,6 +64,7 @@ procedure TCustomPanel.Paint(Canvas: TFCanvas);
 var
   Pt: TPoint;
 begin
+  inherited Paint(Canvas);
   Style.DrawPanel(Canvas, Rect(0, 0, Width, Height), FBevelStyle);
 
   if Text <> '' then

@@ -85,7 +85,7 @@ procedure TMenuBar.Paint(Canvas: TFCanvas);
 {var
   i: integer;   }
 begin
-//  inherited Paint(Canvas);
+  inherited Paint(Canvas);
   Style.DrawWindowBackground(Canvas, ClientRect);
 //  FLayout.Paint(Canvas);
 {

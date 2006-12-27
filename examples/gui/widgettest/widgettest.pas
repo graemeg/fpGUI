@@ -747,6 +747,7 @@ begin
     ComboBox1.Items.Add(Format('Item 1.%d...', [i]));
     ComboBox2.Items.Add(Format('Item 2.%d...', [i]));
   end;
+  ComboBox2.Items.Add('A long item that should cause a horizontal scrollbar to appear.');
   BetaLabel.FontColor := clBlue;
 end;
 

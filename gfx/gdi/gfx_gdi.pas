@@ -577,6 +577,7 @@ end;
 procedure TGDICanvas.DoDrawCircle(const ARect: TRect);
 begin
   {$Warning DoDrawCircle needs testing. }
+  NeedPen;
   Windows.Ellipse(Handle, ARect.Left, ARect.Top, ARect.Right, ARect.Bottom);
 end;
 

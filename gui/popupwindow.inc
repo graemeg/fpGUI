@@ -35,7 +35,7 @@ constructor TPopupWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FParent := nil;
-  FWindowOptions := [woBorderless, woPopup];
+  FWindowOptions := FWindowOptions + [woBorderless, woPopup];
 end;
 
 

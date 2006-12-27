@@ -166,9 +166,11 @@
 
   TWidget = class(TComponent)
   private
+    FColor: TColor;
     FParent: TWidget;
     FOnClick: TNotifyEvent;
     // Property access
+    procedure SetColor(const AValue: TColor);
     procedure SetParent(AParent: TWidget);
     function  GetBoundsRect: TRect;
     function  GetLeft: Integer;
@@ -231,6 +233,7 @@
     property  CanExpandHeight: Boolean read FCanExpandHeight write SetCanExpandHeight default False;
     property  Cursor: TFCursor read FCursor write FCursor default crDefault;
     property  Text: String read FText write SetText;
+    property  Color: TColor read FColor write SetColor default cl3DFace;
     property  OnClick: TNotifyEvent read FOnClick write FOnClick;
   public
     constructor Create(AOwner: TComponent); override;
@@ -452,11 +455,13 @@ end;
 constructor TWidget.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  WidgetStyle := [];
   WidgetState := [wsEnabled];
   FCanExpandWidth   := False;
   FCanExpandHeight  := False;
   FEnabled          := True;
   FVisible          := True;
+  FColor            := cl3DFace;
 end;
 
 destructor TWidget.Destroy;
@@ -830,7 +835,7 @@ end;
 
 procedure TWidget.Paint(Canvas: TFCanvas);
 begin
-  // Do nothing here.
+  Canvas.SetColor(Style.GetUIColor(FColor));
 end;
 
 procedure TWidget.SetParentComponent(AParent: TComponent);
@@ -1154,6 +1159,12 @@ begin
     if Assigned(Parent) and Parent.InheritsFrom(TContainerWidget) then
       TContainerWidget(Parent).InsertChild(Self);
   end;
+end;
+
+procedure TWidget.SetColor(const AValue: TColor);
+begin
+  if FColor=AValue then exit;
+  FColor:=AValue;
 end;
 
 function TWidget.GetBoundsRect: TRect;
