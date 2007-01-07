@@ -197,7 +197,7 @@ type
     MainMenu: TMenuBar;
     Title: TLabel;
     p1, p2, p3, p4, p5, p6: TPanel;
-    HBox: TBoxLayout;
+    MenuBox: TBoxLayout;
   end;
   
   
@@ -272,7 +272,7 @@ begin
   FLayout.Spacing := 0;
   FLayout.BorderSpacing := 6;
   FLayout.HorzAlign := horzLeft;
-  MainMenu.InsertChild(FLayout);
+//  MainMenu.InsertChild(FLayout);
 
 {
   MainMenu.AddMenu('File');
@@ -285,10 +285,10 @@ begin
   FLayout.InsertChild(TPanel.Create('File', self));
   FLayout.InsertChild(TPanel.Create('Edit', self));
 
-  HBox := TBoxLayout.Create(self);
-  HBox.HorzAlign := horzLeft;
-  HBox.Spacing := 0;
-  BoxLayout.InsertChild(HBox);
+  MenuBox := TBoxLayout.Create(self);
+  MenuBox.HorzAlign := horzLeft;
+  MenuBox.Spacing := 0;
+  BoxLayout.InsertChild(MenuBox);
   p1 := TPanel.Create('File', self);
   p1.BevelStyle := bsPlain;
   p2 := TPanel.Create('Edit', self);
@@ -299,12 +299,12 @@ begin
   p4.BevelStyle := bsPlain;
   p5 := TPanel.Create('Help', self);
   p5.BevelStyle := bsPlain;
-//  HBox.InsertChild(p1);
-//  HBox.InsertChild(p2);
-  HBox.InsertChild(p3);
-  HBox.InsertChild(p4);
-  HBox.InsertChild(p5);
-  HBox.InsertChild(TPanel.Create('Testing', self));
+  MenuBox.InsertChild(p1);
+  MenuBox.InsertChild(p2);
+  MenuBox.InsertChild(p3);
+  MenuBox.InsertChild(p4);
+  MenuBox.InsertChild(p5);
+//  MenuBox.InsertChild(TPanel.Create('Testing', self));
 
 
   Title := TLabel.Create(self);
@@ -671,7 +671,7 @@ end;
 
 procedure TEditForm.Edit2Change(Sender: TObject);
 begin
-  PasswordDisplay.Text := '(= ' + Edit2.Text + ')';
+//  PasswordDisplay.Text := '(= ' + Edit2.Text + ')';
 end;
 
 constructor TEditForm.Create(AOwner: TComponent);

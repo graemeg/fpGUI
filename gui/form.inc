@@ -79,6 +79,7 @@
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Show; override;
+    procedure   ShowModal;
     procedure   Close; virtual;
     procedure   SetPosition(APosition: TPoint);
     property    FocusedWidget: TWidget read FFocusedWidget write SetFocusedWidget;
@@ -148,6 +149,11 @@ begin
   Wnd.Show;
 end;
 
+procedure TCustomForm.ShowModal;
+begin
+  Include(WindowOptions, woModal);
+  Show;
+end;
 
 procedure TCustomForm.Close;
 begin

@@ -40,6 +40,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
+    <SearchPaths>
+      <OtherUnitFiles Value="/home/graemeg/programming/fpGUI/gui/"/>
+    </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <IncludeAssertionCode Value="True"/>

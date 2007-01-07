@@ -226,7 +226,7 @@ type
 
   TFWindowOption = (
     woWindow, woBorderless, woPopup, woToolWindow, woChildWindow,
-    woX11SkipWMHints);
+    woX11SkipWMHints, woModal);
   TFWindowOptions = set of TFWindowOption;
 
   TFCursor = (crDefault, crNone, crArrow, crCross, crIBeam, crSize, crSizeNS,

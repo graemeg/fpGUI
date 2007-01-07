@@ -1369,6 +1369,10 @@ begin
     XMapSubwindows(GFApplication.Handle, lParentHandle);
 
   FCanvas := TX11WindowCanvas.Create(Colormap, Handle, GFApplication.FDefaultFont);
+  
+  // for modal windows, this is necessary
+//  if (woModal in WindowOptions) then
+//    XSetTransientForHint(GFApplication.Handle, Handle, Handle);
 end;
 
 
