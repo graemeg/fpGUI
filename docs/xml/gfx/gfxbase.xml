@@ -1,0 +1,6298 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="fpGFX">
+
+<!--
+  ====================================================================
+    GfxBase
+  ====================================================================
+-->
+
+<module name="GfxBase">
+<short></short>
+<descr>
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyNul">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyBackSpace">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyTab">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyLinefeed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyReturn">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyEscape">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDelete">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyVoid">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyBreak">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyScrollForw">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyScrollBack">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyBoot">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCompose">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keySAK">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyUndo">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyRedo">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyMenu">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCancel">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPrintScreen">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyExecute">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyFind">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyBegin">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyClear">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyInsert">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keySelect">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyMacro">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyHelp">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDo">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPause">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyStop">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keySysRq">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyModeSwitch">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyUp">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDown">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyLeft">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyRight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPrior">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPageUp">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyNext">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPageDown">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyHome">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyEnd">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF0">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF1">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF2">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF3">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF4">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF5">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF6">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF7">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF8">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF9">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF10">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF11">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF12">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF13">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF14">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF15">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF16">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF17">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF18">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF19">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF20">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF21">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF22">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF23">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF24">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF25">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF26">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF27">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF28">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF29">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF30">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF31">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF32">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF33">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF34">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF35">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF36">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF37">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF38">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF39">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF40">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF41">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF42">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF43">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF44">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF45">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF46">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF47">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF48">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF49">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF50">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF51">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF52">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF53">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF54">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF55">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF56">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF57">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF58">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF59">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF60">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF61">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF62">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF63">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyF64">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP0">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP1">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP2">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP3">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP4">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP5">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP6">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP7">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP8">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyP9">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPA">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPB">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPC">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPD">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPE">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPPlus">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPMinus">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPSlash">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPAsterisk">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPStar">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPEqual">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPSeparator">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPDecimal">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPParenLeft">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPParenRight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPSpace">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPEnter">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPTab">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPPlusMinus">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPBegin">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF1">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF2">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF3">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF4">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF5">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF6">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF7">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF8">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPF9">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyShift">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCtrl">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyAlt">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyMeta">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keySuper">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyHyper">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyAltGr">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCaps">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyNum">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyScroll">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyShiftL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyShiftR">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCtrlL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCtrlR">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyAltL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyAltR">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyMetaL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyMetaR">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keySuperL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keySuperR">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyHyperL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyHyperR">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyShiftLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCtrlLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyAltLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyMetaLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keySuperLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyHyperLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyAltGrLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCapsLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyNumLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyScrollLock">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadRing">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadCaron">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadOgonek">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadIota">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadDoubleAcute">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadBreve">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadAboveDot">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadBelowDot">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadVoicedSound">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadSemiVoicedSound">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadAcute">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadCedilla">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadCircumflex">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadDiaeresis">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadGrave">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadTilde">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDeadMacron">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyNIL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyEcuSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyColonSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyCruzeiroSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyFFrancSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyLiraSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyMillSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyNairaSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyPesetaSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyRupeeSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyWonSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyNewSheqelSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyDongSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="keyEuroSign">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- resource string Visibility: default -->
+<element name="SUnsupportedPixelFormat">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- resource string Visibility: default -->
+<element name="SIncompatibleCanvasForBlitting">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TSize">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSize.cx">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSize.cy">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TGfxMatrix">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxMatrix._00">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxMatrix._20">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxMatrix._11">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxMatrix._21">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="GfxIdentityMatrix">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PGfxColor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TGfxColor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxColor.Red">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxColor.Green">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxColor.Blue">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxColor.Alpha">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PGfxPixel">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="TGfxPixel">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TGfxImageType">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftInvalid">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftMono">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftPal4">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftPal4A">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftPal8">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftPal8A">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftRGB16">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftRGBA16">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftRGB24">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftRGB32">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxImageType.ftRGBA32">
+<short></short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TGfxPixelFormat">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxPixelFormat.FormatType">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxPixelFormat.RedMask">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxPixelFormat.GreenMask">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxPixelFormat.BlueMask">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGfxPixelFormat.AlphaMask">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FormatTypeBPPTable">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colTransparent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colBlack">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colBlue">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colGreen">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colCyan">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colRed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colMagenta">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colYellow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colWhite">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colGray">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colLtGray">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colDkBlue">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colDkGreen">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colDkCyan">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colDkRed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colDkMagenta">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="colDkYellow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webBlack">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webMaroon">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webGreen">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webOlive">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webNavy">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webPurple">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webTeal">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webGray">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webSilver">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webRed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webLime">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webYellow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webBlue">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webFuchsia">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webAqua">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="webWhite">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatMono">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatPal4">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatPal4A">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatPal8">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatPal8A">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatRGB16">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatRGB24">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatRGB32">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PixelFormatRGBA32">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="EGfxError">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="EGfxUnsupportedPixelFormat">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: default -->
+<element name="EGfxUnsupportedPixelFormat.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="EGfxUnsupportedPixelFormat.Create.APixelFormat">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFCustomBitmap">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFCustomApplication">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFCustomWindow">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TFWindowOption">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFWindowOption.woWindow">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFWindowOption.woBorderless">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFWindowOption.woPopup">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFWindowOption.woToolWindow">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFWindowOption.woChildWindow">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFWindowOption.woX11SkipWMHints">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFWindowOption.woModal">
+<short></short>
+</element>
+
+<!-- set type Visibility: default -->
+<element name="TFWindowOptions">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TFCursor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crDefault">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crNone">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crArrow">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crCross">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crIBeam">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crSize">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crSizeNS">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crSizeWE">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.cpUpArrow">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crHourGlass">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crNoDrop">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFCursor.crHelp">
+<short></short>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TMouseButton">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TMouseButton.mbLeft">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TMouseButton.mbRight">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TMouseButton.mbMiddle">
+<short></short>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TFEventType">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etCreate">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etCanClose">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etClose">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etFocusIn">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etFocusOut">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etHide">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etKeyPressed">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etKeyReleased">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etKeyChar">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etMouseEnter">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etMouseLeave">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etMousePressed">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etMouseReleased">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etMouseMove">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etMouseWheel">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etPaint">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etMove">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etResize">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TFEventType.etShow">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFEvent">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.Msg">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.wparam">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.lparam">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.Result">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.MouseButton">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.EventPointer">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.State">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.Button">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.X">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.Y">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.Width">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.Height">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFEvent.EventType">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TGfxFontClass">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxFontClass.fcSerif">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxFontClass.fcSansSerif">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxFontClass.fcTypewriter">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxFontClass.fcDingbats">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFCustomFont">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomFont.FHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomFont.GetDefaultFontName">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomFont.GetDefaultFontName.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomFont.GetDefaultFontName.AFontClass">
+<short></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomFont.Handle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TGfxPalette">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TGfxPalette.FRefCount">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TGfxPalette.FEntryCount">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TGfxPalette.FEntries">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: private -->
+<element name="TGfxPalette.GetEntry">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TGfxPalette.GetEntry.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxPalette.GetEntry.AIndex">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TGfxPalette.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxPalette.Create.AEntryCount">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxPalette.Create.AEntries">
+<short></short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TGfxPalette.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TGfxPalette.AddRef">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TGfxPalette.Release">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TGfxPalette.EntryCount">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TGfxPalette.Entries">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxPalette.Entries.AIndex">
+<short></short>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TGfxLineStyle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxLineStyle.lsSolid">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TGfxLineStyle.lsDot">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFCustomCanvas">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomCanvas.FMatrix">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomCanvas.FWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomCanvas.FHeight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomCanvas.FHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomCanvas.FPixelFormat">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomCanvas.FColor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TFCustomCanvas.DoExcludeClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.DoExcludeClipRect.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoExcludeClipRect.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TFCustomCanvas.DoIntersectClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.DoIntersectClipRect.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoIntersectClipRect.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TFCustomCanvas.DoUnionClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.DoUnionClipRect.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoUnionClipRect.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TFCustomCanvas.DoGetClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.DoGetClipRect.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoDrawArc">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawArc.ARect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawArc.StartAngle">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawArc.EndAngle">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoDrawCircle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawCircle.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoDrawLine">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawLine.AFrom">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawLine.ATo">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoDrawRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawRect.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoDrawPoint">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawPoint.APoint">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoFillRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoFillRect.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoFillTriangle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoFillTriangle.P1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoFillTriangle.P2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoFillTriangle.P3">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoTextOut">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoTextOut.APosition">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoTextOut.AText">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoCopyRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoCopyRect.ASource">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoCopyRect.ASourceRect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoCopyRect.ADestPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoMaskedCopyRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoMaskedCopyRect.ASource">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoMaskedCopyRect.AMask">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoMaskedCopyRect.ASourceRect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoMaskedCopyRect.AMaskPos">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoMaskedCopyRect.ADestPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomCanvas.DoDrawImageRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawImageRect.AImage">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawImageRect.ASourceRect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DoDrawImageRect.ADestPos">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFCustomCanvas.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.Transform">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.Transform.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.Transform.APoint">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.Transform.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.ReverseTransform">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.ReverseTransform.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.ReverseTransform.APoint">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.ReverseTransform.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.AppendTranslation">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.AppendTranslation.ADelta">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.SaveState">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.RestoreState">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.EmptyClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.SetColor_">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.SetColor_.AColor">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.SetColor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.SetColor.AColor">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.SetFont">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.SetFont.AFont">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.SetLineStyle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.SetLineStyle.ALineStyle">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.ExcludeClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.ExcludeClipRect.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.ExcludeClipRect.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.IntersectClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.IntersectClipRect.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.IntersectClipRect.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.UnionClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.UnionClipRect.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.UnionClipRect.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.GetClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.GetClipRect.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.MapColor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.MapColor.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MapColor.AColor">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.GetColor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.GetColor.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawArc">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawArc.ARect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawArc.StartAngle">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawArc.EndAngle">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawCircle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawCircle.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawLine">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawLine.AFrom">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawLine.ATo">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawPolyLine">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawPolyLine.Coords">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawRect.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawPoint">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawPoint.APoint">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.FillRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.FillRect.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.FillTriangle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.FillTriangle.P1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.FillTriangle.P2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.FillTriangle.P3">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.FontCellHeight">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.FontCellHeight.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.TextExtent">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.TextExtent.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.TextExtent.AText">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomCanvas.TextWidth">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomCanvas.TextWidth.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.TextWidth.AText">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.TextOut">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.TextOut.APosition">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.TextOut.AText">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.Copy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.Copy.ASource">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.Copy.ADestPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.CopyRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.CopyRect.ASource">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.CopyRect.ASourceRect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.CopyRect.ADestPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.MaskedCopy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopy.ASource">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopy.AMask">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopy.ADestPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.MaskedCopyRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopyRect.ASource">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopyRect.AMask">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopyRect.ASourceRect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopyRect.AMaskPos">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.MaskedCopyRect.ADestPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawImage">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawImage.AImage">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawImage.ADestPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomCanvas.DrawImageRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawImageRect.AImage">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawImageRect.ASourceRect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomCanvas.DrawImageRect.ADestPos">
+<short></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomCanvas.Width">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomCanvas.Height">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomCanvas.PixelFormat">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomCanvas.Matrix">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomCanvas.Handle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomBitmap.FWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomBitmap.FHeight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomBitmap.FPixelFormat">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomBitmap.FPalette">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomBitmap.SetPalette">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.SetPalette.APalette">
+<short></short>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomBitmap.FHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomBitmap.FStride">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomBitmap.FData">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFCustomBitmap.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.Create.AWidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.Create.AHeight">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.Create.APixelFormat">
+<short></short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TFCustomBitmap.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomBitmap.Lock">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.Lock.AData">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.Lock.AStride">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomBitmap.Unlock">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomBitmap.SetPixelsFromData">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.SetPixelsFromData.AData">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomBitmap.SetPixelsFromData.AStride">
+<short></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomBitmap.Width">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomBitmap.Height">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomBitmap.PixelFormat">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomBitmap.Palette">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomBitmap.Handle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomBitmap.Data">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomBitmap.Stride">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFCustomScreen">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomScreen.SetMousePos">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomScreen.SetMousePos.NewPos">
+<short></short>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TFCustomScreen.GetMousePos">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomScreen.GetMousePos.Result">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFCustomScreen.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomScreen.CreateBitmapCanvas">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomScreen.CreateBitmapCanvas.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomScreen.CreateBitmapCanvas.AWidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomScreen.CreateBitmapCanvas.AHeight">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomScreen.CreateMonoBitmapCanvas">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomScreen.CreateMonoBitmapCanvas.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomScreen.CreateMonoBitmapCanvas.AWidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomScreen.CreateMonoBitmapCanvas.AHeight">
+<short></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomScreen.MousePos">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomApplication.FOnIdle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomApplication.FQuitWhenLastWindowCloses">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomApplication.FDisplayName">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomApplication.FTitle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomApplication.SetTitle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomApplication.SetTitle.ATitle">
+<short></short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TFCustomApplication.Forms">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFCustomApplication.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TFCustomApplication.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomApplication.AddWindow">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomApplication.AddWindow.AWindow">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomApplication.RemoveWindow">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomApplication.RemoveWindow.AWindow">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomApplication.Initialize">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomApplication.Initialize.ADisplayName">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomApplication.Run">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomApplication.Quit">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomApplication.OnIdle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomApplication.QuitWhenLastWindowCloses">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomApplication.Title">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TGfxCanCloseEvent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TGfxCanCloseEvent.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxCanCloseEvent.Sender">
+<short></short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TGfxKeyEvent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxKeyEvent.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxKeyEvent.AKey">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxKeyEvent.AShift">
+<short></short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TGfxKeyCharEvent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxKeyCharEvent.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxKeyCharEvent.AKeyChar">
+<short></short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TGfxMouseButtonEvent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseButtonEvent.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseButtonEvent.AButton">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseButtonEvent.AShift">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseButtonEvent.AMousePos">
+<short></short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TGfxMouseMoveEvent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseMoveEvent.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseMoveEvent.AShift">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseMoveEvent.AMousePos">
+<short></short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TGfxMouseWheelEvent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseWheelEvent.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseWheelEvent.AShift">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseWheelEvent.AWheelDelta">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxMouseWheelEvent.AMousePos">
+<short></short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TGfxPaintEvent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxPaintEvent.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TGfxPaintEvent.ARect">
+<short></short>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FCursor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnCreate">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnCanClose">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnClose">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnFocusIn">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnFocusOut">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnHide">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnKeyPressed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnKeyReleased">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnKeyChar">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnMouseEnter">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnMouseLeave">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnMousePressed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnMouseReleased">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnMouseMove">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnMouseWheel">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnPaint">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnMove">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnResize">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TFCustomWindow.FOnShow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetClientHeight">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetClientHeight.AValue">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetClientWidth">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetClientWidth.AValue">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetLeft">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetLeft.AValue">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetTop">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetTop.AValue">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetWidth">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetWidth.AWidth">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetHeight">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetHeight.AHeight">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetCursor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetCursor.ACursor">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TFCustomWindow.SetWindowOptions">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetWindowOptions.AValue">
+<short></short>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FParent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FCanvas">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FLeft">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FTop">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FHeight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FClientWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FClientHeight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FWindowOptions">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FChildWindows">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FMinSize">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TFCustomWindow.FMaxSize">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TFCustomWindow.GetTitle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomWindow.GetTitle.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomWindow.SetTitle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetTitle.ATitle">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TFCustomWindow.DoSetCursor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFCustomWindow.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.Create.AParent">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.Create.AWindowOptions">
+<short></short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TFCustomWindow.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFCustomWindow.CanClose">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFCustomWindow.CanClose.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.SetPosition">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetPosition.APosition">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.SetSize">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetSize.ASize">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.SetMinMaxSize">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetMinMaxSize.AMinSize">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetMinMaxSize.AMaxSize">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.SetClientSize">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetClientSize.ASize">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.SetMinMaxClientSize">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetMinMaxClientSize.AMinSize">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.SetMinMaxClientSize.AMaxSize">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.Show">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.Invalidate">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.Invalidate.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.PaintInvalidRegion">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.CaptureMouse">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.ReleaseMouse">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFCustomWindow.ProcessEvent">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFCustomWindow.ProcessEvent.AEvent">
+<short></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.WindowOptions">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Canvas">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Handle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.ChildWindows">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Left">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Top">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Width">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Height">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.ClientWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.ClientHeight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Cursor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Title">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.Parent">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnCreate">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnCanClose">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnClose">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnFocusIn">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnFocusOut">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnHide">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnKeyPressed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnKeyReleased">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnKeyChar">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnMouseEnter">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnMouseLeave">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnMousePressed">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnMouseReleased">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnMouseMove">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnMouseWheel">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnPaint">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnMove">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnResize">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFCustomWindow.OnShow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="Size">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="Size.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="Size.AWidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="Size.AHeight">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="Size.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="PtInRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="PtInRect.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="PtInRect.ARect">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="PtInRect.APoint">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="operator =">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="operator =.__INVALID__">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator =.ASize1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator =.ASize2">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="operator +">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="operator +.__INVALID__">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator +.APoint1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator +.APoint2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator +.APoint">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator +.ASize">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator +.ASize1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator +.ASize2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator +.i">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="operator -">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="operator -.__INVALID__">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator -.APoint1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator -.APoint2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator -.APoint">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator -.i">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator -.ASize">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator =.AColor1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="operator =.AColor2">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetAvgColor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="GetAvgColor.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetAvgColor.AColor1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetAvgColor.AColor2">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="KeycodeToText">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="KeycodeToText.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="KeycodeToText.Key">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="KeycodeToText.ShiftState">
+<short></short>
+</element>
+
+</module> <!-- GfxBase -->
+
+</package>
+</fpdoc-descriptions>
