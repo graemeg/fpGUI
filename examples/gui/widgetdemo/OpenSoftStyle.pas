@@ -5,7 +5,7 @@ unit OpenSoftStyle;
 interface
 
 uses
-  Classes, fpgui, gfxbase;
+  Classes, fpgui, gfxbase, fpgfx;
   
 type
 
@@ -18,12 +18,12 @@ type
     // Buttons (todo)
 //    procedure   DrawButtonFace(Canvas: TGfxCanvas; const ARect: TRect; Flags: TButtonFlags); override;
     // GroupBox
-    procedure   DrawGroupBox(Canvas: TGfxCanvas; const ARect: TRect; const ALabel: String; WidgetState: TWidgetState); override;
+    procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TWidgetState); override;
   end;
   
 
 var
-  FOpenSoftStyle: TOpenSoftStyle;
+  gOpenSoftStyle: TOpenSoftStyle;
   
 implementation
 
@@ -71,7 +71,7 @@ begin
 end;
 
 
-procedure TOpenSoftStyle.DrawGroupBox(Canvas: TGfxCanvas; const ARect: TRect;
+procedure TOpenSoftStyle.DrawGroupBox(Canvas: TFCanvas; const ARect: TRect;
     const ALabel: String; WidgetState: TWidgetState);
 var
   TitleWidth, TitleHeight, TopLine: Integer;
@@ -127,11 +127,11 @@ end;
 
 
 initialization
-  FOpenSoftStyle := TOpenSoftStyle.Create(Application.Display);
+  gOpenSoftStyle := TOpenSoftStyle.Create;
   
 finalization
-  if Assigned(FOpenSoftStyle) then
-    FOpenSoftStyle.Free;
+  if Assigned(gOpenSoftStyle) then
+    gOpenSoftStyle.Free;
   
 end.
 

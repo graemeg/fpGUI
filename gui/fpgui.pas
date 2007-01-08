@@ -153,7 +153,7 @@ procedure LoadForm(AForm: TComponent);
 implementation
 uses
   Math
-  ,StyleManager
+  ,stylemanager
   ;
 
 

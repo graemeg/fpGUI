@@ -1,17 +1,16 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="\"/>
+    <PathDelim Value="/"/>
     <Version Value="5"/>
     <General>
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=""/>
-      <ActiveEditorIndexAtStart Value="1"/>
+      <ActiveEditorIndexAtStart Value="2"/>
     </General>
     <PublishOptions>
       <Version Value="2"/>
-      <DestinationDirectory Value="$(TestDir)\publishedproject\"/>
       <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
@@ -19,7 +18,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">
@@ -39,89 +38,83 @@
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\..\src\applicationh.inc"/>
+        <Filename Value="../../src/applicationh.inc"/>
         <CursorPos X="18" Y="27"/>
         <TopLine Value="1"/>
         <UsageCount Value="13"/>
       </Unit1>
       <Unit2>
-        <Filename Value="..\..\src\application.inc"/>
+        <Filename Value="../../src/application.inc"/>
         <CursorPos X="17" Y="37"/>
         <TopLine Value="73"/>
-        <EditorIndex Value="4"/>
         <UsageCount Value="29"/>
-        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\..\src\formh.inc"/>
+        <Filename Value="../../src/formh.inc"/>
         <CursorPos X="1" Y="83"/>
         <TopLine Value="50"/>
         <UsageCount Value="19"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\..\src\fpgui.pp"/>
+        <Filename Value="../../src/fpgui.pp"/>
         <UnitName Value="fpGUI"/>
         <CursorPos X="18" Y="136"/>
         <TopLine Value="233"/>
         <UsageCount Value="55"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\..\src\form.inc"/>
+        <Filename Value="../../src/form.inc"/>
         <CursorPos X="31" Y="112"/>
         <TopLine Value="97"/>
-        <EditorIndex Value="5"/>
         <UsageCount Value="24"/>
-        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\..\..\fpgfx\src\gfxbase.pp"/>
+        <Filename Value="../../../fpgfx/src/gfxbase.pp"/>
         <UnitName Value="GfxBase"/>
         <CursorPos X="3" Y="41"/>
         <TopLine Value="24"/>
         <UsageCount Value="6"/>
       </Unit6>
       <Unit7>
-        <Filename Value="..\layouttest\layouttest.pp"/>
+        <Filename Value="../layouttest/layouttest.pp"/>
         <UnitName Value="LayoutTest"/>
         <CursorPos X="16" Y="7"/>
         <TopLine Value="1"/>
         <UsageCount Value="10"/>
       </Unit7>
       <Unit8>
-        <Filename Value="..\layouttest\mainform.frm"/>
+        <Filename Value="../layouttest/mainform.frm"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
         <UsageCount Value="10"/>
         <SyntaxHighlighter Value="None"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\..\src\layoutsh.inc"/>
+        <Filename Value="../../src/layoutsh.inc"/>
         <CursorPos X="15" Y="156"/>
         <TopLine Value="131"/>
         <UsageCount Value="23"/>
       </Unit9>
       <Unit10>
-        <Filename Value="..\..\src\widgeth.inc"/>
+        <Filename Value="../../src/widgeth.inc"/>
         <CursorPos X="1" Y="264"/>
         <TopLine Value="219"/>
         <UsageCount Value="21"/>
       </Unit10>
       <Unit11>
-        <Filename Value="..\..\src\widget.inc"/>
+        <Filename Value="../../src/widget.inc"/>
         <CursorPos X="9" Y="1356"/>
         <TopLine Value="1311"/>
-        <EditorIndex Value="6"/>
         <UsageCount Value="45"/>
-        <Loaded Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="..\..\src\buttonsh.inc"/>
+        <Filename Value="../../src/buttonsh.inc"/>
         <CursorPos X="19" Y="39"/>
         <TopLine Value="11"/>
         <UsageCount Value="1"/>
       </Unit12>
       <Unit13>
-        <Filename Value="..\..\src\buttons.inc"/>
+        <Filename Value="../../src/buttons.inc"/>
         <CursorPos X="3" Y="77"/>
         <TopLine Value="56"/>
         <UsageCount Value="10"/>
@@ -137,7 +130,7 @@
         <Loaded Value="True"/>
       </Unit14>
       <Unit15>
-        <Filename Value="..\..\src\groupboxh.inc"/>
+        <Filename Value="../../src/groupboxh.inc"/>
         <CursorPos X="15" Y="21"/>
         <TopLine Value="1"/>
         <UsageCount Value="19"/>
@@ -151,57 +144,57 @@
         <SyntaxHighlighter Value="None"/>
       </Unit16>
       <Unit17>
-        <Filename Value="..\layouttest\boxform.frm"/>
+        <Filename Value="../layouttest/boxform.frm"/>
         <CursorPos X="27" Y="6"/>
         <TopLine Value="1"/>
         <UsageCount Value="33"/>
         <SyntaxHighlighter Value="None"/>
       </Unit17>
       <Unit18>
-        <Filename Value="..\widgettest\groupboxform.frm"/>
+        <Filename Value="../widgettest/groupboxform.frm"/>
         <CursorPos X="9" Y="18"/>
         <TopLine Value="1"/>
         <UsageCount Value="18"/>
         <SyntaxHighlighter Value="None"/>
       </Unit18>
       <Unit19>
-        <Filename Value="..\..\src\binh.inc"/>
+        <Filename Value="../../src/binh.inc"/>
         <CursorPos X="1" Y="18"/>
         <TopLine Value="1"/>
         <UsageCount Value="6"/>
       </Unit19>
       <Unit20>
-        <Filename Value="..\..\src\containerh.inc"/>
+        <Filename Value="../../src/containerh.inc"/>
         <CursorPos X="1" Y="3"/>
         <TopLine Value="1"/>
         <UsageCount Value="6"/>
       </Unit20>
       <Unit21>
-        <Filename Value="opt\fpc-2.1.1\src\rtl\objpas\classes\classesh.inc"/>
+        <Filename Value="opt/fpc-2.1.1/src/rtl/objpas/classes/classesh.inc"/>
         <CursorPos X="3" Y="104"/>
         <TopLine Value="81"/>
         <UsageCount Value="1"/>
       </Unit21>
       <Unit22>
-        <Filename Value="..\..\src\checkboxh.inc"/>
+        <Filename Value="../../src/checkboxh.inc"/>
         <CursorPos X="1" Y="42"/>
         <TopLine Value="20"/>
         <UsageCount Value="13"/>
       </Unit22>
       <Unit23>
-        <Filename Value="..\..\src\groupbox.inc"/>
+        <Filename Value="../../src/groupbox.inc"/>
         <CursorPos X="32" Y="26"/>
         <TopLine Value="12"/>
         <UsageCount Value="16"/>
       </Unit23>
       <Unit24>
-        <Filename Value="..\..\src\styleh.inc"/>
+        <Filename Value="../../src/styleh.inc"/>
         <CursorPos X="20" Y="86"/>
         <TopLine Value="68"/>
         <UsageCount Value="19"/>
       </Unit24>
       <Unit25>
-        <Filename Value="..\..\src\style.inc"/>
+        <Filename Value="../../src/style.inc"/>
         <CursorPos X="17" Y="103"/>
         <TopLine Value="80"/>
         <UsageCount Value="25"/>
@@ -217,237 +210,223 @@
         <Loaded Value="True"/>
       </Unit26>
       <Unit27>
-        <Filename Value="..\..\src\bin.inc"/>
+        <Filename Value="../../src/bin.inc"/>
         <CursorPos X="29" Y="25"/>
         <TopLine Value="2"/>
         <UsageCount Value="7"/>
       </Unit27>
       <Unit28>
-        <Filename Value="..\widgettest\editform.frm"/>
+        <Filename Value="../widgettest/editform.frm"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
         <UsageCount Value="4"/>
         <SyntaxHighlighter Value="None"/>
       </Unit28>
       <Unit29>
-        <Filename Value="..\widgettest\widgettest.pp"/>
+        <Filename Value="../widgettest/widgettest.pp"/>
         <UnitName Value="WidgetTest"/>
         <CursorPos X="1" Y="497"/>
         <TopLine Value="461"/>
         <UsageCount Value="6"/>
       </Unit29>
       <Unit30>
-        <Filename Value="..\..\src\separatorh.inc"/>
+        <Filename Value="../../src/separatorh.inc"/>
         <CursorPos X="15" Y="26"/>
         <TopLine Value="3"/>
         <UsageCount Value="4"/>
       </Unit30>
       <Unit31>
-        <Filename Value="..\..\src\separator.inc"/>
+        <Filename Value="../../src/separator.inc"/>
         <CursorPos X="19" Y="32"/>
         <TopLine Value="30"/>
         <UsageCount Value="4"/>
       </Unit31>
       <Unit32>
-        <Filename Value="..\..\src\layouts.inc"/>
+        <Filename Value="../../src/layouts.inc"/>
         <CursorPos X="17" Y="871"/>
         <TopLine Value="613"/>
-        <EditorIndex Value="3"/>
         <UsageCount Value="29"/>
-        <Loaded Value="True"/>
       </Unit32>
       <Unit33>
-        <Filename Value="..\..\src\win32\defstyle.inc"/>
+        <Filename Value="../../src/win32/defstyle.inc"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
         <UsageCount Value="4"/>
       </Unit33>
       <Unit34>
-        <Filename Value="..\..\src\defimpl\defstyle.inc"/>
+        <Filename Value="../../src/defimpl/defstyle.inc"/>
         <CursorPos X="42" Y="57"/>
         <TopLine Value="23"/>
         <UsageCount Value="12"/>
       </Unit34>
       <Unit35>
-        <Filename Value="..\..\..\fpGFX\src\x11\gfx_x11.pp"/>
+        <Filename Value="../../../fpGFX/src/x11/gfx_x11.pp"/>
         <UnitName Value="GFX_X11"/>
         <CursorPos X="14" Y="499"/>
         <TopLine Value="470"/>
         <UsageCount Value="5"/>
       </Unit35>
       <Unit36>
-        <Filename Value="..\..\..\lptk\src\gfxstyle.pas"/>
+        <Filename Value="../../../lptk/src/gfxstyle.pas"/>
         <UnitName Value="gfxstyle"/>
         <CursorPos X="39" Y="7"/>
         <TopLine Value="93"/>
         <UsageCount Value="5"/>
       </Unit36>
       <Unit37>
-        <Filename Value="..\..\..\lptk\src\gfxwidget.pas"/>
+        <Filename Value="../../../lptk/src/gfxwidget.pas"/>
         <UnitName Value="gfxwidget"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="737"/>
         <UsageCount Value="25"/>
       </Unit37>
       <Unit38>
-        <Filename Value="..\..\src\container.inc"/>
+        <Filename Value="../../src/container.inc"/>
         <CursorPos X="31" Y="25"/>
         <TopLine Value="2"/>
         <UsageCount Value="15"/>
       </Unit38>
       <Unit39>
-        <Filename Value="..\..\src\gridh.inc"/>
+        <Filename Value="../../src/gridh.inc"/>
         <CursorPos X="1" Y="137"/>
         <TopLine Value="103"/>
         <UsageCount Value="6"/>
       </Unit39>
       <Unit40>
-        <Filename Value="..\..\src\grid.inc"/>
+        <Filename Value="../../src/grid.inc"/>
         <CursorPos X="3" Y="18"/>
         <TopLine Value="1"/>
         <UsageCount Value="7"/>
       </Unit40>
       <Unit41>
-        <Filename Value="media\sda5\Programming\MasterMaths\M2Browser_v3\3rdParty\Gauge\TGauge.pas"/>
+        <Filename Value="media/sda5/Programming/MasterMaths/M2Browser_v3/3rdParty/Gauge/TGauge.pas"/>
         <UnitName Value="TGauge"/>
         <CursorPos X="39" Y="3"/>
         <TopLine Value="90"/>
         <UsageCount Value="7"/>
       </Unit41>
       <Unit42>
-        <Filename Value="..\..\src\checkbox.inc"/>
+        <Filename Value="../../src/checkbox.inc"/>
         <CursorPos X="3" Y="89"/>
         <TopLine Value="83"/>
         <UsageCount Value="12"/>
       </Unit42>
       <Unit43>
-        <Filename Value="..\..\src\combobox.inc"/>
+        <Filename Value="../../src/combobox.inc"/>
         <CursorPos X="24" Y="171"/>
         <TopLine Value="148"/>
         <UsageCount Value="6"/>
       </Unit43>
       <Unit44>
-        <Filename Value="..\..\..\personal\fpgui\src\form.inc"/>
+        <Filename Value="../../../personal/fpgui/src/form.inc"/>
         <CursorPos X="27" Y="121"/>
         <TopLine Value="101"/>
         <UsageCount Value="6"/>
       </Unit44>
       <Unit45>
-        <Filename Value="..\..\src\radiobutton.inc"/>
+        <Filename Value="../../src/radiobutton.inc"/>
         <CursorPos X="19" Y="107"/>
         <TopLine Value="85"/>
         <UsageCount Value="12"/>
       </Unit45>
       <Unit46>
-        <Filename Value="..\..\..\lptk\src\gfxbase.pas"/>
+        <Filename Value="../../../lptk/src/gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
         <CursorPos X="38" Y="2355"/>
         <TopLine Value="3421"/>
         <UsageCount Value="25"/>
       </Unit46>
       <Unit47>
-        <Filename Value="..\..\..\lptk\src\schar16.pas"/>
+        <Filename Value="../../../lptk/src/schar16.pas"/>
         <UnitName Value="schar16"/>
         <CursorPos X="10" Y="35"/>
         <TopLine Value="1"/>
         <UsageCount Value="7"/>
       </Unit47>
       <Unit48>
-        <Filename Value="..\..\..\lptk\src\unitkeys.pas"/>
+        <Filename Value="../../../lptk/src/unitkeys.pas"/>
         <UnitName Value="unitkeys"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="302"/>
         <UsageCount Value="7"/>
       </Unit48>
       <Unit49>
-        <Filename Value="..\..\..\lptk\src\wgbutton.pas"/>
+        <Filename Value="../../../lptk/src/wgbutton.pas"/>
         <UnitName Value="wgbutton"/>
         <CursorPos X="15" Y="34"/>
         <TopLine Value="11"/>
         <UsageCount Value="7"/>
       </Unit49>
       <Unit50>
-        <Filename Value="..\..\..\lptk\src\wglabel.pas"/>
+        <Filename Value="../../../lptk/src/wglabel.pas"/>
         <UnitName Value="wglabel"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="1"/>
         <UsageCount Value="7"/>
       </Unit50>
       <Unit51>
-        <Filename Value="..\..\src\colors.inc"/>
+        <Filename Value="../../src/colors.inc"/>
         <CursorPos X="1" Y="1"/>
         <TopLine Value="39"/>
-        <EditorIndex Value="7"/>
         <UsageCount Value="24"/>
-        <Loaded Value="True"/>
       </Unit51>
       <Unit52>
-        <Filename Value="..\..\..\fpgfx.trunk\src\gfxbase.pp"/>
+        <Filename Value="../../../fpgfx.trunk/src/gfxbase.pp"/>
         <UnitName Value="GfxBase"/>
         <CursorPos X="19" Y="402"/>
         <TopLine Value="507"/>
         <UsageCount Value="8"/>
       </Unit52>
       <Unit53>
-        <Filename Value="\opt\lazarus\ide\editoroptions.pp"/>
+        <Filename Value="opt/lazarus/ide/editoroptions.pp"/>
         <ComponentName Value="EditorOptionsForm"/>
         <HasResources Value="True"/>
-        <ResourceFilename Value="\opt\lazarus\ide\editoroptions.lrs"/>
+        <ResourceFilename Value="opt/lazarus/ide/editoroptions.lrs"/>
         <UnitName Value="EditorOptions"/>
         <CursorPos X="28" Y="2302"/>
         <TopLine Value="2595"/>
         <UsageCount Value="21"/>
       </Unit53>
       <Unit54>
-        <Filename Value="\opt\lazarus\components\synedit\synedit.pp"/>
+        <Filename Value="opt/lazarus/components/synedit/synedit.pp"/>
         <UnitName Value="SynEdit"/>
         <CursorPos X="28" Y="6001"/>
         <TopLine Value="5978"/>
         <UsageCount Value="21"/>
       </Unit54>
       <Unit55>
-        <Filename Value="\opt\lazarus\components\synedit\synedittextbuffer.pp"/>
+        <Filename Value="opt/lazarus/components/synedit/synedittextbuffer.pp"/>
         <UnitName Value="SynEditTextBuffer"/>
         <CursorPos X="15" Y="135"/>
         <TopLine Value="181"/>
         <UsageCount Value="21"/>
       </Unit55>
       <Unit56>
-        <Filename Value="\opt\lazarus\components\synedit\synedithighlighter.pp"/>
+        <Filename Value="opt/lazarus/components/synedit/synedithighlighter.pp"/>
         <UnitName Value="SynEditHighlighter"/>
         <CursorPos X="34" Y="145"/>
         <TopLine Value="766"/>
         <UsageCount Value="21"/>
       </Unit56>
       <Unit57>
-        <Filename Value="\opt\lazarus\components\synedit\synhighlighterpas.pp"/>
+        <Filename Value="opt/lazarus/components/synedit/synhighlighterpas.pp"/>
         <UnitName Value="SynHighlighterPas"/>
         <CursorPos X="3" Y="83"/>
         <TopLine Value="658"/>
         <UsageCount Value="21"/>
       </Unit57>
       <Unit58>
-        <Filename Value="..\..\..\tiOPF2\Source\Core\tiObject.pas"/>
+        <Filename Value="../../../tiOPF2/Source/Core/tiObject.pas"/>
         <UnitName Value="tiObject"/>
         <CursorPos X="1" Y="1756"/>
         <TopLine Value="1933"/>
         <UsageCount Value="19"/>
       </Unit58>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
-      <Position1>
-        <Filename Value="OpenSoftStyle.pas"/>
-        <Caret Line="34" Column="1" TopLine="1"/>
-      </Position1>
-      <Position2>
-        <Filename Value="OpenSoftStyle.pas"/>
-        <Caret Line="108" Column="10" TopLine="95"/>
-      </Position2>
-    </JumpHistory>
+    <JumpHistory Count="0" HistoryIndex="-1"/>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
-    <PathDelim Value="\"/>
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>

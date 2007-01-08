@@ -8,9 +8,10 @@ uses
   {$ENDIF}{$ENDIF}
   Classes
   ,SysUtils
-  ,fpgui
   ,OpenSoftStyle
-  ,gfxbase
+  ,fpgui
+  ,fpgfx
+  ,stylemanager
   ;
   
 type
@@ -98,7 +99,7 @@ begin
       exit  //==>
     else
     begin
-      Style := TOpenSoftStyle.Create(Application.Display);
+      Style := gOpenSoftStyle;
       Redraw;
     end;
   end
@@ -108,7 +109,7 @@ begin
       exit  //==>
     else
     begin
-      Style := Application.DefaultStyle;
+      Style := gStyleManager.DefaultStyle;
       Redraw;
     end;
   end;
@@ -352,9 +353,14 @@ var
   WidgetDemoForm: TWidgetDemoForm;
   
 begin
-  WidgetDemoForm := TWidgetDemoForm.Create(nil);
-  Application.AddForm(WidgetDemoForm);
-  Application.Run;
-  WidgetDemoForm.Free;
+  GFApplication.Initialize;
+
+  WidgetDemoForm := TWidgetDemoForm.Create(GFApplication);
+  try
+    WidgetDemoForm.Show;
+    GFApplication.Run;
+  finally
+    WidgetDemoForm.Free;
+  end;
 end.
 
