@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
+    <PathDelim Value="\"/>
     <Version Value="5"/>
     <General>
       <Flags>
@@ -20,7 +20,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">
@@ -28,23 +28,24 @@
         <PackageName Value="fpgfxpackage"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="1">
       <Unit0>
-        <Filename Value="../subwindow/subwindow.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="subwindow"/>
-      </Unit0>
-      <Unit1>
         <Filename Value="helloworld.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelloWorld"/>
-      </Unit1>
+      </Unit0>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
+    <PathDelim Value="\"/>
+    <SearchPaths>
+      <LCLWidgetType Value="win32"/>
+    </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>
+      <TargetCPU Value="i386"/>
+      <TargetOS Value="Win32"/>
     </CodeGeneration>
     <Other>
       <CustomOptions Value="-FUunits

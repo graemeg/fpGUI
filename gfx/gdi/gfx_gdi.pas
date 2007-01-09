@@ -510,7 +510,9 @@ var
 begin
   with ARect do
     Region := Windows.CreateRectRgn(Left, Top, Right, Bottom);
+  {$IFNDEF WinCE}
   Result := Windows.ExtSelectClipRgn(Handle, Region, RGN_OR) <> NULLREGION;
+  {$ENDIF}
   Windows.DeleteObject(Region);
 end;
 
@@ -519,7 +521,7 @@ function TGDICanvas.DoGetClipRect: TRect;
 var
   Rect: Windows.Rect;
 begin
-  Windows.GetClipBox(Handle, Rect);
+  Windows.GetClipBox(Handle, @Rect);
   Result := TRect(Rect);
 end;
 
@@ -569,8 +571,10 @@ begin
   {$Warning DoDrawArc needs testing. }
   Angles2Coords(ARect.Left, ARect.Top, ARect.Right - ARect.Left,
       ARect.Bottom - ARect.Top, StartAngle, EndAngle, SX, SY, EX, EY);
+  {$ifndef wince}
   Windows.Arc(Handle, ARect.Left, ARect.Top, ARect.Right,
       ARect.Bottom, SX, SY, EX, EY)
+  {$endif}
 end;
 
 
@@ -622,7 +626,11 @@ begin
   pts[3].X := pt.X;   pts[3].Y := pt.Y;
 
   NeedBrush;
-  Windows.Polygon(Handle, pts, 3);
+  {$ifdef wince}
+  Windows.Polygon(Handle, @pts[1], 3);
+  {$else}
+  Windows.Polygon(Handle, pts[1], 3);
+  {$endif}
 end;
 
 
@@ -640,7 +648,11 @@ begin
   NeedFont(False);
 
   WideText := Utf8Decode(AText);
-  Windows.GetTextExtentPoint32W(Handle, PWideChar(WideText), Length(WideText), @Result)
+  {$ifdef wince}
+    Windows.GetTextExtentPoint32(Handle, PWideChar(WideText), Length(WideText), @Result)
+  {$else}
+    Windows.GetTextExtentPoint32W(Handle, PWideChar(WideText), Length(WideText), @Result)
+  {$endif}
 end;
 
 
@@ -651,7 +663,11 @@ begin
   NeedFont(True);
 
   WideText := Utf8Decode(AText);
-  Windows.TextOutW(Handle, APosition.x, APosition.y, PWideChar(WideText), Length(WideText))
+  {$ifdef wince}
+    Windows.ExtTextOut(Handle, APosition.x, APosition.y, ETO_CLIPPED, nil, PWideChar(WideText), Length(WideText), nil)
+  {$else}
+    Windows.TextOutW(Handle, APosition.x, APosition.y, PWideChar(WideText), Length(WideText))
+  {$endif}
 end;
 
 
@@ -961,7 +977,9 @@ begin
   IsLocked := True;
   AData := Data;
   AStride := Stride;
+  {$ifndef wince}
   Windows.GdiFlush;
+  {$endif}
 end;
 
 procedure TGDIBitmap.Unlock;
@@ -1163,10 +1181,10 @@ begin
      begin
        if (LoWord(lParam) <> Window.ClientWidth) or (HiWord(lParam) <> Window.ClientHeight) then
        begin
-         Windows.GetWindowRect(Window.Handle, r);
+         Windows.GetWindowRect(Window.Handle, @r);
          Window.FWidth := r.Right - r.Left;
          Window.FHeight := r.Bottom - r.Top;
-         Windows.GetClientRect(Window.Handle, r);
+         Windows.GetClientRect(Window.Handle, @r);
          Window.FClientWidth := LoWord(lParam);
          Window.FClientHeight := HiWord(lParam);
          TGDICanvas(Window.Canvas).Resized(Window.FWidth, Window.FHeight);
@@ -1434,7 +1452,7 @@ begin
     r.Top := 0;
     r.Right := ASize.cx;
     r.Bottom := ASize.cy;
-    Windows.AdjustWindowRectEx(r, FWindowStyle, False, FWindowStyleEx);
+    Windows.AdjustWindowRectEx(@r, FWindowStyle, False, FWindowStyleEx);
     SetSize(Size(WinRectToRect(r)));
   end;
 end;
@@ -1448,7 +1466,7 @@ begin
   Rect.Top := 0;
   Rect.Right := AMinSize.cx;
   Rect.Bottom := AMinSize.cy;
-  Windows.AdjustWindowRectEx(Rect, FWindowStyle, False, FWindowStyleEx);
+  Windows.AdjustWindowRectEx(@Rect, FWindowStyle, False, FWindowStyleEx);
   if AMinSize.cx > 0 then
     FMinSize.cx := Rect.Right - Rect.Left
   else
@@ -1462,7 +1480,7 @@ begin
   Rect.Top := 0;
   Rect.Right := AMaxSize.cx;
   Rect.Bottom := AMaxSize.cy;
-  Windows.AdjustWindowRectEx(Rect, FWindowStyle, False, FWindowStyleEx);
+  Windows.AdjustWindowRectEx(@Rect, FWindowStyle, False, FWindowStyleEx);
   if AMaxSize.cx > 0 then
     FMaxSize.cx := Rect.Right - Rect.Left
   else
@@ -1621,7 +1639,7 @@ begin
        begin
          pt.x := LoWord(AEvent.lparam);
          pt.y := HiWord(AEvent.lparam);
-         Windows.ScreenToClient(Handle, pt);
+         Windows.ScreenToClient(Handle, @pt);
          OnMouseWheel(Self, GetKeyboardShiftState, SmallInt(HiWord(AEvent.wParam)) / -120.0,
           Point(pt.x, pt.y));
        end
@@ -1686,9 +1704,13 @@ end;
 
 procedure TGDIWindow.SetTitle(const ATitle: String);
 begin
+  {$ifdef wince}
+    Windows.SetWindowText(Handle, PWideChar(Utf8Decode(ATitle)))
+  {$else}
   if UnicodeEnabledOS then
     Windows.SetWindowTextW(Handle, PWideChar(Utf8Decode(ATitle)))
   else Windows.SetWindowText(Handle, PChar(Utf8ToAnsi(ATitle)));
+  {$endif}
 end;
 
 
@@ -1753,7 +1775,7 @@ function TGDIWindow.DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Bool
 
     // only WM_MOUSEWHEEL uses screen coordinates!!!
     if uMsg <> WM_MOUSEWHEEL then
-      Windows.ClientToScreen(Handle, pt);
+      Windows.ClientToScreen(Handle, @pt);
 
     Result := WindowFromPoint(pt) <> Handle;
   end;
@@ -1781,7 +1803,7 @@ begin
     pt.x := LoWord(lParam);
     pt.y := HiWord(lParam);
     if uMsg = WM_MOUSEWHEEL then
-      Windows.ScreenToClient(Handle, pt);
+      Windows.ScreenToClient(Handle, @pt);
     if (pt.x < 0) or (pt.y < 0) or (pt.x >= ClientWidth) or
       (pt.y >= ClientHeight) or CursorInDifferentWindow then
       FMouseInWindow := False;
@@ -1825,11 +1847,18 @@ end;
 
 initialization
 
+{$IFDEF WinCE}
+
+  UnicodeEnabledOS := True;
+
+{$ELSE}
+
   WinVersion.dwOSVersionInfoSize := SizeOf(TOSVersionInfo);
   GetVersionEx(WinVersion);
 
   UnicodeEnabledOS := (WinVersion.dwPlatformID = VER_PLATFORM_WIN32_NT)
    or (WinVersion.dwPlatformID = VER_PLATFORM_WIN32_CE);
+{$ENDIF}
 
 end.
 

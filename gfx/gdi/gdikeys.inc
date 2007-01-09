@@ -296,7 +296,9 @@ function GetKeyboardShiftState: TShiftState;
 var
   State: array[Byte] of Byte;
 begin
+  {$ifndef wince}
   Windows.GetKeyboardState(State);
+  {$endif}
   Result := [];
   if (State[VK_SHIFT] and 128) <> 0 then
     Include(Result, ssShift);
