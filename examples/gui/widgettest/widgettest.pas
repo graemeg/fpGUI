@@ -186,12 +186,13 @@ type
   end;
   
 
+  { TMenuForm }
+
   TMenuForm = class(TTestForm)
   private
-    FLayout: TBoxLayout;
+    procedure   CloseMenuClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
   published
     BoxLayout: TBoxLayout;
     MainMenu: TMenuBar;
@@ -257,6 +258,12 @@ end;
 
 { TMenuForm }
 
+procedure TMenuForm.CloseMenuClicked(Sender: TObject);
+begin
+  writeln('...Close menu clicked');
+  Close;
+end;
+
 constructor TMenuForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -268,44 +275,13 @@ begin
   
   MainMenu := TMenuBar.Create(self);
   BoxLayout.InsertChild(MainMenu);
-  FLayout := TBoxLayout.Create(self);
-  FLayout.Spacing := 0;
-  FLayout.BorderSpacing := 6;
-  FLayout.HorzAlign := horzLeft;
-//  MainMenu.InsertChild(FLayout);
 
-{
-  MainMenu.AddMenu('File');
+  MainMenu.AddMenu('Close', 'C', @CloseMenuClicked);
+//  MainMenu.AddMenu('File');
   MainMenu.AddMenu('Edit');
   MainMenu.AddMenu('Options');
   MainMenu.AddMenu('Windows');
   MainMenu.AddMenu('Help');
-}
-
-  FLayout.InsertChild(TPanel.Create('File', self));
-  FLayout.InsertChild(TPanel.Create('Edit', self));
-
-  MenuBox := TBoxLayout.Create(self);
-  MenuBox.HorzAlign := horzLeft;
-  MenuBox.Spacing := 0;
-  BoxLayout.InsertChild(MenuBox);
-  p1 := TPanel.Create('File', self);
-  p1.BevelStyle := bsPlain;
-  p2 := TPanel.Create('Edit', self);
-  p2.BevelStyle := bsPlain;
-  p3 := TPanel.Create('Options', self);
-  p3.BevelStyle := bsPlain;
-  p4 := TPanel.Create('Windows', self);
-  p4.BevelStyle := bsPlain;
-  p5 := TPanel.Create('Help', self);
-  p5.BevelStyle := bsPlain;
-  MenuBox.InsertChild(p1);
-  MenuBox.InsertChild(p2);
-  MenuBox.InsertChild(p3);
-  MenuBox.InsertChild(p4);
-  MenuBox.InsertChild(p5);
-//  MenuBox.InsertChild(TPanel.Create('Testing', self));
-
 
   Title := TLabel.Create(self);
   Title.CanExpandWidth := True;
@@ -317,10 +293,6 @@ begin
   Child := BoxLayout;
 end;
 
-destructor TMenuForm.Destroy;
-begin
-  inherited Destroy;
-end;
 
 { TPanelForm }
 

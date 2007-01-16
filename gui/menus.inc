@@ -29,7 +29,7 @@
     FHotKeyDef: string;
     FSeparator: boolean;
   protected
-    function    ProcessEvent(pEvent: TEventObj): Boolean; override;
+    procedure   Paint(Canvas: TFCanvas); override;
   public
     constructor Create(const pText: string; pOwner: TComponent); overload;
   published
@@ -40,20 +40,17 @@
     property    Enabled;
   end;
 
-  
+
   { TMenuBar }
 
-  TMenuBar = class(TBinWidget)
+  TMenuBar = class(TCustomBoxLayout)
   private
   protected
-    procedure   Paint(Canvas: TFCanvas); override;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     function    AddMenu(const pTitle: string): TMenuItem;
     function    AddMenu(const pTitle: string; const pHotKeyDef: string; pHandlerProc: TNotifyEvent): TMenuItem;
   published
-//    FLayout: TBoxLayout;
   end;
 
 {$ENDIF read_interface}
@@ -64,78 +61,42 @@
 
 { TMenuItem }
 
-function TMenuItem.ProcessEvent(pEvent: TEventObj): Boolean;
+procedure TMenuItem.Paint(Canvas: TFCanvas);
 begin
-  if pEvent.InheritsFrom(TMouseMoveEventObj) then
-    Writeln('MenuItem ' + Text
-        + ' X=' + IntToStr(TMouseMoveEventObj(pEvent).Position.X)
-        + ',Y=' + IntToStr(TMouseMoveEventObj(pEvent).Position.Y));
+  if (wsClicked in WidgetState) and (wsMouseInside in WidgetState) then
+    FBevelStyle := bsLowered
+  else
+    FBevelStyle := bsPlain;
 
-  Result := inherited ProcessEvent(pEvent);
+  inherited Paint(Canvas);
 end;
 
 constructor TMenuItem.Create(const pText: string; pOwner: TComponent);
 begin
   inherited Create(pText, pOwner);
+  WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
   FBevelStyle := bsPlain;
-end;
-
-
-procedure TMenuBar.Paint(Canvas: TFCanvas);
-{var
-  i: integer;   }
-begin
-  inherited Paint(Canvas);
-  Style.DrawWindowBackground(Canvas, ClientRect);
-//  FLayout.Paint(Canvas);
-{
-
-  for i := 1 to VisibleCount do
-  begin
-    DrawColumn(Canvas, i, i = FFocusItem);
-  end;
-
-  Style.DrawSeparator(
-      Canvas,
-      Rect(0, ClientRect.Bottom - 4, ClientRect.Right, ClientRect.Bottom),
-      Horizontal);
- }
 end;
 
 constructor TMenuBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-//  WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
-  FCanExpandWidth := True;
-{
-  FLayout := TBoxLayout.Create(nil);
-  FLayout.Spacing := 0;
-  FLayout.BorderSpacing := 6;
-  FLayout.HorzAlign := horzLeft;
-  
-  InsertChild(FLayout);
-}
+  WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
+  FCanExpandHeight := False;
+  Spacing := 0;
 end;
-
-destructor TMenuBar.Destroy;
-begin
-//  RemoveChild(FLayout);
-//  FLayout.Free;
-  inherited Destroy;
-end;
-
 
 function TMenuBar.AddMenu(const pTitle: string): TMenuItem;
 begin
   Result := TMenuItem.Create(pTitle, self);
-//  FLayout.InsertChild(Result);
+  InsertChild(Result);
 end;
 
 
 function TMenuBar.AddMenu(const pTitle: string; const pHotKeyDef: string;
   pHandlerProc: TNotifyEvent): TMenuItem;
 begin
-  Result := TMenuItem.Create(self);
+  Result := AddMenu(pTitle);
   if pTitle <> '-' then
   begin
     Result.Text       := pTitle;
@@ -143,10 +104,7 @@ begin
     Result.OnClick    := pHandlerProc;
   end
   else
-  begin
     Result.Separator  := True;
-  end;
-//  FLayout.InsertChild(Result);
 end;
 
 

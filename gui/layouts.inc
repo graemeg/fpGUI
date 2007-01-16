@@ -52,7 +52,6 @@ type
     IsRecalcingLayout: Boolean;
     function    GetChildCount: Integer; override;
     function    GetChild(Index: Integer): TWidget; override;
-    procedure   AddFixedChild(AChild: TWidget);
     property    BorderSpacing: Integer read FBorderSpacing write FBorderSpacing;
   public
     constructor Create(AOwner: TComponent); override;
@@ -75,6 +74,8 @@ type
   { TFixedLayout }
 
   TFixedLayout = class(TLayout)
+  private
+    procedure   AddFixedChild(AChild: TWidget);
   protected
     procedure   CalcSizes; override;
   public
@@ -344,10 +345,6 @@ end;
 
 // protected methods
 
-procedure TLayout.AddFixedChild(AChild: TWidget);
-begin
-end;
-
 function TLayout.GetChildCount: Integer;
 begin
   Result := FWidgets.Count;
@@ -399,6 +396,11 @@ begin
     end;
   end;
   raise ELayoutError.Create(SLayoutWidgetNotFound);
+end;
+
+procedure TFixedLayout.AddFixedChild(AChild: TWidget);
+begin
+  // todo
 end;
 
 procedure TFixedLayout.CalcSizes;
@@ -581,7 +583,7 @@ begin
   item := TDockingItem(FWidgets.Add);
   item.Widget := AWidget;
   item.DockingMode := ADockingMode;
-  AddFixedChild(AWidget);
+//  AddFixedChild(AWidget);
 end;
 
 procedure TDockingLayout.AddWidget(AWidget: TWidget; ALeft, ATop: Integer);
@@ -594,7 +596,7 @@ begin
   item.DockingMode := dmUndocked;
   item.Left := ALeft;
   item.Top := ATop;
-  AddFixedChild(AWidget);
+//  AddFixedChild(AWidget);
 end;
 
 
