@@ -1,0 +1,50 @@
+[fpguiapp | fpGUI template application]
+uses
+  fpGFX, fpGUI;
+
+type
+  TMainForm = class(TForm)
+  private
+    FMainLayout: TBoxLayout;
+    lblTemplate: TLabel;
+  public
+    procedure AfterConstruction; override;
+  end;
+
+
+{ TMainForm }
+
+procedure TMainForm.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  Name        := 'MainForm';
+  BorderWidth := 8;
+  Text        := 'fpGUI Template Application';
+
+  FMainLayout := TBoxLayout.Create(self);
+  FMainLayout.Spacing       := 8;
+  FMainLayout.Orientation   := Vertical;
+  FMainLayout.VertAlign     := vertFill;
+  InsertChild(FMainLayout);
+
+  lblTemplate := TLabel.Create('MainForm', self);
+  FMainLayout.InsertChild(lblTemplate);
+
+  // Create other components here
+
+end;
+
+
+var
+  MainForm: TMainForm;
+begin
+  GFApplication.Initialize;
+  MainForm := TMainForm.Create(GFApplication);
+  try
+    MainForm.Show;
+    GFApplication.Run;
+  finally
+    MainForm.Free;
+  end;
+end.
+

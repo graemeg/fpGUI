@@ -192,7 +192,6 @@ begin
     if wsClicked in FWidgetState then
     begin
       Exclude(FWidgetState, wsClicked);
-      Exclude(FWidgetState, wsHasFocus);
       Paint;
       if Assigned(OnClick) then
         OnClick(self);
@@ -209,13 +208,14 @@ begin
   begin
     Include(FWidgetState, wsClicked);
     SetFocus;
-    Paint;
+//    Paint;
   end;
 end;
 
 procedure TWidget.EvOnMouseLeave(Sender: TObject);
 begin
-//  Exclude(FWidgetState, wsHasFocus);
+  Exclude(FWidgetState, wsHasFocus);
+  Paint;
 end;
 
 procedure TWidget.SetColor(const AValue: TGfxColor);
@@ -280,6 +280,7 @@ end;
 procedure TWidget.SetFocus;
 begin
   Include(FWidgetState, wsHasFocus);
+  Paint;
 //  FindForm.FocusedWidget := Self;
 end;
 
@@ -323,16 +324,7 @@ begin
     Include(lFlags, btnIsSelected);
   end;
 
-  if btnIsSelected in lFlags then
-  begin
-    Canvas.SetColor(cl3DDkShadow);
-    Canvas.DrawRect(r);
-    Inc(r.Left);
-    Inc(r.Top);
-    Dec(r.Right);
-    Dec(r.Bottom);
-  end;
-
+  { draw actual button }
   if btnIsPressed in lFlags then
   begin
     Canvas.SetColor(cl3DShadow);
@@ -343,8 +335,23 @@ begin
     Dec(r.Bottom);
   end
   else
+  begin
     Draw3DFrame(TFCanvas(Canvas), r, cl3DHighlight, cl3DLight, cl3DDkShadow, cl3DShadow);
-  
+  end;
+
+  { draw focus rectangle }
+  if (btnIsSelected in lFlags) and not (btnIsPressed in lFlags) then
+  begin
+    Inc(r.Left, 2);
+    Inc(r.Top, 2);
+    Dec(r.Right, 2);
+    Dec(r.Bottom, 2);
+    Canvas.SetColor(cl3DDkShadow);
+    Canvas.SetLineStyle(lsDot);
+    Canvas.DrawRect(r);
+    Canvas.SetLineStyle(lsSolid);
+  end;
+
   Canvas.SetColor(colBlack);
   Pt.x := (Width - Canvas.TextWidth(FCaption)) div 2;
   Pt.y := ((Height - Canvas.FontCellHeight) div 2) + 1;

@@ -426,15 +426,11 @@ end;
 
 function TMouseLeaveCheckEventObj.SendToChild(AChild: TWidget): Boolean;
 begin
-(*  if AChild = AChild.FindForm.MouseCaptureWidget then
-    WriteLn('CapturedWidget: Leave check for ', MouseX, ' / ', MouseY);
-  if {(AChild <> AChild.FindForm.MouseCaptureWidget) and}
-    ((MouseX < AChild.Left) or (MouseY < AChild.Top) or
-    (MouseX >= AChild.Left + AChild.Width) or
-    (MouseY >= AChild.Top + AChild.Height)) and
-    (wsMouseInside in AChild.WidgetState) then
-      AChild.SendEvent(TMouseLeaveEventObj.Create(Self));
-*)
+  if ((FPosition.X < AChild.Left) or (FPosition.Y < AChild.Top) or
+    (FPosition.X >= AChild.Left + AChild.Width) or
+    (FPosition.Y >= AChild.Top + AChild.Height)) and
+      (wsMouseInside in AChild.WidgetState) then
+    AChild.SendEvent(TMouseLeaveEventObj.Create(Self));
 
   Result := inherited SendToChild(AChild);
 end;
@@ -1224,9 +1220,9 @@ function TWidget.EvCalcSizes(Event: TCalcSizesEventObj): Boolean;
 begin
   LAYOUTTRACE('TWidget.EvCalcSizes for %s:%s', [Name, ClassName]);
 
-  FMinSize := gfxbase.Size(0, 0);
-  FMaxSize := gfxbase.Size(InfiniteSize, InfiniteSize);
-  FDefSize := gfxbase.Size(0, 0);
+  FMinSize := Size(0, 0);
+  FMaxSize := Size(InfiniteSize, InfiniteSize);
+  FDefSize := Size(0, 0);
 
   CalcSizes;
 
@@ -1329,7 +1325,9 @@ begin
     (wsEnabled in WidgetState) then
     Redraw;
   Result := False;
-  // WriteLn('Mouse entered ', Name, ':', ClassName, '. New cursor: ', Ord(Event.NewCursor));
+  {$IFDEF DEBUG}
+  WriteLn('Mouse entered ', Name, ':', ClassName, '. New cursor: ', Ord(Event.NewCursor));
+  {$ENDIF}
 end;
 
 function TWidget.EvMouseLeave(Event: TMouseLeaveEventObj): Boolean;
@@ -1339,7 +1337,9 @@ begin
     (wsEnabled in WidgetState) then
     Redraw;
   Result := False;
-  // WriteLn('Mouse left ', Name, ':', ClassName);
+  {$IFDEF DEBUG}
+  WriteLn('Mouse left ', Name, ':', ClassName);
+  {$ENDIF}
 end;
 
 function TWidget.EvMouseLeaveCheck(Event: TMouseLeaveCheckEventObj): Boolean;

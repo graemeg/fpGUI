@@ -70,6 +70,7 @@
     // Combo boxes
     function    GetComboBoxArrowSize: TSize; virtual; abstract;
     procedure   DrawComboBoxArrow(Canvas: TFCanvas; const ARect: TRect; IsPressed, IsEnabled: Boolean); virtual; abstract;
+    function    GetComboBoxBtnSize: TSize; virtual; abstract;
     // Scroll bars
     function    GetScrollBarBorders(Orientation: TOrientation): TRect; virtual; abstract;
     function    GetScrollBarBtnSize(Orientation: TOrientation): TSize; virtual; abstract;
@@ -127,6 +128,7 @@
     // Combo boxes
     procedure   DrawComboBoxArrow(Canvas: TFCanvas; const ARect: TRect; IsPressed, IsEnabled: Boolean); override;
     function    GetComboBoxArrowSize: TSize; override;
+    function    GetComboBoxBtnSize: TSize; override;
     // Scroll bars
     function    GetScrollBarBorders(Orientation: TOrientation): TRect; override;
     function    GetScrollBarBtnSize(Orientation: TOrientation): TSize; override;
@@ -627,7 +629,14 @@ end;
 
 function TDefaultStyle.GetComboBoxArrowSize: TSize;
 begin
-  Result := Size(16, 17);
+  Result.cx := 17;
+  Result.cy := 17;
+end;
+
+function TDefaultStyle.GetComboBoxBtnSize: TSize;
+begin
+  Result.cx := 18;
+  Result.cy := 18;
 end;
 
 procedure TDefaultStyle.DrawComboBoxArrow(Canvas: TFCanvas;

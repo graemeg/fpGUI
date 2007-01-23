@@ -63,7 +63,6 @@ begin
   GFApplication.Initialize;
   MainForm := TMainForm.Create(GFApplication);
   try
-    GFApplication.AddWindow(MainForm.Wnd);  { I don't like this! }
     MainForm.Show;
     GFApplication.Run;
   finally

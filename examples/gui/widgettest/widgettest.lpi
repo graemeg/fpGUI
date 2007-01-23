@@ -6,7 +6,6 @@
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
-        <AlwaysBuild Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>

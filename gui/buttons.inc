@@ -41,6 +41,7 @@
   TButton = class(TCustomButton)
   published
     property    CanExpandWidth;
+    property    CanExpandHeight;
     property    Enabled;
     property    Text;
     property    OnClick;
@@ -98,7 +99,6 @@ begin
   Style.DrawButtonFace(Canvas, Rect(0, 0, BoundsSize.cx, BoundsSize.cy), Flags);
 end;
 
-
 // ===================================================================
 //   TCustomButton
 // ===================================================================
@@ -138,7 +138,6 @@ begin
   end;
   FDefSize := FMinSize + gfxbase.Size(20, 2);
 end;
-
 
 constructor TCustomButton.Create(const pText: string; pOwner: TComponent);
 begin

@@ -30,6 +30,7 @@
     FSeparator: boolean;
   protected
     procedure   Paint(Canvas: TFCanvas); override;
+    function ProcessEvent(Event: TEventObj): Boolean; override;
   public
     constructor Create(const pText: string; pOwner: TComponent); overload;
   published
@@ -69,6 +70,18 @@ begin
     FBevelStyle := bsPlain;
 
   inherited Paint(Canvas);
+end;
+
+function TMenuItem.ProcessEvent(Event: TEventObj): Boolean;
+begin
+  {$IFDEF DEBUG}
+  if Event.InheritsFrom(TMouseEnterEventObj) then
+    writeln(Format('MouseEnter for %s:%s', [Text, Classname]))
+  else if Event.InheritsFrom(TMouseLeaveEventObj) then
+    writeln(Format('MouseLeave for %s:%s', [Text, Classname]));
+  {$ENDIF}
+
+  Result:=inherited ProcessEvent(Event);
 end;
 
 constructor TMenuItem.Create(const pText: string; pOwner: TComponent);

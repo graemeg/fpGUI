@@ -167,7 +167,6 @@ begin
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
 end;
 
-
 procedure TScrollBarSlider.UpdateBar;
 var
   Size: Integer;
@@ -198,7 +197,6 @@ begin
     Redraw;
   end;
 end;
-
 
 procedure TScrollBarSlider.Paint(Canvas: TFCanvas);
 var
@@ -256,7 +254,6 @@ begin
   Style.DrawButtonFace(Canvas, r, [btnIsEmbedded]);
 end;
 
-
 function TScrollBarSlider.ProcessEvent(Event: TEventObj): Boolean;
 begin
   Result := False;
@@ -273,7 +270,6 @@ begin
   if Event.InheritsFrom(TVisibilityChangeEventObj) and Visible then
     UpdateBar;
 end;
-
 
 function TScrollBarSlider.EvMousePressed(Event: TMousePressedEventObj): Boolean;
 var
@@ -309,9 +305,7 @@ begin
   Result := True;
 end;
 
-
-function TScrollBarSlider.EvMouseReleased(
-  Event: TMouseReleasedEventObj): Boolean;
+function TScrollBarSlider.EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
 var
   NewPosition: Integer;
 begin
@@ -348,7 +342,6 @@ begin
   Result := True;
 end;
 
-
 function TScrollBarSlider.EvMouseMove(Event: TMouseMoveEventObj): Boolean;
 var
   Pos, Size, VirtualPos: Integer;
@@ -356,6 +349,7 @@ begin
   if IsDraggingButton then
   begin
     if wsMouseInside in WidgetState then
+    begin
       if TCustomScrollBar(Owner).Orientation = Horizontal then
       begin
         Pos := Event.Position.x;
@@ -364,7 +358,8 @@ begin
       begin
         Pos := Event.Position.y;
         Size := Height;
-      end
+      end;
+    end
     else
     begin
       Pos := DragStartMousePos;
@@ -372,7 +367,7 @@ begin
         Size := Width
       else
         Size := Height;
-    end;
+    end;  { if/else }
 
     ButtonPos := ClipMinMax(DragStartButtonPos + Pos - DragStartMousePos,
       0, Size - ButtonSize);
@@ -391,7 +386,6 @@ begin
     Result := False;
 end;
 
-
 procedure TScrollBarSlider.CalcSizes;
 begin
   if TCustomScrollBar(Owner).Orientation = Horizontal then
@@ -400,31 +394,31 @@ begin
     FDefSize.cy := Style.GetScrollBarBtnSize(Vertical).cx * 5;
 end;
 
-
 function TScrollBarSlider.CalcPosition: Integer;
 var
   Size: Integer;
+  lOwner: TCustomScrollBar;
 begin
-  with TCustomScrollBar(Owner) do
-  begin
-    if Orientation = Horizontal then
-      Size := Self.Width
-    else
-      Size := Self.Height;
+  Assert(Owner is TCustomScrollBar);
+  lOwner := TCustomScrollBar(Owner);
 
-    if Size = ButtonSize then
-      Position := 0
+  if lOwner.Orientation = Horizontal then
+    Size := Width
+  else
+    Size := Height;
+
+  if Size = ButtonSize then
+    lOwner.Position := 0
+  else
+  begin
+    if lOwner.PageSize = 0 then
+	      Result := ButtonPos * (lOwner.Max - lOwner.Min + 1)
     else
-    begin
-      if PageSize = 0 then
-	      Result := ButtonPos * (Max - Min + 1)
-      else
-	      Result := ButtonPos * (Max - Min - PageSize + 2);
-      Result := Result div (Size - ButtonSize);
-      Result := Result + Min;
-    end;
-    Result := ClipPosition(Result);
+	      Result := ButtonPos * (lOwner.Max - lOwner.Min - lOwner.PageSize + 2);
+    Result := Result div (Size - ButtonSize);
+    Result := Result + lOwner.Min;
   end;
+  Result := lOwner.ClipPosition(Result);
 end;
 
 
@@ -438,8 +432,8 @@ begin
   Include(WidgetStyle, wsOpaque);
   Embedded := False;
 
-  FMax := 100;
-  FSmallChange := 1;
+  FMax          := 100;
+  FSmallChange  := 1;
 
   ButtonUp := TScrollBarButton.Create(Self);
   ButtonUp.Name               := '#ScrollBarButtonUp';
@@ -451,7 +445,7 @@ begin
   ButtonUp.SetEmbeddedParent(Self);
 
   Slider := TScrollBarSlider.Create(Self);
-  Slider.Name := '#ScrollBarSlider';
+  Slider.Name                 := '#ScrollBarSlider';
   Slider.SetEmbeddedParent(Self);
 
   ButtonDown := TScrollBarButton.Create(Self);
@@ -464,18 +458,15 @@ begin
   ButtonDown.SetEmbeddedParent(Self);
 end;
 
-
 procedure TCustomScrollBar.LineUp;
 begin
   Position := Position - SmallChange;
 end;
 
-
 procedure TCustomScrollBar.LineDown;
 begin
   Position := Position + SmallChange;
 end;
-
 
 procedure TCustomScrollBar.PageUp;
 var
@@ -703,11 +694,13 @@ end;
 
 function TCustomScrollBar.ClipPosition(APosition: Integer): Integer;
 begin
-  if APosition > Max - PageSize then
+  if APosition > (Max - PageSize) then
+  begin
     if PageSize = 0 then
       Result := Max
     else
-      Result := Max - PageSize + 1
+      Result := Max - PageSize + 1;
+  end
   else
     Result := APosition;
   if Result < Min then

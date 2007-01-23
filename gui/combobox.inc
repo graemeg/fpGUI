@@ -20,8 +20,6 @@
 
   { Combobox widget declarations }
 
-  { TCustomComboBox }
-  
   TComboBoxPopup = class(TPopupWindow)
   private
     FLayout: TBoxLayout;
@@ -37,12 +35,12 @@
     FItemIndex: Integer;
     FItems: TStrings;
     FOnChange: TNotifyEvent;
-    procedure   ButtonClick(Sender: TObject);
+    procedure   ComboBoxButtonClick(Sender: TObject);
     procedure   DropDownDeactivate(Sender: TObject);
     procedure   DropDownDestroy(Sender: TObject);
     procedure   SetItemIndex(const AValue: Integer);
   protected
-    FButton: TGenericButton;
+    ComboBoxButton: TGenericButton;
     FDropDown: TComboBoxPopup;
     lbl: TLabel;
     procedure   Click; override;
@@ -98,7 +96,7 @@ end;
 
 procedure TArrowButton.CalcSizes;
 begin
-  FMinSize := Style.GetComboBoxArrowSize;
+  FMinSize := Style.GetComboBoxBtnSize;
 end;
 
 constructor TComboBoxPopup.Create(AOwner: TComponent);
@@ -107,15 +105,16 @@ begin
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
   BorderWidth := 1;
   Color       := clBlack;
+  Name        := '#ComboBoxPopup';
 
   FLayout := TBoxLayout.Create(self);
-  FLayout.Name        := 'VBox';
+  FLayout.Name        := '#VBoxLayout';
   FLayout.Orientation := Vertical;
   FLayout.Spacing     := 0;
   InsertChild(FLayout);
 
   FListBox := TListBox.Create(self);
-  FListBox.Name       := 'Listbox';
+  FListBox.Name       := '#Listbox';
   FListBox.HotTrack   := True;
   FLayout.InsertChild(FListBox);
 end;
@@ -133,12 +132,13 @@ begin
   FItems := TStringList.Create;
   FItemIndex := -1;
 
-  FButton := TArrowButton.Create(Self);
-  FButton.Name := 'FButton';
-  FButton.Embedded        := True;
-  FButton.CanExpandWidth  := False;
-  FButton.OnClick         := @ButtonClick;
-  FButton.Parent          := Self;
+  ComboBoxButton := TArrowButton.Create(Self);
+  ComboBoxButton.Name             := '#ComboBoxButton';
+  ComboBoxButton.Embedded         := True;
+  ComboBoxButton.CanExpandWidth   := False;
+  ComboBoxButton.CanExpandHeight  := False;
+  ComboBoxButton.OnClick          := @ComboBoxButtonClick;
+  ComboBoxButton.SetEmbeddedParent(Self);
 end;
 
 destructor TCustomComboBox.Destroy;
@@ -152,6 +152,8 @@ var
   Pt: TPoint;
   ItemRect: TRect;
   ItemFlags: TItemFlags;
+  c: TFCanvas;
+  r: TRect;
 begin
   ItemFlags := [];
   Style.DrawEditBox(Canvas, Rect(0, 0, Width, Height));
@@ -168,14 +170,28 @@ begin
       Include(ItemFlags, ifSelected);
     end;
 
-    ItemRect := Rect(0, 0, (Width - FButton.Width), Height);
+    ItemRect := Rect(0, 0, (Width - ComboBoxButton.Width), Height);
 //    InflateRect(ItemRect, -1, -1);
     ItemRect.TopLeft := ItemRect.TopLeft + 1;
     ItemRect.BottomRight := ItemRect.BottomRight - 2;
 
-    Style.DrawItemBefore(Canvas, ItemRect, ItemFlags);
-    Style.DrawText(Canvas, Pt, Text, WidgetState);
-    Style.DrawItemAfter(Canvas, ItemRect, ItemFlags);
+    { Text must be clipped before reaching the button }
+//    try
+//      Canvas.SaveState;
+//      writeln(Format('Canvas size Before %d:%d', [Canvas.Width, Canvas.Height]));
+//      r := Canvas.Transform(ComboBoxButton.BoundsRect);
+//      writeln(Format('  Bounding rectangle (%d:%d)x(%d:%d)', [BoundsRect.Top, BoundsRect.Left, BoundsRect.Bottom, BoundsRect.Right]));
+//      writeln(Format('  Canvas rectangle (%d:%d)x(%d:%d)', [Canvas.GetClipRect.Top, Canvas.GetClipRect.Left, Canvas.GetClipRect.Bottom, Canvas.GetClipRect.Right]));
+//      writeln(Format('  ComboButton rectangle (%d:%d)x(%d:%d)', [r.Top, r.Left, r.Bottom, r.Right]));
+//      Canvas.IntersectClipRect(r);
+//      writeln(Format('Canvas size After %d:%d', [Canvas.Width, Canvas.Height]));
+
+      Style.DrawItemBefore(Canvas, ItemRect, ItemFlags);
+      Style.DrawText(Canvas, Pt, Text, WidgetState);
+      Style.DrawItemAfter(Canvas, ItemRect, ItemFlags);
+//    finally
+//      Canvas.RestoreState;
+//    end;
   end
   else
   begin
@@ -187,25 +203,26 @@ end;
 procedure TCustomComboBox.CalcSizes;
 begin
   with Style.GetEditBoxBorders do
-    FMinSize := gfxBase.Size(FButton.MinSize.cx,
-      Max(FindForm.Wnd.Canvas.FontCellHeight, FButton.MinSize.cy)) +
+    FMinSize := Size(ComboBoxButton.MinSize.cx,
+      Max(FindForm.Wnd.Canvas.FontCellHeight, ComboBoxButton.MinSize.cy)) +
       TopLeft + BottomRight;
 end;
 
 procedure TCustomComboBox.Resized;
 begin
   with Style.GetEditBoxBorders do
-    FButton.SetBounds(Point(Width - Right - FButton.MinSize.cx, Top),
-      FButton.MinSize);
+    ComboBoxButton.SetBounds(
+      Point(Width - Right - ComboBoxButton.MinSize.cx, Top),
+      ComboBoxButton.MinSize);
 end;
 
 function TCustomComboBox.DistributeEvent(Event: TEventObj): Boolean;
 begin
-  Result := Event.SendToChild(FButton) or
-    inherited DistributeEvent(Event);
+  Result := Event.SendToChild(ComboBoxButton);
+//   or inherited DistributeEvent(Event);
 end;
 
-procedure TCustomComboBox.ButtonClick(Sender: TObject);
+procedure TCustomComboBox.ComboBoxButtonClick(Sender: TObject);
 begin
   if Assigned(FDropDown) and FDropDown.Visible then
   begin
@@ -262,7 +279,7 @@ end;
   component, or press the spacebar key. }
 procedure TCustomComboBox.Click;
 begin
-  ButtonClick(nil);
+  ComboBoxButtonClick(nil);
   inherited Click;
 end;
 

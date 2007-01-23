@@ -30,7 +30,7 @@ uses
   SysUtils, Classes,   // FPC units
   X, XLib, XUtil,     // X11 units
   {$IFDEF XftSupport}
-  unitxft;            // Xft font support
+  unitxft,            // Xft font support
   {$ENDIF}
   GfxBase,            // fpGFX units
   GELDirty;           // fpGFX emulation layer
@@ -257,7 +257,12 @@ function GetXEventName(Event: LongInt): String;
 implementation
 
 uses
-  GELImage, fpGFX;
+  GELImage
+  ,fpGFX
+  {$IFDEF XftSupport}
+  ,schar16            // Unicode support
+  {$ENDIF}
+  ;
 
 resourcestring
   SFontCreationFailed = 'Could not create font with descriptor "%s"';
@@ -334,9 +339,9 @@ begin
     //  FBufferWin := -1;
     //  FXftDrawBuffer := nil;
     {$ENDIF}
-    FXftDraw := XftDrawCreate(gApplication.Handle, Handle,
-      XDefaultVisual(gApplication.Handle, XDefaultScreen(gApplication.Handle)),
-      XDefaultColormap(gApplication.Handle, XDefaultScreen(gApplication.Handle)));
+    FXftDraw := XftDrawCreate(GFApplication.Handle, Handle,
+      XDefaultVisual(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)),
+      XDefaultColormap(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)));
   {$ENDIF XftSupport}
 end;
 
@@ -641,12 +646,12 @@ begin
     Exit; //==>
     
   {$IFDEF XftSupport}
-  fnt := XftFontOpenName(gApplication.Handle, XDefaultScreen(gApplication.Handle), PChar('Sans-12'));
+  fnt := XftFontOpenName(GFApplication.Handle, XDefaultScreen(GFApplication.Handle), PChar('Sans-12'));
   SetXftColor(FCurColor,fntColor);
   s := u8(AText);
-//  XftDrawString8(FXftDraw, fntColor, fnt, APosition.x, Aposition.y, PChar(AText),Length(AText));
-  XftDrawString16(FXftDraw, fntColor, fnt, APosition.x, Aposition.y * 3, @s[1], Length16(s));
-  XftFontClose(gApplication.Handle, fnt);
+  XftDrawString8(FXftDraw, fntColor, fnt, APosition.x, Aposition.y, PChar(AText),Length(AText));
+//  XftDrawString16(FXftDraw, fntColor, fnt, APosition.x, Aposition.y * 3, @s[1], Length16(s));
+  XftFontClose(GFApplication.Handle, fnt);
   {$ELSE}
   XDrawString(GFApplication.Handle, Handle, GC, APosition.x,
     APosition.y + FFontStruct^.ascent, PChar(AText), Length(AText));
@@ -1530,20 +1535,23 @@ begin
   GFApplication.DirtyList.AddRect(Self, ARect);
 end;
 
-
 procedure TX11Window.PaintInvalidRegion;
 begin
   GFApplication.DirtyList.PaintQueueForWindow(Self);
 end;
 
-
 procedure TX11Window.CaptureMouse;
 begin
-  XGrabPointer(GFApplication.Handle, Handle, False, ButtonPressMask or
-    ButtonReleaseMask or EnterWindowMask or LeaveWindowMask or
-    PointerMotionMask, GrabModeAsync, GrabModeAsync, 0, 0, CurrentTime);
+  XGrabPointer(GFApplication.Handle, Handle,
+      True,
+      ButtonPressMask or ButtonReleaseMask or EnterWindowMask or LeaveWindowMask or PointerMotionMask,
+      GrabModeAsync,
+      GrabModeAsync,
+      0,
+      0,
+      CurrentTime
+      );
 end;
-
 
 procedure TX11Window.ReleaseMouse;
 begin
@@ -1615,7 +1623,7 @@ begin
      end;
    etMouseLeave:
      begin
-       if Assigned(OnMouseEnter) then OnMouseLeave(Self)
+       if Assigned(OnMouseLeave) then OnMouseLeave(Self)
        else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
      end;
    etMousePressed:

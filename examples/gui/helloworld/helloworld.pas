@@ -3,20 +3,60 @@ program HelloWorld;
 {$mode objfpc}{$h+}
 
 uses
-  fpGUI, fpguipackage;
+  fpGUI
+  ,fpGFX    { GFApplication }
+  ,gfxBase
+  ;
 
 type
   TMainForm = class(TForm)
-    TextLabel: TLabel;
-    lblClose: TLabel;
+  private
+    BoxLayout: TBoxLayout;
+    btnHello: TButton;
+  public
+    procedure AfterConstruction; override;
   end;
+
+
+{ TMainForm }
+
+procedure TMainForm.AfterConstruction;
+var
+  lSize: TSize;
+begin
+  inherited AfterConstruction;
+  Name        := 'MainForm';
+  BorderWidth := 8;
+  Text        := 'fpGUI Application';
+
+  { every fpGUI app needs a layout manager }
+  BoxLayout := TBoxLayout.Create(self);
+  BoxLayout.Spacing       := 8;
+  BoxLayout.VertAlign     := vertFill;
+  InsertChild(BoxLayout);
+
+  { create our button }
+  btnHello := TButton.Create('Hello World!', self);
+  btnHello.CanExpandWidth   := True;
+  btnHello.CanExpandHeight  := True;
+  BoxLayout.InsertChild(btnHello);
+
+  { set a min and max size }
+  lSize.cx := 150;
+  lSize.cy := 100;
+  Wnd.SetMinMaxClientSize(lSize, lSize);
+end;
+
 
 var
   MainForm: TMainForm;
-
 begin
-  Application.CreateForm(TMainForm, MainForm);
-  
-  Application.Run;
-  MainForm.Free;
+  GFApplication.Initialize;
+  MainForm := TMainForm.Create(GFApplication);
+  try
+    MainForm.Show;
+    GFApplication.Run;
+  finally
+    MainForm.Free;
+  end;
 end.
