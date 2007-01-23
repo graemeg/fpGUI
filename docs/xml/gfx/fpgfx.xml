@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0"?>
 <fpdoc-descriptions>
 <package name="fpGFX">
 
@@ -9,13 +9,13 @@
 -->
 
 <module name="fpgfx">
-<short></short>
+<short/>
 <descr>
 </descr>
 
 <!-- unresolved type reference Visibility: default -->
 <element name="Classes">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -24,7 +24,7 @@
 
 <!-- unresolved type reference Visibility: default -->
 <element name="SysUtils">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -33,7 +33,7 @@
 
 <!-- unresolved type reference Visibility: default -->
 <element name="gfxinterface">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -42,7 +42,7 @@
 
 <!-- object Visibility: default -->
 <element name="TFFont">
-<short></short>
+<short/>
 <descr>
 </descr>
 <errors>
@@ -53,7 +53,7 @@
 
 <!-- object Visibility: default -->
 <element name="TFCanvas">
-<short></short>
+<short/>
 <descr>
 </descr>
 <errors>
@@ -64,7 +64,7 @@
 
 <!-- object Visibility: default -->
 <element name="TFBitmap">
-<short></short>
+<short/>
 <descr>
 </descr>
 <errors>
@@ -75,7 +75,7 @@
 
 <!-- object Visibility: default -->
 <element name="TFScreen">
-<short></short>
+<short/>
 <descr>
 </descr>
 <errors>
@@ -85,19 +85,11 @@
 </element>
 
 <!-- object Visibility: default -->
-<element name="TFWindow">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
+<element name="TFWindow"/>
 
 <!-- object Visibility: default -->
 <element name="TFApplication">
-<short></short>
+<short/>
 <descr>
 </descr>
 <errors>
@@ -108,7 +100,7 @@
 
 <!-- function Visibility: default -->
 <element name="GFScreen">
-<short></short>
+<short/>
 <descr>
 </descr>
 <errors>
@@ -119,12 +111,12 @@
 
 <!-- function result Visibility: default -->
 <element name="GFScreen.Result">
-<short></short>
+<short/>
 </element>
 
 <!-- function Visibility: default -->
 <element name="GFApplication">
-<short></short>
+<short/>
 <descr>
 </descr>
 <errors>
@@ -135,7 +127,7 @@
 
 <!-- function result Visibility: default -->
 <element name="GFApplication.Result">
-<short></short>
+<short/>
 </element>
 
 </module> <!-- fpgfx -->

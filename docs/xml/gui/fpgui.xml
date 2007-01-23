@@ -157,7 +157,7 @@
       </element>
 <!-- constant Visibility: default -->
 <element name="clBlack">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -166,7 +166,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clMaroon">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -175,7 +175,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clOlive">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -184,7 +184,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clNavy">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -193,7 +193,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clPurple">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -202,7 +202,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clTeal">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -211,7 +211,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clGray">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -220,7 +220,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clSilver">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -229,7 +229,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clLime">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -238,7 +238,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clFuchsia">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -247,7 +247,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clAqua">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -256,7 +256,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clLtGray">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -265,7 +265,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clDkGray">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -274,7 +274,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clWhite">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -283,7 +283,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBtnFace">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -292,7 +292,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBtnShadow">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -301,7 +301,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBtnHighlight">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -310,7 +310,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clAliceBlue">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -319,7 +319,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clAntiqueWhite">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -328,7 +328,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clAquamarine">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -337,7 +337,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clAzure">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -346,7 +346,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBeige">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -355,7 +355,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBisque">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -364,7 +364,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBlanchedAlmond">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -373,7 +373,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBlueViolet">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -382,7 +382,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBrown">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -391,7 +391,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clBurlyWood">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -400,7 +400,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clCadetBlue">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -409,7 +409,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clChartreuse">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -418,7 +418,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clChocolate">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -427,7 +427,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clLightYellow">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -436,7 +436,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clCornsilk">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -445,7 +445,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clMidnightBlue">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -454,7 +454,7 @@
 
 <!-- constant Visibility: default -->
 <element name="clDarkWhite">
-<short></short>
+<short/>
 <descr>
 </descr>
 <seealso>
@@ -1630,11 +1630,8 @@ ensuring that they look exactly like the equivalent native widgets.</descr>
       <!-- argument Visibility: default -->
       <element name="TPaintEventObj.SendToChild.AChild"><short/></element>
       <!-- object Visibility: default -->
-      <element name="TMouseEventObj">
-        <short/>
-        <descr/>
-        <errors/>
-        <seealso/>
+      <element name="TMouseEventObj">        <short>Mouse event</short>
+        <descr><printshort id="TMouseEventObj"/>. This is a base event being used by any mouse related events.</descr>
       </element>
       <!-- variable Visibility: private -->
       <element name="TMouseEventObj.FShift">
@@ -1719,18 +1716,12 @@ ensuring that they look exactly like the equivalent native widgets.</descr>
         <seealso/>
       </element>
       <!-- object Visibility: default -->
-      <element name="TMousePressedEventObj">
-        <short/>
-        <descr/>
-        <errors/>
-        <seealso/>
+      <element name="TMousePressedEventObj">        <short>Mouse button press event</short>
+        <descr><printshort id="TMousePressedEventObj"/>. This occurs when one of the mouse buttons are being depressed.</descr>
       </element>
       <!-- object Visibility: default -->
-      <element name="TMouseReleasedEventObj">
-        <short/>
-        <descr/>
-        <errors/>
-        <seealso/>
+      <element name="TMouseReleasedEventObj">        <short>Mouse button release event</short>
+        <descr><printshort id="TMouseReleasedEventObj"/>. This occurs when the mouse button was pressed and is now being released.</descr>
       </element>
       <!-- object Visibility: default -->
       <element name="TMouseMoveEventObj">
@@ -1751,11 +1742,8 @@ ensuring that they look exactly like the equivalent native widgets.</descr>
       <!-- argument Visibility: default -->
       <element name="TMouseMoveEventObj.SendToChild.AChild"><short/></element>
       <!-- object Visibility: default -->
-      <element name="TMouseEnterEventObj">
-        <short/>
-        <descr/>
-        <errors/>
-        <seealso/>
+      <element name="TMouseEnterEventObj">        <short>Mouse enter event</short>
+        <descr><printshort id="TMouseEnterEventObj"/>. This occurs when the mouse enters a Window or a Widget.</descr>
       </element>
       <!-- variable Visibility: public -->
       <element name="TMouseEnterEventObj.NewCursor">
@@ -1764,11 +1752,8 @@ ensuring that they look exactly like the equivalent native widgets.</descr>
         <seealso/>
       </element>
       <!-- object Visibility: default -->
-      <element name="TMouseLeaveEventObj">
-        <short/>
-        <descr/>
-        <errors/>
-        <seealso/>
+      <element name="TMouseLeaveEventObj">        <short>Mouse leave event</short>
+        <descr><printshort id="TMouseLeaveEventObj"/>. This occurs when the mouse leaves the Window or Widget.</descr>
       </element>
       <!-- function Visibility: public -->
       <element name="TMouseLeaveEventObj.SendToChild">
@@ -2382,22 +2367,22 @@ want to add a layout to the parent TWidget.</p>
       <element name="TWidget.SetBounds.ASize"><short/></element>
 <!-- argument Visibility: default -->
 <element name="TWidget.SetBounds.x">
-<short></short>
+<short/>
 </element>
 
 <!-- argument Visibility: default -->
 <element name="TWidget.SetBounds.y">
-<short></short>
+<short/>
 </element>
 
 <!-- argument Visibility: default -->
 <element name="TWidget.SetBounds.w">
-<short></short>
+<short/>
 </element>
 
 <!-- argument Visibility: default -->
 <element name="TWidget.SetBounds.h">
-<short></short>
+<short/>
 </element>
       <!-- function Visibility: public -->
       <element name="TWidget.WidgetToClient">
@@ -3578,7 +3563,7 @@ widget it manages into the correct cell.
           <p>Columns and rows behave identically.  A TGridLayout lays out widgets
 in a two-dimensional grid. Widgets can also occupy multiple cells.
 </p>
-          <table border="1" width="300">
+          <table width="300" border="1">
             <tr>
               <td>0,0</td>
               <td>0,1</td>
@@ -4304,22 +4289,16 @@ minimum width set to 75 pixels.</descr>
         <seealso/>
       </element>
       <!-- property Visibility: published -->
-      <element name="TScrollBar.Orientation">
-        <short/>
-        <descr/>
-        <seealso/>
+      <element name="TScrollBar.Orientation">        <short>The scrollbar orientation</short>
+        <descr>This can be either Vertical or Horizontal.</descr>
       </element>
       <!-- property Visibility: published -->
-      <element name="TScrollBar.Min">
-        <short/>
-        <descr/>
-        <seealso/>
+      <element name="TScrollBar.Min">        <short>Minimum position</short>
+        <descr>This is the minimum position the the scrollbar can move to.</descr>
       </element>
       <!-- property Visibility: published -->
-      <element name="TScrollBar.Max">
-        <short/>
-        <descr/>
-        <seealso/>
+      <element name="TScrollBar.Max">        <short>Maximum position</short>
+        <descr>This is the maximum position the scrollbar can move to.</descr>
       </element>
       <!-- property Visibility: published -->
       <element name="TScrollBar.PageSize">
@@ -4328,10 +4307,8 @@ minimum width set to 75 pixels.</descr>
         <seealso/>
       </element>
       <!-- property Visibility: published -->
-      <element name="TScrollBar.Position">
-        <short/>
-        <descr/>
-        <seealso/>
+      <element name="TScrollBar.Position">        <short>Current position of scrollbar</short>
+        <descr>This is the current position of the scrollbar.</descr>
       </element>
       <!-- property Visibility: published -->
       <element name="TScrollBar.SmallChange">
@@ -7206,7 +7183,7 @@ improvements. The Motif style is fpGUI's default GUI style on Unix platforms.</d
       <element name="TMenuItem.Create.pOwner"><short/></element>
 <!-- argument Visibility: default -->
 <element name="TMenuItem.Create.AOwner">
-<short></short>
+<short/>
 </element>
       <!-- constant Visibility: default -->
       <element name="clRed">
