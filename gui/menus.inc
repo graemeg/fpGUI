@@ -30,7 +30,7 @@
     FSeparator: boolean;
   protected
     procedure   Paint(Canvas: TFCanvas); override;
-    function ProcessEvent(Event: TEventObj): Boolean; override;
+    function    ProcessEvent(Event: TEventObj): Boolean; override;
   public
     constructor Create(const pText: string; pOwner: TComponent); overload;
   published
@@ -64,7 +64,7 @@
 
 procedure TMenuItem.Paint(Canvas: TFCanvas);
 begin
-  if (wsClicked in WidgetState) and (wsMouseInside in WidgetState) then
+  if (wsClicked in WidgetState) or (wsMouseInside in WidgetState) then
     FBevelStyle := bsLowered
   else
     FBevelStyle := bsPlain;
@@ -80,8 +80,21 @@ begin
   else if Event.InheritsFrom(TMouseLeaveEventObj) then
     writeln(Format('MouseLeave for %s:%s', [Text, Classname]));
   {$ENDIF}
-
-  Result:=inherited ProcessEvent(Event);
+  
+  if Event.InheritsFrom(TMouseEnterEventObj) then
+  begin
+    Include(WidgetState, wsMouseInside);
+    Redraw;
+    result := True;
+  end
+  else if Event.InheritsFrom(TMouseLeaveEventObj) then
+  begin
+    Exclude(WidgetState, wsMouseInside);
+    Redraw;
+    result := True;
+  end
+  else
+    result := inherited ProcessEvent(Event);
 end;
 
 constructor TMenuItem.Create(const pText: string; pOwner: TComponent);
