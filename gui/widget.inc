@@ -646,6 +646,9 @@ end;
 procedure TWidget.Redraw;
 begin
   Redraw(Rect(0, 0, BoundsSize.cx, BoundsSize.cy));
+  {$IFDEF DEBUG}
+  writeln(ClassName + '.Redraw');
+  {$ENDIF}
 end;
 
 procedure TWidget.Redraw(const ARect: TRect);

@@ -137,7 +137,7 @@ begin
   inherited Paint(Canvas);
 
   if not Canvas.IntersectClipRect(ScrollingSupport.ClientRect) then
-    exit;
+    exit; //==>
 
   Style.SetUIColor(Canvas, clWindow);
 //  Style.DrawWindowBackground(Canvas, ScrollingSupport.ClientRect);
@@ -231,7 +231,7 @@ var
   i, ItemWidth: Integer;
 begin
   if (not Assigned(FindForm)) or (not Assigned(FindForm.Wnd)) then
-    exit;
+    exit; //==>
 
   FMaxItemWidth := 0;
   for i := 0 to Items.Count - 1 do
@@ -246,7 +246,7 @@ end;
 procedure TCustomListBox.UpdateScrollBars;
 begin
   ScrollingSupport.SetVirtualSize(
-    gfxBase.Size(FMaxItemWidth, Items.Count * ItemHeight - 1));
+      Size(FMaxItemWidth, Items.Count * ItemHeight - 1));
 end;
 
 procedure TCustomListBox.RedrawItem(AIndex: Integer);
@@ -254,7 +254,7 @@ var
   ItemRect: TRect;
 begin
   if AIndex < 0 then
-    exit;
+    exit; //==>
   ItemRect := ScrollingSupport.ClientRect;
   Inc(ItemRect.Top, AIndex * ItemHeight -
     ScrollingSupport.VertScrollBar.Position);
