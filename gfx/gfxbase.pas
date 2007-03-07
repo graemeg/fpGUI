@@ -1373,13 +1373,14 @@ procedure TFCustomApplication.Run;
 begin
   DoBreakRun := False;
 
-  if gCommandLineParams.IsParam('?') then
+  if gCommandLineParams.IsParam('?') or gCommandLineParams.IsParam('help') then
   begin
+    writeln(' ');
     writeln(' The following parameters are supported by fpGUI applications.');
     writeln(' ');
     writeln(' -?               Shows this help');
     writeln(' -display         fpGUI/X11 only: sets the display to use');
-    writeln(' -style           Overrides the default (autodetected) GUI style');
+    writeln(' -style           Overrides the default (auto detected) GUI style');
     writeln(' ');
     DoBreakRun := True;
   end;
