@@ -137,11 +137,6 @@ begin
   else if Event.InheritsFrom(TMouseLeaveEventObj) then
   begin
     Exclude(WidgetState, wsMouseInside);
-//    if Assigned(FSubMenu) and (FSubMenu.Visible) then
-//    begin
-//      writeln('1111111111111');
-//     FSubMenu.Close;
-//    end;
     Redraw;
     result := True;
   end
@@ -157,6 +152,9 @@ begin
   end
   else
     inherited Click;
+
+  if FindForm is TPopupMenu then
+    TPopupMenu(FindForm).Close;
 end;
 
 constructor TMenuItem.Create(const pText: string; pOwner: TComponent);

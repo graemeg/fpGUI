@@ -52,7 +52,7 @@
       <Generate Value="Faster"/>
     </CodeGeneration>
     <Other>
-      <CustomOptions Value="-FUunits -dTraceEventsX -dDebug
+      <CustomOptions Value="-FUunits -dTraceEventsX -dDebugX
 "/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

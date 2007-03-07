@@ -267,9 +267,9 @@ end;
 
 procedure TMenuForm.AboutMenuClicked(Sender: TObject);
 begin
-  writeln('...About menu clicked from <' + Sender.ClassName + '>');
+  writeln('   About menu clicked from <' + Sender.ClassName + '>');
   if Sender is TMenuItem then
-    writeln('From: ' + TMenuItem(Sender).Text);
+    writeln('   from: ' + TMenuItem(Sender).Text);
 end;
 
 constructor TMenuForm.Create(AOwner: TComponent);

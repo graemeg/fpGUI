@@ -1353,8 +1353,8 @@ begin
   begin
     if wsMouseInside in WidgetState then
       SendEvent(TMouseLeaveEventObj.Create(Self))
-  end else if (FindForm.MouseCaptureWidget = Self) and
-    not (wsMouseInside in WidgetState) then
+  end
+  else if (FindForm.MouseCaptureWidget = Self) and not (wsMouseInside in WidgetState) then
     SendEvent(TMouseEnterEventObj.Create(Self, Event.Shift, Event.Position));
 
   if (wsMouseInside in WidgetState) and (Event.NewCursor = crDefault) and
