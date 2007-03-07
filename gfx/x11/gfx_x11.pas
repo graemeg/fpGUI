@@ -210,9 +210,7 @@ type
 
   TX11Application = class(TFCustomApplication)
   private
-    DoBreakRun: Boolean;
     FDirtyList: TDirtyList;
-    FDisplayName: String;
     FDefaultFont: TX11FontResourceImpl;
     FEventFilter: TX11EventFilter;
     Handle: PDisplay;
@@ -1031,8 +1029,8 @@ var
   WindowEntry: TFCustomWindow;
   Event: TFEvent;
 begin
-  DoBreakRun := False;
-  
+  inherited Run;
+
   while (not (QuitWhenLastWindowCloses and (Forms.Count = 0))) and
    (DoBreakRun = False) do
   begin
@@ -1243,8 +1241,14 @@ end;
 
 procedure TX11Application.Initialize(ADisplayName: String = '');
 begin
-  if Length(ADisplayName) = 0 then FDisplayName := XDisplayName(nil)
-  else FDisplayName := ADisplayName;
+  if Length(ADisplayName) = 0 then
+  begin
+    // Maybe it was passed as a -display parameter. Lets check first!
+    if FDisplayName = '' then
+      FDisplayName := XDisplayName(nil)
+  end
+  else
+    FDisplayName := ADisplayName;
 
   Handle := XOpenDisplay(PChar(DisplayName));
 
@@ -1262,7 +1266,9 @@ begin
 
   if not Assigned(FDefaultFont) then
   begin
-    {$IFNDEF XftSupport} FDefaultFont.FontData := XLoadQueryFont(Handle, 'fixed'); {$ENDIF}
+    {$IFNDEF XftSupport}
+    FDefaultFont.FontData := XLoadQueryFont(Handle, 'fixed');
+    {$ENDIF}
     if not Assigned(FDefaultFont) then
       raise EX11Error.Create(SNoDefaultFont);
   end;

@@ -161,8 +161,6 @@ type
   { TGDIApplication }
 
   TGDIApplication = class(TFCustomApplication)
-  private
-    DoBreakRun: Boolean;
   public
     { default methods }
     constructor Create; override;
@@ -1062,7 +1060,7 @@ procedure TGDIApplication.Run;
 var
   Msg: TMsg;
 begin
-  DoBreakRun := False;
+  inherited Run;
 
   while Windows.GetMessage(@Msg, 0, 0, 0) and
    (not (QuitWhenLastWindowCloses and (Forms.Count = 0))) and

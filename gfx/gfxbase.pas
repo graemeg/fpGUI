@@ -424,8 +424,9 @@ type
   private
     FOnIdle: TNotifyEvent;
     FQuitWhenLastWindowCloses: Boolean;
-    FDisplayName: String;
   protected
+    FDisplayName: String;
+    DoBreakRun: Boolean;
     FTitle: String;
     procedure   SetTitle(const ATitle: String);
   public
@@ -436,7 +437,7 @@ type
     procedure   AddWindow(AWindow: TFCustomWindow); virtual;
     procedure   RemoveWindow(AWindow: TFCustomWindow); virtual;
     procedure   Initialize(ADisplayName: String = ''); virtual; abstract;
-    procedure   Run; virtual; abstract;
+    procedure   Run; virtual;
     procedure   Quit; virtual; abstract;
     { Properties }
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
@@ -589,8 +590,9 @@ function KeycodeToText(Key: Word; ShiftState: TShiftState): String;
 
 implementation
 
-//uses
-//  GFXInterface;  { Just to get FPC to compile the TGfxCanvas descendants }
+uses
+  CommandLineParams
+  ;
 
 
 { Exceptions }
@@ -1220,112 +1222,112 @@ begin
   end;
 
   case Key of
-    keyNul: s := 'Null';
-    keyBackSpace: s := 'Backspace';
-    keyTab: s := 'Tab';
-    keyLinefeed: s := 'Linefeed';
-    keyReturn: s := 'Enter';
-    keyEscape: s := 'Esc';
-    Ord(' '): s := 'Space';
-    keyDelete: s := 'Del';
-    keyVoid: s := 'Void';
-    keyBreak: s := 'Break';
-    keyScrollForw: s := 'ScrollForw';
-    keyScrollBack: s := 'ScrollBack';
-    keyBoot: s := 'Boot';
-    keyCompose: s := 'Compose';
-    keySAK: s := 'SAK';
-    keyUndo: s := 'Undo';
-    keyRedo: s := 'Redo';
-    keyMenu: s := 'Menu';
-    keyCancel: s := 'Cancel';
-    keyPrintScreen: s := 'PrtScr';
-    keyExecute: s := 'Exec';
-    keyFind: s := 'Find';
-    keyBegin: s := 'Begin';
-    keyClear: s := 'Clear';
-    keyInsert: s := 'Ins';
-    keySelect: s := 'Select';
-    keyMacro: s := 'Macro';
-    keyHelp: s := 'Help';
-    keyDo: s := 'Do';
-    keyPause: s := 'Pause';
-    keySysRq: s := 'SysRq';
-    keyModeSwitch: s := 'ModeSw';
-    keyUp: s := 'Up';
-    keyDown: s := 'Down';
-    keyLeft: s := 'Left';
-    keyRight: s := 'Right';
-    keyPrior: s := 'PgUp';
-    keyNext: s := 'PgDown';
-    keyHome: s := 'Home';
-    keyEnd: s := 'End';
-    keyF0..keyF64: s := 'F' + IntToStr(Key - keyF0);
-    keyP0..keyP9: s := 'KP' + Chr(Key - keyP0 + Ord('0'));
-    keyPA..keyPF: s := 'KP' + Chr(Key - keyPA + Ord('A'));
+    keyNul:           s := 'Null';
+    keyBackSpace:     s := 'Backspace';
+    keyTab:           s := 'Tab';
+    keyLinefeed:      s := 'Linefeed';
+    keyReturn:        s := 'Enter';
+    keyEscape:        s := 'Esc';
+    Ord(' '):         s := 'Space';
+    keyDelete:        s := 'Del';
+    keyVoid:          s := 'Void';
+    keyBreak:         s := 'Break';
+    keyScrollForw:    s := 'ScrollForw';
+    keyScrollBack:    s := 'ScrollBack';
+    keyBoot:          s := 'Boot';
+    keyCompose:       s := 'Compose';
+    keySAK:           s := 'SAK';
+    keyUndo:          s := 'Undo';
+    keyRedo:          s := 'Redo';
+    keyMenu:          s := 'Menu';
+    keyCancel:        s := 'Cancel';
+    keyPrintScreen:   s := 'PrtScr';
+    keyExecute:       s := 'Exec';
+    keyFind:          s := 'Find';
+    keyBegin:         s := 'Begin';
+    keyClear:         s := 'Clear';
+    keyInsert:        s := 'Ins';
+    keySelect:        s := 'Select';
+    keyMacro:         s := 'Macro';
+    keyHelp:          s := 'Help';
+    keyDo:            s := 'Do';
+    keyPause:         s := 'Pause';
+    keySysRq:         s := 'SysRq';
+    keyModeSwitch:    s := 'ModeSw';
+    keyUp:            s := 'Up';
+    keyDown:          s := 'Down';
+    keyLeft:          s := 'Left';
+    keyRight:         s := 'Right';
+    keyPrior:         s := 'PgUp';
+    keyNext:          s := 'PgDown';
+    keyHome:          s := 'Home';
+    keyEnd:           s := 'End';
+    keyF0..keyF64:    s := 'F' + IntToStr(Key - keyF0);
+    keyP0..keyP9:     s := 'KP' + Chr(Key - keyP0 + Ord('0'));
+    keyPA..keyPF:     s := 'KP' + Chr(Key - keyPA + Ord('A'));
     keyPPlus, keyPMinus, keyPSlash, keyPStar, keyPEqual, keyPSeparator,
       keyPDecimal, keyPParenLeft, keyPParenRight, keyPSpace, keyPEnter,
-      keyPTab: s := 'KP' + GetASCIIText;
-    keyPPlusMinus: s := 'KPPlusMinus';
-    keyPBegin: s := 'KPBegin';
-    keyPF1..keyPF9: s := 'KPF' + IntToStr(Key - keyPF1);
-    keyShiftL: s := 'ShiftL';
-    keyShiftR: s := 'ShiftR';
-    keyCtrlL: s := 'CtrlL';
-    keyCtrlR: s := 'CtrlR';
-    keyAltL: s := 'AltL';
-    keyAltR: s := 'AltR';
-    keyMetaL: s := 'MetaL';
-    keyMetaR: s := 'MetaR';
-    keySuperL: s := 'SuperL';
-    keySuperR: s := 'SuperR';
-    keyHyperL: s := 'HyperL';
-    keyHyperR: s := 'HyperR';
-    keyAltGr: s := 'AltGr';
-    keyCaps: s := 'Caps';
-    keyNum: s := 'Num';
-    keyScroll: s := 'Scroll';
-    keyShiftLock: s := 'ShiftLock';
-    keyCtrlLock: s := 'CtrlLock';
-    keyAltLock: s := 'AltLock';
-    keyMetaLock: s := 'MetaLock';
-    keySuperLock: s := 'SuperLock';
-    keyHyperLock: s := 'HyperLock';
-    keyAltGrLock: s := 'AltGrLock';
-    keyCapsLock: s := 'CapsLock';
-    keyNumLock: s := 'NumLock';
-    keyScrollLock: s := 'ScrollLock';
-    keyDeadRing: s := 'DeadRing';
-    keyDeadCaron: s := 'DeadCaron';
-    keyDeadOgonek: s := 'DeadOgonek';
-    keyDeadIota: s := 'DeadIota';
-    keyDeadDoubleAcute: s := 'DeadDoubleAcute';
-    keyDeadBreve: s := 'DeadBreve';
-    keyDeadAboveDot: s := 'DeadAboveDot';
-    keyDeadBelowDot: s := 'DeadBelowDot';
-    keyDeadVoicedSound: s := 'DeadVoicedSound';
+      keyPTab:        s := 'KP' + GetASCIIText;
+    keyPPlusMinus:    s := 'KPPlusMinus';
+    keyPBegin:        s := 'KPBegin';
+    keyPF1..keyPF9:   s := 'KPF' + IntToStr(Key - keyPF1);
+    keyShiftL:        s := 'ShiftL';
+    keyShiftR:        s := 'ShiftR';
+    keyCtrlL:         s := 'CtrlL';
+    keyCtrlR:         s := 'CtrlR';
+    keyAltL:          s := 'AltL';
+    keyAltR:          s := 'AltR';
+    keyMetaL:         s := 'MetaL';
+    keyMetaR:         s := 'MetaR';
+    keySuperL:        s := 'SuperL';
+    keySuperR:        s := 'SuperR';
+    keyHyperL:        s := 'HyperL';
+    keyHyperR:        s := 'HyperR';
+    keyAltGr:         s := 'AltGr';
+    keyCaps:          s := 'Caps';
+    keyNum:           s := 'Num';
+    keyScroll:        s := 'Scroll';
+    keyShiftLock:     s := 'ShiftLock';
+    keyCtrlLock:      s := 'CtrlLock';
+    keyAltLock:       s := 'AltLock';
+    keyMetaLock:      s := 'MetaLock';
+    keySuperLock:     s := 'SuperLock';
+    keyHyperLock:     s := 'HyperLock';
+    keyAltGrLock:     s := 'AltGrLock';
+    keyCapsLock:      s := 'CapsLock';
+    keyNumLock:       s := 'NumLock';
+    keyScrollLock:    s := 'ScrollLock';
+    keyDeadRing:      s := 'DeadRing';
+    keyDeadCaron:     s := 'DeadCaron';
+    keyDeadOgonek:    s := 'DeadOgonek';
+    keyDeadIota:      s := 'DeadIota';
+    keyDeadDoubleAcute:     s := 'DeadDoubleAcute';
+    keyDeadBreve:           s := 'DeadBreve';
+    keyDeadAboveDot:        s := 'DeadAboveDot';
+    keyDeadBelowDot:        s := 'DeadBelowDot';
+    keyDeadVoicedSound:     s := 'DeadVoicedSound';
     keyDeadSemiVoicedSound: s := 'DeadSemiVoicedSound';
-    keyDeadAcute: s := 'DeadAcute';
-    keyDeadCedilla: s := 'DeadCedilla';
-    keyDeadCircumflex: s := 'DeadCircumflex';
-    keyDeadDiaeresis: s := 'DeadDiaeresis';
-    keyDeadGrave: s := 'DeadGrave';
-    keyDeadTilde: s := 'DeadTilde';
-    keyDeadMacron: s := 'DeadMacron';
+    keyDeadAcute:           s := 'DeadAcute';
+    keyDeadCedilla:         s := 'DeadCedilla';
+    keyDeadCircumflex:      s := 'DeadCircumflex';
+    keyDeadDiaeresis:       s := 'DeadDiaeresis';
+    keyDeadGrave:           s := 'DeadGrave';
+    keyDeadTilde:           s := 'DeadTilde';
+    keyDeadMacron:          s := 'DeadMacron';
 
-    keyEcuSign: s := 'Ecu';
-    keyColonSign: s := 'Colon';
-    keyCruzeiroSign: s := 'Cruzeiro';
-    keyFFrancSign: s := 'FFranc';
-    keyLiraSign: s := 'Lira';
-    keyMillSign: s := 'Mill';
-    keyNairaSign: s := 'Naira';
-    keyPesetaSign: s := 'Peseta';
-    keyRupeeSign: s := 'Rupee';
-    keyWonSign: s := 'Won';
+    keyEcuSign:       s := 'Ecu';
+    keyColonSign:     s := 'Colon';
+    keyCruzeiroSign:  s := 'Cruzeiro';
+    keyFFrancSign:    s := 'FFranc';
+    keyLiraSign:      s := 'Lira';
+    keyMillSign:      s := 'Mill';
+    keyNairaSign:     s := 'Naira';
+    keyPesetaSign:    s := 'Peseta';
+    keyRupeeSign:     s := 'Rupee';
+    keyWonSign:       s := 'Won';
     keyNewSheqelSign: s := 'NewShequel';
-    keyDongSign: s := 'Dong';
-    keyEuroSign: s := 'Euro';
+    keyDongSign:      s := 'Dong';
+    keyEuroSign:      s := 'Euro';
   else
     s := '#' + IntToHex(Key, 4);
   end;
@@ -1342,7 +1344,10 @@ end;
 constructor TFCustomApplication.Create;
 begin
   inherited Create(nil);
-  FDisplayName := '';
+  if gCommandLineParams.IsParam('display') then
+    FDisplayName := gCommandLineParams.GetParam('display')
+  else
+    FDisplayName := '';
   Forms := TList.Create;
   FQuitWhenLastWindowCloses := True;
 end;
@@ -1362,6 +1367,22 @@ end;
 procedure TFCustomApplication.RemoveWindow(AWindow: TFCustomWindow);
 begin
   Forms.Remove(AWindow);
+end;
+
+procedure TFCustomApplication.Run;
+begin
+  DoBreakRun := False;
+
+  if gCommandLineParams.IsParam('?') then
+  begin
+    writeln(' The following parameters are supported by fpGUI applications.');
+    writeln(' ');
+    writeln(' -?               Shows this help');
+    writeln(' -display         fpGUI/X11 only: sets the display to use');
+    writeln(' -style           Overrides the default (autodetected) GUI style');
+    writeln(' ');
+    DoBreakRun := True;
+  end;
 end;
 
 {procedure TFCustomApplication.CreateForm(AForm: TCustomForm);
