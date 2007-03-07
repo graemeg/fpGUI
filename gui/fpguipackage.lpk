@@ -17,7 +17,8 @@
         <Generate Value="Faster"/>
       </CodeGeneration>
       <Other>
-        <CustomOptions Value="-dDEBUGx"/>
+        <CustomOptions Value="-dDEBUGx
+"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>

@@ -191,6 +191,7 @@ type
   TMenuForm = class(TTestForm)
   private
     procedure   CloseMenuClicked(Sender: TObject);
+    procedure   AboutMenuClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -264,7 +265,16 @@ begin
   Close;
 end;
 
+procedure TMenuForm.AboutMenuClicked(Sender: TObject);
+begin
+  writeln('...About menu clicked from <' + Sender.ClassName + '>');
+  if Sender is TMenuItem then
+    writeln('From: ' + TMenuItem(Sender).Text);
+end;
+
 constructor TMenuForm.Create(AOwner: TComponent);
+var
+  lMenuItem: TMenuItem;
 begin
   inherited Create(AOwner);
   Name := 'MenuForm';
@@ -281,7 +291,10 @@ begin
   MainMenu.AddMenu('Edit');
   MainMenu.AddMenu('Options');
   MainMenu.AddMenu('Windows');
-  MainMenu.AddMenu('Help');
+  lMenuItem := MainMenu.AddMenu('Help');
+  lMenuItem.SubMenu.AddMenu('Online Help');
+  lMenuItem.SubMenu.AddMenu('Tutorials');
+  lMenuItem.SubMenu.AddMenu('About', '', @AboutMenuClicked);
 
   Title := TLabel.Create(self);
   Title.CanExpandWidth := True;

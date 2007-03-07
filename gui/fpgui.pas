@@ -3,7 +3,7 @@
     
     fpGUI master file
     
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -322,7 +322,6 @@ function IdentToOrientation(const Ident: String; var Orientation: LongInt): Bool
 begin
   Result := IdentToInt(Ident, Orientation, Orientations);
 end;
-
 
 function OrientationToIdent(Orientation: LongInt; var Ident: String): Boolean;
 begin

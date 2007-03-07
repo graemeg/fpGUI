@@ -1057,10 +1057,12 @@ begin
     // According to a comment in X.h, the valid event types start with 2!
     if XEvent._type >= 2 then
     begin
+//      WriteLn('=== Received X event "', GetXEventName(XEvent._type), '"');
       WindowEntry := FindWindowByXID(XEvent.XAny.Window);
 
       if not Assigned(WindowEntry) then
       begin
+//        writeln(Format('==unknown== Window ID = %d', [XEvent.XAny.Window]));
         WriteLn('fpGFX/X11: Received X event "', GetXEventName(XEvent._type), '" for unknown window');
         continue;
       end;
@@ -1142,6 +1144,7 @@ begin
          end;
        X.MapNotify:
          begin
+//          writeln(Format('==MapNotify== Window ID = %d', [XEvent.XAny.Window]));
            Event.EventType := etShow;
            WindowEntry.ProcessEvent(Event);
          end;
@@ -1411,15 +1414,15 @@ begin
   if Assigned(OnClose) then
     OnClose(Self);
 
-  GFApplication.DirtyList.ClearQueueForWindow(Self);
-
-  XDestroyWindow(GFApplication.Handle, Handle);
   Canvas.Free;
+  if FCurCursorHandle <> 0 then
+    XFreeCursor(GFApplication.Handle, FCurCursorHandle);
+
+  GFApplication.DirtyList.ClearQueueForWindow(Self);
 
   GFApplication.Forms.Remove(Self);
 
-  if FCurCursorHandle <> 0 then
-    XFreeCursor(GFApplication.Handle, FCurCursorHandle);
+  XDestroyWindow(GFApplication.Handle, Handle);
 
   inherited Destroy;
 end;

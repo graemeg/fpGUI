@@ -157,8 +157,11 @@ end;
 
 procedure TCustomForm.Close;
 begin
+  LAYOUTTRACE('TCustomForm.Close for %s:%s', [Name, ClassName]);
+
   GFApplication.RemoveWindow(FWnd);
   FVisible := False;
+  
   FWnd.Free;
   FWnd := nil;
 end;
