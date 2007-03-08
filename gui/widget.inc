@@ -178,7 +178,7 @@
     function  GetWidth: Integer;
     function  GetHeight: Integer;
     procedure SetEnabled(AEnabled: Boolean);
-    procedure SetStyle(const AValue: TStyle);
+    procedure SetStyle(const AValue: TStyleAbs);
     procedure SetVisible(AVisible: Boolean);
     // Event handling
     function  EvCalcSizes(Event: TCalcSizesEventObj): Boolean;
@@ -192,7 +192,7 @@
   protected
     FCursor: TFCursor;
     FText: string;
-    FStyle: TStyle;
+    FStyle: TStyleAbs;
     FCanExpandHeight: Boolean;
     FCanExpandWidth: Boolean;
     FEnabled: Boolean;
@@ -225,7 +225,7 @@
     function  DoMouseEnter(AShift: TShiftState; AMousePos: TPoint): Boolean;
 
     // Properties
-    function  GetStyle: TStyle;
+    function  GetStyle: TStyleAbs;
     procedure SetCanExpandWidth(allow: Boolean);
     procedure SetCanExpandHeight(allow: Boolean);
     procedure SetText(const AText: String); virtual;
@@ -265,7 +265,7 @@
     property    MaxSize: TSize read FMaxSize;
     property    DefSize: TSize read FDefSize;
     property    ClientRect: TRect read FClientRect;
-    property    Style: TStyle read GetStyle write SetStyle;
+    property    Style: TStyleAbs read GetStyle write SetStyle;
     property    Enabled: Boolean read FEnabled write SetEnabled default True;
     property    Visible: Boolean read FVisible write SetVisible default True;
   end;
@@ -852,7 +852,7 @@ begin
   end;
 end;
 
-procedure TWidget.SetStyle(const AValue: TStyle);
+procedure TWidget.SetStyle(const AValue: TStyleAbs);
 begin
   FStyle := AValue;
 end;
@@ -1044,7 +1044,7 @@ begin
   Event.Free;
 end;
 
-function TWidget.GetStyle: TStyle;
+function TWidget.GetStyle: TStyleAbs;
 var
   Widget: TWidget;
 begin

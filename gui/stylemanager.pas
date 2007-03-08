@@ -26,18 +26,21 @@ uses
   ,fpGUI
   ;
   
+const
+  cDefaultStyle = 'auto';
+
 type
 
   // A class reference for the TStyle descendants
-  TStyleClass = class of TStyle;
+  TStyleClass = class of TStyleAbs;
 
 
   // A class to hold the TStyle class mappings. The factory maintains
   // a list of these and uses the StyleClass property to create the objects.
   TStyleClassMapping = class(TObject)
   private
-    FsMappingName : string;
-    FStyleClass : TStyleClass;
+    FsMappingName: string;
+    FStyleClass: TStyleClass;
   public
     constructor Create(const AMappingName: string; AStyleClass: TStyleClass); overload;
     property    MappingName: string read FsMappingName;
@@ -52,19 +55,19 @@ type
   TStyleManager = class(TObject)
   private
     FList : TObjectList;
-    FDefaultStyle: TStyle;
-    FUserStyle: TStyle;
+    FDefaultStyle: TStyleAbs;
+    FUserStyle: TStyleAbs;
     FDefaultStyleType: string;
-    function    GetDefaultStyle: TStyle;
+    function    GetDefaultStyle: TStyleAbs;
   public
     constructor Create;
     destructor  Destroy; override;
-    property    DefaultStyle: TStyle read GetDefaultStyle;
-    procedure   SetStyle(pNewStyle: TStyle);
+    property    DefaultStyle: TStyleAbs read GetDefaultStyle;
+    procedure   SetStyle(const AStyleName: string);
     procedure   RegisterClass(const AStyleName: string; AStyleClass : TStyleClass);
-    function    CreateInstance(const AStyleName: string): TStyle; overload;
-    function    CreateInstance: TStyle; overload;
-    procedure   AssignStyleTypes(AStrings : TStrings);
+    function    CreateInstance(const AStyleName: string): TStyleAbs; overload;
+    function    CreateInstance: TStyleAbs; overload;
+    procedure   AssignStyleTypes(AStrings: TStrings);
   end;
 
 
@@ -76,6 +79,9 @@ implementation
 uses
   SysUtils
   ,fpGFX
+  ,WindowsStyle
+  ,OpenSoftStyle
+  ,MotifStyle
   ;
 
 var
@@ -90,18 +96,15 @@ begin
   result := uStyleManager;
 end;
 
+
 { TStyleManager }
 
-function TStyleManager.GetDefaultStyle: TStyle;
+function TStyleManager.GetDefaultStyle: TStyleAbs;
 begin
-  if Assigned(FUserStyle) then
-    Result := FUserStyle
-  else
-  begin
-    if not Assigned(FDefaultStyle) then
-      FDefaultStyle := TDefaultStyle.Create;
-    Result := FDefaultStyle;
-  end;
+  if not Assigned(FDefaultStyle) then
+//    FDefaultStyle.Free;
+  FDefaultStyle := CreateInstance(FDefaultStyleType);
+  Result := FDefaultStyle;
 end;
 
 constructor TStyleManager.Create;
@@ -110,26 +113,31 @@ begin
   FList := TObjectList.Create;
   FUserStyle        := nil;
   FDefaultStyle     := nil;
-  FDefaultStyleType := 'auto';
+  FDefaultStyleType := cDefaultStyle;    // will change later
 end;
 
 destructor TStyleManager.Destroy;
 begin
+  FDefaultStyle.Free;
   FList.Free;
-  
-  {$Note These will be removed later}
-  if FUserStyle <> nil then
-    FUserStyle.Free;
-  if FDefaultStyle <> nil then
-    FDefaultStyle.Free;
   inherited Destroy;
 end;
 
-procedure TStyleManager.SetStyle(pNewStyle: TStyle);
+procedure TStyleManager.SetStyle(const AStyleName: string);
+var
+  i: integer;
 begin
-  if Assigned(FUserStyle) then
-    FUserStyle.Free;
-  FUserStyle := pNewStyle;
+  for i := 0 to FList.Count - 1 do
+    if UpperCase(TStyleClassMapping(FList.Items[i]).MappingName) =
+         UpperCase(AStyleName) then
+    begin
+      FDefaultStyleType := AStyleName;
+      Break; //==>
+    end;
+
+  Assert(FDefaultStyleType <> AStyleName,
+          Format('<%s> does not identify a registered style class.',
+                   [AStyleName]));
 end;
 
 // Register a TStyle class for creation by the factory
@@ -146,19 +154,21 @@ begin
                       [AStyleName]));
   FList.Add(TStyleClassMapping.Create(AStyleName, AStyleClass));
   
+//  writeln('Registering style: ' + AStyleName);
   // we will use this later
 //  FDefaultStyleType := UpperCase(AStyleName);
 end;
 
 // Call the factory to create an instance of TStyle
-function TStyleManager.CreateInstance(const AStyleName: string): TStyle;
+function TStyleManager.CreateInstance(const AStyleName: string): TStyleAbs;
 var
   i: integer;
 begin
   result := nil;
   for i := 0 to FList.Count - 1 do
     if UpperCase(TStyleClassMapping(FList.Items[i]).MappingName) =
-         UpperCase(AStyleName) then begin
+         UpperCase(AStyleName) then
+    begin
       result := TStyleClassMapping(FList.Items[i]).StyleClass.Create;
       Break; //==>
     end;
@@ -168,7 +178,7 @@ begin
                    [AStyleName]));
 end;
 
-function TStyleManager.CreateInstance: TStyle;
+function TStyleManager.CreateInstance: TStyleAbs;
 begin
   result := CreateInstance(FDefaultStyleType);
 end;
@@ -197,7 +207,11 @@ end;
 
 
 initialization
-  uStyleManager := nil;
+//  gStyleManager.RegisterClass(cDefaultStyle, TWindowsStyle);
+  gStyleManager.RegisterClass(cDefaultStyle, TOpenSoftStyle);
+  gStyleManager.RegisterClass('Windows', TWindowsStyle);
+  gStyleManager.RegisterClass('OpenSoft', TOpenSoftStyle);
+  gStyleManager.RegisterClass('Motif', TMotifStyle);
 
 finalization
   uStyleManager.Free;

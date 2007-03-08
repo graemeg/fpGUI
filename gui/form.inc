@@ -115,6 +115,9 @@
 
 constructor TCustomForm.Create(AOwner: TComponent);
 begin
+  if not Assigned(FStyle) then
+    FStyle := gStyleManager.DefaultStyle;
+
   inherited Create(AOwner);
 
   FCanExpandWidth   := True;
@@ -122,8 +125,6 @@ begin
   FCursor           := crArrow;
   FWindowOptions    := [woWindow];
 
-  if not Assigned(FStyle) then
-    FStyle := gStyleManager.DefaultStyle;
 end;
 
 

@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgui, gfxbase, frmCompilerOpt, OpenSoftStyle;
+  fpgui, gfxbase, frmCompilerOpt, OpenSoftStyle, fpguipackage;
 
 type
 

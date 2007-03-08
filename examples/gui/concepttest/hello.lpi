@@ -23,7 +23,7 @@
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="fpGUI_laz"/>
+        <PackageName Value="fpguipackage"/>
       </Item1>
     </RequiredPackages>
     <Units Count="59">
@@ -31,8 +31,8 @@
         <Filename Value="hello.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="hello"/>
-        <CursorPos X="25" Y="286"/>
-        <TopLine Value="270"/>
+        <CursorPos X="62" Y="10"/>
+        <TopLine Value="10"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="136"/>
         <Loaded Value="True"/>

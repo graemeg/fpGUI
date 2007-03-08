@@ -1,9 +1,9 @@
 {
     fpGUI  -  Free Pascal GUI Library
     
-    Default Style implementation for Win32
+    Basic Style implementation for Win32
     
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -16,7 +16,7 @@
 
 {$DEFINE Has_DefaultStyle_GetGUIColor}
 
-function TDefaultStyle.GetGUIColor(Color: TColor): TGfxColor;
+function TBasicStyle.GetGUIColor(Color: TColor): TGfxColor;
 begin
   Color := Windows.GetSysColor(Color and $ffff);
   Result.Red := (Color and $ff) * 257;
@@ -28,7 +28,7 @@ end;
 
 {$DEFINE Has_DefaultStyle_DrawFocusRect}
 
-procedure TDefaultStyle.DrawFocusRect(Canvas: TFCanvas; const ARect: TRect);
+procedure TBasicStyle.DrawFocusRect(Canvas: TFCanvas; const ARect: TRect);
 var
   Rect: Windows.TRect;
 begin

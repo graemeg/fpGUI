@@ -51,7 +51,9 @@ const
 
   InfiniteSize = 16383;
 
+// Insert loads of named colors
 {$I colors.inc}
+
 
 resourcestring
   mbText_Yes        = 'Yes';
@@ -154,6 +156,9 @@ implementation
 uses
   Math
   ,stylemanager
+  ,MotifStyle       // so they register with style manager
+  ,OpenSoftStyle    // so they register with style manager
+  ,WindowsStyle     // so they register with style manager
   ;
 
 

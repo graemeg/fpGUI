@@ -27,7 +27,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="3"/>
-    <Files Count="2">
+    <Files Count="5">
       <Item1>
         <Filename Value="stylemanager.pas"/>
         <UnitName Value="stylemanager"/>
@@ -36,6 +36,18 @@
         <Filename Value="fpgui.pas"/>
         <UnitName Value="fpGUI"/>
       </Item2>
+      <Item3>
+        <Filename Value="windowsstyle.pas"/>
+        <UnitName Value="WindowsStyle"/>
+      </Item3>
+      <Item4>
+        <Filename Value="motifstyle.pas"/>
+        <UnitName Value="MotifStyle"/>
+      </Item4>
+      <Item5>
+        <Filename Value="opensoftstyle.pas"/>
+        <UnitName Value="OpenSoftStyle"/>
+      </Item5>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

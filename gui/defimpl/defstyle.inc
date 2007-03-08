@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
     
-    Default Style class declarations
+    Basic Style class declarations
     
     Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -16,7 +16,7 @@
 
 {$IFNDEF Has_DefaultStyle_GetGUIColor}
 
-function TDefaultStyle.GetGUIColor(Color: TColor): TGfxColor;
+function TBasicStyle.GetGUIColor(Color: TColor): TGfxColor;
 begin
   case Color of
     // UI element colors
@@ -47,17 +47,12 @@ end;
 
 {$IFNDEF Has_DefaultStyle_DrawFocusRect}
 
-procedure TDefaultStyle.DrawFocusRect(Canvas: TFCanvas; const ARect: TRect);
+procedure TBasicStyle.DrawFocusRect(Canvas: TFCanvas; const ARect: TRect);
 begin
-  // !!!: Disabled for Linux as long a a certain nVidia X-Server has bugs with this...
-
   Canvas.SetColor(GetUIColor(cl3DDkShadow));
   Canvas.SetLineStyle(lsDot);
   Canvas.DrawRect(ARect);
   Canvas.SetLineStyle(lsSolid);
-
-//  Canvas.SetColor(rgbaGray);
-//  Canvas.DrawRect(ARect);
 end;
 
 {$ENDIF}

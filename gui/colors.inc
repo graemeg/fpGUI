@@ -1,4 +1,7 @@
 
+{%mainunit fpgui.pp}
+
+
   { NOTE:
       The colors commented out below are not applicable to systems other than
       Windows. For this reason I don't see the need to define them. Under Linux,
@@ -139,13 +142,17 @@ Khaki   	 #f0e68c
 Lavender   	 #e6e6fa
 LavenderBlush  	 #fff0f5
 LawnGreen   	 #7cfc00
-LemonChiffon   	 #fffacd
+}
+  clLemonChiffon    = TColor($CDFAFF);   //  #fffacd
+{
 LightBlue   	 #add8e6
 LightCoral   	 #f08080
 LightCyan   	 #e0ffff
 LightGoldenrodYellow	#fafad2
 LightGreen   	 #90ee90
-LightGrey   	 #d3d3d3
+}
+  clLightGrey    = TColor($D3D3D3);   // #d3d3d3
+{
 LightPink   	 #ffb6c1
 LightSalmon   	 #ffa07a
 LightSeaGreen  	 #20b2aa

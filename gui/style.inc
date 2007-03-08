@@ -28,8 +28,8 @@
   { Possible arrow directions }
   TArrowDirection = (arrowUp, arrowDown, arrowLeft, arrowRight);
 
-  { Style declarations }
-  TStyle = class(TObject)
+  { Abstract Style declarations }
+  TStyleAbs = class(TObject)
   protected
     UIColorCache: array[0..$18] of TGfxColor;
   public
@@ -90,7 +90,7 @@
 
   { TDefaultStyle }
 
-  TDefaultStyle = class(TStyle)
+  TBasicStyle = class(TStyleAbs)
   protected
     procedure   DrawDirectionArrows(ACanvas: TFCanvas; const ARect: TRect; ADirection: TArrowDirection);
     procedure   DrawCheckBoxCheck(ACanvas: TFCanvas; const ARect: TRect; AFlags: TCheckboxFlags);
@@ -146,18 +146,6 @@
   end;
   
   
-  { TMotifStyle }
-
-  TMotifStyle = class(TDefaultStyle)
-  public
-    // General
-    procedure   DrawFocusRect(Canvas: TFCanvas; const ARect: TRect); override;
-    // Buttons
-    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TButtonFlags); override;
-    // Check boxes
-    procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TCheckboxFlags); override;
-  end;
-
 {$ENDIF read_interface}
 
 
@@ -165,16 +153,16 @@
 {$IFDEF read_implementation}
 
 
-{ TStyle }
+{ TStyleAbs }
 
-constructor TStyle.Create;
+constructor TStyleAbs.Create;
 begin
   inherited Create;
   UpdateUIColorCache;
 end;
 
 
-procedure TStyle.UpdateUIColorCache;
+procedure TStyleAbs.UpdateUIColorCache;
 var
   i: TColor;
 begin
@@ -183,7 +171,7 @@ begin
 end;
 
 
-function TStyle.GetUIColor(AColor: TColor): TGfxColor;
+function TStyleAbs.GetUIColor(AColor: TColor): TGfxColor;
 begin
   if (AColor >= clScrollBar) and (AColor <= clScrollBar + $18) then
     Result := UIColorCache[TColor(AColor - clScrollBar)]
@@ -198,7 +186,7 @@ begin
 end;
 
 
-procedure TStyle.SetUIColor(Canvas: TFCanvas; Color: TColor);
+procedure TStyleAbs.SetUIColor(Canvas: TFCanvas; Color: TColor);
 var
   lGfxColor: TGfxColor;
 begin
@@ -215,7 +203,7 @@ begin
 end;
 
 
-{ TDefaultStyle }
+{ TBasicStyle }
 
 const
   rgbaDkWhite:    TGfxColor = (Red: $e000; Green: $e000; Blue: $e000; Alpha: 0);
@@ -229,7 +217,7 @@ const
   {$I defimpl/defstyle.inc}
 {$ENDIF}
 
-procedure TDefaultStyle.DrawDirectionArrows(ACanvas: TFCanvas;
+procedure TBasicStyle.DrawDirectionArrows(ACanvas: TFCanvas;
   const ARect: TRect; ADirection: TArrowDirection);
 var
   peekx, peeky: Cardinal;
@@ -276,7 +264,7 @@ begin
   end;
 end;
 
-procedure TDefaultStyle.DrawCheckBoxCheck(ACanvas: TFCanvas;
+procedure TBasicStyle.DrawCheckBoxCheck(ACanvas: TFCanvas;
   const ARect: TRect; AFlags: TCheckboxFlags);
 begin
   if (cbIsEnabled in AFlags) then
@@ -308,7 +296,7 @@ end;
   Color4: Inner frame right & bottom
 }
 
-procedure TDefaultStyle.Draw3DFrame(Canvas: TFCanvas; const ARect: TRect;
+procedure TBasicStyle.Draw3DFrame(Canvas: TFCanvas; const ARect: TRect;
   Color1, Color2, Color3, Color4: TColor);
 begin
   with ARect do
@@ -336,7 +324,7 @@ begin
   end;
 end;
 
-procedure TDefaultStyle.DrawSunkenOuterBorder(Canvas: TFCanvas;
+procedure TBasicStyle.DrawSunkenOuterBorder(Canvas: TFCanvas;
   const ARect: TRect);
 begin
   with ARect do
@@ -350,7 +338,7 @@ begin
   end;
 end;
 
-procedure TDefaultStyle.DrawRaisedOuterBorder(Canvas: TFCanvas;
+procedure TBasicStyle.DrawRaisedOuterBorder(Canvas: TFCanvas;
   const ARect: TRect);
 begin
   with ARect do
@@ -364,7 +352,7 @@ begin
   end;
 end;
 
-procedure TDefaultStyle.DrawText(Canvas: TFCanvas; const APosition: TPoint;
+procedure TBasicStyle.DrawText(Canvas: TFCanvas; const APosition: TPoint;
   const AText: String; State: TWidgetState);
 begin
   if not (wsEnabled in State) then
@@ -376,7 +364,7 @@ begin
   Canvas.TextOut(APosition, AText);
 end;
 
-procedure TDefaultStyle.DrawItemBefore(Canvas: TFCanvas; const ARect: TRect;
+procedure TBasicStyle.DrawItemBefore(Canvas: TFCanvas; const ARect: TRect;
   Flags: TItemFlags);
 begin
   if ifSelected in Flags then
@@ -387,21 +375,21 @@ begin
   end;
 end;
 
-procedure TDefaultStyle.DrawItemAfter(Canvas: TFCanvas; const ARect: TRect;
+procedure TBasicStyle.DrawItemAfter(Canvas: TFCanvas; const ARect: TRect;
   Flags: TItemFlags);
 begin
   if ifFocused in Flags then
     DrawFocusRect(Canvas, ARect);
 end;
 
-procedure TDefaultStyle.DrawWindowBackground(Canvas: TFCanvas;
+procedure TBasicStyle.DrawWindowBackground(Canvas: TFCanvas;
   const ARect: TRect);
 begin
 //  SetUIColor(Canvas, cl3DFace);
   Canvas.FillRect(ARect);
 end;
 
-procedure TDefaultStyle.DrawButtonFace(Canvas: TFCanvas; const ARect: TRect;
+procedure TBasicStyle.DrawButtonFace(Canvas: TFCanvas; const ARect: TRect;
     Flags: TButtonFlags);
 var
   r: TRect;
@@ -451,17 +439,17 @@ begin
   end;
 end;
 
-function TDefaultStyle.GetButtonBorders: TRect;
+function TBasicStyle.GetButtonBorders: TRect;
 begin
   Result := Rect(5, 5, 5, 5);
 end;
 
-function TDefaultStyle.GetSeparatorSize: Integer;
+function TBasicStyle.GetSeparatorSize: Integer;
 begin
   Result := 2;
 end;
 
-procedure TDefaultStyle.DrawSeparator(Canvas: TFCanvas; const ARect: TRect;
+procedure TBasicStyle.DrawSeparator(Canvas: TFCanvas; const ARect: TRect;
   AOrientation: TOrientation);
 var
   r: TRect;
@@ -476,7 +464,7 @@ begin
   DrawSunkenOuterBorder(Canvas, r);
 end;
 
-procedure TDefaultStyle.DrawGroupBox(Canvas: TFCanvas; const ARect: TRect;
+procedure TBasicStyle.DrawGroupBox(Canvas: TFCanvas; const ARect: TRect;
   const ALabel: String; WidgetState: TWidgetState);
 var
   TitleWidth, TitleHeight, TopLine: Integer;
@@ -510,14 +498,14 @@ begin
     DrawText(Canvas, ARect.TopLeft + Point(9, 0), ALabel, WidgetState);
 end;
 
-function TDefaultStyle.GetGroupBoxBorders(Canvas: TFCanvas;
+function TBasicStyle.GetGroupBoxBorders(Canvas: TFCanvas;
   const ALabel: String; var LabelWidth: Integer): TRect;
 begin
   Result := Rect(6, Canvas.FontCellHeight + 4, 6, 6);
   LabelWidth := Canvas.TextWidth(ALabel) + 6;
 end;
 
-procedure TDefaultStyle.DrawEditBox(Canvas: TFCanvas; const ARect: TRect);
+procedure TBasicStyle.DrawEditBox(Canvas: TFCanvas; const ARect: TRect);
 begin
   Draw3DFrame(Canvas, ARect, cl3DShadow, cl3DDkShadow, cl3DHighlight, cl3DFace);
   SetUIColor(Canvas, clWindow);
@@ -525,12 +513,12 @@ begin
     Canvas.FillRect(Rect(Left + 2, Top + 2, Right - 2, Bottom - 2));
 end;
 
-function TDefaultStyle.GetEditBoxBorders: TRect;
+function TBasicStyle.GetEditBoxBorders: TRect;
 begin
   Result := Rect(2, 2, 2, 2);
 end;
 
-procedure TDefaultStyle.DrawCheckBox(Canvas: TFCanvas;
+procedure TBasicStyle.DrawCheckBox(Canvas: TFCanvas;
   const ARect, LabelRect: TRect; Flags: TCheckboxFlags);
 var
   r: TRect;
@@ -555,7 +543,7 @@ begin
       DrawFocusRect(Canvas, Rect(Left - 2, Top - 2, Right + 2, Bottom + 2));
 end;
 
-procedure TDefaultStyle.GetCheckBoxLayout(const LabelSize: TSize;
+procedure TBasicStyle.GetCheckBoxLayout(const LabelSize: TSize;
   var TotalSize: TSize; var LabelPos: TPoint);
 begin
   TotalSize := Size(LabelSize.cx + 21, Max(13, LabelSize.cy + 4));
@@ -563,7 +551,7 @@ begin
 end;
 
 
-procedure TDefaultStyle.DrawRadioButton(Canvas: TFCanvas;
+procedure TBasicStyle.DrawRadioButton(Canvas: TFCanvas;
   const ARect, LabelRect: TRect; Flags: TCheckboxFlags);
 var
   Index, BtnY: Integer;
@@ -620,26 +608,26 @@ begin
       DrawFocusRect(Canvas, Rect(Left - 2, Top - 2, Right + 2, Bottom + 2));
 end;
 
-procedure TDefaultStyle.GetRadioButtonLayout(const LabelSize: TSize;
+procedure TBasicStyle.GetRadioButtonLayout(const LabelSize: TSize;
   var TotalSize: TSize; var LabelPos: TPoint);
 begin
   TotalSize := Size(LabelSize.cx + 20, Max(12, LabelSize.cy + 4));
   LabelPos := Point(18, (TotalSize.cy - LabelSize.cy) div 2);
 end;
 
-function TDefaultStyle.GetComboBoxArrowSize: TSize;
+function TBasicStyle.GetComboBoxArrowSize: TSize;
 begin
   Result.cx := 17;
   Result.cy := 17;
 end;
 
-function TDefaultStyle.GetComboBoxBtnSize: TSize;
+function TBasicStyle.GetComboBoxBtnSize: TSize;
 begin
   Result.cx := 18;
   Result.cy := 18;
 end;
 
-procedure TDefaultStyle.DrawComboBoxArrow(Canvas: TFCanvas;
+procedure TBasicStyle.DrawComboBoxArrow(Canvas: TFCanvas;
   const ARect: TRect; IsPressed, IsEnabled: Boolean);
 var
   r: TRect;
@@ -660,23 +648,23 @@ begin
   DrawDirectionArrows(Canvas, r, arrowDown);
 end;
 
-function TDefaultStyle.GetScrollBarBorders(Orientation: TOrientation): TRect;
+function TBasicStyle.GetScrollBarBorders(Orientation: TOrientation): TRect;
 begin
   Result := Rect(1, 1, 1, 1);
 end;
 
-function TDefaultStyle.GetScrollBarBtnSize(Orientation: TOrientation): TSize;
+function TBasicStyle.GetScrollBarBtnSize(Orientation: TOrientation): TSize;
 begin
   Result.cx := 16;
   Result.cy := 16;
 end;
 
-function TDefaultStyle.GetScrollBarBtnMinSize: Integer;
+function TBasicStyle.GetScrollBarBtnMinSize: Integer;
 begin
   Result := 30;
 end;
 
-procedure TDefaultStyle.DrawScrollBarBorder(Canvas: TFCanvas;
+procedure TBasicStyle.DrawScrollBarBorder(Canvas: TFCanvas;
   const ARect: TRect);
 begin
   with ARect do
@@ -695,7 +683,7 @@ begin
   end;
 end;
 
-procedure TDefaultStyle.DrawScrollBarButton(Canvas: TFCanvas;
+procedure TBasicStyle.DrawScrollBarButton(Canvas: TFCanvas;
   const ARect: TRect; Direction: TArrowDirection;
   IsPressed, IsEnabled: Boolean);
 var
@@ -717,18 +705,18 @@ begin
   DrawDirectionArrows(Canvas, r, Direction);
 end;
 
-function TDefaultStyle.GetScrollBoxBorders: TRect;
+function TBasicStyle.GetScrollBoxBorders: TRect;
 begin
   Result := Rect(2, 2, 2, 2);
 end;
 
-procedure TDefaultStyle.DrawScrollBoxBorder(Canvas: TFCanvas; const ARect: TRect);
+procedure TBasicStyle.DrawScrollBoxBorder(Canvas: TFCanvas; const ARect: TRect);
 begin
   Draw3DFrame(Canvas, ARect, cl3DShadow, cl3DDkShadow,
     cl3DHighlight, cl3DLight);
 end;
 
-function TDefaultStyle.GetMenuBorders(pCanvas: TFCanvas; const pText: string;
+function TBasicStyle.GetMenuBorders(pCanvas: TFCanvas; const pText: string;
     var pTextWidth: Integer): TRect;
 begin
   pTextWidth := pCanvas.TextWidth(pText) + 6;
@@ -737,12 +725,12 @@ begin
 //  Result := Rect(6, pCanvas.FontCellHeight + 4, 6, 6);
 end;
 
-function TDefaultStyle.GetPanelBorders: TRect;
+function TBasicStyle.GetPanelBorders: TRect;
 begin
   Result := Rect(5, 5, 5, 5);
 end;
 
-procedure TDefaultStyle.DrawPanel(Canvas: TFCanvas; const ARect: TRect;
+procedure TBasicStyle.DrawPanel(Canvas: TFCanvas; const ARect: TRect;
   ABevelStyle: TBevelStyle);
 begin
   // bsPlain, bsLowered, bsRaised
@@ -753,71 +741,6 @@ begin
   else
     DrawRaisedOuterBorder(Canvas, ARect);
 //    Draw3DFrame(Canvas, ARect, cl3DHighlight, cl3DFace, cl3DFace, cl3DShadow);
-end;
-
-
-{ MotifStyle }
-
-procedure TMotifStyle.DrawButtonFace(Canvas: TFCanvas; const ARect: TRect;
-  Flags: TButtonFlags);
-var
-  r: TRect;
-begin
-  r := ARect;
-
-  if btnIsSelected in Flags then
-  begin
-    SetUIColor(Canvas, cl3DDkShadow);
-    Canvas.DrawRect(r);
-    Inc(r.Left);
-    Inc(r.Top);
-    Dec(r.Right);
-    Dec(r.Bottom);
-  end;
-
-  if btnIsPressed in Flags then
-  begin
-    SetUIColor(Canvas, cl3DShadow);
-    Canvas.DrawRect(r);
-    Inc(r.Left);
-    Inc(r.Top);
-    Dec(r.Right);
-    Dec(r.Bottom);
-  end else
-  begin
-    if btnIsEmbedded in Flags then
-      Draw3DFrame(Canvas, r, cl3DLight, cl3DHighlight, cl3DDkShadow, cl3DShadow)
-    else
-      Draw3DFrame(Canvas, r, cl3DHighlight, cl3DLight, cl3DDkShadow, cl3DShadow);
-    Inc(r.Left, 2);
-    Inc(r.Top, 2);
-    Dec(r.Right, 2);
-    Dec(r.Bottom, 2);
-  end;
-
-  SetUIColor(Canvas, cl3DFace);
-  Canvas.FillRect(r);
-
-  if btnHasFocus in Flags then
-  begin
-    r.Left    := ARect.Left + 4;
-    r.Top     := ARect.Top + 4;
-    r.Right   := ARect.Right - 4;
-    r.Bottom  := ARect.Bottom - 4;
-    DrawFocusRect(Canvas, r);
-  end;
-end;
-
-procedure TMotifStyle.DrawFocusRect(Canvas: TFCanvas; const ARect: TRect);
-begin
-  SetUIColor(Canvas, clGray);
-  Canvas.DrawRect(ARect);
-end;
-
-procedure TMotifStyle.DrawCheckBox(Canvas: TFCanvas; const ARect,
-  LabelRect: TRect; Flags: TCheckboxFlags);
-begin
-  inherited DrawCheckBox(Canvas, ARect, LabelRect, Flags);
 end;
 
 
