@@ -14,7 +14,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-unit stylemanager;
+unit StyleManager;
 
 {$mode objfpc}{$H+}
 
@@ -207,8 +207,7 @@ end;
 
 
 initialization
-//  gStyleManager.RegisterClass(cDefaultStyle, TWindowsStyle);
-  gStyleManager.RegisterClass(cDefaultStyle, TOpenSoftStyle);
+  gStyleManager.RegisterClass(cDefaultStyle, TWindowsStyle);
   gStyleManager.RegisterClass('Windows', TWindowsStyle);
   gStyleManager.RegisterClass('OpenSoft', TOpenSoftStyle);
   gStyleManager.RegisterClass('Motif', TMotifStyle);

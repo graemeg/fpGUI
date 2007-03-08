@@ -23,25 +23,17 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="fpgfxpackage"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpguipackage"/>
-      </Item2>
+      </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="1">
       <Unit0>
         <Filename Value="WidgetDemo.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="WidgetDemo"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="OpenSoftStyle.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="OpenSoftStyle"/>
-      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

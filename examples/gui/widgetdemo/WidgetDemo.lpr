@@ -1,3 +1,7 @@
+{
+  A proof of concept demo to see if we could duplicate one of Qt4's demos.
+}
+
 program WidgetDemo;
 
 {$mode objfpc}{$H+}
@@ -8,9 +12,8 @@ uses
   {$ENDIF}{$ENDIF}
   Classes
   ,SysUtils
-  ,OpenSoftStyle
-  ,fpgui
-  ,fpgfx
+  ,fpGFX
+  ,fpGUI
   ,stylemanager
   ;
   
@@ -93,26 +96,12 @@ end;
 
 procedure TWidgetDemoForm.cbStyleChanged(Sender: TObject);
 begin
-  if cbStyle.Text = 'OpenSoft' then
-  begin
-    if self.Style is TOpenSoftStyle then
-      exit  //==>
-    else
-    begin
-      Style := gOpenSoftStyle;
-      Redraw;
-    end;
-  end
-  else
-  begin
-    if self.Style is TDefaultStyle then
-      exit  //==>
-    else
-    begin
-      Style := gStyleManager.DefaultStyle;
-      Redraw;
-    end;
-  end;
+  { I want to try something later with this }
+//  gStyleManager.SetStyle(cbStyle.Text);
+  if cbStyle.Text <> cDefaultStyle then
+    Style.Free;
+  Style := gStyleManager.CreateInstance(cbStyle.Text);
+  Redraw;
 end;
 
 procedure TWidgetDemoForm.TranslateToAfrikaans;
@@ -169,9 +158,12 @@ begin
 end;
 
 procedure TWidgetDemoForm.CreateTopMenu;
+var
+  mi: TMenuItem;
 begin
   MainMenu := TMenuBar.Create(self);
-  MainMenu.AddMenu('File');
+  mi := MainMenu.AddMenu('File');
+  mi.SubMenu.AddMenu('Exit', '', @btnExitClick);
   MainMenu.AddMenu('Edit');
   MainMenu.AddMenu('Options');
   MainMenu.AddMenu('Windows');
@@ -187,11 +179,7 @@ begin
 
   cbStyle := TComboBox.Create(self);
   cbStyle.CanExpandWidth := True;
-  cbStyle.Items.Add('Windows');
-  cbStyle.Items.Add('WindowsXP');
-  cbStyle.Items.Add('Motif');
-  cbStyle.Items.Add('ClearLooks');
-  cbStyle.Items.Add('OpenSoft');
+  gStyleManager.AssignStyleTypes(cbStyle.Items);
   cbStyle.OnChange := @cbStyleChanged;
   cbStyle.ItemIndex := 0;
 
@@ -208,7 +196,7 @@ begin
   chkStdPalette.Checked         := True;
 
   chkDisable := TCheckBox.Create('Disable widgets', self);
-  chkDisable.OnClick :=@chkDisableClick;
+  chkDisable.OnClick := @chkDisableClick;
 
   topCheckboxLayout.InsertChild(chkStdPalette);
   topCheckboxLayout.InsertChild(chkDisable);
