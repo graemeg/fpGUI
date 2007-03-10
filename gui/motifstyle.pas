@@ -104,8 +104,65 @@ end;
 
 procedure TMotifStyle.DrawCheckBox(Canvas: TFCanvas; const ARect,
   LabelRect: TRect; Flags: TCheckboxFlags);
+var
+  r: TRect;
+  xmid: integer;
+  ymid: integer;
+  
+  procedure _DrawBottomHalf;
+  begin
+    // draw the bottom \ line
+    Canvas.DrawLine(Point(r.Left+1, r.Top+ymid+1), Point(r.Left+xmid, r.Bottom));
+    Canvas.DrawLine(Point(r.Left+2, r.Top+ymid+1), Point(r.Left+xmid, r.Bottom-1));
+    Canvas.DrawLine(Point(r.Left+3, r.Top+ymid+1), Point(r.Left+xmid, r.Bottom-2));
+    // draw the bottom / line
+    Canvas.DrawLine(Point(r.Left+xmid, r.Bottom), Point(r.Right, r.Top+ymid-1));
+    Canvas.DrawLine(Point(r.Left+xmid, r.Bottom-1), Point(r.Right-1, r.Top+ymid-1));
+    Canvas.DrawLine(Point(r.Left+xmid, r.Bottom-2), Point(r.Right-2, r.Top+ymid-1));
+  end;
+  
+  procedure _DrawTopHalf;
+  begin
+    // draw the top / line
+    Canvas.DrawLine(Point(r.Left, r.Top+ymid), Point(r.Left+xmid+1, r.Top));
+    Canvas.DrawLine(Point(r.Left+1, r.Top+ymid), Point(r.Left+xmid+1, r.Top+1));
+    Canvas.DrawLine(Point(r.Left+2, r.Top+ymid), Point(r.Left+xmid+1, r.Top+2));
+    // draw the top \ line
+    Canvas.DrawLine(Point(r.Left+xmid+1, r.Top+2), Point(r.Right-1, r.Top+ymid));
+    Canvas.DrawLine(Point(r.Left+xmid+1, r.Top+3), Point(r.Right-2, r.Top+ymid));
+    Canvas.DrawLine(Point(r.Left+xmid+1, r.Top+4), Point(r.Right-3, r.Top+ymid));
+  end;
+  
 begin
-  inherited DrawCheckBox(Canvas, ARect, LabelRect, Flags);
+  SetUIColor(Canvas, cl3DFace);
+  Canvas.FillRect(ARect);
+
+  r.Left    := ARect.Left;
+  r.Top     := ARect.Top + (ARect.Bottom - ARect.Top - 13) div 2;
+  r.Right   := 13;
+  r.Bottom  := r.Top + 13;
+  xmid      := ((r.Right - r.Left) div 2);
+  ymid      := ((r.Bottom - r.Top) div 2) + 1;
+
+  if (cbIsChecked in Flags) then
+  begin
+    SetUIColor(Canvas, clWhite);
+    _DrawBottomHalf;
+    SetUIColor(Canvas, cl3DShadow);
+    _DrawTopHalf;
+  end
+  else
+  begin
+    SetUIColor(Canvas, cl3DShadow);
+    _DrawBottomHalf;
+    SetUIColor(Canvas, clWhite);
+    _DrawTopHalf;
+  end;
+
+  if cbHasFocus in Flags then
+    with LabelRect do
+      DrawFocusRect(Canvas, Rect(Left - 2, Top - 2, Right + 2, Bottom + 2));
+
 end;
 
 
