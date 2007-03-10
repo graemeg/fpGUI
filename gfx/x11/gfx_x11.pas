@@ -22,7 +22,7 @@ unit GFX_X11;
 {$mode objfpc}{$H+}
 
 { Disable this, if you do not want Xft to be used for drawing text }
-{.$Define XftSupport}
+{$Define XftSupport}
 
 interface
 

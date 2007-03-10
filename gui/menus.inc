@@ -112,7 +112,9 @@ end;
 procedure TMenuItem.Paint(Canvas: TFCanvas);
 begin
   if (wsClicked in WidgetState) or (wsMouseInside in WidgetState) then
-    FBevelStyle := bsLowered
+    FBevelStyle := bsRaised
+//  else if (wsClicked in WidgetState) then
+//    FBevelStyle := bsLowered
   else
     FBevelStyle := bsPlain;
 
