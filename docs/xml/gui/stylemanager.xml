@@ -1,145 +1,220 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <fpdoc-descriptions>
-<package name="fpgui">
-
-<!--
+  <package name="fpGUI">
+    <!--
   ====================================================================
     stylemanager
   ====================================================================
 -->
-
-<module name="stylemanager">
-<short></short>
-<descr>
-</descr>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="fpGUI">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TStyleManager">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TStyleManager.FDefaultStyle">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TStyleManager.FUserStyle">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: private -->
-<element name="TStyleManager.GetDefaultStyle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TStyleManager.GetDefaultStyle.Result">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TStyleManager.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TStyleManager.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TStyleManager.DefaultStyle">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TStyleManager.SetStyle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TStyleManager.SetStyle.pNewStyle">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="gStyleManager">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="gStyleManager.Result">
-<short></short>
-</element>
-
-</module> <!-- stylemanager -->
-
-</package>
+    <module name="StyleManager">
+      <short></short>
+      <descr></descr>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Contnrs">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="fpGUI">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="cDefaultStyle">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- "class of" type Visibility: default -->
+      <element name="TStyleClass">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TStyleManager">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TStyleManager.FDefaultStyle">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TStyleManager.FUserStyle">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: private -->
+      <element name="TStyleManager.GetDefaultStyle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TStyleManager.GetDefaultStyle.Result">
+        <short></short>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TStyleManager.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TStyleManager.Destroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TStyleManager.DefaultStyle">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TStyleManager.SetStyle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleManager.SetStyle.pNewStyle">
+        <short></short>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="gStyleManager">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="gStyleManager.Result">
+        <short></short>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TStyleClassMapping">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TStyleClassMapping.FsMappingName">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TStyleClassMapping.FStyleClass">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TStyleClassMapping.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleClassMapping.Create.AMappingName">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleClassMapping.Create.AStyleClass">
+        <short></short>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TStyleClassMapping.MappingName">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TStyleClassMapping.StyleClass">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TStyleManager.FList">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TStyleManager.FDefaultStyleType">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleManager.SetStyle.AStyleName">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TStyleManager.RegisterClass">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleManager.RegisterClass.AStyleName">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleManager.RegisterClass.AStyleClass">
+        <short></short>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TStyleManager.CreateInstance">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TStyleManager.CreateInstance.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleManager.CreateInstance.AStyleName">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TStyleManager.AssignStyleTypes">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TStyleManager.AssignStyleTypes.AStrings">
+        <short></short>
+      </element>
+    </module>
+    <!-- StyleManager -->
+  </package>
 </fpdoc-descriptions>

@@ -1,136 +1,92 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-<package name="fpGFX">
-
-<!--
+  <package name="fpGFX">
+    <!--
   ====================================================================
     fpgfx
   ====================================================================
 -->
-
-<module name="fpgfx">
-<short/>
-<descr>
-</descr>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short/>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="SysUtils">
-<short/>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gfxinterface">
-<short/>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TFFont">
-<short/>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TFCanvas">
-<short/>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TFBitmap">
-<short/>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TFScreen">
-<short/>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TFWindow"/>
-
-<!-- object Visibility: default -->
-<element name="TFApplication">
-<short/>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="GFScreen">
-<short/>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="GFScreen.Result">
-<short/>
-</element>
-
-<!-- function Visibility: default -->
-<element name="GFApplication">
-<short/>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="GFApplication.Result">
-<short/>
-</element>
-
-</module> <!-- fpgfx -->
-
-</package>
+    <module name="fpgfx">
+      <short />
+      <descr></descr>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short />
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="SysUtils">
+        <short />
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="gfxinterface">
+        <short />
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TFFont">
+        <short />
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TFCanvas">
+        <short />
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TFBitmap">
+        <short />
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TFScreen">
+        <short />
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TFWindow" />
+      <!-- object Visibility: default -->
+      <element name="TFApplication">
+        <short />
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="GFScreen">
+        <short />
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="GFScreen.Result">
+        <short />
+      </element>
+      <!-- function Visibility: default -->
+      <element name="GFApplication">
+        <short />
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="GFApplication.Result">
+        <short />
+      </element>
+    </module>
+    <!-- fpgfx -->
+  </package>
 </fpdoc-descriptions>

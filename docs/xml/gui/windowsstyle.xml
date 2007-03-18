@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<fpdoc-descriptions>
+  <package name="fpGUI">
+    <!--
+  ====================================================================
+    WindowsStyle
+  ====================================================================
+-->
+    <module name="WindowsStyle">
+      <short></short>
+      <descr></descr>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="SysUtils">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="fpGUI">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TWindowsStyle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+    </module>
+    <!-- WindowsStyle -->
+  </package>
+</fpdoc-descriptions>

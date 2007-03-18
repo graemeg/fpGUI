@@ -49,6 +49,7 @@
         <UnitName Value="OpenSoftStyle"/>
       </Item5>
     </Files>
+    <LazDoc Paths="../../docs/xml/gui/"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="fpgfxpackage"/>

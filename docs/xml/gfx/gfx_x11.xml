@@ -1,2040 +1,1402 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <fpdoc-descriptions>
-<package name="fpGFX">
-
-<!--
+  <package name="fpGFX">
+    <!--
   ====================================================================
     GFX_X11
   ====================================================================
 -->
-
-<module name="GFX_X11">
-<short></short>
-<descr>
-</descr>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="SysUtils">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="X">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="XLib">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="XUtil">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="GfxBase">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="GELDirty">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- resource string Visibility: default -->
-<element name="SGCCreationFailed">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- resource string Visibility: default -->
-<element name="SXCanvasInvalidFontClass">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- resource string Visibility: default -->
-<element name="SOpenDisplayFailed">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- resource string Visibility: default -->
-<element name="SWindowCreationFailed">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- resource string Visibility: default -->
-<element name="SWindowUnsupportedPixelFormat">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- resource string Visibility: default -->
-<element name="SNoDefaultFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- resource string Visibility: default -->
-<element name="SIncompatibleCanvasForBlitting">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="EX11Error">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11Canvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11Application">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function type Visibility: default -->
-<element name="TX11EventFilter">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11EventFilter.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11EventFilter.AEvent">
-<short></short>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11Font">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Font.FFontStruct">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11Font.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Font.Create.Descriptor">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TX11Font.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TX11Font.GetDefaultFontName">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Font.GetDefaultFontName.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Font.GetDefaultFontName.AFontClass">
-<short></short>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Font.FontStruct">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- pointer type Visibility: default -->
-<element name="PX11CanvasState">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TX11CanvasState">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TX11CanvasState.Prev">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TX11CanvasState.Matrix">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TX11CanvasState.Region">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TX11CanvasState.Color">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TX11CanvasState.Font">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FGC">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FVisual">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FRegion">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FDefaultFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FFontStruct">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FStateStackpointer">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FColormap">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FCurColor">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Canvas.FFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TX11Canvas.Resized">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.Resized.NewWidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.Resized.NewHeight">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Canvas.DoExcludeClipRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Canvas.DoExcludeClipRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoExcludeClipRect.ARect">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Canvas.DoIntersectClipRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Canvas.DoIntersectClipRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoIntersectClipRect.ARect">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Canvas.DoUnionClipRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Canvas.DoUnionClipRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoUnionClipRect.ARect">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Canvas.DoGetClipRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Canvas.DoGetClipRect.Result">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoDrawArc">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawArc.ARect">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawArc.StartAngle">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawArc.EndAngle">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoDrawCircle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawCircle.ARect">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoDrawLine">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawLine.AFrom">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawLine.ATo">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoDrawRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawRect.ARect">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoDrawPoint">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawPoint.APoint">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoFillRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoFillRect.ARect">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoFillTriangle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoFillTriangle.P1">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoFillTriangle.P2">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoFillTriangle.P3">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoTextOut">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoTextOut.APosition">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoTextOut.AText">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoCopyRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoCopyRect.ASource">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoCopyRect.ASourceRect">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoCopyRect.ADestPos">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoMaskedCopyRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoMaskedCopyRect.ASource">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoMaskedCopyRect.AMask">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoMaskedCopyRect.ASourceRect">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoMaskedCopyRect.AMaskPos">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoMaskedCopyRect.ADestPos">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Canvas.DoDrawImageRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawImageRect.AImage">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawImageRect.ASourceRect">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DoDrawImageRect.ADestPos">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11Canvas.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.Create.AColormap">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.Create.AXDrawable">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.Create.ADefaultFont">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TX11Canvas.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TX11Canvas.MapColor">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Canvas.MapColor.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.MapColor.AColor">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TX11Canvas.FontCellHeight">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Canvas.FontCellHeight.Result">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TX11Canvas.TextExtent">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Canvas.TextExtent.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.TextExtent.AText">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Canvas.SaveState">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Canvas.RestoreState">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Canvas.EmptyClipRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Canvas.SetColor_">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.SetColor_.AColor">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Canvas.SetFont">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.SetFont.AFont">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Canvas.SetLineStyle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.SetLineStyle.ALineStyle">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Canvas.DrawPolyLine">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Canvas.DrawPolyLine.Coords">
-<short></short>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Canvas.GC">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Canvas.Visual">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Canvas.Colormap">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Canvas.Region">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11WindowCanvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11WindowCanvas.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11WindowCanvas.Create.AColormap">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11WindowCanvas.Create.AXDrawable">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11WindowCanvas.Create.ADefaultFont">
-<short></short>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11PixmapCanvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11PixmapCanvas.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11PixmapCanvas.Create.AColormap">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11PixmapCanvas.Create.AHandle">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11PixmapCanvas.Create.APixelFormat">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TX11PixmapCanvas.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11MonoPixmapCanvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: default -->
-<element name="TX11MonoPixmapCanvas.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11MonoPixmapCanvas.Create.AColormap">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11MonoPixmapCanvas.Create.AHandle">
-<short></short>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11Bitmap">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Bitmap.IsLocked">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11Bitmap.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Bitmap.Create.AWidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Bitmap.Create.AHeight">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Bitmap.Create.APixelFormat">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TX11Bitmap.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Bitmap.Lock">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Bitmap.Lock.AData">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Bitmap.Lock.AStride">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Bitmap.Unlock">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11Screen">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Screen.FScreenIndex">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Screen.FScreenInfo">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Screen.SetMousePos">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Screen.SetMousePos.NewPos">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Screen.GetMousePos">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Screen.GetMousePos.Result">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11Screen.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TX11Screen.CreateBitmapCanvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Screen.CreateBitmapCanvas.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Screen.CreateBitmapCanvas.AWidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Screen.CreateBitmapCanvas.AHeight">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TX11Screen.CreateMonoBitmapCanvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Screen.CreateMonoBitmapCanvas.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Screen.CreateMonoBitmapCanvas.AWidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Screen.CreateMonoBitmapCanvas.AHeight">
-<short></short>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Screen.ScreenIndex">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Screen.ScreenInfo">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.DoBreakRun">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.FDirtyList">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.FDisplayName">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.FDefaultFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.FEventFilter">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.Handle">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.FWMProtocols">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.FWMDeleteWindow">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Application.FWMHints">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: private -->
-<element name="TX11Application.DirtyList">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: private -->
-<element name="TX11Application.FindWindowByXID">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Application.FindWindowByXID.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Application.FindWindowByXID.XWindowID">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11Application.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TX11Application.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Application.Initialize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Application.Initialize.ADisplayName">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Application.Run">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Application.Quit">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Application.DisplayName">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TX11Application.EventFilter">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TX11Window">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Window.FComposeStatus">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Window.FComposeBuffer">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TX11Window.FCurCursorHandle">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: private -->
-<element name="TX11Window.StartComposing">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Window.StartComposing.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.StartComposing.Event">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TX11Window.EndComposing">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TX11Window.Expose">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.Expose.Event">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TX11Window.Configure">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.Configure.Event">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TX11Window.ClientMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.ClientMessage.Event">
-<short></short>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TX11Window.IsExposing">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TX11Window.CanMaximize">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Window.GetTitle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Window.GetTitle.Result">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Window.ConvertShiftState">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Window.ConvertShiftState.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.ConvertShiftState.AState">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TX11Window.KeySymToKeycode">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TX11Window.KeySymToKeycode.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.KeySymToKeycode.KeySym">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Window.SetTitle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetTitle.ATitle">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Window.DoSetCursor">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TX11Window.UpdateMotifWMHints">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TX11Window.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.Create.AParent">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.Create.AWindowOptions">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TX11Window.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.SetPosition">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetPosition.APosition">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.SetSize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetSize.ASize">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.SetMinMaxSize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetMinMaxSize.AMinSize">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetMinMaxSize.AMaxSize">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.SetClientSize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetClientSize.ASize">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.SetMinMaxClientSize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetMinMaxClientSize.AMinSize">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.SetMinMaxClientSize.AMaxSize">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.Show">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.Invalidate">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.Invalidate.ARect">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.PaintInvalidRegion">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.CaptureMouse">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.ReleaseMouse">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TX11Window.ProcessEvent">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TX11Window.ProcessEvent.AEvent">
-<short></short>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="LeaderWindow">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="ClientLeaderAtom">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="RectToXRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="RectToXRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="RectToXRect.ARect">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="XRectToRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="XRectToRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XRectToRect.ARect">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="GetXEventName">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="GetXEventName.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="GetXEventName.Event">
-<short></short>
-</element>
-
-</module> <!-- GFX_X11 -->
-
-</package>
+    <module name="GFX_X11">
+      <short></short>
+      <descr></descr>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="SysUtils">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="X">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="XLib">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="XUtil">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="GfxBase">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="GELDirty">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- resource string Visibility: default -->
+      <element name="SGCCreationFailed">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- resource string Visibility: default -->
+      <element name="SXCanvasInvalidFontClass">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- resource string Visibility: default -->
+      <element name="SOpenDisplayFailed">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- resource string Visibility: default -->
+      <element name="SWindowCreationFailed">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- resource string Visibility: default -->
+      <element name="SWindowUnsupportedPixelFormat">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- resource string Visibility: default -->
+      <element name="SNoDefaultFont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- resource string Visibility: default -->
+      <element name="SIncompatibleCanvasForBlitting">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="EX11Error">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11Canvas">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11Application">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function type Visibility: default -->
+      <element name="TX11EventFilter">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11EventFilter.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11EventFilter.AEvent">
+        <short></short>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11Font">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Font.FFontStruct">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11Font.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Font.Create.Descriptor">
+        <short></short>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TX11Font.Destroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TX11Font.GetDefaultFontName">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Font.GetDefaultFontName.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Font.GetDefaultFontName.AFontClass">
+        <short></short>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Font.FontStruct">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- pointer type Visibility: default -->
+      <element name="PX11CanvasState">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TX11CanvasState">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TX11CanvasState.Prev">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TX11CanvasState.Matrix">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TX11CanvasState.Region">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TX11CanvasState.Color">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TX11CanvasState.Font">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FGC">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FVisual">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FRegion">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FDefaultFont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FFontStruct">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FStateStackpointer">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FColormap">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FCurColor">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Canvas.FFont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TX11Canvas.Resized">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.Resized.NewWidth">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.Resized.NewHeight">
+        <short></short>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Canvas.DoExcludeClipRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Canvas.DoExcludeClipRect.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoExcludeClipRect.ARect">
+        <short></short>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Canvas.DoIntersectClipRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Canvas.DoIntersectClipRect.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoIntersectClipRect.ARect">
+        <short></short>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Canvas.DoUnionClipRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Canvas.DoUnionClipRect.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoUnionClipRect.ARect">
+        <short></short>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Canvas.DoGetClipRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Canvas.DoGetClipRect.Result">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoDrawArc">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawArc.ARect">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawArc.StartAngle">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawArc.EndAngle">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoDrawCircle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawCircle.ARect">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoDrawLine">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawLine.AFrom">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawLine.ATo">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoDrawRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawRect.ARect">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoDrawPoint">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawPoint.APoint">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoFillRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoFillRect.ARect">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoFillTriangle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoFillTriangle.P1">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoFillTriangle.P2">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoFillTriangle.P3">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoTextOut">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoTextOut.APosition">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoTextOut.AText">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoCopyRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoCopyRect.ASource">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoCopyRect.ASourceRect">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoCopyRect.ADestPos">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoMaskedCopyRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoMaskedCopyRect.ASource">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoMaskedCopyRect.AMask">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoMaskedCopyRect.ASourceRect">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoMaskedCopyRect.AMaskPos">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoMaskedCopyRect.ADestPos">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Canvas.DoDrawImageRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawImageRect.AImage">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawImageRect.ASourceRect">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DoDrawImageRect.ADestPos">
+        <short></short>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11Canvas.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.Create.AColormap">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.Create.AXDrawable">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.Create.ADefaultFont">
+        <short></short>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TX11Canvas.Destroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TX11Canvas.MapColor">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Canvas.MapColor.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.MapColor.AColor">
+        <short></short>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TX11Canvas.FontCellHeight">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Canvas.FontCellHeight.Result">
+        <short></short>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TX11Canvas.TextExtent">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Canvas.TextExtent.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.TextExtent.AText">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Canvas.SaveState">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Canvas.RestoreState">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Canvas.EmptyClipRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Canvas.SetColor_">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.SetColor_.AColor">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Canvas.SetFont">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.SetFont.AFont">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Canvas.SetLineStyle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.SetLineStyle.ALineStyle">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Canvas.DrawPolyLine">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Canvas.DrawPolyLine.Coords">
+        <short></short>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Canvas.GC">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Canvas.Visual">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Canvas.Colormap">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Canvas.Region">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11WindowCanvas">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11WindowCanvas.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11WindowCanvas.Create.AColormap">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11WindowCanvas.Create.AXDrawable">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11WindowCanvas.Create.ADefaultFont">
+        <short></short>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11PixmapCanvas">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11PixmapCanvas.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11PixmapCanvas.Create.AColormap">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11PixmapCanvas.Create.AHandle">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11PixmapCanvas.Create.APixelFormat">
+        <short></short>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TX11PixmapCanvas.Destroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11MonoPixmapCanvas">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- constructor Visibility: default -->
+      <element name="TX11MonoPixmapCanvas.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11MonoPixmapCanvas.Create.AColormap">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11MonoPixmapCanvas.Create.AHandle">
+        <short></short>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11Bitmap">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Bitmap.IsLocked">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11Bitmap.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Bitmap.Create.AWidth">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Bitmap.Create.AHeight">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Bitmap.Create.APixelFormat">
+        <short></short>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TX11Bitmap.Destroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Bitmap.Lock">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Bitmap.Lock.AData">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Bitmap.Lock.AStride">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Bitmap.Unlock">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11Screen">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Screen.FScreenIndex">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Screen.FScreenInfo">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Screen.SetMousePos">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Screen.SetMousePos.NewPos">
+        <short></short>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Screen.GetMousePos">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Screen.GetMousePos.Result">
+        <short></short>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11Screen.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TX11Screen.CreateBitmapCanvas">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Screen.CreateBitmapCanvas.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Screen.CreateBitmapCanvas.AWidth">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Screen.CreateBitmapCanvas.AHeight">
+        <short></short>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TX11Screen.CreateMonoBitmapCanvas">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Screen.CreateMonoBitmapCanvas.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Screen.CreateMonoBitmapCanvas.AWidth">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Screen.CreateMonoBitmapCanvas.AHeight">
+        <short></short>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Screen.ScreenIndex">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Screen.ScreenInfo">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.DoBreakRun">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.FDirtyList">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.FDisplayName">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.FDefaultFont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.FEventFilter">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.Handle">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.FWMProtocols">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.FWMDeleteWindow">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Application.FWMHints">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: private -->
+      <element name="TX11Application.DirtyList">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: private -->
+      <element name="TX11Application.FindWindowByXID">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Application.FindWindowByXID.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Application.FindWindowByXID.XWindowID">
+        <short></short>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11Application.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TX11Application.Destroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Application.Initialize">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Application.Initialize.ADisplayName">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Application.Run">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Application.Quit">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Application.DisplayName">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TX11Application.EventFilter">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TX11Window">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Window.FComposeStatus">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Window.FComposeBuffer">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TX11Window.FCurCursorHandle">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: private -->
+      <element name="TX11Window.StartComposing">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Window.StartComposing.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.StartComposing.Event">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TX11Window.EndComposing">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TX11Window.Expose">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.Expose.Event">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TX11Window.Configure">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.Configure.Event">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TX11Window.ClientMessage">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.ClientMessage.Event">
+        <short></short>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TX11Window.IsExposing">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TX11Window.CanMaximize">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Window.GetTitle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Window.GetTitle.Result">
+        <short></short>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Window.ConvertShiftState">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Window.ConvertShiftState.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.ConvertShiftState.AState">
+        <short></short>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TX11Window.KeySymToKeycode">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TX11Window.KeySymToKeycode.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.KeySymToKeycode.KeySym">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Window.SetTitle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetTitle.ATitle">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Window.DoSetCursor">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TX11Window.UpdateMotifWMHints">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TX11Window.Create">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.Create.AParent">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.Create.AWindowOptions">
+        <short></short>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TX11Window.Destroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.SetPosition">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetPosition.APosition">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.SetSize">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetSize.ASize">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.SetMinMaxSize">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetMinMaxSize.AMinSize">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetMinMaxSize.AMaxSize">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.SetClientSize">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetClientSize.ASize">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.SetMinMaxClientSize">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetMinMaxClientSize.AMinSize">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.SetMinMaxClientSize.AMaxSize">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.Show">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.Invalidate">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.Invalidate.ARect">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.PaintInvalidRegion">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.CaptureMouse">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.ReleaseMouse">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TX11Window.ProcessEvent">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TX11Window.ProcessEvent.AEvent">
+        <short></short>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="LeaderWindow">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="ClientLeaderAtom">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="RectToXRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="RectToXRect.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="RectToXRect.ARect">
+        <short></short>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="XRectToRect">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="XRectToRect.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XRectToRect.ARect">
+        <short></short>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="GetXEventName">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="GetXEventName.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="GetXEventName.Event">
+        <short></short>
+      </element>
+    </module>
+    <!-- GFX_X11 -->
+  </package>
 </fpdoc-descriptions>

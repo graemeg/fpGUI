@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <fpdoc-descriptions>
-  <package name="fpGFX">
+  <package name="fpGUI">
     <!--
   ====================================================================
-    GELImage
+    MotifStyle
   ====================================================================
 -->
-    <module name="GELImage">
+    <module name="MotifStyle">
       <short></short>
       <descr></descr>
       <!-- unresolved type reference Visibility: default -->
@@ -16,94 +16,88 @@
         <seealso></seealso>
       </element>
       <!-- unresolved type reference Visibility: default -->
-      <element name="GfxBase">
+      <element name="SysUtils">
         <short></short>
         <descr></descr>
         <seealso></seealso>
       </element>
-      <!-- procedure Visibility: default -->
-      <element name="ConvertImage">
+      <!-- unresolved type reference Visibility: default -->
+      <element name="fpGUI">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="fpGFX">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TMotifStyle">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TMotifStyle.DrawFocusRect">
         <short></short>
         <descr></descr>
         <errors></errors>
         <seealso></seealso>
       </element>
       <!-- argument Visibility: default -->
-      <element name="ConvertImage.ASourceRect">
+      <element name="TMotifStyle.DrawFocusRect.Canvas">
         <short></short>
       </element>
       <!-- argument Visibility: default -->
-      <element name="ConvertImage.ASourceFormat">
+      <element name="TMotifStyle.DrawFocusRect.ARect">
         <short></short>
       </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ASourcePal">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ASourceData">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ASourceStride">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ADestX">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ADestY">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ADestFormat">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ADestData">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="ConvertImage.ADestStride">
-        <short></short>
-      </element>
-      <!-- procedure Visibility: default -->
-      <element name="FlipMonoImageBits">
+      <!-- procedure Visibility: public -->
+      <element name="TMotifStyle.DrawButtonFace">
         <short></short>
         <descr></descr>
         <errors></errors>
         <seealso></seealso>
       </element>
       <!-- argument Visibility: default -->
-      <element name="FlipMonoImageBits.ASourceRect">
+      <element name="TMotifStyle.DrawButtonFace.Canvas">
         <short></short>
       </element>
       <!-- argument Visibility: default -->
-      <element name="FlipMonoImageBits.ASourceData">
+      <element name="TMotifStyle.DrawButtonFace.ARect">
         <short></short>
       </element>
       <!-- argument Visibility: default -->
-      <element name="FlipMonoImageBits.ASourceStride">
+      <element name="TMotifStyle.DrawButtonFace.Flags">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TMotifStyle.DrawCheckBox">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMotifStyle.DrawCheckBox.Canvas">
         <short></short>
       </element>
       <!-- argument Visibility: default -->
-      <element name="FlipMonoImageBits.ADestX">
+      <element name="TMotifStyle.DrawCheckBox.ARect">
         <short></short>
       </element>
       <!-- argument Visibility: default -->
-      <element name="FlipMonoImageBits.ADestY">
+      <element name="TMotifStyle.DrawCheckBox.LabelRect">
         <short></short>
       </element>
       <!-- argument Visibility: default -->
-      <element name="FlipMonoImageBits.ADestData">
-        <short></short>
-      </element>
-      <!-- argument Visibility: default -->
-      <element name="FlipMonoImageBits.ADestStride">
+      <element name="TMotifStyle.DrawCheckBox.Flags">
         <short></short>
       </element>
     </module>
-    <!-- GELImage -->
+    <!-- MotifStyle -->
   </package>
 </fpdoc-descriptions>

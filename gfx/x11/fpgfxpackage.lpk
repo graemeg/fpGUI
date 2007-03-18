@@ -59,6 +59,7 @@
         <UnitName Value="CommandLineParams"/>
       </Item9>
     </Files>
+    <LazDoc Paths="../../docs/xml/gfx/"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="FCL"/>

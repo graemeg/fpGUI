@@ -1,905 +1,635 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <fpdoc-descriptions>
-<package name="fpGFX">
-
-<!--
+  <package name="fpGFX">
+    <!--
   ====================================================================
     unitxft
   ====================================================================
 -->
-
-<module name="unitxft">
-<short></short>
-<descr>
-</descr>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="SysUtils">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="X">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="XLib">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Xutil">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- alias type Visibility: default -->
-<element name="TPicture">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TXftDraw">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftDraw.dummy">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- pointer type Visibility: default -->
-<element name="PXftDraw">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TXftFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftFont.ascent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftFont.descent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftFont.height">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftFont.max_advance_width">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftFont.ptr1">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftFont.ptr2">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- pointer type Visibility: default -->
-<element name="PXftFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TXRenderColor">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXRenderColor.red">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXRenderColor.green">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXRenderColor.blue">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXRenderColor.alpha">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TXftColor">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftColor.pixel">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXftColor.color">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TXGlyphInfo">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXGlyphInfo.width">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXGlyphInfo.height">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXGlyphInfo.x">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXGlyphInfo.y">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXGlyphInfo.xOff">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TXGlyphInfo.yOff">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TFcPattern">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TFcPattern.dummy">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- pointer type Visibility: default -->
-<element name="PFcPattern">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- pointer type Visibility: default -->
-<element name="PPFcPattern">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TFcFontSet">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TFcFontSet.nfont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TFcFontSet.sfont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TFcFontSet.fonts">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- pointer type Visibility: default -->
-<element name="PFcFontSet">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FC_FAMILY">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FC_SIZE">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FC_SCALABLE">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeVoid">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeInteger">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeDouble">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeString">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeBool">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeMatrix">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeCharSet">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeFTFace">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="FcTypeLangSet">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="XftDrawCreate">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="XftDrawCreate.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawCreate.display">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawCreate.win">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawCreate.vis">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawCreate.colorm">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftDrawChange">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawChange.xftd">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawChange.win">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftDrawDestroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawDestroy.draw">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="XftDrawPicture">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="XftDrawPicture.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawPicture.draw">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="XftFontOpenName">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="XftFontOpenName.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftFontOpenName.display">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftFontOpenName.scr">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftFontOpenName.par3">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftFontClose">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftFontClose.display">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftFontClose.fnt">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftDrawString8">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString8.draw">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString8.col">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString8.fnt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString8.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString8.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString8.txt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString8.len">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftDrawString16">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString16.draw">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString16.col">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString16.fnt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString16.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString16.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString16.txt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawString16.len">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftTextExtents16">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents16.display">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents16.fnt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents16.txt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents16.len">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents16.extents">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftTextExtents8">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents8.display">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents8.fnt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents8.txt">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents8.len">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftTextExtents8.extents">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="XftDrawSetClip">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawSetClip.draw">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftDrawSetClip.rg">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="XftListFonts">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="XftListFonts.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftListFonts.display">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftListFonts.screen">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftListFonts.params">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="XftNameUnparse">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="XftNameUnparse.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftNameUnparse.pat">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftNameUnparse.dest">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="XftNameUnparse.destlen">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="FcFontSetDestroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="FcFontSetDestroy.fsp">
-<short></short>
-</element>
-
-</module> <!-- unitxft -->
-
-</package>
+    <module name="unitxft">
+      <short></short>
+      <descr></descr>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="SysUtils">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="X">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="XLib">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Xutil">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- alias type Visibility: default -->
+      <element name="TPicture">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TXftDraw">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftDraw.dummy">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- pointer type Visibility: default -->
+      <element name="PXftDraw">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TXftFont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftFont.ascent">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftFont.descent">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftFont.height">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftFont.max_advance_width">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftFont.ptr1">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftFont.ptr2">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- pointer type Visibility: default -->
+      <element name="PXftFont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TXRenderColor">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXRenderColor.red">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXRenderColor.green">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXRenderColor.blue">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXRenderColor.alpha">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TXftColor">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftColor.pixel">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXftColor.color">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TXGlyphInfo">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXGlyphInfo.width">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXGlyphInfo.height">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXGlyphInfo.x">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXGlyphInfo.y">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXGlyphInfo.xOff">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TXGlyphInfo.yOff">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TFcPattern">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TFcPattern.dummy">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- pointer type Visibility: default -->
+      <element name="PFcPattern">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- pointer type Visibility: default -->
+      <element name="PPFcPattern">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TFcFontSet">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TFcFontSet.nfont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TFcFontSet.sfont">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TFcFontSet.fonts">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- pointer type Visibility: default -->
+      <element name="PFcFontSet">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FC_FAMILY">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FC_SIZE">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FC_SCALABLE">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeVoid">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeInteger">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeDouble">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeString">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeBool">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeMatrix">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeCharSet">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeFTFace">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="FcTypeLangSet">
+        <short></short>
+        <descr></descr>
+        <seealso></seealso>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="XftDrawCreate">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="XftDrawCreate.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawCreate.display">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawCreate.win">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawCreate.vis">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawCreate.colorm">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftDrawChange">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawChange.xftd">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawChange.win">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftDrawDestroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawDestroy.draw">
+        <short></short>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="XftDrawPicture">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="XftDrawPicture.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawPicture.draw">
+        <short></short>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="XftFontOpenName">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="XftFontOpenName.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftFontOpenName.display">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftFontOpenName.scr">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftFontOpenName.par3">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftFontClose">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftFontClose.display">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftFontClose.fnt">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftDrawString8">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString8.draw">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString8.col">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString8.fnt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString8.x">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString8.y">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString8.txt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString8.len">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftDrawString16">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString16.draw">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString16.col">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString16.fnt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString16.x">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString16.y">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString16.txt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawString16.len">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftTextExtents16">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents16.display">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents16.fnt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents16.txt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents16.len">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents16.extents">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftTextExtents8">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents8.display">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents8.fnt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents8.txt">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents8.len">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftTextExtents8.extents">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="XftDrawSetClip">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawSetClip.draw">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftDrawSetClip.rg">
+        <short></short>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="XftListFonts">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="XftListFonts.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftListFonts.display">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftListFonts.screen">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftListFonts.params">
+        <short></short>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="XftNameUnparse">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="XftNameUnparse.Result">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftNameUnparse.pat">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftNameUnparse.dest">
+        <short></short>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="XftNameUnparse.destlen">
+        <short></short>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="FcFontSetDestroy">
+        <short></short>
+        <descr></descr>
+        <errors></errors>
+        <seealso></seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="FcFontSetDestroy.fsp">
+        <short></short>
+      </element>
+    </module>
+    <!-- unitxft -->
+  </package>
 </fpdoc-descriptions>
