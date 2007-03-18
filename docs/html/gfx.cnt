@@ -402,6 +402,8 @@
    CreateMonoBitmapCanvas gfxbase/tfcustomscreen.createmonobitmapcanvas.html
    MousePos gfxbase/tfcustomscreen.mousepos.html
   TFCustomApplication gfxbase/tfcustomapplication.html
+   FDisplayName gfxbase/tfcustomapplication.fdisplayname.html
+   DoBreakRun gfxbase/tfcustomapplication.dobreakrun.html
    FTitle gfxbase/tfcustomapplication.ftitle.html
    SetTitle gfxbase/tfcustomapplication.settitle.html
    Forms gfxbase/tfcustomapplication.forms.html
@@ -527,6 +529,13 @@
   PX11CanvasState gfx_x11/px11canvasstate.html
   TX11CanvasState gfx_x11/tx11canvasstate.html
   EX11Error gfx_x11/ex11error.html
+  TX11FontResourceImpl gfx_x11/tx11fontresourceimpl.html
+   Create gfx_x11/tx11fontresourceimpl.create.html
+   Destroy gfx_x11/tx11fontresourceimpl.destroy.html
+   GetAscent gfx_x11/tx11fontresourceimpl.getascent.html
+   GetDescent gfx_x11/tx11fontresourceimpl.getdescent.html
+   GetHeight gfx_x11/tx11fontresourceimpl.getheight.html
+   FontData gfx_x11/tx11fontresourceimpl.fontdata.html
   TX11Font gfx_x11/tx11font.html
    Create gfx_x11/tx11font.create.html
    Destroy gfx_x11/tx11font.destroy.html
@@ -792,7 +801,8 @@
 #fpgfx.GfxBase.TFCustomApplication TComponent
 1VFOnIdle
 1VFQuitWhenLastWindowCloses
-1VFDisplayName
+2VFDisplayName
+2VDoBreakRun
 2VFTitle
 2MSetTitle
 3VForms
@@ -908,6 +918,14 @@
 3MPaintAll
 3PFirst rw
 #fpgfx.GFX_X11.EX11Error #fpgfx.GfxBase.EGfxError
+#fpgfx.GFX_X11.TX11FontResourceImpl TObject
+1VFFontData
+3MCreate
+3MDestroy
+3MGetAscent
+3MGetDescent
+3MGetHeight
+3PFontData r
 #fpgfx.GFX_X11.TX11Font #fpgfx.GfxBase.TFCustomFont
 1VFFontStruct
 3MCreate
@@ -920,6 +938,7 @@
 1VFRegion
 1VFDefaultFont
 1VFFontStruct
+1VFXftDraw
 1VFStateStackpointer
 1VFColormap
 1VFCurColor
@@ -980,9 +999,7 @@
 3PScreenIndex r
 3PScreenInfo r
 #fpgfx.GFX_X11.TX11Application #fpgfx.GfxBase.TFCustomApplication
-1VDoBreakRun
 1VFDirtyList
-1VFDisplayName
 1VFDefaultFont
 1VFEventFilter
 1VHandle

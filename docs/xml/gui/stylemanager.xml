@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0"?>
 <fpdoc-descriptions>
   <package name="fpGUI">
     <!--
@@ -7,212 +7,190 @@
   ====================================================================
 -->
     <module name="StyleManager">
-      <short></short>
-      <descr></descr>
+      <short>Defines a class that manages all the GUI Styles.</short>
+      <descr><printshort id="StyleManager" />. All the different styles
+        must register with the Style Manager to be used at runtime.</descr>
       <!-- unresolved type reference Visibility: default -->
       <element name="Classes">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- unresolved type reference Visibility: default -->
       <element name="Contnrs">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- unresolved type reference Visibility: default -->
       <element name="fpGUI">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- constant Visibility: default -->
-      <element name="cDefaultStyle">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+      <element name="cDefaultStyle">        <short>Defines the default style the system will use.</short>
+        <descr><printshort id="cDefaultStyle"/></descr>
       </element>
       <!-- "class of" type Visibility: default -->
       <element name="TStyleClass">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- object Visibility: default -->
-      <element name="TStyleManager">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+      <element name="TStyleManager">        <short>Class that manages the different styles</short>
+        <descr><printshort id="TStyleManager"/>. It's function is to register new style classes, create instances of the style classes and many more functions.</descr>
       </element>
       <!-- variable Visibility: private -->
       <element name="TStyleManager.FDefaultStyle">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- variable Visibility: private -->
       <element name="TStyleManager.FUserStyle">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- function Visibility: private -->
-      <element name="TStyleManager.GetDefaultStyle">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+      <element name="TStyleManager.GetDefaultStyle">        <short>Returns a instance of the default style</short>
+        <descr><printshort id="TStyleManager.GetDefaultStyle"/>. At the moment the default style is hard-coded to the Windows Style, but in the future it will be auto-detected based on the OS and Desktop Manager used.</descr>
       </element>
       <!-- function result Visibility: default -->
       <element name="TStyleManager.GetDefaultStyle.Result">
-        <short></short>
+        <short/>
       </element>
       <!-- constructor Visibility: public -->
       <element name="TStyleManager.Create">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
       </element>
       <!-- destructor Visibility: public -->
       <element name="TStyleManager.Destroy">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
       </element>
       <!-- property Visibility: public -->
       <element name="TStyleManager.DefaultStyle">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- procedure Visibility: public -->
       <element name="TStyleManager.SetStyle">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
       </element>
       <!-- argument Visibility: default -->
       <element name="TStyleManager.SetStyle.pNewStyle">
-        <short></short>
+        <short/>
       </element>
       <!-- function Visibility: default -->
-      <element name="gStyleManager">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+      <element name="gStyleManager">        <short>Singleton function to access the Style Manager</short>
+        <descr><printshort id="gStyleManager"/>. Never create a instance of TStyleManager, always access in through the singleton function.</descr>
       </element>
       <!-- function result Visibility: default -->
       <element name="gStyleManager.Result">
-        <short></short>
+        <short/>
       </element>
       <!-- object Visibility: default -->
-      <element name="TStyleClassMapping">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+      <element name="TStyleClassMapping">        <short>Class to map a string name to a style class</short>
+        <descr><printshort id="TStyleClassMapping"/>. Used internally as a data class to map a user friendly style name to a style class.</descr>
       </element>
       <!-- variable Visibility: private -->
       <element name="TStyleClassMapping.FsMappingName">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- variable Visibility: private -->
       <element name="TStyleClassMapping.FStyleClass">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- constructor Visibility: public -->
       <element name="TStyleClassMapping.Create">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
       </element>
       <!-- argument Visibility: default -->
       <element name="TStyleClassMapping.Create.AMappingName">
-        <short></short>
+        <short/>
       </element>
       <!-- argument Visibility: default -->
       <element name="TStyleClassMapping.Create.AStyleClass">
-        <short></short>
+        <short/>
       </element>
       <!-- property Visibility: public -->
-      <element name="TStyleClassMapping.MappingName">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+      <element name="TStyleClassMapping.MappingName">        <short>User friendly style name</short>
+        <descr><printshort id="TStyleClassMapping.MappingName"/>.</descr>
       </element>
       <!-- property Visibility: public -->
-      <element name="TStyleClassMapping.StyleClass">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+      <element name="TStyleClassMapping.StyleClass">        <short>Class reference to the Style Class</short>
+        <descr><printshort id="TStyleClassMapping.StyleClass"/>.</descr>
       </element>
       <!-- variable Visibility: private -->
       <element name="TStyleManager.FList">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- variable Visibility: private -->
       <element name="TStyleManager.FDefaultStyleType">
-        <short></short>
-        <descr></descr>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <seealso/>
       </element>
       <!-- argument Visibility: default -->
       <element name="TStyleManager.SetStyle.AStyleName">
-        <short></short>
+        <short/>
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyleManager.RegisterClass">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+      <element name="TStyleManager.RegisterClass">        <short>Method used to register a new style with the Style Manager</short>
+        <descr><printshort id="TStyleManager.RegisterClass"/></descr>
+        <example file="examples/TStyleManager.RegisterClass.pas"/>
       </element>
       <!-- argument Visibility: default -->
       <element name="TStyleManager.RegisterClass.AStyleName">
-        <short></short>
+        <short/>
       </element>
       <!-- argument Visibility: default -->
       <element name="TStyleManager.RegisterClass.AStyleClass">
-        <short></short>
+        <short/>
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyleManager.CreateInstance">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+      <element name="TStyleManager.CreateInstance">        <short>Creates an instance of the named style</short>
+        <descr><printshort id="TStyleManager.CreateInstance"/>.</descr>
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyleManager.CreateInstance.Result">
-        <short></short>
+      <element name="TStyleManager.CreateInstance.Result">        <short>An instance of the named style</short>
+        <descr><printshort id="TStyleManager.CreateInstance.Result"/>.</descr>
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyleManager.CreateInstance.AStyleName">
-        <short></short>
+      <element name="TStyleManager.CreateInstance.AStyleName">        <short>The style name</short>
+        <descr><printshort id="TStyleManager.CreateInstance.AStyleName"/>. This name will be used and looked up internally in the style manager and if found, a instance of that style will be returned.</descr>
       </element>
       <!-- procedure Visibility: public -->
       <element name="TStyleManager.AssignStyleTypes">
-        <short></short>
-        <descr></descr>
-        <errors></errors>
-        <seealso></seealso>
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
       </element>
       <!-- argument Visibility: default -->
       <element name="TStyleManager.AssignStyleTypes.AStrings">
-        <short></short>
+        <short/>
       </element>
     </module>
     <!-- StyleManager -->

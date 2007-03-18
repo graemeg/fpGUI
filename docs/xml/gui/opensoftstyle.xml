@@ -7,8 +7,10 @@
   ====================================================================
 -->
     <module name="OpenSoftStyle">
-      <short></short>
-      <descr></descr>
+      <short>Defines a custom GUI Style called OpenSoft.</short>
+      <descr><printshort id="OpenSoftStyle" />. This started as a proof-of-concept
+        on how a custom style can be created. In the future this will be used
+        as the default style in my company products.</descr>
       <!-- unresolved type reference Visibility: default -->
       <element name="Classes">
         <short></short>
@@ -75,8 +77,10 @@
       </element>
       <!-- object Visibility: default -->
       <element name="TOpenSoftStyle">
-        <short></short>
-        <descr></descr>
+        <short>Defines a custom GUI Style called OpenSoft.</short>
+        <descr><printshort id="OpenSoftStyle" />. This started as a proof-of-concept
+          on how a custom style can be created. In the future this will be used
+          as the default style in my company products.</descr>
         <errors></errors>
         <seealso></seealso>
       </element>

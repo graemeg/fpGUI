@@ -640,523 +640,523 @@
         <short />
       </element>
       <!-- object Visibility: default -->
-      <element name="TStyle">
-        <short>The TStyle class is an abstract base class that
+      <element name="TStyleAbs">
+        <short>The TStyleAbs class is an abstract base class that
         encapsulates the look and feel of a GUI.</short>
-        <descr>fpGUI contains a set of TStyle subclasses that
+        <descr>fpGUI contains a set of TStyleAbs subclasses that
         emulate the styles of the different platforms supported by
         fpGUI (TWindowsStyle, TMotifStyle, etc.). By default, these
         styles are built into the fpGUI library. Styles are
         preferably applied application wide, but can also be
-        applied per widget. fpGUI's built-in widgets use TStyle to
+        applied per widget. fpGUI's built-in widgets use TStyleAbs to
         perform all of their drawing, ensuring that they look
         exactly like the equivalent native widgets.</descr>
         <seealso>
-          <link id="TDefaultStyle" />
+          <link id="TBasicStyle" />
         </seealso>
       </element>
       <!-- variable Visibility: protected -->
-      <element name="TStyle.UIColorCache">
+      <element name="TStyleAbs.UIColorCache">
         <short />
         <descr />
         <seealso />
       </element>
       <!-- constructor Visibility: public -->
-      <element name="TStyle.Create">
+      <element name="TStyleAbs.Create">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.Create.ADisplay">
+      <element name="TStyleAbs.Create.ADisplay">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.UpdateUIColorCache">
+      <element name="TStyleAbs.UpdateUIColorCache">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetGUIColor">
+      <element name="TStyleAbs.GetGUIColor">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetGUIColor.Result">
+      <element name="TStyleAbs.GetGUIColor.Result">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetGUIColor.Color">
+      <element name="TStyleAbs.GetGUIColor.Color">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetUIColor">
+      <element name="TStyleAbs.GetUIColor">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetUIColor.Result">
+      <element name="TStyleAbs.GetUIColor.Result">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetUIColor.AColor">
+      <element name="TStyleAbs.GetUIColor.AColor">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.SetUIColor">
+      <element name="TStyleAbs.SetUIColor">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.SetUIColor.Canvas">
+      <element name="TStyleAbs.SetUIColor.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.SetUIColor.Color">
+      <element name="TStyleAbs.SetUIColor.Color">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawText">
+      <element name="TStyleAbs.DrawText">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawText.Canvas">
+      <element name="TStyleAbs.DrawText.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawText.APosition">
+      <element name="TStyleAbs.DrawText.APosition">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawText.AText">
+      <element name="TStyleAbs.DrawText.AText">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawText.State">
+      <element name="TStyleAbs.DrawText.State">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawItemBefore">
+      <element name="TStyleAbs.DrawItemBefore">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawItemBefore.Canvas">
+      <element name="TStyleAbs.DrawItemBefore.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawItemBefore.ARect">
+      <element name="TStyleAbs.DrawItemBefore.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawItemBefore.Flags">
+      <element name="TStyleAbs.DrawItemBefore.Flags">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawItemAfter">
+      <element name="TStyleAbs.DrawItemAfter">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawItemAfter.Canvas">
+      <element name="TStyleAbs.DrawItemAfter.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawItemAfter.ARect">
+      <element name="TStyleAbs.DrawItemAfter.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawItemAfter.Flags">
+      <element name="TStyleAbs.DrawItemAfter.Flags">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawWindowBackground">
+      <element name="TStyleAbs.DrawWindowBackground">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawWindowBackground.Canvas">
+      <element name="TStyleAbs.DrawWindowBackground.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawWindowBackground.ARect">
+      <element name="TStyleAbs.DrawWindowBackground.ARect">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawButtonFace">
+      <element name="TStyleAbs.DrawButtonFace">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawButtonFace.Canvas">
+      <element name="TStyleAbs.DrawButtonFace.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawButtonFace.ARect">
+      <element name="TStyleAbs.DrawButtonFace.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawButtonFace.Flags">
+      <element name="TStyleAbs.DrawButtonFace.Flags">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetButtonBorders">
+      <element name="TStyleAbs.GetButtonBorders">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetButtonBorders.Result">
+      <element name="TStyleAbs.GetButtonBorders.Result">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetSeparatorSize">
+      <element name="TStyleAbs.GetSeparatorSize">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetSeparatorSize.Result">
+      <element name="TStyleAbs.GetSeparatorSize.Result">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawSeparator">
+      <element name="TStyleAbs.DrawSeparator">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawSeparator.Canvas">
+      <element name="TStyleAbs.DrawSeparator.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawSeparator.ARect">
+      <element name="TStyleAbs.DrawSeparator.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawSeparator.AOrientation">
+      <element name="TStyleAbs.DrawSeparator.AOrientation">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawGroupBox">
+      <element name="TStyleAbs.DrawGroupBox">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawGroupBox.Canvas">
+      <element name="TStyleAbs.DrawGroupBox.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawGroupBox.ARect">
+      <element name="TStyleAbs.DrawGroupBox.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawGroupBox.ALabel">
+      <element name="TStyleAbs.DrawGroupBox.ALabel">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawGroupBox.WidgetState">
+      <element name="TStyleAbs.DrawGroupBox.WidgetState">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetGroupBoxBorders">
+      <element name="TStyleAbs.GetGroupBoxBorders">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetGroupBoxBorders.Result">
+      <element name="TStyleAbs.GetGroupBoxBorders.Result">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetGroupBoxBorders.Canvas">
+      <element name="TStyleAbs.GetGroupBoxBorders.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetGroupBoxBorders.ALabel">
+      <element name="TStyleAbs.GetGroupBoxBorders.ALabel">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetGroupBoxBorders.LabelWidth">
+      <element name="TStyleAbs.GetGroupBoxBorders.LabelWidth">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawEditBox">
+      <element name="TStyleAbs.DrawEditBox">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawEditBox.Canvas">
+      <element name="TStyleAbs.DrawEditBox.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawEditBox.ARect">
+      <element name="TStyleAbs.DrawEditBox.ARect">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetEditBoxBorders">
+      <element name="TStyleAbs.GetEditBoxBorders">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetEditBoxBorders.Result">
+      <element name="TStyleAbs.GetEditBoxBorders.Result">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawCheckBox">
+      <element name="TStyleAbs.DrawCheckBox">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawCheckBox.Canvas">
+      <element name="TStyleAbs.DrawCheckBox.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawCheckBox.ARect">
+      <element name="TStyleAbs.DrawCheckBox.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawCheckBox.LabelRect">
+      <element name="TStyleAbs.DrawCheckBox.LabelRect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawCheckBox.Flags">
+      <element name="TStyleAbs.DrawCheckBox.Flags">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.GetCheckBoxLayout">
+      <element name="TStyleAbs.GetCheckBoxLayout">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetCheckBoxLayout.LabelSize">
+      <element name="TStyleAbs.GetCheckBoxLayout.LabelSize">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetCheckBoxLayout.TotalSize">
+      <element name="TStyleAbs.GetCheckBoxLayout.TotalSize">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetCheckBoxLayout.LabelPos">
+      <element name="TStyleAbs.GetCheckBoxLayout.LabelPos">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawRadioButton">
+      <element name="TStyleAbs.DrawRadioButton">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawRadioButton.Canvas">
+      <element name="TStyleAbs.DrawRadioButton.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawRadioButton.ARect">
+      <element name="TStyleAbs.DrawRadioButton.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawRadioButton.LabelRect">
+      <element name="TStyleAbs.DrawRadioButton.LabelRect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawRadioButton.Flags">
+      <element name="TStyleAbs.DrawRadioButton.Flags">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.GetRadioButtonLayout">
+      <element name="TStyleAbs.GetRadioButtonLayout">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetRadioButtonLayout.LabelSize">
+      <element name="TStyleAbs.GetRadioButtonLayout.LabelSize">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetRadioButtonLayout.TotalSize">
+      <element name="TStyleAbs.GetRadioButtonLayout.TotalSize">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetRadioButtonLayout.LabelPos">
+      <element name="TStyleAbs.GetRadioButtonLayout.LabelPos">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetComboBoxArrowSize">
+      <element name="TStyleAbs.GetComboBoxArrowSize">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetComboBoxArrowSize.Result">
+      <element name="TStyleAbs.GetComboBoxArrowSize.Result">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawComboBoxArrow">
+      <element name="TStyleAbs.DrawComboBoxArrow">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawComboBoxArrow.Canvas">
+      <element name="TStyleAbs.DrawComboBoxArrow.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawComboBoxArrow.ARect">
+      <element name="TStyleAbs.DrawComboBoxArrow.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawComboBoxArrow.IsPressed">
+      <element name="TStyleAbs.DrawComboBoxArrow.IsPressed">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawComboBoxArrow.IsEnabled">
+      <element name="TStyleAbs.DrawComboBoxArrow.IsEnabled">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetScrollBarBorders">
+      <element name="TStyleAbs.GetScrollBarBorders">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetScrollBarBorders.Result">
+      <element name="TStyleAbs.GetScrollBarBorders.Result">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetScrollBarBorders.Orientation">
+      <element name="TStyleAbs.GetScrollBarBorders.Orientation">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetScrollBarBtnSize">
+      <element name="TStyleAbs.GetScrollBarBtnSize">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetScrollBarBtnSize.Result">
+      <element name="TStyleAbs.GetScrollBarBtnSize.Result">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetScrollBarBtnSize.Orientation">
+      <element name="TStyleAbs.GetScrollBarBtnSize.Orientation">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetScrollBarBtnMinSize">
+      <element name="TStyleAbs.GetScrollBarBtnMinSize">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetScrollBarBtnMinSize.Result">
+      <element name="TStyleAbs.GetScrollBarBtnMinSize.Result">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawScrollBarBorder">
+      <element name="TStyleAbs.DrawScrollBarBorder">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBarBorder.Canvas">
+      <element name="TStyleAbs.DrawScrollBarBorder.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBarBorder.ARect">
+      <element name="TStyleAbs.DrawScrollBarBorder.ARect">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawScrollBarButton">
+      <element name="TStyleAbs.DrawScrollBarButton">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBarButton.Canvas">
+      <element name="TStyleAbs.DrawScrollBarButton.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBarButton.ARect">
+      <element name="TStyleAbs.DrawScrollBarButton.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBarButton.Direction">
+      <element name="TStyleAbs.DrawScrollBarButton.Direction">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBarButton.IsPressed">
+      <element name="TStyleAbs.DrawScrollBarButton.IsPressed">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBarButton.IsEnabled">
+      <element name="TStyleAbs.DrawScrollBarButton.IsEnabled">
         <short />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetScrollBoxBorders">
+      <element name="TStyleAbs.GetScrollBoxBorders">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetScrollBoxBorders.Result">
+      <element name="TStyleAbs.GetScrollBoxBorders.Result">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawScrollBoxBorder">
+      <element name="TStyleAbs.DrawScrollBoxBorder">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBoxBorder.Canvas">
+      <element name="TStyleAbs.DrawScrollBoxBorder.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawScrollBoxBorder.ARect">
+      <element name="TStyleAbs.DrawScrollBoxBorder.ARect">
         <short />
       </element>
       <!-- object Visibility: default -->
@@ -3047,7 +3047,7 @@
           <p>Sets or Gets the widget's GUI style. The ownership of
           the style object is not transferred.</p>
           <p>If no style is set, the widget uses the application's
-          style, TApplication.DefaultStyle instead.</p>
+          style default style, return by the gStyleManager.</p>
           <p>
           <b>Warning:</b>This function is particularly useful for
           demonstration purposes, where you want to show fpGUI's
@@ -3055,8 +3055,7 @@
           and use one consistent GUI style instead.</p>
         </descr>
         <seealso>
-          <link id="TApplication.DefaultStyle" />
-          <link id="TStyle" />
+          <link id="TStyleAbs" />
         </seealso>
       </element>
       <!-- property Visibility: public -->
@@ -8039,64 +8038,64 @@
         <short>maximum allowed value</short>
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.Draw3DFrame">
+      <element name="TStyleAbs.Draw3DFrame">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.Draw3DFrame.Canvas">
+      <element name="TStyleAbs.Draw3DFrame.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.Draw3DFrame.ARect">
+      <element name="TStyleAbs.Draw3DFrame.ARect">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.Draw3DFrame.Color1">
+      <element name="TStyleAbs.Draw3DFrame.Color1">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.Draw3DFrame.Color2">
+      <element name="TStyleAbs.Draw3DFrame.Color2">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.Draw3DFrame.Color3">
+      <element name="TStyleAbs.Draw3DFrame.Color3">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.Draw3DFrame.Color4">
+      <element name="TStyleAbs.Draw3DFrame.Color4">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawFocusRect">
+      <element name="TStyleAbs.DrawFocusRect">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawFocusRect.Canvas">
+      <element name="TStyleAbs.DrawFocusRect.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawFocusRect.ARect">
+      <element name="TStyleAbs.DrawFocusRect.ARect">
         <short />
       </element>
       <!-- procedure Visibility: public -->
-      <element name="TStyle.DrawSunkenOuterBorder">
+      <element name="TStyleAbs.DrawSunkenOuterBorder">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawSunkenOuterBorder.Canvas">
+      <element name="TStyleAbs.DrawSunkenOuterBorder.Canvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.DrawSunkenOuterBorder.ARect">
+      <element name="TStyleAbs.DrawSunkenOuterBorder.ARect">
         <short />
       </element>
       <!-- object Visibility: default -->
@@ -8486,26 +8485,26 @@
         <seealso />
       </element>
       <!-- function Visibility: public -->
-      <element name="TStyle.GetMenuBorders">
+      <element name="TStyleAbs.GetMenuBorders">
         <short />
         <descr />
         <errors />
         <seealso />
       </element>
       <!-- function result Visibility: default -->
-      <element name="TStyle.GetMenuBorders.Result">
+      <element name="TStyleAbs.GetMenuBorders.Result">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetMenuBorders.pCanvas">
+      <element name="TStyleAbs.GetMenuBorders.pCanvas">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetMenuBorders.pText">
+      <element name="TStyleAbs.GetMenuBorders.pText">
         <short />
       </element>
       <!-- argument Visibility: default -->
-      <element name="TStyle.GetMenuBorders.pTextWidth">
+      <element name="TStyleAbs.GetMenuBorders.pTextWidth">
         <short />
       </element>
       <!-- function Visibility: public -->

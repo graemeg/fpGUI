@@ -7,8 +7,11 @@
   ====================================================================
 -->
     <module name="WindowsStyle">
-      <short></short>
-      <descr></descr>
+      <short>Defines the Windows 9x/2000 GUI Style</short>
+      <descr><printshort id="WindowsStyle" />. Currently this is the default
+        style under all platforms. In the future the Style Manager will be
+        able to detect the OS and Desktop Manager and then pick a more
+        appropriate style.</descr>
       <!-- unresolved type reference Visibility: default -->
       <element name="Classes">
         <short></short>
@@ -29,8 +32,11 @@
       </element>
       <!-- object Visibility: default -->
       <element name="TWindowsStyle">
-        <short></short>
-        <descr></descr>
+        <short>Defines the Windows 9x/2000 GUI Style.</short>
+        <descr><printshort id="TWindowsStyle" />. Currently this is the default
+        style under all platforms. In the future the Style Manager will be
+        able to detect the OS and Desktop Manager and then pick a more
+        appropriate style.</descr>
         <errors></errors>
         <seealso></seealso>
       </element>

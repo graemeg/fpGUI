@@ -78,6 +78,8 @@
   clCornsilk fpgui/clcornsilk.html
   clMidnightBlue fpgui/clmidnightblue.html
   clDarkWhite fpgui/cldarkwhite.html
+  clLemonChiffon fpgui/cllemonchiffon.html
+  clLightGrey fpgui/cllightgrey.html
   TColor fpgui/tcolor.html
   TWidgetState fpgui/twidgetstate.html
   TOrientation fpgui/torientation.html
@@ -102,85 +104,83 @@
   TDrawCellEvent fpgui/tdrawcellevent.html
   PCells fpgui/pcells.html
   TCells fpgui/tcells.html
-  TStyle fpgui/tstyle.html
-   UIColorCache fpgui/tstyle.uicolorcache.html
-   Create fpgui/tstyle.create.html
-   UpdateUIColorCache fpgui/tstyle.updateuicolorcache.html
-   GetGUIColor fpgui/tstyle.getguicolor.html
-   GetUIColor fpgui/tstyle.getuicolor.html
-   SetUIColor fpgui/tstyle.setuicolor.html
-   DrawText fpgui/tstyle.drawtext.html
-   DrawItemBefore fpgui/tstyle.drawitembefore.html
-   DrawItemAfter fpgui/tstyle.drawitemafter.html
-   Draw3DFrame fpgui/tstyle.draw3dframe.html
-   DrawFocusRect fpgui/tstyle.drawfocusrect.html
-   DrawSunkenOuterBorder fpgui/tstyle.drawsunkenouterborder.html
-   DrawRaisedOuterBorder fpgui/tstyle.drawraisedouterborder.html
-   DrawWindowBackground fpgui/tstyle.drawwindowbackground.html
-   DrawButtonFace fpgui/tstyle.drawbuttonface.html
-   GetButtonBorders fpgui/tstyle.getbuttonborders.html
-   GetSeparatorSize fpgui/tstyle.getseparatorsize.html
-   DrawSeparator fpgui/tstyle.drawseparator.html
-   DrawGroupBox fpgui/tstyle.drawgroupbox.html
-   GetGroupBoxBorders fpgui/tstyle.getgroupboxborders.html
-   DrawEditBox fpgui/tstyle.draweditbox.html
-   GetEditBoxBorders fpgui/tstyle.geteditboxborders.html
-   DrawCheckBox fpgui/tstyle.drawcheckbox.html
-   GetCheckBoxLayout fpgui/tstyle.getcheckboxlayout.html
-   DrawRadioButton fpgui/tstyle.drawradiobutton.html
-   GetRadioButtonLayout fpgui/tstyle.getradiobuttonlayout.html
-   GetComboBoxArrowSize fpgui/tstyle.getcomboboxarrowsize.html
-   DrawComboBoxArrow fpgui/tstyle.drawcomboboxarrow.html
-   GetScrollBarBorders fpgui/tstyle.getscrollbarborders.html
-   GetScrollBarBtnSize fpgui/tstyle.getscrollbarbtnsize.html
-   GetScrollBarBtnMinSize fpgui/tstyle.getscrollbarbtnminsize.html
-   DrawScrollBarBorder fpgui/tstyle.drawscrollbarborder.html
-   DrawScrollBarButton fpgui/tstyle.drawscrollbarbutton.html
-   GetScrollBoxBorders fpgui/tstyle.getscrollboxborders.html
-   DrawScrollBoxBorder fpgui/tstyle.drawscrollboxborder.html
-   GetMenuBorders fpgui/tstyle.getmenuborders.html
-   GetPanelBorders fpgui/tstyle.getpanelborders.html
-   DrawPanel fpgui/tstyle.drawpanel.html
-  TDefaultStyle fpgui/tdefaultstyle.html
-   DrawDirectionArrows fpgui/tdefaultstyle.drawdirectionarrows.html
-   DrawCheckBoxCheck fpgui/tdefaultstyle.drawcheckboxcheck.html
-   GetGUIColor fpgui/tdefaultstyle.getguicolor.html
-   DrawText fpgui/tdefaultstyle.drawtext.html
-   DrawItemBefore fpgui/tdefaultstyle.drawitembefore.html
-   DrawItemAfter fpgui/tdefaultstyle.drawitemafter.html
-   Draw3DFrame fpgui/tdefaultstyle.draw3dframe.html
-   DrawFocusRect fpgui/tdefaultstyle.drawfocusrect.html
-   DrawSunkenOuterBorder fpgui/tdefaultstyle.drawsunkenouterborder.html
-   DrawRaisedOuterBorder fpgui/tdefaultstyle.drawraisedouterborder.html
-   DrawWindowBackground fpgui/tdefaultstyle.drawwindowbackground.html
-   DrawButtonFace fpgui/tdefaultstyle.drawbuttonface.html
-   GetButtonBorders fpgui/tdefaultstyle.getbuttonborders.html
-   DrawSeparator fpgui/tdefaultstyle.drawseparator.html
-   GetSeparatorSize fpgui/tdefaultstyle.getseparatorsize.html
-   DrawGroupBox fpgui/tdefaultstyle.drawgroupbox.html
-   GetGroupBoxBorders fpgui/tdefaultstyle.getgroupboxborders.html
-   DrawEditBox fpgui/tdefaultstyle.draweditbox.html
-   GetEditBoxBorders fpgui/tdefaultstyle.geteditboxborders.html
-   DrawCheckBox fpgui/tdefaultstyle.drawcheckbox.html
-   GetCheckBoxLayout fpgui/tdefaultstyle.getcheckboxlayout.html
-   DrawRadioButton fpgui/tdefaultstyle.drawradiobutton.html
-   GetRadioButtonLayout fpgui/tdefaultstyle.getradiobuttonlayout.html
-   DrawComboBoxArrow fpgui/tdefaultstyle.drawcomboboxarrow.html
-   GetComboBoxArrowSize fpgui/tdefaultstyle.getcomboboxarrowsize.html
-   GetScrollBarBorders fpgui/tdefaultstyle.getscrollbarborders.html
-   GetScrollBarBtnSize fpgui/tdefaultstyle.getscrollbarbtnsize.html
-   GetScrollBarBtnMinSize fpgui/tdefaultstyle.getscrollbarbtnminsize.html
-   DrawScrollBarBorder fpgui/tdefaultstyle.drawscrollbarborder.html
-   DrawScrollBarButton fpgui/tdefaultstyle.drawscrollbarbutton.html
-   GetScrollBoxBorders fpgui/tdefaultstyle.getscrollboxborders.html
-   DrawScrollBoxBorder fpgui/tdefaultstyle.drawscrollboxborder.html
-   GetMenuBorders fpgui/tdefaultstyle.getmenuborders.html
-   GetPanelBorders fpgui/tdefaultstyle.getpanelborders.html
-   DrawPanel fpgui/tdefaultstyle.drawpanel.html
-  TMotifStyle fpgui/tmotifstyle.html
-   DrawFocusRect fpgui/tmotifstyle.drawfocusrect.html
-   DrawButtonFace fpgui/tmotifstyle.drawbuttonface.html
-   DrawCheckBox fpgui/tmotifstyle.drawcheckbox.html
+  TStyleAbs fpgui/tstyleabs.html
+   UIColorCache fpgui/tstyleabs.uicolorcache.html
+   Create fpgui/tstyleabs.create.html
+   UpdateUIColorCache fpgui/tstyleabs.updateuicolorcache.html
+   GetGUIColor fpgui/tstyleabs.getguicolor.html
+   GetUIColor fpgui/tstyleabs.getuicolor.html
+   SetUIColor fpgui/tstyleabs.setuicolor.html
+   DrawText fpgui/tstyleabs.drawtext.html
+   DrawItemBefore fpgui/tstyleabs.drawitembefore.html
+   DrawItemAfter fpgui/tstyleabs.drawitemafter.html
+   Draw3DFrame fpgui/tstyleabs.draw3dframe.html
+   DrawFocusRect fpgui/tstyleabs.drawfocusrect.html
+   DrawSunkenOuterBorder fpgui/tstyleabs.drawsunkenouterborder.html
+   DrawRaisedOuterBorder fpgui/tstyleabs.drawraisedouterborder.html
+   DrawWindowBackground fpgui/tstyleabs.drawwindowbackground.html
+   DrawButtonFace fpgui/tstyleabs.drawbuttonface.html
+   GetButtonBorders fpgui/tstyleabs.getbuttonborders.html
+   GetSeparatorSize fpgui/tstyleabs.getseparatorsize.html
+   DrawSeparator fpgui/tstyleabs.drawseparator.html
+   DrawGroupBox fpgui/tstyleabs.drawgroupbox.html
+   GetGroupBoxBorders fpgui/tstyleabs.getgroupboxborders.html
+   DrawEditBox fpgui/tstyleabs.draweditbox.html
+   GetEditBoxBorders fpgui/tstyleabs.geteditboxborders.html
+   DrawCheckBox fpgui/tstyleabs.drawcheckbox.html
+   GetCheckBoxLayout fpgui/tstyleabs.getcheckboxlayout.html
+   DrawRadioButton fpgui/tstyleabs.drawradiobutton.html
+   GetRadioButtonLayout fpgui/tstyleabs.getradiobuttonlayout.html
+   GetComboBoxArrowSize fpgui/tstyleabs.getcomboboxarrowsize.html
+   DrawComboBoxArrow fpgui/tstyleabs.drawcomboboxarrow.html
+   GetComboBoxBtnSize fpgui/tstyleabs.getcomboboxbtnsize.html
+   GetScrollBarBorders fpgui/tstyleabs.getscrollbarborders.html
+   GetScrollBarBtnSize fpgui/tstyleabs.getscrollbarbtnsize.html
+   GetScrollBarBtnMinSize fpgui/tstyleabs.getscrollbarbtnminsize.html
+   DrawScrollBarBorder fpgui/tstyleabs.drawscrollbarborder.html
+   DrawScrollBarButton fpgui/tstyleabs.drawscrollbarbutton.html
+   GetScrollBoxBorders fpgui/tstyleabs.getscrollboxborders.html
+   DrawScrollBoxBorder fpgui/tstyleabs.drawscrollboxborder.html
+   GetMenuBorders fpgui/tstyleabs.getmenuborders.html
+   GetPanelBorders fpgui/tstyleabs.getpanelborders.html
+   DrawPanel fpgui/tstyleabs.drawpanel.html
+  TBasicStyle fpgui/tbasicstyle.html
+   DrawDirectionArrows fpgui/tbasicstyle.drawdirectionarrows.html
+   DrawCheckBoxCheck fpgui/tbasicstyle.drawcheckboxcheck.html
+   GetGUIColor fpgui/tstyleabs.getguicolor.html
+   DrawText fpgui/tstyleabs.drawtext.html
+   DrawItemBefore fpgui/tstyleabs.drawitembefore.html
+   DrawItemAfter fpgui/tstyleabs.drawitemafter.html
+   Draw3DFrame fpgui/tstyleabs.draw3dframe.html
+   DrawFocusRect fpgui/tstyleabs.drawfocusrect.html
+   DrawSunkenOuterBorder fpgui/tstyleabs.drawsunkenouterborder.html
+   DrawRaisedOuterBorder fpgui/tbasicstyle.drawraisedouterborder.html
+   DrawWindowBackground fpgui/tstyleabs.drawwindowbackground.html
+   DrawButtonFace fpgui/tstyleabs.drawbuttonface.html
+   GetButtonBorders fpgui/tstyleabs.getbuttonborders.html
+   DrawSeparator fpgui/tstyleabs.drawseparator.html
+   GetSeparatorSize fpgui/tstyleabs.getseparatorsize.html
+   DrawGroupBox fpgui/tstyleabs.drawgroupbox.html
+   GetGroupBoxBorders fpgui/tstyleabs.getgroupboxborders.html
+   DrawEditBox fpgui/tstyleabs.draweditbox.html
+   GetEditBoxBorders fpgui/tstyleabs.geteditboxborders.html
+   DrawCheckBox fpgui/tstyleabs.drawcheckbox.html
+   GetCheckBoxLayout fpgui/tstyleabs.getcheckboxlayout.html
+   DrawRadioButton fpgui/tstyleabs.drawradiobutton.html
+   GetRadioButtonLayout fpgui/tstyleabs.getradiobuttonlayout.html
+   DrawComboBoxArrow fpgui/tstyleabs.drawcomboboxarrow.html
+   GetComboBoxArrowSize fpgui/tstyleabs.getcomboboxarrowsize.html
+   GetComboBoxBtnSize fpgui/tbasicstyle.getcomboboxbtnsize.html
+   GetScrollBarBorders fpgui/tstyleabs.getscrollbarborders.html
+   GetScrollBarBtnSize fpgui/tstyleabs.getscrollbarbtnsize.html
+   GetScrollBarBtnMinSize fpgui/tstyleabs.getscrollbarbtnminsize.html
+   DrawScrollBarBorder fpgui/tstyleabs.drawscrollbarborder.html
+   DrawScrollBarButton fpgui/tstyleabs.drawscrollbarbutton.html
+   GetScrollBoxBorders fpgui/tstyleabs.getscrollboxborders.html
+   DrawScrollBoxBorder fpgui/tstyleabs.drawscrollboxborder.html
+   GetMenuBorders fpgui/tstyleabs.getmenuborders.html
+   GetPanelBorders fpgui/tbasicstyle.getpanelborders.html
+   DrawPanel fpgui/tbasicstyle.drawpanel.html
   TEventObj fpgui/teventobj.html
    Create fpgui/teventobj.create.html
    AddRef fpgui/teventobj.addref.html
@@ -323,7 +323,6 @@
    IsRecalcingLayout fpgui/tlayout.isrecalcinglayout.html
    GetChildCount fpgui/tlayout.getchildcount.html
    GetChild fpgui/tlayout.getchild.html
-   AddFixedChild fpgui/tlayout.addfixedchild.html
    BorderSpacing fpgui/tlayout.borderspacing.html
    Create fpgui/tlayout.create.html
    Destroy fpgui/tlayout.destroy.html
@@ -482,6 +481,7 @@
    Create fpgui/tcustombutton.create.html
   TButton fpgui/tbutton.html
    CanExpandWidth fpgui/tbutton.canexpandwidth.html
+   CanExpandHeight fpgui/tbutton.canexpandheight.html
    Enabled fpgui/tbutton.enabled.html
    Text fpgui/tbutton.text.html
    OnClick fpgui/tbutton.onclick.html
@@ -624,7 +624,7 @@
    Create fpgui/tcomboboxpopup.create.html
    ListBox fpgui/tcomboboxpopup.listbox.html
   TCustomComboBox fpgui/tcustomcombobox.html
-   FButton fpgui/tcustomcombobox.fbutton.html
+   ComboBoxButton fpgui/tcustomcombobox.comboboxbutton.html
    FDropDown fpgui/tcustomcombobox.fdropdown.html
    lbl fpgui/tcustomcombobox.lbl.html
    Click fpgui/tcustomcombobox.click.html
@@ -725,17 +725,23 @@
    Text fpgui/tpanel.text.html
    BevelStyle fpgui/tpanel.bevelstyle.html
   TMenuItem fpgui/tmenuitem.html
+   Paint fpgui/tmenuitem.paint.html
    ProcessEvent fpgui/tmenuitem.processevent.html
+   Click fpgui/tmenuitem.click.html
    Create fpgui/tmenuitem.create.html
+   Destroy fpgui/tmenuitem.destroy.html
+   SubMenu fpgui/tmenuitem.submenu.html
    Separator fpgui/tmenuitem.separator.html
    HotKeyDef fpgui/tmenuitem.hotkeydef.html
    Text fpgui/tmenuitem.text.html
    Visible fpgui/tmenuitem.visible.html
    Enabled fpgui/tmenuitem.enabled.html
+  TPopupMenu fpgui/tpopupmenu.html
+   Create fpgui/tpopupwindow.create.html
+   Destroy fpgui/tpopupmenu.destroy.html
+   AddMenu fpgui/tpopupmenu.addmenu.html
   TMenuBar fpgui/tmenubar.html
-   Paint fpgui/tmenubar.paint.html
    Create fpgui/tmenubar.create.html
-   Destroy fpgui/tmenubar.destroy.html
    AddMenu fpgui/tmenubar.addmenu.html
   TCustomProgressBar fpgui/tcustomprogressbar.html
    Paint fpgui/tcustomprogressbar.paint.html
@@ -758,16 +764,38 @@
   Max fpgui/max.html
   ClipMinMax fpgui/clipminmax.html
   LoadForm fpgui/loadform.html
- stylemanager stylemanager/index.html
+ StyleManager stylemanager/index.html
+  cDefaultStyle stylemanager/cdefaultstyle.html
+  TStyleClass stylemanager/tstyleclass.html
+  TStyleClassMapping stylemanager/tstyleclassmapping.html
+   Create stylemanager/tstyleclassmapping.create.html
+   MappingName stylemanager/tstyleclassmapping.mappingname.html
+   StyleClass stylemanager/tstyleclassmapping.styleclass.html
   TStyleManager stylemanager/tstylemanager.html
    Create stylemanager/tstylemanager.create.html
    Destroy stylemanager/tstylemanager.destroy.html
    DefaultStyle stylemanager/tstylemanager.defaultstyle.html
    SetStyle stylemanager/tstylemanager.setstyle.html
+   RegisterClass stylemanager/tstylemanager.registerclass.html
+   CreateInstance stylemanager/tstylemanager.createinstance.html
+   AssignStyleTypes stylemanager/tstylemanager.assignstyletypes.html
   gStyleManager stylemanager/gstylemanager.html
+ WindowsStyle windowsstyle/index.html
+  TWindowsStyle windowsstyle/twindowsstyle.html
+ MotifStyle motifstyle/index.html
+  TMotifStyle motifstyle/tmotifstyle.html
+   DrawFocusRect motifstyle/tmotifstyle.drawfocusrect.html
+   DrawButtonFace motifstyle/tmotifstyle.drawbuttonface.html
+   DrawCheckBox motifstyle/tmotifstyle.drawcheckbox.html
+ OpenSoftStyle opensoftstyle/index.html
+  TGradientDirection opensoftstyle/tgradientdirection.html
+  TCalcGradientEndX opensoftstyle/tcalcgradientendx.html
+  TOpenSoftStyle opensoftstyle/topensoftstyle.html
+   GetGUIColor opensoftstyle/topensoftstyle.getguicolor.html
+   DrawGroupBox opensoftstyle/topensoftstyle.drawgroupbox.html
 
 :classes
-#fpgui.fpGUI.TStyle TObject
+#fpgui.fpGUI.TStyleAbs TObject
 2VUIColorCache
 3MCreate
 3MUpdateUIColorCache
@@ -796,6 +824,7 @@
 3MGetRadioButtonLayout
 3MGetComboBoxArrowSize
 3MDrawComboBoxArrow
+3MGetComboBoxBtnSize
 3MGetScrollBarBorders
 3MGetScrollBarBtnSize
 3MGetScrollBarBtnMinSize
@@ -806,7 +835,7 @@
 3MGetMenuBorders
 3MGetPanelBorders
 3MDrawPanel
-#fpgui.fpGUI.TDefaultStyle #fpgui.fpGUI.TStyle
+#fpgui.fpGUI.TBasicStyle #fpgui.fpGUI.TStyleAbs
 2MDrawDirectionArrows
 2MDrawCheckBoxCheck
 3MGetGUIColor
@@ -832,6 +861,7 @@
 3MGetRadioButtonLayout
 3MDrawComboBoxArrow
 3MGetComboBoxArrowSize
+3MGetComboBoxBtnSize
 3MGetScrollBarBorders
 3MGetScrollBarBtnSize
 3MGetScrollBarBtnMinSize
@@ -842,10 +872,6 @@
 3MGetMenuBorders
 3MGetPanelBorders
 3MDrawPanel
-#fpgui.fpGUI.TMotifStyle #fpgui.fpGUI.TDefaultStyle
-3MDrawFocusRect
-3MDrawButtonFace
-3MDrawCheckBox
 #fpgui.fpGUI.TEventObj .TObject
 1VRefCount
 1VFSender
@@ -1018,7 +1044,6 @@
 2VIsRecalcingLayout
 2MGetChildCount
 2MGetChild
-2MAddFixedChild
 2PBorderSpacing rw
 3MCreate
 3MDestroy
@@ -1027,6 +1052,7 @@
 3VLeft
 3VTop
 #fpgui.fpGUI.TFixedLayout #fpgui.fpGUI.TLayout
+1MAddFixedChild
 2MCalcSizes
 3MCreate
 3MAddWidget
@@ -1237,6 +1263,7 @@
 3MCreate
 #fpgui.fpGUI.TButton #fpgui.fpGUI.TCustomButton
 4PCanExpandWidth
+4PCanExpandHeight
 4PEnabled
 4PText
 4POnClick
@@ -1426,11 +1453,11 @@
 1VFItemIndex
 1VFItems
 1VFOnChange
-1MButtonClick
+1MComboBoxButtonClick
 1MDropDownDeactivate
 1MDropDownDestroy
 1MSetItemIndex
-2VFButton
+2VComboBoxButton
 2VFDropDown
 2Vlbl
 2MClick
@@ -1564,17 +1591,27 @@
 #fpgui.fpGUI.TMenuItem #fpgui.fpGUI.TCustomPanel
 1VFHotKeyDef
 1VFSeparator
+1VFSubMenu
+1MGetSubMenu
+1MInternalShowPopupMenu
+2MPaint
 2MProcessEvent
+2MClick
 3MCreate
+3MDestroy
+3PSubMenu r
 4PSeparator rw
 4PHotKeyDef rw
 4PText
 4PVisible
 4PEnabled
-#fpgui.fpGUI.TMenuBar #fpgui.fpGUI.TBinWidget
-2MPaint
+#fpgui.fpGUI.TPopupMenu #fpgui.fpGUI.TPopupWindow
+1VFMenu
 3MCreate
 3MDestroy
+3MAddMenu
+#fpgui.fpGUI.TMenuBar #fpgui.fpGUI.TCustomBoxLayout
+3MCreate
 3MAddMenu
 #fpgui.fpGUI.TCustomProgressBar #fpgui.fpGUI.TCustomPanel
 1VFFillColor
@@ -1603,11 +1640,31 @@
 4PMin
 4PMax
 4PShowPercentage
-#fpgui.stylemanager.TStyleManager TObject
+#fpgui.StyleManager.TStyleClassMapping TObject
+1VFsMappingName
+1VFStyleClass
+3MCreate
+3PMappingName r
+3PStyleClass r
+#fpgui.StyleManager.TStyleManager TObject
+1VFList
 1VFDefaultStyle
 1VFUserStyle
+1VFDefaultStyleType
 1MGetDefaultStyle
 3MCreate
 3MDestroy
 3PDefaultStyle r
 3MSetStyle
+3MRegisterClass
+3MCreateInstance
+3MAssignStyleTypes
+#fpgui.WindowsStyle.TWindowsStyle #fpgui.fpGUI.TBasicStyle
+#fpgui.MotifStyle.TMotifStyle #fpgui.fpGUI.TBasicStyle
+3MDrawFocusRect
+3MDrawButtonFace
+3MDrawCheckBox
+#fpgui.OpenSoftStyle.TOpenSoftStyle #fpgui.fpGUI.TBasicStyle
+1MPaintGradient
+3MGetGUIColor
+3MDrawGroupBox
