@@ -14,7 +14,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-{%mainunit fpgui.pp}
+{%mainunit fpgui.pas}
 
 {
   Default style implementation
@@ -91,10 +91,15 @@
   { TDefaultStyle }
 
   TBasicStyle = class(TStyleAbs)
+  private
+    FImageCanvas: TFCanvas;
+    FMaskCanvas: TFCanvas;
   protected
     procedure   DrawDirectionArrows(ACanvas: TFCanvas; const ARect: TRect; ADirection: TArrowDirection);
     procedure   DrawCheckBoxCheck(ACanvas: TFCanvas; const ARect: TRect; AFlags: TCheckboxFlags);
   public
+    constructor Create; override;
+    destructor  Destroy; override;
     // Colors
     function    GetGUIColor(Color: TColor): TGfxColor; override;
     // General
@@ -283,6 +288,113 @@ begin
     ACanvas.DrawLine(Point(ARect.Right-2, ARect.Top+1), Point(ARect.Left, ARect.Bottom-1));
     ACanvas.DrawLine(Point(ARect.Right-1, ARect.Top+2), Point(ARect.Left+1, ARect.Bottom));
   end;
+end;
+
+constructor TBasicStyle.Create;
+const
+  // 60x12 pixel 4bpp bitmap
+  RadioBitmapData: array[0..359] of Byte = (
+    $00, $00, $22, $22, $00, $00, $00, $00, $22, $22, $00, $00, $00, $00, $22, $22, $00, $00, $00, $00, $22, $22, $00, $00, $00, $00, $22, $22, $00, $00,
+    $00, $22, $11, $11, $22, $00, $00, $22, $11, $11, $22, $00, $00, $22, $11, $11, $22, $00, $00, $22, $11, $11, $22, $00, $00, $22, $11, $11, $22, $00,
+    $02, $11, $77, $77, $11, $50, $02, $11, $77, $77, $11, $50, $02, $11, $33, $33, $11, $50, $02, $11, $33, $33, $11, $50, $02, $11, $33, $33, $11, $50,
+    $02, $17, $77, $77, $74, $50, $02, $17, $77, $77, $74, $50, $02, $13, $33, $33, $34, $50, $02, $13, $33, $33, $34, $50, $02, $13, $33, $33, $34, $50,
+    $21, $77, $77, $77, $77, $45, $21, $77, $76, $67, $77, $45, $21, $33, $33, $33, $33, $45, $21, $33, $36, $63, $33, $45, $21, $33, $32, $23, $33, $45,
+    $21, $77, $77, $77, $77, $45, $21, $77, $66, $66, $77, $45, $21, $33, $33, $33, $33, $45, $21, $33, $66, $66, $33, $45, $21, $33, $22, $22, $33, $45,
+    $21, $77, $77, $77, $77, $45, $21, $77, $66, $66, $77, $45, $21, $33, $33, $33, $33, $45, $21, $33, $66, $66, $33, $45, $21, $33, $22, $22, $33, $45,
+    $21, $77, $77, $77, $77, $45, $21, $77, $76, $67, $77, $45, $21, $33, $33, $33, $33, $45, $21, $33, $36, $63, $33, $45, $21, $33, $32, $23, $33, $45,
+    $02, $17, $77, $77, $74, $50, $02, $17, $77, $77, $74, $50, $02, $13, $33, $33, $34, $50, $02, $13, $33, $33, $34, $50, $02, $13, $33, $33, $34, $50,
+    $02, $44, $77, $77, $44, $50, $02, $44, $77, $77, $44, $50, $02, $44, $33, $33, $44, $50, $02, $44, $33, $33, $44, $50, $02, $44, $33, $33, $44, $50,
+    $00, $55, $44, $44, $55, $00, $00, $55, $44, $44, $55, $00, $00, $55, $44, $44, $55, $00, $00, $55, $44, $44, $55, $00, $00, $55, $44, $44, $55, $00,
+    $00, $00, $55, $55, $00, $00, $00, $00, $55, $55, $00, $00, $00, $00, $55, $55, $00, $00, $00, $00, $55, $55, $00, $00, $00, $00, $55, $55, $00, $00
+  );
+
+  // 12x12 pixel monochrome bitmap
+  RadioMaskData: array[0..23] of Byte = ($0f, $00, $3f, $c0, $7f, $e0, $7f,
+    $e0, $ff, $f0, $ff, $f0, $ff, $f0, $ff, $f0, $7f, $e0, $7f, $e0, $3f, $c0,
+    $0f, $00);
+
+  // 65x13 pixel 4bpp bitmap
+  CheckBoxBitmapData: array[0..428] of Byte = (
+    $22, $22, $22, $22, $22, $22, $52, $22, $22, $22, $22, $22, $25, $22, $22, $22, $22, $22, $22, $52, $22, $22, $22, $22, $22, $25, $22, $22, $22, $22, $22, $22, $50,
+    $21, $11, $11, $11, $11, $14, $52, $11, $11, $11, $11, $11, $45, $21, $11, $11, $11, $11, $14, $52, $11, $11, $11, $11, $11, $45, $21, $11, $11, $11, $11, $14, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $77, $77, $77, $77, $45, $21, $33, $33, $33, $33, $34, $52, $13, $33, $33, $33, $33, $45, $21, $33, $33, $33, $33, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $77, $77, $77, $67, $45, $21, $33, $33, $33, $33, $34, $52, $13, $33, $33, $33, $63, $45, $21, $33, $33, $33, $32, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $77, $77, $76, $67, $45, $21, $33, $33, $33, $33, $34, $52, $13, $33, $33, $36, $63, $45, $21, $33, $33, $33, $22, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $67, $77, $66, $67, $45, $21, $33, $33, $33, $33, $34, $52, $13, $63, $33, $66, $63, $45, $21, $32, $33, $32, $22, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $66, $76, $66, $77, $45, $21, $33, $33, $33, $33, $34, $52, $13, $66, $36, $66, $33, $45, $21, $32, $23, $22, $23, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $66, $66, $67, $77, $45, $21, $33, $33, $33, $33, $34, $52, $13, $66, $66, $63, $33, $45, $21, $32, $22, $22, $33, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $76, $66, $77, $77, $45, $21, $33, $33, $33, $33, $34, $52, $13, $36, $66, $33, $33, $45, $21, $33, $22, $23, $33, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $77, $67, $77, $77, $45, $21, $33, $33, $33, $33, $34, $52, $13, $33, $63, $33, $33, $45, $21, $33, $32, $33, $33, $34, $50,
+    $21, $77, $77, $77, $77, $74, $52, $17, $77, $77, $77, $77, $45, $21, $33, $33, $33, $33, $34, $52, $13, $33, $33, $33, $33, $45, $21, $33, $33, $33, $33, $34, $50,
+    $24, $44, $44, $44, $44, $44, $52, $44, $44, $44, $44, $44, $45, $24, $44, $44, $44, $44, $44, $52, $44, $44, $44, $44, $44, $45, $24, $44, $44, $44, $44, $44, $50,
+    $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $50
+  );
+
+  // 64x8 pixel 4bpp bitmap
+  ArrowBitmapData: array[0..255] of Byte = (
+    $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $13, $33, $33, $31, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $23, $33, $33, $23, $33, $33,
+    $33, $33, $33, $33, $33, $33, $33, $33, $33, $31, $13, $33, $33, $31, $13, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $32, $25, $33, $33, $22, $33, $33,
+    $33, $31, $33, $33, $11, $11, $11, $13, $33, $11, $13, $33, $33, $31, $11, $33, $33, $32, $33, $33, $22, $22, $22, $23, $33, $22, $25, $33, $33, $22, $23, $33,
+    $33, $11, $13, $33, $31, $11, $11, $33, $31, $11, $13, $33, $33, $31, $11, $13, $33, $22, $23, $33, $32, $22, $22, $55, $32, $22, $25, $33, $33, $22, $22, $33,
+    $31, $11, $11, $33, $33, $11, $13, $33, $33, $11, $13, $33, $33, $31, $11, $33, $32, $22, $22, $33, $33, $22, $25, $53, $33, $22, $25, $33, $33, $22, $25, $53,
+    $11, $11, $11, $13, $33, $31, $33, $33, $33, $31, $13, $33, $33, $31, $13, $33, $22, $22, $22, $23, $33, $32, $55, $33, $33, $32, $25, $33, $33, $22, $55, $33,
+    $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $13, $33, $33, $31, $33, $33, $35, $55, $55, $55, $33, $33, $53, $33, $33, $33, $25, $33, $33, $25, $53, $33,
+    $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $33, $35, $33, $33, $35, $33, $33
+  );
+  
+var
+  PalData: array[0..7] of TGfxColor;
+  Palette: TGfxPalette;
+  Bitmap: TFBitmap;
+begin
+  inherited Create;
+  
+  FImageCanvas := TFCanvas(GFScreen.CreateBitmapCanvas(65, 33));
+  FMaskCanvas := TFCanvas(GFScreen.CreateMonoBitmapCanvas(12, 12));
+
+  PalData[0]  := colMagenta;
+  PalData[1]  := GetGUIColor(cl3DDkShadow);
+  PalData[2]  := GetGUIColor(cl3DShadow);
+  PalData[3]  := GetGUIColor(cl3DFace);
+  PalData[4]  := GetGUIColor(cl3DLight);
+  PalData[5]  := GetGUIColor(cl3DHighlight);
+  PalData[6]  := GetGUIColor(clWindowText);
+  PalData[7]  := GetGUIColor(clWindow);
+  Palette     := TGfxPalette.Create(8, @PalData);
+
+  Bitmap := TFBitmap.Create(60, 12, PixelFormatPal4A);
+  BitMap.Palette := Palette;
+  BitMap.SetPixelsFromData(@RadioBitmapData, 30);
+  FImageCanvas.DrawImage(Bitmap, Point(0,0));
+  Bitmap.Free;
+  
+  Bitmap := TFBitmap.Create(12, 12, PixelFormatMono);
+  Bitmap.SetPixelsFromData(@RadioMaskData, 2);
+  FMaskCanvas.DrawImage(Bitmap, Point(0, 0));
+  Bitmap.Free;
+
+  Palette := TGfxPalette.Create(8, @PalData);
+  Bitmap := TFBitmap.Create(66, 13, PixelFormatPal4);
+  BitMap.Palette := Palette;
+  BitMap.SetPixelsFromData(@CheckBoxBitmapData, 33);
+  FImageCanvas.DrawImage(Bitmap, Point(0, 12));
+  Bitmap.Free;
+
+  Palette := TGfxPalette.Create(8, @PalData);
+  Bitmap := TFBitmap.Create(64, 8, PixelFormatPal4);
+  BitMap.Palette := Palette;
+  BitMap.SetPixelsFromData(@ArrowBitmapData, 32);
+  FImageCanvas.DrawImage(Bitmap, Point(0, 25));
+  Bitmap.Free;
+
+  Palette.Release;
+end;
+
+destructor TBasicStyle.Destroy;
+begin
+  FImageCanvas.Free;
+  FMaskCanvas.Free;
+  inherited Destroy;
 end;
 
 // helper functions
@@ -557,7 +669,8 @@ var
   Index, BtnY: Integer;
   r: TRect;
 begin
-{
+  {$Note This is only while I fix the Palette issue under Linux/X11 }
+  {$IFDEF MSWINDOWS}
   with ARect do
   begin
     BtnY := Top + (Bottom - Top - 12) div 2;
@@ -568,11 +681,13 @@ begin
         Inc(Index, 2);
     end else
       Index := 2 + Ord(cbIsChecked in Flags) * 2;
-    Canvas.MaskedCopyRect(ImageCanvas, MaskCanvas,
+
+    Canvas.MaskedCopyRect(FImageCanvas, FMaskCanvas,
       Rect(Index * 12, 0, (Index + 1) * 12, 12),
       Point(0, 0), Point(Left, BtnY));
   end;
-}
+  {$ELSE}
+
 // cl3DLight, cl3DHighlight, cl3DDkShadow, cl3DShadow
   SetUIColor(Canvas, clLtGray);
   r.Left    := ARect.Left;
@@ -602,6 +717,7 @@ begin
     OffsetRect(r, -1, -1);
     Canvas.FillRect(r);
   end;
+  {$ENDIF}
 
   if cbHasFocus in Flags then
     with LabelRect do

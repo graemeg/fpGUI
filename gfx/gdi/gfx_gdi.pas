@@ -746,7 +746,7 @@ procedure TGDICanvas.DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect;
 var
   MemDC: HDC;
   OldBitmap: HBITMAP;
-  GDIPal: array of PRGBQUAD;
+  GDIPal: array of RGBQUAD;
   i: Integer;
 begin
   ASSERT(AImage.InheritsFrom(TGDIBitmap));
@@ -760,7 +760,7 @@ begin
   // Set the color palette, if present
   if Assigned(AImage.Palette) then
   begin
-    GetMem(GDIPal, AImage.Palette.EntryCount * SizeOf(RGBQUAD));
+    SetLength(GDIPal,AImage.Palette.EntryCount * SizeOf(RGBQUAD));
     for i := 0 to AImage.Palette.EntryCount - 1 do
       with AImage.Palette.Entries[i] do
       begin
@@ -769,8 +769,7 @@ begin
         GDIPal[i].rgbBlue := Blue div 257;
         GDIPal[i].rgbReserved := 0;
       end;
-    Windows.SetDIBColorTable(MemDC, 0, AImage.Palette.EntryCount, GDIPal[0]^);
-    FreeMem(GDIPal);
+    Windows.SetDIBColorTable(MemDC, 0, AImage.Palette.EntryCount, GDIPal[0]);
   end;
 
   with ASourceRect do

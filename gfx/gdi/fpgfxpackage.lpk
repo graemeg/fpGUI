@@ -10,13 +10,10 @@
       <SearchPaths>
         <OtherUnitFiles Value="..\;..\emulayer\"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
-        <LCLWidgetType Value="wince"/>
         <SrcPath Value="$(TargetOS)\"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
-        <TargetCPU Value="arm"/>
-        <TargetOS Value="WinCE"/>
       </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>

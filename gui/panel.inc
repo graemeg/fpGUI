@@ -14,7 +14,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-{%mainunit fpgui.pp}
+{%mainunit fpgui.pas}
 
 {
   Panel implementation. I mixture of Delphi's TPanel and TBevel. The class

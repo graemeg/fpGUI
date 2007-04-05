@@ -1,4 +1,4 @@
-{%mainunit fpgui.pp}
+{%mainunit fpgui.pas}
 
 { Listbox widget implementation }
 

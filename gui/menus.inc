@@ -14,7 +14,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-{%mainunit fpgui.pp}
+{%mainunit fpgui.pas}
 
 {
   All menu and menu item implementations

@@ -19,7 +19,9 @@ unit GELImage;
   {$ASSERTIONS On}
 {$ENDIF}
 
-{$mode objfpc}{$H+}
+{$ifdef fpc}
+  {$mode objfpc}{$H+}
+{$endif}
 
 interface
 

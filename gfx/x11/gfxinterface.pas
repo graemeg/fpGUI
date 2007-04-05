@@ -15,6 +15,10 @@
 }
 unit gfxinterface;
 
+{$ifdef fpc}
+  {$mode objfpc}{$H+}
+{$endif}
+
 interface
 
 uses

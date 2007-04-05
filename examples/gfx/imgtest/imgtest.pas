@@ -16,6 +16,10 @@
 
 program ImgTest;
 
+{$ifdef fpc}
+  {$mode objfpc}{$H+}
+{$endif}
+
 uses
   cmem,
   Classes,

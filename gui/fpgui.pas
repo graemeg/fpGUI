@@ -29,7 +29,10 @@ unit fpGUI;
 {$IFDEF Debug}
   {$ASSERTIONS On}
 {$ENDIF}
-{$mode objfpc}{$h+}
+
+{$IFDEF FPC}
+  {$mode objfpc}{$h+}
+{$ENDIF}
 
 interface
 
