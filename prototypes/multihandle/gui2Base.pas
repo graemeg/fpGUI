@@ -215,7 +215,7 @@ end;
 procedure TWidget.EvOnMouseLeave(Sender: TObject);
 begin
   Exclude(FWidgetState, wsHasFocus);
-  Paint;
+//  Paint;
 end;
 
 procedure TWidget.SetColor(const AValue: TGfxColor);
@@ -386,7 +386,7 @@ end;
 procedure TLabel.Paint;
 begin
 //  Color := FParent.Canvas.GetColor;
-//  inherited Paint;
+  inherited Paint;
   Canvas.SetColor(colWhite);
   Canvas.FillRect(Rect(0,0,Width,Height));
   Canvas.SetColor(colBlack);
