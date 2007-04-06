@@ -229,6 +229,7 @@ type
     procedure   Run; override;
     procedure   Quit; override;
     { properties }
+    property    X11Display: PDisplay read Handle;
     property    DisplayName: String read FDisplayName write FDisplayName;
     property    EventFilter: TX11EventFilter read FEventFilter write FEventFilter;
   end;
