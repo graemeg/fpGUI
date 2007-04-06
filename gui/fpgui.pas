@@ -158,10 +158,10 @@ procedure LoadForm(AForm: TComponent);
 implementation
 uses
   Math
-  ,stylemanager
-  ,MotifStyle       // so they register with style manager
-  ,OpenSoftStyle    // so they register with style manager
-  ,WindowsStyle     // so they register with style manager
+  ,StyleManager
+//  ,MotifStyle       // so they register with style manager
+//  ,OpenSoftStyle    // so they register with style manager
+//  ,WindowsStyle     // so they register with style manager
   ;
 
 
