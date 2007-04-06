@@ -55,7 +55,7 @@ const
   InfiniteSize = 16383;
 
 // Insert loads of named colors
-{$I colors.inc}
+{$I fpguicolors.inc}
 
 
 resourcestring
@@ -122,29 +122,29 @@ type
 {$undef read_implementation}
 
 
-{$I style.inc}
-{$I widget.inc}
-{$I container.inc}
-{$I bin.inc}
-{$I layouts.inc}
-{$I form.inc}
-{$I popupwindow.inc}
-{$I label.inc}
-{$I edit.inc}
-{$I buttons.inc}
-{$I scrollbar.inc}
-{$I scrollbox.inc}
-{$I checkbox.inc}
-{$I radiobutton.inc}
-{$I separator.inc}
-{$I groupbox.inc}
-{$I listbox.inc}
-{$I combobox.inc}
-{$I grid.inc}
-{$I dialogs.inc}
-{$I panel.inc}
-{$I menus.inc}
-{$I progressbar.inc}
+{$I fpguistyle.inc}
+{$I fpguiwidget.inc}
+{$I fpguicontainer.inc}
+{$I fpguibin.inc}
+{$I fpguilayouts.inc}
+{$I fpguiform.inc}
+{$I fpguipopupwindow.inc}
+{$I fpguilabel.inc}
+{$I fpguiedit.inc}
+{$I fpguibuttons.inc}
+{$I fpguiscrollbar.inc}
+{$I fpguiscrollbox.inc}
+{$I fpguicheckbox.inc}
+{$I fpguiradiobutton.inc}
+{$I fpguiseparator.inc}
+{$I fpguigroupbox.inc}
+{$I fpguilistbox.inc}
+{$I fpguicombobox.inc}
+{$I fpguigrid.inc}
+{$I fpguidialogs.inc}
+{$I fpguipanel.inc}
+{$I fpguimenus.inc}
+{$I fpguiprogressbar.inc}
 
 
 function Min(a, b: Integer): Integer; inline;
@@ -294,29 +294,29 @@ end;
 {$define read_implementation}
 
 
-{$I style.inc}
-{$I widget.inc}
-{$I container.inc}
-{$I bin.inc}
-{$I layouts.inc}
-{$I form.inc}
-{$I popupwindow.inc}
-{$I label.inc}
-{$I edit.inc}
-{$I buttons.inc}
-{$I scrollbar.inc}
-{$I scrollbox.inc}
-{$I checkbox.inc}
-{$I radiobutton.inc}
-{$I separator.inc}
-{$I groupbox.inc}
-{$I listbox.inc}
-{$I combobox.inc}
-{$I grid.inc}
-{$I dialogs.inc}
-{$I panel.inc}
-{$I menus.inc}
-{$I progressbar.inc}
+{$I fpguistyle.inc}
+{$I fpguiwidget.inc}
+{$I fpguicontainer.inc}
+{$I fpguibin.inc}
+{$I fpguilayouts.inc}
+{$I fpguiform.inc}
+{$I fpguipopupwindow.inc}
+{$I fpguilabel.inc}
+{$I fpguiedit.inc}
+{$I fpguibuttons.inc}
+{$I fpguiscrollbar.inc}
+{$I fpguiscrollbox.inc}
+{$I fpguicheckbox.inc}
+{$I fpguiradiobutton.inc}
+{$I fpguiseparator.inc}
+{$I fpguigroupbox.inc}
+{$I fpguilistbox.inc}
+{$I fpguicombobox.inc}
+{$I fpguigrid.inc}
+{$I fpguidialogs.inc}
+{$I fpguipanel.inc}
+{$I fpguimenus.inc}
+{$I fpguiprogressbar.inc}
 
 
 const
