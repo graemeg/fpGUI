@@ -20,17 +20,17 @@
 
   { Combobox widget declarations }
 
-  TComboBoxPopup = class(TPopupWindow)
+  TFComboBoxPopup = class(TFPopupWindow)
   private
-    FLayout: TBoxLayout;
-    FListBox: TListBox;
+    FLayout: TFBoxLayout;
+    FListBox: TFListBox;
   public
     constructor Create(AOwner: TComponent); override;
-    property    ListBox: TListBox read FListBox;
+    property    ListBox: TFListBox read FListBox;
   end;
   
 
-  TCustomComboBox = class(TWidget)
+  TFCustomComboBox = class(TFWidget)
   private
     FItemIndex: Integer;
     FItems: TStrings;
@@ -40,9 +40,9 @@
     procedure   DropDownDestroy(Sender: TObject);
     procedure   SetItemIndex(const AValue: Integer);
   protected
-    ComboBoxButton: TGenericButton;
-    FDropDown: TComboBoxPopup;
-    lbl: TLabel;
+    ComboBoxButton: TFGenericButton;
+    FDropDown: TFComboBoxPopup;
+    lbl: TFLabel;
     procedure   Click; override;
     procedure   Paint(Canvas: TFCanvas); override;
     procedure   CalcSizes; override;
@@ -59,7 +59,7 @@
   end;
 
 
-  TComboBox = class(TCustomComboBox)
+  TFComboBox = class(TFCustomComboBox)
   published
     property    CanExpandWidth;
     property    CanExpandHeight;
@@ -79,14 +79,14 @@
 { Combobox widget implementation }
 
 type
-  TArrowButton = class(TGenericButton)
+  TFArrowButton = class(TFGenericButton)
   protected
     procedure Paint(Canvas: TFCanvas); override;
     procedure CalcSizes; override;
   end;
 
 
-procedure TArrowButton.Paint(Canvas: TFCanvas);
+procedure TFArrowButton.Paint(Canvas: TFCanvas);
 begin
   inherited Paint(Canvas);
   Style.DrawComboBoxArrow(Canvas, Rect(0, 0, Width, Height),
@@ -94,12 +94,12 @@ begin
     wsEnabled in WidgetState);
 end;
 
-procedure TArrowButton.CalcSizes;
+procedure TFArrowButton.CalcSizes;
 begin
   FMinSize := Style.GetComboBoxBtnSize;
 end;
 
-constructor TComboBoxPopup.Create(AOwner: TComponent);
+constructor TFComboBoxPopup.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
@@ -107,13 +107,13 @@ begin
   Color       := clBlack;
   Name        := '#ComboBoxPopup';
 
-  FLayout := TBoxLayout.Create(self);
+  FLayout := TFBoxLayout.Create(self);
   FLayout.Name        := '#VBoxLayout';
   FLayout.Orientation := Vertical;
   FLayout.Spacing     := 0;
   InsertChild(FLayout);
 
-  FListBox := TListBox.Create(self);
+  FListBox := TFListBox.Create(self);
   FListBox.Name       := '#Listbox';
   FListBox.HotTrack   := True;
   FLayout.InsertChild(FListBox);
@@ -124,7 +124,7 @@ end;
 //   TCustomComboBox
 // -------------------------------------------------------------------
 
-constructor TCustomComboBox.Create(AOwner: TComponent);
+constructor TFCustomComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FCanExpandWidth := True;
@@ -132,7 +132,7 @@ begin
   FItems := TStringList.Create;
   FItemIndex := -1;
 
-  ComboBoxButton := TArrowButton.Create(Self);
+  ComboBoxButton := TFArrowButton.Create(Self);
   ComboBoxButton.Name             := '#ComboBoxButton';
   ComboBoxButton.Embedded         := True;
   ComboBoxButton.CanExpandWidth   := False;
@@ -141,13 +141,13 @@ begin
   ComboBoxButton.SetEmbeddedParent(Self);
 end;
 
-destructor TCustomComboBox.Destroy;
+destructor TFCustomComboBox.Destroy;
 begin
   FDropDown.Free;
   inherited Destroy;
 end;
 
-procedure TCustomComboBox.Paint(Canvas: TFCanvas);
+procedure TFCustomComboBox.Paint(Canvas: TFCanvas);
 var
   Pt: TPoint;
   ItemRect: TRect;
@@ -200,7 +200,7 @@ begin
   end;
 end;
 
-procedure TCustomComboBox.CalcSizes;
+procedure TFCustomComboBox.CalcSizes;
 begin
   with Style.GetEditBoxBorders do
     FMinSize := Size(ComboBoxButton.MinSize.cx,
@@ -208,7 +208,7 @@ begin
       TopLeft + BottomRight;
 end;
 
-procedure TCustomComboBox.Resized;
+procedure TFCustomComboBox.Resized;
 begin
   with Style.GetEditBoxBorders do
     ComboBoxButton.SetBounds(
@@ -216,13 +216,13 @@ begin
       ComboBoxButton.MinSize);
 end;
 
-function TCustomComboBox.DistributeEvent(Event: TEventObj): Boolean;
+function TFCustomComboBox.DistributeEvent(Event: TEventObj): Boolean;
 begin
   Result := Event.SendToChild(ComboBoxButton);
 //   or inherited DistributeEvent(Event);
 end;
 
-procedure TCustomComboBox.ComboBoxButtonClick(Sender: TObject);
+procedure TFCustomComboBox.ComboBoxButtonClick(Sender: TObject);
 begin
   if Assigned(FDropDown) and FDropDown.Visible then
   begin
@@ -232,7 +232,7 @@ begin
   
   if not Assigned(FDropDown) then
   begin
-    FDropDown := TComboBoxPopup.Create(Self);
+    FDropDown := TFComboBoxPopup.Create(Self);
     FDropDown.OnDestroy           := @DropDownDestroy;
     FDropDown.ListBox.Items.Text  := FItems.Text;
     FDropDown.ListBox.FItemIndex  := FItemIndex;
@@ -244,7 +244,7 @@ begin
   FDropDown.Wnd.SetMinMaxClientSize(MaxSize, MaxSize);
 end;
 
-procedure TCustomComboBox.DropDownDeactivate(Sender: TObject);
+procedure TFCustomComboBox.DropDownDeactivate(Sender: TObject);
 begin
   LAYOUTTRACE('TCustomComboBox.DropDownDestroy for %s:%s', [Name, ClassName]);
   ItemIndex := FDropDown.ListBox.ItemIndex;
@@ -252,13 +252,13 @@ begin
   SetFocus;
 end;
 
-procedure TCustomComboBox.DropDownDestroy(Sender: TObject);
+procedure TFCustomComboBox.DropDownDestroy(Sender: TObject);
 begin
   LAYOUTTRACE('TCustomComboBox.DropDownDestroy for %s:%s', [Name, ClassName]);
   FDropDown := nil;
 end;
 
-procedure TCustomComboBox.SetItemIndex(const AValue: Integer);
+procedure TFCustomComboBox.SetItemIndex(const AValue: Integer);
 begin
   if FItemIndex <> AValue then
   begin
@@ -277,7 +277,7 @@ end;
 
 { This event causes the combobox to drop open when you click anywhere in the
   component, or press the spacebar key. }
-procedure TCustomComboBox.Click;
+procedure TFCustomComboBox.Click;
 begin
   ComboBoxButtonClick(nil);
   inherited Click;

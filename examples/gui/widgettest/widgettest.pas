@@ -10,7 +10,7 @@ uses
 type
 
   // forward declarations
-  TCheckBoxForm       = class;
+  TFCheckboxForm       = class;
   TRadioButtonForm    = class;
   TGroupBoxForm       = class;
   TEditForm           = class;
@@ -25,9 +25,9 @@ type
 
   { TMainForm }
 
-  TMainForm = class(TForm)
+  TMainForm = class(TFForm)
   private
-    _frmCheckBox: TCheckBoxForm;
+    _frmCheckBox: TFCheckboxForm;
     _frmRadioButton: TRadioButtonForm;
     _frmGroupBox: TGroupBoxForm;
     _frmEdit: TEditForm;
@@ -43,22 +43,22 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
-    Box: TBoxLayout;
-    Title: TLabel;
-    CheckboxBtn: TButton;
-    RadioButtonBtn: TButton;
-    GroupBoxBtn: TButton;
-    EditBtn: TButton;
-    ScrollBarBtn: TButton;
-    ScrollBoxBtn: TButton;
-    ListBoxBtn: TButton;
-    ComboBoxBtn: TButton;
-    GridBtn: TButton;
-    MenuBtn: TButton;
-    PanelBtn: TButton;
-    ProgressBarBtn: TButton;
+    Box: TFBoxLayout;
+    Title: TFLabel;
+    CheckboxBtn: TFButton;
+    RadioButtonBtn: TFButton;
+    GroupBoxBtn: TFButton;
+    EditBtn: TFButton;
+    ScrollBarBtn: TFButton;
+    ScrollBoxBtn: TFButton;
+    ListBoxBtn: TFButton;
+    ComboBoxBtn: TFButton;
+    GridBtn: TFButton;
+    MenuBtn: TFButton;
+    PanelBtn: TFButton;
+    ProgressBarBtn: TFButton;
     Separator: TSeparator;
-    ExitBtn: TButton;
+    ExitBtn: TFButton;
     procedure CheckBoxBtnClick(Sender: TObject);
     procedure RadioButtonBtnClick(Sender: TObject);
     procedure GroupBoxBtnClick(Sender: TObject);
@@ -75,13 +75,13 @@ type
   end;
 
 
-  TTestForm = class(TForm)
+  TTestForm = class(TFForm)
   end;
 
 
-  TCheckBoxForm = class(TTestForm)
-    Box: TBoxLayout;
-    GrayCheckBox, CheckBox1, CheckBox2: TCheckBox;
+  TFCheckboxForm = class(TTestForm)
+    Box: TFBoxLayout;
+    GrayCheckBox, CheckBox1, CheckBox2: TFCheckbox;
     procedure GrayCheckBoxClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -89,8 +89,8 @@ type
 
 
   TRadioButtonForm = class(TTestForm)
-    Box, HorzBox, ButtonBox1, ButtonBox2: TBoxLayout;
-    GrayCheckBox: TCheckBox;
+    Box, HorzBox, ButtonBox1, ButtonBox2: TFBoxLayout;
+    GrayCheckBox: TFCheckbox;
     Radio1a, Radio1b, Radio2a, Radio2b: TRadioButton;
     procedure GrayCheckBoxClick(Sender: TObject);
   public
@@ -99,10 +99,10 @@ type
 
 
   TGroupBoxForm = class(TTestForm)
-    HorzBox, VertBox1, VertBox2: TBoxLayout;
-    GroupBox1, GroupBox2: TGroupBox;
-    GrayCheckBox: TCheckBox;
-    Button: TButton;
+    HorzBox, VertBox1, VertBox2: TFBoxLayout;
+    GroupBox1, GroupBox2: TFGroupBox;
+    GrayCheckBox: TFCheckbox;
+    Button: TFButton;
     Radio1, Radio2, Radio3, Radio4, Radio5: TRadioButton;
     procedure GrayCheckBoxClick(Sender: TObject);
     procedure ButtonClick(Sender: TObject);
@@ -113,11 +113,11 @@ type
 
 
   TEditForm = class(TTestForm)
-    Grid: TGridLayout;
-    VertBox, HorzBox1, HorzBox2: TBoxLayout;
-    Label1, Label2, PasswordDisplay: TLabel;
-    Edit1, Edit2: TEdit;
-    GrayCheckBox1, GrayCheckBox2: TCheckBox;
+    Grid: TFGridLayout;
+    VertBox, HorzBox1, HorzBox2: TFBoxLayout;
+    Label1, Label2, PasswordDisplay: TFLabel;
+    Edit1, Edit2: TFEdit;
+    GrayCheckBox1, GrayCheckBox2: TFCheckbox;
     Separator: TSeparator;
     procedure GrayCheckBox1Click(Sender: TObject);
     procedure GrayCheckBox2Click(Sender: TObject);
@@ -128,15 +128,15 @@ type
 
 
   TScrollBarForm = class(TTestForm)
-    VertLayout: TBoxLayout;
-    GrayCheckBox: TCheckBox;
-    HorzBox: TBoxLayout;
-    HorzGrid, VertGrid: TGridLayout;
+    VertLayout: TFBoxLayout;
+    GrayCheckBox: TFCheckbox;
+    HorzBox: TFBoxLayout;
+    HorzGrid, VertGrid: TFGridLayout;
     VertBar: TSeparator;
-    VertLabel, Label1, Label2, Label3, Label4, Label5: TLabel;
-    PosLabel1, PosLabel2, PosLabel3, PosLabel4, PosLabel5: TLabel;
-    VertScrollBar, ScrollBar1, ScrollBar2, ScrollBar3,
-      ScrollBar4, ScrollBar5: TScrollBar;
+    VerTFLabel, Label1, Label2, Label3, Label4, Label5: TFLabel;
+    PosLabel1, PosLabel2, PosLabel3, PosLabel4, PosLabel5: TFLabel;
+    VerTFScrollBar, ScrollBar1, ScrollBar2, ScrollBar3,
+      ScrollBar4, ScrollBar5: TFScrollBar;
     procedure GrayCheckBoxClick(Sender: TObject);
     procedure ScrollBar1Change(Sender: TObject);
     procedure ScrollBar2Change(Sender: TObject);
@@ -149,16 +149,16 @@ type
 
 
   TScrollBoxForm = class(TTestForm)
-    VertLayout: TBoxLayout;
-    Label1: TLabel;
-    ScrollBox: TScrollBox;
+    VertLayout: TFBoxLayout;
+    Label1: TFLabel;
+    ScrollBox: TFScrollBox;
   public
     constructor Create(AOwner: TComponent); override;
   end;
 
 
   TListBoxForm = class(TTestForm)
-    ListBox: TListBox;
+    ListBox: TFListBox;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -166,11 +166,11 @@ type
 
   TComboBoxForm = class(TTestForm)
   published
-    VertLayout: TBoxLayout;
-    GrayCheckBox: TCheckBox;
-    BetaLabel: TLabel;
-    ComboBox1: TComboBox;
-    ComboBox2: TComboBox;
+    VertLayout: TFBoxLayout;
+    GrayCheckBox: TFCheckbox;
+    BetaLabel: TFLabel;
+    ComboBox1: TFComboBox;
+    ComboBox2: TFComboBox;
     procedure GrayCheckBoxClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   public
@@ -179,7 +179,7 @@ type
 
 
   TGridForm = class(TTestForm)
-    StringGrid: TStringGrid;
+    StringGrid: TFStringGrid;
     procedure FormCreate(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -195,11 +195,11 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    BoxLayout: TBoxLayout;
-    MainMenu: TMenuBar;
-    Title: TLabel;
-    p1, p2, p3, p4, p5, p6: TPanel;
-    MenuBox: TBoxLayout;
+    BoxLayout: TFBoxLayout;
+    MainMenu: TFMenuBar;
+    Title: TFLabel;
+    p1, p2, p3, p4, p5, p6: TFPanel;
+    MenuBox: TFBoxLayout;
   end;
   
   
@@ -210,11 +210,11 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
-    MainLayout: TBoxLayout;
-    StyleGroup: TGroupBox;
+    MainLayout: TFBoxLayout;
+    StyleGroup: TFGroupBox;
     rbPlain, rbLowered, rbRaised: TRadioButton;
-    VBox1: TBoxLayout;
-    Panel: TPanel;
+    VBox1: TFBoxLayout;
+    Panel: TFPanel;
     Separator: TSeparator;
   end;
   
@@ -228,16 +228,16 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
-    MainLayout: TGridLayout;
-    VBox: TBoxLayout;
-    PB: TProgressBar;
-    cbShowPercent: TCheckBox;
-    gbColor: TGroupBox;
+    MainLayout: TFGridLayout;
+    VBox: TFBoxLayout;
+    PB: TFProgressBar;
+    cbShowPercent: TFCheckbox;
+    gbColor: TFGroupBox;
     rbBlue: TRadioButton;
     rbRed: TRadioButton;
     rbGreen: TRadioButton;
     Separator: TSeparator;
-    btnRandom: TButton;
+    btnRandom: TFButton;
   end;
 
 { TListBoxForm }
@@ -268,22 +268,22 @@ end;
 procedure TMenuForm.AboutMenuClicked(Sender: TObject);
 begin
   writeln('   About menu clicked from <' + Sender.ClassName + '>');
-  if Sender is TMenuItem then
-    writeln('   from: ' + TMenuItem(Sender).Text);
+  if Sender is TFMenuItem then
+    writeln('   from: ' + TFMenuItem(Sender).Text);
 end;
 
 constructor TMenuForm.Create(AOwner: TComponent);
 var
-  lMenuItem: TMenuItem;
+  lMenuItem: TFMenuItem;
 begin
   inherited Create(AOwner);
   Name := 'MenuForm';
   Text := 'Menu Test';
   
-  BoxLayout := TBoxLayout.Create(self);
+  BoxLayout := TFBoxLayout.Create(self);
   BoxLayout.Orientation := Vertical;
   
-  MainMenu := TMenuBar.Create(self);
+  MainMenu := TFMenuBar.Create(self);
   BoxLayout.InsertChild(MainMenu);
 
   MainMenu.AddMenu('Close', 'C', @CloseMenuClicked);
@@ -296,7 +296,7 @@ begin
   lMenuItem.SubMenu.AddMenu('Tutorials');
   lMenuItem.SubMenu.AddMenu('About', '', @AboutMenuClicked);
 
-  Title := TLabel.Create(self);
+  Title := TFLabel.Create(self);
   Title.CanExpandWidth := True;
   Title.Alignment := taCenter;
   Title.Text := 'This is work in progress...';
@@ -325,14 +325,14 @@ begin
   Text := 'Panel Test';
   BorderWidth := 8;
 
-  MainLayout := TBoxLayout.Create(self);
+  MainLayout := TFBoxLayout.Create(self);
   MainLayout.Orientation := Vertical;
   
-  StyleGroup := TGroupBox.Create('Bevel Style:', self);
+  StyleGroup := TFGroupBox.Create('Bevel Style:', self);
   StyleGroup.CanExpandWidth := True;
   MainLayout.InsertChild(StyleGroup);
   
-  VBox1 := TBoxLayout.Create(self);
+  VBox1 := TFBoxLayout.Create(self);
   VBox1.Orientation := Vertical;
   StyleGroup.InsertChild(VBox1);
   
@@ -353,7 +353,7 @@ begin
   Separator := TSeparator.Create(self);
   MainLayout.InsertChild(Separator);
 
-  Panel := TPanel.Create('My Panel', self);
+  Panel := TFPanel.Create('My Panel', self);
   MainLayout.InsertChild(Panel);
   
   Child := MainLayout;
@@ -392,14 +392,14 @@ begin
   Text := 'Progress Bar Demo';
   BorderWidth := 8;
 
-  MainLayout := TGridLayout.Create(self);
+  MainLayout := TFGridLayout.Create(self);
   MainLayout.RowCount := 4;
   MainLayout.ColCount := 2;
   
-  VBox := TBoxLayout.Create(self);
+  VBox := TFBoxLayout.Create(self);
   VBox.Orientation := Vertical;
   
-  gbColor   := TGroupBox.Create('Fill Color', self);
+  gbColor   := TFGroupBox.Create('Fill Color', self);
   rbRed           := TRadioButton.Create('Red', self);
   rbRed.Tag       := 1;
   rbRed.OnClick   := @RadioButtonClick;
@@ -419,20 +419,20 @@ begin
   gbColor.InsertChild(VBox);
   MainLayout.AddWidget(gbColor, 0, 0, 1, 2);
 
-  cbShowPercent := TCheckbox.Create('Show Percentage', self);
+  cbShowPercent := TFCheckbox.Create('Show Percentage', self);
   cbShowPercent.Checked := True;
   cbShowPercent.OnClick := @cbShowPercentClick;
   cbShowPercent.CanExpandWidth := True;
   MainLayout.AddWidget(cbShowPercent, 1, 0, 1, 1);
   
-  btnRandom := TButton.Create('Randomize', self);
+  btnRandom := TFButton.Create('Randomize', self);
   btnRandom.OnClick := @GeneratePercentage;
   MainLayout.AddWidget(btnRandom, 1, 1, 1, 1);
 
   Separator := TSeparator.Create(self);
   MainLayout.AddWidget(Separator, 0, 2, 2, 1);
   
-  PB := TProgressBar.Create('', self);
+  PB := TFProgressBar.Create('', self);
   PB.Position := 75;
   MainLayout.AddWidget(PB, 0, 3, 2, 1);
   
@@ -476,7 +476,7 @@ end;
 procedure TMainForm.CheckBoxBtnClick(Sender: TObject);
 begin
   if not Assigned(_frmCheckBox) then
-    _frmCheckBox := TCheckBoxForm.Create(self);
+    _frmCheckBox := TFCheckboxForm.Create(self);
   _frmCheckBox.Show;
 end;
 
@@ -577,16 +577,16 @@ end;
 
 
 // -------------------------------------------------------------------
-//   TCheckBoxForm
+//   TFCheckboxForm
 // -------------------------------------------------------------------
 
-procedure TCheckBoxForm.GrayCheckBoxClick(Sender: TObject);
+procedure TFCheckboxForm.GrayCheckBoxClick(Sender: TObject);
 begin
   CheckBox1.Enabled := not GrayCheckBox.Checked;
   CheckBox2.Enabled := not GrayCheckBox.Checked;
 end;
 
-constructor TCheckBoxForm.Create(AOwner: TComponent);
+constructor TFCheckboxForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   LoadForm(self);

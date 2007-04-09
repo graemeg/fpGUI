@@ -1,14 +1,14 @@
 object RadioButtonForm: TRadioButtonForm
   BorderWidth = 8
   Text = 'Radio button test'
-  object Box: TBoxLayout
+  object Box: TFBoxLayout
     Orientation = Vertical
     object GrayCheckbox: TCheckbox
       Text = 'Gray radio buttons'
       OnClick = GrayCheckboxClick
     end
-    object HorzBox: TBoxLayout
-      object ButtonBox1: TBoxLayout
+    object HorzBox: TFBoxLayout
+      object ButtonBox1: TFBoxLayout
         Orientation = Vertical
         object Radio1a: TRadioButton
 	        Checked = True
@@ -18,7 +18,7 @@ object RadioButtonForm: TRadioButtonForm
           Text = 'Button 1 b'
         end
       end
-      object ButtonBox2: TBoxLayout
+      object ButtonBox2: TFBoxLayout
         Orientation = Vertical
         object Radio2a: TRadioButton
           Text = 'Button 2 a'

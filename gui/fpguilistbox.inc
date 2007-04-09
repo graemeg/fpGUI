@@ -4,7 +4,7 @@
 
 {$IFDEF read_interface}
 
-  TCustomListBox = class(TWidget)
+  TFCustomListBox = class(TFWidget)
   private
     FHotTrack: Boolean;
     FItems: TStrings;
@@ -37,7 +37,7 @@
   end;
 
 
-  TListBox = class(TCustomListBox)
+  TFListBox = class(TFCustomListBox)
   published
     // TWidget properties
     property    OnClick;
@@ -55,28 +55,28 @@
 {$IFDEF read_implementation}
 
 // ===================================================================
-//   TListBoxStrings
+//   TFListBoxStrings
 // ===================================================================
 
 type
 
-  TListBoxStrings = class(TStringList)
+  TFListBoxStrings = class(TStringList)
   protected
-    ListBox: TCustomListBox;
+    ListBox: TFCustomListBox;
     procedure SetUpdateState(Updating: Boolean); override;
   public
-    constructor Create(AListBox: TCustomListBox);
+    constructor Create(AListBox: TFCustomListBox);
     function Add(const s: String): Integer; override;
   end;
 
 
-constructor TListBoxStrings.Create(AListBox: TCustomListBox);
+constructor TFListBoxStrings.Create(AListBox: TFCustomListBox);
 begin
   inherited Create;
   ListBox := AListBox;
 end;
 
-function TListBoxStrings.Add(const s: String): Integer;
+function TFListBoxStrings.Add(const s: String): Integer;
 var
   ItemWidth: Integer;
 begin
@@ -90,7 +90,7 @@ begin
   end;
 end;
 
-procedure TListBoxStrings.SetUpdateState(Updating: Boolean);
+procedure TFListBoxStrings.SetUpdateState(Updating: Boolean);
 begin
   if not Updating then
     ListBox.RecalcWidth;
@@ -101,7 +101,7 @@ end;
 //   TCustomListBox
 // ===================================================================
 
-constructor TCustomListBox.Create(AOwner: TComponent);
+constructor TFCustomListBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
@@ -111,14 +111,14 @@ begin
   ScrollingSupport := TScrollingSupport.Create(Self);
   ScrollingSupport.HorzScrollBar.OnScroll :=
     @ScrollingSupport.DefHorzScrollHandler;
-  ScrollingSupport.VertScrollBar.OnScroll :=
+  ScrollingSupport.VerTFScrollBar.OnScroll :=
     @ScrollingSupport.DefVertScrollHandler;
-  Items := TListBoxStrings.Create(Self);
+  Items := TFListBoxStrings.Create(Self);
   FItemIndex := -1;
   UpdateScrollBars;
 end;
 
-destructor TCustomListBox.Destroy;
+destructor TFCustomListBox.Destroy;
 begin
   Items.Free;
   ScrollingSupport.Free;
@@ -128,7 +128,7 @@ end;
 
 // protected methods
 
-procedure TCustomListBox.Paint(Canvas: TFCanvas);
+procedure TFCustomListBox.Paint(Canvas: TFCanvas);
 var
   i, StartIndex, EndIndex: Integer;
   ItemRect: TRect;
@@ -144,7 +144,7 @@ begin
   Canvas.FillRect(ScrollingSupport.ClientRect);
   Style.SetUIColor(Canvas, clWindowText);
 
-  with ScrollingSupport.VertScrollBar do
+  with ScrollingSupport.VerTFScrollBar do
   begin
     StartIndex := Position div ItemHeight;
     EndIndex := (Position + PageSize) div ItemHeight;
@@ -187,7 +187,7 @@ begin
   end;
 end;
 
-function TCustomListBox.ProcessEvent(Event: TEventObj): Boolean;
+function TFCustomListBox.ProcessEvent(Event: TEventObj): Boolean;
 begin
   if Event.InheritsFrom(TMousePressedEventObj) then
     Result := ScrollingSupport.ProcessEvent(Event) or
@@ -206,27 +206,27 @@ begin
       inherited ProcessEvent(Event);
 end;
 
-function TCustomListBox.DistributeEvent(Event: TEventObj): Boolean;
+function TFCustomListBox.DistributeEvent(Event: TEventObj): Boolean;
 begin
   Result := ScrollingSupport.DistributeEvent(Event) or
     inherited DistributeEvent(Event);
 end;
 
-procedure TCustomListBox.CalcSizes;
+procedure TFCustomListBox.CalcSizes;
 begin
   ScrollingSupport.CalcSizes;
   ItemHeight := FindForm.Wnd.Canvas.FontCellHeight;
-  ScrollingSupport.VertScrollBar.SmallChange := ItemHeight;
+  ScrollingSupport.VerTFScrollBar.SmallChange := ItemHeight;
   RecalcWidth;
 end;
 
-procedure TCustomListBox.Resized;
+procedure TFCustomListBox.Resized;
 begin
   ScrollingSupport.Resized;
   UpdateScrollBars;
 end;
 
-procedure TCustomListBox.RecalcWidth;
+procedure TFCustomListBox.RecalcWidth;
 var
   i, ItemWidth: Integer;
 begin
@@ -243,13 +243,13 @@ begin
   UpdateScrollBars;
 end;
 
-procedure TCustomListBox.UpdateScrollBars;
+procedure TFCustomListBox.UpdateScrollBars;
 begin
   ScrollingSupport.SetVirtualSize(
       Size(FMaxItemWidth, Items.Count * ItemHeight - 1));
 end;
 
-procedure TCustomListBox.RedrawItem(AIndex: Integer);
+procedure TFCustomListBox.RedrawItem(AIndex: Integer);
 var
   ItemRect: TRect;
 begin
@@ -257,7 +257,7 @@ begin
     exit; //==>
   ItemRect := ScrollingSupport.ClientRect;
   Inc(ItemRect.Top, AIndex * ItemHeight -
-    ScrollingSupport.VertScrollBar.Position);
+    ScrollingSupport.VerTFScrollBar.Position);
   if (ItemRect.Top > ScrollingSupport.ClientRect.Bottom) or
     (ItemRect.Top + ItemHeight <= ScrollingSupport.ClientRect.Top) then
     exit;
@@ -269,7 +269,7 @@ end;
 
 // private methods
 
-function TCustomListBox.EvMousePressed(Event: TMousePressedEventObj): Boolean;
+function TFCustomListBox.EvMousePressed(Event: TMousePressedEventObj): Boolean;
 begin
   if HotTrack then
     Result := False
@@ -279,7 +279,7 @@ begin
     Result := False;
 end;
 
-function TCustomListBox.EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
+function TFCustomListBox.EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
 begin
   if HotTrack and (Event.Button = mbLeft) then
     Result := ProcessMouseEvent(Event)
@@ -287,7 +287,7 @@ begin
     Result := False;
 end;
 
-function TCustomListBox.EvMouseMoved(Event: TMouseMoveEventObj): Boolean;
+function TFCustomListBox.EvMouseMoved(Event: TMouseMoveEventObj): Boolean;
 begin
   if HotTrack then
     Result := ProcessMouseEvent(Event)
@@ -295,7 +295,7 @@ begin
     Result := False;
 end;
 
-function TCustomListBox.ProcessMouseEvent(Event: TMouseEventObj): Boolean;
+function TFCustomListBox.ProcessMouseEvent(Event: TMouseEventObj): Boolean;
 var
   Index: Integer;
 begin
@@ -306,7 +306,7 @@ begin
   end;
 
   Index := (Event.Position.y - ScrollingSupport.ClientRect.Top +
-    ScrollingSupport.VertScrollBar.Position) div ItemHeight;
+    ScrollingSupport.VerTFScrollBar.Position) div ItemHeight;
   if (Index >= 0) and (Index < Items.Count) and ((Index <> ItemIndex) or
     (HotTrack and Event.InheritsFrom(TMouseReleasedEventObj))) then
   begin

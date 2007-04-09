@@ -38,7 +38,7 @@ type
       
   // The following flags are used for styles
 
-  TButtonFlags = set of (
+  TFButtonFlags = set of (
       btnIsEmbedded,
       btnIsDefault,
       btnIsPressed,
@@ -80,16 +80,16 @@ type
     property    Color;
   end;
 
-  { TPopupWindow }
-  {$Note TPopupWindow is still work in progess. }
-  TPopupWindow = class(TForm)
+  { TFPopupWindow }
+  {$Note TFPopupWindow is still work in progess. }
+  TFPopupWindow = class(TForm)
   public
     constructor Create; override;
   end;
 
-  { TButton }
+  { TFButton }
 
-  TButton = class(TWidget)
+  TFButton = class(TWidget)
   private
     FCaption: string;
     procedure   SetCaption(const AValue: string);
@@ -102,9 +102,9 @@ type
     property    OnClick;
   end;
   
-  { TLabel }
+  { TFLabel }
 
-  TLabel = class(TWidget)
+  TFLabel = class(TWidget)
   private
     FCaption: string;
     procedure   SetCaption(const AValue: string);
@@ -115,9 +115,9 @@ type
     property    Caption: string read FCaption write SetCaption;
   end;
 
-  { TCustomEdit }
+  { TFCustomEdit }
 
-  TCustomEdit = class(TWidget)
+  TFCustomEdit = class(TWidget)
   private
     FText: string;
     procedure   SetText(const AValue: string);
@@ -130,7 +130,7 @@ type
 
   { TEdit }
   
-  TEdit = class(TCustomEdit)
+  TEdit = class(TFCustomEdit)
   public
     property    Text;
   end;
@@ -297,19 +297,19 @@ begin
   inherited Create(nil, [woWindow]);
 end;
 
-{ TButton }
+{ TFButton }
 
-procedure TButton.SetCaption(const AValue: string);
+procedure TFButton.SetCaption(const AValue: string);
 begin
   if FCaption=AValue then exit;
   FCaption:=AValue;
   Paint;
 end;
 
-procedure TButton.Paint;
+procedure TFButton.Paint;
 var
   Pt: TPoint;
-  lFlags: TButtonFlags;
+  lFlags: TFButtonFlags;
   r: TRect;
 begin
   inherited Paint;
@@ -360,7 +360,7 @@ begin
   Canvas.TextOut(Pt, FCaption);
 end;
 
-constructor TButton.Create(AParent: TFCustomWindow; APosition: TPoint);
+constructor TFButton.Create(AParent: TFCustomWindow; APosition: TPoint);
 begin
   inherited Create(AParent);
   Include(FWidgetStyle, wsClickable);
@@ -368,9 +368,9 @@ begin
   SetClientSize(Size(75, 25));
 end;
 
-{ TLabel }
+{ TFLabel }
 
-procedure TLabel.SetCaption(const AValue: string);
+procedure TFLabel.SetCaption(const AValue: string);
 var
   w, h: integer;
 begin
@@ -383,7 +383,7 @@ begin
   Paint;
 end;
 
-procedure TLabel.Paint;
+procedure TFLabel.Paint;
 begin
 //  Color := FParent.Canvas.GetColor;
   inherited Paint;
@@ -393,24 +393,24 @@ begin
   Canvas.TextOut(Point(0, 0), FCaption);
 end;
 
-constructor TLabel.Create(AParent: TFCustomWindow; APosition: TPoint);
+constructor TFLabel.Create(AParent: TFCustomWindow; APosition: TPoint);
 begin
   inherited Create(AParent);
   SetPosition(APosition);
   SetClientSize(Size(75, 22));
 end;
 
-{ TPopupWindow }
+{ TFPopupWindow }
 
-constructor TPopupWindow.Create;
+constructor TFPopupWindow.Create;
 begin
 //  inherited Create(nil, [woPopup]);
   inherited Create(nil, [woWindow]);
 end;
 
-{ TCustomEdit }
+{ TFCustomEdit }
 
-procedure TCustomEdit.SetText(const AValue: string);
+procedure TFCustomEdit.SetText(const AValue: string);
 var
   w: integer;
 begin
@@ -421,7 +421,7 @@ begin
   Paint;
 end;
 
-procedure TCustomEdit.Paint;
+procedure TFCustomEdit.Paint;
 begin
   inherited Paint;
   DrawEditBox(TFCanvas(Canvas), Rect(0, 0, Width, Height));
@@ -430,7 +430,7 @@ begin
     Canvas.TextOut(Point(2, 2), FText);
 end;
 
-constructor TCustomEdit.Create(AParent: TFCustomWindow; APosition: TPoint);
+constructor TFCustomEdit.Create(AParent: TFCustomWindow; APosition: TPoint);
 begin
   inherited Create(AParent);
 //  OnMouseEntered := @EvMouseEntered

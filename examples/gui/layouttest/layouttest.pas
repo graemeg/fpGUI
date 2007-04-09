@@ -26,9 +26,9 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
-    Box: TBoxLayout;
-    Title: TLabel;
-    SimpleBtn, FixedBtn, BoxBtn, GridBtn, DockingBtn, ExitBtn: TButton;
+    Box: TFBoxLayout;
+    Title: TFLabel;
+    SimpleBtn, FixedBtn, BoxBtn, GridBtn, DockingBtn, ExitBtn: TFButton;
     Separator: TSeparator;
     procedure   SimpleBtnClicked(Sender: TObject);
     procedure   FixedBtnClicked(Sender: TObject);
@@ -39,36 +39,36 @@ type
   end;
 
   TSimpleForm = class(TForm)
-    Button: TButton;
+    Button: TFButton;
   public
     constructor Create(AOwner: TComponent); override;
   end;
 
 {  TFixedForm = class(TForm)
     Layout: TFixedLayout;
-    Button1, Button2: TButton;
+    Button1, Button2: TFButton;
   public
     constructor Create(AOwner: TComponent); override;
   end;        }
 
   TDockingForm = Class(TForm)
     Layout : TDockingLayout;
-    Button1,Button2,Button3,Button4,Button5 : TButton;
+    Button1,Button2,Button3,Button4,Button5 : TFButton;
   public
     constructor Create(AOwner: TComponent); override;
   end;
   
 
   TGridForm = Class(TForm)
-    Layout : TGridLayout;
-    Button1,Button2,Button3,Button4,Button5, Button6 : TButton;
+    Layout : TFGridLayout;
+    Button1,Button2,Button3,Button4,Button5, Button6 : TFButton;
   public
     constructor Create(AOwner: TComponent); override;
   end;
 
   TBoxForm = Class(TForm)
-    Layout, BoxLayout: TBoxLayout;
-    Button1, Button2, Button3, FlipButton: TButton;
+    Layout, BoxLayout: TFBoxLayout;
+    Button1, Button2, Button3, FlipButton: TFButton;
     procedure   FlipOrientation(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -85,34 +85,34 @@ begin
   BorderWidth := 8;
   Text := 'Layout Demo';
 
-  Box := TBoxLayout.Create(self);
+  Box := TFBoxLayout.Create(self);
   Box.Spacing := 8;
   Box.Orientation := Vertical;
   Box.VertAlign := vertFill;
   InsertChild(Box);
 
-  Title := TLabel.Create('Choose a test Window:', self);
+  Title := TFLabel.Create('Choose a test Window:', self);
   Box.InsertChild(Title);
   
-  SimpleBtn := TButton.Create('Simple layout', self);
+  SimpleBtn := TFButton.Create('Simple layout', self);
   SimpleBtn.OnClick := @SimpleBtnClicked;
   Box.InsertChild(SimpleBtn);
   
-  FixedBtn := TButton.Create('Fixed layout', self);
+  FixedBtn := TFButton.Create('Fixed layout', self);
   FixedBtn.OnClick := @FixedBtnClicked;
   FixedBtn.Enabled := False;
   Box.InsertChild(FixedBtn);
 
-  BoxBtn := TButton.Create('Boxed layout', self);
+  BoxBtn := TFButton.Create('Boxed layout', self);
   BoxBtn.OnClick := @BoxBtnClicked;
   Box.InsertChild(BoxBtn);
   
-  GridBtn := TButton.Create('Grid layout', self);
+  GridBtn := TFButton.Create('Grid layout', self);
   GridBtn.OnClick := @GridBtnClicked;
   GridBtn.Enabled := False;
   Box.InsertChild(GridBtn);
   
-  DockingBtn := TButton.Create('Docking layout', self);
+  DockingBtn := TFButton.Create('Docking layout', self);
   DockingBtn.OnClick := @DockingBtnClicked;
   DockingBtn.Enabled := False;
   Box.InsertChild(DockingBtn);
@@ -120,7 +120,7 @@ begin
   Separator := TSeparator.Create(self);
   Box.InsertChild(Separator);
   
-  ExitBtn := TButton.Create('Exit', self);
+  ExitBtn := TFButton.Create('Exit', self);
   ExitBtn.OnClick := @ExitBtnClicked;
   Box.InsertChild(ExitBtn);
   
@@ -212,7 +212,7 @@ begin
   Text := 'Simple Layout';
   BorderWidth := 8;
 
-  Button := TButton.Create(Self);
+  Button := TFButton.Create(Self);
     Button.Text := 'A button...';
   Child := Button;
 end;
@@ -231,11 +231,11 @@ begin
 
   Layout := TFixedLayout.Create(Self);
     Layout.Name := 'Layout';
-    Button1 := TButton.Create(Self);
+    Button1 := TFButton.Create(Self);
       Button1.Name := 'Button1';
       Button1.Text := 'A button';
     Layout.AddControl(Button1, 20, 20);
-    Button2 := TButton.Create(Self);
+    Button2 := TFButton.Create(Self);
       Button2.Name := 'Button2';
       Button2.Text := 'Another button';
     Layout.AddControl(Button2, 50, 100);
@@ -257,23 +257,23 @@ begin
 
   Layout := TDockingLayout.Create(Self);
     Layout.Name := 'Layout';
-    Button1 := TButton.Create(Self);
+    Button1 := TFButton.Create(Self);
       Button1.Name := 'BTop';
       Button1.Text := 'Top Alignment';
     Layout.AddWidget(Button1, dmTop);
-    Button2 := TButton.Create(Self);
+    Button2 := TFButton.Create(Self);
       Button2.Name := 'BBottom';
       Button2.Text := 'Bottom Alignment';
     Layout.AddWidget(Button2, dmBottom);
-    Button3 := TButton.Create(Self);
+    Button3 := TFButton.Create(Self);
       Button3.Name := 'BLeft';
       Button3.Text := 'Left Alignment';
     Layout.AddWidget(Button3, dmLeft);
-    Button4 := TButton.Create(Self);
+    Button4 := TFButton.Create(Self);
       Button4.Name := 'BRight';
       Button4.Text := 'Right Alignment';
     Layout.AddWidget(Button4, dmRight);
-    Button5 := TButton.Create(Self);
+    Button5 := TFButton.Create(Self);
       Button5.Name := 'BCLient';
       Button5.Text := 'Client Alignment';
     Layout.AddWidget(Button5, dmClient);
@@ -292,34 +292,34 @@ begin
   Text := 'Grid Layout';
   BorderWidth := 8;
 
-  Layout := TGridLayout.Create(Self);
+  Layout := TFGridLayout.Create(Self);
     Layout.Name := 'Layout';
     Layout.RowCount := 4;
     Layout.ColCount := 3;
 
-    Button1 := TButton.Create(Self);
+    Button1 := TFButton.Create(Self);
       Button1.Name := 'TopLeft';
       Button1.Text := 'Top Left';
     Layout.AddWidget(Button1, 0, 0, 1, 1);
-    Button2 := TButton.Create(Self);
+    Button2 := TFButton.Create(Self);
       Button2.Name := 'TopRight';
       Button2.Text := 'Top Right';
     Layout.AddWidget(Button2, 2,0,1,1);
-    Button3 := TButton.Create(Self);
+    Button3 := TFButton.Create(Self);
       Button3.Name := 'CenterCenter';
       Button3.Text := 'Center Center';
       // Button3.CanExpandWidth := False;
       // Button3.CanExpandHeight := False;
     Layout.AddWidget(Button3, 1,1,1,1);
-    Button4 := TButton.Create(Self);
+    Button4 := TFButton.Create(Self);
       Button4.Name := 'BottomLeft';
       Button4.Text := 'Bottom Left';
     Layout.AddWidget(Button4,0,2,1,1);
-    Button5 := TButton.Create(Self);
+    Button5 := TFButton.Create(Self);
       Button5.Name := 'BottomRight';
       Button5.Text := 'Bottom Right';
     Layout.AddWidget(Button5, 2,2,1,1);
-    Button6 := TButton.Create(Self);
+    Button6 := TFButton.Create(Self);
       Button6.Name := 'BottomSpan';
       Button6.Text := 'Span Columns';
     Layout.AddWidget(Button6, 0,3,3,1);
@@ -354,25 +354,25 @@ begin
   Text := 'Box Layout';
   BorderWidth := 8;
   
-  Layout := TBoxLayout.Create(self);
+  Layout := TFBoxLayout.Create(self);
   Layout.Spacing := 8;
   Layout.Orientation := Vertical;
   InsertChild(Layout);
   
-  BoxLayout := TBoxLayout.Create(self);
+  BoxLayout := TFBoxLayout.Create(self);
   BoxLayout.Spacing := 4;
   Layout.InsertChild(BoxLayout);
   
-    Button1 := TButton.Create('Button 1', self);
+    Button1 := TFButton.Create('Button 1', self);
     BoxLayout.InsertChild(Button1);
 
-    Button2 := TButton.Create('Button 2', self);
+    Button2 := TFButton.Create('Button 2', self);
     BoxLayout.InsertChild(Button2);
 
-    Button3 := TButton.Create('Button 3', self);
+    Button3 := TFButton.Create('Button 3', self);
     BoxLayout.InsertChild(Button3);
 
-  FlipButton := TButton.Create('Switch to vertical', self);
+  FlipButton := TFButton.Create('Switch to vertical', self);
   FlipButton.OnClick := @FlipOrientation;
   Layout.InsertChild(FlipButton);
 end;

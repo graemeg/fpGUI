@@ -18,7 +18,7 @@
 
 {$IFDEF read_interface}
 
-  TPopupWindow = class(TCustomForm)
+  TFPopupWindow = class(TFCustomForm)
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Show; override;
@@ -31,7 +31,7 @@
 
 {$IFDEF read_implementation}
 
-constructor TPopupWindow.Create(AOwner: TComponent);
+constructor TFPopupWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FParent := nil;
@@ -39,15 +39,15 @@ begin
 end;
 
 
-procedure TPopupWindow.Show;
+procedure TFPopupWindow.Show;
 begin
   inherited Show;
-  LAYOUTTRACE('TPopupWindow.Show for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFPopupWindow.Show for %s:%s', [Name, ClassName]);
   Wnd.CaptureMouse;
 end;
 
 
-procedure TPopupWindow.Close;
+procedure TFPopupWindow.Close;
 begin
   Wnd.ReleaseMouse;
   inherited Close;

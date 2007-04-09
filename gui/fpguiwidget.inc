@@ -36,7 +36,7 @@
     constructor Create(ASender: TObject);
     procedure   AddRef;
     procedure   Release;
-    function    SendToChild(AChild: TWidget): Boolean; virtual;
+    function    SendToChild(AChild: TFWidget): Boolean; virtual;
   published
     property    Sender: TObject read FSender write FSender;
   end;
@@ -78,14 +78,14 @@
   TPreparePaintEventObj = class(TPaintingEventObj)
   public
     // To prevent invisible children to be processed:
-    function SendToChild(AChild: TWidget): Boolean; override;
+    function SendToChild(AChild: TFWidget): Boolean; override;
   end;
 
 
   TPaintEventObj = class(TPaintingEventObj)
   public
     // To adapt the clipping region and add a translation:
-    function SendToChild(AChild: TWidget): Boolean; override;
+    function SendToChild(AChild: TFWidget): Boolean; override;
   end;
 
 
@@ -97,7 +97,7 @@
     FPosition: TPoint;
   public
     constructor Create(ASender: TObject; AShift: TShiftState; APosition: TPoint);
-    function SendToChild(AChild: TWidget): Boolean; override;
+    function SendToChild(AChild: TFWidget): Boolean; override;
     property Position: TPoint read FPosition write FPosition;
   published
     property Shift: TShiftState read FShift write FShift;
@@ -121,7 +121,7 @@
 
   TMouseMoveEventObj = class(TMouseEventObj)
   public
-    function SendToChild(AChild: TWidget): Boolean; override;
+    function SendToChild(AChild: TFWidget): Boolean; override;
   end;
 
 
@@ -133,13 +133,13 @@
 
   TMouseLeaveEventObj = class(TEventObj)
   public
-    function SendToChild(AChild: TWidget): Boolean; override;
+    function SendToChild(AChild: TFWidget): Boolean; override;
   end;
 
 
   TMouseLeaveCheckEventObj = class(TMouseEventObj)
   public
-    function SendToChild(AChild: TWidget): Boolean; override;
+    function SendToChild(AChild: TFWidget): Boolean; override;
     NewCursor: TFCursor;
   end;
 
@@ -159,19 +159,19 @@
 //   TWidget
 // -------------------------------------------------------------------
 
-  TWidgetStyle = set of (wsCaptureMouse, wsClickable, wsOpaque);
+  TFWidgetStyle = set of (wsCaptureMouse, wsClickable, wsOpaque);
 
-  TContainerWidget = class;
+  TFContainerWidget = class;
 
 
-  TWidget = class(TComponent)
+  TFWidget = class(TComponent)
   private
     FColor: TColor;
-    FParent: TWidget;
+    FParent: TFWidget;
     FOnClick: TNotifyEvent;
     // Property access
     procedure SetColor(const AValue: TColor);
-    procedure SetParent(AParent: TWidget);
+    procedure SetParent(AParent: TFWidget);
     function  GetBoundsRect: TRect;
     function  GetLeft: Integer;
     function  GetTop: Integer;
@@ -203,8 +203,8 @@
     FMinSize: TSize;
     FMaxSize: TSize;
     FDefSize: TSize;
-    WidgetStyle: TWidgetStyle;
-    WidgetState: TWidgetState;
+    WidgetStyle: TFWidgetStyle;
+    WidgetState: TFWidgetState;
     procedure Loaded; override;
     procedure Click; dynamic;
     procedure Paint(Canvas: TFCanvas); virtual;
@@ -239,8 +239,8 @@
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    SendEvent(Event: TEventObj): Boolean;
-    function    FindForm: TCustomForm;
-    procedure   SetEmbeddedParent(AParent: TWidget);
+    function    FindForm: TFCustomForm;
+    procedure   SetEmbeddedParent(AParent: TFWidget);
     procedure   SetBounds(APosition: TPoint; ASize: TSize);
     procedure   SetBounds(x, y, w, h: Integer); overload;
     function    WidgetToClient(const APoint: TPoint): TPoint; virtual;
@@ -253,7 +253,7 @@
     procedure   Scroll(const ARect: TRect; DeltaX, DeltaY: Integer);
     procedure   SetFocus;
     procedure   Update;
-    property    Parent: TWidget read FParent write SetParent;
+    property    Parent: TFWidget read FParent write SetParent;
     property    Origin: TPoint read FOrigin;
     property    BoundsSize: TSize read FBoundsSize;
     property    BoundsRect: TRect read GetBoundsRect;
@@ -302,7 +302,7 @@ begin
 end;
 
 
-function TEventObj.SendToChild(AChild: TWidget): Boolean;
+function TEventObj.SendToChild(AChild: TFWidget): Boolean;
 begin
   Inc(RefCount);
   Result := AChild.SendEvent(Self);
@@ -320,7 +320,7 @@ begin
 end;
 
 
-function TPreparePaintEventObj.SendToChild(AChild: TWidget): Boolean;
+function TPreparePaintEventObj.SendToChild(AChild: TFWidget): Boolean;
 begin
   if wsIsVisible in AChild.WidgetState then
     Result := inherited SendToChild(AChild)
@@ -336,7 +336,7 @@ begin
 end;
 
 
-function TPaintEventObj.SendToChild(AChild: TWidget): Boolean;
+function TPaintEventObj.SendToChild(AChild: TFWidget): Boolean;
 var
   ClientPos: TPoint;
 begin
@@ -372,7 +372,7 @@ begin
 end;
 
 
-function TMouseEventObj.SendToChild(AChild: TWidget): Boolean;
+function TMouseEventObj.SendToChild(AChild: TFWidget): Boolean;
 var
   OldPos, ClientPos: TPoint;
 begin
@@ -400,7 +400,7 @@ begin
 end;
 
 
-function TMouseMoveEventObj.SendToChild(AChild: TWidget): Boolean;
+function TMouseMoveEventObj.SendToChild(AChild: TFWidget): Boolean;
 begin
   if AChild.WidgetState * [wsEnabled, wsIsVisible] = [wsEnabled, wsIsVisible]
     then
@@ -415,7 +415,7 @@ begin
 end;
 
 
-function TMouseLeaveEventObj.SendToChild(AChild: TWidget): Boolean;
+function TMouseLeaveEventObj.SendToChild(AChild: TFWidget): Boolean;
 begin
   if wsMouseInside in AChild.WidgetState then
     Result := inherited SendToChild(AChild)
@@ -424,7 +424,7 @@ begin
 end;
 
 
-function TMouseLeaveCheckEventObj.SendToChild(AChild: TWidget): Boolean;
+function TMouseLeaveCheckEventObj.SendToChild(AChild: TFWidget): Boolean;
 begin
   if ((FPosition.X < AChild.Left) or (FPosition.Y < AChild.Top) or
     (FPosition.X >= AChild.Left + AChild.Width) or
@@ -448,7 +448,7 @@ end;
 //   TWidget
 // ===================================================================
 
-constructor TWidget.Create(AOwner: TComponent);
+constructor TFWidget.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := [];
@@ -460,12 +460,12 @@ begin
   FColor            := cl3DFace;
 end;
 
-destructor TWidget.Destroy;
+destructor TFWidget.Destroy;
 begin
   inherited Destroy;
 end;
 
-function TWidget.SendEvent(Event: TEventObj): Boolean;
+function TFWidget.SendEvent(Event: TEventObj): Boolean;
 {$IFDEF TraceEvents}
 var
   i: Integer;
@@ -490,12 +490,12 @@ begin
   Event.Release;
 end;
 
-function TWidget.FindForm: TCustomForm;
+function TFWidget.FindForm: TFCustomForm;
 var
-  Widget: TWidget;
+  Widget: TFWidget;
 begin
   Widget := Self;
-  while not (Widget is TCustomForm) do
+  while not (Widget is TFCustomForm) do
   begin
     Widget := Widget.Parent;
     if not Assigned(Widget) then
@@ -504,17 +504,17 @@ begin
       exit;
     end;
   end;
-  Result := TCustomForm(Widget);
+  Result := TFCustomForm(Widget);
 end;
 
-procedure TWidget.SetEmbeddedParent(AParent: TWidget);
+procedure TFWidget.SetEmbeddedParent(AParent: TFWidget);
 begin
   FParent := AParent;
 end;
 
-procedure TWidget.SetBounds(APosition: TPoint; ASize: TSize);
+procedure TFWidget.SetBounds(APosition: TPoint; ASize: TSize);
 begin
-  LAYOUTTRACE('TWidget.SetBounds for %s:%s. Old size: %dx%d, new size: %dx%d',
+  LAYOUTTRACE('TFWidget.SetBounds for %s:%s. Old size: %dx%d, new size: %dx%d',
     [Name, ClassName, BoundsSize.cx, BoundsSize.cy, ASize.cx, ASize.cy]);
   FOrigin := APosition;
   if ASize <> BoundsSize then
@@ -525,24 +525,24 @@ begin
   end;
 end;
 
-procedure TWidget.SetBounds(x, y, w, h: Integer);
+procedure TFWidget.SetBounds(x, y, w, h: Integer);
 begin
   SetBounds(Point(x, y), Size(w, h));
 end;
 
-function TWidget.WidgetToClient(const APoint: TPoint): TPoint;
+function TFWidget.WidgetToClient(const APoint: TPoint): TPoint;
 begin
   // as default, the outer rectangle is identical to the client rectangle
   Result := APoint;
 end;
 
-function TWidget.ClientToWidget(const APoint: TPoint): TPoint;
+function TFWidget.ClientToWidget(const APoint: TPoint): TPoint;
 begin
   // as default, the outer rectangle is identical to the client rectangle
   Result := APoint;
 end;
 
-function TWidget.ClientToScreen(const APoint: TPoint): TPoint;
+function TFWidget.ClientToScreen(const APoint: TPoint): TPoint;
 begin
   Result := APoint + Origin;
   Result := ClientToWidget(Result);
@@ -550,9 +550,9 @@ begin
     Result := Parent.ClientToScreen(Result);
 end;
 
-{procedure TWidget.Update;
+{procedure TFWidget.Update;
 begin
-  LAYOUTTRACE('TWidget.Update for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFWidget.Update for %s:%s', [Name, ClassName]);
   if wsIsUpdating in WidgetState then
     exit;
 
@@ -561,16 +561,16 @@ begin
   Exclude(WidgetState, wsIsUpdating);
 end;
 
-procedure TWidget.RecalcLayout;
+procedure TFWidget.RecalcLayout;
 var
   OldW, OldH: Integer;
   x, y: Integer;
-  Widget: TWidget;
+  Widget: TFWidget;
 begin
   if (csLoading in ComponentState) or (not Visible) then
     exit;
 
-  LAYOUTTRACE('TWidget.RecalcLayout for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFWidget.RecalcLayout for %s:%s', [Name, ClassName]);
 
   OldW := Width;
   OldH := Height;
@@ -600,13 +600,13 @@ begin
     x := 0;
     y := 0;
     Widget := Self;
-    while not (Widget is TCustomForm) do
+    while not (Widget is TFCustomForm) do
     begin
       Inc(x, Widget.Left);
       Inc(y, Widget.Top);
       Widget := Widget.parent;
     end;
-    TCustomForm(Widget).Wnd.Invalidate(Rect(x, y,
+    TFCustomForm(Widget).Wnd.Invalidate(Rect(x, y,
       x + Max(Width, OldW), y + Max(Height, OldH)));
   end;
 
@@ -614,11 +614,11 @@ begin
     Parent.RecalcLayout;
 end;}
 
-procedure TWidget.Show;
+procedure TFWidget.Show;
 begin
   if not Visible then
   begin
-    LAYOUTTRACE('TWidget.Show for %s:%s', [Name, ClassName]);
+    LAYOUTTRACE('TFWidget.Show for %s:%s', [Name, ClassName]);
     FVisible := True;
     if Assigned(Parent) and (wsIsVisible in Parent.WidgetState) then
     begin
@@ -628,11 +628,11 @@ begin
   end;
 end;
 
-procedure TWidget.Hide;
+procedure TFWidget.Hide;
 begin
   if Visible then
   begin
-    LAYOUTTRACE('TWidget.Hide for %s:%s', [Name, ClassName]);
+    LAYOUTTRACE('TFWidget.Hide for %s:%s', [Name, ClassName]);
     FVisible := False;
     if wsIsVisible in WidgetState then
     begin
@@ -643,7 +643,7 @@ begin
   end;
 end;
 
-procedure TWidget.Redraw;
+procedure TFWidget.Redraw;
 begin
   Redraw(Rect(0, 0, BoundsSize.cx, BoundsSize.cy));
   {$IFDEF DEBUG}
@@ -651,10 +651,10 @@ begin
   {$ENDIF}
 end;
 
-procedure TWidget.Redraw(const ARect: TRect);
+procedure TFWidget.Redraw(const ARect: TRect);
 var
   x, y: Integer;
-  Form: TCustomForm;
+  Form: TFCustomForm;
   WidgetPos, FormPos: TPoint;
 begin
   if not (wsIsVisible in WidgetState) then
@@ -670,11 +670,11 @@ begin
     Rect(x, y, x + ARect.Right - ARect.Left, y + ARect.Bottom - ARect.Top));
 end;
 
-procedure TWidget.Scroll(const ARect: TRect; DeltaX, DeltaY: Integer);
+procedure TFWidget.Scroll(const ARect: TRect; DeltaX, DeltaY: Integer);
 var
   r, ClipRect: TRect;
-  Widget: TWidget;
-  Form: TCustomForm;
+  Widget: TFWidget;
+  Form: TFCustomForm;
   Canvas: TFCanvas;
 begin
   if not (wsIsVisible in WidgetState) then
@@ -787,12 +787,12 @@ begin
   end;
 end;
 
-procedure TWidget.SetFocus;
+procedure TFWidget.SetFocus;
 begin
   FindForm.FocusedWidget := Self;
 end;
 
-procedure TWidget.Update;
+procedure TFWidget.Update;
 var
   PropagateUpdate: Boolean;
   OldMinSize, OldMaxSize, OldDefSize: TSize;
@@ -818,32 +818,32 @@ begin
     SendEvent(TResizedEventObj.Create(Self, wsSizeIsForced in WidgetState));
 end;
 
-procedure TWidget.Loaded;
+procedure TFWidget.Loaded;
 begin
   inherited Loaded;
 {!!!:  if not (wsEnabled in WidgetState) then
     UpdateEnabledState;}
 end;
 
-procedure TWidget.Click;
+procedure TFWidget.Click;
 begin
   Redraw;
   if Assigned(OnClick) then
     OnClick(Self);
 end;
 
-procedure TWidget.Paint(Canvas: TFCanvas);
+procedure TFWidget.Paint(Canvas: TFCanvas);
 begin
   Canvas.SetColor(Style.GetUIColor(FColor));
 end;
 
-procedure TWidget.SetParentComponent(AParent: TComponent);
+procedure TFWidget.SetParentComponent(AParent: TComponent);
 begin
-  if AParent is TContainerWidget then
-    SetParent(TContainerWidget(AParent));
+  if AParent is TFContainerWidget then
+    SetParent(TFContainerWidget(AParent));
 end;
 
-procedure TWidget.SetEnabled(AEnabled: Boolean);
+procedure TFWidget.SetEnabled(AEnabled: Boolean);
 begin
   if AEnabled <> Enabled then
   begin
@@ -852,12 +852,12 @@ begin
   end;
 end;
 
-procedure TWidget.SetStyle(const AValue: TStyleAbs);
+procedure TFWidget.SetStyle(const AValue: TStyleAbs);
 begin
   FStyle := AValue;
 end;
 
-procedure TWidget.SetVisible(AVisible: Boolean);
+procedure TFWidget.SetVisible(AVisible: Boolean);
 begin
   if AVisible then
     Show
@@ -865,19 +865,19 @@ begin
     Hide;
 end;
 
-procedure TWidget.Resized;
+procedure TFWidget.Resized;
 begin
   // Do nothing by default
 end;
 
-procedure TWidget.EvFocusChanged;
+procedure TFWidget.EvFocusChanged;
 begin
   Redraw;
 end;
 
-procedure TWidget.EvKeyPressed(Key: Word; Shift: TShiftState);
+procedure TFWidget.EvKeyPressed(Key: Word; Shift: TShiftState);
 
-  function SetFocusIfPossible(Widget: TWidget): Boolean;
+  function SetFocusIfPossible(Widget: TFWidget): Boolean;
   begin
     Result := (wsClickable in Widget.WidgetStyle) and
       (wsEnabled in Widget.WidgetState);
@@ -885,18 +885,18 @@ procedure TWidget.EvKeyPressed(Key: Word; Shift: TShiftState);
       Widget.SetFocus;
   end;
 
-  function FocusFirst(Widget: TWidget): Boolean;
+  function FocusFirst(Widget: TFWidget): Boolean;
   var
     i: Integer;
-    Child: TWidget;
+    Child: TFWidget;
   begin
     Result := False;
-    if not Widget.InheritsFrom(TContainerWidget) then
+    if not Widget.InheritsFrom(TFContainerWidget) then
       exit;
 
-    for i := 0 to TContainerWidget(Widget).ChildCount - 1 do
+    for i := 0 to TFContainerWidget(Widget).ChildCount - 1 do
     begin
-      Child := TContainerWidget(Widget).Children[i];
+      Child := TFContainerWidget(Widget).Children[i];
       if SetFocusIfPossible(Child) or FocusFirst(Child) then
       begin
         Result := True;
@@ -905,18 +905,18 @@ procedure TWidget.EvKeyPressed(Key: Word; Shift: TShiftState);
     end;
   end;
 
-  function FocusLast(Widget: TWidget): Boolean;
+  function FocusLast(Widget: TFWidget): Boolean;
   var
     i: Integer;
-    Child: TWidget;
+    Child: TFWidget;
   begin
     Result := False;
-    if not Widget.InheritsFrom(TContainerWidget) then
+    if not Widget.InheritsFrom(TFContainerWidget) then
       exit;
 
-    for i := TContainerWidget(Widget).ChildCount - 1 downto 0 do
+    for i := TFContainerWidget(Widget).ChildCount - 1 downto 0 do
     begin
-      Child := TContainerWidget(Widget).Children[i];
+      Child := TFContainerWidget(Widget).Children[i];
       if SetFocusIfPossible(Child) or FocusLast(Child) then
       begin
         Result := True;
@@ -928,8 +928,8 @@ procedure TWidget.EvKeyPressed(Key: Word; Shift: TShiftState);
 var
   mshift: TShiftState;
   i, j: Integer;
-  CurWidget: TWidget;
-  CurParent: TContainerWidget;
+  CurWidget: TFWidget;
+  CurParent: TFContainerWidget;
 begin
   // Handle focus movement keys
   mshift := Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssSuper, ssHyper, ssAltGr];
@@ -939,8 +939,8 @@ begin
     if Assigned(Parent) then
     begin
       CurWidget := Self;
-      CurParent := TContainerWidget(Parent);
-      while Assigned(CurParent) and CurParent.InheritsFrom(TContainerWidget) do
+      CurParent := TFContainerWidget(Parent);
+      while Assigned(CurParent) and CurParent.InheritsFrom(TFContainerWidget) do
       begin
         for i := CurParent.ChildCount - 1 downto 1 do
         begin
@@ -958,7 +958,7 @@ begin
 	          break;
 	        end;  { if }
         end;  { for }
-	      CurParent := TContainerWidget(CurParent.Parent);
+	      CurParent := TFContainerWidget(CurParent.Parent);
       end;  { while }
     end
     else
@@ -975,8 +975,8 @@ begin
       if Assigned(Parent) then
       begin
         CurWidget := Self;
-        CurParent := TContainerWidget(Parent);
-        while Assigned(CurParent) and CurParent.InheritsFrom(TContainerWidget) do
+        CurParent := TFContainerWidget(Parent);
+        while Assigned(CurParent) and CurParent.InheritsFrom(TFContainerWidget) do
         begin
           for i := 0 to CurParent.ChildCount - 2 do
           begin
@@ -994,7 +994,7 @@ begin
 	            break;
 	          end;  { if }
           end;  { for }
-	        CurParent := TContainerWidget(CurParent.Parent);
+	        CurParent := TFContainerWidget(CurParent.Parent);
         end;  { while }
       end
       else
@@ -1014,25 +1014,25 @@ begin
     Parent.EvKeyPressed(Key, Shift);
 end;
 
-procedure TWidget.EvKeyReleased(Key: Word; Shift: TShiftState);
+procedure TFWidget.EvKeyReleased(Key: Word; Shift: TShiftState);
 begin
   if Assigned(Parent) then
     Parent.EvKeyReleased(Key, Shift);
 end;
 
-procedure TWidget.EvKeyChar(KeyChar: Char);
+procedure TFWidget.EvKeyChar(KeyChar: Char);
 begin
   if Assigned(Parent) then
     Parent.EvKeyChar(KeyChar);
 end;
 
-procedure TWidget.EvTextChanged;
+procedure TFWidget.EvTextChanged;
 begin
   Update;
   Redraw;
 end;
 
-function TWidget.DoMouseEnter(AShift: TShiftState; AMousePos: TPoint): Boolean;
+function TFWidget.DoMouseEnter(AShift: TShiftState; AMousePos: TPoint): Boolean;
 var
   Event: TMouseEnterEventObj;
 begin
@@ -1044,9 +1044,9 @@ begin
   Event.Free;
 end;
 
-function TWidget.GetStyle: TStyleAbs;
+function TFWidget.GetStyle: TStyleAbs;
 var
-  Widget: TWidget;
+  Widget: TFWidget;
 begin
   if Assigned(FStyle) then
     Result := FStyle
@@ -1064,7 +1064,7 @@ begin
   end;
 end;
 
-function TWidget.ProcessEvent(Event: TEventObj): Boolean;
+function TFWidget.ProcessEvent(Event: TEventObj): Boolean;
 var
   Canvas: TFCanvas;
   Matrix: TGfxMatrix;
@@ -1137,62 +1137,62 @@ begin
   end;
 end;
 
-function TWidget.DistributeEvent(Event: TEventObj): Boolean;
+function TFWidget.DistributeEvent(Event: TEventObj): Boolean;
 begin
-  // Do nothing here, as TWidget itself doesn't have children
+  // Do nothing here, as TFWidget itself doesn't have children
   Result := False;
 end;
 
-procedure TWidget.SetParent(AParent: TWidget);
+procedure TFWidget.SetParent(AParent: TFWidget);
 begin
   // !!!: reparenting when changing the form is not possible
   if AParent <> FParent then
   begin
     // Remove the widget from the old parent, if it had a parent...
-    if Assigned(FParent) and FParent.InheritsFrom(TContainerWidget) then
-      TContainerWidget(FParent).RemoveChild(Self);
+    if Assigned(FParent) and FParent.InheritsFrom(TFContainerWidget) then
+      TFContainerWidget(FParent).RemoveChild(Self);
 
     FParent := AParent;
 
     // ...and add it to the new parent, if existent.
-    if Assigned(Parent) and Parent.InheritsFrom(TContainerWidget) then
-      TContainerWidget(Parent).InsertChild(Self);
+    if Assigned(Parent) and Parent.InheritsFrom(TFContainerWidget) then
+      TFContainerWidget(Parent).InsertChild(Self);
   end;
 end;
 
-procedure TWidget.SetColor(const AValue: TColor);
+procedure TFWidget.SetColor(const AValue: TColor);
 begin
   if FColor=AValue then exit;
   FColor:=AValue;
 end;
 
-function TWidget.GetBoundsRect: TRect;
+function TFWidget.GetBoundsRect: TRect;
 begin
   Result.TopLeft := Origin;
   Result.BottomRight := Origin + BoundsSize;
 end;
 
-function TWidget.GetLeft: Integer;
+function TFWidget.GetLeft: Integer;
 begin
   Result := Origin.x;
 end;
 
-function TWidget.GetTop: Integer;
+function TFWidget.GetTop: Integer;
 begin
   Result := Origin.y;
 end;
 
-function TWidget.GetWidth: Integer;
+function TFWidget.GetWidth: Integer;
 begin
   Result := BoundsSize.cx;
 end;
 
-function TWidget.GetHeight: Integer;
+function TFWidget.GetHeight: Integer;
 begin
   Result := BoundsSize.cy;
 end;
 
-procedure TWidget.SetCanExpandWidth(allow: Boolean);
+procedure TFWidget.SetCanExpandWidth(allow: Boolean);
 begin
   if FCanExpandWidth <> allow then
   begin
@@ -1201,7 +1201,7 @@ begin
   end;
 end;
 
-procedure TWidget.SetCanExpandHeight(allow: Boolean);
+procedure TFWidget.SetCanExpandHeight(allow: Boolean);
 begin
   if FCanExpandHeight <> allow then
   begin
@@ -1210,7 +1210,7 @@ begin
   end;
 end;
 
-procedure TWidget.SetText(const AText: String);
+procedure TFWidget.SetText(const AText: String);
 begin
   if AText <> Text then
   begin
@@ -1219,9 +1219,9 @@ begin
   end;
 end;
 
-function TWidget.EvCalcSizes(Event: TCalcSizesEventObj): Boolean;
+function TFWidget.EvCalcSizes(Event: TCalcSizesEventObj): Boolean;
 begin
-  LAYOUTTRACE('TWidget.EvCalcSizes for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFWidget.EvCalcSizes for %s:%s', [Name, ClassName]);
 
   FMinSize := Size(0, 0);
   FMaxSize := Size(InfiniteSize, InfiniteSize);
@@ -1242,7 +1242,7 @@ begin
   Result := False;
 end;
 
-function TWidget.EvEnabledChange(Event: TEnabledChangeEventObj): Boolean;
+function TFWidget.EvEnabledChange(Event: TEnabledChangeEventObj): Boolean;
 var
   NewState: Boolean;
 begin
@@ -1267,7 +1267,7 @@ begin
     Result := False;
 end;
 
-function TWidget.EvVisibilityChange(Event: TVisibilityChangeEventObj): Boolean;
+function TFWidget.EvVisibilityChange(Event: TVisibilityChangeEventObj): Boolean;
 begin
   if Visible then
   begin
@@ -1279,7 +1279,7 @@ begin
   Result := False;
 end;
 
-function TWidget.EvMousePressed(Event: TMousePressedEventObj): Boolean;
+function TFWidget.EvMousePressed(Event: TMousePressedEventObj): Boolean;
 begin
   if (wsClickable in WidgetStyle) and (wsEnabled in WidgetState) and
     (Event.Button = mbLeft) then
@@ -1296,7 +1296,7 @@ begin
     Result := False;
 end;
 
-function TWidget.EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
+function TFWidget.EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
 begin
   if (wsClickable in WidgetStyle) and (wsEnabled in WidgetState) and
     (Event.Button = mbLeft) then
@@ -1319,7 +1319,7 @@ begin
     Result := False;
 end;
 
-function TWidget.EvMouseEnter(Event: TMouseEnterEventObj): Boolean;
+function TFWidget.EvMouseEnter(Event: TMouseEnterEventObj): Boolean;
 begin
   Include(WidgetState, wsMouseInside);
   if Cursor <> crDefault then
@@ -1333,7 +1333,7 @@ begin
   {$ENDIF}
 end;
 
-function TWidget.EvMouseLeave(Event: TMouseLeaveEventObj): Boolean;
+function TFWidget.EvMouseLeave(Event: TMouseLeaveEventObj): Boolean;
 begin
   Exclude(WidgetState, wsMouseInside);
   if (wsClickable in WidgetStyle) and (wsClicked in WidgetState) and
@@ -1345,7 +1345,7 @@ begin
   {$ENDIF}
 end;
 
-function TWidget.EvMouseLeaveCheck(Event: TMouseLeaveCheckEventObj): Boolean;
+function TFWidget.EvMouseLeaveCheck(Event: TMouseLeaveCheckEventObj): Boolean;
 begin
   if ((Event.Position.x < 0) or (Event.Position.y < 0) or
     (Event.Position.x >= BoundsSize.cx) or

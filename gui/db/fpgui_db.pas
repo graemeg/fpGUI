@@ -43,7 +43,7 @@ type
     property OnDataChange: TNotifyEvent read FOnDataChange write FOnDataChange;
   end;
 
-  TDBText = class(TCustomLabel)
+  TDBText = class(TFCustomLabel)
   private
     FDataLink: TFieldDataLink;
     function GetDataField: String;

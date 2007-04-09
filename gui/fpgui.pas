@@ -74,12 +74,12 @@ resourcestring
 
 
 type
-  TWidget       = class;
+  TFWidget       = class;
   TEventObj     = class;
-  TCustomForm   = class;
+  TFCustomForm   = class;
 
 
-  TWidgetState = set of (
+  TFWidgetState = set of (
     wsEnabled,
     wsIsVisible,
     wsSizeIsForced,
@@ -94,10 +94,10 @@ type
 
   // The following flags are used for styles
 
-  TButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
+  TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
                          btnIsSelected, btnHasFocus);
 
-  TCheckboxFlags = set of (cbIsPressed, cbHasFocus, cbIsEnabled, cbIsChecked);
+  TFCheckboxFlags = set of (cbIsPressed, cbHasFocus, cbIsEnabled, cbIsChecked);
 
 
   // Other stuff
@@ -208,7 +208,7 @@ end;
 
 procedure LoadForm(AForm: TComponent);
 type
-  PForm = ^TCustomForm;
+  PForm = ^TFCustomForm;
 var
   lForm: PForm;
   Filename: string;

@@ -16,14 +16,14 @@ type
 
   { TMainForm }
 
-  TMainForm = class(TForm)
+  TMainForm = class(TFForm)
   private
-    FLayout: TBoxLayout;
+    FLayout: TFBoxLayout;
     procedure   MainFormActivate(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   published
-    TextLabel: TLabel;
+    TextLabel: TFLabel;
   end;
 
 
@@ -47,11 +47,11 @@ begin
   Text            := 'UTF Demo';
   OnActivate      := @MainFormActivate;
 
-  FLayout         := TBoxLayout.Create(self);
+  FLayout         := TFBoxLayout.Create(self);
   FLayout.Parent  := self;
   InsertChild(FLayout);
 
-  TextLabel       := TLabel.Create(self);
+  TextLabel       := TFLabel.Create(self);
   TextLabel.Text  := '&Gráficas Magnificacion! Teste';
   FLayout.InsertChild(TextLabel);
 end;

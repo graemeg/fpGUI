@@ -20,19 +20,19 @@
 
   { Container widget declarations }
 
-  TContainerWidget = class(TWidget)
+  TFContainerWidget = class(TFWidget)
   protected
     function    DistributeEvent(Event: TEventObj): Boolean; override;
     function    GetChildCount: Integer; virtual; abstract;
-    function    GetChild(Index: Integer): TWidget; virtual; abstract;
+    function    GetChild(Index: Integer): TFWidget; virtual; abstract;
     property    ChildCount: Integer read GetChildCount;
-    property    Children[Index: Integer]: TWidget read GetChild;
+    property    Children[Index: Integer]: TFWidget read GetChild;
     // Move to public in decendant classes, if you want them visible
-    procedure   InsertChild(AChild: TWidget); dynamic; virtual;
-    procedure   RemoveChild(AChild: TWidget); dynamic; virtual;
+    procedure   InsertChild(AChild: TFWidget); dynamic; virtual;
+    procedure   RemoveChild(AChild: TFWidget); dynamic; virtual;
   public
-    function    GetChildAt(APoint: TPoint): TWidget;
-    function    ContainsChild(AChild: TWidget): Boolean; dynamic; abstract;
+    function    GetChildAt(APoint: TPoint): TFWidget;
+    function    ContainsChild(AChild: TFWidget): Boolean; dynamic; abstract;
   end;
   
 {$ENDIF read_interface}
@@ -45,7 +45,7 @@
 //   TContainerWidget
 // ===================================================================
 
-function TContainerWidget.GetChildAt(APoint: TPoint): TWidget;
+function TFContainerWidget.GetChildAt(APoint: TPoint): TFWidget;
 var
   i: Integer;
 begin
@@ -58,7 +58,7 @@ begin
   Result := nil;
 end;
 
-function TContainerWidget.DistributeEvent(Event: TEventObj): Boolean;
+function TFContainerWidget.DistributeEvent(Event: TEventObj): Boolean;
 var
   i: Integer;
 begin
@@ -73,12 +73,12 @@ begin
   Result := inherited DistributeEvent(Event);
 end;
 
-procedure TContainerWidget.InsertChild(AChild: TWidget);
+procedure TFContainerWidget.InsertChild(AChild: TFWidget);
 begin
   // do nothing
 end;
 
-procedure TContainerWidget.RemoveChild(AChild: TWidget);
+procedure TFContainerWidget.RemoveChild(AChild: TFWidget);
 begin
   // do nothing
 end;

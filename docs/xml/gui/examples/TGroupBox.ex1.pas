@@ -2,7 +2,7 @@
   grpOne := TGroupBox.Create('Group Box 1', self);
   grpOne.CanExpandWidth := True;
 
-  VBox1 := TBoxLayout.Create(self);
+  VBox1 := TFBoxLayout.Create(self);
   VBox1.Orientation := Vertical;
   grpOne.InsertChild(VBox1);
   

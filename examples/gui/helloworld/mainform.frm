@@ -1,10 +1,10 @@
 object MainWindow: TMainWindow
   BorderWidth = 8
   WindowOptions = [woWindow]
-  object TextLabel: TLabel
+  object TexTFLabel: TFLabel
     Text = 'Hello, world!'
   end
-  object lblClose: TLabel
+  object lblClose: TFLabel
     Text = '&Close'
   end
 end

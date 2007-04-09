@@ -18,9 +18,9 @@
 
 {$IFDEF read_interface}
 
-  { TCustomRadioButton }
+  { TFCustomRadioButton }
 
-  TCustomRadioButton = class(TWidget)
+  TFCustomRadioButton = class(TFWidget)
   private
     procedure   SetChecked(AChecked: Boolean);
   protected
@@ -36,7 +36,7 @@
   end;
 
 
-  TRadioButton = class(TCustomRadioButton)
+  TRadioButton = class(TFCustomRadioButton)
   published
     property CanExpandWidth;
     property CanExpandHeight;
@@ -54,24 +54,24 @@
 
 
 // ===================================================================
-//   TCustomRadioButton
+//   TFCustomRadioButton
 // ===================================================================
 
-constructor TCustomRadioButton.Create(AOwner: TComponent);
+constructor TFCustomRadioButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable];
 end;
 
 
-constructor TCustomRadioButton.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomRadioButton.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
   Text := pText;
 end;
 
 
-procedure TCustomRadioButton.Click;
+procedure TFCustomRadioButton.Click;
 begin
   if not Checked then
     SetChecked(True);
@@ -79,11 +79,11 @@ begin
 end;
 
 
-procedure TCustomRadioButton.Paint(Canvas: TFCanvas);
+procedure TFCustomRadioButton.Paint(Canvas: TFCanvas);
 var
   FontHeight: Integer;
   LabelRect: TRect;
-  Flags: TCheckboxFlags;
+  Flags: TFCheckboxFlags;
 begin
   FontHeight := Canvas.FontCellHeight;
   LabelRect.Left := FLabelPos.x;
@@ -106,17 +106,17 @@ begin
   Style.DrawText(Canvas, LabelRect.TopLeft, Text, WidgetState);
 end;
 
-procedure TCustomRadioButton.CalcSizes;
+procedure TFCustomRadioButton.CalcSizes;
 begin
   with FindForm.Wnd.Canvas do
     Style.GetRadioButtonLayout(gfxbase.Size(TextWidth(Text), FontCellHeight),
       FMinSize, FLabelPos);
 end;
 
-procedure TCustomRadioButton.SetChecked(AChecked: Boolean);
+procedure TFCustomRadioButton.SetChecked(AChecked: Boolean);
 var
   i: Integer;
-  Child: TWidget;
+  Child: TFWidget;
 begin
   if AChecked <> Checked then
   begin
@@ -124,12 +124,12 @@ begin
     Redraw;
 
     if Checked and Assigned(Parent) and
-      Parent.InheritsFrom(TContainerWidget) then
-      for i := 0 to TContainerWidget(Parent).ChildCount - 1 do
+      Parent.InheritsFrom(TFContainerWidget) then
+      for i := 0 to TFContainerWidget(Parent).ChildCount - 1 do
       begin
-        Child := TContainerWidget(Parent).Children[i];
-	      if (Child <> Self) and Child.InheritsFrom(TCustomRadioButton) then
-	        TCustomRadioButton(Child).Checked := False;
+        Child := TFContainerWidget(Parent).Children[i];
+	      if (Child <> Self) and Child.InheritsFrom(TFCustomRadioButton) then
+	        TFCustomRadioButton(Child).Checked := False;
       end;
   end;
 end;

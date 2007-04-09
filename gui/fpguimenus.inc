@@ -22,17 +22,17 @@
 
 {$IFDEF read_interface}
 
-  TPopupMenu = class;
-  TMenuBar = class;
+  TFPopupMenu = class;
+  TFMenuBar = class;
 
-  { TMenuItem }
+  { TFMenuItem }
 
-  TMenuItem = class(TCustomPanel)
+  TFMenuItem = class(TFCustomPanel)
   private
     FHotKeyDef: string;
     FSeparator: boolean;
-    FSubMenu: TPopupMenu;
-    function    GetSubMenu: TPopupMenu;
+    FSubMenu: TFPopupMenu;
+    function    GetSubMenu: TFPopupMenu;
     procedure   InternalShowPopupMenu;
   protected
     procedure   Paint(Canvas: TFCanvas); override;
@@ -41,7 +41,7 @@
   public
     constructor Create(const pText: string; pOwner: TComponent); overload;
     destructor  Destroy; override;
-    property    SubMenu: TPopupMenu read GetSubMenu;
+    property    SubMenu: TFPopupMenu read GetSubMenu;
   published
     property    Separator: boolean read FSeparator write FSeparator;
     property    HotKeyDef: string read FHotKeyDef write FHotKeyDef;
@@ -51,28 +51,28 @@
   end;
   
   
-  { TPopupMenu }
+  { TFPopupMenu }
 
-  TPopupMenu = class(TPopupWindow)
+  TFPopupMenu = class(TFPopupWindow)
   private
-    FMenu: TMenuBar;
+    FMenu: TFMenuBar;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    function    AddMenu(const pTitle: string): TMenuItem;
-    function    AddMenu(const pTitle: string; const pHotKeyDef: string; pHandlerProc: TNotifyEvent): TMenuItem;
+    function    AddMenu(const pTitle: string): TFMenuItem;
+    function    AddMenu(const pTitle: string; const pHotKeyDef: string; pHandlerProc: TNotifyEvent): TFMenuItem;
   end;
 
 
-  { TMenuBar }
+  { TFMenuBar }
 
-  TMenuBar = class(TCustomBoxLayout)
+  TFMenuBar = class(TFCustomBoxLayout)
   private
   protected
   public
     constructor Create(AOwner: TComponent); override;
-    function    AddMenu(const pTitle: string): TMenuItem;
-    function    AddMenu(const pTitle: string; const pHotKeyDef: string; pHandlerProc: TNotifyEvent): TMenuItem;
+    function    AddMenu(const pTitle: string): TFMenuItem;
+    function    AddMenu(const pTitle: string; const pHotKeyDef: string; pHandlerProc: TNotifyEvent): TFMenuItem;
   published
   end;
 
@@ -82,16 +82,16 @@
 
 {$IFDEF read_implementation}
 
-{ TMenuItem }
+{ TFMenuItem }
 
-function TMenuItem.GetSubMenu: TPopupMenu;
+function TFMenuItem.GetSubMenu: TFPopupMenu;
 begin
   if not Assigned(FSubMenu) then
-    FSubMenu := TPopupMenu.Create(self);
+    FSubMenu := TFPopupMenu.Create(self);
   Result := FSubMenu;
 end;
 
-procedure TMenuItem.InternalShowPopupMenu;
+procedure TFMenuItem.InternalShowPopupMenu;
 begin
   if Assigned(FSubMenu) and FSubMenu.Visible then
   begin
@@ -101,7 +101,7 @@ begin
 
   if not Assigned(FSubMenu) then
   begin
-    FSubMenu := TPopupMenu.Create(Self);
+    FSubMenu := TFPopupMenu.Create(Self);
   end;
 
   FSubMenu.SetPosition(ClientToScreen(Point(0, Height)));
@@ -109,7 +109,7 @@ begin
   FSubMenu.Wnd.SetMinMaxClientSize(MaxSize, MaxSize);
 end;
 
-procedure TMenuItem.Paint(Canvas: TFCanvas);
+procedure TFMenuItem.Paint(Canvas: TFCanvas);
 begin
   if (wsClicked in WidgetState) or (wsMouseInside in WidgetState) then
     FBevelStyle := bsRaised
@@ -121,7 +121,7 @@ begin
   inherited Paint(Canvas);
 end;
 
-function TMenuItem.ProcessEvent(Event: TEventObj): Boolean;
+function TFMenuItem.ProcessEvent(Event: TEventObj): Boolean;
 begin
   {$IFDEF DEBUG}
   if Event.InheritsFrom(TMouseEnterEventObj) then
@@ -146,7 +146,7 @@ begin
     result := inherited ProcessEvent(Event);
 end;
 
-procedure TMenuItem.Click;
+procedure TFMenuItem.Click;
 begin
   if (wsMouseInside in WidgetState) and Assigned(FSubMenu) then
   begin
@@ -155,27 +155,27 @@ begin
   else
     inherited Click;
 
-  if FindForm is TPopupMenu then
-    TPopupMenu(FindForm).Close;
+  if FindForm is TFPopupMenu then
+    TFPopupMenu(FindForm).Close;
 end;
 
-constructor TMenuItem.Create(const pText: string; pOwner: TComponent);
+constructor TFMenuItem.Create(const pText: string; pOwner: TComponent);
 begin
   inherited Create(pText, pOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
   FBevelStyle := bsPlain;
 end;
 
-destructor TMenuItem.Destroy;
+destructor TFMenuItem.Destroy;
 begin
   if Assigned(FSubMenu) then
     FSubMenu.Free;
   inherited Destroy;
 end;
 
-{ TPopupMenu }
+{ TFPopupMenu }
 
-constructor TPopupMenu.Create(AOwner: TComponent);
+constructor TFPopupMenu.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
@@ -183,33 +183,33 @@ begin
   Color       := clBlack;
   Name        := '#MenuPopup';
 
-  FMenu := TMenuBar.Create(self);
+  FMenu := TFMenuBar.Create(self);
   FMenu.Name        := '#VBoxMenu';
   FMenu.Orientation := Vertical;
   FMenu.Spacing     := 0;
   InsertChild(FMenu);
 end;
 
-destructor TPopupMenu.Destroy;
+destructor TFPopupMenu.Destroy;
 begin
   FMenu.Free;
   inherited Destroy;
 end;
 
-function TPopupMenu.AddMenu(const pTitle: string): TMenuItem;
+function TFPopupMenu.AddMenu(const pTitle: string): TFMenuItem;
 begin
   Result := FMenu.AddMenu(pTitle);
 end;
 
-function TPopupMenu.AddMenu(const pTitle: string; const pHotKeyDef: string;
-  pHandlerProc: TNotifyEvent): TMenuItem;
+function TFPopupMenu.AddMenu(const pTitle: string; const pHotKeyDef: string;
+  pHandlerProc: TNotifyEvent): TFMenuItem;
 begin
   Result := FMenu.AddMenu(pTitle, photKeyDef, pHandlerProc);
 end;
 
-{ TMenuBar }
+{ TFMenuBar }
 
-constructor TMenuBar.Create(AOwner: TComponent);
+constructor TFMenuBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
@@ -217,15 +217,15 @@ begin
   Spacing := 0;
 end;
 
-function TMenuBar.AddMenu(const pTitle: string): TMenuItem;
+function TFMenuBar.AddMenu(const pTitle: string): TFMenuItem;
 begin
-  Result := TMenuItem.Create(pTitle, self);
+  Result := TFMenuItem.Create(pTitle, self);
   InsertChild(Result);
 end;
 
 
-function TMenuBar.AddMenu(const pTitle: string; const pHotKeyDef: string;
-  pHandlerProc: TNotifyEvent): TMenuItem;
+function TFMenuBar.AddMenu(const pTitle: string; const pHotKeyDef: string;
+  pHandlerProc: TNotifyEvent): TFMenuItem;
 begin
   Result := AddMenu(pTitle);
   if pTitle <> '-' then

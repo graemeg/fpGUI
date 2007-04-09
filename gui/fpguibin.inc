@@ -19,19 +19,19 @@
 {$IFDEF read_interface}
 
   { Bin widget declarations }
-  TBinWidget = class(TContainerWidget)
+  TFBinWidget = class(TFContainerWidget)
   protected
-    FChild: TWidget;
-    procedure   SetChild(AChild: TWidget);
+    FChild: TFWidget;
+    procedure   SetChild(AChild: TFWidget);
     function    GetChildCount: Integer; override;
-    function    GetChild(Index: Integer): TWidget; override;
+    function    GetChild(Index: Integer): TFWidget; override;
     procedure   CalcSizes; override;
   public // !!!: temporarily
-    property    Child: TWidget read FChild write SetChild;
+    property    Child: TFWidget read FChild write SetChild;
     // really public :)
-    function    ContainsChild(AChild: TWidget): Boolean; override;
-    procedure   InsertChild(AChild: TWidget); override;
-    procedure   RemoveChild(AChild: TWidget); override;
+    function    ContainsChild(AChild: TFWidget): Boolean; override;
+    procedure   InsertChild(AChild: TFWidget); override;
+    procedure   RemoveChild(AChild: TFWidget); override;
   end;
 
 {$ENDIF read_interface}
@@ -43,16 +43,16 @@
 
 
 // ===================================================================
-//   TBinWidget
+//   TFBinWidget
 // ===================================================================
 
-function TBinWidget.ContainsChild(AChild: TWidget): Boolean;
+function TFBinWidget.ContainsChild(AChild: TFWidget): Boolean;
 begin
   Result := Assigned(AChild) and (FChild = AChild);
 end;
 
 
-procedure TBinWidget.InsertChild(AChild: TWidget);
+procedure TFBinWidget.InsertChild(AChild: TFWidget);
 begin
   if FChild <> AChild then
   begin
@@ -64,7 +64,7 @@ begin
 end;
 
 
-procedure TBinWidget.RemoveChild(AChild: TWidget);
+procedure TFBinWidget.RemoveChild(AChild: TFWidget);
 begin
   if FChild = AChild then
   begin
@@ -74,13 +74,13 @@ begin
 end;
 
 
-function TBinWidget.GetChildCount: Integer;
+function TFBinWidget.GetChildCount: Integer;
 begin
   Result := Ord(Assigned(Child));
 end;
 
 
-function TBinWidget.GetChild(Index: Integer): TWidget;
+function TFBinWidget.GetChild(Index: Integer): TFWidget;
 begin
   if (Index = 0) and Assigned(Child) then
     Result := Child
@@ -89,7 +89,7 @@ begin
 end;
 
 
-procedure TBinWidget.CalcSizes;
+procedure TFBinWidget.CalcSizes;
 begin
   LAYOUTTRACE('TBinWidget.CalcSizes for %s:%s', [Name, ClassName]);
   if Assigned(Child) then
@@ -101,7 +101,7 @@ begin
 end;
 
 
-procedure TBinWidget.SetChild(AChild: TWidget);
+procedure TFBinWidget.SetChild(AChild: TFWidget);
 begin
   InsertChild(AChild);
 end;

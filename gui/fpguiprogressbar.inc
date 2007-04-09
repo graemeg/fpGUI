@@ -24,7 +24,7 @@
 
   { TCustomProgressBar }
 
-  TCustomProgressBar = class(TCustomPanel)
+  TFCustomProgressBar = class(TFCustomPanel)
   private
     FFillColor: TColor;
     FMax: integer;
@@ -48,7 +48,7 @@
   end;
 
 
-  TProgressBar = class(TCustomProgressBar)
+  TFProgressBar = class(TFCustomProgressBar)
   published
     property    CanExpandWidth;
     property    CanExpandHeight;
@@ -67,14 +67,14 @@
 
 {$IFDEF read_implementation}
 
-procedure TCustomProgressBar.SetFillColor(const AValue: TColor);
+procedure TFCustomProgressBar.SetFillColor(const AValue: TColor);
 begin
   if FFillColor = AValue then exit;
   FFillColor := AValue;
   Redraw;
 end;
 
-procedure TCustomProgressBar.SetMax(const AValue: integer);
+procedure TFCustomProgressBar.SetMax(const AValue: integer);
 begin
   if FMax = AValue then exit;
   FMax := AValue;
@@ -83,7 +83,7 @@ begin
   Redraw;
 end;
 
-procedure TCustomProgressBar.SetMin(const AValue: integer);
+procedure TFCustomProgressBar.SetMin(const AValue: integer);
 begin
   if FMin = AValue then exit;
   FMin := AValue;
@@ -92,7 +92,7 @@ begin
   Redraw;
 end;
 
-procedure TCustomProgressBar.SetPosition(const AValue: integer);
+procedure TFCustomProgressBar.SetPosition(const AValue: integer);
 begin
   if FPosition = AValue then
     exit; //==>
@@ -103,7 +103,7 @@ begin
   end;
 end;
 
-procedure TCustomProgressBar.SetShowPercentage(const AValue: Boolean);
+procedure TFCustomProgressBar.SetShowPercentage(const AValue: Boolean);
 begin
   if FShowPercentage = AValue then
     Exit; //==>
@@ -111,7 +111,7 @@ begin
   Redraw;
 end;
 
-procedure TCustomProgressBar.Paint(Canvas: TFCanvas);
+procedure TFCustomProgressBar.Paint(Canvas: TFCanvas);
 var
   Pt: TPoint;
   r: TRect;
@@ -143,7 +143,7 @@ begin
   end;
 end;
 
-constructor TCustomProgressBar.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomProgressBar.Create(const pText: string; pOwner: TComponent);
 begin
   inherited Create(pText, pOwner);
   FCanExpandHeight  := False;

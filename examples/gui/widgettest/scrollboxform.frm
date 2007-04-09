@@ -2,9 +2,9 @@ object ScrollBoxForm: TScrollBoxForm
   BorderWidth = 8
   Text = 'Scroll box test'
   WindowOptions = [woWindow]
-  object VertLayout: TBoxLayout
+  object VertLayout: TFBoxLayout
     Orientation = Vertical
-    object Label1: TLabel
+    object Label1: TFLabel
       CanExpandWidth = True
       Text = 'ScrollBox should be transparent in this demo.'
     end

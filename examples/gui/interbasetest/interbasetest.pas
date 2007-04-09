@@ -30,13 +30,13 @@ type
     Transaction: TIBTransaction;
     Query: TIBQuery;
     DataSource: TDataSource;
-    Box, ConnectionBox: TBoxLayout;
-    ConnectionLabel, ConnectionStateLabel: TLabel;
+    Box, ConnectionBox: TFBoxLayout;
+    ConnectionLabel, ConnectionStateLabel: TFLabel;
     ListBox: TListBox;
-    CurDatasetLabel: TLabel;
+    CurDataseTFLabel: TFLabel;
     CurNameText, CurEMailText: TDBText;
-    Navi: TBoxLayout;
-    FirstDataset, PrevDataset, NextDataset, LastDataset: TButton;
+    Navi: TFBoxLayout;
+    FirstDataset, PrevDataset, NextDataset, LastDataset: TFButton;
     procedure FormCreate(Sender: TObject);
     procedure FirstDatasetClick(Sender: TObject);
     procedure PrevDatasetClick(Sender: TObject);

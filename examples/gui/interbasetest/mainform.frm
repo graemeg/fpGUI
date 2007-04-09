@@ -11,20 +11,20 @@ object MainForm: TMainForm
   end
   object DataSource: TDataSource
   end
-  object Box: TBoxLayout
+  object Box: TFBoxLayout
     Spacing = 8
     Orientation = Vertical
-    object ConnectionBox: TBoxLayout
-      object ConnectionLabel: TLabel
+    object ConnectionBox: TFBoxLayout
+      object ConnectionLabel: TFLabel
         Text = 'Connected to database? '
       end
-      object ConnectionStateLabel: TLabel
+      object ConnectionStateLabel: TFLabel
         Text = 'unknown'
       end
     end
     object ListBox: TListBox
     end
-    object CurDatasetLabel: TLabel
+    object CurDataseTFLabel: TFLabel
       Text = 'Current dataset:'
     end
     object CurNameText: TDBText
@@ -33,20 +33,20 @@ object MainForm: TMainForm
     object CurEMailText: TDBText
       Text = '<e-mail>'
     end
-    object Navi: TBoxLayout
-      object FirstDataset: TButton
+    object Navi: TFBoxLayout
+      object FirstDataset: TFButton
         Text = 'First'
 	OnClick = FirstDatasetClick
       end
-      object PrevDataset: TButton
+      object PrevDataset: TFButton
         Text = 'Previous'
 	OnClick = PrevDatasetClick
       end
-      object NextDataset: TButton
+      object NextDataset: TFButton
         Text = 'Next'
 	OnClick = NextDatasetClick
       end
-      object LastDataset: TButton
+      object LastDataset: TFButton
         Text = 'Last'
 	OnClick = LastDatasetClick
       end

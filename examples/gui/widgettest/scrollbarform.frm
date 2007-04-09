@@ -1,13 +1,13 @@
 object ScrollBarForm: TScrollBarForm
   BorderWidth = 8
   Text = 'Scroll bar test'
-  object VertBox: TBoxLayout
+  object VertBox: TFBoxLayout
     Orientation = Vertical
     object GrayCheckBox: TCheckBox
       Text = 'Gray everything'
       OnClick = GrayCheckBoxClick
     end
-    object HorzBox: TBoxLayout
+    object HorzBox: TFBoxLayout
       object HorzGrid: TGridLayout
         ColCount = 3
         RowCount = 6
@@ -87,11 +87,11 @@ object ScrollBarForm: TScrollBarForm
 	    y = 5
 	    Widget = PosLabel5
 	  end>
-        object Col3Label: TLabel
+        object Col3Label: TFLabel
 	  Alignment = taCenter
           Text = 'Position'
         end
-        object Label1: TLabel
+        object Label1: TFLabel
 	  Alignment = taRightJustify
           Text = '0..1, PageSize=0:'
         end
@@ -100,11 +100,11 @@ object ScrollBarForm: TScrollBarForm
           Max = 1
 	  OnChange = ScrollBar1Change
         end
-        object PosLabel1: TLabel
+        object PosLabel1: TFLabel
 	  Alignment = taCenter
           Text = '---'
         end
-        object Label2: TLabel
+        object Label2: TFLabel
 	  Alignment = taRightJustify
           Text = '0..1, PageSize=1:'
         end
@@ -113,11 +113,11 @@ object ScrollBarForm: TScrollBarForm
           PageSize = 1
 	  OnChange = ScrollBar2Change
         end
-        object PosLabel2: TLabel
+        object PosLabel2: TFLabel
 	  Alignment = taCenter
           Text = '---'
         end
-        object Label3: TLabel
+        object Label3: TFLabel
 	  Alignment = taRightJustify
           Text = '-2..3, PageSize=0:'
         end
@@ -126,11 +126,11 @@ object ScrollBarForm: TScrollBarForm
           Max = 3
 	  OnChange = ScrollBar3Change
         end
-        object PosLabel3: TLabel
+        object PosLabel3: TFLabel
 	  Alignment = taCenter
           Text = '---'
         end
-        object Label4: TLabel
+        object Label4: TFLabel
 	  Alignment = taRightJustify
           Text = '-5..9, PageSize=4:'
         end
@@ -140,11 +140,11 @@ object ScrollBarForm: TScrollBarForm
           PageSize = 4
 	  OnChange = ScrollBar4Change
         end
-        object PosLabel4: TLabel
+        object PosLabel4: TFLabel
 	  Alignment = taCenter
           Text = '---'
         end
-        object Label5: TLabel
+        object Label5: TFLabel
 	  Alignment = taRightJustify
           Text = '-100..200, PageSize=7:'
         end
@@ -154,7 +154,7 @@ object ScrollBarForm: TScrollBarForm
           PageSize = 7
 	  OnChange = ScrollBar5Change
         end
-        object PosLabel5: TLabel
+        object PosLabel5: TFLabel
 	  Alignment = taCenter
           Text = '---'
 	      end
@@ -162,7 +162,7 @@ object ScrollBarForm: TScrollBarForm
       object VertBar: TSeparator
         Orientation = Vertical
       end
-      object VertLabel: TLabel
+      object VerTFLabel: TFLabel
         Text = 'Vertical:'
       end
       object VertScrollBar: TScrollBar

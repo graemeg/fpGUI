@@ -18,9 +18,9 @@
 
 {$IFDEF read_interface}
 
-  { TCustomEdit }
+  { TFCustomEdit }
 
-  TCustomEdit = class(TWidget)
+  TFCustomEdit = class(TFWidget)
   private
     FFontColor: TColor;
     FSelStart: integer;
@@ -52,7 +52,7 @@
   end;
 
 
-  TEdit = class(TCustomEdit)
+  TFEdit = class(TFCustomEdit)
   published
     property CanExpandWidth;
     property Enabled;
@@ -69,10 +69,10 @@
 {$IFDEF read_implementation}
 
 // ===================================================================
-//   TCustomEdit
+//   TFCustomEdit
 // ===================================================================
 
-constructor TCustomEdit.Create(AOwner: TComponent);
+constructor TFCustomEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
@@ -83,14 +83,14 @@ begin
 end;
 
 
-constructor TCustomEdit.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomEdit.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
   Text := pText;
 end;
 
 
-procedure TCustomEdit.Paint(Canvas: TFCanvas);
+procedure TFCustomEdit.Paint(Canvas: TFCanvas);
 var
   Borders: TRect;
   s: String;
@@ -162,7 +162,7 @@ begin
 end;
 
 
-function TCustomEdit.ProcessEvent(Event: TEventObj): Boolean;
+function TFCustomEdit.ProcessEvent(Event: TEventObj): Boolean;
 begin
   if Event.InheritsFrom(TMousePressedEventObj) then
   begin
@@ -174,7 +174,7 @@ begin
 end;
 
 
-procedure TCustomEdit.EvKeyPressed(Key: Word; Shift: TShiftState);
+procedure TFCustomEdit.EvKeyPressed(Key: Word; Shift: TShiftState);
 begin
   if Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssSuper, ssHyper, ssAltGr] = [] then
   begin
@@ -218,7 +218,7 @@ begin
 end;
 
 
-procedure TCustomEdit.EvKeyChar(KeyChar: Char);
+procedure TFCustomEdit.EvKeyChar(KeyChar: Char);
 begin
   case KeyChar of
     #8:      { Backspace }
@@ -244,7 +244,7 @@ begin
 end;
 
 
-procedure TCustomEdit.CalcSizes;
+procedure TFCustomEdit.CalcSizes;
 var
   Borders: TRect;
 begin
@@ -254,7 +254,7 @@ begin
 end;
 
 
-procedure TCustomEdit.EvTextChanged;
+procedure TFCustomEdit.EvTextChanged;
 begin
   Redraw;
   if Assigned(OnChange) then
@@ -262,14 +262,14 @@ begin
 end;
 
 
-procedure TCustomEdit.SetText(const AText: String);
+procedure TFCustomEdit.SetText(const AText: String);
 begin
   FSelOffset := 0;
   inherited SetText(AText);
 end;
 
 
-procedure TCustomEdit.SetPasswordChar(APasswordChar: Char);
+procedure TFCustomEdit.SetPasswordChar(APasswordChar: Char);
 begin
   if APasswordChar <> PasswordChar then
   begin
@@ -279,14 +279,14 @@ begin
 end;
 
 
-procedure TCustomEdit.SetFontColor(const AValue: TColor);
+procedure TFCustomEdit.SetFontColor(const AValue: TColor);
 begin
   if FFontColor = AValue then exit;
   FFontColor := AValue;
 end;
 
 
-procedure TCustomEdit.SetCursorPos(ACursorPos: Integer);
+procedure TFCustomEdit.SetCursorPos(ACursorPos: Integer);
 begin
   if ACursorPos <> CursorPos then
   begin
@@ -296,7 +296,7 @@ begin
 end;
 
 
-procedure TCustomEdit.DoMousePressed(pEvent: TMousePressedEventObj);
+procedure TFCustomEdit.DoMousePressed(pEvent: TMousePressedEventObj);
 var
   Borders: TRect;
   cp: integer;

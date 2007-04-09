@@ -1,16 +1,16 @@
 object CompilerOptForm: TCompilerOptForm
   Text = 'Compiler Options - Code'
   BorderWidth = 5
-  object Box1: TBoxLayout
+  object Box1: TFBoxLayout
     Spacing = 8
     Orientation = Vertical
-    object Box2: TBoxLayout
+    object Box2: TFBoxLayout
       Orientation = Vertical
       Spacing = 4
-      object Box4: TBoxLayout
+      object Box4: TFBoxLayout
         object grpBox1: TGroupBox
           Text = 'Unit Style:'
-          object grpBox1VBox1: TBoxLayout
+          object grpBox1VBox1: TFBoxLayout
             Orientation = Vertical
           	object cbSmartLink: TCheckbox
           	  Checked = True
@@ -20,7 +20,7 @@ object CompilerOptForm: TCompilerOptForm
         end
         object grpBox2: TGroupBox
           Text = 'Checks:'
-          object grpBox2VBox1: TBoxLayout
+          object grpBox2VBox1: TFBoxLayout
             Orientation = Vertical
           	object rbIO: TRadioButton
           	  Checked = True
@@ -42,7 +42,7 @@ object CompilerOptForm: TCompilerOptForm
         end
         object grpBox3: TGroupBox
           Text = 'Heap Size (-Ch):'
-          object grpBox3VBox1: TBoxLayout
+          object grpBox3VBox1: TFBoxLayout
             Orientation = Vertical
           	object edHeapSize: TEdit
           	  Text = '0'
@@ -51,10 +51,10 @@ object CompilerOptForm: TCompilerOptForm
           end
         end
       end
-      object Box5: TBoxLayout
+      object Box5: TFBoxLayout
         object grpBox4: TGroupBox
           Text = 'Generate:'
-          object grpBox4VBox1: TBoxLayout
+          object grpBox4VBox1: TFBoxLayout
             Orientation = Vertical
           	object rbNormal: TRadioButton
           	  Text = 'Normal Code (none)'
@@ -71,25 +71,25 @@ object CompilerOptForm: TCompilerOptForm
         object grpBox5: TGroupBox
           Text = 'Target Platform:'
           CanExpandHeight = True
-          object grpBox5VBox1: TBoxLayout
+          object grpBox5VBox1: TFBoxLayout
             Orientation = Vertical
             VertAlign = vertTop
-          	object lblTarget1: TLabel
+          	object lblTarget1: TFLabel
           	  Text = 'Target OS (-T)'
           	end
-          	object lblTarget2: TLabel
+          	object lblTarget2: TFLabel
           	  Text = 'Target CPU (-P)'
           	end
-          	object lblTarget3: TLabel
+          	object lblTarget3: TFLabel
           	  Text = 'Target i386'
           	end
           end
         end
       end
-      object Box6: TBoxLayout
+      object Box6: TFBoxLayout
         object grpBox6: TGroupBox
           Text = 'Optimizations:'
-          object grpBox6VBox1: TBoxLayout
+          object grpBox6VBox1: TFBoxLayout
             Orientation = Vertical
             CanExpandWidth = True
           	object rbLevel0: TRadioButton
@@ -115,21 +115,21 @@ object CompilerOptForm: TCompilerOptForm
         end
       end
     end
-    object Box3: TBoxLayout
-      object btnOK: TButton
+    object Box3: TFBoxLayout
+      object btnOK: TFButton
         Text = 'OK'
         OnClick = btnCloseClick
       end
-      object btnCancel: TButton
+      object btnCancel: TFButton
         Text = 'Cancel'
       end
-      object btnShowOpt: TButton
+      object btnShowOpt: TFButton
         Text = 'Show Options'
       end
-      object btnTest: TButton
+      object btnTest: TFButton
         Text = 'Test'
       end
-      object btnLoadSave: TButton
+      object btnLoadSave: TFButton
         Text = 'Load/Save'
       end
     end

@@ -39,9 +39,9 @@ type
     // Colors
     function    GetGUIColor(Color: TColor): TGfxColor; override;
     // Buttons (todo)
-//    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TButtonFlags); override;
+//    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TFButtonFlags); override;
     // GroupBox
-    procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TWidgetState); override;
+    procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TFWidgetState); override;
   end;
   
 
@@ -208,7 +208,7 @@ end;
 
 (*
 procedure TOpenSoftStyle.DrawButtonFace(Canvas: TFCanvas; const ARect: TRect;
-  Flags: TButtonFlags);
+  Flags: TFButtonFlags);
 begin
 //  inherited DrawButtonFace(Canvas, ARect, Flags);
 //  PaintGradient(Canvas, ARect, Flags);
@@ -217,7 +217,7 @@ end;
 *)
 
 procedure TOpenSoftStyle.DrawGroupBox(Canvas: TFCanvas; const ARect: TRect;
-    const ALabel: String; WidgetState: TWidgetState);
+    const ALabel: String; WidgetState: TFWidgetState);
 var
   TitleWidth, TitleHeight, TopLine: Integer;
 begin

@@ -19,9 +19,9 @@
 {$IFDEF read_interface}
 
 
-  { TCustomLabel }
+  { TFCustomLabel }
 
-  TCustomLabel = class(TWidget)
+  TFCustomLabel = class(TFWidget)
   private
     FFontColor: TColor;
     procedure   SetAlignment(AAlignment: TAlignment);
@@ -37,7 +37,7 @@
   end;
   
 
-  TLabel = class(TCustomLabel)
+  TFLabel = class(TFCustomLabel)
   public
   published
     property CanExpandWidth;
@@ -55,10 +55,10 @@
 
 
 // ===================================================================
-//   TCustomLabel
+//   TFCustomLabel
 // ===================================================================
 
-procedure TCustomLabel.Paint(Canvas: TFCanvas);
+procedure TFCustomLabel.Paint(Canvas: TFCanvas);
 var
   x: Integer;
 begin
@@ -74,14 +74,14 @@ begin
 end;
 
 
-procedure TCustomLabel.CalcSizes;
+procedure TFCustomLabel.CalcSizes;
 begin
   with FindForm.Wnd.Canvas do
     FMinSize := gfxbase.Size(TextWidth(Text), FontCellHeight);
 end;
 
 
-constructor TCustomLabel.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomLabel.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
   Text := pText;
@@ -89,7 +89,7 @@ begin
 end;
 
 
-procedure TCustomLabel.SetAlignment(AAlignment: TAlignment);
+procedure TFCustomLabel.SetAlignment(AAlignment: TAlignment);
 begin
   if AAlignment <> Alignment then
   begin
@@ -99,7 +99,7 @@ begin
 end;
 
 
-procedure TCustomLabel.SetFontColor(const AValue: TColor);
+procedure TFCustomLabel.SetFontColor(const AValue: TColor);
 begin
   if FFontColor = AValue then exit;
   FFontColor := AValue;

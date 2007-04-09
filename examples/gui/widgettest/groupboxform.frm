@@ -1,17 +1,17 @@
 object GroupBoxForm: TGroupBoxForm
   BorderWidth = 8
   Text = 'Group box test'
-  object HorzBox: TBoxLayout
+  object HorzBox: TFBoxLayout
     VertAlign = vertTop
     object GroupBox1: TGroupBox
       Text = 'Group box #1'
-      object VertBox1: TBoxLayout
+      object VertBox1: TFBoxLayout
         Orientation = Vertical
         object GrayCheckBox: TCheckBox
           Text = 'Gray other group box'
 	  OnClick = GrayCheckBoxClick
         end
-        object Button: TButton
+        object Button: TFButton
 	  Enabled = False
           Text = 'Reset radio buttons'
 	  OnClick = ButtonClick
@@ -20,7 +20,7 @@ object GroupBoxForm: TGroupBoxForm
     end
     object GroupBox2: TGroupBox
       Text = 'Group box #2'
-      object VertBox2: TBoxLayout
+      object VertBox2: TFBoxLayout
         Orientation = Vertical
 	object Radio1: TRadioButton
 	  Checked = True

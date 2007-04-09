@@ -22,7 +22,7 @@
   TScrollEvent = procedure(Sender: TObject; var APosition: Integer) of object;
 
 
-  TCustomScrollBar = class(TWidget)
+  TFCustomScrollBar = class(TFWidget)
   private
     FOrientation: TOrientation;
     FMin: Integer;
@@ -33,9 +33,9 @@
     FLargeChange: Integer;
     FOnChange: TNotifyEvent;
     FOnScroll: TScrollEvent;
-    ButtonUp: TGenericButton;
-    ButtonDown: TGenericButton;
-    Slider: TWidget;
+    ButtonUp: TFGenericButton;
+    ButtonDown: TFGenericButton;
+    Slider: TFWidget;
     Embedded: Boolean;		// for internal embedded usage!
 
     // Event handling
@@ -48,7 +48,7 @@
     procedure   SetPageSize(APageSize: Integer);
     procedure   SetPosition(APosition: Integer);
     // Helpers
-    function    GetButtonSize: Integer;
+    function    GeTFButtonSize: Integer;
     function    ClipPosition(APosition: Integer): Integer;
     procedure   UpdateBar;
   protected
@@ -74,7 +74,7 @@
   end;
   
 
-  TScrollBar = class(TCustomScrollBar)
+  TFScrollBar = class(TFCustomScrollBar)
   published
     property Enabled;
     property Orientation;
@@ -98,16 +98,16 @@
 
 
 // ===================================================================
-//   TCustomScrollBar and helper classes
+//   TFCustomScrollBar and helper classes
 // ===================================================================
 
 // -------------------------------------------------------------------
-//   TScrollBarButton
+//   TFScrollBarButton
 // -------------------------------------------------------------------
 
 type
   { Private button type only used for scrollbars. }
-  TScrollBarButton = class(TGenericButton)
+  TFScrollBarButton = class(TFGenericButton)
   protected
     procedure Paint(Canvas: TFCanvas); override;
     procedure CalcSizes; override;
@@ -116,7 +116,7 @@ type
   end;
 
 
-procedure TScrollBarButton.Paint(Canvas: TFCanvas);
+procedure TFScrollBarButton.Paint(Canvas: TFCanvas);
 begin
   inherited Paint(Canvas);
   Style.DrawScrollBarButton(Canvas, Rect(0, 0, BoundsSize.cx, BoundsSize.cy),
@@ -125,19 +125,19 @@ begin
 end;
 
 
-procedure TScrollBarButton.CalcSizes;
+procedure TFScrollBarButton.CalcSizes;
 begin
-  ASSERT(Owner is TCustomScrollBar);
-  FMinSize := Style.GetScrollBarBtnSize(TCustomScrollBar(Owner).Orientation);
+  ASSERT(Owner is TFCustomScrollBar);
+  FMinSize := Style.GeTFScrollBarBtnSize(TFCustomScrollBar(Owner).Orientation);
 end;
 
 
 // -------------------------------------------------------------------
-//   TScrollBarSlider
+//   TFScrollBarSlider
 // -------------------------------------------------------------------
 
 type
-  TScrollBarSlider = class(TWidget)
+  TFScrollBarSlider = class(TFWidget)
   private
     function    EvMousePressed(Event: TMousePressedEventObj): Boolean;
     function    EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
@@ -149,7 +149,7 @@ type
     PrevAreaPressed: Boolean;
     NextAreaPressed: Boolean;
     DragStartMousePos: Integer;
-    DragStartButtonPos: Integer;
+    DragStarTFButtonPos: Integer;
 //    ButtonMoveSavedPosition: Integer;
     procedure   Paint(Canvas: TFCanvas); override;
     function    ProcessEvent(Event: TEventObj): Boolean; override;
@@ -161,21 +161,21 @@ type
   end;
 
 
-constructor TScrollBarSlider.Create(AOwner: TComponent);
+constructor TFScrollBarSlider.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
 end;
 
-procedure TScrollBarSlider.UpdateBar;
+procedure TFScrollBarSlider.UpdateBar;
 var
   Size: Integer;
 begin
-  ASSERT(Owner is TCustomScrollBar);
+  ASSERT(Owner is TFCustomScrollBar);
 
   if Visible then
   begin
-    with TCustomScrollBar(Owner) do
+    with TFCustomScrollBar(Owner) do
     begin
       if (Min = Max) or (Max - Min = PageSize - 1) then
 	      ButtonPos := 0
@@ -192,23 +192,23 @@ begin
           ButtonPos := (Position - Min) *
 	            (Size - ButtonSize) div (Max - Min - PageSize + 1);
       end;
-      ButtonSize := GetButtonSize;
+      ButtonSize := GeTFButtonSize;
     end;
     Redraw;
   end;
 end;
 
-procedure TScrollBarSlider.Paint(Canvas: TFCanvas);
+procedure TFScrollBarSlider.Paint(Canvas: TFCanvas);
 var
   Size: Integer;
   r: TRect;
   StartPos, EndPos: PInteger;
   Color2: TColor;
 begin
-  ASSERT(Owner is TCustomScrollBar);
+  ASSERT(Owner is TFCustomScrollBar);
   inherited Paint(Canvas);
 
-  if TCustomScrollBar(Owner).Orientation = Horizontal then
+  if TFCustomScrollBar(Owner).Orientation = Horizontal then
   begin
     r.Top := 0;
     r.Bottom := Height;
@@ -254,7 +254,7 @@ begin
   Style.DrawButtonFace(Canvas, r, [btnIsEmbedded]);
 end;
 
-function TScrollBarSlider.ProcessEvent(Event: TEventObj): Boolean;
+function TFScrollBarSlider.ProcessEvent(Event: TEventObj): Boolean;
 begin
   Result := False;
   if Event.InheritsFrom(TMousePressedEventObj) then
@@ -271,7 +271,7 @@ begin
     UpdateBar;
 end;
 
-function TScrollBarSlider.EvMousePressed(Event: TMousePressedEventObj): Boolean;
+function TFScrollBarSlider.EvMousePressed(Event: TMousePressedEventObj): Boolean;
 var
   Pos: Integer;
 begin
@@ -280,7 +280,7 @@ begin
   if Event.Button <> mbLeft then
     exit;
 
-  if TCustomScrollBar(Owner).Orientation = Horizontal then
+  if TFCustomScrollBar(Owner).Orientation = Horizontal then
     Pos := Event.Position.x
   else
     Pos := Event.Position.y;
@@ -288,24 +288,24 @@ begin
   if Pos < ButtonPos then
   begin
     PrevAreaPressed := True;
-    TCustomScrollBar(Owner).PageUp
+    TFCustomScrollBar(Owner).PageUp
   end
   else if Pos > ButtonPos + ButtonSize then
   begin
     NextAreaPressed := True;
-    TCustomScrollBar(Owner).PageDown
+    TFCustomScrollBar(Owner).PageDown
   end
   else
   begin
     IsDraggingButton := True;
     DragStartMousePos := Pos;
-    DragStartButtonPos := ButtonPos;
+    DragStarTFButtonPos := ButtonPos;
   end;
 
   Result := True;
 end;
 
-function TScrollBarSlider.EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
+function TFScrollBarSlider.EvMouseReleased(Event: TMouseReleasedEventObj): Boolean;
 var
   NewPosition: Integer;
 begin
@@ -318,15 +318,15 @@ begin
   begin
     IsDraggingButton := False;
     NewPosition := CalcPosition;
-    if NewPosition <> TCustomScrollBar(Owner).Position then
+    if NewPosition <> TFCustomScrollBar(Owner).Position then
     begin
-      if Assigned(TCustomScrollBar(Owner).OnScroll) then
-        TCustomScrollBar(Owner).OnScroll(Owner, NewPosition);
-      TCustomScrollBar(Owner).FPosition := NewPosition;
+      if Assigned(TFCustomScrollBar(Owner).OnScroll) then
+        TFCustomScrollBar(Owner).OnScroll(Owner, NewPosition);
+      TFCustomScrollBar(Owner).FPosition := NewPosition;
     end;
     if (NewPosition <> DragStartMousePos) and
-        Assigned(TCustomScrollBar(Owner).OnChange) then
-      TCustomScrollBar(Owner).OnChange(Self);
+        Assigned(TFCustomScrollBar(Owner).OnChange) then
+      TFCustomScrollBar(Owner).OnChange(Self);
     UpdateBar;
   end
   else if PrevAreaPressed then
@@ -342,7 +342,7 @@ begin
   Result := True;
 end;
 
-function TScrollBarSlider.EvMouseMove(Event: TMouseMoveEventObj): Boolean;
+function TFScrollBarSlider.EvMouseMove(Event: TMouseMoveEventObj): Boolean;
 var
   Pos, Size, VirtualPos: Integer;
 begin
@@ -350,7 +350,7 @@ begin
   begin
     if wsMouseInside in WidgetState then
     begin
-      if TCustomScrollBar(Owner).Orientation = Horizontal then
+      if TFCustomScrollBar(Owner).Orientation = Horizontal then
       begin
         Pos := Event.Position.x;
         Size := Width;
@@ -363,21 +363,21 @@ begin
     else
     begin
       Pos := DragStartMousePos;
-      if TCustomScrollBar(Owner).Orientation = Horizontal then
+      if TFCustomScrollBar(Owner).Orientation = Horizontal then
         Size := Width
       else
         Size := Height;
     end;  { if/else }
 
-    ButtonPos := ClipMinMax(DragStartButtonPos + Pos - DragStartMousePos,
+    ButtonPos := ClipMinMax(DragStarTFButtonPos + Pos - DragStartMousePos,
       0, Size - ButtonSize);
     VirtualPos := CalcPosition;
 
-    if VirtualPos <> TCustomScrollBar(Owner).Position then
+    if VirtualPos <> TFCustomScrollBar(Owner).Position then
     begin
-      if Assigned(TCustomScrollBar(Owner).OnScroll) then
-        TCustomScrollBar(Owner).OnScroll(Owner, VirtualPos);
-      TCustomScrollBar(Owner).FPosition := VirtualPos;
+      if Assigned(TFCustomScrollBar(Owner).OnScroll) then
+        TFCustomScrollBar(Owner).OnScroll(Owner, VirtualPos);
+      TFCustomScrollBar(Owner).FPosition := VirtualPos;
     end;
 
     Redraw;
@@ -386,21 +386,21 @@ begin
     Result := False;
 end;
 
-procedure TScrollBarSlider.CalcSizes;
+procedure TFScrollBarSlider.CalcSizes;
 begin
-  if TCustomScrollBar(Owner).Orientation = Horizontal then
-    FDefSize.cx := Style.GetScrollBarBtnSize(Horizontal).cy * 5
+  if TFCustomScrollBar(Owner).Orientation = Horizontal then
+    FDefSize.cx := Style.GeTFScrollBarBtnSize(Horizontal).cy * 5
   else
-    FDefSize.cy := Style.GetScrollBarBtnSize(Vertical).cx * 5;
+    FDefSize.cy := Style.GeTFScrollBarBtnSize(Vertical).cx * 5;
 end;
 
-function TScrollBarSlider.CalcPosition: Integer;
+function TFScrollBarSlider.CalcPosition: Integer;
 var
   Size: Integer;
-  lOwner: TCustomScrollBar;
+  lOwner: TFCustomScrollBar;
 begin
-  Assert(Owner is TCustomScrollBar);
-  lOwner := TCustomScrollBar(Owner);
+  Assert(Owner is TFCustomScrollBar);
+  lOwner := TFCustomScrollBar(Owner);
 
   if lOwner.Orientation = Horizontal then
     Size := Width
@@ -423,10 +423,10 @@ end;
 
 
 // -------------------------------------------------------------------
-//   TCustomScrollBar
+//   TFCustomScrollBar
 // -------------------------------------------------------------------
 
-constructor TCustomScrollBar.Create(AOwner: TComponent);
+constructor TFCustomScrollBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Include(WidgetStyle, wsOpaque);
@@ -435,22 +435,22 @@ begin
   FMax          := 100;
   FSmallChange  := 1;
 
-  ButtonUp := TScrollBarButton.Create(Self);
+  ButtonUp := TFScrollBarButton.Create(Self);
   ButtonUp.Name               := '#ScrollBarButtonUp';
-  TScrollBarButton(ButtonUp).Direction := arrowLeft;
+  TFScrollBarButton(ButtonUp).Direction := arrowLeft;
   ButtonUp.Embedded           := True;
   ButtonUp.CanExpandWidth     := False;
   ButtonUp.CanExpandHeight    := False;
   ButtonUp.OnClick            := @ButtonUpClick;
   ButtonUp.SetEmbeddedParent(Self);
 
-  Slider := TScrollBarSlider.Create(Self);
+  Slider := TFScrollBarSlider.Create(Self);
   Slider.Name                 := '#ScrollBarSlider';
   Slider.SetEmbeddedParent(Self);
 
-  ButtonDown := TScrollBarButton.Create(Self);
+  ButtonDown := TFScrollBarButton.Create(Self);
   ButtonDown.Name             := '#ScrollBarButtonDown';
-  TScrollBarButton(ButtonDown).Direction := arrowRight;
+  TFScrollBarButton(ButtonDown).Direction := arrowRight;
   ButtonDown.Embedded         := True;
   ButtonDown.CanExpandWidth   := False;
   ButtonDown.CanExpandHeight  := False;
@@ -458,17 +458,17 @@ begin
   ButtonDown.SetEmbeddedParent(Self);
 end;
 
-procedure TCustomScrollBar.LineUp;
+procedure TFCustomScrollBar.LineUp;
 begin
   Position := Position - SmallChange;
 end;
 
-procedure TCustomScrollBar.LineDown;
+procedure TFCustomScrollBar.LineDown;
 begin
   Position := Position + SmallChange;
 end;
 
-procedure TCustomScrollBar.PageUp;
+procedure TFCustomScrollBar.PageUp;
 var
   Diff: Integer;
 begin
@@ -483,7 +483,7 @@ begin
 end;
 
 
-procedure TCustomScrollBar.PageDown;
+procedure TFCustomScrollBar.PageDown;
 var
   Diff: Integer;
 begin
@@ -498,21 +498,21 @@ begin
 end;
 
 
-function TCustomScrollBar.DistributeEvent(Event: TEventObj): Boolean;
+function TFCustomScrollBar.DistributeEvent(Event: TEventObj): Boolean;
 begin
   Result := Event.SendToChild(Slider) or Event.SendToChild(ButtonUp) or
     Event.SendToChild(ButtonDown);
 end;
 
 
-procedure TCustomScrollBar.Paint(Canvas: TFCanvas);
+procedure TFCustomScrollBar.Paint(Canvas: TFCanvas);
 begin
   if not Embedded then
     Style.DrawScrollBarBorder(Canvas, Rect(0, 0, Width, Height));
 end;
 
 
-procedure TCustomScrollBar.CalcSizes;
+procedure TFCustomScrollBar.CalcSizes;
 begin
   if Orientation = Horizontal then
   begin
@@ -533,7 +533,7 @@ begin
   end;
 
   if not Embedded then
-    with Style.GetScrollBarBorders(Orientation) do
+    with Style.GeTFScrollBarBorders(Orientation) do
     begin
       Inc(FMinSize.cx, Left + Right);
       Inc(FMinSize.cy, Top + Bottom);
@@ -545,12 +545,12 @@ begin
 end;
 
 
-procedure TCustomScrollBar.Resized;
+procedure TFCustomScrollBar.Resized;
 var
   r: TRect;
 begin
   if not Embedded then
-    with Style.GetScrollBarBorders(Orientation) do
+    with Style.GeTFScrollBarBorders(Orientation) do
     begin
       r.Left := Left;
       r.Top := Top;
@@ -589,37 +589,37 @@ begin
 end;
 
 
-procedure TCustomScrollBar.ButtonUpClick(Sender: TObject);
+procedure TFCustomScrollBar.ButtonUpClick(Sender: TObject);
 begin
   LineUp;
 end;
 
 
-procedure TCustomScrollBar.ButtonDownClick(Sender: TObject);
+procedure TFCustomScrollBar.ButtonDownClick(Sender: TObject);
 begin
   LineDown;
 end;
 
 
-procedure TCustomScrollBar.SetOrientation(AOrientation: TOrientation);
+procedure TFCustomScrollBar.SetOrientation(AOrientation: TOrientation);
 begin
   if AOrientation <> Orientation then
   begin
     FOrientation := AOrientation;
     if Orientation = Horizontal then
     begin
-      TScrollBarButton(ButtonUp).Direction := arrowLeft;
-      TScrollBarButton(ButtonDown).Direction := arrowRight;
+      TFScrollBarButton(ButtonUp).Direction := arrowLeft;
+      TFScrollBarButton(ButtonDown).Direction := arrowRight;
     end else
     begin
-      TScrollBarButton(ButtonUp).Direction := arrowUp;
-      TScrollBarButton(ButtonDown).Direction := arrowDown;
+      TFScrollBarButton(ButtonUp).Direction := arrowUp;
+      TFScrollBarButton(ButtonDown).Direction := arrowDown;
     end;
   end;
 end;
 
 
-procedure TCustomScrollBar.SetMin(AMin: Integer);
+procedure TFCustomScrollBar.SetMin(AMin: Integer);
 begin
   if AMin <> FMin then
   begin
@@ -630,7 +630,7 @@ begin
 end;
 
 
-procedure TCustomScrollBar.SetMax(AMax: Integer);
+procedure TFCustomScrollBar.SetMax(AMax: Integer);
 begin
   if AMax <> FMax then
   begin
@@ -641,7 +641,7 @@ begin
 end;
 
 
-procedure TCustomScrollBar.SetPageSize(APageSize: Integer);
+procedure TFCustomScrollBar.SetPageSize(APageSize: Integer);
 begin
   if FPageSize <> APageSize then
   begin
@@ -652,7 +652,7 @@ begin
 end;
 
 
-procedure TCustomScrollBar.SetPosition(APosition: Integer);
+procedure TFCustomScrollBar.SetPosition(APosition: Integer);
 begin
   APosition := ClipPosition(APosition);
 
@@ -669,7 +669,7 @@ begin
 end;
 
 
-function TCustomScrollBar.GetButtonSize: Integer;
+function TFCustomScrollBar.GeTFButtonSize: Integer;
 var
   Size: Integer;
 begin
@@ -684,7 +684,7 @@ begin
       Size := Slider.Width
     else
       Size := Slider.Height;
-    Result := fpGUI.Max(Style.GetScrollBarBtnMinSize,
+    Result := fpGUI.Max(Style.GeTFScrollBarBtnMinSize,
         PageSize * Size div fpGUI.Max(1, Max - Min + 1));
     if Result > Size then
       Result := Size;
@@ -692,7 +692,7 @@ begin
 end;
 
 
-function TCustomScrollBar.ClipPosition(APosition: Integer): Integer;
+function TFCustomScrollBar.ClipPosition(APosition: Integer): Integer;
 begin
   if APosition > (Max - PageSize) then
   begin
@@ -708,11 +708,11 @@ begin
 end;
 
 
-procedure TCustomScrollBar.UpdateBar;
+procedure TFCustomScrollBar.UpdateBar;
 begin
   if Embedded then
     Visible := (Max > Min) and ((PageSize = 0) or (PageSize <= Max - Min));
-  TScrollBarSlider(Slider).UpdateBar;
+  TFScrollBarSlider(Slider).UpdateBar;
 end;
 
 

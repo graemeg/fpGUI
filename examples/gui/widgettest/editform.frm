@@ -40,7 +40,7 @@ object EditForm: TEditForm
 	      y = 3
 	      Widget = PasswordDisplay
       end>
-    object Label1: TLabel
+    object Label1: TFLabel
       Text = 'Normal edit field:'
       CanExpandWidth = False
     end
@@ -53,7 +53,7 @@ object EditForm: TEditForm
     end
     object Separator: TSeparator
     end
-    object Label2: TLabel
+    object Label2: TFLabel
       Text = 'Password edit field:'
       CanExpandWidth = False
     end
@@ -66,7 +66,7 @@ object EditForm: TEditForm
       Text = 'Disabled'
       OnClick = GrayCheckBox2Click
     end
-    object PasswordDisplay: TLabel
+    object PasswordDisplay: TFLabel
       Text = '(Password field)'
       CanExpandWidth = False
     end

@@ -1,7 +1,7 @@
 object CheckBoxForm: TCheckBoxForm
   BorderWidth = 8
   Text = 'Check box test'
-  object Box: TBoxLayout
+  object Box: TFBoxLayout
     Orientation = Vertical
     object GrayCheckBox: TCheckBox
       Text = 'Gray other check boxes'

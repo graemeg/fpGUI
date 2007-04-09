@@ -11,8 +11,8 @@ uses
 type
   TMainForm = class(TForm)
   private
-    BoxLayout: TBoxLayout;
-    btnHello: TButton;
+    BoxLayout: TFBoxLayout;
+    btnHello: TFButton;
   public
     procedure AfterConstruction; override;
   end;
@@ -30,13 +30,13 @@ begin
   Text        := 'fpGUI Application';
 
   { every fpGUI app needs a layout manager }
-  BoxLayout := TBoxLayout.Create(self);
+  BoxLayout := TFBoxLayout.Create(self);
   BoxLayout.Spacing       := 8;
   BoxLayout.VertAlign     := vertFill;
   InsertChild(BoxLayout);
 
   { create our button }
-  btnHello := TButton.Create('Hello World!', self);
+  btnHello := TFButton.Create('Hello World!', self);
   btnHello.CanExpandWidth   := True;
   btnHello.CanExpandHeight  := True;
   BoxLayout.InsertChild(btnHello);

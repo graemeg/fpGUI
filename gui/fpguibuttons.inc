@@ -19,7 +19,7 @@
 
 {$IFDEF read_interface}
 
-  TGenericButton = class(TWidget)
+  TFGenericButton = class(TFWidget)
   protected
     FEmbedded: Boolean;
     procedure   Paint(Canvas: TFCanvas); override;
@@ -29,7 +29,7 @@
   end;
 
 
-  TCustomButton = class(TGenericButton)
+  TFCustomButton = class(TFGenericButton)
   protected
     procedure   Paint(Canvas: TFCanvas); override;
     procedure   CalcSizes; override;
@@ -38,7 +38,7 @@
   end;
 
 
-  TButton = class(TCustomButton)
+  TFButton = class(TFCustomButton)
   published
     property    CanExpandWidth;
     property    CanExpandHeight;
@@ -48,7 +48,7 @@
   end;
 
 {
-  TCustomImageButton = class(TGenericButton)
+  TCustomImageButton = class(TFGenericButton)
   protected
     procedure Paint(Canvas: TGfxCanvas); override;
     procedure EvRecalcLayout; override;
@@ -69,19 +69,19 @@
 {$IFDEF read_implementation}
 
 // ===================================================================
-//   TGenericButton
+//   TFGenericButton
 // ===================================================================
 
-constructor TGenericButton.Create(AOwner: TComponent);
+constructor TFGenericButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
 end;
 
 
-procedure TGenericButton.Paint(Canvas: TFCanvas);
+procedure TFGenericButton.Paint(Canvas: TFCanvas);
 var
-  Flags: TButtonFlags;
+  Flags: TFButtonFlags;
 begin
   if Embedded then
     Flags := [btnIsEmbedded]
@@ -100,17 +100,17 @@ begin
 end;
 
 // ===================================================================
-//   TCustomButton
+//   TFCustomButton
 // ===================================================================
 
-procedure TCustomButton.Paint(Canvas: TFCanvas);
+procedure TFCustomButton.Paint(Canvas: TFCanvas);
 var
   Pt: TPoint;
   Borders: TRect;
 begin
   inherited Paint(Canvas);
 
-  Borders := Style.GetButtonBorders;
+  Borders := Style.GeTFButtonBorders;
   Canvas.IntersectClipRect(Rect(Borders.Left, Borders.Top,
     BoundsSize.cx - Borders.Right, BoundsSize.cy - Borders.Bottom));
 
@@ -123,12 +123,12 @@ begin
 end;
 
 
-procedure TCustomButton.CalcSizes;
+procedure TFCustomButton.CalcSizes;
 var
   Borders: TRect;
 begin
-  LAYOUTTRACE('TCustomButton.CalcSizes for %s:%s', [Name, ClassName]);
-  Borders := Style.GetButtonBorders;
+  LAYOUTTRACE('TFCustomButton.CalcSizes for %s:%s', [Name, ClassName]);
+  Borders := Style.GeTFButtonBorders;
   with FindForm.Wnd.Canvas do
   begin
     FMinSize.cx := Borders.Left + Borders.Right + TextWidth(Text);
@@ -139,7 +139,7 @@ begin
   FDefSize := FMinSize + gfxbase.Size(20, 2);
 end;
 
-constructor TCustomButton.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomButton.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
   Text := pText;

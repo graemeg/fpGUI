@@ -35,9 +35,9 @@ type
     // General
     procedure   DrawFocusRect(Canvas: TFCanvas; const ARect: TRect); override;
     // Buttons
-    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TButtonFlags); override;
+    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TFButtonFlags); override;
     // Check boxes
-    procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TCheckboxFlags); override;
+    procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); override;
   end;
 
 
@@ -47,7 +47,7 @@ implementation
 { MotifStyle }
 
 procedure TMotifStyle.DrawButtonFace(Canvas: TFCanvas; const ARect: TRect;
-  Flags: TButtonFlags);
+  Flags: TFButtonFlags);
 var
   r: TRect;
 begin
@@ -103,7 +103,7 @@ begin
 end;
 
 procedure TMotifStyle.DrawCheckBox(Canvas: TFCanvas; const ARect,
-  LabelRect: TRect; Flags: TCheckboxFlags);
+  LabelRect: TRect; Flags: TFCheckboxFlags);
 var
   r: TRect;
   xmid: integer;

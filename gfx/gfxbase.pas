@@ -1386,14 +1386,14 @@ begin
   end;
 end;
 
-{procedure TFCustomApplication.CreateForm(AForm: TCustomForm);
+{procedure TFCustomApplication.CreateForm(AForm: TFCustomForm);
 var
   form: PForm;
   Filename: String;
   TextStream, BinStream: TStream;
 begin
   form := @Reference;
-  form^ := TCustomForm(InstanceClass.Create(Self));
+  form^ := TFCustomForm(InstanceClass.Create(Self));
 
   Filename := LowerCase(Copy(InstanceClass.ClassName, 2, 255)) + '.frm';
 

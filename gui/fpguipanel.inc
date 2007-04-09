@@ -23,7 +23,7 @@
 
 {$IFDEF read_interface}
 
-  TCustomPanel = class(TBinWidget)
+  TFCustomPanel = class(TFBinWidget)
   private
     FBevelStyle: TBevelStyle;
     procedure   SetBevelStyle(const AValue: TBevelStyle);
@@ -38,7 +38,7 @@
   end;
   
 
-  TPanel = class(TCustomPanel)
+  TFPanel = class(TFCustomPanel)
   published
     property    CanExpandWidth;
     property    CanExpandHeight;
@@ -53,14 +53,14 @@
 
 {$IFDEF read_implementation}
 
-procedure TCustomPanel.SetBevelStyle(const AValue: TBevelStyle);
+procedure TFCustomPanel.SetBevelStyle(const AValue: TBevelStyle);
 begin
   if FBevelStyle = AValue then exit;
   FBevelStyle := AValue;
   Redraw;
 end;
 
-procedure TCustomPanel.Paint(Canvas: TFCanvas);
+procedure TFCustomPanel.Paint(Canvas: TFCanvas);
 var
   Pt: TPoint;
 begin
@@ -76,7 +76,7 @@ begin
   end;
 end;
 
-procedure TCustomPanel.CalcSizes;
+procedure TFCustomPanel.CalcSizes;
 var
   Borders: TRect;
   LabelWidth: Integer;
@@ -98,7 +98,7 @@ begin
   end;
 end;
 
-procedure TCustomPanel.Resized;
+procedure TFCustomPanel.Resized;
 var
   LabelWidth: Integer;
   Borders: TRect;
@@ -112,7 +112,7 @@ begin
   end;
 end;
 
-constructor TCustomPanel.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomPanel.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
   FCanExpandWidth   := True;

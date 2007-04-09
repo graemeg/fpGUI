@@ -18,7 +18,7 @@
 
 {$IFDEF read_interface}
 
-  TCustomSeparator = class(TWidget)
+  TCustomSeparator = class(TFWidget)
   private
     procedure SetOrientation(AOrientation: TOrientation);
     procedure SetSpacing(ASpacing: Integer);

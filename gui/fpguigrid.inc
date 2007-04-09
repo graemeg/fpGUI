@@ -19,7 +19,7 @@
 {$IFDEF read_interface}
 
 // -------------------------------------------------------------------
-//   TCustomGrid
+//   TFCustomGrid
 // -------------------------------------------------------------------
 
   EInvalidGridOperation = class(Exception);
@@ -31,7 +31,7 @@
 //  TIntegerArray = array[0..(MAXINT div SizeOf(Integer))-1] of Integer;
 
 
-  TCustomGrid = class(TWidget)
+  TFCustomGrid = class(TFWidget)
   private
     FColCount: Integer;
     FRowCount: Integer;
@@ -55,7 +55,7 @@
     function  GetRowHeights(ARow: Integer): Integer;
     procedure SetRowHeights(ARow, AHeight: Integer);
     procedure HorzScrollBarScroll(Sender: TObject; var APosition: Integer);
-    procedure VertScrollBarScroll(Sender: TObject; var APosition: Integer);
+    procedure VerTFScrollBarScroll(Sender: TObject; var APosition: Integer);
   protected
     ScrollingSupport: TScrollingSupport;
     procedure Paint(Canvas: TFCanvas); override;
@@ -88,14 +88,14 @@
 
 
 // -------------------------------------------------------------------
-//   TDrawGrid
+//   TFDrawGrid
 // -------------------------------------------------------------------
 
   TDrawCellEvent = procedure(Sender: TObject; ACanvas: TFCanvas;
     ACol, ARow: Integer; Rect: TRect; State: TGridDrawState) of object;
 
 
-  TDrawGrid = class(TCustomGrid)
+  TFDrawGrid = class(TFCustomGrid)
   private
     FOnDrawCell: TDrawCellEvent;
   protected
@@ -118,14 +118,14 @@
 
 
 // -------------------------------------------------------------------
-//   TStringGrid
+//   TFStringGrid
 // -------------------------------------------------------------------
 
   PCells = ^TCells;
   TCells = array[0..(1 shl 30) div SizeOf(AnsiString)] of AnsiString;
 
 
-  TStringGrid = class(TDrawGrid)
+  TFStringGrid = class(TFDrawGrid)
   private
     CellStrings: PCells;
     function    GetCells(ACol, ARow: Integer): String;
@@ -158,12 +158,12 @@ resourcestring
   SGridIndexOutOfRange = 'Grid index out of range';
 
 // ===================================================================
-//   TCustomGrid
+//   TFCustomGrid
 // ===================================================================
 
 // public methods
 
-constructor TCustomGrid.Create(AOwner: TComponent);
+constructor TFCustomGrid.Create(AOwner: TComponent);
 var
   i: Integer;
 begin
@@ -173,7 +173,7 @@ begin
   FCanExpandHeight := True;
   ScrollingSupport := TScrollingSupport.Create(Self);
   ScrollingSupport.HorzScrollBar.OnScroll := @HorzScrollBarScroll;
-  ScrollingSupport.VertScrollBar.OnScroll := @VertScrollBarScroll;
+  ScrollingSupport.VerTFScrollBar.OnScroll := @VerTFScrollBarScroll;
 
   FDefaultColWidth := 64;
   FDefaultRowHeight := 24;
@@ -193,7 +193,7 @@ begin
   RowHeightsChanged;
 end;
 
-destructor TCustomGrid.Destroy;
+destructor TFCustomGrid.Destroy;
 begin
   FreeMem(FRowHeights);
   FreeMem(FColWidths);
@@ -204,7 +204,7 @@ end;
 
 // protected methods
 
-procedure TCustomGrid.Paint(Canvas: TFCanvas);
+procedure TFCustomGrid.Paint(Canvas: TFCanvas);
 var
   x1, y1, x2, y2, x, y, Sum: Integer;
   CellRect: TRect;
@@ -279,7 +279,7 @@ begin
 
     Inc(y);
     if y = FixedRows then
-      Inc(y, ScrollingSupport.VertScrollBar.Position);
+      Inc(y, ScrollingSupport.VerTFScrollBar.Position);
   end;
 
 
@@ -301,7 +301,7 @@ begin
 
     Inc(y);
     if y = FixedRows then
-      Inc(y, ScrollingSupport.VertScrollBar.Position);
+      Inc(y, ScrollingSupport.VerTFScrollBar.Position);
   end;
 
   x := 0;
@@ -331,29 +331,29 @@ begin
     Canvas.FillRect(Rect(x1, CellRect.Top, CellRect.Right + 1, y2));
 end;
 
-function TCustomGrid.ProcessEvent(Event: TEventObj): Boolean;
+function TFCustomGrid.ProcessEvent(Event: TEventObj): Boolean;
 begin
   Result := ScrollingSupport.ProcessEvent(Event) or
     inherited ProcessEvent(Event);
 end;
 
-function TCustomGrid.DistributeEvent(Event: TEventObj): Boolean;
+function TFCustomGrid.DistributeEvent(Event: TEventObj): Boolean;
 begin
   Result := ScrollingSupport.DistributeEvent(Event) or
     inherited DistributeEvent(Event);
 end;
 
-procedure TCustomGrid.CalcSizes;
+procedure TFCustomGrid.CalcSizes;
 begin
   ScrollingSupport.CalcSizes;
 end;
 
-procedure TCustomGrid.Resized;
+procedure TFCustomGrid.Resized;
 begin
   ScrollingSupport.Resized;
 end;
 
-procedure TCustomGrid.ColWidthsChanged;
+procedure TFCustomGrid.ColWidthsChanged;
 var
   i: Integer;
 begin
@@ -370,7 +370,7 @@ begin
     Dec(FFixedWidth);
 end;
 
-procedure TCustomGrid.RowHeightsChanged;
+procedure TFCustomGrid.RowHeightsChanged;
 var
   i: Integer;
 begin
@@ -387,17 +387,17 @@ begin
     Dec(FFixedHeight);
 end;
 
-procedure TCustomGrid.SizeChanged(OldColCount, OldRowCount: Integer);
+procedure TFCustomGrid.SizeChanged(OldColCount, OldRowCount: Integer);
 begin
   Assert(OldColCount = OldColCount);
   Assert(OldRowCount = OldRowCount);
-  // This dynamic method is only used for descendants of TCustomGrid
+  // This dynamic method is only used for descendants of TFCustomGrid
 end;
 
 
 // private methods
 
-procedure TCustomGrid.SetColCount(AColCount: Integer);
+procedure TFCustomGrid.SetColCount(AColCount: Integer);
 var
   OldColCount, i: Integer;
 begin
@@ -417,7 +417,7 @@ begin
   end;
 end;
 
-procedure TCustomGrid.SetRowCount(ARowCount: Integer);
+procedure TFCustomGrid.SetRowCount(ARowCount: Integer);
 var
   OldRowCount, i: Integer;
 begin
@@ -430,14 +430,14 @@ begin
     for i := OldRowCount to FRowCount - 1 do
       FRowHeights^[i] := FDefaultRowHeight;
 
-    ScrollingSupport.VertScrollBar.Max := RowCount - FixedRows - 1;
+    ScrollingSupport.VerTFScrollBar.Max := RowCount - FixedRows - 1;
 
     RowHeightsChanged;
     SizeChanged(FColCount, OldRowCount);
   end;
 end;
 
-procedure TCustomGrid.SetFixedCols(AFixedCols: Integer);
+procedure TFCustomGrid.SetFixedCols(AFixedCols: Integer);
 begin
   if AFixedCols <> FixedCols then
   begin
@@ -446,16 +446,16 @@ begin
   end;
 end;
 
-procedure TCustomGrid.SetFixedRows(AFixedRows: Integer);
+procedure TFCustomGrid.SetFixedRows(AFixedRows: Integer);
 begin
   if AFixedRows <> FixedRows then
   begin
     FFixedRows := AFixedRows;
-    ScrollingSupport.VertScrollBar.Max := RowCount - FixedRows - 1;
+    ScrollingSupport.VerTFScrollBar.Max := RowCount - FixedRows - 1;
   end;
 end;
 
-procedure TCustomGrid.SetDefaultColWidth(AWidth: Integer);
+procedure TFCustomGrid.SetDefaultColWidth(AWidth: Integer);
 var
   i: Integer;
 begin
@@ -468,7 +468,7 @@ begin
   end;
 end;
 
-procedure TCustomGrid.SetDefaultRowHeight(AHeight: Integer);
+procedure TFCustomGrid.SetDefaultRowHeight(AHeight: Integer);
 var
   i: Integer;
 begin
@@ -481,35 +481,35 @@ begin
   end;
 end;
 
-function TCustomGrid.GetColWidths(ACol: Integer): Integer;
+function TFCustomGrid.GetColWidths(ACol: Integer): Integer;
 begin
   if (ACol < 0) or (ACol >= FColCount) then
     raise EInvalidGridOperation(SGridIndexOutOfRange);
   Result := FColWidths^[ACol];
 end;
 
-procedure TCustomGrid.SetColWidths(ACol, AWidth: Integer);
+procedure TFCustomGrid.SetColWidths(ACol, AWidth: Integer);
 begin
   if (ACol < 0) or (ACol >= FColCount) then
     raise EInvalidGridOperation(SGridIndexOutOfRange);
   FColWidths^[ACol] := AWidth;
 end;
 
-function TCustomGrid.GetRowHeights(ARow: Integer): Integer;
+function TFCustomGrid.GetRowHeights(ARow: Integer): Integer;
 begin
   if (ARow < 0) or (ARow >= FRowCount) then
     raise EInvalidGridOperation(SGridIndexOutOfRange);
   Result := FRowHeights^[ARow];
 end;
 
-procedure TCustomGrid.SetRowHeights(ARow, AHeight: Integer);
+procedure TFCustomGrid.SetRowHeights(ARow, AHeight: Integer);
 begin
   if (ARow < 0) or (ARow >= FRowCount) then
     raise EInvalidGridOperation(SGridIndexOutOfRange);
   FRowHeights^[ARow] := AHeight;
 end;
 
-procedure TCustomGrid.HorzScrollBarScroll(Sender: TObject;
+procedure TFCustomGrid.HorzScrollBarScroll(Sender: TObject;
   var APosition: Integer);
 var
   i, Delta: Integer;
@@ -536,18 +536,18 @@ begin
   end;
 end;
 
-procedure TCustomGrid.VertScrollBarScroll(Sender: TObject;
+procedure TFCustomGrid.VerTFScrollBarScroll(Sender: TObject;
   var APosition: Integer);
 var
   i, Delta: Integer;
   r: TRect;
 begin
   Delta := 0;
-  if APosition > ScrollingSupport.VertScrollBar.Position then
-    for i := ScrollingSupport.VertScrollBar.Position to APosition - 1 do
+  if APosition > ScrollingSupport.VerTFScrollBar.Position then
+    for i := ScrollingSupport.VerTFScrollBar.Position to APosition - 1 do
       Dec(Delta, RowHeights[i + FixedRows] + 1)
   else
-    for i := APosition to ScrollingSupport.VertScrollBar.Position - 1 do
+    for i := APosition to ScrollingSupport.VerTFScrollBar.Position - 1 do
       Inc(Delta, RowHeights[i + FixedRows] + 1);
 
   // Scroll the grid body
@@ -565,10 +565,10 @@ end;
 
 
 // -------------------------------------------------------------------
-//   TDrawGrid
+//   TFDrawGrid
 // -------------------------------------------------------------------
 
-procedure TDrawGrid.DrawCell(ACanvas: TFCanvas; ACol, ARow: Integer;
+procedure TFDrawGrid.DrawCell(ACanvas: TFCanvas; ACol, ARow: Integer;
   ARect: TRect;
  AState: TGridDrawState);
 begin
@@ -576,7 +576,7 @@ begin
     OnDrawCell(Self, ACanvas, ACol, ARow, ARect, AState);
 end;
 
-function TDrawGrid.CellRect(ACol, ARow: Integer): TRect;
+function TFDrawGrid.CellRect(ACol, ARow: Integer): TRect;
 var
   i: Integer;
 begin
@@ -593,10 +593,10 @@ end;
 
 
 // -------------------------------------------------------------------
-//   TStringGrid
+//   TFStringGrid
 // -------------------------------------------------------------------
 
-function TStringGrid.GetCells(ACol, ARow: Integer): String;
+function TFStringGrid.GetCells(ACol, ARow: Integer): String;
 begin
   if (ACol >= 0) and (ARow >= 0) and (ACol < ColCount) and (ARow < RowCount) then
     Result := CellStrings^[ARow * ColCount + ACol]
@@ -604,13 +604,13 @@ begin
     SetLength(Result, 0);
 end;
 
-procedure TStringGrid.SetCells(ACol, ARow: Integer; const AValue: String);
+procedure TFStringGrid.SetCells(ACol, ARow: Integer; const AValue: String);
 begin
   if (ACol >= 0) and (ARow >= 0) and (ACol < ColCount) and (ARow < RowCount) then
     CellStrings^[ARow * ColCount + ACol] := AValue;
 end;
 
-procedure TStringGrid.SizeChanged(OldColCount, OldRowCount: Integer);
+procedure TFStringGrid.SizeChanged(OldColCount, OldRowCount: Integer);
 var
   Count: Integer;
 begin
@@ -622,13 +622,13 @@ begin
       Count * SizeOf(AnsiString), #0);
 end;
 
-procedure TStringGrid.DrawCell(ACanvas: TFCanvas; ACol, ARow: Integer;
+procedure TFStringGrid.DrawCell(ACanvas: TFCanvas; ACol, ARow: Integer;
   ARect: TRect;
  AState: TGridDrawState);
 var
   s: String;
 begin
-  // WriteLn('TStringGrid.DrawCell(', ACol, ', ', ARow, ', ', Integer(AState), ');');
+  // WriteLn('TFStringGrid.DrawCell(', ACol, ', ', ARow, ', ', Integer(AState), ');');
   s := Cells[ACol, ARow];
   if Length(s) > 0 then
     ACanvas.TextOut(ARect.TopLeft + Point(2, 2), s);
@@ -636,13 +636,13 @@ begin
     OnDrawCell(Self, ACanvas, ACol, ARow, ARect, AState);
 end;
 
-constructor TStringGrid.Create(AOwner: TComponent);
+constructor TFStringGrid.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Self.SizeChanged(0, 0);
 end;
 
-destructor TStringGrid.Destroy;
+destructor TFStringGrid.Destroy;
 var
   i: Integer;
 begin

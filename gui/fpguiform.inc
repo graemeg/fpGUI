@@ -18,12 +18,12 @@
 
 {$IFDEF read_interface}
 
-  { TCustomForm }
+  { TFCustomForm }
 
-  TCustomForm = class(TBinWidget)
+  TFCustomForm = class(TFBinWidget)
   private
-    FFocusedWidget: TWidget;
-    FMouseCaptureWidget: TWidget;
+    FFocusedWidget: TFWidget;
+    FMouseCaptureWidget: TFWidget;
     FLastSetCursor: TFCursor;
     FWindowOptions: TFWindowOptions;
     FWnd: TFCustomWindow;
@@ -33,8 +33,8 @@
     FOnDeactivate: TNotifyEvent;
     // Property access
     function    GetWnd: TFCustomWindow;
-    procedure   SetFocusedWidget(AWidget: TWidget);
-    procedure   SetMouseCaptureWidget(AWidget: TWidget);
+    procedure   SetFocusedWidget(AWidget: TFWidget);
+    procedure   SetMouseCaptureWidget(AWidget: TFWidget);
     procedure   SetWindowOptions(const AValue: TFWindowOptions);
     // fpGFX event handling
     procedure   WndClose(Sender: TObject);
@@ -62,7 +62,7 @@
     procedure   Loaded; override;
     procedure   Paint(Canvas: TFCanvas); override;
     procedure   Resized; override;
-    function    WidgetCoords(AWidget: TWidget): TPoint;
+    function    WidgetCoords(AWidget: TFWidget): TPoint;
     function    ProcessEvent(Event: TEventObj): Boolean; override;
     procedure   CalcSizes; override;
     procedure   EvTextChanged; override;
@@ -82,15 +82,15 @@
     procedure   ShowModal;
     procedure   Close; virtual;
     procedure   SetPosition(APosition: TPoint);
-    property    FocusedWidget: TWidget read FFocusedWidget write SetFocusedWidget;
+    property    FocusedWidget: TFWidget read FFocusedWidget write SetFocusedWidget;
     property    IsActive: Boolean read FIsActive;
-    property    MouseCaptureWidget: TWidget read FMouseCaptureWidget write SetMouseCaptureWidget;
+    property    MouseCaptureWidget: TFWidget read FMouseCaptureWidget write SetMouseCaptureWidget;
     property    WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
     property    Wnd: TFCustomWindow read GetWnd;
   end;
 
 
-  TForm = class(TCustomForm)
+  TFForm = class(TFCustomForm)
   published
     property BorderWidth;
     property Color;
@@ -110,10 +110,10 @@
 {$IFDEF read_implementation}
 
 // ===================================================================
-//   TCustomForm
+//   TFCustomForm
 // ===================================================================
 
-constructor TCustomForm.Create(AOwner: TComponent);
+constructor TFCustomForm.Create(AOwner: TComponent);
 begin
   if not Assigned(FStyle) then
     FStyle := gStyleManager.DefaultStyle;
@@ -128,7 +128,7 @@ begin
 end;
 
 
-destructor TCustomForm.Destroy;
+destructor TFCustomForm.Destroy;
 begin
   if Assigned(OnDestroy) then
     OnDestroy(Self);
@@ -139,9 +139,9 @@ begin
 end;
 
 
-procedure TCustomForm.Show;
+procedure TFCustomForm.Show;
 begin
-  LAYOUTTRACE('TCustomForm.Show for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFCustomForm.Show for %s:%s', [Name, ClassName]);
 
 //  if Assigned(Wnd) then ; // this makes sure that wnd is created
 
@@ -150,15 +150,15 @@ begin
   Wnd.Show;
 end;
 
-procedure TCustomForm.ShowModal;
+procedure TFCustomForm.ShowModal;
 begin
   Include(WindowOptions, woModal);
   Show;
 end;
 
-procedure TCustomForm.Close;
+procedure TFCustomForm.Close;
 begin
-  LAYOUTTRACE('TCustomForm.Close for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFCustomForm.Close for %s:%s', [Name, ClassName]);
 
   GFApplication.RemoveWindow(FWnd);
   FVisible := False;
@@ -168,7 +168,7 @@ begin
 end;
 
 
-procedure TCustomForm.SetPosition(APosition: TPoint);
+procedure TFCustomForm.SetPosition(APosition: TPoint);
 begin
   if Assigned(FWnd) then
     Wnd.SetPosition(APosition)
@@ -180,7 +180,7 @@ begin
 end;
 
 
-function TCustomForm.WidgetCoords(AWidget: TWidget): TPoint;
+function TFCustomForm.WidgetCoords(AWidget: TFWidget): TPoint;
 begin
   Result := Point(0, 0);
   while AWidget <> Self do
@@ -191,7 +191,7 @@ begin
 end;
 
 
-procedure TCustomForm.Loaded;
+procedure TFCustomForm.Loaded;
 begin
   inherited Loaded;
   if Assigned(OnCreate) then
@@ -199,14 +199,14 @@ begin
 end;
 
 
-procedure TCustomForm.Paint(Canvas: TFCanvas);
+procedure TFCustomForm.Paint(Canvas: TFCanvas);
 begin
   inherited Paint(Canvas);
   Style.DrawWindowBackground(Canvas, Rect(0, 0, Width, Height));
 end;
 
 
-procedure TCustomForm.CalcSizes;
+procedure TFCustomForm.CalcSizes;
 begin
   if Assigned(Child) then
   begin
@@ -218,7 +218,7 @@ begin
 end;
 
 
-function TCustomForm.ProcessEvent(Event: TEventObj): Boolean;
+function TFCustomForm.ProcessEvent(Event: TEventObj): Boolean;
 begin
   if Event is TDestroyEventObj then
     FWnd := nil;
@@ -227,19 +227,19 @@ begin
 end;
 
 
-procedure TCustomForm.EvTextChanged;
+procedure TFCustomForm.EvTextChanged;
 begin
   if Assigned(FWnd) then
     Wnd.Title := Text;
 end;
 
 
-procedure TCustomForm.CreateWnd;
+procedure TFCustomForm.CreateWnd;
 var
   ParentWnd: TFCustomWindow;
 begin
-  if Parent is TCustomForm then
-    ParentWnd := TCustomForm(Parent).Wnd
+  if Parent is TFCustomForm then
+    ParentWnd := TFCustomForm(Parent).Wnd
   else
     ParentWnd := nil;
 
@@ -274,7 +274,7 @@ end;
 
 
 {
-procedure TCustomForm.ApplyNewLayout;
+procedure TFCustomForm.ApplyNewLayout;
 var
   OrigW, OrigH: Integer;
 begin
@@ -305,14 +305,14 @@ begin
 
   if (ClientRect.Right <> OrigW) or (ClientRect.Bottom <> OrigH) then
   begin
-    LAYOUTTRACE('TCustomForm.EvRecalcLayout for %s:%s: Setting size to %dx%d',
+    LAYOUTTRACE('TFCustomForm.EvRecalcLayout for %s:%s: Setting size to %dx%d',
       [Name, ClassName, ClientRect.Right, ClientRect.Bottom]);
     Wnd.SetClientSize(ClientRect.Right, ClientRect.Bottom);
   end;
 end;}
 
 
-procedure TCustomForm.Resized;
+procedure TFCustomForm.Resized;
 begin
   ClientRect.Right := Wnd.ClientWidth;
   ClientRect.Bottom := Wnd.ClientHeight;
@@ -322,7 +322,7 @@ begin
 end;
 
 
-procedure TCustomForm.SetFocusedWidget(AWidget: TWidget);
+procedure TFCustomForm.SetFocusedWidget(AWidget: TFWidget);
 begin
   if AWidget <> FocusedWidget then
   begin
@@ -340,7 +340,7 @@ begin
   end;
 end;
 
-function TCustomForm.GetWnd: TFCustomWindow;
+function TFCustomForm.GetWnd: TFCustomWindow;
 begin
   if not Assigned(FWnd) then
   begin
@@ -354,7 +354,7 @@ begin
 end;
 
 
-procedure TCustomForm.SetMouseCaptureWidget(AWidget: TWidget);
+procedure TFCustomForm.SetMouseCaptureWidget(AWidget: TFWidget);
 begin
   if AWidget <> FMouseCaptureWidget then
   begin
@@ -366,7 +366,7 @@ begin
   end;
 end;
 
-procedure TCustomForm.SetWindowOptions(const AValue: TFWindowOptions);
+procedure TFCustomForm.SetWindowOptions(const AValue: TFWindowOptions);
 begin
   if FWindowOptions=AValue then exit;
   FWindowOptions:=AValue;
@@ -376,13 +376,13 @@ end;
 
 // GfxWindow message handlers
 
-procedure TCustomForm.WndClose(Sender: TObject);
+procedure TFCustomForm.WndClose(Sender: TObject);
 begin
   SendEvent(TDestroyEventObj.Create(Self));
   FMouseCaptureWidget := nil;
 end;
 
-procedure TCustomForm.WndFocusIn(Sender: TObject);
+procedure TFCustomForm.WndFocusIn(Sender: TObject);
 begin
   FIsActive := True;
   if Assigned(FocusedWidget) then
@@ -391,7 +391,7 @@ begin
     OnActivate(Self);
 end;
 
-procedure TCustomForm.WndFocusOut(Sender: TObject);
+procedure TFCustomForm.WndFocusOut(Sender: TObject);
 begin
   FIsActive := False;
   if Assigned(FocusedWidget) then
@@ -400,9 +400,9 @@ begin
     OnDeactivate(Self);
 end;
 
-procedure TCustomForm.WndHide(Sender: TObject);
+procedure TFCustomForm.WndHide(Sender: TObject);
 begin
-  LAYOUTTRACE('TCustomForm.WndHide for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFCustomForm.WndHide for %s:%s', [Name, ClassName]);
   if wsIsVisible in WidgetState then
   begin
     Exclude(WidgetState, wsIsVisible);
@@ -411,7 +411,7 @@ begin
   end;
 end;
 
-procedure TCustomForm.WndKeyPressed(Sender: TObject;
+procedure TFCustomForm.WndKeyPressed(Sender: TObject;
   AKey: Word; AShift: TShiftState);
 begin
   if Assigned(FocusedWidget) then
@@ -420,7 +420,7 @@ begin
     EvKeyPressed(AKey, AShift);
 end;
 
-procedure TCustomForm.WndKeyReleased(Sender: TObject;
+procedure TFCustomForm.WndKeyReleased(Sender: TObject;
   AKey: Word; AShift: TShiftState);
 begin
   if Assigned(FocusedWidget) then
@@ -429,7 +429,7 @@ begin
     EvKeyReleased(AKey, AShift);
 end;
 
-procedure TCustomForm.WndKeyChar(Sender: TObject; AKeyChar: Char);
+procedure TFCustomForm.WndKeyChar(Sender: TObject; AKeyChar: Char);
 begin
   if Assigned(FocusedWidget) then
     FocusedWidget.EvKeyChar(AKeyChar)
@@ -437,7 +437,7 @@ begin
     EvKeyChar(AKeyChar);
 end;
 
-procedure TCustomForm.WndMouseEnter(Sender: TObject;
+procedure TFCustomForm.WndMouseEnter(Sender: TObject;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   if wsEnabled in WidgetState then
@@ -445,14 +445,14 @@ begin
 end;
 
 
-procedure TCustomForm.WndMouseLeave(Sender: TObject);
+procedure TFCustomForm.WndMouseLeave(Sender: TObject);
 begin
   if wsEnabled in WidgetState then
     SendEvent(TMouseLeaveEventObj.Create(Self));
 end;
 
 
-procedure TCustomForm.WndMouseMoved(Sender: TObject;
+procedure TFCustomForm.WndMouseMoved(Sender: TObject;
   AShift: TShiftState; const AMousePos: TPoint);
 {var
   dx, dy: Integer;
@@ -474,7 +474,7 @@ begin
      TMouseMovedEventObj.Create(Self, Shift, x - dx, y - dy));
   end else}
 
-  procedure SendMouseEvents(Widget: TWidget; APos: TPoint);
+  procedure SendMouseEvents(Widget: TFWidget; APos: TPoint);
   var
     LeaveCheckEvent: TMouseLeaveCheckEventObj;
   begin
@@ -503,7 +503,7 @@ begin
 end;
 
 
-procedure TCustomForm.WndMousePressed(Sender: TObject; AButton: TMouseButton;
+procedure TFCustomForm.WndMousePressed(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   if wsEnabled in WidgetState then
@@ -522,7 +522,7 @@ begin
 end;
 
 
-procedure TCustomForm.WndMouseReleased(Sender: TObject; AButton: TMouseButton;
+procedure TFCustomForm.WndMouseReleased(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   if wsEnabled in WidgetState then
@@ -539,7 +539,7 @@ begin
 end;
 
 
-procedure TCustomForm.WndMouseWheel(Sender: TObject; AShift: TShiftState;
+procedure TFCustomForm.WndMouseWheel(Sender: TObject; AShift: TShiftState;
   AWheelDelta: Single; const AMousePos: TPoint);
 begin
   if wsEnabled in WidgetState then
@@ -547,24 +547,24 @@ begin
 end;
 
 
-procedure TCustomForm.WndPaint(Sender: TObject; const ARect: TRect);
+procedure TFCustomForm.WndPaint(Sender: TObject; const ARect: TRect);
 begin
-  LAYOUTTRACE('TCustomForm.WndPaint for %s:%s (%d/%d-%d/%d)',
+  LAYOUTTRACE('TFCustomForm.WndPaint for %s:%s (%d/%d-%d/%d)',
     [Name, ClassName, ARect.Left, ARect.Top, ARect.Right, ARect.Bottom]);
   if wsIsVisible in WidgetState then
     SendEvent(TPaintEventObj.Create(Self, TFCanvas(Wnd.Canvas)));
 end;
 
 
-procedure TCustomForm.WndMove(Sender: TObject);
+procedure TFCustomForm.WndMove(Sender: TObject);
 begin
   FOrigin := Point(Wnd.Left, Wnd.Top);
 end;
 
 
-procedure TCustomForm.WndResize(Sender: TObject);
+procedure TFCustomForm.WndResize(Sender: TObject);
 begin
-  LAYOUTTRACE('TCustomForm.WndResize for %s:%s: New size is %dx%d. Visible? %d',
+  LAYOUTTRACE('TFCustomForm.WndResize for %s:%s: New size is %dx%d. Visible? %d',
     [Name, ClassName, Wnd.Width, Wnd.Height, Ord(wsIsVisible in WidgetState)]);
   if Visible or (wsIsVisible in WidgetState) then
   begin
@@ -574,9 +574,9 @@ begin
 end;
 
 
-procedure TCustomForm.WndShow(Sender: TObject);
+procedure TFCustomForm.WndShow(Sender: TObject);
 begin
-  LAYOUTTRACE('TCustomForm.WndShow for %s:%s', [Name, ClassName]);
+  LAYOUTTRACE('TFCustomForm.WndShow for %s:%s', [Name, ClassName]);
   if not (wsIsVisible in WidgetState) then
   begin
     Include(WidgetState, wsIsVisible);

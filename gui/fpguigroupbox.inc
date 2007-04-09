@@ -20,7 +20,7 @@
 
   { TCustomGroupBox }
 
-  TCustomGroupBox = class(TBinWidget)
+  TFCustomGroupBox = class(TFBinWidget)
   protected
     procedure   Paint(Canvas: TFCanvas); override;
     procedure   CalcSizes; override;
@@ -30,7 +30,7 @@
   end;
 
 
-  TGroupBox = class(TCustomGroupBox)
+  TFGroupBox = class(TFCustomGroupBox)
   published
     property    CanExpandWidth;
     property    CanExpandHeight;
@@ -50,13 +50,13 @@
 //   TCustomGroupBox
 // ===================================================================
 
-procedure TCustomGroupBox.Paint(Canvas: TFCanvas);
+procedure TFCustomGroupBox.Paint(Canvas: TFCanvas);
 begin
   Style.DrawGroupBox(Canvas, Rect(0, 0, Width, Height), Text, WidgetState);
 end;
 
 
-procedure TCustomGroupBox.CalcSizes;
+procedure TFCustomGroupBox.CalcSizes;
 var
   Borders: TRect;
   LabelWidth: Integer;
@@ -80,7 +80,7 @@ begin
 end;
 
 
-procedure TCustomGroupBox.Resized;
+procedure TFCustomGroupBox.Resized;
 var
   LabelWidth: Integer;
   Borders: TRect;
@@ -95,7 +95,7 @@ begin
 end;
 
 
-constructor TCustomGroupBox.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomGroupBox.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
   Text := pText;

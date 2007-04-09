@@ -19,25 +19,25 @@
 
 {$IFDEF read_interface}
 
-  TCustomStandardDialog = class(TCustomForm)
+  TFCustomStandardDialog = class(TFCustomForm)
   private
     procedure StdBtnClicked(Sender: TObject);
   protected
     FButtons: TMsgDlgButtons;
-    MainLayout, BtnLayout: TBoxLayout;
+    MainLayout, BtnLayout: TFBoxLayout;
     Separator: TSeparator;
     function ProcessEvent(Event: TEventObj): Boolean; override;
     function DistributeEvent(Event: TEventObj): Boolean; override;
     procedure CalcSizes; override;
     procedure Resized; override;
-    procedure SetButtons(AButtons: TMsgDlgButtons);
-    property Buttons: TMsgDlgButtons read FButtons write SetButtons default [mbOk, mbCancel];
+    procedure SeTFButtons(AButtons: TMsgDlgButtons);
+    property Buttons: TMsgDlgButtons read FButtons write SeTFButtons default [mbOk, mbCancel];
   public
     constructor Create(AOwner: TComponent); override;
   end;
 
 
-  TStandardDialog = class(TCustomStandardDialog)
+  TFStandardDialog = class(TFCustomStandardDialog)
   published
     property Text;
     property OnCreate;
@@ -53,16 +53,16 @@
 
 
 // ===================================================================
-//   TCustomStandardDialog
+//   TFCustomStandardDialog
 // ===================================================================
 
 // public methods
 
-constructor TCustomStandardDialog.Create(AOwner: TComponent);
+constructor TFCustomStandardDialog.Create(AOwner: TComponent);
 
-  function AddBtn(const AText: String; ADefault: Boolean): TButton;
+  function AddBtn(const AText: String; ADefault: Boolean): TFButton;
   begin
-    Result := TButton.Create(Self);
+    Result := TFButton.Create(Self);
     Result.Text := AText;
     // Result.Default := ADefault;
     Result.OnClick := @StdBtnClicked;
@@ -74,14 +74,14 @@ begin
   FButtons := [mbOk, mbCancel];
   FBorderWidth := 4;
 
-  MainLayout := TBoxLayout.Create(Self);
+  MainLayout := TFBoxLayout.Create(Self);
   MainLayout.Orientation := Vertical;
   MainLayout.SetEmbeddedParent(Self);
 
   Separator := TSeparator.Create(Self);
   Separator.Parent := MainLayout;
 
-  BtnLayout := TBoxLayout.Create(Self);
+  BtnLayout := TFBoxLayout.Create(Self);
   BtnLayout.Orientation := Horizontal;
   BtnLayout.HorzAlign := horzRight;
   BtnLayout.VertAlign := vertCenter;
@@ -106,17 +106,17 @@ end;
 
 // protected methods
 
-function TCustomStandardDialog.ProcessEvent(Event: TEventObj): Boolean;
+function TFCustomStandardDialog.ProcessEvent(Event: TEventObj): Boolean;
 begin
   Result := MainLayout.ProcessEvent(Event) or inherited ProcessEvent(Event);
 end;
 
-function TCustomStandardDialog.DistributeEvent(Event: TEventObj): Boolean;
+function TFCustomStandardDialog.DistributeEvent(Event: TEventObj): Boolean;
 begin
   Result := Event.SendToChild(MainLayout) or inherited DistributeEvent(Event);
 end;
 
-procedure TCustomStandardDialog.CalcSizes;
+procedure TFCustomStandardDialog.CalcSizes;
 begin
   if Assigned(Child) then
   begin
@@ -134,7 +134,7 @@ begin
   FMaxSize.cy := Min(InfiniteSize, MaxSize.cy + MainLayout.DefSize.cy);
 end;
 
-procedure TCustomStandardDialog.Resized;
+procedure TFCustomStandardDialog.Resized;
 begin
   if Assigned(Child) then
     Child.SetBounds(Point(BorderWidth, BorderWidth),
@@ -145,12 +145,12 @@ begin
     gfxBase.Size(Width - 2 * BorderWidth, MainLayout.DefSize.cy - BorderWidth));
 end;
 
-procedure TCustomStandardDialog.SetButtons(AButtons: TMsgDlgButtons);
+procedure TFCustomStandardDialog.SeTFButtons(AButtons: TMsgDlgButtons);
 begin
   FButtons := AButtons;
 end;
 
-procedure TCustomStandardDialog.StdBtnClicked(Sender: TObject);
+procedure TFCustomStandardDialog.StdBtnClicked(Sender: TObject);
 begin
   Close;
 end;

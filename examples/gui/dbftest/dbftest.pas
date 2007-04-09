@@ -25,12 +25,12 @@ type
   TMainForm = class(TForm)
     DataSet: TDBF;
     DataSource: TDataSource;
-    Box: TBoxLayout;
+    Box: TFBoxLayout;
     ListBox: TListBox;
-    CurDatasetLabel: TLabel;
+    CurDataseTFLabel: TFLabel;
     CurNameText, CurEMailText: TDBText;
-    Navi: TBoxLayout;
-    FirstDataset, PrevDataset, NextDataset, LastDataset: TButton;
+    Navi: TFBoxLayout;
+    FirstDataset, PrevDataset, NextDataset, LastDataset: TFButton;
     procedure FormCreate(Sender: TObject);
     procedure FirstDatasetClick(Sender: TObject);
     procedure PrevDatasetClick(Sender: TObject);

@@ -18,9 +18,9 @@
 
 {$IFDEF read_interface}
 
-  { TCustomCheckbox }
+  { TFCustomCheckbox }
 
-  TCustomCheckbox = class(TWidget)
+  TFCustomCheckbox = class(TFWidget)
   private
     procedure   SetChecked(AChecked: Boolean);
   protected
@@ -36,7 +36,7 @@
   end;
 
 
-  TCheckbox = class(TCustomCheckbox)
+  TFCheckbox = class(TFCustomCheckbox)
   published
     property    Enabled;
     property    CanExpandHeight;
@@ -53,35 +53,35 @@
 {$IFDEF read_implementation}
 
 // ===================================================================
-//   TCustomCheckBox
+//   TFCustomCheckbox
 // ===================================================================
 
-constructor TCustomCheckBox.Create(AOwner: TComponent);
+constructor TFCustomCheckbox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
 end;
 
 
-constructor TCustomCheckbox.Create(const pText: string; pOwner: TComponent);
+constructor TFCustomCheckbox.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
   Text := pText;
 end;
 
 
-procedure TCustomCheckBox.Click;
+procedure TFCustomCheckbox.Click;
 begin
   FChecked := not FChecked;
   inherited Click;
 end;
 
 
-procedure TCustomCheckBox.Paint(Canvas: TFCanvas);
+procedure TFCustomCheckbox.Paint(Canvas: TFCanvas);
 var
   FontHeight: Integer;
   LabelRect: TRect;
-  Flags: TCheckboxFlags;
+  Flags: TFCheckboxFlags;
 begin
   FontHeight := Canvas.FontCellHeight;
   LabelRect.Left := FLabelPos.x;
@@ -105,15 +105,15 @@ begin
 end;
 
 
-procedure TCustomCheckBox.CalcSizes;
+procedure TFCustomCheckbox.CalcSizes;
 begin
   with FindForm.Wnd.Canvas do
-    Style.GetCheckBoxLayout(gfxbase.Size(TextWidth(Text), FontCellHeight),
+    Style.GeTFCheckboxLayout(gfxbase.Size(TextWidth(Text), FontCellHeight),
       FMinSize, FLabelPos);
 end;
 
 
-procedure TCustomCheckBox.SetChecked(AChecked: Boolean);
+procedure TFCustomCheckbox.SetChecked(AChecked: Boolean);
 begin
   if AChecked <> Checked then
   begin

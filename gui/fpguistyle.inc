@@ -40,7 +40,7 @@
     function    GetUIColor(AColor: TColor): TGfxColor;
     procedure   SetUIColor(Canvas: TFCanvas; Color: TColor);
     // General
-    procedure   DrawText(Canvas: TFCanvas; const APosition: TPoint; const AText: String; State: TWidgetState); virtual; abstract;
+    procedure   DrawText(Canvas: TFCanvas; const APosition: TPoint; const AText: String; State: TFWidgetState); virtual; abstract;
     procedure   DrawItemBefore(Canvas: TFCanvas; const ARect: TRect; Flags: TItemFlags); virtual; abstract;
     procedure   DrawItemAfter(Canvas: TFCanvas; const ARect: TRect; Flags: TItemFlags); virtual; abstract;
     procedure   Draw3DFrame(Canvas: TFCanvas; const ARect: TRect; Color1, Color2, Color3, Color4: TColor); virtual; abstract;
@@ -50,31 +50,31 @@
     // Windows
     procedure   DrawWindowBackground(Canvas: TFCanvas; const ARect: TRect); virtual; abstract;
     // Buttons
-    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TButtonFlags); virtual; abstract;
-    function    GetButtonBorders: TRect; virtual; abstract;
+    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TFButtonFlags); virtual; abstract;
+    function    GeTFButtonBorders: TRect; virtual; abstract;
     // Separators
     function    GetSeparatorSize: Integer; virtual; abstract;
     procedure   DrawSeparator(Canvas: TFCanvas; const ARect: TRect; AOrientation: TOrientation); virtual; abstract;
     // Group boxes
-    procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TWidgetState); virtual; abstract;
+    procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TFWidgetState); virtual; abstract;
     function    GetGroupBoxBorders(Canvas: TFCanvas; const ALabel: String; var LabelWidth: Integer): TRect; virtual; abstract;
     // Edit widgets
     procedure   DrawEditBox(Canvas: TFCanvas; const ARect: TRect); virtual; abstract;
     function    GetEditBoxBorders: TRect; virtual; abstract;
     // Check boxes
-    procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TCheckboxFlags); virtual; abstract;
-    procedure   GetCheckBoxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); virtual; abstract;
+    procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); virtual; abstract;
+    procedure   GeTFCheckboxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); virtual; abstract;
     // Radio buttons
-    procedure   DrawRadioButton(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TCheckboxFlags); virtual; abstract;
+    procedure   DrawRadioButton(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); virtual; abstract;
     procedure   GetRadioButtonLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); virtual; abstract;
     // Combo boxes
     function    GetComboBoxArrowSize: TSize; virtual; abstract;
     procedure   DrawComboBoxArrow(Canvas: TFCanvas; const ARect: TRect; IsPressed, IsEnabled: Boolean); virtual; abstract;
     function    GetComboBoxBtnSize: TSize; virtual; abstract;
     // Scroll bars
-    function    GetScrollBarBorders(Orientation: TOrientation): TRect; virtual; abstract;
-    function    GetScrollBarBtnSize(Orientation: TOrientation): TSize; virtual; abstract;
-    function    GetScrollBarBtnMinSize: Integer; virtual; abstract;
+    function    GeTFScrollBarBorders(Orientation: TOrientation): TRect; virtual; abstract;
+    function    GeTFScrollBarBtnSize(Orientation: TOrientation): TSize; virtual; abstract;
+    function    GeTFScrollBarBtnMinSize: Integer; virtual; abstract;
     procedure   DrawScrollBarBorder(Canvas: TFCanvas; const ARect: TRect); virtual; abstract;
     procedure   DrawScrollBarButton(Canvas: TFCanvas; const ARect: TRect; Direction: TArrowDirection; IsPressed, IsEnabled: Boolean); virtual; abstract;
     // Scroll boxes
@@ -96,14 +96,14 @@
     FMaskCanvas: TFCanvas;
   protected
     procedure   DrawDirectionArrows(ACanvas: TFCanvas; const ARect: TRect; ADirection: TArrowDirection);
-    procedure   DrawCheckBoxCheck(ACanvas: TFCanvas; const ARect: TRect; AFlags: TCheckboxFlags);
+    procedure   DrawCheckBoxCheck(ACanvas: TFCanvas; const ARect: TRect; AFlags: TFCheckboxFlags);
   public
     constructor Create; override;
     destructor  Destroy; override;
     // Colors
     function    GetGUIColor(Color: TColor): TGfxColor; override;
     // General
-    procedure   DrawText(Canvas: TFCanvas; const APosition: TPoint; const AText: String; State: TWidgetState); override;
+    procedure   DrawText(Canvas: TFCanvas; const APosition: TPoint; const AText: String; State: TFWidgetState); override;
     procedure   DrawItemBefore(Canvas: TFCanvas; const ARect: TRect; Flags: TItemFlags); override;
     procedure   DrawItemAfter(Canvas: TFCanvas; const ARect: TRect; Flags: TItemFlags); override;
     procedure   Draw3DFrame(Canvas: TFCanvas; const ARect: TRect; Color1, Color2, Color3, Color4: TColor); override;
@@ -113,31 +113,31 @@
     // Windows
     procedure   DrawWindowBackground(Canvas: TFCanvas; const ARect: TRect); override;
     // Buttons
-    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TButtonFlags); override;
-    function    GetButtonBorders: TRect; override;
+    procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TFButtonFlags); override;
+    function    GeTFButtonBorders: TRect; override;
     // Separators
     procedure   DrawSeparator(Canvas: TFCanvas; const ARect: TRect; AOrientation: TOrientation); override;
     function    GetSeparatorSize: Integer; override;
     // Group boxes
-    procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TWidgetState); override;
+    procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TFWidgetState); override;
     function    GetGroupBoxBorders(Canvas: TFCanvas; const ALabel: String; var LabelWidth: Integer): TRect; override;
     // Edit widgets
     procedure   DrawEditBox(Canvas: TFCanvas; const ARect: TRect); override;
     function    GetEditBoxBorders: TRect; override;
     // Check boxes
-    procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TCheckboxFlags); override;
-    procedure   GetCheckBoxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); override;
+    procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); override;
+    procedure   GeTFCheckboxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); override;
     // Radio buttons
-    procedure   DrawRadioButton(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TCheckboxFlags); override;
+    procedure   DrawRadioButton(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); override;
     procedure   GetRadioButtonLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); override;
     // Combo boxes
     procedure   DrawComboBoxArrow(Canvas: TFCanvas; const ARect: TRect; IsPressed, IsEnabled: Boolean); override;
     function    GetComboBoxArrowSize: TSize; override;
     function    GetComboBoxBtnSize: TSize; override;
     // Scroll bars
-    function    GetScrollBarBorders(Orientation: TOrientation): TRect; override;
-    function    GetScrollBarBtnSize(Orientation: TOrientation): TSize; override;
-    function    GetScrollBarBtnMinSize: Integer; override;
+    function    GeTFScrollBarBorders(Orientation: TOrientation): TRect; override;
+    function    GeTFScrollBarBtnSize(Orientation: TOrientation): TSize; override;
+    function    GeTFScrollBarBtnMinSize: Integer; override;
     procedure   DrawScrollBarBorder(Canvas: TFCanvas; const ARect: TRect); override;
     procedure   DrawScrollBarButton(Canvas: TFCanvas; const ARect: TRect; Direction: TArrowDirection; IsPressed, IsEnabled: Boolean); override;
     // Scroll boxes
@@ -270,7 +270,7 @@ begin
 end;
 
 procedure TBasicStyle.DrawCheckBoxCheck(ACanvas: TFCanvas;
-  const ARect: TRect; AFlags: TCheckboxFlags);
+  const ARect: TRect; AFlags: TFCheckboxFlags);
 begin
   if (cbIsEnabled in AFlags) then
     SetUIColor(ACanvas, clBtnText)
@@ -465,7 +465,7 @@ begin
 end;
 
 procedure TBasicStyle.DrawText(Canvas: TFCanvas; const APosition: TPoint;
-  const AText: String; State: TWidgetState);
+  const AText: String; State: TFWidgetState);
 begin
   if not (wsEnabled in State) then
   begin
@@ -502,7 +502,7 @@ begin
 end;
 
 procedure TBasicStyle.DrawButtonFace(Canvas: TFCanvas; const ARect: TRect;
-    Flags: TButtonFlags);
+    Flags: TFButtonFlags);
 var
   r: TRect;
 begin
@@ -551,7 +551,7 @@ begin
   end;
 end;
 
-function TBasicStyle.GetButtonBorders: TRect;
+function TBasicStyle.GeTFButtonBorders: TRect;
 begin
   Result := Rect(5, 5, 5, 5);
 end;
@@ -577,7 +577,7 @@ begin
 end;
 
 procedure TBasicStyle.DrawGroupBox(Canvas: TFCanvas; const ARect: TRect;
-  const ALabel: String; WidgetState: TWidgetState);
+  const ALabel: String; WidgetState: TFWidgetState);
 var
   TitleWidth, TitleHeight, TopLine: Integer;
 begin
@@ -631,7 +631,7 @@ begin
 end;
 
 procedure TBasicStyle.DrawCheckBox(Canvas: TFCanvas;
-  const ARect, LabelRect: TRect; Flags: TCheckboxFlags);
+  const ARect, LabelRect: TRect; Flags: TFCheckboxFlags);
 var
   r: TRect;
 begin
@@ -655,7 +655,7 @@ begin
       DrawFocusRect(Canvas, Rect(Left - 2, Top - 2, Right + 2, Bottom + 2));
 end;
 
-procedure TBasicStyle.GetCheckBoxLayout(const LabelSize: TSize;
+procedure TBasicStyle.GeTFCheckboxLayout(const LabelSize: TSize;
   var TotalSize: TSize; var LabelPos: TPoint);
 begin
   TotalSize := Size(LabelSize.cx + 21, Max(13, LabelSize.cy + 4));
@@ -664,7 +664,7 @@ end;
 
 
 procedure TBasicStyle.DrawRadioButton(Canvas: TFCanvas;
-  const ARect, LabelRect: TRect; Flags: TCheckboxFlags);
+  const ARect, LabelRect: TRect; Flags: TFCheckboxFlags);
 var
   Index, BtnY: Integer;
   r: TRect;
@@ -764,18 +764,18 @@ begin
   DrawDirectionArrows(Canvas, r, arrowDown);
 end;
 
-function TBasicStyle.GetScrollBarBorders(Orientation: TOrientation): TRect;
+function TBasicStyle.GeTFScrollBarBorders(Orientation: TOrientation): TRect;
 begin
   Result := Rect(1, 1, 1, 1);
 end;
 
-function TBasicStyle.GetScrollBarBtnSize(Orientation: TOrientation): TSize;
+function TBasicStyle.GeTFScrollBarBtnSize(Orientation: TOrientation): TSize;
 begin
   Result.cx := 16;
   Result.cy := 16;
 end;
 
-function TBasicStyle.GetScrollBarBtnMinSize: Integer;
+function TBasicStyle.GeTFScrollBarBtnMinSize: Integer;
 begin
   Result := 30;
 end;
