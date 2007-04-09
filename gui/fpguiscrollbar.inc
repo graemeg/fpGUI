@@ -537,10 +537,10 @@ begin
     begin
       Inc(FMinSize.cx, Left + Right);
       Inc(FMinSize.cy, Top + Bottom);
-      FDefSize.cx := fpGUI.Min(DefSize.cx + Left + Right, InfiniteSize);
-      FDefSize.cy := fpGUI.Min(DefSize.cy + Top + Bottom, InfiniteSize);
-      FMaxSize.cx := fpGUI.Min(MaxSize.cx + Left + Right, InfiniteSize);
-      FMaxSize.cy := fpGUI.Min(MaxSize.cy + Top + Bottom, InfiniteSize);
+      FDefSize.cx := Math.Min(DefSize.cx + Left + Right, InfiniteSize);
+      FDefSize.cy := Math.Min(DefSize.cy + Top + Bottom, InfiniteSize);
+      FMaxSize.cx := Math.Min(MaxSize.cx + Left + Right, InfiniteSize);
+      FMaxSize.cy := Math.Min(MaxSize.cy + Top + Bottom, InfiniteSize);
     end;
 end;
 
@@ -684,8 +684,8 @@ begin
       Size := Slider.Width
     else
       Size := Slider.Height;
-    Result := fpGUI.Max(Style.GeTFScrollBarBtnMinSize,
-        PageSize * Size div fpGUI.Max(1, Max - Min + 1));
+    Result := Math.Max(Style.GeTFScrollBarBtnMinSize,
+        PageSize * Size div Math.Max(1, Max - Min + 1));
     if Result > Size then
       Result := Size;
   end;

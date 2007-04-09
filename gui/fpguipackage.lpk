@@ -1,14 +1,12 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="2">
-    <PathDelim Value="\"/>
     <Name Value="fpguipackage"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
       <Version Value="5"/>
-      <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
@@ -31,12 +29,12 @@
     <Version Minor="3"/>
     <Files Count="5">
       <Item1>
-        <Filename Value="stylemanager.pas"/>
-        <UnitName Value="StyleManager"/>
-      </Item1>
-      <Item2>
         <Filename Value="fpgui.pas"/>
         <UnitName Value="fpGUI"/>
+      </Item1>
+      <Item2>
+        <Filename Value="stylemanager.pas"/>
+        <UnitName Value="StyleManager"/>
       </Item2>
       <Item3>
         <Filename Value="windowsstyle.pas"/>
@@ -51,7 +49,7 @@
         <UnitName Value="OpenSoftStyle"/>
       </Item5>
     </Files>
-    <LazDoc Paths="..\docs\xml\gui\"/>
+    <LazDoc Paths="../docs/xml/gui/"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="fpgfxpackage"/>
@@ -63,11 +61,10 @@
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)/"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
-      <DestinationDirectory Value="$(TestDir)\publishedpackage\"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>

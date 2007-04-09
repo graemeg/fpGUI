@@ -147,9 +147,7 @@ type
 {$I fpguiprogressbar.inc}
 
 
-function Min(a, b: Integer): Integer; inline;
-function Max(a, b: Integer): Integer; inline;
-function ClipMinMax(val, min, max: Integer): Integer; inline;
+function ClipMinMax(val, min, max: Integer): Integer; //inline;
 
 { This will change at a later date! }
 procedure LoadForm(AForm: TComponent);
@@ -159,9 +157,6 @@ implementation
 uses
   Math
   ,StyleManager
-//  ,MotifStyle       // so they register with style manager
-//  ,OpenSoftStyle    // so they register with style manager
-//  ,WindowsStyle     // so they register with style manager
   ;
 
 
@@ -173,24 +168,6 @@ resourcestring
 var
   EventNestingLevel: Integer;
 {$ENDIF}
-
-
-function Min(a, b: Integer): Integer;
-begin
-  if a < b then
-    Result := a
-  else
-    Result := b;
-end;
-
-
-function Max(a, b: Integer): Integer;
-begin
-  if a > b then
-    Result := a
-  else
-    Result := b;
-end;
 
 
 function ClipMinMax(val, min, max: Integer): Integer;
