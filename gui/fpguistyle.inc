@@ -51,7 +51,7 @@
     procedure   DrawWindowBackground(Canvas: TFCanvas; const ARect: TRect); virtual; abstract;
     // Buttons
     procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TFButtonFlags); virtual; abstract;
-    function    GeTFButtonBorders: TRect; virtual; abstract;
+    function    GetButtonBorders: TRect; virtual; abstract;
     // Separators
     function    GetSeparatorSize: Integer; virtual; abstract;
     procedure   DrawSeparator(Canvas: TFCanvas; const ARect: TRect; AOrientation: TOrientation); virtual; abstract;
@@ -114,7 +114,7 @@
     procedure   DrawWindowBackground(Canvas: TFCanvas; const ARect: TRect); override;
     // Buttons
     procedure   DrawButtonFace(Canvas: TFCanvas; const ARect: TRect; Flags: TFButtonFlags); override;
-    function    GeTFButtonBorders: TRect; override;
+    function    GetButtonBorders: TRect; override;
     // Separators
     procedure   DrawSeparator(Canvas: TFCanvas; const ARect: TRect; AOrientation: TOrientation); override;
     function    GetSeparatorSize: Integer; override;
@@ -551,7 +551,7 @@ begin
   end;
 end;
 
-function TBasicStyle.GeTFButtonBorders: TRect;
+function TBasicStyle.GetButtonBorders: TRect;
 begin
   Result := Rect(5, 5, 5, 5);
 end;

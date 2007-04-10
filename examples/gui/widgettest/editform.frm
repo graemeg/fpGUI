@@ -1,7 +1,7 @@
 object EditForm: TEditForm
   BorderWidth = 8
   Text = 'Edit field test'
-  object Grid: TGridLayout
+  object Grid: TFGridLayout
     ColCount = 3
     RowCount = 4
     GridPositions = <
@@ -44,10 +44,10 @@ object EditForm: TEditForm
       Text = 'Normal edit field:'
       CanExpandWidth = False
     end
-    object Edit1: TEdit
+    object Edit1: TFEdit
       Text = 'Edit1'
     end
-    object GrayCheckBox1: TCheckBox
+    object GrayCheckBox1: TFCheckBox
       Text = 'Disabled'
       OnClick = GrayCheckBox1Click
     end
@@ -57,12 +57,12 @@ object EditForm: TEditForm
       Text = 'Password edit field:'
       CanExpandWidth = False
     end
-    object Edit2: TEdit
+    object Edit2: TFEdit
       PasswordChar = '*'
       Text = 'Edit2'
       OnChange = Edit2Change
     end
-    object GrayCheckBox2: TCheckBox
+    object GrayCheckBox2: TFCheckBox
       Text = 'Disabled'
       OnClick = GrayCheckBox2Click
     end

@@ -1,7 +1,7 @@
 object ListBoxForm: TListBoxForm
   BorderWidth = 8
   Text = 'List box test'
-  object ListBox: TListBox
+  object ListBox: TFListBox
     Items.Strings = (
       'procedure KeyPressed(var Event: TXKeyPressedEvent); message X.KeyPress;'
       'procedure KeyReleased(var Event: TXKeyReleasedEvent); message X.KeyRelease;'

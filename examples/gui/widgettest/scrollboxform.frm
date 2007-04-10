@@ -8,7 +8,7 @@ object ScrollBoxForm: TScrollBoxForm
       CanExpandWidth = True
       Text = 'ScrollBox should be transparent in this demo.'
     end
-    object ScrollBox: TScrollBox
+    object ScrollBox: TFScrollBox
     end
   end
 end

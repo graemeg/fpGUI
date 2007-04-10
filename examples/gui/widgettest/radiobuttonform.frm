@@ -3,27 +3,27 @@ object RadioButtonForm: TRadioButtonForm
   Text = 'Radio button test'
   object Box: TFBoxLayout
     Orientation = Vertical
-    object GrayCheckbox: TCheckbox
+    object GrayCheckbox: TFCheckbox
       Text = 'Gray radio buttons'
       OnClick = GrayCheckboxClick
     end
     object HorzBox: TFBoxLayout
       object ButtonBox1: TFBoxLayout
         Orientation = Vertical
-        object Radio1a: TRadioButton
+        object Radio1a: TFRadioButton
 	        Checked = True
           Text = 'Button 1 a'
         end
-        object Radio1b: TRadioButton
+        object Radio1b: TFRadioButton
           Text = 'Button 1 b'
         end
       end
       object ButtonBox2: TFBoxLayout
         Orientation = Vertical
-        object Radio2a: TRadioButton
+        object Radio2a: TFRadioButton
           Text = 'Button 2 a'
         end
-        object Radio2b: TRadioButton
+        object Radio2b: TFRadioButton
 	        Checked = True
           Text = 'Button 2 b'
         end

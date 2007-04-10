@@ -4,16 +4,16 @@ object ComboBoxForm: TComboBoxForm
   OnCreate = FormCreate
   object VertBox: TFBoxLayout
     Orientation = Vertical
-    object GrayCheckBox: TCheckBox
+    object GrayCheckBox: TFCheckBox
       Text = 'Gray combo boxes'
       OnClick = GrayCheckBoxClick
     end
     object BetaLabel: TFLabel
       Text = '(the drop-down lists are work in progress)'
     end
-    object ComboBox1: TComboBox
+    object ComboBox1: TFComboBox
     end
-    object ComboBox2: TComboBox
+    object ComboBox2: TFComboBox
     end
   end
 end

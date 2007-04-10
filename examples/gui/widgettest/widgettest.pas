@@ -10,7 +10,7 @@ uses
 type
 
   // forward declarations
-  TFCheckboxForm       = class;
+  TCheckboxForm       = class;
   TRadioButtonForm    = class;
   TGroupBoxForm       = class;
   TEditForm           = class;
@@ -27,7 +27,7 @@ type
 
   TMainForm = class(TFForm)
   private
-    _frmCheckBox: TFCheckboxForm;
+    _frmCheckBox: TCheckboxForm;
     _frmRadioButton: TRadioButtonForm;
     _frmGroupBox: TGroupBoxForm;
     _frmEdit: TEditForm;
@@ -79,7 +79,7 @@ type
   end;
 
 
-  TFCheckboxForm = class(TTestForm)
+  TCheckboxForm = class(TTestForm)
     Box: TFBoxLayout;
     GrayCheckBox, CheckBox1, CheckBox2: TFCheckbox;
     procedure GrayCheckBoxClick(Sender: TObject);
@@ -91,7 +91,7 @@ type
   TRadioButtonForm = class(TTestForm)
     Box, HorzBox, ButtonBox1, ButtonBox2: TFBoxLayout;
     GrayCheckBox: TFCheckbox;
-    Radio1a, Radio1b, Radio2a, Radio2b: TRadioButton;
+    Radio1a, Radio1b, Radio2a, Radio2b: TFRadioButton;
     procedure GrayCheckBoxClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -103,7 +103,7 @@ type
     GroupBox1, GroupBox2: TFGroupBox;
     GrayCheckBox: TFCheckbox;
     Button: TFButton;
-    Radio1, Radio2, Radio3, Radio4, Radio5: TRadioButton;
+    Radio1, Radio2, Radio3, Radio4, Radio5: TFRadioButton;
     procedure GrayCheckBoxClick(Sender: TObject);
     procedure ButtonClick(Sender: TObject);
     procedure RadioButtonClick(Sender: TObject);
@@ -212,7 +212,7 @@ type
   published
     MainLayout: TFBoxLayout;
     StyleGroup: TFGroupBox;
-    rbPlain, rbLowered, rbRaised: TRadioButton;
+    rbPlain, rbLowered, rbRaised: TFRadioButton;
     VBox1: TFBoxLayout;
     Panel: TFPanel;
     Separator: TSeparator;
@@ -233,9 +233,9 @@ type
     PB: TFProgressBar;
     cbShowPercent: TFCheckbox;
     gbColor: TFGroupBox;
-    rbBlue: TRadioButton;
-    rbRed: TRadioButton;
-    rbGreen: TRadioButton;
+    rbBlue: TFRadioButton;
+    rbRed: TFRadioButton;
+    rbGreen: TFRadioButton;
     Separator: TSeparator;
     btnRandom: TFButton;
   end;
@@ -311,7 +311,7 @@ end;
 
 procedure TPanelForm.RadioButtonClick(Sender: TObject);
 begin
-  case TRadioButton(Sender).Tag of
+  case TFRadioButton(Sender).Tag of
     1: Panel.BevelStyle := bsPlain;
     2: Panel.BevelStyle := bsLowered;
     3: Panel.BevelStyle := bsRaised;
@@ -336,13 +336,13 @@ begin
   VBox1.Orientation := Vertical;
   StyleGroup.InsertChild(VBox1);
   
-  rbPlain := TRadioButton.Create('Plain', self);
+  rbPlain := TFRadioButton.Create('Plain', self);
   rbPlain.Tag := 1;
   rbPlain.OnClick := @RadioButtonClick;
-  rbLowered := TRadioButton.Create('Lowered', self);
+  rbLowered := TFRadioButton.Create('Lowered', self);
   rbLowered.Tag := 2;
   rbLowered.OnClick := @RadioButtonClick;
-  rbRaised := TRadioButton.Create('Raised', self);
+  rbRaised := TFRadioButton.Create('Raised', self);
   rbRaised.Tag := 3;
   rbRaised.OnClick := @RadioButtonClick;
   rbRaised.Checked := True;
@@ -374,7 +374,7 @@ end;
 
 procedure TProgressBarForm.RadioButtonClick(Sender: TObject);
 begin
-  case TRadioButton(Sender).Tag of
+  case TFRadioButton(Sender).Tag of
     1: PB.FillColor := clRed;
     2: PB.FillColor := clGreen;
     3: PB.FillColor := clBlue;
@@ -400,16 +400,16 @@ begin
   VBox.Orientation := Vertical;
   
   gbColor   := TFGroupBox.Create('Fill Color', self);
-  rbRed           := TRadioButton.Create('Red', self);
+  rbRed           := TFRadioButton.Create('Red', self);
   rbRed.Tag       := 1;
   rbRed.OnClick   := @RadioButtonClick;
   rbRed.Checked   := True;
 
-  rbGreen         := TRadioButton.Create('Green', self);
+  rbGreen         := TFRadioButton.Create('Green', self);
   rbGreen.Tag     := 2;
   rbGreen.OnClick := @RadioButtonClick;
 
-  rbBlue          := TRadioButton.Create('Blue', self);
+  rbBlue          := TFRadioButton.Create('Blue', self);
   rbBlue.Tag      := 3;
   rbBlue.OnClick  := @RadioButtonClick;
 
@@ -476,7 +476,7 @@ end;
 procedure TMainForm.CheckBoxBtnClick(Sender: TObject);
 begin
   if not Assigned(_frmCheckBox) then
-    _frmCheckBox := TFCheckboxForm.Create(self);
+    _frmCheckBox := TCheckboxForm.Create(self);
   _frmCheckBox.Show;
 end;
 
@@ -577,16 +577,16 @@ end;
 
 
 // -------------------------------------------------------------------
-//   TFCheckboxForm
+//   TCheckboxForm
 // -------------------------------------------------------------------
 
-procedure TFCheckboxForm.GrayCheckBoxClick(Sender: TObject);
+procedure TCheckboxForm.GrayCheckBoxClick(Sender: TObject);
 begin
   CheckBox1.Enabled := not GrayCheckBox.Checked;
   CheckBox2.Enabled := not GrayCheckBox.Checked;
 end;
 
-constructor TFCheckboxForm.Create(AOwner: TComponent);
+constructor TCheckboxForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   LoadForm(self);

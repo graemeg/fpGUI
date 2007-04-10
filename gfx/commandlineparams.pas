@@ -136,6 +136,7 @@ var
 const
   cDelim = ' ';
 begin
+  lsValue := '';
   FsParams := '';
   j := ParamCount;
   for i := 1 to j do begin

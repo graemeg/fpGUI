@@ -3,12 +3,12 @@ object ScrollBarForm: TScrollBarForm
   Text = 'Scroll bar test'
   object VertBox: TFBoxLayout
     Orientation = Vertical
-    object GrayCheckBox: TCheckBox
+    object GrayCheckBox: TFCheckBox
       Text = 'Gray everything'
       OnClick = GrayCheckBoxClick
     end
     object HorzBox: TFBoxLayout
-      object HorzGrid: TGridLayout
+      object HorzGrid: TFGridLayout
         ColCount = 3
         RowCount = 6
         ColSpacing = 8
@@ -95,7 +95,7 @@ object ScrollBarForm: TScrollBarForm
 	  Alignment = taRightJustify
           Text = '0..1, PageSize=0:'
         end
-        object ScrollBar1: TScrollBar
+        object ScrollBar1: TFScrollBar
           Min = 0
           Max = 1
 	  OnChange = ScrollBar1Change
@@ -108,7 +108,7 @@ object ScrollBarForm: TScrollBarForm
 	  Alignment = taRightJustify
           Text = '0..1, PageSize=1:'
         end
-        object ScrollBar2: TScrollBar
+        object ScrollBar2: TFScrollBar
           Max = 1
           PageSize = 1
 	  OnChange = ScrollBar2Change
@@ -121,7 +121,7 @@ object ScrollBarForm: TScrollBarForm
 	  Alignment = taRightJustify
           Text = '-2..3, PageSize=0:'
         end
-        object ScrollBar3: TScrollBar
+        object ScrollBar3: TFScrollBar
           Min = -2
           Max = 3
 	  OnChange = ScrollBar3Change
@@ -134,7 +134,7 @@ object ScrollBarForm: TScrollBarForm
 	  Alignment = taRightJustify
           Text = '-5..9, PageSize=4:'
         end
-        object ScrollBar4: TScrollBar
+        object ScrollBar4: TFScrollBar
           Min = -5
           Max = 9
           PageSize = 4
@@ -148,7 +148,7 @@ object ScrollBarForm: TScrollBarForm
 	  Alignment = taRightJustify
           Text = '-100..200, PageSize=7:'
         end
-        object ScrollBar5: TScrollBar
+        object ScrollBar5: TFScrollBar
           Min = -100
           Max = 200
           PageSize = 7
@@ -165,7 +165,7 @@ object ScrollBarForm: TScrollBarForm
       object VerTFLabel: TFLabel
         Text = 'Vertical:'
       end
-      object VertScrollBar: TScrollBar
+      object VertScrollBar: TFScrollBar
         Orientation = Vertical
         Min = -2
 	Max = 3

@@ -36,7 +36,7 @@
   end;
 
 
-  TRadioButton = class(TFCustomRadioButton)
+  TFRadioButton = class(TFCustomRadioButton)
   published
     property CanExpandWidth;
     property CanExpandHeight;

@@ -110,7 +110,7 @@ var
 begin
   inherited Paint(Canvas);
 
-  Borders := Style.GeTFButtonBorders;
+  Borders := Style.GetButtonBorders;
   Canvas.IntersectClipRect(Rect(Borders.Left, Borders.Top,
     BoundsSize.cx - Borders.Right, BoundsSize.cy - Borders.Bottom));
 
@@ -128,7 +128,7 @@ var
   Borders: TRect;
 begin
   LAYOUTTRACE('TFCustomButton.CalcSizes for %s:%s', [Name, ClassName]);
-  Borders := Style.GeTFButtonBorders;
+  Borders := Style.GetButtonBorders;
   with FindForm.Wnd.Canvas do
   begin
     FMinSize.cx := Borders.Left + Borders.Right + TextWidth(Text);

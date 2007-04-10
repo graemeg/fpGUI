@@ -37,8 +37,11 @@ type
   end;
 
   TFWidgetArrayInfo = record
-    min, def, max: Integer;
-    MinFlag, MaxFlag: Boolean;
+    min: Integer;
+    def: Integer;
+    max: Integer;
+    MinFlag: Boolean;
+    MaxFlag: Boolean;
   end;
 
   TFWidgetArrayInfoArray = array[0..(1 shl 30) div SizeOf(TFWidgetArrayInfo) - 1] of TFWidgetArrayInfo;
@@ -61,7 +64,7 @@ type
 
 
 // -------------------------------------------------------------------
-//   FixedLayout
+//   Fixed Layout
 // -------------------------------------------------------------------
 
   TFFixedItem = class(TFLayoutItem)
@@ -71,11 +74,7 @@ type
   end;
 
 
-  { TFixedLayout }
-
   TFFixedLayout = class(TFLayout)
-  private
-    procedure   AddFixedChild(AChild: TFWidget);
   protected
     procedure   CalcSizes; override;
   public
@@ -88,14 +87,15 @@ type
 
 
 // -------------------------------------------------------------------
-//   DockingLayout
+//   Docking Layout
 // -------------------------------------------------------------------
 
   TDockingMode = (dmTop, dmBottom, dmLeft, dmRight, dmClient, dmUndocked);
 
   TFDockingItem = class(TFLayoutItem)
   public
-    Left, Top: Integer;
+    Left: Integer;
+    Top: Integer;
     DockingMode: TDockingMode;
   end;
   
@@ -113,7 +113,7 @@ type
 
 
 // -------------------------------------------------------------------
-//   BoxLayout
+//   Box Layout
 // -------------------------------------------------------------------
 
   TFCustomBoxLayout = class(TFLayout)
@@ -151,7 +151,7 @@ type
 
 
 // -------------------------------------------------------------------
-//   FGridLayout
+//   Grid Layout
 // -------------------------------------------------------------------
 
   TFGridItem = class(TFLayoutItem)
@@ -312,8 +312,6 @@ end;
 //   TFLayout
 // -------------------------------------------------------------------
 
-// public methods
-
 constructor TFLayout.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -321,13 +319,11 @@ begin
   FCanExpandHeight := True;
 end;
 
-
 destructor TFLayout.Destroy;
 begin
   FWidgets.Free;
   inherited Destroy;
 end;
-
 
 function TFLayout.ContainsChild(AChild: TFWidget): Boolean;
 var
@@ -337,13 +333,10 @@ begin
     if TFLayoutItem(FWidgets.Items[i]).Widget = AChild then
     begin
       Result := True;
-      exit;
+      Exit; //==>
     end;
   Result := False;
 end;
-
-
-// protected methods
 
 function TFLayout.GetChildCount: Integer;
 begin
@@ -360,6 +353,24 @@ end;
 //   TFFixedLayout
 // -------------------------------------------------------------------
 
+{ Find the biggest X and Y coordinates that will cover all Widgets, by looking
+  at each Widget in the Layout. }
+procedure TFFixedLayout.CalcSizes;
+var
+  i: Integer;
+  item: TFFixedItem;
+begin
+  if FWidgets.Count = 0 then
+    FDefSize := gfxbase.Size(50, 50)
+  else
+    for i := 0 to FWidgets.Count - 1 do
+    begin
+      item := TFFixedItem(FWidgets.Items[i]);
+      FDefSize.cx := Max(DefSize.cx, item.Left + item.Widget.DefSize.cx);
+      FDefSize.cy := Max(DefSize.cy, item.Top + item.Widget.DefSize.cy);
+    end;
+end;
+
 constructor TFFixedLayout.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -370,13 +381,12 @@ procedure TFFixedLayout.AddWidget(AWidget: TFWidget; ALeft, ATop: Integer);
 var
   item: TFFixedItem;
 begin
-  AWidget.Parent := Self;
-  item := TFFixedItem(FWidgets.Add);
-  item.Left := ALeft;
-  item.Top := ATop;
-  item.Widget := AWidget;
+  AWidget.Parent  := self;
+  item            := TFFixedItem(FWidgets.Add);
+  item.Left       := ALeft;
+  item.Top        := ATop;
+  item.Widget     := AWidget;
   AWidget.SetBounds(Point(item.Left, item.Top), item.Widget.DefSize);
-  AddFixedChild(AWidget);
 end;
 
 procedure TFFixedLayout.MoveWidget(AWidget: TFWidget; ALeft, ATop: Integer);
@@ -390,36 +400,16 @@ begin
     if item.Widget = AWidget then
     begin
       item.Left := ALeft;
-      item.Top := ATop;
+      item.Top  := ATop;
       AWidget.SetBounds(Point(item.Left, item.Top), item.Widget.DefSize);
-      exit;
+      Exit; //==>
     end;
   end;
   raise ELayoutError.Create(SLayoutWidgetNotFound);
 end;
 
-procedure TFFixedLayout.AddFixedChild(AChild: TFWidget);
-begin
-  // todo
-end;
-
-procedure TFFixedLayout.CalcSizes;
-var
-  i: Integer;
-  item: TFFixedItem;
-begin
-  if FWidgets.Count = 0 then
-    FDefSize := gfxbase.Size(50, 50)
-  else
-    for i := 0 to FWidgets.Count - 1 do
-    begin
-      item := TFFixedItem(FWidgets.Items[i]);
-      FDefSize.cx := Max(DefSize.cx, item.Left + item.Widget.DefSize.cx);
-      FDefSize.cy := Max(DefSize.cx, item.Top + item.Widget.DefSize.cy);
-    end;
-end;
-
-{procedure TFixedLayout.EvLayoutChildren(Canvas: TGfxCanvas);
+{
+procedure TFixedLayout.EvLayoutChildren(Canvas: TGfxCanvas);
 var
   i: Integer;
   item: TFixedItem;
@@ -429,8 +419,8 @@ begin
     item := TFixedItem(FWidgets.Items[i]);
     item.Widget.SetBounds(item.Left, item.Top, item.Widget.DefSize.cx, item.Widget.DefSize.cy);
   end;
-end;}
-
+end;
+}
 
 // -------------------------------------------------------------------
 //   TFDockingLayout
@@ -446,12 +436,13 @@ procedure TFDockingLayout.CalcSizes;
 var
   i: Integer;
   item: TFDockingItem;
-  w, cw: TFWidget;
+  w: TFWidget;
+  cw: TFWidget;
 begin
   if FWidgets.Count = 0 then
   begin
     FDefSize := gfxbase.Size(200, 200);
-    exit;
+    Exit; //==>
   end;
 
   // Find the client widget (widget with DockingMode "dmClient")
@@ -462,7 +453,7 @@ begin
     if item.DockingMode = dmClient then
     begin
       cw := item.Widget;
-      break;
+      Break;  //==>
     end;
   end;
 
@@ -471,7 +462,8 @@ begin
     FMinSize := cw.MinSize;
     FMaxSize := cw.MaxSize;
     FDefSize := cw.DefSize;
-  end else
+  end
+  else
     FDefSize := gfxbase.Size(200, 200);
 
   for i := 0 to FWidgets.Count - 1 do
@@ -482,38 +474,38 @@ begin
       dmTop, dmBottom:
         begin
           if MinSize.cx < w.MinSize.cx then
-	    FMinSize.cx := w.MinSize.cx;
-	  Inc(FMinSize.cy, w.MinSize.cy);
-	  if MaxSize.cx < w.MaxSize.cx then
-	    FMaxSize.cx := w.MaxSize.cx;
-	  if MaxSize.cy < InfiniteSize then
-	    Inc(FMaxSize.cy, w.MaxSize.cy);
-	  if DefSize.cx < w.DefSize.cx then
-	    FDefSize.cx := w.DefSize.cx;
-	  Inc(FDefSize.cy, w.DefSize.cy);
+	          FMinSize.cx := w.MinSize.cx;
+      	  Inc(FMinSize.cy, w.MinSize.cy);
+      	  if MaxSize.cx < w.MaxSize.cx then
+      	    FMaxSize.cx := w.MaxSize.cx;
+      	  if MaxSize.cy < InfiniteSize then
+      	    Inc(FMaxSize.cy, w.MaxSize.cy);
+      	  if DefSize.cx < w.DefSize.cx then
+      	    FDefSize.cx := w.DefSize.cx;
+      	  Inc(FDefSize.cy, w.DefSize.cy);
         end;
       dmLeft, dmRight:
         begin
-	  Inc(FMinSize.cx, w.MinSize.cx);
+	        Inc(FMinSize.cx, w.MinSize.cx);
           if MinSize.cy < w.MinSize.cy then
-	    FMinSize.cy := w.MinSize.cy;
-	  if MaxSize.cx < InfiniteSize then
-	    Inc(FMaxSize.cx, w.MaxSize.cx);
-	  if MaxSize.cy < w.MaxSize.cy then
-	    FMaxSize.cy := w.MaxSize.cy;
-	  Inc(FDefSize.cx, w.DefSize.cx);
-	  if DefSize.cy < w.DefSize.cy then
-	    FDefSize.cy := w.DefSize.cy;
+      	    FMinSize.cy := w.MinSize.cy;
+      	  if MaxSize.cx < InfiniteSize then
+      	    Inc(FMaxSize.cx, w.MaxSize.cx);
+      	  if MaxSize.cy < w.MaxSize.cy then
+      	    FMaxSize.cy := w.MaxSize.cy;
+      	  Inc(FDefSize.cx, w.DefSize.cx);
+      	  if DefSize.cy < w.DefSize.cy then
+      	    FDefSize.cy := w.DefSize.cy;
         end;
-    end;
-  end;
+    end;  { case }
+  end;  { for }
 end;
 
-
-{procedure TDockingLayout.EvLayoutChildren(Canvas: TGfxCanvas);
+{
+procedure TDockingLayout.EvLayoutChildren(Canvas: TGfxCanvas);
 var
   clx, cly, clw, clh: Integer;   // Client rectangle
-  ClienTFWidget: TFWidget;
+  ClientWidget: TFWidget;
   i, WidgetW, WidgetH: Integer;
   item: TDockingItem;
 begin
@@ -526,7 +518,7 @@ begin
     exit;
 
   // Process all attached widgets
-  ClienTFWidget := nil;
+  ClientWidget := nil;
   for i := 0 to FWidgets.Count - 1 do
   begin
     item := TDockingItem(FWidgets.Items[i]);
@@ -566,37 +558,36 @@ begin
 	  Dec(clh, WidgetH);
         end;
       dmClient:
-	ClienTFWidget := item.Widget;
+	ClientWidget := item.Widget;
     end;
     if item.DockingMode <> dmClient then
       item.Widget.SetBounds(item.Left, item.Top, WidgetW, WidgetH);
   end;
-  if Assigned(ClienTFWidget) then
+  if Assigned(ClientWidget) then
     ClienTFWidget.SetBounds(clx, cly, clw, clh);
-end;}
+end;
+}
 
 procedure TFDockingLayout.AddWidget(AWidget: TFWidget; ADockingMode: TDockingMode);
 var
   item: TFDockingItem;
 begin
-  AWidget.Parent := Self;
-  item := TFDockingItem(FWidgets.Add);
-  item.Widget := AWidget;
-  item.DockingMode := ADockingMode;
-//  AddFixedChild(AWidget);
+  AWidget.Parent    := Self;
+  item              := TFDockingItem(FWidgets.Add);
+  item.Widget       := AWidget;
+  item.DockingMode  := ADockingMode;
 end;
 
 procedure TFDockingLayout.AddWidget(AWidget: TFWidget; ALeft, ATop: Integer);
 var
   item: TFDockingItem;
 begin
-  AWidget.Parent := Self;
-  item := TFDockingItem(FWidgets.Add);
-  item.Widget := AWidget;
-  item.DockingMode := dmUndocked;
-  item.Left := ALeft;
-  item.Top := ATop;
-//  AddFixedChild(AWidget);
+  AWidget.Parent    := Self;
+  item              := TFDockingItem(FWidgets.Add);
+  item.Widget       := AWidget;
+  item.DockingMode  := dmUndocked;
+  item.Left         := ALeft;
+  item.Top          := ATop;
 end;
 
 
@@ -660,7 +651,8 @@ begin
     else
       FMaxSize.cx := InfiniteSize;
     FMaxSize.cy := InfiniteSize;
-  end else
+  end
+  else
   begin
     FMinSize := Size(0, i);
     FDefSize := MinSize;
@@ -669,7 +661,7 @@ begin
       FMaxSize.cy := i
     else
       FMaxSize.cy := InfiniteSize;
-  end;
+  end;  { if..else }
 
   for i := 0 to FWidgets.Count - 1 do
   begin
@@ -686,8 +678,9 @@ begin
         FDefSize.cy := item.Widget.DefSize.cy;
       if MaxSize.cy > item.Widget.MaxSize.cy then
         FMaxSize.cy := item.Widget.MaxSize.cy;
-    end else
-    begin
+    end
+    else
+    begin { Vertical }
       Inc(FMinSize.cy, item.Widget.MinSize.cy);
       Inc(FDefSize.cy, item.Widget.DefSize.cy);
       FMaxSize.cx := Min(MaxSize.cx, item.Widget.MaxSize.cx);
@@ -698,7 +691,7 @@ begin
         FDefSize.cx := item.Widget.DefSize.cx;
       if MaxSize.cx > item.Widget.MaxSize.cx then
         FMaxSize.cx := item.Widget.MaxSize.cx;
-    end;
+    end;  { if..else }
   end;
 
   Inc(FMinSize.cx, 2 * FBorderSpacing);
@@ -768,7 +761,7 @@ begin
     case FHorzAlign of
       horzCenter: x := (BoundsSize.cx - sum) div 2;
       horzRight:  x := BoundsSize.cx - FBorderSpacing - sum;
-      else	  x := FBorderSpacing;
+      else        x := FBorderSpacing;
     end
   else
     case FVertAlign of
