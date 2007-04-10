@@ -619,21 +619,31 @@ end;
 
 function TX11Canvas.TextExtent(const AText: String): TSize;
 var
+  {$IFDEF XftSupport}
+  extents : TXGlyphInfo;
+  {$ELSE}
   Direction, FontAscent, FontDescent: LongInt;
   CharStruct: TXCharStruct;
+  {$ENDIF}
 begin
-//  inherited;
   if Length(AText) = 0 then
   begin
     Result.cx := 0;
     Result.cy := 0;
-  end else
+  end
+  else
   begin
+    {$IFDEF XftSupport}
+    XftTextExtents8(GFApplication.Handle, FFontStruct.FontData, PChar(AText), Length(AText), extents);
+    Result.cx := extents.xOff;
+    Result.cy := extents.yOff;
+    {$ELSE}
     XQueryTextExtents(GFApplication.Handle, XGContextFromGC(GC),
       PChar(AText), Length(AText),
       @Direction, @FontAscent, @FontDescent, @CharStruct);
     Result.cx := CharStruct.Width;
     Result.cy := CharStruct.Ascent + CharStruct.Descent;
+    {$ENDIF}
   end;
 end;
 
@@ -665,8 +675,9 @@ begin
 //  fnt := XftFontOpenName(GFApplication.Handle, XDefaultScreen(GFApplication.Handle), PChar('Sans-12'));
   SetXftColor(FCurColor,fntColor);
 //  s := u8(AText);
+  XftDrawSetClip(FXftDraw, FRegion);
   XftDrawString8(FXftDraw, fntColor, FFontStruct.FontData, APosition.x,
-      Aposition.y + FFontStruct.GetAscent , PChar(AText),Length(AText));
+      Aposition.y + FFontStruct.GetAscent, PChar(AText), Length(AText));
 //  XftDrawString16(FXftDraw, fntColor, fnt, APosition.x, Aposition.y * 3, @s[1], Length16(s));
 //  XftFontClose(GFApplication.Handle, fnt);
   {$ELSE}

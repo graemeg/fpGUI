@@ -77,6 +77,7 @@ type
   TFFixedLayout = class(TFLayout)
   protected
     procedure   CalcSizes; override;
+    procedure   Resized; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AddWidget(AWidget: TFWidget; ALeft, ATop: Integer);
@@ -101,8 +102,11 @@ type
   
 
   TFDockingLayout = class(TFLayout)
+  private
+    procedure   InternalLayoutChildren;
   protected
     procedure   CalcSizes; override;
+    procedure   Resized; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AddWidget(AWidget: TFWidget; ADockingMode: TDockingMode);
@@ -361,14 +365,32 @@ var
   item: TFFixedItem;
 begin
   if FWidgets.Count = 0 then
+  begin
     FDefSize := gfxbase.Size(50, 50)
+  end
   else
+  begin
     for i := 0 to FWidgets.Count - 1 do
     begin
       item := TFFixedItem(FWidgets.Items[i]);
       FDefSize.cx := Max(DefSize.cx, item.Left + item.Widget.DefSize.cx);
       FDefSize.cy := Max(DefSize.cy, item.Top + item.Widget.DefSize.cy);
     end;
+  end;  { if..else }
+end;
+
+procedure TFFixedLayout.Resized;
+var
+  i: Integer;
+  item: TFFixedItem;
+begin
+  writeln('==> ' + Classname + '.Resized');
+
+  for i := 0 to FWidgets.Count - 1 do
+  begin
+    item := TFFixedItem(FWidgets.Items[i]);
+    item.Widget.SetBounds(item.Widget.Left, item.Widget.Top, item.Widget.Width, item.Widget.Height);
+  end;
 end;
 
 constructor TFFixedLayout.Create(AOwner: TComponent);
@@ -381,12 +403,15 @@ procedure TFFixedLayout.AddWidget(AWidget: TFWidget; ALeft, ATop: Integer);
 var
   item: TFFixedItem;
 begin
-  AWidget.Parent  := self;
-  item            := TFFixedItem(FWidgets.Add);
-  item.Left       := ALeft;
-  item.Top        := ATop;
-  item.Widget     := AWidget;
-  AWidget.SetBounds(Point(item.Left, item.Top), item.Widget.DefSize);
+  if not ContainsChild(AWidget) then
+  begin
+    item            := TFFixedItem(FWidgets.Add);
+    item.Left       := ALeft;
+    item.Top        := ATop;
+    item.Widget     := AWidget;
+    AWidget.Parent  := self;
+    AWidget.SetBounds(Point(item.Left, item.Top), item.Widget.DefSize);
+  end;
 end;
 
 procedure TFFixedLayout.MoveWidget(AWidget: TFWidget; ALeft, ATop: Integer);
@@ -430,6 +455,71 @@ constructor TFDockingLayout.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWidgets := TCollection.Create(TFDockingItem);
+end;
+
+procedure TFDockingLayout.InternalLayoutChildren;
+var
+  clx, cly, clw, clh: Integer;   // Client rectangle
+  ClientWidget: TFWidget;
+  i, WidgetW, WidgetH: Integer;
+  item: TFDockingItem;
+begin
+  clx := 0;
+  cly := 0;
+  clw := BoundsSize.cx;
+  clh := BoundsSize.cy;
+//WriteLn('=> DockingLayout.EvLayoutChildren ', BoundsSize.cx, ' x ', BoundsSize.cy);
+  if (clw = 0) or (clh = 0) then
+    exit;
+
+  // Process all attached widgets
+  ClientWidget := nil;
+  for i := 0 to FWidgets.Count - 1 do
+  begin
+    item := TFDockingItem(FWidgets.Items[i]);
+    case item.DockingMode of
+      dmLeft:
+        begin
+      	  WidgetW := item.Widget.DefSize.cx;
+      	  WidgetH := clh;
+      	  item.Left := clx;
+      	  item.Top := cly;
+      	  Inc(clx, WidgetW);
+      	  Dec(clw, WidgetW);
+        end;
+      dmTop:
+        begin
+      	  WidgetW := clw;
+      	  WidgetH := item.Widget.DefSize.cy;
+      	  item.Left := clx;
+      	  item.Top := cly;
+      	  Inc(cly, WidgetH);
+      	  Dec(clh, WidgetH);
+        end;
+      dmRight:
+        begin
+      	  WidgetW := item.Widget.DefSize.cx;
+      	  WidgetH := clh;
+      	  item.Left := clx + clw - WidgetW;
+                item.Top := cly;
+      	  Dec(clw, WidgetW);
+        end;
+      dmBottom:
+        begin
+      	  WidgetH := item.Widget.DefSize.cy;
+      	  WidgetW := clw;
+      	  item.Left := clx;
+      	  item.Top := cly + clh - WidgetH;
+      	  Dec(clh, WidgetH);
+        end;
+      dmClient:
+	      ClientWidget := item.Widget;
+    end;  { case }
+    if item.DockingMode <> dmClient then
+      item.Widget.SetBounds(item.Left, item.Top, WidgetW, WidgetH);
+  end;  { for }
+  if Assigned(ClientWidget) then
+    ClientWidget.SetBounds(clx, cly, clw, clh);
 end;
 
 procedure TFDockingLayout.CalcSizes;
@@ -501,93 +591,38 @@ begin
   end;  { for }
 end;
 
-{
-procedure TDockingLayout.EvLayoutChildren(Canvas: TGfxCanvas);
-var
-  clx, cly, clw, clh: Integer;   // Client rectangle
-  ClientWidget: TFWidget;
-  i, WidgetW, WidgetH: Integer;
-  item: TDockingItem;
+procedure TFDockingLayout.Resized;
 begin
-  clx := 0;
-  cly := 0;
-  clw := BoundsSize.cx;
-  clh := BoundsSize.cy;
-  // WriteLn('=> DockingLayout.EvLayoutChildren ', BoundsSize.cx, ' x ', BoundsSize.cy);
-  if (clw = 0) or (clh = 0) then
-    exit;
-
-  // Process all attached widgets
-  ClientWidget := nil;
-  for i := 0 to FWidgets.Count - 1 do
-  begin
-    item := TDockingItem(FWidgets.Items[i]);
-    case item.DockingMode of
-      dmLeft:
-        begin
-	  WidgetW := item.Widget.DefSize.cx;
-	  WidgetH := clh;
-	  item.Left := clx;
-	  item.Top := cly;
-	  Inc(clx, WidgetW);
-	  Dec(clw, WidgetW);
-        end;
-      dmTop:
-        begin
-	  WidgetW := clw;
-	  WidgetH := item.Widget.DefSize.cy;
-	  item.Left := clx;
-	  item.Top := cly;
-	  Inc(cly, WidgetH);
-	  Dec(clh, WidgetH);
-        end;
-      dmRight:
-        begin
-	  WidgetW := item.Widget.DefSize.cx;
-	  WidgetH := clh;
-	  item.Left := clx + clw - WidgetW;
-          item.Top := cly;
-	  Dec(clw, WidgetW);
-        end;
-      dmBottom:
-        begin
-	  WidgetH := item.Widget.DefSize.cy;
-	  WidgetW := clw;
-	  item.Left := clx;
-	  item.Top := cly + clh - WidgetH;
-	  Dec(clh, WidgetH);
-        end;
-      dmClient:
-	ClientWidget := item.Widget;
-    end;
-    if item.DockingMode <> dmClient then
-      item.Widget.SetBounds(item.Left, item.Top, WidgetW, WidgetH);
-  end;
-  if Assigned(ClientWidget) then
-    ClienTFWidget.SetBounds(clx, cly, clw, clh);
+  inherited Resized;
+  InternalLayoutChildren;
 end;
-}
 
 procedure TFDockingLayout.AddWidget(AWidget: TFWidget; ADockingMode: TDockingMode);
 var
   item: TFDockingItem;
 begin
-  AWidget.Parent    := Self;
-  item              := TFDockingItem(FWidgets.Add);
-  item.Widget       := AWidget;
-  item.DockingMode  := ADockingMode;
+  if not ContainsChild(AWidget) then
+  begin
+    item              := TFDockingItem(FWidgets.Add);
+    item.Widget       := AWidget;
+    item.DockingMode  := ADockingMode;
+    AWidget.Parent    := Self;
+  end;
 end;
 
 procedure TFDockingLayout.AddWidget(AWidget: TFWidget; ALeft, ATop: Integer);
 var
   item: TFDockingItem;
 begin
-  AWidget.Parent    := Self;
-  item              := TFDockingItem(FWidgets.Add);
-  item.Widget       := AWidget;
-  item.DockingMode  := dmUndocked;
-  item.Left         := ALeft;
-  item.Top          := ATop;
+  if not ContainsChild(AWidget) then
+  begin
+    item              := TFDockingItem(FWidgets.Add);
+    item.Widget       := AWidget;
+    item.DockingMode  := dmUndocked;
+    item.Left         := ALeft;
+    item.Top          := ATop;
+    AWidget.Parent    := Self;
+  end;
 end;
 
 
@@ -1002,13 +1037,16 @@ procedure TFCustomGridLayout.AddWidget(AWidget: TFWidget; x, y, w, h: Integer);
 var
   item: TFGridItem;
 begin
-  AWidget.Parent := Self;
-  item := TFGridItem(FWidgets.Add);
-  item.Widget := AWidget;
-  item.x := x;
-  item.y := y;
-  item.Width := w;
-  item.Height := h;
+  if not ContainsChild(AWidget) then
+  begin
+    item := TFGridItem(FWidgets.Add);
+    item.Widget := AWidget;
+    item.x := x;
+    item.y := y;
+    item.Width := w;
+    item.Height := h;
+    AWidget.Parent := Self;
+  end;
 end;
 
 procedure TFCustomGridLayout.MoveWidget(AWidget: TFWidget; x, y, w, h: Integer);

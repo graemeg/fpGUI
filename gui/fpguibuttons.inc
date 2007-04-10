@@ -76,6 +76,8 @@ constructor TFGenericButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
+  // default size
+  FDefSize := Size(18, 18);
 end;
 
 
@@ -134,7 +136,7 @@ begin
     FMinSize.cx := Borders.Left + Borders.Right + TextWidth(Text);
     if FMinSize.cx < 75 then
       FMinSize.cx := 75;    // apply default button width
-    FMinSize.cy := Borders.Left + Borders.Right + FontCellHeight;
+    FMinSize.cy := Borders.Top + Borders.Bottom + FontCellHeight;
   end;
   FDefSize := FMinSize + gfxbase.Size(20, 2);
 end;
@@ -142,6 +144,8 @@ end;
 constructor TFCustomButton.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
+  // default size
+  FDefSize := Size(75, 25);
   Text := pText;
 end;
 

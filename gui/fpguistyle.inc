@@ -63,7 +63,7 @@
     function    GetEditBoxBorders: TRect; virtual; abstract;
     // Check boxes
     procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); virtual; abstract;
-    procedure   GeTFCheckboxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); virtual; abstract;
+    procedure   GetCheckboxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); virtual; abstract;
     // Radio buttons
     procedure   DrawRadioButton(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); virtual; abstract;
     procedure   GetRadioButtonLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); virtual; abstract;
@@ -72,9 +72,9 @@
     procedure   DrawComboBoxArrow(Canvas: TFCanvas; const ARect: TRect; IsPressed, IsEnabled: Boolean); virtual; abstract;
     function    GetComboBoxBtnSize: TSize; virtual; abstract;
     // Scroll bars
-    function    GeTFScrollBarBorders(Orientation: TOrientation): TRect; virtual; abstract;
-    function    GeTFScrollBarBtnSize(Orientation: TOrientation): TSize; virtual; abstract;
-    function    GeTFScrollBarBtnMinSize: Integer; virtual; abstract;
+    function    GetScrollBarBorders(Orientation: TOrientation): TRect; virtual; abstract;
+    function    GetScrollBarBtnSize(Orientation: TOrientation): TSize; virtual; abstract;
+    function    GetScrollBarBtnMinSize: Integer; virtual; abstract;
     procedure   DrawScrollBarBorder(Canvas: TFCanvas; const ARect: TRect); virtual; abstract;
     procedure   DrawScrollBarButton(Canvas: TFCanvas; const ARect: TRect; Direction: TArrowDirection; IsPressed, IsEnabled: Boolean); virtual; abstract;
     // Scroll boxes
@@ -126,7 +126,7 @@
     function    GetEditBoxBorders: TRect; override;
     // Check boxes
     procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); override;
-    procedure   GeTFCheckboxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); override;
+    procedure   GetCheckboxLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); override;
     // Radio buttons
     procedure   DrawRadioButton(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); override;
     procedure   GetRadioButtonLayout(const LabelSize: TSize; var TotalSize: TSize; var LabelPos: TPoint); override;
@@ -135,9 +135,9 @@
     function    GetComboBoxArrowSize: TSize; override;
     function    GetComboBoxBtnSize: TSize; override;
     // Scroll bars
-    function    GeTFScrollBarBorders(Orientation: TOrientation): TRect; override;
-    function    GeTFScrollBarBtnSize(Orientation: TOrientation): TSize; override;
-    function    GeTFScrollBarBtnMinSize: Integer; override;
+    function    GetScrollBarBorders(Orientation: TOrientation): TRect; override;
+    function    GetScrollBarBtnSize(Orientation: TOrientation): TSize; override;
+    function    GetScrollBarBtnMinSize: Integer; override;
     procedure   DrawScrollBarBorder(Canvas: TFCanvas; const ARect: TRect); override;
     procedure   DrawScrollBarButton(Canvas: TFCanvas; const ARect: TRect; Direction: TArrowDirection; IsPressed, IsEnabled: Boolean); override;
     // Scroll boxes
@@ -655,7 +655,7 @@ begin
       DrawFocusRect(Canvas, Rect(Left - 2, Top - 2, Right + 2, Bottom + 2));
 end;
 
-procedure TBasicStyle.GeTFCheckboxLayout(const LabelSize: TSize;
+procedure TBasicStyle.GetCheckboxLayout(const LabelSize: TSize;
   var TotalSize: TSize; var LabelPos: TPoint);
 begin
   TotalSize := Size(LabelSize.cx + 21, Max(13, LabelSize.cy + 4));
@@ -764,18 +764,18 @@ begin
   DrawDirectionArrows(Canvas, r, arrowDown);
 end;
 
-function TBasicStyle.GeTFScrollBarBorders(Orientation: TOrientation): TRect;
+function TBasicStyle.GetScrollBarBorders(Orientation: TOrientation): TRect;
 begin
   Result := Rect(1, 1, 1, 1);
 end;
 
-function TBasicStyle.GeTFScrollBarBtnSize(Orientation: TOrientation): TSize;
+function TBasicStyle.GetScrollBarBtnSize(Orientation: TOrientation): TSize;
 begin
-  Result.cx := 16;
-  Result.cy := 16;
+  Result.cx := 18;
+  Result.cy := 18;
 end;
 
-function TBasicStyle.GeTFScrollBarBtnMinSize: Integer;
+function TBasicStyle.GetScrollBarBtnMinSize: Integer;
 begin
   Result := 30;
 end;

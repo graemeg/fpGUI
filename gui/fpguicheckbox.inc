@@ -108,7 +108,7 @@ end;
 procedure TFCustomCheckbox.CalcSizes;
 begin
   with FindForm.Wnd.Canvas do
-    Style.GeTFCheckboxLayout(gfxbase.Size(TextWidth(Text), FontCellHeight),
+    Style.GetCheckboxLayout(gfxbase.Size(TextWidth(Text), FontCellHeight),
       FMinSize, FLabelPos);
 end;
 

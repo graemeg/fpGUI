@@ -128,7 +128,7 @@ end;
 procedure TFScrollBarButton.CalcSizes;
 begin
   ASSERT(Owner is TFCustomScrollBar);
-  FMinSize := Style.GeTFScrollBarBtnSize(TFCustomScrollBar(Owner).Orientation);
+  FMinSize := Style.GetScrollBarBtnSize(TFCustomScrollBar(Owner).Orientation);
 end;
 
 
@@ -389,9 +389,9 @@ end;
 procedure TFScrollBarSlider.CalcSizes;
 begin
   if TFCustomScrollBar(Owner).Orientation = Horizontal then
-    FDefSize.cx := Style.GeTFScrollBarBtnSize(Horizontal).cy * 5
+    FDefSize.cx := Style.GetScrollBarBtnSize(Horizontal).cy * 5
   else
-    FDefSize.cy := Style.GeTFScrollBarBtnSize(Vertical).cx * 5;
+    FDefSize.cy := Style.GetScrollBarBtnSize(Vertical).cx * 5;
 end;
 
 function TFScrollBarSlider.CalcPosition: Integer;
@@ -533,7 +533,7 @@ begin
   end;
 
   if not Embedded then
-    with Style.GeTFScrollBarBorders(Orientation) do
+    with Style.GetScrollBarBorders(Orientation) do
     begin
       Inc(FMinSize.cx, Left + Right);
       Inc(FMinSize.cy, Top + Bottom);
@@ -550,7 +550,7 @@ var
   r: TRect;
 begin
   if not Embedded then
-    with Style.GeTFScrollBarBorders(Orientation) do
+    with Style.GetScrollBarBorders(Orientation) do
     begin
       r.Left := Left;
       r.Top := Top;
@@ -684,7 +684,7 @@ begin
       Size := Slider.Width
     else
       Size := Slider.Height;
-    Result := Math.Max(Style.GeTFScrollBarBtnMinSize,
+    Result := Math.Max(Style.GetScrollBarBtnMinSize,
         PageSize * Size div Math.Max(1, Max - Min + 1));
     if Result > Size then
       Result := Size;
