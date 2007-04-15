@@ -8,43 +8,43 @@ object CompilerOptForm: TCompilerOptForm
       Orientation = Vertical
       Spacing = 4
       object Box4: TFBoxLayout
-        object grpBox1: TGroupBox
+        object grpBox1: TFGroupBox
           Text = 'Unit Style:'
           object grpBox1VBox1: TFBoxLayout
             Orientation = Vertical
-          	object cbSmartLink: TCheckbox
+          	object cbSmartLink: TFCheckbox
           	  Checked = True
           	  Text = 'Smart Linkable (-CX)'
           	end
           end
         end
-        object grpBox2: TGroupBox
+        object grpBox2: TFGroupBox
           Text = 'Checks:'
           object grpBox2VBox1: TFBoxLayout
             Orientation = Vertical
-          	object rbIO: TRadioButton
+          	object rbIO: TFRadioButton
           	  Checked = True
           	  Text = 'I/O (-Ci)'
           	end
-          	object rbOverflow: TRadioButton
+          	object rbOverflow: TFRadioButton
           	  Checked = True
           	  Text = 'Overflow (-Co)'
           	end
-          	object rbRange: TRadioButton
+          	object rbRange: TFRadioButton
           	  Checked = True
           	  Text = 'Range (-Cr)'
           	end
-          	object rbStack: TRadioButton
+          	object rbStack: TFRadioButton
           	  Checked = True
           	  Text = 'Stack (-Ct)'
           	end
           end
         end
-        object grpBox3: TGroupBox
+        object grpBox3: TFGroupBox
           Text = 'Heap Size (-Ch):'
           object grpBox3VBox1: TFBoxLayout
             Orientation = Vertical
-          	object edHeapSize: TEdit
+          	object edHeapSize: TFEdit
           	  Text = '0'
               CanExpandWidth = False
           	end
@@ -52,23 +52,23 @@ object CompilerOptForm: TCompilerOptForm
         end
       end
       object Box5: TFBoxLayout
-        object grpBox4: TGroupBox
+        object grpBox4: TFGroupBox
           Text = 'Generate:'
           object grpBox4VBox1: TFBoxLayout
             Orientation = Vertical
-          	object rbNormal: TRadioButton
+          	object rbNormal: TFRadioButton
           	  Text = 'Normal Code (none)'
           	end
-          	object rbFaster: TRadioButton
+          	object rbFaster: TFRadioButton
           	  Checked = True
           	  Text = 'Faster Code (-OG)'
           	end
-          	object rbSmaller: TRadioButton
+          	object rbSmaller: TFRadioButton
           	  Text = 'Smaller Code (-Og)'
           	end
           end
         end
-        object grpBox5: TGroupBox
+        object grpBox5: TFGroupBox
           Text = 'Target Platform:'
           CanExpandHeight = True
           object grpBox5VBox1: TFBoxLayout
@@ -87,28 +87,28 @@ object CompilerOptForm: TCompilerOptForm
         end
       end
       object Box6: TFBoxLayout
-        object grpBox6: TGroupBox
+        object grpBox6: TFGroupBox
           Text = 'Optimizations:'
           object grpBox6VBox1: TFBoxLayout
             Orientation = Vertical
             CanExpandWidth = True
-          	object rbLevel0: TRadioButton
+          	object rbLevel0: TFRadioButton
           	  Text = 'Level 0 (no extra Optimizations) (none)'
           	end
-          	object rbLevel1: TRadioButton
+          	object rbLevel1: TFRadioButton
           	  Checked = True
           	  Text = 'Level 1 (Quick Optimizations) (-O1)'
           	end
-          	object rbLevel2: TRadioButton
+          	object rbLevel2: TFRadioButton
           	  Text = 'Level 2 (Level 1 + Slower Optimizations) (-O2)'
           	end
-          	object rbLevel3: TRadioButton
+          	object rbLevel3: TFRadioButton
           	  Text = 'Level 3 (Level 2 + Uncertain) (-O3)'
           	end
-          	object rbKeepVarReg: TCheckbox
+          	object rbKeepVarReg: TFCheckbox
           	  Text = 'Keep certain variables in registers (-Or)'
           	end
-          	object rbUncOpt: TCheckbox
+          	object rbUncOpt: TFCheckbox
           	  Text = 'Uncertain Optimizations (-Ou)'
           	end
           end

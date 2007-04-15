@@ -30,9 +30,9 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="WidgetDemo.lpr"/>
+        <Filename Value="widgetdemo.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="WidgetDemo"/>
+        <UnitName Value="widgetdemo"/>
       </Unit0>
     </Units>
   </ProjectOptions>

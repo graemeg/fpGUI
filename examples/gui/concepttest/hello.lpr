@@ -7,13 +7,13 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgui, gfxbase, frmCompilerOpt, OpenSoftStyle, fpguipackage;
+  fpGUI, fpGFX, gfxbase, frmCompilerOpt, StyleManager;
 
 type
 
   { TMainForm }
 
-  TMainForm = class(TForm)
+  TMainForm = class(TFForm)
     procedure Button3Clicked(Sender: TObject);
   private
     procedure btnCloseClick(Sender: TObject);
@@ -24,23 +24,23 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    HBox: TBoxLayout;
-    VBox: TBoxLayout;
-    TextLabel: TLabel;
-    Button: TButton;
-    btnGridForm: TButton;
-    btnCompOpt: TButton;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
+    HBox: TFBoxLayout;
+    VBox: TFBoxLayout;
+    TextLabel: TFLabel;
+    Button: TFButton;
+    btnGridForm: TFButton;
+    btnCompOpt: TFButton;
+    Button1: TFButton;
+    Button2: TFButton;
+    Button3: TFButton;
   end;
   
   
   { TGridForm }
 
-  TGridForm = Class(TForm)
-    Layout : TGridLayout;
-    Button1,Button2,Button3,Button4,Button5 : TButton;
+  TGridForm = Class(TFForm)
+    Layout: TFGridLayout;
+    Button1,Button2,Button3,Button4,Button5: TFButton;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -48,22 +48,22 @@ type
   
   { TFindDialog }
 
-  TFindDialog = class(TForm)
+  TFindDialog = class(TFForm)
   private
     procedure btnCloseClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   published
-    lblFind: TLabel;
-    btnFindNext, btnClose: TButton;
-    edFind: TEdit;
-    GroupBox1: TGroupBox;
-    grpBox1Layout: TBoxLayout;
-    Radio1, Radio2: TRadioButton;
-    cbCase: TCheckBox;
-    leftLayout, rightLayout: TBoxLayout;
-    topLeftLayout: TBoxLayout;
-    mainLayout: TBoxLayout;
+    lblFind: TFLabel;
+    btnFindNext, btnClose: TFButton;
+    edFind: TFEdit;
+    GroupBox1: TFGroupBox;
+    grpBox1Layout: TFBoxLayout;
+    Radio1, Radio2: TFRadioButton;
+    cbCase: TFCheckBox;
+    leftLayout, rightLayout: TFBoxLayout;
+    topLeftLayout: TFBoxLayout;
+    mainLayout: TFBoxLayout;
   end;
 
 
@@ -80,49 +80,54 @@ begin
   inherited Create(AOwner);
   Text := 'Find Dialog';
   BorderWidth := 8;
-  WindowType := wtWindow;
 
-  topLeftLayout := TBoxLayout.Create(self);
-  lblFind := TLabel.Create(self);
-  lblFind.Text := 'Find what';
-  edFind := TEdit.Create(self);
+  topLeftLayout := TFBoxLayout.Create(self);
+  topLeftLayout.CanExpandWidth := True;
+    lblFind := TFLabel.Create(self);
+    lblFind.Text := 'Find what:';
+    edFind := TFEdit.Create(self);
   topLeftLayout.InsertChild(lblFind);
   topLeftLayout.InsertChild(edFind);
   
-  leftLayout := TBoxLayout.Create(self);
+  leftLayout := TFBoxLayout.Create(self);
   leftLayout.Orientation := Vertical;
-  leftLayout.CanExpandHeight := True;
-  GroupBox1 := TGroupBox.Create(self);
+  leftLayout.CanExpandWidth := True;
+
+  GroupBox1 := TFGroupBox.Create(self);
   GroupBox1.Text := 'Direction';
-  grpBox1Layout := TBoxLayout.Create(self);
-//  grpBox1Layout.Orientation := Vertical;
+  GroupBox1.CanExpandWidth := True;
+    grpBox1Layout := TFBoxLayout.Create(self);
+      Radio1 := TFRadioButton.Create(self);
+      Radio1.Text := 'Up';
+      Radio1.CanExpandWidth := True;
+      Radio2 := TFRadioButton.Create(self);
+      Radio2.Text := 'Down';
+      Radio2.CanExpandWidth := True;
   GroupBox1.InsertChild(grpBox1Layout);
-  Radio1 := TRadioButton.Create(self);
-  Radio1.Text := 'Up';
-  Radio2 := TRadioButton.Create(self);
-  Radio2.Text := 'Down';
   grpBox1Layout.InsertChild(Radio1);
   grpBox1Layout.InsertChild(Radio2);
 
-  cbCase := TCheckBox.Create(self);
+  cbCase := TFCheckBox.Create(self);
   cbCase.Text := 'Case sensitive';
+  cbCase.CanExpandWidth := True;
+
   leftLayout.InsertChild(topLeftLayout);
   leftLayout.InsertChild(GroupBox1);
   leftLayout.InsertChild(cbCase);
   
-  rightLayout := TBoxLayout.Create(self);
+  rightLayout := TFBoxLayout.Create(self);
   rightLayout.Orientation := Vertical;
   rightLayout.VertAlign := vertTop;
-  btnFindNext := TButton.Create(self);
-  btnFindNext.Text := 'Find Next';
-  btnClose := TButton.Create(self);
-  btnClose.Text := 'Close';
-  btnClose.CanExpandWidth := True;
-  btnClose.OnClick := @btnCloseClick;
+    btnFindNext := TFButton.Create(self);
+    btnFindNext.Text := 'Find Next';
+    btnClose := TFButton.Create(self);
+    btnClose.Text := 'Close';
+    btnClose.CanExpandWidth := True;
+    btnClose.OnClick := @btnCloseClick;
   rightLayout.InsertChild(btnFindNext);
   rightLayout.InsertChild(btnClose);
   
-  mainLayout := TBoxLayout.Create(self);
+  mainLayout := TFBoxLayout.Create(self);
   mainLayout.InsertChild(leftLayout);
   mainLayout.InsertChild(rightLayout);
   
@@ -166,30 +171,30 @@ begin
   BorderWidth := 8;
   self.BorderWidth := 11;
 
-  Layout := TGridLayout.Create(Self);
+  Layout := TFGridLayout.Create(Self);
     Layout.Name := 'Layout';
     Layout.RowCount := 3;
     Layout.ColCount := 3;
 
-    Button1 := TButton.Create(Self);
+    Button1 := TFButton.Create(Self);
       Button1.Name := 'TopLeft';
       Button1.Text := 'Top Left';
     Layout.AddWidget(Button1, 0, 0, 1, 1);
-    Button2 := TButton.Create(Self);
+    Button2 := TFButton.Create(Self);
       Button2.Name := 'TopRight';
       Button2.Text := 'Top Right';
     Layout.AddWidget(Button2, 2,0,1,1);
-    Button3 := TButton.Create(Self);
+    Button3 := TFButton.Create(Self);
       Button3.Name := 'CenterCenter';
       Button3.Text := 'Center Center';
       // Button3.CanExpandWidth := False;
       // Button3.CanExpandHeight := False;
     Layout.AddWidget(Button3, 1,1,1,1);
-    Button4 := TButton.Create(Self);
+    Button4 := TFButton.Create(Self);
       Button4.Name := 'BottomLeft';
       Button4.Text := 'Bottom Left';
     Layout.AddWidget(Button4,0,2,1,1);
-    Button5 := TButton.Create(Self);
+    Button5 := TFButton.Create(Self);
       Button5.Name := 'BottomRight';
       Button5.Text := 'Bottom Right';
     Layout.AddWidget(Button5, 2,2,1,1);
@@ -226,7 +231,12 @@ end;
 procedure TMainForm.btnCompOptClick(Sender: TObject);
 begin
   if not Assigned(CompOpt) then
-    Application.CreateForm(TCompilerOptForm, CompOpt)
+  begin
+    CompOpt := TCompilerOptForm.Create(GFApplication);
+    LoadForm(CompOpt);
+    CompOpt.Style := gStyleManager.CreateInstance('OpenSoft');
+    CompOpt.Show;
+  end
   else
     CompOpt.Show;
 end;
@@ -255,58 +265,55 @@ begin
   inherited Create(AOwner);
   Name := 'frmMain';
   BorderWidth := 8;
-  WindowType := wtWindow;
   OnActivate := @MainFormActivate;
 
-  HBox := TBoxLayout.Create(self);
-  HBox.Name := 'HBox';
-  HBox.Parent := self;
-  HBox.Spacing := 3;
-  HBox.Orientation := Horizontal;
+  HBox := TFBoxLayout.Create(self);
+  HBox.Name         := 'HBox';
+  HBox.Parent       := self;
+  HBox.Spacing      := 3;
+  HBox.Orientation  := Horizontal;
 
-  TextLabel := TLabel.Create(self);
-  TextLabel.Name := 'TextLabel';
-  TextLabel.Text := 'Hello';
-  TextLabel.Parent := HBox;
+  TextLabel := TFLabel.Create(self);
+  TextLabel.Name    := 'TextLabel';
+  TextLabel.Text    := 'Hello';
+  TextLabel.Parent  := HBox;
 
-  Button := TButton.Create(self);
-  Button.Parent := HBox;
-  Button.Text := 'Close';
-  Button.OnClick := @btnCloseClick;
+  Button := TFButton.Create(self);
+  Button.Parent     := HBox;
+  Button.Text       := 'Close';
+  Button.OnClick    := @btnCloseClick;
 
-  btnGridForm := TButton.Create(self);
-  btnGridForm.Parent := HBox;
-  btnGridForm.Text := 'Grid Form';
-  btnGridForm.OnClick := @btnGridFormClick;
+  btnGridForm := TFButton.Create(self);
+  btnGridForm.Parent    := HBox;
+  btnGridForm.Text      := 'Grid Form';
+  btnGridForm.OnClick   := @btnGridFormClick;
   
-  btnCompOpt := TButton.Create(Self);
-    btnCompOpt.Parent := HBox;
-    btnCompOpt.Name := 'btnCompOpt';
-    btnCompOpt.Text := 'Compiler Options';
-    btnCompOpt.OnClick := @btnCompOptClick;
-//    btnCompOpt.FCanExpandWidth := True;  // if not used, button is smaller than others
+  btnCompOpt := TFButton.Create(Self);
+    btnCompOpt.Parent   := HBox;
+    btnCompOpt.Name     := 'btnCompOpt';
+    btnCompOpt.Text     := 'Compiler Options';
+    btnCompOpt.OnClick  := @btnCompOptClick;
 
-  VBox := TBoxLayout.Create(self);
-  VBox.Orientation := Vertical;
-    Button1 := TButton.Create(Self);
-      Button1.Name := 'Top';
-      Button1.Text := 'Top';
-      Button1.CanExpandWidth := True;  // if not used, button is smaller than others
-      Button1.OnClick := @btnTopClick;
+  VBox := TFBoxLayout.Create(self);
+  VBox.Orientation            := Vertical;
+    Button1 := TFButton.Create(Self);
+      Button1.Name            := 'Top';
+      Button1.Text            := 'Top';
+      Button1.CanExpandWidth  := True;  // if not used, button is smaller than others
+      Button1.OnClick         := @btnTopClick;
     VBox.InsertChild(Button1);
-    Button2 := TButton.Create(Self);
-      Button2.Name := 'Centre';
-      Button2.Text := 'Centre';
-      Button2.CanExpandWidth := True;
+    Button2 := TFButton.Create(Self);
+      Button2.Name            := 'Centre';
+      Button2.Text            := 'Centre';
+      Button2.CanExpandWidth  := True;
     VBox.InsertChild(Button2);
-    Button3 := TButton.Create(Self);
-      Button3.Name := 'Bottom';
-      Button3.Text := 'Bottom (SetBounds)';
-      Button3.OnClick :=@Button3Clicked;
+    Button3 := TFButton.Create(Self);
+      Button3.Name            := 'Bottom';
+      Button3.Text            := 'Bottom (SetBounds)';
+      Button3.OnClick         := @Button3Clicked;
     VBox.InsertChild(Button3);
 
   HBox.InsertChild(VBox);
-
 
   Child := HBox;
 end;
@@ -317,18 +324,19 @@ var
 
 begin
   MainForm := nil;
+
   { set application wide style }
+  GFApplication.Initialize;
+//  gStyleManager.CreateInstance('OpenSoft');
 
-  Application.SetStyle(FOpenSoftStyle);
-
-  MainForm := TMainForm.Create(Application);
-//  MainForm.SetBounds(Point(100, 300), Size(300,200));
+  MainForm := TMainForm.Create(GFApplication);
   try
+    MainForm.Style := gStyleManager.CreateInstance('OpenSoft');
     MainForm.Show;
-    Application.Run;
+    GFApplication.Run;
   finally
     MainForm.Free;
   end;
-
 end.
+
 

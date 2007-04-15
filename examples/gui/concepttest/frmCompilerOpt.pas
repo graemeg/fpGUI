@@ -11,9 +11,9 @@ type
 
   { TCompilerOptForm }
 
-  TCompilerOptForm = Class(TForm)
+  TCompilerOptForm = Class(TFForm)
   private
-    FGroupBoxStyle: TStyle;
+    FGroupBoxStyle: TStyleAbs;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -28,34 +28,34 @@ type
     Box5: TFBoxLayout;
     Box6: TFBoxLayout;
     btnOK, btnCancel, btnShowOp, btnTest, btnLoadSave : TFButton;
-    grpBox1: TGroupBox;
+    grpBox1: TFGroupBox;
       grpBox1VBox1: TFBoxLayout;
         cbSmartLink: TFCheckbox;
-    grpBox2: TGroupBox;
+    grpBox2: TFGroupBox;
       grpBox2VBox1: TFBoxLayout;
-        rbIO: TRadioButton;
-        rbOverflow: TRadioButton;
-        rbRange: TRadioButton;
-        rbStack: TRadioButton;
-    grpBox3: TGroupBox;
+        rbIO: TFRadioButton;
+        rbOverflow: TFRadioButton;
+        rbRange: TFRadioButton;
+        rbStack: TFRadioButton;
+    grpBox3: TFGroupBox;
       grpBox3VBox1: TFBoxLayout;
-        edHeapSize: TEdit;
-    grpBox4: TGroupBox;
+        edHeapSize: TFEdit;
+    grpBox4: TFGroupBox;
       grpBox4VBox1: TFBoxLayout;
-        rbNormal: TRadioButton;
-        rbFaster: TRadioButton;
-        rbSmaller: TRadioButton;
-    grpBox5: TGroupBox;
+        rbNormal: TFRadioButton;
+        rbFaster: TFRadioButton;
+        rbSmaller: TFRadioButton;
+    grpBox5: TFGroupBox;
       grpBox5VBox1: TFBoxLayout;
         lblTarget1: TFLabel;
         lblTarget2: TFLabel;
         lblTarget3: TFLabel;
-    grpBox6: TGroupBox;
+    grpBox6: TFGroupBox;
       grpBox6VBox1: TFBoxLayout;
-        rbLevel0: TRadioButton;
-        rbLevel1: TRadioButton;
-        rbLevel2: TRadioButton;
-        rbLevel3: TRadioButton;
+        rbLevel0: TFRadioButton;
+        rbLevel1: TFRadioButton;
+        rbLevel2: TFRadioButton;
+        rbLevel3: TFRadioButton;
         rbKeepVarReg: TFCheckbox;
         rbUncOpt: TFCheckbox;
   end;
@@ -64,8 +64,8 @@ var
   CompOpt: TCompilerOptForm;
 
 implementation
-uses
-  OpenSoftStyle;
+//uses
+//  OpenSoftStyle;
 
 { TCompilerOptForm }
 

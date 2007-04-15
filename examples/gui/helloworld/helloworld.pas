@@ -9,7 +9,7 @@ uses
   ;
 
 type
-  TMainForm = class(TForm)
+  TMainForm = class(TFForm)
   private
     BoxLayout: TFBoxLayout;
     btnHello: TFButton;
