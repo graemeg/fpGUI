@@ -14,47 +14,47 @@ uses
   ,SysUtils
   ,fpGFX
   ,fpGUI
-  ,stylemanager
+  ,StyleManager
   ;
   
 type
 
   { TWidgetDemoForm }
 
-  TWidgetDemoForm = class(TForm)
-    topLayout: TBoxLayout;
-    mainLayout: TGridLayout;
-    MainMenu: TMenuBar;
+  TWidgetDemoForm = class(TFForm)
+    topLayout: TFBoxLayout;
+    mainLayout: TFGridLayout;
+    MainMenu: TFMenuBar;
 
-    topStyleComboLayout: TBoxLayout;
-    lblStyle: TLabel;
-    cbStyle: TComboBox;
+    topStyleComboLayout: TFBoxLayout;
+    lblStyle: TFLabel;
+    cbStyle: TFComboBox;
     
-    topCheckboxLayout: TBoxLayout;
-    chkStdPalette: TCheckBox;
-    chkDisable: TCheckBox;
+    topCheckboxLayout: TFBoxLayout;
+    chkStdPalette: TFCheckBox;
+    chkDisable: TFCheckBox;
 
-    topLeftGroupBox: TGroupBox;
-    topLeftGroupBoxLayout: TBoxLayout;
-    Radio1: TRadioButton;
-    Radio2: TRadioButton;
-    Radio3: TRadioButton;
+    topLeftGroupBox: TFGroupBox;
+    topLeftGroupBoxLayout: TFBoxLayout;
+    Radio1: TFRadioButton;
+    Radio2: TFRadioButton;
+    Radio3: TFRadioButton;
 
-    topRightGroupBox: TGroupBox;
-    topRightGroupBoxLayout: TBoxLayout;
-    Button1: TButton;
-    Button2: TButton;
+    topRightGroupBox: TFGroupBox;
+    topRightGroupBoxLayout: TFBoxLayout;
+    Button1: TFButton;
+    Button2: TFButton;
 
-    StringGrid: TStringGrid;
+    StringGrid: TFStringGrid;
 
-    bottomRightGroupBox: TGroupBox;
-    bottomRightGroupBoxLayout: TBoxLayout;
-    Edit1: TEdit;
-    Edit2: TEdit;
+    bottomRightGroupBox: TFGroupBox;
+    bottomRightGroupBoxLayout: TFBoxLayout;
+    Edit1: TFEdit;
+    Edit2: TFEdit;
 
-    bottomButtonLayout: TBoxLayout;
-    btnExit: TButton;
-    btnHelp: TButton;
+    bottomButtonLayout: TFBoxLayout;
+    btnExit: TFButton;
+    btnHelp: TFButton;
 
     procedure   btnExitClick(Sender: TObject);
     procedure   Radio1Click(Sender: TObject);
@@ -159,9 +159,9 @@ end;
 
 procedure TWidgetDemoForm.CreateTopMenu;
 var
-  mi: TMenuItem;
+  mi: TFMenuItem;
 begin
-  MainMenu := TMenuBar.Create(self);
+  MainMenu := TFMenuBar.Create(self);
   mi := MainMenu.AddMenu('File');
   mi.SubMenu.AddMenu('Exit', '', @btnExitClick);
   MainMenu.AddMenu('Edit');
@@ -173,11 +173,11 @@ end;
 
 procedure TWidgetDemoForm.CreateStyleCombo;
 begin
-  topStyleComboLayout := TBoxLayout.Create(self);
+  topStyleComboLayout := TFBoxLayout.Create(self);
 
-  lblStyle := TLabel.Create('Style:', self);
+  lblStyle := TFLabel.Create('Style:', self);
 
-  cbStyle := TComboBox.Create(self);
+  cbStyle := TFComboBox.Create(self);
   cbStyle.CanExpandWidth := True;
   gStyleManager.AssignStyleTypes(cbStyle.Items);
   cbStyle.OnChange := @cbStyleChanged;
@@ -189,13 +189,13 @@ end;
 
 procedure TWidgetDemoForm.CreateTopCheckboxLine;
 begin
-  topCheckboxLayout := TBoxLayout.Create(self);
+  topCheckboxLayout := TFBoxLayout.Create(self);
 
-  chkStdPalette := TCheckBox.Create('Standard color palette', self);
+  chkStdPalette := TFCheckBox.Create('Standard color palette', self);
   chkStdPalette.CanExpandWidth  := True;
   chkStdPalette.Checked         := True;
 
-  chkDisable := TCheckBox.Create('Disable widgets', self);
+  chkDisable := TFCheckBox.Create('Disable widgets', self);
   chkDisable.OnClick := @chkDisableClick;
 
   topCheckboxLayout.InsertChild(chkStdPalette);
@@ -204,22 +204,22 @@ end;
 
 procedure TWidgetDemoForm.CreateTopLeftGroupBox;
 begin
-  topLeftGroupBox := TGroupBox.Create('Group Box 1', self);
+  topLeftGroupBox := TFGroupBox.Create('Group Box 1', self);
   topLeftGroupBox.CanExpandWidth   := True;
 
-  topLeftGroupBoxLayout := TBoxLayout.Create(self);
+  topLeftGroupBoxLayout := TFBoxLayout.Create(self);
   topLeftGroupBoxLayout.Orientation := Vertical;
 
-  Radio1 := TRadioButton.Create('Radio button 1', self);
+  Radio1 := TFRadioButton.Create('Radio button 1', self);
   Radio1.Checked          := True;
   Radio1.CanExpandWidth   := True;
   Radio1.OnClick          := @Radio1Click;
 
-  Radio2 := TRadioButton.Create('Radio button 2', self);
+  Radio2 := TFRadioButton.Create('Radio button 2', self);
   Radio2.CanExpandWidth   := True;
   Radio2.OnClick          := @Radio2Click;
 
-  Radio3 := TRadioButton.Create('Radio button 3', self);
+  Radio3 := TFRadioButton.Create('Radio button 3', self);
   Radio3.CanExpandWidth   := True;
 
   topLeftGroupBox.InsertChild(topLeftGroupBoxLayout);
@@ -230,19 +230,19 @@ end;
 
 procedure TWidgetDemoForm.CreateTopRightGroupBox;
 begin
-  topRightGroupBox := TGroupBox.Create('Group Box 2', self);
+  topRightGroupBox := TFGroupBox.Create('Group Box 2', self);
   topRightGroupBox.CanExpandWidth     := True;
   topRightGroupBox.CanExpandHeight    := True;
 
-  topRightGroupBoxLayout := TBoxLayout.Create(self);
+  topRightGroupBoxLayout := TFBoxLayout.Create(self);
   topRightGroupBoxLayout.Orientation  := Vertical;
   topRightGroupBoxLayout.VertAlign    := vertCenter;
   topRightGroupBoxLayout.Spacing      := 8;
 
-  Button1 := TButton.Create('Normal Button', self);
+  Button1 := TFButton.Create('Normal Button', self);
   Button1.CanExpandWidth := True;
 
-  Button2 := TButton.Create('Embedded Button', self);
+  Button2 := TFButton.Create('Embedded Button', self);
   Button2.CanExpandWidth := True;
   Button2.Embedded := True;
 
@@ -255,7 +255,7 @@ procedure TWidgetDemoForm.CreateBottomLeftStringGrid;
 var
   x, y: integer;
 begin
-  StringGrid := TStringGrid.Create(self);
+  StringGrid := TFStringGrid.Create(self);
   StringGrid.ColCount := 10;
   StringGrid.RowCount := 15;
   for y := 0 to StringGrid.RowCount - 1 do
@@ -265,15 +265,15 @@ end;
 
 procedure TWidgetDemoForm.CreateBottomRightGroupBox;
 begin
-  bottomRightGroupBox := TGroupBox.Create('Group Box 3', self);
+  bottomRightGroupBox := TFGroupBox.Create('Group Box 3', self);
   bottomRightGroupBox.CanExpandHeight := True;
   bottomRightGroupBox.CanExpandWidth := True;
 
-  bottomRightGroupBoxLayout := TBoxLayout.Create(self);
+  bottomRightGroupBoxLayout := TFBoxLayout.Create(self);
   bottomRightGroupBoxLayout.Orientation := Vertical;
 
-  Edit1 := TEdit.Create('Normal Edit', self);
-  Edit2 := TEdit.Create('Password Edit', self);
+  Edit1 := TFEdit.Create('Normal Edit', self);
+  Edit2 := TFEdit.Create('Password Edit', self);
   Edit2.PasswordChar := '*';
 
   bottomRightGroupBox.InsertChild(bottomRightGroupBoxLayout);
@@ -283,12 +283,12 @@ end;
 
 procedure TWidgetDemoForm.CreateBottomButtonLayout;
 begin
-  bottomButtonLayout := TBoxLayout.Create(self);
+  bottomButtonLayout := TFBoxLayout.Create(self);
   bottomButtonLayout.HorzAlign := horzRight;
 
-  btnHelp := TButton.Create('Help', self);
+  btnHelp := TFButton.Create('Help', self);
 
-  btnExit := TButton.Create('Exit', self);
+  btnExit := TFButton.Create('Exit', self);
   btnExit.OnClick := @btnExitClick;
 
   bottomButtonLayout.InsertChild(btnHelp);
@@ -302,9 +302,9 @@ begin
   BorderWidth   := 8;
 //  WindowType    := wtWindow;
   
-  topLayout := TBoxLayout.Create(self);
+  topLayout := TFBoxLayout.Create(self);
   topLayout.Orientation     := Vertical;
-  mainLayout := TGridLayout.Create(self);
+  mainLayout := TFGridLayout.Create(self);
   mainLayout.RowCount       := 2;
   
   CreateTopMenu;
