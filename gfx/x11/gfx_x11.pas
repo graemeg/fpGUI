@@ -1270,8 +1270,8 @@ begin
     raise EX11Error.CreateFmt(SOpenDisplayFailed, [DisplayName]);
 
   {$IFDEF XftSupport}
-  FDefaultFont := TX11FontResourceImpl.Create('Arial-10');
-//  FDefaultFont := TX11FontResourceImpl.Create('Sans-10');
+//  FDefaultFont := TX11FontResourceImpl.Create('Arial-10');
+  FDefaultFont := TX11FontResourceImpl.Create('Sans-9');
   {$ELSE}
   FDefaultFont := TX11FontResourceImpl.Create('-adobe-helvetica-medium-r-normal--*-120-*-*-*-*-iso8859-1');
   {$ENDIF}
