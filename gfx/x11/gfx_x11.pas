@@ -1274,14 +1274,12 @@ begin
 //  FDefaultFont := TX11FontResourceImpl.Create('Sans-10');
   {$ELSE}
   FDefaultFont := TX11FontResourceImpl.Create('-adobe-helvetica-medium-r-normal--*-120-*-*-*-*-iso8859-1');
-//  FDefaultFont.FontData := XLoadQueryFont(Handle,
-//   '-adobe-helvetica-medium-r-normal--*-120-*-*-*-*-iso8859-1');
   {$ENDIF}
 
   if not Assigned(FDefaultFont) then
   begin
     {$IFNDEF XftSupport}
-    FDefaultFont.FontData := XLoadQueryFont(Handle, 'fixed');
+    FDefaultFont := TX11FontResourceImpl.Create('-*-fixed-*-*-*-*-*-*-*-*-*-*-iso8859-*');
     {$ENDIF}
     if not Assigned(FDefaultFont) then
       raise EX11Error.Create(SNoDefaultFont);
