@@ -112,6 +112,8 @@ type
   end;
 
 
+  { TEditForm }
+
   TEditForm = class(TTestForm)
     Grid: TFGridLayout;
     VertBox, HorzBox1, HorzBox2: TFBoxLayout;
@@ -119,8 +121,10 @@ type
     Edit1, Edit2: TFEdit;
     GrayCheckBox1, GrayCheckBox2: TFCheckbox;
     Separator: TSeparator;
+    cbBorderStyle: TFButton;
     procedure GrayCheckBox1Click(Sender: TObject);
     procedure GrayCheckBox2Click(Sender: TObject);
+    procedure cbBorderStyleClick(Sender: TObject);
     procedure Edit2Change(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -651,6 +655,20 @@ end;
 procedure TEditForm.GrayCheckBox2Click(Sender: TObject);
 begin
   Edit2.Enabled := not GrayCheckBox2.Checked;
+end;
+
+procedure TEditForm.cbBorderStyleClick(Sender: TObject);
+begin
+  if Edit1.BorderStyle = bsNone then
+  begin
+    Edit1.BorderStyle := bsSingle;
+    Edit2.BorderStyle := bsSingle;
+  end
+  else
+  begin
+    Edit1.BorderStyle := bsNone;
+    Edit2.BorderStyle := bsNone;
+  end;
 end;
 
 

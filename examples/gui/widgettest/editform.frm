@@ -3,7 +3,7 @@ object EditForm: TEditForm
   Text = 'Edit field test'
   object Grid: TFGridLayout
     ColCount = 3
-    RowCount = 4
+    RowCount = 5
     GridPositions = <
       item
 	      Widget = Label1
@@ -39,6 +39,13 @@ object EditForm: TEditForm
         x = 1
 	      y = 3
 	      Widget = PasswordDisplay
+      end
+      item
+	      Widget = cbBorderStyle
+        x = 0
+	      y = 4
+	      Width = 3
+	      Height = 1
       end>
     object Label1: TFLabel
       Text = 'Normal edit field:'
@@ -69,6 +76,10 @@ object EditForm: TEditForm
     object PasswordDisplay: TFLabel
       Text = '(Password field)'
       CanExpandWidth = False
+    end
+    object cbBorderStyle: TFButton
+      Text = 'Alternate Border Style'
+      OnClick = cbBorderStyleClick
     end
   end
 end

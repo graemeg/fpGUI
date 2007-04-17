@@ -1,9 +1,9 @@
 {
     fpGUI  -  Free Pascal GUI Library
-    
+
     Edit class declarations
-    
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+
+    Copyright (C) 2000 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -19,19 +19,24 @@
 {$IFDEF read_interface}
 
   { TFCustomEdit }
+  TBorderStyle = (bsNone, bsSingle);
 
   TFCustomEdit = class(TFWidget)
   private
+    FOldVisibleIndex: Integer;
     FFontColor: TColor;
     FSelStart: integer;
     FSelOffset: integer;
     FCursorPos: Integer;
     FPasswordChar: Char;
     FOnChange: TNotifyEvent;
+    FBorderStyle: TBorderStyle;
     procedure   SetFontColor(const AValue: TColor);
     procedure   SetPasswordChar(APasswordChar: Char);
     procedure   SetCursorPos(ACursorPos: Integer);
+    procedure   SetBorderStyle(ABorderStyle: TBorderStyle);
     procedure   DoMousePressed(pEvent: TMousePressedEventObj);
+    function    GetFirstVisibleIndex: Integer;
   protected
     procedure   Paint(Canvas: TFCanvas); override;
     function    ProcessEvent(Event: TEventObj): Boolean; override;
@@ -45,6 +50,7 @@
     property    CursorPos: Integer read FCursorPos write SetCursorPos;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    FontColor: TColor read FFontColor write SetFontColor;
+    property    BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
     procedure   SetText(const AText: String); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -60,6 +66,7 @@
     property Text;
     property OnChange;
     property FontColor;
+    property BorderStyle;
   end;
 
 {$ENDIF read_interface}
@@ -80,8 +87,8 @@ begin
   FCursor := crIBeam;
   FFontColor := clWindowText;
   FCursorPos := 0;
+  FBorderStyle := bsSingle;
 end;
-
 
 constructor TFCustomEdit.Create(const pText: string; pOwner: TComponent);
 begin
@@ -89,19 +96,40 @@ begin
   Text := pText;
 end;
 
+procedure TFCustomEdit.SetBorderStyle(ABorderStyle: TBorderStyle);
+begin
+  if FBorderStyle <> ABorderStyle then
+  begin
+    FBorderStyle := ABorderStyle;
+    Redraw;
+  end;
+end;
 
 procedure TFCustomEdit.Paint(Canvas: TFCanvas);
 var
   Borders: TRect;
-  s: String;
-  x: Integer;
+  s: string;
+  c: TGfxColor;
+  x, y: Integer;
   ItemRect: TRect;
   ItemFlags: TItemFlags;
 begin
   ItemFlags := [];
   Borders := Style.GetEditBoxBorders;
 
-  Style.DrawEditBox(Canvas, Rect(0, 0, BoundsSize.cx, BoundsSize.cy));
+  ItemRect := Rect(0, 0, BoundsSize.cx, BoundsSize.cy);
+  case FBorderStyle of
+    bsNone:
+      begin
+        c := Canvas.GetColor;
+        Style.SetUIColor(Canvas, clWindow);
+        Style.DrawWindowBackground(Canvas, ItemRect);
+        Canvas.SetColor(c);
+      end;
+    bsSingle:
+      Style.DrawEditBox(Canvas, ItemRect);
+  end;
+
 
   if not Canvas.IntersectClipRect(Rect(Borders.Left + 1, Borders.Top + 1,
     BoundsSize.cx - Borders.Right - 1, BoundsSize.cy - Borders.Bottom - 1)) then
@@ -141,7 +169,7 @@ begin
     ItemRect.BottomRight := ItemRect.BottomRight - 2;
 }
 //    InflateRect(ItemRect, -1, -1);
-    
+
 //    Style.SetUIColor(Canvas, clWindowText);
 
     {$Note Start here: Refine the selection rect}
@@ -150,17 +178,33 @@ begin
     Style.DrawItemAfter(Canvas, ItemRect, ItemFlags);
   end
   else
+  begin
+    x := 1;
+    y := GetFirstVisibleIndex;
+    {$ifdef debug}
+    writeln(y);
+    {$endif debug}
+    while (x <= Length(Text)) and (Canvas.TextWidth(Copy(Text, y, x)) < Width - 8) do
+      Inc(x);
+    s := Copy(Text, y, x);
+    {$ifdef debug}
+    writeln(s);
+    writeln(FCursorPos, ':', y);
+    {$endif debug}
     Canvas.TextOut(Borders.TopLeft + Point(1, 1), s);
+  end;
 
-
+  // cursor
   if wsHasFocus in WidgetState then
   begin
     Canvas.SetColor(Style.GetUIColor(clWindowText));
-    x := Borders.Left + 1 + Canvas.TextWidth(Copy(s, 1, CursorPos));
+    x := Canvas.TextWidth(Copy(s, 1, CursorPos-y+1));
+    if CursorPos = 0 then
+      x := 0;
+    x := Borders.Left + 1 + x;
     Canvas.DrawLine(Point(x, Borders.Top), Point(x, BoundsSize.cy - Borders.Bottom));
   end;
 end;
-
 
 function TFCustomEdit.ProcessEvent(Event: TEventObj): Boolean;
 begin
@@ -172,7 +216,6 @@ begin
   end;
   Result := inherited ProcessEvent(Event);
 end;
-
 
 procedure TFCustomEdit.EvKeyPressed(Key: Word; Shift: TShiftState);
 begin
@@ -193,6 +236,7 @@ begin
       else
         inherited EvKeyPressed(Key, Shift);
     end;
+    Redraw;
   end
 {  else if Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssSuper, ssHyper, ssAltGr] = [ssShift] then
   begin
@@ -305,7 +349,7 @@ var
   n: integer;
   cx: integer;
   lText: string;
-  
+
     // replicates pStrValue a set of pRepCount times.
     function lReplicate(const pStrValue : string; pRepCount : Word) : string;
     var
@@ -335,25 +379,33 @@ begin
     Borders := Style.GetEditBoxBorders;
     lSideMargin := Borders.Left + 1;
     cp := CursorPos;
-    
+
     // Make sure we work with the correct displayed text
     if FPasswordChar = #0 then
       lText := Text
     else
       lText := lReplicate(FPasswordChar, Length(Text));
-    
+
     cpx := FindForm.Wnd.Canvas.TextWidth(Copy(lText, 1, CursorPos)) + lSideMargin;
-    
-    for n := 0 to Length(Text) do
+
+    for n := FOldVisibleIndex to Length(Text) do
     begin
-      cx := FindForm.Wnd.Canvas.TextWidth(Copy(lText, 1, n)) + lSideMargin;
+      cx := FindForm.Wnd.Canvas.TextWidth(Copy(lText, FOldVisibleIndex, n-FOldVisibleIndex+1)) + lSideMargin;
       if abs(cx - pEvent.Position.x) < abs(cpx - pEvent.Position.x) then
       begin
         cpx := cx;
         cp := n;
       end;
     end;
-    
+
+    {cp := cp + FOldVisibleIndex - 1;
+
+    if cp < 0 then
+      cp := 0
+    else
+    if cp > Length(Text) then
+      cp := Length(Text);}
+
     FCursorPos := cp;
 
     if (ssShift in pEvent.Shift) then
@@ -368,5 +420,28 @@ begin
   end;
 end;
 
-{$ENDIF read_implementation}
+function TFCustomEdit.GetFirstVisibleIndex: Integer;
+var
+  Canvas: TFCustomCanvas;
 
+  function GetFirstPosition(maxlength: Integer): Integer;
+  begin
+    if Canvas.TextWidth(Copy(Text, 1, maxlength)) < Width-8 then
+      Result := 1
+    else
+    begin
+      Result := maxlength;
+      while (Result > 1) and (Canvas.TextWidth(Copy(Text,
+        Result-1, maxlength-Result+2)) < Width-8) do
+        Dec(Result);
+    end;
+  end;
+
+begin
+  Canvas := FindForm.Wnd.Canvas;
+  Result := GetFirstPosition(Length(Text));
+  if Result > FCursorPos then
+    Result := FCursorPos;
+  FOldVisibleIndex := Result;
+end;
+{$ENDIF read_implementation}
