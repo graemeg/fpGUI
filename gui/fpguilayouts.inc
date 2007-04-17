@@ -384,7 +384,7 @@ var
   i: Integer;
   item: TFFixedItem;
 begin
-  writeln('==> ' + Classname + '.Resized');
+//  writeln('==> ' + Classname + '.Resized');
 
   for i := 0 to FWidgets.Count - 1 do
   begin
