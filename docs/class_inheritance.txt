@@ -1,0 +1,78 @@
+
+The derivation and inheritance of classes are different than one
+might be used to.  It will be explained by the following
+example.
+
+Due to the graphics painting library being different on certain
+platforms we had to do some trickery to the inheritance so the
+same classname could be used in descendant classes for widgets
+etc in fpGUI.
+
+Here is the inheritance for the X11 backend for TFCanvas:
+
+                                  TObject
+                                     |
+                               TFCustomCanvas
+                                     |
+     TDefCanvas      --->        TX11Canvas
+         |
+      TFCanvas
+
+
+
+Here is the inheritance for the GDI backend for TFCanvas:
+
+                                  TObject
+                                     |
+                               TFCustomCanvas
+                                     |
+     TDefCanvas      --->        TGDICanvas
+         |
+      TFCanvas
+
+
+TDefCanvas acts like a alias for the actual backend used. Every 
+painting library has a gfxinterface.pas unit that defines this
+alias.
+
+  X11:    gfx/x11/gfxinterface.pas
+  GDI:    gfx/gdi/gfxinterface.pas
+
+
+TFCanvas is common to all painting backends.
+
+  TFCanvas:    gfx/fpgfx.pas
+
+
+TFCustomCanvas is also common to all painting backends and acts
+like a abstract class defining the class interface that needs
+to be implemented.
+
+  TFCustomCanvas:    gfx/gfxbase.pas
+
+
+Each backend needs to implement the class interface defined by
+TFCustomCanvas. Obviously they are specific to each backend
+so lives in that backends directory.
+
+  TX11Canvas:    gfx/x11/gfx_x11.pas
+  TGDICanvas:    gfx/gdi/gfx_gdi.pas
+
+
+Each backend has it's own fpgfxpackage.lpk Lazarus Package. Due
+to the fpgfxpackage including the common units and the backend
+specific units, it completes the class hierachy and ties
+all the units together.
+
+Other classes that follow this same process (inheritance) are
+listed below.  Their actual definitions are in the 
+gfxinterface.pas unit in each backend directory.
+
+  TDefFont
+  TDefScreen
+  TDefApplication
+  TDefWindow
+  TDefBitmap
+
+        ---------------oO0Oo-----------------
+
