@@ -151,6 +151,7 @@ function ClipMinMax(val, min, max: Integer): Integer; //inline;
 
 { This will change at a later date! }
 procedure LoadForm(AForm: TComponent);
+procedure SaveForm(AForm: TComponent);
 
 
 implementation
@@ -200,6 +201,25 @@ begin
   lForm := @AForm;
   BinStream.Position := 0;
   BinStream.ReadComponent(lForm^);
+  BinStream.Free;
+end;
+
+// graeme: still work in progress (2007-04-25)
+procedure SaveForm(AForm: TComponent);
+var
+  f, f2: TStream;
+  Filename: string;
+  TextStream, BinStream: TStream;
+begin
+  Filename    := LowerCase(Copy(AForm.ClassName, 2, 255)) + '.frm';
+//  Filename    := 'test.frm';
+  BinStream   := TMemoryStream.Create;
+  TextStream  := TFileStream.Create(Filename, fmCreate);
+  BinStream.WriteComponent(AForm);
+  BinStream.Position := 0;
+  ObjectBinaryToText(BinStream, TextStream);
+
+  TextStream.Free;
   BinStream.Free;
 end;
 

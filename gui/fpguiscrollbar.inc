@@ -48,7 +48,7 @@
     procedure   SetPageSize(APageSize: Integer);
     procedure   SetPosition(APosition: Integer);
     // Helpers
-    function    GeTFButtonSize: Integer;
+    function    GetButtonSize: Integer;
     function    ClipPosition(APosition: Integer): Integer;
     procedure   UpdateBar;
   protected
@@ -192,7 +192,7 @@ begin
           ButtonPos := (Position - Min) *
 	            (Size - ButtonSize) div (Max - Min - PageSize + 1);
       end;
-      ButtonSize := GeTFButtonSize;
+      ButtonSize := GetButtonSize;
     end;
     Redraw;
   end;
@@ -278,7 +278,7 @@ begin
   Result := inherited ProcessEvent(Event);	// For mouse grabbing support
 
   if Event.Button <> mbLeft then
-    exit;
+    Exit; //==>
 
   if TFCustomScrollBar(Owner).Orientation = Horizontal then
     Pos := Event.Position.x
@@ -312,7 +312,7 @@ begin
   Result := inherited ProcessEvent(Event);	// For mouse grabbing support
 
   if Event.Button <> mbLeft then
-    exit;
+    Exit; //==>
 
   if IsDraggingButton then
   begin
@@ -348,8 +348,10 @@ var
 begin
   if IsDraggingButton then
   begin
-    if wsMouseInside in WidgetState then
-    begin
+// We can maybe make this a scrollbar option. Reset scrollbar thumb when
+// mouse moves out of bounds of scrollbar. For now it is just anoying.
+//    if wsMouseInside in WidgetState then
+//    begin
       if TFCustomScrollBar(Owner).Orientation = Horizontal then
       begin
         Pos := Event.Position.x;
@@ -359,15 +361,15 @@ begin
         Pos := Event.Position.y;
         Size := Height;
       end;
-    end
-    else
-    begin
-      Pos := DragStartMousePos;
-      if TFCustomScrollBar(Owner).Orientation = Horizontal then
-        Size := Width
-      else
-        Size := Height;
-    end;  { if/else }
+//    end
+//    else
+//    begin
+//      Pos := DragStartMousePos;
+//      if TFCustomScrollBar(Owner).Orientation = Horizontal then
+//        Size := Width
+//      else
+//        Size := Height;
+//    end;  { if/else }
 
     ButtonPos := ClipMinMax(DragStarTFButtonPos + Pos - DragStartMousePos,
       0, Size - ButtonSize);
@@ -382,7 +384,8 @@ begin
 
     Redraw;
     Result := True
-  end else
+  end
+  else
     Result := False;
 end;
 
@@ -669,7 +672,7 @@ begin
 end;
 
 
-function TFCustomScrollBar.GeTFButtonSize: Integer;
+function TFCustomScrollBar.GetButtonSize: Integer;
 var
   Size: Integer;
 begin

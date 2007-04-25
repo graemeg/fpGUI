@@ -18,6 +18,7 @@
 
 {$IFDEF read_interface}
 
+
   { TFCustomEdit }
   TBorderStyle = (bsNone, bsSingle);
 
@@ -36,7 +37,7 @@
     procedure   SetCursorPos(ACursorPos: Integer);
     procedure   SetBorderStyle(ABorderStyle: TBorderStyle);
     procedure   DoMousePressed(pEvent: TMousePressedEventObj);
-    function    GetFirstVisibleIndex: Integer;
+    function    GetFirstVisibleIndex(AText: string): Integer;
   protected
     procedure   Paint(Canvas: TFCanvas); override;
     function    ProcessEvent(Event: TEventObj): Boolean; override;
@@ -140,6 +141,7 @@ begin
   else
     Canvas.SetColor(Style.GetUIColor(clGrayText));
 
+  // If PasswordChar is set we need to use different text
   if PasswordChar = #0 then
     s := PChar(Text)
   else
@@ -163,16 +165,7 @@ begin
     ItemRect.Top := 0;
     ItemRect.Right := Canvas.TextWidth(Copy(s, 1, CursorPos));
     ItemRect.Bottom := Height;
-{
-    ItemRect := Rect(0, 0, Width, Height);
-    ItemRect.TopLeft := ItemRect.TopLeft + 1;
-    ItemRect.BottomRight := ItemRect.BottomRight - 2;
-}
-//    InflateRect(ItemRect, -1, -1);
 
-//    Style.SetUIColor(Canvas, clWindowText);
-
-    {$Note Start here: Refine the selection rect}
     Style.DrawItemBefore(Canvas, ItemRect, ItemFlags);
     Style.DrawText(Canvas, (Borders.TopLeft + Point(1, 1)), s, WidgetState);
     Style.DrawItemAfter(Canvas, ItemRect, ItemFlags);
@@ -180,13 +173,13 @@ begin
   else
   begin
     x := 1;
-    y := GetFirstVisibleIndex;
+    y := GetFirstVisibleIndex(s);
     {$ifdef debug}
     writeln(y);
     {$endif debug}
-    while (x <= Length(Text)) and (Canvas.TextWidth(Copy(Text, y, x)) < Width - 8) do
+    while (x <= Length(Text)) and (Canvas.TextWidth(Copy(s, y, x)) < Width - 8) do
       Inc(x);
-    s := Copy(Text, y, x);
+    s := Copy(s, y, x);
     {$ifdef debug}
     writeln(s);
     writeln(FCursorPos, ':', y);
@@ -420,18 +413,18 @@ begin
   end;
 end;
 
-function TFCustomEdit.GetFirstVisibleIndex: Integer;
+function TFCustomEdit.GetFirstVisibleIndex(AText: string): Integer;
 var
   Canvas: TFCustomCanvas;
 
   function GetFirstPosition(maxlength: Integer): Integer;
   begin
-    if Canvas.TextWidth(Copy(Text, 1, maxlength)) < Width-8 then
+    if Canvas.TextWidth(Copy(AText, 1, maxlength)) < Width-8 then
       Result := 1
     else
     begin
       Result := maxlength;
-      while (Result > 1) and (Canvas.TextWidth(Copy(Text,
+      while (Result > 1) and (Canvas.TextWidth(Copy(AText,
         Result-1, maxlength-Result+2)) < Width-8) do
         Dec(Result);
     end;
@@ -439,7 +432,7 @@ var
 
 begin
   Canvas := FindForm.Wnd.Canvas;
-  Result := GetFirstPosition(Length(Text));
+  Result := GetFirstPosition(Length(AText));
   if Result > FCursorPos then
     Result := FCursorPos;
   FOldVisibleIndex := Result;
