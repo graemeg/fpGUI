@@ -147,11 +147,12 @@ type
 {$I fpguiprogressbar.inc}
 
 
-function ClipMinMax(val, min, max: Integer): Integer; //inline;
+function ClipMinMax(val, min, max: Integer): Integer;
 
 { This will change at a later date! }
 procedure LoadForm(AForm: TComponent);
 procedure SaveForm(AForm: TComponent);
+procedure ShowMessage(const AMessage: string);
 
 
 implementation
@@ -222,6 +223,24 @@ begin
   TextStream.Free;
   BinStream.Free;
 end;
+
+// graeme: still work in progress (2007-05-01)
+procedure ShowMessage(const AMessage: string);
+var
+  frm: TFStandardDialog;
+begin
+  frm := TFStandardDialog.Create(GFApplication);
+  try
+    frm.Text := 'ShowMessage';
+    frm.Buttons := [mbOk];
+//    frm.Buttons := [mbYes, mbNo, mbCancel, mbHelp];
+    frm.Message := AMessage;
+    frm.ShowModal;
+  finally
+//    frm.Free;
+  end
+end;
+
 
 {$IFDEF LAYOUTTRACES}
 procedure LAYOUTTRACE(const Position: String; const args: array of const);

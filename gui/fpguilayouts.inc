@@ -665,9 +665,22 @@ end;
 
 
 procedure TFCustomBoxLayout.RemoveChild(AChild: TFWidget);
+var
+  i: integer;
+  item: TFLayoutItem;
 begin
+  for i := FWidgets.Count - 1 downto 0 do
+  begin
+    item := TFLayoutItem(FWidgets.Items[i]);
+    if item.Widget = AChild then
+    begin
+      item := nil;
+      FWidgets.Delete(i);
+      exit;
+    end
+  end;
   {$Warning Not implemented yet.}
-  raise Exception.Create('TCustomBoxLayout.RemoveChild - Not implemented yet');
+//  raise Exception.Create('TCustomBoxLayout.RemoveChild - Not implemented yet');
 end;
 
 
@@ -1016,7 +1029,7 @@ begin
     Inc(w, (item.Width - 1) * FColSpacing);
     Inc(h, (item.Height - 1) * FRowSpacing);
     item.Widget.SetBounds(Point(x + item.x * FColSpacing,
-      y + item.y * FRowSpacing), gfxbase.Size(w, h));
+      y + item.y * FRowSpacing), Size(w, h));
   end;
 
   FreeMem(ColInfos);

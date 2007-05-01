@@ -20,7 +20,7 @@
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="3"/>
+    <Version Minor="4"/>
     <Files Count="9">
       <Item1>
         <Filename Value="../gfxbase.pas"/>

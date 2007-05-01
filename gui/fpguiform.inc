@@ -124,7 +124,6 @@ begin
   FCanExpandHeight  := True;
   FCursor           := crArrow;
   FWindowOptions    := [woWindow];
-
 end;
 
 
@@ -142,8 +141,6 @@ end;
 procedure TFCustomForm.Show;
 begin
   LAYOUTTRACE('TFCustomForm.Show for %s:%s', [Name, ClassName]);
-
-//  if Assigned(Wnd) then ; // this makes sure that wnd is created
 
   FVisible := True;
   GFApplication.AddWindow(Wnd);

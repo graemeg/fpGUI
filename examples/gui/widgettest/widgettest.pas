@@ -57,6 +57,7 @@ type
     MenuBtn: TFButton;
     PanelBtn: TFButton;
     ProgressBarBtn: TFButton;
+    ShowMessageBtn: TFButton;
     Separator: TSeparator;
     ExitBtn: TFButton;
     procedure CheckBoxBtnClick(Sender: TObject);
@@ -72,6 +73,7 @@ type
     procedure MenuBtnClick(Sender: TObject);
     procedure PanelBtnClick(Sender: TObject);
     procedure ProgressBarBtnClick(Sender: TObject);
+    procedure ShowMessageBtnClick(Sender: TObject);
   end;
 
 
@@ -567,8 +569,8 @@ procedure TMainForm.PanelBtnClick(Sender: TObject);
 begin
   if not Assigned(_frmPanel) then
     _frmPanel := TPanelForm.Create(self);
-  _frmPanel.Show;
-  _frmPanel.SetPosition(Point(Left + Width + 5, FindForm.Top));
+  _frmPanel.ShowModal;
+//  _frmPanel.SetPosition(Point(Left + Width + 5, FindForm.Top));
 end;
 
 procedure TMainForm.ProgressBarBtnClick(Sender: TObject);
@@ -577,6 +579,11 @@ begin
     _frmProgressBar := TProgressBarForm.Create(self);
   _frmProgressBar.Show;
   _frmProgressBar.SetPosition(Point(Left + Width + 5, FindForm.Top));
+end;
+
+procedure TMainForm.ShowMessageBtnClick(Sender: TObject);
+begin
+  ShowMessage('Hello World!');
 end;
 
 
@@ -772,6 +779,8 @@ begin
   for y := 0 to StringGrid.RowCount - 1 do
     for x := 0 to StringGrid.ColCount - 1 do
       StringGrid.Cells[x, y] := Format('%d, %d', [x, y]);
+      
+  StringGrid.Cells[3, 3] := 'This is one long piece of text';
 end;
 
 constructor TGridForm.Create(AOwner: TComponent);

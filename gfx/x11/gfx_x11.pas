@@ -2128,11 +2128,7 @@ end;
 
 function TX11FontResourceImpl.GetHeight: integer;
 begin
-  {$IFDEF XftSupport}
-  Result := FFontData^.height;
-  {$ELSE}
-  Result := FFontData^.Ascent + FFontData^.Descent;
-  {$ENDIF}
+  Result := GetAscent + GetDescent;
 end;
 
 end.

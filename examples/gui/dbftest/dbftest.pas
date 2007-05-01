@@ -18,15 +18,18 @@
 
 program DBFTest;
 
-uses SysUtils, Classes, fpGUI, fpGUI_DB, DB, DBF;
+uses
+  SysUtils, Classes, fpGFX, fpGUI, fpGUI_DB, DB, DBF;
 
 type
 
-  TMainForm = class(TForm)
+  { TMainForm }
+
+  TMainForm = class(TFForm)
     DataSet: TDBF;
     DataSource: TDataSource;
     Box: TFBoxLayout;
-    ListBox: TListBox;
+    ListBox: TFListBox;
     CurDataseTFLabel: TFLabel;
     CurNameText, CurEMailText: TDBText;
     Navi: TFBoxLayout;
@@ -36,6 +39,9 @@ type
     procedure PrevDatasetClick(Sender: TObject);
     procedure NextDatasetClick(Sender: TObject);
     procedure LastDatasetClick(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
   end;
 
 
@@ -48,15 +54,15 @@ var
   x: Integer;
   s: String;
 begin
-  DataSet := TDBF.Create(Self);
-  DataSet.TableName := 'test.dbf';
-  DataSource := TDataSource.Create(Self);
-  DataSource.DataSet := DataSet;
+  DataSet             := TDBF.Create(Self);
+  DataSet.TableName   := 'test.dbf';
+  DataSource          := TDataSource.Create(Self);
+  DataSource.DataSet  := DataSet;
 
-  CurNameText.DataSource := DataSource;
-  CurNameText.DataField := 'Name';
-  CurEMailText.DataSource := DataSource;
-  CurEMailText.DataField := 'Address';
+  CurNameText.DataSource    := DataSource;
+  CurNameText.DataField     := 'Name';
+  CurEMailText.DataSource   := DataSource;
+  CurEMailText.DataField    := 'Address';
 
   DataSet.Open;
 
@@ -69,46 +75,61 @@ begin
     ListBox.Items.Add(s);
     DataSet.Next;
   end;
-
+  
   DataSet.First;
 end;
 
 procedure TMainForm.FirstDatasetClick(Sender: TObject);
 begin
   DataSet.First;
+  ReDraw;   // a hack to get around a TFLabel.SetText issue
 end;
 
 procedure TMainForm.PrevDatasetClick(Sender: TObject);
 begin
   DataSet.Prior;
+  ReDraw;   // a hack to get around a TFLabel.SetText issue
 end;
 
 procedure TMainForm.NextDatasetClick(Sender: TObject);
 begin
   DataSet.Next;
+  ReDraw;   // a hack to get around a TFLabel.SetText issue
 end;
 
 procedure TMainForm.LastDatasetClick(Sender: TObject);
 begin
   DataSet.Last;
+  ReDraw;   // a hack to get around a TFLabel.SetText issue
+end;
+
+constructor TMainForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  LoadForm(self);
+end;
+
+destructor TMainForm.Destroy;
+begin
+  DataSet.Close;
+  DataSource.Free;
+  DataSet.Free;
+  inherited Destroy;
 end;
 
 
 var
   MainForm: TMainForm;
 begin
-  Application.Title := 'Interbase Test';
-  Application.CreateForm(TMainForm, MainForm);
-  Application.Run;
+//  WriteLn('Version: ' + {$I %date%} + ' ' + {$I %time%});
+  GFApplication.Initialize;
+
+  MainForm := TMainForm.Create(GFApplication);
+  try
+    MainForm.Show;
+    GFApplication.Run;
+  finally
+    MainForm.Free;
+  end;
 end.
 
-
-{
-  $Log: dbftest.pp,v $
-  Revision 1.2  2001/01/18 12:40:41  sg
-  * Now uses the correct field names for the data links ;)
-
-  Revision 1.1  2001/01/17 21:33:28  sg
-  * First version
-
-}

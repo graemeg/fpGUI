@@ -122,6 +122,7 @@ begin
   Edit2.Text              := 'Wagwoord teks';
   btnExit.Text            := 'Verlaat Verlaat';
   btnHelp.Text            := 'Hulp';
+  Update;
   Redraw;
 end;
 
@@ -143,6 +144,7 @@ begin
   Edit2.Text              := 'Password Edit';
   btnExit.Text            := 'Exit';
   btnHelp.Text            := 'Help';
+  Update;
   Redraw;
 end;
 

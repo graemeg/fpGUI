@@ -57,7 +57,7 @@ type
                   end;
 
   TXftColor = record
-                pixel : longword;
+                pixel : ptrint;
                 color : TXRenderColor;
               end;
               

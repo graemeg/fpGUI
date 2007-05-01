@@ -5,7 +5,7 @@ object MainForm: TMainForm
   object Box: TFBoxLayout
     Spacing = 8
     Orientation = Vertical
-    object ListBox: TListBox
+    object ListBox: TFListBox
     end
     object CurDataseTFLabel: TFLabel
       Text = 'Current dataset:'

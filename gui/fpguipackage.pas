@@ -7,7 +7,7 @@ unit fpguipackage;
 interface
 
 uses
-  fpGUI, StyleManager, WindowsStyle, MotifStyle, OpenSoftStyle; 
+  fpGUI, StyleManager, WindowsStyle, MotifStyle, OpenSoftStyle, fpGUI_DB; 
 
 implementation
 

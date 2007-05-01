@@ -3,7 +3,7 @@
     
     Label class declarations
     
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2000 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -38,13 +38,12 @@
   
 
   TFLabel = class(TFCustomLabel)
-  public
   published
-    property CanExpandWidth;
-    property Enabled;
-    property FontColor;
-    property Text;
-    property Alignment default taLeftJustify;
+    property    Alignment default taLeftJustify;
+    property    CanExpandWidth;
+    property    Enabled;
+    property    FontColor;
+    property    Text;
   end;
 
 {$ENDIF read_interface}
@@ -63,7 +62,6 @@ var
   x: Integer;
 begin
   Canvas.SetColor(Style.GetUIColor(FFontColor));
-//  Canvas.SetColor(FFontColor);
   case Alignment of
     taLeftJustify: x := 0;
     taCenter: x := (BoundsSize.cx - Canvas.TextWidth(Text)) div 2;
@@ -73,21 +71,18 @@ begin
     (BoundsSize.cy - Canvas.FontCellHeight) div 2), Text, WidgetState);
 end;
 
-
 procedure TFCustomLabel.CalcSizes;
 begin
   with FindForm.Wnd.Canvas do
-    FMinSize := gfxbase.Size(TextWidth(Text), FontCellHeight);
+    FMinSize := Size(TextWidth(Text), FontCellHeight);
 end;
-
 
 constructor TFCustomLabel.Create(const pText: string; pOwner: TComponent);
 begin
   Create(pOwner);
-  Text := pText;
   FFontColor := clWindowText;
+  Text := pText;
 end;
-
 
 procedure TFCustomLabel.SetAlignment(AAlignment: TAlignment);
 begin
@@ -97,7 +92,6 @@ begin
     Redraw;
   end;
 end;
-
 
 procedure TFCustomLabel.SetFontColor(const AValue: TColor);
 begin

@@ -6,6 +6,7 @@
     <CompilerOptions>
       <Version Value="5"/>
       <SearchPaths>
+        <OtherUnitFiles Value="db/"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -26,8 +27,8 @@
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="3"/>
-    <Files Count="5">
+    <Version Minor="4"/>
+    <Files Count="6">
       <Item1>
         <Filename Value="fpgui.pas"/>
         <UnitName Value="fpGUI"/>
@@ -48,6 +49,10 @@
         <Filename Value="opensoftstyle.pas"/>
         <UnitName Value="OpenSoftStyle"/>
       </Item5>
+      <Item6>
+        <Filename Value="db/fpgui_db.pas"/>
+        <UnitName Value="fpGUI_DB"/>
+      </Item6>
     </Files>
     <LazDoc Paths="../docs/xml/gui/"/>
     <RequiredPkgs Count="2">

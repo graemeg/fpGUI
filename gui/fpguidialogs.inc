@@ -3,7 +3,7 @@
     
     Dialogs class declarations
     
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2000 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -19,21 +19,27 @@
 
 {$IFDEF read_interface}
 
+  { TFCustomStandardDialog }
+
   TFCustomStandardDialog = class(TFCustomForm)
   private
-    procedure StdBtnClicked(Sender: TObject);
+    function    GetMessage: string;
+    procedure   SetMessage(const AValue: string);
+    procedure   StdBtnClicked(Sender: TObject);
   protected
     FButtons: TMsgDlgButtons;
     MainLayout, BtnLayout: TFBoxLayout;
     Separator: TSeparator;
-    function ProcessEvent(Event: TEventObj): Boolean; override;
-    function DistributeEvent(Event: TEventObj): Boolean; override;
-    procedure CalcSizes; override;
-    procedure Resized; override;
-    procedure SeTFButtons(AButtons: TMsgDlgButtons);
-    property Buttons: TMsgDlgButtons read FButtons write SeTFButtons default [mbOk, mbCancel];
+    FMessage: TFLabel;
+    function    ProcessEvent(Event: TEventObj): Boolean; override;
+    function    DistributeEvent(Event: TEventObj): Boolean; override;
+    procedure   CalcSizes; override;
+    procedure   Resized; override;
+    procedure   SetButtons(AButtons: TMsgDlgButtons);
+    property    Buttons: TMsgDlgButtons read FButtons write SetButtons default [mbOk, mbCancel];
   public
     constructor Create(AOwner: TComponent); override;
+    property    Message: string read GetMessage write SetMessage;
   end;
 
 
@@ -43,6 +49,8 @@
     property OnCreate;
     property Buttons;
   end;
+  
+  
 
 {$ENDIF read_interface}
 
@@ -59,16 +67,6 @@
 // public methods
 
 constructor TFCustomStandardDialog.Create(AOwner: TComponent);
-
-  function AddBtn(const AText: String; ADefault: Boolean): TFButton;
-  begin
-    Result := TFButton.Create(Self);
-    Result.Text := AText;
-    // Result.Default := ADefault;
-    Result.OnClick := @StdBtnClicked;
-    Result.Parent := BtnLayout;
-  end;
-
 begin
   inherited Create(AOwner);
   FButtons := [mbOk, mbCancel];
@@ -76,31 +74,23 @@ begin
 
   MainLayout := TFBoxLayout.Create(Self);
   MainLayout.Orientation := Vertical;
-  MainLayout.SetEmbeddedParent(Self);
+  Child := MainLayout;
 
+  FMessage := TFLabel.Create(self);
+  FMessage.CanExpandWidth := True;
+  MainLayout.InsertChild(FMessage);
+  
   Separator := TSeparator.Create(Self);
-  Separator.Parent := MainLayout;
+  MainLayout.InsertChild(Separator);
 
   BtnLayout := TFBoxLayout.Create(Self);
   BtnLayout.Orientation := Horizontal;
   BtnLayout.HorzAlign := horzRight;
   BtnLayout.VertAlign := vertCenter;
   BtnLayout.CanExpandHeight := False;
-  BtnLayout.Parent := MainLayout;
+  MainLayout.InsertChild(BtnLayout);
 
-  if mbYes      in FButtons then AddBtn(mbText_Yes, False);
-  if mbNo       in FButtons then AddBtn(mbText_No, False);
-  if mbOk       in FButtons then AddBtn(mbText_OK, True);
-  if mbCancel   in FButtons then AddBtn(mbText_Cancel, False);
-  if mbApply    in FButtons then AddBtn(mbText_Apply, False);
-  if mbAbort    in FButtons then AddBtn(mbText_Abort, False);
-  if mbRetry    in FButtons then AddBtn(mbText_Retry, False);
-  if mbIgnore   in FButtons then AddBtn(mbText_Ignore, False);
-  if mbAll      in FButtons then AddBtn(mbText_All, False);
-  if mbNoToAll  in FButtons then AddBtn(mbText_NoToAll, False);
-  if mbYesToAll in FButtons then AddBtn(mbText_YesToAll, False);
-  if mbHelp     in FButtons then AddBtn(mbText_Help, False);
-
+  SetButtons(FButtons);
 end;
 
 
@@ -138,16 +128,65 @@ procedure TFCustomStandardDialog.Resized;
 begin
   if Assigned(Child) then
     Child.SetBounds(Point(BorderWidth, BorderWidth),
-      gfxBase.Size(Width - 2 * BorderWidth,
-        Height - MainLayout.DefSize.cy - 2 * BorderWidth));
+      Size(Width - 2 * BorderWidth,
+      Height - MainLayout.DefSize.cy - 2 * BorderWidth));
   MainLayout.SetBounds(
     Point(BorderWidth, Height - MainLayout.DefSize.cy - BorderWidth),
-    gfxBase.Size(Width - 2 * BorderWidth, MainLayout.DefSize.cy - BorderWidth));
+    Size(Width - 2 * BorderWidth, MainLayout.DefSize.cy - BorderWidth));
 end;
 
-procedure TFCustomStandardDialog.SeTFButtons(AButtons: TMsgDlgButtons);
+procedure TFCustomStandardDialog.SetButtons(AButtons: TMsgDlgButtons);
+
+  function AddBtn(const AText: String; ADefault: Boolean): TFButton;
+  begin
+    Result := TFButton.Create(Self);
+    Result.Text := AText;
+    // Result.Default := ADefault;
+    Result.OnClick := @StdBtnClicked;
+    Result.Parent := BtnLayout;
+  end;
+
+var
+  i: integer;
+  b: TFButton;
 begin
+  // remove and free all previous buttons
+  for i := ComponentCount - 1 downto 0 do
+  begin
+    if Components[i] is TFButton then
+    begin
+      b := TFButton(Components[i]);
+      if BtnLayout.ContainsChild(b) then
+        BtnLayout.RemoveChild(b);
+      b.Free;
+    end;
+  end;
+
   FButtons := AButtons;
+  
+  if mbYes      in FButtons then AddBtn(mbText_Yes, False);
+  if mbNo       in FButtons then AddBtn(mbText_No, False);
+  if mbOk       in FButtons then AddBtn(mbText_OK, True);
+  if mbCancel   in FButtons then AddBtn(mbText_Cancel, False);
+  if mbApply    in FButtons then AddBtn(mbText_Apply, False);
+  if mbAbort    in FButtons then AddBtn(mbText_Abort, False);
+  if mbRetry    in FButtons then AddBtn(mbText_Retry, False);
+  if mbIgnore   in FButtons then AddBtn(mbText_Ignore, False);
+  if mbAll      in FButtons then AddBtn(mbText_All, False);
+  if mbNoToAll  in FButtons then AddBtn(mbText_NoToAll, False);
+  if mbYesToAll in FButtons then AddBtn(mbText_YesToAll, False);
+  if mbHelp     in FButtons then AddBtn(mbText_Help, False);
+end;
+
+function TFCustomStandardDialog.GetMessage: string;
+begin
+  Result := FMessage.Text;
+end;
+
+procedure TFCustomStandardDialog.SetMessage(const AValue: string);
+begin
+  if FMessage.Text <> AValue then
+    FMessage.Text := AValue;
 end;
 
 procedure TFCustomStandardDialog.StdBtnClicked(Sender: TObject);

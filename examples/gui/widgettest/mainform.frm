@@ -70,6 +70,11 @@ object MainForm: TMainForm
       Text = 'Progress Bar'
       OnClick = ProgressBarBtnClick
     end
+    object ShowMessageBtn: TFButton
+      CanExpandWidth = True
+      Text = 'ShowMessage()'
+      OnClick = ShowMessageBtnClick
+    end
     object Separator: TSeparator
     end
     object ExitBtn: TFButton

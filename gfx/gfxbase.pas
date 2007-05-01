@@ -357,7 +357,8 @@ type
     function    TextExtent(const AText: String): TSize; virtual;
     function    TextWidth(const AText: String): Integer; virtual;
     procedure   TextOut(const APosition: TPoint; const AText: String);
-
+//    procedure TextRect(Rect: TRect; X, Y: Integer; const Text: WideString; TextFlags: Integer = 0);
+    
     // Bit block transfers
     procedure   Copy(ASource: TFCustomCanvas; const ADestPos: TPoint); virtual;
     procedure   CopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect; const ADestPos: TPoint);

@@ -3,7 +3,7 @@
     
     Database support classes
     
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2000 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -17,57 +17,67 @@
 unit fpGUI_DB;
 
 {$IFDEF Debug}
-{$ASSERTIONS On}
+  {$ASSERTIONS On}
 {$ENDIF}
 
 interface
 
-uses Classes, fpGUI, DB;
+uses
+  Classes
+  ,fpGUI
+  ,DB
+  ;
 
 type
+
   TFieldDataLink = class(TDataLink)
   private
-    FWidget: TWidget;
+    FWidget: TFWidget;
     FField: TField;
     FFieldName: String;
     FOnDataChange: TNotifyEvent;
-    procedure SetFieldName(const AFieldName: String);
-    procedure UpdateField;
+    procedure   SetFieldName(const AFieldName: String);
+    procedure   UpdateField;
   protected
-    procedure ActiveChanged; override;
-    procedure RecordChanged(AField: TField); override;
+    procedure   ActiveChanged; override;
+    procedure   RecordChanged(AField: TField); override;
   public
-    constructor Create(AWidget: TWidget);
-    property Field: TField read FField;
-    property FieldName: String read FFieldName write SetFieldName;
-    property OnDataChange: TNotifyEvent read FOnDataChange write FOnDataChange;
+    constructor Create(AWidget: TFWidget);
+    property    Field: TField read FField;
+    property    FieldName: String read FFieldName write SetFieldName;
+    property    OnDataChange: TNotifyEvent read FOnDataChange write FOnDataChange;
   end;
+
 
   TDBText = class(TFCustomLabel)
   private
     FDataLink: TFieldDataLink;
-    function GetDataField: String;
-    procedure SetDataField(const ADataField: String);
-    function GetDataSource: TDataSource;
-    procedure SetDataSource(ADataSource: TDataSource);
-    procedure DataChange(Sender: TObject);
+    function    GetDataField: String;
+    procedure   SetDataField(const ADataField: String);
+    function    GetDataSource: TDataSource;
+    procedure   SetDataSource(ADataSource: TDataSource);
+    procedure   DataChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
+    destructor  Destroy; override;
   published
-    property Text;
-    property DataField: String read GetDataField write SetDataField;
-    property DataSource: TDataSource read GetDataSource write SetDataSource;
+    property    Alignment default taLeftJustify;
+    property    CanExpandWidth;
+    property    DataField: string read GetDataField write SetDataField;
+    property    DataSource: TDataSource read GetDataSource write SetDataSource;
+    property    Enabled;
+    property    FontColor;
+    property    Text;
   end;
 
 
-// ===================================================================
-// ===================================================================
 
 implementation
 
 
-constructor TFieldDataLink.Create(AWidget: TWidget);
+{ TFieldDataLink }
+
+constructor TFieldDataLink.Create(AWidget: TFWidget);
 begin
   inherited Create;
   FWidget := AWidget;
@@ -95,12 +105,14 @@ end;
 
 procedure TFieldDataLink.UpdateField;
 begin
-WriteLn('##############UpdateField. DataSet: ', DataSource.DataSet.ClassName);
+  {$IFDEF DEBUG} WriteLn('## UpdateField. DataSet: ', DataSource.DataSet.ClassName); {$ENDIF}
   FField := DataSource.DataSet.FindField(FieldName);
   if Assigned(OnDataChange) then
     OnDataChange(Self);
 end;
 
+
+{ TDBText }
 
 constructor TDBText.Create(AOwner: TComponent);
 begin
@@ -137,28 +149,18 @@ end;
 
 procedure TDBText.DataChange(Sender: TObject);
 begin
-Write('TDBText.DataChange');
+  {$IFDEF DEBUG} Write('TDBText.DataChange'); {$ENDIF}
   if Assigned(FDataLink.Field) then
   begin
     Text := FDataLink.Field.DisplayText;
-    WriteLn(' new text: "', Text, '"');
-  end else
+    {$IFDEF DEBUG} WriteLn(' new text: "', Text, '"'); {$ENDIF}
+  end
+  else
   begin
     Text := '';
-    WriteLn('DataLink has no data');
+    {$IFDEF DEBUG} WriteLn('DataLink has no data'); {$ENDIF}
   end;
 end;
 
-
 end.
 
-
-{
-  $Log: fpgui_db.pp,v $
-  Revision 1.2  2001/01/17 21:36:26  sg
-  * Updating fixes
-
-  Revision 1.1  2000/12/23 23:20:16  sg
-  * First public CVS version...
-
-}
