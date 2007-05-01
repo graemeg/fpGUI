@@ -16,6 +16,8 @@ object MainForm: TMainForm
     object CurEMailText: TDBText
       Text = '<e-mail>'
     end
+    object CurEmailEdit: TDBEdit
+    end
     object Navi: TFBoxLayout
       object FirstDataset: TFButton
         Text = 'First'

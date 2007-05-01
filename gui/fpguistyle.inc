@@ -59,7 +59,7 @@
     procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TFWidgetState); virtual; abstract;
     function    GetGroupBoxBorders(Canvas: TFCanvas; const ALabel: String; var LabelWidth: Integer): TRect; virtual; abstract;
     // Edit widgets
-    procedure   DrawEditBox(Canvas: TFCanvas; const ARect: TRect); virtual; abstract;
+    procedure   DrawEditBox(Canvas: TFCanvas; const ARect: TRect; const IsReadOnly: Boolean = False); virtual; abstract;
     function    GetEditBoxBorders: TRect; virtual; abstract;
     // Check boxes
     procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); virtual; abstract;
@@ -122,7 +122,7 @@
     procedure   DrawGroupBox(Canvas: TFCanvas; const ARect: TRect; const ALabel: String; WidgetState: TFWidgetState); override;
     function    GetGroupBoxBorders(Canvas: TFCanvas; const ALabel: String; var LabelWidth: Integer): TRect; override;
     // Edit widgets
-    procedure   DrawEditBox(Canvas: TFCanvas; const ARect: TRect); override;
+    procedure   DrawEditBox(Canvas: TFCanvas; const ARect: TRect; const IsReadOnly: Boolean = False); override;
     function    GetEditBoxBorders: TRect; override;
     // Check boxes
     procedure   DrawCheckBox(Canvas: TFCanvas; const ARect, LabelRect: TRect; Flags: TFCheckboxFlags); override;
@@ -617,10 +617,13 @@ begin
   LabelWidth := Canvas.TextWidth(ALabel) + 6;
 end;
 
-procedure TBasicStyle.DrawEditBox(Canvas: TFCanvas; const ARect: TRect);
+procedure TBasicStyle.DrawEditBox(Canvas: TFCanvas; const ARect: TRect; const IsReadOnly: Boolean);
 begin
   Draw3DFrame(Canvas, ARect, cl3DShadow, cl3DDkShadow, cl3DHighlight, cl3DFace);
-  SetUIColor(Canvas, clWindow);
+  if IsReadOnly then
+    SetUIColor(Canvas, cl3DFace)
+  else
+    SetUIColor(Canvas, clWindow);
   with ARect do
     Canvas.FillRect(Rect(Left + 2, Top + 2, Right - 2, Bottom - 2));
 end;

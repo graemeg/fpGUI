@@ -30,29 +30,37 @@ uses
 
 type
 
+  { TFieldDataLink }
+
   TFieldDataLink = class(TDataLink)
   private
     FWidget: TFWidget;
     FField: TField;
-    FFieldName: String;
+    FFieldName: string;
     FOnDataChange: TNotifyEvent;
-    procedure   SetFieldName(const AFieldName: String);
+    function    GetCanModify: Boolean;
+    procedure   SetFieldName(const AFieldName: string);
     procedure   UpdateField;
   protected
     procedure   ActiveChanged; override;
     procedure   RecordChanged(AField: TField); override;
   public
     constructor Create(AWidget: TFWidget);
+    property    CanModify: Boolean read GetCanModify;
     property    Field: TField read FField;
-    property    FieldName: String read FFieldName write SetFieldName;
+    property    FieldName: string read FFieldName write SetFieldName;
+    property    Widget: TFWidget read FWidget write FWidget;
     property    OnDataChange: TNotifyEvent read FOnDataChange write FOnDataChange;
   end;
 
+
+  { TDBText }
 
   TDBText = class(TFCustomLabel)
   private
     FDataLink: TFieldDataLink;
     function    GetDataField: String;
+    function    GetField: TField;
     procedure   SetDataField(const ADataField: String);
     function    GetDataSource: TDataSource;
     procedure   SetDataSource(ADataSource: TDataSource);
@@ -60,6 +68,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    property    Field: TField read GetField;
   published
     property    Alignment default taLeftJustify;
     property    CanExpandWidth;
@@ -70,6 +79,37 @@ type
     property    Text;
   end;
 
+
+  { TDBEdit }
+
+  TDBEdit = class(TFCustomEdit)
+  private
+    FDataLink: TFieldDataLink;
+    function    GetDataField: string;
+    function    GetDataSource: TDataSource;
+    function    GetField: TField;
+    function    GetReadOnly: Boolean;
+    procedure   SetDataField(const ADataField: string);
+    procedure   SetDataSource(const ADataSource: TDataSource);
+    procedure   DataChange(Sender: TObject);
+    procedure   SetReadOnly(const AValue: Boolean);
+  protected
+    procedure   EvKeyPressed(Key: Word; Shift: TShiftState); override;
+    procedure   EvKeyChar(KeyChar: Char); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    property    Field: TField read GetField;
+  published
+    property    BorderStyle;
+    property    CanExpandWidth;
+    property    DataField: string read GetDataField write SetDataField;
+    property    DataSource: TDataSource read GetDataSource write SetDataSource;
+    property    Enabled;
+    property    FontColor;
+    property    Text;
+    property    ReadOnly: Boolean read GetReadOnly write SetReadOnly default False;
+  end;
 
 
 implementation
@@ -94,13 +134,18 @@ begin
     OnDataChange(Self);
 end;
 
-procedure TFieldDataLink.SetFieldName(const AFieldName: String);
+procedure TFieldDataLink.SetFieldName(const AFieldName: string);
 begin
   if AFieldName <> FieldName then
   begin
     FFieldName := AFieldName;
     UpdateField;
   end;
+end;
+
+function TFieldDataLink.GetCanModify: Boolean;
+begin
+  Result := not ReadOnly and (Field <> nil) and Field.CanModify;
 end;
 
 procedure TFieldDataLink.UpdateField;
@@ -132,6 +177,11 @@ begin
   Result := FDataLink.FieldName;
 end;
 
+function TDBText.GetField: TField;
+begin
+  Result := FDataLink.Field;
+end;
+
 procedure TDBText.SetDataField(const ADataField: String);
 begin
   FDataLink.FieldName := ADataField;
@@ -149,7 +199,7 @@ end;
 
 procedure TDBText.DataChange(Sender: TObject);
 begin
-  {$IFDEF DEBUG} Write('TDBText.DataChange'); {$ENDIF}
+  {$IFDEF DEBUG} Write(Classname + '.DataChange'); {$ENDIF}
   if Assigned(FDataLink.Field) then
   begin
     Text := FDataLink.Field.DisplayText;
@@ -160,6 +210,89 @@ begin
     Text := '';
     {$IFDEF DEBUG} WriteLn('DataLink has no data'); {$ENDIF}
   end;
+end;
+
+
+{ TDBEdit }
+
+function TDBEdit.GetDataField: string;
+begin
+  Result := FDataLink.FieldName;
+end;
+
+function TDBEdit.GetDataSource: TDataSource;
+begin
+  Result := FDataLink.DataSource;
+end;
+
+function TDBEdit.GetField: TField;
+begin
+  Result := FDataLink.Field;
+end;
+
+function TDBEdit.GetReadOnly: Boolean;
+begin
+  Result := inherited ReadOnly;
+//  Result := FDataLink.ReadOnly;     { will add this in later }
+end;
+
+procedure TDBEdit.SetDataField(const ADataField: string);
+begin
+  FDataLink.FieldName := ADataField;
+end;
+
+procedure TDBEdit.SetDataSource(const ADataSource: TDataSource);
+begin
+  FDataLink.DataSource := ADataSource;
+end;
+
+procedure TDBEdit.DataChange(Sender: TObject);
+begin
+  {$IFDEF DEBUG} Write(Classname + '.DataChange'); {$ENDIF}
+  if Assigned(FDataLink.Field) then
+  begin
+    Text := FDataLink.Field.DisplayText;
+    {$IFDEF DEBUG} WriteLn(' new text: "', Text, '"'); {$ENDIF}
+  end
+  else
+  begin
+    Text := '';
+    {$IFDEF DEBUG} WriteLn('DataLink has no data'); {$ENDIF}
+  end;
+end;
+
+procedure TDBEdit.SetReadOnly(const AValue: Boolean);
+begin
+  inherited ReadOnly := AValue;
+//  FDataLink.ReadOnly := AValue;         { will add this in later }
+end;
+
+procedure TDBEdit.EvKeyPressed(Key: Word; Shift: TShiftState);
+begin
+//  if ReadOnly then
+//    Exit; //==>
+  inherited EvKeyPressed(Key, Shift);
+end;
+
+procedure TDBEdit.EvKeyChar(KeyChar: Char);
+begin
+  if ReadOnly then
+    Exit; //==>
+  inherited EvKeyChar(KeyChar);
+end;
+
+constructor TDBEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  inherited ReadOnly := True;
+  FDataLink := TFieldDataLink.Create(Self);
+  FDataLink.OnDataChange := @DataChange;
+end;
+
+destructor TDBEdit.Destroy;
+begin
+  FDataLink.Free;
+  inherited Destroy;
 end;
 
 end.

@@ -34,6 +34,7 @@ type
     CurNameText, CurEMailText: TDBText;
     Navi: TFBoxLayout;
     FirstDataset, PrevDataset, NextDataset, LastDataset: TFButton;
+    CurEmailEdit: TDBEdit;
     procedure FormCreate(Sender: TObject);
     procedure FirstDatasetClick(Sender: TObject);
     procedure PrevDatasetClick(Sender: TObject);
@@ -63,9 +64,12 @@ begin
   CurNameText.DataField     := 'Name';
   CurEMailText.DataSource   := DataSource;
   CurEMailText.DataField    := 'Address';
+  CurEmailEdit.DataSource   := DataSource;
+  CurEmailEdit.DataField    := 'Address';
 
   DataSet.Open;
-
+  CurEmailEdit.Field.ReadOnly := True;
+  
   while not DataSet.EOF do
   begin
     SetLength(s, 0);

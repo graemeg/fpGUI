@@ -26,6 +26,7 @@
   private
     FOldVisibleIndex: Integer;
     FFontColor: TColor;
+    FReadOnly: Boolean;
     FSelStart: integer;
     FSelOffset: integer;
     FCursorPos: Integer;
@@ -38,6 +39,7 @@
     procedure   SetBorderStyle(ABorderStyle: TBorderStyle);
     procedure   DoMousePressed(pEvent: TMousePressedEventObj);
     function    GetFirstVisibleIndex(AText: string): Integer;
+    procedure   SetReadOnly(const AValue: Boolean);
   protected
     procedure   Paint(Canvas: TFCanvas); override;
     function    ProcessEvent(Event: TEventObj): Boolean; override;
@@ -52,6 +54,7 @@
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    FontColor: TColor read FFontColor write SetFontColor;
     property    BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
+    property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     procedure   SetText(const AText: String); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -88,7 +91,9 @@ begin
   FCursor := crIBeam;
   FFontColor := clWindowText;
   FCursorPos := 0;
+  FOldVisibleIndex := 0;
   FBorderStyle := bsSingle;
+  FReadOnly := False;
 end;
 
 constructor TFCustomEdit.Create(const pText: string; pOwner: TComponent);
@@ -128,7 +133,7 @@ begin
         Canvas.SetColor(c);
       end;
     bsSingle:
-      Style.DrawEditBox(Canvas, ItemRect);
+      Style.DrawEditBox(Canvas, ItemRect, ReadOnly);
   end;
 
 
@@ -305,7 +310,6 @@ begin
   inherited SetText(AText);
 end;
 
-
 procedure TFCustomEdit.SetPasswordChar(APasswordChar: Char);
 begin
   if APasswordChar <> PasswordChar then
@@ -315,13 +319,11 @@ begin
   end;
 end;
 
-
 procedure TFCustomEdit.SetFontColor(const AValue: TColor);
 begin
   if FFontColor = AValue then exit;
   FFontColor := AValue;
 end;
-
 
 procedure TFCustomEdit.SetCursorPos(ACursorPos: Integer);
 begin
@@ -331,7 +333,6 @@ begin
     Redraw;
   end;
 end;
-
 
 procedure TFCustomEdit.DoMousePressed(pEvent: TMousePressedEventObj);
 var
@@ -437,4 +438,14 @@ begin
     Result := FCursorPos;
   FOldVisibleIndex := Result;
 end;
+
+procedure TFCustomEdit.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly <> AValue then
+  begin
+    FReadOnly := AValue;
+    Redraw;
+  end;
+end;
+
 {$ENDIF read_implementation}
