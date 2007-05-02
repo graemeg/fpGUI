@@ -1,20 +1,19 @@
 {
-    $Id: dbftest.pp,v 1.2 2001/01/18 12:40:41 sg Exp $
+    fpGUI  -  Free Pascal GUI Library
 
-    fpGUI  -  Free Pascal Graphical User Interface
-    Copyright (C) 2001 by
-      Areca Systems GmbH / Sebastian Guenther, sg@freepascal.org
+    DBF Database example
 
-    DBF database test
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
-    See the file COPYING.FPC, included in this distribution,
-    for details about the copyright.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-}
 
+}
 
 program DBFTest;
 
