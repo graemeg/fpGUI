@@ -703,22 +703,44 @@ begin
   InflateRect(r, -2, -2);
   Canvas.DrawCircle(r);
 
-  SetUIColor(Canvas, cl3DDkShadow);
+  if cbIsEnabled in Flags then
+    SetUIColor(Canvas, cl3DDkShadow)
+  else
+    SetUIColor(Canvas, cl3DShadow);
   InflateRect(r, 1, 1);
   Canvas.DrawCircle(r);
   
-  if cbIsChecked in Flags then
+  if cbIsEnabled in Flags then
   begin
-    SetUIColor(Canvas, clNavy);
-    InflateRect(r, -3, -3);
-    Canvas.DrawCircle(r);
-    InflateRect(r, -1, -1);
-    Canvas.FillRect(r);
-    InflateRect(r, 1, 1);
-    SetUIColor(Canvas, clSkyBlue);
-    InflateRect(r, -2, -2);
-    OffsetRect(r, -1, -1);
-    Canvas.FillRect(r);
+    if cbIsChecked in Flags then
+    begin
+      SetUIColor(Canvas, clNavy);
+      InflateRect(r, -3, -3);
+      Canvas.DrawCircle(r);
+      InflateRect(r, -1, -1);
+      Canvas.FillRect(r);
+      InflateRect(r, 1, 1);
+      SetUIColor(Canvas, clSkyBlue);
+      InflateRect(r, -2, -2);
+      OffsetRect(r, -1, -1);
+      Canvas.FillRect(r);
+    end;
+  end
+  else
+  begin
+    if cbIsChecked in Flags then
+    begin
+      SetUIColor(Canvas, cl3DShadow);
+      InflateRect(r, -3, -3);
+      Canvas.DrawCircle(r);
+      InflateRect(r, -1, -1);
+      Canvas.FillRect(r);
+      InflateRect(r, 1, 1);
+      SetUIColor(Canvas, clLtGray);
+      InflateRect(r, -2, -2);
+      OffsetRect(r, -1, -1);
+      Canvas.FillRect(r);
+    end;
   end;
   {$ENDIF}
 
