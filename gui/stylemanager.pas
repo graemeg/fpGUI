@@ -207,8 +207,9 @@ end;
 
 
 initialization
-  gStyleManager.RegisterClass(cDefaultStyle, TWindowsStyle);
-  gStyleManager.RegisterClass('Windows', TWindowsStyle);
+  gStyleManager.RegisterClass(cDefaultStyle, TWin2000Style);
+  gStyleManager.RegisterClass('Windows 9x', TWin9xStyle);
+  gStyleManager.RegisterClass('Windows 2000', TWin2000Style);
   gStyleManager.RegisterClass('OpenSoft', TOpenSoftStyle);
   gStyleManager.RegisterClass('Motif', TMotifStyle);
 
