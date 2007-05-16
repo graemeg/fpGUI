@@ -113,6 +113,7 @@ begin
   inherited Paint(Canvas);
 
   Borders := Style.GetButtonBorders;
+  // setup the clip rectangle
   Canvas.IntersectClipRect(Rect(Borders.Left, Borders.Top,
     BoundsSize.cx - Borders.Right, BoundsSize.cy - Borders.Bottom));
 
