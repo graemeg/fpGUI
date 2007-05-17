@@ -1,0 +1,75 @@
+
+Date: Thu, 17 May 2007 09:27:18 +0200
+From: Graeme Geldenhuys <graemeg@spamfilter.co.za>
+Newsgroups: fpgui.development
+Subject: Re: How does the gui part works?
+
+
+Felipe Monteiro de Carvalho wrote:
+> 
+> I only looked deep at the Gfx backend, so could you try to sumarize how 
+> does the GUI part works?
+> 
+> I am trying to debug a crash on the lcl interface, where it crashes on 
+> TEVENTOBJ__SENDTOCHILD
+> 
+> I see that fpGUI has message handling routines, message handling 
+> classes, and several other things, but I find this a little confusing. 
+> fpGfx already has message handling classes, and message handling 
+> procedures, so it seams like we have the same thing implemented twice.
+
+OK the GFX part gets events from the windowing system, be that X11 or 
+GDI. That means that TFCustomWindow gets all the events from the 
+windowing system.
+
+Now the GUI part. Every widget is *not* a TFCustomWindow, so every 
+widget doesn't have a Handle.  The GUI is implemented with only one 
+handle per Form (TFForm).  All widgets are just painted onto the canvas 
+of the TFForm.
+
+If you look at the TFCustomForm you will see it has a instance of 
+TFCustomWindow stored in FWnd. That instance gets all the events from 
+the windowing system. So to let the widgets also get events we have to 
+implement our own event system. The TFCustomForm will then send those 
+custom events (TEventObj descendants) by translating the windowing 
+events into our custom gui events.
+
+For example:
+   Lets say we have a Form with a Button on it. Now we want to handle a 
+OnMouseMove event on the Button.  The flow of events will go as follows:
+
+1) TFCustomForm.Wnd  will receive the OnMouseMove from the windowing 
+system and process it in the WndMouseMoved() method.
+
+2) WndMouseMoved() will translate that windowing system event into 
+whatever GUI events are needed and start sending them.
+
+3) Any TWidget descendant handles events in the ProcessEvent() method. 
+TWidget being the big one.
+
+4) Because TFCustomForm is a TFContainerWidget descendant, it means it 
+can contain other widgets. So it starts distributing the GUI events to 
+the children. Distribution is done by the DistributeEvent() method.
+
+5) If TFCustomButton needed to do any special processing with the GUI 
+event, it would handle it in its ProcessEvent() method. 
+TWidget.ProcessEvent normally does most of the generic work.
+
+  5.1) As an example of a widget that does custom processing, have a 
+look at the TFMenuItem.ProcessEvent(). In this case it handles the 
+TMouseEnterEventObj and TMouseLeaveEventObj events so it can changes 
+it's look when the mouse enters a menu item or leaves a menu item.
+
+So as a summary:
+   TFCustomForm contains a instance of a GFX window. Translates all the 
+GFX events (underlying windowing events) to GUI events (TEventObj 
+descendants) and distributes them to the children of the Form.
+
+
+Hope that helps a bit....
+
+
+-- 
+Graeme Geldenhuys
+There is no place like S34° 03.168'  E018° 49.342'
+
