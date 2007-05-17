@@ -1438,7 +1438,7 @@ begin
 
   GFApplication.DirtyList.ClearQueueForWindow(Self);
 
-  GFApplication.Forms.Remove(Self);
+  GFApplication.RemoveWindow(Self);
 
   XDestroyWindow(GFApplication.Handle, Handle);
 

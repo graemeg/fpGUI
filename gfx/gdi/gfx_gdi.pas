@@ -1020,8 +1020,7 @@ begin
   Windows.ReleaseDC(0, TempDC);
 end;
 
-function TGDIScreen.CreateMonoBitmapCanvas(AWidth, AHeight: Integer
-  ): TFCustomCanvas;
+function TGDIScreen.CreateMonoBitmapCanvas(AWidth, AHeight: Integer): TFCustomCanvas;
 var
   TempDC: HDC;
 begin
@@ -1040,13 +1039,10 @@ begin
 end;
 
 
+{ It´s not the job of the Application object to clean up undestroyed forms
+  This can generate crashes }
 destructor TGDIApplication.Destroy;
-var
-  i: Integer;
 begin
-  for i := 0 to Forms.Count - 1 do
-    TGDIWindow(Forms[i]).Free;
-
   inherited Destroy;
 end;
 
@@ -1156,11 +1152,15 @@ begin
 
          Event.EventType := etShow;
          Window.ProcessEvent(Event);
+         
+         GFApplication.AddWindow(Window);
        end
        else
        begin
           Event.EventType := etHide;
           Window.ProcessEvent(Event);
+
+         GFApplication.RemoveWindow(Window);
        end;
      end;
      WM_Move:
@@ -1406,10 +1406,10 @@ begin
     Windows.DestroyWindow(OldHandle);
   end;
 
-  GFApplication.Forms.Remove(Self);
+  GFApplication.RemoveWindow(Self);
 
   // Are we the last window for our owning application?
-  if GFApplication.Forms.Count = 0 then
+  if (GFApplication.QuitWhenLastWindowCloses and (GFApplication.Forms.Count = 0)) then
     Windows.PostQuitMessage(0);
 
   inherited Destroy;

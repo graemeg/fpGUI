@@ -1361,13 +1361,21 @@ end;
 
 procedure TFCustomApplication.AddWindow(AWindow: TFCustomWindow);
 begin
+{$IFDEF VerboseFPGUI}
+  WriteLn('[TFCustomApplication.AddWindow] Window Title: ', AWindow.Title);
+{$ENDIF}
+
   if Forms.IndexOf(AWindow) = -1 then
     Forms.Add(AWindow);
 end;
 
 procedure TFCustomApplication.RemoveWindow(AWindow: TFCustomWindow);
 begin
-  Forms.Remove(AWindow);
+{$IFDEF VerboseFPGUI}
+  WriteLn('[TFCustomApplication.RemoveWindow] Window Title: ', AWindow.Title);
+{$ENDIF}
+
+  if (Assigned(Forms) and Assigned(AWindow)) then Forms.Remove(AWindow);
 end;
 
 procedure TFCustomApplication.Run;
