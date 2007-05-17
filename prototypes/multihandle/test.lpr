@@ -22,23 +22,23 @@ type
 
   { TMainWindow }
 
-  TMainWindow = class(TForm)
+  TMainWindow = class(TFForm)
     procedure btnCancelClick(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
     procedure btnPopupClick(Sender: TObject);
   private
-    btnClose: TButton;
-    btnCancel: TButton;
-    btnPopup: TButton;
-    lblWelcome: TLabel;
-    edEdit: TEdit;
+    btnClose: TFButton;
+    btnCancel: TFButton;
+    btnPopup: TFButton;
+    lblWelcome: TFLabel;
+    edEdit: TFEdit;
   public
     constructor Create; override;
     destructor  Destroy; override;
   end;
   
   
-  TMyPopup = class(TPopupWindow)
+  TMyPopup = class(TFPopupWindow)
   public
     constructor Create; override;
   end;
@@ -87,22 +87,22 @@ begin
   SetClientSize(Size(320, 200));
   Color := clLightSteelBlue;
 
-  btnClose := TButton.Create(self, Point(20, 150));
+  btnClose := TFButton.Create(self, Point(20, 150));
   btnClose.Caption := 'Close';
   btnClose.OnClick := @btnCloseClick;
 
-  btnCancel := TButton.Create(self, Point(150, 150));
+  btnCancel := TFButton.Create(self, Point(150, 150));
   btnCancel.Caption := 'Cancel';
   btnCancel.OnClick := @btnCancelClick;
   
-  btnPopup := TButton.Create(self, Point(80, 80));
+  btnPopup := TFButton.Create(self, Point(80, 80));
   btnPopup.Caption := 'Popup';
   btnPopup.OnClick := @btnPopupClick;
 
-  lblWelcome := TLabel.Create(self, Point(10, 10));
+  lblWelcome := TFLabel.Create(self, Point(10, 10));
   lblWelcome.Caption := 'So what do you think?';
   
-  edEdit := TEdit.Create(self, Point(65, 110));
+  edEdit := TFEdit.Create(self, Point(65, 110));
   edEdit.Text := 'Multi-Handle widgets';
 end;
 

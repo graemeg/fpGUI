@@ -47,9 +47,9 @@ type
       );
 
 
-  { TWidget }
+  { TFWidget }
 
-  TWidget = class(TFWindow)
+  TFWidget = class(TFWindow)
   private
     FColor: TGfxColor;
     FOnClick: TNotifyEvent;
@@ -71,9 +71,9 @@ type
     procedure   SetFocus;
   end;
 
-  { TForm }
+  { TFForm }
   
-  TForm = class(TWidget)
+  TFForm = class(TFWidget)
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     constructor Create; virtual; reintroduce;
@@ -82,14 +82,14 @@ type
 
   { TFPopupWindow }
   {$Note TFPopupWindow is still work in progess. }
-  TFPopupWindow = class(TForm)
+  TFPopupWindow = class(TFForm)
   public
     constructor Create; override;
   end;
 
   { TFButton }
 
-  TFButton = class(TWidget)
+  TFButton = class(TFWidget)
   private
     FCaption: string;
     procedure   SetCaption(const AValue: string);
@@ -104,7 +104,7 @@ type
   
   { TFLabel }
 
-  TFLabel = class(TWidget)
+  TFLabel = class(TFWidget)
   private
     FCaption: string;
     procedure   SetCaption(const AValue: string);
@@ -117,7 +117,7 @@ type
 
   { TFCustomEdit }
 
-  TFCustomEdit = class(TWidget)
+  TFCustomEdit = class(TFWidget)
   private
     FText: string;
     procedure   SetText(const AValue: string);
@@ -130,7 +130,7 @@ type
 
   { TEdit }
   
-  TEdit = class(TFCustomEdit)
+  TFEdit = class(TFCustomEdit)
   public
     property    Text;
   end;
@@ -180,9 +180,9 @@ begin
     Canvas.FillRect(Rect(Left + 2, Top + 2, Right - 2, Bottom - 2));
 end;
 
-{ TWidget }
+{ TFWidget }
 
-procedure TWidget.EvOnMouseReleased(Sender: TObject; AButton: TMouseButton;
+procedure TFWidget.EvOnMouseReleased(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   {$IFDEF DEBUG} Writeln(ClassName + '.EvOnMouseReleased'); {$ENDIF}
@@ -199,7 +199,7 @@ begin
   end;
 end;
 
-procedure TWidget.EvOnMousePressed(Sender: TObject; AButton: TMouseButton;
+procedure TFWidget.EvOnMousePressed(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   {$IFDEF DEBUG} Writeln(ClassName + '.EvOnMousePressed'); {$ENDIF}
@@ -212,20 +212,20 @@ begin
   end;
 end;
 
-procedure TWidget.EvOnMouseLeave(Sender: TObject);
+procedure TFWidget.EvOnMouseLeave(Sender: TObject);
 begin
   Exclude(FWidgetState, wsHasFocus);
 //  Paint;
 end;
 
-procedure TWidget.SetColor(const AValue: TGfxColor);
+procedure TFWidget.SetColor(const AValue: TGfxColor);
 begin
   if FColor = AValue then exit;
   FColor := AValue;
   Paint;
 end;
 
-procedure TWidget.Paint;
+procedure TFWidget.Paint;
 var
   r: TRect;
 begin
@@ -238,7 +238,7 @@ begin
   Canvas.FillRect(r);
 end;
 
-constructor TWidget.Create(AParent: TFCustomWindow;
+constructor TFWidget.Create(AParent: TFCustomWindow;
   AWindowOptions: TFWindowOptions);
 begin
   inherited Create(AParent, AWindowOptions);
@@ -253,19 +253,19 @@ begin
   OnMouseLeave      := @EvOnMouseLeave;
 end;
 
-constructor TWidget.Create(AParent: TFCustomWindow);
+constructor TFWidget.Create(AParent: TFCustomWindow);
 begin
   Create(AParent, [woChildWindow]);
 end;
 
-destructor TWidget.Destroy;
+destructor TFWidget.Destroy;
 begin
   OnMouseReleased   := nil;
   OnMousePressed    := nil;
   inherited Destroy;
 end;
 
-procedure TWidget.ProcessEvent(AEvent: TFEvent);
+procedure TFWidget.ProcessEvent(AEvent: TFEvent);
 begin
   inherited ProcessEvent(AEvent);
   case AEvent.EventType of
@@ -277,22 +277,22 @@ begin
 
 end;
 
-procedure TWidget.SetFocus;
+procedure TFWidget.SetFocus;
 begin
   Include(FWidgetState, wsHasFocus);
   Paint;
 //  FindForm.FocusedWidget := Self;
 end;
 
-{ TForm }
+{ TFForm }
 
-constructor TForm.Create(AParent: TFCustomWindow;
+constructor TFForm.Create(AParent: TFCustomWindow;
   AWindowOptions: TFWindowOptions);
 begin
   inherited Create(AParent, AWindowOptions);
 end;
 
-constructor TForm.Create;
+constructor TFForm.Create;
 begin
   inherited Create(nil, [woWindow]);
 end;
