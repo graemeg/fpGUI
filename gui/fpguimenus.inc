@@ -181,10 +181,10 @@ begin
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
   BorderWidth := 1;
   Color       := clBlack;
-  Name        := '#MenuPopup';
+  Name        := '_MenuPopup';
 
   FMenu := TFMenuBar.Create(self);
-  FMenu.Name        := '#VBoxMenu';
+  FMenu.Name        := '_VBoxMenu';
   FMenu.Orientation := Vertical;
   FMenu.Spacing     := 0;
   InsertChild(FMenu);

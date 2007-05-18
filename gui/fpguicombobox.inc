@@ -105,16 +105,16 @@ begin
   WidgetStyle := WidgetStyle + [wsCaptureMouse, wsClickable, wsOpaque];
   BorderWidth := 1;
   Color       := clBlack;
-  Name        := '#ComboBoxPopup';
+  Name        := '_ComboBoxPopup';
 
   FLayout := TFBoxLayout.Create(self);
-  FLayout.Name        := '#VBoxLayout';
+  FLayout.Name        := '_VBoxLayout';
   FLayout.Orientation := Vertical;
   FLayout.Spacing     := 0;
   InsertChild(FLayout);
 
   FListBox := TFListBox.Create(self);
-  FListBox.Name       := '#Listbox';
+  FListBox.Name       := '_Listbox';
   FListBox.HotTrack   := True;
   FLayout.InsertChild(FListBox);
 end;
@@ -133,7 +133,7 @@ begin
   FItemIndex := -1;
 
   ComboBoxButton := TFArrowButton.Create(Self);
-  ComboBoxButton.Name             := '#ComboBoxButton';
+  ComboBoxButton.Name             := '_ComboBoxButton';
   ComboBoxButton.Embedded         := True;
   ComboBoxButton.CanExpandWidth   := False;
   ComboBoxButton.CanExpandHeight  := False;

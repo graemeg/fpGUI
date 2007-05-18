@@ -287,7 +287,7 @@ uses
   GELImage
   ,fpGFX
   {$IFDEF XftSupport}
-  ,schar16            // Unicode support
+//  ,schar16            // Unicode support
   {$ENDIF}
   ;
 
@@ -652,7 +652,7 @@ procedure TX11Canvas.DoTextOut(const APosition: TPoint; const AText: String);
   {$IFDEF XftSupport}
 var
   fntColor: TXftColor;
-  s: String16;
+  WideText: WideString;
 
     procedure SetXftColor(c: TGfxPixel; var colxft: TXftColor);
     begin
@@ -672,14 +672,20 @@ begin
     Exit; //==>
     
   {$IFDEF XftSupport}
-//  fnt := XftFontOpenName(GFApplication.Handle, XDefaultScreen(GFApplication.Handle), PChar('Sans-12'));
+  WideText := Utf8Decode(AText);
+
   SetXftColor(FCurColor,fntColor);
-//  s := u8(AText);
   XftDrawSetClip(FXftDraw, FRegion);
-  XftDrawString8(FXftDraw, fntColor, FFontStruct.FontData, APosition.x,
-      Aposition.y + FFontStruct.GetAscent, PChar(AText), Length(AText));
-//  XftDrawString16(FXftDraw, fntColor, fnt, APosition.x, Aposition.y * 3, @s[1], Length16(s));
-//  XftFontClose(GFApplication.Handle, fnt);
+//  XftDrawString8(FXftDraw, fntColor, FFontStruct.FontData, APosition.x,
+//      Aposition.y + FFontStruct.GetAscent, PChar(AText), Length(AText));
+
+  XftDrawString16(FXftDraw, fntColor, FFontStruct.FontData, APosition.x,
+      Aposition.y + FFontStruct.GetAscent, PChar(WideText), Length(WideText));
+
+// pasgf implementation
+//  XftDrawString16(FXftDraw, FColorTextXft, FCurFontRes.Handle, x,
+//      y+FCurFontRes.GetAscent, @txt[1], Length(txt) )
+
   {$ELSE}
   XDrawString(GFApplication.Handle, Handle, GC, APosition.x,
     APosition.y + FFontStruct.GetAscent, PChar(AText), Length(AText));
@@ -1572,6 +1578,7 @@ end;
 { Makes the window visible and raises it to the top of the stack. }
 procedure TX11Window.Show;
 begin
+  GFApplication.AddWindow(self);
   XMapRaised(GFApplication.Handle, Handle);
 end;
 

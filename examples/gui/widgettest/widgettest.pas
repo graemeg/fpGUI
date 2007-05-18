@@ -117,6 +117,7 @@ type
   { TEditForm }
 
   TEditForm = class(TTestForm)
+  published
     Grid: TFGridLayout;
     VertBox, HorzBox1, HorzBox2: TFBoxLayout;
     Label1, Label2, PasswordDisplay: TFLabel;
@@ -206,6 +207,7 @@ type
     Title: TFLabel;
     p1, p2, p3, p4, p5, p6: TFPanel;
     MenuBox: TFBoxLayout;
+    Separator: TSeparator;
   end;
   
   
@@ -302,6 +304,9 @@ begin
   lMenuItem.SubMenu.AddMenu('Tutorials');
   lMenuItem.SubMenu.AddMenu('About', '', @AboutMenuClicked);
 
+  Separator := TSeparator.Create(self);
+  BoxLayout.InsertChild(Separator);
+  
   Title := TFLabel.Create(self);
   Title.CanExpandWidth := True;
   Title.Alignment := taCenter;
@@ -666,6 +671,7 @@ end;
 
 procedure TEditForm.cbBorderStyleClick(Sender: TObject);
 begin
+//  SaveForm(self);
   if Edit1.BorderStyle = bsNone then
   begin
     Edit1.BorderStyle := bsSingle;
@@ -688,6 +694,7 @@ constructor TEditForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   LoadForm(self);
+  Edit2.PasswordChar := '*';
 end;
 
 

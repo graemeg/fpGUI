@@ -388,6 +388,10 @@ var
   lBorders: TRect;
   lSideMargins: integer;
 begin
+  // This is not pretty and needs to change, but if these two tests are not
+  // here it throws a AV when loading forms
+  if not Assigned(FindForm) then
+    Exit; //==>
   if not Assigned(FindForm.FWnd) then
     Exit; //==>
 

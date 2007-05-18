@@ -439,7 +439,7 @@ begin
   FSmallChange  := 1;
 
   ButtonUp := TFScrollBarButton.Create(Self);
-  ButtonUp.Name               := '#ScrollBarButtonUp';
+  ButtonUp.Name               := '_ScrollBarButtonUp';
   TFScrollBarButton(ButtonUp).Direction := arrowLeft;
   ButtonUp.Embedded           := True;
   ButtonUp.CanExpandWidth     := False;
@@ -448,11 +448,11 @@ begin
   ButtonUp.SetEmbeddedParent(Self);
 
   Slider := TFScrollBarSlider.Create(Self);
-  Slider.Name                 := '#ScrollBarSlider';
+  Slider.Name                 := '_ScrollBarSlider';
   Slider.SetEmbeddedParent(Self);
 
   ButtonDown := TFScrollBarButton.Create(Self);
-  ButtonDown.Name             := '#ScrollBarButtonDown';
+  ButtonDown.Name             := '_ScrollBarButtonDown';
   TFScrollBarButton(ButtonDown).Direction := arrowRight;
   ButtonDown.Embedded         := True;
   ButtonDown.CanExpandWidth   := False;

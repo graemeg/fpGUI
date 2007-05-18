@@ -83,12 +83,12 @@ begin
   Parent := AParent;
 
   FHorzScrollBar := TFScrollBar.Create(Parent);
-  HorzScrollBar.Name := '#Scrolling_HorzBar';
+  HorzScrollBar.Name := '_Scrolling_HorzBar';
   HorzScrollBar.Embedded := True;
   HorzScrollBar.SetEmbeddedParent(Parent);
 
   FVerTFScrollBar := TFScrollBar.Create(Parent);
-  VerTFScrollBar.Name := '#Scrolling_VertBar';
+  VerTFScrollBar.Name := '_Scrolling_VertBar';
   VerTFScrollBar.Orientation := Vertical;
   VerTFScrollBar.Embedded := True;
   VerTFScrollBar.SetEmbeddedParent(Parent);

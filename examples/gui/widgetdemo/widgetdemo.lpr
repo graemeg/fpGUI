@@ -302,12 +302,12 @@ begin
   inherited Create(AOwner);
   Text          := 'Widget Demo';
   BorderWidth   := 8;
-//  WindowType    := wtWindow;
-  
+
   topLayout := TFBoxLayout.Create(self);
   topLayout.Orientation     := Vertical;
   mainLayout := TFGridLayout.Create(self);
   mainLayout.RowCount       := 2;
+//  mainlayout.RowSpacing := 0;
   
   CreateTopMenu;
   topLayout.InsertChild(MainMenu);
@@ -345,7 +345,7 @@ var
 begin
   GFApplication.Initialize;
 
-  WidgetDemoForm := TWidgetDemoForm.Create(GFApplication);
+  WidgetDemoForm := TWidgetDemoForm.Create(nil);
   try
     WidgetDemoForm.Show;
     GFApplication.Run;

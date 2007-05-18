@@ -145,6 +145,7 @@ begin
   LAYOUTTRACE('TFCustomForm.Show for %s:%s', [Name, ClassName]);
 
   FVisible := True;
+//  GFApplication.AddWindow(Wnd);
   Wnd.Show;
 end;
 
