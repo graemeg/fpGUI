@@ -8,7 +8,7 @@ interface
 
 uses
   GfxBase, GFX_X11, gfxinterface, schar16, unitkeys, fpgfx, GELDirty, GELImage, 
-    CommandLineParams; 
+    CommandLineParams, fpUTF8Utils; 
 
 implementation
 

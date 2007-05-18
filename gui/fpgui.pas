@@ -159,6 +159,7 @@ implementation
 uses
   Math
   ,StyleManager
+  ,fpUTF8Utils
   ;
 
 

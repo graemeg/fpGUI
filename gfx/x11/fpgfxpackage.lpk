@@ -21,7 +21,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="4"/>
-    <Files Count="9">
+    <Files Count="10">
       <Item1>
         <Filename Value="../gfxbase.pas"/>
         <UnitName Value="GfxBase"/>
@@ -58,6 +58,10 @@
         <Filename Value="../commandlineparams.pas"/>
         <UnitName Value="CommandLineParams"/>
       </Item9>
+      <Item10>
+        <Filename Value="../fputf8utils.pas"/>
+        <UnitName Value="fpUTF8Utils"/>
+      </Item10>
     </Files>
     <LazDoc Paths="../../docs/xml/gfx/"/>
     <RequiredPkgs Count="1">

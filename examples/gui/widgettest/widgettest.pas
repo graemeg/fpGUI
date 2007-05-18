@@ -694,6 +694,7 @@ constructor TEditForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   LoadForm(self);
+  Edit1.Text := 'Gráficas Magnificacion! Teste';
   Edit2.PasswordChar := '*';
 end;
 

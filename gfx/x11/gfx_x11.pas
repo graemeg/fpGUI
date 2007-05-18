@@ -621,6 +621,7 @@ function TX11Canvas.TextExtent(const AText: String): TSize;
 var
   {$IFDEF XftSupport}
   extents : TXGlyphInfo;
+  WideText: WideString;
   {$ELSE}
   Direction, FontAscent, FontDescent: LongInt;
   CharStruct: TXCharStruct;
@@ -634,7 +635,9 @@ begin
   else
   begin
     {$IFDEF XftSupport}
-    XftTextExtents8(GFApplication.Handle, FFontStruct.FontData, PChar(AText), Length(AText), extents);
+    WideText := Utf8Decode(AText);
+//    XftTextExtents8(GFApplication.Handle, FFontStruct.FontData, PChar(AText), Length(AText), extents);
+    XftTextExtents16(GFApplication.Handle, FFontStruct.FontData, PChar(WideText), Length(WideText), extents);
     Result.cx := extents.xOff;
     Result.cy := extents.yOff;
     {$ELSE}

@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="4"/>
-    <Files Count="6">
+    <Files Count="7">
       <Item1>
         <Filename Value="..\gfxbase.pas"/>
         <UnitName Value="GfxBase"/>
@@ -49,6 +49,10 @@
         <Filename Value="..\gelimage.pas"/>
         <UnitName Value="GELImage"/>
       </Item6>
+      <Item7>
+        <Filename Value="..\fputf8utils.pas"/>
+        <UnitName Value="fpUTF8Utils"/>
+      </Item7>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>
