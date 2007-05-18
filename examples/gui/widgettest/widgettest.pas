@@ -666,7 +666,11 @@ end;
 
 procedure TEditForm.GrayCheckBox2Click(Sender: TObject);
 begin
-  Edit2.Enabled := not GrayCheckBox2.Checked;
+//  Edit2.Enabled := not GrayCheckBox2.Checked;
+  if GrayCheckBox2.Checked then
+    Edit2.PasswordChar := #0
+  else
+    Edit2.PasswordChar := '*';
 end;
 
 procedure TEditForm.cbBorderStyleClick(Sender: TObject);
@@ -695,6 +699,7 @@ begin
   inherited Create(AOwner);
   LoadForm(self);
   Edit1.Text := 'Gráficas Magnificacion! Teste';
+  Edit2.Text := 'Gráficas';
   Edit2.PasswordChar := '*';
 end;
 

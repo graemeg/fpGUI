@@ -1,6 +1,6 @@
 {
     fpGFX  -  Free Pascal Graphics Library
-    Copyright (C) 2006 by Graeme Geldenhuys 
+    Copyright (C) 2006-2007 by Graeme Geldenhuys
       member of the fpGFX development team.
 
     Xft interface functions
@@ -108,11 +108,13 @@ function XftDrawPicture(draw : PXftDraw) : TPicture; cdecl;
 function XftFontOpenName(display : PXDisplay; scr : integer; par3 : PChar) : PXftFont; cdecl;
 procedure XftFontClose(display : PXDisplay; fnt : PXftFont); cdecl;
 
+procedure XftDrawStringUtf8(draw : PXftDraw; var col : TXftColor; fnt : PXftFont; x,y : integer; txt : PChar; len : integer); cdecl;
 procedure XftDrawString8(draw : PXftDraw; var col : TXftColor; fnt : PXftFont; x,y : integer; txt : PChar; len : integer); cdecl;
 procedure XftDrawString16(draw : PXftDraw; var col : TXftColor; fnt : PXftFont; x,y : integer; txt : PChar; len : integer); cdecl;
 
-procedure XftTextExtents16(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl;
+procedure XftTextExtentsUtf8(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl;
 procedure XftTextExtents8(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl;
+procedure XftTextExtents16(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl;
 
 //function XftGlyphExists(display : PXDisplay; fnt : PXftFont; ch : integer) : longbool; cdecl;
 
@@ -124,7 +126,10 @@ function XftListFonts(display : PXDisplay; screen : integer; params : array of c
 function XftNameUnparse(pat : PFcPattern; dest : PChar; destlen : integer) : boolean; cdecl;
 procedure FcFontSetDestroy(fsp : PFcFontSet); cdecl;
 
+
+
 implementation
+
 
 function XftDrawCreate(display : PXDisplay; win : TXID; vis : PVisual; colorm : longint) : PXftDraw; cdecl; external;
 procedure XftDrawChange(xftd : PXftDraw; win : TXID); cdecl; external;
@@ -135,11 +140,13 @@ function XftDrawPicture(draw : PXftDraw) : TPicture; cdecl; external;
 function XftFontOpenName(display : PXDisplay; scr : integer; par3 : PChar) : PXftFont; cdecl; external;
 procedure XftFontClose(display : PXDisplay; fnt : PXftFont); cdecl; external;
 
+procedure XftDrawStringUtf8(draw : PXftDraw; var col : TXftColor; fnt : PXftFont; x,y : integer; txt : PChar; len : integer); cdecl; external;
 procedure XftDrawString8(draw : PXftDraw; var col : TXftColor; fnt : PXftFont; x,y : integer; txt : PChar; len : integer); cdecl; external;
 procedure XftDrawString16(draw : PXftDraw; var col : TXftColor; fnt : PXftFont; x,y : integer; txt : PChar; len : integer); cdecl; external;
 
-procedure XftTextExtents16(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl; external;
+procedure XftTextExtentsUtf8(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl; external;
 procedure XftTextExtents8(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl; external;
+procedure XftTextExtents16(display : PXDisplay; fnt : PXftFont; txt : PChar; len : integer; var extents : TXGlyphInfo); cdecl; external;
 
 //function XftGlyphExists(display : PXDisplay; fnt : PXftFont; ch : integer) : longbool; cdecl; external;
 

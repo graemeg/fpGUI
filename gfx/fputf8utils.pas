@@ -16,6 +16,7 @@ uses
 
 function UTF8Pos(const SearchForText, SearchInText: string): integer;
 function UTF8Copy(const s: string; StartCharIndex, CharCount: integer): string;
+function UTF8Length(const s: string): integer;
 function UTF8Length(p: PChar; ByteCount: integer): integer;
 function UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
 function UTF8CharacterLength(p: PChar): integer;
@@ -53,6 +54,11 @@ begin
    else
      Result:=copy(s,StartBytePos-PChar(s)+1,EndBytePos-StartBytePos);
  end;
+end;
+
+function UTF8Length(const s: string): integer;
+begin
+  Result := UTF8Length(PChar(s),length(s));
 end;
 
 function UTF8Length(p: PChar; ByteCount: integer): integer;

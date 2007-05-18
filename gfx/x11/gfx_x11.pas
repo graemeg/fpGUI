@@ -23,17 +23,13 @@ unit GFX_X11;
   {$mode objfpc}{$H+}
 {$endif}
 
-{ Disable this, if you do not want Xft to be used for drawing text }
-{$Define XftSupport}
 
 interface
 
 uses
   SysUtils, Classes,   // FPC units
   X, XLib, XUtil,     // X11 units
-  {$IFDEF XftSupport}
   unitxft,            // Xft font support
-  {$ENDIF}
   GfxBase,            // fpGFX units
   GELDirty;           // fpGFX emulation layer
 
@@ -64,22 +60,14 @@ type
 
   TX11FontResourceImpl = class(TObject)
   private
-    {$IFDEF XftSupport}
     FFontData: PXftFont;
-    {$ELSE}
-    FFontData: PXFontStruct;
-    {$ENDIF}
   public
     constructor Create(const Descriptor: String);
     destructor  Destroy; override;
     function    GetAscent: integer;
     function    GetDescent: integer;
     function    GetHeight: integer;
-    {$IFDEF XftSupport}
     property    FontData: PXftFont read FFontData;
-    {$ELSE}
-    property    FontData: PXFontStruct read FFontData write FFontData;
-    {$ENDIF}
   end;
   
 
@@ -115,9 +103,7 @@ type
     FRegion: TRegion;
     FDefaultFont: TX11FontResourceImpl;
     FFontStruct: TX11FontResourceImpl;
-    {$IFDEF XftSupport}
     FXftDraw: PXftDraw;
-    {$ENDIF}
     FStateStackpointer: PX11CanvasState;
     FColormap: TColormap;
     FCurColor: TGfxPixel;
@@ -286,9 +272,7 @@ implementation
 uses
   GELImage
   ,fpGFX
-  {$IFDEF XftSupport}
-//  ,schar16            // Unicode support
-  {$ENDIF}
+  ,fpUTF8Utils
   ;
 
 resourcestring
@@ -344,14 +328,9 @@ begin
     LineSolid, CapNotLast, JoinMiter);
 
   FFontStruct := FDefaultFont;
-  {$IFDEF XftSupport}
-    FXftDraw := XftDrawCreate(GFApplication.Handle, Handle,
-      XDefaultVisual(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)),
-      XDefaultColormap(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)));
-  {$ELSE}
-  if Assigned(FFontStruct.FontData) then
-    XSetFont(GFApplication.Handle, GC, FFontStruct.FontData^.FID);
-  {$ENDIF}
+  FXftDraw := XftDrawCreate(GFApplication.Handle, Handle,
+    XDefaultVisual(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)),
+    XDefaultColormap(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)));
 
   FRegion := XCreateRegion;
   Resized(Width, Height);	// Set up a proper clipping region
@@ -359,10 +338,9 @@ end;
 
 destructor TX11Canvas.Destroy;
 begin
-  {$IFDEF XftSupport}
   if FXftDraw <> nil then
     XftDrawDestroy(FXftDraw);
-  {$ENDIF}
+
   XDestroyRegion(Region);
   if Assigned(GC) then
     XFreeGC(GFApplication.Handle, GC);
@@ -499,12 +477,7 @@ begin
       Exit; //==>
     FFontStruct := TX11Font(AFont).FontStruct;
   end;
-  {$IFDEF XftSupport}
-    {$Note Still needs testing }
-    FFontStruct := TX11Font(AFont).FontStruct;
-  {$ELSE}
-  XSetFont(GFApplication.Handle, GC, FFontStruct.FontData^.FID);
-  {$ENDIF}
+  FFontStruct := TX11Font(AFont).FontStruct;
 end;
 
 procedure TX11Canvas.SetLineStyle(ALineStyle: TGfxLineStyle);
@@ -526,7 +499,6 @@ begin
   end;
 end;
 
-
 procedure TX11Canvas.DoDrawArc(const ARect: TRect; StartAngle, EndAngle: Single);
 begin
   with ARect do
@@ -535,7 +507,6 @@ begin
       Round(StartAngle * 64), Round((EndAngle - StartAngle) * 64));
 end;
 
-
 procedure TX11Canvas.DoDrawCircle(const ARect: TRect);
 begin
   with ARect do
@@ -543,12 +514,10 @@ begin
       Left, Top, Right - Left - 1, Bottom - Top - 1, 0, 23040);
 end;
 
-
 procedure TX11Canvas.DoDrawLine(const AFrom, ATo: TPoint);
 begin
   XDrawLine(GFApplication.Handle, Handle, GC, AFrom.x, AFrom.y, ATo.x, ATo.y);
 end;
-
 
 procedure TX11Canvas.DrawPolyLine(const Coords: array of TPoint);
 var
@@ -573,7 +542,6 @@ begin
   FreeMem(Points);
 end;
 
-
 procedure TX11Canvas.DoDrawRect(const ARect: TRect);
 begin
   with ARect do
@@ -581,12 +549,10 @@ begin
       Right - Left - 1, Bottom - Top - 1);
 end;
 
-
 procedure TX11Canvas.DoDrawPoint(const APoint: TPoint);
 begin
   XDrawPoint(GFApplication.Handle, Handle, GC, APoint.x, APoint.y);
 end;
-
 
 procedure TX11Canvas.DoFillRect(const ARect: TRect);
 begin
@@ -610,22 +576,14 @@ begin
   XFillPolygon(GFApplication.Handle, Handle, GC, @pts, 3, 0, CoordModeOrigin);
 end;
 
-
 function TX11Canvas.FontCellHeight: Integer;
 begin
   Result := FFontStruct.GetHeight;
 end;
 
-
 function TX11Canvas.TextExtent(const AText: String): TSize;
 var
-  {$IFDEF XftSupport}
-  extents : TXGlyphInfo;
-  WideText: WideString;
-  {$ELSE}
-  Direction, FontAscent, FontDescent: LongInt;
-  CharStruct: TXCharStruct;
-  {$ENDIF}
+  extents: TXGlyphInfo;
 begin
   if Length(AText) = 0 then
   begin
@@ -634,29 +592,16 @@ begin
   end
   else
   begin
-    {$IFDEF XftSupport}
-    WideText := Utf8Decode(AText);
-//    XftTextExtents8(GFApplication.Handle, FFontStruct.FontData, PChar(AText), Length(AText), extents);
-    XftTextExtents16(GFApplication.Handle, FFontStruct.FontData, PChar(WideText), Length(WideText), extents);
+    XftTextExtentsUtf8(GFApplication.Handle, FFontStruct.FontData, PChar(AText), Length(AText), extents);
     Result.cx := extents.xOff;
     Result.cy := extents.yOff;
-    {$ELSE}
-    XQueryTextExtents(GFApplication.Handle, XGContextFromGC(GC),
-      PChar(AText), Length(AText),
-      @Direction, @FontAscent, @FontDescent, @CharStruct);
-    Result.cx := CharStruct.Width;
-    Result.cy := CharStruct.Ascent + CharStruct.Descent;
-    {$ENDIF}
   end;
 end;
 
-
 procedure TX11Canvas.DoTextOut(const APosition: TPoint; const AText: String);
-  {$IFDEF XftSupport}
 var
   fntColor: TXftColor;
-  WideText: WideString;
-
+    //--------------
     procedure SetXftColor(c: TGfxPixel; var colxft: TXftColor);
     begin
       colxft.color.blue  := (c and $000000FF) shl 8;
@@ -669,32 +614,15 @@ var
       colxft.pixel := 0;
     end;
 
-  {$ENDIF}
 begin
-  if Length(AText) < 1 then
+  if UTF8Length(AText) < 1 then
     Exit; //==>
     
-  {$IFDEF XftSupport}
-  WideText := Utf8Decode(AText);
-
   SetXftColor(FCurColor,fntColor);
   XftDrawSetClip(FXftDraw, FRegion);
-//  XftDrawString8(FXftDraw, fntColor, FFontStruct.FontData, APosition.x,
-//      Aposition.y + FFontStruct.GetAscent, PChar(AText), Length(AText));
-
-  XftDrawString16(FXftDraw, fntColor, FFontStruct.FontData, APosition.x,
-      Aposition.y + FFontStruct.GetAscent, PChar(WideText), Length(WideText));
-
-// pasgf implementation
-//  XftDrawString16(FXftDraw, FColorTextXft, FCurFontRes.Handle, x,
-//      y+FCurFontRes.GetAscent, @txt[1], Length(txt) )
-
-  {$ELSE}
-  XDrawString(GFApplication.Handle, Handle, GC, APosition.x,
-    APosition.y + FFontStruct.GetAscent, PChar(AText), Length(AText));
-  {$ENDIF}
+  XftDrawStringUtf8(FXftDraw, fntColor, FFontStruct.FontData, APosition.x,
+      Aposition.y + FFontStruct.GetAscent, PChar(AText), Length(AText));
 end;
-
 
 procedure TX11Canvas.DoCopyRect(ASource: TFCustomCanvas; const ASourceRect: TRect;
   const ADestPos: TPoint);
@@ -724,7 +652,6 @@ begin
       ASourceRect.Right - ASourceRect.Left,
       ASourceRect.Bottom - ASourceRect.Top, ADestPos.x, ADestPos.y);
 end;
-
 
 procedure TX11Canvas.DoMaskedCopyRect(ASource, AMask: TFCustomCanvas;
   const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint);
@@ -1211,12 +1138,10 @@ begin
   DoBreakRun := False;
 end;
 
-
 procedure TX11Application.Quit;
 begin
   DoBreakRun := True;
 end;
-
 
 function TX11Application.FindWindowByXID(XWindowID: X.TWindow): TFCustomWindow;
 var
@@ -1278,21 +1203,11 @@ begin
   if not Assigned(Handle) then
     raise EX11Error.CreateFmt(SOpenDisplayFailed, [DisplayName]);
 
-  {$IFDEF XftSupport}
 //  FDefaultFont := TX11FontResourceImpl.Create('Arial-10');
-  FDefaultFont := TX11FontResourceImpl.Create('Sans-9');
-  {$ELSE}
-  FDefaultFont := TX11FontResourceImpl.Create('-adobe-helvetica-medium-r-normal--*-120-*-*-*-*-iso8859-1');
-  {$ENDIF}
+  FDefaultFont := TX11FontResourceImpl.Create('Sans-10');
 
   if not Assigned(FDefaultFont) then
-  begin
-    {$IFNDEF XftSupport}
-    FDefaultFont := TX11FontResourceImpl.Create('-*-fixed-*-*-*-*-*-*-*-*-*-*-iso8859-*');
-    {$ENDIF}
-    if not Assigned(FDefaultFont) then
-      raise EX11Error.Create(SNoDefaultFont);
-  end;
+    raise EX11Error.Create(SNoDefaultFont);
 end;
 
 { TX11Window }
@@ -1435,7 +1350,6 @@ begin
 //    XSetTransientForHint(GFApplication.Handle, Handle, Handle);
 end;
 
-
 destructor TX11Window.Destroy;
 begin
   if Assigned(OnClose) then
@@ -1453,7 +1367,6 @@ begin
 
   inherited Destroy;
 end;
-
 
 procedure TX11Window.SetPosition(const APosition: TPoint);
 var
@@ -1496,7 +1409,6 @@ begin
   XMoveWindow(GFApplication.Handle, Handle, lx, ly);
 end;
 
-
 procedure TX11Window.SetSize(const ASize: TSize);
 begin
   // !!!: Implement this properly
@@ -1504,14 +1416,12 @@ begin
   SetClientSize(ASize);
 end;
 
-
 procedure TX11Window.SetMinMaxSize(const AMinSize, AMaxSize: TSize);
 begin
   // !!!: Implement this properly
   WriteLn('fpGFX/X11: TXWindow.SetMinMaxSize is not properly implemented yet');
   SetMinMaxClientSize(AMinSize, AMaxSize);
 end;
-
 
 procedure TX11Window.SetClientSize(const ASize: TSize);
 var
@@ -1535,7 +1445,6 @@ begin
   if ChangeMask <> 0 then
     XConfigureWindow(GFApplication.Handle, Handle, ChangeMask, @Changes);
 end;
-
 
 procedure TX11Window.SetMinMaxClientSize(const AMinSize, AMaxSize: TSize);
 var
@@ -1577,14 +1486,12 @@ begin
   XFree(SizeHints);
 end;
 
-
 { Makes the window visible and raises it to the top of the stack. }
 procedure TX11Window.Show;
 begin
   GFApplication.AddWindow(self);
   XMapRaised(GFApplication.Handle, Handle);
 end;
-
 
 procedure TX11Window.Invalidate(const ARect: TRect);
 begin
@@ -1755,9 +1662,6 @@ begin
   end;
 end;
 
-
-// protected methods
-
 function TX11Window.GetTitle: String;
 var
   s: PChar;
@@ -1767,12 +1671,10 @@ begin
   XFree(s);
 end;
 
-
 procedure TX11Window.SetTitle(const ATitle: String);
 begin
   XStoreName(GFApplication.Handle, Handle, PChar(ATitle));
 end;
-
 
 procedure TX11Window.DoSetCursor;
 const
@@ -1801,7 +1703,6 @@ begin
     FCurCursorHandle := XCreateFontCursor(GFApplication.Handle, ID);
   XDefineCursor(GFApplication.Handle, Handle, FCurCursorHandle);
 end;
-
 
 function TX11Window.ConvertShiftState(AState: Cardinal): TShiftState;
 begin
@@ -1898,7 +1799,6 @@ begin
 {$ENDIF}
 end;
 
-
 procedure TX11Window.UpdateMotifWMHints;
 type
   PMotifWmHints = ^TMotifWmHints;
@@ -1967,17 +1867,12 @@ begin
     XFree(Hints);
 end;
 
-
-{ private methods }
-
-
 function TX11Window.StartComposing(const Event: TFEvent): TKeySym;
 begin
   SetLength(FComposeBuffer,
     XLookupString(Event.EventPointer, @FComposeBuffer[1],
       SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus));
 end;
-
 
 procedure TX11Window.EndComposing;
 var
@@ -1987,7 +1882,6 @@ begin
     for i := 1 to Length(FComposeBuffer) do
       OnKeyChar(Self, FComposeBuffer[i]);
 end;
-
 
 procedure TX11Window.Expose(var Event: TXExposeEvent);
 {var
@@ -2046,7 +1940,6 @@ begin
   end;
 end;
 
-
 procedure TX11Window.ClientMessage(var Event: TXClientMessageEvent);
 begin
   if Event.message_type = GFApplication.FWMProtocols then
@@ -2070,7 +1963,6 @@ begin
   Result.height := ARect.Bottom - ARect.Top;
 end;
 
-
 function XRectToRect(const ARect: TXRectangle): TRect;
 begin
   Result.Left   := ARect.x;
@@ -2078,7 +1970,6 @@ begin
   Result.Right  := ARect.x + ARect.width;
   Result.Bottom := ARect.y + ARect.height;
 end;
-
 
 function GetXEventName(Event: LongInt): String;
 const
@@ -2102,11 +1993,7 @@ end;
 
 constructor TX11FontResourceImpl.Create(const Descriptor: String);
 begin
-  {$IFDEF XftSupport}
   FFontData := XftFontOpenName(GFApplication.Handle, XDefaultScreen(GFApplication.Handle), PChar(Descriptor));
-  {$ELSE}
-  FFontData := XLoadQueryFont(GFApplication.Handle, PChar(Descriptor));
-  {$ENDIF}
   if not Assigned(FFontData) then
     raise EX11Error.CreateFmt(SFontCreationFailed, [Descriptor]);
 end;
@@ -2114,15 +2001,7 @@ end;
 destructor TX11FontResourceImpl.Destroy;
 begin
   if Assigned(FFontData) then
-  begin
-    {$IFDEF XftSupport}
     XftFontClose(GFApplication.Handle, FFontData);
-    {$ELSE}
-    if FFontData^.fid <> 0 then
-      XUnloadFont(GFApplication.Handle, FFontData^.fid);
-    XFreeFontInfo(nil, FFontData, 0);
-    {$ENDIF}
-  end;
   inherited Destroy;
 end;
 

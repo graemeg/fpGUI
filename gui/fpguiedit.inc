@@ -204,24 +204,21 @@ begin
 end;
 
 procedure TFCustomEdit.EvKeyPressed(Key: Word; Shift: TShiftState);
-var
-  WideText: WideString;
 begin
   if Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssSuper, ssHyper, ssAltGr] = [] then
   begin
-    WideText := UTF8Decode(Text);
     // Normal typing - no selections
     case Key of
       keyLeft, keyUp:
         if CursorPos > 0 then
 	        CursorPos := CursorPos - 1;
       keyRight, keyDown:
-	      if CursorPos < Length(WideText) then
+	      if CursorPos < UTF8Length(FText) then
 	        CursorPos := CursorPos + 1;
       keyHome:
         CursorPos := 0;
       keyEnd:
-        CursorPos := Length(WideText);
+        CursorPos := UTF8Length(FText);
       else
         inherited EvKeyPressed(Key, Shift);
     end;
@@ -255,27 +252,23 @@ end;
 
 
 procedure TFCustomEdit.EvKeyChar(KeyChar: Char);
-var
-  WideText: WideString;
 begin
-  WideText := UTF8Decode(FText);
-
   case KeyChar of
     #8:      { Backspace }
       if FCursorPos > 0 then
       begin
-        FText := UTF8Copy(FText, 1, FCursorPos - 1) + UTF8Copy(FText, FCursorPos + 1, Length(WideText));
+        FText := UTF8Copy(FText, 1, FCursorPos - 1) + UTF8Copy(FText, FCursorPos + 1, UTF8Length(FText));
         FCursorPos := FCursorPos - 1;
       end;
     #127:    { Del }
-      if FCursorPos < Length(WideText) then
+      if FCursorPos < UTF8Length(FText) then
       begin
-        FText := UTF8Copy(FText, 1, FCursorPos) + UTF8Copy(FText, FCursorPos + 2, Length(WideText));
+        FText := UTF8Copy(FText, 1, FCursorPos) + UTF8Copy(FText, FCursorPos + 2, UTF8Length(FText));
         Redraw;
       end;
     #32..#126, #128..#255:
       begin
-        FText := UTF8Copy(FText, 1, FCursorPos) + KeyChar + UTF8Copy(FText, CursorPos + 1, Length(WideText));
+        FText := UTF8Copy(FText, 1, FCursorPos) + KeyChar + UTF8Copy(FText, CursorPos + 1, UTF8Length(FText));
         FCursorPos := FCursorPos + 1;
       end;
     else
@@ -301,13 +294,10 @@ begin
 end;
 
 procedure TFCustomEdit.SetText(const AText: String);
-var
-  WideText: WideString;
 begin
   inherited SetText(AText);
-  WideText      := Utf8Decode(FText);
   FSelOffset    := 0;
-  FCursorPos    := Length(WideText);
+  FCursorPos    := UTF8Length(FText);
   FSelStart     := FCursorPos;
   FDrawOffset   := 0;
   AdjustCursor;
@@ -346,7 +336,6 @@ var
   n: integer;
   cx: integer;
   lText: string;
-  WideText: WideString;
 begin
   if (pEvent.Button = mbLeft) then
   begin
@@ -356,12 +345,11 @@ begin
 
     // Make sure we work with the correct displayed text
     lText := GetDrawText;
-    WideText := UTF8Decode(lText);
 
     cp    := FCursorPos;
     cpx   := FindForm.Wnd.Canvas.TextWidth(UTF8Copy(lText, 1, FCursorPos)) - FDrawOffset + lSideMargin;
 
-    for n := 0 to Length(WideText) do
+    for n := 0 to UTF8Length(lText) do
     begin
       cx := FindForm.Wnd.Canvas.TextWidth(UTF8Copy(lText, 1, n)) - FDrawOffset + lSideMargin;
       if abs(cx - pEvent.Position.x) < abs(cpx - pEvent.Position.x) then
@@ -430,15 +418,12 @@ end;
 
 // Return the correct text to be displayed
 function TFCustomEdit.GetDrawText: string;
-var
-  WideText: WideString;
 begin
   if FPasswordChar = #0 then
     Result := FText
   else
   begin
-    WideText := Utf8Decode(FText);
-    Result := StringOfChar(FPasswordChar, Length(WideText));
+    Result := StringOfChar(FPasswordChar, UTF8Length(FText));
   end;
 end;
 
