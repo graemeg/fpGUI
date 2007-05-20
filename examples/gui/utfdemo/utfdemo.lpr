@@ -24,6 +24,7 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     TextLabel: TFLabel;
+    Edit: TFEdit;
   end;
 
 
@@ -33,9 +34,9 @@ procedure TMainForm.MainFormActivate(Sender: TObject);
 var
   max: TSize;
 begin
-  max.cx := 320;
-  max.cy := 200;
-  Wnd.SetMinMaxClientSize(MinSize, max);
+  max.cx := 250;
+  max.cy := 80;
+  Wnd.SetMinMaxClientSize(max, max);
 end;
 
 
@@ -47,13 +48,19 @@ begin
   Text            := 'UTF Demo';
   OnActivate      := @MainFormActivate;
 
-  FLayout         := TFBoxLayout.Create(self);
-  FLayout.Parent  := self;
+  FLayout             := TFBoxLayout.Create(self);
+  FLayout.Orientation := Vertical;
+  FLayout.Parent      := self;
   InsertChild(FLayout);
 
   TextLabel       := TFLabel.Create(self);
-  TextLabel.Text  := '&Gráficas Magnificacion! Teste';
+  TextLabel.Text  := 'Gráficas Magnificacion! Teste';
   FLayout.InsertChild(TextLabel);
+  
+  Edit                := TFEdit.Create(self);
+  Edit.CanExpandWidth := True;
+  Edit.Text           := 'Gráficas Magnificacion! Teste';
+  FLayout.InsertChild(Edit);
 end;
 
 
@@ -61,7 +68,7 @@ var
   MainForm: TMainForm;
 begin
   GFApplication.Initialize;
-  MainForm := TMainForm.Create(GFApplication);
+  MainForm := TMainForm.Create(nil);
   try
     MainForm.Show;
     GFApplication.Run;
