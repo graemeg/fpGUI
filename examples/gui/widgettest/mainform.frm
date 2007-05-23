@@ -70,6 +70,11 @@ object MainForm: TMainForm
       Text = 'Progress Bar'
       OnClick = ProgressBarBtnClick
     end
+    object MemoBtn: TFButton
+      CanExpandWidth = True
+      Text = 'Memo widget'
+      OnClick = MemoBtnClick
+    end
     object ShowMessageBtn: TFButton
       CanExpandWidth = True
       Text = 'ShowMessage()'

@@ -42,9 +42,9 @@ object EditForm: TEditForm
       end
       item
 	      Widget = cbBorderStyle
-        x = 0
+        x = 2
 	      y = 4
-	      Width = 3
+	      Width = 1
 	      Height = 1
       end>
     object Label1: TFLabel
@@ -70,7 +70,7 @@ object EditForm: TEditForm
       OnChange = Edit2Change
     end
     object GrayCheckBox2: TFCheckBox
-      Text = 'Disabled'
+      Text = 'Show Text'
       OnClick = GrayCheckBox2Click
     end
     object PasswordDisplay: TFLabel

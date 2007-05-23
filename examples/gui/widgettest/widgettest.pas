@@ -22,6 +22,7 @@ type
   TMenuForm           = class;
   TPanelForm          = class;
   TProgressBarForm    = class;
+  TMemoForm           = class;
 
   { TMainForm }
 
@@ -39,6 +40,7 @@ type
     _frmMenu: TMenuForm;
     _frmPanel: TPanelForm;
     _frmProgressBar: TProgressBarForm;
+    _frmMemo: TMemoForm;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -57,6 +59,7 @@ type
     MenuBtn: TFButton;
     PanelBtn: TFButton;
     ProgressBarBtn: TFButton;
+    MemoBtn: TFButton;
     ShowMessageBtn: TFButton;
     Separator: TSeparator;
     ExitBtn: TFButton;
@@ -73,6 +76,7 @@ type
     procedure MenuBtnClick(Sender: TObject);
     procedure PanelBtnClick(Sender: TObject);
     procedure ProgressBarBtnClick(Sender: TObject);
+    procedure MemoBtnClick(Sender: TObject);
     procedure ShowMessageBtnClick(Sender: TObject);
   end;
 
@@ -247,6 +251,61 @@ type
     Separator: TSeparator;
     btnRandom: TFButton;
   end;
+  
+  
+  { TMemoForm }
+
+  TMemoForm = class(TTestForm)
+  private
+    BoxLayout: TFBoxLayout;
+    Memo: TFMemo;
+    lblTitle: TFLabel;
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+{ TMemoForm }
+
+constructor TMemoForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Name := 'MemoForm';
+  Text := 'Memo Test';
+  BorderWidth := 8;
+
+  BoxLayout := TFBoxLayout.Create(self);
+  BoxLayout.Orientation := Vertical;
+  self.InsertChild(BoxLayout);
+
+  lblTitle := TFLabel.Create('Work in progress! No mouse or cursor support yet.', self);
+  lblTitle.FontColor := clBlue;
+  lblTitle.CanExpandWidth := True;
+  BoxLayout.InsertChild(lblTitle);
+  
+  Memo := TFMemo.Create(self);
+  BoxLayout.InsertChild(Memo);
+  
+  Memo.Lines.Text :=
+    'constructor TMemoForm.Create(AOwner: TComponent);             ' + #10 +
+    'begin                                                         ' + #10 +
+    '  inherited Create(AOwner);                                   ' + #10 +
+    '  Name := ''MemoForm'';                                       ' + #10 +
+    '  Text := ''Memo Test'';                                      ' + #10 +
+    '  BorderWidth := 8;                                           ' + #10 +
+    '                                                              ' + #10 +
+    '  BoxLayout := TFBoxLayout.Create(self);                      ' + #10 +
+    '  BoxLayout.Orientation := Vertical;                          ' + #10 +
+    '  self.InsertChild(BoxLayout);                                ' + #10 +
+    '                                                              ' + #10 +
+    '  lblTitle := TFLabel.Create(''Work in progress!'', self);    ' + #10 +
+    '  lblTitle.FontColor := clBlue;                               ' + #10 +
+    '  lblTitle.CanExpandWidth := True;                            ' + #10 +
+    '  BoxLayout.InsertChild(lblTitle);                            ' + #10 +
+    '                                                              ' + #10 +
+    '  Memo := TFMemo.Create(self);                                ' + #10 +
+    '  BoxLayout.InsertChild(Memo);                                ';
+end;
+
 
 { TListBoxForm }
 
@@ -480,6 +539,7 @@ begin
   _frmMenu.Free;
   _frmPanel.Free;
   _frmProgressBar.Free;
+  _frmMemo.Free;
   inherited Destroy;
 end;
 
@@ -584,6 +644,14 @@ begin
     _frmProgressBar := TProgressBarForm.Create(self);
   _frmProgressBar.Show;
   _frmProgressBar.SetPosition(Point(Left + Width + 5, FindForm.Top));
+end;
+
+procedure TMainForm.MemoBtnClick(Sender: TObject);
+begin
+  if not Assigned(_frmMemo) then
+    _frmMemo := TMemoForm.Create(self);
+  _frmMemo.Show;
+  _frmMemo.SetPosition(Point(Left + Width + 5, FindForm.Top));
 end;
 
 procedure TMainForm.ShowMessageBtnClick(Sender: TObject);

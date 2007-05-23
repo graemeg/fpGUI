@@ -145,6 +145,7 @@ type
 {$I fpguipanel.inc}
 {$I fpguimenus.inc}
 {$I fpguiprogressbar.inc}
+{$I fpguimemo.inc}
 
 
 function ClipMinMax(val, min, max: Integer): Integer;
@@ -334,6 +335,7 @@ end;
 {$I fpguipanel.inc}
 {$I fpguimenus.inc}
 {$I fpguiprogressbar.inc}
+{$I fpguimemo.inc}
 
 
 const
