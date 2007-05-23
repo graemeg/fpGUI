@@ -54,12 +54,14 @@ begin
   InsertChild(FLayout);
 
   TextLabel       := TFLabel.Create(self);
-  TextLabel.Text  := 'Gráficas Magnificacion! Teste';
+//  TextLabel.Text  := 'Gráficas Magnificacion! Teste';
+  TextLabel.Text  := 'Test Russian text -> Òåñò';
   FLayout.InsertChild(TextLabel);
   
   Edit                := TFEdit.Create(self);
   Edit.CanExpandWidth := True;
-  Edit.Text           := 'Gráficas Magnificacion! Teste';
+//  Edit.Text           := 'Gráficas Magnificacion! Teste';
+  Edit.Text           := 'Test Russian text -> Òåñò';
   FLayout.InsertChild(Edit);
 end;
 
