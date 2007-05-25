@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="2">
+    <Name Value="fpgfxpackage"/>
+    <Author Value="Graeme Geldenhuys"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="../"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="Free Pascal GFX Library - [Linux]
+"/>
+    <License Value="Modified LGPL
+"/>
+    <Version Minor="4"/>
+    <Files Count="10">
+      <Item1>
+        <Filename Value="../gfxbase.pas"/>
+        <UnitName Value="GfxBase"/>
+      </Item1>
+      <Item2>
+        <Filename Value="gfx_carbon.pas"/>
+        <UnitName Value="gfx_carbon"/>
+      </Item2>
+      <Item3>
+        <Filename Value="gfxinterface.pas"/>
+        <UnitName Value="gfxinterface"/>
+      </Item3>
+      <Item4>
+        <Filename Value="../schar16.pas"/>
+        <UnitName Value="schar16"/>
+      </Item4>
+      <Item5>
+        <Filename Value="../unitkeys.pas"/>
+        <UnitName Value="unitkeys"/>
+      </Item5>
+      <Item6>
+        <Filename Value="../fpgfx.pas"/>
+        <UnitName Value="fpgfx"/>
+      </Item6>
+      <Item7>
+        <Filename Value="../geldirty.pas"/>
+        <UnitName Value="GELDirty"/>
+      </Item7>
+      <Item8>
+        <Filename Value="../gelimage.pas"/>
+        <UnitName Value="GELImage"/>
+      </Item8>
+      <Item9>
+        <Filename Value="../commandlineparams.pas"/>
+        <UnitName Value="CommandLineParams"/>
+      </Item9>
+      <Item10>
+        <Filename Value="../fputf8utils.pas"/>
+        <UnitName Value="fpUTF8Utils"/>
+      </Item10>
+    </Files>
+    <LazDoc Paths="../../docs/xml/gfx/"/>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)/"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
