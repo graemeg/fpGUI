@@ -22,21 +22,21 @@ unit gfxinterface;
 interface
 
 uses
-  GFX_X11;
+  gfx_carbon;
 
 type
 
-  TDefCanvas = TX11Canvas;
+  TDefCanvas = TCarbonCanvas;
 
-  TDefFont = TX11Font;
+  TDefFont = TCarbonFont;
 
-  TDefScreen = TX11Screen;
+  TDefScreen = TCarbonScreen;
 
-  TDefApplication = TX11Application;
+  TDefApplication = TCarbonApplication;
   
-  TDefWindow = TX11Window;
+  TDefWindow = TCarbonWindow;
   
-  TDefBitmap = TX11Bitmap;
+  TDefBitmap = TCarbonBitmap;
 
 
 implementation
