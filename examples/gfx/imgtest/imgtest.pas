@@ -76,7 +76,6 @@ end;
 
 var
   MainWindow: TMainWindow;
-  
 begin
   GFApplication.Initialize;
   MainWindow := TMainWindow.Create;
