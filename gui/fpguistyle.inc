@@ -672,8 +672,6 @@ var
   Index, BtnY: Integer;
   r: TRect;
 begin
-  {$Note This is only while I fix the Palette issue under Linux/X11 }
-  {$IFDEF MSWINDOWS}
   with ARect do
   begin
     BtnY := Top + (Bottom - Top - 12) div 2;
@@ -689,60 +687,6 @@ begin
       Rect(Index * 12, 0, (Index + 1) * 12, 12),
       Point(0, 0), Point(Left, BtnY));
   end;
-  {$ELSE}
-
-// cl3DLight, cl3DHighlight, cl3DDkShadow, cl3DShadow
-  SetUIColor(Canvas, clLtGray);
-  r.Left    := ARect.Left;
-  r.Top     := ARect.Top + (ARect.Bottom - ARect.Top - 13) div 2;
-  r.Right   := 13;
-  r.Bottom  := r.Top + 13;
-  Canvas.DrawCircle(r);
-  
-  SetUIColor(Canvas, cl3DShadow);
-  InflateRect(r, -2, -2);
-  Canvas.DrawCircle(r);
-
-  if cbIsEnabled in Flags then
-    SetUIColor(Canvas, cl3DDkShadow)
-  else
-    SetUIColor(Canvas, cl3DShadow);
-  InflateRect(r, 1, 1);
-  Canvas.DrawCircle(r);
-  
-  if cbIsEnabled in Flags then
-  begin
-    if cbIsChecked in Flags then
-    begin
-      SetUIColor(Canvas, clNavy);
-      InflateRect(r, -3, -3);
-      Canvas.DrawCircle(r);
-      InflateRect(r, -1, -1);
-      Canvas.FillRect(r);
-      InflateRect(r, 1, 1);
-      SetUIColor(Canvas, clSkyBlue);
-      InflateRect(r, -2, -2);
-      OffsetRect(r, -1, -1);
-      Canvas.FillRect(r);
-    end;
-  end
-  else
-  begin
-    if cbIsChecked in Flags then
-    begin
-      SetUIColor(Canvas, cl3DShadow);
-      InflateRect(r, -3, -3);
-      Canvas.DrawCircle(r);
-      InflateRect(r, -1, -1);
-      Canvas.FillRect(r);
-      InflateRect(r, 1, 1);
-      SetUIColor(Canvas, clLtGray);
-      InflateRect(r, -2, -2);
-      OffsetRect(r, -1, -1);
-      Canvas.FillRect(r);
-    end;
-  end;
-  {$ENDIF}
 
   if cbHasFocus in Flags then
     with LabelRect do

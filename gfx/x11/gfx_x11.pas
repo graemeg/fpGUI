@@ -273,6 +273,8 @@ uses
   GELImage
   ,fpGFX
   ,fpUTF8Utils
+  ,Xatom
+  ,CTypes {,keysym ,libc , }
   ;
 
 resourcestring
@@ -821,12 +823,12 @@ begin
     else
       raise EX11Error.CreateFmt(SWindowUnsupportedPixelFormat, [Attr.Depth]);
   end;
-
+  
   if Attr.Depth >= 16 then
   begin
-    PixelFormat.RedMask := Visual^.red_mask;
+    PixelFormat.RedMask   := Visual^.red_mask;
     PixelFormat.GreenMask := Visual^.green_mask;
-    PixelFormat.BlueMask := Visual^.blue_mask;
+    PixelFormat.BlueMask  := Visual^.blue_mask;
   end;
 end;
 
@@ -868,6 +870,7 @@ begin
     else
       FStride := AWidth * (FormatTypeBPPTable[APixelFormat.FormatType] shr 3);
   end;
+
   GetMem(FData, FStride * Height);
 end;
 
@@ -1689,8 +1692,18 @@ begin
 end;
 
 procedure TX11Window.SetTitle(const ATitle: String);
+var
+  tp: TXTextProperty;
 begin
+  tp.value    := PCUChar(ATitle);
+  tp.encoding := XA_WM_NAME;
+  tp.format   := 8;
+  tp.nitems   := UTF8Length(ATitle);
+
+  XSetWMName(GFApplication.Handle, Handle, @tp);
   XStoreName(GFApplication.Handle, Handle, PChar(ATitle));
+  XSetIconName(GFApplication.Handle, Handle, PChar(ATitle));
+  XSetWMIconName(GFApplication.Handle, Handle, @tp);
 end;
 
 procedure TX11Window.DoSetCursor;
