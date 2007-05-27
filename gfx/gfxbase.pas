@@ -206,7 +206,7 @@ const
 
   PixelFormatRGBA32: TGfxPixelFormat = (
     FormatType: ftRGB32;
-    RedMask:	  $00ff00ff;
+    RedMask:	  $00ff0000;
     GreenMask:	$0000ff00;
     BlueMask:	  $000000ff;
     AlphaMask:	$ff000000);

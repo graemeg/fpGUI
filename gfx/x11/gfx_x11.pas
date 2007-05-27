@@ -727,9 +727,13 @@ var
   Image: XLib.PXImage;
   ConvertFormat: TGfxPixelFormat;
 begin
+  {$IFDEF VerboseFPGUI}
+    WriteLn('>: DoDrawImageRect');
+  {$ENDIF}
+
+  {$IFDEF VerboseFPGUI}
   ASSERT(AImage.InheritsFrom(TX11Bitmap));
-  {$IFDEF Debug}
-  ASSERT(not TXImage(AImage).IsLocked);
+  ASSERT(not TX11Bitmap(AImage).IsLocked);
   {$ENDIF}
 
   // !!!: Add support for XF86 4 and XShm etc. to speed this up!
@@ -738,7 +742,9 @@ begin
     ASourceRect.Right - ASourceRect.Left,
     ASourceRect.Bottom - ASourceRect.Top, 8, 0);
 
-//  WriteLn('Size allocated: ', Image^.bytes_per_line * (ASourceRect.Bottom - ASourceRect.Top) + 1);
+  {$IFDEF VerboseFPGUIp}
+    WriteLn('Size allocat for imageaed: ', Image^.bytes_per_line * (ASourceRect.Bottom - ASourceRect.Top) + 1);
+  {$ENDIF}
 
   { Here its necessary to alloc an extra byte, otherwise it will fail on 32-bits
    machines, but still work on 64-bits machines. The cause of this is unknown. }
@@ -752,6 +758,13 @@ begin
   else
   begin
     ConvertFormat := PixelFormat;
+
+     { !!!: The following is a workaround: At least the XFree86 X server for
+        ATI graphics adapters uses 32 bit padding per pixel for 24 bpp
+       images...?!? To be checked: Is this always the case or only for ATI? }
+//    if ConvertFormat.FormatType = ftRGB24 then
+//     ConvertFormat.FormatType := ftRGB32;
+
     ConvertImage(ASourceRect, AImage.PixelFormat, AImage.Palette,
       TX11Bitmap(AImage).Data, TX11Bitmap(AImage).Stride,
       0, 0, ConvertFormat, Image^.data, Image^.bytes_per_line);
@@ -762,6 +775,10 @@ begin
   FreeMem(Image^.data);
   Image^.data := nil;
   XDestroyImage(Image);
+
+  {$IFDEF VerboseFPGUI}
+    WriteLn('<: DoDrawImageRect');
+  {$ENDIF}
 end;
 
 

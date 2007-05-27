@@ -343,23 +343,13 @@ begin
      ftRGB24:
        begin
          ConvertToInternal := @ConvertRGB24ToInternal;
-         ParamsS2I.RedShiftR := 8 -
-           GetBitShiftAndCount(ASourceFormat.RedMask, ParamsS2I.RedShiftL);
-         ParamsS2I.GreenShiftR := 16 -
-           GetBitShiftAndCount(ASourceFormat.GreenMask, ParamsS2I.GreenShiftL);
-         ParamsS2I.BlueShiftR := 24 -
-           GetBitShiftAndCount(ASourceFormat.BlueMask, ParamsS2I.BlueShiftL);
+      	 SetupShifts(ASourceFormat, ParamsS2I);
        end;
-    ftRGB32:
-      begin
-        ConvertToInternal := @ConvertRGB32ToInternal;
-	ParamsS2I.RedShiftR := 8 -
-	  GetBitShiftAndCount(ASourceFormat.RedMask, ParamsS2I.RedShiftL);
-	ParamsS2I.GreenShiftR := 16 -
-	  GetBitShiftAndCount(ASourceFormat.GreenMask, ParamsS2I.GreenShiftL);
-	ParamsS2I.BlueShiftR := 24 -
-	  GetBitShiftAndCount(ASourceFormat.BlueMask, ParamsS2I.BlueShiftL);
-      end;
+     ftRGB32:
+       begin
+         ConvertToInternal := @ConvertRGB32ToInternal;
+         SetupShifts(ASourceFormat, ParamsS2I);
+       end;
     else
       raise EGfxUnsupportedPixelFormat.Create(ASourceFormat);
   end;

@@ -56,7 +56,7 @@ begin
   Bitmap.Lock(Data, Stride);
   for j := 0 to 255 do
     for i := 0 to 255 do
-      PLongWord(Data)[j * 256 + i] := (i shl 16) or (j shl 8);
+      PLongWord(Data)[j * 256 + i] := (i shl 8) or (j shl 0);
   Bitmap.Unlock;
 end;
 
