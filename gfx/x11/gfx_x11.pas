@@ -762,8 +762,8 @@ begin
      { !!!: The following is a workaround: At least the XFree86 X server for
         ATI graphics adapters uses 32 bit padding per pixel for 24 bpp
        images...?!? To be checked: Is this always the case or only for ATI? }
-//    if ConvertFormat.FormatType = ftRGB24 then
-//     ConvertFormat.FormatType := ftRGB32;
+    if ConvertFormat.FormatType = ftRGB24 then
+     ConvertFormat.FormatType := ftRGB32;
 
     ConvertImage(ASourceRect, AImage.PixelFormat, AImage.Palette,
       TX11Bitmap(AImage).Data, TX11Bitmap(AImage).Stride,

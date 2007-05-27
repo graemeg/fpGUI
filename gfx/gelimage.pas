@@ -297,12 +297,14 @@ begin
   Scanline := nil;
   ParamsI2D.BlueShiftL := 0;
   ParamsS2I.BlueShiftL := 0;
-  
-  if ASourceFormat.FormatType = ADestFormat.FormatType then
+
+  { To avoid converting at all, everything must be equal:
+    The Alpha, Red, Green and Blue Mask and not only the Format Type }
+{  if ASourceFormat.FormatType = ADestFormat.FormatType then
   begin
     Move( ASourceData^, ADestData^, ADestStride * (ASourceRect.Top - ASourceRect.Bottom) );
     Exit;
-  end;
+  end;}
   
   case ASourceFormat.FormatType of
     ftMono:
@@ -358,7 +360,12 @@ begin
     ftRGB16:
       begin
         ConvertFromInternal := @ConvertInternalToRGB16;
-	SetupShifts(ADestFormat, ParamsI2D);
+         ParamsI2D.RedShiftR := 5 -
+           GetBitShiftAndCount(ADestFormat.RedMask, ParamsI2D.RedShiftL);
+         ParamsI2D.GreenShiftR := 11 -
+           GetBitShiftAndCount(ADestFormat.GreenMask, ParamsI2D.GreenShiftL);
+         ParamsI2D.BlueShiftR := 16 -
+           GetBitShiftAndCount(ADestFormat.BlueMask, ParamsI2D.BlueShiftL);
       end;
     ftRGB24:
       begin
