@@ -25,25 +25,22 @@ unit fpImg;
 interface
 
 uses
-  Classes
-  ,GFXBase
-  ,ImageIO
-  ;
+  Classes, gfxbase, ImageIO, fpgfx;
 
 
-function CreateImageFromFile(AScreen: TGfxScreen; AReader: TImageReaderClass;
-  const AFilename: String): TGfxImage;
+function CreateImageFromFile(AScreen: TFScreen; AReader: TImageReaderClass;
+  const AFilename: String): TFBitmap;
 
-function CreateImageFromStream(AScreen: TGfxScreen; AReader: TImageReaderClass;
-  AStream: TStream): TGfxImage;
+function CreateImageFromStream(AScreen: TFScreen; AReader: TImageReaderClass;
+  AStream: TStream): TFBitmap;
 
 
 
 implementation
 
 
-function CreateImageFromFile(AScreen: TGfxScreen; AReader: TImageReaderClass;
-  const AFilename: String): TGfxImage;
+function CreateImageFromFile(AScreen: TFScreen; AReader: TImageReaderClass;
+  const AFilename: String): TFBitmap;
 var
   Stream: TFileStream;
 begin
@@ -56,8 +53,8 @@ begin
 end;
 
 
-function CreateImageFromStream(AScreen: TGfxScreen; AReader: TImageReaderClass;
-  AStream: TStream): TGfxImage;
+function CreateImageFromStream(AScreen: TFScreen; AReader: TImageReaderClass;
+  AStream: TStream): TFBitmap;
 var
   Reader: TImageReader;
   Data: Pointer;
@@ -67,10 +64,10 @@ begin
   Reader := AReader.Create;
   try
     Reader.ProcessHeaderData(AStream);
-    Result := AScreen.Display.CreateImage(Reader.Width, Reader.Height, Reader.PixelFormat);
+    Result := TFBitmap.Create(Reader.Width, Reader.Height, Reader.PixelFormat);
     if Reader.PaletteSize > 0 then
     begin
-      Palette := AScreen.CreatePalette(Reader.PaletteSize, Reader.Palette);
+      Palette := TGfxPalette.create(Reader.PaletteSize, Reader.Palette);
       try
         Result.Palette := Palette;
       finally

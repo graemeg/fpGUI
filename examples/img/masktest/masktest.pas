@@ -24,44 +24,41 @@ type
   TMainWindow = class
     procedure Paint(Sender: TObject; const ARect: TRect);
   private
-    Display: TDefDisplay;
-    Window: TGfxWindow;
-    Image2, Image4, Image8, Image24, Mask: TGfxImage;
+    Window: TFWindow;
+    Image2, Image4, Image8, Image24, Mask: TFBitmap;
     Image2Canvas, Image4Canvas, Image8Canvas,
-      Image24Canvas, MaskCanvas: TGfxCanvas;
+      Image24Canvas, MaskCanvas: TFCanvas;
   public
-    constructor Create(ADisplay: TDefDisplay);
+    constructor Create;
     destructor Destroy; override;
   end;
 
-constructor TMainWindow.Create(ADisplay: TDefDisplay);
+constructor TMainWindow.Create;
 begin
   inherited Create;
-  Display := ADisplay;
 
   // Load and prepare the images
-  Image2 := CreateImageFromFile(Display.DefaultScreen, TBMPReader, 'image2.bmp');
-  Image2Canvas :=
-    Display.DefaultScreen.CreateBitmap(Image2.Width, Image2.Height);
+  Image2 := CreateImageFromFile(GFScreen, TBMPReader, 'image2.bmp');
+  Image2Canvas := TFBitmap.Create(Image2.Width, Image2.Height);
   Image2Canvas.DrawImage(Image2, Point(0, 0));
 
-  Image4 := CreateImageFromFile(Display.DefaultScreen, TBMPReader, 'image4.bmp');
+  Image4 := CreateImageFromFile(GFScreen, TBMPReader, 'image4.bmp');
   Image4Canvas :=
-    Display.DefaultScreen.CreateBitmap(Image4.Width, Image4.Height);
+    GFScreen.CreateBitmap(Image4.Width, Image4.Height);
   Image4Canvas.DrawImage(Image4, Point(0, 0));
 
-  Image8 := CreateImageFromFile(Display.DefaultScreen, TBMPReader, 'image8.bmp');
+  Image8 := CreateImageFromFile(GFScreen, TBMPReader, 'image8.bmp');
   Image8Canvas :=
     Display.DefaultScreen.CreateBitmap(Image8.Width, Image8.Height);
   Image8Canvas.DrawImage(Image8, Point(0, 0));
 
-  Image24 := CreateImageFromFile(Display.DefaultScreen, TBMPReader, 'image24.bmp');
+  Image24 := CreateImageFromFile(GFScreen, TBMPReader, 'image24.bmp');
   Image24Canvas :=
     Display.DefaultScreen.CreateBitmap(Image24.Width, Image24.Height);
   Image24Canvas.DrawImage(Image24, Point(0, 0));
 
   // Load and prepare the image mask
-  Mask := CreateImageFromFile(Display.DefaultScreen, TBMPReader, 'mask.bmp');
+  Mask := CreateImageFromFile(GFScreen, TBMPReader, 'mask.bmp');
   MaskCanvas := Display.DefaultScreen.CreateMonoBitmap(Mask.Width, Mask.Height);
   MaskCanvas.DrawImage(Mask, Point(0, 0));
 
@@ -124,14 +121,12 @@ begin
 end;
 
 var
-  Display: TDefDisplay;
   MainWindow: TMainWindow;
 begin
-  WriteLn('Version: ' + {$I %date%} + ' ' + {$I %time%});
-  Display := TDefDisplay.Create;
-  MainWindow := TMainWindow.Create(Display);
-  Display.Run;
-  MainWindow.Free;
-  Display.Free;
+  GFApplication.Initialize;
+  MainWindow := TMainWindow.Create;
+  GFApplication.AddWindow(MainWindow);
+  MainWindow.Show;
+  GFApplication.Run;
 end.
 

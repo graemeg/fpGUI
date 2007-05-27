@@ -205,7 +205,7 @@ begin
         24:
           begin
             FFileStride := (Width * 3 + 3) and not 3;
-      	    FPixelFormat := PixelFormatBGR24;
+      	    FPixelFormat := PixelFormatRGB24;
           end;
         else
           raise EImgUnsupportedPixelFormat.Create;
