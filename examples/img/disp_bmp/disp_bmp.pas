@@ -57,11 +57,9 @@ end;
 procedure TMainForm.Paint(Sender: TObject; const Rect: TRect);
 begin
   // debug only
-{
   Canvas.SetColor(colRed);
   Canvas.FillRect(Rect);
   Canvas.SetColor(colYellow);
-}
   // paint image
   Canvas.DrawImage(Image, Point(0, 0));
 end;
@@ -77,11 +75,7 @@ begin
 
   GFApplication.Initialize;
   MainForm := TMainForm.Create;
-  try
-    MainForm.Show;
-    GFApplication.Run;
-  finally
-    MainForm.Free;
-  end;
+  MainForm.Show;
+  GFApplication.Run;
 end.
 

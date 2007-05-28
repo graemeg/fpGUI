@@ -1375,7 +1375,7 @@ begin
   if Assigned(OnClose) then
     OnClose(Self);
 
-  Canvas.Free;
+  FCanvas.Free;
   if FCurCursorHandle <> 0 then
     XFreeCursor(GFApplication.Handle, FCurCursorHandle);
 
