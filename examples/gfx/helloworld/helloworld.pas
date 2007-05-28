@@ -15,6 +15,10 @@
 }
 program HelloWorld;
 
+{$ifdef fpc}
+  {$mode objfpc}{$H+}
+{$endif}
+
 uses
   Classes
   ,fpGFX

@@ -3,7 +3,7 @@
 
     Example: Display BMP file using the fpImg - Free Pascal Imaging Library
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2000 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -17,56 +17,57 @@
 
 program Disp_BMP;
 
+{$ifdef fpc}
+  {$mode objfpc}{$H+}
+{$endif}
+
 uses
   Classes
-  ,GFXBase
-  ,GFXImpl
+  ,fpgfx
+  ,gfxbase
   ,fpImg
   ,BMPReader
-  ,fpgfxpackage
   ;
 
 type
-  TMainWindow = class
-    procedure Paint(Sender: TObject; const Rect: TRect);
+  TMainForm = class(TFWindow)
   private
-    Display: TDefDisplay;
-    Window: TGfxWindow;
-    Image: TGfxImage;
+    Image: TFBitmap;
   public
-    constructor Create(ADisplay: TDefDisplay);
+    constructor Create; overload;
     destructor  Destroy; override;
+    procedure   Paint(Sender: TObject; const Rect: TRect);
   end;
 
-constructor TMainWindow.Create(ADisplay: TDefDisplay);
+constructor TMainForm.Create;
 begin
-  inherited Create;
-  Display         := ADisplay;
-  Image           := CreateImageFromFile(Display.DefaultScreen, TBMPReader, ParamStr(1));
-  Window          := ADisplay.DefaultScreen.CreateWindow;
-  Window.Title    := 'fpImg Bitmap Test';
-  Window.OnPaint  := @Paint;
-  Window.SetFixedClientSize(Size(Image.Width, Image.Height));
-  Window.Show;
+  inherited Create(nil, [woWindow]);
+  Title   := 'fpImg Bitmap Test';
+  OnPaint := @Paint;
+  Image   := CreateImageFromFile(GFScreen, TBMPReader, ParamStr(1));
+  SetClientSize(Size(Image.Width, Image.Height));
 end;
 
-destructor TMainWindow.Destroy;
+destructor TMainForm.Destroy;
 begin
   Image.Free;
   inherited Destroy;
 end;
 
-procedure TMainWindow.Paint(Sender: TObject; const Rect: TRect);
+procedure TMainForm.Paint(Sender: TObject; const Rect: TRect);
 begin
-  Window.Canvas.SetColor(colRed);
-  Window.Canvas.FillRect(Rect);
-  Window.Canvas.SetColor(colYellow);
-  Window.Canvas.DrawImage(Image, Point(0, 0));
+  // debug only
+{
+  Canvas.SetColor(colRed);
+  Canvas.FillRect(Rect);
+  Canvas.SetColor(colYellow);
+}
+  // paint image
+  Canvas.DrawImage(Image, Point(0, 0));
 end;
 
 var
-  Display: TDefDisplay;
-  MainWindow: TMainWindow;
+  MainForm: TMainForm;
 begin
   if ParamCount <> 1 then
   begin
@@ -74,10 +75,13 @@ begin
     Halt(2);
   end;
 
-  Display     := TDefDisplay.Create;
-  MainWindow  := TMainWindow.Create(Display);
-  Display.Run;
-  MainWindow.Free;
-  Display.Free;
+  GFApplication.Initialize;
+  MainForm := TMainForm.Create;
+  try
+    MainForm.Show;
+    GFApplication.Run;
+  finally
+    MainForm.Free;
+  end;
 end.
 
