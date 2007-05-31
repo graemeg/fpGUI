@@ -331,7 +331,7 @@ type
     procedure   SaveState; virtual; abstract;
     procedure   RestoreState; virtual; abstract;
     procedure   EmptyClipRect; virtual;
-    procedure   SetColor_(AColor: TGfxPixel); virtual; abstract;
+    procedure   DoSetColor(AColor: TGfxPixel); virtual; abstract;
     procedure   SetColor(AColor: TGfxColor); virtual;
     procedure   SetFont(AFont: TFCustomFont); virtual; abstract;
     procedure   SetLineStyle(ALineStyle: TGfxLineStyle); virtual; abstract;
@@ -751,7 +751,7 @@ end;
 procedure TFCustomCanvas.SetColor(AColor: TGfxColor);
 begin
   FColor := AColor;
-  SetColor_(MapColor(AColor));
+  DoSetColor(MapColor(AColor));
 end;
 
 procedure TFCustomCanvas.DrawArc(const ARect: TRect; StartAngle, EndAngle: Single);

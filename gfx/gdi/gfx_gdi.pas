@@ -109,7 +109,7 @@ type
     procedure   SaveState; override;
     procedure   RestoreState; override;
     procedure   EmptyClipRect; override;
-    procedure   SetColor_(AColor: TGfxPixel); override;
+    procedure   DoSetColor(AColor: TGfxPixel); override;
     procedure   SetFont(AFont: TFCustomFont); override;
     procedure   SetLineStyle(ALineStyle: TGfxLineStyle); override;
   end;
@@ -532,7 +532,7 @@ begin
 end;
 
 
-procedure TGDICanvas.SetColor_(AColor: TGfxPixel);
+procedure TGDICanvas.DoSetColor(AColor: TGfxPixel);
 begin
   FColor := AColor;
 end;

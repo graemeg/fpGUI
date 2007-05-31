@@ -66,16 +66,13 @@ type
     procedure   SaveState; override;
     procedure   RestoreState; override;
     procedure   EmptyClipRect; override;
-    procedure   SetColor_(AColor: TGfxPixel); override;
+    procedure   DoSetColor(AColor: TGfxPixel); override;
     procedure   SetFont(AFont: TFCustomFont); override;
     procedure   SetLineStyle(ALineStyle: TGfxLineStyle); override;
-    property    Handle: HDC read FHandle;
   end;
 
 
   TxxxWindowCanvas = class(TxxxCanvas)
-  private
-    FWnd: HWND;
   public
     constructor Create(AWnd: HWND);
     destructor Destroy; override;
@@ -112,7 +109,6 @@ type
 
   TxxxApplication = class(TFCustomApplication)
   private
-    DoBreakRun: Boolean;
   public
     { default methods }
     constructor Create; override;
@@ -131,7 +127,7 @@ type
     procedure   SetTitle(const ATitle: String); override;
     procedure   DoSetCursor; override;
   public
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TGfxWindowOptions); override;
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
     procedure   DefaultHandler(var Message); override;
     procedure   SetPosition(const APosition: TPoint); override;

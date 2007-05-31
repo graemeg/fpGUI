@@ -38,12 +38,15 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
-    <SearchPaths>
-      <LCLWidgetType Value="win32"/>
-    </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>
+    <Linking>
+      <Options>
+        <PassLinkerOptions Value="True"/>
+        <LinkerOptions Value="-framework carbon"/>
+      </Options>
+    </Linking>
     <Other>
       <CustomOptions Value="-FUunits
 "/>

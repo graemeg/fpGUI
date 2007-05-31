@@ -134,7 +134,7 @@ type
     procedure   SaveState; override;
     procedure   RestoreState; override;
     procedure   EmptyClipRect; override;
-    procedure   SetColor_(AColor: TGfxPixel); override;
+    procedure   DoSetColor(AColor: TGfxPixel); override;
     procedure   SetFont(AFont: TFCustomFont); override;
     procedure   SetLineStyle(ALineStyle: TGfxLineStyle); override;
     procedure   DrawPolyLine(const Coords: array of TPoint); override;
@@ -378,7 +378,7 @@ begin
   FRegion := SavedState^.Region;
   XSetRegion(GFApplication.Handle, GC, Region);
 
-  SetColor_(SavedState^.Color);
+  DoSetColor(SavedState^.Color);
   SetFont(SavedState^.Font);
 
   Dispose(SavedState);
@@ -449,7 +449,7 @@ begin
   Result := Color.Pixel;
 end;
 
-procedure TX11Canvas.SetColor_(AColor: TGfxPixel);
+procedure TX11Canvas.DoSetColor(AColor: TGfxPixel);
 begin
   if AColor <> FCurColor then
   begin

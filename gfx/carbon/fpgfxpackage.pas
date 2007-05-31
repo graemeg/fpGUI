@@ -7,8 +7,8 @@ unit fpgfxpackage;
 interface
 
 uses
-  GfxBase, GFX_X11, gfxinterface, schar16, unitkeys, fpgfx, GELDirty, GELImage, 
-    CommandLineParams, fpUTF8Utils; 
+  GfxBase, gfx_carbon, gfxinterface, schar16, unitkeys, fpgfx, GELDirty, 
+    GELImage, CommandLineParams, fpUTF8Utils; 
 
 implementation
 
