@@ -126,6 +126,7 @@ type
     function    GetTitle: String; override;
     procedure   SetTitle(const ATitle: String); override;
     procedure   DoSetCursor; override;
+    function    GetHandle: PtrUInt; override;
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;

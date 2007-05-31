@@ -174,6 +174,7 @@ type
 
   TGDIWindow = class(TFCustomWindow)
   protected
+    FHandle: PtrUInt;
     WindowClass: TWndClass;
     WindowClassW: TWndClassW;
     FWindowStyle, FWindowStyleEx: LongWord;
@@ -181,6 +182,7 @@ type
     function    GetTitle: String; override;
     procedure   SetTitle(const ATitle: String); override;
     procedure   DoSetCursor; override;
+    function    GetHandle: PtrUInt; override;
     procedure   UpdateWindowButtons;
     function    DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
   public
@@ -1737,6 +1739,11 @@ begin
     else
       Windows.SetCursor(0);
   end;
+end;
+
+function TGDIWindow.GetHandle: PtrUInt;
+begin
+  Result := FHandle;
 end;
 
 

@@ -224,6 +224,7 @@ type
 
   TX11Window = class(TFCustomWindow)
   private
+    FHandle: PtrUInt;
     FComposeStatus: TXComposeStatus;
     FComposeBuffer: String[32];
     FCurCursorHandle: X.TCursor;
@@ -240,6 +241,7 @@ type
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     procedure   SetTitle(const ATitle: String); override;
     procedure   DoSetCursor; override;
+    function    GetHandle: PtrUInt; override;
     procedure   UpdateMotifWMHints;
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
@@ -1732,6 +1734,11 @@ begin
   else
     FCurCursorHandle := XCreateFontCursor(GFApplication.Handle, ID);
   XDefineCursor(GFApplication.Handle, Handle, FCurCursorHandle);
+end;
+
+function TX11Window.GetHandle: PtrUInt;
+begin
+  Result := FHandle;
 end;
 
 function TX11Window.ConvertShiftState(AState: Cardinal): TShiftState;

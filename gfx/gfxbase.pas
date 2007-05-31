@@ -493,7 +493,6 @@ type
     procedure SetCursor(ACursor: TFCursor);
     procedure SetWindowOptions(const AValue: TFWindowOptions); virtual;
   protected
-    FHandle: Cardinal;
     FParent: TFCustomWindow;
     FCanvas: TFCustomCanvas;
     FLeft: Integer;
@@ -508,6 +507,7 @@ type
     function  GetTitle: String; virtual;
     procedure SetTitle(const ATitle: String); virtual;
     procedure DoSetCursor; virtual; abstract;
+    function  GetHandle: PtrUInt; virtual; abstract;
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); virtual;
     destructor  Destroy; override;
@@ -526,7 +526,7 @@ type
 
     property WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
     property Canvas: TFCustomCanvas read FCanvas;
-    property Handle: Cardinal read FHandle;
+    property Handle: PtrUInt read GetHandle;
     property ChildWindows: TList read FChildWindows;
     // Window state
     property Left: Integer read FLeft write SetLeft;

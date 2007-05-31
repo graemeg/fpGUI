@@ -16,7 +16,7 @@
 unit gfx_carbon;
 
 {$ifdef fpc}
-  {$mode objfpc}{$H+}
+  {$mode delphi}{$H+}
 {$endif}
 
 interface
@@ -129,10 +129,14 @@ type
   { TCarbonWindow }
 
   TCarbonWindow = class(TFCustomWindow)
+  private
+    FHandle: WindowRef;
+    contentView: HIViewRef;
   protected
     function    GetTitle: String; override;
     procedure   SetTitle(const ATitle: String); override;
     procedure   DoSetCursor; override;
+    function    GetHandle: PtrUInt; override;
   public
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
@@ -373,7 +377,7 @@ end;
 
 procedure TCarbonApplication.Run;
 begin
-
+  RunApplicationEventLoop();
 end;
 
 procedure TCarbonApplication.Quit;
@@ -382,6 +386,23 @@ begin
 end;
 
 { TCarbonWindow }
+
+function WindowCommandHandler(nextHandler: EventHandlerCallRef; theEvent: EventRef; userDataPtr: UnivPtr): OSStatus;
+var
+  status: OSStatus;
+  ignoreResult: OSStatus;
+  aCommand: HICommand;
+  theAssociatedControl: ControlRef;
+begin
+  status := eventNotHandledErr;
+
+  ignoreResult := GetEventParameter(theEvent, kEventParamDirectObject, typeHICommand, NIL, sizeof(aCommand), NIL, @aCommand);
+
+//  if aCommand.commandID = UInt32(FourCharCode(kButtonHello)) then status := ButtonHelloPressed()
+//  else if aCommand.commandID = UInt32(FourCharCode(kButtonMessage)) then status := ButtonMessagePressed();
+
+  Result := status;
+end;
 
 function TCarbonWindow.GetTitle: String;
 begin
@@ -398,9 +419,47 @@ begin
 
 end;
 
-constructor TCarbonWindow.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
+function TCarbonWindow.GetHandle: PtrUInt;
 begin
+  Result := PtrUInt(FHandle);
+end;
 
+constructor TCarbonWindow.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
+var
+  status, ignoreResult: OSStatus;
+  cmdEvent: EventTypeSpec;
+  eventHandler: EventHandlerUPP;
+  CarbonRect: FPCMacOSAll.Rect;
+begin
+  CarbonRect.left := 50;
+  CarbonRect.Top := 50;
+  CarbonRect.right := 300;
+  CarbonRect.bottom := 300;
+
+  status := CreateNewWindow(kDocumentWindowClass,
+   (kWindowStandardDocumentAttributes or kWindowStandardHandlerAttribute
+    or kWindowCompositingAttribute),
+   CarbonRect, FHandle);
+
+  if (status <> noErr) or (FHandle = nil) then
+  begin
+//    DoShowMessage('Error', 'CreateNewWindow failed');
+  end;
+
+  ignoreResult := SetWindowTitleWithCFString(FHandle, CFSTRP('Carbon FPC Hello World'));
+
+  ignoreResult := HIViewFindByID(HIViewGetRoot(FHandle), kHIViewWindowContentID, contentView);
+
+  { Add events }
+
+  cmdEvent.eventClass := kEventClassCommand;
+  cmdEvent.eventKind := kEventCommandProcess;
+  eventHandler := NewEventHandlerUPP(@WindowCommandHandler);
+  ignoreResult := InstallEventHandler(GetWindowEventTarget(FHandle),
+   eventHandler, 1, @cmdEvent, nil, nil);
+
+  { Creates a canvas }
+  FCanvas := TCarbonCanvas.Create;
 end;
 
 destructor TCarbonWindow.Destroy;
@@ -440,7 +499,7 @@ end;
 
 procedure TCarbonWindow.Show;
 begin
-
+  ShowWindow(FHandle);
 end;
 
 procedure TCarbonWindow.Invalidate(const ARect: TRect);
