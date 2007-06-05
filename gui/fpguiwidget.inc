@@ -402,15 +402,14 @@ end;
 
 function TMouseMoveEventObj.SendToChild(AChild: TFWidget): Boolean;
 begin
-  if AChild.WidgetState * [wsEnabled, wsIsVisible] = [wsEnabled, wsIsVisible]
-    then
+  if AChild.WidgetState * [wsEnabled, wsIsVisible] = [wsEnabled, wsIsVisible] then
   begin
-    if PtInRect(AChild.BoundsRect, Position) and not
-      (wsMouseInside in AChild.WidgetState) then
+    if PtInRect(AChild.BoundsRect, Position) and not (wsMouseInside in AChild.WidgetState) then
       AChild.DoMouseEnter(Shift, Position - AChild.Origin);
 
     Result := inherited SendToChild(AChild);
-  end else
+  end
+  else
     Result := False;
 end;
 
@@ -645,10 +644,10 @@ end;
 
 procedure TFWidget.Redraw;
 begin
-  Redraw(Rect(0, 0, BoundsSize.cx, BoundsSize.cy));
   {$IFDEF DEBUG}
-  writeln(ClassName + '.Redraw');
+  writeln(Format('TFWidget.Redraw -> %s:%s', [Text, ClassName]));
   {$ENDIF}
+  Redraw(Rect(0, 0, BoundsSize.cx, BoundsSize.cy));
 end;
 
 procedure TFWidget.Redraw(const ARect: TRect);

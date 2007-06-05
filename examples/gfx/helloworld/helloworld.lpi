@@ -28,12 +28,17 @@
         <PackageName Value="fpgfxpackage"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
         <Filename Value="helloworld.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelloWorld"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="../subwindow/subwindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="subwindow"/>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

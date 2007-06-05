@@ -38,6 +38,7 @@ interface
 
 uses
 {$IFDEF mswindows}
+  // used for system theme color detection
   Windows, GFX_GDI,       // This must be removed!!!
 {$ENDIF}
   SysUtils
@@ -74,9 +75,9 @@ resourcestring
 
 
 type
-  TFWidget       = class;
-  TEventObj     = class;
-  TFCustomForm   = class;
+  TFWidget        = class;
+  TEventObj       = class;
+  TFCustomForm    = class;
 
 
   TFWidgetState = set of (

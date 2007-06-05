@@ -1,10 +1,17 @@
-Original Author
--------- ------
+
+ Here is a list of people that have worked or are working on
+ the fpGUI project.
+ 
+
+Original Author (not active anymore)
+------------------------------------
 Sebastian Guenther <sg@freepascal.org>
 
-Main Author
------------
+
+Current Author
+--------------
 Graeme Geldenhuys <graemeg@gmail.com>
+
 
 Contributors
 ------------

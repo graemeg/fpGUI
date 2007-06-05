@@ -3,7 +3,7 @@
     
     Menu class declarations
     
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -16,12 +16,9 @@
 
 {%mainunit fpgui.pas}
 
-{
-  All menu and menu item implementations
-}
-
 {$IFDEF read_interface}
 
+  // forward class declarations
   TFPopupMenu = class;
   TFMenuBar = class;
 
@@ -67,13 +64,10 @@
   { TFMenuBar }
 
   TFMenuBar = class(TFCustomBoxLayout)
-  private
-  protected
   public
     constructor Create(AOwner: TComponent); override;
     function    AddMenu(const pTitle: string): TFMenuItem;
     function    AddMenu(const pTitle: string; const pHotKeyDef: string; pHandlerProc: TNotifyEvent): TFMenuItem;
-  published
   end;
 
 {$ENDIF read_interface}
@@ -95,16 +89,20 @@ procedure TFMenuItem.InternalShowPopupMenu;
 begin
   if Assigned(FSubMenu) and FSubMenu.Visible then
   begin
+//    writeln('Closing submenu');
     FSubMenu.Close;
     Exit; //==>
   end;
 
   if not Assigned(FSubMenu) then
   begin
+//    writeln('Creating submenu');
     FSubMenu := TFPopupMenu.Create(Self);
   end;
 
+//  writeln('set submenu position...');
   FSubMenu.SetPosition(ClientToScreen(Point(0, Height)));
+//  writeln('show submenu...');
   FSubMenu.Show;
   FSubMenu.Wnd.SetMinMaxClientSize(MaxSize, MaxSize);
 end;
@@ -150,10 +148,14 @@ procedure TFMenuItem.Click;
 begin
   if (wsMouseInside in WidgetState) and Assigned(FSubMenu) then
   begin
+//    writeln('Passed');
     InternalShowPopupMenu;
   end
   else
+  begin
+//    writeln('Failed');
     inherited Click;
+  end;
 
   if FindForm is TFPopupMenu then
     TFPopupMenu(FindForm).Close;
@@ -182,6 +184,7 @@ begin
   BorderWidth := 1;
   Color       := clBlack;
   Name        := '_MenuPopup';
+  Visible     := False;
 
   FMenu := TFMenuBar.Create(self);
   FMenu.Name        := '_VBoxMenu';

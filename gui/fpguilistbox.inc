@@ -1,3 +1,19 @@
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    ListBox class declarations
+
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
+
 {%mainunit fpgui.pas}
 
 { Listbox widget implementation }
