@@ -48,8 +48,6 @@ uses
 //  ,Types
   ;
 
-type
-  TColor = type LongWord;
 
 const
 
@@ -96,7 +94,7 @@ type
   // The following flags are used for styles
 
   TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
-                         btnIsSelected, btnHasFocus);
+                         btnIsSelected, btnHasFocus, btnHasParentColor);
 
   TFCheckboxFlags = set of (cbIsPressed, cbHasFocus, cbIsEnabled, cbIsChecked);
 
