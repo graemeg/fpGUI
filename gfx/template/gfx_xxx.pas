@@ -3,7 +3,7 @@
 
     GFX_xxx  -  Template for new targets
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -75,14 +75,14 @@ type
   TxxxWindowCanvas = class(TxxxCanvas)
   public
     constructor Create(AWnd: HWND);
-    destructor Destroy; override;
+    destructor  Destroy; override;
   end;
 
 
   TxxxBitmapCanvas = class(TxxxCanvas)
   public
     constructor Create(ABitmap: HBITMAP; AWidth, AHeight: Integer);
-    destructor Destroy; override;
+    destructor  Destroy; override;
   end;
 
   { TxxxBitmap }
@@ -92,9 +92,9 @@ type
     IsLocked: Boolean;
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); override;
-    destructor Destroy; override;
-    procedure Lock(var AData: Pointer; var AStride: LongWord); override;
-    procedure Unlock; override;
+    destructor  Destroy; override;
+    procedure   Lock(out AData: Pointer; out AStride: LongWord); override;
+    procedure   Unlock; override;
   end;
 
   { TxxxScreen }

@@ -336,7 +336,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TCarbonBitmap.Lock(var AData: Pointer; var AStride: LongWord);
+procedure TCarbonBitmap.Lock(out AData: Pointer; out AStride: LongWord);
 begin
 
 end;

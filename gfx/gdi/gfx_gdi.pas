@@ -903,18 +903,18 @@ begin
     ftMono:
       begin
         FStride := (AWidth + 7) shr 3;
-	GetMem(BitmapInfo, SizeOf(TBitmapInfoHeader) + 2 * SizeOf(RGBQUAD));
-	BitmapInfo^.bmiHeader.biClrUsed := 2;
-	Color               := @BitmapInfo^.bmiColors[0];
-	Color^.rgbRed       := 0;
-	Color^.rgbGreen     := 0;
-	Color^.rgbBlue      := 0;
-	Color^.rgbReserved  := 0;
-	Inc(Color);
-	Color^.rgbRed       := 255;
-	Color^.rgbGreen     := 255;
-	Color^.rgbBlue      := 255;
-	Color^.rgbReserved  := 0;
+        GetMem(BitmapInfo, SizeOf(TBitmapInfoHeader) + 2 * SizeOf(RGBQUAD));
+        BitmapInfo^.bmiHeader.biClrUsed := 2;
+        Color               := @BitmapInfo^.bmiColors[0];
+        Color^.rgbRed       := 0;
+        Color^.rgbGreen     := 0;
+        Color^.rgbBlue      := 0;
+        Color^.rgbReserved  := 0;
+        Inc(Color);
+        Color^.rgbRed       := 255;
+        Color^.rgbGreen     := 255;
+        Color^.rgbBlue      := 255;
+        Color^.rgbReserved  := 0;
       end;
     ftPal4, ftPal4A:
       begin
@@ -970,7 +970,7 @@ begin
 end;
 
 
-procedure TGDIBitmap.Lock(var AData: Pointer; var AStride: LongWord);
+procedure TGDIBitmap.Lock(out AData: Pointer; out AStride: LongWord);
 begin
   ASSERT(not IsLocked);
   IsLocked := True;

@@ -68,6 +68,8 @@ const
 
 type
 
+  TColor = type LongWord;
+
   PGfxColor = ^TGfxColor;
   TGfxColor = packed record
     Red, Green, Blue, Alpha: Word;
@@ -394,7 +396,7 @@ type
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); virtual;
     destructor  Destroy; override;
-    procedure   Lock(var AData: Pointer; var AStride: LongWord); virtual; abstract;
+    procedure   Lock(out AData: Pointer; out AStride: LongWord); virtual; abstract;
     procedure   Unlock; virtual; abstract;
     procedure   SetPixelsFromData(AData: Pointer; AStride: LongWord);
     property    Width: Integer read FWidth;
@@ -584,6 +586,8 @@ operator - (const ASize: TSize; i: Integer) s: TSize;
 operator = (const AColor1, AColor2: TGfxColor) b: Boolean;
 {$endif}
 function GetAvgColor(const AColor1, AColor2: TGfxColor): TGfxColor;
+function GfxColorToTColor(const AColor: TGfxColor): TColor;
+
 
 // Keyboard
 function KeycodeToText(Key: Word; ShiftState: TShiftState): String;
@@ -1184,6 +1188,14 @@ begin
   Result.Blue := AColor1.Blue + (AColor2.Blue - AColor1.Blue) div 2;
   Result.Alpha := AColor1.Alpha + (AColor2.Alpha - AColor1.Alpha) div 2;
 end;
+
+function GfxColorToTColor(const AColor: TGfxColor): TColor;
+begin
+  Result := ((AColor.Red shr 8) and $ff)
+            or (AColor.Green and $ff00)
+            or ((AColor.Blue shl 8) and $ff0000);
+end;
+
 
 { Keyboard functions }
 

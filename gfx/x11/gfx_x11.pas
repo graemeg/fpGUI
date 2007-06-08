@@ -172,7 +172,7 @@ type
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); override;
     destructor  Destroy; override;
-    procedure   Lock(var AData: Pointer; var AStride: LongWord); override;
+    procedure   Lock(out AData: Pointer; out AStride: LongWord); override;
     procedure   Unlock; override;
   end;
 
@@ -882,7 +882,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TX11Bitmap.Lock(var AData: Pointer; var AStride: LongWord);
+procedure TX11Bitmap.Lock(out AData: Pointer; out AStride: LongWord);
 begin
   ASSERT(not IsLocked);
   IsLocked := True;
