@@ -21,7 +21,7 @@
 \chapter{Introduction}
 After developing many cross platform applications with Kylix and Delphi
 I started getting very frustrated with the differences between the look and
-behaviour of the applications under Linux and Windows.  The code was also
+behavior of the applications under Linux and Windows.  The code was also
 riddled with IFDEF statements.
 
 Then I stumbled across the Free Pascal and Lazarus projects. I thought this 
@@ -148,9 +148,86 @@ If a window presents itself for the first time, and no standard size was
 
 
 % *******************************************************************
+\chapter{Single vs Multi handle decision}
+
+... to be written ...
+
+What follows below are just some snippets from the newsgroup and mailing
+lists that I want to reorganise into a chapter. These are things that 
+were discussed that I don't want to forget.
+
+\section{Notes from the newsgroup}
+One handle per Form. Widgets are just painted onto the Form canvas. This 
+will support the most platforms and give us a consistent behavior.
+
+See the /prototype/multihandle directory.
+
+I spoke to Martin Schreiber (MSEgui author) about this as well and the 
+better way seems to be to have one handle per Form (window) and do you 
+own custom events. Implementing as much as you can yourself, will give 
+you a consistent behavior on all platforms and make it more portable.
+
+Martin also tried to implement one handle per widget and came to the 
+following conclusion with makes sense. If you want you GUI Framework to 
+work the same across multiple platforms, you cannot rely on specific 
+behavior on a platform. With one handle per widget you are relying on 
+the underling windowing systems event handling and may very well differ 
+from another platform (which it normally does). This is what Martin 
+experienced, and the only way to get consistent event handling was to do 
+if yourself.  Clipping regions was another issue Martin mentioned.
+
+All his points made perfect sense to me, so I continued with the fpGUI 
+based on one handle per Form and will guarantee that all events, and 
+clipping regions will work exactly the same on all platforms. Just 
+creating the simple prototype I already experienced different behaviors 
+between Windows and Linux.
+
+See the thread titled "Comments from Martin Schreiber" dated 2006-12-07. 
+There I posted some of the discussions with Martin.
+
+But then I remembered a very strong argument for one handle per window: 
+Some platforms I would like to see fpGUI running on the future simply don't support one window inside another. Like Linux Framebuffer for example. I'm not sure about Symbian OS UIQ 3, but I think too.
+
+
+\section{Email from Martin Schreiber}
+Pro's for to have a window handle for every widget:
+It is possible to use more code from the operating system (clipping,
+focus handling, mouse enter/leave...
+
+Con's:
+The functionality of your widgets depends on the OS. It is not easy to
+achieve the same behavior with different systems.
+You have less control over the behavior of the widgets.
+If there are very much widgets in a application there can be performance
+and resource problems (in win95/98 the maximal count of gdi objects and
+window handles is limited). 
+You probably need to implement simplified widgets without handles too
+(TGraphicControl) which brakes orthogonality.
+
+I did three attempts to develop a GUI environment, the first approach
+was based on VCL, the second on CLX and now MSEgui which is done from
+scratch.
+With VCL and CLX I needed very much time to find workarounds to change
+their behavior, some things where simply not possible to realize.
+With about the same expenditure of time I have reached in MSEgui a
+really enjoyable level.
+As an example, the implementation of transparent widgets took me weeks
+in VCL/CLX, semi-transparency was almost unreachable.
+In MSEgui I could implement transparent widgets in 10 minutes because my
+self developed clipping handling was flexible enough.
+
+So my tip is to do as much as possible by your self, at the end you will
+need less time and the quality will be much better.
+But don't underestimate the expenditure of the project.
+For comparison: I invested about 10'000 hours into the development of
+MSEide+MSEgui up to now.
+
+Martin 
+
+% *******************************************************************
 \chapter{Database Components}
 
-... to be continued ...
+... to be written ...
 
 
 \end{document}
