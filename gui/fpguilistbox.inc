@@ -20,6 +20,8 @@
 
 {$IFDEF read_interface}
 
+  { TFCustomListBox }
+
   TFCustomListBox = class(TFWidget)
   private
     FHotTrack: Boolean;
@@ -36,12 +38,12 @@
     procedure   Paint(Canvas: TFCanvas); override;
     function    ProcessEvent(Event: TEventObj): Boolean; override;
     function    DistributeEvent(Event: TEventObj): Boolean; override;
-//    procedure EvKeyPressed(Key: Word; Shift: TShiftState); override;
+    procedure   EvKeyPressed(Key: Word; Shift: TShiftState); override;
     procedure   CalcSizes; override;
     procedure   Resized; override;
     procedure   RecalcWidth;
     procedure   UpdateScrollBars;
-    procedure   RedrawItem(AIndex: Integer);
+    function    RedrawItem(AIndex: Integer): TRect;
     property    CanExpandWidth default True;
     property    CanExpandHeight default True;
     property    HotTrack: Boolean read FHotTrack write FHotTrack default False;
@@ -125,10 +127,8 @@ begin
   FCanExpandHeight := True;
 
   ScrollingSupport := TScrollingSupport.Create(Self);
-  ScrollingSupport.HorzScrollBar.OnScroll :=
-    @ScrollingSupport.DefHorzScrollHandler;
-  ScrollingSupport.VerTFScrollBar.OnScroll :=
-    @ScrollingSupport.DefVertScrollHandler;
+  ScrollingSupport.HorzScrollBar.OnScroll := @ScrollingSupport.DefHorzScrollHandler;
+  ScrollingSupport.VertScrollBar.OnScroll := @ScrollingSupport.DefVertScrollHandler;
   Items := TFListBoxStrings.Create(Self);
   FItemIndex := -1;
   UpdateScrollBars;
@@ -140,9 +140,6 @@ begin
   ScrollingSupport.Free;
   inherited Destroy;
 end;
-
-
-// protected methods
 
 procedure TFCustomListBox.Paint(Canvas: TFCanvas);
 var
@@ -160,7 +157,7 @@ begin
   Canvas.FillRect(ScrollingSupport.ClientRect);
   Style.SetUIColor(Canvas, clWindowText);
 
-  with ScrollingSupport.VerTFScrollBar do
+  with ScrollingSupport.VertScrollBar do
   begin
     StartIndex := Position div ItemHeight;
     EndIndex := (Position + PageSize) div ItemHeight;
@@ -228,11 +225,100 @@ begin
     inherited DistributeEvent(Event);
 end;
 
+procedure TFCustomListBox.EvKeyPressed(Key: Word; Shift: TShiftState);
+var
+  mshift: TShiftState;
+  HorzScrollBar: TFScrollBar;
+  VertScrollBar: TFScrollBar;
+  r: TRect;
+begin
+//  writeln('Before FItemIndex=' + IntToStr(FItemIndex));
+  HorzScrollBar := ScrollingSupport.HorzScrollBar;
+  VertScrollBar := ScrollingSupport.VertScrollBar;
+  
+  mshift := Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssSuper, ssHyper, ssAltGr];
+  if mshift = [] then
+    case Key of
+//      keyLeft:
+//        HorzScrollBar.ButtonUpClick(nil);
+//      keyRight:
+//        HorzScrollBar.ButtonDownClick(nil);
+      keyUp:
+          begin
+//            writeln('keyup');
+            if FItemIndex > 0 then
+            begin
+              RedrawItem(ItemIndex);
+              Dec(FItemIndex);
+              r := RedrawItem(ItemIndex);
+              // we should only call this when focus rect is out of view
+              if not PtInRect(ScrollingSupport.ClientRect, Point(r.Left, r.Top)) then
+              begin
+                VertScrollBar.ButtonUpClick(nil);
+              end;
+            end;
+          end;
+      keyDown:
+          begin
+//            writeln('keydown');
+            if FItemIndex < (Items.Count - 1) then
+            begin
+              RedrawItem(ItemIndex);
+              Inc(FItemIndex);
+              r := RedrawItem(ItemIndex);
+              // we should only call this when focus rect is out of view
+              if not PtInRect(ScrollingSupport.ClientRect, Point(r.Left, r.Bottom)) then
+              begin
+                VertScrollBar.ButtonDownClick(nil);
+              end;
+            end;
+          end;
+      keyPageUp:
+        VertScrollBar.PageUp;
+      keyPageDown:
+        VertScrollBar.PageDown;
+      keyHome:
+          begin
+            RedrawItem(ItemIndex);
+            FItemIndex := 0;
+            RedrawItem(ItemIndex);
+            VertScrollBar.Position := 0;
+          end;
+      keyEnd:
+          begin
+            RedrawItem(ItemIndex);
+            FItemIndex := (Items.Count - 1);
+            RedrawItem(ItemIndex);
+            VertScrollBar.Position := VertScrollBar.Max - VertScrollBar.PageSize;
+          end;
+      keyReturn:
+          begin
+            if Assigned(OnClick) then
+              OnClick(Self);
+          end;
+    end
+  else if mshift = [ssShift] then
+    case Key of
+      keyPageUp:
+        HorzScrollBar.PageUp;
+      keyPageDown:
+        HorzScrollBar.PageDown;
+      keyHome:
+        HorzScrollBar.Position := 0;
+      keyEnd:
+        HorzScrollBar.Position := HorzScrollBar.Max - HorzScrollBar.PageSize;
+    end
+  else
+    inherited EvKeyPressed(Key, Shift);
+
+//  writeln('After FItemIndex=' + IntToStr(FItemIndex));
+end;
+
 procedure TFCustomListBox.CalcSizes;
 begin
   ScrollingSupport.CalcSizes;
   ItemHeight := FindForm.Wnd.Canvas.FontCellHeight;
-  ScrollingSupport.VerTFScrollBar.SmallChange := ItemHeight;
+  ScrollingSupport.VertScrollBar.SmallChange := ItemHeight;
   RecalcWidth;
 end;
 
@@ -265,21 +351,20 @@ begin
       Size(FMaxItemWidth, Items.Count * ItemHeight - 1));
 end;
 
-procedure TFCustomListBox.RedrawItem(AIndex: Integer);
+function TFCustomListBox.RedrawItem(AIndex: Integer): TRect;
 var
   ItemRect: TRect;
 begin
   if AIndex < 0 then
-    exit; //==>
+    Exit; //==>
   ItemRect := ScrollingSupport.ClientRect;
-  Inc(ItemRect.Top, AIndex * ItemHeight -
-    ScrollingSupport.VerTFScrollBar.Position);
+  Inc(ItemRect.Top, AIndex * ItemHeight - ScrollingSupport.VertScrollBar.Position);
   if (ItemRect.Top > ScrollingSupport.ClientRect.Bottom) or
     (ItemRect.Top + ItemHeight <= ScrollingSupport.ClientRect.Top) then
-    exit;
-  ItemRect.Bottom := Min(ItemRect.Top + ItemHeight,
-    ScrollingSupport.ClientRect.Bottom);
+    Exit; //==>
+  ItemRect.Bottom := Min(ItemRect.Top + ItemHeight, ScrollingSupport.ClientRect.Bottom);
   Redraw(ItemRect);
+  Result := ItemRect;
 end;
 
 
@@ -318,11 +403,11 @@ begin
   if not PtInRect(ScrollingSupport.ClientRect, Event.Position) then
   begin
     Result := False;
-    exit;
+    Exit; //==>
   end;
 
   Index := (Event.Position.y - ScrollingSupport.ClientRect.Top +
-    ScrollingSupport.VerTFScrollBar.Position) div ItemHeight;
+    ScrollingSupport.VertScrollBar.Position) div ItemHeight;
   if (Index >= 0) and (Index < Items.Count) and ((Index <> ItemIndex) or
     (HotTrack and Event.InheritsFrom(TMouseReleasedEventObj))) then
   begin

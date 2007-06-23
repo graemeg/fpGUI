@@ -164,7 +164,7 @@ begin
   Canvas.FillRect(FScrollingSupport.ClientRect);
   Style.SetUIColor(Canvas, clWindowText);
 
-  with FScrollingSupport.VerTFScrollBar do
+  with FScrollingSupport.VertScrollBar do
   begin
     StartIndex  := Position div FItemHeight;
     EndIndex    := (Position + PageSize) div FItemHeight;
@@ -234,7 +234,7 @@ procedure TFCustomMemo.CalcSizes;
 begin
   FScrollingSupport.CalcSizes;
   FItemHeight := FindForm.Wnd.Canvas.FontCellHeight;
-  FScrollingSupport.VerTFScrollBar.SmallChange := FItemHeight;
+  FScrollingSupport.VertScrollBar.SmallChange := FItemHeight;
   RecalcWidth;
 end;
 
@@ -275,7 +275,7 @@ begin
 
   FScrollingSupport := TScrollingSupport.Create(Self);
   FScrollingSupport.HorzScrollBar.OnScroll := @FScrollingSupport.DefHorzScrollHandler;
-  FScrollingSupport.VerTFScrollBar.OnScroll := @FScrollingSupport.DefVertScrollHandler;
+  FScrollingSupport.VertScrollBar.OnScroll := @FScrollingSupport.DefVertScrollHandler;
 
   FLines := TFMemoStrings.Create(self);
 //  SetBounds(10, 10, 180, 90);

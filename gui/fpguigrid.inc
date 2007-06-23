@@ -55,7 +55,7 @@
     function  GetRowHeights(ARow: Integer): Integer;
     procedure SetRowHeights(ARow, AHeight: Integer);
     procedure HorzScrollBarScroll(Sender: TObject; var APosition: Integer);
-    procedure VerTFScrollBarScroll(Sender: TObject; var APosition: Integer);
+    procedure VertScrollBarScroll(Sender: TObject; var APosition: Integer);
   protected
     ScrollingSupport: TScrollingSupport;
     procedure Paint(Canvas: TFCanvas); override;
@@ -173,7 +173,7 @@ begin
   FCanExpandHeight := True;
   ScrollingSupport := TScrollingSupport.Create(Self);
   ScrollingSupport.HorzScrollBar.OnScroll := @HorzScrollBarScroll;
-  ScrollingSupport.VerTFScrollBar.OnScroll := @VerTFScrollBarScroll;
+  ScrollingSupport.VertScrollBar.OnScroll := @VertScrollBarScroll;
 
   FDefaultColWidth := 64;
   FDefaultRowHeight := 24;
@@ -279,7 +279,7 @@ begin
 
     Inc(y);
     if y = FixedRows then
-      Inc(y, ScrollingSupport.VerTFScrollBar.Position);
+      Inc(y, ScrollingSupport.VertScrollBar.Position);
   end;
 
 
@@ -301,7 +301,7 @@ begin
 
     Inc(y);
     if y = FixedRows then
-      Inc(y, ScrollingSupport.VerTFScrollBar.Position);
+      Inc(y, ScrollingSupport.VertScrollBar.Position);
   end;
 
   x := 0;
@@ -430,7 +430,7 @@ begin
     for i := OldRowCount to FRowCount - 1 do
       FRowHeights^[i] := FDefaultRowHeight;
 
-    ScrollingSupport.VerTFScrollBar.Max := RowCount - FixedRows - 1;
+    ScrollingSupport.VertScrollBar.Max := RowCount - FixedRows - 1;
 
     RowHeightsChanged;
     SizeChanged(FColCount, OldRowCount);
@@ -451,7 +451,7 @@ begin
   if AFixedRows <> FixedRows then
   begin
     FFixedRows := AFixedRows;
-    ScrollingSupport.VerTFScrollBar.Max := RowCount - FixedRows - 1;
+    ScrollingSupport.VertScrollBar.Max := RowCount - FixedRows - 1;
   end;
 end;
 
@@ -536,18 +536,18 @@ begin
   end;
 end;
 
-procedure TFCustomGrid.VerTFScrollBarScroll(Sender: TObject;
+procedure TFCustomGrid.VertScrollBarScroll(Sender: TObject;
   var APosition: Integer);
 var
   i, Delta: Integer;
   r: TRect;
 begin
   Delta := 0;
-  if APosition > ScrollingSupport.VerTFScrollBar.Position then
-    for i := ScrollingSupport.VerTFScrollBar.Position to APosition - 1 do
+  if APosition > ScrollingSupport.VertScrollBar.Position then
+    for i := ScrollingSupport.VertScrollBar.Position to APosition - 1 do
       Dec(Delta, RowHeights[i + FixedRows] + 1)
   else
-    for i := APosition to ScrollingSupport.VerTFScrollBar.Position - 1 do
+    for i := APosition to ScrollingSupport.VertScrollBar.Position - 1 do
       Inc(Delta, RowHeights[i + FixedRows] + 1);
 
   // Scroll the grid body

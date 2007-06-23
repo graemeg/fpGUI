@@ -849,7 +849,7 @@ begin
       if FHorzAlign = horzFill then
         w := Min(BoundsSize.cx, item.Widget.MaxSize.cx);
     end;
-    item.Widget.SetBounds(Point(xpos, ypos), gfxbase.Size(w, h));
+    item.Widget.SetBounds(Point(xpos, ypos), Size(w, h));
   end;
 
   FreeMem(sizes);
