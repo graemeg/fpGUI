@@ -88,10 +88,10 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
-    procedure   DoGetWinRect(var r: TfpgRect);
+    procedure   DoGetWinRect(var r: TfpgRect); override;
     procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
-    procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
-    procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+    procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
+    procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
     procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
@@ -101,8 +101,8 @@ type
     procedure   DoAddClipRect(const rect: TfpgRect); override;
     procedure   DoClearClipRect; override;
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
-    procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord);
-    procedure   DoEndDraw;
+    procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
+    procedure   DoEndDraw; override;
   public
     constructor Create;
     destructor  Destroy; override;

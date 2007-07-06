@@ -123,20 +123,9 @@ type
 
 
   TfpgCanvas = class(TfpgCanvasImpl)
-  protected
-    FPersistentResources: boolean;
   public
     constructor Create(awin: TfpgWindow); reintroduce;
     destructor  Destroy; override;
-    procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
-    procedure   EndDraw; overload;
-    procedure   FreeResources;
-    procedure   Clear(col: TfpgColor);
-    procedure   GetWinRect(var r: TfpgRect);
-    procedure   XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
-    procedure   XORFillRect(col: TfpgColor; r: TfpgRect);
-    procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
-
     procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord);
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
@@ -597,6 +586,7 @@ end;
 constructor TfpgFontResource.Create(const afontdesc: string);
 begin
   inherited;
+  FFontDesc := afontdesc;
   FRefCount := 0;
 end;
 
@@ -631,64 +621,6 @@ begin
   if fpgCaret.FCanvas = self then
     fpgCaret.UnSetCaret(self);
   inherited Destroy;
-end;
-
-procedure TfpgCanvas.EndDraw(x, y, w, h: TfpgCoord);
-begin
-  if FBeginDrawCount > 0 then
-  begin
-    Dec(FBeginDrawCount);
-    if FBeginDrawCount = 0 then
-    begin
-      DoPutBufferToScreen(x, y, w, h);
-
-      if not FPersistentResources then
-        DoEndDraw;   // !!!
-    end;
-  end;
-end;
-
-procedure TfpgCanvas.EndDraw;
-begin
-  EndDraw(0, 0, FWindow.Width, FWindow.Height);
-end;
-
-procedure TfpgCanvas.FreeResources;
-begin
-  DoEndDraw;
-  FBeginDrawCount := 0;
-end;
-
-procedure TfpgCanvas.Clear(col: TfpgColor);
-var
-  ACol:     TfpgColor;
-  AWinRect: TfpgRect;
-begin
-  ACol := FColor;
-  DoSetColor(col);
-  DoGetWinRect(AWinRect);
-  DoFillRectangle(0, 0, AWinRect.Width, AWinRect.Height);
-  DoSetColor(ACol);
-end;
-
-procedure TfpgCanvas.GetWinRect(var r: TfpgRect);
-begin
-  DoGetWinRect(r);
-end;
-
-procedure TfpgCanvas.XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
-begin
-  DoXORFillRectangle(col, x, y, w, h);
-end;
-
-procedure TfpgCanvas.XORFillRect(col: TfpgColor; r: TfpgRect);
-begin
-  DoXORFillRectangle(col, r.Left, r.Top, r.Width, r.Height);
-end;
-
-procedure TfpgCanvas.FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
-begin
-  DoFillTriangle(x1, y1, x2, y2, x3, y3);
 end;
 
 procedure TfpgCanvas.DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);

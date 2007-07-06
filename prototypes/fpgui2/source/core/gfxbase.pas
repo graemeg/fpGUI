@@ -234,6 +234,7 @@ type
     FLineWidth: integer;
     FLineStyle: TfpgLineStyle;
     FFont: TfpgFontBase;
+    FPersistentResources: boolean;
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); virtual; abstract;
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
@@ -262,16 +263,24 @@ type
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   FillRectangle(r: TfpgRect); overload;
+    procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+    procedure   XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); overload;
+    procedure   XORFillRectangle(col: TfpgColor; r: TfpgRect); overload;
     procedure   SetClipRect(const rect: TfpgRect);
     function    GetClipRect: TfpgRect;
     procedure   AddClipRect(const rect: TfpgRect);
     procedure   ClearClipRect;
+    procedure   Clear(AColor: TfpgColor);
+    procedure   GetWinRect(var r: TfpgRect);
     procedure   SetColor(AColor: TfpgColor);
     procedure   SetTextColor(AColor: TfpgColor);
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
     procedure   SetFont(AFont: TfpgFontBase);
     procedure   BeginDraw; overload;
     procedure   BeginDraw(ABuffered: boolean); overload;
+    procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
+    procedure   EndDraw; overload;
+    procedure   FreeResources;
     property    Color: TfpgColor read FColor;
     property    TextColor: TfpgColor read FTextColor;
     property    Font: TfpgFontBase read FFont write SetFont;
@@ -407,6 +416,21 @@ begin
   DoFillRectangle(r.Left, r.Top, r.Width, r.Height);
 end;
 
+procedure TfpgCanvasBase.FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+begin
+  DoFillTriangle(x1, y1, x2, y2, x3, y3);
+end;
+
+procedure TfpgCanvasBase.XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
+begin
+  DoXORFillRectangle(col, x, y, w, h);
+end;
+
+procedure TfpgCanvasBase.XORFillRectangle(col: TfpgColor; r: TfpgRect);
+begin
+  DoXORFillRectangle(col, r.Left, r.Top, r.Width, r.Height);
+end;
+
 procedure TfpgCanvasBase.SetClipRect(const rect: TfpgRect);
 begin
   DoSetClipRect(rect);
@@ -425,6 +449,23 @@ end;
 procedure TfpgCanvasBase.ClearClipRect;
 begin
   DoClearClipRect;
+end;
+
+procedure TfpgCanvasBase.Clear(AColor: TfpgColor);
+var
+  lCol:     TfpgColor;
+  lWinRect: TfpgRect;
+begin
+  lCol := FColor;
+  DoSetColor(AColor);
+  DoGetWinRect(lWinRect);
+  DoFillRectangle(0, 0, lWinRect.Width, lWinRect.Height);
+  DoSetColor(lCol);
+end;
+
+procedure TfpgCanvasBase.GetWinRect(var r: TfpgRect);
+begin
+  DoGetWinRect(r);
 end;
 
 procedure TfpgCanvasBase.SetColor(AColor: TfpgColor);
@@ -471,6 +512,32 @@ begin
     FBeginDrawCount := 0;
   end;
   Inc(FBeginDrawCount);
+end;
+
+procedure TfpgCanvasBase.EndDraw(x, y, w, h: TfpgCoord);
+begin
+  if FBeginDrawCount > 0 then
+  begin
+    Dec(FBeginDrawCount);
+    if FBeginDrawCount = 0 then
+    begin
+      DoPutBufferToScreen(x, y, w, h);
+
+      if not FPersistentResources then
+        DoEndDraw;
+    end;
+  end;  { if }
+end;
+
+procedure TfpgCanvasBase.EndDraw;
+begin
+  EndDraw(0, 0, FWindow.Width, FWindow.Height);
+end;
+
+procedure TfpgCanvasBase.FreeResources;
+begin
+  DoEndDraw;
+  FBeginDrawCount := 0;
 end;
 
 { TfpgFontBase }
