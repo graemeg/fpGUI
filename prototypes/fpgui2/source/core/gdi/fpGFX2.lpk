@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="2">
+    <PathDelim Value="\"/>
+    <Name Value="fpGFX2"/>
+    <Author Value="Graeme Geldenhuys"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="..\..\"/>
+        <OtherUnitFiles Value="..\;..\..\gui\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="fpGFX redesign with multiple handles per window
+"/>
+    <License Value="Modified LGPL
+"/>
+    <Version Minor="1"/>
+    <Files Count="16">
+      <Item1>
+        <Filename Value="..\gfxbase.pas"/>
+        <UnitName Value="gfxbase"/>
+      </Item1>
+      <Item2>
+        <Filename Value="..\gfxbaseinterfaces.pas"/>
+        <UnitName Value="gfxbaseinterfaces"/>
+      </Item2>
+      <Item3>
+        <Filename Value="..\fpgfx.pas"/>
+        <UnitName Value="fpgfx"/>
+      </Item3>
+      <Item4>
+        <Filename Value="..\gfx_stdimages.pas"/>
+        <UnitName Value="gfx_stdimages"/>
+      </Item4>
+      <Item5>
+        <Filename Value="..\gfx_imgfmt_bmp.pas"/>
+        <UnitName Value="gfx_imgfmt_bmp"/>
+      </Item5>
+      <Item6>
+        <Filename Value="..\gfx_widget.pas"/>
+        <UnitName Value="gfx_widget"/>
+      </Item6>
+      <Item7>
+        <Filename Value="..\..\gui\gui_form.pas"/>
+        <UnitName Value="gui_form"/>
+      </Item7>
+      <Item8>
+        <Filename Value="..\..\gui\gui_label.pas"/>
+        <UnitName Value="gui_label"/>
+      </Item8>
+      <Item9>
+        <Filename Value="..\..\gui\gui_button.pas"/>
+        <UnitName Value="gui_button"/>
+      </Item9>
+      <Item10>
+        <Filename Value="..\..\gui\gui_edit.pas"/>
+        <UnitName Value="gui_edit"/>
+      </Item10>
+      <Item11>
+        <Filename Value="..\..\gui\gui_combobox.pas"/>
+        <UnitName Value="gui_combobox"/>
+      </Item11>
+      <Item12>
+        <Filename Value="..\..\gui\gui_popupwindow.pas"/>
+        <UnitName Value="gui_popupwindow"/>
+      </Item12>
+      <Item13>
+        <Filename Value="gfx_gdi.pas"/>
+        <UnitName Value="gfx_gdi"/>
+      </Item13>
+      <Item14>
+        <Filename Value="..\..\gui\gui_scrollbar.pas"/>
+        <UnitName Value="gui_scrollbar"/>
+      </Item14>
+      <Item15>
+        <Filename Value="..\..\gui\gui_memo.pas"/>
+        <UnitName Value="gui_memo"/>
+      </Item15>
+      <Item16>
+        <Filename Value="..\gfx_utf8utils.pas"/>
+        <UnitName Value="gfx_UTF8utils"/>
+      </Item16>
+    </Files>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)\"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <DestinationDirectory Value="$(TestDir)\publishedpackage\"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
