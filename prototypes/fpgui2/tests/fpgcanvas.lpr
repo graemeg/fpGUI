@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes,
+  Classes, SysUtils,
   fpgfx,
   gfxbase,
   gui_form,
@@ -21,11 +21,17 @@ const
   clBlack     = $000000;
 
 type
+
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
+  private
+    bmp: TfpgImage;
   protected
     procedure HandlePaint; override;
   public
     procedure AfterCreate; override;
+    procedure BeforeDestruction; override;
   end;
 
 { TMainForm }
@@ -34,7 +40,6 @@ procedure TMainForm.HandlePaint;
 var
   r: TfpgRect;
   fnt: TfpgFont;
-  bmp: TfpgImage;
   y: integer;
 begin
   // Enable double buffering. Must be before 'inherited' to prevent form
@@ -53,16 +58,16 @@ begin
   r.Left      := 60;
   r.Width     := 50;
   r.Height    := 50;
-  Canvas.DrawRect(r);
+  Canvas.DrawRectangle(r);
   
   r.Left := 120;
   Canvas.SetLineStyle(2, lsDash);
-  Canvas.DrawRect(r);
+  Canvas.DrawRectangle(r);
 
   r.Left := 180;
   Canvas.SetColor(clGreen);
   Canvas.SetLineStyle(1, lsDot);
-  Canvas.DrawRect(r);
+  Canvas.DrawRectangle(r);
 
   r.Left := 240;
   Canvas.SetColor(clBlue);
@@ -107,20 +112,13 @@ begin
   
   
   // Testing Bitmap painting
-  bmp := LoadImage_BMP('button.bmp');
-  try
-    bmp.CreateMaskFromSample(0,0);
-    bmp.UpdateImage;
-    Canvas.DrawString(5, 180, 'Single BMP file:');
-    Canvas.DrawString(300, 210, '(mask enabled for all images)');
-    Canvas.DrawImage(150, 180, bmp);
-    Canvas.DrawString(5, 210, 'Parts of BMP file:');
-    Canvas.DrawImagePart(150, 210, bmp, 0, 0, 32, 21);
-    Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
-    Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
-  finally
-    bmp.Free;
-  end;
+  Canvas.DrawString(5, 180, 'Single BMP file:');
+  Canvas.DrawString(300, 210, '(mask enabled for all images)');
+  Canvas.DrawImage(150, 180, bmp);
+  Canvas.DrawString(5, 210, 'Parts of BMP file:');
+  Canvas.DrawImagePart(150, 210, bmp, 0, 0, 32, 21);
+  Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
+  Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
 
 
   Canvas.EndDraw;
@@ -131,6 +129,18 @@ begin
   inherited AfterCreate;
   SetPosition(100, 100, 500, 400);
   WindowTitle := 'fpGFX Canvas Test';
+  
+  bmp := LoadImage_BMP('button.bmp');
+  if not Assigned(bmp) then
+    raise Exception.Create('Failed to load button.bmp');
+  bmp.CreateMaskFromSample(0,0);
+  bmp.UpdateImage;
+end;
+
+procedure TMainForm.BeforeDestruction;
+begin
+  bmp.Free;
+  inherited BeforeDestruction;
 end;
 
 procedure MainProc;

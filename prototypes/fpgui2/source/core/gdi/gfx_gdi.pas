@@ -40,10 +40,10 @@ type
     constructor Create(const afontdesc: string);
     destructor  Destroy; override;
     function    HandleIsValid: boolean;
-    function    GetAscent: integer;
-    function    GetDescent: integer;
-    function    GetHeight: integer;
-    function    GetTextWidth(const txt: string): integer;
+    function    GetAscent: integer; override;
+    function    GetDescent: integer; override;
+    function    GetHeight: integer; override;
+    function    GetTextWidth(const txt: string): integer; override;
   end;
 
 
@@ -72,39 +72,35 @@ type
     FDrawing: boolean;
     FBufferBitmap: HBitmap;
     FDrawWindow: TfpgWindowImpl;
-    Fgc, FWinGC: TfpgGContext;
-    FColorText: TfpgColor;
-    FColor: TfpgColor;
+    Fgc: TfpgGContext;
+    FWinGC: TfpgGContext;
     FBackgroundColor: TfpgColor;
     FCurFontRes: TfpgFontResourceImpl;
     FClipRect: TfpgRect;
     FClipRectSet: Boolean;
-    FLineStyle: integer;
-    FLineWidth: integer;
     FWindowsColor: longword;
     FBrush: HBRUSH;
     FPen: HPEN;
     FClipRegion: HRGN;
     FIntLineStyle: integer;
-    FIntLineWidth: integer;
   protected
-    procedure   DoSetFontRes(fntres: TfpgFontResourceImpl);
-    procedure   DoSetTextColor(cl: TfpgColor);
-    procedure   DoSetColor(cl: TfpgColor);
-    procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
-    procedure   DoDrawString(x, y: TfpgCoord; const txt: string);
+    procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
+    procedure   DoSetTextColor(cl: TfpgColor); override;
+    procedure   DoSetColor(cl: TfpgColor); override;
+    procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
     procedure   DoGetWinRect(var r: TfpgRect);
-    procedure   DoFillRectangle(x, y, w, h: TfpgCoord);
+    procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
-    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord);
-    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord);
-    procedure   DoSetClipRect(const rect: TfpgRect);
-    function    DoGetClipRect: TfpgRect;
-    procedure   DoAddClipRect(const rect: TfpgRect);
-    procedure   DoClearClipRect;
-    procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageImpl; xi, yi, w, h: integer);
-    procedure   DoBeginDraw(awin: TfpgWindowImpl; buffered: boolean);
+    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
+    procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
+    procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
+    procedure   DoSetClipRect(const rect: TfpgRect); override;
+    function    DoGetClipRect: TfpgRect; override;
+    procedure   DoAddClipRect(const rect: TfpgRect); override;
+    procedure   DoClearClipRect; override;
+    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord);
     procedure   DoEndDraw;
   public
@@ -869,7 +865,7 @@ begin
   inherited;
 end;
 
-procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowImpl; buffered: boolean);
+procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
   ARect: TfpgRect;
   bmsize: Windows.TSIZE;
@@ -878,7 +874,7 @@ begin
   begin
     // check if the dimensions are ok
     GetBitmapDimensionEx(FBufferBitmap, bmsize);
-    FDrawWindow := awin;
+    FDrawWindow := TfpgWindowImpl(awin);
     DoGetWinRect(ARect);
     if (bmsize.cx <> ARect.Width) or (bmsize.cy <> ARect.Height) then
       DoEndDraw;
@@ -886,7 +882,7 @@ begin
 
   if not FDrawing then
   begin
-    FDrawWindow := awin;
+    FDrawWindow := TfpgWindowImpl(awin);
     FWinGC      := Windows.GetDC(FDrawWindow.FWinHandle);
 
     if buffered then
@@ -1059,7 +1055,7 @@ begin
   FWindowsColor := fpgColorToWin(cl);
 
   FBrush := CreateSolidBrush(FWindowsColor);
-  FPen   := CreatePen(FintLineStyle, FintLineWidth, FWindowsColor);
+  FPen   := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
   SelectObject(Fgc, FBrush);
   SelectObject(Fgc, FPen);
 end;
@@ -1069,29 +1065,29 @@ begin
 { Notes from MSDN: If the value specified by nWidth is greater
 than 1, the fnPenStyle parameter must be PS_NULL, PS_SOLID, or
 PS_INSIDEFRAME. }
-  FintLineWidth := awidth;
+  FLineWidth := awidth;
   case AStyle of
     lsDot:
       begin
       FintLineStyle := PS_DOT;
-      FintLineWidth := 1;
+      FLineWidth := 1;
       end;
     lsDash:
       begin
       FintLineStyle := PS_DASH;
-      FintLineWidth := 1;
+      FLineWidth := 1;
       end;
     lsSolid:
       FintLineStyle := PS_SOLID;
     else
       begin
       FintLineStyle := PS_DOT;
-      FintLineWidth := 1;
+      FLineWidth := 1;
       end;
   end;
 
   DeleteObject(FPen);
-  FPen := CreatePen(FintLineStyle, FintLineWidth, FWindowsColor);
+  FPen := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
   SelectObject(Fgc, FPen);
 end;
 
@@ -1100,15 +1096,15 @@ begin
   Windows.SetTextColor(Fgc, fpgColorToWin(cl));
 end;
 
-procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceImpl);
+procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   if fntres = nil then
-    Exit;
-  FCurFontRes := fntres;
+    Exit; //==>
+  FCurFontRes := TfpgFontResourceImpl(fntres);
   Windows.SelectObject(Fgc, FCurFontRes.Handle);
 end;
 
-procedure TfpgCanvasImpl.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageImpl; xi, yi, w, h: integer);
+procedure TfpgCanvasImpl.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
 const
   DSTCOPY     = $00AA0029;
   ROP_DSPDxax = $00E20746;
@@ -1117,18 +1113,18 @@ var
   rop: longword;
 begin
   if img = nil then
-    Exit;
+    Exit; //==>
 
   tmpdc := CreateCompatibleDC(wapplication.display);
-  SelectObject(tmpdc, img.BMPHandle);
+  SelectObject(tmpdc, TfpgImageImpl(img).BMPHandle);
 
   if img.FIsTwoColor then
     rop := PATCOPY  //ROP_DSPDxax
   else
     rop := SRCCOPY;
 
-  if img.MaskHandle > 0 then
-    MaskBlt(Fgc, x, y, w, h, tmpdc, xi, yi, img.MaskHandle, xi, yi, MakeRop4(rop, DSTCOPY))
+  if TfpgImageImpl(img).MaskHandle > 0 then
+    MaskBlt(Fgc, x, y, w, h, tmpdc, xi, yi, TfpgImageImpl(img).MaskHandle, xi, yi, MakeRop4(rop, DSTCOPY))
   else
     BitBlt(Fgc, x, y, w, h, tmpdc, xi, yi, rop);
 

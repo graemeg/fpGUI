@@ -66,19 +66,9 @@ type
 
 
   TfpgFont = class(TfpgFontBase)
-  private
-    FFontDesc: string;
-    FFontRes: TfpgFontResource;
   public
     constructor Create(afontres: TfpgFontResource; const afontdesc: string);
     destructor  Destroy; override;
-    function    TextWidth(const txt: string): integer;
-    function    Ascent: integer;
-    function    Descent: integer;
-    function    Height: integer;
-    property    FontDesc: string read FFontDesc;
-    property    FontRes: TfpgFontResource read FFontRes;
-    property    Handle: TfpgFontResource read FFontRes;
   end;
 
 
@@ -105,15 +95,6 @@ type
 
 
   TfpgImage = class(TfpgImageImpl)
-  protected
-    FWidth: integer;
-    FHeight: integer;
-    FColorDepth: integer;
-    FMasked: boolean;
-    FImageData: pointer;
-    FImageDataSize: integer;
-    FMaskData: pointer;
-    FMaskDataSize: integer;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -123,14 +104,6 @@ type
     procedure   Invert;
     procedure   UpdateImage;
     procedure   CreateMaskFromSample(x, y: integer);
-    property    ImageData: pointer read FImageData;
-    property    ImageDataSize: integer read FImageDataSize;
-    property    MaskData: pointer read FMaskData;
-    property    MaskDataSize: integer read FMaskDataSize;
-    property    Width: integer read FWidth;
-    property    Height: integer read FHeight;
-    property    ColorDepth: integer read FColorDepth;
-    property    Masked: boolean read FMasked;
   end;
 
 
@@ -150,54 +123,25 @@ type
 
 
   TfpgCanvas = class(TfpgCanvasImpl)
-  private
-    FColorText: TfpgColor;
   protected
-    FBufferedDraw: boolean;
     FPersistentResources: boolean;
-    FWindow: TfpgWindow;
-    FColor: TfpgColor;
-    FTextColor: TfpgColor;
-    FFont: TfpgFont;
-    FLineWidth: integer;
-    FLineStyle: TfpgLineStyle;
-    FBeginDrawCount: integer;
   public
     constructor Create(awin: TfpgWindow); reintroduce;
     destructor  Destroy; override;
-    procedure   BeginDraw; overload;
-    procedure   BeginDraw(abuffered: boolean); overload;
     procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
     procedure   EndDraw; overload;
     procedure   FreeResources;
-    procedure   SetFont(fnt: TfpgFont);
-    procedure   SetColor(cl: TfpgColor);
-    procedure   SetTextColor(cl: TfpgColor);
-    procedure   SetLineStyle(awidth: integer; astyle: TfpgLineStyle);
-    procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   Clear(col: TfpgColor);
     procedure   GetWinRect(var r: TfpgRect);
-    procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
-    procedure   FillRectangle(r: TfpgRect); overload;
     procedure   XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
     procedure   XORFillRect(col: TfpgColor; r: TfpgRect);
     procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
-    procedure   DrawRectangle(x, y, w, h: TfpgCoord);
-    procedure   DrawRect(r: TfpgRect);
-    procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
-    procedure   SetClipRect(const rect: TfpgRect);
-    function    GetClipRect: TfpgRect;
-    procedure   AddClipRect(const rect: TfpgRect);
-    procedure   ClearClipRect;
-    procedure   DrawImage(x, y: TfpgCoord; img: TfpgImage);
-    procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImage; xi, yi, w, h: integer);
+
     procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord);
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
-    property    Font: TfpgFont read FFont write SetFont;
-    property    Color: TfpgColor read FColor;
-    property    TextColor: TfpgColor read FColorText;
   end;
+
 
   { This is very basic for now, just to remind us of theming support. Later we
     will rework this to use a Style Manager like the previous fpGUI. Styles must
@@ -648,26 +592,6 @@ begin
   inherited;
 end;
 
-function TfpgFont.TextWidth(const txt: string): integer;
-begin
-  Result := FFontRes.GetTextWidth(txt);
-end;
-
-function TfpgFont.Ascent: integer;
-begin
-  Result := FFontRes.GetAscent;
-end;
-
-function TfpgFont.Descent: integer;
-begin
-  Result := FFontRes.GetDescent;
-end;
-
-function TfpgFont.Height: integer;
-begin
-  Result := FFontRes.GetHeight;
-end;
-
 { TfpgFontResource }
 
 constructor TfpgFontResource.Create(const afontdesc: string);
@@ -709,28 +633,6 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgCanvas.BeginDraw;
-begin
-  BeginDraw(FBufferedDraw);
-end;
-
-procedure TfpgCanvas.BeginDraw(abuffered: boolean);
-begin
-  if FBeginDrawCount < 1 then
-  begin
-    DoBeginDraw(FWindow, abuffered);
-
-    SetColor(clText1);
-    SetTextColor(clText1);
-    SetFont(fpgApplication.DefaultFont);
-
-    SetLineStyle(0, lsSolid);
-
-    FBeginDrawCount := 0;
-  end;
-  Inc(FBeginDrawCount);
-end;
-
 procedure TfpgCanvas.EndDraw(x, y, w, h: TfpgCoord);
 begin
   if FBeginDrawCount > 0 then
@@ -757,36 +659,6 @@ begin
   FBeginDrawCount := 0;
 end;
 
-procedure TfpgCanvas.SetFont(fnt: TfpgFont);
-begin
-  FFont := fnt;
-  DoSetFontRes(fnt.FFontRes);
-end;
-
-procedure TfpgCanvas.SetTextColor(cl: TfpgColor);
-begin
-  FTextColor := cl;
-  DoSetTextColor(FTextColor);
-end;
-
-procedure TfpgCanvas.SetColor(cl: TfpgColor);
-begin
-  FColor := cl;
-  DoSetColor(FColor);
-end;
-
-procedure TfpgCanvas.SetLineStyle(awidth: integer; astyle: TfpgLineStyle);
-begin
-  FLineWidth := awidth;
-  FLineStyle := astyle;
-  DoSetLineStyle(FLineWidth, FLineStyle);
-end;
-
-procedure TfpgCanvas.DrawString(x, y: TfpgCoord; const txt: string);
-begin
-  DoDrawString(x, y, txt);
-end;
-
 procedure TfpgCanvas.Clear(col: TfpgColor);
 var
   ACol:     TfpgColor;
@@ -804,11 +676,6 @@ begin
   DoGetWinRect(r);
 end;
 
-procedure TfpgCanvas.FillRectangle(x, y, w, h: TfpgCoord);
-begin
-  DoFillRectangle(x, y, w, h);
-end;
-
 procedure TfpgCanvas.XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
   DoXORFillRectangle(col, x, y, w, h);
@@ -819,61 +686,9 @@ begin
   DoXORFillRectangle(col, r.Left, r.Top, r.Width, r.Height);
 end;
 
-procedure TfpgCanvas.FillRectangle(r: TfpgRect);
-begin
-  DoFillRectangle(r.Left, r.Top, r.Width, r.Height);
-end;
-
 procedure TfpgCanvas.FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 begin
   DoFillTriangle(x1, y1, x2, y2, x3, y3);
-end;
-
-procedure TfpgCanvas.DrawRectangle(x, y, w, h: TfpgCoord);
-begin
-  DoDrawRectangle(x, y, w, h);
-end;
-
-procedure TfpgCanvas.DrawRect(r: TfpgRect);
-begin
-  DoDrawRectangle(r.Left, r.Top, r.Width, r.Height);
-end;
-
-procedure TfpgCanvas.DrawLine(x1, y1, x2, y2: TfpgCoord);
-begin
-  DoDrawLine(x1, y1, x2, y2);
-end;
-
-procedure TfpgCanvas.SetClipRect(const rect: TfpgRect);
-begin
-  DoSetClipRect(rect);
-end;
-
-function TfpgCanvas.GetClipRect: TfpgRect;
-begin
-  Result := DoGetClipRect;
-end;
-
-procedure TfpgCanvas.AddClipRect(const rect: TfpgRect);
-begin
-  DoAddClipRect(rect);
-end;
-
-procedure TfpgCanvas.ClearClipRect;
-begin
-  DoClearClipRect;
-end;
-
-procedure TfpgCanvas.DrawImage(x, y: TfpgCoord; img: TfpgImage);
-begin
-  if img = nil then
-    exit;
-  DrawImagePart(x, y, img, 0, 0, img.Width, img.Height);
-end;
-
-procedure TfpgCanvas.DrawImagePart(x, y: TfpgCoord; img: TfpgImage; xi, yi, w, h: integer);
-begin
-  DoDrawImagePart(x, y, img, xi, yi, w, h);
 end;
 
 procedure TfpgCanvas.DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);

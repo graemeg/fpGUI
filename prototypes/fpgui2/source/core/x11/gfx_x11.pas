@@ -51,10 +51,10 @@ type
     constructor Create(const afontdesc: string);
     destructor  Destroy; override;
     function    HandleIsValid: boolean;
-    function    GetAscent: integer;
-    function    GetDescent: integer;
-    function    GetHeight: integer;
-    function    GetTextWidth(const txt: string): integer;
+    function    GetAscent: integer; override;
+    function    GetDescent: integer; override;
+    function    GetHeight: integer; override;
+    function    GetTextWidth(const txt: string): integer; override;
   end;
 
 
@@ -62,7 +62,6 @@ type
   private
     FXimg: TXImage;
     FXimgmask: TXImage;
-    FMasked: boolean;
     function    XImage: PXImage;
     function    XImageMask: PXImage;
   protected
@@ -81,35 +80,31 @@ type
     FBufferPixmap: TPixmap;
     FDrawHandle: TXID;
     Fgc: TfpgGContext;
-    FColorText: TfpgColor;
-    FColor: TfpgColor;
     FCurFontRes: TfpgFontResourceImpl;
     FClipRect: TfpgRect;
     FClipRectSet: boolean;
-    FLineStyle: integer;
-    FLineWidth: integer;
     FXftDraw: PXftDraw;
     FXftDrawBuffer: PXftDraw;
     FColorTextXft: TXftColor;
     FClipRegion: TRegion;
   protected
-    procedure   DoSetFontRes(fntres: TfpgFontResourceImpl);
-    procedure   DoSetTextColor(cl: TfpgColor);
-    procedure   DoSetColor(cl: TfpgColor);
-    procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
-    procedure   DoDrawString(x, y: TfpgCoord; const txt: string);
+    procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
+    procedure   DoSetTextColor(cl: TfpgColor); override;
+    procedure   DoSetColor(cl: TfpgColor); override;
+    procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
     procedure   DoGetWinRect(var r: TfpgRect);
-    procedure   DoFillRectangle(x, y, w, h: TfpgCoord);
+    procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
-    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord);
-    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord);
-    procedure   DoSetClipRect(const rect: TfpgRect);
-    function    DoGetClipRect: TfpgRect;
-    procedure   DoAddClipRect(const rect: TfpgRect);
-    procedure   DoClearClipRect;
-    procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageImpl; xi, yi, w, h: integer);
-    procedure   DoBeginDraw(awin: TfpgWindowImpl; buffered: boolean);
+    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
+    procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
+    procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
+    procedure   DoSetClipRect(const rect: TfpgRect); override;
+    function    DoGetClipRect: TfpgRect; override;
+    procedure   DoAddClipRect(const rect: TfpgRect); override;
+    procedure   DoClearClipRect; override;
+    procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord);
     procedure   DoEndDraw;
   public
@@ -172,9 +167,7 @@ implementation
 uses
   baseunix,
   fpgfx,
-  gfx_widget,   {$Note This dependency to gfx_widget must be removed.}
-  xatom,
-  gfx_UTF8utils;
+  gfx_widget;  {$Note This dependency to gfx_widget must be removed.}
 
 var
   xapplication: TfpgApplication;
@@ -993,7 +986,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowImpl; buffered: boolean);
+procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
   x: integer;
   y: integer;
@@ -1006,7 +999,7 @@ var
   pmh: longword;
   GcValues: TXGcValues;
 begin
-  XGetGeometry(xapplication.display, awin.FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);
+  XGetGeometry(xapplication.display, TfpgWindowImpl(awin).FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);
 
   if FDrawing and buffered and (FBufferPixmap > 0) then
     if FBufferPixmap > 0 then
@@ -1019,7 +1012,7 @@ begin
 
   if not FDrawing then
   begin
-    FDrawWindow := awin;
+    FDrawWindow := TfpgWindowImpl(awin);
 
     if buffered then
     begin
@@ -1074,11 +1067,11 @@ begin
   end;
 end;
 
-procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceImpl);
+procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   if fntres = nil then
-    Exit;
-  FCurFontRes := fntres;
+    Exit; //==>
+  FCurFontRes := TfpgFontResourceImpl(fntres);
 end;
 
 procedure TfpgCanvasImpl.DoSetTextColor(cl: TfpgColor);
@@ -1247,7 +1240,7 @@ begin
   FClipRectSet := False;
 end;
 
-procedure TfpgCanvasImpl.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageImpl; xi, yi, w, h: integer);
+procedure TfpgCanvasImpl.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
 var
   msk: TPixmap;
   gc2: Tgc;
@@ -1255,9 +1248,9 @@ var
   GcValues: TXGcValues;
 begin
   if img = nil then
-    Exit;
+    Exit; //==>
 
-  if img.FMasked then
+  if img.Masked then
   begin
     // rendering the mask
 
@@ -1271,19 +1264,19 @@ begin
     XFillRectangle(xapplication.display, msk, gc2, 0, 0, w, h);
 
     XSetForeground(xapplication.display, gc2, 1);
-    XPutImage(xapplication.display, msk, gc2, img.XImageMask, xi, yi, 0, 0, w, h);
+    XPutImage(xapplication.display, msk, gc2, TfpgImageImpl(img).XImageMask, xi, yi, 0, 0, w, h);
 
     drawgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
     XSetClipMask(xapplication.display, drawgc, msk);
     XSetClipOrigin(xapplication.display, drawgc, x, y);
 
-    XPutImage(xapplication.display, FDrawHandle, drawgc, img.XImage, xi, yi, x, y, w, h);
+    XPutImage(xapplication.display, FDrawHandle, drawgc, TfpgImage(img).XImage, xi, yi, x, y, w, h);
     XFreePixmap(xapplication.display, msk);
     XFreeGc(xapplication.display, drawgc);
     XFreeGc(xapplication.display, gc2);
   end
   else
-    XPutImage(xapplication.display, FDrawHandle, Fgc, img.XImage, xi, yi, x, y, w, h);
+    XPutImage(xapplication.display, FDrawHandle, Fgc, TfpgImage(img).XImage, xi, yi, x, y, w, h);
 end;
 
 { TfpgImageImpl }
