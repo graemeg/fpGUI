@@ -22,8 +22,6 @@ uses
   Classes
   ,fpGFX
   ,GFXBase
-  ,gfx_widget
-  ,gui_form
   ;
 
 const
@@ -36,24 +34,16 @@ const
   
 type
 
-  { TMainWindow }
-
   TMainWindow = class(TfpgWindow)
   private
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
-  protected
-    procedure   HandlePaint; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Show;
   end;
   
-
-procedure TMainWindow.HandlePaint;
-begin
-end;
 
 constructor TMainWindow.Create(AOwner: TComponent);
 begin
@@ -77,7 +67,7 @@ var
   r: TfpgRect;
   i: Integer;
 begin
-  Canvas.BeginDraw;
+  Canvas.BeginDraw;  // begin double buffering
 
   Color     := 0;
   r.Left    := 0;
@@ -112,7 +102,7 @@ end;
 
 procedure TMainWindow.MsgResize(var msg: TfpgMessageRec);
 begin
-  FWidth := msg.Params.rect.Width;
+  FWidth  := msg.Params.rect.Width;
   FHeight := msg.Params.rect.Height;
 end;
 
