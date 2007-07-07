@@ -14,11 +14,6 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-
-
-//   Graeme:         I'm still busy porting this!!!!!
-
-
 program HelloWorld;
 
 {$mode objfpc}{$H+}
@@ -44,62 +39,37 @@ type
   { TMainWindow }
 
   TMainWindow = class(TfpgWindow)
+  private
+    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
+    procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
+    procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
   protected
     procedure   HandlePaint; virtual;
   public
-    constructor Create(aowner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
     procedure   Show;
-    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
-    procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
   end;
+  
 
 procedure TMainWindow.HandlePaint;
 begin
 end;
 
-constructor TMainWindow.Create(aowner: TComponent);
+constructor TMainWindow.Create(AOwner: TComponent);
 begin
-  inherited Create(aowner);
+  inherited Create(AOwner);
   FWidth    := 350;
   FHeight   := 200;
-  DoSetWindowTitle('fpGFX Hello World');
+  WindowAttributes := [waSizeable, waScreenCenterPos];
 end;
 
 procedure TMainWindow.Show;
 begin
   AllocateWindowHandle;
+  // We can't set a title if we don't have a window handle. So we do that here
+  // and not in the constructor.
+  DoSetWindowTitle('fpGFX Hello World');
 end;
-
-{
-var
-  Color: TGfxColor;
-  r: TRect;
-  i: Integer;
-begin
-  Color.Red := 0;
-  Color.Green := 0;
-  Color.Alpha := 0;
-  r.Left := Rect.Left;
-  r.Right := Rect.Right;
-  for i := Rect.Top to Rect.Bottom - 1 do
-  begin
-    Color.Blue := $ffff - (i * $ffff) div ClientHeight;
-    Canvas.SetColor(Color);
-    r.Top := i;
-    r.Bottom := i + 1;
-    Canvas.FillRect(r);
-  end;
-
-  Canvas.SetColor(colBlack);
-  Canvas.SetFont(Font);
-  Canvas.TextOut(Point((ClientWidth - TextSize.cx) div 2 + 1,
-    (ClientHeight - TextSize.cy) div 2 + 1), HelloWorldString);
-
-  Canvas.SetColor(colWhite);
-  Canvas.TextOut(Point((ClientWidth - TextSize.cx) div 2 - 1,
-    (ClientHeight - TextSize.cy) div 2 - 1), HelloWorldString);
-end;
-}
 
 procedure TMainWindow.MsgPaint(var msg: TfpgMessageRec);
 var
@@ -108,29 +78,29 @@ var
   i: Integer;
 begin
   Canvas.BeginDraw;
-  Canvas.Clear(colWhite);
-  
+
   Color     := 0;
   r.Left    := 0;
   r.Width   := FWidth;
   for i := 0 to FHeight-1 do
   begin
-    Color := $ffff - (i * $ffff) div FHeight;
+    Color := $ff - (i * $ff) div FHeight;
     Canvas.SetColor(Color);
     r.Top := i;
     r.Height := i + 1;
-    Canvas.DrawRect(r);
+    Canvas.DrawRectangle(r);
   end;
-{
-  Canvas.SetColor(colBlack);
-  Canvas.SetFont(Font);
-  Canvas.TextOut(Point((ClientWidth - TextSize.cx) div 2 + 1,
-    (ClientHeight - TextSize.cy) div 2 + 1), HelloWorldString);
 
-  Canvas.SetColor(colWhite);
-  Canvas.TextOut(Point((ClientWidth - TextSize.cx) div 2 - 1,
-    (ClientHeight - TextSize.cy) div 2 - 1), HelloWorldString);
-}
+  Canvas.Font := fpgGetFont('Arial-30');
+
+  Canvas.SetTextColor(colBlack);
+  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 + 1,
+    (Height - Canvas.Font.Height) div 2 + 1, HelloWorldString);
+
+  Canvas.SetTextColor(colWhite);
+  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
+    (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
+
   Canvas.EndDraw(0, 0, FWidth, FHeight);
 end;
 
@@ -140,25 +110,13 @@ begin
   Halt(0);
 end;
 
-(*
-constructor TMainWindow.Create;
+procedure TMainWindow.MsgResize(var msg: TfpgMessageRec);
 begin
-  inherited Create(nil, [woWindow]);
-  { Possible font classes:
-    fcSerif, fcSansSerif, fcTypewriter, fcDingbats }
-  Font := TFFont.Create('-*-'
-      + TFFont.GetDefaultFontName(fcSerif)
-      + '-*-r-*-*-34-*-*-*-*-*-*-*');
-
-  Title := 'fpGFX Hello World example';
-  OnPaint := @Paint;
-  Canvas.SetFont(Font);
-  TextSize.cx := Canvas.TextWidth(HelloWorldString);
-  TextSize.cy := Canvas.FontCellHeight;
-  SetClientSize(Size((TextSize.cx * 3) div 2, TextSize.cy * 2));
-  SetMinMaxClientSize(TextSize, Size(0, 0));
+  FWidth := msg.Params.rect.Width;
+  FHeight := msg.Params.rect.Height;
 end;
-*)
+
+
 
 var
   MainWindow: TMainWindow;

@@ -83,7 +83,7 @@ type
     procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
   public
-    constructor Create(aowner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   UpdateWindowPosition;
     function    Right: TfpgCoord;
