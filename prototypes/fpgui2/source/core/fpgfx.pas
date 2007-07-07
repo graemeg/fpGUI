@@ -78,19 +78,15 @@ type
 
   TfpgWindow = class(TfpgWindowImpl)
   protected
-    FParentWindow: TfpgWindow;
-    FCanvas: TfpgCanvas;
-    procedure   AllocateWindowHandle;
-    procedure   ReleaseWindowHandle;
+    procedure   SetParentWindow(const AValue: TfpgWindow); reintroduce;
+    function    GetParentWindow: TfpgWindow; reintroduce;
+    function    GetCanvas: TfpgCanvas; reintroduce;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   UpdateWindowPosition;
-    function    Right: TfpgCoord;
-    function    Bottom: TfpgCoord;
-    property    ParentWindow: TfpgWindow read FParentWindow write FParentWindow;
-    property    Canvas: TfpgCanvas read FCanvas;
-    property    WinHandle;  // surface this property from TfpgXXXImpl class
+    property    ParentWindow: TfpgWindow read GetParentWindow write SetParentWindow;
+    property    Canvas: TfpgCanvas read GetCanvas;
+    property    WinHandle;  // surface this property from TfpgXXXImpl class in it's native format
   end;
 
 
@@ -674,34 +670,19 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgWindow.AllocateWindowHandle;
+procedure TfpgWindow.SetParentWindow(const AValue: TfpgWindow);
 begin
-  DoAllocateWindowHandle(FParentWindow);
+  inherited SetParentWindow(AValue);
 end;
 
-procedure TfpgWindow.ReleaseWindowHandle;
+function TfpgWindow.GetParentWindow: TfpgWindow;
 begin
-  if HasHandle then
-  begin
-    Canvas.FreeResources;
-    DoReleaseWindowHandle;
-  end;
+  result := TfpgWindow(inherited GetParentWindow);
 end;
 
-function TfpgWindow.Right: TfpgCoord;
+function TfpgWindow.GetCanvas: TfpgCanvas;
 begin
-  Result := FLeft + FWidth - 1;
-end;
-
-function TfpgWindow.Bottom: TfpgCoord;
-begin
-  Result := FTop + FHeight - 1;
-end;
-
-procedure TfpgWindow.UpdateWindowPosition;
-begin
-  if HasHandle then
-    DoUpdateWindowPosition(FLeft, FTop, FWidth, FHeight);
+  Result := TfpgCanvas(inherited GetCanvas);
 end;
 
 { TfpgImage }

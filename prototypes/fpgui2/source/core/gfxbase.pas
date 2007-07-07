@@ -10,7 +10,7 @@ uses
 
 type
   TfpgCoord = integer;     // we might use floating point coordinates in the future...
-  TfpgColor = longword;
+  TfpgColor = longword;    // Always in RRGGBB (Red, Green, Blue) format!!
 
 type
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
@@ -90,6 +90,12 @@ const
   KEYSC_ENTER      = $1C;
   KEYSC_SPACE      = $39;
 
+
+  FPG_DEFAULT_FONT_DESC = 'Arial-10';
+  UserNamedColorStart   = 128;
+
+  {$I predefinedcolors.inc}
+
 type
   TfpgRect = object  // not class for static allocations
     Top: TfpgCoord;
@@ -103,7 +109,7 @@ type
     procedure SetRight(Value: TfpgCoord);
   end;
 
-type
+
   TfpgMsgParmMouse = record
     x: TfpgCoord;
     y: TfpgCoord;
@@ -111,10 +117,12 @@ type
     shiftstate: word;
   end;
 
+
   TfpgMsgParmKeyboard = record
     keycode: word;
     shiftstate: word;
   end;
+  
 
   TfpgMessageParams = record
     case integer of
@@ -122,6 +130,7 @@ type
       1: (keyboard: TfpgMsgParmKeyboard);
       2: (rect: TfpgRect);
   end;
+  
 
   TfpgMessageRec = record
     MsgCode: integer;
@@ -131,42 +140,7 @@ type
   end;
   PfpgMessageRec = ^TfpgMessageRec;
 
-const
-  FPG_DEFAULT_FONT_DESC = 'Arial-10';
 
-const
-  UserNamedColorStart   = 128;
-
-// named color identifiers
-const
-  clWindowBackground = $80000001;
-  clBoxColor        = $80000002;
-  clButtonFace      = $80000003;
-  clShadow1         = $80000004;
-  clShadow2         = $80000005;
-  clHilite1         = $80000006;
-  clHilite2         = $80000007;
-  clText1           = $80000008;
-  clText2           = $80000009;
-  clText3           = $8000000A;
-  clText4           = $8000000B;
-  clSelection       = $8000000C;
-  clSelectionText   = $8000000D;
-  clInactiveSel     = $8000000E;
-  clInactiveSelText = $8000000F;
-  clScrollBar       = $80000010;
-  clListBox         = $80000011;
-  clGridLines       = $80000012;
-  clGridHeader      = $80000013;
-  clWidgetFrame     = $80000014;
-  clInactiveWgFrame = $80000015;
-  clTextCursor      = $80000016;
-  clChoiceListBox   = $80000017;
-  clUnset           = $80000018;
-  clMenuText        = $80000019;
-  clMenuDisabled    = $8000001A;
-
-type
   TfpgLineStyle = (lsSolid, lsDash, lsDot);
 
 
@@ -201,8 +175,6 @@ type
   end;
 
 
-  { TfpgFontBase }
-
   TfpgFontBase = class(TObject)
   protected
     FFontDesc: string;
@@ -221,8 +193,6 @@ type
   // forward declaration
   TfpgWindowBase = class;
 
-
-  { TfpgCanvasBase }
 
   TfpgCanvasBase = class(TObject)
   protected
@@ -297,12 +267,25 @@ type
     FHeight: TfpgCoord;
     FMinWidth: TfpgCoord;
     FMinHeight: TfpgCoord;
+    FCanvas: TfpgCanvasBase;
+    FParentWindow: TfpgWindowBase;
     function    HandleIsValid: boolean; virtual; abstract;
+    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual; abstract;
+    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
+    procedure   DoReleaseWindowHandle; virtual; abstract;
+    procedure   SetParentWindow(const AValue: TfpgWindowBase);
+    function    GetParentWindow: TfpgWindowBase;
+    function    GetCanvas: TfpgCanvasBase; virtual;
+    procedure   AllocateWindowHandle;
+    procedure   ReleaseWindowHandle;
   public
     // make some setup before the window shows
     procedure   AdjustWindowStyle; virtual;    // forms modify the window creation parameters
     procedure   SetWindowParameters; virtual;  // invoked after the window is created
-    // general properties
+    // general properties and functions
+    function    Right: TfpgCoord;
+    function    Bottom: TfpgCoord;
+    procedure   UpdateWindowPosition;
     property    HasHandle: boolean read HandleIsValid;
     property    WindowType: TWindowType read FWindowType write FWindowType;
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
@@ -312,6 +295,8 @@ type
     property    Height: TfpgCoord read FHeight write FHeight;
     property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
     property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
+    property    Canvas: TfpgCanvasBase read GetCanvas;
+    property    ParentWindow: TfpgWindowBase read GetParentWindow write SetParentWindow;
   end;
 
 
@@ -361,6 +346,35 @@ end;
 
 { TfpgWindowBase }
 
+procedure TfpgWindowBase.SetParentWindow(const AValue: TfpgWindowBase);
+begin
+  FParentWindow := AValue;
+end;
+
+function TfpgWindowBase.GetParentWindow: TfpgWindowBase;
+begin
+  result := FParentWindow;
+end;
+
+function TfpgWindowBase.GetCanvas: TfpgCanvasBase;
+begin
+  Result := FCanvas;
+end;
+
+procedure TfpgWindowBase.AllocateWindowHandle;
+begin
+  DoAllocateWindowHandle(FParentWindow);
+end;
+
+procedure TfpgWindowBase.ReleaseWindowHandle;
+begin
+  if HasHandle then
+  begin
+    Canvas.FreeResources;
+    DoReleaseWindowHandle;
+  end;
+end;
+
 procedure TfpgWindowBase.AdjustWindowStyle;
 begin
   // does nothing here
@@ -369,6 +383,22 @@ end;
 procedure TfpgWindowBase.SetWindowParameters;
 begin
   // does nothing
+end;
+
+function TfpgWindowBase.Right: TfpgCoord;
+begin
+  Result := FLeft + FWidth - 1;
+end;
+
+function TfpgWindowBase.Bottom: TfpgCoord;
+begin
+  Result := FTop + FHeight - 1;
+end;
+
+procedure TfpgWindowBase.UpdateWindowPosition;
+begin
+  if HasHandle then
+    DoUpdateWindowPosition(FLeft, FTop, FWidth, FHeight);
 end;
 
 { TfpgCanvasBase }

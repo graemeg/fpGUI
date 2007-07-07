@@ -26,7 +26,7 @@ type
   procedure TMainForm.AfterCreate;
   begin
     SetPosition(100, 100, 256, 256);
-    WindowTitle := 'fpGUI2 Bitmap Test';
+    WindowTitle := 'fpGUI Bitmap Test';
   end;
 
   procedure TMainForm.HandlePaint;

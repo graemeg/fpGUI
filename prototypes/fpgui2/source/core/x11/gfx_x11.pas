@@ -117,12 +117,12 @@ type
   protected
     FWinHandle: TfpgWinHandle;
     FModalForWin: TfpgWindowImpl;
-    procedure   DoAllocateWindowHandle(aparent: TfpgWindowImpl);
-    procedure   DoReleaseWindowHandle;
+    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
+    procedure   DoReleaseWindowHandle; override;
     function    HandleIsValid: boolean; override;
     procedure   DoSetWindowTitle(const atitle: string);
     procedure   DoMoveWindow(x, y: TfpgCoord);
-    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
+    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -267,6 +267,7 @@ end;
 type
   PWindowLookupRec = ^WindowLookupRec;
 
+  // single direction linked list
   WindowLookupRec = record
     w: TfpgWindowImpl;
     Next: PWindowLookupRec;
@@ -750,7 +751,7 @@ end;
 
 { TfpgWindowImpl }
 
-procedure TfpgWindowImpl.DoAllocateWindowHandle(aparent: TfpgWindowImpl);
+procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
   pwh: TfpgWinHandle;
   wh: TfpgWinHandle;
@@ -763,7 +764,7 @@ begin
     Exit;
 
   if aparent <> nil then
-    pwh := aparent.WinHandle
+    pwh := TfpgWindowImpl(AParent).WinHandle
   else
     pwh := xapplication.RootWindow;
 
@@ -821,8 +822,8 @@ begin
       1);// send close event instead of quitting the whole application...
 
   // for modal windows, this is necessary
-  if (FWindowType = wtModalForm) and (aparent <> nil) then
-    XSetTransientForHint(xapplication.display, self.FWinHandle, aparent.WinHandle);
+  if (FWindowType = wtModalForm) and (AParent <> nil) then
+    XSetTransientForHint(xapplication.display, self.FWinHandle, TfpgWindowImpl(AParent).WinHandle);
 
   XSelectInput(xapplication.Display, wh, KeyPressMask or KeyReleaseMask or
       ButtonPressMask or ButtonReleaseMask or

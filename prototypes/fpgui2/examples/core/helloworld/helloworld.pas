@@ -27,11 +27,7 @@ uses
 const
   HelloWorldString: String = 'Hello, world!';
 
-const
-  // predefined colors RRGGBB format
-  colWhite = $FFFFFF;
-  colBlack = $000000;
-  
+
 type
 
   TMainWindow = class(TfpgWindow)
@@ -74,7 +70,7 @@ begin
   r.Width   := FWidth;
   for i := 0 to FHeight-1 do
   begin
-    Color := $ff - (i * $ff) div FHeight;
+    Color := $ff - (i * $ff) div FHeight;    // shades of Blue
     Canvas.SetColor(Color);
     r.Top := i;
     r.Height := i + 1;
@@ -83,11 +79,11 @@ begin
 
   Canvas.Font := fpgGetFont('Arial-30');
 
-  Canvas.SetTextColor(colBlack);
+  Canvas.SetTextColor(clBlack);
   Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 + 1,
     (Height - Canvas.Font.Height) div 2 + 1, HelloWorldString);
 
-  Canvas.SetTextColor(colWhite);
+  Canvas.SetTextColor(clWhite);
   Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
     (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
 

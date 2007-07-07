@@ -32,17 +32,12 @@
         <PackageName Value="fpGFX2"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="1">
       <Unit0>
         <Filename Value="bitmaptest.dpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="bitmaptest"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="uhelpers.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="uhelpers"/>
-      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

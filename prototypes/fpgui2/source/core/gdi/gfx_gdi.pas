@@ -116,10 +116,10 @@ type
     FWinStyle: longword;
     FWinStyleEx: longword;
     FParentWinHandle: TfpgWinHandle;
-    procedure   DoAllocateWindowHandle(aparent: TfpgWindowImpl);
-    procedure   DoReleaseWindowHandle;
+    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
+    procedure   DoReleaseWindowHandle; override;
     function    HandleIsValid: boolean; override;
-    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
+    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     procedure   DoMoveWindow(x, y: TfpgCoord);
     //procedure MoveToScreenCenter; override;
     procedure   DoSetWindowTitle(const atitle: string);
@@ -678,7 +678,7 @@ end;
 
 { TfpgWindowImpl }
 
-procedure TfpgWindowImpl.DoAllocateWindowHandle(aparent: TfpgWindowImpl);
+procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
   wcname: string;
   wname: string;
@@ -696,7 +696,7 @@ begin
   wcname      := 'FPGWIN';
 
   if aparent <> nil then
-    FParentWinHandle := aparent.WinHandle
+    FParentWinHandle := TfpgWindowImpl(AParent).WinHandle
   else
     FParentWinHandle := 0;
 

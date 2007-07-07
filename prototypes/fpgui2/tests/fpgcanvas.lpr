@@ -12,13 +12,6 @@ uses
   gui_form,
   gfx_imgfmt_bmp;
 
-const
-  // We need to define more such constants in fpGFX as standard
-             //  RRGGBB
-  clRed       = $FF0000;
-  clGreen     = $00FF00;
-  clBlue      = $0000FF;
-  clBlack     = $000000;
 
 type
 
