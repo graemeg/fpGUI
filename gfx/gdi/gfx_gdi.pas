@@ -141,7 +141,7 @@ type
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); override;
     destructor Destroy; override;
-    procedure Lock(var AData: Pointer; var AStride: LongWord); override;
+    procedure Lock(out AData: Pointer; out AStride: LongWord); override;
     procedure Unlock; override;
   end;
 
