@@ -1663,11 +1663,15 @@ begin
      end;
    etMouseWheel:
      begin
-
+       // it's handled in etMousePressed
      end;
    etPaint:
      begin
-       if Assigned(OnPaint) then OnPaint(Self, Rect(AEvent.X, AEvent.Y, AEvent.Width, AEvent.Height));
+//       if Assigned(OnPaint) then OnPaint(Self, Rect(AEvent.X, AEvent.Y, AEvent.Width, AEvent.Height));
+        // We are ignoring the rectangle from the XEvent and rather use the
+        // full window rectangle.
+        if Assigned(OnPaint) then
+          OnPaint(Self, Rect(0, 0, Width, Height));
      end;
    etMove:
      begin

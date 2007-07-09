@@ -1654,11 +1654,12 @@ begin
          r.Right   := PaintStruct.rcPaint.Right;
          r.Bottom  := PaintStruct.rcPaint.Bottom;
 
-         OldCanvas := Canvas;
-         FCanvas := TGDICanvas.Create(PaintStruct.hdc);
+         // graemeg: What is this extra canvas used for????
+//         OldCanvas := Canvas;
+//         FCanvas := TGDICanvas.Create(PaintStruct.hdc);
          OnPaint(Self, r);
-         Canvas.Free;
-         FCanvas := OldCanvas;
+//         Canvas.Free;
+//         FCanvas := OldCanvas;
        end;
        Windows.EndPaint(Handle, @PaintStruct);
      end;
