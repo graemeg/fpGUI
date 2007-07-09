@@ -109,7 +109,12 @@ type
   end;
 
 
+  { TfpgWindowImpl }
+
   TfpgWindowImpl = class(TfpgWindowBase)
+  private
+    FMouseInWindow: boolean;
+    function    DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wParam, lParam: Cardinal): Boolean;
   protected
     FWinHandle: TfpgWinHandle;
     FModalForWin: TfpgWindowImpl;
@@ -435,8 +440,15 @@ begin
         sstate := sstate or ss_shift;
       msgp.mouse.shiftstate := sstate;
 
-      if mcode <> 0 then
-        fpgSendMessage(nil, w, mcode, msgp);
+
+      if uMsg = WM_MouseMove then
+      begin
+        if w.DoMouseEnterLeaveCheck(w, uMsg, wParam, lParam) then
+        begin
+          if mcode <> 0 then
+            fpgSendMessage(nil, w, mcode, msgp);
+        end;
+      end;
       {
       if uMsg = WM_MOUSEMOVE then
       begin
@@ -677,6 +689,72 @@ begin
 end;
 
 { TfpgWindowImpl }
+
+function TfpgWindowImpl.DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wParam, lParam: Cardinal): Boolean;
+
+  //----------------------
+  function CursorInDifferentWindow: Boolean;
+  var
+    pt: Windows.POINT;
+  begin
+    pt.x := LoWord(lParam);
+    pt.y := HiWord(lParam);
+
+    // only WM_MOUSEWHEEL uses screen coordinates!!!
+    if uMsg <> WM_MOUSEWHEEL then
+      Windows.ClientToScreen(FWinHandle, @pt);
+
+    Result := WindowFromPoint(pt) <> FWinHandle;
+  end;
+
+var
+  pt: Windows.POINT;
+//  Event: TFEvent;
+  msgp: TfpgMessageParams;
+begin
+  FillChar(msgp, sizeof(msgp), 0);
+  if not FMouseInWindow then
+  begin
+    FMouseInWindow := True;
+//    DoSetCursor;
+    Windows.SetCapture(FWinHandle);
+    //Event := TFEvent.Create;
+    //try
+      //Event.lParam := lParam;
+      //Event.EventType := etMouseEnter;
+      //ProcessEvent(Event);
+    //finally
+      //Event.Free;
+    //end;
+    msgp.
+    fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
+    Result := uMsg <> WM_MOUSEMOVE;
+  end else
+  begin
+    pt.x := LoWord(lParam);
+    pt.y := HiWord(lParam);
+    if uMsg = WM_MOUSEWHEEL then
+      Windows.ScreenToClient(Handle, @pt);
+    if (pt.x < 0) or (pt.y < 0) or (pt.x >= ClientWidth) or
+      (pt.y >= ClientHeight) or CursorInDifferentWindow then
+      FMouseInWindow := False;
+
+    if (not FHasMouseCapture) and (not FMouseInWindow) then
+    begin
+      Windows.ReleaseCapture;
+      //Event := TFEvent.Create;
+      //try
+        //Event.EventType := etMouseLeave;
+        //ProcessEvent(Event);
+      //finally
+        //Event.Free;
+      //end;
+      fpgSendMessage(nil, AWindow, FPGM_MOUSELEAVE, msgp);
+      Result := False;
+    end else
+      Result := True;
+  end;
+end;
 
 procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var

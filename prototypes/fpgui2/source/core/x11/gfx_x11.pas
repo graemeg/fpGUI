@@ -478,6 +478,7 @@ end;
 procedure TfpgApplicationImpl.DoWaitWindowMessage(atimeoutms: integer);
 var
   ev: TXEvent;
+  NewEvent: TXevent;
   n: integer;
   i: integer;
   r: integer;
@@ -529,11 +530,12 @@ begin
   blockmsg := False;
   fillchar(msgp, sizeof(msgp), 0);
 
-  //  WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
-  
+
   // According to a comment in X.h, the valid event types start with 2!
   if ev._type < 2 then
     exit;
+
+// WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
 
 
   case ev._type of
@@ -616,10 +618,32 @@ begin
           // generate scroll events:
           if ev._type = MSG_MOUSEDOWN then
           begin
-            if ev.xbutton.button > 5 then
-              i := 1
+            if ev.xbutton.button = Button4 then
+              i := -1
             else
-              i := 3; // amount
+              i := 1;
+              
+    	      // Check for other mouse wheel messages in the queue
+            while XCheckTypedWindowEvent(display, ev.xany.window, X.ButtonPress, @NewEvent) do
+            begin
+  	          if NewEvent.xbutton.Button = 4 then
+  	            Dec(i)
+              else if NewEvent.xbutton.Button = 5 then
+  	            Inc(i)
+              else
+        	    begin
+        	      XPutBackEvent(display, @NewEvent);
+                break;
+        	    end;
+            end;
+
+//            if ev.xbutton.button > 5 then
+//              i := 1
+//            else
+//              i := 3; // amount
+
+            msgp.mouse.x := i;
+            fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
 //            fpgPostMessage(nil, ewg, MSG_SCROLL, ev.xbutton.button mod 4, i, ev.xbutton.state );
           end;
         end
@@ -639,8 +663,10 @@ begin
           repeat
             //
           until not XCheckTypedWindowEvent(display, ev.xany.window, MSG_PAINT, @ev);
-
-          fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_PAINT);
+          if ev.xexpose.count = 0 then
+          begin
+            fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_PAINT);
+          end;
         end;
 
     MSG_MOUSEMOVE:
@@ -722,6 +748,14 @@ begin
     MSG_MOUSEEXIT:
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEEXIT);
 
+    GraphicsExpose,
+    NoExpose:
+      // Do Nothing
+      // writeln('got a GraphicsExpose or NoExpose event');
+      { If this application calls XCopyArea or XCopyPlane
+        and the graphics_exposures member of the GC is
+        True and the source is a window, these events may
+        be generated; handle GraphicsExpose like Expose }
     else
       {$Note This needs attention}
       WriteLn('fpGFX/X11: Unhandled X11 event received: ', GetXEventName(ev._type));

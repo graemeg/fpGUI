@@ -6,27 +6,37 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, GFXBase, fpGFX, gui_form, gfx_widget;
+  Classes, SysUtils, GFXBase, fpGFX, gfx_widget;
   
 type
-  TMainForm = class(TfpgForm)
+
+  { TMainForm }
+
+  TMainForm = class(TfpgWindow)
   private
+    FMoveEventCount: integer;
     function    ShiftStateToStr(AShift: word): string;
     function    MouseState(AShift: word; const AMousePos: TPoint): string;
+    procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
+    procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
+    procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
+    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
+    procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
+    procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
+    procedure   MsgKeyChar(var msg: TfpgMessageRec); message FPGM_KEYCHAR;
+    procedure   MsgKeyPress(var msg: TfpgMessageRec); message FPGM_KEYPRESS;
+    procedure   MsgKeyRelease(var msg: TfpgMessageRec); message FPGM_KEYRELEASE;
+    procedure   MsgMouseDown(var msg: TfpgMessageRec); message FPGM_MOUSEDOWN;
+    procedure   MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
+    procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
+    procedure   MsgDoubleClick(var msg: TfpgMessageRec); message FPGM_DOUBLECLICK;
+    procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
+    procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
+    procedure   MsgScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
   protected
-    procedure   HandleClose; override;
-    procedure   HandlePaint; override;
-    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: word); override;
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean); override;
-    procedure   HandleMouseEnter; override;
-    procedure   HandleMouseExit; override;
-    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word); override;
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
-    procedure   HandleLMouseUp(x, y: integer; shiftstate: word); override;
-    procedure   HandleRMouseDown(x, y: integer; shiftstate: word); override;
-    procedure   HandleRMouseUp(x, y: integer; shiftstate: word); override;
   public
     constructor Create(aowner: TComponent); override;
+    procedure   Show;
   end;
 
 { TMainForm }
@@ -54,85 +64,128 @@ begin
   Result := Result + '] ';
 end;
 
-procedure TMainForm.HandleClose;
+procedure TMainForm.MsgActivate(var msg: TfpgMessageRec);
 begin
-  WriteLn('HandleClose');
-  inherited HandleClose;
+  Writeln('Window Activate message');
 end;
 
-procedure TMainForm.HandlePaint;
+procedure TMainForm.MsgDeActivate(var msg: TfpgMessageRec);
 begin
-  WriteLn('HandlePaint');
-  inherited HandlePaint;
+  Writeln('Window is Deactivate message');
 end;
 
-procedure TMainForm.HandleDoubleClick(x, y: integer; button: word;
-  shiftstate: word);
+procedure TMainForm.MsgClose(var msg: TfpgMessageRec);
 begin
-  WriteLn('HandleDoubleClick');
-  inherited HandleDoubleClick(x, y, button, shiftstate);
+  Writeln('Window Close message');
+  Halt(0);
 end;
 
-procedure TMainForm.HandleKeyChar(var keycode: word; var shiftstate: word;
-  var consumed: boolean);
+procedure TMainForm.MsgPaint(var msg: TfpgMessageRec);
+var
+  h: integer;
 begin
-  Write('Character generated: ');
-  if Char(keycode) >= ' ' then
-    WriteLn('''', Char(keycode), '''')
-  else
-    WriteLn('#', Ord(keycode));
-
-  inherited HandleKeyChar(keycode, shiftstate, consumed);
+  Writeln('Paint message');
+  Canvas.BeginDraw;
+  h := Canvas.Font.Height;
+  Canvas.SetColor(clWhite);
+  Canvas.FillRectangle(0, 0, Width, Height);
+  Canvas.SetTextColor(clBlack);
+  Canvas.DrawString(0, 0, 'Event test');
+  Canvas.DrawString(0, h, 'Do something interactive (move mouse, press keys...)');
+  Canvas.DrawString(0, h*2, 'and watch the output on the console.');
+  Canvas.EndDraw;
 end;
 
-procedure TMainForm.HandleMouseEnter;
+procedure TMainForm.MsgResize(var msg: TfpgMessageRec);
 begin
-  WriteLn('Mouse entered window');
-  inherited HandleMouseEnter;
+  Writeln('Resize');
+  FWidth  := msg.Params.rect.Width;
+  FHeight := msg.Params.rect.Height;
 end;
 
-procedure TMainForm.HandleMouseExit;
+procedure TMainForm.MsgMove(var msg: TfpgMessageRec);
 begin
-  WriteLn('Mouse left window');
-  inherited HandleMouseExit;
+  Writeln('Window Move');
 end;
 
-procedure TMainForm.HandleMouseMove(x, y: integer; btnstate: word;
-  shiftstate: word);
+procedure TMainForm.MsgKeyChar(var msg: TfpgMessageRec);
 begin
-  WriteLn(MouseState(shiftstate, Point(x, y)), 'Mouse moved');
-  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+  Write('Keychar - Character generated: ');
+//  if Char(keycode) >= ' ' then
+//    WriteLn('''', Char(keycode), '''')
+//  else
+//    WriteLn('#', Ord(keycode));
 end;
 
-procedure TMainForm.HandleLMouseDown(x, y: integer; shiftstate: word);
+procedure TMainForm.MsgKeyPress(var msg: TfpgMessageRec);
 begin
-  WriteLn('Left mouse button down');
-  inherited HandleLMouseDown(x, y, shiftstate);
+  Writeln('KeyPress');
 end;
 
-procedure TMainForm.HandleLMouseUp(x, y: integer; shiftstate: word);
+procedure TMainForm.MsgKeyRelease(var msg: TfpgMessageRec);
 begin
-  Writeln('Left mouse button up');
-  inherited HandleLMouseUp(x, y, shiftstate);
+  Writeln('KeyRelease');
 end;
 
-procedure TMainForm.HandleRMouseDown(x, y: integer; shiftstate: word);
+procedure TMainForm.MsgMouseDown(var msg: TfpgMessageRec);
 begin
-  Writeln('Right mouse button down');
-  inherited HandleRMouseDown(x, y, shiftstate);
+  Writeln('Mouse button down.' + ' button=' + IntToStr(msg.Params.mouse.Buttons));
 end;
 
-procedure TMainForm.HandleRMouseUp(x, y: integer; shiftstate: word);
+procedure TMainForm.MsgMouseUp(var msg: TfpgMessageRec);
 begin
-  WriteLn('Right mouse button up');
-  inherited HandleRMouseUp(x, y, shiftstate);
+  Writeln('Mouse button up.' + ' button=' + IntToStr(msg.Params.mouse.Buttons));
+end;
+
+procedure TMainForm.MsgMouseMove(var msg: TfpgMessageRec);
+var
+  s: string;
+begin
+  inc(FMoveEventCount);
+  // only report mouse moves every 10 messages - just to limit the output a bit
+  if (FMoveEventCount mod 10) = 0 then
+  begin
+    s := Format('[%d,%d] ', [msg.Params.mouse.x, msg.Params.mouse.y]);
+    WriteLn(s + 'Mouse move message');
+//    WriteLn(MouseState(shiftstate, Point(x, y)), 'Mouse moved');
+  end;
+end;
+
+procedure TMainForm.MsgDoubleClick(var msg: TfpgMessageRec);
+begin
+  Writeln('Mouse doubleclick');
+end;
+
+procedure TMainForm.MsgMouseEnter(var msg: TfpgMessageRec);
+begin
+  Writeln('Mouse enter');
+end;
+
+procedure TMainForm.MsgMouseExit(var msg: TfpgMessageRec);
+begin
+  Writeln('Mouse exit');
+end;
+
+procedure TMainForm.MsgScroll(var msg: TfpgMessageRec);
+begin
+  Writeln('Mouse scroll delta=' + IntToStr(msg.Params.mouse.x) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
 end;
 
 constructor TMainForm.Create(aowner: TComponent);
 begin
   inherited Create(aowner);
-  SetPosition(100, 100, 500, 100);
-  WindowTitle := 'fpGFX event test';
+  FMoveEventCount := 0;
+  FWidth    := 400;
+  FHeight   := 100;
+  WindowAttributes := [waSizeable, waScreenCenterPos];
+end;
+
+procedure TMainForm.Show;
+begin
+  AllocateWindowHandle;
+  // We can't set a title if we don't have a window handle. So we do that here
+  // and not in the constructor.
+  DoSetWindowTitle('fpGFX event test');
 end;
   
   
