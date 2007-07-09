@@ -3,7 +3,7 @@
 
     GFXBase  -  Abstract declarations to be implemented on each platform
 
-    Copyright (C) 2000 - 2006 See the file AUTHORS.txt, included in this
+    Copyright (C) 2000 - 2007 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -464,7 +464,7 @@ type
   TGfxPaintEvent = procedure(Sender: TObject; const ARect: TRect) of object;
 
 
-  TFCustomWindow = class
+  TFCustomWindow = class(TComponent)
   private
     FCursor: TFCursor;
     FOnCreate: TNotifyEvent;
@@ -511,6 +511,7 @@ type
     procedure DoSetCursor; virtual; abstract;
     function  GetHandle: PtrUInt; virtual; abstract;
   public
+    constructor Create(AOwner: TComponent); override;
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); virtual;
     destructor  Destroy; override;
     function  CanClose: Boolean; virtual;
@@ -1015,10 +1016,15 @@ begin
   // Empty
 end;
 
+constructor TFCustomWindow.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
 constructor TFCustomWindow.Create(AParent: TFCustomWindow;
         AWindowOptions: TFWindowOptions);
 begin
-  inherited Create;
+  Create(nil);
 
   FWindowOptions := AWindowOptions;
   FParent := AParent;

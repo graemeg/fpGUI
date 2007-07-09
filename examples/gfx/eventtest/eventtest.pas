@@ -43,6 +43,7 @@ type
     procedure Move(Sender: TObject);
     procedure Resize(Sender: TObject);
   private
+    FMoveEventCount: integer;
     function ShiftStateToStr(Shift: TShiftState): String;
     function MouseState(AShift: TShiftState; const AMousePos: TPoint): String;
   public
@@ -56,6 +57,7 @@ begin
 
   Title := 'fpGFX Event Test example';
   SetClientSize(Size(500, 100));
+  FMoveEventCount := 0;
   
   OnFocusIn       := @FocusIn;
   OnFocusOut      := @FocusOut;
@@ -119,7 +121,7 @@ begin
   Result := '[X=' + IntToStr(AMousePos.x) + ' Y=' + IntToStr(AMousePos.y);
   if Length(ShiftStateStr) > 0 then
     Result := Result + ' ' + ShiftStateStr;
-  Result := Result + ']';
+  Result := Result + '] ';
 end;
 
 
@@ -193,7 +195,9 @@ end;
 procedure TMainWindow.MouseMove(Sender: TObject; AShift: TShiftState;
   const AMousePos: TPoint);
 begin
-  WriteLn(MouseState(AShift, AMousePos), 'Mouse moved');
+  Inc(FMoveEventCount);
+  if (FMoveEventCount mod 10) = 0 then
+    WriteLn(MouseState(AShift, AMousePos), 'Mouse moved (every 10th event printed)');
 end;
 
 
@@ -207,10 +211,12 @@ end;
 
 procedure TMainWindow.Paint(Sender: TObject; const ARect: TRect);
 begin
+  writeln('Paint event');
   with Canvas do
   begin
     SetColor(colWhite);
-    FillRect(ARect);
+    FillRect(Rect(0, 0, Width, Height));
+
     SetColor(colBlack);
     TextOut(Point(0, 0), 'Event test');
     TextOut(Point(0, FontCellHeight),
