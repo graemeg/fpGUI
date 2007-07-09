@@ -211,11 +211,12 @@ end;
 
 procedure TMainWindow.Paint(Sender: TObject; const ARect: TRect);
 begin
-  writeln('Paint event');
+  writeln(Format('Paint event rect(%d, %d, %d, %d)', [ARect.Left, ARect.Top,
+      ARect.Right, ARect.Bottom]));
   with Canvas do
   begin
     SetColor(colWhite);
-    FillRect(Rect(0, 0, Width, Height));
+    FillRect(ARect);
 
     SetColor(colBlack);
     TextOut(Point(0, 0), 'Event test');
