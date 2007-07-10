@@ -442,42 +442,10 @@ begin
 
 
       if uMsg = WM_MouseMove then
-      begin
-        if w.DoMouseEnterLeaveCheck(w, uMsg, wParam, lParam) then
-        begin
-          if mcode <> 0 then
-            fpgSendMessage(nil, w, mcode, msgp);
-        end;
-      end;
-      {
-      if uMsg = WM_MOUSEMOVE then
-      begin
-        // OK! Windoze doesn't provide MOUSEENTER and MOUSEEXIT messages, so we
-        // have to generate implicitly 'couse we need it for buttons
+        w.DoMouseEnterLeaveCheck(w, uMsg, wParam, lParam);
 
-        GetCursorPos(PT);
-        h := WindowFromPoint(PT);
-        if h <> MouseFocusedWH then
-        begin
-          if MouseFocusedWH > 0 then
-          begin
-             mwg := GetMyWidgetFromHandle(MouseFocusedWH);
-             if mwg <> nil then fpgSendMessage(nil, mwg, FPGM_MOUSEEXIT);
-          end;
-
-          mwg := GetMyWidgetFromHandle(h);
-          if mwg <> nil then
-          begin
-            MouseFocusedWH := h;
-            fpgSendMessage(nil, mwg, FPGM_MOUSEENTER);
-          end
-          else
-          begin
-            MouseFocusedWH := 0;
-          end;
-        end;
-      end;
-}
+      if mcode <> 0 then
+        fpgSendMessage(nil, w, mcode, msgp);
     end;
 
     WM_SIZE:
