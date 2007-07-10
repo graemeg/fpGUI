@@ -115,6 +115,7 @@ type
     y: TfpgCoord;
     Buttons: word;
     shiftstate: word;
+    delta: word;
   end;
 
 

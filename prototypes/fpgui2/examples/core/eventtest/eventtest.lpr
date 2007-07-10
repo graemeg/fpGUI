@@ -167,8 +167,11 @@ begin
 end;
 
 procedure TMainForm.MsgScroll(var msg: TfpgMessageRec);
+var
+  delta: smallint;
 begin
-  Writeln('Mouse scroll delta=' + IntToStr(msg.Params.mouse.x) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
+  delta := msg.Params.mouse.delta;
+  Writeln('Mouse scroll delta=' + IntToStr(delta) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
 end;
 
 constructor TMainForm.Create(aowner: TComponent);

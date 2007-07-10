@@ -278,8 +278,10 @@ end;
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 var
   w: TfpgWindowImpl;
-  kwg, mwg: TfpgWidget;
-  kcode, i: integer;
+  kwg: TfpgWidget;
+  mw: TfpgWindowImpl;
+  kcode: integer;
+  i: integer;
   sstate: integer;
   h: THANDLE;
   p: PChar;
@@ -483,27 +485,42 @@ begin
       fpgSendMessage(nil, w, FPGM_MOVE, msgp);
     end;
 
-    (*
     WM_MOUSEWHEEL:
     begin
       //writeln('MWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8)); // and $FF00) shr 8);
+      pt.x := LoWord(lparam);
+      pt.y := HiWord(lparam);
+      mw   := nil;
+      h    := WindowFromPoint(pt);
+      if h > 0 then  // get window mouse is hovering over
+        mw := TfpgWindowImpl(Windows.GetWindowLong(h, GWL_USERDATA));
 
-      pt.x := (lParam and $FFFF);
-      pt.y := ((lParam and $FFFF0000) shr 16);
-
-      h := WindowFromPoint(pt); //, CWP_SKIPINVISIBLE or CWP_SKIPDISABLED);
-      if h > 0 then
+      if mw <> nil then
       begin
-        wg := TWidget(Windows.GetWindowLong(h, GWL_USERDATA));
-      end;
+        msgp.mouse.x := pt.x;
+        msgp.mouse.y := pt.y;
+        msgp.mouse.delta := SmallInt(HiWord(wParam)) div -120;
+        
+        i := 0;
+        if (wParam and MK_LBUTTON) <> 0 then
+          i := i or MOUSE_LEFT;
+        if (wParam and MK_RBUTTON) <> 0 then
+          i := i or MOUSE_RIGHT;
+        if (wParam and MK_MBUTTON) <> 0 then
+          i := i or MOUSE_MIDDLE;
+        msgp.mouse.Buttons := i;
 
-      if wg <> nil then
-      begin
-        if int(wParam) < 0 then SendMessage(nil, wg, MSG_SCROLL, 1, 3, 0)
-                           else SendMessage(nil, wg, MSG_SCROLL, 0, 3, 0);
+        sstate := 0;
+        if (wParam and MK_CONTROL) <> 0 then
+          sstate := sstate or ss_control;
+        if (wParam and MK_SHIFT) <> 0 then
+          sstate := sstate or ss_shift;
+        msgp.mouse.shiftstate := sstate;
+
+        fpgSendMessage(nil, mw, FPGM_SCROLL, msgp)
       end;
     end;
-*)
+
     WM_ACTIVATE:
       if ((wParam and $FFFF) = WA_INACTIVE) then
         fpgSendMessage(nil, w, FPGM_DEACTIVATE)
@@ -694,11 +711,10 @@ begin
     //finally
       //Event.Free;
     //end;
-//    msgp.mouse.x := LoWord(lParam);
-//    msgp.mouse.y := HiWord(lParam);
     fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
     Result := uMsg <> WM_MOUSEMOVE;
-  end else
+  end
+  else
   begin
     pt.x := LoWord(lParam);
     pt.y := HiWord(lParam);
