@@ -15,8 +15,8 @@ uses
   gfxbase;
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
-function LoadImage_BMP(const AFileName: string): TfpgImage;
-function CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
+function  LoadImage_BMP(const AFileName: string): TfpgImage;
+function  CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
 
 implementation
 
@@ -53,6 +53,7 @@ end;
 
 type
   // Windows BMP format description:
+  // Below is the exact order how how information is stored in a BMP file.
 
   TBMPHeaderRec = packed record
     signature: word;
@@ -123,7 +124,7 @@ var
 
 begin
   if img = nil then
-    Exit;
+    Exit; //==>
 
   img.FreeImage;
 
@@ -131,33 +132,21 @@ begin
   PByte(bh) := p;
   ppal      := nil;
   if bh^.filesize <> bmpsize then
-    Exit;
+    Exit; //==>
 
   pdata := bmp;
   Inc(pdata, bh^.dataoffset);
-
   Inc(p, SizeOf(TBMPHeaderRec));
-
   PByte(ih) := p;
-
   depth := ih^.bitcount;
 
   if depth > 1 then
     img.AllocateImage(32, ih^.Width, ih^.Height)// color image
-
   else
   begin
     img.AllocateImage(1, ih^.Width, ih^.Height);
     img.AllocateMask;
   end;
-
-{$ifdef Win32}
-  // its the Windows native format
-  //  img.SetWindowsBitmap(pdata, ih, 0, ih^.height);
-  //  Exit;
-{$else}
-
-{$endif}
 
   //Writeln('width: ',img.width,' height: ',img.height,' depth: ',depth);
   //Writeln('compression: ',ih^.compression);
@@ -171,7 +160,6 @@ begin
       1: palsize := 2;
       4: palsize := 16;
       else
-        // 256
         palsize  := 256;
     end;
 
@@ -187,9 +175,7 @@ begin
       Inc(Plongword(p));
       Inc(pixelcnt);
     end;
-
     //writeln(pixelcnt,' colors loaded.');
-
   end;
 
   pdest := img.ImageData;

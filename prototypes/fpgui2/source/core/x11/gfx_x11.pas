@@ -65,9 +65,9 @@ type
     function    XImage: PXImage;
     function    XImageMask: PXImage;
   protected
-    procedure   DoFreeImage;
-    procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
-    procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
+    procedure   DoFreeImage; override;
+    procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); override;
+    procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); override;
   public
     constructor Create;
   end;
@@ -107,6 +107,8 @@ type
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure   DoEndDraw; override;
+    function    GetPixel(X, Y: integer): TfpgColor; override;
+    procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -259,7 +261,7 @@ begin
   colxft.color.red   := (c and $00FF0000) shr 8;
 
   colxft.color.alpha := (c and $7F000000) shr 15;
-  colxft.color.alpha := colxft.color.alpha xor $FFFF;  // invert: 0 in ptkColor means not translucent
+  colxft.color.alpha := colxft.color.alpha xor $FFFF;  // invert: 0 means not translucent
 
   colxft.pixel := 0;
 end;
@@ -1096,6 +1098,42 @@ begin
   end;
 end;
 
+function TfpgCanvasImpl.GetPixel(X, Y: integer): TfpgColor;
+var
+  Image: PXImage;
+  Pixel: Cardinal;
+  x_Color: TXColor;
+begin
+  Result := 0;
+
+  Image := XGetImage(xapplication.display, FDrawHandle, X, Y, 1, 1, $FFFFFFFF, ZPixmap);
+  if Image = nil then
+    raise Exception.Create('fpGFX/X11: Invalid XImage');
+
+  try
+    Pixel := XGetPixel(Image, 0, 0);
+    x_Color.pixel := Pixel;
+
+    XQueryColor(xapplication.display, xapplication.DefaultColorMap, @x_Color);
+    Result := TfpgColor(((x_Color.red and $00FF) shl 16) or
+                       ((x_Color.green and $00FF) shl 8) or
+                        (x_Color.blue and $00FF));
+  finally
+    XDestroyImage(Image);
+  end;
+end;
+
+procedure TfpgCanvasImpl.SetPixel(X, Y: integer; const AValue: TfpgColor);
+var
+  oldColor: TfpgColor;
+begin
+  oldColor := Color;
+  SetColor(AValue);
+  DrawLine(X, Y, X+1, Y+1);
+  SetColor(oldColor);
+  {$Note We must implement DrawPoint}
+end;
+
 procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   if fntres = nil then
@@ -1355,6 +1393,7 @@ begin
       depth          := xapplication.DisplayDepth; //  acolordepth;
       bits_per_pixel := 32;
 
+      // Shouldn't we rather get this from XDefaultVisualOfScreen(). PVisual?
       red_mask   := $000000FF;
       green_mask := $0000FF00;
       blue_mask  := $00FF0000;

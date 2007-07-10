@@ -155,6 +155,9 @@ type
     FImageDataSize: integer;
     FMaskData: pointer;
     FMaskDataSize: integer;
+    procedure   DoFreeImage; virtual; abstract;
+    procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
+    procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
   public
     property    ImageData: pointer read FImageData;
     property    ImageDataSize: integer read FImageDataSize;
@@ -225,6 +228,8 @@ type
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); virtual; abstract;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoEndDraw; virtual; abstract;
+    function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
+    procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
   public
     procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   DrawRectangle(r: TfpgRect); overload;
@@ -255,6 +260,7 @@ type
     property    Color: TfpgColor read FColor;
     property    TextColor: TfpgColor read FTextColor;
     property    Font: TfpgFontBase read FFont write SetFont;
+    property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
   end;
 
 

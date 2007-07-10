@@ -34,6 +34,7 @@ var
   r: TfpgRect;
   fnt: TfpgFont;
   y: integer;
+  c: TfpgColor;
 begin
   // Enable double buffering. Must be before 'inherited' to prevent form
   // clearing itself.
@@ -112,7 +113,13 @@ begin
   Canvas.DrawImagePart(150, 210, bmp, 0, 0, 32, 21);
   Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
   Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
-
+  
+  
+  // Testing Canvas.Pixels[]
+  // two pixels should have changed color in the top left of the form
+  c := Canvas.Pixels[192, 215];   // should be orange like color
+  Canvas.Pixels[7,5] := clBlue;
+  Canvas.Pixels[8,5] := c;
 
   Canvas.EndDraw;
 end;

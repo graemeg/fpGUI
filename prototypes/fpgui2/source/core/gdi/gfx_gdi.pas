@@ -59,9 +59,9 @@ type
     property    BMPHandle: HBITMAP read FBMPHandle;
     property    MaskHandle: HBITMAP read FMaskHandle;
   protected
-    procedure   DoFreeImage;
-    procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
-    procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
+    procedure   DoFreeImage; override;
+    procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); override;
+    procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); override;
   public
     constructor Create;
   end;
@@ -103,6 +103,8 @@ type
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
     procedure   DoEndDraw; override;
+    function    GetPixel(X, Y: integer): TfpgColor; override;
+    procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -175,7 +177,7 @@ var
   MouseFocusedWH: HWND;
 
 
-function fpgColorToWin(col: TfpgColor): TfpgColor;
+function fpgColorToWin(col: TfpgColor): longword;
 var
   c: dword;
 begin
@@ -184,6 +186,11 @@ begin
   Result := ((c and $FF0000) shr 16) or ((c and $0000FF) shl 16) or (c and $00FF00);
 end;
 
+function WinColorTofpgColor(col: longword): TfpgColor;
+begin
+  //swapping bytes
+  Result := ((col and $FF0000) shr 16) or ((col and $0000FF) shl 16) or (col and $00FF00);
+end;
 
 function GetMyWidgetFromHandle(wh: TfpgWinHandle): TfpgWidget;
 begin
@@ -1001,6 +1008,19 @@ begin
     FDrawing    := False;
     FDrawWindow := nil;
   end;
+end;
+
+function TfpgCanvasImpl.GetPixel(X, Y: integer): TfpgColor;
+var
+  c: longword;
+begin
+  c := Windows.GetPixel(FDrawWindow.FWinHandle, X, Y);
+  Result := WinColorTofpgColor(c);
+end;
+
+procedure TfpgCanvasImpl.SetPixel(X, Y: integer; const AValue: TfpgColor);
+begin
+  Windows.SetPixel(FDrawWindow.FWinHandle, X, Y, fpgColorToWin(AValue));
 end;
 
 procedure TfpgCanvasImpl.DoPutBufferToScreen(x, y, w, h: TfpgCoord);

@@ -19,6 +19,18 @@ type
   private
     FAlignRect: TfpgRect;
     FOnScreen: boolean;
+    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
+    procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
+    procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
+    procedure   MsgKeyChar(var msg: TfpgMessageRec); message FPGM_KEYCHAR;
+    procedure   MsgKeyPress(var msg: TfpgMessageRec); message FPGM_KEYPRESS;
+    procedure   MsgKeyRelease(var msg: TfpgMessageRec); message FPGM_KEYRELEASE;
+    procedure   MsgMouseDown(var msg: TfpgMessageRec); message FPGM_MOUSEDOWN;
+    procedure   MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
+    procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
+    procedure   MsgDoubleClick(var msg: TfpgMessageRec); message FPGM_DOUBLECLICK;
+    procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
+    procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     procedure   SetEnabled(const AValue: boolean);
     procedure   SetVisible(const AValue: boolean);
@@ -60,18 +72,6 @@ type
   public
     constructor Create(aowner: TComponent); override;
     destructor  Destroy; override;
-    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
-    procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
-    procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
-    procedure   MsgKeyChar(var msg: TfpgMessageRec); message FPGM_KEYCHAR;
-    procedure   MsgKeyPress(var msg: TfpgMessageRec); message FPGM_KEYPRESS;
-    procedure   MsgKeyRelease(var msg: TfpgMessageRec); message FPGM_KEYRELEASE;
-    procedure   MsgMouseDown(var msg: TfpgMessageRec); message FPGM_MOUSEDOWN;
-    procedure   MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
-    procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
-    procedure   MsgDoubleClick(var msg: TfpgMessageRec); message FPGM_DOUBLECLICK;
-    procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
-    procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     OnKeyPress: TKeyPressNotifyEvent;
     procedure   SetFocus;
     procedure   KillFocus;

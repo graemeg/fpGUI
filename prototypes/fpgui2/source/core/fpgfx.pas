@@ -711,7 +711,7 @@ var
   dww: integer;
 begin
   if (FWidth < 1) or (FHeight < 1) then
-    Exit;
+    Exit; //==>
 
   FMasked := True;
   if FMaskData <> nil then
@@ -747,10 +747,10 @@ var
   msklinelen: integer;
 begin
   if FColorDepth = 1 then
-    Exit;
+    Exit; //==>
 
   if (FImageData = nil) then
-    Exit;
+    Exit; //==>
 
   AllocateMask;
 
@@ -823,6 +823,7 @@ begin
   FMasked       := False;
   FWidth        := 0;
   FHeight       := 0;
+  DoFreeImage;
 end;
 
 procedure TfpgImage.Invert;
@@ -831,7 +832,7 @@ var
   n: integer;
 begin
   if FImageData = nil then
-    Exit;
+    Exit; //==>
 
   p := FImageData;
   for n := 1 to FImageDataSize do
