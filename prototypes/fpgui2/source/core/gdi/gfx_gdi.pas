@@ -726,7 +726,8 @@ begin
     //finally
       //Event.Free;
     //end;
-    msgp.
+//    msgp.mouse.x := LoWord(lParam);
+//    msgp.mouse.y := HiWord(lParam);
     fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
     Result := uMsg <> WM_MOUSEMOVE;
   end else
@@ -734,12 +735,13 @@ begin
     pt.x := LoWord(lParam);
     pt.y := HiWord(lParam);
     if uMsg = WM_MOUSEWHEEL then
-      Windows.ScreenToClient(Handle, @pt);
-    if (pt.x < 0) or (pt.y < 0) or (pt.x >= ClientWidth) or
-      (pt.y >= ClientHeight) or CursorInDifferentWindow then
+      Windows.ScreenToClient(FWinHandle, @pt);
+    // we should change the Width and Height to ClientWidth, ClientHeight
+    if (pt.x < 0) or (pt.y < 0) or (pt.x >= Width) or
+      (pt.y >= Height) or CursorInDifferentWindow then
       FMouseInWindow := False;
 
-    if (not FHasMouseCapture) and (not FMouseInWindow) then
+    if {(not FHasMouseCapture) and} (not FMouseInWindow) then
     begin
       Windows.ReleaseCapture;
       //Event := TFEvent.Create;
@@ -749,9 +751,12 @@ begin
       //finally
         //Event.Free;
       //end;
-      fpgSendMessage(nil, AWindow, FPGM_MOUSELEAVE, msgp);
+      msgp.mouse.x := LoWord(lParam);
+      msgp.mouse.y := HiWord(lParam);
+      fpgSendMessage(nil, AWindow, FPGM_MOUSEEXIT, msgp);
       Result := False;
-    end else
+    end
+    else
       Result := True;
   end;
 end;
@@ -984,7 +989,7 @@ begin
     FClipRegion := CreateRectRgn(0, 0, 1, 1);
 
     FColor           := clText1;
-    FLineStyle       := PS_SOLID;
+    FLineStyle       := lsSolid;
     FLineWidth       := 0;
     FBackgroundColor := clBoxColor;
   end;
@@ -1196,7 +1201,7 @@ begin
   tmpdc := CreateCompatibleDC(wapplication.display);
   SelectObject(tmpdc, TfpgImageImpl(img).BMPHandle);
 
-  if img.FIsTwoColor then
+  if TfpgImageImpl(img).FIsTwoColor then
     rop := PATCOPY  //ROP_DSPDxax
   else
     rop := SRCCOPY;
