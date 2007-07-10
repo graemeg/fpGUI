@@ -7,7 +7,7 @@
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
-      <ActiveEditorIndexAtStart Value="0"/>
+      <ActiveEditorIndexAtStart Value="4"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -34,13 +34,13 @@
         <PackageName Value="fpGFXPackage"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="helloworld.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="helloworld"/>
-        <CursorPos X="3" Y="56"/>
-        <TopLine Value="38"/>
+        <CursorPos X="18" Y="12"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
@@ -50,7 +50,7 @@
         <UnitName Value="fpgui"/>
         <CursorPos X="31" Y="8"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="2"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit1>
@@ -64,100 +64,60 @@
       <Unit3>
         <Filename Value="..\gui_widget.inc"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="47" Y="12"/>
+        <CursorPos X="17" Y="3"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="..\gui_button.inc"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="3" Y="27"/>
-        <TopLine Value="6"/>
-        <EditorIndex Value="4"/>
+        <CursorPos X="27" Y="37"/>
+        <TopLine Value="37"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="..\..\..\gfx\gfxbase.pas"/>
         <UnitName Value="GfxBase"/>
-        <CursorPos X="17" Y="1028"/>
-        <TopLine Value="1014"/>
-        <EditorIndex Value="2"/>
+        <CursorPos X="12" Y="122"/>
+        <TopLine Value="109"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="..\..\..\..\..\lazarus215\fpc\2.1.5\source\rtl\objpas\classes\classesh.inc"/>
+        <CursorPos X="4" Y="25"/>
+        <TopLine Value="13"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit6>
     </Units>
-    <JumpHistory Count="17" HistoryIndex="16">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="5" Column="58" TopLine="1"/>
+        <Filename Value="helloworld.lpr"/>
+        <Caret Line="44" Column="44" TopLine="27"/>
       </Position1>
       <Position2>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="6" Column="27" TopLine="1"/>
+        <Filename Value="helloworld.lpr"/>
+        <Caret Line="45" Column="27" TopLine="33"/>
       </Position2>
       <Position3>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="4" Column="14" TopLine="1"/>
+        <Filename Value="helloworld.lpr"/>
+        <Caret Line="25" Column="13" TopLine="21"/>
       </Position3>
       <Position4>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="1" Column="29" TopLine="1"/>
+        <Filename Value="helloworld.lpr"/>
+        <Caret Line="26" Column="13" TopLine="7"/>
       </Position4>
       <Position5>
         <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="12" Column="17" TopLine="1"/>
+        <Caret Line="27" Column="23" TopLine="12"/>
       </Position5>
-      <Position6>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="15" Column="11" TopLine="1"/>
-      </Position6>
-      <Position7>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="6" Column="9" TopLine="1"/>
-      </Position7>
-      <Position8>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="8" Column="10" TopLine="1"/>
-      </Position8>
-      <Position9>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="28" Column="2" TopLine="16"/>
-      </Position9>
-      <Position10>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="29" Column="3" TopLine="17"/>
-      </Position10>
-      <Position11>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="38" Column="28" TopLine="26"/>
-      </Position11>
-      <Position12>
-        <Filename Value="..\gui_button.inc"/>
-        <Caret Line="27" Column="1" TopLine="6"/>
-      </Position12>
-      <Position13>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="38" Column="51" TopLine="26"/>
-      </Position13>
-      <Position14>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="46" Column="3" TopLine="34"/>
-      </Position14>
-      <Position15>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="12" Column="41" TopLine="1"/>
-      </Position15>
-      <Position16>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="11" Column="52" TopLine="1"/>
-      </Position16>
-      <Position17>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="12" Column="40" TopLine="1"/>
-      </Position17>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

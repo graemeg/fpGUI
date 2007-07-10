@@ -3,6 +3,7 @@ program HelloWorld;
 {$mode objfpc}{$h+}
 
 uses
+  Classes,
   fpgui,
   fpGFX,
   gfxBase;
@@ -22,6 +23,7 @@ type
 procedure TMainForm.AfterConstruction;
 var
   lSize: TSize;
+  lPoint: TPoint;
 begin
   inherited AfterConstruction;
   Name        := 'MainForm';
@@ -39,10 +41,16 @@ begin
 {  btnHello.CanExpandWidth   := True;
   btnHello.CanExpandHeight  := True;
   BoxLayout.InsertChild(btnHello); }
+  lSize.cx := 50;
+  lSize.cy := 100;
+  btnHello.SetMinMaxClientSize(lSize, lSize);
+  lPoint.x := 25;
+  lPoint.y := 25;
+  btnHello.SetPosition(lPoint);
 
   { set a min and max size }
-  lSize.cx := 150;
-  lSize.cy := 100;
+  lSize.cx := 200;
+  lSize.cy := 200;
   SetMinMaxClientSize(lSize, lSize);
 end;
 
