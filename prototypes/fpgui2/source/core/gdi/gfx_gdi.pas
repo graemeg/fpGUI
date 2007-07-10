@@ -1020,7 +1020,7 @@ end;
 
 procedure TfpgCanvasImpl.SetPixel(X, Y: integer; const AValue: TfpgColor);
 begin
-  Windows.SetPixel(FDrawWindow.FWinHandle, X, Y, fpgColorToWin(AValue));
+  Windows.SetPixel(Fgc, X, Y, fpgColorToWin(AValue));
 end;
 
 procedure TfpgCanvasImpl.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
@@ -1056,7 +1056,7 @@ begin
   pts[2].X := x2;
   pts[2].Y := y2;
   PolyLine(Fgc, pts, 2);
-  SetPixel(Fgc, x2, y2, FWindowsColor);
+  Windows.SetPixel(Fgc, x2, y2, FWindowsColor);
 end;
 
 procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
