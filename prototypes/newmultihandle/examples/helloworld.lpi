@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="\"/>
+    <PathDelim Value="/"/>
     <Version Value="5"/>
     <General>
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
-      <ActiveEditorIndexAtStart Value="4"/>
+      <ActiveEditorIndexAtStart Value="3"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -46,83 +46,59 @@
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\fpgui.pas"/>
+        <Filename Value="../fpgui.pas"/>
         <UnitName Value="fpgui"/>
         <CursorPos X="31" Y="8"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="..\..\fpgui2\source\gui\gui_form.pas"/>
+        <Filename Value="../../fpgui2/source/gui/gui_form.pas"/>
         <UnitName Value="gui_form"/>
         <CursorPos X="5" Y="2"/>
         <TopLine Value="1"/>
         <UsageCount Value="10"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\gui_widget.inc"/>
+        <Filename Value="../gui_widget.inc"/>
         <IsPartOfProject Value="True"/>
         <CursorPos X="17" Y="3"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\gui_button.inc"/>
+        <Filename Value="../gui_button.inc"/>
         <IsPartOfProject Value="True"/>
         <CursorPos X="27" Y="37"/>
-        <TopLine Value="37"/>
-        <EditorIndex Value="5"/>
+        <TopLine Value="31"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\..\..\gfx\gfxbase.pas"/>
+        <Filename Value="../../../gfx/gfxbase.pas"/>
         <UnitName Value="GfxBase"/>
         <CursorPos X="12" Y="122"/>
         <TopLine Value="109"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="2"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\..\..\..\..\lazarus215\fpc\2.1.5\source\rtl\objpas\classes\classesh.inc"/>
+        <Filename Value="../../../../../lazarus215/fpc/2.1.5/source/rtl/objpas/classes/classesh.inc"/>
         <CursorPos X="4" Y="25"/>
         <TopLine Value="13"/>
-        <EditorIndex Value="1"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit6>
     </Units>
-    <JumpHistory Count="5" HistoryIndex="4">
-      <Position1>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="44" Column="44" TopLine="27"/>
-      </Position1>
-      <Position2>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="45" Column="27" TopLine="33"/>
-      </Position2>
-      <Position3>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="25" Column="13" TopLine="21"/>
-      </Position3>
-      <Position4>
-        <Filename Value="helloworld.lpr"/>
-        <Caret Line="26" Column="13" TopLine="7"/>
-      </Position4>
-      <Position5>
-        <Filename Value="..\gui_widget.inc"/>
-        <Caret Line="27" Column="23" TopLine="12"/>
-      </Position5>
-    </JumpHistory>
+    <JumpHistory Count="0" HistoryIndex="-1"/>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
-    <PathDelim Value="\"/>
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>

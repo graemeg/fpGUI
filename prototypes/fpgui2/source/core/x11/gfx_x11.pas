@@ -637,14 +637,8 @@ begin
         	    end;
             end;
 
-//            if ev.xbutton.button > 5 then
-//              i := 1
-//            else
-//              i := 3; // amount
-
-            msgp.mouse.x := i;
+            msgp.mouse.delta := i;
             fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
-//            fpgPostMessage(nil, ewg, MSG_SCROLL, ev.xbutton.button mod 4, i, ev.xbutton.state );
           end;
         end
         else
