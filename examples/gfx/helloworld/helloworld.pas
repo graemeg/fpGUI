@@ -20,10 +20,8 @@ program HelloWorld;
 {$endif}
 
 uses
-  Classes
-  ,fpGFX
-  ,GFXBase
-  ;
+  Classes,
+  fpGFX, GFXBase;
 
 const
   HelloWorldString: String = 'Hello, world!';

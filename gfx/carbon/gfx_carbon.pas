@@ -100,7 +100,7 @@ type
   public
     constructor Create(AWidth, AHeight: Integer; APixelFormat: TGfxPixelFormat); override;
     destructor Destroy; override;
-    procedure Lock(var AData: Pointer; var AStride: LongWord); override;
+    procedure Lock(out AData: Pointer; out AStride: LongWord); override;
     procedure Unlock; override;
   end;
 
@@ -120,7 +120,6 @@ type
     { default methods }
     constructor Create; override;
     destructor  Destroy; override;
-    procedure   AddWindow(AWindow: TFCustomWindow); override;
     procedure   Initialize(ADisplayName: String = ''); override;
     procedure   Run; override;
     procedure   Quit; override;
@@ -365,11 +364,6 @@ begin
   inherited Destroy;
 end;
 
-procedure TCarbonApplication.AddWindow(AWindow: TFCustomWindow);
-begin
-
-end;
-
 procedure TCarbonApplication.Initialize(ADisplayName: String);
 begin
 
@@ -429,17 +423,17 @@ var
   status, ignoreResult: OSStatus;
   cmdEvent: EventTypeSpec;
   eventHandler: EventHandlerUPP;
-  CarbonRect: FPCMacOSAll.Rect;
+  QDRect: FPCMacOSAll.Rect;
 begin
-  CarbonRect.left := 50;
-  CarbonRect.Top := 50;
-  CarbonRect.right := 300;
-  CarbonRect.bottom := 300;
+  QDRect.left := 50;
+  QDRect.Top := 50;
+  QDRect.right := 300;
+  QDRect.bottom := 300;
 
   status := CreateNewWindow(kDocumentWindowClass,
    (kWindowStandardDocumentAttributes or kWindowStandardHandlerAttribute
     or kWindowCompositingAttribute),
-   CarbonRect, FHandle);
+   QDRect, FHandle);
 
   if (status <> noErr) or (FHandle = nil) then
   begin
