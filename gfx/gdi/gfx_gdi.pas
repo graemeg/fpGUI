@@ -460,7 +460,10 @@ procedure TGDICanvas.SetHandle(AHandle: PtrUInt);
 begin
   FHandle := AHandle;
 
-//  ASSERT(Handle <> 0);
+  { It's possible to set the Handle to zero
+    In this case we effectively disallowing new painting
+    until a new handle is set }
+  if AHandle = 0 then Exit;
 
   Windows.SelectObject(Handle, FDefaultFontHandle);
   Windows.GetTextMetrics(Handle, @FFontMetrics);
@@ -1643,6 +1646,10 @@ var
 begin
   rect := FPaintStruct.rcPaint;
 
+  { It is necessary to create a bitmap and select it to implement
+    double buffering. If we just create a DC and don't select a bitmap,
+    there is no memory where to store the painting }
+  
   hdcMem := CreateCompatibleDC(FPaintStruct.hdc);
 
   NewBitmap := Windows.CreateCompatibleBitmap(FPaintStruct.hdc, Width, Height);
@@ -1651,9 +1658,13 @@ begin
 
   FCanvas.SetHandle(hdcMem);
 
+  { Execution of user paint code }
+
   if Assigned(OnPaint) then OnPaint(Self);
 
-{  Windows.BitBlt(
+  { Flushes the result to the screen }
+  
+  Windows.BitBlt(
    FPaintStruct.hdc,       // handle to destination DC
    rect.Left,              // x-coord of destination upper-left corner
    rect.Top,               // y-coord of destination upper-left corner
@@ -1663,9 +1674,9 @@ begin
    rect.Left,              // x-coordinate of source upper-left corner
    rect.Top,               // y-coordinate of source upper-left corner
    SRCCOPY                 // raster operation code
-  );        }
+  );
 
-  Windows.BitBlt(
+{  Windows.BitBlt(
    FPaintStruct.hdc, // handle to destination DC
    0,                // x-coord of destination upper-left corner
    0,                // y-coord of destination upper-left corner
@@ -1675,11 +1686,15 @@ begin
    0,                // x-coordinate of source upper-left corner
    0,                // y-coordinate of source upper-left corner
    SRCCOPY           // raster operation code
-  );
+  );    }
+
+  { Clean up }
 
   SelectObject(hdcMem, OldBitmap);
   DeleteDC(hdcMem);
   DeleteObject(NewBitmap);
+
+  FCanvas.SetHandle(0);
 end;
 
 procedure TGDIWindow.EvMove;
