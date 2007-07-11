@@ -511,9 +511,10 @@ type
     procedure DoSetCursor; virtual; abstract;
     function  GetHandle: PtrUInt; virtual; abstract;
   public
-    constructor Create(AOwner: TComponent); override;
+    { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); virtual;
     destructor  Destroy; override;
+    { Widget controling methods }
     function  CanClose: Boolean; virtual;
     procedure SetPosition(const APosition: TPoint); virtual;
     procedure SetSize(const ASize: TSize); virtual;
@@ -525,13 +526,32 @@ type
     procedure PaintInvalidRegion; virtual; abstract;
     procedure CaptureMouse; virtual; abstract;
     procedure ReleaseMouse; virtual; abstract;
-    procedure ProcessEvent(AEvent: TFEvent); virtual; abstract;
+    { Event processing methods }
+//    procedure ProcessEvent(AEvent: TFEvent); virtual; abstract;
+    procedure EvCreate; virtual; abstract;
+    procedure EvFocusIn; virtual; abstract;
+    procedure EvFocusOut; virtual; abstract;
+    procedure EvHide; virtual; abstract;
+    procedure EvKeyPressed(AKey: Word); virtual; abstract;
+    procedure EvKeyReleased(AKey: Word); virtual; abstract;
+    procedure EvKeyChar(AKeyChar: Char); virtual; abstract;
+    procedure EvMouseEnter(const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseLeave; virtual; abstract;
+    procedure EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseMove(const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); virtual; abstract;
+    procedure EvPaint; virtual; abstract;
+    procedure EvMove; virtual; abstract;
+    procedure EvResize; virtual; abstract;
+    procedure EvShow; virtual; abstract;
 
+    { Properties }
     property WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
     property Canvas: TFCustomCanvas read FCanvas;
     property Handle: PtrUInt read GetHandle;
     property ChildWindows: TList read FChildWindows;
-    // Window state
+    { Window state }
     property Left: Integer read FLeft write SetLeft;
     property Top: Integer read FTop write SetTop;
     property Width: Integer read FWidth write SetWidth;
@@ -541,7 +561,7 @@ type
     property Cursor: TFCursor read FCursor write SetCursor;
     property Title: String read GetTitle write SetTitle;
     property Parent: TFCustomWindow read FParent;
-    // Event handlers
+    { Event handlers }
     property OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property OnCanClose: TGfxCanCloseEvent read FOnCanClose write FOnCanClose;
     property OnClose: TNotifyEvent read FOnClose write FOnClose;
@@ -1016,15 +1036,10 @@ begin
   // Empty
 end;
 
-constructor TFCustomWindow.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-end;
-
 constructor TFCustomWindow.Create(AParent: TFCustomWindow;
         AWindowOptions: TFWindowOptions);
 begin
-  Create(nil);
+  inherited Create(nil);
 
   FWindowOptions := AWindowOptions;
   FParent := AParent;

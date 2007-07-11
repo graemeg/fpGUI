@@ -186,8 +186,10 @@ type
     procedure   UpdateWindowButtons;
     function    DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
   public
+    { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
+    { Widget controling methods }
     procedure   SetPosition(const APosition: TPoint); override;
     procedure   SetSize(const ASize: TSize); override;
     procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
@@ -198,7 +200,25 @@ type
     procedure   PaintInvalidRegion; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
-    procedure   ProcessEvent(AEvent: TFEvent); override;
+    { Event processing methods }
+//    procedure   ProcessEvent(AEvent: TFEvent); override;
+    procedure   EvCreate; override;
+    procedure   EvFocusIn; override;
+    procedure   EvFocusOut; override;
+    procedure   EvHide; override;
+    procedure   EvKeyPressed(AKey: Word); override;
+    procedure   EvKeyReleased(AKey: Word); override;
+    procedure   EvKeyChar(AKeyChar: Char); override;
+    procedure   EvMouseEnter(const AMousePos: TPoint); override;
+    procedure   EvMouseLeave; override;
+    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseMove(const AMousePos: TPoint); override;
+    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
+    procedure   EvPaint; override;
+    procedure   EvMove; override;
+    procedure   EvResize; override;
+    procedure   EvShow; override;
   end;
 
 
@@ -1083,12 +1103,11 @@ function fpGFXWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM;
   lParam: LPARAM): LRESULT; stdcall;
 var
   Window: TGDIWindow;
-  Event: TFEvent;
   PaintStruct: TPaintStruct;
   r: TRect;
   OldCanvas: TFCustomCanvas;
 begin
-  Event := TFEvent.Create;
+  Result := 0;
 
   if uMsg = WM_CREATE then
   begin
@@ -1100,17 +1119,11 @@ begin
 
   if Assigned(Window) then
   begin
-    Event.msg     := uMsg;
-    Event.wParam  := wParam;
-    Event.lParam  := lParam;
-    Event.Result  := 0;
-
     case uMsg of
      { Messages }
      WM_CREATE:
      begin
-       Event.EventType := etCreate;
-       Window.ProcessEvent(Event);
+       Window.EvCreate();
      end;
      WM_DESTROY:
      begin
@@ -1129,38 +1142,28 @@ begin
      end;
      WM_Activate:
      begin
-       if wParam = WA_INACTIVE then
-       begin
-         Event.EventType := etFocusOut;
-         Window.ProcessEvent(Event);
-       end
-       else
-       begin
-         Event.EventType := etFocusIn;
-         Window.ProcessEvent(Event);
-       end;
+       if wParam = WA_INACTIVE then Window.EvFocusOut()
+       else Window.EvFocusIn();
      end;
      WM_Paint:
      begin
-       Event.EventType := etPaint;
-       Window.ProcessEvent(Event);
+       Windows.BeginPaint(Window.Handle, @PaintStruct);
+       Window.EvPaint();
+       Windows.EndPaint(Window.Handle, @PaintStruct);
      end;
      WM_ShowWindow:
      begin
        if wParam <> 0 then
        begin
-         Event.EventType := etFocusIn;
-         Window.ProcessEvent(Event);
+         Window.EvFocusIn();
 
-         Event.EventType := etShow;
-         Window.ProcessEvent(Event);
-         
+         Window.EvShow();
+
          GFApplication.AddWindow(Window);
        end
        else
        begin
-          Event.EventType := etHide;
-          Window.ProcessEvent(Event);
+         Window.EvHide();
 
          GFApplication.RemoveWindow(Window);
        end;
@@ -1172,8 +1175,7 @@ begin
          Window.FLeft := LoWord(lParam);
          Window.FTop := HiWord(lParam);
 
-         Event.EventType := etMove;
-         Window.ProcessEvent(Event);
+         Window.EvMove();
        end;
      end;
      WM_Size:
@@ -1188,8 +1190,7 @@ begin
          Window.FClientHeight := HiWord(lParam);
          TGDICanvas(Window.Canvas).Resized(Window.FWidth, Window.FHeight);
 
-         Event.EventType := etResize;
-         Window.ProcessEvent(Event);
+         Window.EvResize();
        end;
      end;
      { Input messages }
@@ -1200,18 +1201,16 @@ begin
         
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMousePressed;
-         Event.MouseButton := mbLeft;
-         Window.ProcessEvent(Event);
+         Window.EvMousePressed(mbLeft,
+          Point(LoWord(lparam), HiWord(lParam)));
        end;
      end;
      WM_LButtonUp:
      begin
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMouseReleased;
-         Event.MouseButton := mbLeft;
-         Window.ProcessEvent(Event);
+         Window.EvMouseReleased(mbLeft,
+          Point(LoWord(lparam), HiWord(lParam)));
        end;
      end;
      WM_RButtonDown:
@@ -1221,18 +1220,16 @@ begin
         
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMousePressed;
-         Event.MouseButton := mbRight;
-         Window.ProcessEvent(Event);
+         Window.EvMousePressed(mbRight,
+          Point(LoWord(lparam), HiWord(lParam)));
        end;
      end;
      WM_RButtonUp:
      begin
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMouseReleased;
-         Event.MouseButton := mbRight;
-         Window.ProcessEvent(Event);
+         Window.EvMouseReleased(mbRight,
+          Point(LoWord(lparam), HiWord(lParam)));
        end;
      end;
      WM_MButtonDown:
@@ -1242,63 +1239,58 @@ begin
 
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMousePressed;
-         Event.MouseButton := mbMiddle;
-         Window.ProcessEvent(Event);
+         Window.EvMousePressed(mbMiddle,
+          Point(LoWord(lparam), HiWord(lParam)));
        end;
      end;
      WM_MButtonUp:
      begin
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMouseReleased;
-         Event.MouseButton := mbMiddle;
-         Window.ProcessEvent(Event);
+         Window.EvMouseReleased(mbMiddle,
+          Point(LoWord(lparam), HiWord(lParam)));
        end;
      end;
      WM_MouseMove:
      begin
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMouseMove;
-         Window.ProcessEvent(Event);
+         Window.EvMouseMove(Point(LoWord(lParam), HiWord(lParam)));
        end;
      end;
      WM_MouseWheel:
      begin
        if Window.DoMouseEnterLeaveCheck(uMsg, wParam, lParam) then
        begin
-         Event.EventType := etMouseWheel;
-         Window.ProcessEvent(Event);
+//    Windows.ScreenToClient(Handle, @pt);
+         Window.EvMouseWheel(
+          SmallInt(HiWord(wParam)) / -120.0,
+          Point(LoWord(lparam), HiWord(lparam))
+          );
        end;
      end;
      WM_KeyDown, WM_SysKeyDown:
      begin
-       Event.EventType := etKeyPressed;
-       Window.ProcessEvent(Event);
+       Window.EvKeyPressed(VirtKeyToKeycode(wParam));
+
+       if (wParam = $2e {VK_DELETE}) then Window.EvKeyChar(#127);
      end;
      WM_KeyUp, WM_SysKeyUp:
      begin
-       Event.EventType := etKeyReleased;
-       Window.ProcessEvent(Event);
+       Window.EvKeyReleased(VirtKeyToKeycode(wParam));
      end;
      WM_Char, WM_SysChar:
      begin
-       Event.EventType := etKeyChar;
-       Window.ProcessEvent(Event);
+       Window.EvKeyChar(Chr(wParam));
      end;
     else
       if UnicodeEnabledOS then Result := Windows.DefWindowProcW(hwnd, uMsg, wParam, lParam)
       else Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
     end;
-    
-    if Result = 0 then Result := Event.Result;
   end
   else
     if UnicodeEnabledOS then Result := Windows.DefWindowProcW(hwnd, uMsg, wParam, lParam)
     else Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
-
-  Event.Free;
 end;
 
 
@@ -1549,133 +1541,110 @@ begin
   end;
 end;
 
-procedure TGDIWindow.ProcessEvent(AEvent: TFEvent);
-var
-  pt: Windows.POINT;
-  PaintStruct: TPaintStruct;
-  r: Windows.RECT;
-  OldCanvas: TFCustomCanvas;
+procedure TGDIWindow.EvCreate;
 begin
-  case AEvent.EventType of
-   etCreate:
-     begin
-       if Assigned(OnCreate) then OnCreate(Self)
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etCanClose:
-     begin
-     end;
-   etClose:
-     begin
-     end;
-   etFocusIn:
-     begin
-       FHasFocus := True;
-       if Assigned(OnFocusIn) then OnFocusIn(Self);
-     end;
-   etFocusOut:
-     begin
-       FHasFocus := False;
-       if Assigned(OnFocusOut) then OnFocusOut(Self);
-     end;
-   etHide:
-     begin
-       if Assigned(OnHide) then OnHide(Self);
-     end;
-   etKeyPressed:
-     begin
-       if Assigned(OnKeyPressed) then OnKeyPressed(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+  if Assigned(OnCreate) then OnCreate(Self);
+end;
 
-       if (AEvent.wParam = $2e {VK_DELETE}) then
-       begin
-         if Assigned(OnKeyChar) then OnKeyChar(Self, #127)
-         else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-       end;
-     end;
-   etKeyReleased:
-     begin
-       if Assigned(OnKeyReleased) then OnKeyReleased(Self, VirtKeyToKeycode(AEvent.wParam), GetKeyboardShiftState)
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etKeyChar:
-     begin
-       if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseEnter:
-     begin
-       if Assigned(OnMouseEnter) then
-        OnMouseEnter(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lParam), HiWord(AEvent.lParam)))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseLeave:
-     begin
-       if Assigned(OnMouseLeave) then OnMouseLeave(Self)
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMousePressed:
-     begin
-       if Assigned(OnMousePressed) then
-        OnMousePressed(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseReleased:
-     begin
-       if Assigned(OnMouseReleased) then
-        OnMouseReleased(Self, AEvent.MouseButton, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseMove:
-     begin
-       if Assigned(OnMouseMove) then
-        OnMouseMove(Self, GetKeyboardShiftState, Point(LoWord(AEvent.lparam), HiWord(AEvent.lParam)))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseWheel:
-     begin
-       if Assigned(OnMouseWheel) then
-       begin
-         pt.x := LoWord(AEvent.lparam);
-         pt.y := HiWord(AEvent.lparam);
-         Windows.ScreenToClient(Handle, @pt);
-         OnMouseWheel(Self, GetKeyboardShiftState, SmallInt(HiWord(AEvent.wParam)) / -120.0,
-          Point(pt.x, pt.y));
-       end
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etPaint:
-     begin
-       Windows.BeginPaint(Handle, @PaintStruct);
-       if Assigned(OnPaint) then
-       begin
-         r.Left    := PaintStruct.rcPaint.Left;
-         r.Top     := PaintStruct.rcPaint.Top;
-         r.Right   := PaintStruct.rcPaint.Right;
-         r.Bottom  := PaintStruct.rcPaint.Bottom;
+procedure TGDIWindow.EvFocusIn;
+begin
+  FHasFocus := True;
+  if Assigned(OnFocusIn) then OnFocusIn(Self);
+end;
 
-         // graemeg: What is this extra canvas used for????
-//         OldCanvas := Canvas;
-//         FCanvas := TGDICanvas.Create(PaintStruct.hdc);
-         OnPaint(Self, r);
-//         Canvas.Free;
-//         FCanvas := OldCanvas;
-       end;
-       Windows.EndPaint(Handle, @PaintStruct);
-     end;
-   etMove:
-     begin
-       if Assigned(OnMove) then OnMove(Self);
-     end;
-   etResize:
-     begin
-       if Assigned(OnResize) then OnResize(Self);
-     end;
-   etShow:
-     begin
-       if Assigned(OnShow) then OnShow(Self);
-     end;
-  end;
+procedure TGDIWindow.EvFocusOut;
+begin
+  FHasFocus := False;
+  if Assigned(OnFocusOut) then OnFocusOut(Self);
+end;
+
+procedure TGDIWindow.EvHide;
+begin
+  if Assigned(OnHide) then OnHide(Self);
+end;
+
+procedure TGDIWindow.EvKeyPressed(AKey: Word);
+begin
+  if Assigned(OnKeyPressed) then OnKeyPressed(Self, AKey, GetKeyboardShiftState)
+  else if Assigned(Parent) then Parent.EvKeyPressed(AKey);
+end;
+
+procedure TGDIWindow.EvKeyReleased(AKey: Word);
+begin
+  if Assigned(OnKeyReleased) then OnKeyReleased(Self, AKey, GetKeyboardShiftState)
+  else if Assigned(Parent) then Parent.EvKeyReleased(AKey);
+end;
+
+procedure TGDIWindow.EvKeyChar(AKeyChar: Char);
+begin
+  if Assigned(OnKeyChar) then OnKeyChar(Self, AKeyChar)
+  else if Assigned(Parent) then Parent.EvKeyChar(AKeyChar);
+end;
+
+procedure TGDIWindow.EvMouseEnter(const AMousePos: TPoint);
+begin
+  if Assigned(OnMouseEnter) then
+   OnMouseEnter(Self, GetKeyboardShiftState, AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseEnter(AMousePos);
+end;
+
+procedure TGDIWindow.EvMouseLeave;
+begin
+  if Assigned(OnMouseLeave) then OnMouseLeave(Self)
+  else if Assigned(Parent) then Parent.EvMouseLeave;
+end;
+
+procedure TGDIWindow.EvMousePressed(AButton: TMouseButton;
+ const AMousePos: TPoint);
+begin
+  if Assigned(OnMousePressed) then
+   OnMousePressed(Self, AButton, GetKeyboardShiftState, AMousePos)
+  else if Assigned(Parent) then Parent.EvMousePressed(AButton, AMousePos);
+end;
+
+procedure TGDIWindow.EvMouseReleased(AButton: TMouseButton;
+  const AMousePos: TPoint);
+begin
+  if Assigned(OnMouseReleased) then
+   OnMouseReleased(Self, AButton, GetKeyboardShiftState, AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseReleased(AButton, AMousePos);
+end;
+
+procedure TGDIWindow.EvMouseMove(const AMousePos: TPoint);
+begin
+  if Assigned(OnMouseMove) then
+   OnMouseMove(Self, GetKeyboardShiftState, AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseMove(AMousePos);
+end;
+
+procedure TGDIWindow.EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint);
+begin
+  if Assigned(OnMouseWheel) then
+    OnMouseWheel(Self, GetKeyboardShiftState, AWheelDelta, AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseWheel(AWheelDelta, AMousePos);
+end;
+
+procedure TGDIWindow.EvPaint;
+var
+  r: TRect;
+begin
+  if Assigned(OnPaint) then
+   OnPaint(Self, r);
+end;
+
+procedure TGDIWindow.EvMove;
+begin
+  if Assigned(OnMove) then OnMove(Self);
+end;
+
+procedure TGDIWindow.EvResize;
+begin
+  if Assigned(OnResize) then OnResize(Self);
+end;
+
+procedure TGDIWindow.EvShow;
+begin
+  if Assigned(OnShow) then OnShow(Self);
 end;
 
 function TGDIWindow.GetTitle: String;
@@ -1787,23 +1756,16 @@ function TGDIWindow.DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Bool
 
 var
   pt: Windows.POINT;
-  Event: TFEvent;
 begin
   if not FMouseInWindow then
   begin
     FMouseInWindow := True;
     DoSetCursor;
     Windows.SetCapture(Handle);
-    Event := TFEvent.Create;
-    try
-      Event.lParam := lParam;
-      Event.EventType := etMouseEnter;
-      ProcessEvent(Event);
-    finally
-      Event.Free;
-    end;
+    EvMouseEnter(Point(LoWord(lparam), HiWord(lparam)));
     Result := uMsg <> WM_MOUSEMOVE;
-  end else
+  end
+  else
   begin
     pt.x := LoWord(lParam);
     pt.y := HiWord(lParam);
@@ -1816,15 +1778,10 @@ begin
     if (not FHasMouseCapture) and (not FMouseInWindow) then
     begin
       Windows.ReleaseCapture;
-      Event := TFEvent.Create;
-      try
-        Event.EventType := etMouseLeave;
-        ProcessEvent(Event);
-      finally
-        Event.Free;
-      end;
+      EvMouseLeave;
       Result := False;
-    end else
+    end
+    else
       Result := True;
   end;
 end;
