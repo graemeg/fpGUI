@@ -34,11 +34,11 @@ type
   public
     Font: TFCustomFont;
     TextSize: TSize;
-    procedure Paint(Sender: TObject; const Rect: TRect);
+    procedure Paint(Sender: TObject);
     constructor Create;
   end;
   
-procedure TMainWindow.Paint(Sender: TObject; const Rect: TRect);
+procedure TMainWindow.Paint(Sender: TObject);
 var
   Color: TGfxColor;
   r: TRect;
@@ -47,9 +47,9 @@ begin
   Color.Red := 0;
   Color.Green := 0;
   Color.Alpha := 0;
-  r.Left := Rect.Left;
-  r.Right := Rect.Right;
-  for i := Rect.Top to Rect.Bottom - 1 do
+  r.Left := 0;
+  r.Right := Width;
+  for i := 0 to Height - 1 do
   begin
     Color.Blue := $ffff - (i * $ffff) div ClientHeight;
     Canvas.SetColor(Color);

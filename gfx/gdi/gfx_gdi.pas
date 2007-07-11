@@ -201,7 +201,6 @@ type
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
     { Event processing methods }
-//    procedure   ProcessEvent(AEvent: TFEvent); override;
     procedure   EvCreate; override;
     procedure   EvFocusIn; override;
     procedure   EvFocusOut; override;
@@ -1625,11 +1624,8 @@ begin
 end;
 
 procedure TGDIWindow.EvPaint;
-var
-  r: TRect;
 begin
-  if Assigned(OnPaint) then
-   OnPaint(Self, r);
+  if Assigned(OnPaint) then OnPaint(Self);
 end;
 
 procedure TGDIWindow.EvMove;

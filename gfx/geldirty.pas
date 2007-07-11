@@ -164,7 +164,7 @@ begin
   end;
 
   if IsNotEmpty and Assigned(AWindow.OnPaint) then
-    AWindow.OnPaint(AWindow, AWindow.Canvas.GetClipRect);
+    AWindow.OnPaint(AWindow);
 
   AWindow.Canvas.RestoreState;
 end;

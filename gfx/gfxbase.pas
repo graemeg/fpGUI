@@ -482,7 +482,7 @@ type
     FOnMouseReleased: TGfxMouseButtonEvent;
     FOnMouseMove: TGfxMouseMoveEvent;
     FOnMouseWheel: TGfxMouseWheelEvent;
-    FOnPaint: TGfxPaintEvent;
+    FOnPaint: TNotifyEvent;
     FOnMove: TNotifyEvent;
     FOnResize: TNotifyEvent;
     FOnShow: TNotifyEvent;
@@ -577,7 +577,7 @@ type
     property OnMouseReleased: TGfxMouseButtonEvent read FOnMouseReleased write FOnMouseReleased;
     property OnMouseMove: TGfxMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property OnMouseWheel: TGfxMouseWheelEvent read FOnMouseWheel write FOnMouseWheel;
-    property OnPaint: TGfxPaintEvent read FOnPaint write FOnPaint;
+    property OnPaint: TNotifyEvent read FOnPaint write FOnPaint;
     property OnMove: TNotifyEvent read FOnMove write FOnMove;
     property OnResize: TNotifyEvent read FOnResize write FOnResize;
     property OnShow: TNotifyEvent read FOnShow write FOnShow;
