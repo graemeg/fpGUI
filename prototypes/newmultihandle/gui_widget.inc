@@ -1,3 +1,5 @@
+{%mainunit fpgui.pas}
+
 {$ifndef READ_IMPLEMENTATION}
 
 type

@@ -51,7 +51,7 @@ begin
   r.Right := Width;
   for i := 0 to Height - 1 do
   begin
-    Color.Blue := $ffff - (i * $ffff) div ClientHeight;
+    Color.Blue := $ff - ((i * $ff) div Height) mod $ff;
     Canvas.SetColor(Color);
     r.Top := i;
     r.Bottom := i + 1;

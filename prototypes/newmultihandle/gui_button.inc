@@ -1,3 +1,5 @@
+{%mainunit fpgui.pas}
+
 {$ifndef READ_IMPLEMENTATION}
 
 type
@@ -34,22 +36,30 @@ end;
 
 procedure TFButton.EvPaint;
 var
-  r: TRect;
-  tw: integer;
+  rt: TRect;
+  Flags: TFButtonFlags;
 begin
-  Canvas.SetColor(colBlue);
-  r.Left    := 0;
-  r.Top     := 0;
-  r.Right   := Width;
-  r.Bottom  := Height;
-  Canvas.FillRect(r);
+  rt.Left := 0;
+  rt.Top := 0;
+  rt.Right := Width;
+  rt.Bottom := Height;
 
-  Canvas.SetColor(colWhite);
-  r.Left    := 1;
-  r.Top     := 1;
-  r.Right   := Width + 1;
-  r.Bottom  := Height + 1;
-  Canvas.FillRect(r);
+  { Prepare the flags }
+  
+  Flags := [];
+
+ { if FDown then
+    Include(lBtnFlags, btnIsPressed);
+
+  if FFocused and (not FEmbedded) then
+    Include(lBtnFlags, btnHasFocus);
+
+  if FEmbedded then
+    Include(lBtnFlags, btnIsEmbedded); }
+
+  { Draw the button }
+
+  GFDefaultStyle.DrawButtonFace(Canvas, rt, Flags);
 
   inherited EvPaint();
 end;

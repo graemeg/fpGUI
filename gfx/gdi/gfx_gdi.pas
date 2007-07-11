@@ -560,7 +560,7 @@ function TGDICanvas.MapColor(const AColor: TGfxColor): TGfxPixel;
 begin
 {  Result := Windows.GetNearestColor(Handle, RGB(AColor.Red div 257,
     AColor.Green div 257, AColor.Blue div 257));}
-  Result := RGB(AColor.Red div 257, AColor.Green div 257, AColor.Blue div 257);
+  Result := RGB(AColor.Red, AColor.Green, AColor.Blue);
 end;
 
 
@@ -674,14 +674,17 @@ end;
 function TGDICanvas.TextExtent(const AText: String): TSize;
 var
   WideText: WideString;
+  ASize: Windows.SIZE;
 begin
   NeedFont(False);
 
   WideText := Utf8Decode(AText);
   {$ifdef wince}
-    Windows.GetTextExtentPoint32(Handle, PWideChar(WideText), Length(WideText), @Result)
+    Windows.GetTextExtentPoint32(Handle, PWideChar(WideText), Length(WideText), @Result);
   {$else}
-    Windows.GetTextExtentPoint32W(Handle, PWideChar(WideText), Length(WideText), @Result)
+    Windows.GetTextExtentPoint32W(Handle, PWideChar(WideText), Length(WideText), ASize);
+    Result.cx := ASize.cx;
+    Result.cy := ASize.cy;
   {$endif}
 end;
 
@@ -796,9 +799,9 @@ begin
     for i := 0 to AImage.Palette.EntryCount - 1 do
       with AImage.Palette.Entries[i] do
       begin
-        GDIPal[i].rgbRed := Red div 257;
-        GDIPal[i].rgbGreen := Green div 257;
-        GDIPal[i].rgbBlue := Blue div 257;
+        GDIPal[i].rgbRed := Red;
+        GDIPal[i].rgbGreen := Green;
+        GDIPal[i].rgbBlue := Blue;
         GDIPal[i].rgbReserved := 0;
       end;
     Windows.SetDIBColorTable(MemDC, 0, AImage.Palette.EntryCount, GDIPal[0]);
@@ -1117,7 +1120,6 @@ var
   Window: TGDIWindow;
   PaintStruct: TPaintStruct;
   r: TRect;
-  OldCanvas: TFCustomCanvas;
 begin
   Result := 0;
 

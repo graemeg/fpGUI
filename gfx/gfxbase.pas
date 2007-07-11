@@ -72,7 +72,7 @@ type
 
   PGfxColor = ^TGfxColor;
   TGfxColor = packed record
-    Red, Green, Blue, Alpha: Word;
+    Red, Green, Blue, Alpha: Byte;
   end;
 
   PGfxPixel = ^TGfxPixel;
@@ -106,43 +106,42 @@ const
 
   FormatTypeBPPTable: array[TGfxImageType] of Integer =
     (0, 1, 4, 4, 8, 8, 16, 16, 24, 32, 32);
-
   { Predefined colors }
 
-  colTransparent: TGfxColor	= (Red: $0000; Green: $0000; Blue: $0000; Alpha: $ffff);
-  colBlack: TGfxColor		    = (Red: $0000; Green: $0000; Blue: $0000; Alpha: $0000);
-  colBlue: TGfxColor		    = (Red: $0000; Green: $0000; Blue: $ffff; Alpha: $0000);
-  colGreen: TGfxColor		    = (Red: $0000; Green: $ffff; Blue: $0000; Alpha: $0000);
-  colCyan: TGfxColor		    = (Red: $0000; Green: $ffff; Blue: $ffff; Alpha: $0000);
-  colRed: TGfxColor		      = (Red: $ffff; Green: $0000; Blue: $0000; Alpha: $0000);
-  colMagenta: TGfxColor		  = (Red: $ffff; Green: $0000; Blue: $ffff; Alpha: $0000);
-  colYellow: TGfxColor		  = (Red: $ffff; Green: $ffff; Blue: $0000; Alpha: $0000);
-  colWhite: TGfxColor		    = (Red: $ffff; Green: $ffff; Blue: $ffff; Alpha: $0000);
-  colGray: TGfxColor		    = (Red: $8000; Green: $8000; Blue: $8000; Alpha: $0000);
-  colLtGray: TGfxColor		  = (Red: $c000; Green: $c000; Blue: $c000; Alpha: $0000);
-  colDkBlue: TGfxColor		  = (Red: $0000; Green: $0000; Blue: $8000; Alpha: $0000);
-  colDkGreen: TGfxColor		  = (Red: $0000; Green: $8000; Blue: $0000; Alpha: $0000);
-  colDkCyan: TGfxColor		  = (Red: $0000; Green: $8000; Blue: $8000; Alpha: $0000);
-  colDkRed: TGfxColor		    = (Red: $8000; Green: $0000; Blue: $0000; Alpha: $0000);
-  colDkMagenta: TGfxColor	  = (Red: $8000; Green: $0000; Blue: $8000; Alpha: $0000);
-  colDkYellow: TGfxColor	  = (Red: $8000; Green: $8000; Blue: $0000; Alpha: $0000);
+  colTransparent: TGfxColor    = (Red: $00; Green: $00; Blue: $00; Alpha: $ff);
+  colBlack: TGfxColor          = (Red: $00; Green: $00; Blue: $00; Alpha: $00);
+  colBlue: TGfxColor	       = (Red: $00; Green: $00; Blue: $ff; Alpha: $00);
+  colGreen: TGfxColor	       = (Red: $00; Green: $ff; Blue: $00; Alpha: $00);
+  colCyan: TGfxColor	       = (Red: $00; Green: $ff; Blue: $ff; Alpha: $00);
+  colRed: TGfxColor	       = (Red: $ff; Green: $00; Blue: $00; Alpha: $00);
+  colMagenta: TGfxColor	       = (Red: $ff; Green: $00; Blue: $ff; Alpha: $00);
+  colYellow: TGfxColor	       = (Red: $ff; Green: $ff; Blue: $00; Alpha: $00);
+  colWhite: TGfxColor          = (Red: $ff; Green: $ff; Blue: $ff; Alpha: $00);
+  colGray: TGfxColor	       = (Red: $80; Green: $80; Blue: $80; Alpha: $00);
+  colLtGray: TGfxColor	       = (Red: $c0; Green: $c0; Blue: $c0; Alpha: $00);
+  colDkBlue: TGfxColor         = (Red: $00; Green: $00; Blue: $80; Alpha: $00);
+  colDkGreen: TGfxColor	       = (Red: $00; Green: $80; Blue: $00; Alpha: $00);
+  colDkCyan: TGfxColor	       = (Red: $00; Green: $80; Blue: $80; Alpha: $00);
+  colDkRed: TGfxColor	       = (Red: $80; Green: $00; Blue: $00; Alpha: $00);
+  colDkMagenta: TGfxColor      = (Red: $80; Green: $00; Blue: $80; Alpha: $00);
+  colDkYellow: TGfxColor       = (Red: $80; Green: $80; Blue: $00; Alpha: $00);
 
-  webBlack: TGfxColor		    = (Red: $0000; Green: $0000; Blue: $0000; Alpha: $0000);
-  webMaroon: TGfxColor		  = (Red: $8000; Green: $0000; Blue: $0000; Alpha: $0000);
-  webGreen: TGfxColor		    = (Red: $0000; Green: $8000; Blue: $0000; Alpha: $0000);
-  webOlive: TGfxColor		    = (Red: $8000; Green: $8000; Blue: $0000; Alpha: $0000);
-  webNavy: TGfxColor		    = (Red: $0000; Green: $0000; Blue: $8000; Alpha: $0000);
-  webPurple: TGfxColor		  = (Red: $8000; Green: $0000; Blue: $8000; Alpha: $0000);
-  webTeal: TGfxColor		    = (Red: $0000; Green: $8000; Blue: $8000; Alpha: $0000);
-  webGray: TGfxColor		    = (Red: $8000; Green: $8000; Blue: $8000; Alpha: $0000);
-  webSilver: TGfxColor		  = (Red: $c000; Green: $c000; Blue: $c000; Alpha: $0000);
-  webRed: TGfxColor		      = (Red: $ffff; Green: $0000; Blue: $0000; Alpha: $0000);
-  webLime: TGfxColor		    = (Red: $0000; Green: $ffff; Blue: $0000; Alpha: $0000);
-  webYellow: TGfxColor		  = (Red: $ffff; Green: $ffff; Blue: $0000; Alpha: $0000);
-  webBlue: TGfxColor		    = (Red: $0000; Green: $0000; Blue: $ffff; Alpha: $0000);
-  webFuchsia: TGfxColor		  = (Red: $ffff; Green: $0000; Blue: $ffff; Alpha: $0000);
-  webAqua: TGfxColor		    = (Red: $0000; Green: $ffff; Blue: $ffff; Alpha: $0000);
-  webWhite: TGfxColor		    = (Red: $ffff; Green: $ffff; Blue: $ffff; Alpha: $0000);
+  webBlack: TGfxColor	       = (Red: $00; Green: $00; Blue: $00; Alpha: $00);
+  webMaroon: TGfxColor	       = (Red: $80; Green: $00; Blue: $00; Alpha: $00);
+  webGreen: TGfxColor          = (Red: $00; Green: $80; Blue: $00; Alpha: $00);
+  webOlive: TGfxColor          = (Red: $80; Green: $80; Blue: $00; Alpha: $00);
+  webNavy: TGfxColor	       = (Red: $00; Green: $00; Blue: $80; Alpha: $00);
+  webPurple: TGfxColor	       = (Red: $80; Green: $00; Blue: $80; Alpha: $00);
+  webTeal: TGfxColor	       = (Red: $00; Green: $80; Blue: $80; Alpha: $00);
+  webGray: TGfxColor           = (Red: $80; Green: $80; Blue: $80; Alpha: $00);
+  webSilver: TGfxColor	       = (Red: $c0; Green: $c0; Blue: $c0; Alpha: $00);
+  webRed: TGfxColor            = (Red: $ff; Green: $00; Blue: $00; Alpha: $00);
+  webLime: TGfxColor	       = (Red: $00; Green: $ff; Blue: $00; Alpha: $00);
+  webYellow: TGfxColor 	       = (Red: $ff; Green: $ff; Blue: $00; Alpha: $00);
+  webBlue: TGfxColor           = (Red: $00; Green: $00; Blue: $ff; Alpha: $00);
+  webFuchsia: TGfxColor	       = (Red: $ff; Green: $00; Blue: $ff; Alpha: $00);
+  webAqua: TGfxColor	       = (Red: $00; Green: $ff; Blue: $ff; Alpha: $00);
+  webWhite: TGfxColor          = (Red: $ff; Green: $ff; Blue: $ff; Alpha: $00);
 
 
   // Some predefined pixel formats:
@@ -348,7 +347,8 @@ type
     // Drawing functions
     procedure   DrawArc(const ARect: TRect; StartAngle, EndAngle: Single);
     procedure   DrawCircle(const ARect: TRect);
-    procedure   DrawLine(const AFrom, ATo: TPoint);
+    procedure   DrawLine(const AFrom, ATo: TPoint); overload;
+    procedure   DrawLine(const X1, Y1, X2, Y2: Integer); overload;
     procedure   DrawPolyLine(const Coords: array of TPoint); virtual;
     procedure   DrawRect(const ARect: TRect);
     procedure   DrawPoint(const APoint: TPoint);
@@ -608,6 +608,7 @@ operator - (const ASize: TSize; i: Integer) s: TSize;
 operator = (const AColor1, AColor2: TGfxColor) b: Boolean;
 {$endif}
 function GetAvgColor(const AColor1, AColor2: TGfxColor): TGfxColor;
+function GetGfxColor(const ARed, AGreen, ABlue, AAlpha: Byte): TGfxColor;
 function GfxColorToTColor(const AColor: TGfxColor): TColor;
 
 
@@ -792,6 +793,11 @@ end;
 procedure TFCustomCanvas.DrawLine(const AFrom, ATo: TPoint);
 begin
   DoDrawLine(Transform(AFrom), Transform(ATo));
+end;
+
+procedure TFCustomCanvas.DrawLine(const X1, Y1, X2, Y2: Integer);
+begin
+  DrawLine(Point(X1, Y1), Point(X2, Y2));
 end;
 
 procedure TFCustomCanvas.DrawPolyLine(const Coords: array of TPoint);
@@ -1210,11 +1216,17 @@ begin
   Result.Alpha := AColor1.Alpha + (AColor2.Alpha - AColor1.Alpha) div 2;
 end;
 
+function GetGfxColor(const ARed, AGreen, ABlue, AAlpha: Byte): TGfxColor;
+begin
+  Result.Alpha := AAlpha;
+  Result.Red := ARed;
+  Result.Green := AGreen;
+  Result.Blue := ABlue;
+end;
+
 function GfxColorToTColor(const AColor: TGfxColor): TColor;
 begin
-  Result := ((AColor.Red shr 8) and $ff)
-            or (AColor.Green and $ff00)
-            or ((AColor.Blue shl 8) and $ff0000);
+  Result := AColor.Red or (AColor.Green shl 8) or (AColor.Blue shl 16);
 end;
 
 
