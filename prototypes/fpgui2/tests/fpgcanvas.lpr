@@ -117,9 +117,12 @@ begin
   
   // Testing Canvas.Pixels[]
   // two pixels should have changed color in the top left of the form
-  c := Canvas.Pixels[192, 215];   // should be orange like color
-  Canvas.Pixels[7,5] := clBlue;
-  Canvas.Pixels[8,5] := c;
+  Canvas.Pixels[7,5] := clBlue;   // This tests consistant bit order handling (RGB)
+  Canvas.Pixels[8,5] := clRed;
+  c := Canvas.Pixels[192, 227];   // should be orange like color
+  Canvas.Pixels[9,5] := c;
+  c := Canvas.Pixels[150 + (32*4) + 3, 199];   // should be lightblue like color
+  Canvas.Pixels[10,5] := c;
 
   Canvas.EndDraw;
 end;

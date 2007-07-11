@@ -182,14 +182,14 @@ var
   c: dword;
 begin
   c      := fpgColorToRGB(col);
-  //swapping bytes
+  //swapping bytes (Red and Blue colors)
   Result := ((c and $FF0000) shr 16) or ((c and $0000FF) shl 16) or (c and $00FF00);
 end;
 
 function WinColorTofpgColor(col: longword): TfpgColor;
 begin
   //swapping bytes
-  Result := ((col and $FF0000) shr 16) or ((col and $0000FF) shl 16) or (col and $00FF00);
+  Result := fpgColorToWin(col);
 end;
 
 function GetMyWidgetFromHandle(wh: TfpgWinHandle): TfpgWidget;
@@ -1014,7 +1014,9 @@ function TfpgCanvasImpl.GetPixel(X, Y: integer): TfpgColor;
 var
   c: longword;
 begin
-  c := Windows.GetPixel(FDrawWindow.FWinHandle, X, Y);
+  c := Windows.GetPixel(Fgc, X, Y);
+  if c = CLR_INVALID then
+    Writeln('fpGFX/GDI: TfpgCanvasImpl.GetPixel returned an invalid color');
   Result := WinColorTofpgColor(c);
 end;
 
