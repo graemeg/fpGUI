@@ -31,7 +31,7 @@ type
   TBoxWindow = class(TFWindow)
   public
     constructor Create(AParent: TFCustomWindow);
-    procedure   Paint(Sender: TObject; const Rect: TRect);
+    procedure   Paint(Sender: TObject);
     procedure   MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
   end;
 
@@ -41,7 +41,7 @@ type
   public
     ABox: TBoxWindow;
     constructor Create;
-    procedure   Paint(Sender: TObject; const Rect: TRect);
+    procedure   Paint(Sender: TObject);
     procedure   MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
   end;
   
@@ -62,7 +62,7 @@ begin
   WriteLn('Mouse released on child window');
 end;
 
-procedure TBoxWindow.Paint(Sender: TObject; const Rect: TRect);
+procedure TBoxWindow.Paint(Sender: TObject);
 var
   r: TRect;
   tw: integer;
@@ -94,7 +94,7 @@ begin
   ABox.Show;
 end;
 
-procedure TMainWindow.Paint(Sender: TObject; const Rect: TRect);
+procedure TMainWindow.Paint(Sender: TObject);
 var
   r: TRect;
   tw: integer;

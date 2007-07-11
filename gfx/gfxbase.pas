@@ -321,7 +321,8 @@ type
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); virtual; abstract;
     procedure   DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect; const ADestPos: TPoint); virtual; abstract;
   public
-    constructor Create;
+    constructor Create; virtual;
+    procedure   SetHandle(AHandle: PtrUInt); virtual; abstract;
     // Transformations
     function    Transform(APoint: TPoint): TPoint;
     function    Transform(ARect: TRect): TRect;

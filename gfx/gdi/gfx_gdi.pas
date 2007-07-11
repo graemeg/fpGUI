@@ -101,8 +101,9 @@ type
     procedure   DoMaskedCopyRect(ASource, AMask: TFCustomCanvas; const ASourceRect: TRect; const AMaskPos, ADestPos: TPoint); override;
     procedure   DoDrawImageRect(AImage: TFCustomBitmap; ASourceRect: TRect; const ADestPos: TPoint); override;
   public
-    constructor Create(AHandle: HDC);
+    constructor Create; override;
     destructor  Destroy; override;
+    procedure   SetHandle(AHandle: PtrUInt); override;
     function    MapColor(const AColor: TGfxColor): TGfxPixel; override;
     function    FontCellHeight: Integer; override;
     function    TextExtent(const AText: String): TSize; override;
@@ -173,6 +174,8 @@ type
   { TGDIWindow }
 
   TGDIWindow = class(TFCustomWindow)
+  private
+    FPaintStruct: TPaintStruct;
   protected
     FHandle: PtrUInt;
     WindowClass: TWndClass;
@@ -431,18 +434,12 @@ end;
 
 { TGDICanvas }
 
-constructor TGDICanvas.Create(AHandle: HDC);
+constructor TGDICanvas.Create;
 begin
   inherited Create;
-  FHandle := AHandle;
-  ASSERT(Handle <> 0);
   FDefaultFontHandle := Windows.GetStockObject(DEFAULT_GUI_FONT);
   FCurFontHandle := FDefaultFontHandle;
-  Windows.SelectObject(Handle, FDefaultFontHandle);
-  Windows.GetTextMetrics(Handle, @FFontMetrics);
-  Windows.SetBkMode(Handle, TRANSPARENT);
 end;
-
 
 destructor TGDICanvas.Destroy;
 begin
@@ -459,6 +456,16 @@ begin
   inherited Destroy;
 end;
 
+procedure TGDICanvas.SetHandle(AHandle: PtrUInt);
+begin
+  FHandle := AHandle;
+
+//  ASSERT(Handle <> 0);
+
+  Windows.SelectObject(Handle, FDefaultFontHandle);
+  Windows.GetTextMetrics(Handle, @FFontMetrics);
+  Windows.SetBkMode(Handle, TRANSPARENT);
+end;
 
 procedure TGDICanvas.SaveState;
 var
@@ -874,7 +881,8 @@ end;
 constructor TGDIWindowCanvas.Create(AWnd: HWND);
 begin
   FWnd := AWnd;
-  inherited Create(Windows.GetDC(FWnd));
+  inherited Create();
+  SetHandle(Windows.GetDC(FWnd));
 end;
 
 
@@ -892,7 +900,8 @@ constructor TGDIBitmapCanvas.Create(ABitmap: HBITMAP; AWidth, AHeight: Integer);
 begin
   ASSERT(ABitmap <> 0);
   FBitmap := ABitmap;
-  inherited Create(Windows.CreateCompatibleDC(0));
+  inherited Create();
+  SetHandle(Windows.CreateCompatibleDC(0));
   FWidth := AWidth;
   FHeight := AHeight;
   FOldBitmap := Windows.SelectObject(Handle, Bitmap);
@@ -1147,6 +1156,7 @@ begin
      WM_Paint:
      begin
        Windows.BeginPaint(Window.Handle, @PaintStruct);
+       Window.FPaintStruct := PaintStruct;
        Window.EvPaint();
        Windows.EndPaint(Window.Handle, @PaintStruct);
      end;
@@ -1187,7 +1197,7 @@ begin
          Windows.GetClientRect(Window.Handle, @r);
          Window.FClientWidth := LoWord(lParam);
          Window.FClientHeight := HiWord(lParam);
-         TGDICanvas(Window.Canvas).Resized(Window.FWidth, Window.FHeight);
+//         TGDICanvas(Window.Canvas).Resized(Window.FWidth, Window.FHeight);
 
          Window.EvResize();
        end;
@@ -1379,7 +1389,9 @@ begin
      MainInstance,			// handle to application instance
      Self);				// window-creation data
 
-  FCanvas := TGDIWindowCanvas.Create(Handle);
+  { Creates the Canvas }
+
+  FCanvas := TGDICanvas.Create();
 end;
 
 
@@ -1624,8 +1636,50 @@ begin
 end;
 
 procedure TGDIWindow.EvPaint;
+var
+  rect: TRect;
+  OldBitmap, NewBitmap: HBITMAP;
+  hdcMem: HDC;
 begin
+  rect := FPaintStruct.rcPaint;
+
+  hdcMem := CreateCompatibleDC(FPaintStruct.hdc);
+
+  NewBitmap := Windows.CreateCompatibleBitmap(FPaintStruct.hdc, Width, Height);
+
+  OldBitmap := HBITMAP(SelectObject(hdcMem, NewBitmap));
+
+  FCanvas.SetHandle(hdcMem);
+
   if Assigned(OnPaint) then OnPaint(Self);
+
+{  Windows.BitBlt(
+   FPaintStruct.hdc,       // handle to destination DC
+   rect.Left,              // x-coord of destination upper-left corner
+   rect.Top,               // y-coord of destination upper-left corner
+   rect.Left + rect.Right, // width of destination rectangle
+   rect.Top + rect.Bottom, // height of destination rectangle
+   FCanvas.Handle,         // handle to source DC
+   rect.Left,              // x-coordinate of source upper-left corner
+   rect.Top,               // y-coordinate of source upper-left corner
+   SRCCOPY                 // raster operation code
+  );        }
+
+  Windows.BitBlt(
+   FPaintStruct.hdc, // handle to destination DC
+   0,                // x-coord of destination upper-left corner
+   0,                // y-coord of destination upper-left corner
+   Width,            // width of destination rectangle
+   Height,           // height of destination rectangle
+   FCanvas.Handle,   // handle to source DC
+   0,                // x-coordinate of source upper-left corner
+   0,                // y-coordinate of source upper-left corner
+   SRCCOPY           // raster operation code
+  );
+
+  SelectObject(hdcMem, OldBitmap);
+  DeleteDC(hdcMem);
+  DeleteObject(NewBitmap);
 end;
 
 procedure TGDIWindow.EvMove;
