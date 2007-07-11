@@ -41,19 +41,20 @@ begin
 {  btnHello.CanExpandWidth   := True;
   btnHello.CanExpandHeight  := True;
   BoxLayout.InsertChild(btnHello); }
-  lSize.cx := 50;
-  lSize.cy := 100;
-  btnHello.SetMinMaxClientSize(lSize, lSize);
+  lSize.cx := 100;
+  lSize.cy := 50;
+  btnHello.SetClientSize(lSize);
   lPoint.x := 25;
   lPoint.y := 25;
   btnHello.SetPosition(lPoint);
+  btnHello.Show;
 
   { set a min and max size }
   lSize.cx := 200;
   lSize.cy := 200;
+  SetClientSize(lSize);
   SetMinMaxClientSize(lSize, lSize);
 end;
-
 
 var
   MainForm: TMainForm;

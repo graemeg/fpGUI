@@ -188,6 +188,7 @@ type
     function    GetHandle: PtrUInt; override;
     procedure   UpdateWindowButtons;
     function    DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
+    procedure   EvInternalPaint;
   public
     { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
@@ -1160,7 +1161,7 @@ begin
      begin
        Windows.BeginPaint(Window.Handle, @PaintStruct);
        Window.FPaintStruct := PaintStruct;
-       Window.EvPaint();
+       Window.EvInternalPaint();
        Windows.EndPaint(Window.Handle, @PaintStruct);
      end;
      WM_ShowWindow:
@@ -1200,7 +1201,6 @@ begin
          Windows.GetClientRect(Window.Handle, @r);
          Window.FClientWidth := LoWord(lParam);
          Window.FClientHeight := HiWord(lParam);
-//         TGDICanvas(Window.Canvas).Resized(Window.FWidth, Window.FHeight);
 
          Window.EvResize();
        end;
@@ -1638,7 +1638,13 @@ begin
   else if Assigned(Parent) then Parent.EvMouseWheel(AWheelDelta, AMousePos);
 end;
 
-procedure TGDIWindow.EvPaint;
+{ Because the painting code is executed on the middle of the processing
+  of the event, we have an internal paint method, which allows descending
+  objects to override the EvPaint function like they would do with other
+  event functions.
+
+  This frees the OnPaint event for use by the users of the components }
+procedure TGDIWindow.EvInternalPaint;
 var
   rect: TRect;
   OldBitmap, NewBitmap: HBITMAP;
@@ -1649,7 +1655,7 @@ begin
   { It is necessary to create a bitmap and select it to implement
     double buffering. If we just create a DC and don't select a bitmap,
     there is no memory where to store the painting }
-  
+
   hdcMem := CreateCompatibleDC(FPaintStruct.hdc);
 
   NewBitmap := Windows.CreateCompatibleBitmap(FPaintStruct.hdc, Width, Height);
@@ -1660,10 +1666,10 @@ begin
 
   { Execution of user paint code }
 
-  if Assigned(OnPaint) then OnPaint(Self);
+  EvPaint();
 
   { Flushes the result to the screen }
-  
+
   Windows.BitBlt(
    FPaintStruct.hdc,       // handle to destination DC
    rect.Left,              // x-coord of destination upper-left corner
@@ -1676,25 +1682,20 @@ begin
    SRCCOPY                 // raster operation code
   );
 
-{  Windows.BitBlt(
-   FPaintStruct.hdc, // handle to destination DC
-   0,                // x-coord of destination upper-left corner
-   0,                // y-coord of destination upper-left corner
-   Width,            // width of destination rectangle
-   Height,           // height of destination rectangle
-   FCanvas.Handle,   // handle to source DC
-   0,                // x-coordinate of source upper-left corner
-   0,                // y-coordinate of source upper-left corner
-   SRCCOPY           // raster operation code
-  );    }
-
   { Clean up }
 
   SelectObject(hdcMem, OldBitmap);
   DeleteDC(hdcMem);
   DeleteObject(NewBitmap);
 
+  { Resets the canvas handle }
+
   FCanvas.SetHandle(0);
+end;
+
+procedure TGDIWindow.EvPaint;
+begin
+  if Assigned(OnPaint) then OnPaint(Self);
 end;
 
 procedure TGDIWindow.EvMove;
