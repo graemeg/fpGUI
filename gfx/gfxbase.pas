@@ -614,7 +614,6 @@ function GfxColorToTColor(const AColor: TGfxColor): TColor;
 // Keyboard
 function KeycodeToText(Key: Word; ShiftState: TShiftState): String;
 
-
 implementation
 
 uses
