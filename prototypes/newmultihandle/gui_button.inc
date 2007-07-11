@@ -27,6 +27,8 @@ constructor TFButton.Create(ACaption: string; AParent: TFCustomWindow);
 begin
   Create(AParent);
   
+  DrawBackground := False;
+
   Text := ACaption;
 end;
 
@@ -35,8 +37,6 @@ var
   r: TRect;
   tw: integer;
 begin
-  inherited EvPaint();
-
   Canvas.SetColor(colBlue);
   r.Left    := 0;
   r.Top     := 0;
@@ -50,6 +50,8 @@ begin
   r.Right   := Width + 1;
   r.Bottom  := Height + 1;
   Canvas.FillRect(r);
+
+  inherited EvPaint();
 end;
 
 procedure TFButton.EvMouseReleased(AButton: TMouseButton;

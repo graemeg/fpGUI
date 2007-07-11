@@ -65,8 +65,8 @@
       <Unit3>
         <Filename Value="..\gui_widget.inc"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="1" Y="24"/>
-        <TopLine Value="11"/>
+        <CursorPos X="51" Y="20"/>
+        <TopLine Value="12"/>
         <EditorIndex Value="4"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
@@ -74,8 +74,8 @@
       <Unit4>
         <Filename Value="..\gui_button.inc"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="1" Y="40"/>
-        <TopLine Value="32"/>
+        <CursorPos X="9" Y="49"/>
+        <TopLine Value="34"/>
         <EditorIndex Value="5"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
@@ -105,7 +105,12 @@
         <Loaded Value="True"/>
       </Unit7>
     </Units>
-    <JumpHistory Count="0" HistoryIndex="-1"/>
+    <JumpHistory Count="1" HistoryIndex="0">
+      <Position1>
+        <Filename Value="..\gui_button.inc"/>
+        <Caret Line="51" Column="32" TopLine="32"/>
+      </Position1>
+    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
