@@ -18,9 +18,11 @@ type
   TfpgWidget = class(TfpgWindow)
   private
     FAlignRect: TfpgRect;
+    FOnMouseDown: TMouseButtonEvent;
     FOnMouseEnter: TNotifyEvent;
     FOnMouseExit: TNotifyEvent;
     FOnMouseMove: TMouseMoveEvent;
+    FOnMouseUp: TMouseButtonEvent;
     FOnPaint: TPaintEvent;
     FOnScreen: boolean;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
@@ -74,18 +76,15 @@ type
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   RePaint;
 
-    //property OnMouseDown: TMouseEvent read FOnMouseDown write FOnMouseDown;
-    //property OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
-    //property OnMouseLeave: TNotifyEvent read FOnMouseLeave write FOnMouseLeave;
-    //property OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
-    //property OnMouseUp: TMouseEvent read FOnMouseUp write FOnMouseUp;
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
     property    OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
+    property    OnMouseDown: TMouseButtonEvent read FOnMouseDown write FOnMouseDown;
+    property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     //property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   public
-    constructor Create(aowner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   SetFocus;
     procedure   KillFocus;
@@ -158,10 +157,10 @@ begin
     end;
 end;
 
-constructor TfpgWidget.Create(aowner: TComponent);
+constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   FOnScreen := False;
-  FVisible := True;
+  FVisible  := True;
   FActiveWidget := nil;
   FEnabled      := True;
   FFocusable := False;
@@ -171,8 +170,8 @@ begin
   FAlign := alNone;
 //  OnKeyPress := nil;
 
-  if (aowner <> nil) and (aowner is TfpgWidget) then
-    FParent := TfpgWidget(aowner)
+  if (AOwner <> nil) and (AOwner is TfpgWidget) then
+    FParent := TfpgWidget(AOwner)
   else
     FParent := nil;
 
@@ -263,23 +262,55 @@ begin
 end;
 
 procedure TfpgWidget.MsgMouseDown(var msg: TfpgMessageRec);
+var
+  mb: TMouseButton;
 begin
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
+      begin
+        mb := mbLeft;
         HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+      end;
     MOUSE_RIGHT:
+      begin
+        mb := mbRight;
         HandleRMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+      end;
+    MOUSE_MIDDLE:
+      begin
+        mb := mbMiddle;
+      end;
   end;
+  if Assigned(FOnMouseDown) then
+    FOnMouseDown(self, mb,
+        GetKeyboardShiftState(msg.Params.mouse.shiftstate),
+        Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
 
 procedure TfpgWidget.MsgMouseUp(var msg: TfpgMessageRec);
+var
+  mb: TMouseButton;
 begin
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
+      begin
+        mb := mbLeft;
         HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+      end;
     MOUSE_RIGHT:
+      begin
+        mb := mbRight;
         HandleRMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+      end;
+    MOUSE_MIDDLE:
+      begin
+        mb := mbMiddle;
+      end;
   end;
+  if Assigned(FOnMouseUp) then
+    FOnMouseUp(self, mb,
+        GetKeyboardShiftState(msg.Params.mouse.shiftstate),
+        Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
 
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
