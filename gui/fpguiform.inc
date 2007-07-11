@@ -134,7 +134,7 @@ begin
   if Assigned(FWnd) then
     FWnd.Free;
 
-//  GFApplication.Forms.Remove(Self);
+//  GFApplication.RemoveWindow(Self);
 
   inherited Destroy;
 end;
@@ -145,7 +145,7 @@ begin
   LAYOUTTRACE('TFCustomForm.Show for %s:%s', [Name, ClassName]);
 
   FVisible := True;
-//  GFApplication.AddWindow(Wnd);
+  GFApplication.AddWindow(Wnd);
   Wnd.Show;
 end;
 

@@ -27,11 +27,11 @@ unit GFX_X11;
 interface
 
 uses
-  SysUtils, Classes,   // FPC units
-  X, XLib, XUtil,     // X11 units
-  unitxft,            // Xft font support
-  GfxBase,            // fpGFX units
-  GELDirty;           // fpGFX emulation layer
+  SysUtils, Classes, ctypes, // FPC units
+  X, XLib, XUtil,            // X11 units
+  unitxft,                   // Xft font support
+  GfxBase,                   // fpGFX units
+  GELDirty;                  // fpGFX emulation layer
 
 
 resourcestring
@@ -228,7 +228,8 @@ type
     FComposeStatus: TXComposeStatus;
     FComposeBuffer: String[32];
     FCurCursorHandle: X.TCursor;
-    function    StartComposing(const Event: TFEvent): TKeySym;
+    FXEvent: PXEvent;
+    function    StartComposing(const Event: TXEvent): TKeySym;
     procedure   EndComposing;
     procedure   Expose(var Event: TXExposeEvent); message X.Expose;
     procedure   Configure(var Event: TXConfigureEvent); message X.ConfigureNotify;
@@ -244,8 +245,10 @@ type
     function    GetHandle: PtrUInt; override;
     procedure   UpdateMotifWMHints;
   public
+    { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
+    { Widget controling methods }
     procedure   SetPosition(const APosition: TPoint); override;
     procedure   SetSize(const ASize: TSize); override;
     procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
@@ -256,7 +259,24 @@ type
     procedure   PaintInvalidRegion; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
-    procedure   ProcessEvent(AEvent: TFEvent); override;
+    { Event processing methods }
+    procedure   EvCreate; override;
+    procedure   EvFocusIn; override;
+    procedure   EvFocusOut; override;
+    procedure   EvHide; override;
+    procedure   EvKeyPressed(AKey: Word); override;
+    procedure   EvKeyReleased(AKey: Word); override;
+    procedure   EvKeyChar(AKeyChar: Char); override;
+    procedure   EvMouseEnter(const AMousePos: TPoint); override;
+    procedure   EvMouseLeave; override;
+    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseMove(const AMousePos: TPoint); override;
+    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
+    procedure   EvPaint; override;
+    procedure   EvMove; override;
+    procedure   EvResize; override;
+    procedure   EvShow; override;
   end;
 
 
@@ -267,7 +287,7 @@ var
 function RectToXRect(const ARect: TRect): TXRectangle;
 function XRectToRect(const ARect: TXRectangle): TRect;
 function GetXEventName(Event: LongInt): String;
-
+function XButtonToMouseButton(const XButton: cint; var MouseButton: TMouseButton): Boolean;
 
 implementation
 
@@ -276,7 +296,7 @@ uses
   ,fpGFX
   ,fpUTF8Utils
   ,Xatom
-  ,CTypes {,keysym ,libc , }
+   {,keysym ,libc , }
   ;
 
 resourcestring
@@ -999,7 +1019,9 @@ procedure TX11Application.Run;
 var
   XEvent: TXEvent;
   WindowEntry: TFCustomWindow;
-  Event: TFEvent;
+  MouseButton: TMouseButton;
+  Sum: Integer;
+  NewEvent: TXEvent;
 begin
   inherited Run;
 
@@ -1037,8 +1059,7 @@ begin
         continue;
       end;
       
-      Event := TFEvent.Create;
-      Event.EventPointer := @XEvent;
+      TX11Window(WindowEntry).FXEvent := @XEvent;
 
       case XEvent._type of
        X.DestroyNotify:
@@ -1047,86 +1068,80 @@ begin
          end;
        X.KeyPress:
          begin
-           Event.EventType := etKeyPressed;
-           Event.State := XEvent.xkey.state;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvKeyPressed(XEvent.xkey.keycode);
          end;
        X.KeyRelease:
          begin
-           Event.EventType := etKeyReleased;
-           Event.State := XEvent.xkey.state;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvKeyReleased(XEvent.xkey.keycode);
          end;
        X.ButtonPress:
          begin
-           Event.EventType := etMousePressed;
-           Event.State := XEvent.xbutton.state;
-           Event.Button := XEvent.xbutton.button;
-           Event.X := XEvent.xbutton.x;
-           Event.Y := XEvent.xbutton.y;
-           WindowEntry.ProcessEvent(Event);
+           if XButtonToMouseButton(XEvent.xbutton.button, MouseButton) then
+            WindowEntry.EvMousePressed(MouseButton,
+             Point(XEvent.xbutton.x, XEvent.xbutton.y))
+           else
+           begin
+             if XEvent.xbutton.button = 4 then Sum := -1
+             else Sum := 1;
+
+             // Check for other mouse wheel messages in the queue
+             while XCheckTypedWindowEvent(GFApplication.Handle,
+              WindowEntry.Handle, X.ButtonPress, @NewEvent) do
+             begin
+	       if NewEvent.xbutton.Button = 4 then Dec(Sum)
+               else if NewEvent.xbutton.Button = 5 then Inc(Sum)
+               else
+               begin
+                 XPutBackEvent(GFApplication.Handle, @NewEvent);
+                 break;
+               end;
+             end;
+
+             WindowEntry.EvMouseWheel(
+              Sum, Point(XEvent.xbutton.x, XEvent.xbutton.y));
+           end;
          end;
        X.ButtonRelease:
          begin
-           Event.EventType := etMouseReleased;
-           Event.State := XEvent.xbutton.state;
-           Event.Button := XEvent.xbutton.button;
-           Event.X := XEvent.xbutton.x;
-           Event.Y := XEvent.xbutton.y;
-           WindowEntry.ProcessEvent(Event);
+           XButtonToMouseButton(XEvent.xbutton.button, MouseButton);
+
+           WindowEntry.EvMouseReleased(
+            MouseButton,
+            Point(XEvent.xbutton.x, XEvent.xbutton.y));
          end;
        X.EnterNotify:
          begin
-           Event.EventType := etMouseEnter;
-           Event.State := XEvent.xbutton.state;
-           Event.Button := XEvent.xbutton.button;
-           Event.X := XEvent.xbutton.x;
-           Event.Y := XEvent.xbutton.y;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvMouseEnter(
+            Point(XEvent.xbutton.x, XEvent.xbutton.y));
          end;
        X.LeaveNotify:
          begin
-           Event.EventType := etMouseLeave;
-           Event.State := XEvent.xbutton.state;
-           Event.Button := XEvent.xbutton.button;
-           Event.X := XEvent.xbutton.x;
-           Event.Y := XEvent.xbutton.y;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvMouseLeave();
          end;
        X.MotionNotify:
          begin
-           Event.EventType := etMouseMove;
-           Event.State := XEvent.xbutton.state;
-           Event.Button := XEvent.xbutton.button;
-           Event.X := XEvent.xbutton.x;
-           Event.Y := XEvent.xbutton.y;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvMouseMove(
+            Point(XEvent.xbutton.x, XEvent.xbutton.y));
          end;
        X.FocusIn:
          begin
-           Event.EventType := etFocusIn;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvFocusIn();
          end;
        X.FocusOut:
          begin
-           Event.EventType := etFocusOut;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvFocusOut();
          end;
        X.MapNotify:
          begin
-//          writeln(Format('==MapNotify== Window ID = %d', [XEvent.XAny.Window]));
-           Event.EventType := etShow;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvShow();
          end;
        X.UnmapNotify:
          begin
-           Event.EventType := etHide;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvHide();
          end;
        X.ReparentNotify:
          begin
-           Event.EventType := etCreate;
-           WindowEntry.ProcessEvent(Event);
+           WindowEntry.EvCreate();
          end;
        X.Expose:
          begin
@@ -1134,12 +1149,7 @@ begin
              For now we are just ignoring all expose messages where Count <> 0 }
            if XEvent.xexpose.count = 0 then
            begin
-             Event.EventType := etPaint;
-             Event.X := XEvent.xexpose.x;
-             Event.Y := XEvent.xexpose.y;
-             Event.Width := XEvent.xexpose.width;
-             Event.Height := Xevent.xexpose.height;
-             WindowEntry.ProcessEvent(Event);
+             WindowEntry.EvPaint();
            end;
          end;
        X.ConfigureNotify:
@@ -1154,7 +1164,6 @@ begin
         WriteLn('fpGFX/X11: Unhandled X11 event received: ', GetXEventName(XEvent._type));
       end;
       
-      Event.Free;
     end;
   end;
   DoBreakRun := False;
@@ -1233,9 +1242,6 @@ begin
 end;
 
 { TX11Window }
-
-const
-  ButtonTable: array[1..3] of TMouseButton = (mbLeft, mbMiddle, mbRight);
 
 { Note, this only creates a window, it doesn't actually show the window. It
   is still invisible. To make it visible, we need to call Show(). }
@@ -1543,149 +1549,120 @@ begin
   XUngrabPointer(GFApplication.Handle, CurrentTime);
 end;
 
-procedure TX11Window.ProcessEvent(AEvent: TFEvent);
+procedure TX11Window.EvCreate;
+begin
+  if Assigned(OnCreate) then OnCreate(Self)
+end;
+
+procedure TX11Window.EvFocusIn;
+begin
+  if Assigned(OnFocusIn) then OnFocusIn(Self);
+end;
+
+procedure TX11Window.EvFocusOut;
+begin
+  if Assigned(OnFocusOut) then OnFocusOut(Self);
+end;
+
+procedure TX11Window.EvHide;
+begin
+  if Assigned(OnHide) then OnHide(Self);
+end;
+
+procedure TX11Window.EvKeyPressed(AKey: Word);
 var
   KeySym: TKeySym;
-  Sum: Integer;
-  NewEvent: TXEvent;
 begin
-  case AEvent.EventType of
-   etCreate:
-     begin
-       if Assigned(OnCreate) then OnCreate(Self)
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etCanClose:
-     begin
+  KeySym := StartComposing(FXEvent^);
 
-     end;
-   etClose:
-     begin
+  if Assigned(OnKeyPressed) then
+   OnKeyPressed(Self, AKey, ConvertShiftState(FXEvent^.xkey.state))
+  else if Assigned(Parent) then Parent.EvKeyPressed(AKey);
 
-     end;
-   etFocusIn:
-     begin
-       if Assigned(OnFocusIn) then OnFocusIn(Self);
-     end;
-   etFocusOut:
-     begin
-       if Assigned(OnFocusOut) then OnFocusOut(Self);
-     end;
-   etHide:
-     begin
-       if Assigned(OnHide) then OnHide(Self);
-     end;
-   etKeyPressed:
-     begin
-       KeySym := StartComposing(AEvent);
-       
-       if Assigned(OnKeyPressed) then
-        OnKeyPressed(Self, KeySymToKeycode(KeySym), ConvertShiftState(AEvent.State))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
+  if (FXEvent^.xkey.state and (ControlMask or Mod1Mask)) = 0 then EndComposing;
+end;
 
-       if (AEvent.State and (ControlMask or Mod1Mask)) = 0 then EndComposing;
-     end;
-   etKeyReleased:
-     begin
-       KeySym := StartComposing(AEvent);
-       
-       if Assigned(OnKeyReleased) then
-        OnKeyReleased(Self, KeySymToKeycode(KeySym), ConvertShiftState(AEvent.State))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-       
-       // Do not call EndComposing, as this would generate duplicate KeyChar events!
-     end;
-   etKeyChar:
-     begin
-       if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseEnter:
-     begin
-       if Assigned(OnMouseEnter) then
-        OnMouseEnter(Self, ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseLeave:
-     begin
-       if Assigned(OnMouseLeave) then OnMouseLeave(Self)
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMousePressed:
-     begin
-       case AEvent.Button of
-        Button1..Button3:
-        begin
-          if Assigned(OnMousePressed) then
-           OnMousePressed(Self, ButtonTable[AEvent.Button],
-            ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
-          else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-        end;
-        Button4, Button5:		// Mouse wheel message
-        begin
-          if AEvent.Button = Button4 then
-            Sum := -1
-          else
-            Sum := 1;
+procedure TX11Window.EvKeyReleased(AKey: Word);
+var
+  KeySym: TKeySym;
+begin
+  KeySym := StartComposing(FXEvent^);
 
-  	      // Check for other mouse wheel messages in the queue
-          while XCheckTypedWindowEvent(GFApplication.Handle, Handle, X.ButtonPress, @NewEvent) do
-          begin
-	          if NewEvent.xbutton.Button = 4 then
-	            Dec(Sum)
-            else if NewEvent.xbutton.Button = 5 then
-	            Inc(Sum)
-            else
-      	    begin
-      	      XPutBackEvent(GFApplication.Handle, @NewEvent);
-              break;
-      	    end;
-          end;
+  if Assigned(OnKeyReleased) then
+   OnKeyReleased(Self, KeySymToKeycode(KeySym), ConvertShiftState(FXEvent^.xkey.state))
+  else if Assigned(Parent) then Parent.EvKeyReleased(AKey);
 
-          if Assigned(OnMouseWheel) then
-           OnMouseWheel(Self, ConvertShiftState(AEvent.State), Sum, Point(AEvent.x, AEvent.y))
-          else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-        end;
-       end;
-     end;
-   etMouseReleased:
-     begin
-       if (AEvent.Button >= 1) and (AEvent.Button <= 3) and Assigned(OnMouseReleased) then
-        OnMouseReleased(Self, ButtonTable[AEvent.Button],
-         ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseMove:
-     begin
-       if Assigned(OnMouseMove) then
-        OnMouseMove(Self, ConvertShiftState(AEvent.State), Point(AEvent.x, AEvent.y))
-       else if Assigned(Parent) then Parent.ProcessEvent(AEvent);
-     end;
-   etMouseWheel:
-     begin
-       // it's handled in etMousePressed
-     end;
-   etPaint:
-     begin
-//       if Assigned(OnPaint) then OnPaint(Self, Rect(AEvent.X, AEvent.Y, AEvent.Width, AEvent.Height));
-        // We are ignoring the rectangle from the XEvent and rather use the
-        // full window rectangle.
-        if Assigned(OnPaint) then
-          OnPaint(Self, Rect(0, 0, Width, Height));
-     end;
-   etMove:
-     begin
-       if Assigned(OnMove) then OnMove(Self);
-     end;
-   etResize:
-     begin
-       if Assigned(OnResize) then OnResize(Self);
-     end;
-   etShow:
-     begin
-       if Assigned(OnShow) then OnShow(Self);
-     end;
-  end;
+  // Do not call EndComposing, as this would generate duplicate KeyChar events!
+end;
+
+procedure TX11Window.EvKeyChar(AKeyChar: Char);
+begin
+{  if Assigned(OnKeyChar) then OnKeyChar(Self, Chr(AEvent.wParam))
+  else if Assigned(Parent) then Parent.ProcessEvent(AEvent); }
+end;
+
+procedure TX11Window.EvMouseEnter(const AMousePos: TPoint);
+begin
+  if Assigned(OnMouseEnter) then
+   OnMouseEnter(Self, ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseEnter(AMousePos);
+end;
+
+procedure TX11Window.EvMouseLeave;
+begin
+  if Assigned(OnMouseLeave) then OnMouseLeave(Self)
+  else if Assigned(Parent) then Parent.EvMouseLeave();
+end;
+
+procedure TX11Window.EvMousePressed(AButton: TMouseButton;
+  const AMousePos: TPoint);
+begin
+  if Assigned(OnMousePressed) then
+   OnMousePressed(Self, AButton, ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
+  else if Assigned(Parent) then Parent.EvMousePressed(AButton, AMousePos);
+end;
+
+procedure TX11Window.EvMouseReleased(AButton: TMouseButton;
+  const AMousePos: TPoint);
+begin
+ if Assigned(OnMouseReleased) then
+   OnMouseReleased(Self, AButton,
+   ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseReleased(AButton, AMousePos);
+end;
+
+procedure TX11Window.EvMouseMove(const AMousePos: TPoint);
+begin
+  if Assigned(OnMouseMove) then
+   OnMouseMove(Self, ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseMove(AMousePos);
+end;
+
+procedure TX11Window.EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint);
+begin
+  if Assigned(OnMouseWheel) then
+   OnMouseWheel(Self, ConvertShiftState(FXEvent^.xbutton.state), AWheelDelta, AMousePos)
+  else if Assigned(Parent) then Parent.EvMouseWheel(AWheelDelta, AMousePos);
+end;
+
+procedure TX11Window.EvPaint;
+begin
+  if Assigned(OnPaint) then OnPaint(Self);
+end;
+
+procedure TX11Window.EvMove;
+begin
+  if Assigned(OnMove) then OnMove(Self);
+end;
+
+procedure TX11Window.EvResize;
+begin
+  if Assigned(OnResize) then OnResize(Self);
+end;
+
+procedure TX11Window.EvShow;
+begin
+  if Assigned(OnShow) then OnShow(Self);
 end;
 
 function TX11Window.GetTitle: String;
@@ -1908,10 +1885,10 @@ begin
     XFree(Hints);
 end;
 
-function TX11Window.StartComposing(const Event: TFEvent): TKeySym;
+function TX11Window.StartComposing(const Event: TXEvent): TKeySym;
 begin
   SetLength(FComposeBuffer,
-    XLookupString(Event.EventPointer, @FComposeBuffer[1],
+    XLookupString(@Event, @FComposeBuffer[1],
       SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus));
 end;
 
@@ -2028,6 +2005,21 @@ begin
     Result := EventNames[Event]
   else
     Result := '#' + IntToStr(Event);
+end;
+
+{ Returns True if the button is indeed a mouse button
+  and False if it's the mouse wheel }
+function XButtonToMouseButton(const XButton: cint; var MouseButton: TMouseButton): Boolean;
+const
+  ButtonTable: array[1..3] of TMouseButton = (mbLeft, mbMiddle, mbRight);
+begin
+  Result := False;
+
+  if (XButton > 3) or (XButton < 1) then Exit;
+
+  MouseButton := ButtonTable[XButton];
+  
+  Result := True;
 end;
 
 { TX11FontResourceImpl }
