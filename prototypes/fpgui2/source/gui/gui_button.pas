@@ -188,6 +188,7 @@ var
   lBtnFlags: TFButtonFlags;
 begin
   Canvas.BeginDraw;
+  inherited HandlePaint;
   Canvas.Clear(clButtonFace);
   Canvas.ClearClipRect;
 

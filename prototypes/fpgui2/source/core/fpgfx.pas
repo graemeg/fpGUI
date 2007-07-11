@@ -30,6 +30,9 @@ type
 
   TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
     btnIsSelected, btnHasFocus, btnHasParentColor);
+    
+  TMouseButton = (mbLeft, mbRight, mbMiddle);
+
 
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
@@ -39,10 +42,27 @@ const
 
 
 type
-  TKeyPressNotifyEvent = procedure(Sender: TObject; var keycode: word; var shiftstate: word;
+  { *******************************************
+      Internal event properties: Event Types
+    *******************************************}
+  TIntKeyPressEvent = procedure(Sender: TObject; var keycode: word; var shiftstate: word;
                             var consumed: boolean) of object;
-  TMouseNotifyEvent = procedure(Sender: TObject; x, y: TfpgCoord; var button: word;
+  TIntMouseEvent = procedure(Sender: TObject; x, y: TfpgCoord; var button: word;
                           var shiftstate: word) of object;
+
+
+  { *******************************************
+      Public event properties: Event Types
+    *******************************************}
+  { Keyboard }
+  TKeyEvent = procedure(Sender: TObject; AKey: Word; AShift: TShiftState) of object;
+  TKeyCharEvent = procedure(Sender: TObject; AKeyChar: Char) of object;
+  { Mouse }
+  TMouseButtonEvent = procedure(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint) of object;
+  TMouseMoveEvent = procedure(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint) of object;
+  TMouseWheelEvent = procedure(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint) of object;
+  { Painting }
+  TPaintEvent = procedure(Sender: TObject; const ARect: TfpgRect) of object;
 
 type
   TSizeParams = record
@@ -176,15 +196,16 @@ type
     FEnabled: boolean;
     FNextAlarm: TDateTime;
     FInterval: integer;
+    FOnTimer: TNotifyEvent;
     procedure   SetEnabled(const AValue: boolean);
   public
-    OnTimer: TNotifyEvent;
     constructor Create(ainterval: integer);
     destructor  Destroy; override;
     procedure   CheckAlarm(ctime: TDateTime);
     property    Enabled: boolean read FEnabled write SetEnabled;
     property    NextAlarm: TDateTime read FNextAlarm;
     property    Interval: integer read FInterval write FInterval;
+    property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
   end;
 
 

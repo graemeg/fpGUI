@@ -106,7 +106,7 @@ type
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
   public
-    constructor Create;
+    constructor Create; override;
     destructor  Destroy; override;
   end;
 
@@ -927,6 +927,7 @@ end;
 
 constructor TfpgCanvasImpl.Create;
 begin
+  inherited;
   FDrawing      := False;
   FDrawWindow   := nil;
   FBufferBitmap := 0;

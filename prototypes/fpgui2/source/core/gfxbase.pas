@@ -231,6 +231,7 @@ type
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
   public
+    constructor Create; virtual;
     procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   DrawRectangle(r: TfpgRect); overload;
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
@@ -316,10 +317,42 @@ type
   end;
 
 
+{ ********  Helper functions  ******** }
+{ Keyboard }
+function GetKeyboardShiftState(AShiftState: word): TShiftState;
+function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
+
 implementation
 
 uses
   fpgfx;  // needed for fpgApplication
+
+function GetKeyboardShiftState(AShiftState: word): TShiftState;
+begin
+  Result := [];
+  if (AShiftState and ss_shift) <> 0 then
+    Include(result, ssShift);
+
+  if (AShiftState and ss_Control) <> 0 then
+    Include(result, ssCtrl);
+
+  if (AShiftState and ss_Alt) <> 0 then
+    Include(result, ssAlt);
+
+  if (AShiftState and ss_CapsLock) <> 0 then
+    Include(result, ssCaps);
+
+  if (AShiftState and ss_NumLock) <> 0 then
+    Include(result, ssNum);
+
+  if (AShiftState and ss_ScrollLock) <> 0 then
+    Include(result, ssScroll);
+end;
+
+function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
+begin
+  Result := 'not implemented yet';
+end;
 
 { TfpgRect }
 
@@ -409,6 +442,11 @@ begin
 end;
 
 { TfpgCanvasBase }
+
+constructor TfpgCanvasBase.Create;
+begin
+  FBufferedDraw := True;
+end;
 
 procedure TfpgCanvasBase.DrawRectangle(x, y, w, h: TfpgCoord);
 begin

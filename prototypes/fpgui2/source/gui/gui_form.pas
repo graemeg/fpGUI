@@ -15,6 +15,14 @@ type
 
 
   TfpgForm = class(TfpgWidget)
+  private
+    FOnActivate: TNotifyEvent;
+    FOnClose: TNotifyEvent;
+    FOnCreate: TNotifyEvent;
+    FOnDeactivate: TNotifyEvent;
+    FOnDestroy: TNotifyEvent;
+    FOnHide: TNotifyEvent;
+    FOnShow: TNotifyEvent;
   protected
     FPrevModalForm: TfpgForm;
     FModalResult: integer;
@@ -31,6 +39,10 @@ type
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   HandlePaint; override;
     procedure   HandleClose; virtual;
+    procedure   HandleHide; override;
+    procedure   HandleShow; override;
+    procedure   AfterConstruction; override;
+    procedure   BeforeDestruction; override;
   public
     constructor Create(aowner: TComponent); override;
     procedure   AfterCreate; virtual;
@@ -42,6 +54,15 @@ type
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    ModalResult: integer read FModalResult write FModalResult;
+  published
+    {$Note Refactor this to a TfpgCustomForm and only surface it here }
+    property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
+    property    OnClose: TNotifyEvent read FOnClose write FOnClose;
+    property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
+    property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
+    property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
+    property    OnHide: TNotifyEvent read FOnHide write FOnHide;
+    property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   end;
 
 
@@ -86,9 +107,9 @@ end;
 
 procedure TfpgForm.HandlePaint;
 begin
-  canvas.BeginDraw;
-  canvas.Clear(FBackgroundColor);
-  canvas.EndDraw(0, 0, FWidth, FHeight);
+  Canvas.BeginDraw;
+  Canvas.Clear(FBackgroundColor);
+  Canvas.EndDraw(0, 0, FWidth, FHeight);
 end;
 
 procedure TfpgForm.AdjustWindowStyle;
@@ -172,22 +193,56 @@ begin
     else
       ActiveWidget.SetFocus;
   end;
+  if Assigned(FOnActivate) then
+    FOnActivate(self);
 end;
 
 procedure TfpgForm.MsgDeActivate(var msg: TfpgMessageRec);
 begin
   if ActiveWidget <> nil then
     ActiveWidget.KillFocus;
+  if Assigned(FOnDeactivate) then
+    FOnDeactivate(self);
 end;
 
 procedure TfpgForm.MsgClose(var msg: TfpgMessageRec);
 begin
   HandleClose;
+  if Assigned(FOnClose) then
+    FOnClose(self);
 end;
 
 procedure TfpgForm.HandleClose;
 begin
   Close;
+end;
+
+procedure TfpgForm.HandleHide;
+begin
+  inherited HandleHide;
+  if Assigned(FOnHide) then
+    FOnHide(self);
+end;
+
+procedure TfpgForm.HandleShow;
+begin
+  inherited HandleShow;
+  if Assigned(FOnShow) then
+    FOnShow(self);
+end;
+
+procedure TfpgForm.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  if Assigned(FOnCreate) then
+    FOnCreate(self);
+end;
+
+procedure TfpgForm.BeforeDestruction;
+begin
+  inherited BeforeDestruction;
+  if Assigned(FOnDestroy) then
+    FOnDestroy(self);
 end;
 
 procedure TfpgForm.Hide;

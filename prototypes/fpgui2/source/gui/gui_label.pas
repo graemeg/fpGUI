@@ -35,6 +35,7 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Color: TfpgColor read FColor write SetColor;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+    property    OnMouseMove;
   end;
 
   TLabelClass = class of TfpgLabel;

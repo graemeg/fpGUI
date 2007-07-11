@@ -110,7 +110,7 @@ type
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
   public
-    constructor Create;
+    constructor Create; override;
     destructor  Destroy; override;
   end;
 
@@ -979,8 +979,8 @@ end;
 
 function TfpgFontResourceImpl.GetHeight: integer;
 begin
-  // Not sure which one is better?
-  Result := FFontData^.height; //  GetAscent + GetDescent;
+  // Do NOT use FFontData^.height as it isn't as accurate
+  Result := GetAscent + GetDescent;
 end;
 
 function TfpgFontResourceImpl.GetTextWidth(const txt: string): integer;
@@ -1000,6 +1000,7 @@ end;
 
 constructor TfpgCanvasImpl.Create;
 begin
+  inherited;
   FDrawing    := False;
   FDrawWindow := nil;
 
@@ -1193,7 +1194,7 @@ end;
 procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
 begin
   if Length(txt) < 1 then
-    Exit;
+    Exit; //==>
 
   XftDrawStringUTF8(FXftDraw, FColorTextXft, FCurFontRes.Handle, x, y + FCurFontRes.GetAscent,
     PChar(txt), Length(txt));

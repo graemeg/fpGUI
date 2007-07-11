@@ -18,6 +18,10 @@ type
   TfpgWidget = class(TfpgWindow)
   private
     FAlignRect: TfpgRect;
+    FOnMouseEnter: TNotifyEvent;
+    FOnMouseExit: TNotifyEvent;
+    FOnMouseMove: TMouseMoveEvent;
+    FOnPaint: TPaintEvent;
     FOnScreen: boolean;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -69,10 +73,20 @@ type
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   RePaint;
+
+    //property OnMouseDown: TMouseEvent read FOnMouseDown write FOnMouseDown;
+    //property OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
+    //property OnMouseLeave: TNotifyEvent read FOnMouseLeave write FOnMouseLeave;
+    //property OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
+    //property OnMouseUp: TMouseEvent read FOnMouseUp write FOnMouseUp;
+    property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
+    property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
+    property    OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
+    property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
+    //property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   public
     constructor Create(aowner: TComponent); override;
     destructor  Destroy; override;
-    OnKeyPress: TKeyPressNotifyEvent;
     procedure   SetFocus;
     procedure   KillFocus;
     property    Parent: TfpgWidget read FParent write FParent;
@@ -121,8 +135,7 @@ end;
 procedure TfpgWidget.SetActiveWidget(const AValue: TfpgWidget);
 begin
   if FActiveWidget = AValue then
-    Exit;
-
+    Exit; //==>
   if FActiveWidget <> nil then
     FActiveWidget.HandleKillFocus;
   FActiveWidget := AValue;
@@ -133,9 +146,8 @@ end;
 procedure TfpgWidget.SetVisible(const AValue: boolean);
 begin
   if FVisible = AValue then
-    Exit;
+    Exit; //==>
   FVisible := AValue;
-
   if FOnScreen then
     if FVisible then
       HandleShow
@@ -157,7 +169,7 @@ begin
   FTabOrder  := 0;
   FAnchors := [anLeft, anTop];
   FAlign := alNone;
-  OnKeyPress := nil;
+//  OnKeyPress := nil;
 
   if (aowner <> nil) and (aowner is TfpgWidget) then
     FParent := TfpgWidget(aowner)
@@ -179,6 +191,8 @@ end;
 procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
 begin
   HandlePaint;
+  if Assigned(FOnPaint) then
+    FOnPaint(Self, msg.Params.rect);
 end;
 
 procedure TfpgWidget.MsgKeyChar(var msg: TfpgMessageRec);
@@ -271,6 +285,10 @@ end;
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
 begin
   HandleMouseMove(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
+  if Assigned(OnMouseMove) then
+    OnMouseMove(self,
+        GetKeyboardShiftState(msg.Params.mouse.shiftstate),
+        Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
 
 procedure TfpgWidget.MsgDoubleClick(var msg: TfpgMessageRec);
@@ -281,11 +299,15 @@ end;
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
 begin
   HandleMouseEnter;
+  if Assigned(FOnMouseEnter) then
+    FOnMouseEnter(self);
 end;
 
 procedure TfpgWidget.MsgMouseExit(var msg: TfpgMessageRec);
 begin
   HandleMouseExit;
+  if Assigned(FOnMouseExit) then
+    FOnMouseExit(Self);
 end;
 
 procedure TfpgWidget.HandleShow;
@@ -345,21 +367,16 @@ begin
   // descendants will implement this.
 end;
 
-procedure TfpgWidget.HandleKeyPress(var keycode, shiftstate: word; var consumed: boolean);
-begin
-  // descendants will implement this.
-end;
-
 procedure TfpgWidget.HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean);
 var
   wg: TfpgWidget;
   dir: integer;
 begin
-  if Assigned(OnKeyPress) then
-    OnKeyPress(self, keycode, shiftstate, consumed);
+  //if Assigned(OnKeyPress) then
+    //OnKeyPress(self, keycode, shiftstate, consumed);
 
-  if consumed then
-    Exit;
+  //if consumed then
+    //Exit; //==>
 
   dir := 0;
 
@@ -380,6 +397,7 @@ begin
         dir := -1;
   end;
 
+  {$Note Optimize this code. Constantly setting ActiveWidget causes RePaint to be called!}
   if dir = 1 then
   begin
     // forward
@@ -419,6 +437,11 @@ begin
       consumed     := True;
     end;
   end;
+end;
+
+procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean);
+begin
+  // descendants will implement this.
 end;
 
 procedure TfpgWidget.HandleKeyRelease(var keycode: word; var shiftstate: word; var consumed: boolean);
