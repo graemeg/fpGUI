@@ -1049,12 +1049,10 @@ begin
     // According to a comment in X.h, the valid event types start with 2!
     if XEvent._type >= 2 then
     begin
-//      WriteLn('=== Received X event "', GetXEventName(XEvent._type), '"');
       WindowEntry := FindWindowByXID(XEvent.XAny.Window);
 
       if not Assigned(WindowEntry) then
       begin
-//        writeln(Format('==unknown== Window ID = %d', [XEvent.XAny.Window]));
         WriteLn('fpGFX/X11: Received X event "', GetXEventName(XEvent._type), '" for unknown window');
         continue;
       end;
@@ -1103,11 +1101,15 @@ begin
          end;
        X.ButtonRelease:
          begin
-           XButtonToMouseButton(XEvent.xbutton.button, MouseButton);
+           { Release events are only for mouse buttons, and not mouse wheel moviments }
+           if (XEvent.xbutton.button >= 1) and (XEvent.xbutton.button <= 3) then
+           begin
+             XButtonToMouseButton(XEvent.xbutton.button, MouseButton);
 
-           WindowEntry.EvMouseReleased(
-            MouseButton,
-            Point(XEvent.xbutton.x, XEvent.xbutton.y));
+             WindowEntry.EvMouseReleased(
+              MouseButton,
+              Point(XEvent.xbutton.x, XEvent.xbutton.y));
+           end;
          end;
        X.EnterNotify:
          begin
@@ -1522,15 +1524,17 @@ begin
 end;
 
 procedure TX11Window.Invalidate;
-var
-  ARect: TRect;
+{var
+  ARect: TRect;}
 begin
-  ARect.Left   := Left;
+{  ARect.Left   := Left;
   ARect.Top    := Top;
   ARect.Right  := Left + Width;
   ARect.Bottom := Top + Height;
 
-  GFApplication.DirtyList.AddRect(Self, ARect);
+  GFApplication.DirtyList.AddRect(Self, ARect); }
+  
+  EvPaint();
 end;
 
 procedure TX11Window.PaintInvalidRegion;

@@ -80,6 +80,8 @@ end;
 procedure TFButton.EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint
  );
 begin
+  WriteLn('Mouse Pressed');
+
   FIsPressed := True;
 
   Invalidate;
@@ -90,6 +92,8 @@ end;
 procedure TFButton.EvMouseReleased(AButton: TMouseButton;
   const AMousePos: TPoint);
 begin
+  WriteLn('Mouse Released');
+
   FIsPressed := False;
 
   Invalidate;
