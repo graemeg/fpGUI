@@ -12,6 +12,7 @@ type
   TMainForm = class(TFWidget)
   private
     btnHello: TFButton;
+    txtEdit: TFEdit;
     procedure FormPaint(Sender: TObject);
   public
     constructor Create(AParent: TFCustomWindow); override;
@@ -63,8 +64,8 @@ var
   lSize: TSize;
   lPoint: TPoint;
 begin
-
   inherited AfterConstruction;
+
 //  BorderWidth := 8;
 //  Text        := 'fpGUI Application';
 
@@ -77,6 +78,16 @@ begin
   lPoint.y := 25;
   btnHello.SetPosition(lPoint);
   btnHello.Show;
+
+  { create the edit }
+  txtEdit := TFEdit.Create(self);
+  lSize.cx := 100;
+  lSize.cy := 25;
+  txtEdit.SetClientSize(lSize);
+  lPoint.x := 25;
+  lPoint.y := 100;
+  txtEdit.SetPosition(lPoint);
+  txtEdit.Show;
 
   { set a min and max size }
   lSize.cx := 200;

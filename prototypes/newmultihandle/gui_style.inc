@@ -15,6 +15,7 @@ type
     procedure   DrawButtonFace(ACanvas: TFCustomCanvas; ARect: TRect; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TFCustomCanvas; ARect: TRect); virtual;
     procedure   DrawDirectionArrow(ACanvas: TFCustomCanvas; ARect: TRect; direction: Integer); virtual;
+    procedure   DrawEdit(ACanvas: TFCustomCanvas; ARect: TRect); virtual;
   end;
 
 const
@@ -22,6 +23,7 @@ const
   colShadow2: TGfxColor	       = (Red: $40; Green: $40; Blue: $40; Alpha: $00);
   colHilite1: TGfxColor	       = (Red: $E0; Green: $E0; Blue: $E0; Alpha: $00);
   colHilite2: TGfxColor	       = (Red: $FF; Green: $FF; Blue: $FF; Alpha: $00);
+  colGrayBlue: TGfxColor       = (Red: $7F; Green: $9D; Blue: $B9; Alpha: $00);
 
 {$else}
 
@@ -84,6 +86,17 @@ end;
 
 procedure TFStyle.DrawDirectionArrow(ACanvas: TFCustomCanvas; ARect: TRect; direction: Integer);
 begin
+end;
+
+procedure TFStyle.DrawEdit(ACanvas: TFCustomCanvas; ARect: TRect);
+begin
+  { Inner area }
+  ACanvas.SetColor(colWhite);
+  ACanvas.FillRect(ARect);
+
+  { Outer border }
+  ACanvas.SetColor(colGrayBlue);
+  ACanvas.DrawRect(ARect);
 end;
 
 {$endif}

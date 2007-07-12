@@ -9,10 +9,9 @@ type
   TFButton = class(TFWidget)
   private
     FIsPressed: Boolean;
-  public
-    Text: string;
-    constructor Create(AParent: TFCustomWindow); override;
-    constructor Create(ACaption: string; AParent: TFCustomWindow);
+    FText: string;
+    procedure SetText(const AValue: string);
+  protected
     procedure   EvFocusIn; override;
     procedure   EvFocusOut; override;
     procedure   EvKeyPressed(AKey: Word); override;
@@ -22,6 +21,12 @@ type
     procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
     procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
     procedure   EvPaint; override;
+  public
+    { Constructors and Destructors }
+    constructor Create(AParent: TFCustomWindow); override;
+    constructor Create(ACaption: string; AParent: TFCustomWindow);
+    { Properties }
+    property Text: string read FText write SetText;
   end;
 
 
@@ -31,6 +36,8 @@ constructor TFButton.Create(AParent: TFCustomWindow);
 begin
   inherited Create(AParent);
 
+  FDrawBackground := False;
+
   SetClientSize(Size(100, 50));
 end;
 
@@ -38,9 +45,14 @@ constructor TFButton.Create(ACaption: string; AParent: TFCustomWindow);
 begin
   Create(AParent);
   
-  FDrawBackground := False;
-
   Text := ACaption;
+end;
+
+procedure TFButton.SetText(const AValue: string);
+begin
+  FText := AValue;
+  
+  Invalidate;
 end;
 
 procedure TFButton.EvFocusIn;
@@ -103,16 +115,8 @@ end;
 
 procedure TFButton.EvPaint;
 var
-  rt: TRect;
   Flags: TFButtonFlags;
 begin
-  WriteLn('Paint event');
-
-  rt.Left := 0;
-  rt.Top := 0;
-  rt.Right := Width;
-  rt.Bottom := Height;
-
   { Prepare the flags }
   
   Flags := [];
@@ -120,15 +124,12 @@ begin
   if FIsPressed then
     Include(Flags, fbfIsPressed);
 
-{  if FFocused and (not FEmbedded) then
-    Include(lBtnFlags, btnHasFocus);
-
-  if FEmbedded then
-    Include(lBtnFlags, btnIsEmbedded); }
+{  if FFocused then
+    Include(lBtnFlags, btnHasFocus);  }
 
   { Draw the button }
 
-  GFDefaultStyle.DrawButtonFace(Canvas, rt, Flags);
+  GFDefaultStyle.DrawButtonFace(Canvas, Bounds(0, 0, Width, Height), Flags);
 
   inherited EvPaint();
 end;

@@ -15,6 +15,7 @@ uses
 
 { Primary widgets includes }
 {$include gui_button.inc}
+{$include gui_edit.inc}
 
 var
   { Default Styles }
@@ -32,6 +33,7 @@ implementation
 
 { Primary widgets includes }
 {$include gui_button.inc}
+{$include gui_edit.inc}
 
 initialization
   { Default Styles }
