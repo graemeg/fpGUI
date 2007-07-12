@@ -59,11 +59,15 @@ end;
 
 procedure TFEdit.EvKeyPressed(AKey: Word);
 begin
+  WriteLn('KeyPressed');
+
   inherited EvKeyPressed(AKey);
 end;
 
 procedure TFEdit.EvKeyReleased(AKey: Word);
 begin
+  WriteLn('KeyReleased');
+
   inherited EvKeyReleased(AKey);
 end;
 

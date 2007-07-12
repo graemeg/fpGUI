@@ -39,7 +39,7 @@ type
     procedure MouseReleased(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure MouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
     procedure MouseWheel(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint);
-    procedure Paint(Sender: TObject; const ARect: TRect);
+    procedure Paint(Sender: TObject);
     procedure Move(Sender: TObject);
     procedure Resize(Sender: TObject);
   private
@@ -209,14 +209,13 @@ begin
 end;
 
 
-procedure TMainWindow.Paint(Sender: TObject; const ARect: TRect);
+procedure TMainWindow.Paint(Sender: TObject);
 begin
-  writeln(Format('Paint event rect(%d, %d, %d, %d)', [ARect.Left, ARect.Top,
-      ARect.Right, ARect.Bottom]));
+  writeln('Paint event rect');
   with Canvas do
   begin
     SetColor(colWhite);
-    FillRect(ARect);
+    FillRect(Bounds(0, 0, Width, Height));
 
     SetColor(colBlack);
     TextOut(Point(0, 0), 'Event test');
