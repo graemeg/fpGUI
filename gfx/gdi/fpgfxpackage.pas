@@ -7,7 +7,7 @@ unit fpGFXPackage;
 interface
 
 uses
-  GfxBase, GFXInterface, GFX_GDI, fpgfx, GELDirty, GELImage, fpUTF8Utils; 
+  GfxBase, GFXInterface, gfx_gdi, fpgfx, GELDirty, GELImage, fpUTF8Utils; 
 
 implementation
 

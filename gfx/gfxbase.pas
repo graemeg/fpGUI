@@ -245,13 +245,15 @@ type
    etMouseEnter, etMouseLeave, etMousePressed, etMouseReleased,
    etMouseMove, etMouseWheel, etPaint, etMove, etResize, etShow);
 
-  TFEvent = class
-  public
+  TFEvent = record
     EventType: TFEventType;
+    { Key fields }
+    Key: Word;
+    KeyChar: Char;
     { Mouse fields }
+    MousePos: TPoint;
     MouseButton: TMouseButton;
-    X, Y: Cardinal;
-    Width, Height: Cardinal;
+    WheelDelta: Single;
   end;
 
   { TFCustomFont }
@@ -506,7 +508,24 @@ type
     procedure DoSetCursor; virtual; abstract;
     function  GetHandle: PtrUInt; virtual; abstract;
 
+    { Event processing methods }
+    procedure EvCreate; virtual; abstract;
+    procedure EvFocusIn; virtual; abstract;
+    procedure EvFocusOut; virtual; abstract;
+    procedure EvHide; virtual; abstract;
+    procedure EvKeyPressed(AKey: Word); virtual; abstract;
+    procedure EvKeyReleased(AKey: Word); virtual; abstract;
+    procedure EvKeyChar(AKeyChar: Char); virtual; abstract;
+    procedure EvMouseEnter(const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseLeave; virtual; abstract;
+    procedure EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseMove(const AMousePos: TPoint); virtual; abstract;
+    procedure EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); virtual; abstract;
     procedure EvPaint; virtual; abstract;
+    procedure EvMove; virtual; abstract;
+    procedure EvResize; virtual; abstract;
+    procedure EvShow; virtual; abstract;
   public
     { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); virtual;
@@ -523,24 +542,7 @@ type
     procedure CaptureMouse; virtual; abstract;
     procedure ReleaseMouse; virtual; abstract;
     { Event processing methods }
-//    procedure ProcessEvent(AEvent: TFEvent); virtual; abstract;
-    procedure EvCreate; virtual; abstract;
-    procedure EvFocusIn; virtual; abstract;
-    procedure EvFocusOut; virtual; abstract;
-    procedure EvHide; virtual; abstract;
-    procedure EvKeyPressed(AKey: Word); virtual; abstract;
-    procedure EvKeyReleased(AKey: Word); virtual; abstract;
-    procedure EvKeyChar(AKeyChar: Char); virtual; abstract;
-    procedure EvMouseEnter(const AMousePos: TPoint); virtual; abstract;
-    procedure EvMouseLeave; virtual; abstract;
-    procedure EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
-    procedure EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
-    procedure EvMouseMove(const AMousePos: TPoint); virtual; abstract;
-    procedure EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); virtual; abstract;
-//    procedure EvPaint; virtual; abstract;
-    procedure EvMove; virtual; abstract;
-    procedure EvResize; virtual; abstract;
-    procedure EvShow; virtual; abstract;
+    procedure ProcessEvent(AEvent: TFEvent);
 
     { Properties }
     property WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
@@ -1035,6 +1037,31 @@ end;
 procedure TFCustomWindow.SetTitle(const ATitle: String);
 begin
   // Empty
+end;
+
+procedure TFCustomWindow.ProcessEvent(AEvent: TFEvent);
+begin
+  case AEvent.EventType of
+   etCreate:        EvCreate();
+   etCanClose:      Exit;
+   etClose:         Exit;
+   etFocusIn:       EvFocusIn();
+   etFocusOut:      EvFocusOut();
+   etHide:          EvHide();
+   etKeyPressed:    EvKeyPressed(AEvent.Key);
+   etKeyReleased:   EvKeyReleased(AEvent.Key);
+   etKeyChar:       EvKeyChar(AEvent.KeyChar);
+   etMouseEnter:    EvMouseEnter(AEvent.MousePos);
+   etMouseLeave:    EvMouseLeave();
+   etMousePressed:  EvMousePressed(AEvent.MouseButton, AEvent.MousePos);
+   etMouseReleased: EvMouseReleased(AEvent.MouseButton, AEvent.MousePos);
+   etMouseMove:     EvMouseMove(AEvent.MousePos);
+   etMouseWheel:    EvMouseWheel(AEvent.WheelDelta, AEvent.MousePos);
+   etPaint:         EvPaint();
+   etMove:          EvMove();
+   etResize:        EvResize();
+   etShow:          EvShow();
+  end;
 end;
 
 constructor TFCustomWindow.Create(AParent: TFCustomWindow;

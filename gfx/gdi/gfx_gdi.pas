@@ -13,7 +13,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit GFX_GDI;
+unit gfx_gdi;
 
 {$ifdef fpc}
   {$mode delphi}{$H+}
@@ -190,7 +190,23 @@ type
     function    DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   EvInternalPaint;
     { Event processing methods }
+    procedure   EvCreate; override;
+    procedure   EvFocusIn; override;
+    procedure   EvFocusOut; override;
+    procedure   EvHide; override;
+    procedure   EvKeyPressed(AKey: Word); override;
+    procedure   EvKeyReleased(AKey: Word); override;
+    procedure   EvKeyChar(AKeyChar: Char); override;
+    procedure   EvMouseEnter(const AMousePos: TPoint); override;
+    procedure   EvMouseLeave; override;
+    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseMove(const AMousePos: TPoint); override;
+    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
     procedure   EvPaint; override;
+    procedure   EvMove; override;
+    procedure   EvResize; override;
+    procedure   EvShow; override;
   public
     { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
@@ -205,24 +221,6 @@ type
     procedure   Invalidate; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
-    { Event processing methods }
-    procedure   EvCreate; override;
-    procedure   EvFocusIn; override;
-    procedure   EvFocusOut; override;
-    procedure   EvHide; override;
-    procedure   EvKeyPressed(AKey: Word); override;
-    procedure   EvKeyReleased(AKey: Word); override;
-    procedure   EvKeyChar(AKeyChar: Char); override;
-    procedure   EvMouseEnter(const AMousePos: TPoint); override;
-    procedure   EvMouseLeave; override;
-    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
-    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
-    procedure   EvMouseMove(const AMousePos: TPoint); override;
-    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
-//    procedure   EvPaint; override;
-    procedure   EvMove; override;
-    procedure   EvResize; override;
-    procedure   EvShow; override;
   end;
 
 
@@ -1569,64 +1567,129 @@ begin
 end;
 
 procedure TGDIWindow.EvKeyPressed(AKey: Word);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnKeyPressed) then OnKeyPressed(Self, AKey, GetKeyboardShiftState)
-  else if Assigned(Parent) then Parent.EvKeyPressed(AKey);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etKeyPressed;
+    vEvent.Key := AKey;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvKeyReleased(AKey: Word);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnKeyReleased) then OnKeyReleased(Self, AKey, GetKeyboardShiftState)
-  else if Assigned(Parent) then Parent.EvKeyReleased(AKey);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etKeyReleased;
+    vEvent.Key := AKey;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvKeyChar(AKeyChar: Char);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnKeyChar) then OnKeyChar(Self, AKeyChar)
-  else if Assigned(Parent) then Parent.EvKeyChar(AKeyChar);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etKeyChar;
+    vEvent.KeyChar := AKeyChar;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvMouseEnter(const AMousePos: TPoint);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnMouseEnter) then
    OnMouseEnter(Self, GetKeyboardShiftState, AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseEnter(AMousePos);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etMouseEnter;
+    vEvent.MousePos := AMousePos;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvMouseLeave;
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnMouseLeave) then OnMouseLeave(Self)
-  else if Assigned(Parent) then Parent.EvMouseLeave;
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etMouseLeave;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvMousePressed(AButton: TMouseButton;
  const AMousePos: TPoint);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnMousePressed) then
    OnMousePressed(Self, AButton, GetKeyboardShiftState, AMousePos)
-  else if Assigned(Parent) then Parent.EvMousePressed(AButton, AMousePos);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etMousePressed;
+    vEvent.MousePos := AMousePos;
+    vEvent.MouseButton := AButton;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvMouseReleased(AButton: TMouseButton;
   const AMousePos: TPoint);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnMouseReleased) then
    OnMouseReleased(Self, AButton, GetKeyboardShiftState, AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseReleased(AButton, AMousePos);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etMouseReleased;
+    vEvent.MousePos := AMousePos;
+    vEvent.MouseButton := AButton;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvMouseMove(const AMousePos: TPoint);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnMouseMove) then
    OnMouseMove(Self, GetKeyboardShiftState, AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseMove(AMousePos);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etMouseMove;
+    vEvent.MousePos := AMousePos;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 procedure TGDIWindow.EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint);
+var
+  vEvent: TFEvent;
 begin
   if Assigned(OnMouseWheel) then
     OnMouseWheel(Self, GetKeyboardShiftState, AWheelDelta, AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseWheel(AWheelDelta, AMousePos);
+  else if Assigned(Parent) then
+  begin
+    vEvent.EventType := etMouseMove;
+    vEvent.WheelDelta := AWheelDelta;
+    vEvent.MousePos := AMousePos;
+    Parent.ProcessEvent(vEvent);
+  end;
 end;
 
 { Because the painting code is executed on the middle of the processing
