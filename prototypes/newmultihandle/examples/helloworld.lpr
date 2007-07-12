@@ -65,7 +65,6 @@ var
 begin
 
   inherited AfterConstruction;
-  Name        := 'MainForm';
 //  BorderWidth := 8;
 //  Text        := 'fpGUI Application';
 
