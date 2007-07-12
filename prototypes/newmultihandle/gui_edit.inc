@@ -15,6 +15,7 @@ type
     procedure   EvFocusOut; override;
     procedure   EvKeyPressed(AKey: Word); override;
     procedure   EvKeyReleased(AKey: Word); override;
+    procedure   EvKeyChar(AKeyChar: Char); override;
     procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
     procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
     procedure   EvPaint; override;
@@ -66,9 +67,18 @@ begin
   inherited EvKeyReleased(AKey);
 end;
 
+procedure TFEdit.EvKeyChar(AKeyChar: Char);
+begin
+  WriteLn('KeyChar');
+
+  FText := FText + AKeyChar;
+  
+  Invalidate;
+end;
+
 procedure TFEdit.EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint);
 begin
-  inherited EvMousePressed(AButton, AMousePos);
+  Self.CaptureMouse;
 end;
 
 procedure TFEdit.EvMouseReleased(AButton: TMouseButton;
@@ -81,7 +91,7 @@ procedure TFEdit.EvPaint;
 begin
   { Draw the edit }
 
-  GFDefaultStyle.DrawEdit(Canvas, Bounds(0, 0, Width, Height));
+  GFDefaultStyle.DrawEdit(Canvas, Bounds(0, 0, Width, Height), FText);
 
   inherited EvPaint();
 end;

@@ -15,7 +15,7 @@ type
     procedure   DrawButtonFace(ACanvas: TFCustomCanvas; ARect: TRect; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TFCustomCanvas; ARect: TRect); virtual;
     procedure   DrawDirectionArrow(ACanvas: TFCustomCanvas; ARect: TRect; direction: Integer); virtual;
-    procedure   DrawEdit(ACanvas: TFCustomCanvas; ARect: TRect); virtual;
+    procedure   DrawEdit(ACanvas: TFCustomCanvas; ARect: TRect; AText: string); virtual;
   end;
 
 const
@@ -88,11 +88,15 @@ procedure TFStyle.DrawDirectionArrow(ACanvas: TFCustomCanvas; ARect: TRect; dire
 begin
 end;
 
-procedure TFStyle.DrawEdit(ACanvas: TFCustomCanvas; ARect: TRect);
+procedure TFStyle.DrawEdit(ACanvas: TFCustomCanvas; ARect: TRect; AText: string);
 begin
   { Inner area }
   ACanvas.SetColor(colWhite);
   ACanvas.FillRect(ARect);
+
+  { The text }
+  
+  ACanvas.TextOut(Point(5, 0), AText);
 
   { Outer border }
   ACanvas.SetColor(colGrayBlue);
