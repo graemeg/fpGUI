@@ -1431,6 +1431,7 @@ var
 begin
   Windows.ShowWindow(Handle, SW_SHOWNORMAL);
   Windows.UpdateWindow(Handle);
+  Windows.SetForegroundWindow(Handle);
   for i := 0 to Pred(ChildWindows.Count) do
     TGDIWindow(ChildWindows.Items[i]).Show;
 end;

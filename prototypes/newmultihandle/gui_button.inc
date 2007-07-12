@@ -38,7 +38,7 @@ constructor TFButton.Create(ACaption: string; AParent: TFCustomWindow);
 begin
   Create(AParent);
   
-  DrawBackground := False;
+  FDrawBackground := False;
 
   Text := ACaption;
 end;

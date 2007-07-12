@@ -5,12 +5,11 @@
 type
   TFWidget = class(TFWindow)
   protected
-    DrawBackground: Boolean;
+    FDrawBackground: Boolean;
 
     procedure   EvPaint; override;
   public
     constructor Create(AParent: TFCustomWindow); virtual;
-//    procedure   EvPaint; override;
   end;
 
 {$else}
@@ -22,23 +21,17 @@ begin
 
   { Inherited components should set this to False,
     or the background will override their painting }
-  DrawBackground := True;
+  FDrawBackground := True;
 
   SetClientSize(Size(125, 125));
 end;
 
 procedure TFWidget.EvPaint;
-var
-  r: TRect;
 begin
-  if DrawBackground then
+  if FDrawBackground then
   begin
     Canvas.SetColor(colLtGray);
-    r.Left    := 0;
-    r.Top     := 0;
-    r.Right   := Width;
-    r.Bottom  := Height;
-    Canvas.FillRect(r);
+    Canvas.FillRect(Bounds(0, 0, Width, Height));
   end;
   
   inherited EvPaint();
