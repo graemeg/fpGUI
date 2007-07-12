@@ -44,7 +44,7 @@ type
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
   public
-    constructor Create(aowner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; virtual;
     procedure   Show;
     procedure   Hide;
@@ -139,7 +139,7 @@ begin
   DoSetWindowTitle(FWindowTitle);
 end;
 
-constructor TfpgForm.Create(aowner: TComponent);
+constructor TfpgForm.Create(AOwner: TComponent);
 begin
   inherited;
   FWindowPosition  := wpUser;

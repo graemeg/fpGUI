@@ -75,7 +75,7 @@ type
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   RePaint;
-
+    { property events }
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
     property    OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
