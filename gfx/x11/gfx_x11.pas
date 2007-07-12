@@ -246,7 +246,6 @@ type
     procedure   UpdateMotifWMHints;
 
     { Event processing methods }
-    { Event processing methods }
     procedure   EvCreate; override;
     procedure   EvFocusIn; override;
     procedure   EvFocusOut; override;
@@ -1085,8 +1084,10 @@ begin
              while XCheckTypedWindowEvent(GFApplication.Handle,
               WindowEntry.Handle, X.ButtonPress, @NewEvent) do
              begin
-	       if NewEvent.xbutton.Button = 4 then Dec(Sum)
-               else if NewEvent.xbutton.Button = 5 then Inc(Sum)
+	             if NewEvent.xbutton.Button = 4 then
+                  Dec(Sum)
+               else if NewEvent.xbutton.Button = 5 then
+                  Inc(Sum)
                else
                begin
                  XPutBackEvent(GFApplication.Handle, @NewEvent);
@@ -1453,7 +1454,7 @@ begin
 
   if Assigned(OnKeyPressed) then
    OnKeyPressed(Self, AKey, ConvertShiftState(FXEvent^.xkey.state))
-  else if Assigned(Parent) then Parent.EvKeyPressed(AKey);
+  else if Assigned(Parent) then TX11Window(Parent).EvKeyPressed(AKey);
 
   if (FXEvent^.xkey.state and (ControlMask or Mod1Mask)) = 0 then EndComposing;
 end;
@@ -1466,7 +1467,7 @@ begin
 
   if Assigned(OnKeyReleased) then
    OnKeyReleased(Self, KeySymToKeycode(KeySym), ConvertShiftState(FXEvent^.xkey.state))
-  else if Assigned(Parent) then Parent.EvKeyReleased(AKey);
+  else if Assigned(Parent) then TX11Window(Parent).EvKeyReleased(AKey);
 
   // Do not call EndComposing, as this would generate duplicate KeyChar events!
 end;
@@ -1481,13 +1482,13 @@ procedure TX11Window.EvMouseEnter(const AMousePos: TPoint);
 begin
   if Assigned(OnMouseEnter) then
    OnMouseEnter(Self, ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseEnter(AMousePos);
+  else if Assigned(Parent) then TX11Window(Parent).EvMouseEnter(AMousePos);
 end;
 
 procedure TX11Window.EvMouseLeave;
 begin
   if Assigned(OnMouseLeave) then OnMouseLeave(Self)
-  else if Assigned(Parent) then Parent.EvMouseLeave();
+  else if Assigned(Parent) then TX11Window(Parent).EvMouseLeave();
 end;
 
 procedure TX11Window.EvMousePressed(AButton: TMouseButton;
@@ -1495,7 +1496,7 @@ procedure TX11Window.EvMousePressed(AButton: TMouseButton;
 begin
   if Assigned(OnMousePressed) then
    OnMousePressed(Self, AButton, ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
-  else if Assigned(Parent) then Parent.EvMousePressed(AButton, AMousePos);
+  else if Assigned(Parent) then TX11Window(Parent).EvMousePressed(AButton, AMousePos);
 end;
 
 procedure TX11Window.EvMouseReleased(AButton: TMouseButton;
@@ -1504,21 +1505,21 @@ begin
  if Assigned(OnMouseReleased) then
    OnMouseReleased(Self, AButton,
    ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseReleased(AButton, AMousePos);
+  else if Assigned(Parent) then TX11Window(Parent).EvMouseReleased(AButton, AMousePos);
 end;
 
 procedure TX11Window.EvMouseMove(const AMousePos: TPoint);
 begin
   if Assigned(OnMouseMove) then
    OnMouseMove(Self, ConvertShiftState(FXEvent^.xbutton.state), AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseMove(AMousePos);
+  else if Assigned(Parent) then TX11Window(Parent).EvMouseMove(AMousePos);
 end;
 
 procedure TX11Window.EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint);
 begin
   if Assigned(OnMouseWheel) then
    OnMouseWheel(Self, ConvertShiftState(FXEvent^.xbutton.state), AWheelDelta, AMousePos)
-  else if Assigned(Parent) then Parent.EvMouseWheel(AWheelDelta, AMousePos);
+  else if Assigned(Parent) then TX11Window(Parent).EvMouseWheel(AWheelDelta, AMousePos);
 end;
 
 procedure TX11Window.EvPaint;
