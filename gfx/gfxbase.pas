@@ -505,6 +505,8 @@ type
     procedure SetTitle(const ATitle: String); virtual;
     procedure DoSetCursor; virtual; abstract;
     function  GetHandle: PtrUInt; virtual; abstract;
+
+    procedure EvPaint; virtual; abstract;
   public
     { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); virtual;
@@ -535,7 +537,7 @@ type
     procedure EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
     procedure EvMouseMove(const AMousePos: TPoint); virtual; abstract;
     procedure EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); virtual; abstract;
-    procedure EvPaint; virtual; abstract;
+//    procedure EvPaint; virtual; abstract;
     procedure EvMove; virtual; abstract;
     procedure EvResize; virtual; abstract;
     procedure EvShow; virtual; abstract;

@@ -6,9 +6,11 @@ type
   TFWidget = class(TFWindow)
   protected
     DrawBackground: Boolean;
+
+    procedure   EvPaint; override;
   public
     constructor Create(AParent: TFCustomWindow); virtual;
-    procedure   EvPaint; override;
+//    procedure   EvPaint; override;
   end;
 
 {$else}

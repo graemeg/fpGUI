@@ -241,6 +241,9 @@ type
     procedure   DoSetCursor; override;
     function    GetHandle: PtrUInt; override;
     procedure   UpdateMotifWMHints;
+
+    { Event processing methods }
+    procedure   EvPaint; override;
   public
     { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
@@ -269,7 +272,7 @@ type
     procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
     procedure   EvMouseMove(const AMousePos: TPoint); override;
     procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
-    procedure   EvPaint; override;
+//    procedure   EvPaint; override;
     procedure   EvMove; override;
     procedure   EvResize; override;
     procedure   EvShow; override;
@@ -1011,7 +1014,7 @@ end;
 procedure TX11Application.Run;
 var
   XEvent: TXEvent;
-  WindowEntry: TFCustomWindow;
+  WindowEntry: TX11Window;
   MouseButton: TMouseButton;
   Sum: Integer;
   NewEvent: TXEvent;
@@ -1041,7 +1044,7 @@ begin
     // According to a comment in X.h, the valid event types start with 2!
     if XEvent._type >= 2 then
     begin
-      WindowEntry := FindWindowByXID(XEvent.XAny.Window);
+      WindowEntry := TX11Window(FindWindowByXID(XEvent.XAny.Window));
 
       if not Assigned(WindowEntry) then
       begin
@@ -1049,7 +1052,7 @@ begin
         continue;
       end;
       
-      TX11Window(WindowEntry).FXEvent := @XEvent;
+      WindowEntry.FXEvent := @XEvent;
 
       case XEvent._type of
        X.DestroyNotify:

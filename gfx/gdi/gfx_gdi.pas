@@ -189,6 +189,8 @@ type
     procedure   UpdateWindowButtons;
     function    DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   EvInternalPaint;
+    { Event processing methods }
+    procedure   EvPaint; override;
   public
     { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
@@ -217,7 +219,7 @@ type
     procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
     procedure   EvMouseMove(const AMousePos: TPoint); override;
     procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
-    procedure   EvPaint; override;
+//    procedure   EvPaint; override;
     procedure   EvMove; override;
     procedure   EvResize; override;
     procedure   EvShow; override;
@@ -1655,7 +1657,7 @@ begin
 
   { Execution of user paint code }
 
-  EvPaint();
+  EvPaint;
 
   { Flushes the result to the screen }
 
