@@ -255,7 +255,7 @@ type
     procedure   SetClientSize(const ASize: TSize); override;
     procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
     procedure   Show; override;
-    procedure   Invalidate(const ARect: TRect); override;
+    procedure   Invalidate; override;
     procedure   PaintInvalidRegion; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
@@ -464,9 +464,9 @@ var
   Color: TXColor;
 begin
   Color.Pixel := 0;
-  Color.Red := AColor.Red;
-  Color.Green := AColor.Green;
-  Color.Blue := AColor.Blue;
+  Color.Red := AColor.Red * $FF;
+  Color.Green := AColor.Green * $FF;
+  Color.Blue := AColor.Blue * $FF;
   XAllocColor(GFApplication.Handle, Colormap, @Color);
   Result := Color.Pixel;
 end;
@@ -1521,8 +1521,15 @@ begin
   XMapRaised(GFApplication.Handle, Handle);
 end;
 
-procedure TX11Window.Invalidate(const ARect: TRect);
+procedure TX11Window.Invalidate;
+var
+  ARect: TRect;
 begin
+  ARect.Left   := Left;
+  ARect.Top    := Top;
+  ARect.Right  := Left + Width;
+  ARect.Bottom := Top + Height;
+
   GFApplication.DirtyList.AddRect(Self, ARect);
 end;
 

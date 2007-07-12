@@ -30,7 +30,7 @@ type
   TMainWindow = class(TFWindow)
   private
     Bitmap: TFBitmap;
-    procedure   Paint(Sender: TObject; const Rect: TRect);
+    procedure   Paint(Sender: TObject);
   public
     constructor Create; overload;
     destructor  Destroy; override;
@@ -66,10 +66,17 @@ begin
   inherited Destroy;
 end;
 
-procedure TMainWindow.Paint(Sender: TObject; const Rect: TRect);
+procedure TMainWindow.Paint(Sender: TObject);
+var
+  ARect: TRect;
 begin
+  ARect.Left   := Left;
+  ARect.Top    := Top;
+  ARect.Right  := Left + Width;
+  ARect.Bottom := Top + Height;
+
   Canvas.SetColor(colBlue);
-  Canvas.FillRect(Rect);
+  Canvas.FillRect(ARect);
   Canvas.DrawImage(Bitmap, Point(0, 0));
 end;
 
