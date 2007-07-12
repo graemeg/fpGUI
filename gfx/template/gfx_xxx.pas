@@ -128,19 +128,37 @@ type
     procedure   DoSetCursor; override;
     function    GetHandle: PtrUInt; override;
   public
+    { Constructors / Destructors }
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
-    procedure   DefaultHandler(var Message); override;
+    { Widget controling methods }
     procedure   SetPosition(const APosition: TPoint); override;
     procedure   SetSize(const ASize: TSize); override;
     procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
     procedure   SetClientSize(const ASize: TSize); override;
     procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
     procedure   Show; override;
-    procedure   Invalidate(const ARect: TRect); override;
-    procedure   PaintInvalidRegion; override;
+    procedure   Invalidate; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
+    { Event processing methods }
+    procedure   EvCreate; override;
+    procedure   EvFocusIn; override;
+    procedure   EvFocusOut; override;
+    procedure   EvHide; override;
+    procedure   EvKeyPressed(AKey: Word); override;
+    procedure   EvKeyReleased(AKey: Word); override;
+    procedure   EvKeyChar(AKeyChar: Char); override;
+    procedure   EvMouseEnter(const AMousePos: TPoint); override;
+    procedure   EvMouseLeave; override;
+    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
+    procedure   EvMouseMove(const AMousePos: TPoint); override;
+    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
+    procedure   EvPaint; override;
+    procedure   EvMove; override;
+    procedure   EvResize; override;
+    procedure   EvShow; override;
   end;
 
 

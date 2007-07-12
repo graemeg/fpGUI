@@ -524,7 +524,6 @@ type
     procedure SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); virtual;
     procedure Show; virtual; abstract;
     procedure Invalidate; virtual; abstract;
-    procedure PaintInvalidRegion; virtual; abstract;
     procedure CaptureMouse; virtual; abstract;
     procedure ReleaseMouse; virtual; abstract;
     { Event processing methods }

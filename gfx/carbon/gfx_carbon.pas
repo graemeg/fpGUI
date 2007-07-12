@@ -146,8 +146,7 @@ type
     procedure   SetClientSize(const ASize: TSize); override;
     procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
     procedure   Show; override;
-    procedure   Invalidate(const ARect: TRect); override;
-    procedure   PaintInvalidRegion; override;
+    procedure   Invalidate; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
   end;
@@ -496,12 +495,7 @@ begin
   ShowWindow(FHandle);
 end;
 
-procedure TCarbonWindow.Invalidate(const ARect: TRect);
-begin
-
-end;
-
-procedure TCarbonWindow.PaintInvalidRegion;
+procedure TCarbonWindow.Invalidate;
 begin
 
 end;

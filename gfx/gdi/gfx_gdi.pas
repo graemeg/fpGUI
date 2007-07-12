@@ -201,7 +201,6 @@ type
     procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
     procedure   Show; override;
     procedure   Invalidate; override;
-    procedure   PaintInvalidRegion; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
     { Event processing methods }
@@ -1515,12 +1514,6 @@ end;
 procedure TGDIWindow.Invalidate;
 begin
   Windows.InvalidateRect(Handle, nil, True);
-end;
-
-
-procedure TGDIWindow.PaintInvalidRegion;
-begin
-  Windows.UpdateWindow(Handle);
 end;
 
 

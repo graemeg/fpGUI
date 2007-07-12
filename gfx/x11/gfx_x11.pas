@@ -198,14 +198,12 @@ type
 
   TX11Application = class(TFCustomApplication)
   private
-    FDirtyList: TDirtyList;
     FDefaultFont: TX11FontResourceImpl;
     FEventFilter: TX11EventFilter;
     Handle: PDisplay;
     FWMProtocols: TAtom;		  // Atom for "WM_PROTOCOLS"
     FWMDeleteWindow: TAtom;		// Atom for "WM_DELETE_WINDOW"
     FWMHints: TAtom;			    // Atom for "_MOTIF_WM_HINTS"
-    property    DirtyList: TDirtyList read FDirtyList;
     function    FindWindowByXID(XWindowID: X.TWindow): TFCustomWindow;
   public
     { default methods }
@@ -231,7 +229,6 @@ type
     FXEvent: PXEvent;
     function    StartComposing(const Event: TXEvent): TKeySym;
     procedure   EndComposing;
-    procedure   Expose(var Event: TXExposeEvent); message X.Expose;
     procedure   Configure(var Event: TXConfigureEvent); message X.ConfigureNotify;
     procedure   ClientMessage(var Event: TXClientMessageEvent); message X.ClientMessage;
   protected
@@ -256,7 +253,6 @@ type
     procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
     procedure   Show; override;
     procedure   Invalidate; override;
-    procedure   PaintInvalidRegion; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
     { Event processing methods }
@@ -983,7 +979,6 @@ constructor TX11Application.Create;
 begin
   inherited Create;
   
-  FDirtyList      := TDirtyList.Create;
 end;
 
 
@@ -996,8 +991,6 @@ begin
     for i := 0 to Forms.Count - 1 do
       TFCustomWindow(Forms[i]).Free;
   end;
-
-  DirtyList.Free;
 
   if Assigned(FDefaultFont) then
   begin
@@ -1028,12 +1021,11 @@ begin
   while (not (QuitWhenLastWindowCloses and (Forms.Count = 0))) and
    (DoBreakRun = False) do
   begin
-    if Assigned(OnIdle) or Assigned(DirtyList.First) then
+    if Assigned(OnIdle) then
     begin
       if not XCheckMaskEvent(Handle, MaxInt, @XEvent) then
       begin
-        if Assigned(DirtyList.First) then DirtyList.PaintAll
-        else if Assigned(OnIdle) then OnIdle(Self);
+        if Assigned(OnIdle) then OnIdle(Self);
         
         continue;
       end;
@@ -1389,8 +1381,6 @@ begin
   if FCurCursorHandle <> 0 then
     XFreeCursor(GFApplication.Handle, FCurCursorHandle);
 
-  GFApplication.DirtyList.ClearQueueForWindow(Self);
-
   GFApplication.RemoveWindow(Self);
 
   XDestroyWindow(GFApplication.Handle, Handle);
@@ -1524,22 +1514,8 @@ begin
 end;
 
 procedure TX11Window.Invalidate;
-{var
-  ARect: TRect;}
 begin
-{  ARect.Left   := Left;
-  ARect.Top    := Top;
-  ARect.Right  := Left + Width;
-  ARect.Bottom := Top + Height;
-
-  GFApplication.DirtyList.AddRect(Self, ARect); }
-  
   EvPaint();
-end;
-
-procedure TX11Window.PaintInvalidRegion;
-begin
-  GFApplication.DirtyList.PaintQueueForWindow(Self);
 end;
 
 procedure TX11Window.CaptureMouse;
@@ -1910,38 +1886,6 @@ begin
   if Assigned(OnKeyChar) then
     for i := 1 to Length(FComposeBuffer) do
       OnKeyChar(Self, FComposeBuffer[i]);
-end;
-
-procedure TX11Window.Expose(var Event: TXExposeEvent);
-{var
-  IsNotEmpty: Boolean;
-begin
-WriteLn('Expose');
-  if Assigned(OnPaint) then
-    with Event do
-    begin
-      if not IsExposing then
-      begin
-        IsExposing := True;
-	Canvas.SaveState;
-	Canvas.EmptyClipRect;
-      end;
-      IsNotEmpty := Canvas.UnionClipRect(Rect(x, y, x + Width, y + Height));
-      if Count = 0 then
-      begin
-        if IsNotEmpty then
-	  OnPaint(Self, Canvas.GetClipRect);
-	IsExposing := False;
-	Canvas.RestoreState;
-      end;
-    end;
-end;}
-var
-  r: TRect;
-begin
-  with Event do
-    r := Rect(x, y, x + Width, y + Height);
-  GFApplication.DirtyList.AddRect(Self, r);
 end;
 
 procedure TX11Window.Configure(var Event: TXConfigureEvent);
