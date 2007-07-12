@@ -267,6 +267,8 @@ type
   end;
 
 
+  { TfpgWindowBase }
+
   TfpgWindowBase = class(TComponent)
   private
     FParent: TfpgWindowBase;
@@ -284,6 +286,8 @@ type
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
+    procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
+    function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
@@ -317,6 +321,8 @@ type
     function    Right: TfpgCoord;
     function    Bottom: TfpgCoord;
     procedure   UpdateWindowPosition;
+    procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
+    function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
     property    HasHandle: boolean read HandleIsValid;
     property    WindowType: TWindowType read FWindowType write FWindowType;
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
@@ -462,6 +468,17 @@ procedure TfpgWindowBase.UpdateWindowPosition;
 begin
   if HasHandle then
     DoUpdateWindowPosition(FLeft, FTop, FWidth, FHeight);
+end;
+
+procedure TfpgWindowBase.MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
+begin
+  DoMoveWindow(x, y);
+end;
+
+function TfpgWindowBase.WindowToScreen(ASource: TfpgWindowBase;
+  const AScreenPos: TPoint): TPoint;
+begin
+  Result := DoWindowToScreen(ASource, AScreenPos);
 end;
 
 { TfpgCanvasBase }

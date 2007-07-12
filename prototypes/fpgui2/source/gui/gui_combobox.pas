@@ -14,6 +14,8 @@ uses
 
 type
 
+  { TfpgCustomComboBox }
+
   TfpgCustomComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
@@ -29,6 +31,7 @@ type
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   AfterConstruction; override;
   end;
 
 
@@ -51,6 +54,36 @@ type
   // This is so we can access protected methods
   TPrivateWidget = class(TfpgWidget)
   end;
+  
+  { TDropDownWindow }
+
+  TDropDownWindow = class(TfpgForm)
+  protected
+    procedure EvPaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+{ TDropDownWindow }
+
+procedure TDropDownWindow.EvPaint;
+begin
+  Canvas.BeginDraw;
+  inherited EvPaint;
+  Canvas.Clear(clWhite);
+  Canvas.SetColor(clYellow);
+  Canvas.SetLineStyle(2, lsSolid);
+  Canvas.DrawRectangle(1, 1, Width-1, Height-1);
+  Canvas.EndDraw;
+end;
+
+constructor TDropDownWindow.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  WindowType := wtPopup;
+  WindowAttributes := [];
+  WindowPosition := wpUser;
+end;
   
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList): TfpgComboBox;
@@ -75,16 +108,17 @@ begin
 end;
 
 procedure TfpgCustomComboBox.DoDropDown;
+var
+  pt: TPoint;
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
-    FDropDown          := TfpgForm.Create(nil);
-    FDropDown.WindowType := wtPopup;
-    FDropDown.Sizeable := False;
-    FDropDown.Left     := Left;
-    FDropDown.Top      := Top + Height;
+    pt := WindowToScreen(Parent, Point(Left, Top+Height));
+    FDropDown          := TDropDownWindow.Create(nil);
+    FDropDown.Left     := pt.X;
+    FDropDown.Top      := pt.Y;
     FDropDown.Width    := Width;
-    FDropDown.Height   := DropDownCount * Height;
+    FDropDown.Height   := (DropDownCount * (Height-4));
     FDropDown.Show;
   end
   else
@@ -96,7 +130,6 @@ end;
 
 procedure TfpgCustomComboBox.InternalBtnClick(Sender: TObject);
 begin
-  TPrivateWidget(FInternalBtn).MoveAndResize(Width - min(Height, 20) - 3, 2, Height - 4, Height - 4);
   DoDropDown;
 end;
 
@@ -130,8 +163,8 @@ begin
   Canvas.FillRectAngle(2, 2, Width - 4, Height - 4);
   //  Canvas.FillRectAngle(0,0,Width,Height);
 
-  //  pgfStyle.DrawButtonFace(canvas, width - min(height, 20)-3, 2, height-4, height-4, [btnIsEmbedded]);
-  //  pgfStyle.DrawDirectionArrow(canvas, width - height + 1, 1, height-2, height-2, 1);
+//  fpgStyle.DrawButtonFace(canvas, width - min(height, 20)-3, 2, height-4, height-4, [btnIsEmbedded]);
+//  fpgStyle.DrawDirectionArrow(canvas, width - height + 1, 1, height-2, height-2, 1);
 
   Canvas.EndDraw;
 end;
@@ -141,9 +174,18 @@ begin
   inherited Create(AOwner);
   FBackgroundColor := clBoxColor;
   FDropDownCount   := 8;
+  FWidth := 120;
+  Height := 23;
+end;
+
+procedure TfpgCustomComboBox.AfterConstruction;
+begin
+  inherited AfterConstruction;
+
   if not Assigned(FInternalBtn) then
   begin
-    FInternalBtn           := CreateButton(self, Width - min(Height, 20) - 3, 2, Height - 4, '', @InternalBtnClick);
+    FInternalBtn           := CreateButton(self, (Width-19), 2, 18, '', @InternalBtnClick);
+    FInternalBtn.Height    := 19;
     FInternalBtn.Embedded  := True;
     FInternalBtn.Parent    := self;
     FInternalBtn.ImageName := 'sys.sb.down';

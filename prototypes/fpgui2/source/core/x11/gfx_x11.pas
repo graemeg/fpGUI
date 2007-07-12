@@ -115,6 +115,8 @@ type
   end;
 
 
+  { TfpgWindowImpl }
+
   TfpgWindowImpl = class(TfpgWindowBase)
   protected
     FWinHandle: TfpgWinHandle;
@@ -123,7 +125,8 @@ type
     procedure   DoReleaseWindowHandle; override;
     function    HandleIsValid: boolean; override;
     procedure   DoSetWindowTitle(const atitle: string);
-    procedure   DoMoveWindow(x, y: TfpgCoord);
+    procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
+    function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
     { Event processing methods }
@@ -919,10 +922,26 @@ begin
   Result := (FWinHandle > 0);
 end;
 
-procedure TfpgWindowImpl.DoMoveWindow(x, y: TfpgCoord);
+procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
   if FWinHandle > 0 then
     XMoveWindow(xapplication.display, FWinHandle, x, y);
+end;
+
+function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+var
+  dx: integer;
+  dy: integer;
+  cw : TfpgWinHandle;
+begin
+//  if not HandleIsValid then
+//    Exit; //==>
+    
+  XTranslateCoordinates(xapplication.display, TfpgWindowImpl(ASource).WinHandle,
+      XDefaultRootWindow(xapplication.display), AScreenPos.X, AScreenPos.Y, @dx, @dy, @cw);
+
+  Result.X := dx;
+  Result.Y := dy;
 end;
 
 procedure TfpgWindowImpl.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);

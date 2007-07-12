@@ -127,7 +127,8 @@ type
     procedure   DoReleaseWindowHandle; override;
     function    HandleIsValid: boolean; override;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
-    procedure   DoMoveWindow(x, y: TfpgCoord);
+    procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
+    function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     //procedure MoveToScreenCenter; override;
     procedure   DoSetWindowTitle(const atitle: string);
     property    WinHandle: TfpgWinHandle read FWinHandle;
@@ -873,10 +874,20 @@ begin
   FWinHandle := 0;
 end;
 
-procedure TfpgWindowImpl.DoMoveWindow(x, y: TfpgCoord);
+procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
-  if FWinHandle > 0 then
+  if HandleIsValid then
     Windows.SetWindowPos(WinHandle, 0, x, y, 0, 0, SWP_NOZORDER or SWP_NOSIZE or SWP_NOREDRAW);
+end;
+
+function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+begin
+  if not HandleIsValid then
+    Exit; //==>
+
+  Result.X := AScreenPos.X;
+  Result.Y := AScreenPos.Y;
+  ClientToScreen(TfpgWindowImpl(ASource).WinHandle, Result);
 end;
 
 {
