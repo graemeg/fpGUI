@@ -30,8 +30,7 @@ uses
   SysUtils, Classes, ctypes, // FPC units
   X, XLib, XUtil,            // X11 units
   unitxft,                   // Xft font support
-  GfxBase,                   // fpGFX units
-  GELDirty;                  // fpGFX emulation layer
+  GfxBase;                   // fpGFX units
 
 
 resourcestring
@@ -234,30 +233,19 @@ type
   protected
     IsExposing: Boolean;
     CanMaximize: Boolean;
-    function    GetTitle: String; override;
+
+    { Internal resource allocation methods }
+    procedure   DoSetCursor; override;
+    procedure   DoSetWindowOptions; override;
+    function    GetHandle: PtrUInt; override;
+    procedure   CreateWindow; override;
+
+    { Other internal methods }
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
-    procedure   SetTitle(const ATitle: String); override;
-    procedure   DoSetCursor; override;
-    function    GetHandle: PtrUInt; override;
     procedure   UpdateMotifWMHints;
 
     { Event processing methods }
-    procedure   EvPaint; override;
-  public
-    { Constructors / Destructors }
-    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
-    destructor  Destroy; override;
-    { Widget controling methods }
-    procedure   SetPosition(const APosition: TPoint); override;
-    procedure   SetSize(const ASize: TSize); override;
-    procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
-    procedure   SetClientSize(const ASize: TSize); override;
-    procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
-    procedure   Show; override;
-    procedure   Invalidate; override;
-    procedure   CaptureMouse; override;
-    procedure   ReleaseMouse; override;
     { Event processing methods }
     procedure   EvCreate; override;
     procedure   EvFocusIn; override;
@@ -272,10 +260,26 @@ type
     procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
     procedure   EvMouseMove(const AMousePos: TPoint); override;
     procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
-//    procedure   EvPaint; override;
+    procedure   EvPaint; override;
     procedure   EvMove; override;
     procedure   EvResize; override;
     procedure   EvShow; override;
+  public
+    { Constructors / Destructors }
+    constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
+    destructor  Destroy; override;
+    { Widget controling methods }
+    function    GetTitle: String; override;
+    procedure   SetTitle(const ATitle: String); override;
+    procedure   SetPosition(const APosition: TPoint); override;
+    procedure   SetSize(const ASize: TSize); override;
+    procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
+    procedure   SetClientSize(const ASize: TSize); override;
+    procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
+    procedure   Show; override;
+    procedure   Invalidate; override;
+    procedure   CaptureMouse; override;
+    procedure   ReleaseMouse; override;
   end;
 
 
@@ -1243,136 +1247,18 @@ end;
 { Note, this only creates a window, it doesn't actually show the window. It
   is still invisible. To make it visible, we need to call Show(). }
 constructor TX11Window.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
-const
-  WindowHints: TXWMHints = (
-    flags: InputHint or StateHint or WindowGroupHint;
-    input: True;
-    initial_state: NormalState;
-    icon_pixmap: 0;
-    icon_window: 0;
-    icon_x: 0;
-    icon_y: 0;
-    icon_mask: 0;
-    window_group: 0;
-  );
 var
   Colormap: TColormap;
-  Attr: TXSetWindowAttributes;
-  SizeHints: TXSizeHints;
-  ClassHint: PXClassHint;
-  lParentHandle: X.TWindow;
-  mask: longword;
 begin
   inherited Create(AParent, AWindowOptions);
 
-  if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
-  begin
-    if LeaderWindow = 0 then
-    begin
-      LeaderWindow := XCreateSimpleWindow(GFApplication.Handle,
-        XDefaultRootWindow(GFApplication.Handle), 0, 0, 1, 1, 0, 0, 0);
-
-      ClassHint := XAllocClassHint;
-      ClassHint^.res_name := 'fpGFX'; // !!! use app name
-      ClassHint^.res_class := 'FpGFX';
-      XSetWMProperties(GFApplication.Handle, LeaderWindow, nil, nil, nil, 0, nil, nil,
-        ClassHint);
-      XFree(ClassHint);
-      ClientLeaderAtom := XInternAtom(GFApplication.Handle, 'WM_CLIENT_LEADER', False);
-    end;
-  end;
+  CreateWindow;
+  
+  { Creates the canvas }
 
   Colormap := XDefaultColormap(GFApplication.Handle, XDefaultScreen(GFApplication.Handle));
-  Attr.Colormap := Colormap;
-
-  SizeHints.flags     := XUtil.PSize;
-  SizeHints.x         := 0;
-  SizeHints.y         := 0;
-  SizeHints.width     := 200;
-  SizeHints.height    := 200;
-
-  { Make sure we use the correct parent handle }
-  if FParent <> nil then
-    lParentHandle := TX11Window(FParent).Handle
-  else
-    lParentHandle := XDefaultRootWindow(GFApplication.Handle);
-
-  { setup attributes and masks }
-  if (woBorderless in WindowOptions) or (woToolWindow in WindowOptions) then
-  begin
-    Attr.Override_Redirect := True;    // this removes window borders
-    mask := CWOverrideRedirect;// or CWColormap;
-  end
-  else if (woPopup in WindowOptions) then
-  begin
-    Attr.Override_Redirect := True;    // this removes window borders
-    Attr.save_under := True;
-    mask := CWOverrideRedirect or CWSaveUnder;
-  end
-  else
-  begin
-    Attr.Override_Redirect := False;
-    mask := CWColormap;
-  end;
-
-  FHandle := XCreateWindow(
-    GFApplication.Handle,
-    lParentHandle,                      // parent
-    SizeHints.x, SizeHints.x,           // position (top, left)
-    SizeHints.width, SizeHints.height,  // default size (width, height)
-    0,                                  // border size
-    CopyFromParent,                     // depth
-    InputOutput,                        // class
-    XDefaultVisual(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)),  // visual
-    mask,
-    @Attr);
-
-  if FHandle = 0 then
-    raise EX11Error.Create(SWindowCreationFailed);
-
-  XSelectInput(GFApplication.Handle, FHandle, KeyPressMask or KeyReleaseMask
-    or ButtonPressMask or ButtonReleaseMask
-    or EnterWindowMask or LeaveWindowMask
-    or ButtonMotionMask or PointerMotionMask
-    or ExposureMask
-    or FocusChangeMask
-    or StructureNotifyMask
-//    or PropertyChangeMask
-    );
-    
-  if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
-  begin
-    XSetStandardProperties(GFApplication.Handle, Handle, nil, nil, 0,
-     argv, argc, @SizeHints);
-  
-    XSetWMNormalHints(GFApplication.Handle, Handle, @SizeHints);
-  
-    WindowHints.flags := WindowGroupHint;
-    WindowHints.window_group := LeaderWindow;
-    XSetWMHints(GFApplication.Handle, Handle, @WindowHints);
-  
-    XChangeProperty(GFApplication.Handle, Handle, ClientLeaderAtom, 33, 32,
-     PropModeReplace, @LeaderWindow, 1);
-  
-     // We want to get a Client Message when the user tries to close this window
-    if GFApplication.FWMProtocols = 0 then
-     GFApplication.FWMProtocols := XInternAtom(GFApplication.Handle, 'WM_PROTOCOLS', False);
-    if GFApplication.FWMDeleteWindow = 0 then
-     GFApplication.FWMDeleteWindow := XInternAtom(GFApplication.Handle, 'WM_DELETE_WINDOW', False);
-  
-     // send close event instead of quitting the whole application...
-     XSetWMProtocols(GFApplication.Handle, FHandle, @GFApplication.FWMDeleteWindow, 1);
-   end;
-   
-  { Child windows do not appear until parent (lParentHandle) is mapped }
-  if FParent <> nil then
-    XMapSubwindows(GFApplication.Handle, lParentHandle);
 
   FCanvas := TX11WindowCanvas.Create(Colormap, Handle, GFApplication.FDefaultFont);
-  
-  // for modal windows, this is necessary
-//  if (woModal in WindowOptions) then
-//    XSetTransientForHint(GFApplication.Handle, Handle, Handle);
 end;
 
 destructor TX11Window.Destroy;
@@ -1707,9 +1593,143 @@ begin
   XDefineCursor(GFApplication.Handle, Handle, FCurCursorHandle);
 end;
 
+procedure TX11Window.DoSetWindowOptions;
+begin
+
+end;
+
 function TX11Window.GetHandle: PtrUInt;
 begin
   Result := FHandle;
+end;
+
+procedure TX11Window.CreateWindow;
+const
+  WindowHints: TXWMHints = (
+    flags: InputHint or StateHint or WindowGroupHint;
+    input: True;
+    initial_state: NormalState;
+    icon_pixmap: 0;
+    icon_window: 0;
+    icon_x: 0;
+    icon_y: 0;
+    icon_mask: 0;
+    window_group: 0;
+  );
+var
+  Colormap: TColormap;
+  Attr: TXSetWindowAttributes;
+  SizeHints: TXSizeHints;
+  ClassHint: PXClassHint;
+  lParentHandle: X.TWindow;
+  mask: longword;
+begin
+  if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
+  begin
+    if LeaderWindow = 0 then
+    begin
+      LeaderWindow := XCreateSimpleWindow(GFApplication.Handle,
+        XDefaultRootWindow(GFApplication.Handle), 0, 0, 1, 1, 0, 0, 0);
+
+      ClassHint := XAllocClassHint;
+      ClassHint^.res_name := 'fpGFX'; // !!! use app name
+      ClassHint^.res_class := 'FpGFX';
+      XSetWMProperties(GFApplication.Handle, LeaderWindow, nil, nil, nil, 0, nil, nil,
+        ClassHint);
+      XFree(ClassHint);
+      ClientLeaderAtom := XInternAtom(GFApplication.Handle, 'WM_CLIENT_LEADER', False);
+    end;
+  end;
+
+  Colormap := XDefaultColormap(GFApplication.Handle, XDefaultScreen(GFApplication.Handle));
+  Attr.Colormap := Colormap;
+
+  SizeHints.flags     := XUtil.PSize;
+  SizeHints.x         := 0;
+  SizeHints.y         := 0;
+  SizeHints.width     := 200;
+  SizeHints.height    := 200;
+
+  { Make sure we use the correct parent handle }
+  if FParent <> nil then
+    lParentHandle := TX11Window(FParent).Handle
+  else
+    lParentHandle := XDefaultRootWindow(GFApplication.Handle);
+
+  { setup attributes and masks }
+  if (woBorderless in WindowOptions) or (woToolWindow in WindowOptions) then
+  begin
+    Attr.Override_Redirect := True;    // this removes window borders
+    mask := CWOverrideRedirect;// or CWColormap;
+  end
+  else if (woPopup in WindowOptions) then
+  begin
+    Attr.Override_Redirect := True;    // this removes window borders
+    Attr.save_under := True;
+    mask := CWOverrideRedirect or CWSaveUnder;
+  end
+  else
+  begin
+    Attr.Override_Redirect := False;
+    mask := CWColormap;
+  end;
+
+  FHandle := XCreateWindow(
+    GFApplication.Handle,
+    lParentHandle,                      // parent
+    SizeHints.x, SizeHints.x,           // position (top, left)
+    SizeHints.width, SizeHints.height,  // default size (width, height)
+    0,                                  // border size
+    CopyFromParent,                     // depth
+    InputOutput,                        // class
+    XDefaultVisual(GFApplication.Handle, XDefaultScreen(GFApplication.Handle)),  // visual
+    mask,
+    @Attr);
+
+  if FHandle = 0 then
+    raise EX11Error.Create(SWindowCreationFailed);
+
+  XSelectInput(GFApplication.Handle, FHandle, KeyPressMask or KeyReleaseMask
+    or ButtonPressMask or ButtonReleaseMask
+    or EnterWindowMask or LeaveWindowMask
+    or ButtonMotionMask or PointerMotionMask
+    or ExposureMask
+    or FocusChangeMask
+    or StructureNotifyMask
+//    or PropertyChangeMask
+    );
+
+  if (not (woX11SkipWMHints in WindowOptions)) and (woWindow in WindowOptions) then
+  begin
+    XSetStandardProperties(GFApplication.Handle, Handle, nil, nil, 0,
+     argv, argc, @SizeHints);
+
+    XSetWMNormalHints(GFApplication.Handle, Handle, @SizeHints);
+
+    WindowHints.flags := WindowGroupHint;
+    WindowHints.window_group := LeaderWindow;
+    XSetWMHints(GFApplication.Handle, Handle, @WindowHints);
+
+    XChangeProperty(GFApplication.Handle, Handle, ClientLeaderAtom, 33, 32,
+     PropModeReplace, @LeaderWindow, 1);
+
+     // We want to get a Client Message when the user tries to close this window
+    if GFApplication.FWMProtocols = 0 then
+     GFApplication.FWMProtocols := XInternAtom(GFApplication.Handle, 'WM_PROTOCOLS', False);
+    if GFApplication.FWMDeleteWindow = 0 then
+     GFApplication.FWMDeleteWindow := XInternAtom(GFApplication.Handle, 'WM_DELETE_WINDOW', False);
+
+     // send close event instead of quitting the whole application...
+     XSetWMProtocols(GFApplication.Handle, FHandle, @GFApplication.FWMDeleteWindow, 1);
+   end;
+
+  { Child windows do not appear until parent (lParentHandle) is mapped }
+  if FParent <> nil then
+    XMapSubwindows(GFApplication.Handle, lParentHandle);
+
+  // for modal windows, this is necessary
+//  if (woModal in WindowOptions) then
+//    XSetTransientForHint(GFApplication.Handle, Handle, Handle);
 end;
 
 function TX11Window.ConvertShiftState(AState: Cardinal): TShiftState;
