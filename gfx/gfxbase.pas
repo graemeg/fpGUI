@@ -461,7 +461,7 @@ type
   TGfxPaintEvent = procedure(Sender: TObject; const ARect: TRect) of object;
 
 
-  TFCustomWindow = class(TComponent)
+  TFCustomWindow = class(TObject)
   private
     FCursor: TFCursor;
     FOnCreate: TNotifyEvent;
@@ -483,6 +483,7 @@ type
     FOnMove: TNotifyEvent;
     FOnResize: TNotifyEvent;
     FOnShow: TNotifyEvent;
+    { Property setting methods mapped to other methods }
     procedure SetClientHeight(const AValue: Integer);
     procedure SetClientWidth(const AValue: Integer);
     procedure SetLeft(const AValue: Integer);
@@ -490,7 +491,7 @@ type
     procedure SetWidth(AWidth: Integer);
     procedure SetHeight(AHeight: Integer);
     procedure SetCursor(ACursor: TFCursor);
-    procedure SetWindowOptions(const AValue: TFWindowOptions); virtual;
+    procedure SetWindowOptions(const AValue: TFWindowOptions);
   protected
     FParent: TFCustomWindow;
     FCanvas: TFCustomCanvas;
@@ -503,10 +504,12 @@ type
     FWindowOptions: TFWindowOptions;
     FChildWindows: TList;
     FMinSize, FMaxSize: TSize;
-    function  GetTitle: String; virtual;
-    procedure SetTitle(const ATitle: String); virtual;
+
+    { Internal resource allocation methods }
     procedure DoSetCursor; virtual; abstract;
+    procedure DoSetWindowOptions; virtual; abstract;
     function  GetHandle: PtrUInt; virtual; abstract;
+    procedure CreateWindow; virtual; abstract;
 
     { Event processing methods }
     procedure EvCreate; virtual; abstract;
@@ -532,11 +535,13 @@ type
     destructor  Destroy; override;
     { Widget controling methods }
     function  CanClose: Boolean; virtual;
-    procedure SetPosition(const APosition: TPoint); virtual;
-    procedure SetSize(const ASize: TSize); virtual;
-    procedure SetMinMaxSize(const AMinSize, AMaxSize: TSize); virtual;
-    procedure SetClientSize(const ASize: TSize); virtual;
-    procedure SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); virtual;
+    function  GetTitle: String; virtual;
+    procedure SetTitle(const ATitle: String); virtual;
+    procedure SetPosition(const APosition: TPoint); virtual; abstract;
+    procedure SetSize(const ASize: TSize); virtual; abstract;
+    procedure SetMinMaxSize(const AMinSize, AMaxSize: TSize); virtual; abstract;
+    procedure SetClientSize(const ASize: TSize); virtual; abstract;
+    procedure SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); virtual; abstract;
     procedure Show; virtual; abstract;
     procedure Invalidate; virtual; abstract;
     procedure CaptureMouse; virtual; abstract;
@@ -1004,39 +1009,14 @@ begin
     Result := True;
 end;
 
-procedure TFCustomWindow.SetPosition(const APosition: TPoint);
-begin
-  // Empty
-end;
-
-procedure TFCustomWindow.SetSize(const ASize: TSize);
-begin
-  // Empty
-end;
-
-procedure TFCustomWindow.SetMinMaxSize(const AMinSize, AMaxSize: TSize);
-begin
-  // Empty
-end;
-
-procedure TFCustomWindow.SetClientSize(const ASize: TSize);
-begin
-  // Empty
-end;
-
-procedure TFCustomWindow.SetMinMaxClientSize(const AMinSize, AMaxSize: TSize);
-begin
-  // Empty
-end;
-
 function TFCustomWindow.GetTitle: String;
 begin
-  SetLength(Result, 0);
+
 end;
 
 procedure TFCustomWindow.SetTitle(const ATitle: String);
 begin
-  // Empty
+
 end;
 
 procedure TFCustomWindow.ProcessEvent(AEvent: TFEvent);
@@ -1067,7 +1047,7 @@ end;
 constructor TFCustomWindow.Create(AParent: TFCustomWindow;
         AWindowOptions: TFWindowOptions);
 begin
-  inherited Create(nil);
+  inherited Create;
 
   FWindowOptions := AWindowOptions;
   FParent := AParent;
@@ -1125,8 +1105,9 @@ end;
 
 procedure TFCustomWindow.SetWindowOptions(const AValue: TFWindowOptions);
 begin
-  if FWindowOptions=AValue then exit;
-  FWindowOptions:=AValue;
+  if FWindowOptions = AValue then exit;
+  FWindowOptions := AValue;
+  DoSetWindowOptions;
 end;
 
 { Global functions }

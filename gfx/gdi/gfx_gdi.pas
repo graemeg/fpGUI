@@ -182,10 +182,13 @@ type
     WindowClassW: TWndClassW;
     FWindowStyle, FWindowStyleEx: LongWord;
     FMouseInWindow, FHasMouseCapture, FHasFocus: Boolean;
-    function    GetTitle: String; override;
-    procedure   SetTitle(const ATitle: String); override;
+
+    { Internal resource allocation methods }
     procedure   DoSetCursor; override;
+    procedure   DoSetWindowOptions; override;
     function    GetHandle: PtrUInt; override;
+    procedure   CreateWindow; override;
+    { Internal methods specific to the win backend }
     procedure   UpdateWindowButtons;
     function    DoMouseEnterLeaveCheck(uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   EvInternalPaint;
@@ -212,6 +215,8 @@ type
     constructor Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions); override;
     destructor  Destroy; override;
     { Widget controling methods }
+    function    GetTitle: String; override;
+    procedure   SetTitle(const ATitle: String); override;
     procedure   SetPosition(const APosition: TPoint); override;
     procedure   SetSize(const ASize: TSize); override;
     procedure   SetMinMaxSize(const AMinSize, AMaxSize: TSize); override;
@@ -1308,90 +1313,10 @@ end;
 
 
 constructor TGDIWindow.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowOptions);
-var
-  ParentHandle: HWND;
 begin
   inherited Create(AParent, AWindowOptions);
 
-  { Initialize a window class, if necessary }
-  if woWindow in WindowOptions then
-  begin
-    if UnicodeEnabledOS then
-    begin
-      if not Assigned(WindowClassW.lpfnWndProc) then
-      begin
-        WindowClassW.style := CS_HREDRAW or CS_VREDRAW;
-        WindowClassW.lpfnWndProc := WndProc(@fpGFXWindowProc);
-        WindowClassW.hInstance := MainInstance;
-        WindowClassW.hIcon := LoadIcon(0, IDI_APPLICATION);
-        WindowClassW.hCursor := LoadCursor(0, IDC_ARROW);
-        WindowClassW.hbrBackground := 0;
-        WindowClassW.lpszClassName := 'fpGFX';
-      end;
-      Windows.RegisterClassW(@WindowClassW);
-    end
-    else
-    begin
-      if not Assigned(WindowClass.lpfnWndProc) then
-      begin
-        WindowClass.style := CS_HREDRAW or CS_VREDRAW;
-        WindowClass.lpfnWndProc := WndProc(@fpGFXWindowProc);
-        WindowClass.hInstance := MainInstance;
-        WindowClass.hIcon := LoadIcon(0, IDI_APPLICATION);
-        WindowClass.hCursor := LoadCursor(0, IDC_ARROW);
-        WindowClass.hbrBackground := 0;
-        WindowClass.lpszClassName := 'fpGFX';
-      end;
-      Windows.RegisterClass(@WindowClass);
-    end;
-  end;
-  
-  if Assigned(AParent) then
-    ParentHandle := AParent.Handle
-  else
-    ParentHandle := 0;
-
-  if not (woWindow in FWindowOptions) then FWindowStyle := WS_CHILD
-  else if (woBorderless in FWindowOptions) and (woPopUp in FWindowOptions) then FWindowStyle := WS_POPUP
-  else if woPopUp in FWindowOptions then FWindowStyle := WS_POPUPWINDOW
-  else if woToolWindow in FWindowOptions then FWindowStyle := WS_OVERLAPPEDWINDOW
-  else if woChildWindow in FWindowOptions then FWindowStyle := WS_CHILDWINDOW
-  else if woBorderless in FWindowOptions then FWindowStyle := WS_OVERLAPPED
-  else FWindowStyle := WS_OVERLAPPEDWINDOW;
-
-  if not (woWindow in FWindowOptions) then FWindowStyleEx := 0
-  else if woPopUp in FWindowOptions then FWindowStyleEx := WS_EX_TOOLWINDOW
-  else if woToolWindow in FWindowOptions then FWindowStyleEx := WS_EX_TOOLWINDOW
-  else FWindowStyleEx := WS_EX_APPWINDOW;
-
-  if UnicodeEnabledOS then
-   FHandle := Windows.CreateWindowExW(
-     FWindowStyleEx,			// extended window style
-     'fpGFX',				// registered class name
-     'fpGFX Window',			// window name
-     FWindowStyle,			// window style
-     CW_USEDEFAULT,			// horizontal position of window
-     CW_USEDEFAULT,			// vertical position of window
-     CW_USEDEFAULT,			// window width
-     CW_USEDEFAULT,			// window height
-     ParentHandle,			// handle to parent or owner window
-     0,					// menu handle or child identifier
-     MainInstance,			// handle to application instance
-     Self)				// window-creation data
-  else
-   FHandle := Windows.CreateWindowEx(
-     FWindowStyleEx,			// extended window style
-     'fpGFX',				// registered class name
-     'fpGFX Window',			// window name
-     FWindowStyle,			// window style
-     CW_USEDEFAULT,			// horizontal position of window
-     CW_USEDEFAULT,			// vertical position of window
-     CW_USEDEFAULT,			// window width
-     CW_USEDEFAULT,			// window height
-     ParentHandle,			// handle to parent or owner window
-     0,					// menu handle or child identifier
-     MainInstance,			// handle to application instance
-     Self);				// window-creation data
+  CreateWindow;
 
   { Creates the Canvas }
 
@@ -1831,9 +1756,101 @@ begin
   end;
 end;
 
+procedure TGDIWindow.DoSetWindowOptions;
+begin
+  // implement me
+end;
+
 function TGDIWindow.GetHandle: PtrUInt;
 begin
+//  if FHandle = 0 then CreateWindow;
+
   Result := FHandle;
+end;
+
+procedure TGDIWindow.CreateWindow;
+var
+  ParentHandle: HWND;
+begin
+  { Initialize a window class, if necessary }
+  if woWindow in WindowOptions then
+  begin
+    if UnicodeEnabledOS then
+    begin
+      if not Assigned(WindowClassW.lpfnWndProc) then
+      begin
+        WindowClassW.style := CS_HREDRAW or CS_VREDRAW;
+        WindowClassW.lpfnWndProc := WndProc(@fpGFXWindowProc);
+        WindowClassW.hInstance := MainInstance;
+        WindowClassW.hIcon := LoadIcon(0, IDI_APPLICATION);
+        WindowClassW.hCursor := LoadCursor(0, IDC_ARROW);
+        WindowClassW.hbrBackground := 0;
+        WindowClassW.lpszClassName := 'fpGFX';
+      end;
+      Windows.RegisterClassW(@WindowClassW);
+    end
+    else
+    begin
+      if not Assigned(WindowClass.lpfnWndProc) then
+      begin
+        WindowClass.style := CS_HREDRAW or CS_VREDRAW;
+        WindowClass.lpfnWndProc := WndProc(@fpGFXWindowProc);
+        WindowClass.hInstance := MainInstance;
+        WindowClass.hIcon := LoadIcon(0, IDI_APPLICATION);
+        WindowClass.hCursor := LoadCursor(0, IDC_ARROW);
+        WindowClass.hbrBackground := 0;
+        WindowClass.lpszClassName := 'fpGFX';
+      end;
+      Windows.RegisterClass(@WindowClass);
+    end;
+  end;
+
+  if Assigned(FParent) then
+    ParentHandle := FParent.Handle
+  else
+    ParentHandle := 0;
+
+  if not (woWindow in FWindowOptions) then FWindowStyle := WS_CHILD
+  else if (woBorderless in FWindowOptions) and (woPopUp in FWindowOptions) then FWindowStyle := WS_POPUP
+  else if woPopUp in FWindowOptions then FWindowStyle := WS_POPUPWINDOW
+  else if woToolWindow in FWindowOptions then FWindowStyle := WS_OVERLAPPEDWINDOW
+  else if woChildWindow in FWindowOptions then FWindowStyle := WS_CHILDWINDOW
+  else if woBorderless in FWindowOptions then FWindowStyle := WS_OVERLAPPED
+  else FWindowStyle := WS_OVERLAPPEDWINDOW;
+
+  if not (woWindow in FWindowOptions) then FWindowStyleEx := 0
+  else if woPopUp in FWindowOptions then FWindowStyleEx := WS_EX_TOOLWINDOW
+  else if woToolWindow in FWindowOptions then FWindowStyleEx := WS_EX_TOOLWINDOW
+  else FWindowStyleEx := WS_EX_APPWINDOW;
+
+  if UnicodeEnabledOS then
+   FHandle := Windows.CreateWindowExW(
+     FWindowStyleEx,			// extended window style
+     'fpGFX',				// registered class name
+     'fpGFX Window',			// window name
+     FWindowStyle,			// window style
+     CW_USEDEFAULT,			// horizontal position of window
+     CW_USEDEFAULT,			// vertical position of window
+     CW_USEDEFAULT,			// window width
+     CW_USEDEFAULT,			// window height
+     ParentHandle,			// handle to parent or owner window
+     0,					// menu handle or child identifier
+     MainInstance,			// handle to application instance
+     Self)				// window-creation data
+  else
+   FHandle := Windows.CreateWindowEx(
+     FWindowStyleEx,			// extended window style
+     'fpGFX',				// registered class name
+     'fpGFX Window',			// window name
+     FWindowStyle,			// window style
+     CW_USEDEFAULT,			// horizontal position of window
+     CW_USEDEFAULT,			// vertical position of window
+     CW_USEDEFAULT,			// window width
+     CW_USEDEFAULT,			// window height
+     ParentHandle,			// handle to parent or owner window
+     0,					// menu handle or child identifier
+     MainInstance,			// handle to application instance
+     Self);				// window-creation data
 end;
 
 
