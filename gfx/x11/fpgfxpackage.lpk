@@ -21,7 +21,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="4"/>
-    <Files Count="10">
+    <Files Count="9">
       <Item1>
         <Filename Value="../gfxbase.pas"/>
         <UnitName Value="GfxBase"/>
@@ -47,21 +47,17 @@
         <UnitName Value="fpgfx"/>
       </Item6>
       <Item7>
-        <Filename Value="../geldirty.pas"/>
-        <UnitName Value="GELDirty"/>
-      </Item7>
-      <Item8>
         <Filename Value="../gelimage.pas"/>
         <UnitName Value="GELImage"/>
-      </Item8>
-      <Item9>
+      </Item7>
+      <Item8>
         <Filename Value="../commandlineparams.pas"/>
         <UnitName Value="CommandLineParams"/>
-      </Item9>
-      <Item10>
+      </Item8>
+      <Item9>
         <Filename Value="../fputf8utils.pas"/>
         <UnitName Value="fpUTF8Utils"/>
-      </Item10>
+      </Item9>
     </Files>
     <LazDoc Paths="../../docs/xml/gfx/"/>
     <RequiredPkgs Count="1">

@@ -106,7 +106,8 @@ const
 
   FormatTypeBPPTable: array[TGfxImageType] of Integer =
     (0, 1, 4, 4, 8, 8, 16, 16, 24, 32, 32);
-  { Predefined colors }
+    
+  { Predefined desktop colors }
 
   colTransparent: TGfxColor    = (Red: $00; Green: $00; Blue: $00; Alpha: $ff);
   colBlack: TGfxColor          = (Red: $00; Green: $00; Blue: $00; Alpha: $00);
@@ -125,6 +126,8 @@ const
   colDkRed: TGfxColor	       = (Red: $80; Green: $00; Blue: $00; Alpha: $00);
   colDkMagenta: TGfxColor      = (Red: $80; Green: $00; Blue: $80; Alpha: $00);
   colDkYellow: TGfxColor       = (Red: $80; Green: $80; Blue: $00; Alpha: $00);
+
+  { Predefined web colors }
 
   webBlack: TGfxColor	       = (Red: $00; Green: $00; Blue: $00; Alpha: $00);
   webMaroon: TGfxColor	       = (Red: $80; Green: $00; Blue: $00; Alpha: $00);
@@ -148,37 +151,37 @@ const
 
   PixelFormatMono: TGfxPixelFormat = (
     FormatType: ftMono;
-    RedMask:	  0;
+    RedMask:	0;
     GreenMask:	0;
-    BlueMask:	  0;
+    BlueMask:	0;
     AlphaMask:	0);
 
   PixelFormatPal4: TGfxPixelFormat = (
     FormatType: ftPal4;
-    RedMask:	  0;
+    RedMask:	0;
     GreenMask:	0;
-    BlueMask:	  0;
+    BlueMask:	0;
     AlphaMask:	0);
 
   PixelFormatPal4A: TGfxPixelFormat = (
     FormatType: ftPal4A;
-    RedMask:	  0;
+    RedMask:	0;
     GreenMask:	0;
-    BlueMask:	  0;
+    BlueMask:	0;
     AlphaMask:	0);
 
   PixelFormatPal8: TGfxPixelFormat = (
     FormatType: ftPal8;
-    RedMask:	  0;
+    RedMask:	0;
     GreenMask:	0;
-    BlueMask:	  0;
+    BlueMask:	0;
     AlphaMask:	0);
 
   PixelFormatPal8A: TGfxPixelFormat = (
     FormatType: ftPal8A;
-    RedMask:	  0;
+    RedMask:	0;
     GreenMask:	0;
-    BlueMask:	  0;
+    BlueMask:	0;
     AlphaMask:	0);
 
   { Windows requires this particular order for RGB images }
@@ -186,30 +189,30 @@ const
   { 5-6-5 storage }
   PixelFormatRGB16: TGfxPixelFormat = (
     FormatType:	ftRGB16;
-    RedMask:	  $F800;
+    RedMask:	$F800;
     GreenMask:	$07E0;
-    BlueMask:	  $001F;
+    BlueMask:	$001F;
     AlphaMask:	0);
 
   PixelFormatRGB24: TGfxPixelFormat = (
     FormatType:	ftRGB24;
-    RedMask:	  $ff0000;
+    RedMask:	$ff0000;
     GreenMask:	$00ff00;
-    BlueMask:	  $0000ff;
+    BlueMask:	$0000ff;
     AlphaMask:	0);
 
   PixelFormatRGB32: TGfxPixelFormat = (
     FormatType:	ftRGB32;
-    RedMask:	  $ff0000;
+    RedMask:	$ff0000;
     GreenMask:	$00ff00;
-    BlueMask:	  $0000ff;
+    BlueMask:	$0000ff;
     AlphaMask:	0);
 
   PixelFormatRGBA32: TGfxPixelFormat = (
     FormatType: ftRGB32;
-    RedMask:	  $00ff0000;
+    RedMask:	$00ff0000;
     GreenMask:	$0000ff00;
-    BlueMask:	  $000000ff;
+    BlueMask:	$000000ff;
     AlphaMask:	$ff000000);
 
 type
@@ -244,20 +247,11 @@ type
 
   TFEvent = class
   public
-    { Windows Window Manager fields }
-    Msg: Cardinal;
-    wparam: Cardinal;
-    lparam: Cardinal;
-    Result: Cardinal;
+    EventType: TFEventType;
+    { Mouse fields }
     MouseButton: TMouseButton;
-    { X11 Window Manager fields }
-    EventPointer: Pointer;
-    State: Cardinal;
-    Button: Cardinal;
     X, Y: Cardinal;
     Width, Height: Cardinal;
-    { fpGUI fields }
-    EventType: TFEventType;
   end;
 
   { TFCustomFont }
@@ -1389,11 +1383,14 @@ end;
 constructor TFCustomApplication.Create;
 begin
   inherited Create(nil);
+  
   if gCommandLineParams.IsParam('display') then
     FDisplayName := gCommandLineParams.GetParam('display')
   else
     FDisplayName := '';
+    
   Forms := TList.Create;
+  
   FQuitWhenLastWindowCloses := True;
 end;
 

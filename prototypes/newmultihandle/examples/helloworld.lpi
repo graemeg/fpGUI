@@ -31,24 +31,12 @@
         <PackageName Value="fpGFXPackage"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="1">
       <Unit0>
         <Filename Value="helloworld.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="helloworld"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="../gui_widget.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit1>
-      <Unit2>
-        <Filename Value="../gui_button.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="../gui_style.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

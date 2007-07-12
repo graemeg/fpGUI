@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="2">
-    <PathDelim Value="\"/>
     <Name Value="fpguipackage"/>
     <CompilerOptions>
       <Version Value="5"/>
-      <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -16,7 +14,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="3">
+    <Files Count="4">
       <Item1>
         <Filename Value="fpgui.pas"/>
         <UnitName Value="fpgui"/>
@@ -29,6 +27,10 @@
         <Filename Value="gui_widget.inc"/>
         <Type Value="Include"/>
       </Item3>
+      <Item4>
+        <Filename Value="gui_style.inc"/>
+        <Type Value="Include"/>
+      </Item4>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
