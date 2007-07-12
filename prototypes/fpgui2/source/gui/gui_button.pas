@@ -281,9 +281,9 @@ begin
   FClickOnPush := (not FDown) and AllowDown;
 
   // search the other buttons in the group
-  for n := 0 to FParent.ComponentCount - 1 do
+  for n := 0 to Parent.ComponentCount - 1 do
   begin
-    c := FParent.Components[n];
+    c := Parent.Components[n];
     if (c <> self) and (c is TfpgButton) then
       with TfpgButton(c) do
         if GroupIndex = self.GroupIndex then

@@ -144,6 +144,8 @@ type
 
   TfpgLineStyle = (lsSolid, lsDash, lsDot);
 
+  TMouseButton = (mbLeft, mbRight, mbMiddle);
+
 
   TfpgImageBase = class(TObject)
   protected
@@ -266,6 +268,8 @@ type
 
 
   TfpgWindowBase = class(TComponent)
+  private
+    FParent: TfpgWindowBase;
   protected
     FWindowType: TWindowType;
     FWindowAttributes: TWindowAttributes;
@@ -276,16 +280,35 @@ type
     FMinWidth: TfpgCoord;
     FMinHeight: TfpgCoord;
     FCanvas: TfpgCanvasBase;
-    FParentWindow: TfpgWindowBase;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
-    procedure   SetParentWindow(const AValue: TfpgWindowBase);
-    function    GetParentWindow: TfpgWindowBase;
+    procedure   SetParent(const AValue: TfpgWindowBase); virtual;
+    function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
     procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
+    { Event processing methods }
+    procedure   EvCreate; virtual; abstract;
+    procedure   EvFocusIn; virtual; abstract;
+    procedure   EvFocusOut; virtual; abstract;
+    procedure   EvHide; virtual; abstract;
+//    procedure   EvKeyPressed(AKey: Word); virtual; abstract;
+    procedure   EvKeyPressed(const AKeyCode: word; const AShiftState: word); virtual; abstract;
+    procedure   EvKeyReleased(AKey: Word); virtual; abstract;
+    procedure   EvKeyChar(AKeyChar: Char); virtual; abstract;
+    procedure   EvMouseEnter(const AMousePos: TPoint); virtual; abstract;
+    procedure   EvMouseLeave; virtual; abstract;
+    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
+    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
+    procedure   EvMouseMove(const AMousePos: TPoint); virtual; abstract;
+    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); virtual; abstract;
+    procedure   EvPaint; virtual; abstract;
+    procedure   EvMove; virtual; abstract;
+    procedure   EvResize; virtual; abstract;
+    procedure   EvShow; virtual; abstract;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean); virtual; abstract;
   public
     // make some setup before the window shows
     procedure   AdjustWindowStyle; virtual;    // forms modify the window creation parameters
@@ -304,7 +327,7 @@ type
     property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
     property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
     property    Canvas: TfpgCanvasBase read GetCanvas;
-    property    ParentWindow: TfpgWindowBase read GetParentWindow write SetParentWindow;
+    property    Parent: TfpgWindowBase read GetParent write SetParent;
   end;
 
 
@@ -386,14 +409,14 @@ end;
 
 { TfpgWindowBase }
 
-procedure TfpgWindowBase.SetParentWindow(const AValue: TfpgWindowBase);
+procedure TfpgWindowBase.SetParent(const AValue: TfpgWindowBase);
 begin
-  FParentWindow := AValue;
+  FParent := AValue;
 end;
 
-function TfpgWindowBase.GetParentWindow: TfpgWindowBase;
+function TfpgWindowBase.GetParent: TfpgWindowBase;
 begin
-  result := FParentWindow;
+  result := FParent;
 end;
 
 function TfpgWindowBase.GetCanvas: TfpgCanvasBase;
@@ -403,7 +426,7 @@ end;
 
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
-  DoAllocateWindowHandle(FParentWindow);
+  DoAllocateWindowHandle(FParent);
 end;
 
 procedure TfpgWindowBase.ReleaseWindowHandle;

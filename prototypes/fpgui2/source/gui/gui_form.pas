@@ -34,8 +34,6 @@ type
     procedure   AdjustWindowStyle; override;
     procedure   SetWindowParameters; override;
     procedure   SetWindowTitle(const AValue: string);
-    procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
-    procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   HandlePaint; override;
     procedure   HandleClose; virtual;
@@ -43,6 +41,9 @@ type
     procedure   HandleShow; override;
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
+    { Internal Events }
+    procedure   EvFocusIn; override;
+    procedure   EvFocusOut; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; virtual;
@@ -108,6 +109,7 @@ end;
 procedure TfpgForm.HandlePaint;
 begin
   Canvas.BeginDraw;
+  inherited;
   Canvas.Clear(FBackgroundColor);
   Canvas.EndDraw(0, 0, FWidth, FHeight);
 end;
@@ -183,28 +185,6 @@ begin
   Result := ModalResult;
 end;
 
-procedure TfpgForm.MsgActivate(var msg: TfpgMessageRec);
-begin
-  if (fpgTopModalForm = nil) or (fpgTopModalForm = self) then
-  begin
-    FocusRootWidget := self;
-    if ActiveWidget = nil then
-      ActiveWidget := FindFocusWidget(nil, fsdFirst)
-    else
-      ActiveWidget.SetFocus;
-  end;
-  if Assigned(FOnActivate) then
-    FOnActivate(self);
-end;
-
-procedure TfpgForm.MsgDeActivate(var msg: TfpgMessageRec);
-begin
-  if ActiveWidget <> nil then
-    ActiveWidget.KillFocus;
-  if Assigned(FOnDeactivate) then
-    FOnDeactivate(self);
-end;
-
 procedure TfpgForm.MsgClose(var msg: TfpgMessageRec);
 begin
   HandleClose;
@@ -243,6 +223,31 @@ begin
   inherited BeforeDestruction;
   if Assigned(FOnDestroy) then
     FOnDestroy(self);
+end;
+
+procedure TfpgForm.EvFocusIn;
+begin
+  if (fpgTopModalForm = nil) or (fpgTopModalForm = self) then
+  begin
+    FocusRootWidget := self;
+    if ActiveWidget = nil then
+      ActiveWidget := FindFocusWidget(nil, fsdFirst)
+    else
+      ActiveWidget.SetFocus;
+  end;
+  if Assigned(FOnActivate) then
+    FOnActivate(self);
+
+  inherited EvFocusIn;
+end;
+
+procedure TfpgForm.EvFocusOut;
+begin
+  if ActiveWidget <> nil then
+    ActiveWidget.KillFocus;
+  if Assigned(FOnDeactivate) then
+    FOnDeactivate(self);
+  inherited EvFocusOut;
 end;
 
 procedure TfpgForm.Hide;

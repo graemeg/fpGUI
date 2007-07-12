@@ -31,7 +31,6 @@ type
   TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
     btnIsSelected, btnHasFocus, btnHasParentColor);
     
-  TMouseButton = (mbLeft, mbRight, mbMiddle);
 
 
 const
@@ -62,7 +61,7 @@ type
   TMouseMoveEvent = procedure(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint) of object;
   TMouseWheelEvent = procedure(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint) of object;
   { Painting }
-  TPaintEvent = procedure(Sender: TObject; const ARect: TfpgRect) of object;
+  TPaintEvent = procedure(Sender: TObject{; const ARect: TfpgRect}) of object;
 
 type
   TSizeParams = record
@@ -98,13 +97,13 @@ type
 
   TfpgWindow = class(TfpgWindowImpl)
   protected
-    procedure   SetParentWindow(const AValue: TfpgWindow); reintroduce;
-    function    GetParentWindow: TfpgWindow; reintroduce;
+    procedure   SetParent(const AValue: TfpgWindow); reintroduce;
+    function    GetParent: TfpgWindow; reintroduce;
     function    GetCanvas: TfpgCanvas; reintroduce;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    property    ParentWindow: TfpgWindow read GetParentWindow write SetParentWindow;
+    property    Parent: TfpgWindow read GetParent write SetParent;
     property    Canvas: TfpgCanvas read GetCanvas;
     property    WinHandle;  // surface this property from TfpgXXXImpl class in it's native format
   end;
@@ -657,9 +656,9 @@ end;
 
 { TfpgWindow }
 
-constructor TfpgWindow.Create(aowner: TComponent);
+constructor TfpgWindow.Create(AOwner: TComponent);
 begin
-  inherited Create(aowner); // initialize the platform internals
+  inherited Create(AOwner); // initialize the platform internals
 
   FTop    := 0;
   FLeft   := 0;
@@ -671,16 +670,10 @@ begin
 
   FModalForWin := nil;
 
-  if (aowner <> nil) and (aowner is TfpgWindow) then
-  begin
-    FParentWindow := TfpgWindow(aowner);
-    FWindowType   := wtChild;
-  end
+  if (AOwner <> nil) and (AOwner is TfpgWindow) then
+    FWindowType   := wtChild
   else
-  begin
-    FParentWindow := nil;
     FWindowType   := wtWindow;
-  end;
 
   FCanvas := TfpgCanvas.Create(self);
 end;
@@ -691,14 +684,14 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgWindow.SetParentWindow(const AValue: TfpgWindow);
+procedure TfpgWindow.SetParent(const AValue: TfpgWindow);
 begin
-  inherited SetParentWindow(AValue);
+  inherited SetParent(AValue);
 end;
 
-function TfpgWindow.GetParentWindow: TfpgWindow;
+function TfpgWindow.GetParent: TfpgWindow;
 begin
-  result := TfpgWindow(inherited GetParentWindow);
+  result := TfpgWindow(inherited GetParent);
 end;
 
 function TfpgWindow.GetCanvas: TfpgCanvas;

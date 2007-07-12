@@ -25,7 +25,6 @@ type
     FOnMouseUp: TMouseButtonEvent;
     FOnPaint: TPaintEvent;
     FOnScreen: boolean;
-    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
     procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
     procedure   MsgKeyChar(var msg: TfpgMessageRec); message FPGM_KEYCHAR;
@@ -35,13 +34,10 @@ type
     procedure   MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
     procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
     procedure   MsgDoubleClick(var msg: TfpgMessageRec); message FPGM_DOUBLECLICK;
-    procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
-    procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     procedure   SetEnabled(const AValue: boolean);
     procedure   SetVisible(const AValue: boolean);
   protected
-    FParent: TfpgWidget;
     FVisible: boolean;
     FEnabled: boolean;
     FFocusable: boolean;
@@ -50,12 +46,13 @@ type
     FAnchors: TAnchors;
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
+    function    GetParent: TfpgWidget; reintroduce;
+    procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   DoAlign(aalign: TAlign);
     procedure   HandlePaint; virtual;
     procedure   HandleResize(awidth, aheight: TfpgCoord); virtual;
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean); virtual;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean); virtual;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: word; var consumed: boolean); virtual;
     procedure   HandleSetFocus; virtual;
     procedure   HandleKillFocus; virtual;
@@ -75,6 +72,10 @@ type
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   RePaint;
+    { Internal events }
+    procedure   EvPaint; override;
+    procedure   EvMouseEnter(const AMousePos: TPoint); override;
+    procedure   EvMouseLeave; override;
     { property events }
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
@@ -88,7 +89,7 @@ type
     destructor  Destroy; override;
     procedure   SetFocus;
     procedure   KillFocus;
-    property    Parent: TfpgWidget read FParent write FParent;
+    property    Parent: TfpgWidget read GetParent write SetParent;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    Visible: boolean read FVisible write SetVisible;
     property    Enabled: boolean read FEnabled write SetEnabled;
@@ -157,6 +158,16 @@ begin
     end;
 end;
 
+function TfpgWidget.GetParent: TfpgWidget;
+begin
+  Result := TfpgWidget(inherited GetParent);
+end;
+
+procedure TfpgWidget.SetParent(const AValue: TfpgWidget);
+begin
+  inherited SetParent(AValue);
+end;
+
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
   FOnScreen := False;
@@ -171,11 +182,11 @@ begin
 //  OnKeyPress := nil;
 
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
-    FParent := TfpgWidget(AOwner)
+    Parent := TfpgWidget(AOwner)
   else
-    FParent := nil;
+    Parent := nil;
 
-  if FParent <> nil then
+  if Parent <> nil then
     FWindowType := wtChild;
 
   inherited;
@@ -185,13 +196,6 @@ destructor TfpgWidget.Destroy;
 begin
   HandleHide;
   inherited;
-end;
-
-procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
-begin
-  HandlePaint;
-  if Assigned(FOnPaint) then
-    FOnPaint(Self, msg.Params.rect);
 end;
 
 procedure TfpgWidget.MsgKeyChar(var msg: TfpgMessageRec);
@@ -327,20 +331,6 @@ begin
   //
 end;
 
-procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
-begin
-  HandleMouseEnter;
-  if Assigned(FOnMouseEnter) then
-    FOnMouseEnter(self);
-end;
-
-procedure TfpgWidget.MsgMouseExit(var msg: TfpgMessageRec);
-begin
-  HandleMouseExit;
-  if Assigned(FOnMouseExit) then
-    FOnMouseExit(Self);
-end;
-
 procedure TfpgWidget.HandleShow;
 var
   n: integer;
@@ -349,7 +339,6 @@ begin
   FOnScreen := True;
   if FVisible then
   begin
-    FParentWindow := FParent;
     AllocateWindowHandle;
 
     for n := 0 to ComponentCount - 1 do
@@ -381,6 +370,30 @@ procedure TfpgWidget.RePaint;
 begin
   if HasHandle then
     HandlePaint;
+end;
+
+procedure TfpgWidget.EvPaint;
+begin
+  HandlePaint;
+  if Assigned(FOnPaint) then
+    FOnPaint(Self);
+  inherited EvPaint;
+end;
+
+procedure TfpgWidget.EvMouseEnter(const AMousePos: TPoint);
+begin
+  HandleMouseEnter;
+  if Assigned(FOnMouseEnter) then
+    FOnMouseEnter(self);
+  inherited EvMouseEnter(AMousePos);
+end;
+
+procedure TfpgWidget.EvMouseLeave;
+begin
+  HandleMouseExit;
+  if Assigned(FOnMouseExit) then
+    FOnMouseExit(Self);
+  inherited EvMouseLeave;
 end;
 
 procedure TfpgWidget.SetFocus;
@@ -468,11 +481,6 @@ begin
       consumed     := True;
     end;
   end;
-end;
-
-procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean);
-begin
-  // descendants will implement this.
 end;
 
 procedure TfpgWidget.HandleKeyRelease(var keycode: word; var shiftstate: word; var consumed: boolean);

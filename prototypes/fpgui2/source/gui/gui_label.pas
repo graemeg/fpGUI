@@ -112,6 +112,7 @@ end;
 procedure TfpgLabel.HandlePaint;
 begin
   Canvas.BeginDraw;
+  inherited;
   Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(Font);
   Canvas.SetTextColor(FColor);
