@@ -1510,12 +1510,15 @@ procedure TGDIWindow.EvKeyPressed(AKey: Word);
 var
   vEvent: TFEvent;
 begin
-  if Assigned(OnKeyPressed) then OnKeyPressed(Self, AKey, GetKeyboardShiftState)
-  else if Assigned(Parent) then
+  if GetRootWindow().FocusedWindow = Self then
+  begin
+    if Assigned(OnKeyPressed) then OnKeyPressed(Self, AKey, GetKeyboardShiftState);
+  end
+  else
   begin
     vEvent.EventType := etKeyPressed;
     vEvent.Key := AKey;
-    Parent.ProcessEvent(vEvent);
+    GetRootWindow().FocusedWindow.ProcessEvent(vEvent);
   end;
 end;
 
@@ -1523,12 +1526,15 @@ procedure TGDIWindow.EvKeyReleased(AKey: Word);
 var
   vEvent: TFEvent;
 begin
-  if Assigned(OnKeyReleased) then OnKeyReleased(Self, AKey, GetKeyboardShiftState)
-  else if Assigned(Parent) then
+  if GetRootWindow().FocusedWindow = Self then
+  begin
+    if Assigned(OnKeyReleased) then OnKeyReleased(Self, AKey, GetKeyboardShiftState);
+  end
+  else
   begin
     vEvent.EventType := etKeyReleased;
     vEvent.Key := AKey;
-    Parent.ProcessEvent(vEvent);
+    GetRootWindow().FocusedWindow.ProcessEvent(vEvent);
   end;
 end;
 
@@ -1536,12 +1542,15 @@ procedure TGDIWindow.EvKeyChar(AKeyChar: Char);
 var
   vEvent: TFEvent;
 begin
-  if Assigned(OnKeyChar) then OnKeyChar(Self, AKeyChar)
-  else if Assigned(Parent) then
+  if GetRootWindow().FocusedWindow = Self then
+  begin
+    if Assigned(OnKeyChar) then OnKeyChar(Self, AKeyChar);
+  end
+  else
   begin
     vEvent.EventType := etKeyChar;
     vEvent.KeyChar := AKeyChar;
-    Parent.ProcessEvent(vEvent);
+    GetRootWindow().FocusedWindow.ProcessEvent(vEvent);
   end;
 end;
 
@@ -1576,15 +1585,19 @@ procedure TGDIWindow.EvMousePressed(AButton: TMouseButton;
 var
   vEvent: TFEvent;
 begin
+  { Defines focus }
+  if FFocusable then GetRootWindow().FocusedWindow := Self;
+
+  { Processes the event }
   if Assigned(OnMousePressed) then
-   OnMousePressed(Self, AButton, GetKeyboardShiftState, AMousePos)
-  else if Assigned(Parent) then
+   OnMousePressed(Self, AButton, GetKeyboardShiftState, AMousePos);
+{  else if Assigned(Parent) then
   begin
     vEvent.EventType := etMousePressed;
     vEvent.MousePos := AMousePos;
     vEvent.MouseButton := AButton;
     Parent.ProcessEvent(vEvent);
-  end;
+  end;  }
 end;
 
 procedure TGDIWindow.EvMouseReleased(AButton: TMouseButton;
@@ -1593,14 +1606,14 @@ var
   vEvent: TFEvent;
 begin
   if Assigned(OnMouseReleased) then
-   OnMouseReleased(Self, AButton, GetKeyboardShiftState, AMousePos)
-  else if Assigned(Parent) then
+   OnMouseReleased(Self, AButton, GetKeyboardShiftState, AMousePos);
+{  else if Assigned(Parent) then
   begin
     vEvent.EventType := etMouseReleased;
     vEvent.MousePos := AMousePos;
     vEvent.MouseButton := AButton;
     Parent.ProcessEvent(vEvent);
-  end;
+  end;       }
 end;
 
 procedure TGDIWindow.EvMouseMove(const AMousePos: TPoint);
@@ -1608,13 +1621,13 @@ var
   vEvent: TFEvent;
 begin
   if Assigned(OnMouseMove) then
-   OnMouseMove(Self, GetKeyboardShiftState, AMousePos)
-  else if Assigned(Parent) then
+   OnMouseMove(Self, GetKeyboardShiftState, AMousePos);
+{  else if Assigned(Parent) then
   begin
     vEvent.EventType := etMouseMove;
     vEvent.MousePos := AMousePos;
     Parent.ProcessEvent(vEvent);
-  end;
+  end;     }
 end;
 
 procedure TGDIWindow.EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint);
@@ -1622,14 +1635,14 @@ var
   vEvent: TFEvent;
 begin
   if Assigned(OnMouseWheel) then
-    OnMouseWheel(Self, GetKeyboardShiftState, AWheelDelta, AMousePos)
-  else if Assigned(Parent) then
+    OnMouseWheel(Self, GetKeyboardShiftState, AWheelDelta, AMousePos);
+{  else if Assigned(Parent) then
   begin
     vEvent.EventType := etMouseMove;
     vEvent.WheelDelta := AWheelDelta;
     vEvent.MousePos := AMousePos;
     Parent.ProcessEvent(vEvent);
-  end;
+  end;}
 end;
 
 { Because the painting code is executed on the middle of the processing

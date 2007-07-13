@@ -557,13 +557,15 @@ type
     { Event processing methods }
     procedure ProcessEvent(AEvent: TFEvent);
     { Methods of the child windows list }
-    function  FindTopParentWindow: TFCustomWindow;
+    function  GetRootWindow: TFCustomWindow;
 
     { Properties }
     property WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
     property Canvas: TFCustomCanvas read FCanvas;
     property Handle: PtrUInt read GetHandle;
+    { Properties of the child windows list }
     property ChildWindows: TList read FChildWindows;
+    property FocusedWindow: TFCustomWindow read FFocusedWindow write FFocusedWindow;
     { Window state }
     property ClientWidth: Integer read FClientWidth write SetClientWidth;
     property ClientHeight: Integer read FClientHeight write SetClientHeight;
@@ -1065,7 +1067,9 @@ begin
   FParent := AParent;
 
   FChildWindows := TList.Create;
-  
+
+  FFocusedWindow := Self;
+
   if AParent <> nil then AParent.ChildWindows.Add(Self);
 end;
 
@@ -1131,9 +1135,9 @@ begin
 end;
 
 { Finds the top window througth recursion }
-function TFCustomWindow.FindTopParentWindow: TFCustomWindow;
+function TFCustomWindow.GetRootWindow: TFCustomWindow;
 begin
-  if Assigned(Parent) then Result := Parent.FindTopParentWindow
+  if Assigned(Parent) then Result := Parent.GetRootWindow
   else Result := Self;
 end;
 

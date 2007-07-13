@@ -37,6 +37,7 @@ begin
   inherited Create(AParent);
 
   FDrawBackground := False;
+  Focusable := True;
 
   SetClientSize(Size(100, 50));
 end;

@@ -34,6 +34,7 @@ begin
   inherited Create(AParent);
 
   FDrawBackground := False;
+  Focusable := True;
 
   SetClientSize(Size(100, 50));
 end;
@@ -82,12 +83,16 @@ end;
 
 procedure TFEdit.EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint);
 begin
-  Self.CaptureMouse;
+  WriteLn('Mouse Pressed');
+
+  inherited EvMousePressed(AButton, AMousePos);
 end;
 
 procedure TFEdit.EvMouseReleased(AButton: TMouseButton;
   const AMousePos: TPoint);
 begin
+  WriteLn('Mouse Released');
+
   inherited EvMouseReleased(AButton, AMousePos);
 end;
 
