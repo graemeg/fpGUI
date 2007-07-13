@@ -54,7 +54,7 @@ begin
   AllocateWindowHandle;
   // We can't set a title if we don't have a window handle. So we do that here
   // and not in the constructor.
-  DoSetWindowTitle('fpGFX Hello World');
+  SetWindowTitle('fpGFX Hello World');
 end;
 
 procedure TMainWindow.MsgPaint(var msg: TfpgMessageRec);

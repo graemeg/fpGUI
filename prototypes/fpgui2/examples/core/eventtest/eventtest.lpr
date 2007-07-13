@@ -35,7 +35,7 @@ type
     procedure   MsgScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
   protected
   public
-    constructor Create(aowner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
     procedure   Show;
   end;
 
@@ -174,7 +174,7 @@ begin
   Writeln('Mouse scroll delta=' + IntToStr(delta) + ' button=' + IntToStr(msg.Params.mouse.Buttons));
 end;
 
-constructor TMainForm.Create(aowner: TComponent);
+constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(aowner);
   FMoveEventCount := 0;
@@ -188,7 +188,7 @@ begin
   AllocateWindowHandle;
   // We can't set a title if we don't have a window handle. So we do that here
   // and not in the constructor.
-  DoSetWindowTitle('fpGFX event test');
+  SetWindowTitle('fpGFX event test');
 end;
   
   

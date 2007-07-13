@@ -124,7 +124,7 @@ type
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
     function    HandleIsValid: boolean; override;
-    procedure   DoSetWindowTitle(const atitle: string);
+    procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;

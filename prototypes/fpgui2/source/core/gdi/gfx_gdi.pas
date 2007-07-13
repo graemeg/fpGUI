@@ -130,7 +130,7 @@ type
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     //procedure MoveToScreenCenter; override;
-    procedure   DoSetWindowTitle(const atitle: string);
+    procedure   DoSetWindowTitle(const ATitle: string); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;

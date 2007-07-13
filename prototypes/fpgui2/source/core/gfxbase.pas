@@ -286,11 +286,13 @@ type
     procedure   DoReleaseWindowHandle; virtual; abstract;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
+    procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
     procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
+    procedure   SetWindowTitle(const ATitle: string); virtual;
   public
     // make some setup before the window shows
     procedure   AdjustWindowStyle; virtual;    // forms modify the window creation parameters
@@ -420,6 +422,11 @@ begin
     Canvas.FreeResources;
     DoReleaseWindowHandle;
   end;
+end;
+
+procedure TfpgWindowBase.SetWindowTitle(const ATitle: string);
+begin
+  DoSetWindowTitle(ATitle);
 end;
 
 procedure TfpgWindowBase.AdjustWindowStyle;

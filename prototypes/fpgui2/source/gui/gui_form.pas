@@ -33,7 +33,7 @@ type
     FBackgroundColor: TfpgColor;
     procedure   AdjustWindowStyle; override;
     procedure   SetWindowParameters; override;
-    procedure   SetWindowTitle(const AValue: string);
+    procedure   SetWindowTitle(const ATitle: string); override;
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
@@ -99,10 +99,10 @@ end;
 
 { TfpgForm }
 
-procedure TfpgForm.SetWindowTitle(const AValue: string);
+procedure TfpgForm.SetWindowTitle(const ATitle: string);
 begin
-  FWindowTitle := avalue;
-  inherited DoSetWindowTitle(FWindowTitle);
+  FWindowTitle := ATitle;
+  inherited SetWindowTitle(ATitle);
 end;
 
 procedure TfpgForm.MsgActivate(var msg: TfpgMessageRec);
