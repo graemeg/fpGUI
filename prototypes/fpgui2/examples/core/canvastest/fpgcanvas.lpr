@@ -10,7 +10,7 @@ uses
   fpgfx,
   gfxbase,
   gui_form,
-  gfx_imgfmt_bmp;
+  gfx_imgfmt_bmp, resample;
 
 
 type
@@ -20,6 +20,7 @@ type
   TMainForm = class(TfpgForm)
   private
     bmp: TfpgImage;
+    src, dst: TfpgImage;
   protected
     procedure HandlePaint; override;
   public
@@ -114,6 +115,14 @@ begin
   Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
   Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
   
+//  Canvas.StretchDraw(150, 240, 160, 21, bmp);
+  Canvas.StretchDraw(150, 240, 300, 50, bmp);
+
+//  Stretch(bmp, dst, ResampleFilters[6].Filter, ResampleFilters[6].Width);
+////  Canvas.DrawImage(150, 240, bmp);
+//  Canvas.DrawImage(160, 250, dst);
+
+  
   
   // Testing Canvas.Pixels[]
   // two pixels should have changed color in the top left of the form
@@ -132,16 +141,20 @@ begin
   inherited AfterCreate;
   SetPosition(100, 100, 500, 400);
   WindowTitle := 'fpGFX Canvas Test';
-  
+
   bmp := LoadImage_BMP('button.bmp');
   if not Assigned(bmp) then
     raise Exception.Create('Failed to load button.bmp');
   bmp.CreateMaskFromSample(0,0);
   bmp.UpdateImage;
+  
+  dst := TfpgImage.Create;
+  dst.AllocateImage(bmp.ColorDepth, 200, 50);
 end;
 
 procedure TMainForm.BeforeDestruction;
 begin
+  dst.Free;
   bmp.Free;
   inherited BeforeDestruction;
 end;
