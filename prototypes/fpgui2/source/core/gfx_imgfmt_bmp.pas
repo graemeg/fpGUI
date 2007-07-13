@@ -12,7 +12,7 @@ uses
   Classes,
   SysUtils,
   fpgfx,
-  gfxbase;
+  gfxbase, fpcanvas;
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
 function  LoadImage_BMP(const AFileName: string): TfpgImage;
@@ -37,6 +37,7 @@ begin
     Exit; //==>
 
   AssignFile(AFile, AFileName);
+  FileMode := fmOpenRead; // read-only
   Reset(AFile);
   AImageDataSize := FileSize(AFile);
   GetMem(AImageData, AImageDataSize);

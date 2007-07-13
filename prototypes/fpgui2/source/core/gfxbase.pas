@@ -10,9 +10,15 @@ uses
 
 type
   TfpgCoord = integer;     // we might use floating point coordinates in the future...
-  TfpgColor = longword;    // Always in RRGGBB (Red, Green, Blue) format!!
+  TfpgColor = longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
+  
+  TRGBTriple = record
+    Red: word;
+    Green: word;
+    Blue: word;
+    Alpha: word;
+  end;
 
-type
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
   TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos);
@@ -145,7 +151,15 @@ type
   TfpgLineStyle = (lsSolid, lsDash, lsDot);
 
 
+  // forward declaration
+  TfpgWindowBase = class;
+  TfpgCanvasBase = class;
+
+
   TfpgImageBase = class(TObject)
+  private
+    function GetColor(x, y: TfpgCoord): TfpgColor;
+    procedure SetColor(x, y: TfpgCoord; const AValue: TfpgColor);
   protected
     FWidth: integer;
     FHeight: integer;
@@ -159,6 +173,14 @@ type
     procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
     procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
   public
+    constructor Create;
+    destructor  Destroy; override;
+    procedure   Invert;
+    procedure   FreeImage;
+    procedure   AllocateImage(acolordepth, awidth, aheight: integer);
+    procedure   AllocateMask;
+    procedure   CreateMaskFromSample(x, y: TfpgCoord);
+    procedure   UpdateImage;
     property    ImageData: pointer read FImageData;
     property    ImageDataSize: integer read FImageDataSize;
     property    MaskData: pointer read FMaskData;
@@ -167,6 +189,8 @@ type
     property    Height: integer read FHeight;
     property    ColorDepth: integer read FColorDepth;
     property    Masked: boolean read FMasked;
+    
+    property    Colors[x, y: TfpgCoord]: TfpgColor read GetColor write SetColor;
   end;
 
 
@@ -194,11 +218,39 @@ type
   end;
 
 
-  // forward declaration
-  TfpgWindowBase = class;
+  TfpgCustomInterpolation = class(TObject)
+  private
+    FCanvas: TfpgCanvasBase;
+    FImage: TfpgImageBase;
+  protected
+    procedure   Initialize(AImage: TfpgImageBase; ACanvas: TfpgCanvasBase); virtual;
+    procedure   Execute(x, y, w, h: integer); virtual; abstract;
+  public
+    property    Canvas: TfpgCanvasBase read FCanvas;
+    property    Image: TfpgImageBase read FImage;
+  end;
+  
+  
+  TfpgBaseInterpolation = class(TfpgCustomInterpolation)
+  private
+    xfactor: double;
+    yfactor: double;
+    xsupport: double;
+    ysupport: double;
+    tempimage: TfpgImageBase;
+    procedure   Horizontal(width: integer);
+    procedure   Vertical(dx, dy, width, height: integer);
+  protected
+    procedure   Execute(x, y, w, h: integer); override;
+    function    Filter(x : double): double; virtual; abstract;
+    function    MaxSupport: double; virtual; abstract;
+  end;
+
 
 
   TfpgCanvasBase = class(TObject)
+  private
+    FInterpolation: TfpgCustomInterpolation;
   protected
     FBufferedDraw: boolean;
     FBeginDrawCount: integer;
@@ -237,6 +289,7 @@ type
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+    procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   FillRectangle(r: TfpgRect); overload;
@@ -331,6 +384,14 @@ type
 function GetKeyboardShiftState(AShiftState: word): TShiftState;
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 
+{ Color }
+function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
+function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+function fpgGetRed(const AColor: TfpgColor): word;
+function fpgGetGreen(const AColor: TfpgColor): word;
+function fpgGetBlue(const AColor: TfpgColor): word;
+function fpgGetAlpha(const AColor: TfpgColor): word;
+
 implementation
 
 uses
@@ -361,6 +422,49 @@ end;
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 begin
   Result := 'not implemented yet';
+end;
+
+function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
+begin
+  with Result do
+  begin
+    Red   := fpgGetRed(AColor);
+    Green := fpgGetGreen(AColor);
+    Blue  := fpgGetBlue(AColor);
+    Alpha := fpgGetAlpha(AColor);
+  end
+end;
+
+function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+begin
+  Result :=
+      ((Result shl 16) and $FF) or
+      ((Result shl 8) and $FF) or
+       (Result and $FF);
+end;
+
+function fpgGetRed(const AColor: TfpgColor): word;
+begin
+  // AARRGGBB format
+  Result := (AColor shr 16) and $FF;
+end;
+
+function fpgGetGreen(const AColor: TfpgColor): word;
+begin
+  // AARRGGBB format
+  Result := (AColor shr 8) and $FF;
+end;
+
+function fpgGetBlue(const AColor: TfpgColor): word;
+begin
+  // AARRGGBB format
+  Result := AColor and $FF;
+end;
+
+function fpgGetAlpha(const AColor: TfpgColor): word;
+begin
+  // AARRGGBB format
+  Result := (AColor shr 32) and $FF;
 end;
 
 { TfpgRect }
@@ -499,6 +603,12 @@ procedure TfpgCanvasBase.DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi,
   yi, w, h: integer);
 begin
   DoDrawImagePart(x, y, img, xi, yi, w, h);
+end;
+
+procedure TfpgCanvasBase.StretchDraw(x, y, w, h: TfpgCoord;
+  ASource: TfpgImageBase);
+begin
+
 end;
 
 procedure TfpgCanvasBase.DrawString(x, y: TfpgCoord; const txt: string);
@@ -660,6 +770,318 @@ end;
 function TfpgFontBase.Height: integer;
 begin
   Result := FFontRes.GetHeight;
+end;
+
+{ TfpgCustomInterpolation }
+
+procedure TfpgCustomInterpolation.Initialize(AImage: TfpgImageBase;
+  ACanvas: TfpgCanvasBase);
+begin
+  FImage  := AImage;
+  FCanvas := ACanvas;
+end;
+
+{ TfpgBaseInterpolation }
+
+type
+  TfpgInterpolationContribution = record
+    weight: double;
+    place: integer;
+  end;
+
+function ColorRound(c: double): word;
+begin
+  if c > $FFFF then
+    result := $FFFF
+  else if c < 0.0 then
+    result := 0
+  else
+    result := round(c);
+end;
+
+
+procedure TfpgBaseInterpolation.Horizontal(width: integer);
+var
+  x, y, r: integer;
+  start, stop, maxcontribs: integer;
+  center, re, gr, bl, density: double;
+  contributions: array[0..10] of TfpgInterpolationContribution;
+  dif, w, gamma, a: double;
+  c: TfpgColor;
+  rgb: TRGBTriple;
+begin
+  for x := 0 to Width - 1 do
+  begin
+    center := x * xfactor;
+    start  := round(center - xsupport);
+    if start < 0 then
+      start := 0;
+    stop := round(center + xsupport);
+    if stop >= image.Width then
+      stop := image.Width - 1;
+    density     := 0.0;
+    maxcontribs := -1;
+    for r := start to stop do
+    begin
+      dif := r - center;
+      w   := Filter(dif);
+      if w > 0.0 then
+      begin
+        Inc(maxcontribs);
+        with contributions[maxcontribs] do
+        begin
+          weight  := w;
+          density := density + w;
+          place   := r;
+        end;
+      end;
+    end;
+    if (density <> 0.0) and (density <> 1.0) then
+    begin
+      density := 1.0 / density;
+      for r := 0 to maxcontribs do
+        contributions[r].weight := contributions[r].weight * density;
+    end;
+    for y := 0 to image.Height - 1 do
+    begin
+      gamma := 0.0;
+      re    := 0.0;
+      gr    := 0.0;
+      bl    := 0.0;
+      for r := 0 to maxcontribs do
+        with contributions[r] do
+        begin
+          c   := image.colors[place, y];
+          rgb := fpgColorToRGBTriple(c);
+          a     := weight * rgb.Alpha / $FFFF;
+          re    := re + a * rgb.Red;
+          gr    := gr + a * rgb.Green;
+          bl    := bl + a * rgb.Blue;
+          gamma := gamma + a;
+        end;  { with }
+      with rgb do
+      begin
+        red   := ColorRound(re);
+        green := ColorRound(gr);
+        blue  := ColorRound(bl);
+        alpha := ColorRound(gamma * $FFFF);
+      end;
+      tempimage.colors[x, y] := RGBTripleTofpgColor(rgb);
+    end;
+  end;
+end;
+
+procedure TfpgBaseInterpolation.Vertical(dx, dy, width, height: integer);
+begin
+
+end;
+
+procedure TfpgBaseInterpolation.Execute(x, y, w, h: integer);
+var
+  maxy: integer;
+  rx, ry: integer;
+begin
+  tempimage := TfpgImageBase.Create;
+  tempimage.AllocateImage(image.ColorDepth, w, image.Height);
+//  tempimage := TFPMemoryImage.Create(w, image.Height);
+//  tempimage.UsePalette := False;
+  xfactor   := image.Width / w;
+  yfactor   := image.Height / h;
+  if xfactor > 1.0 then
+    xsupport := MaxSupport
+  else
+    xsupport := xfactor * MaxSupport;
+  if yfactor > 1.0 then
+    ysupport := MaxSupport
+  else
+    ysupport := yfactor * MaxSupport;
+  Horizontal(w);
+  Vertical(x, y, w, h);
+end;
+
+{ TfpgImageBase }
+
+function TfpgImageBase.GetColor(x, y: TfpgCoord): TfpgColor;
+begin
+
+end;
+
+procedure TfpgImageBase.SetColor(x, y: TfpgCoord; const AValue: TfpgColor);
+begin
+
+end;
+
+constructor TfpgImageBase.Create;
+begin
+  FWidth      := 0;
+  FHeight     := 0;
+  FColorDepth := 0;
+
+  FImageData     := nil;
+  FImageDataSize := 0;
+  FMaskData      := nil;
+  FMaskDataSize  := 0;
+  FMasked        := False;
+end;
+
+destructor TfpgImageBase.Destroy;
+begin
+  FreeImage;
+  inherited Destroy;
+end;
+
+procedure TfpgImageBase.Invert;
+var
+  p: ^byte;
+  n: integer;
+begin
+  if FImageData = nil then
+    Exit; //==>
+
+  p := FImageData;
+  for n := 1 to FImageDataSize do
+  begin
+    p^ := p^ xor $FF;
+    Inc(p);
+  end;
+
+  if FMaskData <> nil then
+  begin
+    p := FMaskData;
+    for n := 1 to FMaskDataSize do
+    begin
+      p^ := p^ xor $FF;
+      Inc(p);
+    end;
+  end;
+end;
+
+procedure TfpgImageBase.FreeImage;
+begin
+  if FImageData <> nil then
+    FreeMem(FImageData);
+  FImageData     := nil;
+  FImageDataSize := 0;
+  if FMaskData <> nil then
+    FreeMem(FMaskData);
+  FMaskData     := nil;
+  FMaskDataSize := 0;
+  FMasked       := False;
+  FWidth        := 0;
+  FHeight       := 0;
+  DoFreeImage;
+end;
+
+procedure TfpgImageBase.AllocateImage(acolordepth, awidth, aheight: integer);
+var
+  dww: integer;
+begin
+  FreeImage;
+  FWidth      := awidth;
+  FHeight     := aheight;
+  FColorDepth := acolordepth;
+
+  // Real bitmap
+  if FColorDepth = 1 then
+    dww := (awidth + 31) div 32
+  else
+    dww := FWidth;
+
+  FImageDataSize := dww * FHeight * 4;
+  GetMem(FImageData, FImageDataSize);
+end;
+
+procedure TfpgImageBase.AllocateMask;
+var
+  dww: integer;
+begin
+  if (FWidth < 1) or (FHeight < 1) then
+    Exit; //==>
+
+  FMasked := True;
+  if FMaskData <> nil then
+    FreeMem(FMaskData);
+
+  dww           := (FWidth + 31) div 32;
+  FMaskDataSize := dww * FHeight * 4;
+  GetMem(FMaskData, FMaskDataSize);
+end;
+
+procedure TfpgImageBase.CreateMaskFromSample(x, y: TfpgCoord);
+var
+  p: ^longword;
+  pmsk: ^byte;
+  c: longword;
+  linecnt: integer;
+  pixelcnt: integer;
+  bit: byte;
+  msklinelen: integer;
+begin
+  if FColorDepth = 1 then
+    Exit; //==>
+
+  if (FImageData = nil) then
+    Exit; //==>
+
+  AllocateMask;
+
+  p := FImageData;
+  if x < 0 then
+    Inc(p, FWidth - 1)
+  else
+    Inc(p, x);
+  if y < 0 then
+    Inc(p, FWidth * (FHeight - 1))
+  else
+    Inc(p, FWidth * y);
+
+  c := p^;  // the sample
+
+  msklinelen := FWidth div 32;
+  if (FWidth and $1F) > 0 then
+    Inc(msklinelen);
+
+  msklinelen := msklinelen shl 2;
+
+  p       := FImageData;
+  linecnt := 0;
+
+  repeat
+    pixelcnt := 0;
+    bit      := $80;
+    pmsk     := FMaskData;
+    Inc(pmsk, linecnt * msklinelen);
+
+    repeat
+      if bit = $80 then
+        pmsk^ := 0;
+
+      if p^ <> c then
+        pmsk^ := pmsk^ or bit;
+
+      Inc(p);
+      Inc(pixelcnt);
+
+      if bit = 1 then
+      begin
+        bit := $80;
+        Inc(pmsk);
+      end
+      else
+        bit := bit shr 1;
+    until pixelcnt >= FWidth;
+
+    Inc(linecnt);
+  until linecnt >= FHeight;
+end;
+
+procedure TfpgImageBase.UpdateImage;
+begin
+  if FImageData <> nil then
+    DoInitImage(FColorDepth, FWidth, FHeight, FImageData);
+
+  if FMaskData <> nil then
+    DoInitImageMask(FWidth, FHeight, FMaskData);
 end;
 
 end.

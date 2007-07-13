@@ -1344,7 +1344,6 @@ begin
   if img.Masked then
   begin
     // rendering the mask
-
     msk := XCreatePixmap(xapplication.display, XDefaultRootWindow(xapplication.display), w, h, 1);
     GcValues.foreground := 1;
     GcValues.background := 0;
