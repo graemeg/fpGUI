@@ -59,17 +59,17 @@ type
 
   TDropDownWindow = class(TfpgForm)
   protected
-    procedure EvPaint; override;
+    procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
   end;
 
 { TDropDownWindow }
 
-procedure TDropDownWindow.EvPaint;
+procedure TDropDownWindow.HandlePaint;
 begin
   Canvas.BeginDraw;
-  inherited EvPaint;
+  inherited HandlePaint;
   Canvas.Clear(clWhite);
   Canvas.SetColor(clYellow);
   Canvas.SetLineStyle(2, lsSolid);

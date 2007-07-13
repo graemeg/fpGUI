@@ -144,8 +144,6 @@ type
 
   TfpgLineStyle = (lsSolid, lsDash, lsDot);
 
-  TMouseButton = (mbLeft, mbRight, mbMiddle);
-
 
   TfpgImageBase = class(TObject)
   protected
@@ -293,26 +291,6 @@ type
     function    GetCanvas: TfpgCanvasBase; virtual;
     procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
-    { Event processing methods }
-    procedure   EvCreate; virtual; abstract;
-    procedure   EvFocusIn; virtual; abstract;
-    procedure   EvFocusOut; virtual; abstract;
-    procedure   EvHide; virtual; abstract;
-//    procedure   EvKeyPressed(AKey: Word); virtual; abstract;
-    procedure   EvKeyPressed(const AKeyCode: word; const AShiftState: word); virtual; abstract;
-    procedure   EvKeyReleased(AKey: Word); virtual; abstract;
-    procedure   EvKeyChar(AKeyChar: Char); virtual; abstract;
-    procedure   EvMouseEnter(const AMousePos: TPoint); virtual; abstract;
-    procedure   EvMouseLeave; virtual; abstract;
-    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
-    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); virtual; abstract;
-    procedure   EvMouseMove(const AMousePos: TPoint); virtual; abstract;
-    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); virtual; abstract;
-    procedure   EvPaint; virtual; abstract;
-    procedure   EvMove; virtual; abstract;
-    procedure   EvResize; virtual; abstract;
-    procedure   EvShow; virtual; abstract;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean); virtual; abstract;
   public
     // make some setup before the window shows
     procedure   AdjustWindowStyle; virtual;    // forms modify the window creation parameters

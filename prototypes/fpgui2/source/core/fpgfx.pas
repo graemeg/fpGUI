@@ -31,6 +31,7 @@ type
   TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
     btnIsSelected, btnHasFocus, btnHasParentColor);
     
+  TMouseButton = (mbLeft, mbRight, mbMiddle);
 
 
 const

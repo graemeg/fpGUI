@@ -129,27 +129,6 @@ type
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
-    { Event processing methods }
-    procedure   EvCreate; override;
-    procedure   EvFocusIn; override;
-    procedure   EvFocusOut; override;
-    procedure   EvHide; override;
-//    procedure   EvKeyPressed(AKey: Word); override;
-    procedure   EvKeyPressed(const AKeyCode: word; const AShiftState: word); override;
-    procedure   EvKeyReleased(AKey: Word); override;
-    procedure   EvKeyChar(AKeyChar: Char); override;
-    procedure   EvMouseEnter(const AMousePos: TPoint); override;
-    procedure   EvMouseLeave; override;
-    procedure   EvMousePressed(AButton: TMouseButton; const AMousePos: TPoint); override;
-    procedure   EvMouseReleased(AButton: TMouseButton; const AMousePos: TPoint); override;
-    procedure   EvMouseMove(const AMousePos: TPoint); override;
-    procedure   EvMouseWheel(AWheelDelta: Single; const AMousePos: TPoint); override;
-    procedure   EvPaint; override;
-    procedure   EvMove; override;
-    procedure   EvResize; override;
-    procedure   EvShow; override;
-    { This will be removed later }
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -563,9 +542,6 @@ begin
 
 // WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
 
-  // The window that received the message
-  w := FindWindowByHandle(ev.xany.window);
-  
   case ev._type of
     MSG_KEYPRESS,
     MSG_KEYRELEASE:
@@ -584,8 +560,7 @@ begin
 
       if ev._type = MSG_KEYPRESS then
       begin
-        w.EvKeyPressed(X11keycodeToScanCode(ev.xkey.keycode), Word(ev.xkey.state));
-//        fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
+        fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
 
         //Writeln('scancode: ',IntToHex(X11keycodeToScanCode(ev.xkey.keycode),4)
         //  ,' (',X11keycodeToScanCode(ev.xkey.keycode),')');
@@ -688,8 +663,7 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xany.window, MSG_PAINT, @ev);
           if ev.xexpose.count = 0 then
           begin
-            w.EvPaint;
-//            fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_PAINT);
           end;
         end;
 
@@ -761,27 +735,21 @@ begin
 }
 
     MSG_ACTIVATE:
-        w.EvFocusIn;
-//        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_ACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_ACTIVATE);
 
     MSG_DEACTIVATE:
-        w.EvFocusOut;
-//        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_DEACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_DEACTIVATE);
 
     MSG_MOUSEENTER:
-        w.EvMouseEnter(Point(ev.xbutton.x, ev.xbutton.y));
-//        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEENTER);
+//        w.EvMouseEnter(Point(ev.xbutton.x, ev.xbutton.y));
+        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEENTER);
         
     MSG_MOUSEEXIT:
-        w.EvMouseLeave;
-//        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEEXIT);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEEXIT);
 
     { We handle these two event manually in the TfpgForm class }
 //    MapNotify:
-//        w.EvShow;
-        
 //    UnmapNotify:
-//        w.EvHide;
 
     GraphicsExpose,
     NoExpose:
@@ -960,115 +928,6 @@ begin
 
   if FWinHandle > 0 then
     XMoveResizeWindow(xapplication.display, FWinHandle, aleft, atop, w, h);
-end;
-
-procedure TfpgWindowImpl.EvCreate;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvFocusIn;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvFocusOut;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvHide;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvKeyPressed(const AKeyCode: word; const AShiftState: word);
-var
-  k, ss: word;
-  b: boolean;
-begin
-  k   := AKeyCode;
-  ss  := AShiftState;
-  b   := False;
-  HandleKeyPress(k, ss, b);
-end;
-
-procedure TfpgWindowImpl.EvKeyReleased(AKey: Word);
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvKeyChar(AKeyChar: Char);
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvMouseEnter(const AMousePos: TPoint);
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvMouseLeave;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvMousePressed(AButton: TMouseButton;
-  const AMousePos: TPoint);
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvMouseReleased(AButton: TMouseButton;
-  const AMousePos: TPoint);
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvMouseMove(const AMousePos: TPoint);
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvMouseWheel(AWheelDelta: Single;
-  const AMousePos: TPoint);
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvPaint;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvMove;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvResize;
-begin
-
-end;
-
-procedure TfpgWindowImpl.EvShow;
-begin
-
-end;
-
-procedure TfpgWindowImpl.HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean);
-var
-  w: TfpgWindowImpl;
-begin
-  if not consumed then
-  begin
-    w := TfpgWindowImpl(Parent);
-    while (not consumed) and (w <> nil) do
-    begin
-      w.HandleKeyPress(keycode, shiftstate, consumed);
-      w := TfpgWindowImpl(w.Parent);
-    end;
-  end;
 end;
 
 procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);
