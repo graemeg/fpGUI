@@ -483,16 +483,19 @@ type
     FOnMove: TNotifyEvent;
     FOnResize: TNotifyEvent;
     FOnShow: TNotifyEvent;
+    FVisible: Boolean;
     { Property setting methods mapped to other methods }
     procedure SetClientHeight(const AValue: Integer);
     procedure SetClientWidth(const AValue: Integer);
+    procedure SetCursor(ACursor: TFCursor);
+    procedure SetHeight(AHeight: Integer);
     procedure SetLeft(const AValue: Integer);
     procedure SetTop(const AValue: Integer);
+    procedure SetVisible(const AValue: Boolean);
     procedure SetWidth(AWidth: Integer);
-    procedure SetHeight(AHeight: Integer);
-    procedure SetCursor(ACursor: TFCursor);
     procedure SetWindowOptions(const AValue: TFWindowOptions);
   protected
+    { Fields related to properties }
     FParent: TFCustomWindow;
     FCanvas: TFCustomCanvas;
     FLeft: Integer;
@@ -502,8 +505,12 @@ type
     FClientWidth: Integer;
     FClientHeight: Integer;
     FWindowOptions: TFWindowOptions;
-    FChildWindows: TList;
     FMinSize, FMaxSize: TSize;
+    FFocusable: Boolean;
+
+    { Fields of the child windows list }
+    FChildWindows: TList;
+    FFocusedWindow: TFCustomWindow;
 
     { Internal resource allocation methods }
     procedure DoSetCursor; virtual; abstract;
@@ -543,11 +550,14 @@ type
     procedure SetClientSize(const ASize: TSize); virtual; abstract;
     procedure SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); virtual; abstract;
     procedure Show; virtual; abstract;
+    procedure Hide; virtual; abstract;
     procedure Invalidate; virtual; abstract;
     procedure CaptureMouse; virtual; abstract;
     procedure ReleaseMouse; virtual; abstract;
     { Event processing methods }
     procedure ProcessEvent(AEvent: TFEvent);
+    { Methods of the child windows list }
+    function  FindTopParentWindow: TFCustomWindow;
 
     { Properties }
     property WindowOptions: TFWindowOptions read FWindowOptions write SetWindowOptions;
@@ -555,15 +565,17 @@ type
     property Handle: PtrUInt read GetHandle;
     property ChildWindows: TList read FChildWindows;
     { Window state }
+    property ClientWidth: Integer read FClientWidth write SetClientWidth;
+    property ClientHeight: Integer read FClientHeight write SetClientHeight;
+    property Cursor: TFCursor read FCursor write SetCursor;
     property Left: Integer read FLeft write SetLeft;
     property Top: Integer read FTop write SetTop;
     property Width: Integer read FWidth write SetWidth;
     property Height: Integer read FHeight write SetHeight;
-    property ClientWidth: Integer read FClientWidth write SetClientWidth;
-    property ClientHeight: Integer read FClientHeight write SetClientHeight;
-    property Cursor: TFCursor read FCursor write SetCursor;
     property Title: String read GetTitle write SetTitle;
     property Parent: TFCustomWindow read FParent;
+    property Visible: Boolean read FVisible write SetVisible;
+    property Focusable: Boolean read FFocusable write FFocusable;
     { Event handlers }
     property OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property OnCanClose: TGfxCanCloseEvent read FOnCanClose write FOnCanClose;
@@ -1089,6 +1101,14 @@ begin
   SetPosition(Point(FLeft, AValue));
 end;
 
+procedure TFCustomWindow.SetVisible(const AValue: Boolean);
+begin
+  if FVisible = AValue then exit;
+  
+  if AValue then Show
+  else Hide;
+end;
+
 procedure TFCustomWindow.SetHeight(AHeight: Integer);
 begin
   SetSize(Size(Width, AHeight));
@@ -1108,6 +1128,13 @@ begin
   if FWindowOptions = AValue then exit;
   FWindowOptions := AValue;
   DoSetWindowOptions;
+end;
+
+{ Finds the top window througth recursion }
+function TFCustomWindow.FindTopParentWindow: TFCustomWindow;
+begin
+  if Assigned(Parent) then Result := Parent.FindTopParentWindow
+  else Result := Self;
 end;
 
 { Global functions }

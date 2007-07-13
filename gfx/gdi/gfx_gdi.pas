@@ -223,6 +223,7 @@ type
     procedure   SetClientSize(const ASize: TSize); override;
     procedure   SetMinMaxClientSize(const AMinSize, AMaxSize: TSize); override;
     procedure   Show; override;
+    procedure   Hide; override;
     procedure   Invalidate; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
@@ -1432,11 +1433,24 @@ begin
   Windows.ShowWindow(Handle, SW_SHOWNORMAL);
   Windows.UpdateWindow(Handle);
   Windows.SetForegroundWindow(Handle);
+
+  { Show all child windows }
   for i := 0 to Pred(ChildWindows.Count) do
     TGDIWindow(ChildWindows.Items[i]).Show;
 end;
 
+procedure TGDIWindow.Hide;
+var
+  i: integer;
+begin
+  Windows.ShowWindow(Handle, SW_HIDE);
 
+  { Hide all child windows }
+  for i := 0 to Pred(ChildWindows.Count) do
+    TGDIWindow(ChildWindows.Items[i]).Hide;
+end;
+
+{ Invalidates the entire window }
 procedure TGDIWindow.Invalidate;
 begin
   Windows.InvalidateRect(Handle, nil, True);
