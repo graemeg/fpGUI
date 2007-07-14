@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="1"/>
-    <Files Count="19">
+    <Files Count="20">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -101,6 +101,10 @@
         <Filename Value="../resample.pas"/>
         <UnitName Value="resample"/>
       </Item19>
+      <Item20>
+        <Filename Value="../../gui/gui_dialogs.pas"/>
+        <UnitName Value="gui_dialogs"/>
+      </Item20>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

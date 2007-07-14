@@ -15,7 +15,8 @@ uses
   gui_combobox,
   gui_scrollbar,
   uhelpers,
-  gui_memo;
+  gui_memo,
+  gui_dialogs;
 
 type
 
@@ -25,6 +26,7 @@ type
   private
     procedure btnCloseClick(Sender: TObject);
     procedure btnDisplayBMP(Sender: TObject);
+    procedure btn3Click(Sender: TObject);
   public
     label1: TfpgLabel;
     label2: TfpgLabel;
@@ -72,6 +74,17 @@ type
     bmp.Free;
   end;
 
+  procedure TMainForm.btn3Click(Sender: TObject);
+  begin
+    ShowMessage('Do you really want to quit this application?' + #10 +
+        'We can always keep playing and quite at a later date.' +
+        #10#10 +
+        'This is a very long line that has to must be split automatically ' +
+        'and it should have done so. If not there is a bug in the code. We ' +
+        'must still optimize where it cuts the lines.'
+        , 'My cool message title');
+  end;
+
 
   procedure TMainForm.AfterCreate;
   begin
@@ -92,6 +105,7 @@ type
     btn2.OnClick  := @btnDisplayBMP;
     btn3          := CreateButton(self, 100, 100, 75, 'Embedded', nil);
     btn3.Embedded := True;
+    btn3.OnClick  := @btn3Click;
 
 
     btn           := CreateButton(self, 10, 130, 75, 'Close', @btnCloseClick);
