@@ -126,47 +126,58 @@ end;
 
 procedure TfpgMessageBox.SetMessage(AMessage: string);
 var
-  maxw : integer;
-  n : integer;
-  s, s16 : string;
-  c : char;
+  maxw: integer;
+  n: integer;
+  s, s2: string;
+  c: char;
 
-  procedure AddLine(all : boolean);
+  // -----------------
+  procedure AddLine(all: boolean);
   var
-    w : integer;
-    m : integer;
+    w: integer;
+    m: integer;
   begin
-    s16 := s;
-    w := FFont.TextWidth(s16);
+    s2  := s;
+    w   := FFont.TextWidth(s2);
     if w > FMaxLineWidth then
     begin
       while w > FMaxLineWidth do
       begin
         m := UTF8Length(s);
         repeat
-          dec(m);
-          s16 := UTF8Copy(s,1,m);
-          w := FFont.TextWidth(s16);
+          Dec(m);
+          s2  := UTF8Copy(s,1,m);
+          w   := FFont.TextWidth(s2);
         until w <= FMaxLineWidth;
-        if w > maxw then maxw := w;
-        FLines.Add(s16);
-        s := Copy(s,m+1,length(s));
-        s16 := s;
-        w := FFont.TextWidth(s16);
-      end;
+        if w > maxw then
+          maxw := w;
+
+        // are we in the middle of a word. If so find the beginning of word.
+        while UTF8Copy(s2, m, m+1) <> ' ' do
+        begin
+          Dec(m);
+          s2  := UTF8Copy(s,1,m);
+        end;
+
+        FLines.Add(s2);
+        s   := UTF8Copy(s, m+1, UTF8length(s));
+        s2  := s;
+        w   := FFont.TextWidth(s2);
+      end; { while }
       if all then
       begin
-        FLines.Add(s16);
+        FLines.Add(s2);
         s := '';
       end;
     end
     else
     begin
-      FLines.Add(s16);
+      FLines.Add(s2);
       s := '';
-    end;
+    end; { if/else }
 
-    if w > maxw then maxw := w;
+    if w > maxw then
+      maxw := w;
   end;
 
 begin
@@ -180,22 +191,28 @@ begin
     if (c = #13) or (c = #10) then
     begin
       AddLine(false);
-      if (c = #13) and (n < length(AMessage)) and (AMessage[n+1] = #10) then inc(n);
+      if (c = #13) and (n < length(AMessage)) and (AMessage[n+1] = #10) then
+        Inc(n);
     end
-    else s := s + c;
-    inc(n);
-  end;
+    else
+      s := s + c;
+    Inc(n);
+  end; { while }
+
   AddLine(true);
 
-  width := maxw + 2*10;
+  // dialog width with 10 pixel border on both sides
+  Width := maxw + 2*10;
 
-  if width < FMinWidth then width := FMinWidth;
+  if Width < FMinWidth then
+    Width := FMinWidth;
 
-  FButton.Top := FTextY + FLineHeight*FLines.Count + FTextY;
+  // center button
+  FButton.Top   := FTextY + FLineHeight*FLines.Count + FTextY;
+  FButton.Left  := (Width div 2) - (FButton.Width div 2);
 
-  FButton.Left := (Width div 2) - (FButton.Width div 2);
-
-  height := FButton.Top + FButton.Height + FTextY;
+  // adjust dialog's height
+  Height := FButton.Top + FButton.Height + FTextY;
 end;
 
 

@@ -80,8 +80,8 @@ type
         'We can always keep playing and quite at a later date.' +
         #10#10 +
         'This is a very long line that has to must be split automatically ' +
-        'and it should have done so. If not there is a bug in the code. We ' +
-        'must still optimize where it cuts the lines.'
+        'and it should have done so. If not there is a bug in the code. It ' +
+        'has also been optimized to wordwrap and not split words in half.'
         , 'My cool message title');
   end;
 
