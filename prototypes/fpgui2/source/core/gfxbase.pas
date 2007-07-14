@@ -363,6 +363,8 @@ type
     procedure   UpdateWindowPosition;
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+    procedure   CaptureMouse; virtual; abstract;
+    procedure   ReleaseMouse; virtual; abstract;
     property    HasHandle: boolean read HandleIsValid;
     property    WindowType: TWindowType read FWindowType write FWindowType;
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;

@@ -131,6 +131,8 @@ type
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   CaptureMouse; override;
+    procedure   ReleaseMouse; override;
   end;
 
 
@@ -968,6 +970,24 @@ constructor TfpgWindowImpl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
+end;
+
+procedure TfpgWindowImpl.CaptureMouse;
+begin
+  XGrabPointer(xapplication.Display, FWinHandle,
+      True,
+      ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask,
+      GrabModeAsync,
+      GrabModeAsync,
+      None,
+      0,
+      CurrentTime
+      );
+end;
+
+procedure TfpgWindowImpl.ReleaseMouse;
+begin
+  XUngrabPointer(xapplication.display, CurrentTime);
 end;
 
 { TfpgFontResourceImpl }
