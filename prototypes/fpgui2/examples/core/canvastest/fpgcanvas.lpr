@@ -20,7 +20,7 @@ type
   TMainForm = class(TfpgForm)
   private
     bmp: TfpgImage;
-    src, dst: TfpgImage;
+    dst: TfpgImage;
   protected
     procedure HandlePaint; override;
   public

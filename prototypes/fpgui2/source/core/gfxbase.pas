@@ -438,13 +438,13 @@ begin
     Red   := fpgGetRed(AColor);
     Green := fpgGetGreen(AColor);
     Blue  := fpgGetBlue(AColor);
-    Alpha := fpgGetAlpha(AColor);
+//    Alpha := fpgGetAlpha(AColor);
   end
 end;
 
 function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
 begin
-  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16) or (AColor.Alpha shl 32);
+  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16);// or (AColor.Alpha shl 32);
 end;
 
 function fpgGetRed(const AColor: TfpgColor): word;
@@ -871,7 +871,7 @@ begin
         begin
           c   := image.colors[place, y];
           rgb := fpgColorToRGBTriple(c);
-          a     := weight * rgb.Alpha / $FFFF;
+          a     := weight; // * rgb.Alpha / $FFFF;
           re    := re + a * rgb.Red;
           gr    := gr + a * rgb.Green;
           bl    := bl + a * rgb.Blue;
@@ -882,7 +882,7 @@ begin
         red   := ColorRound(re);
         green := ColorRound(gr);
         blue  := ColorRound(bl);
-        alpha := ColorRound(gamma * $FFFF);
+//        alpha := ColorRound(gamma * $FFFF);
       end;
       tempimage.colors[x, y] := RGBTripleTofpgColor(rgb);
     end;
@@ -942,7 +942,7 @@ begin
         begin
           c := tempimage.colors[x, place];
           rgb := fpgColorToRGBTriple(c);
-          a     := weight * rgb.alpha / $FFFF;
+          a     := weight;// * rgb.alpha / $FFFF;
           re    := re + a * rgb.red;
           gr    := gr + a * rgb.green;
           bl    := bl + a * rgb.blue;
@@ -953,7 +953,7 @@ begin
         red   := ColorRound(re);
         green := ColorRound(gr);
         blue  := ColorRound(bl);
-        alpha := ColorRound(gamma * $FFFF);
+//        alpha := ColorRound(gamma * $FFFF);
       end;
       Canvas.Pixels[x + dx, y + dy] := RGBTripleTofpgColor(rgb);
     end;
