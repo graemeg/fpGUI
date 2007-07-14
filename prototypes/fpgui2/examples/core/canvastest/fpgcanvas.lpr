@@ -117,6 +117,10 @@ begin
   
 //  Canvas.StretchDraw(150, 240, 160, 21, bmp);
   Canvas.StretchDraw(150, 240, 300, 50, bmp);
+  
+  Canvas.DrawImage(150, 300, dst);
+  Canvas.StretchDraw(180, 300, 70, 70, dst);
+  Canvas.StretchDraw(270, 300, 230, 25, bmp);
 
 //  Stretch(bmp, dst, ResampleFilters[6].Filter, ResampleFilters[6].Width);
 ////  Canvas.DrawImage(150, 240, bmp);
@@ -148,8 +152,11 @@ begin
   bmp.CreateMaskFromSample(0,0);
   bmp.UpdateImage;
   
-  dst := TfpgImage.Create;
-  dst.AllocateImage(bmp.ColorDepth, 200, 50);
+//  dst := TfpgImage.Create;
+//  dst.AllocateImage(bmp.ColorDepth, 200, 50);
+  dst := LoadImage_BMP('gears2.bmp');
+  dst.CreateMaskFromSample(0,0);
+  dst.UpdateImage;
 end;
 
 procedure TMainForm.BeforeDestruction;
