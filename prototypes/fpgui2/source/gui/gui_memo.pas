@@ -14,6 +14,8 @@ uses
 
 type
 
+  { TfpgMemo }
+
   TfpgMemo = class(TfpgWidget)
   private
     FLines: TStringList;
@@ -57,6 +59,7 @@ type
     procedure   SetText(const AValue: string);
     function    GetText: string;
     procedure   SetCursorLine(aValue: integer);
+    procedure   UpdateScrollBarCoords;
   protected
     procedure   HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
@@ -132,6 +135,28 @@ begin
   end;
 end;
 
+procedure TfpgMemo.UpdateScrollBarCoords;
+var
+  HWidth,
+  VHeight: Integer;
+begin
+  VHeight := Height - 4;
+  HWidth  := Width - 4;
+  
+  if FVScrollBar.Visible then Dec(HWidth, FVScrollBar.Width);
+  if FHScrollBar.Visible then Dec(VHeight, FHScrollBar.Height);
+  
+  FHScrollBar.Top := Height -FHScrollBar.Height - 2;
+  FHScrollBar.Left := 2;
+  FHScrollBar.Width := HWidth;
+
+  FVScrollBar.Top := 2;
+  FVScrollBar.Left := Width - FVScrollBar.Width - 2;
+  FVScrollBar.Height := VHeight;
+  FVScrollBar.UpdateWindowPosition;
+  FHScrollBar.UpdateWindowPosition;
+end;
+
 constructor TfpgMemo.Create(AOwner: TComponent);
 begin
   inherited;
@@ -165,14 +190,10 @@ begin
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
   FVScrollBar.OnScroll := @VScrollBarMove;
-  FVScrollBar.Top      := 0;
-  FVScrollBar.Left     := Width - FVScrollBar.Width;
-  FVScrollBar.Height   := Height;
 
   FHScrollBar          := TfpgScrollBar.Create(self);
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.OnScroll := @HScrollBarMove;
-  FHScrollBar.Top      := Height - FHScrollbar.Height;
 
   FWrapping := False;
 end;
@@ -445,18 +466,7 @@ begin
 
   FVScrollBar.Visible := vsbvis;
 
-  if FHScrollBar.Visible then
-  begin
-    if not FVScrollBar.Visible then
-      x := Width
-    else
-      x := Width - FVscrollBar.Width;
-    if x <> FHScrollBar.Width then
-    begin
-      FHScrollBar.Width := x;
-      FHScrollBar.UpdateWindowPosition;
-    end;
-  end;
+  UpdateScrollBarCoords;
 
   if FHScrollBar.Visible then
   begin
@@ -583,6 +593,7 @@ begin
   inherited HandleShow;
   RecalcLongestLine;
   UpdateScrollBar;
+  UpdateScrollBarCoords;
 end;
 
 procedure TfpgMemo.VScrollBarMove(Sender: TObject; position: integer);
@@ -621,7 +632,7 @@ begin
   r.Width  := Width - 4;
   r.Height := Height - 4;
   Canvas.SetClipRect(r);
-
+  
   if Enabled then
     Canvas.SetColor(FBackgroundColor)
   else
@@ -689,6 +700,13 @@ begin
 
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);
+    
+  if FHScrollBar.Visible and FVScrollBar.Visible then begin
+    Canvas.SetColor(clWindowBackground);
+    Canvas.FillRectangle(FHScrollBar.Left + FHScrollBar.Width,
+                         FVScrollBar.Top + FVScrollBar.Height,
+                         FVScrollBar.Width, FHScrollBar.Height);
+  end;
 
   Canvas.EndDraw;
 end;
@@ -789,10 +807,18 @@ begin
         end;
       end;
       KEY_HOME:
+      begin
+        if (shiftstate and ss_control) <> 0 then
+          FCursorLine := 1;
         FCursorPos := 0;// home
+      end;
 
       KEY_END:
+      begin
+        if (shiftstate and ss_control) <> 0 then
+          FCursorLine := LineCount;
         FCursorPos := UTF8Length(CurrentLine);// end
+      end;
 
       KEY_PGUP:
         if FCursorLine > 1 then
@@ -1096,15 +1122,7 @@ procedure TfpgMemo.HandleResize(dwidth, dheight: integer);
 begin
   inherited HandleResize(dwidth, dheight);
 
-  FVScrollBar.Top    := 0;
-  FVScrollBar.Height := Height - FHScrollBar.Height;
-  FVScrollBar.Left   := Width - FVScrollBar.Width;
-  FVScrollBar.UpdateWindowPosition;
-
-  FHScrollBar.Top   := Height - FHScrollBar.Height;
-  FHScrollBar.Width := Width - FVScrollBar.Width;
-  FHScrollBar.UpdateWindowPosition;
-
+  //UpdateScrollBarCoords;
   UpdateScrollBar;
 end;
 

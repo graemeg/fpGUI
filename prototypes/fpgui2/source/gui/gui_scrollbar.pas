@@ -14,13 +14,17 @@ uses
 type
   TScrollNotifyEvent = procedure(Sender: TObject; position: integer) of object;
 
+  { TfpgScrollBar }
+
   TfpgScrollBar = class(TfpgWidget)
   protected
     FSliderPos, FSliderLength: TfpgCoord;
     FSliderDragging: boolean;
+    FStartBtnPressed,
+    FEndBtnPressed: Boolean;
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
-    procedure DrawButton(x, y, w, h: TfpgCoord; const imgname: string);
+    procedure DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
     procedure DrawSlider(recalc: boolean);
     procedure HandleLMouseDown(x, y: integer; shiftstate: word); override;
     procedure HandleLMouseUp(x, y: integer; shiftstate: word); override;
@@ -62,13 +66,13 @@ begin
 
   if Orientation = orVertical then
   begin
-    DrawButton(0, 0, Width, Width, 'sys.sb.up');
-    DrawButton(0, Height - Width, Width, Width, 'sys.sb.down');
+    DrawButton(0, 0, Width, Width, 'sys.sb.up' ,FStartBtnPressed);
+    DrawButton(0, Height - Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
   end
   else
   begin
-    DrawButton(0, 0, Height, Height, 'sys.sb.left');
-    DrawButton(Width - Height, 0, Height, Height, 'sys.sb.right');
+    DrawButton(0, 0, Height, Height, 'sys.sb.left', FStartBtnPressed);
+    DrawButton(Width - Height, 0, Height, Height, 'sys.sb.right', FEndBtnPressed);
   end;
 
   DrawSlider(True);
@@ -82,11 +86,14 @@ begin
   DrawSlider(True);
 end;
 
-procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string);
+procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
 var
   img: TfpgImage;
 begin
-  Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded]);
+  if Pressed then
+    Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded, btnIsPressed])
+  else
+    Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded]);
   Canvas.SetColor(clText1);
   img := fpgImages.GetImage(imgname);
   if img <> nil then
@@ -153,20 +160,28 @@ begin
 
   if Orientation = orVertical then
   begin
-    if y <= Width then
-      PositionChange(-1)
-    else if y >= Height - Width then
-      PositionChange(1)
+    if y <= Width then begin
+      PositionChange(-1);
+      FStartBtnPressed := True;
+    end
+    else if y >= Height - Width then begin
+      PositionChange(1);
+      FEndBtnPressed := True;
+    end
     else if (y >= Width + FSliderPos) and (y <= Width + FSliderPos + FSliderLength) then
     begin
       FSliderDragging := True;
       FSliderDragPos  := y;
     end;
   end
-  else if x <= Height then
-    PositionChange(-1)
-  else if x >= Width - Height then
-    PositionChange(1)
+  else if x <= Height then begin
+    PositionChange(-1);
+    FStartBtnPressed := True;
+  end
+  else if x >= Width - Height then begin
+    PositionChange(1);
+    FEndBtnPressed := True;
+  end
   else if (x >= Height + FSliderPos) and (x <= Height + FSliderPos + FSliderLength) then
   begin
     FSliderDragging := True;
@@ -177,13 +192,23 @@ begin
   begin
     FSliderDragStart := FSliderPos;
     DrawSlider(False);
+  end
+  else if FStartBtnPressed or FEndBtnPressed then begin
+    HandlePaint;
   end;
+  
 end;
 
 procedure TfpgScrollBar.HandleLMouseUp(x, y: integer; shiftstate: word);
+var
+  WasPressed: Boolean;
 begin
   inherited;
+  WasPressed := FStartBtnPressed or FEndBtnPressed;
+  FStartBtnPressed := False;
+  FEndBtnPressed   := False;
   FSliderDragging := False;
+  if WasPressed then HandlePaint;
 end;
 
 procedure TfpgScrollBar.HandleMouseMove(x, y: integer; btnstate, shiftstate: word);
