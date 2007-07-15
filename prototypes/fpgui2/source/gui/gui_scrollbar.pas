@@ -18,27 +18,29 @@ type
 
   TfpgScrollBar = class(TfpgWidget)
   protected
-    FSliderPos, FSliderLength: TfpgCoord;
+    FSliderPos: TfpgCoord;
+    FSliderLength: TfpgCoord;
     FSliderDragging: boolean;
     FStartBtnPressed,
     FEndBtnPressed: Boolean;
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
-    procedure DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
-    procedure DrawSlider(recalc: boolean);
-    procedure HandleLMouseDown(x, y: integer; shiftstate: word); override;
-    procedure HandleLMouseUp(x, y: integer; shiftstate: word); override;
-    procedure HandleMouseMove(x, y: integer; btnstate, shiftstate: word); override;
-    procedure HandlePaint; override;
-    procedure PositionChange(d: integer);
+    procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
+    procedure   DrawSlider(recalc: boolean);
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: word); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate, shiftstate: word); override;
+    procedure   HandlePaint; override;
+    procedure   PositionChange(d: integer);
   public
     OnScroll: TScrollNotifyEvent;
     Orientation: TOrientation;
-    Min, Max: integer;
+    Min: integer;
+    Max: integer;
     SliderSize: double;  // 0-1
     Position: integer;
     constructor Create(AOwner: TComponent); override;
-    procedure RepaintSlider;
+    procedure   RepaintSlider;
   end;
 
 

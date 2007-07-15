@@ -16,7 +16,8 @@ uses
   gui_scrollbar,
   uhelpers,
   gui_memo,
-  gui_dialogs;
+  gui_dialogs,
+  gui_listbox;
 
 type
 
@@ -36,6 +37,7 @@ type
     btn2: TfpgButton;
     btn3: TfpgButton;
     memo: TfpgMemo;
+    listbox: TfpgBaseListBox;
     combo1: TfpgComboBox;
     sbar: TfpgScrollBar;
     procedure AfterCreate; override;
@@ -120,6 +122,12 @@ type
     memo.Left   := 250;
     memo.Width  := 200;
     memo.Height := 80;
+    
+    listbox         := TfpgBaseListBox.Create(self);
+    listbox.Top     := 100;
+    listbox.Left    := 250;
+    listbox.Width   := 200;
+    listbox.Height  := 80;
 
     sbar        := TfpgScrollBar.Create(self);
     sbar.Top    := 160;
