@@ -17,6 +17,8 @@ type
   { TfpgScrollBar }
 
   TfpgScrollBar = class(TfpgWidget)
+  private
+    FScrollStep: integer;
   protected
     FSliderPos: TfpgCoord;
     FSliderLength: TfpgCoord;
@@ -25,6 +27,10 @@ type
     FEndBtnPressed: Boolean;
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
+    FScrollTimer: TfpgTimer;
+    FActiveButtonRect: TRect;
+    FMousePosition: TPoint;
+    procedure   ScrollTimer(Sender: TObject);
     procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
     procedure   DrawSlider(recalc: boolean);
     procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
@@ -40,7 +46,9 @@ type
     SliderSize: double;  // 0-1
     Position: integer;
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   RepaintSlider;
+    property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
   end;
 
 
@@ -51,6 +59,9 @@ implementation
 constructor TfpgScrollBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FScrollTimer := TfpgTimer.Create(500);
+  FScrollTimer.Enabled := False;
+  FScrollTimer.OnTimer := @ScrollTimer;
   Orientation   := orVertical;
   Min           := 0;
   Max           := 100;
@@ -60,6 +71,13 @@ begin
   FSliderPos    := 0;
   FSliderDragging := False;
   FSliderLength := 10;
+  FScrollStep   := 1;
+end;
+
+destructor TfpgScrollBar.Destroy;
+begin
+  FScrollTimer.Free;
+  inherited Destroy;
 end;
 
 procedure TfpgScrollBar.HandlePaint;
@@ -86,6 +104,22 @@ begin
   if not HasHandle then
     Exit;
   DrawSlider(True);
+end;
+
+procedure TfpgScrollBar.ScrollTimer(Sender: TObject);
+begin
+  FScrollTimer.Interval := 25;
+  if  (FMousePosition.X < FActiveButtonRect.Right)
+  and (FMousePosition.X > FActiveButtonRect.Left)
+  and (FMousePosition.Y < FActiveButtonRect.Bottom)
+  and (FMousePosition.Y > FActiveButtonRect.Top)
+  then begin
+    if FStartBtnPressed then PositionChange(-FScrollStep);
+    if FEndBtnPressed then PositionChange(FScrollStep);
+  end
+  else begin
+    FScrollTimer.Enabled := False;
+  end;
 end;
 
 procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
@@ -163,12 +197,14 @@ begin
   if Orientation = orVertical then
   begin
     if y <= Width then begin
-      PositionChange(-1);
+      PositionChange(-FScrollStep);
       FStartBtnPressed := True;
+      FActiveButtonRect := Rect(0, 0, Width, Width);
     end
     else if y >= Height - Width then begin
-      PositionChange(1);
+      PositionChange(FScrollStep);
       FEndBtnPressed := True;
+      FActiveButtonRect := Rect(0,Height-Width, Width, Height);
     end
     else if (y >= Width + FSliderPos) and (y <= Width + FSliderPos + FSliderLength) then
     begin
@@ -176,26 +212,33 @@ begin
       FSliderDragPos  := y;
     end;
   end
-  else if x <= Height then begin
-    PositionChange(-1);
-    FStartBtnPressed := True;
-  end
-  else if x >= Width - Height then begin
-    PositionChange(1);
-    FEndBtnPressed := True;
-  end
-  else if (x >= Height + FSliderPos) and (x <= Height + FSliderPos + FSliderLength) then
-  begin
-    FSliderDragging := True;
-    FSliderDragPos  := x;
+  else begin
+    if x <= Height then begin
+      PositionChange(-FScrollStep);
+      FStartBtnPressed := True;
+      FActiveButtonRect := Rect(0, 0, Height, Height);
+    end
+    else if x >= Width - Height then begin
+      PositionChange(FScrollStep);
+      FEndBtnPressed := True;
+      FActiveButtonRect := Rect(Width-Height, 0, Width, Height);
+    end
+    else if (x >= Height + FSliderPos) and (x <= Height + FSliderPos + FSliderLength) then
+    begin
+      FSliderDragging := True;
+      FSliderDragPos  := x;
+    end;
   end;
-
+  
   if FSliderDragging then
   begin
     FSliderDragStart := FSliderPos;
     DrawSlider(False);
   end
   else if FStartBtnPressed or FEndBtnPressed then begin
+    FScrollTimer.Interval := 500;
+    FScrollTimer.Enabled := True;
+
     HandlePaint;
   end;
   
@@ -207,6 +250,7 @@ var
 begin
   inherited;
   WasPressed := FStartBtnPressed or FEndBtnPressed;
+  FScrollTimer.Enabled := False;
   FStartBtnPressed := False;
   FEndBtnPressed   := False;
   FSliderDragging := False;
@@ -222,6 +266,9 @@ var
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
+  FMousePosition.X := x;
+  FMousePosition.Y := y;
+  
   if (not FSliderDragging) or ((btnstate and MOUSE_LEFT) = 0) then
   begin
     FSliderDragging := False;

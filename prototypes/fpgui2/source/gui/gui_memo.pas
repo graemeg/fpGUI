@@ -195,6 +195,7 @@ begin
   FHScrollBar          := TfpgScrollBar.Create(self);
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.OnScroll := @HScrollBarMove;
+  FHScrollBar.ScrollStep := 5;
 
   FWrapping := False;
 end;

@@ -182,6 +182,8 @@ type
   end;
 
 
+  { TfpgTimer }
+
   TfpgTimer = class
   private
     FEnabled: boolean;
@@ -189,13 +191,14 @@ type
     FInterval: integer;
     FOnTimer: TNotifyEvent;
     procedure   SetEnabled(const AValue: boolean);
+    procedure   SetInterval(const AValue: integer);
   public
     constructor Create(ainterval: integer);
     destructor  Destroy; override;
     procedure   CheckAlarm(ctime: TDateTime);
     property    Enabled: boolean read FEnabled write SetEnabled;
     property    NextAlarm: TDateTime read FNextAlarm;
-    property    Interval: integer read FInterval write FInterval;
+    property    Interval: integer read FInterval write SetInterval;
     property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
   end;
 
@@ -331,6 +334,12 @@ begin
   if not FEnabled and AValue then
     FNextAlarm := now + interval * ONE_MILISEC;
   FEnabled := AValue;
+end;
+
+procedure TfpgTimer.SetInterval(const AValue: integer);
+begin
+  FInterval := AValue;
+  FNextAlarm := now + FInterval * ONE_MILISEC;
 end;
 
 constructor TfpgTimer.Create(ainterval: integer);
