@@ -37,6 +37,7 @@ type
     procedure   MsgDoubleClick(var msg: TfpgMessageRec); message FPGM_DOUBLECLICK;
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
+    procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     procedure   SetEnabled(const AValue: boolean);
     procedure   SetVisible(const AValue: boolean);
@@ -68,6 +69,7 @@ type
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: word); virtual;
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint); virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
@@ -346,6 +348,12 @@ begin
     FOnMouseExit(Self);
 end;
 
+procedure TfpgWidget.MsgMouseScroll(var msg: TfpgMessageRec);
+begin
+  HandleMouseScroll(msg.Params.mouse.x, msg.Params.mouse.y,
+      msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
+end;
+
 procedure TfpgWidget.HandleShow;
 var
   n: integer;
@@ -540,37 +548,42 @@ end;
 
 procedure TfpgWidget.HandleRMouseDown(x, y: integer; shiftstate: word);
 begin
-
+  // do nothing yet
 end;
 
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: word);
 begin
-
+  // do nothing yet
 end;
 
 procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: word);
 begin
-
+  // do nothing yet
 end;
 
 procedure TfpgWidget.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word);
 begin
-
+  // do nothing yet
 end;
 
 procedure TfpgWidget.HandleDoubleClick(x, y: integer; button: word; shiftstate: word);
 begin
-
+  // do nothing yet
 end;
 
 procedure TfpgWidget.HandleMouseEnter;
 begin
-
+  // do nothing yet
 end;
 
 procedure TfpgWidget.HandleMouseExit;
 begin
+  // do nothing yet
+end;
 
+procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint);
+begin
+  // do nothing yet
 end;
 
 function TfpgWidget.FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;

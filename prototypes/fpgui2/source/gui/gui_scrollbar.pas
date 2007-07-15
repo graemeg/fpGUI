@@ -18,6 +18,10 @@ type
 
   TfpgScrollBar = class(TfpgWidget)
   private
+    FMax: integer;
+    FMin: integer;
+    FOnScroll: TScrollNotifyEvent;
+    FPosition: integer;
     FScrollStep: integer;
   protected
     FSliderPos: TfpgCoord;
@@ -39,16 +43,16 @@ type
     procedure   HandlePaint; override;
     procedure   PositionChange(d: integer);
   public
-    OnScroll: TScrollNotifyEvent;
     Orientation: TOrientation;
-    Min: integer;
-    Max: integer;
     SliderSize: double;  // 0-1
-    Position: integer;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   RepaintSlider;
+    property    Position: integer read FPosition write FPosition default 10;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
+    property    Min: integer read FMin write FMin default 0;
+    property    Max: integer read FMax write FMax default 100;
+    property    OnScroll: TScrollNotifyEvent read FOnScroll write FOnScroll;
   end;
 
 
@@ -63,11 +67,11 @@ begin
   FScrollTimer.Enabled := False;
   FScrollTimer.OnTimer := @ScrollTimer;
   Orientation   := orVertical;
-  Min           := 0;
-  Max           := 100;
-  Position      := 10;
+  FMin          := 0;
+  FMax          := 100;
+  FPosition     := 10;
   SliderSize    := 0.5;
-  OnScroll      := nil;
+  FOnScroll     := nil;
   FSliderPos    := 0;
   FSliderDragging := False;
   FSliderLength := 10;
@@ -162,20 +166,20 @@ begin
 
   if recalc then
   begin
-    if Position > Max then
-      Position := Max;
-    if Position < min then
-      Position := Min;
+    if FPosition > FMax then
+      FPosition := FMax;
+    if FPosition < FMin then
+      FPosition := FMin;
 
     FSliderLength := trunc(area * SliderSize);
     if FSliderLength < 8 then
       FSliderLength := 8;
     area := area - FSliderLength;
-    mm   := Max - Min;
+    mm   := FMax - FMin;
     if mm = 0 then
       FSliderPos := 0
     else
-      FSliderPos := Trunc(area * ((Position - min) / mm));
+      FSliderPos := Trunc(area * ((FPosition - FMin) / mm));
   end;
 
   if Orientation = orVertical then
@@ -298,30 +302,30 @@ begin
     DrawSlider(False);
 
   if area <> 0 then
-    newp := Min + trunc((Max - Min) * FSliderPos / area)
+    newp := FMin + Trunc((FMax - FMin) * FSliderPos / area)
   else
-    newp := Min;
+    newp := FMin;
 
-  if newp <> Position then
+  if newp <> FPosition then
   begin
-    Position := newp;
-    if Assigned(OnScroll) then
-      OnScroll(self, Position);
+    FPosition := newp;
+    if Assigned(FOnScroll) then
+      FOnScroll(self, FPosition);
   end;
 end;
 
 procedure TfpgScrollBar.PositionChange(d: integer);
 begin
-  Position := Position + d;
-  if Position < Min then
-    Position := Min;
-  if Position > Max then
-    Position := Max;
+  FPosition := FPosition + d;
+  if FPosition < FMin then
+    FPosition := FMin;
+  if FPosition > FMax then
+    FPosition := FMax;
 
   DrawSlider(True);
 
-  if Assigned(OnScroll) then
-    OnScroll(self, Position);
+  if Assigned(FOnScroll) then
+    FOnScroll(self, FPosition);
 end;
 
 end.

@@ -32,7 +32,6 @@ type
     FFirstItem: integer;
     FMargin: integer;
     FBackgroundColor: TfpgColor;  // This should move to TfpgWidget
-    procedure   DoShow; {override;}
     procedure   SetFirstItem(item: integer);
     procedure   UpdateScrollBar;
     procedure   FollowFocus;
@@ -45,6 +44,8 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed : boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: word); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint); override;
     procedure   HandleShow; override;
     // ToDo
     // * handle mouse move
@@ -65,7 +66,7 @@ type
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
   published
-    property FontName: string read GetFontName write SetFontName;
+    property    FontName: string read GetFontName write SetFontName;
   end;
 
 
@@ -121,13 +122,6 @@ begin
   FScrollBar.Left    := Width - FScrollBar.Width - 2;
   FScrollBar.Height  := VHeight;
   FScrollBar.UpdateWindowPosition;
-end;
-
-procedure TfpgBaseListBox.DoShow;
-begin
-  TfpgScrollbarFriend(FScrollBar).SetPosition(Width-18, 0, 18, Height);
-//  inherited DoShow;
-  UpdateScrollBar;
 end;
 
 procedure TfpgBaseListBox.SetFirstItem(item: integer);
@@ -222,7 +216,69 @@ end;
 procedure TfpgBaseListBox.HandleKeyPress(var keycode: word;
   var shiftstate: word; var consumed: boolean);
 begin
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  consumed := true;
+  case keycode of
+    KEY_UP:
+           begin // up
+             if FFocusItem > 1 then
+             begin
+               dec(FFocusItem);
+               FollowFocus;
+               RePaint;
+               DoChange;
+             end;
+           end;
+    KEY_DOWN:
+           begin // down
+             if FFocusItem < ItemCount then
+             begin
+               inc(FFocusItem);
+               FollowFocus;
+               RePaint;
+               DoChange;
+             end;
+           end;
+    KEY_PGUP:
+           begin // pgup
+             dec(FFocusItem,PageLength);
+             if FFocusItem < 1 then FFocusItem := 1;
+             FollowFocus;
+             RePaint;
+             DoChange;
+           end;
+    KEY_PGDN:
+           begin // pgdown
+             inc(FFocusItem,PageLength);
+             if FFocusItem > ItemCount then FFocusItem := ItemCount;
+             FollowFocus;
+             RePaint;
+             DoChange;
+           end;
+    KEY_HOME:
+           begin // home
+             FFocusItem := 1;
+             FollowFocus;
+             RePaint;
+             DoChange;
+           end;
+    KEY_END:
+           begin // end
+             FFocusItem := ItemCount;
+             FollowFocus;
+             RePaint;
+             DoChange;
+           end;
+    KEY_ENTER:
+           begin // enter
+             DoSelect;
+             consumed := false; // to allow the forms to detect it
+           end;
+  else
+    begin
+      consumed := false;
+      inherited HandleKeyPress(keycode, shiftstate, consumed);
+    end;
+  end;
 end;
 
 procedure TfpgBaseListBox.HandleLMouseDown(x, y: integer; shiftstate: word);
@@ -245,6 +301,65 @@ end;
 procedure TfpgBaseListBox.HandleLMouseUp(x, y: integer; shiftstate: word);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
+  if ItemCount < 1 then
+    Exit; //==>
+
+  FMouseDragging := False;
+
+  FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
+  if FFocusItem > ItemCount then
+    FFocusItem := ItemCount;
+
+  FollowFocus;
+  Repaint;
+  DoChange;
+  DoSelect;
+end;
+
+procedure TfpgBaseListBox.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word);
+var
+  oldf: integer;
+begin
+  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+
+  if ItemCount < 1 then
+    Exit; //==>
+
+  if ((not FMouseDragging) or (btnstate and 1 = 0)) and (not HotTrack) then
+    Exit; //==>
+
+  oldf := FFocusItem;
+
+  FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
+  if FFocusItem > ItemCount then
+    FFocusItem := ItemCount;
+
+  if oldf <> FFocusItem then
+  begin
+    FollowFocus;
+    Repaint;
+  end;
+end;
+
+procedure TfpgBaseListBox.HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint);
+var
+  pfi: integer;
+begin
+  pfi := FFirstItem;
+  if delta > 0 then   // scroll down
+    FFirstItem := FFirstItem + abs(delta)
+  else                // scroll up
+    FFirstItem := FFirstItem - abs(delta);
+
+  if FFirstItem + PageLength > ItemCount then
+    FFirstItem := ItemCount - PageLength + 1;
+  if FFirstItem < 1 then
+    FFirstItem := 1;
+  if pfi <> FFirstItem then
+  begin
+    UpdateScrollBar;
+    Repaint;
+  end;
 end;
 
 procedure TfpgBaseListBox.HandleShow;
