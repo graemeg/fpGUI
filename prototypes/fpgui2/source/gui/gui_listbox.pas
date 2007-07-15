@@ -23,6 +23,7 @@ type
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontName(const AValue: string);
     procedure   SetPopupFrame(const AValue: boolean);
+    procedure   UpdateScrollbarCoords;
   protected
     FFont: TfpgFont;
     FScrollBar: TfpgScrollBar;
@@ -44,6 +45,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed : boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: word); override;
+    procedure   HandleShow; override;
     // ToDo
     // * handle mouse move
     // * handle window scrolling
@@ -103,6 +105,22 @@ begin
     Exit; //==>
   FPopupFrame := AValue;
   RePaint;
+end;
+
+procedure TfpgBaseListBox.UpdateScrollbarCoords;
+var
+  HWidth: integer;
+  VHeight: integer;
+begin
+  VHeight := Height - 4;
+  HWidth  := Width - 4;
+
+  if FScrollBar.Visible then Dec(HWidth, FScrollBar.Width);
+
+  FScrollBar.Top     := 2;
+  FScrollBar.Left    := Width - FScrollBar.Width - 2;
+  FScrollBar.Height  := VHeight;
+  FScrollBar.UpdateWindowPosition;
 end;
 
 procedure TfpgBaseListBox.DoShow;
@@ -210,11 +228,29 @@ end;
 procedure TfpgBaseListBox.HandleLMouseDown(x, y: integer; shiftstate: word);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
+
+  if ItemCount < 1 then
+    Exit; //==>
+
+  FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
+  if FFocusItem > ItemCount then
+    FFocusItem := ItemCount;
+
+  FollowFocus;
+  FMouseDragging := true;
+  Repaint;
+  DoChange;
 end;
 
 procedure TfpgBaseListBox.HandleLMouseUp(x, y: integer; shiftstate: word);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
+end;
+
+procedure TfpgBaseListBox.HandleShow;
+begin
+  inherited HandleShow;
+  UpdateScrollBarCoords;
 end;
 
 procedure TfpgBaseListBox.HandleResize(dwidth, dheight: integer);

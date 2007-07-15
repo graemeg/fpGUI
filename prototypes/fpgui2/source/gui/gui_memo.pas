@@ -22,6 +22,7 @@ type
     FMaxLength: integer;
     FCursorPos: integer;
     FCursorLine: integer;
+    FOnChange: TNotifyEvent;
     FSideMargin: integer;
     FSelStartLine: integer;
     FSelEndLine: integer;
@@ -77,7 +78,7 @@ type
     property    CursorLine: integer read FCursorLine write SetCursorLine;
     property    Text: string read GetText write SetText;
     property    Font: TfpgFont read FFont;
-    OnChange: TNotifyEvent;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property    Lines: TStringList read FLines;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -137,8 +138,8 @@ end;
 
 procedure TfpgMemo.UpdateScrollBarCoords;
 var
-  HWidth,
-  VHeight: Integer;
+  HWidth: integer;
+  VHeight: integer;
 begin
   VHeight := Height - 4;
   HWidth  := Width - 4;
@@ -146,13 +147,13 @@ begin
   if FVScrollBar.Visible then Dec(HWidth, FVScrollBar.Width);
   if FHScrollBar.Visible then Dec(VHeight, FHScrollBar.Height);
   
-  FHScrollBar.Top := Height -FHScrollBar.Height - 2;
-  FHScrollBar.Left := 2;
-  FHScrollBar.Width := HWidth;
+  FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
+  FHScrollBar.Left    := 2;
+  FHScrollBar.Width   := HWidth;
 
-  FVScrollBar.Top := 2;
-  FVScrollBar.Left := Width - FVScrollBar.Width - 2;
-  FVScrollBar.Height := VHeight;
+  FVScrollBar.Top     := 2;
+  FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
+  FVScrollBar.Height  := VHeight;
   FVScrollBar.UpdateWindowPosition;
   FHScrollBar.UpdateWindowPosition;
 end;
@@ -170,7 +171,7 @@ begin
   FSideMargin := 3;
   FMaxLength  := 0;
 
-  OnChange := nil;
+  FOnChange := nil;
 
   FLines      := TStringList.Create;
   FFirstLine  := 1;
@@ -941,8 +942,8 @@ begin
   end;
 
   if prevval <> Text then
-    if Assigned(OnChange) then
-      OnChange(self);
+    if Assigned(FOnChange) then
+      FOnChange(self);
 
   if consumed then
     RePaint;
