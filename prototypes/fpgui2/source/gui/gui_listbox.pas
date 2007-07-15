@@ -216,10 +216,13 @@ end;
 procedure TfpgBaseListBox.HandleKeyPress(var keycode: word;
   var shiftstate: word; var consumed: boolean);
 begin
+//  writeln(Classname, '.HandleKeyPress ', IntToHex(keycode, 4));
   consumed := true;
+
   case keycode of
     KEY_UP:
            begin // up
+//            writeln('up');
              if FFocusItem > 1 then
              begin
                dec(FFocusItem);
@@ -230,6 +233,7 @@ begin
            end;
     KEY_DOWN:
            begin // down
+//            writeln('down');
              if FFocusItem < ItemCount then
              begin
                inc(FFocusItem);
@@ -275,10 +279,11 @@ begin
            end;
   else
     begin
+//      writeln('...else...');
       consumed := false;
-      inherited HandleKeyPress(keycode, shiftstate, consumed);
     end;
   end;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgBaseListBox.HandleLMouseDown(x, y: integer; shiftstate: word);

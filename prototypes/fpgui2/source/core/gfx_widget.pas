@@ -418,8 +418,8 @@ begin
   //if Assigned(OnKeyPress) then
     //OnKeyPress(self, keycode, shiftstate, consumed);
 
-  //if consumed then
-    //Exit; //==>
+  if consumed then
+    Exit; //==>
 
   dir := 0;
 

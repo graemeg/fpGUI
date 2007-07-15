@@ -466,10 +466,10 @@ begin
     $6C: Result := $11C; // numpad enter
     $6D: Result := $11D; // right ctrl
     $70: Result := $135; // numpad /
-    $62: Result := $148;
+    $62: Result := $148; // up arrow
     $64: Result := $14B;
     $66: Result := $14D;
-    $68: Result := $150;
+    $68: Result := $150; // down arrow
     $6A: Result := $152;
     $61: Result := $147;
     $63: Result := $149;
