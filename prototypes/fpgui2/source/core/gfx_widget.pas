@@ -331,7 +331,9 @@ end;
 
 procedure TfpgWidget.MsgDoubleClick(var msg: TfpgMessageRec);
 begin
-  //
+  // If we don't generate a mouse down, we get a rapid click
+  // delay under Windows.
+  HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
 end;
 
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
