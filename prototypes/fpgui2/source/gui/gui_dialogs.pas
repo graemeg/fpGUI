@@ -21,7 +21,7 @@ type
     FButton: TfpgButton;
     procedure   ButtonClick(Sender: TObject);
   protected
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner : TComponent); override;
@@ -68,13 +68,11 @@ begin
 end;
 
 procedure TfpgMessageBox.HandleKeyPress(var keycode: word;
-  var shiftstate: word; var consumed: boolean);
+  var shiftstate: TShiftState; var consumed: boolean);
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
-  if keycode = KEY_ESC then
-  begin
+  if keycode = keyEscape then
     Close;
-  end;
 end;
 
 procedure TfpgMessageBox.HandlePaint;

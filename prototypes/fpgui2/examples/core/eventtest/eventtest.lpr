@@ -8,6 +8,11 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, GFXBase, fpGFX, gfx_widget;
   
+
+const
+  ButtonNames: array[TMouseButton] of PChar =
+    ('Left', 'Right', 'Middle');
+
 type
 
   { TMainForm }
@@ -15,8 +20,8 @@ type
   TMainForm = class(TfpgWindow)
   private
     FMoveEventCount: integer;
-    function    ShiftStateToStr(AShift: word): string;
-    function    MouseState(AShift: word; const AMousePos: TPoint): string;
+    function    ShiftStateToStr(Shift: TShiftState): string;
+    function    MouseState(AShift: TShiftState; const AMousePos: TPoint): string;
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
@@ -41,19 +46,43 @@ type
 
 { TMainForm }
 
-function TMainForm.ShiftStateToStr(AShift: word): string;
+function TMainForm.ShiftStateToStr(Shift: TShiftState): string;
 begin
-  Result := '';
-  {$Note This must move into gfx_XXX units and return TShiftState enum}
-  if (AShift and ss_Shift) <> 0 then
+  SetLength(Result, 0);
+  if ssShift in Shift then
     Result := 'Shift ';
-  if (AShift and ss_Alt) <> 0 then
+  if ssAlt in Shift then
     Result := Result + 'Alt ';
-  if (AShift and ss_Control) <> 0 then
+  if ssCtrl in Shift then
     Result := Result + 'Ctrl ';
+  if ssMeta in Shift then
+    Result := Result + 'Meta ';
+  if ssSuper in Shift then
+    Result := Result + 'Super ';
+  if ssHyper in Shift then
+    Result := Result + 'Hyper ';
+  if ssAltGr in Shift then
+    Result := Result + 'AltGr ';
+  if ssCaps in Shift then
+    Result := Result + 'Caps ';
+  if ssNum in Shift then
+    Result := Result + 'Num ';
+  if ssScroll in Shift then
+    Result := Result + 'Scroll ';
+  if ssLeft in Shift then
+    Result := Result + 'Left ';
+  if ssRight in Shift then
+    Result := Result + 'Right ';
+  if ssMiddle in Shift then
+    Result := Result + 'Middle ';
+  if ssDouble in Shift then
+    Result := Result + 'Double ';
+  if Length(Result) > 0 then
+    SetLength(Result, Length(Result) - 1);
+
 end;
 
-function TMainForm.MouseState(AShift: word; const AMousePos: TPoint): string;
+function TMainForm.MouseState(AShift: TShiftState; const AMousePos: TPoint): string;
 var
   ShiftStateStr: String;
 begin
@@ -101,53 +130,63 @@ begin
   Writeln('Resize');
   FWidth  := msg.Params.rect.Width;
   FHeight := msg.Params.rect.Height;
+
+  WriteLn('Window has been resized. New width: ',
+    Width, ' x ', Height);
+//    '; new client width: ', ClientWidth, ' x ', ClientHeight);
+
 end;
 
 procedure TMainForm.MsgMove(var msg: TfpgMessageRec);
 begin
-  Writeln('Window Move');
+  WriteLn('Window has been moved to ', Left, '/', Top);
 end;
 
 procedure TMainForm.MsgKeyChar(var msg: TfpgMessageRec);
+var
+  AKeyChar: Char;
 begin
-  Write('Keychar - Character generated: ');
-//  if Char(keycode) >= ' ' then
-//    WriteLn('''', Char(keycode), '''')
-//  else
-//    WriteLn('#', Ord(keycode));
+  Write('Character generated: ');
+  AKeyChar := msg.Params.keyboard.keychar;
+  if AKeyChar >= ' ' then
+    WriteLn('''', AKeyChar, '''')
+  else
+    WriteLn('#', Ord(AKeyChar));
 end;
 
 procedure TMainForm.MsgKeyPress(var msg: TfpgMessageRec);
 begin
-  Writeln('KeyPress');
+  WriteLn('[', ShiftStateToStr(msg.Params.keyboard.shiftstate), '] Key pressed: ',
+    KeycodeToText(msg.Params.keyboard.keycode, []));
 end;
 
 procedure TMainForm.MsgKeyRelease(var msg: TfpgMessageRec);
 begin
-  Writeln('KeyRelease');
+  WriteLn('[', ShiftStateToStr(msg.Params.keyboard.shiftstate), '] Key released: ',
+    KeycodeToText(msg.Params.keyboard.keycode, []));
 end;
 
 procedure TMainForm.MsgMouseDown(var msg: TfpgMessageRec);
 begin
-  Writeln('Mouse button down.' + ' button=' + IntToStr(msg.Params.mouse.Buttons));
+  WriteLn(MouseState(msg.Params.mouse.shiftstate, Point(msg.Params.mouse.x, msg.Params.mouse.y)),
+    'Mouse button pressed: ', ' button=' + IntToStr(msg.Params.mouse.Buttons));
+//    ButtonNames[msg.Params.mouse.Buttons]);
 end;
 
 procedure TMainForm.MsgMouseUp(var msg: TfpgMessageRec);
 begin
-  Writeln('Mouse button up.' + ' button=' + IntToStr(msg.Params.mouse.Buttons));
+  WriteLn(MouseState(msg.Params.mouse.shiftstate, Point(msg.Params.mouse.x, msg.Params.mouse.y)),
+    'Mouse button released: ', ' button=' + IntToStr(msg.Params.mouse.Buttons));
+//    ButtonNames[msg.Params.mouse.Buttons]);
 end;
 
 procedure TMainForm.MsgMouseMove(var msg: TfpgMessageRec);
-var
-  s: string;
 begin
   inc(FMoveEventCount);
   // only report mouse moves every 10 messages - just to limit the output a bit
   if (FMoveEventCount mod 10) = 0 then
   begin
-    s := Format('[%d,%d] ', [msg.Params.mouse.x, msg.Params.mouse.y]);
-    WriteLn(s + 'Mouse move message');
-//    WriteLn(MouseState(shiftstate, Point(x, y)), 'Mouse moved');
+    WriteLn(MouseState(msg.Params.mouse.shiftstate, Point(msg.Params.mouse.x, msg.Params.mouse.y)), 'Mouse moved');
   end;
 end;
 
@@ -158,12 +197,12 @@ end;
 
 procedure TMainForm.MsgMouseEnter(var msg: TfpgMessageRec);
 begin
-  Writeln('Mouse enter');
+  WriteLn(MouseState(msg.Params.mouse.shiftstate, Point(msg.Params.mouse.x, msg.Params.mouse.y)), 'Mouse entered window');
 end;
 
 procedure TMainForm.MsgMouseExit(var msg: TfpgMessageRec);
 begin
-  Writeln('Mouse exit');
+  WriteLn('Mouse left window');
 end;
 
 procedure TMainForm.MsgScroll(var msg: TfpgMessageRec);

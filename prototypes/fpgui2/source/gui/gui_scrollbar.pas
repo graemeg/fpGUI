@@ -45,9 +45,9 @@ type
     procedure   ScrollTimer(Sender: TObject);
     procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
     procedure   DrawSlider(recalc: boolean);
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
-    procedure   HandleLMouseUp(x, y: integer; shiftstate: word); override;
-    procedure   HandleMouseMove(x, y: integer; btnstate, shiftstate: word); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     procedure   PositionChange(d: integer);
   public
@@ -203,7 +203,7 @@ begin
   end;
 end;
 
-procedure TfpgScrollBar.HandleLMouseDown(x, y: integer; shiftstate: word);
+procedure TfpgScrollBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited;
 
@@ -262,7 +262,7 @@ begin
   end;
 end;
 
-procedure TfpgScrollBar.HandleLMouseUp(x, y: integer; shiftstate: word);
+procedure TfpgScrollBar.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   WasPressed: Boolean;
 begin
@@ -275,7 +275,7 @@ begin
   if WasPressed then HandlePaint;
 end;
 
-procedure TfpgScrollBar.HandleMouseMove(x, y: integer; btnstate, shiftstate: word);
+procedure TfpgScrollBar.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   d: integer;
   area: integer;

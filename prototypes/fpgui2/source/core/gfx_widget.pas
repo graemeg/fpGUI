@@ -56,20 +56,20 @@ type
     procedure   HandlePaint; virtual;
     procedure   HandleResize(awidth, aheight: TfpgCoord); virtual;
     procedure   HandleMove(x, y: TfpgCoord); virtual;
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean); virtual;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean); virtual;
-    procedure   HandleKeyRelease(var keycode: word; var shiftstate: word; var consumed: boolean); virtual;
+    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
+    procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleSetFocus; virtual;
     procedure   HandleKillFocus; virtual;
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); virtual;
-    procedure   HandleRMouseDown(x, y: integer; shiftstate: word); virtual;
-    procedure   HandleLMouseUp(x, y: integer; shiftstate: word); virtual;
-    procedure   HandleRMouseUp(x, y: integer; shiftstate: word); virtual;
-    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word); virtual;
-    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: word); virtual;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); virtual;
+    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); virtual;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); virtual;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); virtual;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); virtual;
+    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); virtual;
     procedure   HandleMouseEnter; virtual;
     procedure   HandleMouseExit; virtual;
-    procedure   HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint); virtual;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
@@ -202,7 +202,8 @@ end;
 
 procedure TfpgWidget.MsgKeyChar(var msg: TfpgMessageRec);
 var
-  key, ss: word;
+  key: word;
+  ss: TShiftState;
   consumed: boolean;
   wg: TfpgWidget;
 begin
@@ -226,7 +227,7 @@ end;
 procedure TfpgWidget.MsgKeyPress(var msg: TfpgMessageRec);
 var
   key: word;
-  ss: word;
+  ss: TShiftState;
   consumed: boolean;
   wg: TfpgWidget;
 begin
@@ -248,7 +249,8 @@ end;
 
 procedure TfpgWidget.MsgKeyRelease(var msg: TfpgMessageRec);
 var
-  key, ss: word;
+  key: word;
+  ss: TShiftState;
   consumed: boolean;
   wg: TfpgWidget;
 begin
@@ -289,8 +291,7 @@ begin
       end;
   end;
   if Assigned(FOnMouseDown) then
-    FOnMouseDown(self, mb,
-        GetKeyboardShiftState(msg.Params.mouse.shiftstate),
+    FOnMouseDown(self, mb, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
 
@@ -315,8 +316,7 @@ begin
       end;
   end;
   if Assigned(FOnMouseUp) then
-    FOnMouseUp(self, mb,
-        GetKeyboardShiftState(msg.Params.mouse.shiftstate),
+    FOnMouseUp(self, mb, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
 
@@ -324,8 +324,7 @@ procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
 begin
   HandleMouseMove(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
   if Assigned(OnMouseMove) then
-    OnMouseMove(self,
-        GetKeyboardShiftState(msg.Params.mouse.shiftstate),
+    OnMouseMove(self, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
 
@@ -412,7 +411,7 @@ begin
   // descendants will implement this.
 end;
 
-procedure TfpgWidget.HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean);
+procedure TfpgWidget.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 var
   wg: TfpgWidget;
   dir: integer;
@@ -426,19 +425,19 @@ begin
   dir := 0;
 
   case keycode of
-    KEY_TAB:
-        if (shiftstate and ss_shift) <> 0 then
+    keyTab:
+        if (ssShift in shiftstate) then
           dir := -1
         else
           dir := 1;
 
-    KEY_ENTER,
-    KEY_DOWN,
-    KEY_RIGHT:
+    keyReturn,
+    keyDown,
+    keyRight:
         dir := 1;
 
-    KEY_UP,
-    KEY_LEFT:
+    keyUp,
+    keyLeft:
         dir := -1;
   end;
 
@@ -484,13 +483,13 @@ begin
   end;
 end;
 
-procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: word;
+procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
   var consumed: boolean);
 begin
   // descendants will implement this.
 end;
 
-procedure TfpgWidget.HandleKeyRelease(var keycode: word; var shiftstate: word; var consumed: boolean);
+procedure TfpgWidget.HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   // descendants will implement this.
 end;
@@ -531,7 +530,7 @@ begin
     ActiveWidget.KillFocus;
 end;
 
-procedure TfpgWidget.HandleLMouseDown(x, y: integer; shiftstate: word);
+procedure TfpgWidget.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   pw: TfpgWidget;
   w: TfpgWidget;
@@ -548,27 +547,27 @@ begin
   end;
 end;
 
-procedure TfpgWidget.HandleRMouseDown(x, y: integer; shiftstate: word);
+procedure TfpgWidget.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   // do nothing yet
 end;
 
-procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: word);
+procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   // do nothing yet
 end;
 
-procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: word);
+procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   // do nothing yet
 end;
 
-procedure TfpgWidget.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word);
+procedure TfpgWidget.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 begin
   // do nothing yet
 end;
 
-procedure TfpgWidget.HandleDoubleClick(x, y: integer; button: word; shiftstate: word);
+procedure TfpgWidget.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
 begin
   // do nothing yet
 end;
@@ -583,7 +582,7 @@ begin
   // do nothing yet
 end;
 
-procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint);
+procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 begin
   // do nothing yet
 end;

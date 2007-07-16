@@ -32,14 +32,6 @@ const
   MOUSE_RIGHT      = 2;
   MOUSE_MIDDLE     = 4;
 
-
-  ss_Shift         = $0001;
-  ss_Control       = $0004;
-  ss_Alt           = $0008;
-  ss_CapsLock      = $0002;
-  ss_NumLock       = $0010;
-  ss_ScrollLock    = $0080;
-
   // Platform independent messages used by fpGUI (TfpgWidget)
   FPGM_PAINT       = 1;
   FPGM_ACTIVATE    = 2;
@@ -60,42 +52,8 @@ const
   FPGM_POPUPCLOSE  = 17;
   FPGM_KILLME      = 9999;
 
-
   // The special keys, based on the well-known keyboard scan codes
-  KEY_LEFT         = $FF4B;
-  KEY_RIGHT        = $FF4D;
-  KEY_DOWN         = $FF50;
-  KEY_UP           = $FF48;
-  KEY_END          = $FF4F;
-  KEY_HOME         = $FF47;
-  KEY_PGUP         = $FF49;
-  KEY_PGDN         = $FF51;
-  KEY_INSERT       = $FF52;
-  KEY_DELETE       = $FF53;
-  KEY_F1           = $FF3B;
-  KEY_F2           = KEY_F1 + 1;
-  KEY_F3           = KEY_F1 + 2;
-  KEY_F4           = KEY_F1 + 3;
-  KEY_F5           = KEY_F1 + 4;
-  KEY_F6           = KEY_F1 + 5;
-  KEY_F7           = KEY_F1 + 6;
-  KEY_F8           = KEY_F1 + 7;
-  KEY_F9           = KEY_F1 + 8;
-  KEY_F10          = KEY_F1 + 9;
-  KEY_F11          = $FF57;
-  KEY_F12          = $FF58;
-  // some general keys
-  KEY_TAB          = $0009;
-  KEY_ENTER        = $000D;
-  KEY_SPACE        = $0020;
-  KEY_ESC          = $001B;
-  KEY_BACKSPACE    = $0008;
-
-
-  // scan codes for KeyPress/KeyRelease
-  KEYSC_ENTER      = $1C;
-  KEYSC_SPACE      = $39;
-
+  {$I keys.inc}
 
   FPG_DEFAULT_FONT_DESC = 'Arial-10';
   UserNamedColorStart   = 128;
@@ -120,14 +78,15 @@ type
     x: TfpgCoord;
     y: TfpgCoord;
     Buttons: word;
-    shiftstate: word;
+    shiftstate: TShiftState;
     delta: word;
   end;
 
 
   TfpgMsgParmKeyboard = record
     keycode: word;
-    shiftstate: word;
+    keychar: char;
+    shiftstate: TShiftState;
   end;
   
 
@@ -390,7 +349,6 @@ type
 
 { ********  Helper functions  ******** }
 { Keyboard }
-function GetKeyboardShiftState(AShiftState: word): TShiftState;
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 
 { Color }
@@ -406,31 +364,153 @@ implementation
 uses
   fpgfx;  // needed for fpgApplication
 
-function GetKeyboardShiftState(AShiftState: word): TShiftState;
-begin
-  Result := [];
-  if (AShiftState and ss_shift) <> 0 then
-    Include(result, ssShift);
-
-  if (AShiftState and ss_Control) <> 0 then
-    Include(result, ssCtrl);
-
-  if (AShiftState and ss_Alt) <> 0 then
-    Include(result, ssAlt);
-
-  if (AShiftState and ss_CapsLock) <> 0 then
-    Include(result, ssCaps);
-
-  if (AShiftState and ss_NumLock) <> 0 then
-    Include(result, ssNum);
-
-  if (AShiftState and ss_ScrollLock) <> 0 then
-    Include(result, ssScroll);
-end;
 
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
+
+  function GetASCIIText: String;
+  var
+    c: Char;
+  begin
+    result := '';
+    c := Chr(AKey and $ff);
+    case c of
+      #13:  Result := Result + 'Enter';
+      #127: Result := Result + 'Del';
+      '+':  Result := Result + 'Plus'
+      else
+        Result := Result + c;
+    end;
+  end;
+
+var
+  s: String;
 begin
-  Result := 'not implemented yet';
+  SetLength(Result, 0);
+
+  if ssShift in AShiftState then
+    Result := 'Shift+';
+  if ssCtrl in AShiftState then
+    Result := 'Ctrl+';
+  if ssAlt in AShiftState then
+    Result := 'Alt+';
+
+  if (AKey > Ord(' ')) and (AKey < 255) then
+  begin
+    Result := Result + GetASCIIText;
+    Exit; //==>
+  end;
+
+  case AKey of
+    keyNul:           s := 'Null';
+    keyBackSpace:     s := 'Backspace';
+    keyTab:           s := 'Tab';
+    keyLinefeed:      s := 'Linefeed';
+    keyReturn:        s := 'Enter';
+    keyEscape:        s := 'Esc';
+    Ord(' '):         s := 'Space';
+    keyDelete:        s := 'Del';
+    keyVoid:          s := 'Void';
+    keyBreak:         s := 'Break';
+    keyScrollForw:    s := 'ScrollForw';
+    keyScrollBack:    s := 'ScrollBack';
+    keyBoot:          s := 'Boot';
+    keyCompose:       s := 'Compose';
+    keySAK:           s := 'SAK';
+    keyUndo:          s := 'Undo';
+    keyRedo:          s := 'Redo';
+    keyMenu:          s := 'Menu';
+    keyCancel:        s := 'Cancel';
+    keyPrintScreen:   s := 'PrtScr';
+    keyExecute:       s := 'Exec';
+    keyFind:          s := 'Find';
+    keyBegin:         s := 'Begin';
+    keyClear:         s := 'Clear';
+    keyInsert:        s := 'Ins';
+    keySelect:        s := 'Select';
+    keyMacro:         s := 'Macro';
+    keyHelp:          s := 'Help';
+    keyDo:            s := 'Do';
+    keyPause:         s := 'Pause';
+    keySysRq:         s := 'SysRq';
+    keyModeSwitch:    s := 'ModeSw';
+    keyUp:            s := 'Up';
+    keyDown:          s := 'Down';
+    keyLeft:          s := 'Left';
+    keyRight:         s := 'Right';
+    keyPrior:         s := 'PgUp';
+    keyNext:          s := 'PgDown';
+    keyHome:          s := 'Home';
+    keyEnd:           s := 'End';
+    keyF0..keyF64:    s := 'F' + IntToStr(AKey - keyF0);
+    keyP0..keyP9:     s := 'KP' + Chr(AKey - keyP0 + Ord('0'));
+    keyPA..keyPF:     s := 'KP' + Chr(AKey - keyPA + Ord('A'));
+    keyPPlus, keyPMinus, keyPSlash, keyPStar, keyPEqual, keyPSeparator,
+      keyPDecimal, keyPParenLeft, keyPParenRight, keyPSpace, keyPEnter,
+      keyPTab:        s := 'KP' + GetASCIIText;
+    keyPPlusMinus:    s := 'KPPlusMinus';
+    keyPBegin:        s := 'KPBegin';
+    keyPF1..keyPF9:   s := 'KPF' + IntToStr(AKey - keyPF1);
+    keyShiftL:        s := 'ShiftL';
+    keyShiftR:        s := 'ShiftR';
+    keyCtrlL:         s := 'CtrlL';
+    keyCtrlR:         s := 'CtrlR';
+    keyAltL:          s := 'AltL';
+    keyAltR:          s := 'AltR';
+    keyMetaL:         s := 'MetaL';
+    keyMetaR:         s := 'MetaR';
+    keySuperL:        s := 'SuperL';
+    keySuperR:        s := 'SuperR';
+    keyHyperL:        s := 'HyperL';
+    keyHyperR:        s := 'HyperR';
+    keyAltGr:         s := 'AltGr';
+    keyCaps:          s := 'Caps';
+    keyNum:           s := 'Num';
+    keyScroll:        s := 'Scroll';
+    keyShiftLock:     s := 'ShiftLock';
+    keyCtrlLock:      s := 'CtrlLock';
+    keyAltLock:       s := 'AltLock';
+    keyMetaLock:      s := 'MetaLock';
+    keySuperLock:     s := 'SuperLock';
+    keyHyperLock:     s := 'HyperLock';
+    keyAltGrLock:     s := 'AltGrLock';
+    keyCapsLock:      s := 'CapsLock';
+    keyNumLock:       s := 'NumLock';
+    keyScrollLock:    s := 'ScrollLock';
+    keyDeadRing:      s := 'DeadRing';
+    keyDeadCaron:     s := 'DeadCaron';
+    keyDeadOgonek:    s := 'DeadOgonek';
+    keyDeadIota:      s := 'DeadIota';
+    keyDeadDoubleAcute:     s := 'DeadDoubleAcute';
+    keyDeadBreve:           s := 'DeadBreve';
+    keyDeadAboveDot:        s := 'DeadAboveDot';
+    keyDeadBelowDot:        s := 'DeadBelowDot';
+    keyDeadVoicedSound:     s := 'DeadVoicedSound';
+    keyDeadSemiVoicedSound: s := 'DeadSemiVoicedSound';
+    keyDeadAcute:           s := 'DeadAcute';
+    keyDeadCedilla:         s := 'DeadCedilla';
+    keyDeadCircumflex:      s := 'DeadCircumflex';
+    keyDeadDiaeresis:       s := 'DeadDiaeresis';
+    keyDeadGrave:           s := 'DeadGrave';
+    keyDeadTilde:           s := 'DeadTilde';
+    keyDeadMacron:          s := 'DeadMacron';
+
+    keyEcuSign:       s := 'Ecu';
+    keyColonSign:     s := 'Colon';
+    keyCruzeiroSign:  s := 'Cruzeiro';
+    keyFFrancSign:    s := 'FFranc';
+    keyLiraSign:      s := 'Lira';
+    keyMillSign:      s := 'Mill';
+    keyNairaSign:     s := 'Naira';
+    keyPesetaSign:    s := 'Peseta';
+    keyRupeeSign:     s := 'Rupee';
+    keyWonSign:       s := 'Won';
+    keyNewSheqelSign: s := 'NewShequel';
+    keyDongSign:      s := 'Dong';
+    keyEuroSign:      s := 'Euro';
+  else
+    s := '#' + IntToHex(AKey, 4);
+  end;
+  Result := Result + s;
 end;
 
 function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;

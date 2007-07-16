@@ -34,9 +34,9 @@ type
     procedure   AdjustCursor;
     function    GetDrawText: string;
     procedure   HandlePaint; override;
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean); override;
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
-    procedure   HandleMouseMove(x, y: integer; btnstate, shiftstate: word); override;
+    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
   public
     PasswordMode: boolean;
     constructor Create(AOwner: TComponent); override;
@@ -252,7 +252,7 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgEdit.HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean);
+procedure TfpgEdit.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 var
   prevval: string;
   s: string;
@@ -291,12 +291,12 @@ begin
     consumed := True;
 
     case keycode of
-      KEY_LEFT:
+      keyLeft:
         if FCursorPos > 0 then
         begin
           Dec(FCursorPos);
 
-          if (shiftstate and ss_control) <> 0 then
+          if (ssCtrl in shiftstate) then
             // word search...
             //                    while (FCursorPos > 0) and not ptkIsAlphaNum(copy(FText,FCursorPos,1))
             //                      do Dec(FCursorPos);
@@ -306,12 +306,12 @@ begin
 
         end;
 
-      KEY_RIGHT:
+      keyRight:
         if FCursorPos < UTF8Length(FText) then
         begin
           Inc(FCursorPos);
 
-          if (shiftstate and ss_control) <> 0 then
+          if (ssCtrl in shiftstate) then
             // word search...
             //                    while (FCursorPos < Length(FText)) and ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
             //                      do Inc(FCursorPos);
@@ -320,10 +320,10 @@ begin
           ;
         end;
 
-      KEY_HOME:
+      keyHome:
         FCursorPos := 0;
 
-      KEY_END:
+      keyEnd:
         FCursorPos := UTF8Length(FText);
       else
         Consumed   := False;
@@ -333,7 +333,7 @@ begin
     begin
       AdjustCursor;
 
-      FSelecting := (shiftstate and ss_shift) <> 0;
+      FSelecting := (ssShift in shiftstate);
 
       if FSelecting then
         FSelOffset := FCursorPos - FSelStart
@@ -347,7 +347,7 @@ begin
     consumed := True;
 
     case keycode of
-      KEY_BACKSPACE:
+      keyBackSpace:
         if FCursorPos > 0 then
         begin
           Delete(FText, FCursorPos, 1);
@@ -355,7 +355,7 @@ begin
         end;// backspace
 
 
-      KEY_DELETE:
+      keyDelete:
         if FSelOffset <> 0 then
           DeleteSelection
         else if FCursorPos < UTF8Length(FText) then
@@ -398,7 +398,7 @@ begin
     inherited;
 end;
 
-procedure TfpgEdit.HandleLMouseDown(x, y: integer; shiftstate: word);
+procedure TfpgEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   s: string;
   n: integer;
@@ -428,7 +428,7 @@ begin
   FMouseDragPos := cp;
   FCursorPos    := cp;
 
-  if (shiftstate and ss_shift) <> 0 then
+  if (ssShift in shiftstate) then
     FSelOffset := FCursorPos - FSelStart
   else
   begin
@@ -438,7 +438,7 @@ begin
   Repaint;
 end;
 
-procedure TfpgEdit.HandleMouseMove(x, y: integer; btnstate, shiftstate: word);
+procedure TfpgEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   s: string;
   n: integer;

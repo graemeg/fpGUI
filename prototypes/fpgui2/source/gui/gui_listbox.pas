@@ -52,11 +52,11 @@ type
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
     procedure   DoChange;
     procedure   DoSelect;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed : boolean); override;
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
-    procedure   HandleLMouseUp(x, y: integer; shiftstate: word); override;
-    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word); override;
-    procedure   HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed : boolean); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleShow; override;
     procedure   HandleResize(dwidth, dheight: integer); override;
     procedure   HandlePaint; override;
@@ -287,14 +287,13 @@ begin
 end;
 
 procedure TfpgBaseListBox.HandleKeyPress(var keycode: word;
-  var shiftstate: word; var consumed: boolean);
+  var shiftstate: TShiftState; var consumed: boolean);
 begin
-//  writeln(Classname, '.HandleKeyPress ', IntToHex(keycode, 4));
   consumed := true;
 
   case keycode of
-    KEY_UP:
-           begin // up
+    keyUp:
+           begin
 //            writeln('up');
              if FFocusItem > 1 then
              begin
@@ -304,8 +303,9 @@ begin
                DoChange;
              end;
            end;
-    KEY_DOWN:
-           begin // down
+           
+    keyDown:
+           begin
 //            writeln('down');
              if FFocusItem < ItemCount then
              begin
@@ -315,51 +315,56 @@ begin
                DoChange;
              end;
            end;
-    KEY_PGUP:
-           begin // pgup
+
+    keyPageUp:
+           begin
              dec(FFocusItem,PageLength);
              if FFocusItem < 1 then FFocusItem := 1;
              FollowFocus;
              RePaint;
              DoChange;
            end;
-    KEY_PGDN:
-           begin // pgdown
+
+    keyPageDown:
+           begin
              inc(FFocusItem,PageLength);
              if FFocusItem > ItemCount then FFocusItem := ItemCount;
              FollowFocus;
              RePaint;
              DoChange;
            end;
-    KEY_HOME:
-           begin // home
+
+    keyHome:
+           begin
              FFocusItem := 1;
              FollowFocus;
              RePaint;
              DoChange;
            end;
-    KEY_END:
-           begin // end
+
+    keyEnd:
+           begin
              FFocusItem := ItemCount;
              FollowFocus;
              RePaint;
              DoChange;
            end;
-    KEY_ENTER:
-           begin // enter
+
+    keyReturn:
+           begin
              DoSelect;
              consumed := false; // to allow the forms to detect it
            end;
   else
     begin
-//      writeln('...else...');
+      writeln('...else...');
       consumed := false;
     end;
   end;
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
-procedure TfpgBaseListBox.HandleLMouseDown(x, y: integer; shiftstate: word);
+procedure TfpgBaseListBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
@@ -376,7 +381,7 @@ begin
   DoChange;
 end;
 
-procedure TfpgBaseListBox.HandleLMouseUp(x, y: integer; shiftstate: word);
+procedure TfpgBaseListBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   if ItemCount < 1 then
@@ -394,7 +399,7 @@ begin
   DoSelect;
 end;
 
-procedure TfpgBaseListBox.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word);
+procedure TfpgBaseListBox.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   oldf: integer;
 begin
@@ -419,7 +424,7 @@ begin
   end;
 end;
 
-procedure TfpgBaseListBox.HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint);
+procedure TfpgBaseListBox.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 var
   pfi: integer;
 begin

@@ -27,7 +27,7 @@ type
     procedure   InternalBtnClick(Sender: TObject);
   protected
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -133,7 +133,7 @@ begin
   DoDropDown;
 end;
 
-procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: word);
+procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   DoDropDown;

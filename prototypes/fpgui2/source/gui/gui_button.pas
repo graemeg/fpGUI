@@ -43,11 +43,11 @@ type
     FFont: TfpgFont;
     procedure   SetShowImage(AValue: Boolean);
     procedure   HandlePaint; override;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean); override;
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean); override;
-    procedure   HandleKeyRelease(var keycode: word; var shiftstate: word; var consumed: boolean); override;
-    procedure   HandleLMouseDown(X, Y: integer; ShiftState: word); override;
-    procedure   HandleLMouseUp(x, y: integer; shiftstate: word); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleLMouseDown(X, Y: integer; ShiftState: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseExit; override;
     procedure   HandleMouseEnter; override;
   public
@@ -321,9 +321,9 @@ begin
   FClicked     := False;
 end;
 
-procedure TfpgButton.HandleKeyPress(var keycode: word; var shiftstate: word; var consumed: boolean);
+procedure TfpgButton.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = KEYSC_ENTER) or (keycode = KEYSC_SPACE) then
+  if (keycode = keyReturn) or (keycode = keySelect) then
   begin
     DoPush;
     Consumed := True;
@@ -332,17 +332,17 @@ begin
     inherited;
 end;
 
-procedure TfpgButton.HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean);
+procedure TfpgButton.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = KEY_ENTER) or (keycode = KEY_SPACE) then
+  if (keycode = keyReturn) or (keycode = keySelect) then
     Consumed := True
   else
     inherited;
 end;
 
-procedure TfpgButton.HandleKeyRelease(var keycode: word; var shiftstate: word; var consumed: boolean);
+procedure TfpgButton.HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = KEYSC_ENTER) or (keycode = KEYSC_SPACE) then
+  if (keycode = keyReturn) or (keycode = keySelect) then
   begin
     DoRelease;
     Consumed := True;
@@ -351,13 +351,13 @@ begin
     inherited;
 end;
 
-procedure TfpgButton.HandleLMouseDown(X, Y: integer; ShiftState: word);
+procedure TfpgButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
 begin
   inherited;
   DoPush;
 end;
 
-procedure TfpgButton.HandleLMouseUp(x, y: integer; shiftstate: word);
+procedure TfpgButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited;
   DoRelease;

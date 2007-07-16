@@ -62,9 +62,9 @@ type
     procedure   SetCursorLine(aValue: integer);
     procedure   UpdateScrollBarCoords;
   protected
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean); override;
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: word); override;
-    procedure   HandleMouseMove(x, y: integer; btnstate, shiftstate: word); override;
+    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleResize(dwidth, dheight: integer); override;
     //procedure HandleWindowScroll(direction, amount : integer); override;
     procedure   HandlePaint; override;
@@ -713,7 +713,7 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgMemo.HandleKeyChar(var keycode: word; var shiftstate: word; var consumed: boolean);
+procedure TfpgMemo.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 var
   prevval: string;
   s: string;
@@ -752,15 +752,15 @@ begin
   begin
     // checking for movement keys:
     consumed   := True;
-    FSelecting := (shiftstate and ss_shift) <> 0;
+    FSelecting := (ssShift in shiftstate);
 
     case keycode of
-      KEY_LEFT:
+      keyLeft:
         if FCursorPos > 0 then
         begin
           Dec(FCursorPos);
 
-          if (shiftstate and ss_control) <> 0 then
+          if (ssCtrl in shiftstate) then
             // word search...
             (*
                     while (FCursorPos > 0) and not pgfIsAlphaNum(copy(CurrentLine,FCursorPos,1))
@@ -772,12 +772,12 @@ begin
 
         end;// left
 
-      KEY_RIGHT:
+      keyRight:
         if FCursorPos < UTF8Length(CurrentLine) then
         begin
           Inc(FCursorPos);
 
-          if (shiftstate and ss_control) <> 0 then
+          if (ssCtrl in shiftstate) then
             // word search...
             (*
                     while (FCursorPos < length(CurrentLine)) and pgfIsAlphaNum(copy(CurrentLine,FCursorPos+1,1))
@@ -789,7 +789,7 @@ begin
 
         end;// right
 
-      KEY_UP:
+      keyUp:
       begin  // up
         cx := GetCursorX;
         if FCursorLine > 1 then
@@ -799,8 +799,8 @@ begin
         end;
       end;
 
-      KEY_DOWN:
-      begin  // down
+      keyDown:
+      begin
         cx := GetCursorX;
         if FCursorLine < LineCount then
         begin
@@ -808,21 +808,22 @@ begin
           SetCPByX(cx);
         end;
       end;
-      KEY_HOME:
+      
+      keyHome:
       begin
-        if (shiftstate and ss_control) <> 0 then
+        if (ssCtrl in shiftstate) then
           FCursorLine := 1;
-        FCursorPos := 0;// home
+        FCursorPos := 0;
       end;
 
-      KEY_END:
+      keyEnd:
       begin
-        if (shiftstate and ss_control) <> 0 then
+        if (ssCtrl in shiftstate) then
           FCursorLine := LineCount;
-        FCursorPos := UTF8Length(CurrentLine);// end
+        FCursorPos := UTF8Length(CurrentLine);
       end;
 
-      KEY_PGUP:
+      keyPageUp:
         if FCursorLine > 1 then
         begin
           cx := GetCursorX;
@@ -830,10 +831,10 @@ begin
           if FCursorLine < 1 then
             FCursorLine := 1;
           SetCPByX(cx);
-        end;// pgup
+        end;
 
-      KEY_PGDN:
-      begin // pgdown
+      keyPageDown:
+      begin
         cx := GetCursorX;
         if FCursorLine < LineCount then
         begin
@@ -867,49 +868,49 @@ begin
     consumed := True;
 
     case keycode of
-      KEY_ENTER:
-      begin // enter
-        ls  := UTF8Copy(FLines[FCursorline - 1], 1, FCursorPos);
-        ls2 := UTF8Copy(FLines[FCursorline - 1], FCursorPos + 1, UTF8Length(FLines[FCursorline - 1]));
-        FLines.Insert(FCursorLine - 1, ls);
-        Inc(FCursorLine);
-        SetLineText(FCursorLine, ls2);
-        FCursorPos := 0;
-      end;
-      KEY_BACKSPACE:
-        if FCursorPos > 0 then
-        begin
-          ls := GetLineText(FCursorLine);
-          Delete(ls, FCursorPos, 1);
-          SetLineText(FCursorLine, ls);
-          Dec(FCursorPos);
-        end
-        else if FCursorLine > 1 then
-        begin
-          ls         := CurrentLine;
-          FLines.Delete(FCursorLine - 1);
-          Dec(FCursorLine);
-          FCursorPos := UTF8Length(FLines.Strings[FCursorLine - 1]);
-          FLines.Strings[FCursorLine - 1] := FLines.Strings[FCursorLine - 1] + ls;
-        end;// backspace
+      keyReturn:
+          begin
+            ls  := UTF8Copy(FLines[FCursorline - 1], 1, FCursorPos);
+            ls2 := UTF8Copy(FLines[FCursorline - 1], FCursorPos + 1, UTF8Length(FLines[FCursorline - 1]));
+            FLines.Insert(FCursorLine - 1, ls);
+            Inc(FCursorLine);
+            SetLineText(FCursorLine, ls2);
+            FCursorPos := 0;
+          end;
+      keyBackSpace:
+          if FCursorPos > 0 then
+          begin
+            ls := GetLineText(FCursorLine);
+            Delete(ls, FCursorPos, 1);
+            SetLineText(FCursorLine, ls);
+            Dec(FCursorPos);
+          end
+          else if FCursorLine > 1 then
+          begin
+            ls         := CurrentLine;
+            FLines.Delete(FCursorLine - 1);
+            Dec(FCursorLine);
+            FCursorPos := UTF8Length(FLines.Strings[FCursorLine - 1]);
+            FLines.Strings[FCursorLine - 1] := FLines.Strings[FCursorLine - 1] + ls;
+          end;
 
-      KEY_DELETE:
-      begin // del
-        ls := GetLineText(FCursorLine);
-        if FSelEndLine > 0 then
-          DeleteSelection
-        else if FCursorPos < UTF8Length(ls) then
-        begin
-          Delete(ls, FCursorPos + 1, 1);
-          SetLineText(FCursorLine, ls);
-        end
-        else if FCursorLine < LineCount then
-        begin
-          ls2 := FLines.Strings[FCursorLine];
-          FLines.Delete(FCursorLine);
-          FLines.Strings[FCursorLine - 1] := ls + ls2;
-        end;
-      end;
+      keyDelete:
+          begin
+            ls := GetLineText(FCursorLine);
+            if FSelEndLine > 0 then
+              DeleteSelection
+            else if FCursorPos < UTF8Length(ls) then
+            begin
+              Delete(ls, FCursorPos + 1, 1);
+              SetLineText(FCursorLine, ls);
+            end
+            else if FCursorLine < LineCount then
+            begin
+              ls2 := FLines.Strings[FCursorLine];
+              FLines.Delete(FCursorLine);
+              FLines.Strings[FCursorLine - 1] := ls + ls2;
+            end;
+          end;
       else
         consumed := False;
     end;
@@ -921,6 +922,7 @@ begin
     end;
   end;
 
+  {$Note This must be fixed. We change keycodes!! }
   if not Consumed and (keycode >= 32) and (keycode < $FF00) then
   begin
     // printeable
@@ -950,7 +952,7 @@ begin
     RePaint;
 end;
 
-procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: word);
+procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   s: string;
   n: integer;
@@ -988,7 +990,7 @@ begin
   FCursorPos     := cp;
   FCursorLine    := lnum;
 
-  if (shiftstate and ss_shift) <> 0 then
+  if (ssShift in shiftstate) then
   begin
     FSelEndLine := lnum;
     FSelEndpos  := cp;
@@ -1002,7 +1004,7 @@ begin
   Repaint;
 end;
 
-procedure TfpgMemo.HandleMouseMove(x, y: integer; btnstate, shiftstate: word);
+procedure TfpgMemo.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   s: string;
   n: integer;

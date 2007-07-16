@@ -2,6 +2,8 @@ unit gfx_x11;
 
 {$mode objfpc}{$H+}
 
+{$Define DEBUG}
+
 interface
 
 uses
@@ -11,7 +13,7 @@ uses
   Xlib,
   XUtil,
   x11_xft,
-  x11_keyconv,
+//  x11_keyconv,
   gfxbase;
 
 type
@@ -137,6 +139,12 @@ type
 
 
   TfpgApplicationImpl = class(TfpgApplicationBase)
+  private
+    FComposeBuffer: String[32];
+    FComposeStatus: TXComposeStatus;
+    function    ConvertShiftState(AState: Cardinal): TShiftState;
+    function    KeySymToKeycode(KeySym: TKeySym): Word;
+    function    StartComposing(const Event: TXEvent): TKeySym;
   protected
     FDisplay: PXDisplay;
     DisplayDepth: integer;
@@ -367,6 +375,108 @@ end;
 
 { TfpgApplicationImpl }
 
+function TfpgApplicationImpl.ConvertShiftState(AState: Cardinal): TShiftState;
+begin
+  Result := [];
+  if (AState and Button1Mask) <> 0 then
+    Include(Result, ssLeft);
+  if (AState and Button2Mask) <> 0 then
+    Include(Result, ssMiddle);
+  if (AState and Button3Mask) <> 0 then
+    Include(Result, ssRight);
+  if (AState and ShiftMask) <> 0 then
+    Include(Result, ssShift);
+  if (AState and LockMask) <> 0 then
+    Include(Result, ssCaps);
+  if (AState and ControlMask) <> 0 then
+    Include(Result, ssCtrl);
+  if (AState and Mod1Mask) <> 0 then
+    Include(Result, ssAlt);
+  if (AState and Mod2Mask) <> 0 then
+    Include(Result, ssNum);
+  if (AState and Mod4Mask) <> 0 then
+    Include(Result, ssSuper);
+  if (AState and Mod5Mask) <> 0 then
+    Include(Result, ssScroll);
+  if (AState and (1 shl 13)) <> 0 then
+    Include(Result, ssAltGr);
+end;
+
+function TfpgApplicationImpl.KeySymToKeycode(KeySym: TKeySym): Word;
+const
+  Table_20aX: array[$20a0..$20ac] of Word = (keyEcuSign, keyColonSign,
+    keyCruzeiroSign, keyFFrancSign, keyLiraSign, keyMillSign, keyNairaSign,
+    keyPesetaSign, keyRupeeSign, keyWonSign, keyNewSheqelSign, keyDongSign,
+    keyEuroSign);
+  Table_feXX: array[$fe50..$fe60] of Word = (keyDeadGrave, keyDeadAcute,
+    keyDeadCircumflex, keyDeadTilde, keyDeadMacron,keyDeadBreve,
+    keyDeadAbovedot, keyDeadDiaeresis, keyDeadRing, keyDeadDoubleacute,
+    keyDeadCaron, keyDeadCedilla, keyDeadOgonek, keyDeadIota,
+    keyDeadVoicedSound, keyDeadSemivoicedSound, keyDeadBelowdot);
+  Table_ff5X: array[$ff50..$ff58] of Word = (keyHome, keyLeft, keyUp, keyRight,
+    keyDown, keyPrior, keyNext, keyEnd, keyBegin);
+  Table_ff6X: array[$ff60..$ff6b] of Word = (keySelect, keyPrintScreen,
+    keyExecute, keyInsert, keyNIL, keyUndo, keyRedo, keyMenu, keyFind,
+    keyCancel, keyHelp, keyBreak);
+  Table_ff9X: array[$ff91..$ff9f] of Word = (keyPF1, keyPF2, keyPF3, keyPF4,
+    keyP7, keyP4, keyP8, keyP6, keyP2, keyP9, keyP3, keyP1, keyP5, keyP0,
+    keyPDecimal);
+  Table_ffeX: array[$ffe1..$ffee] of Word = (keyShiftL, keyShiftR, keyCtrlL,
+    keyCtrlR, keyCapsLock, keyShiftLock, keyMetaL, keyMetaR, keyAltL, keyAltR,
+    keySuperL, keySuperR, keyHyperL, keyHyperR);
+begin
+  case KeySym of
+    0..Ord('a')-1, Ord('z')+1..$bf, $f7:
+      Result := KeySym;
+    Ord('a')..Ord('z'), $c0..$f6, $f8..$ff:
+      Result := KeySym - 32;
+    $20a0..$20ac: Result := Table_20aX[KeySym];
+    $fe20: Result := keyTab;
+    $fe50..$fe60: Result := Table_feXX[KeySym];
+    $ff08: Result := keyBackspace;
+    $ff09: Result := keyTab;
+    $ff0a: Result := keyLinefeed;
+    $ff0b: Result := keyClear;
+    $ff0d: Result := keyReturn;
+    $ff13: Result := keyPause;
+    $ff14: Result := keyScrollLock;
+    $ff15: Result := keySysRq;
+    $ff1b: Result := keyEscape;
+    $ff50..$ff58: Result := Table_ff5X[KeySym];
+    $ff60..$ff6b: Result := Table_ff6X[KeySym];
+    $ff7e: Result := keyModeSwitch;
+    $ff7f: Result := keyNumLock;
+    $ff80: Result := keyPSpace;
+    $ff89: Result := keyPTab;
+    $ff8d: Result := keyPEnter;
+    $ff91..$ff9f: Result := Table_ff9X[KeySym];
+    $ffaa: Result := keyPAsterisk;
+    $ffab: Result := keyPPlus;
+    $ffac: Result := keyPSeparator;
+    $ffad: Result := keyPMinus;
+    $ffae: Result := keyPDecimal;
+    $ffaf: Result := keyPSlash;
+    $ffb0..$ffb9: Result := keyP0 + KeySym - $ffb0;
+    $ffbd: Result := keyPEqual;
+    $ffbe..$ffe0: Result := keyF1 + KeySym - $ffbe;
+    $ffe1..$ffee: Result := Table_ffeX[KeySym];
+    $ffff: Result := keyDelete;
+  else
+    Result := keyNIL;
+  end;
+{$IFDEF Debug}
+  if Result = keyNIL then
+    WriteLn('fpGFX/X11: Unknown KeySym: $', IntToHex(KeySym, 4));
+{$ENDIF}
+end;
+
+function TfpgApplicationImpl.StartComposing(const Event: TXEvent): TKeySym;
+begin
+  SetLength(FComposeBuffer,
+    XLookupString(@Event, @FComposeBuffer[1],
+      SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus));
+end;
+
 constructor TfpgApplicationImpl.Create(const aparams: string);
 var
   wa: TXWindowAttributes;
@@ -509,6 +619,7 @@ var
   msgp: TfpgMessageParams;
   rfds: TFDSet;
   xfd: integer;
+  KeySym: TKeySym;
 begin
   xfd := XConnectionNumber(display);
 
@@ -547,116 +658,91 @@ begin
   case ev._type of
     MSG_KEYPRESS,
     MSG_KEYRELEASE:
-    begin
-      msgp.keyboard.keycode    := X11keycodeToScanCode(ev.xkey.keycode);
-      msgp.keyboard.shiftstate := ev.xkey.state;
+        begin
+          KeySym := StartComposing(ev);
+          msgp.keyboard.keycode     := KeySymToKeycode(KeySym);
+          msgp.keyboard.shiftstate  := ConvertShiftState(ev.xkey.state);
 
-      kwg := FindKeyboardFocus;
-      if kwg <> nil then
-        w := kwg
-      else
-        w := FindWindowByHandle(ev.xkey.window);
-
-      //Writeln('XKey event(',ev._type,'):',
-      //  IntToHex(ev.xkey.keycode,4),' (',ev.xkey.keycode,'), shift=',IntToHex(ev.xkey.state,4));
-
-      if ev._type = MSG_KEYPRESS then
-      begin
-        fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
-
-        //Writeln('scancode: ',IntToHex(X11keycodeToScanCode(ev.xkey.keycode),4)
-        //  ,' (',X11keycodeToScanCode(ev.xkey.keycode),')');
-
-        // force some function keys to send as keychar too
-
-        uc := msgp.keyboard.keycode;
-
-        b := True;
-        case uc of
-          $01: uc := $001B;       // esc
-          $0E: uc       := $0008; // backspace
-          $1C, $11C: uc := $000D; // enter
-          $0F: uc       := $0009; // tab
-          $3B..$44,
-          $57, $58,               // F1 .. F12
-          $147..$149,             // nav keys
-          $14B, $14D,
-          $14F..$153:
-            uc := uc or $FF00;
+          kwg := FindKeyboardFocus;
+          if kwg <> nil then
+            w := kwg
           else
-            b  := False;
-        end;
+            w := FindWindowByHandle(ev.xkey.window);
 
-        if b then
-        begin
-          msgp.keyboard.keycode := uc;
-          fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
-        end
-        else
-        begin
-          // try to convert it to some char
-          sr := 0;
-          r  := XmbLookupString(InputContext, PXKeyPressedEvent(@ev), @a, 16, @ks, @sr);
-          uc := ks and $FFFF;
+          //Writeln('XKey event(',ev._type,'):',
+            //IntToHex(ev.xkey.keycode,4),' (',ev.xkey.keycode,'), shift=',IntToHex(ev.xkey.state,4));
 
-          KeySymToUnicode(ks, @uc);
-          msgp.keyboard.keycode := uc;
-          fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
+          if ev._type = MSG_KEYPRESS then
+          begin
+            fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
+
+            //Writeln('scancode: ',IntToHex(X11keycodeToScanCode(ev.xkey.keycode),4)
+            //  ,' (',X11keycodeToScanCode(ev.xkey.keycode),')');
+
+            // Revision 203 used scancodes and XmbLookupString compared to XLookupString.
+            // Maybe in the future we can switch to XmbLookupString again.
+            if (ev.xkey.state and (ControlMask or Mod1Mask)) = 0 then
+            begin
+              for i := 1 to Length(FComposeBuffer) do
+              begin
+                msgp.keyboard.keychar := FComposeBuffer[i];
+                fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
+              end;
+            end;
+          end { if }
+          else if ev._type = MSG_KEYRELEASE then
+            fpgPostMessage(nil, w, FPGM_KEYRELEASE, msgp);
         end;
-      end
-      else if ev._type = MSG_KEYRELEASE then
-        fpgPostMessage(nil, w, FPGM_KEYRELEASE, msgp);
-    end;
 
     MSG_MOUSEDOWN,
     MSG_MOUSEUP:
-    begin
-      msgp.mouse.x          := ev.xbutton.x;
-      msgp.mouse.y          := ev.xbutton.y;
-      msgp.mouse.Buttons    := ev.xbutton.button;
-      msgp.mouse.shiftstate := ev.xbutton.state;
-
-      w := FindWindowByHandle(ev.xbutton.window);
-      if not blockmsg then
-      begin
-        if (ev.xbutton.button >= 4) and (ev.xbutton.button <= 7) then  // mouse wheel
         begin
-          // generate scroll events:
-          if ev._type = MSG_MOUSEDOWN then
+          msgp.mouse.x          := ev.xbutton.x;
+          msgp.mouse.y          := ev.xbutton.y;
+          msgp.mouse.Buttons    := ev.xbutton.button;
+          msgp.mouse.shiftstate := ConvertShiftState(ev.xbutton.state);
+
+          w := FindWindowByHandle(ev.xbutton.window);
+          if not blockmsg then
           begin
-            if ev.xbutton.button = Button4 then
-              i := -1
-            else
-              i := 1;
-              
-    	      // Check for other mouse wheel messages in the queue
-            while XCheckTypedWindowEvent(display, ev.xany.window, X.ButtonPress, @NewEvent) do
+            if (ev.xbutton.button >= 4) and (ev.xbutton.button <= 7) then  // mouse wheel
             begin
-  	          if NewEvent.xbutton.Button = 4 then
-  	            Dec(i)
-              else if NewEvent.xbutton.Button = 5 then
-  	            Inc(i)
-              else
-        	    begin
-        	      XPutBackEvent(display, @NewEvent);
-                break;
-        	    end;
-            end;
+              // generate scroll events:
+              if ev._type = MSG_MOUSEDOWN then
+              begin
+                if ev.xbutton.button = Button4 then
+                  i := -1
+                else
+                  i := 1;
 
-            msgp.mouse.delta := i;
-            fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
-          end;
-        end
-        else
-        begin
-          if ev._type = MSG_MOUSEUP then
-            mcode := FPGM_MOUSEUP
-          else
-            mcode := FPGM_MOUSEDOWN;
-          fpgPostMessage(nil, w, mcode, msgp);
-        end;  { if/else }
-      end;  { if not blocking }
-    end;
+        	      // Check for other mouse wheel messages in the queue
+                while XCheckTypedWindowEvent(display, ev.xany.window, X.ButtonPress, @NewEvent) do
+                begin
+      	          if NewEvent.xbutton.Button = 4 then
+      	            Dec(i)
+                  else if NewEvent.xbutton.Button = 5 then
+      	            Inc(i)
+                  else
+            	    begin
+            	      XPutBackEvent(display, @NewEvent);
+                    break;
+            	    end;
+                end;
+
+                msgp.mouse.delta := i;
+                fpgPostMessage(nil, w, FPGM_SCROLL, msgp);
+              end;
+            end
+            else
+            begin
+              if ev._type = MSG_MOUSEUP then
+                mcode := FPGM_MOUSEUP
+              else
+                mcode := FPGM_MOUSEDOWN;
+              fpgPostMessage(nil, w, mcode, msgp);
+            end;  { if/else }
+          end;  { if not blocking }
+        end;
 
     MSG_PAINT:
         begin
@@ -680,7 +766,7 @@ begin
             msgp.mouse.x          := ev.xmotion.x;
             msgp.mouse.y          := ev.xmotion.y;
             msgp.mouse.Buttons    := (ev.xmotion.state and $FF00) shr 8;
-            msgp.mouse.shiftstate := ev.xmotion.state and $FF;
+            msgp.mouse.shiftstate := ConvertShiftState(ev.xmotion.state);
             fpgPostMessage(nil, FindWindowByHandle(ev.xbutton.window), FPGM_MOUSEMOVE, msgp);
           end;
         end;
@@ -762,7 +848,7 @@ begin
         True and the source is a window, these events may
         be generated; handle GraphicsExpose like Expose }
     else
-      {$Note This needs attention}
+      {$Note This needs attention. We still have two events slipping by.}
       WriteLn('fpGFX/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
   end;
 end;
@@ -1175,7 +1261,7 @@ begin
   SetColor(AValue);
   DrawLine(X, Y, X+1, Y+1);
   SetColor(oldColor);
-  {$Note We must implement DrawPoint}
+  {$Note We must still implement DrawPoint}
 end;
 
 procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);
