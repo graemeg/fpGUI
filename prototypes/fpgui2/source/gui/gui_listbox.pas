@@ -47,9 +47,6 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: word); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: word; delta: smallint); override;
     procedure   HandleShow; override;
-    // ToDo
-    // * handle mouse move
-    // * handle window scrolling
     procedure   HandleResize(dwidth, dheight: integer); override;
     procedure   HandlePaint; override;
   public
@@ -370,6 +367,7 @@ end;
 procedure TfpgBaseListBox.HandleShow;
 begin
   inherited HandleShow;
+  UpdateScrollBar;
   UpdateScrollBarCoords;
 end;
 
@@ -453,21 +451,21 @@ end;
 constructor TfpgBaseListBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-
   FFont := fpgGetFont('#List');
-  FBackgroundColor := clListBox;
-  FScrollBar := TfpgScrollBar.Create(self);
+  FBackgroundColor    := clListBox;
+  
+  FScrollBar          := TfpgScrollBar.Create(self);
   FScrollBar.OnScroll := @ScrollBarMove;
-  FFocusable := true;
-  FFocusItem := 1;
-  FFirstItem := 1;
-  FWidth := 80;
-  FHeight := 80;
-  FMargin := 2;
-  FMouseDragging := false;
-  FPopupFrame := false;
 
-  FHotTrack := false;
+  FFocusable      := True;
+  FFocusItem      := 1;
+  FFirstItem      := 1;
+  FWidth          := 80;
+  FHeight         := 80;
+  FMargin         := 2;
+  FMouseDragging  := False;
+  FPopupFrame     := False;
+  FHotTrack       := False;
 
   FOnChange := nil;
   FOnSelect := nil;

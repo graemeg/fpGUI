@@ -2,6 +2,14 @@ unit gui_scrollbar;
 
 {$mode objfpc}{$H+}
 
+{
+  TODO:
+    * Set slider button to minimum length (default setting)
+    * Create property to enable dynamic sizing of slider button length.
+    * Paint scroll area between arrow buttons and slider button a different
+      color on click.
+}
+
 interface
 
 uses
@@ -106,7 +114,7 @@ end;
 procedure TfpgScrollBar.RepaintSlider;
 begin
   if not HasHandle then
-    Exit;
+    Exit; //==>
   DrawSlider(True);
 end;
 
@@ -114,16 +122,17 @@ procedure TfpgScrollBar.ScrollTimer(Sender: TObject);
 begin
   FScrollTimer.Interval := 25;
   if  (FMousePosition.X < FActiveButtonRect.Right)
-  and (FMousePosition.X > FActiveButtonRect.Left)
-  and (FMousePosition.Y < FActiveButtonRect.Bottom)
-  and (FMousePosition.Y > FActiveButtonRect.Top)
-  then begin
-    if FStartBtnPressed then PositionChange(-FScrollStep);
-    if FEndBtnPressed then PositionChange(FScrollStep);
+      and (FMousePosition.X > FActiveButtonRect.Left)
+      and (FMousePosition.Y < FActiveButtonRect.Bottom)
+      and (FMousePosition.Y > FActiveButtonRect.Top) then
+  begin
+    if FStartBtnPressed then
+      PositionChange(-FScrollStep);
+    if FEndBtnPressed then
+      PositionChange(FScrollStep);
   end
-  else begin
+  else
     FScrollTimer.Enabled := False;
-  end;
 end;
 
 procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
@@ -171,9 +180,9 @@ begin
     if FPosition < FMin then
       FPosition := FMin;
 
-    FSliderLength := trunc(area * SliderSize);
-    if FSliderLength < 8 then
-      FSliderLength := 8;
+    FSliderLength := Trunc(area * SliderSize);
+    if FSliderLength < 20 then
+      FSliderLength := 20;
     area := area - FSliderLength;
     mm   := FMax - FMin;
     if mm = 0 then
@@ -200,12 +209,14 @@ begin
 
   if Orientation = orVertical then
   begin
-    if y <= Width then begin
+    if y <= Width then
+    begin
       PositionChange(-FScrollStep);
       FStartBtnPressed := True;
       FActiveButtonRect := Rect(0, 0, Width, Width);
     end
-    else if y >= Height - Width then begin
+    else if y >= Height - Width then
+    begin
       PositionChange(FScrollStep);
       FEndBtnPressed := True;
       FActiveButtonRect := Rect(0,Height-Width, Width, Height);
@@ -216,13 +227,16 @@ begin
       FSliderDragPos  := y;
     end;
   end
-  else begin
-    if x <= Height then begin
+  else
+  begin
+    if x <= Height then
+    begin
       PositionChange(-FScrollStep);
       FStartBtnPressed := True;
       FActiveButtonRect := Rect(0, 0, Height, Height);
     end
-    else if x >= Width - Height then begin
+    else if x >= Width - Height then
+    begin
       PositionChange(FScrollStep);
       FEndBtnPressed := True;
       FActiveButtonRect := Rect(Width-Height, 0, Width, Height);
@@ -239,13 +253,13 @@ begin
     FSliderDragStart := FSliderPos;
     DrawSlider(False);
   end
-  else if FStartBtnPressed or FEndBtnPressed then begin
+  else if FStartBtnPressed or FEndBtnPressed then
+  begin
     FScrollTimer.Interval := 500;
     FScrollTimer.Enabled := True;
 
     HandlePaint;
   end;
-  
 end;
 
 procedure TfpgScrollBar.HandleLMouseUp(x, y: integer; shiftstate: word);
