@@ -2,26 +2,36 @@ unit gui_listbox;
 
 {$mode objfpc}{$H+}
 
-{$Note Graeme: This is still work-in-progress! Not ready for use yet.}
+{
+  TODO:
+    * Refactor these to have a better hierarchy
+    * Only surface properties as published in TfpgListBox
+}
 
 interface
 
 uses
-  Classes, SysUtils, gfx_widget, gui_scrollbar, gfxbase, fpgfx;
+  Classes,
+  SysUtils,
+  gfx_widget,
+  gui_scrollbar,
+  gfxbase,
+  fpgfx;
   
 type
 
-  { TfpgBaseListBox }
-
+  // My thinking was that we could use this class as the base class for anything
+  // that contains a list and needs to be presented like a normal listBox.
+  // Not sure if it is actually going to work.
   TfpgBaseListBox = class(TfpgWidget)
   private
     FHotTrack: boolean;
     FOnChange: TNotifyEvent;
     FOnSelect: TNotifyEvent;
     FPopupFrame: boolean;
-    function    GetFontName: string;
+    function    GetFontDesc: string;
     procedure   SetFocusItem(const AValue: integer);
-    procedure   SetFontName(const AValue: string);
+    procedure   SetFontDesc(const AValue: string);
     procedure   SetPopupFrame(const AValue: boolean);
     procedure   UpdateScrollbarCoords;
   protected
@@ -39,6 +49,7 @@ type
     function    ScrollBarWidth: TfpgCoord;
     function    PageLength: integer;
     procedure   ScrollBarMove(Sender: TObject; position : integer);
+    procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
     procedure   DoChange;
     procedure   DoSelect;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: word; var consumed : boolean); override;
@@ -49,33 +60,98 @@ type
     procedure   HandleShow; override;
     procedure   HandleResize(dwidth, dheight: integer); override;
     procedure   HandlePaint; override;
+    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
+    property    HotTrack: boolean read FHotTrack write FHotTrack;
+    property    FocusItem: integer read FFocusItem write SetFocusItem;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Update;
     function    ItemCount: integer; virtual;
     function    RowHeight: integer; virtual;
-    procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
-    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
     property    Font: TfpgFont read FFont;
-    property    HotTrack: boolean read FHotTrack write FHotTrack;
-    property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
+  end;
+
+
+  // Listbox containg strings - the normal listbox as we know it. Used by
+  // component developers.
+  TfpgTextListBox = class(TfpgBaseListBox)
+  protected
+    FItems: TStrings;
+    FInternalItems: TStrings;
+    procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
+    property    Items: TStrings read FItems;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    function    ItemCount: integer; override;
+    function    Text: string;
+  end;
+  
+
+  // The standard strings listbox we will actually use in a GUI.
+  TfpgListBox = class(TfpgTextListBox)
   published
-    property    FontName: string read GetFontName write SetFontName;
+    property    FocusItem;
+    property    FontDesc;
+    property    HotTrack;
+    property    Items;
+    property    PopupFrame;
   end;
 
 
 implementation
 
 type
+  // used to access protected properties
   TfpgScrollbarFriend = class(TfpgScrollbar)
   end;
 
+  // custom stringlist that will notify listbox of item changes
+  TfpgListBoxStrings = class(TStringList)
+  protected
+    ListBox: TfpgTextListBox;
+    procedure   SetUpdateState(Updating: Boolean); override;
+  public
+    constructor Create(AListBox: TfpgTextListBox);
+    function    Add(const s: String): Integer; override;
+  end;
+
+{ TfpgListBoxStrings }
+
+procedure TfpgListBoxStrings.SetUpdateState(Updating: Boolean);
+begin
+  inherited SetUpdateState(Updating);
+  // do nothing extra for now
+end;
+
+constructor TfpgListBoxStrings.Create(AListBox: TfpgTextListBox);
+begin
+  inherited Create;
+  ListBox := AListBox;
+end;
+
+function TfpgListBoxStrings.Add(const s: String): Integer;
+var
+  ItemWidth: Integer;
+begin
+  Result := inherited Add(s);
+  if Assigned(ListBox) and (ListBox.HasHandle) then
+  begin
+    ItemWidth := ListBox.Font.TextWidth(s) + 4;
+//    if ItemWidth > ListBox.FMaxItemWidth then
+//      ListBox.FMaxItemWidth := ItemWidth;
+    ListBox.UpdateScrollBar;
+  end;
+end;
+
+
 { TfpgBaseListBox }
 
-function TfpgBaseListBox.GetFontName: string;
+function TfpgBaseListBox.GetFontDesc: string;
 begin
   result := FFont.FontDesc;
 end;
@@ -90,7 +166,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgBaseListBox.SetFontName(const AValue: string);
+procedure TfpgBaseListBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
@@ -501,7 +577,41 @@ var
   s: string;
 begin
   s := 'Item' + IntToStr(num);
-  Canvas.DrawString(rect.left+4, rect.top+1,s);
+  Canvas.DrawString(rect.left+2, rect.top+1,s);
+end;
+
+{ TfpgTextListBox }
+
+procedure TfpgTextListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
+begin
+  Canvas.DrawString(rect.left+2, rect.top+1, FItems.Strings[num-1]);
+end;
+
+constructor TfpgTextListBox.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FItems := TfpgListBoxStrings.Create(self);
+  FFocusItem := -1;
+end;
+
+destructor TfpgTextListBox.Destroy;
+begin
+  FItems.Free;
+  FInternalItems.Free;
+  inherited Destroy;
+end;
+
+function TfpgTextListBox.ItemCount: integer;
+begin
+  result := FItems.Count;
+end;
+
+function TfpgTextListBox.Text: string;
+begin
+  if (FocusItem > 0) and (FocusItem <= FItems.Count) then
+    result := FItems.Strings[FocusItem-1]
+  else
+    result := '';
 end;
 
 end.

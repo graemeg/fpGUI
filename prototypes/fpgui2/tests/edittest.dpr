@@ -37,7 +37,7 @@ type
     btn2: TfpgButton;
     btn3: TfpgButton;
     memo: TfpgMemo;
-    listbox: TfpgBaseListBox;
+    listbox: TfpgListBox;
     combo1: TfpgComboBox;
     sbar: TfpgScrollBar;
     procedure AfterCreate; override;
@@ -89,6 +89,8 @@ type
 
 
   procedure TMainForm.AfterCreate;
+  var
+    i: integer;
   begin
     SetPosition(200, 200, 500, 350);
     WindowTitle := 'fpGUI Widget Test';
@@ -123,11 +125,15 @@ type
     memo.Width  := 200;
     memo.Height := 80;
     
-    listbox         := TfpgBaseListBox.Create(self);
+    listbox         := TfpgListBox.Create(self);
     listbox.Top     := 100;
     listbox.Left    := 250;
     listbox.Width   := 200;
     listbox.Height  := 80;
+    for i := 1 to 20 do
+      listbox.Items.Add(Format('Items %.2d', [i]));
+    listbox.FocusItem := 3;
+
 
     sbar        := TfpgScrollBar.Create(self);
     sbar.Top    := 160;
