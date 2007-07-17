@@ -58,7 +58,6 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleShow; override;
-    procedure   HandleResize(dwidth, dheight: integer); override;
     procedure   HandlePaint; override;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
     property    HotTrack: boolean read FHotTrack write FHotTrack;
@@ -294,7 +293,6 @@ begin
   case keycode of
     keyUp:
            begin
-//            writeln('up');
              if FFocusItem > 1 then
              begin
                dec(FFocusItem);
@@ -306,7 +304,6 @@ begin
            
     keyDown:
            begin
-//            writeln('down');
              if FFocusItem < ItemCount then
              begin
                inc(FFocusItem);
@@ -357,7 +354,6 @@ begin
            end;
   else
     begin
-      writeln('...else...');
       consumed := false;
     end;
   end;
@@ -447,14 +443,9 @@ end;
 
 procedure TfpgBaseListBox.HandleShow;
 begin
-  inherited HandleShow;
-  UpdateScrollBar;
   UpdateScrollBarCoords;
-end;
-
-procedure TfpgBaseListBox.HandleResize(dwidth, dheight: integer);
-begin
-  inherited HandleResize(dwidth, dheight);
+  UpdateScrollBar;
+  inherited HandleShow;
 end;
 
 procedure TfpgBaseListBox.HandlePaint;

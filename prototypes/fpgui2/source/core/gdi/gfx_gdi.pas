@@ -2,6 +2,8 @@ unit gfx_gdi;
 
 {$mode objfpc}{$H+}
 
+{.$Define Debug}
+
 interface
 
 uses
@@ -179,6 +181,8 @@ var
   wapplication: TfpgApplication;
   MouseFocusedWH: HWND;
 
+// some required keyboard functions
+{$INCLUDE gdikeys.inc}
 
 function fpgColorToWin(col: TfpgColor): longword;
 var
@@ -332,18 +336,8 @@ begin
       if kwg <> nil then
         w := kwg;
 
-      sstate := 0;
-      if GetKeyState(VK_SHIFT) < 0 then
-        sstate := sstate + ss_shift;
-      if GetKeyState(VK_MENU) < 0 then
-        sstate := sstate + ss_alt;
-      if GetKeyState(VK_CONTROL) < 0 then
-        sstate := sstate + ss_control;
-
-      kcode := (lParam shr 16) and $1FF;
-
-      msgp.keyboard.keycode    := kcode;
-      msgp.keyboard.shiftstate := sstate;
+      msgp.keyboard.shiftstate := GetKeyboardShiftState;
+      msgp.keyboard.keycode := VirtKeyToKeycode(wParam);
 
       if uMsg = WM_KEYDOWN then
       begin
@@ -358,33 +352,43 @@ begin
         wmsg.lParam  := lParam;
 
         Windows.TranslateMessage(@wmsg);
+
         // TranslateMessage sends WM_CHAR ocassionally
         // but NOBODY KNOWS WHEN!
+        
+        
+        if (wParam = $2e {VK_DELETE}) then
+        begin
+          msgp.keyboard.keychar := #127;
+          msgp.keyboard.keycode := 0;
+          fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
+        end;
 
         // lets generate the FPGM_KEYCHAR for some special keys
         // based on this table of Windows virtual keys
-        case wParam of
-          $70..$7B,  // F1..F12
-          $21..$24,  // home, end, pageup, pagedn
-          $2D..$2E,  // insert, delete
-          $25..$28:  // arrows
-          begin
-            msgp.keyboard.keycode := kcode or $FF00; // scan code + $FF00
-            fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
-          end;
-        end;
+//        case wParam of
+//          $70..$7B,  // F1..F12
+//          $21..$24,  // home, end, pageup, pagedn
+//          $2D..$2E,  // insert, delete
+//          $25..$28:  // arrows
+//          begin
+//            msgp.keyboard.keycode := kcode or $FF00; // scan code + $FF00
+//            fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
+//          end;
+//        end;
+
       end
       else if uMsg = WM_KEYUP then
         fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
       else if uMsg = WM_CHAR then
       begin
-        msgp.keyboard.keycode := wParam;
+        msgp.keyboard.keychar := Chr(wParam);
         fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
       end;
 
     end;
 
-    (*
+(*
     WM_SETCURSOR:
     begin
       //Writeln('Hittest: ',IntToHex((lParam and $FFFF),4));
@@ -445,13 +449,7 @@ begin
           msgp.mouse.Buttons := MOUSE_RIGHT;
       end;
 
-      sstate := 0;
-      if (wParam and MK_CONTROL) <> 0 then
-        sstate := sstate or ss_control;
-      if (wParam and MK_SHIFT) <> 0 then
-        sstate := sstate or ss_shift;
-      msgp.mouse.shiftstate := sstate;
-
+      msgp.mouse.shiftstate := GetKeyboardShiftState;
 
       if uMsg = WM_MouseMove then
         w.DoMouseEnterLeaveCheck(w, uMsg, wParam, lParam);
@@ -519,13 +517,7 @@ begin
         if (wParam and MK_MBUTTON) <> 0 then
           i := i or MOUSE_MIDDLE;
         msgp.mouse.Buttons := i;
-
-        sstate := 0;
-        if (wParam and MK_CONTROL) <> 0 then
-          sstate := sstate or ss_control;
-        if (wParam and MK_SHIFT) <> 0 then
-          sstate := sstate or ss_shift;
-        msgp.mouse.shiftstate := sstate;
+        msgp.mouse.shiftstate := GetKeyboardShiftState;
 
         fpgSendMessage(nil, mw, FPGM_SCROLL, msgp)
       end;
@@ -538,7 +530,8 @@ begin
         fpgSendMessage(nil, w, FPGM_ACTIVATE);
 
     WM_TIMER:
-      Result := 0;//Writeln('TIMER EVENT!!!');
+      Result := 0;
+      //Writeln('TIMER EVENT!!!');
       // used for event wait timeout
 
 
@@ -567,14 +560,15 @@ begin
     end;
 *)
 
-    WM_CLOSE: fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
+    WM_CLOSE:
+        fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
 
     WM_PAINT:
-    begin
-      Windows.BeginPaint(w.WinHandle, @PaintStruct);
-      fpgSendMessage(nil, w, FPGM_PAINT, msgp);
-      Windows.EndPaint(w.WinHandle, @PaintStruct);
-    end;
+        begin
+          Windows.BeginPaint(w.WinHandle, @PaintStruct);
+          fpgSendMessage(nil, w, FPGM_PAINT, msgp);
+          Windows.EndPaint(w.WinHandle, @PaintStruct);
+        end;
 
     else
       Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -650,7 +644,7 @@ begin
     else
       Exit;  // handling waiting timeout
 
-  {$Note Incorporate Felipes code from previous fpGUI in here. It handles WinCE and Windows just fine. }
+  {$Note Incorporate Felipe's code from previous fpGUI in here. It handles WinCE and Windows just fine. }
   if (GetVersion() < $80000000) then
     Windows.GetMessageW(@Msg, 0, 0, 0)   //NT
   else
