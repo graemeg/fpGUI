@@ -44,7 +44,6 @@ type
     procedure   SetShowImage(AValue: Boolean);
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(X, Y: integer; ShiftState: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -323,7 +322,7 @@ end;
 
 procedure TfpgButton.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = keyReturn) or (keycode = keySelect) then
+  if (keycode = keyReturn) or (keycode = keySpace) then
   begin
     DoPush;
     Consumed := True;
@@ -332,17 +331,9 @@ begin
     inherited;
 end;
 
-procedure TfpgButton.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
-begin
-  if (keycode = keyReturn) or (keycode = keySelect) then
-    Consumed := True
-  else
-    inherited;
-end;
-
 procedure TfpgButton.HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = keyReturn) or (keycode = keySelect) then
+  if (keycode = keyReturn) or (keycode = keySpace) then
   begin
     DoRelease;
     Consumed := True;

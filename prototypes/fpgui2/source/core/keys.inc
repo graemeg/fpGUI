@@ -16,6 +16,7 @@ const
   keyReturn		    = $0d;
   keyEscape		    = $1b;
   keyDelete		    = $7f;
+  keySpace        = $20;
 
   // special keys
 
