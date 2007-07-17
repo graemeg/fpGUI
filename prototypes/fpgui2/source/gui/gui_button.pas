@@ -201,7 +201,7 @@ begin
   if FEmbedded then
     Include(lBtnFlags, btnIsEmbedded);
 
-  fpgStyle.DrawButtonFace(Canvas, 0, 0, Width, Height, lBtnFlags);
+  Canvas.DrawButtonFace(0, 0, Width, Height, lBtnFlags);
 
   if FFocused and (not FEmbedded) then
   begin

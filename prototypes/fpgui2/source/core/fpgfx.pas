@@ -755,6 +755,7 @@ end;
 procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
 begin
   ACanvas.SetColor(clButtonFace);
+  ACanvas.SetLineStyle(1, lsSolid);
   ACanvas.FillRectangle(x, y, w, h);
 
   // Left and Top (outer)
@@ -767,16 +768,16 @@ begin
   end
   else
     ACanvas.SetColor(clHilite1);
-  ACanvas.DrawLine(x, y + h - 2, x, y);  // left
-  ACanvas.DrawLine(x, y, x + w - 1, y);  // top
+  ACanvas.DrawLine(x, y+h, x, y);  // left
+  ACanvas.DrawLine(x, y, x+w, y);  // top
 
   // Left and Top (inner)
-  if btnIsPressed in AFlags then
-  begin
-    ACanvas.SetColor(clShadow1);
-    ACanvas.DrawLine(x + 1, y + h - 3, x + 1, y + 1);  // left
-    ACanvas.DrawLine(x + 1, y + 1, x + w - 2, y + 1);  // top
-  end;
+  //if btnIsPressed in AFlags then
+  //begin
+    //ACanvas.SetColor(clShadow1);
+    //ACanvas.DrawLine(x + 1, y + h - 3, x + 1, y + 1);  // left
+    //ACanvas.DrawLine(x + 1, y + 1, x + w - 2, y + 1);  // top
+  //end;
 
   // Right and Bottom (outer)
   if (btnIsPressed in AFlags) then
@@ -787,17 +788,32 @@ begin
       ACanvas.SetColor(clShadow2);
   end
   else
-    ACanvas.SetColor(clShadow2);
-  ACanvas.DrawLine(x + w - 1, y + 1, x + w - 1, y + h - 1);   // right
-  ACanvas.DrawLine(x, y + h - 1, x + w - 1, y + h - 1);       // bottom
+  begin
+    if (btnIsDefault in AFlags) then
+      ACanvas.SetColor(clBlack)
+    else
+      ACanvas.SetColor(clShadow2);
+  end;
+  ACanvas.DrawLine(x+w-1, y, x+w-1, y+h-1);   // right
+  ACanvas.DrawLine(x, y+h-1, x+w, y+h-1);       // bottom
 
   // Right and Bottom (inner)
   if btnIsPressed in AFlags then
-    ACanvas.SetColor(clHilite1)
+  begin
+    if (btnIsEmbedded in AFlags) then
+      ACanvas.SetColor(clButtonFace)
+    else
+      ACanvas.SetColor(clHilite1);
+  end
   else
-    ACanvas.SetColor(clShadow1);
-  ACanvas.DrawLine(x + w - 2, y + 2, x + w - 2, y + h - 2);   // right
-  ACanvas.DrawLine(x + 1, y + h - 2, x + w - 2, y + h - 2);   // bottom
+  begin
+    if (btnIsDefault in AFlags) then
+      ACanvas.SetColor(clShadow2)
+    else
+      ACanvas.SetColor(clShadow1);
+  end;
+  ACanvas.DrawLine(x+w-2, y+1, x+w-2, y+h-2);   // right
+  ACanvas.DrawLine(x+1, y+h-2, x+w-1, y+h-2);   // bottom
 end;
 
 procedure TfpgStyle.DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord);

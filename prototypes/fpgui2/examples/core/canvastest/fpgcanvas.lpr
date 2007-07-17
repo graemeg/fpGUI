@@ -66,7 +66,7 @@ begin
 
   r.Left := 240;
   Canvas.SetColor(clBlue);
-  Canvas.SetLineStyle(1, lsSolid);
+//  Canvas.SetLineStyle(1, lsSolid);
   Canvas.FillRectangle(r);
 
 
@@ -96,8 +96,8 @@ begin
   Canvas.DrawString(385, 50, '= [btnIsDefault]');
   Canvas.DrawButtonFace(300, 80, 75, 25, [btnIsPressed]);
   Canvas.DrawString(385, 80, '= [btnIsPressed]');
-  Canvas.DrawButtonFace(300, 110, 75, 25, [btnHasFocus]);
-  Canvas.DrawString(385, 110, '= [btnHasFocus]');
+  Canvas.DrawButtonFace(300, 110, 75, 25, [btnIsEmbedded, btnIsPressed]);
+  Canvas.DrawString(385, 110, '= [embedded & pressed]');
   Canvas.DrawButtonFace(300, 140, 75, 25, [btnIsEmbedded]);
   Canvas.DrawString(385, 140, '= [btnIsEmbedded]');
   

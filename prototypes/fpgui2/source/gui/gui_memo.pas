@@ -67,7 +67,7 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleResize(dwidth, dheight: integer); override;
-    //procedure HandleWindowScroll(direction, amount : integer); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
   public
@@ -1157,6 +1157,43 @@ begin
 
   //UpdateScrollBarCoords;
   UpdateScrollBar;
+end;
+
+procedure TfpgMemo.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+  delta: smallint);
+var
+  pfl, pdo : integer;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+
+//  inherited HandleWindowScroll(direction, amount);
+
+  pfl := FFirstLine;
+  pdo := FDrawOffset;
+
+  if delta < 0 then
+    dec(FFirstLine, abs(delta))   // scroll up
+  else
+    inc(FFirstLine, abs(delta));  // scroll down
+
+  if FFirstLine > LineCount - VisibleLines + 1 then
+    FFirstLine := LineCount - VisibleLines + 1;
+  if FFirstLine < 1 then
+    FFirstLine := 1;
+
+  if FHScrollBar.Visible then
+  begin
+    if FDrawOffset > FHScrollBar.Max then
+      FDrawOffset := FHScrollBar.Max;
+    if FDrawOffset < 0 then
+      FDrawOffset := 0;
+  end;
+
+  if (pfl <> FFirstLine) or (pdo <> FDrawOffset) then
+  begin
+    UpdateScrollBar;
+    Repaint;
+  end;
 end;
 
 function TfpgMemo.SelectionText: string;
