@@ -9,8 +9,8 @@ interface
 uses
   x11_xft, x11_keyconv, gfxbase, gfxbaseinterfaces, gfx_x11, fpgfx, 
     gfx_stdimages, gfx_imgfmt_bmp, gfx_widget, gui_form, gui_label, gui_button, 
-    gui_edit, gui_combobox, gui_popupwindow, gui_scrollbar, gui_memo, 
-    gfx_UTF8utils, gui_dialogs, gui_listbox; 
+    gui_edit, gui_combobox, gui_popupwindow, gui_scrollbar, gfx_UTF8utils, 
+    gui_dialogs, gui_listbox, gui_memo; 
 
 implementation
 

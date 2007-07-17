@@ -62,7 +62,8 @@ type
     procedure   SetCursorLine(aValue: integer);
     procedure   UpdateScrollBarCoords;
   protected
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleResize(dwidth, dheight: integer); override;
@@ -713,25 +714,77 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgMemo.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgMemo.HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean);
 var
   prevval: string;
   s: string;
   ls: string;
-  ls2: string;
-  cx: integer;
+begin
+  inherited;
+  prevval  := Text;
+  s        := AText;
+  Consumed := False;
+{
+  Consumed := true;
+  case pgfCheckClipBoardKey(keycode, shiftstate) of
+    ckCopy:   DoCopy;
+    ckPaste:  DoPaste;
+    ckCut:    //if FSelEndLine > 0 then
+              begin
+                DoCopy;
+                DeleteSelection;
+              end;
+  else
+    Consumed := false;
+  end;
+}
 
+  // Printable characters only
+  // Note: This is not UTF-8 compliant!
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) then
+  begin
+    // printeable
+    //FText := FText + s;
+
+    if (FMaxLength <= 0) or (UTF8Length(FLines.Text) < FMaxLength) then
+    begin
+      DeleteSelection;
+      ls := GetLineText(FCursorLine);
+      insert(s, ls, FCursorPos + 1);
+      SetLineText(FCursorLine, ls);
+      Inc(FCursorPos);
+      FSelStartPos  := FCursorPos;
+      FSelStartLine := FCursorLine;
+      FSelEndLine   := 0;
+      AdjustCursor;
+    end;
+
+    consumed := True;
+  end;
+
+  if prevval <> Text then
+    if Assigned(FOnChange) then
+      FOnChange(self);
+
+  if consumed then
+    RePaint;
+end;
+
+procedure TfpgMemo.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+var
+  cx: integer;
+  ls: string;
+  ls2: string;
+  
   procedure StopSelection;
   begin
     FSelStartLine := FCursorLine;
     FSelStartPos  := FCursorPos;
     FSelEndLine   := 0;
   end;
-
+  
 begin
-  inherited;
-  prevval  := Text;
-  s        := char(keycode);
   Consumed := False;
   (*
   Consumed := true;
@@ -808,7 +861,7 @@ begin
           SetCPByX(cx);
         end;
       end;
-      
+
       keyHome:
       begin
         if (ssCtrl in shiftstate) then
@@ -922,34 +975,10 @@ begin
     end;
   end;
 
-  {$Note This must be fixed. We change keycodes!! }
-  if not Consumed and (keycode >= 32) and (keycode < $FF00) then
-  begin
-    // printeable
-    //FText := FText + s;
-
-    if (FMaxLength <= 0) or (UTF8Length(FLines.Text) < FMaxLength) then
-    begin
-      DeleteSelection;
-      ls := GetLineText(FCursorLine);
-      insert(s, ls, FCursorPos + 1);
-      SetLineText(FCursorLine, ls);
-      Inc(FCursorPos);
-      FSelStartPos  := FCursorPos;
-      FSelStartLine := FCursorLine;
-      FSelEndLine   := 0;
-      AdjustCursor;
-    end;
-
-    consumed := True;
-  end;
-
-  if prevval <> Text then
-    if Assigned(FOnChange) then
-      FOnChange(self);
-
   if consumed then
-    RePaint;
+    RePaint
+  else
+    inherited;
 end;
 
 procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);

@@ -56,7 +56,7 @@ type
     procedure   HandlePaint; virtual;
     procedure   HandleResize(awidth, aheight: TfpgCoord); virtual;
     procedure   HandleMove(x, y: TfpgCoord); virtual;
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
+    procedure   HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleSetFocus; virtual;
@@ -202,23 +202,23 @@ end;
 
 procedure TfpgWidget.MsgKeyChar(var msg: TfpgMessageRec);
 var
-  key: word;
+  lText: string;
   ss: TShiftState;
   consumed: boolean;
   wg: TfpgWidget;
 begin
-  key := msg.params.keyboard.keycode;
+  lText := msg.params.keyboard.keychar;
   ss  := msg.params.keyboard.shiftstate;
 
   consumed := False;
-  HandleKeyChar(key, ss, consumed);
+  HandleKeyChar(lText, ss, consumed);
 
   if not consumed then
   begin
     wg := Parent;
     while (not consumed) and (wg <> nil) do
     begin
-      wg.HandleKeyChar(key, ss, consumed);
+      wg.HandleKeyChar(lText, ss, consumed);
       wg := wg.Parent;
     end;
   end;
@@ -411,7 +411,13 @@ begin
   // descendants will implement this.
 end;
 
-procedure TfpgWidget.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgWidget.HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean);
+begin
+  // descendants will implement this.
+end;
+
+procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
+  var consumed: boolean);
 var
   wg: TfpgWidget;
   dir: integer;
@@ -481,12 +487,6 @@ begin
       consumed     := True;
     end;
   end;
-end;
-
-procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
-  var consumed: boolean);
-begin
-  // descendants will implement this.
 end;
 
 procedure TfpgWidget.HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);

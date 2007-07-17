@@ -90,20 +90,20 @@
         <UnitName Value="gui_scrollbar"/>
       </Item16>
       <Item17>
-        <Filename Value="../../gui/gui_memo.pas"/>
-        <UnitName Value="gui_memo"/>
-      </Item17>
-      <Item18>
         <Filename Value="../gfx_utf8utils.pas"/>
         <UnitName Value="gfx_UTF8utils"/>
-      </Item18>
-      <Item19>
+      </Item17>
+      <Item18>
         <Filename Value="../../gui/gui_dialogs.pas"/>
         <UnitName Value="gui_dialogs"/>
-      </Item19>
-      <Item20>
+      </Item18>
+      <Item19>
         <Filename Value="../../gui/gui_listbox.pas"/>
         <UnitName Value="gui_listbox"/>
+      </Item19>
+      <Item20>
+        <Filename Value="../../gui/gui_memo.pas"/>
+        <UnitName Value="gui_memo"/>
       </Item20>
     </Files>
     <RequiredPkgs Count="1">

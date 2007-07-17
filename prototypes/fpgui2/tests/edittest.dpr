@@ -124,7 +124,7 @@ type
     memo.Left   := 250;
     memo.Width  := 200;
     memo.Height := 80;
-    
+
     listbox         := TfpgListBox.Create(self);
     listbox.Top     := 100;
     listbox.Left    := 250;

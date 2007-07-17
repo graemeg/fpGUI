@@ -12,8 +12,10 @@ uses
   gfx_widget;
 
 type
+  TfpgCustomEdit = class(TfpgWidget)
+  end;
 
-  TfpgEdit = class(TfpgWidget)
+  TfpgEdit = class(TfpgCustomEdit)
   private
     FText: string;
     FMaxLength: integer;
@@ -34,7 +36,8 @@ type
     procedure   AdjustCursor;
     function    GetDrawText: string;
     procedure   HandlePaint; override;
-    procedure   HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
   public
@@ -252,10 +255,43 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgEdit.HandleKeyChar(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgEdit.HandleKeyChar(var AText: string;
+  var shiftstate: TShiftState; var consumed: boolean);
 var
-  prevval: string;
   s: string;
+  prevval: string;
+begin
+  prevval := Text;
+  s       := AText;
+  consumed := False;
+  
+  // Handle only printable characters
+  // Note: This is not UTF-8 compliant!
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) then
+  begin
+    if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
+    begin
+      DeleteSelection;
+      Insert(s, FText, FCursorPos + 1);
+      Inc(FCursorPos);
+      FSelStart := FCursorPos;
+      AdjustCursor;
+    end;
+    consumed := True;
+  end;
+
+  if prevval <> Text then
+    if Assigned(OnChange) then
+      OnChange(self);
+
+  if consumed then
+    RePaint
+  else
+    inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
+
+procedure TfpgEdit.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
 
   procedure StopSelection;
   begin
@@ -264,14 +300,8 @@ var
   end;
 
 begin
-  //inherited;
-  //if Consumed then Exit;
-
-  prevval  := Text;
-  {$Note Is this UTF8 safe? }
-  s        := char(keycode);
   Consumed := False;
-  {
+{
   Consumed := true;
   case ptkCheckClipBoardKey(keycode, shiftstate) of
     ckCopy:   DoCopy;
@@ -369,28 +399,7 @@ begin
       StopSelection;
       AdjustCursor;
     end;
-
-  end;
-
-  if not Consumed and (keycode >= 32) and (keycode < $FF00) then
-  begin
-    // printeable
-    if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
-    begin
-      DeleteSelection;
-      {$Note Is this UTF8 safe? }
-      Insert(s, FText, FCursorPos + 1);
-      Inc(FCursorPos);
-      FSelStart := FCursorPos;
-      AdjustCursor;
-    end;
-
-    consumed := True;
-  end;
-
-  if prevval <> Text then
-    if Assigned(OnChange) then
-      OnChange(self);
+  end;  { if }
 
   if consumed then
     RePaint
