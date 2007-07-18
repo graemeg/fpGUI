@@ -768,7 +768,7 @@ begin
   end
   else
     ACanvas.SetColor(clHilite1);
-  ACanvas.DrawLine(x, y+h, x, y);  // left
+  ACanvas.DrawLine(x, y+h-1, x, y);  // left
   ACanvas.DrawLine(x, y, x+w, y);  // top
 
   // Left and Top (inner)

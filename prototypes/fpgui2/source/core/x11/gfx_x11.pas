@@ -1375,7 +1375,7 @@ end;
 
 procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
-  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w - 1, h - 1);
+  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
 end;
 
 procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);

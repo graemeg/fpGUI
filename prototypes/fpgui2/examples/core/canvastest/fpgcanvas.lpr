@@ -129,6 +129,20 @@ begin
   Canvas.DrawImage(150, 300, dst);
   Canvas.StretchDraw(180, 300, 70, 70, dst);
   Canvas.StretchDraw(265, 300, 230, 25, bmp);
+  
+  
+  // testing accuracy of line/rectangle drawing
+  Canvas.SetColor(clBlack);
+  Canvas.SetLineStyle(1, lsSolid);
+  r.Top       := 302;
+  r.Left      := 182;
+  r.Width     := 66;
+  r.Height    := 66;
+  Canvas.DrawRectangle(r);
+
+  Canvas.SetColor(clBlue);
+  Canvas.DrawLine(183, 303, 247, 303);
+
 
 //  Stretch(bmp, dst, ResampleFilters[6].Filter, ResampleFilters[6].Width);
 ////  Canvas.DrawImage(150, 240, bmp);
