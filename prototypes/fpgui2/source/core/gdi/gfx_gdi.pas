@@ -1075,10 +1075,11 @@ end;
 
 procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
-  DoDrawLine(x, y, x+w-1, y); // top
-  DoDrawLine(x+w-1, y, x+w-1, y+h-1); // right
-  DoDrawLine(x, y+h-1, x+w-1, y+h-1); // bottom
-  DoDrawLine(x, y, x, y+h-1); // left
+  Windows.MoveToEx(Fgc, x, y, nil);
+  Windows.LineTo(Fgc, x+w-1, y);
+  Windows.LineTo(Fgc, x+w-1, y+h-1);
+  Windows.LineTo(Fgc, x, y+h-1);
+  Windows.LineTo(Fgc, x, y);
 end;
 
 procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
