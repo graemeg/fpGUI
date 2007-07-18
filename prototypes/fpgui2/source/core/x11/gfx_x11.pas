@@ -189,20 +189,6 @@ var
 
 const
   // map X11 event types to custom event types
-  MSG_KEYPRESS    = KeyPress;
-  MSG_KEYRELEASE  = KeyRelease;
-  MSG_MOUSEDOWN   = ButtonPress;
-  MSG_MOUSEUP     = ButtonRelease;
-  MSG_MOUSEMOVE   = MotionNotify;
-  MSG_MOUSEENTER  = EnterNotify;
-  MSG_MOUSEEXIT   = LeaveNotify;
-  MSG_ACTIVATE    = FocusIn;
-  MSG_DEACTIVATE  = FocusOut;
-  //    = KeymapNotify;
-  MSG_PAINT       = Expose;
-  MSG_CLOSE       = ClientMessage;  // Take note of this!
-  //    = MapNotify;
-  //    = ReparentNotify  // OnCreate event
   MSG_SCROLL      = 65;
   MSG_RESIZE      = 66;
   MSG_POPUPCLOSE  = 67;
@@ -213,19 +199,15 @@ const
  // some externals
 
 // defines:
-procedure XRenderSetPictureClipRectangles(disp: PXDisplay; pic: TPicture; xorigin, yorigin: integer;
-  rect: PXRectangle; num: integer); cdecl; external;
+procedure XRenderSetPictureClipRectangles(disp: PXDisplay; pic: TPicture; xorigin, yorigin: integer; rect: PXRectangle; num: integer); cdecl; external;
 
 // redefines:
-function XmbLookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym;
-  stat: PStatus): longint; cdecl; external;
+function XmbLookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym; stat: PStatus): longint; cdecl; external;
 
 // Double buffer functions
 function XdbeQueryExtension(ADisplay: PXDisplay; AMajor, AMinor: PInt): PStatus; cdecl; external;
-function XdbeAllocateBackBufferName(ADisplay: PXDisplay; AWindow: TfpgWinHandle; ASwapAction: PChar): TfpgWinHandle;
-  cdecl; external;
-function XdbeSwapBuffers(ADisplay: PXDisplay; ASwapInfo: PXdbeSwapInfo; AScreenNums: integer): PStatus;
-  cdecl; external;
+function XdbeAllocateBackBufferName(ADisplay: PXDisplay; AWindow: TfpgWinHandle; ASwapAction: PChar): TfpgWinHandle; cdecl; external;
+function XdbeSwapBuffers(ADisplay: PXDisplay; ASwapInfo: PXdbeSwapInfo; AScreenNums: integer): PStatus; cdecl; external;
 function XdbeDeallocateBackBufferName(ADisplay: PXDisplay; ABuffer: TfpgWinHandle): PStatus; cdecl; external;
 
 function XOpenIM(para1: PDisplay; para2: PXrmHashBucketRec; para3: Pchar; para4: Pchar): PXIM; cdecl; external;
@@ -656,8 +638,8 @@ begin
 // WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
 
   case ev._type of
-    MSG_KEYPRESS,
-    MSG_KEYRELEASE:
+    X.KeyPress,
+    X.KeyRelease:
         begin
           KeySym := StartComposing(ev);
           msgp.keyboard.keycode     := KeySymToKeycode(KeySym);
@@ -672,7 +654,7 @@ begin
           //Writeln('XKey event(',ev._type,'):',
             //IntToHex(ev.xkey.keycode,4),' (',ev.xkey.keycode,'), shift=',IntToHex(ev.xkey.state,4));
 
-          if ev._type = MSG_KEYPRESS then
+          if ev._type = X.KeyPress then
           begin
             fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
 
@@ -690,12 +672,12 @@ begin
               end;
             end;
           end { if }
-          else if ev._type = MSG_KEYRELEASE then
+          else if ev._type = X.KeyRelease then
             fpgPostMessage(nil, w, FPGM_KEYRELEASE, msgp);
         end;
 
-    MSG_MOUSEDOWN,
-    MSG_MOUSEUP:
+    X.ButtonPress,
+    X.ButtonRelease:
         begin
           msgp.mouse.x          := ev.xbutton.x;
           msgp.mouse.y          := ev.xbutton.y;
@@ -708,7 +690,7 @@ begin
             if (ev.xbutton.button >= 4) and (ev.xbutton.button <= 7) then  // mouse wheel
             begin
               // generate scroll events:
-              if ev._type = MSG_MOUSEDOWN then
+              if ev._type = X.ButtonPress then
               begin
                 if ev.xbutton.button = Button4 then
                   i := -1
@@ -735,7 +717,7 @@ begin
             end
             else
             begin
-              if ev._type = MSG_MOUSEUP then
+              if ev._type = X.ButtonRelease then
                 mcode := FPGM_MOUSEUP
               else
                 mcode := FPGM_MOUSEDOWN;
@@ -744,22 +726,22 @@ begin
           end;  { if not blocking }
         end;
 
-    MSG_PAINT:
+    X.Expose:
         begin
           repeat
             //
-          until not XCheckTypedWindowEvent(display, ev.xany.window, MSG_PAINT, @ev);
+          until not XCheckTypedWindowEvent(display, ev.xany.window, X.Expose, @ev);
           if ev.xexpose.count = 0 then
           begin
             fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_PAINT);
           end;
         end;
 
-    MSG_MOUSEMOVE:
+    X.MotionNotify:
         begin
           repeat
             //
-          until not XCheckTypedWindowEvent(display, ev.xbutton.window, MSG_MOUSEMOVE, @ev);
+          until not XCheckTypedWindowEvent(display, ev.xbutton.window, X.MotionNotify, @ev);
 
           if not blockmsg then
           begin
@@ -772,12 +754,12 @@ begin
         end;
 
     // message blockings for modal windows
-    MSG_CLOSE:
+    X.ClientMessage:
         if not blockmsg then
           fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
 
 
-    ConfigureNotify:
+    X.ConfigureNotify:
         begin
           repeat
             //
@@ -811,42 +793,58 @@ begin
         end;
 
 {
-    SelectionNotify:
+    X.SelectionNotify:
         begin
           ProcessSelection(ev);
         end;
 
-    SelectionRequest:
+    X.SelectionRequest:
         begin
           ProcessSelectionRequest(ev);
         end;
 }
 
-    MSG_ACTIVATE:
+    X.FocusIn:
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_ACTIVATE);
 
-    MSG_DEACTIVATE:
+    X.FocusOut:
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_DEACTIVATE);
 
-    MSG_MOUSEENTER:
+    X.EnterNotify:
 //        w.EvMouseEnter(Point(ev.xbutton.x, ev.xbutton.y));
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEENTER);
         
-    MSG_MOUSEEXIT:
+    X.LeaveNotify:
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEEXIT);
 
     { We handle these two event manually in the TfpgForm class }
-//    MapNotify:
-//    UnmapNotify:
+    X.MapNotify,
+    X.UnmapNotify:
+        begin
+          //Writeln('UnmapNotify');
+        end;
 
-    GraphicsExpose,
-    NoExpose:
-      // Do Nothing
-      // writeln('got a GraphicsExpose or NoExpose event');
-      { If this application calls XCopyArea or XCopyPlane
-        and the graphics_exposures member of the GC is
-        True and the source is a window, these events may
-        be generated; handle GraphicsExpose like Expose }
+    { We handle this event manually as well. }
+    X.DestroyNotify:
+        begin
+          //Writeln('DestroyNotify');
+          //fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
+        end;
+
+    X.GraphicsExpose,
+    X.NoExpose:
+        begin
+          // writeln('got a GraphicsExpose or NoExpose event');
+          { If this application calls XCopyArea or XCopyPlane
+            and the graphics_exposures member of the GC is
+            True and the source is a window, these events may
+            be generated; handle GraphicsExpose like Expose }
+        end;
+
+    X.ReparentNotify:
+        begin
+          // We are not interrested in this event
+        end;
     else
       {$Note This needs attention. We still have two events slipping by.}
       WriteLn('fpGFX/X11: Unhandled X11 event received: ', GetXEventName(ev._type));

@@ -42,11 +42,6 @@ begin
   Canvas.BeginDraw;
   inherited HandlePaint;
 
-  // Testing line drawing
-  Canvas.DrawLine(5, 5, 50, 50);
-  Canvas.SetColor(clBlue);
-  Canvas.DrawLine(50, 5, 5, 50);
-  
   // Testing Rectangles
   Canvas.SetColor(clBlack);
   r.Top       := 5;
@@ -66,8 +61,17 @@ begin
 
   r.Left := 240;
   Canvas.SetColor(clBlue);
-//  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.SetLineStyle(1, lsSolid);
   Canvas.FillRectangle(r);
+
+
+  // Testing line drawing
+  Canvas.DrawLine(5, 5, 50, 50);
+  Canvas.SetColor(clBlue);
+  Canvas.DrawLine(50, 5, 5, 50);
+
+  Canvas.SetColor(clRed);
+  Canvas.DrawLine(60, 5, 110, 55);
 
 
   // Testing Text and Fonts
@@ -97,7 +101,7 @@ begin
   Canvas.DrawButtonFace(300, 80, 75, 25, [btnIsPressed]);
   Canvas.DrawString(385, 80, '= [btnIsPressed]');
   Canvas.DrawButtonFace(300, 110, 75, 25, [btnIsEmbedded, btnIsPressed]);
-  Canvas.DrawString(385, 110, '= [embedded & pressed]');
+  Canvas.DrawString(385, 110, '= [embed & press]');
   Canvas.DrawButtonFace(300, 140, 75, 25, [btnIsEmbedded]);
   Canvas.DrawString(385, 140, '= [btnIsEmbedded]');
   
@@ -120,7 +124,7 @@ begin
   
   Canvas.DrawImage(150, 300, dst);
   Canvas.StretchDraw(180, 300, 70, 70, dst);
-  Canvas.StretchDraw(270, 300, 230, 25, bmp);
+  Canvas.StretchDraw(265, 300, 230, 25, bmp);
 
 //  Stretch(bmp, dst, ResampleFilters[6].Filter, ResampleFilters[6].Width);
 ////  Canvas.DrawImage(150, 240, bmp);
