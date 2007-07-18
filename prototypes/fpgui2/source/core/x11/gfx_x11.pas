@@ -182,7 +182,8 @@ implementation
 uses
   baseunix,
   fpgfx,
-  gfx_widget;  {$Note This dependency to gfx_widget must be removed.}
+  gfx_widget,  {$Note This dependency to gfx_widget must be removed.}
+  gui_form; // remove this!!!!!
 
 var
   xapplication: TfpgApplication;
@@ -685,6 +686,15 @@ begin
           msgp.mouse.shiftstate := ConvertShiftState(ev.xbutton.state);
 
           w := FindWindowByHandle(ev.xbutton.window);
+          
+          if fpgTopModalForm <> nil then
+          begin
+            // This is ugly!!!!!!!!!!!!!!!
+            ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+            if (ew <> nil) and (fpgTopModalForm <> ew) then
+              blockmsg := true;
+          end;
+      
           if not blockmsg then
           begin
             if (ev.xbutton.button >= 4) and (ev.xbutton.button <= 7) then  // mouse wheel
@@ -811,7 +821,6 @@ begin
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_DEACTIVATE);
 
     X.EnterNotify:
-//        w.EvMouseEnter(Point(ev.xbutton.x, ev.xbutton.y));
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEENTER);
         
     X.LeaveNotify:
@@ -884,7 +893,7 @@ var
   hints: TXSizeHints;
 begin
   if FWinHandle > 0 then
-    Exit;
+    Exit; //==>
 
   if aparent <> nil then
     pwh := TfpgWindowImpl(AParent).WinHandle
@@ -946,7 +955,7 @@ begin
 
   // for modal windows, this is necessary
   if (FWindowType = wtModalForm) and (AParent <> nil) then
-    XSetTransientForHint(xapplication.display, self.FWinHandle, TfpgWindowImpl(AParent).WinHandle);
+    XSetTransientForHint(xapplication.display, FWinHandle, TfpgWindowImpl(AParent).WinHandle);
 
   XSelectInput(xapplication.Display, wh, KeyPressMask or KeyReleaseMask or
       ButtonPressMask or ButtonReleaseMask or
