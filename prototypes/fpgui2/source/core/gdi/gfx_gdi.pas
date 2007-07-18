@@ -994,13 +994,13 @@ begin
     SetBkMode(Fgc, TRANSPARENT);
 
     FBrush      := CreateSolidBrush(0);
-    FPen        := CreatePen(PS_SOLID, 0, 0);
+    FPen        := CreatePen(PS_SOLID, 0, 0); // defaults to black
     FClipRegion := CreateRectRgn(0, 0, 1, 1);
 
-    FColor           := clText1;
+    FColor           := fpgColorToWin(clText1);
     FLineStyle       := lsSolid;
     FLineWidth       := 0;
-    FBackgroundColor := clBoxColor;
+    FBackgroundColor := fpgColorToWin(clBoxColor);
   end;
 
   FDrawing := True;
@@ -1068,26 +1068,17 @@ begin
 end;
 
 procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
-var
-  pts: array[1..2] of Windows.TPoint;
 begin
-  pts[1].X := x1;
-  pts[1].Y := y1;
-  pts[2].X := x2;
-  pts[2].Y := y2;
-  PolyLine(Fgc, pts, 2);
-  Windows.SetPixel(Fgc, x2, y2, FWindowsColor);
+  Windows.MoveToEx(Fgc, x1, y1, nil);
+  Windows.LineTo(Fgc, x2, y2);
 end;
 
 procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
-var
-  wr: Windows.TRect;
 begin
-  wr.Left   := x;
-  wr.Top    := y;
-  wr.Right  := x + w;
-  wr.Bottom := y + h;
-  Windows.FrameRect(Fgc, wr, FBrush);
+  DoDrawLine(x, y, x+w-1, y); // top
+  DoDrawLine(x+w-1, y, x+w-1, y+h-1); // right
+  DoDrawLine(x, y+h-1, x+w-1, y+h-1); // bottom
+  DoDrawLine(x, y, x, y+h-1); // left
 end;
 
 procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
@@ -1126,7 +1117,7 @@ begin
   pts[2].Y := y2;
   pts[3].X := x3;
   pts[3].Y := y3;
-  Polygon(Fgc, pts, 3);
+  Windows.Polygon(Fgc, pts, 3);
 end;
 
 function TfpgCanvasImpl.DoGetClipRect: TfpgRect;
@@ -1155,19 +1146,27 @@ begin
 end;
 
 procedure TfpgCanvasImpl.DoSetColor(cl: TfpgColor);
+var
+  newBrush, oldBrush: HBRUSH;
+  newPen, oldPen: HPEN;
 begin
-  DeleteObject(FBrush);
-  DeleteObject(FPen);
-
   FWindowsColor := fpgColorToWin(cl);
 
-  FBrush := CreateSolidBrush(FWindowsColor);
-  FPen   := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
-  SelectObject(Fgc, FBrush);
-  SelectObject(Fgc, FPen);
+  newBrush  := CreateSolidBrush(FWindowsColor);
+  newPen    := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
+  oldBrush  := SelectObject(Fgc, newBrush);
+  oldPen    := SelectObject(Fgc, newPen);
+  FBrush    := newBrush;
+  FPen      := newPen;
+
+  DeleteObject(oldBrush);
+  DeleteObject(oldPen);
 end;
 
 procedure TfpgCanvasImpl.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
+var
+  lw: integer;
+  lPen: HPEN;
 begin
 { Notes from MSDN: If the value specified by nWidth is greater
 than 1, the fnPenStyle parameter must be PS_NULL, PS_SOLID, or
@@ -1176,26 +1175,30 @@ PS_INSIDEFRAME. }
   case AStyle of
     lsDot:
       begin
-      FintLineStyle := PS_DOT;
-      FLineWidth := 1;
+        FintLineStyle := PS_DOT;
+        lw := 1;
       end;
     lsDash:
       begin
-      FintLineStyle := PS_DASH;
-      FLineWidth := 1;
+        FintLineStyle := PS_DASH;
+        lw := 1;
       end;
     lsSolid:
-      FintLineStyle := PS_SOLID;
+      begin
+        FintLineStyle := PS_SOLID;
+        lw := FLineWidth;
+      end;
     else
       begin
-      FintLineStyle := PS_DOT;
-      FLineWidth := 1;
+        FintLineStyle := PS_SOLID;
+        lw := 1;
       end;
   end;
 
-  DeleteObject(FPen);
-  FPen := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
-  SelectObject(Fgc, FPen);
+  lPen := CreatePen(FintLineStyle, lw, FWindowsColor);
+  Windows.SelectObject(Fgc, lPen);
+  Windows.DeleteObject(FPen);
+  FPen := lPen;
 end;
 
 procedure TfpgCanvasImpl.DoSetTextColor(cl: TfpgColor);

@@ -69,9 +69,13 @@ begin
   Canvas.DrawLine(5, 5, 50, 50);
   Canvas.SetColor(clBlue);
   Canvas.DrawLine(50, 5, 5, 50);
-
   Canvas.SetColor(clRed);
+  { Diagonal line }
   Canvas.DrawLine(60, 5, 110, 55);
+  { Horizontal line }
+  Canvas.DrawLine(60, 3, 110, 3);
+  { Vertical line }
+  Canvas.DrawLine(58, 5, 58, 55);
 
 
   // Testing Text and Fonts
