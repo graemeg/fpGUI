@@ -21,6 +21,28 @@ uses
 
 type
 
+  { TXPButton }
+
+  TXPButton = class(TfpgButton)
+  private
+    State: integer;
+      // 0-normal
+      // 1-hover
+      // 2-mouse down
+      // 3-disabled
+      // 4-got focus
+    image: TfpgImage;
+  protected
+    procedure   HandlePaint; override;
+    procedure   HandleLMouseDown(X, Y: integer; ShiftState: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseExit; override;
+    procedure   HandleMouseEnter; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+  end;
+
   { TMainForm }
 
   TMainForm = class(TfpgForm)
@@ -40,8 +62,89 @@ type
     listbox: TfpgListBox;
     combo1: TfpgComboBox;
     sbar: TfpgScrollBar;
+    xp: TXPButton;
     procedure AfterCreate; override;
   end;
+
+{ TXPButton }
+
+procedure TXPButton.HandlePaint;
+var
+  x, i: integer;
+begin
+  Canvas.BeginDraw;
+//  inherited HandlePaint;
+  Canvas.ClearClipRect;
+  Canvas.Clear(clGray);
+
+  image := nil;
+  image := LoadImage_BMP('button.bmp');
+  image.CreateMaskFromSample(0, 0);
+  image.UpdateImage;
+  if not Assigned(image) then
+     writeln('Image is nil');
+
+  { left }
+  Writeln(Left, ' ' , Top, ' ', State, ' ', image.Width);
+  x := 0;
+  Canvas.DrawImagePart(x, 0, image, state*32, 0, 3, 21);
+  { body }
+  for i := (x+3) to (x+3+69) do
+    Canvas.DrawImagePart(i, 0, image, (state*32)+3, 0, 1, 21);
+  { right }
+  Canvas.DrawImagePart(i, 0, image, (state*32)+29, 0, 3, 21);
+
+
+  image.Free;
+//    Canvas.DrawString(16, 242, 'OK');
+
+  Canvas.EndDraw;
+end;
+
+procedure TXPButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
+begin
+  State := 2;
+  Repaint;
+  inherited HandleLMouseDown(X, Y, ShiftState);
+end;
+
+procedure TXPButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  State := 1;
+  Repaint;
+  inherited HandleLMouseUp(x, y, shiftstate);
+end;
+
+procedure TXPButton.HandleMouseExit;
+begin
+  writeln('exit');
+  inherited HandleMouseExit;
+  State := 0;
+  Repaint;
+end;
+
+procedure TXPButton.HandleMouseEnter;
+begin
+  writeln('enter');
+  inherited HandleMouseEnter;
+  State := 1;
+  Repaint;
+end;
+
+constructor TXPButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Width := 75;
+  Height := 21;
+  State := 0;
+  
+end;
+
+destructor TXPButton.Destroy;
+begin
+  image.Free;
+  inherited Destroy;
+end;
 
 
   { TMainForm }
@@ -54,6 +157,7 @@ type
   procedure TMainForm.btnDisplayBMP(Sender: TObject);
   var
     bmp: TfpgImage;
+    i: integer;
   begin
     bmp := LoadImage_BMP('button.bmp');
     //    bmp := LoadImage_BMP('..\images\close.bmp');
@@ -71,9 +175,23 @@ type
     Canvas.DrawImagePart(50, 240, bmp, 32, 0, 32, 21);
     Canvas.DrawString(16, 242, 'OK');
 
+    // Lets draw a normal XP Button 75x21
+    {top left corner}
+//    Canvas.DrawImagePart(10, 280, bmp, 32, 0, 3, 3);
+    { left }
+    Canvas.DrawImagePart(10, 280, bmp, 32, 0, 3, 21);
+    { body }
+    for i := 13 to 69 do
+      Canvas.DrawImagePart(i, 280, bmp, 35, 0, 1, 21);
+    { right }
+    Canvas.DrawImagePart(i, 280, bmp, 32+29, 0, 3, 21);
+//    Canvas.DrawString(16, 242, 'OK');
+
+    
     Canvas.EndDraw;
 
     bmp.Free;
+    
   end;
 
   procedure TMainForm.btn3Click(Sender: TObject);
@@ -140,17 +258,23 @@ type
     sbar.Left   := 150;
     sbar.Height := 100;
     sbar.Max    := 15;
+    
+    xp := TXPButton.Create(self);
+    xp.Left := 250;
+    xp.Top := 200;
+    xp.Width := 75;
+
   end;
 
-  procedure MainProc;
-  var
-    frm: TMainForm;
-  begin
-    fpgApplication.Initialize;
-    frm := TMainForm.Create(nil);
-    frm.Show;
-    fpgApplication.Run;
-  end;
+procedure MainProc;
+var
+  frm: TMainForm;
+begin
+  fpgApplication.Initialize;
+  frm := TMainForm.Create(nil);
+  frm.Show;
+  fpgApplication.Run;
+end;
 
 
 begin
