@@ -26,12 +26,13 @@ type
   TXPButton = class(TfpgButton)
   private
     State: integer;
-      // 0-normal
-      // 1-hover
-      // 2-mouse down
-      // 3-disabled
-      // 4-got focus & default button
+      // 0 - normal
+      // 1 - hover
+      // 2 - mouse down
+      // 3 - disabled
+      // 4 - got focus or default
     image: TfpgImage;
+    procedure   SetThemeImage(const AValue: TfpgImage);
   protected
     procedure   HandlePaint; override;
     procedure   HandleLMouseDown(X, Y: integer; ShiftState: TShiftState); override;
@@ -41,6 +42,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    { this property is only for demo purposes! }
+    property    ThemeImage: TfpgImage read image write SetThemeImage;
   end;
 
   { TMainForm }
@@ -62,12 +65,21 @@ type
     listbox: TfpgListBox;
     combo1: TfpgComboBox;
     sbar: TfpgScrollBar;
-    xp1: TXPButton;
+    xpluna: TXPButton;
     xp2: TXPButton;
+    xpsilver: TXPButton;
     procedure AfterCreate; override;
   end;
 
 { TXPButton }
+
+procedure TXPButton.SetThemeImage(const AValue: TfpgImage);
+begin
+  if Assigned(image) then
+    image.Free;
+  image := AValue;
+  Repaint;
+end;
 
 procedure TXPButton.HandlePaint;
 var
@@ -94,7 +106,6 @@ begin
       State := 0;
   end;
 
-
   x := 0;
   { left }
   Canvas.DrawImagePart(x, 0, image, state*32, 0, 3, 21);
@@ -103,8 +114,6 @@ begin
     Canvas.DrawImagePart(i, 0, image, (state*32)+3, 0, 1, 21);
   { right }
   Canvas.DrawImagePart(i, 0, image, (state*32)+29, 0, 3, 21);
-
-
 
   if Focused and (not Embedded) then
   begin
@@ -220,7 +229,7 @@ begin
   Height := 21;
   State := 0;
   
-  image := LoadImage_BMP('button.bmp');
+  image := LoadImage_BMP(SetDirSeparators('../images/themes/luna/button.bmp'));
   image.CreateMaskFromSample(0, 0);
   image.UpdateImage;
   if not Assigned(image) then
@@ -246,8 +255,7 @@ end;
     bmp: TfpgImage;
     i: integer;
   begin
-    bmp := LoadImage_BMP('button.bmp');
-    //    bmp := LoadImage_BMP('..\images\close.bmp');
+    bmp := LoadImage_BMP(SetDirSeparators('../images/themes/luna/button.bmp'));
     bmp.CreateMaskFromSample(0, 0);
     bmp.UpdateImage;
 
@@ -260,25 +268,9 @@ end;
     Canvas.DrawImage(10, 200, bmp);
     Canvas.DrawImagePart(10, 240, bmp, 0, 0, 32, 21);
     Canvas.DrawImagePart(50, 240, bmp, 32, 0, 32, 21);
-    Canvas.DrawString(16, 242, 'OK');
 
-    // Lets draw a normal XP Button 75x21
-    {top left corner}
-//    Canvas.DrawImagePart(10, 280, bmp, 32, 0, 3, 3);
-    { left }
-    Canvas.DrawImagePart(10, 280, bmp, 32, 0, 3, 21);
-    { body }
-    for i := 13 to 69 do
-      Canvas.DrawImagePart(i, 280, bmp, 35, 0, 1, 21);
-    { right }
-    Canvas.DrawImagePart(i, 280, bmp, 32+29, 0, 3, 21);
-//    Canvas.DrawString(16, 242, 'OK');
-
-    
     Canvas.EndDraw;
-
     bmp.Free;
-    
   end;
 
   procedure TMainForm.btn3Click(Sender: TObject);
@@ -296,6 +288,7 @@ end;
   procedure TMainForm.AfterCreate;
   var
     i: integer;
+    bmp: TfpgImage;
   begin
     SetPosition(200, 200, 500, 350);
     WindowTitle := 'fpGUI Widget Test';
@@ -312,7 +305,7 @@ end;
 
     btn2          := CreateButton(self, 10, 100, 75, 'Normal', nil);
     btn2.OnClick  := @btnDisplayBMP;
-    btn2.Enabled  := False;
+//    btn2.Enabled  := False;
     
     btn3          := CreateButton(self, 100, 100, 75, 'Embedded', nil);
     btn3.Embedded := True;
@@ -324,7 +317,6 @@ end;
     btn.ShowImage := True;
 
     combo1 := CreateComboBox(self, 10, 160, 120, nil);
-    //    combo1.Height := 25;//22;
 
     memo        := TfpgMemo.Create(self);
     memo.Top    := 10;
@@ -348,11 +340,11 @@ end;
     sbar.Height := 100;
     sbar.Max    := 15;
     
-    xp1 := TXPButton.Create(self);
-    xp1.Left    := 250;
-    xp1.Top     := 200;
-    xp1.Width   := 75;
-    xp1.Text    := 'XP Button1';
+    xpluna := TXPButton.Create(self);
+    xpluna.Left    := 250;
+    xpluna.Top     := 200;
+    xpluna.Width   := 75;
+    xpluna.Text    := 'XP Luna';
 
     xp2 := TXPButton.Create(self);
     xp2.Left    := 335;
@@ -361,6 +353,15 @@ end;
     xp2.Text    := 'XP Button2';
     xp2.Enabled := False;
 
+    xpsilver := TXPButton.Create(self);
+    xpsilver.Left    := 250;
+    xpsilver.Top     := 230;
+    xpsilver.Width   := 75;
+    xpsilver.Text    := 'XP Silver';
+    bmp := LoadImage_BMP(SetDirSeparators('../images/themes/silver/button.bmp'));
+    bmp.CreateMaskFromSample(0, 0);
+    bmp.UpdateImage;
+    xpsilver.ThemeImage := bmp;
   end;
 
 procedure MainProc;
