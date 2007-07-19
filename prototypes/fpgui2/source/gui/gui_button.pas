@@ -15,15 +15,10 @@ type
 
   TfpgButton = class(TfpgWidget)
   private
-    FEmbedded: Boolean;
     FImageName: string;
     FClicked: Boolean;
-    FImage: TfpgImage;
     FShowImage: Boolean;
     FClickOnPush: Boolean;
-    FDown: Boolean;
-    FImageMargin: integer;
-    FImageSpacing: integer;
     FGroupIndex: integer;
     FAllowAllUp: boolean;
     FModalResult: integer;
@@ -39,6 +34,11 @@ type
     procedure   SetAllowDown(const Value: Boolean);
     procedure   SetAllowAllUp(const Value: boolean);
   protected
+    FImageMargin: integer;
+    FImageSpacing: integer;
+    FEmbedded: Boolean;
+    FDown: Boolean;
+    FImage: TfpgImage;
     FText: string;
     FFont: TfpgFont;
     procedure   SetShowImage(AValue: Boolean);

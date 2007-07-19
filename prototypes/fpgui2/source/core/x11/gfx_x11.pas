@@ -1332,8 +1332,8 @@ begin
   if Length(txt) < 1 then
     Exit; //==>
 
-  XftDrawStringUTF8(FXftDraw, FColorTextXft, FCurFontRes.Handle, x, y + FCurFontRes.GetAscent,
-    PChar(txt), Length(txt));
+  XftDrawStringUTF8(FXftDraw, FColorTextXft, FCurFontRes.Handle, x,
+    y + FCurFontRes.GetAscent, PChar(txt), Length(txt));
 end;
 
 procedure TfpgCanvasImpl.DoGetWinRect(var r: TfpgRect);
@@ -1346,7 +1346,8 @@ var
 begin
   r.left := 0;
   r.Top  := 0;
-  XGetGeometry(xapplication.display, FDrawWindow.FWinHandle, @rw, @x, @y, @(r.Width), @(r.Height), @bw, @d);
+  XGetGeometry(xapplication.display, FDrawWindow.FWinHandle, @rw, @x, @y,
+      @(r.Width), @(r.Height), @bw, @d);
 end;
 
 procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: TfpgCoord);

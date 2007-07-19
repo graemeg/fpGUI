@@ -30,7 +30,7 @@ type
       // 1-hover
       // 2-mouse down
       // 3-disabled
-      // 4-got focus
+      // 4-got focus & default button
     image: TfpgImage;
   protected
     procedure   HandlePaint; override;
@@ -62,7 +62,8 @@ type
     listbox: TfpgListBox;
     combo1: TfpgComboBox;
     sbar: TfpgScrollBar;
-    xp: TXPButton;
+    xp1: TXPButton;
+    xp2: TXPButton;
     procedure AfterCreate; override;
   end;
 
@@ -71,22 +72,31 @@ type
 procedure TXPButton.HandlePaint;
 var
   x, i: integer;
+  r: TfpgRect;
+  iy, y: integer;
+  w: integer;
+  pofs: integer;
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
-  Canvas.Clear(clGray);
+  Canvas.Clear(clButtonFace);
 
-  image := nil;
-  image := LoadImage_BMP('button.bmp');
-  image.CreateMaskFromSample(0, 0);
-  image.UpdateImage;
-  if not Assigned(image) then
-     writeln('Image is nil');
+  if State <> 1 then
+  begin
+    if Down then
+      State := 2
+    else if Focused then
+      State := 4
+    else if not Enabled then
+      State := 3
+    else
+      State := 0;
+  end;
 
-  { left }
-  Writeln(Left, ' ' , Top, ' ', State, ' ', image.Width);
+
   x := 0;
+  { left }
   Canvas.DrawImagePart(x, 0, image, state*32, 0, 3, 21);
   { body }
   for i := (x+3) to (x+3+69) do
@@ -95,8 +105,76 @@ begin
   Canvas.DrawImagePart(i, 0, image, (state*32)+29, 0, 3, 21);
 
 
-  image.Free;
-//    Canvas.DrawString(16, 242, 'OK');
+
+  if Focused and (not Embedded) then
+  begin
+    Canvas.SetColor(clText1);
+    Canvas.SetLineStyle(1, lsDot);
+    Canvas.DrawRectangle(3, 3, Width - 6, Height - 6);
+  end
+  else
+  begin
+    Canvas.SetTextColor(clText1);
+    Canvas.SetColor(clText1);
+  end;
+
+  if not Enabled then
+    Canvas.SetTextColor(clShadow1);
+
+  r.left   := 2;
+  r.top    := 2;
+  r.Width  := Width - 4;
+  r.Height := Height - 4;
+  Canvas.SetClipRect(r);
+
+  Canvas.SetFont(Font);
+  y := Height div 2 - FFont.Height div 2;
+  if y < 3 then
+    y := 3;
+
+  // offset text and image
+  if Down then
+    pofs := 1
+  else
+    pofs := 0;
+
+  if (ShowImage) and (FImage <> nil) then
+  begin
+    iy := Height div 2 - FImage.Height div 2;
+    if ImageMargin = -1 then // centered
+    begin
+      w := FFont.TextWidth(FText) + FImage.Width;
+      if FImageSpacing > 0 then
+        Inc(w, FImageSpacing);
+      x := (Width div 2) - (w div 2);
+      if x < 3 then
+        x := 3;
+    end
+    else
+    begin
+      x := FImageMargin + 3;
+    end;
+
+    Canvas.DrawImage(x + pofs, iy + pofs, FImage);
+    Inc(x, FImage.Width);
+    if FImageSpacing > 0 then
+      Inc(x, FImageSpacing);
+
+    if (FImageSpacing = -1) and (FImageMargin >= 0) then
+    begin
+      w := (Width - 3 - x) div 2 - FFont.TextWidth(FText) div 2;
+      if w < 1 then
+        w := 1; // minimal spacing
+      x := x + w;
+    end;
+  end
+  else
+    x := (Width div 2) - (FFont.TextWidth(FText) div 2);
+
+  if x < 3 then
+    x := 3;
+
+  Canvas.DrawString(x + pofs, y + pofs, FText);
 
   Canvas.EndDraw;
 end;
@@ -117,18 +195,22 @@ end;
 
 procedure TXPButton.HandleMouseExit;
 begin
-  writeln('exit');
   inherited HandleMouseExit;
-  State := 0;
-  Repaint;
+  if Enabled then
+  begin
+    State := 0;
+    Repaint;
+  end;
 end;
 
 procedure TXPButton.HandleMouseEnter;
 begin
-  writeln('enter');
   inherited HandleMouseEnter;
-  State := 1;
-  Repaint;
+  if Enabled then
+  begin
+    State := 1;
+    Repaint;
+  end;
 end;
 
 constructor TXPButton.Create(AOwner: TComponent);
@@ -138,6 +220,11 @@ begin
   Height := 21;
   State := 0;
   
+  image := LoadImage_BMP('button.bmp');
+  image.CreateMaskFromSample(0, 0);
+  image.UpdateImage;
+  if not Assigned(image) then
+     writeln('Image is nil');
 end;
 
 destructor TXPButton.Destroy;
@@ -225,6 +312,8 @@ end;
 
     btn2          := CreateButton(self, 10, 100, 75, 'Normal', nil);
     btn2.OnClick  := @btnDisplayBMP;
+    btn2.Enabled  := False;
+    
     btn3          := CreateButton(self, 100, 100, 75, 'Embedded', nil);
     btn3.Embedded := True;
     btn3.OnClick  := @btn3Click;
@@ -259,10 +348,18 @@ end;
     sbar.Height := 100;
     sbar.Max    := 15;
     
-    xp := TXPButton.Create(self);
-    xp.Left := 250;
-    xp.Top := 200;
-    xp.Width := 75;
+    xp1 := TXPButton.Create(self);
+    xp1.Left    := 250;
+    xp1.Top     := 200;
+    xp1.Width   := 75;
+    xp1.Text    := 'XP Button1';
+
+    xp2 := TXPButton.Create(self);
+    xp2.Left    := 335;
+    xp2.Top     := 200;
+    xp2.Width   := 75;
+    xp2.Text    := 'XP Button2';
+    xp2.Enabled := False;
 
   end;
 
