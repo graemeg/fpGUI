@@ -48,6 +48,7 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandlePaint; override;
     procedure   PositionChange(d: integer);
   public
@@ -326,6 +327,14 @@ begin
     if Assigned(FOnScroll) then
       FOnScroll(self, FPosition);
   end;
+end;
+
+procedure TfpgScrollBar.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+  delta: smallint);
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  if delta < 0 then PositionChange(-FScrollStep);
+  if delta > 0 then PositionChange( FScrollStep);
 end;
 
 procedure TfpgScrollBar.PositionChange(d: integer);
