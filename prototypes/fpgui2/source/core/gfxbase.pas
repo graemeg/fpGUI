@@ -359,6 +359,9 @@ function fpgGetGreen(const AColor: TfpgColor): word;
 function fpgGetBlue(const AColor: TfpgColor): word;
 function fpgGetAlpha(const AColor: TfpgColor): word;
 
+{ Points }
+function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+
 implementation
 
 uses
@@ -551,6 +554,14 @@ function fpgGetAlpha(const AColor: TfpgColor): word;
 begin
   // AARRGGBB format
   Result := Word((AColor shr 32) and $FF);
+end;
+
+function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+begin
+  Result := (APoint.x >= ARect.Left) and
+            (APoint.y >= ARect.Top) and
+            (APoint.x < ARect.Right) and
+            (APoint.y < ARect.Bottom);
 end;
 
 { TfpgRect }
