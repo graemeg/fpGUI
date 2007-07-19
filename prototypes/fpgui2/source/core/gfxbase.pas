@@ -712,8 +712,27 @@ begin
 end;
 
 procedure TfpgCanvasBase.DrawString(x, y: TfpgCoord; const txt: string);
+var
+  underline: integer;
 begin
   DoDrawString(x, y, txt);
+  
+  { What was not handled: underline }
+  if Pos('UNDERLINE', UpperCase(Font.FontDesc)) > 0 then
+  begin
+    underline := (Font.Descent div 2) + 1;
+    if underline = 0 then
+      underline := 1;
+    if underline >= Font.Descent then
+      underline := Font.Descent - 1;
+
+//    if Pos('BOLD', UpperCase(Font.FontDesc)) = 0 then
+      DoSetLineStyle(1, lsSolid);
+//    else
+//      DoSetLineStyle(2, lsSolid);
+    DoSetColor(TextColor);
+    DoDrawLine(x, Font.Height-underline, x+Font.TextWidth(txt), Font.Height-underline);
+  end;
 end;
 
 procedure TfpgCanvasBase.FillRectangle(x, y, w, h: TfpgCoord);
