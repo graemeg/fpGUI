@@ -119,6 +119,7 @@ type
     FDisplay: PXDisplay;
     FRootWindow: TWindow;
     FNetAtoms: array[TNetAtomEnum] of TNetAtom;
+    UTF8_STRING: TAtom;
     FAtomSupported: array[TNetAtomEnum] of Boolean;
     FTimeStamp: LongInt;
     procedure InitNetAtoms;
@@ -172,6 +173,8 @@ type
     procedure   WindowSetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Cards: PLongInt);
     function    WindowGetPropertyWindow(const AWindow: TWindow; AProperty: TAtom; var Count: Integer; var Windows: PWindow): Boolean;
     procedure   WindowSetPropertyWindow(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Windows: PWindow);
+    function    WindowGetPropertyUTF8(const AWindow: TWindow; AProperty: TAtom; var ALength: Integer; var UTF8Text: String): Boolean;
+    procedure   WindowSetPropertyUTF8(const AWindow: TWindow; AProperty: TAtom; ALength: Integer; UTF8Text: String);
 
     constructor Create(ADisplay: PXDisplay);
     destructor  Destroy; override;
@@ -274,6 +277,7 @@ begin
   for NetAtom := Low(TNetAtomEnum) to High(TNetAtomEnum) do begin
     FNetAtoms[NetAtom] := XInternAtom(FDisplay, PChar(NetAtomStr[NetAtom]), True)
   end;
+  UTF8_STRING := XInternAtom(FDisplay, 'UTF8_STRING', True);
 end;
 
 procedure TNETWindowLayer.UpdateSupportedAtoms;
@@ -302,7 +306,7 @@ end;
 function TNETWindowLayer.WindowSetName(const AWindow: TWindow; AName: PChar
   ): Boolean;
 begin
-
+  WindowSetPropertyUTF8(AWindow, FNetAtoms[naWM_NAME], Length(AName), AName);
 end;
 
 function TNETWindowLayer.WindowGetHidden(const AWindow: TWindow; out AValue: Boolean
@@ -688,6 +692,33 @@ procedure TNETWindowLayer.WindowSetPropertyWindow(const AWindow: TWindow;
   AProperty: TAtom; Count: Integer; Windows: PWindow);
 begin
   XChangeProperty(FDisplay, AWindow, AProperty, XA_WINDOW, 32, PropModeReplace, Pointer(Windows), Count);
+end;
+
+function TNETWindowLayer.WindowGetPropertyUTF8(const AWindow: TWindow;
+  AProperty: TAtom; var ALength: Integer; var UTF8Text: String): Boolean;
+var
+  atomtype: TAtom;
+  format: cint;
+  nitems: culong;
+  bytes_after: culong;
+  Utf8Str: PChar;
+begin
+  Result := False;
+  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, False, XA_ATOM, @atomtype, @format, @nitems,
+             @bytes_after, @Utf8Str);
+
+  if (atomtype = XA_WINDOW) and (format = 32) then begin
+    Result := True;
+    UTF8Text := Copy(Utf8Str, 0, nitems);
+    ALength := nitems;
+  end;
+  if nitems > 0 then XFree(Utf8Str);
+end;
+
+procedure TNETWindowLayer.WindowSetPropertyUTF8(const AWindow: TWindow;
+  AProperty: TAtom; ALength: Integer; UTF8Text: String);
+begin
+  XChangeProperty(FDisplay, AWindow, AProperty, UTF8_STRING, 8, PropModeReplace, @UTF8Text[1], ALength);
 end;
 
 function TNETWindowLayer.WindowGetPropertyCardinal(const AWindow: TWindow;
