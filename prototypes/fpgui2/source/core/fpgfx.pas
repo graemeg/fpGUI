@@ -111,6 +111,8 @@ type
 
 
   TfpgImage = class(TfpgImageImpl)
+  public
+    function    ImageFromRect(var ARect: TRect): TfpgImage;
   end;
 
 
@@ -1036,6 +1038,32 @@ begin
     sl.Assign(FImages);
 end;
 
+
+{ TfpgImage }
+
+function TfpgImage.ImageFromRect(var ARect: TRect): TfpgImage;
+var
+  x, y: TfpgCoord;
+  ix, iy: TfpgCoord;
+begin
+  SortRect(ARect);
+  
+  Result := TfpgImage.Create;
+  Result.AllocateImage(ColorDepth, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top);
+  Result.UpdateImage;
+  
+  iy := -1;
+  for y := ARect.Top to ARect.Bottom-1 do
+  begin
+    Inc(iy);
+    ix := -1;
+    for x := ARect.Left to ARect.Right-1 do
+    begin
+      Inc(ix);
+      Result.Colors[ix, iy] := Colors[x, y];
+    end;
+  end;
+end;
 
 initialization
   uApplication    := nil;

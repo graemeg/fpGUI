@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="1"/>
-    <Files Count="20">
+    <Files Count="21">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -105,6 +105,10 @@
         <Filename Value="../../gui/gui_memo.pas"/>
         <UnitName Value="gui_memo"/>
       </Item20>
+      <Item21>
+        <Filename Value="../gfx_extinterpolation.pas"/>
+        <UnitName Value="gfx_extinterpolation"/>
+      </Item21>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

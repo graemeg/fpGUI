@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="1"/>
-    <Files Count="18">
+    <Files Count="19">
       <Item1>
         <Filename Value="..\gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
@@ -97,6 +97,10 @@
         <Filename Value="..\..\gui\gui_listbox.pas"/>
         <UnitName Value="gui_listbox"/>
       </Item18>
+      <Item19>
+        <Filename Value="..\gfx_extinterpolation.pas"/>
+        <UnitName Value="gfx_extinterpolation"/>
+      </Item19>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

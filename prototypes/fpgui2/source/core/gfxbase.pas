@@ -217,6 +217,7 @@ type
   TfpgCanvasBase = class(TObject)
   private
     FInterpolation: TfpgCustomInterpolation;
+    procedure SetInterpolation(const AValue: TfpgCustomInterpolation);
   protected
     FBufferedDraw: boolean;
     FBeginDrawCount: integer;
@@ -250,12 +251,14 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
   public
     constructor Create; virtual;
+    destructor  Destroy; override;
     procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   DrawRectangle(r: TfpgRect); overload;
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
+    procedure   CopyRect(x, y: TfpgCoord; ACanvas: TfpgCanvasBase; var SourceRect: TRect);
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   FillRectangle(r: TfpgRect); overload;
@@ -281,6 +284,7 @@ type
     property    TextColor: TfpgColor read FTextColor;
     property    Font: TfpgFontBase read FFont write SetFont;
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
+    property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
   end;
 
 
@@ -361,6 +365,8 @@ function fpgGetAlpha(const AColor: TfpgColor): word;
 
 { Points }
 function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+procedure SortRect(var ARect: TRect);
+procedure SortRect(var left, top, right, bottom: integer);
 
 implementation
 
@@ -564,6 +570,30 @@ begin
             (APoint.y < ARect.Bottom);
 end;
 
+procedure SortRect(var ARect: TRect);
+begin
+  with ARect do
+    SortRect(left, top, right, bottom);
+end;
+
+procedure SortRect(var left, top, right, bottom: integer);
+var
+  r: integer;
+begin
+  if left > right then
+  begin
+    r       := left;
+    left    := right;
+    right   := r;
+  end;
+  if top > bottom then
+  begin
+    r       := top;
+    top     := bottom;
+    bottom  := r;
+  end;
+end;
+
 { TfpgRect }
 
 procedure TfpgRect.SetRect(aleft, atop, awidth, aheight: TfpgCoord);
@@ -669,9 +699,21 @@ end;
 
 { TfpgCanvasBase }
 
+procedure TfpgCanvasBase.SetInterpolation(const AValue: TfpgCustomInterpolation);
+begin
+  FInterpolation.Free;
+  FInterpolation := AValue;
+end;
+
 constructor TfpgCanvasBase.Create;
 begin
   FBufferedDraw := True;
+end;
+
+destructor TfpgCanvasBase.Destroy;
+begin
+  FInterpolation.Free;
+  inherited Destroy;
 end;
 
 procedure TfpgCanvasBase.DrawRectangle(x, y, w, h: TfpgCoord);
@@ -720,6 +762,21 @@ begin
     if FreeInterpolation then
       IP.Free;
   end;
+end;
+
+procedure TfpgCanvasBase.CopyRect(x, y: TfpgCoord; ACanvas: TfpgCanvasBase;
+  var SourceRect: TRect);
+var
+  xx, r, t: TfpgCoord;
+begin
+  SortRect(SourceRect);
+  with SourceRect do
+    for r := left to right do
+    begin
+      xx := r - left + x;
+      for t := bottom to top do
+        Pixels[xx, (t - bottom + y)] := ACanvas.Pixels[r, t];
+    end;
 end;
 
 procedure TfpgCanvasBase.DrawString(x, y: TfpgCoord; const txt: string);

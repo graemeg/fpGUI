@@ -14,7 +14,8 @@ uses
   gui_scrollbar,
   gui_button,
   gui_label,
-  gfx_imgfmt_bmp;
+  gfx_imgfmt_bmp,
+  gfx_extinterpolation;
 
 type
   { Note:
@@ -85,6 +86,8 @@ type
     procedure   btnCloseClick(Sender: TObject);
     procedure   CreateButtons;
     procedure   CreateScrollbars;
+  protected
+    procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -103,6 +106,8 @@ procedure TThemeScrollbar.HandlePaint;
 var
   imgwidth: integer;
   x: integer;
+  part: TfpgImage;
+  r: TRect;
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
@@ -130,12 +135,24 @@ begin
     { top button }
 //    if Pressed then
 //      Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded, btnIsPressed])
-      Canvas.DrawImagePart(0, 0, image, state*imgwidth, 0, imgwidth, 21);
+      state := 4;
+      r.Left := (state * imgwidth);
+      r.Top := 0;
+      r.Right := (r.Left + imgwidth);
+      r.Bottom := 21;
+      part := image.ImageFromRect(r);
+      Canvas.DrawImagePart(0, 0, image, r.Left, r.Top, width, width);
+//      Canvas.DrawImage(0, 0, part);
+      writeln('Width ', Width);
+      writeln('Height ', Height);
+//      Canvas.StretchDraw(0, 0, width, width, part);
+      part.Free;
+//      Canvas.DrawImagePart(0, 0, image, state*imgwidth, 0, imgwidth, 21);
 //    else
 //      Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded]);
 
     { bottom button }
-    DrawButton(0, Height - Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
+{    DrawButton(0, Height - Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
   end
   else
   begin
@@ -144,7 +161,8 @@ begin
   end;
 
   DrawSlider(True);
-
+}
+  end;
   Canvas.EndDraw;
 end;
 
@@ -155,7 +173,8 @@ var
   NewState: Integer;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
-
+  exit;
+  
   Pt := Point(X, Y);
   NewState := 0;
   if PtInRect(TopRect, Pt) then
@@ -175,9 +194,13 @@ end;
 constructor TThemeScrollbar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  Width := 17;
   State := 0;
   image := LoadImage_BMP(SetDirSeparators('../images/themes/luna/scrollbar.bmp'));
+//  image.CreateMaskFromSample(0, 0);
   image.UpdateImage;
+  
+  Canvas.InterpolationFilter := TBilinearInterpolation.Create;
 end;
 
 destructor TThemeScrollbar.Destroy;
@@ -431,6 +454,92 @@ begin
   sbsilverHor.Max   := 15;
   sbsilverHor.Orientation := orHorizontal;
   sbsilverHor.ThemeImage  := bmp;
+end;
+
+procedure TMainForm.HandlePaint;
+var
+  image: TfpgImage;
+  img: TfpgImage;
+  part: TfpgImage;
+  r: TRect;
+  x, y: TfpgCoord;
+begin
+  Canvas.BeginDraw;
+  inherited HandlePaint;
+  
+  
+  image := LoadImage_BMP(SetDirSeparators('../images/themes/luna/scrollbar.bmp'));
+//  image.CreateMaskFromSample(0, 0);
+  image.UpdateImage;
+
+  Canvas.InterpolationFilter := TfpgMitchelInterpolation.Create;
+  Canvas.StretchDraw(0, 0, Width, 21, image);
+
+  Canvas.InterpolationFilter := TBilinearInterpolation.Create;
+  Canvas.StretchDraw(0, 23, Width, 21, image);
+  
+  r.Left    := 0;
+  r.Top     := 0;
+  r.Right   := 32;
+  r.Bottom  := 21;
+  img := image.ImageFromRect(r);    // now we have the complete widget 32x21
+  // we need 17x17 size
+
+  Canvas.DrawImage(5, 46, img);
+
+  x := 5;
+  y := 69;
+  
+  // left border
+  r.Left    := 0;
+  r.Top     := 0;
+  r.Right   := 2;
+  r.Bottom  := 21;
+  part := img.ImageFromRect(r);
+  Canvas.StretchDraw(x, y, 3, 17, part);
+  
+  // top border
+  r.Left    := 2;
+  r.Top     := 0;
+  r.Right   := 32-2;
+  r.Bottom  := 2;
+  part := img.ImageFromRect(r);
+  Canvas.StretchDraw(x+2+r.Left, y+R.Top, 17-(2*2), r.Bottom-r.Top, part);
+  part.Free;
+
+  // bottom border
+  r.Left    := 2;
+  r.Top     := 21-2;
+  r.Right   := 32-2;
+  r.Bottom  := 21;
+  part := img.ImageFromRect(r);
+  Canvas.StretchDraw(x+2+r.Left, y+R.Top, 17-(2*2), r.Bottom-r.Top, part);
+  part.Free;
+
+  // right border
+  r.Left    := 32-2;
+  r.Top     := 0;
+  r.Right   := 32;
+  r.Bottom  := 21;
+  part := img.ImageFromRect(r);
+  Canvas.StretchDraw(x+4+r.Left, y+R.Top, r.Right-r.Left, 17, part);
+  part.Free;
+
+  // main body
+  r.Left    := 3;
+  r.Top     := 3;
+  r.Right   := 32-2;
+  r.Bottom  := 21-2;
+  part := img.ImageFromRect(r);
+  Canvas.StretchDraw(x+4+r.Left, y+2+R.Top, 17-(2*2), 17-(2*2), part);
+  part.Free;
+
+//  Canvas.StretchDraw(5, 69, 17, 17, partimg);
+  
+  img.Free;
+
+
+  Canvas.EndDraw;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
