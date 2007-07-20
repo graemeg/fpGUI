@@ -291,7 +291,8 @@ end;
     bmp: TfpgImage;
   begin
     SetPosition(200, 200, 500, 350);
-    WindowTitle := 'fpGUI Widget Test';
+//    WindowTitle := 'fpGUI Widget Test';
+    WindowTitle := 'Test Russian text -> Òåñò';
 
     label1 := CreateLabel(self, 5, 5, 'Hello world!');
     label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');

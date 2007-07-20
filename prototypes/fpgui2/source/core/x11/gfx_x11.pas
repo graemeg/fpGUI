@@ -183,7 +183,10 @@ uses
   baseunix,
   fpgfx,
   gfx_widget,  {$Note This dependency to gfx_widget must be removed.}
-  gui_form; // remove this!!!!!
+  gui_form, // remove this!!!!!
+  xatom,
+  gfx_utf8utils,
+  _netlayer;
 
 var
   xapplication: TfpgApplication;
@@ -1027,36 +1030,29 @@ end;
 
 procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);
 var
-  s: string;
-  p: PByte;
+  //s: string;
+  //p: PByte;
+  netlayer: TNETWindowLayer;
 begin
   if FWinHandle <= 0 then
     Exit;
 
-  s := atitle;
+  //s := atitle;
 
-  if length(s) > 0 then
-    p := @s[1]
-  else
-    p := nil;
-  XChangeProperty(xapplication.display, FWinHandle, 39, 31, 8, 0, p, length(s));
-  XChangeProperty(xapplication.display, FWinHandle, 37, 31, 8, 0, p, length(s));
+  //if length(s) > 0 then
+    //p := @s[1]
+  //else
+    //p := nil;
 
-  {
-var
-  tp: TXTextProperty;
-begin
-  tp.value    := PCUChar(ATitle);
-  tp.encoding := XA_WM_NAME;
-  tp.format   := 8;
-  tp.nitems   := UTF8Length(ATitle);
-
-  XSetWMName(xapplication.display, FWinHandle, @tp);
-  XStoreName(xapplication.display, FWinHandle, PChar(ATitle));
-  XSetIconName(xapplication.display, FWinHandle, PChar(ATitle));
-  XSetWMIconName(xapplication.display, FWinHandle, @tp);
-
-}
+  netlayer := TNETWindowLayer.Create(xapplication.display);
+  try
+    netlayer.WindowSetName(FWinHandle, PChar(ATitle));
+  finally
+    netlayer.Free;
+  end;
+  
+//  XChangeProperty(xapplication.display, FWinHandle, 39, 31, 8, 0, p, length(s));
+//  XChangeProperty(xapplication.display, FWinHandle, 37, 31, 8, 0, p, length(s));
 end;
 
 constructor TfpgWindowImpl.Create(AOwner: TComponent);
