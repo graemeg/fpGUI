@@ -1,3 +1,7 @@
+{
+  This demo shows how you can manipulate the data of a TfpgImage
+  directly.
+}
 program bitmaptest;
 
 {$mode objfpc}{$H+}
@@ -26,21 +30,12 @@ type
 { TMainForm }
 
 procedure TMainForm.HandlePaint;
-begin
-  Canvas.BeginDraw; // activate double buffering in time.
-  inherited HandlePaint;
-  Canvas.DrawImage(0, 0, img);
-  Canvas.EndDraw;
-end;
-
-constructor TMainForm.Create(AOwner: TComponent);
 var
   i, j: integer;
 begin
-  inherited Create(AOwner);
-  SetPosition(100, 100, 256, 256);
-  WindowTitle := 'fpGUI Bitmap Test';
-
+  Canvas.BeginDraw; // activate double buffering in time.
+//  inherited HandlePaint;
+  img.Free;
   img := TfpgImage.Create;
   img.AllocateImage(32, 256, 256);
   img.UpdateImage;
@@ -48,6 +43,15 @@ begin
   for j := 0 to 255 do
     for i := 0 to 255 do
       PLongWord(img.ImageData)[j * 256 + i] := (i shl 16) or (j shl 8);
+  Canvas.DrawImage(0, 0, img);
+  Canvas.EndDraw;
+end;
+
+constructor TMainForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SetPosition(100, 100, 256, 256);
+  WindowTitle := 'fpGUI Bitmap Test';
 end;
 
 destructor TMainForm.Destroy;
