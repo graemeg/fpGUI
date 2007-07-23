@@ -10,7 +10,8 @@ uses
   gfx_widget,
   gui_form,
   gfxbase,
-  gui_button;
+  gui_button,
+  fpgfx;
 
 type
 
@@ -21,16 +22,29 @@ type
     FDropDownCount: integer;
     FDropDown: TfpgForm;
     FBackgroundColor: TfpgColor;
+    FFocusItem: integer;
+    FFont: TfpgFont;
     FInternalBtn: TfpgButton;
+    FItems: TStringList;
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
     procedure   DoDropDown;
     procedure   InternalBtnClick(Sender: TObject);
+    procedure   InternalListBoxSelect(Sender: TObject);
+    procedure   SetFocusItem(const AValue: integer);
   protected
+    FMargin: integer;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
+    property    Items: TStringList read FItems;
+    property    FocusItem: integer read FFocusItem write SetFocusItem;
+    property    Font: TfpgFont read FFont;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+    function    Text: string;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterConstruction; override;
   end;
 
@@ -38,6 +52,9 @@ type
   TfpgComboBox = class(TfpgCustomComboBox)
   published
     property    DropDownCount;
+    property    Items;
+    property    FocusItem;
+    property    BackgroundColor;
   end;
   
 
@@ -47,8 +64,8 @@ function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringLi
 implementation
 
 uses
-  fpgfx,
-  Math;
+  Math,
+  gui_listbox;
 
 type
   // This is so we can access protected methods
@@ -58,31 +75,72 @@ type
   { TDropDownWindow }
 
   TDropDownWindow = class(TfpgForm)
+  private
+    FCallerWidget: TfpgWidget;
   protected
     procedure   HandlePaint; override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleShow; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    ListBox:    TfpgListBox;
+    property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   end;
 
 { TDropDownWindow }
 
 procedure TDropDownWindow.HandlePaint;
 begin
+  writeln('paint');
   Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.Clear(clWhite);
-  Canvas.SetColor(clYellow);
-  Canvas.SetLineStyle(2, lsSolid);
-  Canvas.DrawRectangle(1, 1, Width-1, Height-1);
   Canvas.EndDraw;
+end;
+
+procedure TDropDownWindow.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  writeln('DrowDownWindow:  KeyPress');
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  if consumed then
+    Exit; //==>
+    
+  if keycode = keyEscape then
+    Close;
+end;
+
+procedure TDropDownWindow.HandleShow;
+begin
+  writeln('show');
+
+  ListBox.Left := 0;
+  ListBox.Top  := 0;
+  ListBox.Width := Width;
+  ListBox.Height := Height;
+
+  inherited HandleShow;
+  ActiveWidget := ListBox;
+  CaptureMouse;
 end;
 
 constructor TDropDownWindow.Create(AOwner: TComponent);
 begin
+  writeln('create');
   inherited Create(AOwner);
   WindowType := wtPopup;
   WindowAttributes := [];
   WindowPosition := wpUser;
+
+  ListBox := TfpgListBox.Create(self);
+  ListBox.PopupFrame := True;
+end;
+
+destructor TDropDownWindow.Destroy;
+begin
+  ReleaseMouse;
+  inherited Destroy;
 end;
   
 
@@ -107,19 +165,42 @@ begin
   FDropDownCount := AValue;
 end;
 
+procedure TfpgCustomComboBox.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FBackgroundColor := AValue;
+    Repaint;
+  end;
+end;
+
 procedure TfpgCustomComboBox.DoDropDown;
 var
   pt: TPoint;
+  ddw: TDropDownWindow;
+  rowcount: integer;
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
     pt := WindowToScreen(Parent, Point(Left, Top+Height));
-    FDropDown          := TDropDownWindow.Create(nil);
-    FDropDown.Left     := pt.X;
-    FDropDown.Top      := pt.Y;
-    FDropDown.Width    := Width;
-    FDropDown.Height   := (DropDownCount * (Height-4));
+    FDropDown     := TDropDownWindow.Create(nil);
+    ddw           := TDropDownWindow(FDropDown);
+    ddw.Left      := pt.X;
+    ddw.Top       := pt.Y;
+    ddw.Width     := Width;
+    // adjust the height of the dropdown
+    rowcount := FItems.Count;
+    if rowcount > FDropDownCount then
+      rowcount := FDropDownCount;
+    if rowcount < 1 then
+      rowcount := 1;
+    ddw.Height    := (ddw.ListBox.RowHeight * rowcount) + 4;
+    ddw.CallerWidget := self;
+    ddw.ListBox.OnSelect := @InternalListBoxSelect;
+    // Assign combobox text items to internal listbox
+    ddw.ListBox.Items.Assign(FItems);
     FDropDown.Show;
+    ddw.ListBox.SetFocus;
   end
   else
   begin
@@ -131,6 +212,21 @@ end;
 procedure TfpgCustomComboBox.InternalBtnClick(Sender: TObject);
 begin
   DoDropDown;
+end;
+
+procedure TfpgCustomComboBox.InternalListBoxSelect(Sender: TObject);
+begin
+  FFocusItem := TDropDownWindow(FDropDown).ListBox.FocusItem;
+  FDropDown.Close;
+  if HasHandle then
+    Repaint;
+end;
+
+procedure TfpgCustomComboBox.SetFocusItem(const AValue: integer);
+begin
+  if FFocusItem = AValue then
+    Exit; //==>
+  FFocusItem := AValue;
 end;
 
 procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -159,23 +255,61 @@ begin
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-  // we already set the clip rectangle so we can paint full size
-  Canvas.FillRectAngle(2, 2, Width - 4, Height - 4);
-  //  Canvas.FillRectAngle(0,0,Width,Height);
+  Canvas.FillRectangle(2, 2, Width - 4, Height - 4);
+
 
 //  fpgStyle.DrawButtonFace(canvas, width - min(height, 20)-3, 2, height-4, height-4, [btnIsEmbedded]);
 //  fpgStyle.DrawDirectionArrow(canvas, width - height + 1, 1, height-2, height-2, 1);
 
+  Canvas.SetFont(Font);
+
+  if Focused then
+  begin
+    Canvas.SetColor(clSelection);
+    Canvas.SetTextColor(clSelectionText);
+  end
+  else
+  begin
+    Canvas.SetColor(FBackgroundColor);
+    Canvas.SetTextColor(clText1);
+  end;
+
+  Canvas.FillRectangle(r);
+  Canvas.SetClipRect(r);
+
+  // Draw select item's text
+  if FocusItem > -1 then
+    Canvas.DrawString(FMargin+1, FMargin, Text);
+
   Canvas.EndDraw;
+end;
+
+function TfpgCustomComboBox.Text: string;
+begin
+  if (FocusItem > -1) and (FocusItem <= FItems.Count) then
+    Result := FItems.Strings[FocusItem-1]
+  else
+    Result := '';
 end;
 
 constructor TfpgCustomComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FBackgroundColor := clBoxColor;
-  FDropDownCount   := 8;
-  FWidth := 120;
-  Height := 23;
+  FBackgroundColor  := clBoxColor;
+  FDropDownCount    := 8;
+  FWidth            := 120;
+  FHeight           := 23;
+  FFocusItem        := -1;
+  FMargin           := 3;
+  
+  FFont   := fpgGetFont('#List');
+  FItems  := TStringList.Create;
+end;
+
+destructor TfpgCustomComboBox.Destroy;
+begin
+  FItems.Free;
+  inherited Destroy;
 end;
 
 procedure TfpgCustomComboBox.AfterConstruction;

@@ -14,7 +14,6 @@ uses
   gui_edit,
   gui_combobox,
   gui_scrollbar,
-  uhelpers,
   gui_memo,
   gui_dialogs,
   gui_listbox;
@@ -64,6 +63,7 @@ type
     memo: TfpgMemo;
     listbox: TfpgListBox;
     combo1: TfpgComboBox;
+    combo2: TfpgComboBox;
     sbar: TfpgScrollBar;
     xpluna: TXPButton;
     xp2: TXPButton;
@@ -253,7 +253,6 @@ end;
   procedure TMainForm.btnDisplayBMP(Sender: TObject);
   var
     bmp: TfpgImage;
-    i: integer;
   begin
     bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
     bmp.CreateMaskFromSample(0, 0);
@@ -318,6 +317,11 @@ end;
     btn.ShowImage := True;
 
     combo1 := CreateComboBox(self, 10, 160, 120, nil);
+    for i := 1 to 5 do
+      combo1.Items.Add(Format('Items %.2d', [i]));
+    combo2 := CreateComboBox(self, 10, 190, 120, nil);
+    for i := 1 to 20 do
+      combo2.Items.Add(Format('Items %.2d', [i]));
 
     memo        := TfpgMemo.Create(self);
     memo.Top    := 10;
