@@ -1,6 +1,0 @@
-#
-#   Makefile.fpc for fpImg examples
-#
-
-[targets]
-dirs=disp_bmp masktest

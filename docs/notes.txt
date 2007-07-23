@@ -1,0 +1,38 @@
+
+  These are some notes I thought will come in handly as I work through the
+  code and write new code.
+
+
+Event handling
+===============
+* Each platform gets the events from the underlying graphics library.
+* Events get caught and translated into a fpGUI message record.
+* The fpGUI message record gets placed (using fpgPostMessage) in a custom
+  fpGUI message queue (which is a linkedlist structure with 512 links).
+* From there the fpGUI message records get delivered to the specific window.
+* Certain messages traverse up the hierarchy to be processed by all parents.
+* Messages get delivered up the hierarchy using the TObject.Dispatch method
+* Messages get delivered down the hierarchy using the TComponent.Components
+  property.
+* The standard 'message' language feature of Object Pascal gets used to in
+  the class interfaces section to capture a posted message (event). All
+  standard FPGM_xxx messages get handled in the TfpgWidget and TfpgForm 
+  classes.
+
+
+
+Pen and Brush support (X11)
+===========================
+* They come from the GC
+* They are seperate GC's and swapped around when needed in the different 
+  Xlib drawing routines.  Both created with the XCreateGC() function
+  eg:
+    d->gc            = Pen
+    d->gc_brush      = Brush
+
+    XFillRectangle(dpy, screen, d->gc_brush, .....);
+    XDrawRectangle(dpy, screen, d->gc, .....);
+
+* Updating the Pen and Brush attributes are done with a call to XChangeGC(),
+  passing in the relevant GC (d->gc or d->gc_brush).
+
