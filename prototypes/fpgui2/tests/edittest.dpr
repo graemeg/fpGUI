@@ -229,7 +229,7 @@ begin
   Height := 21;
   State := 0;
   
-  image := LoadImage_BMP(SetDirSeparators('../images/themes/luna/button.bmp'));
+  image := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
   image.CreateMaskFromSample(0, 0);
   image.UpdateImage;
   if not Assigned(image) then
@@ -255,7 +255,7 @@ end;
     bmp: TfpgImage;
     i: integer;
   begin
-    bmp := LoadImage_BMP(SetDirSeparators('../images/themes/luna/button.bmp'));
+    bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
     bmp.CreateMaskFromSample(0, 0);
     bmp.UpdateImage;
 
@@ -359,7 +359,7 @@ end;
     xpsilver.Top     := 230;
     xpsilver.Width   := 75;
     xpsilver.Text    := 'XP Silver';
-    bmp := LoadImage_BMP(SetDirSeparators('../images/themes/silver/button.bmp'));
+    bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/button.bmp'));
     bmp.CreateMaskFromSample(0, 0);
     bmp.UpdateImage;
     xpsilver.ThemeImage := bmp;

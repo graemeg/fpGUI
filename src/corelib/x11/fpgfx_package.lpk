@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="2">
-    <Name Value="fpGFX2"/>
+    <Name Value="fpgfx_package"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
       <Version Value="5"/>
@@ -19,12 +19,12 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="fpGFX redesign with multiple handles per window
+    <Description Value="fpGUI redesign with multiple handles
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="1"/>
-    <Files Count="21">
+    <Version Minor="5"/>
+    <Files Count="10">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -38,77 +38,33 @@
         <UnitName Value="gfxbase"/>
       </Item3>
       <Item4>
-        <Filename Value="../gfxbaseinterfaces.pas"/>
-        <UnitName Value="gfxbaseinterfaces"/>
-      </Item4>
-      <Item5>
         <Filename Value="gfx_x11.pas"/>
         <UnitName Value="gfx_x11"/>
-      </Item5>
-      <Item6>
+      </Item4>
+      <Item5>
         <Filename Value="../fpgfx.pas"/>
         <UnitName Value="fpgfx"/>
-      </Item6>
-      <Item7>
+      </Item5>
+      <Item6>
         <Filename Value="../gfx_stdimages.pas"/>
         <UnitName Value="gfx_stdimages"/>
-      </Item7>
-      <Item8>
+      </Item6>
+      <Item7>
         <Filename Value="../gfx_imgfmt_bmp.pas"/>
         <UnitName Value="gfx_imgfmt_bmp"/>
-      </Item8>
-      <Item9>
+      </Item7>
+      <Item8>
         <Filename Value="../gfx_widget.pas"/>
         <UnitName Value="gfx_widget"/>
-      </Item9>
-      <Item10>
-        <Filename Value="../../gui/gui_form.pas"/>
-        <UnitName Value="gui_form"/>
-      </Item10>
-      <Item11>
-        <Filename Value="../../gui/gui_label.pas"/>
-        <UnitName Value="gui_label"/>
-      </Item11>
-      <Item12>
-        <Filename Value="../../gui/gui_button.pas"/>
-        <UnitName Value="gui_button"/>
-      </Item12>
-      <Item13>
-        <Filename Value="../../gui/gui_edit.pas"/>
-        <UnitName Value="gui_edit"/>
-      </Item13>
-      <Item14>
-        <Filename Value="../../gui/gui_combobox.pas"/>
-        <UnitName Value="gui_combobox"/>
-      </Item14>
-      <Item15>
-        <Filename Value="../../gui/gui_popupwindow.pas"/>
-        <UnitName Value="gui_popupwindow"/>
-      </Item15>
-      <Item16>
-        <Filename Value="../../gui/gui_scrollbar.pas"/>
-        <UnitName Value="gui_scrollbar"/>
-      </Item16>
-      <Item17>
+      </Item8>
+      <Item9>
         <Filename Value="../gfx_utf8utils.pas"/>
         <UnitName Value="gfx_UTF8utils"/>
-      </Item17>
-      <Item18>
-        <Filename Value="../../gui/gui_dialogs.pas"/>
-        <UnitName Value="gui_dialogs"/>
-      </Item18>
-      <Item19>
-        <Filename Value="../../gui/gui_listbox.pas"/>
-        <UnitName Value="gui_listbox"/>
-      </Item19>
-      <Item20>
-        <Filename Value="../../gui/gui_memo.pas"/>
-        <UnitName Value="gui_memo"/>
-      </Item20>
-      <Item21>
+      </Item9>
+      <Item10>
         <Filename Value="../gfx_extinterpolation.pas"/>
         <UnitName Value="gfx_extinterpolation"/>
-      </Item21>
+      </Item10>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

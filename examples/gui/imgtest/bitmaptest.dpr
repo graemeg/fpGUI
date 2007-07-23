@@ -7,35 +7,30 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
-  gfx_imgfmt_bmp;
+  gfx_imgfmt_bmp,
+  gui_form;
 
 type
 
-  TMainForm = class(TfpgWindow)
+  TMainForm = class(TfpgForm)
   private
     img: TfpgImage;
-    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
-    procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
+  protected
+    procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   Show;
   end;
 
 
 { TMainForm }
 
-procedure TMainForm.MsgPaint(var msg: TfpgMessageRec);
+procedure TMainForm.HandlePaint;
 begin
-  Canvas.BeginDraw;
+  Canvas.BeginDraw; // activate double buffering in time.
+  inherited HandlePaint;
   Canvas.DrawImage(0, 0, img);
   Canvas.EndDraw;
-end;
-
-procedure TMainForm.MsgClose(var msg: TfpgMessageRec);
-begin
-  ReleaseWindowHandle;
-  Halt(0);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -43,10 +38,9 @@ var
   i, j: integer;
 begin
   inherited Create(AOwner);
-  FWidth    := 256;
-  FHeight   := 256;
-  WindowAttributes := [waScreenCenterPos];
-  
+  SetPosition(100, 100, 256, 256);
+  WindowTitle := 'fpGUI Bitmap Test';
+
   img := TfpgImage.Create;
   img.AllocateImage(32, 256, 256);
   img.UpdateImage;
@@ -62,13 +56,6 @@ begin
   inherited Destroy;
 end;
 
-procedure TMainForm.Show;
-begin
-  AllocateWindowHandle;
-  // We can only set the title once we have a window handle.
-  SetWindowTitle('fpGUI Bitmap Test');
-end;
-
 
 procedure MainProc;
 var
@@ -79,6 +66,7 @@ begin
   frm.Show;
   fpgApplication.Run;
 end;
+
 
 begin
   MainProc;

@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="2">
+    <Name Value="fpgui_package"/>
+    <Author Value="Graeme Geldenhuys"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)/"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="fpGUI - multi-handle redesign"/>
+    <License Value="Modified LGPL"/>
+    <Version Minor="5"/>
+    <Files Count="10">
+      <Item1>
+        <Filename Value="gui_button.pas"/>
+        <UnitName Value="gui_button"/>
+      </Item1>
+      <Item2>
+        <Filename Value="gui_combobox.pas"/>
+        <UnitName Value="gui_combobox"/>
+      </Item2>
+      <Item3>
+        <Filename Value="gui_dialogs.pas"/>
+        <UnitName Value="gui_dialogs"/>
+      </Item3>
+      <Item4>
+        <Filename Value="gui_edit.pas"/>
+        <UnitName Value="gui_edit"/>
+      </Item4>
+      <Item5>
+        <Filename Value="gui_form.pas"/>
+        <UnitName Value="gui_form"/>
+      </Item5>
+      <Item6>
+        <Filename Value="gui_label.pas"/>
+        <UnitName Value="gui_label"/>
+      </Item6>
+      <Item7>
+        <Filename Value="gui_listbox.pas"/>
+        <UnitName Value="gui_listbox"/>
+      </Item7>
+      <Item8>
+        <Filename Value="gui_memo.pas"/>
+        <UnitName Value="gui_memo"/>
+      </Item8>
+      <Item9>
+        <Filename Value="gui_popupwindow.pas"/>
+        <UnitName Value="gui_popupwindow"/>
+      </Item9>
+      <Item10>
+        <Filename Value="gui_scrollbar.pas"/>
+        <UnitName Value="gui_scrollbar"/>
+      </Item10>
+    </Files>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="fpgfx_package"/>
+        <MinVersion Minor="5" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)/"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

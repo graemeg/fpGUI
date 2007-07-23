@@ -196,7 +196,7 @@ begin
   inherited Create(AOwner);
   Width := 17;
   State := 0;
-  image := LoadImage_BMP(SetDirSeparators('../images/themes/luna/scrollbar.bmp'));
+  image := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/scrollbar.bmp'));
 //  image.CreateMaskFromSample(0, 0);
   image.UpdateImage;
   
@@ -369,7 +369,7 @@ begin
   Height := 21;
   State := 0;
 
-  image := LoadImage_BMP(SetDirSeparators('../images/themes/luna/button.bmp'));
+  image := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
   image.CreateMaskFromSample(0, 0);
   image.UpdateImage;
   if not Assigned(image) then
@@ -414,7 +414,7 @@ begin
   xpsilver.Top        := 45;
   xpsilver.Width      := 75;
   xpsilver.Text       := 'XP Silver';
-  bmp := LoadImage_BMP(SetDirSeparators('../images/themes/silver/button.bmp'));
+  bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/button.bmp'));
   bmp.CreateMaskFromSample(0, 0);
   bmp.UpdateImage;
   xpsilver.ThemeImage := bmp;
@@ -424,7 +424,7 @@ procedure TMainForm.CreateScrollbars;
 var
   bmp: TfpgImage;
 begin
-  bmp := LoadImage_BMP(SetDirSeparators('../images/themes/silver/scrollbar.bmp'));
+  bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/scrollbar.bmp'));
   bmp.UpdateImage;
 
   sbluna            := TThemeScrollBar.Create(self);
@@ -468,7 +468,7 @@ begin
   inherited HandlePaint;
   
   
-  image := LoadImage_BMP(SetDirSeparators('../images/themes/luna/scrollbar.bmp'));
+  image := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/scrollbar.bmp'));
 //  image.CreateMaskFromSample(0, 0);
   image.UpdateImage;
 
