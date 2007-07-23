@@ -26,6 +26,7 @@ type
     FFont: TfpgFont;
     FInternalBtn: TfpgButton;
     FItems: TStringList;
+    FOnChange: TNotifyEvent;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
     procedure   DoDropDown;
@@ -42,6 +43,7 @@ type
     property    Font: TfpgFont read FFont;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     function    Text: string;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -55,6 +57,7 @@ type
     property    Items;
     property    FocusItem;
     property    BackgroundColor;
+    property    OnChange;
   end;
   
 
@@ -66,6 +69,9 @@ implementation
 uses
   Math,
   gui_listbox;
+  
+var
+  OriginalFocusRoot: TfpgWidget;
 
 type
   // This is so we can access protected methods
@@ -81,6 +87,7 @@ type
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
+    procedure   HandleHide; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -92,7 +99,6 @@ type
 
 procedure TDropDownWindow.HandlePaint;
 begin
-  writeln('paint');
   Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.Clear(clWhite);
@@ -102,18 +108,22 @@ end;
 procedure TDropDownWindow.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
-  writeln('DrowDownWindow:  KeyPress');
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
-  if consumed then
-    Exit; //==>
-    
+  writeln('DropDownWindow - KeyPress');
   if keycode = keyEscape then
+  begin
     Close;
+    consumed := True;
+  end;
+  
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+//  if consumed then
+//    Exit; //==>
+    
 end;
 
 procedure TDropDownWindow.HandleShow;
 begin
-  writeln('show');
+  FocusRootWidget := ListBox;
 
   ListBox.Left := 0;
   ListBox.Top  := 0;
@@ -121,17 +131,25 @@ begin
   ListBox.Height := Height;
 
   inherited HandleShow;
-  ActiveWidget := ListBox;
-  CaptureMouse;
+//  CaptureMouse;
+end;
+
+procedure TDropDownWindow.HandleHide;
+begin
+  writeln('handlehide');
+  FocusRootWidget := OriginalFocusRoot;
+  OriginalFocusRoot := nil;
+  inherited HandleHide;
+  if Assigned(FocusRootWidget) then
+    FocusRootWidget.SetFocus;
 end;
 
 constructor TDropDownWindow.Create(AOwner: TComponent);
 begin
-  writeln('create');
   inherited Create(AOwner);
-  WindowType := wtPopup;
-  WindowAttributes := [];
-  WindowPosition := wpUser;
+  WindowType        := wtPopup;
+  WindowAttributes  := [];
+  WindowPosition    := wpUser;
 
   ListBox := TfpgListBox.Create(self);
   ListBox.PopupFrame := True;
@@ -139,7 +157,7 @@ end;
 
 destructor TDropDownWindow.Destroy;
 begin
-  ReleaseMouse;
+//  ReleaseMouse;
   inherited Destroy;
 end;
   
@@ -182,6 +200,7 @@ var
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
+    OriginalFocusRoot := FocusRootWidget;
     pt := WindowToScreen(Parent, Point(Left, Top+Height));
     FDropDown     := TDropDownWindow.Create(nil);
     ddw           := TDropDownWindow(FDropDown);
@@ -197,13 +216,17 @@ begin
     ddw.Height    := (ddw.ListBox.RowHeight * rowcount) + 4;
     ddw.CallerWidget := self;
     ddw.ListBox.OnSelect := @InternalListBoxSelect;
-    // Assign combobox text items to internal listbox
+
+    // Assign combobox text items to internal listbox and set default focusitem
     ddw.ListBox.Items.Assign(FItems);
+    ddw.ListBox.FocusItem := FFocusItem;
+
     FDropDown.Show;
     ddw.ListBox.SetFocus;
   end
   else
   begin
+    writeln('DoDropDown - closing dropdown');
     FDropDown.Close;
     FreeAndNil(FDropDown);
   end;
@@ -220,6 +243,8 @@ begin
   FDropDown.Close;
   if HasHandle then
     Repaint;
+  if Assigned(FOnChange) then
+    FOnChange(self);
 end;
 
 procedure TfpgCustomComboBox.SetFocusItem(const AValue: integer);
@@ -286,7 +311,7 @@ end;
 
 function TfpgCustomComboBox.Text: string;
 begin
-  if (FocusItem > -1) and (FocusItem <= FItems.Count) then
+  if (FocusItem > 0) and (FocusItem <= FItems.Count) then
     Result := FItems.Strings[FocusItem-1]
   else
     Result := '';
@@ -299,11 +324,13 @@ begin
   FDropDownCount    := 8;
   FWidth            := 120;
   FHeight           := 23;
-  FFocusItem        := -1;
+  FFocusItem        := 0;
   FMargin           := 3;
   
   FFont   := fpgGetFont('#List');
   FItems  := TStringList.Create;
+  
+  FOnChange := nil;
 end;
 
 destructor TfpgCustomComboBox.Destroy;

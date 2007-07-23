@@ -587,7 +587,7 @@ constructor TfpgTextListBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FItems := TfpgListBoxStrings.Create(self);
-  FFocusItem := -1;
+  FFocusItem := 0;
 end;
 
 destructor TfpgTextListBox.Destroy;
