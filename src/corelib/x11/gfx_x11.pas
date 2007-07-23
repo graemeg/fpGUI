@@ -689,7 +689,6 @@ begin
           msgp.mouse.shiftstate := ConvertShiftState(ev.xbutton.state);
 
           w := FindWindowByHandle(ev.xbutton.window);
-          
           if fpgTopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
@@ -756,6 +755,15 @@ begin
             //
           until not XCheckTypedWindowEvent(display, ev.xbutton.window, X.MotionNotify, @ev);
 
+          w := FindWindowByHandle(ev.xany.window);
+          if fpgTopModalForm <> nil then
+          begin
+            // This is ugly!!!!!!!!!!!!!!!
+            ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+            if (ew <> nil) and (fpgTopModalForm <> ew) then
+              blockmsg := true;
+          end;
+
           if not blockmsg then
           begin
             msgp.mouse.x          := ev.xmotion.x;
@@ -768,8 +776,19 @@ begin
 
     // message blockings for modal windows
     X.ClientMessage:
-        if not blockmsg then
-          fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
+        begin
+          w := FindWindowByHandle(ev.xany.window);
+          if fpgTopModalForm <> nil then
+          begin
+            // This is ugly!!!!!!!!!!!!!!!
+            ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+            if (ew <> nil) and (fpgTopModalForm <> ew) then
+              blockmsg := true;
+          end;
+          
+          if not blockmsg then
+            fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
+        end;
 
 
     X.ConfigureNotify:
