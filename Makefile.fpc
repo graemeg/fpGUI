@@ -1,7 +1,0 @@
-#
-#   Makefile.fpc for fpGFX base tree
-#
-
-[target]
-dirs=src
-exampledirs=examples
