@@ -695,7 +695,7 @@ var
   dw: integer;
   dh: integer;
 begin
-  FAlignRect.top    := 0;
+  FAlignRect.Top    := 0;
   FAlignRect.Left   := 0;
   FAlignRect.Width  := Width;
   FAlignRect.Height := Height;

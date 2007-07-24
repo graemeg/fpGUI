@@ -116,7 +116,8 @@ procedure TfpgLabel.ResizeLabel;
 begin
   Width   := FFont.TextWidth(FText);
   Height  := FFont.Height;
-  UpdateWindowPosition;
+  MoveAndResize(Left, Top, Width, Height);
+//  UpdateWindowPosition;
 end;
 
 constructor TfpgLabel.Create(AOwner: TComponent);
