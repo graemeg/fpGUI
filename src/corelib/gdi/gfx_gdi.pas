@@ -127,6 +127,7 @@ type
     FParentWinHandle: TfpgWinHandle;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
+    procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
@@ -853,24 +854,6 @@ begin
 
   // the forms require some adjustments before the Window appears
   SetWindowParameters;
-
-  BringWindowToTop(FWinHandle);
-
-  if FWindowType in [wtPopup] then
-    Windows.ShowWindow(FWinHandle, SW_SHOWNOACTIVATE)
-  else
-    Windows.ShowWindow(FWinHandle, SW_SHOWNORMAL);
-
-  if (waAutoPos in FWindowAttributes) or
-    (waScreenCenterPos in FWindowAttributes) then
-  begin
-    GetWindowRect(FWinHandle, r);
-    FLeft := r.Left;
-    FTop  := r.Top;
-  end;
-
-  // send the first paint message
-  Windows.UpdateWindow(FWinHandle);
 end;
 
 procedure TfpgWindowImpl.DoReleaseWindowHandle;
@@ -879,6 +862,34 @@ begin
     Exit;
   Windows.DestroyWindow(FWinHandle);
   FWinHandle := 0;
+end;
+
+procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);
+var
+  r: TRect;
+begin
+  if AValue then begin
+    BringWindowToTop(FWinHandle);
+
+    if FWindowType in [wtPopup] then
+      Windows.ShowWindow(FWinHandle, SW_SHOWNOACTIVATE)
+    else
+      Windows.ShowWindow(FWinHandle, SW_SHOWNORMAL);
+
+    if (waAutoPos in FWindowAttributes) or
+      (waScreenCenterPos in FWindowAttributes) then
+    begin
+      GetWindowRect(FWinHandle, r);
+      FLeft := r.Left;
+      FTop  := r.Top;
+    end;
+
+    Windows.UpdateWindow(FWinHandle);
+  end
+  else begin
+    Windows.ShowWindow(FWinHandle, SW_HIDE);
+  end;
+
 end;
 
 procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);

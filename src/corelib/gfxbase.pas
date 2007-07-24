@@ -307,6 +307,7 @@ type
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
+    procedure   DoSetWindowVisible(const AValue: Boolean); virtual; abstract;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
@@ -342,17 +343,12 @@ type
   end;
 
 
-  { TfpgApplicationBase }
-
   TfpgApplicationBase = class(TObject)
-  private
-    FTopModalForm: TfpgWindowBase;
   protected
     FIsInitialized: Boolean;
   public
     constructor Create(const AParams: string); virtual; abstract;
     property    IsInitialized: boolean read FIsInitialized;
-    property    TopModalForm: TfpgWindowBase read FTopModalForm write FTopModalForm;
   end;
 
 

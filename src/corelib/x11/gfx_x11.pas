@@ -41,6 +41,11 @@ type
   end;
 
 type
+
+  TXWindowStateFlag = (xwsfMapped);
+  
+  TXWindowStateFlags = set of TXWindowStateFlag;
+  
   TfpgWindowImpl = class;
 
 
@@ -121,10 +126,12 @@ type
 
   TfpgWindowImpl = class(TfpgWindowBase)
   protected
+    FWinFlags : TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
     FModalForWin: TfpgWindowImpl;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
+    procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
@@ -610,20 +617,15 @@ begin
   xfd := XConnectionNumber(display);
 
   repeat
-    if (atimeoutms >= 0) and (XPending(display) <= 0) then
+    if (atimeoutms > 0) and (XPending(display) <= 0) then
     begin
       // waiting some event for the given timeout
 
       // this Select handles only the first 256 file descriptors
       // poll would be better but FPC has no official poll interface (if I'm right)
-      if atimeoutms > 0 then
-      begin
-        fpFD_ZERO(rfds);
-        fpFD_SET(xfd, rfds);
-        r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
-      end
-      else
-        r := 0;
+      fpFD_ZERO(rfds);
+      fpFD_SET(xfd, rfds);
+      r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
 
       if r <= 0 then
         Exit; // no event received.
@@ -689,11 +691,11 @@ begin
           msgp.mouse.shiftstate := ConvertShiftState(ev.xbutton.state);
 
           w := FindWindowByHandle(ev.xbutton.window);
-          if xapplication.TopModalForm <> nil then
+          if fpgTopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
+            if (ew <> nil) and (fpgTopModalForm <> ew) then
               blockmsg := true;
           end;
       
@@ -756,11 +758,11 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xbutton.window, X.MotionNotify, @ev);
 
           w := FindWindowByHandle(ev.xany.window);
-          if xapplication.TopModalForm <> nil then
+          if fpgTopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
+            if (ew <> nil) and (fpgTopModalForm <> ew) then
               blockmsg := true;
           end;
 
@@ -778,11 +780,11 @@ begin
     X.ClientMessage:
         begin
           w := FindWindowByHandle(ev.xany.window);
-          if xapplication.TopModalForm <> nil then
+          if fpgTopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
+            if (ew <> nil) and (fpgTopModalForm <> ew) then
               blockmsg := true;
           end;
           
@@ -848,11 +850,19 @@ begin
     X.LeaveNotify:
         fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEEXIT);
 
-    { We handle these two event manually in the TfpgForm class }
-    X.MapNotify,
+    X.MapNotify:
+        begin
+          w := FindWindowByHandle(ev.xmap.window);
+          if w <> nil then begin
+            Include(w.FWinFlags, xwsfMapped);
+          end;
+        end;
     X.UnmapNotify:
         begin
-          //Writeln('UnmapNotify');
+          w := FindWindowByHandle(ev.xunmap.window);
+          if w <> nil then begin
+            Exclude(w.FWinFlags, xwsfMapped);
+          end;
         end;
 
     { We handle this event manually as well. }
@@ -987,7 +997,7 @@ begin
       StructureNotifyMask);
 
   SetWindowParameters;
-  XMapWindow(xapplication.Display, wh);
+  
   AddWindowLookup(self);
 end;
 
@@ -1000,6 +1010,19 @@ begin
   XDestroyWindow(xapplication.Display, FWinHandle);
 
   FWinHandle := 0;
+end;
+
+procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);
+begin
+  if AValue then begin
+    if not HandleIsValid then AllocateWindowHandle;
+    XMapWindow(xapplication.Display, FWinHandle);
+    Include(FWinFlags, xwsfMapped);
+  end
+  else begin
+    if HandleIsValid  and (xwsfMapped in FWinFlags) then
+      XUnmapWindow(xapplication.Display, FWinHandle);
+  end;
 end;
 
 function TfpgWindowImpl.HandleIsValid: boolean;
