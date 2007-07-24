@@ -184,8 +184,6 @@ type
   end;
 
 
-  { TfpgTimer }
-
   TfpgTimer = class
   private
     FEnabled: boolean;
@@ -205,7 +203,7 @@ type
   end;
 
 
-  { Caret (text cursor). Inverts painting over text and has blinking
+  { Caret or text cursor, inverts painting over text and has blinking
     support. }
   TfpgCaret = class
   private

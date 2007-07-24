@@ -868,7 +868,8 @@ procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);
 var
   r: TRect;
 begin
-  if AValue then begin
+  if AValue then
+  begin
     BringWindowToTop(FWinHandle);
 
     if FWindowType in [wtPopup] then
@@ -883,13 +884,10 @@ begin
       FLeft := r.Left;
       FTop  := r.Top;
     end;
-
     Windows.UpdateWindow(FWinHandle);
   end
-  else begin
+  else
     Windows.ShowWindow(FWinHandle, SW_HIDE);
-  end;
-
 end;
 
 procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);

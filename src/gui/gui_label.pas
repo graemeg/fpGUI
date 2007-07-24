@@ -29,6 +29,7 @@ type
     FText: string;
     FFont: TfpgFont;
     procedure   HandlePaint; override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -146,6 +147,11 @@ begin
   Canvas.SetTextColor(FColor);
   Canvas.DrawString(0, 0, FText);
   Canvas.EndDraw;
+end;
+
+procedure TfpgLabel.HandleResize(awidth, aheight: TfpgCoord);
+begin
+  inherited HandleResize(awidth, aheight);
 end;
 
 end.
