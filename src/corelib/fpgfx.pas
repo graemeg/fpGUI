@@ -455,6 +455,7 @@ begin
   FDisplayParams  := aparams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
+  TopModalForm   := nil;
 
   inherited Create(aparams);
   

@@ -342,12 +342,17 @@ type
   end;
 
 
+  { TfpgApplicationBase }
+
   TfpgApplicationBase = class(TObject)
+  private
+    FTopModalForm: TfpgWindowBase;
   protected
     FIsInitialized: Boolean;
   public
     constructor Create(const AParams: string); virtual; abstract;
     property    IsInitialized: boolean read FIsInitialized;
+    property    TopModalForm: TfpgWindowBase read FTopModalForm write FTopModalForm;
   end;
 
 

@@ -24,7 +24,7 @@ type
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
   protected
-    FPrevModalForm: TfpgForm;
+    FPrevModalForm: TfpgWindowBase;
     FModalResult: integer;
     FParentForm: TfpgForm;
     FWindowPosition: TWindowPosition;
@@ -70,7 +70,6 @@ var
   // Don't like this. It's a bit of a hack. Possibly move this into
   // fpgApplication, but do we want fpgApplication to have that dependency??
   fpgMainForm: TfpgForm;
-  fpgTopModalForm: TfpgForm;
 
 function WidgetParentForm(wg: TfpgWidget): TfpgForm;
 
@@ -90,7 +89,7 @@ begin
     if w is TfpgForm then
     begin
       Result := TfpgForm(w);
-      Exit;
+      Exit; //==>
     end;
     w := w.Parent;
   end;
@@ -107,7 +106,7 @@ end;
 
 procedure TfpgForm.MsgActivate(var msg: TfpgMessageRec);
 begin
-  if (fpgTopModalForm = nil) or (fpgTopModalForm = self) then
+  if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
     FocusRootWidget := self;
     if ActiveWidget = nil then
@@ -190,8 +189,8 @@ end;
 
 function TfpgForm.ShowModal: integer;
 begin
-  FPrevModalForm  := fpgTopModalForm;
-  fpgTopModalForm := self;
+  FPrevModalForm  := fpgApplication.TopModalForm;
+  fpgApplication.TopModalForm := self;
   ModalResult     := 0;
 
   Show;
@@ -202,7 +201,7 @@ begin
     fpgWaitWindowMessage;
   until (ModalResult <> 0) or (not Visible);
 
-  fpgTopModalForm := FPrevModalForm;
+  fpgApplication.TopModalForm := FPrevModalForm;
   Result := ModalResult;
 end;
 
@@ -248,8 +247,8 @@ end;
 
 procedure TfpgForm.Hide;
 begin
-  if (fpgTopModalForm = self) then
-    fpgTopModalForm := self.FPrevModalForm;
+  if (fpgApplication.TopModalForm = self) then
+    fpgApplication.TopModalForm := FPrevModalForm;
   HandleHide;
   if ModalResult = 0 then
     ModalResult := -1;
@@ -264,7 +263,6 @@ end;
 
 initialization
   fpgMainForm     := nil;
-  fpgTopModalForm := nil;
 
 end.
 

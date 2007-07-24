@@ -174,7 +174,8 @@ implementation
 uses
   {$Note Remove the dependency on gfx_widget and gfx_form units.}
   fpgfx,
-  gfx_widget,//, gfx_form;
+  gfx_widget,
+  gui_form, // remove this!!!!!
   gfx_UTF8Utils;
 
 var
@@ -321,7 +322,7 @@ begin
   if not Assigned(w) then
   begin
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
-    Exit;
+    Exit; //==>
   end;
 
   blockmsg := False;
@@ -331,38 +332,36 @@ begin
     WM_CHAR,
     WM_KEYUP,
     WM_KEYDOWN:
-    begin
-      kwg := FindKeyboardFocus;
-      if kwg <> nil then
-        w := kwg;
-
-      msgp.keyboard.shiftstate := GetKeyboardShiftState;
-      msgp.keyboard.keycode := VirtKeyToKeycode(wParam);
-
-      if uMsg = WM_KEYDOWN then
-      begin
-        fpgSendMessage(nil, w, FPGM_KEYPRESS, msgp);
-
-        // generating WM_CHAR
-        fillchar(wmsg, sizeof(wmsg), 0);
-
-        wmsg.hwnd    := hwnd;
-        wmsg.message := uMsg;
-        wmsg.wParam  := wParam;
-        wmsg.lParam  := lParam;
-
-        Windows.TranslateMessage(@wmsg);
-
-        // TranslateMessage sends WM_CHAR ocassionally
-        // but NOBODY KNOWS WHEN!
-        
-        
-        if (wParam = $2e {VK_DELETE}) then
         begin
-          msgp.keyboard.keychar := #127;
-          msgp.keyboard.keycode := 0;
-          fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
-        end;
+          kwg := FindKeyboardFocus;
+          if kwg <> nil then
+            w := kwg;
+
+          msgp.keyboard.shiftstate := GetKeyboardShiftState;
+          msgp.keyboard.keycode := VirtKeyToKeycode(wParam);
+
+          if uMsg = WM_KEYDOWN then
+          begin
+            fpgSendMessage(nil, w, FPGM_KEYPRESS, msgp);
+
+            // generating WM_CHAR
+            fillchar(wmsg, sizeof(wmsg), 0);
+
+            wmsg.hwnd    := hwnd;
+            wmsg.message := uMsg;
+            wmsg.wParam  := wParam;
+            wmsg.lParam  := lParam;
+
+            Windows.TranslateMessage(@wmsg);
+            // TranslateMessage sends WM_CHAR ocassionally
+            // but NOBODY KNOWS WHEN!
+
+            if (wParam = $2e {VK_DELETE}) then
+            begin
+              msgp.keyboard.keychar := #127;
+              msgp.keyboard.keycode := 0;
+              fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
+            end;
 
         // lets generate the FPGM_KEYCHAR for some special keys
         // based on this table of Windows virtual keys
@@ -377,16 +376,15 @@ begin
 //          end;
 //        end;
 
-      end
-      else if uMsg = WM_KEYUP then
-        fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
-      else if uMsg = WM_CHAR then
-      begin
-        msgp.keyboard.keychar := Chr(wParam);
-        fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
-      end;
-
-    end;
+          end
+          else if uMsg = WM_KEYUP then
+            fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
+          else if uMsg = WM_CHAR then
+          begin
+            msgp.keyboard.keychar := Chr(wParam);
+            fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
+          end;
+        end;
 
 (*
     WM_SETCURSOR:
@@ -407,158 +405,169 @@ begin
     WM_LBUTTONDBLCLK,
     WM_RBUTTONDOWN,
     WM_RBUTTONUP:
-    begin
-      msgp.mouse.x := smallint(lParam and $FFFF);
-      msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
-
-      case uMsg of
-        WM_MOUSEMOVE:
-          mcode := FPGM_MOUSEMOVE;
-        WM_LBUTTONDOWN,
-        WM_RBUTTONDOWN:
-          mcode := FPGM_MOUSEDOWN;
-        WM_LBUTTONUP,
-        WM_RBUTTONUP:
-          mcode := FPGM_MOUSEUP;
-        WM_LBUTTONDBLCLK:
-          mcode := FPGM_DOUBLECLICK;
-        else
-          mcode := 0;
-      end;
-
-      case uMsg of
-        WM_MOUSEMOVE:
         begin
-          i := 0;
-          if (wParam and MK_LBUTTON) <> 0 then
-            i := i or MOUSE_LEFT;
-          if (wParam and MK_RBUTTON) <> 0 then
-            i := i or MOUSE_RIGHT;
-          if (wParam and MK_MBUTTON) <> 0 then
-            i := i or MOUSE_MIDDLE;
-          msgp.mouse.Buttons := i;
+          msgp.mouse.x := smallint(lParam and $FFFF);
+          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
+(*
+          if (wapplication.TopModalForm <> nil) then
+          begin
+            mw := nil;
+            mw := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+            if (mw <> nil) and (wapplication.TopModalForm <> mw) then
+              blockmsg := True;
+          end;
+*)
+//          Writeln('blockmsg ', blockmsg);
+          if not blockmsg then
+          begin
+//            writeln('  we are continueing the event processing...');
+            case uMsg of
+              WM_MOUSEMOVE:
+                mcode := FPGM_MOUSEMOVE;
+              WM_LBUTTONDOWN,
+              WM_RBUTTONDOWN:
+                mcode := FPGM_MOUSEDOWN;
+              WM_LBUTTONUP,
+              WM_RBUTTONUP:
+                mcode := FPGM_MOUSEUP;
+              WM_LBUTTONDBLCLK:
+                mcode := FPGM_DOUBLECLICK;
+              else
+                mcode := 0;
+            end;
+
+            case uMsg of
+              WM_MOUSEMOVE:
+              begin
+                i := 0;
+                if (wParam and MK_LBUTTON) <> 0 then
+                  i := i or MOUSE_LEFT;
+                if (wParam and MK_RBUTTON) <> 0 then
+                  i := i or MOUSE_RIGHT;
+                if (wParam and MK_MBUTTON) <> 0 then
+                  i := i or MOUSE_MIDDLE;
+                msgp.mouse.Buttons := i;
+              end;
+
+              WM_LBUTTONDOWN,
+              WM_LBUTTONUP,
+              WM_LBUTTONDBLCLK:
+                msgp.mouse.Buttons := MOUSE_LEFT;
+
+              WM_RBUTTONDOWN,
+              WM_RBUTTONUP:
+                msgp.mouse.Buttons := MOUSE_RIGHT;
+            end;
+
+            msgp.mouse.shiftstate := GetKeyboardShiftState;
+
+            if uMsg = WM_MouseMove then
+              w.DoMouseEnterLeaveCheck(w, uMsg, wParam, lParam);
+
+            if mcode <> 0 then
+              fpgSendMessage(nil, w, mcode, msgp);
+          end;  { if blockmsg }
         end;
-
-        WM_LBUTTONDOWN,
-        WM_LBUTTONUP,
-        WM_LBUTTONDBLCLK:
-          msgp.mouse.Buttons := MOUSE_LEFT;
-
-        WM_RBUTTONDOWN,
-        WM_RBUTTONUP:
-          msgp.mouse.Buttons := MOUSE_RIGHT;
-      end;
-
-      msgp.mouse.shiftstate := GetKeyboardShiftState;
-
-      if uMsg = WM_MouseMove then
-        w.DoMouseEnterLeaveCheck(w, uMsg, wParam, lParam);
-
-      if mcode <> 0 then
-        fpgSendMessage(nil, w, mcode, msgp);
-    end;
 
     WM_SIZE:
-    begin
-      // note that WM_SIZING allows some control on sizeing
+        begin
+          // note that WM_SIZING allows some control on sizeing
+          //writeln('WM_SIZE: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
+          msgp.rect.Width  := smallint(lParam and $FFFF);
+          msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
 
-      //writeln('WM_SIZE: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
-
-      msgp.rect.Width  := smallint(lParam and $FFFF);
-      msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
-
-      //writeln('WM_SIZE: width=',msgp.rect.width, ' height=',msgp.rect.height);
-
-      // skip minimize...
-      if lparam <> 0 then
-        fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
-    end;
-
+          //writeln('WM_SIZE: width=',msgp.rect.width, ' height=',msgp.rect.height);
+          // skip minimize...
+          if lparam <> 0 then
+            fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
+        end;
 
     WM_MOVE:
-    begin
-      // window decoration correction ...
-      if (GetWindowLong(w.WinHandle, GWL_STYLE) and WS_CHILD) = 0 then
-      begin
-        GetWindowRect(w.WinHandle, r);
-        msgp.rect.Left := r.Left;
-        msgp.rect.top  := r.Top;
-      end
-      else
-      begin
-        msgp.rect.Left := smallint(lParam and $FFFF);
-        msgp.rect.Top  := smallint((lParam and $FFFF0000) shr 16);
-      end;
+        begin
+//          writeln('WM_MOVE');
+          // window decoration correction ...
+          if (GetWindowLong(w.WinHandle, GWL_STYLE) and WS_CHILD) = 0 then
+          begin
+            GetWindowRect(w.WinHandle, r);
+            msgp.rect.Left := r.Left;
+            msgp.rect.top  := r.Top;
+          end
+          else
+          begin
+            msgp.rect.Left := smallint(lParam and $FFFF);
+            msgp.rect.Top  := smallint((lParam and $FFFF0000) shr 16);
+          end;
 
-      fpgSendMessage(nil, w, FPGM_MOVE, msgp);
-    end;
+          fpgSendMessage(nil, w, FPGM_MOVE, msgp);
+        end;
 
     WM_MOUSEWHEEL:
-    begin
-      //writeln('MWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8)); // and $FF00) shr 8);
-      pt.x := LoWord(lparam);
-      pt.y := HiWord(lparam);
-      mw   := nil;
-      h    := WindowFromPoint(pt);
-      if h > 0 then  // get window mouse is hovering over
-        mw := TfpgWindowImpl(Windows.GetWindowLong(h, GWL_USERDATA));
+        begin
+//          writeln('WM_MOUSEWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8)); // and $FF00) shr 8);
+          pt.x := LoWord(lparam);
+          pt.y := HiWord(lparam);
+          mw   := nil;
+          h    := WindowFromPoint(pt);
+          if h > 0 then  // get window mouse is hovering over
+            mw := TfpgWindowImpl(Windows.GetWindowLong(h, GWL_USERDATA));
 
-      if mw <> nil then
-      begin
-        msgp.mouse.x := pt.x;
-        msgp.mouse.y := pt.y;
-        msgp.mouse.delta := SmallInt(HiWord(wParam)) div -120;
-        
-        i := 0;
-        if (wParam and MK_LBUTTON) <> 0 then
-          i := i or MOUSE_LEFT;
-        if (wParam and MK_RBUTTON) <> 0 then
-          i := i or MOUSE_RIGHT;
-        if (wParam and MK_MBUTTON) <> 0 then
-          i := i or MOUSE_MIDDLE;
-        msgp.mouse.Buttons := i;
-        msgp.mouse.shiftstate := GetKeyboardShiftState;
+          if mw <> nil then
+          begin
+            msgp.mouse.x := pt.x;
+            msgp.mouse.y := pt.y;
+            msgp.mouse.delta := SmallInt(HiWord(wParam)) div -120;
 
-        fpgSendMessage(nil, mw, FPGM_SCROLL, msgp)
-      end;
-    end;
+            i := 0;
+            if (wParam and MK_LBUTTON) <> 0 then
+              i := i or MOUSE_LEFT;
+            if (wParam and MK_RBUTTON) <> 0 then
+              i := i or MOUSE_RIGHT;
+            if (wParam and MK_MBUTTON) <> 0 then
+              i := i or MOUSE_MIDDLE;
+            msgp.mouse.Buttons := i;
+            msgp.mouse.shiftstate := GetKeyboardShiftState;
+
+            fpgSendMessage(nil, mw, FPGM_SCROLL, msgp)
+          end;
+        end;
 
     WM_ACTIVATE:
-      if ((wParam and $FFFF) = WA_INACTIVE) then
-        fpgSendMessage(nil, w, FPGM_DEACTIVATE)
-      else
-        fpgSendMessage(nil, w, FPGM_ACTIVATE);
+        begin
+//          writeln('WM_ACTIVATE');
+          if ((wParam and $FFFF) = WA_INACTIVE) then
+            fpgSendMessage(nil, w, FPGM_DEACTIVATE)
+          else
+            fpgSendMessage(nil, w, FPGM_ACTIVATE);
+        end;
 
     WM_TIMER:
-      Result := 0;
-      //Writeln('TIMER EVENT!!!');
-      // used for event wait timeout
-
-
-    (*
-    WM_NCACTIVATE:
-    begin
-      if (ptkTopModalForm <> nil) then
-      begin
-        if (wParam = 0) and (ptkTopModalForm = wg) then
         begin
-          blockmsg := true;
-        end
-        else if (wParam <> 0) and (ptkTopModalForm <> wg) then
-        begin
-          blockmsg := true;
+//          writeln('WM_TIMER');  // used for event wait timeout
+          Result := 0;
         end;
-      end;
 
-      if (PopupListFirst <> nil) and (PopupListFirst.Visible) then BlockMsg := True;
+    WM_NCACTIVATE:
+        begin
+//          writeln('WM_NCACTIVATE');
+          if (wapplication.TopModalForm <> nil) then
+          begin
+            if (wParam = 0) and (wapplication.TopModalForm = w) then
+            begin
+              blockmsg := true;
+            end
+            else if (wParam <> 0) and (wapplication.TopModalForm <> w) then
+            begin
+              blockmsg := true;
+            end;
+          end;
 
-      //writeln('ncactivate: ', ord(BlockMsg));
+          {$Note Complete this!}
+//          if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
+//            blockmsg := True;
 
-      if not BlockMsg then
-        Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
-
-    end;
-*)
+          if not blockmsg then
+            Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+        end;
 
     WM_CLOSE:
         fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
@@ -616,7 +625,7 @@ begin
   hcr_CROSSHAIR := LoadCursor(0, IDC_CROSS);
 
   FIsInitialized := True;
-  wapplication        := TfpgApplication(self);
+  wapplication   := TfpgApplication(self);
 end;
 
 function TfpgApplicationImpl.DoMessagesPending: boolean;
@@ -759,7 +768,7 @@ var
   r: TRect;
 begin
   if FWinHandle > 0 then
-    Exit;
+    Exit; //==>
 
   FWinStyle   := WS_OVERLAPPEDWINDOW;
   FWinStyleEx := WS_EX_APPWINDOW;
@@ -842,7 +851,8 @@ begin
     DoMoveWindow(FLeft, FTop);
   end;
 
-  SetWindowParameters; // the forms require some adjustments before the Window appears
+  // the forms require some adjustments before the Window appears
+  SetWindowParameters;
 
   BringWindowToTop(FWinHandle);
 
@@ -859,6 +869,7 @@ begin
     FTop  := r.Top;
   end;
 
+  // send the first paint message
   Windows.UpdateWindow(FWinHandle);
 end;
 
