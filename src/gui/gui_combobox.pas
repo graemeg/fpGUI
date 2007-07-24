@@ -108,17 +108,12 @@ end;
 procedure TDropDownWindow.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
-  writeln('DropDownWindow - KeyPress');
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
   if keycode = keyEscape then
   begin
     Close;
     consumed := True;
   end;
-  
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
-//  if consumed then
-//    Exit; //==>
-    
 end;
 
 procedure TDropDownWindow.HandleShow;
@@ -131,12 +126,11 @@ begin
   ListBox.Height := Height;
 
   inherited HandleShow;
-//  CaptureMouse;
+  CaptureMouse;
 end;
 
 procedure TDropDownWindow.HandleHide;
 begin
-  writeln('handlehide');
   FocusRootWidget := OriginalFocusRoot;
   OriginalFocusRoot := nil;
   inherited HandleHide;
@@ -157,7 +151,7 @@ end;
 
 destructor TDropDownWindow.Destroy;
 begin
-//  ReleaseMouse;
+  ReleaseMouse;
   inherited Destroy;
 end;
   
@@ -226,7 +220,6 @@ begin
   end
   else
   begin
-    writeln('DoDropDown - closing dropdown');
     FDropDown.Close;
     FreeAndNil(FDropDown);
   end;

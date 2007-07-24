@@ -14,6 +14,7 @@ const
   keyTab		      = $09;
   keyLinefeed		  = $0a;
   keyReturn		    = $0d;
+  keyEnter        = keyReturn;  // alias
   keyEscape		    = $1b;
   keyDelete		    = $7f;
   keySpace        = $20;

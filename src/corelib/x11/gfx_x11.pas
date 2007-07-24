@@ -689,11 +689,11 @@ begin
           msgp.mouse.shiftstate := ConvertShiftState(ev.xbutton.state);
 
           w := FindWindowByHandle(ev.xbutton.window);
-          if fpgTopModalForm <> nil then
+          if xapplication.TopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (fpgTopModalForm <> ew) then
+            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
               blockmsg := true;
           end;
       
@@ -756,11 +756,11 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xbutton.window, X.MotionNotify, @ev);
 
           w := FindWindowByHandle(ev.xany.window);
-          if fpgTopModalForm <> nil then
+          if xapplication.TopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (fpgTopModalForm <> ew) then
+            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
               blockmsg := true;
           end;
 
@@ -778,11 +778,11 @@ begin
     X.ClientMessage:
         begin
           w := FindWindowByHandle(ev.xany.window);
-          if fpgTopModalForm <> nil then
+          if xapplication.TopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (fpgTopModalForm <> ew) then
+            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
               blockmsg := true;
           end;
           
