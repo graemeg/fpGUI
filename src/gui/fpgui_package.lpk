@@ -6,7 +6,7 @@
     <CompilerOptions>
       <Version Value="5"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -18,7 +18,7 @@
     <Description Value="fpGUI - multi-handle redesign"/>
     <License Value="Modified LGPL"/>
     <Version Minor="5"/>
-    <Files Count="10">
+    <Files Count="11">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -59,6 +59,10 @@
         <Filename Value="gui_scrollbar.pas"/>
         <UnitName Value="gui_scrollbar"/>
       </Item10>
+      <Item11>
+        <Filename Value="gui_bevel.pas"/>
+        <UnitName Value="gui_bevel"/>
+      </Item11>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
