@@ -788,6 +788,7 @@ begin
   { What was not handled: underline }
   if Pos('UNDERLINE', UpperCase(Font.FontDesc)) > 0 then
   begin
+    writeln('underline detected in font');
     underline := (Font.Descent div 2) + 1;
     if underline = 0 then
       underline := 1;

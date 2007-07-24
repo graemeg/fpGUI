@@ -290,18 +290,20 @@ end;
     bmp: TfpgImage;
   begin
     SetPosition(200, 200, 500, 350);
-//    WindowTitle := 'fpGUI Widget Test';
     WindowTitle := 'Test Russian text -> Òåñò';
 
     label1 := CreateLabel(self, 5, 5, 'Hello world!');
     label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');
     label2.FontDesc := 'Sans-12:bold:underline';
-    label2.Width := 200;
 
     edit1      := CreateEdit(self, 10, 40, 120, 22);
     edit1.Text := 'Hello world. Hello world. Hello world.';
     edit2      := CreateEdit(self, 10, 70, 200, 22);
     edit2.Text := 'Test Russian text -> Òåñò';
+    // left to right and right to left text in one
+    // fpGUI doesn't handle this correctly yet.
+    // See http://www.catch22.net/tuts/editor18.asp  for how it needs to display and work
+//    edit2.Text := 'HelloيُساوِيWorld';
 
     btn2          := CreateButton(self, 10, 100, 75, 'Normal', nil);
     btn2.OnClick  := @btnDisplayBMP;
@@ -310,7 +312,6 @@ end;
     btn3          := CreateButton(self, 100, 100, 75, 'Embedded', nil);
     btn3.Embedded := True;
     btn3.OnClick  := @btn3Click;
-
 
     btn           := CreateButton(self, 10, 130, 75, 'Close', @btnCloseClick);
     btn.ImageName := 'stdimg.close';
