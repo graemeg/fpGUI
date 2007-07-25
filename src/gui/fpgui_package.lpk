@@ -18,7 +18,7 @@
     <Description Value="fpGUI - multi-handle redesign"/>
     <License Value="Modified LGPL"/>
     <Version Minor="5"/>
-    <Files Count="11">
+    <Files Count="12">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -63,6 +63,10 @@
         <Filename Value="gui_bevel.pas"/>
         <UnitName Value="gui_bevel"/>
       </Item11>
+      <Item12>
+        <Filename Value="gui_checkbox.pas"/>
+        <UnitName Value="gui_checkbox"/>
+      </Item12>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

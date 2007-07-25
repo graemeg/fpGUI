@@ -160,7 +160,6 @@ type
     FFocusedWindow: THANDLE;
     LastClickWindow: TfpgWinHandle; // double click generation
     LastWinClickTime: longword;
-    FTimerWnd: HWND;
   public
     constructor Create(const aparams: string); override;
     function    DoMessagesPending: boolean;
@@ -742,19 +741,19 @@ procedure TfpgApplicationImpl.DoWaitWindowMessage(atimeoutms: integer);
 var
   Msg: TMsg;
   timerid: longword;
-  timerwnd: HWND;
+  ltimerWnd: HWND;
   mp: boolean;
 begin
   timerid  := 0;
-  timerwnd := 0;
+  ltimerWnd := TfpgWindomImpl(wapplication.MainForm).WinHandle;
 
   if (atimeoutms >= 0) and (not DoMessagesPending) then
+  begin
     if atimeoutms > 0 then
-      timerid := Windows.SetTimer(timerwnd, 1, atimeoutms, nil)
-      {$Note This needs to be enabled again, but find a butter solution.}
-      // timerwnd := fpgMainForm.WinHandle;
+      timerid := Windows.SetTimer(ltimerWnd, 1, atimeoutms, nil)
     else
       Exit;  // handling waiting timeout
+  end;
 
   {$Note Incorporate Felipe's code from previous fpGUI in here. It handles WinCE and Windows just fine. }
   if (GetVersion() < $80000000) then
@@ -764,8 +763,8 @@ begin
 
   Windows.DispatchMessage(@msg);
 
-  if timerid > 0 then
-    Windows.KillTimer(timerwnd, 1);
+  if timerid <> 0 then
+    Windows.KillTimer(ltimerWnd, 1);  // same IDEvent as used in SetTimer
 end;
 
 procedure TfpgApplicationImpl.DoFlush;

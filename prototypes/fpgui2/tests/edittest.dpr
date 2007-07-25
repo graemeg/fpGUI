@@ -16,7 +16,8 @@ uses
   gui_scrollbar,
   gui_memo,
   gui_dialogs,
-  gui_listbox;
+  gui_listbox,
+  gui_checkbox;
 
 type
 
@@ -68,6 +69,7 @@ type
     xpluna: TXPButton;
     xp2: TXPButton;
     xpsilver: TXPButton;
+    checkbox: TfpgCheckBox;
     procedure AfterCreate; override;
   end;
 
@@ -368,6 +370,8 @@ end;
     bmp.CreateMaskFromSample(0, 0);
     bmp.UpdateImage;
     xpsilver.ThemeImage := bmp;
+    
+    checkbox := CreateCheckBox(self, 10, 220, 'Checkbox One');
   end;
 
 procedure MainProc;

@@ -28,6 +28,7 @@ type
     procedure   btnStopStartClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
   end;
 
 
@@ -105,6 +106,14 @@ begin
   timer3          := TfpgTimer.Create(1000);
   timer3.OnTimer  := @MyTimer3;
   timer3.Enabled  := True;
+end;
+
+destructor TMainForm.Destroy;
+begin
+  timer3.Free;
+  timer2.Free;
+  timer1.Free;
+  inherited Destroy;
 end;
 
 

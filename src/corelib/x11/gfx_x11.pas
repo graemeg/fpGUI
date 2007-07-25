@@ -621,10 +621,9 @@ begin
   repeat
     if (atimeoutms >= 0) and (XPending(display) <= 0) then
     begin
-      // waiting some event for the given timeout
-
-      // this Select handles only the first 256 file descriptors
-      // poll would be better but FPC has no official poll interface (if I'm right)
+      // Some event is waiting for the given timeout.
+      // This Select handles only the first 256 file descriptors.
+      // Poll would be better but FPC has no official poll interface (if I'm right)
       fpFD_ZERO(rfds);
       fpFD_SET(xfd, rfds);
       r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);

@@ -184,7 +184,7 @@ type
   end;
 
 
-  TfpgTimer = class
+  TfpgTimer = class(TObject)
   private
     FEnabled: boolean;
     FNextAlarm: TDateTime;
@@ -323,18 +323,21 @@ begin
   for n := 1 to fpgTimers.Count do
   begin
     t := TfpgTimer(fpgTimers[n - 1]);
-    if t.Enabled and (t.NextAlarm < dt) then begin
+    if t.Enabled and (t.NextAlarm < dt) then
+    begin
       dt := t.NextAlarm;
       tb := True;
     end;
   end;
 
-  if tb then begin
+  if tb then
+  begin
     Result := trunc(0.5 + (dt - ctime) / ONE_MILISEC);
     if Result < 0 then
       Result := 0;
   end
-  else Result := -1;
+  else
+    Result := -1;
 end;
 
 procedure TfpgTimer.SetEnabled(const AValue: boolean);
@@ -371,7 +374,7 @@ end;
 procedure TfpgTimer.CheckAlarm(ctime: TDateTime);
 begin
   if not FEnabled then
-    Exit;
+    Exit; //==>
 
   if FNextAlarm <= ctime then
   begin
@@ -380,8 +383,8 @@ begin
       while FNextAlarm <= ctime do
         FNextAlarm := FNextAlarm + interval * ONE_MILISEC;
 
-    if Assigned(OnTimer) then
-      OnTimer(self);
+    if Assigned(FOnTimer) then
+      FOnTimer(self);
   end;
 end;
 
@@ -526,7 +529,7 @@ end;
 
 procedure TfpgApplication.Initialize;
 begin
-  {$Note remember to process parameter!! }
+  {$Note Remember to process parameters!! }
   if IsInitialized then
     InternalInit
   else

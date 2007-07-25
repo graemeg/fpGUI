@@ -66,11 +66,6 @@ type
   end;
 
 
-var
-  // Don't like this. It's a bit of a hack. Possibly move this into
-  // fpgApplication, but do we want fpgApplication to have that dependency??
-  fpgMainForm: TfpgForm;
-
 function WidgetParentForm(wg: TfpgWidget): TfpgForm;
 
 
@@ -136,8 +131,8 @@ end;
 
 procedure TfpgForm.AdjustWindowStyle;
 begin
-  if fpgMainForm = nil then
-    fpgMainForm := self;
+  if fpgApplication.MainForm = nil then
+    fpgApplication.MainForm := self;
 
   if FWindowPosition = wpAuto then
     Include(FWindowAttributes, waAutoPos)
@@ -257,12 +252,10 @@ end;
 procedure TfpgForm.Close;
 begin
   Hide;
-  if fpgMainForm = self then
+  if fpgApplication.MainForm = self then
     Halt(0);
 end;
 
-initialization
-  fpgMainForm     := nil;
 
 end.
 
