@@ -7,9 +7,9 @@ unit gfx_gdi;
 interface
 
 uses
+  Windows,
   Classes,
   SysUtils,
-  Windows,
   gfxbase;
 
 { Constants missing on windows unit }
@@ -107,8 +107,8 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -179,7 +179,8 @@ uses
   fpgfx,
   gfx_widget,
   gui_form, // remove this!!!!!
-  gfx_UTF8Utils;
+  gfx_UTF8Utils,
+  math;
 
 var
   wapplication: TfpgApplication;
@@ -209,6 +210,105 @@ begin
     Result := TfpgWidget(Windows.GetWindowLong(wh, GWL_USERDATA))
   else
     Result := nil;
+end;
+
+{ Use CenterPoint to get the Center-Point of any rectangle. It is primarily
+  for use with, and in, other routines such as Quadrant, and RadialPoint. }
+function CenterPoint(Rect: TRect): TPoint;
+var
+  Tmp:  Longint;
+begin
+  with Rect do
+  begin
+    if Right < Left then
+    begin
+      Tmp   := Right;
+      Right := Left;
+      Left  := Tmp;
+    end;
+
+    if Bottom < Top then
+    begin
+      Tmp    := Bottom;
+      Bottom := Top;
+      Top    := Tmp;
+    end;
+
+    Result.X := Left + (Right - Left) div 2;
+    Result.Y := Top + (Bottom - Top) div 2;
+  end;
+end;
+
+{ Use LineEndPoint to get the End-Point of a line of any given Length at
+  any given angle with any given Start-Point. It is primarily for use in
+  other routines such as RadialPoint. The angle is in 1/16th of a degree.
+  For example, a full circle equals 5760 (16*360).  Zero degrees is at the
+  3'o clock position. }
+function LineEndPoint(StartPoint: TPoint; Angle, Length: Extended): TPoint;
+begin
+  if Angle > 360*16 then
+    Angle := Frac(Angle / 360*16) * 360*16;
+
+  if Angle < 0 then
+    Angle := 360*16 - abs(Angle);
+
+  Result.Y := StartPoint.Y - Round(Length*Sin(DegToRad(Angle/16)));
+  Result.X := StartPoint.X + Round(Length*Cos(DegToRad(Angle/16)));
+end;
+
+{ Use EllipseRadialLength to get the Radial-Length of non-rotated ellipse at
+  any given Eccentric( aka Radial ) Angle. It is primarily for use in other
+  routines such as RadialPoint. The Eccentric angle is in 1/16th of a degree.
+  For example, a full circle equals 5760 (16*360).  Zero degrees is at the
+  3'o clock position. }
+function EllipseRadialLength(Rect: TRect; EccentricAngle: Extended): Longint;
+var
+  a, b, R: Extended;
+begin
+  a := (Rect.Right - Rect.Left) div 2;
+  b := (Rect.Bottom - Rect.Top) div 2;
+  R := Sqr(a)*Sqr(b);
+  R := Sqrt(R / ((Sqr(b)*Sqr(Cos(DegToRad(EccentricAngle/16))))
+        + (Sqr(a)*Sqr(Sin(DegToRad(EccentricAngle/16))))));
+  Result := integer(Trunc(R));
+end;
+
+{ Use RadialPoint to get the Radial-Point at any given Eccentric( aka Radial )
+  angle on any non-rotated ellipse. It is primarily for use in Angles2Coords.
+  The EccentricAngle is in 1/16th of a degree. For example, a full circle
+  equals 5760 (16*360).  Zero degrees is at the 3'o clock position. }
+function RadialPoint(EccentricAngle: Extended; Rect: TRect): TPoint;
+var
+  R: Longint;
+Begin
+  R := EllipseRadialLength(Rect, EccentricAngle);
+  Result := LineEndPoint(CenterPoint(Rect), EccentricAngle, R);
+end;
+
+{ Use Angles2Coords to convert an Eccentric(aka Radial) Angle and an
+  Angle-Length, such as are used in X-Windows and GTK, into the coords,
+  for Start and End Radial-Points, such as are used in the Windows API Arc
+  Pie and Chord routines. The angles are 1/16th of a degree. For example, a
+  full circle equals 5760 (16*360). Positive values of Angle and AngleLength
+  mean counter-clockwise while negative values mean clockwise direction.
+  Zero degrees is at the 3'o clock position. }
+procedure Angles2Coords(X, Y, Width, Height: Integer; Angle1, Angle2: Extended;
+    var SX, SY, EX, EY: Integer);
+var
+  aRect: TRect;
+  SP, EP: TPoint;
+begin
+  aRect := Classes.Rect(X, Y, X+Width, Y+Height);
+  SP := RadialPoint(Angle1, aRect);
+  if Angle2 + Angle1 > 360*16 then
+    Angle2 := (Angle2 + Angle1) - 360*16
+  else
+    Angle2 := Angle2 + Angle1;
+  EP := RadialPoint(Angle2, aRect);
+  SX := SP.X;
+  SY := SP.Y;
+  EX := EP.X;
+  EY := EP.Y;
 end;
 
 (*
@@ -1065,46 +1165,24 @@ begin
   Windows.SetPixel(Fgc, X, Y, fpgColorToWin(AValue));
 end;
 
-procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
+procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
-  xr: double;
-  yr: double;
+  SX, SY, EX, EY: Longint;
 begin
-  xr := w / 2;
-  yr := h / 2;
-  Arc(Fgc, x, y, x+w, y+h,
-    Trunc(0.5 + x + xr + cos(a1)*xr),
-    Trunc(0.5 + y + yr - sin(a1)*yr),
-    Trunc(0.5 + x + xr + cos(a1+a2)*xr),
-    Trunc(0.5 + y + yr - sin(a1+a2)*yr)
-  );
-(*
-var
-  SX, SY, EX, EY : Longint;
-begin
-  {$Warning DoDrawArc needs testing. }
-  Angles2Coords(ARect.Left, ARect.Top, ARect.Right - ARect.Left,
-      ARect.Bottom - ARect.Top, StartAngle, EndAngle, SX, SY, EX, EY);
-  {$ifndef wince}
-  Windows.Arc(Handle, ARect.Left, ARect.Top, ARect.Right,
-      ARect.Bottom, SX, SY, EX, EY)
-  {$endif}
-*)
+  Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
+  {$IFNDEF wince}
+  Windows.Arc(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
+  {$ENDIF}
 end;
 
-procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
+procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
-  xr: double;
-  yr: double;
+  SX, SY, EX, EY: Longint;
 begin
-  xr := w / 2;
-  yr := h / 2;
-  Pie(Fgc, x, y, x+w, y+h,
-    Trunc(0.5 + x + xr + cos(a1)*xr),
-    Trunc(0.5 + y + yr - sin(a1)*yr),
-    Trunc(0.5 + x + xr + cos(a1+a2)*xr),
-    Trunc(0.5 + y + yr - sin(a1+a2)*yr)
-  );
+  Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
+  {$IFNDEF wince}
+  Windows.Pie(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
+  {$ENDIF}
 end;
 
 procedure TfpgCanvasImpl.DoPutBufferToScreen(x, y, w, h: TfpgCoord);

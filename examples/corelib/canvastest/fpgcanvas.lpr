@@ -10,7 +10,7 @@ uses
   fpgfx,
   gfxbase,
   gui_form,
-  gfx_imgfmt_bmp, fpgui_package;
+  gfx_imgfmt_bmp, math;
 
 
 type
@@ -158,11 +158,11 @@ begin
   Canvas.SetColor(clBlack);
   Canvas.DrawRectangle(5, 235, 50, 50);
   Canvas.SetColor(clRed);
-  Canvas.DrawArc(5, 235, 50, 50, 0, 360);  // should overlap rectangle pixels
+  Canvas.DrawArc(5, 235, 50, 50, 0, 270);  // should overlap rectangle pixels
   Canvas.SetColor(clBlack);
   Canvas.DrawRectangle(5, 290, 50, 50);
   Canvas.SetColor(clRed);
-  Canvas.FillArc(5, 290, 50, 50, 0, 360);  // should overlap rectangle pixels
+  Canvas.FillArc(5, 290, 50, 50, 0, 270);  // should overlap rectangle pixels
 
 
   Canvas.EndDraw;

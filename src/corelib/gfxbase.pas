@@ -249,8 +249,8 @@ type
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); virtual; abstract;
   public
     constructor Create; virtual;
     destructor  Destroy; override;

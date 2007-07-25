@@ -116,8 +116,8 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
-    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
-    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -1311,13 +1311,13 @@ begin
   {$Note We must still implement DrawPoint}
 end;
 
-procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
+procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
   XDrawArc(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
+procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
   XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, w, h,
       Trunc(64 * a1), Trunc(64 * a2));
