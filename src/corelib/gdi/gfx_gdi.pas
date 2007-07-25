@@ -745,7 +745,7 @@ var
   mp: boolean;
 begin
   timerid  := 0;
-  ltimerWnd := TfpgWindomImpl(wapplication.MainForm).WinHandle;
+  ltimerWnd := TfpgWindowImpl(wapplication.MainForm).WinHandle;
 
   if (atimeoutms >= 0) and (not DoMessagesPending) then
   begin

@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5"/>
-    <Files Count="8">
+    <Files Count="9">
       <Item1>
         <Filename Value="..\gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
@@ -59,6 +59,10 @@
         <Filename Value="..\gfx_extinterpolation.pas"/>
         <UnitName Value="gfx_extinterpolation"/>
       </Item8>
+      <Item9>
+        <Filename Value="..\gfx_cmdlineparams.pas"/>
+        <UnitName Value="gfx_cmdlineparams"/>
+      </Item9>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>
