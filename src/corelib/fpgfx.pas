@@ -314,19 +314,27 @@ var
   n: integer;
   t: TfpgTimer;
   dt: TDateTime;
+  tb: Boolean;
 begin
+  // returns -1 if no timers are pending
   dt := ctime + amaxtime * ONE_MILISEC;
+  tb := False;
 
   for n := 1 to fpgTimers.Count do
   begin
     t := TfpgTimer(fpgTimers[n - 1]);
-    if t.Enabled and (t.NextAlarm < dt) then
+    if t.Enabled and (t.NextAlarm < dt) then begin
       dt := t.NextAlarm;
+      tb := True;
+    end;
   end;
 
-  Result := trunc(0.5 + (dt - ctime) / ONE_MILISEC);
-  if Result < 0 then
-    Result := 0;
+  if tb then begin
+    Result := trunc(0.5 + (dt - ctime) / ONE_MILISEC);
+    if Result < 0 then
+      Result := 0;
+  end
+  else Result := -1;
 end;
 
 procedure TfpgTimer.SetEnabled(const AValue: boolean);

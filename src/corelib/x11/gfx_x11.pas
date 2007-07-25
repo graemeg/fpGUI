@@ -619,7 +619,7 @@ begin
   xfd := XConnectionNumber(display);
 
   repeat
-    if (atimeoutms > 0) and (XPending(display) <= 0) then
+    if (atimeoutms >= 0) and (XPending(display) <= 0) then
     begin
       // waiting some event for the given timeout
 
