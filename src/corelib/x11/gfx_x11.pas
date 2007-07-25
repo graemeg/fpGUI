@@ -116,6 +116,8 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -1307,6 +1309,18 @@ begin
   DrawLine(X, Y, X+1, Y+1);
   SetColor(oldColor);
   {$Note We must still implement DrawPoint}
+end;
+
+procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
+begin
+  XDrawArc(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1,
+      Trunc(64 * a1), Trunc(64 * a2));
+end;
+
+procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
+begin
+  XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, w, h,
+      Trunc(64 * a1), Trunc(64 * a2));
 end;
 
 procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);

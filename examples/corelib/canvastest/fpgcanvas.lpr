@@ -10,7 +10,7 @@ uses
   fpgfx,
   gfxbase,
   gui_form,
-  gfx_imgfmt_bmp;
+  gfx_imgfmt_bmp, fpgui_package;
 
 
 type
@@ -144,12 +144,6 @@ begin
   Canvas.DrawLine(183, 303, 247, 303);
 
 
-//  Stretch(bmp, dst, ResampleFilters[6].Filter, ResampleFilters[6].Width);
-////  Canvas.DrawImage(150, 240, bmp);
-//  Canvas.DrawImage(160, 250, dst);
-
-  
-  
   // Testing Canvas.Pixels[]
   // two pixels should have changed color in the top left of the form
   Canvas.Pixels[7,5] := clBlue;   // This tests consistant bit order handling (RGB)
@@ -158,6 +152,18 @@ begin
   Canvas.Pixels[9,5] := c;
   c := Canvas.Pixels[150 + (32*4) + 3, 199];   // should be lightblue like color
   Canvas.Pixels[10,5] := c;
+  
+  
+  // Arc drawing tests
+  Canvas.SetColor(clBlack);
+  Canvas.DrawRectangle(5, 235, 50, 50);
+  Canvas.SetColor(clRed);
+  Canvas.DrawArc(5, 235, 50, 50, 0, 360);  // should overlap rectangle pixels
+  Canvas.SetColor(clBlack);
+  Canvas.DrawRectangle(5, 290, 50, 50);
+  Canvas.SetColor(clRed);
+  Canvas.FillArc(5, 290, 50, 50, 0, 360);  // should overlap rectangle pixels
+
 
   Canvas.EndDraw;
 end;

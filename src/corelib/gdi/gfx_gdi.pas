@@ -107,6 +107,8 @@ type
     procedure   DoEndDraw; override;
     function    GetPixel(X, Y: integer): TfpgColor; override;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); override;
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -1063,6 +1065,48 @@ begin
   Windows.SetPixel(Fgc, X, Y, fpgColorToWin(AValue));
 end;
 
+procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
+var
+  xr: double;
+  yr: double;
+begin
+  xr := w / 2;
+  yr := h / 2;
+  Arc(Fgc, x, y, x+w, y+h,
+    Trunc(0.5 + x + xr + cos(a1)*xr),
+    Trunc(0.5 + y + yr - sin(a1)*yr),
+    Trunc(0.5 + x + xr + cos(a1+a2)*xr),
+    Trunc(0.5 + y + yr - sin(a1+a2)*yr)
+  );
+(*
+var
+  SX, SY, EX, EY : Longint;
+begin
+  {$Warning DoDrawArc needs testing. }
+  Angles2Coords(ARect.Left, ARect.Top, ARect.Right - ARect.Left,
+      ARect.Bottom - ARect.Top, StartAngle, EndAngle, SX, SY, EX, EY);
+  {$ifndef wince}
+  Windows.Arc(Handle, ARect.Left, ARect.Top, ARect.Right,
+      ARect.Bottom, SX, SY, EX, EY)
+  {$endif}
+*)
+end;
+
+procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double);
+var
+  xr: double;
+  yr: double;
+begin
+  xr := w / 2;
+  yr := h / 2;
+  Pie(Fgc, x, y, x+w, y+h,
+    Trunc(0.5 + x + xr + cos(a1)*xr),
+    Trunc(0.5 + y + yr - sin(a1)*yr),
+    Trunc(0.5 + x + xr + cos(a1+a2)*xr),
+    Trunc(0.5 + y + yr - sin(a1+a2)*yr)
+  );
+end;
+
 procedure TfpgCanvasImpl.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
   if FBufferBitmap > 0 then
@@ -1250,7 +1294,7 @@ begin
   SelectObject(tmpdc, TfpgImageImpl(img).BMPHandle);
 
   if TfpgImageImpl(img).FIsTwoColor then
-    rop := PATCOPY  //ROP_DSPDxax
+    rop := PATCOPY
   else
     rop := SRCCOPY;
 

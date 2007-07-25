@@ -249,6 +249,8 @@ type
     procedure   DoEndDraw; virtual; abstract;
     function    GetPixel(X, Y: integer): TfpgColor; virtual; abstract;
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); virtual; abstract;
+    procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
+    procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: double); virtual; abstract;
   public
     constructor Create; virtual;
     destructor  Destroy; override;
@@ -257,12 +259,14 @@ type
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+    procedure   DrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
     procedure   CopyRect(x, y: TfpgCoord; ACanvas: TfpgCanvasBase; var SourceRect: TRect);
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   FillRectangle(r: TfpgRect); overload;
     procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+    procedure   FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
     procedure   XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); overload;
     procedure   XORFillRectangle(col: TfpgColor; r: TfpgRect); overload;
     procedure   SetClipRect(const rect: TfpgRect);
@@ -748,6 +752,11 @@ begin
   DoDrawImagePart(x, y, img, xi, yi, w, h);
 end;
 
+procedure TfpgCanvasBase.DrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
+begin
+  DoDrawArc(x, y, w, h, a1, a2);
+end;
+
 procedure TfpgCanvasBase.StretchDraw(x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
 var
   i: TfpgCustomInterpolation;
@@ -820,6 +829,11 @@ end;
 procedure TfpgCanvasBase.FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 begin
   DoFillTriangle(x1, y1, x2, y2, x3, y3);
+end;
+
+procedure TfpgCanvasBase.FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
+begin
+  DoFillArc(x, y, w, h, a1, a2);
 end;
 
 procedure TfpgCanvasBase.XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
