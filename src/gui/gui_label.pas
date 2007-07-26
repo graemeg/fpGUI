@@ -146,7 +146,7 @@ begin
   Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(Font);
   Canvas.SetTextColor(FColor);
-  Canvas.DrawString(0, 0, FText);
+  fpgStyle.DrawString(Canvas, 0, 0, FText, Enabled);
   Canvas.EndDraw;
 end;
 

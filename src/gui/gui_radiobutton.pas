@@ -163,11 +163,8 @@ begin
   ty := (Height div 2) - (Font.Height div 2);
   if ty < 0 then
     ty := 0;
-  if Enabled then
-    Canvas.SetTextColor(clText1)
-  else
-    Canvas.SetTextColor(clShadow1);
-  Canvas.DrawString(tx, ty, FText);
+  Canvas.SetTextColor(clText1);
+  fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
 
   Canvas.EndDraw;
 end;

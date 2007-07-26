@@ -268,7 +268,7 @@ begin
   if x < 3 then
     x := 3;
 
-  Canvas.DrawString(x + pofs, y + pofs, AText);
+  fpgStyle.DrawString(Canvas, x+pofs, y+pofs, AText, Enabled);
   Canvas.EndDraw;
 end;
 

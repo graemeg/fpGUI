@@ -21,6 +21,7 @@ type
     FText: string;
     FFont: TfpgFont;
     FBoxSize: integer;
+    FIsPressed: boolean;
     function    GetFontName: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetChecked(const AValue: boolean);
@@ -28,6 +29,7 @@ type
     procedure   SetText(const AValue: string);
   protected
     procedure   HandlePaint; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
@@ -121,28 +123,43 @@ begin
   if r.top < 0 then
     r.top := 0;
 
+  // calculate which image to paint.
+  if Enabled then
+  begin
+    ix := Ord(FChecked);
+    if FIsPressed then
+      Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
+
   // paint the check (in this case a X)
   tx := r.right + 8;
   inc(r.left, 2);
   inc(r.top, 1);
   img := fpgImages.GetImage('sys.checkboxes');
-  if FChecked then  // which image index?
-    ix := 1
-  else
-    ix := 0;
   Canvas.DrawImagePart(r.Left, r.Top, img, ix*13, 0, 13, 13);
 
   ty := (Height div 2) - (Font.Height div 2);
   if ty < 0 then
     ty := 0;
-  Canvas.DrawString(tx, ty, FText);
+  Canvas.SetTextColor(clText1);
+  fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
 
   Canvas.EndDraw;
+end;
+
+procedure TfpgCheckBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  FIsPressed := True;
+  Repaint;
 end;
 
 procedure TfpgCheckBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
+  FIsPressed := False;
   Checked := not FChecked;
   if Assigned(FOnChange) then
     FOnChange(self);
@@ -177,6 +194,7 @@ begin
   FFocusable  := True;
   FBoxSize    := 14;
   FChecked    := False;
+  FIsPressed  := False;
   FOnChange   := nil;
 end;
 

@@ -54,7 +54,7 @@ begin
     
     img := TfpgImage(sl.Objects[n]);
     if img <> nil then
-      Canvas.DrawImage(x+150, y, img);
+      Canvas.DrawImage(x+130, y, img);
 
     inc(y, img.Height+8);
     if y > Height-32 then // largest images are 32 in height

@@ -54,7 +54,7 @@ type
     procedure btnCloseClick(Sender: TObject);
     procedure btnDisplayBMP(Sender: TObject);
     procedure btn3Click(Sender: TObject);
-    procedure checkboxChanged(Sender: TObject);
+    procedure checkbox1Changed(Sender: TObject);
   public
     label1: TfpgLabel;
     label2: TfpgLabel;
@@ -71,7 +71,8 @@ type
     xpluna: TXPButton;
     xp2: TXPButton;
     xpsilver: TXPButton;
-    checkbox: TfpgCheckBox;
+    checkbox1: TfpgCheckBox;
+    checkbox2: TfpgCheckBox;
     radiobtn1: TfpgRadioButton;
     radiobtn2: TfpgRadioButton;
     radiobtn3: TfpgRadioButton;
@@ -291,11 +292,17 @@ begin
       , 'My cool message title');
 end;
 
-procedure TMainForm.checkboxChanged(Sender: TObject);
+procedure TMainForm.checkbox1Changed(Sender: TObject);
 begin
-  radiobtn1.Enabled := not checkbox.Checked;
-  radiobtn2.Enabled := not checkbox.Checked;
-  radiobtn3.Enabled := not checkbox.Checked;
+  label1.Enabled := not checkbox1.Checked;
+  label2.Enabled := not checkbox1.Checked;
+  btn.Enabled := not checkbox1.Checked;
+  btn2.Enabled := not checkbox1.Checked;
+  btn3.Enabled := not checkbox1.Checked;
+  checkbox2.Enabled := not checkbox1.Checked;
+  radiobtn1.Enabled := not checkbox1.Checked;
+  radiobtn2.Enabled := not checkbox1.Checked;
+  radiobtn3.Enabled := not checkbox1.Checked;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -383,11 +390,13 @@ begin
   bmp.UpdateImage;
   xpsilver.ThemeImage := bmp;
   
-  checkbox  := CreateCheckBox(self, 10, 220, 'Disable Radios');
-  checkbox.OnChange := @checkboxChanged;
-  radiobtn1 := CreateRadioButton(self, 10, 245, 'Radio One');
-  radiobtn2 := CreateRadioButton(self, 10, 265, 'Radio Two');
-  radiobtn3 := CreateRadioButton(self, 10, 285, 'Radio Three');
+  checkbox1  := CreateCheckBox(self, 10, 265, 'Disable components');
+  checkbox1.OnChange := @checkbox1Changed;
+  checkbox2  := CreateCheckBox(self, 10, 285, 'Checkbox Two');
+  
+  radiobtn1 := CreateRadioButton(self, 180, 265, 'Radio One');
+  radiobtn2 := CreateRadioButton(self, 180, 285, 'Radio Two');
+  radiobtn3 := CreateRadioButton(self, 180, 305, 'Radio Three');
   radiobtn1.Checked := True;
 end;
 

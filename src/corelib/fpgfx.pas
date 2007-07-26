@@ -156,6 +156,7 @@ type
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer); virtual;
+    procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
   end;
 
 
@@ -891,6 +892,19 @@ begin
     ACanvas.FillTriangle(peekx, peeky, basex, peeky - side, basex, peeky + side);
   end;
 end;
+
+procedure TfpgStyle.DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord;
+  AText: string; AEnabled: boolean);
+begin
+  if not AEnabled then
+  begin
+    ACanvas.SetTextColor(clHilite1);
+    ACanvas.DrawString(x+1, y+1, AText);
+    ACanvas.SetTextColor(clShadow1);
+  end;
+  ACanvas.DrawString(x, y, AText);
+end;
+
 
 { TfpgCaret }
 
