@@ -274,6 +274,9 @@ procedure TfpgWidget.MsgMouseDown(var msg: TfpgMessageRec);
 var
   mb: TMouseButton;
 begin
+  if not FEnabled then
+    exit;   // Do we want this here?
+
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin
@@ -299,6 +302,9 @@ procedure TfpgWidget.MsgMouseUp(var msg: TfpgMessageRec);
 var
   mb: TMouseButton;
 begin
+  if not FEnabled then
+    exit;   // Do we want this here?
+
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin

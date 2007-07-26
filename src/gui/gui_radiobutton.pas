@@ -1,4 +1,4 @@
-unit gui_checkbox;
+unit gui_radiobutton;
 
 {$mode objfpc}{$H+}
 
@@ -10,17 +10,19 @@ uses
   fpgfx,
   gfxbase,
   gfx_widget;
-  
+
 type
 
-  TfpgCheckBox = class(TfpgWidget)
+  TfpgRadioButton = class(TfpgWidget)
   private
     FBackgroundColor: TfpgColor;
     FChecked: boolean;
+    FFont: TfpgFont;
+    FGroupIndex: integer;
     FOnChange: TNotifyEvent;
     FText: string;
-    FFont: TfpgFont;
     FBoxSize: integer;
+    FIsPressed: boolean;
     function    GetFontName: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetChecked(const AValue: boolean);
@@ -28,6 +30,7 @@ type
     procedure   SetText(const AValue: string);
   protected
     procedure   HandlePaint; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
@@ -39,39 +42,32 @@ type
     property    Text: string read FText write SetText;
     property    FontName: string read GetFontName write SetFontName;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+    property    GroupIndex: integer read FGroupIndex write FGroupIndex;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
-
-
-function CreateCheckBox(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgCheckBox;
+  
+  
+function CreateRadioButton(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgRadioButton;
 
 implementation
 
-function CreateCheckBox(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgCheckBox;
+function CreateRadioButton(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgRadioButton;
 begin
-  Result := TfpgCheckBox.Create(AOwner);
+  Result := TfpgRadioButton.Create(AOwner);
   Result.Top    := y;
   Result.Left   := x;
   Result.Text   := AText;
   Result.Width  := Result.Font.TextWidth(Result.Text) + 24;
 end;
 
-{ TfpgCheckBox }
+{ TfpgRadioButton }
 
-procedure TfpgCheckBox.SetChecked(const AValue: boolean);
-begin
-  if FChecked = AValue then
-    Exit; //==>
-  FChecked := AValue;
-  RePaint;
-end;
-
-function TfpgCheckBox.GetFontName: string;
+function TfpgRadioButton.GetFontName: string;
 begin
   Result := FFont.FontDesc;
 end;
 
-procedure TfpgCheckBox.SetBackgroundColor(const AValue: TfpgColor);
+procedure TfpgRadioButton.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor = AValue then
     Exit; //==>
@@ -79,14 +75,40 @@ begin
   RePaint;
 end;
 
-procedure TfpgCheckBox.SetFontName(const AValue: string);
+procedure TfpgRadioButton.SetChecked(const AValue: boolean);
+var
+  i: integer;
+  wg: TfpgWidget;
+begin
+  if FChecked = AValue then
+    Exit; //==>
+  FChecked := AValue;
+  
+  // Clear other radio buttons in the same group
+  if FChecked and (Parent <> nil) then
+  begin
+    for i := 0 to Parent.ComponentCount-1 do
+    begin
+      wg := TfpgWidget(Parent.Components[i]);
+      if (wg <> nil) and (wg <> self) and (wg is TfpgRadioButton) and
+          (TfpgRadioButton(wg).GroupIndex = GroupIndex) then
+      begin
+        TfpgRadioButton(wg).Checked := False;
+      end;
+    end;  { for }
+  end;  { if }
+
+  RePaint;
+end;
+
+procedure TfpgRadioButton.SetFontName(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   RePaint;
 end;
 
-procedure TfpgCheckBox.SetText(const AValue: string);
+procedure TfpgRadioButton.SetText(const AValue: string);
 begin
   if FText = AValue then
     Exit; //==>
@@ -94,17 +116,17 @@ begin
   RePaint;
 end;
 
-procedure TfpgCheckBox.HandlePaint;
+procedure TfpgRadioButton.HandlePaint;
 var
   r: TfpgRect;
   ty: integer;
   tx: integer;
-  ix: integer;
   img: TfpgImage;
+  ix: integer;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
-  
+
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(0, 0, Width, Height);
   Canvas.SetFont(Font);
@@ -121,37 +143,61 @@ begin
   if r.top < 0 then
     r.top := 0;
 
-  // paint the check (in this case a X)
+  // calculate which image to paint.
+  if Enabled then
+  begin
+    ix := Ord(FChecked);
+    if FIsPressed then
+      Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
+
+  // paint the radio button
   tx := r.right + 8;
   inc(r.left, 2);
   inc(r.top, 1);
-  img := fpgImages.GetImage('sys.checkboxes');
-  if FChecked then  // which image index?
-    ix := 1
-  else
-    ix := 0;
-  Canvas.DrawImagePart(r.Left, r.Top, img, ix*13, 0, 13, 13);
+  img := fpgImages.GetImage('sys.radiobuttons');
+  Canvas.DrawImagePart(r.Left, r.Top, img, ix*12, 0, 12, 12);
 
   ty := (Height div 2) - (Font.Height div 2);
   if ty < 0 then
     ty := 0;
+  if Enabled then
+    Canvas.SetTextColor(clText1)
+  else
+    Canvas.SetTextColor(clShadow1);
   Canvas.DrawString(tx, ty, FText);
 
   Canvas.EndDraw;
 end;
 
-procedure TfpgCheckBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TfpgRadioButton.HandleLMouseDown(x, y: integer;
+  shiftstate: TShiftState);
 begin
-  inherited HandleLMouseUp(x, y, shiftstate);
-  Checked := not FChecked;
-  if Assigned(FOnChange) then
-    FOnChange(self);
+  inherited HandleLMouseDown(x, y, shiftstate);
+  FIsPressed := True;
+  Repaint;
 end;
 
-procedure TfpgCheckBox.HandleKeyRelease(var keycode: word;
+procedure TfpgRadioButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+  FIsPressed := False;
+  if not Checked then
+  begin
+    Checked := not FChecked;
+    if Assigned(FOnChange) then
+      FOnChange(self);
+  end
+  else
+    RePaint;
+end;
+
+procedure TfpgRadioButton.HandleKeyRelease(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = keySpace) or (keycode = keyReturn) then
+  if (keycode = keySpace) then
   begin
     consumed := True;
     Checked := not FChecked;
@@ -165,22 +211,24 @@ begin
   inherited HandleKeyRelease(keycode, shiftstate, consumed);
 end;
 
-constructor TfpgCheckBox.Create(AOwner: TComponent);
+constructor TfpgRadioButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FText     := 'CheckBox';
+  FText     := 'RadioButton';
   FFont     := fpgGetFont('#Label1');
   FHeight   := FFont.Height + 4;
   FWidth    := 120;
-
+  
   FBackgroundColor := clWindowBackground;
   FFocusable  := True;
-  FBoxSize    := 14;
+  FBoxSize    := 12;
   FChecked    := False;
+  FGroupIndex := 0;
+  FIsPressed  := False;
   FOnChange   := nil;
 end;
 
-destructor TfpgCheckBox.Destroy;
+destructor TfpgRadioButton.Destroy;
 begin
   FFont.Free;
   inherited Destroy;

@@ -1,13 +1,23 @@
+{
+  This program searches for *.bmp files in the current directory and
+  outputs to stdout the bmp files found as byte array constants.
+}
 program updatestdimgs;
 
 {$IFDEF FPC}
-    {$mode delphi}
-    {$H+}
+  {$mode delphi}{$H+}
 {$ELSE}
-{$APPTYPE CONSOLE}
+  {$APPTYPE CONSOLE}
 {$ENDIF}
 
-uses SysUtils, {$ifdef Win32}Windows{$else}linux{$endif};
+uses 
+  SysUtils 
+  {$ifdef Win32}
+  ,Windows
+  {$else}
+  ,linux
+  {$endif}
+  ;
 
 var
   sr : TSearchRec;

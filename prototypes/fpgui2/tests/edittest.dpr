@@ -17,7 +17,8 @@ uses
   gui_memo,
   gui_dialogs,
   gui_listbox,
-  gui_checkbox;
+  gui_checkbox,
+  gui_radiobutton;
 
 type
 
@@ -53,6 +54,7 @@ type
     procedure btnCloseClick(Sender: TObject);
     procedure btnDisplayBMP(Sender: TObject);
     procedure btn3Click(Sender: TObject);
+    procedure checkboxChanged(Sender: TObject);
   public
     label1: TfpgLabel;
     label2: TfpgLabel;
@@ -70,6 +72,9 @@ type
     xp2: TXPButton;
     xpsilver: TXPButton;
     checkbox: TfpgCheckBox;
+    radiobtn1: TfpgRadioButton;
+    radiobtn2: TfpgRadioButton;
+    radiobtn3: TfpgRadioButton;
     procedure AfterCreate; override;
   end;
 
@@ -245,134 +250,146 @@ begin
 end;
 
 
-  { TMainForm }
+{ TMainForm }
 
-  procedure TMainForm.btnCloseClick(Sender: TObject);
-  begin
-    Close;
-  end;
+procedure TMainForm.btnCloseClick(Sender: TObject);
+begin
+  Close;
+end;
 
-  procedure TMainForm.btnDisplayBMP(Sender: TObject);
-  var
-    bmp: TfpgImage;
-  begin
-    bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
-    bmp.CreateMaskFromSample(0, 0);
-    bmp.UpdateImage;
+procedure TMainForm.btnDisplayBMP(Sender: TObject);
+var
+  bmp: TfpgImage;
+begin
+  exit;
+  bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
+  bmp.CreateMaskFromSample(0, 0);
+  bmp.UpdateImage;
 
-    Canvas.BeginDraw;
-    Canvas.ClearClipRect;
-    // For some reason, under Windows if I don't call this
-    // the forms background goes black.
-    Canvas.Clear(clWindowBackground);
+  Canvas.BeginDraw;
+  Canvas.ClearClipRect;
+  // For some reason, under Windows if I don't call this
+  // the forms background goes black.
+  Canvas.Clear(clWindowBackground);
 
-    Canvas.DrawImage(10, 200, bmp);
-    Canvas.DrawImagePart(10, 240, bmp, 0, 0, 32, 21);
-    Canvas.DrawImagePart(50, 240, bmp, 32, 0, 32, 21);
+  Canvas.DrawImage(10, 200, bmp);
+  Canvas.DrawImagePart(10, 240, bmp, 0, 0, 32, 21);
+  Canvas.DrawImagePart(50, 240, bmp, 32, 0, 32, 21);
 
-    Canvas.EndDraw;
-    bmp.Free;
-  end;
+  Canvas.EndDraw;
+  bmp.Free;
+end;
 
-  procedure TMainForm.btn3Click(Sender: TObject);
-  begin
-    ShowMessage('Do you really want to quit this application?' + #10 +
-        'We can always keep playing and quite at a later date.' +
-        #10#10 +
-        'This is a very long line that has to must be split automatically ' +
-        'and it should have done so. If not there is a bug in the code. It ' +
-        'has also been optimized to wordwrap and not split words in half.'
-        , 'My cool message title');
-  end;
+procedure TMainForm.btn3Click(Sender: TObject);
+begin
+  ShowMessage('Do you really want to quit this application?' + #10 +
+      'We can always keep playing and quite at a later date.' +
+      #10#10 +
+      'This is a very long line that has to must be split automatically ' +
+      'and it should have done so. If not there is a bug in the code. It ' +
+      'has also been optimized to wordwrap and not split words in half.'
+      , 'My cool message title');
+end;
 
+procedure TMainForm.checkboxChanged(Sender: TObject);
+begin
+  radiobtn1.Enabled := not checkbox.Checked;
+  radiobtn2.Enabled := not checkbox.Checked;
+  radiobtn3.Enabled := not checkbox.Checked;
+end;
 
-  procedure TMainForm.AfterCreate;
-  var
-    i: integer;
-    bmp: TfpgImage;
-  begin
-    SetPosition(200, 200, 500, 350);
-    WindowTitle := 'Test Russian text -> Òåñò';
+procedure TMainForm.AfterCreate;
+var
+  i: integer;
+  bmp: TfpgImage;
+begin
+  SetPosition(200, 200, 500, 350);
+  WindowTitle := 'Test Russian text -> Òåñò';
 
-    label1 := CreateLabel(self, 5, 5, 'Hello world!');
-    label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');
-    label2.FontDesc := 'Sans-12:bold:underline';
+  label1 := CreateLabel(self, 5, 5, 'Hello world!');
+  label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');
+  label2.FontDesc := 'Sans-12:bold:underline';
 
-    edit1      := CreateEdit(self, 10, 40, 120, 22);
-    edit1.Text := 'Hello world. Hello world. Hello world.';
-    edit2      := CreateEdit(self, 10, 70, 200, 22);
-    edit2.Text := 'Test Russian text -> Òåñò';
-    // left to right and right to left text in one
-    // fpGUI doesn't handle this correctly yet.
-    // See http://www.catch22.net/tuts/editor18.asp  for how it needs to display and work
+  edit1      := CreateEdit(self, 10, 40, 120, 22);
+  edit1.Text := 'Hello world. Hello world. Hello world.';
+  edit2      := CreateEdit(self, 10, 70, 200, 22);
+  edit2.Text := 'Test Russian text -> Òåñò';
+  // left to right and right to left text in one
+  // fpGUI doesn't handle this correctly yet.
+  // See http://www.catch22.net/tuts/editor18.asp  for how it needs to display and work
 //    edit2.Text := 'HelloيُساوِيWorld';
 
-    btn2          := CreateButton(self, 10, 100, 75, 'Normal', nil);
-    btn2.OnClick  := @btnDisplayBMP;
+  btn2          := CreateButton(self, 10, 100, 75, 'Normal', nil);
+  btn2.OnClick  := @btnDisplayBMP;
 //    btn2.Enabled  := False;
-    
-    btn3          := CreateButton(self, 100, 100, 75, 'Embedded', nil);
-    btn3.Embedded := True;
-    btn3.OnClick  := @btn3Click;
+  
+  btn3          := CreateButton(self, 100, 100, 75, 'Embedded', nil);
+  btn3.Embedded := True;
+  btn3.OnClick  := @btn3Click;
 
-    btn           := CreateButton(self, 10, 130, 75, 'Close', @btnCloseClick);
-    btn.ImageName := 'stdimg.close';
-    btn.ShowImage := True;
+  btn           := CreateButton(self, 10, 130, 75, 'Close', @btnCloseClick);
+  btn.ImageName := 'stdimg.close';
+  btn.ShowImage := True;
 
-    combo1 := CreateComboBox(self, 10, 160, 120, nil);
-    for i := 1 to 5 do
-      combo1.Items.Add(Format('Items %.2d', [i]));
-    combo2 := CreateComboBox(self, 10, 190, 120, nil);
-    for i := 1 to 20 do
-      combo2.Items.Add(Format('Items %.2d', [i]));
+  combo1 := CreateComboBox(self, 10, 160, 120, nil);
+  for i := 1 to 5 do
+    combo1.Items.Add(Format('Items %.2d', [i]));
+  combo2 := CreateComboBox(self, 10, 190, 120, nil);
+  for i := 1 to 20 do
+    combo2.Items.Add(Format('Items %.2d', [i]));
 
-    memo        := TfpgMemo.Create(self);
-    memo.Top    := 10;
-    memo.Left   := 250;
-    memo.Width  := 200;
-    memo.Height := 80;
+  memo        := TfpgMemo.Create(self);
+  memo.Top    := 10;
+  memo.Left   := 250;
+  memo.Width  := 200;
+  memo.Height := 80;
 
-    listbox         := TfpgListBox.Create(self);
-    listbox.Top     := 100;
-    listbox.Left    := 250;
-    listbox.Width   := 200;
-    listbox.Height  := 80;
-    for i := 1 to 20 do
-      listbox.Items.Add(Format('Items %.2d', [i]));
-    listbox.FocusItem := 3;
+  listbox         := TfpgListBox.Create(self);
+  listbox.Top     := 100;
+  listbox.Left    := 250;
+  listbox.Width   := 200;
+  listbox.Height  := 80;
+  for i := 1 to 20 do
+    listbox.Items.Add(Format('Items %.2d', [i]));
+  listbox.FocusItem := 3;
 
 
-    sbar        := TfpgScrollBar.Create(self);
-    sbar.Top    := 160;
-    sbar.Left   := 150;
-    sbar.Height := 100;
-    sbar.Max    := 15;
-    
-    xpluna := TXPButton.Create(self);
-    xpluna.Left    := 250;
-    xpluna.Top     := 200;
-    xpluna.Width   := 75;
-    xpluna.Text    := 'XP Luna';
+  sbar        := TfpgScrollBar.Create(self);
+  sbar.Top    := 160;
+  sbar.Left   := 150;
+  sbar.Height := 100;
+  sbar.Max    := 15;
+  
+  xpluna := TXPButton.Create(self);
+  xpluna.Left    := 250;
+  xpluna.Top     := 200;
+  xpluna.Width   := 75;
+  xpluna.Text    := 'XP Luna';
 
-    xp2 := TXPButton.Create(self);
-    xp2.Left    := 335;
-    xp2.Top     := 200;
-    xp2.Width   := 75;
-    xp2.Text    := 'XP Button2';
-    xp2.Enabled := False;
+  xp2 := TXPButton.Create(self);
+  xp2.Left    := 335;
+  xp2.Top     := 200;
+  xp2.Width   := 75;
+  xp2.Text    := 'XP Button2';
+  xp2.Enabled := False;
 
-    xpsilver := TXPButton.Create(self);
-    xpsilver.Left    := 250;
-    xpsilver.Top     := 230;
-    xpsilver.Width   := 75;
-    xpsilver.Text    := 'XP Silver';
-    bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/button.bmp'));
-    bmp.CreateMaskFromSample(0, 0);
-    bmp.UpdateImage;
-    xpsilver.ThemeImage := bmp;
-    
-    checkbox := CreateCheckBox(self, 10, 220, 'Checkbox One');
-  end;
+  xpsilver := TXPButton.Create(self);
+  xpsilver.Left    := 250;
+  xpsilver.Top     := 230;
+  xpsilver.Width   := 75;
+  xpsilver.Text    := 'XP Silver';
+  bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/button.bmp'));
+  bmp.CreateMaskFromSample(0, 0);
+  bmp.UpdateImage;
+  xpsilver.ThemeImage := bmp;
+  
+  checkbox  := CreateCheckBox(self, 10, 220, 'Disable Radios');
+  checkbox.OnChange := @checkboxChanged;
+  radiobtn1 := CreateRadioButton(self, 10, 245, 'Radio One');
+  radiobtn2 := CreateRadioButton(self, 10, 265, 'Radio Two');
+  radiobtn3 := CreateRadioButton(self, 10, 285, 'Radio Three');
+  radiobtn1.Checked := True;
+end;
 
 procedure MainProc;
 var

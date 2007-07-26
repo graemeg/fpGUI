@@ -1,1 +1,1 @@
-updatestdimgs > ../source/core/stdimages.inc
+updatestdimgs > ../src/corelib/stdimages.inc
