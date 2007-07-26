@@ -832,20 +832,20 @@ end;
 procedure TfpgStyle.DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
 begin
   ACanvas.SetColor(clShadow1);
-  ACanvas.DrawLine(x, y, x + w - 1, y);
-  ACanvas.DrawLine(x, y + h - 1, x, y);
+  ACanvas.DrawLine(x, y, x + w - 1, y);   // top (outer)
+  ACanvas.DrawLine(x, y + h - 1, x, y);   // left (outer)
 
   ACanvas.SetColor(clShadow2);
-  ACanvas.DrawLine(x + 1, y + 1, x + w - 2, y + 1);
-  ACanvas.DrawLine(x + 1, y + h - 2, x + 1, y + 1);
+  ACanvas.DrawLine(x + 1, y + 1, x + w - 2, y + 1);   // top (inner)
+  ACanvas.DrawLine(x + 1, y + h - 2, x + 1, y + 1);   // left (inner)
 
   ACanvas.SetColor(clHilite2);
-  ACanvas.DrawLine(x + 1, y + h - 1, x + w - 1, y + h - 1);
-  ACanvas.DrawLine(x + w - 1, y + 1, x + w - 1, y + h - 1);
+  ACanvas.DrawLine(x + 1, y + h - 1, x + w, y + h - 1);   // bottom (outer)
+  ACanvas.DrawLine(x + w - 1, y, x + w - 1, y + h);   // right (outer)
 
   ACanvas.SetColor(clHilite1);
-  ACanvas.DrawLine(x + 2, y + h - 2, x + w - 2, y + h - 2);
-  ACanvas.DrawLine(x + w - 2, y + 2, x + w - 2, y + h - 2);
+  ACanvas.DrawLine(x + 2, y + h - 2, x + w - 2, y + h - 2);   // bottom (inner)
+  ACanvas.DrawLine(x + w - 2, y + 1, x + w - 2, y + h - 1);   // right (inner)
 end;
 
 procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer);

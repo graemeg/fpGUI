@@ -338,7 +338,7 @@ begin
 
   if not Assigned(FInternalBtn) then
   begin
-    FInternalBtn           := CreateButton(self, (Width-19), 2, 18, '', @InternalBtnClick);
+    FInternalBtn           := CreateButton(self, (Width-20), 2, 18, '', @InternalBtnClick);
     FInternalBtn.Height    := 19;
     FInternalBtn.Embedded  := True;
     FInternalBtn.Parent    := self;
