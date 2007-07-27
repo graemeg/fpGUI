@@ -201,7 +201,7 @@ end;
 
 procedure TfpgEdit.HandlePaint;
 var
-  r: TfpgRect;
+  r: TRect;
   tw, tw2, st, len: integer;
   dtext: string;
 begin
@@ -209,10 +209,7 @@ begin
   Canvas.ClearClipRect;
   Canvas.DrawControlFrame(0, 0, Width, Height);
 
-  r.Left   := 2;
-  r.Top    := 2;
-  r.Width  := Width - 4;
-  r.Height := Height - 4;
+  r := Rect(2, 2, Width-2, Height-2);
   Canvas.SetClipRect(r);
 
   if Enabled then
@@ -220,7 +217,7 @@ begin
   else
     Canvas.SetColor(clWindowBackground);
 
-  Canvas.FillRectAngle(2, 2, Width - 4, Height - 4);
+  Canvas.FillRectAngle(r);
   dtext := GetDrawText;
   Canvas.SetTextColor(clText1);
   Canvas.SetFont(FFont);

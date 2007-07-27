@@ -623,7 +623,7 @@ var
   tw, tw2, st, len: integer;
   yp: integer;
   ls: string;
-  r: TfpgRect;
+  r: TRect;
   selsl, selsp, selel, selep: integer;
 begin
   Canvas.BeginDraw;
@@ -632,8 +632,8 @@ begin
 
   r.Left   := 2;
   r.Top    := 2;
-  r.Width  := Width - 4;
-  r.Height := Height - 4;
+  r.Right  := Width - 4;
+  r.Bottom := Height - 4;
   Canvas.SetClipRect(r);
   
   if Enabled then

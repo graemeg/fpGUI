@@ -96,7 +96,7 @@ end;
 procedure TfpgScrollBar.HandlePaint;
 begin
   Canvas.BeginDraw;
-
+  
   if Orientation = orVertical then
   begin
     DrawButton(0, 0, Width, Width, 'sys.sb.up' ,FStartBtnPressed);
@@ -165,12 +165,12 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.FillRectangle(0, Width, Width, Height - Width - Width);
+    Canvas.FillRectangle(0, Width-1, Width-1, Height - (2*Width)-2);
     area := Height - (Width shl 1);
   end
   else
   begin
-    Canvas.FillRectangle(Height, 0, Width - Height - Height, Height);
+    Canvas.FillRectangle(Height-1, 0, Width - (2*Height)-2, Height-1);
     area := Width - (Height shl 1);
   end;
 

@@ -47,7 +47,7 @@ type
   TXWindowStateFlags = set of TXWindowStateFlag;
   
   TfpgWindowImpl = class;
-
+  
 
   TfpgFontResourceImpl = class(TfpgFontResourceBase)
   private
@@ -88,7 +88,7 @@ type
     FDrawHandle: TXID;
     Fgc: TfpgGContext;
     FCurFontRes: TfpgFontResourceImpl;
-    FClipRect: TfpgRect;
+    FClipRect: TRect;
     FClipRectSet: boolean;
     FXftDraw: PXftDraw;
     FXftDrawBuffer: PXftDraw;
@@ -99,17 +99,17 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
-    procedure   DoGetWinRect(var r: TfpgRect); override;
-    procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoGetWinRect(out r: TRect); override;
+    procedure   DoFillRectangle(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
-    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoDrawRectangle(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
-    procedure   DoSetClipRect(const rect: TfpgRect); override;
-    function    DoGetClipRect: TfpgRect; override;
-    procedure   DoAddClipRect(const rect: TfpgRect); override;
+    procedure   DoSetClipRect(const ARect: TRect); override;
+    function    DoGetClipRect: TRect; override;
+    procedure   DoAddClipRect(const ARect: TRect); override;
     procedure   DoClearClipRect; override;
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
@@ -1305,9 +1305,8 @@ var
 begin
   oldColor := Color;
   SetColor(AValue);
-  DrawLine(X, Y, X+1, Y+1);
+  XDrawPoint(xapplication.display, FDrawHandle, Fgc, X, Y);
   SetColor(oldColor);
-  {$Note We must still implement DrawPoint}
 end;
 
 procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
@@ -1340,42 +1339,41 @@ begin
 end;
 
 procedure TfpgCanvasImpl.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
-//const
-//  DotDashes: array[0..1] of Char = #1#1;
-//  DotDashes: array[0..1] of Char = #4#2;
-  { It was #1#1 which gives 1 pixel dots. Now it gives a 4 pixel line and a
-    2 pixel space. }
-var
-  ls: integer;
-  DotDashes: array[0..6] of Char;
-  len: integer;
+const
+  cDot: array[0..1] of Char = #1#1;
+  cDash: array[0..1] of Char = #4#2;
+  cDashDot: array[0..3] of Char = #4#1#1#1;
+  cDashDotDot: array[0..5] of Char = #4#1#1#1#1#1;
 begin
-  {$Note Extend this and the GDI code some more to support more Line Styles}
-  // This design can be improved on. It smells!
-  len := 0;
   case AStyle of
     lsDot:
         begin
-          ls := LineOnOffDash;
-          len := 2;
-          DotDashes[0] := Char(#1);
-          DotDashes[1] := Char(#1);
+          XSetLineAttributes(xapplication.display, Fgc, 0,
+            LineOnOffDash, CapButt, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDot, 2);
         end;
     lsDash:
         begin
-          ls := LineOnOffDash;
-          len := 2;
-          DotDashes[0] := Char(#4);
-          DotDashes[1] := Char(#2);
+          XSetLineAttributes(xapplication.display, Fgc, 0,
+            LineOnOffDash, CapButt, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDash, 2);
         end;
-    lsSolid:
-        ls := LineSolid;
-    else
-      ls := LineSolid;
-  end;
-  XSetLineAttributes(xapplication.display, Fgc, awidth, ls, CapButt, JoinMiter);
-  if ls = LineOnOffDash then
-    XSetDashes(xapplication.display, Fgc, 0, DotDashes, len);
+    lsDashDot:
+        begin
+          XSetLineAttributes(xapplication.display, Fgc, 0,
+            LineOnOffDash, CapButt, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDashDot, 4);
+        end;
+    lsDashDotDot:
+        begin
+          XSetLineAttributes(xapplication.display, Fgc, 0,
+            LineOnOffDash, CapButt, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDashDotDot, 6);
+        end;
+    else  // which includes lsSolid
+      XSetLineAttributes(xapplication.display, Fgc, 0,
+        LineSolid, CapButt, JoinMiter);
+  end;  { case }
 end;
 
 procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
@@ -1387,28 +1385,32 @@ begin
     y + FCurFontRes.GetAscent, PChar(txt), Length(txt));
 end;
 
-procedure TfpgCanvasImpl.DoGetWinRect(var r: TfpgRect);
+procedure TfpgCanvasImpl.DoGetWinRect(out r: TRect);
 var
   rw: TfpgWinHandle;
   x: integer;
   y: integer;
   bw: longword;
   d: longword;
+  w: Cardinal;
+  h: Cardinal;
 begin
-  r.left := 0;
-  r.Top  := 0;
   XGetGeometry(xapplication.display, FDrawWindow.FWinHandle, @rw, @x, @y,
-      @(r.Width), @(r.Height), @bw, @d);
+      @w, @h, @bw, @d);
+  r.Left    := 0;
+  r.Top     := 0;
+  r.Right   := w;
+  r.Bottom  := h;
 end;
 
-procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgCanvasImpl.DoFillRectangle(x1, y1, x2, y2: TfpgCoord);
 begin
   // Remember this for when we add Canvas.Pen support!
   { Note:  By default XFillRectangle doesn't paint the same size rectangle that
     XDrawRectangle does - given the same coordinates! In this case we enlarge
     the Width and Height to paint consistant rectangle sizes, even thought it
     might repaint the same (only a few) pixels twice. }
-  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w{+1}, h{+1});
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x1, y1, x2-x1, y2-y1);
 end;
 
 procedure TfpgCanvasImpl.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
@@ -1434,9 +1436,9 @@ begin
   XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, 0, 0);
 end;
 
-procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgCanvasImpl.DoDrawRectangle(x1, y1, x2, y2: TfpgCoord);
 begin
-  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
+  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x1, y1, x2-x1, y2-y1);
 end;
 
 procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
@@ -1444,15 +1446,15 @@ begin
   XDrawLine(xapplication.display, FDrawHandle, Fgc, x1, y1, x2, y2);
 end;
 
-procedure TfpgCanvasImpl.DoSetClipRect(const rect: TfpgRect);
+procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TRect);
 var
   r: TXRectangle;
   rg: TRegion;
 begin
-  r.x      := rect.left;
-  r.y      := rect.top;
-  r.Width  := rect.Width;
-  r.Height := rect.Height;
+  r.x      := ARect.Left;
+  r.y      := ARect.Top;
+  r.Width  := ARect.Right - ARect.Left + 1;
+  r.Height := ARect.Bottom - ARect.Top + 1;
 
   rg := XCreateRegion;
   
@@ -1460,32 +1462,32 @@ begin
   XSetRegion(xapplication.display, Fgc, FClipRegion);
   XftDrawSetClip(FXftDraw, FClipRegion);
 
-  FClipRect    := rect;
+  FClipRect    := ARect;
   FClipRectSet := True;
   XDestroyRegion(rg);
 end;
 
-function TfpgCanvasImpl.DoGetClipRect: TfpgRect;
+function TfpgCanvasImpl.DoGetClipRect: TRect;
 begin
   Result := FClipRect;
 end;
 
-procedure TfpgCanvasImpl.DoAddClipRect(const rect: TfpgRect);
+procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TRect);
 var
   r: TXRectangle;
   rg: TRegion;
 begin
-  r.x      := rect.left;
-  r.y      := rect.top;
-  r.Width  := rect.Width;
-  r.Height := rect.Height;
+  r.x      := ARect.Left;
+  r.y      := ARect.Top;
+  r.Width  := ARect.Right - ARect.Left + 1;
+  r.Height := ARect.Bottom - ARect.Top + 1;
 
   rg := XCreateRegion;
   XUnionRectWithRegion(@r, rg, rg);
   XIntersectRegion(FClipRegion, rg, FClipRegion);
   XSetRegion(xapplication.display, Fgc, FClipRegion);
 
-  FClipRect    := Rect;
+  FClipRect    := ARect;    // Double check this, it might be wrong!!
   FClipRectSet := True;
   
   XftDrawSetClip(FXftDraw, FClipRegion);
@@ -1494,7 +1496,7 @@ end;
 
 procedure TfpgCanvasImpl.DoClearClipRect;
 var
-  r: TfpgRect;
+  r: TRect;
 begin
   DoGetWinRect(r);
   DoSetClipRect(r);

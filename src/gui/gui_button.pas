@@ -182,7 +182,7 @@ procedure TfpgButton.HandlePaint;
 var
   AText: string;
   x, y, iy, w: integer;
-  r: TfpgRect;
+  r: TRect;
   pofs: integer;
   lBtnFlags: TFButtonFlags;
 begin
@@ -190,6 +190,8 @@ begin
 //  inherited HandlePaint;
   Canvas.Clear(clButtonFace);
   Canvas.ClearClipRect;
+  
+  r := Rect(0, 0, Width-1, Height-1);
 
   lBtnFlags := [];
   if FDown then
@@ -207,7 +209,8 @@ begin
   begin
     Canvas.SetColor(clText1);
     Canvas.SetLineStyle(1, lsDot);
-    Canvas.DrawRectangle(3, 3, Width - 6, Height - 6);
+    InflateRect(r, -3, -3);
+    Canvas.DrawRectangle(r);
   end
   else
   begin
@@ -215,14 +218,10 @@ begin
     Canvas.SetColor(clText1);
   end;
 
-  r.left   := 2;
-  r.top    := 2;
-  r.Width  := Width - 4;
-  r.Height := Height - 4;
   Canvas.SetClipRect(r);
-
   Canvas.SetFont(Font);
   AText := FText;
+
   y     := Height div 2 - FFont.Height div 2;
   if y < 3 then
     y := 3;

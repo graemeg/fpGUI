@@ -92,7 +92,7 @@ end;
 procedure TXPButton.HandlePaint;
 var
   x, i: integer;
-  r: TfpgRect;
+  r: TRect;
   iy, y: integer;
   w: integer;
   pofs: integer;
@@ -102,6 +102,8 @@ begin
   Canvas.ClearClipRect;
   Canvas.Clear(clButtonFace);
 
+  r := Rect(0, 0, Width, Height);
+  
   if State <> 1 then
   begin
     if Down then
@@ -127,7 +129,8 @@ begin
   begin
     Canvas.SetColor(clText1);
     Canvas.SetLineStyle(1, lsDot);
-    Canvas.DrawRectangle(3, 3, Width - 6, Height - 6);
+    InflateRect(r, -3, -3);
+    Canvas.DrawRectangle(r);
   end
   else
   begin
@@ -138,12 +141,7 @@ begin
   if not Enabled then
     Canvas.SetTextColor(clShadow1);
 
-  r.left   := 2;
-  r.top    := 2;
-  r.Width  := Width - 4;
-  r.Height := Height - 4;
   Canvas.SetClipRect(r);
-
   Canvas.SetFont(Font);
   y := Height div 2 - FFont.Height div 2;
   if y < 3 then
@@ -192,7 +190,6 @@ begin
     x := 3;
 
   Canvas.DrawString(x + pofs, y + pofs, FText);
-
   Canvas.EndDraw;
 end;
 

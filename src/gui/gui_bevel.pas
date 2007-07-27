@@ -77,9 +77,9 @@ begin
   inherited HandlePaint;
   Canvas.Clear(clWindowBackground);
   
-  Canvas.SetLineStyle(2, lsSolid);
-  Canvas.SetColor(clWindowBackground);
-  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
+//  Canvas.SetLineStyle(2, lsSolid);
+//  Canvas.SetColor(clWindowBackground);
+//  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
   Canvas.SetLineStyle(1, lsSolid);
 
   if Style = bsRaised then

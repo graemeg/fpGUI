@@ -32,7 +32,7 @@ type
 
 procedure TMainForm.HandlePaint;
 var
-  r: TfpgRect;
+  r: TRect;
   fnt: TfpgFont;
   y: integer;
   c: TfpgColor;
@@ -46,36 +46,39 @@ begin
   Canvas.SetColor(clBlack);
   r.Top       := 5;
   r.Left      := 60;
-  r.Width     := 50;
-  r.Height    := 50;
-  Canvas.DrawRectangle(r);
+  r.Right     := r.Left + 49;
+  r.Bottom    := r.Top + 49;
+  Canvas.DrawRectangle(r);  // 50x50
   
-  r.Left := 120;
+  r.Left      := 120;
+  r.Right     := r.Left + 49;
   Canvas.SetLineStyle(2, lsDash);
   Canvas.DrawRectangle(r);
 
-  r.Left := 180;
+  r.Left      := 180;
+  r.Right     := r.Left + 49;
   Canvas.SetColor(clGreen);
   Canvas.SetLineStyle(1, lsDot);
   Canvas.DrawRectangle(r);
 
-  r.Left := 240;
+  r.Left      := 240;
+  r.Right     := r.Left + 49;
   Canvas.SetColor(clBlue);
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.FillRectangle(r);
 
 
   // Testing line drawing
-  Canvas.DrawLine(5, 5, 50, 50);
+  Canvas.DrawLine(5, 5, 54, 54);
   Canvas.SetColor(clBlue);
-  Canvas.DrawLine(50, 5, 5, 50);
+  Canvas.DrawLine(54, 5, 5, 54);
   Canvas.SetColor(clRed);
   { Diagonal line }
-  Canvas.DrawLine(60, 5, 110, 55);
+  Canvas.DrawLine(60, 5, 109, 54);
   { Horizontal line }
-  Canvas.DrawLine(60, 3, 110, 3);
+  Canvas.DrawLine(60, 3, 109, 3);
   { Vertical line }
-  Canvas.DrawLine(58, 5, 58, 55);
+  Canvas.DrawLine(58, 5, 58, 54);
 
 
   // Testing Text and Fonts
@@ -97,6 +100,7 @@ begin
 
   // Testing basic style drawings
   Canvas.Font := fpgApplication.DefaultFont;
+//  Canvas.DrawButtonFace(0, 0, 6, 6, []);
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
   Canvas.DrawButtonFace(300, 20, 75, 25, []);
   Canvas.DrawString(385, 20, '= []');
@@ -112,8 +116,9 @@ begin
   Canvas.DrawString(45, y, 'DrawControlFrame():');
   y := y + Canvas.Font.Height;
   Canvas.DrawControlFrame(5, y, 200, 23);
-  
-  
+//  Canvas.DrawControlFrame(0, 0, 5, 5);
+
+
   // Testing Bitmap painting
   Canvas.DrawString(5, 180, 'Single BMP file:');
   Canvas.DrawString(300, 210, '(mask enabled for all images)');
@@ -136,8 +141,8 @@ begin
   Canvas.SetLineStyle(1, lsSolid);
   r.Top       := 302;
   r.Left      := 182;
-  r.Width     := 66;
-  r.Height    := 66;
+  r.Right     := r.Left + 66;
+  r.Bottom    := r.Top + 66;
   Canvas.DrawRectangle(r);
 
   Canvas.SetColor(clBlue);
@@ -156,11 +161,11 @@ begin
   
   // Arc drawing tests
   Canvas.SetColor(clBlack);
-  Canvas.DrawRectangle(5, 235, 50, 50);
+  Canvas.DrawRectangle(5, 235, 55, 285);
   Canvas.SetColor(clRed);
   Canvas.DrawArc(5, 235, 50, 50, 0, 270);  // should overlap rectangle pixels
   Canvas.SetColor(clBlack);
-  Canvas.DrawRectangle(5, 290, 50, 50);
+  Canvas.DrawRectangle(5, 290, 55, 340);
   Canvas.SetColor(clRed);
   Canvas.FillArc(5, 290, 50, 50, 0, 270);  // should overlap rectangle pixels
 

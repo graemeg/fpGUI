@@ -107,7 +107,7 @@ type
   PfpgMessageRec = ^TfpgMessageRec;
 
 
-  TfpgLineStyle = (lsSolid, lsDash, lsDot);
+  TfpgLineStyle = (lsSolid, lsDash, lsDot, lsDashDot, lsDashDotDot);
 
 
   // forward declaration
@@ -232,17 +232,17 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); virtual; abstract;
-    procedure   DoGetWinRect(var r: TfpgRect); virtual; abstract;
-    procedure   DoFillRectangle(x, y, w, h: TfpgCoord); virtual; abstract;
+    procedure   DoGetWinRect(out r: TRect); virtual; abstract;
+    procedure   DoFillRectangle(x1, y1, x2, y2: TfpgCoord); virtual; abstract;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); virtual; abstract;
-    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); virtual; abstract;
+    procedure   DoDrawRectangle(x1, y1, x2, y2: TfpgCoord); virtual; abstract;
     procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); virtual; abstract;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); virtual; abstract;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); virtual; abstract;
-    procedure   DoSetClipRect(const rect: TfpgRect); virtual; abstract;
-    function    DoGetClipRect: TfpgRect; virtual; abstract;
-    procedure   DoAddClipRect(const rect: TfpgRect); virtual; abstract;
+    procedure   DoSetClipRect(const ARect: TRect); virtual; abstract;
+    function    DoGetClipRect: TRect; virtual; abstract;
+    procedure   DoAddClipRect(const ARect: TRect); virtual; abstract;
     procedure   DoClearClipRect; virtual; abstract;
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); virtual; abstract;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); virtual; abstract;
@@ -254,8 +254,8 @@ type
   public
     constructor Create; virtual;
     destructor  Destroy; override;
-    procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
-    procedure   DrawRectangle(r: TfpgRect); overload;
+    procedure   DrawRectangle(x1, y1, x2, y2: TfpgCoord); overload;
+    procedure   DrawRectangle(r: TRect); overload;
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
@@ -263,18 +263,18 @@ type
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
     procedure   CopyRect(x, y: TfpgCoord; ACanvas: TfpgCanvasBase; var SourceRect: TRect);
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
-    procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
-    procedure   FillRectangle(r: TfpgRect); overload;
+    procedure   FillRectangle(x1, y1, x2, y2: TfpgCoord); overload;
+    procedure   FillRectangle(r: TRect); overload;
     procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
     procedure   FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
     procedure   XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); overload;
     procedure   XORFillRectangle(col: TfpgColor; r: TfpgRect); overload;
-    procedure   SetClipRect(const rect: TfpgRect);
-    function    GetClipRect: TfpgRect;
-    procedure   AddClipRect(const rect: TfpgRect);
+    procedure   SetClipRect(const ARect: TRect);
+    function    GetClipRect: TRect;
+    procedure   AddClipRect(const ARect: TRect);
     procedure   ClearClipRect;
     procedure   Clear(AColor: TfpgColor);
-    procedure   GetWinRect(var r: TfpgRect);
+    procedure   GetWinRect(out r: TRect);
     procedure   SetColor(AColor: TfpgColor);
     procedure   SetTextColor(AColor: TfpgColor);
     procedure   SetLineStyle(AWidth: integer; AStyle: TfpgLineStyle);
@@ -726,14 +726,14 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgCanvasBase.DrawRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgCanvasBase.DrawRectangle(x1, y1, x2, y2: TfpgCoord);
 begin
-  DoDrawRectangle(x, y, w, h);
+  DoDrawRectangle(x1, y1, x2, y2);
 end;
 
-procedure TfpgCanvasBase.DrawRectangle(r: TfpgRect);
+procedure TfpgCanvasBase.DrawRectangle(r: TRect);
 begin
-  DoDrawRectangle(r.Left, r.Top, r.Width, r.Height);
+  DoDrawRectangle(r.Left, r.Top, r.Right, r.Bottom);
 end;
 
 procedure TfpgCanvasBase.DrawLine(x1, y1, x2, y2: TfpgCoord);
@@ -818,14 +818,14 @@ begin
   end;
 end;
 
-procedure TfpgCanvasBase.FillRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgCanvasBase.FillRectangle(x1, y1, x2, y2: TfpgCoord);
 begin
-  DoFillRectangle(x, y, w, h);
+  DoFillRectangle(x1, y1, x2, y2);
 end;
 
-procedure TfpgCanvasBase.FillRectangle(r: TfpgRect);
+procedure TfpgCanvasBase.FillRectangle(r: TRect);
 begin
-  DoFillRectangle(r.Left, r.Top, r.Width, r.Height);
+  DoFillRectangle(r.Left, r.Top, r.Right, r.Bottom);
 end;
 
 procedure TfpgCanvasBase.FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
@@ -848,19 +848,19 @@ begin
   DoXORFillRectangle(col, r.Left, r.Top, r.Width, r.Height);
 end;
 
-procedure TfpgCanvasBase.SetClipRect(const rect: TfpgRect);
+procedure TfpgCanvasBase.SetClipRect(const ARect: TRect);
 begin
-  DoSetClipRect(rect);
+  DoSetClipRect(ARect);
 end;
 
-function TfpgCanvasBase.GetClipRect: TfpgRect;
+function TfpgCanvasBase.GetClipRect: TRect;
 begin
   Result := DoGetClipRect;
 end;
 
-procedure TfpgCanvasBase.AddClipRect(const rect: TfpgRect);
+procedure TfpgCanvasBase.AddClipRect(const ARect: TRect);
 begin
-  DoAddClipRect(rect);
+  DoAddClipRect(ARect);
 end;
 
 procedure TfpgCanvasBase.ClearClipRect;
@@ -871,16 +871,16 @@ end;
 procedure TfpgCanvasBase.Clear(AColor: TfpgColor);
 var
   lCol:     TfpgColor;
-  lWinRect: TfpgRect;
+  lWinRect: TRect;
 begin
   lCol := FColor;
   DoSetColor(AColor);
   DoGetWinRect(lWinRect);
-  DoFillRectangle(0, 0, lWinRect.Width, lWinRect.Height);
+  DoFillRectangle(0, 0, lWinRect.Right, lWinRect.Bottom);
   DoSetColor(lCol);
 end;
 
-procedure TfpgCanvasBase.GetWinRect(var r: TfpgRect);
+procedure TfpgCanvasBase.GetWinRect(out r: TRect);
 begin
   DoGetWinRect(r);
 end;

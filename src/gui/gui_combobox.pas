@@ -255,7 +255,7 @@ end;
 
 procedure TfpgCustomComboBox.HandlePaint;
 var
-  r: TfpgRect;
+  r: TRect;
 begin
   inherited HandlePaint;
   Canvas.BeginDraw;
@@ -263,22 +263,17 @@ begin
   Canvas.DrawControlFrame(0, 0, Width, Height);
 
   // internal background rectangle (without frame)
-  r.Left   := 2;
-  r.Top    := 2;
-  r.Width  := Width - 4;
-  r.Height := Height - 4;
+  r := Rect(2, 2, Width-2, Height-2);
   Canvas.SetClipRect(r);
 
   if Enabled then
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-  Canvas.FillRectangle(2, 2, Width - 4, Height - 4);
-
+  Canvas.FillRectangle(r);
 
 //  fpgStyle.DrawButtonFace(canvas, width - min(height, 20)-3, 2, height-4, height-4, [btnIsEmbedded]);
 //  fpgStyle.DrawDirectionArrow(canvas, width - height + 1, 1, height-2, height-2, 1);
-
   Canvas.SetFont(Font);
 
   if Focused then
@@ -291,9 +286,7 @@ begin
     Canvas.SetColor(FBackgroundColor);
     Canvas.SetTextColor(clText1);
   end;
-
   Canvas.FillRectangle(r);
-  Canvas.SetClipRect(r);
 
   // Draw select item's text
   if FocusItem > -1 then
