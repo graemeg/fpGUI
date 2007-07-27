@@ -90,7 +90,7 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
-    procedure   DoGetWinRect(var r: TfpgRect); override;
+    procedure   DoGetWinRect(out r: TRect); override;
     procedure   DoFillRectangle(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
@@ -1080,7 +1080,7 @@ end;
 
 procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
-  ARect: TfpgRect;
+  ARect: TRect;
   bmsize: Windows.TSIZE;
 begin
   if FDrawing and buffered and (FBufferBitmap > 0) then
@@ -1089,7 +1089,8 @@ begin
     GetBitmapDimensionEx(FBufferBitmap, bmsize);
     FDrawWindow := TfpgWindowImpl(awin);
     DoGetWinRect(ARect);
-    if (bmsize.cx <> ARect.Width) or (bmsize.cy <> ARect.Height) then
+    if (bmsize.cx <> (ARect.Right-ARect.Left+1)) or
+       (bmsize.cy <> (ARect.Bottom-ARect.Top+1)) then
       DoEndDraw;
   end;
 
@@ -1101,7 +1102,7 @@ begin
     if buffered then
     begin
       DoGetWinRect(ARect);
-      FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, ARect.Width, ARect.Height);
+      FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, (ARect.Right-ARect.Left+1), (ARect.Bottom-ARect.Top+1));
       Fgc           := CreateCompatibleDC(FWinGC);
       SelectObject(Fgc, FBufferBitmap);
     end
@@ -1272,15 +1273,9 @@ begin
   Result := FClipRect;
 end;
 
-procedure TfpgCanvasImpl.DoGetWinRect(var r: TfpgRect);
-var
-  wr: Windows.TRECT;
+procedure TfpgCanvasImpl.DoGetWinRect(out r: TRect);
 begin
-  GetClientRect(FDrawWindow.FWinHandle, wr);
-  r.top    := wr.Top;
-  r.left   := wr.Left;
-  r.Width  := wr.Right - wr.Left + 1;
-  r.Height := wr.Bottom - wr.Top + 1;
+  GetClientRect(FDrawWindow.FWinHandle, r);
 end;
 
 procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TRect);
