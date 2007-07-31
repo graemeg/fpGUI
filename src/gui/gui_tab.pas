@@ -21,10 +21,10 @@ type
 
   TfpgTabSheet = class(TfpgWidget)
   private
-    function    GetPageControl: TfpgPageContol;
+    function    GetPageControl: TfpgPageControl;
     function    GetPageIndex: Integer;
     function    GetText: string;
-    procedure   SetPageControl(const AValue: TfpgPageContol);
+    procedure   SetPageControl(const AValue: TfpgPageControl);
     procedure   SetPageIndex(const AValue: Integer);
     procedure   SetText(const AValue: string);
   public
@@ -32,7 +32,7 @@ type
     destructor  Destroy; override;
     property    Text: string read GetText write SetText;
     property    PageIndex: Integer read GetPageIndex write SetPageIndex stored False;
-    property    PageControl: TfpgPageContol read GetPageControl write SetPageControl;
+    property    PageControl: TfpgPageControl read GetPageControl write SetPageControl;
   end;
 
 
@@ -63,7 +63,7 @@ implementation
 
 { TfpgTabSheet }
 
-function TfpgTabSheet.GetPageControl: TfpgPageContol;
+function TfpgTabSheet.GetPageControl: TfpgPageControl;
 begin
   if Owner is TfpgPageControl then
     Result := TfpgPageControl(Owner)
@@ -84,13 +84,13 @@ begin
 
 end;
 
-procedure TfpgTabSheet.SetPageControl(const AValue: TfpgPageContol);
+procedure TfpgTabSheet.SetPageControl(const AValue: TfpgPageControl);
 begin
   if PageControl <> AValue then
   begin
     if PageControl <> nil then
       PageControl.RemovePage(self);
-    Owner := AValue;
+//    Owner := AValue;
     if AValue <> nil then
       AValue.InsertPage(self);
   end;
@@ -113,7 +113,7 @@ begin
   if Owner is TfpgPageControl then
   begin
     TfpgPageControl(Owner).RegisterTabSheet(self);
-    FPageIndex := TfpgPageControl(Owner).PageCount + 1;
+//    FPageIndex := TfpgPageControl(Owner).PageCount + 1;
   end;
 end;
 
