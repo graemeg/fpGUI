@@ -18,7 +18,7 @@
     <Description Value="fpGUI - multi-handle redesign"/>
     <License Value="Modified LGPL"/>
     <Version Minor="5"/>
-    <Files Count="13">
+    <Files Count="14">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -71,6 +71,10 @@
         <Filename Value="gui_radiobutton.pas"/>
         <UnitName Value="gui_radiobutton"/>
       </Item13>
+      <Item14>
+        <Filename Value="gui_trackbar.pas"/>
+        <UnitName Value="gui_trackbar"/>
+      </Item14>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
