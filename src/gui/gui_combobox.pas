@@ -288,6 +288,8 @@ begin
   begin
     Canvas.SetColor(clSelection);
     Canvas.SetTextColor(clSelectionText);
+    r.Right := r.Right - FInternalBtn.Width;
+    InflateRect(r, -1, -1);
   end
   else
   begin

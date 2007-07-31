@@ -222,7 +222,7 @@ begin
   dtext := GetDrawText;
   Canvas.SetTextColor(clText1);
   Canvas.SetFont(FFont);
-  Canvas.DrawString(-FDrawOffset + FSideMargin, 3, dtext);
+  fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
 
   if Focused then
   begin

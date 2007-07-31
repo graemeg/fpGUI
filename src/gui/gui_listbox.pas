@@ -501,20 +501,21 @@ begin
     begin
       Canvas.SetColor(FBackgroundColor);
       Canvas.SetTextColor(clText1);
-    end;
+    end;  { if/else }
     Canvas.FillRectangle(r);
 
     DrawItem(n, r, 0);
-    r.Top := r.Top + r.Bottom;
+    r.Top := r.Top + RowHeight;
+    r.Bottom := r.Bottom + RowHeight;
 
     if r.Top >= Height then
       Break;
-  end;
+  end;  { for }
 
   // clearing after the last row
   if r.Top <= Height then
   begin
-    canvas.SetColor(FBackgroundColor);
+    Canvas.SetColor(FBackgroundColor);
     r.Bottom := Height - fmargin;
     Canvas.FillRectangle(r);
   end;
@@ -561,7 +562,7 @@ end;
 
 function TfpgBaseListBox.ItemCount: integer;
 begin
-  {$Note This is wrong!!}
+  // This must be overridden in descendant classes!
   result := 17;
 end;
 
@@ -574,6 +575,7 @@ procedure TfpgBaseListBox.DrawItem(num: integer; rect: TRect; flags: integer);
 var
   s: string;
 begin
+  // This must be overridden in descendant classes!
   s := 'Item' + IntToStr(num);
   Canvas.DrawString(rect.left+2, rect.top+1, s);
 end;

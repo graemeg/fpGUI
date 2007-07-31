@@ -1283,7 +1283,8 @@ begin
   FClipRectSet := True;
   FClipRect    := ARect;
   DeleteObject(FClipRegion);
-  FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Right, ARect.Bottom);
+  // This is a bit of a hack!!! Double check this again and compare output to X11.
+  FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Right+1, ARect.Bottom+1);
   SelectClipRgn(Fgc, FClipRegion);
 end;
 
