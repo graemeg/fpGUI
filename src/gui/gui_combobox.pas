@@ -35,6 +35,7 @@ type
     procedure   SetFocusItem(const AValue: integer);
   protected
     FMargin: integer;
+    procedure   SetEnabled(const AValue: boolean); override;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
@@ -247,6 +248,12 @@ begin
   FFocusItem := AValue;
 end;
 
+procedure TfpgCustomComboBox.SetEnabled(const AValue: boolean);
+begin
+  inherited SetEnabled(AValue);
+  FInternalBtn.Enabled := AValue;
+end;
+
 procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
@@ -257,13 +264,14 @@ procedure TfpgCustomComboBox.HandlePaint;
 var
   r: TRect;
 begin
-  inherited HandlePaint;
   Canvas.BeginDraw;
+//  inherited HandlePaint;
   Canvas.ClearClipRect;
+  r := Rect(0, 0, Width-1, Height-1);
   Canvas.DrawControlFrame(0, 0, Width, Height);
 
   // internal background rectangle (without frame)
-  r := Rect(2, 2, Width-2, Height-2);
+  InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
 
   if Enabled then
@@ -283,14 +291,17 @@ begin
   end
   else
   begin
-    Canvas.SetColor(FBackgroundColor);
+    if Enabled then
+      Canvas.SetColor(FBackgroundColor)
+    else
+      Canvas.SetColor(clWindowBackground);
     Canvas.SetTextColor(clText1);
   end;
   Canvas.FillRectangle(r);
 
   // Draw select item's text
   if FocusItem > -1 then
-    Canvas.DrawString(FMargin+1, FMargin, Text);
+    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
 
   Canvas.EndDraw;
 end;

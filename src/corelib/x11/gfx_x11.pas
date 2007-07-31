@@ -1405,12 +1405,7 @@ end;
 
 procedure TfpgCanvasImpl.DoFillRectangle(x1, y1, x2, y2: TfpgCoord);
 begin
-  // Remember this for when we add Canvas.Pen support!
-  { Note:  By default XFillRectangle doesn't paint the same size rectangle that
-    XDrawRectangle does - given the same coordinates! In this case we enlarge
-    the Width and Height to paint consistant rectangle sizes, even thought it
-    might repaint the same (only a few) pixels twice. }
-  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x1, y1, x2-x1, y2-y1);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x1, y1, x2-x1+1, y2-y1+1);
 end;
 
 procedure TfpgCanvasImpl.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);

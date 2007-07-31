@@ -207,17 +207,18 @@ var
 begin
   Canvas.BeginDraw;
   Canvas.ClearClipRect;
+  r := Rect(0, 0, Width-1, Height-1);
   Canvas.DrawControlFrame(0, 0, Width, Height);
 
-  r := Rect(2, 2, Width-2, Height-2);
+  InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
 
   if Enabled then
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-
   Canvas.FillRectAngle(r);
+
   dtext := GetDrawText;
   Canvas.SetTextColor(clText1);
   Canvas.SetFont(FFont);
@@ -244,7 +245,7 @@ begin
 
     // drawing cursor
     tw := FFont.TextWidth(UTF8copy(dtext, 1, FCursorPos));
-    fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, 3, 2, FFont.Height - 1);
+    fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, 3, fpgCaret.Width, FFont.Height);
   end
   else
     fpgCaret.UnSetCaret(Canvas);

@@ -224,6 +224,8 @@ type
     procedure   SetCaret(acanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
     procedure   UnSetCaret(acanvas: TfpgCanvas);
     procedure   InvertCaret;
+    property    Width: integer read FWidth;
+    property    Height: integer read FHeight;
   end;
 
 var
@@ -982,7 +984,7 @@ begin
   FCanvas        := nil;
   FTop           := 0;
   FLeft          := 0;
-  FWidth         := 1;
+  FWidth         := 2;
   FHeight        := 8;
   FTimer         := TfpgTimer.Create(FInterval);
   FTimer.OnTimer := @OnTimerTime;

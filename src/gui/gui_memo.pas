@@ -155,6 +155,7 @@ begin
   FVScrollBar.Top     := 2;
   FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
   FVScrollBar.Height  := VHeight;
+
   FVScrollBar.UpdateWindowPosition;
   FHScrollBar.UpdateWindowPosition;
 end;
@@ -167,12 +168,12 @@ begin
   FHeight     := FFont.Height * 3 + 4;
   FWidth      := 120;
   FLineHeight := FFont.Height + 2;
-
   FSelecting  := False;
   FSideMargin := 3;
   FMaxLength  := 0;
-
-  FOnChange := nil;
+  FWrapping   := False;
+  FOnChange   := nil;
+  FBackgroundColor := clBoxColor;
 
   FLines      := TStringList.Create;
   FFirstLine  := 1;
@@ -183,8 +184,6 @@ begin
   FSelEndPos    := 0;
   FSelStartLine := 0;
   FSelEndLine   := 0;
-
-  FBackgroundColor := clBoxColor;
 
   FDrawOffset    := 0;
   FMouseDragging := False;
@@ -197,8 +196,6 @@ begin
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.OnScroll := @HScrollBarMove;
   FHScrollBar.ScrollStep := 5;
-
-  FWrapping := False;
 end;
 
 destructor TfpgMemo.Destroy;
@@ -424,7 +421,6 @@ begin
   end;
 
   // vertical adjust
-
   if FCursorLine < FFirstLine then
     FFirstLine := FCursorLine;
   if FCursorline - FFirstLine + 1 > VisibleLines then
@@ -590,9 +586,6 @@ end;
 
 procedure TfpgMemo.HandleShow;
 begin
-  //  FVScrollBar.SetDimensions(width-18,0,18,height);
-  //  FHScrollBar.SetDimensions(0,height-18,width-18,18);
-  //  FHScrollBar.Visible := false;
   inherited HandleShow;
   RecalcLongestLine;
   UpdateScrollBar;
@@ -628,20 +621,18 @@ var
 begin
   Canvas.BeginDraw;
   Canvas.ClearClipRect;
-  fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
+  r := Rect(0, 0, Width-1, Height-1);
+  Canvas.DrawControlFrame(0, 0, Width, Height);
 
-  r.Left   := 2;
-  r.Top    := 2;
-  r.Right  := Width - 4;
-  r.Bottom := Height - 4;
+  InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
-  
+
   if Enabled then
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
+  Canvas.FillRectAngle(r);
 
-  Canvas.FillRectAngle(2, 2, Width - 4, Height - 4);
   Canvas.SetFont(FFont);
 
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
@@ -690,21 +681,20 @@ begin
       begin
         // drawing cursor
         tw := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos));
-        fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, yp, 1, FFont.Height);
+        fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, yp, fpgCaret.Width, FFont.Height);
       end;
-
-    end;
+    end;  { if }
 
     yp := yp + LineHeight;
-
     if yp > Height then
       Break;
-  end;
+  end;  { for }
 
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);
     
-  if FHScrollBar.Visible and FVScrollBar.Visible then begin
+  if FHScrollBar.Visible and FVScrollBar.Visible then
+  begin
     Canvas.SetColor(clWindowBackground);
     Canvas.FillRectangle(FHScrollBar.Left + FHScrollBar.Width,
                          FVScrollBar.Top + FVScrollBar.Height,
@@ -1203,14 +1193,15 @@ begin
   begin
     if FSelOffset < 0 then
     begin
-      Result := Copy16(FText,1+FSelStart + FSelOffset,-FSelOffset);
+      Result := Copy(FText,1+FSelStart + FSelOffset,-FSelOffset);
     end
     else
     begin
-      result := Copy16(FText,1+FSelStart,FSelOffset);
+      result := Copy(FText,1+FSelStart,FSelOffset);
     end;
   end
-  else Result := '';
+  else
+    Result := '';
 }
 end;
 

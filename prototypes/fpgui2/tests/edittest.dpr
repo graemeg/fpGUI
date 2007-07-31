@@ -300,6 +300,7 @@ begin
   radiobtn1.Enabled := not checkbox1.Checked;
   radiobtn2.Enabled := not checkbox1.Checked;
   radiobtn3.Enabled := not checkbox1.Checked;
+  combo2.Enabled := not checkbox1.Checked;
 end;
 
 procedure TMainForm.AfterCreate;

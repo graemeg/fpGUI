@@ -1251,7 +1251,7 @@ procedure TfpgCanvasImpl.DoFillRectangle(x1, y1, x2, y2: TfpgCoord);
 var
   r: TRect;
 begin
-  r := Rect(x1, y1, x2, y2);
+  r := Rect(x1, y1, x2+1, y2+1);
   Windows.FillRect(Fgc, r, FBrush);
 end;
 

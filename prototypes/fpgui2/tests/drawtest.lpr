@@ -63,7 +63,7 @@ begin
   
   // FillRect
   Canvas.SetColor(clYellow);
-  Canvas.FillRectangle(111, 111, 139, 139);  // inner white rectangle
+  Canvas.FillRectangle(111, 111, 138, 138);  // inner white rectangle
 
   // line diagonal
   Canvas.SetColor(clRed);

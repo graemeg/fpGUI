@@ -99,7 +99,7 @@ begin
   
   if Orientation = orVertical then
   begin
-    DrawButton(0, 0, Width, Width, 'sys.sb.up' ,FStartBtnPressed);
+    DrawButton(0, 0, Width, Width, 'sys.sb.up', FStartBtnPressed);
     DrawButton(0, Height - Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
   end
   else
@@ -165,12 +165,12 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.FillRectangle(0, Width-1, Width-1, Height - (2*Width)-2);
+    Canvas.FillRectangle(0, Width, Width-1, Height-1 - Width);
     area := Height - (Width shl 1);
   end
   else
   begin
-    Canvas.FillRectangle(Height-1, 0, Width - (2*Height)-2, Height-1);
+    Canvas.FillRectangle(Height, 0, Width - Height-1, Height);
     area := Width - (Height shl 1);
   end;
 

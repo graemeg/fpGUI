@@ -39,8 +39,6 @@ type
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
-    procedure   SetEnabled(const AValue: boolean);
-    procedure   SetVisible(const AValue: boolean);
   protected
     FVisible: boolean;
     FEnabled: boolean;
@@ -52,6 +50,8 @@ type
     FAlign: TAlign;
     function    GetParent: TfpgWidget; reintroduce;
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
+    procedure   SetEnabled(const AValue: boolean); virtual;
+    procedure   SetVisible(const AValue: boolean); virtual;
     procedure   DoAlign(aalign: TAlign);
     procedure   HandlePaint; virtual;
     procedure   HandleResize(awidth, aheight: TfpgCoord); virtual;
