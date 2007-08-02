@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, fpgfx, gfx_widget, gfxbase, gui_form, gui_tab, gui_button,
-  fpgui_package;
+  gui_label, gui_edit;
 
 type
   TMainForm = class(TfpgForm)
@@ -17,6 +17,9 @@ type
     tsOne: TfpgTabSheet;
     tsTwo: TfpgTabSheet;
     tsThree: TfpgTabSheet;
+    lbl1, lbl2, lbl3: TfpgLabel;
+    btn1: TfpgButton;
+    edit1: TfpgEdit;
     procedure   btnQuitClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -47,17 +50,28 @@ begin
   pcMain.Height := 300;
   pcMain.Anchors := [anLeft, anTop, anRight, anBottom];
 
+  // Tab One
   tsOne := TfpgTabSheet.Create(pcMain);
   tsOne.Text := 'Tab One';
   tsOne.Top := 50;
+  
+  lbl1 := CreateLabel(tsOne, 50, 50, 'TabSheet One');
+  edit1 := CreateEdit(tsOne, 50, 100, 150, 25);
 
+  // Tab Two
   tsTwo := TfpgTabSheet.Create(pcMain);
   tsTwo.Text := 'Tab Two';
   tsTwo.Top := 50;
 
+  lbl2 := CreateLabel(tsTwo, 50, 50, 'TabSheet Two');
+  btn1 := CreateButton(tsTwo, 50, 100, 80, 'Button1', nil);
+
+  // Tab Three
   tsThree := TfpgTabSheet.Create(pcMain);
   tsThree.Text := 'Tab Three';
   tsThree.Top := 50;
+
+  lbl3 := CreateLabel(tsThree, 50, 50, 'TabSheet Three');
 
 end;
 

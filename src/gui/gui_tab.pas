@@ -58,7 +58,6 @@ type
     FOnChange: TTabSheetChange;
     FRightButton: TfpgButton;
     FLeftButton: TfpgButton;
-    FFirstTabSheet: TfpgTabSheet;
     FFirstTabButton: TfpgTabSheet;
     FStyle: TfpgTabStyle;
     FTabPosition: TfpgTabPosition;
@@ -87,6 +86,7 @@ type
     procedure   RePaintTitles; virtual;
     procedure   HandlePaint; override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -476,6 +476,73 @@ procedure TfpgPageControl.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   RePaint;
+end;
+
+procedure TfpgPageControl.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  h: TfpgTabSheet;
+  lp: integer;  // left position
+  bw: integer;  // button width
+begin
+  h := TfpgTabSheet(FPages.First);
+  if h = nil then
+    Exit; //==>
+
+  lp := FMargin;
+  if MaxButtonWidthSum > (Width-(FMargin*2)) then
+    h := FFirstTabButton;
+
+  case TabPosition of
+    tpTop:
+        begin
+          if (y > FMargin) and (y < ButtonHeight) then
+          begin
+            while h <> nil do
+            begin
+              bw := ButtonWidth(h.Text);  // initialize button width
+              if (x > lp) and (x < lp + bw) then
+              begin
+                if h <> ActivePage then
+                begin
+                    ActivePage := h;
+                    {$Note This still needs to be completed.}
+//                    DoChange(ActiveTabSheet);
+                end;
+                exit;
+              end;  { if }
+              lp := lp + bw;
+              if h <> TfpgTabSheet(FPages.Last) then
+                h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
+              else
+                h := nil;
+            end;  { while }
+          end;  { if }
+        end;
+        
+    tpBottom:
+        begin
+{          if (y > Height - FMargin - buttonheight) and (y < height - FMargin) then
+          begin
+            while h <> nil do
+            begin
+              bw := ButtonWidth(h^.TabSheet.Text);  // initialize button width
+              if (x > lp) and (x < lp + bw) then
+              begin
+                if h^.TabSheet <> ActiveTabSheet then
+                begin
+                    ActiveTabSheet := h^.TabSheet;
+                    DoChange(ActiveTabSheet);
+                end;
+                exit;
+              end;
+              lp := lp + bw;
+              h := h^.next;
+            end;  { while }
+          end;  { if }
+}
+        end;
+  end;  { case }
+  inherited HandleLMouseUp(x, y, shiftstate);
 end;
 
 constructor TfpgPageControl.Create(AOwner: TComponent);
