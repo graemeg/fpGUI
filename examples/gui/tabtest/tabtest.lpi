@@ -9,7 +9,6 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value="./"/>
       <TargetFileExt Value=""/>
     </General>
     <VersionInfo>
@@ -17,6 +16,7 @@
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
@@ -34,9 +34,9 @@
     </RequiredPackages>
     <Units Count="1">
       <Unit0>
-        <Filename Value="themetest.lpr"/>
+        <Filename Value="tabtest.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="themetest"/>
+        <UnitName Value="tabtest"/>
       </Unit0>
     </Units>
   </ProjectOptions>

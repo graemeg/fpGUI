@@ -98,7 +98,7 @@ begin
     Exit; //==>
   FPosition := AValue;
   RePaint;
-  // OnChange only fired on keyboard or mouse input.
+  DoChange;
 end;
 
 procedure TfpgTrackBar.SetSliderSize(const AValue: integer);

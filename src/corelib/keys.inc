@@ -5,6 +5,8 @@
   GII info at <http://www.ggi-project.org/packages/libgii.html>
 }
 
+{%mainunit gfxbase.pas}
+
 const
 
   // ASCII keys

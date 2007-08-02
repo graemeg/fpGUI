@@ -76,7 +76,6 @@ type
     procedure   HandleHide; virtual;
     procedure   MoveAndResize(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
-    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   RePaint;
     { property events }
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
@@ -91,6 +90,7 @@ type
     destructor  Destroy; override;
     procedure   SetFocus;
     procedure   KillFocus;
+    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    Visible: boolean read FVisible write SetVisible;

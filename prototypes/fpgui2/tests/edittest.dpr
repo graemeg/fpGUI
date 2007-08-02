@@ -56,9 +56,11 @@ type
     procedure btnDisplayBMP(Sender: TObject);
     procedure btn3Click(Sender: TObject);
     procedure checkbox1Changed(Sender: TObject);
+    procedure TrackBarChanged(Sender: TObject; APosition: integer);
   public
     label1: TfpgLabel;
     label2: TfpgLabel;
+    lblTrackBarPos: TfpgLabel;
     edit1: TfpgEdit;
     edit2: TfpgEdit;
     btn: TfpgButton;
@@ -307,6 +309,11 @@ begin
   edit1.Enabled := not checkbox1.Checked;
 end;
 
+procedure TMainForm.TrackBarChanged(Sender: TObject; APosition: integer);
+begin
+  lblTrackBarPos.Text := IntToStr(APosition);
+end;
+
 procedure TMainForm.AfterCreate;
 var
   i: integer;
@@ -401,11 +408,13 @@ begin
   radiobtn3 := CreateRadioButton(self, 180, 305, 'Radio Three');
   radiobtn1.Checked := True;
   
+  lblTrackBarPos := CreateLabel(self, 420, 200, '0');
   trackbar1 := TfpgTrackBar.Create(self);
   trackbar1.Top    := 230;
   trackbar1.Left   := 335;
   trackbar1.Width  := 100;
   trackbar1.Height := 25;
+  trackbar1.OnChange := @TrackBarChanged;
   
   trackbar2 := TfpgTrackBar.Create(self);
   trackbar2.Top    := 230;

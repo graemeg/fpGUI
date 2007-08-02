@@ -224,7 +224,7 @@ end;
 procedure TThemeButton.HandlePaint;
 var
   x, i: integer;
-  r: TfpgRect;
+  r: TRect;
   iy, y: integer;
   w: integer;
   pofs: integer;
@@ -233,6 +233,7 @@ begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   Canvas.Clear(clButtonFace);
+  r := Rect(0, 0, Width-1, Height-1);
 
   if State <> 1 then
   begin
@@ -270,10 +271,7 @@ begin
   if not Enabled then
     Canvas.SetTextColor(clShadow1);
 
-  r.left   := 2;
-  r.top    := 2;
-  r.Width  := Width - 4;
-  r.Height := Height - 4;
+  InflateRect(r, 2, 2);
   Canvas.SetClipRect(r);
 
   Canvas.SetFont(Font);

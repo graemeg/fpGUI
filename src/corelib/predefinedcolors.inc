@@ -1,4 +1,4 @@
-
+{%mainunit gfxbase.pas}
 
   // The following colors match the predefined Delphi Colors
   // NOTE:
