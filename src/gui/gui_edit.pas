@@ -290,7 +290,9 @@ end;
 
 procedure TfpgEdit.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
-
+var
+  lpos: integer;
+  
   procedure StopSelection;
   begin
     FSelStart  := FCursorPos;
@@ -298,7 +300,9 @@ procedure TfpgEdit.HandleKeyPress(var keycode: word;
   end;
 
 begin
+//  writeln(Classname, '.Keypress');
   Consumed := False;
+  lpos := FCursorPos;
 {
   Consumed := true;
   case ptkCheckClipBoardKey(keycode, shiftstate) of
@@ -356,6 +360,9 @@ begin
       else
         Consumed   := False;
     end;
+
+    if lpos = FCursorPos then // nothing changed so reset consumed
+      consumed := False;
 
     if Consumed then
     begin

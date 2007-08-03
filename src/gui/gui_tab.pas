@@ -91,6 +91,7 @@ type
     procedure   RePaintTitles; virtual;
     procedure   HandlePaint; override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -343,7 +344,6 @@ begin
   if FFirstTabButton <> nil then
   begin
     if TfpgTabSheet(FPages.First) <> FFirstTabButton then
-//    if FPages.IndexOf(FFirstTabButton) <> 0 then
     begin
       FFirstTabButton := TfpgTabSheet(FPages[FPages.IndexOf(FFirstTabButton)-1]);
       RePaint;
@@ -357,7 +357,6 @@ begin
   if FFirstTabButton <> nil then
   begin
     if TfpgTabSheet(FPages.Last) <> FFirstTabButton then
-//    if FPages.IndexOf(FFirstTabButton) <> (FPages.Count-1) then
     begin
       FFirstTabButton := TfpgTabSheet(FPages[FPages.IndexOf(FFirstTabButton)+1]);
       RePaint;
@@ -593,6 +592,42 @@ begin
         end;
   end;  { case }
   inherited HandleLMouseUp(x, y, shiftstate);
+end;
+
+procedure TfpgPageControl.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+var
+  t: TfpgTabSheet;
+  i: integer;
+begin
+//  writeln(Classname, '.Keypress');
+  consumed := True;
+  i := ActivePageIndex;
+  t := ActivePage;
+  
+  case keycode of
+    keyLeft:
+        begin
+          if ActivePage <> TfpgTabSheet(FPages.First) then
+          begin
+            ActivePage := TfpgTabSheet(FPages[i-1]);
+            DoChange(ActivePage);
+          end;
+        end;
+
+    keyRight:
+        begin
+          if ActivePage <> TfpgTabSheet(FPages.Last) then
+          begin
+            ActivePage := TfpgTabSheet(FPages[i+1]);
+            DoChange(ActivePage);
+          end;
+        end;
+
+  else
+    consumed := False;
+  end;  { case/else }
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 constructor TfpgPageControl.Create(AOwner: TComponent);
