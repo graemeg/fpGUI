@@ -18,9 +18,11 @@ type
     tsTwo: TfpgTabSheet;
     tsThree: TfpgTabSheet;
     lbl1, lbl2, lbl3: TfpgLabel;
-    btn1: TfpgButton;
+    btn1, btn2, btn3: TfpgButton;
     edit1: TfpgEdit;
     procedure   btnQuitClick(Sender: TObject);
+    procedure   btn2Click(Sender: TObject);
+    procedure   btn3Click(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -30,6 +32,16 @@ type
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TMainForm.btn2Click(Sender: TObject);
+begin
+  pcMain.ActivePage := tsOne;
+end;
+
+procedure TMainForm.btn3Click(Sender: TObject);
+begin
+  pcMain.ActivePage := tsTwo;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -72,6 +84,10 @@ begin
   tsThree.Top := 50;
 
   lbl3 := CreateLabel(tsThree, 50, 50, 'TabSheet Three');
+
+
+  btn2 := CreateButton(self, 10, 320, 80, 'Page 1', @btn2Click);
+  btn3 := CreateButton(self, 100, 320, 80, 'Page 2', @btn3Click);
 
 end;
 

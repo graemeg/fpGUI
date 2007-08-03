@@ -224,6 +224,7 @@ begin
   FActiveSheet := AValue;
   ActiveWidget := AValue;
   RePaint;
+  fpgSendMessage(self, ActiveWidget, FPGM_PAINT)
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
