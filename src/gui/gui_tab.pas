@@ -25,11 +25,12 @@ type
 
   TfpgTabSheet = class(TfpgWidget)
   private
+    FBackgroundColor: TfpgColor;
     FText: string;
     function    GetPageControl: TfpgPageControl;
     function    GetPageIndex: Integer;
     function    GetText: string;
-//    procedure   SetPageControl(const AValue: TfpgPageControl);
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetPageIndex(const AValue: Integer);
     procedure   SetText(const AValue: string);
   protected
@@ -40,7 +41,8 @@ type
     procedure   AfterConstruction; override;
     property    Text: string read GetText write SetText;
     property    PageIndex: Integer read GetPageIndex write SetPageIndex;
-    property    PageControl: TfpgPageControl read GetPageControl; //write SetPageControl;
+    property    PageControl: TfpgPageControl read GetPageControl;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
   end;
 
 
@@ -51,7 +53,7 @@ type
   private
     FBackgroundColor: TfpgColor;
     FFont: TfpgFont;
-    FActiveSheet: TfpgTabSheet;
+    FActivePage: TfpgTabSheet;
     FMargin: integer;
     FFixedTabWidth: integer;
     FPages: TList;
@@ -60,13 +62,15 @@ type
     FRightButton: TfpgButton;
     FLeftButton: TfpgButton;
     FFirstTabButton: TfpgTabSheet;
+    FSortPages: boolean;
     FStyle: TfpgTabStyle;
     FTabPosition: TfpgTabPosition;
     function    GetActivePageIndex: integer;
     function    GetPageCount: Integer;
     procedure   InsertPage(const APage: TfpgTabSheet);
     procedure   RemovePage(const APage: TfpgTabSheet);
-    procedure   SetActiveSheet(const AValue: TfpgTabSheet);
+    procedure   SetActivePageIndex(const AValue: integer);
+    procedure   SetActivePage(const AValue: TfpgTabSheet);
     function    MaxButtonWidthSum: integer;
     function    MaxButtonHeight: integer;
     function    MaxButtonWidth: integer;
@@ -78,12 +82,11 @@ type
     procedure   LeftButtonClick(Sender: TObject);
     procedure   RightButtonClick(Sender: TObject);
     function    FindNextPage(ACurrent: TfpgTabSheet; AForward: boolean): TfpgTabSheet;
+    procedure   SetSortPages(const AValue: boolean);
     procedure   SetStyle(const AValue: TfpgTabStyle);
     procedure   SetTabPosition(const AValue: TfpgTabPosition);
     procedure   DoChange(ATabSheet: TfpgTabSheet);
   protected
-//    procedure   UnregisterTabSheet(ATabSheet: TfpgTabSheet);
-//    procedure   RegisterTabSheet(ATabSheet: TfpgTabSheet);
     procedure   OrderSheets; // currently using bubblesort
     procedure   RePaintTitles; virtual;
     procedure   HandlePaint; override;
@@ -94,11 +97,12 @@ type
     function    AppendTabSheet(ATitle: string): TfpgTabSheet;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    PageCount: Integer read GetPageCount;
-    property    ActivePageIndex: integer read GetActivePageIndex write FActivePageIndex;
-    property    ActivePage: TfpgTabSheet read FActiveSheet write SetActiveSheet;
+    property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
+    property    ActivePage: TfpgTabSheet read FActivePage write SetActivePage;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth;
     property    Style: TfpgTabStyle read FStyle write SetStyle;
     property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition;
+    property    SortPages: boolean read FSortPages write SetSortPages;
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
   end;
 
@@ -107,6 +111,14 @@ implementation
 
 uses
   gfx_UTF8utils;
+  
+  
+// compare function used by FPages.Sort
+
+function SortCompare(Item1, Item2: Pointer): integer;
+begin
+  Result := CompareText(TfpgTabSheet(Item1).Text, TfpgTabSheet(Item2).Text);
+end;
 
 { TfpgTabSheet }
 
@@ -130,22 +142,22 @@ function TfpgTabSheet.GetText: string;
 begin
   Result := FText;
 end;
-{
-procedure TfpgTabSheet.SetPageControl(const AValue: TfpgPageControl);
+
+procedure TfpgTabSheet.SetBackgroundColor(const AValue: TfpgColor);
 begin
-  if PageControl <> AValue then
-  begin
-    if PageControl <> nil then
-      PageControl.RemovePage(self);
-//    Owner := AValue;
-    if AValue <> nil then
-      AValue.InsertPage(self);
-  end;
+  if FBackgroundColor = AValue then
+    Exit; //==>
+  FBackgroundColor := AValue;
+  RePaint;
 end;
-}
+
 procedure TfpgTabSheet.SetPageIndex(const AValue: Integer);
 begin
-
+  if PageControl <> nil then
+  begin
+    PageControl.FPages.Move(PageIndex, AValue);
+    PageControl.RePaint;//Titles;
+  end;
 end;
 
 procedure TfpgTabSheet.SetText(const AValue: string);
@@ -161,7 +173,7 @@ procedure TfpgTabSheet.HandlePaint;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
-  Canvas.Clear(clWindowBackground);
+  Canvas.Clear(FBackgroundColor);
   Canvas.EndDraw;
 end;
 
@@ -170,6 +182,7 @@ begin
   inherited Create(AOwner);
   FText := '';
   FFocusable := True;
+  FBackgroundColor := clWindowBackground;
 end;
 
 destructor TfpgTabSheet.Destroy;
@@ -199,49 +212,70 @@ begin
 end;
 
 procedure TfpgPageControl.InsertPage(const APage: TfpgTabSheet);
-var
-  i: integer;
 begin
   if FPages.IndexOf(APage) <> -1 then
     Exit; //==>   The page has already been added.
-  i := FPages.Add(APage);
-  ActivePageIndex := i;
-  FActiveSheet := APage;
-  RePaint;
+  FPages.Add(APage);
+  ActivePage := APage;
 end;
 
 procedure TfpgPageControl.RemovePage(const APage: TfpgTabSheet);
 begin
   FPages.Remove(APage);
   {$Note This still needs to be fixed.}
-  if APage = FActiveSheet then
-//    FActiveSheet := FindNextPage(APage, True);
-    FActiveSheet := TfpgTabSheet(FPages.First);
+  if APage = FActivePage then
+//    FActivePage := FindNextPage(APage, True);
+    ActivePage := TfpgTabSheet(FPages.First);
 end;
 
-procedure TfpgPageControl.SetActiveSheet(const AValue: TfpgTabSheet);
+procedure TfpgPageControl.SetActivePageIndex(const AValue: integer);
 begin
-  if FActiveSheet = AValue then
+  if (AValue >= 0) or (AValue < FPages.Count) then
+    ActivePage := TfpgTabSheet(FPages[AValue]);
+end;
+
+procedure TfpgPageControl.SetActivePage(const AValue: TfpgTabSheet);
+begin
+  if FActivePage = AValue then
     Exit; //==>
-  FActiveSheet := AValue;
+  FActivePage := AValue;
   ActiveWidget := AValue;
-  ActivePageIndex := FPages.IndexOf(AValue);
+  FActivePageIndex := FPages.IndexOf(AValue);
   RePaint;
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
+var
+  i: integer;
+  t: TfpgTabSheet;
 begin
+  {$IFDEF DEBUG}writeln(Classname + '.MaxButtonWidthSum');{$ENDIF}
   Result := 0;
+  
+  for i := 0 to FPages.Count-1 do
+  begin
+    t := TfpgTabSheet(FPages[i]);
+    Result := Result + ButtonWidth(t.Text);
+  end;
 end;
 
 function TfpgPageControl.MaxButtonHeight: integer;
 begin
-
+  result := PageCount * ButtonHeight;
 end;
 
 function TfpgPageControl.MaxButtonWidth: integer;
+var
+   t: TfpgTabSheet;
+   i: integer;
 begin
-
+  Result := 0;
+  for i := 0 to FPages.Count-1 do
+  begin
+    t := TfpgTabSheet(FPages[i]);
+    if ButtonWidth(t.Text) > Result then
+      Result := ButtonWidth(t.Text);
+  end;
 end;
 
 function TfpgPageControl.ButtonHeight: integer;
@@ -338,6 +372,14 @@ begin
   result := nil;
 end;
 
+procedure TfpgPageControl.SetSortPages(const AValue: boolean);
+begin
+  if FSortPages = AValue then
+    Exit; //==>
+  FSortPages := AValue;
+  RePaint;
+end;
+
 procedure TfpgPageControl.SetStyle(const AValue: TfpgTabStyle);
 begin
   if FStyle = AValue then
@@ -362,7 +404,7 @@ end;
 
 procedure TfpgPageControl.OrderSheets;
 begin
-
+  FPages.Sort(@SortCompare);
 end;
 
 procedure TfpgPageControl.RePaintTitles;
@@ -371,6 +413,7 @@ var
   r: TRect;
   h: TfpgTabSheet;
   lp: integer;
+  toffset: integer;
 begin
   if not HasHandle then
     Exit; //==>
@@ -419,33 +462,34 @@ begin
           begin
             if h <> ActivePage then
             begin
-                Canvas.SetColor(clHilite1);
-                Canvas.DrawLine(FMargin + lp, FMargin + ButtonHeight - 2, FMargin + lp + ButtonWidth(h.Text), FMargin + ButtonHeight - 2);
-                Canvas.SetColor(clHilite2);
-                Canvas.DrawLine(FMargin + lp, FMargin + ButtonHeight - 1, FMargin + lp + ButtonWidth(h.Text) + 1, FMargin + ButtonHeight - 1);
-                Canvas.SetColor(clShadow1);
-                Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text), FMargin, lp + FMargin + ButtonWidth(h.Text), FMargin + ButtonHeight - 3);
-                h.Visible := False;
+              toffset := 4;
+              Canvas.SetColor(clHilite1);
+              Canvas.DrawLine(FMargin + lp, FMargin + ButtonHeight - 2, FMargin + lp + ButtonWidth(h.Text), FMargin + ButtonHeight - 2);
+              Canvas.SetColor(clHilite2);
+              Canvas.DrawLine(FMargin + lp, FMargin + ButtonHeight - 1, FMargin + lp + ButtonWidth(h.Text) + 1, FMargin + ButtonHeight - 1);
+              Canvas.SetColor(clShadow1);
+              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text), FMargin, lp + FMargin + ButtonWidth(h.Text), FMargin + ButtonHeight - 3);
+              h.Visible := False;
             end
             else
             begin
-                h.Visible := True;
-                h.SetPosition(FMargin+2, FMargin + ButtonHeight, Width - FMargin * 2 - 4, Height - FMargin * 2 - ButtonHeight - 2);
-                Canvas.SetColor(clHilite1);
-                Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin + ButtonWidth(h.Text)-1, FMargin);
-                Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin, FMargin + ButtonHeight - 2);
-                Canvas.SetColor(clHilite2);
-                Canvas.DrawLine(lp + FMargin + 1, FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + 1);
-                Canvas.DrawLine(lp + FMargin + 1, FMargin + 1, lp + FMargin + 1, FMargin + ButtonHeight - 1);
-                Canvas.SetColor(clShadow1);
-                Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 2,FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + ButtonHeight-1);
-                Canvas.SetColor(clShadow2);
-                Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 1,FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 1, FMargin + ButtonHeight - 2);
+              toffset := 2;
+              h.Visible := True;
+              h.SetPosition(FMargin+2, FMargin + ButtonHeight, Width - FMargin * 2 - 4, Height - FMargin * 2 - ButtonHeight - 2);
+              Canvas.SetColor(clHilite1);
+              Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin + ButtonWidth(h.Text)-1, FMargin);
+              Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin, FMargin + ButtonHeight - 2);
+              Canvas.SetColor(clHilite2);
+              Canvas.DrawLine(lp + FMargin + 1, FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + 1);
+              Canvas.DrawLine(lp + FMargin + 1, FMargin + 1, lp + FMargin + 1, FMargin + ButtonHeight - 1);
+              Canvas.SetColor(clShadow1);
+              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 2,FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + ButtonHeight-1);
+              Canvas.SetColor(clShadow2);
+              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 1,FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 1, FMargin + ButtonHeight - 2);
             end;
-            if h = ActivePage then
-              Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin, GetTabText(h.Text))
-            else
-              Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin+2, GetTabText(h.Text));
+            // paint text
+            Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin+toffset, GetTabText(h.Text));
+
             lp := lp + ButtonWidth(h.Text);
             if h <> TfpgTabSheet(FPages.Last) then
               h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
@@ -471,7 +515,8 @@ begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   
-  OrderSheets;
+  if SortPages then
+    OrderSheets;
   Canvas.ClearClipRect;
   Canvas.Clear(FBackgroundColor);
   if Focused then
@@ -553,16 +598,18 @@ end;
 constructor TfpgPageControl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FBackgroundColor := clWindowBackground;
-  FFocusable := True;
-  FPages := TList.Create;
-  FOnChange := nil;
-  FFixedTabWidth := 0;
-  FFont := fpgStyle.DefaultFont;
-  FFirstTabButton := nil;
-  FStyle := tsTabs;
-  FTabPosition := tpTop;
-  FMargin := 1;
+  FFont   := fpgStyle.DefaultFont;
+  FPages  := TList.Create;
+
+  FBackgroundColor  := clWindowBackground;
+  FFocusable        := True;
+  FOnChange         := nil;
+  FFixedTabWidth    := 0;
+  FFirstTabButton   := nil;
+  FStyle            := tsTabs;
+  FTabPosition      := tpTop;
+  FMargin           := 1;
+  FSortPages        := False;
 
   FLeftButton := TfpgButton.Create(self);
   FLeftButton.Text      := '<';
@@ -575,7 +622,6 @@ begin
   FRightButton.Width    := FRightButton.Height;
   FRightButton.Visible  := False;
   FRightButton.OnClick  := @RightButtonClick;
-
 end;
 
 destructor TfpgPageControl.Destroy;
