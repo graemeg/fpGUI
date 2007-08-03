@@ -54,7 +54,7 @@ begin
   btnQuit.ImageName := 'stdimg.Quit';
   btnQuit.ShowImage := True;
   btnQuit.Anchors := [anRight, anBottom];
-  
+
   pcMain := TfpgPageControl.Create(self);
   pcMain.Top := 10;
   pcMain.Left := 10;
@@ -66,6 +66,10 @@ begin
   tsOne := TfpgTabSheet.Create(pcMain);
   tsOne.Text := 'Tab One';
   tsOne.Top := 50;
+
+  tsOne.Left := 10;
+  tsOne.Width := Width - 20;
+  tsOne.Height := 200;
   
   lbl1 := CreateLabel(tsOne, 50, 50, 'TabSheet One');
   edit1 := CreateEdit(tsOne, 50, 100, 150, 25);
@@ -84,7 +88,6 @@ begin
   tsThree.Top := 50;
 
   lbl3 := CreateLabel(tsThree, 50, 50, 'TabSheet Three');
-
 
   btn2 := CreateButton(self, 10, 320, 80, 'Page 1', @btn2Click);
   btn3 := CreateButton(self, 100, 320, 80, 'Page 2', @btn3Click);

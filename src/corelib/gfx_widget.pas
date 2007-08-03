@@ -666,7 +666,7 @@ end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
 begin
-  HandleResize(msg.Params.rect.Width, msg.params.rect.Height);
+  HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
 end;
 
 procedure TfpgWidget.HandleResize(awidth, aheight: TfpgCoord);

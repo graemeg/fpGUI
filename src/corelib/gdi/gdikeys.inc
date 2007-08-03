@@ -12,6 +12,7 @@
 
  **********************************************************************}
 
+{%mainunit gfx_gdi.pas}
 
 function VirtKeyToKeycode(VirtKey: Byte): Word;
 const

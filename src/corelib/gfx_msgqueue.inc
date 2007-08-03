@@ -1,3 +1,4 @@
+{%mainunit fpgfx.pas}
 
 // fpGFX internal message queue implementation
 

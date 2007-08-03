@@ -1,3 +1,4 @@
+{%mainunit gfx_stdimages.pas}
 
 Const
   stdimg_list_add_16 : Array[0..821] of byte = (

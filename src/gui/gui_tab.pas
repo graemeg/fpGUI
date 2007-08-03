@@ -37,8 +37,9 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   AfterConstruction; override;
     property    Text: string read GetText write SetText;
-    property    PageIndex: Integer read GetPageIndex write SetPageIndex stored False;
+    property    PageIndex: Integer read GetPageIndex write SetPageIndex;
     property    PageControl: TfpgPageControl read GetPageControl; //write SetPageControl;
   end;
 
@@ -79,13 +80,13 @@ type
     function    FindNextPage(ACurrent: TfpgTabSheet; AForward: boolean): TfpgTabSheet;
     procedure   SetStyle(const AValue: TfpgTabStyle);
     procedure   SetTabPosition(const AValue: TfpgTabPosition);
+    procedure   DoChange(ATabSheet: TfpgTabSheet);
   protected
 //    procedure   UnregisterTabSheet(ATabSheet: TfpgTabSheet);
 //    procedure   RegisterTabSheet(ATabSheet: TfpgTabSheet);
     procedure   OrderSheets; // currently using bubblesort
     procedure   RePaintTitles; virtual;
     procedure   HandlePaint; override;
-    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -159,7 +160,7 @@ end;
 procedure TfpgTabSheet.HandlePaint;
 begin
   Canvas.BeginDraw;
-//  inherited HandlePaint;
+  inherited HandlePaint;
   Canvas.Clear(clWindowBackground);
   Canvas.EndDraw;
 end;
@@ -167,21 +168,22 @@ end;
 constructor TfpgTabSheet.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FText := '';
   FFocusable := True;
-  if Owner is TfpgPageControl then
-  begin
-    TfpgPageControl(Owner).InsertPage(self);
-//    TfpgPageControl(Owner).RegisterTabSheet(self);
-//    FPageIndex := TfpgPageControl(Owner).PageCount + 1;
-  end;
 end;
 
 destructor TfpgTabSheet.Destroy;
 begin
   if Owner is TfpgPageControl then
     TfpgPageControl(Owner).RemovePage(self);
-//    TfpgPageControl(Owner).UnregisterTabSheet(self);
   inherited Destroy;
+end;
+
+procedure TfpgTabSheet.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  if Owner is TfpgPageControl then
+    TfpgPageControl(Owner).InsertPage(self);
 end;
 
 { TfpgPageControl }
@@ -223,8 +225,8 @@ begin
     Exit; //==>
   FActiveSheet := AValue;
   ActiveWidget := AValue;
+  ActivePageIndex := FPages.IndexOf(AValue);
   RePaint;
-  fpgSendMessage(self, ActiveWidget, FPGM_PAINT)
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
@@ -352,6 +354,12 @@ begin
   RePaint;
 end;
 
+procedure TfpgPageControl.DoChange(ATabSheet: TfpgTabSheet);
+begin
+  if Assigned(FOnChange) then
+    FOnChange(self, ATabSheet);
+end;
+
 procedure TfpgPageControl.OrderSheets;
 begin
 
@@ -396,9 +404,9 @@ begin
             FRightButton.Visible := False;
           end;
           Canvas.SetColor(clHilite1);
-          Canvas.DrawLine(FMargin,ButtonHeight, FMargin, Height - FMargin * 2);
+          Canvas.DrawLine(FMargin, ButtonHeight, FMargin, Height - FMargin * 2);
           Canvas.SetColor(clHilite2);
-          Canvas.DrawLine(FMargin+1,ButtonHeight+1, FMargin+1, Height - FMargin * 2 - 1);
+          Canvas.DrawLine(FMargin+1, ButtonHeight+1, FMargin+1, Height - FMargin * 2 - 1);
           Canvas.SetColor(clShadow2);
           Canvas.DrawLine(FMargin, Height - FMargin * 2, Width - FMargin * 2, Height - FMargin * 2);
           Canvas.DrawLine(Width - FMargin - 1, FMargin + ButtonHeight - 1, Width - FMargin - 1, Height - FMargin);
@@ -434,7 +442,10 @@ begin
                 Canvas.SetColor(clShadow2);
                 Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 1,FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 1, FMargin + ButtonHeight - 2);
             end;
-            Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin, GetTabText(h.Text));
+            if h = ActivePage then
+              Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin, GetTabText(h.Text))
+            else
+              Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin+2, GetTabText(h.Text));
             lp := lp + ButtonWidth(h.Text);
             if h <> TfpgTabSheet(FPages.Last) then
               h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
@@ -473,12 +484,6 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgPageControl.HandleResize(awidth, aheight: TfpgCoord);
-begin
-  inherited HandleResize(awidth, aheight);
-  RePaint;
-end;
-
 procedure TfpgPageControl.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   h: TfpgTabSheet;
@@ -506,8 +511,7 @@ begin
                 if h <> ActivePage then
                 begin
                     ActivePage := h;
-                    {$Note This still needs to be completed.}
-//                    DoChange(ActiveTabSheet);
+                    DoChange(ActivePage);
                 end;
                 exit;
               end;  { if }

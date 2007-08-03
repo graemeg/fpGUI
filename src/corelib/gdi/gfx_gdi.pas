@@ -423,6 +423,7 @@ begin
 
   if not Assigned(w) then
   begin
+    {$IFDEF DEBUG} writeln('Unable to detect Windows - using DefWindowProc'); {$ENDIF}
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
     Exit; //==>
   end;
@@ -435,6 +436,8 @@ begin
     WM_KEYUP,
     WM_KEYDOWN:
         begin
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('wm_char, wm_keyup, wm_keydown'); {$ENDIF}
           kwg := FindKeyboardFocus;
           if kwg <> nil then
             w := kwg;
@@ -508,6 +511,8 @@ begin
     WM_RBUTTONDOWN,
     WM_RBUTTONUP:
         begin
+//          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+//          {$IFDEF DEBUG} writeln('Mouse Move or Button Click'); {$ENDIF}
           msgp.mouse.x := smallint(lParam and $FFFF);
           msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
 (*
@@ -578,7 +583,8 @@ begin
           msgp.rect.Width  := smallint(lParam and $FFFF);
           msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
 
-          //writeln('WM_SIZE: width=',msgp.rect.width, ' height=',msgp.rect.height);
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('WM_SIZE: width=',msgp.rect.width, ' height=',msgp.rect.height); {$ENDIF}
           // skip minimize...
           if lparam <> 0 then
             fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
@@ -586,7 +592,8 @@ begin
 
     WM_MOVE:
         begin
-//          writeln('WM_MOVE');
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('WM_MOVE'); {$ENDIF}
           // window decoration correction ...
           if (GetWindowLong(w.WinHandle, GWL_STYLE) and WS_CHILD) = 0 then
           begin
@@ -605,7 +612,8 @@ begin
 
     WM_MOUSEWHEEL:
         begin
-//          writeln('WM_MOUSEWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8)); // and $FF00) shr 8);
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('WM_MOUSEWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));  {$ENDIF}
           pt.x := LoWord(lparam);
           pt.y := HiWord(lparam);
           mw   := nil;
@@ -635,7 +643,8 @@ begin
 
     WM_ACTIVATE:
         begin
-//          writeln('WM_ACTIVATE');
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('WM_ACTIVATE'); {$ENDIF}
           if ((wParam and $FFFF) = WA_INACTIVE) then
             fpgSendMessage(nil, w, FPGM_DEACTIVATE)
           else
@@ -650,7 +659,8 @@ begin
 
     WM_NCACTIVATE:
         begin
-//          writeln('WM_NCACTIVATE');
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('WM_NCACTIVATE'); {$ENDIF}
           if (wapplication.TopModalForm <> nil) then
           begin
             if (wParam = 0) and (wapplication.TopModalForm = w) then
@@ -672,10 +682,16 @@ begin
         end;
 
     WM_CLOSE:
-        fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
+        begin
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('WM_Close'); {$ENDIF}
+          fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
+        end;
 
     WM_PAINT:
         begin
+          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          {$IFDEF DEBUG} writeln('WM_PAINT'); {$ENDIF}
           Windows.BeginPaint(w.WinHandle, @PaintStruct);
           fpgSendMessage(nil, w, FPGM_PAINT, msgp);
           Windows.EndPaint(w.WinHandle, @PaintStruct);
@@ -994,7 +1010,10 @@ end;
 procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
   if HandleIsValid then
-    Windows.SetWindowPos(WinHandle, 0, x, y, 0, 0, SWP_NOZORDER or SWP_NOSIZE or SWP_NOREDRAW);
+    Windows.SetWindowPos(
+      WinHandle, HWND_TOP,
+      x, y, 0, 0,
+      SWP_NOZORDER or SWP_NOSIZE);// or SWP_NOREDRAW);
 end;
 
 function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
@@ -1055,10 +1074,9 @@ end;
 procedure TfpgWindowImpl.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
 begin
   Windows.SetWindowPos(
-    WinHandle, 0,
+    WinHandle, HWND_TOP,
     aleft, atop, awidth, aheight,
-    SWP_NOZORDER or SWP_NOREDRAW
-    );
+    SWP_NOZORDER);// or SWP_NOREDRAW);
 end;
 
 { TfpgCanvasImpl }

@@ -29,7 +29,6 @@ type
     FText: string;
     FFont: TfpgFont;
     procedure   HandlePaint; override;
-    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -116,8 +115,7 @@ procedure TfpgLabel.ResizeLabel;
 begin
   Width   := FFont.TextWidth(FText);
   Height  := FFont.Height;
-  MoveAndResize(Left, Top, Width, Height);
-//  UpdateWindowPosition;
+  SetPosition(Left, Top, Width, Height);
 end;
 
 constructor TfpgLabel.Create(AOwner: TComponent);
@@ -148,11 +146,6 @@ begin
   Canvas.SetTextColor(FColor);
   fpgStyle.DrawString(Canvas, 0, 0, FText, Enabled);
   Canvas.EndDraw;
-end;
-
-procedure TfpgLabel.HandleResize(awidth, aheight: TfpgCoord);
-begin
-  inherited HandleResize(awidth, aheight);
 end;
 
 end.
