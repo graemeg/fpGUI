@@ -496,7 +496,6 @@ begin
 
   if n < fpgNamedFonts.Count then
     TNamedFontItem(fpgNamedFonts[n]).FontDesc := afontdesc// already defined
-
   else
     fpgNamedFonts.Add(TNamedFontItem.Create(afontid, afontdesc));
 end;
@@ -552,7 +551,7 @@ var
 begin
   fdesc := afontdesc;
 
-  if copy(fdesc, 1, 1) = '#' then
+  if copy(fdesc, 1, 1) = '#' then   // A # (hash) denotes a named font
     fdesc := fpgGetNamedFontDesc(copy(afontdesc, 2, length(afontdesc)));
 
   Result := nil;
@@ -776,13 +775,14 @@ begin
   fpgSetNamedFont('Edit1', 'Arial-10');
   fpgSetNamedFont('Edit2', 'Courier New-10');
   fpgSetNamedFont('List', 'Arial-10');
-  fpgSetNamedFont('Grid', 'Arial-9:antialias=false');
-  fpgSetNamedFont('GridHeader', 'Arial-9:bold:antialias=false');
+  fpgSetNamedFont('Grid', 'Arial-9');
+  fpgSetNamedFont('GridHeader', 'Arial-9:bold');
   fpgSetNamedFont('Menu', 'Arial-10');
   fpgSetNamedFont('MenuAccel', 'Arial-10:bold');
   fpgSetNamedFont('MenuDisabled', 'Arial-10:italic');
 
-  {$Note Refactor this so under Windows it can detect the system colors instead.}
+  {$Note Refactor this so under Windows it can detect the system colors instead.
+    Also under Linux (KDE and Gnome) we should be able to detect the system colors.}
   fpgSetNamedColor(clWindowBackground, $D4D0C8);
   fpgSetNamedColor(clBoxColor, $FFFFFF);
   fpgSetNamedColor(clShadow1, $808080);
