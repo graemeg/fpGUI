@@ -27,6 +27,9 @@ type
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
       mcSizeNWSE, mcSizeNESW, mcMove, mcHourGlass);
 
+  TGradientDirection = (gdVertical,     // Fill vertical
+                        gdHorizontal);  // Fill Horizontal
+
 const
   MOUSE_LEFT       = 1;
   MOUSE_RIGHT      = 2;
@@ -267,6 +270,7 @@ type
     procedure   FillRectangle(r: TRect); overload;
     procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
     procedure   FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
+    procedure   GradientFill(ARect: TRect; AStart, AStop: TfpgColor; ADirection: TGradientDirection);
     procedure   XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); overload;
     procedure   XORFillRectangle(col: TfpgColor; r: TfpgRect); overload;
     procedure   SetClipRect(const ARect: TRect);
@@ -836,6 +840,44 @@ end;
 procedure TfpgCanvasBase.FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
 begin
   DoFillArc(x, y, w, h, a1, a2);
+end;
+
+procedure TfpgCanvasBase.GradientFill(ARect: TRect; AStart, AStop: TfpgColor;
+  ADirection: TGradientDirection);
+var
+  RGBStart: TRGBTriple;
+  RGBStop: TRGBTriple;
+  RDiff, GDiff, BDiff: Integer;
+  count: Integer;
+  i: Integer;
+  newcolor: TRGBTriple;
+begin
+  RGBStart := fpgColorToRGBTriple(fpgColorToRGB(AStart));
+  RGBStop  := fpgColorToRGBTriple(fpgColorToRGB(AStop));
+
+  if ADirection = gdVertical then
+    count := ARect.Bottom - ARect.Top
+  else
+    count := ARect.Right - ARect.Left;
+
+  RDiff := RGBStop.Red - RGBStart.Red;
+  GDiff := RGBStop.Green - RGBStart.Green;
+  BDiff := RGBStop.Blue - RGBStart.Blue;
+
+//  Changing;
+  for i := 0 to count do
+  begin
+    newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
+    newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
+    newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
+    SetColor(RGBTripleTofpgColor(newcolor));
+
+    if ADirection = gdHorizontal then
+      DrawLine(ARect.Left+i, ARect.Top, ARect.Left+i, ARect.Bottom)
+    else
+      DrawLine(ARect.Left, ARect.Top+i, ARect.Right, ARect.Top+i);
+  end;
+//  Changed;
 end;
 
 procedure TfpgCanvasBase.XORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);

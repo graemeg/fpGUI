@@ -267,6 +267,8 @@ function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function CenterPoint(const Rect: TRect): TPoint;
 
+// Debug rountines
+procedure PrintRect(var Rect: TRect);
 
 implementation
 
@@ -389,6 +391,11 @@ begin
     Result.X := (Left+Right) div 2;
     Result.Y := (Top+Bottom) div 2;
   end;
+end;
+
+procedure PrintRect(var Rect: TRect);
+begin
+  writeln('Rect x1=', Rect.Left, ' y1=', Rect.Top, ' x2=', Rect.Right, ' y2=', Rect.Bottom);
 end;
 
 { TfpgTimer }

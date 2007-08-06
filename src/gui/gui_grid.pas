@@ -14,19 +14,21 @@ uses
   
 type
 
-  TFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: integer) of object;
-  TRowChangeNotify = procedure(Sender: TObject; ARow: integer) of object;
+  TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: integer) of object;
+  TfpgRowChangeNotify = procedure(Sender: TObject; ARow: integer) of object;
 
 
   TfpgBaseGrid = class(TfpgWidget)
   private
     FBackgroundColor: TfpgColor;
     FColResizing: boolean;
+    FDefaultColWidth: integer;
+    FDefaultRowHeight: integer;
     FFocusCol: integer;
     FFocusRow: integer;
     FHeaderHeight: integer;
-    FOnFocusChange: TFocusChangeNotify;
-    FOnRowChange: TRowChangeNotify;
+    FOnFocusChange: TfpgFocusChangeNotify;
+    FOnRowChange: TfpgRowChangeNotify;
     FPrevCol: integer;
     FPrevRow: integer;
     FFirstRow: integer;
@@ -34,7 +36,6 @@ type
     FMargin: integer;
     FFont: TfpgFont;
     FHeaderFont: TfpgFont;
-    FRowHeight: integer;
     FRowSelect: boolean;
     FShowGrid: boolean;
     FShowHeader: boolean;
@@ -42,6 +43,8 @@ type
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
+    procedure   SetDefaultColWidth(const AValue: integer);
+    procedure   SetDefaultRowHeight(const AValue: integer);
     procedure   SetFocusCol(const AValue: integer);
     procedure   SetFocusRow(const AValue: integer);
     procedure   CheckFocusChange;
@@ -58,6 +61,8 @@ type
     procedure   DrawCell(ARow, ACol: integer; ARect: TRect; AFlags: integer); virtual;
     procedure   DrawHeader(ACol: integer; ARect: TRect; AFlags: integer); virtual;
     procedure   HandlePaint; override;
+    property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
+    property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -71,12 +76,11 @@ type
     property    RowCount: integer read GetRowCount;
     property    ShowHeader: boolean read FShowHeader write SetShowHeader;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid;
-    property    RowHeight: integer read FRowHeight;
     property    HeaderHeight: integer read FHeaderHeight;
     property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
-    property    OnFocusChange: TFocusChangeNotify read FOnFocusChange write FOnFocusChange;
-    property    OnRowChange: TRowChangeNotify read FOnRowChange write FOnRowChange;
+    property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
+    property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
   end;
 
 implementation
@@ -91,10 +95,27 @@ begin
   RePaint;
 end;
 
+procedure TfpgBaseGrid.SetDefaultColWidth(const AValue: integer);
+begin
+  if FDefaultColWidth = AValue then
+    Exit; //==>
+  FDefaultColWidth := AValue;
+  RePaint;
+end;
+
+procedure TfpgBaseGrid.SetDefaultRowHeight(const AValue: integer);
+begin
+  if FDefaultRowHeight = AValue then
+    Exit; //==>
+  FDefaultRowHeight := AValue;
+  RePaint;
+end;
+
 function TfpgBaseGrid.GetColumnWidth(ACol: integer): integer;
 begin
+  {$Note Later we need to take into account Fixed Columns }
   if ACol = 2 then
-    Result := FTemp
+    Result := 60+(ACol*16) //FTemp
   else
     Result := 60+(ACol*16);
 end;
@@ -123,17 +144,33 @@ procedure TfpgBaseGrid.DrawCell(ARow, ACol: integer; ARect: TRect; AFlags: integ
 var
   s: string;
 begin
-  s := 'Cellg(' + IntToStr(ARow) + ',' + IntToStr(ACol) + ')';
-  Canvas.DrawString(ARect.left+1, ARect.top+1, s);
+  s := 'Cell(' + IntToStr(ARow) + ',' + IntToStr(ACol) + ')';
+  fpgStyle.DrawString(Canvas, ARect.Left+1, ARect.Top+1, s, Enabled);
 end;
 
 procedure TfpgBaseGrid.DrawHeader(ACol: integer; ARect: TRect; AFlags: integer);
 var
   s: string;
 begin
+  // Here we can implement a head style check
+  fpgStyle.DrawButtonFace(Canvas, ARect.Left, ARect.Top, ARect.Right, ARect.Bottom, [btnIsEmbedded]);
+(*
+  // drawing grid lines
+  Canvas.SetColor(clGridLines);
+  Canvas.DrawLine(r.Left, r.Bottom+1, r.Right+1, r.Bottom+1);  // horizontal bottom
+  Canvas.DrawLine(r.Right+1, r.Top, r.Right+1, r.Bottom+1);    // vertical right
+
+  if (col mod 2) = 0 then
+    Canvas.SetColor(clGridHeader)
+  else
+    Canvas.SetColor(clMagenta);
+  Canvas.FillRectangle(r);
+*)
+
+  Canvas.SetTextColor(clText1);
   s := 'Head ' + IntToStr(ACol);
-  Canvas.DrawString(ARect.left + (ARect.Right div 2) - (FHeaderFont.TextWidth(s) div 2),
-    ARect.top+1, s);
+  fpgStyle.DrawString(Canvas, ((ARect.Left + ARect.Right) div 2) - (FHeaderFont.TextWidth(s) div 2),
+    ARect.Top+1, s, Enabled);
 end;
 
 procedure TfpgBaseGrid.SetFocusCol(const AValue: integer);
@@ -166,8 +203,10 @@ end;
 
 procedure TfpgBaseGrid.SetShowGrid(const AValue: boolean);
 begin
-  if FShowGrid=AValue then exit;
-  FShowGrid:=AValue;
+  if FShowGrid = AValue then
+    Exit; //==>
+  FShowGrid := AValue;
+  RePaint;
 end;
 
 procedure TfpgBaseGrid.SetShowHeader(const AValue: boolean);
@@ -188,7 +227,7 @@ begin
     hh := 0;
   if ShowHeader then
     hh := hh + FHeaderHeight+1;
-  result := (Height - 2*FMargin - hh) div (FRowHeight+1)
+  Result := (Height - 2*FMargin - hh) div (FDefaultRowHeight+1)
 end;
 
 function TfpgBaseGrid.VisibleWidth: integer;
@@ -231,7 +270,7 @@ var
   r2: TRect;
   col: integer;
   row: integer;
-  clr: TRect;
+  clipr: TRect;   // clip rectangle
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
@@ -244,124 +283,101 @@ begin
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(r);
   
-  clr := Rect(FMargin, FMargin, VisibleWidth, Height-2*FMargin);
-  r := clr;
-  
+  clipr := Rect(FMargin, FMargin, VisibleWidth, Height-(2*FMargin));
+  r.Right := r.Left;
+
   if (ColumnCount > 0) and ShowHeader then
   begin
-    // Drawing headers
+    // Drawing horizontal headers
     r.Bottom := FHeaderHeight;
-
     Canvas.SetFont(FHeaderFont);
     for col := FFirstCol to ColumnCount do
     begin
-      r.Right := ColumnWidth[col];
-      Canvas.SetClipRect(clr);
-
-      // drawing grid lines
-      Canvas.SetColor(clGridLines);
-      Canvas.DrawLine(r.Left, r.Bottom+1, r.Right+1, r.Bottom+1);
-      Canvas.DrawLine(r.Right+1, r.Top, r.Right+1, r.Bottom+1);
-
-      Canvas.AddClipRect(r);
-      Canvas.SetColor(clGridHeader);
-      Canvas.FillRectangle(r);
-
-      Canvas.SetTextColor(clText1);
+      Inc(r.Right, FDefaultColWidth);
       DrawHeader(col, r, 0);
-
-      r.Left := r.Left + r.Right + 1;
-
-      if r.Left >= clr.Right then
-        Break;
+      Inc(r.Left, FDefaultColWidth);
+      if r.Left >= clipr.Right then
+        Break;  // small optimization. Don't draw what we can't see
     end;
-
     r.Top := r.Top + r.Bottom + 1;
   end;
 
-
   if (RowCount > 0) and (ColumnCount > 0) then
   begin
-    // Drawing items
+    // Drawing cells
+    r.Bottom := DefaultRowHeight;
     Canvas.SetFont(FFont);
-
-    r.Bottom := RowHeight;
 
     for row := FFirstRow to RowCount do
     begin
       r.Left := FMargin;
+      r.Right := r.Left;
       for col := FFirstCol to ColumnCount do
       begin
-        r.Right := ColumnWidth[col];
-
-        canvas.SetClipRect(clr);
+//        r.Right := ColumnWidth[col];
+        Inc(r.Right, FDefaultColWidth);
+//        Canvas.SetClipRect(clipr);
 
         // drawing grid lines
         if FShowGrid then
-          Canvas.SetColor(clGridLines)
-        else
-          Canvas.SetColor(FBackgroundColor);
-
-        canvas.DrawLine(r.Left, r.Bottom+1, r.Right+1, r.Bottom+1);
-        canvas.DrawLine(r.Right+1, r.Top, r.Right+1, r.Bottom+1);
-
-        canvas.AddClipRect(r);
+        begin
+          Canvas.SetColor(clGridLines);
+          Canvas.DrawLine(r.Left, r.Bottom+1, r.Right+1, r.Bottom+1); // cell bottom
+          Canvas.DrawLine(r.Right+1, r.Top, r.Right+1, r.Bottom+1); // cell right
+        end;
 
         if (row = FFocusRow) and (RowSelect or (col = FFocusCol)) then
         begin
           if FFocused then
           begin
-            canvas.SetColor(clSelection);
-            canvas.SetTextColor(clSelectionText);
+            Canvas.SetColor(clSelection);
+            Canvas.SetTextColor(clSelectionText);
           end
           else
           begin
-            canvas.SetColor(clInactiveSel);
-            canvas.SetTextColor(clInactiveSelText);
+            Canvas.SetColor(clInactiveSel);
+            Canvas.SetTextColor(clInactiveSelText);
           end;
         end
         else
         begin
-          canvas.SetColor(BackgroundColor);
-          canvas.SetTextColor(clText1);
+          Canvas.SetColor(BackgroundColor);
+          Canvas.SetTextColor(clText1);
         end;
-
-        canvas.FillRectangle(r);
-
+        Canvas.FillRectangle(r);
         DrawCell(row, col, r, 0);
+        Inc(r.Left, FDefaultColWidth+1);
+//        r.Left := r.Left + r.Right + 1;
 
-        r.Left := r.Left + r.Right + 1;
-
-        if r.Left >= clr.Right then
-          Break;
+        if r.Left >= clipr.Right then
+          Break;  // small optimization. Don't draw what we can't see
       end;
-
-      r.Top := r.Top + r.Bottom + 1;
-
-      if r.Top >= clr.Bottom then break;
-
+      Inc(r.Top, FDefaultRowHeight+1);
+//      r.Top := r.Top + r.Bottom + 1;
+      if r.Top >= clipr.Bottom then
+        break;
     end;
   end; // item drawing
 
-  canvas.SetClipRect(clr);
-  canvas.SetColor(FBackgroundColor);
+  Canvas.SetClipRect(clipr);
+  Canvas.SetColor(FBackgroundColor);
 
   // clearing after the last column
-  if r.Left <= clr.Right then
+  if r.Left <= clipr.Right then
   begin
     r2.Left   := r.Left;
-    r2.Top    := clr.Top;
-    r2.Right  := clr.Right;
-    r2.Bottom := clr.Bottom;
+    r2.Top    := clipr.Top;
+    r2.Right  := clipr.Right;
+    r2.Bottom := clipr.Bottom;
     Canvas.FillRectangle(r2);
   end;
 
   // clearing after the last row
-  if r.Top <= clr.Bottom then
+  if r.Top <= clipr.Bottom then
   begin
-    r.Left    := clr.Left;
-    r.Right   := clr.Right;
-    r.Bottom  := clr.Bottom;
+    r.Left    := clipr.Left;
+    r.Right   := clipr.Right;
+    r.Bottom  := clipr.Bottom;
     Canvas.FillRectangle(r);
   end;
   
@@ -384,14 +400,14 @@ begin
   FShowHeader := True;
   FShowGrid   := True;
   
-  FBackgroundColor  := clBoxColor;
-  FColResizing      := False;
-
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
   
-  FRowHeight    := FFont.Height + 2;
-  FHeaderHeight := FHeaderFont.Height + 2;
+  FDefaultColWidth  := 64;
+  FDefaultRowHeight := FFont.Height + 2;
+  FHeaderHeight     := FHeaderFont.Height + 2;
+  FBackgroundColor  := clBoxColor;
+  FColResizing      := False;
 
   FVScrollBar := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
@@ -404,7 +420,6 @@ begin
 //  FHScrollBar.OnScroll := @HScrollBarMove;
 //  FHScrollBar.ScrollStep := 5;
 
-  FTemp := 50;  // a bit of a hack for now (default column width)
 end;
 
 destructor TfpgBaseGrid.Destroy;

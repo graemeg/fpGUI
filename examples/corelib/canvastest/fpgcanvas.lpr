@@ -170,6 +170,10 @@ begin
   Canvas.FillArc(5, 290, 50, 50, 0, 270);  // should overlap rectangle pixels
 
 
+  // Gradient testing
+  r := Rect(265, 340, 450, 375);
+  Canvas.GradientFill(r, clBlue, clMagenta, gdHorizontal);
+
   Canvas.EndDraw;
 end;
 
