@@ -15,6 +15,7 @@ type
     FEdit: TfpgEdit;
     FAddButton: TfpgButton;
     FListView: TfpgListView;
+    FTmpListView: TfpgListView;
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
     
@@ -22,7 +23,7 @@ type
     procedure AddBttn(Sender: TObject);
     procedure ShowHeadersChange(Sender: TObject);
     procedure PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas; Item: TfpgLVItem;
-                                   Area:TRect; var PaintPart: TfpgLVItemPaintPart);
+                                   ItemIndex: Integer; Area:TRect; var PaintPart: TfpgLVItemPaintPart);
     
   public
     constructor Create(AOwner: TComponent); override;
@@ -39,16 +40,22 @@ end;
 procedure TMainForm.AddBttn(Sender: TObject);
 var
   Item: TfpgLVItem;
+  I: Integer;
 begin
   FListView.BeginUpdate;
-  Item := FListView.ItemAdd;
-  Item.Caption :=FEdit.Text+IntToStr(FListView.Items.Count);
-  Item.SubItems.Add('0');
-  Item.SubItems.Add('1');
-  Item.SubItems.Add('2');
-  Item.SubItems.Add('3');
-  Item.SubItems.Add('4');
+  FTmpListView.BeginUpdate;
+  FListView.Items.Capacity := FListView.Items.Capacity +1000000;
+  for I := 0 to 999999 do begin
+    Item := FListView.ItemAdd;
+    Item.Caption :=FEdit.Text+IntToStr(FListView.Items.Count);
+    Item.SubItems.Add('0');
+    Item.SubItems.Add('1');
+    Item.SubItems.Add('2');
+    Item.SubItems.Add('3');
+    Item.SubItems.Add('4');
+  end;
   FListView.EndUpdate;
+  FTmpListView.EndUpdate;
 
 end;
 
@@ -58,15 +65,14 @@ begin
 end;
 
 procedure TMainForm.PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas;
-  Item: TfpgLVItem; Area: TRect; var PaintPart: TfpgLVItemPaintPart);
+  Item: TfpgLVItem; ItemIndex: Integer; Area: TRect; var PaintPart: TfpgLVItemPaintPart);
 begin
-  if ListView.Items.IndexOf(Item) mod 2 = 0 then  ACanvas.TextColor := clRed;;
+  if ItemIndex mod 2 = 0 then  ACanvas.TextColor := clRed;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
 var
   LVColumn: TfpgLVColumn;
-  TmpListView : TfpgListView;
 begin
   inherited Create(AOwner);
 
@@ -84,8 +90,8 @@ begin
     MultiSelect := True;
   end;
   
-  TmpListView := TfpgListView.Create(Self);
-  with TmpListView do begin
+  FTmpListView := TfpgListView.Create(Self);
+  with FTmpListView do begin
     Parent := Self;
     Top := 10;
     Left := 335;
@@ -101,7 +107,7 @@ begin
   LVColumn.Width := 150;
   LVColumn.Height := 50;
   FListView.Columns.Add(LVColumn);
-  TmpListView.Columns.Add(LVColumn);
+  FTmpListView.Columns.Add(LVColumn);
   
   LVColumn := TfpgLVColumn.Create(FListView.Columns);
   LVColumn.Caption := 'Column 2';
@@ -109,7 +115,7 @@ begin
   LVColumn.Height := 50;
   //LVColumn.Visible := False;
   FListView.Columns.Add(LVColumn);
-  //TmpListView.Columns.Add(LVColumn);
+  //FTmpListView.Columns.Add(LVColumn);
 
   LVColumn := TfpgLVColumn.Create(FListView.Columns);
   LVColumn.Caption := 'Column 3';
@@ -117,7 +123,7 @@ begin
   LVColumn.Height := 50;
   //LVColumn.Visible := False;
   FListView.Columns.Add(LVColumn);
-  TmpListView.Columns.Add(LVColumn);
+  FTmpListView.Columns.Add(LVColumn);
   LVColumn.ColumnIndex := 2;
 
 

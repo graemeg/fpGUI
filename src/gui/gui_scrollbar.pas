@@ -125,14 +125,16 @@ end;
 procedure TfpgScrollBar.SetMax(const AValue: integer);
 begin
   if AValue = FMax then Exit;
-  FMax := AValue;
+  if AValue < FMin then FMax := FMin
+  else FMax := AValue;
   if FPosition > FMax then SetPosition(FMax);
 end;
 
 procedure TfpgScrollBar.SetMin(const AValue: integer);
 begin
   if AValue = FMin then Exit;
-  FMin := AValue;
+  if AValue > FMax then FMin := FMax
+  else FMin := AValue;
   if FPosition < FMin then SetPosition(FMin);
 end;
 
