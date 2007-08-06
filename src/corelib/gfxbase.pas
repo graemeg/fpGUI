@@ -284,8 +284,8 @@ type
     procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
     procedure   EndDraw; overload;
     procedure   FreeResources;
-    property    Color: TfpgColor read FColor;
-    property    TextColor: TfpgColor read FTextColor;
+    property    Color: TfpgColor read FColor write SetColor;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor;
     property    Font: TfpgFontBase read FFont write SetFont;
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;

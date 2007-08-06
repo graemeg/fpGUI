@@ -1,0 +1,178 @@
+program listviewtest;
+
+{$mode objfpc}{$H+}
+
+uses
+  Classes, fpgui_package, fpgfx_package, fpgfx, sysutils ,
+  gui_listview, gui_form, gui_button, gui_edit, gfxbase, gui_checkbox;
+  
+type
+
+  { TMainForm }
+
+  TMainForm = class(TfpgForm)
+  private
+    FEdit: TfpgEdit;
+    FAddButton: TfpgButton;
+    FListView: TfpgListView;
+    FQuitButton: TfpgButton;
+    FCheck: TfpgCheckBox;
+    
+    procedure CloseBttn(Sender: TObject);
+    procedure AddBttn(Sender: TObject);
+    procedure ShowHeadersChange(Sender: TObject);
+    procedure PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas; Item: TfpgLVItem;
+                                   Area:TRect; var PaintPart: TfpgLVItemPaintPart);
+    
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+  end;
+
+{ TMainForm }
+
+procedure TMainForm.CloseBttn(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TMainForm.AddBttn(Sender: TObject);
+var
+  Item: TfpgLVItem;
+begin
+  FListView.BeginUpdate;
+  Item := FListView.ItemAdd;
+  Item.Caption :=FEdit.Text+IntToStr(FListView.Items.Count);
+  Item.SubItems.Add('0');
+  Item.SubItems.Add('1');
+  Item.SubItems.Add('2');
+  Item.SubItems.Add('3');
+  Item.SubItems.Add('4');
+  FListView.EndUpdate;
+
+end;
+
+procedure TMainForm.ShowHeadersChange(Sender: TObject);
+begin
+  FListView.ShowHeaders := TfpgCheckBox(Sender).Checked;
+end;
+
+procedure TMainForm.PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas;
+  Item: TfpgLVItem; Area: TRect; var PaintPart: TfpgLVItemPaintPart);
+begin
+  if ListView.Items.IndexOf(Item) mod 2 = 0 then  ACanvas.TextColor := clRed;;
+end;
+
+constructor TMainForm.Create(AOwner: TComponent);
+var
+  LVColumn: TfpgLVColumn;
+  TmpListView : TfpgListView;
+begin
+  inherited Create(AOwner);
+
+  WindowTitle := 'ListView Test';
+  SetPosition(200, 200, 610, 455);
+
+  FListView := TfpgListView.Create(Self);
+  with FListView do begin
+    Parent := Self;
+    Top := 10;
+    Left := 10;
+    Width := 320;
+    Height := 400;
+    OnPaintItem := @PaintItem;
+    MultiSelect := True;
+  end;
+  
+  TmpListView := TfpgListView.Create(Self);
+  with TmpListView do begin
+    Parent := Self;
+    Top := 10;
+    Left := 335;
+    Width := 270;
+    Height := 400;
+    //OnPaintItem := @PaintItem;
+    Items := FListView.Items;
+  end;
+
+  
+  LVColumn := TfpgLVColumn.Create(FListView.Columns);
+  LVColumn.Caption := 'Column 1';
+  LVColumn.Width := 150;
+  LVColumn.Height := 50;
+  FListView.Columns.Add(LVColumn);
+  TmpListView.Columns.Add(LVColumn);
+  
+  LVColumn := TfpgLVColumn.Create(FListView.Columns);
+  LVColumn.Caption := 'Column 2';
+  LVColumn.Width := 100;
+  LVColumn.Height := 50;
+  //LVColumn.Visible := False;
+  FListView.Columns.Add(LVColumn);
+  //TmpListView.Columns.Add(LVColumn);
+
+  LVColumn := TfpgLVColumn.Create(FListView.Columns);
+  LVColumn.Caption := 'Column 3';
+  LVColumn.Width := 200;
+  LVColumn.Height := 50;
+  //LVColumn.Visible := False;
+  FListView.Columns.Add(LVColumn);
+  TmpListView.Columns.Add(LVColumn);
+  LVColumn.ColumnIndex := 2;
+
+
+  FEdit := TfpgEdit.Create(Self);
+  with FEdit do begin
+    Parent := Self;
+    Top := 420;
+    Left := 10;
+    Width := 100;
+  end;
+
+  FAddButton := TfpgButton.Create(Self);
+  with FAddButton do begin
+    Parent := Self;
+    Top := 420;
+    Left := 120;
+    Width := 80;
+    Text := 'Add';
+    OnClick := @AddBttn;
+  end;
+
+  FQuitButton := TfpgButton.Create(Self);
+  with FQuitButton do begin
+    Parent := Self;
+    Top := 420;
+    Left := 210;
+    Width := 80;
+    Text := 'Quit';
+    OnClick := @CloseBttn;
+  end;
+  
+  FCheck := TfpgCheckBox.Create(Self);
+  with FCheck do begin
+    Parent := Self;
+    Top := 420;
+    Left := 290;
+    Width := 110;
+    Checked := True;
+    Text := 'ShowHeaders';
+    OnChange := @ShowHeadersChange;
+  end;
+
+end;
+
+destructor TMainForm.Destroy;
+begin
+  inherited Destroy;
+end;
+  
+begin
+  fpgApplication.Initialize;
+  with TMainForm.Create(nil) do begin
+    Show;
+    fpgApplication.Run;
+    Free;
+  end;
+end.
+

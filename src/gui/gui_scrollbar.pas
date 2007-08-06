@@ -31,6 +31,9 @@ type
     FOnScroll: TScrollNotifyEvent;
     FPosition: integer;
     FScrollStep: integer;
+    procedure SetMax(const AValue: integer);
+    procedure SetMin(const AValue: integer);
+    procedure SetPosition(const AValue: integer);
   protected
     FSliderPos: TfpgCoord;
     FSliderLength: TfpgCoord;
@@ -57,10 +60,10 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   RepaintSlider;
-    property    Position: integer read FPosition write FPosition default 10;
+    property    Position: integer read FPosition write SetPosition default 10;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
-    property    Min: integer read FMin write FMin default 0;
-    property    Max: integer read FMax write FMax default 100;
+    property    Min: integer read FMin write SetMin default 0;
+    property    Max: integer read FMax write SetMax default 100;
     property    OnScroll: TScrollNotifyEvent read FOnScroll write FOnScroll;
   end;
 
@@ -117,6 +120,27 @@ begin
   if not HasHandle then
     Exit; //==>
   DrawSlider(True);
+end;
+
+procedure TfpgScrollBar.SetMax(const AValue: integer);
+begin
+  if AValue = FMax then Exit;
+  FMax := AValue;
+  if FPosition > FMax then SetPosition(FMax);
+end;
+
+procedure TfpgScrollBar.SetMin(const AValue: integer);
+begin
+  if AValue = FMin then Exit;
+  FMin := AValue;
+  if FPosition < FMin then SetPosition(FMin);
+end;
+
+procedure TfpgScrollBar.SetPosition(const AValue: integer);
+begin
+  if AValue < FMin then FPosition := FMin
+  else if AValue > FMax then FPosition := FMax
+  else FPosition := AValue;
 end;
 
 procedure TfpgScrollBar.ScrollTimer(Sender: TObject);
@@ -182,8 +206,11 @@ begin
       FPosition := FMin;
 
     FSliderLength := Trunc(area * SliderSize);
+    //FSliderLength := Trunc((width/area) * (fmax /area  ));
     if FSliderLength < 20 then
       FSliderLength := 20;
+    if FSliderLength > area then
+      FSliderLength := area;
     area := area - FSliderLength;
     mm   := FMax - FMin;
     if mm = 0 then
@@ -323,7 +350,7 @@ begin
 
   if newp <> FPosition then
   begin
-    FPosition := newp;
+    Position := newp;
     if Assigned(FOnScroll) then
       FOnScroll(self, FPosition);
   end;
