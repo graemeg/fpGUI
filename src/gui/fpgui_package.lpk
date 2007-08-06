@@ -85,6 +85,7 @@
       </Item16>
       <Item17>
         <Filename Value="gui_listview.pas"/>
+        <UnitName Value="gui_listview"/>
       </Item17>
     </Files>
     <RequiredPkgs Count="2">
