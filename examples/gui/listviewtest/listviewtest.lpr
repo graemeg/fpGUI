@@ -44,8 +44,8 @@ var
 begin
   FListView.BeginUpdate;
   FTmpListView.BeginUpdate;
-  FListView.Items.Capacity := FListView.Items.Capacity +1000000;
-  for I := 0 to 999999 do begin
+  FListView.Items.Capacity := FListView.Items.Capacity + 2000;
+  for I := 0 to 1999 do begin
     Item := FListView.ItemAdd;
     Item.Caption :=FEdit.Text+IntToStr(FListView.Items.Count);
     Item.SubItems.Add('0');
@@ -68,6 +68,9 @@ procedure TMainForm.PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas;
   Item: TfpgLVItem; ItemIndex: Integer; Area: TRect; var PaintPart: TfpgLVItemPaintPart);
 begin
   if ItemIndex mod 2 = 0 then  ACanvas.TextColor := clRed;
+  if ItemIndex mod 3 = 0 then  ACanvas.TextColor := clBlue;
+  if ItemIndex mod 4 = 0 then  ACanvas.TextColor := clGray;
+  if ItemIndex mod 5 = 0 then  ACanvas.TextColor := clPink;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -148,6 +151,8 @@ begin
   FQuitButton := TfpgButton.Create(Self);
   with FQuitButton do begin
     Parent := Self;
+    ImageName := 'stdimg.Quit';
+    ShowImage := True;
     Top := 420;
     Left := 210;
     Width := 80;
