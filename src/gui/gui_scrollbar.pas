@@ -191,12 +191,12 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.FillRectangle(0, Width, Width-1, Height-1 - Width);
+    Canvas.FillRectangle(0, Width-1, Width-2, Height-2 - Width-1);
     area := Height - (Width shl 1);
   end
   else
   begin
-    Canvas.FillRectangle(Height, 0, Width - Height-1, Height);
+    Canvas.FillRectangle(Height, 0, Width - Height-3, Height);
     area := Width - (Height shl 1);
   end;
 

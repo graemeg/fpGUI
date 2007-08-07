@@ -236,11 +236,11 @@ type
     procedure   DoSetColor(cl: TfpgColor); virtual; abstract;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); virtual; abstract;
     procedure   DoGetWinRect(out r: TRect); virtual; abstract;
-    procedure   DoFillRectangle(x1, y1, x2, y2: TfpgCoord); virtual; abstract;
+    procedure   DoFillRectangle(x, y, w, h: integer); virtual; abstract;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); virtual; abstract;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); virtual; abstract;
-    procedure   DoDrawRectangle(x1, y1, x2, y2: TfpgCoord); virtual; abstract;
-    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); virtual; abstract;
+    procedure   DoDrawRectangle(x, y, w, h: integer); virtual; abstract;
+    procedure   DoDrawLine(x1, y1, x2, y2: integer); virtual; abstract;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); virtual; abstract;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); virtual; abstract;
     procedure   DoSetClipRect(const ARect: TRect); virtual; abstract;
@@ -257,7 +257,7 @@ type
   public
     constructor Create; virtual;
     destructor  Destroy; override;
-    procedure   DrawRectangle(x1, y1, x2, y2: TfpgCoord); overload;
+    procedure   DrawRectangle(x, y, w, h: integer); overload;
     procedure   DrawRectangle(r: TRect); overload;
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
@@ -266,7 +266,7 @@ type
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
     procedure   CopyRect(x, y: TfpgCoord; ACanvas: TfpgCanvasBase; var SourceRect: TRect);
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
-    procedure   FillRectangle(x1, y1, x2, y2: TfpgCoord); overload;
+    procedure   FillRectangle(x, y, w, h: integer); overload;
     procedure   FillRectangle(r: TRect); overload;
     procedure   FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
     procedure   FillArc(x, y, w, h: TfpgCoord; a1, a2: double);
@@ -730,14 +730,15 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgCanvasBase.DrawRectangle(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCanvasBase.DrawRectangle(x, y, w, h: integer);
 begin
-  DoDrawRectangle(x1, y1, x2, y2);
+  DoDrawRectangle(x, y, w, h);
 end;
 
 procedure TfpgCanvasBase.DrawRectangle(r: TRect);
 begin
-  DoDrawRectangle(r.Left, r.Top, r.Right, r.Bottom);
+  SortRect(r);
+  DoDrawRectangle(r.Left, r.Top, r.Right-r.Left, r.Bottom-r.Top);
 end;
 
 procedure TfpgCanvasBase.DrawLine(x1, y1, x2, y2: TfpgCoord);
@@ -822,14 +823,15 @@ begin
   end;
 end;
 
-procedure TfpgCanvasBase.FillRectangle(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCanvasBase.FillRectangle(x, y, w, h: integer);
 begin
-  DoFillRectangle(x1, y1, x2, y2);
+  DoFillRectangle(x, y, w, h);
 end;
 
 procedure TfpgCanvasBase.FillRectangle(r: TRect);
 begin
-  DoFillRectangle(r.Left, r.Top, r.Right, r.Bottom);
+  SortRect(r);
+  DoFillRectangle(r.Left, r.Top, r.Right-r.Left, r.Bottom-r.Top);
 end;
 
 procedure TfpgCanvasBase.FillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);

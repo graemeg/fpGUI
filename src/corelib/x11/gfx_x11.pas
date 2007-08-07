@@ -100,11 +100,11 @@ type
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
     procedure   DoGetWinRect(out r: TRect); override;
-    procedure   DoFillRectangle(x1, y1, x2, y2: TfpgCoord); override;
+    procedure   DoFillRectangle(x, y, w, h: integer); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
-    procedure   DoDrawRectangle(x1, y1, x2, y2: TfpgCoord); override;
-    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
+    procedure   DoDrawRectangle(x, y, w, h: integer); override;
+    procedure   DoDrawLine(x1, y1, x2, y2: integer); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
     procedure   DoSetClipRect(const ARect: TRect); override;
@@ -1264,6 +1264,8 @@ begin
     end;
 
     Fgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
+    // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
+    XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
 
     FXftDraw := XftDrawCreate(xapplication.display, FDrawHandle,
       XDefaultVisual(xapplication.display, xapplication.DefaultScreen),
@@ -1380,30 +1382,30 @@ begin
     lsDot:
         begin
           XSetLineAttributes(xapplication.display, Fgc, 0,
-            LineOnOffDash, CapButt, JoinMiter);
+            LineOnOffDash, CapNotLast, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDot, 2);
         end;
     lsDash:
         begin
           XSetLineAttributes(xapplication.display, Fgc, 0,
-            LineOnOffDash, CapButt, JoinMiter);
+            LineOnOffDash, CapNotLast, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDash, 2);
         end;
     lsDashDot:
         begin
           XSetLineAttributes(xapplication.display, Fgc, 0,
-            LineOnOffDash, CapButt, JoinMiter);
+            LineOnOffDash, CapNotLast, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDashDot, 4);
         end;
     lsDashDotDot:
         begin
           XSetLineAttributes(xapplication.display, Fgc, 0,
-            LineOnOffDash, CapButt, JoinMiter);
+            LineOnOffDash, CapNotLast, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDashDotDot, 6);
         end;
     else  // which includes lsSolid
       XSetLineAttributes(xapplication.display, Fgc, 0,
-        LineSolid, CapButt, JoinMiter);
+        LineSolid, CapNotLast, JoinMiter);
   end;  { case }
 end;
 
@@ -1434,9 +1436,9 @@ begin
   r.Bottom  := h;
 end;
 
-procedure TfpgCanvasImpl.DoFillRectangle(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: integer);
 begin
-  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x1, y1, x2-x1+1, y2-y1+1);
+  XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
 end;
 
 procedure TfpgCanvasImpl.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
@@ -1462,13 +1464,16 @@ begin
   XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, 0, 0);
 end;
 
-procedure TfpgCanvasImpl.DoDrawRectangle(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: integer);
 begin
-  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x1, y1, x2-x1, y2-y1);
+//  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
+  // Same behavior as Windows. See documentation for reason.
+  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
 end;
 
-procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: integer);
 begin
+  // Same behavior as Windows. See documentation for reason.
   XDrawLine(xapplication.display, FDrawHandle, Fgc, x1, y1, x2, y2);
 end;
 

@@ -44,6 +44,13 @@ begin
 
   // Testing Rectangles
   Canvas.SetColor(clBlack);
+  r.Top       := 0;
+  r.Left      := 0;
+  r.Right     := 1;
+  r.Bottom    := 1;
+  Canvas.DrawRectangle(r);
+
+  Canvas.SetColor(clBlack);
   r.Top       := 5;
   r.Left      := 60;
   r.Right     := r.Left + 49;
@@ -161,11 +168,11 @@ begin
   
   // Arc drawing tests
   Canvas.SetColor(clBlack);
-  Canvas.DrawRectangle(5, 235, 55, 285);
+  Canvas.DrawRectangle(5, 235, 50, 50);
   Canvas.SetColor(clRed);
   Canvas.DrawArc(5, 235, 50, 50, 0, 270);  // should overlap rectangle pixels
   Canvas.SetColor(clBlack);
-  Canvas.DrawRectangle(5, 290, 55, 340);
+  Canvas.DrawRectangle(5, 290, 50, 50);
   Canvas.SetColor(clRed);
   Canvas.FillArc(5, 290, 50, 50, 0, 270);  // should overlap rectangle pixels
 

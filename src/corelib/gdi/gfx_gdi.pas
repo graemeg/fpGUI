@@ -91,11 +91,11 @@ type
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
     procedure   DoGetWinRect(out r: TRect); override;
-    procedure   DoFillRectangle(x1, y1, x2, y2: TfpgCoord); override;
+    procedure   DoFillRectangle(x, y, w, h: integer); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
-    procedure   DoDrawRectangle(x1, y1, x2, y2: TfpgCoord); override;
-    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
+    procedure   DoDrawRectangle(x, y, w, h: integer); override;
+    procedure   DoDrawLine(x1, y1, x2, y2: integer); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
     procedure   DoSetClipRect(const ARect: TRect); override;
@@ -1227,27 +1227,26 @@ begin
   FClipRectSet := False;
 end;
 
-procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
-var
-  pts: array[1..2] of TPoint;
+procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: integer);
 begin
-  pts[1].X := x1;
-  pts[1].Y := y1;
-  pts[2].X := x2;
-  pts[2].Y := y2;
-  Windows.Polygon(Fgc, pts, 2);
+  Windows.MoveToEx(Fgc, x1, y1, nil);
+  Windows.LineTo(Fgc, x2, y2);
 end;
 
-procedure TfpgCanvasImpl.DoDrawRectangle(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: integer);
 var
-  pts: array[1..5] of TPoint;
+  r: TRect;
 begin
-  pts[1].X := x1;  pts[1].Y := y1;
-  pts[2].X := x2;  pts[2].Y := y1;
-  pts[3].X := x2;  pts[3].Y := y2;
-  pts[4].X := x1;  pts[4].Y := y2;
-  pts[5].X := x1;  pts[5].Y := y1;
-  Windows.Polyline(Fgc, pts, 5);
+  if (w = 1) and (h = 1) then
+    SetPixel(x, y, FColor)
+  else
+  begin
+    r := Rect(x, y, x+w-1, y+h-1);
+    DoDrawLine(r.Left, r.Top, r.Right, r.Top);
+    DoDrawLine(r.Right, r.Top, r.Right, r.Bottom);
+    DoDrawLine(r.Right, r.Bottom, r.Left, r.Bottom);
+    DoDrawLine(r.Left, r.Bottom, r.Left, r.Top);
+  end;
 end;
 
 procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
@@ -1265,11 +1264,11 @@ begin
   {$endif}
 end;
 
-procedure TfpgCanvasImpl.DoFillRectangle(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: integer);
 var
   r: TRect;
 begin
-  r := Rect(x1, y1, x2+1, y2+1);
+  r := Rect(x, y, x+w, y+h);
   Windows.FillRect(Fgc, r, FBrush);
 end;
 

@@ -51,9 +51,9 @@ begin
 
   // rectangle
   Canvas.SetColor(clRed);
-  Canvas.DrawRectangle(102, 102, 147, 147);  // (over second outer black rectangle)
+  Canvas.DrawRectangle(102, 102, 46, 46);  // (over second outer black rectangle)
   Canvas.SetColor(clMagenta);
-  Canvas.DrawRectangle(104, 104, 145, 145);  // (over third outer black rectangle)
+  Canvas.DrawRectangle(104, 104, 42, 42);  // (over third outer black rectangle)
 
   // Point (outer 4 corners)
   Canvas.Pixels[100, 100] := clBlue;
@@ -63,23 +63,23 @@ begin
   
   // FillRect
   Canvas.SetColor(clYellow);
-  Canvas.FillRectangle(111, 111, 138, 138);  // inner white rectangle
+  Canvas.FillRectangle(111, 111, 28, 28);  // inner white rectangle
 
   // line diagonal
   Canvas.SetColor(clRed);
-  Canvas.DrawLine(110, 110, 139, 139);  // top/left of inner black rect to bottom/right
+  Canvas.DrawLine(110, 110, 140, 140);  // top/left of inner black rect to bottom/right
   Canvas.SetColor(clGreen);
-  Canvas.DrawLine(139, 110, 110, 139);  // top/right of inner black rect to bottom/left
+  Canvas.DrawLine(139, 110, 109, 140);  // top/right of inner black rect to bottom/left
 
   // line vertical
   Canvas.SetColor(clBlue);
-  Canvas.DrawLine(108, 108, 108, 141);
-  Canvas.DrawLine(141, 108, 141, 141);
+  Canvas.DrawLine(108, 108, 108, 142);
+  Canvas.DrawLine(141, 108, 141, 142);
 
   // line horizontal
   Canvas.SetColor(clGreen);
-  Canvas.DrawLine(106, 106, 143, 106);
-  Canvas.DrawLine(106, 143, 143, 143);
+  Canvas.DrawLine(106, 106, 144, 106);
+  Canvas.DrawLine(106, 143, 144, 143);
 
 
   Canvas.EndDraw;

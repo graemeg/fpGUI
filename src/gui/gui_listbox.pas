@@ -468,13 +468,14 @@ begin
   end
   else
   begin
-    Canvas.DrawControlFrame(0, 0, Width, Height);
+    Canvas.DrawControlFrame(0, 0, Width-1, Height-1);
     InflateRect(r, -2, -2);
   end;
 
   Canvas.SetClipRect(r);
   Canvas.SetColor(FBackgroundColor);
-  Canvas.FillRectangle(r);
+  Canvas.FillRectangle(r.Left, r.Top, Width-4, Height-4);
+//  Canvas.FillRectangle(r);
   Canvas.SetFont(FFont);
 
   r := Rect(FMargin, FMargin, (Width-1)-ScrollBarWidth-FMargin, (Height-1)-FMargin);

@@ -203,13 +203,13 @@ begin
   if FEmbedded then
     Include(lBtnFlags, btnIsEmbedded);
 
-  Canvas.DrawButtonFace(0, 0, Width, Height, lBtnFlags);
+  Canvas.DrawButtonFace(0, 0, Width-1, Height-1, lBtnFlags);
 
   if FFocused and (not FEmbedded) then
   begin
     Canvas.SetColor(clText1);
     Canvas.SetLineStyle(1, lsDot);
-    InflateRect(r, -3, -3);
+    InflateRect(r, -2, -2);
     Canvas.DrawRectangle(r);
   end
   else
@@ -222,7 +222,7 @@ begin
   Canvas.SetFont(Font);
   AText := FText;
 
-  y     := Height div 2 - FFont.Height div 2;
+  y := Height div 2 - FFont.Height div 2;
   if y < 3 then
     y := 3;
 

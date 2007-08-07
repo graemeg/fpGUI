@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="\"/>
+    <PathDelim Value="/"/>
     <Version Value="5"/>
     <General>
       <MainUnit Value="0"/>
-      <IconPath Value=".\"/>
+      <IconPath Value="./"/>
       <TargetFileExt Value=""/>
-      <ActiveEditorIndexAtStart Value="0"/>
+      <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -16,7 +16,6 @@
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
-      <DestinationDirectory Value="$(TestDir)\publishedproject\"/>
       <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
@@ -24,7 +23,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">
@@ -32,136 +31,160 @@
         <PackageName Value="fpgui_package"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="21">
       <Unit0>
         <Filename Value="drawtest.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="drawtest"/>
-        <CursorPos X="42" Y="66"/>
-        <TopLine Value="50"/>
+        <CursorPos X="32" Y="72"/>
+        <TopLine Value="58"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="26"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\..\..\src\corelib\gfx_imgfmt_bmp.pas"/>
+        <Filename Value="../../../src/corelib/gfx_imgfmt_bmp.pas"/>
         <UnitName Value="gfx_imgfmt_bmp"/>
         <CursorPos X="24" Y="18"/>
         <TopLine Value="1"/>
         <UsageCount Value="12"/>
       </Unit1>
       <Unit2>
-        <Filename Value="..\..\..\src\corelib\predefinedcolors.inc"/>
+        <Filename Value="../../../src/corelib/predefinedcolors.inc"/>
         <CursorPos X="15" Y="112"/>
         <TopLine Value="102"/>
-        <EditorIndex Value="1"/>
-        <UsageCount Value="11"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="12"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\..\..\src\corelib\gfxbase.pas"/>
+        <Filename Value="../../../src/corelib/gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
         <CursorPos X="17" Y="240"/>
         <TopLine Value="230"/>
-        <EditorIndex Value="2"/>
-        <UsageCount Value="12"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\..\..\src\corelib\x11\gfx_x11.pas"/>
+        <Filename Value="../../../src/corelib/x11/gfx_x11.pas"/>
         <UnitName Value="gfx_x11"/>
         <CursorPos X="63" Y="1444"/>
         <TopLine Value="1432"/>
-        <EditorIndex Value="3"/>
-        <UsageCount Value="12"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\..\..\src\corelib\gdi\gfx_gdi.pas"/>
+        <Filename Value="../../../src/corelib/gdi/gfx_gdi.pas"/>
         <UnitName Value="gfx_gdi"/>
         <CursorPos X="9" Y="1252"/>
         <TopLine Value="1250"/>
         <UsageCount Value="12"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\..\..\..\..\FPC\2.0.x\src\rtl\objpas\classes\classesh.inc"/>
+        <Filename Value="../../../../../FPC/2.0.x/src/rtl/objpas/classes/classesh.inc"/>
         <CursorPos X="14" Y="25"/>
         <TopLine Value="15"/>
         <UsageCount Value="10"/>
       </Unit6>
       <Unit7>
-        <Filename Value="..\..\..\..\..\FPC\2.0.x\src\rtl\objpas\types.pp"/>
+        <Filename Value="../../../../../FPC/2.0.x/src/rtl/objpas/types.pp"/>
         <UnitName Value="types"/>
         <CursorPos X="13" Y="21"/>
         <TopLine Value="5"/>
         <UsageCount Value="10"/>
       </Unit7>
       <Unit8>
-        <Filename Value="..\..\..\..\..\FPC\2.0.x\src\rtl\win32\windows.pp"/>
+        <Filename Value="../../../../../FPC/2.0.x/src/rtl/win32/windows.pp"/>
         <UnitName Value="windows"/>
         <CursorPos X="7" Y="33"/>
         <TopLine Value="21"/>
         <UsageCount Value="10"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\..\..\..\..\FPC\2.0.x\src\rtl\win32\wininc\struct.inc"/>
+        <Filename Value="../../../../../FPC/2.0.x/src/rtl/win32/wininc/struct.inc"/>
         <CursorPos X="12" Y="220"/>
         <TopLine Value="210"/>
         <UsageCount Value="10"/>
       </Unit9>
       <Unit10>
-        <Filename Value="..\..\..\src\gui\gui_listbox.pas"/>
+        <Filename Value="../../../src/gui/gui_listbox.pas"/>
         <UnitName Value="gui_listbox"/>
         <CursorPos X="1" Y="516"/>
         <TopLine Value="506"/>
         <UsageCount Value="10"/>
       </Unit10>
       <Unit11>
-        <Filename Value="..\..\..\src\gui\gui_button.pas"/>
+        <Filename Value="../../../src/gui/gui_button.pas"/>
         <UnitName Value="gui_button"/>
         <CursorPos X="1" Y="221"/>
         <TopLine Value="210"/>
         <UsageCount Value="10"/>
       </Unit11>
       <Unit12>
-        <Filename Value="..\..\..\src\gui\gui_combobox.pas"/>
+        <Filename Value="../../../src/gui/gui_combobox.pas"/>
         <UnitName Value="gui_combobox"/>
         <CursorPos X="11" Y="287"/>
         <TopLine Value="269"/>
         <UsageCount Value="10"/>
       </Unit12>
       <Unit13>
-        <Filename Value="..\..\..\src\gui\gui_edit.pas"/>
+        <Filename Value="../../../src/gui/gui_edit.pas"/>
         <UnitName Value="gui_edit"/>
         <CursorPos X="12" Y="215"/>
         <TopLine Value="204"/>
         <UsageCount Value="10"/>
       </Unit13>
       <Unit14>
-        <Filename Value="..\..\..\src\gui\gui_memo.pas"/>
+        <Filename Value="../../../src/gui/gui_memo.pas"/>
         <UnitName Value="gui_memo"/>
         <CursorPos X="11" Y="636"/>
         <TopLine Value="625"/>
         <UsageCount Value="10"/>
       </Unit14>
       <Unit15>
-        <Filename Value="..\..\..\..\..\FPC\2.0.x\src\rtl\win32\wininc\func.inc"/>
+        <Filename Value="../../../../../FPC/2.0.x/src/rtl/win32/wininc/func.inc"/>
         <CursorPos X="1" Y="753"/>
         <TopLine Value="745"/>
         <UsageCount Value="10"/>
       </Unit15>
       <Unit16>
-        <Filename Value="..\..\..\..\..\FPC\2.0.x\src\rtl\win32\wininc\redef.inc"/>
+        <Filename Value="../../../../../FPC/2.0.x/src/rtl/win32/wininc/redef.inc"/>
         <CursorPos X="18" Y="692"/>
         <TopLine Value="681"/>
         <UsageCount Value="10"/>
       </Unit16>
+      <Unit17>
+        <Filename Value="../../../../3rdParty/tiOPF2/Source/GUI/tiButtons.pas"/>
+        <UnitName Value="tiButtons"/>
+        <CursorPos X="7" Y="9"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="10"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="/opt/lazarus/lcl/comctrls.pp"/>
+        <UnitName Value="ComCtrls"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="10"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="/opt/fpc/src/rtl/unix/classes.pp"/>
+        <UnitName Value="Classes"/>
+        <CursorPos X="8" Y="42"/>
+        <TopLine Value="24"/>
+        <UsageCount Value="10"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="/opt/fpc/src/rtl/objpas/classes/classes.inc"/>
+        <CursorPos X="1" Y="1"/>
+        <TopLine Value="44"/>
+        <UsageCount Value="10"/>
+      </Unit20>
     </Units>
     <JumpHistory Count="0" HistoryIndex="-1"/>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
-    <PathDelim Value="\"/>
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>

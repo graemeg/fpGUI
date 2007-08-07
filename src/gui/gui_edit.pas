@@ -208,7 +208,7 @@ begin
   Canvas.BeginDraw;
   Canvas.ClearClipRect;
   r := Rect(0, 0, Width-1, Height-1);
-  Canvas.DrawControlFrame(0, 0, Width, Height);
+  Canvas.DrawControlFrame(0, 0, Width-1, Height-1);
 
   InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
@@ -217,7 +217,8 @@ begin
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-  Canvas.FillRectAngle(r);
+  Canvas.FillRectangle(r.Left, r.Top, Width-4, Height-4);
+//  Canvas.FillRectAngle(r);
 
   dtext := GetDrawText;
   Canvas.SetTextColor(clText1);

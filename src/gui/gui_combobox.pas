@@ -268,7 +268,7 @@ begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r := Rect(0, 0, Width-1, Height-1);
-  Canvas.DrawControlFrame(0, 0, Width, Height);
+  Canvas.DrawControlFrame(0, 0, Width-1, Height-1);
 
   // internal background rectangle (without frame)
   InflateRect(r, -2, -2);
@@ -278,7 +278,8 @@ begin
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-  Canvas.FillRectangle(r);
+  Canvas.FillRectangle(r.Left, r.Top, Width-4, Height-4);
+//  Canvas.FillRectangle(r);
 
 //  fpgStyle.DrawButtonFace(canvas, width - min(height, 20)-3, 2, height-4, height-4, [btnIsEmbedded]);
 //  fpgStyle.DrawDirectionArrow(canvas, width - height + 1, 1, height-2, height-2, 1);
