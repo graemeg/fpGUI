@@ -2,7 +2,7 @@ unit gfx_x11;
 
 {$mode objfpc}{$H+}
 
-{$Define DEBUG}
+{.$Define DEBUG}
 
 interface
 
@@ -615,6 +615,36 @@ var
   rfds: TFDSet;
   xfd: integer;
   KeySym: TKeySym;
+
+  // debug purposes only
+  procedure PrintKeyEvent(const event: TXEvent);
+  var
+    keysym: TKeySym;
+    compose_status: TXComposeStatus;
+    length: integer;
+    s: string[10];
+  begin
+    case event._type of
+      X.KeyPress:
+          begin
+            write('*** KeyPress ');
+          end;
+      X.KeyRelease:
+          begin
+            write('*** KeyRelease ');
+          end;
+    else
+        begin
+          writeln('not a key event ');
+        end;
+    end;
+    length := XLookupString(@event, @s[1], 9, @keysym, @compose_status);
+    SetLength(s, length);
+    if((length > 0) and (length <=9)) then
+      writeln('result of xlookupstring [' + s + ']');
+    writeln(Format('*** keysym [%s] ', [XKeysymToString(keysym)]));
+  end;
+  
 begin
   xfd := XConnectionNumber(display);
 
@@ -643,6 +673,7 @@ begin
     exit;
 
 // WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
+//  PrintKeyEvent(ev);  { debug purposes only }
 
   case ev._type of
     X.KeyPress,

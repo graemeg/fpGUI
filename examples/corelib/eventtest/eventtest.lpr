@@ -225,6 +225,7 @@ end;
 procedure TMainForm.Show;
 begin
   AllocateWindowHandle;
+  DoSetWindowVisible(True);
   // We can't set a title if we don't have a window handle. So we do that here
   // and not in the constructor.
   SetWindowTitle('fpGFX event test');

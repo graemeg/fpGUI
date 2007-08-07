@@ -52,6 +52,7 @@ end;
 procedure TMainWindow.Show;
 begin
   AllocateWindowHandle;
+  DoSetWindowVisible(True);
   // We can't set a title if we don't have a window handle. So we do that here
   // and not in the constructor.
   SetWindowTitle('fpGFX Hello World');
@@ -60,20 +61,20 @@ end;
 procedure TMainWindow.MsgPaint(var msg: TfpgMessageRec);
 var
   Color: TfpgColor;
-  r: TfpgRect;
+  r: TRect;
   i: Integer;
 begin
   Canvas.BeginDraw;  // begin double buffering
 
   Color     := 0;
   r.Left    := 0;
-  r.Width   := FWidth;
+  r.Right   := FWidth-1;
   for i := 0 to FHeight-1 do
   begin
     Color := $ff - (i * $ff) div FHeight;    // shades of Blue
     Canvas.SetColor(Color);
     r.Top := i;
-    r.Height := i + 1;
+    r.Bottom := i + 1;
     Canvas.DrawRectangle(r);
   end;
 
@@ -87,7 +88,7 @@ begin
   Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
     (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
 
-  Canvas.EndDraw(0, 0, FWidth, FHeight);
+  Canvas.EndDraw;
 end;
 
 procedure TMainWindow.MsgClose(var msg: TfpgMessageRec);
