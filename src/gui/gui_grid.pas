@@ -169,7 +169,7 @@ begin
 
   Canvas.SetTextColor(clText1);
   s := 'Head ' + IntToStr(ACol);
-  fpgStyle.DrawString(Canvas, (ARect.Width div 2) - (FHeaderFont.TextWidth(s) div 2),
+  fpgStyle.DrawString(Canvas, (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2),
       ARect.Top+1, s, Enabled);
 end;
 

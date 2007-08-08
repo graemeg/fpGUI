@@ -209,7 +209,7 @@ begin
   begin
     Canvas.SetColor(clText1);
     Canvas.SetLineStyle(1, lsDot);
-    InflateRect(r, -2, -2);
+    InflateRect(r, -3, -3);
     Canvas.DrawRectangle(r);
   end
   else
