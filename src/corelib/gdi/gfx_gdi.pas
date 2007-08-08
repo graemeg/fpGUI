@@ -78,7 +78,7 @@ type
     FWinGC: TfpgGContext;
     FBackgroundColor: TfpgColor;
     FCurFontRes: TfpgFontResourceImpl;
-    FClipRect: TRect;
+    FClipRect: TfpgRect;
     FClipRectSet: Boolean;
     FWindowsColor: longword;
     FBrush: HBRUSH;
@@ -90,17 +90,17 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
-    procedure   DoGetWinRect(out r: TRect); override;
-    procedure   DoFillRectangle(x, y, w, h: integer); override;
+    procedure   DoGetWinRect(out r: TfpgRect); override;
+    procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
-    procedure   DoDrawRectangle(x, y, w, h: integer); override;
-    procedure   DoDrawLine(x1, y1, x2, y2: integer); override;
+    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
-    procedure   DoSetClipRect(const ARect: TRect); override;
-    function    DoGetClipRect: TRect; override;
-    procedure   DoAddClipRect(const ARect: TRect); override;
+    procedure   DoSetClipRect(const ARect: TfpgRect); override;
+    function    DoGetClipRect: TfpgRect; override;
+    procedure   DoAddClipRect(const ARect: TfpgRect); override;
     procedure   DoClearClipRect; override;
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
@@ -1209,7 +1209,7 @@ begin
     BitBlt(FWinGC, x, y, w, h, Fgc, x, y, SRCCOPY);
 end;
 
-procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TRect);
+procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TfpgRect);
 var
   rg: HRGN;
 begin
@@ -1227,21 +1227,21 @@ begin
   FClipRectSet := False;
 end;
 
-procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: integer);
+procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
   Windows.MoveToEx(Fgc, x1, y1, nil);
   Windows.LineTo(Fgc, x2, y2);
 end;
 
-procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: integer);
+procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
 var
-  r: TRect;
+  r: TfpgRect;
 begin
   if (w = 1) and (h = 1) then
     SetPixel(x, y, FColor)
   else
   begin
-    r := Rect(x, y, x+w-1, y+h-1);
+    r.SetRect(x, y, w, h);
     DoDrawLine(r.Left, r.Top, r.Right, r.Top);
     DoDrawLine(r.Right, r.Top, r.Right, r.Bottom);
     DoDrawLine(r.Right, r.Bottom, r.Left, r.Bottom);
@@ -1264,11 +1264,13 @@ begin
   {$endif}
 end;
 
-procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: integer);
+procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: TfpgCoord);
 var
+  fr: TfpgRect;
   r: TRect;
 begin
-  r := Rect(x, y, x+w, y+h);
+  fr.SetRect(x, y, w, h);
+  r := Rect(fr.Left, fr.Top, fr.Right, fr.Bottom);
   Windows.FillRect(Fgc, r, FBrush);
 end;
 
@@ -1285,23 +1287,28 @@ begin
   Windows.Polygon(Fgc, pts, 3);
 end;
 
-function TfpgCanvasImpl.DoGetClipRect: TRect;
+function TfpgCanvasImpl.DoGetClipRect: TfpgRect;
 begin
   Result := FClipRect;
 end;
 
-procedure TfpgCanvasImpl.DoGetWinRect(out r: TRect);
+procedure TfpgCanvasImpl.DoGetWinRect(out r: TfpgRect);
+var
+  lr: TRect;
 begin
-  GetClientRect(FDrawWindow.FWinHandle, r);
+  GetClientRect(FDrawWindow.FWinHandle, lr);
+  r.Left    := lr.Left;
+  r.Top     := lr.Top;
+  r.Right   := lr.Right;
+  r.Bottom  := lr.Bottom;
 end;
 
-procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TRect);
+procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TfpgRect);
 begin
   FClipRectSet := True;
   FClipRect    := ARect;
   DeleteObject(FClipRegion);
-  // This is a bit of a hack!!! Double check this again and compare output to X11.
-  FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Right+1, ARect.Bottom+1);
+  FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Width, ARect.Height);
   SelectClipRgn(Fgc, FClipRegion);
 end;
 

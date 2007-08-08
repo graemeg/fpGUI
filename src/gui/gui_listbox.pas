@@ -49,7 +49,7 @@ type
     function    ScrollBarWidth: TfpgCoord;
     function    PageLength: integer;
     procedure   ScrollBarMove(Sender: TObject; position : integer);
-    procedure   DrawItem(num: integer; rect: TRect; flags: integer); virtual;
+    procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
     procedure   DoChange;
     procedure   DoSelect;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed : boolean); override;
@@ -81,7 +81,7 @@ type
   protected
     FItems: TStrings;
     FInternalItems: TStrings;
-    procedure   DrawItem(num: integer; rect: TRect; flags: integer); override;
+    procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
     property    Items: TStrings read FItems;
   public
     constructor Create(AOwner: TComponent); override;
@@ -451,13 +451,13 @@ end;
 procedure TfpgBaseListBox.HandlePaint;
 var
   n: integer;
-  r: TRect;
+  r: TfpgRect;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.ClearClipRect;
   
-  r := Rect(0, 0, Width-1, Height-1);
+  r.SetRect(0, 0, Width, Height);
 
   if popupframe then
   begin
@@ -468,20 +468,21 @@ begin
   end
   else
   begin
-    Canvas.DrawControlFrame(0, 0, Width-1, Height-1);
+    Canvas.DrawControlFrame(r);
     InflateRect(r, -2, -2);
   end;
 
   Canvas.SetClipRect(r);
   Canvas.SetColor(FBackgroundColor);
-  Canvas.FillRectangle(r.Left, r.Top, Width-4, Height-4);
-//  Canvas.FillRectangle(r);
+  Canvas.FillRectangle(r);
   Canvas.SetFont(FFont);
 
-  r := Rect(FMargin, FMargin, (Width-1)-ScrollBarWidth-FMargin, (Height-1)-FMargin);
+  r.SetRect(0, 0, Width-ScrollBarWidth, Height);
+  InflateRect(r, -FMargin, -FMargin);
+//  r.SetRect(FMargin, FMargin, Width-ScrollBarWidth-(FMargin*2), Height - (FMargin*2));
   Canvas.SetClipRect(r);
 
-  r.Bottom := RowHeight;
+  r.Height := RowHeight;
 
   for n := FFirstItem to ItemCount do
   begin
@@ -506,8 +507,7 @@ begin
     Canvas.FillRectangle(r);
 
     DrawItem(n, r, 0);
-    r.Top := r.Top + RowHeight;
-    r.Bottom := r.Bottom + RowHeight;
+    inc(r.Top, RowHeight);
 
     if r.Top >= Height then
       Break;
@@ -517,7 +517,7 @@ begin
   if r.Top <= Height then
   begin
     Canvas.SetColor(FBackgroundColor);
-    r.Bottom := Height - fmargin;
+    r.SetBottom(Height - FMargin);
     Canvas.FillRectangle(r);
   end;
 
@@ -572,7 +572,7 @@ begin
   result := FFont.Height+2;
 end;
 
-procedure TfpgBaseListBox.DrawItem(num: integer; rect: TRect; flags: integer);
+procedure TfpgBaseListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
 var
   s: string;
 begin
@@ -583,7 +583,7 @@ end;
 
 { TfpgTextListBox }
 
-procedure TfpgTextListBox.DrawItem(num: integer; rect: TRect; flags: integer);
+procedure TfpgTextListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
 begin
   Canvas.DrawString(rect.left+2, rect.top+1, FItems.Strings[num-1]);
 end;

@@ -182,7 +182,7 @@ procedure TfpgButton.HandlePaint;
 var
   AText: string;
   x, y, iy, w: integer;
-  r: TRect;
+  r: TfpgRect;
   pofs: integer;
   lBtnFlags: TFButtonFlags;
 begin
@@ -190,8 +190,8 @@ begin
 //  inherited HandlePaint;
   Canvas.Clear(clButtonFace);
   Canvas.ClearClipRect;
-  
-  r := Rect(0, 0, Width-1, Height-1);
+
+  r.SetRect(0, 0, Width, Height);
 
   lBtnFlags := [];
   if FDown then
@@ -203,7 +203,7 @@ begin
   if FEmbedded then
     Include(lBtnFlags, btnIsEmbedded);
 
-  Canvas.DrawButtonFace(0, 0, Width-1, Height-1, lBtnFlags);
+  Canvas.DrawButtonFace(r, lBtnFlags);
 
   if FFocused and (not FEmbedded) then
   begin
@@ -222,7 +222,7 @@ begin
   Canvas.SetFont(Font);
   AText := FText;
 
-  y := Height div 2 - FFont.Height div 2;
+  y := (Height div 2) - (FFont.Height div 2);
   if y < 3 then
     y := 3;
 

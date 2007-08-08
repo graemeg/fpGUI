@@ -616,13 +616,13 @@ var
   tw, tw2, st, len: integer;
   yp: integer;
   ls: string;
-  r: TRect;
+  r: TfpgRect;
   selsl, selsp, selel, selep: integer;
 begin
   Canvas.BeginDraw;
   Canvas.ClearClipRect;
-  r := Rect(0, 0, Width-1, Height-1);
-  Canvas.DrawControlFrame(0, 0, Width, Height);
+  r.SetRect(0, 0, Width, Height);
+  Canvas.DrawControlFrame(r);
 
   InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
@@ -693,11 +693,11 @@ begin
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);
     
+  // The little square in the bottom right corner
   if FHScrollBar.Visible and FVScrollBar.Visible then
   begin
     Canvas.SetColor(clWindowBackground);
-    Canvas.FillRectangle(FHScrollBar.Left + FHScrollBar.Width,
-                         FVScrollBar.Top + FVScrollBar.Height,
+    Canvas.FillRectangle(FHScrollBar.Width, FVScrollBar.Height,
                          FVScrollBar.Width, FHScrollBar.Height);
   end;
 

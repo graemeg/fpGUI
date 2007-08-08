@@ -136,8 +136,11 @@ type
     constructor Create(awin: TfpgWindow); reintroduce;
     destructor  Destroy; override;
     procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
+    procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord);
+    procedure   DrawControlFrame(r: TfpgRect);
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
+    procedure   DrawDirectionArrow(r: TfpgRect; direction: integer);
   end;
 
 
@@ -153,10 +156,10 @@ type
     MenuDisabledFont: TfpgFont;
   public
     constructor Create; virtual;
-    procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: integer; AFlags: TFButtonFlags); virtual;
-    procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: integer); virtual;
-    procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: integer; direction: integer); virtual;
-    procedure   DrawString(ACanvas: TfpgCanvas; x, y: integer; AText: string; AEnabled: boolean = True); virtual;
+    procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
+    procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
+    procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer); virtual;
+    procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
   end;
 
 
@@ -264,11 +267,15 @@ function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
 
 // Rectangle routines
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
+function InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
 function OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
+function OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
 function CenterPoint(const Rect: TRect): TPoint;
+function fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
 
 // Debug rountines
 procedure PrintRect(var Rect: TRect);
+procedure PrintRect(var Rect: TfpgRect);
 
 implementation
 
@@ -367,6 +374,20 @@ begin
     Result := False;
 end;
 
+function InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+begin
+  if Assigned(@Rect) then
+  begin
+    dec(Rect.Left, dx);
+    dec(Rect.Top, dy);
+    inc(Rect.Width, 2*dx);
+    inc(Rect.Height, 2*dy);
+    Result := True;
+  end
+  else
+    Result := False;
+end;
+
 function OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 begin
   if Assigned(@Rect) then
@@ -384,6 +405,21 @@ begin
     OffsetRect := False;
 end;
 
+function OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+begin
+  if Assigned(@Rect) then
+  begin
+    with Rect do
+    begin
+      inc(Left, dx);
+      inc(Top, dy);
+    end;
+    OffsetRect := True;
+  end
+  else
+    OffsetRect := False;
+end;
+
 function CenterPoint(const Rect: TRect): TPoint;
 begin
   with Rect do
@@ -393,9 +429,21 @@ begin
   end;
 end;
 
+function fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
+begin
+  Result.SetRect(ALeft, ATop, AWidth, AHeight);
+end;
+
 procedure PrintRect(var Rect: TRect);
 begin
-  writeln('Rect x1=', Rect.Left, ' y1=', Rect.Top, ' x2=', Rect.Right, ' y2=', Rect.Bottom);
+  writeln('Rect left=', Rect.Left, ' top=', Rect.Top, ' right=', Rect.Right,
+      ' bottom=', Rect.Bottom);
+end;
+
+procedure PrintRect(var Rect: TfpgRect);
+begin
+  writeln('Rect left=', Rect.Left, ' top=', Rect.Top, ' right=', Rect.Right,
+      ' bottom=', Rect.Bottom, ' width=', Rect.Width, ' height=', Rect.Height);
 end;
 
 { TfpgTimer }
@@ -716,14 +764,30 @@ begin
   fpgStyle.DrawButtonFace(self, x, y, w, h, AFlags);
 end;
 
+procedure TfpgCanvas.DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
+begin
+  DrawButtonFace(r.Left, r.Top, r.Width, r.Height, AFlags);
+end;
+
 procedure TfpgCanvas.DrawControlFrame(x, y, w, h: TfpgCoord);
 begin
   fpgStyle.DrawControlFrame(self, x, y, w, h);
 end;
 
+procedure TfpgCanvas.DrawControlFrame(r: TfpgRect);
+begin
+  PrintRect(r);
+  DrawControlFrame(r.Left, r.Top, r.Width, r.Height);
+end;
+
 procedure TfpgCanvas.DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
 begin
   fpgStyle.DrawDirectionArrow(self, x, y, w, h, direction);
+end;
+
+procedure TfpgCanvas.DrawDirectionArrow(r: TfpgRect; direction: integer);
+begin
+  DrawDirectionArrow(r.Left, r.Top, r.Width, r.Height, direction);
 end;
 
 { TfpgWindow }
@@ -824,19 +888,19 @@ begin
   MenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
 end;
 
-procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: integer; AFlags: TFButtonFlags);
+procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
 var
-  r: TRect;
+  r: TfpgRect;
 begin
+  r.SetRect(x, y, w, h);
   if btnIsDefault in AFlags then
   begin
-    r := Rect(x, y, x+w+1, y+h+1);
     ACanvas.SetColor(clBlack);
     ACanvas.SetLineStyle(1, lsSolid);
     ACanvas.DrawRectangle(r);
     InflateRect(r, -1, -1);
     Exclude(AFlags, btnIsDefault);
-    fpgStyle.DrawButtonFace(ACanvas, r.Left, r.Top, r.Right-r.Left-1, r.Bottom-r.Top-1, AFlags);
+    fpgStyle.DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, AFlags);
     Exit; //==>
   end;
 
@@ -854,8 +918,8 @@ begin
   end
   else
     ACanvas.SetColor(clHilite1);
-  ACanvas.DrawLine(x, y+h-1, x, y);  // left
-  ACanvas.DrawLine(x, y, x+w, y);  // top
+  ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
+  ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
 
   // Left and Top (inner)
   //if btnIsPressed in AFlags then
@@ -875,8 +939,8 @@ begin
   end
   else
     ACanvas.SetColor(clShadow2);
-  ACanvas.DrawLine(x+w, y, x+w, y+h);   // right
-  ACanvas.DrawLine(x+w, y+h, x-1, y+h);   // bottom
+  ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
+  ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
 
   // Right and Bottom (inner)
   if btnIsPressed in AFlags then
@@ -888,30 +952,33 @@ begin
   end
   else
     ACanvas.SetColor(clShadow1);
-  ACanvas.DrawLine(x+w-1, y+1, x+w-1, y+h-1);   // right
-  ACanvas.DrawLine(x+w-1, y+h-1, x, y+h-1);   // bottom
+  ACanvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right
+  ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left, r.Bottom-1);   // bottom
 end;
 
-procedure TfpgStyle.DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: integer);
+procedure TfpgStyle.DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
+var
+  r: TfpgRect;
 begin
+  r.SetRect(x, y, w, h);
   ACanvas.SetColor(clShadow1);
-  ACanvas.DrawLine(x, y+h, x, y);   // left (outer)
-  ACanvas.DrawLine(x, y, x+w, y);   // top (outer)
+  ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top); // left (outer)
+  ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);   // top (outer)
 
   ACanvas.SetColor(clHilite2);
-  ACanvas.DrawLine(x+w, y, x+w, y+h);   // right (outer)
-  ACanvas.DrawLine(x+w, y+h, x, y+h);   // bottom (outer)
+  ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right (outer)
+  ACanvas.DrawLine(r.Right, r.Bottom, r.Left, r.Bottom); // bottom (outer)
 
   ACanvas.SetColor(clShadow2);
-  ACanvas.DrawLine(x+1, y+h-1, x+1, y+1);   // left (inner)
-  ACanvas.DrawLine(x+1, y+1, x+w-1, y+1);   // top (inner)
+  ACanvas.DrawLine(r.Left+1, r.Bottom-1, r.Left+1, r.Top+1);   // left (inner)
+  ACanvas.DrawLine(r.Left+1, r.Top+1, r.Right-1, r.Top+1);   // top (inner)
 
   ACanvas.SetColor(clHilite1);
-  ACanvas.DrawLine(x+w-1, y+1, x+w-1, y+h-1);   // right (inner)
-  ACanvas.DrawLine(x+w-1, y+h-1, x+1, y+h-1);   // bottom (inner)
+  ACanvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right (inner)
+  ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left+1, r.Bottom-1);   // bottom (inner)
 end;
 
-procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: integer; direction: integer);
+procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer);
 var
   peekx: integer;
   peeky: integer;

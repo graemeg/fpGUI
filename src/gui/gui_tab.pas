@@ -409,7 +409,7 @@ end;
 procedure TfpgPageControl.RePaintTitles;
 var
   i: integer;
-  r: TRect;
+  r: TfpgRect;
   h: TfpgTabSheet;
   lp: integer;
   toffset: integer;
@@ -433,27 +433,27 @@ begin
               FFirstTabButton := h
             else
               h := FFirstTabButton;
-            r := Rect(FMargin, FMargin, Width - FMargin * 2 - FRightButton.Width * 2 - 1, FRightButton.Height);
+            r.SetRect(FMargin, FMargin, Width-(FMargin*2)-(FRightButton.Width*2)-1, FRightButton.Height);
             FLeftButton.SetPosition(Width - FMargin * 2 - FRightButton.Width * 2, FMargin, FRightButton.Height, FRightButton.Height);
             FRightButton.SetPosition(Width - FMargin * 2 - FrightButton.Width, FMargin, FRightButton.Height, FRightButton.Height);
-            FLeftButton.Visible := True;
-            FRightButton.Visible := True;
+            FLeftButton.Visible   := True;
+            FRightButton.Visible  := True;
           end
           else
           begin
-            r := Rect(FMargin, FMargin, Width - (FMargin*2), ButtonHeight);
-            FLeftButton.Visible := False;
-            FRightButton.Visible := False;
+            r.SetRect(FMargin, FMargin, Width-(FMargin*2), ButtonHeight);
+            FLeftButton.Visible   := False;
+            FRightButton.Visible  := False;
           end;
           Canvas.SetColor(clHilite1);
-          Canvas.DrawLine(FMargin, ButtonHeight, FMargin, Height - FMargin * 2);
+          Canvas.DrawLine(FMargin, ButtonHeight, FMargin, Height-(FMargin*2));
           Canvas.SetColor(clHilite2);
-          Canvas.DrawLine(FMargin+1, ButtonHeight+1, FMargin+1, Height - FMargin * 2 - 1);
+          Canvas.DrawLine(FMargin+1, ButtonHeight+1, FMargin+1, Height - (FMargin*2) - 1);
           Canvas.SetColor(clShadow2);
-          Canvas.DrawLine(FMargin, Height - FMargin * 2, Width - FMargin * 2, Height - FMargin * 2);
+          Canvas.DrawLine(FMargin, Height - (FMargin*2), Width - (FMargin*2), Height - (FMargin*2));
           Canvas.DrawLine(Width - FMargin - 1, FMargin + ButtonHeight - 1, Width - FMargin - 1, Height - FMargin);
           Canvas.SetColor(clShadow1);
-          Canvas.DrawLine(FMargin + 1, Height - FMargin * 2 - 1, Width - FMargin * 2 - 1, Height - FMargin * 2 - 1);
+          Canvas.DrawLine(FMargin + 1, Height - (FMargin*2) - 1, Width - (FMargin*2) - 1, Height - (FMargin*2) - 1);
           Canvas.DrawLine(Width - FMargin - 2, FMargin + ButtonHeight - 1, Width - FMargin - 2, Height - FMargin - 2);
           Canvas.SetClipRect(r);
           lp := 0;
@@ -474,7 +474,7 @@ begin
             begin
               toffset := 2;
               h.Visible := True;
-              h.SetPosition(FMargin+2, FMargin + ButtonHeight, Width - FMargin * 2 - 4, Height - FMargin * 2 - ButtonHeight - 2);
+              h.SetPosition(FMargin+2, FMargin + ButtonHeight, Width - (FMargin*2) - 4, Height - (FMargin*2) - ButtonHeight - 2);
               Canvas.SetColor(clHilite1);
               Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin + ButtonWidth(h.Text)-1, FMargin);
               Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin, FMargin + ButtonHeight - 2);

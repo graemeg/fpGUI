@@ -61,20 +61,18 @@ end;
 procedure TMainWindow.MsgPaint(var msg: TfpgMessageRec);
 var
   Color: TfpgColor;
-  r: TRect;
+  r: TfpgRect;
   i: Integer;
 begin
   Canvas.BeginDraw;  // begin double buffering
 
   Color     := 0;
-  r.Left    := 0;
-  r.Right   := FWidth-1;
+  r.SetRect(0, 0, Width, 1);
   for i := 0 to FHeight-1 do
   begin
     Color := $ff - (i * $ff) div FHeight;    // shades of Blue
     Canvas.SetColor(Color);
     r.Top := i;
-    r.Bottom := i + 1;
     Canvas.DrawRectangle(r);
   end;
 

@@ -262,13 +262,13 @@ end;
 
 procedure TfpgCustomComboBox.HandlePaint;
 var
-  r: TRect;
+  r: TfpgRect;
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
-  r := Rect(0, 0, Width-1, Height-1);
-  Canvas.DrawControlFrame(0, 0, Width-1, Height-1);
+  r.SetRect(0, 0, Width, Height);
+  Canvas.DrawControlFrame(r);
 
   // internal background rectangle (without frame)
   InflateRect(r, -2, -2);
@@ -278,8 +278,7 @@ begin
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-  Canvas.FillRectangle(r.Left, r.Top, Width-4, Height-4);
-//  Canvas.FillRectangle(r);
+  Canvas.FillRectangle(r);
 
 //  fpgStyle.DrawButtonFace(canvas, width - min(height, 20)-3, 2, height-4, height-4, [btnIsEmbedded]);
 //  fpgStyle.DrawDirectionArrow(canvas, width - height + 1, 1, height-2, height-2, 1);
@@ -289,7 +288,7 @@ begin
   begin
     Canvas.SetColor(clSelection);
     Canvas.SetTextColor(clSelectionText);
-    r.Right := r.Right - FInternalBtn.Width;
+    r.Width := r.Width - FInternalBtn.Width;
     InflateRect(r, -1, -1);
   end
   else

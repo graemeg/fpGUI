@@ -58,8 +58,8 @@ type
     procedure   SetColumnWidth(ACol: integer; const AValue: integer); virtual;
     function    GetColumnCount: integer; virtual;
     function    GetRowCount: integer; virtual;
-    procedure   DrawCell(ARow, ACol: integer; ARect: TRect; AFlags: integer); virtual;
-    procedure   DrawHeader(ACol: integer; ARect: TRect; AFlags: integer); virtual;
+    procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
+    procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   HandlePaint; override;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
@@ -140,7 +140,7 @@ begin
   Result := 24;
 end;
 
-procedure TfpgBaseGrid.DrawCell(ARow, ACol: integer; ARect: TRect; AFlags: integer);
+procedure TfpgBaseGrid.DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer);
 var
   s: string;
 begin
@@ -148,12 +148,12 @@ begin
   fpgStyle.DrawString(Canvas, ARect.Left+1, ARect.Top+1, s, Enabled);
 end;
 
-procedure TfpgBaseGrid.DrawHeader(ACol: integer; ARect: TRect; AFlags: integer);
+procedure TfpgBaseGrid.DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer);
 var
   s: string;
 begin
   // Here we can implement a head style check
-  fpgStyle.DrawButtonFace(Canvas, ARect.Left, ARect.Top, ARect.Right, ARect.Bottom, [btnIsEmbedded]);
+  Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
 (*
   // drawing grid lines
   Canvas.SetColor(clGridLines);
@@ -169,8 +169,8 @@ begin
 
   Canvas.SetTextColor(clText1);
   s := 'Head ' + IntToStr(ACol);
-  fpgStyle.DrawString(Canvas, ((ARect.Left + ARect.Right) div 2) - (FHeaderFont.TextWidth(s) div 2),
-    ARect.Top+1, s, Enabled);
+  fpgStyle.DrawString(Canvas, (ARect.Width div 2) - (FHeaderFont.TextWidth(s) div 2),
+      ARect.Top+1, s, Enabled);
 end;
 
 procedure TfpgBaseGrid.SetFocusCol(const AValue: integer);
@@ -266,56 +266,55 @@ end;
 
 procedure TfpgBaseGrid.HandlePaint;
 var
-  r: TRect;
-  r2: TRect;
+  r: TfpgRect;
+  r2: TfpgRect;
   col: integer;
   row: integer;
-  clipr: TRect;   // clip rectangle
+  clipr: TfpgRect;   // clip rectangle
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
-  r := Rect(0, 0, Width-1, Height-1);
 
-  Canvas.DrawControlFrame(0, 0, Width, Height);
+  r.SetRect(0, 0, Width, Height);
+  Canvas.DrawControlFrame(r);
+
   InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(r);
   
-  clipr := Rect(FMargin, FMargin, VisibleWidth, Height-(2*FMargin));
-  r.Right := r.Left;
+  clipr.SetRect(FMargin, FMargin, VisibleWidth, Height-(2*FMargin));
 
   if (ColumnCount > 0) and ShowHeader then
   begin
     // Drawing horizontal headers
-    r.Bottom := FHeaderHeight;
+    r.Height := FHeaderHeight;
     Canvas.SetFont(FHeaderFont);
     for col := FFirstCol to ColumnCount do
     begin
-      Inc(r.Right, FDefaultColWidth);
+      r.Width := FDefaultColWidth;
       DrawHeader(col, r, 0);
-      Inc(r.Left, FDefaultColWidth);
+      r.Left := r.Left + r.Width + 1;
       if r.Left >= clipr.Right then
         Break;  // small optimization. Don't draw what we can't see
     end;
-    r.Top := r.Top + r.Bottom + 1;
+    r.Top := r.Top + r.Height + 1;
   end;
 
   if (RowCount > 0) and (ColumnCount > 0) then
   begin
     // Drawing cells
-    r.Bottom := DefaultRowHeight;
+    r.Height := DefaultRowHeight;
     Canvas.SetFont(FFont);
 
     for row := FFirstRow to RowCount do
     begin
       r.Left := FMargin;
-      r.Right := r.Left;
       for col := FFirstCol to ColumnCount do
       begin
-//        r.Right := ColumnWidth[col];
-        Inc(r.Right, FDefaultColWidth);
+//        r.Width := ColumnWidth[col];
+        r.Width := FDefaultColWidth;
 //        Canvas.SetClipRect(clipr);
 
         // drawing grid lines
@@ -346,14 +345,13 @@ begin
         end;
         Canvas.FillRectangle(r);
         DrawCell(row, col, r, 0);
-        Inc(r.Left, FDefaultColWidth+1);
-//        r.Left := r.Left + r.Right + 1;
+        r.Left := r.Left + r.Width + 1;
 
         if r.Left >= clipr.Right then
           Break;  // small optimization. Don't draw what we can't see
       end;
-      Inc(r.Top, FDefaultRowHeight+1);
-//      r.Top := r.Top + r.Bottom + 1;
+//      Inc(r.Top, FDefaultRowHeight+1);
+      r.Top := r.Top + r.Height + 1;
       if r.Top >= clipr.Bottom then
         break;
     end;
@@ -367,8 +365,8 @@ begin
   begin
     r2.Left   := r.Left;
     r2.Top    := clipr.Top;
-    r2.Right  := clipr.Right;
-    r2.Bottom := clipr.Bottom;
+    r2.SetRight(clipr.Right);
+    r2.Height := clipr.Height;
     Canvas.FillRectangle(r2);
   end;
 
@@ -376,8 +374,8 @@ begin
   if r.Top <= clipr.Bottom then
   begin
     r.Left    := clipr.Left;
-    r.Right   := clipr.Right;
-    r.Bottom  := clipr.Bottom;
+    r.Width   := clipr.Width;
+    r.SetBottom(clipr.Bottom);
     Canvas.FillRectangle(r);
   end;
   

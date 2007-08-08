@@ -7,6 +7,7 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
+  gfx_widget,
   gfx_imgfmt_bmp,
   gui_form,
   gui_label,
@@ -22,8 +23,6 @@ uses
   gui_trackbar;
 
 type
-
-  { TXPButton }
 
   TXPButton = class(TfpgButton)
   private
@@ -48,7 +47,14 @@ type
     property    ThemeImage: TfpgImage read image write SetThemeImage;
   end;
 
-  { TMainForm }
+
+  TMyWidget = class(TfpgWidget)
+  protected
+    procedure   HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+  
 
   TMainForm = class(TfpgForm)
   private
@@ -81,8 +87,46 @@ type
     radiobtn3: TfpgRadioButton;
     trackbar1: TfpgTrackBar;
     trackbar2: TfpgTrackBar;
+    w: TMyWidget;
     procedure AfterCreate; override;
   end;
+
+{ TMyWidget }
+
+procedure TMyWidget.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  Canvas.BeginDraw;
+  inherited HandlePaint;
+  Canvas.Clear(clBlue);
+
+  r.SetRect(0, 0, Width, Height);
+  Canvas.SetColor(clBlack);
+  Canvas.DrawRectangle(r);
+
+  InflateRect(r, -1, -1);
+  Canvas.SetColor(clRed);
+  Canvas.DrawRectangle(r);
+  
+  InflateRect(r, -1, -1);
+//  Canvas.DrawControlFrame(2, 2, Width-4, Height-4);
+  writeln('000000');
+  Canvas.DrawControlFrame(r);
+  writeln('111111');
+{
+  Canvas.SetColor(clGreen);
+  Canvas.FillRectangle(r);
+}
+  Canvas.EndDraw;
+end;
+
+constructor TMyWidget.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FWidth := 15;
+  FHeight := 22;
+end;
 
 { TXPButton }
 
@@ -97,7 +141,7 @@ end;
 procedure TXPButton.HandlePaint;
 var
   x, i: integer;
-  r: TRect;
+  r: TfpgRect;
   iy, y: integer;
   w: integer;
   pofs: integer;
@@ -107,7 +151,7 @@ begin
   Canvas.ClearClipRect;
   Canvas.Clear(clButtonFace);
 
-  r := Rect(0, 0, Width, Height);
+  r.SetRect(0, 0, Width, Height);
   
   if State <> 1 then
   begin
@@ -148,7 +192,7 @@ begin
 
   Canvas.SetClipRect(r);
   Canvas.SetFont(Font);
-  y := Height div 2 - FFont.Height div 2;
+  y := (Height div 2) - (FFont.Height div 2);
   if y < 3 then
     y := 3;
 
@@ -160,7 +204,7 @@ begin
 
   if (ShowImage) and (FImage <> nil) then
   begin
-    iy := Height div 2 - FImage.Height div 2;
+    iy := (Height div 2) - (FImage.Height div 2);
     if ImageMargin = -1 then // centered
     begin
       w := FFont.TextWidth(FText) + FImage.Width;
@@ -325,6 +369,10 @@ begin
   label1 := CreateLabel(self, 5, 5, 'Hello world!');
   label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');
   label2.FontDesc := 'Sans-12:bold:underline';
+  
+  w := TMyWidget.Create(self);
+  w.Top := 40;
+  w.Left := 140;
 
   edit1      := CreateEdit(self, 10, 40, 120, 22);
   edit1.Text := 'Hello world. Hello world. Hello world.';

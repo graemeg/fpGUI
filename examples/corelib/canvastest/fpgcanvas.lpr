@@ -32,7 +32,7 @@ type
 
 procedure TMainForm.HandlePaint;
 var
-  r: TRect;
+  r: TfpgRect;
   fnt: TfpgFont;
   y: integer;
   c: TfpgColor;
@@ -44,32 +44,26 @@ begin
 
   // Testing Rectangles
   Canvas.SetColor(clBlack);
-  r.Top       := 0;
-  r.Left      := 0;
-  r.Right     := 1;
-  r.Bottom    := 1;
+  r.SetRect(0, 0, 1, 1);
   Canvas.DrawRectangle(r);
 
   Canvas.SetColor(clBlack);
   r.Top       := 5;
   r.Left      := 60;
-  r.Right     := r.Left + 49;
-  r.Bottom    := r.Top + 49;
-  Canvas.DrawRectangle(r);  // 50x50
+  r.Width     := 50;
+  r.Height    := 50;
+  Canvas.DrawRectangle(r);
   
   r.Left      := 120;
-  r.Right     := r.Left + 49;
   Canvas.SetLineStyle(2, lsDash);
   Canvas.DrawRectangle(r);
 
   r.Left      := 180;
-  r.Right     := r.Left + 49;
   Canvas.SetColor(clGreen);
   Canvas.SetLineStyle(1, lsDot);
   Canvas.DrawRectangle(r);
 
   r.Left      := 240;
-  r.Right     := r.Left + 49;
   Canvas.SetColor(clBlue);
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.FillRectangle(r);
@@ -81,11 +75,12 @@ begin
   Canvas.DrawLine(54, 5, 5, 54);
   Canvas.SetColor(clRed);
   { Diagonal line }
-  Canvas.DrawLine(60, 5, 109, 54);
+  r.SetRect(60, 5, 50, 50);
+  Canvas.DrawLine(r.Left, r.Top, r.Right, r.Bottom);
   { Horizontal line }
-  Canvas.DrawLine(60, 3, 109, 3);
+  Canvas.DrawLine(r.Left, r.Top-2, r.Right, r.Top-2);
   { Vertical line }
-  Canvas.DrawLine(58, 5, 58, 54);
+  Canvas.DrawLine(r.Left-2, r.Top, r.Left-2, r.Bottom);
 
 
   // Testing Text and Fonts
@@ -107,23 +102,27 @@ begin
 
   // Testing basic style drawings
   Canvas.Font := fpgApplication.DefaultFont;
-//  Canvas.DrawButtonFace(0, 0, 6, 6, []);
   Canvas.DrawString(320, 3, 'DrawButtonFace():');
-  Canvas.DrawButtonFace(300, 20, 75, 25, []);
+
+  r.SetRect(300, 20, 75, 25);
+  Canvas.DrawButtonFace(r, []);
   Canvas.DrawString(385, 20, '= []');
-  Canvas.DrawButtonFace(300, 50, 75, 25, [btnIsDefault]);
+  r.Top := 50;
+  Canvas.DrawButtonFace(r, [btnIsDefault]);
   Canvas.DrawString(385, 50, '= [btnIsDefault]');
-  Canvas.DrawButtonFace(300, 80, 75, 25, [btnIsPressed]);
+  r.Top := 80;
+  Canvas.DrawButtonFace(r, [btnIsPressed]);
   Canvas.DrawString(385, 80, '= [btnIsPressed]');
-  Canvas.DrawButtonFace(300, 110, 75, 25, [btnIsEmbedded, btnIsPressed]);
+  r.Top := 110;
+  Canvas.DrawButtonFace(r, [btnIsEmbedded, btnIsPressed]);
   Canvas.DrawString(385, 110, '= [embed & press]');
-  Canvas.DrawButtonFace(300, 140, 75, 25, [btnIsEmbedded]);
+  r.Top := 140;
+  Canvas.DrawButtonFace(r, [btnIsEmbedded]);
   Canvas.DrawString(385, 140, '= [btnIsEmbedded]');
   
   Canvas.DrawString(45, y, 'DrawControlFrame():');
   y := y + Canvas.Font.Height;
   Canvas.DrawControlFrame(5, y, 200, 23);
-//  Canvas.DrawControlFrame(0, 0, 5, 5);
 
 
   // Testing Bitmap painting
@@ -146,10 +145,7 @@ begin
   // testing accuracy of line/rectangle drawing
   Canvas.SetColor(clBlack);
   Canvas.SetLineStyle(1, lsSolid);
-  r.Top       := 302;
-  r.Left      := 182;
-  r.Right     := r.Left + 66;
-  r.Bottom    := r.Top + 66;
+  r.SetRect(182, 302, 66, 66);
   Canvas.DrawRectangle(r);
 
   Canvas.SetColor(clBlue);
@@ -178,7 +174,7 @@ begin
 
 
   // Gradient testing
-  r := Rect(265, 340, 450, 375);
+  r.SetRect(265, 340, 185, 35);
   Canvas.GradientFill(r, clBlue, clMagenta, gdHorizontal);
 
   Canvas.EndDraw;

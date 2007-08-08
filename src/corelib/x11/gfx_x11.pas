@@ -88,7 +88,7 @@ type
     FDrawHandle: TXID;
     Fgc: TfpgGContext;
     FCurFontRes: TfpgFontResourceImpl;
-    FClipRect: TRect;
+    FClipRect: TfpgRect;
     FClipRectSet: boolean;
     FXftDraw: PXftDraw;
     FXftDrawBuffer: PXftDraw;
@@ -99,17 +99,17 @@ type
     procedure   DoSetTextColor(cl: TfpgColor); override;
     procedure   DoSetColor(cl: TfpgColor); override;
     procedure   DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle); override;
-    procedure   DoGetWinRect(out r: TRect); override;
-    procedure   DoFillRectangle(x, y, w, h: integer); override;
+    procedure   DoGetWinRect(out r: TfpgRect); override;
+    procedure   DoFillRectangle(x, y, w, h: TfpgCoord); override;
     procedure   DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord); override;
     procedure   DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord); override;
-    procedure   DoDrawRectangle(x, y, w, h: integer); override;
-    procedure   DoDrawLine(x1, y1, x2, y2: integer); override;
+    procedure   DoDrawRectangle(x, y, w, h: TfpgCoord); override;
+    procedure   DoDrawLine(x1, y1, x2, y2: TfpgCoord); override;
     procedure   DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer); override;
     procedure   DoDrawString(x, y: TfpgCoord; const txt: string); override;
-    procedure   DoSetClipRect(const ARect: TRect); override;
-    function    DoGetClipRect: TRect; override;
-    procedure   DoAddClipRect(const ARect: TRect); override;
+    procedure   DoSetClipRect(const ARect: TfpgRect); override;
+    function    DoGetClipRect: TfpgRect; override;
+    procedure   DoAddClipRect(const ARect: TfpgRect); override;
     procedure   DoClearClipRect; override;
     procedure   DoBeginDraw(awin: TfpgWindowBase; buffered: boolean); override;
     procedure   DoPutBufferToScreen(x, y, w, h: TfpgCoord); override;
@@ -1418,25 +1418,21 @@ begin
     y + FCurFontRes.GetAscent, PChar(txt), Length(txt));
 end;
 
-procedure TfpgCanvasImpl.DoGetWinRect(out r: TRect);
+procedure TfpgCanvasImpl.DoGetWinRect(out r: TfpgRect);
 var
   rw: TfpgWinHandle;
   x: integer;
   y: integer;
   bw: longword;
   d: longword;
-  w: Cardinal;
-  h: Cardinal;
 begin
-  XGetGeometry(xapplication.display, FDrawWindow.FWinHandle, @rw, @x, @y,
-      @w, @h, @bw, @d);
   r.Left    := 0;
   r.Top     := 0;
-  r.Right   := w;
-  r.Bottom  := h;
+  XGetGeometry(xapplication.display, FDrawWindow.FWinHandle, @rw, @x, @y,
+      @(r.width), @(r.height), @bw, @d);
 end;
 
-procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: integer);
+procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
   XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
 end;
@@ -1464,28 +1460,28 @@ begin
   XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, 0, 0);
 end;
 
-procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: integer);
+procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
 //  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
   // Same behavior as Windows. See documentation for reason.
   XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
 end;
 
-procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: integer);
+procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
   // Same behavior as Windows. See documentation for reason.
   XDrawLine(xapplication.display, FDrawHandle, Fgc, x1, y1, x2, y2);
 end;
 
-procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TRect);
+procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TfpgRect);
 var
   r: TXRectangle;
   rg: TRegion;
 begin
   r.x      := ARect.Left;
   r.y      := ARect.Top;
-  r.Width  := ARect.Right - ARect.Left + 1;
-  r.Height := ARect.Bottom - ARect.Top + 1;
+  r.Width  := ARect.Width;
+  r.Height := ARect.Height;
 
   rg := XCreateRegion;
   
@@ -1498,20 +1494,20 @@ begin
   XDestroyRegion(rg);
 end;
 
-function TfpgCanvasImpl.DoGetClipRect: TRect;
+function TfpgCanvasImpl.DoGetClipRect: TfpgRect;
 begin
   Result := FClipRect;
 end;
 
-procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TRect);
+procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TfpgRect);
 var
   r: TXRectangle;
   rg: TRegion;
 begin
   r.x      := ARect.Left;
   r.y      := ARect.Top;
-  r.Width  := ARect.Right - ARect.Left + 1;
-  r.Height := ARect.Bottom - ARect.Top + 1;
+  r.Width  := ARect.Width;
+  r.Height := ARect.Height;
 
   rg := XCreateRegion;
   XUnionRectWithRegion(@r, rg, rg);
@@ -1527,7 +1523,7 @@ end;
 
 procedure TfpgCanvasImpl.DoClearClipRect;
 var
-  r: TRect;
+  r: TfpgRect;
 begin
   DoGetWinRect(r);
   DoSetClipRect(r);

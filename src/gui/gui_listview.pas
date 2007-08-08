@@ -488,10 +488,13 @@ end;
 procedure TfpgListView.StartShiftSelection;
 begin
   Inc(FShiftCount);
-  if FItems.Count = 0 then Exit;
-  if FShiftCount> 1 then Exit;
+  if FItems.Count = 0 then
+    Exit;
+  if FShiftCount > 1 then
+    Exit;
   FSelectionShiftStart := FItemIndex;
-  if FSelectionShiftStart = -1 then Inc(FSelectionShiftStart);
+  if FSelectionShiftStart = -1 then
+    Inc(FSelectionShiftStart);
   FOldSelected.Clear;
   FOldSelected.AddList(FSelected);
 end;

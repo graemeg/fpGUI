@@ -178,14 +178,14 @@ end;
 
 procedure TfpgTrackBar.HandlePaint;
 var
-  r: TRect;
+  r: TfpgRect;
   linepos: double;
   drawwidth: integer;
   i: integer;
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
-  r := Rect(0, 0, Width-1, Height-1);
+  r.SetRect(0, 0, Width, Height);
   Canvas.Clear(FBackgroundColor);
 
   if FFocused then

@@ -224,7 +224,7 @@ end;
 procedure TThemeButton.HandlePaint;
 var
   x, i: integer;
-  r: TRect;
+  r: TfpgRect;
   iy, y: integer;
   w: integer;
   pofs: integer;
@@ -233,7 +233,7 @@ begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   Canvas.Clear(clButtonFace);
-  r := Rect(0, 0, Width-1, Height-1);
+  r.SetRect(0, 0, Width, Height);
 
   if State <> 1 then
   begin

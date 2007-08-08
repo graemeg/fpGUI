@@ -103,12 +103,12 @@ begin
   if Orientation = orVertical then
   begin
     DrawButton(0, 0, Width, Width, 'sys.sb.up', FStartBtnPressed);
-    DrawButton(0, Height - Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
+    DrawButton(0, Height-Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
   end
   else
   begin
     DrawButton(0, 0, Height, Height, 'sys.sb.left', FStartBtnPressed);
-    DrawButton(Width - Height, 0, Height, Height, 'sys.sb.right', FEndBtnPressed);
+    DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', FEndBtnPressed);
   end;
 
   DrawSlider(True);
@@ -184,7 +184,6 @@ procedure TfpgScrollBar.DrawSlider(recalc: boolean);
 var
   area: TfpgCoord;
   mm: TfpgCoord;
-  rpr: TfpgRect;
 begin
   Canvas.BeginDraw;
 
@@ -195,12 +194,12 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.FillRectangle(0, Width, Width-1, Height-1 - Width);
+    Canvas.FillRectangle(0, Width, Width, Height-Width-Width);
     area := Height - (Width shl 1);
   end
   else
   begin
-    Canvas.FillRectangle(Height, 0, Width - Height-1, Height);
+    Canvas.FillRectangle(Height, 0, Width-Height-Height, Height);
     area := Width - (Height shl 1);
   end;
 
