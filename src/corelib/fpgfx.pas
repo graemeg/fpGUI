@@ -776,7 +776,6 @@ end;
 
 procedure TfpgCanvas.DrawControlFrame(r: TfpgRect);
 begin
-  PrintRect(r);
   DrawControlFrame(r.Left, r.Top, r.Width, r.Height);
 end;
 

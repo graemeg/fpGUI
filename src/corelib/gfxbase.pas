@@ -380,6 +380,7 @@ function fpgGetAlpha(const AColor: TfpgColor): word;
 { Points }
 function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
 procedure SortRect(var ARect: TRect);
+procedure SortRect(var left, top, right, bottom: integer);
 
 implementation
 

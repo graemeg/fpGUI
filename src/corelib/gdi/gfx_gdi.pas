@@ -1098,7 +1098,7 @@ end;
 
 procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
-  ARect: TRect;
+  ARect: TfpgRect;
   bmsize: Windows.TSIZE;
 begin
   if FDrawing and buffered and (FBufferBitmap > 0) then
@@ -1235,17 +1235,20 @@ end;
 
 procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
 var
-  r: TfpgRect;
+  wr: Windows.TRect;
 begin
-  if (w = 1) and (h = 1) then
-    SetPixel(x, y, FColor)
+  wr.Left   := x;
+  wr.Top    := y;
+  wr.Right  := x + w;
+  wr.Bottom := y + h;
+  if FLineStyle = lsSolid then
+    Windows.FrameRect(Fgc, wr, FBrush)  // this handles 1x1 rectangles
   else
   begin
-    r.SetRect(x, y, w, h);
-    DoDrawLine(r.Left, r.Top, r.Right, r.Top);
-    DoDrawLine(r.Right, r.Top, r.Right, r.Bottom);
-    DoDrawLine(r.Right, r.Bottom, r.Left, r.Bottom);
-    DoDrawLine(r.Left, r.Bottom, r.Left, r.Top);
+    DoDrawLine(wr.Left, wr.Top, wr.Right, wr.Top);
+    DoDrawLine(wr.Right, wr.Top, wr.Right, wr.Bottom);
+    DoDrawLine(wr.Right, wr.Bottom, wr.Left, wr.Bottom);
+    DoDrawLine(wr.Left, wr.Bottom, wr.Left, wr.Top);
   end;
 end;
 
@@ -1266,12 +1269,13 @@ end;
 
 procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: TfpgCoord);
 var
-  fr: TfpgRect;
-  r: TRect;
+  wr: Windows.TRect;
 begin
-  fr.SetRect(x, y, w, h);
-  r := Rect(fr.Left, fr.Top, fr.Right, fr.Bottom);
-  Windows.FillRect(Fgc, r, FBrush);
+  wr.Left   := x;
+  wr.Top    := y;
+  wr.Right  := x + w;
+  wr.Bottom := y + h;
+  Windows.FillRect(Fgc, wr, FBrush);
 end;
 
 procedure TfpgCanvasImpl.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
@@ -1294,13 +1298,13 @@ end;
 
 procedure TfpgCanvasImpl.DoGetWinRect(out r: TfpgRect);
 var
-  lr: TRect;
+  wr: TRect;
 begin
-  GetClientRect(FDrawWindow.FWinHandle, lr);
-  r.Left    := lr.Left;
-  r.Top     := lr.Top;
-  r.Right   := lr.Right;
-  r.Bottom  := lr.Bottom;
+  GetClientRect(FDrawWindow.FWinHandle, wr);
+  r.Top     := wr.Top;
+  r.Left    := wr.Left;
+  r.Width   := wr.Right - wr.Left + 1;
+  r.Height  := wr.Bottom - wr.Top + 1;
 end;
 
 procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TfpgRect);
@@ -1308,7 +1312,7 @@ begin
   FClipRectSet := True;
   FClipRect    := ARect;
   DeleteObject(FClipRegion);
-  FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Width, ARect.Height);
+  FClipRegion  := CreateRectRgn(ARect.Left, ARect.Top, ARect.Left+ARect.Width, ARect.Top+ARect.Height);
   SelectClipRgn(Fgc, FClipRegion);
 end;
 
