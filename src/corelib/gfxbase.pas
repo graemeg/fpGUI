@@ -301,7 +301,9 @@ type
   TfpgWindowBase = class(TComponent)
   private
     FParent: TfpgWindowBase;
+    procedure   SetMouseCursor(const AValue: TMouseCursor);
   protected
+    FMouseCursor: TMouseCursor;
     FWindowType: TWindowType;
     FWindowAttributes: TWindowAttributes;
     FTop: TfpgCoord;
@@ -319,6 +321,7 @@ type
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
+    procedure   DoSetMouseCursor; virtual; abstract;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
@@ -326,6 +329,7 @@ type
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
   public
+    constructor Create(AOwner: TComponent); override;
     // make some setup before the window shows
     procedure   AdjustWindowStyle; virtual;    // forms modify the window creation parameters
     procedure   SetWindowParameters; virtual;  // invoked after the window is created
@@ -348,6 +352,7 @@ type
     property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
     property    Canvas: TfpgCanvasBase read GetCanvas;
     property    Parent: TfpgWindowBase read GetParent write SetParent;
+    property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
   end;
 
 
@@ -641,6 +646,14 @@ end;
 
 { TfpgWindowBase }
 
+procedure TfpgWindowBase.SetMouseCursor(const AValue: TMouseCursor);
+begin
+  if FMouseCursor = AValue then
+    Exit; //==>
+  FMouseCursor := AValue;
+  DoSetMouseCursor;
+end;
+
 procedure TfpgWindowBase.SetParent(const AValue: TfpgWindowBase);
 begin
   FParent := AValue;
@@ -673,6 +686,12 @@ end;
 procedure TfpgWindowBase.SetWindowTitle(const ATitle: string);
 begin
   DoSetWindowTitle(ATitle);
+end;
+
+constructor TfpgWindowBase.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FMouseCursor := mcDefault;
 end;
 
 procedure TfpgWindowBase.AdjustWindowStyle;

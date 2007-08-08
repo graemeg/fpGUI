@@ -111,9 +111,8 @@ begin
   
   InflateRect(r, -1, -1);
 //  Canvas.DrawControlFrame(2, 2, Width-4, Height-4);
-  writeln('000000');
   Canvas.DrawControlFrame(r);
-  writeln('111111');
+
 {
   Canvas.SetColor(clGreen);
   Canvas.FillRectangle(r);
@@ -305,26 +304,11 @@ begin
 end;
 
 procedure TMainForm.btnDisplayBMP(Sender: TObject);
-var
-  bmp: TfpgImage;
 begin
-  exit;
-  bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
-  bmp.CreateMaskFromSample(0, 0);
-  bmp.UpdateImage;
-
-  Canvas.BeginDraw;
-  Canvas.ClearClipRect;
-  // For some reason, under Windows if I don't call this
-  // the forms background goes black.
-  Canvas.Clear(clWindowBackground);
-
-  Canvas.DrawImage(10, 200, bmp);
-  Canvas.DrawImagePart(10, 240, bmp, 0, 0, 32, 21);
-  Canvas.DrawImagePart(50, 240, bmp, 32, 0, 32, 21);
-
-  Canvas.EndDraw;
-  bmp.Free;
+  if MouseCursor = mcDefault then
+    MouseCursor := mcHourGlass
+  else
+    MouseCursor := mcDefault;
 end;
 
 procedure TMainForm.btn3Click(Sender: TObject);

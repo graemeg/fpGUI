@@ -139,6 +139,7 @@ type
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
+    procedure   DoSetMouseCursor; override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -195,7 +196,8 @@ uses
   gui_form, // remove this!!!!!
   xatom,
   gfx_utf8utils,
-  _netlayer;
+  _netlayer,
+  cursorfont;
 
 var
   xapplication: TfpgApplication;
@@ -1100,6 +1102,32 @@ begin
 
   if FWinHandle > 0 then
     XMoveResizeWindow(xapplication.display, FWinHandle, aleft, atop, w, h);
+end;
+
+procedure TfpgWindowImpl.DoSetMouseCursor;
+var
+  xc: TCursor;
+  shape: integer;
+begin
+  if not HasHandle then
+    Exit; //==>
+    
+  case FMouseCursor of
+    mcSizeEW:     shape := XC_sb_h_double_arrow;
+    mcSizeNS:     shape := XC_sb_v_double_arrow;
+    mcIBeam:      shape := XC_xterm;
+    mcSizeNWSE:   shape := XC_sizing;
+    mcSizeNESW:   shape := XC_sizing; // ????
+    mcMove:       shape := XC_center_ptr; // ????
+    mcCross:      shape := XC_crosshair;
+    mcHourGlass:  shape := XC_watch;
+  else
+    shape := XC_left_ptr; //XC_arrow;
+  end;
+
+  xc := XCreateFontCursor(xapplication.Display, shape);
+  XDefineCursor(xapplication.Display, FWinHandle, xc);
+  XFreeCursor(xapplication.Display, xc);
 end;
 
 procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);

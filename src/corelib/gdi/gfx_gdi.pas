@@ -136,6 +136,7 @@ type
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     //procedure MoveToScreenCenter; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;
+    procedure   DoSetMouseCursor; override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -157,6 +158,7 @@ type
     hcr_dir_nesw: HCURSOR;
     hcr_move: HCURSOR;
     hcr_crosshair: HCURSOR;
+    hcr_wait: HCURSOR;
     FFocusedWindow: THANDLE;
     LastClickWindow: TfpgWinHandle; // double click generation
     LastWinClickTime: longword;
@@ -491,18 +493,19 @@ begin
           end;
         end;
 
-(*
+
     WM_SETCURSOR:
-    begin
-      //Writeln('Hittest: ',IntToHex((lParam and $FFFF),4));
-      if (lParam and $FFFF) <= 1 then
-      begin
-        ptkSetMouseCursor(wg.WinHandle, wg.MouseCursor);
-        result := 1;
-      end
-      else Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
-    end;
-*)
+        begin
+//          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
+          //Writeln('Hittest: ',IntToHex((lParam and $FFFF),4));
+          if (lParam and $FFFF) <= 1 then
+          begin
+            w.DoSetMouseCursor;
+//            ptkSetMouseCursor(wg.WinHandle, wg.MouseCursor);
+          end
+//          else Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+        end;
+
 
     WM_MOUSEMOVE,
     WM_LBUTTONDOWN,
@@ -738,9 +741,10 @@ begin
   hcr_dir_ns    := LoadCursor(0, IDC_SIZENS);
   hcr_edit      := LoadCursor(0, IDC_IBEAM);
   hcr_dir_nwse  := LoadCursor(0, IDC_SIZENWSE);
-  hcr_DIR_NESW  := LoadCursor(0, IDC_SIZENESW);
-  hcr_MOVE      := LoadCursor(0, IDC_SIZEALL);
-  hcr_CROSSHAIR := LoadCursor(0, IDC_CROSS);
+  hcr_dir_nesw  := LoadCursor(0, IDC_SIZENESW);
+  hcr_move      := LoadCursor(0, IDC_SIZEALL);
+  hcr_crosshair := LoadCursor(0, IDC_CROSS);
+  hcr_wait      := LoadCursor(0, IDC_WAIT);
 
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
@@ -1048,6 +1052,29 @@ begin
   else
     Windows.SetWindowText(WinHandle, PChar(Utf8ToAnsi(ATitle)));
   {$endif}
+end;
+
+procedure TfpgWindowImpl.DoSetMouseCursor;
+var
+  hc: HCURSOR;
+begin
+  if not HasHandle then
+    Exit; //==>
+
+  case FMouseCursor of
+    mcSizeEW:     hc := wapplication.hcr_dir_ew;
+    mcSizeNS:     hc := wapplication.hcr_dir_ns;
+    mcIBeam:      hc := wapplication.hcr_edit;
+    mcSizeNWSE:   hc := wapplication.hcr_dir_nwse;
+    mcSizeNESW:   hc := wapplication.hcr_dir_nesw;
+    mcMove:       hc := wapplication.hcr_move;
+    mcCross:      hc := wapplication.hcr_crosshair;
+    mcHourGlass:  hc := wapplication.hcr_wait;
+  else
+    hc := hcr_default;
+  end;
+
+  SetCursor(hc);
 end;
 
 constructor TfpgWindowImpl.Create(aowner: TComponent);

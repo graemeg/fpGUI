@@ -70,6 +70,8 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
+    procedure   HandleMouseEnter; override;
+    procedure   HandleMouseExit; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -590,6 +592,18 @@ begin
   RecalcLongestLine;
   UpdateScrollBar;
   UpdateScrollBarCoords;
+end;
+
+procedure TfpgMemo.HandleMouseEnter;
+begin
+  inherited HandleMouseEnter;
+  MouseCursor := mcIBeam;
+end;
+
+procedure TfpgMemo.HandleMouseExit;
+begin
+  inherited HandleMouseExit;
+  MouseCursor := mcDefault;
 end;
 
 procedure TfpgMemo.VScrollBarMove(Sender: TObject; position: integer);

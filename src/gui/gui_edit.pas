@@ -40,6 +40,8 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleMouseEnter; override;
+    procedure   HandleMouseExit; override;
   public
     PasswordMode: boolean;
     constructor Create(AOwner: TComponent); override;
@@ -487,6 +489,18 @@ begin
     FCursorPos := cp;
     Repaint;
   end;
+end;
+
+procedure TfpgEdit.HandleMouseEnter;
+begin
+  inherited HandleMouseEnter;
+  MouseCursor := mcIBeam;
+end;
+
+procedure TfpgEdit.HandleMouseExit;
+begin
+  inherited HandleMouseExit;
+  MouseCursor := mcDefault;
 end;
 
 function TfpgEdit.SelectionText: string;
