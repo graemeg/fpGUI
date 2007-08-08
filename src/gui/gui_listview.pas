@@ -33,24 +33,24 @@ type
     FResizable: Boolean;
     FVisible: Boolean;
     FWidth: Integer;
-    procedure SetAutoSize(const AValue: Boolean);
-    procedure SetCaption(const AValue: String);
-    procedure SetColumnIndex(const AValue: Integer);
-    procedure SetHeight(const AValue: Integer);
-    procedure SetResizable(const AValue: Boolean);
-    procedure SetVisible(const AValue: Boolean);
-    procedure SetWidth(const AValue: Integer);
+    procedure   SetAutoSize(const AValue: Boolean);
+    procedure   SetCaption(const AValue: String);
+    procedure   SetColumnIndex(const AValue: Integer);
+    procedure   SetHeight(const AValue: Integer);
+    procedure   SetResizable(const AValue: Boolean);
+    procedure   SetVisible(const AValue: Boolean);
+    procedure   SetWidth(const AValue: Integer);
   public
     constructor Create(AColumns: TfpgLVColumns);
     destructor  Destroy; override;
-    property Caption: String read FCaption write SetCaption;
-    property AutoSize: Boolean read FAutoSize write SetAutoSize;
-    property Width: Integer read FWidth write SetWidth;
-    property Height: Integer read FHeight write SetHeight;
-    property Visible: Boolean read FVisible write SetVisible;
-    property ColumnIndex: Integer read FColumnIndex write SetColumnIndex;
-    property Clickable: Boolean read FClickable write FClickable;
-    property Resizable: Boolean read FResizable write SetResizable;
+    property    Caption: String read FCaption write SetCaption;
+    property    AutoSize: Boolean read FAutoSize write SetAutoSize;
+    property    Width: Integer read FWidth write SetWidth;
+    property    Height: Integer read FHeight write SetHeight;
+    property    Visible: Boolean read FVisible write SetVisible;
+    property    ColumnIndex: Integer read FColumnIndex write SetColumnIndex;
+    property    Clickable: Boolean read FClickable write FClickable;
+    property    Resizable: Boolean read FResizable write SetResizable;
   end;
   
   { TfpgLVColumns }
@@ -59,8 +59,8 @@ type
   private
     FListView: TfpgListView;
     FColumns: TList;
-    function GetColumn(AIndex: Integer): TfpgLVColumn;
-    procedure SetColumn(AIndex: Integer; const AValue: TfpgLVColumn);
+    function    GetColumn(AIndex: Integer): TfpgLVColumn;
+    procedure   SetColumn(AIndex: Integer; const AValue: TfpgLVColumn);
   public
     constructor Create(AListView: TfpgListView);
     destructor  Destroy; override;
@@ -76,7 +76,7 @@ type
   TfpgLVItemPaintPart = set of (lvppBackground, lvppIcon, lvppText, lvppFocused);
   
   TfpgLVPaintItemEvent = procedure(ListView: TfpgListView; Canvas: TfpgCanvas; Item: TfpgLVItem;
-                                   ItemIndex: Integer; Area:TRect; var PaintPart: TfpgLVItemPaintPart) of object;
+                                   ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart) of object;
   
   
   IfpgLVItemViewer = interface
@@ -94,9 +94,9 @@ type
     FColumns: TfpgLVColumns;
     FViewers: TList;
     FItems: TList;
-    function GetCapacity: Integer;
+    function    GetCapacity: Integer;
     function    GetItem(AIndex: Integer): TfpgLVItem;
-    procedure SetCapacity(const AValue: Integer);
+    procedure   SetCapacity(const AValue: Integer);
     procedure   SetItem(AIndex: Integer; const AValue: TfpgLVItem);
     procedure   AddViewer(AValue: IfpgLVItemViewer);
     procedure   DeleteViewer(AValue: IfpgLVItemViewer);
@@ -182,7 +182,7 @@ type
     function    ItemGetSelected(const AItem: TfpgLVItem): Boolean;
     procedure   ItemSetSelected(const AItem: TfpgLVItem; const AValue: Boolean);
     function    ItemGetFromPoint(const X, Y: Integer): TfpgLVItem;
-    function    ItemGetRect(AIndex: Integer): TRect;
+    function    ItemGetRect(AIndex: Integer): TfpgRect;
     function    ItemIndexFromY(Y: Integer): Integer;
     function    HeaderHeight: Integer;
     procedure   DoRepaint;
@@ -256,10 +256,12 @@ var
   AIndex: Integer;
 begin
   AIndex := FViewers.IndexOf(AValue);
-  if AIndex > -1 then begin
+  if AIndex > -1 then
+  begin
     FViewers.Delete(AIndex);
   end;
-  if FViewers.Count = 0 then Free;
+  if FViewers.Count = 0 then
+    Free;
 end;
 
 procedure TfpgLVItems.DoChange(AItem: TfpgLVItem);
@@ -267,9 +269,11 @@ var
   I: Integer;
   AIndex: Integer;
 begin
-  if FUpdateCount > 0 then Exit;
+  if FUpdateCount > 0 then
+    Exit;
   AIndex := IndexOf(AItem);
-  for I := 0 to FViewers.Count -1 do begin
+  for I := 0 to FViewers.Count -1 do
+  begin
     IfpgLVItemViewer(FViewers.Items[I]).ItemChanged(AIndex);
   end;
 end;
@@ -279,9 +283,11 @@ var
   I: Integer;
   AIndex: Integer;
 begin
-  if FUpdateCount > 0 then Exit;
+  if FUpdateCount > 0 then
+    Exit;
   AIndex := IndexOf(AItem);
-  for I := 0 to FViewers.Count -1 do begin
+  for I := 0 to FViewers.Count -1 do
+  begin
     IfpgLVItemViewer(FViewers.Items[I]).ItemAdded(AIndex);
   end;
 end;
@@ -291,9 +297,11 @@ var
   I: Integer;
   AIndex: Integer;
 begin
-  if FUpdateCount > 0 then Exit;
+  if FUpdateCount > 0 then
+    Exit;
   AIndex := IndexOf(AItem);
-  for I := 0 to FViewers.Count -1 do begin
+  for I := 0 to FViewers.Count -1 do
+  begin
     IfpgLVItemViewer(FViewers.Items[I]).ItemDeleted(AIndex);
   end;
 end;
@@ -302,8 +310,10 @@ procedure TfpgLVItems.DoEndUpdate;
 var
   I: Integer;
 begin
-  if FUpdateCount > 0 then Exit;
-  for I := 0 to FViewers.Count -1 do begin
+  if FUpdateCount > 0 then
+    Exit;
+  for I := 0 to FViewers.Count -1 do
+  begin
     IfpgLVItemViewer(FViewers.Items[I]).ItemsUpdated;
   end;
 end;
@@ -361,17 +371,21 @@ end;
 procedure TfpgLVItems.EndUpdate;
 begin
   Dec(FUpdateCount);
-  if FUpdateCount < 0 then FUpdateCount := 0;
-  if FUpdateCount = 0 then DoEndUpdate;
+  if FUpdateCount < 0 then
+    FUpdateCount := 0;
+  if FUpdateCount = 0 then
+    DoEndUpdate;
 end;
 
 { TfpgLVItem }
 
 procedure TfpgLVItem.SetCaption(const AValue: String);
 begin
-  if FCaption=AValue then exit;
+  if FCaption=AValue then
+    Exit;
   FCaption:=AValue;
-  if Assigned(FItems) then FItems.DoChange(Self);
+  if Assigned(FItems) then
+    FItems.DoChange(Self);
 end;
 
 function TfpgLVItem.GetSelected(ListView: TfpgListView): Boolean;
@@ -408,7 +422,8 @@ end;
 
 procedure TfpgListView.SetShowHeaders(const AValue: Boolean);
 begin
-  if FShowHeaders=AValue then exit;
+  if FShowHeaders=AValue then
+    Exit;
   FShowHeaders:=AValue;
   DoRePaint;
 end;
@@ -426,7 +441,8 @@ end;
 
 procedure TfpgListView.SetItems(const AValue: TfpgLVItems);
 begin
-  if AValue = FItems then Exit;
+  if AValue = FItems then
+    Exit;
   AValue.AddViewer(Self);
   FItems.DeleteViewer(Self);
   Fitems := AValue;
@@ -434,13 +450,15 @@ end;
 
 procedure TfpgListView.SetMultiSelect(const AValue: Boolean);
 begin
-  if FMultiSelect=AValue then exit;
+  if FMultiSelect=AValue then
+    Exit;
   FMultiSelect:=AValue;
 end;
 
 procedure TfpgListView.SetOnColumnClick(const AValue: TfpgLVColumnClickEvent);
 begin
-  if FOnColumnClick=AValue then exit;
+  if FOnColumnClick=AValue then
+    Exit;
   FOnColumnClick:=AValue;
 end;
 
@@ -451,24 +469,28 @@ end;
 
 procedure TfpgListView.SetItemIndex(const AValue: Integer);
 begin
-  if FItemIndex=AValue then exit;
+  if FItemIndex=AValue then
+    Exit;
   if (AValue >= -1) and (AValue < FItems.Count) then
     FItemIndex:=AValue;
 end;
 
 procedure TfpgListView.ItemDeleted(AIndex: Integer);
 begin
-  if FUpdateCount = 0 then DoRePaint;
+  if FUpdateCount = 0 then
+    DoRePaint;
 end;
 
 procedure TfpgListView.ItemAdded(AIndex: Integer);
 begin
-  if FUpdateCount = 0 then DoRePaint;
+  if FUpdateCount = 0 then
+    DoRePaint;
 end;
 
 procedure TfpgListView.ItemChanged(AIndex: Integer);
 begin
-  if FUpdateCount = 0 then DoRePaint;
+  if FUpdateCount = 0 then
+    DoRePaint;
   // TODO
 end;
 
@@ -486,23 +508,30 @@ begin
 end;
 
 procedure TfpgListView.StartShiftSelection;
+var
+  I: Integer;
 begin
   Inc(FShiftCount);
   if FItems.Count = 0 then
     Exit;
-  if FShiftCount > 1 then
+  if FShiftCount> 1 then
     Exit;
   FSelectionShiftStart := FItemIndex;
   if FSelectionShiftStart = -1 then
     Inc(FSelectionShiftStart);
   FOldSelected.Clear;
-  FOldSelected.AddList(FSelected);
+  FOldSelected.Capacity := FSelected.Capacity;
+  for I := 0 to FSelected.Count-1 do
+  begin
+    FOldSelected.Add(FSelected.Items[I]);
+  end;
 end;
 
 procedure TfpgListView.EndShiftSelection;
 begin
   Dec(FShiftCount);
-  if FShiftCount > 0 then Exit;
+  if FShiftCount > 0 then
+    Exit;
   FSelectionShiftStart := -1;
   FOldSelected.Clear;
 end;
@@ -513,15 +542,22 @@ var
   I: LongInt;
   ShouldShow: Boolean;
 begin
-  if AStart > AEnd then begin
+  if AStart > AEnd then
+  begin
     TmpI := AStart;
     AStart := AEnd;
     AEnd := TmpI;
   end;
   FSelected.Clear;
-  FSelected.AddList(FOldSelected);
-  if (AStart < 0) or (AEnd > FItems.Count-1) then Exit;
-  for I := AStart to AEnd do begin
+  FSelected.Capacity := FOldSelected.Capacity;
+  for I := 0 to FOldSelected.Count-1 do
+  begin
+    FSelected.Add(FOldSelected.Items[I]);
+  end;
+  if (AStart < 0) or (AEnd > FItems.Count-1) then
+    Exit;
+  for I := AStart to AEnd do
+  begin
     ShouldShow := AValue;
     if FOldSelected.IndexOf(FItems.Item[I]) > -1 then
       ShouldShow := not AValue;
@@ -538,19 +574,23 @@ var
  I: LongInt;
 begin
   TmpI := AStart;
-  if AStart > AEnd then begin
+  if AStart > AEnd then
+  begin
     AStart := AEnd;
     AEnd := TmpI;
   end;
-  if not FMultiSelect then begin
+  if not FMultiSelect then
+  begin
     FSelected.Clear;
     ItemSetSelected(FItems.Item[TmpI], True);
     Exit;
   end;
-  if ssShift in ShiftState then for I := AStart to AEnd do begin
-    if not(IgnoreStartIndex and (I = TmpI))
-    then ItemSetSelected(FItems.Item[I], not ItemGetSelected(FItems.Item[I]));
-  end;
+  if ssShift in ShiftState then
+    for I := AStart to AEnd do
+    begin
+      if not(IgnoreStartIndex and (I = TmpI))
+      then ItemSetSelected(FItems.Item[I], not ItemGetSelected(FItems.Item[I]));
+    end;
 end;
 
 
@@ -578,34 +618,42 @@ var
 begin
   Result := nil;
   ItemTop := (FVScrollBar.Position + Y) -2;
-  if ShowHeaders then Dec(ItemTop, HeaderHeight);
+  if ShowHeaders then
+    Dec(ItemTop, HeaderHeight);
   Index := ItemTop div ItemHeight;
-  if Index < 0 then Exit;
-  if Index >= FItems.Count then Exit;
+  if Index < 0 then
+    Exit;
+  if Index >= FItems.Count then
+    Exit;
 
   Result := FItems.Item[Index];
 end;
 
-function TfpgListView.ItemGetRect(AIndex: Integer): TRect;
+function TfpgListView.ItemGetRect(AIndex: Integer): TfpgRect;
 begin
   Result.Top := 2 + (AIndex * ItemHeight) - FVScrollBar.Position;
-  if ShowHeaders then Inc(Result.Top, HeaderHeight);
-  Result.Bottom := Result.Top + ItemHeight-1;
+  if ShowHeaders then
+    Inc(Result.Top, HeaderHeight);
+  Result.SetBottom(Result.Top + ItemHeight-1);
   Result.Left := 2 - FHScrollBar.Position;
-  Result.Right := (FHScrollBar.Max+(Width-4) - FHScrollBar.Position);
-  if FVScrollBar.Visible then Dec(Result.Right, FVScrollBar.Width);
+  Result.SetRight(FHScrollBar.Max+(Width-4) - FHScrollBar.Position);
+  if FVScrollBar.Visible then
+    Dec(Result.Width, FVScrollBar.Width);
 end;
 
 function TfpgListView.ItemIndexFromY(Y: Integer): Integer;
 var
   TopPos: Integer;
 begin
-  if ShowHeaders and (Y < HeaderHeight) then Exit(-1);
+  if ShowHeaders and (Y < HeaderHeight) then
+    Exit(-1);
 
   TopPos := (FVScrollBar.Position + Y) - 2;
-  if ShowHeaders then Dec(TopPos, HeaderHeight);
+  if ShowHeaders then
+    Dec(TopPos, HeaderHeight);
   Result := TopPos div ItemHeight;
-  if Result > Fitems.Count-1 then Result := -1;
+  if Result > Fitems.Count-1 then
+    Result := -1;
 end;
 
 function TfpgListView.HeaderHeight: Integer;
@@ -615,17 +663,21 @@ end;
 
 procedure TfpgListView.DoRepaint;
 begin
-  if FUpdateCount = 0 then RePaint;
+  if FUpdateCount = 0 then
+    RePaint;
 end;
 
 procedure TfpgListView.DoColumnClick(Column: TfpgLVColumn; Button: Integer);
 begin
-  if not Column.Clickable then Exit;
-  if Assigned(FOnColumnClick) then FOnColumnClick(Self, Column, Button);
+  if not Column.Clickable then
+    Exit;
+  if Assigned(FOnColumnClick) then
+    FOnColumnClick(Self, Column, Button);
 
   Column.FDown := True;
   
-  if FUpdateCount = 0 then begin
+  if FUpdateCount = 0 then
+  begin
     Canvas.BeginDraw;//(2,2, width-4, Height-4);
        PaintHeaders;
     Canvas.EndDraw(2,2, width-4, Height-4);
@@ -640,11 +692,15 @@ var
   Column: TfpgLVColumn;
 begin
   cLeft := 2;
-  for I := 0 to FColumns.Count-1 do begin
+  for I := 0 to FColumns.Count-1 do
+  begin
     Column := FColumns.Column[I];
-    if not Column.Visible then continue;
-    if Column.Resizable then begin
-      if X - (cLeft + Column.Width) > 2 then begin
+    if not Column.Visible then
+      Continue;
+    if Column.Resizable then
+    begin
+      if X - (cLeft + Column.Width) > 2 then
+      begin
         // Mouse.Cursor := mcIBeam;?
         //xc
       end;
@@ -659,12 +715,16 @@ var
 begin
   // Yes this is a dirty dirty hack
   cRect := GetClientRect;
-  if FShowHeaders then Inc(cRect.Top, HeaderHeight);
-  if FHScrollBar.Visible then Dec(cRect.Height, FHScrollBar.Height);
-  if FVScrollBar.Visible then Dec(cRect.Width,  FVScrollBar.Width);
+  if FShowHeaders then
+    Inc(cRect.Top, HeaderHeight);
+  if FHScrollBar.Visible then
+    Dec(cRect.Height, FHScrollBar.Height);
+  if FVScrollBar.Visible then
+    Dec(cRect.Width,  FVScrollBar.Width);
 
 
-  if not PtInRect(cRect, Point(X,Y)) then Exit;
+  if not PtInRect(cRect, Point(X,Y)) then
+    Exit;
 
   TfpgListView(FVScrollBar).HandleMouseScroll(x, y, shiftstate, delta);
 end;
@@ -683,16 +743,22 @@ begin
   
   cRect := GetClientRect;
   
-  if not PtInRect(cRect, Point(X,Y)) then Exit;
+  if not PtInRect(cRect, Point(X,Y)) then
+    Exit;
   
-  if FShowHeaders then begin
-    if (Y < HeaderHeight + cRect.Top)  then begin
+  if FShowHeaders then
+  begin
+    if (Y < HeaderHeight + cRect.Top)  then
+    begin
       cLeft := cRect.Left - FHScrollBar.Position;
-      for I := 0 to FColumns.Count-1 do begin
+      for I := 0 to FColumns.Count-1 do
+      begin
         Column := FColumns.Column[I];
-        if Column.Visible then begin
+        if Column.Visible then
+        begin
           cRight := cLeft + Column.Width-1;
-          if (X <= cRight) and (X >= cLeft) then DoColumnClick(Column, 1);
+          if (X <= cRight) and (X >= cLeft) then
+            DoColumnClick(Column, 1);
           Inc(cLeft, Column.Width);
         end;
       end;
@@ -700,19 +766,26 @@ begin
     Inc(cRect.Top, HeaderHeight);
   end;
   
-  if FHScrollBar.Visible then Dec(cRect.Height, FHScrollBar.Height);
-  if FVScrollBar.Visible then Dec(cRect.Width,  FVScrollBar.Width);
+  if FHScrollBar.Visible then
+    Dec(cRect.Height, FHScrollBar.Height);
+  if FVScrollBar.Visible then
+    Dec(cRect.Width,  FVScrollBar.Width);
   
-  if not PtInRect(cRect, Point(X,Y)) then Exit;
+  if not PtInRect(cRect, Point(X,Y)) then
+    Exit;
 
   Item := ItemGetFromPoint(X, Y);
   IndexOfItem := ItemIndexFromY(Y);
-  if not FMultiSelect then FSelected.Clear;
-  if Item <> nil then begin
+  if not FMultiSelect then
+    FSelected.Clear;
+  if Item <> nil then
+  begin
     FItemIndex := ItemIndexFromY(Y);
     MakeItemVisible(FItemIndex);
-    if FMultiSelect then begin
-      if not ((ssCtrl in shiftstate) or (ssShift in shiftstate)) then begin
+    if FMultiSelect then
+    begin
+      if not ((ssCtrl in shiftstate) or (ssShift in shiftstate)) then
+      begin
         FSelected.Clear;
         ItemSetSelected(Item, True);
       end
@@ -739,16 +812,22 @@ begin
 
   cRect := GetClientRect;
 
-  if not PtInRect(cRect, Point(X,Y)) then Exit;
+  if not PtInRect(cRect, Point(X,Y)) then
+    Exit;
 
-  if FShowHeaders then begin
-    if (Y < HeaderHeight + cRect.Top) then begin
+  if FShowHeaders then
+  begin
+    if (Y < HeaderHeight + cRect.Top) then
+    begin
       cLeft := cRect.Left - FHScrollBar.Position;
-      for I := 0 to FColumns.Count-1 do begin
+      for I := 0 to FColumns.Count-1 do
+      begin
         Column := FColumns.Column[I];
-        if Column.Visible then begin
+        if Column.Visible then
+        begin
           cRight := cLeft + Column.Width-1;
-          if (X <= cRight) and (X >= cLeft) then DoColumnClick(Column, 3);
+          if (X <= cRight) and (X >= cLeft) then
+            DoColumnClick(Column, 3);
           Inc(cLeft, Column.Width);
         end;
       end;
@@ -756,8 +835,10 @@ begin
     Inc(cRect.Top, HeaderHeight);
   end;
   
-  if FVScrollBar.Visible then Dec(cRect.Width, FVScrollBar.Width);
-  if FHScrollBar.Visible then Dec(cRect.Height, FHScrollBar.Height);
+  if FVScrollBar.Visible then
+    Dec(cRect.Width, FVScrollBar.Width);
+  if FHScrollBar.Visible then
+    Dec(cRect.Height, FHScrollBar.Height);
 end;
 
 procedure TfpgListView.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -765,7 +846,8 @@ var
   I: Integer;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
-  for I := 0 to FColumns.Count-1 do begin
+  for I := 0 to FColumns.Count-1 do
+  begin
     FColumns.Column[I].FDown := False;
   end;
   DoRepaint;
@@ -776,7 +858,8 @@ var
   I: Integer;
 begin
   inherited HandleRMouseUp(x, y, shiftstate);
-  for I := 0 to FColumns.Count-1 do begin
+  for I := 0 to FColumns.Count-1 do
+  begin
     FColumns.Column[I].FDown := False;
   end;
   DoRepaint;
@@ -791,9 +874,11 @@ begin
 
   cRect := GetClientRect;
 
-  if not PtInRect(cRect, Point(X,Y)) then Exit;
+  if not PtInRect(cRect, Point(X,Y)) then
+    Exit;
 
-  if Y < (cRect.Top + HeaderHeight) then begin
+  if Y < (cRect.Top + HeaderHeight) then
+  begin
     HandleHeaderMouseMove(x, y, btnstate, shiftstate);
   end;
   
@@ -810,17 +895,20 @@ var
   procedure CheckMultiSelect;
   begin
     if FMultiSelect then begin
-      if (ssShift in shiftstate) or (FSelectionShiftStart > -1) then begin
+      if (ssShift in shiftstate) or (FSelectionShiftStart > -1) then
+      begin
         SelectionSetRangeEnabled(FSelectionShiftStart, FItemIndex, True);
       end
-      else if ssCtrl in shiftstate then begin
+      else if ssCtrl in shiftstate then
+      begin
         SelectionToggleRange(FItemIndex, FItemIndex, shiftstate, False);
       end;
     end;
   end;
   procedure CheckSelectionFocus;
   begin
-    if ((ssShift in shiftstate) or (ssCtrl in shiftstate)) then exit;
+    if ((ssShift in shiftstate) or (ssCtrl in shiftstate)) then
+      Exit;
     FSelected.Clear;
     if FSelectionFollowsFocus and (FItemIndex > -1) then
       ItemSetSelected(FItems.Item[FItemIndex], True);
@@ -832,7 +920,8 @@ begin
   case keycode of
     keyShift, keyShiftR:
     begin
-      if FMultiSelect then StartShiftSelection;
+      if FMultiSelect then
+        StartShiftSelection;
     end;
     keyUp:
     begin
@@ -874,7 +963,8 @@ begin
     keyPageUp:
     begin
       iIndex := ItemIndex - (FVScrollBar.Height div ItemHeight);
-      if iIndex < 0 then iIndex := 0;
+      if iIndex < 0 then
+        iIndex := 0;
       ItemIndex := iIndex;
       MakeItemVisible(ItemIndex);
       CheckSelectionFocus;
@@ -883,7 +973,8 @@ begin
     keyPageDown:
     begin
       iIndex := ItemIndex + (FVScrollBar.Height div ItemHeight);
-      if iIndex > FItems.Count-1 then iIndex := FItems.Count-1;
+      if iIndex > FItems.Count-1 then
+        iIndex := FItems.Count-1;
       ItemIndex := iIndex;
       MakeItemVisible(ItemIndex);
       CheckSelectionFocus;
@@ -917,7 +1008,8 @@ end;
 
 procedure TfpgListView.HandlePaint;
 begin
-  if FUpdateCount > 0 then Exit;
+  if FUpdateCount > 0 then
+    Exit;
   
   Canvas.BeginDraw;
 
@@ -929,16 +1021,15 @@ begin
   if ShowHeaders then
     PaintHeaders;
 
-  // The little square in the bottom right corner
-  if FHScrollBar.Visible and FVScrollBar.Visible then
+  // this paints the small square remaining below the vscrollbar and to the right of the hscrollbar
+  if FVScrollBar.Visible and FHScrollBar.Visible then
   begin
-    Canvas.SetColor(clButtonFace);
-    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
-                         FVScrollBar.Top+FVScrollBar.Height,
-                         FVScrollBar.Width,
-                         FHScrollBar.Height);
+    Canvas.Color := clButtonFace;
+    Canvas.FillRectangle(Width - 2 - FVScrollBar.Width,
+                         Height - 2 - FHScrollBar.Height,
+                         Width - 2,
+                         Height - 2);
   end;
-
   
   fpgStyle.DrawControlFrame(Canvas, 0,0,Width,Height);
   
@@ -965,9 +1056,11 @@ begin
   cLeft := 2;
   if FHScrollBar.Visible then Dec(cLeft, FHScrollBar.Position);
   cTop := 2;
-  for I := 0 to Columns.Count-1 do begin
+  for I := 0 to Columns.Count-1 do
+  begin
     Column := Columns.Column[I];
-    if Column.Visible then begin
+    if Column.Visible then
+    begin
       Flags := [btnIsEmbedded];
       if Column.FDown then Flags := Flags + [btnIsPressed];
       fpgStyle.DrawButtonFace(Canvas,cLeft, cTop, cLeft+Column.Width-1, Canvas.Font.Height+10, Flags);
@@ -975,7 +1068,8 @@ begin
       Inc(cLeft, Column.Width);
     end;
   end;
-  if cLeft < FWidth-2 then begin
+  if cLeft < FWidth-2 then
+  begin
     fpgStyle.DrawButtonFace(Canvas,cLeft, cTop, cLeft+(Width-3-cLeft), Canvas.Font.Height+10, [btnIsEmbedded, btnIsPressed]);
   end;
 end;
@@ -987,7 +1081,7 @@ var
   LastIndex: Integer;
   I, J : Integer;
   PaintPart: TfpgLVItemPaintPart;
-  ItemRect: TRect;
+  ItemRect: TfpgRect;
   ItemState: TfpgLVItemState;
   Item: TfpgLVItem;
   TheText: String;
@@ -997,20 +1091,25 @@ begin
   FirstIndex := (FVScrollBar.Position) div ItemHeight;
   LastIndex := (FVScrollBar.Position+(Height-4)) div ItemHeight;
 
-  if LastIndex > Fitems.Count-1 then LastIndex := FItems.Count-1;
+  if LastIndex > Fitems.Count-1 then
+    LastIndex := FItems.Count-1;
   
-  for I := FirstIndex to LastIndex do begin
+  for I := FirstIndex to LastIndex do
+  begin
     ItemState := [];
     PaintPart := [lvppBackground, lvppIcon, lvppText];
     ItemRect := ItemGetRect(I);
     Item := FItems.Item[I];
-    if Item.Selected[Self] then Include(ItemState, lisSelected);
-    if FItemIndex = I then begin
+    if Item.Selected[Self] then
+      Include(ItemState, lisSelected);
+    if FItemIndex = I then
+    begin
       Include(ItemState, lisFocused);
       Include(PaintPart, lvppFocused);
     end;
 
-    if lisSelected in (ItemState) then begin
+    if lisSelected in (ItemState) then
+    begin
       if Focused then
         Canvas.Color := clSelection
       else
@@ -1023,22 +1122,29 @@ begin
     Canvas.FillRectangle(ItemRect);
     Exclude(PaintPart, lvppBackground);
     TextColor := Canvas.TextColor;
-    if Assigned(FOnPaintItem) then FOnPaintItem(Self, Canvas, Item, I, ItemRect, PaintPart);
+    if Assigned(FOnPaintItem) then
+      FOnPaintItem(Self, Canvas, Item, I, ItemRect, PaintPart);
 
-    if lvppIcon in PaintPart then begin
+    if lvppIcon in PaintPart then
+    begin
       // TODO paint icon
     end;
     
-    if lvppFocused in PaintPart then begin
+    if lvppFocused in PaintPart then
+    begin
       Canvas.Color := clBlack;
       Canvas.SetLineStyle(1, lsDot);
       Canvas.DrawRectangle(ItemRect);
     end;
     
-    if lvppText in PaintPart then begin
-      if lisSelected in ItemState then Canvas.TextColor := clSelectionText;
-      for J := 0 to FColumns.Count -1 do begin;
-        if FColumns.Column[J].Visible then begin
+    if lvppText in PaintPart then
+    begin
+      if lisSelected in ItemState then
+        Canvas.TextColor := clSelectionText;
+      for J := 0 to FColumns.Count -1 do
+      begin
+        if FColumns.Column[J].Visible then
+        begin
           if FColumns.Column[J].ColumnIndex <> -1 then
             ColumnIndex := FColumns.Column[J].ColumnIndex
           else ColumnIndex := J;
@@ -1072,13 +1178,15 @@ begin
   MaxV := 0;
   BevelSize := 2;
   
-  for I := 0 to Columns.Count -1 do begin
+  for I := 0 to Columns.Count -1 do
+  begin
     if Columns.Column[I].Visible then
       Inc(MaxH, Columns.Column[I].Width);
   end;
   
   MaxV := (FItems.Count+2) * ItemHeight - (Height);
-  if ShowHeaders then Inc(MaxV, HeaderHeight);
+  if ShowHeaders then
+    Inc(MaxV, HeaderHeight);
   
   FHScrollBar.Top := Height - FHScrollBar.Height - (BevelSize );
   FHScrollBar.Left := BevelSize;
@@ -1086,12 +1194,14 @@ begin
 
   
   FVScrollBar.Top := BevelSize;
-  if ShowHeaders then FVScrollBar.Top := FVScrollBar.Top + HeaderHeight;
+  if ShowHeaders then
+    FVScrollBar.Top := FVScrollBar.Top + HeaderHeight;
   FVScrollBar.Left := Width - FVScrollBar.Width - (BevelSize );
   FVScrollBar.Height := Height - FVScrollBar.Top - BevelSize;
 
   
-  if FVScrollBar.Visible and FHScrollBar.Visible then begin
+  if FVScrollBar.Visible and FHScrollBar.Visible then
+  begin
     FHScrollBar.Width := FHScrollBar.Width - FVScrollBar.Width;
     FVScrollBar.Height := FVScrollBar.Height - FHScrollBar.Height;
   end;
@@ -1164,8 +1274,10 @@ procedure TfpgListView.EndUpdate;
 begin
   FItems.EndUpdate;
   Dec(FUpdateCount);
-  if FUpdateCount < 0 then FUpdateCount := 0;
-  if FUpdateCount = 0 then DoRePaint;
+  if FUpdateCount < 0 then
+    FUpdateCount := 0;
+  if FUpdateCount = 0 then
+    DoRePaint;
 end;
 
 procedure TfpgListView.MakeItemVisible(AIndex: Integer; PartialOK: Boolean);
@@ -1177,19 +1289,21 @@ var
   vBottom: Integer;
   tVisible, bVisible: Boolean;
 begin
-  if AIndex = -1 then Exit;
+  if AIndex = -1 then
+    Exit;
   iTop := AIndex * ItemHeight;
   iBottom := iTop + ItemHeight;
 
   tVisible := (iTop >= FVScrollBar.Position) and (iTop < FVScrollBar.Position + FVScrollBar.Height);
   bVisible := (iBottom >= FVScrollBar.Position) and (iBottom < FVScrollBar.Position + FVScrollBar.Height);
 
-  if PartialOK and (bVisible or tVisible) then Exit;
+  if PartialOK and (bVisible or tVisible) then
+    Exit;
   
-  if bVisible and tVisible then Exit;
+  if bVisible and tVisible then
+    Exit;
   
-  if  (iBottom >= FVScrollBar.Position + FVScrollBar.Height)
-  then
+  if  (iBottom >= FVScrollBar.Position + FVScrollBar.Height) then
     FVScrollBar.Position := iBottom - FVScrollBar.Height
   else
     FVScrollBar.Position := iTop;
@@ -1250,19 +1364,21 @@ end;
 
 procedure TfpgLVColumn.SetCaption(const AValue: String);
 begin
-  if FCaption=AValue then exit;
+  if FCaption=AValue then
+    Exit;
   FCaption:=AValue;
 end;
 
 procedure TfpgLVColumn.SetColumnIndex(const AValue: Integer);
 begin
-  if FColumnIndex=AValue then exit;
+  if FColumnIndex=AValue then
+    Exit;
   FColumnIndex:=AValue;
 end;
 
 procedure TfpgLVColumn.SetHeight(const AValue: Integer);
 begin
-  if FHeight=AValue then exit;
+  if FHeight=AValue then Exit;
   FHeight:=AValue;
 end;
 

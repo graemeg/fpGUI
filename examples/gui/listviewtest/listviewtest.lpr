@@ -23,7 +23,7 @@ type
     procedure AddBttn(Sender: TObject);
     procedure ShowHeadersChange(Sender: TObject);
     procedure PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas; Item: TfpgLVItem;
-                                   ItemIndex: Integer; Area:TRect; var PaintPart: TfpgLVItemPaintPart);
+                                   ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart);
     
   public
     constructor Create(AOwner: TComponent); override;
@@ -65,7 +65,7 @@ begin
 end;
 
 procedure TMainForm.PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas;
-  Item: TfpgLVItem; ItemIndex: Integer; Area: TRect; var PaintPart: TfpgLVItemPaintPart);
+  Item: TfpgLVItem; ItemIndex: Integer; Area: TfpgRect; var PaintPart: TfpgLVItemPaintPart);
 begin
   if ItemIndex mod 2 = 0 then  ACanvas.TextColor := clRed;
   if ItemIndex mod 3 = 0 then  ACanvas.TextColor := clBlue;
