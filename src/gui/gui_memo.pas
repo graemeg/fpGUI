@@ -696,9 +696,11 @@ begin
   // The little square in the bottom right corner
   if FHScrollBar.Visible and FVScrollBar.Visible then
   begin
-    Canvas.SetColor(clWindowBackground);
-    Canvas.FillRectangle(FHScrollBar.Width, FVScrollBar.Height,
-                         FVScrollBar.Width, FHScrollBar.Height);
+    Canvas.SetColor(clButtonFace);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
+                         FVScrollBar.Top+FVScrollBar.Height,
+                         FVScrollBar.Width,
+                         FHScrollBar.Height);
   end;
 
   Canvas.EndDraw;

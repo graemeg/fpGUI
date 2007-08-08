@@ -43,7 +43,7 @@ type
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
     FScrollTimer: TfpgTimer;
-    FActiveButtonRect: TRect;
+    FActiveButtonRect: TfpgRect;
     FMousePosition: TPoint;
     procedure   ScrollTimer(Sender: TObject);
     procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
@@ -124,25 +124,36 @@ end;
 
 procedure TfpgScrollBar.SetMax(const AValue: integer);
 begin
-  if AValue = FMax then Exit;
-  if AValue < FMin then FMax := FMin
-  else FMax := AValue;
-  if FPosition > FMax then SetPosition(FMax);
+  if AValue = FMax then
+    Exit;
+  if AValue < FMin then
+    FMax := FMin
+  else
+    FMax := AValue;
+  if FPosition > FMax then
+    SetPosition(FMax);
 end;
 
 procedure TfpgScrollBar.SetMin(const AValue: integer);
 begin
-  if AValue = FMin then Exit;
-  if AValue > FMax then FMin := FMax
-  else FMin := AValue;
-  if FPosition < FMin then SetPosition(FMin);
+  if AValue = FMin then
+    Exit;
+  if AValue > FMax then
+    FMin := FMax
+  else
+    FMin := AValue;
+  if FPosition < FMin then
+    SetPosition(FMin);
 end;
 
 procedure TfpgScrollBar.SetPosition(const AValue: integer);
 begin
-  if AValue < FMin then FPosition := FMin
-  else if AValue > FMax then FPosition := FMax
-  else FPosition := AValue;
+  if AValue < FMin then
+    FPosition := FMin
+  else if AValue > FMax then
+    FPosition := FMax
+  else
+    FPosition := AValue;
 end;
 
 procedure TfpgScrollBar.ScrollTimer(Sender: TObject);
@@ -153,13 +164,17 @@ begin
       and (FMousePosition.Y < FActiveButtonRect.Bottom)
       and (FMousePosition.Y > FActiveButtonRect.Top) then
   begin
-    if FStartBtnPressed then begin
+    if FStartBtnPressed then
+    begin
       PositionChange(-FScrollStep);
-      if Position = FMin then FScrollTimer.Enabled := False;
+      if Position = FMin then
+        FScrollTimer.Enabled := False;
     end;
-    if FEndBtnPressed then begin
+    if FEndBtnPressed then
+    begin
       PositionChange(FScrollStep);
-      if Position = FMax then FScrollTimer.Enabled := False;
+      if Position = FMax then
+        FScrollTimer.Enabled := False;
     end;
   end
   else
@@ -246,13 +261,13 @@ begin
     begin
       PositionChange(-FScrollStep);
       FStartBtnPressed := True;
-      FActiveButtonRect := Rect(0, 0, Width, Width);
+      FActiveButtonRect.SetRect(0, 0, Width, Width);
     end
     else if y >= Height - Width then
     begin
       PositionChange(FScrollStep);
       FEndBtnPressed := True;
-      FActiveButtonRect := Rect(0,Height-Width, Width, Height);
+      FActiveButtonRect.SetRect(0,Height-Width, Width, Height);
     end
     else if (y >= Width + FSliderPos) and (y <= Width + FSliderPos + FSliderLength) then
     begin
@@ -266,13 +281,13 @@ begin
     begin
       PositionChange(-FScrollStep);
       FStartBtnPressed := True;
-      FActiveButtonRect := Rect(0, 0, Height, Height);
+      FActiveButtonRect.SetRect(0, 0, Height, Height);
     end
     else if x >= Width - Height then
     begin
       PositionChange(FScrollStep);
       FEndBtnPressed := True;
-      FActiveButtonRect := Rect(Width-Height, 0, Width, Height);
+      FActiveButtonRect.SetRect(Width-Height, 0, Width, Height);
     end
     else if (x >= Height + FSliderPos) and (x <= Height + FSliderPos + FSliderLength) then
     begin

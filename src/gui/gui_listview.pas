@@ -929,14 +929,16 @@ begin
   if ShowHeaders then
     PaintHeaders;
 
-  // this paints the small square remaining below the vscrollbar and to the right of the hscrollbar
-  if FVScrollBar.Visible and FHScrollBar.Visible then begin
-    Canvas.Color := clButtonFace;
-    Canvas.FillRectangle(Width - 2 - FVScrollBar.Width,
-                         Height - 2 - FHScrollBar.Height,
-                         Width - 2,
-                         Height - 2);
+  // The little square in the bottom right corner
+  if FHScrollBar.Visible and FVScrollBar.Visible then
+  begin
+    Canvas.SetColor(clButtonFace);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
+                         FVScrollBar.Top+FVScrollBar.Height,
+                         FVScrollBar.Width,
+                         FHScrollBar.Height);
   end;
+
   
   fpgStyle.DrawControlFrame(Canvas, 0,0,Width,Height);
   
