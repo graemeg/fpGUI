@@ -364,7 +364,7 @@ begin
     DrawSlider(False);
 
   if area <> 0 then
-    newp := FMin + Trunc((FMax - FMin) * FSliderPos / area)
+    newp := FMin + Trunc((FMax - FMin)  * (FSliderPos / area))
   else
     newp := FMin;
 
