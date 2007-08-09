@@ -407,7 +407,7 @@ begin
   sbar.Left   := 150;
   sbar.Height := 100;
   sbar.Max    := 15;
-  
+
   xpluna := TXPButton.Create(self);
   xpluna.Left    := 250;
   xpluna.Top     := 200;

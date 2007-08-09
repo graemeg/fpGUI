@@ -2,6 +2,13 @@ unit gui_grid;
 
 {$mode objfpc}{$H+}
 
+{
+  TODO:
+    * Keyboard navigation
+    * Decendant with TColumn class
+    * Painting of bottom right little rectangle between scrollbars
+}
+
 interface
 
 uses
@@ -42,6 +49,8 @@ type
     FTemp: integer;
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
+    procedure   HScrollBarMove(Sender: TObject; position: integer);
+    procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDefaultColWidth(const AValue: integer);
     procedure   SetDefaultRowHeight(const AValue: integer);
@@ -60,7 +69,9 @@ type
     function    GetRowCount: integer; virtual;
     procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
+    procedure   DrawGrid(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   HandlePaint; override;
+    procedure   HandleShow; override;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
   public
@@ -86,6 +97,26 @@ type
 implementation
 
 { TfpgBaseGrid }
+
+procedure TfpgBaseGrid.HScrollBarMove(Sender: TObject; position: integer);
+begin
+  if FFirstCol <> position then
+  begin
+    if Position < 1 then
+      Position := 1;
+    FFirstCol := position;
+    RePaint;
+  end;
+end;
+
+procedure TfpgBaseGrid.VScrollBarMove(Sender: TObject; position: integer);
+begin
+  if FFirstRow <> position then
+  begin
+    FFirstRow := position;
+    RePaint;
+  end;
+end;
 
 procedure TfpgBaseGrid.SetBackgroundColor(const AValue: TfpgColor);
 begin
@@ -114,8 +145,9 @@ end;
 function TfpgBaseGrid.GetColumnWidth(ACol: integer): integer;
 begin
   {$Note Later we need to take into account Fixed Columns }
+  // GetColumnWidth and SetColumnWidth will be overriden in decendant!
   if ACol = 2 then
-    Result := 60+(ACol*16) //FTemp
+    Result := FTemp
   else
     Result := 60+(ACol*16);
 end;
@@ -144,7 +176,9 @@ procedure TfpgBaseGrid.DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: in
 var
   s: string;
 begin
-  s := 'Cell(' + IntToStr(ARow) + ',' + IntToStr(ACol) + ')';
+  s := 'c(' + IntToStr(ARow) + ',' + IntToStr(ACol) + ')';
+  if (ARow = 5) and (ACol = 2) then
+    s := 'This is Graeme!';
   fpgStyle.DrawString(Canvas, ARect.Left+1, ARect.Top+1, s, Enabled);
 end;
 
@@ -160,17 +194,26 @@ begin
   Canvas.DrawLine(r.Left, r.Bottom+1, r.Right+1, r.Bottom+1);  // horizontal bottom
   Canvas.DrawLine(r.Right+1, r.Top, r.Right+1, r.Bottom+1);    // vertical right
 
-  if (col mod 2) = 0 then
+  if (ACol mod 2) = 0 then
     Canvas.SetColor(clGridHeader)
   else
     Canvas.SetColor(clMagenta);
-  Canvas.FillRectangle(r);
+  Canvas.FillRectangle(ARect);
 *)
 
   Canvas.SetTextColor(clText1);
   s := 'Head ' + IntToStr(ACol);
   fpgStyle.DrawString(Canvas, (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2),
       ARect.Top+1, s, Enabled);
+end;
+
+procedure TfpgBaseGrid.DrawGrid(ARow, ACol: integer; ARect: TfpgRect;
+  AFlags: integer);
+begin
+  // default is inside bottom/right edge or cell
+  Canvas.SetColor(clGridLines);
+  Canvas.DrawLine(ARect.Left, ARect.Bottom, ARect.Right, ARect.Bottom); // cell bottom
+  Canvas.DrawLine(ARect.Right, ARect.Bottom, ARect.Right, ARect.Top-1); // cell right
 end;
 
 procedure TfpgBaseGrid.SetFocusCol(const AValue: integer);
@@ -245,12 +288,42 @@ procedure TfpgBaseGrid.UpdateScrollBar;
 var
   HWidth: integer;
   VHeight: integer;
+  vw: integer;
+  cw: integer;
+  i: integer;
 begin
   VHeight := Height - 4;
   HWidth  := Width - 4;
+  
+  vw := VisibleWidth;
+  cw := 0;
+  for i := 1 to ColumnCount do
+    cw := cw + ColumnWidth[i];
+  FHScrollBar.Visible := cw > vw;
 
-  if FVScrollBar.Visible then Dec(HWidth, FVScrollBar.Width);
-  if FHScrollBar.Visible then Dec(VHeight, FHScrollBar.Height);
+//  writeln('RowCount:', RowCount, '  VisibleLines:', VisibleLines);
+  FVScrollBar.Visible := (RowCount > VisibleLines);
+
+  if FVScrollBar.Visible then
+  begin
+    Dec(HWidth, FVScrollBar.Width);
+    FVScrollBar.Min := 1;
+    if RowCount > 0 then
+      FVScrollBar.SliderSize := VisibleLines / RowCount
+    else
+      FVScrollBar.SliderSize := 0;
+    FVScrollBar.Max := RowCount-VisibleLines+1;
+    FVScrollBar.Position := FFirstRow;
+  end;
+  
+  if FHScrollBar.Visible then
+  begin
+    Dec(VHeight, FHScrollBar.Height);
+    FHScrollBar.Min := 1;
+    FHScrollBar.SliderSize := 0.2;
+    FHScrollBar.Max := ColumnCount;
+    FHScrollBar.Position := FFocusCol;
+  end;
 
   FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
   FHScrollBar.Left    := 2;
@@ -285,6 +358,7 @@ begin
   Canvas.FillRectangle(r);
   
   clipr.SetRect(FMargin, FMargin, VisibleWidth, Height-(2*FMargin));
+  r := clipr;
 
   if (ColumnCount > 0) and ShowHeader then
   begin
@@ -293,13 +367,15 @@ begin
     Canvas.SetFont(FHeaderFont);
     for col := FFirstCol to ColumnCount do
     begin
-      r.Width := FDefaultColWidth;
+      r.Width := ColumnWidth[col];
+      Canvas.SetClipRect(clipr);
+      Canvas.AddClipRect(r);
       DrawHeader(col, r, 0);
-      r.Left := r.Left + r.Width + 1;
+      inc(r.Left, r.Width);
       if r.Left >= clipr.Right then
         Break;  // small optimization. Don't draw what we can't see
     end;
-    r.Top := r.Top + r.Height + 1;
+    inc(r.Top, r.Height);
   end;
 
   if (RowCount > 0) and (ColumnCount > 0) then
@@ -313,17 +389,9 @@ begin
       r.Left := FMargin;
       for col := FFirstCol to ColumnCount do
       begin
-//        r.Width := ColumnWidth[col];
-        r.Width := FDefaultColWidth;
-//        Canvas.SetClipRect(clipr);
-
-        // drawing grid lines
-        if FShowGrid then
-        begin
-          Canvas.SetColor(clGridLines);
-          Canvas.DrawLine(r.Left, r.Bottom+1, r.Right+1, r.Bottom+1); // cell bottom
-          Canvas.DrawLine(r.Right+1, r.Top, r.Right+1, r.Bottom+1); // cell right
-        end;
+        r.Width := ColumnWidth[col];
+        Canvas.SetClipRect(clipr);
+//        Canvas.SetClipRect(r);
 
         if (row = FFocusRow) and (RowSelect or (col = FFocusCol)) then
         begin
@@ -343,15 +411,20 @@ begin
           Canvas.SetColor(BackgroundColor);
           Canvas.SetTextColor(clText1);
         end;
+        Canvas.AddClipRect(r);
         Canvas.FillRectangle(r);
         DrawCell(row, col, r, 0);
-        r.Left := r.Left + r.Width + 1;
 
+        // drawing grid lines
+        if FShowGrid then
+          DrawGrid(row, col, r, 0);
+
+        inc(r.Left, r.Width);
         if r.Left >= clipr.Right then
           Break;  // small optimization. Don't draw what we can't see
       end;
 //      Inc(r.Top, FDefaultRowHeight+1);
-      r.Top := r.Top + r.Height + 1;
+      inc(r.Top, r.Height);
       if r.Top >= clipr.Bottom then
         break;
     end;
@@ -359,7 +432,7 @@ begin
 
   Canvas.SetClipRect(clipr);
   Canvas.SetColor(FBackgroundColor);
-
+  
   // clearing after the last column
   if r.Left <= clipr.Right then
   begin
@@ -378,8 +451,25 @@ begin
     r.SetBottom(clipr.Bottom);
     Canvas.FillRectangle(r);
   end;
-  
+
+  // The little square in the bottom right corner
+  if FHScrollBar.Visible and FVScrollBar.Visible then
+  begin
+    Canvas.SetColor(clButtonFace);
+    Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
+                         FVScrollBar.Top+FVScrollBar.Height,
+                         FVScrollBar.Width,
+                         FHScrollBar.Height);
+  end;
+
+
   Canvas.EndDraw;
+end;
+
+procedure TfpgBaseGrid.HandleShow;
+begin
+  inherited HandleShow;
+  UpdateScrollBar;
 end;
 
 constructor TfpgBaseGrid.Create(AOwner: TComponent);
@@ -401,6 +491,7 @@ begin
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
   
+  FTemp             := 50;  // Just to proof that ColumnWidth does adjust.
   FDefaultColWidth  := 64;
   FDefaultRowHeight := FFont.Height + 2;
   FHeaderHeight     := FHeaderFont.Height + 2;
@@ -410,14 +501,15 @@ begin
   FVScrollBar := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
   FVScrollBar.Visible     := False;
-//  FVScrollBar.OnScroll := @VScrollBarMove;
+  FVScrollBar.OnScroll    := @VScrollBarMove;
+  FVScrollBar.Anchors     := [anTop, anRight, anBottom];
 
   FHScrollBar := TfpgScrollBar.Create(self);
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.Visible     := False;
-//  FHScrollBar.OnScroll := @HScrollBarMove;
-//  FHScrollBar.ScrollStep := 5;
-
+  FHScrollBar.OnScroll    := @HScrollBarMove;
+  FHScrollBar.ScrollStep  := 5;
+  FHScrollBar.Anchors     := [anLeft, anBottom, anRight];
 end;
 
 destructor TfpgBaseGrid.Destroy;
