@@ -703,12 +703,14 @@ begin
       Continue;
     if Column.Resizable then
     begin
-      if X - (cLeft + Column.Width) > 2 then
+      if (X < cLeft + Column.Width) and ((cLeft + Column.Width) - X < 3) then
       begin
-        // Mouse.Cursor := mcIBeam;?
-        //xc
-      end;
+        MouseCursor := mcSizeEW;
+      end
+      else
+        if MouseCursor <> mcDefault then MouseCursor := mcDefault;
     end;
+    Inc(cLeft, Column.Width);
   end;
 end;
 
@@ -884,7 +886,12 @@ begin
   if Y < (cRect.Top + HeaderHeight) then
   begin
     HandleHeaderMouseMove(x, y, btnstate, shiftstate);
-  end;
+  end
+  else
+    if MouseCursor <> mcDefault then MouseCursor := mcDefault;
+
+  
+
   
   //if FVScrollBar.Visible then Dec(cRect.Width, FVScrollBar.Width);
   //if FHScrollBar.Visible then Dec(cRect.Height, FHScrollBar.Height);

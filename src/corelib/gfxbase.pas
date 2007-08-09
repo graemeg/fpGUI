@@ -217,8 +217,11 @@ type
   end;
 
 
+  { TfpgCanvasBase }
+
   TfpgCanvasBase = class(TObject)
   private
+    FFastDoubleBuffer: Boolean;
     FInterpolation: TfpgCustomInterpolation;
     procedure SetInterpolation(const AValue: TfpgCustomInterpolation);
   protected
@@ -293,6 +296,7 @@ type
     property    Font: TfpgFontBase read FFont write SetFont;
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
+    property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
   end;
 
 
@@ -742,6 +746,7 @@ end;
 constructor TfpgCanvasBase.Create;
 begin
   FBufferedDraw := True;
+  FFastDoubleBuffer := True;
 end;
 
 destructor TfpgCanvasBase.Destroy;

@@ -109,6 +109,7 @@ begin
   LVColumn.Caption := 'Column 1';
   LVColumn.Width := 150;
   LVColumn.Height := 50;
+  LVColumn.Resizable := True;
   FListView.Columns.Add(LVColumn);
   FTmpListView.Columns.Add(LVColumn);
   

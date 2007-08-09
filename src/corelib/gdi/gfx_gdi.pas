@@ -69,12 +69,15 @@ type
   end;
 
 
+  { TfpgCanvasImpl }
+
   TfpgCanvasImpl = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
     FBufferBitmap: HBitmap;
     FDrawWindow: TfpgWindowImpl;
-    Fgc: TfpgGContext;
+    Fgc,
+    fBufgc: TfpgGContext;
     FWinGC: TfpgGContext;
     FBackgroundColor: TfpgColor;
     FCurFontRes: TfpgFontResourceImpl;
@@ -85,6 +88,9 @@ type
     FPen: HPEN;
     FClipRegion: HRGN;
     FIntLineStyle: integer;
+    FBufWidth,
+    FBufHeight: Integer;
+    procedure   TryFreeBackBuffer;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
@@ -1120,6 +1126,7 @@ destructor TfpgCanvasImpl.Destroy;
 begin
   if FDrawing then
     DoEndDraw;
+  TryFreeBackBuffer;
   inherited;
 end;
 
@@ -1146,10 +1153,14 @@ begin
 
     if buffered then
     begin
-      DoGetWinRect(ARect);
-      FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, (ARect.Right-ARect.Left+1), (ARect.Bottom-ARect.Top+1));
-      Fgc           := CreateCompatibleDC(FWinGC);
-      SelectObject(Fgc, FBufferBitmap);
+      if (FastDoubleBuffer = False) or (FBufferBitmap = 0) or (FBufWidth <> w) or (FBufHeight <> h) then begin
+        TryFreeBackBuffer;
+        DoGetWinRect(ARect);
+        FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, (ARect.Right-ARect.Left+1), (ARect.Bottom-ARect.Top+1));
+        FBufgc        := CreateCompatibleDC(FWinGC);
+        Fgc           := FBufgc;
+      end;
+      SelectObject(FBufgc, FBufferBitmap);
     end
     else
     begin
@@ -1181,13 +1192,9 @@ begin
     DeleteObject(FPen);
     DeleteObject(FClipRegion);
 
-    if FBufferBitmap > 0 then
-      DeleteObject(FBufferBitmap);
-    FBufferBitmap := 0;
-
-    if Fgc <> FWinGC then
-      DeleteDC(Fgc);
-
+    if FastDoubleBuffer = False then
+      TryFreeBackBuffer;
+      
     Windows.ReleaseDC(FDrawWindow.FWinHandle, FWingc);
 
     FDrawing    := False;
@@ -1402,6 +1409,17 @@ end;
 procedure TfpgCanvasImpl.DoSetTextColor(cl: TfpgColor);
 begin
   Windows.SetTextColor(Fgc, fpgColorToWin(cl));
+end;
+
+procedure TfpgCanvasImpl.TryFreeBackBuffer;
+begin
+  if FBufferBitmap > 0 then
+    DeleteObject(FBufferBitmap);
+  FBufferBitmap := 0;
+  
+  if FBufgc > 0 then
+    DeleteDC(FBufgc);
+  FBufgc := 0;
 end;
 
 procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);

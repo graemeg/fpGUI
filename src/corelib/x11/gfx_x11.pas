@@ -88,7 +88,6 @@ type
     FDrawWindow: TfpgWindowImpl;
     FBufferPixmap: TPixmap;
     FDrawHandle: TXID;
-    FFastDoubleBuffer: Boolean;
     Fgc: TfpgGContext;
     FCurFontRes: TfpgFontResourceImpl;
     FClipRect: TfpgRect;
@@ -127,7 +126,7 @@ type
   public
     constructor Create; override;
     destructor  Destroy; override;
-    property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
+
   end;
 
 
@@ -1250,7 +1249,6 @@ begin
   Fgc           := nil;
   FXftDraw      := nil;
   FClipRegion   := nil;
-  FFastDoubleBuffer := True;
 end;
 
 destructor TfpgCanvasImpl.Destroy;
