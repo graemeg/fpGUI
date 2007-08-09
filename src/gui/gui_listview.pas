@@ -75,6 +75,8 @@ type
   
   TfpgLVItemPaintPart = set of (lvppBackground, lvppIcon, lvppText, lvppFocused);
   
+  TfpgLVPaintColumnEvent = procedure(ListView: TfpgListView; Canvas: TfpgCanvas; Column: TfpgLVColumn;
+                                     ColumnIndex: Integer; Area: TfpgRect; var PaintPart: TfpgLVItemPaintPart) of object;
   TfpgLVPaintItemEvent = procedure(ListView: TfpgListView; Canvas: TfpgCanvas; Item: TfpgLVItem;
                                    ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart) of object;
   
@@ -147,6 +149,7 @@ type
   private
     FItemIndex: Integer;
     FMultiSelect: Boolean;
+    FOnPaintColumn: TfpgLVPaintColumnEvent;
     FShiftCount: Integer;
     FSelectionFollowsFocus: Boolean;
     FSelectionShiftStart: Integer;
@@ -219,6 +222,7 @@ type
     property    ItemHeight: Integer read GetItemHeight;
     property    ItemIndex: Integer read FItemIndex write SetItemIndex;
     property    OnColumnClick: TfpgLVColumnClickEvent read FOnColumnClick write SetOnColumnClick;
+    property    OnPaintColumn: TfpgLVPaintColumnEvent read FOnPaintColumn write FOnPaintColumn;
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;
   end;
 implementation
@@ -678,9 +682,9 @@ begin
   
   if FUpdateCount = 0 then
   begin
-    Canvas.BeginDraw;//(2,2, width-4, Height-4);
+    Canvas.BeginDraw(False);//(2,2, width-4, Height-4);
        PaintHeaders;
-    Canvas.EndDraw(2,2, width-4, Height-4);
+    Canvas.EndDraw;//(2,2, width-4, Height-4);
   end;
 end;
 
@@ -1007,19 +1011,34 @@ end;
 
 
 procedure TfpgListView.HandlePaint;
+var
+ ClipRect: TfpgRect;
 begin
   if FUpdateCount > 0 then
     Exit;
   
-  Canvas.BeginDraw;
+  // we disable bouble buffering
+  Canvas.BeginDraw;//(False);
 
   UpdateScrollBarPositions;
 
-  Canvas.Clear(clListBox);
-
-  PaintItems;
+  //Canvas.Clear(clListBox);
+  
+  fpgStyle.DrawControlFrame(Canvas, 0,0,Width,Height);
+  
+  ClipRect.Top := 2;
+  ClipRect.Left := 2;
+  ClipRect.Width := Width -4;
+  ClipRect.Height := Height -4;
+  
   if ShowHeaders then
+  begin
     PaintHeaders;
+    Inc(ClipRect.Top, HeaderHeight);
+    Dec(ClipRect.Height, HeaderHeight);
+  end;
+  
+  Canvas.SetClipRect(ClipRect);
 
   // this paints the small square remaining below the vscrollbar and to the right of the hscrollbar
   if FVScrollBar.Visible and FHScrollBar.Visible then
@@ -1031,9 +1050,14 @@ begin
                          Height - 2);
   end;
   
-  fpgStyle.DrawControlFrame(Canvas, 0,0,Width,Height);
+  if FVScrollBar.Visible then
+    Dec(ClipRect.Width, FVScrollBar.Width);
+  if FHScrollBar.Visible then
+    Dec(ClipRect.Height, FhScrollBar.Height);
+    
+  Canvas.SetClipRect(ClipRect);
   
-
+  PaintItems;
   
   Canvas.EndDraw;
 end;
@@ -1052,8 +1076,17 @@ var
   cTop: Integer;
   Column: TfpgLVColumn;
   Flags: TFButtonFlags;
+  ClipRect: TfpgRect;
+  cRect: TfpgRect;
+  PaintPart: TfpgLVItemPaintPart;
 begin
   cLeft := 2;
+  ClipRect.Top := 2;
+  ClipRect.Left := 2;
+  ClipRect.Height := HeaderHeight;
+  ClipRect.Width := Width -4;
+  Canvas.SetClipRect(ClipRect);
+  
   if FHScrollBar.Visible then Dec(cLeft, FHScrollBar.Position);
   cTop := 2;
   for I := 0 to Columns.Count-1 do
@@ -1063,14 +1096,26 @@ begin
     begin
       Flags := [btnIsEmbedded];
       if Column.FDown then Flags := Flags + [btnIsPressed];
-      fpgStyle.DrawButtonFace(Canvas,cLeft, cTop, cLeft+Column.Width-1, Canvas.Font.Height+10, Flags);
-      fpgStyle.DrawString(Canvas, cLeft+5, cTop+5, Column.Caption, Enabled);
+      cRect.Top := cTop;
+      cRect.Left := cLeft;
+      cRect.Width := Column.Width;
+      cRect.Height := HeaderHeight;
+      fpgStyle.DrawButtonFace(Canvas,cLeft, cRect.Top, cRect.Width, cRect.Height, Flags);
+      PaintPart := [lvppText];
+      
+      if Assigned(FOnPaintColumn) then
+        FOnPaintColumn(Self, Canvas, Column, I, cRect, PaintPart);
+        
+      if lvppText in PaintPart then
+        fpgStyle.DrawString(Canvas, cLeft+5, cTop+5, Column.Caption, Enabled);
       Inc(cLeft, Column.Width);
     end;
   end;
   if cLeft < FWidth-2 then
   begin
-    fpgStyle.DrawButtonFace(Canvas,cLeft, cTop, cLeft+(Width-3-cLeft), Canvas.Font.Height+10, [btnIsEmbedded, btnIsPressed]);
+    Canvas.SetColor(clButtonFace);
+    Canvas.FillRectangle(cLeft, cTop, cLeft+(Width-3-cLeft), Canvas.Font.Height+10);
+
   end;
 end;
 
@@ -1087,18 +1132,32 @@ var
   TheText: String;
   TextColor: TfpgColor;
   ColumnIndex: Integer;
+  cBottom: Integer;
+  vBottom: Integer;
+  cRight: Integer;
 begin
   FirstIndex := (FVScrollBar.Position) div ItemHeight;
   LastIndex := (FVScrollBar.Position+(Height-4)) div ItemHeight;
 
   if LastIndex > Fitems.Count-1 then
     LastIndex := FItems.Count-1;
+    
+  cBottom := 2 + ((LastIndex+1 - FirstIndex) * ItemHeight);
+  
+  if ShowHeaders then
+    Inc(cBottom, HeaderHeight);
+
   
   for I := FirstIndex to LastIndex do
   begin
     ItemState := [];
     PaintPart := [lvppBackground, lvppIcon, lvppText];
     ItemRect := ItemGetRect(I);
+    
+    if  (I = FirstIndex)
+    and (ItemRect.Top < 2 + HeaderHeight) then
+      Dec(cBottom, (2 + HeaderHeight) - ItemRect.Top);
+    
     Item := FItems.Item[I];
     if Item.Selected[Self] then
       Include(ItemState, lisSelected);
@@ -1161,10 +1220,25 @@ begin
         end;
       end;
     end;
+    
+    //Inc(cBottom, ItemRect.Height);
+    
     Canvas.TextColor := TextColor;
   end;
-
-
+  
+  vBottom := Height - 2;
+  if FHScrollBar.Visible then
+    Dec(vBottom, FHScrollBar.Height);
+    
+  // the painted items haven't fully covered the visible area
+  if vBottom > cBottom then begin
+    ItemRect.Left := 2;
+    ItemRect.Top := cBottom;
+    ItemRect.SetBottom(vBottom);
+    ItemRect.Width := Width - 4;
+    Canvas.SetColor(clListBox);
+    Canvas.FillRectangle(ItemRect);
+  end;
 end;
 
 procedure TfpgListView.UpdateScrollBarPositions;

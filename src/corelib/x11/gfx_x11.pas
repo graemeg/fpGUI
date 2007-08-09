@@ -80,12 +80,15 @@ type
   end;
 
 
+  { TfpgCanvasImpl }
+
   TfpgCanvasImpl = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
     FDrawWindow: TfpgWindowImpl;
     FBufferPixmap: TPixmap;
     FDrawHandle: TXID;
+    FFastDoubleBuffer: Boolean;
     Fgc: TfpgGContext;
     FCurFontRes: TfpgFontResourceImpl;
     FClipRect: TfpgRect;
@@ -94,6 +97,9 @@ type
     FXftDrawBuffer: PXftDraw;
     FColorTextXft: TXftColor;
     FClipRegion: TRegion;
+    FPixHeight,
+    FPixWidth: Integer;
+    procedure   TryFreePixmap;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
     procedure   DoSetTextColor(cl: TfpgColor); override;
@@ -121,6 +127,7 @@ type
   public
     constructor Create; override;
     destructor  Destroy; override;
+    property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
   end;
 
 
@@ -1243,12 +1250,14 @@ begin
   Fgc           := nil;
   FXftDraw      := nil;
   FClipRegion   := nil;
+  FFastDoubleBuffer := True;
 end;
 
 destructor TfpgCanvasImpl.Destroy;
 begin
   if FDrawing then
     DoEndDraw;
+  TryFreePixmap;
   inherited Destroy;
 end;
 
@@ -1282,15 +1291,21 @@ begin
 
     if buffered then
     begin
-      FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, w, h, xapplication.DisplayDepth);
+      if (FastDoubleBuffer = False) or (FBufferPixmap = 0) or (w <> FPixWidth) or (h <> FPixHeight) then
+      begin
+        TryFreePixmap;
+        FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, w, h, xapplication.DisplayDepth);
+      end;
+      FPixHeight := h;
+      FPixWidth := w;
       FDrawHandle   := FBufferPixmap;
     end
     else
     begin
-      FBufferPixmap := 0;
+      TryFreePixmap;
       FDrawHandle   := FDrawWindow.FWinHandle;
     end;
-
+    
     Fgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
     // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
     XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
@@ -1300,6 +1315,7 @@ begin
       XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
 
     FClipRegion := XCreateRegion;
+    
   end;
 
   FDrawing := True;
@@ -1326,9 +1342,8 @@ begin
     XftDrawDestroy(FXftDraw);
     XFreeGc(xapplication.display, Fgc);
 
-    if FBufferPixmap > 0 then
-      XFreePixmap(xapplication.Display, FBufferPixmap);
-    FBufferPixmap := 0;
+    if FastDoubleBuffer = False then
+      TryFreePixmap;
 
     FDrawing    := False;
     FDrawWindow := nil;
@@ -1380,6 +1395,13 @@ procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
   XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, w, h,
       Trunc(64 * a1), Trunc(64 * a2));
+end;
+
+procedure TfpgCanvasImpl.TryFreePixmap;
+begin
+  if FBufferPixmap > 0 then
+    XFreePixmap(xapplication.Display, FBufferPixmap);
+  FBufferPixmap := 0;
 end;
 
 procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);
