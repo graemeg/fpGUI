@@ -61,7 +61,7 @@ type
     procedure   SetShowHeader(const AValue: boolean);
     function    VisibleLines: integer;
     function    VisibleWidth: integer;
-    procedure   UpdateScrollBar;
+    procedure   UpdateScrollBars;
   protected
     function    GetColumnWidth(ACol: integer): integer; virtual;
     procedure   SetColumnWidth(ACol: integer; const AValue: integer); virtual;
@@ -72,6 +72,8 @@ type
     procedure   DrawGrid(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   FollowFocus; virtual;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
   public
@@ -157,7 +159,7 @@ begin
   if (ACol = 2) and (AValue <> FTemp) then
   begin
     FTemp := AValue;
-    UpdateScrollBar;
+    UpdateScrollBars;
     Repaint;
   end;
 end;
@@ -221,6 +223,16 @@ begin
   if FFocusCol = AValue then
     Exit; //==>
   FFocusCol := AValue;
+
+  // apply min/max limit
+  if FFocusCol < 1 then
+    FFocusCol := 1;
+  if FFocusCol > ColumnCount then
+    FFocusCol := ColumnCount;
+
+  FollowFocus;
+  CheckFocusChange;
+  UpdateScrollBars;
 end;
 
 procedure TfpgBaseGrid.SetFocusRow(const AValue: integer);
@@ -228,6 +240,16 @@ begin
   if FFocusRow = AValue then
     Exit; //==>
   FFocusRow := AValue;
+
+  // apply min/max limit
+  if FFocusRow < 1 then
+    FFocusRow := 1;
+  if FFocusRow > RowCount then
+    FFocusRow := RowCount;
+    
+  FollowFocus;
+  CheckFocusChange;
+  UpdateScrollBars;
 end;
 
 procedure TfpgBaseGrid.CheckFocusChange;
@@ -284,7 +306,7 @@ begin
   Result := Width - FMargin*2 - sw;
 end;
 
-procedure TfpgBaseGrid.UpdateScrollBar;
+procedure TfpgBaseGrid.UpdateScrollBars;
 var
   HWidth: integer;
   VHeight: integer;
@@ -301,28 +323,27 @@ begin
     cw := cw + ColumnWidth[i];
   FHScrollBar.Visible := cw > vw;
 
-//  writeln('RowCount:', RowCount, '  VisibleLines:', VisibleLines);
   FVScrollBar.Visible := (RowCount > VisibleLines);
 
   if FVScrollBar.Visible then
   begin
     Dec(HWidth, FVScrollBar.Width);
-    FVScrollBar.Min := 1;
+    FVScrollBar.Min         := 1;
     if RowCount > 0 then
       FVScrollBar.SliderSize := VisibleLines / RowCount
     else
       FVScrollBar.SliderSize := 0;
-    FVScrollBar.Max := RowCount-VisibleLines+1;
-    FVScrollBar.Position := FFirstRow;
+    FVScrollBar.Max         := RowCount-VisibleLines+1;
+    FVScrollBar.Position    := FFirstRow;
   end;
   
   if FHScrollBar.Visible then
   begin
     Dec(VHeight, FHScrollBar.Height);
-    FHScrollBar.Min := 1;
-    FHScrollBar.SliderSize := 0.2;
-    FHScrollBar.Max := ColumnCount;
-    FHScrollBar.Position := FFocusCol;
+    FHScrollBar.Min         := 1;
+    FHScrollBar.SliderSize  := 0.2;
+    FHScrollBar.Max         := ColumnCount;
+    FHScrollBar.Position    := FFocusCol;
   end;
 
   FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
@@ -469,7 +490,169 @@ end;
 procedure TfpgBaseGrid.HandleShow;
 begin
   inherited HandleShow;
-  UpdateScrollBar;
+  UpdateScrollBars;
+end;
+
+procedure TfpgBaseGrid.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+var
+  w: integer;
+begin
+  consumed := True;
+  case keycode of
+    keyRight:
+        begin
+          if RowSelect then
+          begin
+            w := 0;
+            FFocusCol := FFirstCol;
+            while FFocusCol < ColumnCount do
+            begin
+              inc(w, ColumnWidth[FFocusCol]+1);
+              if w + ColumnWidth[FFocusCol+1]+1 > VisibleWidth then
+                Break;
+              inc(FFocusCol);
+            end;
+          end;
+
+          if FFocusCol < ColumnCount then
+          begin
+            inc(FFocusCol);
+            FollowFocus;
+            RePaint;
+            //DoChange;
+          end;
+        end;
+
+    keyLeft:
+        begin
+          if RowSelect then
+            FFocusCol := FFirstCol;
+          if FFocusCol > 1 then
+          begin
+            dec(FFocusCol);
+            FollowFocus;
+            RePaint;
+            //DoChange;
+          end;
+        end;
+
+    keyUp:
+        begin
+          if FFocusRow > 1 then
+          begin
+            dec(FFocusRow);
+            FollowFocus;
+            RePaint;
+            //DoChange;
+          end;
+        end;
+
+    keyDown:
+        begin
+          if FFocusRow < RowCount then
+          begin
+            inc(FFocusRow);
+            FollowFocus;
+            RePaint;
+            //DoChange;
+          end;
+        end;
+
+    keyPageUp:
+        begin
+          dec(FFocusRow,VisibleLines);
+          if FFocusRow < 1 then
+            FFocusRow := 1;
+          FollowFocus;
+          RePaint;
+          //DoChange;
+        end;
+
+    keyPageDown:
+        begin
+          inc(FFocusRow,VisibleLines);
+          if FFocusRow > RowCount then
+            FFocusRow := RowCount;
+          FollowFocus;
+          RePaint;
+          //DoChange;
+        end;
+        
+    keyHome:
+        begin
+          FFocusCol := 1;
+          FollowFocus;
+          RePaint;
+          //DoChange;
+        end;
+        
+    keyEnd:
+        begin
+          FFocusCol := ColumnCount;
+          FollowFocus;
+          RePaint;
+          //DoChange;
+        end;
+
+  else
+    consumed := False;
+  end;
+  
+  if consumed then
+    CheckFocusChange;
+
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TfpgBaseGrid.FollowFocus;
+var
+  n: integer;
+  w: TfpgCoord;
+begin
+  if (RowCount > 0) and (FFocusRow < 1) then
+    FFocusRow := 1;
+  if FFocusRow > RowCount then
+    FFocusRow := RowCount;
+
+  if (ColumnCount > 0) and (FFocusCol < 1) then
+    FFocusCol := 1;
+  if FFocusCol > ColumnCount then
+    FFocusCol := ColumnCount;
+
+  if FFirstRow < 1 then
+    FFirstRow := 1;
+  if FFirstCol < 1 then
+    FFirstCol := 1;
+
+  if FFocusRow < FFirstRow then
+    FFirstRow := FFocusRow
+  else
+  begin
+    if (FFirstRow + VisibleLines - 1) < FFocusRow then
+      FFirstRow := FFocusRow - VisibleLines + 1;
+  end;  { if/else }
+
+  if FFocusCol < FFirstCol then
+    FFirstCol := FFocusCol
+  else
+  begin
+    w := 0;
+    for n := FFocusCol downto FFirstCol do
+    begin
+      w := w + ColumnWidth[n]+1;
+      if w > VisibleWidth then
+      begin
+        if n = FFocusCol then
+          FFirstCol := n
+        else
+          FFirstCol := n+1;
+        break;
+      end;
+    end;  { for }
+  end;  { if/else }
+
+  UpdateScrollBars;
 end;
 
 constructor TfpgBaseGrid.Create(AOwner: TComponent);

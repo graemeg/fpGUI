@@ -147,8 +147,10 @@ begin
   VHeight := Height - 4;
   HWidth  := Width - 4;
   
-  if FVScrollBar.Visible then Dec(HWidth, FVScrollBar.Width);
-  if FHScrollBar.Visible then Dec(VHeight, FHScrollBar.Height);
+  if FVScrollBar.Visible then
+    Dec(HWidth, FVScrollBar.Width);
+  if FHScrollBar.Visible then
+    Dec(VHeight, FHScrollBar.Height);
   
   FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
   FHScrollBar.Left    := 2;
@@ -478,7 +480,6 @@ begin
     else
       FHScrollBar.SliderSize := VisibleWidth / FLongestLineWidth;
     FHScrollBar.Position := FDrawOffset;
-    FHScrollBar.RepaintSlider;
   end;
 
   if FVScrollBar.Visible then
@@ -487,8 +488,6 @@ begin
     FVScrollBar.SliderSize := VisibleLines / LineCount;
     FVScrollBar.Max        := LineCount - VisibleLines + 1;
     FVScrollBar.Position   := FFirstLine;
-
-    FVScrollBar.RePaintSlider;
   end;
 
   if (hsbwas <> FHScrollBar.Visible) or (vsbwas <> FVScrollBar.Visible) then

@@ -67,12 +67,12 @@ begin
   chkShowHeader := CreateCheckBox(self, 10, 320, 'Show Header');
   chkShowHeader.Checked   := True;
   chkShowHeader.OnChange  := @chkShowHeaderChange;
-  chkShowHeader.Anchors := [anLeft, anBottom];
+  chkShowHeader.Anchors   := [anLeft, anBottom];
 
   chkShowGrid := CreateCheckBox(self, chkShowHeader.Right+10, 320, 'Show Grid');
   chkShowGrid.Checked     := True;
   chkShowGrid.OnChange    := @chkShowGridChange;
-  chkShowGrid.Anchors := [anLeft, anBottom];
+  chkShowGrid.Anchors     := [anLeft, anBottom];
 end;
   
   

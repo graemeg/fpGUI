@@ -92,7 +92,7 @@ begin
     OnPaintItem := @PaintItem;
     MultiSelect := True;
   end;
-  
+
   FTmpListView := TfpgListView.Create(Self);
   with FTmpListView do begin
     Parent := Self;

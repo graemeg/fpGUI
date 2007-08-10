@@ -154,6 +154,8 @@ begin
     FPosition := FMax
   else
     FPosition := AValue;
+
+  RepaintSlider;
 end;
 
 procedure TfpgScrollBar.ScrollTimer(Sender: TObject);
@@ -317,10 +319,11 @@ begin
   inherited;
   WasPressed := FStartBtnPressed or FEndBtnPressed;
   FScrollTimer.Enabled := False;
-  FStartBtnPressed := False;
-  FEndBtnPressed   := False;
-  FSliderDragging := False;
-  if WasPressed then HandlePaint;
+  FStartBtnPressed  := False;
+  FEndBtnPressed    := False;
+  FSliderDragging   := False;
+  if WasPressed then
+    HandlePaint;
 end;
 
 procedure TfpgScrollBar.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -380,8 +383,10 @@ procedure TfpgScrollBar.HandleMouseScroll(x, y: integer; shiftstate: TShiftState
   delta: smallint);
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
-  if delta < 0 then PositionChange(-FScrollStep);
-  if delta > 0 then PositionChange( FScrollStep);
+  if delta < 0 then
+    PositionChange(-FScrollStep);
+  if delta > 0 then
+    PositionChange( FScrollStep);
 end;
 
 procedure TfpgScrollBar.PositionChange(d: integer);
@@ -392,7 +397,8 @@ begin
   if FPosition > FMax then
     FPosition := FMax;
 
-  if Visible then DrawSlider(True);
+  if Visible then
+    DrawSlider(True);
 
   if Assigned(FOnScroll) then
     FOnScroll(self, FPosition);

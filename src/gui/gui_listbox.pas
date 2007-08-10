@@ -105,10 +105,6 @@ type
 implementation
 
 type
-  // used to access protected properties
-  TfpgScrollbarFriend = class(TfpgScrollbar)
-  end;
-
   // custom stringlist that will notify listbox of item changes
   TfpgListBoxStrings = class(TStringList)
   protected
@@ -218,8 +214,6 @@ begin
       FScrollBar.SliderSize := 1;
     FScrollBar.Max := ItemCount-pn+1;
     FScrollBar.Position := FFirstItem;
-    if FScrollBar.WinHandle > 0 then
-      TfpgScrollbarFriend(FScrollBar).RePaint;
   end;
 end;
 
