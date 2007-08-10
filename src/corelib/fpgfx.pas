@@ -141,6 +141,7 @@ type
     procedure   DrawControlFrame(r: TfpgRect);
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
     procedure   DrawDirectionArrow(r: TfpgRect; direction: integer);
+    procedure   DrawFocusRect(r: TfpgRect);
   end;
 
 
@@ -160,6 +161,7 @@ type
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
+    procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
   end;
 
 
@@ -789,6 +791,11 @@ begin
   DrawDirectionArrow(r.Left, r.Top, r.Width, r.Height, direction);
 end;
 
+procedure TfpgCanvas.DrawFocusRect(r: TfpgRect);
+begin
+  fpgStyle.DrawFocusRect(self, r);
+end;
+
 { TfpgWindow }
 
 constructor TfpgWindow.Create(AOwner: TComponent);
@@ -1032,6 +1039,25 @@ begin
     ACanvas.SetTextColor(clShadow1);
   end;
   ACanvas.DrawString(x, y, AText);
+end;
+
+procedure TfpgStyle.DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect);
+var
+  oldColor: TfpgColor;
+  oldLineWidth: integer;
+  oldLineStyle: TfpgLineStyle;
+begin
+  oldColor      := ACanvas.Color;
+  oldLineWidth  := ACanvas.LineWidth;
+  oldLineStyle  := ACanvas.LineStyle;
+  
+  ACanvas.SetColor(clText1);
+  ACanvas.SetLineStyle(1, lsDot);
+  ACanvas.DrawRectangle(r);
+  
+  // restore previous settings
+  ACanvas.SetColor(oldColor);
+  ACanvas.SetLineStyle(oldLineWidth, oldLineStyle);
 end;
 
 

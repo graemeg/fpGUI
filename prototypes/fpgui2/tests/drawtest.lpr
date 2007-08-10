@@ -54,6 +54,8 @@ begin
   Canvas.DrawRectangle(102, 102, 46, 46);  // (over second outer black rectangle)
   Canvas.SetColor(clMagenta);
   Canvas.DrawRectangle(104, 104, 42, 42);  // (over third outer black rectangle)
+  r.SetRect(104, 104, 42, 42);
+  Canvas.DrawFocusRect(r);  // (over third outer magenta rectangle)
 
   // Point (outer 4 corners)
   Canvas.Pixels[100, 100] := clBlue;

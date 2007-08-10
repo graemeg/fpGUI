@@ -1077,7 +1077,7 @@ begin
     mcCross:      hc := wapplication.hcr_crosshair;
     mcHourGlass:  hc := wapplication.hcr_wait;
   else
-    hc := hcr_default;
+    hc := wapplication.hcr_default;
   end;
 
   SetCursor(hc);
@@ -1153,10 +1153,13 @@ begin
 
     if buffered then
     begin
-      if (FastDoubleBuffer = False) or (FBufferBitmap = 0) or (FBufWidth <> w) or (FBufHeight <> h) then begin
+      DoGetWinRect(ARect);
+      if (FastDoubleBuffer = False) or (FBufferBitmap = 0)
+        or (FBufWidth <> ARect.Width) or (FBufHeight <> ARect.Height) then
+      begin
         TryFreeBackBuffer;
-        DoGetWinRect(ARect);
-        FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, (ARect.Right-ARect.Left+1), (ARect.Bottom-ARect.Top+1));
+//        DoGetWinRect(ARect);
+        FBufferBitmap := Windows.CreateCompatibleBitmap(FWinGC, ARect.Width, ARect.Height);
         FBufgc        := CreateCompatibleDC(FWinGC);
         Fgc           := FBufgc;
       end;
@@ -1247,7 +1250,7 @@ procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TfpgRect);
 var
   rg: HRGN;
 begin
-  rg           := CreateRectRgn(ARect.Left, ARect.Top, ARect.Right, ARect.Bottom);
+  rg           := CreateRectRgn(ARect.Left, ARect.Top, ARect.Left+ARect.Width, ARect.Top+ARect.Height);
   FClipRect    := ARect;
   FClipRectSet := True;
   CombineRgn(FClipRegion, rg, FClipRegion, RGN_AND);
@@ -1270,19 +1273,23 @@ end;
 procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
 var
   wr: Windows.TRect;
+  r: TfpgRect;
 begin
-  wr.Left   := x;
-  wr.Top    := y;
-  wr.Right  := x + w;
-  wr.Bottom := y + h;
   if FLineStyle = lsSolid then
+  begin
+    wr.Left   := x;
+    wr.Top    := y;
+    wr.Right  := x + w;
+    wr.Bottom := y + h;
     Windows.FrameRect(Fgc, wr, FBrush)  // this handles 1x1 rectangles
+  end
   else
   begin
-    DoDrawLine(wr.Left, wr.Top, wr.Right, wr.Top);
-    DoDrawLine(wr.Right, wr.Top, wr.Right, wr.Bottom);
-    DoDrawLine(wr.Right, wr.Bottom, wr.Left, wr.Bottom);
-    DoDrawLine(wr.Left, wr.Bottom, wr.Left, wr.Top);
+    r.SetRect(x, y, w, h);
+    DoDrawLine(r.Left, r.Top, r.Right, r.Top);
+    DoDrawLine(r.Right, r.Top, r.Right, r.Bottom);
+    DoDrawLine(r.Right, r.Bottom, r.Left, r.Bottom);
+    DoDrawLine(r.Left, r.Bottom, r.Left, r.Top);
   end;
 end;
 
@@ -1400,9 +1407,9 @@ PS_INSIDEFRAME. }
       end;
   end;
 
+  Windows.DeleteObject(FPen);
   lPen := CreatePen(FintLineStyle, lw, FWindowsColor);
   Windows.SelectObject(Fgc, lPen);
-  Windows.DeleteObject(FPen);
   FPen := lPen;
 end;
 

@@ -297,6 +297,8 @@ type
     property    Pixels[X, Y: integer]: TfpgColor read GetPixel write SetPixel;
     property    InterpolationFilter: TfpgCustomInterpolation read FInterpolation write SetInterpolation;
     property    FastDoubleBuffer: Boolean read FFastDoubleBuffer write FFastDoubleBuffer;
+    property    LineStyle: TfpgLineStyle read FLineStyle;
+    property    LineWidth: integer read FLineWidth;
   end;
 
 

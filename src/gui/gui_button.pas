@@ -207,10 +207,8 @@ begin
 
   if FFocused and (not FEmbedded) then
   begin
-    Canvas.SetColor(clText1);
-    Canvas.SetLineStyle(1, lsDot);
     InflateRect(r, -3, -3);
-    Canvas.DrawRectangle(r);
+    Canvas.DrawFocusRect(r);
   end
   else
   begin
