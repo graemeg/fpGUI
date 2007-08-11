@@ -5,7 +5,13 @@ unit gui_dialogs;
 interface
 
 uses
-  Classes, SysUtils, fpgfx, gui_form, gui_button, gui_label;
+  Classes,
+  SysUtils,
+  fpgfx,
+  gui_form,
+  gui_button,
+  gui_label,
+  gui_listbox;
 
 type
 
@@ -27,6 +33,20 @@ type
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
     procedure   SetMessage(AMessage: string);
+  end;
+  
+  
+  TfpgFontSelect = class(TfpgForm)
+  private
+    btnOK: TfpgButton;
+    btnCancel: TfpgButton;
+    lblLabel1: TfpgLabel;
+    lbFaces: TfpgListBox;
+    procedure   OnFaceChange(Sender: TObject);
+    procedure   btnCancelClick(Sender: TObject);
+    procedure   CreateFontList;
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -213,6 +233,63 @@ begin
   Height := FButton.Top + FButton.Height + FTextY;
 end;
 
+
+{ TfpgFontSelect }
+
+procedure TfpgFontSelect.OnFaceChange(Sender: TObject);
+begin
+
+end;
+
+procedure TfpgFontSelect.btnCancelClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TfpgFontSelect.CreateFontList;
+var
+  fl: TStringList;
+  i: integer;
+begin
+  lbFaces.Items.Clear;
+  fl := fpgApplication.GetFontFaceList;
+  for i := 0 to fl.Count-1 do
+    lbFaces.Items.Add(fl.Strings[i]);
+  fl.Free;
+end;
+
+constructor TfpgFontSelect.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  {$Note We need to localize this dialog }
+  WindowTitle := 'Select Font...';
+  Width   := 500;
+  Height  := 400;
+  WindowPosition := wpScreenCenter;
+  
+  lblLabel1 := TfpgLabel.Create(self);
+  with lblLabel1 do
+  begin
+    SetPosition(8,8,73,16);
+    Text := 'Font face:';
+  end;
+
+  lbFaces := TfpgListBox.Create(self);
+  with lbFaces do
+  begin
+    SetPosition(8,28,232,236);
+    Items.Add('Faces');
+    OnChange := @OnFaceChange;
+  end;
+
+  
+  btnCancel := CreateButton(self, 415, 370, 80, 'Cancel', @btnCancelClick);
+  btnCancel.ImageName := 'stdimg.Cancel';
+  btnCancel.ShowImage := True;
+  btnCancel.Anchors := [anRight, anBottom];
+  
+  CreateFontList;
+end;
 
 end.
 
