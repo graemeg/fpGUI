@@ -4,10 +4,12 @@ unit gui_grid;
 
 {
   TODO:
-    * Keyboard navigation
     * Decendant with TColumn class
-    * Painting of bottom right little rectangle between scrollbars
+    * Selecting the last fully visible row, scrolls the grid. Selection
+      is corruct, but because of the scroll it is confusing.
 }
+
+{.$Define DEBUG}
 
 interface
 
@@ -25,10 +27,14 @@ type
   TfpgRowChangeNotify = procedure(Sender: TObject; ARow: integer) of object;
 
 
+  // Column 2 is special just for testing purposes. Descendant classes will
+  // override that special behavior anyway.
   TfpgBaseGrid = class(TfpgWidget)
   private
     FBackgroundColor: TfpgColor;
     FColResizing: boolean;
+    FDragPos: integer;      // used for column resizing
+    FResizedCol: integer;   // used for column resizing
     FDefaultColWidth: integer;
     FDefaultRowHeight: integer;
     FFocusCol: integer;
@@ -50,6 +56,7 @@ type
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
+    procedure   SetRowSelect(const AValue: boolean);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDefaultColWidth(const AValue: integer);
@@ -72,7 +79,12 @@ type
     procedure   DrawGrid(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   FollowFocus; virtual;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
@@ -84,7 +96,7 @@ type
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    FocusCol: integer read FFocusCol write SetFocusCol;
     property    FocusRow: integer read FFocusRow write SetFocusRow;
-    property    RowSelect: boolean read FRowSelect write FRowSelect;
+    property    RowSelect: boolean read FRowSelect write SetRowSelect;
     property    ColumnCount: integer read GetColumnCount;
     property    RowCount: integer read GetRowCount;
     property    ShowHeader: boolean read FShowHeader write SetShowHeader;
@@ -109,6 +121,14 @@ begin
     FFirstCol := position;
     RePaint;
   end;
+end;
+
+procedure TfpgBaseGrid.SetRowSelect(const AValue: boolean);
+begin
+  if FRowSelect = AValue then
+    Exit; //==>
+  FRowSelect := AValue;
+  RePaint;
 end;
 
 procedure TfpgBaseGrid.VScrollBarMove(Sender: TObject; position: integer);
@@ -146,8 +166,8 @@ end;
 
 function TfpgBaseGrid.GetColumnWidth(ACol: integer): integer;
 begin
-  {$Note Later we need to take into account Fixed Columns }
   // GetColumnWidth and SetColumnWidth will be overriden in decendant!
+  // Column 2 is special just for testing purposes
   if ACol = 2 then
     Result := FTemp
   else
@@ -156,6 +176,8 @@ end;
 
 procedure TfpgBaseGrid.SetColumnWidth(ACol: integer; const AValue: integer);
 begin
+  // GetColumnWidth and SetColumnWidth will be overriden in decendant!
+  // Column 2 is special just for testing purposes
   if (ACol = 2) and (AValue <> FTemp) then
   begin
     FTemp := AValue;
@@ -180,16 +202,20 @@ var
 begin
   s := 'c(' + IntToStr(ARow) + ',' + IntToStr(ACol) + ')';
   if (ARow = 5) and (ACol = 2) then
-    s := 'This is Graeme!';
+    s := 'Here lives Graeme!';
   fpgStyle.DrawString(Canvas, ARect.Left+1, ARect.Top+1, s, Enabled);
 end;
 
 procedure TfpgBaseGrid.DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer);
 var
   s: string;
+  r: TfpgRect;
 begin
   // Here we can implement a head style check
   Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
+  r := ARect;
+  InflateRect(r, -2, -2);
+  Canvas.SetClipRect(r);  // text cannot oversheet header border
 (*
   // drawing grid lines
   Canvas.SetColor(clGridLines);
@@ -279,6 +305,7 @@ begin
   if FShowHeader = AValue then
     Exit; //==>
   FShowHeader := AValue;
+  UpdateScrollBars;
   RePaint;
 end;
 
@@ -321,9 +348,9 @@ begin
   cw := 0;
   for i := 1 to ColumnCount do
     cw := cw + ColumnWidth[i];
-  FHScrollBar.Visible := cw > vw;
 
-  FVScrollBar.Visible := (RowCount > VisibleLines);
+  FHScrollBar.Visible := cw > vw;
+  FVScrollBar.Visible := (RowCount-1 > VisibleLines);
 
   if FVScrollBar.Visible then
   begin
@@ -476,6 +503,7 @@ begin
   // The little square in the bottom right corner
   if FHScrollBar.Visible and FVScrollBar.Visible then
   begin
+    Canvas.ClearClipRect;
     Canvas.SetColor(clButtonFace);
     Canvas.FillRectangle(FHScrollBar.Left+FHScrollBar.Width,
                          FVScrollBar.Top+FVScrollBar.Height,
@@ -490,6 +518,12 @@ end;
 procedure TfpgBaseGrid.HandleShow;
 begin
   inherited HandleShow;
+  UpdateScrollBars;
+end;
+
+procedure TfpgBaseGrid.HandleResize(awidth, aheight: TfpgCoord);
+begin
+  inherited HandleResize(awidth, aheight);
   UpdateScrollBars;
 end;
 
@@ -605,6 +639,202 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TfpgBaseGrid.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
+var
+  lRow: integer;
+  lCol: integer;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+
+  lRow := FFirstRow;
+  lCol := FFirstCol;
+
+  if delta > 0 then // scroll down
+    inc(FFirstRow, abs(delta))
+  else              // scroll up
+    dec(FFirstRow, abs(delta));
+    
+  // apply limits
+  if FFirstRow > RowCount - VisibleLines + 1 then
+    FFirstRow := RowCount - VisibleLines + 1;
+  if FFirstRow < 1 then
+    FFirstRow := 1;
+    
+  // scroll left/right
+  // If vertical scrollbar is not visible, but
+  // horizontal is. Mouse wheel will scroll horizontally.  :)
+  if FHScrollBar.Visible and  (not FVScrollBar.Visible) then
+  begin
+    if delta > 0 then // scroll right
+    begin
+      if FFirstCol < ColumnCount then
+        inc(FFirstCol);
+    end
+    else
+    begin
+      if FFirstCol > 1 then
+        dec(FFirstCol);
+    end;
+  end;
+
+  if (lRow <> FFirstRow) or (lCol <> FFirstCol) then
+  begin
+    UpdateScrollBars;
+    RePaint;
+  end;
+end;
+
+procedure TfpgBaseGrid.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
+var
+  hh: integer;
+  cw: integer;
+  n: integer;
+  colresize: boolean;
+begin
+  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+  
+  if (ColumnCount < 0) or (RowCount < 1) then
+    Exit; //==>
+
+  if FColResizing then
+  begin
+    if (btnstate and 1) = 0 then
+      FColResizing := False
+    else
+    begin
+      cw := ColumnWidth[FResizedCol]+x-FDragPos;
+      if cw < 1 then
+        cw := 1;
+      SetColumnWidth(FResizedCol, cw);
+      FDragPos := x;
+    end;
+  end
+  else if ShowHeader then
+  begin
+    colresize := False;
+    hh := FHeaderHeight;
+
+    if (y <= FMargin + hh) then // we are over the Header row
+    begin
+      cw := 0;
+      for n := FFirstCol to ColumnCount do
+      begin
+        inc(cw, ColumnWidth[n]);
+        // Resizing is enabled 4 pixel either way of the cell border
+        if ((x >= (FMargin+cw - 4)) and (x <= (FMargin+cw+4))) or
+           (cw > (FMargin + VisibleWidth)) and (x >= FMargin + VisibleWidth-4)   then
+        begin
+          colresize := True;
+          Break;
+        end;
+
+        if cw > VisibleWidth then
+          Break;
+      end;  { if }
+    end;  { if/else }
+
+    if colresize then
+      MouseCursor := mcSizeEW
+    else
+      MouseCursor := mcDefault;
+  end;  { if/else }
+end;
+
+procedure TfpgBaseGrid.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+
+  {$IFDEF DEBUG}
+  if FColResizing then
+    Writeln('Column ', FResizedCol,' width = ', ColumnWidth[FResizedCol]);
+  {$ENDIF}
+
+  FColResizing  := False;
+  MouseCursor   := mcDefault;
+end;
+
+procedure TfpgBaseGrid.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  hh: integer;
+  n: integer;
+  cw: integer;
+  nw: integer;
+  prow: integer;
+  pcol: integer;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+
+  if (ColumnCount < 0) or (RowCount < 1) then
+    Exit; //==>
+
+  pcol := FFocusCol;
+  prow := FFocusRow;
+
+  // searching for the appropriate character position
+  if ShowHeader then
+    hh := FHeaderHeight+1
+  else
+    hh := 0;
+
+  if ShowHeader and (y <= FMargin+hh) then  // inside Header row
+  begin
+    {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
+    cw := 0;
+    for n := FFirstCol to ColumnCount do
+    begin
+      inc(cw, ColumnWidth[n]);
+      if (x >= (FMargin+cw - 4)) and (x <= (FMargin+cw + 4)) then
+      begin
+        {$IFDEF DEBUG} Writeln('column resize...'); {$ENDIF}
+        FColResizing  := True;
+        FResizedCol   := n;
+        FDragPos      := x;
+        Break;
+      end
+      else if (cw > FMargin+VisibleWidth) and (x >= FMargin+VisibleWidth-4) then
+      begin
+        FColResizing  := True;
+        FResizedCol   := n;
+        FDragPos      := x;
+        nw := ColumnWidth[FResizedCol] - (cw+FMargin-x);
+        if nw > 0 then
+          SetColumnWidth(FResizedCol, nw );
+        Break;
+      end;  { if/else }
+
+      if cw > VisibleWidth then
+        Break;
+    end;  { for }
+  end
+  else
+  begin   // Selecting a Cell via mouse
+    FFocusRow := FFirstRow + ((y - FMargin - hh) div FDefaultRowHeight);
+    if FFocusRow > RowCount then
+      FFocusRow := RowCount;
+    cw := 0;
+    for n := FFirstCol to ColumnCount do
+    begin
+      inc(cw, ColumnWidth[n]);
+      if FMargin+cw >= x then
+      begin
+        FFocusCol := n;
+        Break;
+      end;
+    end;
+  end;  { if/else }
+
+  if (prow <> FFocusRow) or (pcol <> FFocusCol) then
+  begin
+    FollowFocus;
+    Repaint;
+  end;
+
+  if FColResizing then
+    MouseCursor := mcSizeEW;
+
+  CheckFocusChange;
+end;
+
 procedure TfpgBaseGrid.FollowFocus;
 var
   n: integer;
@@ -659,8 +889,8 @@ constructor TfpgBaseGrid.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable   := True;
-  FWidth      := 120;
-  FHeight     := 80;
+  Width       := 120;
+  Height      := 80;
   FFocusCol   := 1;
   FPrevCol    := 0;
   FFocusRow   := 1;
@@ -670,29 +900,31 @@ begin
   FMargin     := 2;
   FShowHeader := True;
   FShowGrid   := True;
+  FRowSelect  := False;
   
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
   
-  FTemp             := 50;  // Just to proof that ColumnWidth does adjust.
+  FTemp             := 50;  // Just to prove that ColumnWidth does adjust.
   FDefaultColWidth  := 64;
   FDefaultRowHeight := FFont.Height + 2;
   FHeaderHeight     := FHeaderFont.Height + 2;
   FBackgroundColor  := clBoxColor;
   FColResizing      := False;
 
+  MinHeight   := HeaderHeight + DefaultRowHeight + FMargin;
+  MinWidth    := DefaultColWidth + FMargin;
+  
   FVScrollBar := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
   FVScrollBar.Visible     := False;
   FVScrollBar.OnScroll    := @VScrollBarMove;
-  FVScrollBar.Anchors     := [anTop, anRight, anBottom];
 
   FHScrollBar := TfpgScrollBar.Create(self);
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.Visible     := False;
   FHScrollBar.OnScroll    := @HScrollBarMove;
   FHScrollBar.ScrollStep  := 5;
-  FHScrollBar.Anchors     := [anLeft, anBottom, anRight];
 end;
 
 destructor TfpgBaseGrid.Destroy;

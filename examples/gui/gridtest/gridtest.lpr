@@ -22,6 +22,10 @@ type
     grdMain: TfpgBaseGrid;
     chkShowHeader: TfpgCheckBox;
     chkShowGrid: TfpgCheckBox;
+    chkRowSelect: TfpgCheckBox;
+    chkDisabled: TfpgCheckBox;
+    procedure   chkDisabledChange(Sender: TObject);
+    procedure   chkRowSelectChange(Sender: TObject);
     procedure   chkShowHeaderChange(Sender: TObject);
     procedure   chkShowGridChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
@@ -30,6 +34,16 @@ type
   end;
 
 { TMainForm }
+
+procedure TMainForm.chkDisabledChange(Sender: TObject);
+begin
+  grdMain.Enabled := not chkDisabled.Checked;
+end;
+
+procedure TMainForm.chkRowSelectChange(Sender: TObject);
+begin
+  grdMain.RowSelect := chkRowSelect.Checked;
+end;
 
 procedure TMainForm.chkShowHeaderChange(Sender: TObject);
 begin
@@ -73,6 +87,16 @@ begin
   chkShowGrid.Checked     := True;
   chkShowGrid.OnChange    := @chkShowGridChange;
   chkShowGrid.Anchors     := [anLeft, anBottom];
+
+  chkRowSelect := CreateCheckBox(self, chkShowGrid.Right+10, 320, 'Row Select');
+  chkRowSelect.Checked     := False;
+  chkRowSelect.OnChange    := @chkRowSelectChange;
+  chkRowSelect.Anchors     := [anLeft, anBottom];
+  
+  chkDisabled := CreateCheckBox(self, chkRowSelect.Right+10, 320, 'Disabled');
+  chkDisabled.Checked     := False;
+  chkDisabled.OnChange    := @chkDisabledChange;
+  chkDisabled.Anchors     := [anLeft, anBottom];
 end;
   
   
