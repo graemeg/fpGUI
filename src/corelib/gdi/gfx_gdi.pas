@@ -714,21 +714,21 @@ end;
 
 { TfpgApplicationImpl }
 
-function TfpgApplicationImpl.DoGetFontFaceList: TStringList;
-  //------
-  function MyFontEnumerator(var LogFont: ENUMLOGFONTEX; var TextMetric: NEWTEXTMETRICEX;
-      FontType: Integer; data: LPARAM): Integer; stdcall;
-  var
-    sl: TStringList;
-    s: string;
-  begin
-    sl  := TStringList(data);
-    s   := LogFont.elfLogFont.lfFaceName;
-    if ((sl.Count = 0) or (sl.Strings[sl.Count-1] <> s)) then
-      sl.Add(s);
-    Result := 1;
-  end;
+// helper function for DoGetFontFaceList
+function MyFontEnumerator(var LogFont: ENUMLOGFONTEX; var TextMetric: NEWTEXTMETRICEX;
+    FontType: Integer; data: LPARAM): Integer; stdcall;
+var
+  sl: TStringList;
+  s: string;
+begin
+  sl  := TStringList(data);
+  s   := LogFont.elfLogFont.lfFaceName;
+  if ((sl.Count = 0) or (sl.Strings[sl.Count-1] <> s)) then
+    sl.Add(s);
+  Result := 1;
+end;
 
+function TfpgApplicationImpl.DoGetFontFaceList: TStringList;
 var
   LFont: TLogFont;
 begin
