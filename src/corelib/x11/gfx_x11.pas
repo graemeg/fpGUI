@@ -181,6 +181,7 @@ type
     InputContext: PXIC;
     LastClickWindow: TfpgWinHandle;   // double click generation
     LastWinClickTime: longword;
+    function    DoGetFontFaceList: TStringList; override;
   public
     constructor Create(const aparams: string); override;
     destructor  Destroy; override;
@@ -478,6 +479,39 @@ begin
   SetLength(FComposeBuffer,
     XLookupString(@Event, @FComposeBuffer[1],
       SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus));
+end;
+
+function TfpgApplicationImpl.DoGetFontFaceList: TStringList;
+var
+  pfs: PFcFontSet;
+  ppat: PPFcPattern;
+  n: integer;
+  s: string;
+  pc: PChar;
+  fl: TStringList;
+begin
+  pfs := XftListFonts(Display, DefaultScreen, [FC_SCALABLE, FcTypeBool, 1, 0, FC_FAMILY, 0]);
+
+  if pfs = nil then
+    Exit; //==>
+
+  Result := TStringList.Create;
+
+  GetMem(pc, 128);
+  n := 0;
+  ppat := pfs^.fonts;
+  while n < pfs^.nfont do
+  begin
+    XftNameUnparse(ppat^, pc, 127);  //XftNameUnparse does not free the name string!
+    s := pc;
+    Result.Add(s);
+    inc(PChar(ppat), sizeof(pointer));
+    inc(n);
+  end;
+  FreeMem(pc);
+  FcFontSetDestroy(pfs);
+
+  Result.Sort;
 end;
 
 constructor TfpgApplicationImpl.Create(const aparams: string);

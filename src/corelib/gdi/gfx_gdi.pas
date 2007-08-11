@@ -168,6 +168,7 @@ type
     FFocusedWindow: THANDLE;
     LastClickWindow: TfpgWinHandle; // double click generation
     LastWinClickTime: longword;
+    function    DoGetFontFaceList: TStringList; override;
   public
     constructor Create(const aparams: string); override;
     function    DoMessagesPending: boolean;
@@ -712,6 +713,31 @@ begin
 end;
 
 { TfpgApplicationImpl }
+
+function TfpgApplicationImpl.DoGetFontFaceList: TStringList;
+  //------
+  function MyFontEnumerator(var LogFont: ENUMLOGFONTEX; var TextMetric: NEWTEXTMETRICEX;
+      FontType: Integer; data: LPARAM): Integer; stdcall;
+  var
+    sl: TStringList;
+    s: string;
+  begin
+    sl  := TStringList(data);
+    s   := LogFont.elfLogFont.lfFaceName;
+    if ((sl.Count = 0) or (sl.Strings[sl.Count-1] <> s)) then
+      sl.Add(s);
+    Result := 1;
+  end;
+
+var
+  LFont: TLogFont;
+begin
+  Result := TStringList.Create;
+  FillChar(LFont, sizeof(LFont), 0);
+  LFont.lfCharset := DEFAULT_CHARSET;
+  EnumFontFamiliesEx(Display, @LFont, @MyFontEnumerator, LongInt(result), 0);
+  Result.Sort;
+end;
 
 constructor TfpgApplicationImpl.Create(const aparams: string);
 begin

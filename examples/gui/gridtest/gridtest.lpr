@@ -57,7 +57,15 @@ begin
 end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
+var
+  sl: TStringList;
+  i: integer;
 begin
+  sl := fpgApplication.GetFontFaceList;
+  Writeln('Fontface Listing:');
+  for i := 0 to sl.Count-1 do
+    Writeln('  ', sl[i]);
+  sl.Free;
   Close;
 end;
 

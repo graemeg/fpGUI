@@ -368,8 +368,10 @@ type
     FTopModalForm: TfpgWindowBase;
   protected
     FIsInitialized: Boolean;
+    function    DoGetFontFaceList: TStringList; virtual; abstract;
   public
     constructor Create(const AParams: string); virtual; abstract;
+    function    GetFontFaceList: TStringList;
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read FTopModalForm write FTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
@@ -1472,6 +1474,13 @@ end;
 function TfpgMitchelInterpolation.MaxSupport: double;
 begin
   result := 2.0;
+end;
+
+{ TfpgApplicationBase }
+
+function TfpgApplicationBase.GetFontFaceList: TStringList;
+begin
+  Result := DoGetFontFaceList;
 end;
 
 end.
