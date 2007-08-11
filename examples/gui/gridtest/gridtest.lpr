@@ -7,9 +7,10 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
+  SysUtils,
   fpgfx,
   gui_form,
-  gui_grid,
+  gui_customgrid,
   gui_button,
   gui_checkbox;
 
@@ -19,7 +20,7 @@ type
   TMainForm = class(TfpgForm)
   private
     btnQuit: TfpgButton;
-    grdMain: TfpgBaseGrid;
+    grdMain: TfpgGrid;
     chkShowHeader: TfpgCheckBox;
     chkShowGrid: TfpgCheckBox;
     chkRowSelect: TfpgCheckBox;
@@ -61,6 +62,8 @@ begin
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
+var
+  c: integer;
 begin
   inherited Create(AOwner);
   WindowTitle := 'Grid control test';
@@ -71,12 +74,15 @@ begin
   btnQuit.ShowImage := True;
   btnQuit.Anchors := [anRight, anBottom];
   
-  grdMain := TfpgBaseGrid.Create(self);
+  grdMain := TfpgGrid.Create(self);
   grdMain.Top      := 10;
   grdMain.Left     := 10;
   grdMain.Width    := Width - 20;
   grdMain.Height   := 300;
   grdMain.Anchors  := [anLeft, anTop, anRight, anBottom];
+  grdMain.RowCount := 25;
+  for c := 1 to grdMain.ColumnCount do
+    grdMain.Columns[c-1].Title := 'Title ' + IntToStr(c);
 
   chkShowHeader := CreateCheckBox(self, 10, 320, 'Show Header');
   chkShowHeader.Checked   := True;

@@ -1,10 +1,9 @@
-unit gui_grid;
+unit gui_basegrid;
 
 {$mode objfpc}{$H+}
 
 {
   TODO:
-    * Decendant with TColumn class
     * Selecting the last fully visible row, scrolls the grid. Selection
       is corruct, but because of the scroll it is confusing.
 }
@@ -68,8 +67,9 @@ type
     procedure   SetShowHeader(const AValue: boolean);
     function    VisibleLines: integer;
     function    VisibleWidth: integer;
-    procedure   UpdateScrollBars;
   protected
+    procedure   UpdateScrollBars; virtual;
+    function    GetHeaderText(ACol: integer): string; virtual;
     function    GetColumnWidth(ACol: integer): integer; virtual;
     procedure   SetColumnWidth(ACol: integer; const AValue: integer); virtual;
     function    GetColumnCount: integer; virtual;
@@ -88,9 +88,6 @@ type
     procedure   FollowFocus; virtual;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
-  public
-    constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
     property    HeaderFont: TfpgFont read FHeaderFont;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
@@ -106,6 +103,9 @@ type
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
   end;
 
 implementation
@@ -171,7 +171,7 @@ begin
   if ACol = 2 then
     Result := FTemp
   else
-    Result := 60+(ACol*16);
+    Result := FDefaultColWidth+(ACol*16);
 end;
 
 procedure TfpgBaseGrid.SetColumnWidth(ACol: integer; const AValue: integer);
@@ -210,6 +210,7 @@ procedure TfpgBaseGrid.DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: intege
 var
   s: string;
   r: TfpgRect;
+  x: integer;
 begin
   // Here we can implement a head style check
   Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
@@ -230,9 +231,11 @@ begin
 *)
 
   Canvas.SetTextColor(clText1);
-  s := 'Head ' + IntToStr(ACol);
-  fpgStyle.DrawString(Canvas, (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2),
-      ARect.Top+1, s, Enabled);
+  s := GetHeaderText(ACol);
+  x := (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
+  if x < 1 then
+    x := 1;
+  fpgStyle.DrawString(Canvas, x, ARect.Top+1, s, Enabled);
 end;
 
 procedure TfpgBaseGrid.DrawGrid(ARow, ACol: integer; ARect: TfpgRect;
@@ -350,7 +353,7 @@ begin
     cw := cw + ColumnWidth[i];
 
   FHScrollBar.Visible := cw > vw;
-  FVScrollBar.Visible := (RowCount-1 > VisibleLines);
+  FVScrollBar.Visible := (RowCount > VisibleLines);
 
   if FVScrollBar.Visible then
   begin
@@ -383,6 +386,11 @@ begin
 
   FVScrollBar.UpdateWindowPosition;
   FHScrollBar.UpdateWindowPosition;
+end;
+
+function TfpgBaseGrid.GetHeaderText(ACol: integer): string;
+begin
+  Result := 'Head ' + IntToStr(ACol);
 end;
 
 procedure TfpgBaseGrid.HandlePaint;
