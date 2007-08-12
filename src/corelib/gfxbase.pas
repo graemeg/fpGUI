@@ -58,7 +58,7 @@ const
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
 
-  FPG_DEFAULT_FONT_DESC = 'Arial-10';
+  FPG_DEFAULT_FONT_DESC = 'Arial,Sans-10';
   UserNamedColorStart   = 128;
 
   {$I predefinedcolors.inc}

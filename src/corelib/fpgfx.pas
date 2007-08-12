@@ -847,16 +847,16 @@ end;
 constructor TfpgStyle.Create;
 begin
   // Setup font aliases
-  fpgSetNamedFont('Label1', 'Arial-10');
-  fpgSetNamedFont('Label2', 'Arial-10:bold');
-  fpgSetNamedFont('Edit1', 'Arial-10');
+  fpgSetNamedFont('Label1', FPG_DEFAULT_FONT_DESC);
+  fpgSetNamedFont('Label2', FPG_DEFAULT_FONT_DESC + ':bold');
+  fpgSetNamedFont('Edit1', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Edit2', 'Courier New-10');
-  fpgSetNamedFont('List', 'Arial-10');
+  fpgSetNamedFont('List', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Grid', 'Arial-9');
   fpgSetNamedFont('GridHeader', 'Arial-9:bold');
-  fpgSetNamedFont('Menu', 'Arial-10');
-  fpgSetNamedFont('MenuAccel', 'Arial-10:bold');
-  fpgSetNamedFont('MenuDisabled', 'Arial-10:italic');
+  fpgSetNamedFont('Menu', FPG_DEFAULT_FONT_DESC);
+  fpgSetNamedFont('MenuAccel', FPG_DEFAULT_FONT_DESC + ':underline');
+  fpgSetNamedFont('MenuDisabled', FPG_DEFAULT_FONT_DESC);
 
   {$Note Refactor this so under Windows it can detect the system colors instead.
     Also under Linux (KDE and Gnome) we should be able to detect the system colors.}

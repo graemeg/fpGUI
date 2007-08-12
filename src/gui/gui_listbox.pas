@@ -579,7 +579,7 @@ end;
 
 procedure TfpgTextListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
 begin
-  Canvas.DrawString(rect.left+2, rect.top+1, FItems.Strings[num-1]);
+  fpgStyle.DrawString(Canvas, rect.left+2, rect.top+1, FItems.Strings[num-1], Enabled);
 end;
 
 constructor TfpgTextListBox.Create(AOwner: TComponent);

@@ -10,7 +10,10 @@ uses
   fpgfx,
   gui_form,
   gui_dialogs,
-  gui_button;
+  gui_button,
+  gui_listbox,
+  gui_edit,
+  gui_label;
 
 
 type
@@ -18,8 +21,12 @@ type
   private
     btnQuit: TfpgButton;
     btnSelectFont: TfpgButton;
+    lbFontList: TfpgListBox;
+    edFontDesc: TfpgEdit;
+    lblFontList: TfpgLabel;
     procedure   btnQuitClick(Sender: TObject);
     procedure   btnSelectFontClick(Sender: TObject);
+    procedure   CreateFontList;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -33,17 +40,23 @@ end;
 
 procedure TMainForm.btnSelectFontClick(Sender: TObject);
 var
-  frm: TfpgFontSelect;
+  fontdesc: string;
 begin
-  frm := TfpgFontSelect.Create(nil);
-  try
-    if frm.ShowModal = 1 then
-    begin
-      // query font selected in dialog
-    end;
-  finally
-    frm.Free;
-  end;
+  fontdesc := edFontDesc.Text;
+  if SelectFontDialog(fontdesc) then
+    edFontDesc.Text := fontdesc;
+end;
+
+procedure TMainForm.CreateFontList;
+var
+  fl: TStringList;
+  i: integer;
+begin
+  lbFontList.Items.Clear;
+  fl := fpgApplication.GetFontFaceList;
+  for i := 0 to fl.Count-1 do
+    lbFontList.Items.Add(fl.Strings[i]);
+  fl.Free;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -51,13 +64,29 @@ begin
   inherited Create(AOwner);
   WindowTitle := 'Font selection test';
   SetPosition(100, 100, 500, 400);
+  
+  btnSelectFont := CreateButton(self, 10, 10, 110, 'Select Font...', @btnSelectFontClick);
+
+  edFontDesc := CreateEdit(self, 10, 45, Width - 20, 24);
+//  edFontDesc.Text := fpgApplication.DefaultFont.FontDesc;
+  edFontDesc.Text := 'Bitstream Vera Sans-9';
+
+  lblFontList := CreateLabel(self, 10, 80, 'Font List:');
+  lbFontList := TfpgListBox.Create(self);
+  with lbFontList do
+  begin
+    SetPosition(10, 100, 232, 236);
+    Items.Clear;
+  end;
+
+  CreateFontList;
 
   btnQuit := CreateButton(self, 415, 370, 80, 'Quit', @btnQuitClick);
   btnQuit.ImageName := 'stdimg.Quit';
   btnQuit.ShowImage := True;
   btnQuit.Anchors := [anRight, anBottom];
-  
-  btnSelectFont := CreateButton(self, 10, 20, 110, 'Select Font...', @btnSelectFontClick);
+
+  btnSelectFont.TabOrder := 0;
 end;
 
 procedure MainProc;

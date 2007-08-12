@@ -1,6 +1,12 @@
+{
+  General dialogs used by fpGUI based applications
+}
+
 unit gui_dialogs;
 
 {$mode objfpc}{$H+}
+
+{.$Define DEBUG}
 
 interface
 
@@ -11,7 +17,9 @@ uses
   gui_form,
   gui_button,
   gui_label,
-  gui_listbox;
+  gui_listbox,
+  gui_checkbox,
+  gui_edit;
 
 type
 
@@ -36,28 +44,58 @@ type
   end;
   
   
-  TfpgFontSelect = class(TfpgForm)
-  private
+  TfpgBaseDialog = class(TfpgForm)
+  protected
+    FSpacing: integer;
+    FDefaultButtonWidth: integer;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    lblLabel1: TfpgLabel;
-    lbFaces: TfpgListBox;
-    procedure   OnFaceChange(Sender: TObject);
-    procedure   btnCancelClick(Sender: TObject);
-    procedure   CreateFontList;
+    procedure   btnOKClick(Sender: TObject); virtual;
+    procedure   btnCancelClick(Sender: TObject); virtual;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
+  end;
+  
+  
+  TfpgFontSelectDialog = class(TfpgBaseDialog)
+  private
+    FSampleText: string;
+    lblLabel1: TfpgLabel;
+    lblLabel2: TfpgLabel;
+    lblLabel3: TfpgLabel;
+    lblLabel4: TfpgLabel;
+    lblLabel5: TfpgLabel;
+    lbCollection: TfpgListBox;
+    lbFaces: TfpgListBox;
+    lbSize: TfpgListBox;
+    cbBold: TfpgCheckBox;
+    cbItalic: TfpgCheckBox;
+    cbUnderline: TfpgCheckBox;
+    cbAntiAlias: TfpgCheckBox;
+    edSample: TfpgEdit;
+    procedure   OnParamChange(Sender: TObject);
+    procedure   CreateFontList;
+  protected
+    function    GetFontDesc: string;
+    procedure   SetFontDesc(Desc: string);
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure   SetSampleText(AText: string);
   end;
 
 
 procedure ShowMessage(AMessage, ATitle: string); overload;
 procedure ShowMessage(AMessage: string); overload;
 
+function SelectFontDialog(var FontDesc: string): boolean;
+
 
 implementation
 
 uses
-  gfxbase, gfx_utf8utils;
+  gfxbase,
+  gfx_utf8utils;
 
 
 procedure ShowMessage(AMessage, ATitle: string);
@@ -77,6 +115,21 @@ end;
 procedure ShowMessage(AMessage: string);
 begin
   ShowMessage(AMessage, 'Message');
+end;
+
+function SelectFontDialog(var FontDesc: string): boolean;
+var
+  frm: TfpgFontSelectDialog;
+begin
+  Result := False;
+  frm := TfpgFontSelectDialog.Create(nil);
+  frm.SetFontDesc(FontDesc);
+  if frm.ShowModal > 0 then
+  begin
+    FontDesc := frm.GetFontDesc;
+    Result := True;
+  end;
+  frm.Free;
 end;
 
 
@@ -121,16 +174,16 @@ begin
   inherited Create(AOwner);
   WindowAttributes := [waAutoPos];
   
-  FLines := TStringList.Create;
-  FFont := fpgGetFont('#Label1');
-  FTextY := 10;
-  FLineHeight := FFont.Height + 4;
-  MinWidth := 200;
+  FLines        := TStringList.Create;
+  FFont         := fpgGetFont('#Label1');
+  FTextY        := 10;
+  FLineHeight   := FFont.Height + 4;
+  MinWidth      := 200;
   FMaxLineWidth := 500;
   
   FButton := TfpgButton.Create(self);
-  FButton.text := 'OK';   // We must localize this
-  FButton.Width := 75;
+  FButton.text    := 'OK';   // We must localize this
+  FButton.Width   := 75;
   FButton.OnClick := @ButtonClick;
   
 end;
@@ -233,20 +286,62 @@ begin
   Height := FButton.Top + FButton.Height + FTextY;
 end;
 
+{ TfpgBaseDialog }
 
-{ TfpgFontSelect }
-
-procedure TfpgFontSelect.OnFaceChange(Sender: TObject);
+procedure TfpgBaseDialog.btnOKClick(Sender: TObject);
 begin
-
+  ModalResult := 1;
 end;
 
-procedure TfpgFontSelect.btnCancelClick(Sender: TObject);
+procedure TfpgBaseDialog.btnCancelClick(Sender: TObject);
 begin
+  ModalResult := 0;
   Close;
 end;
 
-procedure TfpgFontSelect.CreateFontList;
+procedure TfpgBaseDialog.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  if keycode = keyEscape then   // Esc cancels the dialog
+    Close
+  else
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+constructor TfpgBaseDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  {$Note We need to localize this dialog }
+  Width     := 500;
+  Height    := 400;
+  WindowPosition := wpScreenCenter;
+  FSpacing  := 6;
+  FDefaultButtonWidth := 80;
+
+  btnCancel := CreateButton(self, Width-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, 'Cancel', @btnCancelClick);
+  btnCancel.ImageName := 'stdimg.Cancel';
+  btnCancel.ShowImage := True;
+  btnCancel.Anchors   := [anRight, anBottom];
+
+  btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, 'OK', @btnOKClick);
+  btnOK.ImageName := 'stdimg.OK';
+  btnOK.ShowImage := True;
+  btnOK.Anchors   := [anRight, anBottom];
+end;
+
+
+{ TfpgFontSelectDialog }
+
+procedure TfpgFontSelectDialog.OnParamChange(Sender: TObject);
+var
+  fdesc: string;
+begin
+  fdesc := GetFontDesc;
+  {$IFDEF DEBUG} Writeln(fdesc); {$ENDIF}
+  edSample.FontDesc := fdesc;
+end;
+
+procedure TfpgFontSelectDialog.CreateFontList;
 var
   fl: TStringList;
   i: integer;
@@ -258,37 +353,273 @@ begin
   fl.Free;
 end;
 
-constructor TfpgFontSelect.Create(AOwner: TComponent);
+function TfpgFontSelectDialog.GetFontDesc: string;
+var
+  s: string;
+begin
+  s := lbFaces.Text + '-' + lbSize.Text;
+  if cbBold.Checked then
+    s := s + ':bold';
+
+  if cbItalic.Checked then
+    s := s + ':italic';
+
+  if cbAntiAlias.Checked then
+    s := s + ':antialias=true'
+  else
+    s := s + ':antialias=false';
+
+  if cbUnderline.Checked then
+    s := s + ':underline';
+
+  result := s;
+end;
+
+procedure TfpgFontSelectDialog.SetFontDesc(Desc: string);
+var
+  cp: integer;
+  c: char;
+  i: integer;
+  token: string;
+  prop: string;
+  propval: string;
+
+  function NextC : char;
+  begin
+    inc(cp);
+    if cp > length(desc) then
+      c := #0
+    else
+      c := desc[cp];
+    result := c;
+  end;
+
+  procedure NextToken;
+  begin
+    token := '';
+    while (c <> #0) and (c in [' ','a'..'z','A'..'Z','_','0'..'9']) do
+    begin
+      token := token + c;
+      NextC;
+    end;
+  end;
+
+begin
+  cp := 1;
+  c  := desc[1];
+
+  cbBold.Checked      := False;
+  cbItalic.Checked    := False;
+  cbUnderline.Checked := False;
+  cbAntiAlias.Checked := True;
+
+  NextToken;
+  i := lbFaces.Items.IndexOf(token);
+  if i >= 0 then
+    lbFaces.FocusItem := i+1;
+  if c = '-' then
+  begin
+    NextC;
+    NextToken;
+    i := lbSize.Items.IndexOf(token);
+    if i >= 0 then
+      lbSize.FocusItem := i+1;
+  end;
+
+  while c = ':' do
+  begin
+    NextC;
+    NextToken;
+
+    prop := UpperCase(token);
+    propval := '';
+
+    if c = '=' then
+    begin
+      NextC;
+      NextToken;
+      propval := UpperCase(token);
+    end;
+
+    // Do NOT localize these!
+    if prop = 'BOLD' then
+    begin
+      cbBold.Checked := True;
+    end
+    else if prop = 'ITALIC' then
+    begin
+      cbItalic.Checked := True;
+    end
+    else if prop = 'ANTIALIAS' then
+    begin
+      if propval = 'FALSE' then
+        cbAntialias.Checked := False;
+    end
+    else if prop = 'UNDERLINE' then
+    begin
+      cbUnderline.Checked := True;
+    end;
+
+  end;
+
+  OnParamChange(self);
+end;
+
+constructor TfpgFontSelectDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   {$Note We need to localize this dialog }
   WindowTitle := 'Select Font...';
-  Width   := 500;
-  Height  := 400;
-  WindowPosition := wpScreenCenter;
-  
+  Width       := 600;
+  MinWidth    := Width;
+  MinHeight   := Height;
+  FSampleText := 'The quick brown fox jumps over the lazy dog';
+
+  btnCancel.Left := Width - FDefaultButtonWidth - FSpacing;
+  btnOK.Left     := btnCancel.Left - FDefaultButtonWidth - FSpacing;
+
+  lblLabel5 := TfpgLabel.Create(self);
+  with lblLabel5 do
+  begin
+    SetPosition(8, 8, 73, 16);
+    Text := 'Collection:';
+  end;
+
+  {$Note This need to be implemented at some stage. }
+  lbCollection := TfpgListBox.Create(self);
+  with lbCollection do
+  begin
+    SetPosition(8, 28, 145, 236);
+    Items.Add('All Fonts');
+    // These should be stored in <users config path>/fpgui directory
+    Items.Add('Recently Used');
+    Items.Add('Favourites');
+    // From here onwards, these should be created automatically.
+    Items.Add('Fixed Width');
+    Items.Add('Sans');
+    Items.Add('Serif');
+//    OnChange := @OnParamChange;
+    FocusItem := 1;
+    Enabled := False;
+  end;
+
   lblLabel1 := TfpgLabel.Create(self);
   with lblLabel1 do
   begin
-    SetPosition(8,8,73,16);
-    Text := 'Font face:';
+    SetPosition(161, 8, 73, 16);
+    Text := 'Font:';
   end;
 
   lbFaces := TfpgListBox.Create(self);
   with lbFaces do
   begin
-    SetPosition(8,28,232,236);
-    Items.Add('Faces');
-    OnChange := @OnFaceChange;
+    SetPosition(161, 28, 232, 236);
+    Items.Add(' ');
+    OnChange := @OnParamChange;
   end;
 
-  
-  btnCancel := CreateButton(self, 415, 370, 80, 'Cancel', @btnCancelClick);
-  btnCancel.ImageName := 'stdimg.Cancel';
-  btnCancel.ShowImage := True;
-  btnCancel.Anchors := [anRight, anBottom];
-  
+  lblLabel3 := TfpgLabel.Create(self);
+  with lblLabel3 do
+  begin
+    SetPosition(401, 8, 54, 16);
+    Text := 'Size:';
+  end;
+
+  lbSize := TfpgListBox.Create(self);
+  with lbSize do
+  begin
+    SetPosition(401, 28, 52, 236);
+    { We need to improve this! }
+    Items.Add('6');
+    Items.Add('7');
+    Items.Add('8');
+    Items.Add('9');
+    Items.Add('10');
+    Items.Add('11');
+    Items.Add('12');
+    Items.Add('13');
+    Items.Add('14');
+    Items.Add('15');
+    Items.Add('16');
+    Items.Add('18');
+    Items.Add('20');
+    Items.Add('24');
+    Items.Add('28');
+    Items.Add('32');
+    Items.Add('48');
+    Items.Add('64');
+    Items.Add('72');
+    OnChange  := @OnParamChange;
+    FocusItem := 5;
+  end;
+
+  lblLabel2 := TfpgLabel.Create(self);
+  with lblLabel2 do
+  begin
+    SetPosition(461, 8, 54, 16);
+    Text := 'Typeface:';
+  end;
+
+  cbBold := TfpgCheckBox.Create(self);
+  with cbBold do
+  begin
+    SetPosition(461, 32, 87, 20);
+    Text := 'Bold';
+    OnChange := @OnParamChange;
+  end;
+
+  cbItalic := TfpgCheckBox.Create(self);
+  with cbItalic do
+  begin
+    SetPosition(461, 56, 87, 20);
+    Text := 'Italic';
+    OnChange := @OnParamChange;
+  end;
+
+  cbUnderline := TfpgCheckBox.Create(self);
+  with cbUnderline do
+  begin
+    SetPosition(461, 80, 87, 20);
+    Text := 'Underline';
+    OnChange := @OnParamChange;
+  end;
+
+  cbAntiAlias := TfpgCheckBox.Create(self);
+  with cbAntiAlias do
+  begin
+    SetPosition(461, 124, 99, 20);
+    Text := 'Anti aliasing';
+    OnChange := @OnParamChange;
+    Checked := True;
+  end;
+
+  lblLabel4 := TfpgLabel.Create(self);
+  with lblLabel4 do
+  begin
+    SetPosition(8, 268, 55, 16);
+    Text := 'Sample:';
+  end;
+
+  edSample := TfpgEdit.Create(self);
+  with edSample do
+  begin
+    SetPosition(8, 288, 584, 65);
+    Text := FSampleText;
+    Anchors := [anLeft, anTop, anRight, anBottom];
+  end;
+
   CreateFontList;
+end;
+
+procedure TfpgFontSelectDialog.SetSampleText(AText: string);
+begin
+  if FSampleText = AText then
+    Exit; //==>
+  if AText = '' then
+    Exit; //==>
+    
+  FSampleText := AText;
+  edSample.Text := FSampleText;
 end;
 
 end.

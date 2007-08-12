@@ -27,8 +27,8 @@ type
     FMouseDragPos: integer;
     FFont: TfpgFont;
     FDrawOffset: integer;
-    function    GetFontName: string;
-    procedure   SetFontName(const AValue: string);
+    function    GetFontDesc: string;
+    procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -51,7 +51,7 @@ type
     OnChange: TNotifyEvent;
   published
     property    Text: string read FText write SetText;
-    property    FontName: string read GetFontName write SetFontName;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
   end;
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
@@ -118,12 +118,12 @@ begin
     RePaint;
 end;
 
-function TfpgEdit.GetFontName: string;
+function TfpgEdit.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
 end;
 
-procedure TfpgEdit.SetFontName(const AValue: string);
+procedure TfpgEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
