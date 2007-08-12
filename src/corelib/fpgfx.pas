@@ -26,8 +26,6 @@ type
   TAnchor  = (anLeft, anRight, anTop, anBottom);
   TAnchors = set of TAnchor;
 
-  TClipboardKeyType = (ckNone, ckCopy, ckPaste, ckCut);
-
   TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
     btnIsSelected, btnHasFocus, btnHasParentColor);
     

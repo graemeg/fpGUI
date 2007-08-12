@@ -59,7 +59,8 @@ function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 implementation
 
 uses
-  gfx_UTF8utils;
+  gfx_UTF8utils,
+  gfx_clipboard;
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 begin
@@ -153,7 +154,7 @@ procedure TfpgEdit.DoCopy;
 begin
   if FSelOffset = 0 then
     Exit;
-  //SetClipboardText(SelectionText);
+  fpgClipboard.Text := SelectionText;
 end;
 
 procedure TfpgEdit.DoPaste;
@@ -161,7 +162,8 @@ var
   s: string;
 begin
   DeleteSelection;
-          //s := GetClipboardText;
+  s := fpgClipboard.Text;
+
   if (FMaxLength > 0) then
     if UTF8Length(FText) + UTF8Length(s) > FMaxLength then
       s := UTF8Copy(s, 1, FMaxLength - UTF8Length(FText));  // trim the clipboard text if needed
@@ -294,7 +296,7 @@ procedure TfpgEdit.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   lpos: integer;
-  
+
   procedure StopSelection;
   begin
     FSelStart  := FCursorPos;
@@ -305,19 +307,29 @@ begin
 //  writeln(Classname, '.Keypress');
   Consumed := False;
   lpos := FCursorPos;
-{
-  Consumed := true;
-  case ptkCheckClipBoardKey(keycode, shiftstate) of
-    ckCopy:   DoCopy;
-    ckPaste:  DoPaste;
-    ckCut:    begin
-                DoCopy;
-                DeleteSelection;
-              end;
+
+  Consumed := True;
+  case CheckClipBoardKey(keycode, shiftstate) of
+    ckCopy:
+        begin
+//          writeln('ckCopy');
+          DoCopy;
+        end;
+    ckPaste:
+        begin
+//          writeln('ckPaste');
+          DoPaste;
+        end;
+    ckCut:
+        begin
+//          writeln('ckCut');
+          DoCopy;
+          DeleteSelection;
+        end;
   else
-    Consumed := false;
+    Consumed := False;
   end;
-}
+
 
   if not Consumed then
   begin

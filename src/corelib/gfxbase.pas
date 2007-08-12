@@ -30,6 +30,8 @@ type
   TGradientDirection = (gdVertical,     // Fill vertical
                         gdHorizontal);  // Fill Horizontal
 
+  TClipboardKeyType = (ckNone, ckCopy, ckPaste, ckCut);
+  
 const
   MOUSE_LEFT       = 1;
   MOUSE_RIGHT      = 2;
@@ -381,6 +383,7 @@ type
 { ********  Helper functions  ******** }
 { Keyboard }
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
+function CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKeyType;
 
 { Color }
 function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
@@ -547,6 +550,35 @@ begin
     s := '#' + IntToHex(AKey, 4);
   end;
   Result := Result + s;
+end;
+
+function CheckClipboardKey(AKey: Word; AShiftstate: TShiftState): TClipboardKeyType;
+var
+  c: string;
+begin
+//  writeln('CheckClipboardKey');
+  Result := ckNone;
+
+  if AKey = keyInsert then
+  begin
+    if (AShiftstate = [ssCtrl]) then
+      Result := ckCopy
+    else if (AShiftstate = [ssShift]) then
+      Result := ckPaste;
+  end
+  else if (AKey = keyDelete) and (AShiftstate = [ssShift]) then
+    Result := ckCut
+  else if (AShiftstate = [ssCtrl]) then
+  begin
+    c := KeycodeToText(AKey, []);   // case is not important
+//    Writeln('Key: ', c);
+    if c = 'C' then
+      Result := ckCopy
+    else if c = 'V' then
+      Result := ckPaste
+    else if c = 'X' then
+      Result := ckCut;
+  end  { if/else }
 end;
 
 function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
