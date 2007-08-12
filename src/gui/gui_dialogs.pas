@@ -156,9 +156,7 @@ begin
   Canvas.BeginDraw;
   inherited HandlePaint;
 
-//  canvas.Clear(FBackgroundColor);
   Canvas.SetFont(FFont);
-
   y := FTextY;
   for n := 0 to FLines.Count-1 do
   begin
@@ -473,7 +471,7 @@ begin
   Width       := 600;
   MinWidth    := Width;
   MinHeight   := Height;
-  FSampleText := 'The quick brown fox jumps over the lazy dog';
+  FSampleText := 'The quick brown fox jumps over the lazy dog. 0123456789 [oO0,ilLI]';
 
   btnCancel.Left := Width - FDefaultButtonWidth - FSpacing;
   btnOK.Left     := btnCancel.Left - FDefaultButtonWidth - FSpacing;
