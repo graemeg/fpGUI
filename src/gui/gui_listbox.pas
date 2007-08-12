@@ -500,6 +500,30 @@ begin
     end;  { if/else }
     Canvas.FillRectangle(r);
 
+    // This is just a test.
+    // BlueCurve theme  :)
+    if (n = FFocusItem) and FFocused then
+    begin
+      // outer dark border
+      Canvas.SetColor(TfpgColor($3b4c71));
+      Canvas.SetLineStyle(1, lsSolid);
+      Canvas.DrawRectangle(r);
+      InflateRect(r, -1, -1);
+      // left top
+      Canvas.SetColor(TfpgColor($98b2ed));
+      Canvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
+      Canvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
+      // right bottom
+      Canvas.SetColor(TfpgColor($4468b8));
+      Canvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
+      Canvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
+      // inside gradient fill
+      InflateRect(r, -1, -1);
+      Canvas.GradientFill(r, TfpgColor($435e9a), TfpgColor($5476c4), gdVertical);
+      // reset rectangle
+      InflateRect(r, 2, 2);
+    end;
+
     DrawItem(n, r, 0);
     inc(r.Top, RowHeight);
 

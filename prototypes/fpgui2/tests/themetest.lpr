@@ -461,6 +461,7 @@ var
   part: TfpgImage;
   r: TRect;
   x, y: TfpgCoord;
+  nr: TfpgRect;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
@@ -535,6 +536,11 @@ begin
 //  Canvas.StretchDraw(5, 69, 17, 17, partimg);
   
   img.Free;
+  
+  nr.SetRect(20, 250, 100, 4);
+  Canvas.DrawControlFrame(nr);
+  nr.SetRect(70, 241, 11, 21);
+  Canvas.DrawButtonFace(nr, []);
 
 
   Canvas.EndDraw;

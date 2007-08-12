@@ -933,10 +933,11 @@ begin
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
     SetColor(RGBTripleTofpgColor(newcolor));
 
+    // We have to overshoot by 1 pixel as DrawLine paints 1 pixel short (by design)
     if ADirection = gdHorizontal then
-      DrawLine(ARect.Left+i, ARect.Top, ARect.Left+i, ARect.Bottom)
+      DrawLine(ARect.Left+i, ARect.Top, ARect.Left+i, ARect.Bottom+1)
     else
-      DrawLine(ARect.Left, ARect.Top+i, ARect.Right, ARect.Top+i);
+      DrawLine(ARect.Left, ARect.Top+i, ARect.Right+1, ARect.Top+i);
   end;
 //  Changed;
 end;
