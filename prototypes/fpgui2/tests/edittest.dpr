@@ -86,7 +86,7 @@ type
     radiobtn2: TfpgRadioButton;
     radiobtn3: TfpgRadioButton;
     trackbar1: TfpgTrackBar;
-    trackbar2: TfpgTrackBar;
+    trackbar2: TfpgTrackBarExtra;
     w: TMyWidget;
     procedure AfterCreate; override;
   end;
@@ -440,20 +440,22 @@ begin
   radiobtn3 := CreateRadioButton(self, 180, 305, 'Radio Three');
   radiobtn1.Checked := True;
   
-  lblTrackBarPos := CreateLabel(self, 420, 200, '0');
   trackbar1 := TfpgTrackBar.Create(self);
   trackbar1.Top    := 230;
   trackbar1.Left   := 335;
   trackbar1.Width  := 100;
   trackbar1.Height := 25;
-  trackbar1.OnChange := @TrackBarChanged;
-  
-  trackbar2 := TfpgTrackBar.Create(self);
+  trackbar1.ShowPosition := True;
+
+  lblTrackBarPos := CreateLabel(self, 420, 200, '0');
+
+  trackbar2 := TfpgTrackBarExtra.Create(self);
   trackbar2.Top    := 230;
   trackbar2.Left   := 440;
   trackbar2.Orientation := orVertical;
   trackbar2.Width  := 25;
   trackbar2.Height := 100;
+  trackbar2.OnChange := @TrackBarChanged;
 end;
 
 procedure MainProc;

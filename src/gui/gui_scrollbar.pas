@@ -26,15 +26,14 @@ type
 
   TfpgScrollBar = class(TfpgWidget)
   private
+    procedure   SetMax(const AValue: integer);
+    procedure   SetMin(const AValue: integer);
+    procedure   SetPosition(const AValue: integer);
+  protected
     FMax: integer;
     FMin: integer;
-    FOnScroll: TScrollNotifyEvent;
     FPosition: integer;
     FScrollStep: integer;
-    procedure SetMax(const AValue: integer);
-    procedure SetMin(const AValue: integer);
-    procedure SetPosition(const AValue: integer);
-  protected
     FSliderPos: TfpgCoord;
     FSliderLength: TfpgCoord;
     FSliderDragging: boolean;
@@ -45,9 +44,10 @@ type
     FScrollTimer: TfpgTimer;
     FActiveButtonRect: TfpgRect;
     FMousePosition: TPoint;
+    FOnScroll: TScrollNotifyEvent;
     procedure   ScrollTimer(Sender: TObject);
-    procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
-    procedure   DrawSlider(recalc: boolean);
+    procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False); virtual;
+    procedure   DrawSlider(recalc: boolean); virtual;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
@@ -155,7 +155,8 @@ begin
   else
     FPosition := AValue;
 
-  RepaintSlider;
+  if HasHandle then
+    DrawSlider(False);
 end;
 
 procedure TfpgScrollBar.ScrollTimer(Sender: TObject);

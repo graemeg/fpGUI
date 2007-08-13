@@ -4,10 +4,15 @@ unit gui_trackbar;
 
 {
   TODO:
+   - TfpgTrackBarExtra
     * Tick line orientation (top, bottom, left or right)
     * Slide the slider with the mouse button down (like a scrollbar)
     * Slider button style (rectangle, pointer, double pointer)
     * Tick captions
+
+   - TfpgTrackBar
+    * Vertical orientation
+    * show ticks property
 }
 
 interface
@@ -17,13 +22,14 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
-  gfx_widget;
+  gfx_widget,
+  gui_scrollbar;
   
 type
   TTrackBarChange = procedure(Sender: TObject; APosition: integer) of object;
   
   
-  TfpgTrackBar = class(TfpgWidget)
+  TfpgTrackBarExtra = class(TfpgWidget)
   private
     FBackgroundColor: TfpgColor;
     FMax: integer;
@@ -57,18 +63,63 @@ type
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
   end;
   
+  
+  TfpgTrackBar = class(TfpgWidget)
+  private
+    FMax: integer;
+    FMin: integer;
+    FOrientation: TOrientation;
+    FPosition: integer;
+    FScrollStep: integer;
+    FShowPosition: boolean;
+    FSliderPos: TfpgCoord;
+    FSliderLength: TfpgCoord;
+    FSliderDragging: boolean;
+    FStartBtnPressed,
+    FEndBtnPressed: Boolean;
+    FSliderDragPos: TfpgCoord;
+    FSliderDragStart: TfpgCoord;
+    FActiveButtonRect: TfpgRect;
+    FMousePosition: TPoint;
+    FOnChange: TTrackBarChange;
+    FFont: TfpgFont;
+    procedure   SetMax(const AValue: integer);
+    procedure   SetMin(const AValue: integer);
+    procedure   SetPosition(const AValue: integer);
+    procedure   SetShowPosition(const AValue: boolean);
+    function    GetTextWidth: TfpgCoord;
+  protected
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandlePaint; override;
+    procedure   DrawSlider(recalc: boolean); virtual;
+    procedure   RepaintSlider;
+    procedure   PositionChange(d: integer);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    property    Position: integer read FPosition write SetPosition default 10;
+    property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
+    property    Min: integer read FMin write SetMin default 0;
+    property    Max: integer read FMax write SetMax default 100;
+    property    ShowPosition: boolean read FShowPosition write SetShowPosition;
+    property    Orientation: TOrientation read FOrientation write FOrientation;
+    property    OnChange: TTrackBarChange read FOnChange write FOnChange;
+  end;
+  
 
 implementation
 
-{ TfpgTrackBar }
+{ TfpgTrackBarExtra }
 
-procedure TfpgTrackBar.DoChange;
+procedure TfpgTrackBarExtra.DoChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(self, FPosition);
 end;
 
-procedure TfpgTrackBar.SetBackgroundColor(const AValue: TfpgColor);
+procedure TfpgTrackBarExtra.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor = AValue then
     Exit; //==>
@@ -76,7 +127,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgTrackBar.SetMax(const AValue: integer);
+procedure TfpgTrackBarExtra.SetMax(const AValue: integer);
 begin
   if FMax = AValue then
     Exit; //==>
@@ -84,7 +135,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgTrackBar.SetMin(const AValue: integer);
+procedure TfpgTrackBarExtra.SetMin(const AValue: integer);
 begin
   if FMin = AValue then
     Exit; //==>
@@ -92,7 +143,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgTrackBar.SetPosition(const AValue: integer);
+procedure TfpgTrackBarExtra.SetPosition(const AValue: integer);
 begin
   if FPosition = AValue then
     Exit; //==>
@@ -101,7 +152,7 @@ begin
   DoChange;
 end;
 
-procedure TfpgTrackBar.SetSliderSize(const AValue: integer);
+procedure TfpgTrackBarExtra.SetSliderSize(const AValue: integer);
 begin
   if FSliderSize = AValue then
     Exit; //==>
@@ -112,7 +163,7 @@ begin
   end;
 end;
 
-procedure TfpgTrackBar.FixMinMaxOrder;
+procedure TfpgTrackBarExtra.FixMinMaxOrder;
 var
   lmin: integer;
   lmax: integer;
@@ -126,7 +177,7 @@ begin
   end;
 end;
 
-procedure TfpgTrackBar.FixPositionLimits;
+procedure TfpgTrackBarExtra.FixPositionLimits;
 begin
   if FPosition < FMin then
     FPosition := FMin;
@@ -134,7 +185,7 @@ begin
     FPosition := FMax;
 end;
 
-procedure TfpgTrackBar.DrawSlider(p: integer);
+procedure TfpgTrackBarExtra.DrawSlider(p: integer);
 var
   h: integer;
 begin
@@ -176,7 +227,7 @@ begin
   end;
 end;
 
-procedure TfpgTrackBar.HandlePaint;
+procedure TfpgTrackBarExtra.HandlePaint;
 var
   r: TfpgRect;
   linepos: double;
@@ -227,7 +278,7 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgTrackBar.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TfpgTrackBarExtra.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   p: integer;
   linepos: double;
@@ -258,7 +309,7 @@ begin
 //  inherited HandleLMouseUp(x, y, shiftstate);
 end;
 
-procedure TfpgTrackBar.HandleKeyPress(var keycode: word;
+procedure TfpgTrackBarExtra.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   OldPos: integer;
@@ -294,7 +345,7 @@ begin
     DoChange;
 end;
 
-constructor TfpgTrackBar.Create(AOwner: TComponent);
+constructor TfpgTrackBarExtra.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FBackgroundColor := clWindowBackground;
@@ -305,6 +356,273 @@ begin
   FSliderSize   := 11;
   FOrientation  := orHorizontal;
   FOnChange     := nil;
+end;
+
+{ TfpgTrackBar }
+
+procedure TfpgTrackBar.SetMax(const AValue: integer);
+begin
+  if AValue = FMax then
+    Exit;
+  if AValue < FMin then
+    FMax := FMin
+  else
+    FMax := AValue;
+  if FPosition > FMax then
+    SetPosition(FMax);
+end;
+
+procedure TfpgTrackBar.SetMin(const AValue: integer);
+begin
+  if AValue = FMin then
+    Exit;
+  if AValue > FMax then
+    FMin := FMax
+  else
+    FMin := AValue;
+  if FPosition < FMin then
+    SetPosition(FMin);
+end;
+
+procedure TfpgTrackBar.SetPosition(const AValue: integer);
+begin
+  if AValue < FMin then
+    FPosition := FMin
+  else if AValue > FMax then
+    FPosition := FMax
+  else
+    FPosition := AValue;
+
+  if HasHandle then
+    DrawSlider(False);
+end;
+
+procedure TfpgTrackBar.SetShowPosition(const AValue: boolean);
+begin
+  if FShowPosition = AValue then
+    Exit; //==>
+  FShowPosition := AValue;
+  RePaint;
+end;
+
+function TfpgTrackBar.GetTextWidth: TfpgCoord;
+begin
+  if FShowPosition then
+    Result := FFont.TextWidth(IntToStr(Max)) + 4
+  else
+    Result := 0;
+end;
+
+procedure TfpgTrackBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  tw: TfpgCoord;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+
+  if Orientation = orVertical then
+  begin
+    if (y >= Width + FSliderPos) and (y <= Width + FSliderPos + FSliderLength) then
+    begin
+      FSliderDragging := True;
+      FSliderDragPos  := y;
+    end;
+  end
+  else
+  begin
+    tw := GetTextWidth;
+    if (x >= FSliderPos) and (x <= (FSliderPos + FSliderLength + tw)) then
+    begin
+      FSliderDragging := True;
+      FSliderDragPos  := x;
+    end;
+  end;
+
+  if FSliderDragging then
+  begin
+    FSliderDragStart := FSliderPos;
+    DrawSlider(False);
+  end;
+end;
+
+procedure TfpgTrackBar.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+  FSliderDragging   := False;
+  HandlePaint;
+end;
+
+procedure TfpgTrackBar.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
+var
+  d: integer;
+  area: integer;
+  newp: integer;
+  ppos: integer;
+  tw: TfpgCoord;
+begin
+  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+
+  FMousePosition.X := x;
+  FMousePosition.Y := y;
+
+  if (not FSliderDragging) or ((btnstate and MOUSE_LEFT) = 0) then
+  begin
+    FSliderDragging := False;
+    Exit;
+  end;
+
+  if Orientation = orVertical then
+  begin
+    d     := y - FSliderDragPos;
+    area  := Height - FSliderLength-4;
+  end
+  else
+  begin
+    d     := x - FSliderDragPos;
+    tw    := GetTextWidth;
+    area  := Width - FSliderLength-4-tw;
+  end;
+
+  ppos       := FSliderPos;
+  FSliderPos := FSliderDragStart + d;
+
+  if FSliderPos < 0 then
+    FSliderPos := 0;
+  if FSliderPos > area then
+    FSliderPos := area;
+
+  if ppos <> FSliderPos then
+    DrawSlider(False);
+
+  if area <> FMin then
+    newp := FMin + Trunc((FMax - FMin)  * (FSliderPos / area))
+  else
+    newp := FMin;
+
+  if newp <> FPosition then
+  begin
+    Position := newp;
+    if Assigned(FOnChange) then
+      FOnChange(self, FPosition);
+  end;
+end;
+
+procedure TfpgTrackBar.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  Canvas.BeginDraw;
+
+  DrawSlider(True);
+  if Focused then
+  begin
+    r.SetRect(0, 0, Width, Height);
+    Canvas.DrawFocusRect(r);
+  end;
+
+  Canvas.EndDraw;
+end;
+
+procedure TfpgTrackBar.DrawSlider(recalc: boolean);
+var
+  area: TfpgCoord;
+  mm: TfpgCoord;
+  r: TfpgRect;
+  tw: TfpgCoord;
+begin
+  Canvas.BeginDraw;
+  Canvas.Clear(clWindowBackground);
+  Canvas.SetColor(clWindowBackground);
+
+  if Orientation = orVertical then
+    area := Height-4
+  else
+  begin
+    tw := GetTextWidth;
+    area := Width-4-tw;
+  end;
+
+  if recalc then
+  begin
+    if FPosition > FMax then
+      FPosition := FMax;
+    if FPosition < FMin then
+      FPosition := FMin;
+
+    mm   := FMax - FMin;
+    area := area - FSliderLength;
+    if mm = 0 then
+      FSliderPos := FMin
+    else
+      FSliderPos := Trunc(area * ((FPosition - FMin) / mm));
+    if FPosition = FMin then
+      inc(FSliderPos, 2);
+  end;
+
+  if Orientation = orVertical then
+  begin
+    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btnIsEmbedded]);
+    Canvas.EndDraw(0, Width, Width, Height - Width - Width);
+  end
+  else
+  begin
+    r.SetRect(1, (Height-4) div 2, Width - tw - 4, 4);
+    Canvas.DrawControlFrame(r);
+    r.SetRect(FSliderPos, (Height-20) div 2, FSliderLength, 21);
+    Canvas.DrawButtonFace(r, []);
+    if FShowPosition then
+    begin
+      fpgStyle.DrawString(Canvas, Width - tw, (Height - FFont.Height) div 2, IntToStr(Position), Enabled);
+    end;
+  end;
+  Canvas.EndDraw;
+end;
+
+procedure TfpgTrackBar.RepaintSlider;
+begin
+  if not HasHandle then
+    Exit; //==>
+  DrawSlider(True);
+end;
+
+procedure TfpgTrackBar.PositionChange(d: integer);
+begin
+  FPosition := FPosition + d;
+  if FPosition < FMin then
+    FPosition := FMin;
+  if FPosition > FMax then
+    FPosition := FMax;
+
+  if Visible then
+    DrawSlider(True);
+
+  if Assigned(FOnChange) then
+    FOnChange(self, FPosition);
+end;
+
+constructor TfpgTrackBar.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFocusable    := True;
+  Height        := 30;
+  Width         := 100;
+  FOrientation  := orHorizontal;
+  FMin          := 0;
+  FMax          := 100;
+  FPosition     := 0;
+  FSliderPos    := 0;
+  FSliderDragging := False;
+  FSliderLength := 11;
+  FScrollStep   := 1;
+  FShowPosition := False;
+  FFont         := fpgGetFont('#Grid');
+  FOnChange     := nil;
+end;
+
+destructor TfpgTrackBar.Destroy;
+begin
+  FOnChange := nil;
+  FFont.Free;
+  inherited Destroy;
 end;
 
 end.

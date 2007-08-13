@@ -15,7 +15,8 @@ uses
   gui_button,
   gui_label,
   gfx_imgfmt_bmp,
-  gfx_extinterpolation;
+  gfx_extinterpolation,
+  gui_trackbar;
 
 type
   { Note:
@@ -82,7 +83,9 @@ type
     sbsilver: TThemeScrollbar;
     sblunaHor: TThemeScrollbar;
     sbsilverHor: TThemeScrollbar;
-  private
+    trackbar: TfpgTrackBar;
+    lblTrackBar: TfpgLabel;
+    procedure   TrackBarChange(Sender: TObject; APosition: integer);
     procedure   btnCloseClick(Sender: TObject);
     procedure   CreateButtons;
     procedure   CreateScrollbars;
@@ -383,6 +386,11 @@ end;
 
 { TMainForm }
 
+procedure TMainForm.TrackBarChange(Sender: TObject; APosition: integer);
+begin
+  lblTrackBar.Text := IntToStr(APosition);
+end;
+
 procedure TMainForm.btnCloseClick(Sender: TObject);
 begin
   Close;
@@ -564,6 +572,19 @@ begin
   
   CreateButtons;
   CreateScrollbars;
+  
+  lblTrackBar := CreateLabel(self, 190, 265, '--');
+  
+  trackbar := TfpgTrackBar.Create(self);
+  trackbar.Width := 150;
+  trackbar.Orientation := orHorizontal;
+  trackbar.Min := 0;
+  trackbar.Max := 10;
+  trackbar.Top := 265;
+  trackbar.Left := 20;
+//  trackbar.Position := 50;
+  trackbar.OnChange := @TrackBarChange;
+  trackbar.ShowPosition := True;
 end;
   
 
