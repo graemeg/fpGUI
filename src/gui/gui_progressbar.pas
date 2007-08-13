@@ -182,7 +182,7 @@ begin
   begin
   	x := (Width - FFont.TextWidth(txt)) div 2;
   	y := (Height - FFont.Height) div 2;
-    Canvas.SetColor(clSelectionText);
+    Canvas.SetTextColor(clText1);
     Canvas.Font := FFont;
   	Canvas.DrawString(x, y, txt);
   end;

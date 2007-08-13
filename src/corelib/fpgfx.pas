@@ -868,7 +868,7 @@ begin
   fpgSetNamedColor(clText2, $000040);
   fpgSetNamedColor(clText3, $800000);
   fpgSetNamedColor(clText4, $404000);
-  fpgSetNamedColor(clSelection, $000080);
+  fpgSetNamedColor(clSelection, $0A246A);
   fpgSetNamedColor(clSelectionText, $FFFFFF);
   fpgSetNamedColor(clInactiveSel, $D0D0FF);
   fpgSetNamedColor(clInactiveSelText, $000000);
