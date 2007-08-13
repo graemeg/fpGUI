@@ -10,7 +10,7 @@ uses
   gui_button, gui_combobox, gui_dialogs, gui_edit, gui_form, gui_label, 
     gui_listbox, gui_memo, gui_popupwindow, gui_scrollbar, gui_bevel, 
     gui_checkbox, gui_radiobutton, gui_trackbar, gui_tab, gui_basegrid, 
-    gui_listview, gui_customgrid, gui_progressbar; 
+    gui_listview, gui_customgrid, gui_progressbar, gui_menu; 
 
 implementation
 
