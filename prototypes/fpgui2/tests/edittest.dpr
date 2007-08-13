@@ -20,7 +20,8 @@ uses
   gui_listbox,
   gui_checkbox,
   gui_radiobutton,
-  gui_trackbar;
+  gui_trackbar,
+  gui_progressbar;
 
 type
 
@@ -58,6 +59,7 @@ type
 
   TMainForm = class(TfpgForm)
   private
+    procedure Trackbar1Changed(Sender: TObject; APosition: integer);
     procedure btnCloseClick(Sender: TObject);
     procedure btnDisplayBMP(Sender: TObject);
     procedure btn3Click(Sender: TObject);
@@ -88,6 +90,7 @@ type
     trackbar1: TfpgTrackBar;
     trackbar2: TfpgTrackBarExtra;
     w: TMyWidget;
+    progress: TfpgProgressBar;
     procedure AfterCreate; override;
   end;
 
@@ -298,6 +301,11 @@ end;
 
 { TMainForm }
 
+procedure TMainForm.Trackbar1Changed(Sender: TObject; APosition: integer);
+begin
+  progress.Position := APosition;
+end;
+
 procedure TMainForm.btnCloseClick(Sender: TObject);
 begin
   Close;
@@ -446,6 +454,7 @@ begin
   trackbar1.Width  := 100;
   trackbar1.Height := 25;
   trackbar1.ShowPosition := True;
+  trackbar1.OnChange :=@Trackbar1Changed;
 
   lblTrackBarPos := CreateLabel(self, 420, 200, '0');
 
@@ -456,6 +465,11 @@ begin
   trackbar2.Width  := 25;
   trackbar2.Height := 100;
   trackbar2.OnChange := @TrackBarChanged;
+  
+  progress := TfpgProgressBar.Create(self);
+  progress.Left := 300;
+  progress.Top := 275;
+  progress.ShowCaption := True;
 end;
 
 procedure MainProc;
