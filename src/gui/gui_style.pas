@@ -60,7 +60,7 @@ type
       );
       
       
-  TfpgStyleOption = (
+  TfpgStyleOptionEnum = (
       soDefault,
       soFocusRect,
       soButton,
@@ -91,9 +91,9 @@ type
   private
     FRect: TfpgRect;
     FState: TfpgState;
-    FStyleOption: TfpgStyleOption;
+    FStyleOption: TfpgStyleOptionEnum;
   public
-    property  StyleOption: TfpgStyleOption read FStyleOption write FStyleOption;
+    property  StyleOption: TfpgStyleOptionEnum read FStyleOption write FStyleOption;
     property  Rect: TfpgRect read FRect write FRect;
     property  State: TfpgState read FState write FState;
   end;
