@@ -159,7 +159,7 @@ end;
 constructor TfpgForm.Create(AOwner: TComponent);
 begin
   inherited;
-  FWindowPosition  := wpUser;
+  FWindowPosition  := wpAuto;
   FWindowTitle     := '';
   FSizeable        := True;
   FParentForm      := nil;

@@ -1,14 +1,22 @@
 #!/bin/sh
 # fpc/bin must be in your PATH
-fpdoc --package=fpgfx \
+fpdoc --package=CoreLib \
   --format=html \
-  --output=html/gfx/  \
-  --content=html/gfx.cnt \
+  --output=html/corelib/  \
+  --content=html/corelib.cnt \
   --import=html/gui.cnt,../gui/ \
-  --input='-Fi../gfx ../gfx/fpgfx.pas' --descr=xml/gfx/fpgfx.xml \
-  --input='-Fi../gfx ../gfx/gfxbase.pas' --descr=xml/gfx/gfxbase.xml \
-  --input='-Fi../gfx ../gfx/geldirty.pas' --descr=xml/gfx/geldirty.xml \
-  --input='-Fi../gfx ../gfx/gelimage.pas' --descr=xml/gfx/gelimage.xml \
-  --input='-Fi../gfx ../gfx/x11/gfxinterface.pas' --descr=xml/gfx/gfxinterface.xml \
-  --input='-Fi../gfx ../gfx/x11/gfx_x11.pas' --descr=xml/gfx/gfx_x11.xml \
-  --input='-Fi../gfx ../gfx/x11/unitxft.pas' --descr=xml/gfx/unitxft.xml
+  --input='-Fi../src/corelib ../src/corelib/gfxbase.pas' --descr=xml/corelib/gfxbase.xml \
+  --input='-Fi../src/corelib ../src/corelib/x11/gfx_x11.pas' --descr=xml/corelib/x11/gfx_x11.xml \
+  --input='-Fi../src/corelib ../src/corelib/gdi/gfx_gdi.pas' --descr=xml/corelib/gdi/gfx_gdi.xml \
+  --input='-Fi../src/corelib ../src/corelib/fpgfx.pas' --descr=xml/corelib/fpgfx.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_clipboard.pas' --descr=xml/corelib/gfx_clipboard.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_cmdlineparams.pas' --descr=xml/corelib/gfx_cmdlineparams.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_extinterpolation.pas' --descr=xml/corelib/gfx_extinterpolation.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_imgfmt_bmp.pas' --descr=xml/corelib/gfx_imgfmt_bmp.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_stdimages.pas' --descr=xml/corelib/gfx_stdimages.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_utf8utils.pas' --descr=xml/corelib/gfx_utf8utils.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_widget.pas' --descr=xml/corelib/gfx_widget.xml 
+
+
+#  --input='-Fi../src/corelib ../src/corelib/x11/gfx_.pas' --descr=xml/corelib/gfx_.xml \
+

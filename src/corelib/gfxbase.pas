@@ -337,10 +337,12 @@ type
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
   public
+    // The standard constructor.
     constructor Create(AOwner: TComponent); override;
-    // make some setup before the window shows
-    procedure   AdjustWindowStyle; virtual;    // forms modify the window creation parameters
-    procedure   SetWindowParameters; virtual;  // invoked after the window is created
+    // Make some setup before the window shows. Forms modify the window creation parameters.
+    procedure   AdjustWindowStyle; virtual;
+    // Make some setup before the window shows. Invoked after the window is created.
+    procedure   SetWindowParameters; virtual;
     // general properties and functions
     function    Right: TfpgCoord;
     function    Bottom: TfpgCoord;

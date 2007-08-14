@@ -133,6 +133,8 @@ type
   public
     constructor Create(awin: TfpgWindow); reintroduce;
     destructor  Destroy; override;
+    
+    // As soon as TfpgStyle has moved out of CoreLib, these must go!
     procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
     procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord);

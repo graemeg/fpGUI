@@ -23,8 +23,8 @@ uses
 
 type
 
-  { TfpgMessageBox }
-
+  { @abstract(A standard message box dialog.) It is used by the global @link(ShowMessage)
+    function. }
   TfpgMessageBox = class(TfpgForm)
   private
     FLines: TStringList;
@@ -40,10 +40,14 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
+    { This sets the message to be displayed. }
     procedure   SetMessage(AMessage: string);
   end;
   
-  
+
+  { @abstract(A abstract dialog which forms the basis of other dialogs.) This
+    dialog implements the two basic buttons (OK, Cancel) and also some keyboard
+    support like Escape to close the dialog.}
   TfpgBaseDialog = class(TfpgForm)
   protected
     FSpacing: integer;
@@ -57,7 +61,11 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
   
-  
+
+  { @abstract(A standard font selection dialog.) It also contains a Collection
+    listbox which gets automatically populated based on the available fonts.
+    There are two custom collections called Favourites and Recently Used which
+    list you own selection of fonts.}
   TfpgFontSelectDialog = class(TfpgBaseDialog)
   private
     FSampleText: string;
@@ -81,13 +89,16 @@ type
     procedure   SetFontDesc(Desc: string);
   public
     constructor Create(AOwner: TComponent); override;
+    { This well set the sample text or font preview text to AText.}
     procedure   SetSampleText(AText: string);
   end;
 
-
+{ A convenience function to show a message using the TfpgMessageBox class.}
 procedure ShowMessage(AMessage, ATitle: string); overload;
+{ A convenience function to show a message using the TfpgMessageBox class.}
 procedure ShowMessage(AMessage: string); overload;
 
+{ A convenience function to show the font selection dialog (TfpgFontSelectDialog).}
 function SelectFontDialog(var FontDesc: string): boolean;
 
 

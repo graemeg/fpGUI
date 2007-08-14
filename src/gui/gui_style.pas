@@ -99,6 +99,17 @@ type
   end;
   
   
+  TfpgButtonFeatures = set of (bfNone, bfFlat, bfDefault);
+
+  // Button specific options
+  TfpgButtonStyleOption = class(TfpgStyleOption)
+  private
+    FButtonFeatures: TfpgButtonFeatures;
+  public
+    property  ButtonFeatures: TfpgButtonFeatures read FButtonFeatures write FButtonFeatures;
+  end;
+  
+  
   TfpgBaseStyle = class(TObject)
   public
     procedure   DrawControl(element: TfpgControlElement; const option: TfpgStyleOption; canvas: TfpgCanvas; widget: TfpgWidget = nil); virtual; abstract;
