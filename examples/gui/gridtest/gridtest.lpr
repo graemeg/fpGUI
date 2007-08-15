@@ -10,7 +10,7 @@ uses
   SysUtils,
   fpgfx,
   gui_form,
-  gui_customgrid,
+  gui_grid,
   gui_button,
   gui_checkbox;
 

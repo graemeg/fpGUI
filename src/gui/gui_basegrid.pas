@@ -352,8 +352,23 @@ begin
   for i := 1 to ColumnCount do
     cw := cw + ColumnWidth[i];
 
-  FHScrollBar.Visible := cw > vw;
-  FVScrollBar.Visible := (RowCount > VisibleLines);
+  // This needs improving while resizing
+  if cw > vw then
+    FHScrollBar.Visible := True
+  else
+  begin
+    FHScrollBar.Visible := False;
+    FFirstCol := 1;
+  end;
+  
+  // This needs improving while resizing
+  if (RowCount > VisibleLines) then
+    FVScrollBar.Visible := True
+  else
+  begin
+    FVScrollBar.Visible := False;
+    FFirstRow := 1;
+  end;
 
   if FVScrollBar.Visible then
   begin
@@ -365,6 +380,7 @@ begin
       FVScrollBar.SliderSize := 0;
     FVScrollBar.Max         := RowCount-VisibleLines+1;
     FVScrollBar.Position    := FFirstRow;
+    FVScrollBar.RepaintSlider;
   end;
   
   if FHScrollBar.Visible then
@@ -373,7 +389,8 @@ begin
     FHScrollBar.Min         := 1;
     FHScrollBar.SliderSize  := 0.2;
     FHScrollBar.Max         := ColumnCount;
-    FHScrollBar.Position    := FFocusCol;
+    FHScrollBar.Position    := FFirstCol;
+    FHScrollBar.RepaintSlider;
   end;
 
   FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
@@ -661,7 +678,7 @@ begin
     inc(FFirstRow, abs(delta))
   else              // scroll up
     dec(FFirstRow, abs(delta));
-    
+
   // apply limits
   if FFirstRow > RowCount - VisibleLines + 1 then
     FFirstRow := RowCount - VisibleLines + 1;
