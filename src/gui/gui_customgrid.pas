@@ -57,31 +57,6 @@ type
   end;
   
   
-  // Just for testing!!!!!
-  TfpgGrid = class(TfpgCustomGrid)
-  published
-    property    Columns;
-    property    DefaultColWidth;
-    property    DefaultRowHeight;
-    property    Font;
-    property    HeaderFont;
-    property    BackgroundColor;
-    property    FocusCol;
-    property    FocusRow;
-    property    RowSelect;
-    property    ColumnCount;
-    property    RowCount;
-    property    ShowHeader;
-    property    ShowGrid;
-    property    HeaderHeight;
-    property    ColResizing;
-    property    ColumnWidth;
-    property    OnFocusChange;
-    property    OnRowChange;
-
-  end;
-  
-
 implementation
 
 { TGridColumn }

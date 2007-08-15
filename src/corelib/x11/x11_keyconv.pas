@@ -6,8 +6,8 @@ interface
 
 //
   
-// This conversion was taken from the OppenOffice 1.0.1 source code.
-procedure KeySymToUnicode(ks : longword; res : PWord);
+// This conversion was taken from the OpenOffice 1.0.1 source code.
+procedure KeySymToUnicode(ks: longword; res: PWord);
 
 implementation
 

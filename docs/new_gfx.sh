@@ -1,10 +1,17 @@
-makeskel --package=fpGFX --output=xml/gfx/fpgfx.xml --input='-Fi../gfx ../gfx/fpgfx.pas'
-makeskel --package=fpGFX --output=xml/gfx/geldirty.xml --input='-Fi../gfx ../gfx/geldirty.pas'
-makeskel --package=fpGFX --output=xml/gfx/gelimage.xml --input='-Fi../gfx ../gfx/gelimage.pas'
-makeskel --package=fpGFX --output=xml/gfx/gfxbase.xml --input='-Fi../gfx ../gfx/gfxbase.pas'
 
-# X11 interface
-makeskel --package=fpGFX --output=xml/gfx/gfxinterface.xml --input='-Fi../gfx ../gfx/x11/gfxinterface.pas'
-makeskel --package=fpGFX --output=xml/gfx/gfx_x11.xml --input='-Fi../gfx ../gfx/x11/gfx_x11.pas'
-makeskel --package=fpGFX --output=xml/gfx/unitxft.xml --input='-Fi../gfx ../gfx/x11/unitxft.pas'
+#######  CoreLib
+makeskel --package=CoreLib --output=xml/corelib/gfxbase.xml --input='-Fi../src/corelib ../src/corelib/gfxbase.pas'
+makeskel --package=CoreLib --output=xml/corelib/x11/gfx_x11.xml --input='-Fi../src/corelib ../src/corelib/x11/gfx_x11.pas'
+makeskel --package=CoreLib --output=xml/corelib/gdi/gfx_gdi.xml --input='-Fi../src/corelib ../src/corelib/gdi/gfx_gdi.pas'
+makeskel --package=CoreLib --output=xml/corelib/fpgfx.xml --input='-Fi../src/corelib ../src/corelib/fpgfx.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_clipboard.xml --input='-Fi../src/corelib ../src/corelib/gfx_clipboard.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_cmdlineparams.xml --input='-Fi../src/corelib ../src/corelib/gfx_cmdlineparams.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_extinterpolation.xml --input='-Fi../src/corelib ../src/corelib/gfx_extinterpolation.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_imgfmt_bmp.xml --input='-Fi../src/corelib ../src/corelib/gfx_imgfmt_bmp.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_stdimages.xml --input='-Fi../src/corelib ../src/corelib/gfx_stdimages.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_utf8utils.xml --input='-Fi../src/corelib ../src/corelib/gfx_utf8utils.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_widget.xml --input='-Fi../src/corelib ../src/corelib/gfx_widget.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_utils.xml --input='-Fi../src/corelib ../src/corelib/x11/gfx_utils.pas'
+
+# makeskel --package=CoreLib --output=xml/corelib/gfx_.xml --input='-Fi../src/corelib ../src/corelib/gfx_.pas'
 
