@@ -106,7 +106,11 @@ type
 implementation
 
 uses
-  gfx_utils;
+  gfx_utils
+  {$IFDEF MSWINDOWS}
+  ,Windows   // Graeme: temporary, just to see how the grid looks under Windows.
+  {$ENDIF}
+  ;
   
 
 // *****  These two functions will be moving out of this unit soon!
@@ -288,16 +292,16 @@ begin
   try
     // The extra 'or' includes Normal attribute files under Windows. faAnyFile doesn't return those.
     // Reported to FPC as bug 9440 in Mantis.
-    if FindFirst(FDirectoryName + '*', faAnyFile or $00000080, SearchRec) = 0 then
+    if SysUtils.FindFirst(FDirectoryName + '*', faAnyFile or $00000080, SearchRec) = 0 then
     begin
       AddEntry(SearchRec);
-      while FindNext(SearchRec) = 0 do
+      while SysUtils.FindNext(SearchRec) = 0 do
       begin
         AddEntry(SearchRec);
       end;
     end;
   finally
-    FindClose(SearchRec);
+    SysUtils.FindClose(SearchRec);
   end;
 
   Result := FEntries.Count;
@@ -429,11 +433,11 @@ begin
           // File attributes
           s := '';
           //if (e.attributes and FILE_ATTRIBUTE_ARCHIVE) <> 0    then s := s + 'a' else s := s + ' ';
-//          if (e.attributes and FILE_ATTRIBUTE_HIDDEN) <> 0     then s := s + 'h';
-//          if (e.attributes and FILE_ATTRIBUTE_READONLY) <> 0   then s := s + 'r';
-//          if (e.attributes and FILE_ATTRIBUTE_SYSTEM) <> 0     then s := s + 's';
-//          if (e.attributes and FILE_ATTRIBUTE_TEMPORARY) <> 0  then s := s + 't';
-//          if (e.attributes and FILE_ATTRIBUTE_COMPRESSED) <> 0 then s := s + 'c';
+          if (e.attributes and FILE_ATTRIBUTE_HIDDEN) <> 0     then s := s + 'h';
+          if (e.attributes and FILE_ATTRIBUTE_READONLY) <> 0   then s := s + 'r';
+          if (e.attributes and FILE_ATTRIBUTE_SYSTEM) <> 0     then s := s + 's';
+          if (e.attributes and FILE_ATTRIBUTE_TEMPORARY) <> 0  then s := s + 't';
+          if (e.attributes and FILE_ATTRIBUTE_COMPRESSED) <> 0 then s := s + 'c';
           {$ENDIF}
           {$IFDEF UNIX}
           // rights
