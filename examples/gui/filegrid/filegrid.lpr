@@ -29,7 +29,7 @@ begin
   
   FGrid := TfpgFileGrid.Create(self);
   FGrid.SetPosition(8, 8, 600, 370);
-  FGrid.FileList.ReadDirectory('*', False);
+  FGrid.FileList.ReadDirectory('*', True);
   FGrid.Anchors := [anLeft, anTop, anBottom, anRight];
 end;
 

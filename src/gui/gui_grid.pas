@@ -243,7 +243,9 @@ function TFileList.ReadDirectory(const AFilemask: string; AShowHidden: boolean):
     e.Size := sr.Size;
     e.Attributes := sr.Attr; // this is incorrect and needs to improve!
     e.EntryType := etFile;
+    {$IFDEF UNIX}
     e.mode := sr.Mode;
+    {$ENDIF}
     e.IsLink := HasAttrib(sr.Attr, faSymLink);
     fullname := FDirectoryName + e.Name;
     e.LinkTarget := ExtractTargetSymLinkPath(fullname);
@@ -427,11 +429,11 @@ begin
           // File attributes
           s := '';
           //if (e.attributes and FILE_ATTRIBUTE_ARCHIVE) <> 0    then s := s + 'a' else s := s + ' ';
-          if (e.attributes and FILE_ATTRIBUTE_HIDDEN) <> 0     then s := s + 'h';
-          if (e.attributes and FILE_ATTRIBUTE_READONLY) <> 0   then s := s + 'r';
-          if (e.attributes and FILE_ATTRIBUTE_SYSTEM) <> 0     then s := s + 's';
-          if (e.attributes and FILE_ATTRIBUTE_TEMPORARY) <> 0  then s := s + 't';
-          if (e.attributes and FILE_ATTRIBUTE_COMPRESSED) <> 0 then s := s + 'c';
+//          if (e.attributes and FILE_ATTRIBUTE_HIDDEN) <> 0     then s := s + 'h';
+//          if (e.attributes and FILE_ATTRIBUTE_READONLY) <> 0   then s := s + 'r';
+//          if (e.attributes and FILE_ATTRIBUTE_SYSTEM) <> 0     then s := s + 's';
+//          if (e.attributes and FILE_ATTRIBUTE_TEMPORARY) <> 0  then s := s + 't';
+//          if (e.attributes and FILE_ATTRIBUTE_COMPRESSED) <> 0 then s := s + 'c';
           {$ENDIF}
           {$IFDEF UNIX}
           // rights
@@ -447,8 +449,8 @@ begin
               s := modestring[n]+s;
             inc(n);
             b := b shl 1;
-          {$ENDIF}
           end;
+          {$ENDIF}
 
           Canvas.SetFont(FixedFont);
         end;

@@ -8,7 +8,8 @@ interface
 
 uses
   gfxbase, fpgfx, gfx_gdi, gfx_stdimages, gfx_imgfmt_bmp, gfx_widget, 
-    gfx_UTF8utils, gfx_extinterpolation, gfx_cmdlineparams, gfx_clipboard; 
+    gfx_UTF8utils, gfx_extinterpolation, gfx_cmdlineparams, gfx_clipboard, 
+    gfx_utils; 
 
 implementation
 
