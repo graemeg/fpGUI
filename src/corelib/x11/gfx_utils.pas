@@ -43,6 +43,12 @@ begin
 }
 end;
 
+function FileIsSymlink(const AFilename: string): boolean;
+begin
+  Result := (FpReadLink(AFilename) <> '');
+end;
+
+
 
 end.
 

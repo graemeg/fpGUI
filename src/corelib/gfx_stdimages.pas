@@ -267,6 +267,12 @@ begin
             @stdimg_list_remove_16,
       sizeof(stdimg_list_remove_16),
             0,0 );
+            
+  img := fpgImages.AddMaskedBMP(
+            'stdimg.executable',
+            @stdimg_executable_16,
+      sizeof(stdimg_executable_16),
+            0, 0);
 
 
   // Dialog icons

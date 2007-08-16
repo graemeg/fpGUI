@@ -38,6 +38,11 @@ begin
 }
 end;
 
+function FileIsSymlink(const AFilename: string): boolean;
+begin
+  Result := False;
+end;
+
 
 end.
 
