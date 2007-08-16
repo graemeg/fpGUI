@@ -506,11 +506,9 @@ begin
 //          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
           //Writeln('Hittest: ',IntToHex((lParam and $FFFF),4));
           if (lParam and $FFFF) <= 1 then
-          begin
-            w.DoSetMouseCursor;
-//            ptkSetMouseCursor(wg.WinHandle, wg.MouseCursor);
-          end
-//          else Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+            w.DoSetMouseCursor
+          else
+            Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
 
@@ -797,7 +795,10 @@ var
   mp: boolean;
 begin
   timerid  := 0;
-  ltimerWnd := TfpgWindowImpl(wapplication.MainForm).WinHandle;
+  if Assigned(wapplication.MainForm) then
+    ltimerWnd := TfpgWindowImpl(wapplication.MainForm).WinHandle
+  else
+    ltimerWnd := 0;
 
   if (atimeoutms >= 0) and (not DoMessagesPending) then
   begin

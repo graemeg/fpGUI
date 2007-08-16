@@ -139,7 +139,7 @@ end;
 
 procedure TMainForm.MsgMove(var msg: TfpgMessageRec);
 begin
-  WriteLn('Window has been moved to ', Left, '/', Top);
+  WriteLn('Window has been moved to ', msg.Params.rect.Left, '/', msg.Params.rect.Top);
 end;
 
 procedure TMainForm.MsgKeyChar(var msg: TfpgMessageRec);
