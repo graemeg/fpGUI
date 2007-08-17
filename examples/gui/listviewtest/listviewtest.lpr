@@ -24,6 +24,9 @@ type
     procedure ShowHeadersChange(Sender: TObject);
     procedure PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas; Item: TfpgLVItem;
                                    ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart);
+    procedure ItemSelectionChanged(ListView: TfpgListView; Item: TfpgLVItem;
+                                    ItemIndex: Integer; Selected: Boolean);
+
     
   public
     constructor Create(AOwner: TComponent); override;
@@ -44,8 +47,8 @@ var
 begin
   FListView.BeginUpdate;
   FTmpListView.BeginUpdate;
-  FListView.Items.Capacity := FListView.Items.Capacity + 2000;
-  for I := 0 to 1999 do begin
+  //FListView.Items.Capacity := FListView.Items.Capacity + 2000000;
+  //for I := 0 to 1999999 do begin
     Item := FListView.ItemAdd;
     Item.Caption :=FEdit.Text+IntToStr(FListView.Items.Count);
     Item.SubItems.Add('0');
@@ -53,7 +56,7 @@ begin
     Item.SubItems.Add('2');
     Item.SubItems.Add('3');
     Item.SubItems.Add('4');
-  end;
+  //end;
   FListView.EndUpdate;
   FTmpListView.EndUpdate;
 
@@ -73,6 +76,12 @@ begin
   if ItemIndex mod 5 = 0 then  ACanvas.TextColor := clPink;
 end;
 
+procedure TMainForm.ItemSelectionChanged(ListView: TfpgListView;
+  Item: TfpgLVItem; ItemIndex: Integer; Selected: Boolean);
+begin
+  WriteLn('Item changed: ', ItemIndex, ' ', Item.Caption, ' ',Selected);
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 var
   LVColumn: TfpgLVColumn;
@@ -90,6 +99,7 @@ begin
     Width := 320;
     Height := 400;
     OnPaintItem := @PaintItem;
+    OnSelectionChanged := @ItemSelectionChanged;
     MultiSelect := True;
   end;
 
@@ -110,6 +120,7 @@ begin
   LVColumn.Width := 150;
   LVColumn.Height := 50;
   LVColumn.Resizable := True;
+  LVColumn.Alignment := taRightJustify;
   FListView.Columns.Add(LVColumn);
   FTmpListView.Columns.Add(LVColumn);
   
@@ -117,6 +128,7 @@ begin
   LVColumn.Caption := 'Column 2';
   LVColumn.Width := 100;
   LVColumn.Height := 50;
+  LVColumn.Alignment := taCenter;
   //LVColumn.Visible := False;
   FListView.Columns.Add(LVColumn);
   //FTmpListView.Columns.Add(LVColumn);
@@ -126,6 +138,8 @@ begin
   LVColumn.Width := 200;
   LVColumn.Height := 50;
   //LVColumn.Visible := False;
+  LVColumn.Resizable := True;
+  LVColumn.Alignment := taRightJustify;
   FListView.Columns.Add(LVColumn);
   FTmpListView.Columns.Add(LVColumn);
   LVColumn.ColumnIndex := 2;
