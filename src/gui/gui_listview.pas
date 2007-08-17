@@ -820,7 +820,7 @@ begin
     Inc(curLeft, Column.Width);
   end;
   if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
-    if (HeaderX - curLeft) < 5 then
+    if (HeaderX - curLeft < 5) and (HeaderX - curLeft >= 0) then
       NewMouseCursor := mcSizeEW;
       
   if FResizingColumn <> nil then
@@ -904,7 +904,7 @@ begin
         LastColumn := Column;
       end;
       if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
-        if (HeaderX - curLeft) < 5 then
+        if (HeaderX - curLeft < 5) and (HeaderX - curLeft >= 0) then
           FResizingColumn := LastColumn;
     end;
 
