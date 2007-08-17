@@ -953,6 +953,7 @@ begin
   if ADir <> '..' then
     fsel := '';
 
+  GetDir(0, ds);
   rootadd := 1;
 
   {$IFDEF MSWINDOWS}
