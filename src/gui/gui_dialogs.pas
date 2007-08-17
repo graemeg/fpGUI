@@ -1009,12 +1009,14 @@ begin
 
   grid.FileList.ReadDirectory(GetFileFilter, ShowHidden);
   grid.FileList.Sort(soFileName);
-  grid.Update;
+//  grid.Update;
 
   if fsel <> '' then
     SelectFile(fsel)
   else
     grid.FocusRow := 1;
+    
+  grid.Update;
 end;
 
 function TfpgFileDialog.SelectFile(const AFilename: string): boolean;
