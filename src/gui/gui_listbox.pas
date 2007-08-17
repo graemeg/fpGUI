@@ -184,7 +184,8 @@ begin
   VHeight := Height - 4;
   HWidth  := Width - 4;
 
-  if FScrollBar.Visible then Dec(HWidth, FScrollBar.Width);
+  if FScrollBar.Visible then
+    Dec(HWidth, FScrollBar.Width);
 
   FScrollBar.Top     := 2;
   FScrollBar.Left    := Width - FScrollBar.Width - 2;
@@ -214,6 +215,7 @@ begin
       FScrollBar.SliderSize := 1;
     FScrollBar.Max := ItemCount-pn+1;
     FScrollBar.Position := FFirstItem;
+    FScrollBar.RepaintSlider;
   end;
 end;
 

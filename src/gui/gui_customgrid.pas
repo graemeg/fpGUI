@@ -110,8 +110,8 @@ begin
     while n > AValue do
     begin
       TGridColumn(FColumns.Items[n-1]).Free;
+      FColumns.Delete(n-1);
       dec(n);
-      FColumns.Count := n;
     end;
   end;
   UpdateScrollBars;
@@ -170,7 +170,12 @@ end;
 
 destructor TfpgCustomGrid.Destroy;
 begin
-  SetColumnCount(0);
+  while FColumns.Count > 0 do
+  begin
+    TGridColumn(FColumns.Items[0]).Free;
+    FColumns.Delete(0);
+  end;
+
   FColumns.Free;
   inherited Destroy;
 end;

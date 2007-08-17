@@ -27,37 +27,41 @@ type
     FInternalBtn: TfpgButton;
     FItems: TStringList;
     FOnChange: TNotifyEvent;
+    function    GetFontDesc: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
     procedure   DoDropDown;
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
     procedure   SetFocusItem(const AValue: integer);
+    procedure   SetFontDesc(const AValue: string);
   protected
     FMargin: integer;
     procedure   SetEnabled(const AValue: boolean); override;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
-    property    Items: TStringList read FItems;
+    property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    FocusItem: integer read FFocusItem write SetFocusItem;
-    property    Font: TfpgFont read FFont;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
-    function    Text: string;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    function    Text: string;
     procedure   AfterConstruction; override;
+    property    Font: TfpgFont read FFont;
   end;
 
 
   TfpgComboBox = class(TfpgCustomComboBox)
   published
-    property    DropDownCount;
-    property    Items;
-    property    FocusItem;
     property    BackgroundColor;
+    property    DropDownCount;
+    property    FocusItem;
+    property    FontDesc;
+    property    Items;
     property    OnChange;
   end;
   
@@ -187,6 +191,11 @@ begin
   end;
 end;
 
+function TfpgCustomComboBox.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
 procedure TfpgCustomComboBox.DoDropDown;
 var
   pt: TPoint;
@@ -241,11 +250,29 @@ begin
     FOnChange(self);
 end;
 
+{ Focusitem is 1 based and NOT 0 based like the Delphi ItemIndex property.
+  So at startup, FocusItem = 0 which means nothing is selected. If FocusItem = 1
+  it means the first item is selected etc. }
 procedure TfpgCustomComboBox.SetFocusItem(const AValue: integer);
 begin
   if FFocusItem = AValue then
     Exit; //==>
   FFocusItem := AValue;
+  
+  // do some limit check corrections
+  if FFocusItem < 0 then
+    FFocusItem := 0   // nothing is selected
+  else if FFocusItem > FItems.Count then
+    FFocusItem := FItems.Count;
+
+  RePaint;
+end;
+
+procedure TfpgCustomComboBox.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  RePaint;
 end;
 
 procedure TfpgCustomComboBox.SetEnabled(const AValue: boolean);
@@ -302,7 +329,7 @@ begin
   Canvas.FillRectangle(r);
 
   // Draw select item's text
-  if FocusItem > -1 then
+  if FocusItem > 0 then
     fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
 
   Canvas.EndDraw;
@@ -323,7 +350,7 @@ begin
   FDropDownCount    := 8;
   FWidth            := 120;
   FHeight           := 23;
-  FFocusItem        := 0;
+  FFocusItem        := 0; // nothing is selected
   FMargin           := 3;
   
   FFont   := fpgGetFont('#List');
@@ -350,6 +377,7 @@ begin
     FInternalBtn.Parent    := self;
     FInternalBtn.ImageName := 'sys.sb.down';
     FInternalBtn.ShowImage := True;
+    FInternalBtn.Anchors   := [anRight, anTop];
   end;
 end;
 

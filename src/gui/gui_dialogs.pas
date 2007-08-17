@@ -6,6 +6,14 @@ unit gui_dialogs;
 
 {$mode objfpc}{$H+}
 
+{
+  TODO:
+    * Try and abstract the code to remove all IFDEF's
+    * Combobox dropdown in FileDialog doesn't function to do ModolForm being used.
+    * File Selection not working 100% in FileDialog
+    * Moving through directories not working 100% yet in FileDialog.
+}
+
 {.$Define DEBUG}
 
 interface
@@ -19,7 +27,10 @@ uses
   gui_label,
   gui_listbox,
   gui_checkbox,
-  gui_edit;
+  gui_edit,
+  gui_grid,
+  gui_combobox,
+  gui_bevel;
 
 type
 
@@ -92,6 +103,50 @@ type
     { This well set the sample text or font preview text to AText.}
     procedure   SetSampleText(AText: string);
   end;
+  
+  
+  TfpgFileDialog = class(TfpgBaseDialog)
+  private
+    FOpenMode: boolean;
+    FFilterList: TStringList;
+    FFilter: string;
+    procedure   SetFilter(const Value: string);
+    function    GetShowHidden: boolean;
+    procedure   SetShowHidden(const Value: boolean);
+    procedure   ListChanged(Sender: TObject; ARow: integer);
+    procedure   InitializeComponents;
+  protected
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   btnOKClick(Sender: TObject); override;
+    procedure   SetCurrentDirectory(const ADir: string);
+  public
+    chlDir: TfpgComboBox;
+    grid: TfpgFileGrid;
+    btnUpDir: TfpgButton;
+    btnDirNew: TfpgButton;
+    btnShowHidden: TfpgButton;
+    panel1: TfpgBevel;
+    lbFileInfo: TfpgLabel;
+    edFilename: TfpgEdit;
+    chlFilter: TfpgComboBox;
+    lb1: TfpgLabel;
+    lb2: TfpgLabel;
+    FileName: string;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   DirChange(Sender: TObject);
+    procedure   FilterChange(Sender: TObject);
+    procedure   GridDblClick(Sender: TObject; x, y: integer; var btnstate, shiftstate: word);
+    procedure   UpDirClick(Sender: TObject);
+    function    SelectFile(const AFilename: string): boolean;
+    procedure   ProcessFilterString;
+    function    GetFileFilter: string;
+    property    Filter: string read FFilter write SetFilter;
+    function    RunOpenFile: boolean;
+    function    RunSaveFile: boolean;
+    property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
+  end;
+
 
 { A convenience function to show a message using the TfpgMessageBox class.}
 procedure ShowMessage(AMessage, ATitle: string); overload;
@@ -106,9 +161,10 @@ implementation
 
 uses
   gfxbase,
+  gfx_widget,
   gfx_utf8utils;
-
-
+  
+  
 procedure ShowMessage(AMessage, ATitle: string);
 var
   frm: TfpgMessageBox;
@@ -629,6 +685,446 @@ begin
     
   FSampleText := AText;
   edSample.Text := FSampleText;
+end;
+
+{ TfpgFileDialog }
+
+procedure TfpgFileDialog.ListChanged(Sender: TObject; ARow: integer);
+var
+  s : string;
+begin
+  if grid.CurrentEntry = nil then
+    Exit; //==>
+  s := grid.CurrentEntry.Name;
+
+  if grid.CurrentEntry.IsLink then
+    s := s + ' -> ' + grid.CurrentEntry.LinkTarget;
+
+  if grid.CurrentEntry.EntryType <> etDir then
+    edFileName.Text := grid.CurrentEntry.Name;
+    
+  btnOK.Enabled := grid.CurrentEntry.EntryType = etFile;
+
+  lbFileInfo.Text := s;
+end;
+
+procedure TfpgFileDialog.SetFilter(const Value: string);
+begin
+  FFilter := Value;
+  ProcessFilterString;
+end;
+
+function TfpgFileDialog.GetShowHidden: boolean;
+begin
+  Result := btnShowHidden.Down;
+end;
+
+procedure TfpgFileDialog.SetShowHidden(const Value: boolean);
+begin
+  btnShowHidden.Down := Value;
+end;
+
+procedure TfpgFileDialog.InitializeComponents;
+begin
+  chlDir := TfpgComboBox.Create(self);
+  with chlDir do
+  begin
+    SetPosition(8, 12, 526, 22);
+    Anchors := [anLeft, anRight, anTop];
+    FontDesc := '#List';
+    OnChange := @DirChange;
+  end;
+
+  grid := TfpgFileGrid.Create(self);
+  with grid do
+  begin
+    SetPosition(8, 44, 622, 200);
+    Anchors := [anLeft, anRight, anTop, anBottom];
+    OnRowChange := @ListChanged;
+//    OnDoubleClick := @GridDblClick;
+  end;
+
+  btnUpDir := TfpgButton.Create(self);
+  with btnUpDir do
+  begin
+    SetPosition(540, 11, 26, 24);
+    Anchors := [anRight, anTop];
+    Text := '';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.folderup';
+    ModalResult := 0;
+    Focusable := False;
+    OnClick := @UpDirClick;
+  end;
+
+  btnDirNew := TfpgButton.Create(self);
+  with btnDirNew do
+  begin
+    SetPosition(572, 11, 26, 24);
+    Anchors := [anRight, anTop];
+    Text := '';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.foldernew';
+    ModalResult := 0;
+    Focusable := False;
+  end;
+
+  btnShowHidden := TfpgButton.Create(self);
+  with btnShowHidden do
+  begin
+    SetPosition(604, 11, 26, 24);
+    Anchors := [anRight, anTop];
+    Text := '';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.hidden';
+    ModalResult := 0;
+    Focusable := False;
+    GroupIndex := 1;
+    AllowAllUp := True;
+    OnClick := @DirChange;
+  end;
+
+  { Create lower Panel details }
+  
+  panel1 := TfpgBevel.Create(self);
+  with panel1 do
+  begin
+    SetPosition(8, 253, 622, 25);
+    Anchors := [anLeft, anRight, anBottom];
+    Shape := bsBox;
+    Style := bsLowered;
+  end;
+
+  lbFileInfo := TfpgLabel.Create(panel1);
+  with lbFileInfo do
+  begin
+    SetPosition(5, 4, 609, 16);
+    Anchors := [anLeft, anRight, anTop];
+    Text := ' ';
+    FontDesc := '#Label1';
+  end;
+
+  edFilename := TfpgEdit.Create(self);
+  with edFilename do
+  begin
+    SetPosition(8, 301, 622, 22);
+    Anchors := [anLeft, anRight, anBottom];
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+  
+  { Filter section }
+
+  chlFilter := TfpgComboBox.Create(self);
+  with chlFilter do
+  begin
+    SetPosition(8, 345, 622, 22);
+    Anchors := [anLeft, anRight, anBottom];
+    FontDesc := '#List';
+    OnChange := @FilterChange;
+  end;
+
+  lb1 := TfpgLabel.Create(self);
+  with lb1 do
+  begin
+    SetPosition(8, 283, 80, 16);
+    Anchors := [anLeft, anBottom];
+    Text := 'Filename:';
+    FontDesc := '#Label1';
+  end;
+
+  lb2 := TfpgLabel.Create(self);
+  with lb2 do
+  begin
+    SetPosition(8, 327, 64, 16);
+    Anchors := [anLeft, anBottom];
+    Text := 'File type:';
+    FontDesc := '#Label1';
+  end;
+
+  ActiveWidget := grid;
+  FileName := '';
+  Filter := 'All Files (*)|*';
+end;
+
+procedure TfpgFileDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+var
+  e: TFileEntry;
+begin
+  if not consumed then
+  begin
+    if (keycode = keyReturn) and (ActiveWidget = grid) then
+    begin
+      e := grid.CurrentEntry;
+      if (e <> nil) and (e.EntryType = etDir) then
+      begin
+        SetCurrentDirectory(e.Name);
+        consumed := True;
+      end;
+    end;
+  end;
+  if not consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TfpgFileDialog.btnOKClick(Sender: TObject);
+begin
+  if not FOpenMode or SysUtils.FileExists(edFileName.Text) then
+  begin
+    ModalResult := 1;
+  end;
+
+  if ModalResult > 0 then
+    FileName := ExpandFileName(edFileName.Text);
+end;
+
+constructor TfpgFileDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  WindowTitle := 'File Selection';
+  Width := 640;
+  Height := 410; // 460;
+  WindowPosition := wpScreenCenter;
+  FSpacing := 10;
+
+  FFilterList := TStringList.Create;
+  
+  InitializeComponents;
+  
+  // position standard dialog buttons
+  btnCancel.Left  := Width - FDefaultButtonWidth - FSpacing;
+  btnCancel.Top   := Height - btnCancel.Height - FSpacing;
+  btnOK.Left      := btnCancel.Left - FDefaultButtonWidth - 6;
+  btnOK.Top       := btnCancel.Top;
+end;
+
+destructor TfpgFileDialog.Destroy;
+begin
+  FFilterList.Free;
+  inherited Destroy;
+end;
+
+procedure TfpgFileDialog.DirChange(Sender: TObject);
+begin
+  SetCurrentDirectory(chlDir.Text);
+end;
+
+procedure TfpgFileDialog.FilterChange(Sender: TObject);
+begin
+  SetCurrentDirectory('.');
+end;
+
+procedure TfpgFileDialog.GridDblClick(Sender: TObject; x, y: integer;
+  var btnstate, shiftstate: word);
+begin
+
+end;
+
+procedure TfpgFileDialog.UpDirClick(Sender: TObject);
+begin
+  SetCurrentDirectory('..');
+end;
+
+procedure TfpgFileDialog.SetCurrentDirectory(const ADir: string);
+var
+  ds: string;
+  n: integer;
+  rootadd: integer;
+  fsel: string;
+{$ifdef Win32}
+  drvind: integer;
+  drvs: string;
+{$endif}
+begin
+  GetDir(0, ds);
+  fsel := ExtractFileName(ds);
+
+  if not SetCurrentDir(ADir) then
+  begin
+    ShowMessage('Could not open the directory ' + ADir, 'Error');
+    Exit; //==>
+  end;
+
+  chlDir.Items.Clear;
+  if ADir <> '..' then
+    fsel := '';
+
+  rootadd := 1;
+
+  {$IFDEF MSWINDOWS}
+  // making drive list 1
+  drvind := -1;
+  if Copy(ds, 2, 1) = ':' then
+    drvind := ord(UpCase(ds[1]))-ord('A');
+  n := 0;
+  while n < drvind do
+  begin
+    drvs := chr(n+ord('A'))+':\';
+    if Windows.GetDriveType(PChar(drvs)) <> 1 then
+    begin
+      chlDir.Items.Add(u8(drvs));
+    end;
+    inc(n);
+  end;
+  {$ENDIF}
+
+  {$IFDEF UNIX}
+  if Copy(ds, 1, 1) <> DirectorySeparator then
+    ds := DirectorySeparator + ds;
+  {$ENDIF}
+
+  n := 1;
+  while n < Length(ds) do
+  begin
+    if ds[n] = DirectorySeparator then
+    begin
+      chlDir.Items.Add(Copy(ds, 1, n-1+rootadd));
+      rootadd := 0;
+    end;
+    inc(n);
+  end;
+
+  chlDir.Items.Add(ds);
+  chlDir.FocusItem := chlDir.Items.Count;
+
+  {$IFDEF MSWINDOWS}
+  // making drive list 2
+  n := drvind+1;
+  if n < 0 then n := 0;
+  while n <= 25 do
+  begin
+    drvs := chr(n+ord('A'))+':\';
+    if Windows.GetDriveType(PChar(drvs)) <> 1 then
+    begin
+      chlDir.Items.Add(u8(drvs));
+    end;
+    inc(n);
+  end;
+  {$ENDIF}
+
+  grid.FileList.ReadDirectory(GetFileFilter, ShowHidden);
+  grid.FileList.Sort(soFileName);
+  grid.Update;
+
+  if fsel <> '' then
+    SelectFile(fsel)
+  else
+    grid.FocusRow := 1;
+end;
+
+function TfpgFileDialog.SelectFile(const AFilename: string): boolean;
+var
+  n : integer;
+begin
+  for n:=1 to grid.FileList.Count do
+  begin
+    if grid.FileList.Entry[n].Name = AFilename then
+    begin
+      grid.FocusRow := n;
+      Result := True;
+      Exit; //==>
+    end;
+  end;
+  Result := False;
+end;
+
+procedure TfpgFileDialog.ProcessFilterString;
+var
+  p: integer;
+  s: string;
+  fs: string;
+  fm: string;
+begin
+  s := FFilter;
+  FFilterList.Clear;
+  chlFilter.Items.Clear;
+
+  repeat
+    fs  := '';
+    fm  := '';
+    p   := pos('|', s);
+    if p > 0 then
+    begin
+      fs := Copy(s, 1, p-1);
+      Delete(s, 1, p);
+      p := pos('|', s);
+      if p > 0 then
+      begin
+        fm := Copy(s, 1, p-1);
+        Delete(s, 1, p);
+      end
+      else
+      begin
+        fm  := s;
+        s   := '';
+      end;
+    end;
+
+    if (fs <> '') and (fm <> '') then
+    begin
+      chlFilter.Items.Add(fs);
+      FFilterList.Add(fm);
+    end;
+  until (fs = '') or (fm = ''); { repeat/until }
+end;
+
+function TfpgFileDialog.GetFileFilter: string;
+var
+  i: integer;
+begin
+  i := chlFilter.FocusItem;
+  if (i > 0) and (i <= FFilterList.Count) then
+    Result := FFilterList[i-1]
+  else
+    Result := '*';
+end;
+
+function TfpgFileDialog.RunOpenFile: boolean;
+var
+  sdir: string;
+  fname: string;
+begin
+  FOpenMode := True;
+  sdir := ExtractFileDir(FileName);
+  if sdir = '' then
+    sdir := '.';
+  SetCurrentDirectory(sdir);
+  fname := ExtractFileName(FileName);
+  if not SelectFile(fname) then
+    edFilename.Text := fname;
+    
+  WindowTitle     := 'Open File...';
+  btnOK.ImageName := 'stdimg.open';
+  btnOK.Text      := 'Open';
+
+  if ShowModal > 0 then
+    Result := True
+  else
+    Result := False;
+end;
+
+function TfpgFileDialog.RunSaveFile: boolean;
+var
+  sdir: string;
+  fname: string;
+begin
+  FOpenMode := False;
+  sdir := ExtractFileDir(FileName);
+  if sdir = '' then
+    sdir := '.';
+  SetCurrentDirectory(sdir);
+  fname := ExtractFileName(FileName);
+  if not SelectFile(fname) then
+    edFilename.Text := fname;
+
+  WindowTitle     := 'Save File...';
+  btnOK.ImageName := 'stdimg.save';
+  btnOK.Text      := 'Save';
+
+  if ShowModal > 0 then
+    Result := True
+  else
+    Result := False;
 end;
 
 end.

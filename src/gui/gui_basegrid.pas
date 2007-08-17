@@ -106,6 +106,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   Update;
   end;
 
 implementation
@@ -954,9 +955,18 @@ end;
 
 destructor TfpgBaseGrid.Destroy;
 begin
+  FOnRowChange := nil;
+  FOnFocusChange := nil;
   FFont.Free;
   FHeaderFont.Free;
   inherited Destroy;
+end;
+
+procedure TfpgBaseGrid.Update;
+begin
+  UpdateScrollBars;
+  FollowFocus;
+  RePaint;
 end;
 
 end.

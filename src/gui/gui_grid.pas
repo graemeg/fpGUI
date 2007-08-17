@@ -100,6 +100,12 @@ type
     property    FixedFont: TfpgFont read FFixedFont;
     property    FileList: TFileList read FFileList;
     property    DefaultRowHeight;
+  published
+    property    RowCount;
+    property    ColumnCount;
+    property    Columns;
+    property    FocusRow;
+    property    OnRowChange;
   end;
 
 
@@ -343,7 +349,8 @@ end;
 procedure TFileList.Sort(AOrder: TFileListSortOrder);
 var
   newl: TList;
-  n, i: integer;
+  n: integer;
+  i: integer;
   e: TFileEntry;
 
   function IsBefore(newitem, item: TFileEntry): boolean;
@@ -505,6 +512,7 @@ begin
   FFileList := TFileList.Create;
   inherited Create(AOwner);
   ColumnCount := 0;
+  RowCount := 0;
   FFixedFont := fpgGetFont('Courier New-9');
 
   {$Note Abstract this!  No IFDEF's allowed!!! }
@@ -530,6 +538,7 @@ end;
 
 destructor TfpgFileGrid.Destroy;
 begin
+  OnRowChange := nil;
   FFixedFont.Free;
   FFileList.Free;
   inherited Destroy;
