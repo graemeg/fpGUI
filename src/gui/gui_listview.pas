@@ -773,37 +773,60 @@ procedure TfpgListView.HandleHeaderMouseMove(x, y: Integer; btnstate: word;
   Shiftstate: TShiftState);
 var
   I: Integer;
-  cLeft: Integer;
+  curLeft: Integer;
+  curRight: Integer;
   Column: TfpgLVColumn;
+  LastColumn: TfpgLVColumn;
+  HeaderX: Integer; // this is X from the headers point of view
+  NewMouseCursor: TMouseCursor;
 begin
-  cLeft := 2;
+  curLeft := 0;
 
+  HeaderX := FHScrollBar.Position - 2 + X;
+  NewMouseCursor := MouseCursor;
+  LastColumn := nil;
   for I := 0 to FColumns.Count-1 do
   begin
     Column := FColumns.Column[I];
     if not Column.Visible then
       Continue;
-    if Column.Resizable then
+    curRight := curLeft + Column.Width-1;
+    if Column.Resizable or (Assigned(LastColumn) and LastColumn.Resizable) then
     begin
       if (FResizingColumn <> nil) and (FResizingColumn = Column) then
       begin
-        FResizingColumn.Width :=  (x + FHScrollBar.Position)- cLeft;
+        FResizingColumn.Width :=  (x + FHScrollBar.Position)- curLeft;
         DoRepaint;
         Break;
       end
       else begin
-        if ((X + FHScrollBar.Position) < cLeft + Column.Width ) and ((cLeft + Column.Width) - (X + FHScrollBar.Position)< 3) then
+        if (HeaderX >= curLeft) and (HeaderX <= curRight) then // we are within this columns space
         begin
-          MouseCursor := mcSizeEW;
-          Break;
+          if ((LastColumn <> nil) and (LastColumn.Resizable) and (HeaderX - curLeft < 5))
+          or (Column.Resizable) and (curRight - HeaderX < 5)
+          then
+          begin
+            NewMouseCursor := mcSizeEW;
+            Break;
+          end;
         end
         else
-          if MouseCursor <> mcDefault then
-            MouseCursor := mcDefault;
+          NewMouseCursor := mcDefault;
       end;
     end;
-    Inc(cLeft, Column.Width);
+    LastColumn := Column;
+    Inc(curLeft, Column.Width);
   end;
+  if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
+    if (HeaderX - curLeft) < 5 then
+      NewMouseCursor := mcSizeEW;
+      
+  if FResizingColumn <> nil then
+    NewMouseCursor := mcSizeEW;
+  
+  if NewMouseCursor <> MouseCursor then
+    MouseCursor := NewMouseCursor;
+
 end;
 
 procedure TfpgListView.HandleMouseScroll(x, y: integer;
@@ -832,9 +855,11 @@ var
   Item: TfpgLVItem;
   IndexOfItem: Integer;
   cRect: TfpgRect;
-  cLeft, cRight: Integer;
+  curLeft, curRight: Integer;
   I: Integer;
   Column: TfpgLVColumn;
+  LastColumn: TfpgLVColumn;
+  HeaderX: Integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   
@@ -849,24 +874,37 @@ begin
   begin
     if (Y < HeaderHeight + cRect.Top)  then
     begin
-      cLeft := cRect.Left - FHScrollBar.Position;
+      LastColumn := nil;
+      HeaderX := FHScrollBar.Position - 2 + x;
+
+      curLeft := 0;
       for I := 0 to FColumns.Count-1 do
       begin
         Column := FColumns.Column[I];
         if Column.Visible then
         begin
-          cRight := cLeft + Column.Width-1;
-          if (X <= cRight) and (X >= cLeft) then
+          curRight := curLeft + Column.Width-1;
+          if (HeaderX <= curRight) and (HeaderX >= curLeft) then
           begin
-            if (MouseCursor = mcSizeEW) and Column.Resizable then
-              FResizingColumn := Column
+            if (MouseCursor = mcSizeEW) then
+            begin
+              if Column.Resizable and (curRight - HeaderX < 5) then
+                FResizingColumn := Column
+              else
+                if Assigned(LastColumn) and LastColumn.Resizable and (HeaderX - curLeft < 5) then
+                  FResizingColumn := LastColumn
+            end
             else // only perform a mouse click if we aren't resizing
               DoColumnClick(Column, 1);
           end;
-          Inc(cLeft, Column.Width);
+          Inc(curLeft, Column.Width);
         end;
+        LastColumn := Column;
       end;
     end;
+    if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
+      if (HeaderX - curLeft) < 5 then
+        FResizingColumn := LastColumn;
     Inc(cRect.Top, HeaderHeight);
   end;
   
