@@ -162,7 +162,11 @@ implementation
 uses
   gfxbase,
   gfx_widget,
-  gfx_utf8utils;
+  gfx_utf8utils
+  {$IFDEF MSWINDOWS}
+  ,Windows
+  {$ENDIF}
+  ;
   
   
 procedure ShowMessage(AMessage, ATitle: string);
@@ -962,7 +966,7 @@ begin
     drvs := chr(n+ord('A'))+':\';
     if Windows.GetDriveType(PChar(drvs)) <> 1 then
     begin
-      chlDir.Items.Add(u8(drvs));
+      chlDir.Items.Add(drvs);
     end;
     inc(n);
   end;
@@ -996,7 +1000,7 @@ begin
     drvs := chr(n+ord('A'))+':\';
     if Windows.GetDriveType(PChar(drvs)) <> 1 then
     begin
-      chlDir.Items.Add(u8(drvs));
+      chlDir.Items.Add(drvs);
     end;
     inc(n);
   end;
