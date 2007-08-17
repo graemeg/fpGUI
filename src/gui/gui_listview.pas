@@ -712,6 +712,8 @@ begin
     Exit;
   if Index >= FItems.Count then
     Exit;
+  if FHScrollBar.Position - 2 + X > GetVisibleColumnsWidth then
+    Exit;
 
   Result := FItems.Item[Index];
 end;
@@ -901,10 +903,11 @@ begin
         end;
         LastColumn := Column;
       end;
+      if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
+        if (HeaderX - curLeft) < 5 then
+          FResizingColumn := LastColumn;
     end;
-    if not Assigned(FResizingColumn) and Assigned(LastColumn) and LastColumn.Resizable then
-      if (HeaderX - curLeft) < 5 then
-        FResizingColumn := LastColumn;
+
     Inc(cRect.Top, HeaderHeight);
   end;
   
