@@ -10,7 +10,8 @@ uses
   Windows,
   Classes,
   SysUtils,
-  gfxbase;
+  gfxbase,
+  gfx_impl;
 
 { Constants missing on windows unit }
 const
@@ -24,7 +25,7 @@ var
 
 
 type
-  TfpgWinHandle = HWND;
+//  TfpgWinHandle = HWND;
   TfpgGContext  = HDC;
 
 type

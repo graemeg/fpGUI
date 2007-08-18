@@ -1,4 +1,4 @@
-unit gui_popupwindow;
+unit gfx_popupwindow;
 
 {$mode objfpc}{$H+}
 
@@ -13,14 +13,16 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
-  gfx_widget;
+  gfx_widget,
+  gfx_impl;
   
 type
   TfpgPopupWindow = class(TfpgWidget)
+  private
+    FDontCloseWidget: TfpgWidget;
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   AdjustWindowStyle; override;
-    procedure   SetWindowParameters; override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
     procedure   HandleClose; virtual;
@@ -28,7 +30,14 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
     procedure   Close;
+    property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
   end;
+
+
+procedure ClosePopups;
+function  PopupListFirst: TfpgPopupWindow;
+function  PopupListFind(AWinHandle: TfpgWinHandle): TfpgPopupWindow;
+function  PopupDontCloseWidget(AWidget: TfpgWidget): boolean;
 
 
 implementation
@@ -124,7 +133,7 @@ begin
     Result := nil;
 end;
 
-{
+
 function PopupListFind(AWinHandle: TfpgWinHandle): TfpgPopupWindow;
 var
   p: PPopupListRec;
@@ -141,7 +150,27 @@ begin
   end;
   Result := nil;
 end;
-}
+
+function PopupDontCloseWidget(AWidget: TfpgWidget): boolean;
+var
+  p: PPopupListRec;
+begin
+  Result := False;
+  if AWidget = nil then
+    Exit; //==>
+
+  p := uFirstPopup;
+  while p <> nil do
+  begin
+    if p^.Widget.DontCloseWidget = AWidget then
+    begin
+      Result := True;
+      Exit; //==>
+    end;
+    p := p^.Next;
+  end;
+end;
+
 
 { TfpgPopupWindow }
 
@@ -155,11 +184,6 @@ begin
   inherited AdjustWindowStyle;
   // We could possibly change this later
   Exclude(FWindowAttributes, waSizeable);
-end;
-
-procedure TfpgPopupWindow.SetWindowParameters;
-begin
-  inherited SetWindowParameters;
 end;
 
 procedure TfpgPopupWindow.HandleShow;
@@ -183,12 +207,17 @@ constructor TfpgPopupWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowType := wtPopup;
+  FDontCloseWidget := nil;
+  Parent := nil;
 end;
 
 procedure TfpgPopupWindow.ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
 var
   pt: TPoint;
 begin
+  PopupListAdd(self);
+  DontCloseWidget := nil;
+    
   // translate coordinates
   pt    := WindowToScreen(AWidget, Point(x, y));
   // reposition
@@ -200,6 +229,7 @@ end;
 
 procedure TfpgPopupWindow.Close;
 begin
+  PopupListRemove(self);
   HandleHide;
 end;
 

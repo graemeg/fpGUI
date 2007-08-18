@@ -14,10 +14,11 @@ uses
   XUtil,
   x11_xft,
 //  x11_keyconv,
-  gfxbase;
+  gfxbase,
+  gfx_impl;
 
 type
-  TfpgWinHandle = TXID;
+//  TfpgWinHandle = TXID;
   TfpgGContext  = Xlib.TGc;
 
 type
@@ -204,7 +205,8 @@ uses
   xatom,
   gfx_utf8utils,
   _netlayer,
-  cursorfont;
+  cursorfont,
+  gfx_popupwindow;
 
 var
   xapplication: TfpgApplication;
@@ -657,6 +659,7 @@ var
   rfds: TFDSet;
   xfd: integer;
   KeySym: TKeySym;
+  Popup: TfpgWidget;
 
   // debug purposes only
   procedure PrintKeyEvent(const event: TXEvent);
@@ -713,6 +716,10 @@ begin
   // According to a comment in X.h, the valid event types start with 2!
   if ev._type < 2 then
     exit;
+    
+
+  Popup := PopupListFirst;
+
 
 // WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
 //  PrintKeyEvent(ev);  { debug purposes only }
@@ -763,6 +770,24 @@ begin
           msgp.mouse.y          := ev.xbutton.y;
           msgp.mouse.Buttons    := ev.xbutton.button;
           msgp.mouse.shiftstate := ConvertShiftState(ev.xbutton.state);
+
+          { This closes popup windows when you click the mouse elsewhere }
+
+          if (Popup <> nil) then
+          begin
+            w := FindWindowByHandle(ev.xbutton.window);
+            ew := w;
+            while (w <> nil) and (w.Parent <> nil) do
+              w := TfpgWindowImpl(w.Parent);              // check the actual usage of Parent and where it gets set!!
+
+            if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and (not PopupDontCloseWidget(TfpgWidget(ew))) then
+            begin
+              ClosePopups;
+              Popup := nil;
+              fpgPostMessage(nil, ew, FPGM_POPUPCLOSE);
+              //blockmsg := true;
+            end;
+          end;
 
           w := FindWindowByHandle(ev.xbutton.window);
           if xapplication.TopModalForm <> nil then

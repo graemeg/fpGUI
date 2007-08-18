@@ -8,10 +8,10 @@ uses
   Classes,
   SysUtils,
   gfx_widget,
-  gui_form,
   gfxbase,
   gui_button,
-  fpgfx;
+  fpgfx,
+  gfx_popupwindow;
 
 type
 
@@ -20,7 +20,7 @@ type
   TfpgCustomComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
-    FDropDown: TfpgForm;
+    FDropDown: TfpgPopupWindow;
     FBackgroundColor: TfpgColor;
     FFocusItem: integer;
     FFont: TfpgFont;
@@ -39,7 +39,7 @@ type
     FMargin: integer;
     procedure   SetEnabled(const AValue: boolean); override;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
-    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    FocusItem: integer read FFocusItem write SetFocusItem;
@@ -72,20 +72,16 @@ function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringLi
 implementation
 
 uses
-  Math,
   gui_listbox;
   
 var
   OriginalFocusRoot: TfpgWidget;
 
 type
-  // This is so we can access protected methods
-  TPrivateWidget = class(TfpgWidget)
-  end;
-  
-  { TDropDownWindow }
 
-  TDropDownWindow = class(TfpgForm)
+  { This is the class representing the dropdown window of the combo box. }
+
+  TDropDownWindow = class(TfpgPopupWindow)
   private
     FCallerWidget: TfpgWidget;
   protected
@@ -131,7 +127,7 @@ begin
   ListBox.Height := Height;
 
   inherited HandleShow;
-  CaptureMouse;
+//  CaptureMouse;
 end;
 
 procedure TDropDownWindow.HandleHide;
@@ -146,9 +142,9 @@ end;
 constructor TDropDownWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowType        := wtPopup;
-  WindowAttributes  := [];
-  WindowPosition    := wpUser;
+//  WindowType        := wtPopup;
+//  WindowAttributes  := [];
+//  WindowPosition    := wpUser;
 
   ListBox := TfpgListBox.Create(self);
   ListBox.PopupFrame := True;
@@ -156,7 +152,7 @@ end;
 
 destructor TDropDownWindow.Destroy;
 begin
-  ReleaseMouse;
+//  ReleaseMouse;
   inherited Destroy;
 end;
   
@@ -198,18 +194,14 @@ end;
 
 procedure TfpgCustomComboBox.DoDropDown;
 var
-  pt: TPoint;
   ddw: TDropDownWindow;
   rowcount: integer;
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
     OriginalFocusRoot := FocusRootWidget;
-    pt := WindowToScreen(Parent, Point(Left, Top+Height));
     FDropDown     := TDropDownWindow.Create(nil);
     ddw           := TDropDownWindow(FDropDown);
-    ddw.Left      := pt.X;
-    ddw.Top       := pt.Y;
     ddw.Width     := Width;
     // adjust the height of the dropdown
     rowcount := FItems.Count;
@@ -225,7 +217,7 @@ begin
     ddw.ListBox.Items.Assign(FItems);
     ddw.ListBox.FocusItem := FFocusItem;
 
-    FDropDown.Show;
+    FDropDown.ShowAt(Parent, Left, Top+Height);
     ddw.ListBox.SetFocus;
   end
   else
@@ -281,9 +273,10 @@ begin
   FInternalBtn.Enabled := AValue;
 end;
 
-procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgCustomComboBox.HandleLMouseUp(x, y: integer;
+  shiftstate: TShiftState);
 begin
-  inherited HandleLMouseDown(x, y, shiftstate);
+  inherited HandleLMouseUp(x, y, shiftstate);
   DoDropDown;
 end;
 

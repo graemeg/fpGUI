@@ -52,7 +52,7 @@ begin
     Elem.Prev.Next := Elem.Next;
 end;
 
-function pgfAllocateMessage: PfpgMessageRec;
+function fpgAllocateMessage: PfpgMessageRec;
 var
   e: TMessageListElement;
 begin
@@ -111,7 +111,7 @@ begin
   if Dest = nil then
     Exit; //==>
 
-  p := pgfAllocateMessage;
+  p := fpgAllocateMessage;
   if p <> nil then
   begin
     p^.MsgCode := MsgCode;
@@ -130,7 +130,7 @@ begin
   if Dest = nil then
     Exit; //==>
 
-  p := pgfAllocateMessage;
+  p := fpgAllocateMessage;
   if p <> nil then
   begin
     p^.MsgCode := MsgCode;
