@@ -29,7 +29,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
-    procedure   Close;
+    procedure   Close; virtual;
     property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
   end;
 

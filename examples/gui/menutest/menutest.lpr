@@ -68,10 +68,10 @@ begin
   // Create main menu bar
   FMenuBar := TfpgMenuBar.Create(self);
   FMenuBar.SetPosition(0, 0, Width, 20);
-  FMenuBar.AddMenuItem('File', nil).SubMenu := FFileSubMenu;
-  FMenuBar.AddMenuItem('Edit', nil).SubMenu := FEditSubMenu;
-  FMenuBar.AddMenuItem('Windows', nil);
-  FMenuBar.AddMenuItem('Help', nil).SubMenu := FHelpSubMenu;
+  FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
+  FMenuBar.AddMenuItem('&Edit', nil).SubMenu := FEditSubMenu;
+  FMenuBar.AddMenuItem('&Windows', nil);
+  FMenuBar.AddMenuItem('&Help', nil).SubMenu := FHelpSubMenu;
 
 end;
 

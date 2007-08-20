@@ -70,6 +70,7 @@ type
     function    VisibleCount: integer;
     function    VisibleItem(ind: integer): TfpgMenuItem;
     function    MenuFocused: boolean;
+    function    SearchItemByAccel(s: string): integer;
   protected
     FMenuFont: TfpgFont;
     FMenuAccelFont: TfpgFont;
@@ -91,6 +92,7 @@ type
     OpenerMenuBar: TfpgMenuBar;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   Close; override;
     function    AddMenuItem(const menuname: string; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
@@ -107,28 +109,28 @@ type
   protected
     FItems: TList;  // stores visible items only
     FFocusItem: integer;
-    procedure   PrepareToShow;  //
-    function    VisibleCount: integer;  //
-    function    VisibleItem(ind: integer): TfpgMenuItem; //
+    procedure   PrepareToShow;
+    function    VisibleCount: integer;
+    function    VisibleItem(ind: integer): TfpgMenuItem;
     procedure   HandleShow; override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   HandlePaint; override;  //
+    procedure   HandlePaint; override;
   public
-    constructor Create(AOwner: TComponent); override; //
-    destructor  Destroy; override;  //
-    function    ItemWidth(mi: TfpgMenuItem): integer;  //
-    procedure   DrawColumn(col: integer; focus: boolean); //
-    function    CalcMouseCol(x: integer): integer;  //
-    function    GetItemPosX(index: integer): integer; //
-    procedure   DoSelect; //
-    procedure   CloseSubmenus;  //
-    function    MenuFocused: boolean; //
-    function    SearchItemByAccel(s: string): integer;  //
-    procedure   DeActivateMenu; //
-    procedure   ActivateMenu; //
-    function    AddMenuItem(const AMenuTitle: string; OnClickProc: TNotifyEvent): TfpgMenuItem; //
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    function    ItemWidth(mi: TfpgMenuItem): integer;
+    procedure   DrawColumn(col: integer; focus: boolean);
+    function    CalcMouseCol(x: integer): integer;
+    function    GetItemPosX(index: integer): integer;
+    procedure   DoSelect;
+    procedure   CloseSubmenus;
+    function    MenuFocused: boolean;
+    function    SearchItemByAccel(s: string): integer;
+    procedure   DeActivateMenu;
+    procedure   ActivateMenu;
+    function    AddMenuItem(const AMenuTitle: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
@@ -696,8 +698,112 @@ begin
 end;
 
 procedure TfpgPopupMenu.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+var
+  oldf: integer;
+  i: integer;
+  s: string;
+  op: TfpgPopupMenu;
+  trycnt: integer;
+
+  procedure FollowFocus;
+  begin
+    if oldf <> FFocusItem then
+    begin
+      DrawRow(oldf, False);
+      DrawRow(FFocusItem, True);
+    end;
+  end;
+
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
+
+  oldf := FFocusItem;
+
+  consumed := true;
+  case keycode of
+    keyUp:
+           begin // up
+             trycnt := 2;
+             i := FFocusItem-1;
+             repeat
+               while (i >= 1) and not VisibleItem(i).Selectable do dec(i);
+
+               if i >= 1 then break;
+
+               i := VisibleCount;
+               dec(trycnt);
+             until trycnt > 0;
+
+             if i >= 1 then FFocusItem := i;
+           end;
+    keyDown:
+           begin // down
+
+             trycnt := 2;
+             i := FFocusItem+1;
+             repeat
+               while (i <= VisibleCount) and not VisibleItem(i).Selectable do inc(i);
+
+               if i <= VisibleCount then break;
+
+               i := 1;
+               dec(trycnt);
+             until trycnt > 0;
+
+             if i <= VisibleCount then FFocusItem := i;
+
+           end;
+    keyReturn:
+           begin
+             DoSelect;
+           end;
+
+    keyLeft:
+           begin
+             if OpenerMenubar <> nil then OpenerMenubar.HandleKeyPress(keycode, shiftstate, consumed);
+           end;
+
+    keyRight:
+           begin
+             if OpenerMenubar <> nil then OpenerMenubar.HandleKeyPress(keycode, shiftstate, consumed);
+             // VisibleItem(FFocusItem).SubMenu <> nil then DoSelect;
+           end;
+
+    keyBackSpace:
+           begin
+             //if self.OpenerPopup <> nil then
+             Close;
+           end;
+
+    keyEscape:
+           begin
+             Close;
+             op := OpenerPopup;
+             while op <> nil do
+             begin
+               op.Close;
+               op := op.OpenerPopup;
+             end;
+           end;
+  else
+    consumed := false;
+  end;
+
+  FollowFocus;
+
+  if (not consumed) and ((keycode and $8000) <> $8000) then
+  begin
+    // normal char
+    s := chr(keycode and $00FF) + chr((keycode and $FF00) shr 8);
+    i := SearchItemByAccel(s);
+    if i > 0 then
+    begin
+      FFocusItem := i;
+      FollowFocus;
+      Consumed := true;
+      DoSelect;
+    end;
+  end;
 end;
 
 procedure TfpgPopupMenu.HandlePaint;
@@ -705,10 +811,11 @@ var
   n: integer;
 begin
   Canvas.BeginDraw;
-  inherited HandlePaint;
+//  inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
   Canvas.SetColor(clWidgetFrame);
-  Canvas.DrawRectangle(0, 0, Width, Height);
+  Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
+  Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
   for n := 1 to VisibleCount do
   begin
     DrawRow(n, n = FFocusItem);
@@ -749,7 +856,7 @@ begin
   begin
     x := rect.Left + FSymbolWidth + FTextMargin;
 
-    mi.DrawText(Canvas,x,rect.top);
+    mi.DrawText(Canvas, x, rect.top);
 
     if mi.HotKeyDef <> '' then
     begin
@@ -759,7 +866,7 @@ begin
 
     if mi.SubMenu <> nil then
     begin
-      canvas.SetColor(canvas.TextColor);
+      canvas.SetColor(Canvas.TextColor);
       x := (rect.height div 2) - 3;
       canvas.FillTriangle(rect.right-x-2, rect.top+2,
                           rect.right-2, rect.top+2+x,
@@ -832,6 +939,25 @@ end;
 function TfpgPopupMenu.MenuFocused: boolean;
 begin
   Result := (uFocusedPopupMenu = self);
+end;
+
+function TfpgPopupMenu.SearchItemByAccel(s: string): integer;
+var
+  n: integer;
+begin
+  result := -1;
+  for n := 1 to VisibleCount do
+  begin
+    with VisibleItem(n) do
+    begin
+      {$Note Do we need to use UTF-8 upper case? }
+      if Enabled and (UpperCase(s) = UpperCase(GetAccelChar)) then
+      begin
+        result := n;
+        Exit; //==>
+      end;
+    end;
+  end;
 end;
 
 // Collecting visible items and measuring sizes
@@ -910,7 +1036,7 @@ end;
 constructor TfpgPopupMenu.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FMargin     := 2;
+  FMargin     := 3;
   FTextMargin := 3;
   FItems      := TList.Create;
   FBackgroundColor := clWindowBackground;
@@ -932,6 +1058,38 @@ begin
   inherited Destroy;
 end;
 
+{$Note See if we can move this to HandleHide + not make Close virtual! }
+procedure TfpgPopupMenu.Close;
+var
+  n: integer;
+  mi: TfpgMenuItem;
+begin
+  for n := 0 to FItems.Count-1 do
+  begin
+    mi := TfpgMenuItem(FItems[n]);
+    if mi.SubMenu <> nil then
+    begin
+      if mi.SubMenu.HasHandle then
+        mi.SubMenu.Close;
+    end;
+  end;
+  inherited Close;
+  uFocusedPopupMenu := OpenerPopup;
+  if (uFocusedPopupMenu <> nil) and uFocusedPopupMenu.HasHandle then
+    uFocusedPopupMenu.RePaint;
+
+  if (OpenerMenuBar <> nil) and OpenerMenuBar.HasHandle then
+  begin
+    if (OpenerPopup = nil) or not OpenerPopup.HasHandle then
+    begin
+      OpenerMenuBar.DeActivateMenu;
+      //OpenerMenuBar.Repaint;
+    end;
+    //else
+    //OpenerMenuBar.RePaint;
+  end;
+end;
+
 function TfpgPopupMenu.AddMenuItem(const menuname: string;
   const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
 begin
@@ -948,5 +1106,8 @@ begin
   end;
 end;
 
+initialization
+  uFocusedPopupMenu := nil;
+  
 end.
 
