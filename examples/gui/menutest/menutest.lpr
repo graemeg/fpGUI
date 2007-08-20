@@ -71,6 +71,7 @@ begin
   FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
   FMenuBar.AddMenuItem('&Edit', nil).SubMenu := FEditSubMenu;
   FMenuBar.AddMenuItem('&Windows', nil);
+  FMenuBar.AddMenuItem('&Disabled', nil).Enabled := False;
   FMenuBar.AddMenuItem('&Help', nil).SubMenu := FHelpSubMenu;
 
 end;
