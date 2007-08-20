@@ -38,7 +38,7 @@ begin
   inherited Create(AOwner);
   WindowTitle := 'Menu Test';
   WindowPosition := wpUser;
-  SetPosition(100, 100, 300, 200);
+  SetPosition(100, 100, 400, 200);
   
   // Create top level sub-menus
   FFileSubMenu := TfpgPopupMenu.Create(self);
@@ -64,10 +64,11 @@ begin
 
   FHelpSubMenu := TfpgPopupMenu.Create(self);
   FHelpSubMenu.AddMenuItem('&About', 'F12', nil);
+  FHelpSubMenu.AddMenuItem('Test Russian text -> Òåñò', '', nil);
 
   // Create main menu bar
   FMenuBar := TfpgMenuBar.Create(self);
-  FMenuBar.SetPosition(0, 0, Width, 20);
+  FMenuBar.SetPosition(0, 0, Width, FMenuBar.Height);
   FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
   FMenuBar.AddMenuItem('&Edit', nil).SubMenu := FEditSubMenu;
   FMenuBar.AddMenuItem('&Windows', nil);

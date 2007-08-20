@@ -56,6 +56,8 @@ type
   end;
   
   
+  // Actual Menu Items are stored in TComponents Components property
+  // Visible only items are stored in FItems just before a paint
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
     FBackgroundColor: TfpgColor;
@@ -99,6 +101,8 @@ type
   end;
   
   
+  // Actual Menu Items are stored in TComponents Components property
+  // Visible only items are stored in FItems just before a paint
   TfpgMenuBar = class(TfpgWidget)
   private
     FBackgroundColor: TfpgColor;
@@ -371,8 +375,15 @@ begin
   Canvas.BeginDraw;
   inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
-  Canvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
-//  Canvas.Clear(FBackgroundColor);
+  Canvas.Clear(FBackgroundColor);
+//  Canvas.DrawButtonFace(r, []);
+  // inner bottom line
+  Canvas.SetColor(clShadow1);
+  Canvas.DrawLine(r.Left, r.Bottom-1, r.Right+1, r.Bottom-1);   // bottom
+  // outer bottom line
+  Canvas.SetColor(clHilite1);
+  Canvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
+
   for n := 1 to VisibleCount do
     DrawColumn(n, n = FFocusItem);
   Canvas.EndDraw;
@@ -386,6 +397,8 @@ begin
   FFocusItem := 1;
   FFocusable := False;
   FBackgroundColor := clWindowBackground;
+  // calculate the best height based on font
+  FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
   
   FLightColor := TfpgColor($f0ece3);  // color at top of menu bar
   FDarkColor  := TfpgColor($beb8a4);  // color at bottom of menu bar
@@ -411,7 +424,7 @@ var
 begin
   Canvas.BeginDraw;
 
-  r.SetRect(2, 1, 1, fpgStyle.MenuFont.Height+2);
+  r.SetRect(2, 1, 1, fpgStyle.MenuFont.Height+1);
 
   for n := 1 to VisibleCount do
   begin
@@ -423,61 +436,29 @@ begin
       begin
         if MenuFocused then
         begin
-          r2 := r;
-          Canvas.GradientFill(r2, FDarkColor, FLightColor, gdVertical);
-//          Canvas.SetColor(clSelection);
+          Canvas.SetColor(clSelection);
           Canvas.SetTextColor(clSelectionText);
-          Canvas.SetTextColor(clMenuText);
         end
         else
         begin
-//          Canvas.SetColor(clInactiveSel);
+          Canvas.SetColor(clInactiveSel);
           Canvas.SetTextColor(clInactiveSelText);
-//          Canvas.FillRectangle(r);
-
-          // Bluecurve theme - will be removed later
-          r2 := r;
-          // outer dark border
-          Canvas.SetColor(TfpgColor($3b4c71));
-          Canvas.SetLineStyle(1, lsSolid);
-          Canvas.DrawRectangle(r2);
-          InflateRect(r2, -1, -1);
-          // left top
-          Canvas.SetColor(TfpgColor($98b2ed));
-          Canvas.DrawLine(r2.Left, r2.Bottom, r2.Left, r2.Top);  // left
-          Canvas.DrawLine(r2.Left, r2.Top, r2.Right, r2.Top);    // top
-          // right bottom
-          Canvas.SetColor(TfpgColor($4468b8));
-          Canvas.DrawLine(r2.Right, r2.Top, r2.Right, r2.Bottom);   // right
-          Canvas.DrawLine(r2.Right, r2.Bottom, r2.Left-1, r2.Bottom);   // bottom
-          // inside gradient fill
-          InflateRect(r2, -1, -1);
-          Canvas.GradientFill(r2, TfpgColor($435e9a), TfpgColor($5476c4), gdVertical);
-          // reset rectangle
-          InflateRect(r2, 2, 2);
         end;
       end
       else
       begin
         if mi.Enabled then
         begin
-//          Canvas.SetColor(BackgroundColor);
+          Canvas.SetColor(BackgroundColor);
           Canvas.SetTextColor(clMenuText);
-//          Canvas.FillRectangle(r);
-          r2.SetRect(r.Left, r.Top-1, r.Width, Height);
-          Canvas.GradientFill(r2, FLightColor, FDarkColor, gdVertical);
-
         end
         else
         begin
-          r2.SetRect(r.Left, r.Top-1, r.Width, Height);
-          Canvas.GradientFill(r2, FLightColor, FDarkColor, gdVertical);
-//          Canvas.SetColor(BackgroundColor);
+          Canvas.SetColor(BackgroundColor);
           Canvas.SetTextColor(clMenuDisabled);
-//          Canvas.FillRectangle(r);
         end;
       end;  { if/else }
-//      Canvas.FillRectangle(r);
+      Canvas.FillRectangle(r);
       mi.DrawText(Canvas, r.left+4, r.top+1);
       Canvas.EndDraw;
       Exit; //==>
