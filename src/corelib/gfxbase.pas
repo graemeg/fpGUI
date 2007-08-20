@@ -876,10 +876,7 @@ begin
     if underline >= Font.Descent then
       underline := Font.Descent - 1;
 
-//    if Pos('BOLD', UpperCase(Font.FontDesc)) = 0 then
-      DoSetLineStyle(1, lsSolid);
-//    else
-//      DoSetLineStyle(2, lsSolid);
+    DoSetLineStyle(1, lsSolid);
     DoSetColor(TextColor);
     DoDrawLine(x, Font.Height-underline, x+Font.TextWidth(txt), Font.Height-underline);
   end;
