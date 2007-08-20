@@ -1167,8 +1167,7 @@ end;
 
 function TfpgImages.DeleteImage(const imgid: string; freeimg: boolean): boolean;
 var
-  i:   integer;
-  img: TfpgImage;
+  i: integer;
 begin
   i := FImages.IndexOf(LowerCase(imgid));
   if i >= 0 then

@@ -13,12 +13,10 @@ uses
   Xlib,
   XUtil,
   x11_xft,
-//  x11_keyconv,
   gfxbase,
   gfx_impl;
 
 type
-//  TfpgWinHandle = TXID;
   TfpgGContext  = Xlib.TGc;
 
 type
@@ -94,7 +92,6 @@ type
     FClipRect: TfpgRect;
     FClipRectSet: boolean;
     FXftDraw: PXftDraw;
-    FXftDrawBuffer: PXftDraw;
     FColorTextXft: TXftColor;
     FClipRegion: TRegion;
     FPixHeight,
@@ -202,8 +199,6 @@ uses
   fpgfx,
   gfx_widget,  {$Note This dependency to gfx_widget must be removed.}
   gui_form, // remove this!!!!!
-  xatom,
-  gfx_utf8utils,
   _netlayer,
   cursorfont,
   gfx_popupwindow;
@@ -211,13 +206,13 @@ uses
 var
   xapplication: TfpgApplication;
 
-const
+//const
   // map X11 event types to custom event types
-  MSG_SCROLL      = 65;
-  MSG_RESIZE      = 66;
-  MSG_POPUPCLOSE  = 67;
-  MSG_MOVE        = 68;
-  MSG_DOUBLECLICK = 69;
+//  MSG_SCROLL      = 65;
+//  MSG_RESIZE      = 66;
+//  MSG_POPUPCLOSE  = 67;
+//  MSG_MOVE        = 68;
+//  MSG_DOUBLECLICK = 69;
 
 
  // some externals
@@ -490,7 +485,6 @@ var
   n: integer;
   s: string;
   pc: PChar;
-  fl: TStringList;
 begin
   pfs := XftListFonts(Display, DefaultScreen, [FC_SCALABLE, FcTypeBool, 1, 0, FC_FAMILY, 0]);
 
@@ -517,8 +511,6 @@ begin
 end;
 
 constructor TfpgApplicationImpl.Create(const aparams: string);
-var
-  wa: TXWindowAttributes;
 begin
   FIsInitialized    := False;
   FDisplay          := XOpenDisplay(PChar(aparams));
@@ -635,25 +627,14 @@ procedure TfpgApplicationImpl.DoWaitWindowMessage(atimeoutms: integer);
 var
   ev: TXEvent;
   NewEvent: TXevent;
-  n: integer;
   i: integer;
   r: integer;
-  i2: integer;
-  ks: integer;
-  uc: word;
-  a: array[1..16] of char;
-  ss: integer;
-  sr: integer;
-  p: PChar;
   blockmsg: boolean;
-  b: boolean;
   w: TfpgWindowImpl;
   ew: TfpgWindowImpl;
   kwg: TfpgWidget;
   wh: TfpgWinHandle;
   wa: TXWindowAttributes;
-  px: integer;
-  py: integer;
   mcode: integer;
   msgp: TfpgMessageParams;
   rfds: TFDSet;
@@ -1020,7 +1001,6 @@ var
   wh: TfpgWinHandle;
   attr: TXSetWindowAttributes;
   mask: longword;
-  bcolor: longword;
   hints: TXSizeHints;
 begin
   if FWinHandle > 0 then
@@ -1139,7 +1119,7 @@ function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenP
 var
   dx: integer;
   dy: integer;
-  cw : TfpgWinHandle;
+  cw: TfpgWinHandle;
 begin
 //  if not HandleIsValid then
 //    Exit; //==>
@@ -1197,19 +1177,10 @@ end;
 
 procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);
 var
-  //s: string;
-  //p: PByte;
   netlayer: TNETWindowLayer;
 begin
   if FWinHandle <= 0 then
     Exit;
-
-  //s := atitle;
-
-  //if length(s) > 0 then
-    //p := @s[1]
-  //else
-    //p := nil;
 
   netlayer := TNETWindowLayer.Create(xapplication.display);
   try
@@ -1217,9 +1188,6 @@ begin
   finally
     netlayer.Free;
   end;
-  
-//  XChangeProperty(xapplication.display, FWinHandle, 39, 31, 8, 0, p, length(s));
-//  XChangeProperty(xapplication.display, FWinHandle, 37, 31, 8, 0, p, length(s));
 end;
 
 constructor TfpgWindowImpl.Create(AOwner: TComponent);

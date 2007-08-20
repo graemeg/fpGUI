@@ -130,8 +130,9 @@ implementation
 
 // BesselOrderOne: computes Bessel function of x in the first kind of order 0
 
-function J1 (x : double) : double;
-const Pone : array[0..8] of double =
+function J1(x: double): double;
+const
+  Pone: array[0..8] of double =
     (  0.581199354001606143928050809e+21,
       -0.6672106568924916298020941484e+20,
        0.2316433580634002297931815435e+19,
@@ -142,7 +143,7 @@ const Pone : array[0..8] of double =
       -0.4695753530642995859767162166e+7,
        0.270112271089232341485679099e+4
     );
-    Qone : array [0..8] of double =
+  Qone: array [0..8] of double =
     ( 0.11623987080032122878585294e+22,
       0.1185770712190320999837113348e+20,
       0.6092061398917521746105196863e+17,
@@ -154,8 +155,8 @@ const Pone : array[0..8] of double =
       0.1e+1
     );
 var
-  p, q : double;
-  r : 0..8;
+  p, q: double;
+  r: byte;
 begin
   p := Pone[8];
   q := Qone[8];
@@ -167,8 +168,9 @@ begin
   result := p / q;
 end;
 
-function P1 (x : double) : double;
-const Pone : array[0..5] of double =
+function P1(x: double): double;
+const
+  Pone: array[0..5] of double =
     ( 0.352246649133679798341724373e+5,
       0.62758845247161281269005675e+5,
       0.313539631109159574238669888e+5,
@@ -176,7 +178,7 @@ const Pone : array[0..5] of double =
       0.2111529182853962382105718e+3,
       0.12571716929145341558495e+1
     );
-    Qone : array [0..5] of double =
+  Qone: array [0..5] of double =
     ( 0.352246649133679798068390431e+5,
       0.626943469593560511888833731e+5,
       0.312404063819041039923015703e+5,
@@ -186,21 +188,22 @@ const Pone : array[0..5] of double =
     );
 var
   x8, p, q: double;
-  r: 0..5;
+  r: byte;
 begin
   p := Pone[5];
   q := Qone[5];
   x8 := 8.0 / x;
   for r := 4 downto 0 do
-    begin
+  begin
     p := p*x8*x8+pOne[r];
     q := q*x8*x8+Qone[r];
-    end;
+  end;
   result := p / q;
 end;
 
-function Q1 (x : double) : double;
-const Pone : array[0..5] of double =
+function Q1(x: double): double;
+const
+  Pone: array[0..5] of double =
     ( 0.3511751914303552822533318e+3,
       0.7210391804904475039280863e+3,
       0.4259873011654442389886993e+3,
@@ -208,7 +211,7 @@ const Pone : array[0..5] of double =
       0.45681716295512267064405e+1,
       0.3532840052740123642735e-1
     );
-    Qone : array [0..5] of double =
+  Qone : array [0..5] of double =
     ( 0.74917374171809127714519505e+4,
       0.154141773392650970499848051e+5,
       0.91522317015169922705904727e+4,
@@ -218,22 +221,22 @@ const Pone : array[0..5] of double =
     );
 var
   x8, p, q: double;
-  r : 0..5;
+  r: byte;
 begin
   p := Pone[5];
   q := Qone[5];
   x8 := 8.0 / x;
   for r := 4 downto 0 do
-    begin
+  begin
     p := p*x8*x8+pOne[r];
     q := q*x8*x8+Qone[r];
-    end;
+  end;
   result := p / q;
 end;
 
-function BesselOrderOne (x : double) : double;
+function BesselOrderOne(x: double): double;
 var
-  p, q, OneOverSqrt2, sinx, cosx: double;
+  p, OneOverSqrt2, sinx, cosx: double;
 begin
   if x = 0.0 then
     result := 0.0
@@ -261,7 +264,7 @@ end;
 
 // Functions to aid calculations
 
-function Bessel (x : double) : double;
+function Bessel(x: double): double;
 begin
   if x = 0.0 then
     result := PI / 4.0
@@ -269,8 +272,9 @@ begin
     result := BesselOrderOne(PI * x) / (2.0 * x);
 end;
 
-function Sinc (x : double) : double;
-var xx : double;
+function Sinc(x: double): double;
+var
+  xx: double;
 begin
   if x = 0.0 then
     result := 1.0
@@ -281,8 +285,9 @@ begin
     end;
 end;
 
-function Blackman (x : double) : double;
-var xpi : double;
+function Blackman(x: double): double;
+var
+  xpi: double;
 begin
   xpi := PI * x;
   result := 0.42 + 0.5 * cos(xpi) + 0.08 * cos(2*xpi);

@@ -1256,9 +1256,6 @@ begin
 end;
 
 procedure TfpgBaseInterpolation.Execute(x, y, w, h: integer);
-var
-  maxy: integer;
-  rx, ry: integer;
 begin
   tempimage := TfpgImageBase.Create;
   tempimage.AllocateImage(image.ColorDepth, w, image.Height);
