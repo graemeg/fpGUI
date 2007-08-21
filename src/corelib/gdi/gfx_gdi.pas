@@ -1008,7 +1008,7 @@ end;
 
 function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 begin
-  if not ASource.HandleIsValid then
+  if not TfpgWindowImpl(ASource).HandleIsValid then
     Exit; //==>
 
   Result.X := AScreenPos.X;
