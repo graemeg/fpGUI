@@ -206,6 +206,14 @@ uses
 var
   xapplication: TfpgApplication;
 
+{ Double click support }
+const
+  DOUBLECLICK_MS = 200; // the max time between left-clicks for doubleclick
+var
+  LastClickWindow: TfpgWinHandle;
+  LastWinClickTime: longword;
+
+
 //const
   // map X11 event types to custom event types
 //  MSG_SCROLL      = 65;
