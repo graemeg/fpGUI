@@ -878,7 +878,7 @@ begin
 
     DoSetLineStyle(1, lsSolid);
     DoSetColor(TextColor);
-    DoDrawLine(x, Font.Height-underline, x+Font.TextWidth(txt), Font.Height-underline);
+    DoDrawLine(x, y+Font.Height-underline, x+Font.TextWidth(txt), y+Font.Height-underline);
   end;
 end;
 

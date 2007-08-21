@@ -3,7 +3,10 @@ unit gui_menu;
 {$mode objfpc}{$H+}
 
 {
-  Still under construction!!!!!
+  TODO:
+    * Refactor the HotKey painting code into Canvas.DrawString so that other
+      widgets like TfpgButton could also use it.gui_menu
+    * Global keyboard activation of menu items are still missing.
 }
 
 interface
@@ -441,7 +444,8 @@ begin
         end
         else
         begin
-          Canvas.SetColor(clInactiveSel);
+//          Canvas.SetColor(clInactiveSel);
+          Canvas.SetColor(clShadow1);
           Canvas.SetTextColor(clInactiveSelText);
         end;
       end
@@ -914,7 +918,8 @@ begin
         end
         else
         begin
-          Canvas.SetColor(clInactiveSel);
+//          Canvas.SetColor(clInactiveSel);
+          Canvas.SetColor(clShadow1);
           Canvas.SetTextColor(clInactiveSelText);
         end;
       end

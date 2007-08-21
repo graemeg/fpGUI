@@ -597,6 +597,7 @@ begin
   fpgImages.Free;
 
   FFontResList.Free;
+  FDefaultFont.Free;
   inherited Destroy;
 end;
 
@@ -855,7 +856,7 @@ begin
   fpgSetNamedFont('Grid', 'Arial-9');
   fpgSetNamedFont('GridHeader', 'Arial-9:bold');
   fpgSetNamedFont('Menu', FPG_DEFAULT_FONT_DESC);
-  fpgSetNamedFont('MenuAccel', FPG_DEFAULT_FONT_DESC + ':bold');
+  fpgSetNamedFont('MenuAccel', FPG_DEFAULT_FONT_DESC + ':underline');
   fpgSetNamedFont('MenuDisabled', FPG_DEFAULT_FONT_DESC);
 
   {$Note Refactor this so under Windows it can detect the system colors instead.
