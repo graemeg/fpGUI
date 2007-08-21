@@ -436,7 +436,7 @@ begin
     WM_MOUSEMOVE,
     WM_LBUTTONDOWN,
     WM_LBUTTONUP,
-    WM_LBUTTONDBLCLK,
+//    WM_LBUTTONDBLCLK,
     WM_RBUTTONDOWN,
     WM_RBUTTONUP:
         begin
@@ -497,8 +497,8 @@ begin
                     if PopupListFirst = nil then
                       ReleaseCapture;
                   end;
-              WM_LBUTTONDBLCLK:
-                  mcode := FPGM_DOUBLECLICK;
+              //WM_LBUTTONDBLCLK:
+                  //mcode := FPGM_DOUBLECLICK;
               else
                   mcode := 0;
             end;
@@ -518,8 +518,8 @@ begin
 
               WM_LBUTTONDOWN,
               WM_LBUTTONUP,
-              WM_LBUTTONDBLCLK:
-                msgp.mouse.Buttons := MOUSE_LEFT;
+              //WM_LBUTTONDBLCLK:
+                //msgp.mouse.Buttons := MOUSE_LEFT;
 
               WM_RBUTTONDOWN,
               WM_RBUTTONUP:

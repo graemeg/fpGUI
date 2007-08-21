@@ -113,6 +113,15 @@ function FindKeyboardFocus: TfpgWidget;
 
 implementation
 
+
+{ Double click support }
+const
+  DOUBLECLICK_MS = 320; // the max time between left-clicks for doubleclick
+var
+  uLastClickWidget: TfpgWidget;
+  uLastClickTime: DWord;
+  
+
 function FindKeyboardFocus: TfpgWidget;
 begin
   Result := nil;
@@ -303,15 +312,35 @@ end;
 procedure TfpgWidget.MsgMouseUp(var msg: TfpgMessageRec);
 var
   mb: TMouseButton;
+  IsDblClick: boolean;
+  t: DWord;
 begin
   if not FEnabled then
     exit;   // Do we want this here?
+    
+  IsDblClick := False;
 
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin
         mb := mbLeft;
-        HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+        t := fpgGetTickCount - uLastClickTime;
+//        writeln('diff: ', t, '  DoubleClick_MS:', DOUBLECLICK_MS);
+        if uLastClickWidget = self then
+          IsDblClick := (t) <= DOUBLECLICK_MS   // we detected a double click
+        else
+          uLastClickWidget := self;
+        uLastClickTime := fpgGetTickCount;
+//        Writeln('IsDblClick: ', IsDblClick);
+        if IsDblClick then
+        begin
+          HandleDoubleClick(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
+          if Assigned(FOnDoubleClick) then
+            FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
+                Point(msg.Params.mouse.x, msg.Params.mouse.y));
+        end
+        else
+          HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
     MOUSE_RIGHT:
       begin
@@ -323,7 +352,7 @@ begin
         mb := mbMiddle;
       end;
   end;
-  if Assigned(FOnMouseUp) then
+  if Assigned(FOnMouseUp) and not IsDblClick then
     FOnMouseUp(self, mb, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
@@ -338,6 +367,7 @@ end;
 
 procedure TfpgWidget.MsgDoubleClick(var msg: TfpgMessageRec);
 begin
+(*
   // If we don't generate a mouse down, we get a rapid click
   // delay under Windows.
   HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
@@ -347,6 +377,7 @@ begin
   if Assigned(FOnDoubleClick) then
     FOnDoubleClick(self, mbLeft, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
+*)
 end;
 
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
@@ -860,6 +891,8 @@ end;
 
 initialization
   FocusRootWidget := nil;
+  uLastClickWidget := nil;
+  uLastClickTime := 0;
 
 end.
 

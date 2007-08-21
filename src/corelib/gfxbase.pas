@@ -384,19 +384,19 @@ type
 
 { ********  Helper functions  ******** }
 { Keyboard }
-function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
-function CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKeyType;
+function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
+function  CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKeyType;
 
 { Color }
-function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
-function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
-function fpgGetRed(const AColor: TfpgColor): word;
-function fpgGetGreen(const AColor: TfpgColor): word;
-function fpgGetBlue(const AColor: TfpgColor): word;
-function fpgGetAlpha(const AColor: TfpgColor): word;
+function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
+function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+function  fpgGetRed(const AColor: TfpgColor): word;
+function  fpgGetGreen(const AColor: TfpgColor): word;
+function  fpgGetBlue(const AColor: TfpgColor): word;
+function  fpgGetAlpha(const AColor: TfpgColor): word;
 
 { Points }
-function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
+function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
 procedure SortRect(var ARect: TRect);
 procedure SortRect(var left, top, right, bottom: integer);
 

@@ -266,6 +266,8 @@ procedure fpgSetNamedFont(afontid, afontdesc: string);
 procedure fpgInitTimers;
 procedure fpgCheckTimers;
 function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
+function  fpgGetTickCount: DWord;
+
 
 // Rectangle routines
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
@@ -357,6 +359,11 @@ begin
   end
   else
     Result := -1;
+end;
+
+function fpgGetTickCount: DWord;
+begin
+  Result := DWord(Trunc(Now * 24 * 60 * 60 * 1000));
 end;
 
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
