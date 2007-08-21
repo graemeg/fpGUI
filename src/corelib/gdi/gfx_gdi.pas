@@ -524,7 +524,7 @@ begin
 //          {$IFDEF DEBUG} writeln('Mouse Move or Button Click'); {$ENDIF}
           msgp.mouse.x := smallint(lParam and $FFFF);
           msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
-(*
+
           if (wapplication.TopModalForm <> nil) then
           begin
             mw := nil;
@@ -532,24 +532,31 @@ begin
             if (mw <> nil) and (wapplication.TopModalForm <> mw) then
               blockmsg := True;
           end;
-*)
-//          Writeln('blockmsg ', blockmsg);
+
           if not blockmsg then
           begin
 //            writeln('  we are continueing the event processing...');
             case uMsg of
               WM_MOUSEMOVE:
-                mcode := FPGM_MOUSEMOVE;
+                  mcode := FPGM_MOUSEMOVE;
               WM_LBUTTONDOWN,
               WM_RBUTTONDOWN:
-                mcode := FPGM_MOUSEDOWN;
+                  begin
+                    mcode := FPGM_MOUSEDOWN;
+                    // if PopupListFirst = nil then
+                    SetCapture(w.WinHandle);
+                  end;
               WM_LBUTTONUP,
               WM_RBUTTONUP:
-                mcode := FPGM_MOUSEUP;
+                  begin
+                    mcode := FPGM_MOUSEUP;
+                    // if PopupListFirst = nil then
+                    ReleaseCapture();
+                  end;
               WM_LBUTTONDBLCLK:
-                mcode := FPGM_DOUBLECLICK;
+                  mcode := FPGM_DOUBLECLICK;
               else
-                mcode := 0;
+                  mcode := 0;
             end;
 
             case uMsg of

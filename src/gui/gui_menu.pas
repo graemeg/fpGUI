@@ -17,7 +17,6 @@ uses
   gfxbase,
   fpgfx,
   gfx_widget,
-  gui_form,
   gfx_popupwindow,
   gfx_UTF8utils;
   
