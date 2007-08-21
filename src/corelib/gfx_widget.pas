@@ -313,7 +313,6 @@ procedure TfpgWidget.MsgMouseUp(var msg: TfpgMessageRec);
 var
   mb: TMouseButton;
   IsDblClick: boolean;
-  t: DWord;
 begin
   if not FEnabled then
     exit;   // Do we want this here?
@@ -324,23 +323,20 @@ begin
     MOUSE_LEFT:
       begin
         mb := mbLeft;
-        t := fpgGetTickCount - uLastClickTime;
-//        writeln('diff: ', t, '  DoubleClick_MS:', DOUBLECLICK_MS);
         if uLastClickWidget = self then
-          IsDblClick := (t) <= DOUBLECLICK_MS   // we detected a double click
+          IsDblClick := (fpgGetTickCount - uLastClickTime) <= DOUBLECLICK_MS   // we detected a double click
         else
           uLastClickWidget := self;
         uLastClickTime := fpgGetTickCount;
-//        Writeln('IsDblClick: ', IsDblClick);
         if IsDblClick then
         begin
           HandleDoubleClick(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
           if Assigned(FOnDoubleClick) then
             FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
                 Point(msg.Params.mouse.x, msg.Params.mouse.y));
-        end
-        else
-          HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+        end;
+        // The mouse up must still be handled even if we had a double click event.
+        HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
     MOUSE_RIGHT:
       begin
@@ -352,7 +348,7 @@ begin
         mb := mbMiddle;
       end;
   end;
-  if Assigned(FOnMouseUp) and not IsDblClick then
+  if Assigned(FOnMouseUp) then // and not IsDblClick then
     FOnMouseUp(self, mb, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;

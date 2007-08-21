@@ -517,9 +517,9 @@ begin
               end;
 
               WM_LBUTTONDOWN,
-              WM_LBUTTONUP,
+              WM_LBUTTONUP:
               //WM_LBUTTONDBLCLK:
-                //msgp.mouse.Buttons := MOUSE_LEFT;
+                msgp.mouse.Buttons := MOUSE_LEFT;
 
               WM_RBUTTONDOWN,
               WM_RBUTTONUP:
