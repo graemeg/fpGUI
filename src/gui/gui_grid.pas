@@ -32,6 +32,7 @@ type
     property    ColumnWidth;
     property    OnFocusChange;
     property    OnRowChange;
+    property    OnDoubleClick;
   end;
 
 
@@ -106,6 +107,7 @@ type
     property    Columns;
     property    FocusRow;
     property    OnRowChange;
+    property    OnDoubleClick;
   end;
 
 

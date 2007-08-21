@@ -1121,8 +1121,8 @@ var
   dy: integer;
   cw: TfpgWinHandle;
 begin
-//  if not HandleIsValid then
-//    Exit; //==>
+  if not ASource.HandleIsValid then
+    Exit; //==>
     
   XTranslateCoordinates(xapplication.display, TfpgWindowImpl(ASource).WinHandle,
       XDefaultRootWindow(xapplication.display), AScreenPos.X, AScreenPos.Y, @dx, @dy, @cw);

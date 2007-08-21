@@ -18,6 +18,7 @@ type
   TfpgWidget = class(TfpgWindow)
   private
     FAlignRect: TfpgRect;
+    FOnDoubleClick: TMouseButtonEvent;
     FOnMouseDown: TMouseButtonEvent;
     FOnMouseEnter: TNotifyEvent;
     FOnMouseExit: TNotifyEvent;
@@ -84,6 +85,7 @@ type
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property    OnMouseDown: TMouseButtonEvent read FOnMouseDown write FOnMouseDown;
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
+    property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
     //property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   public
     constructor Create(AOwner: TComponent); override;
@@ -338,7 +340,12 @@ procedure TfpgWidget.MsgDoubleClick(var msg: TfpgMessageRec);
 begin
   // If we don't generate a mouse down, we get a rapid click
   // delay under Windows.
-  HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+//  HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+  HandleDoubleClick(msg.Params.mouse.x, msg.Params.mouse.y,
+      msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
+  if Assigned(FOnDoubleClick) then
+    FOnDoubleClick(self, mbLeft, msg.Params.mouse.shiftstate,
+        Point(msg.Params.mouse.x, msg.Params.mouse.y));
 end;
 
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);

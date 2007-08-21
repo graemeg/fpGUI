@@ -425,7 +425,6 @@ var
   r2: TfpgRect;
 begin
   Canvas.BeginDraw;
-
   r.SetRect(2, 1, 1, fpgStyle.MenuFont.Height+1);
 
   for n := 1 to VisibleCount do
@@ -463,7 +462,7 @@ begin
       end;  { if/else }
       Canvas.FillRectangle(r);
       mi.DrawText(Canvas, r.left+4, r.top+1);
-      Canvas.EndDraw;
+      Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
     end;  { if col=n }
     inc(r.Left, ItemWidth(mi));
@@ -682,9 +681,10 @@ begin
   if newf = FFocusItem then
     Exit; //==>
 
-  DrawRow(FFocusItem,false);
+  DrawRow(FFocusItem, False);
   FFocusItem := newf;
-  DrawRow(FFocusItem,true);
+  DrawRow(FFocusItem, True);
+//  repaint;
 end;
 
 procedure TfpgPopupMenu.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -693,7 +693,6 @@ var
   mi: TfpgMenuItem;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
-
   newf := CalcMouseRow(y);
 
   if not VisibleItem(newf).Selectable then
@@ -707,7 +706,8 @@ begin
   end;
 
   mi := VisibleItem(FFocusItem);
-  if (mi <> nil) and (not MenuFocused) and (mi.SubMenu <> nil) and mi.SubMenu.HasHandle then
+  if (mi <> nil) and (not MenuFocused) and (mi.SubMenu <> nil)
+      and mi.SubMenu.HasHandle then
     mi.SubMenu.Close
   else
     DoSelect;
@@ -862,6 +862,7 @@ procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect);
 var
   s: string;
   x: integer;
+  img: TfpgImage;
 begin
   if mi.Separator then
   begin
@@ -884,9 +885,11 @@ begin
     begin
       canvas.SetColor(Canvas.TextColor);
       x := (rect.height div 2) - 3;
-      canvas.FillTriangle(rect.right-x-2, rect.top+2,
-                          rect.right-2, rect.top+2+x,
-                          rect.right-x-2, rect.top+2+2*x);
+      img := fpgImages.GetImage('sys.sb.right');
+      Canvas.DrawImage(rect.right-x-2, rect.Top + ((rect.Height-img.Height) div 2), img);
+//      canvas.FillTriangle(rect.right-x-2, rect.top+2,
+//                          rect.right-2, rect.top+2+x,
+//                          rect.right-x-2, rect.top+2+2*x);
     end;
   end;
 end;
@@ -937,12 +940,11 @@ begin
       end;
       Canvas.FillRectangle(r);
       DrawItem(mi, r);
-      Canvas.EndDraw;
+      Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
     end;
-
     inc(r.Top, ItemHeight(mi) );
-  end;
+  end;  { for }
 end;
 
 function TfpgPopupMenu.ItemHeight(mi: TfpgMenuItem): integer;

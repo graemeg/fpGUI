@@ -217,7 +217,6 @@ var
 begin
   PopupListAdd(self);
   DontCloseWidget := nil;
-    
   // translate coordinates
   pt    := WindowToScreen(AWidget, Point(x, y));
   // reposition

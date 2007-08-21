@@ -114,6 +114,7 @@ type
     function    GetShowHidden: boolean;
     procedure   SetShowHidden(const Value: boolean);
     procedure   ListChanged(Sender: TObject; ARow: integer);
+    procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   InitializeComponents;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -712,6 +713,18 @@ begin
   lbFileInfo.Text := s;
 end;
 
+procedure TfpgFileDialog.GridDblClicked(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+var
+  e : TFileEntry;
+begin
+  e := grid.CurrentEntry;
+  if (e <> nil) and (e.EntryType = etDir) then
+  begin
+    SetCurrentDirectory(e.Name);
+  end;
+end;
+
 procedure TfpgFileDialog.SetFilter(const Value: string);
 begin
   FFilter := Value;
@@ -745,7 +758,7 @@ begin
     SetPosition(8, 44, 622, 200);
     Anchors := [anLeft, anRight, anTop, anBottom];
     OnRowChange := @ListChanged;
-//    OnDoubleClick := @GridDblClick;
+    OnDoubleClick :=@GridDblClicked;
   end;
 
   btnUpDir := TfpgButton.Create(self);

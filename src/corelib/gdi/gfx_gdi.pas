@@ -189,7 +189,8 @@ uses
   gfx_widget,
   gui_form, // remove this!!!!!
   gfx_UTF8Utils,
-  math;
+  math,
+  gfx_popupwindow;
 
 var
   wapplication: TfpgApplication;
@@ -320,91 +321,10 @@ begin
   EY := EP.Y;
 end;
 
-(*
-procedure SendMouseMessage(wg : TWidget; msg : UINT; button : integer; wParam : WPARAM; lParam : LPARAM);
-var
-  p3 : integer;
-  x,y : integer;
-  wwg : TWidget;
-  pwg : TWidget;
-  h : THANDLE;
-  pt : TPOINT;
-begin
-  x := SmallInt(lParam and $FFFF);
-  y := SmallInt((lParam and $FFFF0000) shr 16);
-
-  p3 := button shl 8;
-
-  if (wParam and MK_CONTROL) <> 0 then p3 := p3 or ss_control;
-  if (wParam and MK_SHIFT)   <> 0 then p3 := p3 or ss_shift;
-
-
-  wwg := wg;
-
-  if (PopupListFirst <> nil) then
-  begin
-    if wg = nil then Writeln('wg is NIL !!!');
-
-    pt.x := x;
-    pt.y := y;
-
-    ClientToScreen(wg.WinHandle, pt);
-
-    //Writeln('click x=',pt.X,' y=',pt.y);
-
-    h := WindowFromPoint(pt);
-    wwg := GetMyWidgetFromHandle(h);
-
-    // if wwg <> nil then writeln('widget ok.');
-
-    pwg := wwg;
-    while (pwg <> nil) and (pwg.Parent <> nil) do pwg := pwg.Parent;
-
-    if ((pwg = nil) or (PopupListFind(pwg.WinHandle) = nil)) and (not PopupDontCloseWidget(wwg)) and
-       ((msg = MSG_MOUSEDOWN) or (msg = MSG_MOUSEUP)) then
-    begin
-      ClosePopups;
-
-      SendMessage(nil, wwg, MSG_POPUPCLOSE, 0, 0, 0 );
-    end;
-
-    // sending the message...
-    if wwg <> nil then
-    begin
-      ScreenToClient(wwg.WinHandle, pt);
-      x := pt.x;
-      y := pt.y;
-    end;
-  end;
-
-  if ptkTopModalForm <> nil then
-  begin
-    pwg := WidgetParentForm(wwg);
-    if (pwg <> nil) and (ptkTopModalForm <> pwg) then wwg := nil;
-  end;
-
-  if wwg <> nil then
-  begin
-    if (Msg = MSG_MOUSEDOWN) and (PopupListFirst = nil) then
-    begin
-      SetCapture(wwg.WinHandle);
-    end
-    else if (Msg = MSG_MOUSEUP) and (PopupListFirst = nil) then
-    begin
-      ReleaseCapture();
-    end;
-
-    SendMessage(nil, wwg, Msg, x, y, p3);
-
-  end;
-
-end;
-
-*)
-
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 var
   w: TfpgWindowImpl;
+  pw: TfpgWindowImpl;
   kwg: TfpgWidget;
   mw: TfpgWindowImpl;
   kcode: integer;
@@ -525,6 +445,31 @@ begin
           msgp.mouse.x := smallint(lParam and $FFFF);
           msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
 
+          { This closes popup windows when you click the mouse elsewhere }
+          if (PopupListFirst <> nil) then
+          begin
+            pt.x  := msgp.mouse.x;
+            pt.y  := msgp.mouse.y;
+            ClientToScreen(w.WinHandle, pt);
+            h     := WindowFromPoint(pt);
+            mw    := GetMyWidgetFromHandle(h);
+            pw    := mw;
+            while (pw <> nil) and (pw.Parent <> nil) do
+              pw := TfpgWindowImpl(pw.Parent);
+            if ((pw = nil) or (PopupListFind(pw.WinHandle) = nil)) and (not PopupDontCloseWidget(TfpgWidget(mw))) and
+               ((uMsg = WM_LBUTTONDOWN) or (uMsg = WM_LBUTTONUP)) then
+            begin
+              ClosePopups;
+              fpgSendMessage(nil, mw, FPGM_POPUPCLOSE);
+            end;
+//            if mw <> nil then
+//            begin            // ????
+//              ScreenToClient(mw.WinHandle, pt);
+//              msgp.mouse.x := pt.x;
+//              msgp.mouse.y := pt.y;
+//            end;
+          end;  { if }
+
           if (wapplication.TopModalForm <> nil) then
           begin
             mw := nil;
@@ -535,7 +480,6 @@ begin
 
           if not blockmsg then
           begin
-//            writeln('  we are continueing the event processing...');
             case uMsg of
               WM_MOUSEMOVE:
                   mcode := FPGM_MOUSEMOVE;
@@ -543,15 +487,15 @@ begin
               WM_RBUTTONDOWN:
                   begin
                     mcode := FPGM_MOUSEDOWN;
-                    // if PopupListFirst = nil then
-                    SetCapture(w.WinHandle);
+                    if PopupListFirst = nil then
+                      SetCapture(w.WinHandle);
                   end;
               WM_LBUTTONUP,
               WM_RBUTTONUP:
                   begin
                     mcode := FPGM_MOUSEUP;
-                    // if PopupListFirst = nil then
-                    ReleaseCapture();
+                    if PopupListFirst = nil then
+                      ReleaseCapture;
                   end;
               WM_LBUTTONDBLCLK:
                   mcode := FPGM_DOUBLECLICK;
@@ -681,17 +625,18 @@ begin
           begin
             if (wParam = 0) and (wapplication.TopModalForm = w) then
             begin
-              blockmsg := true;
+              blockmsg := True;
             end
             else if (wParam <> 0) and (wapplication.TopModalForm <> w) then
             begin
-              blockmsg := true;
+              blockmsg := True;
             end;
           end;
 
-          {$Note Complete this!}
-//          if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
-//            blockmsg := True;
+          if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
+          begin
+            blockmsg := True;
+          end;
 
           if not blockmsg then
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -1063,7 +1008,7 @@ end;
 
 function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 begin
-  if not HandleIsValid then
+  if not ASource.HandleIsValid then
     Exit; //==>
 
   Result.X := AScreenPos.X;
