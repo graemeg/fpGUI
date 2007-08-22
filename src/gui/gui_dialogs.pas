@@ -107,20 +107,6 @@ type
   
   TfpgFileDialog = class(TfpgBaseDialog)
   private
-    FOpenMode: boolean;
-    FFilterList: TStringList;
-    FFilter: string;
-    procedure   SetFilter(const Value: string);
-    function    GetShowHidden: boolean;
-    procedure   SetShowHidden(const Value: boolean);
-    procedure   ListChanged(Sender: TObject; ARow: integer);
-    procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure   InitializeComponents;
-  protected
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   btnOKClick(Sender: TObject); override;
-    procedure   SetCurrentDirectory(const ADir: string);
-  public
     chlDir: TfpgComboBox;
     grid: TfpgFileGrid;
     btnUpDir: TfpgButton;
@@ -132,19 +118,44 @@ type
     chlFilter: TfpgComboBox;
     lb1: TfpgLabel;
     lb2: TfpgLabel;
+    FOpenMode: boolean;
+    FFilterList: TStringList;
+    FFilter: string;
+    procedure   SetFilter(const Value: string);
+    function    GetShowHidden: boolean;
+    procedure   SetShowHidden(const Value: boolean);
+    procedure   ListChanged(Sender: TObject; ARow: integer);
+    procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   InitializeComponents;
+    procedure   ProcessFilterString;
+    function    GetFileFilter: string;
+    procedure   FilterChange(Sender: TObject);
+    procedure   DirChange(Sender: TObject);
+    procedure   UpDirClick(Sender: TObject);
+  protected
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   btnOKClick(Sender: TObject); override;
+    procedure   SetCurrentDirectory(const ADir: string);
+  public
     FileName: string;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   DirChange(Sender: TObject);
-    procedure   FilterChange(Sender: TObject);
-    procedure   GridDblClick(Sender: TObject; x, y: integer; var btnstate, shiftstate: word);
-    procedure   UpDirClick(Sender: TObject);
     function    SelectFile(const AFilename: string): boolean;
-    procedure   ProcessFilterString;
-    function    GetFileFilter: string;
-    property    Filter: string read FFilter write SetFilter;
     function    RunOpenFile: boolean;
     function    RunSaveFile: boolean;
+    { The filter consists out of two parts separated by a | sign. If more than
+      one filter needs to be specified each filter is also separated by a | sign.
+      The format for a single filter is: <description>|<filemask>
+      The format for multiple filters are: <description>|<filemask>|<description>|<filemask>|<description>|<filemask>
+      eg:
+           'All Files (*)|*'
+        or
+           'All Files (*)|*|Object Pascal (*.pas)|*.pas'
+           
+      A filemask can also contain more than one mask separated by a ; sign.
+      eg:  'Object Pascal|*.pas;*.lpi;*.pp'
+    }
+    property    Filter: string read FFilter write SetFilter;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
 
@@ -758,7 +769,7 @@ begin
     SetPosition(8, 44, 622, 200);
     Anchors := [anLeft, anRight, anTop, anBottom];
     OnRowChange := @ListChanged;
-    OnDoubleClick :=@GridDblClicked;
+    OnDoubleClick := @GridDblClicked;
   end;
 
   btnUpDir := TfpgButton.Create(self);
@@ -862,6 +873,7 @@ begin
   ActiveWidget := grid;
   FileName := '';
   Filter := 'All Files (*)|*';
+  chlFilter.FocusItem := 1;
 end;
 
 procedure TfpgFileDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -929,12 +941,6 @@ end;
 procedure TfpgFileDialog.FilterChange(Sender: TObject);
 begin
   SetCurrentDirectory('.');
-end;
-
-procedure TfpgFileDialog.GridDblClick(Sender: TObject; x, y: integer;
-  var btnstate, shiftstate: word);
-begin
-
 end;
 
 procedure TfpgFileDialog.UpDirClick(Sender: TObject);

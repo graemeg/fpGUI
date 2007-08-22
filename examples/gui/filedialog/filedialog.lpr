@@ -42,6 +42,7 @@ var
 begin
   dlg := TfpgFileDialog.Create(nil);
   try
+    dlg.Filter := 'All Files (*)|*|Object Pascal (*.pas;*.lpr;*.pp)|*.pas;*.lpr;*.pp|Lazarus Project (*.lpi)|*.lpi';
     if dlg.RunOpenFile then
       edFilename.Text := dlg.FileName;
   finally
