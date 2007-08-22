@@ -9,6 +9,7 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
+  gui_basegrid,
   gui_customgrid;
   
 type
@@ -111,6 +112,66 @@ type
   end;
 
 
+  TfpgStringColumn = class(TfpgGridColumn)
+  private
+    FCells: TStringList;
+  public
+	  constructor Create; override;
+	  destructor  Destroy; override;
+    property    Cells: TStringList read FCells write FCells;
+  end;
+
+
+  TfpgStringGrid = class(TfpgBaseGrid)
+  private
+    FDoPaint: boolean;  // used in destructor
+    FColumns: TList;
+    FDefaultColumnWidth: TfpgCoord;
+    FRowCount: integer;
+    FColumnCount: integer;
+    function    GetCell(ARow, ACol: Longword): string;
+    function    GetColumnCount: integer;
+    function    GetColumnTitle(ACol: integer): string;
+    function    GetColumns(AIndex: integer): TfpgStringColumn;
+    function    GetRowCount: integer;
+    procedure   SetCell(ARow, ACol: Longword; const AValue: string);
+    procedure   SetColumnCount(const AValue: integer);
+    procedure   SetColumnTitle(ACol: integer; const AValue: string);
+    procedure   SetRowCount(const AValue: integer);
+  protected
+    procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); override;
+    function    GetHeaderText(ACol: integer): string; override;
+    function    GetColumnWidth(ACol: integer): integer; override;
+    procedure   SetColumnWidth(ACol: integer; const AValue: integer); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    property    Cells[ARow, ACol: Longword]: string read GetCell write SetCell;
+    property    RowCount: integer read GetRowCount write SetRowCount;
+    property    ColumnCount: integer read GetColumnCount write SetColumnCount;
+    property    Columns[AIndex: integer]: TfpgStringColumn read GetColumns;
+    property    ColumnTitle[ACol: integer]: string read GetColumnTitle write SetColumnTitle;
+    property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
+  published
+    property    DefaultColWidth;
+    property    DefaultRowHeight;
+    property    Font;
+    property    HeaderFont;
+    property    BackgroundColor;
+    property    FocusCol;
+    property    FocusRow;
+    property    RowSelect;
+//    property    ColumnCount;
+//    property    RowCount;
+    property    ShowHeader;
+    property    ShowGrid;
+    property    HeaderHeight;
+    property    ColResizing;
+//    property    ColumnWidth;
+    property    OnFocusChange;
+    property    OnRowChange;
+    property    OnDoubleClick;
+  end;
 
 implementation
 
@@ -120,7 +181,7 @@ uses
   ,Windows   // Graeme: temporary, just to see how the grid looks under Windows.
   {$ENDIF}
   {$IFDEF UNIX}
-  ,libc      // Graeme: temporary, just to see how the grid looks under Windows.
+  ,libc      // Graeme: temporary
   ,baseunix
   {$ENDIF}
   ;
@@ -549,6 +610,231 @@ end;
 function TfpgFileGrid.CurrentEntry: TFileEntry;
 begin
   Result := FFileList.Entry[FocusRow];
+end;
+
+{ TfpgStringColumn }
+
+constructor TfpgStringColumn.Create;
+begin
+  inherited Create;
+  FCells := TStringList.Create;
+//  writeln(Classname, ' .Create');
+end;
+
+destructor TfpgStringColumn.Destroy;
+begin
+  FCells.Free;
+  inherited Destroy;
+end;
+
+
+{ TfpgStringGrid }
+
+function TfpgStringGrid.GetCell(ARow, ACol: Longword): string;
+var
+  diff: integer;
+begin
+  if ACol > FColumns.Count - 1 then
+	  result := ''
+  else
+  begin
+	  diff := (TfpgStringColumn(FColumns[ACol]).Cells.Count - 1) - integer(ARow);
+	  if diff < 0 then
+	    result := ''
+	  else
+	    result := TfpgStringColumn(FColumns[ACol]).Cells[ARow];
+  end;
+end;
+
+function TfpgStringGrid.GetColumnCount: integer;
+begin
+  result := FColumnCount;
+end;
+
+function TfpgStringGrid.GetColumnTitle(ACol: integer): string;
+begin
+  if FColumns.Count - 1 < ACol then
+    result := ''
+  else
+    result := TfpgStringColumn(FColumns[ACol]).Title;
+end;
+
+function TfpgStringGrid.GetColumns(AIndex: integer): TfpgStringColumn;
+begin
+  if (AIndex < 0) or (AIndex > FColumns.Count-1) then
+    Result := nil
+  else
+    Result := TfpgStringColumn(FColumns[AIndex]);
+end;
+
+function TfpgStringGrid.GetRowCount: integer;
+begin
+  result := FRowCount;
+end;
+
+procedure TfpgStringGrid.SetCell(ARow, ACol: Longword; const AValue: string);
+var
+  aCalc: integer;
+  TmpCol: TfpgStringColumn;
+  i: Longword;
+begin
+  aCalc := ACol - FColumns.Count + 1;
+  if aCalc > 0 then
+  begin
+	  for i := 1 to aCalc do
+	  begin
+	    TmpCol := TfpgStringColumn.Create;
+	    TmpCol.Width := DefaultColWidth;
+	    FColumns.Add(TmpCol);
+	  end;
+  end;
+  aCalc := ARow - TfpgStringColumn(FColumns[ACol]).Cells.Count + 1;
+  if aCalc > 0 then
+  begin
+	  for i := 1 to aCalc do
+	    TfpgStringColumn(FColumns[ACol]).Cells.Append('');
+  end;
+  TfpgStringColumn(FColumns[ACol]).Cells[ARow] := AValue;
+  if ACol > FColumnCount - 1 then
+    FColumnCount := ACol + 1;
+  if ARow > FRowCount - 1 then
+    FRowCount := ARow + 1;
+end;
+
+procedure TfpgStringGrid.SetColumnCount(const AValue: integer);
+var
+  i: integer;
+  aCalc: integer;
+begin
+  if AValue <> FColumnCount then
+  begin
+	  if AValue < FColumnCount then
+	  begin
+	    aCalc := FColumns.Count - AValue;
+	    if aCalc > 0 then
+	    begin
+		    for i := 1 to aCalc do
+		    begin
+		      TfpgStringColumn(FColumns[i]).Destroy;
+		      FColumns.Delete(FColumns.Count-1);
+		    end;
+	    end;
+	  end;
+	  FColumnCount := AValue;
+    if FDoPaint then
+	    RePaint;
+  end;
+end;
+
+procedure TfpgStringGrid.SetColumnTitle(ACol: integer; const AValue: string);
+var
+  aCalc: integer;
+begin
+  aCalc := ACol - FColumns.Count + 1;
+  if aCalc > 0 then
+	  Cells[ACol, 0] := '';
+  if AValue <> TfpgStringColumn(FColumns[ACol]).Title then
+  begin
+	  if ACol+1 > FColumnCount then
+      FColumnCount := ACol + 1;
+	  TfpgStringColumn(FColumns[ACol]).Title := aValue;
+	  RePaint;
+  end;
+end;
+
+procedure TfpgStringGrid.SetRowCount(const AValue: integer);
+var
+  i, i1: integer;
+  aCalc: integer;
+  SL: TStringList;
+begin
+  if AValue <> FRowCount then
+  begin
+	  if AValue < FRowCount then
+	  begin
+      for i := 0 to FColumns.Count - 1 do
+	    begin
+		    aCalc := TfpgStringColumn(FColumns[i]).Cells.Count - AValue;
+		    if aCalc > 0 then
+		    begin
+		      sl := TfpgStringColumn(FColumns[i]).Cells;
+		      for i1 := 1 to aCalc do
+			      sl.Delete(sl.Count-1);
+		    end;
+	    end;
+	  end;
+	  FRowCount := aValue;
+    if FDoPaint then
+	    RePaint;
+  end;
+end;
+
+procedure TfpgStringGrid.DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer);
+var
+  s: string;
+begin
+//  inherited DrawCell(ARow, ACol, ARect, AFlags);
+  s := Cells[ACol-1, ARow-1];
+  if s <> '' then
+    Canvas.DrawString(aRect.Left + 1, aRect.top + 1, s);
+end;
+
+function TfpgStringGrid.GetHeaderText(ACol: integer): string;
+begin
+  Result := ColumnTitle[ACol-1];
+end;
+
+function TfpgStringGrid.GetColumnWidth(ACol: integer): integer;
+begin
+  if ACol > FColumns.Count - 1 then
+    result := DefaultColWidth
+  else
+    result := TfpgStringColumn(FColumns[ACol]).Width;
+end;
+
+procedure TfpgStringGrid.SetColumnWidth(ACol: integer; const AValue: integer);
+var
+  aCalc: integer;
+  i: integer;
+  TmpCol: TfpgStringColumn;
+begin
+  aCalc := ACol - FColumns.Count;
+  if aCalc > 0 then
+  begin
+	  for i := 1 to aCalc do
+	  begin
+	    TmpCol := TfpgStringColumn.Create;
+	    TmpCol.Width := DefaultColWidth;
+	    TmpCol.Cells := TStringList.Create;
+	    FColumns.Add(TmpCol);
+	  end;
+  end;
+  if TfpgStringColumn(FColumns[ACol]).Width <> AValue then
+  begin
+	  TfpgStringColumn(FColumns[ACol]).Width := AValue;
+	  RePaint;
+  end;
+end;
+
+constructor TfpgStringGrid.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FDoPaint := True;
+  FColumns := TList.Create;
+  FColumnCount := 0;
+  FRowCount := 0;
+  DefaultColWidth := 100;
+  ColumnCount := 5;
+  RowCount := 5;
+end;
+
+destructor TfpgStringGrid.Destroy;
+begin
+  FDoPaint := False;
+  ColumnCount := 0;
+  RowCount := 0;
+  FColumns.Free;
+  inherited Destroy;
 end;
 
 end.

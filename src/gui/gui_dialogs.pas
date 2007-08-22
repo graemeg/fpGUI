@@ -959,6 +959,7 @@ var
   drvs: string;
 {$endif}
 begin
+  ds := '';
   GetDir(0, ds);
   fsel := ExtractFileName(ds);
 

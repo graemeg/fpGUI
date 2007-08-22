@@ -21,13 +21,13 @@ uses
 type
 
   // data object for grid columns
-  TGridColumn = class(TObject)
+  TfpgGridColumn = class(TObject)
   private
     FAlignment: TAlignment;
     FTitle: string;
     FWidth: integer;
   public
-    constructor Create;
+    constructor Create; virtual;
     property    Width: integer read FWidth write FWidth;
     property    Title: string read FTitle write FTitle;
     property    Alignment: TAlignment read FAlignment write FAlignment;
@@ -36,12 +36,12 @@ type
   
   TfpgCustomGrid = class(TfpgBaseGrid)
   private
-    FRowCount: integer;
-    function    GetColumns(AIndex: integer): TGridColumn;
+    function    GetColumns(AIndex: integer): TfpgGridColumn;
   protected
+    FRowCount: integer;
     FColumns: TList;
     function    GetColumnCount: integer; override;
-    procedure   SetColumnCount(const AValue: integer);
+    procedure   SetColumnCount(const AValue: integer); virtual;
     function    GetRowCount: integer; override;
     procedure   SetRowCount(const AValue: integer); virtual;
     function    GetColumnWidth(ACol: integer): integer; override;
@@ -49,19 +49,19 @@ type
     function    GetHeaderText(ACol: integer): string; override;
     property    RowCount: integer read GetRowCount write SetRowCount;
     property    ColumnCount: integer read GetColumnCount write SetColumnCount;
-    property    Columns[AIndex: integer]: TGridColumn read GetColumns;
+    property    Columns[AIndex: integer]: TfpgGridColumn read GetColumns;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    function    AddColumn(ATitle: string; AWidth: integer): TGridColumn;
+    function    AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn;
   end;
   
   
 implementation
 
-{ TGridColumn }
+{ TfpgGridColumn }
 
-constructor TGridColumn.Create;
+constructor TfpgGridColumn.Create;
 begin
   Width     := 64;
   Title     := '';
@@ -75,12 +75,12 @@ begin
   Result := FRowCount;
 end;
 
-function TfpgCustomGrid.GetColumns(AIndex: integer): TGridColumn;
+function TfpgCustomGrid.GetColumns(AIndex: integer): TfpgGridColumn;
 begin
   if (AIndex < 0) or (AIndex > FColumns.Count-1) then
     Result := nil
   else
-    Result := TGridColumn(FColumns[AIndex]);
+    Result := TfpgGridColumn(FColumns[AIndex]);
 end;
 
 function TfpgCustomGrid.GetColumnCount: integer;
@@ -109,7 +109,7 @@ begin
   begin
     while n > AValue do
     begin
-      TGridColumn(FColumns.Items[n-1]).Free;
+      TfpgGridColumn(FColumns.Items[n-1]).Free;
       FColumns.Delete(n-1);
       dec(n);
     end;
@@ -133,16 +133,16 @@ end;
 function TfpgCustomGrid.GetColumnWidth(ACol: integer): integer;
 begin
   if (ACol > 0) and (ACol <= ColumnCount) then
-    Result := TGridColumn(FColumns[ACol-1]).Width
+    Result := TfpgGridColumn(FColumns[ACol-1]).Width
   else
     result := DefaultColWidth;
 end;
 
 procedure TfpgCustomGrid.SetColumnWidth(ACol: integer; const AValue: integer);
 var
-  lCol: TGridColumn;
+  lCol: TfpgGridColumn;
 begin
-  lCol := TGridColumn(FColumns[ACol-1]);
+  lCol := TfpgGridColumn(FColumns[ACol-1]);
   
   if lCol.Width <> AValue then
   begin
@@ -157,7 +157,7 @@ end;
 
 function TfpgCustomGrid.GetHeaderText(ACol: integer): string;
 begin
-  Result := TGridColumn(FColumns[ACol-1]).Title;
+  Result := TfpgGridColumn(FColumns[ACol-1]).Title;
 end;
 
 constructor TfpgCustomGrid.Create(AOwner: TComponent);
@@ -172,7 +172,7 @@ destructor TfpgCustomGrid.Destroy;
 begin
   while FColumns.Count > 0 do
   begin
-    TGridColumn(FColumns.Items[0]).Free;
+    TfpgGridColumn(FColumns.Items[0]).Free;
     FColumns.Delete(0);
   end;
 
@@ -180,9 +180,9 @@ begin
   inherited Destroy;
 end;
 
-function TfpgCustomGrid.AddColumn(ATitle: string; AWidth: integer): TGridColumn;
+function TfpgCustomGrid.AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn;
 begin
-  Result := TGridColumn.Create;
+  Result := TfpgGridColumn.Create;
   Result.Title := ATitle;
   Result.Width := AWidth;
   FColumns.Add(Result);
