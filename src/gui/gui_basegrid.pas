@@ -204,7 +204,9 @@ begin
   s := 'c(' + IntToStr(ARow) + ',' + IntToStr(ACol) + ')';
   if (ARow = 5) and (ACol = 2) then
     s := 'Here lives Graeme!';
-  fpgStyle.DrawString(Canvas, ARect.Left+1, ARect.Top+1, s, Enabled);
+  if not Enabled then
+    Canvas.SetTextColor(clShadow1);
+  Canvas.DrawString(ARect.Left+1, ARect.Top+1, s);
 end;
 
 procedure TfpgBaseGrid.DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer);

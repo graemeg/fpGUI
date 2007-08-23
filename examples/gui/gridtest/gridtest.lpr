@@ -46,21 +46,25 @@ type
 procedure TMainForm.chkDisabledChange(Sender: TObject);
 begin
   grdMain.Enabled := not chkDisabled.Checked;
+  stringgrid.Enabled := grdMain.Enabled;
 end;
 
 procedure TMainForm.chkRowSelectChange(Sender: TObject);
 begin
   grdMain.RowSelect := chkRowSelect.Checked;
+  stringgrid.RowSelect := grdMain.RowSelect;
 end;
 
 procedure TMainForm.chkShowHeaderChange(Sender: TObject);
 begin
   grdMain.ShowHeader := chkShowHeader.Checked;
+  stringgrid.ShowHeader := grdMain.ShowHeader;
 end;
 
 procedure TMainForm.chkShowGridChange(Sender: TObject);
 begin
   grdMain.ShowGrid := chkShowGrid.Checked;
+  stringgrid.ShowGrid := grdMain.ShowGrid;
 end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
@@ -100,20 +104,21 @@ begin
   for c := 1 to grdMain.ColumnCount do
     grdMain.Columns[c-1].Title := 'Title ' + IntToStr(c);
 
-
   tsTab2 := pagecontrol.AppendTabSheet('String Grid');
   stringgrid := TfpgStringGrid.Create(tsTab2);
   stringgrid.SetPosition(10, 10, Width-50, 250);
-  stringgrid.ColumnCount := 2;
-  stringgrid.RowCount := 5;
-  stringgrid.Cells[2, 1] := 'hello';
-  stringgrid.Cells[5, 2] := 'hello';
+  // change row and column count to something different that the default
+  stringgrid.ColumnCount  := 2;
+  stringgrid.RowCount     := 3;
+  // add and change a column
+  stringgrid.AddColumn('Extra', 100);
+  stringgrid.ColumnWidth[3] := 150;
+  // changes header text in different ways
   stringgrid.ColumnTitle[1] := 'Column 1';
-//  stringgrid.Columns[1].Title := 'Column 1';
-//  stringgrid.Columns[2].Title := 'Col2';
-  //for r := 1 to stringgrid.RowCount do
-    //for c := 1 to stringgrid.ColumnCount do
-      //stringgrid.Cells[r, c] := IntToStr(r) + ',' + IntToStr(c);
+  stringgrid.Columns[2].Title := 'Col 2';
+  // add some text
+  stringgrid.Cells[2, 3] := 'Hello';
+  stringgrid.Cells[3, 1] := '(r1,c3)';
 //  stringgrid.Anchors  := [anLeft, anTop, anRight, anBottom];
 
   pagecontrol.ActivePageIndex := 0;

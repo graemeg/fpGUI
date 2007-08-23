@@ -5,6 +5,7 @@ unit gui_customgrid;
 {
   TODO:
     * Column text alignment needs to be implemented. Currently always Centre.
+    * AlternateColor for rows need to be implemented.
 }
 
 {.$Define DEBUG}
@@ -35,11 +36,13 @@ type
   
   
   TfpgCustomGrid = class(TfpgBaseGrid)
-  private
-    function    GetColumns(AIndex: integer): TfpgGridColumn;
   protected
     FRowCount: integer;
     FColumns: TList;
+    function    GetColumns(AIndex: integer): TfpgGridColumn; virtual;
+    procedure   DoDeleteColumn(ACol: integer); virtual;
+    procedure   DoSetRowCount(AValue: integer); virtual;
+    function    DoCreateColumnClass: TfpgGridColumn; virtual;
     function    GetColumnCount: integer; override;
     procedure   SetColumnCount(const AValue: integer); virtual;
     function    GetRowCount: integer; override;
@@ -50,10 +53,11 @@ type
     property    RowCount: integer read GetRowCount write SetRowCount;
     property    ColumnCount: integer read GetColumnCount write SetColumnCount;
     property    Columns[AIndex: integer]: TfpgGridColumn read GetColumns;
+//    property AlternateColor: TColor read FAlternateColor write SetAlternateColor stored IsAltColorStored;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    function    AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn;
+    function    AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn; virtual;
   end;
   
   
@@ -83,6 +87,22 @@ begin
     Result := TfpgGridColumn(FColumns[AIndex]);
 end;
 
+procedure TfpgCustomGrid.DoDeleteColumn(ACol: integer);
+begin
+  TfpgGridColumn(FColumns.Items[ACol-1]).Free;
+  FColumns.Delete(ACol-1);
+end;
+
+procedure TfpgCustomGrid.DoSetRowCount(AValue: integer);
+begin
+  // do nothing
+end;
+
+function TfpgCustomGrid.DoCreateColumnClass: TfpgGridColumn;
+begin
+  Result := TfpgGridColumn.Create;
+end;
+
 function TfpgCustomGrid.GetColumnCount: integer;
 begin
   Result := FColumns.Count;
@@ -109,8 +129,7 @@ begin
   begin
     while n > AValue do
     begin
-      TfpgGridColumn(FColumns.Items[n-1]).Free;
-      FColumns.Delete(n-1);
+      DoDeleteColumn(n);
       dec(n);
     end;
   end;
@@ -127,6 +146,7 @@ begin
   begin
     FocusRow := FRowCount;
   end;
+  DoSetRowCount(AValue);  // could be implemented by descendants
   RePaint;
 end;
 
@@ -182,7 +202,7 @@ end;
 
 function TfpgCustomGrid.AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn;
 begin
-  Result := TfpgGridColumn.Create;
+  Result := DoCreateColumnClass;
   Result.Title := ATitle;
   Result.Width := AWidth;
   FColumns.Add(Result);
