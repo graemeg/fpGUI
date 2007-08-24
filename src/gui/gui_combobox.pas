@@ -28,6 +28,7 @@ type
     FItems: TStringList;
     FOnChange: TNotifyEvent;
     function    GetFontDesc: string;
+    function    GetText: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
     procedure   DoDropDown;
@@ -35,6 +36,7 @@ type
     procedure   InternalListBoxSelect(Sender: TObject);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
+    procedure   SetText(const AValue: string);
   protected
     FMargin: integer;
     procedure   SetEnabled(const AValue: boolean); override;
@@ -46,10 +48,10 @@ type
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    Text: string read GetText write SetText;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    function    Text: string;
     procedure   AfterConstruction; override;
     property    Font: TfpgFont read FFont;
   end;
@@ -62,6 +64,7 @@ type
     property    FocusItem;
     property    FontDesc;
     property    Items;
+    property    Text;
     property    OnChange;
   end;
   
@@ -192,6 +195,14 @@ begin
   Result := FFont.FontDesc;
 end;
 
+function TfpgCustomComboBox.GetText: string;
+begin
+  if (FocusItem > 0) and (FocusItem <= FItems.Count) then
+    Result := FItems.Strings[FocusItem-1]
+  else
+    Result := '';
+end;
+
 procedure TfpgCustomComboBox.DoDropDown;
 var
   ddw: TDropDownWindow;
@@ -267,6 +278,27 @@ begin
   RePaint;
 end;
 
+procedure TfpgCustomComboBox.SetText(const AValue: string);
+var
+  i: integer;
+begin
+  if AValue = '' then
+    SetFocusItem(0)  // nothing selected
+  else
+  begin
+    for i := 0 to FItems.Count - 1 do
+    begin
+      if SameText(FItems.Strings[i], AValue) then
+      begin
+        SetFocusItem(i+1);
+        Break;
+      end;
+    end;
+    // if we get here, we didn't find a match
+    SetFocusItem(0);
+  end;
+end;
+
 procedure TfpgCustomComboBox.SetEnabled(const AValue: boolean);
 begin
   inherited SetEnabled(AValue);
@@ -326,14 +358,6 @@ begin
     fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
 
   Canvas.EndDraw;
-end;
-
-function TfpgCustomComboBox.Text: string;
-begin
-  if (FocusItem > 0) and (FocusItem <= FItems.Count) then
-    Result := FItems.Strings[FocusItem-1]
-  else
-    Result := '';
 end;
 
 constructor TfpgCustomComboBox.Create(AOwner: TComponent);

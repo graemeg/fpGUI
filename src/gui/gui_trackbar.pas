@@ -99,6 +99,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+  published
     property    Position: integer read FPosition write SetPosition default 10;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    Min: integer read FMin write SetMin default 0;

@@ -671,8 +671,9 @@ end;
 
 procedure TMediatorComboBoxView.ObjectToGui;
 begin
+  // NOTE:  FocusItem is 1 based!!
   EditControl.FocusItem :=
-      EditControl.Items.IndexOf(Subject.PropValue[FieldName]);
+      EditControl.Items.IndexOf(Subject.PropValue[FieldName]) +1;
 end;
 
 
@@ -741,7 +742,7 @@ var
 begin
   lItems := EditControl.Items;
   lItems.Clear;
-//  EditControl.Text := '';
+  EditControl.Text := '';
 
   if (FList = nil) or
      (FList.Count < 1) or
@@ -794,7 +795,7 @@ constructor TMediatorDynamicComboBoxView.CreateCustom(pList: TtiObjectList;
   pEditControl: TfpgWidget; pSubject: TtiObject; pFieldName: string);
 begin
   Create;
-  FGuiFieldName   := 'Text';    // TComboBox defaults to Text property
+  FGuiFieldName   := 'Text';    // TfpgComboBox defaults to Text property
 
   FSubject        := pSubject;
   FFieldName      := pFieldName;
@@ -848,7 +849,7 @@ begin
   SetOnChangeActive(false);
 
   //  Set the index only (We're assuming the item is present in the list)
-  EditControl.FocusItem := -1;
+  EditControl.FocusItem := 0;
   if FSubject = nil then
     Exit; //==>
 

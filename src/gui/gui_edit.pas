@@ -54,6 +54,7 @@ type
     property    Text: string read FText write SetText;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+    property    MaxLength: integer read FMaxLength write FMaxLength;
   end;
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
@@ -83,18 +84,18 @@ begin
 
   FFont := fpgGetFont('#Edit1');  // owned object !
 
-  FHeight      := FFont.Height + 6;
-  FWidth       := 120;
+  FHeight       := FFont.Height + 6;
+  FWidth        := 120;
   FBackgroundColor := clBoxColor;
-  FSelecting   := False;
-  FSideMargin  := 3;
-  FMaxLength   := 0;
-  FText        := '';
-  FCursorPos   := UTF8Length(FText);
-  FSelStart    := FCursorPos;
-  FSelOffset   := 0;
-  FDrawOffset  := 0;
-  PasswordMode := False;
+  FSelecting    := False;
+  FSideMargin   := 3;
+  FMaxLength    := 0; // no limit
+  FText         := '';
+  FCursorPos    := UTF8Length(FText);
+  FSelStart     := FCursorPos;
+  FSelOffset    := 0;
+  FDrawOffset   := 0;
+  PasswordMode  := False;
 
   OnChange := nil;
 end;
@@ -106,19 +107,30 @@ begin
 end;
 
 procedure TfpgEdit.SetText(const AValue: string);
+var
+  s: string;
 begin
   if FText = AValue then
     Exit;
+    
+  if FMaxLength <> 0 then
+  begin
+    if UTF8Length(FText) > FMaxLength then
+      s := UTF8Copy(AValue, 1, FMaxLength)
+    else
+      s := AValue;
+  end
+  else
+    s := AValue;
 
-  FText       := AValue;
+  FText       := s;
   FCursorPos  := UTF8Length(FText);
   FSelStart   := FCursorPos;
   FSelOffset  := 0;
   FDrawOffset := 0;
 
   AdjustCursor;
-  if FWinHandle > 0 then
-    RePaint;
+  RePaint;
 end;
 
 function TfpgEdit.GetFontDesc: string;
@@ -307,6 +319,7 @@ procedure TfpgEdit.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   lpos: integer;
+  hasChanged: boolean;
 
   procedure StopSelection;
   begin
@@ -318,6 +331,7 @@ begin
 //  writeln(Classname, '.Keypress');
   Consumed := False;
   lpos := FCursorPos;
+  hasChanged := False;
 
   Consumed := True;
   case CheckClipBoardKey(keycode, shiftstate) of
@@ -330,12 +344,14 @@ begin
         begin
 //          writeln('ckPaste');
           DoPaste;
+          hasChanged := True;
         end;
     ckCut:
         begin
 //          writeln('ckCut');
           DoCopy;
           DeleteSelection;
+          hasChanged := True;
         end;
   else
     Consumed := False;
@@ -408,18 +424,24 @@ begin
 
     case keycode of
       keyBackSpace:
-        if FCursorPos > 0 then
-        begin
-          Delete(FText, FCursorPos, 1);
-          Dec(FCursorPos);
-        end;// backspace
+          begin
+            if FCursorPos > 0 then
+            begin
+              Delete(FText, FCursorPos, 1);
+              Dec(FCursorPos);
+              hasChanged := True;
+            end;// backspace
+          end;
 
 
       keyDelete:
-        if FSelOffset <> 0 then
-          DeleteSelection
-        else if FCursorPos < UTF8Length(FText) then
-          Delete(FText, FCursorPos + 1, 1);
+          begin
+            if FSelOffset <> 0 then
+              DeleteSelection
+            else if FCursorPos < UTF8Length(FText) then
+              Delete(FText, FCursorPos + 1, 1);
+            hasChanged := True;
+          end;
       else
         Consumed := False;
     end;
@@ -435,6 +457,10 @@ begin
     RePaint
   else
     inherited;
+    
+  if hasChanged then
+    if Assigned(OnChange) then
+      OnChange(self);
 end;
 
 procedure TfpgEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
