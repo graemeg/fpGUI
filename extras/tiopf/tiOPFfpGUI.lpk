@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="2">
+    <Name Value="tiOPFfpGUI"/>
+    <Author Value="Graeme Geldenhuys"/>
+    <AutoUpdate Value="OnRebuildingAll"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="gui/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="tiOPF GUI layer - visual units
+"/>
+    <License Value="Mozilla Public License v1.1
+"/>
+    <Version Major="2" Release="3"/>
+    <Files Count="3">
+      <Item1>
+        <Filename Value="gui/tiGUIUtils.pas"/>
+        <UnitName Value="tiGUIUtils"/>
+      </Item1>
+      <Item2>
+        <Filename Value="gui/tiDialogs.pas"/>
+        <UnitName Value="tiDialogs"/>
+      </Item2>
+      <Item3>
+        <Filename Value="gui/tiGUIINI.pas"/>
+        <UnitName Value="tiGUIINI"/>
+      </Item3>
+    </Files>
+    <RequiredPkgs Count="3">
+      <Item1>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="tiOPF"/>
+        <MinVersion Major="2" Release="3" Valid="True"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="fpgui_package"/>
+        <MinVersion Minor="5" Valid="True"/>
+      </Item3>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)/"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
