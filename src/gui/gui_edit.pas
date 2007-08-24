@@ -28,6 +28,7 @@ type
     FFont: TfpgFont;
     FDrawOffset: integer;
     function    GetFontDesc: string;
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
     procedure   DeleteSelection;
@@ -52,6 +53,7 @@ type
   published
     property    Text: string read FText write SetText;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
   end;
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
@@ -122,6 +124,15 @@ end;
 function TfpgEdit.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
+end;
+
+procedure TfpgEdit.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FBackgroundColor := AValue;
+    Repaint;
+  end;
 end;
 
 procedure TfpgEdit.SetFontDesc(const AValue: string);

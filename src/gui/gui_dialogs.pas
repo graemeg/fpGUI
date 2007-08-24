@@ -9,9 +9,7 @@ unit gui_dialogs;
 {
   TODO:
     * Try and abstract the code to remove all IFDEF's
-    * Combobox dropdown in FileDialog doesn't function to do ModolForm being used.
-    * File Selection not working 100% in FileDialog
-    * Moving through directories not working 100% yet in FileDialog.
+    * Implement MessageDlg with icons and buttons
 }
 
 {.$Define DEBUG}

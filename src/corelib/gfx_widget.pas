@@ -49,6 +49,7 @@ type
     FAnchors: TAnchors;
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
+    FHint: string;
     function    GetParent: TfpgWidget; reintroduce;
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
@@ -102,6 +103,7 @@ type
     property    Focused: boolean read FFocused write FFocused;
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
+    property    Hint: string read FHint write FHint;
   end;
 
 
@@ -183,15 +185,16 @@ end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
-  FOnScreen := False;
-  FVisible  := True;
+  FOnScreen   := False;
+  FVisible    := True;
   FActiveWidget := nil;
   FEnabled      := True;
-  FFocusable := False;
-  FFocused   := False;
-  FTabOrder  := 0;
-  FAnchors := [anLeft, anTop];
-  FAlign := alNone;
+  FFocusable  := False;
+  FFocused    := False;
+  FTabOrder   := 0;
+  FAnchors    := [anLeft, anTop];
+  FAlign      := alNone;
+  FHint       := '';
 //  OnKeyPress := nil;
 
   if (AOwner <> nil) and (AOwner is TfpgWidget) then

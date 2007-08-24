@@ -174,6 +174,7 @@
   clPaleGreen           = TfpgColor($98fb98);
   clPaleTurquoise       = TfpgColor($afeeee);
   clPaleVioletRed       = TfpgColor($db7093);
+  clPaleBlue            = TfpgColor($e9f5fe);
   clPapayaWhip          = TfpgColor($ffefd5);
   clPeachPuff           = TfpgColor($ffdab9);
   clPeru                = TfpgColor($cd853f);

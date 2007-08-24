@@ -7,7 +7,7 @@ unit tiOPFfpGUI;
 interface
 
 uses
-  tiGUIUtils, tiDialogs, tiGUIINI; 
+  tiGUIUtils, tiDialogs, tiGUIINI, tiGenericEditMediators, tiGUIConstants; 
 
 implementation
 
