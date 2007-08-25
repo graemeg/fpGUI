@@ -251,7 +251,8 @@ end;
 constructor TfpgMessageBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowAttributes := [waAutoPos];
+  WindowPosition := wpScreenCenter;
+  Sizeable := False;
   
   FLines        := TStringList.Create;
   FFont         := fpgGetFont('#Label1');
@@ -264,7 +265,6 @@ begin
   FButton.text    := 'OK';   // We must localize this
   FButton.Width   := 75;
   FButton.OnClick := @ButtonClick;
-  
 end;
 
 destructor TfpgMessageBox.Destroy;
