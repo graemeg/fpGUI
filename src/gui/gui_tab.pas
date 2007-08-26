@@ -570,7 +570,8 @@ begin
         
     tpBottom:
         begin
-{          if (y > Height - FMargin - buttonheight) and (y < height - FMargin) then
+(*
+          if (y > Height - FMargin - buttonheight) and (y < height - FMargin) then
           begin
             while h <> nil do
             begin
@@ -588,7 +589,7 @@ begin
               h := h^.next;
             end;  { while }
           end;  { if }
-}
+*)
         end;
   end;  { case }
   inherited HandleLMouseUp(x, y, shiftstate);

@@ -46,7 +46,7 @@ type
     procedure   SetVisible(const AValue: Boolean);
     procedure   SetWidth(const AValue: Integer);
   public
-    constructor Create(AColumns: TfpgLVColumns);
+    constructor Create(AColumns: TfpgLVColumns); reintroduce;
     destructor  Destroy; override;
     property    Caption: String read FCaption write SetCaption;
     property    CaptionAlignment: TAlignment read FCaptionAlignment write SetCaptionAlignment;
@@ -244,7 +244,14 @@ type
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;
     property    OnSelectionChanged: TfpgLVItemSelectEvent read FOnSelectionChanged write FOnSelectionChanged;
   end;
+  
+  
 implementation
+
+type
+  // used to access protected methods
+  TfpgScrollbarFriend = class(TfpgScrollbar)
+  end;
 
 { TfpgLVItems }
 
@@ -847,8 +854,8 @@ begin
 
   if not PtInRect(cRect, Point(X,Y)) then
     Exit;
-  // Yes this is a dirty dirty hack
-  TfpgListView(FVScrollBar).HandleMouseScroll(x, y, shiftstate, delta);
+
+  TfpgScrollbarFriend(FVScrollBar).HandleMouseScroll(x, y, shiftstate, delta);
 end;
 
 procedure TfpgListView.HandleLMouseDown(x, y: integer; shiftstate: TShiftState

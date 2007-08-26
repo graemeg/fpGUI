@@ -133,11 +133,11 @@ type
   private
     function    GetCell(ACol, ARow: LongWord): string;
     function    GetColumnTitle(ACol: integer): string;
-    function    GetColumnWidth(ACol: integer): integer;
     procedure   SetCell(ACol, ARow: LongWord; const AValue: string);
     procedure   SetColumnTitle(ACol: integer; const AValue: string);
-    procedure   SetColumnWidth(ACol: integer; const AValue: integer);
   protected
+    function    GetColumnWidth(ACol: integer): integer; override;
+    procedure   SetColumnWidth(ACol: integer; const AValue: integer); override;
     function    GetColumns(AIndex: integer): TfpgStringColumn; reintroduce;
     procedure   DoDeleteColumn(ACol: integer); override;
     procedure   DoSetRowCount(AValue: integer); override;
