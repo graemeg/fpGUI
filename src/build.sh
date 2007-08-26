@@ -1,2 +1,2 @@
-fpc @~/.fpc.cfg gui/fpgui_package.pas -dRELEASE -dX11
+fpc @extrafpc.cfg gui/fpgui_package.pas -dRELEASE -dX11
 

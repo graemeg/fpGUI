@@ -5,21 +5,21 @@
 This is still a work in progress until I can find a suitable solution. I'm
 not 100% satisfied with this, but it's a quick and dirty way to get things
 to compile. I'll assume you have the 'fpc' executable setup in your PATH so it
-can be run from any location on your computer.
+can be run from any location on your computer. I'll also assume you global 
+fpc.cfg file has been setup correctly so the FPC compiler can find the RTL and
+FCL units.
 
 Under Linux run:  build.sh
-  This assumes that your global fpc.cfg file is located in you HOME directory
 
 Under Windows run:  build.bat
-  This assumes that you global fpc.cfg file is located in C:\Windows\ directory.
 
 
-The fpc.cfg file located in this directory is combined with your global fpc.cfg
-file. The locat config file sets up all the required search and include paths
-to compile CoreLib and GUI directories.
+The extrafpc.cfg file located in this directory is combined with your global 
+fpc.cfg file. The local extrafpc.cfg file sets up all the required search and 
+include paths to compile CoreLib and GUI directories.
 
-All compiled units (*.o and *.ppu) are saved in the ../lib directory. This makes
-the search paths for you applications a little easier to setup.
+All compiled units (*.o and *.ppu) are saved in the ../lib directory. This 
+makes the search paths for you applications a little easier to setup.
 
 
   Building fpGUI using Lazarus
@@ -62,13 +62,26 @@ find all the fpGUI compiled units and source for you.
    automatically include the paths to the fpGUI compiled units for you.
 
 
+ Compiling any of the examples from the Command Line
+ ===================================================
+
+You need to compile fpGUI first as mentioned above!
+Every project in the ../examples directory has it's own extrafpc.cfg file.
+You only need to specify that config file and the project unit to compile
+it.  
+
+fpc @extrafpc.cfg <project unit>
+
+Example:
+  fpc @extrafpc.cfg docedit.lpr
+
+
+
 
 Regards,
   - Graeme -
 
                 ===========================================
-
-
 
 
 
