@@ -2,6 +2,16 @@ unit gui_combobox;
 
 {$mode objfpc}{$H+}
 
+{
+  TODO:
+    * When combobox Items changes, the combobox needs to refresh. We need a
+      custom StringItems class to notify us of changes. See TfpgListBox for
+      an example.
+    * Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
+      the items list.
+
+}
+
 interface
 
 uses
@@ -37,6 +47,7 @@ type
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
+    procedure   SetWidth(const AValue: TfpgCoord);
   protected
     FMargin: integer;
     procedure   SetEnabled(const AValue: boolean); override;
@@ -52,8 +63,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   Update;
     procedure   AfterConstruction; override;
     property    Font: TfpgFont read FFont;
+    property    Width: TfpgCoord read FWidth write SetWidth;
   end;
 
 
@@ -65,6 +78,8 @@ type
     property    FontDesc;
     property    Items;
     property    Text;
+    property    Width;
+    property    Height;
     property    OnChange;
   end;
   
@@ -299,6 +314,16 @@ begin
   end;
 end;
 
+procedure TfpgCustomComboBox.SetWidth(const AValue: TfpgCoord);
+begin
+  if FWidth = AValue then
+    Exit; //==>
+  FWidth := AValue;
+  if Assigned(FInternalBtn) then
+    FInternalBtn.Left := Width - 20;
+  RePaint;
+end;
+
 procedure TfpgCustomComboBox.SetEnabled(const AValue: boolean);
 begin
   inherited SetEnabled(AValue);
@@ -369,6 +394,7 @@ begin
   FHeight           := 23;
   FFocusItem        := 0; // nothing is selected
   FMargin           := 3;
+  FFocusable        := True;
   
   FFont   := fpgGetFont('#List');
   FItems  := TStringList.Create;
@@ -380,6 +406,12 @@ destructor TfpgCustomComboBox.Destroy;
 begin
   FItems.Free;
   inherited Destroy;
+end;
+
+procedure TfpgCustomComboBox.Update;
+begin
+  FFocusItem := 1;
+  Repaint;
 end;
 
 procedure TfpgCustomComboBox.AfterConstruction;

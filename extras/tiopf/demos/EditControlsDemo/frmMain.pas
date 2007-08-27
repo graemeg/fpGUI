@@ -249,6 +249,7 @@ var
 begin
   inherited Create(AOwner);
   WindowTitle := 'Edit Mediators Demo';
+  WindowPosition := wpUser;
   SetPosition(100, 100, 500, 200);
 
   { The Data Object being observed }

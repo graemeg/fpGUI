@@ -1128,13 +1128,21 @@ begin
     Exit; //==>
 
   // we could not be sure about the buffer contents!
-  FCanvas.BeginDraw(False);
   try
-    // this works well on narrow characters like 'i' or 'l' in non-mono fonts
-    FCanvas.XORFillRectangle($FFFFFF, FLeft, FTop, FWidth, FHeight);
-    FVisible := not FVisible;
-  finally
-    FCanvas.EndDraw(FLeft, FTop, FWidth, FHeight);
+    FCanvas.BeginDraw(False);
+    try
+      // this works well on narrow characters like 'i' or 'l' in non-mono fonts
+      FCanvas.XORFillRectangle($FFFFFF, FLeft, FTop, FWidth, FHeight);
+      FVisible := not FVisible;
+    finally
+      FCanvas.EndDraw(FLeft, FTop, FWidth, FHeight);
+    end;
+  except
+    {$Note This occurs every now and again with TfpgMemo and CaretInvert painting! }
+    // Investigate this.
+    {$IFDEF DEBUG}
+    writeln('TfpgCaret.InvertCaret cause an exception');
+    {$ENDIF}
   end;
 end;
 

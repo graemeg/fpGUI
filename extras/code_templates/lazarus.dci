@@ -1,50 +1,39 @@
 [fpguiapp | fpGUI template application]
 uses
-  fpGFX, fpGUI;
+  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  cthreads,
+  {$ENDIF}{$ENDIF}
+  Classes, fpgfx, gui_form;
 
 type
-  TMainForm = class(TForm)
-  private
-    FMainLayout: TBoxLayout;
-    lblTemplate: TLabel;
+  TMainForm = class(TfpgForm)
   public
-    procedure AfterConstruction; override;
+    constructor Create(AOwner: TComponent); override;
   end;
-
 
 { TMainForm }
 
-procedure TMainForm.AfterConstruction;
+constructor TMainForm.Create(AOwner: TComponent);
 begin
-  inherited AfterConstruction;
-  Name        := 'MainForm';
-  BorderWidth := 8;
-  Text        := 'fpGUI Template Application';
-
-  FMainLayout := TBoxLayout.Create(self);
-  FMainLayout.Spacing       := 8;
-  FMainLayout.Orientation   := Vertical;
-  FMainLayout.VertAlign     := vertFill;
-  InsertChild(FMainLayout);
-
-  lblTemplate := TLabel.Create('MainForm', self);
-  FMainLayout.InsertChild(lblTemplate);
-
-  // Create other components here
-
+  inherited Create(AOwner);
+  WindowTitle := 'My Title';
+  WindowPosition := wpUser;
+  SetPosition(100, 100, 300, 200);
 end;
 
 
+procedure MainProc;
 var
-  MainForm: TMainForm;
+  frm: TMainForm;
 begin
-  GFApplication.Initialize;
-  MainForm := TMainForm.Create(GFApplication);
-  try
-    MainForm.Show;
-    GFApplication.Run;
-  finally
-    MainForm.Free;
-  end;
+  fpgApplication.Initialize;
+  frm := TMainForm.Create(nil);
+  frm.Show;
+  fpgApplication.Run;
+end;
+
+begin
+  MainProc;
 end.
+
 

@@ -9,7 +9,7 @@ interface
 uses
   Classes
   ,tiGenericEditMediators
-//  ,tiGenericListMediators
+  ,tiGenericListMediators
 //  ,tiCompositeMediators
   ;
 
@@ -51,18 +51,18 @@ type
   
 
   { TPersonList_ComboBox_Mediator }
-{
+
   TPersonList_ComboBox_Mediator = class(TComboBoxMediator)
   protected
     procedure SetupGUIandObject; override;
   end;
   
-  
+(*
   TPersonList_ListView_CompositeMediator = class(TCompositeListViewMediator)
   protected
     procedure   SetupGUIandObject; override;
   end;
-}
+*)
 
 implementation
 
@@ -99,17 +99,17 @@ end;
 
 
 { TPersonList_ComboBox_Mediator }
-(*
+
 procedure TPersonList_ComboBox_Mediator.SetupGUIandObject;
 begin
   inherited SetupGUIandObject;
-  View.Style := csDropDownList;
+//  View.Style := csDropDownList;
 //  View.ReadOnly := True;
 end;
 
 
 { TPersonList_ListView_CompositeMediator }
-
+(*
 procedure TPersonList_ListView_CompositeMediator.SetupGUIandObject;
 begin
   inherited SetupGUIandObject;

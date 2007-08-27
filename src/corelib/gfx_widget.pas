@@ -409,7 +409,7 @@ begin
   begin
     AllocateWindowHandle;
     DoSetWindowVisible(True);
-    
+
     for n := 0 to ComponentCount - 1 do
     begin
       c := Components[n];

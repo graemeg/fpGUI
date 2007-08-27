@@ -6,6 +6,8 @@ unit gui_listbox;
   TODO:
     * Refactor these to have a better hierarchy
     * Only surface properties as published in TfpgListBox
+    * Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
+      the items list.
 }
 
 interface

@@ -632,8 +632,8 @@ begin
     VisibleItem(FFocusItem).Click;
   end;  { if/else }
 
-  if OpenerMenuBar <> nil then
-    OpenerMenuBar.DeActivateMenu;
+//  if OpenerMenuBar <> nil then
+//    OpenerMenuBar.DeActivateMenu;
 end;
 
 procedure TfpgPopupMenu.CloseSubmenus;

@@ -21,7 +21,7 @@
     <License Value="Mozilla Public License v1.1
 "/>
     <Version Major="2" Release="3"/>
-    <Files Count="5">
+    <Files Count="6">
       <Item1>
         <Filename Value="gui/tiGUIUtils.pas"/>
         <UnitName Value="tiGUIUtils"/>
@@ -42,19 +42,23 @@
         <Filename Value="gui/tiGUIConstants.pas"/>
         <UnitName Value="tiGUIConstants"/>
       </Item5>
+      <Item6>
+        <Filename Value="gui/tiGenericListMediators.pas"/>
+        <UnitName Value="tiGenericListMediators"/>
+      </Item6>
     </Files>
     <RequiredPkgs Count="3">
       <Item1>
-        <PackageName Value="fpgui_package"/>
-        <MinVersion Minor="5" Valid="True"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item1>
       <Item2>
         <PackageName Value="tiOPF"/>
         <MinVersion Major="2" Release="3" Valid="True"/>
       </Item2>
       <Item3>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="fpgui_package"/>
+        <MinVersion Minor="5" Valid="True"/>
       </Item3>
     </RequiredPkgs>
     <UsageOptions>

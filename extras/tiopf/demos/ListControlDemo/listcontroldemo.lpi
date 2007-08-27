@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <PathDelim Value="/"/>
+    <Version Value="5"/>
+    <General>
+      <Flags>
+        <SaveOnlyProjectUnits Value="True"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
+      <IconPath Value="./"/>
+      <TargetFileExt Value=""/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="tiOPFfpGUI"/>
+        <MinVersion Major="2" Release="3" Valid="True"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="5">
+      <Unit0>
+        <Filename Value="listcontroldemo.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="listcontroldemo"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="frmMain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frmMain"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../Common/Model_View.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Model_View"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../Common/Constants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Constants"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../Common/Model.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Model"/>
+      </Unit4>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="5"/>
+    <SearchPaths>
+      <OtherUnitFiles Value="../Common/"/>
+    </SearchPaths>
+    <CodeGeneration>
+      <Generate Value="Faster"/>
+    </CodeGeneration>
+    <Other>
+      <CustomOptions Value="-FUunits
+"/>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+</CONFIG>

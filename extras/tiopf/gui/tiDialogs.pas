@@ -95,11 +95,11 @@ begin
     lForm.WindowTitle := pHeading;
     lForm.WindowPosition := wpScreenCenter;
     lForm.Name        := 'FormShowStrings';
-//    lMemo.Parent      := lForm;
-    lMemo.Align       := alClient;
     lMemo.Lines.Assign(AStrings);
     lMemo.FontDesc    := 'Courier New-10';
     gGUIINI.ReadFormState(lForm);
+    lMemo.SetPosition(0, 0, lForm.Width, lForm.Height);
+    lMemo.Align       := alClient;
     lForm.ShowModal;
     gGUIINI.WriteFormState(lForm);
   finally
