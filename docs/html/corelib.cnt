@@ -1,0 +1,1801 @@
+# FPDoc Content File
+:link tree
+#CoreLib index.html
+ gfxbase gfxbase/index.html
+  MOUSE_LEFT gfxbase/mouse_left.html
+  MOUSE_RIGHT gfxbase/mouse_right.html
+  MOUSE_MIDDLE gfxbase/mouse_middle.html
+  FPGM_PAINT gfxbase/fpgm_paint.html
+  FPGM_ACTIVATE gfxbase/fpgm_activate.html
+  FPGM_DEACTIVATE gfxbase/fpgm_deactivate.html
+  FPGM_KEYPRESS gfxbase/fpgm_keypress.html
+  FPGM_KEYRELEASE gfxbase/fpgm_keyrelease.html
+  FPGM_KEYCHAR gfxbase/fpgm_keychar.html
+  FPGM_MOUSEDOWN gfxbase/fpgm_mousedown.html
+  FPGM_MOUSEUP gfxbase/fpgm_mouseup.html
+  FPGM_MOUSEMOVE gfxbase/fpgm_mousemove.html
+  FPGM_DOUBLECLICK gfxbase/fpgm_doubleclick.html
+  FPGM_MOUSEENTER gfxbase/fpgm_mouseenter.html
+  FPGM_MOUSEEXIT gfxbase/fpgm_mouseexit.html
+  FPGM_CLOSE gfxbase/fpgm_close.html
+  FPGM_SCROLL gfxbase/fpgm_scroll.html
+  FPGM_RESIZE gfxbase/fpgm_resize.html
+  FPGM_MOVE gfxbase/fpgm_move.html
+  FPGM_POPUPCLOSE gfxbase/fpgm_popupclose.html
+  FPGM_KILLME gfxbase/fpgm_killme.html
+  keyNul gfxbase/keynul.html
+  keyBackSpace gfxbase/keybackspace.html
+  keyTab gfxbase/keytab.html
+  keyLinefeed gfxbase/keylinefeed.html
+  keyReturn gfxbase/keyreturn.html
+  keyEnter gfxbase/keyenter.html
+  keyEscape gfxbase/keyescape.html
+  keyDelete gfxbase/keydelete.html
+  keySpace gfxbase/keyspace.html
+  keyVoid gfxbase/keyvoid.html
+  keyBreak gfxbase/keybreak.html
+  keyScrollForw gfxbase/keyscrollforw.html
+  keyScrollBack gfxbase/keyscrollback.html
+  keyBoot gfxbase/keyboot.html
+  keyCompose gfxbase/keycompose.html
+  keySAK gfxbase/keysak.html
+  keyUndo gfxbase/keyundo.html
+  keyRedo gfxbase/keyredo.html
+  keyMenu gfxbase/keymenu.html
+  keyCancel gfxbase/keycancel.html
+  keyPrintScreen gfxbase/keyprintscreen.html
+  keyExecute gfxbase/keyexecute.html
+  keyFind gfxbase/keyfind.html
+  keyBegin gfxbase/keybegin.html
+  keyClear gfxbase/keyclear.html
+  keyInsert gfxbase/keyinsert.html
+  keySelect gfxbase/keyselect.html
+  keyMacro gfxbase/keymacro.html
+  keyHelp gfxbase/keyhelp.html
+  keyDo gfxbase/keydo.html
+  keyPause gfxbase/keypause.html
+  keyStop gfxbase/keystop.html
+  keySysRq gfxbase/keysysrq.html
+  keyModeSwitch gfxbase/keymodeswitch.html
+  keyUp gfxbase/keyup.html
+  keyDown gfxbase/keydown.html
+  keyLeft gfxbase/keyleft.html
+  keyRight gfxbase/keyright.html
+  keyPrior gfxbase/keyprior.html
+  keyPageUp gfxbase/keypageup.html
+  keyNext gfxbase/keynext.html
+  keyPageDown gfxbase/keypagedown.html
+  keyHome gfxbase/keyhome.html
+  keyEnd gfxbase/keyend.html
+  keyF0 gfxbase/keyf0.html
+  keyF1 gfxbase/keyf1.html
+  keyF2 gfxbase/keyf2.html
+  keyF3 gfxbase/keyf3.html
+  keyF4 gfxbase/keyf4.html
+  keyF5 gfxbase/keyf5.html
+  keyF6 gfxbase/keyf6.html
+  keyF7 gfxbase/keyf7.html
+  keyF8 gfxbase/keyf8.html
+  keyF9 gfxbase/keyf9.html
+  keyF10 gfxbase/keyf10.html
+  keyF11 gfxbase/keyf11.html
+  keyF12 gfxbase/keyf12.html
+  keyF13 gfxbase/keyf13.html
+  keyF14 gfxbase/keyf14.html
+  keyF15 gfxbase/keyf15.html
+  keyF16 gfxbase/keyf16.html
+  keyF17 gfxbase/keyf17.html
+  keyF18 gfxbase/keyf18.html
+  keyF19 gfxbase/keyf19.html
+  keyF20 gfxbase/keyf20.html
+  keyF21 gfxbase/keyf21.html
+  keyF22 gfxbase/keyf22.html
+  keyF23 gfxbase/keyf23.html
+  keyF24 gfxbase/keyf24.html
+  keyF25 gfxbase/keyf25.html
+  keyF26 gfxbase/keyf26.html
+  keyF27 gfxbase/keyf27.html
+  keyF28 gfxbase/keyf28.html
+  keyF29 gfxbase/keyf29.html
+  keyF30 gfxbase/keyf30.html
+  keyF31 gfxbase/keyf31.html
+  keyF32 gfxbase/keyf32.html
+  keyF33 gfxbase/keyf33.html
+  keyF34 gfxbase/keyf34.html
+  keyF35 gfxbase/keyf35.html
+  keyF36 gfxbase/keyf36.html
+  keyF37 gfxbase/keyf37.html
+  keyF38 gfxbase/keyf38.html
+  keyF39 gfxbase/keyf39.html
+  keyF40 gfxbase/keyf40.html
+  keyF41 gfxbase/keyf41.html
+  keyF42 gfxbase/keyf42.html
+  keyF43 gfxbase/keyf43.html
+  keyF44 gfxbase/keyf44.html
+  keyF45 gfxbase/keyf45.html
+  keyF46 gfxbase/keyf46.html
+  keyF47 gfxbase/keyf47.html
+  keyF48 gfxbase/keyf48.html
+  keyF49 gfxbase/keyf49.html
+  keyF50 gfxbase/keyf50.html
+  keyF51 gfxbase/keyf51.html
+  keyF52 gfxbase/keyf52.html
+  keyF53 gfxbase/keyf53.html
+  keyF54 gfxbase/keyf54.html
+  keyF55 gfxbase/keyf55.html
+  keyF56 gfxbase/keyf56.html
+  keyF57 gfxbase/keyf57.html
+  keyF58 gfxbase/keyf58.html
+  keyF59 gfxbase/keyf59.html
+  keyF60 gfxbase/keyf60.html
+  keyF61 gfxbase/keyf61.html
+  keyF62 gfxbase/keyf62.html
+  keyF63 gfxbase/keyf63.html
+  keyF64 gfxbase/keyf64.html
+  keyP0 gfxbase/keyp0.html
+  keyP1 gfxbase/keyp1.html
+  keyP2 gfxbase/keyp2.html
+  keyP3 gfxbase/keyp3.html
+  keyP4 gfxbase/keyp4.html
+  keyP5 gfxbase/keyp5.html
+  keyP6 gfxbase/keyp6.html
+  keyP7 gfxbase/keyp7.html
+  keyP8 gfxbase/keyp8.html
+  keyP9 gfxbase/keyp9.html
+  keyPA gfxbase/keypa.html
+  keyPB gfxbase/keypb.html
+  keyPC gfxbase/keypc.html
+  keyPD gfxbase/keypd.html
+  keyPE gfxbase/keype.html
+  keyPF gfxbase/keypf.html
+  keyPPlus gfxbase/keypplus.html
+  keyPMinus gfxbase/keypminus.html
+  keyPSlash gfxbase/keypslash.html
+  keyPAsterisk gfxbase/keypasterisk.html
+  keyPStar gfxbase/keypstar.html
+  keyPEqual gfxbase/keypequal.html
+  keyPSeparator gfxbase/keypseparator.html
+  keyPDecimal gfxbase/keypdecimal.html
+  keyPParenLeft gfxbase/keypparenleft.html
+  keyPParenRight gfxbase/keypparenright.html
+  keyPSpace gfxbase/keypspace.html
+  keyPEnter gfxbase/keypenter.html
+  keyPTab gfxbase/keyptab.html
+  keyPPlusMinus gfxbase/keypplusminus.html
+  keyPBegin gfxbase/keypbegin.html
+  keyPF1 gfxbase/keypf1.html
+  keyPF2 gfxbase/keypf2.html
+  keyPF3 gfxbase/keypf3.html
+  keyPF4 gfxbase/keypf4.html
+  keyPF5 gfxbase/keypf5.html
+  keyPF6 gfxbase/keypf6.html
+  keyPF7 gfxbase/keypf7.html
+  keyPF8 gfxbase/keypf8.html
+  keyPF9 gfxbase/keypf9.html
+  keyShift gfxbase/keyshift.html
+  keyCtrl gfxbase/keyctrl.html
+  keyAlt gfxbase/keyalt.html
+  keyMeta gfxbase/keymeta.html
+  keySuper gfxbase/keysuper.html
+  keyHyper gfxbase/keyhyper.html
+  keyAltGr gfxbase/keyaltgr.html
+  keyCaps gfxbase/keycaps.html
+  keyNum gfxbase/keynum.html
+  keyScroll gfxbase/keyscroll.html
+  keyShiftL gfxbase/keyshiftl.html
+  keyShiftR gfxbase/keyshiftr.html
+  keyCtrlL gfxbase/keyctrll.html
+  keyCtrlR gfxbase/keyctrlr.html
+  keyAltL gfxbase/keyaltl.html
+  keyAltR gfxbase/keyaltr.html
+  keyMetaL gfxbase/keymetal.html
+  keyMetaR gfxbase/keymetar.html
+  keySuperL gfxbase/keysuperl.html
+  keySuperR gfxbase/keysuperr.html
+  keyHyperL gfxbase/keyhyperl.html
+  keyHyperR gfxbase/keyhyperr.html
+  keyShiftLock gfxbase/keyshiftlock.html
+  keyCtrlLock gfxbase/keyctrllock.html
+  keyAltLock gfxbase/keyaltlock.html
+  keyMetaLock gfxbase/keymetalock.html
+  keySuperLock gfxbase/keysuperlock.html
+  keyHyperLock gfxbase/keyhyperlock.html
+  keyAltGrLock gfxbase/keyaltgrlock.html
+  keyCapsLock gfxbase/keycapslock.html
+  keyNumLock gfxbase/keynumlock.html
+  keyScrollLock gfxbase/keyscrolllock.html
+  keyDeadRing gfxbase/keydeadring.html
+  keyDeadCaron gfxbase/keydeadcaron.html
+  keyDeadOgonek gfxbase/keydeadogonek.html
+  keyDeadIota gfxbase/keydeadiota.html
+  keyDeadDoubleAcute gfxbase/keydeaddoubleacute.html
+  keyDeadBreve gfxbase/keydeadbreve.html
+  keyDeadAboveDot gfxbase/keydeadabovedot.html
+  keyDeadBelowDot gfxbase/keydeadbelowdot.html
+  keyDeadVoicedSound gfxbase/keydeadvoicedsound.html
+  keyDeadSemiVoicedSound gfxbase/keydeadsemivoicedsound.html
+  keyDeadAcute gfxbase/keydeadacute.html
+  keyDeadCedilla gfxbase/keydeadcedilla.html
+  keyDeadCircumflex gfxbase/keydeadcircumflex.html
+  keyDeadDiaeresis gfxbase/keydeaddiaeresis.html
+  keyDeadGrave gfxbase/keydeadgrave.html
+  keyDeadTilde gfxbase/keydeadtilde.html
+  keyDeadMacron gfxbase/keydeadmacron.html
+  keyNIL gfxbase/keynil.html
+  keyEcuSign gfxbase/keyecusign.html
+  keyColonSign gfxbase/keycolonsign.html
+  keyCruzeiroSign gfxbase/keycruzeirosign.html
+  keyFFrancSign gfxbase/keyffrancsign.html
+  keyLiraSign gfxbase/keylirasign.html
+  keyMillSign gfxbase/keymillsign.html
+  keyNairaSign gfxbase/keynairasign.html
+  keyPesetaSign gfxbase/keypesetasign.html
+  keyRupeeSign gfxbase/keyrupeesign.html
+  keyWonSign gfxbase/keywonsign.html
+  keyNewSheqelSign gfxbase/keynewsheqelsign.html
+  keyDongSign gfxbase/keydongsign.html
+  keyEuroSign gfxbase/keyeurosign.html
+  FPG_DEFAULT_FONT_DESC gfxbase/fpg_default_font_desc.html
+  UserNamedColorStart gfxbase/usernamedcolorstart.html
+  clAqua gfxbase/claqua.html
+  clBlack gfxbase/clblack.html
+  clBlue gfxbase/clblue.html
+  clCream gfxbase/clcream.html
+  clDkGray gfxbase/cldkgray.html
+  clFuchsia gfxbase/clfuchsia.html
+  clGray gfxbase/clgray.html
+  clGreen gfxbase/clgreen.html
+  clLime gfxbase/cllime.html
+  clLtGray gfxbase/clltgray.html
+  clMaroon gfxbase/clmaroon.html
+  clNavy gfxbase/clnavy.html
+  clOlive gfxbase/clolive.html
+  clPurple gfxbase/clpurple.html
+  clRed gfxbase/clred.html
+  clSilver gfxbase/clsilver.html
+  clTeal gfxbase/clteal.html
+  clWhite gfxbase/clwhite.html
+  clYellow gfxbase/clyellow.html
+  clNone gfxbase/clnone.html
+  clDefault gfxbase/cldefault.html
+  clMoneyGreen gfxbase/clmoneygreen.html
+  clSkyBlue gfxbase/clskyblue.html
+  clMedGray gfxbase/clmedgray.html
+  clWindowBackground gfxbase/clwindowbackground.html
+  clBoxColor gfxbase/clboxcolor.html
+  clButtonFace gfxbase/clbuttonface.html
+  clShadow1 gfxbase/clshadow1.html
+  clShadow2 gfxbase/clshadow2.html
+  clHilite1 gfxbase/clhilite1.html
+  clHilite2 gfxbase/clhilite2.html
+  clText1 gfxbase/cltext1.html
+  clText2 gfxbase/cltext2.html
+  clText3 gfxbase/cltext3.html
+  clText4 gfxbase/cltext4.html
+  clSelection gfxbase/clselection.html
+  clSelectionText gfxbase/clselectiontext.html
+  clInactiveSel gfxbase/clinactivesel.html
+  clInactiveSelText gfxbase/clinactiveseltext.html
+  clScrollBar gfxbase/clscrollbar.html
+  clListBox gfxbase/cllistbox.html
+  clGridLines gfxbase/clgridlines.html
+  clGridHeader gfxbase/clgridheader.html
+  clWidgetFrame gfxbase/clwidgetframe.html
+  clInactiveWgFrame gfxbase/clinactivewgframe.html
+  clTextCursor gfxbase/cltextcursor.html
+  clChoiceListBox gfxbase/clchoicelistbox.html
+  clUnset gfxbase/clunset.html
+  clMenuText gfxbase/clmenutext.html
+  clMenuDisabled gfxbase/clmenudisabled.html
+  clAliceBlue gfxbase/claliceblue.html
+  clAntiqueWhite gfxbase/clantiquewhite.html
+  clAquamarine gfxbase/claquamarine.html
+  clAzure gfxbase/clazure.html
+  clBeige gfxbase/clbeige.html
+  clBisque gfxbase/clbisque.html
+  clBlanchedAlmond gfxbase/clblanchedalmond.html
+  clBlueViolet gfxbase/clblueviolet.html
+  clBrown gfxbase/clbrown.html
+  clBurlyWood gfxbase/clburlywood.html
+  clCadetBlue gfxbase/clcadetblue.html
+  clChartreuse gfxbase/clchartreuse.html
+  clChocolate gfxbase/clchocolate.html
+  clCoral gfxbase/clcoral.html
+  clCornflowerBlue gfxbase/clcornflowerblue.html
+  clCornsilk gfxbase/clcornsilk.html
+  clCrimson gfxbase/clcrimson.html
+  clCyan gfxbase/clcyan.html
+  clDarkBlue gfxbase/cldarkblue.html
+  clDarkCyan gfxbase/cldarkcyan.html
+  clDarkGoldenrod gfxbase/cldarkgoldenrod.html
+  clDarkGray gfxbase/cldarkgray.html
+  clDarkGreen gfxbase/cldarkgreen.html
+  clDarkKhaki gfxbase/cldarkkhaki.html
+  clDarkMagenta gfxbase/cldarkmagenta.html
+  clDarkOliveGreen gfxbase/cldarkolivegreen.html
+  clDarkOrange gfxbase/cldarkorange.html
+  clDarkOrchid gfxbase/cldarkorchid.html
+  clDarkRed gfxbase/cldarkred.html
+  clDarkSalmon gfxbase/cldarksalmon.html
+  clDarkSeaGreen gfxbase/cldarkseagreen.html
+  clDarkSlateBlue gfxbase/cldarkslateblue.html
+  clDarkSlateGray gfxbase/cldarkslategray.html
+  clDarkTurquoise gfxbase/cldarkturquoise.html
+  clDarkViolet gfxbase/cldarkviolet.html
+  clDeepPink gfxbase/cldeeppink.html
+  clDeepSkyBlue gfxbase/cldeepskyblue.html
+  clDimGray gfxbase/cldimgray.html
+  clDodgerBlue gfxbase/cldodgerblue.html
+  clFireBrick gfxbase/clfirebrick.html
+  clFloralWhite gfxbase/clfloralwhite.html
+  clForestGreen gfxbase/clforestgreen.html
+  clGainsboro gfxbase/clgainsboro.html
+  clGhostWhite gfxbase/clghostwhite.html
+  clGold gfxbase/clgold.html
+  clGoldenrod gfxbase/clgoldenrod.html
+  clGreenYellow gfxbase/clgreenyellow.html
+  clHoneydew gfxbase/clhoneydew.html
+  clHotPink gfxbase/clhotpink.html
+  clIndianRed gfxbase/clindianred.html
+  clIndigo gfxbase/clindigo.html
+  clIvory gfxbase/clivory.html
+  clKhaki gfxbase/clkhaki.html
+  clLavender gfxbase/cllavender.html
+  clLavenderBlush gfxbase/cllavenderblush.html
+  clLawnGreen gfxbase/cllawngreen.html
+  clLemonChiffon gfxbase/cllemonchiffon.html
+  clLightBlue gfxbase/cllightblue.html
+  clLightCoral gfxbase/cllightcoral.html
+  clLightCyan gfxbase/cllightcyan.html
+  clLightGoldenrodYellow gfxbase/cllightgoldenrodyellow.html
+  clLightGreen gfxbase/cllightgreen.html
+  clLightGrey gfxbase/cllightgrey.html
+  clLightPink gfxbase/cllightpink.html
+  clLightSalmon gfxbase/cllightsalmon.html
+  clLightSeaGreen gfxbase/cllightseagreen.html
+  clLightSkyBlue gfxbase/cllightskyblue.html
+  clLightSlateGray gfxbase/cllightslategray.html
+  clLightSteelBlue gfxbase/cllightsteelblue.html
+  clLightYellow gfxbase/cllightyellow.html
+  clLimeGreen gfxbase/cllimegreen.html
+  clLinen gfxbase/cllinen.html
+  clMagenta gfxbase/clmagenta.html
+  clMediumAquamarine gfxbase/clmediumaquamarine.html
+  clMediumBlue gfxbase/clmediumblue.html
+  clMediumOrchid gfxbase/clmediumorchid.html
+  clMediumPurple gfxbase/clmediumpurple.html
+  clMediumSeaGreen gfxbase/clmediumseagreen.html
+  clMediumSlateBlue gfxbase/clmediumslateblue.html
+  clMediumSpringGreen gfxbase/clmediumspringgreen.html
+  clMediumTurquoise gfxbase/clmediumturquoise.html
+  clMediumVioletRed gfxbase/clmediumvioletred.html
+  clMidnightBlue gfxbase/clmidnightblue.html
+  clMintCream gfxbase/clmintcream.html
+  clMistyRose gfxbase/clmistyrose.html
+  clMoccasin gfxbase/clmoccasin.html
+  clNavajoWhite gfxbase/clnavajowhite.html
+  clOldLace gfxbase/cloldlace.html
+  clOliveDrab gfxbase/clolivedrab.html
+  clOrange gfxbase/clorange.html
+  clOrangeRed gfxbase/clorangered.html
+  clOrchid gfxbase/clorchid.html
+  clPaleGoldenrod gfxbase/clpalegoldenrod.html
+  clPaleGreen gfxbase/clpalegreen.html
+  clPaleTurquoise gfxbase/clpaleturquoise.html
+  clPaleVioletRed gfxbase/clpalevioletred.html
+  clPaleBlue gfxbase/clpaleblue.html
+  clPapayaWhip gfxbase/clpapayawhip.html
+  clPeachPuff gfxbase/clpeachpuff.html
+  clPeru gfxbase/clperu.html
+  clPink gfxbase/clpink.html
+  clPlum gfxbase/clplum.html
+  clPowderBlue gfxbase/clpowderblue.html
+  clRosyBrown gfxbase/clrosybrown.html
+  clRoyalBlue gfxbase/clroyalblue.html
+  clSaddleBrown gfxbase/clsaddlebrown.html
+  clSalmon gfxbase/clsalmon.html
+  clSandyBrown gfxbase/clsandybrown.html
+  clSeaGreen gfxbase/clseagreen.html
+  clSeashell gfxbase/clseashell.html
+  clSienna gfxbase/clsienna.html
+  clSkyBlue2 gfxbase/clskyblue2.html
+  clSlateBlue gfxbase/clslateblue.html
+  clSlateGray gfxbase/clslategray.html
+  clSnow gfxbase/clsnow.html
+  clSpringGreen gfxbase/clspringgreen.html
+  clSteelBlue gfxbase/clsteelblue.html
+  clTan gfxbase/cltan.html
+  clThistle gfxbase/clthistle.html
+  clTomato gfxbase/cltomato.html
+  clTurquoise gfxbase/clturquoise.html
+  clViolet gfxbase/clviolet.html
+  clWheat gfxbase/clwheat.html
+  clWhiteSmoke gfxbase/clwhitesmoke.html
+  clYellowGreen gfxbase/clyellowgreen.html
+  TfpgCoord gfxbase/tfpgcoord.html
+  TfpgColor gfxbase/tfpgcolor.html
+  TRGBTriple gfxbase/trgbtriple.html
+  TWindowType gfxbase/twindowtype.html
+  TWindowAttribute gfxbase/twindowattribute.html
+  TWindowAttributes gfxbase/twindowattributes.html
+  TMouseCursor gfxbase/tmousecursor.html
+  TGradientDirection gfxbase/tgradientdirection.html
+  TClipboardKeyType gfxbase/tclipboardkeytype.html
+  TfpgMsgParmMouse gfxbase/tfpgmsgparmmouse.html
+  TfpgMsgParmKeyboard gfxbase/tfpgmsgparmkeyboard.html
+  TfpgMessageParams gfxbase/tfpgmessageparams.html
+  TfpgMessageRec gfxbase/tfpgmessagerec.html
+  PfpgMessageRec gfxbase/pfpgmessagerec.html
+  TfpgLineStyle gfxbase/tfpglinestyle.html
+  TfpgRect gfxbase/tfpgrect.html
+   Top gfxbase/tfpgrect.top.html
+   Left gfxbase/tfpgrect.left.html
+   Width gfxbase/tfpgrect.width.html
+   Height gfxbase/tfpgrect.height.html
+   SetRect gfxbase/tfpgrect.setrect.html
+   Bottom gfxbase/tfpgrect.bottom.html
+   Right gfxbase/tfpgrect.right.html
+   SetBottom gfxbase/tfpgrect.setbottom.html
+   SetRight gfxbase/tfpgrect.setright.html
+  TfpgImageBase gfxbase/tfpgimagebase.html
+   FWidth gfxbase/tfpgimagebase.fwidth.html
+   FHeight gfxbase/tfpgimagebase.fheight.html
+   FColorDepth gfxbase/tfpgimagebase.fcolordepth.html
+   FMasked gfxbase/tfpgimagebase.fmasked.html
+   FImageData gfxbase/tfpgimagebase.fimagedata.html
+   FImageDataSize gfxbase/tfpgimagebase.fimagedatasize.html
+   FMaskData gfxbase/tfpgimagebase.fmaskdata.html
+   FMaskDataSize gfxbase/tfpgimagebase.fmaskdatasize.html
+   DoFreeImage gfxbase/tfpgimagebase.dofreeimage.html
+   DoInitImage gfxbase/tfpgimagebase.doinitimage.html
+   DoInitImageMask gfxbase/tfpgimagebase.doinitimagemask.html
+   Create gfxbase/tfpgimagebase.create.html
+   Destroy gfxbase/tfpgimagebase.destroy.html
+   Invert gfxbase/tfpgimagebase.invert.html
+   FreeImage gfxbase/tfpgimagebase.freeimage.html
+   AllocateImage gfxbase/tfpgimagebase.allocateimage.html
+   AllocateMask gfxbase/tfpgimagebase.allocatemask.html
+   CreateMaskFromSample gfxbase/tfpgimagebase.createmaskfromsample.html
+   UpdateImage gfxbase/tfpgimagebase.updateimage.html
+   ImageData gfxbase/tfpgimagebase.imagedata.html
+   ImageDataSize gfxbase/tfpgimagebase.imagedatasize.html
+   MaskData gfxbase/tfpgimagebase.maskdata.html
+   MaskDataSize gfxbase/tfpgimagebase.maskdatasize.html
+   Width gfxbase/tfpgimagebase.width.html
+   Height gfxbase/tfpgimagebase.height.html
+   ColorDepth gfxbase/tfpgimagebase.colordepth.html
+   Masked gfxbase/tfpgimagebase.masked.html
+   Colors gfxbase/tfpgimagebase.colors.html
+  TfpgFontResourceBase gfxbase/tfpgfontresourcebase.html
+   GetAscent gfxbase/tfpgfontresourcebase.getascent.html
+   GetDescent gfxbase/tfpgfontresourcebase.getdescent.html
+   GetHeight gfxbase/tfpgfontresourcebase.getheight.html
+   GetTextWidth gfxbase/tfpgfontresourcebase.gettextwidth.html
+  TfpgFontBase gfxbase/tfpgfontbase.html
+   FFontDesc gfxbase/tfpgfontbase.ffontdesc.html
+   FFontRes gfxbase/tfpgfontbase.ffontres.html
+   TextWidth gfxbase/tfpgfontbase.textwidth.html
+   Ascent gfxbase/tfpgfontbase.ascent.html
+   Descent gfxbase/tfpgfontbase.descent.html
+   Height gfxbase/tfpgfontbase.height.html
+   FontDesc gfxbase/tfpgfontbase.fontdesc.html
+   FontRes gfxbase/tfpgfontbase.fontres.html
+   Handle gfxbase/tfpgfontbase.handle.html
+  TfpgCustomInterpolation gfxbase/tfpgcustominterpolation.html
+   Initialize gfxbase/tfpgcustominterpolation.initialize.html
+   Execute gfxbase/tfpgcustominterpolation.execute.html
+   Canvas gfxbase/tfpgcustominterpolation.canvas.html
+   Image gfxbase/tfpgcustominterpolation.image.html
+  TfpgBaseInterpolation gfxbase/tfpgbaseinterpolation.html
+   Execute gfxbase/tfpgbaseinterpolation.execute.html
+   Filter gfxbase/tfpgbaseinterpolation.filter.html
+   MaxSupport gfxbase/tfpgbaseinterpolation.maxsupport.html
+   Destroy gfxbase/tfpgbaseinterpolation.destroy.html
+  TfpgMitchelInterpolation gfxbase/tfpgmitchelinterpolation.html
+   Filter gfxbase/tfpgmitchelinterpolation.filter.html
+   MaxSupport gfxbase/tfpgmitchelinterpolation.maxsupport.html
+  TfpgCanvasBase gfxbase/tfpgcanvasbase.html
+   FBufferedDraw gfxbase/tfpgcanvasbase.fbuffereddraw.html
+   FBeginDrawCount gfxbase/tfpgcanvasbase.fbegindrawcount.html
+   FWindow gfxbase/tfpgcanvasbase.fwindow.html
+   FColor gfxbase/tfpgcanvasbase.fcolor.html
+   FTextColor gfxbase/tfpgcanvasbase.ftextcolor.html
+   FLineWidth gfxbase/tfpgcanvasbase.flinewidth.html
+   FLineStyle gfxbase/tfpgcanvasbase.flinestyle.html
+   FFont gfxbase/tfpgcanvasbase.ffont.html
+   FPersistentResources gfxbase/tfpgcanvasbase.fpersistentresources.html
+   DoSetFontRes gfxbase/tfpgcanvasbase.dosetfontres.html
+   DoSetTextColor gfxbase/tfpgcanvasbase.dosettextcolor.html
+   DoSetColor gfxbase/tfpgcanvasbase.dosetcolor.html
+   DoSetLineStyle gfxbase/tfpgcanvasbase.dosetlinestyle.html
+   DoGetWinRect gfxbase/tfpgcanvasbase.dogetwinrect.html
+   DoFillRectangle gfxbase/tfpgcanvasbase.dofillrectangle.html
+   DoXORFillRectangle gfxbase/tfpgcanvasbase.doxorfillrectangle.html
+   DoFillTriangle gfxbase/tfpgcanvasbase.dofilltriangle.html
+   DoDrawRectangle gfxbase/tfpgcanvasbase.dodrawrectangle.html
+   DoDrawLine gfxbase/tfpgcanvasbase.dodrawline.html
+   DoDrawImagePart gfxbase/tfpgcanvasbase.dodrawimagepart.html
+   DoDrawString gfxbase/tfpgcanvasbase.dodrawstring.html
+   DoSetClipRect gfxbase/tfpgcanvasbase.dosetcliprect.html
+   DoGetClipRect gfxbase/tfpgcanvasbase.dogetcliprect.html
+   DoAddClipRect gfxbase/tfpgcanvasbase.doaddcliprect.html
+   DoClearClipRect gfxbase/tfpgcanvasbase.doclearcliprect.html
+   DoBeginDraw gfxbase/tfpgcanvasbase.dobegindraw.html
+   DoPutBufferToScreen gfxbase/tfpgcanvasbase.doputbuffertoscreen.html
+   DoEndDraw gfxbase/tfpgcanvasbase.doenddraw.html
+   GetPixel gfxbase/tfpgcanvasbase.getpixel.html
+   SetPixel gfxbase/tfpgcanvasbase.setpixel.html
+   DoDrawArc gfxbase/tfpgcanvasbase.dodrawarc.html
+   DoFillArc gfxbase/tfpgcanvasbase.dofillarc.html
+   Create gfxbase/tfpgcanvasbase.create.html
+   Destroy gfxbase/tfpgcanvasbase.destroy.html
+   DrawRectangle gfxbase/tfpgcanvasbase.drawrectangle.html
+   DrawLine gfxbase/tfpgcanvasbase.drawline.html
+   DrawImage gfxbase/tfpgcanvasbase.drawimage.html
+   DrawImagePart gfxbase/tfpgcanvasbase.drawimagepart.html
+   DrawArc gfxbase/tfpgcanvasbase.drawarc.html
+   StretchDraw gfxbase/tfpgcanvasbase.stretchdraw.html
+   CopyRect gfxbase/tfpgcanvasbase.copyrect.html
+   DrawString gfxbase/tfpgcanvasbase.drawstring.html
+   FillRectangle gfxbase/tfpgcanvasbase.fillrectangle.html
+   FillTriangle gfxbase/tfpgcanvasbase.filltriangle.html
+   FillArc gfxbase/tfpgcanvasbase.fillarc.html
+   GradientFill gfxbase/tfpgcanvasbase.gradientfill.html
+   XORFillRectangle gfxbase/tfpgcanvasbase.xorfillrectangle.html
+   SetClipRect gfxbase/tfpgcanvasbase.setcliprect.html
+   GetClipRect gfxbase/tfpgcanvasbase.getcliprect.html
+   AddClipRect gfxbase/tfpgcanvasbase.addcliprect.html
+   ClearClipRect gfxbase/tfpgcanvasbase.clearcliprect.html
+   Clear gfxbase/tfpgcanvasbase.clear.html
+   GetWinRect gfxbase/tfpgcanvasbase.getwinrect.html
+   SetColor gfxbase/tfpgcanvasbase.setcolor.html
+   SetTextColor gfxbase/tfpgcanvasbase.settextcolor.html
+   SetLineStyle gfxbase/tfpgcanvasbase.setlinestyle.html
+   SetFont gfxbase/tfpgcanvasbase.setfont.html
+   BeginDraw gfxbase/tfpgcanvasbase.begindraw.html
+   EndDraw gfxbase/tfpgcanvasbase.enddraw.html
+   FreeResources gfxbase/tfpgcanvasbase.freeresources.html
+   Color gfxbase/tfpgcanvasbase.color.html
+   TextColor gfxbase/tfpgcanvasbase.textcolor.html
+   Font gfxbase/tfpgcanvasbase.font.html
+   Pixels gfxbase/tfpgcanvasbase.pixels.html
+   InterpolationFilter gfxbase/tfpgcanvasbase.interpolationfilter.html
+   FastDoubleBuffer gfxbase/tfpgcanvasbase.fastdoublebuffer.html
+   LineStyle gfxbase/tfpgcanvasbase.linestyle.html
+   LineWidth gfxbase/tfpgcanvasbase.linewidth.html
+  TfpgWindowBase gfxbase/tfpgwindowbase.html
+   FMouseCursor gfxbase/tfpgwindowbase.fmousecursor.html
+   FWindowType gfxbase/tfpgwindowbase.fwindowtype.html
+   FWindowAttributes gfxbase/tfpgwindowbase.fwindowattributes.html
+   FTop gfxbase/tfpgwindowbase.ftop.html
+   FLeft gfxbase/tfpgwindowbase.fleft.html
+   FWidth gfxbase/tfpgwindowbase.fwidth.html
+   FHeight gfxbase/tfpgwindowbase.fheight.html
+   FMinWidth gfxbase/tfpgwindowbase.fminwidth.html
+   FMinHeight gfxbase/tfpgwindowbase.fminheight.html
+   FCanvas gfxbase/tfpgwindowbase.fcanvas.html
+   HandleIsValid gfxbase/tfpgwindowbase.handleisvalid.html
+   DoUpdateWindowPosition gfxbase/tfpgwindowbase.doupdatewindowposition.html
+   DoAllocateWindowHandle gfxbase/tfpgwindowbase.doallocatewindowhandle.html
+   DoReleaseWindowHandle gfxbase/tfpgwindowbase.doreleasewindowhandle.html
+   DoSetWindowVisible gfxbase/tfpgwindowbase.dosetwindowvisible.html
+   DoMoveWindow gfxbase/tfpgwindowbase.domovewindow.html
+   DoWindowToScreen gfxbase/tfpgwindowbase.dowindowtoscreen.html
+   DoSetWindowTitle gfxbase/tfpgwindowbase.dosetwindowtitle.html
+   DoSetMouseCursor gfxbase/tfpgwindowbase.dosetmousecursor.html
+   SetParent gfxbase/tfpgwindowbase.setparent.html
+   GetParent gfxbase/tfpgwindowbase.getparent.html
+   GetCanvas gfxbase/tfpgwindowbase.getcanvas.html
+   AllocateWindowHandle gfxbase/tfpgwindowbase.allocatewindowhandle.html
+   ReleaseWindowHandle gfxbase/tfpgwindowbase.releasewindowhandle.html
+   SetWindowTitle gfxbase/tfpgwindowbase.setwindowtitle.html
+   Create gfxbase/tfpgwindowbase.create.html
+   AdjustWindowStyle gfxbase/tfpgwindowbase.adjustwindowstyle.html
+   SetWindowParameters gfxbase/tfpgwindowbase.setwindowparameters.html
+   Right gfxbase/tfpgwindowbase.right.html
+   Bottom gfxbase/tfpgwindowbase.bottom.html
+   UpdateWindowPosition gfxbase/tfpgwindowbase.updatewindowposition.html
+   MoveWindow gfxbase/tfpgwindowbase.movewindow.html
+   WindowToScreen gfxbase/tfpgwindowbase.windowtoscreen.html
+   CaptureMouse gfxbase/tfpgwindowbase.capturemouse.html
+   ReleaseMouse gfxbase/tfpgwindowbase.releasemouse.html
+   HasHandle gfxbase/tfpgwindowbase.hashandle.html
+   WindowType gfxbase/tfpgwindowbase.windowtype.html
+   WindowAttributes gfxbase/tfpgwindowbase.windowattributes.html
+   Left gfxbase/tfpgwindowbase.left.html
+   Top gfxbase/tfpgwindowbase.top.html
+   Width gfxbase/tfpgwindowbase.width.html
+   Height gfxbase/tfpgwindowbase.height.html
+   MinWidth gfxbase/tfpgwindowbase.minwidth.html
+   MinHeight gfxbase/tfpgwindowbase.minheight.html
+   Canvas gfxbase/tfpgwindowbase.canvas.html
+   Parent gfxbase/tfpgwindowbase.parent.html
+   MouseCursor gfxbase/tfpgwindowbase.mousecursor.html
+  TfpgApplicationBase gfxbase/tfpgapplicationbase.html
+   FIsInitialized gfxbase/tfpgapplicationbase.fisinitialized.html
+   DoGetFontFaceList gfxbase/tfpgapplicationbase.dogetfontfacelist.html
+   Create gfxbase/tfpgapplicationbase.create.html
+   GetFontFaceList gfxbase/tfpgapplicationbase.getfontfacelist.html
+   IsInitialized gfxbase/tfpgapplicationbase.isinitialized.html
+   TopModalForm gfxbase/tfpgapplicationbase.topmodalform.html
+   MainForm gfxbase/tfpgapplicationbase.mainform.html
+  KeycodeToText gfxbase/keycodetotext.html
+  CheckClipboardKey gfxbase/checkclipboardkey.html
+  fpgColorToRGBTriple gfxbase/fpgcolortorgbtriple.html
+  RGBTripleTofpgColor gfxbase/rgbtripletofpgcolor.html
+  fpgGetRed gfxbase/fpggetred.html
+  fpgGetGreen gfxbase/fpggetgreen.html
+  fpgGetBlue gfxbase/fpggetblue.html
+  fpgGetAlpha gfxbase/fpggetalpha.html
+  PtInRect gfxbase/ptinrect.html
+  SortRect gfxbase/sortrect.html
+ gfx_x11 gfx_x11/index.html
+  TfpgGContext gfx_x11/tfpggcontext.html
+  PInt gfx_x11/pint.html
+  TXIC gfx_x11/txic.html
+  PXIC gfx_x11/pxic.html
+  TXIM gfx_x11/txim.html
+  PXIM gfx_x11/pxim.html
+  PXdbeSwapInfo gfx_x11/pxdbeswapinfo.html
+  TXdbeSwapInfo gfx_x11/txdbeswapinfo.html
+  TXWindowStateFlag gfx_x11/txwindowstateflag.html
+  TXWindowStateFlags gfx_x11/txwindowstateflags.html
+  TfpgFontResourceImpl gfx_x11/tfpgfontresourceimpl.html
+   Handle gfx_x11/tfpgfontresourceimpl.handle.html
+   Create gfx_x11/tfpgfontresourceimpl.create.html
+   Destroy gfx_x11/tfpgfontresourceimpl.destroy.html
+   HandleIsValid gfx_x11/tfpgfontresourceimpl.handleisvalid.html
+   GetAscent gfx_x11/tfpgfontresourceimpl.getascent.html
+   GetDescent gfx_x11/tfpgfontresourceimpl.getdescent.html
+   GetHeight gfx_x11/tfpgfontresourceimpl.getheight.html
+   GetTextWidth gfx_x11/tfpgfontresourceimpl.gettextwidth.html
+  TfpgImageImpl gfx_x11/tfpgimageimpl.html
+   DoFreeImage gfx_x11/tfpgimageimpl.dofreeimage.html
+   DoInitImage gfx_x11/tfpgimageimpl.doinitimage.html
+   DoInitImageMask gfx_x11/tfpgimageimpl.doinitimagemask.html
+   Create gfx_x11/tfpgimageimpl.create.html
+  TfpgCanvasImpl gfx_x11/tfpgcanvasimpl.html
+   DoSetFontRes gfx_x11/tfpgcanvasimpl.dosetfontres.html
+   DoSetTextColor gfx_x11/tfpgcanvasimpl.dosettextcolor.html
+   DoSetColor gfx_x11/tfpgcanvasimpl.dosetcolor.html
+   DoSetLineStyle gfx_x11/tfpgcanvasimpl.dosetlinestyle.html
+   DoGetWinRect gfx_x11/tfpgcanvasimpl.dogetwinrect.html
+   DoFillRectangle gfx_x11/tfpgcanvasimpl.dofillrectangle.html
+   DoXORFillRectangle gfx_x11/tfpgcanvasimpl.doxorfillrectangle.html
+   DoFillTriangle gfx_x11/tfpgcanvasimpl.dofilltriangle.html
+   DoDrawRectangle gfx_x11/tfpgcanvasimpl.dodrawrectangle.html
+   DoDrawLine gfx_x11/tfpgcanvasimpl.dodrawline.html
+   DoDrawImagePart gfx_x11/tfpgcanvasimpl.dodrawimagepart.html
+   DoDrawString gfx_x11/tfpgcanvasimpl.dodrawstring.html
+   DoSetClipRect gfx_x11/tfpgcanvasimpl.dosetcliprect.html
+   DoGetClipRect gfx_x11/tfpgcanvasimpl.dogetcliprect.html
+   DoAddClipRect gfx_x11/tfpgcanvasimpl.doaddcliprect.html
+   DoClearClipRect gfx_x11/tfpgcanvasimpl.doclearcliprect.html
+   DoBeginDraw gfx_x11/tfpgcanvasimpl.dobegindraw.html
+   DoPutBufferToScreen gfx_x11/tfpgcanvasimpl.doputbuffertoscreen.html
+   DoEndDraw gfx_x11/tfpgcanvasimpl.doenddraw.html
+   GetPixel gfx_x11/tfpgcanvasimpl.getpixel.html
+   SetPixel gfx_x11/tfpgcanvasimpl.setpixel.html
+   DoDrawArc gfx_x11/tfpgcanvasimpl.dodrawarc.html
+   DoFillArc gfx_x11/tfpgcanvasimpl.dofillarc.html
+   Create gfx_x11/tfpgcanvasimpl.create.html
+   Destroy gfx_x11/tfpgcanvasimpl.destroy.html
+  TfpgWindowImpl gfx_x11/tfpgwindowimpl.html
+   FWinFlags gfx_x11/tfpgwindowimpl.fwinflags.html
+   FWinHandle gfx_x11/tfpgwindowimpl.fwinhandle.html
+   FModalForWin gfx_x11/tfpgwindowimpl.fmodalforwin.html
+   DoAllocateWindowHandle gfx_x11/tfpgwindowimpl.doallocatewindowhandle.html
+   DoReleaseWindowHandle gfx_x11/tfpgwindowimpl.doreleasewindowhandle.html
+   DoSetWindowVisible gfx_x11/tfpgwindowimpl.dosetwindowvisible.html
+   HandleIsValid gfx_x11/tfpgwindowimpl.handleisvalid.html
+   DoSetWindowTitle gfx_x11/tfpgwindowimpl.dosetwindowtitle.html
+   DoMoveWindow gfx_x11/tfpgwindowimpl.domovewindow.html
+   DoWindowToScreen gfx_x11/tfpgwindowimpl.dowindowtoscreen.html
+   DoUpdateWindowPosition gfx_x11/tfpgwindowimpl.doupdatewindowposition.html
+   DoSetMouseCursor gfx_x11/tfpgwindowimpl.dosetmousecursor.html
+   WinHandle gfx_x11/tfpgwindowimpl.winhandle.html
+   Create gfx_x11/tfpgwindowimpl.create.html
+   CaptureMouse gfx_x11/tfpgwindowimpl.capturemouse.html
+   ReleaseMouse gfx_x11/tfpgwindowimpl.releasemouse.html
+  TfpgApplicationImpl gfx_x11/tfpgapplicationimpl.html
+   FDisplay gfx_x11/tfpgapplicationimpl.fdisplay.html
+   DisplayDepth gfx_x11/tfpgapplicationimpl.displaydepth.html
+   DefaultBackground gfx_x11/tfpgapplicationimpl.defaultbackground.html
+   DefaultForeground gfx_x11/tfpgapplicationimpl.defaultforeground.html
+   DefaultScreen gfx_x11/tfpgapplicationimpl.defaultscreen.html
+   DefaultVisual gfx_x11/tfpgapplicationimpl.defaultvisual.html
+   DefaultColorMap gfx_x11/tfpgapplicationimpl.defaultcolormap.html
+   RootWindow gfx_x11/tfpgapplicationimpl.rootwindow.html
+   xia_clipboard gfx_x11/tfpgapplicationimpl.xia_clipboard.html
+   xia_motif_wm_hints gfx_x11/tfpgapplicationimpl.xia_motif_wm_hints.html
+   xia_wm_protocols gfx_x11/tfpgapplicationimpl.xia_wm_protocols.html
+   xia_wm_delete_window gfx_x11/tfpgapplicationimpl.xia_wm_delete_window.html
+   xia_wm_state gfx_x11/tfpgapplicationimpl.xia_wm_state.html
+   xia_wm_state_modal gfx_x11/tfpgapplicationimpl.xia_wm_state_modal.html
+   xia_targets gfx_x11/tfpgapplicationimpl.xia_targets.html
+   InputMethod gfx_x11/tfpgapplicationimpl.inputmethod.html
+   InputContext gfx_x11/tfpgapplicationimpl.inputcontext.html
+   LastClickWindow gfx_x11/tfpgapplicationimpl.lastclickwindow.html
+   LastWinClickTime gfx_x11/tfpgapplicationimpl.lastwinclicktime.html
+   DoGetFontFaceList gfx_x11/tfpgapplicationimpl.dogetfontfacelist.html
+   Create gfx_x11/tfpgapplicationimpl.create.html
+   Destroy gfx_x11/tfpgapplicationimpl.destroy.html
+   DoMessagesPending gfx_x11/tfpgapplicationimpl.domessagespending.html
+   DoWaitWindowMessage gfx_x11/tfpgapplicationimpl.dowaitwindowmessage.html
+   DoFlush gfx_x11/tfpgapplicationimpl.doflush.html
+   GetScreenWidth gfx_x11/tfpgapplicationimpl.getscreenwidth.html
+   GetScreenHeight gfx_x11/tfpgapplicationimpl.getscreenheight.html
+   Display gfx_x11/tfpgapplicationimpl.display.html
+ gfx_gdi gfx_gdi/index.html
+  WM_MOUSEWHEEL gfx_gdi/wm_mousewheel.html
+  VER_PLATFORM_WIN32_CE gfx_gdi/ver_platform_win32_ce.html
+  TfpgGContext gfx_gdi/tfpggcontext.html
+  TfpgFontResourceImpl gfx_gdi/tfpgfontresourceimpl.html
+   OpenFontByDesc gfx_gdi/tfpgfontresourceimpl.openfontbydesc.html
+   Handle gfx_gdi/tfpgfontresourceimpl.handle.html
+   Create gfx_gdi/tfpgfontresourceimpl.create.html
+   Destroy gfx_gdi/tfpgfontresourceimpl.destroy.html
+   HandleIsValid gfx_gdi/tfpgfontresourceimpl.handleisvalid.html
+   GetAscent gfx_gdi/tfpgfontresourceimpl.getascent.html
+   GetDescent gfx_gdi/tfpgfontresourceimpl.getdescent.html
+   GetHeight gfx_gdi/tfpgfontresourceimpl.getheight.html
+   GetTextWidth gfx_gdi/tfpgfontresourceimpl.gettextwidth.html
+  TfpgFontImpl gfx_gdi/tfpgfontimpl.html
+  TfpgImageImpl gfx_gdi/tfpgimageimpl.html
+   DoFreeImage gfx_gdi/tfpgimageimpl.dofreeimage.html
+   DoInitImage gfx_gdi/tfpgimageimpl.doinitimage.html
+   DoInitImageMask gfx_gdi/tfpgimageimpl.doinitimagemask.html
+   Create gfx_gdi/tfpgimageimpl.create.html
+  TfpgCanvasImpl gfx_gdi/tfpgcanvasimpl.html
+   DoSetFontRes gfx_gdi/tfpgcanvasimpl.dosetfontres.html
+   DoSetTextColor gfx_gdi/tfpgcanvasimpl.dosettextcolor.html
+   DoSetColor gfx_gdi/tfpgcanvasimpl.dosetcolor.html
+   DoSetLineStyle gfx_gdi/tfpgcanvasimpl.dosetlinestyle.html
+   DoGetWinRect gfx_gdi/tfpgcanvasimpl.dogetwinrect.html
+   DoFillRectangle gfx_gdi/tfpgcanvasimpl.dofillrectangle.html
+   DoXORFillRectangle gfx_gdi/tfpgcanvasimpl.doxorfillrectangle.html
+   DoFillTriangle gfx_gdi/tfpgcanvasimpl.dofilltriangle.html
+   DoDrawRectangle gfx_gdi/tfpgcanvasimpl.dodrawrectangle.html
+   DoDrawLine gfx_gdi/tfpgcanvasimpl.dodrawline.html
+   DoDrawImagePart gfx_gdi/tfpgcanvasimpl.dodrawimagepart.html
+   DoDrawString gfx_gdi/tfpgcanvasimpl.dodrawstring.html
+   DoSetClipRect gfx_gdi/tfpgcanvasimpl.dosetcliprect.html
+   DoGetClipRect gfx_gdi/tfpgcanvasimpl.dogetcliprect.html
+   DoAddClipRect gfx_gdi/tfpgcanvasimpl.doaddcliprect.html
+   DoClearClipRect gfx_gdi/tfpgcanvasimpl.doclearcliprect.html
+   DoBeginDraw gfx_gdi/tfpgcanvasimpl.dobegindraw.html
+   DoPutBufferToScreen gfx_gdi/tfpgcanvasimpl.doputbuffertoscreen.html
+   DoEndDraw gfx_gdi/tfpgcanvasimpl.doenddraw.html
+   GetPixel gfx_gdi/tfpgcanvasimpl.getpixel.html
+   SetPixel gfx_gdi/tfpgcanvasimpl.setpixel.html
+   DoDrawArc gfx_gdi/tfpgcanvasimpl.dodrawarc.html
+   DoFillArc gfx_gdi/tfpgcanvasimpl.dofillarc.html
+   Create gfx_gdi/tfpgcanvasimpl.create.html
+   Destroy gfx_gdi/tfpgcanvasimpl.destroy.html
+  TfpgWindowImpl gfx_gdi/tfpgwindowimpl.html
+   FWinHandle gfx_gdi/tfpgwindowimpl.fwinhandle.html
+   FModalForWin gfx_gdi/tfpgwindowimpl.fmodalforwin.html
+   FWinStyle gfx_gdi/tfpgwindowimpl.fwinstyle.html
+   FWinStyleEx gfx_gdi/tfpgwindowimpl.fwinstyleex.html
+   FParentWinHandle gfx_gdi/tfpgwindowimpl.fparentwinhandle.html
+   DoAllocateWindowHandle gfx_gdi/tfpgwindowimpl.doallocatewindowhandle.html
+   DoReleaseWindowHandle gfx_gdi/tfpgwindowimpl.doreleasewindowhandle.html
+   DoSetWindowVisible gfx_gdi/tfpgwindowimpl.dosetwindowvisible.html
+   HandleIsValid gfx_gdi/tfpgwindowimpl.handleisvalid.html
+   DoUpdateWindowPosition gfx_gdi/tfpgwindowimpl.doupdatewindowposition.html
+   DoMoveWindow gfx_gdi/tfpgwindowimpl.domovewindow.html
+   DoWindowToScreen gfx_gdi/tfpgwindowimpl.dowindowtoscreen.html
+   DoSetWindowTitle gfx_gdi/tfpgwindowimpl.dosetwindowtitle.html
+   DoSetMouseCursor gfx_gdi/tfpgwindowimpl.dosetmousecursor.html
+   WinHandle gfx_gdi/tfpgwindowimpl.winhandle.html
+   Create gfx_gdi/tfpgwindowimpl.create.html
+   CaptureMouse gfx_gdi/tfpgwindowimpl.capturemouse.html
+   ReleaseMouse gfx_gdi/tfpgwindowimpl.releasemouse.html
+  TfpgApplicationImpl gfx_gdi/tfpgapplicationimpl.html
+   FDisplay gfx_gdi/tfpgapplicationimpl.fdisplay.html
+   WindowClass gfx_gdi/tfpgapplicationimpl.windowclass.html
+   WidgetClass gfx_gdi/tfpgapplicationimpl.widgetclass.html
+   hcr_default gfx_gdi/tfpgapplicationimpl.hcr_default.html
+   hcr_dir_ew gfx_gdi/tfpgapplicationimpl.hcr_dir_ew.html
+   hcr_dir_ns gfx_gdi/tfpgapplicationimpl.hcr_dir_ns.html
+   hcr_edit gfx_gdi/tfpgapplicationimpl.hcr_edit.html
+   hcr_dir_nwse gfx_gdi/tfpgapplicationimpl.hcr_dir_nwse.html
+   hcr_dir_nesw gfx_gdi/tfpgapplicationimpl.hcr_dir_nesw.html
+   hcr_move gfx_gdi/tfpgapplicationimpl.hcr_move.html
+   hcr_crosshair gfx_gdi/tfpgapplicationimpl.hcr_crosshair.html
+   hcr_wait gfx_gdi/tfpgapplicationimpl.hcr_wait.html
+   FFocusedWindow gfx_gdi/tfpgapplicationimpl.ffocusedwindow.html
+   LastClickWindow gfx_gdi/tfpgapplicationimpl.lastclickwindow.html
+   LastWinClickTime gfx_gdi/tfpgapplicationimpl.lastwinclicktime.html
+   DoGetFontFaceList gfx_gdi/tfpgapplicationimpl.dogetfontfacelist.html
+   Create gfx_gdi/tfpgapplicationimpl.create.html
+   DoMessagesPending gfx_gdi/tfpgapplicationimpl.domessagespending.html
+   DoWaitWindowMessage gfx_gdi/tfpgapplicationimpl.dowaitwindowmessage.html
+   DoFlush gfx_gdi/tfpgapplicationimpl.doflush.html
+   GetScreenWidth gfx_gdi/tfpgapplicationimpl.getscreenwidth.html
+   GetScreenHeight gfx_gdi/tfpgapplicationimpl.getscreenheight.html
+   Display gfx_gdi/tfpgapplicationimpl.display.html
+  UnicodeEnabledOS gfx_gdi/unicodeenabledos.html
+  WinVersion gfx_gdi/winversion.html
+ fpgfx fpgfx/index.html
+  AllAnchors fpgfx/allanchors.html
+  cMessageQueueSize fpgfx/cmessagequeuesize.html
+  TOrientation fpgfx/torientation.html
+  TAlign fpgfx/talign.html
+  TAnchor fpgfx/tanchor.html
+  TAnchors fpgfx/tanchors.html
+  TFButtonFlags fpgfx/tfbuttonflags.html
+  TMouseButton fpgfx/tmousebutton.html
+  TIntKeyPressEvent fpgfx/tintkeypressevent.html
+  TIntMouseEvent fpgfx/tintmouseevent.html
+  TKeyEvent fpgfx/tkeyevent.html
+  TKeyCharEvent fpgfx/tkeycharevent.html
+  TMouseButtonEvent fpgfx/tmousebuttonevent.html
+  TMouseMoveEvent fpgfx/tmousemoveevent.html
+  TMouseWheelEvent fpgfx/tmousewheelevent.html
+  TPaintEvent fpgfx/tpaintevent.html
+  TSizeParams fpgfx/tsizeparams.html
+  TfpgFontResource fpgfx/tfpgfontresource.html
+   FFontDesc fpgfx/tfpgfontresource.ffontdesc.html
+   FRefCount fpgfx/tfpgfontresource.frefcount.html
+   Create fpgfx/tfpgfontresource.create.html
+   IncRefCount fpgfx/tfpgfontresource.increfcount.html
+   DecRefCount fpgfx/tfpgfontresource.decrefcount.html
+   FontDesc fpgfx/tfpgfontresource.fontdesc.html
+  TfpgFont fpgfx/tfpgfont.html
+   Create fpgfx/tfpgfont.create.html
+   Destroy fpgfx/tfpgfont.destroy.html
+  TfpgWindow fpgfx/tfpgwindow.html
+   SetParent fpgfx/tfpgwindow.setparent.html
+   GetParent fpgfx/tfpgwindow.getparent.html
+   GetCanvas fpgfx/tfpgwindow.getcanvas.html
+   Create fpgfx/tfpgwindow.create.html
+   Destroy fpgfx/tfpgwindow.destroy.html
+   Parent fpgfx/tfpgwindow.parent.html
+   Canvas fpgfx/tfpgwindow.canvas.html
+   WinHandle fpgfx/tfpgwindow.winhandle.html
+  TfpgImage fpgfx/tfpgimage.html
+   ImageFromRect fpgfx/tfpgimage.imagefromrect.html
+  TfpgImages fpgfx/tfpgimages.html
+   Create fpgfx/tfpgimages.create.html
+   Destroy fpgfx/tfpgimages.destroy.html
+   AddImage fpgfx/tfpgimages.addimage.html
+   DeleteImage fpgfx/tfpgimages.deleteimage.html
+   GetImage fpgfx/tfpgimages.getimage.html
+   AddBMP fpgfx/tfpgimages.addbmp.html
+   AddMaskedBMP fpgfx/tfpgimages.addmaskedbmp.html
+   ListImages fpgfx/tfpgimages.listimages.html
+  TfpgCanvas fpgfx/tfpgcanvas.html
+   Create fpgfx/tfpgcanvas.create.html
+   Destroy fpgfx/tfpgcanvas.destroy.html
+   DrawButtonFace fpgfx/tfpgcanvas.drawbuttonface.html
+   DrawControlFrame fpgfx/tfpgcanvas.drawcontrolframe.html
+   DrawDirectionArrow fpgfx/tfpgcanvas.drawdirectionarrow.html
+   DrawFocusRect fpgfx/tfpgcanvas.drawfocusrect.html
+  TfpgStyle fpgfx/tfpgstyle.html
+   DefaultFont fpgfx/tfpgstyle.defaultfont.html
+   MenuFont fpgfx/tfpgstyle.menufont.html
+   MenuAccelFont fpgfx/tfpgstyle.menuaccelfont.html
+   MenuDisabledFont fpgfx/tfpgstyle.menudisabledfont.html
+   Create fpgfx/tfpgstyle.create.html
+   DrawButtonFace fpgfx/tfpgstyle.drawbuttonface.html
+   DrawControlFrame fpgfx/tfpgstyle.drawcontrolframe.html
+   DrawDirectionArrow fpgfx/tfpgstyle.drawdirectionarrow.html
+   DrawString fpgfx/tfpgstyle.drawstring.html
+   DrawFocusRect fpgfx/tfpgstyle.drawfocusrect.html
+  TfpgApplication fpgfx/tfpgapplication.html
+   FDisplayParams fpgfx/tfpgapplication.fdisplayparams.html
+   FScreenWidth fpgfx/tfpgapplication.fscreenwidth.html
+   FScreenHeight fpgfx/tfpgapplication.fscreenheight.html
+   FDefaultFont fpgfx/tfpgapplication.fdefaultfont.html
+   FFontResList fpgfx/tfpgapplication.ffontreslist.html
+   FreeFontRes fpgfx/tfpgapplication.freefontres.html
+   InternalInit fpgfx/tfpgapplication.internalinit.html
+   RunMessageLoop fpgfx/tfpgapplication.runmessageloop.html
+   WaitWindowMessage fpgfx/tfpgapplication.waitwindowmessage.html
+   Create fpgfx/tfpgapplication.create.html
+   Destroy fpgfx/tfpgapplication.destroy.html
+   GetFont fpgfx/tfpgapplication.getfont.html
+   Initialize fpgfx/tfpgapplication.initialize.html
+   Run fpgfx/tfpgapplication.run.html
+   Flush fpgfx/tfpgapplication.flush.html
+   ProcessMessages fpgfx/tfpgapplication.processmessages.html
+   ScreenWidth fpgfx/tfpgapplication.screenwidth.html
+   ScreenHeight fpgfx/tfpgapplication.screenheight.html
+   DefaultFont fpgfx/tfpgapplication.defaultfont.html
+  TfpgTimer fpgfx/tfpgtimer.html
+   Create fpgfx/tfpgtimer.create.html
+   Destroy fpgfx/tfpgtimer.destroy.html
+   CheckAlarm fpgfx/tfpgtimer.checkalarm.html
+   Enabled fpgfx/tfpgtimer.enabled.html
+   NextAlarm fpgfx/tfpgtimer.nextalarm.html
+   Interval fpgfx/tfpgtimer.interval.html
+   OnTimer fpgfx/tfpgtimer.ontimer.html
+  TfpgCaret fpgfx/tfpgcaret.html
+   Create fpgfx/tfpgcaret.create.html
+   Destroy fpgfx/tfpgcaret.destroy.html
+   SetCaret fpgfx/tfpgcaret.setcaret.html
+   UnSetCaret fpgfx/tfpgcaret.unsetcaret.html
+   InvertCaret fpgfx/tfpgcaret.invertcaret.html
+   Width fpgfx/tfpgcaret.width.html
+   Height fpgfx/tfpgcaret.height.html
+  fpgApplication fpgfx/fpgapplication.html
+  fpgGetFont fpgfx/fpggetfont.html
+  fpgWaitWindowMessage fpgfx/fpgwaitwindowmessage.html
+  fpgPostMessage fpgfx/fpgpostmessage.html
+  fpgSendMessage fpgfx/fpgsendmessage.html
+  fpgDeliverMessage fpgfx/fpgdelivermessage.html
+  fpgDeliverMessages fpgfx/fpgdelivermessages.html
+  fpgGetFirstMessage fpgfx/fpggetfirstmessage.html
+  fpgDeleteFirstMessage fpgfx/fpgdeletefirstmessage.html
+  fpgColorToRGB fpgfx/fpgcolortorgb.html
+  fpgGetNamedColor fpgfx/fpggetnamedcolor.html
+  fpgSetNamedColor fpgfx/fpgsetnamedcolor.html
+  fpgGetNamedFontDesc fpgfx/fpggetnamedfontdesc.html
+  fpgSetNamedFont fpgfx/fpgsetnamedfont.html
+  fpgInitTimers fpgfx/fpginittimers.html
+  fpgCheckTimers fpgfx/fpgchecktimers.html
+  fpgClosestTimer fpgfx/fpgclosesttimer.html
+  fpgGetTickCount fpgfx/fpggettickcount.html
+  InflateRect fpgfx/inflaterect.html
+  OffsetRect fpgfx/offsetrect.html
+  CenterPoint fpgfx/centerpoint.html
+  fpgRect fpgfx/fpgrect.html
+  PrintRect fpgfx/printrect.html
+  fpgStyle fpgfx/fpgstyle.html
+  fpgCaret fpgfx/fpgcaret.html
+  fpgImages fpgfx/fpgimages.html
+ gfx_clipboard gfx_clipboard/index.html
+  TfpgClipboard gfx_clipboard/tfpgclipboard.html
+   Text gfx_clipboard/tfpgclipboard.text.html
+  fpgClipboard gfx_clipboard/fpgclipboard.html
+ gfx_cmdlineparams gfx_cmdlineparams/index.html
+  ctiCommandLineParamPrefix gfx_cmdlineparams/cticommandlineparamprefix.html
+  TGfxCommandLineParams gfx_cmdlineparams/tgfxcommandlineparams.html
+   Create gfx_cmdlineparams/tgfxcommandlineparams.create.html
+   Destroy gfx_cmdlineparams/tgfxcommandlineparams.destroy.html
+   IsParam gfx_cmdlineparams/tgfxcommandlineparams.isparam.html
+   GetParam gfx_cmdlineparams/tgfxcommandlineparams.getparam.html
+   Params gfx_cmdlineparams/tgfxcommandlineparams.params.html
+   AsString gfx_cmdlineparams/tgfxcommandlineparams.asstring.html
+  gCommandLineParams gfx_cmdlineparams/gcommandlineparams.html
+ gfx_extinterpolation gfx_extinterpolation/index.html
+  TBlackmanInterpolation gfx_extinterpolation/tblackmaninterpolation.html
+   Filter gfx_extinterpolation/tblackmaninterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tblackmaninterpolation.maxsupport.html
+  TBlackmanSincInterpolation gfx_extinterpolation/tblackmansincinterpolation.html
+   Filter gfx_extinterpolation/tblackmansincinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tblackmansincinterpolation.maxsupport.html
+  TBlackmanBesselInterpolation gfx_extinterpolation/tblackmanbesselinterpolation.html
+   Filter gfx_extinterpolation/tblackmanbesselinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tblackmanbesselinterpolation.maxsupport.html
+  TGaussianInterpolation gfx_extinterpolation/tgaussianinterpolation.html
+   Filter gfx_extinterpolation/tgaussianinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tgaussianinterpolation.maxsupport.html
+  TBoxInterpolation gfx_extinterpolation/tboxinterpolation.html
+   Filter gfx_extinterpolation/tboxinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tboxinterpolation.maxsupport.html
+  THermiteInterpolation gfx_extinterpolation/thermiteinterpolation.html
+   Filter gfx_extinterpolation/thermiteinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/thermiteinterpolation.maxsupport.html
+  TLanczosInterpolation gfx_extinterpolation/tlanczosinterpolation.html
+   Filter gfx_extinterpolation/tlanczosinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tlanczosinterpolation.maxsupport.html
+  TQuadraticInterpolation gfx_extinterpolation/tquadraticinterpolation.html
+   Filter gfx_extinterpolation/tquadraticinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tquadraticinterpolation.maxsupport.html
+  TCubicInterpolation gfx_extinterpolation/tcubicinterpolation.html
+   Filter gfx_extinterpolation/tcubicinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tcubicinterpolation.maxsupport.html
+  TCatromInterpolation gfx_extinterpolation/tcatrominterpolation.html
+   Filter gfx_extinterpolation/tcatrominterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tcatrominterpolation.maxsupport.html
+  TBilinearInterpolation gfx_extinterpolation/tbilinearinterpolation.html
+   Filter gfx_extinterpolation/tbilinearinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tbilinearinterpolation.maxsupport.html
+  THanningInterpolation gfx_extinterpolation/thanninginterpolation.html
+   Filter gfx_extinterpolation/thanninginterpolation.filter.html
+   MaxSupport gfx_extinterpolation/thanninginterpolation.maxsupport.html
+  THammingInterpolation gfx_extinterpolation/thamminginterpolation.html
+   Filter gfx_extinterpolation/thamminginterpolation.filter.html
+   MaxSupport gfx_extinterpolation/thamminginterpolation.maxsupport.html
+  TBSplineInterpolation gfx_extinterpolation/tbsplineinterpolation.html
+   Filter gfx_extinterpolation/tbsplineinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tbsplineinterpolation.maxsupport.html
+  TBellInterpolation gfx_extinterpolation/tbellinterpolation.html
+   Filter gfx_extinterpolation/tbellinterpolation.filter.html
+   MaxSupport gfx_extinterpolation/tbellinterpolation.maxsupport.html
+ gfx_imgfmt_bmp gfx_imgfmt_bmp/index.html
+  ReadImage_BMP gfx_imgfmt_bmp/readimage_bmp.html
+  LoadImage_BMP gfx_imgfmt_bmp/loadimage_bmp.html
+  CreateImage_BMP gfx_imgfmt_bmp/createimage_bmp.html
+ gfx_stdimages gfx_stdimages/index.html
+  fpgCreateStandardImages gfx_stdimages/fpgcreatestandardimages.html
+ gfx_UTF8utils gfx_utf8utils/index.html
+  UTF8Pos gfx_utf8utils/utf8pos.html
+  UTF8Copy gfx_utf8utils/utf8copy.html
+  UTF8Length gfx_utf8utils/utf8length.html
+  UTF8CharStart gfx_utf8utils/utf8charstart.html
+  UTF8CharacterLength gfx_utf8utils/utf8characterlength.html
+ gfx_widget gfx_widget/index.html
+  TFocusSearchDirection gfx_widget/tfocussearchdirection.html
+  TfpgWidget gfx_widget/tfpgwidget.html
+   FVisible gfx_widget/tfpgwidget.fvisible.html
+   FEnabled gfx_widget/tfpgwidget.fenabled.html
+   FFocusable gfx_widget/tfpgwidget.ffocusable.html
+   FFocused gfx_widget/tfpgwidget.ffocused.html
+   FTabOrder gfx_widget/tfpgwidget.ftaborder.html
+   FAnchors gfx_widget/tfpgwidget.fanchors.html
+   FActiveWidget gfx_widget/tfpgwidget.factivewidget.html
+   FAlign gfx_widget/tfpgwidget.falign.html
+   FHint gfx_widget/tfpgwidget.fhint.html
+   GetParent gfx_widget/tfpgwidget.getparent.html
+   SetParent gfx_widget/tfpgwidget.setparent.html
+   SetEnabled gfx_widget/tfpgwidget.setenabled.html
+   SetVisible gfx_widget/tfpgwidget.setvisible.html
+   DoAlign gfx_widget/tfpgwidget.doalign.html
+   HandlePaint gfx_widget/tfpgwidget.handlepaint.html
+   HandleResize gfx_widget/tfpgwidget.handleresize.html
+   HandleMove gfx_widget/tfpgwidget.handlemove.html
+   HandleKeyChar gfx_widget/tfpgwidget.handlekeychar.html
+   HandleKeyPress gfx_widget/tfpgwidget.handlekeypress.html
+   HandleKeyRelease gfx_widget/tfpgwidget.handlekeyrelease.html
+   HandleSetFocus gfx_widget/tfpgwidget.handlesetfocus.html
+   HandleKillFocus gfx_widget/tfpgwidget.handlekillfocus.html
+   HandleLMouseDown gfx_widget/tfpgwidget.handlelmousedown.html
+   HandleRMouseDown gfx_widget/tfpgwidget.handlermousedown.html
+   HandleLMouseUp gfx_widget/tfpgwidget.handlelmouseup.html
+   HandleRMouseUp gfx_widget/tfpgwidget.handlermouseup.html
+   HandleMouseMove gfx_widget/tfpgwidget.handlemousemove.html
+   HandleDoubleClick gfx_widget/tfpgwidget.handledoubleclick.html
+   HandleMouseEnter gfx_widget/tfpgwidget.handlemouseenter.html
+   HandleMouseExit gfx_widget/tfpgwidget.handlemouseexit.html
+   HandleMouseScroll gfx_widget/tfpgwidget.handlemousescroll.html
+   FindFocusWidget gfx_widget/tfpgwidget.findfocuswidget.html
+   HandleAlignments gfx_widget/tfpgwidget.handlealignments.html
+   HandleShow gfx_widget/tfpgwidget.handleshow.html
+   HandleHide gfx_widget/tfpgwidget.handlehide.html
+   MoveAndResize gfx_widget/tfpgwidget.moveandresize.html
+   MoveAndResizeBy gfx_widget/tfpgwidget.moveandresizeby.html
+   RePaint gfx_widget/tfpgwidget.repaint.html
+   OnPaint gfx_widget/tfpgwidget.onpaint.html
+   OnMouseExit gfx_widget/tfpgwidget.onmouseexit.html
+   OnMouseEnter gfx_widget/tfpgwidget.onmouseenter.html
+   OnMouseMove gfx_widget/tfpgwidget.onmousemove.html
+   OnMouseDown gfx_widget/tfpgwidget.onmousedown.html
+   OnMouseUp gfx_widget/tfpgwidget.onmouseup.html
+   OnDoubleClick gfx_widget/tfpgwidget.ondoubleclick.html
+   Create gfx_widget/tfpgwidget.create.html
+   Destroy gfx_widget/tfpgwidget.destroy.html
+   SetFocus gfx_widget/tfpgwidget.setfocus.html
+   KillFocus gfx_widget/tfpgwidget.killfocus.html
+   SetPosition gfx_widget/tfpgwidget.setposition.html
+   Parent gfx_widget/tfpgwidget.parent.html
+   ActiveWidget gfx_widget/tfpgwidget.activewidget.html
+   Visible gfx_widget/tfpgwidget.visible.html
+   Enabled gfx_widget/tfpgwidget.enabled.html
+   TabOrder gfx_widget/tfpgwidget.taborder.html
+   Focusable gfx_widget/tfpgwidget.focusable.html
+   Focused gfx_widget/tfpgwidget.focused.html
+   Anchors gfx_widget/tfpgwidget.anchors.html
+   Align gfx_widget/tfpgwidget.align.html
+   Hint gfx_widget/tfpgwidget.hint.html
+  FindKeyboardFocus gfx_widget/findkeyboardfocus.html
+  FocusRootWidget gfx_widget/focusrootwidget.html
+ gfx_utils gfx_utils/index.html
+  ExtractTargetSymLinkPath gfx_utils/extracttargetsymlinkpath.html
+  FileIsSymlink gfx_utils/fileissymlink.html
+ gfx_popupwindow gfx_popupwindow/index.html
+  TfpgPopupWindow gfx_popupwindow/tfpgpopupwindow.html
+   MsgClose gfx_popupwindow/tfpgpopupwindow.msgclose.html
+   AdjustWindowStyle gfx_popupwindow/tfpgpopupwindow.adjustwindowstyle.html
+   HandleShow gfx_popupwindow/tfpgpopupwindow.handleshow.html
+   HandleHide gfx_popupwindow/tfpgpopupwindow.handlehide.html
+   HandleClose gfx_popupwindow/tfpgpopupwindow.handleclose.html
+   Create gfx_popupwindow/tfpgpopupwindow.create.html
+   ShowAt gfx_popupwindow/tfpgpopupwindow.showat.html
+   Close gfx_popupwindow/tfpgpopupwindow.close.html
+   DontCloseWidget gfx_popupwindow/tfpgpopupwindow.dontclosewidget.html
+  ClosePopups gfx_popupwindow/closepopups.html
+  PopupListFirst gfx_popupwindow/popuplistfirst.html
+  PopupListFind gfx_popupwindow/popuplistfind.html
+  PopupDontCloseWidget gfx_popupwindow/popupdontclosewidget.html
+
+:classes
+#CoreLib.gfxbase.TfpgRect 0VTop
+0VLeft
+0VWidth
+0VHeight
+0MSetRect
+0MBottom
+0MRight
+0MSetBottom
+0MSetRight
+#CoreLib.gfxbase.TfpgImageBase TObject
+1MGetColor
+1MSetColor
+2VFWidth
+2VFHeight
+2VFColorDepth
+2VFMasked
+2VFImageData
+2VFImageDataSize
+2VFMaskData
+2VFMaskDataSize
+2MDoFreeImage
+2MDoInitImage
+2MDoInitImageMask
+3MCreate
+3MDestroy
+3MInvert
+3MFreeImage
+3MAllocateImage
+3MAllocateMask
+3MCreateMaskFromSample
+3MUpdateImage
+3PImageData r
+3PImageDataSize r
+3PMaskData r
+3PMaskDataSize r
+3PWidth r
+3PHeight r
+3PColorDepth r
+3PMasked r
+3PColors rw
+#CoreLib.gfxbase.TfpgFontResourceBase TObject
+3MGetAscent
+3MGetDescent
+3MGetHeight
+3MGetTextWidth
+#CoreLib.gfxbase.TfpgFontBase TObject
+2VFFontDesc
+2VFFontRes
+3MTextWidth
+3MAscent
+3MDescent
+3MHeight
+3PFontDesc r
+3PFontRes r
+3PHandle r
+#CoreLib.gfxbase.TfpgCustomInterpolation TObject
+1VFCanvas
+1VFImage
+2MInitialize
+2MExecute
+3PCanvas r
+3PImage r
+#CoreLib.gfxbase.TfpgBaseInterpolation #CoreLib.gfxbase.TfpgCustomInterpolation
+1Vxfactor
+1Vyfactor
+1Vxsupport
+1Vysupport
+1Vtempimage
+1MHorizontal
+1MVertical
+2MExecute
+2MFilter
+2MMaxSupport
+3MDestroy
+#CoreLib.gfxbase.TfpgMitchelInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfxbase.TfpgCanvasBase TObject
+1VFFastDoubleBuffer
+1VFInterpolation
+1MSetInterpolation
+2VFBufferedDraw
+2VFBeginDrawCount
+2VFWindow
+2VFColor
+2VFTextColor
+2VFLineWidth
+2VFLineStyle
+2VFFont
+2VFPersistentResources
+2MDoSetFontRes
+2MDoSetTextColor
+2MDoSetColor
+2MDoSetLineStyle
+2MDoGetWinRect
+2MDoFillRectangle
+2MDoXORFillRectangle
+2MDoFillTriangle
+2MDoDrawRectangle
+2MDoDrawLine
+2MDoDrawImagePart
+2MDoDrawString
+2MDoSetClipRect
+2MDoGetClipRect
+2MDoAddClipRect
+2MDoClearClipRect
+2MDoBeginDraw
+2MDoPutBufferToScreen
+2MDoEndDraw
+2MGetPixel
+2MSetPixel
+2MDoDrawArc
+2MDoFillArc
+3MCreate
+3MDestroy
+3MDrawRectangle
+3MDrawLine
+3MDrawImage
+3MDrawImagePart
+3MDrawArc
+3MStretchDraw
+3MCopyRect
+3MDrawString
+3MFillRectangle
+3MFillTriangle
+3MFillArc
+3MGradientFill
+3MXORFillRectangle
+3MSetClipRect
+3MGetClipRect
+3MAddClipRect
+3MClearClipRect
+3MClear
+3MGetWinRect
+3MSetColor
+3MSetTextColor
+3MSetLineStyle
+3MSetFont
+3MBeginDraw
+3MEndDraw
+3MFreeResources
+3PColor rw
+3PTextColor rw
+3PFont rw
+3PPixels rw
+3PInterpolationFilter rw
+3PFastDoubleBuffer rw
+3PLineStyle r
+3PLineWidth r
+#CoreLib.gfxbase.TfpgWindowBase TComponent
+1VFParent
+1MSetMouseCursor
+2VFMouseCursor
+2VFWindowType
+2VFWindowAttributes
+2VFTop
+2VFLeft
+2VFWidth
+2VFHeight
+2VFMinWidth
+2VFMinHeight
+2VFCanvas
+2MHandleIsValid
+2MDoUpdateWindowPosition
+2MDoAllocateWindowHandle
+2MDoReleaseWindowHandle
+2MDoSetWindowVisible
+2MDoMoveWindow
+2MDoWindowToScreen
+2MDoSetWindowTitle
+2MDoSetMouseCursor
+2MSetParent
+2MGetParent
+2MGetCanvas
+2MAllocateWindowHandle
+2MReleaseWindowHandle
+2MSetWindowTitle
+3MCreate
+3MAdjustWindowStyle
+3MSetWindowParameters
+3MRight
+3MBottom
+3MUpdateWindowPosition
+3MMoveWindow
+3MWindowToScreen
+3MCaptureMouse
+3MReleaseMouse
+3PHasHandle r
+3PWindowType rw
+3PWindowAttributes rw
+3PLeft rw
+3PTop rw
+3PWidth rw
+3PHeight rw
+3PMinWidth rw
+3PMinHeight rw
+3PCanvas r
+3PParent rw
+3PMouseCursor rw
+#CoreLib.gfxbase.TfpgApplicationBase TObject
+1VFMainForm
+1VFTopModalForm
+2VFIsInitialized
+2MDoGetFontFaceList
+3MCreate
+3MGetFontFaceList
+3PIsInitialized r
+3PTopModalForm rw
+3PMainForm rw
+#CoreLib.gfx_x11.TfpgFontResourceImpl #CoreLib.gfxbase.TfpgFontResourceBase
+1VFFontData
+2PHandle r
+3MCreate
+3MDestroy
+3MHandleIsValid
+3MGetAscent
+3MGetDescent
+3MGetHeight
+3MGetTextWidth
+#CoreLib.gfx_x11.TfpgImageImpl #CoreLib.gfxbase.TfpgImageBase
+1VFXimg
+1VFXimgmask
+1MXImage
+1MXImageMask
+2MDoFreeImage
+2MDoInitImage
+2MDoInitImageMask
+3MCreate
+#CoreLib.gfx_x11.TfpgCanvasImpl #CoreLib.gfxbase.TfpgCanvasBase
+1VFDrawing
+1VFDrawWindow
+1VFBufferPixmap
+1VFDrawHandle
+1VFgc
+1VFCurFontRes
+1VFClipRect
+1VFClipRectSet
+1VFXftDraw
+1VFColorTextXft
+1VFClipRegion
+1VFPixHeight
+1VFPixWidth
+1MTryFreePixmap
+2MDoSetFontRes
+2MDoSetTextColor
+2MDoSetColor
+2MDoSetLineStyle
+2MDoGetWinRect
+2MDoFillRectangle
+2MDoXORFillRectangle
+2MDoFillTriangle
+2MDoDrawRectangle
+2MDoDrawLine
+2MDoDrawImagePart
+2MDoDrawString
+2MDoSetClipRect
+2MDoGetClipRect
+2MDoAddClipRect
+2MDoClearClipRect
+2MDoBeginDraw
+2MDoPutBufferToScreen
+2MDoEndDraw
+2MGetPixel
+2MSetPixel
+2MDoDrawArc
+2MDoFillArc
+3MCreate
+3MDestroy
+#CoreLib.gfx_x11.TfpgWindowImpl #CoreLib.gfxbase.TfpgWindowBase
+2VFWinFlags
+2VFWinHandle
+2VFModalForWin
+2MDoAllocateWindowHandle
+2MDoReleaseWindowHandle
+2MDoSetWindowVisible
+2MHandleIsValid
+2MDoSetWindowTitle
+2MDoMoveWindow
+2MDoWindowToScreen
+2MDoUpdateWindowPosition
+2MDoSetMouseCursor
+2PWinHandle r
+3MCreate
+3MCaptureMouse
+3MReleaseMouse
+#CoreLib.gfx_x11.TfpgApplicationImpl #CoreLib.gfxbase.TfpgApplicationBase
+1VFComposeBuffer
+1VFComposeStatus
+1MConvertShiftState
+1MKeySymToKeycode
+1MStartComposing
+2VFDisplay
+2VDisplayDepth
+2VDefaultBackground
+2VDefaultForeground
+2VDefaultScreen
+2VDefaultVisual
+2VDefaultColorMap
+2VRootWindow
+2Vxia_clipboard
+2Vxia_motif_wm_hints
+2Vxia_wm_protocols
+2Vxia_wm_delete_window
+2Vxia_wm_state
+2Vxia_wm_state_modal
+2Vxia_targets
+2VInputMethod
+2VInputContext
+2VLastClickWindow
+2VLastWinClickTime
+2MDoGetFontFaceList
+3MCreate
+3MDestroy
+3MDoMessagesPending
+3MDoWaitWindowMessage
+3MDoFlush
+3MGetScreenWidth
+3MGetScreenHeight
+3PDisplay r
+#CoreLib.gfx_gdi.TfpgFontResourceImpl #CoreLib.gfxbase.TfpgFontResourceBase
+1VFFontData
+1VFMetrics
+2MOpenFontByDesc
+2PHandle r
+3MCreate
+3MDestroy
+3MHandleIsValid
+3MGetAscent
+3MGetDescent
+3MGetHeight
+3MGetTextWidth
+#CoreLib.gfx_gdi.TfpgFontImpl #CoreLib.gfxbase.TfpgFontBase
+#CoreLib.gfx_gdi.TfpgImageImpl #CoreLib.gfxbase.TfpgImageBase
+1VFBMPHandle
+1VFMaskHandle
+1VFIsTwoColor
+1PBMPHandle r
+1PMaskHandle r
+2MDoFreeImage
+2MDoInitImage
+2MDoInitImageMask
+3MCreate
+#CoreLib.gfx_gdi.TfpgCanvasImpl #CoreLib.gfxbase.TfpgCanvasBase
+1VFDrawing
+1VFBufferBitmap
+1VFDrawWindow
+1VFgc
+1VfBufgc
+1VFWinGC
+1VFBackgroundColor
+1VFCurFontRes
+1VFClipRect
+1VFClipRectSet
+1VFWindowsColor
+1VFBrush
+1VFPen
+1VFClipRegion
+1VFIntLineStyle
+1VFBufWidth
+1VFBufHeight
+1MTryFreeBackBuffer
+2MDoSetFontRes
+2MDoSetTextColor
+2MDoSetColor
+2MDoSetLineStyle
+2MDoGetWinRect
+2MDoFillRectangle
+2MDoXORFillRectangle
+2MDoFillTriangle
+2MDoDrawRectangle
+2MDoDrawLine
+2MDoDrawImagePart
+2MDoDrawString
+2MDoSetClipRect
+2MDoGetClipRect
+2MDoAddClipRect
+2MDoClearClipRect
+2MDoBeginDraw
+2MDoPutBufferToScreen
+2MDoEndDraw
+2MGetPixel
+2MSetPixel
+2MDoDrawArc
+2MDoFillArc
+3MCreate
+3MDestroy
+#CoreLib.gfx_gdi.TfpgWindowImpl #CoreLib.gfxbase.TfpgWindowBase
+1VFMouseInWindow
+1MDoMouseEnterLeaveCheck
+2VFWinHandle
+2VFModalForWin
+2VFWinStyle
+2VFWinStyleEx
+2VFParentWinHandle
+2MDoAllocateWindowHandle
+2MDoReleaseWindowHandle
+2MDoSetWindowVisible
+2MHandleIsValid
+2MDoUpdateWindowPosition
+2MDoMoveWindow
+2MDoWindowToScreen
+2MDoSetWindowTitle
+2MDoSetMouseCursor
+2PWinHandle r
+3MCreate
+3MCaptureMouse
+3MReleaseMouse
+#CoreLib.gfx_gdi.TfpgApplicationImpl #CoreLib.gfxbase.TfpgApplicationBase
+2VFDisplay
+2VWindowClass
+2VWidgetClass
+2Vhcr_default
+2Vhcr_dir_ew
+2Vhcr_dir_ns
+2Vhcr_edit
+2Vhcr_dir_nwse
+2Vhcr_dir_nesw
+2Vhcr_move
+2Vhcr_crosshair
+2Vhcr_wait
+2VFFocusedWindow
+2VLastClickWindow
+2VLastWinClickTime
+2MDoGetFontFaceList
+3MCreate
+3MDoMessagesPending
+3MDoWaitWindowMessage
+3MDoFlush
+3MGetScreenWidth
+3MGetScreenHeight
+3PDisplay r
+#CoreLib.fpgfx.TfpgFontResource #CoreLib.gfx_x11.TfpgFontResourceImpl
+2VFFontDesc
+2VFRefCount
+3MCreate
+3MIncRefCount
+3MDecRefCount
+3PFontDesc r
+#CoreLib.fpgfx.TfpgFont #CoreLib.gfxbase.TfpgFontBase
+3MCreate
+3MDestroy
+#CoreLib.fpgfx.TfpgWindow #CoreLib.gfx_x11.TfpgWindowImpl
+2MSetParent
+2MGetParent
+2MGetCanvas
+3MCreate
+3MDestroy
+3PParent rw
+3PCanvas r
+3PWinHandle
+#CoreLib.fpgfx.TfpgImage #CoreLib.gfx_x11.TfpgImageImpl
+3MImageFromRect
+#CoreLib.fpgfx.TfpgImages .TObject
+1VFImages
+3MCreate
+3MDestroy
+3MAddImage
+3MDeleteImage
+3MGetImage
+3MAddBMP
+3MAddMaskedBMP
+3MListImages
+#CoreLib.fpgfx.TfpgCanvas #CoreLib.gfx_x11.TfpgCanvasImpl
+3MCreate
+3MDestroy
+3MDrawButtonFace
+3MDrawControlFrame
+3MDrawDirectionArrow
+3MDrawFocusRect
+#CoreLib.fpgfx.TfpgStyle .TObject
+3VDefaultFont
+3VMenuFont
+3VMenuAccelFont
+3VMenuDisabledFont
+3MCreate
+3MDrawButtonFace
+3MDrawControlFrame
+3MDrawDirectionArrow
+3MDrawString
+3MDrawFocusRect
+#CoreLib.fpgfx.TfpgApplication #CoreLib.gfx_x11.TfpgApplicationImpl
+2VFDisplayParams
+2VFScreenWidth
+2VFScreenHeight
+2VFDefaultFont
+2VFFontResList
+2MFreeFontRes
+2MInternalInit
+2MRunMessageLoop
+2MWaitWindowMessage
+3MCreate
+3MDestroy
+3MGetFont
+3MInitialize
+3MRun
+3MFlush
+3MProcessMessages
+3PScreenWidth r
+3PScreenHeight r
+3PDefaultFont r
+#CoreLib.fpgfx.TfpgTimer TObject
+1VFEnabled
+1VFNextAlarm
+1VFInterval
+1VFOnTimer
+1MSetEnabled
+1MSetInterval
+3MCreate
+3MDestroy
+3MCheckAlarm
+3PEnabled rw
+3PNextAlarm r
+3PInterval rw
+3POnTimer rw
+#CoreLib.fpgfx.TfpgCaret .TObject
+1VFEnabled
+1VFVisible
+1VFInterval
+1VFCanvas
+1VFTop
+1VFLeft
+1VFWidth
+1VFHeight
+1VFTimer
+1MOnTimerTime
+3MCreate
+3MDestroy
+3MSetCaret
+3MUnSetCaret
+3MInvertCaret
+3PWidth r
+3PHeight r
+#CoreLib.gfx_clipboard.TfpgClipboard TObject
+1VFClipboardData
+1MGetText
+1MSetText
+3PText rw
+#CoreLib.gfx_cmdlineparams.TGfxCommandLineParams TObject
+1VFsParams
+1VFslParams
+1MReadParams
+1MWordExtract
+1MWordCount
+1MWordPosition
+1MExtractChar
+1MCharInStr
+1MStripLeadingDelims
+1MStripTrailingDelims
+1MNumToken
+1MToken
+1MStrTran
+3MCreate
+3MDestroy
+3MIsParam
+3MGetParam
+3PParams r
+3PAsString r
+#CoreLib.gfx_extinterpolation.TBlackmanInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TBlackmanSincInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TBlackmanBesselInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TGaussianInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TBoxInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.THermiteInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TLanczosInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TQuadraticInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TCubicInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TCatromInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TBilinearInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.THanningInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.THammingInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TBSplineInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_extinterpolation.TBellInterpolation #CoreLib.gfxbase.TfpgBaseInterpolation
+2MFilter
+2MMaxSupport
+#CoreLib.gfx_widget.TfpgWidget #CoreLib.fpgfx.TfpgWindow
+1VFAlignRect
+1VFOnDoubleClick
+1VFOnMouseDown
+1VFOnMouseEnter
+1VFOnMouseExit
+1VFOnMouseMove
+1VFOnMouseUp
+1VFOnPaint
+1VFOnScreen
+1MMsgPaint
+1MMsgResize
+1MMsgMove
+1MMsgKeyChar
+1MMsgKeyPress
+1MMsgKeyRelease
+1MMsgMouseDown
+1MMsgMouseUp
+1MMsgMouseMove
+1MMsgDoubleClick
+1MMsgMouseEnter
+1MMsgMouseExit
+1MMsgMouseScroll
+1MSetActiveWidget
+2VFVisible
+2VFEnabled
+2VFFocusable
+2VFFocused
+2VFTabOrder
+2VFAnchors
+2VFActiveWidget
+2VFAlign
+2VFHint
+2MGetParent
+2MSetParent
+2MSetEnabled
+2MSetVisible
+2MDoAlign
+2MHandlePaint
+2MHandleResize
+2MHandleMove
+2MHandleKeyChar
+2MHandleKeyPress
+2MHandleKeyRelease
+2MHandleSetFocus
+2MHandleKillFocus
+2MHandleLMouseDown
+2MHandleRMouseDown
+2MHandleLMouseUp
+2MHandleRMouseUp
+2MHandleMouseMove
+2MHandleDoubleClick
+2MHandleMouseEnter
+2MHandleMouseExit
+2MHandleMouseScroll
+2MFindFocusWidget
+2MHandleAlignments
+2MHandleShow
+2MHandleHide
+2MMoveAndResize
+2MMoveAndResizeBy
+2MRePaint
+2POnPaint rw
+2POnMouseExit rw
+2POnMouseEnter rw
+2POnMouseMove rw
+2POnMouseDown rw
+2POnMouseUp rw
+2POnDoubleClick rw
+3MCreate
+3MDestroy
+3MSetFocus
+3MKillFocus
+3MSetPosition
+3PParent rw
+3PActiveWidget rw
+3PVisible rw
+3PEnabled rw
+3PTabOrder rw
+3PFocusable rw
+3PFocused rw
+3PAnchors rw
+3PAlign rw
+3PHint rw
+#CoreLib.gfx_popupwindow.TfpgPopupWindow #CoreLib.gfx_widget.TfpgWidget
+1VFDontCloseWidget
+2MMsgClose
+2MAdjustWindowStyle
+2MHandleShow
+2MHandleHide
+2MHandleClose
+3MCreate
+3MShowAt
+3MClose
+3PDontCloseWidget rw

@@ -12,6 +12,7 @@ makeskel --package=CoreLib --output=xml/corelib/gfx_stdimages.xml --input='-Fi..
 makeskel --package=CoreLib --output=xml/corelib/gfx_utf8utils.xml --input='-Fi../src/corelib ../src/corelib/gfx_utf8utils.pas'
 makeskel --package=CoreLib --output=xml/corelib/gfx_widget.xml --input='-Fi../src/corelib ../src/corelib/gfx_widget.pas'
 makeskel --package=CoreLib --output=xml/corelib/gfx_utils.xml --input='-Fi../src/corelib ../src/corelib/x11/gfx_utils.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_popupwindow.xml --input='-Fi../src/corelib ../src/corelib/gfx_popupwindow.pas'
 
 # makeskel --package=CoreLib --output=xml/corelib/gfx_.xml --input='-Fi../src/corelib ../src/corelib/gfx_.pas'
 

@@ -14,11 +14,12 @@ fpdoc --package=GUI \
   --descr=xml/gui/gui_dialogs.xml --input='-Fi../src/gui ../src/gui/gui_dialogs.pas' \
   --descr=xml/gui/gui_edit.xml --input='-Fi../src/gui ../src/gui/gui_edit.pas' \
   --descr=xml/gui/gui_form.xml --input='-Fi../src/gui ../src/gui/gui_form.pas' \
+  --descr=xml/gui/gui_grid.xml --input='-Fi../src/gui ../src/gui/gui_grid.pas' \
   --descr=xml/gui/gui_label.xml --input='-Fi../src/gui ../src/gui/gui_label.pas' \
   --descr=xml/gui/gui_listbox.xml --input='-Fi../src/gui ../src/gui/gui_listbox.pas' \
   --descr=xml/gui/gui_listview.xml --input='-Fi../src/gui ../src/gui/gui_listview.pas' \
   --descr=xml/gui/gui_memo.xml --input='-Fi../src/gui ../src/gui/gui_memo.pas' \
-  --descr=xml/gui/gui_popupwindow.xml --input='-Fi../src/gui ../src/gui/gui_popupwindow.pas' \
+  --descr=xml/gui/gui_menu.xml --input='-Fi../src/gui ../src/gui/gui_menu.pas' \
   --descr=xml/gui/gui_progressbar.xml --input='-Fi../src/gui ../src/gui/gui_progressbar.pas' \
   --descr=xml/gui/gui_radiobutton.xml --input='-Fi../src/gui ../src/gui/gui_radiobutton.pas' \
   --descr=xml/gui/gui_scrollbar.xml --input='-Fi../src/gui ../src/gui/gui_scrollbar.pas' \
