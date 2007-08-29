@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO8859-1"?>
+<fpdoc-description>
+
+<package name="fpc">
+
+<module name="Classes">
+ <topic name="UsingKeyboard">
+  <short>Using the keyboard functions</short>
+    <descr>
+      To use the keyboard functions of the CRT unit, one...
+    </descr>
+ </topic>
+</module>
+
+</package>
+
+</fpdoc-description>
+
