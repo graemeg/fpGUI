@@ -23,6 +23,7 @@ type
     FAllowAllUp: boolean;
     FModalResult: integer;
     function    GetFontDesc: string;
+    procedure   SetDefault(const AValue: boolean);
     procedure   SetEmbedded(const AValue: Boolean);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetImageName(const AValue: string);
@@ -41,6 +42,7 @@ type
     FImage: TfpgImage;
     FText: string;
     FFont: TfpgFont;
+    FDefault: boolean;
     procedure   SetShowImage(AValue: Boolean);
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -61,6 +63,7 @@ type
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
   published
     property    Text: string read FText write SetText;
+    property    Default: boolean read FDefault write SetDefault;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    ImageName: string read FImageName write SetImageName;
     property    ImageMargin: integer read FImageMargin write SetImageMargin;
@@ -133,6 +136,31 @@ begin
   Result := FFont.FontDesc;
 end;
 
+procedure TfpgButton.SetDefault(const AValue: boolean);
+var
+  i: integer;
+  wg: TfpgWidget;
+begin
+  if FDefault = AValue then
+    Exit; //==>
+  FDefault := AValue;
+  
+  // Clear other buttons Default state
+  if FDefault and (Parent <> nil) then
+  begin
+    for i := 0 to Parent.ComponentCount-1 do
+    begin
+      wg := TfpgWidget(Parent.Components[i]);
+      if (wg <> nil) and (wg <> self) and (wg is TfpgButton) then
+      begin
+        TfpgButton(wg).Default := False;
+      end;
+    end;  { for }
+  end;  { if }
+
+  RePaint;
+end;
+
 procedure TfpgButton.SetEmbedded(const AValue: Boolean);
 begin
   if FEmbedded = AValue then
@@ -168,6 +196,7 @@ begin
   FImageSpacing := -1;
   FModalResult  := 0;
   FEmbedded     := False;
+  FDefault      := False;
 end;
 
 destructor TfpgButton.Destroy;
@@ -202,6 +231,9 @@ begin
 
   if FEmbedded then
     Include(lBtnFlags, btnIsEmbedded);
+    
+  if FDefault then
+    Include(lBtnFlags, btnIsDefault);
 
   Canvas.DrawButtonFace(r, lBtnFlags);
 
