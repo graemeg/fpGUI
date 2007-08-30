@@ -120,6 +120,7 @@ begin
   FBevelStyle   := bsRaised;
   FWidth        := 80;
   FHeight       := 80;
+  FFocusable    := True;  // otherwise children can't get focus
 end;
 
 end.
