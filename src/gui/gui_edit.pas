@@ -17,6 +17,7 @@ type
 
   TfpgEdit = class(TfpgCustomEdit)
   private
+    FOnChange: TNotifyEvent;
     FText: string;
     FMaxLength: integer;
     FCursorPos: integer;
@@ -49,7 +50,7 @@ type
     destructor  Destroy; override;
     function    SelectionText: string;
     property    Font: TfpgFont read FFont;
-    OnChange: TNotifyEvent;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property    Text: string read FText write SetText;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -97,7 +98,7 @@ begin
   FDrawOffset   := 0;
   PasswordMode  := False;
 
-  OnChange := nil;
+  FOnChange := nil;
 end;
 
 destructor TfpgEdit.Destroy;
@@ -306,8 +307,8 @@ begin
   end;
 
   if prevval <> Text then
-    if Assigned(OnChange) then
-      OnChange(self);
+    if Assigned(FOnChange) then
+      FOnChange(self);
 
   if consumed then
     RePaint
@@ -459,8 +460,8 @@ begin
     inherited;
     
   if hasChanged then
-    if Assigned(OnChange) then
-      OnChange(self);
+    if Assigned(FOnChange) then
+      FOnChange(self);
 end;
 
 procedure TfpgEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);

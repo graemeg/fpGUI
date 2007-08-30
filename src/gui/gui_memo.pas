@@ -75,7 +75,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   UpdateScrollBar;
+    procedure   UpdateScrollBars;
     function    SelectionText: string;
     property    LineHeight: integer read FLineHeight;
     property    CursorLine: integer read FCursorLine write SetCursorLine;
@@ -437,10 +437,10 @@ begin
       FFirstLine := 1;
   end;
 
-  UpdateScrollbar;
+  UpdateScrollbars;
 end;
 
-procedure TfpgMemo.UpdateScrollBar;
+procedure TfpgMemo.UpdateScrollBars;
 var
   vlines: integer;
   vsbw, x: integer;
@@ -480,6 +480,7 @@ begin
     else
       FHScrollBar.SliderSize := VisibleWidth / FLongestLineWidth;
     FHScrollBar.Position := FDrawOffset;
+    FHScrollBar.RepaintSlider;
   end;
 
   if FVScrollBar.Visible then
@@ -488,6 +489,7 @@ begin
     FVScrollBar.SliderSize := VisibleLines / LineCount;
     FVScrollBar.Max        := LineCount - VisibleLines + 1;
     FVScrollBar.Position   := FFirstLine;
+    FVScrollBar.RepaintSlider;
   end;
 
   if (hsbwas <> FHScrollBar.Visible) or (vsbwas <> FVScrollBar.Visible) then
@@ -589,7 +591,7 @@ procedure TfpgMemo.HandleShow;
 begin
   inherited HandleShow;
   RecalcLongestLine;
-  UpdateScrollBar;
+  UpdateScrollBars;
   UpdateScrollBarCoords;
 end;
 
@@ -728,21 +730,6 @@ begin
   inherited;
   prevval  := Text;
   s        := AText;
-  Consumed := False;
-{
-  Consumed := true;
-  case pgfCheckClipBoardKey(keycode, shiftstate) of
-    ckCopy:   DoCopy;
-    ckPaste:  DoPaste;
-    ckCut:    //if FSelEndLine > 0 then
-              begin
-                DoCopy;
-                DeleteSelection;
-              end;
-  else
-    Consumed := false;
-  end;
-}
 
   // Printable characters only
   // Note: This is not UTF-8 compliant!
@@ -781,6 +768,7 @@ var
   cx: integer;
   ls: string;
   ls2: string;
+  hasChanged: boolean;
   
   procedure StopSelection;
   begin
@@ -790,21 +778,27 @@ var
   end;
   
 begin
-  Consumed := False;
-  (*
-  Consumed := true;
-  case pgfCheckClipBoardKey(keycode, shiftstate) of
-    ckCopy:   DoCopy;
-    ckPaste:  DoPaste;
-    ckCut:    //if FSelEndLine > 0 then
-              begin
-                DoCopy;
-                DeleteSelection;
-              end;
+  Consumed := True;
+  hasChanged := False;
+  case CheckClipBoardKey(keycode, shiftstate) of
+    ckCopy:
+        begin
+          DoCopy;
+        end;
+    ckPaste:
+        begin
+          DoPaste;
+          hasChanged := True;
+        end;
+    ckCut:
+        begin
+          DoCopy;
+          DeleteSelection;
+          hasChanged := True;
+        end;
   else
-    Consumed := false;
+    Consumed := False;
   end;
-*)
 
   if not Consumed then
   begin
@@ -934,22 +928,26 @@ begin
             Inc(FCursorLine);
             SetLineText(FCursorLine, ls2);
             FCursorPos := 0;
+            hasChanged := True;
           end;
       keyBackSpace:
-          if FCursorPos > 0 then
           begin
-            ls := GetLineText(FCursorLine);
-            Delete(ls, FCursorPos, 1);
-            SetLineText(FCursorLine, ls);
-            Dec(FCursorPos);
-          end
-          else if FCursorLine > 1 then
-          begin
-            ls         := CurrentLine;
-            FLines.Delete(FCursorLine - 1);
-            Dec(FCursorLine);
-            FCursorPos := UTF8Length(FLines.Strings[FCursorLine - 1]);
-            FLines.Strings[FCursorLine - 1] := FLines.Strings[FCursorLine - 1] + ls;
+            if FCursorPos > 0 then
+            begin
+              ls := GetLineText(FCursorLine);
+              Delete(ls, FCursorPos, 1);
+              SetLineText(FCursorLine, ls);
+              Dec(FCursorPos);
+            end
+            else if FCursorLine > 1 then
+            begin
+              ls         := CurrentLine;
+              FLines.Delete(FCursorLine - 1);
+              Dec(FCursorLine);
+              FCursorPos := UTF8Length(FLines.Strings[FCursorLine - 1]);
+              FLines.Strings[FCursorLine - 1] := FLines.Strings[FCursorLine - 1] + ls;
+            end;
+            hasChanged := True;
           end;
 
       keyDelete:
@@ -968,6 +966,7 @@ begin
               FLines.Delete(FCursorLine);
               FLines.Strings[FCursorLine - 1] := ls + ls2;
             end;
+            hasChanged := True;
           end;
       else
         consumed := False;
@@ -984,6 +983,10 @@ begin
     RePaint
   else
     inherited;
+    
+  if hasChanged then
+    if Assigned(FOnChange) then
+      FOnChange(self);
 end;
 
 procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -1149,7 +1152,7 @@ begin
 
   if (pfl <> FFirstLine) or (pdo <> FDrawOffset) then
   begin
-    UpdateScrollBar;
+    UpdateScrollBars;
     Repaint;
   end;
 
@@ -1160,8 +1163,8 @@ procedure TfpgMemo.HandleResize(dwidth, dheight: integer);
 begin
   inherited HandleResize(dwidth, dheight);
 
-  //UpdateScrollBarCoords;
-  UpdateScrollBar;
+  UpdateScrollBarCoords;
+  UpdateScrollBars;
 end;
 
 procedure TfpgMemo.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
@@ -1170,8 +1173,6 @@ var
   pfl, pdo : integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
-
-//  inherited HandleWindowScroll(direction, amount);
 
   pfl := FFirstLine;
   pdo := FDrawOffset;
@@ -1196,7 +1197,7 @@ begin
 
   if (pfl <> FFirstLine) or (pdo <> FDrawOffset) then
   begin
-    UpdateScrollBar;
+    UpdateScrollBars;
     Repaint;
   end;
 end;

@@ -399,6 +399,7 @@ begin
   memo.Left   := 250;
   memo.Width  := 200;
   memo.Height := 80;
+  memo.Anchors := [anLeft, anTop, anRight, anBottom];
 
   listbox         := TfpgListBox.Create(self);
   listbox.Top     := 100;
