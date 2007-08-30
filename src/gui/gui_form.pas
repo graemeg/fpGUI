@@ -41,6 +41,7 @@ type
     procedure   HandleClose; virtual;
     procedure   HandleHide; override;
     procedure   HandleShow; override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
   public
@@ -72,7 +73,14 @@ function WidgetParentForm(wg: TfpgWidget): TfpgForm;
 implementation
 
 uses
-  fpgfx;
+  fpgfx,
+  gui_menu;
+  
+type
+  // to access protected methods
+  TfpgMenuBarFriend = class(TfpgMenuBar)
+  end;
+
 
 function WidgetParentForm(wg: TfpgWidget): TfpgForm;
 var
@@ -224,6 +232,30 @@ begin
   inherited HandleShow;
   if Assigned(FOnShow) then
     FOnShow(self);
+end;
+
+procedure TfpgForm.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+var
+  i: integer;
+  wg: TfpgWidget;
+begin
+//  writeln(Classname, '.Keypress');
+  // find the TfpgMenuBar
+  if not consumed then
+  begin
+    for i := 0 to ComponentCount-1 do
+    begin
+      wg := TfpgWidget(Components[i]);
+      if (wg <> nil) and (wg <> self) and (wg is TfpgMenuBar) then
+      begin
+        TfpgMenuBarFriend(wg).HandleKeyPress(keycode, shiftstate, consumed);
+        Break; //==>
+      end;
+    end;
+  end;  { if }
+
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgForm.AfterConstruction;

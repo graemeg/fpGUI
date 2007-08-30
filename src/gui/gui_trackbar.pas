@@ -22,8 +22,7 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
-  gfx_widget,
-  gui_scrollbar;
+  gfx_widget;
   
 type
   TTrackBarChange = procedure(Sender: TObject; APosition: integer) of object;
@@ -75,11 +74,8 @@ type
     FSliderPos: TfpgCoord;
     FSliderLength: TfpgCoord;
     FSliderDragging: boolean;
-    FStartBtnPressed,
-    FEndBtnPressed: Boolean;
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
-    FActiveButtonRect: TfpgRect;
     FMousePosition: TPoint;
     FOnChange: TTrackBarChange;
     FFont: TfpgFont;
@@ -281,7 +277,6 @@ end;
 
 procedure TfpgTrackBarExtra.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
-  p: integer;
   linepos: double;
   drawwidth: integer;
   OldPos: integer;

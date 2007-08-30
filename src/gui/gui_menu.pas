@@ -365,7 +365,26 @@ end;
 
 procedure TfpgMenuBar.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
+var
+  s: string;
+  i: integer;
 begin
+//  writeln(Classname, '.Keypress');
+  s := KeycodeToText(keycode, shiftstate);
+//  writeln('s: ', s);
+  // handle MenuBar (Alt+?) shortcuts only - for now!
+  if (length(s) = 5) and (copy(s, 1, 4) = 'Alt+') then
+  begin
+    s := KeycodeToText(keycode, []);
+    i := SearchItemByAccel(s);
+    if i <> -1 then
+    begin
+      consumed := True;
+//      writeln('Selected ', VisibleItem(i).Text);
+      FFocusItem := i;
+      DoSelect;
+    end;
+  end;
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 

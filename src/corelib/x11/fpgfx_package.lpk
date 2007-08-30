@@ -8,7 +8,7 @@
       <SearchPaths>
         <IncludeFiles Value="../"/>
         <OtherUnitFiles Value="../;../../gui/"/>
-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+        <UnitOutputDirectory Value="../../../lib/"/>
       </SearchPaths>
       <CodeGeneration>
         <Optimizations>

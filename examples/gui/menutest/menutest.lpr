@@ -9,7 +9,8 @@ uses
   Classes,
   fpgfx,
   gui_form,
-  gui_menu;
+  gui_menu,
+  gui_edit;
 
 type
   TMainForm = class(TfpgForm)
@@ -19,10 +20,12 @@ type
     FEditSubMenu: TfpgPopupMenu;
     FEditSelectSubMenu: TfpgPopupMenu;
     FHelpSubMenu: TfpgPopupMenu;
+    edit1: TfpgEdit;
     procedure   miExitClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   end;
+
 
 { TMainForm }
 
@@ -75,6 +78,9 @@ begin
   FMenuBar.AddMenuItem('&Disabled', nil).Enabled := False;
   FMenuBar.AddMenuItem('&Help', nil).SubMenu := FHelpSubMenu;
 
+
+  edit1 := TfpgEdit.Create(self);
+  edit1.SetPosition(10, 70, 100, 24);
 end;
 
 
