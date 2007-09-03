@@ -46,13 +46,14 @@ type
     FInactSelTextColor: TfpgColor;
     FImageIndex: integer;
     procedure   SetCollapsed(const AValue: boolean);
-    procedure   SetInActSelColor(const AValue: TfpgColor);
+    procedure   SetInactSelColor(const AValue: TfpgColor);
     procedure   SetInactSelTextColor(const AValue: TfpgColor);
     procedure   SetParent(const AValue: TfpgTreeNode);
     procedure   SetSelColor(const AValue: TfpgColor);
     procedure   SetSelTextColor(const AValue: TfpgColor);
     procedure   SetText(const AValue: string);
     procedure   SetTextColor(const AValue: TfpgColor);
+    procedure   DoRePaint;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -88,7 +89,7 @@ type
     property    TextColor: TfpgColor read FTextColor write SetTextColor;
     property    SelColor: TfpgColor read FSelColor write SetSelColor;
     property    SelTextColor: TfpgColor read FSelTextColor write SetSelTextColor;
-    property    InactSelColor: TfpgColor read FInactSelColor write SetInActSelColor;
+    property    InactSelColor: TfpgColor read FInactSelColor write SetInactSelColor;
     property    InactSelTextColor: TfpgColor read FInactSelTextColor write SetInactSelTextColor;
   end;
   
@@ -129,8 +130,11 @@ type
     function    GetNodeHeightSum: integer;
     function    MaxNodeWidth: integer;
     function    GetNodeHeight: integer;
+    function    GetNodeWidth(ANode: TfpgTreeNode): integer; // width of a node inclusive image
     function    NodeIsVisible(ANode: TfpgTreeNode): boolean;
     function    GetAbsoluteNodeTop(ANode: TfpgTreeNode): integer; // returns the node-top in pixels
+    function    GetColumnLeft(AIndex: integer): integer;
+    procedure   PreCalcColumnLeft;
     procedure   VScrollbarScroll(Sender: TObject; position: integer);
     procedure   HScrollbarMove(Sender: TObject; position: integer);
     procedure   UpdateScrollbars;
@@ -138,6 +142,12 @@ type
   protected
     FColumnLeft: TList;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleShow; override;
+    procedure   HandlePaint; override;
     procedure   DoChange; virtual;
     procedure   DoExpand(ANode: TfpgTreeNode); virtual;
     function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
@@ -147,6 +157,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure   SetColumnWidth(AIndex, AWidth: word);
+    function    GetColumnWidth(AIndex: word): word; // the width of a column - aIndex of the rootnode = 0
     property    Font: TfpgFont read FFont;
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
@@ -162,46 +173,92 @@ type
 
 implementation
 
+type
+  PColumnLeft = ^integer;
+
+
 { TfpgTreeNode }
 
-procedure TfpgTreeNode.SetInActSelColor(const AValue: TfpgColor);
+procedure TfpgTreeNode.SetInactSelColor(const AValue: TfpgColor);
 begin
-
+  if AValue <> FInactSelColor then
+  begin
+    FInactSelColor := AValue;
+    DoRePaint;
+  end;
 end;
 
 procedure TfpgTreeNode.SetCollapsed(const AValue: boolean);
 begin
-
+  if aValue <> FCollapsed then
+  begin
+    FCollapsed := AValue;
+    DoRePaint;
+  end;
 end;
 
 procedure TfpgTreeNode.SetInactSelTextColor(const AValue: TfpgColor);
 begin
-
+  if AValue <> FInactSelTextColor then
+  begin
+    FInactSelTextColor := AValue;
+    DoRePaint;
+  end;
 end;
 
 procedure TfpgTreeNode.SetParent(const AValue: TfpgTreeNode);
 begin
-
+  if aValue <> FParent then
+  begin
+    if FParent <> nil then
+      FParent.UnRegisterSubNode(self); // unregisteres
+    FParent := aValue;
+    if FParent <> nil then
+    begin
+      DoRePaint;
+    end;
+  end;
 end;
 
 procedure TfpgTreeNode.SetSelColor(const AValue: TfpgColor);
 begin
-
+  if FSelColor <> aValue then
+  begin
+    FSelColor := aValue;
+    DoRePaint;
+  end;
 end;
 
 procedure TfpgTreeNode.SetSelTextColor(const AValue: TfpgColor);
 begin
-
+  if FTextColor <> aValue then
+  begin
+    FSelTextColor := aValue;
+    DoRePaint;
+  end;
 end;
 
 procedure TfpgTreeNode.SetText(const AValue: string);
 begin
-
+  if aValue <> FText then
+  begin
+    FText := aValue;
+    DoRePaint;
+  end;
 end;
 
 procedure TfpgTreeNode.SetTextColor(const AValue: TfpgColor);
 begin
+  if FTextColor <> aValue then
+  begin
+    FTextColor := aValue;
+    DoRePaint;
+  end;
+end;
 
+procedure TfpgTreeNode.DoRePaint;
+begin
+  // todo
 end;
 
 constructor TfpgTreeNode.Create;
@@ -547,16 +604,15 @@ end;
 
 procedure TfpgTreeview.SetFontDesc(const AValue: string);
 begin
-
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  RePaint;
 end;
 
 procedure TfpgTreeview.SetSelection(const AValue: TfpgTreeNode);
 var
   n: TfpgTreeNode;
 begin
-  {$IFDEF DEBUG}
-  writeln('TfpgTreeView.SetSelection');
-  {$ENDIF}
   if aValue <> FSelection then
   begin
     FSelection := aValue;
@@ -589,22 +645,45 @@ end;
 
 procedure TfpgTreeview.SetShowColumns(const AValue: boolean);
 begin
-
+  if FShowColumns <> aValue then
+  begin
+    FShowColumns := aValue;
+    RePaint;
+  end;
 end;
 
 procedure TfpgTreeview.SetShowImages(const AValue: boolean);
 begin
-
+  if AValue <> FShowImages then
+  begin
+    FShowImages := AValue;
+    UpdateScrollbars;
+    RePaint;
+  end;
 end;
 
 function TfpgTreeview.VisibleWidth: integer;
 begin
-
+  if GetNodeHeightSum * (GetNodeHeight) > Height - 2 then
+    VisibleWidth := Width - 2 - FVScrollbar.Width
+  else
+    result := Width - 2;
 end;
 
 function TfpgTreeview.VisibleHeight: integer;
 begin
-
+  if FShowColumns then
+  begin
+    if MaxNodeWidth > Width - 2 then
+      result := Height - 2 - FHScrollbar.Height - FColumnHeight
+    else
+      result := Height - 2 - FColumnHeight;
+  end
+  else
+    if MaxNodeWidth > width - 2 then
+      result := Height - 2 - FHScrollbar.Height
+    else
+      result := Height - 2;
 end;
 
 function TfpgTreeview.GetNodeHeightSum: integer;
@@ -612,9 +691,6 @@ var
   h: TfpgTreeNode;
   i: integer;
 begin
-{$IFDEF DEBUG}
-  writeln('TfpgTreeView.GetNodeHeightSum');
-{$ENDIF}
   h := RootNode;
   i := -1;
   while h <> nil do
@@ -647,13 +723,72 @@ begin
 end;
 
 function TfpgTreeview.MaxNodeWidth: integer;
+var
+  h: TfpgTreeNode;
+  w: integer;
+  r: integer;
 begin
-
+  {$IFDEF DEBUG}
+  writeln('TfpgTreeView.MaxNodeWidth');
+  {$ENDIF}
+  result := 0;
+  h := RootNode.FirstSubNode;
+  r := 0;
+  while h <> nil do
+  begin
+    w := GetColumnLeft(StepToRoot(h));
+    if r < w + GetNodeWidth(h) then
+      r := w + GetNodeWidth(h);
+    if (not h.collapsed) and (h.count > 0) then
+      h := h.FirstSubNode
+    else
+    begin
+      if h.next <> nil then
+        h := h.next
+      else
+      begin
+        while h.next = nil do
+        begin
+          h := h.parent;
+          if h = nil then
+          begin
+            result := r + 4;
+            exit;
+          end;
+        end;  { while }
+        h := h.next;
+      end;
+    end;  { if/else }
+  end;  { while }
 end;
 
 function TfpgTreeview.GetNodeHeight: integer;
 begin
   Result := FFont.Height + 5;
+end;
+
+function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
+//var
+//   AImage: TfpgImageItem;
+begin
+  {$IFDEF DEBUG}
+  writeln('TfpgTreeView.GetNodeWidth');
+  {$ENDIF}
+  if ANode = nil then
+    Result := 0
+  else
+  begin
+    Result := FFont.TextWidth(ANode.Text) + 2;
+    //if ShowImages and (ImageList <> nil) then
+    //begin
+      //if ANode.ImageIndex > -1 then
+      //begin
+        //AImage := ImageList.Item[ANode.ImageIndex];
+        //if AImage <> nil then
+          //result := result + AImage.Image.Width + 2;
+      //end;
+    //end;
+  end;  { if/else }
 end;
 
 function TfpgTreeview.NodeIsVisible(ANode: TfpgTreeNode): boolean;
@@ -684,6 +819,90 @@ begin
     inc(i);
   end;
   result := (i - 1) * GetNodeHeight;
+end;
+
+function TfpgTreeview.GetColumnLeft(AIndex: integer): integer;
+var
+   AColumnLeft: PColumnLeft;
+begin
+  if FColumnLeft = nil then
+  begin
+    PreCalcColumnLeft;
+    if AIndex < 0 then
+      Result := 0
+    else
+    begin
+      if AIndex > FColumnLeft.Count - 1 then
+      begin
+        AColumnLeft := FColumnLeft[FColumnLeft.Count - 1];
+        result := AColumnLeft^;
+      end
+      else
+      begin
+        AColumnLeft := FColumnLeft[AIndex];
+        result := AColumnLeft^;
+      end;
+    end;
+  end;
+end;
+
+function TfpgTreeview.GetColumnWidth(AIndex: word): word;
+var
+  h: PfpgTreeColumnWidth;
+  i: integer;
+begin
+{$IFDEF DEBUG}
+  writeln('TfpgTreeView.GetColumnWidth');
+{$ENDIF}
+  h := FFirstColumn;
+  i := 0;
+  if h = nil then // not found
+  begin
+    result := DefaultColumnWidth;
+    exit;
+  end;
+  while i < aIndex do
+  begin
+    if h = nil then // not found - returns the default
+    begin
+      result := DefaultColumnWidth;
+      exit;
+    end;
+    h := h^.next;
+    inc(i);
+  end;
+  if h <> nil then
+    result := h^.width
+  else // not found -> returns the default
+    result := DefaultColumnWidth;
+end;
+
+procedure TfpgTreeview.PreCalcColumnLeft;
+var
+  Aleft: TfpgCoord;
+  ACounter: integer;
+  AColumnLeft: PColumnLeft;
+begin
+  {$IFDEF DEBUG}
+  writeln('TfpgTreeView.PreCalcColumnWidth');
+  {$ENDIf}
+  if FColumnLeft = nil then
+	  FColumnLeft := TList.Create
+  else
+	  FColumnLeft.Clear;
+  for ACounter := 0 to FColumnLeft.Count - 1 do  // Freeing Memory
+  begin
+    AColumnLeft := FColumnLeft[ACounter];
+    Dispose(AColumnLeft);
+  end;
+  Aleft := 0;
+  for ACounter := 1 to RootNode.GetMaxDepth do
+  begin
+  	AColumnLeft := new(PColumnLeft);
+  	AColumnLeft^ := Aleft;
+  	FColumnLeft.Add(AColumnLeft);
+  	Aleft := ALeft + GetColumnWidth(ACounter);
+  end;
 end;
 
 procedure TfpgTreeview.HScrollbarMove(Sender: TObject; position: integer);
@@ -738,6 +957,287 @@ begin
   inherited HandleResize(awidth, aheight);
   ResetScrollbar;
   RePaint;
+end;
+
+procedure TfpgTreeview.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+end;
+
+procedure TfpgTreeview.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+end;
+
+procedure TfpgTreeview.HandleDoubleClick(x, y: integer; button: word;
+  shiftstate: TShiftState);
+begin
+  inherited HandleDoubleClick(x, y, button, shiftstate);
+end;
+
+procedure TfpgTreeview.HandleShow;
+begin
+  ResetScrollbar;
+  inherited HandleShow;
+end;
+
+procedure TfpgTreeview.HandlePaint;
+var
+  r: TfpgRect;
+  h: TfpgTreeNode;
+  i: integer;
+  i1: integer;
+  w: integer;
+  YPos: integer;
+  col: integer;
+  ACenterPos: integer;
+//  AImageItem: TfpgImageItem;
+  AVisibleHeight: integer;
+label
+  label_next;
+begin
+  {$IFDEF DEBUG}
+  writeln('TfpgTreeview.HandlePaint');
+  {$ENDIF}
+//  inherited HandlePaint;
+  if not HasHandle then
+    Exit; //==>
+  i1 := 0;
+  PreCalcColumnLeft;
+  UpdateScrollbars;
+  AVisibleHeight := VisibleHeight;
+
+  Canvas.BeginDraw;  // start double buffering
+  Canvas.ClearClipRect;
+  Canvas.Clear(FBackgroundColor);
+  if FFocused then
+    Canvas.SetColor(clWidgetFrame)
+  else
+    Canvas.SetColor(clInactiveWgFrame);
+  r.SetRect(0, 0, Width, Height);
+  Canvas.DrawRectangle(r); // border
+
+  if ShowColumns then // draw the column header?
+  begin
+    r.SetRect(1, 1, VisibleWidth, FColumnHeight);
+    Canvas.SetClipRect(r);
+    Canvas.SetColor(clHilite1);
+    Canvas.DrawLine(1, 1, VisibleWidth, 1);
+    Canvas.DrawLine(1, 1, 1, FColumnHeight - 1);
+    Canvas.SetColor(clHilite2);
+    Canvas.DrawLine(1, 2, VisibleWidth - 1, 2);
+    Canvas.DrawLine(2, 2, FColumnHeight - 1, 2);
+    Canvas.SetColor(clShadow2);
+    Canvas.DrawLine(1, FColumnHeight, VisibleWidth, FColumnHeight);
+    Canvas.DrawLine(VisibleWidth, 1, VisibleWidth, FColumnHeight);
+    Canvas.SetColor(clShadow1);
+    Canvas.DrawLine(2, FColumnHeight - 1, VisibleWidth - 1, FColumnHeight - 1);
+    Canvas.DrawLine(VisibleWidth - 1, 2, VisibleWidth - 1, FColumnHeight - 1);
+    Canvas.SetColor(clGridHeader);
+    Canvas.FillRectangle(3, 3, VisibleWidth - 4, FColumnHeight - 4);
+    Canvas.SetColor(clWidgetFrame);
+
+    w := 0;
+    r.SetRect(3, 2, VisibleWidth - 4, FColumnHeight - 2);
+    Canvas.SetClipRect(r);
+    for i := 1 to rootnode.getMaxDepth - 1 do
+    begin
+      w := w + GetColumnWidth(i);
+      Canvas.DrawLine(w - FXOffset, 2, w - FXOffset, FColumnHeight - 1);
+    end;
+    Canvas.SetColor(clShadow1);
+    w := 0;
+    for i := 1 to rootnode.getMaxDepth - 1 do
+    begin
+      w := w + GetColumnWidth(i);
+      Canvas.DrawLine(w - 1 - FXOffset, 3, w - 1 - FXOffset, FColumnHeight - 2);
+    end;
+    Canvas.SetColor(clHilite2);
+    w := 0;
+    for i := 1 to rootnode.getMaxDepth - 1 do
+    begin
+      w := w + GetColumnWidth(i);
+      Canvas.DrawLine(w + 1 - FXOffset, 3, w + 1 - FXOffset, FColumnHeight - 2);
+    end;
+  end;
+  
+  if ShowColumns then
+  begin
+    r.SetRect(1, 1 + FColumnHeight, VisibleWidth, VisibleHeight); // drawing rectangle for nodes and lines
+    col := FColumnHeight;
+  end
+  else
+  begin
+    r.SetRect(1, 1, VisibleWidth, VisibleHeight);
+    col := 0;
+  end;
+  Canvas.ClearClipRect;
+  Canvas.SetClipRect(r);
+
+  // draw the nodes with lines
+  h := RootNode.FirstSubNode;
+  Canvas.SetTextColor(RootNode.ParentTextColor);
+  YPos := 0;
+  while h <> nil do
+  begin
+    Canvas.SetTextColor(h.ParentTextColor);
+    // lines with + or -
+    w := GetColumnLeft(StepToRoot(h));
+    YPos := YPos + GetNodeHeight;
+    ACenterPos := YPos - FYOffset + col - GetNodeHeight + (GetNodeHeight div 2);
+    if ACenterPos > FHScrollbar.Position - GetNodeHeight then
+    begin
+      if h = Selection then // draw the selection rectangle and text
+      begin
+        if Focused then
+        begin
+          Canvas.SetColor(h.ParentSelColor);
+          Canvas.SetTextColor(h.ParentSelTextColor);
+        end
+        else
+        begin
+          Canvas.SetColor(h.ParentInactSelColor);
+          Canvas.SetTextColor(h.ParentInActSelTextColor);
+        end;
+        Canvas.FillRectangle(w - FXOffset, YPos - FYOffset + col - GetNodeHeight + FFont.Ascent div 2 - 2, GetNodeWidth(h), GetNodeHeight);
+{
+        if (ImageList <> nil) and ShowImages then
+        begin
+          AImageItem := ImageList.Item[h.ImageIndex];
+          if AImageItem <> nil then
+          begin
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image,0,0,16,16);
+            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
+          end
+          else
+            Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+        end
+        else
+}
+          Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+        Canvas.SetTextColor(h.ParentTextColor);
+      end
+      else
+      begin
+{
+        if (ImageList <> nil) and  ShowImages then
+        begin
+          AImageItem := ImageList.Item[h.ImageIndex];
+          if AImageItem <> nil then
+          begin
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image,0,0,16,16);
+            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
+          end
+          else
+            Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+        end
+        else
+}
+          Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+      end;  { if/else }
+      Canvas.SetColor(clText1);
+      if h.Count > 0 then // subnodes?
+      begin
+        Canvas.DrawRectangle(w - FXOffset - GetColumnWidth(i1) div 2 - 3, ACenterPos - 3, 9, 9);
+        if h.Collapsed then // draw a "+"
+        begin
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 3, ACenterPos + 1);
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 1, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos + 3);
+        end
+        else
+        begin // draw a "-"
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 3, ACenterPos + 1);
+        end;
+      end
+      else
+      begin
+        Canvas.SetColor(clText1);
+        Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,  ACenterPos + 1, w - FXOffset - 3,  ACenterPos + 1);
+      end;
+
+      if h.prev <> nil then
+      begin
+        // line up to the previous node
+        if h.prev.count > 0 then
+        begin
+          if h.count > 0 then
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 4, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 6)
+          else
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 6)
+        end
+        else
+        begin
+          if h.count > 0 then
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 3, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 2)
+          else
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 2);
+        end;
+      end
+      else
+      begin
+        if h.count > 0 then
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,ACenterPos - 3, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - GetNodeHeight div 2 + 3)
+        else
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - GetNodeHeight div 2 + 3);
+      end;
+    end;
+    if AVisibleHeight > ACenterPos + GetNodeHeight then
+    begin
+      if h.count > 0 then
+      begin
+        if not h.collapsed then
+          h := h.FirstSubNode
+        else
+          goto label_next;
+      end
+      else
+      begin
+        label_next:
+      if h.next <> nil then
+        h := h.next // next node
+      else
+      begin
+        while h.next = nil do // or recurse next node per parent
+        begin
+          h := h.parent;
+          if (h = nil) or (h = rootnode) then
+          begin
+            Canvas.EndDraw;
+            Exit; //==>
+          end;
+        end;  { while }
+        h := h.next;
+      end;  { if/else }
+    end;
+    end
+    else
+    begin
+      // Draw Lines up to the parent nodes
+      ACenterPos := ACenterPos + GetNodeHeight;
+      while h <> RootNode do
+      begin
+        w := GetColumnLeft(StepToRoot(h));
+        if h.next <> nil then
+        begin
+          h := h.next;
+          if h.prev.count > 0 then
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, GetAbsoluteNodeTop(h.prev) - FYOffset + 6 + GetNodeHeight div 2)
+          else
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, GetAbsoluteNodeTop(h.prev) - FYOffset + 2 + GetNodeHeight div 2);
+         end;
+         h := h.parent;
+      end;
+      Canvas.EndDraw;
+      Exit; //==>
+    end;
+  end;
+  Canvas.EndDraw;
+end;
+
+procedure TfpgTreeview.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgTreeview.DoChange;
@@ -861,7 +1361,7 @@ begin
   FSelection := nil;
   FDefaultColumnWidth := 15;
   FFirstColumn := nil;
-  FFont := fpgGetFont('#Label');
+  FFont := fpgGetFont('#Label1');
   
   FHScrollbar := TfpgScrollbar.Create(self);
   FHScrollbar.Orientation := orHorizontal;
