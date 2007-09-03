@@ -321,6 +321,18 @@ begin
   EY := EP.Y;
 end;
 
+// returns true when the operating system is windows 2000 or newer
+function IsWin2kOrLater: Boolean;
+begin
+  Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion >= 5);
+end;
+
+// returns true when the operating system is windows XP or newer
+function IsWinXP: Boolean;
+begin
+  Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion >= 5) and (Win32MinorVersion >= 1);
+end;
+
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 var
   w: TfpgWindowImpl;
