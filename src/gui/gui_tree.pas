@@ -9,6 +9,8 @@ unit gui_tree;
   WARNING:   This is still under heavy development! Do NOT use.
 }
 
+{.$Define Debug}
+
 interface
 
 uses
@@ -60,8 +62,8 @@ type
     // node related
     procedure   UnregisterSubNode(aNode: TfpgTreeNode);
     procedure   Append(aValue: TfpgTreeNode);
-    function    FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode;
     function    AppendText(AText: string): TfpgTreeNode;
+    function    FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode;
     function    GetMaxDepth: integer;
     function    GetMaxVisibleDepth: integer;
     procedure   Collapse;
@@ -162,8 +164,8 @@ type
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
   published
-    property    ShowImages: boolean read FShowImages write SetShowImages;
-    property    ShowColumns: boolean read FShowColumns write SetShowColumns;
+    property    ShowImages: boolean read FShowImages write SetShowImages default False;
+    property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -312,7 +314,7 @@ end;
 procedure TfpgTreeNode.Append(aValue: TfpgTreeNode);
 begin
   aValue.Parent := self;
-  aValue.next := nil;
+  aValue.Next   := nil;
 
   if FFirstSubNode = nil then
     FFirstSubNode := aValue;
@@ -577,7 +579,7 @@ end;
 
 function TfpgTreeview.GetFontDesc: string;
 begin
-
+  Result := FFont.FontDesc;
 end;
 
 function TfpgTreeview.GetRootNode: TfpgTreeNode;
@@ -826,22 +828,21 @@ var
    AColumnLeft: PColumnLeft;
 begin
   if FColumnLeft = nil then
-  begin
     PreCalcColumnLeft;
-    if AIndex < 0 then
-      Result := 0
+
+  if AIndex < 0 then
+    Result := 0
+  else
+  begin
+    if AIndex > FColumnLeft.Count - 1 then
+    begin
+      AColumnLeft := FColumnLeft[FColumnLeft.Count - 1];
+      result := AColumnLeft^;
+    end
     else
     begin
-      if AIndex > FColumnLeft.Count - 1 then
-      begin
-        AColumnLeft := FColumnLeft[FColumnLeft.Count - 1];
-        result := AColumnLeft^;
-      end
-      else
-      begin
-        AColumnLeft := FColumnLeft[AIndex];
-        result := AColumnLeft^;
-      end;
+      AColumnLeft := FColumnLeft[AIndex];
+      result := AColumnLeft^;
     end;
   end;
 end;
@@ -901,7 +902,7 @@ begin
   	AColumnLeft := new(PColumnLeft);
   	AColumnLeft^ := Aleft;
   	FColumnLeft.Add(AColumnLeft);
-  	Aleft := ALeft + GetColumnWidth(ACounter);
+  	Aleft := Aleft + GetColumnWidth(ACounter);
   end;
 end;
 
@@ -1076,7 +1077,7 @@ begin
 
   // draw the nodes with lines
   h := RootNode.FirstSubNode;
-  Canvas.SetTextColor(RootNode.ParentTextColor);
+//  Canvas.SetTextColor(RootNode.ParentTextColor);
   YPos := 0;
   while h <> nil do
   begin
@@ -1357,12 +1358,14 @@ end;
 constructor TfpgTreeview.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FRootNode := nil;
-  FSelection := nil;
+  FRootNode     := nil;
+  FSelection    := nil;
+  FShowImages   := False;
+  FShowColumns  := False;
   FDefaultColumnWidth := 15;
-  FFirstColumn := nil;
+  FFirstColumn  := nil;
   FFont := fpgGetFont('#Label1');
-  
+
   FHScrollbar := TfpgScrollbar.Create(self);
   FHScrollbar.Orientation := orHorizontal;
   FHScrollbar.OnScroll    := @HScrollbarMove;
@@ -1376,12 +1379,12 @@ begin
   FVScrollbar.Position    := 0;
   FVScrollbar.SliderSize  := 0.2;
   
-  FBackgroundColor := clListBox;
-  FFocusable    := True;
-  FMoving       := False;
-  FXOffset      := 0;
-  FYOffset      := 0;
-  FColumnHeight := FFont.Height + 2;
+  FBackgroundColor  := clListBox;
+  FFocusable        := True;
+  FMoving           := False;
+  FXOffset          := 0;
+  FYOffset          := 0;
+  FColumnHeight     := FFont.Height + 2;
 end;
 
 procedure TfpgTreeview.SetColumnWidth(AIndex, AWidth: word);

@@ -32,12 +32,18 @@ begin
   
   TV := TfpgTreeView.Create(self);
   TV.SetPosition(8, 8, 250, 180);
-  TV.ShowColumns := False;
+  TV.Align := alClient;
+  TV.ShowColumns := True;
   n := TV.RootNode.AppendText('Node 1');
   n.AppendText('Node 1.1');
+  n.AppendText('Node 1.2');
   n := TV.RootNode.AppendText('Node 2');
   n.AppendText('Node 2.1');
+  n := n.AppendText('Node 2.2');
+  n.AppendText('Node 2.2.1');
+  TV.RootNode.FirstSubNode.Next.Collapse;
   TV.RootNode.AppendText('Node 3');
+  TV.Selection := n;
 end;
 
 
