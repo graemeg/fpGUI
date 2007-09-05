@@ -5,6 +5,10 @@ unit gui_tree;
 {
   TODO:
     * Lots!!
+    * Columns need to be reworked. We don't want coluns per node levels. Instead
+      we want a main column covering the tree. Then extra columns for user
+      text and data.gui_tree
+    * Implement event handlers the user can hook into and do custom drawing.
     
   WARNING:   This is still under heavy development! Do NOT use.
 }
@@ -34,13 +38,11 @@ type
   private
     FFirstSubNode: TfpgTreeNode; // the subnodes - for list implementation
     FLastSubNode: TfpgTreeNode;
-
     FText: string;
     FParent: TfpgTreeNode;
     FNext: TfpgTreeNode;
     FPrev: TfpgTreeNode;
     FCollapsed: boolean;
-
     FSelColor: TfpgColor;
     FTextColor: TfpgColor;
     FSelTextColor: TfpgColor;
@@ -102,12 +104,15 @@ type
   TfpgTreeview = class(TfpgWidget)
   private
     FRootNode: TfpgTreeNode;
+    FScrollWheelDelta: integer;
     FSelection: TfpgTreeNode; // currently selected node
     FDefaultColumnWidth: word;
     FFirstColumn: PfpgTreeColumnWidth; // the list for column widths
     FFont: TfpgFont;
     FShowColumns: boolean;
     FHScrollbar: TfpgScrollbar;
+    FTreeLineColor: TfpgColor;
+    FTreeLineStyle: TfpgLineStyle;
     FVScrollbar: TfpgScrollbar;
 //    FImageList : TfpgImageList;   // imagelist to be implemented in the future
     FShowImages : boolean;
@@ -127,6 +132,8 @@ type
     procedure   SetSelection(const AValue: TfpgTreeNode);
     procedure   SetShowColumns(const AValue: boolean);
     procedure   SetShowImages(const AValue: boolean);
+    procedure   SetTreeLineColor(const AValue: TfpgColor);
+    procedure   SetTreeLineStyle(const AValue: TfpgLineStyle);
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
     function    GetNodeHeightSum: integer;
@@ -148,8 +155,10 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
+    procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DoChange; virtual;
     procedure   DoExpand(ANode: TfpgTreeNode); virtual;
     function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
@@ -168,6 +177,9 @@ type
     property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth;
+    property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor;
+    property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle;
+    property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
   end;
@@ -664,6 +676,22 @@ begin
   end;
 end;
 
+procedure TfpgTreeview.SetTreeLineColor(const AValue: TfpgColor);
+begin
+  if FTreeLineColor = AValue then
+    Exit; //==>
+  FTreeLineColor := AValue;
+  RePaint;
+end;
+
+procedure TfpgTreeview.SetTreeLineStyle(const AValue: TfpgLineStyle);
+begin
+  if FTreeLineStyle = AValue then
+    Exit; //==>
+  FTreeLineStyle := AValue;
+  RePaint;
+end;
+
 function TfpgTreeview.VisibleWidth: integer;
 begin
   if GetNodeHeightSum * (GetNodeHeight) > Height - 2 then
@@ -1018,53 +1046,28 @@ begin
   r.SetRect(0, 0, Width, Height);
   Canvas.DrawRectangle(r); // border
 
-  if ShowColumns then // draw the column header?
-  begin
-    r.SetRect(1, 1, VisibleWidth, FColumnHeight);
-    Canvas.SetClipRect(r);
-    Canvas.SetColor(clHilite1);
-    Canvas.DrawLine(1, 1, VisibleWidth, 1);
-    Canvas.DrawLine(1, 1, 1, FColumnHeight - 1);
-    Canvas.SetColor(clHilite2);
-    Canvas.DrawLine(1, 2, VisibleWidth - 1, 2);
-    Canvas.DrawLine(2, 2, FColumnHeight - 1, 2);
-    Canvas.SetColor(clShadow2);
-    Canvas.DrawLine(1, FColumnHeight, VisibleWidth, FColumnHeight);
-    Canvas.DrawLine(VisibleWidth, 1, VisibleWidth, FColumnHeight);
-    Canvas.SetColor(clShadow1);
-    Canvas.DrawLine(2, FColumnHeight - 1, VisibleWidth - 1, FColumnHeight - 1);
-    Canvas.DrawLine(VisibleWidth - 1, 2, VisibleWidth - 1, FColumnHeight - 1);
-    Canvas.SetColor(clGridHeader);
-    Canvas.FillRectangle(3, 3, VisibleWidth - 4, FColumnHeight - 4);
-    Canvas.SetColor(clWidgetFrame);
-
-    w := 0;
-    r.SetRect(3, 2, VisibleWidth - 4, FColumnHeight - 2);
-    Canvas.SetClipRect(r);
-    for i := 1 to rootnode.getMaxDepth - 1 do
-    begin
-      w := w + GetColumnWidth(i);
-      Canvas.DrawLine(w - FXOffset, 2, w - FXOffset, FColumnHeight - 1);
-    end;
-    Canvas.SetColor(clShadow1);
-    w := 0;
-    for i := 1 to rootnode.getMaxDepth - 1 do
-    begin
-      w := w + GetColumnWidth(i);
-      Canvas.DrawLine(w - 1 - FXOffset, 3, w - 1 - FXOffset, FColumnHeight - 2);
-    end;
-    Canvas.SetColor(clHilite2);
-    w := 0;
-    for i := 1 to rootnode.getMaxDepth - 1 do
-    begin
-      w := w + GetColumnWidth(i);
-      Canvas.DrawLine(w + 1 - FXOffset, 3, w + 1 - FXOffset, FColumnHeight - 2);
-    end;
-  end;
-  
+  {$Note Columns need to be redesigned completely }
   if ShowColumns then
   begin
-    r.SetRect(1, 1 + FColumnHeight, VisibleWidth, VisibleHeight); // drawing rectangle for nodes and lines
+    // Drawing column headers
+    r.SetRect(1, 1, 0, FColumnHeight);
+    for col := 1 to rootnode.getMaxDepth - 1 do
+    begin
+      r.Width := GetColumnWidth(col);
+      DrawHeader(col, r, 0);
+      inc(r.Left, r.Width);
+      if r.Left >= VisibleWidth then
+        Break;  // small optimization. Don't draw what we can't see
+    end;
+    // Fill remainder of the client area with one big header
+    r.width := VisibleWidth - r.Left + 1;
+    DrawHeader(col+1, r, 0);
+  end;
+
+  // Calculate the client area used for nodes and lines
+  if ShowColumns then
+  begin
+    r.SetRect(1, 1 + FColumnHeight, VisibleWidth, VisibleHeight);
     col := FColumnHeight;
   end
   else
@@ -1136,53 +1139,71 @@ begin
 }
           Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
       end;  { if/else }
-      Canvas.SetColor(clText1);
+
+      Canvas.SetLineStyle(1, FTreeLineStyle);
       if h.Count > 0 then // subnodes?
       begin
+        // subnode rectangle around the "+" or "-"
+        Canvas.SetColor(FTreeLineColor);
+        Canvas.SetLineStyle(1, lsSolid);  // rectangle is always solid line style
         Canvas.DrawRectangle(w - FXOffset - GetColumnWidth(i1) div 2 - 3, ACenterPos - 3, 9, 9);
-        if h.Collapsed then // draw a "+"
+        Canvas.SetColor(clText1);
+
+        if h.Collapsed then
         begin
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 3, ACenterPos + 1);
+          // draw a "+"
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 1, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos + 3);
         end
         else
-        begin // draw a "-"
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 3, ACenterPos + 1);
+        begin
+          // draw a "-"
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
         end;
+        
+        Canvas.SetLineStyle(1, FTreeLineStyle);
       end
       else
       begin
-        Canvas.SetColor(clText1);
-        Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,  ACenterPos + 1, w - FXOffset - 3,  ACenterPos + 1);
+        // short horizontal line for each node
+        Canvas.SetColor(FTreeLineColor);
+        Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,  ACenterPos + 1, w - FXOffset - 1,  ACenterPos + 1);
       end;
 
+      Canvas.SetColor(FTreeLineColor);
       if h.prev <> nil then
       begin
         // line up to the previous node
         if h.prev.count > 0 then
         begin
+          // take the previous subnode rectangle in account
           if h.count > 0 then
-            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 4, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 6)
+            // we have a subnode rectangle
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 4, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight) + 5)
           else
-            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 6)
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight) + 5);
         end
         else
         begin
+          // previous node has no subnodes
           if h.count > 0 then
-            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 3, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 2)
+            // we have a subnode rectangle
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 3, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 1)
           else
-            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 2);
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 1);
         end;
       end
       else
       begin
         if h.count > 0 then
+          // take the subnode rectangle in account
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,ACenterPos - 3, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - GetNodeHeight div 2 + 3)
         else
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - GetNodeHeight div 2 + 3);
       end;
     end;
-    if AVisibleHeight > ACenterPos + GetNodeHeight then
+    
+    if AVisibleHeight > (ACenterPos + GetNodeHeight) then
     begin
       if h.count > 0 then
       begin
@@ -1235,10 +1256,54 @@ begin
   Canvas.EndDraw;
 end;
 
+procedure TfpgTreeview.DrawHeader(ACol: integer; ARect: TfpgRect;
+  AFlags: integer);
+var
+  s: string;
+  r: TfpgRect;
+  x: integer;
+begin
+  // Here we can implement a head style check
+  Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
+{
+  r := ARect;
+  InflateRect(r, -2, -2);
+  Canvas.SetClipRect(r);  // text cannot oversheet header border
+
+  Canvas.SetTextColor(clText1);
+  s := GetHeaderText(ACol);
+  x := (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
+  if x < 1 then
+    x := 1;
+  fpgStyle.DrawString(Canvas, x, ARect.Top+1, s, Enabled);
+}
+end;
+
 procedure TfpgTreeview.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TfpgTreeview.HandleMouseScroll(x, y: integer;
+  shiftstate: TShiftState; delta: smallint);
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  if delta > 0 then
+  begin
+    inc(FYOffset, FScrollWheelDelta);
+    if FYOffset > VisibleHeight then
+      FYOffset := VisibleHeight;
+  end
+  else
+  begin
+    dec(FYOffset, FScrollWheelDelta);
+    if FYOffset < 0 then
+      FYOffset := 0;
+  end;
+    
+  UpdateScrollbars;
+  RePaint;
 end;
 
 procedure TfpgTreeview.DoChange;
@@ -1380,11 +1445,14 @@ begin
   FVScrollbar.SliderSize  := 0.2;
   
   FBackgroundColor  := clListBox;
+  FTreeLineColor    := clShadow1; //clText1;
+  FTreeLineStyle    := lsSolid;
   FFocusable        := True;
   FMoving           := False;
   FXOffset          := 0;
   FYOffset          := 0;
   FColumnHeight     := FFont.Height + 2;
+  FScrollWheelDelta := 15;
 end;
 
 procedure TfpgTreeview.SetColumnWidth(AIndex, AWidth: word);

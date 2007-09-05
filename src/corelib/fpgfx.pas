@@ -886,7 +886,7 @@ begin
   fpgSetNamedColor(clButtonFace, $D4D0C8);
   fpgSetNamedColor(clListBox, $FFFFFF);
   fpgSetNamedColor(clGridLines, $A0A0A0);
-  fpgSetNamedColor(clGridHeader, $E0E0E0);
+  fpgSetNamedColor(clGridHeader, $D4D0C8);
   fpgSetNamedColor(clWidgetFrame, $000000);
   fpgSetNamedColor(clInactiveWgFrame, $A0A0A0);
   fpgSetNamedColor(clTextCursor, $000000);

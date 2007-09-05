@@ -7,14 +7,16 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
+  SysUtils,
   fpgfx,
   gui_form,
-  gui_tree;
+  gui_tree,
+  gfxbase;
 
 type
   TMainForm = class(TfpgForm)
   private
-    TV: TfpgTreeView;
+    tree: TfpgTreeView;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -24,26 +26,35 @@ type
 constructor TMainForm.Create(AOwner: TComponent);
 var
   n: TfpgTreeNode;
+  i: integer;
+  s: string;
 begin
   inherited Create(AOwner);
   WindowTitle := 'Treeview Test';
   WindowPosition := wpUser;
   SetPosition(100, 100, 300, 200);
   
-  TV := TfpgTreeView.Create(self);
-  TV.SetPosition(8, 8, 250, 180);
-  TV.Align := alClient;
-  TV.ShowColumns := True;
-  n := TV.RootNode.AppendText('Node 1');
+  tree := TfpgTreeView.Create(self);
+  tree.SetPosition(8, 8, Width-16, Height-16);
+  tree.Anchors := [anTop, anLeft, anRight, anBottom];
+  tree.ShowColumns := True;
+//  tree.TreeLineStyle := lsDot;
+  tree.ScrollWheelDelta := 30;
+
+  n := tree.RootNode.AppendText('Node 1');
   n.AppendText('Node 1.1');
   n.AppendText('Node 1.2');
-  n := TV.RootNode.AppendText('Node 2');
+  n := tree.RootNode.AppendText('Node 2');
   n.AppendText('Node 2.1');
   n := n.AppendText('Node 2.2');
-  n.AppendText('Node 2.2.1');
-  TV.RootNode.FirstSubNode.Next.Collapse;
-  TV.RootNode.AppendText('Node 3');
-  TV.Selection := n;
+  for i := 1 to 3 do
+  begin
+    s := Format('Node 2.2.%d', [i]);
+    n.AppendText(s);// + ' ' + s + ' ' + s);
+  end;
+  tree.RootNode.FirstSubNode.Next.Collapse;
+  tree.RootNode.AppendText('Node 3');
+  tree.Selection := n;
 end;
 
 
