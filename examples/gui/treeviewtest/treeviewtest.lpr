@@ -38,7 +38,7 @@ begin
   tree.SetPosition(8, 8, Width-16, Height-16);
   tree.Anchors := [anTop, anLeft, anRight, anBottom];
 //  tree.ShowColumns := True;
-//  tree.TreeLineStyle := lsDot;
+//  tree.TreeLineStyle := lsSolid;
   tree.ScrollWheelDelta := 30;
 
   n := tree.RootNode.AppendText('Node 1');

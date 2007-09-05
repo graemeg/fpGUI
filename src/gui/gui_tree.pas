@@ -978,13 +978,112 @@ begin
 end;
 
 procedure TfpgTreeview.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  col: integer;
+  i: integer;
+  w: integer;
+  i1: integer;
+  last: TfpgTreeNode;
+  node: TfpgTreeNode;
+  cancel: boolean;
+  OldSel: TfpgTreeNode;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
+
+  node := nil;
+  OldSel := Selection;
+  if FMoving then // column resize
+  begin
+    FMoving := false;
+    x := x + FXOffset;
+    SetColumnWidth(FMovingCol, GetColumnWidth(FMovingCol) + x - FMovingPos);
+    FMoving := false;
+  end
+  else
+  begin
+    if ShowColumns then
+      col := FColumnHeight
+    else
+      col := 0;
+    y := y - col - 1 + FYOffset;
+    i := 0;
+    x := x + FXOffset;
+    cancel := False;
+    last := RootNode;
+    while not (((i - 1) * GetNodeHeight - 2 <= y) and ((i) * GetNodeHeight + 2 >= y)) do
+    begin
+      node := NextVisualNode(last);
+      if node = nil then
+        exit; //==>
+      if node = last then
+      begin
+        cancel := True;
+        break;  //==>
+      end;
+      inc(i);
+      last := node;
+    end;
+    
+    if (not cancel) or (node <> nil) then
+    begin
+      // +/- or node-selection?
+      i1  := StepToRoot(node);
+      w   := GetColumnLeft(i1);
+      if (x >= w - GetColumnWidth(i1) div 2 - 3) and (x <= w - GetColumnWidth(i1) div 2 + 6) then
+      // collapse or expand?
+      begin // yes
+        if node.Count > 0 then
+        begin
+          if node.Collapsed then
+          begin
+            node.expand;
+            DoExpand(node);
+          end
+          else
+            node.Collapse;
+          ResetScrollBar;
+          RePaint;
+        end;
+      end
+      else
+      begin
+        if x > w - GetColumnWidth(i1) div 2 + 6 then
+          Selection := node;
+      end;
+    end;
+  end;
+  if OldSel <> Selection then
+  begin
+    RePaint;
+    DoChange;
+  end;
 end;
 
 procedure TfpgTreeview.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  xpos: integer;
+  i: integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
+  if ShowColumns then
+  begin
+    x := x + FXOffset;
+    xpos := 0;
+    i := 0;
+    while xpos + 2 < x do
+    begin
+      inc(i);
+      xpos := xpos + GetColumnWidth(i);
+    end;
+    if (x > xpos - 2) and (x < xpos + 2) then
+    begin
+      FMoving := True;
+      FMovingPos := xpos;
+      FMovingCol := i;
+      SetColumnWidth(i, GetColumnWidth(i));
+    end;
+  end;
+  RePaint;
 end;
 
 procedure TfpgTreeview.HandleDoubleClick(x, y: integer; button: word;
@@ -1069,7 +1168,6 @@ begin
 
   // draw the nodes with lines
   h := RootNode.FirstSubNode;
-//  Canvas.SetTextColor(RootNode.ParentTextColor);
   YPos := 0;
   while h <> nil do
   begin
@@ -1077,8 +1175,8 @@ begin
     Canvas.SetTextColor(h.ParentTextColor);
     // lines with + or -
     w := GetColumnLeft(StepToRoot(h));
+    ACenterPos := YPos - FYOffset + col + (GetNodeHeight div 2);
     YPos := YPos + GetNodeHeight;
-    ACenterPos := YPos - FYOffset + col - GetNodeHeight + (GetNodeHeight div 2);
 //writeln(ACenterPos, ' > ', FHScrollbar.Position - GetNodeHeight);
     if ACenterPos > (FHScrollbar.Position - GetNodeHeight) then
     begin
@@ -1144,7 +1242,7 @@ begin
         begin
           // draw a "+"
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
-          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 1, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos + 3);
+          Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 1, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos + 4);
         end
         else
         begin
@@ -1238,7 +1336,6 @@ begin
             y := GetAbsoluteNodeTop(h.prev) - FYOffset + 5 + (GetNodeHeight div 2);
             if ShowColumns then
               inc(y, FColumnHeight);
-            Canvas.SetColor(clRed);
             Canvas.DrawLine(x, ACenterPos, x, y);
           end
           else
@@ -1247,7 +1344,6 @@ begin
             y := GetAbsoluteNodeTop(h.prev) - FYOffset + 1 + (GetNodeHeight div 2);
             if ShowColumns then
               inc(y, FColumnHeight);
-            Canvas.SetColor(clBlue);
             Canvas.DrawLine(x, ACenterPos, x, y);
           end;
         end;
@@ -1450,7 +1546,7 @@ begin
   
   FBackgroundColor  := clListBox;
   FTreeLineColor    := clShadow1; //clText1;
-  FTreeLineStyle    := lsSolid;
+  FTreeLineStyle    := lsDot;
   FFocusable        := True;
   FMoving           := False;
   FXOffset          := 0;
