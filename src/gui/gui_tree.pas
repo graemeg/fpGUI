@@ -145,7 +145,7 @@ type
     function    GetColumnLeft(AIndex: integer): integer;
     procedure   PreCalcColumnLeft;
     procedure   VScrollbarScroll(Sender: TObject; position: integer);
-    procedure   HScrollbarMove(Sender: TObject; position: integer);
+    procedure   HScrollbarScroll(Sender: TObject; position: integer);
     procedure   UpdateScrollbars;
     procedure   ResetScrollbar;
   protected
@@ -596,9 +596,6 @@ end;
 
 function TfpgTreeview.GetRootNode: TfpgTreeNode;
 begin
-{$IFDEF DEBUG}
-  writeln('TfpgTreeview.GetRootNode');
-{$ENDIF}
   if FRootNode = nil then
     FRootNode := TfpgTreeNode.Create;
   FRootNode.TextColor     := clText1;
@@ -694,26 +691,18 @@ end;
 
 function TfpgTreeview.VisibleWidth: integer;
 begin
-  if GetNodeHeightSum * (GetNodeHeight) > Height - 2 then
-    VisibleWidth := Width - 2 - FVScrollbar.Width
-  else
-    result := Width - 2;
+  Result := Width - 2;
+  if FVScrollbar.Visible then
+     dec(Result, FVScrollbar.Width);
 end;
 
 function TfpgTreeview.VisibleHeight: integer;
 begin
+  Result := Height - 2;
   if FShowColumns then
-  begin
-    if MaxNodeWidth > Width - 2 then
-      result := Height - 2 - FHScrollbar.Height - FColumnHeight
-    else
-      result := Height - 2 - FColumnHeight;
-  end
-  else
-    if MaxNodeWidth > width - 2 then
-      result := Height - 2 - FHScrollbar.Height
-    else
-      result := Height - 2;
+    dec(Result, FColumnHeight);
+  if FHScrollbar.Visible then
+    dec(Result, FHScrollbar.Height);
 end;
 
 function TfpgTreeview.GetNodeHeightSum: integer;
@@ -794,7 +783,7 @@ end;
 
 function TfpgTreeview.GetNodeHeight: integer;
 begin
-  Result := FFont.Height + 5;
+  Result := FFont.Height + 2;
 end;
 
 function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
@@ -934,7 +923,7 @@ begin
   end;
 end;
 
-procedure TfpgTreeview.HScrollbarMove(Sender: TObject; position: integer);
+procedure TfpgTreeview.HScrollbarScroll(Sender: TObject; position: integer);
 begin
   FXOffset := Position;
   RePaint;
@@ -1020,10 +1009,10 @@ var
   YPos: integer;
   col: integer;
   ACenterPos: integer;
+  x,
+  y: integer;
 //  AImageItem: TfpgImageItem;
   AVisibleHeight: integer;
-label
-  label_next;
 begin
   {$IFDEF DEBUG}
   writeln('TfpgTreeview.HandlePaint');
@@ -1084,12 +1073,14 @@ begin
   YPos := 0;
   while h <> nil do
   begin
+//writeln('painting node: ', h.Text);
     Canvas.SetTextColor(h.ParentTextColor);
     // lines with + or -
     w := GetColumnLeft(StepToRoot(h));
     YPos := YPos + GetNodeHeight;
     ACenterPos := YPos - FYOffset + col - GetNodeHeight + (GetNodeHeight div 2);
-    if ACenterPos > FHScrollbar.Position - GetNodeHeight then
+//writeln(ACenterPos, ' > ', FHScrollbar.Position - GetNodeHeight);
+    if ACenterPos > (FHScrollbar.Position - GetNodeHeight) then
     begin
       if h = Selection then // draw the selection rectangle and text
       begin
@@ -1203,18 +1194,19 @@ begin
       end;
     end;
     
-    if AVisibleHeight > (ACenterPos + GetNodeHeight) then
+    if ShowColumns then
+      i := ACenterPos
+    else
+      i := ACenterPos + GetNodeHeight;
+    
+    if AVisibleHeight > i then
     begin
-      if h.count > 0 then
+      if (h.count > 0) and (not h.Collapsed) then
       begin
-        if not h.collapsed then
-          h := h.FirstSubNode
-        else
-          goto label_next;
-      end
-      else
-      begin
-        label_next:
+        h := h.FirstSubNode;
+        continue;
+      end;
+
       if h.next <> nil then
         h := h.next // next node
       else
@@ -1224,13 +1216,11 @@ begin
           h := h.parent;
           if (h = nil) or (h = rootnode) then
           begin
-            Canvas.EndDraw;
-            Exit; //==>
+            break;  //==>
           end;
         end;  { while }
         h := h.next;
       end;  { if/else }
-    end;
     end
     else
     begin
@@ -1243,14 +1233,27 @@ begin
         begin
           h := h.next;
           if h.prev.count > 0 then
-            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, GetAbsoluteNodeTop(h.prev) - FYOffset + 6 + GetNodeHeight div 2)
+          begin
+            x := w - FXOffset - GetColumnWidth(i1) div 2 + 1;
+            y := GetAbsoluteNodeTop(h.prev) - FYOffset + 5 + (GetNodeHeight div 2);
+            if ShowColumns then
+              inc(y, FColumnHeight);
+            Canvas.SetColor(clRed);
+            Canvas.DrawLine(x, ACenterPos, x, y);
+          end
           else
-            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos, w - FXOffset - GetColumnWidth(i1) div 2 + 1, GetAbsoluteNodeTop(h.prev) - FYOffset + 2 + GetNodeHeight div 2);
-         end;
-         h := h.parent;
+          begin
+            x := w - FXOffset - GetColumnWidth(i1) div 2 + 1;
+            y := GetAbsoluteNodeTop(h.prev) - FYOffset + 1 + (GetNodeHeight div 2);
+            if ShowColumns then
+              inc(y, FColumnHeight);
+            Canvas.SetColor(clBlue);
+            Canvas.DrawLine(x, ACenterPos, x, y);
+          end;
+        end;
+        h := h.parent;
       end;
-      Canvas.EndDraw;
-      Exit; //==>
+      break;  //==>
     end;
   end;
   Canvas.EndDraw;
@@ -1433,10 +1436,11 @@ begin
 
   FHScrollbar := TfpgScrollbar.Create(self);
   FHScrollbar.Orientation := orHorizontal;
-  FHScrollbar.OnScroll    := @HScrollbarMove;
+  FHScrollbar.OnScroll    := @HScrollbarScroll;
   FHScrollbar.Visible     := False;
   FHScrollbar.Position    := 0;
   FHScrollbar.SliderSize  := 0.2;
+  
   FVScrollbar := TfpgScrollbar.Create(self);
   FVScrollbar.Orientation := orVertical;
   FVScrollbar.OnScroll    := @VScrollbarScroll;
