@@ -1089,7 +1089,20 @@ end;
 procedure TfpgTreeview.HandleDoubleClick(x, y: integer; button: word;
   shiftstate: TShiftState);
 begin
+  // to setup cursor co-ordinates and handle selection
+  HandleLMouseUp(x, y, shiftstate);
   inherited HandleDoubleClick(x, y, button, shiftstate);
+  if Selection <> nil then
+  begin
+    if Selection.Collapsed then
+    begin
+      Selection.Expand;
+      DoExpand(Selection);
+    end
+    else
+      Selection.Collapse;
+    RePaint;
+  end;
 end;
 
 procedure TfpgTreeview.HandleShow;
@@ -1380,8 +1393,80 @@ end;
 
 procedure TfpgTreeview.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
+var
+  h: TfpgTreeNode;
+  OldSelection: TfpgTreeNode;
 begin
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  OldSelection := Selection;
+  case KeyCode of
+    keyRight:
+      begin
+        Consumed := True;
+        Selection.Collapsed := false;
+        DoExpand(Selection);
+        ResetScrollbar;
+        RePaint;
+      end;
+      
+    keyLeft:
+      begin
+        Consumed := True;
+        Selection.Collapsed := true;
+        ResetScrollbar;
+        RePaint;
+      end;
+      
+    keyUp:
+      begin
+        if Selection = nil then
+          Selection := RootNode.FirstSubNode
+        else
+          if Selection <> RootNode then
+          begin
+            if NodeIsVisible(selection) then
+            begin
+              h := PrevVisualNode(Selection);
+              if (h <> RootNode) and (h <> nil) then
+                Selection := h;
+            end
+            else
+            begin
+              Selection := RootNode.FirstSubNode;
+            end;
+          end;
+          Consumed := True;
+      end;
+      
+    keyDown:
+      begin
+        Consumed := True;
+        if Selection = nil then
+          Selection := RootNode.FirstSubNode
+        else
+        begin
+          if NodeIsVisible(selection) then
+          begin
+            h := NextVisualNode(Selection);
+            if (h <> nil) then
+              Selection := h;
+          end
+          else
+            Selection := RootNode.FirstSubNode;
+        end;
+      end;
+      
+    else
+      Consumed := False;
+  end;
+
+  if Selection <> OldSelection then
+  begin
+    RePaint;
+    DoChange;
+  end;
+
+  if not Consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgTreeview.HandleMouseScroll(x, y: integer;
@@ -1418,40 +1503,39 @@ begin
 end;
 
 function TfpgTreeview.NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
-label
-  nextnode;
-begin
-  {$Note Remove the use of Label and Goto! Quick!!! }
-  result := nil;
-  if aNode.Collapsed then
+  //----------------
+  procedure _FindNextNode;
   begin
-    nextnode:
-    if aNode.Next <> nil then
+    if ANode.Next <> nil then
     begin
-      result := aNode.Next;
-      exit;
+      result := ANode.Next;
     end
     else
     begin
-      while aNode.next = nil do
+      while ANode.Next = nil do
       begin
-        aNode := aNode.Parent;
-        if aNode = nil then
-          exit;
+        ANode := ANode.Parent;
+        if ANode = nil then
+          exit;  //==>
       end;
-      result := aNode.Next;
-      exit;
+      result := ANode.Next;
     end;
+  end;
+
+begin
+  result := nil;
+  if ANode.Collapsed then
+  begin
+    _FindNextNode;
   end
   else
   begin
-    if aNode.Count > 0 then
+    if ANode.Count > 0 then
     begin
-      result := aNode.FirstSubNode;
-      exit;
+      result := ANode.FirstSubNode;
     end
     else
-      goto nextnode;
+      _FindNextNode;
   end;
 end;
 
@@ -1462,12 +1546,12 @@ begin
   n := ANode;
   if ANode.Prev <> nil then
   begin
-    result := ANode.Prev;
-    ANode := ANode.Prev;
+    result  := ANode.Prev;
+    ANode   := ANode.Prev;
     while (not ANode.Collapsed) and (ANode.Count > 0) do
     begin
-      result := ANode.LastSubNode;
-      aNode := ANode.LastSubNode;
+      result  := ANode.LastSubNode;
+      ANode   := ANode.LastSubNode;
     end;
   end
   else
