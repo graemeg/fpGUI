@@ -53,10 +53,10 @@ type
     procedure   Close;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition;
-    property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    ModalResult: integer read FModalResult write FModalResult;
   published
     {$Note Refactor this to a TfpgCustomForm and only surface it here }
+    property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
     property    OnClose: TNotifyEvent read FOnClose write FOnClose;
     property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;

@@ -81,10 +81,10 @@ type
   // component developers.
   TfpgTextListBox = class(TfpgBaseListBox)
   protected
-    FItems: TStrings;
+    FItems: TStringList;
     FInternalItems: TStrings;
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
-    property    Items: TStrings read FItems;
+    property    Items: TStringList read FItems;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
