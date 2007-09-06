@@ -63,7 +63,6 @@ type
   TDesignedForm = class(TfpgForm)
   public
     procedure AfterCreate; override;
-    FormDesigner: TFormDesigner;
   end;
 
 
@@ -275,6 +274,7 @@ var
   wgd: TWidgetDesigner;
   shift: boolean;
 begin
+  writeln('TFormDesigner.MsgMouseDown');
   FDragging := True;
   FWasDrag  := False;
   FDragPosX := msg.Params.mouse.x;
@@ -311,6 +311,7 @@ var
   shift: boolean;
   x, y: integer;
 begin
+writeln('TFormDesigner.MsgMouseUp');
   FDragging := False;
 
   shift := (ssShift in msg.Params.mouse.shiftstate);
@@ -480,8 +481,8 @@ var
   l1: TfpgLabel;
   ed1: TfpgEdit;
 begin
-  Exit;
-
+//  Exit;
+  writeln('InitTest');
   l1  := CreateLabel(FForm, 10, 10, 'Test Label');
   ed1 := CreateEdit(FForm, 10, 50, 150, 0);
 

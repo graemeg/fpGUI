@@ -41,6 +41,7 @@ type
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
   protected
+    FFormDesigner: TObject;
     FVisible: boolean;
     FEnabled: boolean;
     FFocusable: boolean;
@@ -95,6 +96,7 @@ type
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   Invalidate; // double check this works as developers expect????
+    property    FormDesigner: TObject read FFormDesigner write FFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    Visible: boolean read FVisible write SetVisible;
@@ -246,6 +248,12 @@ var
   consumed: boolean;
   wg: TfpgWidget;
 begin
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+    Exit;
+  end;
+
   key := msg.params.keyboard.keycode;
   ss  := msg.params.keyboard.shiftstate;
   consumed := False;
@@ -269,6 +277,12 @@ var
   consumed: boolean;
   wg: TfpgWidget;
 begin
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+    Exit;
+  end;
+
   key := msg.params.keyboard.keycode;
   ss  := msg.params.keyboard.shiftstate;
   consumed := False;
@@ -289,6 +303,12 @@ procedure TfpgWidget.MsgMouseDown(var msg: TfpgMessageRec);
 var
   mb: TMouseButton;
 begin
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+    Exit;
+  end;
+
   if not FEnabled then
     exit;   // Do we want this here?
 
@@ -318,6 +338,12 @@ var
   mb: TMouseButton;
   IsDblClick: boolean;
 begin
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+    Exit;
+  end;
+
   if not FEnabled then
     exit;   // Do we want this here?
     
@@ -359,6 +385,12 @@ end;
 
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
 begin
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+    Exit;
+  end;
+
   HandleMouseMove(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
   if Assigned(OnMouseMove) then
     OnMouseMove(self, msg.Params.mouse.shiftstate,
@@ -382,6 +414,12 @@ end;
 
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
 begin
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+    Exit;
+  end;
+
   HandleMouseEnter;
   if Assigned(FOnMouseEnter) then
     FOnMouseEnter(self);
@@ -389,6 +427,12 @@ end;
 
 procedure TfpgWidget.MsgMouseExit(var msg: TfpgMessageRec);
 begin
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+    Exit;
+  end;
+
   HandleMouseExit;
   if Assigned(FOnMouseExit) then
     FOnMouseExit(Self);
@@ -706,6 +750,10 @@ end;
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
 begin
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+  end;
 end;
 
 procedure TfpgWidget.HandleResize(awidth, aheight: TfpgCoord);
@@ -723,6 +771,10 @@ end;
 procedure TfpgWidget.MsgMove(var msg: TfpgMessageRec);
 begin
   HandleMove(msg.Params.rect.left, msg.Params.rect.top);
+  if FFormDesigner <> nil then
+  begin
+    FFormDesigner.Dispatch(msg);
+  end;
 end;
 
 procedure TfpgWidget.HandleMove(x, y: TfpgCoord);

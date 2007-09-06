@@ -112,6 +112,13 @@ begin
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
     FocusRootWidget := self;
+    
+    if FFormDesigner <> nil then
+    begin
+      FFormDesigner.Dispatch(msg);
+      Exit;
+    end;
+
     if ActiveWidget = nil then
       ActiveWidget := FindFocusWidget(nil, fsdFirst)
     else

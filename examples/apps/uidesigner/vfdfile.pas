@@ -34,39 +34,29 @@ type
     Position: integer;
     Data: string;
   end;
+  
 
   TVFDFile = class
   protected
     FFileData: string;
     FParsedData: string;
-
     FBlocks: TList;
-
   public
     NewFormsDecl: string;
     NewFormsImpl: string;
-
     constructor Create;
     destructor Destroy; override;
-
     function LoadFile(fname: string): boolean;
-
     procedure AddBlock(aposition: integer; ablockid, aformname, ablockdata: string);
     function BlockCount: integer;
     function Block(index: integer): TVFDFileBlock;
-
     procedure FreeBlocks;
-
     function GetBlocks: integer;   // parse file
     function MergeBlocks: string;  // store file
-
     procedure AddNewFormDecl(formname, formheadblock: string);
     procedure AddNewFormImpl(formname, formbody: string);
-
     function FindFormBlock(blockid, formname: string): TVFDFileBlock;
-
     procedure SetFormData(formname, headblock, bodyblock: string);
-
     procedure NewFileSkeleton(unitname: string);
   end;
 
@@ -91,9 +81,13 @@ var
   s: string;
 begin
   s :=
-    '  T' + formname + ' = class(TGfxForm)'#10 + '  public'#10 + '    {@VFD_HEAD_BEGIN: ' + formname + '}'#10 +
-    formheadblock + '    {@VFD_HEAD_END: ' + formname + '}'#10 + #10 + '    procedure AfterCreate; override;'#10
-    + '  end;'#10 + ''#10;
+    '  T' + formname + ' = class(TfpgForm)' + LineEnding +
+    '  public' + LineEnding +
+    '    {@VFD_HEAD_BEGIN: ' + formname + '}' + LineEnding +
+    formheadblock +
+    '    {@VFD_HEAD_END: ' + formname + '}' + LineEnding + LineEnding +
+    '    procedure AfterCreate; override;' + LineEnding
+    + '  end;' + LineEnding + LineEnding;
   NewFormsDecl := NewFormsDecl + s;
 end;
 
@@ -101,8 +95,13 @@ procedure TVFDFile.AddNewFormImpl(formname, formbody: string);
 var
   s: string;
 begin
-  s := #10#10 + 'procedure T' + formname + '.AfterCreate;'#10 + 'begin'#10 + '  {@VFD_BODY_BEGIN: ' + formname + '}'#10 +
-    formbody + '  {@VFD_BODY_END: ' + formname + '}'#10 + 'end;'#10;
+  s := LineEnding + LineEnding +
+    'procedure T' + formname + '.AfterCreate;' + LineEnding +
+    'begin' + LineEnding +
+    '  {@VFD_BODY_BEGIN: ' + formname + '}' + LineEnding +
+    formbody +
+    '  {@VFD_BODY_END: ' + formname + '}' + LineEnding +
+    'end;' + LineEnding;
   NewFormsImpl := NewFormsImpl + s;
 end;
 
@@ -214,7 +213,7 @@ begin
       deletelen   := length(startmarker);
       dropmarker  := False;
 
-      Writeln('marker: ', startmarker);
+//      Writeln('marker: ', startmarker);
 
       // block marker ?
 
@@ -322,7 +321,7 @@ begin
 
     iblock := startmarker;
     if endmarker <> '' then
-      iblock := iblock + #10 + fb.Data + endmarker;
+      iblock := iblock + LineEnding + fb.Data + endmarker;
 
     if fb.BlockID = 'VFD_NEWFORM_DECL' then
       iblock := NewFormsDecl + iblock
@@ -348,13 +347,19 @@ end;
 procedure TVFDFile.NewFileSkeleton(unitname: string);
 begin
   FFileData :=
-    'unit ' + unitname + ';'#10 + #10 + '{$ifdef FPC}'#10 + '{$mode objfpc}{$H+}'#10 +
-    '{$endif}'#10 + ''#10 + 'interface'#10 + ''#10 + 'uses'#10 +
-    '  SysUtils, Classes, gfxbase, wgedit, unitkeys, schar16, gfxstyle,'#10 +
-    '  gfxwidget, gfxform, wglabel, wgbutton,'#10 + '  wglistbox, wgmemo, wgchoicelist, wggrid, sqldb, sqluis,'#10
-    + '  wgdbgrid, gfxdialogs, wgcheckbox;'#10 + ''#10 + 'type'#10 + ''#10 +
-    '{@VFD_NEWFORM_DECL}'#10 + ''#10 + 'implementation'#10 + ''#10 + '{@VFD_NEWFORM_IMPL}'#10
-    + ''#10 + 'end.'#10;
+    'unit ' + unitname + ';'+ LineEnding + LineEnding +
+    '{$mode objfpc}{$H+}' + LineEnding + LineEnding +
+    'interface' + LineEnding + LineEnding +
+    'uses' + LineEnding +
+    '  SysUtils, Classes, gfxbase, fpgfx, gui_edit, ' + LineEnding +
+    '  gfx_widget, gui_form, gui_label, gui_button,' + LineEnding +
+    '  gui_listbox, gui_memo, gui_combobox, gui_grid, ' + LineEnding +
+    '  gui_dialogs, gui_checkbox;' + LineEnding + LineEnding +
+    'type' + LineEnding + LineEnding +
+    '{@VFD_NEWFORM_DECL}' + LineEnding + LineEnding +
+    'implementation' + LineEnding + LineEnding +
+    '{@VFD_NEWFORM_IMPL}' + LineEnding + LineEnding +
+    'end.' + LineEnding;
 
   GetBlocks;
 end;

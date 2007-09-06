@@ -716,8 +716,11 @@ begin
 
   if grid.CurrentEntry.EntryType <> etDir then
     edFileName.Text := grid.CurrentEntry.Name;
-    
-  btnOK.Enabled := grid.CurrentEntry.EntryType = etFile;
+
+  if FOpenMode then
+    btnOK.Enabled := grid.CurrentEntry.EntryType = etFile
+  else
+    btnOK.Enabled := edFileName.Text <> '';
 
   lbFileInfo.Text := s;
 end;
