@@ -54,7 +54,11 @@ type
     FTemp: integer;
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
+    function    GetFontDesc: string;
+    function    GetHeaderFontDesc: string;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
+    procedure   SetFontDesc(const AValue: string);
+    procedure   SetHeaderFontDesc(const AValue: string);
     procedure   SetRowSelect(const AValue: boolean);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
@@ -89,7 +93,9 @@ type
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
     property    Font: TfpgFont read FFont;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HeaderFont: TfpgFont read FHeaderFont;
+    property    HeaderFontDesc: string read GetHeaderFontDesc write SetHeaderFontDesc;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    FocusCol: integer read FFocusCol write SetFocusCol;
     property    FocusRow: integer read FFocusRow write SetFocusRow;
@@ -122,6 +128,30 @@ begin
     FFirstCol := position;
     RePaint;
   end;
+end;
+
+function TfpgBaseGrid.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+function TfpgBaseGrid.GetHeaderFontDesc: string;
+begin
+  Result := FHeaderFont.FontDesc;
+end;
+
+procedure TfpgBaseGrid.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  RePaint;
+end;
+
+procedure TfpgBaseGrid.SetHeaderFontDesc(const AValue: string);
+begin
+  FHeaderFont.Free;
+  FHeaderFont := fpgGetFont(AValue);
+  RePaint;
 end;
 
 procedure TfpgBaseGrid.SetRowSelect(const AValue: boolean);

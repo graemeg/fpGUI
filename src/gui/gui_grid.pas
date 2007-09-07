@@ -20,13 +20,17 @@ uses
   gui_customgrid;
   
 type
+{
   TfpgGrid = class(TfpgCustomGrid)
+  public
+    property    Font;
+    property    HeaderFont;
   published
     property    Columns;
     property    DefaultColWidth;
     property    DefaultRowHeight;
-    property    Font;
-    property    HeaderFont;
+    property    FontDesc;
+    property    HeaderFontDesc;
     property    BackgroundColor;
     property    FocusCol;
     property    FocusRow;
@@ -42,7 +46,7 @@ type
     property    OnRowChange;
     property    OnDoubleClick;
   end;
-
+}
 
   //*****************  Move these to CoreLib  ********************
   TFileEntryType = (etFile, etDir);
@@ -109,7 +113,11 @@ type
     property    FixedFont: TfpgFont read FFixedFont;
     property    FileList: TFileList read FFileList;
     property    DefaultRowHeight;
+    property    Font;
+    property    HeaderFont;
   published
+    property    FontDesc;
+    property    HeaderFontDesc;
     property    RowCount;
     property    ColumnCount;
     property    Columns;
@@ -154,13 +162,14 @@ type
 //    property    Rows[index: Integer]: TStrings read GetRows write SetRows;
   end;
 
+
   TfpgStringGrid = class(TfpgCustomStringGrid)
   published
     property    Columns;
     property    DefaultColWidth;
     property    DefaultRowHeight;
-    property    Font;
-    property    HeaderFont;
+    property    FontDesc;
+    property    HeaderFontDesc;
     property    BackgroundColor;
     property    FocusCol;
     property    FocusRow;

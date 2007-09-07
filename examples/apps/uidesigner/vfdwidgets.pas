@@ -169,33 +169,33 @@ begin
 
   // Label
   wc          := TVFDWidgetClass.Create(TfpgLabel);
-  wc.NameBase := 'lb';
+  wc.NameBase := 'lblName';
   wc.AddProperty('Text', TPropertyString, 'Label text');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used displaying the label text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the label text');
   wc.WidgetIconName := 'vfd.label';
   RegisterVFDWidget(wc);
 
   // Edit
   wc          := TVFDWidgetClass.Create(TfpgEdit);
-  wc.NameBase := 'ed';
+  wc.NameBase := 'edtName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used displaying the text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.edit';
   RegisterVFDWidget(wc);
 
   // Memo
   wc          := TVFDWidgetClass.Create(TfpgMemo);
-  wc.NameBase := 'memo';
+  wc.NameBase := 'memName';
   wc.AddProperty('Lines', TPropertyStringList, '');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used displaying the text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.memo';
   RegisterVFDWidget(wc);
 
   // Button
   wc          := TVFDWidgetClass.Create(TfpgButton);
-  wc.NameBase := 'btn';
+  wc.NameBase := 'btnName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used displaying the text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('ImageName', TPropertyString, '');
 //  wc.AddProperty('ShowImage', TPropertyEnum, '');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
@@ -204,42 +204,42 @@ begin
 
   // CheckBox
   wc          := TVFDWidgetClass.Create(TfpgCheckBox);
-  wc.NameBase := 'cb';
+  wc.NameBase := 'cbName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used displaying the text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.checkbox';
   RegisterVFDWidget(wc);
 
-  // ChoiceList
+  // ComboBox
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
-  wc.NameBase := 'chl';
+  wc.NameBase := 'cbName';
   //wc.AddProperty('Text',TPropertyString16,'');
   wc.AddProperty('Items', TPropertyStringList, '');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used displaying the text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.choicelist';
   RegisterVFDWidget(wc);
 
-  // TextListBox
+  // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
-  wc.NameBase := 'lst';
+  wc.NameBase := 'lstName';
   //wc.AddProperty('Text',TPropertyString16,'');
   wc.AddProperty('Items', TPropertyStringList, '');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used displaying the text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.listbox';
   RegisterVFDWidget(wc);
 
   // StringGrid
   wc := TVFDWidgetClass.Create(TfpgStringGrid);
-  wc.NameBase := 'grid';
+  wc.NameBase := 'grdName';
 //  wc.AddProperty('Columns',TPropertyDBColumns,'');
   wc.AddProperty('FontDesc',TPropertyString,'');
-  wc.AddProperty('HeaderFontName',TPropertyString,'');
+  wc.AddProperty('HeaderFontDesc',TPropertyString,'');
   wc.WidgetIconName := 'vfd.dbgrid';
   RegisterVFDWidget(wc);
 
   // Panel
   wc           := TVFDWidgetClass.Create(TfpgBevel);
-  wc.NameBase  := 'panel';
+  wc.NameBase  := 'pnlName';
   wc.AddProperty('shape', TPropertyEnum, '');
   wc.AddProperty('style', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.panel';
@@ -248,7 +248,7 @@ begin
 
   // Other - do not delete!!! this should be the last...
   wc          := TVFDWidgetClass.Create(TOtherWidget);
-  wc.NameBase := 'wg';
+  wc.NameBase := 'Custom';
   wc.WidgetIconName := 'vfd.other';
   RegisterVFDWidget(wc);
   VFDOtherWidget := wc;

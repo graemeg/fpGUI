@@ -191,6 +191,7 @@ begin
   clist.Anchors := [anLeft, anRight, anTop, anBottom];
 
   clist.Items.Add('-');
+{
   clist.Items.Add('Label');
   clist.Items.Add('Edit');
   clist.Items.Add('Button');
@@ -199,7 +200,7 @@ begin
   clist.Items.Add('Memo');
   clist.Items.Add('ListBox');
   clist.Items.Add('[OTHER]');
-
+}
   clist.OnChange := @(maindsgn.OnPaletteChange);
 end;
 

@@ -431,7 +431,7 @@ begin
   s := ExtractFileName(FEditedFileName);
   if s = '' then
     s := '[new]';
-  frmMain.WindowTitle := 'fpGUI uiDesigner v' + program_version + ' - ' + s;
+  frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + s;
 end;
 
 end.
