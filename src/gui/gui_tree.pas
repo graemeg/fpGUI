@@ -101,7 +101,7 @@ type
   TfpgTreeExpandEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
   
   
-  TfpgTreeview = class(TfpgWidget)
+  TfpgTreeView = class(TfpgWidget)
   private
     FRootNode: TfpgTreeNode;
     FScrollWheelDelta: integer;
@@ -1613,6 +1613,8 @@ begin
   FDefaultColumnWidth := 15;
   FFirstColumn  := nil;
   FFont := fpgGetFont('#Label1');
+  FWidth := 150;
+  FHeight := 100;
 
   FHScrollbar := TfpgScrollbar.Create(self);
   FHScrollbar.Orientation := orHorizontal;

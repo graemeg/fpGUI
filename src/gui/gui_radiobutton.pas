@@ -23,10 +23,10 @@ type
     FText: string;
     FBoxSize: integer;
     FIsPressed: boolean;
-    function    GetFontName: string;
+    function    GetFontDesc: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetChecked(const AValue: boolean);
-    procedure   SetFontName(const AValue: string);
+    procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
   protected
     procedure   HandlePaint; override;
@@ -40,7 +40,7 @@ type
   published
     property    Checked: boolean read FChecked write SetChecked;
     property    Text: string read FText write SetText;
-    property    FontName: string read GetFontName write SetFontName;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -62,7 +62,7 @@ end;
 
 { TfpgRadioButton }
 
-function TfpgRadioButton.GetFontName: string;
+function TfpgRadioButton.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
 end;
@@ -101,7 +101,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgRadioButton.SetFontName(const AValue: string);
+procedure TfpgRadioButton.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);

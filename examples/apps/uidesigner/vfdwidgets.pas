@@ -40,6 +40,7 @@ var
 implementation
 
 uses
+  fpgfx,
   vfddesigner,
   gui_form,
   gui_label,
@@ -51,8 +52,13 @@ uses
   gui_grid,
   gui_checkbox,
   gui_bevel,
-  fpgfx
-  ;
+  gui_tree,
+  gui_radiobutton,
+  gui_listview,
+  gui_trackbar,
+  gui_menu,
+  gui_progressbar,
+  gui_tab;
 
 var
   FVFDFormWidget: TVFDWidgetClass;
@@ -118,8 +124,8 @@ begin
     0, 0);
 
   fpgImages.AddMaskedBMP(
-    'vfd.choicelist', @stdimg_vfd_choicelist,
-    sizeof(stdimg_vfd_choicelist),
+    'vfd.combobox', @stdimg_vfd_combobox,
+    sizeof(stdimg_vfd_combobox),
     0, 0);
 
   fpgImages.AddMaskedBMP(
@@ -133,18 +139,59 @@ begin
     0, 0);
 
   fpgImages.AddMaskedBMP(
-                   'vfd.dbgrid',
-            @stdimg_vfd_dbgrid,
-      sizeof(stdimg_vfd_dbgrid),
-            15,0 );
+    'vfd.dbgrid', @stdimg_vfd_dbgrid,
+    sizeof(stdimg_vfd_dbgrid),
+    15,0 );
 
-  {
   fpgImages.AddMaskedBMP(
-                   'vfd.',
-            @stdimg_vfd_,
-      sizeof(stdimg_vfd_),
-            0,0 );
-}
+    'vfd.progressbar', @stdimg_vfd_progressbar,
+    sizeof(stdimg_vfd_progressbar),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.trackbar', @stdimg_vfd_trackbar,
+    sizeof(stdimg_vfd_trackbar),
+    0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.gauge', @stdimg_vfd_gauge,
+    sizeof(stdimg_vfd_gauge),
+    0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.menubar', @stdimg_vfd_menubar,
+    sizeof(stdimg_vfd_menubar),
+    0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.listview', @stdimg_vfd_listview,
+    sizeof(stdimg_vfd_listview),
+    0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.stringgrid', @stdimg_vfd_stringgrid,
+    sizeof(stdimg_vfd_stringgrid),
+    0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.radiobutton', @stdimg_vfd_radiobutton,
+    sizeof(stdimg_vfd_radiobutton),
+    0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.pagecontrol', @stdimg_vfd_pagecontrol,
+    sizeof(stdimg_vfd_pagecontrol),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.treeview', @stdimg_vfd_treeview,
+    sizeof(stdimg_vfd_treeview),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.newform', @stdimg_vfd_newform,
+    sizeof(stdimg_vfd_newform),
+    0, 0);
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -158,7 +205,6 @@ end;
 procedure RegisterWidgets;
 var
   wc: TVFDWidgetClass;
-  //wp : TVFDWidgetProperty;
 begin
   LoadIcons;
 
@@ -197,7 +243,7 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('ImageName', TPropertyString, '');
-//  wc.AddProperty('ShowImage', TPropertyEnum, '');
+  wc.AddProperty('ShowImage', TPropertyInteger, 'Boolean value');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
   wc.WidgetIconName := 'vfd.button';
   RegisterVFDWidget(wc);
@@ -210,19 +256,25 @@ begin
   wc.WidgetIconName := 'vfd.checkbox';
   RegisterVFDWidget(wc);
 
+  // RadioButton
+  wc          := TVFDWidgetClass.Create(TfpgRadioButton);
+  wc.NameBase := 'rbName';
+  wc.AddProperty('Text', TPropertyString, 'Initial text');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.WidgetIconName := 'vfd.radiobutton';
+  RegisterVFDWidget(wc);
+
   // ComboBox
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
   wc.NameBase := 'cbName';
-  //wc.AddProperty('Text',TPropertyString16,'');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
-  wc.WidgetIconName := 'vfd.choicelist';
+  wc.WidgetIconName := 'vfd.combobox';
   RegisterVFDWidget(wc);
 
   // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
   wc.NameBase := 'lstName';
-  //wc.AddProperty('Text',TPropertyString16,'');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.listbox';
@@ -234,16 +286,78 @@ begin
 //  wc.AddProperty('Columns',TPropertyDBColumns,'');
   wc.AddProperty('FontDesc',TPropertyString,'');
   wc.AddProperty('HeaderFontDesc',TPropertyString,'');
-  wc.WidgetIconName := 'vfd.dbgrid';
+  wc.WidgetIconName := 'vfd.stringgrid';
   RegisterVFDWidget(wc);
 
   // Panel
   wc           := TVFDWidgetClass.Create(TfpgBevel);
   wc.NameBase  := 'pnlName';
-  wc.AddProperty('shape', TPropertyEnum, '');
-  wc.AddProperty('style', TPropertyEnum, '');
+  wc.AddProperty('Shape', TPropertyEnum, '');
+  wc.AddProperty('Style', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.panel';
   wc.Container := True;
+  RegisterVFDWidget(wc);
+  
+  // ProgressBar
+  wc          := TVFDWidgetClass.Create(TfpgProgressBar);
+  wc.NameBase := 'pbName';
+  wc.AddProperty('Min', TPropertyInteger, '');
+  wc.AddProperty('Max', TPropertyInteger, '');
+  wc.AddProperty('Position', TPropertyInteger, '');
+  wc.WidgetIconName := 'vfd.progressbar';
+  RegisterVFDWidget(wc);
+
+  // TrackBar
+  wc          := TVFDWidgetClass.Create(TfpgTrackBar);
+  wc.NameBase := 'tbName';
+  wc.AddProperty('Min', TPropertyInteger, '');
+  wc.AddProperty('Max', TPropertyInteger, '');
+  wc.AddProperty('Position', TPropertyInteger, '');
+  wc.AddProperty('Orientation', TPropertyEnum, '');
+  wc.WidgetIconName := 'vfd.trackbar';
+  RegisterVFDWidget(wc);
+
+(*
+  // ListView
+  // Currently causes a Access Violation when resized!
+
+  wc := TVFDWidgetClass.Create(TfpgListView);
+  wc.NameBase := 'lvName';
+//  wc.AddProperty('Columns',TPropertyDBColumns, '');
+//  wc.AddProperty('Items', TPropertyStringList, '');
+//  wc.AddProperty('FontDesc',TPropertyString,'');
+//  wc.AddProperty('HeaderFontDesc',TPropertyString,'');
+  wc.WidgetIconName := 'vfd.listview';
+  RegisterVFDWidget(wc);
+*)
+
+  // Treeview
+  wc := TVFDWidgetClass.Create(TfpgTreeView);
+  wc.NameBase := 'tvName';
+  wc.AddProperty('FontDesc',TPropertyString, '');
+  wc.AddProperty('ShowImages',TPropertyInteger, 'Boolean value');
+  wc.AddProperty('ShowColumns',TPropertyInteger, 'Boolean value');
+  wc.AddProperty('DefaultColumnWidth',TPropertyInteger,'');
+  wc.WidgetIconName := 'vfd.treeview';
+  RegisterVFDWidget(wc);
+  
+  // PageControl
+  wc          := TVFDWidgetClass.Create(TfpgPageControl);
+  wc.NameBase := 'pcName';
+  wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
+//  wc.AddProperty('BackgroundColor', TPropertyString, '');
+  wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
+  wc.AddProperty('SortPages', TPropertyInteger, 'Boolean value');
+  wc.AddProperty('Style', TPropertyEnum, '');
+  wc.AddProperty('TabPosition', TPropertyEnum, '');
+  wc.WidgetIconName := 'vfd.pagecontrol';
+  RegisterVFDWidget(wc);
+
+  // MenuBar
+  wc          := TVFDWidgetClass.Create(TfpgMenuBar);
+  wc.NameBase := 'mnuMain';
+//  wc.AddProperty('BackgroundColor', TPropertyString, '');
+  wc.WidgetIconName := 'vfd.menubar';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
@@ -254,10 +368,12 @@ begin
   VFDOtherWidget := wc;
 end;
 
-initialization
-  begin
-    FVFDWidgets := TList.Create;
-  end;
 
+initialization
+    FVFDWidgets := TList.Create;
+
+finalization
+    FVFDWidgets.Free;
+    
 end.
 

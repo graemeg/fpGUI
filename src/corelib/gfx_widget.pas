@@ -154,6 +154,8 @@ procedure TfpgWidget.SetActiveWidget(const AValue: TfpgWidget);
 begin
   if FActiveWidget = AValue then
     Exit; //==>
+  if FFormDesigner <> nil then Exit;
+  
   if FActiveWidget <> nil then
     FActiveWidget.HandleKillFocus;
   FActiveWidget := AValue;

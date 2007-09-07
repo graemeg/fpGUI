@@ -96,15 +96,16 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    AppendTabSheet(ATitle: string): TfpgTabSheet;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    PageCount: Integer read GetPageCount;
-    property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
     property    ActivePage: TfpgTabSheet read FActivePage write SetActivePage;
+    property    OnChange: TTabSheetChange read FOnChange write FOnChange;
+  published
+    property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth;
+    property    SortPages: boolean read FSortPages write SetSortPages;
     property    Style: TfpgTabStyle read FStyle write SetStyle;
     property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition;
-    property    SortPages: boolean read FSortPages write SetSortPages;
-    property    OnChange: TTabSheetChange read FOnChange write FOnChange;
   end;
 
 
@@ -636,6 +637,8 @@ begin
   inherited Create(AOwner);
   FFont   := fpgStyle.DefaultFont;
   FPages  := TList.Create;
+  FWidth  := 150;
+  FHeight := 100;
 
   FBackgroundColor  := clWindowBackground;
   FFocusable        := True;

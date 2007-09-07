@@ -316,13 +316,13 @@ procedure TMainForm.AfterCreate;
 begin
   inherited AfterCreate;
   WindowPosition := wpUser;
-  WindowTitle := 'fpGUI Visual Form Designer';
+  WindowTitle := 'fpGUI Designer';
   SetPosition(0, 0, 550, 50);
 
   l1 := CreateLabel(self, 5, 5, 'File name:');
 
   edFormFile       := CreateEdit(self, 5, 5 + 20, 250, 0);
-  edFormFile.Text := './aanewform.pas';
+//  edFormFile.Text := './aanewform.pas';
 
   btnSave := CreateButton(self, 270, 12, 50, 'Save', nil);
   btnLoad := CreateButton(self, 330, 12, 50, 'Load', nil);

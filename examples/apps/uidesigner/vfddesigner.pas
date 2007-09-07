@@ -274,7 +274,7 @@ var
   wgd: TWidgetDesigner;
   shift: boolean;
 begin
-  writeln('TFormDesigner.MsgMouseDown');
+//  writeln('TFormDesigner.MsgMouseDown');
   FDragging := True;
   FWasDrag  := False;
   FDragPosX := msg.Params.mouse.x;
@@ -311,7 +311,7 @@ var
   shift: boolean;
   x, y: integer;
 begin
-writeln('TFormDesigner.MsgMouseUp');
+//  writeln('TFormDesigner.MsgMouseUp');
   FDragging := False;
 
   shift := (ssShift in msg.Params.mouse.shiftstate);
@@ -788,9 +788,9 @@ begin
     wg.SetPosition(x, y, 160, 200);
     TfpgListBox(wg).Items.Add(newname);
   end
-  else if wgcname = 'CHOICELIST' then
+  else if wgcname = 'COMBOBOX' then
   begin
-    newname := GenerateNewName('cbChoice');
+    newname := GenerateNewName('cbComboBox');
     wg      := CreateComboBox(FForm, x, y, 150, nil);
     TfpgComboBox(wg).Items.Add(newname);
   end
@@ -1256,7 +1256,7 @@ begin
       wgclass := TOtherWidget(wd.Widget).wgClassName
     else
       wgclass := wd.Widget.ClassName;
-    Result := Result + '    ' + wd.Widget.Name + ' : ' + wgclass + ';'#10;
+    Result := Result + '    ' + wd.Widget.Name + ' : ' + wgclass + ';' + LineEnding;
   end;
 end;
 
@@ -1354,8 +1354,9 @@ begin
   if maindsgn.SaveComponentNames then
     s := s + ident + 'Name := ' + QuotedStr(wg.Name) + ';' + LineEnding;
 
-  s := s + ident + 'SetPosition(' + IntToStr(wg.Left) + ',' + IntToStr(wg.Top) + ',' +
-    IntToStr(wg.Width) + ',' + IntToStr(wg.Height) + ');' + LineEnding;
+  s := s + ident + 'SetPosition(' + IntToStr(wg.Left) + ', '
+      + IntToStr(wg.Top) + ',' + IntToStr(wg.Width) + ', '
+      + IntToStr(wg.Height) + ');' + LineEnding;
 
   if wg.Anchors <> [anLeft, anTop] then
   begin
@@ -1550,7 +1551,7 @@ begin
   inherited AfterCreate;
   WindowPosition := wpUser;
   WindowTitle := 'New Form';
-  SetPosition(300, 100, 300, 250);
+  SetPosition(300, 150, 300, 250);
 end;
 
 
@@ -1560,11 +1561,8 @@ procedure TOtherWidget.HandlePaint;
 var
   s: string;
 begin
-  inherited HandlePaint;
-  if not HasHandle then
-    Exit;
-
   Canvas.BeginDraw;
+  inherited HandlePaint;
 
   Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(FFont);

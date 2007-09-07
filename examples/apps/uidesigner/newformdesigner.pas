@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Essential classes used by the uiDesigner
+      Essential classes used by the fpGUI Designer
 }
 
 unit newformdesigner;
@@ -54,6 +54,7 @@ type
   TfrmMain = class(TfpgForm)
   public
     {@VFD_HEAD_BEGIN: frmMain}
+    btnNewForm: TfpgButton;
     btnOpen: TfpgButton;
     MainMenu: TfpgMenuBar;
     btnSave: TfpgButton;
@@ -185,6 +186,8 @@ const
 {@VFD_NEWFORM_IMPL}
 
 procedure TfrmMain.AfterCreate;
+const
+  cWidth = 635;
 var
   n: integer;
   x: integer;
@@ -195,16 +198,30 @@ begin
   {@VFD_BODY_BEGIN: frmMain}
   WindowPosition := wpUser;
   WindowTitle   := 'frmMain';
-  SetPosition(0, 0, 506, 87);
+  SetPosition(0, 0, cWidth, 87);
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
-    SetPosition(0, 0, 500, 24);
+  begin
+    SetPosition(0, 0, cWidth, 24);
+    Anchors := [anTop, anLeft, anRight];
+  end;
+
+  btnNewForm := TfpgButton.Create(self);
+  with btnNewForm do
+  begin
+    SetPosition(4, 28, 25, 24);
+    Text      := '';
+    ImageName := 'vfd.newform';
+    ShowImage := True;
+    Focusable := False;
+    OnClick   := @(maindsgn.OnNewForm);
+  end;
 
   btnOpen := TfpgButton.Create(self);
   with btnOpen do
   begin
-    SetPosition(4, 40, 25, 24);
+    SetPosition(btnNewForm.Right+3, 28, 25, 24);
     Text      := '';
     ImageName := 'stdimg.open';
     ShowImage := True;
@@ -215,7 +232,7 @@ begin
   btnSave := TfpgButton.Create(self);
   with btnSave do
   begin
-    SetPosition(32, 40, 25, 24);
+    SetPosition(btnOpen.Right+3, 28, 25, 24);
     Text      := '';
     ImageName := 'stdimg.save';
     ShowImage := True;
@@ -225,13 +242,17 @@ begin
 
   wgpalette := TwgPalette.Create(self);
   with wgpalette do
-    SetPosition(116, 28, 384, 28);
+  begin
+    SetPosition(116, 28, cWidth - 116, 28);
+    Anchors := [anTop, anLeft, anRight];
+  end;
 
   chlPalette := TfpgComboBox.Create(self);
   with chlPalette do
   begin
-    SetPosition(116, 60, 386, 22);
+    SetPosition(116, 60, 200, 22);
     Items.Add('-');
+    FocusItem := 1;
   end;
 
   {@VFD_BODY_END: frmMain}

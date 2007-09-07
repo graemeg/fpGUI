@@ -354,7 +354,8 @@ begin
     '  SysUtils, Classes, gfxbase, fpgfx, gui_edit, ' + LineEnding +
     '  gfx_widget, gui_form, gui_label, gui_button,' + LineEnding +
     '  gui_listbox, gui_memo, gui_combobox, gui_grid, ' + LineEnding +
-    '  gui_dialogs, gui_checkbox;' + LineEnding + LineEnding +
+    '  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, ' + LineEnding +
+    '  gui_progressbar, gui_radiobutton, gui_tab, gui_menu;' + LineEnding + LineEnding +
     'type' + LineEnding + LineEnding +
     '{@VFD_NEWFORM_DECL}' + LineEnding + LineEnding +
     'implementation' + LineEnding + LineEnding +
