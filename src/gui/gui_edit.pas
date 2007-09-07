@@ -544,12 +544,16 @@ end;
 procedure TfpgEdit.HandleMouseEnter;
 begin
   inherited HandleMouseEnter;
+  if (csDesigning in ComponentState) then
+    Exit;
   MouseCursor := mcIBeam;
 end;
 
 procedure TfpgEdit.HandleMouseExit;
 begin
   inherited HandleMouseExit;
+  if (csDesigning in ComponentState) then
+    Exit;
   MouseCursor := mcDefault;
 end;
 

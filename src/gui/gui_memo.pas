@@ -590,6 +590,10 @@ end;
 procedure TfpgMemo.HandleShow;
 begin
   inherited HandleShow;
+  if (csDesigning in ComponentState) then
+    Exit;
+  if (csLoading in ComponentState) then
+    Exit;
   RecalcLongestLine;
   UpdateScrollBars;
   UpdateScrollBarCoords;

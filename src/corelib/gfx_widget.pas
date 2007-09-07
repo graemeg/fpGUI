@@ -190,6 +190,7 @@ end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
+  Include(ComponentState, csLoading);
   FOnScreen   := False;
   FVisible    := True;
   FActiveWidget := nil;
@@ -211,6 +212,13 @@ begin
     FWindowType := wtChild;
 
   inherited;
+
+  // This is for components that are create at runtime, after it's
+  // parent has already been shown.
+  if (Parent <> nil) and (Parent.HasHandle) then
+    HandleShow;
+
+  Exclude(ComponentState, csLoading);
 end;
 
 destructor TfpgWidget.Destroy;

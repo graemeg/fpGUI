@@ -116,6 +116,7 @@ end;
 function TVFDWidgetClass.CreateWidget(AOwner: TComponent): TfpgWidget;
 begin
   Result := WidgetClass.Create(AOwner);
+  Include(Result.ComponentState, csDesigning);
 end;
 
 destructor TVFDWidgetClass.Destroy;

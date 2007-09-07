@@ -59,6 +59,7 @@ type
 
   TMainForm = class(TfpgForm)
   private
+    FbtnRuntime: TfpgButton;
     procedure Trackbar1Changed(Sender: TObject; APosition: integer);
     procedure btnCloseClick(Sender: TObject);
     procedure btnDisplayBMP(Sender: TObject);
@@ -317,6 +318,9 @@ begin
     MouseCursor := mcHourGlass
   else
     MouseCursor := mcDefault;
+
+  if not Assigned(FbtnRuntime) then
+    FbtnRuntime := CreateButton(self, 100, 130, 75, 'At Runtime', nil);
 end;
 
 procedure TMainForm.btn3Click(Sender: TObject);

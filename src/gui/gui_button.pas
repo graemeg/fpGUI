@@ -87,10 +87,8 @@ function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
   AOnClickEvent: TNotifyEvent): TfpgButton;
 begin
   Result         := TfpgButton.Create(AOwner);
-  Result.Left    := x;
-  Result.Top     := y;
   Result.Text    := AText;
-  Result.Width   := w;
+  Result.SetPosition(x, y, w, Result.Height); // font was used to calculate height.
   Result.OnClick := AOnClickEvent;
 end;
 
@@ -374,12 +372,16 @@ end;
 procedure TfpgButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
 begin
   inherited;
+  if (csDesigning in ComponentState) then
+    Exit;
   DoPush;
 end;
 
 procedure TfpgButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited;
+  if (csDesigning in ComponentState) then
+    Exit;
   DoRelease;
 end;
 

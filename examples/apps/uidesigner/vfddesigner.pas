@@ -1552,6 +1552,7 @@ begin
   WindowPosition := wpUser;
   WindowTitle := 'New Form';
   SetPosition(300, 150, 300, 250);
+  Include(ComponentState, csDesigning);
 end;
 
 
