@@ -14,21 +14,21 @@ uses
 
 type
 
-  TfrmValami = class(TGfxForm)
+  TfrmValami = class(TfpgForm)
   public
     {@VFD_HEAD_BEGIN: frmValami}
-    ed1 : TwgEdit;
-    btn1 : TwgButton;
-    chl1 : TwgChoiceList;
-    wg1 : Twg;
-    lst1 : TwgTextListBox;
-    memo1 : TwgMemo;
-    grid1 : TwgDBGrid;
-    panel1 : TwgBevel;
-    lb1 : TwgLabel;
-    ed2 : TwgEdit;
-    panel2 : TwgBevel;
-    lb2 : TwgLabel;
+    ed1 : TfpgEdit;
+    btn1 : TfpgButton;
+    chl1 : TfpgComboBox;
+    wg1 : Tfpg;
+    lst1 : TfpgListBox;
+    memo1 : TfpgMemo;
+    grid1 : TfpgStringGrid;
+    panel1 : TfpgBevel;
+    lb1 : TfpgLabel;
+    ed2 : TfpgEdit;
+    panel2 : TfpgBevel;
+    lb2 : TfpgLabel;
     {@VFD_HEAD_END: frmValami}
 
     procedure AfterCreate; override;
@@ -37,11 +37,11 @@ type
   TfrmVFDSetup = class(TGfxForm)
   public
     {@VFD_HEAD_BEGIN: frmVFDSetup}
-    panel1 : TwgBevel;
-    lb1 : TwgLabel;
-    chl1 : TwgChoiceList;
-    btnOK : TwgButton;
-    btnCancel : TwgButton;
+    panel1 : TfpgBevel;
+    lb1 : TfpgLabel;
+    chl1 : TfpgComboBox;
+    btnOK : TfpgButton;
+    btnCancel : TfpgButton;
     {@VFD_HEAD_END: frmVFDSetup}
 
     procedure AfterCreate; override;
@@ -56,51 +56,51 @@ implementation
 procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
-  SetDimensions(331,481,237,103);
-  WindowTitle8 := 'General settings';
+  SetPosition(331,481,237,103);
+  WindowTitle := 'General settings';
 
-  panel1 := TwgBevel.Create(self);
+  panel1 := TfpgBevel.Create(self);
   with panel1 do
   begin
-    SetDimensions(8,12,220,52);
+    SetPosition(8,12,220,52);
     shape := bsBox;
     style := bsRaised;
   end;
 
-  lb1 := TwgLabel.Create(panel1);
+  lb1 := TfpgLabel.Create(panel1);
   with lb1 do
   begin
-    SetDimensions(8,16,92,16);
-    Text := u8('Grid resolution:');
+    SetPosition(8,16,92,16);
+    Text := 'Grid resolution:';
     FontName := '#Label1';
   end;
 
-  chl1 := TwgChoiceList.Create(panel1);
+  chl1 := TfpgComboBox.Create(panel1);
   with chl1 do
   begin
-    SetDimensions(116,14,56,22);
-    Items.Add(u8('1'));
-    Items.Add(u8('4'));
-    Items.Add(u8('5'));
+    SetPosition(116,14,56,22);
+    Items.Add('1');
+    Items.Add('4');
+    Items.Add('5');
     FontName := '#List';
     FocusItem := 2;
   end;
 
-  btnOK := TwgButton.Create(self);
+  btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
-    SetDimensions(8,72,96,24);
-    Text := u8('OK');
+    SetPosition(8,72,96,24);
+    Text := 'OK';
     FontName := '#Label1';
     ImageName := 'stdimg.ok';
     ModalResult := 1;
   end;
 
-  btnCancel := TwgButton.Create(self);
+  btnCancel := TfpgButton.Create(self);
   with btnCancel do
   begin
-    SetDimensions(132,72,96,24);
-    Text := u8('Cancel');
+    SetPosition(132,72,96,24);
+    Text := 'Cancel';
     FontName := '#Label1';
     ImageName := 'stdimg.cancel';
     ModalResult := -1;
@@ -113,110 +113,110 @@ end;
 procedure TfrmValami.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmValami}
-  SetDimensions(310,122,491,340);
-  WindowTitle8 := 'frmValami';
+  SetPosition(310,122,491,340);
+  WindowTitle := 'frmValami';
 
-  ed1 := TwgEdit.Create(self);
+  ed1 := TfpgEdit.Create(self);
   with ed1 do
   begin
-    SetDimensions(12,48,120,22);
-    Text := u8('');
+    SetPosition(12,48,120,22);
+    Text := '';
     FontName := '#Edit1';
   end;
 
-  btn1 := TwgButton.Create(self);
+  btn1 := TfpgButton.Create(self);
   with btn1 do
   begin
-    SetDimensions(12,76,96,24);
-    Text := u8('Button');
+    SetPosition(12,76,96,24);
+    Text := 'Button';
     FontName := '#Label1';
     ImageName := 'stdimg.ok';
     ModalResult := 0;
   end;
 
-  chl1 := TwgChoiceList.Create(self);
+  chl1 := TfpgComboBox.Create(self);
   with chl1 do
   begin
-    SetDimensions(148,40,120,22);
-    Items.Add(u8('egy'));
-    Items.Add(u8('ketto'));
-    Items.Add(u8('harom'));
+    SetPosition(148,40,120,22);
+    Items.Add('egy');
+    Items.Add('ketto');
+    Items.Add('harom');
     FontName := '#List';
   end;
 
-  wg1 := Twg.Create(self);
+  wg1 := Tfpg.Create(self);
   with wg1 do
   begin
-    SetDimensions(148,84,120,32);
+    SetPosition(148,84,120,32);
   end;
 
-  lst1 := TwgTextListBox.Create(self);
+  lst1 := TfpgListBox.Create(self);
   with lst1 do
   begin
-    SetDimensions(12,116,104,92);
-    Items.Add(u8('as'));
-    Items.Add(u8('asdf'));
-    Items.Add(u8('asd'));
-    Items.Add(u8('f as'));
+    SetPosition(12,116,104,92);
+    Items.Add('as'));
+    Items.Add('asdf');
+    Items.Add('asd');
+    Items.Add('f as');
     FontName := '#List';
   end;
 
-  memo1 := TwgMemo.Create(self);
+  memo1 := TfpgMemo.Create(self);
   with memo1 do
   begin
-    SetDimensions(136,124,120,72);
-    Lines.Add(u8('valami szoveg'));
-    Lines.Add(u8('masodik sor'));
+    SetPosition(136,124,120,72);
+    Lines.Add('valami szoveg');
+    Lines.Add('masodik sor');
     FontName := '#Edit1';
   end;
 
-  grid1 := TwgDBGrid.Create(self);
+  grid1 := TfpgStringGrid.Create(self);
   with grid1 do
   begin
-    SetDimensions(16,216,180,104);
-    AddColumn8('ID','',50,alLeft);
-    AddColumn8('NAME','',70,alLeft);
+    SetPosition(16,216,180,104);
+    AddColumn('ID','',50,alLeft);
+    AddColumn('NAME','',70,alLeft);
     FontName := '#Grid';
     HeaderFontName := '#GridHeader';
   end;
 
-  panel1 := TwgBevel.Create(self);
+  panel1 := TfpgBevel.Create(self);
   with panel1 do
   begin
-    SetDimensions(276,156,192,148);
+    SetPosition(276,156,192,148);
     shape := bsBox;
     style := bsRaised;
   end;
 
-  lb1 := TwgLabel.Create(panel1);
+  lb1 := TfpgLabel.Create(panel1);
   with lb1 do
   begin
-    SetDimensions(16,8,80,16);
-    Text := u8('Label');
+    SetPosition(16,8,80,16);
+    Text := 'Label';
     FontName := '#Label1';
   end;
 
-  ed2 := TwgEdit.Create(panel1);
+  ed2 := TfpgEdit.Create(panel1);
   with ed2 do
   begin
-    SetDimensions(8,32,120,22);
-    Text := u8('');
+    SetPosition(8,32,120,22);
+    Text := '';
     FontName := '#Edit1';
   end;
 
-  panel2 := TwgBevel.Create(panel1);
+  panel2 := TfpgBevel.Create(panel1);
   with panel2 do
   begin
-    SetDimensions(40,64,124,56);
+    SetPosition(40,64,124,56);
     shape := bsFrame;
     style := bsLowered;
   end;
 
-  lb2 := TwgLabel.Create(panel2);
+  lb2 := TfpgLabel.Create(panel2);
   with lb2 do
   begin
-    SetDimensions(32,24,80,16);
-    Text := u8('Label');
+    SetPosition(32,24,80,16);
+    Text := 'Label';
     FontName := '#Label1';
   end;
 

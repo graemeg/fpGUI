@@ -249,6 +249,7 @@ begin
   Edit.SetPosition(0, 0, Width, Height);
   Edit.Anchors  := Anchors;
   Edit.OnChange := @UpdateProperty;
+  Edit.Visible := True;
 end;
 
 procedure TGeneralPropertyEditor.LoadIntValue(wg: TfpgWidget);
@@ -404,6 +405,7 @@ begin
     UpdateWindowPosition;
     Anchors := [anTop, anRight];
     OnClick := @OnEditClick;
+    Visible := True;
   end;
 end;
 
@@ -477,6 +479,7 @@ begin
   chl.SetPosition(0, 0, Width, Height);
   chl.Anchors  := Anchors;
   chl.OnChange := @UpdateProperty;
+  chl.Visible := True;
 end;
 
 procedure TChoicePropertyEditor.LoadValue(wg: TfpgWidget);

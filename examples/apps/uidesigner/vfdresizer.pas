@@ -129,6 +129,7 @@ begin
     7: MouseCursor := mcSizeNESW;
     8: MouseCursor := mcSizeEW;
   end;
+  Visible := True;
 end;
 
 procedure TwgResizer.Show;

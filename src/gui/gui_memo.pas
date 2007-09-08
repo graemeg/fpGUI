@@ -1166,7 +1166,8 @@ end;
 procedure TfpgMemo.HandleResize(dwidth, dheight: integer);
 begin
   inherited HandleResize(dwidth, dheight);
-
+  if (csLoading in ComponentState) then
+    Exit;
   UpdateScrollBarCoords;
   UpdateScrollBars;
 end;

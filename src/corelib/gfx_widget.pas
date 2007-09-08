@@ -76,6 +76,7 @@ type
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
     procedure   HandleAlignments(dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
+    procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
     procedure   MoveAndResize(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   RePaint;
@@ -216,7 +217,8 @@ begin
   // This is for components that are create at runtime, after it's
   // parent has already been shown.
   if (Parent <> nil) and (Parent.HasHandle) then
-    HandleShow;
+    InternalHandleShow;
+//    HandleShow;
 
   Exclude(ComponentState, csLoading);
 end;
@@ -473,6 +475,14 @@ begin
         TfpgWidget(c).HandleShow;
     end;
   end;
+end;
+
+procedure TfpgWidget.InternalHandleShow;
+begin
+  FOnScreen := True;
+  FVisible := False;
+  AllocateWindowHandle;
+  DoSetWindowVisible(False);
 end;
 
 procedure TfpgWidget.HandleHide;
@@ -803,6 +813,8 @@ var
   dw: integer;
   dh: integer;
 begin
+  if (csLoading in ComponentState) then
+    Exit;
   FAlignRect.Top    := 0;
   FAlignRect.Left   := 0;
   FAlignRect.Width  := Width;

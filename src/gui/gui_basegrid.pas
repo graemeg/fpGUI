@@ -586,6 +586,8 @@ end;
 procedure TfpgBaseGrid.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
+  if (csLoading in ComponentState) then
+    Exit;
   UpdateScrollBars;
 end;
 

@@ -973,6 +973,8 @@ begin
   writeln(Classname, '.HandleResize');
   {$ENDIF}
   inherited HandleResize(awidth, aheight);
+  if (csLoading in ComponentState) then
+    exit;
   ResetScrollbar;
   RePaint;
 end;
