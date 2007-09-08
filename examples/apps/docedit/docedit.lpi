@@ -35,7 +35,7 @@
         <PackageName Value="FCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="docedit.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -46,6 +46,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_main"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="frm_options.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_options"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   fpgfx,
-  frm_main;
+  frm_main, frm_options;
 
 
 procedure MainProc;

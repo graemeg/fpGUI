@@ -23,45 +23,46 @@ uses
 type
   TMainForm = class(TfpgForm)
   private
-    btnQuit: TfpgButton;
     FDescriptionNode: TDomNode;
-    lblXMLFile: TfpgLabel;
-    edXMLFile: TfpgEdit;
-    btnOpen: TfpgButton;
-    menubar: TfpgMenuBar;
-    miFile: TfpgPopupMenu;
-    miInsert: TfpgPopupMenu;
-    miExtra: TfpgPopupMenu;
-    miHelp: TfpgPopupMenu;
-    
     FDoc: TXMLDocument;
     FModified: Boolean;
     CurrentModule: TDomElement;
     FModuleTree: TObjectList;
     FElementTree: TObjectList;
-    
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenClicked(Sender: TObject);
-    procedure   InitializeComponents;
-    procedure   SetupMenuBar;
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
     procedure   miFileSaveAsClicked(Sender: TObject);
     procedure   miHelpAboutClicked(Sender: TObject);
+    procedure   miExtraOptionsClicked(Sender: TObject);
     procedure   ProcessXMLFile(pFilename: string);
     procedure   Refresh;
     procedure   GetElementList(List: TStrings);
   public
+    {@VFD_HEAD_BEGIN: MainForm}
+    menubar: TfpgMenuBar;
+    miFile: TfpgPopupMenu;
+    miInsert: TfpgPopupMenu;
+    miExtra: TfpgPopupMenu;
+    miHelp: TfpgPopupMenu;
+    btnQuit: TfpgButton;
+    lblXMLFile: TfpgLabel;
+    edXMLFile: TfpgEdit;
+    btnOpen: TfpgButton;
+    {@VFD_HEAD_END: MainForm}
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   AfterCreate; override;
     property    DescriptionNode: TDomNode read FDescriptionNode write FDescriptionNode;
   end;
   
+{@VFD_NEWFORM_DECL}
 
 implementation
 
 uses
-  gui_dialogs;
+  gui_dialogs, frm_options;
   
   
 const
@@ -81,6 +82,8 @@ type
   TModuleTreeItem   = class(TNodeTreeItem);
   TTopicTreeItem    = class(TNodeTreeItem);
   TPackageTreeItem  = class(TNodeTreeItem);
+  
+{@VFD_NEWFORM_IMPL}
 
 { TNodeTreeItem }
 
@@ -106,70 +109,6 @@ end;
 procedure TMainForm.btnOpenClicked(Sender: TObject);
 begin
   // open xml file
-end;
-
-procedure TMainForm.InitializeComponents;
-begin
-  SetupMenuBar;
-  
-  btnQuit := CreateButton(self, Width-88, Height-31, 80, 'Quit', @btnQuitClicked);
-  with btnQuit do
-  begin
-    ImageName := 'stdimg.Quit';
-    ShowImage := True;
-    Anchors   := [anRight, anBottom];
-  end;
-  
-  lblXMLFile := CreateLabel(self, 8, 38, 'XML File:');
-  edXMLFile  := CreateEdit(self, lblXMLFile.Right+8, lblXMLFile.Top+36, 485, 23);
-  edXMLFile.Text := '';
-  
-  btnOpen := CreateButton(self, edXMLFile.Right+10, edXMLFile.Top, 80, 'Open', @btnOpenClicked);
-  with btnOpen do
-  begin
-    ImageName := 'stdimg.Open';
-    ShowImage := True;
-  end;
-end;
-
-procedure TMainForm.SetupMenuBar;
-begin
-  // create top level menus.
-  miFile := TfpgPopupMenu.Create(self);
-  miFile.AddMenuItem('&New...', 'Ctrl-N', nil);
-  miFile.AddMenuItem('&Open..', 'Ctrl-O', @miFileOpenClicked);
-  miFile.AddMenuItem('&Save', 'Ctrl-S', nil);
-  miFile.AddMenuItem('S&ave As..', 'Ctrl+Shift+S', @miFileSaveAsClicked);
-  miFile.AddMenuItem('-', '', nil);
-  miFile.AddMenuItem('&Close', 'Ctrl-W', nil);
-  miFile.AddMenuItem('&Recent', '', nil);
-  miFile.AddMenuItem('-', '', nil);
-  miFile.AddMenuItem('&Quit', 'Ctrl-Q', @miFileQuitClicked);
-
-  miInsert := TfpgPopupMenu.Create(self);
-  miInsert.AddMenuItem('&Package', '', nil);
-  miInsert.AddMenuItem('&Module', '', nil);
-  miInsert.AddMenuItem('&Topic', '', nil);
-  miInsert.AddMenuItem('&Element', '', nil);
-  miInsert.AddMenuItem('&Link', '', nil);
-  miInsert.AddMenuItem('T&able', '', nil);
-  miInsert.AddMenuItem('&Short Desc Link', '', nil);
-
-  miExtra := TfpgPopupMenu.Create(self);
-  miExtra.AddMenuItem('&Options...', '', nil);
-  miExtra.AddMenuItem('&Build...', '', nil);
-
-  miHelp := TfpgPopupMenu.Create(self);
-  miHelp.AddMenuItem('About...', '', @miHelpAboutClicked);
-
-  // create main menu bar
-  menubar := TfpgMenuBar.Create(self);
-  menubar.SetPosition(0, 0, Width, menubar.Height);
-  menubar.Anchors := [anLeft, anTop, anRight];
-  menubar.AddMenuItem('&File', nil).SubMenu     := miFile;
-  menubar.AddMenuItem('&Insert', nil).SubMenu   := miInsert;
-  menubar.AddMenuItem('&Extra', nil).SubMenu    := miExtra;
-  menubar.AddMenuItem('&Help', nil).SubMenu     := miHelp;
 end;
 
 procedure TMainForm.miFileQuitClicked(Sender: TObject);
@@ -214,6 +153,18 @@ begin
       + #10 + 'Written by Graeme Geldenhuys - 2007'
       + #10 + 'Using the fpGUI toolkit'
       ,'About');
+end;
+
+procedure TMainForm.miExtraOptionsClicked(Sender: TObject);
+var
+  frm: TfrmOptions;
+begin
+  frm := TfrmOptions.Create(nil);
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainForm.ProcessXMLFile(pFilename: string);
@@ -342,12 +293,7 @@ begin
   inherited Create(AOwner);
   WindowTitle := cAppName;
   Sizeable := False;
-  // Golden ratio 1.618
-  Width   := 650;
-  Height  := 402;
 
-  InitializeComponents;
-  
   FModuleTree := TObjectList.Create;
   FElementTree := TObjectList.Create;
 end;
@@ -357,6 +303,114 @@ begin
   FModuleTree.Free;
   FElementTree.Free;
   inherited Destroy;
+end;
+
+procedure TMainForm.AfterCreate;
+begin
+  {@VFD_BODY_BEGIN: MainForm}
+  SetPosition(456, 254, 650, 402);
+  WindowTitle := 'frmMain';
+  WindowPosition := wpScreenCenter;
+
+  menubar := TfpgMenuBar.Create(self);
+  with menubar do
+  begin
+    SetPosition(0, 0, 650, 23);
+    Anchors := [anLeft,anRight,anTop];
+  end;
+
+  miFile := TfpgPopupMenu.Create(self);
+  with miFile do
+  begin
+    SetPosition(464, 169, 160, 24);
+    AddMenuItem('&New...', 'Ctrl-N', nil);
+    AddMenuItem('&Open..', 'Ctrl-O', @miFileOpenClicked);
+    AddMenuItem('&Save', 'Ctrl-S', nil);
+    AddMenuItem('S&ave As..', 'Ctrl+Shift+S', @miFileSaveAsClicked);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('&Close', 'Ctrl-W', nil);
+    AddMenuItem('&Recent', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('&Quit', 'Ctrl-Q', @miFileQuitClicked);
+  end;
+
+  miInsert := TfpgPopupMenu.Create(self);
+  with miInsert do
+  begin
+    SetPosition(464, 190, 160, 24);
+    AddMenuItem('&Package', '', nil);
+    AddMenuItem('&Module', '', nil);
+    AddMenuItem('&Topic', '', nil);
+    AddMenuItem('&Element', '', nil);
+    AddMenuItem('&Link', '', nil);
+    AddMenuItem('T&able', '', nil);
+    AddMenuItem('&Short Desc Link', '', nil);
+  end;
+
+  miExtra := TfpgPopupMenu.Create(self);
+  with miExtra do
+  begin
+    SetPosition(464, 211, 160, 24);
+    AddMenuItem('&Options...', '', @miExtraOptionsClicked);
+    AddMenuItem('&Build...', '', nil);
+  end;
+
+  miHelp := TfpgPopupMenu.Create(self);
+  with miHelp do
+  begin
+    SetPosition(464, 232, 160, 24);
+    AddMenuItem('About...', '', @miHelpAboutClicked);
+  end;
+
+  btnQuit := TfpgButton.Create(self);
+  with btnQuit do
+  begin
+    SetPosition(566, 370, 75, 23);
+    Anchors := [anRight,anBottom];
+    Text := 'Quit';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.Quit';
+    ModalResult := 0;
+    ShowImage := True;
+    OnClick   := @btnQuitClicked;
+  end;
+
+  lblXMLFile := TfpgLabel.Create(self);
+  with lblXMLFile do
+  begin
+    SetPosition(4, 48, 58, 19);
+    Text := 'XML File:';
+    FontDesc := '#Label1';
+  end;
+
+  edXMLFile := TfpgEdit.Create(self);
+  with edXMLFile do
+  begin
+    SetPosition(62, 44, 485, 23);
+    Anchors := [anLeft,anRight,anTop];
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+
+  btnOpen := TfpgButton.Create(self);
+  with btnOpen do
+  begin
+    SetPosition(554, 44, 75, 23);
+    Anchors := [anRight,anTop];
+    Text := 'Open';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.Open';
+    ModalResult := 0;
+    ShowImage := True;
+    OnClick   := @btnOpenClicked;
+  end;
+
+  {@VFD_BODY_END: MainForm}
+
+  menubar.AddMenuItem('&File', nil).SubMenu     := miFile;
+  menubar.AddMenuItem('&Insert', nil).SubMenu   := miInsert;
+  menubar.AddMenuItem('&Extra', nil).SubMenu    := miExtra;
+  menubar.AddMenuItem('&Help', nil).SubMenu     := miHelp;
 end;
 
 end.
