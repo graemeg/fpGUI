@@ -40,14 +40,12 @@ type
     FProp: TVFDWidgetProperty;
   public
     OnUpdate: TNotifyEvent;
-    procedure UpdateProperty(Sender: TObject);
-    property Prop: TVFDWidgetProperty read FProp;
+    procedure   UpdateProperty(Sender: TObject);
+    property    Prop: TVFDWidgetProperty read FProp;
     constructor Create(AOwner: TComponent; aprop: TVFDWidgetProperty); reintroduce;
-  public
-    // virtuals
-    procedure CreateLayout; virtual;
-    procedure LoadValue(wg: TfpgWidget); virtual;
-    procedure StoreValue(wg: TfpgWidget); virtual;
+    procedure   CreateLayout; virtual;
+    procedure   LoadValue(wg: TfpgWidget); virtual;
+    procedure   StoreValue(wg: TfpgWidget); virtual;
   end;
 
 
@@ -56,15 +54,13 @@ type
     Name: string;
     Description: string;
   public
-    // Virtuals
     constructor Create(aName: string); virtual;
-    function ParseSourceLine(wg: TfpgWidget; const line: string): boolean; virtual;
-    function GetPropertySource(wg: TfpgWidget; const ident: string): string; virtual;
-    // Property editing
-    function GetValueText(wg: TfpgWidget): string; virtual;
-    procedure DrawValue(wg: TfpgWidget; Canvas: TfpgCanvas; rect: TfpgRect; flags: integer); virtual;
-    function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; virtual;
-    procedure OnExternalEdit(wg: TfpgWidget); virtual;
+    function    ParseSourceLine(wg: TfpgWidget; const line: string): boolean; virtual;
+    function    GetPropertySource(wg: TfpgWidget; const ident: string): string; virtual;
+    function    GetValueText(wg: TfpgWidget): string; virtual;
+    procedure   DrawValue(wg: TfpgWidget; Canvas: TfpgCanvas; rect: TfpgRect; flags: integer); virtual;
+    function    CreateEditor(AOwner: TComponent): TVFDPropertyEditor; virtual;
+    procedure   OnExternalEdit(wg: TfpgWidget); virtual;
   end;
 
 
@@ -81,11 +77,11 @@ type
     NameBase: string;
     Container: boolean;
     constructor Create(aClass: TWidgetClass);
-    destructor Destroy; override;
-    function AddProperty(apropname: string; apropclass: TVFDPropertyClass; desc: string): TVFDWidgetProperty;
-    function PropertyCount: integer;
-    function GetProperty(ind: integer): TVFDWidgetProperty;
-    function CreateWidget(AOwner: TComponent): TfpgWidget;
+    destructor  Destroy; override;
+    function    AddProperty(apropname: string; apropclass: TVFDPropertyClass; desc: string): TVFDWidgetProperty;
+    function    PropertyCount: integer;
+    function    GetProperty(ind: integer): TVFDWidgetProperty;
+    function    CreateWidget(AOwner: TComponent): TfpgWidget;
   end;
 
 

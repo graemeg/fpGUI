@@ -441,13 +441,13 @@ end;
 
 procedure TfpgBaseListBox.HandleShow;
 begin
+  inherited HandleShow;
 //  if (csDesigning in ComponentState) then
 //    Exit;
   if (csLoading in ComponentState) then
     Exit;
   UpdateScrollBarCoords;
   UpdateScrollBar;
-  inherited HandleShow;
 end;
 
 procedure TfpgBaseListBox.HandlePaint;
@@ -558,6 +558,7 @@ begin
   
   FScrollBar          := TfpgScrollBar.Create(self);
   FScrollBar.OnScroll := @ScrollBarMove;
+  FScrollBar.Visible  := False;
 
   FFocusable      := True;
   FFocusItem      := 1;

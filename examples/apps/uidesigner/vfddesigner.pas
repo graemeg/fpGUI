@@ -68,7 +68,7 @@ type
 
   TWidgetDesigner = class(TObject)
   private
-    procedure SetSelected(const AValue: boolean);
+    procedure   SetSelected(const AValue: boolean);
   public
     FFormDesigner: TFormDesigner;
     FWidget: TfpgWidget;
@@ -96,49 +96,48 @@ type
     FWasDrag: boolean;
   protected
     // messages of the designed widgets
-    procedure MsgMouseDown(var msg: TfpgMessageRec); message FPGM_MOUSEDOWN;
-    procedure MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
-    procedure MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
-    procedure MsgKeyPress(var msg: TfpgMessageRec); message FPGM_KEYPRESS;
-    procedure MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
-    procedure MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
-    procedure MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
+    procedure   MsgMouseDown(var msg: TfpgMessageRec); message FPGM_MOUSEDOWN;
+    procedure   MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
+    procedure   MsgMouseMove(var msg: TfpgMessageRec); message FPGM_MOUSEMOVE;
+    procedure   MsgKeyPress(var msg: TfpgMessageRec); message FPGM_KEYPRESS;
+    procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
+    procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
+    procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
   public
     OneClickMove: boolean; // the widgets can be selected and dragged within one click
     constructor Create;
-    destructor Destroy; override;
-    procedure ClearForm;
-    procedure DefaultHandler(var msg); override;
-    procedure Show;
-    procedure InitTest;
-    function AddWidget(wg: TfpgWidget; wgc: TVFDWidgetClass): TWidgetDesigner;
-    function WidgetDesigner(wg: TfpgWidget): TWidgetDesigner;
-    function FindWidgetByName(const wgname: string): TfpgWidget;
-    procedure DeSelectAll;
-    procedure SelectAll;
-    procedure SelectNextWidget(fw: boolean);
-    procedure MoveResizeWidgets(dx, dy, dw, dh: integer);
-    procedure DeleteWidgets;
-    procedure EditWidgetOrder;
-    procedure DesignerKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
-    procedure PutControlByName(x, y: integer; cname: string);
-    procedure InsertWidget(pwg: TfpgWidget; x, y: integer; wgc: TVFDWidgetClass);
-    procedure OnPaletteChange(Sender: TObject);
-    procedure UpdatePropWin;
-    procedure OnPropTextChange(Sender: TObject);
-    procedure OnPropNameChange(Sender: TObject);
-    procedure OnPropPosEdit(Sender: TObject);
-    procedure OnOtherChange(Sender: TObject);
-    procedure OnAnchorChange(Sender: TObject);
-    procedure OnEditWidget(Sender: TObject);
-    function GenerateNewName(namebase: string): string;
-    procedure RunWidgetEditor(wgd: TWidgetDesigner; wg: TfpgWidget);
-  public
-    function GetFormSourceDecl: string;
-    function GetFormSourceImpl: string;
-    function GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
-    property Form: TDesignedForm read FForm;
-    property FormOther: string read FFormOther write FFormOther;
+    destructor  Destroy; override;
+    procedure   ClearForm;
+    procedure   DefaultHandler(var msg); override;
+    procedure   Show;
+    procedure   InitTest;
+    function    AddWidget(wg: TfpgWidget; wgc: TVFDWidgetClass): TWidgetDesigner;
+    function    WidgetDesigner(wg: TfpgWidget): TWidgetDesigner;
+    function    FindWidgetByName(const wgname: string): TfpgWidget;
+    procedure   DeSelectAll;
+    procedure   SelectAll;
+    procedure   SelectNextWidget(fw: boolean);
+    procedure   MoveResizeWidgets(dx, dy, dw, dh: integer);
+    procedure   DeleteWidgets;
+    procedure   EditWidgetOrder;
+    procedure   DesignerKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+//    procedure PutControlByName(x, y: integer; cname: string);
+    procedure   InsertWidget(pwg: TfpgWidget; x, y: integer; wgc: TVFDWidgetClass);
+    procedure   OnPaletteChange(Sender: TObject);
+    procedure   UpdatePropWin;
+    procedure   OnPropTextChange(Sender: TObject);
+    procedure   OnPropNameChange(Sender: TObject);
+    procedure   OnPropPosEdit(Sender: TObject);
+    procedure   OnOtherChange(Sender: TObject);
+    procedure   OnAnchorChange(Sender: TObject);
+    procedure   OnEditWidget(Sender: TObject);
+    function    GenerateNewName(namebase: string): string;
+    procedure   RunWidgetEditor(wgd: TWidgetDesigner; wg: TfpgWidget);
+    function    GetFormSourceDecl: string;
+    function    GetFormSourceImpl: string;
+    function    GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
+    property    Form: TDesignedForm read FForm;
+    property    FormOther: string read FFormOther write FFormOther;
   end;
 
 
@@ -174,7 +173,7 @@ begin
 
   UpdateResizerPositions;
 
-  if FSelected and (Widget.Parent.WinHandle > 0) then
+  if FSelected and Widget.Parent.HasHandle then
     for n := 1 to 8 do
       resizer[n].Show;
 end;
@@ -494,6 +493,7 @@ function TFormDesigner.AddWidget(wg: TfpgWidget; wgc: TVFDWidgetClass): TWidgetD
 var
   cd: TWidgetDesigner;
 begin
+//  writeln('TFormDesigner.AddWidget');
   cd     := TWidgetDesigner.Create(self, wg, wgc);
   FWidgets.Add(cd);
   //cd.Selected := true;
@@ -711,8 +711,13 @@ begin
 
     keyDelete: DeleteWidgets;
 
-    keyTab: SelectNextWidget(True);
-//    KEY_STAB: SelectNextWidget(False);
+    keyTab:
+        begin
+          if ssShift in shiftstate then
+            SelectNextWidget(False) // tab backwards
+          else
+            SelectNextWidget(True); // tab forward
+        end;
 
     keyF1: ShowMessage('ENTER, F11: switch to Properties' + LineEnding +
         'TAB, SHIFT+TAB: select next widget' + LineEnding +
@@ -739,6 +744,7 @@ begin
       MoveResizeWidgets(dx, dy, 0, 0);
 end;
 
+(*
 procedure TFormDesigner.PutControlByName(x, y: integer; cname: string);
 var
   wg: TfpgWidget;
@@ -821,6 +827,7 @@ begin
     UpdatePropWin;
   end;
 end;
+*)
 
 procedure TFormDesigner.OnPaletteChange(Sender: TObject);
 begin
@@ -1491,6 +1498,7 @@ var
   wg: TfpgWidget;
   wgd: TWidgetDesigner;
 begin
+//  writeln('TFormDesigner.InsertWidget');
   if wgc = nil then
     Exit;
 
@@ -1515,8 +1523,9 @@ begin
   wg := wgc.CreateWidget(pwg);
   if wg <> nil then
   begin
-    wg.Left := x;
-    wg.Top  := y;
+    wg.FormDesigner := self;
+//    wg.Left := x;
+//    wg.Top  := y;
     if newname = '' then
       newname := GenerateNewName(wgc.NameBase);
     wg.Name := newname;
@@ -1524,6 +1533,7 @@ begin
       TOtherWidget(wg).wgClassName := newclassname;
     wgd          := AddWidget(wg, wgc);
     wg.Visible   := True;
+    wg.SetPosition(x, y, wg.Width, wg.Height);
     DeSelectAll;
     wgd.Selected := True;
     UpdatePropWin;

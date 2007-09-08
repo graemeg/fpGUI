@@ -371,6 +371,7 @@ end;
 
 procedure TfpgButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
 begin
+//  writeln('TfpgButton - mouse down');
   inherited;
   if (csDesigning in ComponentState) then
     Exit;
@@ -379,6 +380,7 @@ end;
 
 procedure TfpgButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
+//  writeln('mouse up');
   inherited;
   if (csDesigning in ComponentState) then
     Exit;

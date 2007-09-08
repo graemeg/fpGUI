@@ -253,6 +253,8 @@ begin
   wc.NameBase := 'cbName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.checkbox';
   RegisterVFDWidget(wc);
 
@@ -261,6 +263,9 @@ begin
   wc.NameBase := 'rbName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('GroupIndex', TPropertyInteger, '');
+  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.radiobutton';
   RegisterVFDWidget(wc);
 
@@ -337,7 +342,10 @@ begin
   wc.AddProperty('FontDesc',TPropertyString, '');
   wc.AddProperty('ShowImages',TPropertyInteger, 'Boolean value');
   wc.AddProperty('ShowColumns',TPropertyInteger, 'Boolean value');
-  wc.AddProperty('DefaultColumnWidth',TPropertyInteger,'');
+  wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
+  wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
+//  wc.AddProperty('TreeLineColor', TPropertyString, '');
+  wc.AddProperty('ScrollWheelDelta', TPropertyInteger, 'Scroll amount with mouse wheel');
   wc.WidgetIconName := 'vfd.treeview';
   RegisterVFDWidget(wc);
   

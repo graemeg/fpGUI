@@ -223,13 +223,10 @@ begin
       CloseFile(ff);
     end;
     writeln('Form saved.');
-
-    frmMain.WindowTitle := fname + ' - VFD v' + program_version;
-
+    frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + fname;
   except
     Writeln('Form save I/O failure.');
   end;
-
 end;
 
 procedure TMainDesigner.OnAnchorChange(Sender: TObject);
@@ -291,7 +288,7 @@ procedure TMainDesigner.CreateWindows;
  //  fd : TFormDesigner;
 begin
   frmMain := TfrmMain.Create(nil);
-  frmMain.WindowTitle := 'fpGUI Form Designer - v' + program_version;
+  frmMain.WindowTitle := 'fpGUI Designer v' + program_version;
   frmMain.Show;
 
   frmProperties := TfrmProperties.Create(nil);

@@ -120,9 +120,9 @@ begin
   Height    := 5;
   direction := adirection;
   case direction of
-    1: MouseCursor := mcSizeNWSE;
+    1: MouseCursor := mcSizeSENW;
     2: MouseCursor := mcSizeNS;
-    3: MouseCursor := mcSizeNESW;
+    3: MouseCursor := mcSizeSWNE;
     4: MouseCursor := mcSizeEW;
     5: MouseCursor := mcSizeNWSE;
     6: MouseCursor := mcSizeNS;

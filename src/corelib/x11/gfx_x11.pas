@@ -1169,9 +1169,11 @@ begin
     mcSizeEW:     shape := XC_sb_h_double_arrow;
     mcSizeNS:     shape := XC_sb_v_double_arrow;
     mcIBeam:      shape := XC_xterm;
-    mcSizeNWSE:   shape := XC_sizing;
-    mcSizeNESW:   shape := XC_sizing; // ????
-    mcMove:       shape := XC_center_ptr; // ????
+    mcSizeNWSE:   shape := XC_bottom_right_corner;
+    mcSizeNESW:   shape := XC_bottom_left_corner;
+    mcSizeSWNE:   shape := XC_top_right_corner;
+    mcSizeSENW:   shape := XC_top_left_corner;
+    mcMove:       shape := XC_fleur;
     mcCross:      shape := XC_crosshair;
     mcHourGlass:  shape := XC_watch;
   else

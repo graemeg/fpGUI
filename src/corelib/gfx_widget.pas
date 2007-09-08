@@ -315,6 +315,7 @@ var
 begin
   if FFormDesigner <> nil then
   begin
+//    writeln('dispatching message to designer...');
     FFormDesigner.Dispatch(msg);
     Exit;
   end;

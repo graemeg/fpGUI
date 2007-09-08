@@ -1107,6 +1107,8 @@ end;
 
 procedure TfpgTreeview.HandleShow;
 begin
+  if (csLoading in ComponentState) then
+    Exit;
   ResetScrollbar;
   inherited HandleShow;
 end;

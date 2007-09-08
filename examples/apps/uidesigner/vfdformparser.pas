@@ -303,7 +303,8 @@ begin
       end;
 
       wg.Name := wgname;
-
+      wg.FormDesigner := ffd;
+      
       NextLine;
       s     := UpperCase(line);
       ident := GetIdentifier(s);

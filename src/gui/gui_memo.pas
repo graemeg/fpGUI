@@ -195,11 +195,13 @@ begin
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
   FVScrollBar.OnScroll := @VScrollBarMove;
+  FVScrollBar.Visible  := False;
 
   FHScrollBar          := TfpgScrollBar.Create(self);
   FHScrollBar.Orientation := orHorizontal;
   FHScrollBar.OnScroll := @HScrollBarMove;
   FHScrollBar.ScrollStep := 5;
+  FHScrollBar.Visible  := False;
 end;
 
 destructor TfpgMemo.Destroy;
@@ -590,8 +592,6 @@ end;
 procedure TfpgMemo.HandleShow;
 begin
   inherited HandleShow;
-  if (csDesigning in ComponentState) then
-    Exit;
   if (csLoading in ComponentState) then
     Exit;
   RecalcLongestLine;

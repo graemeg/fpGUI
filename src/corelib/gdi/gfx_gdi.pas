@@ -163,6 +163,8 @@ type
     hcr_edit: HCURSOR;
     hcr_dir_nwse: HCURSOR;
     hcr_dir_nesw: HCURSOR;
+//    hcr_dir_senw: HCURSOR;
+//    hcr_dir_swne: HCURSOR;
     hcr_move: HCURSOR;
     hcr_crosshair: HCURSOR;
     hcr_wait: HCURSOR;
@@ -737,6 +739,8 @@ begin
   hcr_edit      := LoadCursor(0, IDC_IBEAM);
   hcr_dir_nwse  := LoadCursor(0, IDC_SIZENWSE);
   hcr_dir_nesw  := LoadCursor(0, IDC_SIZENESW);
+//  hcr_dir_senw  := LoadCursor(0, IDC_SIZENWSE);
+//  hcr_dir_swne  := LoadCursor(0, IDC_SIZENESW);
   hcr_move      := LoadCursor(0, IDC_SIZEALL);
   hcr_crosshair := LoadCursor(0, IDC_CROSS);
   hcr_wait      := LoadCursor(0, IDC_WAIT);
@@ -1063,8 +1067,12 @@ begin
     mcSizeEW:     hc := wapplication.hcr_dir_ew;
     mcSizeNS:     hc := wapplication.hcr_dir_ns;
     mcIBeam:      hc := wapplication.hcr_edit;
-    mcSizeNWSE:   hc := wapplication.hcr_dir_nwse;
-    mcSizeNESW:   hc := wapplication.hcr_dir_nesw;
+    mcSizeNWSE,
+    mcSizeSENW:   hc := wapplication.hcr_dir_nwse;
+    mcSizeNESW,
+    mcSizeSWNE:   hc := wapplication.hcr_dir_nesw;
+//    mcSizeSWNE:   hc := wapplication.hcr_dir_swne;
+//    mcSizeSENW:   hc := wapplication.hcr_dir_senw;
     mcMove:       hc := wapplication.hcr_move;
     mcCross:      hc := wapplication.hcr_crosshair;
     mcHourGlass:  hc := wapplication.hcr_wait;
