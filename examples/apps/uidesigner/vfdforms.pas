@@ -396,8 +396,9 @@ end;
 procedure TEditPositionForm.AfterCreate;
 begin
   inherited AfterCreate;
-  WindowPosition := wpUser;
-  SetPosition(0, 0, 186, 66);
+  WindowPosition := wpScreenCenter;
+  Width := 186;
+  Height := 66;
   WindowTitle := 'Position';
 
   lbPos           := CreateLabel(self, 8, 8, 'Pos:      ');

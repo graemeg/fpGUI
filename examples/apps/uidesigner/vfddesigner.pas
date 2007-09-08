@@ -1286,6 +1286,26 @@ begin
       + IntToStr(FForm.Top) + ', '
       + IntToStr(FForm.Width) + ', '
       + IntToStr(FForm.Height) + ');' + LineEnding;
+
+{
+  // Extend this and the Form Parser to handle WindowPosition, Width and Height
+  case FForm.WindowPosition of
+    wpUser:
+        begin
+          s := s + '  SetPosition('
+              + IntToStr(FForm.Left) + ', '
+              + IntToStr(FForm.Top) + ', '
+              + IntToStr(FForm.Width) + ', '
+              + IntToStr(FForm.Height) + ');' + LineEnding;
+        end;
+    else
+        begin
+          s := s + 'WindowPosition := wpScreenCenter;' + LineEnding;
+          s := s + 'Width := ' + IntToStr(FForm.Width) + ';' + LineEnding
+              + 'Height := ' + IntToStr(FForm.Height) + ';' + LineEnding;
+        end;
+  end;
+}
   s := s + '  WindowTitle := ' + QuotedStr(FForm.WindowTitle) + ';' + LineEnding;
 
   //adding other form properties, idented
@@ -1524,8 +1544,6 @@ begin
   if wg <> nil then
   begin
     wg.FormDesigner := self;
-//    wg.Left := x;
-//    wg.Top  := y;
     if newname = '' then
       newname := GenerateNewName(wgc.NameBase);
     wg.Name := newname;

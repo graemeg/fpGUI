@@ -211,6 +211,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgForm);
   wc.NameBase := 'frm';
   wc.AddProperty('WindowTitle', TPropertyString, '');
+//  wc.AddProperty('WindowPosition', TPropertyEnum, '');
   FVFDFormWidget := wc;
 
   // Label
@@ -243,7 +244,7 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('ImageName', TPropertyString, '');
-  wc.AddProperty('ShowImage', TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('ShowImage', TPropertyInteger, 'Boolean value');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
   wc.WidgetIconName := 'vfd.button';
   RegisterVFDWidget(wc);
@@ -253,7 +254,7 @@ begin
   wc.NameBase := 'cbName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
-  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
 //  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.checkbox';
   RegisterVFDWidget(wc);
@@ -264,7 +265,7 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
-  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
 //  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.radiobutton';
   RegisterVFDWidget(wc);
@@ -340,8 +341,8 @@ begin
   wc := TVFDWidgetClass.Create(TfpgTreeView);
   wc.NameBase := 'tvName';
   wc.AddProperty('FontDesc',TPropertyString, '');
-  wc.AddProperty('ShowImages',TPropertyInteger, 'Boolean value');
-  wc.AddProperty('ShowColumns',TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('ShowImages',TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('ShowColumns',TPropertyInteger, 'Boolean value');
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
 //  wc.AddProperty('TreeLineColor', TPropertyString, '');
@@ -355,18 +356,18 @@ begin
   wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
 //  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
-  wc.AddProperty('SortPages', TPropertyInteger, 'Boolean value');
+//  wc.AddProperty('SortPages', TPropertyInteger, 'Boolean value');
   wc.AddProperty('Style', TPropertyEnum, '');
   wc.AddProperty('TabPosition', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.pagecontrol';
   RegisterVFDWidget(wc);
 
   // MenuBar
-  wc          := TVFDWidgetClass.Create(TfpgMenuBar);
-  wc.NameBase := 'mnuMain';
-//  wc.AddProperty('BackgroundColor', TPropertyString, '');
-  wc.WidgetIconName := 'vfd.menubar';
-  RegisterVFDWidget(wc);
+//  wc          := TVFDWidgetClass.Create(TfpgMenuBar);
+//  wc.NameBase := 'mnuMain';
+////  wc.AddProperty('BackgroundColor', TPropertyString, '');
+//  wc.WidgetIconName := 'vfd.menubar';
+//  RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
   wc          := TVFDWidgetClass.Create(TOtherWidget);
