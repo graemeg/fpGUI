@@ -576,6 +576,10 @@ end;
 procedure TfpgBaseGrid.HandleShow;
 begin
   inherited HandleShow;
+  if (csDesigning in ComponentState) then
+    Exit;
+  if (csLoading in ComponentState) then
+    Exit;
   UpdateScrollBars;
 end;
 

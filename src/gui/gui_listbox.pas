@@ -441,6 +441,10 @@ end;
 
 procedure TfpgBaseListBox.HandleShow;
 begin
+//  if (csDesigning in ComponentState) then
+//    Exit;
+  if (csLoading in ComponentState) then
+    Exit;
   UpdateScrollBarCoords;
   UpdateScrollBar;
   inherited HandleShow;

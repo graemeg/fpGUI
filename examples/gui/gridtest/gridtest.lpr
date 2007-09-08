@@ -24,7 +24,7 @@ type
     pagecontrol: TfpgPageControl;
     tsTab1: TfpgTabSheet;
     tsTab2: TfpgTabSheet;
-    grdMain: TfpgGrid;
+    grdMain: TfpgStringGrid;
     stringgrid: TfpgStringGrid;
     chkShowHeader: TfpgCheckBox;
     chkShowGrid: TfpgCheckBox;
@@ -45,26 +45,26 @@ type
 
 procedure TMainForm.chkDisabledChange(Sender: TObject);
 begin
-  grdMain.Enabled := not chkDisabled.Checked;
-  stringgrid.Enabled := grdMain.Enabled;
+//  grdMain.Enabled := not chkDisabled.Checked;
+  stringgrid.Enabled := not chkDisabled.Checked;
 end;
 
 procedure TMainForm.chkRowSelectChange(Sender: TObject);
 begin
-  grdMain.RowSelect := chkRowSelect.Checked;
-  stringgrid.RowSelect := grdMain.RowSelect;
+//  grdMain.RowSelect := chkRowSelect.Checked;
+  stringgrid.RowSelect := chkRowSelect.Checked;
 end;
 
 procedure TMainForm.chkShowHeaderChange(Sender: TObject);
 begin
-  grdMain.ShowHeader := chkShowHeader.Checked;
-  stringgrid.ShowHeader := grdMain.ShowHeader;
+//  grdMain.ShowHeader := chkShowHeader.Checked;
+  stringgrid.ShowHeader := chkShowHeader.Checked;
 end;
 
 procedure TMainForm.chkShowGridChange(Sender: TObject);
 begin
-  grdMain.ShowGrid := chkShowGrid.Checked;
-  stringgrid.ShowGrid := grdMain.ShowGrid;
+//  grdMain.ShowGrid := chkShowGrid.Checked;
+  stringgrid.ShowGrid := chkShowGrid.Checked;
 end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
@@ -97,12 +97,12 @@ begin
 
   tsTab1 := TfpgTabSheet.Create(pagecontrol);
   tsTab1.Text := 'Base Grid';
-  grdMain := TfpgGrid.Create(tsTab1);
-  grdMain.SetPosition(10, 10, Width-50, 250);
+//  grdMain := TfpgStringGrid.Create(tsTab1);
+//  grdMain.SetPosition(10, 10, Width-50, 250);
 //  grdMain.Anchors  := [anLeft, anTop, anRight, anBottom];
-  grdMain.RowCount := 25;
-  for c := 1 to grdMain.ColumnCount do
-    grdMain.Columns[c-1].Title := 'Title ' + IntToStr(c);
+//  grdMain.RowCount := 25;
+//  for c := 1 to grdMain.ColumnCount do
+//    grdMain.Columns[c-1].Title := 'Title ' + IntToStr(c);
 
   tsTab2 := pagecontrol.AppendTabSheet('String Grid');
   stringgrid := TfpgStringGrid.Create(tsTab2);

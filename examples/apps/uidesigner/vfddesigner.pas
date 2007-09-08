@@ -1256,7 +1256,7 @@ begin
       wgclass := TOtherWidget(wd.Widget).wgClassName
     else
       wgclass := wd.Widget.ClassName;
-    Result := Result + '    ' + wd.Widget.Name + ' : ' + wgclass + ';' + LineEnding;
+    Result := Result + '    ' + wd.Widget.Name + ': ' + wgclass + ';' + LineEnding;
   end;
 end;
 
@@ -1274,8 +1274,11 @@ begin
   if maindsgn.SaveComponentNames then
     s := s + '  Name := ' + QuotedStr(FForm.Name) + ';' + LineEnding;
 
-  s := s + '  SetPosition(' + IntToStr(FForm.Left) + ',' + IntToStr(FForm.Top) + ',' + IntToStr(
-    FForm.Width) + ',' + IntToStr(FForm.Height) + ');' + LineEnding;
+  s := s + '  SetPosition('
+      + IntToStr(FForm.Left) + ', '
+      + IntToStr(FForm.Top) + ', '
+      + IntToStr(FForm.Width) + ', '
+      + IntToStr(FForm.Height) + ');' + LineEnding;
   s := s + '  WindowTitle := ' + QuotedStr(FForm.WindowTitle) + ';' + LineEnding;
 
   //adding other form properties, idented
@@ -1354,8 +1357,10 @@ begin
   if maindsgn.SaveComponentNames then
     s := s + ident + 'Name := ' + QuotedStr(wg.Name) + ';' + LineEnding;
 
-  s := s + ident + 'SetPosition(' + IntToStr(wg.Left) + ', '
-      + IntToStr(wg.Top) + ',' + IntToStr(wg.Width) + ', '
+  s := s + ident + 'SetPosition('
+      + IntToStr(wg.Left) + ', '
+      + IntToStr(wg.Top) + ', '
+      + IntToStr(wg.Width) + ', '
       + IntToStr(wg.Height) + ');' + LineEnding;
 
   if wg.Anchors <> [anLeft, anTop] then
@@ -1570,7 +1575,7 @@ begin
   Canvas.SetColor(clWidgetFrame);
   Canvas.DrawRectangle(0, 0, Width, Height);
   Canvas.SetTextColor(clText1);
-  s := Name + ' : ' + wgClassName;
+  s := Name + ': ' + wgClassName;
   Canvas.DrawString(2, 2, s);
   
   Canvas.EndDraw;

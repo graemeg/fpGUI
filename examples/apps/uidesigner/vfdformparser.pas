@@ -295,17 +295,6 @@ begin
         end;
       end;
 
-      {
-      if      wgclassuc = 'TWGLABEL'     then wg := TwgLabel.Create(pwg)
-      else if wgclassuc = 'TWGEDIT'      then wg := TwgEdit.Create(pwg)
-      else if wgclassuc = 'TWGCHECKBOX'  then wg := TwgCheckBox.Create(pwg)
-      else if wgclassuc = 'TWGBUTTON'    then wg := TwgButton.Create(pwg)
-      else if wgclassuc = 'TWGMEMO'      then wg := TwgMemo.Create(pwg)
-      else if wgclassuc = 'TWGCHOICELIST'     then wg := TwgChoiceList.Create(pwg)
-      else if wgclassuc = 'TWGDBGRID'     then wg := TwgDBGrid.Create(pwg)
-      else if wgclassuc = 'TWGTEXTLISTBOX'     then wg := TwgTextListBox.Create(pwg)
-      else
-}
       if wg = nil then
       begin
         wgc := VFDOtherWidget;
