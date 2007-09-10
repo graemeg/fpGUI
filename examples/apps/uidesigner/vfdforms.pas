@@ -31,9 +31,7 @@ uses
   gui_edit,
   gui_button,
   gui_listbox,
-  gui_memo,
-  gui_combobox,
-  gui_checkbox;
+  gui_combobox;
 
 type
 
@@ -99,18 +97,6 @@ type
   end;
 
 
-  TfrmLoadSave = class(TfpgForm)
-  public
-    {@VFD_HEAD_BEGIN: frmLoadSave}
-    lb1: TfpgLabel;
-    edFileName: TfpgEdit;
-    btnOK: TfpgButton;
-    btnCancel: TfpgButton;
-    {@VFD_HEAD_END: frmLoadSave}
-    procedure AfterCreate; override;
-  end;
-
-
   TfrmVFDSetup = class(TfpgForm)
   public
     {@VFD_HEAD_BEGIN: frmVFDSetup}
@@ -123,41 +109,8 @@ type
   end;
 
 
-  TMainForm = class(TfpgForm)
-  public
-    l1: TfpgLabel;
-    l2: TfpgLabel;
-    edFormFile: TfpgEdit;
-    btnSave: TfpgButton;
-    btnLoad: TfpgButton;
-    btnNewForm: TfpgButton;
-    chlGrid: TfpgComboBox;
-    procedure AfterCreate; override;
-  end;
-
-
-  TPropertyForm = class(TfpgForm)
-  protected
-    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-  public
-    l1, l2, l3, l4, l5, l6, l7, l8: TfpgLabel;
-    lbClass: TfpgLabel;
-    edName: TfpgEdit;
-    lbText: TfpgLabel;
-    edText: TfpgEdit;
-    btnEdit: TfpgButton;
-    lbTop, lbLeft, lbWidth, lbHeight: TfpgLabel;
-    btnTop, btnLeft, btnWidth, btnHeight: TfpgButton;
-    cbAL, cbAT, cbAR, cbAB: TfpgCheckBox;
-    edOther: TfpgMemo;
-    procedure AfterCreate; override;
-  end;
-
-
 var
   PaletteForm: TPaletteForm;
- //MainForm : TMainForm;
- //PropertyForm : TPropertyForm;
 
 function GridResolution: integer;
 
@@ -204,142 +157,6 @@ begin
   clist.OnChange := @(maindsgn.OnPaletteChange);
 end;
 
-{ TPropertyForm }
-
-procedure TPropertyForm.AfterCreate;
-var
-  x, x2, w, y, gap: integer;
-begin
-  inherited AfterCreate;
-  WindowPosition := wpUser;
-  WindowTitle := 'Properties';
-  SetPosition(10, 80, 250, 320);
-
-  x   := 3;
-  x2  := x + 90;
-  gap := 22;
-  w := Width - x2 - 3;
-  y := 3;
-
-  l1      := CreateLabel(self, x, y, 'Class name:');
-  lbClass := CreateLabel(self, x2, y, 'CLASS');
-  lbClass.Width := w;
-  lbClass.FontDesc := '#Label2';
-
-  Inc(y, gap);
-
-  l2           := CreateLabel(self, x, y, 'Name:');
-  edName       := CreateEdit(self, x2, y, w, 0);
-  edName.Text  := 'NAME';
-  edName.Anchors := [anLeft, anRight, anTop];
-
-  Inc(y, gap);
-  lbText         := CreateLabel(self, x, y, 'Text/Items:');
-  edText         := CreateEdit(self, x2, y, w, 0);
-  edText.Text    := 'Text';
-  edText.Anchors := [anLeft, anRight, anTop];
-
-  btnEdit := CreateButton(self, x2, y, 100, 'Edit...', nil);
-
-  Inc(y, 2 * gap);
-  l3           := CreateLabel(self, x, y, 'Left:');
-  lbLeft       := CreateLabel(self, x2, y, 'Left');
-  lbLeft.Width := 50;
-  btnLeft      := CreateButton(self, x2 + 50, y - 2, 30, '...', @maindsgn.OnPropPosEdit);
-  btnLeft.Height := 20;
-  Inc(y, gap);
-  l4           := CreateLabel(self, x, y, 'Top:');
-  lbTop        := CreateLabel(self, x2, y, 'Top');
-  lbTop.Width  := 50;
-  btnTop       := CreateButton(self, x2 + 50, y - 2, 30, '...', @maindsgn.OnPropPosEdit);
-  btnTop.Height := 20;
-  Inc(y, gap);
-  l5           := CreateLabel(self, x, y, 'Width:');
-  lbWidth      := CreateLabel(self, x2, y, 'w');
-  lbWidth.Width := 50;
-  btnWidth     := CreateButton(self, x2 + 50, y - 2, 30, '...', @maindsgn.OnPropPosEdit);
-  btnWidth.Height := 20;
-  Inc(y, gap);
-  l6           := CreateLabel(self, x, y, 'Height:');
-  lbHeight     := CreateLabel(self, x2, y, 'h');
-  lbHeight.Width := 50;
-  btnHeight    := CreateButton(self, x2 + 50, y - 2, 30, '...', @maindsgn.OnPropPosEdit);
-  btnHeight.Height := 20;
-
-  Inc(y, gap);
-  l6 := CreateLabel(self, x, y, 'Anchors:');
-
-  cbAL := CreateCheckBox(self, x2, y, 'L');
-  cbAT := CreateCheckBox(self, x2 + 36, y, 'T');
-  cbAR := CreateCheckBox(self, x2 + 2 * 36, y, 'R');
-  cbAB := CreateCheckBox(self, x2 + 3 * 36, y, 'B');
-
-  Inc(y, gap);
-  l7 := CreateLabel(self, x, y, 'Other settings:');
-
-  edOther          := TfpgMemo.Create(self);
-  edOther.SetPosition(x, y + gap, self.Width - 2 * x, self.Height - x - y - gap);
-  edOther.Anchors  := AllAnchors;
-  edOther.FontDesc := '#Edit2';
-
-  //  lbHeight := CreateLabel(self, x2,y, 'h');
-  //  lbHeight.Width := w;
-
-  edText.OnChange := @maindsgn.OnPropTextChange;
-  edName.OnChange := @maindsgn.OnPropNameChange;
-
-  cbAL.OnChange := @maindsgn.OnAnchorChange;
-  cbAT.OnChange := @maindsgn.OnAnchorChange;
-  cbAR.OnChange := @maindsgn.OnAnchorChange;
-  cbAB.OnChange := @maindsgn.OnAnchorChange;
-
-  edOther.OnChange  := @maindsgn.OnOtherChange;
-  btnEdit.OnClick   := @maindsgn.OnEditWidget;
-end;
-
-procedure TPropertyForm.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
-begin
-  if (keycode = keyEnter) or (keycode = keyF11) then
-  begin
-    if maindsgn.selectedform <> nil then
-      maindsgn.selectedform.Form.SetFocus;
-//      GfxActivateWindow(maindsgn.selectedform.Form.WinHandle);
-    consumed := True;
-  end
-  else
-    inherited;
-end;
-
-{ TMainForm }
-
-procedure TMainForm.AfterCreate;
-begin
-  inherited AfterCreate;
-  WindowPosition := wpUser;
-  WindowTitle := 'fpGUI Designer';
-  SetPosition(0, 0, 550, 50);
-
-  l1 := CreateLabel(self, 5, 5, 'File name:');
-
-  edFormFile       := CreateEdit(self, 5, 5 + 20, 250, 0);
-//  edFormFile.Text := './aanewform.pas';
-
-  btnSave := CreateButton(self, 270, 12, 50, 'Save', nil);
-  btnLoad := CreateButton(self, 330, 12, 50, 'Load', nil);
-
-  l1      := CreateLabel(self, 400, 5, 'Grid:');
-  chlGrid := CreateComboBox(self, 400, 5 + 20, 50, nil);
-  chlGrid.Items.Add('1');
-  chlGrid.Items.Add('4');
-  chlGrid.Items.Add('8');
-  chlGrid.FocusItem := 2;
-
-  btnNewForm := CreateButton(self, 460, 12, 80, 'New Form', nil);
-
-  btnSave.OnClick     := @maindsgn.OnSaveFile;
-  btnLoad.OnClick     := @maindsgn.OnLoadFile;
-  btnNewForm.OnClick  := @ maindsgn.OnNewForm;
-end;
 
 { TInsertCustomForm }
 
@@ -533,58 +350,6 @@ begin
   end
   else
     inherited HandleKeyPress(keycode, shiftstate, consumed);
-end;
-
-{ TfrmLoadSave }
-
-procedure TfrmLoadSave.AfterCreate;
-begin
-  {@VFD_BODY_BEGIN: frmLoadSave}
-  SetPosition(276, 141, 300, 95);
-  WindowTitle := 'Form file';
-
-  lb1 := TfpgLabel.Create(self);
-  with lb1 do
-  begin
-    SetPosition(8, 8, 80, 16);
-    Text     := 'File name:';
-    FontDesc := '#Label1';
-  end;
-
-  edFileName := TfpgEdit.Create(self);
-  with edFileName do
-  begin
-    SetPosition(8, 28, 280, 22);
-    Anchors  := [anLeft, anRight, anTop];
-    Text     := '';
-    FontDesc := '#Edit1';
-  end;
-
-  btnOK := TfpgButton.Create(self);
-  with btnOK do
-  begin
-    SetPosition(8, 60, 96, 24);
-    Anchors     := [anLeft, anBottom];
-    Text        := 'OK';
-    FontDesc    := '#Label1';
-    ImageName   := 'stdimg.ok';
-    ShowImage   := True;
-    ModalResult := 1;
-  end;
-
-  btnCancel := TfpgButton.Create(self);
-  with btnCancel do
-  begin
-    SetPosition(192, 60, 96, 24);
-    Anchors     := [anRight, anBottom];
-    Text        := 'Cancel';
-    FontDesc    := '#Label1';
-    ImageName   := 'stdimg.cancel';
-    ShowImage   := True;
-    ModalResult := -1;
-  end;
-
-  {@VFD_BODY_END: frmLoadSave}
 end;
 
 procedure TfrmVFDSetup.AfterCreate;

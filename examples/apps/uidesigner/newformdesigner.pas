@@ -54,22 +54,22 @@ type
   TfrmMain = class(TfpgForm)
   public
     {@VFD_HEAD_BEGIN: frmMain}
+    MainMenu: TfpgMenuBar;
     btnNewForm: TfpgButton;
     btnOpen: TfpgButton;
-    MainMenu: TfpgMenuBar;
     btnSave: TfpgButton;
     wgpalette: TwgPalette;
     chlPalette: TfpgComboBox;
+    filemenu: TfpgPopupMenu;
+    formmenu: TfpgPopupMenu;
+    setmenu: TfpgPopupMenu;
     {@VFD_HEAD_END: frmMain}
 
-    FileMenu: TfpgPopupMenu;
-    FormMenu: TfpgPopupMenu;
-    SetMenu: TfpgPopupMenu;
-    function GetSelectedWidget: TVFDWidgetClass;
-    procedure SetSelectedWidget(wgc: TVFDWidgetClass);
-    procedure AfterCreate; override;
-    procedure OnPaletteClick(Sender: TObject);
-    property SelectedWidget: TVFDWidgetClass read GetSelectedWidget write SetSelectedWidget;
+    function    GetSelectedWidget: TVFDWidgetClass;
+    procedure   SetSelectedWidget(wgc: TVFDWidgetClass);
+    procedure   AfterCreate; override;
+    procedure   OnPaletteClick(Sender: TObject);
+    property    SelectedWidget: TVFDWidgetClass read GetSelectedWidget write SetSelectedWidget;
   end;
 
 
@@ -79,25 +79,25 @@ type
   public
     Widget: TfpgWidget;
     constructor Create;
-    destructor Destroy; override;
-    function GetCount: integer;
-    procedure Clear;
-    property Count: integer read GetCount;
-    procedure AddItem(aProp: TVFDWidgetProperty);
-    function GetItem(index: integer): TVFDWidgetProperty;
+    destructor  Destroy; override;
+    function    GetCount: integer;
+    procedure   Clear;
+    property    Count: integer read GetCount;
+    procedure   AddItem(aProp: TVFDWidgetProperty);
+    function    GetItem(index: integer): TVFDWidgetProperty;
   end;
 
 
   TwgPropertyList = class(TfpgListBox)
   protected
-    procedure DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
-    procedure HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
-    procedure HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
-    procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
-    procedure HandleSetFocus; override;
-    procedure HandleKillFocus; override;
-    procedure OnRowChange(Sender: TObject);
-    procedure OnUpdateProperty(Sender: TObject);
+    procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleSetFocus; override;
+    procedure   HandleKillFocus; override;
+    procedure   OnRowChange(Sender: TObject);
+    procedure   OnUpdateProperty(Sender: TObject);
   public
     Props: TPropertyList;
     NameWidth: integer;
@@ -105,12 +105,12 @@ type
     NameDrag: boolean;
     NameDragPos: integer;
     BackgroundColor: TfpgColor;
-    procedure ReleaseEditor;
-    procedure AllocateEditor;
     constructor Create(AOwner: TComponent); override;
-    function ItemCount: integer; override;
-    function RowHeight: integer; override;
-    procedure RealignEditor;
+    procedure   ReleaseEditor;
+    procedure   AllocateEditor;
+    function    ItemCount: integer; override;
+    function    RowHeight: integer; override;
+    procedure   RealignEditor;
   end;
 
 
@@ -186,33 +186,32 @@ const
 {@VFD_NEWFORM_IMPL}
 
 procedure TfrmMain.AfterCreate;
-const
-  cWidth = 635;
 var
   n: integer;
   x: integer;
   wgc: TVFDWidgetClass;
   btn: TwgPaletteButton;
-  mi: TfpgMenuItem;
 begin
   {@VFD_BODY_BEGIN: frmMain}
+  SetPosition(43, 40, 635, 87);
+  WindowTitle := 'frmMain';
   WindowPosition := wpUser;
-  WindowTitle   := 'frmMain';
-  SetPosition(0, 0, cWidth, 87);
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
   begin
-    SetPosition(0, 0, cWidth, 24);
-    Anchors := [anTop, anLeft, anRight];
+    SetPosition(0, 0, 635, 24);
+    Anchors := [anLeft,anRight,anTop];
   end;
 
   btnNewForm := TfpgButton.Create(self);
   with btnNewForm do
   begin
     SetPosition(4, 28, 25, 24);
-    Text      := '';
+    Text := '';
+    FontDesc := '#Label1';
     ImageName := 'vfd.newform';
+    ModalResult := 0;
     ShowImage := True;
     Focusable := False;
     OnClick   := @(maindsgn.OnNewForm);
@@ -221,9 +220,11 @@ begin
   btnOpen := TfpgButton.Create(self);
   with btnOpen do
   begin
-    SetPosition(btnNewForm.Right+3, 28, 25, 24);
-    Text      := '';
+    SetPosition(30, 28, 25, 24);
+    Text := '';
+    FontDesc := '#Label1';
     ImageName := 'stdimg.open';
+    ModalResult := 0;
     ShowImage := True;
     Focusable := False;
     OnClick   := @(maindsgn.OnLoadFile);
@@ -232,9 +233,11 @@ begin
   btnSave := TfpgButton.Create(self);
   with btnSave do
   begin
-    SetPosition(btnOpen.Right+3, 28, 25, 24);
-    Text      := '';
+    SetPosition(56, 28, 25, 24);
+    Text := '';
+    FontDesc := '#Label1';
     ImageName := 'stdimg.save';
+    ModalResult := 0;
     ShowImage := True;
     Focusable := False;
     OnClick   := @(maindsgn.OnSaveFile);
@@ -243,8 +246,9 @@ begin
   wgpalette := TwgPalette.Create(self);
   with wgpalette do
   begin
-    SetPosition(116, 28, cWidth - 116, 28);
-    Anchors := [anTop, anLeft, anRight];
+    SetPosition(116, 28, 519, 28);
+    Anchors := [anLeft,anRight,anTop];
+    Focusable := False;
   end;
 
   chlPalette := TfpgComboBox.Create(self);
@@ -252,13 +256,41 @@ begin
   begin
     SetPosition(116, 60, 200, 22);
     Items.Add('-');
+    FontDesc := '#List';
     FocusItem := 1;
+  end;
+
+  filemenu := TfpgPopupMenu.Create(self);
+  with filemenu do
+  begin
+    SetPosition(464, 64, 120, 20);
+    AddMenuItem('New', '', @(maindsgn.OnNewFile));
+    AddMenuItem('Open', '', @(maindsgn.OnLoadFile));
+    AddMenuItem('Save', '', @(maindsgn.OnSaveFile));
+    AddMenuItem('-', '', nil);
+    AddMenuItem('New Form...', '', @(maindsgn.OnNewForm));
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Exit', '', @(maindsgn.OnExit));
+  end;
+
+  formmenu := TfpgPopupMenu.Create(self);
+  with formmenu do
+  begin
+    SetPosition(464, 48, 120, 20);
+    AddMenuItem('Widget Order...', '', @(maindsgn.OnEditWidgetOrder));
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Edit special...', '', nil);
+  end;
+
+  setmenu := TfpgPopupMenu.Create(self);
+  with setmenu do
+  begin
+    SetPosition(464, 29, 120, 20);
+    AddMenuItem('General options ...', '', @(maindsgn.OnOptionsClick));
   end;
 
   {@VFD_BODY_END: frmMain}
 
-
-  wgpalette.Focusable := False;
 
   x := 0;
   for n := 1 to VFDWidgetCount do
@@ -277,39 +309,6 @@ begin
     chlPalette.Items.AddObject(wgc.WidgetClass.ClassName, wgc);
 
     Inc(x, 32);
-  end;
-
-  filemenu := TfpgPopupMenu.Create(self);
-  with filemenu do
-  begin
-    mi         := AddMenuItem('New', '', nil);
-    mi.OnClick := @(maindsgn.OnNewFile);
-    mi         := AddMenuItem('Open', '', nil);
-    mi.OnClick := @(maindsgn.OnLoadFile);
-    mi         := AddMenuItem('Save', '', nil);
-    mi.OnClick := @(maindsgn.OnSaveFile);
-    AddMenuItem('-', '', nil);
-    mi         := AddMenuItem('New Form...', '', nil);
-    mi.OnClick := @(maindsgn.OnNewForm);
-    AddMenuItem('-', '', nil);
-    mi         := AddMenuItem('Exit', '', nil);
-    mi.OnClick := @(maindsgn.OnExit);
-  end;
-
-  formmenu := TfpgPopupMenu.Create(self);
-  with formmenu do
-  begin
-    mi         := AddMenuItem('Widget Order...', '', nil);
-    mi.OnClick := @(maindsgn.OnEditWidgetOrder);
-    AddMenuItem('-', '', nil);
-    AddMenuItem('Edit special...', '', nil);
-  end;
-
-  setmenu := TfpgPopupMenu.Create(self);
-  with setmenu do
-  begin
-    mi         := AddMenuItem('General options ...', '', nil);
-    mi.OnClick := @(maindsgn.OnOptionsClick);
   end;
 
   MainMenu.AddMenuItem('&File', nil).SubMenu     := filemenu;
@@ -364,7 +363,7 @@ begin
 
   WindowPosition := wpUser;
   WindowTitle := 'Properties';
-  SetPosition(0, 120, 250, 450);
+  SetPosition(43, 150, 250, 450);
 
   x   := 3;
   x2  := x + 50;
@@ -402,18 +401,18 @@ begin
   btnLeft    := CreateButton(self, 50, y - 2, 48, '1234', @(maindsgn.OnPropPosEdit));
   with btnLeft do
   begin
-    Height          := 22;
-    btnLeft.Anchors := [anLeft, anBottom];
-    Focusable       := False;
+    Height        := 22;
+    Anchors       := [anLeft, anBottom];
+    Focusable     := False;
   end;
   l4 := CreateLabel(self, 110, y, 'Top:');
   l4.Anchors := [anLeft, anBottom];
   btnTop     := CreateButton(self, 160, y - 2, 48, '45', @(maindsgn.OnPropPosEdit));
   with btnTop do
   begin
-    Height          := 22;
-    btnLeft.Anchors := [anLeft, anBottom];
-    Focusable       := False;
+    Height        := 22;
+    Anchors       := [anLeft, anBottom];
+    Focusable     := False;
   end;
   Inc(y, gap + 5);
   l5         := CreateLabel(self, 3, y + 1, 'Width:');
@@ -421,18 +420,18 @@ begin
   btnWidth   := CreateButton(self, 50, y - 2, 48, '1234', @(maindsgn.OnPropPosEdit));
   with btnWidth do
   begin
-    Height          := 22;
-    btnLeft.Anchors := [anLeft, anBottom];
-    Focusable       := False;
+    Height        := 22;
+    Anchors       := [anLeft, anBottom];
+    Focusable     := False;
   end;
   l6 := CreateLabel(self, 110, y, 'Height:');
   l6.Anchors := [anLeft, anBottom];
   btnHeight  := CreateButton(self, 160, y - 2, 48, '45', @(maindsgn.OnPropPosEdit));
   with btnHeight do
   begin
-    Height          := 22;
-    btnLeft.Anchors := [anLeft, anBottom];
-    Focusable       := False;
+    Height        := 22;
+    Anchors       := [anLeft, anBottom];
+    Focusable     := False;
   end;
   Inc(y, gap + 5);
 
