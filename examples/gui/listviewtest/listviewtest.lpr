@@ -26,11 +26,8 @@ type
                                    ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart);
     procedure ItemSelectionChanged(ListView: TfpgListView; Item: TfpgLVItem;
                                     ItemIndex: Integer; Selected: Boolean);
-
-    
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
   end;
 
 { TMainForm }
@@ -188,14 +185,10 @@ begin
 
 end;
 
-destructor TMainForm.Destroy;
-begin
-  inherited Destroy;
-end;
-  
 begin
   fpgApplication.Initialize;
-  with TMainForm.Create(nil) do begin
+  with TMainForm.Create(nil) do
+  begin
     Show;
     fpgApplication.Run;
     Free;

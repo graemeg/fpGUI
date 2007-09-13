@@ -52,6 +52,11 @@ type
   
 
   TfrmMain = class(TfpgForm)
+  private
+    FFileOpenRecent: TfpgMenuItem;
+    procedure   OpenRecentFileClick(Sender: TObject);
+    procedure   miHelpAboutClick(Sender: TObject);
+    procedure   miHelpAboutGUI(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: frmMain}
     MainMenu: TfpgMenuBar;
@@ -63,10 +68,16 @@ type
     filemenu: TfpgPopupMenu;
     formmenu: TfpgPopupMenu;
     setmenu: TfpgPopupMenu;
+    miOpenRecentMenu: TfpgPopupMenu;
+    helpmenu: TfpgPopupMenu;
+    previewmenu: TfpgPopupMenu;
     {@VFD_HEAD_END: frmMain}
-
+    
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     function    GetSelectedWidget: TVFDWidgetClass;
     procedure   SetSelectedWidget(wgc: TVFDWidgetClass);
+    procedure   AddRecentFile(AFilename: string);
     procedure   AfterCreate; override;
     procedure   OnPaletteClick(Sender: TObject);
     property    SelectedWidget: TVFDWidgetClass read GetSelectedWidget write SetSelectedWidget;
@@ -125,7 +136,24 @@ type
     btnTop, btnLeft, btnWidth, btnHeight: TfpgButton;
     btnAnLeft, btnAnTop, btnAnRight, btnAnBottom: TfpgButton;
     lstProps: TwgPropertyList;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
+  end;
+
+
+  TfrmAbout = class(TfpgForm)
+  public
+    {@VFD_HEAD_BEGIN: frmAbout}
+    lblName1: TfpgLabel;
+    lblVersion: TfpgLabel;
+    btnName1: TfpgButton;
+    lblName3: TfpgLabel;
+    lblName4: TfpgLabel;
+    lblCompiled: TfpgLabel;
+    {@VFD_HEAD_END: frmAbout}
     procedure AfterCreate; override;
+    class procedure Execute;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -140,50 +168,93 @@ implementation
 
 uses
   fpgfx,
-  vfdmain;
+  vfdmain,
+  gui_iniutils,
+  gui_dialogs;
 
-const
-  vfd_anchorbottom: array[0..121] of byte = (
-    66, 77, 122, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 40, 0, 0,
-    0, 15, 0, 0, 0, 15, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-    60, 0, 0, 0, 235, 10, 0, 0, 235, 10, 0, 0, 2, 0, 0, 0, 2,
-    0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 255, 254, 0, 0, 128, 2,
-    0, 0, 254, 254, 0, 0, 252, 126, 0, 0, 248, 62, 0, 0, 240, 30, 0,
-    0, 255, 254, 0, 0, 255, 254, 0, 0, 255, 254, 0, 0, 255, 254, 0, 0,
-    255, 254, 0, 0, 255, 254, 0, 0, 255, 254, 0, 0, 255, 254, 0, 0, 255,
-    254, 0, 0);
 
-  vfd_anchorleft: array[0..121] of byte = (
-    66, 77, 122, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 40, 0, 0,
-    0, 15, 0, 0, 0, 15, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-    60, 0, 0, 0, 235, 10, 0, 0, 235, 10, 0, 0, 2, 0, 0, 0, 2,
-    0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 255, 254, 0, 0, 191, 254,
-    0, 0, 191, 254, 0, 0, 191, 254, 0, 0, 187, 254, 0, 0, 179, 254, 0,
-    0, 163, 254, 0, 0, 131, 254, 0, 0, 163, 254, 0, 0, 179, 254, 0, 0,
-    187, 254, 0, 0, 191, 254, 0, 0, 191, 254, 0, 0, 191, 254, 0, 0, 255,
-    254, 0, 0);
+// Anchor images
+{$I anchors.inc}
 
-  vfd_anchorright: array[0..121] of byte = (
-    66, 77, 122, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 40, 0, 0,
-    0, 15, 0, 0, 0, 15, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-    60, 0, 0, 0, 235, 10, 0, 0, 235, 10, 0, 0, 2, 0, 0, 0, 2,
-    0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 255, 254, 0, 0, 255, 250,
-    0, 0, 255, 250, 0, 0, 255, 250, 0, 0, 255, 186, 0, 0, 255, 154, 0,
-    0, 255, 138, 0, 0, 255, 130, 0, 0, 255, 138, 0, 0, 255, 154, 0, 0,
-    255, 186, 0, 0, 255, 250, 0, 0, 255, 250, 0, 0, 255, 250, 0, 0, 255,
-    254, 0, 0);
-
-  vfd_anchortop: array[0..121] of byte = (
-    66, 77, 122, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 40, 0, 0,
-    0, 15, 0, 0, 0, 15, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-    60, 0, 0, 0, 235, 10, 0, 0, 235, 10, 0, 0, 2, 0, 0, 0, 2,
-    0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 255, 254, 0, 0, 255, 254,
-    0, 0, 255, 254, 0, 0, 255, 254, 0, 0, 255, 254, 0, 0, 255, 254, 0,
-    0, 255, 254, 0, 0, 255, 254, 0, 0, 255, 254, 0, 0, 240, 30, 0, 0,
-    248, 62, 0, 0, 252, 126, 0, 0, 254, 254, 0, 0, 128, 2, 0, 0, 255,
-    254, 0, 0);
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TfrmAbout.AfterCreate;
+begin
+  {@VFD_BODY_BEGIN: frmAbout}
+  SetPosition(378, 267, 276, 180);
+  WindowTitle := 'Product Information...';
+  Sizeable := False;
+  WindowPosition := wpScreenCenter;
+
+  lblName1 := TfpgLabel.Create(self);
+  with lblName1 do
+  begin
+    SetPosition(12, 16, 255, 31);
+    Text := 'fpGUI Designer';
+    FontDesc := 'Arial-20';
+  end;
+
+  lblVersion := TfpgLabel.Create(self);
+  with lblVersion do
+  begin
+    SetPosition(150, 56, 175, 16);
+    Text := 'Version:  %s';
+    FontDesc := '#Label2';
+  end;
+
+  btnName1 := TfpgButton.Create(self);
+  with btnName1 do
+  begin
+    SetPosition(194, 148, 75, 24);
+    Anchors := [anRight,anBottom];
+    Text := 'Close';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.close';
+    ModalResult := 1;
+  end;
+
+  lblName3 := TfpgLabel.Create(self);
+  with lblName3 do
+  begin
+    SetPosition(12, 100, 241, 14);
+    Text := 'Written by Graeme Geldenhuys';
+    FontDesc := 'Arial-9';
+  end;
+
+  lblName4 := TfpgLabel.Create(self);
+  with lblName4 do
+  begin
+    SetPosition(12, 116, 246, 14);
+    Text := 'http://opensoft.homeip.net/fpgui/';
+    FontDesc := 'Arial-9:underline';
+  end;
+
+  lblCompiled := TfpgLabel.Create(self);
+  with lblCompiled do
+  begin
+    SetPosition(12, 132, 191, 13);
+    Text := 'Compiled on:  %s';
+    FontDesc := 'Arial-8';
+  end;
+
+  {@VFD_BODY_END: frmAbout}
+end;
+
+class procedure TfrmAbout.Execute;
+var
+  frm: TfrmAbout;
+begin
+  frm := TfrmAbout.Create(nil);
+  try
+    frm.lblVersion.Text := Format(frm.lblVersion.Text, [program_version]);
+    frm.lblCompiled.Text := Format(frm.lblCompiled.Text, [ {$I %date%} + ' ' + {$I %time%}]);
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
+end;
+
 
 procedure TfrmMain.AfterCreate;
 var
@@ -193,7 +264,7 @@ var
   btn: TwgPaletteButton;
 begin
   {@VFD_BODY_BEGIN: frmMain}
-  SetPosition(43, 40, 635, 87);
+  SetPosition(84, 123, 635, 87);
   WindowTitle := 'frmMain';
   WindowPosition := wpUser;
 
@@ -266,6 +337,8 @@ begin
     SetPosition(464, 64, 120, 20);
     AddMenuItem('New', '', @(maindsgn.OnNewFile));
     AddMenuItem('Open', '', @(maindsgn.OnLoadFile));
+    //    FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
+    //    FFileOpenRecent.Enabled := False;
     AddMenuItem('Save', '', @(maindsgn.OnSaveFile));
     AddMenuItem('-', '', nil);
     AddMenuItem('New Form...', '', @(maindsgn.OnNewForm));
@@ -287,6 +360,31 @@ begin
   begin
     SetPosition(464, 29, 120, 20);
     AddMenuItem('General options ...', '', @(maindsgn.OnOptionsClick));
+  end;
+
+  miOpenRecentMenu := TfpgPopupMenu.Create(self);
+  with miOpenRecentMenu do
+  begin
+    SetPosition(336, 68, 128, 20);
+  end;
+
+  helpmenu := TfpgPopupMenu.Create(self);
+  with helpmenu do
+  begin
+    SetPosition(328, 52, 120, 20);
+    AddMenuItem('Product Information', '', @miHelpAboutClick);
+    AddMenuItem('About fpGUI', '', @miHelpAboutGUI);
+  end;
+
+  previewmenu := TfpgPopupMenu.Create(self);
+  with previewmenu do
+  begin
+    SetPosition(324, 36, 120, 20);
+    AddMenuItem('with Windows 9x', '', nil).Enabled := False;
+    AddMenuItem('with Windows XP', '', nil).Enabled := False;
+    AddMenuItem('with OpenSoft', '', nil).Enabled := False;
+    AddMenuItem('with Motif', '', nil).Enabled := False;
+    AddMenuItem('with OpenLook', '', nil).Enabled := False;
   end;
 
   {@VFD_BODY_END: frmMain}
@@ -314,6 +412,10 @@ begin
   MainMenu.AddMenuItem('&File', nil).SubMenu     := filemenu;
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := setmenu;
   MainMenu.AddMenuItem('Fo&rm', nil).SubMenu     := formmenu;
+  MainMenu.AddMenuItem('&Preview', nil).SubMenu  := previewmenu;
+  MainMenu.AddMenuItem('&Help', nil).SubMenu     := helpmenu;
+  
+//  FFileOpenRecent.SubMenu := miOpenRecentMenu;
 end;
 
 procedure TfrmMain.OnPaletteClick(Sender: TObject);
@@ -340,25 +442,21 @@ var
 begin
   inherited;
 
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(
     'vfd.anchorleft', @vfd_anchorleft,
-    sizeof(vfd_anchorleft)
-    );
+    sizeof(vfd_anchorleft), 0, 0);
 
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(
     'vfd.anchorright', @vfd_anchorright,
-    sizeof(vfd_anchorright)
-    );
+    sizeof(vfd_anchorright), 0, 0);
 
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(
     'vfd.anchortop', @vfd_anchortop,
-    sizeof(vfd_anchortop)
-    );
+    sizeof(vfd_anchortop), 0, 0);
 
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(
     'vfd.anchorbottom', @vfd_anchorbottom,
-    sizeof(vfd_anchorbottom)
-    );
+    sizeof(vfd_anchorbottom), 0, 0);
 
 
   WindowPosition := wpUser;
@@ -515,6 +613,19 @@ begin
   end
   else
     inherited;
+end;
+
+constructor TfrmProperties.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Name := 'frmProperties';
+  gINI.ReadFormState(self);
+end;
+
+destructor TfrmProperties.Destroy;
+begin
+  gINI.WriteFormState(self);
+  inherited Destroy;
 end;
 
 { TPropertyList }
@@ -697,6 +808,35 @@ begin
   editor.SetPosition(x, editor.Top, Width - ScrollBarWidth - x, editor.Height);
 end;
 
+procedure TfrmMain.OpenRecentFileClick(Sender: TObject);
+begin
+  if Sender is TfpgMenuItem then
+    writeln(TfpgMenuItem(Sender).Text + ' clicked...');
+end;
+
+procedure TfrmMain.miHelpAboutClick(Sender: TObject);
+begin
+  TfrmAbout.Execute;
+end;
+
+procedure TfrmMain.miHelpAboutGUI(Sender: TObject);
+begin
+  ShowMessage('This product was created using fpGUI v0.5', 'About fpGUI');
+end;
+
+constructor TfrmMain.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Name := 'frmMain';
+  gINI.ReadFormState(self);
+end;
+
+destructor TfrmMain.Destroy;
+begin
+  gINI.WriteFormState(self);
+  inherited Destroy;
+end;
+
 function TfrmMain.GetSelectedWidget: TVFDWidgetClass;
 begin
   if chlPalette.FocusItem > 1 then
@@ -716,6 +856,15 @@ begin
       if wgpalette.Components[n] is TwgPaletteButton then
         TwgPaletteButton(wgpalette.Components[n]).Down := False;
   end;
+end;
+
+procedure TfrmMain.AddRecentFile(AFilename: string);
+var
+  mi: TfpgMenuItem;
+begin
+  gINI.WriteString('RecentFiles', ExtractFileName(AFileName), AFileName);
+  FFileOpenRecent.Enabled := True;
+  mi := miOpenRecentMenu.AddMenuItem(AFileName, '', @OpenRecentFileClick);
 end;
 
 procedure TwgPropertyList.ReleaseEditor;
@@ -760,6 +909,7 @@ begin
   Canvas.Clear(clWindowBackground);
   Canvas.EndDraw;
 end;
+
 
 end.
 

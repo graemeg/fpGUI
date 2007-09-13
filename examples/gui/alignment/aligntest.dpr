@@ -99,6 +99,7 @@ begin
   frm.Show;
 
   fpgApplication.Run;
+  frm.Free;
 end;
 
 begin

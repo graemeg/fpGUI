@@ -157,6 +157,7 @@ begin
   frm := TMainForm.Create(nil);
   frm.Show;
   fpgApplication.Run;
+  frm.Free;
 end;
 
 begin

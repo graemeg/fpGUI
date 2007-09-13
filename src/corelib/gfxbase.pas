@@ -369,6 +369,7 @@ type
   TfpgApplicationBase = class(TObject)
   private
     FMainForm: TfpgWindowBase;
+    FTerminated: boolean;
     FTopModalForm: TfpgWindowBase;
   protected
     FIsInitialized: Boolean;
@@ -379,6 +380,7 @@ type
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read FTopModalForm write FTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
+    property    Terminated: boolean read FTerminated write FTerminated;
   end;
 
 

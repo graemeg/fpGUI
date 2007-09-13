@@ -707,7 +707,7 @@ procedure TfpgApplication.RunMessageLoop;
 begin
   repeat
     WaitWindowMessage(1000);
-  until False;
+  until Terminated;
 end;
 
 { TfpgFont }

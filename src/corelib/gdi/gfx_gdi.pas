@@ -708,6 +708,7 @@ constructor TfpgApplicationImpl.Create(const aparams: string);
 begin
   FIsInitialized  := False;
   FDisplay        := Windows.GetDC(0);
+  Terminated := False;
 
   with WindowClass do
   begin

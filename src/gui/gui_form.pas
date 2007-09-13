@@ -292,7 +292,7 @@ procedure TfpgForm.Close;
 begin
   Hide;
   if fpgApplication.MainForm = self then
-    Halt(0);
+    fpgApplication.Terminated := True;
 end;
 
 

@@ -526,6 +526,7 @@ begin
   if FDisplay = nil then
     Exit; //==>
 
+  Terminated := False;
   DefaultScreen     := XDefaultScreen(Display);
   RootWindow        := XRootWindow(FDisplay, DefaultScreen);
   DefaultBackground := XBlackPixel(FDisplay, DefaultScreen);
@@ -1101,13 +1102,16 @@ end;
 
 procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);
 begin
-  if AValue then begin
-    if not HandleIsValid then AllocateWindowHandle;
+  if AValue then
+  begin
+    if not HandleIsValid then
+      AllocateWindowHandle;
     XMapWindow(xapplication.Display, FWinHandle);
     Include(FWinFlags, xwsfMapped);
   end
-  else begin
-    if HandleIsValid  and (xwsfMapped in FWinFlags) then
+  else
+  begin
+    if HandleIsValid and (xwsfMapped in FWinFlags) then
       XUnmapWindow(xapplication.Display, FWinHandle);
   end;
 end;

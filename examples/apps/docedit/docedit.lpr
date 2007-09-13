@@ -16,9 +16,13 @@ var
   frm: TMainForm;
 begin
   fpgApplication.Initialize;
-  frm := TMainForm.Create(nil);
-  frm.Show;
-  fpgApplication.Run;
+  try
+    frm := TMainForm.Create(nil);
+    frm.Show;
+    fpgApplication.Run;
+  finally
+    frm.Free;
+  end;
 end;
 
 begin

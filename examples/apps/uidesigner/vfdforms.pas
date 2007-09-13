@@ -78,14 +78,18 @@ type
 
   TWidgetOrderForm = class(TVFDDialog)
   public
+    {@VFD_HEAD_BEGIN: WidgetOrderForm}
     l1: TfpgLabel;
     list: TfpgListBox;
-    btnUP,
-    btnDOWN,
-    btnOK,
+    btnOK: TfpgButton;
     btnCancel: TfpgButton;
-    procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
+    btnUp: TfpgButton;
+    btnDown: TfpgButton;
+    {@VFD_HEAD_END: WidgetOrderForm}
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
+    procedure   OnButtonClick(Sender: TObject);
   end;
   
 
@@ -105,7 +109,9 @@ type
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
     {@VFD_HEAD_END: frmVFDSetup}
-    procedure AfterCreate; override;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
   end;
 
 
@@ -118,7 +124,8 @@ implementation
 
 uses
   vfdmain,
-  fpgfx;
+  fpgfx,
+  gui_iniutils;
 
 function GridResolution: integer;
 begin
@@ -217,11 +224,12 @@ begin
   Width := 186;
   Height := 66;
   WindowTitle := 'Position';
+  Sizeable := False;
 
   lbPos           := CreateLabel(self, 8, 8, 'Pos:      ');
   edPos           := CreateEdit(self, 8, 28, 80, 0);
-  btnOK           := CreateButton(self, 96, 8, 80, 'OK', @OnButtonClick);
-  btnCancel       := CreateButton(self, 96, 36, 80, 'Cancel', @OnButtonClick);
+  btnOK           := CreateButton(self, 100, 8, 75, 'OK', @OnButtonClick);
+  btnCancel       := CreateButton(self, 100, 36, 75, 'Cancel', @OnButtonClick);
   btnOK.ImageName := 'stdimg.ok';
   btnOK.ShowImage := True;
   btnCancel.ImageName := 'stdimg.cancel';
@@ -238,27 +246,92 @@ end;
 
 { TWidgetOrderForm }
 
+constructor TWidgetOrderForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Name := 'WidgetOrderForm';
+  gINI.ReadFormState(self);
+end;
+
+destructor TWidgetOrderForm.Destroy;
+begin
+  gINI.WriteFormState(self);
+  inherited Destroy;
+end;
+
 procedure TWidgetOrderForm.AfterCreate;
 begin
   inherited AfterCreate;
-  WindowPosition := wpScreenCenter;
-  SetPosition(0, 0, 322, 258);
+  {@VFD_BODY_BEGIN: WidgetOrderForm}
+  SetPosition(100, 100, 312, 258);
   WindowTitle := 'Widget order';
+  WindowPosition := wpScreenCenter;
 
-  l1 := CreateLabel(self, 4, 4, 'Form widget order:');
+  l1 := TfpgLabel.Create(self);
+  with l1 do
+  begin
+    SetPosition(4, 4, 108, 16);
+    Text := 'Form widget order:';
+    FontDesc := '#Label1';
+  end;
 
   list := TfpgListBox.Create(self);
-  list.SetPosition(4, 24, 220, 228);
+  with list do
+  begin
+    SetPosition(4, 24, 220, 228);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#List';
+  end;
 
-  btnOK           := CreateButton(self, 232, 24, 80, 'OK', @OnButtonClick);
-  btnOK.ImageName := 'stdimg.ok';
-  btnOK.ShowImage := True;
-  btnCancel       := CreateButton(self, 232, 52, 80, 'Cancel', @OnButtonClick);
-  btnCancel.ImageName := 'stdimg.cancel';
-  btnCancel.ShowImage := True;
+  btnOK := TfpgButton.Create(self);
+  with btnOK do
+  begin
+    SetPosition(232, 24, 75, 24);
+    Anchors := [anRight,anTop];
+    Text := 'OK';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.ok';
+    ModalResult := 0;
+    OnClick := @OnButtonClick;
+  end;
 
-  btnUP   := CreateButton(self, 232, 108, 80, 'UP', @OnButtonClick);
-  btnDOWN := CreateButton(self, 232, 136, 80, 'DOWN', @OnButtonClick);
+  btnCancel := TfpgButton.Create(self);
+  with btnCancel do
+  begin
+    SetPosition(232, 52, 75, 24);
+    Anchors := [anRight,anTop];
+    Text := 'Cancel';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.cancel';
+    ModalResult := 0;
+    OnClick := @OnButtonClick;
+  end;
+
+  btnUp := TfpgButton.Create(self);
+  with btnUp do
+  begin
+    SetPosition(232, 108, 75, 24);
+    Anchors := [anRight,anTop];
+    Text := 'Up';
+    FontDesc := '#Label1';
+    ImageName := '';
+    ModalResult := 0;
+    OnClick := @OnButtonClick;
+  end;
+
+  btnDown := TfpgButton.Create(self);
+  with btnDown do
+  begin
+    SetPosition(232, 136, 75, 24);
+    Anchors := [anRight,anTop];
+    Text := 'Down';
+    FontDesc := '#Label1';
+    ImageName := '';
+    ModalResult := 0;
+    OnClick := @OnButtonClick;
+  end;
+
+  {@VFD_BODY_END: WidgetOrderForm}
 end;
 
 procedure TWidgetOrderForm.OnButtonClick(Sender: TObject);
@@ -352,47 +425,67 @@ begin
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+constructor TfrmVFDSetup.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Name := 'frmVFDSetup';
+  gINI.ReadFormState(self);
+end;
+
+destructor TfrmVFDSetup.Destroy;
+begin
+  gINI.WriteFormState(self);
+  inherited Destroy;
+end;
+
 procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
-  SetPosition(322, 337, 237, 70);
+  SetPosition(394, 399, 237, 70);
   WindowTitle := 'General settings';
+  WindowPosition := wpScreenCenter;
 
   lb1 := TfpgLabel.Create(self);
   with lb1 do
   begin
-    SetPosition(8, 8, 92, 16);
+    SetPosition(8, 8, 116, 16);
     Text := 'Grid resolution:';
+    FontDesc := '#Label1';
   end;
 
   chlGrid := TfpgComboBox.Create(self);
   with chlGrid do
   begin
-    SetPosition(104, 4, 56, 22);
-    items.Add('1');
-    items.Add('4');
-    items.Add('8');
+    SetPosition(128, 4, 56, 22);
+    Items.Add('1');
+    Items.Add('4');
+    Items.Add('8');
+    FontDesc := '#List';
     FocusItem := 2;
   end;
 
   btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
-    SetPosition(8, 40, 96, 24);
-    Text        := 'OK';
-    ImageName   := 'stdimg.ok';
-    ShowImage   := True;
+    SetPosition(77, 40, 75, 24);
+    Anchors := [anRight,anBottom];
+    Text := 'OK';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.ok';
     ModalResult := 1;
+    ShowImage   := True;
   end;
 
   btnCancel := TfpgButton.Create(self);
   with btnCancel do
   begin
-    SetPosition(132, 40, 96, 24);
-    Text        := 'Cancel';
-    ImageName   := 'stdimg.cancel';
-    ShowImage   := True;
+    SetPosition(156, 40, 75, 24);
+    Anchors := [anRight,anBottom];
+    Text := 'Cancel';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.cancel';
     ModalResult := -1;
+    ShowImage   := True;
   end;
 
   {@VFD_BODY_END: frmVFDSetup}

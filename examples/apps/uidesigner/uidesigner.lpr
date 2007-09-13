@@ -31,34 +31,22 @@ uses
 procedure MainProc;
 begin
   fpgApplication.Initialize;
+  try
+    RegisterWidgets;
+    PropList := TPropertyList.Create;
+    maindsgn := TMainDesigner.Create;
+    maindsgn.CreateWindows;
+    maindsgn.EditedFileName := ParamStr(1);
+    if FileExists(maindsgn.EditedFileName) then
+      maindsgn.OnLoadFile(maindsgn);
 
-  RegisterWidgets;
-  PropList := TPropertyList.Create;
-  maindsgn := TMainDesigner.Create;
-  maindsgn.CreateWindows;
-  maindsgn.EditedFileName := ParamStr(1);
-  if FileExists(maindsgn.EditedFileName) then
-    maindsgn.OnLoadFile(maindsgn);
-
-  // Note:  This needs improving!!
-  fpgApplication.ProcessMessages;
-  repeat
-    fpgWaitWindowMessage;
-  until (not frmMain.Visible);
-  
-{
-  repeat
-    try
-      fpgDoMessageLoop;
-      break;
-    except
-      on e: Exception do
-        ShowMessage(e.message, 'Exception');
-    end;
-  until False;
-}
-
-//  fpgApplication.Run;
+    // Note:  This needs improving!!
+    fpgApplication.MainForm := frmMain;
+    fpgApplication.Run;
+    
+  finally
+    maindsgn.Free;
+  end;
 end;
 
 begin

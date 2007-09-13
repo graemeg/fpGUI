@@ -32,7 +32,7 @@ uses
   newformdesigner;
 
 const
-  program_version = '0.10';
+  program_version = '0.2';
 
 type
 
@@ -153,14 +153,9 @@ begin
       begin
         bl2 := FFile.Block(m);
         if (bl2.BlockID = 'VFD_BODY_BEGIN') and (bl2.FormName = bl.FormName) then
-          CreateParseForm(bl.FormName, bl.Data, bl2.Data)// pair has found
-          //Writeln('Parsing form: ',bl.FormName);
-          //Writeln(bl.data);
-          //Writeln(bl2.data);
-        ;
+          CreateParseForm(bl.FormName, bl.Data, bl2.Data); // pair was found
       end;
   end;
-
 end;
 
 procedure TMainDesigner.OnSaveFile(Sender: TObject);
@@ -222,7 +217,7 @@ begin
     finally
       CloseFile(ff);
     end;
-    writeln('Form saved.');
+//    frmMain.AddRecentFile(fname);
     frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + fname;
   except
     Writeln('Form save I/O failure.');
@@ -322,6 +317,9 @@ begin
     TFormDesigner(FDesigners[n]).Free;
   FDesigners.Free;
   FFile.Free;
+  
+  frmProperties.Free;
+  frmMain.Free;
   inherited;
 end;
 
@@ -395,7 +393,8 @@ end;
 
 procedure TMainDesigner.OnExit(Sender: TObject);
 begin
-  halt(0);
+  frmProperties.Close;
+  frmMain.Close;
 end;
 
 procedure TMainDesigner.OnOptionsClick(Sender: TObject);

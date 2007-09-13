@@ -52,7 +52,7 @@ implementation
 procedure TfrmOptions.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmOptions}
-  SetPosition(428, 237, 397, 357);
+  SetPosition(394, 264, 397, 357);
   WindowTitle := 'Options';
   WindowPosition := wpScreenCenter;
 
