@@ -26,7 +26,9 @@
    DefaultColWidth gui_basegrid/tfpgbasegrid.defaultcolwidth.html
    DefaultRowHeight gui_basegrid/tfpgbasegrid.defaultrowheight.html
    Font gui_basegrid/tfpgbasegrid.font.html
+   FontDesc gui_basegrid/tfpgbasegrid.fontdesc.html
    HeaderFont gui_basegrid/tfpgbasegrid.headerfont.html
+   HeaderFontDesc gui_basegrid/tfpgbasegrid.headerfontdesc.html
    BackgroundColor gui_basegrid/tfpgbasegrid.backgroundcolor.html
    FocusCol gui_basegrid/tfpgbasegrid.focuscol.html
    FocusRow gui_basegrid/tfpgbasegrid.focusrow.html
@@ -61,6 +63,7 @@
    FImage gui_button/tfpgbutton.fimage.html
    FText gui_button/tfpgbutton.ftext.html
    FFont gui_button/tfpgbutton.ffont.html
+   FDefault gui_button/tfpgbutton.fdefault.html
    SetShowImage gui_button/tfpgbutton.setshowimage.html
    HandlePaint gui_button/tfpgbutton.handlepaint.html
    HandleKeyPress gui_button/tfpgbutton.handlekeypress.html
@@ -79,6 +82,7 @@
    Font gui_button/tfpgbutton.font.html
    AllowDown gui_button/tfpgbutton.allowdown.html
    Text gui_button/tfpgbutton.text.html
+   Default gui_button/tfpgbutton.default.html
    FontDesc gui_button/tfpgbutton.fontdesc.html
    ImageName gui_button/tfpgbutton.imagename.html
    ImageMargin gui_button/tfpgbutton.imagemargin.html
@@ -100,7 +104,7 @@
    Font gui_checkbox/tfpgcheckbox.font.html
    Checked gui_checkbox/tfpgcheckbox.checked.html
    Text gui_checkbox/tfpgcheckbox.text.html
-   FontName gui_checkbox/tfpgcheckbox.fontname.html
+   FontDesc gui_checkbox/tfpgcheckbox.fontdesc.html
    BackgroundColor gui_checkbox/tfpgcheckbox.backgroundcolor.html
    OnChange gui_checkbox/tfpgcheckbox.onchange.html
   CreateCheckBox gui_checkbox/createcheckbox.html
@@ -229,6 +233,7 @@
    HandleClose gui_form/tfpgform.handleclose.html
    HandleHide gui_form/tfpgform.handlehide.html
    HandleShow gui_form/tfpgform.handleshow.html
+   HandleKeyPress gui_form/tfpgform.handlekeypress.html
    AfterConstruction gui_form/tfpgform.afterconstruction.html
    BeforeDestruction gui_form/tfpgform.beforedestruction.html
    Create gui_form/tfpgform.create.html
@@ -238,9 +243,9 @@
    ShowModal gui_form/tfpgform.showmodal.html
    Close gui_form/tfpgform.close.html
    Sizeable gui_form/tfpgform.sizeable.html
+   ModalResult gui_form/tfpgform.modalresult.html
    WindowPosition gui_form/tfpgform.windowposition.html
    WindowTitle gui_form/tfpgform.windowtitle.html
-   ModalResult gui_form/tfpgform.modalresult.html
    OnActivate gui_form/tfpgform.onactivate.html
    OnClose gui_form/tfpgform.onclose.html
    OnCreate gui_form/tfpgform.oncreate.html
@@ -252,26 +257,6 @@
  gui_grid gui_grid/index.html
   TFileEntryType gui_grid/tfileentrytype.html
   TFileListSortOrder gui_grid/tfilelistsortorder.html
-  TfpgGrid gui_grid/tfpggrid.html
-   Columns gui_grid/tfpggrid.columns.html
-   DefaultColWidth gui_grid/tfpggrid.defaultcolwidth.html
-   DefaultRowHeight gui_grid/tfpggrid.defaultrowheight.html
-   Font gui_grid/tfpggrid.font.html
-   HeaderFont gui_grid/tfpggrid.headerfont.html
-   BackgroundColor gui_grid/tfpggrid.backgroundcolor.html
-   FocusCol gui_grid/tfpggrid.focuscol.html
-   FocusRow gui_grid/tfpggrid.focusrow.html
-   RowSelect gui_grid/tfpggrid.rowselect.html
-   ColumnCount gui_grid/tfpggrid.columncount.html
-   RowCount gui_grid/tfpggrid.rowcount.html
-   ShowHeader gui_grid/tfpggrid.showheader.html
-   ShowGrid gui_grid/tfpggrid.showgrid.html
-   HeaderHeight gui_grid/tfpggrid.headerheight.html
-   ColResizing gui_grid/tfpggrid.colresizing.html
-   ColumnWidth gui_grid/tfpggrid.columnwidth.html
-   OnFocusChange gui_grid/tfpggrid.onfocuschange.html
-   OnRowChange gui_grid/tfpggrid.onrowchange.html
-   OnDoubleClick gui_grid/tfpggrid.ondoubleclick.html
   TFileEntry gui_grid/tfileentry.html
    Create gui_grid/tfileentry.create.html
    Name gui_grid/tfileentry.name.html
@@ -303,6 +288,10 @@
    FixedFont gui_grid/tfpgfilegrid.fixedfont.html
    FileList gui_grid/tfpgfilegrid.filelist.html
    DefaultRowHeight gui_grid/tfpgfilegrid.defaultrowheight.html
+   Font gui_grid/tfpgfilegrid.font.html
+   HeaderFont gui_grid/tfpgfilegrid.headerfont.html
+   FontDesc gui_grid/tfpgfilegrid.fontdesc.html
+   HeaderFontDesc gui_grid/tfpgfilegrid.headerfontdesc.html
    RowCount gui_grid/tfpgfilegrid.rowcount.html
    ColumnCount gui_grid/tfpgfilegrid.columncount.html
    Columns gui_grid/tfpgfilegrid.columns.html
@@ -330,8 +319,8 @@
    Columns gui_grid/tfpgstringgrid.columns.html
    DefaultColWidth gui_grid/tfpgstringgrid.defaultcolwidth.html
    DefaultRowHeight gui_grid/tfpgstringgrid.defaultrowheight.html
-   Font gui_grid/tfpgstringgrid.font.html
-   HeaderFont gui_grid/tfpgstringgrid.headerfont.html
+   FontDesc gui_grid/tfpgstringgrid.fontdesc.html
+   HeaderFontDesc gui_grid/tfpgstringgrid.headerfontdesc.html
    BackgroundColor gui_grid/tfpgstringgrid.backgroundcolor.html
    FocusCol gui_grid/tfpgstringgrid.focuscol.html
    FocusRow gui_grid/tfpgstringgrid.focusrow.html
@@ -515,7 +504,7 @@
    HandleMouseExit gui_memo/tfpgmemo.handlemouseexit.html
    Create gui_memo/tfpgmemo.create.html
    Destroy gui_memo/tfpgmemo.destroy.html
-   UpdateScrollBar gui_memo/tfpgmemo.updatescrollbar.html
+   UpdateScrollBars gui_memo/tfpgmemo.updatescrollbars.html
    SelectionText gui_memo/tfpgmemo.selectiontext.html
    LineHeight gui_memo/tfpgmemo.lineheight.html
    CursorLine gui_memo/tfpgmemo.cursorline.html
@@ -621,7 +610,7 @@
    Font gui_radiobutton/tfpgradiobutton.font.html
    Checked gui_radiobutton/tfpgradiobutton.checked.html
    Text gui_radiobutton/tfpgradiobutton.text.html
-   FontName gui_radiobutton/tfpgradiobutton.fontname.html
+   FontDesc gui_radiobutton/tfpgradiobutton.fontdesc.html
    BackgroundColor gui_radiobutton/tfpgradiobutton.backgroundcolor.html
    GroupIndex gui_radiobutton/tfpgradiobutton.groupindex.html
    OnChange gui_radiobutton/tfpgradiobutton.onchange.html
@@ -709,15 +698,15 @@
    Create gui_tab/tfpgpagecontrol.create.html
    Destroy gui_tab/tfpgpagecontrol.destroy.html
    AppendTabSheet gui_tab/tfpgpagecontrol.appendtabsheet.html
-   BackgroundColor gui_tab/tfpgpagecontrol.backgroundcolor.html
    PageCount gui_tab/tfpgpagecontrol.pagecount.html
-   ActivePageIndex gui_tab/tfpgpagecontrol.activepageindex.html
    ActivePage gui_tab/tfpgpagecontrol.activepage.html
+   OnChange gui_tab/tfpgpagecontrol.onchange.html
+   ActivePageIndex gui_tab/tfpgpagecontrol.activepageindex.html
+   BackgroundColor gui_tab/tfpgpagecontrol.backgroundcolor.html
    FixedTabWidth gui_tab/tfpgpagecontrol.fixedtabwidth.html
+   SortPages gui_tab/tfpgpagecontrol.sortpages.html
    Style gui_tab/tfpgpagecontrol.style.html
    TabPosition gui_tab/tfpgpagecontrol.tabposition.html
-   SortPages gui_tab/tfpgpagecontrol.sortpages.html
-   OnChange gui_tab/tfpgpagecontrol.onchange.html
  gui_trackbar gui_trackbar/index.html
   TTrackBarChange gui_trackbar/ttrackbarchange.html
   TfpgTrackBarExtra gui_trackbar/tfpgtrackbarextra.html
@@ -749,6 +738,19 @@
    ShowPosition gui_trackbar/tfpgtrackbar.showposition.html
    Orientation gui_trackbar/tfpgtrackbar.orientation.html
    OnChange gui_trackbar/tfpgtrackbar.onchange.html
+ gui_iniutils gui_iniutils/index.html
+  TfpgINIFile gui_iniutils/tfpginifile.html
+   CreateExt gui_iniutils/tfpginifile.createext.html
+   ReadString gui_iniutils/tfpginifile.readstring.html
+   ReadInteger gui_iniutils/tfpginifile.readinteger.html
+   ReadBool gui_iniutils/tfpginifile.readbool.html
+   ReadDate gui_iniutils/tfpginifile.readdate.html
+   ReadDateTime gui_iniutils/tfpginifile.readdatetime.html
+   ReadFloat gui_iniutils/tfpginifile.readfloat.html
+   ReadTime gui_iniutils/tfpginifile.readtime.html
+   ReadFormState gui_iniutils/tfpginifile.readformstate.html
+   WriteFormState gui_iniutils/tfpginifile.writeformstate.html
+  gINI gui_iniutils/gini.html
 
 :classes
 #GUI.gui_basegrid.TfpgBaseGrid #CoreLib.gfx_widget.TfpgWidget
@@ -776,7 +778,11 @@
 1VFTemp
 1VFVScrollBar
 1VFHScrollBar
+1MGetFontDesc
+1MGetHeaderFontDesc
 1MHScrollBarMove
+1MSetFontDesc
+1MSetHeaderFontDesc
 1MSetRowSelect
 1MVScrollBarMove
 1MSetBackgroundColor
@@ -810,7 +816,9 @@
 2PDefaultColWidth rw
 2PDefaultRowHeight rw
 2PFont r
+2PFontDesc rw
 2PHeaderFont r
+2PHeaderFontDesc rw
 2PBackgroundColor rw
 2PFocusCol rw
 2PFocusRow rw
@@ -845,6 +853,7 @@
 1VFAllowAllUp
 1VFModalResult
 1MGetFontDesc
+1MSetDefault
 1MSetEmbedded
 1MSetFontDesc
 1MSetImageName
@@ -862,6 +871,7 @@
 2VFImage
 2VFText
 2VFFont
+2VFDefault
 2MSetShowImage
 2MHandlePaint
 2MHandleKeyPress
@@ -880,6 +890,7 @@
 3PFont r
 3PAllowDown rw
 4PText rw
+4PDefault rw
 4PFontDesc rw
 4PImageName rw
 4PImageMargin rw
@@ -897,10 +908,10 @@
 1VFFont
 1VFBoxSize
 1VFIsPressed
-1MGetFontName
+1MGetFontDesc
 1MSetBackgroundColor
 1MSetChecked
-1MSetFontName
+1MSetFontDesc
 1MSetText
 2MHandlePaint
 2MHandleLMouseDown
@@ -911,7 +922,7 @@
 3PFont r
 4PChecked rw
 4PText rw
-4PFontName rw
+4PFontDesc rw
 4PBackgroundColor rw
 4POnChange rw
 #GUI.gui_combobox.TfpgCustomComboBox #CoreLib.gfx_widget.TfpgWidget
@@ -1071,6 +1082,7 @@
 3PShowHidden rw
 #GUI.gui_edit.TfpgCustomEdit #CoreLib.gfx_widget.TfpgWidget
 #GUI.gui_edit.TfpgEdit #GUI.gui_edit.TfpgCustomEdit
+1VFOnChange
 1VFText
 1VFMaxLength
 1VFCursorPos
@@ -1103,7 +1115,7 @@
 3MDestroy
 3MSelectionText
 3PFont r
-3VOnChange
+3POnChange rw
 4PText rw
 4PFontDesc rw
 4PBackgroundColor rw
@@ -1133,6 +1145,7 @@
 2MHandleClose
 2MHandleHide
 2MHandleShow
+2MHandleKeyPress
 2MAfterConstruction
 2MBeforeDestruction
 3MCreate
@@ -1142,9 +1155,9 @@
 3MShowModal
 3MClose
 3PSizeable rw
-3PWindowPosition rw
-3PWindowTitle rw
 3PModalResult rw
+4PWindowPosition rw
+4PWindowTitle rw
 4POnActivate rw
 4POnClose rw
 4POnCreate rw
@@ -1152,26 +1165,6 @@
 4POnDestroy rw
 4POnHide rw
 4POnShow rw
-#GUI.gui_grid.TfpgGrid #GUI.gui_customgrid.TfpgCustomGrid
-4PColumns
-4PDefaultColWidth
-4PDefaultRowHeight
-4PFont
-4PHeaderFont
-4PBackgroundColor
-4PFocusCol
-4PFocusRow
-4PRowSelect
-4PColumnCount
-4PRowCount
-4PShowHeader
-4PShowGrid
-4PHeaderHeight
-4PColResizing
-4PColumnWidth
-4POnFocusChange
-4POnRowChange
-4POnDoubleClick
 #GUI.gui_grid.TFileEntry TObject
 1VFAttributes
 1VFEntryType
@@ -1219,6 +1212,10 @@
 3PFixedFont r
 3PFileList r
 3PDefaultRowHeight
+3PFont
+3PHeaderFont
+4PFontDesc
+4PHeaderFontDesc
 4PRowCount
 4PColumnCount
 4PColumns
@@ -1251,8 +1248,8 @@
 4PColumns
 4PDefaultColWidth
 4PDefaultRowHeight
-4PFont
-4PHeaderFont
+4PFontDesc
+4PHeaderFontDesc
 4PBackgroundColor
 4PFocusCol
 4PFocusRow
@@ -1581,7 +1578,7 @@
 2MHandleMouseExit
 3MCreate
 3MDestroy
-3MUpdateScrollBar
+3MUpdateScrollBars
 3MSelectionText
 3PLineHeight r
 3PCursorLine rw
@@ -1725,10 +1722,10 @@
 1VFText
 1VFBoxSize
 1VFIsPressed
-1MGetFontName
+1MGetFontDesc
 1MSetBackgroundColor
 1MSetChecked
-1MSetFontName
+1MSetFontDesc
 1MSetText
 2MHandlePaint
 2MHandleLMouseDown
@@ -1739,7 +1736,7 @@
 3PFont r
 4PChecked rw
 4PText rw
-4PFontName rw
+4PFontDesc rw
 4PBackgroundColor rw
 4PGroupIndex rw
 4POnChange rw
@@ -1863,15 +1860,15 @@
 3MCreate
 3MDestroy
 3MAppendTabSheet
-3PBackgroundColor rw
 3PPageCount r
-3PActivePageIndex rw
 3PActivePage rw
-3PFixedTabWidth rw
-3PStyle rw
-3PTabPosition rw
-3PSortPages rw
 3POnChange rw
+4PActivePageIndex rw
+4PBackgroundColor rw
+4PFixedTabWidth rw
+4PSortPages rw
+4PStyle rw
+4PTabPosition rw
 #GUI.gui_trackbar.TfpgTrackBarExtra #CoreLib.gfx_widget.TfpgWidget
 1VFBackgroundColor
 1VFMax
@@ -1910,11 +1907,8 @@
 1VFSliderPos
 1VFSliderLength
 1VFSliderDragging
-1VFStartBtnPressed
-1VFEndBtnPressed
 1VFSliderDragPos
 1VFSliderDragStart
-1VFActiveButtonRect
 1VFMousePosition
 1VFOnChange
 1VFFont
@@ -1939,3 +1933,15 @@
 4PShowPosition rw
 4POrientation rw
 4POnChange rw
+#GUI.gui_iniutils.TfpgINIFile TINIFile
+1VFReadOnly
+3MCreateExt
+3MReadString
+3MReadInteger
+3MReadBool
+3MReadDate
+3MReadDateTime
+3MReadFloat
+3MReadTime
+3MReadFormState
+3MWriteFormState

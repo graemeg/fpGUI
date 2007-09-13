@@ -619,6 +619,7 @@
    IsInitialized gfxbase/tfpgapplicationbase.isinitialized.html
    TopModalForm gfxbase/tfpgapplicationbase.topmodalform.html
    MainForm gfxbase/tfpgapplicationbase.mainform.html
+   Terminated gfxbase/tfpgapplicationbase.terminated.html
   KeycodeToText gfxbase/keycodetotext.html
   CheckClipboardKey gfxbase/checkclipboardkey.html
   fpgColorToRGBTriple gfxbase/fpgcolortorgbtriple.html
@@ -1020,6 +1021,7 @@
  gfx_widget gfx_widget/index.html
   TFocusSearchDirection gfx_widget/tfocussearchdirection.html
   TfpgWidget gfx_widget/tfpgwidget.html
+   FFormDesigner gfx_widget/tfpgwidget.fformdesigner.html
    FVisible gfx_widget/tfpgwidget.fvisible.html
    FEnabled gfx_widget/tfpgwidget.fenabled.html
    FFocusable gfx_widget/tfpgwidget.ffocusable.html
@@ -1054,9 +1056,9 @@
    FindFocusWidget gfx_widget/tfpgwidget.findfocuswidget.html
    HandleAlignments gfx_widget/tfpgwidget.handlealignments.html
    HandleShow gfx_widget/tfpgwidget.handleshow.html
+   InternalHandleShow gfx_widget/tfpgwidget.internalhandleshow.html
    HandleHide gfx_widget/tfpgwidget.handlehide.html
    MoveAndResize gfx_widget/tfpgwidget.moveandresize.html
-   MoveAndResizeBy gfx_widget/tfpgwidget.moveandresizeby.html
    RePaint gfx_widget/tfpgwidget.repaint.html
    OnPaint gfx_widget/tfpgwidget.onpaint.html
    OnMouseExit gfx_widget/tfpgwidget.onmouseexit.html
@@ -1069,7 +1071,10 @@
    Destroy gfx_widget/tfpgwidget.destroy.html
    SetFocus gfx_widget/tfpgwidget.setfocus.html
    KillFocus gfx_widget/tfpgwidget.killfocus.html
+   MoveAndResizeBy gfx_widget/tfpgwidget.moveandresizeby.html
    SetPosition gfx_widget/tfpgwidget.setposition.html
+   Invalidate gfx_widget/tfpgwidget.invalidate.html
+   FormDesigner gfx_widget/tfpgwidget.formdesigner.html
    Parent gfx_widget/tfpgwidget.parent.html
    ActiveWidget gfx_widget/tfpgwidget.activewidget.html
    Visible gfx_widget/tfpgwidget.visible.html
@@ -1303,6 +1308,7 @@
 3PMouseCursor rw
 #CoreLib.gfxbase.TfpgApplicationBase TObject
 1VFMainForm
+1VFTerminated
 1VFTopModalForm
 2VFIsInitialized
 2MDoGetFontFaceList
@@ -1311,6 +1317,7 @@
 3PIsInitialized r
 3PTopModalForm rw
 3PMainForm rw
+3PTerminated rw
 #CoreLib.gfx_x11.TfpgFontResourceImpl #CoreLib.gfxbase.TfpgFontResourceBase
 1VFFontData
 2PHandle r
@@ -1728,6 +1735,7 @@
 1MMsgMouseExit
 1MMsgMouseScroll
 1MSetActiveWidget
+2VFFormDesigner
 2VFVisible
 2VFEnabled
 2VFFocusable
@@ -1762,9 +1770,9 @@
 2MFindFocusWidget
 2MHandleAlignments
 2MHandleShow
+2MInternalHandleShow
 2MHandleHide
 2MMoveAndResize
-2MMoveAndResizeBy
 2MRePaint
 2POnPaint rw
 2POnMouseExit rw
@@ -1777,7 +1785,10 @@
 3MDestroy
 3MSetFocus
 3MKillFocus
+3MMoveAndResizeBy
 3MSetPosition
+3MInvalidate
+3PFormDesigner rw
 3PParent rw
 3PActiveWidget rw
 3PVisible rw

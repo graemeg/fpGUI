@@ -21,6 +21,8 @@ makeskel --package=GUI --output=xml/gui/gui_scrollbar.xml --input='-Fi../src/gui
 makeskel --package=GUI --output=xml/gui/gui_style.xml --input='-Fi../src/gui ../src/gui/gui_style.pas'
 makeskel --package=GUI --output=xml/gui/gui_tab.xml --input='-Fi../src/gui ../src/gui/gui_tab.pas'
 makeskel --package=GUI --output=xml/gui/gui_trackbar.xml --input='-Fi../src/gui ../src/gui/gui_trackbar.pas'
+makeskel --package=GUI --output=xml/gui/gui_tree.xml --input='-Fi../src/gui ../src/gui/gui_tree.pas'
+makeskel --package=GUI --output=xml/gui/gui_iniutils.xml --input='-Fi../src/gui ../src/gui/gui_iniutils.pas'
 
 
 # makeskel --package=GUI --output=xml/gui/gui_.xml --input='-Fi../src/gui ../src/gui/gui_.pas'

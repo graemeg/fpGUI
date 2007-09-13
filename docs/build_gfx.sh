@@ -1,11 +1,11 @@
 #!/bin/sh
 # fpc/bin must be in your PATH
+#   --html-search=../search.html \
 fpdoc --package=CoreLib \
   --format=html \
   --output=html/corelib/  \
   --content=html/corelib.cnt \
   --import=html/gui.cnt,../gui/ \
-  --html-search=../search.html \
   --input='-Fi../src/corelib ../src/corelib/gfxbase.pas' --descr=xml/corelib/gfxbase.xml \
   --input='-Fi../src/corelib ../src/corelib/x11/gfx_x11.pas' --descr=xml/corelib/x11/gfx_x11.xml \
   --input='-Fi../src/corelib ../src/corelib/gdi/gfx_gdi.pas' --descr=xml/corelib/gdi/gfx_gdi.xml \
