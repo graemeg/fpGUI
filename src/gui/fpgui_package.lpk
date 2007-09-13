@@ -3,11 +3,17 @@
   <Package Version="2">
     <Name Value="fpgui_package"/>
     <Author Value="Graeme Geldenhuys"/>
+    <AutoUpdate Value="OnRebuildingAll"/>
     <CompilerOptions>
       <Version Value="5"/>
       <SearchPaths>
         <UnitOutputDirectory Value="../../lib"/>
       </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <AllowLabel Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <CodeGeneration>
         <Generate Value="Faster"/>
       </CodeGeneration>
@@ -15,8 +21,10 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="fpGUI - multi-handle redesign"/>
-    <License Value="Modified LGPL"/>
+    <Description Value="fpGUI - multi-handle redesign
+"/>
+    <License Value="Modified LGPL
+"/>
     <Version Minor="5"/>
     <Files Count="23">
       <Item1>
@@ -114,12 +122,12 @@
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="fpgfx_package"/>
-        <MinVersion Minor="5" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="fpgfx_package"/>
+        <MinVersion Minor="5" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>

@@ -1001,7 +1001,7 @@ var
   side: integer;
   margin: integer;
 begin
-  ACanvas.SetColor(clText1);
+//  ACanvas.SetColor(clText1);
   side   := (w div 4) + 1;
   margin := side + 1;
 

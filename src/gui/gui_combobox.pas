@@ -34,7 +34,8 @@ type
     FBackgroundColor: TfpgColor;
     FFocusItem: integer;
     FFont: TfpgFont;
-    FInternalBtn: TfpgButton;
+    FInternalBtnRect: TfpgRect;
+    FInternalBtnDown: boolean;
     FItems: TStringList;
     FOnChange: TNotifyEvent;
     function    GetFontDesc: string;
@@ -48,11 +49,13 @@ type
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
     procedure   SetWidth(const AValue: TfpgCoord);
+    procedure   CalculateInternalButtonRect;
   protected
     FMargin: integer;
-    procedure   SetEnabled(const AValue: boolean); override;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    FocusItem: integer read FFocusItem write SetFocusItem;
@@ -90,7 +93,8 @@ function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringLi
 implementation
 
 uses
-  gui_listbox;
+  gui_listbox,
+  math;
   
 var
   OriginalFocusRoot: TfpgWidget;
@@ -248,6 +252,7 @@ begin
   end
   else
   begin
+    FInternalBtnDown := False;
     FDropDown.Close;
     FreeAndNil(FDropDown);
   end;
@@ -319,29 +324,43 @@ begin
   if FWidth = AValue then
     Exit; //==>
   FWidth := AValue;
-  if Assigned(FInternalBtn) then
-    FInternalBtn.Left := Width - 20;
   RePaint;
 end;
 
-procedure TfpgCustomComboBox.SetEnabled(const AValue: boolean);
+procedure TfpgCustomComboBox.CalculateInternalButtonRect;
 begin
-  inherited SetEnabled(AValue);
-  FInternalBtn.Enabled := AValue;
+  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
+end;
+
+procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer;
+  shiftstate: TShiftState);
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  FInternalBtnDown  := True;
 end;
 
 procedure TfpgCustomComboBox.HandleLMouseUp(x, y: integer;
   shiftstate: TShiftState);
 begin
+  FInternalBtnDown  := False;
   inherited HandleLMouseUp(x, y, shiftstate);
   DoDropDown;
+end;
+
+procedure TfpgCustomComboBox.HandleResize(awidth, aheight: TfpgCoord);
+begin
+  inherited HandleResize(awidth, aheight);
+  CalculateInternalButtonRect;
 end;
 
 procedure TfpgCustomComboBox.HandlePaint;
 var
   r: TfpgRect;
+  ar: TfpgRect;
+  btnflags: TFButtonFlags;
 begin
   Canvas.BeginDraw;
+  btnflags := [];
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -355,17 +374,33 @@ begin
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
+
   Canvas.FillRectangle(r);
 
-//  fpgStyle.DrawButtonFace(canvas, width - min(height, 20)-3, 2, height-4, height-4, [btnIsEmbedded]);
-//  fpgStyle.DrawDirectionArrow(canvas, width - height + 1, 1, height-2, height-2, 1);
+  // paint the fake dropdown button
+  if FInternalBtnDown then
+    Include(btnflags, btnIsPressed);
+  fpgStyle.DrawButtonFace(Canvas,
+      FInternalBtnRect.Left,
+      FInternalBtnRect.Top,
+      FInternalBtnRect.Width,
+      FInternalBtnRect.Height, btnflags);
+  ar := FInternalBtnRect;
+  InflateRect(ar, -1, -1);
+  if Enabled then
+    Canvas.SetColor(clText1)
+  else
+    Canvas.SetColor(clShadow2);
+  fpgStyle.DrawDirectionArrow(Canvas,
+      ar.Left, ar.Top, ar.Width, ar.Height, 1);
+
+  Dec(r.Width, FInternalBtnRect.Width);
   Canvas.SetFont(Font);
 
   if Focused then
   begin
     Canvas.SetColor(clSelection);
     Canvas.SetTextColor(clSelectionText);
-    r.Width := r.Width - FInternalBtn.Width;
     InflateRect(r, -1, -1);
   end
   else
@@ -395,6 +430,7 @@ begin
   FFocusItem        := 0; // nothing is selected
   FMargin           := 3;
   FFocusable        := True;
+  FInternalBtnDown  := False;
   
   FFont   := fpgGetFont('#List');
   FItems  := TStringList.Create;
@@ -417,17 +453,7 @@ end;
 procedure TfpgCustomComboBox.AfterConstruction;
 begin
   inherited AfterConstruction;
-
-  if not Assigned(FInternalBtn) then
-  begin
-    FInternalBtn           := CreateButton(self, (Width-20), 2, 18, '', @InternalBtnClick);
-    FInternalBtn.Height    := 19;
-    FInternalBtn.Embedded  := True;
-    FInternalBtn.Parent    := self;
-    FInternalBtn.ImageName := 'sys.sb.down';
-    FInternalBtn.ShowImage := True;
-    FInternalBtn.Anchors   := [anRight, anTop];
-  end;
+  CalculateInternalButtonRect;
 end;
 
 end.
