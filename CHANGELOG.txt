@@ -1,0 +1,76 @@
+
+  Release notes for fpGUI
+  =======================
+
+
+v0.5  (2007-09-13)
+  - The first release since the rewrite of fpGUI to use a 'windowed'
+    multi-handle implementation.
+  - Available components in this release:
+    * Button with image support
+    * Label
+    * Bevel (aka Panel)
+    * Radio Buttons
+    * Check Boxes
+    * Track Bar (aka Slider)
+    * Page Control (aka Tab Control)
+    * List Box
+    * Scrollbars
+    * Memo (partially implemented)
+    * Forms (Windows). Normal, Modal and Popup.
+    * Dialogs
+          o ShowMessage()
+          o Font Selection dialog
+          o File Open...
+          o File Save As... 
+    * Text Edit
+    * Combo Box (aka Choice List)
+    * Grids (aka Tables)
+          o Base Grid
+          o Custom Grid
+          o Draw Grid
+          o String Grid
+          o File Grid 
+    * Progress Bar
+    * List View
+    * Main Menu bar and Popup Menus
+    * Treeview 
+  - Align and Anchor support has been added.
+  - Clipboard support (application wide). Global (OS based) 
+    is in the works.
+  - All painting is done via double buffering, so drawing flicker 
+    is a thing of the past.
+  - Better font support. We now have support for Font Aliases. We 
+    can define a font style (font name, size and attributes) and 
+    give it a text name. Whenever we want to use that font style, 
+    we can reference it by the text name.
+  - All colors are now defined in RGB order, no matter what platform 
+    we use.
+  - Modal form support (with some minor issues under Windows that 
+    should be fixed soon).
+  - Widgets and Forms now have a single consistent constructor due 
+    to the base window class that descends from TComponent.
+  - Delayed resource allocation. This is very handy under Linux where 
+    the X Server can be in a remote location (not on the same computer). 
+    This gives a performance bonus as we need to communicate less with 
+    the X Server which is inherently slow.
+  - Supports a Model-GUI-Mediator (MGM) implementation to work with 
+    the tiOPF Object Persistent Framework. Business Objects can now 
+    be saved in a OO fashion. The MGM implementation also makes the 
+    standard fpGUI components Object-Aware. No need for DB Components.
+  - fpGUI now has a Visual Form (GUI) Designer in the example/apps 
+    directory. Developers can now create forms visually at a much 
+    faster rate. The designer uses the same source file that contains 
+    your code - generating the ui code like you would have done 
+    manually. No external ui files like Lazarus (*.lfm) or Delphi 
+    (*.dfm). See the readme file in the project directory for more 
+    details. 
+
+
+v0.4
+  - The last version of fpGUI using a single handle (windowless) 
+    design.
+
+                  --------------oOo----------------
+
+
