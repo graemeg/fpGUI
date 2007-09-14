@@ -110,7 +110,6 @@ type
     procedure   ClearForm;
     procedure   DefaultHandler(var msg); override;
     procedure   Show;
-    procedure   InitTest;
     function    AddWidget(wg: TfpgWidget; wgc: TVFDWidgetClass): TWidgetDesigner;
     function    WidgetDesigner(wg: TfpgWidget): TWidgetDesigner;
     function    FindWidgetByName(const wgname: string): TfpgWidget;
@@ -473,20 +472,6 @@ procedure TFormDesigner.Show;
 begin
   FForm.Show;
   UpdatePropWin;
-end;
-
-procedure TFormDesigner.InitTest;
-var
-  l1: TfpgLabel;
-  ed1: TfpgEdit;
-begin
-//  Exit;
-  writeln('InitTest');
-  l1  := CreateLabel(FForm, 10, 10, 'Test Label');
-  ed1 := CreateEdit(FForm, 10, 50, 150, 0);
-
-  AddWidget(l1, nil);
-  AddWidget(ed1, nil);
 end;
 
 function TFormDesigner.AddWidget(wg: TfpgWidget; wgc: TVFDWidgetClass): TWidgetDesigner;

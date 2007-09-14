@@ -337,6 +337,8 @@ type
     procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
+    procedure   SetHeight(const AValue: TfpgCoord); virtual;
+    procedure   SetWidth(const AValue: TfpgCoord); virtual;
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
@@ -357,8 +359,8 @@ type
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
     property    Left: TfpgCoord read FLeft write FLeft;
     property    Top: TfpgCoord read FTop write FTop;
-    property    Width: TfpgCoord read FWidth write FWidth;
-    property    Height: TfpgCoord read FHeight write FHeight;
+    property    Width: TfpgCoord read FWidth write SetWidth;
+    property    Height: TfpgCoord read FHeight write SetHeight;
     property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
     property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
     property    Canvas: TfpgCanvasBase read GetCanvas;
@@ -731,6 +733,20 @@ end;
 procedure TfpgWindowBase.SetWindowTitle(const ATitle: string);
 begin
   DoSetWindowTitle(ATitle);
+end;
+
+procedure TfpgWindowBase.SetHeight(const AValue: TfpgCoord);
+begin
+  if FHeight = AValue then
+    Exit;
+  FHeight := AValue;
+end;
+
+procedure TfpgWindowBase.SetWidth(const AValue: TfpgCoord);
+begin
+  if FWidth = AValue then
+    Exit;
+  FWidth := AValue;
 end;
 
 constructor TfpgWindowBase.Create(AOwner: TComponent);

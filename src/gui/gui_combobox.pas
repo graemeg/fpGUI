@@ -25,8 +25,6 @@ uses
 
 type
 
-  { TfpgCustomComboBox }
-
   TfpgCustomComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
@@ -48,16 +46,17 @@ type
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
-    procedure   SetWidth(const AValue: TfpgCoord);
     procedure   CalculateInternalButtonRect;
   protected
     FMargin: integer;
-    property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
+    procedure   SetHeight(const AValue: TfpgCoord); override;
+    procedure   SetWidth(const AValue: TfpgCoord); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     procedure   PaintInternalButton; virtual;
+    property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
@@ -68,9 +67,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Update;
-    procedure   AfterConstruction; override;
     property    Font: TfpgFont read FFont;
-    property    Width: TfpgCoord read FWidth write SetWidth;
   end;
 
 
@@ -322,15 +319,21 @@ end;
 
 procedure TfpgCustomComboBox.SetWidth(const AValue: TfpgCoord);
 begin
-  if FWidth = AValue then
-    Exit; //==>
-  FWidth := AValue;
+  inherited;
+  CalculateInternalButtonRect;
   RePaint;
 end;
 
 procedure TfpgCustomComboBox.CalculateInternalButtonRect;
 begin
   FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
+end;
+
+procedure TfpgCustomComboBox.SetHeight(const AValue: TfpgCoord);
+begin
+  inherited;
+  CalculateInternalButtonRect;
+  RePaint;
 end;
 
 procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -451,7 +454,8 @@ begin
   
   FFont   := fpgGetFont('#List');
   FItems  := TStringList.Create;
-  
+  CalculateInternalButtonRect;
+
   FOnChange := nil;
 end;
 
@@ -465,12 +469,6 @@ procedure TfpgCustomComboBox.Update;
 begin
   FFocusItem := 1;
   Repaint;
-end;
-
-procedure TfpgCustomComboBox.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  CalculateInternalButtonRect;
 end;
 
 end.

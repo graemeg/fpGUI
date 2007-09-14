@@ -2,10 +2,6 @@ unit gfx_popupwindow;
 
 {$mode objfpc}{$H+}
 
-{
-  Still under construction!!!!!
-}
-
 interface
 
 uses

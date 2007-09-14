@@ -44,11 +44,11 @@ type
     procedure nextline;
   public
     constructor Create(const FormName, FormHead, FormBody: string);
-    destructor Destroy; override;
-    function ParseForm: TFormDesigner;
-    procedure ParseFormProperties;
-    procedure ParseFormWidgets;
-    function ReadWGProperty(propline: string; wg: TfpgWidget; wgc: TVFDWidgetClass): boolean;
+    destructor  Destroy; override;
+    function    ParseForm: TFormDesigner;
+    procedure   ParseFormProperties;
+    procedure   ParseFormWidgets;
+    function    ReadWGProperty(propline: string; wg: TfpgWidget; wgc: TVFDWidgetClass): boolean;
   end;
 
 
