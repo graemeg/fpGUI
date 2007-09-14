@@ -34,7 +34,7 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
-    property    AutoSize: boolean read FAutoSize write SetAutoSize default True;
+    property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
     property    Text: string read FText write SetText;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Color: TfpgColor read FColor write SetColor;
@@ -127,7 +127,7 @@ begin
   FWidth  := 80;
   FColor  := clText1;
   FBackgroundColor := clWindowBackground;
-  FAutoSize := True;
+  FAutoSize := False;
 end;
 
 destructor TfpgLabel.Destroy;
