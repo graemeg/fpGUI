@@ -291,6 +291,7 @@ type
     procedure   BeginDraw; overload;
     procedure   BeginDraw(ABuffered: boolean); overload;
     procedure   EndDraw(x, y, w, h: TfpgCoord); overload;
+    procedure   EndDraw(ARect: TfpgRect); overload;
     procedure   EndDraw; overload;
     procedure   FreeResources;
     property    Color: TfpgColor read FColor write SetColor;
@@ -1049,6 +1050,11 @@ begin
         DoEndDraw;
     end;
   end;  { if }
+end;
+
+procedure TfpgCanvasBase.EndDraw(ARect: TfpgRect);
+begin
+  EndDraw(ARect.Left, ARect.Top, ARect.Width, ARect.Height);
 end;
 
 procedure TfpgCanvasBase.EndDraw;

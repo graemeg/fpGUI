@@ -546,7 +546,8 @@ begin
   inherited HandleMouseEnter;
   if (csDesigning in ComponentState) then
     Exit;
-  MouseCursor := mcIBeam;
+  if Enabled then
+    MouseCursor := mcIBeam;
 end;
 
 procedure TfpgEdit.HandleMouseExit;

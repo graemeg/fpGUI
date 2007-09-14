@@ -8,7 +8,7 @@
       <SearchPaths>
         <IncludeFiles Value="../"/>
         <OtherUnitFiles Value="../;../../gui/"/>
-        <UnitOutputDirectory Value="../../../lib/"/>
+        <UnitOutputDirectory Value="../../../lib"/>
       </SearchPaths>
       <CodeGeneration>
         <Optimizations>
@@ -23,7 +23,7 @@
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="5"/>
+    <Version Minor="5" Release="1"/>
     <Files Count="15">
       <Item1>
         <Filename Value="x11_xft.pas"/>

@@ -37,7 +37,7 @@ type
     FSliderPos: TfpgCoord;
     FSliderLength: TfpgCoord;
     FSliderDragging: boolean;
-    FStartBtnPressed,
+    FStartBtnPressed: Boolean;
     FEndBtnPressed: Boolean;
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
@@ -187,15 +187,25 @@ end;
 procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
 var
   img: TfpgImage;
+  dx: integer;
+  dy: integer;
 begin
   if Pressed then
-    Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded, btnIsPressed])
+  begin
+    Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded, btnIsPressed]);
+    dx := 1;
+    dy := 1;
+  end
   else
+  begin
     Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded]);
+    dx := 0;
+    dy := 0;
+  end;
   Canvas.SetColor(clText1);
   img := fpgImages.GetImage(imgname);
   if img <> nil then
-    Canvas.DrawImage(x + w div 2 - (img.Width div 2), y + h div 2 - (img.Height div 2), img);
+    Canvas.DrawImage(x + w div 2 - (img.Width div 2) + dx, y + h div 2 - (img.Height div 2) + dy, img);
 end;
 
 procedure TfpgScrollBar.DrawSlider(recalc: boolean);

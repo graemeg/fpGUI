@@ -35,7 +35,7 @@ type
     FFocusItem: integer;
     FFont: TfpgFont;
     FInternalBtnRect: TfpgRect;
-    FInternalBtnDown: boolean;
+    FBtnPressed: Boolean;
     FItems: TStringList;
     FOnChange: TNotifyEvent;
     function    GetFontDesc: string;
@@ -57,6 +57,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
+    procedure   PaintInternalButton; virtual;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
@@ -252,7 +253,7 @@ begin
   end
   else
   begin
-    FInternalBtnDown := False;
+    FBtnPressed := False;
     FDropDown.Close;
     FreeAndNil(FDropDown);
   end;
@@ -332,19 +333,21 @@ begin
   FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
 end;
 
-procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer;
-  shiftstate: TShiftState);
+procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
-  FInternalBtnDown  := True;
+  // botton down only if user clicked on the button.
+  if PtInRect(FInternalBtnRect, Point(x, y)) then
+    FBtnPressed := True;
+  PaintInternalButton;
 end;
 
-procedure TfpgCustomComboBox.HandleLMouseUp(x, y: integer;
-  shiftstate: TShiftState);
+procedure TfpgCustomComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  FInternalBtnDown  := False;
   inherited HandleLMouseUp(x, y, shiftstate);
+  FBtnPressed := False;
   DoDropDown;
+  PaintInternalButton;
 end;
 
 procedure TfpgCustomComboBox.HandleResize(awidth, aheight: TfpgCoord);
@@ -356,11 +359,8 @@ end;
 procedure TfpgCustomComboBox.HandlePaint;
 var
   r: TfpgRect;
-  ar: TfpgRect;
-  btnflags: TFButtonFlags;
 begin
   Canvas.BeginDraw;
-  btnflags := [];
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -378,21 +378,7 @@ begin
   Canvas.FillRectangle(r);
 
   // paint the fake dropdown button
-  if FInternalBtnDown then
-    Include(btnflags, btnIsPressed);
-  fpgStyle.DrawButtonFace(Canvas,
-      FInternalBtnRect.Left,
-      FInternalBtnRect.Top,
-      FInternalBtnRect.Width,
-      FInternalBtnRect.Height, btnflags);
-  ar := FInternalBtnRect;
-  InflateRect(ar, -1, -1);
-  if Enabled then
-    Canvas.SetColor(clText1)
-  else
-    Canvas.SetColor(clShadow2);
-  fpgStyle.DrawDirectionArrow(Canvas,
-      ar.Left, ar.Top, ar.Width, ar.Height, 1);
+  PaintInternalButton;
 
   Dec(r.Width, FInternalBtnRect.Width);
   Canvas.SetFont(Font);
@@ -420,6 +406,37 @@ begin
   Canvas.EndDraw;
 end;
 
+procedure TfpgCustomComboBox.PaintInternalButton;
+var
+  ar: TfpgRect;
+  btnflags: TFButtonFlags;
+begin
+  Canvas.BeginDraw;
+  btnflags := [];
+  ar := FInternalBtnRect;
+  InflateRect(ar, -2, -2);
+  if FBtnPressed then
+  begin
+    Include(btnflags, btnIsPressed);
+    OffsetRect(ar, 1, 1);
+  end;
+  // paint button face
+  fpgStyle.DrawButtonFace(Canvas,
+      FInternalBtnRect.Left,
+      FInternalBtnRect.Top,
+      FInternalBtnRect.Width,
+      FInternalBtnRect.Height, btnflags);
+  if Enabled then
+    Canvas.SetColor(clText1)
+  else
+  begin
+    Canvas.SetColor(clShadow1);
+  end;
+  // paint arrow
+  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, 1);
+  Canvas.EndDraw(FInternalBtnRect);
+end;
+
 constructor TfpgCustomComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -430,7 +447,7 @@ begin
   FFocusItem        := 0; // nothing is selected
   FMargin           := 3;
   FFocusable        := True;
-  FInternalBtnDown  := False;
+  FBtnPressed       := False;
   
   FFont   := fpgGetFont('#List');
   FItems  := TStringList.Create;
