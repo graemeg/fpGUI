@@ -39,6 +39,7 @@ type
   TMainDesigner = class(TObject)
   private
     procedure SetEditedFileName(const Value: string);
+    procedure  LoadGridResolution;
   protected
     FDesigners: TList;
     FFile: TVFDFile;
@@ -307,8 +308,8 @@ begin
 
   // options
   SaveComponentNames := True;
-  GridResolution     := gINI.ReadInteger('Options', 'GridResolution', 4);
-
+  LoadGridResolution;
+  
   FEditedFileName := '';
 end;
 
@@ -408,7 +409,7 @@ begin
   try
     if frm.ShowModal = 1 then
     begin
-      GridResolution            := gINI.ReadInteger('Options', 'GridResolution', 4);
+      LoadGridResolution;
       frmMain.mru.MaxItems      := gINI.ReadInteger('Options', 'MRUFileCount', 4);
       frmMain.mru.ShowFullPath  := gINI.ReadBool('Options', 'ShowFullPath', True);
     end;
@@ -426,6 +427,15 @@ begin
   if s = '' then
     s := '[new]';
   frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + s;
+end;
+
+procedure TMainDesigner.LoadGridResolution;
+begin
+  case gINI.ReadInteger('Options', 'GridResolution', 2) of
+    1: GridResolution := 2;
+    2: GridResolution := 4;
+    3: GridResolution := 8;
+  end;
 end;
 
 end.

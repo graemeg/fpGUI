@@ -18,6 +18,7 @@ type
   TfpgEdit = class(TfpgCustomEdit)
   private
     FOnChange: TNotifyEvent;
+    FPasswordMode: boolean;
     FText: string;
     FMaxLength: integer;
     FCursorPos: integer;
@@ -31,6 +32,7 @@ type
     function    GetFontDesc: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
+    procedure   SetPasswordMode(const AValue: boolean);
     procedure   SetText(const AValue: string);
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -45,11 +47,11 @@ type
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
   public
-    PasswordMode: boolean;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    SelectionText: string;
     property    Font: TfpgFont read FFont;
+    property    PasswordMode: boolean read FPasswordMode write SetPasswordMode;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property    Text: string read FText write SetText;
@@ -96,7 +98,7 @@ begin
   FSelStart     := FCursorPos;
   FSelOffset    := 0;
   FDrawOffset   := 0;
-  PasswordMode  := False;
+  FPasswordMode := False;
 
   FOnChange := nil;
 end;
@@ -153,6 +155,12 @@ begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   RePaint;
+end;
+
+procedure TfpgEdit.SetPasswordMode(const AValue: boolean);
+begin
+  if FPasswordMode=AValue then exit;
+  FPasswordMode:=AValue;
 end;
 
 procedure TfpgEdit.DeleteSelection;
