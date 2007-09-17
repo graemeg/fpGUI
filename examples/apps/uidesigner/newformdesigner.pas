@@ -34,6 +34,7 @@ uses
   gui_memo,
   gui_combobox,
   gui_menu,
+  gui_mru,
   vfdwidgetclass,
   vfdwidgets;
 
@@ -54,9 +55,9 @@ type
   TfrmMain = class(TfpgForm)
   private
     FFileOpenRecent: TfpgMenuItem;
-    procedure   OpenRecentFileClick(Sender: TObject);
     procedure   miHelpAboutClick(Sender: TObject);
     procedure   miHelpAboutGUI(Sender: TObject);
+    procedure   miMRUClick(Sender: TObject; const FileName: string);
   public
     {@VFD_HEAD_BEGIN: frmMain}
     MainMenu: TfpgMenuBar;
@@ -72,12 +73,12 @@ type
     helpmenu: TfpgPopupMenu;
     previewmenu: TfpgPopupMenu;
     {@VFD_HEAD_END: frmMain}
+    mru: TfpgMRU;
     
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    GetSelectedWidget: TVFDWidgetClass;
     procedure   SetSelectedWidget(wgc: TVFDWidgetClass);
-    procedure   AddRecentFile(AFilename: string);
     procedure   AfterCreate; override;
     procedure   OnPaletteClick(Sender: TObject);
     property    SelectedWidget: TVFDWidgetClass read GetSelectedWidget write SetSelectedWidget;
@@ -337,8 +338,8 @@ begin
     SetPosition(464, 64, 120, 20);
     AddMenuItem('New', '', @(maindsgn.OnNewFile));
     AddMenuItem('Open', '', @(maindsgn.OnLoadFile));
-    //    FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
-    //    FFileOpenRecent.Enabled := False;
+    FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
+//      FFileOpenRecent.Enabled := False;
     AddMenuItem('Save', '', @(maindsgn.OnSaveFile));
     AddMenuItem('-', '', nil);
     AddMenuItem('New Form...', '', @(maindsgn.OnNewForm));
@@ -415,7 +416,14 @@ begin
   MainMenu.AddMenuItem('&Preview', nil).SubMenu  := previewmenu;
   MainMenu.AddMenuItem('&Help', nil).SubMenu     := helpmenu;
   
-//  FFileOpenRecent.SubMenu := miOpenRecentMenu;
+  FFileOpenRecent.SubMenu := miOpenRecentMenu;
+
+  mru := TfpgMRU.Create(self);
+  mru.ParentMenuItem  := miOpenRecentMenu;
+  mru.OnClick         := @miMRUClick;
+  mru.MaxItems        := gINI.ReadInteger('Options', 'MRUFileCount', 4);
+  mru.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
+  mru.LoadMRU;
 end;
 
 procedure TfrmMain.OnPaletteClick(Sender: TObject);
@@ -808,12 +816,6 @@ begin
   editor.SetPosition(x, editor.Top, Width - ScrollBarWidth - x, editor.Height);
 end;
 
-procedure TfrmMain.OpenRecentFileClick(Sender: TObject);
-begin
-  if Sender is TfpgMenuItem then
-    writeln(TfpgMenuItem(Sender).Text + ' clicked...');
-end;
-
 procedure TfrmMain.miHelpAboutClick(Sender: TObject);
 begin
   TfrmAbout.Execute;
@@ -822,6 +824,12 @@ end;
 procedure TfrmMain.miHelpAboutGUI(Sender: TObject);
 begin
   ShowMessage('This product was created using fpGUI v0.5', 'About fpGUI');
+end;
+
+procedure TfrmMain.miMRUClick(Sender: TObject; const FileName: string);
+begin
+  maindsgn.EditedFileName := FileName;
+  maindsgn.OnLoadFile(maindsgn);
 end;
 
 constructor TfrmMain.Create(AOwner: TComponent);
@@ -856,15 +864,6 @@ begin
       if wgpalette.Components[n] is TwgPaletteButton then
         TwgPaletteButton(wgpalette.Components[n]).Down := False;
   end;
-end;
-
-procedure TfrmMain.AddRecentFile(AFilename: string);
-var
-  mi: TfpgMenuItem;
-begin
-  gINI.WriteString('RecentFiles', ExtractFileName(AFileName), AFileName);
-  FFileOpenRecent.Enabled := True;
-  mi := miOpenRecentMenu.AddMenuItem(AFileName, '', @OpenRecentFileClick);
 end;
 
 procedure TwgPropertyList.ReleaseEditor;

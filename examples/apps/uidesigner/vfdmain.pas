@@ -80,7 +80,8 @@ var
 implementation
 
 uses
-  vfdformparser;
+  vfdformparser,
+  gui_iniutils;
 
 { TMainDesigner }
 
@@ -156,6 +157,8 @@ begin
           CreateParseForm(bl.FormName, bl.Data, bl2.Data); // pair was found
       end;
   end;
+  
+  frmMain.mru.AddItem(fname);
 end;
 
 procedure TMainDesigner.OnSaveFile(Sender: TObject);
@@ -303,8 +306,8 @@ begin
   FFile        := TVFDFile.Create;
 
   // options
-  SaveComponentNames := False;
-  GridResolution     := 4;
+  SaveComponentNames := True;
+  GridResolution     := gINI.ReadInteger('Options', 'GridResolution', 4);
 
   FEditedFileName := '';
 end;
@@ -402,21 +405,16 @@ var
   frm: TfrmVFDSetup;
 begin
   frm := TfrmVFDSetup.Create(nil);
-
-  case GridResolution of
-    1: frm.chlGrid.FocusItem := 1;
-    4: frm.chlGrid.FocusItem := 2;
-    8: frm.chlGrid.FocusItem := 3;
-  end;
-
-  if frm.ShowModal > 0 then
-    case frm.chlGrid.FocusItem of
-      1: GridResolution := 1;
-      2: GridResolution := 4;
-      3: GridResolution := 8;
+  try
+    if frm.ShowModal = 1 then
+    begin
+      GridResolution            := gINI.ReadInteger('Options', 'GridResolution', 4);
+      frmMain.mru.MaxItems      := gINI.ReadInteger('Options', 'MRUFileCount', 4);
+      frmMain.mru.ShowFullPath  := gINI.ReadBool('Options', 'ShowFullPath', True);
     end;
-
-  frm.Free;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TMainDesigner.SetEditedFileName(const Value: string);

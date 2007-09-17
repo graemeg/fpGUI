@@ -331,10 +331,10 @@ begin
       x := msg.Params.mouse.x;
       y := msg.Params.mouse.y;
 
-      if GridResolution > 1 then
+      if maindsgn.GridResolution > 1 then
       begin
-        x := x - x mod GridResolution;
-        y := y - y mod GridResolution;
+        x := x - x mod maindsgn.GridResolution;
+        y := y - y mod maindsgn.GridResolution;
       end;
 
       InsertWidget(pwg, x, y, wgc);
@@ -386,10 +386,10 @@ begin
   if (wgd = nil) or (not wgd.Selected) then
     Exit;
 
-  if GridResolution > 1 then
+  if maindsgn.GridResolution > 1 then
   begin
-    dx := dx - (dx mod GridResolution);
-    dy := dy - (dy mod GridResolution);
+    dx := dx - (dx mod maindsgn.GridResolution);
+    dy := dy - (dy mod maindsgn.GridResolution);
   end;
 
   MoveResizeWidgets(dx, dy, 0, 0);
@@ -580,8 +580,7 @@ begin
     cd := TWidgetDesigner(FWidgets.Items[n]);
     if cd.Selected then
     begin
-      if GridResolution > 1 then
-      ;
+//      if maindsgn.GridResolution > 1 then;
       cd.Widget.MoveAndResizeBy(dx, dy, dw, dh);
       cd.UpdateResizerPositions;
     end;

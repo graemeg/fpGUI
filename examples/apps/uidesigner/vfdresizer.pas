@@ -49,7 +49,8 @@ implementation
 
 uses
   vfddesigner,
-  vfdforms;
+  vfdforms,
+  vfdmain;
 
 { TwgResizer }
 
@@ -91,7 +92,7 @@ begin
   dy := y - FDragPosY;
 
   wgd   := TWidgetDesigner(wgdesigner);
-  gridc := GridResolution;
+  gridc := maindsgn.GridResolution;
 
   dx := dx - dx mod gridc;
   dy := dy - dy mod gridc;

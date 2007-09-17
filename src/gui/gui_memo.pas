@@ -2,6 +2,12 @@ unit gui_memo;
 
 {$mode objfpc}{$H+}
 
+{
+  TODO:
+    * Started a implementation for Tab support. It is still very experimental
+      and should not be used yet.
+}
+
 interface
 
 uses
@@ -36,6 +42,8 @@ type
     FDrawOffset: integer;
     FLineHeight: integer;
     FFirstLine: integer;
+    FTabWidth: integer;
+    FUseTabs: boolean;
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
     FWrapping: boolean;
@@ -82,6 +90,8 @@ type
     property    Text: string read GetText write SetText;
     property    Font: TfpgFont read FFont;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    UseTabs: boolean read FUseTabs write FUseTabs;
+    property    TabWidth: integer read FTabWidth write FTabWidth;
   published
     property    Lines: TStringList read FLines;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -178,6 +188,8 @@ begin
   FWrapping   := False;
   FOnChange   := nil;
   FBackgroundColor := clBoxColor;
+  FUseTabs    := False;
+  FTabWidth   := 4;
 
   FLines      := TStringList.Create;
   FFirstLine  := 1;
@@ -633,10 +645,12 @@ procedure TfpgMemo.HandlePaint;
 var
   n: integer;
   tw, tw2, st, len: integer;
-  yp: integer;
+  yp, xp: integer;
   ls: string;
   r: TfpgRect;
   selsl, selsp, selel, selep: integer;
+  c: integer;
+  s: string;
 begin
   Canvas.BeginDraw;
   Canvas.ClearClipRect;
@@ -673,7 +687,27 @@ begin
   for n := FFirstline to LineCount do
   begin
     ls := GetLineText(n);
-    Canvas.DrawString(-FDrawOffset + FSideMargin, yp, ls);
+    if FUseTabs then
+    begin
+      xp := 0;
+      s := '';
+      for c := 1 to Length(ls) do
+      begin
+        if ls[c] = #9 then
+        begin
+          if s <> '' then
+            Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
+          xp := xp + Canvas.Font.TextWidth(' ') * FTabWidth;
+          s := '';
+        end
+        else
+          s := s + ls[c];
+      end;
+      if s <> '' then
+        Canvas.DrawString(-FDrawOffset + FSideMargin + xp, yp, s);
+    end
+    else
+      Canvas.DrawString(-FDrawOffset + FSideMargin, yp, ls);
 
     if Focused then
     begin
@@ -971,6 +1005,29 @@ begin
               FLines.Strings[FCursorLine - 1] := ls + ls2;
             end;
             hasChanged := True;
+          end;
+      keyTab:
+          begin
+            if FUseTabs then
+            begin
+              ls := GetLineText(FCursorLine);
+{              if FSelEndLine > 0 then
+                DeleteSelection
+              else} if FCursorPos < UTF8Length(ls) then
+              begin
+                Insert(#9, ls, FCursorPos);
+                SetLineText(FCursorLine, ls);
+              end;
+{
+              else if FCursorLine < LineCount then
+              begin
+                ls2 := FLines.Strings[FCursorLine];
+                FLines.Delete(FCursorLine);
+                FLines.Strings[FCursorLine - 1] := ls + ls2;
+              end;
+}
+              hasChanged := True;
+            end;
           end;
       else
         consumed := False;

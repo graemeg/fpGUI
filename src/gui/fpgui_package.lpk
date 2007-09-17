@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="23">
+    <Files Count="24">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -119,15 +119,19 @@
         <Filename Value="gui_iniutils.pas"/>
         <UnitName Value="gui_iniutils"/>
       </Item23>
+      <Item24>
+        <Filename Value="gui_mru.pas"/>
+        <UnitName Value="gui_mru"/>
+      </Item24>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpgfx_package"/>
         <MinVersion Minor="5" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>

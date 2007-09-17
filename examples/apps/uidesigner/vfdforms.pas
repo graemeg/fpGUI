@@ -31,7 +31,9 @@ uses
   gui_edit,
   gui_button,
   gui_listbox,
-  gui_combobox;
+  gui_combobox,
+  gui_trackbar,
+  gui_checkbox;
 
 type
 
@@ -102,12 +104,21 @@ type
 
 
   TfrmVFDSetup = class(TfpgForm)
+  private
+    procedure   LoadSettings;
+    procedure   SaveSettings;
+    procedure   btnOKClick(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: frmVFDSetup}
     lb1: TfpgLabel;
     chlGrid: TfpgComboBox;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
+    lblRecentFiles: TfpgLabel;
+    tbMRUFileCount: TfpgTrackBar;
+    cbFullPath: TfpgCheckBox;
+    lblName1: TfpgLabel;
+    lblName2: TfpgLabel;
     {@VFD_HEAD_END: frmVFDSetup}
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -118,8 +129,6 @@ type
 var
   PaletteForm: TPaletteForm;
 
-function GridResolution: integer;
-
 implementation
 
 uses
@@ -127,10 +136,6 @@ uses
   fpgfx,
   gui_iniutils;
 
-function GridResolution: integer;
-begin
-  Result := maindsgn.GridResolution;
-end;
 
 { TPaletteForm }
 
@@ -425,11 +430,32 @@ begin
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TfrmVFDSetup.LoadSettings;
+begin
+  chlGrid.FocusItem := gINI.ReadInteger('Options', 'GridResolution', 2);
+  tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
+  cbFullPath.Checked := gINI.ReadBool('Options', 'ShowFullPath', True);
+end;
+
+procedure TfrmVFDSetup.SaveSettings;
+begin
+  gINI.WriteInteger('Options', 'GridResolution', chlGrid.FocusItem);
+  gINI.WriteInteger('Options', 'MRUFileCount', tbMRUFileCount.Position);
+  gINI.WriteBool('Options', 'ShowFullPath', cbFullPath.Checked);
+end;
+
+procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
+begin
+  SaveSettings;
+  ModalResult := 1;
+end;
+
 constructor TfrmVFDSetup.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Name := 'frmVFDSetup';
   gINI.ReadFormState(self);
+  LoadSettings;
 end;
 
 destructor TfrmVFDSetup.Destroy;
@@ -441,14 +467,14 @@ end;
 procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
-  SetPosition(394, 399, 237, 70);
+  SetPosition(394, 399, 252, 184);
   WindowTitle := 'General settings';
   WindowPosition := wpScreenCenter;
 
   lb1 := TfpgLabel.Create(self);
   with lb1 do
   begin
-    SetPosition(8, 8, 116, 16);
+    SetPosition(28, 28, 116, 16);
     Text := 'Grid resolution:';
     FontDesc := '#Label1';
   end;
@@ -456,36 +482,80 @@ begin
   chlGrid := TfpgComboBox.Create(self);
   with chlGrid do
   begin
-    SetPosition(128, 4, 56, 22);
+    SetPosition(140, 24, 88, 22);
     Items.Add('1');
     Items.Add('4');
     Items.Add('8');
     FontDesc := '#List';
-    FocusItem := 2;
+    FocusItem := 0;
   end;
 
   btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
-    SetPosition(77, 40, 75, 24);
+    SetPosition(92, 154, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
     ImageName := 'stdimg.ok';
-    ModalResult := 1;
-    ShowImage   := True;
+    ModalResult := 0;
+    ShowImage := True;
+    OnClick := @btnOKClick;
   end;
 
   btnCancel := TfpgButton.Create(self);
   with btnCancel do
   begin
-    SetPosition(156, 40, 75, 24);
+    SetPosition(171, 154, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
     ImageName := 'stdimg.cancel';
     ModalResult := -1;
-    ShowImage   := True;
+    ShowImage := True;
+  end;
+
+  lblRecentFiles := TfpgLabel.Create(self);
+  with lblRecentFiles do
+  begin
+    SetPosition(28, 88, 136, 16);
+    Text := 'Recent files count:';
+    FontDesc := '#Label1';
+  end;
+
+  tbMRUFileCount := TfpgTrackBar.Create(self);
+  with tbMRUFileCount do
+  begin
+    SetPosition(156, 80, 76, 30);
+    Min := 2;
+    Max := 10;
+    Position := 4;
+    Orientation := orHorizontal;
+    ShowPosition := True;
+  end;
+
+  cbFullPath := TfpgCheckBox.Create(self);
+  with cbFullPath do
+  begin
+    SetPosition(24, 108, 204, 20);
+    Text := 'Show the full file path';
+    FontDesc := '#Label1';
+  end;
+
+  lblName1 := TfpgLabel.Create(self);
+  with lblName1 do
+  begin
+    SetPosition(8, 8, 176, 16);
+    Text := 'Form designer';
+    FontDesc := '#Label2';
+  end;
+
+  lblName2 := TfpgLabel.Create(self);
+  with lblName2 do
+  begin
+    SetPosition(8, 64, 232, 16);
+    Text := 'Open Recent menu settings';
+    FontDesc := '#Label2';
   end;
 
   {@VFD_BODY_END: frmVFDSetup}
