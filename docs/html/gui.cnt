@@ -111,10 +111,14 @@
  gui_combobox gui_combobox/index.html
   TfpgCustomComboBox gui_combobox/tfpgcustomcombobox.html
    FMargin gui_combobox/tfpgcustomcombobox.fmargin.html
-   SetEnabled gui_combobox/tfpgcustomcombobox.setenabled.html
-   DropDownCount gui_combobox/tfpgcustomcombobox.dropdowncount.html
+   SetHeight gui_combobox/tfpgcustomcombobox.setheight.html
+   SetWidth gui_combobox/tfpgcustomcombobox.setwidth.html
+   HandleLMouseDown gui_combobox/tfpgcustomcombobox.handlelmousedown.html
    HandleLMouseUp gui_combobox/tfpgcustomcombobox.handlelmouseup.html
+   HandleResize gui_combobox/tfpgcustomcombobox.handleresize.html
    HandlePaint gui_combobox/tfpgcustomcombobox.handlepaint.html
+   PaintInternalButton gui_combobox/tfpgcustomcombobox.paintinternalbutton.html
+   DropDownCount gui_combobox/tfpgcustomcombobox.dropdowncount.html
    Items gui_combobox/tfpgcustomcombobox.items.html
    FocusItem gui_combobox/tfpgcustomcombobox.focusitem.html
    BackgroundColor gui_combobox/tfpgcustomcombobox.backgroundcolor.html
@@ -124,9 +128,7 @@
    Create gui_combobox/tfpgcustomcombobox.create.html
    Destroy gui_combobox/tfpgcustomcombobox.destroy.html
    Update gui_combobox/tfpgcustomcombobox.update.html
-   AfterConstruction gui_combobox/tfpgcustomcombobox.afterconstruction.html
    Font gui_combobox/tfpgcustomcombobox.font.html
-   Width gui_combobox/tfpgcustomcombobox.width.html
   TfpgComboBox gui_combobox/tfpgcombobox.html
    BackgroundColor gui_combobox/tfpgcombobox.backgroundcolor.html
    DropDownCount gui_combobox/tfpgcombobox.dropdowncount.html
@@ -202,11 +204,11 @@
  gui_edit gui_edit/index.html
   TfpgCustomEdit gui_edit/tfpgcustomedit.html
   TfpgEdit gui_edit/tfpgedit.html
-   PasswordMode gui_edit/tfpgedit.passwordmode.html
    Create gui_edit/tfpgedit.create.html
    Destroy gui_edit/tfpgedit.destroy.html
    SelectionText gui_edit/tfpgedit.selectiontext.html
    Font gui_edit/tfpgedit.font.html
+   PasswordMode gui_edit/tfpgedit.passwordmode.html
    OnChange gui_edit/tfpgedit.onchange.html
    Text gui_edit/tfpgedit.text.html
    FontDesc gui_edit/tfpgedit.fontdesc.html
@@ -511,6 +513,8 @@
    Text gui_memo/tfpgmemo.text.html
    Font gui_memo/tfpgmemo.font.html
    OnChange gui_memo/tfpgmemo.onchange.html
+   UseTabs gui_memo/tfpgmemo.usetabs.html
+   TabWidth gui_memo/tfpgmemo.tabwidth.html
    Lines gui_memo/tfpgmemo.lines.html
    FontDesc gui_memo/tfpgmemo.fontdesc.html
  gui_menu gui_menu/index.html
@@ -751,6 +755,21 @@
    ReadFormState gui_iniutils/tfpginifile.readformstate.html
    WriteFormState gui_iniutils/tfpginifile.writeformstate.html
   gINI gui_iniutils/gini.html
+ gui_mru gui_mru/index.html
+  TMRUClickEvent gui_mru/tmruclickevent.html
+  TfpgMRU gui_mru/tfpgmru.html
+   Loaded gui_mru/tfpgmru.loaded.html
+   Notification gui_mru/tfpgmru.notification.html
+   DoClick gui_mru/tfpgmru.doclick.html
+   Create gui_mru/tfpgmru.create.html
+   Destroy gui_mru/tfpgmru.destroy.html
+   AddItem gui_mru/tfpgmru.additem.html
+   RemoveItem gui_mru/tfpgmru.removeitem.html
+   LoadMRU gui_mru/tfpgmru.loadmru.html
+   MaxItems gui_mru/tfpgmru.maxitems.html
+   ShowFullPath gui_mru/tfpgmru.showfullpath.html
+   ParentMenuItem gui_mru/tfpgmru.parentmenuitem.html
+   OnClick gui_mru/tfpgmru.onclick.html
 
 :classes
 #GUI.gui_basegrid.TfpgBaseGrid #CoreLib.gfx_widget.TfpgWidget
@@ -931,7 +950,8 @@
 1VFBackgroundColor
 1VFFocusItem
 1VFFont
-1VFInternalBtn
+1VFInternalBtnRect
+1VFBtnPressed
 1VFItems
 1VFOnChange
 1MGetFontDesc
@@ -944,12 +964,16 @@
 1MSetFocusItem
 1MSetFontDesc
 1MSetText
-1MSetWidth
+1MCalculateInternalButtonRect
 2VFMargin
-2MSetEnabled
-2PDropDownCount rw
+2MSetHeight
+2MSetWidth
+2MHandleLMouseDown
 2MHandleLMouseUp
+2MHandleResize
 2MHandlePaint
+2MPaintInternalButton
+2PDropDownCount rw
 2PItems r
 2PFocusItem rw
 2PBackgroundColor rw
@@ -959,9 +983,7 @@
 3MCreate
 3MDestroy
 3MUpdate
-3MAfterConstruction
 3PFont r
-3PWidth rw
 #GUI.gui_combobox.TfpgComboBox #GUI.gui_combobox.TfpgCustomComboBox
 4PBackgroundColor
 4PDropDownCount
@@ -1069,6 +1091,8 @@
 1MFilterChange
 1MDirChange
 1MUpDirClick
+1MedFilenameChanged
+1MUpdateButtonState
 2MHandleKeyPress
 2MbtnOKClick
 2MSetCurrentDirectory
@@ -1083,6 +1107,7 @@
 #GUI.gui_edit.TfpgCustomEdit #CoreLib.gfx_widget.TfpgWidget
 #GUI.gui_edit.TfpgEdit #GUI.gui_edit.TfpgCustomEdit
 1VFOnChange
+1VFPasswordMode
 1VFText
 1VFMaxLength
 1VFCursorPos
@@ -1097,6 +1122,7 @@
 1MGetFontDesc
 1MSetBackgroundColor
 1MSetFontDesc
+1MSetPasswordMode
 1MSetText
 1MDeleteSelection
 1MDoCopy
@@ -1110,11 +1136,11 @@
 1MHandleMouseMove
 1MHandleMouseEnter
 1MHandleMouseExit
-3VPasswordMode
 3MCreate
 3MDestroy
 3MSelectionText
 3PFont r
+3PPasswordMode rw
 3POnChange rw
 4PText rw
 4PFontDesc rw
@@ -1541,6 +1567,8 @@
 1VFDrawOffset
 1VFLineHeight
 1VFFirstLine
+1VFTabWidth
+1VFUseTabs
 1VFVScrollBar
 1VFHScrollBar
 1VFWrapping
@@ -1585,6 +1613,8 @@
 3PText rw
 3PFont r
 3POnChange rw
+3PUseTabs rw
+3PTabWidth rw
 4PLines r
 4PFontDesc rw
 #GUI.gui_menu.TfpgMenuItem TComponent
@@ -1945,3 +1975,28 @@
 3MReadTime
 3MReadFormState
 3MWriteFormState
+#GUI.gui_mru.TfpgMRU TComponent
+1VFItems
+1VFMaxItems
+1VFShowFullPath
+1VFParentMenuItem
+1VFIniFilePath
+1VFOnClick
+1MSetMaxItems
+1MSetParentMenuItem
+1MSetShowFullPath
+1MSaveMRU
+1MItemsChange
+1MClearParentMenu
+2MLoaded
+2MNotification
+2MDoClick
+3MCreate
+3MDestroy
+3MAddItem
+3MRemoveItem
+3MLoadMRU
+4PMaxItems rw
+4PShowFullPath rw
+4PParentMenuItem rw
+4POnClick rw

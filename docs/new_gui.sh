@@ -23,6 +23,7 @@ makeskel --package=GUI --output=xml/gui/gui_tab.xml --input='-Fi../src/gui ../sr
 makeskel --package=GUI --output=xml/gui/gui_trackbar.xml --input='-Fi../src/gui ../src/gui/gui_trackbar.pas'
 makeskel --package=GUI --output=xml/gui/gui_tree.xml --input='-Fi../src/gui ../src/gui/gui_tree.pas'
 makeskel --package=GUI --output=xml/gui/gui_iniutils.xml --input='-Fi../src/gui ../src/gui/gui_iniutils.pas'
+makeskel --package=GUI --output=xml/gui/gui_mru.xml --input='-Fi../src/gui ../src/gui/gui_mru.pas'
 
 
 # makeskel --package=GUI --output=xml/gui/gui_.xml --input='-Fi../src/gui ../src/gui/gui_.pas'

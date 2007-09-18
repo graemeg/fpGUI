@@ -589,6 +589,8 @@
    AllocateWindowHandle gfxbase/tfpgwindowbase.allocatewindowhandle.html
    ReleaseWindowHandle gfxbase/tfpgwindowbase.releasewindowhandle.html
    SetWindowTitle gfxbase/tfpgwindowbase.setwindowtitle.html
+   SetHeight gfxbase/tfpgwindowbase.setheight.html
+   SetWidth gfxbase/tfpgwindowbase.setwidth.html
    Create gfxbase/tfpgwindowbase.create.html
    AdjustWindowStyle gfxbase/tfpgwindowbase.adjustwindowstyle.html
    SetWindowParameters gfxbase/tfpgwindowbase.setwindowparameters.html
@@ -1284,6 +1286,8 @@
 2MAllocateWindowHandle
 2MReleaseWindowHandle
 2MSetWindowTitle
+2MSetHeight
+2MSetWidth
 3MCreate
 3MAdjustWindowStyle
 3MSetWindowParameters
