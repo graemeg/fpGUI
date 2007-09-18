@@ -268,7 +268,7 @@ begin
 
     if lok then
     begin
-      //writeln('wg create: ',wgname,' (',wgclass,') - ',wgparent);
+//      writeln('wg create: ',wgname,' (',wgclass,') - ',wgparent);
 
       // searching for the parent ...
       pwg := nil;

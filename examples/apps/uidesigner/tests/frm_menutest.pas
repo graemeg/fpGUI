@@ -40,21 +40,24 @@ end;
 procedure TfrmMain.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmMain}
-  SetPosition(278, 186, 591, 274);
+  Name := 'frmMain';
+  SetPosition(278, 186, 399, 142);
   WindowTitle := 'frmMain';
   WindowPosition := wpScreenCenter;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
   begin
-    SetPosition(0, 0, 592, 23);
+    Name := 'MainMenu';
+    SetPosition(0, 0, 400, 23);
     Anchors := [anLeft,anRight,anTop];
   end;
 
   miFile := TfpgPopupMenu.Create(self);
   with miFile do
   begin
-    SetPosition(424, 44, 152, 24);
+    Name := 'miFile';
+    SetPosition(200, 48, 152, 24);
     AddMenuItem('&New...', 'Ctrl-N', nil);
     AddMenuItem('&Open...', 'Ctrl-O', nil);
     AddMenuItem('-', '', nil);
@@ -64,7 +67,8 @@ begin
   btnName1 := TfpgButton.Create(self);
   with btnName1 do
   begin
-    SetPosition(76, 156, 75, 24);
+    Name := 'btnName1';
+    SetPosition(8, 112, 75, 24);
     Text := 'Button';
     FontDesc := '#Label1';
     ImageName := 'stdimg.quit';

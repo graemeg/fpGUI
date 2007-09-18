@@ -353,7 +353,7 @@ begin
   // PageControl
   wc          := TVFDWidgetClass.Create(TfpgPageControl);
   wc.NameBase := 'pcName';
-  wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
+//  wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
 //  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
 //  wc.AddProperty('SortPages', TPropertyInteger, 'Boolean value');
