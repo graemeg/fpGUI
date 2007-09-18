@@ -11,6 +11,7 @@ interface
 uses
   Classes,
   SysUtils,
+  gfxbase,
   fpgfx,
   gui_form,
   gui_button,
@@ -18,6 +19,8 @@ uses
   gui_label,
   gui_menu,
   gui_memo,
+  gui_tree,
+  gui_bevel,
   dom, XMLWrite, XMLRead, contnrs;
 
 type
@@ -47,9 +50,9 @@ type
     miExtra: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     btnQuit: TfpgButton;
-    lblXMLFile: TfpgLabel;
-    edXMLFile: TfpgEdit;
-    btnOpen: TfpgButton;
+    tvXML: TfpgTreeView;
+    pnlName1: TfpgBevel;
+    lblFilename: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -124,8 +127,10 @@ begin
   try
     dlg.Filter := 'FPDoc Desc Files (*.xml)|*.xml|All Files (*)|*';
     if dlg.RunOpenFile then
-      edXMLFile.Text := dlg.FileName;
+    begin
+      lblFilename.Text := dlg.FileName;
       ProcessXMLFile(dlg.FileName);
+    end
   finally
     dlg.Free;
   end;
@@ -138,9 +143,9 @@ begin
   dlg := TfpgFileDialog.Create(nil);
   try
     dlg.Filter := 'FPDoc Desc Files (*.xml)|*.xml|All Files (*)|*';
-    dlg.FileName := edXMLFile.Text;
+    dlg.FileName := lblFilename.Text;
     if dlg.RunSaveFile then
-      edXMLFile.Text := dlg.FileName;
+      lblFilename.Text := dlg.FileName;
   finally
     dlg.Free;
   end;
@@ -308,13 +313,15 @@ end;
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
-  SetPosition(456, 254, 650, 402);
-  WindowTitle := 'frmMain';
+  Name := 'MainForm';
+  SetPosition(346, 279, 650, 402);
+  WindowTitle := 'fpGUI Documentation Editor';
   WindowPosition := wpScreenCenter;
 
   menubar := TfpgMenuBar.Create(self);
   with menubar do
   begin
+    Name := 'menubar';
     SetPosition(0, 0, 650, 23);
     Anchors := [anLeft,anRight,anTop];
   end;
@@ -322,6 +329,7 @@ begin
   miFile := TfpgPopupMenu.Create(self);
   with miFile do
   begin
+    Name := 'miFile';
     SetPosition(464, 169, 160, 24);
     AddMenuItem('&New...', 'Ctrl-N', nil);
     AddMenuItem('&Open..', 'Ctrl-O', @miFileOpenClicked);
@@ -337,6 +345,7 @@ begin
   miInsert := TfpgPopupMenu.Create(self);
   with miInsert do
   begin
+    Name := 'miInsert';
     SetPosition(464, 190, 160, 24);
     AddMenuItem('&Package', '', nil);
     AddMenuItem('&Module', '', nil);
@@ -350,6 +359,7 @@ begin
   miExtra := TfpgPopupMenu.Create(self);
   with miExtra do
   begin
+    Name := 'miExtra';
     SetPosition(464, 211, 160, 24);
     AddMenuItem('&Options...', '', @miExtraOptionsClicked);
     AddMenuItem('&Build...', '', nil);
@@ -358,6 +368,7 @@ begin
   miHelp := TfpgPopupMenu.Create(self);
   with miHelp do
   begin
+    Name := 'miHelp';
     SetPosition(464, 232, 160, 24);
     AddMenuItem('About...', '', @miHelpAboutClicked);
   end;
@@ -365,7 +376,8 @@ begin
   btnQuit := TfpgButton.Create(self);
   with btnQuit do
   begin
-    SetPosition(566, 370, 75, 23);
+    Name := 'btnQuit';
+    SetPosition(566, 350, 75, 23);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -375,34 +387,36 @@ begin
     OnClick   := @btnQuitClicked;
   end;
 
-  lblXMLFile := TfpgLabel.Create(self);
-  with lblXMLFile do
+  tvXML := TfpgTreeView.Create(self);
+  with tvXML do
   begin
-    SetPosition(4, 48, 58, 19);
-    Text := 'XML File:';
+    Name := 'tvXML';
+    SetPosition(4, 28, 226, 340);
     FontDesc := '#Label1';
+    DefaultColumnWidth := 15;
+    TreeLineStyle := lsDot;
+    ScrollWheelDelta := 15;
   end;
 
-  edXMLFile := TfpgEdit.Create(self);
-  with edXMLFile do
+  pnlName1 := TfpgBevel.Create(self);
+  with pnlName1 do
   begin
-    SetPosition(62, 44, 485, 23);
+    Name := 'pnlName1';
+    SetPosition(0, 381, 650, 20);
+    Anchors := [anLeft,anRight,anBottom];
+    Shape := bsBox;
+    Style := bsLowered;
+    Focusable := False;
+  end;
+
+  lblFilename := TfpgLabel.Create(pnlName1);
+  with lblFilename do
+  begin
+    Name := 'lblFilename';
+    SetPosition(6, 2, 636, 16);
     Anchors := [anLeft,anRight,anTop];
-    Text := '';
-    FontDesc := '#Edit1';
-  end;
-
-  btnOpen := TfpgButton.Create(self);
-  with btnOpen do
-  begin
-    SetPosition(554, 44, 75, 23);
-    Anchors := [anRight,anTop];
-    Text := 'Open';
+    Text := '<filename>';
     FontDesc := '#Label1';
-    ImageName := 'stdimg.Open';
-    ModalResult := 0;
-    ShowImage := True;
-    OnClick   := @btnOpenClicked;
   end;
 
   {@VFD_BODY_END: MainForm}

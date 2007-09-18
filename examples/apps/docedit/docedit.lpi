@@ -28,11 +28,11 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="FCL"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpgui_package"/>
         <MinVersion Minor="5" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
       </Item2>
     </RequiredPackages>
     <Units Count="3">
