@@ -130,6 +130,8 @@ type
     procedure   FilterChange(Sender: TObject);
     procedure   DirChange(Sender: TObject);
     procedure   UpDirClick(Sender: TObject);
+    procedure   edFilenameChanged(Sender: TObject);
+    procedure   UpdateButtonState;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
@@ -717,10 +719,7 @@ begin
   if grid.CurrentEntry.EntryType <> etDir then
     edFileName.Text := grid.CurrentEntry.Name;
 
-  if FOpenMode then
-    btnOK.Enabled := grid.CurrentEntry.EntryType = etFile
-  else
-    btnOK.Enabled := edFileName.Text <> '';
+  UpdateButtonState;
 
   lbFileInfo.Text := s;
 end;
@@ -840,6 +839,7 @@ begin
     Anchors := [anLeft, anRight, anBottom];
     Text := '';
     FontDesc := '#Edit1';
+    OnChange := @edFilenameChanged;
   end;
   
   { Filter section }
@@ -913,7 +913,7 @@ begin
   inherited Create(AOwner);
   WindowTitle := 'File Selection';
   Width := 640;
-  Height := 410; // 460;
+  Height := 410;
   WindowPosition := wpScreenCenter;
   FSpacing := 10;
 
@@ -947,6 +947,19 @@ end;
 procedure TfpgFileDialog.UpDirClick(Sender: TObject);
 begin
   SetCurrentDirectory('..');
+end;
+
+procedure TfpgFileDialog.edFilenameChanged(Sender: TObject);
+begin
+  UpdateButtonState;
+end;
+
+procedure TfpgFileDialog.UpdateButtonState;
+begin
+  if FOpenMode then
+    btnOK.Enabled := grid.CurrentEntry.EntryType = etFile
+  else
+    btnOK.Enabled := edFileName.Text <> '';
 end;
 
 procedure TfpgFileDialog.SetCurrentDirectory(const ADir: string);
