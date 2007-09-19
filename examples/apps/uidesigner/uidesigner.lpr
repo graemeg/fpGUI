@@ -25,7 +25,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, fpgfx, vfdmain, vfdresizer, vfdforms,
   vfdfile, newformdesigner, vfdwidgets, vfdformparser, vfdeditors,
-  vfdwidgetclass, vfdutils, vfdprops, vfddesigner;
+  vfdwidgetclass, vfdutils, vfdprops, vfddesigner, vfdpropeditgrid;
 
 
 procedure MainProc;

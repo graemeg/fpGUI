@@ -58,7 +58,8 @@ uses
   gui_trackbar,
   gui_menu,
   gui_progressbar,
-  gui_tab;
+  gui_tab,
+  vfdpropeditgrid;
 
 var
   FVFDFormWidget: TVFDWidgetClass;
@@ -289,9 +290,10 @@ begin
   // StringGrid
   wc := TVFDWidgetClass.Create(TfpgStringGrid);
   wc.NameBase := 'grdName';
-//  wc.AddProperty('Columns',TPropertyDBColumns,'');
-  wc.AddProperty('FontDesc',TPropertyString,'');
-  wc.AddProperty('HeaderFontDesc',TPropertyString,'');
+  wc.AddProperty('Columns', TPropertyDBColumns, '');
+  wc.AddProperty('FontDesc', TPropertyString, '');
+  wc.AddProperty('HeaderFontDesc', TPropertyString, '');
+  wc.AddProperty('RowCount', TPropertyInteger, '');
   wc.WidgetIconName := 'vfd.stringgrid';
   RegisterVFDWidget(wc);
 

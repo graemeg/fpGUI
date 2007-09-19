@@ -33,7 +33,7 @@
         <MinVersion Minor="5" Valid="True"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="13">
+    <Units Count="14">
       <Unit0>
         <Filename Value="uidesigner.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -99,6 +99,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="vfdutils"/>
       </Unit12>
+      <Unit13>
+        <Filename Value="vfdpropeditgrid.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdpropeditgrid"/>
+      </Unit13>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

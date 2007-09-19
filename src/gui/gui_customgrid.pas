@@ -15,7 +15,6 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
   fpgfx,
   gui_basegrid;
   
@@ -52,12 +51,16 @@ type
     function    GetHeaderText(ACol: integer): string; override;
     property    RowCount: integer read GetRowCount write SetRowCount;
     property    ColumnCount: integer read GetColumnCount write SetColumnCount;
+    { Columns AIndex is 1-based. }
     property    Columns[AIndex: integer]: TfpgGridColumn read GetColumns;
 //    property AlternateColor: TColor read FAlternateColor write SetAlternateColor stored IsAltColorStored;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn; virtual;
+    { AIndex is 1-based. }
+    procedure   DeleteColumn(AIndex: integer); virtual;
+    procedure   MoveColumn(oldindex, newindex: integer); virtual;
   end;
   
   
@@ -67,9 +70,9 @@ implementation
 
 constructor TfpgGridColumn.Create;
 begin
-  Width     := 64;
+  Width     := 65;
   Title     := '';
-  Alignment := taCenter;
+  Alignment := taLeftJustify;
 end;
 
 { TfpgCustomGrid }
@@ -81,10 +84,10 @@ end;
 
 function TfpgCustomGrid.GetColumns(AIndex: integer): TfpgGridColumn;
 begin
-  if (AIndex < 0) or (AIndex > FColumns.Count-1) then
+  if (AIndex < 1) or (AIndex > FColumns.Count) then
     Result := nil
   else
-    Result := TfpgGridColumn(FColumns[AIndex]);
+    Result := TfpgGridColumn(FColumns[AIndex-1]);
 end;
 
 procedure TfpgCustomGrid.DoDeleteColumn(ACol: integer);
@@ -182,8 +185,8 @@ end;
 
 constructor TfpgCustomGrid.Create(AOwner: TComponent);
 begin
-  inherited Create(AOwner);
   FColumns := TList.Create;
+  inherited Create(AOwner);
   ColumnCount := 5;
   RowCount    := 5;
 end;
@@ -207,8 +210,31 @@ begin
   Result.Width := AWidth;
   FColumns.Add(Result);
   
+  if csUpdating in ComponentState then
+    Exit; //==>
+    
   UpdateScrollBars;
   RePaint;
+end;
+
+procedure TfpgCustomGrid.DeleteColumn(AIndex: integer);
+var
+  c: TfpgGridColumn;
+begin
+  c := Columns[AIndex];
+  if c <> nil then
+  begin
+    DoDeleteColumn(AIndex);
+    if HasHandle then
+      Update;
+  end;
+end;
+
+procedure TfpgCustomGrid.MoveColumn(oldindex, newindex: integer);
+begin
+  FColumns.Move(oldindex, newindex);
+  if HasHandle then
+    Update;
 end;
 
 end.

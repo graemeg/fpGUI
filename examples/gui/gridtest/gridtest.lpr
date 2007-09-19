@@ -107,11 +107,11 @@ begin
   tsTab2 := pagecontrol.AppendTabSheet('String Grid');
   stringgrid := TfpgStringGrid.Create(tsTab2);
   stringgrid.SetPosition(10, 10, Width-50, 250);
-  // change row and column count to something different that the default
+  // change row and column count to something different than the default
   stringgrid.ColumnCount  := 2;
   stringgrid.RowCount     := 3;
   // add and change a column
-  stringgrid.AddColumn('Extra', 100);
+  stringgrid.AddColumn('Extra (col3)', 100);
   stringgrid.ColumnWidth[3] := 150;
   // changes header text in different ways
   stringgrid.ColumnTitle[1] := 'Column 1';

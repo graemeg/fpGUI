@@ -49,7 +49,6 @@ implementation
 
 uses
   vfddesigner,
-  vfdforms,
   vfdmain;
 
 { TwgResizer }

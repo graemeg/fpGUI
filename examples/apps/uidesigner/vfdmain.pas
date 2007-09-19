@@ -221,8 +221,8 @@ begin
     finally
       CloseFile(ff);
     end;
-//    frmMain.AddRecentFile(fname);
     frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + fname;
+    frmMain.mru.AddItem(fname);
   except
     Writeln('Form save I/O failure.');
   end;

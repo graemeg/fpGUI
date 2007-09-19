@@ -151,9 +151,12 @@ type
     procedure   DoSetRowCount(AValue: integer); override;
     function    DoCreateColumnClass: TfpgStringColumn; reintroduce; override;
     procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); override;
+    { AIndex is 1-based. }
     property    Columns[AIndex: integer]: TfpgStringColumn read GetColumns;
   public
-    function    AddColumn(ATitle: string; AWidth: integer): TfpgStringColumn; reintroduce; override;
+    constructor Create(AOwner: TComponent); override;
+    function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify): TfpgStringColumn; overload;
+    { ACol and ARow is 1-based. }
     property    Cells[ACol, ARow: LongWord]: string read GetCell write SetCell;
 //    property Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
     property    ColumnTitle[ACol: integer]: string read GetColumnTitle write SetColumnTitle;
@@ -592,7 +595,7 @@ begin
   RowCount := 0;
   FFixedFont := fpgGetFont('Courier New-9');
 
-  {$Note Abstract this!  No IFDEF's allowed!!! }
+  {$Note No IFDEF's allowed!!! But how the hell to we get around this? }
 {$ifdef MSWINDOWS}
   AddColumn('Name', 320);
 {$else}
@@ -745,13 +748,24 @@ begin
   end;
 end;
 
-function TfpgCustomStringGrid.AddColumn(ATitle: string; AWidth: integer): TfpgStringColumn;
+constructor TfpgCustomStringGrid.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  ColumnCount := 0;
+  RowCount := 0;
+end;
+
+function TfpgCustomStringGrid.AddColumn(ATitle: string; AWidth: integer;
+    AAlignment: TAlignment): TfpgStringColumn;
 var
   r: integer;
 begin
+  Include(ComponentState, csUpdating);
   Result := TfpgStringColumn(inherited AddColumn(ATitle, AWidth));
+  Result.Alignment := AAlignment;
   for r := 1 to RowCount do
     Result.Cells.Append('');
+  Exclude(ComponentState, csUpdating);
 end;
 
 end.
