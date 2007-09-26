@@ -3,7 +3,12 @@ unit gui_tab;
 {$mode objfpc}{$H+}
 
 {
-  Incomplete:  I'm currently busy developing this component.
+  TODO:
+    * Tab Styles (tab, button, flat button, angled)
+    * Tab Position (top, bottom, left, right)
+    * Better keyboard support
+    * Focus rectangle drawn on tabs itself.gui_tab
+    * FindNextPage() must be implemented
 }
 
 interface
@@ -20,8 +25,9 @@ type
   // forward declaration
   TfpgPageControl = class;
   
-  TfpgTabStyle = (tsTabs, tsButtons, tsFlatButtons);
+  TfpgTabStyle    = (tsTabs, tsButtons, tsFlatButtons);
   TfpgTabPosition = (tpTop, tpBottom{, tpLeft, tpRight});
+
 
   TfpgTabSheet = class(TfpgWidget)
   private
@@ -174,7 +180,7 @@ end;
 procedure TfpgTabSheet.HandlePaint;
 begin
   Canvas.BeginDraw;
-  inherited HandlePaint;
+//  inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
   Canvas.EndDraw;
 end;
@@ -414,6 +420,7 @@ var
   h: TfpgTabSheet;
   lp: integer;
   toffset: integer;
+  dx: integer;
 begin
   if not HasHandle then
     Exit; //==>
@@ -446,16 +453,20 @@ begin
             FLeftButton.Visible   := False;
             FRightButton.Visible  := False;
           end;
+          // tabsheet area - left outer line
           Canvas.SetColor(clHilite1);
           Canvas.DrawLine(FMargin, ButtonHeight, FMargin, Height-(FMargin*2));
+          // tabsheet area - left inner line
           Canvas.SetColor(clHilite2);
           Canvas.DrawLine(FMargin+1, ButtonHeight+1, FMargin+1, Height - (FMargin*2) - 1);
+          // tabsheet area - outer bottom & right line
           Canvas.SetColor(clShadow2);
           Canvas.DrawLine(FMargin, Height - (FMargin*2), Width - (FMargin*2), Height - (FMargin*2));
-          Canvas.DrawLine(Width - FMargin - 1, FMargin + ButtonHeight - 1, Width - FMargin - 1, Height - FMargin);
+          Canvas.DrawLine(Width - (FMargin*2), Height - (FMargin*2), Width - (FMargin*2), FMargin + ButtonHeight - 3);
+          // tabsheet area - inner bottom & right line
           Canvas.SetColor(clShadow1);
           Canvas.DrawLine(FMargin + 1, Height - (FMargin*2) - 1, Width - (FMargin*2) - 1, Height - (FMargin*2) - 1);
-          Canvas.DrawLine(Width - FMargin - 2, FMargin + ButtonHeight - 1, Width - FMargin - 2, Height - FMargin - 2);
+          Canvas.DrawLine(Width - FMargin - 2, Height - FMargin - 2, Width - FMargin - 2, FMargin + ButtonHeight - 2);
           Canvas.SetClipRect(r);
           lp := 0;
           while h <> nil do
@@ -463,12 +474,18 @@ begin
             if h <> ActivePage then
             begin
               toffset := 4;
+              // tabsheet area - top lines under inactive tabs
               Canvas.SetColor(clHilite1);
               Canvas.DrawLine(FMargin + lp, FMargin + ButtonHeight - 2, FMargin + lp + ButtonWidth(h.Text), FMargin + ButtonHeight - 2);
               Canvas.SetColor(clHilite2);
-              Canvas.DrawLine(FMargin + lp, FMargin + ButtonHeight - 1, FMargin + lp + ButtonWidth(h.Text) + 1, FMargin + ButtonHeight - 1);
+              if TfpgTabSheet(FPages.First) = h then
+                dx := 1
+              else
+                dx := -1;
+              Canvas.DrawLine(FMargin + lp+dx, FMargin + ButtonHeight - 1, FMargin + lp + ButtonWidth(h.Text) + 1, FMargin + ButtonHeight - 1);
+              // vertical divider line between inactive tabs
               Canvas.SetColor(clShadow1);
-              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text), FMargin, lp + FMargin + ButtonWidth(h.Text), FMargin + ButtonHeight - 3);
+              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text), FMargin, lp + FMargin + ButtonWidth(h.Text), FMargin + ButtonHeight - 2);
               h.Visible := False;
             end
             else
@@ -476,16 +493,20 @@ begin
               toffset := 2;
               h.Visible := True;
               h.SetPosition(FMargin+2, FMargin + ButtonHeight, Width - (FMargin*2) - 4, Height - (FMargin*2) - ButtonHeight - 2);
+              // tab outer left & top line
               Canvas.SetColor(clHilite1);
+              Canvas.DrawLine(lp + FMargin, FMargin + ButtonHeight - 2, lp + FMargin, FMargin);
               Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin + ButtonWidth(h.Text)-1, FMargin);
-              Canvas.DrawLine(lp + FMargin, FMargin, lp + FMargin, FMargin + ButtonHeight - 2);
+              // tab inner left & top line
               Canvas.SetColor(clHilite2);
+              Canvas.DrawLine(lp + FMargin + 1, FMargin + ButtonHeight - 1, lp + FMargin + 1, FMargin + 1);
               Canvas.DrawLine(lp + FMargin + 1, FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + 1);
-              Canvas.DrawLine(lp + FMargin + 1, FMargin + 1, lp + FMargin + 1, FMargin + ButtonHeight - 1);
+              // tab inner right line
               Canvas.SetColor(clShadow1);
-              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 2,FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + ButtonHeight-1);
+              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 2, FMargin + ButtonHeight);
+              // tab outer right line
               Canvas.SetColor(clShadow2);
-              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 1,FMargin + 1, lp + FMargin + ButtonWidth(h.Text) - 1, FMargin + ButtonHeight - 2);
+              Canvas.DrawLine(lp + FMargin + ButtonWidth(h.Text) - 1, FMargin, lp + FMargin + ButtonWidth(h.Text) - 1, FMargin + ButtonHeight-1);
             end;
             // paint text
             Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin+toffset, GetTabText(h.Text));
@@ -496,10 +517,11 @@ begin
             else
               h := nil;
           end;  { while }
+          // tabsheet area - top lines on right of tabs
           Canvas.SetColor(clHilite1);
-          Canvas.Drawline(lp + 1, FMargin + ButtonHeight - 2, Width, FMargin + ButtonHeight - 2);
+          Canvas.Drawline(lp + 1, FMargin + ButtonHeight - 2, Width - (FMargin*2), FMargin + ButtonHeight - 2);
           Canvas.SetColor(clHilite2);
-          Canvas.Drawline(lp + 1, FMargin + ButtonHeight - 1, Width, FMargin + ButtonHeight - 1);
+          Canvas.Drawline(lp , FMargin + ButtonHeight - 1, Width - (FMargin*2)-1, FMargin + ButtonHeight - 1);
         end;
 
     tpBottom:
@@ -523,7 +545,7 @@ begin
     Canvas.SetColor(clWidgetFrame)
   else
     Canvas.SetColor(clInactiveWgFrame);
-  Canvas.DrawRectangle(0, 0, Width-1, Height-1);
+  Canvas.DrawRectangle(0, 0, Width, Height);
   RePaintTitles;
 
   Canvas.EndDraw;
