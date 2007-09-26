@@ -52,7 +52,7 @@ type
   end;
 
 
-  TTabSheetChange = procedure(Sender: TObject; NewActiveSheet: TfpgTabSheet);
+  TTabSheetChange = procedure(Sender: TObject; NewActiveSheet: TfpgTabSheet) of object;
   
   
   TfpgPageControl = class(TfpgWidget)
