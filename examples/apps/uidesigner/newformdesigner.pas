@@ -183,6 +183,7 @@ uses
 procedure TfrmAbout.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmAbout}
+  Name := 'frmAbout';
   SetPosition(378, 267, 276, 180);
   WindowTitle := 'Product Information...';
   Sizeable := False;
@@ -191,6 +192,7 @@ begin
   lblName1 := TfpgLabel.Create(self);
   with lblName1 do
   begin
+    Name := 'lblName1';
     SetPosition(12, 16, 255, 31);
     Text := 'fpGUI Designer';
     FontDesc := 'Arial-20';
@@ -199,6 +201,7 @@ begin
   lblVersion := TfpgLabel.Create(self);
   with lblVersion do
   begin
+    Name := 'lblVersion';
     SetPosition(150, 56, 175, 16);
     Text := 'Version:  %s';
     FontDesc := '#Label2';
@@ -207,6 +210,7 @@ begin
   btnName1 := TfpgButton.Create(self);
   with btnName1 do
   begin
+    Name := 'btnName1';
     SetPosition(194, 148, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Close';
@@ -218,6 +222,7 @@ begin
   lblName3 := TfpgLabel.Create(self);
   with lblName3 do
   begin
+    Name := 'lblName3';
     SetPosition(12, 100, 241, 14);
     Text := 'Written by Graeme Geldenhuys';
     FontDesc := 'Arial-9';
@@ -226,6 +231,7 @@ begin
   lblName4 := TfpgLabel.Create(self);
   with lblName4 do
   begin
+    Name := 'lblName4';
     SetPosition(12, 116, 246, 14);
     Text := 'http://opensoft.homeip.net/fpgui/';
     FontDesc := 'Arial-9:underline';
@@ -234,6 +240,7 @@ begin
   lblCompiled := TfpgLabel.Create(self);
   with lblCompiled do
   begin
+    Name := 'lblCompiled';
     SetPosition(12, 132, 191, 13);
     Text := 'Compiled on:  %s';
     FontDesc := 'Arial-8';
@@ -265,6 +272,7 @@ var
   btn: TwgPaletteButton;
 begin
   {@VFD_BODY_BEGIN: frmMain}
+  Name := 'frmMain';
   SetPosition(84, 123, 635, 87);
   WindowTitle := 'frmMain';
   WindowPosition := wpUser;
@@ -272,6 +280,7 @@ begin
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
   begin
+    Name := 'MainMenu';
     SetPosition(0, 0, 635, 24);
     Anchors := [anLeft,anRight,anTop];
   end;
@@ -279,6 +288,7 @@ begin
   btnNewForm := TfpgButton.Create(self);
   with btnNewForm do
   begin
+    Name := 'btnNewForm';
     SetPosition(4, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
@@ -286,12 +296,14 @@ begin
     ModalResult := 0;
     ShowImage := True;
     Focusable := False;
+    ImageMargin := -1;
     OnClick   := @(maindsgn.OnNewForm);
   end;
 
   btnOpen := TfpgButton.Create(self);
   with btnOpen do
   begin
+    Name := 'btnOpen';
     SetPosition(30, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
@@ -299,12 +311,14 @@ begin
     ModalResult := 0;
     ShowImage := True;
     Focusable := False;
+    ImageMargin := -1;
     OnClick   := @(maindsgn.OnLoadFile);
   end;
 
   btnSave := TfpgButton.Create(self);
   with btnSave do
   begin
+    Name := 'btnSave';
     SetPosition(56, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
@@ -312,12 +326,14 @@ begin
     ModalResult := 0;
     ShowImage := True;
     Focusable := False;
+    ImageMargin := -1;
     OnClick   := @(maindsgn.OnSaveFile);
   end;
 
   wgpalette := TwgPalette.Create(self);
   with wgpalette do
   begin
+    Name := 'wgpalette';
     SetPosition(116, 28, 519, 28);
     Anchors := [anLeft,anRight,anTop];
     Focusable := False;
@@ -326,6 +342,7 @@ begin
   chlPalette := TfpgComboBox.Create(self);
   with chlPalette do
   begin
+    Name := 'chlPalette';
     SetPosition(116, 60, 200, 22);
     Items.Add('-');
     FontDesc := '#List';
@@ -335,11 +352,12 @@ begin
   filemenu := TfpgPopupMenu.Create(self);
   with filemenu do
   begin
+    Name := 'filemenu';
     SetPosition(464, 64, 120, 20);
     AddMenuItem('New', '', @(maindsgn.OnNewFile));
     AddMenuItem('Open', '', @(maindsgn.OnLoadFile));
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
-//      FFileOpenRecent.Enabled := False;
+    //      FFileOpenRecent.Enabled := False;
     AddMenuItem('Save', '', @(maindsgn.OnSaveFile));
     AddMenuItem('-', '', nil);
     AddMenuItem('New Form...', '', @(maindsgn.OnNewForm));
@@ -350,6 +368,7 @@ begin
   formmenu := TfpgPopupMenu.Create(self);
   with formmenu do
   begin
+    Name := 'formmenu';
     SetPosition(464, 48, 120, 20);
     AddMenuItem('Widget Order...', '', @(maindsgn.OnEditWidgetOrder));
     AddMenuItem('-', '', nil);
@@ -359,6 +378,7 @@ begin
   setmenu := TfpgPopupMenu.Create(self);
   with setmenu do
   begin
+    Name := 'setmenu';
     SetPosition(464, 29, 120, 20);
     AddMenuItem('General options ...', '', @(maindsgn.OnOptionsClick));
   end;
@@ -366,12 +386,14 @@ begin
   miOpenRecentMenu := TfpgPopupMenu.Create(self);
   with miOpenRecentMenu do
   begin
+    Name := 'miOpenRecentMenu';
     SetPosition(336, 68, 128, 20);
   end;
 
   helpmenu := TfpgPopupMenu.Create(self);
   with helpmenu do
   begin
+    Name := 'helpmenu';
     SetPosition(328, 52, 120, 20);
     AddMenuItem('Product Information', '', @miHelpAboutClick);
     AddMenuItem('About fpGUI', '', @miHelpAboutGUI);
@@ -380,6 +402,7 @@ begin
   previewmenu := TfpgPopupMenu.Create(self);
   with previewmenu do
   begin
+    Name := 'previewmenu';
     SetPosition(324, 36, 120, 20);
     AddMenuItem('with Windows 9x', '', nil).Enabled := False;
     AddMenuItem('with Windows XP', '', nil).Enabled := False;

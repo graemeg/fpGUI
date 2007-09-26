@@ -207,8 +207,8 @@ begin
   FImage        := nil;
   FImageName    := '';
   FShowImage    := True;
-  FImageMargin  := 3;
-  FImageSpacing := -1;
+  FImageMargin  := 3;   // image is 3 pixels from edge of button. -1 will centre image.
+  FImageSpacing := -1;  // text is centered in remainind space
   FModalResult  := 0;
   FEmbedded     := False;
   FDefault      := False;
