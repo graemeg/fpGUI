@@ -1,7 +1,22 @@
 {
-  This is where all style related types should be define. The base Style
-  class should also be defined here.
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      This is where all style related types should be defined. The base
+      Style class should also be defined here.
+      This is still work in progress!
 }
+
 unit gui_style;
 
 {$mode objfpc}{$H+}

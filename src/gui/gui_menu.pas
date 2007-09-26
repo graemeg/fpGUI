@@ -1,3 +1,20 @@
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Defines a MainMenu Bar, Popup Menu and Menu Item controls.
+}
+
 unit gui_menu;
 
 {$mode objfpc}{$H+}
