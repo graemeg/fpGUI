@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="CoreLib">
+
+<!--
+  ====================================================================
+    gfx_utils
+  ====================================================================
+-->
+
+<module name="gfx_utils">
+<short>Utility functions.</short>
+<descr>Utility functions that need different implementations for each
+ supported platform.
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="ExtractTargetSymLinkPath">
+<short>Returns the target symbolic link path</short>
+<descr>This functions returns a blank string under Windows because the file
+ system doesn't support symbolic links. Under Linux it returns the target path
+ of the symbol link. This function is used in the File Open/Save dialog.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="ExtractTargetSymLinkPath.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ExtractTargetSymLinkPath.ALink">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="FileIsSymlink">
+<short>Is the file a symbolic link.</short>
+<descr>Under Windows this function always returns False, due to the file 
+ system not supporting symbolic links. Under Linux it will return True if the
+ specified file is a symbolic link.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="FileIsSymlink.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="FileIsSymlink.AFilename">
+<short></short>
+</element>
+
+</module> <!-- gfx_utils -->
+
+</package>
+</fpdoc-descriptions>

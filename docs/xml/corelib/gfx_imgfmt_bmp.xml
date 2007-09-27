@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="CoreLib">
+
+<!--
+  ====================================================================
+    gfx_imgfmt_bmp
+  ====================================================================
+-->
+
+<module name="gfx_imgfmt_bmp">
+<short>BMP image reader implementation</short>
+<descr>This unit implements a BMP (Bitmap) image reader.
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="fpgfx">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gfxbase">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="fpcanvas">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="ReadImage_BMP">
+<short>Reads the internal structure of the BMP file.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ReadImage_BMP.img">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ReadImage_BMP.bmp">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ReadImage_BMP.bmpsize">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="LoadImage_BMP">
+<short>Load's the image from the file specified.</short>
+<descr>This functions loads the BMP image from the file specified and returns
+a TfpgImage object representing the BMP file.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="LoadImage_BMP.Result">
+<short>The TfpgImage represeting the BMP file.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="LoadImage_BMP.AFileName">
+<short>The file name on disk containing the BMP data.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="CreateImage_BMP">
+<short>Creates a TfpgImage representing a BMP file from data in memory.</short>
+<descr>Creates a TfpgImage representing a BMP file from data in memory.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="CreateImage_BMP.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="CreateImage_BMP.bmp">
+<short>Pointer to BMP data in memory.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="CreateImage_BMP.bmpsize">
+<short>Size of the data in memory to read.</short>
+</element>
+
+</module> <!-- gfx_imgfmt_bmp -->
+
+</package>
+</fpdoc-descriptions>

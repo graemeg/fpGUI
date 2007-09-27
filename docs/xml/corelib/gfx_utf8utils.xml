@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="CoreLib">
+
+<!--
+  ====================================================================
+    gfx_UTF8utils
+  ====================================================================
+-->
+
+<module name="gfx_UTF8utils">
+<short></short>
+<descr>
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UTF8Pos">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="UTF8Pos.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Pos.SearchForText">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Pos.SearchInText">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UTF8Copy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="UTF8Copy.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Copy.s">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Copy.StartCharIndex">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Copy.CharCount">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UTF8Length">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="UTF8Length.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Length.s">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Length.p">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Length.ByteCount">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UTF8CharStart">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="UTF8CharStart.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8CharStart.UTF8Str">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8CharStart.Len">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8CharStart.Index">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UTF8CharacterLength">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="UTF8CharacterLength.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8CharacterLength.p">
+<short></short>
+</element>
+
+</module> <!-- gfx_UTF8utils -->
+
+</package>
+</fpdoc-descriptions>

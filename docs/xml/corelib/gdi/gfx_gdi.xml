@@ -1,0 +1,1780 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="CoreLib">
+
+<!--
+  ====================================================================
+    gfx_gdi
+  ====================================================================
+-->
+
+<module name="gfx_gdi">
+<short></short>
+<descr>
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Windows">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gfxbase">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gfx_impl">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="WM_MOUSEWHEEL">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="VER_PLATFORM_WIN32_CE">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="UnicodeEnabledOS">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="WinVersion">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="TfpgGContext">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgWindowImpl">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgFontResourceImpl">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontResourceImpl.FFontData">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontResourceImpl.FMetrics">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TfpgFontResourceImpl.OpenFontByDesc">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFontResourceImpl.OpenFontByDesc.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFontResourceImpl.OpenFontByDesc.desc">
+<short></short>
+</element>
+
+<!-- property Visibility: protected -->
+<element name="TfpgFontResourceImpl.Handle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgFontResourceImpl.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFontResourceImpl.Create.afontdesc">
+<short></short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TfpgFontResourceImpl.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFontResourceImpl.HandleIsValid">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFontResourceImpl.HandleIsValid.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFontResourceImpl.GetAscent">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFontResourceImpl.GetAscent.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFontResourceImpl.GetDescent">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFontResourceImpl.GetDescent.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFontResourceImpl.GetHeight">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFontResourceImpl.GetHeight.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFontResourceImpl.GetTextWidth">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFontResourceImpl.GetTextWidth.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFontResourceImpl.GetTextWidth.txt">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgFontImpl">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgImageImpl">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgImageImpl.FBMPHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgImageImpl.FMaskHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgImageImpl.FIsTwoColor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: private -->
+<element name="TfpgImageImpl.BMPHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: private -->
+<element name="TfpgImageImpl.MaskHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgImageImpl.DoFreeImage">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgImageImpl.DoInitImage">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgImageImpl.DoInitImage.acolordepth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgImageImpl.DoInitImage.awidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgImageImpl.DoInitImage.aheight">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgImageImpl.DoInitImage.aimgdata">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgImageImpl.DoInitImageMask">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgImageImpl.DoInitImageMask.awidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgImageImpl.DoInitImageMask.aheight">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgImageImpl.DoInitImageMask.aimgdata">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgImageImpl.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgCanvasImpl">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FDrawing">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FBufferBitmap">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FDrawWindow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.Fgc">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.fBufgc">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FWinGC">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FBackgroundColor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FCurFontRes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FClipRect">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FClipRectSet">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FWindowsColor">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FBrush">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FPen">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FClipRegion">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FIntLineStyle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FBufWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgCanvasImpl.FBufHeight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgCanvasImpl.TryFreeBackBuffer">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoSetFontRes">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoSetFontRes.fntres">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoSetTextColor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoSetTextColor.cl">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoSetColor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoSetColor.cl">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoSetLineStyle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoSetLineStyle.awidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoSetLineStyle.astyle">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoGetWinRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoGetWinRect.r">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoFillRectangle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillRectangle.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillRectangle.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillRectangle.w">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillRectangle.h">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoXORFillRectangle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoXORFillRectangle.col">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoXORFillRectangle.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoXORFillRectangle.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoXORFillRectangle.w">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoXORFillRectangle.h">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoFillTriangle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillTriangle.x1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillTriangle.y1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillTriangle.x2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillTriangle.y2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillTriangle.x3">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillTriangle.y3">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoDrawRectangle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawRectangle.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawRectangle.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawRectangle.w">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawRectangle.h">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoDrawLine">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawLine.x1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawLine.y1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawLine.x2">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawLine.y2">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoDrawImagePart">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawImagePart.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawImagePart.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawImagePart.img">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawImagePart.xi">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawImagePart.yi">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawImagePart.w">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawImagePart.h">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoDrawString">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawString.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawString.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawString.txt">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoSetClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoSetClipRect.ARect">
+<short></short>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TfpgCanvasImpl.DoGetClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgCanvasImpl.DoGetClipRect.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoAddClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoAddClipRect.ARect">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoClearClipRect">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoBeginDraw">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoBeginDraw.awin">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoBeginDraw.buffered">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoPutBufferToScreen">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoPutBufferToScreen.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoPutBufferToScreen.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoPutBufferToScreen.w">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoPutBufferToScreen.h">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoEndDraw">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TfpgCanvasImpl.GetPixel">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgCanvasImpl.GetPixel.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.GetPixel.X">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.GetPixel.Y">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.SetPixel">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.SetPixel.X">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.SetPixel.Y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.SetPixel.AValue">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoDrawArc">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawArc.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawArc.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawArc.w">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawArc.h">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawArc.a1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoDrawArc.a2">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgCanvasImpl.DoFillArc">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillArc.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillArc.y">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillArc.w">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillArc.h">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillArc.a1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgCanvasImpl.DoFillArc.a2">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgCanvasImpl.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TfpgCanvasImpl.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgWindowImpl.FMouseInWindow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: private -->
+<element name="TfpgWindowImpl.DoMouseEnterLeaveCheck">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgWindowImpl.DoMouseEnterLeaveCheck.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoMouseEnterLeaveCheck.AWindow">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoMouseEnterLeaveCheck.uMsg">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoMouseEnterLeaveCheck.wParam">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoMouseEnterLeaveCheck.lParam">
+<short></short>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgWindowImpl.FWinHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgWindowImpl.FModalForWin">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgWindowImpl.FWinStyle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgWindowImpl.FWinStyleEx">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgWindowImpl.FParentWinHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgWindowImpl.DoAllocateWindowHandle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoAllocateWindowHandle.AParent">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgWindowImpl.DoReleaseWindowHandle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgWindowImpl.DoSetWindowVisible">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoSetWindowVisible.AValue">
+<short></short>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TfpgWindowImpl.HandleIsValid">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgWindowImpl.HandleIsValid.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgWindowImpl.DoUpdateWindowPosition">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoUpdateWindowPosition.aleft">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoUpdateWindowPosition.atop">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoUpdateWindowPosition.awidth">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoUpdateWindowPosition.aheight">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgWindowImpl.DoMoveWindow">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoMoveWindow.x">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoMoveWindow.y">
+<short></short>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TfpgWindowImpl.DoWindowToScreen">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgWindowImpl.DoWindowToScreen.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoWindowToScreen.ASource">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoWindowToScreen.AScreenPos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgWindowImpl.DoSetWindowTitle">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.DoSetWindowTitle.ATitle">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgWindowImpl.DoSetMouseCursor">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: protected -->
+<element name="TfpgWindowImpl.WinHandle">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgWindowImpl.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgWindowImpl.Create.AOwner">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgWindowImpl.CaptureMouse">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgWindowImpl.ReleaseMouse">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgApplicationImpl">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.FDisplay">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.WindowClass">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.WidgetClass">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_default">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_dir_ew">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_dir_ns">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_edit">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_dir_nwse">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_dir_nesw">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_move">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_crosshair">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.hcr_wait">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.FFocusedWindow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.LastClickWindow">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgApplicationImpl.LastWinClickTime">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TfpgApplicationImpl.DoGetFontFaceList">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgApplicationImpl.DoGetFontFaceList.Result">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgApplicationImpl.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgApplicationImpl.Create.aparams">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgApplicationImpl.DoMessagesPending">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgApplicationImpl.DoMessagesPending.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgApplicationImpl.DoWaitWindowMessage">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgApplicationImpl.DoWaitWindowMessage.atimeoutms">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgApplicationImpl.DoFlush">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgApplicationImpl.GetScreenWidth">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgApplicationImpl.GetScreenWidth.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgApplicationImpl.GetScreenHeight">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgApplicationImpl.GetScreenHeight.Result">
+<short></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TfpgApplicationImpl.Display">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+</module> <!-- gfx_gdi -->
+
+</package>
+</fpdoc-descriptions>
