@@ -875,11 +875,9 @@ begin
   TfpgScrollbarFriend(FVScrollBar).HandleMouseScroll(x, y, shiftstate, delta);
 end;
 
-procedure TfpgListView.HandleLMouseDown(x, y: integer; shiftstate: TShiftState
-  );
+procedure TfpgListView.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   Item: TfpgLVItem;
-  IndexOfItem: Integer;
   cRect: TfpgRect;
   curLeft, curRight: Integer;
   I: Integer;
@@ -944,7 +942,6 @@ begin
     Exit;
 
   Item := ItemGetFromPoint(X, Y);
-  IndexOfItem := ItemIndexFromY(Y);
   if not FMultiSelect then
     SelectionClear;
   if Item <> nil then
@@ -1064,7 +1061,6 @@ procedure TfpgListView.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   iIndex: Integer;
-  AStart, AEnd: Integer;
   OldIndex: Integer;
   procedure CheckMultiSelect;
   begin
@@ -1304,7 +1300,6 @@ end;
 
 procedure TfpgListView.PaintItems;
 var
-  VisibleItem: TfpgLVItem;
   FirstIndex,
   LastIndex: Integer;
   I, J : Integer;
@@ -1319,7 +1314,6 @@ var
   ColumnIndex: Integer;
   cBottom: Integer;
   vBottom: Integer;
-  cRight: Integer;
   tLeft,
   tWidth: Integer;
 begin
@@ -1565,11 +1559,8 @@ end;
 
 procedure TfpgListView.MakeItemVisible(AIndex: Integer; PartialOK: Boolean);
 var
-  Index: Integer;
   iTop,
-  iBottom,
-  vTop,
-  vBottom: Integer;
+  iBottom: integer;
   tVisible, bVisible: Boolean;
 begin
   if AIndex = -1 then

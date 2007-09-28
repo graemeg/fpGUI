@@ -89,6 +89,7 @@ type
     FStyle: TfpgTabStyle;
     FTabPosition: TfpgTabPosition;
     function    GetActivePageIndex: integer;
+    function GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
     procedure   InsertPage(const APage: TfpgTabSheet);
     procedure   RemovePage(const APage: TfpgTabSheet);
@@ -121,6 +122,7 @@ type
     function    AppendTabSheet(ATitle: string): TfpgTabSheet;
     property    PageCount: Integer read GetPageCount;
     property    ActivePage: TfpgTabSheet read FActivePage write SetActivePage;
+    property    Pages[AIndex: integer]: TfpgTabSheet read GetPage;
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
@@ -229,6 +231,13 @@ end;
 function TfpgPageControl.GetActivePageIndex: integer;
 begin
   Result := FActivePageIndex;
+end;
+
+function TfpgPageControl.GetPage(AIndex: integer): TfpgTabSheet;
+begin
+  Result := nil;
+  if (AIndex >= 0) and (AIndex < FPages.Count) then
+    Result := TfpgTabSheet(FPages[AIndex]);
 end;
 
 function TfpgPageControl.GetPageCount: Integer;
@@ -720,23 +729,10 @@ begin
 end;
 
 function TfpgPageControl.AppendTabSheet(ATitle: string): TfpgTabSheet;
-var
-//  h: PTabSheetList;
-  nt: TfpgTabSheet;
 begin
-//  h := FFirstTabSheet;
-  nt := TfpgTabSheet.Create(self);
-  nt.Text := ATitle;
-  //if h = nil then
-    //FFirstTabSheet := nl
-  //else
-  //begin
-    //while h^.next <> nil do
-      //h := h^.next;
-    //h^.next := nl;
-    //nl^.prev := h;
-  //end;
-  result := nt;
+  Result := TfpgTabSheet.Create(self);
+  Result.Text := ATitle;
+  InsertPage(Result);
 end;
 
 end.
