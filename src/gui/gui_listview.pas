@@ -30,14 +30,13 @@ uses
   gui_scrollbar;
   
 type
-  TfpgListView = class;
-  TfpgLVItem = class;
-  TfpgLVColumns = class;
-  TfpgLVColumn = class;
+  TfpgListView    = class;
+  TfpgLVItem      = class;
+  TfpgLVColumns   = class;
+  TfpgLVColumn    = class;
   
   TfpgLVColumnClickEvent = procedure(Listview: TfpgListView; Column: TfpgLVColumn; Button: Integer) of object;
   
-  { TfpgLVColumn }
 
   TfpgLVColumn = class(TComponent)
   private
@@ -77,7 +76,6 @@ type
     property    Resizable: Boolean read FResizable write SetResizable;
   end;
   
-  { TfpgLVColumns }
 
   TfpgLVColumns = class(TPersistent)
   private
@@ -89,11 +87,13 @@ type
     constructor Create(AListView: TfpgListView);
     destructor  Destroy; override;
     function    Add(AColumn: TfpgLVColumn): Integer;
+    procedure   Clear;
     procedure   Delete(AIndex: Integer);
     procedure   Insert(AColumn: TfpgLVColumn; AIndex: Integer);
     function    Count: Integer;
     property    Column[AIndex: Integer]: TfpgLVColumn read GetColumn write SetColumn;
   end;
+
   
   TfpgLVItemState = set of (lisFocused, lisSelected, lisHotTrack);
   
@@ -114,7 +114,6 @@ type
     procedure ItemsUpdated;
   end;
   
-  { TfpgLVItems }
 
   TfpgLVItems = class(TObject)
   private
@@ -134,23 +133,22 @@ type
     procedure   DoAdd(AItem: TfpgLVItem);
     procedure   DoDelete(AItem: TfpgLVItem);
     procedure   DoEndUpdate;
-    
-  protected
   public
     constructor Create(AViewer: IfpgLVItemViewer);
     destructor  Destroy; override;
     function    Add(AItem: TfpgLVItem): Integer;
     function    Count: Integer;
+    procedure   Clear;
     procedure   Delete(AIndex: Integer);
     function    IndexOf(AItem: TfpgLVItem): Integer;
     procedure   InsertItem(AItem: TfpgLVItem; AIndex: Integer);
     procedure   BeginUpdate;
     procedure   EndUpdate;
-
     property    Capacity: Integer read GetCapacity write SetCapacity;
     property    Columns: TfpgLVColumns read FColumns;
     property    Item[AIndex: Integer]: TfpgLVItem read GetItem write SetItem;
   end;
+  
   
   TfpgLVItem = class(TObject)
   private
@@ -171,8 +169,6 @@ type
     property    Selected[ListView: TfpgListView]: Boolean read GetSelected write SetSelected;
   end;
   
-  
-  { TfpgListView }
 
   TfpgListView = class(TfpgWidget, IfpgLVItemViewer)
   private
@@ -208,7 +204,7 @@ type
     procedure   ItemAdded(AIndex: Integer);
     procedure   ItemChanged(AIndex: Integer);
     procedure   ItemsUpdated;
-    
+    //
     function    GetClientRect: TfpgRect;
     function    GetVisibleColumnsWidth: Integer;
     function    GetItemAreaHeight: Integer;
@@ -403,6 +399,15 @@ end;
 function TfpgLVItems.Count: Integer;
 begin
   Result := FItems.Count;
+end;
+
+procedure TfpgLVItems.Clear;
+var
+  i: integer;
+begin
+  for i :=  FItems.Count-1 downto 0 do
+    Delete(i);
+  FItems.Clear;
 end;
 
 procedure TfpgLVItems.Delete(AIndex: Integer);
@@ -1617,6 +1622,15 @@ function TfpgLVColumns.Add(AColumn: TfpgLVColumn): Integer;
 begin
   Result := Count;
   Insert(AColumn, Count);
+end;
+
+procedure TfpgLVColumns.Clear;
+var
+  i: integer;
+begin
+  for  i := FColumns.Count-1 downto 0 do
+    Delete(i);
+  FColumns.Clear;
 end;
 
 procedure TfpgLVColumns.Delete(AIndex: Integer);

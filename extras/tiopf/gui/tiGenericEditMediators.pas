@@ -1,4 +1,4 @@
-{
+(*
 
 Revision history:
 
@@ -15,7 +15,7 @@ ToDo:
     created in each Form using mediating views.
   * As soon as TfpgSpinEdit has been implemented, port the SpinEdit mediator
 
-}
+*)
 
 unit tiGenericEditMediators;
 
