@@ -1398,10 +1398,11 @@ begin
           Canvas.SetClipRect(iColumnClipRect);
           if FColumns.Column[J].ColumnIndex <> -1 then
             ColumnIndex := FColumns.Column[J].ColumnIndex
-          else ColumnIndex := J;
+          else
+            ColumnIndex := J;
           if ColumnIndex = 0 then
             TheText := Item.Caption
-          else if item.SubItems.Count > ColumnIndex then
+          else if Item.SubItems.Count > ColumnIndex then
             TheText := Item.SubItems.Strings[ColumnIndex-1]
           else
             TheText := '';

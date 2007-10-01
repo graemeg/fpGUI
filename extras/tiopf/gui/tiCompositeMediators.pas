@@ -58,7 +58,7 @@ type
     property    ShowDeleted: Boolean read FShowDeleted write SetShowDeleted;
   end;
 
-{
+
   TCompositeStringGridMediator = class(TtiObject)
   private
     FDisplayNames: string;
@@ -70,7 +70,7 @@ type
     procedure   DoCreateItemMediator(AData: TtiObject); overload;
     procedure   DoCreateItemMediator(AData: TtiObject; pRowIdx : Integer); overload;
   protected
-    FView: TStringGrid;
+    FView: TfpgStringGrid;
     FModel: TtiObjectList;
     FMediatorList: TObjectList;
     procedure   CreateSubMediators;
@@ -78,11 +78,11 @@ type
     procedure   RebuildStringGrid; virtual;
     function    DataAndPropertyValid(const AData: TtiObject): Boolean;
   public
-    constructor CreateCustom(AModel: TtiObjectList; AGrid : TStringGrid; ADisplayNames : string; IsObserving: Boolean = True);
+    constructor CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; IsObserving: Boolean = True);
     procedure   BeforeDestruction; override;
     procedure   Update(ASubject: TtiObject); override;
   published
-    property    View: TStringGrid read FView;
+    property    View: TfpgStringGrid read FView;
     property    Model: TtiObjectList read FModel;
     property    DisplayNames: string read FDisplayNames;
     property    IsObserving: boolean read FIsObserving;
@@ -90,7 +90,6 @@ type
     property    SelectedObject: TtiObject read GetSelectedObjected write SetSelectedObject;
   end;
 
-}
 
 implementation
 
@@ -122,24 +121,24 @@ type
     property    DisplayNames: string read FDisplayNames;
   end;
 
-(*
+
   TStringGridRowMediator = class(TtiObject)
   private
     FDisplayNames: string;
-    FView: TStringGrid;
+    FView: TfpgStringGrid;
     FModel: TtiObject;
-    FRowIndex : Integer;
+    FRowIndex: Integer;
 //    procedure   SetupFields;
   public
-    constructor CreateCustom(AModel: TtiObject; AGrid: TStringGrid; ADisplayNames: string; pRowIndex: integer; IsObserving: Boolean = True);
+    constructor CreateCustom(AModel: TtiObject; AGrid: TfpgStringGrid; ADisplayNames: string; pRowIndex: integer; IsObserving: Boolean = True);
     procedure   BeforeDestruction; override;
     procedure   Update(ASubject: TtiObject); override;
   published
     property    Model: TtiObject read FModel;
-    property    View: TStringGrid Read FView;
+    property    View: TfpgStringGrid read FView;
     property    DisplayNames: string read FDisplayNames;
   end;
-*)
+
 
 { Helper functions }
 
@@ -193,8 +192,8 @@ end;
 //  {$ifdef fpc} {$Note Add the appropriate code here} {$endif}
 //end;
 
-(*
-constructor TStringGridRowMediator.CreateCustom(AModel: TtiObject; AGrid : TStringGrid; ADisplayNames: string; pRowIndex : integer; IsObserving: Boolean);
+
+constructor TStringGridRowMediator.CreateCustom(AModel: TtiObject; AGrid : TfpgStringGrid; ADisplayNames: string; pRowIndex : integer; IsObserving: Boolean);
 begin
   inherited Create;
   FModel        := AModel;
@@ -230,7 +229,7 @@ begin
     FView.Cells[i, FRowIndex] := FModel.PropValue[lFieldName];
   end;
 end;
-*)
+
 
 { TListViewListItemMediator }
 
@@ -382,22 +381,14 @@ procedure TCompositeListViewMediator.RebuildList;
 begin
   { This rebuilds the whole list. Not very efficient. You can always override
     this in your mediators to create a more optimised rebuild. }
-  {$ifdef fpc}
   View.BeginUpdate;
-  {$else}
-  View.Items.BeginUpdate;
-  {$endif}
   try
     FMediatorList.Clear;
     View.Columns.Clear;
     View.Items.Clear;
     CreateSubMediators;
   finally
-  {$ifdef fpc}
   View.EndUpdate;
-  {$else}
-  View.Items.EndUpdate;
-  {$endif}
   end;
 end;
 
@@ -507,13 +498,15 @@ begin
 end;
 
 { TCompositeStringGridMediator }
-(*
+
 function TCompositeStringGridMediator.GetSelectedObjected: TtiObject;
 begin
-  if FView.Selection.Top = 0 then
+  if FView.FocusRow = 0 then
+//  if FView.Selection.Top = 0 then
     Result := nil
   else
-    Result := TtiObject(FView.Objects[1, FView.Selection.Top]);
+//    Result := TtiObject(FView.Objects[1, FView.Selection.Top]);
+    Result := TtiObject(FView.Objects[1, FView.FocusRow]);
 end;
 
 procedure TCompositeStringGridMediator.SetSelectedObject(const AValue: TtiObject);
@@ -525,7 +518,7 @@ begin
     if TtiObject(FView.Objects[1, i]) = AValue then
     begin
     
-      FView.Row := i;
+      FView.FocusRow := i;
       Exit; //==>
     end;
   end;
@@ -570,7 +563,6 @@ begin
   end;
 end;
 
-
 procedure TCompositeStringGridMediator.CreateSubMediators;
 var
   i: integer;
@@ -581,16 +573,15 @@ begin
   for i := 1 to tiNumToken(FDisplayNames, cFieldDelimiter) do
   begin
     lField := tiToken(FDisplayNames, cFieldDelimiter, i);
-    FView.Cells[i, 0]   := tiFieldName(lField);
-    FView.ColWidths[i]  := tiFieldWidth(lField);
+    FView.Cells[i, 1]     := tiFieldName(lField);
+    FView.ColumnWidth[i]  := tiFieldWidth(lField);
 
     //resize the last column to fill the grid.
     if i = tiNumToken(FDisplayNames, cFieldDelimiter) then
-      FView.ColWidths[i] := FView.width - lColumnTotalWidth + 10
+      FView.ColumnWidth[i] := FView.Width - lColumnTotalWidth + 10
     else
-      lColumnTotalWidth := lColumnTotalWidth + FView.ColWidths[i] + 20;
+      lColumnTotalWidth := lColumnTotalWidth + FView.ColumnWidth[i] + 20;
   end;
-  
   for i := 0 to FModel.Count - 1 do
   begin
     if not FModel.Items[i].Deleted or FShowDeleted then
@@ -603,29 +594,28 @@ end;
 procedure TCompositeStringGridMediator.SetupGUIandObject;
 begin
   //Setup default properties for the StringGrid
-  {$ifdef fpc}
-  FView.Clear;
-  FView.Columns.Clear;
-  {$endif}
-  FView.Options       := FView.Options + [goRowSelect];
-  FView.ColCount      := tiNumToken(FDisplayNames, cFieldDelimiter) + 1;
-  FView.RowCount      := FModel.Count + 1;
-  FView.FixedCols     := 1;
-  FView.FixedRows     := 1;
-  FView.ColWidths[0]  := 20;
-  
-  {$IFDEF FPC}
-  FView.AutoSize := False;
-  FView.ScrollBars := ssAutoBoth;
-  {$ENDIF}
+  FView.RowSelect     := True;
+  FView.ColumnCount   := tiNumToken(FDisplayNames, cFieldDelimiter);
+  FView.RowCount      := FModel.Count;
+//  FView.ColumnWidth[0]  := 20;
 end;
 
 procedure TCompositeStringGridMediator.RebuildStringGrid;
 begin
-  { Do nothing. Can be implement as you see fit. A simple example is given
-    in the Demos/GenericMediatingViews/Composite_ListView_Mediator }
-  raise EtiOPFProgrammerException.Create('You are trying to call ' + Classname
-    + '.RebuildStringGrid, which must be overridden in the concrete class.');
+  { This rebuilds the whole list. Not very efficient. }
+//  View.BeginUpdate;
+  try
+    FMediatorList.Clear;
+//    View.Columns.Clear;
+    CreateSubMediators;
+  finally
+//    View.EndUpdate;
+  end;
+
+//  { Do nothing. Can be implement as you see fit. A simple example is given
+//    in the Demos/GenericMediatingViews/Composite_ListView_Mediator }
+//  raise EtiOPFProgrammerException.Create('You are trying to call ' + Classname
+//    + '.RebuildStringGrid, which must be overridden in the concrete class.');
 end;
 
 function TCompositeStringGridMediator.DataAndPropertyValid(const AData: TtiObject): Boolean;
@@ -650,7 +640,7 @@ begin
 end;
 
 constructor TCompositeStringGridMediator.CreateCustom(AModel: TtiObjectList;
-  AGrid: TStringGrid; ADisplayNames: string; IsObserving: Boolean);
+  AGrid: TfpgStringGrid; ADisplayNames: string; IsObserving: Boolean);
 begin
   inherited Create;
   
@@ -660,9 +650,8 @@ begin
   FIsObserving  := IsObserving;
   FDisplayNames := ADisplayNames;
   FShowDeleted  := False;
-  
+
   SetupGUIandObject;
-  
   if (FDisplayNames <> '') and (tiNumToken(ADisplayNames, cFieldDelimiter) > 0) then
   begin
     CreateSubMediators;
@@ -687,7 +676,7 @@ begin
   Assert(FModel = ASubject);
   RebuildStringGrid;
 end;
-*)
+
 
 end.
 

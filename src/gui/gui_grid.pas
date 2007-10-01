@@ -158,8 +158,10 @@ type
   private
     function    GetCell(ACol, ARow: LongWord): string;
     function    GetColumnTitle(ACol: integer): string;
+    function    GetObjects(ACol, ARow: LongWord): TObject;
     procedure   SetCell(ACol, ARow: LongWord; const AValue: string);
     procedure   SetColumnTitle(ACol: integer; const AValue: string);
+    procedure   SetObjects(ACol, ARow: LongWord; const AValue: TObject);
   protected
     function    GetColumnWidth(ACol: integer): integer; override;
     procedure   SetColumnWidth(ACol: integer; const AValue: integer); override;
@@ -175,7 +177,7 @@ type
     function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify): TfpgStringColumn; overload;
     { ACol and ARow is 1-based. }
     property    Cells[ACol, ARow: LongWord]: string read GetCell write SetCell;
-//    property Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
+    property    Objects[ACol, ARow: LongWord]: TObject read GetObjects write SetObjects;
     property    ColumnTitle[ACol: integer]: string read GetColumnTitle write SetColumnTitle;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
 //    property    Cols[index: Integer]: TStrings read GetCols write SetCols;
@@ -678,6 +680,15 @@ begin
   Result := TfpgStringColumn(FColumns.Items[ACol-1]).Title;
 end;
 
+function TfpgCustomStringGrid.GetObjects(ACol, ARow: LongWord): TObject;
+begin
+  if ACol > ColumnCount then
+    Exit; //==>
+  if ARow > RowCount then
+    Exit; //==>
+  Result := TfpgStringColumn(FColumns.Items[ACol-1]).Cells.Objects[ARow-1];
+end;
+
 function TfpgCustomStringGrid.GetColumnWidth(ACol: integer): integer;
 begin
   if ACol > ColumnCount then
@@ -705,6 +716,16 @@ begin
     Exit; //==>
   TfpgStringColumn(FColumns.Items[ACol-1]).Title := AValue;
   RePaint;
+end;
+
+procedure TfpgCustomStringGrid.SetObjects(ACol, ARow: LongWord;
+  const AValue: TObject);
+begin
+  if ACol > ColumnCount then
+    Exit; //==>
+  if ARow > RowCount then
+    Exit; //==>
+  TfpgStringColumn(FColumns.Items[ACol-1]).Cells.Objects[ARow-1] := AValue;
 end;
 
 procedure TfpgCustomStringGrid.SetColumnWidth(ACol: integer; const AValue: integer);
