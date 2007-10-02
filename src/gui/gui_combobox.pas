@@ -75,6 +75,7 @@ type
     procedure   PaintInternalButton; virtual;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
+    // property is 1-based
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;

@@ -109,6 +109,7 @@ type
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    UseTabs: boolean read FUseTabs write FUseTabs;
     property    TabWidth: integer read FTabWidth write FTabWidth;
+    property    MaxLength: integer read FMaxLength write FMaxLength;
   published
     property    Lines: TStringList read FLines;
     property    FontDesc: string read GetFontDesc write SetFontDesc;

@@ -828,10 +828,10 @@ var
 begin
   if not DataAndPropertyValid then
     Exit; //==>
-  if EditControl.FocusItem < 0 then
+  if EditControl.FocusItem < 1 then
     Exit; //==>
 
-  lValue := TtiObject(FList.Items[EditControl.FocusItem]);
+  lValue := TtiObject(FList.Items[EditControl.FocusItem-1]);
 
   lPropType := typinfo.PropType(Subject, FieldName);
   if lPropType = tkClass then
@@ -865,7 +865,7 @@ begin
   for i := 0 to FList.Count - 1 do
     if FList.Items[i] = lValue then
     begin
-      EditControl.FocusItem := i;
+      EditControl.FocusItem := i+1; // Control is 1-based
       Break; //==>
     end;
 
