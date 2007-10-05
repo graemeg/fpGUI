@@ -176,8 +176,9 @@ end;
 
 procedure TfpgEdit.SetPasswordMode(const AValue: boolean);
 begin
-  if FPasswordMode=AValue then exit;
-  FPasswordMode:=AValue;
+  if FPasswordMode = AValue then
+    Exit; //==>
+  FPasswordMode := AValue;
 end;
 
 procedure TfpgEdit.DeleteSelection;
@@ -186,12 +187,12 @@ begin
   begin
     if FSelOffset < 0 then
     begin
-      Delete(FText, 1 + FSelStart + FSelOffset, -FSelOffset);
+      UTF8Delete(FText, 1 + FSelStart + FSelOffset, -FSelOffset);
       FCurSorPos := FSelStart + FSelOffset;
     end
     else
     begin
-      Delete(FText, 1 + FSelStart, FSelOffset);
+      UTF8Delete(FText, 1 + FSelStart, FSelOffset);
       FCurSorPos := FSelStart;
     end;
     FSelOffset := 0;
@@ -202,7 +203,7 @@ end;
 procedure TfpgEdit.DoCopy;
 begin
   if FSelOffset = 0 then
-    Exit;
+    Exit; //==>
   fpgClipboard.Text := SelectionText;
 end;
 
@@ -219,8 +220,8 @@ begin
 
   if UTF8Length(s) < 1 then
     Exit; //==>
-  {$Note Is Insert() UTF-8 safe? }
-  Insert(s, FText, FCursorPos + 1);
+
+  UTF8Insert(s, FText, FCursorPos + 1);
   FCursorPos := FCursorPos + UTF8Length(s);
   AdjustCursor;
   Repaint;
@@ -323,7 +324,7 @@ begin
     if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
     begin
       DeleteSelection;
-      Insert(s, FText, FCursorPos + 1);
+      UTF8Insert(s, FText, FCursorPos + 1);
       Inc(FCursorPos);
       FSelStart := FCursorPos;
       AdjustCursor;
@@ -453,7 +454,7 @@ begin
           begin
             if FCursorPos > 0 then
             begin
-              Delete(FText, FCursorPos, 1);
+              UTF8Delete(FText, FCursorPos, 1);
               Dec(FCursorPos);
               hasChanged := True;
             end;// backspace
@@ -465,7 +466,7 @@ begin
             if FSelOffset <> 0 then
               DeleteSelection
             else if FCursorPos < UTF8Length(FText) then
-              Delete(FText, FCursorPos + 1, 1);
+              UTF8Delete(FText, FCursorPos + 1, 1);
             hasChanged := True;
           end;
       else
@@ -491,7 +492,6 @@ end;
 
 procedure TfpgEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
-  s: string;
   n: integer;
   cpx: integer;
   cp: integer;
@@ -504,7 +504,6 @@ begin
   dtext := GetDrawText;
   cpx   := FFont.TextWidth(UTF8Copy(dtext, 1, FCursorPos)) - FDrawOffset + FSideMargin;
   cp    := FCursorPos;
-  s     := '';
 
   for n := 0 to UTF8Length(dtext) do
   begin
@@ -531,7 +530,6 @@ end;
 
 procedure TfpgEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
-  s: string;
   n: integer;
   cpx: integer;
   cp: integer;
@@ -545,7 +543,6 @@ begin
   dtext := GetDrawText;
   cpx   := FFont.TextWidth(UTF8Copy(dtext, 1, FCursorPos)) - FDrawOffset + FSideMargin;
   cp    := FCursorPos;
-  s     := '';
 
   for n := 0 to UTF8Length(dtext) do
   begin

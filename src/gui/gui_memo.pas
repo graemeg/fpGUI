@@ -302,7 +302,7 @@ begin
     else
       len := selep - st;
 
-    Delete(ls, st + 1, len);
+    UTF8Delete(ls, st + 1, len);
     SetLineText(n, ls);
   end;
 
@@ -798,7 +798,7 @@ begin
     begin
       DeleteSelection;
       ls := GetLineText(FCursorLine);
-      insert(s, ls, FCursorPos + 1);
+      UTF8Insert(s, ls, FCursorPos + 1);
       SetLineText(FCursorLine, ls);
       Inc(FCursorPos);
       FSelStartPos  := FCursorPos;
@@ -991,7 +991,7 @@ begin
             if FCursorPos > 0 then
             begin
               ls := GetLineText(FCursorLine);
-              Delete(ls, FCursorPos, 1);
+              UTF8Delete(ls, FCursorPos, 1);
               SetLineText(FCursorLine, ls);
               Dec(FCursorPos);
             end
@@ -1013,7 +1013,7 @@ begin
               DeleteSelection
             else if FCursorPos < UTF8Length(ls) then
             begin
-              Delete(ls, FCursorPos + 1, 1);
+              UTF8Delete(ls, FCursorPos + 1, 1);
               SetLineText(FCursorLine, ls);
             end
             else if FCursorLine < LineCount then
@@ -1033,7 +1033,7 @@ begin
                 DeleteSelection
               else} if FCursorPos < UTF8Length(ls) then
               begin
-                Insert(#9, ls, FCursorPos);
+                UTF8Insert(#9, ls, FCursorPos);
                 SetLineText(FCursorLine, ls);
               end;
 {

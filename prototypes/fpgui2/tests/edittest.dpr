@@ -9,6 +9,7 @@ uses
   fpgfx,
   gfx_widget,
   gfx_imgfmt_bmp,
+  gfx_UTF8utils,
   gui_form,
   gui_label,
   gui_button,
@@ -360,7 +361,7 @@ var
   bmp: TfpgImage;
 begin
   SetPosition(200, 200, 500, 350);
-  WindowTitle := 'Test Russian text -> Òåñò';
+  WindowTitle := 'UTF-8 Title -> Òåñò';
 
   label1 := CreateLabel(self, 5, 5, 'Hello world!');
   label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');
@@ -373,7 +374,11 @@ begin
   edit1      := CreateEdit(self, 10, 40, 120, 22);
   edit1.Text := 'Hello world. Hello world. Hello world.';
   edit2      := CreateEdit(self, 10, 70, 200, 22);
-  edit2.Text := 'Test Russian text -> Òåñò';
+  edit2.Text := 'UTF-8 text -> Òåñò';
+//  writeln(UTF8Length(edit2.text));
+//  writeln(Length(edit2.text));
+  UTF8Insert('ö', edit2.Text, 15);
+
   // left to right and right to left text in one
   // fpGUI doesn't handle this correctly yet.
   // See http://www.catch22.net/tuts/editor18.asp  for how it needs to display and work

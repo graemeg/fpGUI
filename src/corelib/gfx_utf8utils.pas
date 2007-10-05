@@ -1,6 +1,6 @@
 {
-  Some handly UTF8 function copied from the Lazarus LCL. Surely we can move
-  this into FPC?
+  Some handly UTF8 function copied from the Lazarus LCL. Comes from the LCLProc
+  unit.Surely we can move this into FPC?
 }
 unit gfx_UTF8utils;
 
@@ -12,14 +12,14 @@ uses
   Classes, SysUtils;
 
 
-function UTF8Pos(const SearchForText, SearchInText: string): integer;
-function UTF8Copy(const s: string; StartCharIndex, CharCount: integer): string;
-function UTF8Length(const s: string): integer;
-function UTF8Length(p: PChar; ByteCount: integer): integer;
-function UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
-function UTF8CharacterLength(p: PChar): integer;
-
-{$Note I believe we need a UTF8Delete and UTF8Insert as well. }
+function  UTF8Pos(const SearchForText, SearchInText: string): integer;
+function  UTF8Copy(const s: string; StartCharIndex, CharCount: integer): string;
+function  UTF8Length(const s: string): integer;
+function  UTF8Length(p: PChar; ByteCount: integer): integer;
+function  UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
+function  UTF8CharacterLength(p: PChar): integer;
+procedure UTF8Insert(const Source: string; var S: string; Index: integer);
+procedure UTF8Delete(var S: string; Index, Size: integer);
 
 
 implementation
@@ -29,11 +29,11 @@ function UTF8Pos(const SearchForText, SearchInText: string): integer;
 var
  p: LongInt;
 begin
- p:=System.Pos(SearchForText,SearchInText);
- if p>0 then
-   Result:=UTF8Length(PChar(SearchInText),p-1)+1
- else
-   Result:=0;
+  p := System.Pos(SearchForText, SearchInText);
+  if p > 0 then
+    Result := UTF8Length(PChar(SearchInText), p-1) + 1
+  else
+    Result := 0;
 end;
 
 // returns substring
@@ -136,6 +136,32 @@ begin
   end
   else
     Result:=0;
+end;
+
+procedure UTF8Insert(const Source: string; var S: string; Index: integer);
+var
+  b: string;
+  e: string;
+begin
+  if UTF8Length(Source) = 0 then
+    Exit; //==>
+  b := UTF8Copy(S, 1, Index-1); // beginning string
+  e := UTF8Copy(S, Index, UTF8Length(S)-Index+1); // ending string
+  S := b + Source + e;
+end;
+
+procedure UTF8Delete(var S: string; Index, Size: integer);
+var
+  ls: integer;
+  b: string;
+  e: string;
+begin
+  ls := UTF8Length(S);
+  if (Index > ls) or (Index <= 0) or (Size <= 0) then
+    Exit; //==>
+  b := UTF8Copy(S, 1, Index-1); // beginning string
+  e := UTF8Copy(S, Index+Size, UTF8Length(S)-(Index+Size-1)); // ending string
+  S := b + e;
 end;
 
 end.

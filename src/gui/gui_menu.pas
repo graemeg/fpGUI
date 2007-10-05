@@ -458,7 +458,6 @@ var
   n: integer;
   r: TfpgRect;
   mi: TfpgMenuItem;
-  r2: TfpgRect;
 begin
   Canvas.BeginDraw;
   r.SetRect(2, 1, 1, fpgStyle.MenuFont.Height+1);

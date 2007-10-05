@@ -230,6 +230,7 @@ procedure XRenderSetPictureClipRectangles(disp: PXDisplay; pic: TPicture; xorigi
 
 // redefines:
 function XmbLookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym; stat: PStatus): longint; cdecl; external;
+function Xutf8LookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym; stat: PStatus): longint; cdecl; external;
 
 // Double buffer functions
 function XdbeQueryExtension(ADisplay: PXDisplay; AMajor, AMinor: PInt): PStatus; cdecl; external;
@@ -539,13 +540,13 @@ begin
   DefaultColorMap := XDefaultColorMap(FDisplay, DefaultScreen);
 
   // Initialize atoms
-  xia_clipboard        := XInternAtom(FDisplay, 'CLIPBOARD', longbool(0));
-  xia_targets          := XInternAtom(FDisplay, 'TARGETS', longbool(0));
-  xia_motif_wm_hints   := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', longbool(0));
-  xia_wm_protocols     := XInternAtom(FDisplay, 'WM_PROTOCOLS', longbool(0));
-  xia_wm_delete_window := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', longbool(0));
-  xia_wm_state       := XInternAtom(FDisplay, '_NET_WM_STATE', longbool(0));
-  xia_wm_state_modal := XInternAtom(FDisplay, '_NET_WM_STATE_MODAL', longbool(0));
+  xia_clipboard         := XInternAtom(FDisplay, 'CLIPBOARD', longbool(0));
+  xia_targets           := XInternAtom(FDisplay, 'TARGETS', longbool(0));
+  xia_motif_wm_hints    := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', longbool(0));
+  xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', longbool(0));
+  xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', longbool(0));
+  xia_wm_state          := XInternAtom(FDisplay, '_NET_WM_STATE', longbool(0));
+  xia_wm_state_modal    := XInternAtom(FDisplay, '_NET_WM_STATE_MODAL', longbool(0));
 
   // for correct keyboard handling
   InputMethod := XOpenIM(FDisplay, nil, nil, nil);

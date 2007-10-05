@@ -284,7 +284,6 @@ procedure TNETWindowLayer.UpdateSupportedAtoms;
 var
   AtomCount: Integer;
   Atoms: PNetAtom;
-  Data: Pointer;
   I: Integer;
   NetAtom: TNetAtomEnum;
 begin
@@ -306,6 +305,7 @@ end;
 function TNETWindowLayer.WindowSetName(const AWindow: TWindow; AName: PChar
   ): Boolean;
 begin
+  Result := True; //????
   WindowSetPropertyUTF8(AWindow, FNetAtoms[naWM_NAME], Length(AName), AName);
 end;
 
@@ -623,7 +623,7 @@ end;
 
 function TNETWindowLayer.ManagerIsValid: Boolean;
 begin
-
+  Result := False;  // ?????  Todo
 end;
 
 procedure TNETWindowLayer.SendRootWindowMessage(AMessage: PXEvent);
@@ -791,9 +791,7 @@ function TNETWindowLayer.WindowGetState(const AWindow: TWindow; out
 var
   AtomCount: Integer;
   StateAtoms: PAtom;
-  Data: Pointer;
   I: Integer;
-  State: TNetWindowState;
 begin
   Result := FAtomSupported[naWM_STATE];
   if Result = False then Exit;

@@ -150,13 +150,13 @@ begin
 end;
 
 function TfpgListBoxStrings.Add(const s: String): Integer;
-var
-  ItemWidth: Integer;
+//var
+//  ItemWidth: Integer;
 begin
   Result := inherited Add(s);
   if Assigned(ListBox) and (ListBox.HasHandle) then
   begin
-    ItemWidth := ListBox.Font.TextWidth(s) + 4;
+//    ItemWidth := ListBox.Font.TextWidth(s) + 4;
 //    if ItemWidth > ListBox.FMaxItemWidth then
 //      ListBox.FMaxItemWidth := ItemWidth;
     ListBox.UpdateScrollBar;
