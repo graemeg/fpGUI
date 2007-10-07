@@ -70,6 +70,15 @@ type
   end;
 
 
+  TPropertyBoolean = class(TVFDWidgetProperty)
+  public
+    function ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
+    function GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function GetValueText(wg: TfpgWidget): string; override;
+    function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+  end;
+
+
   TGPEType = (gptInteger, gptString);
 
 
@@ -91,6 +100,13 @@ type
   public
     chl: TfpgComboBox;
     procedure CreateLayout; override;
+    procedure LoadValue(wg: TfpgWidget); override;
+    procedure StoreValue(wg: TfpgWidget); override;
+  end;
+  
+  
+  TBooleanPropertyEditor = class(TChoicePropertyEditor)
+  public
     procedure LoadValue(wg: TfpgWidget); override;
     procedure StoreValue(wg: TfpgWidget); override;
   end;
@@ -369,6 +385,58 @@ begin
   end;
 end;
 
+{ TPropertyBoolean }
+
+
+function TPropertyBoolean.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;
+var
+  s: string;
+  bval: boolean;
+begin
+  s      := line;
+  Result := False;
+  if UpperCase(GetIdentifier(s)) <> UpperCase(Name) then
+    Exit;
+
+  Result := CheckSymbol(s, ':=');
+  if Result then
+  begin
+    bval   := GetBoolValue(s);
+    Result := CheckSymbol(s, ';');
+  end
+  else
+    bval   := False;
+
+  if Result then
+    SetOrdProp(wg, Name, Ord(bval));
+end;
+
+function TPropertyBoolean.GetPropertySource(wg: TfpgWidget; const ident: string): string;
+var
+  i: integer;
+  s: string;
+begin
+  i := GetOrdProp(wg, Name);
+  if i = 1 then
+    s := 'True'
+  else
+    s := 'False';
+  Result := ident + Name + ' := ' + s + ';' + LineEnding;
+end;
+
+function TPropertyBoolean.GetValueText(wg: TfpgWidget): string;
+begin
+  if GetOrdProp(wg, Name) = 1 then
+    Result := 'True'
+  else
+    Result := 'False';
+end;
+
+function TPropertyBoolean.CreateEditor(AOwner: TComponent): TVFDPropertyEditor;
+begin
+  Result := TBooleanPropertyEditor.Create(AOwner, self);
+end;
+
 { TExternalPropertyEditor }
 
 procedure TExternalPropertyEditor.HandlePaint;
@@ -505,6 +573,26 @@ end;
 procedure TChoicePropertyEditor.StoreValue(wg: TfpgWidget);
 begin
   SetEnumProp(wg, prop.Name, chl.Text);
+end;
+
+{ TBooleanPropertyEditor }
+
+procedure TBooleanPropertyEditor.LoadValue(wg: TfpgWidget);
+var
+  b: integer;
+begin
+  b := GetOrdProp(wg, prop.Name);
+  chl.Items.Add('True');
+  chl.Items.Add('False');
+  if b = 1 then
+    chl.FocusItem := 1
+  else
+    chl.FocusItem := 2;
+end;
+
+procedure TBooleanPropertyEditor.StoreValue(wg: TfpgWidget);
+begin
+  SetOrdProp(wg, prop.Name, Ord(StrToBool(chl.Text)));
 end;
 
 end.

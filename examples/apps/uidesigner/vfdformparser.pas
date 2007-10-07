@@ -57,6 +57,7 @@ function GetStringValue(var s: string): string;
 procedure SkipSpaces(var s: string);
 function CheckSymbol(var s: string; const sym: string): boolean;
 function GetIntValue(var s: string): integer;
+function GetBoolValue(var s: string): boolean;
 
 implementation
 
@@ -135,6 +136,27 @@ begin
   end;
   Result := StrToIntDef(ns, 0);
   Delete(s, 1, length(ns));
+end;
+
+function GetBoolValue(var s: string): boolean;
+var
+  ts: string;
+  fs: string;
+begin
+  SkipSpaces(s);
+  ts := copy(s, 1, 4);    // true string
+  fs := copy(s, 1, 5);    // false string
+  if UpperCase(ts) = 'TRUE' then
+    Result := True
+  else if UpperCase(fs) = 'FALSE' then
+    Result := False
+  else
+    raise exception.Create('Failed to parse Boolean value <' + s + '>');
+    
+  if Result then
+    Delete(s, 1, 4)
+  else
+    Delete(s, 1, 5);
 end;
 
 function GetStringValue(var s: string): string;

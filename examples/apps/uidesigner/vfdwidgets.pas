@@ -245,7 +245,7 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('ImageName', TPropertyString, '');
-//  wc.AddProperty('ShowImage', TPropertyInteger, 'Boolean value');
+  wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
   wc.WidgetIconName := 'vfd.button';
   RegisterVFDWidget(wc);
@@ -255,7 +255,7 @@ begin
   wc.NameBase := 'cbName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
-//  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
+  wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
 //  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.checkbox';
   RegisterVFDWidget(wc);
@@ -266,7 +266,7 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
-//  wc.AddProperty('Checked', TPropertyInteger, 'Boolean value');
+  wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
 //  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.radiobutton';
   RegisterVFDWidget(wc);
@@ -294,6 +294,8 @@ begin
   wc.AddProperty('FontDesc', TPropertyString, '');
   wc.AddProperty('HeaderFontDesc', TPropertyString, '');
   wc.AddProperty('RowCount', TPropertyInteger, '');
+  wc.AddProperty('ShowHeader', TPropertyBoolean, '');
+  wc.AddProperty('ShowGrid', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.stringgrid';
   RegisterVFDWidget(wc);
 
@@ -343,8 +345,8 @@ begin
   wc := TVFDWidgetClass.Create(TfpgTreeView);
   wc.NameBase := 'tvName';
   wc.AddProperty('FontDesc',TPropertyString, '');
-//  wc.AddProperty('ShowImages',TPropertyInteger, 'Boolean value');
-//  wc.AddProperty('ShowColumns',TPropertyInteger, 'Boolean value');
+  wc.AddProperty('ShowImages',TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
 //  wc.AddProperty('TreeLineColor', TPropertyString, '');
@@ -358,7 +360,7 @@ begin
 //  wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
 //  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
-//  wc.AddProperty('SortPages', TPropertyInteger, 'Boolean value');
+  wc.AddProperty('SortPages', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('Style', TPropertyEnum, '');
   wc.AddProperty('TabPosition', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.pagecontrol';
