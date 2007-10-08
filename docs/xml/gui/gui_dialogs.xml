@@ -1,0 +1,1229 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="GUI">
+
+<!--
+  ====================================================================
+    gui_dialogs
+  ====================================================================
+-->
+
+<module name="gui_dialogs">
+<short>Various dialogs used by fpGUI based applications.</short>
+<descr>
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="fpgfx">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_form">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_button">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_label">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_listbox">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_checkbox">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_edit">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_grid">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_combobox">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_bevel">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgMessageBox">
+<short>A standard message box dialog.</short>
+<descr>
+A standard message box dialog. It is used by the global <link id="ShowMessage"/>
+function.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgMessageBox.FLines">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgMessageBox.FFont">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgMessageBox.FTextY">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgMessageBox.FLineHeight">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgMessageBox.FMaxLineWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgMessageBox.FButton">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgMessageBox.ButtonClick">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgMessageBox.ButtonClick.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgMessageBox.HandleKeyPress">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgMessageBox.HandleKeyPress.keycode">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgMessageBox.HandleKeyPress.shiftstate">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgMessageBox.HandleKeyPress.consumed">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgMessageBox.HandlePaint">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgMessageBox.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgMessageBox.Create.AOwner">
+<short></short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TfpgMessageBox.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgMessageBox.SetMessage">
+<short>Sets the message to be displayed.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgMessageBox.SetMessage.AMessage">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgBaseDialog">
+<short>An abstract dialog which forms the basis of other dialogs.</short>
+<descr>
+This dialog implements the two basic buttons (OK, Cancel) and also some 
+keyboard support like Escape to close the dialog.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgBaseDialog.FSpacing">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgBaseDialog.FDefaultButtonWidth">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgBaseDialog.btnOK">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: protected -->
+<element name="TfpgBaseDialog.btnCancel">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgBaseDialog.btnOKClick">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgBaseDialog.btnOKClick.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgBaseDialog.btnCancelClick">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgBaseDialog.btnCancelClick.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgBaseDialog.HandleKeyPress">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgBaseDialog.HandleKeyPress.keycode">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgBaseDialog.HandleKeyPress.shiftstate">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgBaseDialog.HandleKeyPress.consumed">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgBaseDialog.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgBaseDialog.Create.AOwner">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgFontSelectDialog">
+<short>A standard font selection dialog.</short>
+<descr>
+It also contains a Collection listbox which gets automatically populated 
+based on the available fonts. There are two custom collections called 
+<i>Favourites</i> and <i>Recently Used</i> which list your own selection of 
+fonts. <i>Font Aliases</i> will list all registered font aliases used by the
+application, including the default font aliases used by fpGUI (eg: #Edit2 = 
+'Courier New-10').
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.FSampleText">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lblLabel1">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lblLabel2">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lblLabel3">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lblLabel4">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lblLabel5">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lbCollection">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lbFaces">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.lbSize">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.cbBold">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.cbItalic">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.cbUnderline">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.cbAntiAlias">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFontSelectDialog.edSample">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFontSelectDialog.OnParamChange">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFontSelectDialog.OnParamChange.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFontSelectDialog.CreateFontList">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: protected -->
+<element name="TfpgFontSelectDialog.GetFontDesc">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFontSelectDialog.GetFontDesc.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgFontSelectDialog.SetFontDesc">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFontSelectDialog.SetFontDesc.Desc">
+<short></short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgFontSelectDialog.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFontSelectDialog.Create.AOwner">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgFontSelectDialog.SetSampleText">
+<short>The sample text or font preview text to be shown.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFontSelectDialog.SetSampleText.AText">
+<short></short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgFileDialog">
+<short>File Open or File Save dialog.</short>
+<descr>
+This dialog acts as both the <i>File Open</i> or <i>File Save</i> dialog used
+in fpGUI applications. The specific one needed can be launched by the 
+<link id="TfpgFileDialog.RunOpenFile"/> or the <link id="TfpgFileDialog.RunSaveFile"/>
+methods.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.chlDir">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.grid">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.btnUpDir">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.btnDirNew">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.btnShowHidden">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.panel1">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.lbFileInfo">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.edFilename">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.chlFilter">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.lb1">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.lb2">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.FOpenMode">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.FFilterList">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: private -->
+<element name="TfpgFileDialog.FFilter">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.SetFilter">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.SetFilter.Value">
+<short></short>
+</element>
+
+<!-- function Visibility: private -->
+<element name="TfpgFileDialog.GetShowHidden">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFileDialog.GetShowHidden.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.SetShowHidden">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.SetShowHidden.Value">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.ListChanged">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.ListChanged.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.ListChanged.ARow">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.GridDblClicked">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.GridDblClicked.Sender">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.GridDblClicked.AButton">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.GridDblClicked.AShift">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.GridDblClicked.AMousePos">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.InitializeComponents">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.ProcessFilterString">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: private -->
+<element name="TfpgFileDialog.GetFileFilter">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFileDialog.GetFileFilter.Result">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.FilterChange">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.FilterChange.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.DirChange">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.DirChange.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.UpDirClick">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.UpDirClick.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.edFilenameChanged">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.edFilenameChanged.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: private -->
+<element name="TfpgFileDialog.UpdateButtonState">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgFileDialog.HandleKeyPress">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.HandleKeyPress.keycode">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.HandleKeyPress.shiftstate">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.HandleKeyPress.consumed">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgFileDialog.btnOKClick">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.btnOKClick.Sender">
+<short></short>
+</element>
+
+<!-- procedure Visibility: protected -->
+<element name="TfpgFileDialog.SetCurrentDirectory">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.SetCurrentDirectory.ADir">
+<short></short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TfpgFileDialog.FileName">
+<short>The filename selected by the user.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TfpgFileDialog.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.Create.AOwner">
+<short></short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TfpgFileDialog.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFileDialog.SelectFile">
+<short>Select specified file at startup.</short>
+<descr>
+When the dialog is opened the file specified is pre selected.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFileDialog.SelectFile.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TfpgFileDialog.SelectFile.AFilename">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFileDialog.RunOpenFile">
+<short>Open the dialog as a File Open dialog.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFileDialog.RunOpenFile.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFileDialog.RunSaveFile">
+<short>Open the dialog as File Save dialog.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TfpgFileDialog.RunSaveFile.Result">
+<short></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TfpgFileDialog.Filter">
+<short>File mask filters available in the dialog.</short>
+<descr>
+<p>
+The filter consists out of two parts separated by a | sign. If more than
+one filter needs to be specified each filter is also separated by a | sign.
+The format for a single filter is: &lt;description&gt;|&lt;filemask&gt;
+The format for multiple filters are: &lt;description&gt;|&lt;filemask&gt;|&lt;description&gt;|&lt;filemask&gt;|&lt;description&gt;|&lt;filemask&gt;
+</p>
+<p>
+ Example:<br/>
+ <ul>
+   <li><p>'All Files (*)|*'</p></li>
+   <li><p>'All Files (*)|*|Object Pascal (*.pas)|*.pas'</p></li>
+ </ul>
+</p>
+<p>           
+A filemask can also contain more than one mask separated by a ; sign.<br/>
+eg: 'Object Pascal|*.pas;*.lpi;*.pp'
+</p>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TfpgFileDialog.ShowHidden">
+<short>If set to True the dialog will list hidden files as well.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="ShowMessage">
+<short>Displays a message box with an OK button.</short>
+<descr>
+Call ShowMessage to display a simple message box with an OK button. If ATitle is
+not specified the caption of the message box will be 'Message'.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ShowMessage.AMessage">
+<short>AMessage parameter is the message string that appears in the message box.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ShowMessage.ATitle">
+<short>ATitle parameter is the string that appears as the caption of the message box.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="SelectFontDialog">
+<short>A convenience function to show the font selection dialog.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+  <link id="TfpgFontSelectDialog"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="SelectFontDialog.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SelectFontDialog.FontDesc">
+<short></short>
+</element>
+
+</module> <!-- gui_dialogs -->
+
+</package>
+</fpdoc-descriptions>
