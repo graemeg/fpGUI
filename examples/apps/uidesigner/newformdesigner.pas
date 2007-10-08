@@ -106,9 +106,11 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleSetFocus; override;
     procedure   HandleKillFocus; override;
     procedure   OnRowChange(Sender: TObject);
+    procedure   OnScrolling(Sender: TObject);
     procedure   OnUpdateProperty(Sender: TObject);
   public
     Props: TPropertyList;
@@ -714,12 +716,18 @@ begin
   NameWidth       := 80;
   editor          := nil;
   OnChange        := @OnRowChange;
+  OnScroll        := @OnScrolling;
   BackgroundColor := clWindowBackground;
   NameDrag        := False;
   //FontName := 'arial-10:antialias=false';
 end;
 
 procedure TwgPropertyList.OnRowChange(Sender: TObject);
+begin
+  AllocateEditor;
+end;
+
+procedure TwgPropertyList.OnScrolling(Sender: TObject);
 begin
   AllocateEditor;
 end;
@@ -812,6 +820,13 @@ begin
     NameDrag := False
   else
     inherited;
+end;
+
+procedure TwgPropertyList.HandleMouseScroll(x, y: integer;
+  shiftstate: TShiftState; delta: smallint);
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  AllocateEditor;
 end;
 
 procedure TwgPropertyList.HandleSetFocus;

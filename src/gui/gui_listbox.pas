@@ -47,6 +47,7 @@ type
   private
     FHotTrack: boolean;
     FOnChange: TNotifyEvent;
+    FOnScroll: TNotifyEvent;
     FOnSelect: TNotifyEvent;
     FPopupFrame: boolean;
     function    GetFontDesc: string;
@@ -68,7 +69,7 @@ type
     function    ListHeight: TfpgCoord;
     function    ScrollBarWidth: TfpgCoord;
     function    PageLength: integer;
-    procedure   ScrollBarMove(Sender: TObject; position : integer);
+    procedure   ScrollBarMove(Sender: TObject; position: integer);
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
     procedure   DoChange;
     procedure   DoSelect;
@@ -92,6 +93,7 @@ type
     property    Font: TfpgFont read FFont;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
+    property    OnScroll: TNotifyEvent read FOnScroll write FOnScroll;
   end;
 
 
@@ -287,6 +289,8 @@ procedure TfpgBaseListBox.ScrollBarMove(Sender: TObject; position: integer);
 begin
   FFirstItem := position;
   Repaint;
+  if Assigned(FOnScroll) then
+    FOnScroll(self);
 end;
 
 procedure TfpgBaseListBox.DoChange;
@@ -590,6 +594,7 @@ begin
 
   FOnChange := nil;
   FOnSelect := nil;
+  FOnScroll := nil;
 end;
 
 destructor TfpgBaseListBox.Destroy;
