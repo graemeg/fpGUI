@@ -43,17 +43,17 @@ var
  EndBytePos: PChar;
  MaxBytes: PtrInt;
 begin
- StartBytePos:=UTF8CharStart(PChar(s),length(s),StartCharIndex-1);
- if StartBytePos=nil then
-   Result:=''
+ StartBytePos := UTF8CharStart(PChar(s),length(s),StartCharIndex-1);
+ if StartBytePos = nil then
+   Result := ''
  else
  begin
-   MaxBytes:=PtrInt(PChar(s)+length(s)-StartBytePos);
-   EndBytePos:=UTF8CharStart(StartBytePos,MaxBytes,CharCount);
-   if EndBytePos=nil then
-     Result:=copy(s,StartBytePos-PChar(s)+1,MaxBytes)
+   MaxBytes := PtrInt(PChar(s)+length(s)-StartBytePos);
+   EndBytePos := UTF8CharStart(StartBytePos,MaxBytes,CharCount);
+   if EndBytePos = nil then
+     Result := copy(s,StartBytePos-PChar(s)+1,MaxBytes)
    else
-     Result:=copy(s,StartBytePos-PChar(s)+1,EndBytePos-StartBytePos);
+     Result := copy(s,StartBytePos-PChar(s)+1,EndBytePos-StartBytePos);
  end;
 end;
 
@@ -66,13 +66,13 @@ function UTF8Length(p: PChar; ByteCount: integer): integer;
 var
   CharLen: LongInt;
 begin
-  Result:=0;
-  while (ByteCount>0) do
+  Result := 0;
+  while (ByteCount > 0) do
   begin
     inc(Result);
-    CharLen:=UTF8CharacterLength(p);
-    inc(p,CharLen);
-    dec(ByteCount,CharLen);
+    CharLen := UTF8CharacterLength(p);
+    inc(p, CharLen);
+    dec(ByteCount, CharLen);
   end;
 end;
 
@@ -80,26 +80,26 @@ function UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
 var
   CharLen: LongInt;
 begin
-  Result:=UTF8Str;
-  if Result<>nil then
+  Result := UTF8Str;
+  if Result <> nil then
   begin
-    while (Index>0) and (Len>0) do
+    while (Index > 0) and (Len > 0) do
     begin
-      CharLen:=UTF8CharacterLength(Result);
-      dec(Len,CharLen);
+      CharLen := UTF8CharacterLength(Result);
+      dec(Len, CharLen);
       dec(Index);
-      inc(Result,CharLen);
+      inc(Result, CharLen);
     end;
-    if (Index>0) or (Len<0) then
-      Result:=nil;
+    if (Index > 0) or (Len < 0) then
+      Result := nil;
   end;
 end;
 
 function UTF8CharacterLength(p: PChar): integer;
 begin
-  if p<>nil then
+  if p <> nil then
   begin
-    if ord(p^)< %11000000 then
+    if ord(p^) < %11000000 then
     begin
       // regular single byte character (#0 is a character, this is pascal ;)
       Result:=1;
@@ -108,9 +108,9 @@ begin
     begin
       // could be 2 byte character
       if (ord(p[1]) and %11000000) = %10000000 then
-        Result:=2
+        Result := 2
       else
-        Result:=1;
+        Result := 1;
     end
     else if ((ord(p^) and %11110000) = %11100000) then
     begin
