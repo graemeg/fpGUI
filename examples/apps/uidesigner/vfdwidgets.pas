@@ -243,10 +243,15 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgButton);
   wc.NameBase := 'btnName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
+  wc.AddProperty('AllowAllUp', TPropertyBoolean, '');
+  wc.AddProperty('Embedded', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('GroupIndex', TPropertyInteger, '');
+  wc.AddProperty('ImageMargin', TPropertyInteger, '');
   wc.AddProperty('ImageName', TPropertyString, '');
-  wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('ImageSpacing', TPropertyInteger, '');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
+  wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');
   wc.WidgetIconName := 'vfd.button';
   RegisterVFDWidget(wc);
 
@@ -282,8 +287,10 @@ begin
   // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
   wc.NameBase := 'lstName';
+  wc.AddProperty('HotTrack', TPropertyBoolean, '');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('PopupFrame', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.listbox';
   RegisterVFDWidget(wc);
 
@@ -294,6 +301,7 @@ begin
   wc.AddProperty('FontDesc', TPropertyString, '');
   wc.AddProperty('HeaderFontDesc', TPropertyString, '');
   wc.AddProperty('RowCount', TPropertyInteger, '');
+  wc.AddProperty('RowSelect', TPropertyBoolean, '');
   wc.AddProperty('ShowHeader', TPropertyBoolean, '');
   wc.AddProperty('ShowGrid', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.stringgrid';

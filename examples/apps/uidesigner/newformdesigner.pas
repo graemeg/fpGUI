@@ -372,7 +372,7 @@ begin
     SetPosition(464, 48, 120, 20);
     AddMenuItem('Widget Order...', '', @(maindsgn.OnEditWidgetOrder));
     AddMenuItem('-', '', nil);
-    AddMenuItem('Edit special...', '', nil);
+    AddMenuItem('Edit special...', '', nil).Enabled := False;
   end;
 
   setmenu := TfpgPopupMenu.Create(self);

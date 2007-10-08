@@ -23,6 +23,7 @@ unit gui_dialogs;
   TODO:
     * Try and abstract the code to remove all IFDEF's
     * Implement MessageDlg with icons and buttons
+    * Select Directory dialog
 }
 
 {.$Define DEBUG}
@@ -45,8 +46,6 @@ uses
 
 type
 
-  { @abstract(A standard message box dialog.) It is used by the global @link(ShowMessage)
-    function. }
   TfpgMessageBox = class(TfpgForm)
   private
     FLines: TStringList;
@@ -62,14 +61,10 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor  Destroy; override;
-    { This sets the message to be displayed. }
     procedure   SetMessage(AMessage: string);
   end;
   
 
-  { @abstract(A abstract dialog which forms the basis of other dialogs.) This
-    dialog implements the two basic buttons (OK, Cancel) and also some keyboard
-    support like Escape to close the dialog.}
   TfpgBaseDialog = class(TfpgForm)
   protected
     FSpacing: integer;
@@ -84,10 +79,6 @@ type
   end;
   
 
-  { @abstract(A standard font selection dialog.) It also contains a Collection
-    listbox which gets automatically populated based on the available fonts.
-    There are two custom collections called Favourites and Recently Used which
-    list you own selection of fonts.}
   TfpgFontSelectDialog = class(TfpgBaseDialog)
   private
     FSampleText: string;
@@ -111,7 +102,6 @@ type
     procedure   SetFontDesc(Desc: string);
   public
     constructor Create(AOwner: TComponent); override;
-    { This well set the sample text or font preview text to AText.}
     procedure   SetSampleText(AText: string);
   end;
   
@@ -156,29 +146,14 @@ type
     function    SelectFile(const AFilename: string): boolean;
     function    RunOpenFile: boolean;
     function    RunSaveFile: boolean;
-    { The filter consists out of two parts separated by a | sign. If more than
-      one filter needs to be specified each filter is also separated by a | sign.
-      The format for a single filter is: <description>|<filemask>
-      The format for multiple filters are: <description>|<filemask>|<description>|<filemask>|<description>|<filemask>
-      eg:
-           'All Files (*)|*'
-        or
-           'All Files (*)|*|Object Pascal (*.pas)|*.pas'
-           
-      A filemask can also contain more than one mask separated by a ; sign.
-      eg:  'Object Pascal|*.pas;*.lpi;*.pp'
-    }
     property    Filter: string read FFilter write SetFilter;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
 
 
-{ A convenience function to show a message using the TfpgMessageBox class.}
 procedure ShowMessage(AMessage, ATitle: string); overload;
-{ A convenience function to show a message using the TfpgMessageBox class.}
 procedure ShowMessage(AMessage: string); overload;
 
-{ A convenience function to show the font selection dialog (TfpgFontSelectDialog).}
 function SelectFontDialog(var FontDesc: string): boolean;
 
 
@@ -389,7 +364,7 @@ end;
 
 procedure TfpgBaseDialog.btnCancelClick(Sender: TObject);
 begin
-  ModalResult := 0;
+  ModalResult := 2;
   Close;
 end;
 
@@ -397,7 +372,7 @@ procedure TfpgBaseDialog.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
   if keycode = keyEscape then   // Esc cancels the dialog
-    Close
+    btnCancelClick(nil)
   else
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
@@ -405,7 +380,7 @@ end;
 constructor TfpgBaseDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  {$Note We need to localize this dialog }
+  {TODO: We need to localize this dialog }
   Width     := 500;
   Height    := 400;
   WindowPosition := wpScreenCenter;
@@ -452,6 +427,7 @@ var
   s: string;
 begin
   s := lbFaces.Text + '-' + lbSize.Text;
+  // Do NOT localize these!
   if cbBold.Checked then
     s := s + ':bold';
 
@@ -478,13 +454,13 @@ var
   prop: string;
   propval: string;
 
-  function NextC : char;
+  function NextC: char;
   begin
     inc(cp);
-    if cp > length(desc) then
+    if cp > length(Desc) then
       c := #0
     else
-      c := desc[cp];
+      c := Desc[cp];
     result := c;
   end;
 
@@ -500,7 +476,7 @@ var
 
 begin
   cp := 1;
-  c  := desc[1];
+  c  := Desc[1];
 
   cbBold.Checked      := False;
   cbItalic.Checked    := False;
@@ -562,7 +538,7 @@ end;
 constructor TfpgFontSelectDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  {$Note We need to localize this dialog }
+  {TODO: We need to localize this dialog }
   WindowTitle := 'Select Font...';
   Width       := 600;
   MinWidth    := Width;
@@ -579,7 +555,7 @@ begin
     Text := 'Collection:';
   end;
 
-  {$Note This need to be implemented at some stage. }
+  {TODO: This need to be implemented at some stage. }
   lbCollection := TfpgListBox.Create(self);
   with lbCollection do
   begin
@@ -592,6 +568,7 @@ begin
     Items.Add('Fixed Width');
     Items.Add('Sans');
     Items.Add('Serif');
+    Items.Add('Font Aliases');
 //    OnChange := @OnParamChange;
     FocusItem := 1;
     Enabled := False;
@@ -716,11 +693,12 @@ begin
   edSample.Text := FSampleText;
 end;
 
+
 { TfpgFileDialog }
 
 procedure TfpgFileDialog.ListChanged(Sender: TObject; ARow: integer);
 var
-  s : string;
+  s: string;
 begin
   if grid.CurrentEntry = nil then
     Exit; //==>
@@ -733,14 +711,13 @@ begin
     edFileName.Text := grid.CurrentEntry.Name;
 
   UpdateButtonState;
-
   lbFileInfo.Text := s;
 end;
 
 procedure TfpgFileDialog.GridDblClicked(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 var
-  e : TFileEntry;
+  e: TFileEntry;
 begin
   e := grid.CurrentEntry;
   if (e <> nil) and (e.EntryType = etDir) then
@@ -917,7 +894,7 @@ begin
     ModalResult := 1;
   end;
 
-  if ModalResult > 0 then
+  if ModalResult = 1 then
     FileName := ExpandFileName(edFileName.Text);
 end;
 
@@ -925,10 +902,10 @@ constructor TfpgFileDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowTitle := 'File Selection';
-  Width := 640;
-  Height := 410;
+  Width       := 640;
+  Height      := 410;
   WindowPosition := wpScreenCenter;
-  FSpacing := 10;
+  FSpacing    := 10;
 
   FFilterList := TStringList.Create;
   
@@ -1056,7 +1033,6 @@ begin
 
   grid.FileList.ReadDirectory(GetFileFilter, ShowHidden);
   grid.FileList.Sort(soFileName);
-//  grid.Update;
 
   if fsel <> '' then
     SelectFile(fsel)
@@ -1068,9 +1044,9 @@ end;
 
 function TfpgFileDialog.SelectFile(const AFilename: string): boolean;
 var
-  n : integer;
+  n: integer;
 begin
-  for n:=1 to grid.FileList.Count do
+  for n := 1 to grid.FileList.Count do
   begin
     if grid.FileList.Entry[n].Name = AFilename then
     begin
@@ -1151,7 +1127,7 @@ begin
   btnOK.ImageName := 'stdimg.open';
   btnOK.Text      := 'Open';
 
-  if ShowModal > 0 then
+  if ShowModal = 1 then
     Result := True
   else
     Result := False;
@@ -1175,7 +1151,7 @@ begin
   btnOK.ImageName := 'stdimg.save';
   btnOK.Text      := 'Save';
 
-  if ShowModal > 0 then
+  if ShowModal = 1 then
     Result := True
   else
     Result := False;

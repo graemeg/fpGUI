@@ -1020,6 +1020,8 @@
   UTF8Length gfx_utf8utils/utf8length.html
   UTF8CharStart gfx_utf8utils/utf8charstart.html
   UTF8CharacterLength gfx_utf8utils/utf8characterlength.html
+  UTF8Insert gfx_utf8utils/utf8insert.html
+  UTF8Delete gfx_utf8utils/utf8delete.html
  gfx_widget gfx_widget/index.html
   TFocusSearchDirection gfx_widget/tfocussearchdirection.html
   TfpgWidget gfx_widget/tfpgwidget.html

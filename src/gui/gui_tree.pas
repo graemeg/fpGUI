@@ -1391,25 +1391,9 @@ end;
 
 procedure TfpgTreeview.DrawHeader(ACol: integer; ARect: TfpgRect;
   AFlags: integer);
-var
-  s: string;
-  r: TfpgRect;
-  x: integer;
 begin
   // Here we can implement a head style check
   Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
-{
-  r := ARect;
-  InflateRect(r, -2, -2);
-  Canvas.SetClipRect(r);  // text cannot oversheet header border
-
-  Canvas.SetTextColor(clText1);
-  s := GetHeaderText(ACol);
-  x := (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
-  if x < 1 then
-    x := 1;
-  fpgStyle.DrawString(Canvas, x, ARect.Top+1, s, Enabled);
-}
 end;
 
 procedure TfpgTreeview.HandleKeyPress(var keycode: word;

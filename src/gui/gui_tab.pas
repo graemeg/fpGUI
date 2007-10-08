@@ -441,7 +441,6 @@ end;
 
 procedure TfpgPageControl.RePaintTitles;
 var
-  i: integer;
   r: TfpgRect;
   h: TfpgTabSheet;
   lp: integer;
@@ -647,14 +646,12 @@ end;
 procedure TfpgPageControl.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
-  t: TfpgTabSheet;
   i: integer;
 begin
 //  writeln(Classname, '.Keypress');
   consumed := True;
   i := ActivePageIndex;
-  t := ActivePage;
-  
+
   case keycode of
     keyLeft:
         begin

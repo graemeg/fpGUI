@@ -166,6 +166,8 @@
    Create gui_customgrid/tfpgcustomgrid.create.html
    Destroy gui_customgrid/tfpgcustomgrid.destroy.html
    AddColumn gui_customgrid/tfpgcustomgrid.addcolumn.html
+   DeleteColumn gui_customgrid/tfpgcustomgrid.deletecolumn.html
+   MoveColumn gui_customgrid/tfpgcustomgrid.movecolumn.html
  gui_dialogs gui_dialogs/index.html
   TfpgMessageBox gui_dialogs/tfpgmessagebox.html
    HandleKeyPress gui_dialogs/tfpgmessagebox.handlekeypress.html
@@ -313,8 +315,10 @@
    DoCreateColumnClass gui_grid/tfpgcustomstringgrid.docreatecolumnclass.html
    DrawCell gui_grid/tfpgcustomstringgrid.drawcell.html
    Columns gui_grid/tfpgcustomstringgrid.columns.html
+   Create gui_grid/tfpgcustomstringgrid.create.html
    AddColumn gui_grid/tfpgcustomstringgrid.addcolumn.html
    Cells gui_grid/tfpgcustomstringgrid.cells.html
+   Objects gui_grid/tfpgcustomstringgrid.objects.html
    ColumnTitle gui_grid/tfpgcustomstringgrid.columntitle.html
    ColumnWidth gui_grid/tfpgcustomstringgrid.columnwidth.html
   TfpgStringGrid gui_grid/tfpgstringgrid.html
@@ -430,6 +434,7 @@
    Create gui_listview/tfpglvcolumns.create.html
    Destroy gui_listview/tfpglvcolumns.destroy.html
    Add gui_listview/tfpglvcolumns.add.html
+   Clear gui_listview/tfpglvcolumns.clear.html
    Delete gui_listview/tfpglvcolumns.delete.html
    Insert gui_listview/tfpglvcolumns.insert.html
    Count gui_listview/tfpglvcolumns.count.html
@@ -444,6 +449,7 @@
    Destroy gui_listview/tfpglvitems.destroy.html
    Add gui_listview/tfpglvitems.add.html
    Count gui_listview/tfpglvitems.count.html
+   Clear gui_listview/tfpglvitems.clear.html
    Delete gui_listview/tfpglvitems.delete.html
    IndexOf gui_listview/tfpglvitems.indexof.html
    InsertItem gui_listview/tfpglvitems.insertitem.html
@@ -515,6 +521,7 @@
    OnChange gui_memo/tfpgmemo.onchange.html
    UseTabs gui_memo/tfpgmemo.usetabs.html
    TabWidth gui_memo/tfpgmemo.tabwidth.html
+   MaxLength gui_memo/tfpgmemo.maxlength.html
    Lines gui_memo/tfpgmemo.lines.html
    FontDesc gui_memo/tfpgmemo.fontdesc.html
  gui_menu gui_menu/index.html
@@ -704,6 +711,7 @@
    AppendTabSheet gui_tab/tfpgpagecontrol.appendtabsheet.html
    PageCount gui_tab/tfpgpagecontrol.pagecount.html
    ActivePage gui_tab/tfpgpagecontrol.activepage.html
+   Pages gui_tab/tfpgpagecontrol.pages.html
    OnChange gui_tab/tfpgpagecontrol.onchange.html
    ActivePageIndex gui_tab/tfpgpagecontrol.activepageindex.html
    BackgroundColor gui_tab/tfpgpagecontrol.backgroundcolor.html
@@ -1022,6 +1030,8 @@
 3MCreate
 3MDestroy
 3MAddColumn
+3MDeleteColumn
+3MMoveColumn
 #GUI.gui_dialogs.TfpgMessageBox TfpgForm
 1VFLines
 1VFFont
@@ -1256,8 +1266,10 @@
 #GUI.gui_grid.TfpgCustomStringGrid #GUI.gui_customgrid.TfpgCustomGrid
 1MGetCell
 1MGetColumnTitle
+1MGetObjects
 1MSetCell
 1MSetColumnTitle
+1MSetObjects
 2MGetColumnWidth
 2MSetColumnWidth
 2MGetColumns
@@ -1266,8 +1278,10 @@
 2MDoCreateColumnClass
 2MDrawCell
 2PColumns r
+3MCreate
 3MAddColumn
 3PCells rw
+3PObjects rw
 3PColumnTitle rw
 3PColumnWidth rw
 #GUI.gui_grid.TfpgStringGrid #GUI.gui_grid.TfpgCustomStringGrid
@@ -1416,6 +1430,7 @@
 3MCreate
 3MDestroy
 3MAdd
+3MClear
 3MDelete
 3MInsert
 3MCount
@@ -1444,6 +1459,7 @@
 3MDestroy
 3MAdd
 3MCount
+3MClear
 3MDelete
 3MIndexOf
 3MInsertItem
@@ -1615,6 +1631,7 @@
 3POnChange rw
 3PUseTabs rw
 3PTabWidth rw
+3PMaxLength rw
 4PLines r
 4PFontDesc rw
 #GUI.gui_menu.TfpgMenuItem TComponent
@@ -1862,6 +1879,7 @@
 1VFStyle
 1VFTabPosition
 1MGetActivePageIndex
+1MGetPage
 1MGetPageCount
 1MInsertPage
 1MRemovePage
@@ -1892,6 +1910,7 @@
 3MAppendTabSheet
 3PPageCount r
 3PActivePage rw
+3PPages r
 3POnChange rw
 4PActivePageIndex rw
 4PBackgroundColor rw
