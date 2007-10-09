@@ -43,6 +43,9 @@ type
 
   TfpgScrollBar = class(TfpgWidget)
   private
+    FLargeChange: Integer;
+    PrevAreaPressed: Boolean;
+    NextAreaPressed: Boolean;
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
     procedure   SetPosition(const AValue: integer);
@@ -79,6 +82,7 @@ type
     procedure   RepaintSlider;
     property    Position: integer read FPosition write SetPosition default 10;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
+//    property    LargeChange: Integer read FLargeChange write FLargeChange default 0;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
     property    OnScroll: TScrollNotifyEvent read FOnScroll write FOnScroll;
@@ -105,6 +109,10 @@ begin
   FSliderDragging := False;
   FSliderLength := 10;
   FScrollStep   := 1;
+  FLargeChange  := 0;
+  
+  PrevAreaPressed := False;
+  NextAreaPressed := False;
 end;
 
 destructor TfpgScrollBar.Destroy;
@@ -269,6 +277,23 @@ begin
       FSliderPos := Trunc(area * ((FPosition - FMin) / mm));
   end;
 
+  // Paint the area between the buttons and the Slider
+  if Orientation = orVertical then
+  begin
+    if PrevAreaPressed then
+    begin
+      Canvas.SetColor(clShadow1);
+      Canvas.FillRectangle(0, Width, Width, FSliderPos);
+      Canvas.SetColor(clScrollBar);
+    end
+    else if NextAreaPressed then
+    begin
+      Canvas.SetColor(clShadow1);
+      Canvas.FillRectangle(0, FSliderPos + FSliderLength, Width, Height - Width - FSliderPos);
+      Canvas.SetColor(clScrollBar);
+    end;
+  end;
+
   if Orientation = orVertical then
   begin
     Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btnIsEmbedded]);
@@ -282,6 +307,8 @@ begin
 end;
 
 procedure TfpgScrollBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  lPos: TfpgCoord;
 begin
   inherited;
 
@@ -289,12 +316,14 @@ begin
   begin
     if y <= Width then
     begin
+      // Up button has been pressed
       PositionChange(-FScrollStep);
       FStartBtnPressed := True;
       FActiveButtonRect.SetRect(0, 0, Width, Width);
     end
     else if y >= Height - Width then
     begin
+      // Down button has been pressed
       PositionChange(FScrollStep);
       FEndBtnPressed := True;
       FActiveButtonRect.SetRect(0,Height-Width, Width, Height);
@@ -303,6 +332,18 @@ begin
     begin
       FSliderDragging := True;
       FSliderDragPos  := y;
+    end
+    else if (y > Width) and (y < Width + FSliderPos) then
+    begin
+      // Clicked between Up button and Slider
+      PrevAreaPressed := True;
+      PositionChange(-(FScrollStep * 5))
+    end
+    else if (y < (Height - Width)) and (y > (Width + FSliderPos + FSliderLength)) then
+    begin
+      // Clicked between Down button and Slider
+      NextAreaPressed := True;
+      PositionChange(FScrollStep * 5);
     end;
   end
   else
@@ -350,6 +391,18 @@ begin
   FStartBtnPressed  := False;
   FEndBtnPressed    := False;
   FSliderDragging   := False;
+  
+  if PrevAreaPressed then
+  begin
+    PrevAreaPressed := False;
+    WasPressed := True;
+  end
+  else if NextAreaPressed then
+  begin
+    NextAreaPressed := False;
+    WasPressed := True;
+  end;
+
   if WasPressed then
     HandlePaint;
 end;
