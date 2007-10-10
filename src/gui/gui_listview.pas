@@ -243,6 +243,7 @@ type
     procedure   EndUpdate;
     procedure   MakeItemVisible(AIndex: Integer; PartialOK: Boolean = False);
     function    ItemAdd: TfpgLVItem;
+  published
     property    Columns: TfpgLVColumns read FColumns;
     property    Items: TfpgLVItems read FItems write SetItems;
     property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
@@ -1514,6 +1515,8 @@ end;
 constructor TfpgListView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FWidth       := 120;
+  FHeight      := 80;
   Focusable := True;
   FShowHeaders := True;
 

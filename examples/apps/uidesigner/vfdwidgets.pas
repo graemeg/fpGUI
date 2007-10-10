@@ -342,9 +342,12 @@ begin
   wc := TVFDWidgetClass.Create(TfpgListView);
   wc.NameBase := 'lvName';
   //wc.AddProperty('Columns',TPropertyDBColumns, '');
-  //wc.AddProperty('Items', TPropertyStringList, '');
   //wc.AddProperty('FontDesc',TPropertyString,'');
   //wc.AddProperty('HeaderFontDesc',TPropertyString,'');
+  //wc.AddProperty('Items', TPropertyStringList, '');
+  //wc.AddProperty('ItemHeight', TPropertyInteger, '');
+  wc.AddProperty('MultiSelect', TPropertyBoolean, '');
+  wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.listview';
   RegisterVFDWidget(wc);
 
