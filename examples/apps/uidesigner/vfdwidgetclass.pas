@@ -167,7 +167,13 @@ begin
   y  := rect.top;
   fy := y + rect.Height div 2 - Canvas.Font.Height div 2;
 
-  s := GetValueText(wg);
+  try
+    s := GetValueText(wg);
+  except
+    on E: Exception do
+      writeln('Detected a error: ', E.Message);
+  end;
+  
   Canvas.BeginDraw;
   Canvas.DrawString(x + 1, fy, s);
   Canvas.EndDraw;

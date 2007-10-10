@@ -1496,13 +1496,23 @@ begin
   if FVScrollBar.Max = 0 then
     FVScrollBar.SliderSize := 1
   else
-    FVScrollBar.SliderSize := FVScrollBar.Height / (FVScrollBar.Max + FVScrollBar.Height);
+  begin
+    if (FVScrollBar.Max + FVScrollBar.Height) > 0 then
+      FVScrollBar.SliderSize := FVScrollBar.Height / (FVScrollBar.Max + FVScrollBar.Height)
+    else
+      FVScrollBar.SliderSize := 0.5;
+  end;
   FVScrollBar.RepaintSlider;
 
   if FHScrollBar.Max = 0 then
     FHScrollBar.SliderSize := 1
   else
-    FHScrollBar.SliderSize := FHScrollBar.Width / (FHScrollBar.Max + FHScrollBar.Width);
+  begin
+    if (FHScrollBar.Max + FHScrollBar.Width) > 0 then
+      FHScrollBar.SliderSize := FHScrollBar.Width / (FHScrollBar.Max + FHScrollBar.Width)
+    else
+      FHScrollBar.SliderSize := 0.5;
+  end;
   FHScrollBar.RepaintSlider;
 
 

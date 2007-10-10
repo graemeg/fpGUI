@@ -103,6 +103,7 @@ type
     procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
+    procedure   DesignerKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
   public
     OneClickMove: boolean; // the widgets can be selected and dragged within one click
     constructor Create;
@@ -119,7 +120,6 @@ type
     procedure   MoveResizeWidgets(dx, dy, dw, dh: integer);
     procedure   DeleteWidgets;
     procedure   EditWidgetOrder;
-    procedure   DesignerKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 //    procedure PutControlByName(x, y: integer; cname: string);
     procedure   InsertWidget(pwg: TfpgWidget; x, y: integer; wgc: TVFDWidgetClass);
     procedure   OnPaletteChange(Sender: TObject);
@@ -606,6 +606,7 @@ begin
     else
       Inc(n);
   end;
+  UpdatePropWin;
 end;
 
 

@@ -119,6 +119,9 @@ function FindKeyboardFocus: TfpgWidget;
 
 implementation
 
+uses
+  math;
+
 
 { Double click support }
 const
@@ -782,10 +785,10 @@ var
   dw: integer;
   dh: integer;
 begin
-  dw := awidth - FWidth;
-  dh := aheight - FHeight;
-  FWidth  := awidth;
-  FHeight := aheight;
+  dw      := awidth - FWidth;
+  dh      := aheight - FHeight;
+  FWidth  := Max(awidth, FMinWidth);
+  FHeight := Max(aheight, FMinHeight);
   HandleAlignments(dw, dh);
 end;
 

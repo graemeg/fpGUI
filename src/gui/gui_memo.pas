@@ -518,8 +518,17 @@ begin
   if FVScrollBar.Visible then
   begin
     FVScrollBar.Min        := 1;
-    FVScrollBar.SliderSize := VisibleLines / LineCount;
-    FVScrollBar.Max        := LineCount - VisibleLines + 1;
+    // TODO: Look at calculation of vlines value to improve this!
+    if LineCount > 0 then
+    begin
+      FVScrollBar.SliderSize := VisibleLines / LineCount;
+      FVScrollBar.Max        := LineCount - VisibleLines + 1;
+    end
+    else
+    begin
+      FVScrollBar.SliderSize := 0.5;
+      FVScrollBar.Max        := 10;
+    end;
     FVScrollBar.Position   := FFirstLine;
     FVScrollBar.RepaintSlider;
   end;
