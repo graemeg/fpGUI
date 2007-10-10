@@ -1515,7 +1515,7 @@ constructor TfpgListView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Focusable := True;
-  ShowHeaders := True;
+  FShowHeaders := True;
 
   FVScrollBar := TfpgScrollBar.Create(Self);
   FVScrollBar.Orientation := orVertical;

@@ -335,19 +335,19 @@ begin
   wc.WidgetIconName := 'vfd.trackbar';
   RegisterVFDWidget(wc);
 
-(*
+
   // ListView
   // Currently causes a Access Violation when resized!
 
   wc := TVFDWidgetClass.Create(TfpgListView);
   wc.NameBase := 'lvName';
-//  wc.AddProperty('Columns',TPropertyDBColumns, '');
-//  wc.AddProperty('Items', TPropertyStringList, '');
-//  wc.AddProperty('FontDesc',TPropertyString,'');
-//  wc.AddProperty('HeaderFontDesc',TPropertyString,'');
+  //wc.AddProperty('Columns',TPropertyDBColumns, '');
+  //wc.AddProperty('Items', TPropertyStringList, '');
+  //wc.AddProperty('FontDesc',TPropertyString,'');
+  //wc.AddProperty('HeaderFontDesc',TPropertyString,'');
   wc.WidgetIconName := 'vfd.listview';
   RegisterVFDWidget(wc);
-*)
+
 
   // Treeview
   wc := TVFDWidgetClass.Create(TfpgTreeView);
