@@ -170,7 +170,7 @@ begin
   for n := 0 to T^.MaxValue do
   begin
     sl.Add(P^);
-    Inc(integer(P), Length(P^) + 1);
+    Inc(PtrInt(P), Length(P^) + 1);
   end;
 end;
 
