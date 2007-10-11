@@ -366,6 +366,7 @@ begin
   label1 := CreateLabel(self, 5, 5, 'Hello world!');
   label2 := CreateLabel(self, 5, 20, 'Hello world in Bold!');
   label2.FontDesc := 'Sans-12:bold:underline';
+  label2.Width := 200;
   
   w := TMyWidget.Create(self);
   w.Top := 40;
@@ -408,7 +409,7 @@ begin
   memo.Left   := 250;
   memo.Width  := 200;
   memo.Height := 80;
-  memo.Anchors := [anLeft, anTop, anRight, anBottom];
+//  memo.Anchors := [anLeft, anTop, anRight, anBottom];
 
   listbox         := TfpgListBox.Create(self);
   listbox.Top     := 100;

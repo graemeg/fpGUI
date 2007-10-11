@@ -23,12 +23,10 @@ var
   UnicodeEnabledOS: Boolean;
   WinVersion: TOSVersionInfo;
 
-
 type
-//  TfpgWinHandle = HWND;
-  TfpgGContext  = HDC;
+  TfpgGContext = HDC;
 
-type
+  // forward declaration
   TfpgWindowImpl = class;
 
 
@@ -70,14 +68,12 @@ type
   end;
 
 
-  { TfpgCanvasImpl }
-
   TfpgCanvasImpl = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
     FBufferBitmap: HBitmap;
     FDrawWindow: TfpgWindowImpl;
-    Fgc,
+    Fgc: TfpgGContext;
     fBufgc: TfpgGContext;
     FWinGC: TfpgGContext;
     FBackgroundColor: TfpgColor;
@@ -89,7 +85,7 @@ type
     FPen: HPEN;
     FClipRegion: HRGN;
     FIntLineStyle: integer;
-    FBufWidth,
+    FBufWidth: Integer;
     FBufHeight: Integer;
     procedure   TryFreeBackBuffer;
   protected
@@ -1359,27 +1355,21 @@ begin
 end;
 
 procedure TfpgCanvasImpl.DoSetColor(cl: TfpgColor);
-var
-  newBrush, oldBrush: HBRUSH;
-  newPen, oldPen: HPEN;
 begin
+  DeleteObject(FBrush);
+  DeleteObject(FPen);
+
   FWindowsColor := fpgColorToWin(cl);
 
-  newBrush  := CreateSolidBrush(FWindowsColor);
-  newPen    := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
-  oldBrush  := SelectObject(Fgc, newBrush);
-  oldPen    := SelectObject(Fgc, newPen);
-  FBrush    := newBrush;
-  FPen      := newPen;
-
-  DeleteObject(oldBrush);
-  DeleteObject(oldPen);
+  FBrush := CreateSolidBrush(FWindowsColor);
+  FPen   := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
+  SelectObject(Fgc, FBrush);
+  SelectObject(Fgc, FPen);
 end;
 
 procedure TfpgCanvasImpl.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
 var
   lw: integer;
-  lPen: HPEN;
 begin
 { Notes from MSDN: If the value specified by nWidth is greater
 than 1, the fnPenStyle parameter must be PS_NULL, PS_SOLID, or
@@ -1408,10 +1398,9 @@ PS_INSIDEFRAME. }
       end;
   end;
 
-  Windows.DeleteObject(FPen);
-  lPen := CreatePen(FintLineStyle, lw, FWindowsColor);
-  Windows.SelectObject(Fgc, lPen);
-  FPen := lPen;
+  DeleteObject(FPen);
+  FPen := CreatePen(FintLineStyle, lw, FWindowsColor);
+  SelectObject(Fgc, FPen);
 end;
 
 procedure TfpgCanvasImpl.DoSetTextColor(cl: TfpgColor);
