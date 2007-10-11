@@ -126,7 +126,7 @@ type
 
 
 procedure EditStringList(sl: TStringList);
-procedure GetEnumPropValueList(wg: TObject; const propname: string; sl: TStringList);
+procedure GetEnumPropValueList(wg: TObject; const APropName: string; sl: TStringList);
 
 
 implementation
@@ -152,25 +152,26 @@ begin
   frmie.Free;
 end;
 
-procedure GetEnumPropValueList(wg: TObject; const propname: string; sl: TStringList);
+procedure GetEnumPropValueList(wg: TObject; const APropName: string; sl: TStringList);
 var
-  pi: PPropInfo;
-  P: ^ShortString;
-  T: PTypeData;
+  lPropInfo: PPropInfo;
+  s: string;
+  lTypeData: PTypeData;
   n: integer;
 begin
-  pi := GetPropInfo(wg, propname);
-{$ifdef FPC}
-  T  := GetTypeData(pi^.PropType);
-{$else}
-  T  := GetTypeData(pi^.PropType^);
-{$endif}
-  P  := @T^.NameList;
+  lPropInfo := GetPropInfo(wg, APropName);
+  lTypeData := GetTypeData(lPropInfo^.PropType);
 
-  for n := 0 to T^.MaxValue do
-  begin
-    sl.Add(P^);
-    Inc(PtrInt(P), Length(P^) + 1);
+  sl.BeginUpdate;
+  try
+    sl.Clear;
+    for n := lTypeData^.MinValue to lTypeData^.MaxValue do
+    begin
+      s := GetEnumName(lPropInfo^.PropType, n);
+      sl.Add(s);
+    end;
+  finally
+    sl.EndUpdate;
   end;
 end;
 
