@@ -212,6 +212,7 @@ end;
 
 procedure TfpgForm.Show;
 begin
+  Visible := True;
   HandleShow;
 end;
 
