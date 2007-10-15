@@ -41,6 +41,7 @@ type
     FOnDestroy: TNotifyEvent;
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
   protected
     FPrevModalForm: TfpgWindowBase;
     FModalResult: integer;
@@ -73,6 +74,7 @@ type
     property    ModalResult: integer read FModalResult write FModalResult;
   published
     {$Note Refactor this to a TfpgCustomForm and only surface it here }
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
@@ -81,6 +83,7 @@ type
     property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
     property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
     property    OnHide: TNotifyEvent read FOnHide write FOnHide;
+    property    OnPaint;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   end;
 
@@ -162,6 +165,14 @@ begin
   Canvas.EndDraw(0, 0, FWidth, FHeight);
 end;
 
+procedure TfpgForm.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor = AValue then
+    Exit; //==>
+  FBackgroundColor := AValue;
+  RePaint;
+end;
+
 procedure TfpgForm.AdjustWindowStyle;
 begin
   if fpgApplication.MainForm = nil then
@@ -212,7 +223,7 @@ end;
 
 procedure TfpgForm.Show;
 begin
-  Visible := True;
+  FVisible := True;
   HandleShow;
 end;
 

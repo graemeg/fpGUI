@@ -248,6 +248,7 @@
    Close gui_form/tfpgform.close.html
    Sizeable gui_form/tfpgform.sizeable.html
    ModalResult gui_form/tfpgform.modalresult.html
+   BackgroundColor gui_form/tfpgform.backgroundcolor.html
    WindowPosition gui_form/tfpgform.windowposition.html
    WindowTitle gui_form/tfpgform.windowtitle.html
    OnActivate gui_form/tfpgform.onactivate.html
@@ -256,6 +257,7 @@
    OnDeactivate gui_form/tfpgform.ondeactivate.html
    OnDestroy gui_form/tfpgform.ondestroy.html
    OnHide gui_form/tfpgform.onhide.html
+   OnPaint gui_form/tfpgform.onpaint.html
    OnShow gui_form/tfpgform.onshow.html
   WidgetParentForm gui_form/widgetparentform.html
  gui_grid gui_grid/index.html
@@ -395,6 +397,7 @@
    Font gui_listbox/tfpgbaselistbox.font.html
    OnChange gui_listbox/tfpgbaselistbox.onchange.html
    OnSelect gui_listbox/tfpgbaselistbox.onselect.html
+   OnScroll gui_listbox/tfpgbaselistbox.onscroll.html
   TfpgTextListBox gui_listbox/tfpgtextlistbox.html
    FItems gui_listbox/tfpgtextlistbox.fitems.html
    FInternalItems gui_listbox/tfpgtextlistbox.finternalitems.html
@@ -1164,6 +1167,7 @@
 1VFOnDestroy
 1VFOnHide
 1VFOnShow
+1MSetBackgroundColor
 2VFPrevModalForm
 2VFModalResult
 2VFParentForm
@@ -1192,6 +1196,7 @@
 3MClose
 3PSizeable rw
 3PModalResult rw
+4PBackgroundColor rw
 4PWindowPosition rw
 4PWindowTitle rw
 4POnActivate rw
@@ -1200,6 +1205,7 @@
 4POnDeactivate rw
 4POnDestroy rw
 4POnHide rw
+4POnPaint
 4POnShow rw
 #GUI.gui_grid.TFileEntry TObject
 1VFAttributes
@@ -1330,6 +1336,7 @@
 #GUI.gui_listbox.TfpgBaseListBox #CoreLib.gfx_widget.TfpgWidget
 1VFHotTrack
 1VFOnChange
+1VFOnScroll
 1VFOnSelect
 1VFPopupFrame
 1MGetFontDesc
@@ -1373,6 +1380,7 @@
 3PFont r
 3POnChange rw
 3POnSelect rw
+3POnScroll rw
 #GUI.gui_listbox.TfpgTextListBox #GUI.gui_listbox.TfpgBaseListBox
 2VFItems
 2VFInternalItems
@@ -1551,19 +1559,19 @@
 3MEndUpdate
 3MMakeItemVisible
 3MItemAdd
-3PColumns r
-3PItems rw
-3PSelectionFollowsFocus rw
-3PShowHeaders rw
-3PMultiSelect rw
-3PVScrollBar r
-3PHScrollBar r
-3PItemHeight r
-3PItemIndex rw
-3POnColumnClick rw
-3POnPaintColumn rw
-3POnPaintItem rw
-3POnSelectionChanged rw
+4PColumns r
+4PItems rw
+4PSelectionFollowsFocus rw
+4PShowHeaders rw
+4PMultiSelect rw
+4PVScrollBar r
+4PHScrollBar r
+4PItemHeight r
+4PItemIndex rw
+4POnColumnClick rw
+4POnPaintColumn rw
+4POnPaintItem rw
+4POnSelectionChanged rw
 #GUI.gui_memo.TfpgMemo #CoreLib.gfx_widget.TfpgWidget
 1VFLines
 1VFMaxLength
@@ -1788,6 +1796,9 @@
 4PGroupIndex rw
 4POnChange rw
 #GUI.gui_scrollbar.TfpgScrollBar #CoreLib.gfx_widget.TfpgWidget
+1VFLargeChange
+1VPrevAreaPressed
+1VNextAreaPressed
 1MSetMax
 1MSetMin
 1MSetPosition

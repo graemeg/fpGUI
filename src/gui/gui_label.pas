@@ -104,7 +104,7 @@ end;
 procedure TfpgLabel.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor = AValue then
-    Exit;
+    Exit; //==>
   FBackgroundColor := AValue;
   RePaint;
 end;
@@ -121,7 +121,7 @@ end;
 procedure TfpgLabel.SetText(const AValue: string);
 begin
   if FText = AValue then
-    Exit;
+    Exit; //==>
   FText := AValue;
   if FAutoSize then
     ResizeLabel;

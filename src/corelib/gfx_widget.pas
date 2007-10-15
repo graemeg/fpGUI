@@ -149,7 +149,7 @@ end;
 procedure TfpgWidget.SetEnabled(const AValue: boolean);
 begin
   if FEnabled = AValue then
-    Exit;
+    Exit; //==>
   FEnabled := AValue;
   RePaint;
 end;
@@ -158,7 +158,8 @@ procedure TfpgWidget.SetActiveWidget(const AValue: TfpgWidget);
 begin
   if FActiveWidget = AValue then
     Exit; //==>
-  if FFormDesigner <> nil then Exit;
+  if FFormDesigner <> nil then
+    Exit; //==>
   
   if FActiveWidget <> nil then
     FActiveWidget.HandleKillFocus;
@@ -169,6 +170,7 @@ end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
 begin
+//  Writeln(Classname, ' TfpgWidget.SetVisible AValue = ', AValue);
   if FVisible = AValue then
     Exit; //==>
   FVisible := AValue;
@@ -220,8 +222,10 @@ begin
   // This is for components that are create at runtime, after it's
   // parent has already been shown.
   if (Parent <> nil) and (Parent.HasHandle) then
+  begin
+//    writeln('about to call InternalHandleShow');
     InternalHandleShow;
-//    HandleShow;
+  end;
 
   Exclude(ComponentState, csLoading);
 end;
@@ -466,6 +470,8 @@ var
   c: TComponent;
 begin
   FOnScreen := True;
+  FVisible := True;
+//  writeln(Classname, ' TfpgWidget.HandleShow - FVisible = ', FVisible);
   if FVisible then
   begin
     AllocateWindowHandle;
@@ -766,9 +772,11 @@ end;
 
 procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
 begin
+  Canvas.BeginDraw;
   HandlePaint;
   if Assigned(FOnPaint) then
     FOnPaint(Self);
+  Canvas.EndDraw;
 end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);

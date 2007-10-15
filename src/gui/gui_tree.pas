@@ -24,10 +24,10 @@ unit gui_tree;
     * Lots!!
     * Columns need to be reworked. We don't want coluns per node levels. Instead
       we want a main column covering the tree. Then extra columns for user
-      text and data.gui_tree
+      text and data.
     * Implement event handlers the user can hook into and do custom drawing.
     
-  WARNING:   This is still under heavy development! Do NOT use.
+  WARNING:   This is still under heavy development! Do NOT use yet.
 }
 
 {.$Define Debug}
@@ -105,7 +105,7 @@ type
     property    Parent: TfpgTreeNode read FParent write SetParent;
     property    FirstSubNode: TfpgTreeNode read FFirstSubNode;
     property    LastSubNode: TfpgTreeNode read FLastSubNode;
-    property    ImageIndex : integer read FImageIndex write FImageIndex;
+    property    ImageIndex: integer read FImageIndex write FImageIndex;
     // color settings
     property    TextColor: TfpgColor read FTextColor write SetTextColor;
     property    SelColor: TfpgColor read FSelColor write SetSelColor;

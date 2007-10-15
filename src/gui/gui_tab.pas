@@ -89,7 +89,7 @@ type
     FStyle: TfpgTabStyle;
     FTabPosition: TfpgTabPosition;
     function    GetActivePageIndex: integer;
-    function GetPage(AIndex: integer): TfpgTabSheet;
+    function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
     procedure   InsertPage(const APage: TfpgTabSheet);
     procedure   RemovePage(const APage: TfpgTabSheet);
@@ -258,8 +258,13 @@ begin
   FPages.Remove(APage);
   {$Note This still needs to be fixed.}
   if APage = FActivePage then
+  begin
 //    FActivePage := FindNextPage(APage, True);
-    ActivePage := TfpgTabSheet(FPages.First);
+//    if FPages.Count > 0 then
+      ActivePage := TfpgTabSheet(FPages.First);
+//    else
+//      ActivePage := nil;
+  end;
 end;
 
 procedure TfpgPageControl.SetActivePageIndex(const AValue: integer);
@@ -454,6 +459,8 @@ begin
     Exit; //==>
 
   h := TfpgTabSheet(FPages.First);
+  if h = nil then
+    Exit;
   Canvas.BeginDraw;
   Canvas.SetTextColor(clText1);
   
@@ -712,6 +719,9 @@ destructor TfpgPageControl.Destroy;
 var
   ts: TfpgTabSheet;
 begin
+  FOnChange := nil;
+  FActivePage := TfpgTabSheet(FPages[0]);
+  ActiveWidget := nil;
   while FPages.Count > 0 do
   begin
     ts := TfpgTabSheet(FPages.Last);
@@ -719,9 +729,7 @@ begin
     ts.Free;
   end;
   FPages.Free;
-
   FFirstTabButton := nil;
-  FOnChange := nil;
   inherited Destroy;
 end;
 
