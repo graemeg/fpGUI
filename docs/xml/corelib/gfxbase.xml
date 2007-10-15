@@ -9,8 +9,9 @@
 -->
 
 <module name="gfxbase">
-<short></short>
-<descr>
+<short>The base unit and starting point of fpGUI</short>
+<descr>This unit contains all the abstract classes for the CoreLib code
+of fpGUI. It also defines many types and constants used throughout the toolkit.
 </descr>
 
 <!-- unresolved type reference Visibility: default -->
@@ -33,8 +34,10 @@
 
 <!-- alias type Visibility: default -->
 <element name="TfpgCoord">
-<short></short>
-<descr>
+<short>A custom type used to represent X and Y coordinates.</short>
+<descr>Internally TfpgCoord is actually a Integer type. We created a custom 
+alias type for use in fpGUI in the event that we might want to change the 
+underlying type in the future. Example to floating points.
 </descr>
 <seealso>
 </seealso>
@@ -42,8 +45,17 @@
 
 <!-- alias type Visibility: default -->
 <element name="TfpgColor">
-<short></short>
+<short>Represents a color in integer format.</short>
 <descr>
+<p>TfpgColor is always in RRGGBB (Red, Green, Blue) format, no matter tho
+operating system.
+</p>
+<p>The gfxbase unit also contains definitions of many useful color constants. It
+defines the standard predefined Delphi colors (like clRed, clMagenta etc.), the
+ 140 websafe colors using the defacto standard names as used by Netscape and 
+Internet Explorer web browsers. As well as some internal color constants used
+by many GUI components (like clText, clWindowBackground etc.).
+</p>
 </descr>
 <seealso>
 </seealso>
@@ -51,7 +63,7 @@
 
 <!-- record type Visibility: default -->
 <element name="TRGBTriple">
-<short></short>
+<short>A record structure holding the RGBA values of a color.</short>
 <descr>
 </descr>
 <seealso>
@@ -87,7 +99,7 @@
 
 <!-- variable Visibility: default -->
 <element name="TRGBTriple.Alpha">
-<short></short>
+<short>Alpha support has not really been implemented in fpGUI yet.</short>
 <descr>
 </descr>
 <seealso>
@@ -96,7 +108,7 @@
 
 <!-- enumeration type Visibility: default -->
 <element name="TWindowType">
-<short></short>
+<short>Enum type defining what types of windows can be created.</short>
 <descr>
 </descr>
 <seealso>
@@ -105,27 +117,31 @@
 
 <!-- enumeration value Visibility: default -->
 <element name="TWindowType.wtChild">
-<short></short>
+<short>The window being created is a child on another window. This normally
+means no titlebar or window borders are going to be created.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
 <element name="TWindowType.wtWindow">
-<short></short>
+<short>This would specify a standard window with titlebar and window borders.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
 <element name="TWindowType.wtModalForm">
-<short></short>
+<short>This windows is the same as <link id="TWindowType.wtWindow">wtWindow</link>, 
+but grabs the input focus until it has closed.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
 <element name="TWindowType.wtPopup">
-<short></short>
+<short>This window will normall not have a titlebar or window borders and will 
+appear above other windows. It is used for example in the dropdown window of a 
+ComboBox or a tooltip window.</short>
 </element>
 
 <!-- enumeration type Visibility: default -->
 <element name="TWindowAttribute">
-<short></short>
+<short>An enum types defining extra attributes of a window.</short>
 <descr>
 </descr>
 <seealso>
@@ -134,22 +150,24 @@
 
 <!-- enumeration value Visibility: default -->
 <element name="TWindowAttribute.waSizeable">
-<short></short>
+<short>If this attribute is set, the window will be resizeable by the user.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
 <element name="TWindowAttribute.waAutoPos">
-<short></short>
+<short>If this attribute is set, the underlying window manager will decide where
+the window will be placed on the screen it it becomes visible for the first time.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
 <element name="TWindowAttribute.waScreenCenterPos">
-<short></short>
+<short>If this attribute is set, the window will be centred on the screen when
+it is shown for the first time.</short>
 </element>
 
 <!-- set type Visibility: default -->
 <element name="TWindowAttributes">
-<short></short>
+<short>A set of TWindowAttribute types.</short>
 <descr>
 </descr>
 <seealso>
@@ -158,7 +176,7 @@
 
 <!-- enumeration type Visibility: default -->
 <element name="TMouseCursor">
-<short></short>
+<short>Enum types of the available mouse cursor shapes.</short>
 <descr>
 </descr>
 <seealso>
@@ -167,7 +185,7 @@
 
 <!-- enumeration value Visibility: default -->
 <element name="TMouseCursor.mcDefault">
-<short></short>
+<short>Normally the default arrow cursor.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
@@ -222,12 +240,12 @@
 
 <!-- enumeration value Visibility: default -->
 <element name="TMouseCursor.mcHourGlass">
-<short></short>
+<short>Normally a hourglass or watch representing a busy state.</short>
 </element>
 
 <!-- enumeration type Visibility: default -->
 <element name="TGradientDirection">
-<short></short>
+<short>Enum types defining how a gradient must be painted</short>
 <descr>
 </descr>
 <seealso>
@@ -236,17 +254,17 @@
 
 <!-- enumeration value Visibility: default -->
 <element name="TGradientDirection.gdVertical">
-<short></short>
+<short>Defines that the gradient must be painted vertically.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
 <element name="TGradientDirection.gdHorizontal">
-<short></short>
+<short>Defines that the gradient must be painted horizontally.</short>
 </element>
 
 <!-- enumeration type Visibility: default -->
 <element name="TClipboardKeyType">
-<short></short>
+<short>Represents the clipboard function being triggered by some keyboard key combination.</short>
 <descr>
 </descr>
 <seealso>
@@ -275,7 +293,7 @@
 
 <!-- constant Visibility: default -->
 <element name="MOUSE_LEFT">
-<short></short>
+<short>Constant representing the left mouse button.</short>
 <descr>
 </descr>
 <seealso>
@@ -284,7 +302,7 @@
 
 <!-- constant Visibility: default -->
 <element name="MOUSE_RIGHT">
-<short></short>
+<short>Constant representing the right mouse button.</short>
 <descr>
 </descr>
 <seealso>
@@ -293,7 +311,7 @@
 
 <!-- constant Visibility: default -->
 <element name="MOUSE_MIDDLE">
-<short></short>
+<short>Constant representing the middle mouse button.</short>
 <descr>
 </descr>
 <seealso>
@@ -302,7 +320,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_PAINT">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -311,7 +329,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_ACTIVATE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -320,7 +338,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_DEACTIVATE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -329,7 +347,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_KEYPRESS">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -338,7 +356,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_KEYRELEASE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -347,7 +365,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_KEYCHAR">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -356,7 +374,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_MOUSEDOWN">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -365,7 +383,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_MOUSEUP">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -374,7 +392,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_MOUSEMOVE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -383,7 +401,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_DOUBLECLICK">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -392,7 +410,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_MOUSEENTER">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -401,7 +419,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_MOUSEEXIT">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -410,7 +428,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_CLOSE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -419,7 +437,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_SCROLL">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -428,7 +446,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_RESIZE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -437,7 +455,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_MOVE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -446,7 +464,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_POPUPCLOSE">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -455,7 +473,7 @@
 
 <!-- constant Visibility: default -->
 <element name="FPGM_KILLME">
-<short></short>
+<short>Platform independent messages used by fpGUI.</short>
 <descr>
 </descr>
 <seealso>
@@ -3965,8 +3983,10 @@
 
 <!-- object Visibility: default -->
 <element name="TfpgRect">
-<short></short>
-<descr>
+<short>A rectangle structure used throughout fpGUI.</short>
+<descr>Note that this structure is not a class, so static allocations are 
+allowed. This makes it much easier to use in Widgets and in fpGUI internal
+messages.
 </descr>
 <errors>
 </errors>
@@ -4012,7 +4032,7 @@
 
 <!-- procedure Visibility: default -->
 <element name="TfpgRect.SetRect">
-<short></short>
+<short>A convenience function to quickly set a rectangle structure.</short>
 <descr>
 </descr>
 <errors>
@@ -4043,7 +4063,7 @@
 
 <!-- function Visibility: default -->
 <element name="TfpgRect.Bottom">
-<short></short>
+<short>Calculates and returns the bottom position of the rectangle.</short>
 <descr>
 </descr>
 <errors>
@@ -4059,7 +4079,7 @@
 
 <!-- function Visibility: default -->
 <element name="TfpgRect.Right">
-<short></short>
+<short>Calculates and returns the Right most position of the rectangle.</short>
 <descr>
 </descr>
 <errors>
@@ -4075,7 +4095,7 @@
 
 <!-- procedure Visibility: default -->
 <element name="TfpgRect.SetBottom">
-<short></short>
+<short>Sets the bottom value and recalculates the Height value.</short>
 <descr>
 </descr>
 <errors>
@@ -4091,7 +4111,7 @@
 
 <!-- procedure Visibility: default -->
 <element name="TfpgRect.SetRight">
-<short></short>
+<short>Sets the Right value and recalculates the Width value.</short>
 <descr>
 </descr>
 <errors>
@@ -4321,8 +4341,10 @@
 
 <!-- object Visibility: default -->
 <element name="TfpgWindowBase">
-<short></short>
-<descr>
+<short>Abstract class use for representing a Window or Widget</short>
+<descr>fpGUI is a <i>Windowed</i> toolkit. By that we mean that every component
+or widget has a window handle. Widgets are essentially embedded windows without
+titlebars or borders inside a main parent window.
 </descr>
 <errors>
 </errors>
@@ -4332,7 +4354,7 @@
 
 <!-- object Visibility: default -->
 <element name="TfpgCanvasBase">
-<short></short>
+<short>Abstract class used to represent a Canvas for painting</short>
 <descr>
 </descr>
 <errors>
@@ -4343,7 +4365,7 @@
 
 <!-- object Visibility: default -->
 <element name="TfpgImageBase">
-<short></short>
+<short>Abstract class used to represent a Image</short>
 <descr>
 </descr>
 <errors>
