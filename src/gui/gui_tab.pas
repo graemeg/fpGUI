@@ -720,7 +720,8 @@ var
   ts: TfpgTabSheet;
 begin
   FOnChange := nil;
-  FActivePage := TfpgTabSheet(FPages[0]);
+  if FPages.Count > 0 then
+    FActivePage := TfpgTabSheet(FPages[0]);
   ActiveWidget := nil;
   while FPages.Count > 0 do
   begin
