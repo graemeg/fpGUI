@@ -53,19 +53,20 @@ type
 
   TfpgTreeNode = class(TObject)
   private
-    FFirstSubNode: TfpgTreeNode; // the subnodes - for list implementation
-    FLastSubNode: TfpgTreeNode;
-    FText: string;
-    FParent: TfpgTreeNode;
-    FNext: TfpgTreeNode;
-    FPrev: TfpgTreeNode;
     FCollapsed: boolean;
-    FSelColor: TfpgColor;
-    FTextColor: TfpgColor;
-    FSelTextColor: TfpgColor;
+    FData: Pointer;
+    FFirstSubNode: TfpgTreeNode; // the subnodes - for list implementation
+    FImageIndex: integer;
     FInactSelColor: TfpgColor;
     FInactSelTextColor: TfpgColor;
-    FImageIndex: integer;
+    FLastSubNode: TfpgTreeNode;
+    FNext: TfpgTreeNode;
+    FParent: TfpgTreeNode;
+    FPrev: TfpgTreeNode;
+    FSelColor: TfpgColor;
+    FSelTextColor: TfpgColor;
+    FText: string;
+    FTextColor: TfpgColor;
     procedure   SetCollapsed(const AValue: boolean);
     procedure   SetInactSelColor(const AValue: TfpgColor);
     procedure   SetInactSelTextColor(const AValue: TfpgColor);
@@ -79,39 +80,40 @@ type
     constructor Create;
     destructor  Destroy; override;
     // node related
-    procedure   UnregisterSubNode(aNode: TfpgTreeNode);
-    procedure   Append(aValue: TfpgTreeNode);
     function    AppendText(AText: string): TfpgTreeNode;
+    function    Count: integer;
+    function    CountRecursive: integer;
     function    FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode;
     function    GetMaxDepth: integer;
     function    GetMaxVisibleDepth: integer;
+    procedure   Append(aValue: TfpgTreeNode);
+    procedure   Clear;  // remove all nodes recursively
     procedure   Collapse;
     procedure   Expand;
-    function    Count: integer;
-    function    CountRecursive: integer;
     procedure   Remove(aNode: TfpgTreeNode);
-    procedure   Clear;  // remove all nodes recursively
+    procedure   UnregisterSubNode(aNode: TfpgTreeNode);
     // parent color settings
-    function    ParentTextColor: TfpgColor;
-    function    ParentSelTextColor: TfpgColor;
-    function    ParentSelColor: TfpgColor;
-    function    ParentInactSelTextColor: TfpgColor;
     function    ParentInactSelColor: TfpgColor;
+    function    ParentInactSelTextColor: TfpgColor;
+    function    ParentSelColor: TfpgColor;
+    function    ParentSelTextColor: TfpgColor;
+    function    ParentTextColor: TfpgColor;
     // general properties
     property    Collapsed: boolean read FCollapsed write SetCollapsed;
+    property    Data: Pointer read FData write FData;
+    property    FirstSubNode: TfpgTreeNode read FFirstSubNode;
+    property    ImageIndex: integer read FImageIndex write FImageIndex;
+    property    LastSubNode: TfpgTreeNode read FLastSubNode;
     property    Next: TfpgTreeNode read FNext write FNext;
+    property    Parent: TfpgTreeNode read FParent write SetParent;
     property    Prev: TfpgTreeNode read FPrev write FPrev;
     property    Text: string read FText write SetText;
-    property    Parent: TfpgTreeNode read FParent write SetParent;
-    property    FirstSubNode: TfpgTreeNode read FFirstSubNode;
-    property    LastSubNode: TfpgTreeNode read FLastSubNode;
-    property    ImageIndex: integer read FImageIndex write FImageIndex;
     // color settings
-    property    TextColor: TfpgColor read FTextColor write SetTextColor;
-    property    SelColor: TfpgColor read FSelColor write SetSelColor;
-    property    SelTextColor: TfpgColor read FSelTextColor write SetSelTextColor;
     property    InactSelColor: TfpgColor read FInactSelColor write SetInactSelColor;
     property    InactSelTextColor: TfpgColor read FInactSelTextColor write SetInactSelTextColor;
+    property    SelColor: TfpgColor read FSelColor write SetSelColor;
+    property    SelTextColor: TfpgColor read FSelTextColor write SetSelTextColor;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor;
   end;
   
   
@@ -120,28 +122,28 @@ type
   
   TfpgTreeView = class(TfpgWidget)
   private
-    FRootNode: TfpgTreeNode;
-    FScrollWheelDelta: integer;
-    FSelection: TfpgTreeNode; // currently selected node
+//    FImageList : TfpgImageList;   // imagelist to be implemented in the future
+    FBackgroundColor: TfpgColor;
+    FColumnHeight: integer; // height of the column header
     FDefaultColumnWidth: word;
     FFirstColumn: PfpgTreeColumnWidth; // the list for column widths
     FFont: TfpgFont;
-    FShowColumns: boolean;
     FHScrollbar: TfpgScrollbar;
+    FMoving: boolean;
+    FMovingCol: integer;
+    FMovingPos: integer;
+    FOnChange: TNotifyEvent;
+    FOnExpand: TfpgTreeExpandEvent;
+    FRootNode: TfpgTreeNode;
+    FScrollWheelDelta: integer;
+    FSelection: TfpgTreeNode; // currently selected node
+    FShowColumns: boolean;
+    FShowImages : boolean;
     FTreeLineColor: TfpgColor;
     FTreeLineStyle: TfpgLineStyle;
     FVScrollbar: TfpgScrollbar;
-//    FImageList : TfpgImageList;   // imagelist to be implemented in the future
-    FShowImages : boolean;
     FXOffset: integer; // for repaint and scrollbar-calculation
     FYOffset: integer;
-    FColumnHeight: integer; // height of the column header
-    FMoving: boolean;
-    FMovingPos: integer;
-    FMovingCol: integer;
-    FBackgroundColor: TfpgColor;
-    FOnChange: TNotifyEvent;
-    FOnExpand: TfpgTreeExpandEvent;
     function    GetFontDesc: string;
     function    GetRootNode: TfpgTreeNode;
     procedure   SetDefaultColumnWidth(const AValue: word);
@@ -190,13 +192,13 @@ type
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
   published
-    property    ShowImages: boolean read FShowImages write SetShowImages default False;
-    property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta;
+    property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
+    property    ShowImages: boolean read FShowImages write SetShowImages default False;
     property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor;
     property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle;
-    property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
   end;
@@ -294,6 +296,7 @@ end;
 
 constructor TfpgTreeNode.Create;
 begin
+  FData           := nil;
   FFirstSubNode   := nil;
   FLastSubNode    := nil;
   FText           := '';
@@ -314,6 +317,7 @@ destructor TfpgTreeNode.Destroy;
 begin
   if FParent <> nil then
     FParent.UnregisterSubNode(self);
+  FData := nil;
   inherited Destroy;
 end;
 
