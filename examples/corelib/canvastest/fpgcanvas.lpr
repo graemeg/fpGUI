@@ -134,9 +134,8 @@ begin
   Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
   Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
   
-//  Canvas.StretchDraw(150, 240, 160, 21, bmp);
   Canvas.StretchDraw(150, 240, 300, 50, bmp);
-  
+
   Canvas.DrawImage(150, 300, dst);
   Canvas.StretchDraw(180, 300, 70, 70, dst);
   Canvas.StretchDraw(265, 300, 230, 25, bmp);

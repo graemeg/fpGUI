@@ -1277,8 +1277,8 @@ end;
 
 procedure TfpgBaseInterpolation.Execute(x, y, w, h: integer);
 begin
-//  tempimage := TfpgImageBase.Create;
-//  tempimage.AllocateImage(image.ColorDepth, w, image.Height);
+  tempimage := TfpgImageBase.Create;
+  tempimage.AllocateImage(image.ColorDepth, w, image.Height);
 
   xfactor   := image.Width / w;
   yfactor   := image.Height / h;
@@ -1296,7 +1296,7 @@ end;
 
 destructor TfpgBaseInterpolation.Destroy;
 begin
-//  tempimage.Free;
+  tempimage.Free;
   inherited Destroy;
 end;
 
@@ -1399,7 +1399,10 @@ begin
     dww := FWidth;
 
   FImageDataSize := dww * FHeight * 4;
+  FImageData := nil;
   GetMem(FImageData, FImageDataSize);
+  if FImageData = nil then
+    raise Exception.Create('Failed to allocate ' + IntToStr(FImageDataSize) + 'bytes of memory for FImageData');
 end;
 
 procedure TfpgImageBase.AllocateMask;
