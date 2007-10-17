@@ -402,6 +402,7 @@ begin
   PaintInternalButton;
 
   Dec(r.Width, FInternalBtnRect.Width);
+  Canvas.SetClipRect(r);
   Canvas.SetFont(Font);
 
   if Focused then

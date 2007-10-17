@@ -383,6 +383,8 @@ begin
   {TODO: We need to localize this dialog }
   Width     := 500;
   Height    := 400;
+  MinWidth  := 300;
+  MinHeight := 300;
   WindowPosition := wpScreenCenter;
   FSpacing  := 6;
   FDefaultButtonWidth := 80;

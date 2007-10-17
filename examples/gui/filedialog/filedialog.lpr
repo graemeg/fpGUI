@@ -18,16 +18,20 @@ uses
 type
   TMainForm = class(TfpgForm)
   private
-    btnQuit: TfpgButton;
+    {@VFD_HEAD_BEGIN: MainForm}
     btnOpenFile: TfpgButton;
     btnSaveFile: TfpgButton;
     edFilename: TfpgEdit;
+    btnQuit: TfpgButton;
+    {@VFD_HEAD_END: MainForm}
     procedure   btnQuitClick(Sender: TObject);
     procedure   btnOpenFileClick(Sender: TObject);
     procedure   btnSaveFileClick(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; override;
   end;
+
+{@VFD_NEWFORM_DECL}
 
 { TMainForm }
 
@@ -64,25 +68,85 @@ begin
   end;
 end;
 
-constructor TMainForm.Create(AOwner: TComponent);
+procedure TMainForm.AfterCreate;
 begin
-  inherited Create(AOwner);
+  inherited AfterCreate;
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(100, 100, 419, 138);
   WindowTitle := 'File dialog test';
-  SetPosition(100, 100, 500, 400);
-  
-  btnOpenFile := CreateButton(self, 10, 10, 110, 'Open File...', @btnOpenFileClick);
-  btnSaveFile := CreateButton(self, 10, btnOpenFile.Bottom + 8, 110, 'Save File...', @btnSaveFileClick);
+  MinWidth := 300;
+  MinHeight := 135;
 
-  edFilename := CreateEdit(self, 10, btnSaveFile.Bottom + 15, Width - 20, 24);
-  edFilename.Text := '';
+  btnOpenFile := TfpgButton.Create(self);
+  with btnOpenFile do
+  begin
+    Name := 'btnOpenFile';
+    SetPosition(8, 8, 80, 23);
+    Text := 'Open File...';
+    AllowAllUp := False;
+    Embedded := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    ImageMargin := 3;
+    ImageName := '';
+    ImageSpacing := -1;
+    ModalResult := 0;
+    ShowImage := True;
+    OnClick := @btnOpenFileClick;
+  end;
 
-  btnQuit := CreateButton(self, 415, 370, 80, 'Quit', @btnQuitClick);
-  btnQuit.ImageName := 'stdimg.Quit';
-  btnQuit.ShowImage := True;
-  btnQuit.Anchors := [anRight, anBottom];
+  btnSaveFile := TfpgButton.Create(self);
+  with btnSaveFile do
+  begin
+    Name := 'btnSaveFile';
+    SetPosition(8, 34, 80, 23);
+    Text := 'Save File...';
+    AllowAllUp := False;
+    Embedded := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    ImageMargin := 3;
+    ImageName := '';
+    ImageSpacing := -1;
+    ModalResult := 0;
+    ShowImage := True;
+    OnClick := @btnSaveFileClick;
+  end;
 
-  btnOpenFile.TabOrder := 0;
+  edFilename := TfpgEdit.Create(self);
+  with edFilename do
+  begin
+    Name := 'edFilename';
+    SetPosition(8, 70, 400, 24);
+    Anchors := [anLeft,anRight,anTop];
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+
+  btnQuit := TfpgButton.Create(self);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(329, 107, 80, 23);
+    Anchors := [anRight,anBottom];
+    Text := 'Quit';
+    AllowAllUp := False;
+    Embedded := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    ImageMargin := 3;
+    ImageName := 'stdimg.Quit';
+    ImageSpacing := -1;
+    ModalResult := 0;
+    ShowImage := True;
+    OnClick := @btnQuitClick;
+  end;
+
+  {@VFD_BODY_END: MainForm}
 end;
+
+{@VFD_NEWFORM_IMPL}
 
 procedure MainProc;
 var
