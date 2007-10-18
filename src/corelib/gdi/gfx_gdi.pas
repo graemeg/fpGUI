@@ -352,16 +352,55 @@ var
   
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
+
+    procedure GetWindowBorderDimentions(const w: TfpgWindowBase; var dx, dy: integer);
+    var
+      bx: integer;  // left/right border width
+      by: integer;  // top/bottom border height
+      bt: integer;  // title bar
+    begin
+      bx := 0;
+      by := 0;
+      bt := 0;
+
+      if w.WindowType in [wtWindow, wtModalForm] then
+      begin
+        if w is TfpgForm then
+        begin
+          if TfpgForm(w).Sizeable then
+          begin
+            bx := GetSystemMetrics(SM_CXSIZEFRAME);
+            by := GetSystemMetrics(SM_CYSIZEFRAME);
+          end
+          else
+          begin
+            bx := GetSystemMetrics(SM_CXFIXEDFRAME);
+            by := GetSystemMetrics(SM_CYFIXEDFRAME);
+          end;
+        end;
+        bt := GetSystemMetrics(SM_CYCAPTION);
+      end;
+      dx := (2 * bx);
+      dy := (2 * by) + bt;
+    end;
+
     procedure SetWin32SizePoint(AWidth, AHeight: integer; var pt: TPoint);
     var
       IntfWidth: integer;
       IntfHeight: integer;
+      dx: integer;
+      dy: integer;
     begin
       // 0 means no constraint
 //      if (AWidth=0) and (AHeight=0) then exit;
-
-      IntfWidth := AWidth;
-      IntfHeight := AHeight;
+      dx := 0;
+      dy := 0;
+      IntfWidth   := AWidth;
+      IntfHeight  := AHeight;
+      
+      GetWindowBorderDimentions(w, dx, dy);
+      Inc(IntfWidth, dx);
+      Inc(IntfHeight, dy);
 
       if AWidth > 0 then
         pt.X := IntfWidth;
@@ -369,7 +408,7 @@ var
         pt.Y := IntfHeight;
     end;
   begin
-    if (w = nil) or not (w is TfpgForm) then
+    if (w = nil) {or not (w is TfpgForm)} then
       Exit; //==>
     SetWin32SizePoint(w.MinWidth, w.MinHeight, MinMaxInfo.ptMinTrackSize);
 //    SetWin32SizePoint(MaxWidth, MaxHeight, MinMaxInfo.ptMaxSize);
@@ -971,6 +1010,8 @@ begin
   rwidth  := FWidth;
   rheight := FHeight;
 
+  // Because a child has no borders or title bar the
+  // client area size gets adjusted.
   if (FWinStyle and WS_CHILD) = 0 then
   begin
     r.Left   := FLeft;

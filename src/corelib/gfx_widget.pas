@@ -824,7 +824,7 @@ var
   dh: integer;
 begin
   if (csLoading in ComponentState) then
-    Exit;
+    Exit;  //==>
   FAlignRect.Top    := 0;
   FAlignRect.Left   := 0;
   FAlignRect.Width  := Width;
@@ -841,9 +841,8 @@ begin
     if (Components[n] is TfpgWidget) then
     begin
       wg := TfpgWidget(Components[n]);
-
       if (wg.FAlign = alNone) and
-        (anBottom in wg.Anchors) or (anRight in wg.Anchors) then
+          ((anBottom in wg.Anchors) or (anRight in wg.Anchors)) then
       begin
         // we must alter the window
         dx := 0;
@@ -863,7 +862,7 @@ begin
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
       end;
-    end;
+    end;  { if }
 
   RePaint;
 end;
