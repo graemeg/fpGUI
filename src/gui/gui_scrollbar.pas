@@ -292,8 +292,24 @@ begin
       Canvas.FillRectangle(0, FSliderPos + FSliderLength, Width, Height - Width - FSliderPos);
       Canvas.SetColor(clScrollBar);
     end;
+  end
+  else
+  begin
+    if PrevAreaPressed then
+    begin
+      Canvas.SetColor(clShadow1);
+      Canvas.FillRectangle(Height, 0, FSliderPos, Height);
+      Canvas.SetColor(clScrollBar);
+    end
+    else if NextAreaPressed then
+    begin
+      Canvas.SetColor(clShadow1);
+      Canvas.FillRectangle(FSliderPos + FSliderLength, 0, Width - Height - FSliderPos, Height);
+      Canvas.SetColor(clScrollBar);
+    end;
   end;
 
+  // Paint the slider button
   if Orientation = orVertical then
   begin
     Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btnIsEmbedded]);
@@ -328,12 +344,12 @@ begin
       FEndBtnPressed := True;
       FActiveButtonRect.SetRect(0,Height-Width, Width, Height);
     end
-    else if (y >= Width + FSliderPos) and (y <= Width + FSliderPos + FSliderLength) then
+    else if (y >= (Width + FSliderPos)) and (y <= Width + FSliderPos + FSliderLength) then
     begin
       FSliderDragging := True;
       FSliderDragPos  := y;
     end
-    else if (y > Width) and (y < Width + FSliderPos) then
+    else if (y > Width) and (y < (Width + FSliderPos)) then
     begin
       // Clicked between Up button and Slider
       PrevAreaPressed := True;
@@ -350,20 +366,34 @@ begin
   begin
     if x <= Height then
     begin
+      // Left button has been pressed
       PositionChange(-FScrollStep);
       FStartBtnPressed := True;
       FActiveButtonRect.SetRect(0, 0, Height, Height);
     end
     else if x >= Width - Height then
     begin
+      // Right button has been pressed
       PositionChange(FScrollStep);
       FEndBtnPressed := True;
       FActiveButtonRect.SetRect(Width-Height, 0, Width, Height);
     end
-    else if (x >= Height + FSliderPos) and (x <= Height + FSliderPos + FSliderLength) then
+    else if (x >= (Height + FSliderPos)) and (x <= Height + FSliderPos + FSliderLength) then
     begin
       FSliderDragging := True;
       FSliderDragPos  := x;
+    end
+    else if (x > Height) and (x < (Height + FSliderPos)) then
+    begin
+      // Clicked between Left button and Slider
+      PrevAreaPressed := True;
+      PositionChange(-(FScrollStep * 5));
+    end
+    else if (x < (Width - Height)) and (x > (Height + FSliderPos + FSliderLength)) then
+    begin
+      // Clicked between the Right button and Slider
+      NextAreaPressed := True;
+      PositionChange(FScrollStep * 5);
     end;
   end;
   
