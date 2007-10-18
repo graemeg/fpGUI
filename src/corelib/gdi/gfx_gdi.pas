@@ -349,6 +349,33 @@ var
   mcode: integer;
   wmsg: TMsg;
   PaintStruct: TPaintStruct;
+  
+  //------------
+  procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
+    procedure SetWin32SizePoint(AWidth, AHeight: integer; var pt: TPoint);
+    var
+      IntfWidth: integer;
+      IntfHeight: integer;
+    begin
+      // 0 means no constraint
+//      if (AWidth=0) and (AHeight=0) then exit;
+
+      IntfWidth := AWidth;
+      IntfHeight := AHeight;
+
+      if AWidth > 0 then
+        pt.X := IntfWidth;
+      if AHeight > 0 then
+        pt.Y := IntfHeight;
+    end;
+  begin
+    if (w = nil) or not (w is TfpgForm) then
+      Exit; //==>
+    SetWin32SizePoint(w.MinWidth, w.MinHeight, MinMaxInfo.ptMinTrackSize);
+//    SetWin32SizePoint(MaxWidth, MaxHeight, MinMaxInfo.ptMaxSize);
+//    SetWin32SizePoint(MaxWidth, MaxHeight, MinMaxInfo.ptMaxTrackSize);
+  end;
+
 begin
   if uMsg = WM_CREATE then
   begin
@@ -544,6 +571,11 @@ begin
             if mcode <> 0 then
               fpgSendMessage(nil, w, mcode, msgp);
           end;  { if blockmsg }
+        end;
+
+    WM_GETMINMAXINFO:
+        begin
+          SetMinMaxInfo(PMINMAXINFO(LParam)^);
         end;
 
     WM_SIZE:

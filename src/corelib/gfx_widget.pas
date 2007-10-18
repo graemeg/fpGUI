@@ -13,7 +13,6 @@ uses
 type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
 
-  { TfpgWidget }
 
   TfpgWidget = class(TfpgWindow)
   private
