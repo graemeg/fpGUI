@@ -225,8 +225,14 @@ begin
 end;
 
 function TPropertyInteger.GetPropertySource(wg: TfpgWidget; const ident: string): string;
+var
+  PropInfo: PPropInfo;
 begin
-  Result := ident + Name + ' := ' + IntToStr(GetOrdProp(wg, Name)) + ';' + LineEnding;
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  if PropInfo^.Default <> GetOrdProp(wg, Name) then
+    Result := ident + Name + ' := ' + IntToStr(GetOrdProp(wg, Name)) + ';' + LineEnding
+  else
+    Result := '';
 end;
 
 function TPropertyInteger.GetValueText(wg: TfpgWidget): string;

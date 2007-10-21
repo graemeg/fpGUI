@@ -46,9 +46,9 @@ type
     procedure   SetStep(const AValue: longint);
   protected
     procedure   HandlePaint; override;
-    property    Max: longint read FMax write SetMax;
-    property    Min: longint read FMin write SetMin;
-    property    Position: longint read FPosition write SetPosition;
+    property    Max: longint read FMax write SetMax default 100;
+    property    Min: longint read FMin write SetMin default 0;
+    property    Position: longint read FPosition write SetPosition default 0;
     property    Step: longint read FStep write SetStep;
 //    property    FontName: string read GetFontName write SetFontName;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;

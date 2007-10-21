@@ -70,7 +70,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 10;
     property    Position: integer read FPosition write SetPosition default 0;
@@ -113,12 +113,12 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
-    property    Position: integer read FPosition write SetPosition default 10;
+    property    Position: integer read FPosition write SetPosition default 0;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
-    property    ShowPosition: boolean read FShowPosition write SetShowPosition;
-    property    Orientation: TOrientation read FOrientation write FOrientation;
+    property    ShowPosition: boolean read FShowPosition write SetShowPosition default False;
+    property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
   end;
   
