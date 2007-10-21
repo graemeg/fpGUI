@@ -156,7 +156,7 @@ begin
   ShowMessage(cAppName
       + #10
       + #10 + 'Written by Graeme Geldenhuys - 2007'
-      + #10 + 'Using the fpGUI toolkit'
+      + #10 + 'Using the ' + fpGUIName + ' v' + fpGUIVersion
       ,'About');
 end;
 

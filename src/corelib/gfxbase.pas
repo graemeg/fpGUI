@@ -342,6 +342,7 @@ type
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
+    procedure   AfterConstruction; override;
     // Make some setup before the window shows. Forms modify the window creation parameters.
     procedure   AdjustWindowStyle; virtual;
     // Make some setup before the window shows. Invoked after the window is created.
@@ -408,7 +409,13 @@ procedure SortRect(var left, top, right, bottom: integer);
 implementation
 
 uses
-  fpgfx;  // needed for fpgApplication
+  fpgfx,  // needed for fpgApplication
+  typinfo;
+  
+  
+const
+  NoDefault = $80000000;
+  tkPropsWithDefault = [tkInteger, tkChar, tkSet, tkEnumeration];
 
 
 function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
@@ -660,6 +667,32 @@ begin
     SortRect(left, top, right, bottom);
 end;
 
+// This function uses RTTI to automatically set the default values of properties.
+// That means we don't have to do it in the constructor anymore! :-)
+procedure SetDefaults(Obj: TObject);
+var
+  PropInfos: PPropList;
+  Count, Loop: Integer;
+begin
+  PropInfos := nil;
+  { Find out how many properties we'll be considering }
+  Count := GetPropList(Obj.ClassInfo, tkPropsWithDefault, nil);
+  { Allocate memory to hold their RTTI data }
+  GetMem(PropInfos, Count * SizeOf(PPropInfo));
+  try
+    { Get hold of the property list in our new buffer }
+    GetPropList(Obj.ClassInfo, tkPropsWithDefault, PropInfos);
+    { Loop through all the selected properties }
+    for Loop := 0 to Count - 1 do
+      with PropInfos^[Loop]^ do
+        { If there is supposed to be a default value... }
+        if Default <> NoDefault then
+          { ...then jolly well set it }
+          SetOrdProp(Obj, PropInfos^[Loop], Default)
+  finally
+    FreeMem(PropInfos, Count * SizeOf(PPropInfo));
+  end;
+end;
 
 { TfpgRect }
 
@@ -753,6 +786,16 @@ constructor TfpgWindowBase.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
+end;
+
+procedure TfpgWindowBase.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  { Here is a neater way by using RTTI to set default property values all
+    automatically. No need to duplicate the efforts and manually set the
+    property default values in the constructor. This code is no the same for
+    each TfpgWindowBase descendant (which includes GUI widgets) }
+//  SetDefaults(self);
 end;
 
 procedure TfpgWindowBase.AdjustWindowStyle;

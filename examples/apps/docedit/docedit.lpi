@@ -2,7 +2,7 @@
 <CONFIG>
   <ProjectOptions>
     <PathDelim Value="/"/>
-    <Version Value="5"/>
+    <Version Value="6"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
@@ -28,11 +28,11 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="fpgui_package"/>
-        <MinVersion Minor="5" Valid="True"/>
+        <PackageName Value="FCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="FCL"/>
+        <PackageName Value="fpgui_package"/>
+        <MinVersion Minor="5" Valid="True"/>
       </Item2>
     </RequiredPackages>
     <Units Count="3">

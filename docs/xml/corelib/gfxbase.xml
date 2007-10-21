@@ -10,8 +10,16 @@
 
 <module name="gfxbase">
 <short>The base unit and starting point of fpGUI</short>
-<descr>This unit contains all the abstract classes for the CoreLib code
+<descr>
+<p>
+This unit contains all the abstract classes for the CoreLib code
 of fpGUI. It also defines many types and constants used throughout the toolkit.
+</p>
+<p>
+When implementing support for a completely new windowing system 
+(eg: Carbon used in Mac OS-X) you would implement all the abstract methods
+defined in this unit.
+</p>
 </descr>
 
 <!-- unresolved type reference Visibility: default -->

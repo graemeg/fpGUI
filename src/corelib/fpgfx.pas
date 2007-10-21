@@ -37,6 +37,10 @@ const
 
   // Used for the internal message queue
   cMessageQueueSize = 512;
+  
+  // version and name constants
+  fpGUIVersion = '0.5.1';
+  fpGUIName    = 'fpGUI Library';
 
 
 type
