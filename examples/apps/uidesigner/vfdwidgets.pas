@@ -212,7 +212,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgForm);
   wc.NameBase := 'frm';
   wc.AddProperty('WindowTitle', TPropertyString, '');
-  wc.AddProperty('WindowPosition', TPropertyEnum, '');
+//  wc.AddProperty('WindowPosition', TPropertyEnum, '');
   FVFDFormWidget := wc;
 
   // Label

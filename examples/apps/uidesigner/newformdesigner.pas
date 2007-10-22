@@ -841,7 +841,8 @@ end;
 procedure TwgPropertyList.HandleKillFocus;
 begin
   inherited HandleKillFocus;
-  Editor.Visible := True;
+  if Editor <> nil then
+    Editor.Visible := True;
 end;
 
 procedure TwgPropertyList.RealignEditor;

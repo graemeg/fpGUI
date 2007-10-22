@@ -80,14 +80,14 @@ type
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
   published
     property    Text: string read FText write SetText;
-    property    Default: boolean read FDefault write SetDefault;
+    property    Default: boolean read FDefault write SetDefault default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    ImageName: string read FImageName write SetImageName;
-    property    ImageMargin: integer read FImageMargin write SetImageMargin;
-    property    ImageSpacing: integer read FImageSpacing write SetImageSpacing;
-    property    GroupIndex: integer read FGroupIndex write FGroupIndex;
-    property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp;
-    property    ModalResult: integer read FModalResult write FModalResult;
+    property    ImageMargin: integer read FImageMargin write SetImageMargin default 3;
+    property    ImageSpacing: integer read FImageSpacing write SetImageSpacing default -1;
+    property    GroupIndex: integer read FGroupIndex write FGroupIndex default 0;
+    property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp default False;
+    property    ModalResult: integer read FModalResult write FModalResult default 0;
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
     property    ShowImage: Boolean read FShowImage write SetShowImage default True;
   end;
@@ -212,6 +212,7 @@ begin
   FModalResult  := 0;
   FEmbedded     := False;
   FDefault      := False;
+  FAllowAllUp   := False;
 end;
 
 destructor TfpgButton.Destroy;
