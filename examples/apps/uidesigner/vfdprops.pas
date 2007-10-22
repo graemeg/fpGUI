@@ -422,13 +422,20 @@ function TPropertyBoolean.GetPropertySource(wg: TfpgWidget; const ident: string)
 var
   i: integer;
   s: string;
+  PropInfo: PPropInfo;
 begin
+  PropInfo := GetPropInfo(wg.ClassType, Name);
   i := GetOrdProp(wg, Name);
-  if i = 1 then
-    s := 'True'
+  if PropInfo^.Default <> i then
+  begin
+    if i = 1 then
+      s := 'True'
+    else
+      s := 'False';
+    Result := ident + Name + ' := ' + s + ';' + LineEnding;
+  end
   else
-    s := 'False';
-  Result := ident + Name + ' := ' + s + ';' + LineEnding;
+    Result := '';
 end;
 
 function TPropertyBoolean.GetValueText(wg: TfpgWidget): string;
@@ -516,8 +523,14 @@ begin
 end;
 
 function TPropertyEnum.GetPropertySource(wg: TfpgWidget; const ident: string): string;
+var
+  PropInfo: PPropInfo;
 begin
-  Result := ident + Name + ' := ' + GetEnumProp(wg, Name) + ';' + LineEnding;
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  if PropInfo^.Default <> GetOrdProp(wg, Name) then
+    Result := ident + Name + ' := ' + GetEnumProp(wg, Name) + ';' + LineEnding
+  else
+    Result := '';
 end;
 
 function TPropertyEnum.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;

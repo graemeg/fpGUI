@@ -126,11 +126,11 @@ type
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
-    property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth;
-    property    SortPages: boolean read FSortPages write SetSortPages;
-    property    Style: TfpgTabStyle read FStyle write SetStyle;
-    property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
+    property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
+    property    SortPages: boolean read FSortPages write SetSortPages default False;
+    property    Style: TfpgTabStyle read FStyle write SetStyle default tsTabs;
+    property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition default tpTop;
   end;
 
 

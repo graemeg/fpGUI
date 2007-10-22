@@ -373,13 +373,12 @@ end;
 
 procedure TMediatorView.GuiToObject;
 begin
-  Subject.PropValue[FieldName] := TypInfo.GetPropValue((FEditControl as ComponentClass), GuiFieldName);
+  Subject.PropValue[FieldName] := TypInfo.GetPropValue(FEditControl, GuiFieldName);
 end;
 
 procedure TMediatorView.ObjectToGui;
 begin
-  TypInfo.SetPropValue( (FEditControl as ComponentClass), GuiFieldName,
-      Subject.PropValue[FieldName]);
+  TypInfo.SetPropValue(FEditControl, GuiFieldName, Subject.PropValue[FieldName]);
 end;
 
 procedure TMediatorView.SetupGUIandObject;
