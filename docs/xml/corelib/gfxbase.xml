@@ -7214,6 +7214,17 @@ titlebars or borders inside a main parent window.
 </element>
 
 <!-- procedure Visibility: public -->
+<element name="TfpgWindowBase.AfterConstruction">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
 <element name="TfpgWindowBase.AdjustWindowStyle">
 <short></short>
 <descr>

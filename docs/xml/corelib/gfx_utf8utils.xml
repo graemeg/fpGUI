@@ -171,6 +171,58 @@
 <short></short>
 </element>
 
+<!-- procedure Visibility: default -->
+<element name="UTF8Insert">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Insert.Source">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Insert.S">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Insert.Index">
+<short></short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="UTF8Delete">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Delete.S">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Delete.Index">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="UTF8Delete.Size">
+<short></short>
+</element>
+
 </module> <!-- gfx_UTF8utils -->
 
 </package>

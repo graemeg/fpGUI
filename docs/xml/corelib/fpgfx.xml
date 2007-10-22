@@ -226,6 +226,24 @@
 </seealso>
 </element>
 
+<!-- constant Visibility: default -->
+<element name="fpGUIVersion">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpGUIName">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
 <!-- procedure type Visibility: default -->
 <element name="TIntKeyPressEvent">
 <short></short>
