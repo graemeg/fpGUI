@@ -30,32 +30,38 @@ uses
 
 type
   TfpgCustomEdit = class(TfpgWidget)
+  private
+    FText: string;
+    FFont: TfpgFont;
+    FPasswordMode: boolean;
+  protected
+    FMouseDragPos: integer;
+    FDrawOffset: integer;
+    FSideMargin: integer;
+    FSelStart: integer;
+    FSelOffset: integer;
+    FCursorPos: integer;
+    function    GetDrawText: string;
+    procedure   SetPasswordMode(const AValue: boolean);
+    property    Font: TfpgFont read FFont;
+    property    PasswordMode: boolean read FPasswordMode write SetPasswordMode;
   end;
+
 
   TfpgEdit = class(TfpgCustomEdit)
   private
     FOnChange: TNotifyEvent;
-    FPasswordMode: boolean;
-    FText: string;
     FMaxLength: integer;
-    FCursorPos: integer;
-    FSideMargin: integer;
     FBackgroundColor: TfpgColor;
-    FSelStart, FSelOffset: integer;
     FSelecting: boolean;
-    FMouseDragPos: integer;
-    FFont: TfpgFont;
-    FDrawOffset: integer;
     function    GetFontDesc: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
-    procedure   SetPasswordMode(const AValue: boolean);
     procedure   SetText(const AValue: string);
     procedure   DeleteSelection;
     procedure   DoCopy;
     procedure   DoPaste;
     procedure   AdjustCursor;
-    function    GetDrawText: string;
     procedure   HandlePaint; override;
     procedure   HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -67,17 +73,18 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    SelectionText: string;
-    property    Font: TfpgFont read FFont;
-    property    PasswordMode: boolean read FPasswordMode write SetPasswordMode;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property    Text: string read FText write SetText;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    MaxLength: integer read FMaxLength write FMaxLength;
+    property    PasswordMode;
   end;
+  
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
+
 
 implementation
 
@@ -94,6 +101,25 @@ begin
   if h > 0 then
     Result.Height := h;
 end;
+
+
+{ TfpgCustomEdit }
+
+function TfpgCustomEdit.GetDrawText: string;
+begin
+  if not PassWordMode then
+    Result := FText
+  else
+    Result := StringOfChar('*', UTF8Length(FText));
+end;
+
+procedure TfpgCustomEdit.SetPasswordMode (const AValue: boolean );
+begin
+  if FPasswordMode = AValue then
+    Exit; //==>
+  FPasswordMode := AValue;
+end;
+
 
 { TfpgEdit }
 
@@ -174,13 +200,6 @@ begin
   RePaint;
 end;
 
-procedure TfpgEdit.SetPasswordMode(const AValue: boolean);
-begin
-  if FPasswordMode = AValue then
-    Exit; //==>
-  FPasswordMode := AValue;
-end;
-
 procedure TfpgEdit.DeleteSelection;
 begin
   if FSelOffset <> 0 then
@@ -243,14 +262,6 @@ begin
     if tw <> 0 then
       Dec(FDrawOffset, 2);
   end;
-end;
-
-function TfpgEdit.GetDrawText: string;
-begin
-  if not PassWordMode then
-    Result := FText
-  else
-    Result := StringOfChar('*', UTF8Length(FText));
 end;
 
 procedure TfpgEdit.HandlePaint;
@@ -594,6 +605,7 @@ begin
   else
     Result := '';
 end;
+
 
 end.
 

@@ -12,15 +12,15 @@ uses
   Classes, SysUtils;
 
 
-function  UTF8Pos(const SearchForText, SearchInText: string): integer;
+function  UTF8CharacterLength(p: PChar): integer;
+function  UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
 function  UTF8Copy(const s: string; StartCharIndex, CharCount: integer): string;
+function  UTF8CStringToUTF8String(SourceStart: PChar; SourceLen: SizeInt): string;
 function  UTF8Length(const s: string): integer;
 function  UTF8Length(p: PChar; ByteCount: integer): integer;
-function  UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
-function  UTF8CharacterLength(p: PChar): integer;
-procedure UTF8Insert(const Source: string; var S: string; Index: integer);
+function  UTF8Pos(const SearchForText, SearchInText: string): integer;
 procedure UTF8Delete(var S: string; Index, Size: integer);
-
+procedure UTF8Insert(const Source: string; var S: string; Index: integer);
 
 implementation
 
@@ -55,6 +55,72 @@ begin
    else
      Result := copy(s,StartBytePos-PChar(s)+1,EndBytePos-StartBytePos);
  end;
+end;
+
+function UTF8CStringToUTF8String (SourceStart: PChar; SourceLen: SizeInt): string;
+var
+  Source: PChar;
+  Dest: PChar;
+  SourceEnd: PChar;
+  CharLen: integer;
+  SourceCopied: PChar;
+
+  // Copies from SourceStart till Source to Dest and updates Dest
+  procedure CopyPart; inline;
+  var
+    CopyLength: SizeInt;
+  begin
+    CopyLength := Source - SourceCopied;
+    if CopyLength=0 then exit;
+    move(SourceCopied^ , Dest^, CopyLength);
+    SourceCopied:=Source;
+    inc(Dest, CopyLength);
+  end;
+
+begin
+  SetLength(Result, SourceLen);
+  if SourceLen=0 then
+    Exit; //==>
+  SourceCopied:=SourceStart;
+  Source:=SourceStart;
+  Dest:=PChar(Result);
+  SourceEnd := Source + SourceLen;
+  while Source<SourceEnd do
+  begin
+    CharLen := UTF8CharacterLength(Source);
+    if (CharLen=1) and (Source^='\') then
+    begin
+      CopyPart;
+      inc(Source);
+      if Source^ in ['t', 'n', '"', '\'] then
+      begin
+        case Source^ of
+         't' : Dest^ := #9;
+         '"' : Dest^ := '"';
+         '\' : Dest^ := '\';
+         'n' :
+         // fpc 2.1.1 stores string constants as array of char so maybe this
+         // will work for without ifdef (once available in 2.0.x too):
+         // move(lineending, dest^, sizeof(LineEnding));
+{$IFDEF WINDOWS}
+               begin
+                 move(lineending[1], dest^, length(LineEnding));
+                 inc(dest^, length(LineEnding)-1);
+               end;
+{$ELSE}
+               Dest^ := LineEnding;
+{$ENDIF}
+        end;
+        inc(Source);
+        inc(Dest);
+      end;
+      SourceCopied := Source;
+    end
+    else
+      Inc(Source, CharLen);
+  end;
+  CopyPart;
+  SetLength(Result, Dest - PChar(Result));
 end;
 
 function UTF8Length(const s: string): integer;

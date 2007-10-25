@@ -119,8 +119,8 @@ type
     property    RowSelect: boolean read FRowSelect write SetRowSelect;
     property    ColumnCount: integer read GetColumnCount;
     property    RowCount: integer read GetRowCount;
-    property    ShowHeader: boolean read FShowHeader write SetShowHeader;
-    property    ShowGrid: boolean read FShowGrid write SetShowGrid;
+    property    ShowHeader: boolean read FShowHeader write SetShowHeader default True;
+    property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
     property    HeaderHeight: integer read FHeaderHeight;
     property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;

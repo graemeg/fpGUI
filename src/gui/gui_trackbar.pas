@@ -96,6 +96,8 @@ type
     FMousePosition: TPoint;
     FOnChange: TTrackBarChange;
     FFont: TfpgFont;
+    FBackgroundColor: TfpgColor;
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
     procedure   SetPosition(const AValue: integer);
@@ -113,6 +115,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    Position: integer read FPosition write SetPosition default 0;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    Min: integer read FMin write SetMin default 0;
@@ -385,6 +388,14 @@ begin
     SetPosition(FMax);
 end;
 
+procedure TfpgTrackBar.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor = AValue then
+    Exit; //==>
+  FBackgroundColor := AValue;
+  RePaint;
+end;
+
 procedure TfpgTrackBar.SetMin(const AValue: integer);
 begin
   if AValue = FMin then
@@ -543,8 +554,8 @@ var
   tw: TfpgCoord;
 begin
   Canvas.BeginDraw;
-  Canvas.Clear(clWindowBackground);
-  Canvas.SetColor(clWindowBackground);
+  Canvas.Clear(FBackgroundColor);
+  Canvas.SetColor(FBackgroundColor);
 
   if Orientation = orVertical then
     area := Height-4
@@ -628,6 +639,7 @@ begin
   FScrollStep   := 1;
   FShowPosition := False;
   FFont         := fpgGetFont('#Grid');
+  FBackgroundColor := clWindowBackground;
   FOnChange     := nil;
 end;
 

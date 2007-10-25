@@ -52,7 +52,6 @@ uses
 procedure TItemEditorForm.AfterCreate;
 begin
   inherited;
-//  WindowPosition := wpUser;
   WindowTitle := 'Items';
   SetPosition(0, 0, 360, 230);
 
