@@ -7651,12 +7651,14 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="fpgColorToRGBTriple">
-<short></short>
+<short>Converts the TfpgColor to TRGBTriple type</short>
 <descr>
+This function converts the given TfpgColor into a TRGBTriple type.
 </descr>
 <errors>
 </errors>
 <seealso>
+  <link id="TRGBTriple" />
 </seealso>
 </element>
 
@@ -7672,12 +7674,14 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="RGBTripleTofpgColor">
-<short></short>
+<short>Converts the TRGBTriple to TfpgColor type</short>
 <descr>
+This function converts the given TRGBTriple into a TfpgColor type.
 </descr>
 <errors>
 </errors>
 <seealso>
+  <link id="TRGBTriple" />
 </seealso>
 </element>
 
@@ -7693,7 +7697,7 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="fpgGetRed">
-<short></short>
+<short>Returns the Red portion of a color value.</short>
 <descr>
 </descr>
 <errors>
@@ -7714,7 +7718,7 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="fpgGetGreen">
-<short></short>
+<short>Returns the Green portion of a color value.</short>
 <descr>
 </descr>
 <errors>
@@ -7735,7 +7739,7 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="fpgGetBlue">
-<short></short>
+<short>Returns the Blue portion of a color value.</short>
 <descr>
 </descr>
 <errors>
@@ -7756,7 +7760,7 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="fpgGetAlpha">
-<short></short>
+<short>Returns the Alpha portion of a color value.</short>
 <descr>
 </descr>
 <errors>
@@ -7772,6 +7776,34 @@ titlebars or borders inside a main parent window.
 
 <!-- argument Visibility: default -->
 <element name="fpgGetAlpha.AColor">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgGetAvgColor">
+<short>Calculates the average color using the two supplied</short>
+<descr>
+This function calculates and returns the average color by using AColor1 
+and AColor2. The Alpha value also gets taken into account.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgGetAvgColor.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgGetAvgColor.AColor1">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgGetAvgColor.AColor2">
 <short></short>
 </element>
 

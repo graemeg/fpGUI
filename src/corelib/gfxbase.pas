@@ -400,6 +400,8 @@ function  fpgGetRed(const AColor: TfpgColor): word;
 function  fpgGetGreen(const AColor: TfpgColor): word;
 function  fpgGetBlue(const AColor: TfpgColor): word;
 function  fpgGetAlpha(const AColor: TfpgColor): word;
+function  fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
+
 
 { Points }
 function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
@@ -633,6 +635,20 @@ function fpgGetAlpha(const AColor: TfpgColor): word;
 begin
   // AARRGGBB format
   Result := Word((AColor shr 32) and $FF);
+end;
+
+function fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
+var
+  c1, c2: TRGBTriple;
+  avg: TRGBTriple;
+begin
+  c1 := fpgColorToRGBTriple(AColor1);
+  c2 := fpgColorToRGBTriple(AColor2);
+  avg.Red   := c1.Red + (c2.Red - c1.Red) div 2;
+  avg.Green := c1.Green + (c2.Green - c1.Green) div 2;
+  avg.Blue  := c1.Blue + (c2.Blue - c1.Blue) div 2;
+  avg.Alpha := c1.Alpha + (c2.Alpha - c1.Alpha) div 2;
+  Result := RGBTripleTofpgColor(avg);
 end;
 
 function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;

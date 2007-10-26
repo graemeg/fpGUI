@@ -592,6 +592,7 @@
    SetHeight gfxbase/tfpgwindowbase.setheight.html
    SetWidth gfxbase/tfpgwindowbase.setwidth.html
    Create gfxbase/tfpgwindowbase.create.html
+   AfterConstruction gfxbase/tfpgwindowbase.afterconstruction.html
    AdjustWindowStyle gfxbase/tfpgwindowbase.adjustwindowstyle.html
    SetWindowParameters gfxbase/tfpgwindowbase.setwindowparameters.html
    Right gfxbase/tfpgwindowbase.right.html
@@ -630,6 +631,7 @@
   fpgGetGreen gfxbase/fpggetgreen.html
   fpgGetBlue gfxbase/fpggetblue.html
   fpgGetAlpha gfxbase/fpggetalpha.html
+  fpgGetAvgColor gfxbase/fpggetavgcolor.html
   PtInRect gfxbase/ptinrect.html
   SortRect gfxbase/sortrect.html
  gfx_x11 gfx_x11/index.html
@@ -823,6 +825,8 @@
  fpgfx fpgfx/index.html
   AllAnchors fpgfx/allanchors.html
   cMessageQueueSize fpgfx/cmessagequeuesize.html
+  fpGUIVersion fpgfx/fpguiversion.html
+  fpGUIName fpgfx/fpguiname.html
   TOrientation fpgfx/torientation.html
   TAlign fpgfx/talign.html
   TAnchor fpgfx/tanchor.html
@@ -1015,13 +1019,14 @@
  gfx_stdimages gfx_stdimages/index.html
   fpgCreateStandardImages gfx_stdimages/fpgcreatestandardimages.html
  gfx_UTF8utils gfx_utf8utils/index.html
-  UTF8Pos gfx_utf8utils/utf8pos.html
-  UTF8Copy gfx_utf8utils/utf8copy.html
-  UTF8Length gfx_utf8utils/utf8length.html
-  UTF8CharStart gfx_utf8utils/utf8charstart.html
   UTF8CharacterLength gfx_utf8utils/utf8characterlength.html
-  UTF8Insert gfx_utf8utils/utf8insert.html
+  UTF8CharStart gfx_utf8utils/utf8charstart.html
+  UTF8Copy gfx_utf8utils/utf8copy.html
+  UTF8CStringToUTF8String gfx_utf8utils/utf8cstringtoutf8string.html
+  UTF8Length gfx_utf8utils/utf8length.html
+  UTF8Pos gfx_utf8utils/utf8pos.html
   UTF8Delete gfx_utf8utils/utf8delete.html
+  UTF8Insert gfx_utf8utils/utf8insert.html
  gfx_widget gfx_widget/index.html
   TFocusSearchDirection gfx_widget/tfocussearchdirection.html
   TfpgWidget gfx_widget/tfpgwidget.html
@@ -1291,6 +1296,7 @@
 2MSetHeight
 2MSetWidth
 3MCreate
+3MAfterConstruction
 3MAdjustWindowStyle
 3MSetWindowParameters
 3MRight

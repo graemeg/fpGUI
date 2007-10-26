@@ -118,6 +118,57 @@ Const
      190,190,190,190,190,190,190,176,176,176,176,176,176,176,176,176,176,
      176,176);
      
+{ This procedure creates a sunken 3d effect in a rectangle with a color gradient }
+procedure FillRectGradient(Canvas: TfpgCanvas; X, Y, W, H: TfpgCoord;
+    Strip: Integer; Astart, Astop: TfpgColor);
+var
+  RGBStart: TRGBTriple;
+  RGBStop: TRGBTriple;
+  RDiff, GDiff, BDiff: Integer;
+  count: Integer;
+  i: Integer;
+  newcolor: TRGBTriple;
+  Hx, Hy: TfpgCoord; // Coordinates for Horizontal Lines
+  Vx, Vy: TfpgCoord; // Coordinates for Vertical Lines
+  avgcolor: TfpgColor;
+begin
+  RGBStart := fpgColorToRGBTriple(fpgColorToRGB(AStart));
+  RGBStop  := fpgColorToRGBTriple(fpgColorToRGB(AStop));
+
+  count := Strip;
+  Hx := X;
+  Hy := Y;
+  Vx := X;
+  Vy := Y;
+
+  RDiff := RGBStop.Red - RGBStart.Red;
+  GDiff := RGBStop.Green - RGBStart.Green;
+  BDiff := RGBStop.Blue - RGBStart.Blue;
+
+//  Changing;
+  Canvas.BeginDraw;
+  for i := 0 to count do
+  begin
+    newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
+    newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
+    newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
+   
+    Canvas.SetLineStyle(1, lsSolid);
+    Canvas.SetColor(RGBTripleTofpgColor(newcolor));
+    Canvas.DrawLine(Hx, Hy, W+2, Hy); // Horizontal Line
+    Canvas.DrawLine(Vx, Vy, Vx, H+2); // Vertical Line
+    // next Horizontal Line: one pixel lower, one pixel shorter on the left
+    Hx := Hx + 1;
+    Hy := Hy + 1;
+    // Next Vertical Line: One pixel to the right, one pixel shorter on top
+    Vx := Vx + 1;
+    Vy := Vy + 1
+  end;
+ 
+  //  Changed;
+  Canvas.EndDraw;
+end;
+     
 
 {@VFD_NEWFORM_IMPL}
 
@@ -219,6 +270,7 @@ begin
     FontDesc := '#Edit1';
     Text := '$800000';
     OnChange := @edtThreeDeeChanged;
+    BackgroundColor := $F5F5F5;
   end;
 
   cbName1 := TfpgCheckBox.Create(self);
@@ -267,6 +319,7 @@ begin
     SetPosition(48, 144, 120, 22);
     FontDesc := '#Edit1';
     Text := '$800000';
+    BackgroundColor := $B0C4DE
   end;
 
   Custom2 := TthreedeeEdit.Create(self);
@@ -276,6 +329,7 @@ begin
     SetPosition(48, 80, 120, 22);
     FontDesc := '#Edit1';
     Text := '$800000';
+    BackgroundColor := $B0C4DE;
   end;
 
   lblName1 := TfpgLabel.Create(self);
@@ -308,6 +362,7 @@ procedure TthreedeeEdit.Draw3DControlShadow(ARect: TfpgRect);
 var
   r: TfpgRect;
 begin
+(*
   Canvas.DrawImage(ARect.Left, ARect.Top, FimgLeftTop);
 //  Canvas.StretchDraw(1, 8, 7, ARect.Height, FimgLeft);
   r.SetRect(ARect.Left, 8, 8, ARect.Height);
@@ -315,6 +370,8 @@ begin
 //  Canvas.StretchDraw(8, 1, Width+5, 7, FimgTop);
   r.SetRect(8, ARect.Top, Width+5, 8);
   Canvas.GradientFill(r, clM2Grey, BackgroundColor, gdVertical);
+*)
+  FillRectGradient(Canvas, ARect.Left, ARect.Top, ARect.Width, ARect.Height, 7, TfpgColor($777777), BackgroundColor);
 end;
 
 procedure TthreedeeEdit.SetErrorColor(const AValue: TfpgColor);
