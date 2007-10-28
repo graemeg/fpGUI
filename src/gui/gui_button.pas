@@ -90,10 +90,14 @@ type
     property    ModalResult: integer read FModalResult write FModalResult default 0;
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
     property    ShowImage: Boolean read FShowImage write SetShowImage default True;
+    property    OnMouseExit;
+    property    OnMouseEnter;
   end;
+
 
 function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
   AOnClickEvent: TNotifyEvent): TfpgButton;
+
 
 implementation
 

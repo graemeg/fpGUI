@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
+  <Package Version="3">
     <Name Value="fpgui_package"/>
     <Author Value="Graeme Geldenhuys"/>
-    <AutoUpdate Value="OnRebuildingAll"/>
     <CompilerOptions>
       <Version Value="5"/>
       <SearchPaths>
+        <OtherUnitFiles Value="db/"/>
         <UnitOutputDirectory Value="../../lib"/>
       </SearchPaths>
       <Parsing>
@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="24">
+    <Files Count="25">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -123,6 +123,10 @@
         <Filename Value="gui_mru.pas"/>
         <UnitName Value="gui_mru"/>
       </Item24>
+      <Item25>
+        <Filename Value="db/fpgui_db.pas"/>
+        <UnitName Value="fpgui_db"/>
+      </Item25>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

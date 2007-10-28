@@ -30,7 +30,7 @@ uses
 
 type
 
-  TfpgLabel = class(TfpgWidget)
+  TfpgCustomLabel = class(TfpgWidget)
   private
     FAutoSize: boolean;
     FBackgroundColor: TfpgColor;
@@ -46,24 +46,39 @@ type
     FText: string;
     FFont: TfpgFont;
     procedure   HandlePaint; override;
-  public
-    constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
-    property    Font: TfpgFont read FFont;
-  published
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
     property    Text: string read FText write SetText;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Color: TfpgColor read FColor write SetColor;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    property    Font: TfpgFont read FFont;
+  end;
+  
+  
+  TfpgLabel = class(TfpgCustomLabel)
+  published
+    property    AutoSize;
+    property    BackgroundColor;
+    property    Color;
+    property    FontDesc;
+    property    Text;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseDown;
+    property    OnMouseUp;
     property    OnMouseMove;
   end;
 
-  TLabelClass = class of TfpgLabel;
 
+// A convenience function to create a TfpgLabel instance
 function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgLabel;
 
+
 implementation
+
 
 function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgLabel;
 begin
@@ -74,22 +89,15 @@ begin
   Result.Width := Result.Font.TextWidth(Result.Text);
 end;
 
-{ TfpgLabel }
 
-procedure TfpgLabel.SetColor(const AValue: TfpgColor);
-begin
-  if FColor = AValue then
-    Exit;
-  FColor := AValue;
-  RePaint;
-end;
+{ TfpgCustomLabel }
 
-function TfpgLabel.GetFontDesc: string;
+function TfpgCustomLabel.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
 end;
 
-procedure TfpgLabel.SetAutoSize(const AValue: boolean);
+procedure TfpgCustomLabel.SetAutoSize(const AValue: boolean);
 begin
   if FAutoSize = AValue then
     Exit; //==>
@@ -101,7 +109,7 @@ begin
   end;
 end;
 
-procedure TfpgLabel.SetBackgroundColor(const AValue: TfpgColor);
+procedure TfpgCustomLabel.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor = AValue then
     Exit; //==>
@@ -109,7 +117,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgLabel.SetFontDesc(const AValue: string);
+procedure TfpgCustomLabel.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
@@ -118,7 +126,15 @@ begin
   RePaint;
 end;
 
-procedure TfpgLabel.SetText(const AValue: string);
+procedure TfpgCustomLabel.SetColor(const AValue: TfpgColor);
+begin
+  if FColor = AValue then
+    Exit;
+  FColor := AValue;
+  RePaint;
+end;
+
+procedure TfpgCustomLabel.SetText(const AValue: string);
 begin
   if FText = AValue then
     Exit; //==>
@@ -128,14 +144,14 @@ begin
   RePaint;
 end;
 
-procedure TfpgLabel.ResizeLabel;
+procedure TfpgCustomLabel.ResizeLabel;
 begin
   Width   := FFont.TextWidth(FText);
   Height  := FFont.Height;
   SetPosition(Left, Top, Width, Height);
 end;
 
-constructor TfpgLabel.Create(AOwner: TComponent);
+constructor TfpgCustomLabel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText   := 'Label';
@@ -147,14 +163,14 @@ begin
   FAutoSize := False;
 end;
 
-destructor TfpgLabel.Destroy;
+destructor TfpgCustomLabel.Destroy;
 begin
   FText := '';
   FFont.Free;
   inherited Destroy;
 end;
 
-procedure TfpgLabel.HandlePaint;
+procedure TfpgCustomLabel.HandlePaint;
 begin
   Canvas.BeginDraw;
   inherited;
