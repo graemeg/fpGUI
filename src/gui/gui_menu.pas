@@ -100,7 +100,7 @@ type
     FItems: TList;
     FFocusItem: integer;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
-    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
@@ -567,11 +567,11 @@ var
 begin
   // Close all previous popups
   for n := 1 to VisibleCount do
-  with VisibleItem(n) do
-  begin
-    if (SubMenu <> nil) and (SubMenu.HasHandle) then
-      SubMenu.Close;
-  end;
+    with VisibleItem(n) do
+    begin
+      if (SubMenu <> nil) and (SubMenu.HasHandle) then
+        SubMenu.Close;
+    end;
 end;
 
 function TfpgMenuBar.MenuFocused: boolean;
@@ -722,7 +722,7 @@ begin
 //  repaint;
 end;
 
-procedure TfpgPopupMenu.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TfpgPopupMenu.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   newf: integer;
   mi: TfpgMenuItem;

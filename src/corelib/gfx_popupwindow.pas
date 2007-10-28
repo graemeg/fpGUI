@@ -224,8 +224,8 @@ end;
 
 procedure TfpgPopupWindow.Close;
 begin
-  PopupListRemove(self);
   HandleHide;
+  PopupListRemove(self);
 end;
 
 
