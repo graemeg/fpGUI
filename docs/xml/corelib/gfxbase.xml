@@ -55,14 +55,15 @@ underlying type in the future. Example to floating points.
 <element name="TfpgColor">
 <short>Represents a color in integer format.</short>
 <descr>
-<p>TfpgColor is always in RRGGBB (Red, Green, Blue) format, no matter tho
+<p>TfpgColor is always in RRGGBB (Red, Green, Blue) format, no matter the
 operating system.
 </p>
-<p>The gfxbase unit also contains definitions of many useful color constants. It
-defines the standard predefined Delphi colors (like clRed, clMagenta etc.), the
- 140 websafe colors using the defacto standard names as used by Netscape and 
-Internet Explorer web browsers. As well as some internal color constants used
-by many GUI components (like clText, clWindowBackground etc.).
+<p>The <var>gfxbase</var> unit also contains definitions of many useful color 
+constants. It defines the standard predefined Delphi colors (like clRed, 
+clMagenta etc.), the 140 websafe colors using the defacto standard names as 
+used by Netscape and Internet Explorer web browsers. As well as some internal 
+color constants used by many GUI components (like clText, clWindowBackground 
+etc.).
 </p>
 </descr>
 <seealso>
