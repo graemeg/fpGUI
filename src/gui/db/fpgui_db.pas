@@ -12,7 +12,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Database support classes.
+      Database support classes. This serves as an example of how someone
+      could implement DB aware components for fpGUI.
 }
 
 unit fpgui_db;

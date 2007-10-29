@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      General dialogs used by fpGUI based applications.
+      Standard dialogs used by fpGUI based applications.
 }
 
 unit gui_dialogs;
@@ -22,7 +22,7 @@ unit gui_dialogs;
 {
   TODO:
     * Try and abstract the code to remove all IFDEF's
-    * Implement MessageDlg with icons and buttons
+    * Implement MessageDlg with icons and buttons [Work-In-Progress]
     * Select Directory dialog
 }
 
@@ -34,6 +34,7 @@ uses
   Classes,
   SysUtils,
   fpgfx,
+  gfx_imgfmt_bmp,
   gui_form,
   gui_button,
   gui_label,
@@ -43,6 +44,20 @@ uses
   gui_grid,
   gui_combobox,
   gui_bevel;
+
+type
+  TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation, mtCustom);
+  TfpgMsgDlgBtn = (mbNoButton, mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore,
+                mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose);
+  TfpgMsgDlgButtons = set of TfpgMsgDlgBtn;
+
+
+const
+  mbYesNoCancel = [mbYes, mbNo, mbCancel];
+  mbYesNo = [mbYes, mbNo];
+  mbOKCancel = [mbOK, mbCancel];
+  mbAbortRetryIgnore = [mbAbort, mbRetry, mbIgnore];
+
 
 type
 
@@ -59,7 +74,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
   public
-    constructor Create(AOwner : TComponent); override;
+    constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   SetMessage(AMessage: string);
   end;
@@ -149,6 +164,17 @@ type
     property    Filter: string read FFilter write SetFilter;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
+  
+
+{ This lets us use a single include file for both the Interface and
+  Implementation sections. }
+{$define read_interface}
+{$undef read_implementation}
+
+
+{$I messagedialog.inc}
+
+
 
 
 procedure ShowMessage(AMessage, ATitle: string); overload;
@@ -252,7 +278,7 @@ begin
   FMaxLineWidth := 500;
   
   FButton := TfpgButton.Create(self);
-  FButton.text    := 'OK';   // We must localize this
+  FButton.Text    := 'OK';   // We must localize this
   FButton.Width   := 75;
   FButton.OnClick := @ButtonClick;
 end;
@@ -1158,6 +1184,16 @@ begin
   else
     Result := False;
 end;
+
+
+{ This lets us use a single include file for both the Interface and
+  Implementation sections. }
+{$undef read_interface}
+{$define read_implementation}
+
+
+{$I messagedialog.inc}
+
 
 end.
 
