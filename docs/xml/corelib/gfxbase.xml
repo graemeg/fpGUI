@@ -5089,12 +5089,12 @@ titlebars or borders inside a main parent window.
 <descr>
 This is used as the base class to implement Interpolation filters like
 Gaussian, Sinc etc... These decendant filters are used in the 
-<link id="TfpgCanvas.StretchDraw">StretchDraw</link> function.
+<link id="TfpgCanvasBase.StretchDraw">Canvas.StretchDraw</link> function.
 </descr>
 <errors>
 </errors>
 <seealso>
-  <link id="TfpgCanvas.StretchDraw" />
+  <link id="TfpgCanvasBase.StretchDraw">Canvas.StretchDraw</link>
 </seealso>
 </element>
 
