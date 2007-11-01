@@ -5085,12 +5085,16 @@ titlebars or borders inside a main parent window.
 
 <!-- object Visibility: default -->
 <element name="TfpgBaseInterpolation">
-<short></short>
+<short>A abstract class representing a base Interpolation filter.</short>
 <descr>
+This is used as the base class to implement Interpolation filters like
+Gaussian, Sinc etc... These decendant filters are used in the 
+<link id="TfpgCanvas.StretchDraw">StretchDraw</link> function.
 </descr>
 <errors>
 </errors>
 <seealso>
+  <link id="TfpgCanvas.StretchDraw" />
 </seealso>
 </element>
 
@@ -7600,8 +7604,10 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="KeycodeToText">
-<short></short>
+<short>Returns the text representation of a keycode.</short>
 <descr>
+This is mainly used for debugging, but could also be used for Menu Item keyboard
+shortcuts etc.
 </descr>
 <errors>
 </errors>
@@ -7626,8 +7632,10 @@ titlebars or borders inside a main parent window.
 
 <!-- function Visibility: default -->
 <element name="CheckClipboardKey">
-<short></short>
+<short>Detects if the pressed keys represent a Clipboard key shortcut</short>
 <descr>
+Detects if the pressed keys represent a Clipboard key shortcut. If it does, it
+returns the correct enum type detected.
 </descr>
 <errors>
 </errors>
@@ -7810,8 +7818,10 @@ and AColor2. The Alpha value also gets taken into account.
 
 <!-- function Visibility: default -->
 <element name="PtInRect">
-<short></short>
+<short>Returns true if APoint is inside ARect rectangle</short>
 <descr>
+This function is used to detect if the point APoint is inside the given
+rectangle ARect.  If it is, the function returns True, otherwise False.
 </descr>
 <errors>
 </errors>
@@ -7836,8 +7846,10 @@ and AColor2. The Alpha value also gets taken into account.
 
 <!-- procedure Visibility: default -->
 <element name="SortRect">
-<short></short>
+<short>Fixes the Top, Bottom and Left, Right to always represent a valid rectangle</short>
 <descr>
+This function fixes a rectangle so that the Left point is always smaller than the 
+Right. And the Top is always smaller than the Bottom.
 </descr>
 <errors>
 </errors>

@@ -949,6 +949,7 @@
   CenterPoint fpgfx/centerpoint.html
   fpgRect fpgfx/fpgrect.html
   PrintRect fpgfx/printrect.html
+  DumpStack fpgfx/dumpstack.html
   fpgStyle fpgfx/fpgstyle.html
   fpgCaret fpgfx/fpgcaret.html
   fpgImages fpgfx/fpgimages.html

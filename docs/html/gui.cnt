@@ -92,6 +92,8 @@
    ModalResult gui_button/tfpgbutton.modalresult.html
    Embedded gui_button/tfpgbutton.embedded.html
    ShowImage gui_button/tfpgbutton.showimage.html
+   OnMouseExit gui_button/tfpgbutton.onmouseexit.html
+   OnMouseEnter gui_button/tfpgbutton.onmouseenter.html
   CreateButton gui_button/createbutton.html
  gui_checkbox gui_checkbox/index.html
   TfpgCheckBox gui_checkbox/tfpgcheckbox.html
@@ -169,6 +171,14 @@
    DeleteColumn gui_customgrid/tfpgcustomgrid.deletecolumn.html
    MoveColumn gui_customgrid/tfpgcustomgrid.movecolumn.html
  gui_dialogs gui_dialogs/index.html
+  mbYesNoCancel gui_dialogs/mbyesnocancel.html
+  mbYesNo gui_dialogs/mbyesno.html
+  mbOKCancel gui_dialogs/mbokcancel.html
+  mbAbortRetryIgnore gui_dialogs/mbabortretryignore.html
+  stdimg_fpgui_logo gui_dialogs/stdimg_fpgui_logo.html
+  TfpgMsgDlgType gui_dialogs/tfpgmsgdlgtype.html
+  TfpgMsgDlgBtn gui_dialogs/tfpgmsgdlgbtn.html
+  TfpgMsgDlgButtons gui_dialogs/tfpgmsgdlgbuttons.html
   TfpgMessageBox gui_dialogs/tfpgmessagebox.html
    HandleKeyPress gui_dialogs/tfpgmessagebox.handlekeypress.html
    HandlePaint gui_dialogs/tfpgmessagebox.handlepaint.html
@@ -201,21 +211,46 @@
    RunSaveFile gui_dialogs/tfpgfiledialog.runsavefile.html
    Filter gui_dialogs/tfpgfiledialog.filter.html
    ShowHidden gui_dialogs/tfpgfiledialog.showhidden.html
+  TfpgMessageDialog gui_dialogs/tfpgmessagedialog.html
+   HandlePaint gui_dialogs/tfpgmessagedialog.handlepaint.html
+   lblName1 gui_dialogs/tfpgmessagedialog.lblname1.html
+   pnlIcon gui_dialogs/tfpgmessagedialog.pnlicon.html
+   AfterCreate gui_dialogs/tfpgmessagedialog.aftercreate.html
+   About gui_dialogs/tfpgmessagedialog.about.html
+   AboutFPGui gui_dialogs/tfpgmessagedialog.aboutfpgui.html
+   Critical gui_dialogs/tfpgmessagedialog.critical.html
+   Information gui_dialogs/tfpgmessagedialog.information.html
+   Question gui_dialogs/tfpgmessagedialog.question.html
+   Warning gui_dialogs/tfpgmessagedialog.warning.html
+   InformativeText gui_dialogs/tfpgmessagedialog.informativetext.html
+   Text gui_dialogs/tfpgmessagedialog.text.html
+   Buttons gui_dialogs/tfpgmessagedialog.buttons.html
+   DefaultButton gui_dialogs/tfpgmessagedialog.defaultbutton.html
+   DialogType gui_dialogs/tfpgmessagedialog.dialogtype.html
   ShowMessage gui_dialogs/showmessage.html
   SelectFontDialog gui_dialogs/selectfontdialog.html
  gui_edit gui_edit/index.html
   TfpgCustomEdit gui_edit/tfpgcustomedit.html
+   FMouseDragPos gui_edit/tfpgcustomedit.fmousedragpos.html
+   FDrawOffset gui_edit/tfpgcustomedit.fdrawoffset.html
+   FSideMargin gui_edit/tfpgcustomedit.fsidemargin.html
+   FSelStart gui_edit/tfpgcustomedit.fselstart.html
+   FSelOffset gui_edit/tfpgcustomedit.fseloffset.html
+   FCursorPos gui_edit/tfpgcustomedit.fcursorpos.html
+   GetDrawText gui_edit/tfpgcustomedit.getdrawtext.html
+   SetPasswordMode gui_edit/tfpgcustomedit.setpasswordmode.html
+   Font gui_edit/tfpgcustomedit.font.html
+   PasswordMode gui_edit/tfpgcustomedit.passwordmode.html
   TfpgEdit gui_edit/tfpgedit.html
    Create gui_edit/tfpgedit.create.html
    Destroy gui_edit/tfpgedit.destroy.html
    SelectionText gui_edit/tfpgedit.selectiontext.html
-   Font gui_edit/tfpgedit.font.html
-   PasswordMode gui_edit/tfpgedit.passwordmode.html
    OnChange gui_edit/tfpgedit.onchange.html
    Text gui_edit/tfpgedit.text.html
    FontDesc gui_edit/tfpgedit.fontdesc.html
    BackgroundColor gui_edit/tfpgedit.backgroundcolor.html
    MaxLength gui_edit/tfpgedit.maxlength.html
+   PasswordMode gui_edit/tfpgedit.passwordmode.html
   CreateEdit gui_edit/createedit.html
  gui_form gui_form/index.html
   TWindowPosition gui_form/twindowposition.html
@@ -344,19 +379,28 @@
    OnRowChange gui_grid/tfpgstringgrid.onrowchange.html
    OnDoubleClick gui_grid/tfpgstringgrid.ondoubleclick.html
  gui_label gui_label/index.html
-  TLabelClass gui_label/tlabelclass.html
+  TfpgCustomLabel gui_label/tfpgcustomlabel.html
+   FText gui_label/tfpgcustomlabel.ftext.html
+   FFont gui_label/tfpgcustomlabel.ffont.html
+   HandlePaint gui_label/tfpgcustomlabel.handlepaint.html
+   AutoSize gui_label/tfpgcustomlabel.autosize.html
+   Text gui_label/tfpgcustomlabel.text.html
+   FontDesc gui_label/tfpgcustomlabel.fontdesc.html
+   Color gui_label/tfpgcustomlabel.color.html
+   BackgroundColor gui_label/tfpgcustomlabel.backgroundcolor.html
+   Create gui_label/tfpgcustomlabel.create.html
+   Destroy gui_label/tfpgcustomlabel.destroy.html
+   Font gui_label/tfpgcustomlabel.font.html
   TfpgLabel gui_label/tfpglabel.html
-   FText gui_label/tfpglabel.ftext.html
-   FFont gui_label/tfpglabel.ffont.html
-   HandlePaint gui_label/tfpglabel.handlepaint.html
-   Create gui_label/tfpglabel.create.html
-   Destroy gui_label/tfpglabel.destroy.html
-   Font gui_label/tfpglabel.font.html
    AutoSize gui_label/tfpglabel.autosize.html
-   Text gui_label/tfpglabel.text.html
-   FontDesc gui_label/tfpglabel.fontdesc.html
-   Color gui_label/tfpglabel.color.html
    BackgroundColor gui_label/tfpglabel.backgroundcolor.html
+   Color gui_label/tfpglabel.color.html
+   FontDesc gui_label/tfpglabel.fontdesc.html
+   Text gui_label/tfpglabel.text.html
+   OnMouseEnter gui_label/tfpglabel.onmouseenter.html
+   OnMouseExit gui_label/tfpglabel.onmouseexit.html
+   OnMouseDown gui_label/tfpglabel.onmousedown.html
+   OnMouseUp gui_label/tfpglabel.onmouseup.html
    OnMouseMove gui_label/tfpglabel.onmousemove.html
   CreateLabel gui_label/createlabel.html
  gui_listbox gui_listbox/index.html
@@ -550,7 +594,7 @@
    FItems gui_menu/tfpgpopupmenu.fitems.html
    FFocusItem gui_menu/tfpgpopupmenu.ffocusitem.html
    HandleMouseMove gui_menu/tfpgpopupmenu.handlemousemove.html
-   HandleLMouseUp gui_menu/tfpgpopupmenu.handlelmouseup.html
+   HandleLMouseDown gui_menu/tfpgpopupmenu.handlelmousedown.html
    HandleKeyPress gui_menu/tfpgpopupmenu.handlekeypress.html
    HandlePaint gui_menu/tfpgpopupmenu.handlepaint.html
    HandleShow gui_menu/tfpgpopupmenu.handleshow.html
@@ -746,6 +790,7 @@
    PositionChange gui_trackbar/tfpgtrackbar.positionchange.html
    Create gui_trackbar/tfpgtrackbar.create.html
    Destroy gui_trackbar/tfpgtrackbar.destroy.html
+   BackgroundColor gui_trackbar/tfpgtrackbar.backgroundcolor.html
    Position gui_trackbar/tfpgtrackbar.position.html
    ScrollStep gui_trackbar/tfpgtrackbar.scrollstep.html
    Min gui_trackbar/tfpgtrackbar.min.html
@@ -930,6 +975,8 @@
 4PModalResult rw
 4PEmbedded rw
 4PShowImage rw
+4POnMouseExit
+4POnMouseEnter
 #GUI.gui_checkbox.TfpgCheckBox #CoreLib.gfx_widget.TfpgWidget
 1VFBackgroundColor
 1VFChecked
@@ -1117,31 +1164,59 @@
 3MRunSaveFile
 3PFilter rw
 3PShowHidden rw
+#GUI.gui_dialogs.TfpgMessageDialog #GUI.gui_dialogs.TfpgBaseDialog
+1VFInformativeText
+1VFText
+1VFButtons
+1VFDefaultButton
+1VFDialogType
+1MSetButtons
+1MSetDefaultButton
+1MSetInformativeText
+1MSetText
+1MpnlIconPaint
+2MHandlePaint
+3VlblName1
+3VpnlIcon
+3MAfterCreate
+3MAbout
+3MAboutFPGui
+3MCritical
+3MInformation
+3MQuestion
+3MWarning
+3PInformativeText rw
+3PText rw
+3PButtons rw
+3PDefaultButton rw
+3PDialogType r
 #GUI.gui_edit.TfpgCustomEdit #CoreLib.gfx_widget.TfpgWidget
+1VFText
+1VFFont
+1VFPasswordMode
+2VFMouseDragPos
+2VFDrawOffset
+2VFSideMargin
+2VFSelStart
+2VFSelOffset
+2VFCursorPos
+2MGetDrawText
+2MSetPasswordMode
+2PFont r
+2PPasswordMode rw
 #GUI.gui_edit.TfpgEdit #GUI.gui_edit.TfpgCustomEdit
 1VFOnChange
-1VFPasswordMode
-1VFText
 1VFMaxLength
-1VFCursorPos
-1VFSideMargin
 1VFBackgroundColor
-1VFSelStart
-1VFSelOffset
 1VFSelecting
-1VFMouseDragPos
-1VFFont
-1VFDrawOffset
 1MGetFontDesc
 1MSetBackgroundColor
 1MSetFontDesc
-1MSetPasswordMode
 1MSetText
 1MDeleteSelection
 1MDoCopy
 1MDoPaste
 1MAdjustCursor
-1MGetDrawText
 1MHandlePaint
 1MHandleKeyChar
 1MHandleKeyPress
@@ -1152,13 +1227,12 @@
 3MCreate
 3MDestroy
 3MSelectionText
-3PFont r
-3PPasswordMode rw
 3POnChange rw
 4PText rw
 4PFontDesc rw
 4PBackgroundColor rw
 4PMaxLength rw
+4PPasswordMode
 #GUI.gui_form.TfpgForm #CoreLib.gfx_widget.TfpgWidget
 1VFOnActivate
 1VFOnClose
@@ -1310,7 +1384,7 @@
 4POnFocusChange
 4POnRowChange
 4POnDoubleClick
-#GUI.gui_label.TfpgLabel #CoreLib.gfx_widget.TfpgWidget
+#GUI.gui_label.TfpgCustomLabel #CoreLib.gfx_widget.TfpgWidget
 1VFAutoSize
 1VFBackgroundColor
 1VFColor
@@ -1324,14 +1398,24 @@
 2VFText
 2VFFont
 2MHandlePaint
+2PAutoSize rw
+2PText rw
+2PFontDesc rw
+2PColor rw
+2PBackgroundColor rw
 3MCreate
 3MDestroy
 3PFont r
-4PAutoSize rw
-4PText rw
-4PFontDesc rw
-4PColor rw
-4PBackgroundColor rw
+#GUI.gui_label.TfpgLabel #GUI.gui_label.TfpgCustomLabel
+4PAutoSize
+4PBackgroundColor
+4PColor
+4PFontDesc
+4PText
+4POnMouseEnter
+4POnMouseExit
+4POnMouseDown
+4POnMouseUp
 4POnMouseMove
 #GUI.gui_listbox.TfpgBaseListBox #CoreLib.gfx_widget.TfpgWidget
 1VFHotTrack
@@ -1688,7 +1772,7 @@
 2VFItems
 2VFFocusItem
 2MHandleMouseMove
-2MHandleLMouseUp
+2MHandleLMouseDown
 2MHandleKeyPress
 2MHandlePaint
 2MHandleShow
@@ -1972,6 +2056,8 @@
 1VFMousePosition
 1VFOnChange
 1VFFont
+1VFBackgroundColor
+1MSetBackgroundColor
 1MSetMax
 1MSetMin
 1MSetPosition
@@ -1986,6 +2072,7 @@
 2MPositionChange
 3MCreate
 3MDestroy
+4PBackgroundColor rw
 4PPosition rw
 4PScrollStep rw
 4PMin rw
