@@ -39,6 +39,8 @@ type
   private
     FBevelShape: TBevelShape;
     FBevelStyle: TBevelStyle;
+    FBackgroundColor: TfpgColor;
+    procedure SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetBevelShape(const AValue: TBevelShape);
     procedure   SetBevelStyle(const AValue: TBevelStyle);
   protected
@@ -48,6 +50,7 @@ type
   published
     property    Shape: TBevelShape read FBevelShape write SetBevelShape default bsBox;
     property    Style: TBevelStyle read FBevelStyle write SetBevelStyle default bsRaised;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
   end;
 
 
@@ -80,6 +83,12 @@ begin
   Repaint;
 end;
 
+procedure TfpgBevel.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor=AValue then exit;
+  FBackgroundColor:=AValue;
+end;
+
 procedure TfpgBevel.SetBevelStyle(const AValue: TBevelStyle);
 begin
   if FBevelStyle = AValue then
@@ -92,7 +101,7 @@ procedure TfpgBevel.HandlePaint;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
-  Canvas.Clear(clWindowBackground);
+  Canvas.Clear(BackgroundColor);
   
 //  Canvas.SetLineStyle(2, lsSolid);
 //  Canvas.SetColor(clWindowBackground);
@@ -138,6 +147,7 @@ begin
   FWidth        := 80;
   FHeight       := 80;
   FFocusable    := True;  // otherwise children can't get focus
+  FBackgroundColor := clWindowBackground;
 end;
 
 end.
