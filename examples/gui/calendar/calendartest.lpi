@@ -1,0 +1,285 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <PathDelim Value="/"/>
+    <Version Value="6"/>
+    <General>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <ActiveEditorIndexAtStart Value="1"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+      <Language Value=""/>
+      <CharSet Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="fpgui_package"/>
+        <MinVersion Minor="5" Release="1" Valid="True"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="16">
+      <Unit0>
+        <Filename Value="calendartest.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="calendartest"/>
+        <CursorPos X="29" Y="19"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <UnitName Value="gui_popupcalendar"/>
+        <CursorPos X="24" Y="32"/>
+        <TopLine Value="30"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../../../src/gui/gui_grid.pas"/>
+        <UnitName Value="gui_grid"/>
+        <CursorPos X="28" Y="206"/>
+        <TopLine Value="164"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../../../src/gui/gui_customgrid.pas"/>
+        <UnitName Value="gui_customgrid"/>
+        <CursorPos X="32" Y="54"/>
+        <TopLine Value="48"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../../../src/gui/gui_basegrid.pas"/>
+        <UnitName Value="gui_basegrid"/>
+        <CursorPos X="17" Y="135"/>
+        <TopLine Value="87"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="../../../src/corelib/gfx_popupwindow.pas"/>
+        <UnitName Value="gfx_popupwindow"/>
+        <CursorPos X="35" Y="238"/>
+        <TopLine Value="166"/>
+        <UsageCount Value="10"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../../src/gui/gui_form.pas"/>
+        <UnitName Value="gui_form"/>
+        <CursorPos X="1" Y="12"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="10"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="../../../src/gui/gui_combobox.pas"/>
+        <UnitName Value="gui_combobox"/>
+        <CursorPos X="16" Y="188"/>
+        <TopLine Value="171"/>
+        <UsageCount Value="10"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="../../../src/gui/gui_button.pas"/>
+        <UnitName Value="gui_button"/>
+        <CursorPos X="25" Y="91"/>
+        <TopLine Value="54"/>
+        <UsageCount Value="10"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="../../../src/gui/gui_listbox.pas"/>
+        <UnitName Value="gui_listbox"/>
+        <CursorPos X="1" Y="491"/>
+        <TopLine Value="475"/>
+        <UsageCount Value="10"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="../../../src/corelib/gfxbase.pas"/>
+        <UnitName Value="gfxbase"/>
+        <CursorPos X="3" Y="839"/>
+        <TopLine Value="837"/>
+        <UsageCount Value="10"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="../../../src/corelib/gfx_widget.pas"/>
+        <UnitName Value="gfx_widget"/>
+        <CursorPos X="3" Y="795"/>
+        <TopLine Value="790"/>
+        <UsageCount Value="10"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="../../../src/gui/gui_scrollbar.pas"/>
+        <UnitName Value="gui_scrollbar"/>
+        <CursorPos X="66" Y="42"/>
+        <TopLine Value="36"/>
+        <UsageCount Value="10"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="/opt/fpc-2.2.0/src/rtl/objpas/sysutils/sysinth.inc"/>
+        <CursorPos X="18" Y="107"/>
+        <TopLine Value="86"/>
+        <UsageCount Value="10"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="/opt/fpc-2.2.0/src/rtl/objpas/sysutils/datih.inc"/>
+        <CursorPos X="14" Y="115"/>
+        <TopLine Value="91"/>
+        <UsageCount Value="10"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="../../../src/gui/gui_memo.pas"/>
+        <UnitName Value="gui_memo"/>
+        <CursorPos X="1" Y="22"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="10"/>
+      </Unit15>
+    </Units>
+    <JumpHistory Count="29" HistoryIndex="28">
+      <Position1>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="111" Column="5" TopLine="58"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="144" Column="21" TopLine="138"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="95" Column="5" TopLine="42"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="94" Column="51" TopLine="88"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="92" Column="66" TopLine="59"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="94" Column="1" TopLine="68"/>
+      </Position6>
+      <Position7>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="61" Column="11" TopLine="59"/>
+      </Position7>
+      <Position8>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="71" Column="43" TopLine="59"/>
+      </Position8>
+      <Position9>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="69" Column="40" TopLine="45"/>
+      </Position9>
+      <Position10>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="70" Column="40" TopLine="47"/>
+      </Position10>
+      <Position11>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="151" Column="5" TopLine="98"/>
+      </Position11>
+      <Position12>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="157" Column="5" TopLine="104"/>
+      </Position12>
+      <Position13>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="220" Column="28" TopLine="178"/>
+      </Position13>
+      <Position14>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="156" Column="12" TopLine="126"/>
+      </Position14>
+      <Position15>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="150" Column="9" TopLine="126"/>
+      </Position15>
+      <Position16>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="151" Column="3" TopLine="148"/>
+      </Position16>
+      <Position17>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="115" Column="38" TopLine="100"/>
+      </Position17>
+      <Position18>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="108" Column="30" TopLine="100"/>
+      </Position18>
+      <Position19>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="71" Column="45" TopLine="68"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="172" Column="5" TopLine="114"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="272" Column="27" TopLine="226"/>
+      </Position21>
+      <Position22>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="171" Column="18" TopLine="156"/>
+      </Position22>
+      <Position23>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="156" Column="1" TopLine="151"/>
+      </Position23>
+      <Position24>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="19" Column="53" TopLine="17"/>
+      </Position24>
+      <Position25>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="94" Column="37" TopLine="90"/>
+      </Position25>
+      <Position26>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="95" Column="17" TopLine="71"/>
+      </Position26>
+      <Position27>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="98" Column="16" TopLine="72"/>
+      </Position27>
+      <Position28>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="102" Column="1" TopLine="73"/>
+      </Position28>
+      <Position29>
+        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
+        <Caret Line="5" Column="50" TopLine="1"/>
+      </Position29>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="5"/>
+    <CodeGeneration>
+      <Generate Value="Faster"/>
+    </CodeGeneration>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+</CONFIG>

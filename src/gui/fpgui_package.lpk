@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="26">
+    <Files Count="27">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -131,15 +131,19 @@
         <Filename Value="messagedialog.inc"/>
         <Type Value="Binary"/>
       </Item26>
+      <Item27>
+        <Filename Value="gui_popupcalendar.pas"/>
+        <UnitName Value="gui_popupcalendar"/>
+      </Item27>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpgfx_package"/>
         <MinVersion Minor="5" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>

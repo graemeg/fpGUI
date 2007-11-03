@@ -139,6 +139,7 @@ type
     property    ColumnCount;
     property    Columns;
     property    FocusRow;
+    property    ScrollBarStyle;
     property    OnRowChange;
     property    OnDoubleClick;
   end;
@@ -198,6 +199,7 @@ type
     property    RowSelect;
     property    ColumnCount;
     property    RowCount;
+    property    ScrollBarStyle;
     property    ShowHeader;
     property    ShowGrid;
     property    HeaderHeight;

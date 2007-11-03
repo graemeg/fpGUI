@@ -39,7 +39,7 @@ uses
 type
   TScrollNotifyEvent = procedure(Sender: TObject; position: integer) of object;
 
-  { TfpgScrollBar }
+  TfpgScrollStyle = (ssNone, ssHorizontal, ssVertical, ssAutoBoth);
 
   TfpgScrollBar = class(TfpgWidget)
   private

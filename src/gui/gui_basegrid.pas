@@ -66,6 +66,7 @@ type
     FFont: TfpgFont;
     FHeaderFont: TfpgFont;
     FRowSelect: boolean;
+    FScrollBarStyle: TfpgScrollStyle;
     FShowGrid: boolean;
     FShowHeader: boolean;
     FTemp: integer;
@@ -77,6 +78,7 @@ type
     procedure   SetFontDesc(const AValue: string);
     procedure   SetHeaderFontDesc(const AValue: string);
     procedure   SetRowSelect(const AValue: boolean);
+    procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDefaultColWidth(const AValue: integer);
@@ -121,6 +123,7 @@ type
     property    RowCount: integer read GetRowCount;
     property    ShowHeader: boolean read FShowHeader write SetShowHeader default True;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
+    property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    HeaderHeight: integer read FHeaderHeight;
     property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
@@ -177,6 +180,13 @@ begin
     Exit; //==>
   FRowSelect := AValue;
   RePaint;
+end;
+
+procedure TfpgBaseGrid.SetScrollBarStyle(const AValue: TfpgScrollStyle);
+begin
+  if FScrollBarStyle = AValue then
+    Exit; //==>
+  FScrollBarStyle := AValue;
 end;
 
 procedure TfpgBaseGrid.VScrollBarMove(Sender: TObject; position: integer);
@@ -404,7 +414,7 @@ begin
 
   // This needs improving while resizing
   if cw > vw then
-    FHScrollBar.Visible := True
+    FHScrollBar.Visible := not (FScrollBarStyle in [ssNone, ssVertical])
   else
   begin
     FHScrollBar.Visible := False;
@@ -413,7 +423,7 @@ begin
   
   // This needs improving while resizing
   if (RowCount > VisibleLines) then
-    FVScrollBar.Visible := True
+    FVScrollBar.Visible := not (FScrollBarStyle in [ssNone, ssHorizontal])
   else
   begin
     FVScrollBar.Visible := False;
@@ -982,6 +992,7 @@ begin
   FShowHeader := True;
   FShowGrid   := True;
   FRowSelect  := False;
+  FScrollBarStyle := ssAutoBoth;
   
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');

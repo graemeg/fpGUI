@@ -16,17 +16,22 @@ type
   TfpgPopupWindow = class(TfpgWidget)
   private
     FDontCloseWidget: TfpgWidget;
+    FPopupFrame: boolean;
+    procedure   SetPopupFrame(const AValue: boolean);
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   AdjustWindowStyle; override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
     procedure   HandleClose; virtual;
+    procedure   ProcessPopupFrame; virtual;
+    procedure   DoPaintPopupFrame; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
     procedure   Close; virtual;
     property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
+    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
   end;
 
 
@@ -170,6 +175,14 @@ end;
 
 { TfpgPopupWindow }
 
+procedure TfpgPopupWindow.SetPopupFrame(const AValue: boolean);
+begin
+  if FPopupFrame = AValue then
+    Exit; //==>
+  FPopupFrame := AValue;
+  ProcessPopupFrame;
+end;
+
 procedure TfpgPopupWindow.MsgClose(var msg: TfpgMessageRec);
 begin
   HandleClose;
@@ -199,12 +212,52 @@ begin
   HandleHide;
 end;
 
+procedure TfpgPopupWindow.ProcessPopupFrame;
+var
+  i: integer;
+begin
+  if PopupFrame then
+  begin
+    for i := 0 to ComponentCount-1 do
+    begin
+      if Components[i] is TfpgWidget then
+        TfpgWidget(Components[i]).Anchors := [anRight, anBottom];
+    end;
+    // make space for the frame
+//    Width := Width + 1;
+//    Height := Height + 1;
+//    UpdateWindowPosition;
+    HandleResize(Width+1, Height+1);
+    UpdateWindowPosition;
+
+    for i := 0 to ComponentCount-1 do
+    begin
+      if Components[i] is TfpgWidget then
+        TfpgWidget(Components[i]).Anchors := [anLeft, anTop];
+    end;
+    HandleResize(Width+1, Height+1);
+    UpdateWindowPosition;
+
+    Canvas.BeginDraw;
+    DoPaintPopupFrame;
+    Canvas.EndDraw;
+  end;
+end;
+
+procedure TfpgPopupWindow.DoPaintPopupFrame;
+begin
+  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.SetColor(clWidgetFrame);
+  Canvas.DrawRectangle(0, 0, Width, Height);
+end;
+
 constructor TfpgPopupWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   WindowType := wtPopup;
   FDontCloseWidget := nil;
   Parent := nil;
+  FPopupFrame := False;
 end;
 
 procedure TfpgPopupWindow.ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
