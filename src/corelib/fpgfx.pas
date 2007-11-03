@@ -592,7 +592,7 @@ begin
   FDisplayParams  := aparams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
-  TopModalForm   := nil;
+  FModalFormStack := TList.Create;
 
   inherited Create(aparams);
   
@@ -617,6 +617,7 @@ begin
 
   FFontResList.Free;
   FDefaultFont.Free;
+  FreeAndNil(FModalFormStack);
   inherited Destroy;
 end;
 

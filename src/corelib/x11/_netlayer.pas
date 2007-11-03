@@ -122,6 +122,7 @@ type
     UTF8_STRING: TAtom;
     FAtomSupported: array[TNetAtomEnum] of Boolean;
     FTimeStamp: LongInt;
+    function GetNetAtom(AAtom: TNetAtomEnum): TNetAtom;
     procedure InitNetAtoms;
     procedure UpdateSupportedAtoms;
   public
@@ -139,11 +140,12 @@ type
     function    WindowMove(const AWindow: TWindow; const AX, AY: Integer): Boolean;
     function    WindowSetSticky(const AWindow: TWindow; const AValue: Boolean): Boolean;
     function    WindowGetSticky(const AWindow: TWindow; out AValue: Boolean): Boolean;
-    procedure   WindowSetPID(const AWindow: TWindow; const APID: Integer);
+    procedure   WindowSetPID(const AWindow: TWindow; const APID: Cardinal);
     function    WindowGetFrameExtents(const AWindow: TWindow; out ATopHeight, ALeftWidth, ARightWidth, ABottomHeight: Integer): Boolean;
     procedure   WindowSetSupportPING(const AWindow: TWindow);
     procedure   WindowReplyToPING(const AWindow: TWindow; AClientMessage: PXClientMessageEvent);
     function    WindowGetState(const AWindow: TWindow; out AWindowState: TNetWindowStates): Boolean;
+    function    WindowSetModal(const AWindow: TWindow; const AValue: Boolean): Boolean;
     procedure   WindowDemandsAttention(const AWindow: TWindow);
     procedure   WindowSetSkipTaskbar(const AWindow: TWindow; const AValue: Boolean);
     procedure   WindowSetSkipPager(const AWindow: TWindow; const AValue: Boolean);
@@ -167,8 +169,12 @@ type
     procedure   SendRootWindowMessage(AMessage: PXEvent);
     procedure   SendRootWindowClientMessage(AMessage: PXClientMessageEvent);
     // property setting and getting routines
+    // the "WindowSetPropertyXX procedures replace the entire property so if
+    // the property is an array of items then you should copy the old property
+    // value and add the new item to the list and pass that list to the Set procedure
     function    WindowGetPropertyAtom(const AWindow: TWindow; AProperty: TAtom; var Count: Integer; var Atoms: PAtom): Boolean;
     procedure   WindowSetPropertyAtom(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Atoms: PAtom);
+    procedure   WindowAppendPropertyAtom(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Atoms: PAtom);
     function    WindowGetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom; var Count: Integer; var Cards: PLongWord): Boolean;
     procedure   WindowSetPropertyCardinal(const AWindow: TWindow; AProperty: TAtom; Count: Integer; Cards: PLongInt);
     function    WindowGetPropertyWindow(const AWindow: TWindow; AProperty: TAtom; var Count: Integer; var Windows: PWindow): Boolean;
@@ -178,6 +184,8 @@ type
 
     constructor Create(ADisplay: PXDisplay);
     destructor  Destroy; override;
+    
+    property    NetAtom[AAtom: TNetAtomEnum]: TNetAtom read GetNetAtom;
   end;
   
   const
@@ -272,12 +280,17 @@ implementation
 
 procedure TNETWindowLayer.InitNetAtoms;
 var
-  NetAtom: TNetAtomEnum;
+  ANetAtom: TNetAtomEnum;
 begin
-  for NetAtom := Low(TNetAtomEnum) to High(TNetAtomEnum) do begin
-    FNetAtoms[NetAtom] := XInternAtom(FDisplay, PChar(NetAtomStr[NetAtom]), True)
+  for ANetAtom := Low(TNetAtomEnum) to High(TNetAtomEnum) do begin
+    FNetAtoms[ANetAtom] := XInternAtom(FDisplay, PChar(NetAtomStr[ANetAtom]), True)
   end;
   UTF8_STRING := XInternAtom(FDisplay, 'UTF8_STRING', True);
+end;
+
+function TNETWindowLayer.GetNetAtom(AAtom: TNetAtomEnum): TNetAtom;
+begin
+  Result := FNetAtoms[AAtom]
 end;
 
 procedure TNETWindowLayer.UpdateSupportedAtoms;
@@ -285,15 +298,15 @@ var
   AtomCount: Integer;
   Atoms: PNetAtom;
   I: Integer;
-  NetAtom: TNetAtomEnum;
+  ANetAtom: TNetAtomEnum;
 begin
   if WindowGetPropertyAtom(FRootWindow, FNetAtoms[naSUPPORTED], AtomCount, Atoms) = False then;// Exit;
   //WriteLn('RootWindow Atom Count = ',AtomCount);
   FillChar(FAtomSupported, SizeOf(Boolean) * Length(FAtomSupported), 0);;
   for I := 0 to AtomCount-1 do begin
-    for NetAtom := Low(TNetAtomEnum) to High(TNetAtomEnum) do begin
-      if Atoms[I] = FNetAtoms[NetAtom] then begin
-        FAtomSupported[NetAtom] := True;
+    for ANetAtom := Low(TNetAtomEnum) to High(TNetAtomEnum) do begin
+      if Atoms[I] = FNetAtoms[ANetAtom] then begin
+        FAtomSupported[ANetAtom] := True;
         //WriteLn('Found ', NetAtomStr[NetAtom]);
       end;
     end;
@@ -540,8 +553,9 @@ begin
   if Result then AValue := nwsSticky in WinState;
 end;
 
-procedure TNETWindowLayer.WindowSetPID(const AWindow: TWindow; const APID: Integer);
+procedure TNETWindowLayer.WindowSetPID(const AWindow: TWindow; const APID: Cardinal);
 begin
+  WindowSetPropertyCardinal(AWindow, FNetAtoms[naWM_PID], 1, @APID);
 end;
 
 function TNETWindowLayer.WindowGetFrameExtents(const AWindow: TWindow; out
@@ -564,8 +578,12 @@ begin
 end;
 
 procedure TNETWindowLayer.WindowSetSupportPING(const AWindow: TWindow);
+var
+  WM_PROTOCOLS: TAtom;
 begin
+  //WM_PROTOCOLS := XInternAtom(FDisplay, 'WM_PROTOCOLS', True);
   WindowAddProtocol(AWindow, FNetAtoms[naWM_PING]);
+  //WindowAppendPropertyAtom(AWindow, WM_PROTOCOLS, 1, @FNetAtoms[naWM_PING]);
 end;
 
 procedure TNETWindowLayer.WindowReplyToPING(const AWindow: TWindow;
@@ -623,6 +641,7 @@ end;
 
 function TNETWindowLayer.ManagerIsValid: Boolean;
 begin
+  // if the window manager changes we need to refresh the list of atoms supported by it
   Result := False;  // ?????  Todo
 end;
 
@@ -661,6 +680,43 @@ procedure TNETWindowLayer.WindowSetPropertyAtom(const AWindow: TWindow;
   AProperty: TAtom; Count: Integer; Atoms: PAtom);
 begin
   XChangeProperty(FDisplay, AWindow, AProperty, XA_ATOM, 32, PropModeReplace, Pointer(Atoms), Count);
+end;
+
+procedure TNETWindowLayer.WindowAppendPropertyAtom(const AWindow: TWindow;
+  AProperty: TAtom; Count: Integer; Atoms: PAtom);
+var
+  AtomCount: Integer;
+  SetAtoms: PAtom;
+  I: Integer;
+  NewAtoms: array of TAtom;
+  NewCount: Integer;
+     function AtomInList(AAtom: PAtom): Boolean;
+     var
+       J: Integer;
+     begin
+       Result := False;
+       for J := 0 to AtomCount-1 do
+         if SetAtoms^ = AAtom^ then Exit(True);
+     end;
+begin
+  if WindowGetPropertyAtom(AWindow, AProperty, AtomCount, SetAtoms) = False then
+  begin
+    SetAtoms := nil;
+    AtomCount := 0;
+  end;
+  NewCount := AtomCount;
+  SetLength(NewAtoms, AtomCount + Count);
+  for I := 0 to Count-1 do
+  begin
+    if AtomInList(@Atoms[I]) = False then
+    begin
+      NewAtoms[NewCount] := Atoms[I];
+      Inc(NewCount);
+    end;
+  end;
+  if AtomCount > 0 then XFree(SetAtoms);
+  if NewCount > 0 then
+    WindowSetPropertyAtom(AWindow, AProperty, NewCount, @NewAtoms[0]);
 end;
 
 procedure TNETWindowLayer.WindowSetPropertyCardinal(const AWindow: TWindow;
@@ -744,16 +800,29 @@ var
   Count: cint;
   Protocols: PAtom;
   NewProtocols: array of TAtom;
+  I: Integer;
 begin
+  Count := 0;
+  Protocols := nil;
+
   XGetWMProtocols(FDisplay, AWindow, @Protocols, @Count);
-  
   SetLength(NewProtocols, Count+1);
-  Move(Protocols[0], NewProtocols[0], SizeOf(TAtom)* Count);
+  if Protocols <> nil then
+  begin
+    for I := 0 to Count -1 do
+      if Protocols[I] = AProtocol then
+      begin
+        XFree(Protocols);
+        Exit;
+      end;
+    Move(Protocols[0], NewProtocols[0], SizeOf(TAtom)* Count);
+  end;
+
   NewProtocols[Count] := AProtocol;
-  
-  if Count > 0 then XFree(Protocols);
-  
-  XSetWMProtocols(FDisplay, AWindow, @NewProtocols, Count+1);
+  XSetWMProtocols(FDisplay, AWindow, @NewProtocols[0], Count+1);
+
+  if Count > 0 then
+    XFree(Protocols);
 end;
 
 function TNETWindowLayer.WindowGetAllowedActions(const AWindow: TWindow;
@@ -816,6 +885,15 @@ begin
   end;
   if AtomCount > 0 then
     XFree(StateAtoms);
+end;
+
+function TNETWindowLayer.WindowSetModal(const AWindow: TWindow;
+  const AValue: Boolean): Boolean;
+begin
+  Result := FAtomSupported[naWM_STATE] and FAtomSupported[naWM_STATE_MODAL];
+  if not Result then
+    Exit;
+  WindowAppendPropertyAtom(AWindow, FNetAtoms[naWM_STATE], 1, @FNetAtoms[naWM_STATE_MODAL]);
 end;
 
 procedure TNETWindowLayer.WindowDemandsAttention(const AWindow: TWindow);

@@ -370,19 +370,25 @@ type
   end;
 
 
+  { TfpgApplicationBase }
+
   TfpgApplicationBase = class(TObject)
   private
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
-    FTopModalForm: TfpgWindowBase;
+    function GetTopModalForm: TfpgWindowBase;
   protected
     FIsInitialized: Boolean;
+    FModalFormStack: TList;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
   public
     constructor Create(const AParams: string); virtual; abstract;
     function    GetFontFaceList: TStringList;
+    procedure   PushModalForm(AForm: TfpgWindowBase);
+    procedure   PopModalForm;
+    function    PrevModalForm: TfpgWindowBase;
     property    IsInitialized: boolean read FIsInitialized;
-    property    TopModalForm: TfpgWindowBase read FTopModalForm write FTopModalForm;
+    property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
     property    Terminated: boolean read FTerminated write FTerminated;
   end;
@@ -1592,9 +1598,47 @@ end;
 
 { TfpgApplicationBase }
 
+function TfpgApplicationBase.GetTopModalForm: TfpgWindowBase;
+begin
+  Result := nil;
+  if (FModalFormStack <> nil) and (FModalFormStack.Count > 0) then
+    Result := TFpgWindowBase(FModalFormStack.Items[FModalFormStack.Count-1]);
+end;
+
 function TfpgApplicationBase.GetFontFaceList: TStringList;
 begin
   Result := DoGetFontFaceList;
+end;
+
+procedure TfpgApplicationBase.PushModalForm(AForm: TfpgWindowBase);
+var
+  StackIndex: Integer;
+begin
+  if FModalFormStack = nil then
+    Exit;
+  StackIndex := FModalFormStack.IndexOf(AForm);
+  if StackIndex = -1 then
+    FModalFormStack.Add(AForm)
+  //else move to top of stack?
+end;
+
+procedure TfpgApplicationBase.PopModalForm;
+begin
+  if FModalFormStack = nil then
+    Exit;
+  if FModalFormStack.Count > 0 then
+    FModalFormStack.Delete(FModalFormStack.Count-1);
+end;
+
+function TfpgApplicationBase.PrevModalForm: TfpgWindowBase;
+begin
+  Result := nil;
+  if FModalFormStack = nil then
+    Exit;
+  if FModalFormStack.Count < 2 then
+    Exit;
+
+  Result := TfpgWindowBase(FModalFormStack.Items[FModalFormStack.Count-2]);
 end;
 
 end.

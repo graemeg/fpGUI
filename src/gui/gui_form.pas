@@ -43,7 +43,6 @@ type
     FOnShow: TNotifyEvent;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
   protected
-    FPrevModalForm: TfpgWindowBase;
     FModalResult: integer;
     FParentForm: TfpgForm;
     FWindowPosition: TWindowPosition;
@@ -211,7 +210,6 @@ begin
   FMinWidth        := 32;
   FMinHeight       := 32;
   FModalResult     := 0;
-  FPrevModalForm   := nil;
 
   AfterCreate;
 end;
@@ -229,8 +227,8 @@ end;
 
 function TfpgForm.ShowModal: integer;
 begin
-  FPrevModalForm  := fpgApplication.TopModalForm;
-  fpgApplication.TopModalForm := self;
+  FWindowType := wtModalForm;
+  fpgApplication.PushModalForm(self);
   ModalResult     := 0;
 
   Show;
@@ -241,7 +239,7 @@ begin
     fpgWaitWindowMessage;
   until (ModalResult <> 0) or (not Visible);
 
-  fpgApplication.TopModalForm := FPrevModalForm;
+  fpgApplication.PopModalForm;
   Result := ModalResult;
 end;
 
@@ -312,7 +310,7 @@ end;
 procedure TfpgForm.Hide;
 begin
   if (fpgApplication.TopModalForm = self) then
-    fpgApplication.TopModalForm := FPrevModalForm;
+    fpgApplication.PopModalForm;
   HandleHide;
   if ModalResult = 0 then
     ModalResult := -1;

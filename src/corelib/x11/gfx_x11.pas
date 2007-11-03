@@ -13,6 +13,7 @@ uses
   Xlib,
   XUtil,
   x11_xft,
+  _netlayer,
   gfxbase,
   gfx_impl;
 
@@ -172,8 +173,7 @@ type
     xia_motif_wm_hints: TAtom;
     xia_wm_protocols: TAtom;
     xia_wm_delete_window: TAtom;
-    xia_wm_state: TAtom;
-    xia_wm_state_modal: TAtom;
+    netlayer: TNETWindowLayer;
     xia_targets: TAtom;
     InputMethod: PXIM;
     InputContext: PXIC;
@@ -199,7 +199,6 @@ uses
   fpgfx,
   gfx_widget,  {$Note This dependency to gfx_widget must be removed.}
   gui_form, // remove this!!!!!
-  _netlayer,
   cursorfont,
   gfx_popupwindow;
 
@@ -545,8 +544,8 @@ begin
   xia_motif_wm_hints    := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', longbool(0));
   xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', longbool(0));
   xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', longbool(0));
-  xia_wm_state          := XInternAtom(FDisplay, '_NET_WM_STATE', longbool(0));
-  xia_wm_state_modal    := XInternAtom(FDisplay, '_NET_WM_STATE_MODAL', longbool(0));
+
+  netlayer := TNETWindowLayer.Create(FDisplay);
 
   // for correct keyboard handling
   InputMethod := XOpenIM(FDisplay, nil, nil, nil);
@@ -563,7 +562,9 @@ end;
 
 destructor TfpgApplicationImpl.Destroy;
 begin
+  netlayer.Free;
   XCloseDisplay(FDisplay);
+  
   inherited Destroy;
 end;
 
@@ -870,16 +871,29 @@ begin
     X.ClientMessage:
         begin
           w := FindWindowByHandle(ev.xany.window);
-          if xapplication.TopModalForm <> nil then
+          // WM_PROTOCOLS message
+          if ev.xclient.message_type = xia_wm_protocols then
           begin
-            // This is ugly!!!!!!!!!!!!!!!
-            ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
-              blockmsg := true;
-          end;
+            //WriteLn(XGetAtomName(FDisplay, TAtom(ev.xclient.data.l[0])));
+            if  (ev.xclient.data.l[0] = netlayer.NetAtom[naWM_PING]) then
+            begin
+              // always respond to pings or the wm will kill us
+              netlayer.WindowReplyToPING(w.FWinHandle, @ev.xclient);
+            end
+            else if ev.xclient.data.l[0] = xia_wm_delete_window then
+            begin
+              if xapplication.TopModalForm <> nil then
+              begin
+                // This is ugly!!!!!!!!!!!!!!!
+                ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+                if (ew <> nil) and (xapplication.TopModalForm <> ew) then
+                  blockmsg := true;
+              end;
           
-          if not blockmsg then
-            fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
+              if not blockmsg then
+                fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
+             end;
+          end; // WM_PROTOCOLS
         end;
 
 
@@ -1009,6 +1023,7 @@ procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
   pwh: TfpgWinHandle;
   wh: TfpgWinHandle;
+  lmwh: TfpgWinHandle;
   attr: TXSetWindowAttributes;
   mask: longword;
   hints: TXSizeHints;
@@ -1039,6 +1054,15 @@ begin
     mask, @attr);
 
   FWinHandle := wh;
+    
+  // so newish window manager can close unresponsive programs
+  if AParent = nil then // is a toplevel window
+  begin
+    XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, nil, nil);
+    fpgApplication.netlayer.WindowSetPID(FWinHandle, GetProcessID);
+    fpgApplication.netlayer.WindowSetSupportPING(FWinHandle);
+  end;
+
   hints.flags := 0;
 
   if not (waAutoPos in FWindowAttributes) then
@@ -1071,13 +1095,33 @@ begin
   XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
 
   if FWindowType <> wtChild then
-    XSetWMProtocols(xapplication.Display, FWinHandle, @(xapplication.xia_wm_delete_window),
-      1);// send close event instead of quitting the whole application...
+    // send close event instead of quitting the whole application...
+    fpgApplication.netlayer.WindowAddProtocol(FWinHandle, xapplication.xia_wm_delete_window);
 
   // for modal windows, this is necessary
-  if (FWindowType = wtModalForm) and (AParent <> nil) then
-    XSetTransientForHint(xapplication.display, FWinHandle, TfpgWindowImpl(AParent).WinHandle);
+  if FWindowType = wtModalForm then
+  begin
+    if Parent = nil then
+    begin
+      lmwh := 0;
+      if fpgApplication.PrevModalForm <> nil then
+        lmwh := TfpgWindowImpl(fpgApplication.PrevModalForm).WinHandle
+      else if fpgApplication.MainForm <> nil then
+        lmwh := TfpgWindowImpl(fpgApplication.MainForm).WinHandle;
+      if lmwh <> 0 then
+      begin
+        XSetTransientForHint(xapplication.display, FWinHandle, lmwh);
+        fpgApplication.netlayer.WindowSetModal(FWinHandle, True);
+      end;
+    end
+    else // Parent <> nil
+    begin
+      // this doesn't make any sense
 
+      //XSetTransientForHint(xapplication.display, FWinHandle, TfpgWindowImpl(Parent).FWinHandle);
+    end;
+  end;
+  
   XSelectInput(xapplication.Display, wh, KeyPressMask or KeyReleaseMask or
       ButtonPressMask or ButtonReleaseMask or
       EnterWindowMask or LeaveWindowMask or
@@ -1191,18 +1235,10 @@ begin
 end;
 
 procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);
-var
-  netlayer: TNETWindowLayer;
 begin
   if FWinHandle <= 0 then
     Exit;
-
-  netlayer := TNETWindowLayer.Create(xapplication.display);
-  try
-    netlayer.WindowSetName(FWinHandle, PChar(ATitle));
-  finally
-    netlayer.Free;
-  end;
+  fpgApplication.netlayer.WindowSetName(FWinHandle, PChar(ATitle));
 end;
 
 constructor TfpgWindowImpl.Create(AOwner: TComponent);
