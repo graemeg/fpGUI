@@ -707,8 +707,9 @@ begin
     Exit; //==>
   if TfpgStringColumn(FColumns.Items[ACol-1]).Cells[ARow-1] <> AValue then
   begin
+    BeginUpdate;
     TfpgStringColumn(FColumns.Items[ACol-1]).Cells[ARow-1] := AValue;
-    RePaint;
+    EndUpdate;
   end;
 end;
 
@@ -716,8 +717,9 @@ procedure TfpgCustomStringGrid.SetColumnTitle(ACol: integer; const AValue: strin
 begin
   if ACol > ColumnCount then
     Exit; //==>
+  BeginUpdate;
   TfpgStringColumn(FColumns.Items[ACol-1]).Title := AValue;
-  RePaint;
+  EndUpdate;
 end;
 
 procedure TfpgCustomStringGrid.SetObjects(ACol, ARow: LongWord;
@@ -734,8 +736,9 @@ procedure TfpgCustomStringGrid.SetColumnWidth(ACol: integer; const AValue: integ
 begin
   if ACol > ColumnCount then
     Exit; //==>
+  BeginUpdate;
   TfpgStringColumn(FColumns.Items[ACol-1]).Width := AValue;
-  RePaint;
+  EndUpdate;
 end;
 
 function TfpgCustomStringGrid.GetColumns(AIndex: integer): TfpgStringColumn;

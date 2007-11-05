@@ -72,6 +72,7 @@ type
     FTemp: integer;
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
+    FUpdateCount: integer;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -133,6 +134,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Update;
+    procedure   BeginUpdate;
+    procedure   EndUpdate;
   end;
 
 implementation
@@ -993,7 +996,8 @@ begin
   FShowGrid   := True;
   FRowSelect  := False;
   FScrollBarStyle := ssAutoBoth;
-  
+  FUpdateCount    := 0;
+
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
   
@@ -1033,6 +1037,21 @@ begin
   UpdateScrollBars;
   FollowFocus;
   RePaint;
+end;
+
+procedure TfpgBaseGrid.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TfpgBaseGrid.EndUpdate;
+begin
+  if FUpdateCount > 0 then
+  begin
+    Dec(FUpdateCount);
+    if FUpdateCount = 0 then
+      RePaint;
+  end;
 end;
 
 end.

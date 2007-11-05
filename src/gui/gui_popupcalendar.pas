@@ -96,6 +96,7 @@ var
   lCellText: string;
 begin
   lCellText := '';
+  grdName1.BeginUpdate;
   for r := 0 to 6 do
     for c := 1 to 7 do
     begin
@@ -110,10 +111,7 @@ begin
           grdName1.Cells[c, r] := IntToStr(lCellDay);
       end;
     end;
-//    drawtext(canvas,
-//         msestring(inttostr(dayof(incday(ffirstdate,cell.row*7+cell.col)))),
-//                   rect,flags1);
-
+  grdName1.EndUpdate;
 end;
 
 procedure TfpgPopupCalendar.grdName1DoubleClick(Sender: TObject;
