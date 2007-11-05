@@ -148,12 +148,9 @@ var
   lD, lM, lY: Word;
   lTheFirst: TDateTime;
 begin
-  if FDate > 0 then
-  begin
-    DecodeDate(FDate, lY, lM, lD);
-    lTheFirst := EncodeDate(lY, lM, 1);
-    FMonthOffset := 2 - DayOfWeek(lTheFirst);
- end;
+  DecodeDate(FDate, lY, lM, lD);
+  lTheFirst := EncodeDate(lY, lM, 1);
+  FMonthOffset := 2 - DayOfWeek(lTheFirst);
 end;
 
 function TfpgPopupCalendar.CalculateCellDay(const ACol, ARow: LongWord): Word;
@@ -189,11 +186,20 @@ begin
 end;
 
 procedure TfpgPopupCalendar.UpdateCalendar;
+var
+  lD, lM, lY: Word;
 begin
-  CalculateMonthOffset;
-  PopulateDays;
-  edtYear.Text := IntToStr(Year);
-  edtMonth.Text := LongMonthNames[Month];
+  if FDate > 0 then
+  begin
+    CalculateMonthOffset;
+    PopulateDays;
+    edtYear.Text := IntToStr(Year);
+    edtMonth.Text := LongMonthNames[Month];
+    DecodeDate(FDate, lY, lM, lD);
+    writeln(' lD: ', lD);
+    grdName1.FocusCol := (lD - FMonthOffset) mod 7 + 1;
+    grdName1.FocusRow := (lD - FMonthOffset) div 7 + 1;
+  end;
 end;
 
 procedure TfpgPopupCalendar.btnYearUpClicked(Sender: TObject);
@@ -240,10 +246,10 @@ procedure TfpgPopupCalendar.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: fpgPopupCalendar}
   Name := 'fpgPopupCalendar';
-  SetPosition(100, 268, 233, 179);
-//  WindowTitle := 'fpgPopupCalendar';
-//    WindowPosition := wpUser;
-//    Sizeable := False;
+  SetPosition(100, 268, 233, 138);
+  //  WindowTitle := 'fpgPopupCalendar';
+  //    WindowPosition := wpUser;
+  //    Sizeable := False;
 
   edtYear := TfpgEdit.Create(self);
   with edtYear do
@@ -253,6 +259,7 @@ begin
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
+    BorderStyle := bsSingle;
   end;
 
   btnYearUp := TfpgButton.Create(self);
@@ -261,10 +268,10 @@ begin
     Name := 'btnYearUp';
     SetPosition(72, 0, 13, 11);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
-    Embedded := True;
     OnClick := @btnYearUpClicked;
   end;
 
@@ -274,10 +281,10 @@ begin
     Name := 'btnYearDown';
     SetPosition(72, 11, 13, 11);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
-    Embedded := True;
     OnClick := @btnYearDownClicked;
   end;
 
@@ -285,10 +292,11 @@ begin
   with edtMonth do
   begin
     Name := 'edtMonth';
-    SetPosition(85, 0, 136, 22);
+    SetPosition(85, 0, 135, 22);
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
+    BorderStyle := bsSingle;
   end;
 
   btnMonthUp := TfpgButton.Create(self);
@@ -297,10 +305,10 @@ begin
     Name := 'btnMonthUp';
     SetPosition(220, 0, 13, 11);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
-    Embedded := True;
     OnClick := @btnMonthUpClicked;
   end;
 
@@ -310,10 +318,10 @@ begin
     Name := 'btnMonthDown';
     SetPosition(220, 11, 13, 11);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
-    Embedded := True;
     OnClick := @btnMonthDownClicked;
   end;
 
@@ -321,7 +329,7 @@ begin
   with grdName1 do
   begin
     Name := 'grdName1';
-    SetPosition(0, 23, 233, 156);
+    SetPosition(0, 23, 233, 114);
     AddColumn('Mon', 33, taLeftJustify);
     AddColumn('Tue', 32, taLeftJustify);
     AddColumn('Wed', 33, taLeftJustify);

@@ -4,19 +4,19 @@
     <PathDelim Value="/"/>
     <Version Value="6"/>
     <General>
+      <Flags>
+        <SaveOnlyProjectUnits Value="True"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=""/>
-      <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
-      <Language Value=""/>
-      <CharSet Value=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
-      <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
@@ -32,210 +32,13 @@
         <MinVersion Minor="5" Release="1" Valid="True"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="21">
+    <Units Count="1">
       <Unit0>
         <Filename Value="calendartest.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="calendartest"/>
-        <CursorPos X="29" Y="19"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="0"/>
-        <UsageCount Value="21"/>
-        <Loaded Value="True"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
-        <UnitName Value="gui_popupcalendar"/>
-        <CursorPos X="1" Y="217"/>
-        <TopLine Value="199"/>
-        <EditorIndex Value="1"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit1>
-      <Unit2>
-        <Filename Value="../../../src/gui/gui_grid.pas"/>
-        <UnitName Value="gui_grid"/>
-        <CursorPos X="13" Y="741"/>
-        <TopLine Value="725"/>
-        <EditorIndex Value="5"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="../../../src/gui/gui_customgrid.pas"/>
-        <UnitName Value="gui_customgrid"/>
-        <CursorPos X="32" Y="54"/>
-        <TopLine Value="48"/>
-        <EditorIndex Value="7"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit3>
-      <Unit4>
-        <Filename Value="../../../src/gui/gui_basegrid.pas"/>
-        <UnitName Value="gui_basegrid"/>
-        <CursorPos X="1" Y="1039"/>
-        <TopLine Value="1026"/>
-        <EditorIndex Value="8"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit4>
-      <Unit5>
-        <Filename Value="../../../src/corelib/gfx_popupwindow.pas"/>
-        <UnitName Value="gfx_popupwindow"/>
-        <CursorPos X="35" Y="238"/>
-        <TopLine Value="166"/>
-        <UsageCount Value="10"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="../../../src/gui/gui_form.pas"/>
-        <UnitName Value="gui_form"/>
-        <CursorPos X="1" Y="12"/>
-        <TopLine Value="1"/>
-        <UsageCount Value="10"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="../../../src/gui/gui_combobox.pas"/>
-        <UnitName Value="gui_combobox"/>
-        <CursorPos X="16" Y="188"/>
-        <TopLine Value="171"/>
-        <UsageCount Value="10"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="../../../src/gui/gui_button.pas"/>
-        <UnitName Value="gui_button"/>
-        <CursorPos X="25" Y="91"/>
-        <TopLine Value="54"/>
-        <UsageCount Value="10"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="../../../src/gui/gui_listbox.pas"/>
-        <UnitName Value="gui_listbox"/>
-        <CursorPos X="1" Y="491"/>
-        <TopLine Value="475"/>
-        <UsageCount Value="10"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="../../../src/corelib/gfxbase.pas"/>
-        <UnitName Value="gfxbase"/>
-        <CursorPos X="3" Y="839"/>
-        <TopLine Value="837"/>
-        <UsageCount Value="10"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="../../../src/corelib/gfx_widget.pas"/>
-        <UnitName Value="gfx_widget"/>
-        <CursorPos X="3" Y="795"/>
-        <TopLine Value="790"/>
-        <UsageCount Value="10"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="../../../src/gui/gui_scrollbar.pas"/>
-        <UnitName Value="gui_scrollbar"/>
-        <CursorPos X="66" Y="42"/>
-        <TopLine Value="36"/>
-        <UsageCount Value="10"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="/opt/fpc-2.2.0/src/rtl/objpas/sysutils/sysinth.inc"/>
-        <CursorPos X="18" Y="107"/>
-        <TopLine Value="86"/>
-        <UsageCount Value="10"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="/opt/fpc-2.2.0/src/rtl/objpas/sysutils/datih.inc"/>
-        <CursorPos X="14" Y="115"/>
-        <TopLine Value="91"/>
-        <UsageCount Value="10"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="../../../src/gui/gui_memo.pas"/>
-        <UnitName Value="gui_memo"/>
-        <CursorPos X="1" Y="22"/>
-        <TopLine Value="1"/>
-        <UsageCount Value="10"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="../../../src/corelib/fpgfx.pas"/>
-        <UnitName Value="fpgfx"/>
-        <CursorPos X="42" Y="14"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="2"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit16>
-      <Unit17>
-        <Filename Value="../../../src/corelib/x11/gfx_x11.pas"/>
-        <UnitName Value="gfx_x11"/>
-        <CursorPos X="17" Y="300"/>
-        <TopLine Value="271"/>
-        <EditorIndex Value="3"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit17>
-      <Unit18>
-        <Filename Value="/opt/lazarus/lcl/grids.pas"/>
-        <UnitName Value="Grids"/>
-        <CursorPos X="3" Y="5574"/>
-        <TopLine Value="5558"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="../../../../../kylix3/source/clx/QGrids.pas"/>
-        <UnitName Value="QGrids"/>
-        <CursorPos X="1" Y="916"/>
-        <TopLine Value="899"/>
-        <UsageCount Value="10"/>
-      </Unit19>
-      <Unit20>
-        <Filename Value="../../../../3rdParty/tiOPF2/Source/Core/tiObject.pas"/>
-        <UnitName Value="tiObject"/>
-        <CursorPos X="1" Y="3722"/>
-        <TopLine Value="3714"/>
-        <EditorIndex Value="6"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit20>
     </Units>
-    <JumpHistory Count="9" HistoryIndex="8">
-      <Position1>
-        <Filename Value="/opt/lazarus/lcl/grids.pas"/>
-        <Caret Line="37" Column="45" TopLine="19"/>
-      </Position1>
-      <Position2>
-        <Filename Value="../../../src/gui/gui_basegrid.pas"/>
-        <Caret Line="1048" Column="5" TopLine="1009"/>
-      </Position2>
-      <Position3>
-        <Filename Value="../../../../3rdParty/tiOPF2/Source/Core/tiObject.pas"/>
-        <Caret Line="20" Column="16" TopLine="1"/>
-      </Position3>
-      <Position4>
-        <Filename Value="../../../src/gui/gui_grid.pas"/>
-        <Caret Line="180" Column="76" TopLine="167"/>
-      </Position4>
-      <Position5>
-        <Filename Value="../../../src/gui/gui_grid.pas"/>
-        <Caret Line="671" Column="1" TopLine="653"/>
-      </Position5>
-      <Position6>
-        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
-        <Caret Line="211" Column="5" TopLine="204"/>
-      </Position6>
-      <Position7>
-        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
-        <Caret Line="78" Column="73" TopLine="63"/>
-      </Position7>
-      <Position8>
-        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
-        <Caret Line="181" Column="11" TopLine="168"/>
-      </Position8>
-      <Position9>
-        <Filename Value="../../../src/gui/gui_popupcalendar.pas"/>
-        <Caret Line="196" Column="12" TopLine="193"/>
-      </Position9>
-    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>

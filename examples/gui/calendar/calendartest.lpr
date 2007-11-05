@@ -11,7 +11,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, fpgfx, gui_form, gui_popupcalendar, gui_edit,
-  gui_button, gui_label, gfx_popupwindow;
+  gui_button, gui_label, gfx_popupwindow, gui_combobox;
 
 type
   TMainForm = class(TfpgForm)
@@ -24,6 +24,7 @@ type
     btnName1: TfpgButton;
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
+    cbName1: TfpgComboBox;
     {@VFD_HEAD_END: MainForm}
     FDropDown: TfpgPopupCalendar;
     procedure   AfterCreate; override;
@@ -45,6 +46,7 @@ begin
     FDropDown     := TfpgPopupCalendar.Create(nil);
     FDropDown.ShowAt(self, edtName1.Left, edtName1.Top+edtName1.Height);
     FDropDown.PopupFrame:= True;
+    FDropDown.grdName1.SetFocus;
   end
   else
   begin
@@ -58,7 +60,7 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(100, 100, 417, 270);
+  SetPosition(286, 234, 417, 270);
   WindowTitle := 'fpGUI Calendar Test';
   WindowPosition := wpUser;
 
@@ -98,6 +100,20 @@ begin
     SetPosition(68, 116, 276, 16);
     Text := '*****   This is still Work-In-Progress  *****';
     FontDesc := '#Label2';
+  end;
+
+  cbName1 := TfpgComboBox.Create(self);
+  with cbName1 do
+  begin
+    Name := 'cbName1';
+    SetPosition(124, 184, 120, 23);
+    Items.Add('line1');
+    Items.Add('line2');
+    Items.Add('line3');
+    Items.Add('line4');
+    Items.Add('line5');
+    Items.Add('line6');
+    FontDesc := '#List';
   end;
 
   {@VFD_BODY_END: MainForm}

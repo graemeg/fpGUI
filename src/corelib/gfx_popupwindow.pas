@@ -227,7 +227,7 @@ begin
 //    Width := Width + 1;
 //    Height := Height + 1;
 //    UpdateWindowPosition;
-    HandleResize(Width+1, Height+1);
+    HandleResize(Width+2, Height+2);
     UpdateWindowPosition;
 
     for i := 0 to ComponentCount-1 do
@@ -235,7 +235,7 @@ begin
       if Components[i] is TfpgWidget then
         TfpgWidget(Components[i]).Anchors := [anLeft, anTop];
     end;
-    HandleResize(Width+1, Height+1);
+    HandleResize(Width+2, Height+2);
     UpdateWindowPosition;
 
     Canvas.BeginDraw;
