@@ -1501,38 +1501,34 @@ var
   aCapStyle: Longint;
 begin
   aCapStyle := CapNotLast;
-  if awidth < 0 then
-  begin
-    { Alternative line drawing - Using X algorithm instead of hardware algorithm }
-    awidth := -awidth;
-    if (awidth > 1) and (astyle = lsSolid) then
-      aCapStyle := CapButt;
-  end
-  else
-    awidth := 0;
+  // Is this still needed??  I don't think so
+  //if (awidth > 1) and (astyle = lsSolid) then
+  //  aCapStyle := CapButt;
+  if awidth = 1 then
+    awidth := 0;  // switch to hardware algorithm
 
   case AStyle of
     lsDot:
         begin
-          XSetLineAttributes(xapplication.display, Fgc, 1,
+          XSetLineAttributes(xapplication.display, Fgc, awidth,
             LineOnOffDash, aCapStyle, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDot, 2);
         end;
     lsDash:
         begin
-          XSetLineAttributes(xapplication.display, Fgc, 1,
+          XSetLineAttributes(xapplication.display, Fgc, awidth,
             LineOnOffDash, aCapStyle, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDash, 2);
         end;
     lsDashDot:
         begin
-          XSetLineAttributes(xapplication.display, Fgc, 1,
+          XSetLineAttributes(xapplication.display, Fgc, awidth,
             LineOnOffDash, aCapStyle, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDashDot, 4);
         end;
     lsDashDotDot:
         begin
-          XSetLineAttributes(xapplication.display, Fgc, 1,
+          XSetLineAttributes(xapplication.display, Fgc, awidth,
             LineOnOffDash, aCapStyle, JoinMiter);
           XSetDashes(xapplication.display, Fgc, 0, cDashDotDot, 6);
         end;

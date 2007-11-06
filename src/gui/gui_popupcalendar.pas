@@ -246,7 +246,7 @@ procedure TfpgPopupCalendar.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: fpgPopupCalendar}
   Name := 'fpgPopupCalendar';
-  SetPosition(100, 268, 233, 138);
+  SetPosition(285, 249, 233, 142);
   //  WindowTitle := 'fpgPopupCalendar';
   //    WindowPosition := wpUser;
   //    Sizeable := False;
@@ -329,7 +329,7 @@ begin
   with grdName1 do
   begin
     Name := 'grdName1';
-    SetPosition(0, 23, 233, 114);
+    SetPosition(0, 23, 233, 119);
     AddColumn('Mon', 33, taLeftJustify);
     AddColumn('Tue', 32, taLeftJustify);
     AddColumn('Wed', 33, taLeftJustify);
