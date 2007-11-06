@@ -80,8 +80,6 @@ type
   end;
 
 
-  { TfpgCanvasImpl }
-
   TfpgCanvasImpl = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
@@ -125,11 +123,8 @@ type
   public
     constructor Create; override;
     destructor  Destroy; override;
-
   end;
 
-
-  { TfpgWindowImpl }
 
   TfpgWindowImpl = class(TfpgWindowBase)
   protected
@@ -211,15 +206,6 @@ const
 var
   LastClickWindow: TfpgWinHandle;
   LastWinClickTime: longword;
-
-
-//const
-  // map X11 event types to custom event types
-//  MSG_SCROLL      = 65;
-//  MSG_RESIZE      = 66;
-//  MSG_POPUPCLOSE  = 67;
-//  MSG_MOVE        = 68;
-//  MSG_DOUBLECLICK = 69;
 
 
  // some externals
@@ -1514,73 +1500,46 @@ const
 var
   aCapStyle: Longint;
 begin
-  if awidth < 0 then begin
+  aCapStyle := CapNotLast;
+  if awidth < 0 then
+  begin
     { Alternative line drawing - Using X algorithm instead of hardware algorithm }
     awidth := -awidth;
-    aCapStyle := CapNotLast;
-    if (awidth > 1) and (astyle = lsSolid) then aCapStyle := CapButt;
-    case AStyle of
-      lsDot:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 1,
-              LineOnOffDash, aCapStyle, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDot, 2);
-          end;
-      lsDash:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 1,
-              LineOnOffDash, aCapStyle, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDash, 2);
-          end;
-      lsDashDot:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 1,
-              LineOnOffDash, aCapStyle, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDashDot, 4);
-          end;
-      lsDashDotDot:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 1,
-              LineOnOffDash, aCapStyle, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDashDotDot, 6);
-          end;
-      else  // which includes lsSolid
-        XSetLineAttributes(xapplication.display, Fgc, awidth,
-          LineSolid, aCapStyle, JoinMiter);
-    end;  { case }
-    end
-  else begin
+    if (awidth > 1) and (astyle = lsSolid) then
+      aCapStyle := CapButt;
+  end
+  else
     awidth := 0;
-    case AStyle of
-      lsDot:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 0,
-              LineOnOffDash, CapNotLast, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDot, 2);
-          end;
-      lsDash:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 0,
-              LineOnOffDash, CapNotLast, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDash, 2);
-          end;
-      lsDashDot:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 0,
-              LineOnOffDash, CapNotLast, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDashDot, 4);
-          end;
-      lsDashDotDot:
-          begin
-            XSetLineAttributes(xapplication.display, Fgc, 0,
-              LineOnOffDash, CapNotLast, JoinMiter);
-            XSetDashes(xapplication.display, Fgc, 0, cDashDotDot, 6);
-          end;
-      else  // which includes lsSolid
-        XSetLineAttributes(xapplication.display, Fgc, awidth,
-          LineSolid, CapNotLast, JoinMiter);
-    end;  { case }
-  end; { awidth >= 0 }
+
+  case AStyle of
+    lsDot:
+        begin
+          XSetLineAttributes(xapplication.display, Fgc, 1,
+            LineOnOffDash, aCapStyle, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDot, 2);
+        end;
+    lsDash:
+        begin
+          XSetLineAttributes(xapplication.display, Fgc, 1,
+            LineOnOffDash, aCapStyle, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDash, 2);
+        end;
+    lsDashDot:
+        begin
+          XSetLineAttributes(xapplication.display, Fgc, 1,
+            LineOnOffDash, aCapStyle, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDashDot, 4);
+        end;
+    lsDashDotDot:
+        begin
+          XSetLineAttributes(xapplication.display, Fgc, 1,
+            LineOnOffDash, aCapStyle, JoinMiter);
+          XSetDashes(xapplication.display, Fgc, 0, cDashDotDot, 6);
+        end;
+    else  // which includes lsSolid
+      XSetLineAttributes(xapplication.display, Fgc, awidth,
+        LineSolid, aCapStyle, JoinMiter);
+  end;  { case }
 end;
 
 procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
