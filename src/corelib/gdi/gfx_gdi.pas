@@ -1295,10 +1295,13 @@ var
   SX, SY, EX, EY: Longint;
 begin
   {Stupid GDI can't tell the difference between 0 and 360°!!}
-  if a2 = 0 then exit;
+  if a2 = 0 then
+    Exit; //==>
   {Stupid GDI must be told in which direction to draw}
-  if a2 < 0 then Windows.SetArcDirection(FGc,AD_CLOCKWISE)
-  else Windows.SetArcDirection(FGc,AD_COUNTERCLOCKWISE);
+  if a2 < 0 then
+    Windows.SetArcDirection(FGc, AD_CLOCKWISE)
+  else
+    Windows.SetArcDirection(FGc, AD_COUNTERCLOCKWISE);
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Arc(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
@@ -1310,10 +1313,13 @@ var
   SX, SY, EX, EY: Longint;
 begin
   {Stupid GDI can't tell the difference between 0 and 360°!!}
-  if a2 = 0 then exit;
+  if a2 = 0 then
+    Exit; //==>
   {Stupid GDI must be told in which direction to draw}
-  if a2 < 0 then Windows.SetArcDirection(FGc,AD_CLOCKWISE)
-  else Windows.SetArcDirection(FGc,AD_COUNTERCLOCKWISE);
+  if a2 < 0 then
+    Windows.SetArcDirection(FGc, AD_CLOCKWISE)
+  else
+    Windows.SetArcDirection(FGc, AD_COUNTERCLOCKWISE);
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Pie(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
@@ -1451,38 +1457,36 @@ begin
 end;
 
 procedure TfpgCanvasImpl.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
+const
+  cDot: array[1..2] of DWORD = (1, 1);
+  cDash: array[1..4] of DWORD = (4, 2, 4, 2);
 var
   lw: integer;
+  logBrush: TLogBrush;
 begin
-{ Notes from MSDN: If the value specified by nWidth is greater
-than 1, the fnPenStyle parameter must be PS_NULL, PS_SOLID, or
-PS_INSIDEFRAME. }
   FLineWidth := awidth;
+  logBrush.lbStyle := BS_SOLID;
+  logBrush.lbColor := FWindowsColor;
+  logBrush.lbHatch := 0;
+  DeleteObject(FPen);
   case AStyle of
     lsDot:
       begin
-        FintLineStyle := PS_DOT;
-        lw := 1;
+        FPen := ExtCreatePen(PS_GEOMETRIC or PS_ENDCAP_FLAT or PS_USERSTYLE, FLineWidth, logBrush, Length(cDot), @cDot);
       end;
     lsDash:
       begin
-        FintLineStyle := PS_DASH;
-        lw := 1;
+        FPen := ExtCreatePen(PS_GEOMETRIC or PS_ENDCAP_FLAT or PS_USERSTYLE, FLineWidth, logBrush, Length(cDash), @cDash);
       end;
     lsSolid:
       begin
-        FintLineStyle := PS_SOLID;
-        lw := FLineWidth;
+        FPen := CreatePen(PS_SOLID, FLineWidth, FWindowsColor);
       end;
     else
       begin
-        FintLineStyle := PS_SOLID;
-        lw := 1;
+        FPen := CreatePen(PS_SOLID, FLineWidth, FWindowsColor);
       end;
   end;
-
-  DeleteObject(FPen);
-  FPen := CreatePen(FintLineStyle, lw, FWindowsColor);
   SelectObject(Fgc, FPen);
 end;
 
