@@ -17,4 +17,6 @@ Contributors
 ------------
 Felipe Monteiro de Carvalho <felipemonteiro.carvalho@gmail.com>
 Andrew Haines <andrewd207@aol.com>
+Giuliano Colla <giuliano.colla@fastwebnet.it>
+
 

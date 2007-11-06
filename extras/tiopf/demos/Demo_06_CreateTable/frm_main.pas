@@ -52,7 +52,7 @@ begin
     LTableMetaData.Name:= 'Client';
     LTableMetaData.AddField('OID',               qfkString,  36); // Using GUID OIDs
     LTableMetaData.AddField('Client_Name',       qfkString, 200);
-    LTableMetaData.AddField('ACN',               qfkString,   9);
+    LTableMetaData.AddField('Client_ID',         qfkString,   9);
     gTIOPFManager.CreateTable(LTableMetaData);
   finally
     LTableMetaData.Free;
