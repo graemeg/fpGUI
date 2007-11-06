@@ -1294,6 +1294,11 @@ procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
+  {Stupid GDI can't tell the difference between 0 and 360°!!}
+  if a2 = 0 then exit;
+  {Stupid GDI must be told in which direction to draw}
+  if a2 < 0 then Windows.SetArcDirection(FGc,AD_CLOCKWISE)
+  else Windows.SetArcDirection(FGc,AD_COUNTERCLOCKWISE);
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Arc(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
@@ -1304,6 +1309,11 @@ procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
+  {Stupid GDI can't tell the difference between 0 and 360°!!}
+  if a2 = 0 then exit;
+  {Stupid GDI must be told in which direction to draw}
+  if a2 < 0 then Windows.SetArcDirection(FGc,AD_CLOCKWISE)
+  else Windows.SetArcDirection(FGc,AD_COUNTERCLOCKWISE);
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Pie(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
