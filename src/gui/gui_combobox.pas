@@ -19,15 +19,12 @@ unit gui_combobox;
 
 {$mode objfpc}{$H+}
 
-{
-  TODO:
-    * When combobox Items changes, the combobox needs to refresh. We need a
+{ TODO: When combobox Items changes, the combobox needs to refresh. We need a
       custom StringItems class to notify us of changes. See TfpgListBox for
-      an example.
-    * Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
-      the items list.
-
-}
+      an example. }
+      
+{ TODO: Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
+      the items list. }
 
 interface
 
@@ -42,30 +39,31 @@ uses
 
 type
 
-  TfpgCustomComboBox = class(TfpgWidget)
+  TfpgAbstractComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
-    FDropDown: TfpgPopupWindow;
     FBackgroundColor: TfpgColor;
     FFocusItem: integer;
     FFont: TfpgFont;
     FInternalBtnRect: TfpgRect;
-    FBtnPressed: Boolean;
     FItems: TStringList;
     FOnChange: TNotifyEvent;
     function    GetFontDesc: string;
-    function    GetText: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
-    procedure   DoDropDown;
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
-    procedure   SetText(const AValue: string);
     procedure   CalculateInternalButtonRect;
   protected
     FMargin: integer;
+    FBtnPressed: Boolean;
+    FDropDown: TfpgPopupWindow;
+    procedure   DoDropDown; virtual;
+    function    GetText: string; virtual;
+    function    HasText: boolean; virtual;
+    procedure   SetText(const AValue: string); virtual;
     procedure   SetHeight(const AValue: TfpgCoord); override;
     procedure   SetWidth(const AValue: TfpgCoord); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -89,7 +87,7 @@ type
   end;
 
 
-  TfpgComboBox = class(TfpgCustomComboBox)
+  TfpgComboBox = class(TfpgAbstractComboBox)
   published
     property    BackgroundColor;
     property    DropDownCount;
@@ -207,16 +205,16 @@ begin
   {$Note We still need to handle the AList param as well.}
 end;
 
-{ TfpgCustomComboBox }
+{ TfpgAbstractComboBox }
 
-procedure TfpgCustomComboBox.SetDropDownCount(const AValue: integer);
+procedure TfpgAbstractComboBox.SetDropDownCount(const AValue: integer);
 begin
   if FDropDownCount = AValue then
     Exit;
   FDropDownCount := AValue;
 end;
 
-procedure TfpgCustomComboBox.SetBackgroundColor(const AValue: TfpgColor);
+procedure TfpgAbstractComboBox.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor <> AValue then
   begin
@@ -225,12 +223,12 @@ begin
   end;
 end;
 
-function TfpgCustomComboBox.GetFontDesc: string;
+function TfpgAbstractComboBox.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
 end;
 
-function TfpgCustomComboBox.GetText: string;
+function TfpgAbstractComboBox.GetText: string;
 begin
   if (FocusItem > 0) and (FocusItem <= FItems.Count) then
     Result := FItems.Strings[FocusItem-1]
@@ -238,7 +236,12 @@ begin
     Result := '';
 end;
 
-procedure TfpgCustomComboBox.DoDropDown;
+function TfpgAbstractComboBox.HasText: boolean;
+begin
+  Result := FocusItem > 0;
+end;
+
+procedure TfpgAbstractComboBox.DoDropDown;
 var
   ddw: TDropDownWindow;
   rowcount: integer;
@@ -274,12 +277,12 @@ begin
   end;
 end;
 
-procedure TfpgCustomComboBox.InternalBtnClick(Sender: TObject);
+procedure TfpgAbstractComboBox.InternalBtnClick(Sender: TObject);
 begin
   DoDropDown;
 end;
 
-procedure TfpgCustomComboBox.InternalListBoxSelect(Sender: TObject);
+procedure TfpgAbstractComboBox.InternalListBoxSelect(Sender: TObject);
 begin
   FFocusItem := TDropDownWindow(FDropDown).ListBox.FocusItem;
   FDropDown.Close;
@@ -292,7 +295,7 @@ end;
 { Focusitem is 1 based and NOT 0 based like the Delphi ItemIndex property.
   So at startup, FocusItem = 0 which means nothing is selected. If FocusItem = 1
   it means the first item is selected etc. }
-procedure TfpgCustomComboBox.SetFocusItem(const AValue: integer);
+procedure TfpgAbstractComboBox.SetFocusItem(const AValue: integer);
 begin
   if FFocusItem = AValue then
     Exit; //==>
@@ -307,14 +310,14 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomComboBox.SetFontDesc(const AValue: string);
+procedure TfpgAbstractComboBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   RePaint;
 end;
 
-procedure TfpgCustomComboBox.SetText(const AValue: string);
+procedure TfpgAbstractComboBox.SetText(const AValue: string);
 var
   i: integer;
 begin
@@ -335,26 +338,26 @@ begin
   end;
 end;
 
-procedure TfpgCustomComboBox.SetWidth(const AValue: TfpgCoord);
+procedure TfpgAbstractComboBox.SetWidth(const AValue: TfpgCoord);
 begin
   inherited;
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgCustomComboBox.CalculateInternalButtonRect;
+procedure TfpgAbstractComboBox.CalculateInternalButtonRect;
 begin
   FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
 end;
 
-procedure TfpgCustomComboBox.SetHeight(const AValue: TfpgCoord);
+procedure TfpgAbstractComboBox.SetHeight(const AValue: TfpgCoord);
 begin
   inherited;
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgCustomComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgAbstractComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // botton down only if user clicked on the button.
@@ -363,7 +366,7 @@ begin
   PaintInternalButton;
 end;
 
-procedure TfpgCustomComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
@@ -371,13 +374,13 @@ begin
   PaintInternalButton;
 end;
 
-procedure TfpgCustomComboBox.HandleResize(awidth, aheight: TfpgCoord);
+procedure TfpgAbstractComboBox.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   CalculateInternalButtonRect;
 end;
 
-procedure TfpgCustomComboBox.HandlePaint;
+procedure TfpgAbstractComboBox.HandlePaint;
 var
   r: TfpgRect;
 begin
@@ -422,13 +425,13 @@ begin
   Canvas.FillRectangle(r);
 
   // Draw select item's text
-  if FocusItem > 0 then
+  if HasText then
     fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
 
   Canvas.EndDraw;
 end;
 
-procedure TfpgCustomComboBox.PaintInternalButton;
+procedure TfpgAbstractComboBox.PaintInternalButton;
 var
   ar: TfpgRect;
   btnflags: TFButtonFlags;
@@ -459,7 +462,7 @@ begin
   Canvas.EndDraw(FInternalBtnRect);
 end;
 
-constructor TfpgCustomComboBox.Create(AOwner: TComponent);
+constructor TfpgAbstractComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FBackgroundColor  := clBoxColor;
@@ -478,13 +481,13 @@ begin
   FOnChange := nil;
 end;
 
-destructor TfpgCustomComboBox.Destroy;
+destructor TfpgAbstractComboBox.Destroy;
 begin
   FItems.Free;
   inherited Destroy;
 end;
 
-procedure TfpgCustomComboBox.Update;
+procedure TfpgAbstractComboBox.Update;
 begin
   FFocusItem := 1;
   Repaint;

@@ -23,29 +23,33 @@ unit gui_popupcalendar;
 {
     * This is still under development!!!!!!!!!
 }
-{$Define DEBUG} // while developing the component
+{.$Define DEBUG} // while developing the component
 
 
 { todo: Support highlighting special days. }
 { todo: Support custom colors. }
 { todo: Must be able to switch the first day of the week. }
+{ todo: Create a TfpgDateTimeEdit component with options for Date, Time or Date & Time. }
+{ todo: Create a 'Jump to Today'  property for TfpgCalendarCombo. }
 
 interface
 
 uses
   SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_bevel, gfx_popupwindow;
+  gfx_widget, gui_button, gui_combobox, gui_grid,
+  gui_dialogs, gfx_popupwindow;
 
 type
+
+  TfpgOnDateSetEvent = procedure(Sender: TObject; const ADate: TDateTime) of object;
+  
 
   TfpgPopupCalendar = class(TfpgPopupWindow)
   private
     FMonthOffset: integer;
     FDate: TDateTime;
+    FCallerWidget: TfpgWidget;
+    FOnValueSet: TfpgOnDateSetEvent;
     {@VFD_HEAD_BEGIN: fpgPopupCalendar}
     edtYear: TfpgEdit;
     btnYearUp: TfpgButton;
@@ -70,17 +74,41 @@ type
     procedure   grdName1KeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   TearDown;
   protected
+    FOrigFocusWin: TfpgWidget;
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
+    procedure   HandleHide; override;
+    property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget); reintroduce;
     procedure   AfterCreate;
     property    Day: Word index 1 read GetDateElement write SetDateElement;
     property    Month: Word index 2 read GetDateElement write SetDateElement;
     property    Year: Word index 3 read GetDateElement write SetDateElement;
+    property    OnValueSet: TfpgOnDateSetEvent read FOnValueSet write FOnValueSet;
   published
     property    Value: TDateTime read FDate write SetDateValue;
+  end;
+  
+  
+  TfpgCalendarCombo = class(TfpgAbstractComboBox)
+  private
+    FDate: TDateTime;
+    FDateFormat: string;
+    procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime);
+    procedure   SetDateFormat(const AValue: string);
+    procedure   SetDateValue(const AValue: TDateTime);
+    procedure   SetText(const AValue: string); override;
+    function    GetText: string; override;
+  protected
+    function    HasText: boolean; override;
+    procedure   DoDropDown; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property    Value: TDateTime read FDate write SetDateValue;
+    property    DateFormat: string read FDateFormat write SetDateFormat;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -96,9 +124,7 @@ procedure TfpgPopupCalendar.PopulateDays;
 var
   r, c: integer;
   lCellDay: Word;
-  lCellText: string;
 begin
-  lCellText := '';
   grdName1.BeginUpdate;
   for r := 0 to 6 do
     for c := 1 to 7 do
@@ -141,6 +167,8 @@ begin
     Exit; //==>
   lD := StrToInt(s);
   Value := EncodeDate(Year, Month, lD);
+  if Assigned(OnValueSet) then
+    OnValueSet(self, Value);
   {$IFDEF DEBUG}
   writeln('Selected date: ', FormatDateTime('yyyy-mm-dd', Value));
   {$ENDIF}
@@ -212,7 +240,7 @@ begin
     edtYear.Text := IntToStr(Year);
     edtMonth.Text := LongMonthNames[Month];
     DecodeDate(FDate, lY, lM, lD);
-    writeln(' lD: ', lD);
+//    writeln(' lD: ', lD);
     grdName1.FocusCol := (lD - FMonthOffset) mod 7 + 1;
     grdName1.FocusRow := (lD - FMonthOffset) div 7 + 1;
   end;
@@ -309,6 +337,11 @@ begin
     begin
       consumed := True;
       TearDown;
+    end
+    else if keycode = keyEscape then
+    begin
+      consumed := True;
+      Close;
     end;
   end;
   
@@ -322,9 +355,20 @@ begin
   grdName1.SetFocus;
 end;
 
-constructor TfpgPopupCalendar.Create(AOwner: TComponent);
+procedure TfpgPopupCalendar.HandleHide;
+begin
+  FocusRootWidget := FOrigFocusWin;
+  FOrigFocusWin := nil;
+  inherited HandleHide;
+  if Assigned(FocusRootWidget) then
+    FocusRootWidget.SetFocus;
+end;
+
+constructor TfpgPopupCalendar.Create(AOwner: TComponent;
+  AOrigFocusWin: TfpgWidget);
 begin
   inherited Create(AOwner);
+  FOrigFocusWin := AOrigFocusWin;
   AfterCreate;
   FDate := Date;
   FMonthOffset := 0;
@@ -442,5 +486,95 @@ begin
   {@VFD_BODY_END: fpgPopupCalendar}
 end;
 
+
+{ TfpgCalendarCombo }
+
+procedure TfpgCalendarCombo.SetDateValue(const AValue: TDateTime);
+begin
+  if FDate = AValue then
+    Exit; //==>
+  FDate := AValue;
+  RePaint;
+end;
+
+procedure TfpgCalendarCombo.SetText(const AValue: string);
+begin
+  try
+    FDate := StrToDateTime(AValue);
+  except
+    on E: Exception do
+    begin
+      ShowMessage(E.Message);
+    end;
+  end;
+end;
+
+function TfpgCalendarCombo.GetText: string;
+begin
+  Result := FormatDateTime(FDateFormat, FDate);
+end;
+
+function TfpgCalendarCombo.HasText: boolean;
+begin
+  Result := FDate > 0;
+end;
+
+constructor TfpgCalendarCombo.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FDate := Now;
+  DateFormat := ShortDateFormat;
+end;
+
+procedure TfpgCalendarCombo.InternalOnValueSet(Sender: TObject;
+  const ADate: TDateTime);
+begin
+  Value := ADate;
+  {$IFDEF DEBUG}
+  writeln('New value: ', FormatDateTime(FDateFormat, ADate));
+  {$ENDIF}
+end;
+
+procedure TfpgCalendarCombo.SetDateFormat(const AValue: string);
+var
+  OldFormat: string;
+begin
+  if FDateFormat = AValue then
+    Exit; //==>
+  OldFormat := FDateFormat;
+  FDateFormat := AValue;
+  try
+    FormatDateTime(FDateFormat, FDate);
+    RePaint;
+  except
+    on E: Exception do
+    begin
+      FDateFormat := OldFormat;
+      ShowMessage(E.Message);
+    end;
+  end;
+end;
+
+procedure TfpgCalendarCombo.DoDropDown;
+var
+  ddw: TfpgPopupCalendar;
+begin
+  if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
+  begin
+    FDropDown := TfpgPopupCalendar.Create(nil, FocusRootWidget);
+    ddw := TfpgPopupCalendar(FDropDown);
+    ddw.CallerWidget := self;
+    ddw.Value := FDate;
+    ddw.ShowAt(Parent, Left, Top+Height);
+    ddw.PopupFrame := True;
+    ddw.OnValueSet := @InternalOnValueSet;
+  end
+  else
+  begin
+    FBtnPressed := False;
+    FDropDown.Close;
+    FreeAndNil(FDropDown);
+  end;
+end;
 
 end.
