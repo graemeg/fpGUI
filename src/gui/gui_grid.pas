@@ -208,6 +208,7 @@ type
     property    OnFocusChange;
     property    OnRowChange;
     property    OnDoubleClick;
+    property    OnKeyPress;
   end;
   
 

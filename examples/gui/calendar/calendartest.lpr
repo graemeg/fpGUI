@@ -46,7 +46,7 @@ begin
     FDropDown     := TfpgPopupCalendar.Create(nil);
     FDropDown.ShowAt(self, edtName1.Left, edtName1.Top+edtName1.Height);
     FDropDown.PopupFrame:= True;
-    FDropDown.grdName1.SetFocus;
+//    FDropDown.grdName1.SetFocus;
   end
   else
   begin

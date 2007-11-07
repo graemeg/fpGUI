@@ -20,16 +20,15 @@ unit gui_popupcalendar;
 
 {$mode objfpc}{$H+}
 
+{
+    * This is still under development!!!!!!!!!
+}
 {$Define DEBUG} // while developing the component
 
-{
-  TODO:
-    * This is still under development!!!!!!!!!!!!!!!!!!!!!!
-    * Support highlighting special days.
-    * Support custom colors.
-    * Must be able to switch the first day of the week.
-    * Keyboard support.
-}
+
+{ todo: Support highlighting special days. }
+{ todo: Support custom colors. }
+{ todo: Must be able to switch the first day of the week. }
 
 interface
 
@@ -47,6 +46,15 @@ type
   private
     FMonthOffset: integer;
     FDate: TDateTime;
+    {@VFD_HEAD_BEGIN: fpgPopupCalendar}
+    edtYear: TfpgEdit;
+    btnYearUp: TfpgButton;
+    btnYearDown: TfpgButton;
+    edtMonth: TfpgEdit;
+    btnMonthUp: TfpgButton;
+    btnMonthDown: TfpgButton;
+    grdName1: TfpgStringGrid;
+    {@VFD_HEAD_END: fpgPopupCalendar}
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
@@ -59,18 +67,13 @@ type
     procedure   btnMonthUpClicked(Sender: TObject);
     procedure   btnMonthDownClicked(Sender: TObject);
     procedure   grdName1DoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   grdName1KeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   TearDown;
   protected
     procedure   HandlePaint; override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleShow; override;
   public
-    {@VFD_HEAD_BEGIN: fpgPopupCalendar}
-    edtYear: TfpgEdit;
-    btnYearUp: TfpgButton;
-    btnYearDown: TfpgButton;
-    edtMonth: TfpgEdit;
-    btnMonthUp: TfpgButton;
-    btnMonthDown: TfpgButton;
-    grdName1: TfpgStringGrid;
-    {@VFD_HEAD_END: fpgPopupCalendar}
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate;
     property    Day: Word index 1 read GetDateElement write SetDateElement;
@@ -116,6 +119,19 @@ end;
 
 procedure TfpgPopupCalendar.grdName1DoubleClick(Sender: TObject;
   AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+begin
+  TearDown;
+end;
+
+procedure TfpgPopupCalendar.grdName1KeyPress(Sender: TObject;
+  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  // Pass the grid event on to the TfpgPopupCalender instance.
+  HandleKeyPress(KeyCode, ShiftState, consumed);
+  Consumed := True;
+end;
+
+procedure TfpgPopupCalendar.TearDown;
 var
   lD: Word;
   s: string;
@@ -233,6 +249,79 @@ begin
   Canvas.EndDraw;
 end;
 
+procedure TfpgPopupCalendar.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  case keycode of
+    keyUp:
+        begin
+          if (ssCtrl in shiftstate) then
+          begin
+            btnYearUpClicked(nil);    // Ctrl+Up Arrow
+            consumed := True;
+          end;
+        end;
+    keyDown:
+        begin
+          if (ssCtrl in shiftstate) then
+          begin
+            btnYearDownClicked(nil);  // Ctrl+Down Arrow
+            consumed := True;
+          end;
+        end;
+    keyLeft:
+        begin
+          if (ssCtrl in shiftstate) then
+          begin
+            btnMonthDownClicked(nil); // Ctrl+Left Arrow
+            consumed := True;
+          end;
+        end;
+    keyRight:
+        begin
+          if (ssCtrl in shiftstate) then
+          begin
+            btnMonthUpClicked(nil);   // Ctrl+Right Arrow
+            consumed := True;
+          end;
+        end;
+    keyPageUp:
+        begin
+          if (ssCtrl in shiftstate) then
+            btnYearDownClicked(nil)   // Ctrl+PageUp
+          else
+            btnMonthDownClicked(nil); // PageUp
+          consumed := True;
+        end;
+    keyPageDown:
+        begin
+          if (ssCtrl in shiftstate) then
+            btnYearUpClicked(nil)     // Ctrl+PageDown
+          else
+            btnMonthUpClicked(nil);   // PageDown
+          consumed := True;
+        end;
+  end;
+  
+  if not consumed then
+  begin
+    if keycode = keyEnter then
+    begin
+      consumed := True;
+      TearDown;
+    end;
+  end;
+  
+  if not consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TfpgPopupCalendar.HandleShow;
+begin
+  inherited HandleShow;
+  grdName1.SetFocus;
+end;
+
 constructor TfpgPopupCalendar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -272,6 +361,7 @@ begin
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
+    Focusable := False;
     OnClick := @btnYearUpClicked;
   end;
 
@@ -285,6 +375,7 @@ begin
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
+    Focusable := False;
     OnClick := @btnYearDownClicked;
   end;
 
@@ -309,6 +400,7 @@ begin
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
+    Focusable := False;
     OnClick := @btnMonthUpClicked;
   end;
 
@@ -322,6 +414,7 @@ begin
     FontDesc := '#Label1';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
+    Focusable := False;
     OnClick := @btnMonthDownClicked;
   end;
 
@@ -342,7 +435,8 @@ begin
     RowCount := 6;
     ScrollBarStyle := ssNone;
     ColResizing := False;
-    OnDoubleClick:=@grdName1DoubleClick;
+    OnDoubleClick := @grdName1DoubleClick;
+    OnKeyPress := @grdName1KeyPress;
   end;
 
   {@VFD_BODY_END: fpgPopupCalendar}

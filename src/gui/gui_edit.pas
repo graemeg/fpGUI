@@ -95,6 +95,7 @@ type
     property    OnPaint;
     property    OnMouseExit;
     property    OnMouseEnter;
+    property    OnKeyPress;
   end;
   
 

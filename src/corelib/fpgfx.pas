@@ -1,6 +1,7 @@
 unit fpgfx;
 
 {$mode objfpc}{$H+}
+{.$INTERFACES CORBA}
 
 interface
 
@@ -59,12 +60,15 @@ type
   { Keyboard }
   TKeyEvent = procedure(Sender: TObject; AKey: Word; AShift: TShiftState) of object;
   TKeyCharEvent = procedure(Sender: TObject; AKeyChar: Char) of object;
+  TKeyPressEvent = procedure(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean) of object;
   { Mouse }
   TMouseButtonEvent = procedure(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint) of object;
   TMouseMoveEvent = procedure(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint) of object;
   TMouseWheelEvent = procedure(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint) of object;
   { Painting }
   TPaintEvent = procedure(Sender: TObject{; const ARect: TfpgRect}) of object;
+  
+  
 
 type
   TSizeParams = record

@@ -24,6 +24,7 @@ type
     FOnMouseMove: TMouseMoveEvent;
     FOnMouseUp: TMouseButtonEvent;
     FOnPaint: TPaintEvent;
+    FOnKeyPress: TKeyPressEvent;
     FOnScreen: boolean;
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -87,7 +88,7 @@ type
     property    OnMouseDown: TMouseButtonEvent read FOnMouseDown write FOnMouseDown;
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
-    //property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
+    property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -536,13 +537,13 @@ begin
 end;
 
 procedure TfpgWidget.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
-  var consumed: boolean);
+    var consumed: boolean);
 var
   wg: TfpgWidget;
   dir: integer;
 begin
-  //if Assigned(OnKeyPress) then
-    //OnKeyPress(self, keycode, shiftstate, consumed);
+  if Assigned(OnKeyPress) then
+    OnKeyPress(self, keycode, shiftstate, consumed);
 
   if consumed then
     Exit; //==>
