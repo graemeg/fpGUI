@@ -27,7 +27,9 @@ fpdoc --package=GUI \
   --descr=xml/gui/gui_tab.xml --input='-Fi../src/gui ../src/gui/gui_tab.pas' \
   --descr=xml/gui/gui_trackbar.xml --input='-Fi../src/gui ../src/gui/gui_trackbar.pas' \
   --descr=xml/gui/gui_iniutils.xml --input='-Fi../src/gui ../src/gui/gui_iniutils.pas' \
-  --descr=xml/gui/gui_mru.xml --input='-Fi../src/gui ../src/gui/gui_mru.pas'
+  --descr=xml/gui/gui_mru.xml --input='-Fi../src/gui ../src/gui/gui_mru.pas' \
+  --descr=xml/gui/gui_gauge.xml --input='-Fi../src/gui ../src/gui/gui_gauge.pas' \
+  --descr=xml/gui/gui_popupcalendar.xml --input='-Fi../src/gui ../src/gui/gui_popupcalendar.pas'
 
 
 #  --descr=xml/gui/gui_.xml --input='-Fi../src/gui ../src/gui/gui_.pas' \

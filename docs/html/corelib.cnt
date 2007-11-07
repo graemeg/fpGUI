@@ -616,9 +616,13 @@
    MouseCursor gfxbase/tfpgwindowbase.mousecursor.html
   TfpgApplicationBase gfxbase/tfpgapplicationbase.html
    FIsInitialized gfxbase/tfpgapplicationbase.fisinitialized.html
+   FModalFormStack gfxbase/tfpgapplicationbase.fmodalformstack.html
    DoGetFontFaceList gfxbase/tfpgapplicationbase.dogetfontfacelist.html
    Create gfxbase/tfpgapplicationbase.create.html
    GetFontFaceList gfxbase/tfpgapplicationbase.getfontfacelist.html
+   PushModalForm gfxbase/tfpgapplicationbase.pushmodalform.html
+   PopModalForm gfxbase/tfpgapplicationbase.popmodalform.html
+   PrevModalForm gfxbase/tfpgapplicationbase.prevmodalform.html
    IsInitialized gfxbase/tfpgapplicationbase.isinitialized.html
    TopModalForm gfxbase/tfpgapplicationbase.topmodalform.html
    MainForm gfxbase/tfpgapplicationbase.mainform.html
@@ -715,8 +719,7 @@
    xia_motif_wm_hints gfx_x11/tfpgapplicationimpl.xia_motif_wm_hints.html
    xia_wm_protocols gfx_x11/tfpgapplicationimpl.xia_wm_protocols.html
    xia_wm_delete_window gfx_x11/tfpgapplicationimpl.xia_wm_delete_window.html
-   xia_wm_state gfx_x11/tfpgapplicationimpl.xia_wm_state.html
-   xia_wm_state_modal gfx_x11/tfpgapplicationimpl.xia_wm_state_modal.html
+   netlayer gfx_x11/tfpgapplicationimpl.netlayer.html
    xia_targets gfx_x11/tfpgapplicationimpl.xia_targets.html
    InputMethod gfx_x11/tfpgapplicationimpl.inputmethod.html
    InputContext gfx_x11/tfpgapplicationimpl.inputcontext.html
@@ -837,6 +840,7 @@
   TIntMouseEvent fpgfx/tintmouseevent.html
   TKeyEvent fpgfx/tkeyevent.html
   TKeyCharEvent fpgfx/tkeycharevent.html
+  TKeyPressEvent fpgfx/tkeypressevent.html
   TMouseButtonEvent fpgfx/tmousebuttonevent.html
   TMouseMoveEvent fpgfx/tmousemoveevent.html
   TMouseWheelEvent fpgfx/tmousewheelevent.html
@@ -1077,6 +1081,7 @@
    OnMouseDown gfx_widget/tfpgwidget.onmousedown.html
    OnMouseUp gfx_widget/tfpgwidget.onmouseup.html
    OnDoubleClick gfx_widget/tfpgwidget.ondoubleclick.html
+   OnKeyPress gfx_widget/tfpgwidget.onkeypress.html
    Create gfx_widget/tfpgwidget.create.html
    Destroy gfx_widget/tfpgwidget.destroy.html
    SetFocus gfx_widget/tfpgwidget.setfocus.html
@@ -1107,10 +1112,13 @@
    HandleShow gfx_popupwindow/tfpgpopupwindow.handleshow.html
    HandleHide gfx_popupwindow/tfpgpopupwindow.handlehide.html
    HandleClose gfx_popupwindow/tfpgpopupwindow.handleclose.html
+   ProcessPopupFrame gfx_popupwindow/tfpgpopupwindow.processpopupframe.html
+   DoPaintPopupFrame gfx_popupwindow/tfpgpopupwindow.dopaintpopupframe.html
    Create gfx_popupwindow/tfpgpopupwindow.create.html
    ShowAt gfx_popupwindow/tfpgpopupwindow.showat.html
    Close gfx_popupwindow/tfpgpopupwindow.close.html
    DontCloseWidget gfx_popupwindow/tfpgpopupwindow.dontclosewidget.html
+   PopupFrame gfx_popupwindow/tfpgpopupwindow.popupframe.html
   ClosePopups gfx_popupwindow/closepopups.html
   PopupListFirst gfx_popupwindow/popuplistfirst.html
   PopupListFind gfx_popupwindow/popuplistfind.html
@@ -1322,13 +1330,17 @@
 #CoreLib.gfxbase.TfpgApplicationBase TObject
 1VFMainForm
 1VFTerminated
-1VFTopModalForm
+1MGetTopModalForm
 2VFIsInitialized
+2VFModalFormStack
 2MDoGetFontFaceList
 3MCreate
 3MGetFontFaceList
+3MPushModalForm
+3MPopModalForm
+3MPrevModalForm
 3PIsInitialized r
-3PTopModalForm rw
+3PTopModalForm r
 3PMainForm rw
 3PTerminated rw
 #CoreLib.gfx_x11.TfpgFontResourceImpl #CoreLib.gfxbase.TfpgFontResourceBase
@@ -1425,8 +1437,7 @@
 2Vxia_motif_wm_hints
 2Vxia_wm_protocols
 2Vxia_wm_delete_window
-2Vxia_wm_state
-2Vxia_wm_state_modal
+2Vnetlayer
 2Vxia_targets
 2VInputMethod
 2VInputContext
@@ -1733,6 +1744,7 @@
 1VFOnMouseMove
 1VFOnMouseUp
 1VFOnPaint
+1VFOnKeyPress
 1VFOnScreen
 1MMsgPaint
 1MMsgResize
@@ -1794,6 +1806,7 @@
 2POnMouseDown rw
 2POnMouseUp rw
 2POnDoubleClick rw
+2POnKeyPress rw
 3MCreate
 3MDestroy
 3MSetFocus
@@ -1814,12 +1827,17 @@
 3PHint rw
 #CoreLib.gfx_popupwindow.TfpgPopupWindow #CoreLib.gfx_widget.TfpgWidget
 1VFDontCloseWidget
+1VFPopupFrame
+1MSetPopupFrame
 2MMsgClose
 2MAdjustWindowStyle
 2MHandleShow
 2MHandleHide
 2MHandleClose
+2MProcessPopupFrame
+2MDoPaintPopupFrame
 3MCreate
 3MShowAt
 3MClose
 3PDontCloseWidget rw
+3PPopupFrame rw
