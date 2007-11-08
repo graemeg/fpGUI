@@ -195,7 +195,9 @@ uses
   gfx_widget,  {$Note This dependency to gfx_widget must be removed.}
   gui_form, // remove this!!!!!
   cursorfont,
-  gfx_popupwindow;
+  gfx_popupwindow,
+  xatom,      // used for XA_WM_NAME
+  gfx_utf8utils;
 
 var
   xapplication: TfpgApplication;
@@ -1220,11 +1222,24 @@ begin
   XFreeCursor(xapplication.Display, xc);
 end;
 
-procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);
+procedure TfpgWindowImpl.DoSetWindowTitle(const ATitle: string);
+var
+  tp: TXTextProperty;
 begin
   if FWinHandle <= 0 then
     Exit;
   fpgApplication.netlayer.WindowSetName(FWinHandle, PChar(ATitle));
+
+  // Required for titles to work in IceWM. The above netlayer doesn't do the trick.
+  tp.value    := PCUChar(ATitle);
+  tp.encoding := XA_WM_NAME;
+  tp.format   := 8;
+  tp.nitems   := UTF8Length(ATitle);
+
+  XSetWMName(xapplication.Display, FWinHandle, @tp);
+  XStoreName(xapplication.Display, FWinHandle, PChar(ATitle));
+  XSetIconName(xapplication.Display, FWinHandle, PChar(ATitle));
+  XSetWMIconName(xapplication.Display, FWinHandle, @tp);
 end;
 
 constructor TfpgWindowImpl.Create(AOwner: TComponent);

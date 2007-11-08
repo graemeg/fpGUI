@@ -106,9 +106,11 @@ type
     procedure   DoDropDown; override;
   public
     constructor Create(AOwner: TComponent); override;
+    property    DateValue: TDateTime read FDate write SetDateValue;
   published
-    property    Value: TDateTime read FDate write SetDateValue;
+    property    BackgroundColor;
     property    DateFormat: string read FDateFormat write SetDateFormat;
+    property    FontDesc;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -529,7 +531,7 @@ end;
 procedure TfpgCalendarCombo.InternalOnValueSet(Sender: TObject;
   const ADate: TDateTime);
 begin
-  Value := ADate;
+  DateValue := ADate;
   {$IFDEF DEBUG}
   writeln('New value: ', FormatDateTime(FDateFormat, ADate));
   {$ENDIF}

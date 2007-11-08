@@ -59,6 +59,8 @@ uses
   gui_menu,
   gui_progressbar,
   gui_tab,
+  gui_popupcalendar,
+  gui_gauge,
   vfdpropeditgrid;
 
 var
@@ -193,6 +195,11 @@ begin
     'vfd.newform', @stdimg_vfd_newform,
     sizeof(stdimg_vfd_newform),
     0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.combodateedit', @stdimg_vfd_dateedit,
+    sizeof(stdimg_vfd_dateedit),
+    0, 0);
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -261,7 +268,6 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
-//  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.checkbox';
   RegisterVFDWidget(wc);
 
@@ -272,7 +278,6 @@ begin
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
-//  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.WidgetIconName := 'vfd.radiobutton';
   RegisterVFDWidget(wc);
 
@@ -282,6 +287,13 @@ begin
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.combobox';
+  RegisterVFDWidget(wc);
+
+  // Calendar ComboBox
+  wc          := TVFDWidgetClass.Create(TfpgCalendarCombo);
+  wc.NameBase := 'calName';
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.WidgetIconName := 'vfd.combodateedit';
   RegisterVFDWidget(wc);
 
   // ListBox
@@ -335,22 +347,13 @@ begin
   wc.WidgetIconName := 'vfd.trackbar';
   RegisterVFDWidget(wc);
 
-
   // ListView
-  // Currently causes a Access Violation when resized!
-
   wc := TVFDWidgetClass.Create(TfpgListView);
   wc.NameBase := 'lvName';
-  //wc.AddProperty('Columns',TPropertyDBColumns, '');
-  //wc.AddProperty('FontDesc',TPropertyString,'');
-  //wc.AddProperty('HeaderFontDesc',TPropertyString,'');
-  //wc.AddProperty('Items', TPropertyStringList, '');
-  //wc.AddProperty('ItemHeight', TPropertyInteger, '');
   wc.AddProperty('MultiSelect', TPropertyBoolean, '');
   wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.listview';
   RegisterVFDWidget(wc);
-
 
   // Treeview
   wc := TVFDWidgetClass.Create(TfpgTreeView);
@@ -360,7 +363,6 @@ begin
   wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
-//  wc.AddProperty('TreeLineColor', TPropertyString, '');
   wc.AddProperty('ScrollWheelDelta', TPropertyInteger, 'Scroll amount with mouse wheel');
   wc.WidgetIconName := 'vfd.treeview';
   RegisterVFDWidget(wc);
@@ -368,8 +370,6 @@ begin
   // PageControl
   wc          := TVFDWidgetClass.Create(TfpgPageControl);
   wc.NameBase := 'pcName';
-//  wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
-//  wc.AddProperty('BackgroundColor', TPropertyString, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
   wc.AddProperty('SortPages', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('Style', TPropertyEnum, '');
@@ -377,12 +377,17 @@ begin
   wc.WidgetIconName := 'vfd.pagecontrol';
   RegisterVFDWidget(wc);
 
-  // MenuBar
-//  wc          := TVFDWidgetClass.Create(TfpgMenuBar);
-//  wc.NameBase := 'mnuMain';
-////  wc.AddProperty('BackgroundColor', TPropertyString, '');
-//  wc.WidgetIconName := 'vfd.menubar';
-//  RegisterVFDWidget(wc);
+  // Gauge
+  wc          := TVFDWidgetClass.Create(TfpgGauge);
+  wc.NameBase := 'gauName';
+  wc.AddProperty('Kind', TPropertyEnum, '');
+  wc.AddProperty('MinValue', TPropertyInteger, '');
+  wc.AddProperty('MaxValue', TPropertyInteger, '');
+  wc.AddProperty('Progress', TPropertyInteger, '');
+  wc.AddProperty('ShowText', TPropertyBoolean, 'Boolean value');
+  wc.WidgetIconName := 'vfd.gauge';
+  RegisterVFDWidget(wc);
+
 
   // Other - do not delete!!! this should be the last...
   wc          := TVFDWidgetClass.Create(TOtherWidget);

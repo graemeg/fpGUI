@@ -79,6 +79,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   AddProgress(AValue: Longint);
     property    Percentage: Longint read GetPercentage;
+    property    Font: TfpgFont read FFont;
   published
     property    Align;
     property    Anchors;
@@ -87,7 +88,6 @@ type
     property    Color: TfpgColor read FColor write FColor default clButtonFace;
     property    Enabled;
     property    FirstColor: TfpgColor read FFirstColor write SetFirstColor default clBlack;
-    property    Font: TfpgFont read FFont;
     property    Kind: TGaugeKind read FKind write SetGaugeKind default gkHorizontalBar;
     property    MinValue: Longint read FMin write SetMin default 0;
     property    MaxValue: Longint read FMax write SetMax default 100;

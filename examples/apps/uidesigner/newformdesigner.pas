@@ -275,7 +275,7 @@ var
 begin
   {@VFD_BODY_BEGIN: frmMain}
   Name := 'frmMain';
-  SetPosition(84, 123, 635, 87);
+  SetPosition(84, 123, 695, 87);
   WindowTitle := 'frmMain';
   WindowPosition := wpUser;
 
@@ -283,7 +283,7 @@ begin
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 635, 24);
+    SetPosition(0, 0, 696, 24);
     Anchors := [anLeft,anRight,anTop];
   end;
 
@@ -294,11 +294,9 @@ begin
     SetPosition(4, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
-    ImageName := 'vfd.newform';
-    ModalResult := 0;
-    ShowImage := True;
-    Focusable := False;
     ImageMargin := -1;
+    ImageName := 'vfd.newform';
+    Focusable := False;
     OnClick   := @(maindsgn.OnNewForm);
   end;
 
@@ -309,11 +307,9 @@ begin
     SetPosition(30, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
-    ImageName := 'stdimg.open';
-    ModalResult := 0;
-    ShowImage := True;
-    Focusable := False;
     ImageMargin := -1;
+    ImageName := 'stdimg.open';
+    Focusable := False;
     OnClick   := @(maindsgn.OnLoadFile);
   end;
 
@@ -324,11 +320,9 @@ begin
     SetPosition(56, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
-    ImageName := 'stdimg.save';
-    ModalResult := 0;
-    ShowImage := True;
-    Focusable := False;
     ImageMargin := -1;
+    ImageName := 'stdimg.save';
+    Focusable := False;
     OnClick   := @(maindsgn.OnSaveFile);
   end;
 
@@ -336,7 +330,7 @@ begin
   with wgpalette do
   begin
     Name := 'wgpalette';
-    SetPosition(116, 28, 519, 28);
+    SetPosition(116, 28, 580, 28);
     Anchors := [anLeft,anRight,anTop];
     Focusable := False;
   end;
