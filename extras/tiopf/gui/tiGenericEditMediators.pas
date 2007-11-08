@@ -1,7 +1,6 @@
 (*
 
 Revision history:
-
   2005-08-17: First release by Graeme Geldenhuys (graemeg@gmail.com)
   2007-08-24: Ported the code to the fpGUI toolkit.  [Graeme]
 
@@ -30,10 +29,10 @@ uses
   ,gui_edit
   ,gui_checkbox
   ,gui_label
-//  ,Spin       { TSpinEdit - standard component included in Lazarus LCL }
   ,gui_trackbar
   ,gui_combobox
   ,gui_memo
+  ,gui_popupcalendar
   ;
 
 type
@@ -199,6 +198,17 @@ type
     property    EditControl: TfpgMemo read GetEditControl write SetEditControl;
     procedure   ObjectToGui; override;
     procedure   GuiToObject; override;
+    class function ComponentClass: TClass; override;
+  end;
+
+
+  { Base class to handle TfpgCalendarCombo controls }
+  TMediatorCalendarComboView = class(TMediatorView)
+  private
+    function    GetEditControl: TfpgCalendarCombo;
+    procedure   SetEditControl(const AValue: TfpgCalendarCombo);
+  public
+    property    EditControl: TfpgCalendarCombo read GetEditControl write SetEditControl;
     class function ComponentClass: TClass; override;
   end;
 
@@ -929,6 +939,24 @@ class function TMediatorStaticTextView.ComponentClass: TClass;
 begin
   Result := TfpgLabel;
 end;
+
+{ TMediatorCalendarComboView }
+
+function TMediatorCalendarComboView.GetEditControl: TfpgCalendarCombo;
+begin
+  Result := TfpgCalendarCombo(FEditControl);
+end;
+
+procedure TMediatorCalendarComboView.SetEditControl(const AValue: TfpgCalendarCombo);
+begin
+  FEditControl := AValue;
+end;
+
+class function TMediatorCalendarComboView.ComponentClass: TClass;
+begin
+  Result := TfpgCalendarCombo;
+end;
+
 
 initialization
 finalization

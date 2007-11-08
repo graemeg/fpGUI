@@ -16,7 +16,9 @@ uses
   gui_form,
   gui_dialogs,
   gui_button,
-  gui_label;
+  gui_label,
+  gui_popupcalendar,
+  gui_combobox;
   
 type
   // forward declaration
@@ -25,6 +27,7 @@ type
 
   TMainForm = class(TfpgForm)
   private
+    cal: TfpgComboBox;
     btnClose: TfpgButton;
     btnOpenForm1: TfpgButton;
     procedure   btnCloseClick(Sender: TObject);
@@ -36,6 +39,7 @@ type
 
   TForm1 = class(TfpgForm)
   private
+    cal: TfpgComboBox;
     Label1: TfpgLabel;
     btnClose: TfpgButton;
     btnOpenForm2: TfpgButton;
@@ -111,6 +115,9 @@ begin
   btnClose.ShowImage := True;
   
   btnOpenForm2 := CreateButton(self, 70, 100, 80, 'Open Form2', @btnOpenForm2Click);
+  
+  cal := TfpgComboBox.Create(self);
+  cal.SetPosition(10, 10, 120, 23);
 end;
 
 
@@ -146,6 +153,9 @@ begin
   btnClose.ShowImage := True;
   
   btnOpenForm1 := CreateButton(self, 100, 100, 80, 'Open Form1', @btnOpenForm1Click);
+  
+  cal := TfpgComboBox.Create(self);
+  cal.SetPosition(10, 10, 120, 23);
 end;
 
 

@@ -22,6 +22,7 @@ unit gui_popupcalendar;
 
 {
     * This is still under development!!!!!!!!!
+      It needs lots of testing and debugging.
 }
 {.$Define DEBUG} // while developing the component
 
@@ -31,6 +32,12 @@ unit gui_popupcalendar;
 { todo: Must be able to switch the first day of the week. }
 { todo: Create a TfpgDateTimeEdit component with options for Date, Time or Date & Time. }
 { todo: Create a 'Jump to Today'  property for TfpgCalendarCombo. }
+{ todo: Changing months and checking min/max limits takes into account the
+        original date, not the selected day in the grid. It should use the
+        selected day in grid. }
+{ todo: Paint previous and next months days in grey. Visiblity of these must
+        be user selectable. }
+{ todo: Paint days out of min/max range in grey. }
 
 interface
 
@@ -48,6 +55,8 @@ type
   private
     FMonthOffset: integer;
     FDate: TDateTime;
+    FMaxDate: TDateTime;
+    FMinDate: TDateTime;
     FCallerWidget: TfpgWidget;
     FOnValueSet: TfpgOnDateSetEvent;
     {@VFD_HEAD_BEGIN: fpgPopupCalendar}
@@ -65,6 +74,8 @@ type
     function    CalculateCellDay(const ACol, ARow: LongWord): Word;
     procedure   SetDateElement(Index: integer; const AValue: Word);
     procedure   SetDateValue(const AValue: TDateTime);
+    procedure   SetMaxDate(const AValue: TDateTime);
+    procedure   SetMinDate(const AValue: TDateTime);
     procedure   UpdateCalendar;
     procedure   btnYearUpClicked(Sender: TObject);
     procedure   btnYearDownClicked(Sender: TObject);
@@ -88,7 +99,9 @@ type
     property    Year: Word index 3 read GetDateElement write SetDateElement;
     property    OnValueSet: TfpgOnDateSetEvent read FOnValueSet write FOnValueSet;
   published
-    property    Value: TDateTime read FDate write SetDateValue;
+    property    DateValue: TDateTime read FDate write SetDateValue;
+    property    MinDate: TDateTime read FMinDate write SetMinDate;
+    property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
   end;
   
   
@@ -96,9 +109,13 @@ type
   private
     FDate: TDateTime;
     FDateFormat: string;
+    FMaxDate: TDateTime;
+    FMinDate: TDateTime;
     procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime);
     procedure   SetDateFormat(const AValue: string);
     procedure   SetDateValue(const AValue: TDateTime);
+    procedure   SetMaxDate(const AValue: TDateTime);
+    procedure   SetMinDate(const AValue: TDateTime);
     procedure   SetText(const AValue: string); override;
     function    GetText: string; override;
   protected
@@ -106,11 +123,14 @@ type
     procedure   DoDropDown; override;
   public
     constructor Create(AOwner: TComponent); override;
-    property    DateValue: TDateTime read FDate write SetDateValue;
   published
     property    BackgroundColor;
     property    DateFormat: string read FDateFormat write SetDateFormat;
+    property    DateValue: TDateTime read FDate write SetDateValue;
     property    FontDesc;
+    property    MinDate: TDateTime read FMinDate write SetMinDate;
+    property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
+    property    OnChange;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -163,18 +183,23 @@ procedure TfpgPopupCalendar.TearDown;
 var
   lD: Word;
   s: string;
+  d: TDateTime;
 begin
   s := grdName1.Cells[grdName1.FocusCol, grdName1.FocusRow];
   if s = '' then
     Exit; //==>
   lD := StrToInt(s);
-  Value := EncodeDate(Year, Month, lD);
-  if Assigned(OnValueSet) then
-    OnValueSet(self, Value);
-  {$IFDEF DEBUG}
-  writeln('Selected date: ', FormatDateTime('yyyy-mm-dd', Value));
-  {$ENDIF}
-  Close;
+  d := EncodeDate(Year, Month, lD);
+  if (d >= FMinDate) and (d <= FMaxDate) then
+  begin
+    DateValue := d;
+    if Assigned(OnValueSet) then
+      OnValueSet(self, DateValue);
+    {$IFDEF DEBUG}
+    writeln('Selected date: ', FormatDateTime('yyyy-mm-dd', DateValue));
+    {$ENDIF}
+    Close;
+  end;
 end;
 
 function TfpgPopupCalendar.GetDateElement(Index: integer): Word;
@@ -209,6 +234,7 @@ end;
 procedure TfpgPopupCalendar.SetDateElement(Index: integer; const AValue: Word);
 var
   lD, lM, lY: Word;
+  lDate: TDateTime;
 begin
   if AValue > 0 then
   begin
@@ -218,8 +244,12 @@ begin
       2: lM := AValue;
       3: lY := AValue;
     end;
-    FDate := EncodeDate(lY, lM, lD);
-    UpdateCalendar;
+    try
+      lDate := EncodeDate(lY, lM, lD);
+      SetDateValue(lDate);
+    except
+      // do nothing!  Not nice?
+    end;
   end;
 end;
 
@@ -227,45 +257,111 @@ procedure TfpgPopupCalendar.SetDateValue(const AValue: TDateTime);
 begin
   if FDate = AValue then
     Exit; //==>
+
+  if (trunc(FDate) >= trunc(FMinDate)) then
+    {$IFDEF DEBUG}
+    writeln('Passed min test')
+    {$ENDIF}
+  else
+    exit;
+
+  if (FDate <= FMaxDate) then
+    {$IFDEF DEBUG}
+    writeln('Passed max test')
+    {$ENDIF}
+  else
+    exit;
+    
+  {$IFDEF DEBUG} writeln('SetDateValue: ', FormatDateTime('yyyy-mm-dd', AValue)); {$ENDIF}
   FDate := AValue;
   UpdateCalendar;
+end;
+
+procedure TfpgPopupCalendar.SetMaxDate(const AValue: TDateTime);
+begin
+  if FMaxDate = AValue then
+    Exit; //==>
+  FMaxDate := AValue;
+
+  // correct min/max values
+  if FMinDate > AValue then
+    FMinDate := IncMonth(AValue, -12); // one year less
+
+  if FDate > FMaxDate then
+  begin
+    FDate := FMaxDate;
+    UpdateCalendar;
+  end;
+end;
+
+procedure TfpgPopupCalendar.SetMinDate(const AValue: TDateTime);
+begin
+  if FMinDate = AValue then
+    Exit; //==>
+  FMinDate := AValue;
+
+  // correct min/max values
+  if AValue > FMaxDate then
+    FMaxDate := IncMonth(AValue, 12); // one year more
+
+  if FDate < FMinDate then
+  begin
+    FDate := FMinDate;
+    UpdateCalendar;
+  end;
 end;
 
 procedure TfpgPopupCalendar.UpdateCalendar;
 var
   lD, lM, lY: Word;
 begin
-  if FDate > 0 then
+  if (FDate >= FMinDate) and (FDate <= FMaxDate) then
   begin
     CalculateMonthOffset;
     PopulateDays;
     edtYear.Text := IntToStr(Year);
     edtMonth.Text := LongMonthNames[Month];
     DecodeDate(FDate, lY, lM, lD);
-//    writeln(' lD: ', lD);
+
     grdName1.FocusCol := (lD - FMonthOffset) mod 7 + 1;
     grdName1.FocusRow := (lD - FMonthOffset) div 7 + 1;
   end;
 end;
 
 procedure TfpgPopupCalendar.btnYearUpClicked(Sender: TObject);
+var
+  d: TDateTime;
 begin
-  Year := Year + 1;
+  d := IncMonth(FDate, 12);
+  if d <= FMaxDate then
+    DateValue := d;
 end;
 
 procedure TfpgPopupCalendar.btnYearDownClicked(Sender: TObject);
+var
+  d: TDateTime;
 begin
-  Year := Year - 1;
+  d := IncMonth(FDate, -12);
+  if d >= FMinDate then
+    DateValue := d;
 end;
 
 procedure TfpgPopupCalendar.btnMonthUpClicked(Sender: TObject);
+var
+  d: TDateTime;
 begin
-  Value := IncMonth(FDate);
+  d := IncMonth(FDate);
+  if d <= FMaxDate then
+    DateValue := d;
 end;
 
 procedure TfpgPopupCalendar.btnMonthDownClicked(Sender: TObject);
+var
+  d: TDateTime;
 begin
-  Value := IncMonth(FDate, -1);
+  d := IncMonth(FDate, -1);
+  if d >= FMinDate then
+    DateValue := d;
 end;
 
 procedure TfpgPopupCalendar.HandlePaint;
@@ -355,6 +451,10 @@ procedure TfpgPopupCalendar.HandleShow;
 begin
   inherited HandleShow;
   grdName1.SetFocus;
+  {$IFDEF DEBUG}
+  writeln('Min: ', FormatDateTime('yyyy-mm-dd', MinDate),
+          '   Max: ', FormatDateTime('yyyy-mm-dd', MaxDate));
+  {$ENDIF}
 end;
 
 procedure TfpgPopupCalendar.HandleHide;
@@ -480,7 +580,7 @@ begin
     HeaderFontDesc := '#GridHeader';
     RowCount := 6;
     ScrollBarStyle := ssNone;
-    ColResizing := False;
+//    ColResizing := False;
     OnDoubleClick := @grdName1DoubleClick;
     OnKeyPress := @grdName1KeyPress;
   end;
@@ -497,6 +597,40 @@ begin
     Exit; //==>
   FDate := AValue;
   RePaint;
+end;
+
+procedure TfpgCalendarCombo.SetMaxDate(const AValue: TDateTime);
+begin
+  if FMaxDate = AValue then
+    Exit; //==>
+  FMaxDate := AValue;
+
+  // correct min/max values
+  if FMinDate > AValue then
+    FMinDate := IncMonth(AValue, -12); // one year less
+
+  if FDate > FMaxDate then
+  begin
+    FDate := FMaxDate;
+    Repaint;
+  end;
+end;
+
+procedure TfpgCalendarCombo.SetMinDate(const AValue: TDateTime);
+begin
+  if FMinDate = AValue then
+    Exit; //==>
+  FMinDate := AValue;
+  
+  // correct min/max values
+  if AValue > FMaxDate then
+    FMaxDate := IncMonth(AValue, 12); // one year more
+
+  if FDate < FMinDate then
+  begin
+    FDate := FMinDate;
+    Repaint;
+  end;
 end;
 
 procedure TfpgCalendarCombo.SetText(const AValue: string);
@@ -518,12 +652,14 @@ end;
 
 function TfpgCalendarCombo.HasText: boolean;
 begin
-  Result := FDate > 0;
+  Result := FDate >= FMinDate;
 end;
 
 constructor TfpgCalendarCombo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FMinDate := EncodeDate(1900, 01, 01);
+  FMaxDate := EncodeDate(2100, 01, 31);
   FDate := Now;
   DateFormat := ShortDateFormat;
 end;
@@ -532,6 +668,8 @@ procedure TfpgCalendarCombo.InternalOnValueSet(Sender: TObject;
   const ADate: TDateTime);
 begin
   DateValue := ADate;
+  if Assigned(OnChange) then
+    OnChange(self);
   {$IFDEF DEBUG}
   writeln('New value: ', FormatDateTime(FDateFormat, ADate));
   {$ENDIF}
@@ -565,11 +703,13 @@ begin
   begin
     FDropDown := TfpgPopupCalendar.Create(nil, FocusRootWidget);
     ddw := TfpgPopupCalendar(FDropDown);
-    ddw.CallerWidget := self;
-    ddw.Value := FDate;
+    ddw.CallerWidget  := self;
+    ddw.MinDate       := FMinDate;
+    ddw.MaxDate       := FMaxDate;
+    ddw.DateValue     := FDate;
     ddw.ShowAt(Parent, Left, Top+Height);
-    ddw.PopupFrame := True;
-    ddw.OnValueSet := @InternalOnValueSet;
+    ddw.PopupFrame    := True;
+    ddw.OnValueSet    := @InternalOnValueSet;
   end
   else
   begin

@@ -203,7 +203,7 @@ type
     property    ShowHeader;
     property    ShowGrid;
     property    HeaderHeight;
-    property    ColResizing;
+//    property    ColResizing;
     property    ColumnWidth;
     property    OnFocusChange;
     property    OnRowChange;

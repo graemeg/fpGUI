@@ -19,6 +19,8 @@ type
     procedure   btnDownClicked(Sender: TObject);
     procedure   btnDateFormatClicked(Sender: TObject);
     procedure   btnTodayClicked(Sender: TObject);
+    procedure   btnMinDateClicked(Sender: TObject);
+    procedure   btnMaxDateClicked(Sender: TObject);
     procedure   DoDropDown;
   public
     {@VFD_HEAD_BEGIN: MainForm}
@@ -27,7 +29,7 @@ type
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
     cbName1: TfpgComboBox;
-    cbCalendar: TfpgCalendarCombo;
+    cal: TfpgCalendarCombo;
     btnDateFormat: TfpgButton;
     edtDateFormat: TfpgEdit;
     lblName3: TfpgLabel;
@@ -35,6 +37,10 @@ type
     lblName5: TfpgLabel;
     btnToday: TfpgButton;
     lblName6: TfpgLabel;
+    edtMinDate: TfpgEdit;
+    edtMaxDate: TfpgEdit;
+    btnMinDate: TfpgButton;
+    btnMaxDate: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     FDropDown: TfpgPopupCalendar;
     procedure   AfterCreate; override;
@@ -51,12 +57,38 @@ end;
 
 procedure TMainForm.btnDateFormatClicked(Sender: TObject);
 begin
-  cbCalendar.DateFormat := edtDateFormat.Text;
+  cal.DateFormat := edtDateFormat.Text;
 end;
 
 procedure TMainForm.btnTodayClicked(Sender: TObject);
 begin
-  cbCalendar.DateValue := Now;
+  cal.DateValue := Now;
+end;
+
+procedure TMainForm.btnMinDateClicked(Sender: TObject);
+var
+  old: string;
+begin
+  old := ShortDateFormat;
+  ShortDateFormat := 'yyyy-mm-dd';
+  try
+    cal.MinDate := StrToDate(edtMinDate.Text);
+  finally
+    ShortDateFormat := old;
+  end;
+end;
+
+procedure TMainForm.btnMaxDateClicked(Sender: TObject);
+var
+  old: string;
+begin
+  old := ShortDateFormat;
+  ShortDateFormat := 'yyyy-mm-dd';
+  try
+    cal.MaxDate := StrToDate(edtMaxDate.Text);
+  finally
+    ShortDateFormat := old;
+  end;
 end;
 
 procedure TMainForm.DoDropDown;
@@ -136,10 +168,10 @@ begin
     FontDesc := '#List';
   end;
 
-  cbCalendar := TfpgCalendarCombo.Create(self);
-  with cbCalendar do
+  cal := TfpgCalendarCombo.Create(self);
+  with cal do
   begin
-    Name := 'cbCalendar';
+    Name := 'cal';
     SetPosition(132, 196, 120, 23);
     FontDesc := '#List';
     DateFormat := 'yyyy-mm-dd';
@@ -149,7 +181,7 @@ begin
   with btnDateFormat do
   begin
     Name := 'btnDateFormat';
-    SetPosition(300, 168, 75, 23);
+    SetPosition(388, 148, 75, 23);
     Text := 'Set Format';
     FontDesc := '#Label1';
     ImageName := '';
@@ -160,7 +192,7 @@ begin
   with edtDateFormat do
   begin
     Name := 'edtDateFormat';
-    SetPosition(300, 196, 120, 21);
+    SetPosition(288, 148, 92, 21);
     Text := 'yy-mm-d';
     FontDesc := '#Edit1';
   end;
@@ -197,7 +229,7 @@ begin
   with btnToday do
   begin
     Name := 'btnToday';
-    SetPosition(384, 168, 75, 23);
+    SetPosition(388, 120, 75, 23);
     Text := 'Today';
     FontDesc := '#Label1';
     ImageName := '';
@@ -211,6 +243,46 @@ begin
     SetPosition(192, 63, 246, 16);
     Text := 'calendar window part.';
     FontDesc := '#Label1';
+  end;
+
+  edtMinDate := TfpgEdit.Create(self);
+  with edtMinDate do
+  begin
+    Name := 'edtMinDate';
+    SetPosition(288, 176, 92, 21);
+    Text := '2005-01-01';
+    FontDesc := '#Edit1';
+  end;
+
+  edtMaxDate := TfpgEdit.Create(self);
+  with edtMaxDate do
+  begin
+    Name := 'edtMaxDate';
+    SetPosition(288, 204, 92, 21);
+    Text := '2009-01-01';
+    FontDesc := '#Edit1';
+  end;
+
+  btnMinDate := TfpgButton.Create(self);
+  with btnMinDate do
+  begin
+    Name := 'btnMinDate';
+    SetPosition(388, 176, 75, 23);
+    Text := 'Min Date';
+    FontDesc := '#Label1';
+    ImageName := '';
+    OnClick := @btnMinDateClicked;
+  end;
+
+  btnMaxDate := TfpgButton.Create(self);
+  with btnMaxDate do
+  begin
+    Name := 'btnMaxDate';
+    SetPosition(388, 204, 75, 23);
+    Text := 'Max Date';
+    FontDesc := '#Label1';
+    ImageName := '';
+    OnClick := @btnMaxDateClicked;
   end;
 
   {@VFD_BODY_END: MainForm}

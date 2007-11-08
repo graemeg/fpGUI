@@ -126,7 +126,7 @@ type
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    HeaderHeight: integer read FHeaderHeight;
-    property    ColResizing: boolean read FColResizing write FColResizing;
+//    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
