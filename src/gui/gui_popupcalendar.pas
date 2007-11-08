@@ -318,17 +318,17 @@ begin
     keyPageUp:
         begin
           if (ssCtrl in shiftstate) then
-            btnYearDownClicked(nil)   // Ctrl+PageUp
+            btnYearUpClicked(nil)   // Ctrl+PageUp
           else
-            btnMonthDownClicked(nil); // PageUp
+            btnMonthUpClicked(nil); // PageUp
           consumed := True;
         end;
     keyPageDown:
         begin
           if (ssCtrl in shiftstate) then
-            btnYearUpClicked(nil)     // Ctrl+PageDown
+            btnYearDownClicked(nil)     // Ctrl+PageDown
           else
-            btnMonthUpClicked(nil);   // PageDown
+            btnMonthDownClicked(nil);   // PageDown
           consumed := True;
         end;
   end;

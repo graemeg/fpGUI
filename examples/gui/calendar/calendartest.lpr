@@ -34,6 +34,7 @@ type
     lblName4: TfpgLabel;
     lblName5: TfpgLabel;
     btnToday: TfpgButton;
+    lblName6: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
     FDropDown: TfpgPopupCalendar;
     procedure   AfterCreate; override;
@@ -55,7 +56,7 @@ end;
 
 procedure TMainForm.btnTodayClicked(Sender: TObject);
 begin
-  cbCalendar.Value := Now;
+  cbCalendar.DateValue := Now;
 end;
 
 procedure TMainForm.DoDropDown;
@@ -78,7 +79,7 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(286, 234, 504, 270);
+  SetPosition(286, 234, 470, 253);
   WindowTitle := 'fpGUI Calendar Test';
   WindowPosition := wpUser;
 
@@ -140,6 +141,7 @@ begin
   begin
     Name := 'cbCalendar';
     SetPosition(132, 196, 120, 23);
+    FontDesc := '#List';
     DateFormat := 'yyyy-mm-dd';
   end;
 
@@ -167,8 +169,8 @@ begin
   with lblName3 do
   begin
     Name := 'lblName3';
-    SetPosition(160, 52, 336, 15);
-    Text := '<----  This one is fake. It only used the calendar window part';
+    SetPosition(160, 48, 287, 15);
+    Text := '<----  This one is fake. It only used the';
     FontDesc := '#Label1';
     Color := clBlue;
   end;
@@ -200,6 +202,15 @@ begin
     FontDesc := '#Label1';
     ImageName := '';
     OnClick := @btnTodayClicked;
+  end;
+
+  lblName6 := TfpgLabel.Create(self);
+  with lblName6 do
+  begin
+    Name := 'lblName6';
+    SetPosition(192, 63, 246, 16);
+    Text := 'calendar window part.';
+    FontDesc := '#Label1';
   end;
 
   {@VFD_BODY_END: MainForm}
