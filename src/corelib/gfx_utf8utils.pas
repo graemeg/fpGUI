@@ -1,6 +1,6 @@
 {
   Some handly UTF8 function copied from the Lazarus LCL. Comes from the LCLProc
-  unit.Surely we can move this into FPC?
+  unit. Surely we can move this into FPC?
 }
 unit gfx_UTF8utils;
 
@@ -57,7 +57,7 @@ begin
  end;
 end;
 
-function UTF8CStringToUTF8String (SourceStart: PChar; SourceLen: SizeInt): string;
+function UTF8CStringToUTF8String(SourceStart: PChar; SourceLen: SizeInt): string;
 var
   Source: PChar;
   Dest: PChar;

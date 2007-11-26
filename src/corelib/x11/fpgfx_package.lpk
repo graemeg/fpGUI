@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
+  <Package Version="3">
     <Name Value="fpgfx_package"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="15">
+    <Files Count="16">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -85,6 +85,10 @@
         <Filename Value="gfx_impl.pas"/>
         <UnitName Value="gfx_impl"/>
       </Item15>
+      <Item16>
+        <Filename Value="../gfx_strings.pas"/>
+        <UnitName Value="gfx_strings"/>
+      </Item16>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>
