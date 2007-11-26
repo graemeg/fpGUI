@@ -3,7 +3,7 @@ program listviewtest;
 {$mode objfpc}{$H+}
 
 uses
-  Classes, fpgui_package, fpgfx_package, fpgfx, sysutils ,
+  Classes, fpgfx, sysutils ,
   gui_listview, gui_form, gui_button, gui_edit, gfxbase, gui_checkbox;
   
 type

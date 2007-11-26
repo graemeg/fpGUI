@@ -2,7 +2,7 @@
 <CONFIG>
   <ProjectOptions>
     <PathDelim Value="/"/>
-    <Version Value="5"/>
+    <Version Value="6"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
@@ -25,10 +25,10 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="fpgfx_package"/>
+        <PackageName Value="fpgui_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="fpgui_package"/>
+        <PackageName Value="fpgfx_package"/>
       </Item2>
     </RequiredPackages>
     <Units Count="1">
