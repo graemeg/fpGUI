@@ -21,9 +21,9 @@ unit gui_dialogs;
 
 {
   TODO:
-    * Try and abstract the code to remove all IFDEF's
+    * Try and refactor the code to remove all IFDEF's
     * Implement MessageDlg with icons and buttons [Work-In-Progress]
-    * Select Directory dialog
+    * Select Directory dialog (treeview style)
 }
 
 {.$Define DEBUG}
@@ -748,10 +748,13 @@ var
   e: TFileEntry;
 begin
   e := grid.CurrentEntry;
-  if (e <> nil) and (e.EntryType = etDir) then
-  begin
-    SetCurrentDirectory(e.Name);
-  end;
+  if (e = nil) then
+    Exit; //==>
+    
+  if (e.EntryType = etDir) then
+    SetCurrentDirectory(e.Name)
+  else if (e.EntryType = etFile) then
+    btnOKClick(Sender);
 end;
 
 procedure TfpgFileDialog.SetFilter(const Value: string);

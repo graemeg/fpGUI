@@ -192,13 +192,13 @@ type
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
   published
-    property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth;
+    property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth default 15;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta;
+    property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta default 15;
     property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
     property    ShowImages: boolean read FShowImages write SetShowImages default False;
-    property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor;
-    property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle;
+    property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor default clShadow1;
+    property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle default lsDot;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
   end;
