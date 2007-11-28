@@ -22,7 +22,7 @@ unit gui_basegrid;
 {
   TODO:
     * Selecting the last fully visible row, scrolls the grid. Selection
-      is corruct, but because of the scroll it is confusing.
+      is correct, but because of the scroll it is confusing.
 }
 
 {.$Define DEBUG}

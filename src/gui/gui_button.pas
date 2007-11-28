@@ -26,12 +26,14 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
-  gfx_widget;
+  gfx_widget,
+  gfx_command_intf;
 
 type
 
-  TfpgButton = class(TfpgWidget)
+  TfpgButton = class(TfpgWidget, ICommandHolder)
   private
+    FCommand: ICommand;
     FImageName: string;
     FClicked: Boolean;
     FShowImage: Boolean;
@@ -75,6 +77,8 @@ type
     procedure   DoPush;
     procedure   DoRelease;
     procedure   Click;
+    function    GetCommand: ICommand;   // ICommandHolder interface
+    procedure   SetCommand(ACommand: ICommand); // ICommandHolder interface
     property    Down: Boolean read FDown write SetDown;
     property    Font: TfpgFont read FFont;
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
@@ -439,6 +443,16 @@ begin
 
   if Assigned(OnClick) then
     OnClick(self);
+end;
+
+function TfpgButton.GetCommand: ICommand;
+begin
+  Result := FCommand;
+end;
+
+procedure TfpgButton.SetCommand(ACommand: ICommand);
+begin
+  FCommand := ACommand;
 end;
 
 procedure TfpgButton.SetImageMargin(const Value: integer);

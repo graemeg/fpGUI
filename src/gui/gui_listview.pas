@@ -183,7 +183,7 @@ type
     FSelected: TList;
     FOldSelected: TList;
     FUpdateCount: Integer;
-    FVScrollBar,
+    FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
     FColumns: TfpgLVColumns;
     FItems: TfpgLVItems;
@@ -1199,7 +1199,7 @@ begin
 
   UpdateScrollBarPositions;
 
-  fpgStyle.DrawControlFrame(Canvas, 0,0,Width,Height);
+  fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
   
   ClipRect.Top := 2;
   ClipRect.Left := 2;
