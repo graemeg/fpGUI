@@ -190,7 +190,7 @@ uses
   gfx_widget,
   gfx_utf8utils
   {$IFDEF MSWINDOWS}
-  ,Windows
+  ,Windows   // used by File Dialog
   {$ENDIF}
   ;
   

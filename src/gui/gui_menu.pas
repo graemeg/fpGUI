@@ -35,7 +35,8 @@ uses
   fpgfx,
   gfx_widget,
   gfx_popupwindow,
-  gfx_UTF8utils;
+  gfx_UTF8utils,
+  gfx_command_intf;
   
 type
   TfpgHotKeyDef = string;
@@ -45,8 +46,9 @@ type
   TfpgMenuBar = class;
   
   
-  TfpgMenuItem = class(TComponent)
+  TfpgMenuItem = class(TComponent, ICommandHolder)
   private
+    FCommand: ICommand;
     FEnabled: boolean;
     FHotKeyDef: TfpgHotKeyDef;
     FOnClick: TNotifyEvent;
@@ -65,6 +67,8 @@ type
     function    Selectable: boolean;
     function    GetAccelChar: string;
     procedure   DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord);
+    function    GetCommand: ICommand;
+    procedure   SetCommand(ACommand: ICommand);
     property    Text: string read FText write SetText;
     property    HotKeyDef: TfpgHotKeyDef read FHotKeyDef write SetHotKeyDef;
     property    Separator: boolean read FSeparator write SetSeparator;
@@ -114,7 +118,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Close; override;
-    function    AddMenuItem(const menuname: string; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
+    function    AddMenuItem(const AMenuName: string; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
+    function    MenuItemByName(const AMenuName: string): TfpgMenuItem;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
@@ -278,6 +283,16 @@ begin
   // Draw the remaining text after the & sign
   if UTF8Length(s) > 0 then
     ACanvas.DrawString(x, y, s);
+end;
+
+function TfpgMenuItem.GetCommand: ICommand;
+begin
+  Result := FCommand;
+end;
+
+procedure TfpgMenuItem.SetCommand(ACommand: ICommand);
+begin
+  FCommand := ACommand;
 end;
 
 { TfpgMenuBar }
@@ -1144,19 +1159,35 @@ begin
   end;
 end;
 
-function TfpgPopupMenu.AddMenuItem(const menuname: string;
-  const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
+function TfpgPopupMenu.AddMenuItem(const AMenuName: string;
+    const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
 begin
   result := TfpgMenuItem.Create(self);
-  if menuname <> '-' then
+  if AMenuName <> '-' then
   begin
-    result.Text := menuname;
+    result.Text := AMenuName;
     result.hotkeydef := hotkeydef;
     result.OnClick := HandlerProc;
   end
   else
   begin
     result.Separator := true;
+  end;
+end;
+
+function TfpgPopupMenu.MenuItemByName(const AMenuName: string): TfpgMenuItem;
+var
+  i: integer;
+begin
+  Result := nil;
+  for i := 0 to ComponentCount-1 do
+  begin
+    if Components[i] is TfpgMenuItem then
+      if SameText(TfpgMenuItem(Components[i]).Text, AMenuName) then
+      begin
+        Result := TfpgMenuItem(Components[i]);
+        Exit; //==>
+      end;
   end;
 end;
 

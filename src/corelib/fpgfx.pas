@@ -278,12 +278,13 @@ function  fpgGetTickCount: DWord;
 
 
 // Rectangle routines
-function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
-function InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
-function OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
-function OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
-function CenterPoint(const Rect: TRect): TPoint;
-function fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
+function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
+function  InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
+function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
+function  CenterPoint(const Rect: TRect): TPoint;
+function  CenterPoint(const Rect: TfpgRect): TPoint;
+function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
 
 // Debug rountines
 procedure PrintRect(var Rect: TRect);
@@ -441,11 +442,14 @@ end;
 
 function CenterPoint(const Rect: TRect): TPoint;
 begin
-  with Rect do
-  begin
-    Result.X := (Left+Right) div 2;
-    Result.Y := (Top+Bottom) div 2;
-  end;
+  Result.X := (Rect.Left + Rect.Right) div 2;
+  Result.Y := (Rect.Top + Rect.Bottom) div 2;
+end;
+
+function CenterPoint(const Rect: TfpgRect): TPoint;
+begin
+  Result.X := (Rect.Left + Rect.Right) div 2;
+  Result.Y := (Rect.Top + Rect.Bottom) div 2;
 end;
 
 function fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
