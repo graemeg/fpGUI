@@ -85,6 +85,7 @@ type
     sbsilverHor: TThemeScrollbar;
     trackbar: TfpgTrackBar;
     lblTrackBar: TfpgLabel;
+    FIndex: integer;
     procedure   TrackBarChange(Sender: TObject; APosition: integer);
     procedure   btnCloseClick(Sender: TObject);
     procedure   CreateButtons;
@@ -94,6 +95,69 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
+
+
+
+  procedure PaintPartScaledImage(Image: TfpgImage; Canvas: TfpgCanvas; x, y: TfpgCoord; OrigWidth, OrigHeight: TfpgCoord; NewWidth, NewHeight: TfpgCoord; Border: TfpgCoord; ImgIndex: integer);
+  var
+    rect: TfpgRect;
+    img: TfpgImage;
+    part: TfpgImage;
+  begin
+    // Get correct image
+    rect.SetRect(OrigWidth * ImgIndex, 0, OrigWidth, OrigHeight);
+    img := image.ImageFromRect(rect);
+
+    //  Painting Anti-Clockwise
+    // top-left
+    rect.SetRect(0, 0, Border, Border);
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x, y, Border, Border, part);
+
+    // left
+    rect.SetRect(0, Border, Border, OrigHeight-(Border*2));
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x, y+Border, Border, NewHeight-(Border*2), part);
+
+    // bottom-left
+    rect.SetRect(0, OrigHeight-Border, Border, Border);
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x, y+(NewHeight-Border), Border, Border, part);
+
+    // bottom
+    rect.SetRect(Border, OrigHeight-Border, OrigWidth-(Border*2), Border);
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x+Border, y+(NewHeight-Border), NewWidth-(Border*2), Border, part);
+
+    // bottom-right
+    rect.SetRect(OrigWidth-Border, OrigHeight-Border, Border, Border);
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x+(NewWidth-Border), y+(NewHeight-Border), Border, Border, part);
+
+    // right
+    rect.SetRect(OrigWidth-Border, Border, Border, OrigHeight-(Border*2));
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x+(NewWidth-Border), y+Border, Border, NewHeight-(Border*2), part);
+
+    // top-right
+    rect.SetRect(OrigWidth-Border, 0, Border, Border);
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x+(NewWidth-Border), y, Border, Border, part);
+
+    // top
+    rect.SetRect(Border, 0, OrigWidth-(Border*2), Border);
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x+Border, y, NewWidth-(Border*2), Border, part);
+
+    // client area
+    rect.SetRect(Border, Border, OrigWidth-(Border*2), OrigHeight-(Border*2));
+    part := img.ImageFromRect(rect);
+    Canvas.StretchDraw(x+Border, y+Border, NewWidth-(Border*2), NewHeight-(Border*2), part);
+
+    part.Free;
+    img.Free;
+  end;
+
 
 { TThemeScrollbar }
 
@@ -389,6 +453,7 @@ end;
 procedure TMainForm.TrackBarChange(Sender: TObject; APosition: integer);
 begin
   lblTrackBar.Text := IntToStr(APosition);
+  RePaint;
 end;
 
 procedure TMainForm.btnCloseClick(Sender: TObject);
@@ -413,13 +478,13 @@ begin
   xpluna.Left         := 80;
   xpluna.Top          := 45;
   xpluna.Width        := 75;
-  xpluna.Text         := 'XP Luna';
+  xpluna.Text         := 'XP Luna (-)';
 
   xpsilver := TThemeButton.Create(self);
   xpsilver.Left       := 230;
   xpsilver.Top        := 45;
   xpsilver.Width      := 75;
-  xpsilver.Text       := 'XP Silver';
+  xpsilver.Text       := 'XP Silver (+)';
   bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/button.bmp'));
   bmp.CreateMaskFromSample(0, 0);
   bmp.UpdateImage;
@@ -433,11 +498,12 @@ begin
   bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/scrollbar.bmp'));
   bmp.UpdateImage;
 
-  sbluna            := TThemeScrollBar.Create(self);
-  sbluna.Top        := 80;
-  sbluna.Left       := 130;
-  sbluna.Height     := 100;
-  sbluna.Max        := 15;
+  sbluna := TThemeScrollBar.Create(self);
+  with sbluna do
+  begin
+    SetPosition(130, 80, 24, 100);
+    Max := 15;
+  end;
 
   sbsilver          := TThemeScrollBar.Create(self);
   sbsilver.Top      := 80;
@@ -445,7 +511,7 @@ begin
   sbsilver.Height   := 100;
   sbsilver.Max      := 15;
   sbsilver.ThemeImage := bmp;
-
+{
   sblunaHor         := TThemeScrollBar.Create(self);
   sblunaHor.Top     := 100;
   sblunaHor.Left    := 20;
@@ -460,16 +526,19 @@ begin
   sbsilverHor.Max   := 15;
   sbsilverHor.Orientation := orHorizontal;
   sbsilverHor.ThemeImage  := bmp;
+}
 end;
 
 procedure TMainForm.HandlePaint;
 var
   image: TfpgImage;
   img: TfpgImage;
-  part: TfpgImage;
   r: TRect;
+  r2: TfpgRect;
   x, y: TfpgCoord;
   nr: TfpgRect;
+  
+
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
@@ -495,54 +564,17 @@ begin
   Canvas.DrawImage(5, 46, img);
 
   x := 5;
-  y := 69;
+  y := 75;
   
   // left border
-  r.Left    := 0;
-  r.Top     := 0;
-  r.Right   := 2;
-  r.Bottom  := 21;
-  part := img.ImageFromRect(r);
-  Canvas.StretchDraw(x, y, 3, 17, part);
-  
-  // top border
-  r.Left    := 2;
-  r.Top     := 0;
-  r.Right   := 32-2;
-  r.Bottom  := 2;
-  part := img.ImageFromRect(r);
-  Canvas.StretchDraw(x+2+r.Left, y+R.Top, 17-(2*2), r.Bottom-r.Top, part);
-  part.Free;
+  //r.Left    := 0;
+  //r.Top     := 0;
+  //r.Right   := 2;
+  //r.Bottom  := 21;
+  PaintPartScaledImage(image, Canvas, x, y, 32, 21, 90, 24, 3, trackbar.Position);
 
-  // bottom border
-  r.Left    := 2;
-  r.Top     := 21-2;
-  r.Right   := 32-2;
-  r.Bottom  := 21;
-  part := img.ImageFromRect(r);
-  Canvas.StretchDraw(x+2+r.Left, y+R.Top, 17-(2*2), r.Bottom-r.Top, part);
-  part.Free;
+  PaintPartScaledImage(image, Canvas, x, 100, 32, 21, 17, 17, 3, trackbar.Position);
 
-  // right border
-  r.Left    := 32-2;
-  r.Top     := 0;
-  r.Right   := 32;
-  r.Bottom  := 21;
-  part := img.ImageFromRect(r);
-  Canvas.StretchDraw(x+4+r.Left, y+R.Top, r.Right-r.Left, 17, part);
-  part.Free;
-
-  // main body
-  r.Left    := 3;
-  r.Top     := 3;
-  r.Right   := 32-2;
-  r.Bottom  := 21-2;
-  part := img.ImageFromRect(r);
-  Canvas.StretchDraw(x+4+r.Left, y+2+R.Top, 17-(2*2), 17-(2*2), part);
-  part.Free;
-
-//  Canvas.StretchDraw(5, 69, 17, 17, partimg);
-  
   img.Free;
   
   nr.SetRect(20, 250, 100, 4);
@@ -559,6 +591,9 @@ begin
   inherited Create(AOwner);
   WindowTitle := 'Theme test';
   SetPosition(100, 100, 400, 300);
+  
+  // image index
+  FIndex := 0;
   
   lblLuna := CreateLabel(self, 100, 5, 'Luna');
   lblLuna.FontDesc    := 'Sans-12:bold:underline';
@@ -579,10 +614,10 @@ begin
   trackbar.Width := 150;
   trackbar.Orientation := orHorizontal;
   trackbar.Min := 0;
-  trackbar.Max := 10;
+  trackbar.Max := 8;
   trackbar.Top := 265;
   trackbar.Left := 20;
-//  trackbar.Position := 50;
+  trackbar.Position := 0;
   trackbar.OnChange := @TrackBarChange;
   trackbar.ShowPosition := True;
 end;
