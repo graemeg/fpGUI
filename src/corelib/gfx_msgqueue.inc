@@ -4,7 +4,7 @@
 
 type
   // a simlpe linked list implementation
-  TMessageListElement = class
+  TMessageListElement = class(TObject)
   protected
     Next: TMessageListElement;
     Prev: TMessageListElement;
@@ -96,10 +96,13 @@ begin
   UsedLastMessage  := nil;
   FreeFirstMessage := nil;
   FreeLastMessage  := nil;
+  
+  uMsgQueueList := TList.Create;
 
   for n := 1 to cMessageQueueSize do
   begin
     e := TMessageListElement.Create;
+    uMsgQueueList.Add(e); // so we can free it off later
     MsgListInsertElement(e,FreeFirstMessage,FreeLastMessage);
   end;
 end;

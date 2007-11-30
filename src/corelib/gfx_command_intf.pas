@@ -1,7 +1,6 @@
 unit gfx_command_intf;
 
 {$mode objfpc}{$H+}
-{$INTERFACES CORBA}
 
 interface
 

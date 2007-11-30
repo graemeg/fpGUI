@@ -165,6 +165,7 @@ type
     MenuDisabledFont: TfpgFont;
   public
     constructor Create; virtual;
+    destructor  Destroy; override;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer); virtual;
@@ -217,9 +218,8 @@ type
   end;
 
 
-  { Caret or text cursor, inverts painting over text and has blinking
-    support. }
-  TfpgCaret = class
+  { Caret or text cursor, inverts painting over text and has blinking support. }
+  TfpgCaret = class(TObject)
   private
     FEnabled: boolean;
     FVisible: boolean;
@@ -303,6 +303,7 @@ var
   fpgNamedColors: array[0..255] of TfpgColor;
   fpgNamedFonts:  TList;
   uApplication:   TfpgApplication;
+  uMsgQueueList: TList;
 
 const
   ONE_MILISEC = 1 / (24 * 60 * 60 * 1000);
@@ -333,17 +334,17 @@ end;
 
 procedure fpgCheckTimers;
 var
-  n: integer;
+  i: integer;
   ctime: TDateTime;
 begin
   ctime := now;
-  for n := 1 to fpgTimers.Count do
-    TfpgTimer(fpgTimers[n - 1]).CheckAlarm(ctime);
+  for i := 0 to fpgTimers.Count-1 do
+    TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
 end;
 
 function fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
 var
-  n: integer;
+  i: integer;
   t: TfpgTimer;
   dt: TDateTime;
   tb: Boolean;
@@ -352,9 +353,9 @@ begin
   dt := ctime + amaxtime * ONE_MILISEC;
   tb := False;
 
-  for n := 1 to fpgTimers.Count do
+  for i := 0 to fpgTimers.Count-1 do
   begin
-    t := TfpgTimer(fpgTimers[n - 1]);
+    t := TfpgTimer(fpgTimers[i]);
     if t.Enabled and (t.NextAlarm < dt) then
     begin
       dt := t.NextAlarm;
@@ -503,7 +504,7 @@ var
   i: integer;
 begin
   i := fpgTimers.IndexOf(self);
-  if i >= 0 then
+  if i > -1 then
     fpgTimers.Delete(i);
   inherited Destroy;
 end;
@@ -622,10 +623,34 @@ begin
   fpgNamedFonts.Free;
 
   fpgImages.Free;
+  fpgStyle.Free;
+  fpgCaret.Free;
+  
+  for i := fpgTimers.Count-1 downto 0 do
+  begin
+    TfpgTimer(fpgTimers[i]).Free;
+    fpgTimers.Delete(i);
+  end;
+  fpgTimers.Free;
 
-  FFontResList.Free;
   FDefaultFont.Free;
+
+  for i := FFontResList.Count-1 downto 0 do
+  begin
+    TfpgFontResource(FFontResList[i]).Free;
+    FFontResList.Delete(i);
+  end;
+  FFontResList.Free;
+
   FreeAndNil(FModalFormStack);
+
+  for i := uMsgQueueList.Count-1 downto 0 do
+  begin
+    TMessageListElement(uMsgQueueList[i]).Free;
+    uMsgQueueList.Delete(i);
+  end;
+  uMsgQueueList.Free;
+
   inherited Destroy;
 end;
 
@@ -661,7 +686,7 @@ begin
   else
   begin
     fr.Free;
-    writeln('error opening font.');
+    writeln('fpGFX: Error opening font.');
   end;
 end;
 
@@ -683,12 +708,12 @@ procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
 var
   n: integer;
 begin
-  for n := 0 to FFontResList.Count - 1 do
+  for n := FFontResList.Count-1 downto 0 do
     if FFontResList[n] = Pointer(afontres) then
     begin
       TfpgFontResource(FFontResList[n]).Free;
       FFontResList.Delete(n);
-      Exit;
+      Exit; //==>
     end;
 end;
 
@@ -744,7 +769,6 @@ destructor TfpgFont.Destroy;
 begin
   if TfpgFontResource(FFontRes).DecRefCount <= 0 then
     fpgApplication.FreeFontRes(TfpgFontResource(FFontRes));
-
   inherited;
 end;
 
@@ -921,6 +945,15 @@ begin
   MenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
   MenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
   MenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
+end;
+
+destructor TfpgStyle.Destroy;
+begin
+  DefaultFont.Free;
+  MenuFont.Free;
+  MenuAccelFont.Free;
+  MenuDisabledFont.Free;
+  inherited Destroy;
 end;
 
 procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
@@ -1114,15 +1147,16 @@ end;
 
 destructor TfpgCaret.Destroy;
 begin
+  FCanvas := nil;
   FTimer.Free;
   inherited Destroy;
 end;
 
-procedure TfpgCaret.SetCaret(acanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
+procedure TfpgCaret.SetCaret(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord);
 begin
   FEnabled := True;
   FVisible := False;
-  FCanvas  := acanvas;
+  FCanvas  := ACanvas;
   FLeft    := x;
   FTop     := y;
   FWidth   := w;
@@ -1134,9 +1168,9 @@ begin
   FTimer.Enabled  := True;
 end;
 
-procedure TfpgCaret.UnSetCaret(acanvas: TfpgCanvas);
+procedure TfpgCaret.UnSetCaret(ACanvas: TfpgCanvas);
 begin
-  if (FCanvas = acanvas) or (acanvas = nil) then
+  if (FCanvas = ACanvas) or (ACanvas = nil) then
   begin
     FEnabled := False;
     FCanvas  := nil;
@@ -1176,10 +1210,15 @@ end;
 
 destructor TfpgImages.Destroy;
 var
-  n: integer;
+  i: integer;
+  img: TfpgImage;
 begin
-  for n := 0 to FImages.Count - 1 do
-    FImages.Objects[n].Free;
+  for i :=  FImages.Count-1 downto 0 do
+  begin
+    img := TfpgImage(FImages.Objects[i]);
+    FImages.Delete(i);
+    img.Free;
+  end;
   FImages.Free;
   inherited Destroy;
 end;
@@ -1304,13 +1343,13 @@ end;
 
 initialization
   uApplication    := nil;
+  uMsgQueueList   := nil;
   fpgTimers       := nil;
   fpgCaret        := nil;
   fpgImages       := nil;
   fpgInitMsgQueue;
 
 finalization;
-  fpgCaret.Free;
   uApplication.free;
 
 end.

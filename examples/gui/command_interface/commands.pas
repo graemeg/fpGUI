@@ -5,7 +5,6 @@
 unit commands;
 
 {$mode objfpc}{$H+}
-{$INTERFACES CORBA}
 
 interface
 
