@@ -94,6 +94,7 @@
         <UnitName Value="gfx_command_intf"/>
       </Item17>
     </Files>
+    <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="FCL"/>

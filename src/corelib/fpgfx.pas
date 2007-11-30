@@ -1,7 +1,6 @@
 unit fpgfx;
 
 {$mode objfpc}{$H+}
-{.$INTERFACES CORBA}
 
 interface
 
@@ -9,7 +8,7 @@ uses
   Classes,
   SysUtils,
   gfxbase
-  // This is the only place we have such IFDEF!!! Is this ok, or must be
+  // This is the only place we have such IFDEF!!! Is this ok, or must we
   // implement it like we have done for the previous version of fpGFX?
   {$IFDEF MSWINDOWS}
   ,gfx_gdi
@@ -29,7 +28,7 @@ type
 
   TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
     btnIsSelected, btnHasFocus, btnHasParentColor);
-    
+
   TMouseButton = (mbLeft, mbRight, mbMiddle);
 
 
@@ -38,7 +37,7 @@ const
 
   // Used for the internal message queue
   cMessageQueueSize = 512;
-  
+
   // version and name constants
   fpGUIVersion = '0.5.1';
   fpGUIName    = 'fpGUI Library';
@@ -67,8 +66,8 @@ type
   TMouseWheelEvent = procedure(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint) of object;
   { Painting }
   TPaintEvent = procedure(Sender: TObject{; const ARect: TfpgRect}) of object;
-  
-  
+
+
 
 type
   TSizeParams = record
@@ -142,7 +141,7 @@ type
   public
     constructor Create(awin: TfpgWindow); reintroduce;
     destructor  Destroy; override;
-    
+
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
     procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
     procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
@@ -604,7 +603,7 @@ begin
   FModalFormStack := TList.Create;
 
   inherited Create(aparams);
-  
+
   if IsInitialized then
   begin
     FScreenWidth  := GetScreenWidth;
@@ -621,7 +620,7 @@ begin
   for i := 0 to (fpgNamedFonts.Count - 1) do
     TNamedFontItem(fpgNamedFonts.Items[i]).Free;
   fpgNamedFonts.Free;
-  
+
   fpgImages.Free;
 
   FFontResList.Free;
@@ -1080,11 +1079,11 @@ begin
   oldColor      := ACanvas.Color;
   oldLineWidth  := ACanvas.LineWidth;
   oldLineStyle  := ACanvas.LineStyle;
-  
+
   ACanvas.SetColor(clText1);
   ACanvas.SetLineStyle(1, lsDot);
   ACanvas.DrawRectangle(r);
-  
+
   // restore previous settings
   ACanvas.SetColor(oldColor);
   ACanvas.SetLineStyle(oldLineWidth, oldLineStyle);
@@ -1263,11 +1262,11 @@ var
   ix, iy: TfpgCoord;
 begin
   SortRect(ARect);
-  
+
   Result := TfpgImage.Create;
   Result.AllocateImage(ColorDepth, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top);
   Result.UpdateImage;
-  
+
   iy := -1;
   for y := ARect.Top to ARect.Bottom-1 do
   begin

@@ -63,7 +63,11 @@ type
     procedure   SetThemeImage(const AValue: TfpgImage);
   protected
     procedure   HandlePaint; override;
+    procedure   DrawSlider(recalc: boolean); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleMouseExit; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -176,6 +180,9 @@ var
   part: TfpgImage;
   r: TRect;
 begin
+  TopRect.SetRect(0, 0, Width, Width);
+  BottomRect.SetRect(0, Height-Width, Width, Width);
+
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -198,39 +205,40 @@ begin
 
   if Orientation = orVertical then
   begin
-//    DrawButton(0, 0, Width, Width, 'sys.sb.up' ,FStartBtnPressed);
-    { top button }
-//    if Pressed then
-//      Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded, btnIsPressed])
-      state := 4;
-      r.Left := (state * imgwidth);
-      r.Top := 0;
-      r.Right := (r.Left + imgwidth);
-      r.Bottom := 21;
-      part := image.ImageFromRect(r);
-      Canvas.DrawImagePart(0, 0, image, r.Left, r.Top, width, width);
-//      Canvas.DrawImage(0, 0, part);
-      writeln('Width ', Width);
-      writeln('Height ', Height);
-//      Canvas.StretchDraw(0, 0, width, width, part);
-      part.Free;
-//      Canvas.DrawImagePart(0, 0, image, state*imgwidth, 0, imgwidth, 21);
-//    else
-//      Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded]);
-
-    { bottom button }
-{    DrawButton(0, Height - Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
+    PaintPartScaledImage(image, Canvas, 0, 0, 32, 21, Width, Width, 3, state);
+    PaintPartScaledImage(image, Canvas, 0, Height-Width, 32, 21, Width, Width, 3, state);
   end
   else
   begin
+    PaintPartScaledImage(image, Canvas, 0, 0, 32, 21, Height, Height, 3, state+4);
+    PaintPartScaledImage(image, Canvas, Width-Height, 0, 32, 21, Height, Height, 3, state+4);
+
     DrawButton(0, 0, Height, Height, 'sys.sb.left', FStartBtnPressed);
     DrawButton(Width - Height, 0, Height, Height, 'sys.sb.right', FEndBtnPressed);
   end;
 
   DrawSlider(True);
-}
+
+  Canvas.EndDraw;
+end;
+
+procedure TThemeScrollbar.DrawSlider(recalc: boolean);
+begin
+  inherited DrawSlider(recalc);
+{
+  // Paint the slider button
+  if Orientation = orVertical then
+  begin
+    PaintPartScaledImage(Image, Canvas, 0, Width+FSliderPos, 32, 21, Width, FSliderLength, 3, 4);
+//    Canvas.EndDraw(0, Width, Width, Height - Width - Width);
+  end
+  else
+  begin
+    PaintPartScaledImage(Image, Canvas, Height+FSliderPos, 0, 32, 21, FSliderLength, Height, 3, 0);
+//    Canvas.EndDraw(Height, 0, Width - Height - Height, Height);
   end;
   Canvas.EndDraw;
+}
 end;
 
 procedure TThemeScrollbar.HandleMouseMove(x, y: integer; btnstate: word;
@@ -240,7 +248,7 @@ var
   NewState: Integer;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
-  exit;
+//  exit;
   
   Pt := Point(X, Y);
   NewState := 0;
@@ -254,6 +262,34 @@ begin
   if NewState <> State then
   begin
     State := NewState;
+    Repaint;
+  end;
+end;
+
+procedure TThemeScrollbar.HandleMouseExit;
+begin
+  State := 0;
+  Repaint;
+  inherited HandleMouseExit;
+end;
+
+procedure TThemeScrollbar.HandleLMouseDown(x, y: integer;
+  shiftstate: TShiftState);
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  if PtInRect(TopRect, Point(x,y)) then
+  begin
+    State := 2;
+    Repaint;
+  end;
+end;
+
+procedure TThemeScrollbar.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+  if PtInRect(TopRect, Point(x,y)) then
+  begin
+    State := 1;
     Repaint;
   end;
 end;
