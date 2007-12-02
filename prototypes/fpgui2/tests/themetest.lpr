@@ -16,7 +16,8 @@ uses
   gui_label,
   gfx_imgfmt_bmp,
   gfx_extinterpolation,
-  gui_trackbar;
+  gui_trackbar,
+  gui_style;
 
 type
   { Note:
@@ -74,6 +75,19 @@ type
     { this property is only for demo purposes! }
     property    ThemeImage: TfpgImage read image write SetThemeImage;
   end;
+  
+  
+  { TStyledButton }
+
+  TStyledButton = class(TfpgButton)
+  private
+    FStyle: TfpgBaseStyle;
+  protected
+    procedure   HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+  end;
 
 
   TMainForm = class(TfpgForm)
@@ -83,6 +97,7 @@ type
     lblSilver: TfpgLabel;
     xpluna: TThemeButton;
     xpsilver: TThemeButton;
+    styledbutton: TStyledButton;
     sbluna: TThemeScrollbar;
     sbsilver: TThemeScrollbar;
     sblunaHor: TThemeScrollbar;
@@ -99,6 +114,61 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
+
+{ TStyledButton }
+
+procedure TStyledButton.HandlePaint;
+var
+  buttonoptions: TfpgButtonStyleOption;
+begin
+  Canvas.BeginDraw;
+  
+  Canvas.Clear(clButtonFace);
+  Canvas.ClearClipRect;
+
+  // Setup all button options that we need
+  buttonoptions := TfpgButtonStyleOption.Create;
+  buttonoptions.Rect.SetRect(0, 0, Width, Height);
+  buttonoptions.StyleOption := soButton;
+  buttonoptions.State := [];
+  buttonoptions.ButtonFeatures := [];
+  
+  if Enabled then
+    Include(buttonoptions.State, stEnabled);
+    
+  if FDown then
+    Include(buttonoptions.State, stLowered)
+  else
+    Include(buttonoptions.State, stRaised);
+
+  if FFocused then
+    Include(buttonoptions.State, stHasFocus);
+
+  if FEmbedded then
+    Include(buttonoptions.ButtonFeatures, bfEmbedded);
+
+  if FDefault then
+    Include(buttonoptions.ButtonFeatures, bfDefault);
+
+  // Now let the Style do ALL the drawing. Nothing must be done here!
+  FStyle.DrawControl(cePushButtonBevel, buttonoptions, Canvas, self);
+  FStyle.DrawPrimitive(peFocusRectangle, buttonoptions, Canvas, self);
+
+  buttonoptions.Free;
+  Canvas.EndDraw;
+end;
+
+constructor TStyledButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FStyle := TfpgWin2000Style.Create;
+end;
+
+destructor TStyledButton.Destroy;
+begin
+  FStyle.Free;
+  inherited Destroy;
+end;
 
 
 
@@ -525,6 +595,11 @@ begin
   bmp.CreateMaskFromSample(0, 0);
   bmp.UpdateImage;
   xpsilver.ThemeImage := bmp;
+  
+  styledbutton := TStyledButton.Create(self);
+  styledbutton.SetPosition(btnClose.Left-20, btnClose.Top-80, 75, 24);
+//      styledbutton.Default := True;
+  styledbutton.Text := 'Styled';
 end;
 
 procedure TMainForm.CreateScrollbars;

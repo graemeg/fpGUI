@@ -21,6 +21,8 @@ unit gui_style;
 
 {$mode objfpc}{$H+}
 
+{$Define DEBUG}
+
 interface
 
 uses
@@ -114,7 +116,7 @@ type
   end;
   
   
-  TfpgButtonFeatures = set of (bfNone, bfFlat, bfDefault);
+  TfpgButtonFeatures = set of (bfNone, bfFlat, bfDefault, bfEmbedded);
 
   // Button specific options
   TfpgButtonStyleOption = class(TfpgStyleOption)
@@ -156,7 +158,7 @@ type
   
   // This class provides a widgte style similar to the classic BlueCurve theme
   // originally created by Red Hat.
-  TfpgBluecurveStyle = class(TfpgCommonStyle)
+  TfpgBlueCurveStyle = class(TfpgCommonStyle)
   end;
   
   
@@ -179,13 +181,77 @@ implementation
 { TfpgCommonStyle }
 
 procedure TfpgCommonStyle.DrawControl(element: TfpgControlElement;
-  const option: TfpgStyleOption; canvas: TfpgCanvas; widget: TfpgWidget);
+    const option: TfpgStyleOption; canvas: TfpgCanvas; widget: TfpgWidget);
+var
+  r: TfpgRect;
 begin
   //  Do common things here
+  case element of
+    cePushButtonBevel:
+        begin
+          {$IFDEF DEBUG}
+          writeln('TfpgCommonStyle.DrawControl: cePushButtonBevel');
+          {$ENDIF}
+          r.SetRect(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height);
+          
+          if bfDefault in TfpgButtonStyleOption(option).ButtonFeatures then
+          begin
+            Canvas.SetColor(clBlack);
+            Canvas.SetLineStyle(1, lsSolid);
+            Canvas.DrawRectangle(r);
+            InflateRect(r, -1, -1);
+          end;
+
+          Canvas.SetColor(clButtonFace);
+          Canvas.SetLineStyle(1, lsSolid);
+          Canvas.FillRectangle(r.Left, r.Top, r.Width, r.Height);
+
+          // Left and Top (outer)
+          if stLowered in option.State then
+          begin
+            if bfEmbedded in TfpgButtonStyleOption(option).ButtonFeatures then
+              Canvas.SetColor(clHilite1)
+            else
+              Canvas.SetColor(clShadow2);
+          end
+          else
+            Canvas.SetColor(clHilite1);
+          Canvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
+          Canvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
+
+          // Right and Bottom (outer)
+          if stLowered in option.State then
+          begin
+            if bfEmbedded in TfpgButtonStyleOption(option).ButtonFeatures then
+              Canvas.SetColor(clHilite1)
+            else
+              Canvas.SetColor(clShadow2);
+          end
+          else
+            Canvas.SetColor(clShadow2);
+          Canvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
+          Canvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
+
+          // Right and Bottom (inner)
+          if stLowered in option.State then
+          begin
+            if bfEmbedded in TfpgButtonStyleOption(option).ButtonFeatures then
+              Canvas.SetColor(clButtonFace)
+            else
+              Canvas.SetColor(clHilite1);
+          end
+          else
+            Canvas.SetColor(clShadow1);
+          Canvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right
+          Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Left, r.Bottom-1);   // bottom
+        end  { cePushButtonBevel }
+  end;
 end;
 
 procedure TfpgCommonStyle.DrawPrimitive(element: TfpgPrimitiveElement;
-  const option: TfpgStyleOption; canvas: TfpgCanvas; widget: TfpgWidget);
+    const option: TfpgStyleOption; canvas: TfpgCanvas; widget: TfpgWidget);
+var
+  r: TfpgRect;
 begin
   // Do common things here. It's going to be a huge case statement. This design
   // allows us to add new controls or elements without having to instantly
@@ -193,15 +259,27 @@ begin
   case element of
     peFocusRectangle:
         begin
-          canvas.DrawFocusRect(option.Rect);
-        end;
+          {$IFDEF DEBUG}
+          writeln('TfpgCommonStyle.DrawPrimitive: peFocusRectangle');
+          {$ENDIF}
+          if stHasFocus in option.State then
+          begin
+            r.SetRect(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height);
+            InflateRect(r, -3, -3);
+            Canvas.DrawFocusRect(r);
+          end;
+        end;  { peFocusRectangle }
+        
     peIndicatorRadioButton:
         begin      // just an example!!!!!!!!
-          canvas.SetColor(clShadow1);
-          canvas.DrawArc(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height, 0, 180);
-          canvas.SetColor(clHilite1);
-          canvas.DrawArc(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height, 180, 0);
-        end;
+          {$IFDEF DEBUG}
+          writeln('TfpgCommonStyle.DrawPrimitive: peIndicatorRadioButton');
+          {$ENDIF}
+          Canvas.SetColor(clShadow1);
+          Canvas.DrawArc(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height, 0, 180);
+          Canvas.SetColor(clHilite1);
+          Canvas.DrawArc(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height, 180, 0);
+        end; { peIndicatorRadioButton }
   end;
 end;
 
