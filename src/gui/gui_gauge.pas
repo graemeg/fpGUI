@@ -104,6 +104,9 @@ function CreateGauge (AOwner: TComponent; ALeft, ATop, AWidth,
 
 implementation
 
+uses
+  gfx_wuline;
+
 { This procedure draws a filled arc with a color gradient  -
   to be moved in CanvasBase? }
 procedure FillArcGradient(canvas: TfpgCanvas; X,Y,W,H: TfpgCoord; a1,a2: double; Astart,Astop: TfpgColor);
@@ -168,7 +171,7 @@ end;
 { TfpgGauge }
 
 { Drawing procedures - they're called from HandlePaint, which takes care of
-  canvas.BeginDraw and Canvas.EndDraw - Shouldn't be used otherwise. }
+  Canvas.BeginDraw and Canvas.EndDraw - Shouldn't be used otherwise. }
 procedure TfpgGauge.BackgroundDraw;
 begin
   {common Background for all kinds }
@@ -199,12 +202,12 @@ begin
             { Round frame for the Pie }
             Canvas.SetLineStyle(2, lsSolid);
         	  Canvas.SetColor(TfpgColor($98b2ed));
-        	  Canvas.DrawArc(Left, Top, Width, Height , 0, 360);
+        	  Canvas.DrawArc(Left, Top, Width, Height, 0, 360);
           end;
       gkNeedle:
           begin
             { Half a filled circle background for needle }
-            FillArcGradient (Canvas,Left, Top, Width, Height * 2 -1, 0, 180,TfpgColor($425d9b),TfpgColor($98b2ed));
+            FillArcGradient(Canvas,Left, Top, Width, Height * 2 -1, 0, 180,TfpgColor($425d9b),TfpgColor($98b2ed));
     	      Canvas.SetLineStyle(2, lsSolid);
             //Canvas.SetColor(TfpgColor($3b4c71));
     	      Canvas.SetColor(TfpgColor($98b2ed));
@@ -269,7 +272,7 @@ begin
               // right bottom
               Canvas.SetColor(TfpgColor($3b4c71));
               Canvas.DrawLine(Right, Top, Right, Bottom);   // right
-              Canvas.DrawLine(Right, Bottom, Left-1, Bottom);   // bottom
+              Canvas.DrawLine(Right, Bottom, Left, Bottom);   // bottom
               // inside gradient fill
               InflateRect(FClientRect, -1, -1);
               Canvas.GradientFill(FClientRect, TfpgColor($425d9b), TfpgColor($97b0e8), gdVertical);
@@ -282,7 +285,7 @@ begin
             begin
               if BarLength > Height then
                 BarLength := Height;
-              Top := Height - BarLength;
+              Top := Height - BarLength+1;
               Height := BarLength;
               // left top
               Canvas.SetColor(TfpgColor($98b2ed));
@@ -291,7 +294,7 @@ begin
               // right bottom
               Canvas.SetColor(TfpgColor($3b4c71));
               Canvas.DrawLine(Right, Top, Right, Bottom);   // right
-              Canvas.DrawLine(Right, Bottom, Left-1, Bottom);   // bottom
+              Canvas.DrawLine(Right, Bottom, Left, Bottom);   // bottom
               // inside gradient fill
               InflateRect(FClientRect, -1, -1);
               Canvas.GradientFill(FClientRect, TfpgColor($425d9b), TfpgColor($97b0e8), gdHorizontal);
@@ -334,9 +337,21 @@ begin
       Angle := (Pi * ((Percentage / 100.0))); // percentage to radiants
       Canvas.SetColor(TfpgColor($3b4c71));
       Canvas.SetLineStyle(2,lsSolid);
-      Canvas.DrawLine(Center.X, FClientRect.Bottom,
-      Integer(round(Center.X - (Radius.X * Cos(Angle)))),
-      Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle)))));
+      //Canvas.DrawLine(Center.X, FClientRect.Bottom,
+          //Integer(round(Center.X - (Radius.X * Cos(Angle)))),
+          //Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle)))));
+          
+      { *** Experimental *** }
+      WuLine(Canvas,
+          Point(Center.X, FClientRect.Bottom),
+          Point(Integer(round(Center.X - (Radius.X * Cos(Angle)))),
+                Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle))))),
+          Canvas.Color);
+      WuLine(Canvas,
+          Point(Center.X+1, FClientRect.Bottom),
+          Point(Integer(round(Center.X+1 - (Radius.X * Cos(Angle)))),
+                Integer(round((FClientRect.Bottom) - (Radius.Y * Sin(Angle))))),
+          Canvas.Color);
     end;
   end;
 end;
@@ -367,9 +382,21 @@ begin
       { draw needle }
       Angle := (Pi * ((Percentage / (100 * 2 / 3)) + -0.25));
       Canvas.SetLineStyle(2,lsSolid);
-      Canvas.DrawLine(Center.X, Center.Y,
-          Integer(round(Center.X  - ( Radius.X * cos(Angle)))),
-          Integer(round((Center.Y) - (Radius.Y * Sin(Angle)))));
+      //Canvas.DrawLine(Center.X, Center.Y,
+          //Integer(round(Center.X  - ( Radius.X * cos(Angle)))),
+          //Integer(round((Center.Y) - (Radius.Y * Sin(Angle)))));
+
+      { *** Experimental *** }
+      WuLine(Canvas,
+          Point(Center.X, Center.Y),
+          Point(Integer(round(Center.X  - ( Radius.X * cos(Angle)))),
+                Integer(round((Center.Y) - (Radius.Y * Sin(Angle))))),
+          Canvas.Color);
+      WuLine(Canvas,
+          Point(Center.X+1, Center.Y),
+          Point(Integer(round(Center.X+1  - ( Radius.X * cos(Angle)))),
+                Integer(round((Center.Y) - (Radius.Y * Sin(Angle))))),
+          Canvas.Color);
     end;  { if }
   end;  { with }
 end;

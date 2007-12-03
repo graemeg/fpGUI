@@ -189,7 +189,7 @@ begin
     // right bottom
     Canvas.SetColor(TfpgColor($3b4c71));
     Canvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
-    Canvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
+    Canvas.DrawLine(r.Right, r.Bottom, r.Left, r.Bottom);   // bottom
     // inside gradient fill
     InflateRect(r, -1, -1);
     Canvas.GradientFill(r, TfpgColor($425d9b), TfpgColor($97b0e8), gdVertical);

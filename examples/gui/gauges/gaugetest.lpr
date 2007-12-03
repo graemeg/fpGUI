@@ -16,7 +16,6 @@ uses
   gui_trackbar,
   gui_label,
   gfx_imgfmt_bmp,
-  fpgui_package,
   gui_edit,
   gui_bevel,
   gui_gauge;
@@ -82,7 +81,7 @@ begin
   with Gauge do
   begin
     Name := 'Gauge';
-    SetPosition(124, 104, 151, 25);
+    SetPosition(124, 104, 150, 25);
     Kind := gkHorizontalBar;
   end;
 
