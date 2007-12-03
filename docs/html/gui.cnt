@@ -39,7 +39,6 @@
    ShowGrid gui_basegrid/tfpgbasegrid.showgrid.html
    ScrollBarStyle gui_basegrid/tfpgbasegrid.scrollbarstyle.html
    HeaderHeight gui_basegrid/tfpgbasegrid.headerheight.html
-   ColResizing gui_basegrid/tfpgbasegrid.colresizing.html
    ColumnWidth gui_basegrid/tfpgbasegrid.columnwidth.html
    OnFocusChange gui_basegrid/tfpgbasegrid.onfocuschange.html
    OnRowChange gui_basegrid/tfpgbasegrid.onrowchange.html
@@ -82,6 +81,8 @@
    DoPush gui_button/tfpgbutton.dopush.html
    DoRelease gui_button/tfpgbutton.dorelease.html
    Click gui_button/tfpgbutton.click.html
+   GetCommand gui_button/tfpgbutton.getcommand.html
+   SetCommand gui_button/tfpgbutton.setcommand.html
    Down gui_button/tfpgbutton.down.html
    Font gui_button/tfpgbutton.font.html
    AllowDown gui_button/tfpgbutton.allowdown.html
@@ -402,7 +403,6 @@
    ShowHeader gui_grid/tfpgstringgrid.showheader.html
    ShowGrid gui_grid/tfpgstringgrid.showgrid.html
    HeaderHeight gui_grid/tfpgstringgrid.headerheight.html
-   ColResizing gui_grid/tfpgstringgrid.colresizing.html
    ColumnWidth gui_grid/tfpgstringgrid.columnwidth.html
    OnFocusChange gui_grid/tfpgstringgrid.onfocuschange.html
    OnRowChange gui_grid/tfpgstringgrid.onrowchange.html
@@ -609,6 +609,8 @@
    Selectable gui_menu/tfpgmenuitem.selectable.html
    GetAccelChar gui_menu/tfpgmenuitem.getaccelchar.html
    DrawText gui_menu/tfpgmenuitem.drawtext.html
+   GetCommand gui_menu/tfpgmenuitem.getcommand.html
+   SetCommand gui_menu/tfpgmenuitem.setcommand.html
    Text gui_menu/tfpgmenuitem.text.html
    HotKeyDef gui_menu/tfpgmenuitem.hotkeydef.html
    Separator gui_menu/tfpgmenuitem.separator.html
@@ -638,6 +640,7 @@
    Destroy gui_menu/tfpgpopupmenu.destroy.html
    Close gui_menu/tfpgpopupmenu.close.html
    AddMenuItem gui_menu/tfpgpopupmenu.addmenuitem.html
+   MenuItemByName gui_menu/tfpgpopupmenu.menuitembyname.html
    BackgroundColor gui_menu/tfpgpopupmenu.backgroundcolor.html
    BeforeShow gui_menu/tfpgpopupmenu.beforeshow.html
   TfpgMenuBar gui_menu/tfpgmenubar.html
@@ -762,7 +765,7 @@
    DrawPrimitive gui_style/tfpgcommonstyle.drawprimitive.html
   TfpgWin2000Style gui_style/tfpgwin2000style.html
   TfpgWinXPStyle gui_style/tfpgwinxpstyle.html
-  TfpgBluecurveStyle gui_style/tfpgbluecurvestyle.html
+  TfpgBlueCurveStyle gui_style/tfpgbluecurvestyle.html
   TfpgClearLookStyle gui_style/tfpgclearlookstyle.html
   TfpgMotifStyle gui_style/tfpgmotifstyle.html
  gui_tab gui_tab/index.html
@@ -865,6 +868,7 @@
    Create gui_gauge/tfpggauge.create.html
    AddProgress gui_gauge/tfpggauge.addprogress.html
    Percentage gui_gauge/tfpggauge.percentage.html
+   Font gui_gauge/tfpggauge.font.html
    Align gui_gauge/tfpggauge.align.html
    Anchors gui_gauge/tfpggauge.anchors.html
    SecondColor gui_gauge/tfpggauge.secondcolor.html
@@ -872,7 +876,6 @@
    Color gui_gauge/tfpggauge.color.html
    Enabled gui_gauge/tfpggauge.enabled.html
    FirstColor gui_gauge/tfpggauge.firstcolor.html
-   Font gui_gauge/tfpggauge.font.html
    Kind gui_gauge/tfpggauge.kind.html
    MinValue gui_gauge/tfpggauge.minvalue.html
    MaxValue gui_gauge/tfpggauge.maxvalue.html
@@ -895,13 +898,20 @@
    Month gui_popupcalendar/tfpgpopupcalendar.month.html
    Year gui_popupcalendar/tfpgpopupcalendar.year.html
    OnValueSet gui_popupcalendar/tfpgpopupcalendar.onvalueset.html
-   Value gui_popupcalendar/tfpgpopupcalendar.value.html
+   DateValue gui_popupcalendar/tfpgpopupcalendar.datevalue.html
+   MinDate gui_popupcalendar/tfpgpopupcalendar.mindate.html
+   MaxDate gui_popupcalendar/tfpgpopupcalendar.maxdate.html
   TfpgCalendarCombo gui_popupcalendar/tfpgcalendarcombo.html
    HasText gui_popupcalendar/tfpgcalendarcombo.hastext.html
    DoDropDown gui_popupcalendar/tfpgcalendarcombo.dodropdown.html
    Create gui_popupcalendar/tfpgcalendarcombo.create.html
-   Value gui_popupcalendar/tfpgcalendarcombo.value.html
+   BackgroundColor gui_popupcalendar/tfpgcalendarcombo.backgroundcolor.html
    DateFormat gui_popupcalendar/tfpgcalendarcombo.dateformat.html
+   DateValue gui_popupcalendar/tfpgcalendarcombo.datevalue.html
+   FontDesc gui_popupcalendar/tfpgcalendarcombo.fontdesc.html
+   MinDate gui_popupcalendar/tfpgcalendarcombo.mindate.html
+   MaxDate gui_popupcalendar/tfpgcalendarcombo.maxdate.html
+   OnChange gui_popupcalendar/tfpgcalendarcombo.onchange.html
 
 :classes
 #GUI.gui_basegrid.TfpgBaseGrid #CoreLib.gfx_widget.TfpgWidget
@@ -983,7 +993,6 @@
 2PShowGrid rw
 2PScrollBarStyle rw
 2PHeaderHeight r
-2PColResizing rw
 2PColumnWidth rw
 2POnFocusChange rw
 2POnRowChange rw
@@ -1005,6 +1014,7 @@
 4PStyle rw
 4PBackgroundColor rw
 #GUI.gui_button.TfpgButton #CoreLib.gfx_widget.TfpgWidget
+1VFCommand
 1VFImageName
 1VFClicked
 1VFShowImage
@@ -1046,6 +1056,8 @@
 3MDoPush
 3MDoRelease
 3MClick
+3MGetCommand
+3MSetCommand
 3PDown rw
 3PFont r
 3PAllowDown rw
@@ -1479,7 +1491,6 @@
 4PShowHeader
 4PShowGrid
 4PHeaderHeight
-4PColResizing
 4PColumnWidth
 4POnFocusChange
 4POnRowChange
@@ -1828,6 +1839,7 @@
 4PLines r
 4PFontDesc rw
 #GUI.gui_menu.TfpgMenuItem TComponent
+1VFCommand
 1VFEnabled
 1VFHotKeyDef
 1VFOnClick
@@ -1845,6 +1857,8 @@
 3MSelectable
 3MGetAccelChar
 3MDrawText
+3MGetCommand
+3MSetCommand
 3PText rw
 3PHotKeyDef rw
 3PSeparator rw
@@ -1887,6 +1901,7 @@
 3MDestroy
 3MClose
 3MAddMenuItem
+3MMenuItemByName
 3PBackgroundColor rw
 3PBeforeShow rw
 #GUI.gui_menu.TfpgMenuBar #CoreLib.gfx_widget.TfpgWidget
@@ -2039,7 +2054,7 @@
 3MDrawPrimitive
 #GUI.gui_style.TfpgWin2000Style #GUI.gui_style.TfpgCommonStyle
 #GUI.gui_style.TfpgWinXPStyle #GUI.gui_style.TfpgCommonStyle
-#GUI.gui_style.TfpgBluecurveStyle #GUI.gui_style.TfpgCommonStyle
+#GUI.gui_style.TfpgBlueCurveStyle #GUI.gui_style.TfpgCommonStyle
 #GUI.gui_style.TfpgClearLookStyle #GUI.gui_style.TfpgCommonStyle
 #GUI.gui_style.TfpgMotifStyle #GUI.gui_style.TfpgCommonStyle
 #GUI.gui_tab.TfpgTabSheet #CoreLib.gfx_widget.TfpgWidget
@@ -2253,6 +2268,7 @@
 3MCreate
 3MAddProgress
 3PPercentage r
+3PFont r
 4PAlign
 4PAnchors
 4PSecondColor rw
@@ -2260,7 +2276,6 @@
 4PColor rw
 4PEnabled
 4PFirstColor rw
-4PFont r
 4PKind rw
 4PMinValue rw
 4PMaxValue rw
@@ -2270,6 +2285,8 @@
 #GUI.gui_popupcalendar.TfpgPopupCalendar #CoreLib.gfx_popupwindow.TfpgPopupWindow
 1VFMonthOffset
 1VFDate
+1VFMaxDate
+1VFMinDate
 1VFCallerWidget
 1VFOnValueSet
 1VedtYear
@@ -2285,6 +2302,8 @@
 1MCalculateCellDay
 1MSetDateElement
 1MSetDateValue
+1MSetMaxDate
+1MSetMinDate
 1MUpdateCalendar
 1MbtnYearUpClicked
 1MbtnYearDownClicked
@@ -2305,17 +2324,28 @@
 3PMonth
 3PYear
 3POnValueSet rw
-4PValue rw
+4PDateValue rw
+4PMinDate rw
+4PMaxDate rw
 #GUI.gui_popupcalendar.TfpgCalendarCombo #GUI.gui_combobox.TfpgAbstractComboBox
 1VFDate
 1VFDateFormat
+1VFMaxDate
+1VFMinDate
 1MInternalOnValueSet
 1MSetDateFormat
 1MSetDateValue
+1MSetMaxDate
+1MSetMinDate
 1MSetText
 1MGetText
 2MHasText
 2MDoDropDown
 3MCreate
-4PValue rw
+4PBackgroundColor
 4PDateFormat rw
+4PDateValue rw
+4PFontDesc
+4PMinDate rw
+4PMaxDate rw
+4POnChange

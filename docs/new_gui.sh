@@ -1,3 +1,4 @@
+#!/bin/sh
 
 #######  GUI
 makeskel --package=GUI --output=xml/gui/gui_basegrid.xml --input='-Fi../src/gui ../src/gui/gui_basegrid.pas'
@@ -6,7 +7,7 @@ makeskel --package=GUI --output=xml/gui/gui_button.xml --input='-Fi../src/gui ..
 makeskel --package=GUI --output=xml/gui/gui_checkbox.xml --input='-Fi../src/gui ../src/gui/gui_checkbox.pas'
 makeskel --package=GUI --output=xml/gui/gui_combobox.xml --input='-Fi../src/gui ../src/gui/gui_combobox.pas'
 makeskel --package=GUI --output=xml/gui/gui_customgrid.xml --input='-Fi../src/gui ../src/gui/gui_customgrid.pas'
-makeskel --package=GUI --output=xml/gui/gui_dialogs.xml --input='-Fi../src/gui ../src/gui/gui_dialogs.pas'
+#makeskel --package=GUI --output=xml/gui/gui_dialogs.xml --input='-Fi../src/gui ../src/gui/gui_dialogs.pas'
 makeskel --package=GUI --output=xml/gui/gui_edit.xml --input='-Fi../src/gui ../src/gui/gui_edit.pas'
 makeskel --package=GUI --output=xml/gui/gui_form.xml --input='-Fi../src/gui ../src/gui/gui_form.pas'
 makeskel --package=GUI --output=xml/gui/gui_grid.xml --input='-Fi../src/gui ../src/gui/gui_grid.pas'

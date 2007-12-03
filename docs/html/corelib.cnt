@@ -889,6 +889,7 @@
    MenuAccelFont fpgfx/tfpgstyle.menuaccelfont.html
    MenuDisabledFont fpgfx/tfpgstyle.menudisabledfont.html
    Create fpgfx/tfpgstyle.create.html
+   Destroy fpgfx/tfpgstyle.destroy.html
    DrawButtonFace fpgfx/tfpgstyle.drawbuttonface.html
    DrawControlFrame fpgfx/tfpgstyle.drawcontrolframe.html
    DrawDirectionArrow fpgfx/tfpgstyle.drawdirectionarrow.html
@@ -1123,6 +1124,9 @@
   PopupListFirst gfx_popupwindow/popuplistfirst.html
   PopupListFind gfx_popupwindow/popuplistfind.html
   PopupDontCloseWidget gfx_popupwindow/popupdontclosewidget.html
+ gfx_wuline gfx_wuline/index.html
+  WuLine gfx_wuline/wuline.html
+  DrawWuCircle gfx_wuline/drawwucircle.html
 
 :classes
 #CoreLib.gfxbase.TfpgRect 0VTop
@@ -1608,6 +1612,7 @@
 3VMenuAccelFont
 3VMenuDisabledFont
 3MCreate
+3MDestroy
 3MDrawButtonFace
 3MDrawControlFrame
 3MDrawDirectionArrow
@@ -1647,7 +1652,7 @@
 3PNextAlarm r
 3PInterval rw
 3POnTimer rw
-#CoreLib.fpgfx.TfpgCaret .TObject
+#CoreLib.fpgfx.TfpgCaret TObject
 1VFEnabled
 1VFVisible
 1VFInterval

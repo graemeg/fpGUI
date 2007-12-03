@@ -4,6 +4,7 @@ fpdoc --package=GUI \
   --format=html \
   --output=html/gui/  \
   --content=html/gui.cnt \
+  --html-search=/fpgui/docs/search.html \
   --import=html/corelib.cnt,../corelib/ \
   --descr=xml/gui/gui_basegrid.xml --input='-Fi../src/gui ../src/gui/gui_basegrid.pas' \
   --descr=xml/gui/gui_bevel.xml --input='-Fi../src/gui ../src/gui/gui_bevel.pas' \

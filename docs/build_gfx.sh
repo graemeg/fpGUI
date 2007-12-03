@@ -5,6 +5,7 @@ fpdoc --package=CoreLib \
   --format=html \
   --output=html/corelib/  \
   --content=html/corelib.cnt \
+  --html-search=/fpgui/docs/search.html \
   --import=html/gui.cnt,../gui/ \
   --input='-Fi../src/corelib ../src/corelib/gfxbase.pas' --descr=xml/corelib/gfxbase.xml \
   --input='-Fi../src/corelib ../src/corelib/x11/gfx_x11.pas' --descr=xml/corelib/x11/gfx_x11.xml \
@@ -18,7 +19,8 @@ fpdoc --package=CoreLib \
   --input='-Fi../src/corelib ../src/corelib/gfx_utf8utils.pas' --descr=xml/corelib/gfx_utf8utils.xml \
   --input='-Fi../src/corelib ../src/corelib/gfx_widget.pas' --descr=xml/corelib/gfx_widget.xml \
   --input='-Fi../src/corelib ../src/corelib/x11/gfx_utils.pas' --descr=xml/corelib/gfx_utils.xml \
-  --input='-Fi../src/corelib ../src/corelib/gfx_popupwindow.pas' --descr=xml/corelib/gfx_popupwindow.xml 
+  --input='-Fi../src/corelib ../src/corelib/gfx_popupwindow.pas' --descr=xml/corelib/gfx_popupwindow.xml \
+  --input='-Fi../src/corelib ../src/corelib/gfx_wuline.pas' --descr=xml/corelib/gfx_wuline.xml 
 
 
 #  --input='-Fi../src/corelib ../src/corelib/x11/gfx_.pas' --descr=xml/corelib/gfx_.xml \
