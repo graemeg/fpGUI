@@ -27,7 +27,7 @@ unit gui_tree;
       text and data.
     * Implement event handlers the user can hook into and do custom drawing.
     
-  WARNING:   This is still under heavy development! Do NOT use yet.
+  WARNING:   This is still under heavy development. Use at own risk!
 }
 
 {.$Define Debug}
@@ -1268,12 +1268,23 @@ begin
       end;  { if/else }
 
       Canvas.SetLineStyle(1, FTreeLineStyle);
-      if h.Count > 0 then // subnodes?
+      if h.Count > 0 then   // do we have subnodes?
       begin
+        // small horizontal line above rectangle for first subnode (with children) only
+        if (h <> RootNode.FirstSubNode) then
+        begin
+          if (h.Parent.FirstSubNode = h)  then
+          begin
+            Canvas.SetLineStyle(1, FTreeLineStyle);
+            Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 7, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 3);
+          end;
+        end;
+
         // subnode rectangle around the "+" or "-"
         Canvas.SetColor(FTreeLineColor);
         Canvas.SetLineStyle(1, lsSolid);  // rectangle is always solid line style
         Canvas.DrawRectangle(w - FXOffset - GetColumnWidth(i1) div 2 - 3, ACenterPos - 3, 9, 9);
+        
         Canvas.SetColor(clText1);
 
         if h.Collapsed then

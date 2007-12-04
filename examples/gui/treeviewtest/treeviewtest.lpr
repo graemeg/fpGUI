@@ -26,6 +26,7 @@ type
 constructor TMainForm.Create(AOwner: TComponent);
 var
   n: TfpgTreeNode;
+  n2: TfpgTreeNode;
   i: integer;
   s: string;
 begin
@@ -50,12 +51,21 @@ begin
   for i := 1 to 3 do
   begin
     s := Format('Node 2.2.%d', [i]);
-    n.AppendText(s);// + ' ' + s + ' ' + s);
+    if i = 2 then
+      n2 := n.AppendText(s)
+    else
+      n.AppendText(s);
   end;
   n.Parent.AppendText('Node 2.3');
   tree.RootNode.FirstSubNode.Next.Collapse;
   tree.RootNode.AppendText('Node 3');
   tree.Selection := n;
+//  n := tree.RootNode.FindSubNode('Node 2.2.2', True);
+  if Assigned(n2) then
+  begin
+    n2.AppendText('Child 1').AppendText('Child 2');
+    n2.Collapsed := False;
+  end;
 end;
 
 
