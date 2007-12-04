@@ -167,6 +167,8 @@ type
     procedure   HScrollbarScroll(Sender: TObject; position: integer);
     procedure   UpdateScrollbars;
     procedure   ResetScrollbar;
+    procedure   ClearColumnLeft;
+    procedure   FreeAllTreeNodes;
   protected
     FColumnLeft: TList;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
@@ -186,6 +188,7 @@ type
     function    StepToRoot(aNode: TfpgTreeNode): integer;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   SetColumnWidth(AIndex, AWidth: word);
     function    GetColumnWidth(AIndex: word): word; // the width of a column - aIndex of the rootnode = 0
     property    Font: TfpgFont read FFont;
@@ -317,7 +320,12 @@ destructor TfpgTreeNode.Destroy;
 begin
   if FParent <> nil then
     FParent.UnregisterSubNode(self);
-  FData := nil;
+  FData       := nil;
+  FParent     := nil;
+  FNext       := nil;
+  FPrev       := nil;
+  FFirstSubNode   := nil;
+  FLastSubNode    := nil;
   inherited Destroy;
 end;
 
@@ -862,8 +870,6 @@ begin
 end;
 
 function TfpgTreeview.GetColumnLeft(AIndex: integer): integer;
-var
-   AColumnLeft: PColumnLeft;
 begin
   if FColumnLeft = nil then
     PreCalcColumnLeft;
@@ -873,15 +879,9 @@ begin
   else
   begin
     if AIndex > FColumnLeft.Count - 1 then
-    begin
-      AColumnLeft := FColumnLeft[FColumnLeft.Count - 1];
-      result := AColumnLeft^;
-    end
+      result := PColumnLeft(FColumnLeft[FColumnLeft.Count - 1])^
     else
-    begin
-      AColumnLeft := FColumnLeft[AIndex];
-      result := AColumnLeft^;
-    end;
+      result := PColumnLeft(FColumnLeft[AIndex])^;
   end;
 end;
 
@@ -926,14 +926,10 @@ begin
   writeln('TfpgTreeView.PreCalcColumnWidth');
   {$ENDIf}
   if FColumnLeft = nil then
-	  FColumnLeft := TList.Create
-  else
-	  FColumnLeft.Clear;
-  for ACounter := 0 to FColumnLeft.Count - 1 do  // Freeing Memory
-  begin
-    AColumnLeft := FColumnLeft[ACounter];
-    Dispose(AColumnLeft);
-  end;
+	  FColumnLeft := TList.Create;
+
+  ClearColumnLeft;  // Freeing memory
+
   Aleft := 0;
   for ACounter := 1 to RootNode.GetMaxDepth do
   begin
@@ -986,6 +982,47 @@ begin
   else
     FVScrollbar.SetPosition(Width - 19, 1, 18, Height - 2);
   FHScrollbar.SetPosition(1, Height - 19, Width - 2, 18);
+end;
+
+procedure TfpgTreeView.ClearColumnLeft;
+var
+  i: integer;
+  AColumnLeft: PColumnLeft;
+begin
+  for i := 0 to FColumnLeft.Count - 1 do  // Freeing Memory
+  begin
+    AColumnLeft := FColumnLeft[i];
+    Dispose(AColumnLeft);
+  end;
+  FColumnLeft.Clear;
+end;
+
+procedure TfpgTreeView.FreeAllTreeNodes;
+var
+  n: TfpgTreeNode;
+  i: integer;
+  list: TList;
+begin
+  list := TList.Create;
+  n := RootNode.FirstSubNode;
+  list.Add(n);
+  
+  while n <> nil do
+  begin
+    // todo: this only frees of the first level of nodes!!!!
+    n := n.next;
+    list.Add(n);
+  end;
+
+//  writeln('NodeCount = ', list.Count);
+  while list.Count > 0 do
+  begin
+    n := TfpgTreeNode(list.Last);
+    list.Remove(n);
+    n.Free;
+  end;
+  list.Clear;
+  list.Free;
 end;
 
 procedure TfpgTreeview.HandleResize(awidth, aheight: TfpgCoord);
@@ -1659,6 +1696,18 @@ begin
   FYOffset          := 0;
   FColumnHeight     := FFont.Height + 2;
   FScrollWheelDelta := 15;
+end;
+
+destructor TfpgTreeView.Destroy;
+var
+  i: integer;
+begin
+  ClearColumnLeft;
+  FFont.Free;
+  
+  FreeAllTreeNodes;
+
+  inherited Destroy;
 end;
 
 procedure TfpgTreeview.SetColumnWidth(AIndex, AWidth: word);

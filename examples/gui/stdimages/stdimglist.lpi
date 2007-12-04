@@ -2,7 +2,7 @@
 <CONFIG>
   <ProjectOptions>
     <PathDelim Value="/"/>
-    <Version Value="5"/>
+    <Version Value="6"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
@@ -45,7 +45,8 @@
       <Generate Value="Faster"/>
     </CodeGeneration>
     <Other>
-      <CustomOptions Value="-FUunits"/>
+      <CustomOptions Value="-FUunits
+"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

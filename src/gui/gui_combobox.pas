@@ -484,6 +484,7 @@ end;
 destructor TfpgAbstractComboBox.Destroy;
 begin
   FItems.Free;
+  FFont.Free;
   inherited Destroy;
 end;
 

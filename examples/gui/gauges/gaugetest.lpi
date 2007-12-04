@@ -50,7 +50,8 @@
       <Generate Value="Faster"/>
     </CodeGeneration>
     <Other>
-      <CustomOptions Value="-FUunits"/>
+      <CustomOptions Value="-FUunits
+"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
