@@ -120,7 +120,7 @@ procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(278, 186, 600, 400);
+  SetPosition(278, 186, 600, 312);
   WindowTitle := 'fpGUI Wu Anti-Aliased Line test';
   WindowPosition := wpScreenCenter;
   Sizeable := False;
@@ -129,7 +129,7 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(500, 368, 90, 24);
+    SetPosition(500, 280, 90, 24);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -148,11 +148,10 @@ begin
   with rbSpokes do
   begin
     Name := 'rbSpokes';
-    SetPosition(12, 8, 120, 19);
+    SetPosition(12, 28, 120, 19);
     Text := 'Spokes';
     FontDesc := '#Label1';
     GroupIndex := 1;
-    Checked := True;
     OnChange := @RadioButtonChanged;
   end;
 
@@ -160,10 +159,11 @@ begin
   with rbLines do
   begin
     Name := 'rbLines';
-    SetPosition(12, 28, 120, 19);
+    SetPosition(12, 8, 120, 19);
     Text := 'Lines';
     FontDesc := '#Label1';
     GroupIndex := 1;
+    Checked := True;
     OnChange := @RadioButtonChanged;
   end;
 
