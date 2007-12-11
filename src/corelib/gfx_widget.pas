@@ -196,6 +196,8 @@ end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
+  { TODO -oGraeme -cRelease Blocker : ComponentState is read-only. I'm
+    exploiting a FPC <= 2.2.0 bug. I need to fix this! }
   Include(ComponentState, csLoading);
   FOnScreen   := False;
   FVisible    := True;
@@ -207,7 +209,6 @@ begin
   FAnchors    := [anLeft, anTop];
   FAlign      := alNone;
   FHint       := '';
-//  OnKeyPress := nil;
 
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
     Parent := TfpgWidget(AOwner)
@@ -223,11 +224,10 @@ begin
   // parent has already been shown.
   if (Parent <> nil) and (Parent.HasHandle) then
   begin
-//    writeln('about to call InternalHandleShow');
     InternalHandleShow;
   end;
 
-  Exclude(ComponentState, csLoading);
+  Loaded;  // remove csLoading from ComponentState
 end;
 
 destructor TfpgWidget.Destroy;

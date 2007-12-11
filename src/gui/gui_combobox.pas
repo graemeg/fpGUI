@@ -465,16 +465,16 @@ end;
 constructor TfpgAbstractComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FFont   := fpgGetFont('#List');
   FBackgroundColor  := clBoxColor;
   FDropDownCount    := 8;
   FWidth            := 120;
-  FHeight           := 23;
+  FHeight           := FFont.Height + 6;
   FFocusItem        := 0; // nothing is selected
   FMargin           := 3;
   FFocusable        := True;
   FBtnPressed       := False;
   
-  FFont   := fpgGetFont('#List');
   FItems  := TStringList.Create;
   CalculateInternalButtonRect;
 

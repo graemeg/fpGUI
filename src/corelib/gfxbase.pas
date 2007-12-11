@@ -372,7 +372,7 @@ type
 
   { TfpgApplicationBase }
 
-  TfpgApplicationBase = class(TObject)
+  TfpgApplicationBase = class(TComponent)
   private
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
@@ -387,10 +387,14 @@ type
     procedure   PushModalForm(AForm: TfpgWindowBase);
     procedure   PopModalForm;
     function    PrevModalForm: TfpgWindowBase;
+    procedure   CreateForm(AFormClass: TComponentClass; var AForm: TfpgWindowBase);
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
     property    Terminated: boolean read FTerminated write FTerminated;
+    { TODO : Implement these two properties in the near future. }
+//    property    FormCount...
+//    property    Forms[]...
   end;
 
 
@@ -1639,6 +1643,17 @@ begin
     Exit;
 
   Result := TfpgWindowBase(FModalFormStack.Items[FModalFormStack.Count-2]);
+end;
+
+procedure TfpgApplicationBase.CreateForm(AFormClass: TComponentClass;
+  var AForm: TfpgWindowBase);
+begin
+  try
+    AForm := TfpgWindowBase(AFormClass.Create(self));
+  except
+    AForm := nil;
+    raise;
+  end;
 end;
 
 end.

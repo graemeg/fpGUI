@@ -744,6 +744,9 @@ end;
 
 procedure TfpgApplication.WaitWindowMessage(atimeoutms: integer);
 begin
+  if IsMultiThread then
+    CheckSynchronize;  // execute the to-be synchronized method
+
   DoWaitWindowMessage(fpgClosestTimer(now, atimeoutms));
   fpgDeliverMessages;
   fpgCheckTimers;
