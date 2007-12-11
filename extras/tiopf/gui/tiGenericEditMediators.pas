@@ -316,7 +316,8 @@ end;
 
 destructor TMediatorView.Destroy;
 begin
-  FSubject.DetachObserver(self);
+  if Assigned(FSubject) then
+    FSubject.DetachObserver(self);
   inherited Destroy;
 end;
 
