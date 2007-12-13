@@ -382,7 +382,7 @@ type
     FModalFormStack: TList;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
   public
-    constructor Create(const AParams: string); virtual; abstract;
+    constructor Create(const AParams: string); virtual; abstract; reintroduce;
     function    GetFontFaceList: TStringList;
     procedure   PushModalForm(AForm: TfpgWindowBase);
     procedure   PopModalForm;
