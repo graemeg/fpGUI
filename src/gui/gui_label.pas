@@ -65,6 +65,8 @@ type
     property    Color;
     property    FontDesc;
     property    Text;
+    property    OnClick;
+    property    OnDoubleClick;
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnMouseDown;

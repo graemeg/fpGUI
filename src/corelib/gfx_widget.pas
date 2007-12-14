@@ -17,6 +17,7 @@ type
   TfpgWidget = class(TfpgWindow)
   private
     FAlignRect: TfpgRect;
+    FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
     FOnMouseDown: TMouseButtonEvent;
     FOnMouseEnter: TNotifyEvent;
@@ -87,6 +88,7 @@ type
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property    OnMouseDown: TMouseButtonEvent read FOnMouseDown write FOnMouseDown;
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
+    property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
     property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   public
@@ -384,7 +386,10 @@ begin
           if Assigned(FOnDoubleClick) then
             FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
                 Point(msg.Params.mouse.x, msg.Params.mouse.y));
-        end;
+        end
+        else
+          if Assigned(FOnClick) then
+            FOnClick(self);
         // The mouse up must still be handled even if we had a double click event.
         HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;

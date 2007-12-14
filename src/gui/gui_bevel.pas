@@ -51,6 +51,8 @@ type
     property    Shape: TBevelShape read FBevelShape write SetBevelShape default bsBox;
     property    Style: TBevelStyle read FBevelStyle write SetBevelStyle default bsRaised;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
+    property    OnClick;
+    property    OnDoubleClick;
   end;
 
 

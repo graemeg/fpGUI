@@ -84,6 +84,7 @@ begin
   begin
     Name := 'pnlName1';
     SetPosition(0, 0, 300, 64);
+    OnClick := @TimerFired;
   end;
 
   lblName2 := TfpgLabel.Create(pnlName1);
@@ -93,6 +94,7 @@ begin
     SetPosition(24, 8, 272, 31);
     Text := 'Splash screen goes here!';
     FontDesc := 'Arial-18';
+    OnClick := @TimerFired;
   end;
 
   lblName1 := TfpgLabel.Create(pnlName1);
@@ -102,6 +104,7 @@ begin
     SetPosition(52, 42, 188, 15);
     Text := 'Click me to make me disappear.';
     FontDesc := '#Label1';
+    OnClick := @TimerFired;
   end;
 
   {@VFD_BODY_END: SplashForm}

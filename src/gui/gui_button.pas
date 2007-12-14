@@ -71,7 +71,6 @@ type
     procedure   HandleMouseExit; override;
     procedure   HandleMouseEnter; override;
   public
-    OnClick: TNotifyEvent;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   DoPush;
@@ -96,6 +95,7 @@ type
     property    ShowImage: Boolean read FShowImage write SetShowImage default True;
     property    OnMouseExit;
     property    OnMouseEnter;
+    property    OnClick;
   end;
 
 
