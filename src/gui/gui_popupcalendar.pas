@@ -569,13 +569,13 @@ begin
   begin
     Name := 'grdName1';
     SetPosition(0, 23, 233, 119);
-    AddColumn('Mon', 33, taLeftJustify);
-    AddColumn('Tue', 32, taLeftJustify);
-    AddColumn('Wed', 33, taLeftJustify);
-    AddColumn('Thu', 32, taLeftJustify);
-    AddColumn('Fri', 33, taLeftJustify);
-    AddColumn('Sat', 32, taLeftJustify);
-    AddColumn('Sun', 33, taLeftJustify);
+    AddColumn('Mon', 33, taCenter);
+    AddColumn('Tue', 32, taCenter);
+    AddColumn('Wed', 33, taCenter);
+    AddColumn('Thu', 32, taCenter);
+    AddColumn('Fri', 33, taCenter);
+    AddColumn('Sat', 32, taCenter);
+    AddColumn('Sun', 33, taCenter);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     RowCount := 6;

@@ -782,13 +782,34 @@ begin
 end;
 
 procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: integer; ARect: TfpgRect;
-  AFlags: integer);
+    AFlags: integer);
+var
+  x: TfpgCoord;
 begin
   if Cells[ACol, ARow] <> '' then
   begin
     if not Enabled then
       Canvas.SetTextColor(clShadow1);
-    Canvas.DrawString(ARect.Left+1, ARect.Top+1, Cells[ACol, ARow]);
+
+    case Columns[ACol].Alignment of
+      taLeftJustify:
+          begin
+            x := ARect.Left + 1;
+          end;
+      taCenter:
+          begin
+            x := (ARect.Width - Font.TextWidth(Cells[ACol, ARow])) div 2;
+            Inc(x, ARect.Left);
+          end;
+      taRightJustify:
+          begin
+            x := ARect.Right - Font.TextWidth(Cells[ACol, ARow]) - 1;
+            if x < (ARect.Left + 1) then
+              x := ARect.Left + 1;
+          end;
+    end;  { case }
+
+    Canvas.DrawString(x, ARect.Top+1, Cells[ACol, ARow]);
   end;
 end;
 

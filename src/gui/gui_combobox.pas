@@ -483,6 +483,8 @@ end;
 
 destructor TfpgAbstractComboBox.Destroy;
 begin
+  if Assigned(FDropDown) then
+    FDropDown.Free;
   FItems.Free;
   FFont.Free;
   inherited Destroy;

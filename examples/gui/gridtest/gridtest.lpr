@@ -119,7 +119,14 @@ begin
   // add some text
   stringgrid.Cells[2, 3] := 'Hello';
   stringgrid.Cells[3, 1] := '(r1,c3)';
-//  stringgrid.Anchors  := [anLeft, anTop, anRight, anBottom];
+  
+  // alignment test
+  stringgrid.columns[1].Alignment := taLeftJustify;
+  stringgrid.Cells[1, 2] := 'left';
+  stringgrid.columns[2].Alignment := taCenter;
+  stringgrid.Cells[2, 2] := 'center';
+  stringgrid.columns[3].Alignment := taRightJustify;
+  stringgrid.Cells[3, 2] := 'right';
 
   pagecontrol.ActivePageIndex := 0;
 
