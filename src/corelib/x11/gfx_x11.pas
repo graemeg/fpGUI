@@ -1109,7 +1109,12 @@ begin
       //XSetTransientForHint(xapplication.display, FWinHandle, TfpgWindowImpl(Parent).FWinHandle);
     end;
   end;
-  
+
+  // todo: This needs testing!!
+  if (FWindowType = wtPopup) and (waStayOnTop in FWindowAttributes) then
+    // we have a Splash screen
+    fpgApplication.netlayer.WindowSetType(FWinHandle, nwtSplash);
+
   XSelectInput(xapplication.Display, wh, KeyPressMask or KeyReleaseMask or
       ButtonPressMask or ButtonReleaseMask or
       EnterWindowMask or LeaveWindowMask or

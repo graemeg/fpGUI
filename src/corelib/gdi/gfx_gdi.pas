@@ -1045,6 +1045,10 @@ begin
     DoMoveWindow(FLeft, FTop);
   end;
 
+  if waStayOnTop in FWindowAttributes then
+    SetWindowPos(FWinHandle, HWND_TOPMOST, 0, 0, 0, 0,
+      SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
+
   // the forms require some adjustments before the Window appears
   SetWindowParameters;
 end;

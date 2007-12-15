@@ -21,7 +21,7 @@ type
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
-  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos);
+  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop);
   TWindowAttributes = set of TWindowAttribute;
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,

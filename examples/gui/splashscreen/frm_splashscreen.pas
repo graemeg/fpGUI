@@ -14,6 +14,8 @@ uses
 
 type
 
+  { TSplashForm }
+
   TSplashForm = class(TfpgForm)
     procedure SplashFormShow(Sender: TObject);
     procedure TimerFired(Sender: TObject);
@@ -21,6 +23,7 @@ type
     tmr: TfpgTimer;
   protected
     procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure AdjustWindowStyle; override;
   public
     {@VFD_HEAD_BEGIN: SplashForm}
     pnlName1: TfpgBevel;
@@ -59,10 +62,17 @@ begin
   TimerFired(nil);
 end;
 
+procedure TSplashForm.AdjustWindowStyle;
+begin
+  inherited AdjustWindowStyle;
+
+end;
+
 constructor TSplashForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowType := wtPopup;
+  WindowType := wtPopup;  // removes borders and title bar
+  Include(WindowAttributes, waStayOnTop); // well, it lets the window stay on top. :)
 
   tmr := TfpgTimer.Create(3000);
   tmr.OnTimer := @TimerFired;
