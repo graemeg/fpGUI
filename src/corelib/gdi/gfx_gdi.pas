@@ -899,23 +899,15 @@ function TfpgWindowImpl.DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wP
 
 var
   pt: Windows.POINT;
-//  Event: TFEvent;
   msgp: TfpgMessageParams;
 begin
   FillChar(msgp, sizeof(msgp), 0);
   if not FMouseInWindow then
   begin
     FMouseInWindow := True;
-//    DoSetCursor;
-    Windows.SetCapture(FWinHandle);
-    //Event := TFEvent.Create;
-    //try
-      //Event.lParam := lParam;
-      //Event.EventType := etMouseEnter;
-      //ProcessEvent(Event);
-    //finally
-      //Event.Free;
-    //end;
+//    Windows.SetCapture(FWinHandle);
+//    msgp.mouse.x := LoWord(lParam);
+//    msgp.mouse.y := HiWord(lParam);
     fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
     Result := uMsg <> WM_MOUSEMOVE;
   end
@@ -932,14 +924,7 @@ begin
 
     if {(not FHasMouseCapture) and} (not FMouseInWindow) then
     begin
-      Windows.ReleaseCapture;
-      //Event := TFEvent.Create;
-      //try
-        //Event.EventType := etMouseLeave;
-        //ProcessEvent(Event);
-      //finally
-        //Event.Free;
-      //end;
+//      Windows.ReleaseCapture;
       msgp.mouse.x := LoWord(lParam);
       msgp.mouse.y := HiWord(lParam);
       fpgSendMessage(nil, AWindow, FPGM_MOUSEEXIT, msgp);
