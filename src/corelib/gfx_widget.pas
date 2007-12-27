@@ -386,10 +386,8 @@ begin
           if Assigned(FOnDoubleClick) then
             FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
                 Point(msg.Params.mouse.x, msg.Params.mouse.y));
-        end
-        else
-          if Assigned(FOnClick) then
-            FOnClick(self);
+        end;
+
         // The mouse up must still be handled even if we had a double click event.
         HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
@@ -679,7 +677,8 @@ end;
 
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  if Assigned(FOnClick) then
+    FOnClick(self);
 end;
 
 procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);

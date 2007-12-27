@@ -407,7 +407,7 @@ end;
 procedure TfpgButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
 //  writeln('mouse up');
-  inherited;
+//  inherited;
   if (csDesigning in ComponentState) then
     Exit;
   DoRelease;

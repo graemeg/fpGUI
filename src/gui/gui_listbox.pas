@@ -386,6 +386,10 @@ begin
 
   if ItemCount < 1 then
     Exit; //==>
+    
+  { User clicked outside listbox bounds. ComboBox requires this check. }
+  if y < 0 then
+    Exit; //==>
 
   FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
   if FFocusItem > ItemCount then
@@ -405,9 +409,13 @@ begin
 
   FMouseDragging := False;
 
-  FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
-  if FFocusItem > ItemCount then
-    FFocusItem := ItemCount;
+  { User clicked outside listbox bounds. ComboBox requires this check. }
+  if not (y < 0) then
+  begin
+    FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
+    if FFocusItem > ItemCount then
+      FFocusItem := ItemCount;
+  end;
 
   FollowFocus;
   Repaint;

@@ -13,6 +13,9 @@ uses
   gfx_impl;
   
 type
+
+  { TfpgPopupWindow }
+
   TfpgPopupWindow = class(TfpgWidget)
   private
     FDontCloseWidget: TfpgWidget;
@@ -277,7 +280,7 @@ end;
 
 procedure TfpgPopupWindow.Close;
 begin
-  HandleHide;
+  HandleClose;
   PopupListRemove(self);
 end;
 
