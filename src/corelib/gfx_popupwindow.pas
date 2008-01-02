@@ -14,8 +14,6 @@ uses
   
 type
 
-  { TfpgPopupWindow }
-
   TfpgPopupWindow = class(TfpgWidget)
   private
     FDontCloseWidget: TfpgWidget;
@@ -188,6 +186,9 @@ end;
 
 procedure TfpgPopupWindow.MsgClose(var msg: TfpgMessageRec);
 begin
+  {$IFDEF DEBUG}
+  writeln('TfpgPopupWindow.MsgClose [', Classname, ']');
+  {$ENDIF}
   HandleClose;
 end;
 
@@ -227,9 +228,6 @@ begin
         TfpgWidget(Components[i]).Anchors := [anRight, anBottom];
     end;
     // make space for the frame
-//    Width := Width + 1;
-//    Height := Height + 1;
-//    UpdateWindowPosition;
     HandleResize(Width+2, Height+2);
     UpdateWindowPosition;
 

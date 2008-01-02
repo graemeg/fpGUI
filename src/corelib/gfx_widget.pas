@@ -234,6 +234,9 @@ end;
 
 destructor TfpgWidget.Destroy;
 begin
+  {$IFDEF DEBUG}
+  writeln('TfpgWidget.Destroy [', Classname, ']');
+  {$ENDIF}
   HandleHide;
   inherited;
 end;

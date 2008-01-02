@@ -126,6 +126,7 @@ type
     procedure   HandleHide; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     ListBox:    TfpgListBox;
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   end;
@@ -146,8 +147,8 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
   if keycode = keyEscape then
   begin
-    Close;
     consumed := True;
+    Close;
   end;
 end;
 
@@ -164,10 +165,15 @@ end;
 
 procedure TDropDownWindow.HandleHide;
 begin
-  FocusRootWidget.ReleaseMouse;  // for internal ListBox
+  // HandleHide also gets called in TfpgWidget.Destroy so we need a few
+  // if Assigned() tests here. This should be improved on.
+  if Assigned(FocusRootWidget) then
+    FocusRootWidget.ReleaseMouse;  // for internal ListBox
+
   FocusRootWidget   := OriginalFocusRoot;
   OriginalFocusRoot := nil;
   inherited HandleHide;
+
   if Assigned(FocusRootWidget) then
     FocusRootWidget.SetFocus;
 end;
@@ -175,12 +181,14 @@ end;
 constructor TDropDownWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-//  WindowType        := wtPopup;
-//  WindowAttributes  := [];
-//  WindowPosition    := wpUser;
-
   ListBox := TfpgListBox.Create(self);
   ListBox.PopupFrame := True;
+end;
+
+destructor TDropDownWindow.Destroy;
+begin
+  ListBox.Free;
+  inherited Destroy;
 end;
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList): TfpgComboBox;
@@ -328,7 +336,7 @@ begin
     begin
       if SameText(FItems.Strings[i], AValue) then
       begin
-        SetFocusItem(i+1);
+        SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
         Break;
       end;
     end;
@@ -358,6 +366,9 @@ end;
 
 procedure TfpgAbstractComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
+  {$IFDEF DEBUG}
+  writeln('TfpgAbstractComboBox.HandleLMouseDown [', Classname, ']');
+  {$ENDIF}
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
   if PtInRect(FInternalBtnRect, Point(x, y)) then
@@ -367,6 +378,9 @@ end;
 
 procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
+  {$IFDEF DEBUG}
+  writeln('TfpgAbstractComboBox.HandleLMouseUp [', Classname, ']');
+  {$ENDIF}
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
   DoDropDown;

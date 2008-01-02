@@ -102,7 +102,6 @@ type
   TfpgTextListBox = class(TfpgBaseListBox)
   protected
     FItems: TStringList;
-    FInternalItems: TStrings;
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
     property    Items: TStringList read FItems;
   public
@@ -134,7 +133,9 @@ type
     procedure   SetUpdateState(Updating: Boolean); override;
   public
     constructor Create(AListBox: TfpgTextListBox);
+    destructor  Destroy; override;
     function    Add(const s: String): Integer; override;
+    procedure   Delete(Index: Integer); override;
   end;
 
 { TfpgListBoxStrings }
@@ -151,18 +152,24 @@ begin
   ListBox := AListBox;
 end;
 
+destructor TfpgListBoxStrings.Destroy;
+begin
+  ListBox := nil;
+  inherited Destroy;
+end;
+
 function TfpgListBoxStrings.Add(const s: String): Integer;
-//var
-//  ItemWidth: Integer;
 begin
   Result := inherited Add(s);
   if Assigned(ListBox) and (ListBox.HasHandle) then
-  begin
-//    ItemWidth := ListBox.Font.TextWidth(s) + 4;
-//    if ItemWidth > ListBox.FMaxItemWidth then
-//      ListBox.FMaxItemWidth := ItemWidth;
     ListBox.UpdateScrollBar;
-  end;
+end;
+
+procedure TfpgListBoxStrings.Delete(Index: Integer);
+begin
+  inherited Delete(Index);
+  if Assigned(ListBox) and (ListBox.HasHandle) then
+    ListBox.UpdateScrollBar;
 end;
 
 
@@ -472,8 +479,6 @@ end;
 procedure TfpgBaseListBox.HandleShow;
 begin
   inherited HandleShow;
-//  if (csDesigning in ComponentState) then
-//    Exit;
   if (csLoading in ComponentState) then
     Exit;
   UpdateScrollBarCoords;
@@ -655,8 +660,7 @@ end;
 
 destructor TfpgTextListBox.Destroy;
 begin
-  FItems.Free;
-  FInternalItems.Free;
+  TfpgListBoxStrings(FItems).Free;
   inherited Destroy;
 end;
 
