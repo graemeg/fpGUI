@@ -64,6 +64,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
     function    GetDrawText: string;
@@ -79,11 +80,11 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    SelectionText: string;
+    procedure   SelectAll;
   end;
 
 
   TfpgEdit = class(TfpgCustomEdit)
-  private
   published
     property    Text;
     property    FontDesc;
@@ -262,7 +263,7 @@ end;
 procedure TfpgCustomEdit.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
-  lpos: integer;
+//   lpos: integer;
   hasChanged: boolean;
 
   procedure StopSelection;
@@ -274,7 +275,7 @@ var
 begin
 //  writeln(Classname, '.Keypress');
   Consumed := False;
-  lpos := FCursorPos;
+//   lpos := FCursorPos;
   hasChanged := False;
 
   Consumed := True;
@@ -305,12 +306,11 @@ begin
   if not Consumed then
   begin
     // checking for movement keys:
-    consumed := True;
-
     case keycode of
       keyLeft:
         if FCursorPos > 0 then
         begin
+          consumed := True;
           Dec(FCursorPos);
 
           if (ssCtrl in shiftstate) then
@@ -326,6 +326,7 @@ begin
       keyRight:
         if FCursorPos < UTF8Length(FText) then
         begin
+          consumed := True;
           Inc(FCursorPos);
 
           if (ssCtrl in shiftstate) then
@@ -338,16 +339,17 @@ begin
         end;
 
       keyHome:
-        FCursorPos := 0;
+        begin
+          consumed := True;
+          FCursorPos := 0;
+        end;
 
       keyEnd:
-        FCursorPos := UTF8Length(FText);
-      else
-        Consumed   := False;
+        begin
+          consumed := True;
+          FCursorPos := UTF8Length(FText);
+        end;
     end;
-
-    if lpos = FCursorPos then // nothing changed so reset consumed
-      consumed := False;
 
     if Consumed then
     begin
@@ -478,6 +480,15 @@ begin
     FCursorPos := cp;
     Repaint;
   end;
+end;
+
+procedure TfpgCustomEdit.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
+begin
+  // button is always Mouse_Left, but lets leave this test here for good measure
+  if button = MOUSE_LEFT then
+    SelectAll
+  else
+    inherited;
 end;
 
 procedure TfpgCustomEdit.HandleMouseEnter;
@@ -640,6 +651,14 @@ begin
   Repaint;
 end;
 
+procedure TfpgCustomEdit.SelectAll;
+begin
+  FSelecting  := True;
+  FSelStart   := 0;
+  FSelOffset  := UTF8Length(FText);
+  FCursorPos  := FSelOffset;
+  Repaint;
+end;
 
 end.
 
