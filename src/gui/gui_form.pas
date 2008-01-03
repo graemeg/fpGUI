@@ -318,8 +318,8 @@ end;
 
 procedure TfpgForm.Close;
 begin
-  fpgApplication.RemoveComponent(self);
   Hide;
+  fpgApplication.RemoveComponent(self);
   if fpgApplication.MainForm = self then
     fpgApplication.Terminated := True;
 end;

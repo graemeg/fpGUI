@@ -130,6 +130,7 @@ type
   protected
     FWinFlags : TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
+    FBackupWinHandle: TfpgWinHandle;  // Used by DestroyNotify & UnmapNotify events
     FModalForWin: TfpgWindowImpl;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
@@ -349,6 +350,29 @@ begin
     end;
     p := p^.Next;
   end;
+  {$IFDEF DEBUG}
+  writeln('GFX/X11: FindWindowByHandle failed to find <', IntToHex(wh, 9), '>');
+  {$ENDIF}
+  Result := nil;
+end;
+
+function FindWindowByBackupHandle(wh: TfpgWinHandle): TfpgWindowImpl;
+var
+  p: PWindowLookupRec;
+begin
+  p := FirstWindowLookupRec;
+  while p <> nil do
+  begin
+    if p^.w.FBackupWinHandle = wh then
+    begin
+      Result := p^.w;
+      Exit;
+    end;
+    p := p^.Next;
+  end;
+  {$IFDEF DEBUG}
+  writeln('GFX/X11: FindWindowByBackupHandle failed to find <', IntToHex(wh, 9), '>');
+  {$ENDIF}
   Result := nil;
 end;
 
@@ -669,6 +693,15 @@ var
       writeln('result of xlookupstring [' + s + ']');
     writeln(Format('*** keysym [%s] ', [XKeysymToString(keysym)]));
   end;
+
+  // Debug info only
+  procedure ReportLostWindow(const event: TXEvent);
+  begin
+    {$IFDEF DEBUG}
+    writeln('fpGFX/X11: ', GetXEventName(event._type), ' can''t find <',
+        IntToHex(event.xany.window, 9), '>');
+    {$ENDIF}
+  end;
   
 begin
   xfd := XConnectionNumber(display);
@@ -716,7 +749,11 @@ begin
           if kwg <> nil then
             w := kwg
           else
+          begin
             w := FindWindowByHandle(ev.xkey.window);
+            if not Assigned(w) then
+              ReportLostWindow(ev);
+          end;
 
           //Writeln('XKey event(',ev._type,'):',
             //IntToHex(ev.xkey.keycode,4),' (',ev.xkey.keycode,'), shift=',IntToHex(ev.xkey.state,4));
@@ -756,6 +793,9 @@ begin
           if (Popup <> nil) then
           begin
             w := FindWindowByHandle(ev.xbutton.window);
+            if not Assigned(w) then
+              ReportLostWindow(ev);
+              
             ew := w;
             while (w <> nil) and (w.Parent <> nil) do
               w := TfpgWindowImpl(w.Parent);              // check the actual usage of Parent and where it gets set!!
@@ -837,6 +877,8 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xbutton.window, X.MotionNotify, @ev);
 
           w := FindWindowByHandle(ev.xany.window);
+          if not Assigned(w) then
+            ReportLostWindow(ev);
           if xapplication.TopModalForm <> nil then
           begin
             // This is ugly!!!!!!!!!!!!!!!
@@ -858,12 +900,15 @@ begin
     // message blockings for modal windows
     X.ClientMessage:
         begin
-          w := FindWindowByHandle(ev.xany.window);
+          w := FindWindowByBackupHandle(ev.xany.window);
+          if not Assigned(w) then
+            ReportLostWindow(ev);
+
           // WM_PROTOCOLS message
-          if ev.xclient.message_type = xia_wm_protocols then
+          if Assigned(w) and (ev.xclient.message_type = xia_wm_protocols) then
           begin
             //WriteLn(XGetAtomName(FDisplay, TAtom(ev.xclient.data.l[0])));
-            if  (ev.xclient.data.l[0] = netlayer.NetAtom[naWM_PING]) then
+            if (ev.xclient.data.l[0] = netlayer.NetAtom[naWM_PING]) then
             begin
               // always respond to pings or the wm will kill us
               netlayer.WindowReplyToPING(w.FWinHandle, @ev.xclient);
@@ -896,7 +941,10 @@ begin
           msgp.rect.Width  := ev.xconfigure.Width;
           msgp.rect.Height := ev.xconfigure.Height;
 
-          w := FindWindowByHandle(ev.xconfigure.window);
+          w := FindWindowByBackupHandle(ev.xconfigure.window);
+          if not Assigned(w) then
+            ReportLostWindow(ev);
+            
           if w <> nil then
           begin
             if w.FWindowType <> wtChild then
@@ -945,23 +993,28 @@ begin
     X.MapNotify:
         begin
           w := FindWindowByHandle(ev.xmap.window);
-          if w <> nil then begin
+          if w <> nil then
             Include(w.FWinFlags, xwsfMapped);
-          end;
-        end;
-    X.UnmapNotify:
-        begin
-          w := FindWindowByHandle(ev.xunmap.window);
-          if w <> nil then begin
-            Exclude(w.FWinFlags, xwsfMapped);
-          end;
         end;
 
-    { We handle this event manually as well. }
+    X.UnmapNotify:
+        begin
+          // special case which uses a different find window method
+          w := FindWindowByBackupHandle(ev.xunmap.window);
+          if not Assigned(w) then
+            ReportLostWindow(ev)
+          else
+            Exclude(w.FWinFlags, xwsfMapped);
+        end;
+
     X.DestroyNotify:
         begin
-          //Writeln('DestroyNotify');
-          //fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
+          // special case which uses a different find window method
+          w := FindWindowByBackupHandle(ev.xany.window);
+          if not Assigned(w) then
+            ReportLostWindow(ev)
+          else
+            RemoveWindowLookup(TfpgWindowImpl(w));
         end;
 
     X.GraphicsExpose,
@@ -976,10 +1029,10 @@ begin
 
     X.ReparentNotify:
         begin
-          // We are not interrested in this event
+          // We are not interrested in this event yet
         end;
+
     else
-      {$Note This needs attention. We still have two events slipping by.}
       WriteLn('fpGFX/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
   end;
 end;
@@ -1016,7 +1069,7 @@ var
   mask: longword;
   hints: TXSizeHints;
 begin
-  if FWinHandle > 0 then
+  if HandleIsValid then
     Exit; //==>
 
   if aparent <> nil then
@@ -1042,6 +1095,7 @@ begin
     mask, @attr);
 
   FWinHandle := wh;
+  FBackupWinHandle := wh;
     
   // so newish window manager can close unresponsive programs
   if AParent = nil then // is a toplevel window
@@ -1132,8 +1186,9 @@ begin
   if FWinHandle <= 0 then
     Exit;
 
-  RemoveWindowLookup(self);
   XDestroyWindow(xapplication.Display, FWinHandle);
+  // RemoveWindowLookup is now deferred to DestroyNotify event.
+//  RemoveWindowLookup(self);
 
   FWinHandle := 0;
 end;
@@ -1161,7 +1216,7 @@ end;
 
 procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
-  if FWinHandle > 0 then
+  if HandleIsValid then
     XMoveWindow(xapplication.display, FWinHandle, x, y);
 end;
 
@@ -1251,6 +1306,7 @@ constructor TfpgWindowImpl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
+  FBackupWinHandle := 0;
 end;
 
 procedure TfpgWindowImpl.CaptureMouse;
