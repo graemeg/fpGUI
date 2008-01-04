@@ -1,9 +1,13 @@
+{
+  This is based on the Command design pattern. Use Google if you don't
+  know what design patterns are. The Command pattern is very similar to
+  Delphi's TAction feature.
+}
 unit gfx_command_intf;
 
 {$mode objfpc}{$H+}
 
 interface
-
 
 type
   ICommand = interface(IInterface)

@@ -22,6 +22,7 @@ type
     FHelpSubMenu: TfpgPopupMenu;
     edit1: TfpgEdit;
     procedure   miExitClicked(Sender: TObject);
+    procedure   miMenuItemSelected(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -32,6 +33,12 @@ type
 procedure TMainForm.miExitClicked(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TMainForm.miMenuItemSelected(Sender: TObject);
+begin
+  if Sender is TfpgMenuItem then
+    writeln('Menu clicked: ', TfpgMenuItem(Sender).Text);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -45,29 +52,29 @@ begin
   
   // Create top level sub-menus
   FFileSubMenu := TfpgPopupMenu.Create(self);
-  FFileSubMenu.AddMenuItem('&Open', 'Ctrl-O', nil);
-  FFileSubMenu.AddMenuItem('&Save', 'Ctrl-S', nil);
-  FFileSubMenu.AddMenuItem('S&ave As', 'Ctrl+Shift+S', nil);
+  FFileSubMenu.AddMenuItem('&Open', 'Ctrl-O', @miMenuItemSelected);
+  FFileSubMenu.AddMenuItem('&Save', 'Ctrl-S', @miMenuItemSelected);
+  FFileSubMenu.AddMenuItem('S&ave As', 'Ctrl+Shift+S', @miMenuItemSelected);
   FFileSubMenu.AddMenuItem('-', '', nil);
-  FFileSubMenu.AddMenuItem('Save && Reload', '', nil);
+  FFileSubMenu.AddMenuItem('Save && Reload', '', @miMenuItemSelected);
   FFileSubMenu.AddMenuItem('-', '', nil);
   FFileSubMenu.AddMenuItem('&Quit', 'Ctrl-Q', @miExitClicked);
 
   FEditSubMenu := TfpgPopupMenu.Create(self);
-  FEditSubMenu.AddMenuItem('&Cut', 'Ctrl-X', nil);
-  FEditSubMenu.AddMenuItem('C&opy', 'Ctrl-C', nil);
-  FEditSubMenu.AddMenuItem('&Paste', 'Ctrl-V', nil);
+  FEditSubMenu.AddMenuItem('&Cut', 'Ctrl-X', @miMenuItemSelected);
+  FEditSubMenu.AddMenuItem('C&opy', 'Ctrl-C', @miMenuItemSelected);
+  FEditSubMenu.AddMenuItem('&Paste', 'Ctrl-V', @miMenuItemSelected);
   FEditSubMenu.AddMenuItem('-', '', nil);
-  FEditSubMenu.AddMenuItem('&Spell check', 'F4', nil).Enabled := False;
+  FEditSubMenu.AddMenuItem('&Spell check', 'F4', @miMenuItemSelected).Enabled := False;
   FEditSelectSubMenu := TfpgPopupMenu.Create(self);
   FEditSubMenu.AddMenuItem('Selec&t', '', nil).SubMenu := FEditSelectSubMenu;
-    FEditSelectSubMenu.AddMenuItem('Select All', '', nil);
-    FEditSelectSubMenu.AddMenuItem('Select Word', '', nil);
-    FEditSelectSubMenu.AddMenuItem('Select Line', '', nil);
+    FEditSelectSubMenu.AddMenuItem('Select All', '', @miMenuItemSelected);
+    FEditSelectSubMenu.AddMenuItem('Select Word', '', @miMenuItemSelected);
+    FEditSelectSubMenu.AddMenuItem('Select Line', '', @miMenuItemSelected);
 
   FHelpSubMenu := TfpgPopupMenu.Create(self);
-  FHelpSubMenu.AddMenuItem('&About', 'F12', nil);
-  FHelpSubMenu.AddMenuItem('Test Russian text -> Òåñò', '', nil);
+  FHelpSubMenu.AddMenuItem('&About', 'F12', @miMenuItemSelected);
+  FHelpSubMenu.AddMenuItem('Test Russian text -> Òåñò', '', @miMenuItemSelected);
 
   // Create main menu bar
   FMenuBar := TfpgMenuBar.Create(self);
@@ -77,7 +84,6 @@ begin
   FMenuBar.AddMenuItem('&Windows', nil);
   FMenuBar.AddMenuItem('&Disabled', nil).Enabled := False;
   FMenuBar.AddMenuItem('&Help', nil).SubMenu := FHelpSubMenu;
-
 
   edit1 := TfpgEdit.Create(self);
   edit1.SetPosition(10, 70, 100, 24);

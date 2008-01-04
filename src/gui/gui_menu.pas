@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -22,7 +22,7 @@ unit gui_menu;
 {
   TODO:
     * Refactor the HotKey painting code into Canvas.DrawString so that other
-      widgets like TfpgButton could also use it.gui_menu
+      widgets like TfpgButton could also use it.
     * Global keyboard activation of menu items are still missing.
 }
 
@@ -79,7 +79,7 @@ type
   end;
   
   
-  // Actual Menu Items are stored in TComponents Components property
+  // Actual Menu Items are stored in TComponent's Components property
   // Visible only items are stored in FItems just before a paint
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
@@ -103,8 +103,10 @@ type
     FSymbolWidth: integer;
     FItems: TList;
     FFocusItem: integer;
+    procedure   HandleMouseExit; override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
@@ -359,6 +361,9 @@ begin
 
   if newf = FFocusItem then
     Exit; //==>
+
+  //if VisibleItem(newf).SubMenu.Visible then
+    //exit;
 
   DrawColumn(FFocusItem, False);
   FFocusItem := newf;
@@ -648,8 +653,9 @@ end;
 
 procedure TfpgPopupMenu.SetBackgroundColor(const AValue: TfpgColor);
 begin
-  if FBackgroundColor=AValue then exit;
-  FBackgroundColor:=AValue;
+  if FBackgroundColor = AValue then Exit; //==>
+    Exit;
+  FBackgroundColor := AValue;
 end;
 
 procedure TfpgPopupMenu.DoSelect;
@@ -731,18 +737,33 @@ begin
   if newf = FFocusItem then
     Exit; //==>
 
-  DrawRow(FFocusItem, False);
   FFocusItem := newf;
-  DrawRow(FFocusItem, True);
-//  repaint;
+  Repaint;
 end;
 
 procedure TfpgPopupMenu.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
+  r: TfpgRect;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+
+  r.SetRect(0, 0, Width, Height);
+  if not PtInRect(r, Point(x, y)) then
+  begin
+//    writeln('Pointer out of bounds.');
+    ClosePopups;
+    Exit;
+  end;
+end;
+
+procedure TfpgPopupMenu.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
   newf: integer;
   mi: TfpgMenuItem;
+  r: TfpgRect;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
+
   newf := CalcMouseRow(y);
 
   if not VisibleItem(newf).Selectable then
@@ -775,8 +796,7 @@ var
   begin
     if oldf <> FFocusItem then
     begin
-      DrawRow(oldf, False);
-      DrawRow(FFocusItem, True);
+      Repaint;
     end;
   end;
 
@@ -882,10 +902,10 @@ begin
   Canvas.SetColor(clWidgetFrame);
   Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
   Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
+
   for n := 1 to VisibleCount do
-  begin
     DrawRow(n, n = FFocusItem);
-  end;
+
   Canvas.EndDraw;
 end;
 
@@ -970,7 +990,6 @@ begin
         end
         else
         begin
-//          Canvas.SetColor(clInactiveSel);
           Canvas.SetColor(clShadow1);
           Canvas.SetTextColor(clInactiveSelText);
         end;
@@ -1027,6 +1046,13 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TfpgPopupMenu.HandleMouseExit;
+begin
+  inherited HandleMouseExit;
+  FFocusItem := 0;
+  Repaint;
 end;
 
 // Collecting visible items and measuring sizes
@@ -1116,7 +1142,7 @@ begin
   FSymbolWidth      := FMenuFont.Height+2;
 
   FBeforeShow   := nil;
-  FFocusItem    := 1;
+  FFocusItem    := 0;
   OpenerPopup   := nil;
   OpenerMenubar := nil;
 end;
