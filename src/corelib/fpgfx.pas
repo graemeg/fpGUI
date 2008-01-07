@@ -289,6 +289,7 @@ function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
 // Debug rountines
 procedure PrintRect(var Rect: TRect);
 procedure PrintRect(var Rect: TfpgRect);
+procedure PrintCoord(const x, y: TfpgCoord);
 procedure DumpStack;
 
 
@@ -468,6 +469,11 @@ procedure PrintRect(var Rect: TfpgRect);
 begin
   writeln('Rect left=', Rect.Left, ' top=', Rect.Top, ' right=', Rect.Right,
       ' bottom=', Rect.Bottom, ' width=', Rect.Width, ' height=', Rect.Height);
+end;
+
+procedure PrintCoord(const x, y: TfpgCoord);
+begin
+  writeln('x=', x, '  y=', y);
 end;
 
 procedure DumpStack;

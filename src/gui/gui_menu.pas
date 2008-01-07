@@ -135,10 +135,16 @@ type
     FBeforeShow: TNotifyEvent;
     FLightColor: TfpgColor;
     FDarkColor: TfpgColor;
+    FPrevFocusItem: integer;
+    FFocusItem: integer;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
+    procedure   SetFocusItem(const AValue: integer);
+    procedure   DoSelect;
+    procedure   CloseSubmenus;
+    function    ItemWidth(mi: TfpgMenuItem): integer;
   protected
     FItems: TList;  // stores visible items only
-    FFocusItem: integer;
+    property    FocusItem: integer read FFocusItem write SetFocusItem;
     procedure   PrepareToShow;
     function    VisibleCount: integer;
     function    VisibleItem(ind: integer): TfpgMenuItem;
@@ -147,19 +153,16 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
+    function    CalcMouseCol(x: integer): integer;
+    function    GetItemPosX(index: integer): integer;
+    function    MenuFocused: boolean;
+    function    SearchItemByAccel(s: string): integer;
+    procedure   ActivateMenu;
+    procedure   DeActivateMenu;
+    procedure   DrawColumn(col: integer; focus: boolean); virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    function    ItemWidth(mi: TfpgMenuItem): integer;
-    procedure   DrawColumn(col: integer; focus: boolean); virtual;
-    function    CalcMouseCol(x: integer): integer;
-    function    GetItemPosX(index: integer): integer;
-    procedure   DoSelect;
-    procedure   CloseSubmenus;
-    function    MenuFocused: boolean;
-    function    SearchItemByAccel(s: string): integer;
-    procedure   DeActivateMenu;
-    procedure   ActivateMenu;
     function    AddMenuItem(const AMenuTitle: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
@@ -305,12 +308,19 @@ begin
   FBackgroundColor:=AValue;
 end;
 
+procedure TfpgMenuBar.SetFocusItem(const AValue: integer);
+begin
+  if FFocusItem = AValue then
+    Exit;
+  FPrevFocusItem := FFocusItem;
+  FFocusItem := AValue;
+end;
+
 procedure TfpgMenuBar.PrepareToShow;
 var
   n: integer;
   mi: TfpgMenuItem;
 begin
-//  writeln(Classname, ' PrepareToShow');
   if Assigned(FBeforeShow) then
     FBeforeShow(self);
 
@@ -365,9 +375,8 @@ begin
   //if VisibleItem(newf).SubMenu.Visible then
     //exit;
 
-  DrawColumn(FFocusItem, False);
-  FFocusItem := newf;
-  DrawColumn(FFocusItem, True);
+  FocusItem := newf;
+  Repaint;
 end;
 
 procedure TfpgMenuBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -392,9 +401,9 @@ begin
 
   if newf <> FFocusItem then
   begin
-    DrawColumn(FFocusItem, False);
-    FFocusItem := newf;
-    DrawColumn(FFocusItem, True);
+//    DrawColumn(FFocusItem, False);
+    FocusItem := newf;
+//    DrawColumn(FFocusItem, True);
   end;
 
   DoSelect;
@@ -443,7 +452,7 @@ begin
   Canvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
 
   for n := 1 to VisibleCount do
-    DrawColumn(n, n = FFocusItem);
+    DrawColumn(n, n = FocusItem);
   Canvas.EndDraw;
 end;
 
@@ -451,10 +460,11 @@ constructor TfpgMenuBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FItems := TList.Create;
-  FBeforeShow := nil;
-  FFocusItem := 1;
-  FFocusable := False;
-  FBackgroundColor := clWindowBackground;
+  FBeforeShow       := nil;
+  FFocusItem        := 0;
+  FPrevFocusItem    := 0;
+  FFocusable        := False;
+  FBackgroundColor  := clWindowBackground;
   // calculate the best height based on font
   FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
   
@@ -559,14 +569,14 @@ procedure TfpgMenuBar.DoSelect;
 var
   mi: TfpgMenuItem;
 begin
-  mi := VisibleItem(FFocusItem);
+  mi := VisibleItem(FocusItem);
   CloseSubMenus;  // deactivates menubar!
 
   if mi.SubMenu <> nil then
   begin
     ActivateMenu;
     // showing the submenu
-    mi.SubMenu.ShowAt(self, GetItemPosX(FFocusItem)+2, fpgStyle.MenuFont.Height+4);
+    mi.SubMenu.ShowAt(self, GetItemPosX(FocusItem)+2, fpgStyle.MenuFont.Height+4);
     mi.SubMenu.OpenerPopup := nil;
     mi.SubMenu.OpenerMenuBar := self;
     mi.SubMenu.DontCloseWidget := self;
@@ -576,7 +586,7 @@ begin
   end
   else
   begin
-    VisibleItem(FFocusItem).Click;
+    VisibleItem(FocusItem).Click;
     DeActivateMenu;
   end;
 end;
@@ -730,6 +740,8 @@ begin
     Exit; //==>
 
   newf := CalcMouseRow(y);
+  if newf < 1 then
+    Exit;
 
   if not VisibleItem(newf).Selectable then
     Exit; //==>
@@ -765,16 +777,14 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
   newf := CalcMouseRow(y);
+  if newf < 1 then
+    Exit;
 
   if not VisibleItem(newf).Selectable then
     Exit; //==>
 
   if newf <> FFocusItem then
-  begin
-    DrawRow(FFocusItem, False);
     FFocusItem := newf;
-    DrawRow(FFocusItem, True);
-  end;
 
   mi := VisibleItem(FFocusItem);
   if (mi <> nil) and (not MenuFocused) and (mi.SubMenu <> nil)
@@ -1117,9 +1127,16 @@ var
   h: integer;
   n: integer;
 begin
-  Result := 1;
   h := 2;
-  n := 1;
+  n := 0;
+  Result := n;
+
+  // sanity check
+  if y < 1 then
+    Exit
+  else
+    n := 1;
+    
   while (h <= y) and (n <= VisibleCount) do
   begin
     Result := n;
