@@ -13,9 +13,9 @@ uses
   Classes
   ,SysUtils
   ,tiObject
-  ,gui_listview   { TListView }
+  ,gui_listview   { TfpgListView }
   ,Contnrs        { TObjectList }
-  ,gui_grid       { TStringGrid }
+  ,gui_grid       { TfpgStringGrid }
   ;
 
   
@@ -573,8 +573,8 @@ begin
   for i := 1 to tiNumToken(FDisplayNames, cFieldDelimiter) do
   begin
     lField := tiToken(FDisplayNames, cFieldDelimiter, i);
-    FView.Cells[i, 1]     := tiFieldName(lField);
     FView.ColumnWidth[i]  := tiFieldWidth(lField);
+    FView.ColumnTitle[i]  := tiFieldCaption(lField);
 
     //resize the last column to fill the grid.
     if i = tiNumToken(FDisplayNames, cFieldDelimiter) then
@@ -597,7 +597,6 @@ begin
   FView.RowSelect     := True;
   FView.ColumnCount   := tiNumToken(FDisplayNames, cFieldDelimiter);
   FView.RowCount      := FModel.Count;
-//  FView.ColumnWidth[0]  := 20;
 end;
 
 procedure TCompositeStringGridMediator.RebuildStringGrid;
