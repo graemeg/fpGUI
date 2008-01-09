@@ -517,7 +517,6 @@ begin
   begin
     if TtiObject(FView.Objects[1, i]) = AValue then
     begin
-    
       FView.FocusRow := i;
       Exit; //==>
     end;
@@ -532,7 +531,6 @@ begin
   BeginUpdate;
   try
     FShowDeleted := AVAlue;
-
     RebuildStringGrid;
   finally
     EndUpdate;

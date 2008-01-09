@@ -1178,10 +1178,22 @@ begin
           Canvas.DrawImage(13, 13, logo);
           logo.free;
         end;
+
     mtError:
         begin
           Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.critical'));
         end;
+
+    mtConfirmation:
+        begin
+          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.help'));
+        end;
+
+    mtWarning:
+        begin
+          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.warning'));
+        end;
+
     else
         begin // default to Information
           Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.info'));
@@ -1241,8 +1253,21 @@ end;
 class function TfpgMessageDialog.Question(const ATitle: string;
   const AText: string; AButtons: TfpgMsgDlgButtons;
   ADefaultButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
+var
+  dlg: TfpgMessageDialog;
 begin
   writeln('** Implement TfpgMessageDialog.Question');
+{
+  dlg := TfpgMessageDialog.Create(nil);
+  try
+    dlg.FDialogType := mtConfirmation;
+    dlg.Text := AText;
+    dlg.WindowTitle := ATitle;
+    Result := dlg.ShowModal;
+  finally
+    dlg.Free;
+  end;
+}
 end;
 
 class function TfpgMessageDialog.Warning(const ATitle: string;
