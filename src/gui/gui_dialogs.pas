@@ -33,6 +33,7 @@ interface
 uses
   Classes,
   SysUtils,
+  gfxbase,
   fpgfx,
   gfx_imgfmt_bmp,
   gui_form,
@@ -58,6 +59,11 @@ const
   mbOKCancel = [mbOK, mbCancel];
   mbAbortRetryIgnore = [mbAbort, mbRetry, mbIgnore];
 
+
+  { todo: Somehow we need to localize this }
+  cMsgDlgBtnText: array[TfpgMsgDlgBtn] of string =
+      ( '', 'Yes', 'No', 'OK', 'Cancel', 'Abort', 'Retry', 'Ignore',
+        'All', 'No to All', 'Yes to All', 'Help', 'Close' );
 
 type
 
@@ -186,7 +192,6 @@ function SelectFontDialog(var FontDesc: string): boolean;
 implementation
 
 uses
-  gfxbase,
   gfx_widget,
   gfx_utf8utils
   {$IFDEF MSWINDOWS}
@@ -416,11 +421,13 @@ begin
   FDefaultButtonWidth := 80;
 
   btnCancel := CreateButton(self, Width-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, 'Cancel', @btnCancelClick);
+  btnCancel.Name      := 'btnCancel';
   btnCancel.ImageName := 'stdimg.Cancel';
   btnCancel.ShowImage := True;
   btnCancel.Anchors   := [anRight, anBottom];
 
   btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, 'OK', @btnOKClick);
+  btnOK.Name      := 'btnOK';
   btnOK.ImageName := 'stdimg.OK';
   btnOK.ShowImage := True;
   btnOK.Anchors   := [anRight, anBottom];

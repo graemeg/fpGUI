@@ -1089,18 +1089,28 @@ type
     FButtons: TfpgMsgDlgButtons;
     FDefaultButton: TfpgMsgDlgBtn;
     FDialogType: TfpgMsgDlgType;
+    FButtonList: TList; // pointers to buttons
     procedure   SetButtons(const AValue: TfpgMsgDlgButtons);
     procedure   SetDefaultButton(const AValue: TfpgMsgDlgBtn);
     procedure   SetInformativeText(const AValue: string);
     procedure   SetText(const AValue: string);
     procedure   pnlIconPaint(Sender: TObject);
+    procedure   PrepareIcon;
+    procedure   PrepareText;
+    procedure   PrepareButtons;
   protected
+    procedure   SetWindowTitle(const ATitle: string); override;
     procedure   HandlePaint; override;
+    procedure   HandleShow; override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
+    procedure   PrepareLayout;
   public
     {@VFD_HEAD_BEGIN: fpgMessageDialog}
     lblName1: TfpgLabel;
     pnlIcon: TfpgBevel;
     {@VFD_HEAD_END: fpgMessageDialog}
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterCreate; override;
     class procedure About(const ATitle: string; const AText: string);
     class procedure AboutFPGui(const ATitle: string = '');
@@ -1162,12 +1172,105 @@ begin
   wg.Visible := False;
 end;
 
+procedure TfpgMessageDialog.PrepareIcon;
+begin
+  writeln(' > implement PrepareIcon');
+end;
+
+procedure TfpgMessageDialog.PrepareText;
+begin
+  writeln(' > implement PrepareText');
+  Height := 150;
+end;
+
+procedure TfpgMessageDialog.PrepareButtons;
+const
+  cSpacing = 4;
+var
+  i: integer;
+  b: TfpgButton;
+  lcount: integer;
+  lwidth: integer;
+  ltop: integer;
+  lleft: integer;
+  sl: TStringList;
+  lDefault: integer;
+  
+  function GetButtonCount: integer;
+  var
+    i: TfpgMsgDlgBtn;
+  begin
+    Result := 0;
+    for i := Low(TfpgMsgDlgBtn) to High(TfpgMsgDlgBtn) do
+    begin
+      if i in Buttons then
+      begin
+        inc(Result);
+        sl.Add(cMsgDlgBtnText[i]);
+        if i = DefaultButton then
+          lDefault := Result-1;
+      end;
+    end;
+  end;
+  
+begin
+  writeln('PrepareButtons');
+  sl      := TStringList.Create;  // holds button captions
+  lcount  := GetButtonCount;
+  lwidth  := 0;
+  writeln(' DEBUG:  form width: ', width, ' height:', height, ' count:', lcount);
+
+  // create buttons
+  for i := 0 to lcount-1 do
+  begin
+    b       := TfpgButton.Create(self);
+    b.Text  := sl[i];
+    b.Name  := 'DlgButton' + IntToStr(i+1);
+    if (i = lDefault) or (lcount = 1) then
+      b.Default := True;
+    FButtonList.Add(b);
+    lwidth  := lwidth + b.Width
+  end;
+  lwidth := lwidth + (cSpacing * (lcount-1));
+  
+  // position buttons
+  ltop := Height - TfpgButton(FButtonList[0]).Height - cSpacing;
+  lleft := (Width - lwidth) div 2;
+  for i := 0 to lcount-1 do
+  begin
+    b := TfpgButton(FButtonList[i]);
+    b.SetPosition(lleft, ltop, b.Width, b.Height);
+    writeln('  button l:', lleft, ' t:', ltop, ' w:', b.width, ' h:', b.height);
+    lleft := lleft + b.Width + cSpacing;
+  end;
+  
+  sl.Free;
+end;
+
+procedure TfpgMessageDialog.SetWindowTitle(const ATitle: string);
+begin
+  if ATitle = '' then
+  begin
+    case DialogType of
+      mtAbout:        SetWindowTitle('About fpGUI...');
+      mtError:        SetWindowTitle('Error');
+      mtWarning:      SetWindowTitle('Warning');
+      mtConfirmation: SetWindowTitle('Confirmation');
+    end;
+  end
+  else
+    inherited SetWindowTitle(ATitle);
+end;
+
 procedure TfpgMessageDialog.HandlePaint;
 var
   logo: TfpgImage;
+  i: integer;
 begin
-  inherited HandlePaint;
+//  writeln('HandlePaint');
+
   Canvas.BeginDraw;
+  inherited HandlePaint;
   case FDialogType of
     mtAbout:
         begin
@@ -1202,6 +1305,55 @@ begin
   Canvas.EndDraw;
 end;
 
+procedure TfpgMessageDialog.HandleShow;
+var
+  i: integer;
+begin
+//  writeln('HandleShow');
+  inherited HandleShow;
+  
+  for i := 0 to ComponentCount-1 do
+    if Components[i] is TfpgButton then
+      if TfpgButton(Components[i]).Default then
+        TfpgButton(Components[i]).SetFocus;
+end;
+
+procedure TfpgMessageDialog.HandleResize(awidth, aheight: TfpgCoord);
+begin
+//  writeln('HandleResize');
+  inherited HandleResize(awidth, aheight);
+end;
+
+procedure TfpgMessageDialog.PrepareLayout;
+begin
+  PrepareIcon;
+  PrepareText;
+  PrepareButtons;
+end;
+
+constructor TfpgMessageDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FButtonList := TList.Create;
+  
+{
+  btnOK.Enabled := False;
+  btnOK.Visible := False
+  btnCancel.Enabled := False;
+  btnCancel.Visible := False;
+}
+end;
+
+destructor TfpgMessageDialog.Destroy;
+begin
+  while FButtonList.Count > 0 do
+  begin
+    TfpgButton(FButtonList.Last).Free;
+    FButtonList.Remove(FButtonList.Last);
+  end;
+  inherited Destroy;
+end;
+
 class procedure TfpgMessageDialog.About(const ATitle: string; const AText: string);
 begin
   writeln('** Implement TfpgMessageDialog.About');
@@ -1228,8 +1380,22 @@ end;
 class function TfpgMessageDialog.Critical(const ATitle: string;
   const AText: string; AButtons: TfpgMsgDlgButtons;
   ADefaultButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
+var
+  dlg: TfpgMessageDialog;
 begin
   writeln('** Implement TfpgMessageDialog.Critical');
+  dlg := TfpgMessageDialog.Create(nil);
+  try
+    dlg.FDialogType   := mtWarning;
+    dlg.FButtons      := AButtons;
+    dlg.Text          := AText;
+    dlg.WindowTitle   := ATitle;
+    dlg.FDefaultButton := ADefaultButton;
+    dlg.PrepareLayout;
+    Result := TfpgMsgDlgBtn(dlg.ShowModal);
+  finally
+    dlg.Free;
+  end;
 end;
 
 class function TfpgMessageDialog.Information(const ATitle: string;
@@ -1238,12 +1404,15 @@ class function TfpgMessageDialog.Information(const ATitle: string;
 var
   dlg: TfpgMessageDialog;
 begin
-//  writeln('** Implement TfpgMessageDialog.Information');
+  writeln('** Implement TfpgMessageDialog.Information');
   dlg := TfpgMessageDialog.Create(nil);
   try
-    dlg.FDialogType := mtInformation;
-    dlg.Text := AText;
-    dlg.WindowTitle := ATitle;
+    dlg.FDialogType   := mtInformation;
+    dlg.FButtons      := AButtons;
+    dlg.Text          := AText;
+    dlg.WindowTitle   := ATitle;
+    dlg.FDefaultButton := ADefaultButton;
+    dlg.PrepareLayout;
     dlg.ShowModal;
   finally
     dlg.Free;
@@ -1257,29 +1426,43 @@ var
   dlg: TfpgMessageDialog;
 begin
   writeln('** Implement TfpgMessageDialog.Question');
-{
   dlg := TfpgMessageDialog.Create(nil);
   try
-    dlg.FDialogType := mtConfirmation;
-    dlg.Text := AText;
-    dlg.WindowTitle := ATitle;
-    Result := dlg.ShowModal;
+    dlg.FDialogType   := mtConfirmation;
+    dlg.FButtons      := AButtons;
+    dlg.Text          := AText;
+    dlg.WindowTitle   := ATitle;
+    dlg.FDefaultButton := ADefaultButton;
+    dlg.PrepareLayout;
+    Result := TfpgMsgDlgBtn(dlg.ShowModal);
   finally
     dlg.Free;
   end;
-}
 end;
 
 class function TfpgMessageDialog.Warning(const ATitle: string;
   const AText: string; AButtons: TfpgMsgDlgButtons;
   ADefaultButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
+var
+  dlg: TfpgMessageDialog;
 begin
   writeln('** Implement TfpgMessageDialog.Warning');
+  dlg := TfpgMessageDialog.Create(nil);
+  try
+    dlg.FDialogType   := mtWarning;
+    dlg.FButtons      := AButtons;
+    dlg.Text          := AText;
+    dlg.WindowTitle   := ATitle;
+    dlg.FDefaultButton := ADefaultButton;
+    dlg.PrepareLayout;
+    Result := TfpgMsgDlgBtn(dlg.ShowModal);
+  finally
+    dlg.Free;
+  end;
 end;
 
 procedure TfpgMessageDialog.AfterCreate;
 begin
-  writeln('TfpgMessageDialgo.AfterCreate');
   {@VFD_BODY_BEGIN: fpgMessageDialog}
   Name := 'fpgMessageDialog';
   SetPosition(303, 245, 447, 400);
@@ -1291,7 +1474,7 @@ begin
   with lblName1 do
   begin
     Name := 'lblName1';
-    SetPosition(116, 20, 312, 16);
+    SetPosition(116, 20, 312, Font.Height);
     Text := 'Label';
     FontDesc := '#Label2';
   end;
