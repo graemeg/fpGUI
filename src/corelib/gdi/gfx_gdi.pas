@@ -902,29 +902,29 @@ var
   msgp: TfpgMessageParams;
 begin
   FillChar(msgp, sizeof(msgp), 0);
+  pt.x := LoWord(lParam);
+  pt.y := HiWord(lParam);
   if not FMouseInWindow then
   begin
-    FMouseInWindow := True;
-//    Windows.SetCapture(FWinHandle);
-//    msgp.mouse.x := LoWord(lParam);
-//    msgp.mouse.y := HiWord(lParam);
-    fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
+    if {(pt.x > 0) and (pt.y > 0) and (pt.x < Width) and
+      (pt.y < Height) and} not CursorInDifferentWindow then
+    begin
+      FMouseInWindow := True;
+      fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
+    end;
     Result := uMsg <> WM_MOUSEMOVE;
   end
   else
   begin
-    pt.x := LoWord(lParam);
-    pt.y := HiWord(lParam);
     if uMsg = WM_MOUSEWHEEL then
       Windows.ScreenToClient(FWinHandle, @pt);
     // we should change the Width and Height to ClientWidth, ClientHeight
-    if (pt.x < 0) or (pt.y < 0) or (pt.x >= Width) or
-      (pt.y >= Height) or CursorInDifferentWindow then
+    if {(pt.x < 0) or (pt.y < 0) or (pt.x >= Width) or
+        (pt.y >= Height) or} CursorInDifferentWindow then
       FMouseInWindow := False;
 
-    if {(not FHasMouseCapture) and} (not FMouseInWindow) then
+    if (not FMouseInWindow) then
     begin
-//      Windows.ReleaseCapture;
       msgp.mouse.x := LoWord(lParam);
       msgp.mouse.y := HiWord(lParam);
       fpgSendMessage(nil, AWindow, FPGM_MOUSEEXIT, msgp);
