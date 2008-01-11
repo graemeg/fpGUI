@@ -47,23 +47,25 @@ uses
   gui_bevel;
 
 type
-  TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation, mtCustom);
-  TfpgMsgDlgBtn = (mbNoButton, mbYes, mbNo, mbOK, mbCancel, mbAbort, mbRetry, mbIgnore,
-                mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose);
+  TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
+      mtCustom);
+      
+  TfpgMsgDlgBtn = (mbNoButton, mbOK, mbCancel, mbYes, mbNo, mbAbort,
+      mbRetry, mbIgnore, mbYesToAll, mbNoToAll, mbHelp, mbClose);
+      
   TfpgMsgDlgButtons = set of TfpgMsgDlgBtn;
 
-
 const
-  mbYesNoCancel = [mbYes, mbNo, mbCancel];
-  mbYesNo = [mbYes, mbNo];
-  mbOKCancel = [mbOK, mbCancel];
-  mbAbortRetryIgnore = [mbAbort, mbRetry, mbIgnore];
+  mbYesNoCancel       = [mbYes, mbNo, mbCancel];
+  mbYesNo             = [mbYes, mbNo];
+  mbOKCancel          = [mbOK, mbCancel];
+  mbAbortRetryIgnore  = [mbAbort, mbRetry, mbIgnore];
 
 
   { todo: Somehow we need to localize this }
   cMsgDlgBtnText: array[TfpgMsgDlgBtn] of string =
-      ( '', 'Yes', 'No', 'OK', 'Cancel', 'Abort', 'Retry', 'Ignore',
-        'All', 'No to All', 'Yes to All', 'Help', 'Close' );
+      ( '', 'OK', 'Cancel', 'Yes', 'No', 'Abort', 'Retry', 'Ignore',
+        'Yes to All', 'No to All', 'Help', 'Close' );
 
 type
 
@@ -75,7 +77,6 @@ type
     FLineHeight: integer;
     FMaxLineWidth: integer;
     FButton: TfpgButton;
-    procedure   ButtonClick(Sender: TObject);
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
@@ -200,6 +201,88 @@ uses
   ;
   
   
+procedure WrapText(const AText: String; ALines: TStrings; AFont: TfpgFont;
+    const ALineWidth: Integer; out AWidth: Integer);
+var
+  maxw: integer;
+  n: integer;
+  s, s2: string;
+  c: char;
+
+  // -----------------
+  procedure AddLine(all: boolean);
+  var
+    w: integer;
+    m: integer;
+  begin
+    s2  := s;
+    w   := AFont.TextWidth(s2);
+    if w > ALineWidth then
+    begin
+      while w > ALineWidth do
+      begin
+        m := UTF8Length(s);
+        repeat
+          Dec(m);
+          s2  := UTF8Copy(s,1,m);
+          w   := AFont.TextWidth(s2);
+        until w <= ALineWidth;
+        if w > maxw then
+          maxw := w;
+
+        // are we in the middle of a word. If so find the beginning of word.
+        while UTF8Copy(s2, m, m+1) <> ' ' do
+        begin
+          Dec(m);
+          s2  := UTF8Copy(s,1,m);
+        end;
+
+        ALines.Add(s2);
+        s   := UTF8Copy(s, m+1, UTF8length(s));
+        s2  := s;
+        w   := AFont.TextWidth(s2);
+      end; { while }
+      if all then
+      begin
+        ALines.Add(s2);
+        s := '';
+      end;
+    end
+    else
+    begin
+      ALines.Add(s2);
+      s := '';
+    end; { if/else }
+
+    if w > maxw then
+      maxw := w;
+  end;
+
+begin
+  s := '';
+  ALines.Clear;
+  n := 1;
+  maxw := 0;
+  while n <= Length(AText) do
+  begin
+    c := AText[n];
+    if (c = #13) or (c = #10) then
+    begin
+      AddLine(false);
+      if (c = #13) and (n < Length(AText)) and (AText[n+1] = #10) then
+        Inc(n);
+    end
+    else
+      s := s + c;
+    Inc(n);
+  end; { while }
+
+  AddLine(true);
+
+  // set out variable
+  AWidth := maxw;
+end;
+
 procedure ShowMessage(AMessage, ATitle: string);
 var
   frm: TfpgMessageBox;
@@ -236,11 +319,6 @@ end;
 
 
 { TfpgMessageBox }
-
-procedure TfpgMessageBox.ButtonClick(Sender: TObject);
-begin
-  ModalResult := 1;
-end;
 
 procedure TfpgMessageBox.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
@@ -283,9 +361,9 @@ begin
   FMaxLineWidth := 500;
   
   FButton := TfpgButton.Create(self);
-  FButton.Text    := 'OK';   // We must localize this
+  FButton.Text    := cMsgDlgBtnText[mbOK];   // We must localize this
   FButton.Width   := 75;
-  FButton.OnClick := @ButtonClick;
+  FButton.ModalResult := Ord(mbOK);
 end;
 
 destructor TfpgMessageBox.Destroy;
@@ -297,83 +375,12 @@ end;
 
 procedure TfpgMessageBox.SetMessage(AMessage: string);
 var
-  maxw: integer;
-  n: integer;
-  s, s2: string;
-  c: char;
-
-  // -----------------
-  procedure AddLine(all: boolean);
-  var
-    w: integer;
-    m: integer;
-  begin
-    s2  := s;
-    w   := FFont.TextWidth(s2);
-    if w > FMaxLineWidth then
-    begin
-      while w > FMaxLineWidth do
-      begin
-        m := UTF8Length(s);
-        repeat
-          Dec(m);
-          s2  := UTF8Copy(s,1,m);
-          w   := FFont.TextWidth(s2);
-        until w <= FMaxLineWidth;
-        if w > maxw then
-          maxw := w;
-
-        // are we in the middle of a word. If so find the beginning of word.
-        while UTF8Copy(s2, m, m+1) <> ' ' do
-        begin
-          Dec(m);
-          s2  := UTF8Copy(s,1,m);
-        end;
-
-        FLines.Add(s2);
-        s   := UTF8Copy(s, m+1, UTF8length(s));
-        s2  := s;
-        w   := FFont.TextWidth(s2);
-      end; { while }
-      if all then
-      begin
-        FLines.Add(s2);
-        s := '';
-      end;
-    end
-    else
-    begin
-      FLines.Add(s2);
-      s := '';
-    end; { if/else }
-
-    if w > maxw then
-      maxw := w;
-  end;
-
+  outw: integer;
 begin
-  s := '';
-  FLines.Clear;
-  n := 1;
-  maxw := 0;
-  while n <= length(AMessage) do
-  begin
-    c := AMessage[n];
-    if (c = #13) or (c = #10) then
-    begin
-      AddLine(false);
-      if (c = #13) and (n < length(AMessage)) and (AMessage[n+1] = #10) then
-        Inc(n);
-    end
-    else
-      s := s + c;
-    Inc(n);
-  end; { while }
-
-  AddLine(true);
-
+  WrapText(AMessage, FLines, FFont, FMaxLineWidth, outw);
+  
   // dialog width with 10 pixel border on both sides
-  Width := maxw + 2*10;
+  Width := outw + 2*10;
 
   if Width < FMinWidth then
     Width := FMinWidth;
