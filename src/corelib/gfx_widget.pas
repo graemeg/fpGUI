@@ -19,6 +19,8 @@ type
     FAlignRect: TfpgRect;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
+    FOnEnter: TNotifyEvent;
+    FOnExit: TNotifyEvent;
     FOnMouseDown: TMouseButtonEvent;
     FOnMouseEnter: TNotifyEvent;
     FOnMouseExit: TNotifyEvent;
@@ -83,6 +85,8 @@ type
     procedure   RePaint;
     { property events }
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
+    property    OnEnter: TNotifyEvent read FOnEnter write FOnEnter;
+    property    OnExit: TNotifyEvent read FOnExit write FOnExit;
     property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
     property    OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
     property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
@@ -645,6 +649,9 @@ begin
     Parent.ActiveWidget := self;
     Parent.SetFocus;
   end;
+  
+  if Assigned(OnEnter) then
+    OnEnter(self);
 end;
 
 procedure TfpgWidget.HandleKillFocus;
@@ -654,6 +661,9 @@ begin
 
   if ActiveWidget <> nil then
     ActiveWidget.KillFocus;
+    
+  if Assigned(OnExit) then
+    OnExit(self);
 end;
 
 procedure TfpgWidget.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);

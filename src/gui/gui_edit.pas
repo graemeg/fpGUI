@@ -34,20 +34,24 @@ type
 
   TfpgCustomEdit = class(TfpgWidget)
   private
+    FAutoSelect: Boolean;
+    FHideSelection: Boolean;
     FText: string;
     FBackgroundColor: TfpgColor;
     FFont: TfpgFont;
-    FPasswordMode: boolean;
+    FPasswordMode: Boolean;
     FBorderStyle: TfpgEditBorderStyle;
     FOnChange: TNotifyEvent;
     FMaxLength: integer;
-    FSelecting: boolean;
+    FSelecting: Boolean;
     procedure   AdjustCursor;
     procedure   DeleteSelection;
     procedure   DoCopy;
     procedure   DoPaste;
+    procedure   SetAutoSelect(const AValue: Boolean);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
+    procedure   SetHideSelection(const AValue: Boolean);
     procedure   SetPasswordMode(const AValue: boolean);
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
@@ -60,43 +64,56 @@ type
     FSelOffset: integer;
     FCursorPos: integer;
     procedure   HandlePaint; override;
-    procedure   HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyChar(var AText: String; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
-    function    GetDrawText: string;
+    procedure   HandleSetFocus; override;
+    procedure   HandleKillFocus; override;
+    function    GetDrawText: String;
+    property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    Font: TfpgFont read FFont;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    PasswordMode: boolean read FPasswordMode write SetPasswordMode default False;
+    property    FontDesc: String read GetFontDesc write SetFontDesc;
+    property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
+    property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default bsDefault;
-    property    Text: string read FText write SetText;
-    property    MaxLength: integer read FMaxLength write FMaxLength;
+    property    Text: String read FText write SetText;
+    property    MaxLength: Integer read FMaxLength write FMaxLength;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    SelectionText: string;
     procedure   SelectAll;
+    procedure   Clear;
+    procedure   ClearSelection;
+    procedure   CopyToClipboard;
+    procedure   CutToClipboard;
+    procedure   PasteFromClipboard;
   end;
 
 
   TfpgEdit = class(TfpgCustomEdit)
   published
-    property    Text;
-    property    FontDesc;
+    property    AutoSelect;
     property    BackgroundColor;
+    property    BorderStyle;
+    property    FontDesc;
+    property    HideSelection;
     property    MaxLength;
     property    PasswordMode;
-    property    BorderStyle;
+    property    Text;
     property    OnChange;
-    property    OnPaint;
-    property    OnMouseExit;
-    property    OnMouseEnter;
+    property    OnEnter;
+    property    OnExit;
     property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
   end;
   
 
@@ -155,6 +172,13 @@ begin
     Exit; //==>
   FBorderStyle := AValue;
   RePaint;
+end;
+
+procedure TfpgCustomEdit.SetHideSelection(const AValue: Boolean);
+begin
+  if FHideSelection = AValue then
+    Exit;
+  FHideSelection := AValue;
 end;
 
 procedure TfpgCustomEdit.HandlePaint;
@@ -221,24 +245,30 @@ begin
   Canvas.SetFont(FFont);
   fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
 
-  // drawing selection
-  if FSelOffset <> 0 then
-    DrawSelection;
 
   if Focused then
   begin
+    // drawing selection
+    if FSelOffset <> 0 then
+      DrawSelection;
+
     // drawing cursor
     tw := FFont.TextWidth(UTF8copy(dtext, 1, FCursorPos));
     fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, 3, fpgCaret.Width, FFont.Height);
   end
   else
+  begin
+    // drawing selection
+    if (AutoSelect = False) and (FSelOffset <> 0) and (HideSelection = False) then
+      DrawSelection;
     fpgCaret.UnSetCaret(Canvas);
+  end;
 
   Canvas.EndDraw;
 end;
 
-procedure TfpgCustomEdit.HandleKeyChar(var AText: string;
-  var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgCustomEdit.HandleKeyChar(var AText: String;
+  var shiftstate: TShiftState; var consumed: Boolean);
 var
   s: string;
   prevval: string;
@@ -520,6 +550,21 @@ begin
   MouseCursor := mcDefault;
 end;
 
+procedure TfpgCustomEdit.HandleSetFocus;
+begin
+  inherited HandleSetFocus;
+  writeln('FSelOffset: ', FSelOffset);
+  if AutoSelect then
+    SelectAll;
+end;
+
+procedure TfpgCustomEdit.HandleKillFocus;
+begin
+  inherited HandleKillFocus;
+  if AutoSelect then
+    FSelOffset := 0;
+end;
+
 function TfpgCustomEdit.GetDrawText: string;
 begin
   if not PassWordMode then
@@ -536,7 +581,9 @@ begin
   FHeight           := FFont.Height + 6;
   FWidth            := 120;
   FBackgroundColor  := clBoxColor;
+  FAutoSelect       := True;
   FSelecting        := False;
+  FHideSelection    := True;
   FSideMargin       := 3;
   FMaxLength        := 0; // no limit
   FText             := '';
@@ -663,6 +710,13 @@ begin
   Repaint;
 end;
 
+procedure TfpgCustomEdit.SetAutoSelect(const AValue: Boolean);
+begin
+  if FAutoSelect = AValue then
+    Exit; //==>
+  FAutoSelect := AValue;
+end;
+
 procedure TfpgCustomEdit.SelectAll;
 begin
   FSelecting  := True;
@@ -670,6 +724,32 @@ begin
   FSelOffset  := UTF8Length(FText);
   FCursorPos  := FSelOffset;
   Repaint;
+end;
+
+procedure TfpgCustomEdit.Clear;
+begin
+  Text := '';
+end;
+
+procedure TfpgCustomEdit.ClearSelection;
+begin
+  DeleteSelection;
+end;
+
+procedure TfpgCustomEdit.CopyToClipboard;
+begin
+  DoCopy;
+end;
+
+procedure TfpgCustomEdit.CutToClipboard;
+begin
+  DoCopy;
+  DeleteSelection;
+end;
+
+procedure TfpgCustomEdit.PasteFromClipboard;
+begin
+  DoPaste;
 end;
 
 end.

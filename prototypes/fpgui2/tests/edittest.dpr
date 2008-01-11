@@ -373,9 +373,12 @@ begin
   w.Left := 140;
 
   edit1      := CreateEdit(self, 10, 40, 120, 22);
+  edit1.AutoSelect := False;
+  edit1.HideSelection := False;
   edit1.Text := 'Hello world. Hello world. Hello world.';
   edit2      := CreateEdit(self, 10, 70, 200, 22);
   edit2.Text := 'UTF-8 text -> Òåñò';
+
 //  writeln(UTF8Length(edit2.text));
 //  writeln(Length(edit2.text));
   UTF8Insert('ö', edit2.Text, 15);
