@@ -107,7 +107,7 @@ type
     property    Text: string read GetText write SetText;
     property    Font: TfpgFont read FFont;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    UseTabs: boolean read FUseTabs write FUseTabs;
+    property    UseTabs: boolean read FUseTabs write FUseTabs default False;
     property    TabWidth: integer read FTabWidth write FTabWidth;
     property    MaxLength: integer read FMaxLength write FMaxLength;
   published
@@ -1054,10 +1054,12 @@ begin
               end;
 }
               hasChanged := True;
-            end;
+            end
+            else
+              Consumed := False;
           end;
       else
-        consumed := False;
+        Consumed := False;
     end;
 
     if Consumed then
@@ -1067,7 +1069,7 @@ begin
     end;
   end;
 
-  if consumed then
+  if Consumed then
     RePaint
   else
     inherited;

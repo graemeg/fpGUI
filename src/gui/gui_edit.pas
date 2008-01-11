@@ -305,7 +305,6 @@ end;
 procedure TfpgCustomEdit.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
-//   lpos: integer;
   hasChanged: boolean;
 
   procedure StopSelection;
@@ -315,27 +314,22 @@ var
   end;
 
 begin
-//  writeln(Classname, '.Keypress');
   Consumed := False;
-//   lpos := FCursorPos;
   hasChanged := False;
 
   Consumed := True;
   case CheckClipBoardKey(keycode, shiftstate) of
     ckCopy:
         begin
-//          writeln('ckCopy');
           DoCopy;
         end;
     ckPaste:
         begin
-//          writeln('ckPaste');
           DoPaste;
           hasChanged := True;
         end;
     ckCut:
         begin
-//          writeln('ckCut');
           DoCopy;
           DeleteSelection;
           hasChanged := True;
