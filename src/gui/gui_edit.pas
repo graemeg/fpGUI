@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -162,6 +162,30 @@ var
   r: TfpgRect;
   tw, tw2, st, len: integer;
   dtext: string;
+
+  // paint selection rectangle
+  procedure DrawSelection;
+  var
+    lcolor: TfpgColor;
+  begin
+    if Focused then
+      lcolor := clSelection
+    else
+      lcolor := clInactiveSel;
+
+    len := FSelOffset;
+    st  := FSelStart;
+    if len < 0 then
+    begin
+      st  := st + len;
+      len := -len;
+    end;
+    tw  := FFont.TextWidth(UTF8copy(dtext, 1, st));
+    tw2 := FFont.TextWidth(UTF8copy(dtext, 1, st + len));
+    Canvas.XORFillRectangle(fpgColorToRGB(lcolor) xor $FFFFFF,
+      -FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
+  end;
+  
 begin
   Canvas.BeginDraw;
 
@@ -191,30 +215,18 @@ begin
   else
     Canvas.SetColor(clWindowBackground);
 
-  Canvas.FillRectAngle(r);
+  Canvas.FillRectangle(r);
   dtext := GetDrawText;
   Canvas.SetTextColor(clText1);
   Canvas.SetFont(FFont);
   fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
 
+  // drawing selection
+  if FSelOffset <> 0 then
+    DrawSelection;
+
   if Focused then
   begin
-    // drawing selection
-    if FSelOffset <> 0 then
-    begin
-      len := FSelOffset;
-      st  := FSelStart;
-      if len < 0 then
-      begin
-        st  := st + len;
-        len := -len;
-      end;
-      tw  := FFont.TextWidth(UTF8copy(dtext, 1, st));
-      tw2 := FFont.TextWidth(UTF8copy(dtext, 1, st + len));
-      Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, -FDrawOffset +
-        FSideMargin + tw, 3, tw2 - tw, FFont.Height);
-    end;
-
     // drawing cursor
     tw := FFont.TextWidth(UTF8copy(dtext, 1, FCursorPos));
     fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, 3, fpgCaret.Width, FFont.Height);
