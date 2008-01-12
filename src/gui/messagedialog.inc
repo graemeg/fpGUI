@@ -1219,6 +1219,25 @@ var
     i: TfpgMsgDlgBtn;
   begin
     Result := 0;
+    
+    // try known sets first
+    if Buttons = mbYesNoCancel then
+    begin
+      { todo: At some stage the StyleManager can give use the correct button
+        order based on the OS and Window Manager. }
+      Result := 3;
+      sl.Add(cMsgDlgBtnText[mbYes] + '=' + IntToStr(Ord(mbYes)));
+      sl.Add(cMsgDlgBtnText[mbNo] + '=' + IntToStr(Ord(mbNo)));
+      sl.Add(cMsgDlgBtnText[mbCancel] + '=' + IntToStr(Ord(mbCancel)));
+      case DefaultButton of
+        mbYes:    lDefault := 0;
+        mbNo:     lDefault := 1;
+        mbCancel: lDefault := 2;
+      end;
+      Exit;
+    end;
+    
+    // if we got here, try all known buttons.
     for i := Low(TfpgMsgDlgBtn) to High(TfpgMsgDlgBtn) do
     begin
       if i in Buttons then
@@ -1382,11 +1401,7 @@ end;
 
 destructor TfpgMessageDialog.Destroy;
 begin
-  while FButtonList.Count > 0 do
-  begin
-    TfpgButton(FButtonList.Last).Free;
-    FButtonList.Remove(FButtonList.Last);
-  end;
+  FButtonList.Clear;
   FInformativeText.Free;
   inherited Destroy;
 end;

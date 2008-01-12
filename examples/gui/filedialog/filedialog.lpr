@@ -16,6 +16,9 @@ uses
 
 
 type
+
+  { TMainForm }
+
   TMainForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: MainForm}
@@ -23,10 +26,14 @@ type
     btnSaveFile: TfpgButton;
     edFilename: TfpgEdit;
     btnQuit: TfpgButton;
+    btnName1: TfpgButton;
+    btnName2: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure   btnQuitClick(Sender: TObject);
     procedure   btnOpenFileClick(Sender: TObject);
     procedure   btnSaveFileClick(Sender: TObject);
+    procedure   btnMessageBoxClick(Sender: TObject);
+    procedure   btnMessageDlgClick(Sender: TObject);
   public
     procedure   AfterCreate; override;
   end;
@@ -68,12 +75,26 @@ begin
   end;
 end;
 
+procedure TMainForm.btnMessageBoxClick(Sender: TObject);
+begin
+  ShowMessage('This is some pretty cool shit');
+end;
+
+procedure TMainForm.btnMessageDlgClick(Sender: TObject);
+begin
+  TfpgMessageDialog.AboutFPGui('My title here');
+  TfpgMessageDialog.Critical('Something Critical...', 'And this is where the text goes.', mbAbortRetryIgnore, mbAbort);
+  TfpgMessageDialog.Warning('Some Warning...', 'And this is where the text goes.', mbYesNoCancel, mbNo);
+  TfpgMessageDialog.Information('Some Information...', 'And this is where the text goes.', [mbOK], mbNoButton);
+  TfpgMessageDialog.Question('Some Question...', 'Did everything work okay?', mbYesNo, mbNoButton);
+end;
+
 procedure TMainForm.AfterCreate;
 begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(100, 100, 419, 138);
+  SetPosition(197, 147, 419, 138);
   WindowTitle := 'File dialog test';
   MinWidth := 300;
   MinHeight := 135;
@@ -84,15 +105,8 @@ begin
     Name := 'btnOpenFile';
     SetPosition(8, 8, 80, 23);
     Text := 'Open File...';
-    AllowAllUp := False;
-    Embedded := False;
     FontDesc := '#Label1';
-    GroupIndex := 0;
-    ImageMargin := 3;
     ImageName := '';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ShowImage := True;
     OnClick := @btnOpenFileClick;
   end;
 
@@ -102,15 +116,8 @@ begin
     Name := 'btnSaveFile';
     SetPosition(8, 34, 80, 23);
     Text := 'Save File...';
-    AllowAllUp := False;
-    Embedded := False;
     FontDesc := '#Label1';
-    GroupIndex := 0;
-    ImageMargin := 3;
     ImageName := '';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ShowImage := True;
     OnClick := @btnSaveFileClick;
   end;
 
@@ -131,16 +138,31 @@ begin
     SetPosition(329, 107, 80, 23);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
-    AllowAllUp := False;
-    Embedded := False;
     FontDesc := '#Label1';
-    GroupIndex := 0;
-    ImageMargin := 3;
     ImageName := 'stdimg.Quit';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ShowImage := True;
     OnClick := @btnQuitClick;
+  end;
+
+  btnName1 := TfpgButton.Create(self);
+  with btnName1 do
+  begin
+    Name := 'btnName1';
+    SetPosition(148, 8, 119, 27);
+    Text := 'Message Box';
+    FontDesc := '#Label1';
+    ImageName := '';
+    OnClick := @btnMessageBoxClick;
+  end;
+
+  btnName2 := TfpgButton.Create(self);
+  with btnName2 do
+  begin
+    Name := 'btnName2';
+    SetPosition(272, 8, 131, 27);
+    Text := 'Message Dialog';
+    FontDesc := '#Label1';
+    ImageName := '';
+    OnClick := @btnMessageDlgClick;
   end;
 
   {@VFD_BODY_END: MainForm}
