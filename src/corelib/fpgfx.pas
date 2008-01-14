@@ -297,7 +297,8 @@ implementation
 
 uses
   gfx_imgfmt_bmp,
-  gfx_stdimages;
+  gfx_stdimages,
+  gfx_extinterpolation; // only so that it get auto compiled
 
 var
   fpgTimers:      TList;

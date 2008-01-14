@@ -547,7 +547,6 @@ end;
 procedure TfpgCustomEdit.HandleSetFocus;
 begin
   inherited HandleSetFocus;
-  writeln('FSelOffset: ', FSelOffset);
   if AutoSelect then
     SelectAll;
 end;

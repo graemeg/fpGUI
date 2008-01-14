@@ -327,11 +327,11 @@ end;
 procedure TMainForm.btn3Click(Sender: TObject);
 begin
   ShowMessage('Do you really want to quit this application?' + #10 +
-      'We can always keep playing and quite at a later date.' +
+      'We can always keep playing and quit at a later date.' +
       #10#10 +
-      'This is a very long line that must be split automatically, ' +
+      'This is a new paragraph and very long line that must be split automatically, ' +
       'and it should have done so. If not, there is a bug in the code. It ' +
-      'has also been optimized to wordwrap and not split words in half.'
+      'has also been optimized to wordwrap and not split words over two lines.'
       , 'My cool message title');
 end;
 

@@ -43,7 +43,7 @@ begin
   Canvas.DrawString(10, 60+(Canvas.Font.Height*2), 'ending points.');
 
   // final image
-  Canvas.DrawString(10, 195-Canvas.Font.Height, 'The final images should look line this:');
+  Canvas.DrawString(10, 195-Canvas.Font.Height, 'The final images should look like this:');
   Canvas.DrawImage(100, 200, finalimg);
 
   // blank rectangle image
