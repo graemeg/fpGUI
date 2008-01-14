@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -21,9 +21,11 @@ unit gui_grid;
 
 {
   TODO:
-    * TCustomStringGrid: Objects property needs to be implemented.
-    * TCustomStringGrid: Col[] and Row[] properties need to be implemented.
-       The return TStrings with all text inserted.gui_grid
+    * TCustomStringGrid: Col[] and Row[] properties need to be implemented,
+      returning a TStrings with all related text inserted.
+    * File Grid: Introduce support for images based on file types. User must
+      be able to override the default images with their own.
+    * Remove the usage of libc unit. libc is linux/x86 specific.
 }
 
 interface
@@ -307,7 +309,7 @@ begin
     result := p^.gr_name;
 end;
 {$ELSE}
-// Still need to find a alternative as we can't use the libc unit.
+// Still need to find an alternative for FreeBSD as we can't use the libc unit.
 function GetGroupName(gid: integer): string;
 begin
   result := IntToStr(gid);
@@ -326,6 +328,7 @@ begin
     result := '';
 end;
 {$ELSE}
+// Still need to find an alternative for FreeBSD as we can't use the libc unit.
 function GetUserName(uid: integer): string;
 begin
   result := IntToStr(uid);

@@ -77,13 +77,16 @@ type
     FLineHeight: integer;
     FMaxLineWidth: integer;
     FButton: TfpgButton;
+    FCentreText: Boolean;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
+    procedure   HandleShow; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   SetMessage(AMessage: string);
+    property    CentreText: Boolean read FCentreText write FCentreText default False;
   end;
   
 
@@ -184,8 +187,8 @@ type
 
 
 
-procedure ShowMessage(AMessage, ATitle: string); overload;
-procedure ShowMessage(AMessage: string); overload;
+procedure ShowMessage(AMessage, ATitle: string; ACentreText: Boolean = False); overload;
+procedure ShowMessage(AMessage: string; ACentreText: Boolean = False); overload;
 
 function SelectFontDialog(var FontDesc: string): boolean;
 
@@ -268,7 +271,10 @@ begin
     c := AText[n];
     if (c = #13) or (c = #10) then
     begin
-      AddLine(false);
+      // True indicates that if the text is split over multiple lines the last
+      // line must also be pocessed before continuing. If False then double CR
+      // can get ignored.
+      AddLine(true);
       if (c = #13) and (n < Length(AText)) and (AText[n+1] = #10) then
         Inc(n);
     end
@@ -283,13 +289,14 @@ begin
   AWidth := maxw;
 end;
 
-procedure ShowMessage(AMessage, ATitle: string);
+procedure ShowMessage(AMessage, ATitle: string; ACentreText: Boolean);
 var
   frm: TfpgMessageBox;
 begin
   frm := TfpgMessageBox.Create(nil);
   try
     frm.WindowTitle := ATitle;
+    frm.CentreText := ACentreText;
     frm.SetMessage(AMessage);
     frm.ShowModal;
   finally
@@ -297,9 +304,9 @@ begin
   end;
 end;
 
-procedure ShowMessage(AMessage: string);
+procedure ShowMessage(AMessage: string; ACentreText: Boolean);
 begin
-  ShowMessage(AMessage, 'Message');
+  ShowMessage(AMessage, 'Message', ACentreText);
 end;
 
 function SelectFontDialog(var FontDesc: string): boolean;
@@ -341,10 +348,19 @@ begin
   for n := 0 to FLines.Count-1 do
   begin
     tw := FFont.TextWidth(FLines[n]);
-    Canvas.DrawString(Width div 2 - tw div 2, y, FLines[n]);
+    if CentreText then
+      Canvas.DrawString(Width div 2 - tw div 2, y, FLines[n])
+    else
+      Canvas.DrawString(10, y, FLines[n]);
     Inc(y, FLineHeight);
   end;
   Canvas.EndDraw;
+end;
+
+procedure TfpgMessageBox.HandleShow;
+begin
+  inherited HandleShow;
+  FButton.SetFocus;
 end;
 
 constructor TfpgMessageBox.Create(AOwner: TComponent);
@@ -359,6 +375,7 @@ begin
   FLineHeight   := FFont.Height + 4;
   MinWidth      := 200;
   FMaxLineWidth := 500;
+  FCentreText   := False;
   
   FButton := TfpgButton.Create(self);
   FButton.Text    := cMsgDlgBtnText[mbOK];   // We must localize this

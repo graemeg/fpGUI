@@ -1354,7 +1354,8 @@ begin
 //      tw := FFont.TextWidth(FInformativeText[i]);
 //      Canvas.DrawString(Width div 2 - tw div 2, y, FInformativeText[i]);
       // left align text
-      Canvas.DrawString(70, y, FInformativeText[i]);
+      if FInformativeText[i] <> '' then
+        Canvas.DrawString(70, y, FInformativeText[i]);
       Inc(y, FLineHeight);
     end;
   end;
@@ -1517,7 +1518,7 @@ procedure TfpgMessageDialog.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: fpgMessageDialog}
   Name := 'fpgMessageDialog';
-  WindowTitle := 'Form1';
+  WindowTitle := 'Message...';
   Sizeable := False;
   Width     := 500;
   Height    := 400;
