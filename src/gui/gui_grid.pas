@@ -220,7 +220,7 @@ uses
   ,Windows   // Graeme: temporary, just to see how the grid looks under Windows.
   {$ENDIF}
   {$IFDEF UNIX}
-  ,libc      // Graeme: temporary
+    {$IFDEF LINUX},libc{$ENDIF} // Graeme: temporary. libc is not available for FreeBSD.
   ,baseunix
   {$ENDIF}
   ;
@@ -297,6 +297,7 @@ begin
 end;
 
 {$IFDEF UNIX}
+{$IFDEF LINUX}
 function GetGroupName(gid: integer): string;
 var
   p: PGroup;
@@ -305,7 +306,15 @@ begin
   if p <> nil then
     result := p^.gr_name;
 end;
+{$ELSE}
+// Still need to find a alternative as we can't use the libc unit.
+function GetGroupName(gid: integer): string;
+begin
+  result := IntToStr(gid);
+end;
+{$ENDIF}
 
+{$IFDEF LINUX}
 function GetUserName(uid: integer): string;
 var
   p: PPasswd;
@@ -316,7 +325,13 @@ begin
   else
     result := '';
 end;
-{$ENDIF}
+{$ELSE}
+function GetUserName(uid: integer): string;
+begin
+  result := IntToStr(uid);
+end;
+{$ENDIF LINUX}
+{$ENDIF UNIX}
 
 
 { TFileEntry }
