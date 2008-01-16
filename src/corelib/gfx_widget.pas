@@ -333,14 +333,14 @@ var
 begin
   if FFormDesigner <> nil then
   begin
-//    writeln('dispatching message to designer...');
+    // dispatching message to designer
     FFormDesigner.Dispatch(msg);
     Exit;
   end;
 
   if not FEnabled then
     exit;   // Do we want this here?
-
+    
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin

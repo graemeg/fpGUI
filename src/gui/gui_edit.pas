@@ -26,7 +26,8 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
-  gfx_widget;
+  gfx_widget,
+  gui_menu;
 
 type
   TfpgEditBorderStyle = (bsNone, bsDefault, bsSingle);
@@ -36,6 +37,8 @@ type
   private
     FAutoSelect: Boolean;
     FHideSelection: Boolean;
+    FPopupMenu: TfpgPopupMenu;
+    FDefaultPopupMenu: TfpgPopupMenu;
     FText: string;
     FBackgroundColor: TfpgColor;
     FFont: TfpgFont;
@@ -56,6 +59,11 @@ type
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
+    procedure   DefaultPopupCut(Sender: TObject);
+    procedure   DefaultPopupCopy(Sender: TObject);
+    procedure   DefaultPopupPaste(Sender: TObject);
+    procedure   DefaultPopupClearAll(Sender: TObject);
+    procedure   SetDefaultPopupMenuItemsState;
   protected
     FMouseDragPos: integer;
     FDrawOffset: integer;
@@ -63,10 +71,12 @@ type
     FSelStart: integer;
     FSelOffset: integer;
     FCursorPos: integer;
+    procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
     procedure   HandleKeyChar(var AText: String; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
@@ -76,13 +86,14 @@ type
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
+    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default bsDefault;
     property    Font: TfpgFont read FFont;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
-    property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
-    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default bsDefault;
-    property    Text: String read FText write SetText;
     property    MaxLength: Integer read FMaxLength write FMaxLength;
+    property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
+    property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
+    property    Text: String read FText write SetText;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
@@ -98,6 +109,8 @@ type
 
 
   TfpgEdit = class(TfpgCustomEdit)
+  public
+    property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
     property    AutoSelect;
     property    BackgroundColor;
@@ -125,6 +138,14 @@ implementation
 uses
   gfx_UTF8utils,
   gfx_clipboard;
+  
+const
+  // internal popupmenu item names
+  ipmCut        = 'miDefaultCut';
+  ipmCopy       = 'miDefaultCopy';
+  ipmPaste      = 'miDefaultPaste';
+  ipmClearAll   = 'miDefaultClearAll';
+
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 begin
@@ -483,6 +504,15 @@ begin
   Repaint;
 end;
 
+procedure TfpgCustomEdit.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleRMouseDown(x, y, shiftstate);
+  if Assigned(PopupMenu) then
+    PopupMenu.ShowAt(self, x, y)
+  else
+    ShowDefaultPopupMenu(x, y, ShiftState);
+end;
+
 procedure TfpgCustomEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   n: integer;
@@ -586,11 +616,15 @@ begin
   FDrawOffset       := 0;
   FPasswordMode     := False;
   FBorderStyle      := bsDefault;
+  FPopupMenu        := nil;
+  FDefaultPopupMenu := nil;
   FOnChange         := nil;
 end;
 
 destructor TfpgCustomEdit.Destroy;
 begin
+  if Assigned(FDefaultPopupMenu) then
+    FDefaultPopupMenu.Free;
   FFont.Free;
   inherited Destroy;
 end;
@@ -655,6 +689,72 @@ begin
 
   AdjustCursor;
   RePaint;
+end;
+
+procedure TfpgCustomEdit.DefaultPopupCut(Sender: TObject);
+begin
+  CutToClipboard;
+end;
+
+procedure TfpgCustomEdit.DefaultPopupCopy(Sender: TObject);
+begin
+  CopyToClipboard;
+end;
+
+procedure TfpgCustomEdit.DefaultPopupPaste(Sender: TObject);
+begin
+  PasteFromClipboard
+end;
+
+procedure TfpgCustomEdit.DefaultPopupClearAll(Sender: TObject);
+begin
+  Clear;
+end;
+
+procedure TfpgCustomEdit.SetDefaultPopupMenuItemsState;
+var
+  i: integer;
+  itm: TfpgMenuItem;
+begin
+  for i := 0 to FDefaultPopupMenu.ComponentCount-1 do
+  begin
+    if FDefaultPopupMenu.Components[i] is TfpgMenuItem then
+    begin
+      itm := TfpgMenuItem(FDefaultPopupMenu.Components[i]);
+      // enabled/disable menu items
+      if itm.Name = ipmCut then
+        itm.Enabled := FSelOffset <> 0
+      else if itm.Name = ipmCopy then
+        itm.Enabled := FSelOffset <> 0
+      else if itm.Name = ipmPaste then
+        itm.Enabled := fpgClipboard.Text <> ''
+      else if itm.Name = ipmClearAll then
+        itm.Enabled := Text <> '';
+    end;
+  end;
+end;
+
+procedure TfpgCustomEdit.ShowDefaultPopupMenu(const x, y: integer;
+  const shiftstate: TShiftState);
+var
+  itm: TfpgMenuItem;
+begin
+  if not Assigned(FDefaultPopupMenu) then
+  begin
+    { todo: This text needs to be localized }
+    FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
+    itm := FDefaultPopupMenu.AddMenuItem('Cut', '', @DefaultPopupCut);
+    itm.Name := ipmCut;
+    itm := FDefaultPopupMenu.AddMenuItem('Copy', '', @DefaultPopupCopy);
+    itm.Name := ipmCopy;
+    itm := FDefaultPopupMenu.AddMenuItem('Paste', '', @DefaultPopupPaste);
+    itm.Name := ipmPaste;
+    itm := FDefaultPopupMenu.AddMenuItem('Clear all text', '', @DefaultPopupClearAll);
+    itm.Name := ipmClearAll;
+  end;
+  
+  SetDefaultPopupMenuItemsState;
+  FDefaultPopupMenu.ShowAt(self, x, y);
 end;
 
 procedure TfpgCustomEdit.DeleteSelection;

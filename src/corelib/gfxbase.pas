@@ -34,8 +34,8 @@ type
   
 const
   MOUSE_LEFT       = 1;
-  MOUSE_RIGHT      = 2;
-  MOUSE_MIDDLE     = 4;
+  MOUSE_RIGHT      = 3;
+  MOUSE_MIDDLE     = 2;
 
   // Platform independent messages used by fpGUI (TfpgWidget)
   FPGM_PAINT       = 1;

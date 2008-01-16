@@ -53,16 +53,16 @@
     </Files>
     <RequiredPkgs Count="3">
       <Item1>
-        <PackageName Value="fpgui_package"/>
-        <MinVersion Minor="5" Valid="True"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item1>
       <Item2>
         <PackageName Value="tiOPF"/>
         <MinVersion Major="2" Release="3" Valid="True"/>
       </Item2>
       <Item3>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="fpgui_package"/>
+        <MinVersion Minor="5" Valid="True"/>
       </Item3>
     </RequiredPkgs>
     <UsageOptions>
