@@ -388,7 +388,10 @@ begin
 end;
 
 procedure TfpgBaseListBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  tmp: IInterface;
 begin
+  tmp := PrintCallTrace(ClassName, 'HandleLMouseDown');
   inherited HandleLMouseDown(x, y, shiftstate);
 
   if ItemCount < 1 then
@@ -593,7 +596,7 @@ begin
   
   FScrollBar          := TfpgScrollBar.Create(self);
   FScrollBar.OnScroll := @ScrollBarMove;
-  FScrollBar.Visible  := False;
+//  FScrollBar.Visible  := False;
 
   FFocusable      := True;
   FFocusItem      := 1;
@@ -659,7 +662,11 @@ begin
 end;
 
 destructor TfpgTextListBox.Destroy;
+var
+  tmp: IInterface;
 begin
+  tmp := PrintCallTrace(ClassName, 'Destroy');
+  PrintCallTraceDbgLn('**** Freeing off the listbox items');
   TfpgListBoxStrings(FItems).Free;
   inherited Destroy;
 end;
@@ -670,7 +677,10 @@ begin
 end;
 
 function TfpgTextListBox.Text: string;
+var
+  tmp: IInterface;
 begin
+  tmp := PrintCallTrace(Classname, 'Text');
   if (FocusItem > 0) and (FocusItem <= FItems.Count) then
     result := FItems.Strings[FocusItem-1]
   else

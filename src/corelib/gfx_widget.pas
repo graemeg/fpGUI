@@ -132,6 +132,7 @@ uses
 { Double click support }
 const
   DOUBLECLICK_MS = 320; // the max time between left-clicks for doubleclick
+
 var
   uLastClickWidget: TfpgWidget;
   uLastClickTime: DWord;
@@ -176,7 +177,6 @@ end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
 begin
-//  Writeln(Classname, ' TfpgWidget.SetVisible AValue = ', AValue);
   if FVisible = AValue then
     Exit; //==>
   FVisible := AValue;
@@ -202,7 +202,7 @@ end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
-  { TODO -oGraeme -cRelease Blocker : ComponentState is read-only. I'm
+  { TODO: -oGraeme -cRelease_Blocker ComponentState is read-only. I'm
     exploiting a FPC <= 2.2.0 bug. I need to fix this! }
   Include(ComponentState, csLoading);
   FOnScreen   := False;
@@ -517,7 +517,8 @@ begin
   end;
   FOnScreen := False;
 
-  ReleaseWindowHandle;
+  if HasHandle then
+    ReleaseWindowHandle;
 end;
 
 procedure TfpgWidget.RePaint;

@@ -45,7 +45,7 @@ type
     FPosition: Longint;
     FKind: TGaugeKind;
     FShowText: Boolean;
-    {TODO _ Implement Border style }
+    { TODO: Implement Border style }
     FBorderStyle: TBorderStyle;
     FColor: TfpgColor; // Background color
     { Currently little used colors, should be derived from style and possibly
@@ -53,7 +53,7 @@ type
     or give pair? }
     FFirstColor: TfpgColor; // Text and Needle color
     FSecondColor: TfpgColor; // Bar, Pie etc. main color
-    { Currently unused - TODO - Implement Low Watermark and High Watermark }
+    { TODO: Currently unused. Implement Low Watermark and High Watermark }
     FLWMColor: TfpgColor; // Low Watermark Color
     FLWMValue: Longint;   //  Low Watermark Value
     FHWMColor: TfpgColor; // High Watermark Color
@@ -448,7 +448,7 @@ begin
   if AValue <> FBorderStyle then
   begin
     FBorderStyle := AValue;
-    {TODO - Implement Border style }
+    { TODO: Implement Border style }
     // Graeme:  Wouldn't descending from TfpgBevel give you this functionality already?
     //          It could be a option.
     //RePaint;
@@ -460,7 +460,7 @@ begin
   if AValue <> FFirstColor then
   begin
     FFirstColor := AValue;
-    {TODO - allow user colors}
+    { TODO: allow user colors}
     //RePaint;
   end;
 end;
@@ -470,7 +470,7 @@ begin
   if AValue <> FSecondColor then
   begin
     FSecondColor := AValue;
-    {TODO - allow user colors}
+    { TODO: allow user colors}
     //RePaint;
   end;
 end;
@@ -525,7 +525,7 @@ begin
     FPosition := AValue;
     if CurrPercentage <> Percentage then  // Visible value has changed
       MustRepaint := True;
-    { TODO Check against low and high watermarks }
+    { TODO: Check against low and high watermarks }
     end;
   if MustRepaint then
     RePaint;

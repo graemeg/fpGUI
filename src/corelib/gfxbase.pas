@@ -326,6 +326,7 @@ type
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
+    procedure   DoRemoveWindowLookup; virtual; abstract;
     procedure   DoSetWindowVisible(const AValue: Boolean); virtual; abstract;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); virtual; abstract;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
@@ -787,6 +788,7 @@ begin
     Canvas.FreeResources;
     DoReleaseWindowHandle;
   end;
+  DoRemoveWindowLookup;
 end;
 
 procedure TfpgWindowBase.SetWindowTitle(const ATitle: string);

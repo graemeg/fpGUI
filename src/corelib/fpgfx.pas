@@ -290,6 +290,8 @@ function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
 procedure PrintRect(var Rect: TRect);
 procedure PrintRect(var Rect: TfpgRect);
 procedure PrintCoord(const x, y: TfpgCoord);
+function  PrintCallTrace(const AClassName, AMethodName: string): IInterface;
+procedure PrintCallTraceDbgLn(const AMessage: string);
 procedure DumpStack;
 
 
@@ -475,6 +477,58 @@ end;
 procedure PrintCoord(const x, y: TfpgCoord);
 begin
   writeln('x=', x, '  y=', y);
+end;
+
+var
+  iCallTrace: integer;
+
+type
+  TPrintCallTrace = class(TInterfacedObject)
+  private
+    FClassName: string;
+    FMethodName: string;
+    spacing: string;
+  public
+    constructor Create(const AClassName, AMethodName: string);
+    destructor Destroy; override;
+  end;
+
+{ TPrintCallTrace }
+
+constructor TPrintCallTrace.Create(const AClassname, AMethodName: string);
+var
+  i: integer;
+begin
+  inherited Create;
+  spacing := '';
+  inc(iCallTrace);
+  for i := 0 to iCallTrace do
+    spacing := spacing + '  ';
+  FClassName := AClassName;
+  FMethodName := AMethodName;
+  Writeln(Format('%s>> %s.%s', [spacing, FClassName, FMethodName]));
+end;
+
+destructor TPrintCallTrace.Destroy;
+begin
+  Writeln(Format('%s<< %s.%s', [spacing, FClassName, FMethodName]));
+  dec(iCallTrace);
+  inherited Destroy;
+end;
+  
+function PrintCallTrace(const AClassName, AMethodName: string): IInterface;
+begin
+  Result := TPrintCallTrace.Create(AClassName, AMethodName);
+end;
+
+procedure PrintCallTraceDbgLn(const AMessage: string);
+var
+  i: integer;
+  s: string;
+begin
+  for i := 0 to iCallTrace+1 do
+    s := s + '  ';
+  writeln(s + AMessage);
 end;
 
 procedure DumpStack;
@@ -1357,10 +1411,11 @@ initialization
   fpgTimers       := nil;
   fpgCaret        := nil;
   fpgImages       := nil;
+  iCallTrace      := -1;
   fpgInitMsgQueue;
 
 finalization;
-  uApplication.free;
+  uApplication.Free;
 
 end.
 

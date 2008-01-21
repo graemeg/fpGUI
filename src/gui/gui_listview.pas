@@ -572,7 +572,6 @@ procedure TfpgListView.ItemChanged(AIndex: Integer);
 begin
   if FUpdateCount = 0 then
     DoRePaint;
-  // TODO
 end;
 
 procedure TfpgListView.ItemsUpdated;
@@ -1374,7 +1373,7 @@ begin
 
     if lvppIcon in PaintPart then
     begin
-      // TODO paint icon
+      { TODO: paint icon }
     end;
     
     if lvppFocused in PaintPart then

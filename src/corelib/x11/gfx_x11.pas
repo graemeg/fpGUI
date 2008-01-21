@@ -134,6 +134,7 @@ type
     FModalForWin: TfpgWindowImpl;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
+    procedure   DoRemoveWindowLookup; override;
     procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;
@@ -734,8 +735,10 @@ begin
   Popup := PopupListFirst;
 
 
-// WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
+  {$IFDEF DEBUG}
+  WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
 //  PrintKeyEvent(ev);  { debug purposes only }
+  {$ENDIF}
 
   case ev._type of
     X.KeyPress,
@@ -1182,15 +1185,28 @@ begin
 end;
 
 procedure TfpgWindowImpl.DoReleaseWindowHandle;
+var
+  lCallTrace: IInterface;
 begin
-  if FWinHandle <= 0 then
-    Exit;
-
-  XDestroyWindow(xapplication.Display, FWinHandle);
-  // RemoveWindowLookup is now deferred to DestroyNotify event.
-//  RemoveWindowLookup(self);
+  lCallTrace := PrintCallTrace(Classname, 'DoReleaseWindowHandle: ' + Name);
+  if HandleIsValid then
+  begin
+    PrintCallTraceDbgLn('XDestroyWindow');
+    XDestroyWindow(xapplication.Display, FWinHandle);
+  end
+  else
+  begin
+    PrintCallTraceDbgLn(' RemoveWindowLookup');
+    RemoveWindowLookup(self);
+  end;
 
   FWinHandle := 0;
+end;
+
+procedure TfpgWindowImpl.DoRemoveWindowLookup;
+begin
+  PrintCallTraceDbgLn('RemoveWindowLookup ' + Name + ' [' + Classname + ']');
+  RemoveWindowLookup(self);
 end;
 
 procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);

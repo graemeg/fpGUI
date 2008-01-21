@@ -132,6 +132,7 @@ type
     FParentWinHandle: TfpgWinHandle;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
+    procedure   DoRemoveWindowLookup; override;
     procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
@@ -429,7 +430,7 @@ begin
 
   if not Assigned(w) then
   begin
-    {$IFDEF DEBUG} writeln('Unable to detect Windows - using DefWindowProc'); {$ENDIF}
+    {$IFDEF DEBUG} writeln('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
     Exit; //==>
   end;
@@ -1044,6 +1045,11 @@ begin
     Exit;
   Windows.DestroyWindow(FWinHandle);
   FWinHandle := 0;
+end;
+
+procedure TfpgWindowImpl.DoRemoveWindowLookup;
+begin
+  // Nothing to do here
 end;
 
 procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);

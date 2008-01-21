@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -18,6 +18,8 @@
 unit gui_combobox;
 
 {$mode objfpc}{$H+}
+
+{.$Define DEBUG}
 
 { TODO: When combobox Items changes, the combobox needs to refresh. We need a
       custom StringItems class to notify us of changes. See TfpgListBox for
@@ -56,6 +58,7 @@ type
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   CalculateInternalButtonRect;
+    procedure   MsgPopupClose(var msg: TfpgMessageRec); message FPGM_POPUPCLOSE;
   protected
     FMargin: integer;
     FBtnPressed: Boolean;
@@ -114,7 +117,6 @@ var
   OriginalFocusRoot: TfpgWidget;
 
 type
-
   { This is the class representing the dropdown window of the combo box. }
   TDropDownWindow = class(TfpgPopupWindow)
   private
@@ -131,12 +133,13 @@ type
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   end;
 
+
 { TDropDownWindow }
 
 procedure TDropDownWindow.HandlePaint;
 begin
   Canvas.BeginDraw;
-  inherited HandlePaint;
+//  inherited HandlePaint;
   Canvas.Clear(clWhite);
   Canvas.EndDraw;
 end;
@@ -186,8 +189,10 @@ begin
 end;
 
 destructor TDropDownWindow.Destroy;
+var
+  tmp: IInterface;
 begin
-  ListBox.Free;
+  tmp := PrintCallTrace(ClassName, 'Destroy');
   inherited Destroy;
 end;
 
@@ -228,6 +233,7 @@ end;
 
 function TfpgAbstractComboBox.GetText: string;
 begin
+  PrintCallTraceDbgLn('FocusItem = ' + IntToStr(FocusItem));
   if (FocusItem > 0) and (FocusItem <= FItems.Count) then
     Result := FItems.Strings[FocusItem-1]
   else
@@ -241,15 +247,19 @@ end;
 
 procedure TfpgAbstractComboBox.DoDropDown;
 var
+  tmp: IInterface;
   ddw: TDropDownWindow;
   rowcount: integer;
 begin
+  tmp := PrintCallTrace(Classname, 'DoDropDown');
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
+    PrintCallTraceDbgLn('DoDropDown - Part 1');
+    FreeAndNil(FDropDown);
     OriginalFocusRoot := FocusRootWidget;
-    FDropDown     := TDropDownWindow.Create(nil);
-    ddw           := TDropDownWindow(FDropDown);
-    ddw.Width     := Width;
+    FDropDown       := TDropDownWindow.Create(nil);
+    ddw := TDropDownWindow(FDropDown);
+    ddw.Width := Width;
     // adjust the height of the dropdown
     rowcount := FItems.Count;
     if rowcount > FDropDownCount then
@@ -264,15 +274,16 @@ begin
     ddw.ListBox.Items.Assign(FItems);
     ddw.ListBox.FocusItem := FFocusItem;
 
-    FDropDown.ShowAt(Parent, Left, Top+Height);
-    FDropDown.DontCloseWidget := self;  // now we can control when the popup window closes
-//    FDropDown.ActiveWidget := ddw.ListBox;
+//    ddw.DontCloseWidget := self;  // now we can control when the popup window closes
+    ddw.ShowAt(Parent, Left, Top+Height);
     ddw.ListBox.SetFocus;
   end
   else
   begin
+    PrintCallTraceDbgLn('DoDropDown - Part 2');
     FBtnPressed := False;
-    FDropDown.Close;
+    ddw := TDropDownWindow(FDropDown);
+    ddw.Close;
     FreeAndNil(FDropDown);
   end;
 end;
@@ -285,13 +296,16 @@ end;
 procedure TfpgAbstractComboBox.InternalListBoxSelect(Sender: TObject);
 var
   msgp: TfpgMessageParams;
+  tmp: IInterface;
 begin
+  tmp := PrintCallTrace(ClassName, 'InternalListBoxSelect');
   FFocusItem := TDropDownWindow(FDropDown).ListBox.FocusItem;
 
   { Don't use .Close because this method is called by FDropDown.ListBox and
-    causes issues if it's freed to quickly. }
-//  FDropDown.Close;
-  fpgSendMessage(self, FDropDown, FPGM_CLOSE, msgp);
+    causes issues if it's freed to quickly. We can't destroy the ListBox while
+    it's still executing it's event handler - instead we send a message to self. }
+  FDropDown.Close;
+//  fpgSendMessage(self, self, FPGM_POPUPCLOSE, msgp); // request to close the dropdown.
 
   if HasHandle then
     Repaint;
@@ -357,6 +371,14 @@ begin
   FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
 end;
 
+procedure TfpgAbstractComboBox.MsgPopupClose(var msg: TfpgMessageRec);
+var
+  tmp: IInterface;
+begin
+  tmp := PrintCallTrace(Classname, 'MsgPopupClose');
+  DoDropDown;
+end;
+
 procedure TfpgAbstractComboBox.SetHeight(const AValue: TfpgCoord);
 begin
   inherited;
@@ -365,10 +387,10 @@ begin
 end;
 
 procedure TfpgAbstractComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  tmp: IInterface;
 begin
-  {$IFDEF DEBUG}
-  writeln('TfpgAbstractComboBox.HandleLMouseDown [', Classname, ']');
-  {$ENDIF}
+  tmp := PrintCallTrace(Classname, 'HandleLMouseDown');
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
   if PtInRect(FInternalBtnRect, Point(x, y)) then
@@ -377,10 +399,10 @@ begin
 end;
 
 procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  tmp: IInterface;
 begin
-  {$IFDEF DEBUG}
-  writeln('TfpgAbstractComboBox.HandleLMouseUp [', Classname, ']');
-  {$ENDIF}
+  tmp := PrintCallTrace(Classname, 'HandleLMouseUp');
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
   DoDropDown;
@@ -495,11 +517,12 @@ begin
 end;
 
 destructor TfpgAbstractComboBox.Destroy;
+var
+  tmp: IInterface;
 begin
-  { Todo: Double check FDropDown.Free call, because we are closing FDropDown
-    via a fpgSendMessage call. This needs improving. }
-  if Assigned(FDropDown) and (FDropDown.HasHandle) then
-    FDropDown.Free;
+  tmp := PrintCallTrace(ClassName, 'Destroy');
+  FDropDown.Free;
+  PrintCallTraceDbgLn('**** Freeing off the ComboBox items');
   FItems.Free;
   FFont.Free;
   inherited Destroy;
@@ -507,7 +530,7 @@ end;
 
 procedure TfpgAbstractComboBox.Update;
 begin
-  FFocusItem := 1;
+  FFocusItem := 0;
   Repaint;
 end;
 
