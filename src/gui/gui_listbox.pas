@@ -412,15 +412,18 @@ begin
 end;
 
 procedure TfpgBaseListBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  r: TfpgRect;
 begin
+  r.SetRect(Left, Top, Width, Height);
   inherited HandleLMouseUp(x, y, shiftstate);
   if ItemCount < 1 then
     Exit; //==>
-
+    
   FMouseDragging := False;
 
   { User clicked outside listbox bounds. ComboBox requires this check. }
-  if not (y < 0) then
+  if PtInRect(r, Point(x, y)) then
   begin
     FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
     if FFocusItem > ItemCount then
@@ -651,6 +654,8 @@ end;
 
 procedure TfpgTextListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
 begin
+  if num < 1 then
+    Exit;
   fpgStyle.DrawString(Canvas, rect.left+2, rect.top+1, FItems.Strings[num-1], Enabled);
 end;
 

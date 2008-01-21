@@ -126,6 +126,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -179,6 +180,13 @@ begin
 
   if Assigned(FocusRootWidget) then
     FocusRootWidget.SetFocus;
+end;
+
+procedure TDropDownWindow.HandleLMouseUp(x, y: integer; shiftstate: TShiftState
+  );
+begin
+  writeln('TDropDownWindow.HandleLMouseUp');
+  inherited HandleLMouseUp(x, y, shiftstate);
 end;
 
 constructor TDropDownWindow.Create(AOwner: TComponent);
@@ -274,7 +282,7 @@ begin
     ddw.ListBox.Items.Assign(FItems);
     ddw.ListBox.FocusItem := FFocusItem;
 
-//    ddw.DontCloseWidget := self;  // now we can control when the popup window closes
+    ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     ddw.ShowAt(Parent, Left, Top+Height);
     ddw.ListBox.SetFocus;
   end

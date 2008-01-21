@@ -533,7 +533,9 @@ begin
             pw    := mw;
             while (pw <> nil) and (pw.Parent <> nil) do
               pw := TfpgWindowImpl(pw.Parent);
-            if ((pw = nil) or (PopupListFind(pw.WinHandle) = nil)) and (not PopupDontCloseWidget(TfpgWidget(mw))) and
+
+            if ((pw = nil) or (PopupListFind(pw.WinHandle) = nil)) and
+               (not PopupDontCloseWidget(TfpgWidget(mw))) and
                ((uMsg = WM_LBUTTONDOWN) or (uMsg = WM_LBUTTONUP)) then
             begin
               ClosePopups;
