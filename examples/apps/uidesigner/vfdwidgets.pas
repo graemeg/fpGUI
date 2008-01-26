@@ -233,6 +233,7 @@ begin
   // Edit
   wc          := TVFDWidgetClass.Create(TfpgEdit);
   wc.NameBase := 'edtName';
+//  wc.AddProperty('Color', TPropertyColor, 'Text color');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.edit';

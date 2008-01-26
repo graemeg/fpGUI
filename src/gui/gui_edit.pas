@@ -47,6 +47,7 @@ type
     FOnChange: TNotifyEvent;
     FMaxLength: integer;
     FSelecting: Boolean;
+    FColor: TfpgColor;
     procedure   AdjustCursor;
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -64,6 +65,7 @@ type
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
+    procedure   SetColor(const AValue: TfpgColor);
   protected
     FMouseDragPos: integer;
     FDrawOffset: integer;
@@ -95,6 +97,7 @@ type
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
     property    Text: String read FText write SetText;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    Color: TfpgColor read FColor write SetColor default clText1;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -115,6 +118,7 @@ type
     property    AutoSelect;
     property    BackgroundColor;
     property    BorderStyle;
+    property    Color;
     property    FontDesc;
     property    HideSelection;
     property    MaxLength;
@@ -202,6 +206,14 @@ begin
   FHideSelection := AValue;
 end;
 
+procedure TfpgCustomEdit.SetColor(const AValue: TfpgColor);
+begin
+  if FColor = AValue then
+    Exit;
+  FColor := AValue;
+  RePaint;
+end;
+
 procedure TfpgCustomEdit.HandlePaint;
 var
   r: TfpgRect;
@@ -277,8 +289,8 @@ begin
 
   Canvas.FillRectangle(r);
   dtext := GetDrawText;
-  Canvas.SetTextColor(clText1);
   Canvas.SetFont(FFont);
+  Canvas.SetTextColor(FColor);
   fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
 
 
@@ -618,6 +630,7 @@ begin
   Focusable         := True;
   FHeight           := FFont.Height + 6;
   FWidth            := 120;
+  FColor            := clText1;
   FBackgroundColor  := clBoxColor;
   FAutoSelect       := True;
   FSelecting        := False;
