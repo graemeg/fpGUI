@@ -222,12 +222,12 @@ end;
 procedure TfpgPopupWindow.HandleShow;
 begin
   inherited HandleShow;
-  CaptureMouse;
+//  CaptureMouse;
 end;
 
 procedure TfpgPopupWindow.HandleHide;
 begin
-  ReleaseMouse;
+//  ReleaseMouse;
   inherited HandleHide;
 end;
 

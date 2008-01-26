@@ -32,7 +32,7 @@
         <MinVersion Minor="5" Valid="True"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="2">
       <Unit0>
         <Filename Value="edittest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -43,11 +43,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uhelpers"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="edittest.dpr"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="edittest"/>
-      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

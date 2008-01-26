@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -398,8 +398,8 @@ begin
     Exit; //==>
     
   { User clicked outside listbox bounds. ComboBox requires this check. }
-  if y < 0 then
-    Exit; //==>
+  //if y < 0 then
+    //Exit; //==>
 
   FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
   if FFocusItem > ItemCount then
@@ -423,12 +423,12 @@ begin
   FMouseDragging := False;
 
   { User clicked outside listbox bounds. ComboBox requires this check. }
-  if PtInRect(r, Point(x, y)) then
-  begin
-    FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
-    if FFocusItem > ItemCount then
-      FFocusItem := ItemCount;
-  end;
+  //if PtInRect(r, Point(x, y)) then
+  //begin
+    //FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
+    //if FFocusItem > ItemCount then
+      //FFocusItem := ItemCount;
+  //end;
 
   FollowFocus;
   Repaint;

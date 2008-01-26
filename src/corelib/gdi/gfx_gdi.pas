@@ -1,3 +1,20 @@
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      This defines the CoreLib backend interface to the Windows GDI API.
+}
+
 unit gfx_gdi;
 
 {$mode objfpc}{$H+}
@@ -15,7 +32,7 @@ uses
 
 { Constants missing on windows unit }
 const
-  WM_MOUSEWHEEL         = $020a;
+  WM_MOUSEWHEEL         = $020a;    // we could remove this since FPC 2.0.4
   VER_PLATFORM_WIN32_CE = 3;
 
 { Unicode selection variables }
@@ -498,7 +515,6 @@ begin
           end;
         end;
 
-
     WM_SETCURSOR:
         begin
 //          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
@@ -509,14 +525,25 @@ begin
             Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
+    WM_LBUTTONDBLCLK:
+        begin
+          {$IFDEF DEBUG}
+          writeln('fpGFX/GDI:', w.ClassName + ': MouseButton DoubleClick event');
+          {$ENDIF}
+        end;
 
     WM_MOUSEMOVE,
     WM_LBUTTONDOWN,
     WM_LBUTTONUP,
-//    WM_LBUTTONDBLCLK,
+    WM_MBUTTONDOWN,
+    WM_MBUTTONUP,
     WM_RBUTTONDOWN,
     WM_RBUTTONUP:
         begin
+          {$IFDEF DEBUG}
+          if not uMsg = WM_MOUSEMOVE then
+            writeln('fpGFX/GDI: Found a mouse button event');
+          {$ENDIF}
 //          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
 //          {$IFDEF DEBUG} writeln('Mouse Move or Button Click'); {$ENDIF}
           msgp.mouse.x := smallint(lParam and $FFFF);
@@ -557,21 +584,32 @@ begin
               blockmsg := True;
           end;
 
+          // Is message blocked by a modal form?
           if not blockmsg then
           begin
             case uMsg of
               WM_MOUSEMOVE:
                   mcode := FPGM_MOUSEMOVE;
+                  
               WM_LBUTTONDOWN,
+              WM_MBUTTONDOWN,
               WM_RBUTTONDOWN:
                   begin
+                    {$IFDEF DEBUG}
+                    writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonDown event');
+                    {$ENDIF}
                     mcode := FPGM_MOUSEDOWN;
                     if PopupListFirst = nil then
                       SetCapture(w.WinHandle);
                   end;
+                  
               WM_LBUTTONUP,
+              WM_MBUTTONUP,
               WM_RBUTTONUP:
                   begin
+                    {$IFDEF DEBUG}
+                    writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonUp event');
+                    {$ENDIF}
                     mcode := FPGM_MOUSEUP;
                     if PopupListFirst = nil then
                       ReleaseCapture;
@@ -597,12 +635,15 @@ begin
 
               WM_LBUTTONDOWN,
               WM_LBUTTONUP:
-              //WM_LBUTTONDBLCLK:
-                msgp.mouse.Buttons := MOUSE_LEFT;
+                  msgp.mouse.Buttons := MOUSE_LEFT;
+                
+              WM_MBUTTONDOWN,
+              WM_MBUTTONUP:
+                  msgp.mouse.Buttons := MOUSE_MIDDLE;
 
               WM_RBUTTONDOWN,
               WM_RBUTTONUP:
-                msgp.mouse.Buttons := MOUSE_RIGHT;
+                  msgp.mouse.Buttons := MOUSE_RIGHT;
             end;
 
             msgp.mouse.shiftstate := GetKeyboardShiftState;
@@ -627,8 +668,10 @@ begin
           msgp.rect.Width  := smallint(lParam and $FFFF);
           msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
 
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('WM_SIZE: width=',msgp.rect.width, ' height=',msgp.rect.height); {$ENDIF}
+          {$IFDEF DEBUG}
+            write(w.ClassName + ': ');
+            writeln('WM_SIZE: width=',msgp.rect.width, ' height=',msgp.rect.height);
+          {$ENDIF}
           // skip minimize...
           if lparam <> 0 then
             fpgSendMessage(nil, w, FPGM_RESIZE, msgp);
@@ -636,8 +679,10 @@ begin
 
     WM_MOVE:
         begin
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('WM_MOVE'); {$ENDIF}
+          {$IFDEF DEBUG}
+          write(w.ClassName + ': ');
+          writeln('WM_MOVE');
+          {$ENDIF}
           // window decoration correction ...
           if (GetWindowLong(w.WinHandle, GWL_STYLE) and WS_CHILD) = 0 then
           begin
@@ -656,8 +701,10 @@ begin
 
     WM_MOUSEWHEEL:
         begin
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('WM_MOUSEWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));  {$ENDIF}
+          {$IFDEF DEBUG}
+            write(w.ClassName + ': ');
+            writeln('WM_MOUSEWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
+          {$ENDIF}
           pt.x := LoWord(lparam);
           pt.y := HiWord(lparam);
           mw   := nil;
@@ -687,8 +734,10 @@ begin
 
     WM_ACTIVATE:
         begin
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('WM_ACTIVATE'); {$ENDIF}
+          {$IFDEF DEBUG}
+            write(w.ClassName + ': ');
+            writeln('WM_ACTIVATE');
+          {$ENDIF}
           if ((wParam and $FFFF) = WA_INACTIVE) then
             fpgSendMessage(nil, w, FPGM_DEACTIVATE)
           else
@@ -703,24 +752,33 @@ begin
 
     WM_NCACTIVATE:
         begin
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('WM_NCACTIVATE'); {$ENDIF}
+          {$IFDEF DEBUG}
+            write(w.ClassName + ': ');
+            writeln('WM_NCACTIVATE');
+          {$ENDIF}
           if (wapplication.TopModalForm <> nil) then
           begin
             if (wParam = 0) and (wapplication.TopModalForm = w) then
             begin
+              {$IFDEF DEBUG}
+              writeln(' Blockmsg = True (part 1)');
+              {$ENDIF}
               blockmsg := True;
             end
             else if (wParam <> 0) and (wapplication.TopModalForm <> w) then
             begin
+              {$IFDEF DEBUG}
+              writeln(' Blockmsg = True (part 2)');
+              {$ENDIF}
               blockmsg := True;
             end;
           end;
 
-          if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
-          begin
-            blockmsg := True;
-          end;
+          //if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
+          //begin
+            //writeln(' Blockmsg = True (part 3)');
+            //blockmsg := True;
+          //end;
 
           if not blockmsg then
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -728,15 +786,19 @@ begin
 
     WM_CLOSE:
         begin
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('WM_Close'); {$ENDIF}
+          {$IFDEF DEBUG}
+            write(w.ClassName + ': ');
+            writeln('WM_Close');
+          {$ENDIF}
           fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
         end;
 
     WM_PAINT:
         begin
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('WM_PAINT'); {$ENDIF}
+          {$IFDEF DEBUG}
+            write(w.ClassName + ': ');
+            writeln('WM_PAINT');
+          {$ENDIF}
           Windows.BeginPaint(w.WinHandle, @PaintStruct);
           fpgSendMessage(nil, w, FPGM_PAINT, msgp);
           Windows.EndPaint(w.WinHandle, @PaintStruct);

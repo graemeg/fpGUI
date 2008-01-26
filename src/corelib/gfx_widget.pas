@@ -567,7 +567,7 @@ begin
           dir := -1
         else
           dir := 1;
-
+{
     keyReturn,
     keyDown,
     keyRight:
@@ -576,6 +576,7 @@ begin
     keyUp,
     keyLeft:
         dir := -1;
+}
   end;
 
   {$Note Optimize this code. Constantly setting ActiveWidget causes RePaint to be called!}

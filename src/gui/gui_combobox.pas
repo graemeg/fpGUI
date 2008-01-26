@@ -158,13 +158,11 @@ end;
 
 procedure TDropDownWindow.HandleShow;
 begin
-  FocusRootWidget := ListBox;
-  ListBox.Left    := 0;
-  ListBox.Top     := 0;
-  ListBox.Width   := Width;
-  ListBox.Height  := Height;
+//  FocusRootWidget := ListBox;
+  ListBox.SetPosition(0, 0, Width, Height);
   inherited HandleShow;
-  FocusRootWidget.CaptureMouse;  // for internal ListBox
+//  FocusRootWidget.CaptureMouse;  // for internal ListBox
+  ActiveWidget := ListBox;
 end;
 
 procedure TDropDownWindow.HandleHide;
@@ -401,9 +399,9 @@ begin
   tmp := PrintCallTrace(Classname, 'HandleLMouseDown');
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
-  if PtInRect(FInternalBtnRect, Point(x, y)) then
-    FBtnPressed := True;
+  FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
   PaintInternalButton;
+  DoDropDown;
 end;
 
 procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -413,7 +411,7 @@ begin
   tmp := PrintCallTrace(Classname, 'HandleLMouseUp');
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-  DoDropDown;
+//  DoDropDown;
   PaintInternalButton;
 end;
 

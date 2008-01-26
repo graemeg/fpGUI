@@ -481,10 +481,12 @@ procedure TfpgPopupCalendar.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: fpgPopupCalendar}
   Name := 'fpgPopupCalendar';
-  SetPosition(285, 249, 233, 142);
-  //  WindowTitle := 'fpgPopupCalendar';
-  //    WindowPosition := wpUser;
-  //    Sizeable := False;
+  Width := 233;
+  Height := 142;
+//  SetPosition(285, 249, 233, 142);
+//  WindowTitle := 'fpgPopupCalendar';
+//  WindowPosition := wpUser;
+//  Sizeable := False;
 
   edtYear := TfpgEdit.Create(self);
   with edtYear do

@@ -212,11 +212,18 @@ var
   procedure DrawSelection;
   var
     lcolor: TfpgColor;
+    r: TfpgRect;
   begin
     if Focused then
-      lcolor := clSelection
+    begin
+      lcolor := clSelection;
+      Canvas.SetTextColor(clSelectionText);
+    end
     else
+    begin
       lcolor := clInactiveSel;
+      Canvas.SetTextColor(clText1);
+    end;
 
     len := FSelOffset;
     st  := FSelStart;
@@ -229,6 +236,14 @@ var
     tw2 := FFont.TextWidth(UTF8copy(dtext, 1, st + len));
     Canvas.XORFillRectangle(fpgColorToRGB(lcolor) xor $FFFFFF,
       -FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
+
+{   // This migt be used in the future
+    Canvas.SetColor(lcolor);
+    Canvas.FillRectangle(-FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
+    r.SetRect(-FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
+    Canvas.AddClipRect(r);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
+}
   end;
   
 begin

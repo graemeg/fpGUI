@@ -81,6 +81,9 @@ type
   
   // Actual Menu Items are stored in TComponent's Components property
   // Visible only items are stored in FItems just before a paint
+
+  { TfpgPopupMenu }
+
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
     FBackgroundColor: TfpgColor;
@@ -923,6 +926,7 @@ procedure TfpgPopupMenu.HandleShow;
 begin
   PrepareToShow;
   inherited HandleShow;
+  CaptureMouse;
 end;
 
 function TfpgPopupMenu.VisibleCount: integer;
@@ -1166,6 +1170,7 @@ end;
 
 destructor TfpgPopupMenu.Destroy;
 begin
+  ReleaseMouse;
   FItems.Free;
   inherited Destroy;
 end;
