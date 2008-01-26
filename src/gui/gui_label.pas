@@ -49,7 +49,7 @@ type
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
     property    Text: string read FText write SetText;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    Color: TfpgColor read FColor write SetColor;
+    property    Color: TfpgColor read FColor write SetColor default clText1;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
   public
     constructor Create(AOwner: TComponent); override;

@@ -333,10 +333,20 @@ begin
       'and it should have done so. If not, there is a bug in the code. It ' +
       'has also been optimized to wordwrap and not split words over two lines.'
       , 'My cool message title');
-  if edit1.Color = clBlue then
-    edit1.Color := clText1
+  if btn2.Color = clBlue then
+  begin
+    edit1.Color := clText1;
+    btn2.Color := clText1;
+    checkbox2.Color := clText1;
+    radiobtn1.Color := clText1;
+  end
   else
+  begin
     edit1.Color := clBlue;
+    btn2.Color := clBlue;
+    checkbox2.Color := clBlue;
+    radiobtn1.Color := clBlue;
+  end;
 end;
 
 procedure TMainForm.checkbox1Changed(Sender: TObject);

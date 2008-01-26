@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -30,10 +30,13 @@ uses
 
 type
 
+  { TfpgRadioButton }
+
   TfpgRadioButton = class(TfpgWidget)
   private
     FBackgroundColor: TfpgColor;
     FChecked: boolean;
+    FColor: TfpgColor;
     FFont: TfpgFont;
     FGroupIndex: integer;
     FOnChange: TNotifyEvent;
@@ -43,6 +46,7 @@ type
     function    GetFontDesc: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetChecked(const AValue: boolean);
+    procedure   SetColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
   protected
@@ -55,11 +59,12 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
-    property    Checked: boolean read FChecked write SetChecked;
-    property    Text: string read FText write SetText;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
+    property    Checked: boolean read FChecked write SetChecked default False;
+    property    Color: TfpgColor read FColor write SetColor default clText1;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
+    property    Text: string read FText write SetText;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
   
@@ -116,6 +121,14 @@ begin
   end;  { if }
 
   RePaint;
+end;
+
+procedure TfpgRadioButton.SetColor(const AValue: TfpgColor);
+begin
+  if FColor = AValue then
+    Exit;
+  FColor := AValue;
+  Repaint;
 end;
 
 procedure TfpgRadioButton.SetFontDesc(const AValue: string);
@@ -180,7 +193,7 @@ begin
   ty := (Height div 2) - (Font.Height div 2);
   if ty < 0 then
     ty := 0;
-  Canvas.SetTextColor(clText1);
+  Canvas.SetTextColor(FColor);
   fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
 
   Canvas.EndDraw;
