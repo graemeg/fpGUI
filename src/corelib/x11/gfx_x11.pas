@@ -791,36 +791,50 @@ begin
           msgp.mouse.Buttons    := ev.xbutton.button;
           msgp.mouse.shiftstate := ConvertShiftState(ev.xbutton.state);
 
-          { This closes popup windows when you click the mouse elsewhere }
 
+          w := FindWindowByHandle(ev.xbutton.window);
+          if not Assigned(w) then
+            ReportLostWindow(ev);
+{
+          else
+          begin
+            if ev._type = X.ButtonPress then
+            begin
+              writeln('***** CaptureMouse for ', w.ClassName, ' - ', w.Name);
+              w.CaptureMouse;
+            end
+            else
+            begin
+              writeln('***** ReleaseMouse for ', w.ClassName, ' - ', w.Name);
+              w.ReleaseMouse;
+            end;
+          end;
+}
+
+          { This closes popup windows when you click the mouse elsewhere }
           if (Popup <> nil) then
           begin
-            w := FindWindowByHandle(ev.xbutton.window);
-            if not Assigned(w) then
-              ReportLostWindow(ev);
-              
             ew := w;
             while (w <> nil) and (w.Parent <> nil) do
-              w := TfpgWindowImpl(w.Parent);              // check the actual usage of Parent and where it gets set!!
+              w := TfpgWindowImpl(w.Parent);
 
-            if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and (not PopupDontCloseWidget(TfpgWidget(ew))) then
+            if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and
+               (not PopupDontCloseWidget(TfpgWidget(ew))) then
             begin
               ClosePopups;
-              Popup := nil;
               fpgPostMessage(nil, ew, FPGM_POPUPCLOSE);
-              //blockmsg := true;
             end;
           end;
 
-          w := FindWindowByHandle(ev.xbutton.window);
+          w := FindWindowByHandle(ev.xbutton.window); // restore w
           if xapplication.TopModalForm <> nil then
           begin
-            // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
             if (ew <> nil) and (xapplication.TopModalForm <> ew) then
               blockmsg := true;
           end;
-      
+
+          // Is message blocked by a modal form?
           if not blockmsg then
           begin
             if (ev.xbutton.button >= 4) and (ev.xbutton.button <= 7) then  // mouse wheel
@@ -834,7 +848,7 @@ begin
                   i := 1;
 
         	      // Check for other mouse wheel messages in the queue
-                while XCheckTypedWindowEvent(display, ev.xany.window, X.ButtonPress, @NewEvent) do
+                while XCheckTypedWindowEvent(display, ev.xbutton.window, X.ButtonPress, @NewEvent) do
                 begin
       	          if NewEvent.xbutton.Button = 4 then
       	            Dec(i)
@@ -854,9 +868,19 @@ begin
             else
             begin
               if ev._type = X.ButtonRelease then
-                mcode := FPGM_MOUSEUP
+              begin
+                {$IFDEF DEBUG}
+                writeln('****  PostMessage MouseUp ', w.ClassName, ' - ', w.Name);
+                {$ENDIF}
+                mcode := FPGM_MOUSEUP;
+              end
               else
+              begin
+                {$IFDEF DEBUG}
+                writeln('**** PostMessage MouseDown ', w.ClassName, ' - ', w.Name);
+                {$ENDIF}
                 mcode := FPGM_MOUSEDOWN;
+              end;
               fpgPostMessage(nil, w, mcode, msgp);
             end;  { if/else }
           end;  { if not blocking }
@@ -866,10 +890,10 @@ begin
         begin
           repeat
             //
-          until not XCheckTypedWindowEvent(display, ev.xany.window, X.Expose, @ev);
+          until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.Expose, @ev);
           if ev.xexpose.count = 0 then
           begin
-            fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_PAINT);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xexpose.window), FPGM_PAINT);
           end;
         end;
 
@@ -877,33 +901,30 @@ begin
         begin
           repeat
             //
-          until not XCheckTypedWindowEvent(display, ev.xbutton.window, X.MotionNotify, @ev);
-
-          w := FindWindowByHandle(ev.xany.window);
+          until not XCheckTypedWindowEvent(display, ev.xmotion.window, X.MotionNotify, @ev);
+          w := FindWindowByHandle(ev.xmotion.window);
           if not Assigned(w) then
             ReportLostWindow(ev);
           if xapplication.TopModalForm <> nil then
           begin
-            // This is ugly!!!!!!!!!!!!!!!
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
             if (ew <> nil) and (xapplication.TopModalForm <> ew) then
               blockmsg := true;
           end;
-
           if not blockmsg then
           begin
             msgp.mouse.x          := ev.xmotion.x;
             msgp.mouse.y          := ev.xmotion.y;
             msgp.mouse.Buttons    := (ev.xmotion.state and $FF00) shr 8;
             msgp.mouse.shiftstate := ConvertShiftState(ev.xmotion.state);
-            fpgPostMessage(nil, FindWindowByHandle(ev.xbutton.window), FPGM_MOUSEMOVE, msgp);
+            fpgPostMessage(nil, FindWindowByHandle(ev.xmotion.window), FPGM_MOUSEMOVE, msgp);
           end;
         end;
 
     // message blockings for modal windows
     X.ClientMessage:
         begin
-          w := FindWindowByBackupHandle(ev.xany.window);
+          w := FindWindowByBackupHandle(ev.xclient.window);
           if not Assigned(w) then
             ReportLostWindow(ev);
 
@@ -927,17 +948,16 @@ begin
               end;
           
               if not blockmsg then
-                fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_CLOSE);
+                fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window), FPGM_CLOSE);
              end;
           end; // WM_PROTOCOLS
         end;
-
 
     X.ConfigureNotify:
         begin
           repeat
             //
-          until not XCheckTypedWindowEvent(display, ev.xany.window, ConfigureNotify, @ev);
+          until not XCheckTypedWindowEvent(display, ev.xconfigure.window, ConfigureNotify, @ev);
 
           msgp.rect.Left   := ev.xconfigure.x;
           msgp.rect.Top    := ev.xconfigure.y;
@@ -982,16 +1002,16 @@ begin
 }
 
     X.FocusIn:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_ACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window), FPGM_ACTIVATE);
 
     X.FocusOut:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_DEACTIVATE);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window), FPGM_DEACTIVATE);
 
     X.EnterNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEENTER);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEENTER);
         
     X.LeaveNotify:
-        fpgPostMessage(nil, FindWindowByHandle(ev.xany.window), FPGM_MOUSEEXIT);
+        fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEEXIT);
 
     X.MapNotify:
         begin
@@ -1013,7 +1033,7 @@ begin
     X.DestroyNotify:
         begin
           // special case which uses a different find window method
-          w := FindWindowByBackupHandle(ev.xany.window);
+          w := FindWindowByBackupHandle(ev.xdestroywindow.window);
           if not Assigned(w) then
             ReportLostWindow(ev)
           else
@@ -1185,18 +1205,18 @@ begin
 end;
 
 procedure TfpgWindowImpl.DoReleaseWindowHandle;
-var
-  lCallTrace: IInterface;
+//var
+//  lCallTrace: IInterface;
 begin
-  lCallTrace := PrintCallTrace(Classname, 'DoReleaseWindowHandle: ' + Name);
+//  lCallTrace := PrintCallTrace(Classname, 'DoReleaseWindowHandle: ' + Name);
   if HandleIsValid then
   begin
-    PrintCallTraceDbgLn('XDestroyWindow');
+//    PrintCallTraceDbgLn('XDestroyWindow');
     XDestroyWindow(xapplication.Display, FWinHandle);
   end
   else
   begin
-    PrintCallTraceDbgLn(' RemoveWindowLookup');
+//    PrintCallTraceDbgLn(' RemoveWindowLookup');
     RemoveWindowLookup(self);
   end;
 
@@ -1205,7 +1225,7 @@ end;
 
 procedure TfpgWindowImpl.DoRemoveWindowLookup;
 begin
-  PrintCallTraceDbgLn('RemoveWindowLookup ' + Name + ' [' + Classname + ']');
+//  PrintCallTraceDbgLn('RemoveWindowLookup ' + Name + ' [' + Classname + ']');
   RemoveWindowLookup(self);
 end;
 

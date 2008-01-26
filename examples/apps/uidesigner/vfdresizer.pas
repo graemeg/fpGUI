@@ -55,8 +55,8 @@ uses
 
 procedure TwgResizer.HandlePaint;
 begin
-  inherited HandlePaint;
   Canvas.BeginDraw;
+  inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
   Canvas.EndDraw;
 end;
@@ -85,8 +85,9 @@ var
 begin
 //  inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
-  if not FDragging then
+  if (not FDragging) or ((btnstate and MOUSE_LEFT) = 0) then
     Exit;
+    
   dx := x - FDragPosX;
   dy := y - FDragPosY;
 
@@ -120,14 +121,14 @@ begin
   Height    := 5;
   direction := adirection;
   case direction of
-    1: MouseCursor := mcSizeSENW;
-    2: MouseCursor := mcSizeNS;
-    3: MouseCursor := mcSizeSWNE;
-    4: MouseCursor := mcSizeEW;
-    5: MouseCursor := mcSizeNWSE;
-    6: MouseCursor := mcSizeNS;
-    7: MouseCursor := mcSizeNESW;
-    8: MouseCursor := mcSizeEW;
+    1: MouseCursor := mcSizeSENW;   // top left
+    2: MouseCursor := mcSizeNS;     // top
+    3: MouseCursor := mcSizeSWNE;   // top right
+    4: MouseCursor := mcSizeEW;     // right
+    5: MouseCursor := mcSizeNWSE;   // bottom right
+    6: MouseCursor := mcSizeNS;     // bottom
+    7: MouseCursor := mcSizeNESW;   // bottom left
+    8: MouseCursor := mcSizeEW;     // left
   end;
   Visible := True;
 end;
