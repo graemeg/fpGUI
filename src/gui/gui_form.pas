@@ -244,10 +244,7 @@ begin
 end;
 
 procedure TfpgForm.MsgClose(var msg: TfpgMessageRec);
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(Classname, 'MsgClose');
   if Assigned(FOnClose) then
     FOnClose(self);
   HandleClose;
