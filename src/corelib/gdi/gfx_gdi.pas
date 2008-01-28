@@ -524,14 +524,16 @@ begin
           else
             Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
-
+(*
     WM_LBUTTONDBLCLK:
         begin
           {$IFDEF DEBUG}
           writeln('fpGFX/GDI:', w.ClassName + ': MouseButton DoubleClick event');
           {$ENDIF}
         end;
+*)
 
+    WM_LBUTTONDBLCLK,
     WM_MOUSEMOVE,
     WM_LBUTTONDOWN,
     WM_LBUTTONUP,
@@ -590,7 +592,8 @@ begin
             case uMsg of
               WM_MOUSEMOVE:
                   mcode := FPGM_MOUSEMOVE;
-                  
+
+              WM_LBUTTONDBLCLK,
               WM_LBUTTONDOWN,
               WM_MBUTTONDOWN,
               WM_RBUTTONDOWN:
@@ -633,6 +636,7 @@ begin
                 msgp.mouse.Buttons := i;
               end;
 
+              WM_LBUTTONDBLCLK,
               WM_LBUTTONDOWN,
               WM_LBUTTONUP:
                   msgp.mouse.Buttons := MOUSE_LEFT;
