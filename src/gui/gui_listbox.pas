@@ -388,19 +388,12 @@ begin
 end;
 
 procedure TfpgBaseListBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(ClassName, 'HandleLMouseDown');
   inherited HandleLMouseDown(x, y, shiftstate);
 
   if ItemCount < 1 then
     Exit; //==>
     
-  { User clicked outside listbox bounds. ComboBox requires this check. }
-  //if y < 0 then
-    //Exit; //==>
-
   FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
   if FFocusItem > ItemCount then
     FFocusItem := ItemCount;
@@ -421,14 +414,6 @@ begin
     Exit; //==>
     
   FMouseDragging := False;
-
-  { User clicked outside listbox bounds. ComboBox requires this check. }
-  //if PtInRect(r, Point(x, y)) then
-  //begin
-    //FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
-    //if FFocusItem > ItemCount then
-      //FFocusItem := ItemCount;
-  //end;
 
   FollowFocus;
   Repaint;
@@ -667,11 +652,7 @@ begin
 end;
 
 destructor TfpgTextListBox.Destroy;
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(ClassName, 'Destroy');
-  PrintCallTraceDbgLn('**** Freeing off the listbox items');
   TfpgListBoxStrings(FItems).Free;
   inherited Destroy;
 end;
@@ -682,10 +663,7 @@ begin
 end;
 
 function TfpgTextListBox.Text: string;
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(Classname, 'Text');
   if (FocusItem > 0) and (FocusItem <= FItems.Count) then
     result := FItems.Strings[FocusItem-1]
   else

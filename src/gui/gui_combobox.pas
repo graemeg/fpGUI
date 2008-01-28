@@ -126,10 +126,8 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
-    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     ListBox:    TfpgListBox;
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   end;
@@ -158,10 +156,8 @@ end;
 
 procedure TDropDownWindow.HandleShow;
 begin
-//  FocusRootWidget := ListBox;
   ListBox.SetPosition(0, 0, Width, Height);
   inherited HandleShow;
-//  FocusRootWidget.CaptureMouse;  // for internal ListBox
   ActiveWidget := ListBox;
 end;
 
@@ -180,26 +176,11 @@ begin
     FocusRootWidget.SetFocus;
 end;
 
-procedure TDropDownWindow.HandleLMouseUp(x, y: integer; shiftstate: TShiftState
-  );
-begin
-  writeln('TDropDownWindow.HandleLMouseUp');
-  inherited HandleLMouseUp(x, y, shiftstate);
-end;
-
 constructor TDropDownWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   ListBox := TfpgListBox.Create(self);
   ListBox.PopupFrame := True;
-end;
-
-destructor TDropDownWindow.Destroy;
-var
-  tmp: IInterface;
-begin
-  tmp := PrintCallTrace(ClassName, 'Destroy');
-  inherited Destroy;
 end;
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList): TfpgComboBox;
@@ -239,7 +220,6 @@ end;
 
 function TfpgAbstractComboBox.GetText: string;
 begin
-  PrintCallTraceDbgLn('FocusItem = ' + IntToStr(FocusItem));
   if (FocusItem > 0) and (FocusItem <= FItems.Count) then
     Result := FItems.Strings[FocusItem-1]
   else
@@ -253,14 +233,11 @@ end;
 
 procedure TfpgAbstractComboBox.DoDropDown;
 var
-  tmp: IInterface;
   ddw: TDropDownWindow;
   rowcount: integer;
 begin
-  tmp := PrintCallTrace(Classname, 'DoDropDown');
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
-    PrintCallTraceDbgLn('DoDropDown - Part 1');
     FreeAndNil(FDropDown);
     OriginalFocusRoot := FocusRootWidget;
     FDropDown       := TDropDownWindow.Create(nil);
@@ -286,7 +263,6 @@ begin
   end
   else
   begin
-    PrintCallTraceDbgLn('DoDropDown - Part 2');
     FBtnPressed := False;
     ddw := TDropDownWindow(FDropDown);
     ddw.Close;
@@ -302,16 +278,9 @@ end;
 procedure TfpgAbstractComboBox.InternalListBoxSelect(Sender: TObject);
 var
   msgp: TfpgMessageParams;
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(ClassName, 'InternalListBoxSelect');
   FFocusItem := TDropDownWindow(FDropDown).ListBox.FocusItem;
-
-  { Don't use .Close because this method is called by FDropDown.ListBox and
-    causes issues if it's freed to quickly. We can't destroy the ListBox while
-    it's still executing it's event handler - instead we send a message to self. }
   FDropDown.Close;
-//  fpgSendMessage(self, self, FPGM_POPUPCLOSE, msgp); // request to close the dropdown.
 
   if HasHandle then
     Repaint;
@@ -378,10 +347,7 @@ begin
 end;
 
 procedure TfpgAbstractComboBox.MsgPopupClose(var msg: TfpgMessageRec);
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(Classname, 'MsgPopupClose');
   DoDropDown;
 end;
 
@@ -393,10 +359,7 @@ begin
 end;
 
 procedure TfpgAbstractComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(Classname, 'HandleLMouseDown');
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
   FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
@@ -405,10 +368,7 @@ begin
 end;
 
 procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(Classname, 'HandleLMouseUp');
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
 //  DoDropDown;
@@ -523,12 +483,8 @@ begin
 end;
 
 destructor TfpgAbstractComboBox.Destroy;
-var
-  tmp: IInterface;
 begin
-  tmp := PrintCallTrace(ClassName, 'Destroy');
   FDropDown.Free;
-  PrintCallTraceDbgLn('**** Freeing off the ComboBox items');
   FItems.Free;
   FFont.Free;
   inherited Destroy;
