@@ -35,7 +35,7 @@ type
 
   TfpgButton = class(TfpgWidget, ICommandHolder)
   private
-    FColor: TfpgColor;
+    FTextColor: TfpgColor;
     FCommand: ICommand;
     FImageName: string;
     FClicked: Boolean;
@@ -45,7 +45,7 @@ type
     FAllowAllUp: boolean;
     FModalResult: integer;
     function    GetFontDesc: string;
-    procedure   SetColor(const AValue: TfpgColor);
+    procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetDefault(const AValue: boolean);
     procedure   SetEmbedded(const AValue: Boolean);
     procedure   SetFontDesc(const AValue: string);
@@ -86,18 +86,18 @@ type
     property    Font: TfpgFont read FFont;
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
   published
-    property    Text: string read FText write SetText;
-    property    Color: TfpgColor read FColor write SetColor default clText1;
-    property    Default: boolean read FDefault write SetDefault default False;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    ImageName: string read FImageName write SetImageName;
-    property    ImageMargin: integer read FImageMargin write SetImageMargin default 3;
-    property    ImageSpacing: integer read FImageSpacing write SetImageSpacing default -1;
-    property    GroupIndex: integer read FGroupIndex write FGroupIndex default 0;
     property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp default False;
-    property    ModalResult: integer read FModalResult write FModalResult default 0;
+    property    Default: boolean read FDefault write SetDefault default False;
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    GroupIndex: integer read FGroupIndex write FGroupIndex default 0;
+    property    ImageMargin: integer read FImageMargin write SetImageMargin default 3;
+    property    ImageName: string read FImageName write SetImageName;
+    property    ImageSpacing: integer read FImageSpacing write SetImageSpacing default -1;
+    property    ModalResult: integer read FModalResult write FModalResult default 0;
     property    ShowImage: Boolean read FShowImage write SetShowImage default True;
+    property    Text: string read FText write SetText;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    OnMouseExit;
     property    OnMouseEnter;
     property    OnClick;
@@ -164,12 +164,13 @@ begin
   Result := FFont.FontDesc;
 end;
 
-procedure TfpgButton.SetColor(const AValue: TfpgColor);
+procedure TfpgButton.SetTextColor(const AValue: TfpgColor);
 begin
-  if FColor = AValue then
-    Exit;
-  FColor := AValue;
-  Repaint;
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
+    Repaint;
+  end;
 end;
 
 procedure TfpgButton.SetDefault(const AValue: boolean);
@@ -219,7 +220,7 @@ begin
   FHeight       := FFont.Height + 8;
   FWidth        := 75;
   FFocusable    := True;
-  FColor        := clText1;
+  FTextColor    := clText1;
   OnClick       := nil;
   FDown         := False;
   FClicked      := False;
@@ -281,7 +282,7 @@ begin
     Canvas.DrawFocusRect(r);
   end;
   
-  Canvas.SetTextColor(FColor);
+  Canvas.SetTextColor(FTextColor);
   Canvas.SetColor(clText1);
 
   Canvas.SetClipRect(r);

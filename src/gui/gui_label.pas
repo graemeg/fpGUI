@@ -34,12 +34,12 @@ type
   private
     FAutoSize: boolean;
     FBackgroundColor: TfpgColor;
-    FColor: TfpgColor;
+    FTextColor: TfpgColor;
     function    GetFontDesc: string;
     procedure   SetAutoSize(const AValue: boolean);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
-    procedure   SetColor(const AValue: TfpgColor);
+    procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetText(const AValue: string);
     procedure   ResizeLabel;
   protected
@@ -47,10 +47,10 @@ type
     FFont: TfpgFont;
     procedure   HandlePaint; override;
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
-    property    Text: string read FText write SetText;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    Color: TfpgColor read FColor write SetColor default clText1;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+    property    Text: string read FText write SetText;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -62,16 +62,16 @@ type
   published
     property    AutoSize;
     property    BackgroundColor;
-    property    Color;
     property    FontDesc;
     property    Text;
+    property    TextColor;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnMouseDown;
     property    OnMouseEnter;
     property    OnMouseExit;
-    property    OnMouseDown;
-    property    OnMouseUp;
     property    OnMouseMove;
+    property    OnMouseUp;
   end;
 
 
@@ -88,7 +88,7 @@ begin
   Result.Left  := x;
   Result.Top   := y;
   Result.Text  := AText;
-  Result.Width := Result.Font.TextWidth(Result.Text);
+  Result.Width := Result.Font.TextWidth(Result.Text) + 5;  // 5 is some extra spacing
 end;
 
 
@@ -128,12 +128,13 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomLabel.SetColor(const AValue: TfpgColor);
+procedure TfpgCustomLabel.SetTextColor(const AValue: TfpgColor);
 begin
-  if FColor = AValue then
-    Exit;
-  FColor := AValue;
-  RePaint;
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
+    RePaint;
+  end;
 end;
 
 procedure TfpgCustomLabel.SetText(const AValue: string);
@@ -160,7 +161,7 @@ begin
   FFont   := fpgGetFont('#Label1');
   FHeight := FFont.Height;
   FWidth  := 80;
-  FColor  := clText1;
+  FTextColor := clText1;
   FBackgroundColor := clWindowBackground;
   FAutoSize := False;
 end;
@@ -178,7 +179,7 @@ begin
   inherited;
   Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(Font);
-  Canvas.SetTextColor(FColor);
+  Canvas.SetTextColor(FTextColor);
   fpgStyle.DrawString(Canvas, 0, 0, FText, Enabled);
   Canvas.EndDraw;
 end;

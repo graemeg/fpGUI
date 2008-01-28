@@ -47,7 +47,7 @@ type
     FOnChange: TNotifyEvent;
     FMaxLength: integer;
     FSelecting: Boolean;
-    FColor: TfpgColor;
+    FTextColor: TfpgColor;
     procedure   AdjustCursor;
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -65,7 +65,7 @@ type
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
-    procedure   SetColor(const AValue: TfpgColor);
+    procedure   SetTextColor(const AValue: TfpgColor);
   protected
     FMouseDragPos: integer;
     FDrawOffset: integer;
@@ -96,8 +96,8 @@ type
     property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
     property    Text: String read FText write SetText;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    Color: TfpgColor read FColor write SetColor default clText1;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -118,12 +118,12 @@ type
     property    AutoSelect;
     property    BackgroundColor;
     property    BorderStyle;
-    property    Color;
     property    FontDesc;
     property    HideSelection;
     property    MaxLength;
     property    PasswordMode;
     property    Text;
+    property    TextColor;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -206,12 +206,13 @@ begin
   FHideSelection := AValue;
 end;
 
-procedure TfpgCustomEdit.SetColor(const AValue: TfpgColor);
+procedure TfpgCustomEdit.SetTextColor(const AValue: TfpgColor);
 begin
-  if FColor = AValue then
-    Exit;
-  FColor := AValue;
-  RePaint;
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
+    RePaint;
+  end;
 end;
 
 procedure TfpgCustomEdit.HandlePaint;
@@ -290,7 +291,7 @@ begin
   Canvas.FillRectangle(r);
   dtext := GetDrawText;
   Canvas.SetFont(FFont);
-  Canvas.SetTextColor(FColor);
+  Canvas.SetTextColor(FTextColor);
   fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
 
 
@@ -630,7 +631,7 @@ begin
   Focusable         := True;
   FHeight           := FFont.Height + 6;
   FWidth            := 120;
-  FColor            := clText1;
+  FTextColor        := clText1;
   FBackgroundColor  := clBoxColor;
   FAutoSelect       := True;
   FSelecting        := False;

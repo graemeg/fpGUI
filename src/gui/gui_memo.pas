@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -56,6 +56,7 @@ type
     FMouseDragPos: integer;
     FFont: TfpgFont;
     FBackgroundColor: TfpgColor;
+    FTextColor: TfpgColor;
     FDrawOffset: integer;
     FLineHeight: integer;
     FFirstLine: integer;
@@ -67,6 +68,8 @@ type
     FLongestLineWidth: TfpgCoord;
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
+    procedure   SetTextColor(const AValue: TfpgColor);
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   RecalcLongestLine;
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -102,18 +105,23 @@ type
     destructor  Destroy; override;
     procedure   UpdateScrollBars;
     function    SelectionText: string;
-    property    LineHeight: integer read FLineHeight;
     property    CursorLine: integer read FCursorLine write SetCursorLine;
-    property    Text: string read GetText write SetText;
     property    Font: TfpgFont read FFont;
-    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    UseTabs: boolean read FUseTabs write FUseTabs default False;
-    property    TabWidth: integer read FTabWidth write FTabWidth;
+    property    LineHeight: integer read FLineHeight;
     property    MaxLength: integer read FMaxLength write FMaxLength;
+    property    TabWidth: integer read FTabWidth write FTabWidth;
+    property    Text: string read GetText write SetText;
+    property    UseTabs: boolean read FUseTabs write FUseTabs default False;
   published
-    property    Lines: TStringList read FLines;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Lines: TStringList read FLines;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
+
+
+function CreateMemo(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMemo;
 
 
 implementation
@@ -122,6 +130,18 @@ uses
   gfx_UTF8utils;
 
 { TfpgMemo }
+
+
+function CreateMemo(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMemo;
+begin
+  Result       := TfpgMemo.Create(AOwner);
+  Result.Left  := x;
+  Result.Top   := y;
+  Result.Width := w;
+  if h > 0 then
+    Result.Height := h;
+end;
+
 
 procedure TfpgMemo.SetCursorLine(aValue: integer);
 var
@@ -205,6 +225,7 @@ begin
   FMaxLength  := 0;
   FWrapping   := False;
   FOnChange   := nil;
+  FTextColor  := clText1;
   FBackgroundColor := clBoxColor;
   FUseTabs    := False;
   FTabWidth   := 4;
@@ -559,6 +580,24 @@ begin
   RePaint;
 end;
 
+procedure TfpgMemo.SetTextColor(const AValue: TfpgColor);
+begin
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
+    RePaint;
+  end;
+end;
+
+procedure TfpgMemo.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FBackgroundColor := AValue;
+    Repaint;
+  end;
+end;
+
 procedure TfpgMemo.SetLineText(linenum: integer; Value: string);
 begin
   FLines.Strings[linenum - 1] := Value;
@@ -693,6 +732,7 @@ begin
     Canvas.SetColor(clWindowBackground);
   Canvas.FillRectAngle(r);
 
+  Canvas.SetTextColor(FTextColor);
   Canvas.SetFont(FFont);
 
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then

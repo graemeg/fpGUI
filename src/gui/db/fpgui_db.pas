@@ -69,13 +69,14 @@ type
     destructor  Destroy; override;
     property    Field: TField read GetField;
   published
+    property    AutoSize;
+    property    BackgroundColor;
     property    DataField: string read GetDataField write SetDataField;
     property    DataSource: TDataSource read GetDataSource write SetDataSource;
     property    Enabled;
-    property    BackgroundColor;
-    property    Color;
     property    FontDesc;
     property    Text;
+    property    TextColor;
   end;
 
 {

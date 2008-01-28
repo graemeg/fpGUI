@@ -36,7 +36,7 @@ type
   private
     FBackgroundColor: TfpgColor;
     FChecked: boolean;
-    FColor: TfpgColor;
+    FTextColor: TfpgColor;
     FOnChange: TNotifyEvent;
     FText: string;
     FFont: TfpgFont;
@@ -45,7 +45,7 @@ type
     function    GetFontDesc: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetChecked(const AValue: boolean);
-    procedure   SetColor(const AValue: TfpgColor);
+    procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
   protected
@@ -60,9 +60,9 @@ type
   published
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    Checked: boolean read FChecked write SetChecked default False;
-    property    Color: TfpgColor read FColor write SetColor default clText1;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Text: string read FText write SetText;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
@@ -90,12 +90,13 @@ begin
   RePaint;
 end;
 
-procedure TfpgCheckBox.SetColor(const AValue: TfpgColor);
+procedure TfpgCheckBox.SetTextColor(const AValue: TfpgColor);
 begin
-  if FColor = AValue then
-    Exit;
-  FColor := AValue;
-  Repaint;
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
+    Repaint;
+  end;
 end;
 
 function TfpgCheckBox.GetFontDesc: string;
@@ -173,7 +174,7 @@ begin
   ty := (Height div 2) - (Font.Height div 2);
   if ty < 0 then
     ty := 0;
-  Canvas.SetTextColor(FColor);
+  Canvas.SetTextColor(FTextColor);
   fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
 
   Canvas.EndDraw;
@@ -219,7 +220,7 @@ begin
   FFont       := fpgGetFont('#Label1');
   FHeight     := FFont.Height + 4;
   FWidth      := 120;
-  FColor      := clText1;
+  FTextColor  := clText1;
   FBackgroundColor := clWindowBackground;
   FFocusable  := True;
   FBoxSize    := 14;
