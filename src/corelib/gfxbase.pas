@@ -10,8 +10,8 @@ uses
 
 type
   TfpgCoord = integer;     // we might use floating point coordinates in the future...
-  TfpgColor = longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
-  
+  TfpgColor = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
+
   TRGBTriple = record
     Red: word;
     Green: word;
@@ -211,15 +211,13 @@ type
     destructor  Destroy; override;
   end;
 
-
+  
   TfpgMitchelInterpolation = class(TfpgBaseInterpolation)
   protected
     function    Filter(x: double): double; override;
     function    MaxSupport: double; override;
   end;
 
-
-  { TfpgCanvasBase }
 
   TfpgCanvasBase = class(TObject)
   private
@@ -1371,6 +1369,40 @@ begin
   inherited Destroy;
 end;
 
+{ TfpgMitchelInterpolation }
+
+function TfpgMitchelInterpolation.Filter(x: double): double;
+const
+  B  = (1.0/3.0);
+  C  = (1.0/3.0);
+  P0 = ((  6.0- 2.0*B       )/6.0);
+  P2 = ((-18.0+12.0*B+ 6.0*C)/6.0);
+  P3 = (( 12.0- 9.0*B- 6.0*C)/6.0);
+  Q0 = ((       8.0*B+24.0*C)/6.0);
+  Q1 = ((     -12.0*B-48.0*C)/6.0);
+  Q2 = ((       6.0*B+30.0*C)/6.0);
+  Q3 = ((     - 1.0*B- 6.0*C)/6.0);
+begin
+  if (x < -2.0) then
+    result := 0.0
+  else if (x < -1.0) then
+    result := Q0-x*(Q1-x*(Q2-x*Q3))
+  else if (x < 0.0) then
+    result := P0+x*x*(P2-x*P3)
+  else if (x < 1.0) then
+    result := P0+x*x*(P2+x*P3)
+  else if (x < 2.0) then
+    result := Q0+x*(Q1+x*(Q2+x*Q3))
+  else
+  result := 0.0;
+end;
+
+function TfpgMitchelInterpolation.MaxSupport: double;
+begin
+  result := 2.0;
+end;
+
+
 { TfpgImageBase }
 
 function TfpgImageBase.GetColor(x, y: TfpgCoord): TfpgColor;
@@ -1567,39 +1599,6 @@ begin
 
   if FMaskData <> nil then
     DoInitImageMask(FWidth, FHeight, FMaskData);
-end;
-
-{ TfpgMitchelInterpolation }
-
-function TfpgMitchelInterpolation.Filter(x: double): double;
-const
-  B  = (1.0/3.0);
-  C  = (1.0/3.0);
-  P0 = ((  6.0- 2.0*B       )/6.0);
-  P2 = ((-18.0+12.0*B+ 6.0*C)/6.0);
-  P3 = (( 12.0- 9.0*B- 6.0*C)/6.0);
-  Q0 = ((       8.0*B+24.0*C)/6.0);
-  Q1 = ((     -12.0*B-48.0*C)/6.0);
-  Q2 = ((       6.0*B+30.0*C)/6.0);
-  Q3 = ((     - 1.0*B- 6.0*C)/6.0);
-begin
-  if (x < -2.0) then
-    result := 0.0
-  else if (x < -1.0) then
-    result := Q0-x*(Q1-x*(Q2-x*Q3))
-  else if (x < 0.0) then
-    result := P0+x*x*(P2-x*P3)
-  else if (x < 1.0) then
-    result := P0+x*x*(P2+x*P3)
-  else if (x < 2.0) then
-    result := Q0+x*(Q1+x*(Q2+x*Q3))
-  else
-  result := 0.0;
-end;
-
-function TfpgMitchelInterpolation.MaxSupport: double;
-begin
-  result := 2.0;
 end;
 
 { TfpgApplicationBase }

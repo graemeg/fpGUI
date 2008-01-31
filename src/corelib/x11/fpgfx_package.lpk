@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="18">
+    <Files Count="17">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -86,17 +86,13 @@
         <UnitName Value="gfx_impl"/>
       </Item15>
       <Item16>
-        <Filename Value="../gfx_strings.pas"/>
-        <UnitName Value="gfx_strings"/>
-      </Item16>
-      <Item17>
         <Filename Value="../gfx_command_intf.pas"/>
         <UnitName Value="gfx_command_intf"/>
-      </Item17>
-      <Item18>
+      </Item16>
+      <Item17>
         <Filename Value="../gfx_wuline.pas"/>
         <UnitName Value="gfx_wuline"/>
-      </Item18>
+      </Item17>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/"/>
     <RequiredPkgs Count="1">

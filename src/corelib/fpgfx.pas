@@ -2,6 +2,8 @@ unit fpgfx;
 
 {$mode objfpc}{$H+}
 
+{.$Define DEBUG}
+
 interface
 
 uses
@@ -242,9 +244,9 @@ type
   end;
 
 var
-  fpgStyle:  TfpgStyle;   // move this into fpgApplication
-  fpgCaret:  TfpgCaret;   // move this into fpgApplication
-  fpgImages: TfpgImages;  // move this into fpgApplication
+  fpgStyle:  TfpgStyle;   { TODO -ograemeg : move this into fpgApplication }
+  fpgCaret:  TfpgCaret;   { TODO -ograemeg : move this into fpgApplication }
+  fpgImages: TfpgImages;  { TODO -ograemeg : move this into fpgApplication }
 
 // Application singleton
 function  fpgApplication: TfpgApplication;
@@ -275,7 +277,6 @@ procedure fpgInitTimers;
 procedure fpgCheckTimers;
 function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
 function  fpgGetTickCount: DWord;
-
 
 // Rectangle routines
 function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
@@ -506,12 +507,16 @@ begin
     spacing := spacing + '  ';
   FClassName := AClassName;
   FMethodName := AMethodName;
+  {$IFDEF DEBUG}
   Writeln(Format('%s>> %s.%s', [spacing, FClassName, FMethodName]));
+  {$ENDIF}
 end;
 
 destructor TPrintCallTrace.Destroy;
 begin
+  {$IFDEF DEBUG}
   Writeln(Format('%s<< %s.%s', [spacing, FClassName, FMethodName]));
+  {$ENDIF}
   dec(iCallTrace);
   inherited Destroy;
 end;
@@ -596,7 +601,7 @@ end;
 
 function fpgColorToRGB(col: TfpgColor): TfpgColor;
 begin
-  if (col and $80000000) <> 0 then
+  if (col and cl_BaseNamedColor) <> 0 then
     Result := fpgNamedColors[col and $FF] or (col and $7F000000)// named color keeping alpha
   else
     Result := col;
@@ -611,7 +616,7 @@ procedure fpgSetNamedColor(colorid, rgbvalue: longword);
 var
   i: longword;
 begin
-  if (colorid and $80000000) = 0 then
+  if (colorid and cl_BaseNamedColor) = 0 then
     Exit;
   i := colorid and $FF;
   fpgNamedColors[i] := rgbvalue;
@@ -628,7 +633,9 @@ begin
       Exit; //==>
     end;
 
+  {.$IFDEF DEBUG}
   Writeln('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
+  {.$ENDIF}
   Result := FPG_DEFAULT_FONT_DESC;
 end;
 
@@ -747,7 +754,9 @@ begin
   else
   begin
     fr.Free;
+    {$IFDEF DEBUG}
     writeln('fpGFX: Error opening font.');
+    {$ENDIF}
   end;
 end;
 

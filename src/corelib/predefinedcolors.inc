@@ -34,33 +34,34 @@
 
 
   // System named color identifiers.  DON'T CHANGE THE ORDER!
+  cl_BaseNamedColor      = TfpgColor($80000000);
 
-  clWindowBackground    = $80000001;
-  clBoxColor            = $80000002;
-  clButtonFace          = $80000003;
-  clShadow1             = $80000004;    // nice for disabled text
-  clShadow2             = $80000005;
-  clHilite1             = $80000006;
-  clHilite2             = $80000007;
-  clText1               = $80000008;    // normal text
-  clText2               = $80000009;    // deep dark blue
-  clText3               = $8000000A;    // red/brown
-  clText4               = $8000000B;    // mud dark green
-  clSelection           = $8000000C;
-  clSelectionText       = $8000000D;
-  clInactiveSel         = $8000000E;
-  clInactiveSelText     = $8000000F;
-  clScrollBar           = $80000010;
-  clListBox             = $80000011;
-  clGridLines           = $80000012;
-  clGridHeader          = $80000013;
-  clWidgetFrame         = $80000014;
-  clInactiveWgFrame     = $80000015;
-  clTextCursor          = $80000016;
-  clChoiceListBox       = $80000017;
-  clUnset               = $80000018;
-  clMenuText            = $80000019;
-  clMenuDisabled        = $8000001A;
+  clWindowBackground    = TfpgColor(cl_BaseNamedColor + 1);
+  clBoxColor            = TfpgColor(cl_BaseNamedColor + 2);
+  clButtonFace          = TfpgColor(cl_BaseNamedColor + 3);
+  clShadow1             = TfpgColor(cl_BaseNamedColor + 4); // nice for disabled text
+  clShadow2             = TfpgColor(cl_BaseNamedColor + 5); // $80000005;
+  clHilite1             = TfpgColor(cl_BaseNamedColor + 6); // $80000006;
+  clHilite2             = TfpgColor(cl_BaseNamedColor + 7); // $80000007;
+  clText1               = TfpgColor(cl_BaseNamedColor + 8); // $80000008;    // normal text
+  clText2               = TfpgColor(cl_BaseNamedColor + 9); // $80000009;    // deep dark blue
+  clText3               = TfpgColor(cl_BaseNamedColor + 10); // $8000000A;    // red/brown
+  clText4               = TfpgColor(cl_BaseNamedColor + 11); // $8000000B;    // mud dark green
+  clSelection           = TfpgColor(cl_BaseNamedColor + 12); // $8000000C;
+  clSelectionText       = TfpgColor(cl_BaseNamedColor + 13); // $8000000D;
+  clInactiveSel         = TfpgColor(cl_BaseNamedColor + 14); // $8000000E;
+  clInactiveSelText     = TfpgColor(cl_BaseNamedColor + 15); // $8000000F;
+  clScrollBar           = TfpgColor(cl_BaseNamedColor + 16); // $80000010;
+  clListBox             = TfpgColor(cl_BaseNamedColor + 17); // $80000011;
+  clGridLines           = TfpgColor(cl_BaseNamedColor + 18); // $80000012;
+  clGridHeader          = TfpgColor(cl_BaseNamedColor + 19); // $80000013;
+  clWidgetFrame         = TfpgColor(cl_BaseNamedColor + 20); // $80000014;
+  clInactiveWgFrame     = TfpgColor(cl_BaseNamedColor + 21); // $80000015;
+  clTextCursor          = TfpgColor(cl_BaseNamedColor + 22); // $80000016;
+  clChoiceListBox       = TfpgColor(cl_BaseNamedColor + 23); // $80000017;
+  clUnset               = TfpgColor(cl_BaseNamedColor + 24); // $80000018;
+  clMenuText            = TfpgColor(cl_BaseNamedColor + 25); // $80000019;
+  clMenuDisabled        = TfpgColor(cl_BaseNamedColor + 26); // $8000001A;
 
 
 

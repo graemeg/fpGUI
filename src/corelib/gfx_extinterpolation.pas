@@ -123,6 +123,7 @@ type
     function  Filter(x: double): double; override;
     function  MaxSupport: double; override;
   end;
+
   
 
 implementation

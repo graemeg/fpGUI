@@ -106,11 +106,11 @@ type
     property    FormDesigner: TObject read FFormDesigner write FFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
-    property    Visible: boolean read FVisible write SetVisible;
-    property    Enabled: boolean read FEnabled write SetEnabled;
+    property    Visible: boolean read FVisible write SetVisible default True;
+    property    Enabled: boolean read FEnabled write SetEnabled default True;
     property    TabOrder: integer read FTabOrder write FTabOrder;
-    property    Focusable: boolean read FFocusable write FFocusable;
-    property    Focused: boolean read FFocused write FFocused;
+    property    Focusable: boolean read FFocusable write FFocusable default False;
+    property    Focused: boolean read FFocused write FFocused default False;
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
     property    Hint: string read FHint write FHint;

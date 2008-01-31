@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="14">
+    <Files Count="15">
       <Item1>
         <Filename Value="..\gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
@@ -72,17 +72,21 @@
         <UnitName Value="gfx_utils"/>
       </Item11>
       <Item12>
-        <Filename Value="gfx_impl.pas"/>
-        <UnitName Value="gfx_impl"/>
-      </Item12>
-      <Item13>
         <Filename Value="..\gfx_popupwindow.pas"/>
         <UnitName Value="gfx_popupwindow"/>
+      </Item12>
+      <Item13>
+        <Filename Value="gfx_impl.pas"/>
+        <UnitName Value="gfx_impl"/>
       </Item13>
       <Item14>
+        <Filename Value="..\gfx_command_intf.pas"/>
+        <UnitName Value="gfx_command_intf"/>
+      </Item14>
+      <Item15>
         <Filename Value="..\gfx_wuline.pas"/>
         <UnitName Value="gfx_wuline"/>
-      </Item14>
+      </Item15>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

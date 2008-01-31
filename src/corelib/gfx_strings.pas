@@ -829,6 +829,7 @@ var
   Temp: integer;
   Item1, Item2: PWideStringItem;
 begin
+  { todo: This is not 64bit compatible. integer <> pointer }
   Item1 := @FList^[Index1];
   Item2 := @FList^[Index2];
   Temp  := integer(Item1^.FString);
