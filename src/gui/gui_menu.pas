@@ -82,8 +82,6 @@ type
   // Actual Menu Items are stored in TComponent's Components property
   // Visible only items are stored in FItems just before a paint
 
-  { TfpgPopupMenu }
-
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
     FBackgroundColor: TfpgColor;
@@ -755,9 +753,6 @@ begin
 
   newf := CalcMouseRow(y);
   if newf < 1 then
-    Exit;
-
-  if not VisibleItem(newf).Selectable then
     Exit; //==>
 
   if newf = FFocusItem then
@@ -1011,7 +1006,10 @@ begin
         if MenuFocused then
         begin
           Canvas.SetColor(clSelection);
-          Canvas.SetTextColor(clSelectionText);
+          if mi.Selectable then
+            Canvas.SetTextColor(clSelectionText)
+          else
+            Canvas.SetTextColor(clMenuDisabled);
         end
         else
         begin
