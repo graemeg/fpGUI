@@ -303,9 +303,15 @@ type
   end;
 
 
-  { TfpgWindowBase }
+  TfpgComponent = class(TComponent)
+  private
+    FTagPointer: Pointer;
+  public
+    property    TagPointer: Pointer read FTagPointer write FTagPointer;
+  end;
 
-  TfpgWindowBase = class(TComponent)
+
+  TfpgWindowBase = class(TfpgComponent)
   private
     FParent: TfpgWindowBase;
     procedure   SetMouseCursor(const AValue: TMouseCursor);

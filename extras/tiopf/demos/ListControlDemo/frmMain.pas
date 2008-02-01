@@ -166,8 +166,8 @@ begin
   AgeTrackBar.ShowPosition := True;
   AgeTrackBar.Enabled := False;
 
-  CreateLabel(self, edtName.Right + 30, edtName.Top, 'These components observe the ').Color := clBlue;
-  CreateLabel(self, edtName.Right + 30, AgeTrackBar.Top-5, 'selected item of ComboBox').Color := clBlue;
+  CreateLabel(self, edtName.Right + 30, edtName.Top, 'These components observe the ').TextColor := clBlue;
+  CreateLabel(self, edtName.Right + 30, AgeTrackBar.Top-5, 'selected item of ComboBox').TextColor := clBlue;
   
   cbPeople := TfpgComboBox.Create(self);
   cbPeople.Top          := AgeTrackBar.Bottom + 17;

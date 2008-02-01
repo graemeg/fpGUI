@@ -78,7 +78,7 @@ begin
   lblClient.Align := alClient;
 
   lblNone := CreateLabel(self, 15, 120, 'Resize the form to see Align in action');
-  lblNone.Color := clWhite;
+  lblNone.TextColor := clWhite;
   lblNone.BackgroundColor := clBlack;
 end;
 
