@@ -36,6 +36,7 @@ type
   TfpgButton = class(TfpgWidget, ICommandHolder)
   private
     FTextColor: TfpgColor;
+    FBackgroundColor: TfpgColor;
     FCommand: ICommand;
     FImageName: string;
     FClicked: Boolean;
@@ -46,6 +47,7 @@ type
     FModalResult: integer;
     function    GetFontDesc: string;
     procedure   SetTextColor(const AValue: TfpgColor);
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDefault(const AValue: boolean);
     procedure   SetEmbedded(const AValue: Boolean);
     procedure   SetFontDesc(const AValue: string);
@@ -87,6 +89,7 @@ type
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
   published
     property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp default False;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clButtonFace;
     property    Default: boolean read FDefault write SetDefault default False;
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -173,6 +176,15 @@ begin
   end;
 end;
 
+procedure TfpgButton.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FBackgroundColor := AValue;
+    Repaint;
+  end;
+end;
+
 procedure TfpgButton.SetDefault(const AValue: boolean);
 var
   i: integer;
@@ -181,7 +193,7 @@ begin
   if FDefault = AValue then
     Exit; //==>
   FDefault := AValue;
-  
+
   // Clear other buttons Default state
   if FDefault and (Parent <> nil) then
   begin
@@ -221,6 +233,7 @@ begin
   FWidth        := 75;
   FFocusable    := True;
   FTextColor    := clText1;
+  FBackgroundColor := clButtonFace;
   OnClick       := nil;
   FDown         := False;
   FClicked      := False;
@@ -231,7 +244,7 @@ begin
   FImageName    := '';
   FShowImage    := True;
   FImageMargin  := 3;   // image is 3 pixels from edge of button. -1 will centre image.
-  FImageSpacing := -1;  // text is centered in remainind space
+  FImageSpacing := -1;  // text is centered in remaining space
   FModalResult  := 0;
   FEmbedded     := False;
   FDefault      := False;
@@ -253,10 +266,11 @@ var
   r: TfpgRect;
   pofs: integer;
   lBtnFlags: TFButtonFlags;
+  clr: TfpgColor;
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
-  Canvas.Clear(clButtonFace);
+//  Canvas.Clear(FBackgroundColor);  // Do we need this?
   Canvas.ClearClipRect;
 
   r.SetRect(0, 0, Width, Height);
@@ -270,18 +284,26 @@ begin
 
   if FEmbedded then
     Include(lBtnFlags, btnIsEmbedded);
-    
+
   if FDefault then
     Include(lBtnFlags, btnIsDefault);
 
-  Canvas.DrawButtonFace(r, lBtnFlags);
+  if FBackgroundColor <> clButtonFace then
+  begin
+    clr := fpgColorToRGB(clButtonFace);
+    fpgSetNamedColor(clButtonface, FBackgroundColor);
+    Canvas.DrawButtonFace(r, lBtnFlags);
+    fpgSetNamedColor(clButtonface, clr);
+  end
+  else
+    Canvas.DrawButtonFace(r, lBtnFlags);
 
   if FFocused and (not FEmbedded) then
   begin
     InflateRect(r, -3, -3);
     Canvas.DrawFocusRect(r);
   end;
-  
+
   Canvas.SetTextColor(FTextColor);
   Canvas.SetColor(clText1);
 

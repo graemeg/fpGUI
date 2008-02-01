@@ -171,11 +171,23 @@ type
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
 
+function CreateMenuBar(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMenuBar;
+
 
 implementation
 
 var
   uFocusedPopupMenu: TfpgPopupMenu;
+
+function CreateMenuBar(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMenuBar;
+begin
+  Result       := TfpgMenuBar.Create(AOwner);
+  Result.Left  := x;
+  Result.Top   := y;
+  Result.Width := w;
+  if h > 0 then
+    Result.Height := h;
+end;
 
 
 { TfpgMenuItem }
@@ -667,7 +679,6 @@ end;
 procedure TfpgPopupMenu.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor = AValue then Exit; //==>
-    Exit;
   FBackgroundColor := AValue;
 end;
 

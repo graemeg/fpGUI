@@ -214,6 +214,7 @@ begin
     tb.BackgroundColor        := clWindowBackground;
     lblName1.BackgroundColor  := clWindowBackground;
     lblName2.BackgroundColor  := clWindowBackground;
+    btnQuit.BackgroundColor   := clButtonFace;
   end
   else
   begin
@@ -223,6 +224,7 @@ begin
     tb.BackgroundColor        := clM2DarkBlue;
     lblName1.BackgroundColor  := clM2DarkBlue;
     lblName2.BackgroundColor  := clM2DarkBlue;
+    btnQuit.BackgroundColor   := clM2DarkBlue;
   end;
 end;
 
@@ -250,6 +252,7 @@ begin
     Text := 'Quit';
     FontDesc := '#Label1';
     ImageName := 'stdimg.quit';
+    BackgroundColor := clM2DarkBlue;
     OnClick := @btnQuitClicked;
   end;
 
