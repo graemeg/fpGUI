@@ -151,7 +151,7 @@ begin
     SetPosition(68, 100, 276, 16);
     Text := '*****   This still needs some testing  *****';
     FontDesc := '#Label2';
-    Color := clRed;
+    TextColor := clRed;
   end;
 
   cbName1 := TfpgComboBox.Create(self);
@@ -204,7 +204,7 @@ begin
     SetPosition(160, 48, 287, 15);
     Text := '<----  This one is fake. It only used the';
     FontDesc := '#Label1';
-    Color := clBlue;
+    TextColor := clBlue;
   end;
 
   lblName4 := TfpgLabel.Create(self);
