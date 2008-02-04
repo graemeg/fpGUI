@@ -45,6 +45,7 @@ type
   private
     FDropDownCount: integer;
     FBackgroundColor: TfpgColor;
+    FTextColor: TfpgColor;
     FFocusItem: integer;
     FFont: TfpgFont;
     FInternalBtnRect: TfpgRect;
@@ -52,6 +53,7 @@ type
     FOnChange: TNotifyEvent;
     function    GetFontDesc: string;
     procedure   SetBackgroundColor(const AValue: TfpgColor);
+    procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
@@ -78,7 +80,8 @@ type
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     // property is 1-based
     property    FocusItem: integer read FFocusItem write SetFocusItem;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    Text: string read GetText write SetText;
@@ -96,10 +99,11 @@ type
     property    DropDownCount;
     property    FocusItem;
     property    FontDesc;
+    property    Height;
     property    Items;
     property    Text;
+    property    TextColor;
     property    Width;
-    property    Height;
     property    OnChange;
   end;
   
@@ -209,6 +213,15 @@ begin
   if FBackgroundColor <> AValue then
   begin
     FBackgroundColor := AValue;
+    Repaint;
+  end;
+end;
+
+procedure TfpgAbstractComboBox.SetTextColor(const AValue: TfpgColor);
+begin
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
     Repaint;
   end;
 end;
@@ -421,7 +434,7 @@ begin
       Canvas.SetColor(FBackgroundColor)
     else
       Canvas.SetColor(clWindowBackground);
-    Canvas.SetTextColor(clText1);
+    Canvas.SetTextColor(FTextColor);
   end;
   Canvas.FillRectangle(r);
 
@@ -468,6 +481,7 @@ begin
   inherited Create(AOwner);
   FFont   := fpgGetFont('#List');
   FBackgroundColor  := clBoxColor;
+  FTextColor        := clText1;
   FDropDownCount    := 8;
   FWidth            := 120;
   FHeight           := FFont.Height + 6;

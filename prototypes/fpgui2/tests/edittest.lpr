@@ -82,7 +82,6 @@ type
     combo2: TfpgComboBox;
     sbar: TfpgScrollBar;
     xpluna: TXPButton;
-    xp2: TXPButton;
     xpsilver: TXPButton;
     checkbox1: TfpgCheckBox;
     checkbox2: TfpgCheckBox;
@@ -362,8 +361,12 @@ begin
   radiobtn1.Enabled := not checkbox1.Checked;
   radiobtn2.Enabled := not checkbox1.Checked;
   radiobtn3.Enabled := not checkbox1.Checked;
+  combo1.Enabled := not checkbox1.Checked;
   combo2.Enabled := not checkbox1.Checked;
   edit1.Enabled := not checkbox1.Checked;
+  listbox.Enabled := not checkbox1.Checked;
+  xpluna.Enabled := not checkbox1.Checked;
+  xpsilver.Enabled := not checkbox1.Checked;
 end;
 
 procedure TMainForm.TrackBarChanged(Sender: TObject; APosition: integer);
@@ -417,8 +420,11 @@ begin
   btn.ShowImage := True;
 
   combo1 := CreateComboBox(self, 10, 160, 120, nil);
+  combo1.BackgroundColor := clYellow;
+  combo1.TextColor := clRed;
   for i := 1 to 5 do
     combo1.Items.Add(Format('Items %.2d', [i]));
+
   combo2 := CreateComboBox(self, 10, 190, 120, nil);
   for i := 1 to 20 do
     combo2.Items.Add(Format('Items %.2d', [i]));
@@ -435,6 +441,8 @@ begin
   listbox.Left    := 250;
   listbox.Width   := 200;
   listbox.Height  := 80;
+  listbox.TextColor := clRed;
+  listbox.BackgroundColor := clYellow;
   for i := 1 to 20 do
     listbox.Items.Add(Format('Items %.2d', [i]));
   listbox.FocusItem := 3;
@@ -451,13 +459,6 @@ begin
   xpluna.Top     := 200;
   xpluna.Width   := 75;
   xpluna.Text    := 'XP Luna';
-
-  xp2 := TXPButton.Create(self);
-  xp2.Left    := 335;
-  xp2.Top     := 200;
-  xp2.Width   := 75;
-  xp2.Text    := 'XP Button2';
-  xp2.Enabled := False;
 
   xpsilver := TXPButton.Create(self);
   xpsilver.Left    := 250;

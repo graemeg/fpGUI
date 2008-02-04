@@ -50,10 +50,14 @@ type
     FOnScroll: TNotifyEvent;
     FOnSelect: TNotifyEvent;
     FPopupFrame: boolean;
+    FTextColor: TfpgColor;
+    FBackgroundColor: TfpgColor;  // This should move to TfpgWidget
     function    GetFontDesc: string;
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetPopupFrame(const AValue: boolean);
+    procedure   SetTextColor(const AValue: TfpgColor);
+    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   UpdateScrollbarCoords;
   protected
     FFont: TfpgFont;
@@ -62,7 +66,6 @@ type
     FMouseDragging: boolean;
     FFirstItem: integer;
     FMargin: integer;
-    FBackgroundColor: TfpgColor;  // This should move to TfpgWidget
     procedure   SetFirstItem(item: integer);
     procedure   UpdateScrollBar;
     procedure   FollowFocus;
@@ -80,10 +83,12 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
-    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
-    property    HotTrack: boolean read FHotTrack write FHotTrack;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    HotTrack: boolean read FHotTrack write FHotTrack;
+    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -115,12 +120,17 @@ type
   // The standard strings listbox we will actually use in a GUI.
   TfpgListBox = class(TfpgTextListBox)
   published
+    property    BackgroundColor;
     property    FocusItem;
     property    FontDesc;
     property    HotTrack;
     property    Items;
     property    PopupFrame;
+    property    TextColor;
   end;
+
+
+function CreateListBox(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgListBox;
 
 
 implementation
@@ -137,6 +147,18 @@ type
     function    Add(const s: String): Integer; override;
     procedure   Delete(Index: Integer); override;
   end;
+
+
+function CreateListBox(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgListBox;
+begin
+  Result       := TfpgListBox.Create(AOwner);
+  Result.Left  := x;
+  Result.Top   := y;
+  Result.Width := w;
+  if h > 0 then
+    Result.Height := h;
+end;
+
 
 { TfpgListBoxStrings }
 
@@ -203,6 +225,24 @@ begin
     Exit; //==>
   FPopupFrame := AValue;
   RePaint;
+end;
+
+procedure TfpgBaseListBox.SetTextColor(const AValue: TfpgColor);
+begin
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
+    RePaint;
+  end;
+end;
+
+procedure TfpgBaseListBox.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FBackgroundColor := AValue;
+    Repaint;
+  end;
 end;
 
 procedure TfpgBaseListBox.UpdateScrollbarCoords;
@@ -530,7 +570,7 @@ begin
     else
     begin
       Canvas.SetColor(FBackgroundColor);
-      Canvas.SetTextColor(clText1);
+      Canvas.SetTextColor(FTextColor);
     end;  { if/else }
     Canvas.FillRectangle(r);
 
@@ -581,7 +621,8 @@ begin
   inherited Create(AOwner);
   FFont := fpgGetFont('#List');
   FBackgroundColor    := clListBox;
-  
+  FTextColor          := clText1;
+
   FScrollBar          := TfpgScrollBar.Create(self);
   FScrollBar.OnScroll := @ScrollBarMove;
 //  FScrollBar.Visible  := False;
