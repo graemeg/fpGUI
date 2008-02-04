@@ -695,10 +695,7 @@ begin
   fpgCaret.Free;
   
   for i := fpgTimers.Count-1 downto 0 do
-  begin
     TfpgTimer(fpgTimers[i]).Free;
-    fpgTimers.Delete(i);
-  end;
   fpgTimers.Free;
 
   FDefaultFont.Free;
