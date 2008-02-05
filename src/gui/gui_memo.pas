@@ -565,8 +565,8 @@ end;
 
 function TfpgMemo.GetLineText(linenum: integer): string;
 begin
-{  if LineCount < 1 then
-    FLines.Add('');       }
+  if LineCount < 1 then
+    FLines.Add('');
   if (linenum >= 1) and (linenum <= LineCount) then
     Result := FLines.Strings[linenum - 1]
   else

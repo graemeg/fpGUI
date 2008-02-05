@@ -118,7 +118,6 @@ type
     editor: TVFDPropertyEditor;
     NameDrag: boolean;
     NameDragPos: integer;
-    BackgroundColor: TfpgColor;
     constructor Create(AOwner: TComponent); override;
     procedure   ReleaseEditor;
     procedure   AllocateEditor;
@@ -753,7 +752,7 @@ begin
   Inc(x);
   // Drawing the contents
   r.SetRect(x, y, rect.right - x, rect.Height);
-  Canvas.SetColor(FBackgroundColor);
+  Canvas.SetColor(BackgroundColor);
   Canvas.FillRectangle(r);
   Canvas.SetTextColor(clText1);
   Inc(r.left, 2);
