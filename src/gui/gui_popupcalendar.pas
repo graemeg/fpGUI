@@ -20,11 +20,15 @@ unit gui_popupcalendar;
 
 {$mode objfpc}{$H+}
 
-{
-    * This is still under development!!!!!!!!!
-      It needs lots of testing and debugging.
-}
 {.$Define DEBUG} // while developing the component
+
+{
+    ***********************************************************
+    **********   This is still under development!   ***********
+    ***********************************************************
+
+    It needs lots of testing and debugging.
+}
 
 
 { todo: Support highlighting special days. }

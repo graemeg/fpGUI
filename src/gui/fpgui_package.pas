@@ -11,7 +11,8 @@ uses
     gui_listbox, gui_memo, gui_scrollbar, gui_bevel, gui_checkbox, 
     gui_radiobutton, gui_trackbar, gui_tab, gui_basegrid, gui_listview, 
     gui_customgrid, gui_progressbar, gui_menu, gui_style, gui_grid, gui_tree, 
-    gui_iniutils, gui_mru, fpgui_db, gui_popupcalendar, gui_gauge; 
+    gui_iniutils, gui_mru, fpgui_db, gui_popupcalendar, gui_gauge, 
+    gui_editcombo; 
 
 implementation
 

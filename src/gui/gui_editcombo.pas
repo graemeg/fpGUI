@@ -12,21 +12,25 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Defines a ComboBox control. Also known as a Choice List control.
+      Defines a edit ComboBox control with auto-complete feature.
 }
 
-unit gui_combobox;
+unit gui_editcombo;
 
 {$mode objfpc}{$H+}
 
 {.$Define DEBUG}
 
-{ TODO: When combobox Items changes, the combobox needs to refresh. We need a
-      custom StringItems class to notify us of changes. See TfpgListBox for
-      an example. }
-      
-{ TODO: Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
-      the items list. }
+{
+    ***********************************************************
+    **********   This is still under development!   ***********
+    ***********************************************************
+
+    It needs lots of testing and debugging.
+}
+
+
+{ TODO: Needs a lot of refactoring to get rid of code duplication. }
 
 {
 This is an example of what we can aim for:
@@ -58,11 +62,15 @@ uses
 
 type
 
-  TfpgAbstractComboBox = class(TfpgWidget)
+  TfpgAbstractEditCombo = class(TfpgWidget)
   private
+    FAutoCompletion: Boolean;
     FDropDownCount: integer;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
+    FText: string;
+    FSelectedItem: integer;
+    FMaxLength: integer;
     FFocusItem: integer;
     FFont: TfpgFont;
     FInternalBtnRect: TfpgRect;
@@ -82,21 +90,28 @@ type
     FMargin: integer;
     FBtnPressed: Boolean;
     FDropDown: TfpgPopupWindow;
+    FDrawOffset: integer;
+    FSelStart: integer;
+    FSelOffset: integer;
+    FCursorPos: integer;
     procedure   DoDropDown; virtual;
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
     procedure   SetHeight(const AValue: TfpgCoord); override;
     procedure   SetWidth(const AValue: TfpgCoord); override;
+    procedure   HandleKeyChar(var AText: String; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     procedure   PaintInternalButton; virtual;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
-    property    Items: TStringList read FItems;    {$Note Make this read/write }
+    property    Items: TStringList read FItems;    {$Note Make this read/write}
     // property is 1-based
     property    FocusItem: integer read FFocusItem write SetFocusItem;
+    property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -110,8 +125,9 @@ type
   end;
 
 
-  TfpgComboBox = class(TfpgAbstractComboBox)
+  TfpgEditCombo = class(TfpgAbstractEditCombo)
   published
+    property    AutoCompletion;
     property    BackgroundColor;
     property    DropDownCount;
     property    FocusItem;
@@ -123,17 +139,18 @@ type
     property    Width;
     property    OnChange;
   end;
-  
 
-function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList): TfpgComboBox;
+
+function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList:TStringList): TfpgEditCombo;
 
 
 implementation
 
 uses
   gui_listbox,
+  gfx_UTF8utils,
   math;
-  
+
 var
   OriginalFocusRoot: TfpgWidget;
 
@@ -144,6 +161,7 @@ type
     FCallerWidget: TfpgWidget;
   protected
     procedure   HandlePaint; override;
+    procedure   HandleKeyChar(var AText: String; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
@@ -164,14 +182,29 @@ begin
   Canvas.EndDraw;
 end;
 
+procedure TDropDownWindow.HandleKeyChar(var AText: String;
+  var shiftstate: TShiftState; var consumed: Boolean);
+begin
+  if TfpgEditCombo(FCallerWidget).FAutoCompletion then
+    TfpgEditCombo(FCallerWidget).HandleKeyChar(AText,shiftstate,consumed);
+end;
+
 procedure TDropDownWindow.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
-  if keycode = keyEscape then
+  if TfpgEditCombo(FCallerWidget).FAutoCompletion then
   begin
-    consumed := True;
-    Close;
+    TfpgEditCombo(FCallerWidget).HandleKeyPress(keycode,shiftstate,consumed);
+//    consumed:= True;
+  end
+  else
+  begin
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
+    if keycode = keyEscape then
+    begin
+      consumed := True;
+      Close;
+    end;
   end;
 end;
 
@@ -204,9 +237,10 @@ begin
   ListBox.PopupFrame := True;
 end;
 
-function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList): TfpgComboBox;
+function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord;
+    AList: TStringList): TfpgEditCombo;
 begin
-  Result           := TfpgComboBox.Create(AOwner);
+  Result           := TfpgEditCombo.Create(AOwner);
   Result.Left      := x;
   Result.Top       := y;
   Result.Width     := w;
@@ -216,16 +250,16 @@ begin
   {$Note We still need to handle the AList param as well.}
 end;
 
-{ TfpgAbstractComboBox }
+{ TfpgAbstractEditCombo }
 
-procedure TfpgAbstractComboBox.SetDropDownCount(const AValue: integer);
+procedure TfpgAbstractEditCombo.SetDropDownCount(const AValue: integer);
 begin
   if FDropDownCount = AValue then
     Exit;
   FDropDownCount := AValue;
 end;
 
-procedure TfpgAbstractComboBox.SetBackgroundColor(const AValue: TfpgColor);
+procedure TfpgAbstractEditCombo.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor <> AValue then
   begin
@@ -234,7 +268,7 @@ begin
   end;
 end;
 
-procedure TfpgAbstractComboBox.SetTextColor(const AValue: TfpgColor);
+procedure TfpgAbstractEditCombo.SetTextColor(const AValue: TfpgColor);
 begin
   if FTextColor <> AValue then
   begin
@@ -243,25 +277,55 @@ begin
   end;
 end;
 
-function TfpgAbstractComboBox.GetFontDesc: string;
+function TfpgAbstractEditCombo.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
 end;
 
-function TfpgAbstractComboBox.GetText: string;
+function TfpgAbstractEditCombo.GetText: string;
+var
+  i: integer;
 begin
-  if (FocusItem > 0) and (FocusItem <= FItems.Count) then
-    Result := FItems.Strings[FocusItem-1]
+  if FAutoCompletion then
+  begin
+    if (FocusItem > 0) and (FocusItem <= FItems.Count) then
+    begin
+      FText := FItems.Strings[FocusItem-1];
+      FSelectedItem:= FocusItem-1;
+    end
+    else if FText <> '' then
+    begin
+      for i := 0 to FItems.Count - 1 do
+      begin
+        if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+        begin
+          FSelectedItem := i;
+          if FDropDown= nil then
+            DoDropDown;
+          TDropDownWindow(FDropDown).ListBox.SetFirstItem(FSelectedItem+1);
+          TDropDownWindow(FDropDown).ListBox.Invalidate;
+          Break;
+        end;
+        FSelectedItem := -1;
+      end;
+    end;
+    FCursorPos := UTF8Length(FText);
+    FSelStart := FCursorPos;
+    Result := FText;
+  end
   else
-    Result := '';
+    if (FocusItem > 0) and (FocusItem <= FItems.Count) then
+      Result := FItems.Strings[FocusItem-1]
+    else
+      Result := '';
 end;
 
-function TfpgAbstractComboBox.HasText: boolean;
+function TfpgAbstractEditCombo.HasText: boolean;
 begin
   Result := FocusItem > 0;
 end;
 
-procedure TfpgAbstractComboBox.DoDropDown;
+procedure TfpgAbstractEditCombo.DoDropDown;
 var
   ddw: TDropDownWindow;
   rowcount: integer;
@@ -289,7 +353,7 @@ begin
 
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     ddw.ShowAt(Parent, Left, Top+Height);
-    ddw.ListBox.SetFocus;
+//    ddw.ListBox.SetFocus;
   end
   else
   begin
@@ -300,12 +364,12 @@ begin
   end;
 end;
 
-procedure TfpgAbstractComboBox.InternalBtnClick(Sender: TObject);
+procedure TfpgAbstractEditCombo.InternalBtnClick(Sender: TObject);
 begin
   DoDropDown;
 end;
 
-procedure TfpgAbstractComboBox.InternalListBoxSelect(Sender: TObject);
+procedure TfpgAbstractEditCombo.InternalListBoxSelect(Sender: TObject);
 var
   msgp: TfpgMessageParams;
 begin
@@ -319,14 +383,14 @@ begin
 end;
 
 { Focusitem is 1 based and NOT 0 based like the Delphi ItemIndex property.
-  So at startup, FocusItem = 0 which means nothing is selected. If FocusItem = 1
-  it means the first item is selected etc. }
-procedure TfpgAbstractComboBox.SetFocusItem(const AValue: integer);
+  So at startup, FocusItem = 0 which means nothing is selected. If
+  FocusItem = 1 it means the first item is selected etc. }
+procedure TfpgAbstractEditCombo.SetFocusItem(const AValue: integer);
 begin
   if FFocusItem = AValue then
     Exit; //==>
   FFocusItem := AValue;
-  
+
   // do some limit check corrections
   if FFocusItem < 0 then
     FFocusItem := 0   // nothing is selected
@@ -336,14 +400,14 @@ begin
   RePaint;
 end;
 
-procedure TfpgAbstractComboBox.SetFontDesc(const AValue: string);
+procedure TfpgAbstractEditCombo.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   RePaint;
 end;
 
-procedure TfpgAbstractComboBox.SetText(const AValue: string);
+procedure TfpgAbstractEditCombo.SetText(const AValue: string);
 var
   i: integer;
 begin
@@ -353,9 +417,9 @@ begin
   begin
     for i := 0 to FItems.Count - 1 do
     begin
-      if SameText(FItems.Strings[i], AValue) then
+      if SameText(UTF8Copy(FItems.Strings[i],1,UTF8Length(AVAlue)), AValue) then
       begin
-        SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
+  SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
         Break;
       end;
     end;
@@ -364,56 +428,188 @@ begin
   end;
 end;
 
-procedure TfpgAbstractComboBox.SetWidth(const AValue: TfpgCoord);
+procedure TfpgAbstractEditCombo.SetWidth(const AValue: TfpgCoord);
 begin
   inherited;
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgAbstractComboBox.CalculateInternalButtonRect;
+procedure TfpgAbstractEditCombo.CalculateInternalButtonRect;
 begin
-  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
+  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2,
+      Height-4);
 end;
 
-procedure TfpgAbstractComboBox.MsgPopupClose(var msg: TfpgMessageRec);
+procedure TfpgAbstractEditCombo.MsgPopupClose(var msg: TfpgMessageRec);
 begin
   DoDropDown;
 end;
 
-procedure TfpgAbstractComboBox.SetHeight(const AValue: TfpgCoord);
+procedure TfpgAbstractEditCombo.SetHeight(const AValue: TfpgCoord);
 begin
   inherited;
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgAbstractComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgAbstractEditCombo.HandleKeyChar(var AText: String;
+    var shiftstate: TShiftState; var consumed: Boolean);
+var
+  s: string;
+  prevval: string;
+begin
+  prevval := FText;
+  s       := AText;
+  consumed := False;
+
+  // Handle only printable characters
+  // Note: This is not UTF-8 compliant!
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) then
+  begin
+    if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
+    begin
+      UTF8Insert(s, FText, FCursorPos + 1);
+      Inc(FCursorPos);
+      FSelStart := FCursorPos;
+    end;
+    consumed := True;
+  end;
+
+  if prevval <> FText then
+    if Assigned(FOnChange) then
+      FOnChange(self);
+
+  if consumed then
+    RePaint
+  else
+    inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
+
+procedure TfpgAbstractEditCombo.HandleKeyPress(var keycode: word;
+    var shiftstate: TShiftState; var consumed: boolean);
+var
+  hasChanged: boolean;
+begin
+  hasChanged := False;
+
+  consumed := True;
+
+  case keycode of
+    keyBackSpace:
+        begin
+          if HasText then
+            FocusItem:= 0;
+          if FCursorPos > 0 then
+          begin
+            UTF8Delete(FText, FCursorPos, 1);
+            Dec(FCursorPos);
+            hasChanged := True;
+          end;// backspace
+        end;
+
+    keyDelete:
+        begin
+          if HasText then
+            FocusItem:= 0;
+          FSelectedItem:= -1;
+          hasChanged := True;
+        end;
+
+    keyReturn:
+        begin
+          if FSelectedItem > -1 then
+            FText:= Items[FSelectedItem];
+        end;
+
+    else
+    begin
+      Consumed := False;
+    end;
+  end;
+
+  if Consumed then
+  begin
+    FSelStart  := FCursorPos;
+    FSelOffset := 0;
+  end;
+
+  if consumed then
+    RePaint
+  else
+    inherited;
+
+  if hasChanged then
+    if Assigned(FOnChange) then
+      FOnChange(self);
+end;
+
+procedure TfpgAbstractEditCombo.HandleLMouseDown(x, y: integer;
+    shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
   FBtnPressed := PtInRect(FInternalBtnRect, Point(x, y));
-  PaintInternalButton;
-  DoDropDown;
+  if not FAutoCompletion then
+  begin
+    PaintInternalButton;
+    DoDropDown;
+  end
+  else if FBtnPressed then
+    begin
+      PaintInternalButton;
+      DoDropDown;
+    end;
 end;
 
-procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TfpgAbstractEditCombo.HandleLMouseUp(x, y: integer;
+    shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-//  DoDropDown;
   PaintInternalButton;
 end;
 
-procedure TfpgAbstractComboBox.HandleResize(awidth, aheight: TfpgCoord);
+procedure TfpgAbstractEditCombo.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   CalculateInternalButtonRect;
 end;
 
-procedure TfpgAbstractComboBox.HandlePaint;
+procedure TfpgAbstractEditCombo.HandlePaint;
 var
   r: TfpgRect;
+  tw, tw2, st, len: integer;
+
+  // paint selection rectangle
+  procedure DrawSelection;
+  var
+    lcolor: TfpgColor;
+  begin
+    if Focused then
+    begin
+      lcolor := clSelection;
+      Canvas.SetTextColor(clSelectionText);
+    end
+    else
+    begin
+      lcolor := clInactiveSel;
+      Canvas.SetTextColor(clText1);
+    end;
+
+    len := FSelOffset;
+    st  := FSelStart;
+    if len < 0 then
+    begin
+      st  := st + len;
+      len := -len;
+    end;
+    tw  := FFont.TextWidth(UTF8Copy(Items[FSelectedItem], 1, st));
+    tw2 := FFont.TextWidth(UTF8Copy(Items[FSelectedItem], 1, st + len));
+    Canvas.XORFillRectangle(fpgColorToRGB(lcolor) xor $FFFFFF,
+      -FDrawOffset + FMargin + tw, 3, tw2 - tw, FFont.Height);
+  end;
+
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
@@ -425,13 +621,6 @@ begin
   InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
 
-  if Enabled then
-    Canvas.SetColor(FBackgroundColor)
-  else
-    Canvas.SetColor(clWindowBackground);
-
-  Canvas.FillRectangle(r);
-
   // paint the fake dropdown button
   PaintInternalButton;
 
@@ -439,12 +628,21 @@ begin
   Canvas.SetClipRect(r);
   Canvas.SetFont(Font);
 
-  if Focused then
-  begin
-    Canvas.SetColor(clSelection);
-    Canvas.SetTextColor(clSelectionText);
-    InflateRect(r, -1, -1);
-  end
+  if not AutoCompletion then
+    if Focused then
+    begin
+      Canvas.SetColor(clSelection);
+      Canvas.SetTextColor(clSelectionText);
+      InflateRect(r, -1, -1);
+    end
+    else
+    begin
+      if Enabled then
+        Canvas.SetColor(FBackgroundColor)
+      else
+        Canvas.SetColor(clWindowBackground);
+      Canvas.SetTextColor(FTextColor);
+    end
   else
   begin
     if Enabled then
@@ -456,13 +654,52 @@ begin
   Canvas.FillRectangle(r);
 
   // Draw select item's text
-  if HasText then
-    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
+  if not AutoCompletion then
+  begin
+    if HasText then
+      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
+  end
+  else
+  begin
+    if HasText then
+    begin
+      FSelOffset:= 0;
+      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
+    end
+    else
+      if Text<> '' then
+        if FSelectedItem> -1 then
+        begin
+          FSelOffset:= FFont.TextWidth(UTF8Copy(Items[FSelectedItem], UTF8Length(FText) + 1,
+            UTF8Length(Items[FSelectedItem]) - UTF8Length(FText)));
+          fpgStyle.DrawString(Canvas, FMargin+1, FMargin, FText + UTF8Copy(Items[FSelectedItem],
+            UTF8Length(FText) + 1, UTF8Length(Items[FSelectedItem]) - UTF8Length(FText)), Enabled);
+        end
+        else
+        begin
+          FSelOffset:= 0;
+          fpgStyle.DrawString(Canvas, FMargin+1, FMargin, FText, Enabled);
+        end;
+
+    if Focused then
+    begin
+      // drawing selection
+      if FSelOffset <> 0 then
+        DrawSelection;
+
+      // drawing cursor
+      FCursorPos:= UTF8Length(FText);
+      tw := FFont.TextWidth(UTF8Copy(FText, 1, FCursorPos));
+      fpgCaret.SetCaret(Canvas, -FDrawOffset + FMargin + tw, 3, fpgCaret.Width, FFont.Height);
+    end
+    else
+      fpgCaret.UnSetCaret(Canvas);
+  end;
 
   Canvas.EndDraw;
 end;
 
-procedure TfpgAbstractComboBox.PaintInternalButton;
+procedure TfpgAbstractEditCombo.PaintInternalButton;
 var
   ar: TfpgRect;
   btnflags: TFButtonFlags;
@@ -493,10 +730,10 @@ begin
   Canvas.EndDraw(FInternalBtnRect);
 end;
 
-constructor TfpgAbstractComboBox.Create(AOwner: TComponent);
+constructor TfpgAbstractEditCombo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFont   := fpgGetFont('#List');
+  FFont             := fpgGetFont('#List');
   FBackgroundColor  := clBoxColor;
   FTextColor        := clText1;
   FDropDownCount    := 8;
@@ -506,6 +743,14 @@ begin
   FMargin           := 3;
   FFocusable        := True;
   FBtnPressed       := False;
+  FAutocompletion := False;
+
+  FText             := '';
+  FCursorPos        := UTF8Length(FText);
+  FSelStart         := FCursorPos;
+  FSelOffset        := 0;
+  FDrawOffset       := 0;
+  FSelectedItem     := 0;
 
   FItems  := TStringList.Create;
   CalculateInternalButtonRect;
@@ -513,7 +758,7 @@ begin
   FOnChange := nil;
 end;
 
-destructor TfpgAbstractComboBox.Destroy;
+destructor TfpgAbstractEditCombo.Destroy;
 begin
   FDropDown.Free;
   FItems.Free;
@@ -521,11 +766,10 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgAbstractComboBox.Update;
+procedure TfpgAbstractEditCombo.Update;
 begin
   FFocusItem := 0;
   Repaint;
 end;
 
 end.
-

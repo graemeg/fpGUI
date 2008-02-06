@@ -8,7 +8,7 @@ Original Author (not active anymore)
 Sebastian Guenther <sg@freepascal.org>
 
 
-Current Author
+Core Developer
 --------------
 Graeme Geldenhuys <graemeg@gmail.com>
 
@@ -18,5 +18,10 @@ Contributors
 Felipe Monteiro de Carvalho <felipemonteiro.carvalho@gmail.com>
 Andrew Haines <andrewd207@aol.com>
 Giuliano Colla <giuliano.colla@fastwebnet.it>
+Jean-Marc <????>
+Antonio <slapshot@slapshot.fr>
 
 
+           ______________.o0O0o.______________
+           
+           

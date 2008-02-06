@@ -66,7 +66,6 @@ type
     FMouseDragging: boolean;
     FFirstItem: integer;
     FMargin: integer;
-    procedure   SetFirstItem(item: integer);
     procedure   UpdateScrollBar;
     procedure   FollowFocus;
     function    ListHeight: TfpgCoord;
@@ -95,6 +94,7 @@ type
     procedure   Update;
     function    ItemCount: integer; virtual;
     function    RowHeight: integer; virtual;
+    procedure   SetFirstItem(item: integer);
     property    Font: TfpgFont read FFont;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnSelect: TNotifyEvent read FOnSelect write FOnSelect;

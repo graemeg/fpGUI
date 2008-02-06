@@ -344,9 +344,11 @@ begin
 end;
 
 // returns true when the operating system is windows XP or newer
-function IsWinXP: Boolean;
+function IsWinXPOrLater: Boolean;
 begin
-  Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion >= 5) and (Win32MinorVersion >= 1);
+  Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and
+     (((Win32MajorVersion = 5) and (Win32MinorVersion >= 1)) or
+      ((Win32MajorVersion >= 6) and (Win32MinorVersion >= 0))) );
 end;
 
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
