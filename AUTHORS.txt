@@ -18,8 +18,8 @@ Contributors
 Felipe Monteiro de Carvalho <felipemonteiro.carvalho@gmail.com>
 Andrew Haines <andrewd207@aol.com>
 Giuliano Colla <giuliano.colla@fastwebnet.it>
-Jean-Marc <????>
-Antonio <slapshot@slapshot.fr>
+Jean-Marc Levecque <jean-marc.levecque@orange.fr>
+Antonio Sanguigni <a.sanguigni@gmail.com>
 
 
            ______________.o0O0o.______________
