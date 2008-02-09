@@ -100,7 +100,7 @@ type
     procedure   SetText(const AValue: string); virtual;
     procedure   SetHeight(const AValue: TfpgCoord); override;
     procedure   SetWidth(const AValue: TfpgCoord); override;
-    procedure   HandleKeyChar(var AText: String; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -161,7 +161,7 @@ type
     FCallerWidget: TfpgWidget;
   protected
     procedure   HandlePaint; override;
-    procedure   HandleKeyChar(var AText: String; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
@@ -182,7 +182,7 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TDropDownWindow.HandleKeyChar(var AText: String;
+procedure TDropDownWindow.HandleKeyChar(var AText: TfpgChar;
   var shiftstate: TShiftState; var consumed: Boolean);
 begin
   if TfpgEditCombo(FCallerWidget).FAutoCompletion then
@@ -453,7 +453,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgAbstractEditCombo.HandleKeyChar(var AText: String;
+procedure TfpgAbstractEditCombo.HandleKeyChar(var AText: TfpgChar;
     var shiftstate: TShiftState; var consumed: Boolean);
 var
   s: string;

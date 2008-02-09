@@ -90,7 +90,7 @@ type
     procedure   SetCursorLine(aValue: integer);
     procedure   UpdateScrollBarCoords;
   protected
-    procedure   HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
@@ -826,7 +826,7 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgMemo.HandleKeyChar(var AText: string; var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgMemo.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);
 var
   prevval: string;
   s: string;

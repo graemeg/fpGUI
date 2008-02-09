@@ -9,8 +9,10 @@ uses
   SysUtils;
 
 type
-  TfpgCoord = integer;     // we might use floating point coordinates in the future...
-  TfpgColor = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
+  TfpgCoord   = integer;     // we might use floating point coordinates in the future...
+  TfpgColor   = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
+  TfpgString  = type string;
+  TfpgChar    = type string[4];
 
   TRGBTriple = record
     Red: word;
@@ -90,7 +92,7 @@ type
 
   TfpgMsgParmKeyboard = record
     keycode: word;
-    keychar: char;
+    keychar: TfpgChar;
     shiftstate: TShiftState;
   end;
   

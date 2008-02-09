@@ -75,7 +75,7 @@ type
     FCursorPos: integer;
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
-    procedure   HandleKeyChar(var AText: String; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -316,10 +316,10 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgCustomEdit.HandleKeyChar(var AText: String;
+procedure TfpgCustomEdit.HandleKeyChar(var AText: TfpgChar;
   var shiftstate: TShiftState; var consumed: Boolean);
 var
-  s: string;
+  s: TfpgChar;
   prevval: string;
 begin
   prevval := Text;
