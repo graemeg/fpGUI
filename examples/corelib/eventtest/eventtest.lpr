@@ -144,14 +144,14 @@ end;
 
 procedure TMainForm.MsgKeyChar(var msg: TfpgMessageRec);
 var
-  AKeyChar: Char;
+  AKeyChar: TfpgChar;
 begin
   Write('Character generated: ');
   AKeyChar := msg.Params.keyboard.keychar;
   if AKeyChar >= ' ' then
     WriteLn('''', AKeyChar, '''')
   else
-    WriteLn('#', Ord(AKeyChar));
+    WriteLn('#', Ord(AKeyChar[1]));
 end;
 
 procedure TMainForm.MsgKeyPress(var msg: TfpgMessageRec);
