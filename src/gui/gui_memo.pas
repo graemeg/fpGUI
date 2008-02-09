@@ -837,12 +837,9 @@ begin
   s        := AText;
 
   // Printable characters only
-  // Note: This is not UTF-8 compliant!
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) then
+  // Note: This is now UTF-8 compliant!
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
   begin
-    // printeable
-    //FText := FText + s;
-
     if (FMaxLength <= 0) or (UTF8Length(FLines.Text) < FMaxLength) then
     begin
       DeleteSelection;
