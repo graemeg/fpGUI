@@ -512,7 +512,7 @@ begin
             fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
           else if uMsg = WM_CHAR then
           begin
-            msgp.keyboard.keychar := Chr(wParam);
+            msgp.keyboard.keychar := UTF8Encode(WideChar(wParam));
             fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
           end;
         end;
