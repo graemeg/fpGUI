@@ -61,10 +61,13 @@ uses
   gfx_popupwindow;
 
 type
+  TAllowNew = (anNo,anYes,anAsk);
 
   TfpgAbstractEditCombo = class(TfpgWidget)
   private
     FAutoCompletion: Boolean;
+    FAutoDropDown: Boolean;
+    FAllowNew: TAllowNew;
     FDropDownCount: integer;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
@@ -76,7 +79,9 @@ type
     FInternalBtnRect: TfpgRect;
     FItems: TStringList;
     FOnChange: TNotifyEvent;
+    FNewItem: boolean;
     function    GetFontDesc: string;
+    procedure   SetAllowNew(const AValue: TAllowNew);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
@@ -112,6 +117,8 @@ type
     // property is 1-based
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
+    property    AutoDropDown: Boolean read FAutoDropDown write FAutoDropDown default False;
+    property    AllowNew: TAllowNew read FAllowNew write SetAllowNew default anNo;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -122,12 +129,15 @@ type
     destructor  Destroy; override;
     procedure   Update;
     property    Font: TfpgFont read FFont;
+    property    NewText: boolean read FNewItem;
   end;
 
 
   TfpgEditCombo = class(TfpgAbstractEditCombo)
   published
     property    AutoCompletion;
+    property    AutoDropDown;
+    property    AllowNew;
     property    BackgroundColor;
     property    DropDownCount;
     property    FocusItem;
@@ -259,6 +269,12 @@ begin
   FDropDownCount := AValue;
 end;
 
+procedure TfpgAbstractEditCombo.SetAllowNew(const AValue: TAllowNew);
+begin
+  if FAllowNew <> AValue then
+    FAllowNew:= AValue;
+end;
+
 procedure TfpgAbstractEditCombo.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor <> AValue then
@@ -293,22 +309,43 @@ begin
       FText := FItems.Strings[FocusItem-1];
       FSelectedItem:= FocusItem-1;
     end
-    else if FText <> '' then
-    begin
-      for i := 0 to FItems.Count - 1 do
-      begin
-        if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+    else
+      if FText <> '' then
+        if FSelectedItem < -1 then
         begin
-          FSelectedItem := i;
-          if FDropDown= nil then
-            DoDropDown;
-          TDropDownWindow(FDropDown).ListBox.SetFirstItem(FSelectedItem+1);
-          TDropDownWindow(FDropDown).ListBox.Invalidate;
-          Break;
+          if Assigned(FDropDown) then
+            FDropDown.Close;
+          inc(FSelectedItem);      // with FSelectedItem set to -2 for delet key and -4 for return key
+        end
+        else
+        begin
+          FSelectedItem := -1;
+          if Assigned(FDropDown) then
+            FDropDown.Close;
+          for i := 0 to FItems.Count - 1 do
+          begin
+            if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+            begin
+              FSelectedItem := i;
+              if AutoDropDown then
+                DoDropDown;
+              Break;
+            end;
+          end;
+          case FAllowNew of
+            anNo:
+              if FSelectedItem= -1 then
+              begin
+                UTF8Delete(FText, FCursorPos, 1);
+                Dec(FCursorPos);
+              end;
+            anAsk,anYes:
+              if FSelectedItem= -1 then
+              begin
+                FNewItem:= True;
+              end;
+          end;
         end;
-        FSelectedItem := -1;
-      end;
-    end;
     FCursorPos := UTF8Length(FText);
     FSelStart := FCursorPos;
     Result := FText;
@@ -328,7 +365,7 @@ end;
 procedure TfpgAbstractEditCombo.DoDropDown;
 var
   ddw: TDropDownWindow;
-  rowcount: integer;
+  rowcount, i: integer;
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
@@ -337,18 +374,28 @@ begin
     FDropDown       := TDropDownWindow.Create(nil);
     ddw := TDropDownWindow(FDropDown);
     ddw.Width := Width;
+    ddw.CallerWidget      := self;
+    ddw.ListBox.OnSelect  := @InternalListBoxSelect;
+
+    // Assign combobox text items to internal listbox
+    if FAutoCompletion then
+    begin
+      for i := 0 to FItems.Count - 1 do
+        if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+          ddw.ListBox.Items.Add(FItems.Strings[i]);
+    end
+    else
+      ddw.ListBox.Items.Assign(FItems);
+
     // adjust the height of the dropdown
-    rowcount := FItems.Count;
+    rowcount := ddw.ListBox.Items.Count;
     if rowcount > FDropDownCount then
       rowcount := FDropDownCount;
     if rowcount < 1 then
       rowcount := 1;
     ddw.Height            := (ddw.ListBox.RowHeight * rowcount) + 4;
-    ddw.CallerWidget      := self;
-    ddw.ListBox.OnSelect  := @InternalListBoxSelect;
-
-    // Assign combobox text items to internal listbox and set default focusitem
-    ddw.ListBox.Items.Assign(FItems);
+    
+    // set default focusitem
     ddw.ListBox.FocusItem := FFocusItem;
 
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
@@ -419,7 +466,7 @@ begin
     begin
       if SameText(UTF8Copy(FItems.Strings[i],1,UTF8Length(AVAlue)), AValue) then
       begin
-  SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
+        SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
         Break;
       end;
     end;
@@ -460,16 +507,16 @@ var
   prevval: string;
 begin
   prevval := FText;
-  s       := AText;
+  s       := UTF8Encode(AText);
   consumed := False;
 
   // Handle only printable characters
   // Note: This is not UTF-8 compliant!
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) then
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 256) and (Ord(AText[1]) <> 127) or (Length(AText) > 1) then
   begin
     if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
     begin
-      UTF8Insert(s, FText, FCursorPos + 1);
+      UTF8Insert(s, FText, FCursorPos + UTF8Length(s));
       Inc(FCursorPos);
       FSelStart := FCursorPos;
     end;
@@ -512,14 +559,19 @@ begin
         begin
           if HasText then
             FocusItem:= 0;
-          FSelectedItem:= -1;
+          FSelectedItem:= -2;      // detects delete has been pressed
           hasChanged := True;
         end;
 
     keyReturn:
         begin
           if FSelectedItem > -1 then
-            FText:= Items[FSelectedItem];
+            SetText(Items[FSelectedItem])
+          else
+            SetText('');
+          FSelectedItem:= -4;      // detects return has been pressed (must be 4 due to number of repaints)
+          if FNewItem and (FAllowNew = anYes) then
+            FItems.Add(FText);
         end;
 
     else
@@ -580,6 +632,7 @@ procedure TfpgAbstractEditCombo.HandlePaint;
 var
   r: TfpgRect;
   tw, tw2, st, len: integer;
+  Texte: string;
 
   // paint selection rectangle
   procedure DrawSelection;
@@ -667,8 +720,10 @@ begin
       fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
     end
     else
-      if Text<> '' then
-        if FSelectedItem> -1 then
+    begin
+      Texte:= Text;
+      if Texte <> '' then
+        if FSelectedItem > -1 then
         begin
           FSelOffset:= FFont.TextWidth(UTF8Copy(Items[FSelectedItem], UTF8Length(FText) + 1,
             UTF8Length(Items[FSelectedItem]) - UTF8Length(FText)));
@@ -680,6 +735,7 @@ begin
           FSelOffset:= 0;
           fpgStyle.DrawString(Canvas, FMargin+1, FMargin, FText, Enabled);
         end;
+    end;
 
     if Focused then
     begin
@@ -743,14 +799,15 @@ begin
   FMargin           := 3;
   FFocusable        := True;
   FBtnPressed       := False;
-  FAutocompletion := False;
+  FAutocompletion   := False;
 
   FText             := '';
   FCursorPos        := UTF8Length(FText);
   FSelStart         := FCursorPos;
   FSelOffset        := 0;
   FDrawOffset       := 0;
-  FSelectedItem     := 0;
+  FSelectedItem     := -1;       // to allow typing if list is empty
+  FNewItem          := False;
 
   FItems  := TStringList.Create;
   CalculateInternalButtonRect;

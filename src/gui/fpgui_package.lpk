@@ -31,7 +31,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="29">
+    <Files Count="28">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -144,20 +144,16 @@
         <Filename Value="gui_gauge.pas"/>
         <UnitName Value="gui_gauge"/>
       </Item28>
-      <Item29>
-        <Filename Value="gui_editcombo.pas"/>
-        <UnitName Value="gui_editcombo"/>
-      </Item29>
     </Files>
     <LazDoc Paths="../../docs/xml/gui/"/>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpgfx_package"/>
         <MinVersion Minor="5" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>

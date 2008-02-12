@@ -52,6 +52,7 @@ type
     FPopupFrame: boolean;
     FTextColor: TfpgColor;
     FBackgroundColor: TfpgColor;  // This should move to TfpgWidget
+    FAutoHeight: boolean;
     function    GetFontDesc: string;
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
@@ -59,6 +60,7 @@ type
     procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   UpdateScrollbarCoords;
+    procedure   SetAutoHeight(const AValue: boolean);
   protected
     FFont: TfpgFont;
     FScrollBar: TfpgScrollBar;
@@ -82,6 +84,7 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
+    property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -120,6 +123,7 @@ type
   // The standard strings listbox we will actually use in a GUI.
   TfpgListBox = class(TfpgTextListBox)
   published
+    property    AutoHeight;
     property    BackgroundColor;
     property    FocusItem;
     property    FontDesc;
@@ -216,6 +220,8 @@ procedure TfpgBaseListBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
+  if FAutoHeight then
+    Height:= ((Height - 6) div RowHeight) * RowHeight + 6;
   RePaint;
 end;
 
@@ -260,6 +266,14 @@ begin
   FScrollBar.Left    := Width - FScrollBar.Width - 2;
   FScrollBar.Height  := VHeight;
   FScrollBar.UpdateWindowPosition;
+end;
+
+procedure TfpgBaseListBox.SetAutoHeight(const AValue: boolean);
+begin
+  if FAutoHeight= AValue then
+    Exit; //==>
+  FAutoHeight := AValue;
+  Height := (PageLength * RowHeight) + (2 * FMargin);
 end;
 
 procedure TfpgBaseListBox.SetFirstItem(item: integer);
@@ -636,6 +650,7 @@ begin
   FMouseDragging  := False;
   FPopupFrame     := False;
   FHotTrack       := False;
+  FAutoHeight     := False;
 
   FOnChange := nil;
   FOnSelect := nil;

@@ -157,8 +157,10 @@ begin
   Result.Left  := x;
   Result.Top   := y;
   Result.Width := w;
-  if h > 0 then
-    Result.Height := h;
+  if h < TfpgEdit(Result).FFont.Height + 6 then
+    Result.Height:= TfpgEdit(Result).FFont.Height + 6
+  else
+    Result.Height:= h;
 end;
 
 
@@ -322,10 +324,9 @@ var
   s: TfpgChar;
   prevval: string;
 begin
-  prevval := Text;
-  s       := AText;
-  consumed := False;
-
+  prevval   := Text;
+  s         := AText;
+  consumed  := False;
   // Handle only printable characters
   // Note: This is now UTF-8 compliant!
   if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
@@ -690,6 +691,8 @@ procedure TfpgCustomEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
+  if Height < FFont.Height + 6 then
+    Height:= FFont.Height + 6;
   RePaint;
 end;
 
