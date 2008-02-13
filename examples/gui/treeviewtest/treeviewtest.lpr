@@ -58,8 +58,8 @@ begin
 
   // create a image list
   imagelist := TfpgImageList.Create;
-  imagelist.AddItemFromFile('../../../images/folder_16.bmp', 0);
-  imagelist.AddItemFromFile('../../../images/menu_preferences_16.bmp', 1);
+  imagelist.AddItemFromFile(SetDirSeparators('../../../images/folder_16.bmp'), 0);
+  imagelist.AddItemFromFile(SetDirSeparators('../../../images/menu_preferences_16.bmp'), 1);
 
   // create a treeview
   tree := TfpgTreeView.Create(self);
