@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="5" Release="1"/>
-    <Files Count="17">
+    <Files Count="18">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -93,6 +93,10 @@
         <Filename Value="../gfx_wuline.pas"/>
         <UnitName Value="gfx_wuline"/>
       </Item17>
+      <Item18>
+        <Filename Value="../gfx_imagelist.pas"/>
+        <UnitName Value="gfx_imagelist"/>
+      </Item18>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/"/>
     <RequiredPkgs Count="1">
