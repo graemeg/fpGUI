@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -40,6 +40,7 @@ uses
   gfx_widget,
   gfxbase,
   fpgfx,
+  gfx_imagelist,
   gui_scrollbar;
   
 type
@@ -120,18 +121,22 @@ type
   TfpgTreeExpandEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
   
   
+  { TfpgTreeView }
+
   TfpgTreeView = class(TfpgWidget)
   private
-//    FImageList : TfpgImageList;   // imagelist to be implemented in the future
+    FImageList: TfpgImageList;
     FBackgroundColor: TfpgColor;
     FColumnHeight: integer; // height of the column header
     FDefaultColumnWidth: word;
+    FIndentNodeWithNoImage: boolean;
     FFirstColumn: PfpgTreeColumnWidth; // the list for column widths
     FFont: TfpgFont;
     FHScrollbar: TfpgScrollbar;
     FMoving: boolean;
     FMovingCol: integer;
     FMovingPos: integer;
+    FNoImageIndent: integer;
     FOnChange: TNotifyEvent;
     FOnExpand: TfpgTreeExpandEvent;
     FRootNode: TfpgTreeNode;
@@ -153,6 +158,7 @@ type
     procedure   SetShowImages(const AValue: boolean);
     procedure   SetTreeLineColor(const AValue: TfpgColor);
     procedure   SetTreeLineStyle(const AValue: TfpgLineStyle);
+    procedure   SetIndentNodeWithNoImage(const AValue: boolean);
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
     function    GetNodeHeightSum: integer;
@@ -194,9 +200,12 @@ type
     property    Font: TfpgFont read FFont;
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
+    property    ImageList: TfpgImageList read FImageList write FImageList;
   published
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth default 15;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    IndentNodeWithNoImage: boolean read FIndentNodeWithNoImage write SetIndentNodeWithNoImage default True;
+    property    NoImageIndent: integer read FNoImageIndent write FNoImageIndent default 16;
     property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta default 15;
     property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
     property    ShowImages: boolean read FShowImages write SetShowImages default False;
@@ -718,6 +727,16 @@ begin
   RePaint;
 end;
 
+procedure TfpgTreeView.SetIndentNodeWithNoImage(const AValue: boolean);
+begin
+  if AValue <> FIndentNodeWithNoImage then
+  begin
+    FIndentNodeWithNoImage := AValue;
+    UpdateScrollbars;
+    RePaint;
+  end;
+end;
+
 function TfpgTreeview.VisibleWidth: integer;
 begin
   Result := Width - 2;
@@ -816,8 +835,8 @@ begin
 end;
 
 function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
-//var
-//   AImage: TfpgImageItem;
+var
+  AImage: TfpgImageItem;
 begin
   {$IFDEF DEBUG}
   writeln('TfpgTreeView.GetNodeWidth');
@@ -827,15 +846,15 @@ begin
   else
   begin
     Result := FFont.TextWidth(ANode.Text) + 2;
-    //if ShowImages and (ImageList <> nil) then
-    //begin
-      //if ANode.ImageIndex > -1 then
-      //begin
-        //AImage := ImageList.Item[ANode.ImageIndex];
-        //if AImage <> nil then
-          //result := result + AImage.Image.Width + 2;
-      //end;
-    //end;
+    if ShowImages and (ImageList <> nil) then
+    begin
+      if ANode.ImageIndex > -1 then
+      begin
+        AImage := ImageList.Item[ANode.ImageIndex];
+        if AImage <> nil then
+          result := result + AImage.Image.Width + 2;
+      end;
+    end;
   end;  { if/else }
 end;
 
@@ -1185,7 +1204,7 @@ var
   ACenterPos: integer;
   x,
   y: integer;
-//  AImageItem: TfpgImageItem;
+  AImageItem: TfpgImageItem;
   AVisibleHeight: integer;
 begin
   {$IFDEF DEBUG}
@@ -1268,39 +1287,45 @@ begin
           Canvas.SetTextColor(h.ParentInActSelTextColor);
         end;
         Canvas.FillRectangle(w - FXOffset, YPos - FYOffset + col - GetNodeHeight + FFont.Ascent div 2 - 2, GetNodeWidth(h), GetNodeHeight);
-{
         if (ImageList <> nil) and ShowImages then
         begin
           AImageItem := ImageList.Item[h.ImageIndex];
           if AImageItem <> nil then
           begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image,0,0,16,16);
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image, 0, 0, 16, 16);
             Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
           end
           else
-            Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          begin
+            if FIndentNodeWithNoImage then
+              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - FFont.Ascent div 2, h.text)
+            else
+              Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          end;
         end
         else
-}
           Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
         Canvas.SetTextColor(h.ParentTextColor);
       end
       else
       begin
-{
-        if (ImageList <> nil) and  ShowImages then
+        if (ImageList <> nil) and ShowImages then
         begin
           AImageItem := ImageList.Item[h.ImageIndex];
           if AImageItem <> nil then
           begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image,0,0,16,16);
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image, 0, 0, 16, 16);
             Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
           end
           else
-            Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          begin
+            if FIndentNodeWithNoImage then
+              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - FFont.Ascent div 2, h.text)
+            else
+              Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          end
         end
         else
-}
           Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
       end;  { if/else }
 
@@ -1696,6 +1721,8 @@ begin
   FYOffset          := 0;
   FColumnHeight     := FFont.Height + 2;
   FScrollWheelDelta := 15;
+  FNoImageIndent    := 16;
+  FIndentNodeWithNoImage := True;
 end;
 
 destructor TfpgTreeView.Destroy;
