@@ -103,11 +103,13 @@ begin
   cbShowImages := CreateCheckBox(self, 8, 204, 'Show images');
   cbShowImages.Checked := True;
   cbShowImages.OnChange := @cbShowImagesChange;
+  cbShowImages.Anchors := [anLeft, anBottom];
   
   // create a checkbox
   cbIndentNode := CreateCheckBox(self, 120, 204, 'Indent node with no image');
   cbIndentNode.Checked := True;
   cbIndentNode.OnChange := @cbIndentNodeChange;
+  cbIndentNode.Anchors := [anLeft, anBottom];
 end;
 
 destructor TMainForm.Destroy;
