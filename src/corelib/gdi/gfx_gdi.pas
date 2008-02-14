@@ -197,6 +197,14 @@ type
   end;
 
 
+  TfpgClipboardImpl = class(TfpgClipboardBase)
+  protected
+    FClipboardText: string;
+    function    DoGetText: string; override;
+    procedure   DoSetText(const AValue: string); override;
+    procedure   InitClipboard; override;
+  end;
+
 implementation
 
 uses
@@ -442,6 +450,38 @@ begin
     w.FWinHandle := hwnd; // this is very important, because number of messages sent
     // before the createwindow returns the window handle
     Windows.SetWindowLong(hwnd, GWL_USERDATA, longword(w));
+  end
+  else if (uMsg = WM_RENDERALLFORMATS) or (uMsg = WM_RENDERFORMAT) then
+  begin
+//    writeln('cliboard rendering...');
+    if uMsg = WM_RENDERALLFORMATS then
+    begin
+//      writeln('ALL');
+      CloseClipboard;
+      OpenClipboard(0);
+    end;
+    // Windows seems unhappy unless I do these two steps. Documentation
+    // seems to vary on whether opening the clipboard is necessary or
+    // is in fact wrong:
+    // fall through...
+    h := GlobalAlloc(GHND, Length(fpgClipboard.FClipboardText)+1);
+    if (h <> 0) then
+    begin
+      p := GlobalLock(h);
+      Move(fpgClipboard.FClipboardText[1], p^, Length(fpgClipboard.FClipboardText));
+      inc(p, Length(fpgClipboard.FClipboardText));
+      p^ := #0;
+      GlobalUnlock(h);
+      SetClipboardData(CF_TEXT, h);
+    end;
+
+    // Windows also seems unhappy if I don't do this. Documentation very
+    // unclear on what is correct:
+    if uMsg = WM_RENDERALLFORMATS then
+      CloseClipboard;
+
+    Result := 1;
+    Exit; //==>
   end;
 
   w      := TfpgWindowImpl(Windows.GetWindowLong(hwnd, GWL_USERDATA));
@@ -1865,6 +1905,62 @@ begin
 
   pbi := @bi;
   SetDIBits(wapplication.display, FMaskHandle, 0, aheight, aimgdata, pbi^, DIB_RGB_COLORS);
+end;
+
+{ TfpgClipboardImpl }
+
+function TfpgClipboardImpl.DoGetText: string;
+var
+  h: THANDLE;
+  p: PChar;
+begin
+  Result := '';
+  if not Windows.OpenClipboard(0) then
+    Exit;
+
+  h := GetClipboardData(CF_TEXT);
+  if h <> 0 then
+  begin
+    p := Windows.GlobalLock(h);
+    FClipboardText := '';
+    while p^ <> #0 do
+    begin
+      FClipboardText := FClipboardText + p^;
+      inc(p);
+    end;
+    GlobalUnlock(h);
+  end;
+  CloseClipboard;
+  Result := FClipboardText;
+end;
+
+procedure TfpgClipboardImpl.DoSetText(const AValue: string);
+begin
+  FClipboardText := AValue;
+  if OpenClipboard(FClipboardWndHandle) then
+  begin
+    EmptyClipboard;
+    SetClipboardData(CF_TEXT, 0);
+    CloseClipboard;
+  end;
+end;
+
+procedure TfpgClipboardImpl.InitClipboard;
+begin
+  FClipboardWndHandle := Windows.CreateWindowEx(
+      0,			  // extended window style
+      'FPGUI',  // registered class name
+      nil,			// window name
+      0,			  // window style
+      0,			  // horizontal position of window
+      0,			  // vertical position of window
+      10,			  // window width
+      10,       // window height
+      0,        // handle to parent or owner window
+      0,        // menu handle or child identifier
+      MainInstance, // handle to application instance
+      nil       // window-creation data
+      );
 end;
 
 initialization
