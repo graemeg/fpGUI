@@ -853,7 +853,9 @@ begin
         AImage := ImageList.Item[ANode.ImageIndex];
         if AImage <> nil then
           result := result + AImage.Image.Width + 2;
-      end;
+      end
+      else if IndentNodeWithNoImage then
+        result := result + NoImageIndent + 2;
     end;
   end;  { if/else }
 end;
@@ -1265,13 +1267,12 @@ begin
   YPos := 0;
   while h <> nil do
   begin
-//writeln('painting node: ', h.Text);
     Canvas.SetTextColor(h.ParentTextColor);
     // lines with + or -
     w := GetColumnLeft(StepToRoot(h));
     ACenterPos := YPos - FYOffset + col + (GetNodeHeight div 2);
     YPos := YPos + GetNodeHeight;
-//writeln(ACenterPos, ' > ', FHScrollbar.Position - GetNodeHeight);
+
     if ACenterPos > (FHScrollbar.Position - GetNodeHeight) then
     begin
       if h = Selection then // draw the selection rectangle and text
