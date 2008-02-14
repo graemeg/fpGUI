@@ -165,7 +165,7 @@ type
     DefaultScreen: integer;
     DefaultVisual: PVisual;
     DefaultColorMap: TColorMap;
-    RootWindow: TfpgWinHandle;
+    FRootWindow: TfpgWinHandle;
     xia_clipboard: TAtom;
     xia_motif_wm_hints: TAtom;
     xia_wm_protocols: TAtom;
@@ -186,8 +186,20 @@ type
     function    GetScreenWidth: TfpgCoord;
     function    GetScreenHeight: TfpgCoord;
     property    Display: PXDisplay read FDisplay;
+    property    RootWindow: TfpgWinHandle read FRootWindow;
   end;
 
+
+  TfpgClipboardImpl = class(TfpgClipboardBase)
+  private
+    FWaitingForSelection: Boolean;
+  protected
+    FClipboardText: string;
+    function    DoGetText: string; override;
+    procedure   DoSetText(const AValue: string); override;
+    procedure   InitClipboard; override;
+  end;
+  
 
 implementation
 
@@ -395,6 +407,65 @@ begin
     Result := '#' + IntToStr(Event);
 end;
 
+// clipboard event
+procedure ProcessSelection(var ev: TXEvent);
+var
+  s: string;
+  actual: TAtom;
+  format: integer;
+  count, remaining: longword;
+  data: PChar;
+begin
+  if ev.xselection._property > 0 then
+  begin
+    XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
+        ev.xselection._property, 0, 16000,
+        false, // delete
+        0, // type
+        @actual, @format, @count, @remaining,
+        @data);
+    s := data;
+
+    fpgClipboard.FClipboardText := s;
+    XFree(data);
+  end
+  else
+  begin
+    fpgClipboard.FClipboardText := '';
+  end;
+
+  fpgClipboard.FWaitingForSelection := false;
+end;
+
+// clipboard event
+procedure ProcessSelectionRequest(var ev: TXEvent);
+var
+  e: TXSelectionEvent;
+  a: TAtom;
+begin
+  e._type       := SelectionNotify;
+  e.requestor   := ev.xselectionrequest.requestor;
+  e.selection   := ev.xselectionrequest.selection;
+  e.selection   := xapplication.xia_clipboard;
+  e.target      := ev.xselectionrequest.target;
+  e.time        := ev.xselectionrequest.time;
+  e._property   := ev.xselectionrequest._property;
+
+  if e.target = xapplication.xia_targets then
+  begin
+    a := XA_STRING;
+    XChangeProperty(xapplication.Display, e.requestor, e._property,
+		      XA_ATOM, sizeof(TAtom)*8, 0, PByte(@a), sizeof(TAtom));
+  end
+  else
+  begin
+    XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
+        8, 0, PByte(@fpgClipboard.FClipboardText[1]), Length(fpgClipboard.FClipboardText));
+  end;
+
+  XSendEvent(xapplication.Display, e.requestor, false, 0, @e );
+end;
+
 { TfpgApplicationImpl }
 
 function TfpgApplicationImpl.ConvertShiftState(AState: Cardinal): TShiftState;
@@ -537,11 +608,14 @@ begin
   FDisplay          := XOpenDisplay(PChar(aparams));
   
   if FDisplay = nil then
-    Exit; //==>
+//  begin
+    raise Exception.Create('fpGUI-X11: Could not open the display. Is your X11 server running?');
+//    halt(1);
+//  end;
 
   Terminated := False;
   DefaultScreen     := XDefaultScreen(Display);
-  RootWindow        := XRootWindow(FDisplay, DefaultScreen);
+  FRootWindow       := XRootWindow(FDisplay, DefaultScreen);
   DefaultBackground := XBlackPixel(FDisplay, DefaultScreen);
   DefaultForeground := XWhitePixel(FDisplay, DefaultScreen);
 
@@ -989,7 +1063,6 @@ begin
           end;
         end;
 
-{
     X.SelectionNotify:
         begin
           ProcessSelection(ev);
@@ -999,7 +1072,16 @@ begin
         begin
           ProcessSelectionRequest(ev);
         end;
-}
+        
+    X.SelectionClear:
+        begin
+          { TODO : Not sure if I am handling this correctly? }
+          if ev.xselectionclear.selection = xia_clipboard then
+          begin
+            fpgClipboard.FClipboardText := '';
+            Exit;
+          end;
+        end;
 
     X.FocusIn:
         fpgPostMessage(nil, FindWindowByHandle(ev.xfocus.window), FPGM_ACTIVATE);
@@ -1907,6 +1989,40 @@ function TfpgImageImpl.XImageMask: PXImage;
 begin
   Result := @FXimgMask;
 end;
+
+{ TfpgClipboardImpl }
+
+function TfpgClipboardImpl.DoGetText: string;
+begin
+  XConvertSelection(xapplication.Display, xapplication.xia_clipboard,
+      XA_STRING, xapplication.xia_clipboard, FClipboardWndHandle, 0);
+
+  FWaitingForSelection := True;
+  fpgDeliverMessages; // delivering the remaining messages
+
+  repeat
+    fpgWaitWindowMessage;
+    fpgDeliverMessages;
+  until not FWaitingForSelection;
+
+  Result := FClipboardText;
+end;
+
+procedure TfpgClipboardImpl.DoSetText(const AValue: string);
+begin
+  FClipboardText := AValue;
+  XSetSelectionOwner(xapplication.Display, xapplication.xia_clipboard,
+      FClipboardWndHandle, 0);
+end;
+
+procedure TfpgClipboardImpl.InitClipboard;
+begin
+  FWaitingForSelection := False;
+  FClipboardWndHandle := XCreateSimpleWindow(xapplication.Display,
+      xapplication.RootWindow, 10, 10, 10, 10, 0, 0, 0);
+end;
+
+
 
 initialization
   xapplication := nil;

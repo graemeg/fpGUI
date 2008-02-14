@@ -42,7 +42,7 @@ const
 
   // version and name constants
   fpGUIVersion = '0.5.1';
-  fpGUIName    = 'fpGUI Library';
+  fpGUIName    = 'fpGUI Toolkit';
 
 
 type
@@ -242,14 +242,20 @@ type
     property    Width: integer read FWidth;
     property    Height: integer read FHeight;
   end;
+  
+  
+  TfpgClipboard = class(TfpgClipboardImpl)
+  end;
+  
 
 var
   fpgStyle:  TfpgStyle;   { TODO -ograemeg : move this into fpgApplication }
   fpgCaret:  TfpgCaret;   { TODO -ograemeg : move this into fpgApplication }
   fpgImages: TfpgImages;  { TODO -ograemeg : move this into fpgApplication }
 
-// Application singleton
+// Application & Clipboard singletons
 function  fpgApplication: TfpgApplication;
+function  fpgClipboard: TfpgClipboard;
 
 // Fonts (easy access function)
 function  fpgGetFont(const afontdesc: string): TfpgFont;
@@ -304,10 +310,11 @@ uses
   gfx_extinterpolation; // only so that it get auto compiled
 
 var
-  fpgTimers:      TList;
+  fpgTimers: TList;
   fpgNamedColors: array[0..255] of TfpgColor;
-  fpgNamedFonts:  TList;
-  uApplication:   TfpgApplication;
+  fpgNamedFonts: TList;
+  uApplication: TfpgApplication;
+  uClipboard: TfpgClipboard;
   uMsgQueueList: TList;
 
 const
@@ -592,11 +599,18 @@ begin
   end;
 end;
 
-function  fpgApplication: TfpgApplication;
+function fpgApplication: TfpgApplication;
 begin
   if not Assigned(uApplication) then
     uApplication := TfpgApplication.Create;
   result := uApplication;
+end;
+
+function fpgClipboard: TfpgClipboard;
+begin
+  if not Assigned(uClipboard) then
+    uClipboard := TfpgClipboard.Create;
+  Result := uClipboard;
 end;
 
 function fpgColorToRGB(col: TfpgColor): TfpgColor;
@@ -671,15 +685,20 @@ begin
   FScreenHeight   := -1;
   FModalFormStack := TList.Create;
 
-  inherited Create(aparams);
+  try
+    inherited Create(aparams);
 
-  if IsInitialized then
-  begin
-    FScreenWidth  := GetScreenWidth;
-    FScreenHeight := GetScreenHeight;
+    if IsInitialized then
+    begin
+      FScreenWidth  := GetScreenWidth;
+      FScreenHeight := GetScreenHeight;
+    end;
+
+    FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
+  except
+    on E: Exception do
+        writeln(E.Message);
   end;
-
-  FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
 end;
 
 destructor TfpgApplication.Destroy;
@@ -759,7 +778,7 @@ end;
 
 procedure TfpgApplication.Initialize;
 begin
-  {$Note Remember to process parameters!! }
+  { TODO : Remember to process parameters!! }
   if IsInitialized then
     InternalInit
   else
@@ -1413,6 +1432,7 @@ end;
 
 initialization
   uApplication    := nil;
+  uClipboard      := nil;
   uMsgQueueList   := nil;
   fpgTimers       := nil;
   fpgCaret        := nil;
@@ -1421,6 +1441,7 @@ initialization
   fpgInitMsgQueue;
 
 finalization;
+  uClipboard.Free;
   uApplication.Free;
 
 end.

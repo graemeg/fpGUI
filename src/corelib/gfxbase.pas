@@ -6,7 +6,8 @@ interface
 
 uses
   Classes,
-  SysUtils;
+  SysUtils,
+  gfx_impl;
 
 type
   TfpgCoord   = integer;     // we might use floating point coordinates in the future...
@@ -402,6 +403,18 @@ type
     { TODO : Implement these two properties in the near future. }
 //    property    FormCount...
 //    property    Forms[]...
+  end;
+  
+  
+  TfpgClipboardBase = class(TObject)
+  protected
+    FClipboardWndHandle: TfpgWinHandle;
+    function    DoGetText: string; virtual; abstract;
+    procedure   DoSetText(const AValue: string); virtual; abstract;
+    procedure   InitClipboard; virtual; abstract;
+  public
+    constructor Create;
+    property    Text: string read DoGetText write DoSetText;
   end;
 
 
@@ -1663,6 +1676,13 @@ begin
     AForm := nil;
     raise;
   end;
+end;
+
+{ TfpgClipboardBase }
+
+constructor TfpgClipboardBase.Create;
+begin
+  InitClipboard;
 end;
 
 end.

@@ -140,8 +140,7 @@ function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 implementation
 
 uses
-  gfx_UTF8utils,
-  gfx_clipboard;
+  gfx_UTF8utils;
   
 const
   // internal popupmenu item names
