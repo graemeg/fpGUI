@@ -54,6 +54,10 @@ type
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
     FHint: string;
+    FBackgroundColor: TfpgColor;
+    FTextColor: TfpgColor;
+    procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
+    procedure   SetTextColor(const AValue: TfpgColor); virtual;
     function    GetParent: TfpgWidget; reintroduce;
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
@@ -114,6 +118,8 @@ type
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
     property    Hint: string read FHint write FHint;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
+    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
   end;
 
 
@@ -190,6 +196,24 @@ begin
     end;
 end;
 
+procedure TfpgWidget.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FBackgroundColor := AValue;
+    RePaint;
+  end;
+end;
+
+procedure TfpgWidget.SetTextColor(const AValue: TfpgColor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FTextColor := AValue;
+    Repaint;
+  end;
+end;
+
 function TfpgWidget.GetParent: TfpgWidget;
 begin
   Result := TfpgWidget(inherited GetParent);
@@ -215,6 +239,8 @@ begin
   FAnchors    := [anLeft, anTop];
   FAlign      := alNone;
   FHint       := '';
+  FBackgroundColor := clWindowBackground;
+  FTextColor  := clText1;
 
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
     Parent := TfpgWidget(AOwner)

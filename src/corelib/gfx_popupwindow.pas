@@ -198,10 +198,11 @@ end;
 
 procedure TfpgPopupWindow.SetPopupFrame(const AValue: boolean);
 begin
-  if FPopupFrame = AValue then
-    Exit; //==>
-  FPopupFrame := AValue;
-  ProcessPopupFrame;
+  if FPopupFrame <> AValue then
+  begin
+    FPopupFrame := AValue;
+    ProcessPopupFrame;
+  end;
 end;
 
 procedure TfpgPopupWindow.MsgClose(var msg: TfpgMessageRec);
@@ -266,10 +267,14 @@ begin
 end;
 
 procedure TfpgPopupWindow.DoPaintPopupFrame;
+var
+  lColor: TfpgColor;
 begin
+  lColor := fpgColorToRGB(BackgroundColor);
   Canvas.SetLineStyle(1, lsSolid);
   Canvas.SetColor(clWidgetFrame);
   Canvas.DrawRectangle(0, 0, Width, Height);
+  Canvas.SetColor(lColor);
 end;
 
 constructor TfpgPopupWindow.Create(AOwner: TComponent);

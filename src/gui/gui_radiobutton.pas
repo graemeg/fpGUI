@@ -34,9 +34,7 @@ type
 
   TfpgRadioButton = class(TfpgWidget)
   private
-    FBackgroundColor: TfpgColor;
     FChecked: boolean;
-    FTextColor: TfpgColor;
     FFont: TfpgFont;
     FGroupIndex: integer;
     FOnChange: TNotifyEvent;
@@ -44,9 +42,7 @@ type
     FBoxSize: integer;
     FIsPressed: boolean;
     function    GetFontDesc: string;
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetChecked(const AValue: boolean);
-    procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
   protected
@@ -59,12 +55,12 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
+    property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
     property    Text: string read FText write SetText;
-    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
+    property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
   
@@ -87,14 +83,6 @@ end;
 function TfpgRadioButton.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
-end;
-
-procedure TfpgRadioButton.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then
-    Exit; //==>
-  FBackgroundColor := AValue;
-  RePaint;
 end;
 
 procedure TfpgRadioButton.SetChecked(const AValue: boolean);
@@ -121,15 +109,6 @@ begin
   end;  { if }
 
   RePaint;
-end;
-
-procedure TfpgRadioButton.SetTextColor(const AValue: TfpgColor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    Repaint;
-  end;
 end;
 
 procedure TfpgRadioButton.SetFontDesc(const AValue: string);
@@ -246,8 +225,8 @@ begin
   FFont       := fpgGetFont('#Label1');
   FHeight     := FFont.Height + 4;
   FWidth      := 120;
-  FTextColor  := clText1;
-  FBackgroundColor := clWindowBackground;
+  FTextColor  := Parent.TextColor;
+  FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;
   FBoxSize    := 12;
   FChecked    := False;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -30,7 +30,8 @@ uses
   
 type
 
-  TBevelShape = (bsBox, bsFrame, bsTopLine, bsBottomLine, bsLeftLine, bsRightLine, bsSpacer);
+  TBevelShape = (bsBox, bsFrame, bsTopLine, bsBottomLine, bsLeftLine,
+                 bsRightLine, bsSpacer);
 
   TBevelStyle = (bsLowered, bsRaised);
   
@@ -39,8 +40,6 @@ type
   private
     FBevelShape: TBevelShape;
     FBevelStyle: TBevelStyle;
-    FBackgroundColor: TfpgColor;
-    procedure SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetBevelShape(const AValue: TBevelShape);
     procedure   SetBevelStyle(const AValue: TBevelStyle);
   protected
@@ -48,9 +47,9 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    BackgroundColor;
     property    Shape: TBevelShape read FBevelShape write SetBevelShape default bsBox;
     property    Style: TBevelStyle read FBevelStyle write SetBevelStyle default bsRaised;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    OnClick;
     property    OnDoubleClick;
   end;
@@ -83,12 +82,6 @@ begin
     Exit; //==>
   FBevelShape := AValue;
   Repaint;
-end;
-
-procedure TfpgBevel.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor=AValue then exit;
-  FBackgroundColor:=AValue;
 end;
 
 procedure TfpgBevel.SetBevelStyle(const AValue: TBevelStyle);
@@ -149,7 +142,7 @@ begin
   FWidth        := 80;
   FHeight       := 80;
   FFocusable    := True;  // otherwise children can't get focus
-  FBackgroundColor := clWindowBackground;
+  FBackgroundColor := Parent.BackgroundColor;
 end;
 
 end.

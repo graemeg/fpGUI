@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -33,13 +33,9 @@ type
   TfpgCustomLabel = class(TfpgWidget)
   private
     FAutoSize: boolean;
-    FBackgroundColor: TfpgColor;
-    FTextColor: TfpgColor;
     function    GetFontDesc: string;
     procedure   SetAutoSize(const AValue: boolean);
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetFontDesc(const AValue: string);
-    procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetText(const AValue: string);
     procedure   ResizeLabel;
   protected
@@ -47,10 +43,8 @@ type
     FFont: TfpgFont;
     procedure   HandlePaint; override;
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Text: string read FText write SetText;
-    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -111,14 +105,6 @@ begin
   end;
 end;
 
-procedure TfpgCustomLabel.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then
-    Exit; //==>
-  FBackgroundColor := AValue;
-  RePaint;
-end;
-
 procedure TfpgCustomLabel.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
@@ -126,15 +112,6 @@ begin
   if FAutoSize then
     ResizeLabel;
   RePaint;
-end;
-
-procedure TfpgCustomLabel.SetTextColor(const AValue: TfpgColor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    RePaint;
-  end;
 end;
 
 procedure TfpgCustomLabel.SetText(const AValue: string);
@@ -157,13 +134,13 @@ end;
 constructor TfpgCustomLabel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FText   := 'Label';
-  FFont   := fpgGetFont('#Label1');
-  FHeight := FFont.Height;
-  FWidth  := 80;
-  FTextColor := clText1;
-  FBackgroundColor := clWindowBackground;
-  FAutoSize := False;
+  FText       := 'Label';
+  FFont       := fpgGetFont('#Label1');
+  FHeight     := FFont.Height;
+  FWidth      := 80;
+  FTextColor  := Parent.TextColor;
+  FBackgroundColor := Parent.BackgroundColor;
+  FAutoSize   := False;
 end;
 
 destructor TfpgCustomLabel.Destroy;

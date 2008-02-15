@@ -49,7 +49,6 @@ type
   TOtherWidget = class(TfpgWidget)
   protected
     FFont: TfpgFont;
-    FBackgroundColor: TfpgColor;
     procedure HandlePaint; override;
   public
     wgClassName: string;

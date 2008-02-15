@@ -84,11 +84,9 @@ type
 
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
-    FBackgroundColor: TfpgColor;
     FBeforeShow: TNotifyEvent;
     FMargin: TfpgCoord;
     FTextMargin: TfpgCoord;
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   DoSelect;
     procedure   CloseSubmenus;
     function    GetItemPosY(index: integer): integer;
@@ -123,7 +121,6 @@ type
     procedure   Close; override;
     function    AddMenuItem(const AMenuName: string; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
     function    MenuItemByName(const AMenuName: string): TfpgMenuItem;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
   
@@ -132,13 +129,11 @@ type
   // Visible only items are stored in FItems just before a paint
   TfpgMenuBar = class(TfpgWidget)
   private
-    FBackgroundColor: TfpgColor;
     FBeforeShow: TNotifyEvent;
     FLightColor: TfpgColor;
     FDarkColor: TfpgColor;
     FPrevFocusItem: integer;
     FFocusItem: integer;
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetFocusItem(const AValue: integer);
     procedure   DoSelect;
     procedure   CloseSubmenus;
@@ -165,7 +160,6 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    AddMenuItem(const AMenuTitle: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
 
@@ -314,12 +308,6 @@ begin
 end;
 
 { TfpgMenuBar }
-
-procedure TfpgMenuBar.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor=AValue then exit;
-  FBackgroundColor:=AValue;
-end;
 
 procedure TfpgMenuBar.SetFocusItem(const AValue: integer);
 begin
@@ -477,7 +465,8 @@ begin
   FFocusItem        := 0;
   FPrevFocusItem    := 0;
   FFocusable        := False;
-  FBackgroundColor  := clWindowBackground;
+  FBackgroundColor  := Parent.BackgroundColor;
+  FTextColor        := Parent.TextColor;
   // calculate the best height based on font
   FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
   
@@ -673,12 +662,6 @@ begin
 end;
 
 { TfpgPopupMenu }
-
-procedure TfpgPopupMenu.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then Exit; //==>
-  FBackgroundColor := AValue;
-end;
 
 procedure TfpgPopupMenu.DoSelect;
 var
@@ -917,7 +900,7 @@ var
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
-  Canvas.Clear(FBackgroundColor);
+  Canvas.Clear(BackgroundColor);
   Canvas.SetColor(clWidgetFrame);
   Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
   Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
@@ -1164,7 +1147,7 @@ begin
   FMargin     := 3;
   FTextMargin := 3;
   FItems      := TList.Create;
-  FBackgroundColor := clWindowBackground;
+
   // fonts
   FMenuFont         := fpgStyle.MenuFont;
   FMenuAccelFont    := fpgStyle.MenuAccelFont;

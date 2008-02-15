@@ -69,8 +69,6 @@ type
     FAutoDropDown: Boolean;
     FAllowNew: TAllowNew;
     FDropDownCount: integer;
-    FBackgroundColor: TfpgColor;
-    FTextColor: TfpgColor;
     FText: string;
     FSelectedItem: integer;
     FMaxLength: integer;
@@ -82,8 +80,6 @@ type
     FNewItem: boolean;
     function    GetFontDesc: string;
     procedure   SetAllowNew(const AValue: TAllowNew);
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
-    procedure   SetTextColor(const AValue: TfpgColor);
     procedure   SetDropDownCount(const AValue: integer);
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
@@ -273,24 +269,6 @@ procedure TfpgAbstractEditCombo.SetAllowNew(const AValue: TAllowNew);
 begin
   if FAllowNew <> AValue then
     FAllowNew:= AValue;
-end;
-
-procedure TfpgAbstractEditCombo.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor <> AValue then
-  begin
-    FBackgroundColor := AValue;
-    Repaint;
-  end;
-end;
-
-procedure TfpgAbstractEditCombo.SetTextColor(const AValue: TfpgColor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    Repaint;
-  end;
 end;
 
 function TfpgAbstractEditCombo.GetFontDesc: string;
@@ -791,7 +769,7 @@ begin
   inherited Create(AOwner);
   FFont             := fpgGetFont('#List');
   FBackgroundColor  := clBoxColor;
-  FTextColor        := clText1;
+  FTextColor        := Parent.TextColor;
   FDropDownCount    := 8;
   FWidth            := 120;
   FHeight           := FFont.Height + 6;

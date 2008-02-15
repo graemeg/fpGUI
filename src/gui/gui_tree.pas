@@ -126,7 +126,6 @@ type
   TfpgTreeView = class(TfpgWidget)
   private
     FImageList: TfpgImageList;
-    FBackgroundColor: TfpgColor;
     FColumnHeight: integer; // height of the column header
     FDefaultColumnWidth: word;
     FIndentNodeWithNoImage: boolean;
@@ -1021,7 +1020,6 @@ end;
 procedure TfpgTreeView.FreeAllTreeNodes;
 var
   n: TfpgTreeNode;
-  i: integer;
   list: TList;
 begin
   list := TList.Create;

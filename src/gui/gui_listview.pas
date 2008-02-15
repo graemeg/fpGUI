@@ -1313,7 +1313,7 @@ var
   ItemState: TfpgLVItemState;
   Item: TfpgLVItem;
   TheText: String;
-  TextColor: TfpgColor;
+  TheTextColor: TfpgColor;
   oClipRect: TfpgRect;
   iColumnClipRect: TfpgRect;
   ColumnIndex: Integer;
@@ -1367,7 +1367,7 @@ begin
 
     Canvas.FillRectangle(ItemRect);
     Exclude(PaintPart, lvppBackground);
-    TextColor := Canvas.TextColor;
+    TheTextColor := Canvas.TextColor;
     if Assigned(FOnPaintItem) then
       FOnPaintItem(Self, Canvas, Item, I, ItemRect, PaintPart);
 
@@ -1424,7 +1424,7 @@ begin
     
     Canvas.SetClipRect(oClipRect);
     
-    Canvas.TextColor := TextColor;
+    Canvas.TextColor := TheTextColor;
   end;
   
   vBottom := Height - 2;

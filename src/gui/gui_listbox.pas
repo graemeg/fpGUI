@@ -50,15 +50,11 @@ type
     FOnScroll: TNotifyEvent;
     FOnSelect: TNotifyEvent;
     FPopupFrame: boolean;
-    FTextColor: TfpgColor;
-    FBackgroundColor: TfpgColor;  // This should move to TfpgWidget
     FAutoHeight: boolean;
     function    GetFontDesc: string;
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetPopupFrame(const AValue: boolean);
-    procedure   SetTextColor(const AValue: TfpgColor);
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   UpdateScrollbarCoords;
     procedure   SetAutoHeight(const AValue: boolean);
   protected
@@ -85,12 +81,10 @@ type
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
     property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HotTrack: boolean read FHotTrack write FHotTrack;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
-    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -124,7 +118,7 @@ type
   TfpgListBox = class(TfpgTextListBox)
   published
     property    AutoHeight;
-    property    BackgroundColor;
+    property    BackgroundColor default clListBox;
     property    FocusItem;
     property    FontDesc;
     property    HotTrack;
@@ -231,24 +225,6 @@ begin
     Exit; //==>
   FPopupFrame := AValue;
   RePaint;
-end;
-
-procedure TfpgBaseListBox.SetTextColor(const AValue: TfpgColor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    RePaint;
-  end;
-end;
-
-procedure TfpgBaseListBox.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor <> AValue then
-  begin
-    FBackgroundColor := AValue;
-    Repaint;
-  end;
 end;
 
 procedure TfpgBaseListBox.UpdateScrollbarCoords;
@@ -635,7 +611,7 @@ begin
   inherited Create(AOwner);
   FFont := fpgGetFont('#List');
   FBackgroundColor    := clListBox;
-  FTextColor          := clText1;
+  FTextColor          := Parent.TextColor;
 
   FScrollBar          := TfpgScrollBar.Create(self);
   FScrollBar.OnScroll := @ScrollBarMove;

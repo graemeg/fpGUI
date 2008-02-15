@@ -55,8 +55,6 @@ type
     FMouseDragging: boolean;
     FMouseDragPos: integer;
     FFont: TfpgFont;
-    FBackgroundColor: TfpgColor;
-    FTextColor: TfpgColor;
     FDrawOffset: integer;
     FLineHeight: integer;
     FFirstLine: integer;
@@ -68,8 +66,6 @@ type
     FLongestLineWidth: TfpgCoord;
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
-    procedure   SetTextColor(const AValue: TfpgColor);
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   RecalcLongestLine;
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -113,10 +109,10 @@ type
     property    Text: string read GetText write SetText;
     property    UseTabs: boolean read FUseTabs write FUseTabs default False;
   published
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
+    property    BackgroundColor default clBoxColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Lines: TStringList read FLines;
-    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
+    property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
@@ -225,7 +221,7 @@ begin
   FMaxLength  := 0;
   FWrapping   := False;
   FOnChange   := nil;
-  FTextColor  := clText1;
+  FTextColor  := Parent.TextColor;
   FBackgroundColor := clBoxColor;
   FUseTabs    := False;
   FTabWidth   := 4;
@@ -496,7 +492,7 @@ end;
 procedure TfpgMemo.UpdateScrollBars;
 var
   vlines: integer;
-  vsbw, x: integer;
+  vsbw: integer;
   hsbwas: boolean;
   vsbwas: boolean;
   vsbvis: boolean;
@@ -580,24 +576,6 @@ begin
   RePaint;
 end;
 
-procedure TfpgMemo.SetTextColor(const AValue: TfpgColor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    RePaint;
-  end;
-end;
-
-procedure TfpgMemo.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor <> AValue then
-  begin
-    FBackgroundColor := AValue;
-    Repaint;
-  end;
-end;
-
 procedure TfpgMemo.SetLineText(linenum: integer; Value: string);
 begin
   FLines.Strings[linenum - 1] := Value;
@@ -611,7 +589,6 @@ end;
 // Set cursor position by X
 procedure TfpgMemo.SetCPByX(x: integer);
 var
-  s: string;
   n: integer;
   cpx: integer;
   cp: integer;
@@ -624,8 +601,6 @@ begin
   cp  := FCursorPos;
   if cp > UTF8Length(ls) then
     cp := UTF8Length(ls);
-
-  s := '';
 
   for n := 0 to UTF8Length(ls) do
   begin
@@ -1118,7 +1093,6 @@ end;
 
 procedure TfpgMemo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
-  s: string;
   n: integer;
   cpx: integer;
   cp: integer;
@@ -1136,8 +1110,6 @@ begin
   ls  := GetLineText(lnum);
   cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
   cp  := FCursorPos;
-
-  s := '';
 
   for n := 0 to UTF8Length(ls) do
   begin
@@ -1170,7 +1142,6 @@ end;
 
 procedure TfpgMemo.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
-  s: string;
   n: integer;
   cpx: integer;
   cp: integer;
@@ -1192,7 +1163,6 @@ begin
   ls  := GetLineText(lnum);
   cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
   cp  := FCursorPos;
-  s   := '';
 
   for n := 0 to UTF8Length(ls) do
   begin

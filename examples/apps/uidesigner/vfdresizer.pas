@@ -31,7 +31,6 @@ type
   TwgResizer = class(TfpgWidget)
   protected
     wgdesigner: TObject;
-    FBackgroundColor: TfpgColor;
     procedure HandlePaint; override;
     procedure HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;

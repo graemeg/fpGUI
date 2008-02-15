@@ -67,6 +67,7 @@ type
     procedure btn3Click(Sender: TObject);
     procedure checkbox1Changed(Sender: TObject);
     procedure TrackBarChanged(Sender: TObject; APosition: integer);
+    procedure xpsilverClick(Sender: TObject);
   public
     label1: TfpgLabel;
     label2: TfpgLabel;
@@ -302,6 +303,14 @@ end;
 
 { TMainForm }
 
+procedure TMainForm.xpsilverClick(Sender: TObject);
+begin
+  if BackgroundColor = clWindowBackground then
+    BackgroundColor := clGreen
+  else
+    BackgroundColor := clWindowBackground;
+end;
+
 procedure TMainForm.Trackbar1Changed(Sender: TObject; APosition: integer);
 begin
   progress.Position := APosition;
@@ -469,6 +478,7 @@ begin
   bmp.CreateMaskFromSample(0, 0);
   bmp.UpdateImage;
   xpsilver.ThemeImage := bmp;
+  xpsilver.OnClick := @xpsilverClick;
   
   checkbox1  := CreateCheckBox(self, 10, 265, 'Disable components');
   checkbox1.OnChange := @checkbox1Changed;

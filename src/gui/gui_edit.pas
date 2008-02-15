@@ -40,20 +40,17 @@ type
     FPopupMenu: TfpgPopupMenu;
     FDefaultPopupMenu: TfpgPopupMenu;
     FText: string;
-    FBackgroundColor: TfpgColor;
     FFont: TfpgFont;
     FPasswordMode: Boolean;
     FBorderStyle: TfpgEditBorderStyle;
     FOnChange: TNotifyEvent;
     FMaxLength: integer;
     FSelecting: Boolean;
-    FTextColor: TfpgColor;
     procedure   AdjustCursor;
     procedure   DeleteSelection;
     procedure   DoCopy;
     procedure   DoPaste;
     procedure   SetAutoSelect(const AValue: Boolean);
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
     procedure   SetHideSelection(const AValue: Boolean);
     procedure   SetPasswordMode(const AValue: boolean);
@@ -65,7 +62,6 @@ type
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
-    procedure   SetTextColor(const AValue: TfpgColor);
   protected
     FMouseDragPos: integer;
     FDrawOffset: integer;
@@ -87,7 +83,6 @@ type
     procedure   HandleKillFocus; override;
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default bsDefault;
     property    Font: TfpgFont read FFont;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
@@ -96,7 +91,6 @@ type
     property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
     property    Text: String read FText write SetText;
-    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
@@ -116,7 +110,7 @@ type
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
     property    AutoSelect;
-    property    BackgroundColor;
+    property    BackgroundColor default clBoxColor;
     property    BorderStyle;
     property    FontDesc;
     property    HideSelection;
@@ -183,15 +177,6 @@ begin
   end;
 end;
 
-procedure TfpgCustomEdit.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor <> AValue then
-  begin
-    FBackgroundColor := AValue;
-    Repaint;
-  end;
-end;
-
 procedure TfpgCustomEdit.SetBorderStyle(const AValue: TfpgEditBorderStyle);
 begin
   if FBorderStyle = AValue then
@@ -205,15 +190,6 @@ begin
   if FHideSelection = AValue then
     Exit;
   FHideSelection := AValue;
-end;
-
-procedure TfpgCustomEdit.SetTextColor(const AValue: TfpgColor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    RePaint;
-  end;
 end;
 
 procedure TfpgCustomEdit.HandlePaint;
@@ -631,7 +607,7 @@ begin
   Focusable         := True;
   FHeight           := FFont.Height + 6;
   FWidth            := 120;
-  FTextColor        := clText1;
+  FTextColor        := Parent.TextColor;
   FBackgroundColor  := clBoxColor;
   FAutoSelect       := True;
   FSelecting        := False;

@@ -35,8 +35,6 @@ type
 
   TfpgButton = class(TfpgWidget, ICommandHolder)
   private
-    FTextColor: TfpgColor;
-    FBackgroundColor: TfpgColor;
     FCommand: ICommand;
     FImageName: string;
     FClicked: Boolean;
@@ -46,8 +44,6 @@ type
     FAllowAllUp: boolean;
     FModalResult: integer;
     function    GetFontDesc: string;
-    procedure   SetTextColor(const AValue: TfpgColor);
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDefault(const AValue: boolean);
     procedure   SetEmbedded(const AValue: Boolean);
     procedure   SetFontDesc(const AValue: string);
@@ -89,7 +85,7 @@ type
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
   published
     property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp default False;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clButtonFace;
+    property    BackgroundColor default clButtonFace;
     property    Default: boolean read FDefault write SetDefault default False;
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -100,7 +96,7 @@ type
     property    ModalResult: integer read FModalResult write FModalResult default 0;
     property    ShowImage: Boolean read FShowImage write SetShowImage default True;
     property    Text: string read FText write SetText;
-    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
+    property    TextColor;
     property    OnMouseExit;
     property    OnMouseEnter;
     property    OnClick;
@@ -167,24 +163,6 @@ begin
   Result := FFont.FontDesc;
 end;
 
-procedure TfpgButton.SetTextColor(const AValue: TfpgColor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    Repaint;
-  end;
-end;
-
-procedure TfpgButton.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor <> AValue then
-  begin
-    FBackgroundColor := AValue;
-    Repaint;
-  end;
-end;
-
 procedure TfpgButton.SetDefault(const AValue: boolean);
 var
   i: integer;
@@ -232,7 +210,7 @@ begin
   FHeight       := FFont.Height + 8;
   FWidth        := 75;
   FFocusable    := True;
-  FTextColor    := clText1;
+  FTextColor    := Parent.TextColor;
   FBackgroundColor := clButtonFace;
   OnClick       := nil;
   FDown         := False;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -31,14 +31,12 @@ uses
 type
   TfpgCustomProgressBar = class(TfpgWidget)
   private
-    FBackgroundColor: TfpgColor;
     FMax: longint;
     FMin: longint;
     FPosition: longint;
     FShowCaption: boolean;
     FStep: longint;
     FFont: TfpgFont;
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetMax(const AValue: longint);
     procedure   SetMin(const AValue: longint);
     procedure   SetPosition(const AValue: longint);
@@ -51,7 +49,6 @@ type
     property    Position: longint read FPosition write SetPosition default 0;
     property    Step: longint read FStep write SetStep;
 //    property    FontName: string read GetFontName write SetFontName;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    ShowCaption: boolean read FShowCaption write SetShowCaption;
   public
     constructor Create(AOwner: TComponent); override;
@@ -64,12 +61,13 @@ type
   
   TfpgProgressBar = class(TfpgCustomProgressBar)
   published
-    property    BackgroundColor;
+    property    BackgroundColor default $c4c4c4;
     property    ShowCaption;
     property    Max;
     property    Min;
     property    Position;
     property    Step;
+    property    TextColor;
   end;
 
 implementation
@@ -89,14 +87,6 @@ begin
 
   FMax := AValue;
 	RePaint;
-end;
-
-procedure TfpgCustomProgressBar.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then
-    Exit; //==>
-  FBackgroundColor := AValue;
-  RePaint;
 end;
 
 procedure TfpgCustomProgressBar.SetMin(const AValue: longint);
@@ -199,7 +189,7 @@ begin
   begin
   	x := (Width - FFont.TextWidth(txt)) div 2;
   	y := (Height - FFont.Height) div 2;
-    Canvas.SetTextColor(clText1);
+    Canvas.SetTextColor(TextColor);
     Canvas.Font := FFont;
   	Canvas.DrawString(x, y, txt);
   end;
@@ -217,6 +207,7 @@ begin
   FStep     := 1;
   FPosition := 0;
   FBackgroundColor := TfpgColor($c4c4c4); // clListBox;
+  FTextColor := Parent.TextColor;
   FShowCaption := False;
   FFont     := fpgStyle.DefaultFont;
 end;

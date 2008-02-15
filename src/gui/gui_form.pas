@@ -41,14 +41,12 @@ type
     FOnDestroy: TNotifyEvent;
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
   protected
     FModalResult: integer;
     FParentForm: TfpgForm;
     FWindowPosition: TWindowPosition;
     FWindowTitle: string;
     FSizeable: boolean;
-    FBackgroundColor: TfpgColor;
     procedure   AdjustWindowStyle; override;
     procedure   SetWindowParameters; override;
     procedure   SetWindowTitle(const ATitle: string); override;
@@ -73,7 +71,8 @@ type
     property    ModalResult: integer read FModalResult write FModalResult;
   published
     {$Note Refactor this to a TfpgCustomForm and only surface it here }
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
+    property    BackgroundColor;
+    property    TextColor;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
@@ -164,14 +163,6 @@ begin
   Canvas.EndDraw(0, 0, FWidth, FHeight);
 end;
 
-procedure TfpgForm.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then
-    Exit; //==>
-  FBackgroundColor := AValue;
-  RePaint;
-end;
-
 procedure TfpgForm.AdjustWindowStyle;
 begin
   if fpgApplication.MainForm = nil then
@@ -207,6 +198,7 @@ begin
   FSizeable        := True;
   FParentForm      := nil;
   FBackgroundColor := clWindowBackground;
+  FTextColor       := clText1;
   FMinWidth        := 32;
   FMinHeight       := 32;
   FModalResult     := 0;

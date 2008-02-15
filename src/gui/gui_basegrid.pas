@@ -47,7 +47,6 @@ type
   // override that special behavior anyway.
   TfpgBaseGrid = class(TfpgWidget)
   private
-    FBackgroundColor: TfpgColor;
     FColResizing: boolean;
     FDragPos: integer;      // used for column resizing
     FResizedCol: integer;   // used for column resizing
@@ -81,7 +80,6 @@ type
     procedure   SetRowSelect(const AValue: boolean);
     procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetDefaultColWidth(const AValue: integer);
     procedure   SetDefaultRowHeight(const AValue: integer);
     procedure   SetFocusCol(const AValue: integer);
@@ -199,14 +197,6 @@ begin
     FFirstRow := position;
     RePaint;
   end;
-end;
-
-procedure TfpgBaseGrid.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then
-    Exit; //==>
-  FBackgroundColor := AValue;
-  RePaint;
 end;
 
 procedure TfpgBaseGrid.SetDefaultColWidth(const AValue: integer);

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -48,12 +48,10 @@ type
 
   TfpgTabSheet = class(TfpgWidget)
   private
-    FBackgroundColor: TfpgColor;
     FText: string;
     function    GetPageControl: TfpgPageControl;
     function    GetPageIndex: Integer;
     function    GetText: string;
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetPageIndex(const AValue: Integer);
     procedure   SetText(const AValue: string);
   protected
@@ -65,7 +63,6 @@ type
     property    Text: string read GetText write SetText;
     property    PageIndex: Integer read GetPageIndex write SetPageIndex;
     property    PageControl: TfpgPageControl read GetPageControl;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
   end;
 
 
@@ -74,7 +71,6 @@ type
   
   TfpgPageControl = class(TfpgWidget)
   private
-    FBackgroundColor: TfpgColor;
     FFont: TfpgFont;
     FActivePage: TfpgTabSheet;
     FMargin: integer;
@@ -100,7 +96,6 @@ type
     function    MaxButtonWidth: integer;
     function    ButtonHeight: integer;
     function    ButtonWidth(AText: string): integer;
-    procedure   SetBackgroundColor(const AValue: TfpgColor);
     procedure   SetFixedTabWidth(const AValue: integer);
     function    GetTabText(AText: string): string;
     procedure   LeftButtonClick(Sender: TObject);
@@ -126,11 +121,12 @@ type
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
+    property    BackgroundColor;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
     property    SortPages: boolean read FSortPages write SetSortPages default False;
     property    Style: TfpgTabStyle read FStyle write SetStyle default tsTabs;
     property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition default tpTop;
+    property    TextColor;
   end;
 
 
@@ -170,14 +166,6 @@ begin
   Result := FText;
 end;
 
-procedure TfpgTabSheet.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then
-    Exit; //==>
-  FBackgroundColor := AValue;
-  RePaint;
-end;
-
 procedure TfpgTabSheet.SetPageIndex(const AValue: Integer);
 begin
   if PageControl <> nil then
@@ -209,7 +197,8 @@ begin
   inherited Create(AOwner);
   FText := '';
   FFocusable := True;
-  FBackgroundColor := clWindowBackground;
+  FBackgroundColor := Parent.BackgroundColor;
+  FTextColor := Parent.TextColor;
 end;
 
 destructor TfpgTabSheet.Destroy;
@@ -328,14 +317,6 @@ begin
     result := FFixedTabWidth
   else
     result := FFont.TextWidth(AText) + 10;
-end;
-
-procedure TfpgPageControl.SetBackgroundColor(const AValue: TfpgColor);
-begin
-  if FBackgroundColor = AValue then
-    Exit; //==>
-  FBackgroundColor := AValue;
-  RePaint;
 end;
 
 procedure TfpgPageControl.SetFixedTabWidth(const AValue: integer);
@@ -462,8 +443,8 @@ begin
   if h = nil then
     Exit;
   Canvas.BeginDraw;
-  Canvas.SetTextColor(clText1);
-  
+  Canvas.SetTextColor(TextColor);
+
   case TabPosition of
     tpTop:
         begin
@@ -692,7 +673,8 @@ begin
   FWidth  := 150;
   FHeight := 100;
 
-  FBackgroundColor  := clWindowBackground;
+  FTextColor        := Parent.TextColor;
+  FBackgroundColor  := Parent.BackgroundColor;
   FFocusable        := True;
   FOnChange         := nil;
   FFixedTabWidth    := 0;
