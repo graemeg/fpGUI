@@ -109,6 +109,7 @@ type
     procedure   OrderSheets; // currently using bubblesort
     procedure   RePaintTitles; virtual;
     procedure   HandlePaint; override;
+    procedure   HandleShow; override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
@@ -564,6 +565,13 @@ begin
   Canvas.EndDraw;
 end;
 
+procedure TfpgPageControl.HandleShow;
+begin
+  inherited HandleShow;
+  FLeftButton.Visible := False;
+  FRightButton.Visible := False;
+end;
+
 procedure TfpgPageControl.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   h: TfpgTabSheet;
@@ -687,13 +695,11 @@ begin
   FLeftButton := TfpgButton.Create(self);
   FLeftButton.Text      := '<';
   FLeftButton.Width     := FLeftButton.Height;
-  FLeftButton.Visible   := False;
   FLeftButton.OnClick   := @LeftButtonClick;
 
   FRightButton := TfpgButton.Create(self);
   FRightButton.Text     := '>';
   FRightButton.Width    := FRightButton.Height;
-  FRightButton.Visible  := False;
   FRightButton.OnClick  := @RightButtonClick;
 end;
 
