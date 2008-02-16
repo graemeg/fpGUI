@@ -777,7 +777,7 @@ procedure TwgPropertyList.OnUpdateProperty(Sender: TObject);
 begin
 //  writeln('updating property...');
   editor.StoreValue(props.Widget);
-  props.Widget.UpdateWindowPosition;
+//  props.Widget.UpdateWindowPosition;
 end;
 
 procedure TwgPropertyList.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
