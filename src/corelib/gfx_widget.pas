@@ -2,6 +2,8 @@ unit gfx_widget;
 
 {$mode objfpc}{$H+}
 
+{.$Define DEBUG}
+
 interface
 
 uses
@@ -739,11 +741,17 @@ end;
 
 procedure TfpgWidget.HandleMouseEnter;
 begin
+  {$IFDEF DEBUG}
+  writeln('TfpgWidget.HandleMouseEnter: ' + ClassName);
+  {$ENDIF}
   // do nothing yet
 end;
 
 procedure TfpgWidget.HandleMouseExit;
 begin
+  {$IFDEF DEBUG}
+  writeln('TfpgWidget.HandleMouseExit: ' + ClassName);
+  {$ENDIF}
   // do nothing yet
 end;
 

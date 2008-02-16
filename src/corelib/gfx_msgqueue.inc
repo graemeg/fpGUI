@@ -156,7 +156,12 @@ begin
   m.Dest    := Dest;
   m.Params  := aparams;
 
-  m.Dest.Dispatch(m)
+  try
+    m.Dest.Dispatch(m)
+  except
+    on E: Exception do
+      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
+  end;
 end;
 
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
@@ -170,7 +175,12 @@ begin
   m.Sender  := Sender;
   m.Dest    := Dest;
 
-  m.Dest.Dispatch(m)
+  try
+    m.Dest.Dispatch(m)
+  except
+    on E: Exception do
+      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
+  end;
 end;
 
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
@@ -178,7 +188,14 @@ begin
   if msg.MsgCode = FPGM_KILLME then
     msg.Dest.Free
   else
-    msg.Dest.Dispatch(msg);
+  begin
+    try
+      msg.Dest.Dispatch(msg);
+    except
+      on E: Exception do
+        {$IFDEF DEBUG}writeln('fpgDeliverMessage Caught Exception: ' + E.Message){$ENDIF};
+    end;
+  end;
 end;
 
 procedure fpgDeliverMessages;
