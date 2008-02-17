@@ -19,11 +19,11 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="fpGUI redesign with multiple handles
+    <Description Value="fpGUI - multi-handle redesign
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="5" Release="1"/>
+    <Version Minor="6"/>
     <Files Count="17">
       <Item1>
         <Filename Value="x11_xft.pas"/>
