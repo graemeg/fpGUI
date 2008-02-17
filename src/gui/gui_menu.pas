@@ -87,7 +87,6 @@ type
   
   // Actual Menu Items are stored in TComponent's Components property
   // Visible only items are stored in FItems just before a paint
-
   TfpgPopupMenu = class(TfpgPopupWindow)
   private
     FBeforeShow: TNotifyEvent;
@@ -108,6 +107,7 @@ type
     FSymbolWidth: integer;
     FItems: TList;
     FFocusItem: integer;
+    procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -115,6 +115,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
+    procedure   HandleClose; override;
     procedure   DrawItem(mi: TfpgMenuItem; rect: TfpgRect); virtual;
     procedure   DrawRow(line: integer; focus: boolean); virtual;
     function    ItemHeight(mi: TfpgMenuItem): integer; virtual;
@@ -945,7 +946,12 @@ procedure TfpgPopupMenu.HandleShow;
 begin
   PrepareToShow;
   inherited HandleShow;
-  CaptureMouse;
+end;
+
+procedure TfpgPopupMenu.HandleClose;
+begin
+  ReleaseMouse;
+  inherited HandleClose;
 end;
 
 function TfpgPopupMenu.VisibleCount: integer;
@@ -1084,8 +1090,15 @@ begin
   end;
 end;
 
+procedure TfpgPopupMenu.HandleMouseEnter;
+begin
+  inherited HandleMouseEnter;
+  CaptureMouse;
+end;
+
 procedure TfpgPopupMenu.HandleMouseExit;
 begin
+  ReleaseMouse;
   inherited HandleMouseExit;
   FFocusItem := 0;
   Repaint;
@@ -1192,7 +1205,6 @@ end;
 
 destructor TfpgPopupMenu.Destroy;
 begin
-  ReleaseMouse;
   FItems.Free;
   inherited Destroy;
 end;
