@@ -41,6 +41,12 @@ uses
 type
   TfpgHotKeyDef = string;
   
+  TfpgMenuOption = (mnuo_autoopen,          // auto open menus when mouse over menubar
+                    mnuo_nofollowingmouse   // don't auto open new menus as mouse moves over menubar
+                    );
+  
+  TfpgMenuOptions = set of TfpgMenuOption;
+  
   // forward declarations
   TfpgPopupMenu = class;
   TfpgMenuBar = class;
@@ -132,6 +138,7 @@ type
     FBeforeShow: TNotifyEvent;
     FLightColor: TfpgColor;
     FDarkColor: TfpgColor;
+    FMenuOptions: TfpgMenuOptions;
     FPrevFocusItem: integer;
     FFocusItem: integer;
     procedure   SetFocusItem(const AValue: integer);
@@ -160,6 +167,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    AddMenuItem(const AMenuTitle: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
+    property    MenuOptions: TfpgMenuOptions read FMenuOptions write FMenuOptions;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
 
@@ -363,8 +371,23 @@ var
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
-  if not MenuFocused then
-    Exit; //==>
+  // process menu options
+  if mnuo_nofollowingmouse in FMenuOptions then
+  begin
+    if not MenuFocused then
+      Exit; //==>
+  end
+  else if mnuo_autoopen in FMenuOptions then
+  begin
+    if not Focused then
+      ActivateMenu;
+  end
+  else
+  begin
+    if not Focused then
+      Exit;
+  end;
+
 
   newf := CalcMouseCol(x);
   if not VisibleItem(newf).Selectable then
@@ -373,11 +396,16 @@ begin
   if newf = FFocusItem then
     Exit; //==>
 
-  //if VisibleItem(newf).SubMenu.Visible then
-    //exit;
-
   FocusItem := newf;
-  Repaint;
+  // continue processing menu options
+  if mnuo_autoopen in FMenuOptions then
+    DoSelect
+  else
+  begin
+    Repaint;
+    if not MenuFocused then
+      DoSelect;
+  end
 end;
 
 procedure TfpgMenuBar.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -472,6 +500,8 @@ begin
   
   FLightColor := TfpgColor($f0ece3);  // color at top of menu bar
   FDarkColor  := TfpgColor($beb8a4);  // color at bottom of menu bar
+  
+  FMenuOptions := [];
 end;
 
 destructor TfpgMenuBar.Destroy;
