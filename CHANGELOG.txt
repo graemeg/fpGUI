@@ -3,6 +3,37 @@
   =======================
 
 
+v0.6  (2008-02-17) revision 534
+  - Added a new INI Utils unit which introduces ReadOnly ini support
+  - Implemented the Model-GUI-Meditor design pattern so fpGUI can be
+    used with tiOPF's object persistent framework. This allows any
+    fpGUI component to become object-aware. I find this a better
+    alternative to DB-aware components.
+  - Many improvements to the GUI Designer. New property editors, new
+    components, better mouse support, MRU menu etc.
+  - 64-bit support is now added
+  - Newly supported platforms: FreeBSD and DesktopBSD
+  - Unicode text input is now supported under Windows.
+  - Started implementing Message Dialogs (with multiple buttons, icons etc).
+  - New components:
+    * Calendar combobox
+    * Gauges (pie, bar, needle, etc.)
+    * DB Label example component.
+  - Better support for newer desktop environments under Linux.
+  - Anti-aliased line drawing support.
+  - Line styles (dot, solid, dash...) are now fully supported on all platforms.
+  - Implemented the Command design pattern interface. Something like 
+    Delphi's TAction component.
+  - Fixed many memory leaks in CoreLib units.
+  - New examples/demos added: Splash Screen, Command Handler, Gauges, 
+    Anti-aliased line drawing etc..
+  - Started working on Message Dialogs.
+  - Better clipboard support.
+  - Including MANY more improvements and bug fixes. There are to 
+    many to list. For a detailed listing of the changes use the svn command
+    line client as follows:  svn log -r 367:534 
+
+
 v0.5  (2007-09-13)
   - The first release since the rewrite of fpGUI to use a 'windowed'
     multi-handle implementation.
