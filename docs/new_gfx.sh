@@ -4,7 +4,6 @@ makeskel --package=CoreLib --output=xml/corelib/gfxbase.xml --input='-Fi../src/c
 makeskel --package=CoreLib --output=xml/corelib/x11/gfx_x11.xml --input='-Fi../src/corelib ../src/corelib/x11/gfx_x11.pas'
 makeskel --package=CoreLib --output=xml/corelib/gdi/gfx_gdi.xml --input='-Fi../src/corelib ../src/corelib/gdi/gfx_gdi.pas'
 makeskel --package=CoreLib --output=xml/corelib/fpgfx.xml --input='-Fi../src/corelib ../src/corelib/fpgfx.pas'
-makeskel --package=CoreLib --output=xml/corelib/gfx_clipboard.xml --input='-Fi../src/corelib ../src/corelib/gfx_clipboard.pas'
 makeskel --package=CoreLib --output=xml/corelib/gfx_cmdlineparams.xml --input='-Fi../src/corelib ../src/corelib/gfx_cmdlineparams.pas'
 makeskel --package=CoreLib --output=xml/corelib/gfx_extinterpolation.xml --input='-Fi../src/corelib ../src/corelib/gfx_extinterpolation.pas'
 makeskel --package=CoreLib --output=xml/corelib/gfx_imgfmt_bmp.xml --input='-Fi../src/corelib ../src/corelib/gfx_imgfmt_bmp.pas'

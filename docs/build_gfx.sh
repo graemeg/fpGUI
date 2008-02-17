@@ -11,7 +11,6 @@ fpdoc --package=CoreLib \
   --input='-Fi../src/corelib ../src/corelib/x11/gfx_x11.pas' --descr=xml/corelib/x11/gfx_x11.xml \
   --input='-Fi../src/corelib ../src/corelib/gdi/gfx_gdi.pas' --descr=xml/corelib/gdi/gfx_gdi.xml \
   --input='-Fi../src/corelib ../src/corelib/fpgfx.pas' --descr=xml/corelib/fpgfx.xml \
-  --input='-Fi../src/corelib ../src/corelib/gfx_clipboard.pas' --descr=xml/corelib/gfx_clipboard.xml \
   --input='-Fi../src/corelib ../src/corelib/gfx_cmdlineparams.pas' --descr=xml/corelib/gfx_cmdlineparams.xml \
   --input='-Fi../src/corelib ../src/corelib/gfx_extinterpolation.pas' --descr=xml/corelib/gfx_extinterpolation.xml \
   --input='-Fi../src/corelib ../src/corelib/gfx_imgfmt_bmp.pas' --descr=xml/corelib/gfx_imgfmt_bmp.xml \

@@ -21,7 +21,7 @@ unit gui_style;
 
 {$mode objfpc}{$H+}
 
-{$Define DEBUG}
+{.$Define DEBUG}
 
 interface
 

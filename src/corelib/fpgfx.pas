@@ -41,7 +41,7 @@ const
   cMessageQueueSize = 512;
 
   // version and name constants
-  fpGUIVersion = '0.5.1';
+  fpGUIVersion = '0.6';
   fpGUIName    = 'fpGUI Toolkit';
 
 

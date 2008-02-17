@@ -32,7 +32,7 @@ uses
   newformdesigner;
 
 const
-  program_version = '0.3 beta';
+  program_version = '0.6 beta';
 
 type
 

@@ -195,7 +195,7 @@ begin
   begin
     Name := 'lblName1';
     SetPosition(12, 16, 255, 31);
-    Text := 'fpGUI Designer';
+    Text := 'fpGUI UI Designer';
     FontDesc := 'Arial-20';
   end;
 
@@ -855,7 +855,8 @@ end;
 
 procedure TfrmMain.miHelpAboutGUI(Sender: TObject);
 begin
-  ShowMessage('This product was created using fpGUI v0.5', 'About fpGUI');
+  ShowMessage('This product was created using ' + fpGUIName + ' v' +
+      fpGUIVersion, 'About fpGUI');
 end;
 
 procedure TfrmMain.miMRUClick(Sender: TObject; const FileName: string);
