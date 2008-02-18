@@ -174,14 +174,17 @@ begin
   ListBox.SetPosition(0, 0, Width, Height);
   inherited HandleShow;
   ActiveWidget := ListBox;
+//  ActiveWidget.CaptureMouse;
 end;
 
 procedure TDropDownWindow.HandleHide;
 begin
   // HandleHide also gets called in TfpgWidget.Destroy so we need a few
   // if Assigned() tests here. This should be improved on.
-  if Assigned(FocusRootWidget) then
-    FocusRootWidget.ReleaseMouse;  // for internal ListBox
+//  if Assigned(ActiveWidget) then
+//    ActiveWidget.ReleaseMouse;
+//  if Assigned(FocusRootWidget) then
+//    FocusRootWidget.ReleaseMouse;  // for internal ListBox
 
   FocusRootWidget   := OriginalFocusRoot;
   OriginalFocusRoot := nil;

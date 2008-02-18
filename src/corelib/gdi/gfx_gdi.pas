@@ -644,8 +644,8 @@ begin
                     writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonDown event');
                     {$ENDIF}
                     mcode := FPGM_MOUSEDOWN;
-                    if PopupListFirst = nil then
-                      SetCapture(w.WinHandle);
+//                    if PopupListFirst = nil then
+//                      SetCapture(w.WinHandle);
                   end;
                   
               WM_LBUTTONUP,
@@ -656,8 +656,8 @@ begin
                     writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonUp event');
                     {$ENDIF}
                     mcode := FPGM_MOUSEUP;
-                    if PopupListFirst = nil then
-                      ReleaseCapture;
+//                    if PopupListFirst = nil then
+//                      ReleaseCapture;
                   end;
               //WM_LBUTTONDBLCLK:
                   //mcode := FPGM_DOUBLECLICK;
@@ -799,32 +799,35 @@ begin
     WM_NCACTIVATE:
         begin
           {$IFDEF DEBUG}
-            write(w.ClassName + ': ');
-            writeln('WM_NCACTIVATE');
+            write(w.ClassName + ': WM_NCACTIVATE');
           {$ENDIF}
+          if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
+          begin
+            {$IFDEF DEBUG}
+            writeln(' Blockmsg = True (part 1) : ' + PopupListFirst.ClassName);
+            {$ENDIF}
+            // This is ugly but needed for now to get TfpgCombobox to work
+//            if PopupListFirst.ClassName <> 'TDropDownWindow' then
+            if not (PopupListFirst is TfpgPopupWindow) then
+              blockmsg := True;
+          end else
           if (wapplication.TopModalForm <> nil) then
           begin
             if (wParam = 0) and (wapplication.TopModalForm = w) then
             begin
               {$IFDEF DEBUG}
-              writeln(' Blockmsg = True (part 1)');
+              writeln(' Blockmsg = True (part 2)');
               {$ENDIF}
               blockmsg := True;
             end
             else if (wParam <> 0) and (wapplication.TopModalForm <> w) then
             begin
               {$IFDEF DEBUG}
-              writeln(' Blockmsg = True (part 2)');
+              writeln(' Blockmsg = True (part 3)');
               {$ENDIF}
               blockmsg := True;
             end;
           end;
-
-          //if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
-          //begin
-            //writeln(' Blockmsg = True (part 3)');
-            //blockmsg := True;
-          //end;
 
           if not blockmsg then
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -1287,6 +1290,9 @@ end;
 procedure TfpgWindowImpl.ReleaseMouse;
 begin
   Windows.ReleaseCapture;
+//  if PopupListFirst <> nil then
+//    Windows.SetCapture(PopupListFirst^.);
+//  if GfxFirstPopup <> nil then SetCapture(GfxFirstPopup^.wg.WinHandle);
 end;
 
 function TfpgWindowImpl.HandleIsValid: boolean;

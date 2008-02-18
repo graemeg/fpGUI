@@ -19,6 +19,8 @@ unit gui_menu;
 
 {$mode objfpc}{$H+}
 
+{.$Define DEBUG}
+
 {
   TODO:
     * Refactor the HotKey painting code into Canvas.DrawString so that other
@@ -944,13 +946,17 @@ end;
 
 procedure TfpgPopupMenu.HandleShow;
 begin
+//  CaptureMouse;
   PrepareToShow;
   inherited HandleShow;
 end;
 
 procedure TfpgPopupMenu.HandleClose;
 begin
-  ReleaseMouse;
+  {$IFDEF DEBUG}
+  writeln(Classname, '.HandleClose');
+  {$ENDIF}
+//  ReleaseMouse;
   inherited HandleClose;
 end;
 
@@ -1092,16 +1098,22 @@ end;
 
 procedure TfpgPopupMenu.HandleMouseEnter;
 begin
+  {$IFDEF DEBUG}
+  writeln(Classname, '.HandleMouseEnter');
+  {$ENDIF}
+//  CaptureMouse;
   inherited HandleMouseEnter;
-  CaptureMouse;
 end;
 
 procedure TfpgPopupMenu.HandleMouseExit;
 begin
-  ReleaseMouse;
+  {$IFDEF DEBUG}
+  writeln(Classname, '.HandleMouseExit');
+  {$ENDIF}
   inherited HandleMouseExit;
   FFocusItem := 0;
   Repaint;
+//  ReleaseMouse;
 end;
 
 // Collecting visible items and measuring sizes
@@ -1205,6 +1217,10 @@ end;
 
 destructor TfpgPopupMenu.Destroy;
 begin
+  {$IFDEF DEBUG}
+  writeln(Classname, '.Destroy');
+  {$ENDIF}
+//  ReleaseMouse;
   FItems.Free;
   inherited Destroy;
 end;

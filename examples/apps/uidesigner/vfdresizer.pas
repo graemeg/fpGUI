@@ -66,12 +66,14 @@ begin
   FDragging := True;
   FDragPosX := x;
   FDragPosy := y;
+  CaptureMouse;
 end;
 
 procedure TwgResizer.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FDragging := False;
+  ReleaseMouse;
 end;
 
 procedure TwgResizer.HandleMouseMove(x, y: integer; btnstate: word;

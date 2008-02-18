@@ -42,8 +42,6 @@ type
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   AdjustWindowStyle; override;
-    procedure   HandleShow; override;
-    procedure   HandleHide; override;
     procedure   HandleClose; virtual;
     procedure   ProcessPopupFrame; virtual;
     procedure   DoPaintPopupFrame; virtual;
@@ -220,18 +218,6 @@ begin
   Exclude(FWindowAttributes, waSizeable);
 end;
 
-procedure TfpgPopupWindow.HandleShow;
-begin
-  inherited HandleShow;
-//  CaptureMouse;
-end;
-
-procedure TfpgPopupWindow.HandleHide;
-begin
-//  ReleaseMouse;
-  inherited HandleHide;
-end;
-
 procedure TfpgPopupWindow.HandleClose;
 begin
   HandleHide;
@@ -305,6 +291,11 @@ procedure TfpgPopupWindow.Close;
 begin
   HandleClose;
   PopupListRemove(self);
+  { TODO : Move this out to the GDI specific unit. }
+  {$IFDEF MSWINDOWS}
+  if uFirstPopup <> nil then
+    uFirstPopup^.Widget.CaptureMouse;
+  {$ENDIF}
 end;
 
 
