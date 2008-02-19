@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -36,6 +36,7 @@ uses
   gfxbase,
   fpgfx,
   gfx_imgfmt_bmp,
+  gfx_constants,
   gui_form,
   gui_button,
   gui_label,
@@ -62,10 +63,9 @@ const
   mbAbortRetryIgnore  = [mbAbort, mbRetry, mbIgnore];
 
 
-  { todo: Somehow we need to localize this }
   cMsgDlgBtnText: array[TfpgMsgDlgBtn] of string =
-      ( '', 'OK', 'Cancel', 'Yes', 'No', 'Abort', 'Retry', 'Ignore',
-        'Yes to All', 'No to All', 'Help', 'Close' );
+      ( '', rsOK, rsCancel, rsYes, rsNo, rsAbort, rsRetry, rsIgnore,
+        rsYesToAll, rsNoToAll, rsHelp, rsClose );
 
 type
 
@@ -99,6 +99,7 @@ type
     procedure   btnOKClick(Sender: TObject); virtual;
     procedure   btnCancelClick(Sender: TObject); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   SetupCaptions; virtual;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -125,6 +126,7 @@ type
   protected
     function    GetFontDesc: string;
     procedure   SetFontDesc(Desc: string);
+    procedure   SetupCaptions; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   SetSampleText(AText: string);
@@ -306,7 +308,7 @@ end;
 
 procedure ShowMessage(AMessage: string; ACentreText: Boolean);
 begin
-  ShowMessage(AMessage, 'Message', ACentreText);
+  ShowMessage(AMessage, rsMessage, ACentreText);
 end;
 
 function SelectFontDialog(var FontDesc: string): boolean;
@@ -378,7 +380,7 @@ begin
   FCentreText   := False;
   
   FButton := TfpgButton.Create(self);
-  FButton.Text    := cMsgDlgBtnText[mbOK];   // We must localize this
+  FButton.Text    := cMsgDlgBtnText[mbOK];
   FButton.Width   := 75;
   FButton.ModalResult := Ord(mbOK);
 end;
@@ -432,6 +434,12 @@ begin
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TfpgBaseDialog.SetupCaptions;
+begin
+  btnCancel.Text  := rsCancel;
+  btnOK.Text      := rsOK;
+end;
+
 constructor TfpgBaseDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -444,13 +452,13 @@ begin
   FSpacing  := 6;
   FDefaultButtonWidth := 80;
 
-  btnCancel := CreateButton(self, Width-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, 'Cancel', @btnCancelClick);
+  btnCancel := CreateButton(self, Width-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsCancel, @btnCancelClick);
   btnCancel.Name      := 'btnCancel';
   btnCancel.ImageName := 'stdimg.Cancel';
   btnCancel.ShowImage := True;
   btnCancel.Anchors   := [anRight, anBottom];
 
-  btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, 'OK', @btnOKClick);
+  btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsOK, @btnOKClick);
   btnOK.Name      := 'btnOK';
   btnOK.ImageName := 'stdimg.OK';
   btnOK.ShowImage := True;
@@ -594,11 +602,16 @@ begin
   OnParamChange(self);
 end;
 
+procedure TfpgFontSelectDialog.SetupCaptions;
+begin
+  inherited SetupCaptions;
+end;
+
 constructor TfpgFontSelectDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   {TODO: We need to localize this dialog }
-  WindowTitle := 'Select Font...';
+  WindowTitle := rsSelectAFont;
   Width       := 600;
   MinWidth    := Width;
   MinHeight   := Height;
@@ -611,10 +624,11 @@ begin
   with lblLabel5 do
   begin
     SetPosition(8, 8, 73, 16);
-    Text := 'Collection:';
+    Text := rsCollection + ':';
   end;
 
-  {TODO: This need to be implemented at some stage. }
+  { TODO : This need to be implemented at some stage. }
+  { TODO : This needs to be localized. }
   lbCollection := TfpgListBox.Create(self);
   with lbCollection do
   begin
@@ -637,7 +651,7 @@ begin
   with lblLabel1 do
   begin
     SetPosition(161, 8, 73, 16);
-    Text := 'Font:';
+    Text := rsName + ':';
   end;
 
   lbFaces := TfpgListBox.Create(self);
@@ -652,7 +666,7 @@ begin
   with lblLabel3 do
   begin
     SetPosition(401, 8, 54, 16);
-    Text := 'Size:';
+    Text := rsSize + ':';
   end;
 
   lbSize := TfpgListBox.Create(self);
@@ -687,14 +701,14 @@ begin
   with lblLabel2 do
   begin
     SetPosition(461, 8, 54, 16);
-    Text := 'Typeface:';
+    Text := 'Typeface:';     { TODO : Localize this }
   end;
 
   cbBold := TfpgCheckBox.Create(self);
   with cbBold do
   begin
     SetPosition(461, 32, 87, 20);
-    Text := 'Bold';
+    Text := rsBold;
     OnChange := @OnParamChange;
   end;
 
@@ -702,7 +716,7 @@ begin
   with cbItalic do
   begin
     SetPosition(461, 56, 87, 20);
-    Text := 'Italic';
+    Text := rsItalic;
     OnChange := @OnParamChange;
   end;
 
@@ -726,8 +740,8 @@ begin
   lblLabel4 := TfpgLabel.Create(self);
   with lblLabel4 do
   begin
-    SetPosition(8, 268, 55, 16);
-    Text := 'Sample:';
+    SetPosition(8, 268, 584, 16);
+    Text := rsExampleText + ':';
   end;
 
   edSample := TfpgEdit.Create(self);

@@ -14,24 +14,33 @@ interface
 
 resourcestring
 
-{ Define Compiler language symbol (eg: gr for German) to include the correct
+{ Define Compiler language symbol (eg: de for German) to include the correct
   language resource file otherwise the Default (English) resource file will
   be used. }
 
-{.$DEFINE gr}     // German
+{.$DEFINE de}     // German
 {.$DEFINE ru}     // Russian
 {.$DEFINE fr}     // French
 {.$DEFINE pt}     // Portuguese
+{.$DEFINE za}     // Afrikaans
 
 
-{$IF defined(gr)}
+
+{$IF defined(de)}
   {$I lang_german.inc}
+  
 {$ELSEIF defined(ru)}
   {$I lang_russian.inc}
+  
 {$ELSEIF defined(fr)}
   {$I lang_french.inc}
+  
 {$ELSEIF defined(pt)}
   {$I lang_portuguese.inc}
+  
+{$ELSEIF defined(za)}
+  {$I lang_afrikaans.inc}
+
 {$ELSE}
   {$I lang_english.inc}
 {$IFEND}

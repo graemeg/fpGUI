@@ -27,6 +27,9 @@ rsInsert                 = 'Insert';
 rsEdit                   = 'Edit';
 rsDelete                 = 'Delete';
 rsExit                   = 'Exit';
+rsYesToAll               = 'Yes to All';
+rsNoToAll                = 'No to All';
+
 
 
 // Captions

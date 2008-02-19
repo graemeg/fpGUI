@@ -27,13 +27,15 @@ rsInsert                 = 'Einfgen';
 rsEdit                   = 'Bearbeiten';
 rsDelete                 = 'Lschen';
 rsExit                   = 'Exit';
+rsYesToAll               = 'Yes to All';
+rsNoToAll                = 'No to All';
 
 
 // Captions
 rsError                  = 'Fehler';
 rsCriticalError          = 'Schwerer Fehler';
 rsInformation            = 'Information';
-rsConfirmation           = 'Besttigen';
+rsConfirmation           = 'Bestätigen';
 rsWarning                = 'Warnung';
 rsMessage                = 'Nachricht';
 
@@ -49,10 +51,10 @@ rsCannotCreateDir        = 'Verzeichnis kann nicht erzeugt werden';
 
 
 // Font Dialog
-rsSelectAFont            = 'Zeichensatz auswhlen';
+rsSelectAFont            = 'Wählen Sie eine Schriftart';
 rsName                   = 'Name';
 rsCollection             = 'Collection';
-rsSize                   = 'Gráe';
+rsSize                   = 'Größe';
 rsStyle                  = 'Stil';
 rsItalic                 = 'Kursiv';
 rsBold                   = 'Fett';
@@ -61,7 +63,7 @@ rsExampleText            = 'Beispieltext';
 
 
 // Open Dialog
-rsOpenAFile              = 'Datei ffnen';
+rsOpenAFile              = 'Öffnen einer Datei';
 rsFileName               = 'Dateiname';
 rsFileType               = 'Dateityp';
 rsDrive                  = 'Laufwerk';
