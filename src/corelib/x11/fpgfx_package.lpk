@@ -23,7 +23,7 @@
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="6"/>
+    <Version Minor="6" Release="1"/>
     <Files Count="18">
       <Item1>
         <Filename Value="x11_xft.pas"/>
