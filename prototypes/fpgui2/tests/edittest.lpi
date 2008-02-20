@@ -29,7 +29,6 @@
     <RequiredPackages Count="1">
       <Item1>
         <PackageName Value="fpgui_package"/>
-        <MinVersion Minor="5" Valid="True"/>
       </Item1>
     </RequiredPackages>
     <Units Count="2">
