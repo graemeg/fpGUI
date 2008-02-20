@@ -95,6 +95,7 @@ type
     property    ImageSpacing: integer read FImageSpacing write SetImageSpacing default -1;
     property    ModalResult: integer read FModalResult write FModalResult default 0;
     property    ShowImage: Boolean read FShowImage write SetShowImage default True;
+    property    TabOrder;
     property    Text: string read FText write SetText;
     property    TextColor;
     property    OnMouseExit;

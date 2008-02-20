@@ -116,6 +116,7 @@ type
     property    HideSelection;
     property    MaxLength;
     property    PasswordMode;
+    property    TabOrder;
     property    Text;
     property    TextColor;
     property    OnChange;

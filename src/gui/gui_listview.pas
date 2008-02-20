@@ -253,6 +253,7 @@ type
     property    HScrollBar: TfpgScrollBar read FHScrollBar;
     property    ItemHeight: Integer read GetItemHeight;
     property    ItemIndex: Integer read FItemIndex write SetItemIndex;
+    property    TabOrder;
     property    OnColumnClick: TfpgLVColumnClickEvent read FOnColumnClick write SetOnColumnClick;
     property    OnPaintColumn: TfpgLVPaintColumnEvent read FOnPaintColumn write FOnPaintColumn;
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;

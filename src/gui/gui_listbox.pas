@@ -124,6 +124,7 @@ type
     property    HotTrack;
     property    Items;
     property    PopupFrame;
+    property    TabOrder;
     property    TextColor;
   end;
 

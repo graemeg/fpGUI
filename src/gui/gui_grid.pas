@@ -142,6 +142,7 @@ type
     property    Columns;
     property    FocusRow;
     property    ScrollBarStyle;
+    property    TabOrder;
     property    OnRowChange;
     property    OnDoubleClick;
   end;
@@ -190,27 +191,28 @@ type
 
   TfpgStringGrid = class(TfpgCustomStringGrid)
   published
+    property    BackgroundColor;
+//    property    ColResizing;
+    property    ColumnCount;
     property    Columns;
+    property    ColumnWidth;
     property    DefaultColWidth;
     property    DefaultRowHeight;
-    property    FontDesc;
-    property    HeaderFontDesc;
-    property    BackgroundColor;
     property    FocusCol;
     property    FocusRow;
-    property    RowSelect;
-    property    ColumnCount;
-    property    RowCount;
-    property    ScrollBarStyle;
-    property    ShowHeader;
-    property    ShowGrid;
+    property    FontDesc;
+    property    HeaderFontDesc;
     property    HeaderHeight;
-//    property    ColResizing;
-    property    ColumnWidth;
-    property    OnFocusChange;
-    property    OnRowChange;
+    property    RowCount;
+    property    RowSelect;
+    property    ScrollBarStyle;
+    property    ShowGrid;
+    property    ShowHeader;
+    property    TabOrder;
     property    OnDoubleClick;
+    property    OnFocusChange;
     property    OnKeyPress;
+    property    OnRowChange;
   end;
   
 

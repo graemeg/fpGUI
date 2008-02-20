@@ -57,6 +57,7 @@ type
     property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    TabOrder;
     property    Text: string read FText write SetText;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;

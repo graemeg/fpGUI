@@ -112,6 +112,7 @@ type
     property    BackgroundColor default clBoxColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Lines: TStringList read FLines;
+    property    TabOrder;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;

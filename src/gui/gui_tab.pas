@@ -126,6 +126,7 @@ type
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
     property    SortPages: boolean read FSortPages write SetSortPages default False;
     property    Style: TfpgTabStyle read FStyle write SetStyle default tsTabs;
+    property    TabOrder;
     property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition default tpTop;
     property    TextColor;
   end;

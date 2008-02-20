@@ -112,6 +112,7 @@ type
     property    FontDesc;
     property    Height;
     property    Items;
+    property    TabOrder;
     property    Text;
     property    TextColor;
     property    Width;

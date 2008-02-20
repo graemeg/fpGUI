@@ -208,6 +208,7 @@ type
     property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta default 15;
     property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
     property    ShowImages: boolean read FShowImages write SetShowImages default False;
+    property    TabOrder;
     property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor default clShadow1;
     property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle default lsDot;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;

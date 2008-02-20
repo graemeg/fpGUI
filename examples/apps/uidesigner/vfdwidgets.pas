@@ -234,6 +234,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgEdit);
   wc.NameBase := 'edtName';
 //  wc.AddProperty('Color', TPropertyColor, 'Text color');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.edit';
@@ -244,6 +245,7 @@ begin
   wc.NameBase := 'memName';
   wc.AddProperty('Lines', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.memo';
   RegisterVFDWidget(wc);
 
@@ -260,33 +262,37 @@ begin
   wc.AddProperty('ImageSpacing', TPropertyInteger, '');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
   wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.button';
   RegisterVFDWidget(wc);
 
   // CheckBox
   wc          := TVFDWidgetClass.Create(TfpgCheckBox);
   wc.NameBase := 'cbName';
-  wc.AddProperty('Text', TPropertyString, 'Initial text');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.WidgetIconName := 'vfd.checkbox';
   RegisterVFDWidget(wc);
 
   // RadioButton
   wc          := TVFDWidgetClass.Create(TfpgRadioButton);
   wc.NameBase := 'rbName';
-  wc.AddProperty('Text', TPropertyString, 'Initial text');
+  wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
-  wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.WidgetIconName := 'vfd.radiobutton';
   RegisterVFDWidget(wc);
 
   // ComboBox
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
   wc.NameBase := 'cbName';
-  wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('Items', TPropertyStringList, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.combobox';
   RegisterVFDWidget(wc);
 
@@ -294,16 +300,18 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgCalendarCombo);
   wc.NameBase := 'calName';
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.combodateedit';
   RegisterVFDWidget(wc);
 
   // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
   wc.NameBase := 'lstName';
+  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('HotTrack', TPropertyBoolean, '');
   wc.AddProperty('Items', TPropertyStringList, '');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('PopupFrame', TPropertyBoolean, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.listbox';
   RegisterVFDWidget(wc);
 
@@ -317,6 +325,7 @@ begin
   wc.AddProperty('RowSelect', TPropertyBoolean, '');
   wc.AddProperty('ShowHeader', TPropertyBoolean, '');
   wc.AddProperty('ShowGrid', TPropertyBoolean, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.stringgrid';
   RegisterVFDWidget(wc);
 
@@ -341,10 +350,11 @@ begin
   // TrackBar
   wc          := TVFDWidgetClass.Create(TfpgTrackBar);
   wc.NameBase := 'tbName';
-  wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Max', TPropertyInteger, '');
-  wc.AddProperty('Position', TPropertyInteger, '');
+  wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Orientation', TPropertyEnum, '');
+  wc.AddProperty('Position', TPropertyInteger, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.trackbar';
   RegisterVFDWidget(wc);
 
@@ -353,18 +363,20 @@ begin
   wc.NameBase := 'lvName';
   wc.AddProperty('MultiSelect', TPropertyBoolean, '');
   wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.listview';
   RegisterVFDWidget(wc);
 
   // Treeview
   wc := TVFDWidgetClass.Create(TfpgTreeView);
   wc.NameBase := 'tvName';
-  wc.AddProperty('FontDesc',TPropertyString, '');
-  wc.AddProperty('ShowImages',TPropertyBoolean, 'Boolean value');
-  wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
-  wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
+  wc.AddProperty('FontDesc',TPropertyString, '');
   wc.AddProperty('ScrollWheelDelta', TPropertyInteger, 'Scroll amount with mouse wheel');
+  wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('ShowImages',TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.treeview';
   RegisterVFDWidget(wc);
   
@@ -374,6 +386,7 @@ begin
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
   wc.AddProperty('SortPages', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('Style', TPropertyEnum, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('TabPosition', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.pagecontrol';
   RegisterVFDWidget(wc);

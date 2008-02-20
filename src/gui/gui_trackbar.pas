@@ -74,6 +74,7 @@ type
     property    Position: integer read FPosition write SetPosition default 0;
     property    SliderSize: integer read FSliderSize write SetSliderSize default 11;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
+    property    TabOrder;
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
   end;
   
@@ -118,6 +119,7 @@ type
     property    Max: integer read FMax write SetMax default 100;
     property    ShowPosition: boolean read FShowPosition write SetShowPosition default False;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
+    property    TabOrder;
     property    TextColor;
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
   end;

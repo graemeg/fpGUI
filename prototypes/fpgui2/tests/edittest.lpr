@@ -485,8 +485,11 @@ begin
   checkbox2  := CreateCheckBox(self, 10, 285, 'Checkbox Two');
   
   radiobtn1 := CreateRadioButton(self, 180, 265, 'Radio One');
+  radiobtn1.GroupIndex := 2;
   radiobtn2 := CreateRadioButton(self, 180, 285, 'Radio Two');
+  radiobtn2.GroupIndex := 2;
   radiobtn3 := CreateRadioButton(self, 180, 305, 'Radio Three');
+  radiobtn3.GroupIndex := 2;
   radiobtn1.Checked := True;
   
   trackbar1 := TfpgTrackBar.Create(self);

@@ -245,7 +245,10 @@ begin
   FTextColor  := clText1;
 
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
-    Parent := TfpgWidget(AOwner)
+  begin
+    Parent := TfpgWidget(AOwner);
+    FTabOrder := AOwner.ComponentCount;
+  end
   else
     Parent := nil;
 

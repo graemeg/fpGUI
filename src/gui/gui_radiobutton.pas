@@ -49,7 +49,9 @@ type
     procedure   HandlePaint; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    function    FindNeighbor(direction: TFocusSearchDirection): TfpgRadioButton;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -59,6 +61,7 @@ type
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
+    property    TabOrder;
     property    Text: string read FText write SetText;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -109,6 +112,9 @@ begin
   end;  { if }
 
   RePaint;
+
+  if Assigned(FOnChange) then
+      FOnChange(self);
 end;
 
 procedure TfpgRadioButton.SetFontDesc(const AValue: string);
@@ -194,11 +200,39 @@ begin
   if not Checked then
   begin
     Checked := not FChecked;
-    if Assigned(FOnChange) then
-      FOnChange(self);
   end
   else
     RePaint;
+end;
+
+procedure TfpgRadioButton.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+var
+  nbr: TfpgRadioButton;
+begin
+  if (keycode = keyUp) then
+  begin
+    consumed := True;
+    nbr := FindNeighbor(fsdPrev);
+    if nbr = Self then
+      nbr := FindNeighbor(fsdLast);
+    nbr.SetFocus;
+    nbr.Checked := True;
+  end else
+  if (keycode = keyDown) then
+  begin
+    consumed := True;
+    nbr := FindNeighbor(fsdNext);
+    if nbr = Self then
+      nbr := FindNeighbor(fsdFirst);
+    nbr.SetFocus;
+    nbr.Checked := True;
+  end;
+
+  if consumed then
+    Exit; //==>
+
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgRadioButton.HandleKeyRelease(var keycode: word;
@@ -207,15 +241,65 @@ begin
   if (keycode = keySpace) then
   begin
     consumed := True;
-    Checked := not FChecked;
-    if Assigned(FOnChange) then
-      FOnChange(self);
+    Checked := true;
   end;
 
   if consumed then
     Exit; //==>
 
   inherited HandleKeyRelease(keycode, shiftstate, consumed);
+end;
+
+function TfpgRadioButton.FindNeighbor(direction: TFocusSearchDirection): TfpgRadioButton;
+var
+  i: integer;
+  wg, bestwg: TfpgWidget;
+  bestdsp, dsp: integer; // spacing delta
+begin
+  if (Parent <> nil) then
+  begin
+    case direction of
+      fsdNext: bestdsp := High(integer); // or "-999999" like that in TfpgWidget.FindFocusWidget?
+      fsdPrev: bestdsp := Low(integer);  // or "999999"?
+    end;
+
+    bestwg := Self;
+    for i := 0 to Parent.ComponentCount-1 do
+    begin
+      wg := TfpgWidget(Parent.Components[i]);
+      if (wg <> nil) and (wg <> self) and (wg is TfpgRadioButton) and
+          (TfpgRadioButton(wg).GroupIndex = GroupIndex) then
+      begin
+        case direction of
+          fsdNext:
+            begin
+              dsp := (wg.Top - Self.Top) + (wg.Left - Self.Left);
+              if (dsp > 0) and (dsp < bestdsp) then
+              begin
+                bestwg := wg;
+                bestdsp := dsp;
+              end;
+            end;
+          fsdPrev:
+            begin
+              dsp := (wg.Top - Self.Top) + (wg.Left - Self.Left);
+              if (dsp < 0) and (dsp > bestdsp) then
+              begin
+                bestwg := wg;
+                bestdsp := dsp;
+              end;
+            end;
+          fsdFirst:
+            if (wg.Top < bestwg.Top) then
+              bestwg := wg;
+          fsdLast:
+            if (wg.Top > bestwg.Top) then
+              bestwg := wg;
+        end;
+        Result := TfpgRadioButton(bestwg);
+      end;
+    end;  { for }
+  end;  { if }
 end;
 
 constructor TfpgRadioButton.Create(AOwner: TComponent);
