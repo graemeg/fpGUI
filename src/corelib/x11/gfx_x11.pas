@@ -1391,6 +1391,7 @@ begin
     mcMove:       shape := XC_fleur;
     mcCross:      shape := XC_crosshair;
     mcHourGlass:  shape := XC_watch;
+    mcHand:       shape := XC_hand2;
   else
     shape := XC_left_ptr; //XC_arrow;
   end;

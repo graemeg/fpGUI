@@ -28,7 +28,8 @@ type
   TWindowAttributes = set of TWindowAttribute;
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
-      mcSizeNWSE, mcSizeNESW, mcSizeSWNE, mcSizeSENW, mcMove, mcHourGlass);
+      mcSizeNWSE, mcSizeNESW, mcSizeSWNE, mcSizeSENW, mcMove, mcHourGlass,
+      mcHand);
 
   TGradientDirection = (gdVertical,     // Fill vertical
                         gdHorizontal);  // Fill Horizontal

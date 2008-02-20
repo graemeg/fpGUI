@@ -182,6 +182,7 @@ type
     hcr_move: HCURSOR;
     hcr_crosshair: HCURSOR;
     hcr_wait: HCURSOR;
+    hcr_hand: HCURSOR;
     FFocusedWindow: THANDLE;
     LastClickWindow: TfpgWinHandle; // double click generation
     LastWinClickTime: longword;
@@ -926,6 +927,7 @@ begin
   hcr_move      := LoadCursor(0, IDC_SIZEALL);
   hcr_crosshair := LoadCursor(0, IDC_CROSS);
   hcr_wait      := LoadCursor(0, IDC_WAIT);
+  hcr_hand      := LoadCursor(0, IDC_HAND);
 
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
@@ -1269,6 +1271,7 @@ begin
     mcMove:       hc := wapplication.hcr_move;
     mcCross:      hc := wapplication.hcr_crosshair;
     mcHourGlass:  hc := wapplication.hcr_wait;
+    mcHand:       hc := wapplication.hcr_hand;
   else
     hc := wapplication.hcr_default;
   end;
