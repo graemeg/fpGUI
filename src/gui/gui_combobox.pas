@@ -211,7 +211,7 @@ begin
   Result.Focusable := True;
 
   Result.Height := 23;  // replace this with font height + margins
-  {$Note We still need to handle the AList param as well.}
+  { TODO : We still need to handle the AList param as well.}
 end;
 
 { TfpgAbstractComboBox }
