@@ -1,78 +1,78 @@
-{%mainunit gfx_constants.pas}
+﻿{%mainunit gfx_constants.pas}
 
-rsLanguage               = 'Russian';
+rsLanguage               = 'Русский';
 
 
 // Buttons
 rsOK                     = 'OK';
-rsCancel                 = 'Cancel';
-rsHelp                   = 'Help';
-rsOpen                   = 'Open';
-rsSave                   = 'Save';
-rsCreate                 = 'Create';
-rsChange                 = 'Changes';
-rsFind                   = 'Find';
-rsSearch                 = 'Search';
-rsReplace                = 'Replace';
-rsConfirm                = 'Confirm';
-rsAll                    = 'All';
-rsSelect                 = 'Select';
-rsYes                    = 'Yes';
-rsNo                     = 'No';
-rsAbort                  = 'Abort';
-rsRetry                  = 'Retry';
-rsIgnore                 = 'Ignore';
-rsClose                  = 'Close';
-rsInsert                 = 'Insert';
-rsEdit                   = 'Edit';
-rsDelete                 = 'Delete';
-rsExit                   = 'Exit';
-rsYesToAll               = 'Yes to All';
-rsNoToAll                = 'No to All';
+rsCancel                 = 'Отмена';
+rsHelp                   = 'Справка';
+rsOpen                   = 'Открыть';
+rsSave                   = 'Сохранить';
+rsCreate                 = 'Создать';
+rsChange                 = 'Изменить';
+rsFind                   = 'Найти';
+rsSearch                 = 'Поиск';
+rsReplace                = 'Заменить';
+rsConfirm                = 'Подтвердить';
+rsAll                    = 'Все';
+rsSelect                 = 'Выбрать';
+rsYes                    = 'Да';
+rsNo                     = 'Нет';
+rsAbort                  = 'Прервать';
+rsRetry                  = 'Повторить';
+rsIgnore                 = 'Пропустить';
+rsClose                  = 'Закрыть';
+rsInsert                 = 'Вставить';
+rsEdit                   = 'Редактировать';
+rsDelete                 = 'Удалить';
+rsExit                   = 'Выход';
+rsYesToAll               = 'Да для всех';
+rsNoToAll                = 'Нет для всех';
 
 
 // Captions
-rsError                  = 'Error';
-rsCriticalError          = 'Critical Error';
-rsInformation            = 'Information';
-rsConfirmation           = 'Confirm';
-rsWarning                = 'Warning';
-rsMessage                = 'Message';
+rsError                  = 'Ошибка';
+rsCriticalError          = 'Критическая ошибка';
+rsInformation            = 'Информация';
+rsConfirmation           = 'Подтверждение';
+rsWarning                = 'Внимание';
+rsMessage                = 'Сообщение';
 
 
 // Standard file filters
-rsAllFiles               = 'All Files';
+rsAllFiles               = 'Все файлы';
 
 
 // CreateDir Dialog
-rsCreateDirectory        = 'Create directory';
-rsEnterNewDirectory      = 'Enter new directory name';
-rsCannotCreateDir        = 'Cannot create directory';
+rsCreateDirectory        = 'Создать директорию';
+rsEnterNewDirectory      = 'Укажите имя новой директории';
+rsCannotCreateDir        = 'Невозможно создать директорию';
 
 
 // Font Dialog
-rsSelectAFont            = 'Select a font';
-rsName                   = 'Name';
-rsCollection             = 'Collection';
-rsSize                   = 'Size';
-rsStyle                  = 'Style';
-rsItalic                 = 'Italic';
-rsBold                   = 'Bold';
-rsUnderScore             = 'UnderScore';
-rsExampleText            = 'Example Text';
+rsSelectAFont            = 'Выбор шрифта';
+rsName                   = 'Название';
+rsCollection             = 'Группа';
+rsSize                   = 'Размер';
+rsStyle                  = 'Стиль';
+rsItalic                 = 'Курсив';
+rsBold                   = 'Жирный';
+rsUnderScore             = 'Подчеркнутый';
+rsExampleText            = 'Пример текста';
 
 
 // Open Dialog
-rsOpenAFile              = 'Open a file';
-rsFileName               = 'Filename';
-rsFileType               = 'Type of file';
-rsDrive                  = 'Drive';
-rsFiles                  = 'Files';
-rsDirectories            = 'Directories';
-rsShowHidden             = 'Show hidden files';
+rsOpenAFile              = 'Открыть файл';
+rsFileName               = 'Имя файла';
+rsFileType               = 'Тип файла';
+rsDrive                  = 'Диск';
+rsFiles                  = 'Файлы';
+rsDirectories            = 'Директории';
+rsShowHidden             = 'Показывать скрытые файлы';
 
 
 // Save Dialog
-rsSaveAFile              = 'Save file as';
+rsSaveAFile              = 'Сохранить файл как';
 
 
