@@ -34,6 +34,7 @@ type
 
   TfpgRadioButton = class(TfpgWidget)
   private
+    FAutoSize: boolean;
     FChecked: boolean;
     FFont: TfpgFont;
     FGroupIndex: integer;
@@ -42,9 +43,11 @@ type
     FBoxSize: integer;
     FIsPressed: boolean;
     function    GetFontDesc: string;
+    procedure   SetAutoSize(const AValue: boolean);
     procedure   SetChecked(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
+    procedure   DoAdjustWidth;
   protected
     procedure   HandlePaint; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -57,6 +60,7 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
+    property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
     property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -86,6 +90,16 @@ end;
 function TfpgRadioButton.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
+end;
+
+procedure TfpgRadioButton.SetAutoSize(const AValue: boolean);
+begin
+  if FAutoSize = AValue then
+    Exit; //==>
+  FAutoSize := AValue;
+  if FAutoSize then
+    DoAdjustWidth;
+  Repaint;
 end;
 
 procedure TfpgRadioButton.SetChecked(const AValue: boolean);
@@ -129,7 +143,18 @@ begin
   if FText = AValue then
     Exit; //==>
   FText := AValue;
+  if AutoSize then
+    DoAdjustWidth;
   RePaint;
+end;
+
+procedure TfpgRadioButton.DoAdjustWidth;
+begin
+  if AutoSize then
+  begin
+    Width := Font.TextWidth(FText) + 24; // 24 is extra padding for image
+    UpdateWindowPosition;
+  end;
 end;
 
 procedure TfpgRadioButton.HandlePaint;
@@ -333,6 +358,7 @@ begin
   FChecked    := False;
   FGroupIndex := 0;
   FIsPressed  := False;
+  FAutoSize   := False;
   FOnChange   := nil;
 end;
 

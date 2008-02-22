@@ -1229,7 +1229,7 @@ begin
   r.SetRect(0, 0, Width, Height);
   Canvas.DrawRectangle(r); // border
 
-  {$Note Columns need to be redesigned completely }
+  { TODO : Columns need to be redesigned completely }
   if ShowColumns then
   begin
     // Drawing column headers

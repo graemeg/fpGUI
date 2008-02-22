@@ -130,6 +130,7 @@ type
     procedure   Close; override;
     function    AddMenuItem(const AMenuName: string; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
     function    MenuItemByName(const AMenuName: string): TfpgMenuItem;
+    function    MenuItem(const AMenuPos: integer): TfpgMenuItem;  // added to allow for localization
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
   
@@ -170,6 +171,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    AddMenuItem(const AMenuTitle: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
+    function    MenuItem(const AMenuPos: integer): TfpgMenuItem;  // added to allow for localization
     property    MenuOptions: TfpgMenuOptions read FMenuOptions write FMenuOptions;
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
@@ -692,6 +694,11 @@ begin
   Result.HotKeyDef  := '';
   Result.OnClick    := OnClickProc;
   Result.Separator  := False;
+end;
+
+function TfpgMenuBar.MenuItem(const AMenuPos: integer): TfpgMenuItem;
+begin
+  Result:= TfpgMenuItem(Components[AMenuPos]);
 end;
 
 { TfpgPopupMenu }
@@ -1287,6 +1294,11 @@ begin
         Exit; //==>
       end;
   end;
+end;
+
+function TfpgPopupMenu.MenuItem(const AMenuPos: integer): TfpgMenuItem;
+begin
+  Result:= TfpgMenuItem(Components[AMenuPos]);
 end;
 
 initialization

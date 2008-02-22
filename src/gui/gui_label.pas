@@ -200,13 +200,13 @@ begin
   begin
     Width   := FFont.TextWidth(FText);
     Height  := FFont.Height;
-    SetPosition(Left, Top, Width, Height);
   end
-  else
-  if FWrapText then
+  else if FWrapText then
     Wrap(Width, FText)
   else
     Height := FFont.Height;
+
+  UpdateWindowPosition;
   RePaint;
 end;
 

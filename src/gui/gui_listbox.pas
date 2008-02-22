@@ -273,7 +273,7 @@ begin
       FScrollBar.SliderSize := pn / ItemCount
     else
       FScrollBar.SliderSize := 1;
-    FScrollBar.Max := ItemCount-pn+1;
+    FScrollBar.Max := ItemCount-pn{+1};     // change to avoid the last blanc item
     FScrollBar.Position := FFirstItem;
     FScrollBar.RepaintSlider;
   end;
