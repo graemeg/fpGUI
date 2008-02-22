@@ -23,6 +23,7 @@ resourcestring
 {.$DEFINE fr}     // French
 {.$DEFINE pt}     // Portuguese
 {.$DEFINE za}     // Afrikaans
+{.$DEFINE it}     // Italian
 
 
 
@@ -40,6 +41,9 @@ resourcestring
   
 {$ELSEIF defined(za)}
   {$I lang_afrikaans.inc}
+
+{$ELSEIF defined(it)}
+  {$I lang_italian.inc}
 
 {$ELSE}
   {$I lang_english.inc}
