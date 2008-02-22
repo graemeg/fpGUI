@@ -1,4 +1,4 @@
-﻿{%mainunit gfx_constants.pas}
+{%mainunit gfx_constants.pas}
 
 rsLanguage               = 'Русский';
 
