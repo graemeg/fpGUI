@@ -1,78 +1,78 @@
 {%mainunit gfx_constants.pas}
 
-rsLanguage               = 'French';
+rsLanguage               = 'Français';
 
 
 // Buttons
 rsOK                     = 'OK';
-rsCancel                 = 'Cancel';
-rsHelp                   = 'Help';
-rsOpen                   = 'Open';
-rsSave                   = 'Save';
-rsCreate                 = 'Create';
-rsChange                 = 'Changes';
-rsFind                   = 'Find';
-rsSearch                 = 'Search';
-rsReplace                = 'Replace';
-rsConfirm                = 'Confirm';
-rsAll                    = 'All';
-rsSelect                 = 'Select';
-rsYes                    = 'Yes';
-rsNo                     = 'No';
-rsAbort                  = 'Abort';
-rsRetry                  = 'Retry';
-rsIgnore                 = 'Ignore';
-rsClose                  = 'Close';
-rsInsert                 = 'Insert';
-rsEdit                   = 'Edit';
-rsDelete                 = 'Delete';
-rsExit                   = 'Exit';
-rsYesToAll               = 'Yes to All';
-rsNoToAll                = 'No to All';
+rsCancel                 = 'Annuler';
+rsHelp                   = 'Aide';
+rsOpen                   = 'Ouvrir';
+rsSave                   = 'Sauver';
+rsCreate                 = 'Créer';
+rsChange                 = 'Changements';
+rsFind                   = 'Trouver';
+rsSearch                 = 'Chercher';
+rsReplace                = 'Remplacer';
+rsConfirm                = 'Confirmer';
+rsAll                    = 'Tous';
+rsSelect                 = 'Selectionner';
+rsYes                    = 'Oui';
+rsNo                     = 'Non';
+rsAbort                  = 'Arrêter';
+rsRetry                  = 'Retenter';
+rsIgnore                 = 'Ignorer';
+rsClose                  = 'Fermer';
+rsInsert                 = 'Insérer';
+rsEdit                   = 'Editer';
+rsDelete                 = 'Supprimer';
+rsExit                   = 'Sortir';
+rsYesToAll               = 'Oui à tous';
+rsNoToAll                = 'Non à tous';
 
 
 // Captions
-rsError                  = 'Error';
-rsCriticalError          = 'Critical Error';
+rsError                  = 'Erreur';
+rsCriticalError          = 'Erreur critique';
 rsInformation            = 'Information';
-rsConfirmation           = 'Confirm';
-rsWarning                = 'Warning';
+rsConfirmation           = 'Confirmation';
+rsWarning                = 'Alerte';
 rsMessage                = 'Message';
 
 
 // Standard file filters
-rsAllFiles               = 'All Files';
+rsAllFiles               = 'Tous les fichiers';
 
 
 // CreateDir Dialog
-rsCreateDirectory        = 'Create directory';
-rsEnterNewDirectory      = 'Enter new directory name';
-rsCannotCreateDir        = 'Cannot create directory';
+rsCreateDirectory        = 'Créer répertoire';
+rsEnterNewDirectory      = 'Entrer nom du nouveau répertoire';
+rsCannotCreateDir        = 'Impossible de créer le répertoire';
 
 
 // Font Dialog
-rsSelectAFont            = 'Select a font';
-rsName                   = 'Name';
+rsSelectAFont            = 'Choisir la police';
+rsName                   = 'Nom';
 rsCollection             = 'Collection';
-rsSize                   = 'Size';
+rsSize                   = 'Taille';
 rsStyle                  = 'Style';
-rsItalic                 = 'Italic';
-rsBold                   = 'Bold';
-rsUnderScore             = 'UnderScore';
-rsExampleText            = 'Example Text';
+rsItalic                 = 'Italique';
+rsBold                   = 'Gras';
+rsUnderScore             = 'Souligné';
+rsExampleText            = 'Texte exemple';
 
 
 // Open Dialog
-rsOpenAFile              = 'Open a file';
-rsFileName               = 'Filename';
-rsFileType               = 'Type of file';
-rsDrive                  = 'Drive';
-rsFiles                  = 'Files';
-rsDirectories            = 'Directories';
-rsShowHidden             = 'Show hidden files';
+rsOpenAFile              = 'Ouvrir un fichier';
+rsFileName               = 'Nom de fichier';
+rsFileType               = 'Type de fichier';
+rsDrive                  = 'Disque';
+rsFiles                  = 'Fichiers';
+rsDirectories            = 'Répertoires';
+rsShowHidden             = 'Montrer les fichiers cachés';
 
 
 // Save Dialog
-rsSaveAFile              = 'Save file as';
+rsSaveAFile              = 'Sauver sous';
 
 
