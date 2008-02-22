@@ -139,10 +139,11 @@ begin
       AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
     end;
   until UTF8Pos(' ', AText) = 0;
-  if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText)) < MaxLength then
-    FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText
-  else
-    FWrappedText.Add(AText);
+  if FWrappedText.Count > 1 then
+    if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText)) < MaxLength then
+      FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText
+    else
+      FWrappedText.Add(AText);
   Height := FWrappedText.Count * (Font.Height + 2);
 end;
 
