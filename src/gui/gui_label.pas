@@ -125,6 +125,7 @@ begin
   FWrappedText.Clear;
   repeat
   if UTF8Pos(' ', AText) > 0 then
+  begin
     if Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText))) < MaxLength then
     begin
       if FWrappedText.Count > 0 then
@@ -138,12 +139,20 @@ begin
         FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
       AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
     end;
+  end
+  else
+  begin
+    FWrappedText.Add(AText);
+    AText:= '';
+  end;
   until UTF8Pos(' ', AText) = 0;
-  if FWrappedText.Count > 1 then
+  if FWrappedText.Count > 0 then
+  begin
     if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText)) < MaxLength then
       FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText
     else
       FWrappedText.Add(AText);
+  end;
   Height := FWrappedText.Count * (Font.Height + 2);
 end;
 
