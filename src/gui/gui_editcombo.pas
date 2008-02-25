@@ -61,7 +61,8 @@ uses
   gfx_popupwindow;
 
 type
-  TAllowNew = (anNo,anYes,anAsk);
+  TAllowNew = (anNo, anYes, anAsk);
+
 
   TfpgAbstractEditCombo = class(TfpgWidget)
   private
@@ -109,6 +110,7 @@ type
     procedure   HandlePaint; override;
     procedure   PaintInternalButton; virtual;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
+    // property is 0-based
     property    Items: TStringList read FItems;    {$Note Make this read/write}
     // property is 1-based
     property    FocusItem: integer read FFocusItem write SetFocusItem;
@@ -349,11 +351,11 @@ begin
   begin
     FreeAndNil(FDropDown);
     OriginalFocusRoot := FocusRootWidget;
-    FDropDown       := TDropDownWindow.Create(nil);
+    FDropDown := TDropDownWindow.Create(nil);
     ddw := TDropDownWindow(FDropDown);
     ddw.Width := Width;
-    ddw.CallerWidget      := self;
-    ddw.ListBox.OnSelect  := @InternalListBoxSelect;
+    ddw.CallerWidget := self;
+    ddw.ListBox.OnSelect := @InternalListBoxSelect;
 
     // Assign combobox text items to internal listbox
     if FAutoCompletion then
@@ -371,7 +373,7 @@ begin
       rowcount := FDropDownCount;
     if rowcount < 1 then
       rowcount := 1;
-    ddw.Height            := (ddw.ListBox.RowHeight * rowcount) + 4;
+    ddw.Height := (ddw.ListBox.RowHeight * rowcount) + 4;
     
     // set default focusitem
     ddw.ListBox.FocusItem := FFocusItem;
@@ -396,9 +398,17 @@ end;
 
 procedure TfpgAbstractEditCombo.InternalListBoxSelect(Sender: TObject);
 var
-  msgp: TfpgMessageParams;
+  i: Integer;
 begin
-  FFocusItem := TDropDownWindow(FDropDown).ListBox.FocusItem;
+  for i := 0 to Items.Count-1 do
+  begin
+    // Items is 0-based and FocusItem is 1-based
+    if Items[i]= TDropDownWindow(FDropDown).ListBox.Items[TDropDownWindow(FDropDown).ListBox.FocusItem-1] then
+    begin
+      FFocusItem := i+1;
+      Break;
+    end;
+  end;
   FDropDown.Close;
 
   if HasHandle then
@@ -442,7 +452,7 @@ begin
   begin
     for i := 0 to FItems.Count - 1 do
     begin
-      if SameText(UTF8Copy(FItems.Strings[i],1,UTF8Length(AVAlue)), AValue) then
+      if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(AVAlue)), AValue) then
       begin
         SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
         Break;
@@ -484,9 +494,9 @@ var
   s: string;
   prevval: string;
 begin
-  prevval := FText;
-  s       := UTF8Encode(AText);
-  consumed := False;
+  prevval   := FText;
+  s         := UTF8Encode(AText);
+  consumed  := False;
 
   // Handle only printable characters
   // Note: This is not UTF-8 compliant!
