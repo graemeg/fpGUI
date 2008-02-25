@@ -149,9 +149,10 @@ begin
   begin
     Name := 'rbSpokes';
     SetPosition(12, 28, 120, 19);
-    Text := 'Spokes';
     FontDesc := '#Label1';
     GroupIndex := 1;
+    TabOrder := 2;
+    Text := 'Spokes';
     OnChange := @RadioButtonChanged;
   end;
 
@@ -160,10 +161,11 @@ begin
   begin
     Name := 'rbLines';
     SetPosition(12, 8, 120, 19);
-    Text := 'Lines';
+    Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 1;
-    Checked := True;
+    TabOrder := 1;
+    Text := 'Lines';
     OnChange := @RadioButtonChanged;
   end;
 
@@ -172,9 +174,10 @@ begin
   begin
     Name := 'rbSpiral';
     SetPosition(12, 48, 120, 19);
-    Text := 'Spiral';
     FontDesc := '#Label1';
     GroupIndex := 1;
+    TabOrder := 3;
+    Text := 'Spiral';
     OnChange := @RadioButtonChanged;
   end;
 

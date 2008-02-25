@@ -869,8 +869,8 @@ begin
           w := FindWindowByHandle(ev.xbutton.window);
           if not Assigned(w) then
             ReportLostWindow(ev);
-{
-          else
+
+{          else
           begin
             if ev._type = X.ButtonPress then
             begin
@@ -1431,7 +1431,7 @@ end;
 procedure TfpgWindowImpl.CaptureMouse;
 begin
   XGrabPointer(xapplication.Display, FWinHandle,
-      True,
+      False,
       ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask,
       GrabModeAsync,
       GrabModeAsync,

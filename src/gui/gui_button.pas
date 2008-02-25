@@ -55,6 +55,8 @@ type
     function    GetAllowDown: Boolean;
     procedure   SetAllowDown(const Value: Boolean);
     procedure   SetAllowAllUp(const Value: boolean);
+    procedure   DoPush;
+    procedure   DoRelease(x, y: integer);
   protected
     FImageMargin: integer;
     FImageSpacing: integer;
@@ -75,8 +77,6 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   DoPush;
-    procedure   DoRelease;
     procedure   Click;
     function    GetCommand: ICommand;   // ICommandHolder interface
     procedure   SetCommand(ACommand: ICommand); // ICommandHolder interface
@@ -364,21 +364,26 @@ begin
     Click;
 end;
 
-procedure TfpgButton.DoRelease;
+procedure TfpgButton.DoRelease(x, y: integer);
+var
+  r: TfpgRect;
 begin
+  r.SetRect(0, 0, Width, Height);
   if AllowDown then
   begin
     if FDown and (not FClickOnPush) and FAllowAllUp then
     begin
       FDown := False;
       RePaint;
-      Click;
+      if PtInRect(r, Point(x, y)) then
+        Click;
     end;
   end
   else
   begin
     if FDown and FClicked then
-      Click;
+      if PtInRect(r, Point(x, y)) then
+        Click;
     FDown := False;
     RePaint;
   end;
@@ -402,7 +407,7 @@ procedure TfpgButton.HandleKeyRelease(var keycode: word; var shiftstate: TShiftS
 begin
   if (keycode = keyReturn) or (keycode = keySpace) then
   begin
-    DoRelease;
+    DoRelease(1, 1); // fake co-ordinates to it executes the Click
     Consumed := True;
   end
   else
@@ -411,20 +416,20 @@ end;
 
 procedure TfpgButton.HandleLMouseDown(X, Y: integer; ShiftState: TShiftState);
 begin
-//  writeln('TfpgButton - mouse down');
   inherited;
   if (csDesigning in ComponentState) then
     Exit;
+  CaptureMouse;
   DoPush;
 end;
 
 procedure TfpgButton.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-//  writeln('mouse up');
 //  inherited;
   if (csDesigning in ComponentState) then
     Exit;
-  DoRelease;
+  ReleaseMouse;
+  DoRelease(x, y);
 end;
 
 procedure TfpgButton.HandleMouseExit;

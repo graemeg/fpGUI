@@ -16,6 +16,8 @@ type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
 
 
+  { TfpgWidget }
+
   TfpgWidget = class(TfpgWindow)
   private
     FAlignRect: TfpgRect;
@@ -371,18 +373,20 @@ begin
 
   if not FEnabled then
     exit;   // Do we want this here?
-    
+
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin
         mb := mbLeft;
         HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
+
     MOUSE_RIGHT:
       begin
         mb := mbRight;
         HandleRMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
+
     MOUSE_MIDDLE:
       begin
         mb := mbMiddle;
@@ -417,9 +421,11 @@ begin
           IsDblClick := (fpgGetTickCount - uLastClickTime) <= DOUBLECLICK_MS   // we detected a double click
         else
           uLastClickWidget := self;
+
         uLastClickTime := fpgGetTickCount;
         if IsDblClick then
         begin
+
           HandleDoubleClick(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
           if Assigned(FOnDoubleClick) then
             FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
@@ -429,11 +435,13 @@ begin
         // The mouse up must still be handled even if we had a double click event.
         HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
+
     MOUSE_RIGHT:
       begin
         mb := mbRight;
         HandleRMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
+
     MOUSE_MIDDLE:
       begin
         mb := mbMiddle;

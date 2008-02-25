@@ -227,8 +227,8 @@ procedure TDropDownWindow.HandleHide;
 begin
   // HandleHide also gets called in TfpgWidget.Destroy so we need a few
   // if Assigned() tests here. This should be improved on.
-  if Assigned(FocusRootWidget) then
-    FocusRootWidget.ReleaseMouse;  // for internal ListBox
+//  if Assigned(FocusRootWidget) then
+//    FocusRootWidget.ReleaseMouse;  // for internal ListBox
 
   FocusRootWidget   := OriginalFocusRoot;
   OriginalFocusRoot := nil;
