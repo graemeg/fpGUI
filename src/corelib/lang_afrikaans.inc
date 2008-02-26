@@ -4,14 +4,14 @@ rsLanguage               = 'Afrikaans';
 
 
 // Buttons
-rsOK                     = 'OK';
+rsOK                     = 'Goed';
 rsCancel                 = 'Kanselleer';
 rsHelp                   = 'Hulp';
-rsOpen                   = 'Open';
+rsOpen                   = 'Maak oop';
 rsSave                   = 'Stoor';
 rsCreate                 = 'Create';
-rsChange                 = 'Changes';
-rsFind                   = 'Find';
+rsChange                 = 'Verander';
+rsFind                   = 'Vind';
 rsSearch                 = 'Soek';
 rsReplace                = 'Vervang';
 rsConfirm                = 'Confirm';
@@ -20,28 +20,28 @@ rsSelect                 = 'Select';
 rsYes                    = 'Ja';
 rsNo                     = 'Nee';
 rsAbort                  = 'Abort';
-rsRetry                  = 'Retry';
-rsIgnore                 = 'Ignore';
-rsClose                  = 'Maak toe';
+rsRetry                  = 'Probeer weer';
+rsIgnore                 = 'Ignoreer';
+rsClose                  = 'Sluit';
 rsInsert                 = 'Insert';
-rsEdit                   = 'Edit';
+rsEdit                   = 'Redigeer';
 rsDelete                 = 'Delete';
-rsExit                   = 'Exit';
-rsYesToAll               = 'Yes to All';
-rsNoToAll                = 'No to All';
+rsExit                   = 'Staak';
+rsYesToAll               = 'Ja vir Alles';
+rsNoToAll                = 'Nee vir Alles';
 
 
 // Captions
 rsError                  = 'Fout';
-rsCriticalError          = 'Critical Error';
-rsInformation            = 'Information';
+rsCriticalError          = 'Kritiese Fout';
+rsInformation            = 'Informasie';
 rsConfirmation           = 'Confirm';
-rsWarning                = 'Warning';
+rsWarning                = 'Waarskuwing';
 rsMessage                = 'Boodskap';
 
 
 // Standard file filters
-rsAllFiles               = 'All Files';
+rsAllFiles               = 'Alle Lêers';
 
 
 // CreateDir Dialog
@@ -52,27 +52,27 @@ rsCannotCreateDir        = 'Cannot create directory';
 
 // Font Dialog
 rsSelectAFont            = 'Select a font';
-rsName                   = 'Name';
+rsName                   = 'Naam';
 rsCollection             = 'Collection';
-rsSize                   = 'Size';
-rsStyle                  = 'Style';
+rsSize                   = 'Groote';
+rsStyle                  = 'Steil';
 rsItalic                 = 'Italic';
 rsBold                   = 'Bold';
-rsUnderScore             = 'UnderScore';
+rsUnderScore             = 'Onderstreep';
 rsExampleText            = 'Example Text';
 
 
 // Open Dialog
-rsOpenAFile              = 'Open a file';
-rsFileName               = 'Filename';
-rsFileType               = 'Type of file';
+rsOpenAFile              = 'Maak ''n leêr op';
+rsFileName               = 'Lêer naam';
+rsFileType               = 'Tipe Leêr';
 rsDrive                  = 'Drive';
-rsFiles                  = 'Files';
+rsFiles                  = 'Lêers';
 rsDirectories            = 'Directories';
 rsShowHidden             = 'Show hidden files';
 
 
 // Save Dialog
-rsSaveAFile              = 'Save file as';
+rsSaveAFile              = 'Stoor ''n lêer';
 
 
