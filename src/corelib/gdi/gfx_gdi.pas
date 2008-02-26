@@ -808,8 +808,8 @@ begin
             writeln(' Blockmsg = True (part 1) : ' + PopupListFirst.ClassName);
             {$ENDIF}
             // This is ugly but needed for now to get TfpgCombobox to work
-//            if PopupListFirst.ClassName <> 'TDropDownWindow' then
-            if not (PopupListFirst is TfpgPopupWindow) then
+            if (PopupListFirst.ClassName <> 'TDropDownWindow') then
+//            if not (PopupListFirst is TfpgPopupWindow) then
               blockmsg := True;
           end else
           if (wapplication.TopModalForm <> nil) then
