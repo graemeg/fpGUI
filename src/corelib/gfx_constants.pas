@@ -21,7 +21,7 @@ resourcestring
 {.$DEFINE de}     // German
 {.$DEFINE ru}     // Russian
 {.$DEFINE fr}     // French
-{.$DEFINE pt}     // Portuguese
+{.$DEFINE pt}     // Portuguese (Brazil)
 {.$DEFINE za}     // Afrikaans
 {.$DEFINE it}     // Italian
 
