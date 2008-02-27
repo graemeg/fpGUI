@@ -102,9 +102,11 @@ type
   // Listbox containg strings - the normal listbox as we know it. Used by
   // component developers.
   TfpgTextListBox = class(TfpgBaseListBox)
+  private
   protected
     FItems: TStringList;
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     property    Items: TStringList read FItems;
   public
     constructor Create(AOwner: TComponent); override;
@@ -133,6 +135,7 @@ function CreateListBox(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgListBox;
 
 
 implementation
+
 
 type
   // custom stringlist that will notify listbox of item changes
@@ -675,6 +678,29 @@ begin
   if num < 1 then
     Exit;
   fpgStyle.DrawString(Canvas, rect.left+2, rect.top+1, FItems.Strings[num-1], Enabled);
+end;
+
+procedure TfpgTextListBox.HandleKeyChar(var AText: TfpgChar;
+  var shiftstate: TShiftState; var consumed: boolean);
+var
+  i: integer;
+begin
+  // if user press a key then it will search the stringlist for a word
+  // beginning with such as letter
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1 ) then
+    for i := FFocusItem to FItems.Count - 1 do
+    begin
+      if SameText(LeftStr(FItems.Strings[i], Length(AText)), AText) then
+      begin
+        FFocusItem := i + 1;
+        FollowFocus;
+        RePaint;
+        DoChange;
+        Consumed := True;
+        break;
+      end;
+    end;
+  inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
 constructor TfpgTextListBox.Create(AOwner: TComponent);
