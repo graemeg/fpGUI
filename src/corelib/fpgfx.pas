@@ -307,7 +307,8 @@ implementation
 uses
   gfx_imgfmt_bmp,
   gfx_stdimages,
-  gfx_extinterpolation; // only so that it get auto compiled
+  gfx_extinterpolation, // only so that it get auto compiled
+  gfx_translations;
 
 var
   fpgTimers: TList;
@@ -811,6 +812,8 @@ begin
   fpgCaret      := TfpgCaret.Create;
   fpgImages     := TfpgImages.Create;
   fpgCreateStandardImages;
+  
+  TranslateResourceStrings(ExtractFilePath(ParamStr(0)), '');
 end;
 
 procedure TfpgApplication.Flush;

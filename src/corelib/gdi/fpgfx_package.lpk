@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="1"/>
-    <Files Count="16">
+    <Files Count="18">
       <Item1>
         <Filename Value="..\gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
@@ -91,6 +91,14 @@
         <Filename Value="..\gfx_constants.pas"/>
         <UnitName Value="gfx_constants"/>
       </Item16>
+      <Item17>
+        <Filename Value="..\gfx_pofiles.pas"/>
+        <UnitName Value="gfx_pofiles"/>
+      </Item17>
+      <Item18>
+        <Filename Value="..\gfx_translations.pas"/>
+        <UnitName Value="gfx_translations"/>
+      </Item18>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

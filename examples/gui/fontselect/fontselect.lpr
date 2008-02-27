@@ -13,7 +13,8 @@ uses
   gui_button,
   gui_listbox,
   gui_edit,
-  gui_label;
+  gui_label,
+  gfx_constants;
 
 
 type
@@ -65,7 +66,7 @@ begin
   WindowTitle := 'Font selection test';
   SetPosition(100, 100, 500, 400);
   
-  btnSelectFont := CreateButton(self, 10, 10, 110, 'Select Font...', @btnSelectFontClick);
+  btnSelectFont := CreateButton(self, 10, 10, 110, rsSelectAFont, @btnSelectFontClick);
 
   edFontDesc := CreateEdit(self, 10, 45, Width - 20, 24);
 //  edFontDesc.Text := fpgApplication.DefaultFont.FontDesc;
@@ -81,7 +82,7 @@ begin
 
   CreateFontList;
 
-  btnQuit := CreateButton(self, 415, 370, 80, 'Quit', @btnQuitClick);
+  btnQuit := CreateButton(self, 415, 370, 80, rsExit, @btnQuitClick);
   btnQuit.ImageName := 'stdimg.Quit';
   btnQuit.ShowImage := True;
   btnQuit.Anchors := [anRight, anBottom];

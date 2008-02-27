@@ -15,6 +15,9 @@ implementation
 
 uses
   baseunix;
+  
+// the common code for all platforms
+{$I gfx_utils_impl.inc}
 
 // File utils
 function ExtractTargetSymLinkPath(ALink: string): string;

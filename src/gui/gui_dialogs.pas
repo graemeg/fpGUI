@@ -707,7 +707,7 @@ begin
   cbBold := TfpgCheckBox.Create(self);
   with cbBold do
   begin
-    SetPosition(461, 32, 87, 20);
+    SetPosition(461, 32, 110, 20);
     Text := rsBold;
     OnChange := @OnParamChange;
   end;
@@ -715,7 +715,7 @@ begin
   cbItalic := TfpgCheckBox.Create(self);
   with cbItalic do
   begin
-    SetPosition(461, 56, 87, 20);
+    SetPosition(461, 56, 110, 20);
     Text := rsItalic;
     OnChange := @OnParamChange;
   end;
@@ -723,15 +723,15 @@ begin
   cbUnderline := TfpgCheckBox.Create(self);
   with cbUnderline do
   begin
-    SetPosition(461, 80, 87, 20);
-    Text := 'Underline';
+    SetPosition(461, 80, 110, 20);
+    Text := rsUnderScore;
     OnChange := @OnParamChange;
   end;
 
   cbAntiAlias := TfpgCheckBox.Create(self);
   with cbAntiAlias do
   begin
-    SetPosition(461, 124, 99, 20);
+    SetPosition(461, 124, 110, 20);
     Text := 'Anti aliasing';
     OnChange := @OnParamChange;
     Checked := True;
