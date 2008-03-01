@@ -566,7 +566,8 @@ end;
 function TfpgApplicationImpl.StartComposing(const Event: TXEvent): TKeySym;
 begin
   SetLength(FComposeBuffer,
-    XLookupString(@Event, @FComposeBuffer[1],
+    // XLookupString(@Event, @FComposeBuffer[1],    
+    Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
       SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus));
 end;
 
@@ -762,7 +763,8 @@ var
           writeln('not a key event ');
         end;
     end;
-    length := XLookupString(@event, @s[1], 9, @keysym, @compose_status);
+    // length := XLookupString(@event, @s[1], 9, @keysym, @compose_status);
+    length := Xutf8LookupString(InputContext, @event.xkey, @s[1], 9, @keysym, @compose_status);
     SetLength(s, length);
     if((length > 0) and (length <=9)) then
       writeln('result of xlookupstring [' + s + ']');
@@ -846,9 +848,14 @@ begin
             // Maybe in the future we can switch to XmbLookupString again.
             if (ev.xkey.state and (ControlMask or Mod1Mask)) = 0 then
             begin
-              for i := 1 to Length(FComposeBuffer) do
+              {for i := 1 to Length(FComposeBuffer) do
               begin
                 msgp.keyboard.keychar := FComposeBuffer[i];
+                fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
+              end;}
+              for i := 1 to UTF8Length(FComposeBuffer) do
+              begin
+                msgp.keyboard.keychar := UTF8Copy(FComposeBuffer, i, 1);
                 fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
               end;
             end;
