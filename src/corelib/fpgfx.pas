@@ -813,7 +813,8 @@ begin
   fpgImages     := TfpgImages.Create;
   fpgCreateStandardImages;
   
-  TranslateResourceStrings(ExtractFilePath(ParamStr(0)), '');
+  TranslateResourceStrings('fpgui', ExtractFilePath(ParamStr(0)), '');
+  TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
 end;
 
 procedure TfpgApplication.Flush;

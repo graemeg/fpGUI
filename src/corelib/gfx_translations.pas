@@ -43,7 +43,7 @@ type
   end;
 
 
-procedure TranslateResourceStrings(const BaseDirectory, CustomLang: string);
+procedure TranslateResourceStrings(const BaseAppName, BaseDirectory, CustomLang: string);
 
 
 implementation
@@ -51,24 +51,23 @@ implementation
 uses
   GetText
   ,gfx_pofiles
-  ,gfx_constants
   ,gfx_utils
   ;
   
 
 var
   TranslationList: TTranslationList;
-  SystemLanguageID1: string;
-  SystemLanguageID2: string;
+  SystemLanguageID1: string = '';
+  SystemLanguageID2: string = '';
 
 
-procedure CollectTranslations(const BaseDir: string);
+procedure CollectTranslations(const BaseAppName, BaseDir: string);
 var
   FileInfo: TSearchRec;
   ID: string;
   SearchMask: string;
 begin
-  // search for all languages/fpgui.xxx.po files
+  // search for all <BaseAppName>.xxx.po files
   if TranslationList = nil then
     TranslationList := TTranslationList.Create
   else
@@ -78,15 +77,15 @@ begin
   TranslationList.Add('en');
   // search existing translations
 
-  SearchMask := fpgAddTrailingValue(BaseDir, PathDelim, false) + {'languages' + PathDelim +} 'fpgui.*.po';
+  SearchMask := fpgAddTrailingValue(BaseDir, PathDelim, false) + BaseAppName + '.*.po';
   //writeln('CollectTranslations ',SearchMask);
   if SysUtils.FindFirst(SearchMask, faAnyFile, FileInfo) = 0
   then begin
     repeat
       if (FileInfo.Name = '.') or (FileInfo.Name = '..') or (FileInfo.Name = '') then
         Continue;
-      ID := copy(FileInfo.Name,length('fpgui.')+1,
-               length(FileInfo.Name)-length('fpgui..po'));
+      ID := copy(FileInfo.Name,length(BaseAppName + '.')+1,
+               length(FileInfo.Name)-length(BaseAppName + '..po'));
       //writeln('CollectTranslations A ',FileInfo.Name,' ID=',ID);
       if (ID <> '') and (Pos('.',ID) < 1) and (TranslationList.IndexOf(ID) < 0) then
       begin
@@ -98,7 +97,7 @@ begin
   SysUtils.FindClose(FileInfo);
 end;
 
-procedure TranslateResourceStrings(const BaseDirectory, CustomLang: string);
+procedure TranslateResourceStrings(const BaseAppName, BaseDirectory, CustomLang: string);
 const
   Ext = '.%s.po';
 var
@@ -106,9 +105,13 @@ var
   FallbackLang: string;
   Dir: string;
 begin
-//  writeln('TranslateResourceStrings A CustomLang=',CustomLang);
+  {$IFDEF DEBUG}
+  writeln('BaseAppName = ',BaseAppName);
+  writeln('BaseDirectory = ',BaseDirectory);
+  writeln('CustomLang = ',CustomLang);
+  {$ENDIF}
   if TranslationList = nil then
-    CollectTranslations(BaseDirectory);
+    CollectTranslations(BaseAppName, BaseDirectory);
     
   if CustomLang = '' then
   begin
@@ -123,18 +126,33 @@ begin
 //  writeln('TranslateResourceStrings A Lang=',Lang,' FallbackLang=',FallbackLang);
   Dir := fpgAddTrailingValue(BaseDirectory, PathDelim, false);
 
-  // We use one translation file for all fpGUI related text
-  TranslateUnitResourceStrings('gfx_constants',
-    Dir + {'languages/}'fpgui' + Ext, Lang, FallbackLang);
-    
+  // We use one translation file for all fpGUI Toolkit related text and one
+  // translation file for all fpGUI based application text
+  if BaseAppName = 'fpgui' then
+    TranslateUnitResourceStrings('gfx_constants',
+      Dir + BaseAppName + Ext, Lang, FallbackLang)
+  else
+    { TODO : What the hell do we do here? }
+    TranslateUnitResourceStrings('strconstants',
+      Dir + BaseAppName + Ext, Lang, FallbackLang);
+
   {$IFDEF DEBUG}
+  writeln('Lang = ' + Lang);
   writeln('SystemLanguageID1 = ' + SystemLanguageID1);
   writeln('SystemLanguageID2 = ' + SystemLanguageID2);
-  writeln('Translation file = ' +Dir + {'languages/}'fpgui' + Ext);
+  writeln('Translation file = ' +Dir + BaseAppName + Ext);
   {$ENDIF}
-//  writeln(Lang);
 end;
 
+// Strip the '.' onwards part. eg: en_ZA.UTF-8  ->  en_ZA
+procedure FixLanguageIDs;
+var
+  lpos: integer;
+begin
+  lpos := Pos('.', SystemLanguageID1);
+  if lpos > 0 then
+    SystemLanguageID1 := Copy(SystemLanguageID1, 0, lpos-1);
+end;
 
 { TTranslationList }
 
@@ -183,6 +201,7 @@ end;
 initialization
   TranslationList := nil;
   GetLanguageIDs(SystemLanguageID1, SystemLanguageID2);
+  FixLanguageIDs;
 
 finalization
   TranslationList.Free;
