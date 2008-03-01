@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="1"/>
-    <Files Count="18">
+    <Files Count="19">
       <Item1>
         <Filename Value="..\gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
@@ -99,6 +99,10 @@
         <Filename Value="..\gfx_translations.pas"/>
         <UnitName Value="gfx_translations"/>
       </Item18>
+      <Item19>
+        <Filename Value="..\gfx_stringhashlist.pas"/>
+        <UnitName Value="gfx_stringhashlist"/>
+      </Item19>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

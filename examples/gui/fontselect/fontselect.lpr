@@ -14,7 +14,8 @@ uses
   gui_listbox,
   gui_edit,
   gui_label,
-  gfx_constants;
+  gfx_constants,
+  strconstants;
 
 
 type
@@ -31,6 +32,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
+  
 
 { TMainForm }
 
@@ -63,7 +65,7 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowTitle := 'Font selection test';
+  WindowTitle := rsTitle;
   SetPosition(100, 100, 500, 400);
   
   btnSelectFont := CreateButton(self, 10, 10, 110, rsSelectAFont, @btnSelectFontClick);

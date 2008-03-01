@@ -35,7 +35,7 @@ rsNoToAll                = 'No to All';
 rsError                  = 'Error';
 rsCriticalError          = 'Critical Error';
 rsInformation            = 'Information';
-rsConfirmation           = 'Confirm';
+rsConfirmation           = 'Confirmation';
 rsWarning                = 'Warning';
 rsMessage                = 'Message';
 
@@ -74,5 +74,9 @@ rsShowHidden             = 'Show hidden files';
 
 // Save Dialog
 rsSaveAFile              = 'Save file as';
+
+// Error messages
+rsListMustBeEmpty        = 'List must be empty';
+
 
 

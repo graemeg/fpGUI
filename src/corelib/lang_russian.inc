@@ -76,3 +76,6 @@ rsShowHidden             = 'Показывать скрытые файлы';
 rsSaveAFile              = 'Сохранить файл как';
 
 
+// Error messages
+rsListMustBeEmpty        = 'Список должен быть пустым';
+

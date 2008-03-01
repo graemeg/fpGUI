@@ -24,7 +24,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="1"/>
-    <Files Count="20">
+    <Files Count="21">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -105,6 +105,10 @@
         <Filename Value="../gfx_translations.pas"/>
         <UnitName Value="gfx_translations"/>
       </Item20>
+      <Item21>
+        <Filename Value="../gfx_stringhashlist.pas"/>
+        <UnitName Value="gfx_stringhashlist"/>
+      </Item21>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/"/>
     <RequiredPkgs Count="1">

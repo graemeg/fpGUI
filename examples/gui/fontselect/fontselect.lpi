@@ -32,12 +32,17 @@
         <MinVersion Minor="5" Valid="True"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
         <Filename Value="fontselect.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fontselect"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="strconstants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="strconstants"/>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

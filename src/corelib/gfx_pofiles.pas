@@ -34,12 +34,15 @@ unit gfx_pofiles;
 
 {$mode objfpc}{$H+}{$INLINE ON}
 
+{.$Define DEBUG}
+
 interface
 
 uses
   Classes,
   SysUtils,
-  Contnrs;
+  Contnrs,
+  gfx_stringhashlist;
 
 type
   TPOFileItem = class(TObject)
@@ -54,8 +57,8 @@ type
   TPOFile = class(TObject)
   protected
     FItems: TFPList;  // list of TPOFileItem
-    FIdentifierToItem: TFPObjectHashTable;
-    FOriginalToItem: TFPObjectHashTable;
+    FIdentifierToItem: TStringHashList;
+    FOriginalToItem: TStringHashList;
   public
     constructor Create(const AFilename: string);
     constructor Create(AStream: TStream);
@@ -261,8 +264,8 @@ var
 begin
   inherited Create;
   FItems          := TFPList.Create;
-  FIdentifierToItem := TFPObjectHashTable.Create(False);
-  FOriginalToItem := TFPObjectHashTable.Create(False);
+  FIdentifierToItem := TStringHashList.Create(False);
+  FOriginalToItem := TStringHashList.Create(True);
 
   Size := AStream.Size - AStream.Position;
   if Size <= 0 then
@@ -341,6 +344,9 @@ procedure TPOFile.Add(const Identifier, OriginalValue, TranslatedValue: string);
 var
   Item: TPOFileItem;
 begin
+  {$IFDEF DEBUG}
+  writeln('TPOFile.Add: ' + Identifier + ' | ' + OriginalValue + ' | ' + TranslatedValue);
+  {$ENDIF}
   if (TranslatedValue = '') then
     Exit; //==>
   Item := TPOFileItem.Create(Identifier, OriginalValue, TranslatedValue);
@@ -352,10 +358,20 @@ end;
 function TPOFile.Translate(const Identifier, OriginalValue: string): string;
 var
   Item: TPOFileItem;
+  s: string;
 begin
-  Item := TPOFileItem(FIdentifierToItem.Items[Identifier]);
+  s := StringReplace(Identifier, '.', ':', []);
+  {$IFDEF DEBUG}
+  writeln('TPOFile.Translate: ' + s + '(' + Identifier + ') | ' + OriginalValue);
+  {$ENDIF}
+  Item := TPOFileItem(FIdentifierToItem.Data[s]);
   if Item = nil then
-    Item := TPOFileItem(FOriginalToItem.Items[OriginalValue]);
+  begin
+    {$IFDEF DEBUG}
+    writeln('  identifier lookup failed, trying original value');
+    {$ENDIF}
+    Item := TPOFileItem(FOriginalToItem.Data[OriginalValue]);
+  end;
   if Item <> nil then
   begin
     Result := Item.Translation;
@@ -363,7 +379,12 @@ begin
       raise Exception.Create('TPOFile.Translate Inconsistency');
   end
   else
+  begin
+    {$IFDEF DEBUG}
+    writeln('  OriginalValue lookup failed, defaulting to original value');
+    {$ENDIF}
     Result := OriginalValue;
+  end;
 end;
 
 { TPOFileItem }

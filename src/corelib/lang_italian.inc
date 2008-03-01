@@ -76,3 +76,6 @@ rsShowHidden             = 'Mostra files nascosti';
 rsSaveAFile              = 'Salva con nome';
 
 
+// Error messages
+rsListMustBeEmpty        = 'Elenco deve essere vuoto';
+

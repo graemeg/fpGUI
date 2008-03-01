@@ -77,3 +77,6 @@ rsShowHidden             = 'Mostrar arquivos ocultos';
 rsSaveAFile              = 'Salvar arquivo como';
 
 
+// Error messages
+rsListMustBeEmpty        = 'Lista deve estar vazio';
+

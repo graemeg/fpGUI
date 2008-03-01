@@ -76,3 +76,6 @@ rsShowHidden             = 'Montrer les fichiers cachés';
 rsSaveAFile              = 'Sauver sous';
 
 
+// Error messages
+rsListMustBeEmpty        = 'Liste doit être vide';
+

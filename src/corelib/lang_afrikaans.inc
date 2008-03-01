@@ -7,25 +7,25 @@ rsLanguage               = 'Afrikaans';
 rsOK                     = 'Goed';
 rsCancel                 = 'Kanselleer';
 rsHelp                   = 'Hulp';
-rsOpen                   = 'Maak oop';
+rsOpen                   = 'Open';
 rsSave                   = 'Stoor';
-rsCreate                 = 'Create';
+rsCreate                 = 'Skep';
 rsChange                 = 'Verander';
 rsFind                   = 'Vind';
 rsSearch                 = 'Soek';
 rsReplace                = 'Vervang';
-rsConfirm                = 'Confirm';
+rsConfirm                = 'Bevestig';
 rsAll                    = 'Alles';
-rsSelect                 = 'Select';
+rsSelect                 = 'Kies';
 rsYes                    = 'Ja';
 rsNo                     = 'Nee';
-rsAbort                  = 'Abort';
+rsAbort                  = 'Staak';
 rsRetry                  = 'Probeer weer';
 rsIgnore                 = 'Ignoreer';
 rsClose                  = 'Sluit';
-rsInsert                 = 'Insert';
+rsInsert                 = 'Invoeg';
 rsEdit                   = 'Redigeer';
-rsDelete                 = 'Delete';
+rsDelete                 = 'Skrap';
 rsExit                   = 'Staak';
 rsYesToAll               = 'Ja vir Alles';
 rsNoToAll                = 'Nee vir Alles';
@@ -35,7 +35,7 @@ rsNoToAll                = 'Nee vir Alles';
 rsError                  = 'Fout';
 rsCriticalError          = 'Kritiese Fout';
 rsInformation            = 'Informasie';
-rsConfirmation           = 'Confirm';
+rsConfirmation           = 'Bevestiging';
 rsWarning                = 'Waarskuwing';
 rsMessage                = 'Boodskap';
 
@@ -45,34 +45,36 @@ rsAllFiles               = 'Alle Lêers';
 
 
 // CreateDir Dialog
-rsCreateDirectory        = 'Create directory';
-rsEnterNewDirectory      = 'Enter new directory name';
-rsCannotCreateDir        = 'Cannot create directory';
+rsCreateDirectory        = 'Skep ''n lÃªergids';
+rsEnterNewDirectory      = 'Gee ''n nuwe lÃªergids naam';
+rsCannotCreateDir        = 'Kan nie die lÃªergids skep nie';
 
 
 // Font Dialog
-rsSelectAFont            = 'Select a font';
+rsSelectAFont            = 'Kies ''n lettertipe';
 rsName                   = 'Naam';
-rsCollection             = 'Collection';
+rsCollection             = 'Versameling';
 rsSize                   = 'Groote';
 rsStyle                  = 'Steil';
-rsItalic                 = 'Italic';
-rsBold                   = 'Bold';
+rsItalic                 = 'Kursief';
+rsBold                   = 'Vetdruk';
 rsUnderScore             = 'Onderstreep';
-rsExampleText            = 'Example Text';
+rsExampleText            = 'Teks Voorbeeld';
 
 
 // Open Dialog
 rsOpenAFile              = 'Maak ''n leêr op';
 rsFileName               = 'Lêer naam';
 rsFileType               = 'Tipe Leêr';
-rsDrive                  = 'Drive';
+rsDrive                  = 'Dryf';
 rsFiles                  = 'Lêers';
-rsDirectories            = 'Directories';
-rsShowHidden             = 'Show hidden files';
+rsDirectories            = 'LÃªergidse';
+rsShowHidden             = 'Wys verseekte lÃªers';
 
 
 // Save Dialog
 rsSaveAFile              = 'Stoor ''n lêer';
 
+// Error messages
+rsListMustBeEmpty        = 'Lys moet leeg wees';
 
