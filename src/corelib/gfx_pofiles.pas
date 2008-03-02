@@ -66,6 +66,7 @@ type
     procedure   ReadPOText(const s: string);
     procedure   Add(const Identifier, OriginalValue, TranslatedValue: string);
     function    Translate(const Identifier, OriginalValue: string): string;
+    procedure   AppendFile(const AFilename: string);
   end;
 
 
@@ -177,15 +178,24 @@ var
   DefValue: string;
 {$endif ver2_0}
   po: TPOFile;
+  lPath, lFile: string;
+  lPos: integer;
 begin
   Result := False;
   //debugln('TranslateUnitResourceStrings) ResUnitName="',ResUnitName,'" AFilename="',AFilename,'"');
-  if (ResUnitName = '') or (AFilename = '') or (not FileExists(AFilename)) then
+  if {(ResUnitName = '') or} (AFilename = '') or (not FileExists(AFilename)) then
     Exit;
   try
     po := nil;
     // read .po file
     po := TPOFile.Create(AFilename);
+    // Now append fpGUI translations
+    lPath := ExtractFilePath(AFilename);
+    lFile := ExtractFileName(AFilename);
+    lPos := Pos('.', lFile);
+    lFile := lPath + 'fpgui' + Copy(lFile, lPos, Length(lFile)-lPos+1);
+//    writeln('lFile = ', lFile);
+    po.AppendFile(lFile);
     try
 {$ifdef ver2_0}
       for TableID := 0 to ResourceStringTableCount - 1 do
@@ -215,7 +225,8 @@ begin
         end;
       end;
 {$else ver2_0}
-      SetUnitResourceStrings(ResUnitName, @Translate, po);
+//      SetUnitResourceStrings(ResUnitName, @Translate, po);
+      SetResourceStrings(@Translate, po);
 {$endif ver2_0}
     finally
       po.Free;
@@ -233,7 +244,7 @@ end;
 
 procedure TranslateUnitResourceStrings(const ResUnitName, BaseFilename, Lang, FallbackLang: string);
 begin
-  if (ResUnitName = '') or (BaseFilename = '') then
+  if {(ResUnitName = '') or} (BaseFilename = '') then
     Exit;
 
   //debugln('TranslateUnitResourceStrings BaseFilename="',BaseFilename,'"');
@@ -384,6 +395,29 @@ begin
     writeln('  OriginalValue lookup failed, defaulting to original value');
     {$ENDIF}
     Result := OriginalValue;
+  end;
+end;
+
+procedure TPOFile.AppendFile(const AFilename: string);
+var
+  Size: integer;
+  s: string;
+  f: TStream;
+begin
+  // Now fpGUI translation
+  if (AFilename = '') or (not FileExists(AFilename)) then
+    Exit;
+  f := TFileStream.Create(AFilename, fmOpenRead);
+  try
+    s := '';
+    Size := f.Size - f.Position;
+    if Size <= 0 then
+      Exit; //==>
+    SetLength(s, Size);
+    f.Read(s[1], Size);
+    ReadPOText(s);
+  finally
+    f.Free;
   end;
 end;
 

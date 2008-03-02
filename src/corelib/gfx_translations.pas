@@ -128,12 +128,11 @@ begin
 
   // We use one translation file for all fpGUI Toolkit related text and one
   // translation file for all fpGUI based application text
-  if BaseAppName = 'fpgui' then
-    TranslateUnitResourceStrings('gfx_constants',
-      Dir + BaseAppName + Ext, Lang, FallbackLang)
-  else
-    { TODO : What the hell do we do here? }
-    TranslateUnitResourceStrings('strconstants',
+//  if BaseAppName = 'fpgui' then
+//    TranslateUnitResourceStrings('',
+//      Dir + BaseAppName + Ext, Lang, FallbackLang)
+//  else
+    TranslateUnitResourceStrings('fake',
       Dir + BaseAppName + Ext, Lang, FallbackLang);
 
   {$IFDEF DEBUG}

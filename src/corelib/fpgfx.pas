@@ -188,7 +188,7 @@ type
     procedure   RunMessageLoop;
     procedure   WaitWindowMessage(atimeoutms: integer);
   public
-    constructor Create(const aparams: string = ''); override;
+    constructor Create(const AParams: string = ''); override;
     destructor  Destroy; override;
     function    GetFont(const afontdesc: string): TfpgFont;
     procedure   Initialize;
@@ -678,10 +678,10 @@ begin
   Result := fpgApplication.GetFont(afontdesc);
 end;
 
-constructor TfpgApplication.Create(const aparams: string);
+constructor TfpgApplication.Create(const AParams: string);
 begin
   FFontResList    := TList.Create;
-  FDisplayParams  := aparams;
+  FDisplayParams  := AParams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
   FModalFormStack := TList.Create;
@@ -813,7 +813,7 @@ begin
   fpgImages     := TfpgImages.Create;
   fpgCreateStandardImages;
   
-  TranslateResourceStrings('fpgui', ExtractFilePath(ParamStr(0)), '');
+  // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
 end;
 

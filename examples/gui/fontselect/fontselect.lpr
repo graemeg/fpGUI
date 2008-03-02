@@ -14,8 +14,12 @@ uses
   gui_listbox,
   gui_edit,
   gui_label,
-  gfx_constants,
-  strconstants;
+  gfx_constants;
+  
+  
+resourcestring
+  rsMyTitle = 'Font selection test';
+  rsMyFontList = 'Font List';
 
 
 type
@@ -65,7 +69,7 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowTitle := rsTitle;
+  WindowTitle := rsMyTitle;
   SetPosition(100, 100, 500, 400);
   
   btnSelectFont := CreateButton(self, 10, 10, 110, rsSelectAFont, @btnSelectFontClick);
@@ -74,7 +78,7 @@ begin
 //  edFontDesc.Text := fpgApplication.DefaultFont.FontDesc;
   edFontDesc.Text := 'Bitstream Vera Sans-9';
 
-  lblFontList := CreateLabel(self, 10, 80, 'Font List:');
+  lblFontList := CreateLabel(self, 10, 80, rsMyFontList + ':');
   lbFontList := TfpgListBox.Create(self);
   with lbFontList do
   begin
