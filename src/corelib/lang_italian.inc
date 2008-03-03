@@ -1,6 +1,6 @@
 {%mainunit gfx_constants.pas}
 
-rsLanguage               = 'Italian';
+rsLanguage               = 'Italiano';
 
 
 // Buttons
@@ -17,7 +17,7 @@ rsReplace                = 'Sostituisci';
 rsConfirm                = 'Conferma';
 rsAll                    = 'Tutto';
 rsSelect                 = 'Seleziona';
-rsYes                    = 'Sì';
+rsYes                    = 'SÃ¬';
 rsNo                     = 'No';
 rsAbort                  = 'Interrompi';
 rsRetry                  = 'Riprova';
@@ -27,7 +27,7 @@ rsInsert                 = 'Inserisci';
 rsEdit                   = 'Modifica';
 rsDelete                 = 'Cancella';
 rsExit                   = 'Esci';
-rsYesToAll               = 'Sì a Tutto';
+rsYesToAll               = 'SÃ¬ a Tutto';
 rsNoToAll                = 'No a Tutto';
 
 

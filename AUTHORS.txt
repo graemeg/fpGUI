@@ -6,7 +6,7 @@
 Original Authors (not active anymore)
 -------------------------------------
 Sebastian Guenther <sg@freepascal.org>
-Nagy Viktor <nvitya@freemail.hu>
+Viktor Nagy <nvitya@freemail.hu>
 
 
 Core Developer
@@ -16,11 +16,14 @@ Graeme Geldenhuys <graemeg@gmail.com>
 
 Contributors
 ------------
-Felipe Monteiro de Carvalho <felipemonteiro.carvalho@gmail.com>
-Andrew Haines <andrewd207@aol.com>
-Giuliano Colla <giuliano.colla@fastwebnet.it>
-Jean-Marc Levecque <jean-marc.levecque@orange.fr>
-Antonio Sanguigni <a.sanguigni@gmail.com>
+Felipe Monteiro de Carvalho
+Andrew Haines
+Giuliano Colla
+Jean-Marc Levecque - various & French translation
+Antonio Sanguigni - various & Italian translation
+Vladimir Zhirov - various & Russian translation
+Alexsander Rosa - Portuguese translation
+Horacio Jamilis - Spanish translation
 
 
            ______________.o0O0o.______________
