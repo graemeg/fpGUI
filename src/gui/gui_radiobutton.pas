@@ -198,7 +198,7 @@ begin
   tx := r.right + 8;
   inc(r.left, 2);
   inc(r.top, 1);
-  img := fpgImages.GetImage('sys.radiobuttons');
+  img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize
   Canvas.DrawImagePart(r.Left, r.Top, img, ix*12, 0, 12, 12);
 
   ty := (Height div 2) - (Font.Height div 2);
@@ -287,9 +287,9 @@ begin
   begin
     FoundIt := False;
     if direction in [fsdLast, fsdPrev] then
-      bestdtab := Low(integer)   // or "-999999" like that in TfpgWidget.FindFocusWidget?
+      bestdtab := Low(integer)
     else
-      bestdtab := High(integer); // or "999999"?
+      bestdtab := High(integer);
     
     for i := 0 to Parent.ComponentCount-1 do
     begin

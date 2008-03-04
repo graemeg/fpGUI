@@ -29,6 +29,9 @@ rsDelete                 = 'Skrap';
 rsExit                   = 'Staak';
 rsYesToAll               = 'Ja vir Alles';
 rsNoToAll                = 'Nee vir Alles';
+rsCut                    = 'Cut';
+rsCopy                   = 'Copy';
+rsPaste                  = 'Paste';
 
 
 // Captions
@@ -38,6 +41,7 @@ rsInformation            = 'Informasie';
 rsConfirmation           = 'Bevestiging';
 rsWarning                = 'Waarskuwing';
 rsMessage                = 'Boodskap';
+rsAbout                  = 'About %s';
 
 
 // Standard file filters
@@ -59,7 +63,16 @@ rsStyle                  = 'Steil';
 rsItalic                 = 'Kursief';
 rsBold                   = 'Vetdruk';
 rsUnderScore             = 'Onderstreep';
+rsTypeface               = 'Typeface';
+rsAntiAliasing           = 'Anti aliasing';
 rsExampleText            = 'Teks Voorbeeld';
+rsCollectionAllFonts     = 'All Fonts';
+rsCollectionRecentlyUsed = 'Recently Used';
+rsCollectionFavourites   = 'Favourites';
+rsCollectionFixedWidth   = 'Fixed Width';
+rsCollectionSans         = 'Sans';
+rsCollectionSerif        = 'Serif';
+rsCollectionFontAliases  = 'Font Aliases';
 
 
 // Open Dialog
@@ -70,11 +83,41 @@ rsDrive                  = 'Dryf';
 rsFiles                  = 'Lêers';
 rsDirectories            = 'LÃªergidse';
 rsShowHidden             = 'Wys verseekte lÃªers';
+rsFileSelection          = 'File Selection';
+rsFileModifiedTime       = 'Mod. Time';
+rsFileAttributes         = 'Attributes';
+rsFileRights             = 'Rights';
+rsFileOwner              = 'Owner';
+rsFileGroup              = 'Group';
 
 
 // Save Dialog
 rsSaveAFile              = 'Stoor ''n lêer';
 
+
 // Error messages
-rsListMustBeEmpty        = 'Lys moet leeg wees';
+rsErrListMustBeEmpty     = 'Lys moet leeg wees';
+rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';
+rsErrItemOfWrongType     = 'Item is not of <%s> type!';
+rsErrFailedToCreateDir   = 'Failed to create the directory <%s>';
+rsErrNotAssigned         = '<%s> not assigned';
+
+
+// Calendar Combo & Dialog
+rsShortMon               = 'Mon';
+rsShortTue               = 'Tue';
+rsShortWed               = 'Wed';
+rsShortThu               = 'Thu';
+rsShortFri               = 'Fri';
+rsShortSat               = 'Sat';
+rsShortSun               = 'Sun';
+rsLongMon                = 'Monday';
+rsLongTue                = 'Tuesday';
+rsLongWed                = 'Wednesday';
+rsLongThu                = 'Thursday';
+rsLongFri                = 'Friday';
+rsLongSat                = 'Saturday';
+rsLongSun                = 'Sunday';
+
+
 

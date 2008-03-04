@@ -443,7 +443,6 @@ end;
 constructor TfpgBaseDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  {TODO: We need to localize this dialog }
   Width     := 500;
   Height    := 400;
   MinWidth  := 300;
@@ -454,13 +453,13 @@ begin
 
   btnCancel := CreateButton(self, Width-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsCancel, @btnCancelClick);
   btnCancel.Name      := 'btnCancel';
-  btnCancel.ImageName := 'stdimg.Cancel';
+  btnCancel.ImageName := 'stdimg.Cancel';   // Do NOT localize
   btnCancel.ShowImage := True;
   btnCancel.Anchors   := [anRight, anBottom];
 
   btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsOK, @btnOKClick);
   btnOK.Name      := 'btnOK';
-  btnOK.ImageName := 'stdimg.OK';
+  btnOK.ImageName := 'stdimg.OK';   // Do NOT localize
   btnOK.ShowImage := True;
   btnOK.Anchors   := [anRight, anBottom];
 end;
@@ -624,24 +623,23 @@ begin
   with lblLabel5 do
   begin
     SetPosition(8, 8, 73, 16);
-    Text := rsCollection + ':';
+    Text := fpgAddColon(rsCollection);
   end;
 
   { TODO : This need to be implemented at some stage. }
-  { TODO : This needs to be localized. }
   lbCollection := TfpgListBox.Create(self);
   with lbCollection do
   begin
     SetPosition(8, 28, 145, 236);
-    Items.Add('All Fonts');
+    Items.Add(rsCollectionAllFonts);
     // These should be stored in <users config path>/fpgui directory
-    Items.Add('Recently Used');
-    Items.Add('Favourites');
+    Items.Add(rsCollectionRecentlyUsed);
+    Items.Add(rsCollectionFavourites);
     // From here onwards, these should be created automatically.
-    Items.Add('Fixed Width');
-    Items.Add('Sans');
-    Items.Add('Serif');
-    Items.Add('Font Aliases');
+    Items.Add(rsCollectionFixedWidth);
+    Items.Add(rsCollectionSans);
+    Items.Add(rsCollectionSerif);
+    Items.Add(rsCollectionFontAliases);
 //    OnChange := @OnParamChange;
     FocusItem := 1;
     Enabled := False;
@@ -651,7 +649,7 @@ begin
   with lblLabel1 do
   begin
     SetPosition(161, 8, 73, 16);
-    Text := rsName + ':';
+    Text := fpgAddColon(rsName);
   end;
 
   lbFaces := TfpgListBox.Create(self);
@@ -666,7 +664,7 @@ begin
   with lblLabel3 do
   begin
     SetPosition(401, 8, 54, 16);
-    Text := rsSize + ':';
+    Text := fpgAddColon(rsSize);
   end;
 
   lbSize := TfpgListBox.Create(self);
@@ -701,7 +699,7 @@ begin
   with lblLabel2 do
   begin
     SetPosition(461, 8, 54, 16);
-    Text := 'Typeface:';     { TODO : Localize this }
+    Text := fpgAddColon(rsTypeface);
   end;
 
   cbBold := TfpgCheckBox.Create(self);
@@ -732,7 +730,7 @@ begin
   with cbAntiAlias do
   begin
     SetPosition(461, 124, 110, 20);
-    Text := 'Anti aliasing';
+    Text := rsAntiAliasing;
     OnChange := @OnParamChange;
     Checked := True;
   end;
@@ -741,7 +739,7 @@ begin
   with lblLabel4 do
   begin
     SetPosition(8, 268, 584, 16);
-    Text := rsExampleText + ':';
+    Text := fpgAddColon(rsExampleText);
   end;
 
   edSample := TfpgEdit.Create(self);
@@ -845,7 +843,7 @@ begin
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
-    ImageName := 'stdimg.folderup';
+    ImageName := 'stdimg.folderup';   // Do NOT localize
     ModalResult := 0;
     Focusable := False;
     OnClick := @UpDirClick;
@@ -858,7 +856,7 @@ begin
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
-    ImageName := 'stdimg.foldernew';
+    ImageName := 'stdimg.foldernew';    // Do NOT localize
     ModalResult := 0;
     Focusable := False;
   end;
@@ -870,7 +868,7 @@ begin
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
-    ImageName := 'stdimg.hidden';
+    ImageName := 'stdimg.hidden';   // Do NOT localize
     ModalResult := 0;
     Focusable := False;
     GroupIndex := 1;
@@ -924,7 +922,7 @@ begin
   begin
     SetPosition(8, 283, 80, 16);
     Anchors := [anLeft, anBottom];
-    Text := 'Filename:';
+    Text := fpgAddColon(rsFileName);
     FontDesc := '#Label1';
   end;
 
@@ -933,13 +931,13 @@ begin
   begin
     SetPosition(8, 327, 64, 16);
     Anchors := [anLeft, anBottom];
-    Text := 'File type:';
+    Text := fpgAddColon(rsFileType);
     FontDesc := '#Label1';
   end;
 
   ActiveWidget := grid;
   FileName := '';
-  Filter := 'All Files (*)|*';
+  Filter := rsAllFiles + ' (*)|*';
   chlFilter.FocusItem := 1;
 end;
 
@@ -977,7 +975,7 @@ end;
 constructor TfpgFileDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowTitle := 'File Selection';
+  WindowTitle := rsFileSelection;
   Width       := 640;
   Height      := 410;
   WindowPosition := wpScreenCenter;
@@ -1045,7 +1043,7 @@ begin
 
   if not SetCurrentDir(ADir) then
   begin
-    ShowMessage('Could not open the directory ' + ADir, 'Error');
+    ShowMessage(Format(rsErrCouldNotOpenDir, [ADir]), rsError);
     Exit; //==>
   end;
 
@@ -1199,9 +1197,9 @@ begin
   if not SelectFile(fname) then
     edFilename.Text := fname;
     
-  WindowTitle     := 'Open File...';
-  btnOK.ImageName := 'stdimg.open';
-  btnOK.Text      := 'Open';
+  WindowTitle     := rsOpenAFile;
+  btnOK.ImageName := 'stdimg.open';   // Do NOT localize
+  btnOK.Text      := rsOpen;
 
   if ShowModal = 1 then
     Result := True
@@ -1223,9 +1221,9 @@ begin
   if not SelectFile(fname) then
     edFilename.Text := fname;
 
-  WindowTitle     := 'Save File...';
-  btnOK.ImageName := 'stdimg.save';
-  btnOK.Text      := 'Save';
+  WindowTitle     := rsSaveAFile;
+  btnOK.ImageName := 'stdimg.save';   // Do NOT localize
+  btnOK.Text      := rsSave;
 
   if ShowModal = 1 then
     Result := True

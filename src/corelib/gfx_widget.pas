@@ -781,9 +781,9 @@ begin
   Result  := nil;
   FoundIt := False;
   if direction in [fsdLast, fsdPrev] then
-    lasttaborder := -999999
+    lasttaborder := Low(integer)
   else
-    lasttaborder := 999999;
+    lasttaborder := High(integer);
 
   for n := 0 to ComponentCount - 1 do
     if Components[n] is TfpgWidget then

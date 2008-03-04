@@ -148,7 +148,7 @@ begin
   tx := r.right + 8;
   inc(r.left, 2);
   inc(r.top, 1);
-  img := fpgImages.GetImage('sys.checkboxes');
+  img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize
   Canvas.DrawImagePart(r.Left, r.Top, img, ix*13, 0, 13, 13);
 
   ty := (Height div 2) - (Font.Height div 2);

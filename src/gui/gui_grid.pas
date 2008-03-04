@@ -220,6 +220,7 @@ implementation
 
 uses
   gfx_utils
+  ,gfx_constants
   {$IFDEF MSWINDOWS}
   ,Windows   // Graeme: temporary, just to see how the grid looks under Windows.
   {$ENDIF}
@@ -554,17 +555,17 @@ begin
   case ACol of
     1:  begin
           if e.EntryType = etDir then
-            img := fpgImages.GetImage('stdimg.folder')
+            img := fpgImages.GetImage('stdimg.folder')            // Do NOT localize
           else
           begin
-            img := fpgImages.GetImage('stdimg.document');
+            img := fpgImages.GetImage('stdimg.document');         // Do NOT localize
             {$IFDEF UNIX}
            if (e.Mode and $40) <> 0 then
-              img := fpgImages.GetImage('stdimg.executable');
+              img := fpgImages.GetImage('stdimg.executable');     // Do NOT localize
             {$ENDIF}
            {$IFDEF MSWINDOWS}
            if lowercase(e.Extention) = 'exe' then
-              img := fpgImages.GetImage('stdimg.executable');
+              img := fpgImages.GetImage('stdimg.executable');     // Do NOT localize
            {$ENDIF}
           end;
 
@@ -639,19 +640,19 @@ begin
 
   {$Note No IFDEF's allowed!!! But how the hell to we get around this? }
 {$ifdef MSWINDOWS}
-  AddColumn('Name', 320);
+  AddColumn(rsName, 320);
 {$else}
-  AddColumn('Name', 220);
+  AddColumn(rsName, 220);
 {$endif}
 
-  AddColumn('Size', 80);
-  AddColumn('Mod. Time', 108);
+  AddColumn(rsSize, 80);
+  AddColumn(rsFileModifiedTime, 108);
 {$ifdef MSWINDOWS}
-  AddColumn('Attributes', 78);
+  AddColumn(rsFileAttributes, 78);
 {$else}
-  AddColumn('Rights', 78);
-  AddColumn('Owner', 54);
-  AddColumn('Group', 54);
+  AddColumn(rsFileRights, 78);
+  AddColumn(rsFileOwner, 54);
+  AddColumn(rsFileGroup, 54);
 {$endif}
 
   RowSelect := True;

@@ -1292,10 +1292,10 @@ begin
   if ATitle = '' then
   begin
     case DialogType of
-      mtAbout:        SetWindowTitle('About fpGUI...');
-      mtError:        SetWindowTitle('Error');
-      mtWarning:      SetWindowTitle('Warning');
-      mtConfirmation: SetWindowTitle('Confirmation');
+      mtAbout:        SetWindowTitle(Format(rsAbout, [fpGUIName]));
+      mtError:        SetWindowTitle(rsError);
+      mtWarning:      SetWindowTitle(rsWarning);
+      mtConfirmation: SetWindowTitle(rsConfirmation);
     end;
   end
   else
@@ -1324,22 +1324,22 @@ begin
 
     mtError:
         begin
-          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.critical'));
+          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.critical'));    // Do NOT localize
         end;
 
     mtConfirmation:
         begin
-          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.help'));
+          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.help'));        // Do NOT localize
         end;
 
     mtWarning:
         begin
-          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.warning'));
+          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.warning'));     // Do NOT localize
         end;
 
     else
         begin // default to Information
-          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.info'));
+          Canvas.DrawImage(12, 12, fpgImages.GetImage('stdimg.dlg.info'));        // Do NOT localize
         end;
   end;
 
@@ -1421,7 +1421,7 @@ begin
   try
     dlg.FDialogType := mtAbout;
     if ATitle = '' then
-      dlg.WindowTitle := 'About fpGUI...'
+      dlg.WindowTitle := Format(rsAbout, [fpGUIName])
     else
       dlg.WindowTitle := ATitle;
     dlg.ShowModal;
@@ -1438,12 +1438,12 @@ var
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
-    dlg.FDialogType   := mtWarning;
-    dlg.FButtons      := AButtons;
-    dlg.Text := 'A title can go here';
+    dlg.FDialogType     := mtWarning;
+    dlg.FButtons        := AButtons;
+    dlg.Text            := ATitle;
     dlg.InformativeText := AText;
-    dlg.WindowTitle   := ATitle;
-    dlg.FDefaultButton := ADefaultButton;
+    dlg.WindowTitle     := ATitle;
+    dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
     Result := TfpgMsgDlgBtn(dlg.ShowModal);
   finally
@@ -1459,12 +1459,12 @@ var
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
-    dlg.FDialogType   := mtInformation;
-    dlg.FButtons      := AButtons;
-    dlg.Text := 'A title can go here';
+    dlg.FDialogType     := mtInformation;
+    dlg.FButtons        := AButtons;
+    dlg.Text            := ATitle;
     dlg.InformativeText := AText;
-    dlg.WindowTitle   := ATitle;
-    dlg.FDefaultButton := ADefaultButton;
+    dlg.WindowTitle     := ATitle;
+    dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
     dlg.ShowModal;
   finally
@@ -1480,12 +1480,12 @@ var
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
-    dlg.FDialogType   := mtConfirmation;
-    dlg.FButtons      := AButtons;
-    dlg.Text := 'A title can go here';
+    dlg.FDialogType     := mtConfirmation;
+    dlg.FButtons        := AButtons;
+    dlg.Text            := ATitle;
     dlg.InformativeText := AText;
-    dlg.WindowTitle   := ATitle;
-    dlg.FDefaultButton := ADefaultButton;
+    dlg.WindowTitle     := ATitle;
+    dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
     Result := TfpgMsgDlgBtn(dlg.ShowModal);
   finally
@@ -1501,12 +1501,12 @@ var
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
-    dlg.FDialogType   := mtWarning;
-    dlg.FButtons      := AButtons;
-    dlg.Text := 'A title can go here';
+    dlg.FDialogType     := mtWarning;
+    dlg.FButtons        := AButtons;
+    dlg.Text            := ATitle;
     dlg.InformativeText := AText;
-    dlg.WindowTitle   := ATitle;
-    dlg.FDefaultButton := ADefaultButton;
+    dlg.WindowTitle     := ATitle;
+    dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
     Result := TfpgMsgDlgBtn(dlg.ShowModal);
   finally
@@ -1518,8 +1518,8 @@ procedure TfpgMessageDialog.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: fpgMessageDialog}
   Name := 'fpgMessageDialog';
-  WindowTitle := 'Message...';
-  Sizeable := False;
+  WindowTitle := rsMessage;
+  Sizeable  := False;
   Width     := 500;
   Height    := 400;
   MinWidth  := 300;

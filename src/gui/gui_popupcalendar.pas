@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -142,7 +142,8 @@ type
 implementation
 
 uses
-  gui_scrollbar;
+  gui_scrollbar
+  ,gfx_constants;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -575,13 +576,13 @@ begin
   begin
     Name := 'grdName1';
     SetPosition(0, 23, 233, 119);
-    AddColumn('Mon', 33, taCenter);
-    AddColumn('Tue', 32, taCenter);
-    AddColumn('Wed', 33, taCenter);
-    AddColumn('Thu', 32, taCenter);
-    AddColumn('Fri', 33, taCenter);
-    AddColumn('Sat', 32, taCenter);
-    AddColumn('Sun', 33, taCenter);
+    AddColumn(rsShortMon, 33, taCenter);
+    AddColumn(rsShortTue, 32, taCenter);
+    AddColumn(rsShortWed, 33, taCenter);
+    AddColumn(rsShortThu, 32, taCenter);
+    AddColumn(rsShortFri, 33, taCenter);
+    AddColumn(rsShortSat, 32, taCenter);
+    AddColumn(rsShortSun, 33, taCenter);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     RowCount := 6;

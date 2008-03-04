@@ -29,6 +29,9 @@ rsDelete                 = 'Delete';
 rsExit                   = 'Exit';
 rsYesToAll               = 'Yes to All';
 rsNoToAll                = 'No to All';
+rsCut                    = 'Cut';
+rsCopy                   = 'Copy';
+rsPaste                  = 'Paste';
 
 
 // Captions
@@ -38,6 +41,7 @@ rsInformation            = 'Information';
 rsConfirmation           = 'Confirmation';
 rsWarning                = 'Warning';
 rsMessage                = 'Message';
+rsAbout                  = 'About %s';
 
 
 // Standard file filters
@@ -59,7 +63,16 @@ rsStyle                  = 'Style';
 rsItalic                 = 'Italic';
 rsBold                   = 'Bold';
 rsUnderScore             = 'UnderScore';
+rsTypeface               = 'Typeface';
+rsAntiAliasing           = 'Anti aliasing';
 rsExampleText            = 'Example Text';
+rsCollectionAllFonts     = 'All Fonts';
+rsCollectionRecentlyUsed = 'Recently Used';
+rsCollectionFavourites   = 'Favourites';
+rsCollectionFixedWidth   = 'Fixed Width';
+rsCollectionSans         = 'Sans';
+rsCollectionSerif        = 'Serif';
+rsCollectionFontAliases  = 'Font Aliases';
 
 
 // Open Dialog
@@ -70,13 +83,41 @@ rsDrive                  = 'Drive';
 rsFiles                  = 'Files';
 rsDirectories            = 'Directories';
 rsShowHidden             = 'Show hidden files';
+rsFileSelection          = 'File Selection';
+rsFileModifiedTime       = 'Mod. Time';
+rsFileAttributes         = 'Attributes';
+rsFileRights             = 'Rights';
+rsFileOwner              = 'Owner';
+rsFileGroup              = 'Group';
 
 
 // Save Dialog
 rsSaveAFile              = 'Save file as';
 
+
 // Error messages
-rsListMustBeEmpty        = 'List must be empty';
+rsErrListMustBeEmpty     = 'List must be empty';
+rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';
+rsErrItemOfWrongType     = 'Item is not of <%s> type!';
+rsErrFailedToCreateDir   = 'Failed to create the directory <%s>';
+rsErrNotAssigned         = '<%s> not assigned';
+
+
+// Calendar Combo & Dialog
+rsShortMon               = 'Mon';
+rsShortTue               = 'Tue';
+rsShortWed               = 'Wed';
+rsShortThu               = 'Thu';
+rsShortFri               = 'Fri';
+rsShortSat               = 'Sat';
+rsShortSun               = 'Sun';
+rsLongMon                = 'Monday';
+rsLongTue                = 'Tuesday';
+rsLongWed                = 'Wednesday';
+rsLongThu                = 'Thursday';
+rsLongFri                = 'Friday';
+rsLongSat                = 'Saturday';
+rsLongSun                = 'Sunday';
 
 
 

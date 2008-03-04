@@ -123,6 +123,7 @@ end;
 
 procedure TfpgScrollBar.HandlePaint;
 begin
+  // Do NOT localize
   Canvas.BeginDraw;
   
   if Orientation = orVertical then

@@ -52,7 +52,8 @@ function gINI(const AFileName: string = ''): TfpgINIFile;
 implementation
 
 uses
-  fpgfx;
+  fpgfx
+  ,gfx_constants;
 
 var
   uINI: TfpgINIFile;
@@ -82,7 +83,7 @@ begin
 
   { We used a non-Global config dir, so should be able to create the dir }
   if not ForceDirectories(lDir) then
-    raise Exception.Create('Failed to create the directory <' + lDir + '>');
+    raise Exception.CreateFmt(rsErrFailedToCreateDir, [lDir]);
 
 
   if lFileName = '' then
@@ -153,6 +154,7 @@ begin
   Result := inherited ReadTime(ASection, AName, ADefault);
 end;
 
+// Do NOT localize
 procedure TfpgINIFile.ReadFormState(AForm: TfpgForm; AHeight: integer; AWidth: integer);
 var
   LINISection: string;
@@ -161,7 +163,7 @@ var
   LHeight: integer;
   LWidth: integer;
 begin
-  Assert(AForm <> nil, 'pForm not assigned');
+  Assert(AForm <> nil, Format(rsErrNotAssigned, ['pForm']));
   LINISection := AForm.Name + 'State';
   // Read form position, -1 if not stored in registry
   LTop        := readInteger(LINISection, 'Top', -1);
@@ -207,6 +209,7 @@ begin
   //{$ENDIF MSWINDOWS}
 end;
 
+// Do NOT localize
 procedure TfpgINIFile.WriteFormState(AForm: TfpgForm);
 var
   LINISection: string;

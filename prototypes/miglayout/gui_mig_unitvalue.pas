@@ -15,6 +15,8 @@ type
   public
     property    Pixels: integer read FPixels;
   end;
+  
+  TUnitValueArray = array[0..3] of TUnitValue;
 
 implementation
 

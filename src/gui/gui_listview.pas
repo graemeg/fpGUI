@@ -263,6 +263,10 @@ type
   
 implementation
 
+uses
+  gfx_constants;
+  
+
 type
   // used to access protected methods
   TfpgScrollbarFriend = class(TfpgScrollbar)
@@ -442,7 +446,7 @@ begin
   if AItem.InheritsFrom(TfpgLVItem) then
     FItems.Insert(AIndex, AItem)
   else
-    raise Exception.Create('Item is not of TfpgLVItem type!');
+    raise Exception.CreateFmt(rsErrItemOfWrongType, ['TfpgLVItem']);
 end;
 
 procedure TfpgLVItems.BeginUpdate;

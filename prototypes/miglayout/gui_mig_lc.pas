@@ -27,9 +27,12 @@ type
     FNoCache: Boolean;
     FAlignX: TUnitValue;
     FAlignY: TUnitValue;
+    FInsets: TUnitValueArray;
     FLeftToRight: Boolean;
     FTopToBottom: Boolean;
+    function GetInsets: TUnitValueArray;
     procedure SetHideMode(const AValue: integer);
+    procedure SetInsets(const AValue: TUnitValueArray);
   public
     constructor Create;
     property    NoCache: Boolean read FNoCache write FNoCache default False;
@@ -42,6 +45,7 @@ type
     property    GridGapX: TBoundSize read FGridGapX write FGridGapX;
     property    GridGapY: TBoundSize read FGridGapY write FGridGapY;
     property    HideMode: integer read FHideMode write SetHideMode;
+    property    Insets: TUnitValueArray read GetInsets write SetInsets;
     property    LeftToRight: Boolean read FLeftToRight write FLeftToRight;
     property    TopToBottom: Boolean read FTopToBottom write FTopToBottom;
   end;
@@ -59,6 +63,16 @@ begin
     raise EIllegalArgument.CreateFmt('Wrong HideMode: %d', [AValue]);
   
   FHideMode:=AValue;
+end;
+
+function TLC.GetInsets: TUnitValueArray;
+begin
+
+end;
+
+procedure TLC.SetInsets(const AValue: TUnitValueArray);
+begin
+
 end;
 
 constructor TLC.Create;

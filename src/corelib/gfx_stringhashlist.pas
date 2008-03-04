@@ -310,7 +310,7 @@ begin
   begin
     if Count > 0 then
     begin
-      raise EListError.Create(rsListMustBeEmpty);
+      raise EListError.Create(rsErrListMustBeEmpty);
       exit;
     end;
     fCaseSensitive := Value;

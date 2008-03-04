@@ -29,6 +29,9 @@ rsDelete                 = 'Cancella';
 rsExit                   = 'Esci';
 rsYesToAll               = 'Sì a Tutto';
 rsNoToAll                = 'No a Tutto';
+rsCut                    = 'Cut';
+rsCopy                   = 'Copy';
+rsPaste                  = 'Paste';
 
 
 // Captions
@@ -38,6 +41,7 @@ rsInformation            = 'Informazione';
 rsConfirmation           = 'Conferma';
 rsWarning                = 'Attenzione';
 rsMessage                = 'Messaggio';
+rsAbout                  = 'About %s';
 
 
 // Standard file filters
@@ -59,7 +63,16 @@ rsStyle                  = 'Stile';
 rsItalic                 = 'Italico';
 rsBold                   = 'Grassetto';
 rsUnderScore             = 'Sottolineato';
+rsTypeface               = 'Typeface';
+rsAntiAliasing           = 'Anti aliasing';
 rsExampleText            = 'Testo di Esempio';
+rsCollectionAllFonts     = 'All Fonts';
+rsCollectionRecentlyUsed = 'Recently Used';
+rsCollectionFavourites   = 'Favourites';
+rsCollectionFixedWidth   = 'Fixed Width';
+rsCollectionSans         = 'Sans';
+rsCollectionSerif        = 'Serif';
+rsCollectionFontAliases  = 'Font Aliases';
 
 
 // Open Dialog
@@ -70,6 +83,12 @@ rsDrive                  = 'Disco';
 rsFiles                  = 'Files';
 rsDirectories            = 'Cartelle';
 rsShowHidden             = 'Mostra files nascosti';
+rsFileSelection          = 'File Selection';
+rsFileModifiedTime       = 'Mod. Time';
+rsFileAttributes         = 'Attributes';
+rsFileRights             = 'Rights';
+rsFileOwner              = 'Owner';
+rsFileGroup              = 'Group';
 
 
 // Save Dialog
@@ -77,5 +96,28 @@ rsSaveAFile              = 'Salva con nome';
 
 
 // Error messages
-rsListMustBeEmpty        = 'Elenco deve essere vuoto';
+rsErrListMustBeEmpty     = 'Elenco deve essere vuoto';
+rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';
+rsErrItemOfWrongType     = 'Item is not of <%s> type!';
+rsErrFailedToCreateDir   = 'Failed to create the directory <%s>';
+rsErrNotAssigned         = '<%s> not assigned';
+
+
+// Calendar Combo & Dialog
+rsShortMon               = 'Mon';
+rsShortTue               = 'Tue';
+rsShortWed               = 'Wed';
+rsShortThu               = 'Thu';
+rsShortFri               = 'Fri';
+rsShortSat               = 'Sat';
+rsShortSun               = 'Sun';
+rsLongMon                = 'Monday';
+rsLongTue                = 'Tuesday';
+rsLongWed                = 'Wednesday';
+rsLongThu                = 'Thursday';
+rsLongFri                = 'Friday';
+rsLongSat                = 'Saturday';
+rsLongSun                = 'Sunday';
+
+
 

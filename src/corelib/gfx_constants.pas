@@ -1,16 +1,21 @@
 {
   Constants used throughout fpGUI will be defined here. This includes
-  language constants for localization. For now, localization is very simplistic
-  and done at compile time. At a later date we can autodetect and autoselect
-  the correct language resource at runtime.
+  language constants for localization.
   
-  GetText might also be a better option.
+  You only need to changes these defines if you want the default fpGUI language
+  to be something other than English.
+  
+  Soon the lang_*.inc files will be auto generated from the actual *.po files.
+  At which point only the .po files need to be maintained.
 }
 unit gfx_constants;
 
 {$mode objfpc}{$H+}
 
 interface
+
+uses
+  gfxbase;
 
 resourcestring
 
@@ -54,7 +59,19 @@ resourcestring
 {$IFEND}
 
 
+{ This is so that when we support LTR and RTL languages, the colon will be
+  added at the correct place. }
+function fpgAddColon(const AText: TfpgString): TfpgString;
+
+
 implementation
+
+
+function fpgAddColon(const AText: TfpgString): TfpgString;
+begin
+  { TODO : Check language direction and add colon at appropriate end. }
+  result := AText + ':';
+end;
 
 end.
 

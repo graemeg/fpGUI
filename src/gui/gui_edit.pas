@@ -135,7 +135,8 @@ function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 implementation
 
 uses
-  gfx_UTF8utils;
+  gfx_UTF8utils,
+  gfx_constants;
   
 const
   // internal popupmenu item names
@@ -751,13 +752,13 @@ begin
   begin
     { todo: This text needs to be localized }
     FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
-    itm := FDefaultPopupMenu.AddMenuItem('Cut', '', @DefaultPopupCut);
+    itm := FDefaultPopupMenu.AddMenuItem(rsCut, '', @DefaultPopupCut);
     itm.Name := ipmCut;
-    itm := FDefaultPopupMenu.AddMenuItem('Copy', '', @DefaultPopupCopy);
+    itm := FDefaultPopupMenu.AddMenuItem(rsCopy, '', @DefaultPopupCopy);
     itm.Name := ipmCopy;
-    itm := FDefaultPopupMenu.AddMenuItem('Paste', '', @DefaultPopupPaste);
+    itm := FDefaultPopupMenu.AddMenuItem(rsPaste, '', @DefaultPopupPaste);
     itm.Name := ipmPaste;
-    itm := FDefaultPopupMenu.AddMenuItem('Clear all text', '', @DefaultPopupClearAll);
+    itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
     itm.Name := ipmClearAll;
   end;
   
