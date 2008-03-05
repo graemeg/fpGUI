@@ -176,6 +176,7 @@ type
     InputContext: PXIC;
     LastClickWindow: TfpgWinHandle;   // double click generation
     LastWinClickTime: longword;
+    FLastKeySym: TKeySym;   // Used for KeyRelease event
     function    DoGetFontFaceList: TStringList; override;
   public
     constructor Create(const aparams: string); override;
@@ -557,6 +558,7 @@ begin
   else
     Result := keyNIL;
   end;
+
 {$IFDEF Debug}
   if Result = keyNIL then
     WriteLn('fpGFX/X11: Unknown KeySym: $', IntToHex(KeySym, 4));
@@ -564,11 +566,14 @@ begin
 end;
 
 function TfpgApplicationImpl.StartComposing(const Event: TXEvent): TKeySym;
+var
+  l: integer;
 begin
-  SetLength(FComposeBuffer,
-    // XLookupString(@Event, @FComposeBuffer[1],    
-    Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
-      SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus));
+//  l := XLookupString(@Event, @FComposeBuffer[1],
+  l := Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
+      SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus);
+//  writeln('ComposeBuffer length = ', l);
+  SetLength(FComposeBuffer, l);
 end;
 
 function TfpgApplicationImpl.DoGetFontFaceList: TStringList;
@@ -763,7 +768,7 @@ var
           writeln('not a key event ');
         end;
     end;
-    // length := XLookupString(@event, @s[1], 9, @keysym, @compose_status);
+//    length := XLookupString(@event, @s[1], 9, @keysym, @compose_status);
     length := Xutf8LookupString(InputContext, @event.xkey, @s[1], 9, @keysym, @compose_status);
     SetLength(s, length);
     if((length > 0) and (length <=9)) then
@@ -821,6 +826,11 @@ begin
     X.KeyRelease:
         begin
           KeySym := StartComposing(ev);
+          if ev._type = X.KeyPress then
+            FLastKeySym := KeySym   // save it for KeyRelease event
+          else
+            KeySym := FLastKeySym;  // restore saved KeySym
+
           msgp.keyboard.keycode     := KeySymToKeycode(KeySym);
           msgp.keyboard.shiftstate  := ConvertShiftState(ev.xkey.state);
 
@@ -834,25 +844,14 @@ begin
               ReportLostWindow(ev);
           end;
 
-          //Writeln('XKey event(',ev._type,'):',
-            //IntToHex(ev.xkey.keycode,4),' (',ev.xkey.keycode,'), shift=',IntToHex(ev.xkey.state,4));
-
           if ev._type = X.KeyPress then
           begin
             fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
-
-            //Writeln('scancode: ',IntToHex(X11keycodeToScanCode(ev.xkey.keycode),4)
-            //  ,' (',X11keycodeToScanCode(ev.xkey.keycode),')');
 
             // Revision 203 used scancodes and XmbLookupString compared to XLookupString.
             // Maybe in the future we can switch to XmbLookupString again.
             if (ev.xkey.state and (ControlMask or Mod1Mask)) = 0 then
             begin
-              {for i := 1 to Length(FComposeBuffer) do
-              begin
-                msgp.keyboard.keychar := FComposeBuffer[i];
-                fpgPostMessage(nil, w, FPGM_KEYCHAR, msgp);
-              end;}
               for i := 1 to UTF8Length(FComposeBuffer) do
               begin
                 msgp.keyboard.keychar := UTF8Copy(FComposeBuffer, i, 1);

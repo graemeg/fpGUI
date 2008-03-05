@@ -29,9 +29,9 @@ rsDelete                 = 'Cancella';
 rsExit                   = 'Esci';
 rsYesToAll               = 'Sì a Tutto';
 rsNoToAll                = 'No a Tutto';
-rsCut                    = 'Cut';
-rsCopy                   = 'Copy';
-rsPaste                  = 'Paste';
+rsCut                    = 'Taglia';
+rsCopy                   = 'Copia';
+rsPaste                  = 'Incolla';
 
 
 // Captions
@@ -41,7 +41,7 @@ rsInformation            = 'Informazione';
 rsConfirmation           = 'Conferma';
 rsWarning                = 'Attenzione';
 rsMessage                = 'Messaggio';
-rsAbout                  = 'About %s';
+rsAbout                  = 'Informazioni %s';
 
 
 // Standard file filters
@@ -66,10 +66,10 @@ rsUnderScore             = 'Sottolineato';
 rsTypeface               = 'Typeface';
 rsAntiAliasing           = 'Anti aliasing';
 rsExampleText            = 'Testo di Esempio';
-rsCollectionAllFonts     = 'All Fonts';
-rsCollectionRecentlyUsed = 'Recently Used';
-rsCollectionFavourites   = 'Favourites';
-rsCollectionFixedWidth   = 'Fixed Width';
+rsCollectionAllFonts     = 'Tutti i Fonts';
+rsCollectionRecentlyUsed = 'Usati Recentemente';
+rsCollectionFavourites   = 'Preferiti';
+rsCollectionFixedWidth   = 'Larghezza Fissa';
 rsCollectionSans         = 'Sans';
 rsCollectionSerif        = 'Serif';
 rsCollectionFontAliases  = 'Font Aliases';
@@ -83,12 +83,12 @@ rsDrive                  = 'Disco';
 rsFiles                  = 'Files';
 rsDirectories            = 'Cartelle';
 rsShowHidden             = 'Mostra files nascosti';
-rsFileSelection          = 'File Selection';
-rsFileModifiedTime       = 'Mod. Time';
-rsFileAttributes         = 'Attributes';
-rsFileRights             = 'Rights';
-rsFileOwner              = 'Owner';
-rsFileGroup              = 'Group';
+rsFileSelection          = 'Seleziona File';
+rsFileModifiedTime       = 'Tempo Mod.';
+rsFileAttributes         = 'Attributi';
+rsFileRights             = 'Diritti';
+rsFileOwner              = 'Proprietario';
+rsFileGroup              = 'Gruppo';
 
 
 // Save Dialog
@@ -97,27 +97,27 @@ rsSaveAFile              = 'Salva con nome';
 
 // Error messages
 rsErrListMustBeEmpty     = 'Elenco deve essere vuoto';
-rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';
-rsErrItemOfWrongType     = 'Item is not of <%s> type!';
-rsErrFailedToCreateDir   = 'Failed to create the directory <%s>';
-rsErrNotAssigned         = '<%s> not assigned';
+rsErrCouldNotOpenDir     = 'Impossibile aprire la cartella <%s>';
+rsErrItemOfWrongType     = 'L''elemento non è del tipo <%s> !';
+rsErrFailedToCreateDir   = 'Impossibile creare la cartella <%s>';
+rsErrNotAssigned         = '<%s> non assegnato';
 
 
 // Calendar Combo & Dialog
-rsShortMon               = 'Mon';
-rsShortTue               = 'Tue';
-rsShortWed               = 'Wed';
-rsShortThu               = 'Thu';
-rsShortFri               = 'Fri';
-rsShortSat               = 'Sat';
-rsShortSun               = 'Sun';
-rsLongMon                = 'Monday';
-rsLongTue                = 'Tuesday';
-rsLongWed                = 'Wednesday';
-rsLongThu                = 'Thursday';
-rsLongFri                = 'Friday';
-rsLongSat                = 'Saturday';
-rsLongSun                = 'Sunday';
+rsShortMon               = 'Lun';
+rsShortTue               = 'Mar';
+rsShortWed               = 'Mer';
+rsShortThu               = 'Gio';
+rsShortFri               = 'Ven';
+rsShortSat               = 'Sab';
+rsShortSun               = 'Dom';
+rsLongMon                = 'Lunedì';
+rsLongTue                = 'Martedì';
+rsLongWed                = 'Mercoledì';
+rsLongThu                = 'Giovedì';
+rsLongFri                = 'Venerdì';
+rsLongSat                = 'Sabato';
+rsLongSun                = 'Domenica';
 
 
 
