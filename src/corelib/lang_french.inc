@@ -29,9 +29,9 @@ rsDelete                 = 'Supprimer';
 rsExit                   = 'Sortir';
 rsYesToAll               = 'Oui à tous';
 rsNoToAll                = 'Non à tous';
-rsCut                    = 'Cut';
-rsCopy                   = 'Copy';
-rsPaste                  = 'Paste';
+rsCut                    = 'Couper';
+rsCopy                   = 'Copier';
+rsPaste                  = 'Coller';
 
 
 // Captions
@@ -41,7 +41,7 @@ rsInformation            = 'Information';
 rsConfirmation           = 'Confirmation';
 rsWarning                = 'Alerte';
 rsMessage                = 'Message';
-rsAbout                  = 'About %s';
+rsAbout                  = 'A propos de %s';
 
 
 // Standard file filters
@@ -63,16 +63,16 @@ rsStyle                  = 'Style';
 rsItalic                 = 'Italique';
 rsBold                   = 'Gras';
 rsUnderScore             = 'Souligné';
-rsTypeface               = 'Typeface';
-rsAntiAliasing           = 'Anti aliasing';
+rsTypeface               = 'Style';
+rsAntiAliasing           = 'Anti alias';
 rsExampleText            = 'Texte exemple';
-rsCollectionAllFonts     = 'All Fonts';
-rsCollectionRecentlyUsed = 'Recently Used';
-rsCollectionFavourites   = 'Favourites';
-rsCollectionFixedWidth   = 'Fixed Width';
+rsCollectionAllFonts     = 'Toutes les polices';
+rsCollectionRecentlyUsed = 'Récemment utilisées';
+rsCollectionFavourites   = 'Favorites';
+rsCollectionFixedWidth   = 'Largeur fixe';
 rsCollectionSans         = 'Sans';
 rsCollectionSerif        = 'Serif';
-rsCollectionFontAliases  = 'Font Aliases';
+rsCollectionFontAliases  = 'Alias';
 
 
 // Open Dialog
@@ -83,12 +83,12 @@ rsDrive                  = 'Disque';
 rsFiles                  = 'Fichiers';
 rsDirectories            = 'Répertoires';
 rsShowHidden             = 'Montrer les fichiers cachés';
-rsFileSelection          = 'File Selection';
-rsFileModifiedTime       = 'Mod. Time';
-rsFileAttributes         = 'Attributes';
-rsFileRights             = 'Rights';
-rsFileOwner              = 'Owner';
-rsFileGroup              = 'Group';
+rsFileSelection          = 'Sélection fichier';
+rsFileModifiedTime       = 'Date modif.';
+rsFileAttributes         = 'Attributs';
+rsFileRights             = 'Droits';
+rsFileOwner              = 'Propriétaire';
+rsFileGroup              = 'Groupe';
 
 
 // Save Dialog
@@ -97,27 +97,27 @@ rsSaveAFile              = 'Sauver sous';
 
 // Error messages
 rsErrListMustBeEmpty     = 'Liste doit être vide';
-rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';
-rsErrItemOfWrongType     = 'Item is not of <%s> type!';
-rsErrFailedToCreateDir   = 'Failed to create the directory <%s>';
-rsErrNotAssigned         = '<%s> not assigned';
+rsErrCouldNotOpenDir     = 'Le répertoire <%s> n''a pas pu être ouvert';
+rsErrItemOfWrongType     = 'L''item n''est pas du type <%s>!';
+rsErrFailedToCreateDir   = 'Le répertoire <%s> n''a pas pu être ouvert';
+rsErrNotAssigned         = '<%s> n''est pas assigné';
 
 
 // Calendar Combo & Dialog
-rsShortMon               = 'Mon';
-rsShortTue               = 'Tue';
-rsShortWed               = 'Wed';
-rsShortThu               = 'Thu';
-rsShortFri               = 'Fri';
-rsShortSat               = 'Sat';
-rsShortSun               = 'Sun';
-rsLongMon                = 'Monday';
-rsLongTue                = 'Tuesday';
-rsLongWed                = 'Wednesday';
-rsLongThu                = 'Thursday';
-rsLongFri                = 'Friday';
-rsLongSat                = 'Saturday';
-rsLongSun                = 'Sunday';
+rsShortMon               = 'Lun';
+rsShortTue               = 'Mar';
+rsShortWed               = 'Mer';
+rsShortThu               = 'Jeu';
+rsShortFri               = 'Ven';
+rsShortSat               = 'Sam';
+rsShortSun               = 'Dim';
+rsLongMon                = 'Lundi';
+rsLongTue                = 'Mardi';
+rsLongWed                = 'Mercredi';
+rsLongThu                = 'Jeudi';
+rsLongFri                = 'Vendredi';
+rsLongSat                = 'Samedi';
+rsLongSun                = 'Dimanche';
 
 
 
