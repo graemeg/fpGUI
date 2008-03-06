@@ -23,15 +23,15 @@ rsAbort                  = 'Прервать';
 rsRetry                  = 'Повторить';
 rsIgnore                 = 'Пропустить';
 rsClose                  = 'Закрыть';
-rsInsert                 = 'Вставить';
+rsInsert                 = 'Вставка';
 rsEdit                   = 'Редактировать';
 rsDelete                 = 'Удалить';
 rsExit                   = 'Выход';
 rsYesToAll               = 'Да для всех';
 rsNoToAll                = 'Нет для всех';
-rsCut                    = 'Cut';
-rsCopy                   = 'Copy';
-rsPaste                  = 'Paste';
+rsCut                    = 'Вырезать';
+rsCopy                   = 'Копировать';
+rsPaste                  = 'Вставить';
 
 
 // Captions
@@ -41,7 +41,7 @@ rsInformation            = 'Информация';
 rsConfirmation           = 'Подтверждение';
 rsWarning                = 'Внимание';
 rsMessage                = 'Сообщение';
-rsAbout                  = 'About %s';
+rsAbout                  = 'Информация о %s';
 
 
 // Standard file filters
@@ -63,16 +63,16 @@ rsStyle                  = 'Стиль';
 rsItalic                 = 'Курсив';
 rsBold                   = 'Жирный';
 rsUnderScore             = 'Подчеркнутый';
-rsTypeface               = 'Typeface';
-rsAntiAliasing           = 'Anti aliasing';
+rsTypeface               = 'Начертание';
+rsAntiAliasing           = 'Сглаживание';
 rsExampleText            = 'Пример текста';
-rsCollectionAllFonts     = 'All Fonts';
-rsCollectionRecentlyUsed = 'Recently Used';
-rsCollectionFavourites   = 'Favourites';
-rsCollectionFixedWidth   = 'Fixed Width';
+rsCollectionAllFonts     = 'Все шрифты';
+rsCollectionRecentlyUsed = 'Ранее использованные';
+rsCollectionFavourites   = 'Избранные';
+rsCollectionFixedWidth   = 'Моноширинные';
 rsCollectionSans         = 'Sans';
 rsCollectionSerif        = 'Serif';
-rsCollectionFontAliases  = 'Font Aliases';
+rsCollectionFontAliases  = 'Псевдонимы шрифтов';
 
 
 // Open Dialog
@@ -83,12 +83,12 @@ rsDrive                  = 'Диск';
 rsFiles                  = 'Файлы';
 rsDirectories            = 'Директории';
 rsShowHidden             = 'Показывать скрытые файлы';
-rsFileSelection          = 'File Selection';
-rsFileModifiedTime       = 'Mod. Time';
-rsFileAttributes         = 'Attributes';
-rsFileRights             = 'Rights';
-rsFileOwner              = 'Owner';
-rsFileGroup              = 'Group';
+rsFileSelection          = 'Выбор файла';
+rsFileModifiedTime       = 'Изменен';
+rsFileAttributes         = 'Атрибуты';
+rsFileRights             = 'Права';
+rsFileOwner              = 'Владелец';
+rsFileGroup              = 'Группа';
 
 
 // Save Dialog
@@ -97,27 +97,27 @@ rsSaveAFile              = 'Сохранить файл как';
 
 // Error messages
 rsErrListMustBeEmpty     = 'Список должен быть пустым';
-rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';
-rsErrItemOfWrongType     = 'Item is not of <%s> type!';
-rsErrFailedToCreateDir   = 'Failed to create the directory <%s>';
-rsErrNotAssigned         = '<%s> not assigned';
+rsErrCouldNotOpenDir     = 'Невозможно открыть директорию <%s>';
+rsErrItemOfWrongType     = 'Элемент не принадлежит типу <%s>!';
+rsErrFailedToCreateDir   = 'Невозможно создать директорию <%s>';
+rsErrNotAssigned         = 'Значение <%s> не определено';
 
 
 // Calendar Combo & Dialog
-rsShortMon               = 'Mon';
-rsShortTue               = 'Tue';
-rsShortWed               = 'Wed';
-rsShortThu               = 'Thu';
-rsShortFri               = 'Fri';
-rsShortSat               = 'Sat';
-rsShortSun               = 'Sun';
-rsLongMon                = 'Monday';
-rsLongTue                = 'Tuesday';
-rsLongWed                = 'Wednesday';
-rsLongThu                = 'Thursday';
-rsLongFri                = 'Friday';
-rsLongSat                = 'Saturday';
-rsLongSun                = 'Sunday';
+rsShortMon               = 'Пн';
+rsShortTue               = 'Вт';
+rsShortWed               = 'Ср';
+rsShortThu               = 'Чт';
+rsShortFri               = 'Пт';
+rsShortSat               = 'Сб';
+rsShortSun               = 'Вс';
+rsLongMon                = 'Понедельник';
+rsLongTue                = 'Вторник';
+rsLongWed                = 'Среда';
+rsLongThu                = 'Четверг';
+rsLongFri                = 'Пятница';
+rsLongSat                = 'Суббота';
+rsLongSun                = 'Воскресенье';
 
 
 

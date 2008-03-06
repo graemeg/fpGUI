@@ -1726,8 +1726,6 @@ begin
 end;
 
 destructor TfpgTreeView.Destroy;
-var
-  i: integer;
 begin
   ClearColumnLeft;
   FFont.Free;
