@@ -153,7 +153,7 @@ type
   TfpgApplicationImpl = class(TfpgApplicationBase)
   private
     FComposeBuffer: String[32];
-    FComposeStatus: TXComposeStatus;
+    FComposeStatus: TStatus;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
@@ -745,6 +745,7 @@ var
   xfd: integer;
   KeySym: TKeySym;
   Popup: TfpgWidget;
+  status: TStatus;
 
   // debug purposes only
   procedure PrintKeyEvent(const event: TXEvent);
@@ -768,7 +769,6 @@ var
           writeln('not a key event ');
         end;
     end;
-//    length := XLookupString(@event, @s[1], 9, @keysym, @compose_status);
     length := Xutf8LookupString(InputContext, @event.xkey, @s[1], 9, @keysym, @compose_status);
     SetLength(s, length);
     if((length > 0) and (length <=9)) then
@@ -802,7 +802,7 @@ begin
         Exit; // no event received.
     end;
     XNextEvent(display, @ev);
-  until (not XFilterEvent(@ev, 0));
+  until (not XFilterEvent(@ev, X.None));
 
   blockmsg := False;
   fillchar(msgp, sizeof(msgp), 0);
@@ -825,9 +825,32 @@ begin
     X.KeyPress,
     X.KeyRelease:
         begin
-          KeySym := StartComposing(ev);
           if ev._type = X.KeyPress then
+          begin
+            KeySym := StartComposing(ev);
+            { TODO -oGG : Move some code into the case statement }
+            case FComposeStatus of
+              XLookupNone:
+                  begin
+//                    writeln('KeyPress - XLookupNone');
+                    Exit;
+                  end;
+              XLookupChars:
+                  begin
+//                    writeln('KeyPress - XLookupChars');
+                  // do nothing
+                  end;
+              XLookupKeySymVal:
+                  begin
+//                    writeln('KeyPress - XLookupKeySymVal');
+                  end;
+              XLookupBoth:
+                  begin
+//                    writeln('KeyPress - XLookupBoth');
+                  end;
+            end;
             FLastKeySym := KeySym   // save it for KeyRelease event
+          end
           else
             KeySym := FLastKeySym;  // restore saved KeySym
 
@@ -848,8 +871,6 @@ begin
           begin
             fpgPostMessage(nil, w, FPGM_KEYPRESS, msgp);
 
-            // Revision 203 used scancodes and XmbLookupString compared to XLookupString.
-            // Maybe in the future we can switch to XmbLookupString again.
             if (ev.xkey.state and (ControlMask or Mod1Mask)) = 0 then
             begin
               for i := 1 to UTF8Length(FComposeBuffer) do

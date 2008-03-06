@@ -16,6 +16,7 @@
         </Optimizations>
       </CodeGeneration>
       <Other>
+        <CustomOptions Value="-B"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
