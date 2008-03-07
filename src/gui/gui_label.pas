@@ -250,7 +250,7 @@ var
   r: TfpgRect;
 begin
   Canvas.BeginDraw;
-  inherited;
+  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
   Canvas.Clear(FBackgroundColor);
