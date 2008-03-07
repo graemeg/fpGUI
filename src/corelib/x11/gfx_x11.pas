@@ -147,6 +147,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
+    procedure   SetFullscreen(AValue: Boolean); override;
   end;
 
 
@@ -1346,6 +1347,9 @@ begin
       AllocateWindowHandle;
     XMapWindow(xapplication.Display, FWinHandle);
     Include(FWinFlags, xwsfMapped);
+    // Fullscreen can only be set visible (mapped) windows.
+    if waFullScreen in FWindowAttributes then
+      fpgApplication.netlayer.WindowSetFullscreen(FWinHandle, True);
   end
   else
   begin
@@ -1471,6 +1475,12 @@ end;
 procedure TfpgWindowImpl.ReleaseMouse;
 begin
   XUngrabPointer(xapplication.display, CurrentTime);
+end;
+
+procedure TfpgWindowImpl.SetFullscreen(AValue: Boolean);
+begin
+  inherited SetFullscreen(AValue);
+  fpgApplication.netlayer.WindowSetFullscreen(FWinHandle, AValue);
 end;
 
 { TfpgFontResourceImpl }

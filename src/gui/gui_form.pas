@@ -34,6 +34,7 @@ type
 
   TfpgForm = class(TfpgWidget)
   private
+    FFullScreen: boolean;
     FOnActivate: TNotifyEvent;
     FOnClose: TNotifyEvent;
     FOnCreate: TNotifyEvent;
@@ -69,6 +70,7 @@ type
     procedure   Close;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: integer read FModalResult write FModalResult;
+    property    FullScreen: boolean read FFullScreen write FFullScreen default False;
   published
     {$Note Refactor this to a TfpgCustomForm and only surface it here }
     property    BackgroundColor;
@@ -182,6 +184,11 @@ begin
     Include(FWindowAttributes, waSizeable)
   else
     Exclude(FWindowAttributes, waSizeable);
+    
+  if FFullScreen then
+    Include(FWindowAttributes, waFullScreen)
+  else
+    Exclude(FWindowAttributes, waFullScreen);
 end;
 
 procedure TfpgForm.SetWindowParameters;
@@ -202,6 +209,7 @@ begin
   FMinWidth        := 32;
   FMinHeight       := 32;
   FModalResult     := 0;
+  FFullScreen := False;
 
   AfterCreate;
 end;

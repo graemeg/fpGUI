@@ -24,7 +24,7 @@ type
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
-  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop);
+  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop, waFullScreen);
   TWindowAttributes = set of TWindowAttribute;
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
@@ -364,6 +364,7 @@ type
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
     procedure   CaptureMouse; virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
+    procedure   SetFullscreen(AValue: Boolean); virtual;
     property    HasHandle: boolean read HandleIsValid;
     property    WindowType: TWindowType read FWindowType write FWindowType;
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
@@ -881,6 +882,15 @@ function TfpgWindowBase.WindowToScreen(ASource: TfpgWindowBase;
   const AScreenPos: TPoint): TPoint;
 begin
   Result := DoWindowToScreen(ASource, AScreenPos);
+end;
+
+procedure TfpgWindowBase.SetFullscreen(AValue: Boolean);
+begin
+  if AValue then
+    Include(FWindowAttributes, waFullScreen)
+  else
+    Exclude(FWindowAttributes, waFullScreen);
+  // now decendants must override this and implement the actualy fullscreen part
 end;
 
 { TfpgCanvasBase }
