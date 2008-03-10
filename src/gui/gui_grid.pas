@@ -214,7 +214,9 @@ type
     property    OnKeyPress;
     property    OnRowChange;
   end;
-  
+
+function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;
+
 
 implementation
 
@@ -225,11 +227,22 @@ uses
   ,Windows   // Graeme: temporary, just to see how the grid looks under Windows.
   {$ENDIF}
   {$IFDEF UNIX}
-    {$if defined(linux) and defined(cpu386)},libc{$endif} // Graeme: temporary. libc is not available for FreeBSD.
+    // Graeme: temporary. libc is not available for FreeBSD.
+    {$if defined(linux) and defined(cpu386)},libc{$endif}
   ,baseunix
   {$ENDIF}
   ;
-  
+
+function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;
+begin
+  Result  := TfpgStringGrid.Create(AOwner);
+  Result.Left         := x;
+  Result.Top          := y;
+  Result.Width        := w;
+  Result.Height       := h;
+  Result.ColumnCount  := AColumnCount;
+end;
+
 
 // *****  These two functions will be moving out of this unit soon!
   
