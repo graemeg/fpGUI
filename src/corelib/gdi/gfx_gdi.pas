@@ -1097,8 +1097,10 @@ begin
   end
   else if FWindowType in [wtPopup] then
   begin
-    FWinStyle   := WS_POPUP;
-    FWinStyleEx := WS_EX_TOOLWINDOW;
+    // This prevents the popup window from stealing the focus. eg: ComboBox dropdown
+    FParentWinHandle := GetDesktopWindow;
+    FWinStyle   := WS_CHILD;
+    FWinStyleEx := WS_EX_TOPMOST or WS_EX_TOOLWINDOW;
   end;
 
   if FWindowType = wtModalForm then
