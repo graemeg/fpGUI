@@ -336,7 +336,7 @@ begin
       if SameText(FItems.Strings[i], AValue) then
       begin
         SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
-        Break;
+        Exit;
       end;
     end;
     // if we get here, we didn't find a match
