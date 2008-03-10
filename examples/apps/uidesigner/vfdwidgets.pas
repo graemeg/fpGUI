@@ -225,8 +225,11 @@ begin
   // Label
   wc          := TVFDWidgetClass.Create(TfpgLabel);
   wc.NameBase := 'lblName';
-  wc.AddProperty('Text', TPropertyString, 'Label text');
+  wc.AddProperty('Alignment', TPropertyEnum, 'Horizontal text alignment');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the label text');
+  wc.AddProperty('Layout', TPropertyEnum, 'Vertical text layout');
+  wc.AddProperty('Text', TPropertyString, 'Label text');
+  wc.AddProperty('WrapText', TPropertyBoolean, 'If True text will wrap when it doesn''t fit the width');
   wc.WidgetIconName := 'vfd.label';
   RegisterVFDWidget(wc);
 
@@ -254,7 +257,7 @@ begin
   wc.NameBase := 'btnName';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('AllowAllUp', TPropertyBoolean, '');
-  wc.AddProperty('Embedded', TPropertyBoolean, '');
+  wc.AddProperty('Embedded', TPropertyBoolean, 'No focus rectangle will be drawn. eg: Toolbar buttons');
   wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
   wc.AddProperty('ImageMargin', TPropertyInteger, '');

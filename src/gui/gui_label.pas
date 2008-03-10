@@ -30,16 +30,19 @@ uses
   gfx_widget;
 
 type
+  TLayout = (tlTop, tlCenter, tlBottom);
 
   TfpgCustomLabel = class(TfpgWidget)
   private
     FAutoSize: boolean;
     FAlignment: TAlignment;
+    FLayout: TLayout;
     FWrapText: boolean;
     FWrappedText: TStringList;
     procedure   Wrap(MaxLength: integer; AText: string);
     procedure   SetWrapText(const AValue: boolean);
     procedure   SetAlignment(const AValue: TAlignment);
+    procedure   SetLayout(const AValue: TLayout);
     function    GetFontDesc: string;
     procedure   SetAutoSize(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
@@ -51,8 +54,8 @@ type
     procedure   HandlePaint; override;
     property    WrapText: boolean read FWrapText write SetWrapText default False;
     property    Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
-    property    Length: integer read FWidth write SetWidth;
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
+    property    Layout: TLayout read FLayout write SetLayout default tlTop;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Text: string read FText write SetText;
   public
@@ -68,9 +71,10 @@ type
     property    AutoSize;
     property    BackgroundColor;
     property    FontDesc;
-    property    Length;
+    property    Layout;
     property    Text;
     property    TextColor;
+    property    Width;
     property    WrapText;
     property    OnClick;
     property    OnDoubleClick;
@@ -83,23 +87,14 @@ type
 
 
 // A convenience function to create a TfpgLabel instance
-function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgLabel; overload;
-function CreateLabel(AOwner: TComponent; x, y, w: TfpgCoord; AText: string): TfpgLabel; overload;
-
+function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string; w: TfpgCoord= 0; h: TfpgCoord= 0;
+          HAlign: TAlignment= taLeftJustify; VAlign: TLayout= tlTop): TfpgLabel; overload;
 
 implementation
 
 
-function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgLabel;
-begin
-  Result       := TfpgLabel.Create(AOwner);
-  Result.Left  := x;
-  Result.Top   := y;
-  Result.Text  := AText;
-  Result.Width := Result.Font.TextWidth(Result.Text) + 5;  // 5 is some extra spacing
-end;
-
-function CreateLabel(AOwner: TComponent; x, y, w: TfpgCoord; AText: string): TfpgLabel;
+function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string; w: TfpgCoord= 0; h: TfpgCoord= 0;
+          HAlign: TAlignment= taLeftJustify; VAlign: TLayout= tlTop): TfpgLabel; overload;
 begin
   Result       := TfpgLabel.Create(AOwner);
   Result.Left  := x;
@@ -111,12 +106,17 @@ begin
     Result.FAutoSize := True;
   end
   else
-    begin
+  begin
     Result.Width := w;
     Result.WrapText := True;
-    end;
+  end;
+  if h < Result.Font.Height then
+    Result.Height:= Result.Font.Height
+  else
+    Result.Height:= h;
+  Result.Alignment:= HAlign;
+  Result.Layout:= VAlign;
 end;
-
 
 { TfpgCustomLabel }
 
@@ -153,16 +153,16 @@ begin
     else
       FWrappedText.Add(AText);
   end;
-  Height := FWrappedText.Count * (Font.Height + 2);
+  if Height < FWrappedText.Count * (Font.Height + 2) then
+    Height := FWrappedText.Count * (Font.Height + 2);
 end;
 
 procedure TfpgCustomLabel.SetWrapText(const AValue: boolean);
 begin
   FWrapText := AValue;
   if FWrapText then
-    Wrap(Width, FText)
-  else
-    Height := FFont.Height;
+    Wrap(Width, FText);
+  RePaint;
 end;
 
 procedure TfpgCustomLabel.SetAlignment(const AValue: TAlignment);
@@ -172,6 +172,15 @@ begin
   FAlignment := AValue;
   if FAlignment <> taLeftJustify then
     FAutoSize := False;
+  ResizeLabel;
+end;
+
+procedure TfpgCustomLabel.SetLayout(const AValue: TLayout);
+begin
+  if FLayout = AValue then
+    Exit;
+  FLayout := AValue;
+  ResizeLabel;
 end;
 
 function TfpgCustomLabel.GetFontDesc: string;
@@ -209,12 +218,9 @@ begin
   if FAutoSize then
   begin
     Width   := FFont.TextWidth(FText);
-    Height  := FFont.Height;
   end
   else if FWrapText then
-    Wrap(Width, FText)
-  else
-    Height := FFont.Height;
+    Wrap(Width, FText);
 
   UpdateWindowPosition;
   RePaint;
@@ -231,6 +237,7 @@ begin
   FBackgroundColor := Parent.BackgroundColor;
   FAutoSize   := False;
 
+  FLayout      := tlTop;
   FAlignment   := taLeftJustify;
   FWrapText    := False;
   FWrappedText := TStringList.Create;
@@ -262,27 +269,81 @@ begin
       for i:= 0 to Pred(FWrappedText.Count) do
         case FAlignment of
           taLeftJustify:
-              fpgStyle.DrawString(Canvas, 0, (Font.Height + 2) * i, FWrappedText[i], Enabled);
-              
+            case FLayout of
+              tlTop:
+                fpgStyle.DrawString(Canvas, 0, (Font.Height + 2) * i, FWrappedText[i], Enabled);
+              tlBottom:
+                fpgStyle.DrawString(Canvas, 0,
+                    Height - ((Font.Height + 2) * FWrappedText.Count)+ ((Font.Height + 2) * i),
+                    FWrappedText[i], Enabled);
+              tlCenter:
+                fpgStyle.DrawString(Canvas, 0,
+                    ((Height - (Font.Height + 2) * FWrappedText.Count) div 2) + ((Font.Height + 2) * i),
+                    FWrappedText[i], Enabled);
+              end;
+
           taRightJustify:
-              fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]), (Font.Height + 2) * i,
+            case FLayout of
+              tlTop:
+                fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
+                    (Font.Height + 2) * i, FWrappedText[i], Enabled);
+              tlBottom:
+                fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
+                    Height - ((Font.Height + 2) * FWrappedText.Count)+ ((Font.Height + 2) * i),
                     FWrappedText[i], Enabled);
-                    
+              tlCenter:
+                fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
+                    ((Height - (Font.Height + 2) * FWrappedText.Count) div 2) + ((Font.Height + 2) * i),
+                    FWrappedText[i], Enabled);
+              end;
+
           taCenter:
-              fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2, (Font.Height + 2) * i,
+            case FLayout of
+              tlTop:
+                fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
+                    (Font.Height + 2) * i, FWrappedText[i], Enabled);
+              tlBottom:
+                fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
+                    Height - ((Font.Height + 2) * FWrappedText.Count)+ ((Font.Height + 2) * i),
                     FWrappedText[i], Enabled);
+              tlCenter:
+                fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
+                    ((Height - (Font.Height + 2) * FWrappedText.Count) div 2) + ((Font.Height + 2) * i),
+                    FWrappedText[i], Enabled);
+              end;
         end;
   end
   else
     case FAlignment of
       taLeftJustify:
-          fpgStyle.DrawString(Canvas, 0, 0, FText, Enabled);
-          
+        case FLayout of
+          tlTop:
+            fpgStyle.DrawString(Canvas, 0, 0, FText, Enabled);
+          tlBottom:
+            fpgStyle.DrawString(Canvas, 0, Height - Font.Height, FText, Enabled);
+          tlCenter:
+            fpgStyle.DrawString(Canvas, 0, (Height - Font.Height) div 2, FText, Enabled);
+          end;
+
       taRightJustify:
-          fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FText), 0, FText, Enabled);
-          
+        case FLayout of
+          tlTop:
+            fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FText), 0, FText, Enabled);
+          tlBottom:
+            fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FText), Height - Font.Height, FText, Enabled);
+          tlCenter:
+            fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FText), (Height - Font.Height) div 2, FText, Enabled);
+          end;
+
       taCenter:
-          fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FText)) div 2, 0, FText, Enabled);
+        case FLayout of
+          tlTop:
+            fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FText)) div 2, 0, FText, Enabled);
+          tlBottom:
+            fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FText)) div 2, Height - Font.Height, FText, Enabled);
+          tlCenter:
+            fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FText)) div 2, (Height - Font.Height) div 2, FText, Enabled);
+          end;
     end;
   Canvas.EndDraw;
 end;
