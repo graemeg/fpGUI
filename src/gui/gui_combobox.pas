@@ -120,7 +120,8 @@ type
   end;
   
 
-function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList): TfpgComboBox;
+function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
+      h: TfpgCoord = 0): TfpgComboBox;
 
 
 implementation
@@ -202,7 +203,8 @@ begin
   ListBox.PopupFrame := True;
 end;
 
-function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList): TfpgComboBox;
+function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
+      h: TfpgCoord = 0): TfpgComboBox;
 begin
   Result           := TfpgComboBox.Create(AOwner);
   Result.Left      := x;
@@ -210,8 +212,12 @@ begin
   Result.Width     := w;
   Result.Focusable := True;
 
-  Result.Height := 23;  // replace this with font height + margins
-  { TODO : We still need to handle the AList param as well.}
+  if h < TfpgComboBox(Result).FFont.Height + 6 then
+    Result.Height:= TfpgComboBox(Result).FFont.Height + 6
+  else
+    Result.Height:= h;
+    
+  Result.Items.AddStrings(AList);
 end;
 
 { TfpgAbstractComboBox }
@@ -260,6 +266,7 @@ begin
     if rowcount < 1 then
       rowcount := 1;
     ddw.Height            := (ddw.ListBox.RowHeight * rowcount) + 4;
+    ddw.ListBox.Height    := ddw.Height;   // needed in follow focus, otherwise, the default value (80) is used
     ddw.CallerWidget      := self;
     ddw.ListBox.OnSelect  := @InternalListBoxSelect;
 
@@ -268,7 +275,7 @@ begin
     ddw.ListBox.FocusItem := FFocusItem;
 
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
-    ddw.ShowAt(Parent, Left, Top+Height);
+    ddw.ShowAt(Parent, Left, Top + Height);      // drop the box below the combo
     ddw.ListBox.SetFocus;
   end
   else
@@ -320,6 +327,11 @@ procedure TfpgAbstractComboBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
+  if Height < FFont.Height + 6 then
+  begin
+    Height:= FFont.Height + 6;
+//    UpdateWindowPosition;
+  end;
   RePaint;
 end;
 
