@@ -209,7 +209,7 @@ begin
   FMinWidth        := 32;
   FMinHeight       := 32;
   FModalResult     := 0;
-  FFullScreen := False;
+  FFullScreen      := False;
 
   AfterCreate;
 end;

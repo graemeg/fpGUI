@@ -160,6 +160,7 @@ type
     procedure   FilterChange(Sender: TObject);
     procedure   DirChange(Sender: TObject);
     procedure   UpDirClick(Sender: TObject);
+    procedure   btnDirNewClicked(Sender: TObject);
     procedure   edFilenameChanged(Sender: TObject);
     procedure   UpdateButtonState;
   protected
@@ -185,6 +186,7 @@ type
 
 
 {$I messagedialog.inc}
+{$I newdirdialog.inc}
 
 
 
@@ -456,12 +458,14 @@ begin
   btnCancel.ImageName := 'stdimg.Cancel';   // Do NOT localize
   btnCancel.ShowImage := True;
   btnCancel.Anchors   := [anRight, anBottom];
+  btnCancel.TabOrder  := 2;
 
   btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsOK, @btnOKClick);
   btnOK.Name      := 'btnOK';
   btnOK.ImageName := 'stdimg.OK';   // Do NOT localize
   btnOK.ShowImage := True;
   btnOK.Anchors   := [anRight, anBottom];
+  btnOK.TabOrder  := 1;
 end;
 
 
@@ -859,6 +863,7 @@ begin
     ImageName := 'stdimg.foldernew';    // Do NOT localize
     ModalResult := 0;
     Focusable := False;
+    OnClick := @btnDirNewClicked;
   end;
 
   btnShowHidden := TfpgButton.Create(self);
@@ -1011,6 +1016,28 @@ end;
 procedure TfpgFileDialog.UpDirClick(Sender: TObject);
 begin
   SetCurrentDirectory('..');
+end;
+
+procedure TfpgFileDialog.btnDirNewClicked(Sender: TObject);
+var
+  dlg: TfpgNewDirDialog;
+begin
+  dlg := TfpgNewDirDialog.Create(nil);
+  try
+    if dlg.ShowModal = 1 then
+    begin
+      if dlg.Directory <> '' then
+      begin
+        ShowMessage(dlg.Directory);
+        mkdir(dlg.Directory);
+        grid.FileList.ReadDirectory(GetFileFilter, ShowHidden);
+        grid.FileList.Sort(soFileName);
+        grid.Invalidate;
+      end;
+    end;
+  finally
+    dlg.Free;
+  end;
 end;
 
 procedure TfpgFileDialog.edFilenameChanged(Sender: TObject);
@@ -1239,6 +1266,7 @@ end;
 
 
 {$I messagedialog.inc}
+{$I newdirdialog.inc}
 
 
 end.
