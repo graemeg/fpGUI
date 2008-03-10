@@ -967,10 +967,10 @@ begin
   w1 := TfpgWidget(p1);
   w2 := TfpgWidget(p2);
   case w1.Align of
-    alTop: Result := CompareInts(w1.Top, w2.Top);
+    alTop:    Result := CompareInts(w1.Top, w2.Top);
     alBottom: Result := CompareInts(w2.Top, w1.Top);
-    alLeft: Result   := CompareInts(w1.Left, w2.Left);
-    alRight: Result  := CompareInts(w2.Left, w1.Left);
+    alLeft:   Result := CompareInts(w1.Left, w2.Left);
+    alRight:  Result := CompareInts(w2.Left, w1.Left);
     else
       Result         := 0;
   end;
