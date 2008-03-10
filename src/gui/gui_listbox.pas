@@ -96,6 +96,7 @@ type
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
     property    OnScroll: TNotifyEvent read FOnScroll write FOnScroll;
+    property    OnKeyPress; // to allow to detect return or tab key has been pressed
   end;
 
 
