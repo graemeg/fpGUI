@@ -174,7 +174,16 @@ type
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
   end;
+  
 
+  TMsgHookItem = class
+    Dest: TObject;
+    Listener: TObject;
+    MsgCode: integer;
+  end;
+
+
+  { TfpgApplication }
 
   TfpgApplication = class(TfpgApplicationImpl)
   protected
@@ -183,6 +192,7 @@ type
     FScreenHeight: integer;
     FDefaultFont: TfpgFont;
     FFontResList: TList;
+    FMessageHookList: TFPList;
     procedure   FreeFontRes(afontres: TfpgFontResource);
     procedure   InternalInit;
     procedure   RunMessageLoop;
@@ -195,6 +205,8 @@ type
     procedure   Run;
     procedure   Flush;
     procedure   ProcessMessages;
+    procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
+    procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
     property    DefaultFont: TfpgFont read FDefaultFont;
@@ -703,7 +715,8 @@ begin
   FScreenWidth    := -1;
   FScreenHeight   := -1;
   FModalFormStack := TList.Create;
-
+  FMessageHookList := TFPList.Create;
+  
   try
     inherited Create(aparams);
 
@@ -746,6 +759,10 @@ begin
   FFontResList.Free;
 
   FreeAndNil(FModalFormStack);
+  
+  for i := 0 to FMessageHookList.Count-1 do
+    TMsgHookItem(FMessageHookList[i]).Free;
+  FreeAndNil(FMessageHookList);
 
   for i := uMsgQueueList.Count-1 downto 0 do
   begin
@@ -847,6 +864,35 @@ begin
   begin
     WaitWindowMessage(0);
     Flush;
+  end;
+end;
+
+procedure TfpgApplication.SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
+var
+  oItem: TMsgHookItem;
+begin
+  oItem := TMsgHookItem.Create;
+  oItem.Dest := AWidget;
+  oItem.Listener := AListener;
+  oItem.MsgCode := AMsgCode;
+  FMessageHookList.Add(oItem);
+end;
+
+procedure TfpgApplication.UnsetMessageHook(AWidget: TObject;
+  const AMsgCode: integer; AListener: TObject);
+var
+  oItem: TMsgHookItem;
+  i: integer;
+begin
+  for i := 0 to FMessageHookList.Count-1 do
+  begin
+    oItem := TMsgHookItem(FMessageHookList.Items[i]);
+    if (oItem.Dest = AWidget) and (oItem.Listener = AListener) and (oItem.MsgCode = AMsgCode) then
+    begin
+      FMessageHookList.Delete(i);
+      oItem.Free;
+      Exit;
+    end;
   end;
 end;
 

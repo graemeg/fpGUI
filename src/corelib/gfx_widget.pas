@@ -33,6 +33,8 @@ type
     FOnPaint: TPaintEvent;
     FOnKeyPress: TKeyPressEvent;
     FOnScreen: boolean;
+    procedure   SetActiveWidget(const AValue: TfpgWidget);
+  protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
     procedure   MsgMove(var msg: TfpgMessageRec); message FPGM_MOVE;
@@ -46,7 +48,6 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
-    procedure   SetActiveWidget(const AValue: TfpgWidget);
   protected
     FFormDesigner: TObject;
     FVisible: boolean;

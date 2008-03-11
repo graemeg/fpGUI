@@ -184,6 +184,9 @@ begin
 end;
 
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
+var
+  oItem: TMsgHookItem;
+  i: integer;
 begin
   if msg.MsgCode = FPGM_KILLME then
     msg.Dest.Free
@@ -191,6 +194,15 @@ begin
   begin
     try
       msg.Dest.Dispatch(msg);
+      if fpgApplication.FMessageHookList.Count > 0 then
+      begin
+        for i := 0 to fpgApplication.FMessageHookList.Count - 1 do
+        begin
+          oItem := TMsgHookItem(fpgApplication.FMessageHookList.Items[i]);
+          if (msg.Dest = oItem.Dest) and (msg.MsgCode = oItem.MsgCode) then
+            oItem.Listener.Dispatch(msg);
+        end;
+      end;
     except
       on E: Exception do
         {$IFDEF DEBUG}writeln('fpgDeliverMessage Caught Exception: ' + E.Message){$ENDIF};
