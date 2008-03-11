@@ -620,7 +620,7 @@ begin
         begin
           { TODO : We could improve the X,Y coordinates. Not really sure how
             Menu Key should handle that. }
-          HandleRMouseDown(10, 10, []);
+          HandleRMouseDown(Width div 2, Height div 2, []);
         end;
   end;
 
