@@ -110,7 +110,7 @@ const
     $5a,		// $5a  'Z'
     -1,			// $5b  VK_LWIN
     -1,			// $5c  VK_RWIN
-    -1,			// $5d  VK_APPS
+    keyMenu,			// $5d  VK_APPS
     -1,			// $5e
     -1,			// $5f  VK_SLEEP
     keyP0,		// $60  VK_NUMPAD0
