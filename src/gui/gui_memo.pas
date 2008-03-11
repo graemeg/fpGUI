@@ -19,11 +19,7 @@ unit gui_memo;
 
 {$mode objfpc}{$H+}
 
-{
-  TODO:
-    * Started a implementation for Tab support. It is still very experimental
-      and should not be used yet.
-}
+  { TODO : Started a implementation for Tab support. It is still very experimental and should not be used yet. }
 
 interface
 
@@ -125,6 +121,56 @@ implementation
 
 uses
   gfx_UTF8utils;
+  
+  
+type
+  // custom stringlist that will notify the memo of item changes
+  TfpgMemoStrings = class(TStringList)
+  protected
+    Memo: TfpgMemo;
+  public
+    constructor Create(AMemo: TfpgMemo); reintroduce;
+    destructor  Destroy; override;
+    function    Add(const s: String): Integer; override;
+    procedure   Delete(Index: Integer); override;
+    procedure   Clear; override;
+  end;
+
+{ TfpgMemoStrings }
+
+constructor TfpgMemoStrings.Create(AMemo: TfpgMemo);
+begin
+  inherited Create;
+  Memo := AMemo;
+end;
+
+destructor TfpgMemoStrings.Destroy;
+begin
+  Memo := nil;
+  inherited Destroy;
+end;
+
+function TfpgMemoStrings.Add(const s: String): Integer;
+begin
+  Result := inherited Add(s);
+  if Assigned(Memo) and (Memo.HasHandle) then
+    Memo.Invalidate;
+end;
+
+procedure TfpgMemoStrings.Delete(Index: Integer);
+begin
+  inherited Delete(Index);
+  if Assigned(Memo) and (Memo.HasHandle) then
+    Memo.Invalidate;
+end;
+
+procedure TfpgMemoStrings.Clear;
+begin
+  inherited Clear;
+  if Assigned(Memo) and (Memo.HasHandle) then
+    Memo.Invalidate;
+end;
+
 
 { TfpgMemo }
 
@@ -227,7 +273,7 @@ begin
   FUseTabs    := False;
   FTabWidth   := 4;
 
-  FLines      := TStringList.Create;
+  FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 1;
   FCursorLine := 1;
 
@@ -254,7 +300,7 @@ end;
 
 destructor TfpgMemo.Destroy;
 begin
-  FLines.Free;
+  TfpgMemoStrings(FLines).Free;
   FFont.Free;
   inherited Destroy;
 end;

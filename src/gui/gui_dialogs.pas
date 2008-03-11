@@ -45,7 +45,8 @@ uses
   gui_edit,
   gui_grid,
   gui_combobox,
-  gui_bevel;
+  gui_bevel,
+  gui_memo;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
@@ -108,9 +109,10 @@ type
   TfpgFontSelectDialog = class(TfpgBaseDialog)
   private
     FSampleText: string;
+    FMode: Byte;    // 1 - Normal Fonts;  2 - Alias Fonts
     lblLabel1: TfpgLabel;
-    lblLabel2: TfpgLabel;
-    lblLabel3: TfpgLabel;
+    lblTypeface: TfpgLabel;
+    lblSize: TfpgLabel;
     lblLabel4: TfpgLabel;
     lblLabel5: TfpgLabel;
     lbCollection: TfpgListBox;
@@ -120,9 +122,12 @@ type
     cbItalic: TfpgCheckBox;
     cbUnderline: TfpgCheckBox;
     cbAntiAlias: TfpgCheckBox;
-    edSample: TfpgEdit;
+    memSample: TfpgMemo;
+    procedure   OnCollectionChanged(Sender: TObject);
     procedure   OnParamChange(Sender: TObject);
     procedure   CreateFontList;
+    procedure   CreateFontAliasList;
+    procedure   SetupUI(AMode: Byte);
   protected
     function    GetFontDesc: string;
     procedure   SetFontDesc(Desc: string);
@@ -320,7 +325,7 @@ begin
   Result := False;
   frm := TfpgFontSelectDialog.Create(nil);
   frm.SetFontDesc(FontDesc);
-  if frm.ShowModal > 0 then
+  if frm.ShowModal = 1 then
   begin
     FontDesc := frm.GetFontDesc;
     Result := True;
@@ -471,13 +476,31 @@ end;
 
 { TfpgFontSelectDialog }
 
+procedure TfpgFontSelectDialog.OnCollectionChanged(Sender: TObject);
+begin
+  if lbCollection.Text = rsCollectionFontAliases then
+  begin
+    CreateFontAliasList;
+    SetupUI(2);
+  end
+  else
+  begin
+    CreateFontList;
+    SetupUI(1);
+  end;
+  OnParamChange(nil);
+end;
+
 procedure TfpgFontSelectDialog.OnParamChange(Sender: TObject);
 var
   fdesc: string;
 begin
   fdesc := GetFontDesc;
   {$IFDEF DEBUG} Writeln(fdesc); {$ENDIF}
-  edSample.FontDesc := fdesc;
+  memSample.FontDesc := fdesc;
+  memSample.Text := FSampleText;
+  if FMode = 2 then
+    memSample.Lines.Add(fpgGetNamedFontDesc(UTF8Copy(fdesc, 2, UTF8Length(fdesc)-1)));
 end;
 
 procedure TfpgFontSelectDialog.CreateFontList;
@@ -488,30 +511,75 @@ begin
   lbFaces.Items.Clear;
   fl := fpgApplication.GetFontFaceList;
   for i := 0 to fl.Count-1 do
-    lbFaces.Items.Add(fl.Strings[i]);
+    lbFaces.Items.Add(fl[i]);
   fl.Free;
+  lbFaces.FocusItem := 1;
+end;
+
+procedure TfpgFontSelectDialog.CreateFontAliasList;
+var
+  fl: TStringList;
+  i: integer;
+begin
+  lbFaces.Items.Clear;
+  fl := fpgGetNamedFontList;
+  for i := 0 to fl.Count-1 do
+    lbFaces.Items.Add(fl.Names[i]);
+  fl.Free;
+  lbFaces.FocusItem := 1
+end;
+
+procedure TfpgFontSelectDialog.SetupUI(AMode: Byte);
+begin
+  FMode := AMode;
+  case FMode of
+    1:  // Normal Fonts
+      begin
+        lblSize.Enabled := True;
+        lblTypeFace.Enabled := True;
+        lbSize.Enabled := True;
+        cbBold.Enabled := True;
+        cbItalic.Enabled := True;
+        cbUnderline.Enabled := True;
+        cbAntiAlias.Enabled := True;
+      end;
+    2:  // Font Aliases
+      begin
+        lblSize.Enabled := False;
+        lblTypeFace.Enabled := False;
+        lbSize.Enabled := False;
+        cbBold.Enabled := False;
+        cbItalic.Enabled := False;
+        cbUnderline.Enabled := False;
+        cbAntiAlias.Enabled := False;
+      end;
+  end;
 end;
 
 function TfpgFontSelectDialog.GetFontDesc: string;
 var
   s: string;
 begin
-  s := lbFaces.Text + '-' + lbSize.Text;
-  // Do NOT localize these!
-  if cbBold.Checked then
-    s := s + ':bold';
-
-  if cbItalic.Checked then
-    s := s + ':italic';
-
-  if cbAntiAlias.Checked then
-    s := s + ':antialias=true'
+  if FMode = 2 then
+    s := lbFaces.Text
   else
-    s := s + ':antialias=false';
+  begin
+    s := lbFaces.Text + '-' + lbSize.Text;
+    // Do NOT localize these!
+    if cbBold.Checked then
+      s := s + ':bold';
 
-  if cbUnderline.Checked then
-    s := s + ':underline';
+    if cbItalic.Checked then
+      s := s + ':italic';
 
+    if cbAntiAlias.Checked then
+      s := s + ':antialias=true'
+    else
+      s := s + ':antialias=false';
+
+    if cbUnderline.Checked then
+      s := s + ':underline';
+  end;
   result := s;
 end;
 
@@ -543,10 +611,37 @@ var
       NextC;
     end;
   end;
+  
+  procedure ProcessAliasFont;
+  var
+    i: integer;
+  begin
+    lbCollection.FocusItem := lbCollection.ItemCount;
+    for i := 1 to lbFaces.ItemCount do
+    begin
+      if SameText(lbFaces.Items[i-1], Desc) then
+      begin
+        lbFaces.FocusItem := i;
+        Exit; //==>
+      end;
+    end;
+  end;
 
 begin
   cp := 1;
   c  := Desc[1];
+
+  if Desc[1] = '#' then
+    FMode := 2
+  else
+    FMode := 1;
+  SetupUI(FMode);
+
+  if FMode = 2 then
+  begin
+    ProcessAliasFont;
+    Exit; //==>
+  end;
 
   cbBold.Checked      := False;
   cbItalic.Checked    := False;
@@ -613,13 +708,13 @@ end;
 constructor TfpgFontSelectDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  {TODO: We need to localize this dialog }
   WindowTitle := rsSelectAFont;
   Width       := 600;
   MinWidth    := Width;
   MinHeight   := Height;
   FSampleText := 'The quick brown fox jumps over the lazy dog. 0123456789 [oO0,ilLI]';
-
+  FMode       := 1; // normal fonts
+  
   btnCancel.Left := Width - FDefaultButtonWidth - FSpacing;
   btnOK.Left     := btnCancel.Left - FDefaultButtonWidth - FSpacing;
 
@@ -634,6 +729,7 @@ begin
   lbCollection := TfpgListBox.Create(self);
   with lbCollection do
   begin
+    Name := 'lbCollection';
     SetPosition(8, 28, 145, 236);
     Items.Add(rsCollectionAllFonts);
     // These should be stored in <users config path>/fpgui directory
@@ -644,9 +740,9 @@ begin
     Items.Add(rsCollectionSans);
     Items.Add(rsCollectionSerif);
     Items.Add(rsCollectionFontAliases);
-//    OnChange := @OnParamChange;
     FocusItem := 1;
-    Enabled := False;
+    OnChange := @OnCollectionChanged;
+//    Enabled := False;
   end;
 
   lblLabel1 := TfpgLabel.Create(self);
@@ -659,14 +755,16 @@ begin
   lbFaces := TfpgListBox.Create(self);
   with lbFaces do
   begin
+    Name := 'lbFaces';
     SetPosition(161, 28, 232, 236);
     Items.Add(' ');
     OnChange := @OnParamChange;
   end;
 
-  lblLabel3 := TfpgLabel.Create(self);
-  with lblLabel3 do
+  lblSize := TfpgLabel.Create(self);
+  with lblSize do
   begin
+    Name := 'lblSize';
     SetPosition(401, 8, 54, 16);
     Text := fpgAddColon(rsSize);
   end;
@@ -674,6 +772,7 @@ begin
   lbSize := TfpgListBox.Create(self);
   with lbSize do
   begin
+    Name := 'lbSize';
     SetPosition(401, 28, 52, 236);
     { We need to improve this! }
     Items.Add('6');
@@ -696,12 +795,12 @@ begin
     Items.Add('64');
     Items.Add('72');
     OnChange  := @OnParamChange;
-    FocusItem := 5;
   end;
 
-  lblLabel2 := TfpgLabel.Create(self);
-  with lblLabel2 do
+  lblTypeface := TfpgLabel.Create(self);
+  with lblTypeface do
   begin
+    Name := 'lblTypeface';
     SetPosition(461, 8, 54, 16);
     Text := fpgAddColon(rsTypeface);
   end;
@@ -746,8 +845,8 @@ begin
     Text := fpgAddColon(rsExampleText);
   end;
 
-  edSample := TfpgEdit.Create(self);
-  with edSample do
+  memSample := TfpgMemo.Create(self);
+  with memSample do
   begin
     SetPosition(8, 288, 584, 65);
     Text := FSampleText;
@@ -765,7 +864,7 @@ begin
     Exit; //==>
     
   FSampleText := AText;
-  edSample.Text := FSampleText;
+  memSample.Text := FSampleText;
 end;
 
 

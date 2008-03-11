@@ -271,12 +271,13 @@ procedure fpgDeliverMessages;
 function  fpgGetFirstMessage: PfpgMessageRec;
 procedure fpgDeleteFirstMessage;
 
-// Color routines
+// Color & Font routines
 function  fpgColorToRGB(col: TfpgColor): TfpgColor;
 function  fpgGetNamedColor(col: TfpgColor): TfpgColor;
 procedure fpgSetNamedColor(colorid, rgbvalue: longword);
 function  fpgGetNamedFontDesc(afontid: string): string;
 procedure fpgSetNamedFont(afontid, afontdesc: string);
+function  fpgGetNamedFontList: TStringlist;
 
 // Timers rountines
 procedure fpgInitTimers;
@@ -666,6 +667,23 @@ begin
     TNamedFontItem(fpgNamedFonts[n]).FontDesc := afontdesc// already defined
   else
     fpgNamedFonts.Add(TNamedFontItem.Create(afontid, afontdesc));
+end;
+
+function fpgGetNamedFontList: TStringlist;
+var
+  n: integer;
+  oFont: TNamedFontItem;
+begin
+  if fpgNamedFonts.Count > 0 then
+    Result := TStringList.Create
+  else
+    Exit; //==>
+  
+  for n := 0 to fpgNamedFonts.Count-1 do
+  begin
+    oFont := TNamedFontItem(fpgNamedFonts[n]);
+    Result.Add(Format('#%s=%s', [oFont.FontID, oFont.FontDesc]));
+  end;
 end;
 
 procedure fpgWaitWindowMessage;

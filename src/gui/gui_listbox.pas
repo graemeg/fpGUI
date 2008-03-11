@@ -149,6 +149,7 @@ type
     destructor  Destroy; override;
     function    Add(const s: String): Integer; override;
     procedure   Delete(Index: Integer); override;
+    procedure   Clear; override;
   end;
 
 
@@ -197,6 +198,12 @@ begin
     ListBox.UpdateScrollBar;
 end;
 
+procedure TfpgListBoxStrings.Clear;
+begin
+  inherited Clear;
+  ListBox.FocusItem := 0;
+end;
+
 
 { TfpgBaseListBox }
 
@@ -206,13 +213,31 @@ begin
 end;
 
 procedure TfpgBaseListBox.SetFocusItem(const AValue: integer);
+var
+  old: integer;
 begin
   if FFocusItem = AValue then
     Exit; //==>
-  FFocusItem := AValue;
+
+  old := FFocusItem;
+  // do some sanity checks
+  if AValue < 0 then  // zero is a valid focusitem (no selection)
+    FFocusItem := 1
+  else if AValue > ItemCount then
+    FFocusItem := ItemCount
+  else
+    FFocusItem := AValue;
+    
+  if FFocusItem = old then
+    Exit; //==>
+    
+  if FFocusItem <= 1 then
+    FFirstItem := 1;
+
   FollowFocus;
   UpdateScrollbar;
   RePaint;
+  DoChange;
 end;
 
 procedure TfpgBaseListBox.SetFontDesc(const AValue: string);
@@ -337,13 +362,16 @@ end;
 
 procedure TfpgBaseListBox.DoChange;
 begin
-  if Assigned(FOnChange) then
+  {$IFDEF DEBUG}
+  writeln(Name + '.OnChange assigned');
+  {$ENDIF}
+  if Assigned(OnChange) then
     FOnChange(self);
 end;
 
 procedure TfpgBaseListBox.DoSelect;
 begin
-  if Assigned(FOnSelect) then
+  if Assigned(OnSelect) then
     FOnSelect(self);
 end;
 
@@ -354,66 +382,42 @@ begin
 
   case keycode of
     keyUp:
-           begin
-             if FFocusItem > 1 then
-             begin
-               dec(FFocusItem);
-               FollowFocus;
-               RePaint;
-               DoChange;
-             end;
-           end;
+        begin
+          if FFocusItem > 1 then
+            FocusItem := FFocusItem - 1;
+        end;
            
     keyDown:
-           begin
-             if FFocusItem < ItemCount then
-             begin
-               inc(FFocusItem);
-               FollowFocus;
-               RePaint;
-               DoChange;
-             end;
-           end;
+        begin
+          if FFocusItem < ItemCount then
+            FocusItem := FFocusItem + 1;
+        end;
 
     keyPageUp:
-           begin
-             dec(FFocusItem,PageLength);
-             if FFocusItem < 1 then FFocusItem := 1;
-             FollowFocus;
-             RePaint;
-             DoChange;
-           end;
+        begin
+          FocusItem := FFocusItem - PageLength;
+        end;
 
     keyPageDown:
-           begin
-             inc(FFocusItem,PageLength);
-             if FFocusItem > ItemCount then FFocusItem := ItemCount;
-             FollowFocus;
-             RePaint;
-             DoChange;
-           end;
+        begin
+          FocusItem := FFocusItem + PageLength;
+        end;
 
     keyHome:
-           begin
-             FFocusItem := 1;
-             FollowFocus;
-             RePaint;
-             DoChange;
-           end;
+        begin
+          FocusItem := 1;
+        end;
 
     keyEnd:
-           begin
-             FFocusItem := ItemCount;
-             FollowFocus;
-             RePaint;
-             DoChange;
-           end;
+        begin
+          FocusItem := ItemCount;
+        end;
 
     keyReturn:
-           begin
-             DoSelect;
-             consumed := false; // to allow the forms to detect it
-           end;
+        begin
+          DoSelect;
+          consumed := false; // to allow the forms to detect it
+        end;
   else
     begin
       consumed := false;
@@ -429,14 +433,8 @@ begin
   if ItemCount < 1 then
     Exit; //==>
     
-  FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
-  if FFocusItem > ItemCount then
-    FFocusItem := ItemCount;
-
-  FollowFocus;
-  FMouseDragging := true;
-  Repaint;
-  DoChange;
+  FocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
+  FMouseDragging := True;
 end;
 
 procedure TfpgBaseListBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -449,16 +447,10 @@ begin
     Exit; //==>
     
   FMouseDragging := False;
-
-  FollowFocus;
-  Repaint;
-  DoChange;
   DoSelect;
 end;
 
 procedure TfpgBaseListBox.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
-var
-  oldf: integer;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
@@ -468,17 +460,7 @@ begin
   if ((not FMouseDragging) or (btnstate and 1 = 0)) and (not HotTrack) then
     Exit; //==>
 
-  oldf := FFocusItem;
-
-  FFocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
-  if FFocusItem > ItemCount then
-    FFocusItem := ItemCount;
-
-  if oldf <> FFocusItem then
-  begin
-    FollowFocus;
-    Repaint;
-  end;
+  FocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
 end;
 
 procedure TfpgBaseListBox.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
@@ -618,12 +600,8 @@ begin
   FBackgroundColor    := clListBox;
   FTextColor          := Parent.TextColor;
 
-  FScrollBar          := TfpgScrollBar.Create(self);
-  FScrollBar.OnScroll := @ScrollBarMove;
-//  FScrollBar.Visible  := False;
-
   FFocusable      := True;
-  FFocusItem      := 1;
+  FFocusItem      := 0;
   FFirstItem      := 1;
   FWidth          := 80;
   FHeight         := 80;
@@ -632,6 +610,9 @@ begin
   FPopupFrame     := False;
   FHotTrack       := False;
   FAutoHeight     := False;
+
+  FScrollBar          := TfpgScrollBar.Create(self);
+  FScrollBar.OnScroll := @ScrollBarMove;
 
   FOnChange := nil;
   FOnSelect := nil;
@@ -689,18 +670,15 @@ begin
   // if user press a key then it will search the stringlist for a word
   // beginning with such as letter
   if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1 ) then
-    for i := FFocusItem to FItems.Count - 1 do
+    for i := FFocusItem to FItems.Count do
     begin
-      if SameText(LeftStr(FItems.Strings[i], Length(AText)), AText) then
+      if SameText(LeftStr(FItems.Strings[i-1], Length(AText)), AText) then
       begin
-        FFocusItem := i + 1;
-        FollowFocus;
-        RePaint;
-        DoChange;
+        FocusItem := i;
         Consumed := True;
         break;
       end;
-    end;
+    end;  { for }
   inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
@@ -724,8 +702,8 @@ end;
 
 function TfpgTextListBox.Text: string;
 begin
-  if (FocusItem > 0) and (FocusItem <= FItems.Count) then
-    result := FItems.Strings[FocusItem-1]
+  if (ItemCount > 0) and (FocusItem <> 0) then
+    result := FItems[FocusItem-1]
   else
     result := '';
 end;

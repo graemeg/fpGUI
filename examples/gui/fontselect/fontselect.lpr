@@ -36,7 +36,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
-  
+
 
 { TMainForm }
 
@@ -75,13 +75,13 @@ begin
   btnSelectFont := CreateButton(self, 10, 10, 110, rsSelectAFont, @btnSelectFontClick);
 
   edFontDesc := CreateEdit(self, 10, 45, Width - 20, 24);
-//  edFontDesc.Text := fpgApplication.DefaultFont.FontDesc;
   edFontDesc.Text := 'Bitstream Vera Sans-9';
 
   lblFontList := CreateLabel(self, 10, 80, rsMyFontList + ':');
   lbFontList := TfpgListBox.Create(self);
   with lbFontList do
   begin
+    Name := 'lbFontList';
     SetPosition(10, 100, 232, 236);
     Items.Clear;
   end;
@@ -93,7 +93,10 @@ begin
   btnQuit.ShowImage := True;
   btnQuit.Anchors := [anRight, anBottom];
 
-  btnSelectFont.TabOrder := 0;
+  btnSelectFont.TabOrder := 1;
+  edFontDesc.TabOrder := 2;
+  lbFontList.TabOrder := 3;
+  btnQuit.TabOrder := 4;
 end;
 
 procedure MainProc;
