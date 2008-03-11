@@ -192,8 +192,8 @@ type
     function    DoMessagesPending: boolean;
     procedure   DoWaitWindowMessage(atimeoutms: integer);
     procedure   DoFlush;
-    function    GetScreenWidth: TfpgCoord;
-    function    GetScreenHeight: TfpgCoord;
+    function    GetScreenWidth: TfpgCoord; override;
+    function    GetScreenHeight: TfpgCoord; override;
     property    Display: HDC read FDisplay;
   end;
 

@@ -616,6 +616,12 @@ begin
     keyLeft:
         dir := -1;
 }
+      keyMenu:
+        begin
+          { TODO : We could improve the X,Y coordinates. Not really sure how
+            Menu Key should handle that. }
+          HandleRMouseDown(10, 10, []);
+        end;
   end;
 
   {$Note Optimize this code. Constantly setting ActiveWidget causes RePaint to be called!}

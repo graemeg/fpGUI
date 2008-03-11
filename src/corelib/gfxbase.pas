@@ -398,6 +398,8 @@ type
     procedure   PopModalForm;
     function    PrevModalForm: TfpgWindowBase;
     procedure   CreateForm(AFormClass: TComponentClass; var AForm: TfpgWindowBase);
+    function    GetScreenWidth: TfpgCoord; virtual; abstract;
+    function    GetScreenHeight: TfpgCoord; virtual; abstract;
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
