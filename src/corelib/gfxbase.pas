@@ -1872,7 +1872,6 @@ end;
 function TfpgFileListBase.InitializeEntry(sr: TSearchRec): TFileEntry;
 var
   e: TFileEntry;
-  fullname: TfpgString;
 begin
   e := TFileEntry.Create;
   e.Name        := sr.Name;
@@ -1880,9 +1879,6 @@ begin
   e.Size        := sr.Size;
   e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
   e.EntryType   := etFile;
-  fullname      := FDirectoryName + e.Name;
-  e.IsLink      := FileIsSymlink(fullname);
-  e.LinkTarget  := ExtractTargetSymLinkPath(fullname);
   e.ModTime     := FileDateToDateTime(sr.Time);
 
   if HasAttrib(sr.Attr, faDirectory) then

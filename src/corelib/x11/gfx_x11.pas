@@ -473,6 +473,18 @@ begin
   XSendEvent(xapplication.Display, e.requestor, false, 0, @e );
 end;
 
+// File utils
+function ExtractTargetSymLinkPath(ALink: string): string;
+begin
+  Result := fpReadLink(ALink);
+end;
+
+function FileIsSymlink(const AFilename: string): boolean;
+begin
+  Result := (FpReadLink(AFilename) <> '');
+end;
+
+
 { TfpgApplicationImpl }
 
 function TfpgApplicationImpl.ConvertShiftState(AState: Cardinal): TShiftState;
@@ -575,10 +587,8 @@ function TfpgApplicationImpl.StartComposing(const Event: TXEvent): TKeySym;
 var
   l: integer;
 begin
-//  l := XLookupString(@Event, @FComposeBuffer[1],
   l := Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
-      SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus);
-//  writeln('ComposeBuffer length = ', l);
+        SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus);
   SetLength(FComposeBuffer, l);
 end;
 
@@ -2070,12 +2080,16 @@ end;
 function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
 var
   info: Tstat;
+  fullname: TfpgString;
 begin
   Result := inherited InitializeEntry(sr);
   if Assigned(Result) then
   begin
+    fullname           := DirectoryName + Result.Name;
+    Result.IsLink      := FileIsSymlink(fullname);
+    Result.LinkTarget  := ExtractTargetSymLinkPath(fullname);
     Result.mode        := sr.Mode;
-    Fpstat(PChar(DirectoryName + Result.Name), info);
+    Fpstat(PChar(fullname), info);
     Result.GroupID     := info.st_gid;
     Result.OwnerID     := info.st_uid;
   end;

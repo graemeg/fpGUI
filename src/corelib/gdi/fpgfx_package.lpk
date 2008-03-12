@@ -8,7 +8,6 @@
       <Version Value="5"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="..\"/>
         <OtherUnitFiles Value="..\;..\..\gui\"/>
         <UnitOutputDirectory Value="..\..\..\lib"/>
       </SearchPaths>
@@ -18,6 +17,7 @@
         </Optimizations>
       </CodeGeneration>
       <Other>
+        <CustomOptions Value="-B"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
@@ -26,7 +26,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="1"/>
-    <Files Count="20">
+    <Files Count="21">
       <Item1>
         <Filename Value="..\gfxbase.pas"/>
         <UnitName Value="gfxbase"/>
@@ -64,7 +64,7 @@
         <UnitName Value="gfx_cmdlineparams"/>
       </Item9>
       <Item10>
-        <Filename Value="gfx_utils.pas"/>
+        <Filename Value="..\gfx_utils.pas"/>
         <UnitName Value="gfx_utils"/>
       </Item10>
       <Item11>
@@ -107,6 +107,10 @@
         <Filename Value="gdikeys.inc"/>
         <Type Value="Include"/>
       </Item20>
+      <Item21>
+        <Filename Value="gfx_utils_impl.inc"/>
+        <Type Value="Include"/>
+      </Item21>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

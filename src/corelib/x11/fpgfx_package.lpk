@@ -6,7 +6,6 @@
     <CompilerOptions>
       <Version Value="5"/>
       <SearchPaths>
-        <IncludeFiles Value="../"/>
         <OtherUnitFiles Value="../;../../gui/"/>
         <UnitOutputDirectory Value="../../../lib"/>
       </SearchPaths>
@@ -16,7 +15,8 @@
         </Optimizations>
       </CodeGeneration>
       <Other>
-        <CustomOptions Value="-B"/>
+        <CustomOptions Value="-B
+"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
@@ -25,7 +25,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="1"/>
-    <Files Count="21">
+    <Files Count="22">
       <Item1>
         <Filename Value="x11_xft.pas"/>
         <UnitName Value="x11_xft"/>
@@ -71,7 +71,7 @@
         <UnitName Value="gfx_cmdlineparams"/>
       </Item11>
       <Item12>
-        <Filename Value="gfx_utils.pas"/>
+        <Filename Value="../gfx_utils.pas"/>
         <UnitName Value="gfx_utils"/>
       </Item12>
       <Item13>
@@ -110,6 +110,10 @@
         <Filename Value="../gfx_stringhashlist.pas"/>
         <UnitName Value="gfx_stringhashlist"/>
       </Item21>
+      <Item22>
+        <Filename Value="gfx_utils_impl.inc"/>
+        <Type Value="Include"/>
+      </Item22>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/"/>
     <RequiredPkgs Count="1">
