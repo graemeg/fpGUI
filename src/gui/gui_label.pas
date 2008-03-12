@@ -51,6 +51,7 @@ type
   protected
     FText: string;
     FFont: TfpgFont;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     property    WrapText: boolean read FWrapText write SetWrapText default False;
     property    Alignment: TAlignment read FAlignment write SetAlignment default taLeftJustify;
@@ -121,31 +122,42 @@ end;
 { TfpgCustomLabel }
 
 procedure TfpgCustomLabel.Wrap(MaxLength: integer; AText: string);
+var
+  l: integer;
 begin
   FWrappedText.Clear;
+  l := 0;
   repeat
-  if UTF8Pos(' ', AText) > 0 then
-  begin
-    if Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText))) < MaxLength then
+    if UTF8Pos(' ', AText) > 0 then
     begin
-      if FWrappedText.Count > 0 then
-        if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' +
-            UTF8Copy(AText, 1, UTF8Pos(' ', AText)))) < MaxLength then
-          FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' '
-              + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
+      if Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText))) < MaxLength then
+      begin
+        if FWrappedText.Count > 0 then
+          if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' +
+              UTF8Copy(AText, 1, UTF8Pos(' ', AText)))) < MaxLength then
+            FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' '
+                + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
+          else
+            FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))))
         else
-          FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))))
+          FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
+        AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
+      end
       else
+      begin
         FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
-      AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
-    end;
-  end
-  else
-  begin
-    FWrappedText.Add(AText);
-    AText:= '';
-  end;
+        if l < Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText))) then
+          l := Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText)));
+        AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
+      end;  { if/else }
+    end
+    else
+    begin
+      FWrappedText.Add(AText);
+      AText := '';
+    end;  { if/else }
   until UTF8Pos(' ', AText) = 0;
+  
   if FWrappedText.Count > 0 then
   begin
     if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText)) < MaxLength then
@@ -153,16 +165,25 @@ begin
     else
       FWrappedText.Add(AText);
   end;
-  if Height < FWrappedText.Count * (Font.Height + 2) then
-    Height := FWrappedText.Count * (Font.Height + 2);
+
+  if AutoSize then
+  begin
+    if Height < FWrappedText.Count * (Font.Height + 2) then
+      Height := FWrappedText.Count * (Font.Height + 2);
+    if Width < l then  	// adjust the length to the longest word
+      Width := l;
+  end;
 end;
 
 procedure TfpgCustomLabel.SetWrapText(const AValue: boolean);
 begin
-  FWrapText := AValue;
-  if FWrapText then
-    Wrap(Width, FText);
-  RePaint;
+  if FWrapText <> AValue then
+  begin
+    FWrapText := AValue;
+    if FWrapText then
+      Wrap(Width, FText);
+    RePaint;
+  end;
 end;
 
 procedure TfpgCustomLabel.SetAlignment(const AValue: TAlignment);
@@ -216,14 +237,19 @@ end;
 procedure TfpgCustomLabel.ResizeLabel;
 begin
   if FAutoSize then
-  begin
-    Width   := FFont.TextWidth(FText);
-  end
+    Width := FFont.TextWidth(FText)
   else if FWrapText then
     Wrap(Width, FText);
 
   UpdateWindowPosition;
   RePaint;
+end;
+
+procedure TfpgCustomLabel.HandleResize(awidth, aheight: TfpgCoord);
+begin
+  inherited HandleResize(awidth, aheight);
+  if FWrapText then
+    Wrap(Width, FText);
 end;
 
 constructor TfpgCustomLabel.Create(AOwner: TComponent);
@@ -236,7 +262,6 @@ begin
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FAutoSize   := False;
-
   FLayout      := tlTop;
   FAlignment   := taLeftJustify;
   FWrapText    := False;
