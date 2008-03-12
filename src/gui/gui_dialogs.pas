@@ -104,7 +104,6 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
-  
 
   TfpgFontSelectDialog = class(TfpgBaseDialog)
   private
@@ -138,6 +137,8 @@ type
   end;
   
   
+  { TfpgFileDialog }
+
   TfpgFileDialog = class(TfpgBaseDialog)
   private
     chlDir: TfpgComboBox;
@@ -192,7 +193,7 @@ type
 
 {$I messagedialog.inc}
 {$I newdirdialog.inc}
-
+{$I promptuserdialog.inc}
 
 
 
@@ -1309,6 +1310,8 @@ end;
 
 {$I messagedialog.inc}
 {$I newdirdialog.inc}
+{$I promptuserdialog.inc}
+
 
 
 end.

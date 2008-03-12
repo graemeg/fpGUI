@@ -95,6 +95,11 @@ rsFileGroup              = 'Group';
 rsSaveAFile              = 'Stoor ''n lêer';
 
 
+// User Dialog
+rsUserName               = 'Gebruikers naam';
+rsPassword               = 'Wagwoord';
+
+
 // Error messages
 rsErrListMustBeEmpty     = 'Lys moet leeg wees';
 rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';

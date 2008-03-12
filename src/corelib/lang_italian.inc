@@ -95,6 +95,10 @@ rsFileGroup              = 'Gruppo';
 rsSaveAFile              = 'Salva con nome';
 
 
+// User Dialog
+rsUserName               = 'Nome utente';
+rsPassword               = 'Password';
+
 // Error messages
 rsErrListMustBeEmpty     = 'Elenco deve essere vuoto';
 rsErrCouldNotOpenDir     = 'Impossibile aprire la cartella <%s>';

@@ -95,6 +95,11 @@ rsFileGroup              = 'Groupe';
 rsSaveAFile              = 'Sauver sous';
 
 
+// User Dialog
+rsUserName               = 'User name';
+rsPassword               = 'Password';
+
+
 // Error messages
 rsErrListMustBeEmpty     = 'Liste doit être vide';
 rsErrCouldNotOpenDir     = 'Le répertoire <%s> n''a pas pu être ouvert';

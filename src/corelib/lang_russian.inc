@@ -95,6 +95,11 @@ rsFileGroup              = 'Группа';
 rsSaveAFile              = 'Сохранить файл как';
 
 
+// User Dialog
+rsUserName               = 'User name';
+rsPassword               = 'Password';
+
+
 // Error messages
 rsErrListMustBeEmpty     = 'Список должен быть пустым';
 rsErrCouldNotOpenDir     = 'Невозможно открыть директорию <%s>';

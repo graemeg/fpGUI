@@ -32,7 +32,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="1"/>
-    <Files Count="30">
+    <Files Count="31">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -153,16 +153,20 @@
         <Filename Value="messagedialog.inc"/>
         <Type Value="Include"/>
       </Item30>
+      <Item31>
+        <Filename Value="promptuserdialog.inc"/>
+        <Type Value="Include"/>
+      </Item31>
     </Files>
     <LazDoc Paths="../../docs/xml/gui/"/>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="fpgfx_package"/>
-        <MinVersion Minor="6" Release="1" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="fpgfx_package"/>
+        <MinVersion Minor="6" Release="1" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>

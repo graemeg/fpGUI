@@ -28,12 +28,14 @@ type
     btnQuit: TfpgButton;
     btnName1: TfpgButton;
     btnName2: TfpgButton;
+    btnUserPrompt: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure   btnQuitClick(Sender: TObject);
     procedure   btnOpenFileClick(Sender: TObject);
     procedure   btnSaveFileClick(Sender: TObject);
     procedure   btnMessageBoxClick(Sender: TObject);
     procedure   btnMessageDlgClick(Sender: TObject);
+    procedure   btnUserPromptClick(Sender: TObject);
   public
     procedure   AfterCreate; override;
   end;
@@ -41,6 +43,22 @@ type
 {@VFD_NEWFORM_DECL}
 
 { TMainForm }
+
+procedure TMainForm.btnUserPromptClick(Sender: TObject);
+var
+  dlg: TfpgPromptUserDialog;
+begin
+  dlg := TfpgPromptUserDialog.Create(nil);
+  try
+    dlg.WindowTitle := 'Sample Login';
+    if dlg.ShowModal = 1 then
+    begin
+      TfpgMessageDialog.Information('User Results', 'User=' + dlg.UserID + #13#10 + 'Pass='+ dlg.Password, [mbOK]);
+    end;
+  finally
+    dlg.Free;
+  end;
+end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
@@ -107,6 +125,7 @@ begin
     Text := 'Open File...';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 1;
     OnClick := @btnOpenFileClick;
   end;
 
@@ -118,6 +137,7 @@ begin
     Text := 'Save File...';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 2;
     OnClick := @btnSaveFileClick;
   end;
 
@@ -127,6 +147,7 @@ begin
     Name := 'edFilename';
     SetPosition(8, 70, 400, 24);
     Anchors := [anLeft,anRight,anTop];
+    TabOrder := 2;
     Text := '';
     FontDesc := '#Edit1';
   end;
@@ -140,6 +161,7 @@ begin
     Text := 'Quit';
     FontDesc := '#Label1';
     ImageName := 'stdimg.Quit';
+    TabOrder := 6;
     OnClick := @btnQuitClick;
   end;
 
@@ -151,6 +173,7 @@ begin
     Text := 'Message Box';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 3;
     OnClick := @btnMessageBoxClick;
   end;
 
@@ -162,7 +185,20 @@ begin
     Text := 'Message Dialog';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 4;
     OnClick := @btnMessageDlgClick;
+  end;
+
+  btnUserPrompt := TfpgButton.Create(self);
+  with btnUserPrompt do
+  begin
+    Name := 'btnUserPrompt';
+    SetPosition(272, 40, 131, 24);
+    Text := 'User Prompt';
+    FontDesc := '#Label1';
+    ImageName := '';
+    TabOrder := 5;
+    OnClick := @btnUserPromptClick;
   end;
 
   {@VFD_BODY_END: MainForm}

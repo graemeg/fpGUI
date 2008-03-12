@@ -1223,7 +1223,7 @@ var
     // try known sets first
     if Buttons = mbYesNoCancel then
     begin
-      { todo: At some stage the StyleManager can give use the correct button
+      { TODO : At some stage the StyleManager can give us the correct button
         order based on the OS and Window Manager. }
       Result := 3;
       sl.Add(cMsgDlgBtnText[mbYes] + '=' + IntToStr(Ord(mbYes)));
@@ -1531,7 +1531,7 @@ begin
   begin
     Name := 'lblName1';
     SetPosition(116, 20, 312, Font.Height);
-    Text := 'Label';
+    Text := '';
     FontDesc := '#Label2';
   end;
 
