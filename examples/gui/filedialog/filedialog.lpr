@@ -77,7 +77,7 @@ end;
 
 procedure TMainForm.btnMessageBoxClick(Sender: TObject);
 begin
-  ShowMessage('This is some pretty cool shit');
+  ShowMessage('This is some pretty cool stuff');
 end;
 
 procedure TMainForm.btnMessageDlgClick(Sender: TObject);

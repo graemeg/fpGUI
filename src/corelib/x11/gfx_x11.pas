@@ -202,6 +202,11 @@ type
     procedure   InitClipboard; override;
   end;
   
+  
+  TfpgFileListImpl = class(TfpgFileListBase)
+    function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
+    function    UpdateDirectory(const aDirectory: TfpgString): TfpgString; override;
+  end;
 
 implementation
 
@@ -2060,7 +2065,35 @@ begin
       xapplication.RootWindow, 10, 10, 10, 10, 0, 0, 0);
 end;
 
+{ TfpgFileListImpl }
 
+function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
+var
+  info: Tstat;
+begin
+  Result := inherited InitializeEntry(sr);
+  if Assigned(Result) then
+  begin
+    Result.mode        := sr.Mode;
+    Fpstat(PChar(DirectoryName + Result.Name), info);
+    Result.GroupID     := info.st_gid;
+    Result.OwnerID     := info.st_uid;
+  end;
+end;
+
+function TfpgFileListImpl.UpdateDirectory(const aDirectory: TfpgString
+  ): TfpgString;
+var
+  ds: string;
+begin
+  FSpecialDirs.Clear;
+  
+  ds := aDirectory;
+  if Copy(ds, 1, 1) <> DirectorySeparator then
+    ds := DirectorySeparator + ds;
+
+  Result := inherited UpdateDirectory(ds);
+end;
 
 initialization
   xapplication := nil;

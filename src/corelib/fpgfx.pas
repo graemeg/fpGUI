@@ -259,6 +259,8 @@ type
   TfpgClipboard = class(TfpgClipboardImpl)
   end;
   
+  TfpgFileList = class(TfpgFileListImpl)
+  end;
 
 var
   fpgStyle:  TfpgStyle;   { TODO -ograemeg : move this into fpgApplication }

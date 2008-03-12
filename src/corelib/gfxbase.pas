@@ -420,6 +420,69 @@ type
     constructor Create;
     property    Text: string read DoGetText write DoSetText;
   end;
+  
+  TFileEntryType = (etFile, etDir);
+  TFileListSortOrder = (soNone, soFileName, soCSFileName, soFileExt, soSize, soTime);
+
+  // A simple data object
+  TFileEntry = class(TObject)
+  private
+    FAttributes: longword;
+    FEntryType: TFileEntryType;
+    FExtention: string;
+    FGroupID: integer; // unix
+    FIsLink: boolean;
+    FLinkTarget: string;
+    FMode: longword; // unix
+    FModTime: TDateTime;
+    FName: string;
+    FOwnerID: integer; // unix
+    FSize: int64;
+  public
+    constructor Create;
+    property    Name: string read FName write FName;
+    property    Extention: string read FExtention write FExtention;
+    property    Size: int64 read FSize write FSize;
+    property    EntryType: TFileEntryType read FEntryType write FEntryType;
+    property    IsLink: boolean read FIsLink write FIsLink;
+    property    Attributes: longword read FAttributes write FAttributes;
+    property    Mode: longword read FMode write FMode;  // only used by unix OS's
+    property    ModTime: TDateTime read FModTime write FModTime;
+    property    OwnerID: integer read FOwnerID write FOwnerID;
+    property    GroupID: integer read FGroupID write FGroupID;
+    property    LinkTarget: string read FLinkTarget write FLinkTarget;
+  end;
+
+  { TfpgFileListBase }
+
+  TfpgFileListBase = class(TObject)
+  private
+    FEntries: TList;
+    FDirectoryName: TfpgString;
+    FFileMask: TfpgString;
+    FShowHidden: boolean;
+    FCurrentSpecialDir: integer;
+    procedure   AddEntry(sr: TSearchRec);
+    function    GetEntry(i: integer): TFileEntry;
+    function    HasAttrib(fileAttrib, testAttrib: Integer): Boolean;
+  protected
+    FSpecialDirs: TStringList;
+    function    InitializeEntry(sr: TSearchRec): TFileEntry; virtual;
+    function    UpdateDirectory(const aDirectory: TfpgString): TfpgString virtual;
+  public
+    constructor Create;
+    destructor  Destroy; override;
+    function    Count: integer;
+    function    CurrentSpecialDir: integer;
+    function    ReadDirectory(const aDirectory: TfpgString = ''): boolean;
+    procedure   Clear;
+    procedure   Sort(AOrder: TFileListSortOrder);
+    property    Entry[i: integer]: TFileEntry read GetEntry;
+    property    SpecialDirs: TStringList read FSpecialDirs;
+    property    DirectoryName: TfpgString read FDirectoryName;
+    property    FileMask: TfpgString read FFileMask write FFileMask;
+    property    ShowHidden: boolean read FShowHidden write FShowHidden;
+  end;
 
 
 { ********  Helper functions  ******** }
@@ -446,6 +509,7 @@ implementation
 
 uses
   fpgfx,  // needed for fpgApplication
+  gfx_utils, // needed for fpgFileList
   typinfo;
   
   
@@ -1696,6 +1760,301 @@ end;
 constructor TfpgClipboardBase.Create;
 begin
   InitClipboard;
+end;
+
+// Helper functions for TFileEntry and TfpgFileListBase
+
+function StringMatches(const astr, apat: string): boolean;
+var
+  pati, si: longint;
+begin
+  result := True;
+  pati := 1;
+  si := 1;
+  while result and (si <= length(astr)) and (pati <= length(apat)) do
+  begin
+    if (apat[pati] = '?') or (apat[pati] = astr[si]) then
+    begin
+      inc(si);
+      inc(pati);
+    end
+    else if (apat[pati] = '*') then
+    begin
+      while (pati <= length(apat)) and (apat[pati] in ['?','*']) do
+        inc(pati);
+      if pati > length(apat) then
+      begin
+        si := length(astr)+1;
+        Break;   // * at the end
+      end;
+
+      while (si <= length(astr)) and (astr[si] <> apat[pati]) do
+        inc(si);
+      if si > length(astr) then
+        result := False;
+    end
+    else
+    begin
+      result := False;
+    end;
+  end;
+
+  result := result and (si > length(astr));
+end;
+
+// multiple patterns separated with ;
+function FileNameMatches(const astr, apats: string): boolean;
+var
+  cpat: string;
+  p: integer;
+  s: string;
+  astrupper: string;
+begin
+  astrupper := UpperCase(astr);
+  result := False;
+  s := apats;
+  repeat
+    cpat := '';
+    p := pos(';',s);
+    if p > 0 then
+    begin
+      cpat := copy(s, 1, p-1);
+      delete(s, 1, p);
+    end
+    else
+    begin
+      cpat := s;
+      s := '';
+    end;  { if/else }
+    cpat := UpperCase(trim(cpat));
+    if cpat <> '' then
+      result := StringMatches(astrupper, cpat);
+  until result or (cpat = '');
+end;
+
+{ TFileEntry }
+
+constructor TFileEntry.Create;
+begin
+  FAttributes := 0;
+  FMode := 0;
+  FSize := 0;
+  FIsLink := False;
+  FEntryType := etFile;
+end;
+
+{ TfpgFileListBase }
+
+procedure TfpgFileListBase.AddEntry(sr: TSearchRec);
+var
+  e: TFileEntry;
+begin
+  e := InitializeEntry(sr);
+  if Assigned(e) then
+    FEntries.Add(e);
+end;
+
+function TfpgFileListBase.HasAttrib(fileAttrib, testAttrib: Integer): Boolean;
+begin
+  { HasAttrib() tests whether or not a file (with attributes fileAttrib) has the
+  testAttrib attribute bit set. }
+  Result := (fileAttrib and testAttrib) <> 0;
+end;
+
+function TfpgFileListBase.GetEntry(i: integer): TFileEntry;
+begin
+  if (i < 1) or (i > FEntries.Count) then
+    Result := nil
+  else
+    Result := TFileEntry(FEntries[i-1]);
+end;
+
+function TfpgFileListBase.InitializeEntry(sr: TSearchRec): TFileEntry;
+var
+  e: TFileEntry;
+  fullname: TfpgString;
+begin
+  e := TFileEntry.Create;
+  e.Name        := sr.Name;
+  e.Extention   := ExtractFileExt(e.Name);
+  e.Size        := sr.Size;
+  e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
+  e.EntryType   := etFile;
+  fullname      := FDirectoryName + e.Name;
+  e.IsLink      := FileIsSymlink(fullname);
+  e.LinkTarget  := ExtractTargetSymLinkPath(fullname);
+  e.ModTime     := FileDateToDateTime(sr.Time);
+
+  if HasAttrib(sr.Attr, faDirectory) then
+    e.EntryType := etDir
+  else
+    e.EntryType := etFile;
+
+  if (e.Name = '.') or
+     ((e.Name = '..') and (FDirectoryName = '/')) or
+     (not FShowHidden and (Copy(e.Name, 1, 1) = '.') and (Copy(e.Name, 2, 1) <> '.')) or
+//       (not FShowHidden and HasAttrib(sr.Attr, faHidden)) or
+     ((e.EntryType = etFile) and not FileNameMatches(e.Name, FFileMask)) then
+  begin
+    // do not add this entry
+    Result := nil;
+  end else
+    Result := e;
+end;
+
+function TfpgFileListBase.UpdateDirectory(const aDirectory: TfpgString): TfpgString;
+{Sets up FSpecialDirs list}
+var
+  i, n: integer;
+  rootadd: integer;
+begin
+  // find insert position
+  i := 0;
+  while (i < FSpecialDirs.Count)
+    and (FSpecialDirs.Strings[i][1] <= aDirectory[1]) do
+      inc(i);
+  
+  n := 1;
+  rootadd := 1;
+  while n < Length(aDirectory) do
+  begin
+    if aDirectory[n] = DirectorySeparator then
+    begin
+      FSpecialDirs.Insert(i, Copy(aDirectory, 1, n-1+rootadd));
+      rootadd := 0;
+      inc(i);
+    end;
+    inc(n);
+  end;
+
+  FSpecialDirs.Insert(i, aDirectory);
+  FCurrentSpecialDir := i;
+  
+  Result := aDirectory;
+end;
+
+constructor TfpgFileListBase.Create;
+begin
+  FEntries := TList.Create;
+  FDirectoryName := '';
+  FSpecialDirs := TStringList.Create;
+end;
+
+destructor TfpgFileListBase.Destroy;
+begin
+  Clear;
+  FSpecialDirs.Free;
+  FEntries.Free;
+  inherited Destroy;
+end;
+
+function TfpgFileListBase.Count: integer;
+begin
+  Result := FEntries.Count;
+end;
+
+function TfpgFileListBase.CurrentSpecialDir: integer;
+begin
+  Result := FCurrentSpecialDir;
+end;
+
+function TfpgFileListBase.ReadDirectory(const aDirectory: TfpgString = ''): boolean;
+var
+  SearchRec: TSearchRec;
+  dir: TfpgString; //  to prevent FDirectoryName from having incorrect value
+begin
+  // default parameter value is current directory
+  if aDirectory <> '' then
+    dir := ExpandFileName(aDirectory)
+  else
+    GetDir(0, dir);
+    
+  // vvzh: now we have to use SetCurrentDir in order to make ExpandFileName work
+  if not SetCurrentDir(dir) then
+  begin
+    Result := False;
+    Exit; //==>
+  end;
+
+  FDirectoryName := UpdateDirectory(dir);
+  // Add PathDelim to end if it doesn't yet exist
+  FDirectoryName := IncludeTrailingPathDelimiter(FDirectoryName);
+
+  Clear;
+  try
+    // The extra 'or' includes Normal attribute files under Windows. faAnyFile doesn't return those.
+    // Reported to FPC as bug 9440 in Mantis.
+    if SysUtils.FindFirst(FDirectoryName + '*', faAnyFile or $00000080, SearchRec) = 0 then
+    begin
+      AddEntry(SearchRec);
+      while SysUtils.FindNext(SearchRec) = 0 do
+      begin
+        AddEntry(SearchRec);
+      end;
+    end;
+  finally
+    SysUtils.FindClose(SearchRec);
+  end;
+end;
+
+procedure TfpgFileListBase.Clear;
+var
+  n: integer;
+begin
+  for n := 0 to FEntries.Count-1 do
+    TFileEntry(FEntries[n]).Free;
+  FEntries.Clear;
+end;
+
+procedure TfpgFileListBase.Sort(AOrder: TFileListSortOrder);
+var
+  newl: TList;
+  n: integer;
+  i: integer;
+  e: TFileEntry;
+
+  function IsBefore(newitem, item: TFileEntry): boolean;
+  begin
+    //if newitem.etype = etDir then writeln('dir: ',newitem.name,' (',item.name,')');
+    if (newitem.EntryType = etDir) and (item.EntryType <> etDir) then
+    begin
+      result := true;
+    end
+    else if (newitem.EntryType <> etDir) and (item.EntryType = etDir) then
+    begin
+      result := false;
+    end
+    else if (newitem.EntryType = etDir) and (newitem.Name = '..') then
+    begin
+      result := true;
+    end
+    else if (item.EntryType = etDir) and (item.Name = '..') then
+    begin
+      result := false;
+    end
+    else
+      case AOrder of
+        soFileName   : result := UpperCase(newitem.Name) < UpperCase(item.Name);
+        soCSFileName : result := newitem.Name < item.Name;
+        soFileExt    : result := UpperCase(newitem.Extention+' '+newitem.Name) < UpperCase(item.Extention+' '+item.Name);
+        soSize       : result := newitem.size < item.size;
+        soTime       : result := newitem.modtime < item.modtime;
+      else
+        result := False;
+      end;
+  end;
+
+begin
+  newl := TList.Create;
+  for n := 0 to FEntries.Count-1 do
+  begin
+    e := TFileEntry(FEntries[n]);
+    i := 0;
+    while (i < newl.Count) and not IsBefore(e,TFileEntry(newl[i])) do inc(i);
+    newl.Insert(i,e);
+  end;
+  FEntries.Free;
+  FEntries := newl;
 end;
 
 end.

@@ -206,6 +206,14 @@ type
     procedure   InitClipboard; override;
   end;
 
+
+  { TfpgFileListImpl }
+
+  TfpgFileListImpl = class(TfpgFileListBase)
+    function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
+    function    UpdateDirectory(const aDirectory: TfpgString): TfpgString; override;
+  end;
+
 implementation
 
 uses
@@ -1987,6 +1995,47 @@ begin
       MainInstance, // handle to application instance
       nil       // window-creation data
       );
+end;
+
+{ TfpgFileListImpl }
+
+function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
+begin
+  Result := inherited InitializeEntry(sr);
+  if Assigned(Result) then
+  begin
+    Result.Name := UTF8Encode(Result.Name);
+    Result.Extention := UTF8Encode(Result.Extention);
+  end;
+end;
+
+function TfpgFileListImpl.UpdateDirectory(const aDirectory: TfpgString
+  ): TfpgString;
+var
+  n: integer;
+  drvs: string;
+begin
+  FSpecialDirs.Clear;
+  
+  // making drive list
+  if Copy(aDirectory, 2, 1) = ':' then
+  begin
+    n := 0;
+    { TODO: replace 25 with a constant: max nested directories displayed }
+    while n <= 25 do
+    begin
+      drvs := chr(n+ord('A'))+':\';
+      if Windows.GetDriveType(PChar(drvs)) <> 1 then
+      begin
+        // vvzh: to avoid doubling of drive letters in inherited UpdateDirectory
+        if Pos(drvs, aDirectory) <> 1 then
+          FSpecialDirs.Add(drvs);
+      end;
+      inc(n);
+    end;
+  end;
+
+  Result := inherited UpdateDirectory(aDirectory);
 end;
 
 initialization

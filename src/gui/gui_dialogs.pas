@@ -1127,9 +1127,10 @@ begin
     begin
       if dlg.Directory <> '' then
       begin
-        ShowMessage(dlg.Directory);
         mkdir(dlg.Directory);
-        grid.FileList.ReadDirectory(GetFileFilter, ShowHidden);
+        grid.FileList.FileMask := GetFileFilter;
+        grid.FileList.ShowHidden := ShowHidden;
+        grid.FileList.ReadDirectory();
         grid.FileList.Sort(soFileName);
         grid.Invalidate;
       end;
@@ -1154,85 +1155,27 @@ end;
 
 procedure TfpgFileDialog.SetCurrentDirectory(const ADir: string);
 var
-  ds: string;
-  n: integer;
-  rootadd: integer;
   fsel: string;
-{$ifdef Win32}
-  drvind: integer;
-  drvs: string;
-{$endif}
 begin
-  ds := '';
-  GetDir(0, ds);
-  fsel := ExtractFileName(ds);
+  if ADir = '..' then
+    fsel := ExtractFileName(
+      ExcludeTrailingPathDelimiter(grid.FileList.DirectoryName))
+  else
+    fsel := '';
+    
+  grid.FileList.FileMask := GetFileFilter;
+  grid.FileList.ShowHidden := ShowHidden;
 
-  if not SetCurrentDir(ADir) then
+  if not grid.FileList.ReadDirectory(ADir) then
   begin
     ShowMessage(Format(rsErrCouldNotOpenDir, [ADir]), rsError);
     Exit; //==>
   end;
-
-  chlDir.Items.Clear;
-  if ADir <> '..' then
-    fsel := '';
-
-  GetDir(0, ds);
-  rootadd := 1;
-
-  {$IFDEF MSWINDOWS}
-  // making drive list 1
-  drvind := -1;
-  if Copy(ds, 2, 1) = ':' then
-    drvind := ord(UpCase(ds[1]))-ord('A');
-  n := 0;
-  while n < drvind do
-  begin
-    drvs := chr(n+ord('A'))+':\';
-    if Windows.GetDriveType(PChar(drvs)) <> 1 then
-    begin
-      chlDir.Items.Add(drvs);
-    end;
-    inc(n);
-  end;
-  {$ENDIF}
-
-  {$IFDEF UNIX}
-  if Copy(ds, 1, 1) <> DirectorySeparator then
-    ds := DirectorySeparator + ds;
-  {$ENDIF}
-
-  n := 1;
-  while n < Length(ds) do
-  begin
-    if ds[n] = DirectorySeparator then
-    begin
-      chlDir.Items.Add(Copy(ds, 1, n-1+rootadd));
-      rootadd := 0;
-    end;
-    inc(n);
-  end;
-
-  chlDir.Items.Add(ds);
-  chlDir.FocusItem := chlDir.Items.Count;
-
-  {$IFDEF MSWINDOWS}
-  // making drive list 2
-  n := drvind+1;
-  if n < 0 then n := 0;
-  while n <= 25 do
-  begin
-    drvs := chr(n+ord('A'))+':\';
-    if Windows.GetDriveType(PChar(drvs)) <> 1 then
-    begin
-      chlDir.Items.Add(drvs);
-    end;
-    inc(n);
-  end;
-  {$ENDIF}
-
-  grid.FileList.ReadDirectory(GetFileFilter, ShowHidden);
+  
   grid.FileList.Sort(soFileName);
+  
+  chlDir.Items.Assign(grid.FileList.SpecialDirs);
+  chlDir.FocusItem := grid.FileList.CurrentSpecialDir + 1;
 
   if fsel <> '' then
     SelectFile(fsel)
