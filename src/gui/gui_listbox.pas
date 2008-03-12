@@ -415,13 +415,12 @@ begin
 
     keyReturn:
         begin
-          DoSelect;
+          if FocusItem > 0 then
+            DoSelect;
           consumed := false; // to allow the forms to detect it
         end;
   else
-    begin
-      consumed := false;
-    end;
+    consumed := false;
   end;
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
