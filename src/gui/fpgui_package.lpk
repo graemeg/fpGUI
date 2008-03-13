@@ -23,7 +23,8 @@
         </Debugging>
       </Linking>
       <Other>
-        <CustomOptions Value="-B"/>
+        <CustomOptions Value="-B
+"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
@@ -161,12 +162,12 @@
     <LazDoc Paths="../../docs/xml/gui/"/>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpgfx_package"/>
         <MinVersion Minor="6" Release="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
