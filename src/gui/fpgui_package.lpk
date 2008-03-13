@@ -17,11 +17,6 @@
       <CodeGeneration>
         <Generate Value="Faster"/>
       </CodeGeneration>
-      <Linking>
-        <Debugging>
-          <GenerateDebugInfo Value="True"/>
-        </Debugging>
-      </Linking>
       <Other>
         <CustomOptions Value="-B
 "/>

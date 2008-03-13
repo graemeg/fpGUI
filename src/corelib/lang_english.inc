@@ -98,7 +98,7 @@ rsSaveAFile              = 'Save file as';
 // User Dialog
 rsUserName               = 'User name';
 rsPassword               = 'Password';
-
+rsDatabase               = 'Database';
 
 // Error messages
 rsErrListMustBeEmpty     = 'List must be empty';

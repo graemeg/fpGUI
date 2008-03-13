@@ -98,6 +98,7 @@ rsSaveAFile              = 'Stoor ''n lêer';
 // User Dialog
 rsUserName               = 'Gebruikers naam';
 rsPassword               = 'Wagwoord';
+rsDatabase               = 'Database';
 
 
 // Error messages

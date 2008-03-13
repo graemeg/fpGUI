@@ -5,19 +5,36 @@
 
 { TfpgPromptUserDialog }
 
-TfpgPromptUserDialog = class(TfpgBaseDialog)
-private
-  lblTitle: TfpgLabel;
-  lblTitlePw: TfpgLabel;
-  edUserID: TfpgEdit;
-  edPassword: TfpgEdit;
-  function    GetUserID: TfpgString;
-  function    GetUserPassword: TfpgString;
-public
-  constructor Create(AOwner: TComponent); override;
-  property    UserID: TfpgString read GetUserID;
-  property    Password: TfpgString read GetUserPassword;
-end;
+  TfpgPromptUserDialog = class(TfpgBaseDialog)
+  private
+    lblTitle: TfpgLabel;
+    lblTitlePw: TfpgLabel;
+    edUserID: TfpgEdit;
+    edPassword: TfpgEdit;
+    function    GetUserID: TfpgString;
+    function    GetUserPassword: TfpgString;
+  public
+    constructor Create(AOwner: TComponent); override;
+    // Gof defines this Authenticate method a Hook operation in Template methods pattern.
+    // Subclass will have to override and implement it. By default it returns True.
+    function    Authenticate: boolean; virtual;
+    procedure   Wiggle(const Seconds: integer = 1; const MovingPixels: integer = 5; const aSleep: integer = 75);
+    property    UserID: TfpgString read GetUserID;
+    property    Password: TfpgString read GetUserPassword;
+  end;
+
+
+  TfpgPromptUserDbDialog = class(TfpgPromptUserDialog)
+  private
+    lblDatabases: TfpgLabel;
+  protected
+    aStringList: TStringList;
+    cbDatabases: TfpgComboBox;
+    procedure   PopulateComboDb; virtual;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+  end;
 
 
 {$ENDIF read_interface}
@@ -70,6 +87,71 @@ begin
   btnCancel.TabOrder    := 4;
 end;
 
+function TfpgPromptUserDialog.Authenticate: boolean;
+begin
+  Result := True;
+end;
+
+procedure TfpgPromptUserDialog.Wiggle(const Seconds: integer; const MovingPixels: integer; const aSleep: integer);
+var
+  MyTime: TDateTime;
+begin
+  MyTime := Now;
+  repeat
+    MoveWindow(Left - MovingPixels, Top);
+    fpgApplication.ProcessMessages;
+    Sleep(aSleep);
+    MoveWindow(Left + MovingPixels * 2, Top);
+    fpgApplication.ProcessMessages;
+    Sleep(aSleep);
+    MoveWindow(Left - MovingPixels, Top);
+    fpgApplication.ProcessMessages;
+  until SecondsBetween(Now, MyTime) >= Seconds;
+end;
+
+{ TfpgPromptUserDbDialog }
+
+constructor TfpgPromptUserDbDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  // reset dimensions
+  Width     := 200;
+  Height    := 185;
+  MinWidth  := 200;
+  MinHeight := 185;
+
+  aStringList := TStringList.Create;
+
+  lblDatabases := CreateLabel(self, 8, 101, rsDatabase);
+  cbDatabases := CreateComboBox(self, 8, 119, 184, aStringList);
+  cbDatabases.Anchors := [anLeft, anTop, anRight];
+
+  // reposition buttons
+  btnCancel.Left  := Width-FDefaultButtonWidth-FSpacing;
+  btnCancel.Top   := Height - FSpacing - btnCancel.Height;
+  btnOK.Left      := btnCancel.Left-FDefaultButtonWidth-FSpacing;
+  btnOK.Top       := btnCancel.Top;
+
+  // now reset tab order
+  edUserID.TabOrder     := 1;
+  edPassword.TabOrder   := 2;
+  cbDatabases.TabOrder  := 3;
+  btnOK.TabOrder        := 5;
+  btnCancel.TabOrder    := 6;
+  
+  PopulateComboDb;
+end;
+
+destructor TfpgPromptUserDbDialog.Destroy;
+begin
+  aStringList.Free;
+  inherited Destroy;
+end;
+
+procedure TfpgPromptUserDbDialog.PopulateComboDb;
+begin
+  // do nothing. Derived classe will implement it
+end;
 
 {$ENDIF read_implementation}
 

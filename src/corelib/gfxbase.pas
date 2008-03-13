@@ -380,13 +380,11 @@ type
   end;
 
 
-  { TfpgApplicationBase }
-
   TfpgApplicationBase = class(TComponent)
   private
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
-    function GetTopModalForm: TfpgWindowBase;
+    function    GetTopModalForm: TfpgWindowBase;
   protected
     FIsInitialized: Boolean;
     FModalFormStack: TList;
@@ -421,8 +419,10 @@ type
     property    Text: string read DoGetText write DoSetText;
   end;
   
+  
   TFileEntryType = (etFile, etDir);
   TFileListSortOrder = (soNone, soFileName, soCSFileName, soFileExt, soSize, soTime);
+
 
   // A simple data object
   TFileEntry = class(TObject)
@@ -453,7 +453,6 @@ type
     property    LinkTarget: string read FLinkTarget write FLinkTarget;
   end;
 
-  { TfpgFileListBase }
 
   TfpgFileListBase = class(TObject)
   private
@@ -941,6 +940,8 @@ end;
 
 procedure TfpgWindowBase.MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
+  Left  := x;
+  Top   := y;
   DoMoveWindow(x, y);
 end;
 

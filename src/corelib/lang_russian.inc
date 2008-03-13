@@ -98,6 +98,7 @@ rsSaveAFile              = 'Сохранить файл как';
 // User Dialog
 rsUserName               = 'Имя пользователя';
 rsPassword               = 'Пароль';
+rsDatabase               = 'Database';
 
 
 // Error messages

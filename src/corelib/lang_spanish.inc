@@ -98,6 +98,7 @@ rsSaveAFile              = 'Guardar como';
 // User Dialog
 rsUserName               = 'User name';
 rsPassword               = 'Password';
+rsDatabase               = 'Database';
 
 
 // Error messages

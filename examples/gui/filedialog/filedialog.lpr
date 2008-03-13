@@ -7,6 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
+  gfxbase,
   fpgfx,
   gui_form,
   gui_dialogs,
@@ -39,6 +40,37 @@ type
   public
     procedure   AfterCreate; override;
   end;
+  
+
+  TMyDBLoginDlg = class(TfpgPromptUserDbDialog)
+  private
+    function    GetDatabase: TfpgString;
+  protected
+    procedure   PopulateComboDb; override;
+  public
+    property    Database: TfpgString read GetDatabase;
+  end;
+
+{ TMyDBLoginDlg }
+
+function TMyDBLoginDlg.GetDatabase: TfpgString;
+begin
+  Result := aStringList.ValueFromIndex[cbDatabases.FocusItem-1];
+end;
+
+procedure TMyDBLoginDlg.PopulateComboDb;
+var
+  i: integer;
+begin
+  aStringList.Clear;
+  aStringList.Add('Database1=192.168.0.1:/data/db1.gdb');
+  aStringList.Add('Database2=192.168.0.10:/data/live.gdb');
+  aStringList.Add('Database3=192.168.0.150:/data/sometest.gdb');
+  aStringList.Add('Database4=192.168.0.200:c:\MyData\test.gdb');
+  cbDatabases.Items.Clear;
+  for i := 0 to aStringList.Count-1 do
+    cbDatabases.Items.Add(aStringList.Names[i]);
+end;
 
 {@VFD_NEWFORM_DECL}
 
@@ -46,14 +78,18 @@ type
 
 procedure TMainForm.btnUserPromptClick(Sender: TObject);
 var
-  dlg: TfpgPromptUserDialog;
+  dlg: TMyDBLoginDlg;
 begin
-  dlg := TfpgPromptUserDialog.Create(nil);
+  dlg := TMyDBLoginDlg.Create(nil);
   try
     dlg.WindowTitle := 'Sample Login';
     if dlg.ShowModal = 1 then
     begin
-      TfpgMessageDialog.Information('User Results', 'User=' + dlg.UserID + #13#10 + 'Pass='+ dlg.Password, [mbOK]);
+      TfpgMessageDialog.Information('User Results',
+          'User=' + dlg.UserID + #13 +
+          'Pass=' + dlg.Password +  #13 +
+          'Database=' + dlg.Database, [mbOK]);
+      fpgApplication.ProcessMessages;
     end;
   finally
     dlg.Free;

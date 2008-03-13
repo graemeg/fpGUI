@@ -98,6 +98,7 @@ rsSaveAFile              = 'Salva con nome';
 // User Dialog
 rsUserName               = 'Nome utente';
 rsPassword               = 'Password';
+rsDatabase               = 'Archivi';
 
 // Error messages
 rsErrListMustBeEmpty     = 'Elenco deve essere vuoto';

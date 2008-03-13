@@ -211,6 +211,7 @@ uses
   {$IFDEF MSWINDOWS}
   ,Windows   // used by File Dialog
   {$ENDIF}
+  ,DateUtils
   ;
   
   
