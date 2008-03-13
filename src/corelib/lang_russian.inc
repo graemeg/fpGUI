@@ -96,8 +96,8 @@ rsSaveAFile              = 'Сохранить файл как';
 
 
 // User Dialog
-rsUserName               = 'User name';
-rsPassword               = 'Password';
+rsUserName               = 'Имя пользователя';
+rsPassword               = 'Пароль';
 
 
 // Error messages
