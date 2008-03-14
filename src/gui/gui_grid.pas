@@ -158,6 +158,7 @@ type
     property    ShowGrid;
     property    ShowHeader;
     property    TabOrder;
+    property    OnCanSelectCell;
     property    OnDoubleClick;
     property    OnFocusChange;
     property    OnKeyPress;

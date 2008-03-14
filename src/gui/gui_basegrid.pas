@@ -41,6 +41,7 @@ type
 
   TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: integer) of object;
   TfpgRowChangeNotify = procedure(Sender: TObject; ARow: integer) of object;
+  TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: integer; var ACanSelect: boolean) of object;
 
 
   // Column 2 is special just for testing purposes. Descendant classes will
@@ -55,6 +56,7 @@ type
     FFocusCol: integer;
     FFocusRow: integer;
     FHeaderHeight: integer;
+    FOnCanSelectCell: TfpgCanSelectCellEvent;
     FOnFocusChange: TfpgFocusChangeNotify;
     FOnRowChange: TfpgRowChangeNotify;
     FPrevCol: integer;
@@ -96,6 +98,8 @@ type
     procedure   SetColumnWidth(ACol: integer; const AValue: integer); virtual;
     function    GetColumnCount: integer; virtual;
     function    GetRowCount: integer; virtual;
+    function    CanSelectCell(const ARow, ACol: integer): boolean;
+    procedure   DoCanSelectCell(const ARow, ACol: integer; var ACanSelect: boolean);
     procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DrawGrid(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
@@ -114,7 +118,6 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HeaderFont: TfpgFont read FHeaderFont;
     property    HeaderFontDesc: string read GetHeaderFontDesc write SetHeaderFontDesc;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor;
     property    FocusCol: integer read FFocusCol write SetFocusCol;
     property    FocusRow: integer read FFocusRow write SetFocusRow;
     property    RowSelect: boolean read FRowSelect write SetRowSelect;
@@ -128,6 +131,7 @@ type
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
+    property    OnCanSelectCell: TfpgCanSelectCellEvent read FOnCanSelectCell write FOnCanSelectCell;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -245,6 +249,20 @@ end;
 function TfpgBaseGrid.GetRowCount: integer;
 begin
   Result := 24;
+end;
+
+function TfpgBaseGrid.CanSelectCell(const ARow, ACol: integer): boolean;
+begin
+  Result := (ARow > 0) and (ACol > 0) and (ARow <= RowCount) and (ACol <= ColumnCount);
+  if Result then
+    DoCanSelectCell(ARow, ACol, Result);
+end;
+
+procedure TfpgBaseGrid.DoCanSelectCell(const ARow, ACol: integer; var
+  ACanSelect: boolean);
+begin
+  if Assigned(OnCanSelectCell) then
+    FOnCanSelectCell(self, ARow, ACol, ACanSelect);
 end;
 
 procedure TfpgBaseGrid.DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer);
@@ -615,6 +633,7 @@ procedure TfpgBaseGrid.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   w: integer;
+  r: integer;
 begin
   consumed := True;
   case keycode of
@@ -633,12 +652,11 @@ begin
             end;
           end;
 
-          if FFocusCol < ColumnCount then
+          if CanSelectCell(FFocusRow, FFocusCol+1) then
           begin
             inc(FFocusCol);
             FollowFocus;
             RePaint;
-            //DoChange;
           end;
         end;
 
@@ -646,71 +664,80 @@ begin
         begin
           if RowSelect then
             FFocusCol := FFirstCol;
-          if FFocusCol > 1 then
+          if CanSelectCell(FFocusRow, FFocusCol-1) then
           begin
             dec(FFocusCol);
             FollowFocus;
             RePaint;
-            //DoChange;
           end;
         end;
 
     keyUp:
         begin
-          if FFocusRow > 1 then
+          if CanSelectCell(FFocusRow-1, FFocusCol) then
           begin
             dec(FFocusRow);
             FollowFocus;
             RePaint;
-            //DoChange;
           end;
         end;
 
     keyDown:
         begin
-          if FFocusRow < RowCount then
+          if CanSelectCell(FFocusRow+1, FFocusCol) then
           begin
             inc(FFocusRow);
             FollowFocus;
             RePaint;
-            //DoChange;
           end;
         end;
 
     keyPageUp:
         begin
-          dec(FFocusRow,VisibleLines);
-          if FFocusRow < 1 then
-            FFocusRow := 1;
-          FollowFocus;
-          RePaint;
-          //DoChange;
+          r := FFocusRow-VisibleLines;
+          if r < 1 then
+            r := 1;
+
+          if (FFocusRow <> 1) and CanSelectCell(r, FFocusCol) then
+          begin
+            FFocusRow := r;
+            FollowFocus;
+            RePaint;
+          end;
         end;
 
     keyPageDown:
         begin
-          inc(FFocusRow,VisibleLines);
-          if FFocusRow > RowCount then
-            FFocusRow := RowCount;
-          FollowFocus;
-          RePaint;
-          //DoChange;
+          r := FFocusRow+VisibleLines;
+          if r > RowCount then
+            r := RowCount;
+
+          if (FFocusRow <> RowCount) and CanSelectCell(r, FFocusCol) then
+          begin
+            FFocusRow := r;
+            FollowFocus;
+            RePaint;
+          end;
         end;
         
     keyHome:
         begin
-          FFocusCol := 1;
-          FollowFocus;
-          RePaint;
-          //DoChange;
+          if (FFocusCol <> 1) and CanSelectCell(FFocusRow, 1) then
+          begin
+            FFocusCol := 1;
+            FollowFocus;
+            RePaint;
+          end;
         end;
         
     keyEnd:
         begin
-          FFocusCol := ColumnCount;
-          FollowFocus;
-          RePaint;
-          //DoChange;
+          if (FFocusCol <> ColumnCount) and CanSelectCell(FFocusRow, ColumnCount) then
+          begin
+            FFocusCol := ColumnCount;
+            FollowFocus;
+            RePaint;
+          end;
         end;
 
   else
@@ -906,6 +933,13 @@ begin
       end;
     end;
   end;  { if/else }
+  
+  if not CanSelectCell(FFocusRow, FFocusCol) then
+  begin
+    // restore previous values
+    FFocusRow := prow;
+    FFocusCol := pcol;
+  end;
 
   if (prow <> FFocusRow) or (pcol <> FFocusCol) then
   begin
