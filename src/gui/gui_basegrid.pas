@@ -91,6 +91,7 @@ type
     procedure   SetShowHeader(const AValue: boolean);
     function    VisibleLines: integer;
     function    VisibleWidth: integer;
+    procedure   SetFirstRow(const AValue: integer);
   protected
     procedure   UpdateScrollBars; virtual;
     function    GetHeaderText(ACol: integer): string; virtual;
@@ -129,6 +130,7 @@ type
     property    HeaderHeight: integer read FHeaderHeight;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
+    property    TopRow: integer read FFirstRow write SetFirstRow;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
     property    OnCanSelectCell: TfpgCanSelectCellEvent read FOnCanSelectCell write FOnCanSelectCell;
@@ -169,6 +171,8 @@ procedure TfpgBaseGrid.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
+  if DefaultRowHeight < FFont.Height + 2 then
+    DefaultRowHeight := FFont.Height + 2;
   RePaint;
 end;
 
@@ -176,6 +180,8 @@ procedure TfpgBaseGrid.SetHeaderFontDesc(const AValue: string);
 begin
   FHeaderFont.Free;
   FHeaderFont := fpgGetFont(AValue);
+  if FHeaderHeight < FHeaderFont.Height + 2 then
+    FHeaderHeight := FHeaderFont.Height + 2;
   RePaint;
 end;
 
@@ -332,7 +338,6 @@ begin
 
   FollowFocus;
   CheckFocusChange;
-  UpdateScrollBars;
 end;
 
 procedure TfpgBaseGrid.SetFocusRow(const AValue: integer);
@@ -349,7 +354,6 @@ begin
     
   FollowFocus;
   CheckFocusChange;
-  UpdateScrollBars;
 end;
 
 procedure TfpgBaseGrid.CheckFocusChange;
@@ -405,6 +409,16 @@ begin
   else
     sw := 0;
   Result := Width - FMargin*2 - sw;
+end;
+
+procedure TfpgBaseGrid.SetFirstRow(const AValue: integer);
+begin
+  if FFirstRow = AValue then
+    Exit;
+  if AValue < (RowCount - VisibleLines + 1) then
+    FFirstRow := AValue;
+  UpdateScrollBars;
+  RePaint;
 end;
 
 procedure TfpgBaseGrid.UpdateScrollBars;
