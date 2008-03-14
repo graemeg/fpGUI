@@ -1933,6 +1933,7 @@ end;
 constructor TfpgFileListBase.Create;
 begin
   FEntries := TList.Create;
+  FFileMask := '*';
   FDirectoryName := '';
   FSpecialDirs := TStringList.Create;
 end;

@@ -30,7 +30,8 @@ type
 
 procedure TMainForm.chkShowHiddenChanged(Sender: TObject);
 begin
-  FGrid.FileList.ReadDirectory('*', chkShowHidden.Checked);
+  FGrid.FileList.ShowHidden := chkShowHidden.Checked;
+  FGrid.FileList.ReadDirectory('');
   fpgSendMessage(self, FGrid, FPGM_PAINT);
 end;
 
@@ -47,7 +48,8 @@ begin
   
   FGrid := TfpgFileGrid.Create(self);
   FGrid.SetPosition(8, 8, 600, 360);
-  FGrid.FileList.ReadDirectory('*', True);
+  FGrid.FileList.ShowHidden := True;
+  FGrid.FileList.ReadDirectory('');
   FGrid.Anchors := [anLeft, anTop, anBottom, anRight];
   
   chkShowHidden := CreateCheckBox(self, 8, Height - 25, 'Show Hidden');
