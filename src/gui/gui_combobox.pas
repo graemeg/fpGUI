@@ -58,6 +58,8 @@ uses
 
 type
 
+  { TfpgAbstractComboBox }
+
   TfpgAbstractComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
@@ -84,6 +86,7 @@ type
     procedure   SetText(const AValue: string); virtual;
     procedure   SetHeight(const AValue: TfpgCoord); override;
     procedure   SetWidth(const AValue: TfpgCoord); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
@@ -361,6 +364,43 @@ begin
   inherited;
   CalculateInternalButtonRect;
   RePaint;
+end;
+
+procedure TfpgAbstractComboBox.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+var
+  hasChanged: boolean;
+begin
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  hasChanged := False;
+  consumed := True;
+  case keycode of
+
+    keyDown:
+       begin
+         FocusItem := FocusItem + 1;
+         hasChanged := True;
+       end;
+
+    keyUp:
+       begin
+         FocusItem := FocusItem - 1;
+         hasChanged := True;
+       end;
+
+    else
+    begin
+      Consumed := False;
+    end;
+  end;
+
+  if consumed then
+    RePaint
+  else
+    inherited;
+
+  if hasChanged then
+    if Assigned(FOnChange) then
+      FOnChange(self);
 end;
 
 procedure TfpgAbstractComboBox.CalculateInternalButtonRect;
