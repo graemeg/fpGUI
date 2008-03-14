@@ -467,7 +467,7 @@ type
   protected
     FSpecialDirs: TStringList;
     function    InitializeEntry(sr: TSearchRec): TFileEntry; virtual;
-    function    UpdateDirectory(const aDirectory: TfpgString): TfpgString virtual;
+    procedure   PopulateSpecialDirs(const aDirectory: TfpgString); virtual;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -1899,7 +1899,7 @@ begin
     Result := e;
 end;
 
-function TfpgFileListBase.UpdateDirectory(const aDirectory: TfpgString): TfpgString;
+procedure TfpgFileListBase.PopulateSpecialDirs(const aDirectory: TfpgString);
 {Sets up FSpecialDirs list}
 var
   i, n: integer;
@@ -1924,10 +1924,8 @@ begin
     inc(n);
   end;
 
-  FSpecialDirs.Insert(i, aDirectory);
+  FSpecialDirs.Insert(i, ExcludeTrailingPathDelimiter(aDirectory));
   FCurrentSpecialDir := i;
-  
-  Result := aDirectory;
 end;
 
 constructor TfpgFileListBase.Create;
@@ -1963,29 +1961,29 @@ var
 begin
   // default parameter value is current directory
   if aDirectory <> '' then
-    dir := ExpandFileName(aDirectory)
+    dir := fpgExpandFileName(aDirectory)
   else
-    GetDir(0, dir);
+    dir := fpgGetCurrentDir;
     
   // vvzh: now we have to use SetCurrentDir in order to make ExpandFileName work
-  if not SetCurrentDir(dir) then
+  if not fpgSetCurrentDir(dir) then
   begin
     Result := False;
     Exit; //==>
   end;
 
-  FDirectoryName := UpdateDirectory(dir);
   // Add PathDelim to end if it doesn't yet exist
-  FDirectoryName := IncludeTrailingPathDelimiter(FDirectoryName);
-
+  FDirectoryName := IncludeTrailingPathDelimiter(dir);
+  PopulateSpecialDirs(FDirectoryName);
+  
   Clear;
   try
     // The extra 'or' includes Normal attribute files under Windows. faAnyFile doesn't return those.
     // Reported to FPC as bug 9440 in Mantis.
-    if SysUtils.FindFirst(FDirectoryName + '*', faAnyFile or $00000080, SearchRec) = 0 then
+    if fpgFindFirst(FDirectoryName + '*', faAnyFile or $00000080, SearchRec) = 0 then
     begin
       AddEntry(SearchRec);
-      while SysUtils.FindNext(SearchRec) = 0 do
+      while fpgFindNext(SearchRec) = 0 do
       begin
         AddEntry(SearchRec);
       end;

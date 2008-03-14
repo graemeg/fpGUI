@@ -210,8 +210,7 @@ type
   { TfpgFileListImpl }
 
   TfpgFileListImpl = class(TfpgFileListBase)
-    function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
-    function    UpdateDirectory(const aDirectory: TfpgString): TfpgString; override;
+    procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
 
 implementation
@@ -1999,18 +1998,7 @@ end;
 
 { TfpgFileListImpl }
 
-function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
-begin
-  Result := inherited InitializeEntry(sr);
-  if Assigned(Result) then
-  begin
-    Result.Name := UTF8Encode(Result.Name);
-    Result.Extention := UTF8Encode(Result.Extention);
-  end;
-end;
-
-function TfpgFileListImpl.UpdateDirectory(const aDirectory: TfpgString
-  ): TfpgString;
+procedure TfpgFileListImpl.PopulateSpecialDirs(const aDirectory: TfpgString);
 var
   n: integer;
   drvs: string;
@@ -2035,7 +2023,7 @@ begin
     end;
   end;
 
-  Result := inherited UpdateDirectory(aDirectory);
+  inherited PopulateSpecialDirs(aDirectory);
 end;
 
 initialization

@@ -207,6 +207,7 @@ implementation
 
 uses
   gfx_widget,
+  gfx_utils,
   gfx_utf8utils
   {$IFDEF MSWINDOWS}
   ,Windows   // used by File Dialog
@@ -898,7 +899,7 @@ begin
   e := grid.CurrentEntry;
   if (e = nil) then
     Exit; //==>
-    
+
   if (e.EntryType = etDir) then
     SetCurrentDirectory(e.Name)
   else if (e.EntryType = etFile) then
@@ -1053,13 +1054,26 @@ var
 begin
   if not consumed then
   begin
-    if (keycode = keyReturn) and (ActiveWidget = grid) then
+    if (ActiveWidget = grid) then
     begin
-      e := grid.CurrentEntry;
-      if (e <> nil) and (e.EntryType = etDir) then
-      begin
-        SetCurrentDirectory(e.Name);
-        consumed := True;
+      case keycode of
+        keyReturn:
+          begin
+            e := grid.CurrentEntry;
+            if (e <> nil) then
+            begin
+              if (e.EntryType = etDir) then
+                SetCurrentDirectory(e.Name)
+              else if (e.EntryType = etFile) then
+                btnOKClick(btnOK);
+              consumed := True;
+            end;
+          end;
+        keyBackSpace:
+          begin
+             SetCurrentDirectory('..');
+             consumed := True;
+          end;
       end;
     end;
   end;
@@ -1068,14 +1082,24 @@ begin
 end;
 
 procedure TfpgFileDialog.btnOKClick(Sender: TObject);
+var
+  e: TFileEntry;
 begin
-  if not FOpenMode or SysUtils.FileExists(edFileName.Text) then
+  e := grid.CurrentEntry;
+  if e.EntryType = etDir then
+  begin
+    SetCurrentDirectory(e.Name);
+    Exit; //==>
+  end;
+
+  if not FOpenMode or fpgFileExists(edFileName.Text) then
   begin
     ModalResult := 1;
   end;
 
   if ModalResult = 1 then
-    FileName := ExpandFileName(edFileName.Text);
+    // FileName := fpgExpandFileName(edFileName.Text);
+    FileName := grid.FileList.DirectoryName + edFileName.Text;
 end;
 
 constructor TfpgFileDialog.Create(AOwner: TComponent);
@@ -1150,7 +1174,7 @@ end;
 procedure TfpgFileDialog.UpdateButtonState;
 begin
   if FOpenMode then
-    btnOK.Enabled := grid.CurrentEntry.EntryType = etFile
+    // btnOK.Enabled := grid.CurrentEntry.EntryType = etFile
   else
     btnOK.Enabled := edFileName.Text <> '';
 end;
@@ -1185,6 +1209,7 @@ begin
     grid.FocusRow := 1;
     
   grid.Update;
+  grid.SetFocus;
 end;
 
 function TfpgFileDialog.SelectFile(const AFilename: string): boolean;

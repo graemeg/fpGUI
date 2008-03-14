@@ -7,21 +7,20 @@ interface
 uses
   Classes, SysUtils, gfxbase;
   
-  
 // Common functions for all platforms
 function fpgAddTrailingValue(const ALine, AValue: TfpgString; ADuplicates: boolean = true): TfpgString;
 
-
-
 // RTL wrapper filesystem functions with platform specific encodings
 
-// function fpgFindFirst(const Path: TfpgString; Attr: Longint; out Rslt: TSearchRec): Longint;
-
+function fpgFindFirst(const Path: TfpgString; Attr: Longint; out Rslt: TSearchRec): Longint;
+function fpgFindNext(var Rslt: TSearchRec): Longint;
+function fpgGetCurrentDir: TfpgString;
+function fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
+function fpgExpandFileName(const FileName: TfpgString): TfpgString;
+function fpgFileExists(const FileName: TfpgString): Boolean;
 
 { ***  Examples of others we could do  *** }
 
-// function fpgGetCurrentDir: TfpgString;
-// function fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
 // function fpgCreateDir(const NewDir: TfpgString): Boolean;
 // function fpgRemoveDir(const Dir: TfpgString): Boolean;
 // function fpgForceDirectories(const Dir: TfpgString): Boolean;
@@ -59,9 +58,6 @@ begin
   else
     result := ALine;
 end;
-
-
-
 
 
 end.

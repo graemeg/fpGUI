@@ -205,7 +205,7 @@ type
   
   TfpgFileListImpl = class(TfpgFileListBase)
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
-    function    UpdateDirectory(const aDirectory: TfpgString): TfpgString; override;
+    procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
 
 implementation
@@ -2095,8 +2095,7 @@ begin
   end;
 end;
 
-function TfpgFileListImpl.UpdateDirectory(const aDirectory: TfpgString
-  ): TfpgString;
+procedure TfpgFileListImpl.PopulateSpecialDirs(const aDirectory: TfpgString);
 var
   ds: string;
 begin
@@ -2106,8 +2105,9 @@ begin
   if Copy(ds, 1, 1) <> DirectorySeparator then
     ds := DirectorySeparator + ds;
 
-  Result := inherited UpdateDirectory(ds);
+  inherited PopulateSpecialDirs(ds);
 end;
+
 
 initialization
   xapplication := nil;

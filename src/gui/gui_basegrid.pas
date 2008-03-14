@@ -736,7 +736,16 @@ begin
         
     keyHome:
         begin
-          if (FFocusCol <> 1) and CanSelectCell(FFocusRow, 1) then
+          if FRowSelect then
+          begin
+            if (FFocusRow <> 1) and CanSelectCell(1, FFocusCol) then
+            begin
+              FFocusRow := 1;
+              FollowFocus;
+              RePaint;
+            end;
+          end
+          else if (FFocusCol <> 1) and CanSelectCell(FFocusRow, 1) then
           begin
             FFocusCol := 1;
             FollowFocus;
@@ -746,7 +755,16 @@ begin
         
     keyEnd:
         begin
-          if (FFocusCol <> ColumnCount) and CanSelectCell(FFocusRow, ColumnCount) then
+          if FRowSelect then
+          begin
+            if (FFocusRow <> RowCount) and CanSelectCell(RowCount, FFocusCol) then
+            begin
+              FFocusRow := RowCount;
+              FollowFocus;
+              RePaint;
+            end;
+          end
+          else if (FFocusCol <> ColumnCount) and CanSelectCell(FFocusRow, ColumnCount) then
           begin
             FFocusCol := ColumnCount;
             FollowFocus;
