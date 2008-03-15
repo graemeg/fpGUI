@@ -367,6 +367,20 @@ begin
       ((Win32MajorVersion >= 6) and (Win32MinorVersion >= 0)));
 end;
 
+function WinkeystateToShiftstate(keystate: cardinal): TShiftState;
+begin
+ result:= [];
+  if GetKeyState(vk_menu) < 0 then begin
+    Include(result, ssAlt);
+  end;
+  if GetKeyState(vk_shift) < 0 then begin
+    Include(result, ssShift);
+  end;
+  if GetKeyState(vk_control) < 0 then begin
+    Include(result, ssCtrl);
+  end;
+end;
+
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 var
   w: TfpgWindowImpl;
@@ -508,7 +522,9 @@ begin
   case uMsg of
     WM_CHAR,
     WM_KEYUP,
-    WM_KEYDOWN:
+    WM_SYSKEYUP,
+    WM_KEYDOWN,
+    WM_SYSKEYDOWN:
         begin
           {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
           {$IFDEF DEBUG} writeln('wm_char, wm_keyup, wm_keydown'); {$ENDIF}
@@ -516,10 +532,11 @@ begin
           if kwg <> nil then
             w := kwg;
 
-          msgp.keyboard.shiftstate := GetKeyboardShiftState;
+          msgp.keyboard.shiftstate := WinkeystateToShiftstate(lparam);
+//          msgp.keyboard.shiftstate := GetKeyboardShiftState;
           msgp.keyboard.keycode := VirtKeyToKeycode(wParam);
 
-          if uMsg = WM_KEYDOWN then
+          if (uMsg = WM_KEYDOWN) or (uMsg = WM_SYSKEYDOWN) then
           begin
             fpgSendMessage(nil, w, FPGM_KEYPRESS, msgp);
 
@@ -556,7 +573,7 @@ begin
 //        end;
 
           end
-          else if uMsg = WM_KEYUP then
+          else if (uMsg = WM_KEYUP) or (uMsg = WM_SYSKEYUP) then
             fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
           else if uMsg = WM_CHAR then
           begin
