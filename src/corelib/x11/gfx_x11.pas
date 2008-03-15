@@ -16,6 +16,15 @@ uses
   _netlayer,
   gfxbase,
   gfx_impl;
+  
+const
+  IconBitmapWidth = 16;
+  IconBitmapHeight = 16;
+
+  IconBitmapBits: packed array[1..32] of Byte = (
+     $00, $00, $78, $07, $08, $09, $38, $09, $08, $07, $08, $01,
+     $08, $01, $00, $00, $00, $00, $98, $74, $a4, $24, $84, $24,
+     $b4, $24, $a4, $24, $18, $73, $00, $00);
 
 type
   TfpgGContext  = Xlib.TGc;
@@ -128,7 +137,7 @@ type
 
   TfpgWindowImpl = class(TfpgWindowBase)
   protected
-    FWinFlags : TXWindowStateFlags;
+    FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
     FBackupWinHandle: TfpgWinHandle;  // Used by DestroyNotify & UnmapNotify events
     FModalForWin: TfpgWindowImpl;
@@ -630,10 +639,7 @@ begin
   FDisplay          := XOpenDisplay(PChar(aparams));
   
   if FDisplay = nil then
-//  begin
     raise Exception.Create('fpGUI-X11: Could not open the display. Is your X11 server running?');
-//    halt(1);
-//  end;
 
   Terminated := False;
   DefaultScreen     := XDefaultScreen(Display);
@@ -1216,6 +1222,9 @@ var
   attr: TXSetWindowAttributes;
   mask: longword;
   hints: TXSizeHints;
+
+  IconPixmap: TPixmap;
+  WMHints: PXWMHints;
 begin
   if HandleIsValid then
     Exit; //==>
@@ -1244,13 +1253,23 @@ begin
 
   FWinHandle := wh;
   FBackupWinHandle := wh;
-    
+  
   // so newish window manager can close unresponsive programs
   if AParent = nil then // is a toplevel window
   begin
-    XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, nil, nil);
+    IconPixMap := XCreateBitmapFromData(fpgApplication.Display, FWinHandle,
+      @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
+
+    WMHints := XAllocWMHints;
+    WMHints^.icon_pixmap := IconPixmap;
+    WMHints^.flags := IconPixmapHint;
+
+//    XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, nil, nil);
+    XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
     fpgApplication.netlayer.WindowSetPID(FWinHandle, GetProcessID);
     fpgApplication.netlayer.WindowSetSupportPING(FWinHandle);
+
+    XFree(WMHints);
   end;
 
   hints.flags := 0;
