@@ -153,6 +153,78 @@ type
   end;
 
 
+  { TMyTestWindow }
+
+  TMyTestWindow = class(TfpgPopupWindow)
+  private
+    FCallerWidget: TfpgAbstractComboBox;
+    FListBox: TfpgListBox;
+    procedure   SetFirstItem;
+  protected
+    procedure   ListBoxSelect(Sender: TObject);
+    procedure   HandleShow; override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+  public
+    constructor Create(AOwner: TComponent; ACallerWidget: TfpgAbstractComboBox); reintroduce;
+    property    ListBox: TfpgListBox read FListBox;
+  end;
+
+{ TMyTestWindow }
+
+procedure TMyTestWindow.SetFirstItem;
+var
+  i: integer;
+begin
+  // If FocusItem is less than DropDownCount FirsItem = 1
+  if ListBox.FocusItem <= FCallerWidget.DropDownCount then
+    ListBox.SetFirstItem(1)
+  // If FocusItem is in the last DropDownCount of items
+  else if (ListBox.ItemCount - ListBox.FocusItem) < FCallerWidget.DropDownCount then
+    ListBox.SetFirstItem(ListBox.ItemCount - FCallerWidget.DropDownCount+1)
+  else
+  // Try and centre FocusItem in the drow down window
+    ListBox.SetFirstItem(ListBox.FocusItem - (FCallerWidget.DropDownCount div 2));
+end;
+
+procedure TMyTestWindow.ListBoxSelect(Sender: TObject);
+begin
+  FCallerWidget.FocusItem := ListBox.FocusItem;
+  Close;
+end;
+
+procedure TMyTestWindow.HandleShow;
+begin
+  ListBox.SetPosition(0, 0, Width, Height);
+  inherited HandleShow;
+  SetFirstItem;
+  ListBox.SetFocus;
+end;
+
+procedure TMyTestWindow.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  if KeyCode = keyEscape then
+  begin
+    Close;
+  end
+end;
+
+constructor TMyTestWindow.Create(AOwner: TComponent; ACallerWidget: TfpgAbstractComboBox);
+begin
+  inherited Create(nil);
+  if not Assigned(ACallerWidget) then
+    raise Exception.Create('ACallerWidget may not be <nil>');
+  FCallerWidget := ACallerWidget;
+
+  FListBox := CreateListBox(self, 0, 0, 80, 100);
+  FListBox.PopupFrame := True;
+  FListBox.Items.Assign(FCallerWidget.Items);
+  FListBox.FocusItem := FCallerWidget.FocusItem;
+  FListBox.OnSelect := @ListBoxSelect;
+end;
+
+
 { TDropDownWindow }
 
 procedure TDropDownWindow.HandlePaint;
@@ -178,7 +250,8 @@ procedure TDropDownWindow.HandleShow;
 begin
   ListBox.SetPosition(0, 0, Width, Height);
   inherited HandleShow;
-  ActiveWidget := ListBox;
+//  ActiveWidget := ListBox;
+
 //  ActiveWidget.CaptureMouse;
 end;
 
@@ -252,15 +325,21 @@ end;
 
 procedure TfpgAbstractComboBox.DoDropDown;
 var
-  ddw: TDropDownWindow;
+//  ddw: TDropDownWindow;
+  ddw: TMyTestWindow;
   rowcount: integer;
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
     FreeAndNil(FDropDown);
     OriginalFocusRoot := FocusRootWidget;
-    FDropDown       := TDropDownWindow.Create(nil);
-    ddw := TDropDownWindow(FDropDown);
+//    FDropDown       := TDropDownWindow.Create(nil);
+
+    ddw := TMyTestWindow.Create(nil, self);
+    FDropDown := TMyTestWindow(ddw);
+    ddw.Height := 200;
+
+//    ddw := TDropDownWindow(FDropDown);
     ddw.Width := Width;
     // adjust the height of the dropdown
     rowcount := FItems.Count;
@@ -268,23 +347,25 @@ begin
       rowcount := FDropDownCount;
     if rowcount < 1 then
       rowcount := 1;
+//-----
     ddw.Height            := (ddw.ListBox.RowHeight * rowcount) + 4;
-    ddw.ListBox.Height    := ddw.Height;   // needed in follow focus, otherwise, the default value (80) is used
-    ddw.CallerWidget      := self;
-    ddw.ListBox.OnSelect  := @InternalListBoxSelect;
+//    ddw.ListBox.Height    := ddw.Height;   // needed in follow focus, otherwise, the default value (80) is used
+//    ddw.CallerWidget      := self;
+//    ddw.ListBox.OnSelect  := @InternalListBoxSelect;
 
     // Assign combobox text items to internal listbox and set default focusitem
-    ddw.ListBox.Items.Assign(FItems);
-    ddw.ListBox.FocusItem := FFocusItem;
+//    ddw.ListBox.Items.Assign(FItems);
+//    ddw.ListBox.FocusItem := FFocusItem;
 
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     ddw.ShowAt(Parent, Left, Top + Height);      // drop the box below the combo
-    ddw.ListBox.SetFocus;
+//    ddw.ListBox.SetFocus;
   end
   else
   begin
     FBtnPressed := False;
-    ddw := TDropDownWindow(FDropDown);
+//    ddw := TDropDownWindow(FDropDown);
+    ddw := TMyTestWindow(FDropDown);
     ddw.Close;
     FreeAndNil(FDropDown);
   end;
@@ -376,21 +457,23 @@ begin
   case keycode of
 
     keyDown:
-       begin
-         FocusItem := FocusItem + 1;
-         hasChanged := True;
-       end;
+      begin
+        if (shiftstate = [ssAlt]) then
+          DoDropDown
+        else
+        begin
+          FocusItem   := FocusItem + 1;
+          hasChanged  := True;
+        end;
+      end;
 
     keyUp:
-       begin
-         FocusItem := FocusItem - 1;
-         hasChanged := True;
-       end;
-
+      begin
+        FocusItem   := FocusItem - 1;
+        hasChanged  := True;
+      end;
     else
-    begin
       Consumed := False;
-    end;
   end;
 
   if consumed then
