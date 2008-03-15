@@ -1174,7 +1174,7 @@ end;
 procedure TfpgFileDialog.UpdateButtonState;
 begin
   if FOpenMode then
-    // btnOK.Enabled := grid.CurrentEntry.EntryType = etFile
+    btnOK.Enabled := True
   else
     btnOK.Enabled := edFileName.Text <> '';
 end;

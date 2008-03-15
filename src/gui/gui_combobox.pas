@@ -71,7 +71,7 @@ type
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
     procedure   InternalBtnClick(Sender: TObject);
-    procedure   InternalListBoxSelect(Sender: TObject);
+    procedure   DoOnChange;
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   CalculateInternalButtonRect;
@@ -138,24 +138,7 @@ var
 
 type
   { This is the class representing the dropdown window of the combo box. }
-  TDropDownWindow = class(TfpgPopupWindow)
-  private
-    FCallerWidget: TfpgWidget;
-  protected
-    procedure   HandlePaint; override;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   HandleShow; override;
-    procedure   HandleHide; override;
-  public
-    constructor Create(AOwner: TComponent); override;
-    ListBox:    TfpgListBox;
-    property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
-  end;
-
-
-  { TMyTestWindow }
-
-  TMyTestWindow = class(TfpgPopupWindow)
+  TComboboxDropdownWindow = class(TfpgPopupWindow)
   private
     FCallerWidget: TfpgAbstractComboBox;
     FListBox: TfpgListBox;
@@ -169,9 +152,10 @@ type
     property    ListBox: TfpgListBox read FListBox;
   end;
 
-{ TMyTestWindow }
 
-procedure TMyTestWindow.SetFirstItem;
+{ TComboboxDropdownWindow }
+
+procedure TComboboxDropdownWindow.SetFirstItem;
 var
   i: integer;
 begin
@@ -186,13 +170,13 @@ begin
     ListBox.SetFirstItem(ListBox.FocusItem - (FCallerWidget.DropDownCount div 2));
 end;
 
-procedure TMyTestWindow.ListBoxSelect(Sender: TObject);
+procedure TComboboxDropdownWindow.ListBoxSelect(Sender: TObject);
 begin
   FCallerWidget.FocusItem := ListBox.FocusItem;
   Close;
 end;
 
-procedure TMyTestWindow.HandleShow;
+procedure TComboboxDropdownWindow.HandleShow;
 begin
   ListBox.SetPosition(0, 0, Width, Height);
   inherited HandleShow;
@@ -200,7 +184,7 @@ begin
   ListBox.SetFocus;
 end;
 
-procedure TMyTestWindow.HandleKeyPress(var keycode: word;
+procedure TComboboxDropdownWindow.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
@@ -210,7 +194,7 @@ begin
   end
 end;
 
-constructor TMyTestWindow.Create(AOwner: TComponent; ACallerWidget: TfpgAbstractComboBox);
+constructor TComboboxDropdownWindow.Create(AOwner: TComponent; ACallerWidget: TfpgAbstractComboBox);
 begin
   inherited Create(nil);
   if not Assigned(ACallerWidget) then
@@ -225,59 +209,6 @@ begin
 end;
 
 
-{ TDropDownWindow }
-
-procedure TDropDownWindow.HandlePaint;
-begin
-  Canvas.BeginDraw;
-//  inherited HandlePaint;
-  Canvas.Clear(clWhite);
-  Canvas.EndDraw;
-end;
-
-procedure TDropDownWindow.HandleKeyPress(var keycode: word;
-  var shiftstate: TShiftState; var consumed: boolean);
-begin
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
-  if keycode = keyEscape then
-  begin
-    consumed := True;
-    Close;
-  end;
-end;
-
-procedure TDropDownWindow.HandleShow;
-begin
-  ListBox.SetPosition(0, 0, Width, Height);
-  inherited HandleShow;
-//  ActiveWidget := ListBox;
-
-//  ActiveWidget.CaptureMouse;
-end;
-
-procedure TDropDownWindow.HandleHide;
-begin
-  // HandleHide also gets called in TfpgWidget.Destroy so we need a few
-  // if Assigned() tests here. This should be improved on.
-//  if Assigned(ActiveWidget) then
-//    ActiveWidget.ReleaseMouse;
-//  if Assigned(FocusRootWidget) then
-//    FocusRootWidget.ReleaseMouse;  // for internal ListBox
-
-  FocusRootWidget   := OriginalFocusRoot;
-  OriginalFocusRoot := nil;
-  inherited HandleHide;
-
-  if Assigned(FocusRootWidget) then
-    FocusRootWidget.SetFocus;
-end;
-
-constructor TDropDownWindow.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  ListBox := TfpgListBox.Create(self);
-  ListBox.PopupFrame := True;
-end;
 
 function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
       h: TfpgCoord = 0): TfpgComboBox;
@@ -325,47 +256,34 @@ end;
 
 procedure TfpgAbstractComboBox.DoDropDown;
 var
-//  ddw: TDropDownWindow;
-  ddw: TMyTestWindow;
+  ddw: TComboboxDropdownWindow;
   rowcount: integer;
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
     FreeAndNil(FDropDown);
     OriginalFocusRoot := FocusRootWidget;
-//    FDropDown       := TDropDownWindow.Create(nil);
 
-    ddw := TMyTestWindow.Create(nil, self);
-    FDropDown := TMyTestWindow(ddw);
-    ddw.Height := 200;
+    FDropDown := TComboboxDropdownWindow.Create(nil, self);
+    ddw := TComboboxDropdownWindow(FDropDown);
 
-//    ddw := TDropDownWindow(FDropDown);
-    ddw.Width := Width;
     // adjust the height of the dropdown
     rowcount := FItems.Count;
     if rowcount > FDropDownCount then
       rowcount := FDropDownCount;
     if rowcount < 1 then
-      rowcount := 1;
-//-----
-    ddw.Height            := (ddw.ListBox.RowHeight * rowcount) + 4;
-//    ddw.ListBox.Height    := ddw.Height;   // needed in follow focus, otherwise, the default value (80) is used
-//    ddw.CallerWidget      := self;
-//    ddw.ListBox.OnSelect  := @InternalListBoxSelect;
+      rowcount := 1;  // Even if empty at least show one line dropdown
 
-    // Assign combobox text items to internal listbox and set default focusitem
-//    ddw.ListBox.Items.Assign(FItems);
-//    ddw.ListBox.FocusItem := FFocusItem;
-
+    ddw.Width   := Width;
+    ddw.Height  := (ddw.ListBox.RowHeight * rowcount) + 4;
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     ddw.ShowAt(Parent, Left, Top + Height);      // drop the box below the combo
-//    ddw.ListBox.SetFocus;
   end
   else
   begin
+    // This actually never gets reached!!! Debug and test if this is still needed.
     FBtnPressed := False;
-//    ddw := TDropDownWindow(FDropDown);
-    ddw := TMyTestWindow(FDropDown);
+    ddw := TComboboxDropdownWindow(FDropDown);
     ddw.Close;
     FreeAndNil(FDropDown);
   end;
@@ -376,15 +294,8 @@ begin
   DoDropDown;
 end;
 
-procedure TfpgAbstractComboBox.InternalListBoxSelect(Sender: TObject);
-var
-  msgp: TfpgMessageParams;
+procedure TfpgAbstractComboBox.DoOnChange;
 begin
-  FFocusItem := TDropDownWindow(FDropDown).ListBox.FocusItem;
-  FDropDown.Close;
-
-  if HasHandle then
-    Repaint;
   if Assigned(FOnChange) then
     FOnChange(self);
 end;
@@ -405,6 +316,7 @@ begin
     FFocusItem := FItems.Count;
 
   RePaint;
+  DoOnChange;
 end;
 
 procedure TfpgAbstractComboBox.SetFontDesc(const AValue: string);
@@ -493,6 +405,12 @@ end;
 
 procedure TfpgAbstractComboBox.MsgPopupClose(var msg: TfpgMessageRec);
 begin
+  { TODO : Fixed Combobox dropdown flicker effect. }
+  { This gets called on MouseUp after you clicked on the combobox to open it.
+    The GFX backend is programmed to close popups, so this DoDropDown call
+    reopens it again.
+    This is what causes the flicker effect when the dropdown window is
+    displayed - it actually gets created, destroyed and then created again.}
   DoDropDown;
 end;
 
@@ -516,7 +434,6 @@ procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftS
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
-//  DoDropDown;
   PaintInternalButton;
 end;
 
