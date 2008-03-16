@@ -223,8 +223,9 @@ begin
     Result.Height:= TfpgComboBox(Result).FFont.Height + 6
   else
     Result.Height:= h;
-    
-  Result.Items.AddStrings(AList);
+
+  if Assigned(AList) then
+    Result.Items.Assign(AList);
 end;
 
 { TfpgAbstractComboBox }
@@ -296,7 +297,7 @@ end;
 
 procedure TfpgAbstractComboBox.DoOnChange;
 begin
-  if Assigned(FOnChange) then
+  if Assigned(OnChange) then
     FOnChange(self);
 end;
 
@@ -394,8 +395,7 @@ begin
     inherited;
 
   if hasChanged then
-    if Assigned(FOnChange) then
-      FOnChange(self);
+    DoOnChange;
 end;
 
 procedure TfpgAbstractComboBox.CalculateInternalButtonRect;
@@ -405,7 +405,7 @@ end;
 
 procedure TfpgAbstractComboBox.MsgPopupClose(var msg: TfpgMessageRec);
 begin
-  { TODO : Fixed Combobox dropdown flicker effect. }
+  { TODO : Fix Combobox dropdown flicker effect. }
   { This gets called on MouseUp after you clicked on the combobox to open it.
     The GFX backend is programmed to close popups, so this DoDropDown call
     reopens it again.

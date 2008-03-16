@@ -127,6 +127,7 @@ type
     procedure   Update;
     property    Font: TfpgFont read FFont;
     property    NewText: boolean read FNewItem;
+    property    OnKeyPress;
   end;
 
 
@@ -148,13 +149,15 @@ type
   end;
 
 
-function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList:TStringList): TfpgEditCombo;
+function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList:TStringList;
+      h: TfpgCoord = 0): TfpgEditCombo;
 
 
 implementation
 
 uses
   gui_listbox,
+  gui_form,
   gfx_UTF8utils,
   math;
 
@@ -244,17 +247,21 @@ begin
   ListBox.PopupFrame := True;
 end;
 
-function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord;
-    AList: TStringList): TfpgEditCombo;
+function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
+      h: TfpgCoord = 0): TfpgEditCombo;
 begin
   Result           := TfpgEditCombo.Create(AOwner);
   Result.Left      := x;
   Result.Top       := y;
   Result.Width     := w;
   Result.Focusable := True;
+  if h < TfpgEditCombo(Result).FFont.Height + 6 then
+    Result.Height:= TfpgEditCombo(Result).FFont.Height + 6
+  else
+    Result.Height:= h;
 
-  Result.Height := 23;  // replace this with font height + margins
-  {$Note We still need to handle the AList param as well.}
+  if Assigned(AList) then
+    Result.Items.Assign(AList);
 end;
 
 { TfpgAbstractEditCombo }
@@ -294,7 +301,7 @@ begin
         begin
           if Assigned(FDropDown) then
             FDropDown.Close;
-          inc(FSelectedItem);      // with FSelectedItem set to -2 for delet key and -4 for return key
+          inc(FSelectedItem);      // with FSelectedItem set to -2 for delete key and -4 for return key
         end
         else
         begin
@@ -344,7 +351,8 @@ end;
 procedure TfpgAbstractEditCombo.DoDropDown;
 var
   ddw: TDropDownWindow;
-  rowcount, i: integer;
+  rowcount, i, t: integer;
+  theparent: TfpgWidget;
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
@@ -373,12 +381,35 @@ begin
     if rowcount < 1 then
       rowcount := 1;
     ddw.Height := (ddw.ListBox.RowHeight * rowcount) + 4;
-    
+    ddw.ListBox.Height := ddw.Height;   // needed in follow focus, otherwise, the default value (80) is used
+
     // set default focusitem
     ddw.ListBox.FocusItem := FFocusItem;
 
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
-    ddw.ShowAt(Parent, Left, Top+Height);
+    theparent := Self;
+    t:= 0;
+    repeat
+      t := t + theparent.Top;
+      theparent:= theparent.Parent;
+    until theparent is TfpgForm;
+    if (t + Height + ddw.Height) > theparent.Height then
+      if t > ddw.Height then
+        ddw.ShowAt(Parent, Left, Top - ddw.Height)         // drop the list above the combo
+      else
+      begin
+        while (t + Height + ddw.Height) > theparent.Height do
+        begin
+          FDropDownCount:= FDropDownCount - 1;
+          if rowcount > FDropDownCount then
+            rowcount:= FDropDownCount;
+          ddw.Height := (ddw.ListBox.RowHeight * rowcount) + 4;
+          ddw.ListBox.Height := ddw.Height;
+        end;
+        ddw.ShowAt(Parent, Left, t + Height);           // drop a reduced list below the combo
+      end
+    else
+      ddw.ShowAt(Parent, Left, Top + Height);           // drop the list below the combo
 //    ddw.ListBox.SetFocus;
   end
   else
@@ -438,6 +469,8 @@ procedure TfpgAbstractEditCombo.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
+  if Height < FFont.Height + 6 then
+    Height := FFont.Height + 6;
   RePaint;
 end;
 
@@ -454,7 +487,7 @@ begin
       if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(AVAlue)), AValue) then
       begin
         SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
-        Break;
+        Exit;
       end;
     end;
     // if we get here, we didn't find a match
@@ -494,12 +527,12 @@ var
   prevval: string;
 begin
   prevval   := FText;
-  s         := UTF8Encode(AText);
+  s         := AText;
   consumed  := False;
 
   // Handle only printable characters
   // Note: This is not UTF-8 compliant!
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 256) and (Ord(AText[1]) <> 127) or (Length(AText) > 1) then
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
   begin
     if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
     begin
@@ -574,13 +607,14 @@ begin
   end;
 
   if consumed then
-    RePaint
-  else
-    inherited;
+    RePaint;
+//  else
+//    inherited;
 
   if hasChanged then
     if Assigned(FOnChange) then
       FOnChange(self);
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgAbstractEditCombo.HandleLMouseDown(x, y: integer;
@@ -787,6 +821,7 @@ begin
   FFocusable        := True;
   FBtnPressed       := False;
   FAutocompletion   := False;
+  AutoDropDown      := False;
 
   FText             := '';
   FCursorPos        := UTF8Length(FText);
