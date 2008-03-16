@@ -303,30 +303,33 @@ var
 begin
   prevval   := Text;
   s         := AText;
-  consumed  := False;
-  // Handle only printable characters
-  // Note: This is now UTF-8 compliant!
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
+
+  if not consumed then
   begin
-    if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
+    // Handle only printable characters
+    // Note: This is now UTF-8 compliant!
+    if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
     begin
-      DeleteSelection;
-      UTF8Insert(s, FText, FCursorPos + 1);
-      Inc(FCursorPos);
-      FSelStart := FCursorPos;
-      AdjustCursor;
+      if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
+      begin
+        DeleteSelection;
+        UTF8Insert(s, FText, FCursorPos + 1);
+        Inc(FCursorPos);
+        FSelStart := FCursorPos;
+        AdjustCursor;
+      end;
+      consumed := True;
     end;
-    consumed := True;
+
+    if prevval <> Text then
+      if Assigned(FOnChange) then
+        FOnChange(self);
   end;
-
-  if prevval <> Text then
-    if Assigned(FOnChange) then
-      FOnChange(self);
-
+  
   if consumed then
-    RePaint
-  else
-    inherited HandleKeyChar(AText, shiftstate, consumed);
+    RePaint;
+
+  inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
 procedure TfpgCustomEdit.HandleKeyPress(var keycode: word;
@@ -341,7 +344,6 @@ var
   end;
 
 begin
-  Consumed := False;
   hasChanged := False;
 
   Consumed := True;
