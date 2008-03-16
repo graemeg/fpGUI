@@ -1085,11 +1085,14 @@ procedure TfpgFileDialog.btnOKClick(Sender: TObject);
 var
   e: TFileEntry;
 begin
-  e := grid.CurrentEntry;
-  if e.EntryType = etDir then
+  if FOpenMode then
   begin
-    SetCurrentDirectory(e.Name);
-    Exit; //==>
+    e := grid.CurrentEntry;
+    if e.EntryType = etDir then
+    begin
+      SetCurrentDirectory(e.Name);
+      Exit; //==>
+    end;
   end;
 
   if not FOpenMode or fpgFileExists(edFileName.Text) then
@@ -1288,8 +1291,10 @@ begin
   sdir := ExtractFileDir(FileName);
   if sdir = '' then
     sdir := '.';
+
   SetCurrentDirectory(sdir);
   fname := ExtractFileName(FileName);
+
   if not SelectFile(fname) then
     edFilename.Text := fname;
     

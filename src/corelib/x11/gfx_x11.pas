@@ -935,17 +935,20 @@ begin
 }
 
           { This closes popup windows when you click the mouse elsewhere }
-          if (Popup <> nil) then
+          if ev._type = X.ButtonPress then
           begin
-            ew := w;
-            while (w <> nil) and (w.Parent <> nil) do
-              w := TfpgWindowImpl(w.Parent);
-
-            if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and
-               (not PopupDontCloseWidget(TfpgWidget(ew))) then
+            if (Popup <> nil) then
             begin
-              ClosePopups;
-              fpgPostMessage(nil, ew, FPGM_POPUPCLOSE);
+              ew := w;
+              while (w <> nil) and (w.Parent <> nil) do
+                w := TfpgWindowImpl(w.Parent);
+
+              if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and
+                 (not PopupDontCloseWidget(TfpgWidget(ew))) then
+              begin
+                ClosePopups;
+//                fpgPostMessage(nil, ew, FPGM_POPUPCLOSE);
+              end;
             end;
           end;
 

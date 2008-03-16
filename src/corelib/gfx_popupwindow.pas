@@ -64,7 +64,7 @@ implementation
 
 
 type
-  // Popup window linked list. Maybe we can implemnt it via a TList as well.
+  // Popup window linked list. Maybe we can implement it via a TList as well.
   PPopupListRec = ^PopupListRec;
   PopupListRec = record
     Widget: TfpgPopupWindow;
@@ -83,6 +83,9 @@ procedure ClosePopups;
 begin
   while uFirstPopup <> nil do
   begin
+    {$IFDEF DEBUG}
+    writeln('...closing ', uFirstPopup^.Widget.Name);
+    {$ENDIF}
     TfpgPopupWindow(uFirstPopup^.Widget).Close;
   end;
 end;
