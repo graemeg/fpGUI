@@ -58,29 +58,46 @@ uses
 
 type
 
-  { TfpgAbstractComboBox }
-
-  TfpgAbstractComboBox = class(TfpgWidget)
+  TfpgBaseComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
-    FFocusItem: integer;
     FFont: TfpgFont;
-    FInternalBtnRect: TfpgRect;
-    FItems: TStringList;
     FOnChange: TNotifyEvent;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
-    procedure   InternalBtnClick(Sender: TObject);
-    procedure   DoOnChange;
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
+  protected
+    FFocusItem: integer;
+    FItems: TStringList;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   DoOnChange;
+    procedure   DoDropDown; virtual; abstract;
+    function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
+    property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
+    property    FocusItem: integer read FFocusItem write SetFocusItem;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Items: TStringList read FItems;    {$Note Make this read/write }
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    property    Font: TfpgFont read FFont;
+  end;
+  
+
+  TfpgAbstractComboBox = class(TfpgBaseComboBox)
+  private
+    FInternalBtnRect: TfpgRect;
+    procedure   InternalBtnClick(Sender: TObject);
+    procedure   SetFocusItem(const AValue: integer);
     procedure   CalculateInternalButtonRect;
     procedure   MsgPopupClose(var msg: TfpgMessageRec); message FPGM_POPUPCLOSE;
   protected
     FMargin: integer;
     FBtnPressed: Boolean;
     FDropDown: TfpgPopupWindow;
-    procedure   DoDropDown; virtual;
+    procedure   DoDropDown; override;
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
@@ -92,18 +109,11 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     procedure   PaintInternalButton; virtual;
-    property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
-    property    Items: TStringList read FItems;    {$Note Make this read/write }
-    // property is 1-based
-    property    FocusItem: integer read FFocusItem write SetFocusItem;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    Text: string read GetText write SetText;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Update;
-    property    Font: TfpgFont read FFont;
   end;
 
 
@@ -153,6 +163,130 @@ type
   end;
 
 
+{ TfpgBaseComboBox }
+
+procedure TfpgBaseComboBox.SetDropDownCount(const AValue: integer);
+begin
+  if FDropDownCount = AValue then
+    Exit;
+  FDropDownCount := AValue;
+end;
+
+function TfpgBaseComboBox.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+{ Focusitem is 1 based and NOT 0 based like the Delphi ItemIndex property.
+  So at startup, FocusItem = 0 which means nothing is selected. If FocusItem = 1
+  it means the first item is selected etc. }
+procedure TfpgBaseComboBox.SetFocusItem(const AValue: integer);
+begin
+  if FFocusItem = AValue then
+    Exit; //==>
+  FFocusItem := AValue;
+
+  // do some limit check corrections
+  if FFocusItem < 0 then
+    FFocusItem := 0   // nothing is selected
+  else if FFocusItem > FItems.Count then
+    FFocusItem := FItems.Count;
+
+  RePaint;
+  DoOnChange;
+end;
+
+procedure TfpgBaseComboBox.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  if Height < FFont.Height + 6 then
+    Height:= FFont.Height + 6;
+  RePaint;
+end;
+
+procedure TfpgBaseComboBox.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  if not consumed then
+  begin
+    case keycode of
+      keyDown:
+        begin
+          if (shiftstate = [ssAlt]) then
+            DoDropDown
+          else
+          begin
+            FocusItem := FocusItem + 1;
+            consumed := True;
+          end;
+        end;
+
+      keyUp:
+        begin
+          FocusItem := FocusItem - 1;
+          consumed := True;
+        end;
+    end;  { case }
+  end;  { if }
+end;
+
+procedure TfpgBaseComboBox.DoOnChange;
+begin
+  if Assigned(OnChange) then
+    FOnChange(self);
+end;
+
+function TfpgBaseComboBox.GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect;
+var
+  pt: TPoint;
+begin
+  // translate ComboBox coordinates
+  pt := WindowToScreen(AParent, Point(AComboBox.Left, AComboBox.Bottom));
+
+  // dropdown will not fit below combobox so we place it above
+  if (pt.y + ADropDown.Height) > fpgApplication.ScreenHeight then
+    Result.Top := AComboBox.Top - ADropDown.Height
+  else
+    Result.Top := AComboBox.Bottom;
+
+  // dropdown height doesn't fit in screen height so shrink it
+  if (ADropDown.Height > fpgApplication.ScreenHeight) then
+  begin
+    // 50 is just some spacing for taskbars (top or bottom aligned)
+    Result.Top    := AComboBox.Top - pt.y + 50;
+    Result.Height := fpgApplication.ScreenHeight - 50;
+  end
+  else
+    Result.Height := ADropDown.Height;
+
+  Result.Left   := AComboBox.Left;
+  Result.Width  := ADropDown.Width;
+
+//  writeln('H:', fpgApplication.ScreenHeight, '  W:', fpgApplication.ScreenWidth);
+//  writeln('Point x:', pt.x, '  y:', pt.y);
+//  PrintRect(Result);
+end;
+
+constructor TfpgBaseComboBox.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FDropDownCount := 8;
+  FFocusItem := 0; // nothing is selected
+  FItems  := TStringList.Create;
+  FFont   := fpgGetFont('#List');
+  FOnChange := nil;
+end;
+
+destructor TfpgBaseComboBox.Destroy;
+begin
+  FFont.Free;
+  FItems.Free;
+  inherited Destroy;
+end;
+
+
 { TComboboxDropdownWindow }
 
 procedure TComboboxDropdownWindow.SetFirstItem;
@@ -197,6 +331,7 @@ end;
 constructor TComboboxDropdownWindow.Create(AOwner: TComponent; ACallerWidget: TfpgAbstractComboBox);
 begin
   inherited Create(nil);
+  Name := '_ComboboxDropdownWindow';
   if not Assigned(ACallerWidget) then
     raise Exception.Create('ACallerWidget may not be <nil>');
   FCallerWidget := ACallerWidget;
@@ -230,22 +365,10 @@ end;
 
 { TfpgAbstractComboBox }
 
-procedure TfpgAbstractComboBox.SetDropDownCount(const AValue: integer);
-begin
-  if FDropDownCount = AValue then
-    Exit;
-  FDropDownCount := AValue;
-end;
-
-function TfpgAbstractComboBox.GetFontDesc: string;
-begin
-  Result := FFont.FontDesc;
-end;
-
 function TfpgAbstractComboBox.GetText: string;
 begin
   if (FocusItem > 0) and (FocusItem <= FItems.Count) then
-    Result := FItems.Strings[FocusItem-1]
+    Result := Items.Strings[FocusItem-1]
   else
     Result := '';
 end;
@@ -259,7 +382,9 @@ procedure TfpgAbstractComboBox.DoDropDown;
 var
   ddw: TComboboxDropdownWindow;
   rowcount: integer;
+  r: TfpgRect;
 begin
+  writeln('DoDropDown');
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
     FreeAndNil(FDropDown);
@@ -278,7 +403,9 @@ begin
     ddw.Width   := Width;
     ddw.Height  := (ddw.ListBox.RowHeight * rowcount) + 4;
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
-    ddw.ShowAt(Parent, Left, Top + Height);      // drop the box below the combo
+    r := GetDropDownPos(Parent, self, ddw);
+    ddw.Height := r.Height;
+    ddw.ShowAt(Parent, r.Left, r.Top);
   end
   else
   begin
@@ -295,41 +422,9 @@ begin
   DoDropDown;
 end;
 
-procedure TfpgAbstractComboBox.DoOnChange;
-begin
-  if Assigned(OnChange) then
-    FOnChange(self);
-end;
-
-{ Focusitem is 1 based and NOT 0 based like the Delphi ItemIndex property.
-  So at startup, FocusItem = 0 which means nothing is selected. If FocusItem = 1
-  it means the first item is selected etc. }
 procedure TfpgAbstractComboBox.SetFocusItem(const AValue: integer);
 begin
-  if FFocusItem = AValue then
-    Exit; //==>
-  FFocusItem := AValue;
-  
-  // do some limit check corrections
-  if FFocusItem < 0 then
-    FFocusItem := 0   // nothing is selected
-  else if FFocusItem > FItems.Count then
-    FFocusItem := FItems.Count;
 
-  RePaint;
-  DoOnChange;
-end;
-
-procedure TfpgAbstractComboBox.SetFontDesc(const AValue: string);
-begin
-  FFont.Free;
-  FFont := fpgGetFont(AValue);
-  if Height < FFont.Height + 6 then
-  begin
-    Height:= FFont.Height + 6;
-//    UpdateWindowPosition;
-  end;
-  RePaint;
 end;
 
 procedure TfpgAbstractComboBox.SetText(const AValue: string);
@@ -342,7 +437,7 @@ begin
   begin
     for i := 0 to FItems.Count - 1 do
     begin
-      if SameText(FItems.Strings[i], AValue) then
+      if SameText(Items.Strings[i], AValue) then
       begin
         SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
         Exit;
@@ -361,41 +456,10 @@ begin
 end;
 
 procedure TfpgAbstractComboBox.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
-var
-  hasChanged: boolean;
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
-  hasChanged := False;
-  consumed := True;
-  case keycode of
-
-    keyDown:
-      begin
-        if (shiftstate = [ssAlt]) then
-          DoDropDown
-        else
-        begin
-          FocusItem   := FocusItem + 1;
-          hasChanged  := True;
-        end;
-      end;
-
-    keyUp:
-      begin
-        FocusItem   := FocusItem - 1;
-        hasChanged  := True;
-      end;
-    else
-      Consumed := False;
-  end;
-
   if consumed then
     RePaint
-  else
-    inherited;
-
-  if hasChanged then
-    DoOnChange;
 end;
 
 procedure TfpgAbstractComboBox.CalculateInternalButtonRect;
@@ -528,28 +592,20 @@ end;
 constructor TfpgAbstractComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFont   := fpgGetFont('#List');
   FBackgroundColor  := clBoxColor;
   FTextColor        := Parent.TextColor;
-  FDropDownCount    := 8;
   FWidth            := 120;
-  FHeight           := FFont.Height + 6;
-  FFocusItem        := 0; // nothing is selected
+  FHeight           := Font.Height + 6;
   FMargin           := 3;
   FFocusable        := True;
   FBtnPressed       := False;
 
-  FItems  := TStringList.Create;
   CalculateInternalButtonRect;
-
-  FOnChange := nil;
 end;
 
 destructor TfpgAbstractComboBox.Destroy;
 begin
   FDropDown.Free;
-  FItems.Free;
-  FFont.Free;
   inherited Destroy;
 end;
 
