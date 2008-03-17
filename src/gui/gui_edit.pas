@@ -129,6 +129,29 @@ type
   end;
   
 
+  TfpgNumericEdit = class(TfpgCustomEdit)
+  protected
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+  published
+    property    AutoSelect;
+    property    BackgroundColor default clBoxColor;
+    property    BorderStyle;
+    property    FontDesc;
+    property    HideSelection;
+//    property    MaxLength;  { probably MaxValue and MinValue }
+    property    TabOrder;
+//    property    Text;   { this should become Value }
+    property    TextColor;
+    property    OnChange;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
+  end;
+  
+
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 
 
@@ -855,6 +878,22 @@ procedure TfpgCustomEdit.PasteFromClipboard;
 begin
   DoPaste;
 end;
+
+procedure TfpgNumericEdit.HandleKeyChar(var AText: TfpgChar;
+  var shiftstate: TShiftState; var consumed: Boolean);
+var
+  n: integer;
+begin
+  n := Ord(AText[1]);
+  if ((n >= 48) and (n <= 57)) or ((n = Ord(DecimalSeparator)) or (n = Ord('-')))
+     and (Pos(AText[1], Self.Text) <= 0)  then
+    consumed := False
+  else
+    consumed := True;
+
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
+
 
 end.
 
