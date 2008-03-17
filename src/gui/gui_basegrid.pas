@@ -42,7 +42,7 @@ type
   TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: integer) of object;
   TfpgRowChangeNotify = procedure(Sender: TObject; ARow: integer) of object;
   TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: integer; var ACanSelect: boolean) of object;
-
+  TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: integer; const ARect: TfpgRect; AFlags: integer; var ADefaultDrawing: boolean) of object;
 
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
@@ -50,6 +50,7 @@ type
   private
     FColResizing: boolean;
     FDragPos: integer;      // used for column resizing
+    FOnDrawCell: TfpgDrawCellEvent;
     FResizedCol: integer;   // used for column resizing
     FDefaultColWidth: integer;
     FDefaultRowHeight: integer;
@@ -100,6 +101,7 @@ type
     function    GetColumnCount: integer; virtual;
     function    GetRowCount: integer; virtual;
     function    CanSelectCell(const ARow, ACol: integer): boolean;
+    function    DoDrawCellEvent(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer): boolean; virtual;
     procedure   DoCanSelectCell(const ARow, ACol: integer; var ACanSelect: boolean);
     procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
@@ -131,6 +133,7 @@ type
 //    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
     property    TopRow: integer read FFirstRow write SetFirstRow;
+    property    OnDrawCell: TfpgDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
     property    OnCanSelectCell: TfpgCanSelectCellEvent read FOnCanSelectCell write FOnCanSelectCell;
@@ -262,6 +265,14 @@ begin
   Result := (ARow > 0) and (ACol > 0) and (ARow <= RowCount) and (ACol <= ColumnCount);
   if Result then
     DoCanSelectCell(ARow, ACol, Result);
+end;
+
+function TfpgBaseGrid.DoDrawCellEvent(ARow, ACol: integer; ARect: TfpgRect;
+  AFlags: integer): boolean;
+begin
+  Result := True;
+  if Assigned(OnDrawCell) then
+    FOnDrawCell(self, ARow, ACol, ARect, AFlags, Result);
 end;
 
 procedure TfpgBaseGrid.DoCanSelectCell(const ARow, ACol: integer; var
@@ -571,7 +582,8 @@ begin
         end;
         Canvas.AddClipRect(r);
         Canvas.FillRectangle(r);
-        DrawCell(row, col, r, 0);
+        if DoDrawCellEvent(row, col, r, 0) then
+          DrawCell(row, col, r, 0);
 
         // drawing grid lines
         if FShowGrid then

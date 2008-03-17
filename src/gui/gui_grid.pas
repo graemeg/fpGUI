@@ -160,6 +160,7 @@ type
     property    TabOrder;
     property    TopRow;
     property    OnCanSelectCell;
+    property    OnDrawCell;
     property    OnDoubleClick;
     property    OnFocusChange;
     property    OnKeyPress;
