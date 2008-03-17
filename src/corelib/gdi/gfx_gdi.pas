@@ -610,7 +610,7 @@ begin
     WM_RBUTTONUP:
         begin
           {$IFDEF DEBUG}
-          if not uMsg = WM_MOUSEMOVE then
+          if uMsg <> WM_MOUSEMOVE then
             writeln('fpGFX/GDI: Found a mouse button event');
           {$ENDIF}
 //          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
@@ -619,31 +619,28 @@ begin
           msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
 
           { This closes popup windows when you click the mouse elsewhere }
-          if (PopupListFirst <> nil) then
+          if uMsg = WM_LBUTTONDOWN then
           begin
-            pt.x  := msgp.mouse.x;
-            pt.y  := msgp.mouse.y;
-            ClientToScreen(w.WinHandle, pt);
-            h     := WindowFromPoint(pt);
-            mw    := GetMyWidgetFromHandle(h);
-            pw    := mw;
-            while (pw <> nil) and (pw.Parent <> nil) do
-              pw := TfpgWindowImpl(pw.Parent);
-
-            if ((pw = nil) or (PopupListFind(pw.WinHandle) = nil)) and
-               (not PopupDontCloseWidget(TfpgWidget(mw))) and
-               ((uMsg = WM_LBUTTONDOWN) or (uMsg = WM_LBUTTONUP)) then
+            if (PopupListFirst <> nil) then
             begin
-              ClosePopups;
-              fpgSendMessage(nil, mw, FPGM_POPUPCLOSE);
-            end;
-//            if mw <> nil then
-//            begin            // ????
-//              ScreenToClient(mw.WinHandle, pt);
-//              msgp.mouse.x := pt.x;
-//              msgp.mouse.y := pt.y;
-//            end;
-          end;  { if }
+              pt.x  := msgp.mouse.x;
+              pt.y  := msgp.mouse.y;
+              ClientToScreen(w.WinHandle, pt);
+              h     := WindowFromPoint(pt);
+              mw    := GetMyWidgetFromHandle(h);
+              pw    := mw;
+              while (pw <> nil) and (pw.Parent <> nil) do
+                pw := TfpgWindowImpl(pw.Parent);
+
+              if ((pw = nil) or (PopupListFind(pw.WinHandle) = nil)) and
+                 (not PopupDontCloseWidget(TfpgWidget(mw))) and
+                 (uMsg = WM_LBUTTONDOWN) then
+              begin
+                ClosePopups;
+//                fpgSendMessage(nil, mw, FPGM_POPUPCLOSE);
+              end;
+            end;  { if }
+          end;
 
           if (wapplication.TopModalForm <> nil) then
           begin
