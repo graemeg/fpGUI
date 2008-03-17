@@ -96,9 +96,9 @@ rsSaveAFile              = 'Guardar como';
 
 
 // User Dialog
-rsUserName               = 'User name';
-rsPassword               = 'Password';
-rsDatabase               = 'Database';
+rsUserName               = 'Nombre de usuario';
+rsPassword               = 'Contraseña';
+rsDatabase               = 'Base de datos';
 
 
 // Error messages
