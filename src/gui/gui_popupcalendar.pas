@@ -35,7 +35,6 @@ unit gui_popupcalendar;
 { todo: Support custom colors. }
 { todo: Must be able to switch the first day of the week. }
 { todo: Create a TfpgDateTimeEdit component with options for Date, Time or Date & Time. }
-{ todo: Create a 'Jump to Today'  property for TfpgCalendarCombo. }
 { todo: Changing months and checking min/max limits takes into account the
         original date, not the selected day in the grid. It should use the
         selected day in grid. }
@@ -55,6 +54,8 @@ type
   TfpgOnDateSetEvent = procedure(Sender: TObject; const ADate: TDateTime) of object;
   
 
+  { TfpgPopupCalendar }
+
   TfpgPopupCalendar = class(TfpgPopupWindow)
   private
     FMonthOffset: integer;
@@ -63,6 +64,7 @@ type
     FMinDate: TDateTime;
     FCallerWidget: TfpgWidget;
     FOnValueSet: TfpgOnDateSetEvent;
+    FCloseOnSelect: boolean;
     {@VFD_HEAD_BEGIN: fpgPopupCalendar}
     edtYear: TfpgEdit;
     btnYearUp: TfpgButton;
@@ -70,6 +72,7 @@ type
     edtMonth: TfpgEdit;
     btnMonthUp: TfpgButton;
     btnMonthDown: TfpgButton;
+    btnToday: TfpgButton;
     grdName1: TfpgStringGrid;
     {@VFD_HEAD_END: fpgPopupCalendar}
     function    GetDateElement(Index: integer): Word;
@@ -80,11 +83,13 @@ type
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
     procedure   SetMinDate(const AValue: TDateTime);
+    procedure   SetCloseOnSelect(const AValue: boolean);
     procedure   UpdateCalendar;
     procedure   btnYearUpClicked(Sender: TObject);
     procedure   btnYearDownClicked(Sender: TObject);
     procedure   btnMonthUpClicked(Sender: TObject);
     procedure   btnMonthDownClicked(Sender: TObject);
+    procedure   btnTodayClicked(Sender: TObject);
     procedure   grdName1DoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   grdName1KeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   TearDown;
@@ -98,6 +103,7 @@ type
   public
     constructor Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget); reintroduce;
     procedure   AfterCreate;
+    property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
     property    Day: Word index 1 read GetDateElement write SetDateElement;
     property    Month: Word index 2 read GetDateElement write SetDateElement;
     property    Year: Word index 3 read GetDateElement write SetDateElement;
@@ -109,12 +115,15 @@ type
   end;
   
   
+  { TfpgCalendarCombo }
+
   TfpgCalendarCombo = class(TfpgAbstractComboBox)
   private
     FDate: TDateTime;
     FDateFormat: string;
     FMaxDate: TDateTime;
     FMinDate: TDateTime;
+    FCloseOnSelect: boolean;
     procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime);
     procedure   SetDateFormat(const AValue: string);
     procedure   SetDateValue(const AValue: TDateTime);
@@ -122,6 +131,7 @@ type
     procedure   SetMinDate(const AValue: TDateTime);
     procedure   SetText(const AValue: string); override;
     function    GetText: string; override;
+    procedure   SetCloseOnSelect(const AValue: boolean);
   protected
     function    HasText: boolean; override;
     procedure   DoDropDown; override;
@@ -134,6 +144,9 @@ type
     property    FontDesc;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
+    { Clicking on calendar Today button will close the popup calendar by default }
+    property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
+    property    TabOrder;
     property    OnChange;
   end;
 
@@ -143,7 +156,8 @@ implementation
 
 uses
   gui_scrollbar
-  ,gfx_constants;
+  ,gfx_constants
+  ;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -203,7 +217,8 @@ begin
     {$IFDEF DEBUG}
     writeln('Selected date: ', FormatDateTime('yyyy-mm-dd', DateValue));
     {$ENDIF}
-    Close;
+    if CloseOnSelect then
+      Close;
   end;
 end;
 
@@ -316,6 +331,13 @@ begin
   end;
 end;
 
+procedure TfpgPopupCalendar.SetCloseOnSelect(const AValue: boolean);
+begin
+  if FCloseOnSelect = AValue then
+    exit;
+  FCloseOnSelect := AValue;
+end;
+
 procedure TfpgPopupCalendar.UpdateCalendar;
 var
   lD, lM, lY: Word;
@@ -367,6 +389,15 @@ begin
   d := IncMonth(FDate, -1);
   if d >= FMinDate then
     DateValue := d;
+end;
+
+procedure TfpgPopupCalendar.btnTodayClicked(Sender: TObject);
+begin
+  if Now >= FMinDate then
+  begin
+    DateValue := Now;
+    TearDown;
+  end;
 end;
 
 procedure TfpgPopupCalendar.HandlePaint;
@@ -471,14 +502,14 @@ begin
     FocusRootWidget.SetFocus;
 end;
 
-constructor TfpgPopupCalendar.Create(AOwner: TComponent;
-  AOrigFocusWin: TfpgWidget);
+constructor TfpgPopupCalendar.Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget);
 begin
   inherited Create(AOwner);
   FOrigFocusWin := AOrigFocusWin;
   AfterCreate;
   FDate := Date;
   FMonthOffset := 0;
+  FCloseOnSelect := True;
   UpdateCalendar;
 end;
 
@@ -486,18 +517,16 @@ procedure TfpgPopupCalendar.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: fpgPopupCalendar}
   Name := 'fpgPopupCalendar';
-  Width := 233;
-  Height := 142;
-//  SetPosition(285, 249, 233, 142);
+  SetPosition(285, 249, 233, 142);
 //  WindowTitle := 'fpgPopupCalendar';
-//  WindowPosition := wpUser;
 //  Sizeable := False;
+//  WindowPosition := wpUser;
 
   edtYear := TfpgEdit.Create(self);
   with edtYear do
   begin
     Name := 'edtYear';
-    SetPosition(0, 0, 72, 22);
+    SetPosition(0, 0, 52, 22);
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
@@ -508,7 +537,7 @@ begin
   with btnYearUp do
   begin
     Name := 'btnYearUp';
-    SetPosition(72, 0, 13, 11);
+    SetPosition(52, 0, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -522,7 +551,7 @@ begin
   with btnYearDown do
   begin
     Name := 'btnYearDown';
-    SetPosition(72, 11, 13, 11);
+    SetPosition(52, 11, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -536,7 +565,7 @@ begin
   with edtMonth do
   begin
     Name := 'edtMonth';
-    SetPosition(85, 0, 135, 22);
+    SetPosition(65, 0, 115, 22);
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
@@ -547,7 +576,7 @@ begin
   with btnMonthUp do
   begin
     Name := 'btnMonthUp';
-    SetPosition(220, 0, 13, 11);
+    SetPosition(180, 0, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -561,7 +590,7 @@ begin
   with btnMonthDown do
   begin
     Name := 'btnMonthDown';
-    SetPosition(220, 11, 13, 11);
+    SetPosition(180, 11, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -570,29 +599,50 @@ begin
     Focusable := False;
     OnClick := @btnMonthDownClicked;
   end;
+  
+  btnToday := TfpgButton.Create(self);
+  with btnToday do
+  begin
+    Name := 'btnToday';
+    SetPosition(194, 0, 40, 22);
+    Text := 'Today';
+    FontDesc := '#Label1';
+    Focusable := True;
+    OnClick := @btnTodayClicked;
+  end;
 
   grdName1 := TfpgStringGrid.Create(self);
   with grdName1 do
   begin
     Name := 'grdName1';
     SetPosition(0, 23, 233, 119);
-    AddColumn(rsShortMon, 33, taCenter);
-    AddColumn(rsShortTue, 32, taCenter);
-    AddColumn(rsShortWed, 33, taCenter);
-    AddColumn(rsShortThu, 32, taCenter);
-    AddColumn(rsShortFri, 33, taCenter);
-    AddColumn(rsShortSat, 32, taCenter);
-    AddColumn(rsShortSun, 33, taCenter);
+    AddColumn('Sun', 33, taCenter);
+    AddColumn('Mon', 32, taCenter);
+    AddColumn('Tue', 33, taCenter);
+    AddColumn('Wed', 32, taCenter);
+    AddColumn('Thu', 33, taCenter);
+    AddColumn('Fri', 32, taCenter);
+    AddColumn('Sat', 33, taCenter);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     RowCount := 6;
     ScrollBarStyle := ssNone;
-//    ColResizing := False;
     OnDoubleClick := @grdName1DoubleClick;
     OnKeyPress := @grdName1KeyPress;
   end;
 
   {@VFD_BODY_END: fpgPopupCalendar}
+  
+  // Setup localization
+  // UI Designer doesn't support resource strings yet!
+  grdName1.ColumnTitle[1] := rsShortSun;
+  grdName1.ColumnTitle[2] := rsShortMon;
+  grdName1.ColumnTitle[3] := rsShortTue;
+  grdName1.ColumnTitle[4] := rsShortWed;
+  grdName1.ColumnTitle[5] := rsShortThu;
+  grdName1.ColumnTitle[6] := rsShortFri;
+  grdName1.ColumnTitle[7] := rsShortSat;
+  btnToday.Text := rsToday;
 end;
 
 
@@ -657,6 +707,13 @@ begin
   Result := FormatDateTime(FDateFormat, FDate);
 end;
 
+procedure TfpgCalendarCombo.SetCloseOnSelect(const AValue: boolean);
+begin
+  if FCloseOnSelect = AValue then
+    Exit; //==>
+  FCloseOnSelect := AValue;
+end;
+
 function TfpgCalendarCombo.HasText: boolean;
 begin
   Result := FDate >= FMinDate;
@@ -668,6 +725,7 @@ begin
   FMinDate := EncodeDate(1900, 01, 01);
   FMaxDate := EncodeDate(2100, 01, 31);
   FDate := Now;
+  FCloseOnSelect := True;
   DateFormat := ShortDateFormat;
 end;
 
@@ -710,11 +768,16 @@ begin
   begin
     FDropDown := TfpgPopupCalendar.Create(nil, FocusRootWidget);
     ddw := TfpgPopupCalendar(FDropDown);
+  { Set to false CloseOnSelect to leave opened popup calendar menu}
+    ddw.CloseOnSelect := CloseOnSelect;
     ddw.CallerWidget  := self;
     ddw.MinDate       := FMinDate;
     ddw.MaxDate       := FMaxDate;
     ddw.DateValue     := FDate;
     ddw.ShowAt(Parent, Left, Top+Height);
+{ I added this call to UpdateCalendar because sometimes after btnTodayClicked event,
+  reopeing the dropdown menu gave an empty calendar}
+    ddw.UpdateCalendar; //slapshot
     ddw.PopupFrame    := True;
     ddw.OnValueSet    := @InternalOnValueSet;
   end

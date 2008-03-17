@@ -11,7 +11,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, gfxbase, fpgfx, gui_form, gui_popupcalendar, gui_edit,
-  gui_button, gui_label, gfx_popupwindow, gui_combobox;
+  gui_button, gui_label, gfx_popupwindow, gui_combobox, gui_checkbox;
 
 type
   TMainForm = class(TfpgForm)
@@ -22,6 +22,7 @@ type
     procedure   btnMinDateClicked(Sender: TObject);
     procedure   btnMaxDateClicked(Sender: TObject);
     procedure   DoDropDown;
+    procedure   cbCloseOnSelectChanged(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     edtName1: TfpgEdit;
@@ -41,6 +42,7 @@ type
     edtMaxDate: TfpgEdit;
     btnMinDate: TfpgButton;
     btnMaxDate: TfpgButton;
+    cbCloseOnSelect: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     FDropDown: TfpgPopupCalendar;
     procedure   AfterCreate; override;
@@ -49,6 +51,11 @@ type
 {@VFD_NEWFORM_DECL}
 
 { TMainForm }
+
+procedure TMainForm.cbCloseOnSelectChanged(Sender: TObject);
+begin
+  cal.CloseOnSelect := TfpgCheckBox(Sender).Checked;
+end;
 
 procedure TMainForm.btnDownClicked(Sender: TObject);
 begin
@@ -132,6 +139,7 @@ begin
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'sys.sb.down';
+    TabOrder := 1;
     OnClick := @btnDownClicked;
   end;
 
@@ -140,17 +148,17 @@ begin
   begin
     Name := 'lblName1';
     SetPosition(16, 32, 80, 16);
-    Text := 'Enter a date:';
     FontDesc := '#Label1';
+    Text := 'Enter a date:';
   end;
 
   lblName2 := TfpgLabel.Create(self);
   with lblName2 do
   begin
     Name := 'lblName2';
-    SetPosition(68, 100, 276, 16);
-    Text := '*****   This still needs some testing  *****';
+    SetPosition(16, 100, 276, 16);
     FontDesc := '#Label2';
+    Text := '*****   This still needs some testing  *****';
     TextColor := clRed;
   end;
 
@@ -159,13 +167,14 @@ begin
   begin
     Name := 'cbName1';
     SetPosition(132, 144, 120, 23);
+    FontDesc := '#List';
     Items.Add('line1');
     Items.Add('line2');
     Items.Add('line3');
     Items.Add('line4');
     Items.Add('line5');
     Items.Add('line6');
-    FontDesc := '#List';
+    TabOrder := 4;
   end;
 
   cal := TfpgCalendarCombo.Create(self);
@@ -174,6 +183,7 @@ begin
     Name := 'cal';
     SetPosition(132, 196, 120, 23);
     FontDesc := '#List';
+    TabOrder := 5;
     DateFormat := 'yyyy-mm-dd';
   end;
 
@@ -185,6 +195,7 @@ begin
     Text := 'Set Format';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 6;
     OnClick := @btnDateFormatClicked;
   end;
 
@@ -192,7 +203,8 @@ begin
   with edtDateFormat do
   begin
     Name := 'edtDateFormat';
-    SetPosition(288, 148, 92, 21);
+    SetPosition(288, 148, 92, 22);
+    TabOrder := 7;
     Text := 'yy-mm-d';
     FontDesc := '#Edit1';
   end;
@@ -202,8 +214,8 @@ begin
   begin
     Name := 'lblName3';
     SetPosition(160, 48, 287, 15);
-    Text := '<----  This one is fake. It only used the';
     FontDesc := '#Label1';
+    Text := '<----  This one is fake. It only used the';
     TextColor := clBlue;
   end;
 
@@ -212,8 +224,8 @@ begin
   begin
     Name := 'lblName4';
     SetPosition(12, 148, 96, 15);
-    Text := 'Normal Combo:';
     FontDesc := '#Label1';
+    Text := 'Normal Combo:';
   end;
 
   lblName5 := TfpgLabel.Create(self);
@@ -221,8 +233,8 @@ begin
   begin
     Name := 'lblName5';
     SetPosition(12, 200, 104, 15);
-    Text := 'Calendar Combo:';
     FontDesc := '#Label1';
+    Text := 'Calendar Combo:';
   end;
 
   btnToday := TfpgButton.Create(self);
@@ -233,6 +245,7 @@ begin
     Text := 'Today';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 11;
     OnClick := @btnTodayClicked;
   end;
 
@@ -241,15 +254,16 @@ begin
   begin
     Name := 'lblName6';
     SetPosition(192, 63, 246, 16);
-    Text := 'calendar window part.';
     FontDesc := '#Label1';
+    Text := 'calendar window part.';
   end;
 
   edtMinDate := TfpgEdit.Create(self);
   with edtMinDate do
   begin
     Name := 'edtMinDate';
-    SetPosition(288, 176, 92, 21);
+    SetPosition(288, 176, 92, 22);
+    TabOrder := 13;
     Text := '2005-01-01';
     FontDesc := '#Edit1';
   end;
@@ -258,7 +272,8 @@ begin
   with edtMaxDate do
   begin
     Name := 'edtMaxDate';
-    SetPosition(288, 204, 92, 21);
+    SetPosition(288, 204, 92, 22);
+    TabOrder := 14;
     Text := '2009-01-01';
     FontDesc := '#Edit1';
   end;
@@ -271,6 +286,7 @@ begin
     Text := 'Min Date';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 15;
     OnClick := @btnMinDateClicked;
   end;
 
@@ -282,7 +298,20 @@ begin
     Text := 'Max Date';
     FontDesc := '#Label1';
     ImageName := '';
+    TabOrder := 16;
     OnClick := @btnMaxDateClicked;
+  end;
+
+  cbCloseOnSelect := TfpgCheckBox.Create(self);
+  with cbCloseOnSelect do
+  begin
+    Name := 'cbCloseOnSelect';
+    SetPosition(328, 88, 120, 20);
+    Checked := True;
+    FontDesc := '#Label1';
+    TabOrder := 17;
+    Text := 'Close on select';
+    OnChange := @cbCloseOnSelectChanged;
   end;
 
   {@VFD_BODY_END: MainForm}

@@ -110,20 +110,45 @@ rsErrNotAssigned         = '<%s> not assigned';
 
 
 // Calendar Combo & Dialog
-rsShortMon               = 'Mon';
-rsShortTue               = 'Tue';
-rsShortWed               = 'Wed';
-rsShortThu               = 'Thu';
-rsShortFri               = 'Fri';
+rsShortMon               = 'Maa';
+rsShortTue               = 'Din';
+rsShortWed               = 'Woe';
+rsShortThu               = 'Don';
+rsShortFri               = 'Vry';
 rsShortSat               = 'Sat';
-rsShortSun               = 'Sun';
-rsLongMon                = 'Monday';
-rsLongTue                = 'Tuesday';
-rsLongWed                = 'Wednesday';
-rsLongThu                = 'Thursday';
-rsLongFri                = 'Friday';
-rsLongSat                = 'Saturday';
-rsLongSun                = 'Sunday';
+rsShortSun               = 'Son';
+rsLongMon                = 'Maandag';
+rsLongTue                = 'Dinsdag';
+rsLongWed                = 'Woensdag';
+rsLongThu                = 'Donderdag';
+rsLongFri                = 'Vrydag';
+rsLongSat                = 'Saterdag';
+rsLongSun                = 'Sondag';
+rsToday                  = 'Vandag';
+rsShortJan               = 'Jan';
+rsShortFeb               = 'Feb';
+rsShortMar               = 'Mar';
+rsShortApr               = 'Apr';
+rsShortMay               = 'Mei';
+rsShortJun               = 'Jun';
+rsShortJul               = 'Jul';
+rsShortAug               = 'Aug';
+rsShortSep               = 'Sep';
+rsShortOct               = 'Okt';
+rsShortNov               = 'Nov';
+rsShortDec               = 'Des';
+rsLongJan                = 'Januarie';
+rsLongFeb                = 'Februarie';
+rsLongMar                = 'Maart';
+rsLongApr                = 'April';
+rsLongMay                = 'Mei';
+rsLongJun                = 'Junie';
+rsLongJul                = 'Julie';
+rsLongAug                = 'Augustus';
+rsLongSep                = 'September';
+rsLongOct                = 'Oktober';
+rsLongNov                = 'November';
+rsLongDec                = 'Desember';
 
 
 

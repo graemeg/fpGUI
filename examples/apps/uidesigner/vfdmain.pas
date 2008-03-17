@@ -82,7 +82,8 @@ implementation
 
 uses
   vfdformparser,
-  gui_iniutils;
+  gui_iniutils,
+  gfx_utils;
 
 { TMainDesigner }
 
@@ -191,7 +192,7 @@ begin
 
   EditedFileName := fname;
 
-  if FileExists(fname) then
+  if fpgFileExists(fname) then
   begin
     FFile.LoadFile(fname);
     FFile.GetBlocks;

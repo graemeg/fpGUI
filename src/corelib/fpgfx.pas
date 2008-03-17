@@ -186,6 +186,8 @@ type
   { TfpgApplication }
 
   TfpgApplication = class(TfpgApplicationImpl)
+  private
+    procedure   SetupLocalizationStrings;
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -323,7 +325,8 @@ uses
   gfx_imgfmt_bmp,
   gfx_stdimages,
   gfx_extinterpolation, // only so that it get auto compiled
-  gfx_translations;
+  gfx_translations,
+  gfx_constants;
 
 var
   fpgTimers: TList;
@@ -828,6 +831,54 @@ begin
   RunMessageLoop;
 end;
 
+procedure TfpgApplication.SetupLocalizationStrings;
+begin
+  // setup internal FPC arrays with localized values
+  ShortDayNames[1] := rsShortSun;
+  ShortDayNames[2] := rsShortMon;
+  ShortDayNames[3] := rsShortTue;
+  ShortDayNames[4] := rsShortWed;
+  ShortDayNames[5] := rsShortThu;
+  ShortDayNames[6] := rsShortFri;
+  ShortDayNames[7] := rsShortSat;
+  
+  LongDayNames[1] := rsLongSun;
+  LongDayNames[2] := rsLongMon;
+  LongDayNames[3] := rsLongTue;
+  LongDayNames[4] := rsLongWed;
+  LongDayNames[5] := rsLongThu;
+  LongDayNames[6] := rsLongFri;
+  LongDayNames[7] := rsLongSat;
+
+  ShortMonthNames[1] := rsShortJan;
+  ShortMonthNames[2] := rsShortFeb;
+  ShortMonthNames[3] := rsShortMar;
+  ShortMonthNames[4] := rsShortApr;
+  ShortMonthNames[5] := rsShortMay;
+  ShortMonthNames[6] := rsShortJun;
+  ShortMonthNames[7] := rsShortJul;
+  ShortMonthNames[8] := rsShortAug;
+  ShortMonthNames[9] := rsShortSep;
+  ShortMonthNames[10] := rsShortOct;
+  ShortMonthNames[11] := rsShortNov;
+  ShortMonthNames[12] := rsShortDec;
+
+  LongMonthNames[1] := rsLongJan;
+  LongMonthNames[2] := rsLongFeb;
+  LongMonthNames[3] := rsLongMar;
+  LongMonthNames[4] := rsLongApr;
+  LongMonthNames[5] := rsLongMay;
+  LongMonthNames[6] := rsLongJun;
+  LongMonthNames[7] := rsLongJul;
+  LongMonthNames[8] := rsLongAug;
+  LongMonthNames[9] := rsLongSep;
+  LongMonthNames[10] := rsLongOct;
+  LongMonthNames[11] := rsLongNov;
+  LongMonthNames[12] := rsLongDec;
+  
+
+end;
+
 procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
 var
   n: integer;
@@ -852,6 +903,7 @@ begin
   
   // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
+  SetupLocalizationStrings;
 end;
 
 procedure TfpgApplication.Flush;

@@ -124,6 +124,31 @@ rsLongThu                = 'Четверг';
 rsLongFri                = 'Пятница';
 rsLongSat                = 'Суббота';
 rsLongSun                = 'Воскресенье';
+rsToday                  = 'Today';
+rsShortJan               = 'Jan';
+rsShortFeb               = 'Feb';
+rsShortMar               = 'Mar';
+rsShortApr               = 'Apr';
+rsShortMay               = 'May';
+rsShortJun               = 'Jun';
+rsShortJul               = 'Jul';
+rsShortAug               = 'Aug';
+rsShortSep               = 'Sep';
+rsShortOct               = 'Oct';
+rsShortNov               = 'Nov';
+rsShortDec               = 'Dec';
+rsLongJan                = 'January';
+rsLongFeb                = 'February';
+rsLongMar                = 'March';
+rsLongApr                = 'April';
+rsLongMay                = 'May';
+rsLongJun                = 'June';
+rsLongJul                = 'July';
+rsLongAug                = 'August';
+rsLongSep                = 'September';
+rsLongOct                = 'October';
+rsLongNov                = 'November';
+rsLongDec                = 'December';
 
 
 

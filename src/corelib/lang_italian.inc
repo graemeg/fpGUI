@@ -100,6 +100,7 @@ rsUserName               = 'Nome utente';
 rsPassword               = 'Password';
 rsDatabase               = 'Archivi';
 
+
 // Error messages
 rsErrListMustBeEmpty     = 'Elenco deve essere vuoto';
 rsErrCouldNotOpenDir     = 'Impossibile aprire la cartella <%s>';
@@ -123,6 +124,31 @@ rsLongThu                = 'Giovedì';
 rsLongFri                = 'Venerdì';
 rsLongSat                = 'Sabato';
 rsLongSun                = 'Domenica';
+rsToday                  = 'Oggi';
+rsShortJan               = 'Jan';
+rsShortFeb               = 'Feb';
+rsShortMar               = 'Mar';
+rsShortApr               = 'Apr';
+rsShortMay               = 'May';
+rsShortJun               = 'Jun';
+rsShortJul               = 'Jul';
+rsShortAug               = 'Aug';
+rsShortSep               = 'Sep';
+rsShortOct               = 'Oct';
+rsShortNov               = 'Nov';
+rsShortDec               = 'Dec';
+rsLongJan                = 'January';
+rsLongFeb                = 'February';
+rsLongMar                = 'March';
+rsLongApr                = 'April';
+rsLongMay                = 'May';
+rsLongJun                = 'June';
+rsLongJul                = 'July';
+rsLongAug                = 'August';
+rsLongSep                = 'September';
+rsLongOct                = 'October';
+rsLongNov                = 'November';
+rsLongDec                = 'December';
 
 
 
