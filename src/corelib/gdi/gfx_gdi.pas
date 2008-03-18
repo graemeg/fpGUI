@@ -1017,17 +1017,17 @@ end;
 
 function TfpgApplicationImpl.Screen_dpi_x: integer;
 begin
-  Result := 96;
+  Result := GetDeviceCaps(wapplication.display, LOGPIXELSX)
 end;
 
 function TfpgApplicationImpl.Screen_dpi_y: integer;
 begin
-  Result := 96;
+  Result := GetDeviceCaps(wapplication.display, LOGPIXELSY)
 end;
 
 function TfpgApplicationImpl.Screen_dpi: integer;
 begin
-  Result := 96;
+  Result := Screen_dpi_y;
 end;
 
 { TfpgWindowImpl }
