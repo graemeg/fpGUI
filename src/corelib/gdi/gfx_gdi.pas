@@ -135,8 +135,6 @@ type
   end;
 
 
-  { TfpgWindowImpl }
-
   TfpgWindowImpl = class(TfpgWindowBase)
   private
     FMouseInWindow: boolean;
@@ -194,6 +192,9 @@ type
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
+    function    Screen_dpi_x: integer; override;
+    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi: integer; override;
     property    Display: HDC read FDisplay;
   end;
 
@@ -207,11 +208,10 @@ type
   end;
 
 
-  { TfpgFileListImpl }
-
   TfpgFileListImpl = class(TfpgFileListBase)
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
+
 
 implementation
 
@@ -1013,6 +1013,21 @@ var
 begin
   GetWindowRect(GetDesktopWindow, r);
   Result := r.Bottom - r.Top;
+end;
+
+function TfpgApplicationImpl.Screen_dpi_x: integer;
+begin
+  Result := 96;
+end;
+
+function TfpgApplicationImpl.Screen_dpi_y: integer;
+begin
+  Result := 96;
+end;
+
+function TfpgApplicationImpl.Screen_dpi: integer;
+begin
+  Result := 96;
 end;
 
 { TfpgWindowImpl }
@@ -2013,6 +2028,8 @@ end;
 { TfpgFileListImpl }
 
 procedure TfpgFileListImpl.PopulateSpecialDirs(const aDirectory: TfpgString);
+const
+  MAX_DRIVES = 25;
 var
   n: integer;
   drvs: string;
@@ -2023,15 +2040,12 @@ begin
   if Copy(aDirectory, 2, 1) = ':' then
   begin
     n := 0;
-    { TODO: replace 25 with a constant: max nested directories displayed }
-    while n <= 25 do
+    while n <= MAX_DRIVES do
     begin
       drvs := chr(n+ord('A'))+':\';
       if Windows.GetDriveType(PChar(drvs)) <> 1 then
       begin
-        // vvzh: to avoid doubling of drive letters in inherited UpdateDirectory
-        if Pos(drvs, aDirectory) <> 1 then
-          FSpecialDirs.Add(drvs);
+        FSpecialDirs.Add(drvs);
       end;
       inc(n);
     end;

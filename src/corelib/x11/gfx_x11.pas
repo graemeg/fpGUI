@@ -196,6 +196,9 @@ type
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
+    function    Screen_dpi_x: integer; override;
+    function    Screen_dpi_y: integer; override;
+    function    Screen_dpi: integer; override;
     property    Display: PXDisplay read FDisplay;
     property    RootWindow: TfpgWinHandle read FRootWindow;
   end;
@@ -217,12 +220,13 @@ type
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
 
+
 implementation
 
 uses
   baseunix,
   fpgfx,
-  gfx_widget,  {$Note This dependency to gfx_widget must be removed.}
+  gfx_widget,
   gui_form, // remove this!!!!!
   cursorfont,
   gfx_popupwindow,
@@ -1215,6 +1219,42 @@ begin
   Result := wa.Height;
 end;
 
+function TfpgApplicationImpl.Screen_dpi_x: integer;
+var
+  mm: integer;
+begin
+  // 25.4 is millimeters per inch
+  mm := 0;
+  mm := DisplayWidthMM(Display, DefaultScreen);
+  if mm > 0 then
+    Result := Round((GetScreenWidth * 25.4) / mm)
+  else
+    Result := 96; // seems to be a well known default. :-(
+end;
+
+function TfpgApplicationImpl.Screen_dpi_y: integer;
+var
+  mm: integer;
+begin
+  // 25.4 is millimeters per inch
+  mm := 0;
+  mm := DisplayHeightMM(Display, DefaultScreen);
+  if mm > 0 then
+    Result := Round((GetScreenHeight * 25.4) / mm)
+  else
+    Result := Screen_dpi_x; // same as width
+end;
+
+function TfpgApplicationImpl.Screen_dpi: integer;
+begin
+  Result := Screen_dpi_y;
+  {$IFDEF DEBUG}
+  writeln('Display width in mm: ', DisplayWidthMM(Display, DefaultScreen));
+  writeln('Display height in mm: ', DisplayHeightMM(Display, DefaultScreen));
+  writeln('Display dpi: ', Result);
+  {$ENDIF}
+end;
+
 { TfpgWindowImpl }
 
 procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
@@ -2116,6 +2156,7 @@ var
   ds: string;
 begin
   FSpecialDirs.Clear;
+  FSpecialDirs.Add(DirectorySeparator); // add root
   
   ds := aDirectory;
   if Copy(ds, 1, 1) <> DirectorySeparator then

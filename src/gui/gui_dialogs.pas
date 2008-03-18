@@ -1044,8 +1044,11 @@ begin
 
   ActiveWidget := grid;
   FileName := '';
-  Filter := rsAllFiles + ' (*)|*';
+  SetFilter(rsAllFiles + ' (*)|*');
+  // we don't want chlFilter to call FilterChange
+  chlFilter.OnChange := nil;
   chlFilter.FocusItem := 1;
+  chlFilter.OnChange := @FilterChange; // restore event handler
 end;
 
 procedure TfpgFileDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -1202,9 +1205,12 @@ begin
   end;
   
   grid.FileList.Sort(soFileName);
-  
+
+  // we don't want chlDir to call DirChange while populating items
+  chlDir.OnChange := nil;
   chlDir.Items.Assign(grid.FileList.SpecialDirs);
   chlDir.FocusItem := grid.FileList.CurrentSpecialDir + 1;
+  chlDir.OnChange := @DirChange; // restore event handler
 
   if fsel <> '' then
     SelectFile(fsel)
@@ -1238,10 +1244,11 @@ var
   fs: string;
   fm: string;
 begin
+  // we don't want chlFilter to call FilterChange while populating items
+  chlFilter.OnChange := nil;
   s := FFilter;
   FFilterList.Clear;
   chlFilter.Items.Clear;
-
   repeat
     fs  := '';
     fm  := '';
@@ -1269,6 +1276,8 @@ begin
       FFilterList.Add(fm);
     end;
   until (fs = '') or (fm = ''); { repeat/until }
+  // restore event handler
+  chlFilter.OnChange := @FilterChange;
 end;
 
 function TfpgFileDialog.GetFileFilter: string;

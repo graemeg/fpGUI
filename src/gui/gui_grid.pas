@@ -67,6 +67,8 @@ type
   end;
 }
   
+  { TfpgFileGrid }
+
   TfpgFileGrid = class(TfpgCustomGrid)
   private
     FFileList: TfpgFileList;

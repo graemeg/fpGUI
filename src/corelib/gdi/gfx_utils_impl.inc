@@ -1,39 +1,14 @@
 {%mainunit gfx_utils.pas}
 
-// GDI specific implementations of RTL wrapper functions
+// GDI specific implementations of encoding functions
 
-function fpgFindFirst(const Path: TfpgString; Attr: Longint; out
-  Rslt: TSearchRec): Longint;
+function fpgToOSEncoding(aString: TfpgString): string;
 begin
-  Result := FindFirst(Utf8ToAnsi(Path), Attr, Rslt);
-  Rslt.Name := AnsiToUtf8(Rslt.Name);
+  Result := Utf8ToAnsi(aString);
 end;
 
-function fpgFindNext(var Rslt: TSearchRec): Longint;
+function fpgFromOSEncoding(aString: string): TfpgString;
 begin
-  Result := FindNext(Rslt);
-  Rslt.Name := AnsiToUtf8(Rslt.Name);
+  Result := AnsiToUtf8(aString);
 end;
-
-function fpgGetCurrentDir: TfpgString;
-begin
-  Result := AnsiToUtf8(GetCurrentDir);
-end;
-
-function fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
-begin
-  Result := SetCurrentDir(Utf8ToAnsi(NewDir));
-end;
-
-function fpgExpandFileName(const FileName: TfpgString): TfpgString;
-begin
-  Result := AnsiToUtf8(ExpandFileName(Utf8ToAnsi(FileName)));
-end;
-
-function fpgFileExists(const FileName: TfpgString): Boolean;
-begin
-  Result := FileExists(Utf8ToAnsi(FileName));
-end;
-
-
 

@@ -398,6 +398,9 @@ type
     procedure   CreateForm(AFormClass: TComponentClass; var AForm: TfpgWindowBase);
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
+    function    Screen_dpi_x: integer; virtual; abstract;
+    function    Screen_dpi_y: integer; virtual; abstract;
+    function    Screen_dpi: integer; virtual; abstract;
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
@@ -1902,29 +1905,32 @@ end;
 procedure TfpgFileListBase.PopulateSpecialDirs(const aDirectory: TfpgString);
 {Sets up FSpecialDirs list}
 var
-  i, n: integer;
-  rootadd: integer;
+  i, n, sp: integer;
 begin
   // find insert position
   i := 0;
   while (i < FSpecialDirs.Count)
-    and (FSpecialDirs.Strings[i][1] <= aDirectory[1]) do
-      inc(i);
+    and (FSpecialDirs.Strings[i][1] < aDirectory[1]) do
+      Inc(i);
   
-  n := 1;
-  rootadd := 1;
+  sp := Pos(DirectorySeparator, aDirectory) + 1;
+  n := sp;
   while n < Length(aDirectory) do
   begin
     if aDirectory[n] = DirectorySeparator then
     begin
-      FSpecialDirs.Insert(i, Copy(aDirectory, 1, n-1+rootadd));
-      rootadd := 0;
-      inc(i);
+      Inc(i);
+      FSpecialDirs.Insert(i, Copy(aDirectory, 1, n-1));
     end;
-    inc(n);
+    Inc(n);
   end;
 
-  FSpecialDirs.Insert(i, ExcludeTrailingPathDelimiter(aDirectory));
+  if (n > sp) then
+  begin
+    Inc(i);
+    FSpecialDirs.Insert(i, ExcludeTrailingPathDelimiter(aDirectory))
+  end;
+    
   FCurrentSpecialDir := i;
 end;
 
@@ -1959,6 +1965,7 @@ var
   SearchRec: TSearchRec;
   dir: TfpgString; //  to prevent FDirectoryName from having incorrect value
 begin
+  writeln(aDirectory);
   // default parameter value is current directory
   if aDirectory <> '' then
     dir := fpgExpandFileName(aDirectory)

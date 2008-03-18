@@ -1,36 +1,15 @@
 {%mainunit gfx_utils.pas}
 
-// X11 specific filesystem implementations of RTL wrapper functions
+// X11 specific filesystem implementations of encoding functions
 
-function fpgFindFirst(const Path: TfpgString; Attr: Longint; out
-  Rslt: TSearchRec): Longint;
+function fpgToOSEncoding(aString: TfpgString): string;
 begin
-  Result := FindFirst(Path, Attr, Rslt);
+  Result := aString;
 end;
 
-function fpgFindNext(var Rslt: TSearchRec): Longint;
+function fpgFromOSEncoding(aString: string): TfpgString;
 begin
-  Result := FindNext(Rslt);
-end;
-
-function fpgGetCurrentDir: TfpgString;
-begin
-  Result := GetCurrentDir;
-end;
-
-function fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
-begin
-  Result := SetCurrentDir(NewDir);
-end;
-
-function fpgExpandFileName(const FileName: TfpgString): TfpgString;
-begin
-  Result := ExpandFileName(FileName);
-end;
-
-function fpgFileExists(const FileName: TfpgString): Boolean;
-begin
-  Result := FileExists(FileName);
+  Result := aString;
 end;
 
 
