@@ -799,19 +799,18 @@ begin
             fpgSendMessage(nil, mw, FPGM_SCROLL, msgp)
           end;
         end;
-
-    WM_ACTIVATE:
+(*
+    WM_ACTIVATE:  // We currently use WM_NCACTIVATE instead!
         begin
           {$IFDEF DEBUG}
-            write(w.ClassName + ': ');
-            writeln('WM_ACTIVATE');
+            writeln(w.ClassName + ': WM_ACTIVATE');
           {$ENDIF}
-          if ((wParam and $FFFF) = WA_INACTIVE) then
+          if (Lo(wParam) = WA_INACTIVE) then
             fpgSendMessage(nil, w, FPGM_DEACTIVATE)
           else
             fpgSendMessage(nil, w, FPGM_ACTIVATE);
         end;
-
+*)
     WM_TIMER:
         begin
 //          writeln('WM_TIMER');  // used for event wait timeout
@@ -821,8 +820,13 @@ begin
     WM_NCACTIVATE:
         begin
           {$IFDEF DEBUG}
-            write(w.ClassName + ': WM_NCACTIVATE');
+            writeln(w.ClassName + ': WM_NCACTIVATE');
           {$ENDIF}
+          if (Lo(wParam) = WA_INACTIVE) then
+            fpgSendMessage(nil, w, FPGM_DEACTIVATE)
+          else
+            fpgSendMessage(nil, w, FPGM_ACTIVATE);
+
           if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
           begin
             {$IFDEF DEBUG}
