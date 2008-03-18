@@ -58,6 +58,8 @@ type
     procedure   HandleClose; virtual;
     procedure   HandleHide; override;
     procedure   HandleShow; override;
+    procedure   HandleMove(x, y: TfpgCoord); override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
@@ -95,6 +97,7 @@ implementation
 
 uses
   fpgfx,
+  gfx_popupwindow,
   gui_menu;
   
 type
@@ -151,6 +154,7 @@ end;
 
 procedure TfpgForm.MsgDeActivate(var msg: TfpgMessageRec);
 begin
+  ClosePopups;
   if ActiveWidget <> nil then
     ActiveWidget.KillFocus;
   if Assigned(FOnDeactivate) then
@@ -267,6 +271,18 @@ begin
   inherited HandleShow;
   if Assigned(FOnShow) then
     FOnShow(self);
+end;
+
+procedure TfpgForm.HandleMove(x, y: TfpgCoord);
+begin
+  ClosePopups;
+  inherited HandleMove(x, y);
+end;
+
+procedure TfpgForm.HandleResize(awidth, aheight: TfpgCoord);
+begin
+  ClosePopups;
+  inherited HandleResize(awidth, aheight);
 end;
 
 procedure TfpgForm.HandleKeyPress(var keycode: word;
