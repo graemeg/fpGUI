@@ -180,22 +180,46 @@ var
   po: TPOFile;
   lPath, lFile: string;
   lPos: integer;
+  ToolkitOnly: Boolean;
 begin
+  {$IFDEF DEBUG}
+  writeln('TranslateUnitResourceStrings:');
+  {$ENDIF}
   Result := False;
-  //debugln('TranslateUnitResourceStrings) ResUnitName="',ResUnitName,'" AFilename="',AFilename,'"');
+  ToolkitOnly := False;
+
+  // build correct filename for fpGUI Toolkit translations.
+  lPath := ExtractFilePath(AFilename);
+  lFile := ExtractFileName(AFilename);
+  lPos := Pos('.', lFile);
+  lFile := lPath + 'fpgui' + Copy(lFile, lPos, Length(lFile)-lPos+1);
+  {$IFDEF DEBUG}
+  writeln('  lFile = ', lFile);
+  writeln('  ResUnitName="', ResUnitName, '"');
+  writeln('  AFilename="', AFilename, '"');
+  {$ENDIF}
+
   if {(ResUnitName = '') or} (AFilename = '') or (not FileExists(AFilename)) then
-    Exit;
+    ToolkitOnly := True;  // we don't have a application translation file
   try
     po := nil;
     // read .po file
-    po := TPOFile.Create(AFilename);
-    // Now append fpGUI translations
-    lPath := ExtractFilePath(AFilename);
-    lFile := ExtractFileName(AFilename);
-    lPos := Pos('.', lFile);
-    lFile := lPath + 'fpgui' + Copy(lFile, lPos, Length(lFile)-lPos+1);
-//    writeln('lFile = ', lFile);
-    po.AppendFile(lFile);
+    if ToolkitOnly then
+    begin
+      if not FileExists(lFile) then
+        Exit;
+      {$IFDEF DEBUG}
+      writeln('  ************  Only translating the toolkit   ***********');
+      {$ENDIF}
+      po := TPOFile.Create(nil);
+      po.AppendFile(lFile);
+    end
+    else
+    begin
+      po := TPOFile.Create(AFilename);
+      // Now append fpGUI translations
+      po.AppendFile(lFile);
+    end;
     try
 {$ifdef ver2_0}
       for TableID := 0 to ResourceStringTableCount - 1 do
@@ -247,11 +271,20 @@ begin
   if {(ResUnitName = '') or} (BaseFilename = '') then
     Exit;
 
-  //debugln('TranslateUnitResourceStrings BaseFilename="',BaseFilename,'"');
   if (FallbackLang <> '') then
+  begin
+    {$IFDEF DEBUG}
+    writeln('1) Trying fallback language... ', Fallbacklang);
+    {$ENDIF}
     TranslateUnitResourceStrings(ResUnitName, Format(BaseFilename, [FallbackLang]));
+  end;
   if (Lang <> '') then
+  begin
+    {$IFDEF DEBUG}
+    writeln('2) Trying language... ', Lang);
+    {$ENDIF}
     TranslateUnitResourceStrings(ResUnitName, Format(BaseFilename, [Lang]));
+  end;
 end;
 
 { TPOFile }
@@ -260,11 +293,13 @@ constructor TPOFile.Create(const AFilename: string);
 var
   f: TStream;
 begin
-  f := TFileStream.Create(AFilename, fmOpenRead);
+  if AFilename <> '' then
+    f := TFileStream.Create(AFilename, fmOpenRead);
   try
     Self.Create(f);
   finally
-    f.Free;
+    if Assigned(f) then
+      f.Free;
   end;
 end;
 
@@ -277,6 +312,9 @@ begin
   FItems          := TFPList.Create;
   FIdentifierToItem := TStringHashList.Create(False);
   FOriginalToItem := TStringHashList.Create(True);
+  
+  if AStream = nil then
+    Exit;
 
   Size := AStream.Size - AStream.Position;
   if Size <= 0 then

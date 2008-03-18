@@ -145,6 +145,8 @@ type
 
 
   TfrmAbout = class(TfpgForm)
+  private
+    procedure ApplyScreenRatio;
   public
     {@VFD_HEAD_BEGIN: frmAbout}
     lblName1: TfpgLabel;
@@ -181,7 +183,37 @@ uses
 
 {@VFD_NEWFORM_IMPL}
 
+procedure TfrmAbout.ApplyScreenRatio;
+var
+  i: integer;
+  wg: TfpgWidget;
+  ratio: double;
+begin
+//  writeln('dpi = ', fpgApplication.Screen_dpi);
+  // Form was designed at 96 dpi.
+  ratio := 96 / fpgApplication.Screen_dpi;
+  for i := 0 to ComponentCount-1 do
+  begin
+    if Components[i] is TfpgWidget then
+    begin
+      wg := TfpgWidget(Components[i]);
+      wg.Top := round(wg.Top * ratio);
+      wg.Left := round(wg.Left * ratio);
+      wg.Width := round(wg.Width * ratio);
+      wg.Height := round(wg.Height * ratio);
+    end;
+  end;
+end;
+
 procedure TfrmAbout.AfterCreate;
+  function FontRatio(ASize: integer): string;
+  begin
+    Result := Format('%d', [round(ASize*((96/fpgApplication.Screen_dpi)-0.1))]);
+    if StrToInt(Result) <= 6 then // sanity check
+      Result := '8';
+    writeln('Old:', ASize, '  New:', Result);
+  end;
+
 begin
   {@VFD_BODY_BEGIN: frmAbout}
   Name := 'frmAbout';
@@ -196,7 +228,8 @@ begin
     Name := 'lblName1';
     SetPosition(12, 16, 255, 31);
     Text := 'fpGUI UI Designer';
-    FontDesc := 'Arial-20';
+    FontDesc := 'Arial-' + FontRatio(20);
+    backgroundcolor := clGreen;
   end;
 
   lblVersion := TfpgLabel.Create(self);
@@ -226,7 +259,7 @@ begin
     Name := 'lblName3';
     SetPosition(12, 100, 241, 14);
     Text := 'Written by Graeme Geldenhuys';
-    FontDesc := 'Arial-9';
+    FontDesc := 'Arial-' + FontRatio(9);
   end;
 
   lblName4 := TfpgLabel.Create(self);
@@ -235,7 +268,7 @@ begin
     Name := 'lblName4';
     SetPosition(12, 116, 246, 14);
     Text := 'http://opensoft.homeip.net/fpgui/';
-    FontDesc := 'Arial-9:underline';
+    FontDesc := 'Arial-' + FontRatio(9) + ':underline';
   end;
 
   lblCompiled := TfpgLabel.Create(self);
@@ -244,10 +277,12 @@ begin
     Name := 'lblCompiled';
     SetPosition(12, 132, 191, 13);
     Text := 'Compiled on:  %s';
-    FontDesc := 'Arial-8';
+    FontDesc := 'Arial-' + FontRatio(8);
   end;
 
   {@VFD_BODY_END: frmAbout}
+  
+  ApplyScreenRatio;
 end;
 
 class procedure TfrmAbout.Execute;

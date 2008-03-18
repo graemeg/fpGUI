@@ -127,6 +127,7 @@ begin
     SetPosition(8, 4, 110, 16);
     Text := 'String Grid columns:';
     FontDesc := '#Label1';
+    AutoSize := True;
   end;
 
   grid := TColumnsGrid.Create(self);
@@ -144,6 +145,7 @@ begin
     SetPosition(344, 24, 56, 16);
     Text := 'Column:';
     FontDesc := '#Label1';
+    AutoSize := True;
   end;
 
   lbLabel3 := TfpgLabel.Create(self);
@@ -153,6 +155,7 @@ begin
     SetPosition(344, 56, 34, 16);
     Text := 'Title:';
     FontDesc := '#Label1';
+    AutoSize := True;
   end;
 
   lbLabel6 := TfpgLabel.Create(self);
@@ -162,6 +165,7 @@ begin
     SetPosition(344, 100, 88, 16);
     Text := 'Column width:';
     FontDesc := '#Label1';
+    AutoSize := True;
   end;
 
   lbLabel5 := TfpgLabel.Create(self);
@@ -171,6 +175,7 @@ begin
     SetPosition(344, 144, 83, 16);
     Text := 'Alignment:';
     FontDesc := '#Label1';
+    AutoSize := True;
   end;
 
   lbCOLNO := TfpgLabel.Create(self);
@@ -180,6 +185,7 @@ begin
     SetPosition(404, 24, 54, 16);
     Text := '--';
     FontDesc := '#Label1';
+    AutoSize := True;
   end;
 
   edTITLE := TfpgEdit.Create(self);

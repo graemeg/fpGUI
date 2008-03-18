@@ -725,6 +725,7 @@ begin
   with lblLabel5 do
   begin
     SetPosition(8, 8, 73, 16);
+    AutoSize := True;
     Text := fpgAddColon(rsCollection);
   end;
 
@@ -752,6 +753,7 @@ begin
   with lblLabel1 do
   begin
     SetPosition(161, 8, 73, 16);
+    AutoSize := True;
     Text := fpgAddColon(rsName);
   end;
 
@@ -769,6 +771,7 @@ begin
   begin
     Name := 'lblSize';
     SetPosition(401, 8, 54, 16);
+    AutoSize := True;
     Text := fpgAddColon(rsSize);
   end;
 
@@ -805,6 +808,7 @@ begin
   begin
     Name := 'lblTypeface';
     SetPosition(461, 8, 54, 16);
+    AutoSize := True;
     Text := fpgAddColon(rsTypeface);
   end;
 
@@ -845,6 +849,7 @@ begin
   with lblLabel4 do
   begin
     SetPosition(8, 268, 584, 16);
+    AutoSize := True;
     Text := fpgAddColon(rsExampleText);
   end;
 

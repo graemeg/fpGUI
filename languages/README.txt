@@ -1,4 +1,5 @@
 Quick Start for translators:
+----------------------------
 
 For example finnish translation:
 Search for all *.fi.po files. They are simple text files, with an easy format.
@@ -10,7 +11,7 @@ Do not send diffs for .po files.
 
 
 Now the background:
-
+-------------------
 The <fpGUIdir>/languages directory contains all the stuff for
 internationalization of the fpGUI Toolkit.
 
@@ -32,13 +33,15 @@ This is done by <fpGUIdir>/tools/localize.sh or <fpGUIdir>\tools\localize.bat.
 
 This will create the file fpgui.po, which should be translated in all
 required languages to a fpgui.xx.po file. For the xx see the gettext unit
-in the procedure TranslateResourceStrings.
+in the procedure TranslateResourceStrings. All translation .po files are 
+in UTF-8 encoding.
 
+english:           fpgui.en.po
 german:            fpgui.de.po
-russian (KOI8-R):  fpgui.ru.po
+russian:           fpgui.ru.po
 spanish:           fpgui.es.po
 french:            fpgui.fr.po
 italian:           fpgui.it.po
 afrikaans:         fpgui.af.po
-
+portuguese:        fpgui.pt.po
 

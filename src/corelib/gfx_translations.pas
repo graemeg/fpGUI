@@ -126,6 +126,13 @@ begin
 //  writeln('TranslateResourceStrings A Lang=',Lang,' FallbackLang=',FallbackLang);
   Dir := fpgAddTrailingValue(BaseDirectory, PathDelim, false);
 
+  {$IFDEF DEBUG}
+  writeln('Lang = ' + Lang);
+  writeln('SystemLanguageID1 = ' + SystemLanguageID1);
+  writeln('SystemLanguageID2 = ' + SystemLanguageID2);
+  writeln('Translation file = ' +Dir + BaseAppName + Ext);
+  {$ENDIF}
+
   // We use one translation file for all fpGUI Toolkit related text and one
   // translation file for all fpGUI based application text
 //  if BaseAppName = 'fpgui' then
@@ -134,13 +141,6 @@ begin
 //  else
     TranslateUnitResourceStrings('fake',
       Dir + BaseAppName + Ext, Lang, FallbackLang);
-
-  {$IFDEF DEBUG}
-  writeln('Lang = ' + Lang);
-  writeln('SystemLanguageID1 = ' + SystemLanguageID1);
-  writeln('SystemLanguageID2 = ' + SystemLanguageID2);
-  writeln('Translation file = ' +Dir + BaseAppName + Ext);
-  {$ENDIF}
 end;
 
 // Strip the '.' onwards part. eg: en_ZA.UTF-8  ->  en_ZA
