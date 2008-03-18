@@ -105,6 +105,7 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
+
   TfpgFontSelectDialog = class(TfpgBaseDialog)
   private
     FSampleText: string;

@@ -77,6 +77,14 @@ type
     function GetValueText(wg: TfpgWidget): string; override;
     function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
   end;
+  
+  
+  { TPropertyFontDesc }
+
+  TPropertyFontDesc = class(TPropertyString)
+    function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+    procedure OnExternalEdit(wg: TfpgWidget); override;
+  end;
 
 
   TGPEType = (gptInteger, gptString);
@@ -135,7 +143,8 @@ uses
   TypInfo,
   vfdformparser,
   vfdeditors,
-  fpgfx;
+  fpgfx,
+  gui_dialogs;
 
 procedure EditStringList(sl: TStringList);
 var
@@ -482,7 +491,7 @@ begin
     Height  := self.Height;
     Width   := 24;
     Top     := 0;
-    Left    := self.Width - Width;
+    Left    := self.Width - btnEdit.Width;
     Text    := '...';
     UpdateWindowPosition;
     Anchors := [anTop, anRight];
@@ -503,6 +512,7 @@ begin
     Exit;
   prop.OnExternalEdit(widget);
   widget.Invalidate;
+  RePaint;
 end;
 
 procedure TExternalPropertyEditor.StoreValue(wg: TfpgWidget);
@@ -613,6 +623,22 @@ end;
 procedure TBooleanPropertyEditor.StoreValue(wg: TfpgWidget);
 begin
   SetOrdProp(wg, prop.Name, Ord(StrToBool(chl.Text)));
+end;
+
+{ TPropertyFontDesc }
+
+function TPropertyFontDesc.CreateEditor(AOwner: TComponent): TVFDPropertyEditor;
+begin
+  Result := TExternalPropertyEditor.Create(AOwner, self);
+end;
+
+procedure TPropertyFontDesc.OnExternalEdit(wg: TfpgWidget);
+var
+  s: string;
+begin
+  s := GetStrProp(wg, Name);
+  if SelectFontDialog(s) then
+    SetStrProp(wg, Name, s);
 end;
 
 end.

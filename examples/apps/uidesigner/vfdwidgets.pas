@@ -226,7 +226,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgLabel);
   wc.NameBase := 'lblName';
   wc.AddProperty('Alignment', TPropertyEnum, 'Horizontal text alignment');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the label text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the label text');
   wc.AddProperty('Layout', TPropertyEnum, 'Vertical text layout');
   wc.AddProperty('Text', TPropertyString, 'Label text');
   wc.AddProperty('WrapText', TPropertyBoolean, 'If True text will wrap when it doesn''t fit the width');
@@ -239,7 +239,7 @@ begin
 //  wc.AddProperty('Color', TPropertyColor, 'Text color');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.WidgetIconName := 'vfd.edit';
   RegisterVFDWidget(wc);
 
@@ -247,7 +247,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgMemo);
   wc.NameBase := 'memName';
   wc.AddProperty('Lines', TPropertyStringList, '');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.memo';
   RegisterVFDWidget(wc);
@@ -258,7 +258,7 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('AllowAllUp', TPropertyBoolean, '');
   wc.AddProperty('Embedded', TPropertyBoolean, 'No focus rectangle will be drawn. eg: Toolbar buttons');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
   wc.AddProperty('ImageMargin', TPropertyInteger, '');
   wc.AddProperty('ImageName', TPropertyString, '');
@@ -273,7 +273,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgCheckBox);
   wc.NameBase := 'cbName';
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.WidgetIconName := 'vfd.checkbox';
@@ -283,7 +283,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgRadioButton);
   wc.NameBase := 'rbName';
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
@@ -293,7 +293,7 @@ begin
   // ComboBox
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
   wc.NameBase := 'cbName';
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.combobox';
@@ -302,7 +302,7 @@ begin
   // Calendar ComboBox
   wc          := TVFDWidgetClass.Create(TfpgCalendarCombo);
   wc.NameBase := 'calName';
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.combodateedit';
   RegisterVFDWidget(wc);
@@ -310,7 +310,7 @@ begin
   // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
   wc.NameBase := 'lstName';
-  wc.AddProperty('FontDesc', TPropertyString, 'The font used for displaying the text');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('HotTrack', TPropertyBoolean, '');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('PopupFrame', TPropertyBoolean, '');
@@ -322,8 +322,8 @@ begin
   wc := TVFDWidgetClass.Create(TfpgStringGrid);
   wc.NameBase := 'grdName';
   wc.AddProperty('Columns', TPropertyDBColumns, '');
-  wc.AddProperty('FontDesc', TPropertyString, '');
-  wc.AddProperty('HeaderFontDesc', TPropertyString, '');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('HeaderFontDesc', TPropertyFontDesc, '');
   wc.AddProperty('RowCount', TPropertyInteger, '');
   wc.AddProperty('RowSelect', TPropertyBoolean, '');
   wc.AddProperty('ShowHeader', TPropertyBoolean, '');
@@ -374,7 +374,7 @@ begin
   wc := TVFDWidgetClass.Create(TfpgTreeView);
   wc.NameBase := 'tvName';
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
-  wc.AddProperty('FontDesc',TPropertyString, '');
+  wc.AddProperty('FontDesc',TPropertyFontDesc, '');
   wc.AddProperty('ScrollWheelDelta', TPropertyInteger, 'Scroll amount with mouse wheel');
   wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
   wc.AddProperty('ShowImages',TPropertyBoolean, 'Boolean value');
