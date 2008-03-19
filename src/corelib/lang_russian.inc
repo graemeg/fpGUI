@@ -98,7 +98,7 @@ rsSaveAFile              = 'Сохранить файл как';
 // User Dialog
 rsUserName               = 'Имя пользователя';
 rsPassword               = 'Пароль';
-rsDatabase               = 'Database';
+rsDatabase               = 'База данных';
 
 
 // Error messages
@@ -124,31 +124,31 @@ rsLongThu                = 'Четверг';
 rsLongFri                = 'Пятница';
 rsLongSat                = 'Суббота';
 rsLongSun                = 'Воскресенье';
-rsToday                  = 'Today';
-rsShortJan               = 'Jan';
-rsShortFeb               = 'Feb';
-rsShortMar               = 'Mar';
-rsShortApr               = 'Apr';
-rsShortMay               = 'May';
-rsShortJun               = 'Jun';
-rsShortJul               = 'Jul';
-rsShortAug               = 'Aug';
-rsShortSep               = 'Sep';
-rsShortOct               = 'Oct';
-rsShortNov               = 'Nov';
-rsShortDec               = 'Dec';
-rsLongJan                = 'January';
-rsLongFeb                = 'February';
-rsLongMar                = 'March';
-rsLongApr                = 'April';
-rsLongMay                = 'May';
-rsLongJun                = 'June';
-rsLongJul                = 'July';
-rsLongAug                = 'August';
-rsLongSep                = 'September';
-rsLongOct                = 'October';
-rsLongNov                = 'November';
-rsLongDec                = 'December';
+rsToday                  = 'Сегодня';
+rsShortJan               = 'Янв';
+rsShortFeb               = 'Фев';
+rsShortMar               = 'Мар';
+rsShortApr               = 'Апр';
+rsShortMay               = 'Май';
+rsShortJun               = 'Июн';
+rsShortJul               = 'Июл';
+rsShortAug               = 'Авг';
+rsShortSep               = 'Сен';
+rsShortOct               = 'Окт';
+rsShortNov               = 'Ноя';
+rsShortDec               = 'Дек';
+rsLongJan                = 'Январь';
+rsLongFeb                = 'Февраль';
+rsLongMar                = 'Март';
+rsLongApr                = 'Апрель';
+rsLongMay                = 'Май';
+rsLongJun                = 'Июнь';
+rsLongJul                = 'Июль';
+rsLongAug                = 'Август';
+rsLongSep                = 'Сентябрь';
+rsLongOct                = 'Октябрь';
+rsLongNov                = 'Ноябрь';
+rsLongDec                = 'Декабрь';
 
 
 
