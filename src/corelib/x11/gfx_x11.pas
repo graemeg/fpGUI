@@ -27,34 +27,37 @@ const
      $b4, $24, $a4, $24, $18, $73, $00, $00);
 
 type
-  TfpgGContext  = Xlib.TGc;
 
-type
+  TfpgGContext  = Xlib.TGc;
   PInt = ^integer;
+
 
   TXIC = record
     dummy: Pointer;
   end;
   PXIC = ^TXIC;
 
+
   TXIM = record
     dummy: Pointer;
   end;
   PXIM = ^TXIM;
 
-  PXdbeSwapInfo = ^TXdbeSwapInfo;
 
   TXdbeSwapInfo = record
     Window: TfpgWinHandle;
     SwapAction: PChar;
   end;
+  PXdbeSwapInfo = ^TXdbeSwapInfo;
 
-type
 
   TXWindowStateFlag = (xwsfMapped);
-  
   TXWindowStateFlags = set of TXWindowStateFlag;
   
+  // Returns True if it 'ate' the event
+  TX11EventFilter = function(const AEvent: TXEvent): Boolean of object;
+
+  // forward declaration
   TfpgWindowImpl = class;
   
 
@@ -160,10 +163,13 @@ type
   end;
 
 
+  { TfpgApplicationImpl }
+
   TfpgApplicationImpl = class(TfpgApplicationBase)
   private
     FComposeBuffer: String[32];
     FComposeStatus: TStatus;
+    FEventFilter: TX11EventFilter;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
@@ -201,6 +207,7 @@ type
     function    Screen_dpi: integer; override;
     property    Display: PXDisplay read FDisplay;
     property    RootWindow: TfpgWinHandle read FRootWindow;
+    property    EventFilter: TX11EventFilter read FEventFilter write FEventFilter;
   end;
 
 
@@ -817,6 +824,8 @@ begin
   repeat
     if (atimeoutms >= 0) and (XPending(display) <= 0) then
     begin
+      if Assigned(FOnIdle) then
+        OnIdle(self);
       // Some event is waiting for the given timeout.
       // This Select handles only the first 256 file descriptors.
       // Poll would be better but FPC has no official poll interface (if I'm right)
@@ -829,6 +838,11 @@ begin
     end;
     XNextEvent(display, @ev);
   until (not XFilterEvent(@ev, X.None));
+  
+  // if the event filter returns true then it ate the message
+  if Assigned(FEventFilter) and FEventFilter(ev) then
+    exit; // no more processing required for that event
+
 
   blockmsg := False;
   fillchar(msgp, sizeof(msgp), 0);

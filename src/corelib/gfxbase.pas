@@ -386,6 +386,7 @@ type
     FTerminated: boolean;
     function    GetTopModalForm: TfpgWindowBase;
   protected
+    FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
     FModalFormStack: TList;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
@@ -408,6 +409,7 @@ type
     { TODO : Implement these two properties in the near future. }
 //    property    FormCount...
 //    property    Forms[]...
+    property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
   end;
   
   
