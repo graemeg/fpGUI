@@ -416,7 +416,6 @@ begin
     {$IFDEF DEBUG}
     writeln('.... destroying');
     {$ENDIF}
-    // This actually never gets reached!!! Debug and test if this is still needed.
     FBtnPressed := False;
     ddw := TComboboxDropdownWindow(FDropDown);
     ddw.Close;

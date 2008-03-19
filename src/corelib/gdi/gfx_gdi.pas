@@ -637,7 +637,6 @@ begin
                  (uMsg = WM_LBUTTONDOWN) then
               begin
                 ClosePopups;
-//                fpgSendMessage(nil, mw, FPGM_POPUPCLOSE);
               end;
             end;  { if }
           end;
