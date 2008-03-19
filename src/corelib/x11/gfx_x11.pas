@@ -923,21 +923,6 @@ begin
           if not Assigned(w) then
             ReportLostWindow(ev);
 
-{          else
-          begin
-            if ev._type = X.ButtonPress then
-            begin
-              writeln('***** CaptureMouse for ', w.ClassName, ' - ', w.Name);
-              w.CaptureMouse;
-            end
-            else
-            begin
-              writeln('***** ReleaseMouse for ', w.ClassName, ' - ', w.Name);
-              w.ReleaseMouse;
-            end;
-          end;
-}
-
           { This closes popup windows when you click the mouse elsewhere }
           if ev._type = X.ButtonPress then
           begin
@@ -951,7 +936,6 @@ begin
                  (not PopupDontCloseWidget(TfpgWidget(ew))) then
               begin
                 ClosePopups;
-//                fpgPostMessage(nil, ew, FPGM_POPUPCLOSE);
               end;
             end;
           end;

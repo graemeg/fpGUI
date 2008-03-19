@@ -768,6 +768,7 @@ begin
   begin
     FDropDown := TfpgPopupCalendar.Create(nil, FocusRootWidget);
     ddw := TfpgPopupCalendar(FDropDown);
+    ddw.DontCloseWidget := self;
   { Set to false CloseOnSelect to leave opened popup calendar menu}
     ddw.CloseOnSelect := CloseOnSelect;
     ddw.CallerWidget  := self;

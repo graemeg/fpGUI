@@ -92,7 +92,6 @@ type
     procedure   InternalBtnClick(Sender: TObject);
     procedure   SetFocusItem(const AValue: integer);
     procedure   CalculateInternalButtonRect;
-    procedure   MsgPopupClose(var msg: TfpgMessageRec); message FPGM_POPUPCLOSE;
   protected
     FMargin: integer;
     FBtnPressed: Boolean;
@@ -384,9 +383,14 @@ var
   rowcount: integer;
   r: TfpgRect;
 begin
-  writeln('DoDropDown');
+  {$IFDEF DEBUG}
+  write('DoDropDown');
+  {$ENDIF}
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
+    {$IFDEF DEBUG}
+    writeln('.... creating');
+    {$ENDIF}
     FreeAndNil(FDropDown);
     OriginalFocusRoot := FocusRootWidget;
 
@@ -403,12 +407,15 @@ begin
     ddw.Width   := Width;
     ddw.Height  := (ddw.ListBox.RowHeight * rowcount) + 4;
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
-    r := GetDropDownPos(Parent, self, ddw);
-    ddw.Height := r.Height;
+    r := GetDropDownPos(Parent, self, ddw);  // find suitable position
+    ddw.Height := r.Height;  // in case GetDropDownPos resized us
     ddw.ShowAt(Parent, r.Left, r.Top);
   end
   else
   begin
+    {$IFDEF DEBUG}
+    writeln('.... destroying');
+    {$ENDIF}
     // This actually never gets reached!!! Debug and test if this is still needed.
     FBtnPressed := False;
     ddw := TComboboxDropdownWindow(FDropDown);
@@ -465,17 +472,6 @@ end;
 procedure TfpgAbstractComboBox.CalculateInternalButtonRect;
 begin
   FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
-end;
-
-procedure TfpgAbstractComboBox.MsgPopupClose(var msg: TfpgMessageRec);
-begin
-  { TODO : Fix Combobox dropdown flicker effect. }
-  { This gets called on MouseUp after you clicked on the combobox to open it.
-    The GFX backend is programmed to close popups, so this DoDropDown call
-    reopens it again.
-    This is what causes the flicker effect when the dropdown window is
-    displayed - it actually gets created, destroyed and then created again.}
-  DoDropDown;
 end;
 
 procedure TfpgAbstractComboBox.SetHeight(const AValue: TfpgCoord);
