@@ -664,9 +664,14 @@ begin
                     {$IFDEF DEBUG}
                     writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonDown event');
                     {$ENDIF}
+                    // This is temporary and we should try and move it to
+                    // the UI Designer code instead.
+                    if (uMsg = WM_LBUTTONDOWN) and (w is TfpgWidget) then
+                    begin
+                      if TfpgWidget(w).FormDesigner <> nil then
+                        w.CaptureMouse;
+                    end;
                     mcode := FPGM_MOUSEDOWN;
-//                    if PopupListFirst = nil then
-//                      SetCapture(w.WinHandle);
                   end;
                   
               WM_LBUTTONUP,
@@ -676,12 +681,15 @@ begin
                     {$IFDEF DEBUG}
                     writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonUp event');
                     {$ENDIF}
+                    // This is temporary and we should try and move it to
+                    // the UI Designer code instead.
+                    if (uMsg = WM_LBUTTONUP) and (w is TfpgWidget) then
+                    begin
+                      if TfpgWidget(w).FormDesigner <> nil then
+                        w.ReleaseMouse;
+                    end;
                     mcode := FPGM_MOUSEUP;
-//                    if PopupListFirst = nil then
-//                      ReleaseCapture;
                   end;
-              //WM_LBUTTONDBLCLK:
-                  //mcode := FPGM_DOUBLECLICK;
               else
                   mcode := 0;
             end;
