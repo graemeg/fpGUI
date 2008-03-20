@@ -2004,7 +2004,7 @@ begin
     GlobalUnlock(h);
   end;
   CloseClipboard;
-  Result := FClipboardText;
+  Result := AnsiToUtf8(FClipboardText);
 end;
 
 procedure TfpgClipboardImpl.DoSetText(const AValue: string);
