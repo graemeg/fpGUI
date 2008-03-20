@@ -58,6 +58,8 @@ uses
 
 type
 
+  { TfpgBaseComboBox }
+
   TfpgBaseComboBox = class(TfpgWidget)
   private
     FDropDownCount: integer;
@@ -86,6 +88,8 @@ type
   end;
   
 
+  { TfpgAbstractComboBox }
+
   TfpgAbstractComboBox = class(TfpgBaseComboBox)
   private
     FInternalBtnRect: TfpgRect;
@@ -105,6 +109,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     procedure   PaintInternalButton; virtual;
@@ -494,6 +499,32 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
   PaintInternalButton;
+end;
+
+procedure TfpgAbstractComboBox.HandleMouseScroll(x, y: integer;
+  shiftstate: TShiftState; delta: smallint);
+var
+  NewIndex: Integer;
+begin
+  if (FDropDown <> nil) and FDropDown.Visible then
+    Exit;
+  if Items.Count < 1 then
+    Exit;
+
+  NewIndex := FocusItem + Delta;
+
+  if NewIndex > Items.Count then
+    NewIndex := Items.Count;
+    
+  if NewIndex < 1 then
+    NewIndex := 1;
+    
+  if NewIndex <> FocusItem then
+  begin
+    FocusItem := NewIndex;
+    RePaint;
+  end;
+
 end;
 
 procedure TfpgAbstractComboBox.HandleResize(awidth, aheight: TfpgCoord);
