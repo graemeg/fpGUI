@@ -39,6 +39,7 @@ type
     FLayout: TLayout;
     FWrapText: boolean;
     FWrappedText: TStringList;
+    FLineSpace: integer;
     procedure   Wrap(MaxLength: integer; AText: string);
     procedure   SetWrapText(const AValue: boolean);
     procedure   SetAlignment(const AValue: TAlignment);
@@ -59,6 +60,7 @@ type
     property    Layout: TLayout read FLayout write SetLayout default tlTop;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Text: string read FText write SetText;
+    property    LineSpace: integer read FLineSpace write FLineSpace default 2;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -89,18 +91,19 @@ type
 
 // A convenience function to create a TfpgLabel instance
 function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string; w: TfpgCoord= 0; h: TfpgCoord= 0;
-          HAlign: TAlignment= taLeftJustify; VAlign: TLayout= tlTop): TfpgLabel; overload;
+          HAlign: TAlignment= taLeftJustify; VAlign: TLayout= tlTop; ALineSpace: integer= 2): TfpgLabel; overload;
 
 implementation
 
 
-function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string; w: TfpgCoord= 0; h: TfpgCoord= 0;
-          HAlign: TAlignment= taLeftJustify; VAlign: TLayout= tlTop): TfpgLabel; overload;
+function CreateLabel(AOwner: TComponent; x, y: TfpgCoord; AText: string; w: TfpgCoord; h: TfpgCoord;
+          HAlign: TAlignment; VAlign: TLayout; ALineSpace: integer): TfpgLabel; overload;
 begin
   Result       := TfpgLabel.Create(AOwner);
   Result.Left  := x;
   Result.Top   := y;
   Result.Text  := AText;
+  Result.LineSpace := ALineSpace;
   if w = 0 then
   begin
     Result.Width := Result.Font.TextWidth(Result.Text) + 5;  // 5 is some extra spacing
@@ -123,56 +126,81 @@ end;
 
 procedure TfpgCustomLabel.Wrap(MaxLength: integer; AText: string);
 var
-  l: integer;
+  l, i: integer;
+  
+  procedure DoWrap(separ: Char);
+  begin
+    if Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(separ, AText))) < MaxLength then
+    begin
+      if FWrappedText.Count > 0 then
+      begin
+        if UTF8Pos(#13,FWrappedText[Pred(FWrappedText.Count)]) > 0 then
+          FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(separ, AText))))
+        else
+          if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' +
+              UTF8Copy(AText, 1, UTF8Pos(separ, AText)))) < MaxLength then
+            FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' '
+                + UTF8Copy(AText, 1, Pred(UTF8Pos(separ, AText)))
+          else
+            FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(separ, AText))))
+      end
+      else
+        FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(separ, AText))));
+      AText := UTF8Copy(AText, Succ(UTF8Pos(separ, AText)), UTF8Length(AText) - Pred(UTF8Pos(separ, AText)));
+    end
+    else
+    begin
+      FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(separ, AText))));
+      if l < Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(separ, AText))) then
+        l := Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(separ, AText)));
+      AText := UTF8Copy(AText, Succ(UTF8Pos(separ, AText)), UTF8Length(AText) - Pred(UTF8Pos(separ, AText)));
+    end;
+    if separ = #13 then
+      FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + separ;
+  end;
+
 begin
   FWrappedText.Clear;
   l := 0;
   repeat
     if UTF8Pos(' ', AText) > 0 then
     begin
-      if Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText))) < MaxLength then
-      begin
-        if FWrappedText.Count > 0 then
-          if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' +
-              UTF8Copy(AText, 1, UTF8Pos(' ', AText)))) < MaxLength then
-            FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' '
-                + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
-          else
-            FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))))
+      if (UTF8Pos(#13,AText) > 0) then
+        if (UTF8Pos(#13,AText) < UTF8Pos(' ',AText)) then
+          DoWrap(#13)
         else
-          FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
-        AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
-      end
+          DoWrap(' ')
       else
-      begin
-        FWrappedText.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
-        if l < Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText))) then
-          l := Font.TextWidth(UTF8Copy(AText, 1, UTF8Pos(' ', AText)));
-        AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
-      end;  { if/else }
+        DoWrap(' ')
     end
     else
-    begin
-      FWrappedText.Add(AText);
-      AText := '';
-    end;  { if/else }
+      if (UTF8Pos(#13,AText) > 0) then
+        DoWrap(#13)
+      else
+      begin
+        FWrappedText.Add(AText);
+        AText := '';
+      end;
   until UTF8Pos(' ', AText) = 0;
   
   if FWrappedText.Count > 0 then
-  begin
-    if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText)) < MaxLength then
-      FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText
+    if UTF8Pos(#13,FWrappedText[Pred(FWrappedText.Count)]) > 0 then
+      FWrappedText.Add(AText)
     else
-      FWrappedText.Add(AText);
-  end;
+      if (Font.TextWidth(FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText)) < MaxLength then
+        FWrappedText[Pred(FWrappedText.Count)] := FWrappedText[Pred(FWrappedText.Count)] + ' ' + AText
+      else
+        FWrappedText.Add(AText);
 
+  for i := 0 to  Pred(FWrappedText.Count) do
+    if UTF8Pos(#13,FWrappedText[i]) > 0 then
+      FWrappedText[i] := UTF8Copy(FWrappedText[i], 1 , UTF8Length(FWrappedText[i]) - 1);
+
+  if Height < FWrappedText.Count * (Font.Height + LineSpace) then
+    Height := FWrappedText.Count * (Font.Height + LineSpace);
   if AutoSize then
-  begin
-    if Height < FWrappedText.Count * (Font.Height + 2) then
-      Height := FWrappedText.Count * (Font.Height + 2);
     if Width < l then  	// adjust the length to the longest word
       Width := l;
-  end;
 end;
 
 procedure TfpgCustomLabel.SetWrapText(const AValue: boolean);
@@ -214,8 +242,6 @@ begin
   if FAutoSize = AValue then
     Exit; //==>
   FAutoSize := AValue;
-  if FAutoSize then
-    FAlignment := taLeftJustify;
   ResizeLabel;
 end;
 
@@ -266,6 +292,7 @@ begin
   FAlignment   := taLeftJustify;
   FWrapText    := False;
   FWrappedText := TStringList.Create;
+  FLineSpace    := 2;
 end;
 
 destructor TfpgCustomLabel.Destroy;
@@ -296,14 +323,14 @@ begin
           taLeftJustify:
             case FLayout of
               tlTop:
-                fpgStyle.DrawString(Canvas, 0, (Font.Height + 2) * i, FWrappedText[i], Enabled);
+                fpgStyle.DrawString(Canvas, 0, (Font.Height + LineSpace) * i, FWrappedText[i], Enabled);
               tlBottom:
                 fpgStyle.DrawString(Canvas, 0,
-                    Height - ((Font.Height + 2) * FWrappedText.Count)+ ((Font.Height + 2) * i),
+                    Height - ((Font.Height + LineSpace) * FWrappedText.Count)+ ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               tlCenter:
                 fpgStyle.DrawString(Canvas, 0,
-                    ((Height - (Font.Height + 2) * FWrappedText.Count) div 2) + ((Font.Height + 2) * i),
+                    ((Height - (Font.Height + LineSpace) * FWrappedText.Count) div 2) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               end;
 
@@ -311,14 +338,14 @@ begin
             case FLayout of
               tlTop:
                 fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
-                    (Font.Height + 2) * i, FWrappedText[i], Enabled);
+                    (Font.Height + LineSpace) * i, FWrappedText[i], Enabled);
               tlBottom:
                 fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
-                    Height - ((Font.Height + 2) * FWrappedText.Count)+ ((Font.Height + 2) * i),
+                    Height - ((Font.Height + LineSpace) * FWrappedText.Count)+ ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               tlCenter:
                 fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
-                    ((Height - (Font.Height + 2) * FWrappedText.Count) div 2) + ((Font.Height + 2) * i),
+                    ((Height - (Font.Height + LineSpace) * FWrappedText.Count) div 2) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               end;
 
@@ -326,14 +353,14 @@ begin
             case FLayout of
               tlTop:
                 fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
-                    (Font.Height + 2) * i, FWrappedText[i], Enabled);
+                    (Font.Height + LineSpace) * i, FWrappedText[i], Enabled);
               tlBottom:
                 fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
-                    Height - ((Font.Height + 2) * FWrappedText.Count)+ ((Font.Height + 2) * i),
+                    Height - ((Font.Height + LineSpace) * FWrappedText.Count)+ ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               tlCenter:
                 fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
-                    ((Height - (Font.Height + 2) * FWrappedText.Count) div 2) + ((Font.Height + 2) * i),
+                    ((Height - (Font.Height + LineSpace) * FWrappedText.Count) div 2) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               end;
         end;
