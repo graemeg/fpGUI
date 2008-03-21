@@ -12,6 +12,7 @@ uses
   X,
   Xlib,
   XUtil,
+  ctypes,
   x11_xft,
   _netlayer,
   gfxbase,
@@ -50,6 +51,45 @@ type
   end;
   PXdbeSwapInfo = ^TXdbeSwapInfo;
 
+  // MWM support
+  TMWMHints = record
+    flags: culong;
+    functions: culong;
+    decorations: culong;
+    input_mode: longint;
+    status: culong;
+  end;
+  
+  
+const
+// Motif window hints
+  MWM_HINTS_FUNCTIONS     = 1 shl 0;
+  MWM_HINTS_DECORATIONS   = 1 shl 1;
+  MWM_HINTS_INPUT_MODE    = 1 shl 2;
+  MWM_HINTS_STATUS        = 1 shl 3;
+// bit definitions for MwmHints.functions */
+  MWM_FUNC_ALL            = 1 shl 0;
+  MWM_FUNC_RESIZE         = 1 shl 1;
+  MWM_FUNC_MOVE           = 1 shl 2;
+  MWM_FUNC_MINIMIZE       = 1 shl 3;
+  MWM_FUNC_MAXIMIZE       = 1 shl 4;
+  MWM_FUNC_CLOSE          = 1 shl 5;
+// bit definitions for MwmHints.decorations */
+  MWM_DECOR_ALL           = 1 shl 0;
+  MWM_DECOR_BORDER        = 1 shl 1;
+  MWM_DECOR_RESIZEH       = 1 shl 2;
+  MWM_DECOR_TITLE         = 1 shl 3;
+  MWM_DECOR_MENU          = 1 shl 4;
+  MWM_DECOR_MINIMIZE      = 1 shl 5;
+  MWM_DECOR_MAXIMIZE      = 1 shl 6;
+// bit definitions for MwmHints.inputMode */
+  MWM_INPUT_MODELESS                  = 0;
+  MWM_INPUT_PRIMARY_APPLICATION_MODAL = 1;
+  MWM_INPUT_SYSTEM_MODAL              = 2;
+  MWM_INPUT_FULL_APPLICATION_MODAL    = 3;
+  PROP_MWM_HINTS_ELEMENTS             = 5;
+
+type
 
   TXWindowStateFlag = (xwsfMapped);
   TXWindowStateFlags = set of TXWindowStateFlag;
@@ -1266,6 +1306,9 @@ var
 
   IconPixmap: TPixmap;
   WMHints: PXWMHints;
+  
+  prop: TAtom;
+  mwmhints: TMWMHints;
 begin
   if HandleIsValid then
     Exit; //==>
@@ -1369,6 +1412,31 @@ begin
   if (FWindowType = wtPopup) and (waStayOnTop in FWindowAttributes) then
     // we have a Splash screen
     fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtSplash]);
+
+  // process Borderless forms
+  if (FWindowType = wtWindow) and (waBorderless in FWindowAttributes) then
+  begin
+    prop := X.None;
+    prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', longbool(0));
+    if prop = X.None then
+    begin
+      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
+      // Set Override Redirect here!
+      mwmhints.flags := 0;
+    end
+    else
+    begin
+      mwmhints.flags := MWM_HINTS_DECORATIONS;
+      mwmhints.decorations := 0;
+
+      if xapplication.xia_motif_wm_hints <> X.None then
+      begin
+
+        prop := xapplication.xia_motif_wm_hints;
+        XChangeProperty(xapplication.display, FWinHandle, prop, prop, 32, PropModeReplace, @mwmhints, PROP_MWM_HINTS_ELEMENTS);
+      end;
+    end;
+  end;
 
   { TODO : We could optimise this for non-focusable widgets }
   XSelectInput(xapplication.Display, wh, KeyPressMask or KeyReleaseMask or

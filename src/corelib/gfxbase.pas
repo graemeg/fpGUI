@@ -24,7 +24,7 @@ type
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
-  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop, waFullScreen);
+  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop, waFullScreen, waBorderless);
   TWindowAttributes = set of TWindowAttribute;
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
@@ -267,6 +267,8 @@ type
     procedure   DrawRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   DrawRectangle(r: TfpgRect); overload;
     procedure   DrawLine(x1, y1, x2, y2: TfpgCoord);
+    procedure   DrawLineClipped(var x1, y1, x2, y2: TfpgCoord; const AClipRect: TfpgRect);
+    procedure   ClipLine(var x1, y1, x2, y2: TfpgCoord; const AClipRect: TfpgRect; out FallsOutsideRegion: Boolean);
     procedure   DrawImage(x, y: TfpgCoord; img: TfpgImageBase);
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
     procedure   DrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
@@ -998,6 +1000,101 @@ end;
 procedure TfpgCanvasBase.DrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
   DoDrawLine(x1, y1, x2, y2);
+end;
+
+procedure TfpgCanvasBase.DrawLineClipped(var x1, y1, x2, y2: TfpgCoord;
+  const AClipRect: TfpgRect);
+var
+  OutOfRegion: boolean;
+begin
+  ClipLine(X1, Y1, X2, Y2, AClipRect, OutOfRegion);
+  if not OutOfRegion then
+    DrawLine(X1, Y1, X2, Y2);                { Draw the new line!            }
+end;
+
+{ DrawLineClipped - This procedure clips a line to the AClipRect boundaries and
+ then calls the DrawLine procedure with the clipped coordinates.  If the line
+ lies completely outside of the clip boundary, then the Line routine is not
+ called.  This procedure uses the well known Cohen-Sutherland line clipping
+ algorithm to clip each coordinate.
+
+ Use this if you did not what to change the Canvas.ClipRegion for some reason.
+ For a detailed explanation see:
+   http://www.nondot.org/~sabre/graphpro/line6.html                           }
+procedure TfpgCanvasBase.ClipLine(var x1, y1, x2, y2: TfpgCoord;
+  const AClipRect: TfpgRect; out FallsOutsideRegion: Boolean);
+CONST
+  CodeBottom = 1; CodeTop    = 2;             { BitFields for output codes }
+  CodeLeft   = 4; CodeRight  = 8;
+
+  FUNCTION CompOutCode(X, Y : INTEGER) : integer;  { Nested function }
+  VAR Code : integer;
+  BEGIN
+    Code := 0;
+    IF      Y > AClipRect.Bottom THEN Code := CodeBottom
+    ELSE IF Y < AClipRect.Top THEN Code := CodeTop;
+    IF      X > AClipRect.Right THEN Code := Code+CodeRight
+    ELSE IF X < AClipRect.Left THEN Code := Code+CodeLeft;
+    Result := Code;
+  END;
+
+VAR
+  OutCode0,         { The code of the first endpoint  }
+  OutCode1,         { The code of the second endpoint }
+  OutCodeOut : integer;
+  X, Y : INTEGER;
+BEGIN
+  FallsOutsideRegion := False;
+  OutCode0 := CompOutCode(X1, Y1);            { Compute the original codes   }
+  OutCode1 := CompOutCode(X2, Y2);
+
+  WHILE (OutCode0 <> 0) OR (OutCode1 <> 0) DO { While not Trivially Accepted }
+  BEGIN
+    IF (OutCode0 AND OutCode1) <> 0 THEN      { Trivial Reject }
+    begin
+      FallsOutsideRegion := True;
+      Exit;   //==>
+    end
+    ELSE
+    BEGIN        { Failed both tests, so calculate the line segment to clip }
+      IF OutCode0 > 0 THEN
+        OutCodeOut := OutCode0    { Clip the first point }
+      ELSE
+        OutCodeOut := OutCode1;   { Clip the last point  }
+
+      IF (OutCodeOut AND CodeBottom) = CodeBottom THEN
+      BEGIN               { Clip the line to the bottom of the viewport     }
+        Y := AClipRect.Bottom;
+        X := X1+LONGINT(X2-X1)*LONGINT(Y-Y1) DIV (Y2 - Y1);
+      END
+      ELSE IF (OutCodeOut AND CodeTop) = CodeTop THEN
+      BEGIN               { Clip the line to the top of the viewport        }
+        Y := AClipRect.Top;
+        X := X1+LONGINT(X2-X1)*LONGINT(Y-Y1) DIV (Y2 - Y1);
+      END
+      ELSE IF (OutCodeOut AND CodeRight) = CodeRight THEN
+      BEGIN               { Clip the line to the right edge of the viewport }
+        X := AClipRect.Right;
+        Y := Y1+LONGINT(Y2-Y1)*LONGINT(X-X1) DIV (X2-X1);
+      END
+      ELSE IF (OutCodeOut AND CodeLeft) = CodeLeft THEN
+      BEGIN               { Clip the line to the left edge of the viewport  }
+        X := AClipRect.Left;
+        Y := Y1+LONGINT(Y2-Y1)*LONGINT(X-X1) DIV (X2-X1);
+      END;
+
+      IF (OutCodeOut = OutCode0) THEN       { Modify the first coordinate   }
+      BEGIN
+        X1 := X; Y1 := Y;                   { Update temporary variables    }
+        OutCode0 := CompOutCode(X1, Y1);    { Recalculate the OutCode       }
+      END
+      ELSE                                  { Modify the second coordinate  }
+      BEGIN
+        X2 := X; Y2 := Y;                   { Update temporary variables    }
+        OutCode1 := CompOutCode(X2, Y2);    { Recalculate the OutCode       }
+      END;
+    END;
+  END;  { while }
 end;
 
 procedure TfpgCanvasBase.DrawImage(x, y: TfpgCoord; img: TfpgImageBase);

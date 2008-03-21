@@ -63,6 +63,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
+    procedure   DoOnClose; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; virtual;
@@ -249,8 +250,6 @@ end;
 
 procedure TfpgForm.MsgClose(var msg: TfpgMessageRec);
 begin
-  if Assigned(FOnClose) then
-    FOnClose(self);
   HandleClose;
 end;
 
@@ -323,6 +322,12 @@ begin
     FOnDestroy(self);
 end;
 
+procedure TfpgForm.DoOnClose;
+begin
+  if Assigned(FOnClose) then
+    OnClose(self);
+end;
+
 procedure TfpgForm.Hide;
 begin
   if (fpgApplication.TopModalForm = self) then
@@ -334,8 +339,11 @@ end;
 
 procedure TfpgForm.Close;
 begin
+  DoOnClose;
+
   Hide;
   fpgApplication.RemoveComponent(self);
+
   if fpgApplication.MainForm = self then
     fpgApplication.Terminated := True;
 end;

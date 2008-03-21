@@ -37,12 +37,15 @@ type
   TfpgPrimitiveElement = (
       peFocusRectangle,                // The focus rectangle
       pePanel,                         // Generic bevel of a panel
+      pePanelButton,                   // Panel are of standard button
       pePanelButtonBevel,              // The bevel of a button
       pePanelEditBox,                  // Frame around a text edit box
-      peFrameMenu,                     // Frame for popup windows and menus
+      pePanelToolbarButton,            // Panel area of a toolbar button
       pePanelMenuBar,                  // The menu bar panel
       pePanelScrollAreaCorner,         // Panel at the bottom right corner of the scroll area
+      peFrameMenu,                     // Frame for popup windows and menus
       peFrameDefaultButton,            // Frame around a default button like in a dialog
+      peFrameToolbarButton,            // Frame around a toolbar button
       peFramePageControl,              // Frame for a Page Control
       peIndicatorArrowUp,              // Generic up arrow
       peIndicatorArrowDown,            // Generic down arrow
@@ -101,6 +104,34 @@ type
       stEnabled
       );
   TfpgState = set of TfpgStateItem;
+  
+  
+  TfpgStandardPixmap = (
+      spMessageBoxInformation,
+      spMessageBoxCritical,
+      spMessageBoxError,
+      spMessageBoxWarning,
+      spMessageBoxQuestion,
+      spDirOpenIcon,
+      spDirCloseIcon,
+      spDirIcon,
+      spDirLinkIcon,
+      spFileIcon,
+      spFileLinkIcon,
+      spFileDialogToParent,           // Icon of back to parent dir
+      spFileDialogNewFolder,
+      spDialogOkButton,
+      spDialogCancelButton,
+      spDialogHelpButton,
+      spDialogSaveButton,
+      spDialogOpenButton,
+      spDialogCloseButton,
+      spDialogApplyButton,
+      spDialogResetButton,
+      spDialogDiscardButton,
+      spDialogYesButton,
+      spDialogNoButton
+      );
   
       
   // Just a data class
@@ -202,9 +233,9 @@ begin
             InflateRect(r, -1, -1);
           end;
 
-          Canvas.SetColor(clButtonFace);
-          Canvas.SetLineStyle(1, lsSolid);
-          Canvas.FillRectangle(r.Left, r.Top, r.Width, r.Height);
+//          Canvas.SetColor(clButtonFace);
+//          Canvas.SetLineStyle(1, lsSolid);
+ //         Canvas.FillRectangle(r.Left, r.Top, r.Width, r.Height);
 
           // Left and Top (outer)
           if stLowered in option.State then
