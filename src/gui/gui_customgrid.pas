@@ -32,6 +32,7 @@ interface
 uses
   Classes,
   SysUtils,
+  gfxbase,
   fpgfx,
   gui_basegrid;
   
@@ -43,18 +44,25 @@ type
     FAlignment: TAlignment;
     FTitle: string;
     FWidth: integer;
+    FBackgroundColor: TfpgColor;
+    FTextColor: TfpgColor;
   public
     constructor Create; virtual;
     property    Width: integer read FWidth write FWidth;
     property    Title: string read FTitle write FTitle;
     property    Alignment: TAlignment read FAlignment write FAlignment;
+    property    BackgroundColor: TfpgColor read FBackgroundColor write FBackgroundColor;
+    property    TextColor: TfpgColor read FTextColor write FTextColor;
   end;
   
   
+  { TfpgCustomGrid }
+
   TfpgCustomGrid = class(TfpgBaseGrid)
   protected
     FRowCount: integer;
     FColumns: TList;
+    procedure   SetTextColor(const AValue: TfpgColor); override;
     function    GetColumns(AIndex: integer): TfpgGridColumn; virtual;
     procedure   DoDeleteColumn(ACol: integer); virtual;
     procedure   DoSetRowCount(AValue: integer); virtual;
@@ -65,6 +73,10 @@ type
     procedure   SetRowCount(const AValue: integer); virtual;
     function    GetColumnWidth(ACol: integer): integer; override;
     procedure   SetColumnWidth(ACol: integer; const AValue: integer); override;
+    function    GetColumnBackgroundColor(ACol: integer): TfpgColor; override;
+    procedure   SetColumnBackgroundColor(ACol: integer; const AValue: TfpgColor); override;
+    function    GetColumnTextColor(ACol: integer): TfpgColor; override;
+    procedure   SetColumnTextColor(ACol: integer; const AValue: TfpgColor); override;
     function    GetHeaderText(ACol: integer): string; override;
     property    RowCount: integer read GetRowCount write SetRowCount;
     property    ColumnCount: integer read GetColumnCount write SetColumnCount;
@@ -97,6 +109,18 @@ end;
 function TfpgCustomGrid.GetRowCount: integer;
 begin
   Result := FRowCount;
+end;
+
+procedure TfpgCustomGrid.SetTextColor(const AValue: TfpgColor);
+var
+  i: integer;
+begin
+  inherited SetTextColor(AValue);
+  for i := 0 to ColumnCount-1 do
+  begin
+    TfpgGridColumn(FColumns.Items[i]).TextColor := AValue;
+  end;
+  Repaint;
 end;
 
 function TfpgCustomGrid.GetColumns(AIndex: integer): TfpgGridColumn;
@@ -195,6 +219,50 @@ begin
   end;
 end;
 
+function TfpgCustomGrid.GetColumnBackgroundColor(ACol: integer): TfpgColor;
+begin
+  if (ACol > 0) and (ACol <= ColumnCount) then
+    Result := TfpgGridColumn(FColumns[ACol-1]).FBackgroundColor
+  else
+    result := BackgroundColor;
+end;
+
+procedure TfpgCustomGrid.SetColumnBackgroundColor(ACol: integer; const AValue: TfpgColor);
+var
+  lCol: TfpgGridColumn;
+begin
+  lCol := TfpgGridColumn(FColumns[ACol-1]);
+
+  if lCol.FBackgroundColor <> AValue then
+  begin
+    lCol.FBackgroundColor := AValue;
+//    UpdateScrollBars;
+    Repaint;
+  end;
+end;
+
+function TfpgCustomGrid.GetColumnTextColor(ACol: integer): TfpgColor;
+begin
+  if (ACol > 0) and (ACol <= ColumnCount) then
+    Result := TfpgGridColumn(FColumns[ACol-1]).FTextColor
+  else
+    result := TextColor;
+end;
+
+procedure TfpgCustomGrid.SetColumnTextColor(ACol: integer; const AValue: TfpgColor);
+var
+  lCol: TfpgGridColumn;
+begin
+  lCol := TfpgGridColumn(FColumns[ACol-1]);
+
+  if lCol.FTextColor <> AValue then
+  begin
+    lCol.FTextColor := AValue;
+//    UpdateScrollBars;
+    Repaint;
+  end;
+end;
+
 function TfpgCustomGrid.GetHeaderText(ACol: integer): string;
 begin
   Result := TfpgGridColumn(FColumns[ACol-1]).Title;
@@ -225,6 +293,8 @@ begin
   Result := DoCreateColumnClass;
   Result.Title := ATitle;
   Result.Width := AWidth;
+  Result.Backgroundcolor := clBoxcolor;
+  Result.TextColor := TextColor;
   FColumns.Add(Result);
   
   if csUpdating in ComponentState then

@@ -8,6 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   SysUtils,
+  gfxbase,
   fpgfx,
   gui_form,
   gui_grid,
@@ -17,6 +18,8 @@ uses
 
 
 type
+
+  { TMainForm }
 
   TMainForm = class(TfpgForm)
   private
@@ -35,6 +38,8 @@ type
     procedure   chkShowHeaderChange(Sender: TObject);
     procedure   chkShowGridChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
+    procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: integer;
+        const ARect: TfpgRect; AFlags: integer; var ADefaultDrawing: boolean);
   protected
     procedure   HandleShow; override;
   public
@@ -70,6 +75,21 @@ end;
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TMainForm.stringgridDrawCell(Sender: TObject; const ARow,
+  ACol: integer; const ARect: TfpgRect; AFlags: integer;
+  var ADefaultDrawing: boolean);
+begin
+  if (ACol = 1) and (ARow = 3) then
+  begin
+    ADefaultDrawing := False;
+    StringGrid.Canvas.SetColor(clGreen);
+    fpgStyle.DrawDirectionArrow(StringGrid.Canvas, ARect.Left, ARect.Top,
+        ARect.Height, ARect.Height, 3);
+    StringGrid.Canvas.SetTextColor(clTeal);
+    StringGrid.Canvas.DrawString(ARect.Height + ARect.Left + 2, ARect.Top, StringGrid.Cells[ACol, ARow]);
+  end;
 end;
 
 procedure TMainForm.HandleShow;
@@ -117,6 +137,8 @@ begin
   stringgrid.ColumnTitle[1] := 'Column 1';
   stringgrid.Columns[2].Title := 'Col 2';
   // add some text
+  stringgrid.Cells[1, 1] := '(r1,c1)';
+  stringgrid.Cells[1, 3] := 'Custom';
   stringgrid.Cells[2, 3] := 'Hello';
   stringgrid.Cells[3, 1] := '(r1,c3)';
   
@@ -127,6 +149,15 @@ begin
   stringgrid.Cells[2, 2] := 'center';
   stringgrid.columns[3].Alignment := taRightJustify;
   stringgrid.Cells[3, 2] := 'right';
+  
+  // override default colors
+  stringgrid.BackgroundColor:= clKhaki;
+  stringgrid.ColumnBackgroundColor[2] := clLightGrey;
+  stringgrid.TextColor:= clBlue;
+  stringgrid.ColumnTextColor[1] := clRed;
+  
+  // Add custom painting
+  stringgrid.OnDrawCell:=@stringgridDrawCell;
 
   pagecontrol.ActivePageIndex := 0;
 

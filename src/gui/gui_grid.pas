@@ -129,12 +129,15 @@ type
     property    Columns[AIndex: integer]: TfpgStringColumn read GetColumns;
   public
     constructor Create(AOwner: TComponent); override;
-    function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify): TfpgStringColumn; overload;
+    function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify;
+      AbackgroundColor: TfpgColor= clDefault; ATextColor: TfpgColor= clDefault): TfpgStringColumn; overload;
     { ACol and ARow is 1-based. }
     property    Cells[ACol, ARow: LongWord]: string read GetCell write SetCell;
     property    Objects[ACol, ARow: LongWord]: TObject read GetObjects write SetObjects;
     property    ColumnTitle[ACol: integer]: string read GetColumnTitle write SetColumnTitle;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
+    property    ColumnBackgroundColor[ACol: integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
+    property    ColumnTextColor[ACol: integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
 //    property    Cols[index: Integer]: TStrings read GetCols write SetCols;
 //    property    Rows[index: Integer]: TStrings read GetRows write SetRows;
   end;
@@ -557,13 +560,24 @@ begin
 end;
 
 function TfpgCustomStringGrid.AddColumn(ATitle: string; AWidth: integer;
-    AAlignment: TAlignment): TfpgStringColumn;
+    AAlignment: TAlignment; ABackgroundColor: TfpgColor; ATextColor: TfpgColor): TfpgStringColumn;
 var
   r: integer;
 begin
   Include(ComponentState, csUpdating);
   Result := TfpgStringColumn(inherited AddColumn(ATitle, AWidth));
   Result.Alignment := AAlignment;
+
+  if ABackgroundColor = clDefault then
+    Result.BackgroundColor := clBoxColor
+  else
+    Result.BackgroundColor:= ABackgroundColor;
+
+  if ATextColor = clDefault then
+    Result.TextColor := TextColor
+  else
+    Result.TextColor:= ATextColor;
+    
   for r := 1 to RowCount do
     Result.Cells.Append('');
   Exclude(ComponentState, csUpdating);

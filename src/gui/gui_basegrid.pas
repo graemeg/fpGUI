@@ -46,6 +46,9 @@ type
 
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
+
+  { TfpgBaseGrid }
+
   TfpgBaseGrid = class(TfpgWidget)
   private
     FColResizing: boolean;
@@ -98,6 +101,10 @@ type
     function    GetHeaderText(ACol: integer): string; virtual;
     function    GetColumnWidth(ACol: integer): integer; virtual;
     procedure   SetColumnWidth(ACol: integer; const AValue: integer); virtual;
+    function    GetColumnBackgroundColor(ACol: integer): TfpgColor; virtual;
+    procedure   SetColumnBackgroundColor(ACol: integer; const AValue: TfpgColor); virtual;
+    function    GetColumnTextColor(ACol: integer): TfpgColor; virtual;
+    procedure   SetColumnTextColor(ACol: integer; const AValue: TfpgColor); virtual;
     function    GetColumnCount: integer; virtual;
     function    GetRowCount: integer; virtual;
     function    CanSelectCell(const ARow, ACol: integer): boolean;
@@ -132,6 +139,8 @@ type
     property    HeaderHeight: integer read FHeaderHeight;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
+    property    ColumnBackgroundColor[ACol: integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
+    property    ColumnTextColor[ACol: integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
     property    TopRow: integer read FFirstRow write SetFirstRow;
     property    OnDrawCell: TfpgDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
@@ -248,6 +257,26 @@ begin
     UpdateScrollBars;
     Repaint;
   end;
+end;
+
+function TfpgBaseGrid.GetColumnBackgroundColor(ACol: integer): TfpgColor;
+begin
+  // implemented in descendant
+end;
+
+procedure TfpgBaseGrid.SetColumnBackgroundColor(ACol: integer; const AValue: TfpgColor);
+begin
+  // implemented in descendant
+end;
+
+function TfpgBaseGrid.GetColumnTextColor(ACol: integer): TfpgColor;
+begin
+  // implemented in descendant
+end;
+
+procedure TfpgBaseGrid.SetColumnTextColor(ACol: integer; const AValue: TfpgColor);
+begin
+  // implemented in descendant
 end;
 
 function TfpgBaseGrid.GetColumnCount: integer;
@@ -577,8 +606,8 @@ begin
         end
         else
         begin
-          Canvas.SetColor(BackgroundColor);
-          Canvas.SetTextColor(clText1);
+          Canvas.SetColor(ColumnBackgroundColor[col]);
+          Canvas.SetTextColor(ColumnTextColor[col]);
         end;
         Canvas.AddClipRect(r);
         Canvas.FillRectangle(r);

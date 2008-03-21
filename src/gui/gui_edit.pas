@@ -331,7 +331,7 @@ begin
   begin
     // Handle only printable characters
     // Note: This is now UTF-8 compliant!
-    if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
+    if ((Ord(AText[1]) > 31) and (Ord(AText[1]) < 127)) or (Length(AText) > 1) then
     begin
       if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
       begin
