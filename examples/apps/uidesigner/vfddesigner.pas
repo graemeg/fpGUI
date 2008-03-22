@@ -272,6 +272,7 @@ var
   shift: boolean;
 begin
 //  writeln('TFormDesigner.MsgMouseDown');
+  msg.Stop  := True;
   FDragging := True;
   FWasDrag  := False;
   FDragPosX := msg.Params.mouse.x;
@@ -309,6 +310,7 @@ var
   x, y: integer;
 begin
 //  writeln('TFormDesigner.MsgMouseUp');
+  msg.Stop  := True;
   FDragging := False;
 
   shift := (ssShift in msg.Params.mouse.shiftstate);
@@ -373,6 +375,7 @@ var
   dx, dy: integer;
   wgd: TWidgetDesigner;
 begin
+  msg.Stop  := True;
   if not FDragging then
     Exit;
 
@@ -403,6 +406,7 @@ begin
   key := msg.params.keyboard.keycode;
   ss  := msg.params.keyboard.shiftstate;
 
+  msg.Stop := True;
   consumed := False;
 
   DesignerKeyPress(key, ss, consumed);
@@ -412,10 +416,12 @@ procedure TFormDesigner.MsgMove(var msg: TfpgMessageRec);
 begin
   if msg.dest = FForm then
     UpdatePropWin;
+  msg.Stop  := True;
 end;
 
 procedure TFormDesigner.MsgResize(var msg: TfpgMessageRec);
 begin
+  msg.Stop := True;
   if msg.dest = FForm then
   begin
     DeSelectAll; // because of the anchorings
@@ -1230,6 +1236,7 @@ end;
 
 procedure TFormDesigner.MsgActivate(var msg: TfpgMessageRec);
 begin
+  msg.Stop := True;
   maindsgn.SelectForm(self);
 end;
 
