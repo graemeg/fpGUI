@@ -575,8 +575,10 @@ begin
   if FCursorPos <> cp then
   begin
     FCursorPos := cp;
+    AdjustCursor;
     Repaint;
   end;
+
 end;
 
 procedure TfpgCustomEdit.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
