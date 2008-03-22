@@ -40,12 +40,13 @@ type
   TScrollNotifyEvent = procedure(Sender: TObject; position: integer) of object;
 
   TfpgScrollStyle = (ssNone, ssHorizontal, ssVertical, ssAutoBoth);
+  
+  TfpgScrollBarPart = (sbpNone, sbpUpBack, sbpPageUpBack, sbpSlider, sbpDownForward, sbpPageDownForward);
 
   TfpgScrollBar = class(TfpgWidget)
   private
     FLargeChange: Integer;
-    PrevAreaPressed: Boolean;
-    NextAreaPressed: Boolean;
+    FScrollbarDownPart: TfpgScrollBarPart;
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
     procedure   SetPosition(const AValue: integer);
@@ -56,9 +57,6 @@ type
     FScrollStep: integer;
     FSliderPos: TfpgCoord;
     FSliderLength: TfpgCoord;
-    FSliderDragging: boolean;
-    FStartBtnPressed: Boolean;
-    FEndBtnPressed: Boolean;
     FSliderDragPos: TfpgCoord;
     FSliderDragStart: TfpgCoord;
     FScrollTimer: TfpgTimer;
@@ -106,13 +104,9 @@ begin
   SliderSize    := 0.5;
   FOnScroll     := nil;
   FSliderPos    := 0;
-  FSliderDragging := False;
   FSliderLength := 10;
   FScrollStep   := 1;
   FLargeChange  := 0;
-  
-  PrevAreaPressed := False;
-  NextAreaPressed := False;
 end;
 
 destructor TfpgScrollBar.Destroy;
@@ -128,13 +122,13 @@ begin
   
   if Orientation = orVertical then
   begin
-    DrawButton(0, 0, Width, Width, 'sys.sb.up', FStartBtnPressed);
-    DrawButton(0, Height-Width, Width, Width, 'sys.sb.down', FEndBtnPressed);
+    DrawButton(0, 0, Width, Width, 'sys.sb.up', FScrollbarDownPart = sbpPageUpBack);
+    DrawButton(0, Height-Width, Width, Width, 'sys.sb.down', FScrollbarDownPart = sbpPageDownForward);
   end
   else
   begin
-    DrawButton(0, 0, Height, Height, 'sys.sb.left', FStartBtnPressed);
-    DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', FEndBtnPressed);
+    DrawButton(0, 0, Height, Height, 'sys.sb.left', FScrollbarDownPart = sbpPageUpBack);
+    DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', FScrollbarDownPart = sbpPageDownForward);
   end;
 
   DrawSlider(True);
@@ -186,28 +180,75 @@ begin
 end;
 
 procedure TfpgScrollBar.ScrollTimer(Sender: TObject);
+   function WithinActiveButton: Boolean;
+   begin
+     Result := (FMousePosition.X < FActiveButtonRect.Right)
+           and (FMousePosition.X > FActiveButtonRect.Left)
+           and (FMousePosition.Y < FActiveButtonRect.Bottom)
+           and (FMousePosition.Y > FActiveButtonRect.Top);
+   end;
+   function WithinPageArea(IsBefore: Boolean): Boolean;
+   begin
+     case Orientation of
+       orVertical:
+         if IsBefore then
+           Result := (FMousePosition.X > -1)
+                 and (FMousePosition.X < Width)
+                 and (FMousePosition.Y < FSliderPos + Width)
+                 and (FMousePosition.Y > Width)
+         else
+           Result := (FMousePosition.X > -1)
+                 and (FMousePosition.X < Width)
+                 and (FMousePosition.Y < Height - Width)
+                 and (FMousePosition.Y > Width + FSliderPos + FSliderLength);
+       orHorizontal:
+         if IsBefore then
+           Result := (FMousePosition.X > Height)
+                 and (FMousePosition.X < FSliderPos + Height)
+                 and (FMousePosition.Y < Height)
+                 and (FMousePosition.Y > -1)
+         else
+           Result := (FMousePosition.X > Height + FSliderPos + FSliderLength)
+                 and (FMousePosition.X < Width - Height)
+                 and (FMousePosition.Y < Height)
+                 and (FMousePosition.Y > -1);
+     end;
+   end;
 begin
+
   FScrollTimer.Interval := 25;
-  if  (FMousePosition.X < FActiveButtonRect.Right)
-      and (FMousePosition.X > FActiveButtonRect.Left)
-      and (FMousePosition.Y < FActiveButtonRect.Bottom)
-      and (FMousePosition.Y > FActiveButtonRect.Top) then
-  begin
-    if FStartBtnPressed then
-    begin
-      PositionChange(-FScrollStep);
-      if Position = FMin then
-        FScrollTimer.Enabled := False;
-    end;
-    if FEndBtnPressed then
-    begin
-      PositionChange(FScrollStep);
-      if Position = FMax then
-        FScrollTimer.Enabled := False;
-    end;
-  end
+  case FScrollbarDownPart of
+    sbpUpBack:
+      begin
+        if WithinActiveButton then
+          PositionChange(-FScrollStep);
+        if Position = FMin then
+          FScrollTimer.Enabled := False;
+      end;
+    sbpDownForward:
+      begin
+        if WithinActiveButton then
+          PositionChange(FScrollStep);
+        if Position = FMax then
+          FScrollTimer.Enabled := False;
+      end;
+    sbpPageUpBack:
+      begin
+        if (Position = FMin) or not WithinPageArea(True) then
+          FScrollTimer.Enabled := False
+        else
+          PositionChange(-(FScrollStep * 5));
+      end;
+    sbpPageDownForward:
+      begin
+        if (Position = FMax) or not WithinPageArea(False) then
+          FScrollTimer.Enabled := False
+        else
+          PositionChange(FScrollStep * 5);
+      end;
   else
     FScrollTimer.Enabled := False;
+  end;
 end;
 
 procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
@@ -281,31 +322,31 @@ begin
   // Paint the area between the buttons and the Slider
   if Orientation = orVertical then
   begin
-    if PrevAreaPressed then
+    if FScrollbarDownPart in [sbpUpBack, sbpPageUpBack] then
     begin
       Canvas.SetColor(clShadow1);
       Canvas.FillRectangle(0, Width, Width, FSliderPos);
       Canvas.SetColor(clScrollBar);
     end
-    else if NextAreaPressed then
+    else if FScrollbarDownPart in [sbpDownForward, sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(0, FSliderPos + FSliderLength, Width, Height - Width - FSliderPos);
+      Canvas.FillRectangle(0, FSliderPos + FSliderLength, Width, Height - Width - (FSliderPos + FSliderLength));
       Canvas.SetColor(clScrollBar);
     end;
   end
   else
   begin
-    if PrevAreaPressed then
+    if FScrollbarDownPart in [sbpUpBack, sbpPageUpBack] then
     begin
       Canvas.SetColor(clShadow1);
       Canvas.FillRectangle(Height, 0, FSliderPos, Height);
       Canvas.SetColor(clScrollBar);
     end
-    else if NextAreaPressed then
+    else if FScrollbarDownPart in [sbpDownForward, sbpPageDownForward] then
     begin
       Canvas.SetColor(clShadow1);
-      Canvas.FillRectangle(FSliderPos + FSliderLength, 0, Width - Height - FSliderPos, Height);
+      Canvas.FillRectangle(FSliderPos + FSliderLength, 0, Width - Height - (FSliderPos + FSliderLength), Height);
       Canvas.SetColor(clScrollBar);
     end;
   end;
@@ -335,31 +376,31 @@ begin
     begin
       // Up button has been pressed
       PositionChange(-FScrollStep);
-      FStartBtnPressed := True;
+      FScrollbarDownPart := sbpUpBack;
       FActiveButtonRect.SetRect(0, 0, Width, Width);
     end
     else if y >= Height - Width then
     begin
       // Down button has been pressed
       PositionChange(FScrollStep);
-      FEndBtnPressed := True;
+      FScrollbarDownPart := sbpDownForward;
       FActiveButtonRect.SetRect(0,Height-Width, Width, Height);
     end
     else if (y >= (Width + FSliderPos)) and (y <= Width + FSliderPos + FSliderLength) then
     begin
-      FSliderDragging := True;
+      FScrollbarDownPart := sbpSlider;
       FSliderDragPos  := y;
     end
     else if (y > Width) and (y < (Width + FSliderPos)) then
     begin
       // Clicked between Up button and Slider
-      PrevAreaPressed := True;
+      FScrollbarDownPart := sbpPageUpBack;
       PositionChange(-(FScrollStep * 5))
     end
     else if (y < (Height - Width)) and (y > (Width + FSliderPos + FSliderLength)) then
     begin
       // Clicked between Down button and Slider
-      NextAreaPressed := True;
+      FScrollbarDownPart := sbpPageDownForward;
       PositionChange(FScrollStep * 5);
     end;
   end
@@ -369,41 +410,41 @@ begin
     begin
       // Left button has been pressed
       PositionChange(-FScrollStep);
-      FStartBtnPressed := True;
+      FScrollbarDownPart := sbpUpBack;
       FActiveButtonRect.SetRect(0, 0, Height, Height);
     end
     else if x >= Width - Height then
     begin
       // Right button has been pressed
       PositionChange(FScrollStep);
-      FEndBtnPressed := True;
+      FScrollbarDownPart := sbpDownForward;
       FActiveButtonRect.SetRect(Width-Height, 0, Width, Height);
     end
     else if (x >= (Height + FSliderPos)) and (x <= Height + FSliderPos + FSliderLength) then
     begin
-      FSliderDragging := True;
+      FScrollbarDownPart := sbpSlider;
       FSliderDragPos  := x;
     end
     else if (x > Height) and (x < (Height + FSliderPos)) then
     begin
       // Clicked between Left button and Slider
-      PrevAreaPressed := True;
+      FScrollbarDownPart := sbpPageUpBack;
       PositionChange(-(FScrollStep * 5));
     end
     else if (x < (Width - Height)) and (x > (Height + FSliderPos + FSliderLength)) then
     begin
       // Clicked between the Right button and Slider
-      NextAreaPressed := True;
+      FScrollbarDownPart := sbpPageDownForward;
       PositionChange(FScrollStep * 5);
     end;
   end;
   
-  if FSliderDragging then
+  if FScrollbarDownPart = sbpSlider then
   begin
     FSliderDragStart := FSliderPos;
     DrawSlider(False);
   end
-  else if FStartBtnPressed or FEndBtnPressed then
+  else if FScrollbarDownPart <> sbpNone then
   begin
     FScrollTimer.Interval := 500;
     FScrollTimer.Enabled := True;
@@ -417,23 +458,11 @@ var
   WasPressed: Boolean;
 begin
   inherited;
-  WasPressed := FStartBtnPressed or FEndBtnPressed;
+  WasPressed := FScrollbarDownPart <> sbpNone;
   FScrollTimer.Enabled := False;
-  FStartBtnPressed  := False;
-  FEndBtnPressed    := False;
-  FSliderDragging   := False;
-  
-  if PrevAreaPressed then
-  begin
-    PrevAreaPressed := False;
-    WasPressed := True;
-  end
-  else if NextAreaPressed then
-  begin
-    NextAreaPressed := False;
-    WasPressed := True;
-  end;
 
+  FScrollbarDownPart := sbpNone;
+  
   if WasPressed then
     HandlePaint;
 end;
@@ -450,11 +479,8 @@ begin
   FMousePosition.X := x;
   FMousePosition.Y := y;
   
-  if (not FSliderDragging) or ((btnstate and MOUSE_LEFT) = 0) then
-  begin
-    FSliderDragging := False;
+  if (FScrollbarDownPart <> sbpSlider) or ((btnstate and MOUSE_LEFT) = 0) then
     Exit;
-  end;
 
   if Orientation = orVertical then
   begin
