@@ -132,6 +132,8 @@ type
   end;
 
 
+  { TfpgCanvasImpl }
+
   TfpgCanvasImpl = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
@@ -147,6 +149,8 @@ type
     FClipRegion: TRegion;
     FPixHeight,
     FPixWidth: Integer;
+    FBufferFreeTimer: TObject;
+    procedure   BufferFreeTimer(Sender: TObject);
     procedure   TryFreePixmap;
   protected
     procedure   DoSetFontRes(fntres: TfpgFontResourceBase); override;
@@ -1688,6 +1692,7 @@ destructor TfpgCanvasImpl.Destroy;
 begin
   if FDrawing then
     DoEndDraw;
+  FreeAndNil(FBufferFreeTimer);
   TryFreePixmap;
   inherited Destroy;
 end;
@@ -1730,13 +1735,41 @@ begin
 
     if buffered then
     begin
-      if (FastDoubleBuffer = False) or (FBufferPixmap = 0) or (w <> FPixWidth) or (h <> FPixHeight) then
+      if (FBufferPixmap = 0)
+      or (FastDoubleBuffer = False)
+      or (FastDoubleBuffer and (w > FPixWidth) or (h > FPixHeight))
+      or ((FastDoubleBuffer = False) and ((w <> FPixWidth) or (h <> FPixHeight)))
+      then
       begin
+        if FastDoubleBuffer and ((w > FPixWidth) or (h > FPixHeight)) then
+        begin
+          FPixHeight := h + 30;
+          FPixWidth  := w + 30;
+        end
+        else begin
+          FPixHeight := h;
+          FPixWidth  := w;
+        end;
         TryFreePixmap;
-        FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, w, h, xapplication.DisplayDepth);
+        FBufferPixmap := XCreatePixmap(xapplication.display, FDrawWindow.FWinHandle, FPixWidth, FPixHeight, xapplication.DisplayDepth);
       end;
-      FPixHeight := h;
-      FPixWidth := w;
+      if FastDoubleBuffer then
+      begin
+        // Rapid paint events reuse the double buffer which resests a delay
+        // After the delay the double buffer is freed, letting the OS use video
+        // memory if needed.
+        // Things like scrolling and resizing are fast
+
+        // Reset the timers next trigger
+        if FBufferFreeTimer = nil then
+        begin
+          FBufferFreeTimer := TfpgTimer.Create(500);
+          TfpgTimer(FBufferFreeTimer).OnTimer := @BufferFreeTimer;
+        end
+        else
+          TfpgTimer(FBufferFreeTimer).Enabled := False;
+        TfpgTimer(FBufferFreeTimer).Enabled := True;
+      end;
       FDrawHandle   := FBufferPixmap;
     end
     else
@@ -1834,6 +1867,15 @@ procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
   XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, w, h,
       Trunc(64 * a1), Trunc(64 * a2));
+end;
+
+procedure TfpgCanvasImpl.BufferFreeTimer(Sender: TObject);
+begin
+  {$IFDEF DEBUG}
+  WriteLn('fpGFX/X11: Freeing Buffer w=', FPixWidth, ' h=', FPixHeight);
+  {$ENDIF}
+  TryFreePixmap;
+  FreeAndNil(FBufferFreeTimer);
 end;
 
 procedure TfpgCanvasImpl.TryFreePixmap;

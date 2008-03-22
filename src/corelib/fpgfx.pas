@@ -369,8 +369,17 @@ var
   ctime: TDateTime;
 begin
   ctime := now;
-  for i := 0 to fpgTimers.Count-1 do
-    TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
+  i := 0;
+
+  while i <  fpgTimers.Count do
+  begin
+    if fpgTimers[i] = nil then
+      fpgTimers.Delete(i)
+    else begin
+      TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
+      Inc(i);
+    end;
+  end;
 end;
 
 function fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
@@ -387,7 +396,7 @@ begin
   for i := 0 to fpgTimers.Count-1 do
   begin
     t := TfpgTimer(fpgTimers[i]);
-    if t.Enabled and (t.NextAlarm < dt) then
+    if (t <> nil) and t.Enabled and (t.NextAlarm < dt) then
     begin
       dt := t.NextAlarm;
       tb := True;
@@ -597,7 +606,7 @@ var
 begin
   i := fpgTimers.IndexOf(self);
   if i > -1 then
-    fpgTimers.Delete(i);
+    fpgTimers[i] := nil; // we free the item in fpgCheckTimers
   inherited Destroy;
 end;
 
@@ -751,7 +760,8 @@ begin
   fpgCaret.Free;
   
   for i := fpgTimers.Count-1 downto 0 do
-    TfpgTimer(fpgTimers[i]).Free;
+    if fpgTimers[i] <> nil then
+      TfpgTimer(fpgTimers[i]).Free;
   fpgTimers.Free;
 
   FDefaultFont.Free;

@@ -450,6 +450,8 @@ begin
 end;
 
 procedure TfpgBaseListBox.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
+var
+  NewFocus: Integer;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
@@ -459,7 +461,11 @@ begin
   if ((not FMouseDragging) or (btnstate and 1 = 0)) and (not HotTrack) then
     Exit; //==>
 
-  FocusItem := FFirstItem + Trunc((y - FMargin) / RowHeight);
+  NewFocus := FFirstItem + Trunc((y - FMargin) / RowHeight);
+  if NewFocus < 1 then
+    NewFocus := 1;
+
+  FocusItem := NewFocus;
 end;
 
 procedure TfpgBaseListBox.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
