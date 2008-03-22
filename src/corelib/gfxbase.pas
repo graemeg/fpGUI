@@ -112,6 +112,7 @@ type
     Sender: TObject;
     Dest: TObject;
     Params: TfpgMessageParams;
+    Stop: Boolean;
   end;
   PfpgMessageRec = ^TfpgMessageRec;
 

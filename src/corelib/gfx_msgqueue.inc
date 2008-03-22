@@ -139,6 +139,7 @@ begin
     p^.MsgCode := MsgCode;
     p^.Sender  := Sender;
     p^.Dest    := Dest;
+    p^.Stop    := False;
   end
   else
     Writeln('THE MESSAGE QUEUE IS FULL.');

@@ -313,7 +313,8 @@ begin
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
-    Exit;
+    if msg.Stop then
+      Exit;
   end;
 
   key := msg.params.keyboard.keycode;
@@ -342,7 +343,8 @@ begin
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
-    Exit;
+    if msg.Stop then
+      Exit;
   end;
 
   key := msg.params.keyboard.keycode;
@@ -369,7 +371,8 @@ begin
   begin
     // dispatching message to designer
     FFormDesigner.Dispatch(msg);
-    Exit;
+    if msg.Stop then
+      Exit;
   end;
 
   if not FEnabled then
@@ -406,7 +409,8 @@ begin
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
-    Exit;
+    if msg.Stop then
+      Exit;
   end;
 
   if not FEnabled then
@@ -458,7 +462,8 @@ begin
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
-    Exit;
+    if msg.Stop then
+      Exit;
   end;
 
   HandleMouseMove(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
@@ -487,7 +492,8 @@ begin
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
-    Exit;
+    if msg.Stop then
+      Exit;
   end;
 
   HandleMouseEnter;
@@ -500,7 +506,8 @@ begin
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
-    Exit;
+    if msg.Stop then
+      Exit;
   end;
 
   HandleMouseExit;
