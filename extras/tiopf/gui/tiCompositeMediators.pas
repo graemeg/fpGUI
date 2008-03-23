@@ -24,14 +24,14 @@ type
   { Composite mediator for TfpgListView }
   TCompositeListViewMediator = class(TtiObject)
   private
-    FIsObserving: Boolean;
-    FDisplayNames: string;
-    FShowDeleted: Boolean;
     function    GetSelectedObject: TtiObject;
     procedure   SetSelectedObject(const AValue: TtiObject);
     procedure   SetShowDeleted(const AValue: Boolean);
     procedure   DoCreateItemMediator(AData: TtiObject);
   protected
+    FIsObserving: Boolean;
+    FDisplayNames: string;
+    FShowDeleted: Boolean;
     FView: TfpgListView;
     FModel: TtiObjectList;
     FMediatorList: TObjectList;
@@ -98,7 +98,8 @@ type
     FModel: TtiObject;
     FView: TfpgLVItem;
     FDisplayNames: string;
-    procedure   SetupFields;
+  protected
+    procedure   SetupFields; virtual;
   public
     constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem; const ADisplayNames: string; IsObserving: Boolean = True);
     procedure   BeforeDestruction; override;
@@ -128,6 +129,11 @@ type
     property    View: TfpgStringGrid read FView;
     property    DisplayNames: string read FDisplayNames;
   end;
+
+
+function tiFieldName(const AField: string): string;
+function tiFieldWidth(const AField: string): integer;
+function tiFieldCaption(const AField: string): string;
 
 
 implementation

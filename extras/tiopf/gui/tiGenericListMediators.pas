@@ -215,8 +215,8 @@ begin
     selected := View.FocusItem;
   end;
 
-  ptr := View.OnSelect;
-  View.OnSelect := nil;
+  ptr := View.OnChange;
+  View.OnChange := nil;
   View.Items.BeginUpdate;
   try
     View.Items.Clear;
@@ -237,7 +237,7 @@ begin
   finally
     View.Items.EndUpdate;
     view.Update;
-    View.OnSelect := ptr;
+    View.OnChange := ptr;
     HandleSelectionChanged;
   end;
 end;
@@ -349,6 +349,7 @@ begin
     end;
   finally
     View.Items.EndUpdate;
+    View.FocusItem := 1;
     View.OnChange := ptr;
     HandleSelectionChanged;
   end;

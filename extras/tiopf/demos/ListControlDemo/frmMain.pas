@@ -112,19 +112,29 @@ begin
 end;
 
 procedure TMainForm.lbSelectionChanged(Sender: TObject);
+var
+  backup: TNotifyEvent;
 begin
   FListBoxMediator.HandleSelectionChanged;
   { This is only done to keep the ComboBox and ListBox in sync. This would not
     be done or needed in a real application }
+  backup := cbPeople.OnChange;
+  cbPeople.OnChange := nil;
   cbPeople.FocusItem := lbPeople.FocusItem;
+  cbpeople.OnChange := backup;
 end;
 
 procedure TMainForm.cbSelectionChanged(Sender: TObject);
+var
+  backup: TNotifyEvent;
 begin
   FComboBoxMediator.HandleSelectionChanged;
   { This is only done to keep the ComboBox and ListBox in sync. This would not
     be done or needed in a real application }
+  backup := lbPeople.OnChange;
+  lbPeople.OnChange := nil;
   lbPeople.FocusItem := cbPeople.FocusItem;
+  lbPeople.OnChange := backup;
 end;
 
 procedure TMainForm.chkShowDeletedChange(Sender: TObject);
@@ -134,6 +144,8 @@ begin
 end;
 
 procedure TMainForm.InitializeComponents;
+var
+  lbl: TfpgLabel;
 begin
   btnClose := CreateButton(self, 416, 370, 75, 'Close', @btnCloseClick);
   btnClose.ImageName := 'stdimg.Close';
@@ -166,9 +178,10 @@ begin
   AgeTrackBar.ShowPosition := True;
   AgeTrackBar.Enabled := False;
 
-  CreateLabel(self, edtName.Right + 30, edtName.Top, 'These components observe the ').TextColor := clBlue;
-  CreateLabel(self, edtName.Right + 30, AgeTrackBar.Top-5, 'selected item of ComboBox').TextColor := clBlue;
-  
+  lbl := CreateLabel(self, edtName.Right + 30, edtName.Top, 'These components observe the selected item of ComboBox', 200, AgeTrackBar.Top-5);
+  lbl.TextColor := clBlue;
+  lbl.WrapText := True;
+
   cbPeople := TfpgComboBox.Create(self);
   cbPeople.Top          := AgeTrackBar.Bottom + 17;
   cbPeople.Left         := 7;
