@@ -70,6 +70,7 @@ type
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
   protected
+    FInternalBtnRect: TfpgRect;
     FFocusItem: integer;
     FItems: TStringList;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -92,7 +93,6 @@ type
 
   TfpgAbstractComboBox = class(TfpgBaseComboBox)
   private
-    FInternalBtnRect: TfpgRect;
     procedure   InternalBtnClick(Sender: TObject);
     procedure   SetFocusItem(const AValue: integer);
     procedure   CalculateInternalButtonRect;

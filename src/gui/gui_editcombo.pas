@@ -72,7 +72,6 @@ type
     FText: string;
     FSelectedItem: integer;
     FMaxLength: integer;
-    FInternalBtnRect: TfpgRect;
     FNewItem: boolean;
     procedure   SetAllowNew(const AValue: TAllowNew);
     procedure   InternalBtnClick(Sender: TObject);
