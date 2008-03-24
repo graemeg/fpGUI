@@ -26,6 +26,7 @@ unit gui_listbox;
     * Only surface properties as published in TfpgListBox
     * Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
       the items list.
+    * Color Listbox: User Defined color palette support.
 }
 
 interface
@@ -141,15 +142,19 @@ type
   end;
 
 
-  TfpgColorPalette = (cpStandardColors, cpSystemColors, cpWebColors);
+  TfpgColorPalette = (cpStandardColors, cpSystemColors, cpWebColors, cpUserDefined);
 
   
-  TfpgColorListBox = class(TfpgBaseListBox)
+  TfpgBaseColorListBox = class(TfpgBaseListBox)
   private
     FColorBoxWidth: TfpgCoord;
     FColorBoxHeight: TfpgCoord;
     FColorPalette: TfpgColorPalette;
-    procedure   SetColorPalette (const AValue: TfpgColorPalette );
+    FShowColorNames: Boolean;
+    function    GetColor: TfpgColor;
+    procedure   SetColor(const AValue: TfpgColor);
+    procedure   SetColorPalette(const AValue: TfpgColorPalette);
+    procedure   SetShowColorNames (const AValue: Boolean );
     procedure   SetupColorPalette;
     procedure   FreeAndClearColors;
   protected
@@ -157,12 +162,31 @@ type
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
 //    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     property    Items: TList read FItems;
+    property    Color: TfpgColor read GetColor write SetColor;
+    property    ColorPalette: TfpgColorPalette read FColorPalette write SetColorPalette;
+    property    ShowColorNames: Boolean read FShowColorNames write SetShowColorNames default True;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    ItemCount: integer; override;
-    function    Color: TfpgColor;
-    property    ColorPalette: TfpgColorPalette read FColorPalette write SetColorPalette;
+
+  end;
+  
+  
+  TfpgColorListBox = class(TfpgBaseColorListBox)
+  published
+    property    AutoHeight;
+    property    BackgroundColor default clListBox;
+    property    Color;
+    property    ColorPalette;
+    property    FocusItem;
+    property    FontDesc;
+    property    HotTrack;
+    property    Items;
+    property    PopupFrame;
+    property    ShowColorNames;
+    property    TabOrder;
+    property    TextColor;
   end;
 
 
@@ -756,18 +780,47 @@ begin
   ColorValue := AColorValue;
 end;
 
-{ TfpgColorListBox }
+{ TfpgBaseColorListBox }
 
-procedure TfpgColorListBox.SetColorPalette (const AValue: TfpgColorPalette );
+procedure TfpgBaseColorListBox.SetColorPalette (const AValue: TfpgColorPalette );
 begin
   if FColorPalette = AValue then
-    exit;
+    Exit;
   FColorPalette := AValue;
   SetupColorPalette;
-//  Repaint;
+  RePaint;
 end;
 
-procedure TfpgColorListBox.SetupColorPalette;
+procedure TfpgBaseColorListBox.SetShowColorNames (const AValue: Boolean );
+begin
+  if FShowColorNames = AValue then
+    Exit;
+  FShowColorNames := AValue;
+  Repaint;
+end;
+
+function TfpgBaseColorListBox.GetColor: TfpgColor;
+begin
+  Result := TColorItem(FItems.Items[FocusItem-1]).ColorValue;
+end;
+
+procedure TfpgBaseColorListBox.SetColor(const AValue: TfpgColor);
+var
+  i: integer;
+begin
+  if GetColor = AValue then
+    Exit;
+  for i := 0 to FItems.Count-1 do
+  begin
+    if TColorItem(FItems.Items[i]).ColorValue = AValue then
+    begin
+      FocusItem := i+1;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TfpgBaseColorListBox.SetupColorPalette;
 begin
   FreeAndClearColors;
 
@@ -829,15 +882,155 @@ begin
     cpWebColors:
         begin
           { TODO : Need to add the web colors }
-          FItems.Add(TColorItem.Create('clRed', clRed));
-          FItems.Add(TColorItem.Create('clGreen', clGreen));
-          FItems.Add(TColorItem.Create('clBlue', clBlue));
+          FItems.Add(TColorItem.Create('clAliceBlue', clAliceBlue));
+          FItems.Add(TColorItem.Create('clAntiqueWhite', clAntiqueWhite));
+          FItems.Add(TColorItem.Create('clAqua', clAqua));
+          FItems.Add(TColorItem.Create('clAquamarine', clAquamarine));
+          FItems.Add(TColorItem.Create('clAzure', clAzure));
+          FItems.Add(TColorItem.Create('clBeige', clBeige));
+          FItems.Add(TColorItem.Create('clBisque', clBisque));
           FItems.Add(TColorItem.Create('clBlack', clBlack));
+          FItems.Add(TColorItem.Create('clBlanchedAlmond', clBlanchedAlmond));
+          FItems.Add(TColorItem.Create('clBlue', clBlue));
+          FItems.Add(TColorItem.Create('clBlueViolet', clBlueViolet));
+          FItems.Add(TColorItem.Create('clBrown', clBrown));
+          FItems.Add(TColorItem.Create('clBurlyWood', clBurlyWood));
+          FItems.Add(TColorItem.Create('clCadetBlue', clCadetBlue));
+          FItems.Add(TColorItem.Create('clChartreuse', clChartreuse));
+          FItems.Add(TColorItem.Create('clChocolate', clChocolate));
+          FItems.Add(TColorItem.Create('clCoral', clCoral));
+          FItems.Add(TColorItem.Create('clCornflowerBlue', clCornflowerBlue));
+          FItems.Add(TColorItem.Create('clCornsilk', clCornsilk));
+          FItems.Add(TColorItem.Create('clCrimson', clCrimson));
+          FItems.Add(TColorItem.Create('clCyan', clCyan));
+          FItems.Add(TColorItem.Create('clDarkBlue', clDarkBlue));
+          FItems.Add(TColorItem.Create('clDarkCyan', clDarkCyan));
+          FItems.Add(TColorItem.Create('clDarkGoldenrod', clDarkGoldenrod));
+          FItems.Add(TColorItem.Create('clDarkGray', clDarkGray));
+          FItems.Add(TColorItem.Create('clDarkGreen', clDarkGreen));
+          FItems.Add(TColorItem.Create('clDarkKhaki', clDarkKhaki));
+          FItems.Add(TColorItem.Create('clDarkMagenta', clDarkMagenta));
+          FItems.Add(TColorItem.Create('clDarkOliveGreen', clDarkOliveGreen));
+          FItems.Add(TColorItem.Create('clDarkOrange', clDarkOrange));
+          FItems.Add(TColorItem.Create('clDarkOrchid', clDarkOrchid));
+          FItems.Add(TColorItem.Create('clDarkRed', clDarkRed));
+          FItems.Add(TColorItem.Create('clDarkSalmon', clDarkSalmon));
+          FItems.Add(TColorItem.Create('clDarkSeaGreen', clDarkSeaGreen));
+          FItems.Add(TColorItem.Create('clDarkSlateBlue', clDarkSlateBlue));
+          FItems.Add(TColorItem.Create('clDarkSlateGray', clDarkSlateGray));
+          FItems.Add(TColorItem.Create('clDarkTurquoise', clDarkTurquoise));
+          FItems.Add(TColorItem.Create('clDarkViolet', clDarkViolet));
+          FItems.Add(TColorItem.Create('clDeepPink', clDeepPink));
+          FItems.Add(TColorItem.Create('clDeepSkyBlue', clDeepSkyBlue));
+          FItems.Add(TColorItem.Create('clDimGray',clDimGray ));
+          FItems.Add(TColorItem.Create('clDodgerBlue', clDodgerBlue));
+          FItems.Add(TColorItem.Create('clFireBrick', clFireBrick));
+          FItems.Add(TColorItem.Create('clFloralWhite', clFloralWhite));
+          FItems.Add(TColorItem.Create('clForestGreen', clForestGreen));
+          FItems.Add(TColorItem.Create('clFuchsia', clFuchsia));
+          FItems.Add(TColorItem.Create('clGainsboro', clGainsboro));
+          FItems.Add(TColorItem.Create('clGhostWhite', clGhostWhite));
+          FItems.Add(TColorItem.Create('clGold', clGold));
+          FItems.Add(TColorItem.Create('clGoldenrod', clGoldenrod));
+          FItems.Add(TColorItem.Create('clGray', clGray));
+          FItems.Add(TColorItem.Create('clGreen', clGreen));
+          FItems.Add(TColorItem.Create('clGreenYellow', clGreenYellow));
+          FItems.Add(TColorItem.Create('clHoneydew', clHoneydew));
+          FItems.Add(TColorItem.Create('clHotPink', clHotPink));
+          FItems.Add(TColorItem.Create('clIndianRed', clIndianRed));
+          FItems.Add(TColorItem.Create('clIndigo', clIndigo));
+          FItems.Add(TColorItem.Create('clIvory', clIvory));
+          FItems.Add(TColorItem.Create('clKhaki', clKhaki));
+          FItems.Add(TColorItem.Create('clLavender', clLavender));
+          FItems.Add(TColorItem.Create('clLavenderBlush', clLavenderBlush));
+          FItems.Add(TColorItem.Create('clLawnGreen', clLawnGreen));
+          FItems.Add(TColorItem.Create('clLemonChiffon', clLemonChiffon));
+          FItems.Add(TColorItem.Create('clLightBlue', clLightBlue));
+          FItems.Add(TColorItem.Create('clLightCoral', clLightCoral));
+          FItems.Add(TColorItem.Create('clLightCyan', clLightCyan));
+          FItems.Add(TColorItem.Create('clLightGoldenrodYellow', clLightGoldenrodYellow));
+          FItems.Add(TColorItem.Create('clLightGreen', clLightGreen));
+          FItems.Add(TColorItem.Create('clLightGrey', clLightGrey));
+          FItems.Add(TColorItem.Create('clLightPink', clLightPink));
+          FItems.Add(TColorItem.Create('clLightSalmon', clLightSalmon));
+          FItems.Add(TColorItem.Create('clLightSeaGreen', clLightSeaGreen));
+          FItems.Add(TColorItem.Create('clLightSkyBlue', clLightSkyBlue));
+          FItems.Add(TColorItem.Create('clLightSlateGray', clLightSlateGray));
+          FItems.Add(TColorItem.Create('clLightSteelBlue', clLightSteelBlue));
+          FItems.Add(TColorItem.Create('clLightYellow', clLightYellow));
+          FItems.Add(TColorItem.Create('clLime', clLime));
+          FItems.Add(TColorItem.Create('clLimeGreen', clLimeGreen));
+          FItems.Add(TColorItem.Create('clLinen', clLinen));
+          FItems.Add(TColorItem.Create('clMagenta', clMagenta));
+          FItems.Add(TColorItem.Create('clMaroon', clMaroon));
+          FItems.Add(TColorItem.Create('clMediumAquamarine', clMediumAquamarine));
+          FItems.Add(TColorItem.Create('clMediumBlue', clMediumBlue));
+          FItems.Add(TColorItem.Create('clMediumOrchid', clMediumOrchid));
+          FItems.Add(TColorItem.Create('clMediumPurple', clMediumPurple));
+          FItems.Add(TColorItem.Create('clMediumSeaGreen', clMediumSeaGreen));
+          FItems.Add(TColorItem.Create('clMediumSlateBlue', clMediumSlateBlue));
+          FItems.Add(TColorItem.Create('clMediumSpringGreen', clMediumSpringGreen));
+          FItems.Add(TColorItem.Create('clMediumTurquoise', clMediumTurquoise));
+          FItems.Add(TColorItem.Create('clMediumVioletRed', clMediumVioletRed));
+          FItems.Add(TColorItem.Create('clMidnightBlue', clMidnightBlue));
+          FItems.Add(TColorItem.Create('clMintCream', clMintCream));
+          FItems.Add(TColorItem.Create('clMistyRose', clMistyRose));
+          FItems.Add(TColorItem.Create('clMoccasin', clMoccasin));
+          FItems.Add(TColorItem.Create('clNavajoWhite', clNavajoWhite));
+          FItems.Add(TColorItem.Create('clNavy', clNavy));
+          FItems.Add(TColorItem.Create('clOldLace', clOldLace));
+          FItems.Add(TColorItem.Create('clOlive', clOlive));
+          FItems.Add(TColorItem.Create('clOliveDrab', clOliveDrab));
+          FItems.Add(TColorItem.Create('clOrange', clOrange));
+          FItems.Add(TColorItem.Create('clOrangeRed', clOrangeRed));
+          FItems.Add(TColorItem.Create('clOrchid', clOrchid));
+          FItems.Add(TColorItem.Create('clPaleGoldenrod', clPaleGoldenrod));
+          FItems.Add(TColorItem.Create('clPaleGreen', clPaleGreen));
+          FItems.Add(TColorItem.Create('clPaleTurquoise', clPaleTurquoise));
+          FItems.Add(TColorItem.Create('clPaleVioletRed', clPaleVioletRed));
+          FItems.Add(TColorItem.Create('clPaleBlue',clPaleBlue ));
+          FItems.Add(TColorItem.Create('clPapayaWhip', clPapayaWhip));
+          FItems.Add(TColorItem.Create('clPeachPuff',clPeachPuff ));
+          FItems.Add(TColorItem.Create('clPeru', clPeru));
+          FItems.Add(TColorItem.Create('clPink', clPink));
+          FItems.Add(TColorItem.Create('clPlum', clPlum));
+          FItems.Add(TColorItem.Create('clPowderBlue', clPowderBlue));
+          FItems.Add(TColorItem.Create('clPurple', clPurple));
+          FItems.Add(TColorItem.Create('clRed', clRed));
+          FItems.Add(TColorItem.Create('clRosyBrown', clRosyBrown));
+          FItems.Add(TColorItem.Create('clRoyalBlue', clRoyalBlue));
+          FItems.Add(TColorItem.Create('clSaddleBrown', clSaddleBrown));
+          FItems.Add(TColorItem.Create('clSalmon', clSalmon));
+          FItems.Add(TColorItem.Create('clSandyBrown', clSandyBrown));
+          FItems.Add(TColorItem.Create('clSeaGreen', clSeaGreen));
+          FItems.Add(TColorItem.Create('clSeashell', clSeashell));
+          FItems.Add(TColorItem.Create('clSienna', clSienna));
+          FItems.Add(TColorItem.Create('clSilver', clSilver));
+          FItems.Add(TColorItem.Create('clSkyBlue2', clSkyBlue2));
+          FItems.Add(TColorItem.Create('clSlateBlue', clSlateBlue));
+          FItems.Add(TColorItem.Create('clSlateGray', clSlateGray));
+          FItems.Add(TColorItem.Create('clSnow', clSnow));
+          FItems.Add(TColorItem.Create('clSpringGreen', clSpringGreen));
+          FItems.Add(TColorItem.Create('clSteelBlue', clSteelBlue));
+          FItems.Add(TColorItem.Create('clTan', clTan));
+          FItems.Add(TColorItem.Create('clTeal', clTeal));
+          FItems.Add(TColorItem.Create('clThistle', clThistle));
+          FItems.Add(TColorItem.Create('clTomato', clTomato));
+          FItems.Add(TColorItem.Create('clTurquoise', clTurquoise));
+          FItems.Add(TColorItem.Create('clViolet', clViolet));
+          FItems.Add(TColorItem.Create('clWheat', clWheat));
+          FItems.Add(TColorItem.Create('clWhite', clWhite));
+          FItems.Add(TColorItem.Create('clWhiteSmoke', clWhiteSmoke));
+          FItems.Add(TColorItem.Create('clYellow', clYellow));
+          FItems.Add(TColorItem.Create('clYellowGreen', clYellowGreen));
         end;
   end;
+  FocusItem := 1;
+  FollowFocus;
+  UpdateScrollbar;
 end;
 
-procedure TfpgColorListBox.FreeAndClearColors;
+procedure TfpgBaseColorListBox.FreeAndClearColors;
 var
   i: integer;
 begin
@@ -846,7 +1039,7 @@ begin
   FItems.Clear;
 end;
 
-procedure TfpgColorListBox.DrawItem (num: integer; rect: TfpgRect; flags: integer );
+procedure TfpgBaseColorListBox.DrawItem (num: integer; rect: TfpgRect; flags: integer );
 var
   itm: TColorItem;
 begin
@@ -859,14 +1052,16 @@ begin
   Canvas.SetColor(clBlack);
   Canvas.DrawRectangle(rect.Left + 2, rect.Top + 4, FColorBoxWidth, FColorboxHeight);
   // color text
-  fpgStyle.DrawString(Canvas, FColorboxWidth + 8 + rect.left, rect.top+1, itm.ColorName, Enabled);
+  if FShowColorNames then
+    fpgStyle.DrawString(Canvas, FColorboxWidth + 8 + rect.left, rect.top+1, itm.ColorName, Enabled);
 end;
 
-constructor TfpgColorListBox.Create (AOwner: TComponent );
+constructor TfpgBaseColorListBox.Create (AOwner: TComponent );
 begin
   inherited Create (AOwner );
   FColorBoxWidth := 35;
   FColorBoxHeight := 10;
+  FShowColorNames := True;
 
   FItems := TList.Create;
   // default Delphi colors
@@ -874,21 +1069,16 @@ begin
   SetupColorPalette;
 end;
 
-destructor TfpgColorListBox.Destroy;
+destructor TfpgBaseColorListBox.Destroy;
 begin
   FreeAndClearColors;
   FItems.Free;
   inherited Destroy;
 end;
 
-function TfpgColorListBox.ItemCount: integer;
+function TfpgBaseColorListBox.ItemCount: integer;
 begin
   result := FItems.Count;
-end;
-
-function TfpgColorListBox.Color: TfpgColor;
-begin
-  Result := TColorItem(FItems.Items[FocusItem]).ColorValue;
 end;
 
 end.
