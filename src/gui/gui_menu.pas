@@ -1134,7 +1134,7 @@ var
   mi: TfpgMenuItem;
 begin
   if Assigned(FBeforeShow) then
-    FBeforeShow(self);
+    BeforeShow(self);
 
   // Collecting visible items
   FItems.Count := 0;
@@ -1150,9 +1150,9 @@ begin
   end;
 
   // Measuring sizes
-  h             := 0;
-  tw            := 0;
-  hkw           := 0;
+  h             := 0;   // height
+  tw            := 0;   // text width
+  hkw           := 0;   // hotkey width
   FSymbolWidth  := 0;
   for n := 1 to VisibleCount do
   begin
@@ -1172,7 +1172,7 @@ begin
   end;
 
   if hkw > 0 then
-    hkw := hkw + 5;
+    hkw := hkw + 10; // spacing between text and hotkey text
 
   FHeight := FMargin*2 + h;
   FWidth  := (FMargin+FTextMargin)*2 + FSymbolWidth + tw + hkw;

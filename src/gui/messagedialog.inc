@@ -1416,7 +1416,6 @@ class procedure TfpgMessageDialog.AboutFPGui(const ATitle: string);
 var
   dlg: TfpgMessageDialog;
 begin
-//  writeln('** Implement TfpgMessageDialog.AboutFPGui');
   dlg := TfpgMessageDialog.Create(nil);
   try
     dlg.FDialogType := mtAbout;
@@ -1424,6 +1423,9 @@ begin
       dlg.WindowTitle := Format(rsAbout, [fpGUIName])
     else
       dlg.WindowTitle := ATitle;
+    dlg.Buttons := [mbOK];
+    dlg.DefaultButton := mbOK;
+    dlg.PrepareLayout;
     dlg.ShowModal;
   finally
     dlg.Free;
