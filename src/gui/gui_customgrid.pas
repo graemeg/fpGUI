@@ -191,6 +191,7 @@ begin
     FocusRow := FRowCount;
   end;
   DoSetRowCount(AValue);  // could be implemented by descendants
+  UpdateScrollBars;
   RePaint;
 end;
 
