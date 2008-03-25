@@ -35,7 +35,7 @@
         <MinVersion Minor="5" Valid="True"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="8">
       <Unit0>
         <Filename Value="docedit.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -51,6 +51,31 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_options"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="model.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="model"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="fpdeutil.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FPDEUtil"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="pkeditor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PkEditor"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="doceditmsg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="doceditmsg"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="doceditopts.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="doceditopts"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

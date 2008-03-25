@@ -21,11 +21,12 @@ uses
   gui_memo,
   gui_tree,
   gui_bevel,
-  dom, XMLWrite, XMLRead, contnrs;
+  dom, XMLWrite, XMLRead, contnrs, model;
 
 type
   TMainForm = class(TfpgForm)
   private
+    FFile: TDescDocument;
     FDescriptionNode: TDomNode;
     FDoc: TXMLDocument;
     FModified: Boolean;
@@ -33,14 +34,11 @@ type
     FModuleTree: TObjectList;
     FElementTree: TObjectList;
     procedure   btnQuitClicked(Sender: TObject);
-    procedure   btnOpenClicked(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
     procedure   miFileSaveAsClicked(Sender: TObject);
     procedure   miHelpAboutClicked(Sender: TObject);
     procedure   miExtraOptionsClicked(Sender: TObject);
-    procedure   ProcessXMLFile(pFilename: string);
-    procedure   Refresh;
     procedure   GetElementList(List: TStrings);
   public
     {@VFD_HEAD_BEGIN: MainForm}
@@ -109,11 +107,6 @@ begin
   Close;
 end;
 
-procedure TMainForm.btnOpenClicked(Sender: TObject);
-begin
-  // open xml file
-end;
-
 procedure TMainForm.miFileQuitClicked(Sender: TObject);
 begin
   Close;
@@ -129,7 +122,8 @@ begin
     if dlg.RunOpenFile then
     begin
       lblFilename.Text := dlg.FileName;
-      ProcessXMLFile(dlg.FileName);
+      FFile := TDescDocument.Create(dlg.Filename);
+//      ProcessXMLFile(dlg.FileName);
     end
   finally
     dlg.Free;
@@ -170,107 +164,6 @@ begin
   finally
     frm.Free;
   end;
-end;
-
-procedure TMainForm.ProcessXMLFile(pFilename: string);
-var
-  dn: TDOMNode;
-  ls: TStringList;
-begin
-  ReadXMLFile(FDoc, pFilename);
-  FDescriptionNode := FDoc.DocumentElement;
-  Refresh;
-  ls := TStringList.Create;
-  GetElementList(ls);
-  writeln('.......');
-  writeln(ls.Text);
-  ls.Free;
-end;
-
-procedure TMainForm.Refresh;
-
-  procedure DoTopicNode(Node: TDomElement; Parent: TNodeTreeItem);
-  var
-    TTreeNode: TTopicTreeItem;
-    SubNode: TDomNode;
-  begin
-    TTreeNode := TTopicTreeItem.Create(TDomElement(Node));
-//    TTreeNode.ConnectSelect(@SelectTopic,Node);
-//    TTreeNode.ConnectButtonPressEvent(@PopupTopicMenu,Nil);
-//    Parent.CheckSubItems;
-    Parent.Add(TTreeNode);
-//    TFPGtkTree(Parent.SubTree).Append(TTreeNode);
-//    TTreeNode.Show;
-    SubNode := Node.FirstChild;
-    while (SubNode <> nil) do
-    begin
-      if (SubNode.NodeType = ELEMENT_NODE) and (SubNode.NodeName = 'topic') then
-        DoTopicNode(SubNode as TDomElement, TTreeNode);
-      SubNode := SubNode.NextSibling;
-    end;
-  end;
-
-var
-  Node, SubNode, SSnode: TDomNode;
-  FTreeNode: TPackageTreeItem;
-  MTreeNode: TModuleTreeItem;
-
-begin
-  CurrentModule := nil;
-
-//  FModuleTree.Tree.ClearItems(0,-1);
-  if Assigned(FDescriptionNode) then
-  begin
-    Node := FDescriptionNode.FirstChild;
-    while Assigned(Node) do
-    begin
-      if (Node.NodeType = ELEMENT_NODE) and (Node.NodeName = 'package') then
-      begin
-        writeln('package: ', Node.Attributes.GetNamedItem('name').TextContent);
-        FTreeNode := TPackageTreeItem.Create(TDomElement(Node));
-//        FTreeNode.ConnectSelect(@Selectpackage,Node);
-//        FTreeNode.ConnectButtonPressEvent(@PopupModuleMenu,Nil);
-        FModuleTree.Add(FTreeNode);
-//        FTreeNode.Show;
-        SubNode := Node.FirstChild;
-        while Assigned(SubNode) do
-        begin
-          if (SubNode.NodeType = ELEMENT_NODE) and (SubNode.NodeName = 'module') then
-          begin
-            writeln('  module: ', SubNode.Attributes.GetNamedItem('name').TextContent);
-            if not Assigned(CurrentModule) then
-              CurrentModule := TDomElement(SubNode);
-            MTreeNode := TModuleTreeItem.Create(TDomElement(SubNode));
-//            MtreeNode.ConnectSelect(@SelectModule,SubNode);
-//            MTreeNode.ConnectButtonPressEvent(@PopupModuleMenu,Nil);
-//            FTreeNode.CheckSubtree;
-            FTreeNode.Add(MTreeNode);
-//            TFPGtkTree(FTreeNode.SubTree).Append(MTreeNode);
-            //MTreeNode.Show;
-            SSNode := SubNode.FirstChild;
-            while (SSNode <> nil) do
-            begin
-              if (SSNode.NodeType = ELEMENT_NODE) and (SSNode.NodeName = 'topic') then
-              begin
-                writeln('    topic: ', SSNode.Attributes.GetNamedItem('name').TextContent);
-                DoTopicNode(SSNode as TDomElement, MTreeNode);
-              end;
-              SSNode := SSNode.NextSibling;
-            end;
-          end
-          else if (SubNode.NodeType = ELEMENT_NODE) and (SubNode.NodeName = 'topic') then
-          begin
-            writeln('  topic: ', SubNode.Attributes.GetNamedItem('name').TextContent);
-            DoTopicNode(SubNode as TDomElement,FTreeNode);
-          end;
-          SubNode := SubNode.NextSibling;
-        end;
-      end;
-      Node := Node.NextSibling;
-    end;
-  end;
-//  CurrentModule := Nil;
-  FModified := False;
 end;
 
 procedure TMainForm.GetElementList(List: TStrings);
