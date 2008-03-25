@@ -60,11 +60,14 @@ resourcestring
 
 
 const
-  {$IFDEF UNIX}
-  AllFilesMask    = '*';
-  {$ELSE}
-  AllFilesMask    = '*.*';
-  {$ENDIF UNIX}
+  // FPC 2.2.0 and earlier only
+  {$if defined(VER2_0) or defined(VER2_2_0)}
+    {$IFDEF UNIX}
+    AllFilesMask    = '*';
+    {$ELSE}
+    AllFilesMask    = '*.*';
+    {$ENDIF UNIX}
+  {$endif}
 
 
 { This is so that when we support LTR and RTL languages, the colon will be

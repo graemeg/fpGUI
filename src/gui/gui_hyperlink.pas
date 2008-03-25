@@ -50,13 +50,13 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   GoHyperLink;
   published
-    property    URL: TfpgString read FUrl write SetURL;
     property    Autosize;
     property    FontDesc;
+    property    HotTrackColor: TfpgColor read fHotTrackColor write SetHotTrackColor;
+    property    HotTrackFont: TfpgString read fHTFont write SetHotTrackFont;
     property    Text;
     property    TextColor;
-    property    HotTrackFont: TfpgString read fHTFont write SetHotTrackFont;
-    property    HotTrackColor: TfpgColor read fHotTrackColor write SetHotTrackColor;
+    property    URL: TfpgString read FUrl write SetURL;
 end;
 
 

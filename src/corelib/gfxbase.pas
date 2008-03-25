@@ -313,6 +313,8 @@ type
   TfpgComponent = class(TComponent)
   private
     FTagPointer: Pointer;
+  protected
+    FComponentState: TComponentState; // because FPC developers don't want to give me a TComponent.Loading function
   public
     property    TagPointer: Pointer read FTagPointer write FTagPointer;
   end;
