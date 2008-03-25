@@ -11,7 +11,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, gfxbase, fpgfx, gui_form, gui_popupcalendar, gui_edit,
-  gui_button, gui_label, gfx_popupwindow, gui_combobox, gui_checkbox;
+  gui_button, gui_label, gfx_popupwindow, gui_combobox, gui_checkbox, dateutils;
 
 type
   TMainForm = class(TfpgForm)
@@ -23,6 +23,7 @@ type
     procedure   btnMaxDateClicked(Sender: TObject);
     procedure   DoDropDown;
     procedure   cbCloseOnSelectChanged(Sender: TObject);
+    procedure   DrawCalendar(month, year: integer);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     edtName1: TfpgEdit;
@@ -57,6 +58,68 @@ begin
   cal.CloseOnSelect := TfpgCheckBox(Sender).Checked;
 end;
 
+type
+  TStartDay = (wdSun, wdMon, wdTue, wdWed, wdThu, wdFri, wdSat);
+
+procedure TMainForm.DrawCalendar(month, year: integer);
+var
+  weekstartday: TStartDay;
+  i: integer;
+  dayIndex: Byte;
+  startingPos: integer;
+  days: integer;
+  currentDay: integer;
+  s: string;
+begin
+  weekstartday := wdMon;  // 0=Sun, 1=Mon, 2=Tue etc.
+  weekstartday := TStartDay(Ord(cbName1.FocusItem-1));
+  
+  // Month and year
+  writeln('');
+  writeln(LongMonthNames[month], ' ', year);
+
+  // draw day-of-week header
+  for i := Ord(weekstartday) to Ord(weekstartday)+6 do
+  begin
+    if (i < 7) then
+      dayIndex := i
+    else
+      dayIndex := i - 7;
+
+    write(ShortDayNames[dayIndex+1] + ' ');
+  end;
+  writeln('');
+  
+  startingPos := DayOfTheWeek(EncodeDate(year, month, 1)-Ord(weekstartday))-1;
+  days := DaysInAMonth(year, month);
+//  writeln('startingpos:', startingPos, '  days:', days);
+
+  // draw blanks before first of month
+  if not (startingPos = 6) then
+  for i := 0 to startingPos do
+    write('    ');
+
+  // draw days of month
+  currentDay := 1;
+  i := startingPos;
+  //for i := startingPos to days do
+  while currentDay <= days do
+  begin
+    i := i + 1;
+    if ((i mod 7) = 0) and (currentDay <> 1) then
+      writeln('');
+    if currentDay <= 9 then
+      s := ' '
+    else
+      s := '';
+    write(currentDay, '  ' + s);
+    currentDay := currentDay + 1;
+  end;
+  
+  writeln('');
+  writeln('-----');
+end;
+
 procedure TMainForm.btnDownClicked(Sender: TObject);
 begin
   DoDropDown;
@@ -89,6 +152,7 @@ procedure TMainForm.btnMaxDateClicked(Sender: TObject);
 var
   old: string;
 begin
+{
   old := ShortDateFormat;
   ShortDateFormat := 'yyyy-mm-dd';
   try
@@ -96,6 +160,8 @@ begin
   finally
     ShortDateFormat := old;
   end;
+  }
+  DrawCalendar(StrToInt(edtMaxDate.Text), 2008);
 end;
 
 procedure TMainForm.DoDropDown;
@@ -168,12 +234,13 @@ begin
     Name := 'cbName1';
     SetPosition(132, 144, 120, 23);
     FontDesc := '#List';
-    Items.Add('line1');
-    Items.Add('line2');
-    Items.Add('line3');
-    Items.Add('line4');
-    Items.Add('line5');
-    Items.Add('line6');
+    Items.Add('Sun');
+    Items.Add('Mon');
+    Items.Add('Tue');
+    Items.Add('Wed');
+    Items.Add('Thu');
+    Items.Add('Fri');
+    Items.Add('Sat');
     TabOrder := 4;
   end;
 
