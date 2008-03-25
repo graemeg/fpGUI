@@ -59,6 +59,14 @@ resourcestring
 {$IFEND}
 
 
+const
+  {$IFDEF UNIX}
+  AllFilesMask    = '*';
+  {$ELSE}
+  AllFilesMask    = '*.*';
+  {$ENDIF UNIX}
+
+
 { This is so that when we support LTR and RTL languages, the colon will be
   added at the correct place. }
 function fpgAddColon(const AText: TfpgString): TfpgString;

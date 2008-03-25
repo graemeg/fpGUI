@@ -517,6 +517,7 @@ implementation
 uses
   fpgfx,  // needed for fpgApplication
   gfx_utils, // needed for fpgFileList
+  gfx_constants,
   typinfo;
   
   
@@ -2088,7 +2089,7 @@ begin
   try
     // The extra 'or' includes Normal attribute files under Windows. faAnyFile doesn't return those.
     // Reported to FPC as bug 9440 in Mantis.
-    if fpgFindFirst(FDirectoryName + '*', faAnyFile or $00000080, SearchRec) = 0 then
+    if fpgFindFirst(FDirectoryName + AllFilesMask, faAnyFile or $00000080, SearchRec) = 0 then
     begin
       AddEntry(SearchRec);
       while fpgFindNext(SearchRec) = 0 do

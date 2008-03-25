@@ -1,5 +1,8 @@
 {%mainunit gfx_utils.pas}
 
+uses
+  Registry, Shellapi;
+  
 // GDI specific implementations of encoding functions
 
 function fpgToOSEncoding(aString: TfpgString): string;
@@ -10,5 +13,14 @@ end;
 function fpgFromOSEncoding(aString: string): TfpgString;
 begin
   Result := AnsiToUtf8(aString);
+end;
+
+procedure fpgOpenURL(const aURL: TfpgString);
+begin
+  try
+    ShellExecute(0, 'open', PChar(aURL), nil, nil, 0) ;
+  except
+    // do nothing
+  end;
 end;
 
