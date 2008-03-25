@@ -31,8 +31,6 @@ uses
 
 type
 
-  { TfpgButton }
-
   TfpgButton = class(TfpgWidget, ICommandHolder)
   private
     FCommand: ICommand;
@@ -105,7 +103,7 @@ type
 
 
 function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
-  AOnClickEvent: TNotifyEvent): TfpgButton;
+  AOnClickEvent: TNotifyEvent; AImage: string = ''): TfpgButton;
 
 
 implementation
@@ -114,12 +112,13 @@ uses
   gui_form; {$Note Try and remove this gui_form dependency.}
 
 function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
-  AOnClickEvent: TNotifyEvent): TfpgButton;
+  AOnClickEvent: TNotifyEvent; AImage: string): TfpgButton;
 begin
   Result         := TfpgButton.Create(AOwner);
   Result.Text    := AText;
   Result.SetPosition(x, y, w, Result.Height); // font was used to calculate height.
   Result.OnClick := AOnClickEvent;
+  Result.ImageName := AImage;
 end;
 
 { TfpgButton }
