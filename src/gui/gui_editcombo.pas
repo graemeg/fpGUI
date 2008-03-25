@@ -400,7 +400,10 @@ var
   i: integer;
 begin
   if AValue = '' then
-    FocusItem := 0  // nothing selected
+  begin
+    FocusItem := 0;  // nothing selected
+    FText:= '';
+  end
   else
   begin
     for i := 0 to Items.Count - 1 do
@@ -512,6 +515,8 @@ begin
           FSelectedItem:= -4;      // detects return has been pressed (must be 4 due to number of repaints)
           if FNewItem and (FAllowNew = anYes) then
             FItems.Add(FText);
+          if Assigned(FDropDown) then
+            FDropDown.Close;
         end;
 
     else
