@@ -1997,6 +1997,7 @@ begin
      ((e.EntryType = etFile) and not FileNameMatches(e.Name, FFileMask)) then
   begin
     // do not add this entry
+    e.Free;
     Result := nil;
   end else
     Result := e;
