@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="GUI">
+    <module name="gui_hyperlink">
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Sysutils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gui_label">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="fpgfx">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="gfxbase">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+      <element name="TfpgHyperlink">
+        <short>TfpgCustomLabel derived class implements a hyperlink. </short>
+        <descr>This is a class to implement a hyperlink. Of course, such as all the other fpGUI components it is cross platform Windows, Linux but its behaviour can be different because the browser call. Under Windows ShellExecute Windows API is used, so you can have in the hyperlink any URL web compliant, that is, not only a typical http:// hyperlink but also a mailto: will work. 
+Under Linux you can have just a tipical http:// hyperlink.</descr>
+      </element>
+      <element name="TfpgHyperlink.URL">
+        <short>String type property that contains the hyperlink to jump.</short>
+      </element>
+      <element name="TfpgHyperlink.FontDesc">
+        <short>Standard font for this component is Arial-8:antialias=true:underline</short>
+      </element>
+      <element name="TfpgHyperlink.HandleLMouseDown">
+        <short>This overriden procedure intercepts left mouse keydown, call its inherited method and run GoHyperLink method to jump hyperlink. </short>
+      </element>
+      <element name="TfpgHyperlink.GoHyperLink">
+        <short>Jump to hyperlink.</short>
+      </element>
+      <element name="TfpgHyperlink.Autosize">
+        <short>Its default is True, so the hyperlink width is automatically determined.</short>
+      </element>
+      <element name="TfpgHyperlink.Text">
+        <short>Text description for the hyperlink.</short>
+        <descr>It can be, of course, different from URL and more descriptive about the hyperlink to reach.</descr>
+      </element>
+      <element name="TfpgHyperlink.TextColor">
+        <short>Color of Text property.</short>
+      </element>
+      <element name="TfpgHyperlink.HotTrackFont">
+        <short>This property is the type of font when mouse is over the hyperlink</short>
+      </element>
+      <element name="TfpgHyperlink.HotTrackColor">
+        <short>Same as HotTrackFont but for TextColor property when the mouse is over the hyperlink.</short>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>

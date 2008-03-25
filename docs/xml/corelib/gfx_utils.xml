@@ -10,8 +10,8 @@
 
 <module name="gfx_utils">
 <short>Utility functions.</short>
-<descr>Utility functions that need different implementations for each
- supported platform.
+<descr>Utility functions used throughout fpGUI. Some have common
+implementations and some have platform specific implementations.
 </descr>
 
 <!-- unresolved type reference Visibility: default -->
@@ -32,12 +32,20 @@
 </seealso>
 </element>
 
+<!-- unresolved type reference Visibility: default -->
+<element name="gfxbase">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
 <!-- function Visibility: default -->
-<element name="ExtractTargetSymLinkPath">
-<short>Returns the target symbolic link path</short>
-<descr>This functions returns a blank string under Windows because the file
- system doesn't support symbolic links. Under Linux it returns the target path
- of the symbol link. This function is used in the File Open/Save dialog.
+<element name="fpgToOSEncoding">
+<short>Converts string from fpGUI to OS specific filesystem encoding</short>
+<descr>This function is specific to filesystem strings like Paths, Filenames
+ and Directories.
 </descr>
 <errors>
 </errors>
@@ -46,21 +54,20 @@
 </element>
 
 <!-- function result Visibility: default -->
-<element name="ExtractTargetSymLinkPath.Result">
+<element name="fpgToOSEncoding.Result">
 <short></short>
 </element>
 
 <!-- argument Visibility: default -->
-<element name="ExtractTargetSymLinkPath.ALink">
+<element name="fpgToOSEncoding.aString">
 <short></short>
 </element>
 
 <!-- function Visibility: default -->
-<element name="FileIsSymlink">
-<short>Is the file a symbolic link.</short>
-<descr>Under Windows this function always returns False, due to the file 
- system not supporting symbolic links. Under Linux it will return True if the
- specified file is a symbolic link.
+<element name="fpgFromOSEncoding">
+<short>Converts OS specific filesystem encoding to fpGUI string</short>
+<descr>This function is specific to filesystem strings like Paths, Filenames
+ and Directories.
 </descr>
 <errors>
 </errors>
@@ -69,12 +76,191 @@
 </element>
 
 <!-- function result Visibility: default -->
-<element name="FileIsSymlink.Result">
+<element name="fpgFromOSEncoding.Result">
 <short></short>
 </element>
 
 <!-- argument Visibility: default -->
-<element name="FileIsSymlink.AFilename">
+<element name="fpgFromOSEncoding.aString">
+<short></short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="fpgOpenURL">
+<short>Launches the users Web Browser using the specified URL</short>
+<descr>On each platform, this function will try and find the appropriate (system
+ default) web browser.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgOpenURL.aURL">
+<short>URL address to go to</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgAddTrailingValue">
+<short>If ALine is not '', add the trailing value AValue</short>
+<descr>If ALine is not '', add the trailing value AValue
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgAddTrailingValue.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgAddTrailingValue.ALine">
+<short>The source string</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgAddTrailingValue.AValue">
+<short>The value that must be added</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgAddTrailingValue.ADuplicates">
+<short>Are duplicate AValue's allowed</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgFindFirst">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgFindFirst.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgFindFirst.Path">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgFindFirst.Attr">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgFindFirst.Rslt">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgFindNext">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgFindNext.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgFindNext.Rslt">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgGetCurrentDir">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgGetCurrentDir.Result">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgSetCurrentDir">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgSetCurrentDir.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgSetCurrentDir.NewDir">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgExpandFileName">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgExpandFileName.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgExpandFileName.FileName">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpgFileExists">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="fpgFileExists.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="fpgFileExists.FileName">
 <short></short>
 </element>
 

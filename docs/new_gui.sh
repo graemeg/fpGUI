@@ -28,6 +28,7 @@ makeskel --package=GUI --output=xml/gui/gui_iniutils.xml --input='-Fi../src/gui 
 makeskel --package=GUI --output=xml/gui/gui_mru.xml --input='-Fi../src/gui ../src/gui/gui_mru.pas'
 makeskel --package=GUI --output=xml/gui/gui_gauge.xml --input='-Fi../src/gui ../src/gui/gui_gauge.pas'
 makeskel --package=GUI --output=xml/gui/gui_popupcalendar.xml --input='-Fi../src/gui ../src/gui/gui_popupcalendar.pas'
+# makeskel --package=GUI --output=xml/gui/gui_hyperlink.xml --input='-Fi../src/gui ../src/gui/gui_hyperlink.pas'
 
 
 # makeskel --package=GUI --output=xml/gui/gui_.xml --input='-Fi../src/gui ../src/gui/gui_.pas'
