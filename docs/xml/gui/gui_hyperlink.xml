@@ -1,59 +1,53 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0"?>
 <fpdoc-descriptions>
-<package name="GUI">
+  <package name="GUI">
     <module name="gui_hyperlink">
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Sysutils">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gui_label">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="fpgfx">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gfxbase">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
+      <short>A label component that can launch a web browser</short>
+      <descr>This component acts like a link found in a web page. You can assign a
+target URL and if the user clicks on the component, it will launch a web browser
+using the target URL as destination.</descr>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Sysutils">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="gui_label">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="fpgfx">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="gfxbase">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
       <element name="TfpgHyperlink">
-        <short>TfpgCustomLabel derived class implements a hyperlink. </short>
-        <descr>This is a class to implement a hyperlink. Of course, such as all the other fpGUI components it is cross platform Windows, Linux but its behaviour can be different because the browser call. Under Windows ShellExecute Windows API is used, so you can have in the hyperlink any URL web compliant, that is, not only a typical http:// hyperlink but also a mailto: will work. 
-Under Linux you can have just a tipical http:// hyperlink.</descr>
+        <short>A <var>TfpgCustomLabel</var> descendant that implements hyperlink support</short>
+        <descr>This is a class to implement a hyperlink. Of course, such as all 
+the other fpGUI components it is cross platform (Windows, Linux) but its 
+behaviour can be different because of the the way the browser is called. Under Windows the 
+ShellExecute Windows API is used, so you can have any web compliant URL as the
+hyperlink target. For example, the typical http:// hyperlink but also a 
+mailto: link will work. Under Linux you can only use the typical http:// hyperlink.
+</descr>
       </element>
       <element name="TfpgHyperlink.URL">
-        <short>String type property that contains the hyperlink to jump.</short>
+        <short>String type property that contains the hyperlink target.</short>
       </element>
       <element name="TfpgHyperlink.FontDesc">
         <short>Standard font for this component is Arial-8:antialias=true:underline</short>
@@ -69,7 +63,7 @@ Under Linux you can have just a tipical http:// hyperlink.</descr>
       </element>
       <element name="TfpgHyperlink.Text">
         <short>Text description for the hyperlink.</short>
-        <descr>It can be, of course, different from URL and more descriptive about the hyperlink to reach.</descr>
+        <descr>It can be different from the URL target and more descriptive.</descr>
       </element>
       <element name="TfpgHyperlink.TextColor">
         <short>Color of Text property.</short>

@@ -4,13 +4,22 @@
  gui_basegrid gui_basegrid/index.html
   TfpgFocusChangeNotify gui_basegrid/tfpgfocuschangenotify.html
   TfpgRowChangeNotify gui_basegrid/tfpgrowchangenotify.html
+  TfpgCanSelectCellEvent gui_basegrid/tfpgcanselectcellevent.html
+  TfpgDrawCellEvent gui_basegrid/tfpgdrawcellevent.html
   TfpgBaseGrid gui_basegrid/tfpgbasegrid.html
    UpdateScrollBars gui_basegrid/tfpgbasegrid.updatescrollbars.html
    GetHeaderText gui_basegrid/tfpgbasegrid.getheadertext.html
    GetColumnWidth gui_basegrid/tfpgbasegrid.getcolumnwidth.html
    SetColumnWidth gui_basegrid/tfpgbasegrid.setcolumnwidth.html
+   GetColumnBackgroundColor gui_basegrid/tfpgbasegrid.getcolumnbackgroundcolor.html
+   SetColumnBackgroundColor gui_basegrid/tfpgbasegrid.setcolumnbackgroundcolor.html
+   GetColumnTextColor gui_basegrid/tfpgbasegrid.getcolumntextcolor.html
+   SetColumnTextColor gui_basegrid/tfpgbasegrid.setcolumntextcolor.html
    GetColumnCount gui_basegrid/tfpgbasegrid.getcolumncount.html
    GetRowCount gui_basegrid/tfpgbasegrid.getrowcount.html
+   CanSelectCell gui_basegrid/tfpgbasegrid.canselectcell.html
+   DoDrawCellEvent gui_basegrid/tfpgbasegrid.dodrawcellevent.html
+   DoCanSelectCell gui_basegrid/tfpgbasegrid.docanselectcell.html
    DrawCell gui_basegrid/tfpgbasegrid.drawcell.html
    DrawHeader gui_basegrid/tfpgbasegrid.drawheader.html
    DrawGrid gui_basegrid/tfpgbasegrid.drawgrid.html
@@ -29,7 +38,6 @@
    FontDesc gui_basegrid/tfpgbasegrid.fontdesc.html
    HeaderFont gui_basegrid/tfpgbasegrid.headerfont.html
    HeaderFontDesc gui_basegrid/tfpgbasegrid.headerfontdesc.html
-   BackgroundColor gui_basegrid/tfpgbasegrid.backgroundcolor.html
    FocusCol gui_basegrid/tfpgbasegrid.focuscol.html
    FocusRow gui_basegrid/tfpgbasegrid.focusrow.html
    RowSelect gui_basegrid/tfpgbasegrid.rowselect.html
@@ -40,8 +48,13 @@
    ScrollBarStyle gui_basegrid/tfpgbasegrid.scrollbarstyle.html
    HeaderHeight gui_basegrid/tfpgbasegrid.headerheight.html
    ColumnWidth gui_basegrid/tfpgbasegrid.columnwidth.html
+   ColumnBackgroundColor gui_basegrid/tfpgbasegrid.columnbackgroundcolor.html
+   ColumnTextColor gui_basegrid/tfpgbasegrid.columntextcolor.html
+   TopRow gui_basegrid/tfpgbasegrid.toprow.html
+   OnDrawCell gui_basegrid/tfpgbasegrid.ondrawcell.html
    OnFocusChange gui_basegrid/tfpgbasegrid.onfocuschange.html
    OnRowChange gui_basegrid/tfpgbasegrid.onrowchange.html
+   OnCanSelectCell gui_basegrid/tfpgbasegrid.oncanselectcell.html
    Create gui_basegrid/tfpgbasegrid.create.html
    Destroy gui_basegrid/tfpgbasegrid.destroy.html
    Update gui_basegrid/tfpgbasegrid.update.html
@@ -53,9 +66,11 @@
   TfpgBevel gui_bevel/tfpgbevel.html
    HandlePaint gui_bevel/tfpgbevel.handlepaint.html
    Create gui_bevel/tfpgbevel.create.html
+   BackgroundColor gui_bevel/tfpgbevel.backgroundcolor.html
    Shape gui_bevel/tfpgbevel.shape.html
    Style gui_bevel/tfpgbevel.style.html
-   BackgroundColor gui_bevel/tfpgbevel.backgroundcolor.html
+   OnClick gui_bevel/tfpgbevel.onclick.html
+   OnDoubleClick gui_bevel/tfpgbevel.ondoubleclick.html
   CreateBevel gui_bevel/createbevel.html
  gui_button gui_button/index.html
   TfpgButton gui_button/tfpgbutton.html
@@ -75,30 +90,31 @@
    HandleLMouseUp gui_button/tfpgbutton.handlelmouseup.html
    HandleMouseExit gui_button/tfpgbutton.handlemouseexit.html
    HandleMouseEnter gui_button/tfpgbutton.handlemouseenter.html
-   OnClick gui_button/tfpgbutton.onclick.html
    Create gui_button/tfpgbutton.create.html
    Destroy gui_button/tfpgbutton.destroy.html
-   DoPush gui_button/tfpgbutton.dopush.html
-   DoRelease gui_button/tfpgbutton.dorelease.html
    Click gui_button/tfpgbutton.click.html
    GetCommand gui_button/tfpgbutton.getcommand.html
    SetCommand gui_button/tfpgbutton.setcommand.html
    Down gui_button/tfpgbutton.down.html
    Font gui_button/tfpgbutton.font.html
    AllowDown gui_button/tfpgbutton.allowdown.html
-   Text gui_button/tfpgbutton.text.html
-   Default gui_button/tfpgbutton.default.html
-   FontDesc gui_button/tfpgbutton.fontdesc.html
-   ImageName gui_button/tfpgbutton.imagename.html
-   ImageMargin gui_button/tfpgbutton.imagemargin.html
-   ImageSpacing gui_button/tfpgbutton.imagespacing.html
-   GroupIndex gui_button/tfpgbutton.groupindex.html
    AllowAllUp gui_button/tfpgbutton.allowallup.html
-   ModalResult gui_button/tfpgbutton.modalresult.html
+   BackgroundColor gui_button/tfpgbutton.backgroundcolor.html
+   Default gui_button/tfpgbutton.default.html
    Embedded gui_button/tfpgbutton.embedded.html
+   FontDesc gui_button/tfpgbutton.fontdesc.html
+   GroupIndex gui_button/tfpgbutton.groupindex.html
+   ImageMargin gui_button/tfpgbutton.imagemargin.html
+   ImageName gui_button/tfpgbutton.imagename.html
+   ImageSpacing gui_button/tfpgbutton.imagespacing.html
+   ModalResult gui_button/tfpgbutton.modalresult.html
    ShowImage gui_button/tfpgbutton.showimage.html
+   TabOrder gui_button/tfpgbutton.taborder.html
+   Text gui_button/tfpgbutton.text.html
+   TextColor gui_button/tfpgbutton.textcolor.html
    OnMouseExit gui_button/tfpgbutton.onmouseexit.html
    OnMouseEnter gui_button/tfpgbutton.onmouseenter.html
+   OnClick gui_button/tfpgbutton.onclick.html
   CreateButton gui_button/createbutton.html
  gui_checkbox gui_checkbox/index.html
   TfpgCheckBox gui_checkbox/tfpgcheckbox.html
@@ -109,13 +125,31 @@
    Create gui_checkbox/tfpgcheckbox.create.html
    Destroy gui_checkbox/tfpgcheckbox.destroy.html
    Font gui_checkbox/tfpgcheckbox.font.html
-   Checked gui_checkbox/tfpgcheckbox.checked.html
-   Text gui_checkbox/tfpgcheckbox.text.html
-   FontDesc gui_checkbox/tfpgcheckbox.fontdesc.html
    BackgroundColor gui_checkbox/tfpgcheckbox.backgroundcolor.html
+   Checked gui_checkbox/tfpgcheckbox.checked.html
+   FontDesc gui_checkbox/tfpgcheckbox.fontdesc.html
+   TabOrder gui_checkbox/tfpgcheckbox.taborder.html
+   Text gui_checkbox/tfpgcheckbox.text.html
+   TextColor gui_checkbox/tfpgcheckbox.textcolor.html
    OnChange gui_checkbox/tfpgcheckbox.onchange.html
   CreateCheckBox gui_checkbox/createcheckbox.html
  gui_combobox gui_combobox/index.html
+  TfpgBaseComboBox gui_combobox/tfpgbasecombobox.html
+   FInternalBtnRect gui_combobox/tfpgbasecombobox.finternalbtnrect.html
+   FFocusItem gui_combobox/tfpgbasecombobox.ffocusitem.html
+   FItems gui_combobox/tfpgbasecombobox.fitems.html
+   HandleKeyPress gui_combobox/tfpgbasecombobox.handlekeypress.html
+   DoOnChange gui_combobox/tfpgbasecombobox.doonchange.html
+   DoDropDown gui_combobox/tfpgbasecombobox.dodropdown.html
+   GetDropDownPos gui_combobox/tfpgbasecombobox.getdropdownpos.html
+   DropDownCount gui_combobox/tfpgbasecombobox.dropdowncount.html
+   FocusItem gui_combobox/tfpgbasecombobox.focusitem.html
+   FontDesc gui_combobox/tfpgbasecombobox.fontdesc.html
+   Items gui_combobox/tfpgbasecombobox.items.html
+   OnChange gui_combobox/tfpgbasecombobox.onchange.html
+   Create gui_combobox/tfpgbasecombobox.create.html
+   Destroy gui_combobox/tfpgbasecombobox.destroy.html
+   Font gui_combobox/tfpgbasecombobox.font.html
   TfpgAbstractComboBox gui_combobox/tfpgabstractcombobox.html
    FMargin gui_combobox/tfpgabstractcombobox.fmargin.html
    FBtnPressed gui_combobox/tfpgabstractcombobox.fbtnpressed.html
@@ -126,31 +160,28 @@
    SetText gui_combobox/tfpgabstractcombobox.settext.html
    SetHeight gui_combobox/tfpgabstractcombobox.setheight.html
    SetWidth gui_combobox/tfpgabstractcombobox.setwidth.html
+   HandleKeyPress gui_combobox/tfpgabstractcombobox.handlekeypress.html
    HandleLMouseDown gui_combobox/tfpgabstractcombobox.handlelmousedown.html
    HandleLMouseUp gui_combobox/tfpgabstractcombobox.handlelmouseup.html
+   HandleMouseScroll gui_combobox/tfpgabstractcombobox.handlemousescroll.html
    HandleResize gui_combobox/tfpgabstractcombobox.handleresize.html
    HandlePaint gui_combobox/tfpgabstractcombobox.handlepaint.html
    PaintInternalButton gui_combobox/tfpgabstractcombobox.paintinternalbutton.html
-   DropDownCount gui_combobox/tfpgabstractcombobox.dropdowncount.html
-   Items gui_combobox/tfpgabstractcombobox.items.html
-   FocusItem gui_combobox/tfpgabstractcombobox.focusitem.html
-   BackgroundColor gui_combobox/tfpgabstractcombobox.backgroundcolor.html
-   FontDesc gui_combobox/tfpgabstractcombobox.fontdesc.html
-   OnChange gui_combobox/tfpgabstractcombobox.onchange.html
    Text gui_combobox/tfpgabstractcombobox.text.html
    Create gui_combobox/tfpgabstractcombobox.create.html
    Destroy gui_combobox/tfpgabstractcombobox.destroy.html
    Update gui_combobox/tfpgabstractcombobox.update.html
-   Font gui_combobox/tfpgabstractcombobox.font.html
   TfpgComboBox gui_combobox/tfpgcombobox.html
    BackgroundColor gui_combobox/tfpgcombobox.backgroundcolor.html
    DropDownCount gui_combobox/tfpgcombobox.dropdowncount.html
    FocusItem gui_combobox/tfpgcombobox.focusitem.html
    FontDesc gui_combobox/tfpgcombobox.fontdesc.html
-   Items gui_combobox/tfpgcombobox.items.html
-   Text gui_combobox/tfpgcombobox.text.html
-   Width gui_combobox/tfpgcombobox.width.html
    Height gui_combobox/tfpgcombobox.height.html
+   Items gui_combobox/tfpgcombobox.items.html
+   TabOrder gui_combobox/tfpgcombobox.taborder.html
+   Text gui_combobox/tfpgcombobox.text.html
+   TextColor gui_combobox/tfpgcombobox.textcolor.html
+   Width gui_combobox/tfpgcombobox.width.html
    OnChange gui_combobox/tfpgcombobox.onchange.html
   CreateComboBox gui_combobox/createcombobox.html
  gui_customgrid gui_customgrid/index.html
@@ -159,9 +190,12 @@
    Width gui_customgrid/tfpggridcolumn.width.html
    Title gui_customgrid/tfpggridcolumn.title.html
    Alignment gui_customgrid/tfpggridcolumn.alignment.html
+   BackgroundColor gui_customgrid/tfpggridcolumn.backgroundcolor.html
+   TextColor gui_customgrid/tfpggridcolumn.textcolor.html
   TfpgCustomGrid gui_customgrid/tfpgcustomgrid.html
    FRowCount gui_customgrid/tfpgcustomgrid.frowcount.html
    FColumns gui_customgrid/tfpgcustomgrid.fcolumns.html
+   SetTextColor gui_customgrid/tfpgcustomgrid.settextcolor.html
    GetColumns gui_customgrid/tfpgcustomgrid.getcolumns.html
    DoDeleteColumn gui_customgrid/tfpgcustomgrid.dodeletecolumn.html
    DoSetRowCount gui_customgrid/tfpgcustomgrid.dosetrowcount.html
@@ -172,6 +206,10 @@
    SetRowCount gui_customgrid/tfpgcustomgrid.setrowcount.html
    GetColumnWidth gui_customgrid/tfpgcustomgrid.getcolumnwidth.html
    SetColumnWidth gui_customgrid/tfpgcustomgrid.setcolumnwidth.html
+   GetColumnBackgroundColor gui_customgrid/tfpgcustomgrid.getcolumnbackgroundcolor.html
+   SetColumnBackgroundColor gui_customgrid/tfpgcustomgrid.setcolumnbackgroundcolor.html
+   GetColumnTextColor gui_customgrid/tfpgcustomgrid.getcolumntextcolor.html
+   SetColumnTextColor gui_customgrid/tfpgcustomgrid.setcolumntextcolor.html
    GetHeaderText gui_customgrid/tfpgcustomgrid.getheadertext.html
    RowCount gui_customgrid/tfpgcustomgrid.rowcount.html
    ColumnCount gui_customgrid/tfpgcustomgrid.columncount.html
@@ -186,6 +224,7 @@
   mbYesNo gui_dialogs/mbyesno.html
   mbOKCancel gui_dialogs/mbokcancel.html
   mbAbortRetryIgnore gui_dialogs/mbabortretryignore.html
+  cMsgDlgBtnText gui_dialogs/cmsgdlgbtntext.html
   stdimg_fpgui_logo gui_dialogs/stdimg_fpgui_logo.html
   TfpgMsgDlgType gui_dialogs/tfpgmsgdlgtype.html
   TfpgMsgDlgBtn gui_dialogs/tfpgmsgdlgbtn.html
@@ -193,9 +232,11 @@
   TfpgMessageBox gui_dialogs/tfpgmessagebox.html
    HandleKeyPress gui_dialogs/tfpgmessagebox.handlekeypress.html
    HandlePaint gui_dialogs/tfpgmessagebox.handlepaint.html
+   HandleShow gui_dialogs/tfpgmessagebox.handleshow.html
    Create gui_dialogs/tfpgmessagebox.create.html
    Destroy gui_dialogs/tfpgmessagebox.destroy.html
    SetMessage gui_dialogs/tfpgmessagebox.setmessage.html
+   CentreText gui_dialogs/tfpgmessagebox.centretext.html
   TfpgBaseDialog gui_dialogs/tfpgbasedialog.html
    FSpacing gui_dialogs/tfpgbasedialog.fspacing.html
    FDefaultButtonWidth gui_dialogs/tfpgbasedialog.fdefaultbuttonwidth.html
@@ -204,10 +245,12 @@
    btnOKClick gui_dialogs/tfpgbasedialog.btnokclick.html
    btnCancelClick gui_dialogs/tfpgbasedialog.btncancelclick.html
    HandleKeyPress gui_dialogs/tfpgbasedialog.handlekeypress.html
+   SetupCaptions gui_dialogs/tfpgbasedialog.setupcaptions.html
    Create gui_dialogs/tfpgbasedialog.create.html
   TfpgFontSelectDialog gui_dialogs/tfpgfontselectdialog.html
    GetFontDesc gui_dialogs/tfpgfontselectdialog.getfontdesc.html
    SetFontDesc gui_dialogs/tfpgfontselectdialog.setfontdesc.html
+   SetupCaptions gui_dialogs/tfpgfontselectdialog.setupcaptions.html
    Create gui_dialogs/tfpgfontselectdialog.create.html
    SetSampleText gui_dialogs/tfpgfontselectdialog.setsampletext.html
   TfpgFileDialog gui_dialogs/tfpgfiledialog.html
@@ -223,9 +266,15 @@
    Filter gui_dialogs/tfpgfiledialog.filter.html
    ShowHidden gui_dialogs/tfpgfiledialog.showhidden.html
   TfpgMessageDialog gui_dialogs/tfpgmessagedialog.html
+   SetWindowTitle gui_dialogs/tfpgmessagedialog.setwindowtitle.html
    HandlePaint gui_dialogs/tfpgmessagedialog.handlepaint.html
+   HandleShow gui_dialogs/tfpgmessagedialog.handleshow.html
+   HandleKeyPress gui_dialogs/tfpgmessagedialog.handlekeypress.html
+   PrepareLayout gui_dialogs/tfpgmessagedialog.preparelayout.html
    lblName1 gui_dialogs/tfpgmessagedialog.lblname1.html
    pnlIcon gui_dialogs/tfpgmessagedialog.pnlicon.html
+   Create gui_dialogs/tfpgmessagedialog.create.html
+   Destroy gui_dialogs/tfpgmessagedialog.destroy.html
    AfterCreate gui_dialogs/tfpgmessagedialog.aftercreate.html
    About gui_dialogs/tfpgmessagedialog.about.html
    AboutFPGui gui_dialogs/tfpgmessagedialog.aboutfpgui.html
@@ -238,6 +287,21 @@
    Buttons gui_dialogs/tfpgmessagedialog.buttons.html
    DefaultButton gui_dialogs/tfpgmessagedialog.defaultbutton.html
    DialogType gui_dialogs/tfpgmessagedialog.dialogtype.html
+  TfpgNewDirDialog gui_dialogs/tfpgnewdirdialog.html
+   Create gui_dialogs/tfpgbasedialog.create.html
+   Directory gui_dialogs/tfpgnewdirdialog.directory.html
+  TfpgPromptUserDialog gui_dialogs/tfpgpromptuserdialog.html
+   Create gui_dialogs/tfpgbasedialog.create.html
+   Authenticate gui_dialogs/tfpgpromptuserdialog.authenticate.html
+   Wiggle gui_dialogs/tfpgpromptuserdialog.wiggle.html
+   UserID gui_dialogs/tfpgpromptuserdialog.userid.html
+   Password gui_dialogs/tfpgpromptuserdialog.password.html
+  TfpgPromptUserDbDialog gui_dialogs/tfpgpromptuserdbdialog.html
+   aStringList gui_dialogs/tfpgpromptuserdbdialog.astringlist.html
+   cbDatabases gui_dialogs/tfpgpromptuserdbdialog.cbdatabases.html
+   PopulateComboDb gui_dialogs/tfpgpromptuserdbdialog.populatecombodb.html
+   Create gui_dialogs/tfpgpromptuserdbdialog.create.html
+   Destroy gui_dialogs/tfpgpromptuserdbdialog.destroy.html
   ShowMessage gui_dialogs/showmessage.html
   SelectFontDialog gui_dialogs/selectfontdialog.html
  gui_edit gui_edit/index.html
@@ -249,37 +313,73 @@
    FSelStart gui_edit/tfpgcustomedit.fselstart.html
    FSelOffset gui_edit/tfpgcustomedit.fseloffset.html
    FCursorPos gui_edit/tfpgcustomedit.fcursorpos.html
+   ShowDefaultPopupMenu gui_edit/tfpgcustomedit.showdefaultpopupmenu.html
    HandlePaint gui_edit/tfpgcustomedit.handlepaint.html
    HandleKeyChar gui_edit/tfpgcustomedit.handlekeychar.html
    HandleKeyPress gui_edit/tfpgcustomedit.handlekeypress.html
    HandleLMouseDown gui_edit/tfpgcustomedit.handlelmousedown.html
+   HandleRMouseDown gui_edit/tfpgcustomedit.handlermousedown.html
    HandleMouseMove gui_edit/tfpgcustomedit.handlemousemove.html
+   HandleDoubleClick gui_edit/tfpgcustomedit.handledoubleclick.html
    HandleMouseEnter gui_edit/tfpgcustomedit.handlemouseenter.html
    HandleMouseExit gui_edit/tfpgcustomedit.handlemouseexit.html
+   HandleSetFocus gui_edit/tfpgcustomedit.handlesetfocus.html
+   HandleKillFocus gui_edit/tfpgcustomedit.handlekillfocus.html
    GetDrawText gui_edit/tfpgcustomedit.getdrawtext.html
-   BackgroundColor gui_edit/tfpgcustomedit.backgroundcolor.html
+   AutoSelect gui_edit/tfpgcustomedit.autoselect.html
+   BorderStyle gui_edit/tfpgcustomedit.borderstyle.html
    Font gui_edit/tfpgcustomedit.font.html
    FontDesc gui_edit/tfpgcustomedit.fontdesc.html
-   PasswordMode gui_edit/tfpgcustomedit.passwordmode.html
-   BorderStyle gui_edit/tfpgcustomedit.borderstyle.html
-   Text gui_edit/tfpgcustomedit.text.html
+   HideSelection gui_edit/tfpgcustomedit.hideselection.html
    MaxLength gui_edit/tfpgcustomedit.maxlength.html
+   PasswordMode gui_edit/tfpgcustomedit.passwordmode.html
+   PopupMenu gui_edit/tfpgcustomedit.popupmenu.html
+   Text gui_edit/tfpgcustomedit.text.html
    OnChange gui_edit/tfpgcustomedit.onchange.html
    Create gui_edit/tfpgcustomedit.create.html
    Destroy gui_edit/tfpgcustomedit.destroy.html
    SelectionText gui_edit/tfpgcustomedit.selectiontext.html
+   SelectAll gui_edit/tfpgcustomedit.selectall.html
+   Clear gui_edit/tfpgcustomedit.clear.html
+   ClearSelection gui_edit/tfpgcustomedit.clearselection.html
+   CopyToClipboard gui_edit/tfpgcustomedit.copytoclipboard.html
+   CutToClipboard gui_edit/tfpgcustomedit.cuttoclipboard.html
+   PasteFromClipboard gui_edit/tfpgcustomedit.pastefromclipboard.html
   TfpgEdit gui_edit/tfpgedit.html
-   Text gui_edit/tfpgedit.text.html
-   FontDesc gui_edit/tfpgedit.fontdesc.html
+   PopupMenu gui_edit/tfpgedit.popupmenu.html
+   AutoSelect gui_edit/tfpgedit.autoselect.html
    BackgroundColor gui_edit/tfpgedit.backgroundcolor.html
+   BorderStyle gui_edit/tfpgedit.borderstyle.html
+   FontDesc gui_edit/tfpgedit.fontdesc.html
+   HideSelection gui_edit/tfpgedit.hideselection.html
    MaxLength gui_edit/tfpgedit.maxlength.html
    PasswordMode gui_edit/tfpgedit.passwordmode.html
-   BorderStyle gui_edit/tfpgedit.borderstyle.html
+   TabOrder gui_edit/tfpgedit.taborder.html
+   Text gui_edit/tfpgedit.text.html
+   TextColor gui_edit/tfpgedit.textcolor.html
    OnChange gui_edit/tfpgedit.onchange.html
-   OnPaint gui_edit/tfpgedit.onpaint.html
-   OnMouseExit gui_edit/tfpgedit.onmouseexit.html
-   OnMouseEnter gui_edit/tfpgedit.onmouseenter.html
+   OnEnter gui_edit/tfpgedit.onenter.html
+   OnExit gui_edit/tfpgedit.onexit.html
    OnKeyPress gui_edit/tfpgedit.onkeypress.html
+   OnMouseEnter gui_edit/tfpgedit.onmouseenter.html
+   OnMouseExit gui_edit/tfpgedit.onmouseexit.html
+   OnPaint gui_edit/tfpgedit.onpaint.html
+  TfpgNumericEdit gui_edit/tfpgnumericedit.html
+   HandleKeyChar gui_edit/tfpgcustomedit.handlekeychar.html
+   AutoSelect gui_edit/tfpgnumericedit.autoselect.html
+   BackgroundColor gui_edit/tfpgnumericedit.backgroundcolor.html
+   BorderStyle gui_edit/tfpgcustomedit.borderstyle.html
+   FontDesc gui_edit/tfpgcustomedit.fontdesc.html
+   HideSelection gui_edit/tfpgnumericedit.hideselection.html
+   TabOrder gui_edit/tfpgnumericedit.taborder.html
+   TextColor gui_edit/tfpgnumericedit.textcolor.html
+   OnChange gui_edit/tfpgcustomedit.onchange.html
+   OnEnter gui_edit/tfpgnumericedit.onenter.html
+   OnExit gui_edit/tfpgnumericedit.onexit.html
+   OnKeyPress gui_edit/tfpgnumericedit.onkeypress.html
+   OnMouseEnter gui_edit/tfpgnumericedit.onmouseenter.html
+   OnMouseExit gui_edit/tfpgnumericedit.onmouseexit.html
+   OnPaint gui_edit/tfpgnumericedit.onpaint.html
   CreateEdit gui_edit/createedit.html
  gui_form gui_form/index.html
   TWindowPosition gui_form/twindowposition.html
@@ -289,7 +389,6 @@
    FWindowPosition gui_form/tfpgform.fwindowposition.html
    FWindowTitle gui_form/tfpgform.fwindowtitle.html
    FSizeable gui_form/tfpgform.fsizeable.html
-   FBackgroundColor gui_form/tfpgform.fbackgroundcolor.html
    AdjustWindowStyle gui_form/tfpgform.adjustwindowstyle.html
    SetWindowParameters gui_form/tfpgform.setwindowparameters.html
    SetWindowTitle gui_form/tfpgform.setwindowtitle.html
@@ -300,9 +399,12 @@
    HandleClose gui_form/tfpgform.handleclose.html
    HandleHide gui_form/tfpgform.handlehide.html
    HandleShow gui_form/tfpgform.handleshow.html
+   HandleMove gui_form/tfpgform.handlemove.html
+   HandleResize gui_form/tfpgform.handleresize.html
    HandleKeyPress gui_form/tfpgform.handlekeypress.html
    AfterConstruction gui_form/tfpgform.afterconstruction.html
    BeforeDestruction gui_form/tfpgform.beforedestruction.html
+   DoOnClose gui_form/tfpgform.doonclose.html
    Create gui_form/tfpgform.create.html
    AfterCreate gui_form/tfpgform.aftercreate.html
    Show gui_form/tfpgform.show.html
@@ -311,7 +413,9 @@
    Close gui_form/tfpgform.close.html
    Sizeable gui_form/tfpgform.sizeable.html
    ModalResult gui_form/tfpgform.modalresult.html
+   FullScreen gui_form/tfpgform.fullscreen.html
    BackgroundColor gui_form/tfpgform.backgroundcolor.html
+   TextColor gui_form/tfpgform.textcolor.html
    WindowPosition gui_form/tfpgform.windowposition.html
    WindowTitle gui_form/tfpgform.windowtitle.html
    OnActivate gui_form/tfpgform.onactivate.html
@@ -324,30 +428,6 @@
    OnShow gui_form/tfpgform.onshow.html
   WidgetParentForm gui_form/widgetparentform.html
  gui_grid gui_grid/index.html
-  TFileEntryType gui_grid/tfileentrytype.html
-  TFileListSortOrder gui_grid/tfilelistsortorder.html
-  TFileEntry gui_grid/tfileentry.html
-   Create gui_grid/tfileentry.create.html
-   Name gui_grid/tfileentry.name.html
-   Extention gui_grid/tfileentry.extention.html
-   Size gui_grid/tfileentry.size.html
-   EntryType gui_grid/tfileentry.entrytype.html
-   IsLink gui_grid/tfileentry.islink.html
-   Attributes gui_grid/tfileentry.attributes.html
-   Mode gui_grid/tfileentry.mode.html
-   ModTime gui_grid/tfileentry.modtime.html
-   OwnerID gui_grid/tfileentry.ownerid.html
-   GroupID gui_grid/tfileentry.groupid.html
-   LinkTarget gui_grid/tfileentry.linktarget.html
-  TFileList gui_grid/tfilelist.html
-   Create gui_grid/tfilelist.create.html
-   Destroy gui_grid/tfilelist.destroy.html
-   Count gui_grid/tfilelist.count.html
-   ReadDirectory gui_grid/tfilelist.readdirectory.html
-   Clear gui_grid/tfilelist.clear.html
-   Sort gui_grid/tfilelist.sort.html
-   Entry gui_grid/tfilelist.entry.html
-   DirectoryName gui_grid/tfilelist.directoryname.html
   TfpgFileGrid gui_grid/tfpgfilegrid.html
    GetRowCount gui_grid/tfpgfilegrid.getrowcount.html
    DrawCell gui_grid/tfpgfilegrid.drawcell.html
@@ -366,6 +446,7 @@
    Columns gui_grid/tfpgfilegrid.columns.html
    FocusRow gui_grid/tfpgfilegrid.focusrow.html
    ScrollBarStyle gui_grid/tfpgfilegrid.scrollbarstyle.html
+   TabOrder gui_grid/tfpgfilegrid.taborder.html
    OnRowChange gui_grid/tfpgfilegrid.onrowchange.html
    OnDoubleClick gui_grid/tfpgfilegrid.ondoubleclick.html
   TfpgStringColumn gui_grid/tfpgstringcolumn.html
@@ -387,53 +468,71 @@
    Objects gui_grid/tfpgcustomstringgrid.objects.html
    ColumnTitle gui_grid/tfpgcustomstringgrid.columntitle.html
    ColumnWidth gui_grid/tfpgcustomstringgrid.columnwidth.html
+   ColumnBackgroundColor gui_grid/tfpgcustomstringgrid.columnbackgroundcolor.html
+   ColumnTextColor gui_grid/tfpgcustomstringgrid.columntextcolor.html
   TfpgStringGrid gui_grid/tfpgstringgrid.html
+   BackgroundColor gui_grid/tfpgstringgrid.backgroundcolor.html
+   ColumnCount gui_grid/tfpgstringgrid.columncount.html
    Columns gui_grid/tfpgstringgrid.columns.html
+   ColumnWidth gui_grid/tfpgstringgrid.columnwidth.html
    DefaultColWidth gui_grid/tfpgstringgrid.defaultcolwidth.html
    DefaultRowHeight gui_grid/tfpgstringgrid.defaultrowheight.html
-   FontDesc gui_grid/tfpgstringgrid.fontdesc.html
-   HeaderFontDesc gui_grid/tfpgstringgrid.headerfontdesc.html
-   BackgroundColor gui_grid/tfpgstringgrid.backgroundcolor.html
    FocusCol gui_grid/tfpgstringgrid.focuscol.html
    FocusRow gui_grid/tfpgstringgrid.focusrow.html
-   RowSelect gui_grid/tfpgstringgrid.rowselect.html
-   ColumnCount gui_grid/tfpgstringgrid.columncount.html
-   RowCount gui_grid/tfpgstringgrid.rowcount.html
-   ScrollBarStyle gui_grid/tfpgstringgrid.scrollbarstyle.html
-   ShowHeader gui_grid/tfpgstringgrid.showheader.html
-   ShowGrid gui_grid/tfpgstringgrid.showgrid.html
+   FontDesc gui_grid/tfpgstringgrid.fontdesc.html
+   HeaderFontDesc gui_grid/tfpgstringgrid.headerfontdesc.html
    HeaderHeight gui_grid/tfpgstringgrid.headerheight.html
-   ColumnWidth gui_grid/tfpgstringgrid.columnwidth.html
-   OnFocusChange gui_grid/tfpgstringgrid.onfocuschange.html
-   OnRowChange gui_grid/tfpgstringgrid.onrowchange.html
+   RowCount gui_grid/tfpgstringgrid.rowcount.html
+   RowSelect gui_grid/tfpgstringgrid.rowselect.html
+   ScrollBarStyle gui_grid/tfpgstringgrid.scrollbarstyle.html
+   ShowGrid gui_grid/tfpgstringgrid.showgrid.html
+   ShowHeader gui_grid/tfpgstringgrid.showheader.html
+   TabOrder gui_grid/tfpgstringgrid.taborder.html
+   TopRow gui_grid/tfpgstringgrid.toprow.html
+   OnCanSelectCell gui_grid/tfpgstringgrid.oncanselectcell.html
+   OnDrawCell gui_grid/tfpgstringgrid.ondrawcell.html
    OnDoubleClick gui_grid/tfpgstringgrid.ondoubleclick.html
+   OnFocusChange gui_grid/tfpgstringgrid.onfocuschange.html
    OnKeyPress gui_grid/tfpgstringgrid.onkeypress.html
+   OnRowChange gui_grid/tfpgstringgrid.onrowchange.html
+  CreateStringGrid gui_grid/createstringgrid.html
  gui_label gui_label/index.html
+  TLayout gui_label/tlayout.html
   TfpgCustomLabel gui_label/tfpgcustomlabel.html
    FText gui_label/tfpgcustomlabel.ftext.html
    FFont gui_label/tfpgcustomlabel.ffont.html
+   HandleResize gui_label/tfpgcustomlabel.handleresize.html
    HandlePaint gui_label/tfpgcustomlabel.handlepaint.html
+   WrapText gui_label/tfpgcustomlabel.wraptext.html
+   Alignment gui_label/tfpgcustomlabel.alignment.html
    AutoSize gui_label/tfpgcustomlabel.autosize.html
-   Text gui_label/tfpgcustomlabel.text.html
+   Layout gui_label/tfpgcustomlabel.layout.html
    FontDesc gui_label/tfpgcustomlabel.fontdesc.html
-   Color gui_label/tfpgcustomlabel.color.html
-   BackgroundColor gui_label/tfpgcustomlabel.backgroundcolor.html
+   Text gui_label/tfpgcustomlabel.text.html
+   LineSpace gui_label/tfpgcustomlabel.linespace.html
    Create gui_label/tfpgcustomlabel.create.html
    Destroy gui_label/tfpgcustomlabel.destroy.html
    Font gui_label/tfpgcustomlabel.font.html
   TfpgLabel gui_label/tfpglabel.html
+   Alignment gui_label/tfpglabel.alignment.html
    AutoSize gui_label/tfpglabel.autosize.html
    BackgroundColor gui_label/tfpglabel.backgroundcolor.html
-   Color gui_label/tfpglabel.color.html
    FontDesc gui_label/tfpglabel.fontdesc.html
+   Layout gui_label/tfpglabel.layout.html
    Text gui_label/tfpglabel.text.html
+   TextColor gui_label/tfpglabel.textcolor.html
+   Width gui_label/tfpglabel.width.html
+   WrapText gui_label/tfpglabel.wraptext.html
+   OnClick gui_label/tfpglabel.onclick.html
+   OnDoubleClick gui_label/tfpglabel.ondoubleclick.html
+   OnMouseDown gui_label/tfpglabel.onmousedown.html
    OnMouseEnter gui_label/tfpglabel.onmouseenter.html
    OnMouseExit gui_label/tfpglabel.onmouseexit.html
-   OnMouseDown gui_label/tfpglabel.onmousedown.html
-   OnMouseUp gui_label/tfpglabel.onmouseup.html
    OnMouseMove gui_label/tfpglabel.onmousemove.html
+   OnMouseUp gui_label/tfpglabel.onmouseup.html
   CreateLabel gui_label/createlabel.html
  gui_listbox gui_listbox/index.html
+  TfpgColorPalette gui_listbox/tfpgcolorpalette.html
   TfpgBaseListBox gui_listbox/tfpgbaselistbox.html
    FFont gui_listbox/tfpgbaselistbox.ffont.html
    FScrollBar gui_listbox/tfpgbaselistbox.fscrollbar.html
@@ -441,8 +540,6 @@
    FMouseDragging gui_listbox/tfpgbaselistbox.fmousedragging.html
    FFirstItem gui_listbox/tfpgbaselistbox.ffirstitem.html
    FMargin gui_listbox/tfpgbaselistbox.fmargin.html
-   FBackgroundColor gui_listbox/tfpgbaselistbox.fbackgroundcolor.html
-   SetFirstItem gui_listbox/tfpgbaselistbox.setfirstitem.html
    UpdateScrollBar gui_listbox/tfpgbaselistbox.updatescrollbar.html
    FollowFocus gui_listbox/tfpgbaselistbox.followfocus.html
    ListHeight gui_listbox/tfpgbaselistbox.listheight.html
@@ -459,34 +556,69 @@
    HandleMouseScroll gui_listbox/tfpgbaselistbox.handlemousescroll.html
    HandleShow gui_listbox/tfpgbaselistbox.handleshow.html
    HandlePaint gui_listbox/tfpgbaselistbox.handlepaint.html
-   PopupFrame gui_listbox/tfpgbaselistbox.popupframe.html
-   HotTrack gui_listbox/tfpgbaselistbox.hottrack.html
+   AutoHeight gui_listbox/tfpgbaselistbox.autoheight.html
    FocusItem gui_listbox/tfpgbaselistbox.focusitem.html
    FontDesc gui_listbox/tfpgbaselistbox.fontdesc.html
+   HotTrack gui_listbox/tfpgbaselistbox.hottrack.html
+   PopupFrame gui_listbox/tfpgbaselistbox.popupframe.html
    Create gui_listbox/tfpgbaselistbox.create.html
    Destroy gui_listbox/tfpgbaselistbox.destroy.html
    Update gui_listbox/tfpgbaselistbox.update.html
    ItemCount gui_listbox/tfpgbaselistbox.itemcount.html
    RowHeight gui_listbox/tfpgbaselistbox.rowheight.html
+   SetFirstItem gui_listbox/tfpgbaselistbox.setfirstitem.html
    Font gui_listbox/tfpgbaselistbox.font.html
    OnChange gui_listbox/tfpgbaselistbox.onchange.html
    OnSelect gui_listbox/tfpgbaselistbox.onselect.html
    OnScroll gui_listbox/tfpgbaselistbox.onscroll.html
+   OnKeyPress gui_listbox/tfpgbaselistbox.onkeypress.html
   TfpgTextListBox gui_listbox/tfpgtextlistbox.html
    FItems gui_listbox/tfpgtextlistbox.fitems.html
-   FInternalItems gui_listbox/tfpgtextlistbox.finternalitems.html
    DrawItem gui_listbox/tfpgtextlistbox.drawitem.html
+   HandleKeyChar gui_listbox/tfpgtextlistbox.handlekeychar.html
    Items gui_listbox/tfpgtextlistbox.items.html
    Create gui_listbox/tfpgtextlistbox.create.html
    Destroy gui_listbox/tfpgtextlistbox.destroy.html
    ItemCount gui_listbox/tfpgtextlistbox.itemcount.html
    Text gui_listbox/tfpgtextlistbox.text.html
   TfpgListBox gui_listbox/tfpglistbox.html
+   AutoHeight gui_listbox/tfpglistbox.autoheight.html
+   BackgroundColor gui_listbox/tfpglistbox.backgroundcolor.html
    FocusItem gui_listbox/tfpglistbox.focusitem.html
    FontDesc gui_listbox/tfpglistbox.fontdesc.html
    HotTrack gui_listbox/tfpglistbox.hottrack.html
    Items gui_listbox/tfpglistbox.items.html
    PopupFrame gui_listbox/tfpglistbox.popupframe.html
+   TabOrder gui_listbox/tfpglistbox.taborder.html
+   TextColor gui_listbox/tfpglistbox.textcolor.html
+  TColorItem gui_listbox/tcoloritem.html
+   Create gui_listbox/tcoloritem.create.html
+   ColorName gui_listbox/tcoloritem.colorname.html
+   ColorValue gui_listbox/tcoloritem.colorvalue.html
+  TfpgBaseColorListBox gui_listbox/tfpgbasecolorlistbox.html
+   FItems gui_listbox/tfpgbasecolorlistbox.fitems.html
+   DrawItem gui_listbox/tfpgbaselistbox.drawitem.html
+   Items gui_listbox/tfpgbasecolorlistbox.items.html
+   Color gui_listbox/tfpgbasecolorlistbox.color.html
+   ColorPalette gui_listbox/tfpgbasecolorlistbox.colorpalette.html
+   ShowColorNames gui_listbox/tfpgbasecolorlistbox.showcolornames.html
+   Create gui_listbox/tfpgbaselistbox.create.html
+   Destroy gui_listbox/tfpgbaselistbox.destroy.html
+   ItemCount gui_listbox/tfpgbaselistbox.itemcount.html
+  TfpgColorListBox gui_listbox/tfpgcolorlistbox.html
+   AutoHeight gui_listbox/tfpgcolorlistbox.autoheight.html
+   BackgroundColor gui_listbox/tfpgcolorlistbox.backgroundcolor.html
+   Color gui_listbox/tfpgcolorlistbox.color.html
+   ColorPalette gui_listbox/tfpgcolorlistbox.colorpalette.html
+   FocusItem gui_listbox/tfpgcolorlistbox.focusitem.html
+   FontDesc gui_listbox/tfpgcolorlistbox.fontdesc.html
+   HotTrack gui_listbox/tfpgcolorlistbox.hottrack.html
+   Items gui_listbox/tfpgcolorlistbox.items.html
+   PopupFrame gui_listbox/tfpgcolorlistbox.popupframe.html
+   ShowColorNames gui_listbox/tfpgcolorlistbox.showcolornames.html
+   TabOrder gui_listbox/tfpgcolorlistbox.taborder.html
+   TextColor gui_listbox/tfpgcolorlistbox.textcolor.html
+  CreateListBox gui_listbox/createlistbox.html
  gui_listview gui_listview/index.html
   TfpgLVColumnClickEvent gui_listview/tfpglvcolumnclickevent.html
   TfpgLVItemState gui_listview/tfpglvitemstate.html
@@ -571,6 +703,7 @@
    HScrollBar gui_listview/tfpglistview.hscrollbar.html
    ItemHeight gui_listview/tfpglistview.itemheight.html
    ItemIndex gui_listview/tfpglistview.itemindex.html
+   TabOrder gui_listview/tfpglistview.taborder.html
    OnColumnClick gui_listview/tfpglistview.oncolumnclick.html
    OnPaintColumn gui_listview/tfpglistview.onpaintcolumn.html
    OnPaintItem gui_listview/tfpglistview.onpaintitem.html
@@ -591,18 +724,24 @@
    Destroy gui_memo/tfpgmemo.destroy.html
    UpdateScrollBars gui_memo/tfpgmemo.updatescrollbars.html
    SelectionText gui_memo/tfpgmemo.selectiontext.html
-   LineHeight gui_memo/tfpgmemo.lineheight.html
    CursorLine gui_memo/tfpgmemo.cursorline.html
-   Text gui_memo/tfpgmemo.text.html
    Font gui_memo/tfpgmemo.font.html
-   OnChange gui_memo/tfpgmemo.onchange.html
-   UseTabs gui_memo/tfpgmemo.usetabs.html
-   TabWidth gui_memo/tfpgmemo.tabwidth.html
+   LineHeight gui_memo/tfpgmemo.lineheight.html
    MaxLength gui_memo/tfpgmemo.maxlength.html
-   Lines gui_memo/tfpgmemo.lines.html
+   TabWidth gui_memo/tfpgmemo.tabwidth.html
+   Text gui_memo/tfpgmemo.text.html
+   UseTabs gui_memo/tfpgmemo.usetabs.html
+   BackgroundColor gui_memo/tfpgmemo.backgroundcolor.html
    FontDesc gui_memo/tfpgmemo.fontdesc.html
+   Lines gui_memo/tfpgmemo.lines.html
+   TabOrder gui_memo/tfpgmemo.taborder.html
+   TextColor gui_memo/tfpgmemo.textcolor.html
+   OnChange gui_memo/tfpgmemo.onchange.html
+  CreateMemo gui_memo/creatememo.html
  gui_menu gui_menu/index.html
   TfpgHotKeyDef gui_menu/tfpghotkeydef.html
+  TfpgMenuOption gui_menu/tfpgmenuoption.html
+  TfpgMenuOptions gui_menu/tfpgmenuoptions.html
   TfpgMenuItem gui_menu/tfpgmenuitem.html
    Create gui_menu/tfpgmenuitem.create.html
    Click gui_menu/tfpgmenuitem.click.html
@@ -625,11 +764,15 @@
    FSymbolWidth gui_menu/tfpgpopupmenu.fsymbolwidth.html
    FItems gui_menu/tfpgpopupmenu.fitems.html
    FFocusItem gui_menu/tfpgpopupmenu.ffocusitem.html
+   HandleMouseEnter gui_menu/tfpgpopupmenu.handlemouseenter.html
+   HandleMouseExit gui_menu/tfpgpopupmenu.handlemouseexit.html
    HandleMouseMove gui_menu/tfpgpopupmenu.handlemousemove.html
    HandleLMouseDown gui_menu/tfpgpopupmenu.handlelmousedown.html
+   HandleLMouseUp gui_menu/tfpgpopupmenu.handlelmouseup.html
    HandleKeyPress gui_menu/tfpgpopupmenu.handlekeypress.html
    HandlePaint gui_menu/tfpgpopupmenu.handlepaint.html
    HandleShow gui_menu/tfpgpopupmenu.handleshow.html
+   HandleClose gui_menu/tfpgpopupmenu.handleclose.html
    DrawItem gui_menu/tfpgpopupmenu.drawitem.html
    DrawRow gui_menu/tfpgpopupmenu.drawrow.html
    ItemHeight gui_menu/tfpgpopupmenu.itemheight.html
@@ -641,11 +784,11 @@
    Close gui_menu/tfpgpopupmenu.close.html
    AddMenuItem gui_menu/tfpgpopupmenu.addmenuitem.html
    MenuItemByName gui_menu/tfpgpopupmenu.menuitembyname.html
-   BackgroundColor gui_menu/tfpgpopupmenu.backgroundcolor.html
+   MenuItem gui_menu/tfpgpopupmenu.menuitem.html
    BeforeShow gui_menu/tfpgpopupmenu.beforeshow.html
   TfpgMenuBar gui_menu/tfpgmenubar.html
    FItems gui_menu/tfpgmenubar.fitems.html
-   FFocusItem gui_menu/tfpgmenubar.ffocusitem.html
+   FocusItem gui_menu/tfpgmenubar.focusitem.html
    PrepareToShow gui_menu/tfpgmenubar.preparetoshow.html
    VisibleCount gui_menu/tfpgmenubar.visiblecount.html
    VisibleItem gui_menu/tfpgmenubar.visibleitem.html
@@ -654,21 +797,20 @@
    HandleLMouseDown gui_menu/tfpgmenubar.handlelmousedown.html
    HandleKeyPress gui_menu/tfpgmenubar.handlekeypress.html
    HandlePaint gui_menu/tfpgmenubar.handlepaint.html
-   Create gui_menu/tfpgmenubar.create.html
-   Destroy gui_menu/tfpgmenubar.destroy.html
-   ItemWidth gui_menu/tfpgmenubar.itemwidth.html
-   DrawColumn gui_menu/tfpgmenubar.drawcolumn.html
    CalcMouseCol gui_menu/tfpgmenubar.calcmousecol.html
    GetItemPosX gui_menu/tfpgmenubar.getitemposx.html
-   DoSelect gui_menu/tfpgmenubar.doselect.html
-   CloseSubmenus gui_menu/tfpgmenubar.closesubmenus.html
    MenuFocused gui_menu/tfpgmenubar.menufocused.html
    SearchItemByAccel gui_menu/tfpgmenubar.searchitembyaccel.html
-   DeActivateMenu gui_menu/tfpgmenubar.deactivatemenu.html
    ActivateMenu gui_menu/tfpgmenubar.activatemenu.html
+   DeActivateMenu gui_menu/tfpgmenubar.deactivatemenu.html
+   DrawColumn gui_menu/tfpgmenubar.drawcolumn.html
+   Create gui_menu/tfpgmenubar.create.html
+   Destroy gui_menu/tfpgmenubar.destroy.html
    AddMenuItem gui_menu/tfpgmenubar.addmenuitem.html
-   BackgroundColor gui_menu/tfpgmenubar.backgroundcolor.html
+   MenuItem gui_menu/tfpgmenubar.menuitem.html
+   MenuOptions gui_menu/tfpgmenubar.menuoptions.html
    BeforeShow gui_menu/tfpgmenubar.beforeshow.html
+  CreateMenuBar gui_menu/createmenubar.html
  gui_progressbar gui_progressbar/index.html
   TfpgCustomProgressBar gui_progressbar/tfpgcustomprogressbar.html
    HandlePaint gui_progressbar/tfpgcustomprogressbar.handlepaint.html
@@ -676,7 +818,6 @@
    Min gui_progressbar/tfpgcustomprogressbar.min.html
    Position gui_progressbar/tfpgcustomprogressbar.position.html
    Step gui_progressbar/tfpgcustomprogressbar.step.html
-   BackgroundColor gui_progressbar/tfpgcustomprogressbar.backgroundcolor.html
    ShowCaption gui_progressbar/tfpgcustomprogressbar.showcaption.html
    Create gui_progressbar/tfpgcustomprogressbar.create.html
    Destroy gui_progressbar/tfpgcustomprogressbar.destroy.html
@@ -690,35 +831,40 @@
    Min gui_progressbar/tfpgprogressbar.min.html
    Position gui_progressbar/tfpgprogressbar.position.html
    Step gui_progressbar/tfpgprogressbar.step.html
+   TextColor gui_progressbar/tfpgprogressbar.textcolor.html
  gui_radiobutton gui_radiobutton/index.html
   TfpgRadioButton gui_radiobutton/tfpgradiobutton.html
    HandlePaint gui_radiobutton/tfpgradiobutton.handlepaint.html
    HandleLMouseDown gui_radiobutton/tfpgradiobutton.handlelmousedown.html
    HandleLMouseUp gui_radiobutton/tfpgradiobutton.handlelmouseup.html
+   HandleKeyPress gui_radiobutton/tfpgradiobutton.handlekeypress.html
    HandleKeyRelease gui_radiobutton/tfpgradiobutton.handlekeyrelease.html
+   FindNeighbor gui_radiobutton/tfpgradiobutton.findneighbor.html
    Create gui_radiobutton/tfpgradiobutton.create.html
    Destroy gui_radiobutton/tfpgradiobutton.destroy.html
    Font gui_radiobutton/tfpgradiobutton.font.html
-   Checked gui_radiobutton/tfpgradiobutton.checked.html
-   Text gui_radiobutton/tfpgradiobutton.text.html
-   FontDesc gui_radiobutton/tfpgradiobutton.fontdesc.html
+   AutoSize gui_radiobutton/tfpgradiobutton.autosize.html
    BackgroundColor gui_radiobutton/tfpgradiobutton.backgroundcolor.html
+   Checked gui_radiobutton/tfpgradiobutton.checked.html
+   FontDesc gui_radiobutton/tfpgradiobutton.fontdesc.html
    GroupIndex gui_radiobutton/tfpgradiobutton.groupindex.html
+   TabOrder gui_radiobutton/tfpgradiobutton.taborder.html
+   Text gui_radiobutton/tfpgradiobutton.text.html
+   TextColor gui_radiobutton/tfpgradiobutton.textcolor.html
    OnChange gui_radiobutton/tfpgradiobutton.onchange.html
   CreateRadioButton gui_radiobutton/createradiobutton.html
  gui_scrollbar gui_scrollbar/index.html
   TScrollNotifyEvent gui_scrollbar/tscrollnotifyevent.html
   TfpgScrollStyle gui_scrollbar/tfpgscrollstyle.html
+  TfpgScrollBarPart gui_scrollbar/tfpgscrollbarpart.html
   TfpgScrollBar gui_scrollbar/tfpgscrollbar.html
    FMax gui_scrollbar/tfpgscrollbar.fmax.html
    FMin gui_scrollbar/tfpgscrollbar.fmin.html
+   FPageSize gui_scrollbar/tfpgscrollbar.fpagesize.html
    FPosition gui_scrollbar/tfpgscrollbar.fposition.html
    FScrollStep gui_scrollbar/tfpgscrollbar.fscrollstep.html
    FSliderPos gui_scrollbar/tfpgscrollbar.fsliderpos.html
    FSliderLength gui_scrollbar/tfpgscrollbar.fsliderlength.html
-   FSliderDragging gui_scrollbar/tfpgscrollbar.fsliderdragging.html
-   FStartBtnPressed gui_scrollbar/tfpgscrollbar.fstartbtnpressed.html
-   FEndBtnPressed gui_scrollbar/tfpgscrollbar.fendbtnpressed.html
    FSliderDragPos gui_scrollbar/tfpgscrollbar.fsliderdragpos.html
    FSliderDragStart gui_scrollbar/tfpgscrollbar.fsliderdragstart.html
    FScrollTimer gui_scrollbar/tfpgscrollbar.fscrolltimer.html
@@ -739,6 +885,7 @@
    Create gui_scrollbar/tfpgscrollbar.create.html
    Destroy gui_scrollbar/tfpgscrollbar.destroy.html
    RepaintSlider gui_scrollbar/tfpgscrollbar.repaintslider.html
+   PageSize gui_scrollbar/tfpgscrollbar.pagesize.html
    Position gui_scrollbar/tfpgscrollbar.position.html
    ScrollStep gui_scrollbar/tfpgscrollbar.scrollstep.html
    Min gui_scrollbar/tfpgscrollbar.min.html
@@ -750,6 +897,7 @@
   TfpgStyleOptionEnum gui_style/tfpgstyleoptionenum.html
   TfpgStateItem gui_style/tfpgstateitem.html
   TfpgState gui_style/tfpgstate.html
+  TfpgStandardPixmap gui_style/tfpgstandardpixmap.html
   TfpgButtonFeatures gui_style/tfpgbuttonfeatures.html
   TfpgStyleOption gui_style/tfpgstyleoption.html
    StyleOption gui_style/tfpgstyleoption.styleoption.html
@@ -780,11 +928,11 @@
    Text gui_tab/tfpgtabsheet.text.html
    PageIndex gui_tab/tfpgtabsheet.pageindex.html
    PageControl gui_tab/tfpgtabsheet.pagecontrol.html
-   BackgroundColor gui_tab/tfpgtabsheet.backgroundcolor.html
   TfpgPageControl gui_tab/tfpgpagecontrol.html
    OrderSheets gui_tab/tfpgpagecontrol.ordersheets.html
    RePaintTitles gui_tab/tfpgpagecontrol.repainttitles.html
    HandlePaint gui_tab/tfpgpagecontrol.handlepaint.html
+   HandleShow gui_tab/tfpgpagecontrol.handleshow.html
    HandleLMouseUp gui_tab/tfpgpagecontrol.handlelmouseup.html
    HandleKeyPress gui_tab/tfpgpagecontrol.handlekeypress.html
    Create gui_tab/tfpgpagecontrol.create.html
@@ -799,7 +947,9 @@
    FixedTabWidth gui_tab/tfpgpagecontrol.fixedtabwidth.html
    SortPages gui_tab/tfpgpagecontrol.sortpages.html
    Style gui_tab/tfpgpagecontrol.style.html
+   TabOrder gui_tab/tfpgpagecontrol.taborder.html
    TabPosition gui_tab/tfpgpagecontrol.tabposition.html
+   TextColor gui_tab/tfpgpagecontrol.textcolor.html
  gui_trackbar gui_trackbar/index.html
   TTrackBarChange gui_trackbar/ttrackbarchange.html
   TfpgTrackBarExtra gui_trackbar/tfpgtrackbarextra.html
@@ -813,6 +963,7 @@
    Position gui_trackbar/tfpgtrackbarextra.position.html
    SliderSize gui_trackbar/tfpgtrackbarextra.slidersize.html
    Orientation gui_trackbar/tfpgtrackbarextra.orientation.html
+   TabOrder gui_trackbar/tfpgtrackbarextra.taborder.html
    OnChange gui_trackbar/tfpgtrackbarextra.onchange.html
   TfpgTrackBar gui_trackbar/tfpgtrackbar.html
    HandleLMouseDown gui_trackbar/tfpgtrackbar.handlelmousedown.html
@@ -831,6 +982,8 @@
    Max gui_trackbar/tfpgtrackbar.max.html
    ShowPosition gui_trackbar/tfpgtrackbar.showposition.html
    Orientation gui_trackbar/tfpgtrackbar.orientation.html
+   TabOrder gui_trackbar/tfpgtrackbar.taborder.html
+   TextColor gui_trackbar/tfpgtrackbar.textcolor.html
    OnChange gui_trackbar/tfpgtrackbar.onchange.html
  gui_iniutils gui_iniutils/index.html
   TfpgINIFile gui_iniutils/tfpginifile.html
@@ -894,6 +1047,7 @@
    CallerWidget gui_popupcalendar/tfpgpopupcalendar.callerwidget.html
    Create gui_popupcalendar/tfpgpopupcalendar.create.html
    AfterCreate gui_popupcalendar/tfpgpopupcalendar.aftercreate.html
+   CloseOnSelect gui_popupcalendar/tfpgpopupcalendar.closeonselect.html
    Day gui_popupcalendar/tfpgpopupcalendar.day.html
    Month gui_popupcalendar/tfpgpopupcalendar.month.html
    Year gui_popupcalendar/tfpgpopupcalendar.year.html
@@ -911,19 +1065,36 @@
    FontDesc gui_popupcalendar/tfpgcalendarcombo.fontdesc.html
    MinDate gui_popupcalendar/tfpgcalendarcombo.mindate.html
    MaxDate gui_popupcalendar/tfpgcalendarcombo.maxdate.html
+   CloseOnSelect gui_popupcalendar/tfpgcalendarcombo.closeonselect.html
+   TabOrder gui_popupcalendar/tfpgcalendarcombo.taborder.html
    OnChange gui_popupcalendar/tfpgcalendarcombo.onchange.html
+ gui_hyperlink gui_hyperlink/index.html
+  TfpgHyperlink gui_hyperlink/tfpghyperlink.html
+   HandleMouseEnter gui_hyperlink/tfpghyperlink.handlemouseenter.html
+   HandleMouseExit gui_hyperlink/tfpghyperlink.handlemouseexit.html
+   HandleLMouseDown gui_hyperlink/tfpghyperlink.handlelmousedown.html
+   Create gui_label/tfpgcustomlabel.create.html
+   GoHyperLink gui_hyperlink/tfpghyperlink.gohyperlink.html
+   Autosize gui_hyperlink/tfpghyperlink.autosize.html
+   FontDesc gui_hyperlink/tfpghyperlink.fontdesc.html
+   HotTrackColor gui_hyperlink/tfpghyperlink.hottrackcolor.html
+   HotTrackFont gui_hyperlink/tfpghyperlink.hottrackfont.html
+   Text gui_hyperlink/tfpghyperlink.text.html
+   TextColor gui_hyperlink/tfpghyperlink.textcolor.html
+   URL gui_hyperlink/tfpghyperlink.url.html
 
 :classes
 #GUI.gui_basegrid.TfpgBaseGrid #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
 1VFColResizing
 1VFDragPos
+1VFOnDrawCell
 1VFResizedCol
 1VFDefaultColWidth
 1VFDefaultRowHeight
 1VFFocusCol
 1VFFocusRow
 1VFHeaderHeight
+1VFOnCanSelectCell
 1VFOnFocusChange
 1VFOnRowChange
 1VFPrevCol
@@ -949,7 +1120,6 @@
 1MSetRowSelect
 1MSetScrollBarStyle
 1MVScrollBarMove
-1MSetBackgroundColor
 1MSetDefaultColWidth
 1MSetDefaultRowHeight
 1MSetFocusCol
@@ -959,12 +1129,20 @@
 1MSetShowHeader
 1MVisibleLines
 1MVisibleWidth
+1MSetFirstRow
 2MUpdateScrollBars
 2MGetHeaderText
 2MGetColumnWidth
 2MSetColumnWidth
+2MGetColumnBackgroundColor
+2MSetColumnBackgroundColor
+2MGetColumnTextColor
+2MSetColumnTextColor
 2MGetColumnCount
 2MGetRowCount
+2MCanSelectCell
+2MDoDrawCellEvent
+2MDoCanSelectCell
 2MDrawCell
 2MDrawHeader
 2MDrawGrid
@@ -983,7 +1161,6 @@
 2PFontDesc rw
 2PHeaderFont r
 2PHeaderFontDesc rw
-2PBackgroundColor rw
 2PFocusCol rw
 2PFocusRow rw
 2PRowSelect rw
@@ -994,8 +1171,13 @@
 2PScrollBarStyle rw
 2PHeaderHeight r
 2PColumnWidth rw
+2PColumnBackgroundColor rw
+2PColumnTextColor rw
+2PTopRow rw
+2POnDrawCell rw
 2POnFocusChange rw
 2POnRowChange rw
+2POnCanSelectCell rw
 3MCreate
 3MDestroy
 3MUpdate
@@ -1004,15 +1186,15 @@
 #GUI.gui_bevel.TfpgBevel #CoreLib.gfx_widget.TfpgWidget
 1VFBevelShape
 1VFBevelStyle
-1VFBackgroundColor
-1MSetBackgroundColor
 1MSetBevelShape
 1MSetBevelStyle
 2MHandlePaint
 3MCreate
+4PBackgroundColor
 4PShape rw
 4PStyle rw
-4PBackgroundColor rw
+4POnClick
+4POnDoubleClick
 #GUI.gui_button.TfpgButton #CoreLib.gfx_widget.TfpgWidget
 1VFCommand
 1VFImageName
@@ -1034,6 +1216,8 @@
 1MGetAllowDown
 1MSetAllowDown
 1MSetAllowAllUp
+1MDoPush
+1MDoRelease
 2VFImageMargin
 2VFImageSpacing
 2VFEmbedded
@@ -1050,32 +1234,32 @@
 2MHandleLMouseUp
 2MHandleMouseExit
 2MHandleMouseEnter
-3VOnClick
 3MCreate
 3MDestroy
-3MDoPush
-3MDoRelease
 3MClick
 3MGetCommand
 3MSetCommand
 3PDown rw
 3PFont r
 3PAllowDown rw
-4PText rw
-4PDefault rw
-4PFontDesc rw
-4PImageName rw
-4PImageMargin rw
-4PImageSpacing rw
-4PGroupIndex rw
 4PAllowAllUp rw
-4PModalResult rw
+4PBackgroundColor
+4PDefault rw
 4PEmbedded rw
+4PFontDesc rw
+4PGroupIndex rw
+4PImageMargin rw
+4PImageName rw
+4PImageSpacing rw
+4PModalResult rw
 4PShowImage rw
+4PTabOrder
+4PText rw
+4PTextColor
 4POnMouseExit
 4POnMouseEnter
+4POnClick
 #GUI.gui_checkbox.TfpgCheckBox #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
 1VFChecked
 1VFOnChange
 1VFText
@@ -1083,7 +1267,6 @@
 1VFBoxSize
 1VFIsPressed
 1MGetFontDesc
-1MSetBackgroundColor
 1MSetChecked
 1MSetFontDesc
 1MSetText
@@ -1094,26 +1277,39 @@
 3MCreate
 3MDestroy
 3PFont r
+4PBackgroundColor
 4PChecked rw
-4PText rw
 4PFontDesc rw
-4PBackgroundColor rw
+4PTabOrder
+4PText rw
+4PTextColor
 4POnChange rw
-#GUI.gui_combobox.TfpgAbstractComboBox #CoreLib.gfx_widget.TfpgWidget
+#GUI.gui_combobox.TfpgBaseComboBox #CoreLib.gfx_widget.TfpgWidget
 1VFDropDownCount
-1VFBackgroundColor
-1VFFocusItem
 1VFFont
-1VFInternalBtnRect
-1VFItems
 1VFOnChange
 1MGetFontDesc
-1MSetBackgroundColor
 1MSetDropDownCount
-1MInternalBtnClick
-1MInternalListBoxSelect
 1MSetFocusItem
 1MSetFontDesc
+2VFInternalBtnRect
+2VFFocusItem
+2VFItems
+2MHandleKeyPress
+2MDoOnChange
+2MDoDropDown
+2MGetDropDownPos
+2PDropDownCount rw
+2PFocusItem rw
+2PFontDesc rw
+2PItems r
+2POnChange rw
+3MCreate
+3MDestroy
+3PFont r
+#GUI.gui_combobox.TfpgAbstractComboBox #GUI.gui_combobox.TfpgBaseComboBox
+1MInternalBtnClick
+1MSetFocusItem
 1MCalculateInternalButtonRect
 2VFMargin
 2VFBtnPressed
@@ -1124,43 +1320,45 @@
 2MSetText
 2MSetHeight
 2MSetWidth
+2MHandleKeyPress
 2MHandleLMouseDown
 2MHandleLMouseUp
+2MHandleMouseScroll
 2MHandleResize
 2MHandlePaint
 2MPaintInternalButton
-2PDropDownCount rw
-2PItems r
-2PFocusItem rw
-2PBackgroundColor rw
-2PFontDesc rw
-2POnChange rw
 2PText rw
 3MCreate
 3MDestroy
 3MUpdate
-3PFont r
 #GUI.gui_combobox.TfpgComboBox #GUI.gui_combobox.TfpgAbstractComboBox
 4PBackgroundColor
 4PDropDownCount
 4PFocusItem
 4PFontDesc
-4PItems
-4PText
-4PWidth
 4PHeight
+4PItems
+4PTabOrder
+4PText
+4PTextColor
+4PWidth
 4POnChange
 #GUI.gui_customgrid.TfpgGridColumn TObject
 1VFAlignment
 1VFTitle
 1VFWidth
+1VFBackgroundColor
+1VFTextColor
 3MCreate
 3PWidth rw
 3PTitle rw
 3PAlignment rw
+3PBackgroundColor rw
+3PTextColor rw
 #GUI.gui_customgrid.TfpgCustomGrid #GUI.gui_basegrid.TfpgBaseGrid
 2VFRowCount
 2VFColumns
+2MSetTextColor
 2MGetColumns
 2MDoDeleteColumn
 2MDoSetRowCount
@@ -1171,6 +1369,10 @@
 2MSetRowCount
 2MGetColumnWidth
 2MSetColumnWidth
+2MGetColumnBackgroundColor
+2MSetColumnBackgroundColor
+2MGetColumnTextColor
+2MSetColumnTextColor
 2MGetHeaderText
 2PRowCount rw
 2PColumnCount rw
@@ -1187,12 +1389,14 @@
 1VFLineHeight
 1VFMaxLineWidth
 1VFButton
-1MButtonClick
+1VFCentreText
 2MHandleKeyPress
 2MHandlePaint
+2MHandleShow
 3MCreate
 3MDestroy
 3MSetMessage
+3PCentreText rw
 #GUI.gui_dialogs.TfpgBaseDialog TfpgForm
 2VFSpacing
 2VFDefaultButtonWidth
@@ -1201,12 +1405,14 @@
 2MbtnOKClick
 2MbtnCancelClick
 2MHandleKeyPress
+2MSetupCaptions
 3MCreate
 #GUI.gui_dialogs.TfpgFontSelectDialog #GUI.gui_dialogs.TfpgBaseDialog
 1VFSampleText
+1VFMode
 1VlblLabel1
-1VlblLabel2
-1VlblLabel3
+1VlblTypeface
+1VlblSize
 1VlblLabel4
 1VlblLabel5
 1VlbCollection
@@ -1216,11 +1422,15 @@
 1VcbItalic
 1VcbUnderline
 1VcbAntiAlias
-1VedSample
+1VmemSample
+1MOnCollectionChanged
 1MOnParamChange
 1MCreateFontList
+1MCreateFontAliasList
+1MSetupUI
 2MGetFontDesc
 2MSetFontDesc
+2MSetupCaptions
 3MCreate
 3MSetSampleText
 #GUI.gui_dialogs.TfpgFileDialog #GUI.gui_dialogs.TfpgBaseDialog
@@ -1249,6 +1459,7 @@
 1MFilterChange
 1MDirChange
 1MUpDirClick
+1MbtnDirNewClicked
 1MedFilenameChanged
 1MUpdateButtonState
 2MHandleKeyPress
@@ -1262,20 +1473,35 @@
 3MRunSaveFile
 3PFilter rw
 3PShowHidden rw
-#GUI.gui_dialogs.TfpgMessageDialog #GUI.gui_dialogs.TfpgBaseDialog
+#GUI.gui_dialogs.TfpgMessageDialog TfpgForm
 1VFInformativeText
 1VFText
 1VFButtons
 1VFDefaultButton
 1VFDialogType
+1VFButtonList
+1VFMaxLineWidth
+1VFFont
+1VFTextY
+1VFLineHeight
+1MGetInformativeText
 1MSetButtons
 1MSetDefaultButton
 1MSetInformativeText
 1MSetText
 1MpnlIconPaint
+1MPrepareIcon
+1MPrepareText
+1MPrepareButtons
+2MSetWindowTitle
 2MHandlePaint
+2MHandleShow
+2MHandleKeyPress
+2MPrepareLayout
 3VlblName1
 3VpnlIcon
+3MCreate
+3MDestroy
 3MAfterCreate
 3MAbout
 3MAboutFPGui
@@ -1288,9 +1514,37 @@
 3PButtons rw
 3PDefaultButton rw
 3PDialogType r
+#GUI.gui_dialogs.TfpgNewDirDialog #GUI.gui_dialogs.TfpgBaseDialog
+1VlblTitle
+1VedDirectory
+1MGetDirectory
+3MCreate
+3PDirectory r
+#GUI.gui_dialogs.TfpgPromptUserDialog #GUI.gui_dialogs.TfpgBaseDialog
+1VlblTitle
+1VlblTitlePw
+1VedUserID
+1VedPassword
+1MGetUserID
+1MGetUserPassword
+3MCreate
+3MAuthenticate
+3MWiggle
+3PUserID r
+3PPassword r
+#GUI.gui_dialogs.TfpgPromptUserDbDialog #GUI.gui_dialogs.TfpgPromptUserDialog
+1VlblDatabases
+2VaStringList
+2VcbDatabases
+2MPopulateComboDb
+3MCreate
+3MDestroy
 #GUI.gui_edit.TfpgCustomEdit #CoreLib.gfx_widget.TfpgWidget
+1VFAutoSelect
+1VFHideSelection
+1VFPopupMenu
+1VFDefaultPopupMenu
 1VFText
-1VFBackgroundColor
 1VFFont
 1VFPasswordMode
 1VFBorderStyle
@@ -1301,50 +1555,93 @@
 1MDeleteSelection
 1MDoCopy
 1MDoPaste
-1MSetBackgroundColor
+1MSetAutoSelect
 1MSetBorderStyle
+1MSetHideSelection
 1MSetPasswordMode
 1MGetFontDesc
 1MSetFontDesc
 1MSetText
+1MDefaultPopupCut
+1MDefaultPopupCopy
+1MDefaultPopupPaste
+1MDefaultPopupClearAll
+1MSetDefaultPopupMenuItemsState
 2VFMouseDragPos
 2VFDrawOffset
 2VFSideMargin
 2VFSelStart
 2VFSelOffset
 2VFCursorPos
+2MShowDefaultPopupMenu
 2MHandlePaint
 2MHandleKeyChar
 2MHandleKeyPress
 2MHandleLMouseDown
+2MHandleRMouseDown
 2MHandleMouseMove
+2MHandleDoubleClick
 2MHandleMouseEnter
 2MHandleMouseExit
+2MHandleSetFocus
+2MHandleKillFocus
 2MGetDrawText
-2PBackgroundColor rw
+2PAutoSelect rw
+2PBorderStyle rw
 2PFont r
 2PFontDesc rw
-2PPasswordMode rw
-2PBorderStyle rw
-2PText rw
+2PHideSelection rw
 2PMaxLength rw
+2PPasswordMode rw
+2PPopupMenu rw
+2PText rw
 2POnChange rw
 3MCreate
 3MDestroy
 3MSelectionText
+3MSelectAll
+3MClear
+3MClearSelection
+3MCopyToClipboard
+3MCutToClipboard
+3MPasteFromClipboard
 #GUI.gui_edit.TfpgEdit #GUI.gui_edit.TfpgCustomEdit
-4PText
-4PFontDesc
+3PPopupMenu
+4PAutoSelect
 4PBackgroundColor
+4PBorderStyle
+4PFontDesc
+4PHideSelection
 4PMaxLength
 4PPasswordMode
-4PBorderStyle
+4PTabOrder
+4PText
+4PTextColor
 4POnChange
-4POnPaint
-4POnMouseExit
-4POnMouseEnter
+4POnEnter
+4POnExit
 4POnKeyPress
+4POnMouseEnter
+4POnMouseExit
+4POnPaint
+#GUI.gui_edit.TfpgNumericEdit #GUI.gui_edit.TfpgCustomEdit
+2MHandleKeyChar
+4PAutoSelect
+4PBackgroundColor
+4PBorderStyle
+4PFontDesc
+4PHideSelection
+4PTabOrder
+4PTextColor
+4POnChange
+4POnEnter
+4POnExit
+4POnKeyPress
+4POnMouseEnter
+4POnMouseExit
+4POnPaint
 #GUI.gui_form.TfpgForm #CoreLib.gfx_widget.TfpgWidget
+1VFFullScreen
 1VFOnActivate
 1VFOnClose
 1VFOnCreate
@@ -1352,13 +1649,11 @@
 1VFOnDestroy
 1VFOnHide
 1VFOnShow
-1MSetBackgroundColor
 2VFModalResult
 2VFParentForm
 2VFWindowPosition
 2VFWindowTitle
 2VFSizeable
-2VFBackgroundColor
 2MAdjustWindowStyle
 2MSetWindowParameters
 2MSetWindowTitle
@@ -1369,9 +1664,12 @@
 2MHandleClose
 2MHandleHide
 2MHandleShow
+2MHandleMove
+2MHandleResize
 2MHandleKeyPress
 2MAfterConstruction
 2MBeforeDestruction
+2MDoOnClose
 3MCreate
 3MAfterCreate
 3MShow
@@ -1380,7 +1678,9 @@
 3MClose
 3PSizeable rw
 3PModalResult rw
-4PBackgroundColor rw
+3PFullScreen rw
+4PBackgroundColor
+4PTextColor
 4PWindowPosition rw
 4PWindowTitle rw
 4POnActivate rw
@@ -1391,42 +1691,6 @@
 4POnHide rw
 4POnPaint
 4POnShow rw
-#GUI.gui_grid.TFileEntry TObject
-1VFAttributes
-1VFEntryType
-1VFExtention
-1VFGroupID
-1VFIsLink
-1VFLinkTarget
-1VFMode
-1VFModTime
-1VFName
-1VFOwnerID
-1VFSize
-3MCreate
-3PName rw
-3PExtention rw
-3PSize rw
-3PEntryType rw
-3PIsLink rw
-3PAttributes rw
-3PMode rw
-3PModTime rw
-3POwnerID rw
-3PGroupID rw
-3PLinkTarget rw
-#GUI.gui_grid.TFileList TObject
-1VFEntries
-1VFDirectoryName
-1MGetEntry
-3MCreate
-3MDestroy
-3MCount
-3MReadDirectory
-3MClear
-3MSort
-3PEntry r
-3PDirectoryName r
 #GUI.gui_grid.TfpgFileGrid #GUI.gui_customgrid.TfpgCustomGrid
 1VFFileList
 1VFFixedFont
@@ -1447,6 +1711,7 @@
 4PColumns
 4PFocusRow
 4PScrollBarStyle
+4PTabOrder
 4POnRowChange
 4POnDoubleClick
 #GUI.gui_grid.TfpgStringColumn #GUI.gui_customgrid.TfpgGridColumn
@@ -1475,79 +1740,99 @@
 3PObjects rw
 3PColumnTitle rw
 3PColumnWidth rw
+3PColumnBackgroundColor rw
+3PColumnTextColor rw
 #GUI.gui_grid.TfpgStringGrid #GUI.gui_grid.TfpgCustomStringGrid
+4PBackgroundColor
+4PColumnCount
 4PColumns
+4PColumnWidth
 4PDefaultColWidth
 4PDefaultRowHeight
-4PFontDesc
-4PHeaderFontDesc
-4PBackgroundColor
 4PFocusCol
 4PFocusRow
-4PRowSelect
-4PColumnCount
-4PRowCount
-4PScrollBarStyle
-4PShowHeader
-4PShowGrid
+4PFontDesc
+4PHeaderFontDesc
 4PHeaderHeight
-4PColumnWidth
-4POnFocusChange
-4POnRowChange
+4PRowCount
+4PRowSelect
+4PScrollBarStyle
+4PShowGrid
+4PShowHeader
+4PTabOrder
+4PTopRow
+4POnCanSelectCell
+4POnDrawCell
 4POnDoubleClick
+4POnFocusChange
 4POnKeyPress
+4POnRowChange
 #GUI.gui_label.TfpgCustomLabel #CoreLib.gfx_widget.TfpgWidget
 1VFAutoSize
-1VFBackgroundColor
-1VFColor
+1VFAlignment
+1VFLayout
+1VFWrapText
+1VFWrappedText
+1VFLineSpace
+1MWrap
+1MSetWrapText
+1MSetAlignment
+1MSetLayout
 1MGetFontDesc
 1MSetAutoSize
-1MSetBackgroundColor
 1MSetFontDesc
-1MSetColor
 1MSetText
 1MResizeLabel
 2VFText
 2VFFont
+2MHandleResize
 2MHandlePaint
+2PWrapText rw
+2PAlignment rw
 2PAutoSize rw
-2PText rw
+2PLayout rw
 2PFontDesc rw
-2PColor rw
-2PBackgroundColor rw
+2PText rw
+2PLineSpace rw
 3MCreate
 3MDestroy
 3PFont r
 #GUI.gui_label.TfpgLabel #GUI.gui_label.TfpgCustomLabel
+4PAlignment
 4PAutoSize
 4PBackgroundColor
-4PColor
 4PFontDesc
+4PLayout
 4PText
+4PTextColor
+4PWidth
+4PWrapText
+4POnClick
+4POnDoubleClick
+4POnMouseDown
 4POnMouseEnter
 4POnMouseExit
-4POnMouseDown
-4POnMouseUp
 4POnMouseMove
+4POnMouseUp
 #GUI.gui_listbox.TfpgBaseListBox #CoreLib.gfx_widget.TfpgWidget
 1VFHotTrack
 1VFOnChange
 1VFOnScroll
 1VFOnSelect
 1VFPopupFrame
+1VFAutoHeight
 1MGetFontDesc
 1MSetFocusItem
 1MSetFontDesc
 1MSetPopupFrame
 1MUpdateScrollbarCoords
+1MSetAutoHeight
 2VFFont
 2VFScrollBar
 2VFFocusItem
 2VFMouseDragging
 2VFFirstItem
 2VFMargin
-2VFBackgroundColor
-2MSetFirstItem
 2MUpdateScrollBar
 2MFollowFocus
 2MListHeight
@@ -1564,34 +1849,78 @@
 2MHandleMouseScroll
 2MHandleShow
 2MHandlePaint
-2PPopupFrame rw
-2PHotTrack rw
+2PAutoHeight rw
 2PFocusItem rw
 2PFontDesc rw
+2PHotTrack rw
+2PPopupFrame rw
 3MCreate
 3MDestroy
 3MUpdate
 3MItemCount
 3MRowHeight
+3MSetFirstItem
 3PFont r
 3POnChange rw
 3POnSelect rw
 3POnScroll rw
+3POnKeyPress
 #GUI.gui_listbox.TfpgTextListBox #GUI.gui_listbox.TfpgBaseListBox
 2VFItems
-2VFInternalItems
 2MDrawItem
+2MHandleKeyChar
 2PItems r
 3MCreate
 3MDestroy
 3MItemCount
 3MText
 #GUI.gui_listbox.TfpgListBox #GUI.gui_listbox.TfpgTextListBox
+4PAutoHeight
+4PBackgroundColor
 4PFocusItem
 4PFontDesc
 4PHotTrack
 4PItems
 4PPopupFrame
+4PTabOrder
+4PTextColor
+#GUI.gui_listbox.TColorItem TObject
+3MCreate
+3VColorName
+3VColorValue
+#GUI.gui_listbox.TfpgBaseColorListBox #GUI.gui_listbox.TfpgBaseListBox
+1VFColorBoxWidth
+1VFColorBoxHeight
+1VFColorPalette
+1VFShowColorNames
+1MGetColor
+1MSetColor
+1MSetColorPalette
+1MSetShowColorNames
+1MSetupColorPalette
+1MFreeAndClearColors
+2VFItems
+2MDrawItem
+2PItems r
+2PColor rw
+2PColorPalette rw
+2PShowColorNames rw
+3MCreate
+3MDestroy
+3MItemCount
+#GUI.gui_listbox.TfpgColorListBox #GUI.gui_listbox.TfpgBaseColorListBox
+4PAutoHeight
+4PBackgroundColor
+4PColor
+4PColorPalette
+4PFocusItem
+4PFontDesc
+4PHotTrack
+4PItems
+4PPopupFrame
+4PShowColorNames
+4PTabOrder
+4PTextColor
 #GUI.gui_listview.TfpgLVColumn TComponent
 1VFAlignment
 1VFCaptionAlignment
@@ -1764,6 +2093,7 @@
 4PHScrollBar r
 4PItemHeight r
 4PItemIndex rw
+4PTabOrder
 4POnColumnClick rw
 4POnPaintColumn rw
 4POnPaintItem rw
@@ -1783,7 +2113,6 @@
 1VFMouseDragging
 1VFMouseDragPos
 1VFFont
-1VFBackgroundColor
 1VFDrawOffset
 1VFLineHeight
 1VFFirstLine
@@ -1828,16 +2157,19 @@
 3MDestroy
 3MUpdateScrollBars
 3MSelectionText
-3PLineHeight r
 3PCursorLine rw
-3PText rw
 3PFont r
-3POnChange rw
-3PUseTabs rw
-3PTabWidth rw
+3PLineHeight r
 3PMaxLength rw
-4PLines r
+3PTabWidth rw
+3PText rw
+3PUseTabs rw
+4PBackgroundColor
 4PFontDesc rw
+4PLines r
+4PTabOrder
+4PTextColor
+4POnChange rw
 #GUI.gui_menu.TfpgMenuItem TComponent
 1VFCommand
 1VFEnabled
@@ -1867,11 +2199,9 @@
 3PSubMenu rw
 3POnClick rw
 #GUI.gui_menu.TfpgPopupMenu #CoreLib.gfx_popupwindow.TfpgPopupWindow
-1VFBackgroundColor
 1VFBeforeShow
 1VFMargin
 1VFTextMargin
-1MSetBackgroundColor
 1MDoSelect
 1MCloseSubmenus
 1MGetItemPosY
@@ -1886,11 +2216,15 @@
 2VFSymbolWidth
 2VFItems
 2VFFocusItem
+2MHandleMouseEnter
+2MHandleMouseExit
 2MHandleMouseMove
 2MHandleLMouseDown
+2MHandleLMouseUp
 2MHandleKeyPress
 2MHandlePaint
 2MHandleShow
+2MHandleClose
 2MDrawItem
 2MDrawRow
 2MItemHeight
@@ -1902,16 +2236,21 @@
 3MClose
 3MAddMenuItem
 3MMenuItemByName
-3PBackgroundColor rw
+3MMenuItem
 3PBeforeShow rw
 #GUI.gui_menu.TfpgMenuBar #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
 1VFBeforeShow
 1VFLightColor
 1VFDarkColor
-1MSetBackgroundColor
+1VFMenuOptions
+1VFPrevFocusItem
+1VFFocusItem
+1MSetFocusItem
+1MDoSelect
+1MCloseSubmenus
+1MItemWidth
 2VFItems
-2VFFocusItem
+2PFocusItem rw
 2MPrepareToShow
 2MVisibleCount
 2MVisibleItem
@@ -1920,30 +2259,26 @@
 2MHandleLMouseDown
 2MHandleKeyPress
 2MHandlePaint
+2MCalcMouseCol
+2MGetItemPosX
+2MMenuFocused
+2MSearchItemByAccel
+2MActivateMenu
+2MDeActivateMenu
+2MDrawColumn
 3MCreate
 3MDestroy
-3MItemWidth
-3MDrawColumn
-3MCalcMouseCol
-3MGetItemPosX
-3MDoSelect
-3MCloseSubmenus
-3MMenuFocused
-3MSearchItemByAccel
-3MDeActivateMenu
-3MActivateMenu
 3MAddMenuItem
-3PBackgroundColor rw
+3MMenuItem
+3PMenuOptions rw
 3PBeforeShow rw
 #GUI.gui_progressbar.TfpgCustomProgressBar #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
 1VFMax
 1VFMin
 1VFPosition
 1VFShowCaption
 1VFStep
 1VFFont
-1MSetBackgroundColor
 1MSetMax
 1MSetMin
 1MSetPosition
@@ -1954,7 +2289,6 @@
 2PMin rw
 2PPosition rw
 2PStep rw
-2PBackgroundColor rw
 2PShowCaption rw
 3MCreate
 3MDestroy
@@ -1968,8 +2302,9 @@
 4PMin
 4PPosition
 4PStep
+4PTextColor
 #GUI.gui_radiobutton.TfpgRadioButton #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
+1VFAutoSize
 1VFChecked
 1VFFont
 1VFGroupIndex
@@ -1978,39 +2313,46 @@
 1VFBoxSize
 1VFIsPressed
 1MGetFontDesc
-1MSetBackgroundColor
+1MSetAutoSize
 1MSetChecked
 1MSetFontDesc
 1MSetText
+1MDoAdjustWidth
 2MHandlePaint
 2MHandleLMouseDown
 2MHandleLMouseUp
+2MHandleKeyPress
 2MHandleKeyRelease
+2MFindNeighbor
 3MCreate
 3MDestroy
 3PFont r
+4PAutoSize rw
+4PBackgroundColor
 4PChecked rw
-4PText rw
 4PFontDesc rw
-4PBackgroundColor rw
 4PGroupIndex rw
+4PTabOrder
+4PText rw
+4PTextColor
 4POnChange rw
 #GUI.gui_scrollbar.TfpgScrollBar #CoreLib.gfx_widget.TfpgWidget
 1VFLargeChange
-1VPrevAreaPressed
-1VNextAreaPressed
+1VFScrollbarDownPart
 1MSetMax
 1MSetMin
 1MSetPosition
+1MStep
+1MStepPage
+1MStepStart
+1MStepEnd
 2VFMax
 2VFMin
+2VFPageSize
 2VFPosition
 2VFScrollStep
 2VFSliderPos
 2VFSliderLength
-2VFSliderDragging
-2VFStartBtnPressed
-2VFEndBtnPressed
 2VFSliderDragPos
 2VFSliderDragStart
 2VFScrollTimer
@@ -2031,6 +2373,7 @@
 3MCreate
 3MDestroy
 3MRepaintSlider
+3PPageSize rw
 3PPosition rw
 3PScrollStep rw
 3PMin rw
@@ -2058,12 +2401,10 @@
 #GUI.gui_style.TfpgClearLookStyle #GUI.gui_style.TfpgCommonStyle
 #GUI.gui_style.TfpgMotifStyle #GUI.gui_style.TfpgCommonStyle
 #GUI.gui_tab.TfpgTabSheet #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
 1VFText
 1MGetPageControl
 1MGetPageIndex
 1MGetText
-1MSetBackgroundColor
 1MSetPageIndex
 1MSetText
 2MHandlePaint
@@ -2073,9 +2414,7 @@
 3PText rw
 3PPageIndex rw
 3PPageControl r
-3PBackgroundColor rw
 #GUI.gui_tab.TfpgPageControl #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
 1VFFont
 1VFActivePage
 1VFMargin
@@ -2101,7 +2440,6 @@
 1MMaxButtonWidth
 1MButtonHeight
 1MButtonWidth
-1MSetBackgroundColor
 1MSetFixedTabWidth
 1MGetTabText
 1MLeftButtonClick
@@ -2114,6 +2452,7 @@
 2MOrderSheets
 2MRePaintTitles
 2MHandlePaint
+2MHandleShow
 2MHandleLMouseUp
 2MHandleKeyPress
 3MCreate
@@ -2124,13 +2463,14 @@
 3PPages r
 3POnChange rw
 4PActivePageIndex rw
-4PBackgroundColor rw
+4PBackgroundColor
 4PFixedTabWidth rw
 4PSortPages rw
 4PStyle rw
+4PTabOrder
 4PTabPosition rw
+4PTextColor
 #GUI.gui_trackbar.TfpgTrackBarExtra #CoreLib.gfx_widget.TfpgWidget
-1VFBackgroundColor
 1VFMax
 1VFMin
 1VFOnChange
@@ -2138,7 +2478,6 @@
 1VFPosition
 1VFSliderSize
 1MDoChange
-1MSetBackgroundColor
 1MSetMax
 1MSetMin
 1MSetPosition
@@ -2150,12 +2489,13 @@
 2MHandleLMouseUp
 2MHandleKeyPress
 3MCreate
-4PBackgroundColor rw
+4PBackgroundColor
 4PMin rw
 4PMax rw
 4PPosition rw
 4PSliderSize rw
 4POrientation rw
+4PTabOrder
 4POnChange rw
 #GUI.gui_trackbar.TfpgTrackBar #CoreLib.gfx_widget.TfpgWidget
 1VFMax
@@ -2172,8 +2512,6 @@
 1VFMousePosition
 1VFOnChange
 1VFFont
-1VFBackgroundColor
-1MSetBackgroundColor
 1MSetMax
 1MSetMin
 1MSetPosition
@@ -2188,13 +2526,15 @@
 2MPositionChange
 3MCreate
 3MDestroy
-4PBackgroundColor rw
+4PBackgroundColor
 4PPosition rw
 4PScrollStep rw
 4PMin rw
 4PMax rw
 4PShowPosition rw
 4POrientation rw
+4PTabOrder
+4PTextColor
 4POnChange rw
 #GUI.gui_iniutils.TfpgINIFile TINIFile
 1VFReadOnly
@@ -2289,12 +2629,14 @@
 1VFMinDate
 1VFCallerWidget
 1VFOnValueSet
+1VFCloseOnSelect
 1VedtYear
 1VbtnYearUp
 1VbtnYearDown
 1VedtMonth
 1VbtnMonthUp
 1VbtnMonthDown
+1VbtnToday
 1VgrdName1
 1MGetDateElement
 1MPopulateDays
@@ -2304,11 +2646,13 @@
 1MSetDateValue
 1MSetMaxDate
 1MSetMinDate
+1MSetCloseOnSelect
 1MUpdateCalendar
 1MbtnYearUpClicked
 1MbtnYearDownClicked
 1MbtnMonthUpClicked
 1MbtnMonthDownClicked
+1MbtnTodayClicked
 1MgrdName1DoubleClick
 1MgrdName1KeyPress
 1MTearDown
@@ -2320,6 +2664,7 @@
 2PCallerWidget rw
 3MCreate
 3MAfterCreate
+3PCloseOnSelect rw
 3PDay
 3PMonth
 3PYear
@@ -2332,6 +2677,7 @@
 1VFDateFormat
 1VFMaxDate
 1VFMinDate
+1VFCloseOnSelect
 1MInternalOnValueSet
 1MSetDateFormat
 1MSetDateValue
@@ -2339,6 +2685,7 @@
 1MSetMinDate
 1MSetText
 1MGetText
+1MSetCloseOnSelect
 2MHasText
 2MDoDropDown
 3MCreate
@@ -2348,4 +2695,27 @@
 4PFontDesc
 4PMinDate rw
 4PMaxDate rw
+4PCloseOnSelect rw
+4PTabOrder
 4POnChange
+#GUI.gui_hyperlink.TfpgHyperlink #GUI.gui_label.TfpgCustomLabel
+1VfHotTrackColor
+1VfOldColor
+1VfOldFont
+1VfHTFont
+1VfUrl
+1MSetHotTrackColor
+1MSetHotTrackFont
+1MSetURL
+2MHandleMouseEnter
+2MHandleMouseExit
+2MHandleLMouseDown
+3MCreate
+3MGoHyperLink
+4PAutosize
+4PFontDesc
+4PHotTrackColor rw
+4PHotTrackFont rw
+4PText
+4PTextColor
+4PURL rw

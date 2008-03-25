@@ -14,5 +14,11 @@ makeskel --package=CoreLib --output=xml/corelib/gfx_utils.xml --input='-Fi../src
 makeskel --package=CoreLib --output=xml/corelib/gfx_popupwindow.xml --input='-Fi../src/corelib ../src/corelib/gfx_popupwindow.pas'
 makeskel --package=CoreLib --output=xml/corelib/gfx_wuline.xml --input='-Fi../src/corelib ../src/corelib/gfx_wuline.pas'
 
+makeskel --package=CoreLib --output=xml/corelib/gfx_imagelist.xml --input='-Fi../src/corelib ../src/corelib/gfx_imagelist.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_constants.xml --input='-Fi../src/corelib ../src/corelib/gfx_constants.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_pofiles.xml --input='-Fi../src/corelib ../src/corelib/gfx_pofiles.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_translations.xml --input='-Fi../src/corelib ../src/corelib/gfx_translations.pas'
+makeskel --package=CoreLib --output=xml/corelib/gfx_stringhashlist.xml --input='-Fi../src/corelib ../src/corelib/gfx_stringhashlist.pas'
+
 # makeskel --package=CoreLib --output=xml/corelib/gfx_.xml --input='-Fi../src/corelib ../src/corelib/gfx_.pas'
 

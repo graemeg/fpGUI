@@ -95,6 +95,7 @@ type
     procedure   SetShowHeader(const AValue: boolean);
     function    VisibleLines: integer;
     function    VisibleWidth: integer;
+    function    VisibleHeight: integer;
     procedure   SetFirstRow(const AValue: integer);
   protected
     procedure   UpdateScrollBars; virtual;
@@ -333,7 +334,7 @@ begin
   Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
   r := ARect;
   InflateRect(r, -2, -2);
-  Canvas.SetClipRect(r);  // text cannot oversheet header border
+  Canvas.AddClipRect(r);  // text may not overshoot header border
 (*
   // drawing grid lines
   Canvas.SetColor(clGridLines);
@@ -448,7 +449,18 @@ begin
     sw := FVScrollBar.Width-1
   else
     sw := 0;
-  Result := Width - FMargin*2 - sw;
+  Result := Width - (FMargin*2) - sw;
+end;
+
+function TfpgBaseGrid.VisibleHeight: integer;
+var
+  sw: integer;
+begin
+  if FHScrollBar.Visible then
+    sw := FHScrollBar.Height-1
+  else
+    sw := 0;
+  Result := Height - (FMargin*2) - sw;
 end;
 
 procedure TfpgBaseGrid.SetFirstRow(const AValue: integer);
@@ -554,8 +566,8 @@ begin
   Canvas.SetClipRect(r);
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(r);
-  
-  clipr.SetRect(FMargin, FMargin, VisibleWidth, Height-(2*FMargin));
+
+  clipr.SetRect(FMargin, FMargin, VisibleWidth, VisibleHeight);
   r := clipr;
 
   if (ColumnCount > 0) and ShowHeader then
@@ -661,7 +673,6 @@ begin
                          FVScrollBar.Width,
                          FHScrollBar.Height);
   end;
-
 
   Canvas.EndDraw;
 end;
