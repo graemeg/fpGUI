@@ -182,8 +182,6 @@ type
     hcr_wait: HCURSOR;
     hcr_hand: HCURSOR;
     FFocusedWindow: THANDLE;
-    LastClickWindow: TfpgWinHandle; // double click generation
-    LastWinClickTime: longword;
     function    DoGetFontFaceList: TStringList; override;
   public
     constructor Create(const aparams: string); override;
@@ -216,10 +214,9 @@ type
 implementation
 
 uses
-  {$Note Remove the dependency on gfx_widget and gfx_form units.}
   fpgfx,
   gfx_widget,
-  gui_form, // remove this!!!!!
+  gui_form, // how can we remove this dependency?
   gfx_UTF8Utils,
   math,
   gfx_popupwindow;
@@ -559,19 +556,6 @@ begin
               fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
             end;
 
-        // lets generate the FPGM_KEYCHAR for some special keys
-        // based on this table of Windows virtual keys
-//        case wParam of
-//          $70..$7B,  // F1..F12
-//          $21..$24,  // home, end, pageup, pagedn
-//          $2D..$2E,  // insert, delete
-//          $25..$28:  // arrows
-//          begin
-//            msgp.keyboard.keycode := kcode or $FF00; // scan code + $FF00
-//            fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
-//          end;
-//        end;
-
           end
           else if (uMsg = WM_KEYUP) or (uMsg = WM_SYSKEYUP) then
             fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
@@ -591,14 +575,6 @@ begin
           else
             Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
-(*
-    WM_LBUTTONDBLCLK:
-        begin
-          {$IFDEF DEBUG}
-          writeln('fpGFX/GDI:', w.ClassName + ': MouseButton DoubleClick event');
-          {$ENDIF}
-        end;
-*)
 
     WM_LBUTTONDBLCLK,
     WM_MOUSEMOVE,

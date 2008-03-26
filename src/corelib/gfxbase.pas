@@ -2069,7 +2069,6 @@ var
   SearchRec: TSearchRec;
   dir: TfpgString; //  to prevent FDirectoryName from having incorrect value
 begin
-  writeln(aDirectory);
   // default parameter value is current directory
   if aDirectory <> '' then
     dir := fpgExpandFileName(aDirectory)

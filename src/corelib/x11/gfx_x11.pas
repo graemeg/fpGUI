@@ -132,8 +132,6 @@ type
   end;
 
 
-  { TfpgCanvasImpl }
-
   TfpgCanvasImpl = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
@@ -207,8 +205,6 @@ type
   end;
 
 
-  { TfpgApplicationImpl }
-
   TfpgApplicationImpl = class(TfpgApplicationBase)
   private
     FComposeBuffer: String[32];
@@ -234,8 +230,6 @@ type
     xia_targets: TAtom;
     InputMethod: PXIM;
     InputContext: PXIC;
-    LastClickWindow: TfpgWinHandle;   // double click generation
-    LastWinClickTime: longword;
     FLastKeySym: TKeySym;   // Used for KeyRelease event
     function    DoGetFontFaceList: TStringList; override;
   public
@@ -286,13 +280,6 @@ uses
 
 var
   xapplication: TfpgApplication;
-
-{ Double click support }
-const
-  DOUBLECLICK_MS = 200; // the max time between left-clicks for doubleclick
-var
-  LastClickWindow: TfpgWinHandle;
-  LastWinClickTime: longword;
 
 
  // some externals

@@ -137,15 +137,12 @@ function FindKeyboardFocus: TfpgWidget;
 implementation
 
 uses
-  math;
+  math, gfx_constants;
 
-
-{ Double click support }
-const
-  DOUBLECLICK_MS = 320; // the max time between left-clicks for doubleclick
 
 var
   uLastClickWidget: TfpgWidget;
+  uLastClickPoint: TPoint;
   uLastClickTime: DWord;
   
 
@@ -429,10 +426,14 @@ begin
       begin
         mb := mbLeft;
         if uLastClickWidget = self then
-          IsDblClick := (fpgGetTickCount - uLastClickTime) <= DOUBLECLICK_MS   // we detected a double click
+          IsDblClick := ((fpgGetTickCount - uLastClickTime) <= DOUBLECLICK_MS)
+            and (Abs(uLastClickPoint.x - msg.Params.mouse.x) <= DOUBLECLICK_DISTANCE)
+            and (Abs(uLastClickPoint.y - msg.Params.mouse.y) <= DOUBLECLICK_DISTANCE)
+          // we detected a double click
         else
           uLastClickWidget := self;
 
+        uLastClickPoint := Point(msg.Params.mouse.x, msg.Params.mouse.y);
         uLastClickTime := fpgGetTickCount;
         if IsDblClick then
         begin
