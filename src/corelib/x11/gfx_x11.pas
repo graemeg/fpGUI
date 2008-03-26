@@ -1418,7 +1418,7 @@ begin
     fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtSplash]);
 
   // process Borderless forms
-  if (FWindowType = wtWindow) and (waBorderless in FWindowAttributes) then
+  if ((FWindowType = wtWindow) or (FWindowType = wtModalForm)) and (waBorderless in FWindowAttributes) then
   begin
     prop := X.None;
     prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', longbool(0));
