@@ -24,7 +24,8 @@ interface
 
 uses
   SysUtils,
-  Classes;
+  Classes,
+  gfx_utils;
 
 type
   TVFDFileBlock = class
@@ -265,7 +266,7 @@ var
   cnt: integer;
 begin
   Result := False;
-  AssignFile(ff, fname);
+  AssignFile(ff, fpgToOSEncoding(fname));
   try
     Reset(ff, 1);
   except

@@ -35,6 +35,7 @@ uses
   gui_combobox,
   gui_menu,
   gui_mru,
+  gui_hyperlink,
   vfdwidgetclass,
   vfdwidgets;
 
@@ -151,7 +152,7 @@ type
     lblVersion: TfpgLabel;
     btnName1: TfpgButton;
     lblName3: TfpgLabel;
-    lblName4: TfpgLabel;
+    lblName4: TfpgHyperlink;
     lblCompiled: TfpgLabel;
     {@VFD_HEAD_END: frmAbout}
     procedure AfterCreate; override;
@@ -229,13 +230,16 @@ begin
     FontDesc := 'Arial-9';
   end;
 
-  lblName4 := TfpgLabel.Create(self);
+  lblName4 := TfpgHyperlink.Create(self);
   with lblName4 do
   begin
     Name := 'lblName4';
     SetPosition(12, 116, 246, 14);
     Text := 'http://opensoft.homeip.net/fpgui/';
+    URL := 'http://opensoft.homeip.net/fpgui/';
     FontDesc := 'Arial-9:underline';
+    HotTrackColor := clRoyalBlue;
+    HotTrackFont := 'Arial-9:underline';
   end;
 
   lblCompiled := TfpgLabel.Create(self);
@@ -352,8 +356,7 @@ begin
     AddMenuItem('New', '', @(maindsgn.OnNewFile));
     AddMenuItem('Open', '', @(maindsgn.OnLoadFile));
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
-    //      FFileOpenRecent.Enabled := False;
-    AddMenuItem('Save', '', @(maindsgn.OnSaveFile));
+    AddMenuItem('Save As...', '', @(maindsgn.OnSaveFile));
     AddMenuItem('-', '', nil);
     AddMenuItem('New Form...', '', @(maindsgn.OnNewForm));
     AddMenuItem('-', '', nil);
@@ -366,8 +369,9 @@ begin
     Name := 'formmenu';
     SetPosition(464, 48, 120, 20);
     AddMenuItem('Widget Order...', '', @(maindsgn.OnEditWidgetOrder));
+    AddMenuItem('Tab Order...', '', nil).Enabled := False;  // TODO
     AddMenuItem('-', '', nil);
-    AddMenuItem('Edit special...', '', nil).Enabled := False;
+    AddMenuItem('Edit special...', '', nil).Enabled := False; // TODO
   end;
 
   setmenu := TfpgPopupMenu.Create(self);

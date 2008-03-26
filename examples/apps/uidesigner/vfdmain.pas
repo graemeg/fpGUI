@@ -137,7 +137,7 @@ begin
   end;
   FDesigners.Clear;
 
-  if not FileExists(fname) then
+  if not fpgFileExists(fname) then
   begin
     ShowMessage('File does not exists.', 'Error loading form');
     Exit;
@@ -174,18 +174,24 @@ var
 begin
   fname := EditedFileName;
 
-  afiledialog          := TfpgFileDialog.Create(nil);
-  afiledialog.Filename := EditedFilename;
-  afiledialog.WindowTitle := 'Save form source';
-  afiledialog.Filter   := 'Pascal source files (*.pas;*.inc;*.dpr;*.lpr)|*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
-  if afiledialog.RunSaveFile then
-  begin
-    EditedFileName := aFileDialog.Filename;
-    fname          := EditedFilename;
-  end
+  if ((Sender as TComponent).Name = 'btnSave')
+    and (EditedFileName <> '') then
+      fname := EditedFileName
   else
-    fname          := '';
-  aFileDialog.Free;
+  begin
+    afiledialog          := TfpgFileDialog.Create(nil);
+    afiledialog.Filename := EditedFilename;
+    afiledialog.WindowTitle := 'Save form source';
+    afiledialog.Filter   := 'Pascal source files (*.pas;*.inc;*.dpr;*.lpr)|*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
+    if afiledialog.RunSaveFile then
+    begin
+      EditedFileName := aFileDialog.Filename;
+      fname          := EditedFilename;
+    end
+    else
+      fname          := '';
+    aFileDialog.Free;
+  end;
 
   if fname = '' then
     Exit;
@@ -214,7 +220,7 @@ begin
 
   fdata := FFile.MergeBlocks;
 
-  AssignFile(ff, fname);
+  AssignFile(ff, fpgToOSEncoding(fname));
   try
     Rewrite(ff, 1);
     try
@@ -222,7 +228,8 @@ begin
     finally
       CloseFile(ff);
     end;
-    frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + fname;
+    // frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + fname;
+    //    everything is done by SetEditedFileName (EditedFileName := ...)
     frmMain.mru.AddItem(fname);
   except
     Writeln('Form save I/O failure.');
