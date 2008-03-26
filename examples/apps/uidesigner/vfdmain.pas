@@ -68,6 +68,7 @@ type
     procedure   OnAnchorChange(Sender: TObject);
     procedure   OnEditWidget(Sender: TObject);
     procedure   OnEditWidgetOrder(Sender: TObject);
+    procedure   OnEditTabOrder(Sender: TObject);
     procedure   OnExit(Sender: TObject);
     procedure   OnOptionsClick(Sender: TObject);
     property    EditedFileName: string read FEditedFileName write SetEditedFileName;
@@ -401,6 +402,12 @@ procedure TMainDesigner.OnEditWidgetOrder(Sender: TObject);
 begin
   if SelectedForm <> nil then
     SelectedForm.EditWidgetOrder;
+end;
+
+procedure TMainDesigner.OnEditTabOrder(Sender: TObject);
+begin
+  if SelectedForm <> nil then
+    SelectedForm.EditTabOrder;
 end;
 
 procedure TMainDesigner.OnExit(Sender: TObject);

@@ -119,6 +119,7 @@ type
     procedure   MoveResizeWidgets(dx, dy, dw, dh: integer);
     procedure   DeleteWidgets;
     procedure   EditWidgetOrder;
+    procedure   EditTabOrder;
 //    procedure PutControlByName(x, y: integer; cname: string);
     procedure   InsertWidget(pwg: TfpgWidget; x, y: integer; wgc: TVFDWidgetClass);
     procedure   OnPaletteChange(Sender: TObject);
@@ -142,7 +143,7 @@ type
 implementation
 
 uses
-  vfdmain;
+  vfdmain, TypInfo;
 
 { TWidgetDesigner }
 
@@ -681,6 +682,70 @@ begin
     end;
 
   end;
+  frm.Free;
+end;
+
+procedure TFormDesigner.EditTabOrder;
+const
+  cDivider = ' : ';
+var
+  frm: TWidgetOrderForm;
+  n, fi, i: integer;
+  cd: TWidgetDesigner;
+  identlevel: integer;
+  s: string;
+  taborder: integer;
+
+  procedure AddChildWidgets(pwg: TfpgWidget; slist: TStrings);
+  var
+    f: integer;
+    fcd: TWidgetDesigner;
+  begin
+    for f := 0 to FWidgets.Count - 1 do
+    begin
+      fcd := TWidgetDesigner(FWidgets.Items[f]);
+
+      if fcd.Widget.Parent = pwg then
+      begin
+        frm.list.Items.AddObject(StringOfChar(' ', identlevel) + fcd.Widget.Name + cDivider + fcd.Widget.ClassName, fcd);
+        Inc(identlevel, 2);
+        AddChildWidgets(fcd.Widget, slist);
+        Dec(identlevel, 2);
+      end;
+
+      if fcd.Selected then
+        fi := f + 1;
+    end;
+  end;
+
+begin
+  frm := TWidgetOrderForm.Create(nil);
+  frm.WindowTitle := 'Tab Order';
+  fi  := 1;
+  identlevel := 0;
+
+  AddChildWidgets(FForm, frm.list.Items);
+
+  if fi <= frm.list.ItemCount then
+    frm.list.FocusItem := fi;
+
+  if frm.ShowModal = 1 then
+  begin
+    taborder := 1;
+    for n := 0 to frm.List.Items.Count - 1 do
+    begin
+        try
+          if IsPublishedProp(TWidgetDesigner(frm.List.Items.Objects[n]).Widget, 'TabOrder') then
+          begin
+//            SetPropValue(TWidgetDesigner(frm.List.Items.Objects[n]).Widget, 'TabOrder', taborder);
+            TWidgetDesigner(frm.List.Items.Objects[n]).Widget.TabOrder := taborder;
+            inc(taborder);
+          end;
+        except
+          // do nothing. TabOrder was not published
+        end;
+    end;
+  end;  { if }
   frm.Free;
 end;
 

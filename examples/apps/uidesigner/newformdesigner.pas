@@ -369,7 +369,7 @@ begin
     Name := 'formmenu';
     SetPosition(464, 48, 120, 20);
     AddMenuItem('Widget Order...', '', @(maindsgn.OnEditWidgetOrder));
-    AddMenuItem('Tab Order...', '', nil).Enabled := False;  // TODO
+    AddMenuItem('Tab Order...', '', @(maindsgn.OnEditTabOrder));
     AddMenuItem('-', '', nil);
     AddMenuItem('Edit special...', '', nil).Enabled := False; // TODO
   end;
