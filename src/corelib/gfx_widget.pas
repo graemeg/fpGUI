@@ -228,14 +228,11 @@ end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
-  { TODO: -oGraeme -cRelease_Blocker ComponentState is read-only. I'm
-    exploiting a FPC <= 2.2.0 bug. I need to fix this! }
-//  {$if defined(VER2_0) or defined(VER2_2_0)}
-//  Include(ComponentState, csLoading);
-//  {$else}
-//  Loading;    // ????
-//  {$endif}
-  Include(FComponentState, csLoading);
+  {$if defined(VER2_0) or defined(VER2_2_0)}
+  Include(ComponentState, csLoading);
+  {$else}
+  Loading;
+  {$endif}
 
   FOnScreen   := False;
   FVisible    := True;
