@@ -502,7 +502,7 @@ begin
   FTextColor        := Parent.TextColor;
   // calculate the best height based on font
   FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
-  
+
   FLightColor := TfpgColor($f0ece3);  // color at top of menu bar
   FDarkColor  := TfpgColor($beb8a4);  // color at bottom of menu bar
   

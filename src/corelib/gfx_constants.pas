@@ -15,7 +15,7 @@ unit gfx_constants;
 interface
 
 uses
-  gfxbase;
+  SysUtils, gfxbase;
 
 resourcestring
 
@@ -74,7 +74,8 @@ const
   DOUBLECLICK_MS = 320; // the max time between left-clicks for doubleclick
   DOUBLECLICK_DISTANCE = 5; // max distance between points when doing doubleclick
 
-
+  ONE_MILISEC = 1/MSecsPerDay;
+  
 
 { This is so that when we support LTR and RTL languages, the colon will be
   added at the correct place. }

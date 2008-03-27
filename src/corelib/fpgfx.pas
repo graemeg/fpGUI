@@ -165,7 +165,6 @@ type
     MenuFont: TfpgFont;
     MenuAccelFont: TfpgFont;
     MenuDisabledFont: TfpgFont;
-  public
     constructor Create; virtual;
     destructor  Destroy; override;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
@@ -336,8 +335,6 @@ var
   uClipboard: TfpgClipboard;
   uMsgQueueList: TList;
 
-const
-  ONE_MILISEC = 1 / (24 * 60 * 60 * 1000);
 
 type
   TNamedFontItem = class
@@ -415,7 +412,7 @@ end;
 
 function fpgGetTickCount: DWord;
 begin
-  Result := DWord(Trunc(Now * 24 * 60 * 60 * 1000));
+  Result := DWord(Trunc(Now * MSecsPerDay));
 end;
 
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;

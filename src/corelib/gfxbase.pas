@@ -1,3 +1,20 @@
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      The Big Bang starts here!  The starting unit for fpGUI.
+}
+
 unit gfxbase;
 
 {$mode objfpc}{$H+}
@@ -63,8 +80,11 @@ const
 
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
-
-  FPG_DEFAULT_FONT_DESC = 'Arial-10:antialias=true';
+  
+var
+  FPG_DEFAULT_FONT_DESC: string = 'Arial-10:antialias=true';
+  
+const
   UserNamedColorStart   = 128;
 
   {$I predefinedcolors.inc}
