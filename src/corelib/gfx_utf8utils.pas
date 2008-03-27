@@ -21,6 +21,8 @@ function  UTF8Length(p: PChar; ByteCount: integer): integer;
 function  UTF8Pos(const SearchForText, SearchInText: string): integer;
 procedure UTF8Delete(var S: string; Index, Size: integer);
 procedure UTF8Insert(const Source: string; var S: string; Index: integer);
+function  UTF8CharAtByte(const s: string; BytePos: integer; var aChar: string): integer;
+
 
 implementation
 
@@ -214,6 +216,23 @@ begin
   b := UTF8Copy(S, 1, Index-1); // beginning string
   e := UTF8Copy(S, Index, UTF8Length(S)-Index+1); // ending string
   S := b + Source + e;
+end;
+
+function UTF8CharAtByte(const s: string; BytePos: integer;
+  var aChar: string): integer;
+var
+  CharLen: Integer;
+begin
+  if BytePos > 0 then
+  begin
+    CharLen := UTF8CharacterLength(@s[BytePos]);
+    aChar   := Copy(s, BytePos, CharLen);
+    Result  := BytePos + CharLen;
+  end else
+  begin
+    aChar   := '';
+    Result  := 1;
+  end;
 end;
 
 procedure UTF8Delete(var S: string; Index, Size: integer);

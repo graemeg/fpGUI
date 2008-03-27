@@ -33,6 +33,8 @@ type
   TfpgEditBorderStyle = (bsNone, bsDefault, bsSingle);
 
 
+  { TfpgCustomEdit }
+
   TfpgCustomEdit = class(TfpgWidget)
   private
     FAutoSelect: Boolean;
@@ -47,6 +49,7 @@ type
     FMaxLength: integer;
     FSelecting: Boolean;
     procedure   AdjustCursor;
+    function    CursorPosToCharPos(x, y: integer): integer;
     procedure   DeleteSelection;
     procedure   DoCopy;
     procedure   DoPaste;
@@ -160,7 +163,7 @@ implementation
 uses
   gfx_UTF8utils,
   gfx_constants;
-  
+
 const
   // internal popupmenu item names
   ipmCut        = 'miDefaultCut';
@@ -200,6 +203,50 @@ begin
     if tw <> 0 then
       Dec(FDrawOffset, 2);
   end;
+end;
+
+function TfpgCustomEdit.CursorPosToCharPos(x, y: integer): integer;
+var
+  n: integer;
+  cpx: integer;
+  cx: integer;
+  dtext: string;
+  tw, dpos: integer;
+  // tc: Cardinal;
+  ch: string;
+begin
+  // searching the appropriate character position
+  dtext  := GetDrawText;
+  cpx    := FFont.TextWidth(UTF8Copy(dtext, 1, FCursorPos)) - FDrawOffset + FSideMargin;
+  Result := FCursorPos;
+  
+  // tc := fpgGetTickCount;
+  {for n := 0 to UTF8Length(dtext) do
+  begin
+    cx := FFont.TextWidth(UTF8Copy(dtext, 1, n)) - FDrawOffset + FSideMargin;
+    if abs(cx - x) < abs(cpx - x) then
+    begin
+      cpx    := cx;
+      Result := n;
+    end;
+  end;}
+  
+  tw   := 0;
+  n    := 0;
+  dpos := 0;
+  while dpos <= Length(dtext) do
+  begin
+    dpos := UTF8CharAtByte(dtext, dpos, ch);
+    tw := tw + FFont.TextWidth(ch);
+    cx := tw - FDrawOffset + FSideMargin;
+    if abs(cx - x) < abs(cpx - x) then
+    begin
+      cpx    := cx;
+      Result := n;
+    end;
+    Inc(n);
+  end;
+  // writeln(fpgGetTickCount - tc);
 end;
 
 procedure TfpgCustomEdit.SetBorderStyle(const AValue: TfpgEditBorderStyle);
@@ -507,20 +554,7 @@ var
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
-  // searching the appropriate character position
-  dtext := GetDrawText;
-  cpx   := FFont.TextWidth(UTF8Copy(dtext, 1, FCursorPos)) - FDrawOffset + FSideMargin;
-  cp    := FCursorPos;
-
-  for n := 0 to UTF8Length(dtext) do
-  begin
-    cx := FFont.TextWidth(UTF8Copy(dtext, 1, n)) - FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
-    begin
-      cpx := cx;
-      cp  := n;
-    end;
-  end;
+  cp := CursorPosToCharPos(x, y);
 
   FMouseDragPos := cp;
   FCursorPos    := cp;
@@ -546,29 +580,12 @@ end;
 
 procedure TfpgCustomEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
-  n: integer;
-  cpx: integer;
   cp: integer;
-  cx: integer;
-  dtext: string;
 begin
   if (btnstate and MOUSE_LEFT) = 0 then
     Exit;
-
-  // searching the appropriate character position
-  dtext := GetDrawText;
-  cpx   := FFont.TextWidth(UTF8Copy(dtext, 1, FCursorPos)) - FDrawOffset + FSideMargin;
-  cp    := FCursorPos;
-
-  for n := 0 to UTF8Length(dtext) do
-  begin
-    cx := FFont.TextWidth(UTF8Copy(dtext, 1, n)) - FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
-    begin
-      cpx := cx;
-      cp  := n;
-    end;
-  end;
+    
+  cp := CursorPosToCharPos(x, y);
 
   //FMouseDragPos := cp;
   FSelOffset := cp - FSelStart;
@@ -578,7 +595,6 @@ begin
     AdjustCursor;
     Repaint;
   end;
-
 end;
 
 procedure TfpgCustomEdit.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
