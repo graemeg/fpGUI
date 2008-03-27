@@ -879,6 +879,7 @@ end;
 procedure TfpgCustomEdit.ClearSelection;
 begin
   DeleteSelection;
+  RePaint;
 end;
 
 procedure TfpgCustomEdit.CopyToClipboard;
@@ -890,6 +891,7 @@ procedure TfpgCustomEdit.CutToClipboard;
 begin
   DoCopy;
   DeleteSelection;
+  RePaint;
 end;
 
 procedure TfpgCustomEdit.PasteFromClipboard;
