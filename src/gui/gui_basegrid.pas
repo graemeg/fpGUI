@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -18,12 +18,6 @@
 unit gui_basegrid;
 
 {$mode objfpc}{$H+}
-
-{
-  TODO:
-    * Selecting the last fully visible row, scrolls the grid. Selection
-      is correct, but because of the scroll it is confusing.
-}
 
 {.$Define DEBUG}
 
@@ -1062,7 +1056,7 @@ begin
   else
   begin
     if (FFirstRow + VisibleLines - 1) < FFocusRow then
-      FFirstRow := FFocusRow - VisibleLines + 1;
+      FFirstRow := FFocusRow - VisibleLines;// + 1;
   end;  { if/else }
 
   if FFocusCol < FFirstCol then
