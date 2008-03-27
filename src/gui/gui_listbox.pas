@@ -950,7 +950,7 @@ begin
           FItems.Add(TColorItem.Create('clLightCyan', clLightCyan));
           FItems.Add(TColorItem.Create('clLightGoldenrodYellow', clLightGoldenrodYellow));
           FItems.Add(TColorItem.Create('clLightGreen', clLightGreen));
-          FItems.Add(TColorItem.Create('clLightGrey', clLightGrey));
+          FItems.Add(TColorItem.Create('clLightGray', clLightGray));
           FItems.Add(TColorItem.Create('clLightPink', clLightPink));
           FItems.Add(TColorItem.Create('clLightSalmon', clLightSalmon));
           FItems.Add(TColorItem.Create('clLightSeaGreen', clLightSeaGreen));

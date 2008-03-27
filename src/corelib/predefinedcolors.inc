@@ -137,7 +137,7 @@
   clLightCyan           = TfpgColor($e0ffff);
   clLightGoldenrodYellow  = TfpgColor($fafad2);
   clLightGreen          = TfpgColor($90ee90);
-  clLightGrey           = TfpgColor($d3d3d3);
+  clLightGray           = TfpgColor($d3d3d3);
   clLightPink           = TfpgColor($ffb6c1);
   clLightSalmon         = TfpgColor($ffa07a);
   clLightSeaGreen       = TfpgColor($20b2aa);
