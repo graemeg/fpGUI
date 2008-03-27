@@ -1978,9 +1978,10 @@ begin
       inc(p);
     end;
     GlobalUnlock(h);
+    FClipboardText := AnsiToUtf8(FClipboardText);
   end;
   CloseClipboard;
-  Result := AnsiToUtf8(FClipboardText);
+  Result := FClipboardText;
 end;
 
 procedure TfpgClipboardImpl.DoSetText(const AValue: string);
