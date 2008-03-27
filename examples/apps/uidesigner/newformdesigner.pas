@@ -431,7 +431,7 @@ begin
 
     Inc(x, 32);
   end;
-
+  chlPalette.Items.Sort;
   MainMenu.AddMenuItem('&File', nil).SubMenu     := filemenu;
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := setmenu;
   MainMenu.AddMenuItem('Fo&rm', nil).SubMenu     := formmenu;
