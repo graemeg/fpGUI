@@ -457,7 +457,7 @@ type
   private
     FAttributes: longword;
     FEntryType: TFileEntryType;
-    FExtention: string;
+    FExtension: string;
     FGroupID: integer; // unix
     FIsLink: boolean;
     FLinkTarget: string;
@@ -469,7 +469,7 @@ type
   public
     constructor Create;
     property    Name: string read FName write FName;
-    property    Extention: string read FExtention write FExtention;
+    property    Extension: string read FExtension write FExtension;
     property    Size: int64 read FSize write FSize;
     property    EntryType: TFileEntryType read FEntryType write FEntryType;
     property    IsLink: boolean read FIsLink write FIsLink;
@@ -2000,7 +2000,7 @@ var
 begin
   e := TFileEntry.Create;
   e.Name        := sr.Name;
-  e.Extention   := ExtractFileExt(e.Name);
+  e.Extension   := ExtractFileExt(e.Name);
   e.Size        := sr.Size;
   e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
   e.EntryType   := etFile;
@@ -2159,7 +2159,7 @@ var
       case AOrder of
         soFileName   : result := UpperCase(newitem.Name) < UpperCase(item.Name);
         soCSFileName : result := newitem.Name < item.Name;
-        soFileExt    : result := UpperCase(newitem.Extention+' '+newitem.Name) < UpperCase(item.Extention+' '+item.Name);
+        soFileExt    : result := UpperCase(newitem.Extension+' '+newitem.Name) < UpperCase(item.Extension+' '+item.Name);
         soSize       : result := newitem.size < item.size;
         soTime       : result := newitem.modtime < item.modtime;
       else
