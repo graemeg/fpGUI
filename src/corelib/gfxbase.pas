@@ -76,11 +76,6 @@ const
   FPGM_RESIZE      = 15;
   FPGM_MOVE        = 16;
   FPGM_POPUPCLOSE  = 17;
-  // Text Messages
-  FPGM_TEXT_CHANGE = 18;
-  FPGM_TEXT_INSERT = 19;
-  FPGM_TEXT_DELETE = 20;
-  
   FPGM_KILLME      = 9999;
 
   // The special keys, based on the well-known keyboard scan codes
@@ -123,22 +118,12 @@ type
     shiftstate: TShiftState;
   end;
   
-  
-  TfpgMsgParmText = record
-     Text: PChar;
-     Length: Integer;
-     StartLine,
-     EndLine: Integer;
-     Before: Boolean;
-  end;
-  
 
   TfpgMessageParams = record
     case integer of
       0: (mouse: TfpgMsgParmMouse);
       1: (keyboard: TfpgMsgParmKeyboard);
       2: (rect: TfpgRect);
-      3: (text: TfpgMsgParmText);
   end;
   
 
@@ -150,6 +135,7 @@ type
     Stop: Boolean;
   end;
   PfpgMessageRec = ^TfpgMessageRec;
+
 
   TfpgLineStyle = (lsSolid, lsDash, lsDot, lsDashDot, lsDashDotDot);
 
