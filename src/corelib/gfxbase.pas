@@ -2087,6 +2087,7 @@ var
   SearchRec: TSearchRec;
   dir: TfpgString; //  to prevent FDirectoryName from having incorrect value
 begin
+  Result:=False;
   // default parameter value is current directory
   if aDirectory <> '' then
     dir := fpgExpandFileName(aDirectory)
@@ -2095,10 +2096,7 @@ begin
     
   // vvzh: now we have to use SetCurrentDir in order to make ExpandFileName work
   if not fpgSetCurrentDir(dir) then
-  begin
-    Result := False;
     Exit; //==>
-  end;
 
   // Add PathDelim to end if it doesn't yet exist
   FDirectoryName := IncludeTrailingPathDelimiter(dir);
@@ -2116,6 +2114,7 @@ begin
         AddEntry(SearchRec);
       end;
     end;
+    Result:=True;
   finally
     SysUtils.FindClose(SearchRec);
   end;
