@@ -2237,8 +2237,8 @@ begin
   if Assigned(Result) then
   begin
     fullname           := DirectoryName + Result.Name;
-    Result.IsLink      := FileIsSymlink(fullname);
     Result.LinkTarget  := ExtractTargetSymLinkPath(fullname);
+    Result.IsLink:=(Result.LinkTarget<>'');
     Result.mode        := sr.Mode;
     Fpstat(PChar(fullname), info);
     Result.GroupID     := info.st_gid;
