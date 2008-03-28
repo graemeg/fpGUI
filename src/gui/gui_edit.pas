@@ -213,9 +213,10 @@ var
   dtext: string;
   tw, dpos: integer;
   // tc: Cardinal;
-  ch: string;
+  ch: TfpgChar;
 begin
   // searching the appropriate character position
+  ch     := '';
   dtext  := GetDrawText;
   cpx    := FFont.TextWidth(UTF8Copy(dtext, 1, FCursorPos)) - FDrawOffset + FSideMargin;
   Result := FCursorPos;

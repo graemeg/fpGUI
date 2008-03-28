@@ -54,10 +54,10 @@ type
     FFirstColor: TfpgColor; // Text and Needle color
     FSecondColor: TfpgColor; // Bar, Pie etc. main color
     { TODO: Currently unused. Implement Low Watermark and High Watermark }
-    FLWMColor: TfpgColor; // Low Watermark Color
-    FLWMValue: Longint;   //  Low Watermark Value
-    FHWMColor: TfpgColor; // High Watermark Color
-    FHWMValue: Longint;   // High Watermark Color
+//    FLWMColor: TfpgColor; // Low Watermark Color
+//    FLWMValue: Longint;   //  Low Watermark Value
+//    FHWMColor: TfpgColor; // High Watermark Color
+//    FHWMValue: Longint;   // High Watermark Color
     procedure   BackgroundDraw;
     procedure   TextDraw;
     procedure   BarDraw;

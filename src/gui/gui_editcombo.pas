@@ -140,7 +140,6 @@ implementation
 
 uses
   gui_listbox,
-  gui_form,
   gfx_UTF8utils,
   math;
 

@@ -89,6 +89,12 @@ implementation
 
 uses
   TypInfo;
+  
+
+type
+  // used to get to SetDesigning() in Form Designer
+  TComponentFriendClass = class(TComponent);
+
 
 { TVFDWidgetClass }
 
@@ -112,7 +118,7 @@ end;
 function TVFDWidgetClass.CreateWidget(AOwner: TComponent): TfpgWidget;
 begin
   Result := WidgetClass.Create(AOwner);
-  Include(Result.ComponentState, csDesigning);
+  TComponentFriendClass(Result).SetDesigning(True);
 end;
 
 destructor TVFDWidgetClass.Destroy;

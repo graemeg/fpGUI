@@ -145,6 +145,10 @@ implementation
 uses
   vfdmain, TypInfo;
 
+type
+  // used to get to SetDesigning() in Form Designer
+  TComponentFriendClass = class(TComponent);
+
 { TWidgetDesigner }
 
 procedure TWidgetDesigner.SetSelected(const AValue: boolean);
@@ -1641,7 +1645,7 @@ begin
   WindowPosition := wpUser;
   WindowTitle := 'New Form';
   SetPosition(300, 150, 300, 250);
-  Include(ComponentState, csDesigning);
+//  TComponentFriendClass(self).SetDesigning(True);
 end;
 
 

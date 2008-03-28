@@ -441,6 +441,7 @@ begin
 end;
 
 procedure TfpgMemo.DoPaste;
+{
 var
   s: string;
   si: string;
@@ -449,6 +450,7 @@ var
   n: integer;
   l: integer;
   lcnt: integer;
+}
 begin
   Exit;
   (*
@@ -1362,8 +1364,8 @@ begin
     end;
   end
   else
-    Result := '';
 }
+    Result := '';
 end;
 
 function TfpgMemo.GetText: string;

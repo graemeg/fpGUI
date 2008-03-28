@@ -55,8 +55,8 @@ type
 
   TColumnsGrid = class(TfpgCustomGrid)
   protected
-    function    GetRowCount: integer; override;
-    procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer);  override;
+    function    GetRowCount: Longword; override;
+    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer);  override;
   public
     dbgrid: TfpgStringGrid;
     constructor Create(AOwner: TComponent); override;
@@ -65,7 +65,7 @@ type
 
   TColumnEditForm = class(TfpgForm)
   private
-    procedure GridRowChange(Sender: TObject; row: integer);
+    procedure GridRowChange(Sender: TObject; row: Longword);
     procedure EditChange(Sender: TObject);
     procedure NewButtonClick(Sender: TObject);
     procedure DeleteButtonClick(Sender: TObject);
@@ -283,7 +283,7 @@ begin
   {@VFD_BODY_END: ColumnEditForm}
 end;
 
-procedure TColumnEditForm.GridRowChange(Sender: TObject; row: integer);
+procedure TColumnEditForm.GridRowChange(Sender: TObject; row: Longword);
 var
   i: integer;
   c: TfpgStringColumn;
@@ -376,7 +376,7 @@ end;
 
 { TColumnsGrid }
 
-function TColumnsGrid.GetRowCount: integer;
+function TColumnsGrid.GetRowCount: Longword;
 begin
   try
     Result := dbgrid.ColumnCount;
@@ -385,7 +385,7 @@ begin
   end;
 end;
 
-procedure TColumnsGrid.DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer);
+procedure TColumnsGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer);
 var
   s: string;
   x: integer;

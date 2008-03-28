@@ -52,7 +52,6 @@ uses
   SysUtils,
   gfx_widget,
   gfxbase,
-  gui_button,
   fpgfx,
   gfx_popupwindow;
 

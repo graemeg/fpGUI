@@ -159,7 +159,7 @@ type
     procedure   SetFilter(const Value: string);
     function    GetShowHidden: boolean;
     procedure   SetShowHidden(const Value: boolean);
-    procedure   ListChanged(Sender: TObject; ARow: integer);
+    procedure   ListChanged(Sender: TObject; ARow: Longword);
     procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   InitializeComponents;
     procedure   ProcessFilterString;
@@ -879,7 +879,7 @@ end;
 
 { TfpgFileDialog }
 
-procedure TfpgFileDialog.ListChanged(Sender: TObject; ARow: integer);
+procedure TfpgFileDialog.ListChanged(Sender: TObject; ARow: Longword);
 var
   s: string;
 begin

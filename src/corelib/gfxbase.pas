@@ -936,7 +936,7 @@ begin
   inherited AfterConstruction;
   { Here is a neater way by using RTTI to set default property values all
     automatically. No need to duplicate the efforts and manually set the
-    property default values in the constructor. This code is no the same for
+    property default values in the constructor. This code is now the same for
     each TfpgWindowBase descendant (which includes GUI widgets) }
 //  SetDefaults(self);
 end;

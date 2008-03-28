@@ -238,7 +238,8 @@ begin
     Text := 'http://opensoft.homeip.net/fpgui/';
     URL := 'http://opensoft.homeip.net/fpgui/';
     FontDesc := 'Arial-9:underline';
-    HotTrackColor := clRoyalBlue;
+    TextColor := clRoyalBlue;
+    HotTrackColor := clBlue;
     HotTrackFont := 'Arial-9:underline';
   end;
 

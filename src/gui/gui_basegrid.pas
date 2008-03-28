@@ -33,10 +33,10 @@ uses
   
 type
 
-  TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: integer) of object;
-  TfpgRowChangeNotify = procedure(Sender: TObject; ARow: integer) of object;
-  TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: integer; var ACanSelect: boolean) of object;
-  TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: integer; const ARect: TfpgRect; AFlags: integer; var ADefaultDrawing: boolean) of object;
+  TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: Longword) of object;
+  TfpgRowChangeNotify = procedure(Sender: TObject; ARow: Longword) of object;
+  TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: Longword; var ACanSelect: boolean) of object;
+  TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: Longword; const ARect: TfpgRect; AFlags: integer; var ADefaultDrawing: boolean) of object;
 
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
@@ -51,16 +51,16 @@ type
     FResizedCol: integer;   // used for column resizing
     FDefaultColWidth: integer;
     FDefaultRowHeight: integer;
-    FFocusCol: integer;
-    FFocusRow: integer;
+    FFocusCol: Longword;
+    FFocusRow: Longword;
     FHeaderHeight: integer;
     FOnCanSelectCell: TfpgCanSelectCellEvent;
     FOnFocusChange: TfpgFocusChangeNotify;
     FOnRowChange: TfpgRowChangeNotify;
-    FPrevCol: integer;
-    FPrevRow: integer;
-    FFirstRow: integer;
-    FFirstCol: integer;
+    FPrevCol: Longword;
+    FPrevRow: Longword;
+    FFirstRow: Longword;
+    FFirstCol: Longword;
     FMargin: integer;
     FFont: TfpgFont;
     FHeaderFont: TfpgFont;
@@ -82,32 +82,32 @@ type
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   SetDefaultColWidth(const AValue: integer);
     procedure   SetDefaultRowHeight(const AValue: integer);
-    procedure   SetFocusCol(const AValue: integer);
-    procedure   SetFocusRow(const AValue: integer);
+    procedure   SetFocusCol(const AValue: Longword);
+    procedure   SetFocusRow(const AValue: Longword);
     procedure   CheckFocusChange;
     procedure   SetShowGrid(const AValue: boolean);
     procedure   SetShowHeader(const AValue: boolean);
-    function    VisibleLines: integer;
+    function    VisibleLines: Longword;
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
-    procedure   SetFirstRow(const AValue: integer);
+    procedure   SetFirstRow(const AValue: Longword);
   protected
     procedure   UpdateScrollBars; virtual;
-    function    GetHeaderText(ACol: integer): string; virtual;
-    function    GetColumnWidth(ACol: integer): integer; virtual;
-    procedure   SetColumnWidth(ACol: integer; const AValue: integer); virtual;
-    function    GetColumnBackgroundColor(ACol: integer): TfpgColor; virtual;
-    procedure   SetColumnBackgroundColor(ACol: integer; const AValue: TfpgColor); virtual;
-    function    GetColumnTextColor(ACol: integer): TfpgColor; virtual;
-    procedure   SetColumnTextColor(ACol: integer; const AValue: TfpgColor); virtual;
-    function    GetColumnCount: integer; virtual;
-    function    GetRowCount: integer; virtual;
-    function    CanSelectCell(const ARow, ACol: integer): boolean;
-    function    DoDrawCellEvent(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer): boolean; virtual;
+    function    GetHeaderText(ACol: Longword): string; virtual;
+    function    GetColumnWidth(ACol: Longword): integer; virtual;
+    procedure   SetColumnWidth(ACol: Longword; const AValue: integer); virtual;
+    function    GetColumnBackgroundColor(ACol: Longword): TfpgColor; virtual;
+    procedure   SetColumnBackgroundColor(ACol: Longword; const AValue: TfpgColor); virtual;
+    function    GetColumnTextColor(ACol: Longword): TfpgColor; virtual;
+    procedure   SetColumnTextColor(ACol: Longword; const AValue: TfpgColor); virtual;
+    function    GetColumnCount: Longword; virtual;
+    function    GetRowCount: Longword; virtual;
+    function    CanSelectCell(const ARow, ACol: Longword): boolean;
+    function    DoDrawCellEvent(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer): boolean; virtual;
     procedure   DoCanSelectCell(const ARow, ACol: integer; var ACanSelect: boolean);
-    procedure   DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
-    procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
-    procedure   DrawGrid(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
+    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer); virtual;
+    procedure   DrawHeader(ACol: Longword; ARect: TfpgRect; AFlags: integer); virtual;
+    procedure   DrawGrid(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
@@ -123,20 +123,20 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HeaderFont: TfpgFont read FHeaderFont;
     property    HeaderFontDesc: string read GetHeaderFontDesc write SetHeaderFontDesc;
-    property    FocusCol: integer read FFocusCol write SetFocusCol;
-    property    FocusRow: integer read FFocusRow write SetFocusRow;
+    property    FocusCol: Longword read FFocusCol write SetFocusCol;
+    property    FocusRow: Longword read FFocusRow write SetFocusRow;
     property    RowSelect: boolean read FRowSelect write SetRowSelect;
-    property    ColumnCount: integer read GetColumnCount;
-    property    RowCount: integer read GetRowCount;
+    property    ColumnCount: Longword read GetColumnCount;
+    property    RowCount: Longword read GetRowCount;
     property    ShowHeader: boolean read FShowHeader write SetShowHeader default True;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    HeaderHeight: integer read FHeaderHeight;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
-    property    ColumnWidth[ACol: integer]: integer read GetColumnWidth write SetColumnWidth;
-    property    ColumnBackgroundColor[ACol: integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
-    property    ColumnTextColor[ACol: integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
-    property    TopRow: integer read FFirstRow write SetFirstRow;
+    property    ColumnWidth[ACol: Longword]: integer read GetColumnWidth write SetColumnWidth;
+    property    ColumnBackgroundColor[ACol: Longword]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
+    property    ColumnTextColor[ACol: Longword]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
+    property    TopRow: Longword read FFirstRow write SetFirstRow;
     property    OnDrawCell: TfpgDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
@@ -155,7 +155,7 @@ implementation
 
 procedure TfpgBaseGrid.HScrollBarMove(Sender: TObject; position: integer);
 begin
-  if FFirstCol <> position then
+  if FFirstCol <> Longword(position) then
   begin
     if Position < 1 then
       Position := 1;
@@ -209,7 +209,7 @@ end;
 
 procedure TfpgBaseGrid.VScrollBarMove(Sender: TObject; position: integer);
 begin
-  if FFirstRow <> position then
+  if FFirstRow <> LongWord(position) then
   begin
     FFirstRow := position;
     RePaint;
@@ -232,17 +232,12 @@ begin
   RePaint;
 end;
 
-function TfpgBaseGrid.GetColumnWidth(ACol: integer): integer;
+function TfpgBaseGrid.GetColumnWidth(ACol: Longword): integer;
 begin
-  // GetColumnWidth and SetColumnWidth will be overriden in decendant!
-  // Column 2 is special just for testing purposes
-  if ACol = 2 then
-    Result := FTemp
-  else
-    Result := FDefaultColWidth+(ACol*16);
+  Result := 50;
 end;
 
-procedure TfpgBaseGrid.SetColumnWidth(ACol: integer; const AValue: integer);
+procedure TfpgBaseGrid.SetColumnWidth(ACol: Longword; const AValue: integer);
 begin
   // GetColumnWidth and SetColumnWidth will be overriden in decendant!
   // Column 2 is special just for testing purposes
@@ -254,44 +249,44 @@ begin
   end;
 end;
 
-function TfpgBaseGrid.GetColumnBackgroundColor(ACol: integer): TfpgColor;
+function TfpgBaseGrid.GetColumnBackgroundColor(ACol: Longword): TfpgColor;
 begin
   // implemented in descendant
 end;
 
-procedure TfpgBaseGrid.SetColumnBackgroundColor(ACol: integer; const AValue: TfpgColor);
+procedure TfpgBaseGrid.SetColumnBackgroundColor(ACol: Longword; const AValue: TfpgColor);
 begin
   // implemented in descendant
 end;
 
-function TfpgBaseGrid.GetColumnTextColor(ACol: integer): TfpgColor;
+function TfpgBaseGrid.GetColumnTextColor(ACol: Longword): TfpgColor;
 begin
   // implemented in descendant
 end;
 
-procedure TfpgBaseGrid.SetColumnTextColor(ACol: integer; const AValue: TfpgColor);
+procedure TfpgBaseGrid.SetColumnTextColor(ACol: Longword; const AValue: TfpgColor);
 begin
   // implemented in descendant
 end;
 
-function TfpgBaseGrid.GetColumnCount: integer;
+function TfpgBaseGrid.GetColumnCount: Longword;
 begin
   Result := 7;
 end;
 
-function TfpgBaseGrid.GetRowCount: integer;
+function TfpgBaseGrid.GetRowCount: Longword;
 begin
   Result := 24;
 end;
 
-function TfpgBaseGrid.CanSelectCell(const ARow, ACol: integer): boolean;
+function TfpgBaseGrid.CanSelectCell(const ARow, ACol: Longword): boolean;
 begin
   Result := (ARow > 0) and (ACol > 0) and (ARow <= RowCount) and (ACol <= ColumnCount);
   if Result then
     DoCanSelectCell(ARow, ACol, Result);
 end;
 
-function TfpgBaseGrid.DoDrawCellEvent(ARow, ACol: integer; ARect: TfpgRect;
+function TfpgBaseGrid.DoDrawCellEvent(ARow, ACol: Longword; ARect: TfpgRect;
   AFlags: integer): boolean;
 begin
   Result := True;
@@ -306,7 +301,7 @@ begin
     FOnCanSelectCell(self, ARow, ACol, ACanSelect);
 end;
 
-procedure TfpgBaseGrid.DrawCell(ARow, ACol: integer; ARect: TfpgRect; AFlags: integer);
+procedure TfpgBaseGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer);
 var
   s: string;
 begin
@@ -318,7 +313,7 @@ begin
   Canvas.DrawString(ARect.Left+1, ARect.Top+1, s);
 end;
 
-procedure TfpgBaseGrid.DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer);
+procedure TfpgBaseGrid.DrawHeader(ACol: Longword; ARect: TfpgRect; AFlags: integer);
 var
   s: string;
   r: TfpgRect;
@@ -350,7 +345,7 @@ begin
   fpgStyle.DrawString(Canvas, x, ARect.Top+1, s, Enabled);
 end;
 
-procedure TfpgBaseGrid.DrawGrid(ARow, ACol: integer; ARect: TfpgRect;
+procedure TfpgBaseGrid.DrawGrid(ARow, ACol: Longword; ARect: TfpgRect;
   AFlags: integer);
 begin
   // default is inside bottom/right edge or cell
@@ -359,7 +354,7 @@ begin
   Canvas.DrawLine(ARect.Right, ARect.Bottom, ARect.Right, ARect.Top-1); // cell right
 end;
 
-procedure TfpgBaseGrid.SetFocusCol(const AValue: integer);
+procedure TfpgBaseGrid.SetFocusCol(const AValue: Longword);
 begin
   if FFocusCol = AValue then
     Exit; //==>
@@ -375,7 +370,7 @@ begin
   CheckFocusChange;
 end;
 
-procedure TfpgBaseGrid.SetFocusRow(const AValue: integer);
+procedure TfpgBaseGrid.SetFocusRow(const AValue: Longword);
 begin
   if FFocusRow = AValue then
     Exit; //==>
@@ -422,7 +417,7 @@ begin
   RePaint;
 end;
 
-function TfpgBaseGrid.VisibleLines: integer;
+function TfpgBaseGrid.VisibleLines: Longword;
 var
   hh: integer;
 begin
@@ -432,7 +427,7 @@ begin
     hh := 0;
   if ShowHeader then
     hh := hh + FHeaderHeight+1;
-  Result := (Height - 2*FMargin - hh) div (FDefaultRowHeight+1)
+  Result := (Height - (2*FMargin) - hh) div (FDefaultRowHeight+1)
 end;
 
 function TfpgBaseGrid.VisibleWidth: integer;
@@ -457,7 +452,7 @@ begin
   Result := Height - (FMargin*2) - sw;
 end;
 
-procedure TfpgBaseGrid.SetFirstRow(const AValue: integer);
+procedure TfpgBaseGrid.SetFirstRow(const AValue: Longword);
 begin
   if FFirstRow = AValue then
     Exit;
@@ -536,7 +531,7 @@ begin
   FHScrollBar.UpdateWindowPosition;
 end;
 
-function TfpgBaseGrid.GetHeaderText(ACol: integer): string;
+function TfpgBaseGrid.GetHeaderText(ACol: Longword): string;
 begin
   Result := 'Head ' + IntToStr(ACol);
 end;
@@ -545,8 +540,8 @@ procedure TfpgBaseGrid.HandlePaint;
 var
   r: TfpgRect;
   r2: TfpgRect;
-  col: integer;
-  row: integer;
+  col: Longword;
+  row: Longword;
   clipr: TfpgRect;   // clip rectangle
 begin
   Canvas.BeginDraw;
@@ -693,7 +688,7 @@ procedure TfpgBaseGrid.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   w: integer;
-  r: integer;
+  r: Longword;
 begin
   consumed := True;
   case keycode of
@@ -830,8 +825,8 @@ end;
 
 procedure TfpgBaseGrid.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
 var
-  lRow: integer;
-  lCol: integer;
+  lRow: Longword;
+  lCol: Longword;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
 
@@ -945,11 +940,11 @@ end;
 procedure TfpgBaseGrid.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 var
   hh: integer;
-  n: integer;
+  n: Longword;
   cw: integer;
   nw: integer;
-  prow: integer;
-  pcol: integer;
+  prow: Longword;
+  pcol: Longword;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
@@ -997,7 +992,7 @@ begin
   end
   else
   begin   // Selecting a Cell via mouse
-    FFocusRow := FFirstRow + ((y - FMargin - hh) div FDefaultRowHeight);
+    FFocusRow := FFirstRow + Longword((y - FMargin - hh) div FDefaultRowHeight);
     if FFocusRow > RowCount then
       FFocusRow := RowCount;
     cw := 0;
@@ -1033,7 +1028,7 @@ end;
 
 procedure TfpgBaseGrid.FollowFocus;
 var
-  n: integer;
+  n: Longword;
   w: TfpgCoord;
 begin
   if (RowCount > 0) and (FFocusRow < 1) then

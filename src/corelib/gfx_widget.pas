@@ -258,7 +258,7 @@ begin
   if Parent <> nil then
     FWindowType := wtChild;
 
-  inherited;
+  inherited Create(AOwner);
 
   // This is for components that are create at runtime, after it's
   // parent has already been shown.

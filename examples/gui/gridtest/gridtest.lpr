@@ -38,7 +38,7 @@ type
     procedure   chkShowHeaderChange(Sender: TObject);
     procedure   chkShowGridChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
-    procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: integer;
+    procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Longword;
         const ARect: TfpgRect; AFlags: integer; var ADefaultDrawing: boolean);
   protected
     procedure   HandleShow; override;
@@ -78,7 +78,7 @@ begin
 end;
 
 procedure TMainForm.stringgridDrawCell(Sender: TObject; const ARow,
-  ACol: integer; const ARect: TfpgRect; AFlags: integer;
+  ACol: Longword; const ARect: TfpgRect; AFlags: integer;
   var ADefaultDrawing: boolean);
 begin
   if (ACol = 1) and (ARow = 3) then
@@ -152,12 +152,12 @@ begin
   
   // override default colors
   stringgrid.BackgroundColor:= clKhaki;
-  stringgrid.ColumnBackgroundColor[2] := clLightGrey;
+  stringgrid.ColumnBackgroundColor[2] := clLightGray;
   stringgrid.TextColor:= clBlue;
   stringgrid.ColumnTextColor[1] := clRed;
   
   // Add custom painting
-  stringgrid.OnDrawCell:=@stringgridDrawCell;
+  stringgrid.OnDrawCell := @stringgridDrawCell;
 
   pagecontrol.ActivePageIndex := 0;
 

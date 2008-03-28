@@ -86,7 +86,7 @@ begin
     '  public' + LineEnding +
     '    {@VFD_HEAD_BEGIN: ' + formname + '}' + LineEnding +
     formheadblock +
-    '    {@VFD_HEAD_END: ' + formname + '}' + LineEnding + LineEnding +
+    '    {@VFD_HEAD_END: ' + formname + '}' + LineEnding +
     '    procedure AfterCreate; override;' + LineEnding
     + '  end;' + LineEnding + LineEnding;
   NewFormsDecl := NewFormsDecl + s;
