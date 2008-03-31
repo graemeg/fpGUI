@@ -34,11 +34,14 @@ uses
 const
   WM_MOUSEWHEEL         = $020a;    // we could remove this since FPC 2.0.4
   VER_PLATFORM_WIN32_CE = 3;
+  CLEARTYPE_QUALITY     = 5;
 
-{ Unicode selection variables }
 var
+  { Unicode selection variables }
   UnicodeEnabledOS: Boolean;
   WinVersion: TOSVersionInfo;
+  { Font smoothing type selection variable }
+  FontSmoothingType: Cardinal;
 
 type
   TfpgGContext = HDC;
@@ -1776,7 +1779,7 @@ begin
     lfUnderline      := 0;
     lfStrikeOut      := 0;
     lfCharSet        := DEFAULT_CHARSET; //0; //Byte(Font.Charset);
-    lfQuality        := ANTIALIASED_QUALITY;
+    lfQuality        := Byte(FontSmoothingType);
     { Everything else as default }
     lfOutPrecision   := OUT_DEFAULT_PRECIS;
     lfClipPrecision  := CLIP_DEFAULT_PRECIS;
@@ -1818,6 +1821,8 @@ begin
       lf.lfItalic := 1
     else if prop = 'ANTIALIAS' then
       if propval = 'FALSE' then
+        lf.lfQuality := NONANTIALIASED_QUALITY else
+      if propval = 'DEFAULT' then
         lf.lfQuality := DEFAULT_QUALITY;
   end;
 
@@ -2048,11 +2053,18 @@ initialization
 
 {$IFDEF WinCE}
   UnicodeEnabledOS := True;
+  FontSmoothingType := DEFAULT_QUALITY;
 {$ELSE}
   WinVersion.dwOSVersionInfoSize := SizeOf(TOSVersionInfo);
   GetVersionEx(WinVersion);
   UnicodeEnabledOS := (WinVersion.dwPlatformID = VER_PLATFORM_WIN32_NT) or
     (WinVersion.dwPlatformID = VER_PLATFORM_WIN32_CE);
+    
+  if SystemParametersInfo(SPI_GETFONTSMOOTHINGTYPE, 0, @FontSmoothingType, 0)
+    and (FontSmoothingType = FE_FONTSMOOTHINGCLEARTYPE) then
+      FontSmoothingType := CLEARTYPE_QUALITY
+    else
+      FontSmoothingType := ANTIALIASED_QUALITY;
 {$ENDIF}
 
 end.
