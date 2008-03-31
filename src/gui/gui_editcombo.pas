@@ -400,8 +400,8 @@ var
 begin
   if AValue = '' then
   begin
-    FocusItem := 0;  // nothing selected
     FText:= '';
+    FocusItem := 0;  // nothing selected
   end
   else
   begin
