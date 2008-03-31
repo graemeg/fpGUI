@@ -280,7 +280,7 @@ begin
               img := fpgImages.GetImage('stdimg.executable');     // Do NOT localize
             {$ENDIF}
            {$IFDEF MSWINDOWS}
-           if lowercase(e.Extention) = 'exe' then
+           if lowercase(e.Extension) = 'exe' then
               img := fpgImages.GetImage('stdimg.executable');     // Do NOT localize
            {$ENDIF}
           end;

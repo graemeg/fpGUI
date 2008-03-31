@@ -130,20 +130,40 @@ type
     property    OnMouseExit;
     property    OnPaint;
   end;
-  
 
-  TfpgNumericEdit = class(TfpgCustomEdit)
+
+  { TfpgBaseNumericEdit }
+
+  TfpgBaseNumericEdit = class(TfpgCustomEdit)
+  private
+    fOldColor: TfpgColor;
+    fAlignment: TAlignment;
+    fDecimalSeparator: char;
+    fNegativeColor: TfpgColor;
+    fThousandSeparator: char;
+    procedure   SetOldColor(const AValue: TfpgColor);
+    procedure   SetAlignment(const AValue: TAlignment);
+    procedure   SetDecimalSeparator(const AValue: char);
+    procedure   SetNegativeColor(const AValue: TfpgColor);
+    procedure   SetThousandSeparator(const AValue: char);
   protected
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
-  published
+    procedure   HandlePaint; override;
+    procedure   Format; virtual;
+    procedure   Justify; virtual; // to implement in derived classes
+    property    OldColor: TfpgColor read fOldColor write SetOldColor;
+    property    Alignment: TAlignment read fAlignment write SetAlignment default taRightJustify;
     property    AutoSelect;
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
-    property    FontDesc;
+    {Someone likes to use English operating system but localized decimal and thousand separators
+     Still to implement !!}
+    property    DecimalSeparator: char read fDecimalSeparator write SetDecimalSeparator;
+    property    ThousandSeparator: char read fThousandSeparator write SetThousandSeparator;
+    property    NegativeColor: TfpgColor read fNegativeColor write SetNegativeColor;
     property    HideSelection;
 //    property    MaxLength;  { probably MaxValue and MinValue }
     property    TabOrder;
-//    property    Text;   { this should become Value }
     property    TextColor;
     property    OnChange;
     property    OnEnter;
@@ -152,8 +172,43 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
+    property    Text;   { this should become Value }
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property    FontDesc;
   end;
-  
+
+
+  { TfpgEditInteger }
+
+  TfpgEditInteger = class(TfpgBaseNumericEdit)
+  protected
+    function    GetValue: integer; virtual;
+    procedure   SetValue(const AValue: integer); virtual;
+    procedure   Format; override;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+  published
+     property   Alignment;
+     property   NegativeColor;
+     property   Value: integer read GetValue write SetValue;
+  end;
+
+
+  { TfpgEditFloat }
+
+  TfpgEditFloat = class(TfpgBaseNumericEdit)
+  protected
+    function    GetValue: extended; virtual;
+    procedure   SetValue(const AValue: extended); virtual;
+    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+  published
+     property   Alignment;
+     property   NegativeColor;
+     property   DecimalSeparator;
+     property   Value: extended read GetValue write SetValue;
+  end;
+
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 
@@ -900,18 +955,176 @@ begin
   DoPaste;
 end;
 
-procedure TfpgNumericEdit.HandleKeyChar(var AText: TfpgChar;
+{ TfpgBaseNumericEdit }
+
+procedure TfpgBaseNumericEdit.SetOldColor(const AValue: TfpgColor);
+begin
+  if fOldColor=AValue then exit;
+  fOldColor:=AValue;
+end;
+
+procedure TfpgBaseNumericEdit.SetAlignment(const AValue: TAlignment);
+begin
+  if fAlignment=AValue then exit;
+  fAlignment:=AValue;
+end;
+
+procedure TfpgBaseNumericEdit.SetDecimalSeparator(const AValue: char);
+begin
+  if fDecimalSeparator=AValue then exit;
+  fDecimalSeparator:=AValue;
+end;
+
+procedure TfpgBaseNumericEdit.SetNegativeColor(const AValue: TfpgColor);
+begin
+  if fNegativeColor=AValue then exit;
+  fNegativeColor:=AValue;
+end;
+
+procedure TfpgBaseNumericEdit.SetThousandSeparator(const AValue: char);
+begin
+  if fThousandSeparator=AValue then exit;
+  fThousandSeparator:=AValue;
+end;
+
+procedure TfpgBaseNumericEdit.Justify;
+begin
+  //based on Alignment property this method will align the derived edit correctly.
+end;
+
+procedure TfpgBaseNumericEdit.HandleKeyChar(var AText: TfpgChar;
+  var shiftstate: TShiftState; var consumed: Boolean);
+begin
+  Format; // just call format virtual procedure to have a simple way to manage polymorphism here
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
+
+procedure TfpgBaseNumericEdit.HandlePaint;
+var
+  x: TfpgCoord;
+  s: string;
+  r: TfpgRect;
+  tw: integer;
+begin
+  if Alignment = taRightJustify then
+  begin
+    Canvas.BeginDraw;
+    inherited HandlePaint;
+    //  Canvas.ClearClipRect;
+    //  r.SetRect(0, 0, Width, Height);
+    Canvas.Clear(BackgroundColor);
+    Canvas.SetFont(Font);
+    Canvas.SetTextColor(TextColor);
+    x := Width - Font.TextWidth(Text) - 1;
+    Canvas.DrawString(x,1,Text);
+    Canvas.EndDraw;
+    if Focused then
+      fpgCaret.SetCaret(Canvas, x + Font.TextWidth(Text) - 1, 3, fpgCaret.Width, Font.Height);
+  end
+  else
+  inherited;
+end;
+
+procedure TfpgBaseNumericEdit.Format;
+begin
+  // Colour negative number
+  if LeftStr(Text,1) = '-' then
+    TextColor := NegativeColor
+  else
+    TextColor := OldColor;
+end;
+
+constructor TfpgBaseNumericEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  fAlignment := taRightJustify;
+  DecimalSeparator := SysUtils.DecimalSeparator;
+  ThousandSeparator := SysUtils.ThousandSeparator;
+  NegativeColor := clRed;
+  OldColor := TextColor;
+end;
+
+{ TfpgEditInteger }
+
+function TfpgEditInteger.GetValue: integer;
+begin
+  try
+    Result := StrToInt(Text);
+  except
+    on E: EConvertError do
+    begin
+      Result := 0;
+      Text := '';
+      Invalidate;
+    end;
+  end;
+end;
+
+procedure TfpgEditInteger.SetValue(const AValue: integer);
+begin
+  try
+    Text := IntToStr(AValue);
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+end;
+
+procedure TfpgEditInteger.Format;
+begin
+// here there will be, for example, thousand separator integer formatting routine
+  inherited Format;
+end;
+
+procedure TfpgEditInteger.HandleKeyChar(var AText: TfpgChar;
   var shiftstate: TShiftState; var consumed: Boolean);
 var
   n: integer;
 begin
   n := Ord(AText[1]);
-  if ((n >= 48) and (n <= 57)) or ((n = Ord(DecimalSeparator)) or (n = Ord('-')))
-     and (Pos(AText[1], Self.Text) <= 0)  then
+  if ((n >= 48) and (n <= 57) or (n = Ord('-')) and (Pos(AText[1], Self.Text) <= 0)) then
     consumed := False
   else
     consumed := True;
+  inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
 
+{ TfpgEditFloat }
+
+function TfpgEditFloat.GetValue: extended;
+begin
+  try
+    Result := StrToFloat(Text);
+  except
+    on E: EConvertError do
+    begin
+      Result := 0;
+      Text := FloatToStr(Result);
+    end;
+  end;
+end;
+
+procedure TfpgEditFloat.SetValue(const AValue: extended);
+begin
+  try
+    Text := FloatToStr(AValue);
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+end;
+
+procedure TfpgEditFloat.HandleKeyChar(var AText: TfpgChar;
+  var shiftstate: TShiftState; var consumed: Boolean);
+var
+  n: integer;
+begin
+  n := Ord(AText[1]);
+  if ((n >= 48) and (n <= 57) or (n = Ord('-')) and (Pos(AText[1], Self.Text) <= 0))
+     or ((n = Ord(Self.DecimalSeparator)) and (Pos(AText[1], Self.Text) <= 0)) then
+    consumed := False
+  else
+    consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
