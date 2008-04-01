@@ -57,6 +57,7 @@ type
     property    Text;
     property    TextColor;
     property    URL: TfpgString read FUrl write SetURL;
+    property    OnClick;
 end;
 
 
@@ -128,7 +129,8 @@ end;
 procedure TfpgHyperlink.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
-  GoHyperlink;
+  if not Assigned(OnClick) then
+    GoHyperlink;
 end;
 
 
