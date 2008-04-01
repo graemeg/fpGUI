@@ -147,6 +147,7 @@ type
     procedure   Update;
     procedure   BeginUpdate;
     procedure   EndUpdate;
+    procedure   MouseToCell(X, Y: Integer; var ACol, ARow: Longword);
   end;
 
 implementation
@@ -992,19 +993,7 @@ begin
   end
   else
   begin   // Selecting a Cell via mouse
-    FFocusRow := FFirstRow + Longword((y - FMargin - hh) div FDefaultRowHeight);
-    if FFocusRow > RowCount then
-      FFocusRow := RowCount;
-    cw := 0;
-    for n := FFirstCol to ColumnCount do
-    begin
-      inc(cw, ColumnWidth[n]);
-      if FMargin+cw >= x then
-      begin
-        FFocusCol := n;
-        Break;
-      end;
-    end;
+    MouseToCell(x, y, FFocusCol, FFocusRow);
   end;  { if/else }
   
   if not CanSelectCell(FFocusRow, FFocusCol) then
@@ -1150,6 +1139,34 @@ begin
       RePaint;
   end;
 end;
+
+procedure TfpgBaseGrid.MouseToCell(X, Y: Integer; var ACol, ARow: Longword);
+var
+  hh: integer;
+  cw: integer;
+  n: Longword;
+begin
+  if ShowHeader then
+    hh := FHeaderHeight+1
+  else
+    hh := 0;
+
+  ARow := FFirstRow + Longword((y - FMargin - hh) div FDefaultRowHeight);
+  if ARow > RowCount then
+    ARow := RowCount;
+
+  cw := 0;
+  for n := FFirstCol to ColumnCount do
+  begin
+    inc(cw, ColumnWidth[n]);
+    if FMargin+cw >= x then
+    begin
+      ACol := n;
+      Break;
+    end;
+  end;
+end;
+
 
 end.
 
