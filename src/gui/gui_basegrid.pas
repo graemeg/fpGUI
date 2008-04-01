@@ -33,10 +33,12 @@ uses
   
 type
 
+  TfpgGridDrawState = set of (gdSelected, gdFocused, gdFixed);
+
   TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: Longword) of object;
   TfpgRowChangeNotify = procedure(Sender: TObject; ARow: Longword) of object;
   TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: Longword; var ACanSelect: boolean) of object;
-  TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: Longword; const ARect: TfpgRect; AFlags: integer; var ADefaultDrawing: boolean) of object;
+  TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: Longword; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean) of object;
 
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
@@ -103,9 +105,9 @@ type
     function    GetColumnCount: Longword; virtual;
     function    GetRowCount: Longword; virtual;
     function    CanSelectCell(const ARow, ACol: Longword): boolean;
-    function    DoDrawCellEvent(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer): boolean; virtual;
+    function    DoDrawCellEvent(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState): boolean; virtual;
     procedure   DoCanSelectCell(const ARow, ACol: integer; var ACanSelect: boolean);
-    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer); virtual;
+    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState); virtual;
     procedure   DrawHeader(ACol: Longword; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DrawGrid(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   HandlePaint; override;
@@ -288,7 +290,7 @@ begin
 end;
 
 function TfpgBaseGrid.DoDrawCellEvent(ARow, ACol: Longword; ARect: TfpgRect;
-  AFlags: integer): boolean;
+  AFlags: TfpgGridDrawState): boolean;
 begin
   Result := True;
   if Assigned(OnDrawCell) then
@@ -302,7 +304,7 @@ begin
     FOnCanSelectCell(self, ARow, ACol, ACanSelect);
 end;
 
-procedure TfpgBaseGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer);
+procedure TfpgBaseGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);
 var
   s: string;
 begin
@@ -544,7 +546,9 @@ var
   col: Longword;
   row: Longword;
   clipr: TfpgRect;   // clip rectangle
+  drawstate: TfpgGridDrawState;
 begin
+  drawstate := [];
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -613,8 +617,14 @@ begin
         end;
         Canvas.AddClipRect(r);
         Canvas.FillRectangle(r);
-        if DoDrawCellEvent(row, col, r, 0) then
-          DrawCell(row, col, r, 0);
+        // setup drawstate
+        if FFocused then
+          Include(drawstate, gdFocused);
+        if (row = FFocusRow) and (col = FFocusCol) then
+          Include(drawstate, gdSelected);
+          
+        if DoDrawCellEvent(row, col, r, drawstate) then
+          DrawCell(row, col, r, drawstate);
 
         // drawing grid lines
         if FShowGrid then

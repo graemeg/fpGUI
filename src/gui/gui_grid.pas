@@ -35,6 +35,7 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
+  gui_basegrid,
   gui_customgrid;
   
 type
@@ -74,7 +75,7 @@ type
     FFixedFont: TfpgFont;
   protected
     function    GetRowCount: Longword; override;
-    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer); override;
+    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -123,7 +124,7 @@ type
     procedure   DoDeleteColumn(ACol: integer); override;
     procedure   DoSetRowCount(AValue: integer); override;
     function    DoCreateColumnClass: TfpgStringColumn; reintroduce; override;
-    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer); override;
+    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
     { AIndex is 1-based. }
     property    Columns[AIndex: Longword]: TfpgStringColumn read GetColumns;
   public
@@ -243,7 +244,7 @@ begin
   Result := FFileList.Count;
 end;
 
-procedure TfpgFileGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer);
+procedure TfpgFileGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);
 const
   modestring: string[9] = 'xwrxwrxwr';  // must be in reverse order
 var
@@ -519,7 +520,7 @@ begin
 end;
 
 procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect;
-    AFlags: integer);
+    AFlags: TfpgGridDrawState);
 var
   x: TfpgCoord;
 begin

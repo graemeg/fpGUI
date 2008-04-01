@@ -11,6 +11,7 @@ uses
   gfxbase,
   fpgfx,
   gui_form,
+  gui_basegrid,
   gui_grid,
   gui_button,
   gui_checkbox,
@@ -39,7 +40,7 @@ type
     procedure   chkShowGridChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Longword;
-        const ARect: TfpgRect; AFlags: integer; var ADefaultDrawing: boolean);
+        const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
   protected
     procedure   HandleShow; override;
   public
@@ -78,7 +79,7 @@ begin
 end;
 
 procedure TMainForm.stringgridDrawCell(Sender: TObject; const ARow,
-  ACol: Longword; const ARect: TfpgRect; AFlags: integer;
+  ACol: Longword; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
   var ADefaultDrawing: boolean);
 begin
   if (ACol = 1) and (ARow = 3) then

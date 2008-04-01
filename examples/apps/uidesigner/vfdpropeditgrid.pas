@@ -34,6 +34,7 @@ uses
   gui_memo,
   gui_combobox,
   gui_customgrid,
+  gui_basegrid,
   gui_grid,
   gui_checkbox,
   vfdforms,
@@ -56,7 +57,7 @@ type
   TColumnsGrid = class(TfpgCustomGrid)
   protected
     function    GetRowCount: Longword; override;
-    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer);  override;
+    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);  override;
   public
     dbgrid: TfpgStringGrid;
     constructor Create(AOwner: TComponent); override;
@@ -385,7 +386,7 @@ begin
   end;
 end;
 
-procedure TColumnsGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: integer);
+procedure TColumnsGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);
 var
   s: string;
   x: integer;
