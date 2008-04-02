@@ -28,7 +28,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="1"/>
-    <Files Count="32">
+    <Files Count="33">
       <Item1>
         <Filename Value="gui_button.pas"/>
         <UnitName Value="gui_button"/>
@@ -157,6 +157,9 @@
         <Filename Value="gui_hyperlink.pas"/>
         <UnitName Value="gui_hyperlink"/>
       </Item32>
+      <Item33>
+        <Filename Value="gui_panel.pas"/>
+      </Item33>
     </Files>
     <LazDoc Paths="../../docs/xml/gui/"/>
     <RequiredPkgs Count="2">

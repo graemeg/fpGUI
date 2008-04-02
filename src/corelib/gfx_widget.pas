@@ -110,7 +110,7 @@ type
     procedure   SetFocus;
     procedure   KillFocus;
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
-    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
+    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
     property    FormDesigner: TObject read FFormDesigner write FFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
@@ -532,18 +532,15 @@ var
 begin
   FOnScreen := True;
   FVisible := True;
-//  writeln(Classname, ' TfpgWidget.HandleShow - FVisible = ', FVisible);
-  if FVisible then
-  begin
-    AllocateWindowHandle;
-    DoSetWindowVisible(True);
 
-    for n := 0 to ComponentCount - 1 do
-    begin
-      c := Components[n];
-      if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) then
-        TfpgWidget(c).HandleShow;
-    end;
+  AllocateWindowHandle;
+  DoSetWindowVisible(True);
+
+  for n := 0 to ComponentCount - 1 do
+  begin
+    c := Components[n];
+    if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) then
+      TfpgWidget(c).HandleShow;
   end;
 end;
 

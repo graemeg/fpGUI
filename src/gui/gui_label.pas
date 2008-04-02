@@ -30,7 +30,7 @@ uses
   gfx_widget;
 
 type
-  TLayout = (tlTop, tlCenter, tlBottom);
+
 
   TfpgCustomLabel = class(TfpgWidget)
   private
@@ -49,6 +49,7 @@ type
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
     procedure   ResizeLabel;
+    function    GetTextHeight: integer;
   protected
     FText: string;
     FFont: TfpgFont;
@@ -65,6 +66,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
+    property    TextHeight: integer read GetTextHeight;
   end;
   
   
@@ -270,6 +272,14 @@ begin
 
   UpdateWindowPosition;
   RePaint;
+end;
+
+function TfpgCustomLabel.GetTextHeight: integer;
+begin
+  if FWrapText then
+    Result := (Font.Height * FWrappedText.Count) + (FLineSpace * Pred(FWrappedText.Count))
+  else
+    Result := Font.Height;
 end;
 
 procedure TfpgCustomLabel.HandleResize(awidth, aheight: TfpgCoord);

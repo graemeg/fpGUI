@@ -24,6 +24,7 @@ type
   TOrientation = (orVertical, orHorizontal);
 
   TAlign = (alNone, alTop, alBottom, alLeft, alRight, alClient);
+  TLayout = (tlTop, tlCenter, tlBottom);
 
   TAnchor  = (anLeft, anRight, anTop, anBottom);
   TAnchors = set of TAnchor;

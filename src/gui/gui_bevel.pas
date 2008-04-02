@@ -54,14 +54,14 @@ type
     property    OnDoubleClick;
   end;
 
-
+{
 function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
            AShape: TBevelShape; AStyle: TBevelStyle): TfpgBevel;
-
+}
 
 implementation
 
-
+{
 function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth,
   AHeight: TfpgCoord; AShape: TBevelShape; AStyle: TBevelStyle): TfpgBevel;
 begin
@@ -73,6 +73,7 @@ begin
   Result.Shape    := AShape;
   Result.Style    := AStyle;
 end;
+}
 
 { TfpgBevel }
 
