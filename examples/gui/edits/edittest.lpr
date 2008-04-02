@@ -6,13 +6,18 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpgfx, gui_form, gui_label, gui_edit, gui_button, fpgui_package;
+  Classes, fpgfx, gui_form, gui_label, gui_edit, gui_button, gui_radiobutton,
+  gui_listbox, gfxbase;
 
 type
+
+  { TMainForm }
 
   TMainForm = class(TfpgForm)
   private
     procedure btnQuitClicked(Sender: TObject);
+    procedure rbClicked(Sender: TObject);
+    procedure lbChange(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     lblName1: TfpgLabel;
@@ -22,12 +27,15 @@ type
     edtInteger: TfpgEditInteger;
     edtFloat: TfpgEditFloat;
     btnQuit: TfpgButton;
+    rbPoint: TfpgRadioButton;
+    rbComma: TfpgRadioButton;
+    lbNegativeColor: TfpgColorListBox;
+    lblNegativeColor: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
-
 
 
 {@VFD_NEWFORM_IMPL}
@@ -37,11 +45,26 @@ begin
   Close;
 end;
 
+procedure TMainForm.rbClicked(Sender: TObject);
+begin
+  if Sender is TfpgRadioButton then
+    if (Sender as TfpgRadioButton).tag = 0 then
+      edtFloat.DecimalSeparator := '.'
+    else
+      edtFloat.DecimalSeparator := ',';
+end;
+
+procedure TMainForm.lbChange(Sender: TObject);
+begin
+  edtFloat.NegativeColor := lbNegativeColor.Color;
+  edtInteger.NegativeColor := lbNegativeColor.Color;
+end;
+
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(363, 198, 271, 234);
+  SetPosition(376, 202, 392, 239);
   WindowTitle := 'Edit components';
   WindowPosition := wpScreenCenter;
 
@@ -100,7 +123,8 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(188, 200, 75, 24);
+    SetPosition(296, 199, 75, 24);
+    Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
     ImageName := '';
@@ -108,9 +132,58 @@ begin
     OnClick := @btnQuitClicked;
   end;
 
-  {@VFD_BODY_END: MainForm}
-end;
+  rbPoint := TfpgRadioButton.Create(self);
+  with rbPoint do
+  begin
+    Name := 'rbPoint';
+    SetPosition(160, 136, 184, 20);
+    Checked := True;
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    TabOrder := 7;
+    Text := 'Point as DecimalSeparator';
+    Tag := 0;
+    OnChange := @rbClicked;
+  end;
 
+  rbComma := TfpgRadioButton.Create(self);
+  with rbComma do
+  begin
+    Name := 'rbComma';
+    SetPosition(160, 160, 196, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    TabOrder := 8;
+    Text := 'Comma as DecimalSeparator';
+    Tag := 1;
+    OnChange := @rbClicked;
+  end;
+
+  lbNegativeColor := TfpgColorListBox.Create(self);
+  with lbNegativeColor do
+  begin
+    Name := 'lbNegativeColor';
+    SetPosition(200, 28, 176, 92);
+    Color := clRed;
+    OnChange := @lbChange;
+  end;
+
+  lblNegativeColor := TfpgLabel.Create(self);
+  with lblNegativeColor do
+  begin
+    Name := 'lblNegativeColor';
+    SetPosition(196, 8, 188, 16);
+    FontDesc := '#Label1';
+    Text := 'Choose color for negative num.';
+  end;
+
+  {@VFD_BODY_END: MainForm}
+  
+  if edtFloat.DecimalSeparator = '.' then
+    rbPoint.Checked := True
+  else
+    rbComma.Checked := True;
+end;
 
 procedure MainProc;
 var
