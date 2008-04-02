@@ -209,7 +209,12 @@ type
   end;
 
 
+  { TfpgFileListImpl }
+
   TfpgFileListImpl = class(TfpgFileListBase)
+    function    EncodeAttributesString(attrs: longword): TFileModeString;
+    constructor Create; override;
+    function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
 
@@ -2019,6 +2024,35 @@ begin
 end;
 
 { TfpgFileListImpl }
+
+function TfpgFileListImpl.EncodeAttributesString(attrs: longword
+  ): TFileModeString;
+begin
+  Result := '';
+  //if (attrs and FILE_ATTRIBUTE_ARCHIVE) <> 0    then s := s + 'a' else s := s + ' ';
+  if (attrs and FILE_ATTRIBUTE_HIDDEN) <> 0     then Result := Result + 'h';
+  if (attrs and FILE_ATTRIBUTE_READONLY) <> 0   then Result := Result + 'r';
+  if (attrs and FILE_ATTRIBUTE_SYSTEM) <> 0     then Result := Result + 's';
+  if (attrs and FILE_ATTRIBUTE_TEMPORARY) <> 0  then Result := Result + 't';
+  if (attrs and FILE_ATTRIBUTE_COMPRESSED) <> 0 then Result := Result + 'c';
+end;
+
+constructor TfpgFileListImpl.Create;
+begin
+  inherited Create;
+  FHasFileMode := false;
+end;
+
+function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
+begin
+  Result := inherited InitializeEntry(sr);
+  if Assigned(Result) then
+  begin
+    // using sr.Attr here is incorrect and needs to be improved!
+    Result.Attributes   := EncodeAttributesString(sr.Attr);
+    Result.IsExecutable := (LowerCase(Result.Extension) = '.exe');
+  end;
+end;
 
 procedure TfpgFileListImpl.PopulateSpecialDirs(const aDirectory: TfpgString);
 const

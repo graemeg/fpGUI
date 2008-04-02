@@ -450,22 +450,28 @@ type
   
   TFileEntryType = (etFile, etDir);
   TFileListSortOrder = (soNone, soFileName, soCSFileName, soFileExt, soSize, soTime);
+  TFileModeString = string[9];
 
 
   // A simple data object
   TFileEntry = class(TObject)
   private
-    FAttributes: longword;
     FEntryType: TFileEntryType;
     FExtension: string;
-    FGroupID: integer; // unix
+    FName: string;
+    FModTime: TDateTime;
+    FSize: int64;
     FIsLink: boolean;
     FLinkTarget: string;
-    FMode: longword; // unix
-    FModTime: TDateTime;
-    FName: string;
+    FIsExecutable: boolean;
+    FModeString: TFileModeString;
+    FOwner: TfpgString;
+    FGroup: TfpgString;
+    FAttrString: TFileModeString;
+    {FMode: longword; // unix
     FOwnerID: integer; // unix
-    FSize: int64;
+    FGroupID: integer; // unix
+    FAttributes: longword; // windows}
   public
     constructor Create;
     property    Name: string read FName write FName;
@@ -473,12 +479,17 @@ type
     property    Size: int64 read FSize write FSize;
     property    EntryType: TFileEntryType read FEntryType write FEntryType;
     property    IsLink: boolean read FIsLink write FIsLink;
-    property    Attributes: longword read FAttributes write FAttributes;
-    property    Mode: longword read FMode write FMode;  // only used by unix OS's
-    property    ModTime: TDateTime read FModTime write FModTime;
-    property    OwnerID: integer read FOwnerID write FOwnerID;
-    property    GroupID: integer read FGroupID write FGroupID;
     property    LinkTarget: string read FLinkTarget write FLinkTarget;
+    property    IsExecutable: boolean read FIsExecutable write FIsExecutable;
+    property    ModTime: TDateTime read FModTime write FModTime;
+    property    Mode: TFileModeString read FModeString write FModeString;
+    property    Owner: TfpgString read FOwner write FOwner;
+    property    Group: TfpgString read FGroup write FGroup;
+    property    Attributes: TFileModeString read FAttrString write FAttrString;
+    {property    Attributes: longword read FAttributes write FAttributes;
+    property    Mode: longword read FMode write FMode;  // only used by unix OS's
+    property    OwnerID: integer read FOwnerID write FOwnerID;
+    property    GroupID: integer read FGroupID write FGroupID;}
   end;
 
 
@@ -494,13 +505,15 @@ type
     function    HasAttrib(fileAttrib, testAttrib: Integer): Boolean;
   protected
     FSpecialDirs: TStringList;
+    FHasFileMode: boolean;
     function    InitializeEntry(sr: TSearchRec): TFileEntry; virtual;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); virtual;
   public
-    constructor Create;
+    constructor Create; virtual;
     destructor  Destroy; override;
     function    Count: integer;
     function    CurrentSpecialDir: integer;
+    property    HasFileMode: boolean read FHasFileMode;
     function    ReadDirectory(const aDirectory: TfpgString = ''): boolean;
     procedure   Clear;
     procedure   Sort(AOrder: TFileListSortOrder);
@@ -1961,10 +1974,13 @@ end;
 
 constructor TFileEntry.Create;
 begin
-  FAttributes := 0;
-  FMode := 0;
+  {FAttributes := 0;
+  FMode := 0;}
+  FAttrString := '';
+  FModeString := '';
   FSize := 0;
   FIsLink := False;
+  FIsExecutable := false;
   FEntryType := etFile;
 end;
 
@@ -2002,8 +2018,7 @@ begin
   e.Name        := sr.Name;
   e.Extension   := ExtractFileExt(e.Name);
   e.Size        := sr.Size;
-  e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
-  e.EntryType   := etFile;
+  // e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
   e.ModTime     := FileDateToDateTime(sr.Time);
 
   if HasAttrib(sr.Attr, faDirectory) then

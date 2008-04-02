@@ -178,16 +178,7 @@ function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCoun
 implementation
 
 uses
-  gfx_constants
-  {$IFDEF MSWINDOWS}
-  ,Windows   // Graeme: temporary, just to see how the grid looks under Windows.
-  {$ENDIF}
-  {$IFDEF UNIX}
-    // Graeme: temporary. libc is not available for FreeBSD.
-    {$if defined(linux) and defined(cpu386)},libc{$endif}
-//  ,baseunix
-  {$ENDIF}
-  ;
+  gfx_constants;
 
 function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;
 begin
@@ -199,44 +190,6 @@ begin
   Result.ColumnCount  := AColumnCount;
 end;
 
-{$IFDEF UNIX}
-{$if defined(linux) and defined(cpu386)}
-function GetGroupName(gid: integer): string;
-var
-  p: PGroup;
-begin
-  p := getgrgid(gid);
-  if p <> nil then
-    result := p^.gr_name;
-end;
-{$else}
-// Still need to find an alternative for FreeBSD as we can't use the libc unit.
-function GetGroupName(gid: integer): string;
-begin
-  result := IntToStr(gid);
-end;
-{$endif}
-
-{$if defined(linux) and defined(cpu386)}
-function GetUserName(uid: integer): string;
-var
-  p: PPasswd;
-begin
-  p := getpwuid(uid);
-  if p <> nil then
-    result := p^.pw_name
-  else
-    result := '';
-end;
-{$else}
-// Still need to find an alternative for FreeBSD as we can't use the libc unit.
-function GetUserName(uid: integer): string;
-begin
-  result := IntToStr(uid);
-end;
-{$endif}
-{$ENDIF UNIX}
-
 { TfpgFileGrid }
 
 function TfpgFileGrid.GetRowCount: Longword;
@@ -246,15 +199,13 @@ end;
 
 procedure TfpgFileGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);
 const
-  modestring: string[9] = 'xwrxwrxwr';  // must be in reverse order
+  picture_width = 20;
 var
   e: TFileEntry;
   x: integer;
   y: integer;
   s: string;
   img: TfpgImage;
-  b: integer;
-  n: integer;
 begin
   e := FFileList.Entry[ARow];
   if e = nil then
@@ -272,25 +223,18 @@ begin
   case ACol of
     1:  begin
           if e.EntryType = etDir then
-            img := fpgImages.GetImage('stdimg.folder')            // Do NOT localize
+            img := fpgImages.GetImage('stdimg.folder')          // Do NOT localize
+          else if e.IsExecutable then
+            img := fpgImages.GetImage('stdimg.executable')      // Do NOT localize
           else
-          begin
-            img := fpgImages.GetImage('stdimg.document');         // Do NOT localize
-            {$IFDEF UNIX}
-           if (e.Mode and $40) <> 0 then
-              img := fpgImages.GetImage('stdimg.executable');     // Do NOT localize
-            {$ENDIF}
-           {$IFDEF MSWINDOWS}
-           if lowercase(e.Extension) = 'exe' then
-              img := fpgImages.GetImage('stdimg.executable');     // Do NOT localize
-           {$ENDIF}
-          end;
+            img := fpgImages.GetImage('stdimg.document');       // Do NOT localize
 
           if img <> nil then
-            Canvas.DrawImage(ARect.Left+1, y, img);
-          if e.IsLink then
-            Canvas.DrawImage(ARect.Left+1, y, fpgImages.GetImage('stdimg.link'));
-          x := ARect.Left + 20;
+            Canvas.DrawImage(ARect.Left + (picture_width - img.Width) div 2,
+               y + (ARect.Height - img.Height) div 2, img);
+          if e.IsLink then  // paint shortcut link symbol over existing image
+            Canvas.DrawImage(ARect.Left+1, ARect.Top+1, fpgImages.GetImage('stdimg.link'));
+          x := ARect.Left + picture_width;
           s := e.Name;
         end;
         
@@ -304,44 +248,21 @@ begin
     3:  s := FormatDateTime('yyyy-mm-dd hh:nn', e.ModTime);
 
     4:  begin
-          {$IFDEF MSWINDOWS}
-          // File attributes
-          s := '';
-          //if (e.attributes and FILE_ATTRIBUTE_ARCHIVE) <> 0    then s := s + 'a' else s := s + ' ';
-          if (e.attributes and FILE_ATTRIBUTE_HIDDEN) <> 0     then s := s + 'h';
-          if (e.attributes and FILE_ATTRIBUTE_READONLY) <> 0   then s := s + 'r';
-          if (e.attributes and FILE_ATTRIBUTE_SYSTEM) <> 0     then s := s + 's';
-          if (e.attributes and FILE_ATTRIBUTE_TEMPORARY) <> 0  then s := s + 't';
-          if (e.attributes and FILE_ATTRIBUTE_COMPRESSED) <> 0 then s := s + 'c';
-          {$ENDIF}
-          {$IFDEF UNIX}
-          // rights
-          //rwx rwx rwx
-          b := 1;
-          n := 1;
-          s := '';
-          while n <= 9 do
-          begin
-            if (e.Mode and b) = 0 then
-              s := '-' + s
-            else
-              s := modestring[n] + s;
-            inc(n);
-            b := b shl 1;
-          end;
-          {$ENDIF}
+          if FFileList.HasFileMode then // on unix
+            s := e.Mode
+          else                          // on windows
+            s := e.Attributes;
 
           Canvas.SetFont(FixedFont);
         end;
-
-    {$IFDEF UNIX}
-    5:  s := GetUserName(e.ownerid);  // use getpwuid(); for the name of this user
-    {$ENDIF}
-
-    {$IFDEF UNIX}
-    6:  s := GetGroupName(e.groupid);  // use getgrgid(); for the name of this group
-    {$ENDIF}
   end;
+  
+  if FFileList.HasFileMode then // unix
+    case ACol of
+      5:  s := e.Owner;
+      6:  s := e.Group;
+    end;
+  
   // centre text in row height
   y := y + ((DefaultRowHeight - Canvas.Font.Height) div 2);
   Canvas.DrawString(x, y, s);
@@ -354,24 +275,23 @@ begin
   ColumnCount := 0;
   RowCount := 0;
   FFixedFont := fpgGetFont('Courier New-9');
-
-  {$Note No IFDEF's allowed!!! But how the hell to we get around this? }
-{$ifdef MSWINDOWS}
-  AddColumn(rsName, 320);
-{$else}
-  AddColumn(rsName, 220);
-{$endif}
+  
+  if FFileList.HasFileMode then
+    AddColumn(rsName, 220)  // save space for file mode, owner and group
+  else
+    AddColumn(rsName, 320); // more space to filename
 
   AddColumn(rsSize, 80);
   AddColumn(rsFileModifiedTime, 108);
-{$ifdef MSWINDOWS}
-  AddColumn(rsFileAttributes, 78);
-{$else}
-  AddColumn(rsFileRights, 78);
-  AddColumn(rsFileOwner, 54);
-  AddColumn(rsFileGroup, 54);
-{$endif}
-
+  
+  if FFileList.HasFileMode then
+  begin
+    AddColumn(rsFileRights, 78);
+    AddColumn(rsFileOwner, 54);
+    AddColumn(rsFileGroup, 54);
+  end else
+    AddColumn(rsFileAttributes, 78);
+    
   RowSelect := True;
   DefaultRowHeight := fpgImages.GetImage('stdimg.document').Height + 2;
 end;

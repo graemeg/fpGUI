@@ -260,7 +260,13 @@ type
   end;
   
   
+  { TfpgFileListImpl }
+
   TfpgFileListImpl = class(TfpgFileListBase)
+    function    EncodeModeString(FileMode: longword): TFileModeString;
+    function    GetUserName(uid: integer): string;
+    function    GetGroupName(gid: integer): string;
+    constructor Create; override;
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
   end;
@@ -270,6 +276,8 @@ implementation
 
 uses
   baseunix,
+  // Graeme: temporary. libc is not available for FreeBSD.
+  {$if defined(linux) and defined(cpu386)}libc,{$endif}
   fpgfx,
   gfx_widget,
   gui_form, // remove this!!!!!
@@ -805,7 +813,7 @@ var
   wa: TXWindowAttributes;
   mcode: integer;
   msgp: TfpgMessageParams;
-  rfds: TFDSet;
+  rfds: baseunix.TFDSet;
   xfd: integer;
   KeySym: TKeySym;
   Popup: TfpgWidget;
@@ -2228,6 +2236,74 @@ end;
 
 { TfpgFileListImpl }
 
+function TfpgFileListImpl.EncodeModeString(FileMode: longword): TFileModeString;
+const
+  modestring: string[9] = 'xwrxwrxwr';  // must be in reverse order
+var
+  b: integer;
+  n: integer;
+begin
+  // rights
+  //rwx rwx rwx
+  b := 1;
+  n := 1;
+  Result := '';
+  while n <= 9 do
+  begin
+    if (FileMode and b) = 0 then
+      Result := '-' + Result
+    else
+      Result := modestring[n] + Result;
+    inc(n);
+    b := b shl 1;
+  end;
+end;
+
+{$if defined(linux) and defined(cpu386)}
+function TfpgFileListImpl.GetUserName(uid: integer): string;
+var
+  p: PPasswd;
+begin
+  p := getpwuid(uid);
+  if p <> nil then
+    result := p^.pw_name
+  else
+    result := '';
+end;
+{$else}
+// Still need to find an alternative for FreeBSD as we can't use the libc unit.
+function TfpgFileListImpl.GetUserName(uid: integer): string;
+begin
+  result := IntToStr(uid);
+end;
+{$endif}
+
+constructor TfpgFileListImpl.Create;
+begin
+  inherited Create;
+  FHasFileMode := true;
+end;
+
+{$if defined(linux) and defined(cpu386)}
+function TfpgFileListImpl.GetGroupName(gid: integer): string;
+var
+  p: PGroup;
+begin
+  p := getgrgid(gid);
+  if p <> nil then
+    result := p^.gr_name;
+end;
+
+{$else}
+// Still need to find an alternative for FreeBSD as we can't use the libc unit.
+function TfpgFileListImpl.GetGroupName(gid: integer): string;
+begin
+  result := IntToStr(gid);
+end;
+
+
+{$endif}
+
 function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
 var
   info: Tstat;
@@ -2236,13 +2312,16 @@ begin
   Result := inherited InitializeEntry(sr);
   if Assigned(Result) then
   begin
-    fullname           := DirectoryName + Result.Name;
-    Result.LinkTarget  := ExtractTargetSymLinkPath(fullname);
-    Result.IsLink:=(Result.LinkTarget<>'');
-    Result.mode        := sr.Mode;
+    fullname            := DirectoryName + Result.Name;
+    Result.LinkTarget   := ExtractTargetSymLinkPath(fullname);
+    Result.IsLink       := (Result.LinkTarget<>'');
+    Result.IsExecutable := ((sr.Mode and $40) <> 0);
+    Result.mode         := EncodeModeString(sr.Mode);
     Fpstat(PChar(fullname), info);
-    Result.GroupID     := info.st_gid;
-    Result.OwnerID     := info.st_uid;
+    {Result.GroupID     := info.st_gid;
+    Result.OwnerID      := info.st_uid;}
+    Result.Owner        := GetUserName(info.st_uid);
+    Result.Group        := GetGroupName(info.st_uid);
   end;
 end;
 
