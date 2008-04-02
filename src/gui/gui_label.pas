@@ -75,6 +75,7 @@ type
     property    BackgroundColor;
     property    FontDesc;
     property    Layout;
+    property    LineSpace;
     property    Text;
     property    TextColor;
     property    Width;
@@ -326,11 +327,11 @@ begin
                 fpgStyle.DrawString(Canvas, 0, (Font.Height + LineSpace) * i, FWrappedText[i], Enabled);
               tlBottom:
                 fpgStyle.DrawString(Canvas, 0,
-                    Height - ((Font.Height + LineSpace) * FWrappedText.Count)+ ((Font.Height + LineSpace) * i),
+                    Height - (Font.Height * FWrappedText.Count) - (LineSpace * Pred(FWrappedText.Count)) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               tlCenter:
                 fpgStyle.DrawString(Canvas, 0,
-                    ((Height - (Font.Height + LineSpace) * FWrappedText.Count) div 2) + ((Font.Height + LineSpace) * i),
+                    ((Height - (Font.Height * FWrappedText.Count) - (LineSpace * Pred(FWrappedText.Count))) div 2) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               end;
 
@@ -341,11 +342,11 @@ begin
                     (Font.Height + LineSpace) * i, FWrappedText[i], Enabled);
               tlBottom:
                 fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
-                    Height - ((Font.Height + LineSpace) * FWrappedText.Count)+ ((Font.Height + LineSpace) * i),
+                    Height - (Font.Height * FWrappedText.Count) - (LineSpace * Pred(FWrappedText.Count)) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               tlCenter:
                 fpgStyle.DrawString(Canvas, Width - Font.TextWidth(FWrappedText[i]),
-                    ((Height - (Font.Height + LineSpace) * FWrappedText.Count) div 2) + ((Font.Height + LineSpace) * i),
+                    ((Height - (Font.Height * FWrappedText.Count) - (LineSpace * Pred(FWrappedText.Count))) div 2) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               end;
 
@@ -356,12 +357,14 @@ begin
                     (Font.Height + LineSpace) * i, FWrappedText[i], Enabled);
               tlBottom:
                 fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
-                    Height - ((Font.Height + LineSpace) * FWrappedText.Count)+ ((Font.Height + LineSpace) * i),
+                    Height - (Font.Height * FWrappedText.Count) - (LineSpace * Pred(FWrappedText.Count)) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
               tlCenter:
+                begin
                 fpgStyle.DrawString(Canvas, (Width - Font.TextWidth(FWrappedText[i])) div 2,
-                    ((Height - (Font.Height + LineSpace) * FWrappedText.Count) div 2) + ((Font.Height + LineSpace) * i),
+                    ((Height - (Font.Height * FWrappedText.Count) - (LineSpace * Pred(FWrappedText.Count))) div 2) + ((Font.Height + LineSpace) * i),
                     FWrappedText[i], Enabled);
+                end;
               end;
         end;
   end
