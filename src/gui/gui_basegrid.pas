@@ -420,6 +420,7 @@ begin
   RePaint;
 end;
 
+// Return the fully visible lines only. Partial lines not counted
 function TfpgBaseGrid.VisibleLines: Longword;
 var
   hh: integer;
@@ -430,7 +431,7 @@ begin
     hh := 0;
   if ShowHeader then
     hh := hh + FHeaderHeight+1;
-  Result := (Height - (2*FMargin) - hh) div (FDefaultRowHeight+1)
+  Result := (Height - (2*FMargin) - hh) div (FDefaultRowHeight);
 end;
 
 function TfpgBaseGrid.VisibleWidth: integer;
@@ -459,8 +460,10 @@ procedure TfpgBaseGrid.SetFirstRow(const AValue: Longword);
 begin
   if FFirstRow = AValue then
     Exit;
-  if AValue < (RowCount - VisibleLines + 1) then
-    FFirstRow := AValue;
+  if AValue < ((RowCount - VisibleLines) + 1) then
+    FFirstRow := AValue
+  else
+    FFirstRow := (RowCount - VisibleLines) + 1;
   UpdateScrollBars;
   RePaint;
 end;
@@ -1049,8 +1052,8 @@ begin
     FFirstRow := FFocusRow
   else
   begin
-    if (FFirstRow + VisibleLines - 1) < FFocusRow then
-      FFirstRow := FFocusRow - VisibleLines;// + 1;
+    if (FFirstRow + VisibleLines) <= FFocusRow then
+      FFirstRow := (FFocusRow - VisibleLines) + 1;  // scroll last partial row into view
   end;  { if/else }
 
   if FFocusCol < FFirstCol then

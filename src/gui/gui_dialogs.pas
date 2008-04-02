@@ -942,7 +942,7 @@ begin
   grid := TfpgFileGrid.Create(self);
   with grid do
   begin
-    SetPosition(8, 44, 622, 200);
+    SetPosition(8, 44, 622, 203);
     Anchors := [anLeft, anRight, anTop, anBottom];
     OnRowChange := @ListChanged;
     OnDoubleClick := @GridDblClicked;

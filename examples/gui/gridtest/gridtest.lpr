@@ -15,7 +15,8 @@ uses
   gui_grid,
   gui_button,
   gui_checkbox,
-  gui_tab;
+  gui_tab,
+  gui_edit;
 
 
 type
@@ -24,16 +25,16 @@ type
 
   TMainForm = class(TfpgForm)
   private
+    {@VFD_HEAD_BEGIN: MainForm}
     btnQuit: TfpgButton;
-    pagecontrol: TfpgPageControl;
-    tsTab1: TfpgTabSheet;
-    tsTab2: TfpgTabSheet;
-    grdMain: TfpgStringGrid;
     stringgrid: TfpgStringGrid;
     chkShowHeader: TfpgCheckBox;
     chkShowGrid: TfpgCheckBox;
     chkRowSelect: TfpgCheckBox;
     chkDisabled: TfpgCheckBox;
+    edtTopRow: TfpgEditInteger;
+    btnTopRow: TfpgButton;
+    {@VFD_HEAD_END: MainForm}
     procedure   chkDisabledChange(Sender: TObject);
     procedure   chkRowSelectChange(Sender: TObject);
     procedure   chkShowHeaderChange(Sender: TObject);
@@ -41,35 +42,32 @@ type
     procedure   btnQuitClick(Sender: TObject);
     procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Longword;
         const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
-  protected
-    procedure   HandleShow; override;
+    procedure   btnTopRowClicked(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; override;
   end;
+
+{@VFD_NEWFORM_DECL}
 
 { TMainForm }
 
 procedure TMainForm.chkDisabledChange(Sender: TObject);
 begin
-//  grdMain.Enabled := not chkDisabled.Checked;
   stringgrid.Enabled := not chkDisabled.Checked;
 end;
 
 procedure TMainForm.chkRowSelectChange(Sender: TObject);
 begin
-//  grdMain.RowSelect := chkRowSelect.Checked;
   stringgrid.RowSelect := chkRowSelect.Checked;
 end;
 
 procedure TMainForm.chkShowHeaderChange(Sender: TObject);
 begin
-//  grdMain.ShowHeader := chkShowHeader.Checked;
   stringgrid.ShowHeader := chkShowHeader.Checked;
 end;
 
 procedure TMainForm.chkShowGridChange(Sender: TObject);
 begin
-//  grdMain.ShowGrid := chkShowGrid.Checked;
   stringgrid.ShowGrid := chkShowGrid.Checked;
 end;
 
@@ -93,97 +91,147 @@ begin
   end;
 end;
 
-procedure TMainForm.HandleShow;
+procedure TMainForm.btnTopRowClicked(Sender: TObject);
 begin
-  inherited HandleShow;
+  if edtTopRow.Value < 1 then
+    Exit;
+  stringgrid.TopRow := edtTopRow.Value;
 end;
 
-constructor TMainForm.Create(AOwner: TComponent);
+procedure TMainForm.AfterCreate;
 var
-  c: integer;
-  r: integer;
+  r: Longword;
 begin
-  inherited Create(AOwner);
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(351, 214, 566, 350);
   WindowTitle := 'Grid control test';
-  SetPosition(100, 100, 566, 350);
+  WindowPosition := wpScreenCenter;
 
-  btnQuit := CreateButton(self, 476, 320, 80, 'Quit', @btnQuitClick);
-  btnQuit.ImageName := 'stdimg.Quit';
-  btnQuit.ShowImage := True;
-  btnQuit.Anchors := [anRight, anBottom];
-  
-  pagecontrol := TfpgPageControl.Create(self);
-  pagecontrol.SetPosition(10, 10, Width-20, 300);
-  pagecontrol.Anchors := [anLeft, anTop, anRight, anBottom];
+  btnQuit := TfpgButton.Create(self);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(476, 320, 80, 25);
+    Anchors := [anRight,anBottom];
+    Text := 'Quit';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.Quit';
+    OnClick := @btnQuitClick;
+  end;
 
-  tsTab1 := TfpgTabSheet.Create(pagecontrol);
-  tsTab1.Text := 'Base Grid';
-//  grdMain := TfpgStringGrid.Create(tsTab1);
-//  grdMain.SetPosition(10, 10, Width-50, 250);
-//  grdMain.Anchors  := [anLeft, anTop, anRight, anBottom];
-//  grdMain.RowCount := 25;
-//  for c := 1 to grdMain.ColumnCount do
-//    grdMain.Columns[c-1].Title := 'Title ' + IntToStr(c);
+  stringgrid := TfpgStringGrid.Create(self);
+  with stringgrid do
+  begin
+    Name := 'stringgrid';
+    SetPosition(10, 10, 426, 250);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    AddColumn('Column 1', 100, taLeftJustify);
+    AddColumn('Col 2', 50, taCenter);
+    AddColumn('New', 150, taRightJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    RowCount := 17;
+    TabOrder := 1;
+    // Alignment test
+    Cells[1, 2] := 'left';
+    Cells[2, 2] := 'center';
+    Cells[3, 2] := 'right';
+    // override default colors
+    BackgroundColor:= clKhaki;
+    ColumnBackgroundColor[2] := clLightGray;
+    TextColor:= clBlue;
+    ColumnTextColor[1] := clRed;
+    // add some text
+    Cells[1, 1] := '(r1,c1)';
+    Cells[1, 3] := 'Custom';
+    Cells[2, 3] := 'Hello';
+    Cells[3, 1] := '(r1,c3)';
+    // Add custom painting
+    OnDrawCell := @stringgridDrawCell;
+  end;
 
-  tsTab2 := pagecontrol.AppendTabSheet('String Grid');
-  stringgrid := TfpgStringGrid.Create(tsTab2);
-  stringgrid.SetPosition(10, 10, Width-50, 250);
-  // change row and column count to something different than the default
-  stringgrid.ColumnCount  := 2;
-  stringgrid.RowCount     := 3;
-  // add and change a column
-  stringgrid.AddColumn('Extra (col3)', 100);
-  stringgrid.ColumnWidth[3] := 150;
-  // changes header text in different ways
-  stringgrid.ColumnTitle[1] := 'Column 1';
-  stringgrid.Columns[2].Title := 'Col 2';
-  // add some text
-  stringgrid.Cells[1, 1] := '(r1,c1)';
-  stringgrid.Cells[1, 3] := 'Custom';
-  stringgrid.Cells[2, 3] := 'Hello';
-  stringgrid.Cells[3, 1] := '(r1,c3)';
-  
-  // alignment test
-  stringgrid.columns[1].Alignment := taLeftJustify;
-  stringgrid.Cells[1, 2] := 'left';
-  stringgrid.columns[2].Alignment := taCenter;
-  stringgrid.Cells[2, 2] := 'center';
-  stringgrid.columns[3].Alignment := taRightJustify;
-  stringgrid.Cells[3, 2] := 'right';
-  
-  // override default colors
-  stringgrid.BackgroundColor:= clKhaki;
-  stringgrid.ColumnBackgroundColor[2] := clLightGray;
-  stringgrid.TextColor:= clBlue;
-  stringgrid.ColumnTextColor[1] := clRed;
-  
-  // Add custom painting
-  stringgrid.OnDrawCell := @stringgridDrawCell;
+  chkShowHeader := TfpgCheckBox.Create(self);
+  with chkShowHeader do
+  begin
+    Name := 'chkShowHeader';
+    SetPosition(10, 320, 100, 24);
+    Anchors := [anLeft,anBottom];
+    Checked := True;
+    FontDesc := '#Label1';
+    TabOrder := 2;
+    Text := 'Show Header';
+    OnChange  := @chkShowHeaderChange;
+  end;
 
-  pagecontrol.ActivePageIndex := 0;
+  chkShowGrid := TfpgCheckBox.Create(self);
+  with chkShowGrid do
+  begin
+    Name := 'chkShowGrid';
+    SetPosition(110, 320, 100, 24);
+    Anchors := [anLeft,anBottom];
+    Checked := True;
+    FontDesc := '#Label1';
+    TabOrder := 3;
+    Text := 'Show Grid';
+    OnChange    := @chkShowGridChange;
+  end;
 
-  chkShowHeader := CreateCheckBox(self, 10, 320, 'Show Header');
-  chkShowHeader.Checked   := True;
-  chkShowHeader.OnChange  := @chkShowHeaderChange;
-  chkShowHeader.Anchors   := [anLeft, anBottom];
+  chkRowSelect := TfpgCheckBox.Create(self);
+  with chkRowSelect do
+  begin
+    Name := 'chkRowSelect';
+    SetPosition(210, 320, 100, 24);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    TabOrder := 4;
+    Text := 'Row Select';
+    OnChange    := @chkRowSelectChange;
+  end;
 
-  chkShowGrid := CreateCheckBox(self, chkShowHeader.Right+10, 320, 'Show Grid');
-  chkShowGrid.Checked     := True;
-  chkShowGrid.OnChange    := @chkShowGridChange;
-  chkShowGrid.Anchors     := [anLeft, anBottom];
+  chkDisabled := TfpgCheckBox.Create(self);
+  with chkDisabled do
+  begin
+    Name := 'chkDisabled';
+    SetPosition(310, 320, 100, 24);
+    Anchors := [anLeft,anBottom];
+    FontDesc := '#Label1';
+    TabOrder := 5;
+    Text := 'Disabled';
+    OnChange    := @chkDisabledChange;
+  end;
 
-  chkRowSelect := CreateCheckBox(self, chkShowGrid.Right+10, 320, 'Row Select');
-  chkRowSelect.Checked     := False;
-  chkRowSelect.OnChange    := @chkRowSelectChange;
-  chkRowSelect.Anchors     := [anLeft, anBottom];
-  
-  chkDisabled := CreateCheckBox(self, chkRowSelect.Right+10, 320, 'Disabled');
-  chkDisabled.Checked     := False;
-  chkDisabled.OnChange    := @chkDisabledChange;
-  chkDisabled.Anchors     := [anLeft, anBottom];
+  edtTopRow := TfpgEditInteger.Create(self);
+  with edtTopRow do
+  begin
+    Name := 'edtTopRow';
+    SetPosition(12, 280, 56, 22);
+    Anchors := [anLeft,anBottom];
+  end;
+
+  btnTopRow := TfpgButton.Create(self);
+  with btnTopRow do
+  begin
+    Name := 'btnTopRow';
+    SetPosition(76, 280, 91, 24);
+    Anchors := [anLeft,anBottom];
+    Text := 'Set TopRow';
+    FontDesc := '#Label1';
+    ImageName := '';
+    TabOrder := 7;
+    OnClick := @btnTopRowClicked;
+  end;
+
+  {@VFD_BODY_END: MainForm}
+
+  for r := 1 to stringgrid.RowCount do
+    stringgrid.Cells[3, r] := IntToStr(r);
+
 end;
   
-  
+
+{@VFD_NEWFORM_IMPL}
+
 procedure MainProc;
 var
   frm: TMainForm;

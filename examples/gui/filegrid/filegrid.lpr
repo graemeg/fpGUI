@@ -35,6 +35,7 @@ type
 
 procedure TMainForm.chkShowHiddenChanged(Sender: TObject);
 begin
+//  FGrid.
   FGrid.FileList.ShowHidden := chkShowHidden.Checked;
   FGrid.FileList.ReadDirectory('');
   fpgSendMessage(self, FGrid, FPGM_PAINT);
@@ -48,7 +49,8 @@ end;
 procedure TMainForm.GridDblClick(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
-  if (FGrid.CurrentEntry.Attributes and faDirectory) = 0 then
+  if FGrid.CurrentEntry.EntryType = etFile then
+//  if (FGrid.CurrentEntry.Attributes and faDirectory) = 0 then
     Exit; //==>
     
   FGrid.FileList.ReadDirectory(FGrid.FileList.DirectoryName + FGrid.CurrentEntry.Name);
