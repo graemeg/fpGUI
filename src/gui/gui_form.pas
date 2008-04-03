@@ -75,7 +75,7 @@ type
     property    ModalResult: integer read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
   published
-    {$Note Refactor this to a TfpgCustomForm and only surface it here }
+    { TODO : Refactor this to a TfpgCustomForm and only surface it here }
     property    BackgroundColor;
     property    TextColor;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;

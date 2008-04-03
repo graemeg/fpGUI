@@ -62,6 +62,46 @@ find all the fpGUI compiled units and source for you.
    automatically include the paths to the fpGUI compiled units for you.
 
 
+ Building fpGUI from the Free Pascal Text IDE
+ ============================================
+ 
+First you would need to setup the 'fp' IDE to find the related files.
+As far as I understand the text mode IDE has it's own built-in compiler
+so doesn't read the standard fpc.cfg file.
+
+ * Run the text mode IDE from the command line:  fp
+ * Navigate the menus to: Options|Directories and select the 'Units'
+   tab.
+ * Now enter the following directories replacing the relevant parts with
+   you actual paths. The example below is valid on my system only.
+   I was using FPC 2.2.0 under Linux and the X11 corelib backend.
+  
+    /opt/fpc_2.2.0/lib/fpc/2.2.0/units/i386-linux/*
+    /opt/fpc_2.2.0/lib/fpc/2.2.0/units/i386-linux/rtl
+    /home/graemeg/programming/fpGUI/src/corelib
+    /home/graemeg/programming/fpGUI/src/corelib/x11
+    /home/graemeg/programming/fpGUI/src/gui
+
+ * Now select the 'Include files' tab and enter the following paths.
+   Again change the paths to point to your actual directories and
+   X11 or GDI corelib backend.
+  
+    /home/graemeg/programming/fpGUI/src/corelib  
+    /home/graemeg/programming/fpGUI/src/corelib/x11
+  
+ * Now changes to 'Miscellaneous' tab, PPU output directory. Type in
+   the edit box:  units
+  
+   NOTE:
+   This will place all the compiled *.ppu and *.o files into a 'units'
+   directory inside you current directory. So make sure you create it
+   before you try to compile for the first time. FPC doesn't create
+   directories for you!
+  
+ * Now you are ready to open your projects main program unit (F3) and
+   compiling it by pressing (F9). 
+  
+  
  Compiling any of the examples from the Command Line
  ===================================================
 

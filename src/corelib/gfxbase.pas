@@ -52,7 +52,7 @@ type
                         gdHorizontal);  // Fill Horizontal
 
   TClipboardKeyType = (ckNone, ckCopy, ckPaste, ckCut);
-  
+
 const
   MOUSE_LEFT       = 1;
   MOUSE_RIGHT      = 3;
@@ -80,10 +80,10 @@ const
 
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
-  
+
 var
   FPG_DEFAULT_FONT_DESC: string = 'Arial-10:antialias=true';
-  
+
 const
   UserNamedColorStart   = 128;
 
@@ -117,7 +117,7 @@ type
     keychar: TfpgChar;
     shiftstate: TShiftState;
   end;
-  
+
 
   TfpgMessageParams = record
     case integer of
@@ -125,7 +125,7 @@ type
       1: (keyboard: TfpgMsgParmKeyboard);
       2: (rect: TfpgRect);
   end;
-  
+
 
   TfpgMessageRec = record
     MsgCode: integer;
@@ -217,8 +217,8 @@ type
     property    Canvas: TfpgCanvasBase read FCanvas;
     property    Image: TfpgImageBase read FImage;
   end;
-  
-  
+
+
   TfpgBaseInterpolation = class(TfpgCustomInterpolation)
   private
     xfactor: double;
@@ -236,7 +236,7 @@ type
     destructor  Destroy; override;
   end;
 
-  
+
   TfpgMitchelInterpolation = class(TfpgBaseInterpolation)
   protected
     function    Filter(x: double): double; override;
@@ -434,8 +434,8 @@ type
 //    property    Forms[]...
     property    OnIdle: TNotifyEvent read FOnIdle write FOnIdle;
   end;
-  
-  
+
+
   TfpgClipboardBase = class(TObject)
   protected
     FClipboardWndHandle: TfpgWinHandle;
@@ -446,8 +446,8 @@ type
     constructor Create;
     property    Text: string read DoGetText write DoSetText;
   end;
-  
-  
+
+
   TFileEntryType = (etFile, etDir);
   TFileListSortOrder = (soNone, soFileName, soCSFileName, soFileExt, soSize, soTime);
   TFileModeString = string[9];
@@ -552,8 +552,8 @@ uses
   gfx_utils, // needed for fpgFileList
   gfx_constants,
   typinfo;
-  
-  
+
+
 const
   NoDefault = $80000000;
   tkPropsWithDefault = [tkInteger, tkChar, tkSet, tkEnumeration];
@@ -1189,7 +1189,7 @@ var
   underline: integer;
 begin
   DoDrawString(x, y, txt);
-  
+
   { What was not handled: underline }
   if Pos('UNDERLINE', UpperCase(Font.FontDesc)) > 0 then
   begin
@@ -2049,7 +2049,7 @@ begin
   while (i < FSpecialDirs.Count)
     and (FSpecialDirs.Strings[i][1] < aDirectory[1]) do
       Inc(i);
-  
+
   sp := Pos(DirectorySeparator, aDirectory) + 1;
   n := sp;
   while n < Length(aDirectory) do
@@ -2067,7 +2067,7 @@ begin
     Inc(i);
     FSpecialDirs.Insert(i, ExcludeTrailingPathDelimiter(aDirectory))
   end;
-    
+
   FCurrentSpecialDir := i;
 end;
 
@@ -2108,7 +2108,7 @@ begin
     dir := fpgExpandFileName(aDirectory)
   else
     dir := fpgGetCurrentDir;
-    
+
   // vvzh: now we have to use SetCurrentDir in order to make ExpandFileName work
   if not fpgSetCurrentDir(dir) then
     Exit; //==>
@@ -2116,7 +2116,7 @@ begin
   // Add PathDelim to end if it doesn't yet exist
   FDirectoryName := IncludeTrailingPathDelimiter(dir);
   PopulateSpecialDirs(FDirectoryName);
-  
+
   Clear;
   try
     // The extra 'or' includes Normal attribute files under Windows. faAnyFile doesn't return those.

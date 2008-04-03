@@ -1119,10 +1119,10 @@ type
     procedure   AfterCreate; override;
     class procedure About(const ATitle: string; const AText: string);
     class procedure AboutFPGui(const ATitle: string = '');
-    class function Critical(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = mbOK; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
-    class function Information(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = mbOK; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
-    class function Question(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = mbOK; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
-    class function Warning(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = mbOK; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
+    class function Critical(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
+    class function Information(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
+    class function Question(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
+    class function Warning(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
     property    InformativeText: string read GetInformativeText write SetInformativeText;
     property    Text: string read FText write SetText;
     property    Buttons: TfpgMsgDlgButtons read FButtons write SetButtons;

@@ -15,13 +15,14 @@ uses
 
 type
 
-  TtiGUIINIFile = class(TtiINIFile)
+  TtiGuiINIFile = class(TtiINIFile)
   public
     procedure   ReadFormState(AForm: TfpgForm; AHeight: integer = -1; AWidth: integer = -1);
     procedure   WriteFormState(AForm : TfpgForm);
   end;
 
-function GGUIINI(const AFileName: string = ''): TtiGUIINIFile;
+function gGUIINI(const AFileName: string = ''): TtiGuiINIFile;
+
 
 implementation
 uses
@@ -29,25 +30,28 @@ uses
   ;
 
 var
-  uGUIINI : TtiGUIINIFile;
+  uGuiINI : TtiGuiINIFile;
 
 
-function GGUIINI(const AFileName: string = ''): TtiGUIINIFile;
+function gGUIINI(const AFileName: string = ''): TtiGuiINIFile;
 begin
-  if UGUIINI = nil then
-    UGUIINI := TtiGUIINIFile.CreateExt(AFileName);
-  result := UGUIINI;
+  if uGuiINI = nil then
+  begin
+    uGuiINI := TtiGuiINIFile.CreateExt(AFileName);
+    uGuiINI.CacheUpdates := False;
+  end;
+  result := uGuiINI;
 end;
 
-procedure TtiGUIINIFile.ReadFormState(AForm: TfpgForm; AHeight : integer = -1; AWidth : integer = -1);
+procedure TtiGuiINIFile.ReadFormState(AForm: TfpgForm; AHeight : integer = -1; AWidth : integer = -1);
 var
-  LINISection : string;
-  LTop : integer;
-  LLeft : integer;
-  LHeight : integer;
-  LWidth : integer;
+  LINISection: string;
+  LTop: integer;
+  LLeft: integer;
+  LHeight: integer;
+  LWidth: integer;
 begin
-  Assert(AForm <> nil, 'pForm not assigned');
+  Assert(AForm <> nil, 'AForm not assigned');
   LINISection := AForm.Name + 'State';
   // Read form position, -1 if not stored in registry
   LTop := readInteger(LINISection, 'Top',    -1);
@@ -96,7 +100,7 @@ begin
   //{$ENDIF MSWINDOWS}
 end;
 
-procedure TtiGUIINIFile.WriteFormState(AForm: TfpgForm);
+procedure TtiGuiINIFile.WriteFormState(AForm: TfpgForm);
 var
   LINISection: string;
 begin
@@ -104,21 +108,24 @@ begin
 //  writeInteger(LINISection, 'WindowState', ord(AForm.WindowState));
 //  if AForm.WindowState = wsNormal then
 //  begin
-    writeInteger(LINISection, 'Top',    AForm.Top);
-    writeInteger(LINISection, 'Left',   AForm.Left);
+    WriteInteger(LINISection, 'Top', AForm.Top);
+    WriteInteger(LINISection, 'Left', AForm.Left);
     if AForm.Sizeable then
     begin
-      writeInteger(LINISection, 'Height', AForm.Height);
-      WriteInteger(LINISection, 'Width',  AForm.Width);
+      WriteInteger(LINISection, 'Height', AForm.Height);
+      WriteInteger(LINISection, 'Width', AForm.Width);
     end;
 //  end;
+
+  writeln('....LINISection = ', LINISection, ' to file: ', FileName);
+  writeln('....WriteFormState. DONE');
 end;
 
 initialization
-  uGUIINI := nil;
+  uGuiINI := nil;
 
 finalization
-  uGUIINI.Free;
+  uGuiINI.Free;
 
 end.
 
