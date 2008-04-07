@@ -61,6 +61,8 @@ type
       // 3 - disabled
       // 4 - got focus or default
     image: TfpgImage;
+    FStartBtnPressed: Boolean;
+    FEndBtnPressed: Boolean;
     procedure   SetThemeImage(const AValue: TfpgImage);
   protected
     procedure   HandlePaint; override;
