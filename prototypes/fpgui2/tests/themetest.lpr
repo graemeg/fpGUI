@@ -422,6 +422,17 @@ begin
       State := 0;
   end;
 
+  //if Assigned(image) then
+  //begin
+    //try
+    //image.CreateMaskFromSample(0, 0);
+    //image.UpdateImage;
+    //except
+      //raise Exception.Create('Failed to create ImageMask in TThemeButton');
+    //end;
+  //end;
+  PaintPartScaledImage(image, Canvas, 0, 0, 32, 21, Width, Height, 3, state);
+(*
   x := 0;
   { left }
   Canvas.DrawImagePart(x, 0, image, state*32, 0, 3, 21);
@@ -430,7 +441,7 @@ begin
     Canvas.DrawImagePart(i, 0, image, (state*32)+3, 0, 1, 21);
   { right }
   Canvas.DrawImagePart(i, 0, image, (state*32)+29, 0, 3, 21);
-
+*)
   if Focused and (not Embedded) then
   begin
     Canvas.SetColor(clText1);
@@ -496,6 +507,7 @@ begin
   if x < 3 then
     x := 3;
 
+  Canvas.TextColor := TextColor;
   Canvas.DrawString(x + pofs, y + pofs, FText);
 
   Canvas.EndDraw;
@@ -572,6 +584,7 @@ end;
 procedure TMainForm.CreateButtons;
 var
   bmp: TfpgImage;
+  vista: TThemeButton;
 begin
   btnClose := TfpgButton.Create(self);
   btnClose.Width      := 75;
@@ -597,7 +610,20 @@ begin
   bmp.CreateMaskFromSample(0, 0);
   bmp.UpdateImage;
   xpsilver.ThemeImage := bmp;
-  
+
+  vista := TThemeButton.Create(self);
+  vista.Left         := 20;
+  vista.Top          := 145;
+  vista.Width        := 100;
+  vista.Height       := 26;
+  vista.TextColor    := clWhite;
+  vista.FontDesc     := 'Arial-10:bold';
+  vista.Text         := 'Vista';
+  bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/vista/button.bmp'));
+  bmp.CreateMaskFromSample(0, 0);
+  bmp.UpdateImage;
+  vista.ThemeImage := bmp;
+
   styledbutton := TStyledButton.Create(self);
   styledbutton.SetPosition(btnClose.Left-20, btnClose.Top-80, 75, 24);
 //      styledbutton.Default := True;
