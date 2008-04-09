@@ -118,12 +118,20 @@ type
     shiftstate: TShiftState;
   end;
 
+  
+  TfpgMsgParmUser = record
+    Param1: Integer;
+    Param2: Integer;
+    Param3: Integer;
+  end;
+
 
   TfpgMessageParams = record
     case integer of
       0: (mouse: TfpgMsgParmMouse);
       1: (keyboard: TfpgMsgParmKeyboard);
       2: (rect: TfpgRect);
+      3: (user: TfpgMsgParmUser);
   end;
 
 
