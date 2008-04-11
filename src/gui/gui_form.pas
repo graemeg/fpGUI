@@ -240,9 +240,13 @@ begin
   // processing messages until this form ends.
   // delivering the remaining messages
   fpgApplication.ProcessMessages;
-  repeat
-    fpgWaitWindowMessage;
-  until (ModalResult <> 0) or (not Visible);
+  try
+    repeat
+      fpgWaitWindowMessage;
+    until (ModalResult <> 0) or (not Visible);
+  except
+    fpgApplication.HandleException(self);
+  end;
 
   fpgApplication.PopModalForm;
   Result := ModalResult;

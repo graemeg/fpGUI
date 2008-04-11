@@ -157,12 +157,12 @@ begin
   m.Dest    := Dest;
   m.Params  := aparams;
 
-  try
+//  try
     m.Dest.Dispatch(m)
-  except
-    on E: Exception do
-      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
-  end;
+//  except
+//    on E: Exception do
+//      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
+//  end;
 end;
 
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
@@ -176,12 +176,12 @@ begin
   m.Sender  := Sender;
   m.Dest    := Dest;
 
-  try
+//  try
     m.Dest.Dispatch(m)
-  except
-    on E: Exception do
-      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
-  end;
+//  except
+//    on E: Exception do
+//      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
+//  end;
 end;
 
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
@@ -193,7 +193,7 @@ begin
     msg.Dest.Free
   else
   begin
-    try
+//    try
       msg.Dest.Dispatch(msg);
       if fpgApplication.FMessageHookList.Count > 0 then
       begin
@@ -204,10 +204,10 @@ begin
             oItem.Listener.Dispatch(msg);
         end;
       end;
-    except
-      on E: Exception do
-        {$IFDEF DEBUG}writeln('fpgDeliverMessage Caught Exception: ' + E.Message){$ENDIF};
-    end;
+//    except
+//      on E: Exception do
+//        {$IFDEF DEBUG}writeln('fpgDeliverMessage Caught Exception: ' + E.Message){$ENDIF};
+//    end;
   end;
 end;
 

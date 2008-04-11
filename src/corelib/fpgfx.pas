@@ -69,7 +69,8 @@ type
   TMouseWheelEvent = procedure(Sender: TObject; AShift: TShiftState; AWheelDelta: Single; const AMousePos: TPoint) of object;
   { Painting }
   TPaintEvent = procedure(Sender: TObject{; const ARect: TfpgRect}) of object;
-
+  { Exceptions }
+  TExceptionEvent = procedure(Sender: TObject; E: Exception) of object;
 
 
 type
@@ -187,6 +188,8 @@ type
 
   TfpgApplication = class(TfpgApplicationImpl)
   private
+    FOnException: TExceptionEvent;
+    FStopOnException: Boolean;
     procedure   SetupLocalizationStrings;
   protected
     FDisplayParams: string;
@@ -209,9 +212,13 @@ type
     procedure   ProcessMessages;
     procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
+    procedure   HandleException(Sender: TObject);
+    procedure   ShowException(E: Exception);
+    property    DefaultFont: TfpgFont read FDefaultFont;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
-    property    DefaultFont: TfpgFont read FDefaultFont;
+    property    StopOnException: Boolean read FStopOnException write FStopOnException;
+    property    OnException: TExceptionEvent read FOnException write FOnException;
   end;
 
 
@@ -326,7 +333,8 @@ uses
   gfx_stdimages,
   gfx_extinterpolation, // only so that it get auto compiled
   gfx_translations,
-  gfx_constants;
+  gfx_constants,
+  gui_dialogs;
 
 var
   fpgTimers: TList;
@@ -570,9 +578,28 @@ begin
 end;
 
 procedure DumpStack;
+Var
+  Message : String;
+  i : longint;
 begin
   writeln(' Stack trace:');
-  Dump_Stack(StdOut, get_frame);
+//  Dump_Stack(StdOut, get_frame);
+
+  Writeln(stdout,'An unhandled exception occurred at $',HexStr(Ptrint(ExceptAddr),sizeof(PtrInt)*2),' :');
+  if ExceptObject is exception then
+   begin
+     Message:=Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
+     Writeln(stdout,Message);
+   end
+  else
+   Writeln(stdout,'Exception object ',ExceptObject.ClassName,' is not of class Exception.');
+  Writeln(stdout,BackTraceStrFunc(ExceptAddr));
+  if (ExceptFrameCount>0) then
+    begin
+      for i:=0 to ExceptFrameCount-1 do
+        Writeln(stdout,BackTraceStrFunc(ExceptFrames[i]));
+    end;
+  Writeln(stdout,'');
 end;
 
 { TfpgTimer }
@@ -728,6 +755,7 @@ begin
   FScreenHeight   := -1;
   FModalFormStack := TList.Create;
   FMessageHookList := TFPList.Create;
+  FStopOnException := False;
   
   try
     inherited Create(aparams);
@@ -741,7 +769,7 @@ begin
     FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
   except
     on E: Exception do
-        writeln(E.Message);
+      Sysutils.ShowException(ExceptObject, ExceptAddr);
   end;
 end;
 
@@ -831,12 +859,18 @@ begin
   if IsInitialized then
     InternalInit
   else
-    raise Exception.Create('Failed in initialize the Application object!');
+    raise Exception.Create('Failed to initialize the Application object!');
 end;
 
 procedure TfpgApplication.Run;
 begin
-  RunMessageLoop;
+  repeat
+    try
+      RunMessageLoop;
+    except
+      HandleException(Self);
+    end;
+  until Terminated;
 end;
 
 procedure TfpgApplication.SetupLocalizationStrings;
@@ -958,6 +992,35 @@ begin
   end;
 end;
 
+procedure TfpgApplication.HandleException(Sender: TObject);
+begin
+  if not (ExceptObject is Exception) then
+    SysUtils.ShowException(ExceptObject, ExceptAddr)
+  else
+  begin
+    if not (ExceptObject is EAbort) then  // EAborts are silent. They show no message.
+    begin
+      if Assigned(FOnException) then
+        FOnException(Sender, Exception(ExceptObject))
+      else
+      begin
+//        SysUtils.ShowException(ExceptObject, ExceptAddr);
+        ShowException(Exception(ExceptObject));
+//        DumpStack;
+      end;
+    end;
+  end;  { if/else }
+
+  // Note: We should not terminate when we receive EAbort exceptions.
+  if (not (ExceptObject is EAbort)) and StopOnException then
+    Terminated := True;
+end;
+
+procedure TfpgApplication.ShowException(E: Exception);
+begin
+  TfpgMessageDialog.Critical('An unexpected error occurred.', E.Message);
+end;
+
 procedure TfpgApplication.WaitWindowMessage(atimeoutms: integer);
 begin
   if IsMultiThread then
@@ -970,9 +1033,7 @@ end;
 
 procedure TfpgApplication.RunMessageLoop;
 begin
-  repeat
-    WaitWindowMessage(1000);
-  until Terminated;
+  WaitWindowMessage(1000);
 end;
 
 { TfpgFont }
