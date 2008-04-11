@@ -357,7 +357,7 @@ begin
     '  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, ' + LineEnding +
     '  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, ' + LineEnding +
     '  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,' + LineEnding +
-    '  gui_bevel, gui_popupcalendar, gui_gauge;' + LineEnding + LineEnding +
+    '  gui_panel, gui_popupcalendar, gui_gauge;' + LineEnding + LineEnding +
     'type' + LineEnding + LineEnding +
     '{@VFD_NEWFORM_DECL}' + LineEnding + LineEnding +
     'implementation' + LineEnding + LineEnding +

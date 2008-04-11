@@ -474,6 +474,8 @@ begin
   FAlignment        := taCenter;
   FLayout           := tlCenter;
   FWrapText         := False;
+  FLineSpace        := 2;
+  FMargin           := 2;
 end;
 
 {TfpgGroupBox}

@@ -51,7 +51,7 @@ uses
   gui_combobox,
   gui_grid,
   gui_checkbox,
-  gui_bevel,
+  gui_panel,
   gui_tree,
   gui_radiobutton,
   gui_listview,
@@ -333,10 +333,15 @@ begin
   RegisterVFDWidget(wc);
 
   // Panel
-  wc           := TVFDWidgetClass.Create(TfpgBevel);
+  wc           := TVFDWidgetClass.Create(TfpgPanel);
   wc.NameBase  := 'pnlName';
-  wc.AddProperty('Shape', TPropertyEnum, '');
+  wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
+  wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
+  wc.AddProperty('LineSpace', TPropertyInteger, 'Line spacing between wrapped caption');
+  wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
   wc.AddProperty('Style', TPropertyEnum, '');
+  wc.AddProperty('Text', TPropertyString, 'The panel caption');
+  wc.AddProperty('WrapText', TPropertyBoolean, 'Should the panel text be wrapped');
   wc.WidgetIconName := 'vfd.panel';
   wc.Container := True;
   RegisterVFDWidget(wc);
