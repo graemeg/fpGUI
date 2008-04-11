@@ -129,6 +129,8 @@ type
     property    TextColor;
     property    Width;
     property    OnChange;
+    property    OnCloseUp;
+    property    OnDropDown;
   end;
 
 
@@ -359,6 +361,11 @@ begin
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     r := GetDropDownPos(Parent, self, ddw);
     ddw.Height := r.Height;
+
+    if (FItems.Count > 0) and Assigned(OnDropDown) then
+      OnDropDown(self);
+    ddw.OnClose := @InternalOnClose;
+
     ddw.ShowAt(Parent, r.Left, r.Top);
   end
   else

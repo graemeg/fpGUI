@@ -56,6 +56,9 @@ uses
   gfx_popupwindow;
 
 type
+  // widget options
+  TfpgComboOption = (wo_FocusItemTriggersOnChange);
+  TfpgComboOptions = set of TfpgComboOption;
 
   { TfpgBaseComboBox }
 
@@ -64,6 +67,9 @@ type
     FDropDownCount: integer;
     FFont: TfpgFont;
     FOnChange: TNotifyEvent;
+    FOnCloseUp: TNotifyEvent;
+    FOnDropDown: TNotifyEvent;
+    FOptions: TfpgComboOptions;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
     procedure   SetFocusItem(const AValue: integer);
@@ -72,15 +78,20 @@ type
     FInternalBtnRect: TfpgRect;
     FFocusItem: integer;
     FItems: TStringList;
+    procedure   InternalOnClose(Sender: TObject);
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   DoOnChange;
+    procedure   DoOnChange; virtual;
     procedure   DoDropDown; virtual; abstract;
+    procedure   DoOnCloseUp; virtual;
     function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
+    property    Options: TfpgComboOptions read FOptions write FOptions;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnCloseUp: TNotifyEvent read FOnCloseUp write FOnCloseUp;
+    property    OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -93,7 +104,6 @@ type
   TfpgAbstractComboBox = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
-    procedure   SetFocusItem(const AValue: integer);
     procedure   CalculateInternalButtonRect;
   protected
     FMargin: integer;
@@ -128,11 +138,14 @@ type
     property    FontDesc;
     property    Height;
     property    Items;
+    property    Options;
     property    TabOrder;
     property    Text;
     property    TextColor;
     property    Width;
     property    OnChange;
+    property    OnCloseUp;
+    property    OnDropDown;
   end;
   
 
@@ -196,7 +209,8 @@ begin
     FFocusItem := FItems.Count;
 
   RePaint;
-  DoOnChange;
+  if wo_FocusItemTriggersOnChange in FOptions then
+    DoOnChange;
 end;
 
 procedure TfpgBaseComboBox.SetFontDesc(const AValue: string);
@@ -206,6 +220,11 @@ begin
   if Height < FFont.Height + 6 then
     Height:= FFont.Height + 6;
   RePaint;
+end;
+
+procedure TfpgBaseComboBox.InternalOnClose(Sender: TObject);
+begin
+  DoOnCloseUp;
 end;
 
 procedure TfpgBaseComboBox.HandleKeyPress(var keycode: word;
@@ -239,6 +258,12 @@ procedure TfpgBaseComboBox.DoOnChange;
 begin
   if Assigned(OnChange) then
     FOnChange(self);
+end;
+
+procedure TfpgBaseComboBox.DoOnCloseUp;
+begin
+  if Assigned(OnCloseUp) then
+    OnCloseUp(self);
 end;
 
 function TfpgBaseComboBox.GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect;
@@ -279,6 +304,7 @@ begin
   FFocusItem := 0; // nothing is selected
   FItems  := TStringList.Create;
   FFont   := fpgGetFont('#List');
+  FOptions := [];
   FOnChange := nil;
 end;
 
@@ -310,6 +336,8 @@ end;
 procedure TComboboxDropdownWindow.ListBoxSelect(Sender: TObject);
 begin
   FCallerWidget.FocusItem := ListBox.FocusItem;
+  if not (wo_FocusItemTriggersOnChange in FCallerWidget.FOptions) then
+    FCallerWidget.DoOnChange;
   Close;
 end;
 
@@ -413,6 +441,11 @@ begin
     ddw.DontCloseWidget := self;  // now we can control when the popup window closes
     r := GetDropDownPos(Parent, self, ddw);  // find suitable position
     ddw.Height := r.Height;  // in case GetDropDownPos resized us
+    
+    if (FItems.Count > 0) and Assigned(OnDropDown) then
+      OnDropDown(self);
+    ddw.OnClose := @InternalOnClose;
+    
     ddw.ShowAt(Parent, r.Left, r.Top);
   end
   else
@@ -430,11 +463,6 @@ end;
 procedure TfpgAbstractComboBox.InternalBtnClick(Sender: TObject);
 begin
   DoDropDown;
-end;
-
-procedure TfpgAbstractComboBox.SetFocusItem(const AValue: integer);
-begin
-
 end;
 
 procedure TfpgAbstractComboBox.SetText(const AValue: string);
@@ -523,7 +551,6 @@ begin
     FocusItem := NewIndex;
     RePaint;
   end;
-
 end;
 
 procedure TfpgAbstractComboBox.HandleResize(awidth, aheight: TfpgCoord);

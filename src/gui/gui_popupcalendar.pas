@@ -148,6 +148,8 @@ type
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
     property    TabOrder;
     property    OnChange;
+    property    OnCloseUp;
+    property    OnDropDown;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -334,7 +336,7 @@ end;
 procedure TfpgPopupCalendar.SetCloseOnSelect(const AValue: boolean);
 begin
   if FCloseOnSelect = AValue then
-    exit;
+    Exit;
   FCloseOnSelect := AValue;
 end;
 
@@ -755,7 +757,7 @@ begin
     on E: Exception do
     begin
       FDateFormat := OldFormat;
-      ShowMessage(E.Message);
+      fpgApplication.HandleException(self);
     end;
   end;
 end;
@@ -772,6 +774,10 @@ begin
   { Set to false CloseOnSelect to leave opened popup calendar menu}
     ddw.CloseOnSelect := CloseOnSelect;
     ddw.CallerWidget  := self;
+
+    if Assigned(OnDropDown) then
+      OnDropDown(self);
+
     ddw.MinDate       := FMinDate;
     ddw.MaxDate       := FMaxDate;
     ddw.DateValue     := FDate;
@@ -781,6 +787,7 @@ begin
     ddw.UpdateCalendar; //slapshot
     ddw.PopupFrame    := True;
     ddw.OnValueSet    := @InternalOnValueSet;
+    ddw.OnClose       := @InternalOnClose;
   end
   else
   begin

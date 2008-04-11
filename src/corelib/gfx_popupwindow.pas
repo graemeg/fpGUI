@@ -37,6 +37,7 @@ type
   TfpgPopupWindow = class(TfpgWidget)
   private
     FDontCloseWidget: TfpgWidget;
+    FOnClose: TNotifyEvent;
     FPopupFrame: boolean;
     procedure   SetPopupFrame(const AValue: boolean);
   protected
@@ -45,12 +46,14 @@ type
     procedure   HandleClose; virtual;
     procedure   ProcessPopupFrame; virtual;
     procedure   DoPaintPopupFrame; virtual;
+    procedure   DoOnClose; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
     procedure   Close; virtual;
     property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
+    property    OnClose: TNotifyEvent read FOnClose write FOnClose;
   end;
 
 
@@ -223,6 +226,7 @@ end;
 
 procedure TfpgPopupWindow.HandleClose;
 begin
+  DoOnClose;
   HandleHide;
 end;
 
@@ -264,6 +268,12 @@ begin
   Canvas.SetColor(clWidgetFrame);
   Canvas.DrawRectangle(0, 0, Width, Height);
   Canvas.SetColor(lColor);
+end;
+
+procedure TfpgPopupWindow.DoOnClose;
+begin
+  if Assigned(OnClose) then
+    OnClose(self);
 end;
 
 constructor TfpgPopupWindow.Create(AOwner: TComponent);
