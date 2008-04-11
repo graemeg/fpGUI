@@ -31,6 +31,9 @@ type
 
   TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
     btnIsSelected, btnHasFocus, btnHasParentColor);
+    
+  TFTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter, txtBottom, txtWrap, txtEnabled,
+    txtAutoSize);
 
   TMouseButton = (mbLeft, mbRight, mbMiddle);
 
@@ -154,6 +157,9 @@ type
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
     procedure   DrawDirectionArrow(r: TfpgRect; direction: integer);
     procedure   DrawFocusRect(r: TfpgRect);
+    function    DrawText(x, y, w, h: TfpgCoord; AText: string; AFlags: TFTextFlags; ALineSpace: integer = 2): integer;
+    function    DrawText(x, y: TfpgCoord; AText: string; AFlags: TFTextFlags; ALineSpace: integer = 2): integer;
+    function    DrawText(r: TfpgRect; AText: string; AFlags: TFTextFlags; ALineSpace: integer = 2): integer;
   end;
 
 
@@ -334,6 +340,7 @@ uses
   gfx_extinterpolation, // only so that it get auto compiled
   gfx_translations,
   gfx_constants,
+  gfx_UTF8utils,
   gui_dialogs;
 
 var
@@ -1127,6 +1134,213 @@ end;
 procedure TfpgCanvas.DrawFocusRect(r: TfpgRect);
 begin
   fpgStyle.DrawFocusRect(self, r);
+end;
+
+function TfpgCanvas.DrawText(x, y, w, h: TfpgCoord; AText: string; AFlags: TFTextFlags;
+                ALineSpace: integer = 2): integer;
+var
+  wtxt, htxt, i, wt, l: integer;
+  wraptxt: string;
+  wraplst: TStringList;
+begin
+  if (txtWrap in AFlags) then
+  begin
+    wraplst := TStringList.Create;
+    wtxt := 0;
+    htxt := 0;
+    wraptxt := AText;
+    while wraptxt > '' do
+      if UTF8Pos(' ', wraptxt) > 0 then
+        if (UTF8Pos(#13,wraptxt) > 0) then
+          if (UTF8Pos(#13,wraptxt) < UTF8Pos(' ',wraptxt)) then
+            if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt)))) > wtxt then
+            begin
+              wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt))));
+              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)));
+            end
+            else
+              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)))
+          else
+            if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt)))) > wtxt then
+            begin
+              wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt))));
+              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)));
+            end
+            else
+              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)))
+        else
+          if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt)))) > wtxt then
+          begin
+            wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt))));
+            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)));
+          end
+          else
+            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)))
+      else
+        if (UTF8Pos(#13,wraptxt) > 0) then
+          if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt)))) > wtxt then
+          begin
+            wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt))));
+            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)));
+          end
+          else
+            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)))
+        else
+          if Font.TextWidth(wraptxt) > wtxt then
+          begin
+            wtxt := Font.TextWidth(wraptxt);
+            wraptxt := '';
+          end
+          else
+            wraptxt := '';
+    if ((txtAutoSize in AFlags) or (w = 0)) and (wtxt > w) then
+      wt := wtxt
+    else
+      wt := w;
+    while AText > '' do
+    begin
+      if UTF8Pos(' ', AText) > 0 then
+        if (UTF8Pos(#13,AText) > 0) then
+          if (UTF8Pos(#13,AText) < UTF8Pos(' ',AText)) then
+          begin
+            if wraplst.Count > 0 then
+              if wraplst[Pred(wraplst.Count)] = '' then
+                wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
+              else
+                if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))) <= wt then
+                  wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
+                else
+                  wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))))
+            else
+              wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))));
+            wraplst.Add('');
+            AText := UTF8Copy(AText, Succ(UTF8Pos(#13, AText)), UTF8Length(AText) - Pred(UTF8Pos(#13, AText)));
+          end
+          else
+          begin
+            if wraplst.Count > 0 then
+              if wraplst[Pred(wraplst.Count)] = '' then
+                wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
+              else
+                if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))) <= wt then
+                  wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
+                else
+                  wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))))
+            else
+              wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
+            AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
+          end
+        else
+        begin
+          if wraplst.Count > 0 then
+            if wraplst[Pred(wraplst.Count)] = '' then
+              wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
+            else
+              if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))) <= wt then
+                wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
+              else
+                wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))))
+          else
+            wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
+          AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
+        end
+      else
+        if (UTF8Pos(#13,AText) > 0) then
+        begin
+          if wraplst.Count > 0 then
+            if wraplst[Pred(wraplst.Count)] = '' then
+              wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
+            else
+              if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))) <= wt then
+                wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
+              else
+                wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))))
+          else
+            wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))));
+          wraplst.Add('');
+          AText := UTF8Copy(AText, Succ(UTF8Pos(#13, AText)), UTF8Length(AText) - Pred(UTF8Pos(#13, AText)));
+        end
+        else
+        begin
+          if wraplst.Count > 0 then
+            if wraplst[Pred(wraplst.Count)] = '' then
+              wraplst[Pred(wraplst.Count)] := AText
+            else
+              if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + AText) <= wt then
+                wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + AText
+              else
+                wraplst.Add(AText)
+          else
+            wraplst.Add(AText);
+          AText := '';
+        end;
+    end;
+    htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
+    for i := 0 to Pred(wraplst.Count) do
+    begin
+      l :=  (Font.Height + ALineSpace) * i;
+      wtxt := Font.TextWidth(wraplst[i]);
+      if (txtLeft in AFlags) and (txtTop in AFlags) then
+        fpgStyle.DrawString(self, x, y + l, wraplst[i]);
+      if (txtLeft in AFlags) and (txtVCenter in AFlags) then
+        fpgStyle.DrawString(self, x, y + l + (h - htxt) div 2, wraplst[i]);
+      if (txtLeft in AFlags) and (txtBottom in AFlags) then
+        fpgStyle.DrawString(self, x, y + l + h - htxt, wraplst[i]);
+      if (txtHCenter in AFlags) and (txtTop in AFlags) then
+        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l, wraplst[i]);
+      if (txtHCenter in AFlags) and (txtVCenter in AFlags) then
+        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + (h - htxt) div 2, wraplst[i]);
+      if (txtHCenter in AFlags) and (txtBottom in AFlags) then
+        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + h - htxt, wraplst[i]);
+      if (txtRight in AFlags) and (txtTop in AFlags) then
+        fpgStyle.DrawString(self, x + w - wtxt, y + l, wraplst[i]);
+      if (txtRight in AFlags) and (txtVCenter in AFlags) then
+        fpgStyle.DrawString(self, x + w - wtxt, y + l + (h - htxt) div 2, wraplst[i]);
+      if (txtRight in AFlags) and (txtBottom in AFlags) then
+        fpgStyle.DrawString(self, x + w - wtxt, y + l + h - htxt, wraplst[i]);
+    end;
+    wraplst.Free;
+  end
+  else
+  begin
+    wtxt := self.Font.TextWidth(AText);
+    htxt := self.Font.Height;
+    if (txtAutoSize in AFlags) or (w = 0) then
+      w := wtxt;
+    if (txtAutoSize in AFlags) or (h = 0) then
+      h := htxt;
+    if (txtLeft in AFlags) and (txtTop in AFlags) then
+      fpgStyle.DrawString(self, x, y, AText);
+    if (txtLeft in AFlags) and (txtVCenter in AFlags) then
+      fpgStyle.DrawString(self, x, y + (h - htxt) div 2, AText);
+    if (txtLeft in AFlags) and (txtBottom in AFlags) then
+      fpgStyle.DrawString(self, x, y + h - htxt, AText);
+    if (txtHCenter in AFlags) and (txtTop in AFlags) then
+      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y, AText);
+    if (txtHCenter in AFlags) and (txtVCenter in AFlags) then
+      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + (h - htxt) div 2, AText);
+    if (txtHCenter in AFlags) and (txtBottom in AFlags) then
+      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + h - htxt, AText);
+    if (txtRight in AFlags) and (txtTop in AFlags) then
+      fpgStyle.DrawString(self, x + w - wtxt, y, AText);
+    if (txtRight in AFlags) and (txtVCenter in AFlags) then
+      fpgStyle.DrawString(self, x + w - wtxt, y + (h - htxt) div 2, AText);
+    if (txtRight in AFlags) and (txtBottom in AFlags) then
+      fpgStyle.DrawString(self, x + w - wtxt, y + h - htxt, AText);
+  Result := htxt;
+  end;
+end;
+
+function TfpgCanvas.DrawText(x, y: TfpgCoord; AText: string; AFlags: TFTextFlags;
+                ALineSpace: integer = 2): integer;
+begin
+  Result := DrawText(x, y, 0, 0, AText, AFlags, ALineSpace);
+end;
+
+function TfpgCanvas.DrawText(r: TfpgRect; AText: string; AFlags: TFTextFlags;
+                ALineSpace: integer = 2): integer;
+begin
+  Result := DrawText(r.Left, r.Top, r.Width, r.Height, AText, AFlags, ALineSpace);
 end;
 
 { TfpgWindow }

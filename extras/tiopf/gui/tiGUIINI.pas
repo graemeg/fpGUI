@@ -116,9 +116,6 @@ begin
       WriteInteger(LINISection, 'Width', AForm.Width);
     end;
 //  end;
-
-  writeln('....LINISection = ', LINISection, ' to file: ', FileName);
-  writeln('....WriteFormState. DONE');
 end;
 
 initialization

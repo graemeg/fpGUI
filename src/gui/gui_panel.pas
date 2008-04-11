@@ -27,8 +27,7 @@ uses
   SysUtils,
   fpgfx,
   gfxbase,
-  gfx_widget,
-  gui_Label;
+  gfx_widget;
 
 type
 
@@ -37,20 +36,42 @@ type
 
   TPanelStyle = (bsLowered, bsRaised);
 
-  TPanelType = (ptBevel, ptPanel, ptGroupBox);
 
-
-  TfpgPanel = class(TfpgWidget)
+  TfpgAbstractPanel = class(TfpgWidget)
   private
-    FAlignment: TAlignment;
-    FLabel: TfpgLabel;
-    FLayout: TLayout;
     FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
-    FPanelType: TPanelType;
-    procedure   AlignText;
-    procedure   SetPanelShape(const AValue: TPanelShape);
     procedure   SetPanelStyle(const AValue: TPanelStyle);
+    function    GetBackgroundColor: Tfpgcolor;
+    procedure   SetBackgroundColor(const AValue: Tfpgcolor);
+  protected
+    property    BackgroundColor: TfpgColor read GetBackgroundColor write SetBackgroundColor;
+    property    Style: TPanelStyle read FPanelStyle write SetPanelStyle default bsRaised;
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+  TfpgBevel = class(TfpgAbstractPanel)
+  private
+    procedure   SetPanelShape(const AValue: TPanelShape);
+  protected
+    procedure   HandlePaint; override;
+  published
+    property    BackgroundColor;
+    property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
+    property    Style;
+    property    OnClick;
+    property    OnDoubleClick;
+  end;
+
+  TfpgPanel = class(TfpgAbstractPanel)
+  private
+    FAlignment: TAlignment;
+    FLayout: TLayout;
+    FWrapText: boolean;
+    FLineSpace: integer;
+    FMargin: integer;
+    FText: string;
     function    GetAlignment: TAlignment;
     procedure   SetAlignment(const AValue: TAlignment);
     function    GetLayout: TLayout;
@@ -59,58 +80,86 @@ type
     procedure   SetText(const AValue: string);
     function    GetTextColor: Tfpgcolor;
     procedure   SetTextColor(const AValue: Tfpgcolor);
-    function    GetBackgroundColor: Tfpgcolor;
-    procedure   SetBackgroundColor(const AValue: Tfpgcolor);
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
-    function    GetTextLength: integer;
-    procedure   SetTextLength(const AValue: integer);
-    function    GetTextAlignment: TAlignment;
-    procedure   SetTextAlignment(const AValue: TAlignment);
-    function    GetTextLineSpace: integer;
-    procedure   SetTextLineSpace(const AValue: integer);
+    function    GetLineSpace: integer;
+    procedure   SetLineSpace(const AValue: integer);
+    function    GetMargin: integer;
+    procedure   SetMargin(const AValue: integer);
     function    GetWrapText: boolean;
     procedure   SetWrapText(const AValue: boolean);
   protected
+    FFont: TfpgFont;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
+    property    Font: TfpgFont read FFont;
   published
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
-    property    BackgroundColor: TfpgColor read GetBackgroundColor write SetBackgroundColor;
+    property    BackgroundColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Layout: TLayout read GetLayout write SetLayout default tlCenter;
-    property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
-    property    Style: TPanelStyle read FPanelStyle write SetPanelStyle default bsRaised;
+    property    Style;
     property    Text: string read GetText write SetText;
-    property    TextAlignment: TAlignment read GetTextAlignment write SetTextAlignment default taCenter;
     property    TextColor: Tfpgcolor read GetTextColor write SetTextColor;
-    property    TextLength: integer read GetTextLength write SetTextLength;
-    property    TextLineSpace: integer read GetTextLineSpace write SetTextLineSpace default 2;
+    property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
+    property    Margin: integer read GetMargin write SetMargin default 2;
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
     property    OnClick;
     property    OnDoubleClick;
   end;
 
+  TfpgGroupBox = class(TfpgAbstractPanel)
+  private
+    FAlignment: TAlignment;
+    FMargin: integer;
+    FText: string;
+    function    GetAlignment: TAlignment;
+    procedure   SetAlignment(const AValue: TAlignment);
+    function    GetText: string;
+    procedure   SetText(const AValue: string);
+    function    GetTextColor: Tfpgcolor;
+    procedure   SetTextColor(const AValue: Tfpgcolor);
+    function    GetFontDesc: string;
+    procedure   SetFontDesc(const AValue: string);
+    function    GetMargin: integer;
+    procedure   SetMargin(const AValue: integer);
+  protected
+    FFont: TfpgFont;
+    procedure   HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property    Font: TfpgFont read FFont;
+  published
+    property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
+    property    BackgroundColor;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Style;
+    property    Text: string read GetText write SetText;
+    property    TextColor: Tfpgcolor read GetTextColor write SetTextColor;
+    property    Margin: integer read GetMargin write SetMargin default 2;
+    property    OnClick;
+    property    OnDoubleClick;
+  end;
 
-function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
-  AShape: TPanelShape; AStyle: TPanelStyle): TfpgPanel;
+
+function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AShape: TPanelShape;
+         AStyle: TPanelStyle): TfpgBevel;
 
 function CreatePanel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
-  AStyle: TPanelStyle): TfpgPanel;
+         AStyle: TPanelStyle; AALignment: TAlignment= taCenter; ALayout: TLayout= tlCenter;
+         AMargin: integer= 2; ALineSpace: integer= 2): TfpgPanel;
 
-function CreateGroupBox(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
-  AText: string; AStyle: TPanelStyle): TfpgPanel;
+function CreateGroupBox(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
+         AStyle: TPanelStyle; AALignment: TAlignment= taCenter; AMargin: integer= 2): TfpgGroupBox;
 
 
 implementation
 
-
-function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
-  AShape: TPanelShape; AStyle: TPanelStyle): TfpgPanel;
+function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AShape: TPanelShape;
+         AStyle: TPanelStyle): TfpgBevel;
 begin
-  Result        := TfpgPanel.Create(AOwner);
-  Result.FPanelType := ptBevel;
+  Result        := TfpgBevel.Create(AOwner);
   Result.Left   := ALeft;
   Result.Top    := ATop;
   Result.Width  := AWidth;
@@ -120,134 +169,129 @@ begin
 end;
 
 function CreatePanel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
-  AStyle: TPanelStyle): TfpgPanel;
-
-  function DoCreate: TfpgPanel;
-  begin
-    Result        := TfpgPanel.Create(AOwner);
-    Result.FPanelType := ptPanel;
-    Result.Left   := ALeft;
-    Result.Top    := ATop;
-    Result.Width  := AWidth;
-    Result.Height := AHeight;
-    Result.Shape  := bsBox;
-    Result.Style  := AStyle;
-    Result.FLabel := TfpgLabel.Create(Result);
-    Result.FLabel.Text := AText;
-  end;
-
+         AStyle: TPanelStyle; AALignment: TAlignment= taCenter; ALayout: TLayout= tlCenter;
+         AMargin: integer= 2; ALineSpace: integer= 2): TfpgPanel;
 begin
-  Result := DoCreate;
-  Result.FLabel.SetPosition((Result.Width - Result.FLabel.Font.TextWidth(Result.FLabel.Text)) div 2,
-    (Result.Height - Result.FLabel.Font.Height) div 2,
-    Result.FLabel.Font.TextWidth(Result.FLabel.Text),
-    Result.FLabel.Font.Height);
+  Result          := TfpgPanel.Create(AOwner);
+  Result.Left     := ALeft;
+  Result.Top      := ATop;
+  Result.Width    := AWidth;
+  Result.Height   := AHeight;
+  Result.FText    := AText;
+  Result.Style    := AStyle;
+  Result.FAlignment:= AAlignment;
+  Result.FLayout   := ALayout;
+  Result.FMargin   := AMargin;
+  Result.FLineSpace:= ALineSpace;
 end;
 
-function CreateGroupBox(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
-  AText: string; AStyle: TPanelStyle): TfpgPanel;
-
-  function DoCreate: TfpgPanel;
-  begin
-    Result        := TfpgPanel.Create(AOwner);
-    Result.FPanelType := ptGroupBox;
-    Result.Left   := ALeft;
-    Result.Top    := ATop;
-    Result.Width  := AWidth;
-    Result.Height := AHeight;
-    Result.Shape  := bsBox;
-    Result.Style  := AStyle;
-    Result.FLabel := TfpgLabel.Create(Result);
-    Result.FLabel.Text := AText;
-  end;
-
+function CreateGroupBox(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
+         AStyle: TPanelStyle; AALignment: TAlignment= taCenter; AMargin: integer= 2): TfpgGroupBox;
 begin
-  Result := DoCreate;
-  Result.FLabel.Width := Result.FLabel.Font.TextWidth(Result.FLabel.Text) + 4;
-  Result.FLabel.Height := Result.FLabel.Font.Height + 2;
-  Result.FLabel.Alignment := taCenter;
-  Result.FLabel.Layout := tlBottom;
-  Result.FLabel.SetPosition(5, -3, Result.FLabel.Width, Result.FLabel.Height);
+  Result            := TfpgGroupBox.Create(AOwner);
+  Result.Left       := ALeft;
+  Result.Top        := ATop;
+  Result.Width      := AWidth;
+  Result.Height     := AHeight;
+  Result.FText      := AText;
+  Result.Style      := AStyle;
+  Result.FAlignment := AAlignment;
+  Result.FMargin    := AMargin;
 end;
 
-{ TfpgPanel }
 
-procedure TfpgPanel.AlignText;
-begin
-  case FPanelType of
-    ptGroupBox:
-    begin
-      FLabel.Width  := FLabel.Font.TextWidth(FLabel.Text) + 4;
-      FLabel.Height := FLabel.TextHeight + 2;
-    end;
-    ptPanel:
-      if WrapText then
-      begin
-        FLabel.Width  := TextLength;
-        FLabel.Height := FLabel.TextHeight;
-      end;
-    else
-    begin
-      FLabel.Width  := FLabel.Font.TextWidth(FLabel.Text);
-      FLabel.Height := FLabel.TextHeight;
-    end;
-  end;
-  case FAlignment of
-    taLeftJustify:
-      case FLayout of
-        tlTop:
-          if FPanelType = ptGroupBox then
-            FLabel.SetPosition(5, -3, FLabel.Width, FLabel.Height)
-          else
-            FLabel.SetPosition(1, 1, FLabel.Width, FLabel.Height);
-        tlBottom:
-          FLabel.SetPosition(1, FHeight - FLabel.Height - 1, FLabel.Width, FLabel.Height);
-        tlCenter:
-          FLabel.SetPosition(1, (FHeight - FLabel.Height) div 2, FLabel.Width, FLabel.Height);
-      end;
-    taRightJustify:
-      case FLayout of
-        tlTop:
-          if FPanelType = ptGroupBox then
-            FLabel.SetPosition(FWidth - FLabel.Width - 5, -3, FLabel.Width, FLabel.Height)
-          else
-            FLabel.SetPosition(FWidth - FLabel.Width - 1, 1, FLabel.Width, FLabel.Height);
-        tlBottom:
-          FLabel.SetPosition(FWidth - FLabel.Width - 1, FHeight - FLabel.Height - 1, FLabel.Width, FLabel.Height);
-        tlCenter:
-          FLabel.SetPosition(FWidth - FLabel.Width - 1, (FHeight - FLabel.Height) div 2, FLabel.Width, FLabel.Height);
-      end;
-    taCenter:
-      case FLayout of
-        tlTop:
-          if FPanelType = ptGroupBox then
-            FLabel.SetPosition((FWidth - FLabel.Width) div 2, -3, FLabel.Width, FLabel.Height)
-          else
-            FLabel.SetPosition((FWidth - FLabel.Width) div 2, 1, FLabel.Width, FLabel.Height);
-        tlBottom:
-          FLabel.SetPosition((FWidth - FLabel.Width) div 2, FHeight - FLabel.Height - 1, FLabel.Width, FLabel.Height);
-        tlCenter:
-          FLabel.SetPosition((FWidth - FLabel.Width) div 2, (FHeight - FLabel.Height) div 2, FLabel.Width,
-            FLabel.Height);
-      end;
-  end;
-end;
+{TfpgAbstractPanel}
 
-procedure TfpgPanel.SetPanelShape(const AValue: TPanelShape);
-begin
-  if FPanelShape = AValue then
-    Exit; //==>
-  FPanelShape := AValue;
-  Repaint;
-end;
-
-procedure TfpgPanel.SetPanelStyle(const AValue: TPanelStyle);
+procedure TfpgAbstractPanel.SetPanelStyle(const AValue: TPanelStyle);
 begin
   if FPanelStyle = AValue then
     Exit; //==>
   FPanelStyle := AValue;
   Repaint;
 end;
+
+function TfpgAbstractPanel.GetBackgroundColor: Tfpgcolor;
+begin
+  Result := FBackgroundColor;
+end;
+
+procedure TfpgAbstractPanel.SetBackgroundColor(const AValue: Tfpgcolor);
+begin
+  if FBackgroundColor <> AValue then
+  begin
+    FBackgroundColor := AValue;
+    Repaint;
+  end;
+end;
+
+constructor TfpgAbstractPanel.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FPanelShape      := bsBox;
+  FPanelStyle      := bsRaised;
+  FWidth           := 80;
+  FHeight          := 80;
+  FFocusable       := True;  // otherwise children can't get focus
+  FBackgroundColor := Parent.BackgroundColor;
+end;
+
+{TfpgBevel}
+
+procedure TfpgBevel.SetPanelShape(const AValue: TPanelShape);
+begin
+  if FPanelShape <> AValue then
+  begin
+    FPanelShape := AValue;
+    Repaint;
+  end;
+end;
+
+procedure TfpgBevel.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  Canvas.BeginDraw;
+  inherited HandlePaint;
+
+  Canvas.Clear(BackgroundColor);
+
+  //  Canvas.SetLineStyle(2, lsSolid);
+  //  Canvas.SetColor(clWindowBackground);
+  //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
+  Canvas.SetLineStyle(1, lsSolid);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clHilite2)
+  else
+    Canvas.SetColor(clShadow2);
+
+  if Shape in [bsBox, bsFrame, bsTopLine] then
+    Canvas.DrawLine(0, 0, Width - 1, 0);
+  if Shape in [bsBox, bsFrame, bsLeftLine] then
+    Canvas.DrawLine(0, 1, 0, Height - 1);
+  if Shape in [bsFrame, bsRightLine] then
+    Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
+  if Shape in [bsFrame, bsBottomLine] then
+    Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  if Shape in [bsFrame, bsTopLine] then
+    Canvas.DrawLine(1, 1, Width - 2, 1);
+  if Shape in [bsFrame, bsLeftLine] then
+    Canvas.DrawLine(1, 2, 1, Height - 2);
+  if Shape in [bsBox, bsFrame, bsRightLine] then
+    Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  if Shape in [bsBox, bsFrame, bsBottomLine] then
+    Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+
+  Canvas.EndDraw;
+end;
+
+{TfpgPanel}
 
 function TfpgPanel.GetAlignment: TAlignment;
 begin
@@ -259,7 +303,7 @@ begin
   if FAlignment <> AValue then
   begin
     FAlignment := AValue;
-    AlignText;
+    Repaint;
   end;
 end;
 
@@ -273,139 +317,100 @@ begin
   if FLayout <> AValue then
   begin
     FLayout := AValue;
-    AlignText;
+    Repaint;
   end;
 end;
 
 function TfpgPanel.GetText: string;
 begin
-  Result := FLabel.Text;
+  Result := FText;
 end;
 
 procedure TfpgPanel.SetText(const AValue: string);
 begin
-  if FLabel.Text <> AValue then
+  if FText <> AValue then
   begin
-    FLabel.Text := AValue;
-    AlignText;
+    FText := AValue;
+    Repaint;
   end;
 end;
 
 function TfpgPanel.GetTextColor: Tfpgcolor;
 begin
-  Result := FLabel.TextColor;
+  Result := FTextColor;
 end;
 
 procedure TfpgPanel.SetTextColor(const AValue: Tfpgcolor);
 begin
-  if FLabel.TextColor <> AValue then
-    FLabel.TextColor := AValue;
-end;
-
-function TfpgPanel.GetBackgroundColor: Tfpgcolor;
-begin
-  Result := FBackgroundColor;
-end;
-
-procedure TfpgPanel.SetBackgroundColor(const AValue: Tfpgcolor);
-begin
-  if FBackgroundColor <> AValue then
+  if FTextColor <> AValue then
   begin
-    FBackgroundColor := AValue;
-    if Assigned(FLabel) then
-      FLabel.BackgroundColor := AValue;
+    FTextColor := AValue;
     Repaint;
   end;
 end;
 
 function TfpgPanel.GetFontDesc: string;
 begin
-  Result := FLabel.FontDesc;
+  Result := FFont.FontDesc;
 end;
 
 procedure TfpgPanel.SetFontDesc(const AValue: string);
 begin
-  if FLabel.FontDesc <> AValue then
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  Repaint;
+end;
+
+function TfpgPanel.GetLineSpace: integer;
+begin
+  Result := FLineSpace;
+end;
+
+procedure TfpgPanel.SetLineSpace(const AValue: integer);
+begin
+  if FLineSpace <> AValue then
   begin
-    FLabel.FontDesc := AValue;
-    AlignText;
+    FLineSpace := AValue;
+    Repaint;
   end;
 end;
 
-function TfpgPanel.GetTextLength: integer;
+function TfpgPanel.GetMargin: integer;
 begin
-  Result := FLabel.Width;
+  Result := FMargin;
 end;
 
-procedure TfpgPanel.SetTextLength(const AValue: integer);
+procedure TfpgPanel.SetMargin(const AValue: integer);
 begin
-  if FLabel.Width <> AValue then
+  if FMargin <> AValue then
   begin
-    FLabel.Width := AValue;
-    AlignText;
-  end;
-end;
-
-function TfpgPanel.GetTextAlignment: TAlignment;
-begin
-  Result := FLabel.Alignment;
-end;
-
-procedure TfpgPanel.SetTextAlignment(const AValue: TAlignment);
-begin
-  if FLabel.Alignment <> AValue then
-  begin
-    FLabel.Alignment := AValue;
-    AlignText;
-  end;
-end;
-
-function TfpgPanel.GetTextLineSpace: integer;
-begin
-  Result := FLabel.LineSpace;
-end;
-
-procedure TfpgPanel.SetTextLineSpace(const AValue: integer);
-begin
-  if FLabel.LineSpace <> AValue then
-  begin
-    FLabel.LineSpace := AValue;
-    AlignText;
+    FMargin := AValue;
+    Repaint;
   end;
 end;
 
 function Tfpgpanel.GetWrapText: boolean;
 begin
-  Result := FLabel.WrapText;
+  Result := FWrapText;
 end;
 
 procedure Tfpgpanel.SetWrapText(const AValue: boolean);
 begin
-  if FLabel.WrapText <> AValue then
+  if FWrapText <> AValue then
   begin
-    FLabel.WrapText := AValue;
-    AlignText;
+    FWrapText := AValue;
+    Repaint;
   end;
 end;
-
 procedure TfpgPanel.HandlePaint;
 var
   r: TfpgRect;
+  lTxtFlags: TFTextFlags;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
 
-  if FPanelType = ptGroupBox then
-  begin
-    Canvas.Clear(Parent.BackgroundColor);
-    Canvas.ClearClipRect;
-    r.SetRect(0, 5, Width, Height - 5);
-    Canvas.SetClipRect(r);
-    Canvas.Clear(FBackgroundColor);
-    Canvas.ClearClipRect;
-  end
-  else
-    Canvas.Clear(BackgroundColor);
+  Canvas.Clear(BackgroundColor);
 
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
@@ -417,69 +422,265 @@ begin
   else
     Canvas.SetColor(clShadow2);
 
-  if FPanelType = ptGroupBox then
-  begin
-    if Shape in [bsBox, bsFrame, bsTopLine] then
-      Canvas.DrawLine(0, 5, Width - 1, 5);
-    if Shape in [bsBox, bsFrame, bsLeftLine] then
-      Canvas.DrawLine(0, 6, 0, Height);
-    if Shape in [bsFrame, bsRightLine] then
-      Canvas.DrawLine(Width - 2, 6, Width - 2, Height);
-    if Shape in [bsFrame, bsBottomLine] then
-      Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
-  end
-  else
-  begin
-    if Shape in [bsBox, bsFrame, bsTopLine] then
-      Canvas.DrawLine(0, 0, Width - 1, 0);
-    if Shape in [bsBox, bsFrame, bsLeftLine] then
-      Canvas.DrawLine(0, 1, 0, Height - 1);
-    if Shape in [bsFrame, bsRightLine] then
-      Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
-    if Shape in [bsFrame, bsBottomLine] then
-      Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
-  end;
+  Canvas.DrawLine(0, 0, Width - 1, 0);
+  Canvas.DrawLine(0, 1, 0, Height - 1);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
   else
     Canvas.SetColor(clHilite2);
 
-  if FPanelType = ptGroupBox then
-  begin
-    if Shape in [bsFrame, bsTopLine] then
-      Canvas.DrawLine(1, 6, Width - 2, 6);
-    if Shape in [bsFrame, bsLeftLine] then
-      Canvas.DrawLine(1, 7, 1, Height - 1);
-    if Shape in [bsBox, bsFrame, bsRightLine] then
-      Canvas.DrawLine(Width - 1, 5, Width - 1, Height - 1);
-    if Shape in [bsBox, bsFrame, bsBottomLine] then
-      Canvas.DrawLine(0, Height - 1, Width, Height - 1);
-  end
-  else
-  begin
-    if Shape in [bsFrame, bsTopLine] then
-      Canvas.DrawLine(1, 1, Width - 2, 1);
-    if Shape in [bsFrame, bsLeftLine] then
-      Canvas.DrawLine(1, 2, 1, Height - 2);
-    if Shape in [bsBox, bsFrame, bsRightLine] then
-      Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
-    if Shape in [bsBox, bsFrame, bsBottomLine] then
-      Canvas.DrawLine(0, Height - 1, Width, Height - 1);
-  end;
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+
+  Canvas.SetTextColor(FTextColor);
+  Canvas.SetFont(Font);
+
+  lTxtFlags:= [];
+  if FWrapText then
+    Include(lTxtFlags, txtWrap);
+  case FAlignment of
+    taLeftJustify:
+      Include(lTxtFlags, txtLeft);
+    taRightJustify:
+      Include(lTxtFlags, txtRight);
+    taCenter:
+      Include(lTxtFlags, txtHCenter);
+    end;
+  case FLayout of
+    tlTop:
+      Include(lTxtFlags, txtTop);
+    tlBottom:
+      Include(lTxtFlags, txtBottom);
+    tlCenter:
+      Include(lTxtFlags, txtVCenter);
+    end;
+  Canvas.DrawText(FMargin, FMargin, Width - FMargin * 2, Height - FMargin * 2, FText, lTxtFlags, FLineSpace);
 
   Canvas.EndDraw;
 end;
 
-constructor TfpgPanel.Create(AOwner: TComponent);
+constructor TfpgPanel.Create(Aowner: TComponent);
 begin
   inherited Create(AOwner);
-  FPanelShape      := bsBox;
-  FPanelStyle      := bsRaised;
-  FWidth           := 80;
-  FHeight          := 80;
-  FFocusable       := True;  // otherwise children can't get focus
-  FBackgroundColor := Parent.BackgroundColor;
+  FText             := 'Panel';
+  FFont             := fpgGetFont('#Label1');
+  FPanelShape       := bsBox;
+  FPanelStyle       := bsRaised;
+  FWidth            := 80;
+  FHeight           := 80;
+  FFocusable        := True;  // otherwise children can't get focus
+  FBackgroundColor  := Parent.BackgroundColor;
+  FAlignment        := taCenter;
+  FLayout           := tlCenter;
+  FWrapText         := False;
+end;
+
+{TfpgGroupBox}
+
+function TfpgGroupBox.GetAlignment: TAlignment;
+begin
+  Result := FAlignment;
+end;
+
+procedure TfpgGroupBox.SetAlignment(const AValue: TAlignment);
+begin
+  if FAlignment <> AValue then
+  begin
+    FAlignment := AValue;
+    Repaint;
+  end;
+end;
+
+function TfpgGroupBox.GetText: string;
+begin
+  Result := FText;
+end;
+
+procedure TfpgGroupBox.SetText(const AValue: string);
+begin
+  if FText <> AValue then
+  begin
+    FText := AValue;
+    Repaint;
+  end;
+end;
+
+function TfpgGroupBox.GetTextColor: Tfpgcolor;
+begin
+  Result := FTextColor;
+end;
+
+procedure TfpgGroupBox.SetTextColor(const AValue: Tfpgcolor);
+begin
+  if FTextColor <> AValue then
+  begin
+    FTextColor := AValue;
+    Repaint;
+  end;
+end;
+
+function TfpgGroupBox.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+procedure TfpgGroupBox.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  Repaint;
+end;
+
+function TfpgGroupBox.GetMargin: integer;
+begin
+  Result := FMargin;
+end;
+
+procedure TfpgGroupBox.SetMargin(const AValue: integer);
+begin
+  if FMargin <> AValue then
+  begin
+    FMargin := AValue;
+    Repaint;
+  end;
+end;
+
+procedure TfpgGroupBox.HandlePaint;
+var
+  r: TfpgRect;
+  lTxtFlags: TFTextFlags;
+  w: integer;
+begin
+  Canvas.BeginDraw;
+  inherited HandlePaint;
+
+  Canvas.Clear(Parent.BackgroundColor);
+  Canvas.ClearClipRect;
+  r.SetRect(0, 5, Width, Height);
+  Canvas.SetClipRect(r);
+  Canvas.Clear(FBackgroundColor);
+//  Canvas.ClearClipRect;
+
+  //  Canvas.SetLineStyle(2, lsSolid);
+  //  Canvas.SetColor(clWindowBackground);
+  //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
+  Canvas.SetLineStyle(1, lsSolid);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clHilite2)
+  else
+    Canvas.SetColor(clShadow2);
+
+  Canvas.DrawLine(0, 5, Width - 1, 5);
+  Canvas.DrawLine(0, 6, 0, Height - 1);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(Width - 1, 5, Width - 1, Height - 1);
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+
+  Canvas.SetTextColor(FTextColor);
+  Canvas.SetFont(Font);
+  
+  lTxtFlags:= [txtTop];
+  case FAlignment of
+    taLeftJustify:
+      begin
+        w := FFont.TextWidth(FText) + FMargin * 2;
+        r.SetRect(5, 0, w, FFont.Height + FMargin);
+        Canvas.SetClipRect(r);
+        Canvas.Clear(FBackgroundColor);
+
+        if Style = bsRaised then
+          Canvas.SetColor(clHilite2)
+        else
+          Canvas.SetColor(clShadow2);
+
+        Canvas.DrawLine(5, 0, w + 5, 0);
+        Canvas.DrawLine(5, 0, 5, 6);
+
+        if Style = bsRaised then
+          Canvas.SetColor(clShadow2)
+        else
+          Canvas.SetColor(clHilite2);
+
+        Canvas.DrawLine(w + 5, 0, w + 5, 6);
+
+        Include(lTxtFlags, txtLeft);
+        Canvas.DrawText(FMargin + 5, 0, FText, lTxtFlags);
+      end;
+    taRightJustify:
+      begin
+        w := Width - FFont.TextWidth(FText) - (FMargin * 2) - 5;
+        r.SetRect(w, 0, FFont.TextWidth(FText) + FMargin * 2, FFont.Height + FMargin);
+        Canvas.SetClipRect(r);
+        Canvas.Clear(FBackgroundColor);
+
+        if Style = bsRaised then
+          Canvas.SetColor(clHilite2)
+        else
+          Canvas.SetColor(clShadow2);
+
+        Canvas.DrawLine(w, 0, Width - 5, 0);
+        Canvas.DrawLine(w, 0, w, 6);
+
+        if Style = bsRaised then
+          Canvas.SetColor(clShadow2)
+        else
+          Canvas.SetColor(clHilite2);
+
+        Canvas.DrawLine(Width - 6, 0, Width - 6, 6);
+
+        Include(lTxtFlags, txtRight);
+        Canvas.DrawText(Width - FFont.TextWidth(FText) - FMargin - 5, 0, FText, lTxtFlags);
+      end;
+    taCenter:
+      begin
+        w := (Width - FFont.TextWidth(FText) - FMargin * 2) div 2;
+        r.SetRect(w, 0, FFont.TextWidth(FText) + FMargin * 2, FFont.Height + FMargin);
+        Canvas.SetClipRect(r);
+        Canvas.Clear(FBackgroundColor);
+
+        if Style = bsRaised then
+          Canvas.SetColor(clHilite2)
+        else
+          Canvas.SetColor(clShadow2);
+
+        Canvas.DrawLine(w, 0, w + FFont.TextWidth(FText) + FMargin * 2, 0);
+        Canvas.DrawLine(w, 0, w, 6);
+
+        if Style = bsRaised then
+          Canvas.SetColor(clShadow2)
+        else
+          Canvas.SetColor(clHilite2);
+
+        Canvas.DrawLine(w + FFont.TextWidth(FText) + FMargin * 2, 0, w + FFont.TextWidth(FText) + FMargin * 2, 6);
+
+        Include(lTxtFlags, txtHCenter);
+        Canvas.DrawText(w + FMargin, 0, FText, lTxtFlags);
+      end;
+    end;
+
+  Canvas.EndDraw;
+end;
+
+constructor TfpgGroupBox.Create(Aowner: TComponent);
+begin
+  inherited Create(AOwner);
+  FText             := 'Group box';
+  FFont             := fpgGetFont('#Label1');
+  FPanelShape       := bsBox;
+  FPanelStyle       := bsRaised;
+  FWidth            := 80;
+  FHeight           := 80;
+  FFocusable        := True;  // otherwise children can't get focus
+  FBackgroundColor  := Parent.BackgroundColor;
+  FAlignment        := taLeftJustify;
+  FMargin           := 2;
 end;
 
 end.
