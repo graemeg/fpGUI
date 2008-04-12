@@ -18,7 +18,8 @@ uses
   gui_button,
   gui_label,
   gui_popupcalendar,
-  gui_combobox;
+  gui_combobox,
+  gui_edit;
   
 type
   // forward declaration
@@ -30,6 +31,7 @@ type
     cal: TfpgComboBox;
     btnClose: TfpgButton;
     btnOpenForm1: TfpgButton;
+    edtTest: TfpgEdit;
     procedure   btnCloseClick(Sender: TObject);
     procedure   btnOpenForm1Click(Sender: TObject);
   public
@@ -43,6 +45,7 @@ type
     Label1: TfpgLabel;
     btnClose: TfpgButton;
     btnOpenForm2: TfpgButton;
+    edtTest: TfpgEdit;
     procedure   btnCloseClick(Sender: TObject);
     procedure   btnOpenForm2Click(Sender: TObject);
   public
@@ -54,6 +57,7 @@ type
   private
     Label1: TfpgLabel;
     btnClose: TfpgButton;
+    edtTest: TfpgEdit;
     procedure   btnCloseClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -79,6 +83,9 @@ begin
   btnClose := CreateButton(self, 110, 170, 80, 'Quit', @btnCloseClick);
   btnClose.ImageName := 'stdimg.Quit';
   btnClose.ShowImage := True;
+  
+  edtTest := CreateEdit(self, 10, 60, 100, 23);
+
 end;
 
 { TForm1 }
@@ -96,6 +103,7 @@ begin
     frm := TForm2.Create(nil);
     frm.ShowModal;
     writeln('Form2: This should only appear after the form closes.');
+    edtTest.SetFocus;
   finally
     frm.Free;
   end;
@@ -118,6 +126,9 @@ begin
   
   cal := TfpgComboBox.Create(self);
   cal.SetPosition(10, 10, 120, 23);
+  
+  edtTest := CreateEdit(self, 10, 60, 100, 23);
+
 end;
 
 
@@ -156,6 +167,8 @@ begin
   
   cal := TfpgComboBox.Create(self);
   cal.SetPosition(10, 10, 120, 23);
+  
+  edtTest := CreateEdit(self, 10, 60, 100, 23);
 end;
 
 
