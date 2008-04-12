@@ -334,8 +334,6 @@ end;
 
 procedure TfpgForm.Hide;
 begin
-  if (fpgApplication.TopModalForm = self) then
-    fpgApplication.PopModalForm;
   HandleHide;
   if ModalResult = 0 then
     ModalResult := -1;
