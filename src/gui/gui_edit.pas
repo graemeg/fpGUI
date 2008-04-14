@@ -352,16 +352,14 @@ var
     end;
     tw  := FFont.TextWidth(UTF8copy(dtext, 1, st));
     tw2 := FFont.TextWidth(UTF8copy(dtext, 1, st + len));
-    Canvas.XORFillRectangle(fpgColorToRGB(lcolor) xor $FFFFFF,
-      -FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
 
-{   // This migt be used in the future
     Canvas.SetColor(lcolor);
     Canvas.FillRectangle(-FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
     r.SetRect(-FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
     Canvas.AddClipRect(r);
+    Canvas.SetTextColor(clWhite);
     fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
-}
+    Canvas.ClearClipRect;
   end;
   
 begin
