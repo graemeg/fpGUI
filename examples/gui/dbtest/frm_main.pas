@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpgfx,
   gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_bevel, fpgui_db, db, dbf;
+  gui_listbox, gui_bevel, fpgui_db, db, dbf{, dbf_fields};
 
 type
 
@@ -89,10 +89,27 @@ constructor TMainForm.Create(AOwner: TComponent);
 var
   x: Integer;
   s: string;
+//  fields: TDbfFieldDefs;
 begin
   inherited Create(AOwner);
   DataSet             := TDBF.Create(Self);
   DataSet.TableName   := 'test.dbf';
+  
+  // If you wanted to create a new DBF table
+{
+  fields := TDbfFieldDefs.Create(self);
+  fields.Add('Name', ftString, 50);
+  fields.Add('Address', ftString, 150);
+  DataSet.CreateTableEx(fields); // <== Now we have an empty db table
+
+  DataSet.Open;
+  
+  Dataset.Insert;  // <== Start inserting data
+  Dataset.FieldByName('Name').AsString := 'Graeme Geldenhuys';
+  Dataset.FieldByName('Address').AsString := 'graemeg@nospam.co.za';
+  DataSet.Post;
+}
+  
   DataSource          := TDataSource.Create(Self);
   DataSource.DataSet  := DataSet;
 
