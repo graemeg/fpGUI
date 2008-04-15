@@ -1402,7 +1402,9 @@ end;
 
 destructor TfpgMessageDialog.Destroy;
 begin
+  FFont.Free;
   FButtonList.Clear;
+  FButtonList.Free;
   FInformativeText.Free;
   inherited Destroy;
 end;
