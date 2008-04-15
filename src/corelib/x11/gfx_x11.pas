@@ -199,6 +199,7 @@ type
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   ActivateWindow; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
     procedure   SetFullscreen(AValue: Boolean); override;
@@ -1593,6 +1594,11 @@ begin
   inherited Create(AOwner);
   FWinHandle := 0;
   FBackupWinHandle := 0;
+end;
+
+procedure TfpgWindowImpl.ActivateWindow;
+begin
+  XSetInputFocus(xapplication.Display, FWinHandle, RevertToParent, CurrentTime);
 end;
 
 procedure TfpgWindowImpl.CaptureMouse;

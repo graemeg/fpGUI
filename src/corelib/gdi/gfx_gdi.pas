@@ -162,6 +162,7 @@ type
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   ActivateWindow; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
   end;
@@ -1316,6 +1317,11 @@ constructor TfpgWindowImpl.Create(aowner: TComponent);
 begin
   inherited;
   FWinHandle := 0;
+end;
+
+procedure TfpgWindowImpl.ActivateWindow;
+begin
+  SetForegroundWindow(FWinHandle);
 end;
 
 procedure TfpgWindowImpl.CaptureMouse;

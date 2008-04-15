@@ -393,6 +393,7 @@ type
     procedure   UpdateWindowPosition;
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+    procedure   ActivateWindow; virtual; abstract;
     procedure   CaptureMouse; virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
     procedure   SetFullscreen(AValue: Boolean); virtual;
