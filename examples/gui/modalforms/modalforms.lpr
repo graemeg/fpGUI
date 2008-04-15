@@ -99,11 +99,12 @@ procedure TForm1.btnOpenForm2Click(Sender: TObject);
 var
   frm: TForm2;
 begin
+  frm := TForm2.Create(nil);
   try
-    frm := TForm2.Create(nil);
     frm.ShowModal;
     writeln('Form2: This should only appear after the form closes.');
     edtTest.SetFocus;
+    ActivateWindow;
   finally
     frm.Free;
   end;
@@ -143,10 +144,11 @@ procedure TMainForm.btnOpenForm1Click(Sender: TObject);
 var
   frm: TForm1;
 begin
+  frm := TForm1.Create(nil);
   try
-    frm := TForm1.Create(nil);
     frm.ShowModal;
     writeln('Form1: This should only appear after the form closes.');
+    ActivateWindow;
   finally
     frm.Free;
   end;
