@@ -7,7 +7,7 @@ unit gg_mvp;
 interface
 
 uses
-  basic_intf, basic_impl, view_impl, LazarusPackageIntf; 
+  basic_intf, basic_impl, view_impl, fpgui_intf, LazarusPackageIntf; 
 
 implementation
 

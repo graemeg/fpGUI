@@ -25,28 +25,6 @@ type
   end;
 
 
-  TListModel = class(TInterfacedObject, IListModel, ISubject)
-  private
-    fItems: IInterfaceList;
-    fSubject: ISubject;
-  protected
-    property Items: IInterfaceList read fItems;
-    // IListModel
-    function GetCount: Integer;
-    function GetItem(Idx: Integer): IInterface;
-    procedure Add(Item: IInterface);
-    procedure Clear;
-    procedure Insert(Item, Before: IInterface);
-    procedure Move(Item, Before: IInterface);
-    procedure Remove(Item: IInterface);
-    // ISubject
-    property Subject: ISubject read FSubject implements ISubject;
-  public
-    constructor Create; virtual;
-    destructor Destroy; override;
-  end;
-  
-  
   TString = class(TInterfacedObject, IString, IVisited)
   private
     fString: string;
@@ -58,13 +36,6 @@ type
   end;
   
   
-  TStringListModel = class(TListModel, IStringListModel)
-  private
-    // IStringListModel
-    function GetItem(Idx: Integer): IString;
-  end;
-  
-  
   TStringSelection = class(TInterfacedObject, ISelection, IVisited)
   private
     fModel: IStringListModel;
@@ -72,6 +43,7 @@ type
     // ISelection
     procedure AddItem(const Item: IInterface);
     procedure Clear;
+    function GetCount: integer;
     procedure RemoveItem(const Item: IInterface);
     procedure SelectModel;
     // IVisited
@@ -81,6 +53,98 @@ type
   end;
   
   
+  TCommand = class(TInterfacedObject, ICommand, IVisited)
+  private
+    fSelection: ISelection;
+    procedure BindSelection(const Selection: ISelection);
+  protected
+    // IVisited
+    procedure Accept(const Visitor: IVisitor); virtual;
+    // ICommand
+    function Execute: Boolean; virtual; abstract;
+    function GetEnabled: Boolean; virtual; abstract;
+    function GetText: string; virtual; abstract;
+  end;
+  
+  
+  TCommandSet = class(TInterfacedObject, ICommandSet, IObserver, ISubject, IVisited)
+  private
+    fItems: IInterfaceList;
+    fSubject: ISubject;
+    function GetCount: integer;
+    // IVisited
+    procedure Accept(const Visitor: IVisitor);
+  protected
+    property Count: integer read GetCount;
+    property Items: IInterfaceList read fItems;
+    // IObserver
+    procedure Update(Subject: IInterface);
+    // ISubject
+    property Subject: ISubject read fSubject implements ISubject;
+  public
+    constructor Create; virtual;
+  end;
+  
+  
+  TMVPModel = class(TInterfacedObject, IMVPModel, ISubject)
+  private
+    fCommandSet: ICommandSet;
+    fCurrentSelection: ISelection;
+    fSubject: ISubject;
+    // IMVPModel
+    function GetCommandSet: ICommandSet;
+    function GetCurrentSelection: ISelection;
+  protected
+    property CommandSet: ICommandSet read GetCommandSet;
+    property CurrentSelection: ISelection read GetCurrentSelection;
+    // 3 methods to be called by the constructor
+    procedure BindSelection; virtual;
+    procedure CreateCommandSet(var ACommandSet: ICommandSet); virtual; abstract;
+    procedure CreateSelection(var ASelection: ISelection); virtual; abstract;
+    // ISubject
+    property Subject: ISubject read fSubject implements ISubject;
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+  end;
+  
+
+  TListModel = class(TMVPModel, IListModel)
+  private
+    fItems: IInterfaceList;
+  protected
+    property Items: IInterfaceList read fItems;
+    // IListModel
+    function GetCount: Integer; virtual;
+    function GetItem(Idx: Integer): IInterface; virtual;
+    procedure Add(const Item: IInterface); virtual;
+    procedure Clear; virtual;
+    function IndexOf(const Item: IInterface): Integer; virtual;
+    procedure Insert(const Item, Before: IInterface); virtual;
+    procedure Move(const Item, Before: IInterface); virtual;
+    procedure Remove(const Item: IInterface); virtual;
+  public
+    destructor Destroy; override;
+  end;
+
+
+  TStringListModel = class(TListModel, IStringListModel, IVisited)
+  private
+    // IStringListModel
+    function IStringListModel.GetItem = StringListModelGetItem;
+    function StringListModelGetItem(Idx: Integer): IString;
+    // IVisited
+    procedure Accept(const Visitor: IVisitor); virtual;
+  protected
+    // IMVPModel
+    procedure CreateCommandSet(var ACommandSet: ICommandSet); override;
+    procedure CreateSelection(var ASelection: ISelection); override;
+  public
+    destructor Destroy; override;
+  end;
+
+
+
 
 implementation
 
@@ -149,50 +213,79 @@ begin
   Result := fItems[Idx];
 end;
 
-procedure TListModel.Add(Item: IInterface);
+procedure TListModel.Add(const Item: IInterface);
 begin
-  fSubject.BeginUpdate;
+  Subject.BeginUpdate;
+  if fItems = nil then
+    fItems := TInterfaceList.Create;
+//  fItems.Add(Item as IInterface);
   fItems.Add(Item);
-  fSubject.EndUpdate;
+  Subject.EndUpdate;
 end;
 
 procedure TListModel.Clear;
 begin
-  fSubject.BeginUpdate;
+  Subject.BeginUpdate;
   fItems.Clear;
-  fSubject.EndUpdate;
+  Subject.EndUpdate;
 end;
 
-procedure TListModel.Insert(Item, Before: IInterface);
+function TListModel.IndexOf(const Item: IInterface): Integer;
 begin
-  fSubject.BeginUpdate;
-  fItems.Insert(fItems.IndexOf(Before), Item);
-  fSubject.EndUpdate;
+  if fItems <> nil then
+//    Result := fItems.IndexOf(Item as IInterface)
+    Result := fItems.IndexOf(Item)
+  else
+    Result := -1;
 end;
 
-procedure TListModel.Move(Item, Before: IInterface);
+procedure TListModel.Insert(const Item, Before: IInterface);
 var
-  IndexOfBefore: integer;
+  InsertIdx: integer;
 begin
-  fSubject.BeginUpdate;
-  IndexOfBefore := fItems.IndexOf(Before);
-  if IndexOfBefore < 0 then
-    IndexOfBefore := 0;
-  fItems.Delete(fItems.IndexOf(Item));
-  fItems.Insert(IndexOfBefore, Item);
-  fSubject.EndUpdate;
+  if fItems = nil then
+    fItems := TInterfaceList.Create;
+  if fItems.IndexOf(Item) < 0 then
+  begin
+    Subject.BeginUpdate;
+    InsertIdx := fItems.IndexOf(Before);
+    if InsertIdx < 0 then
+      InsertIdx := 0;
+    fItems.Insert(InsertIdx, Item);
+    Subject.EndUpdate;
+  end;
 end;
 
-procedure TListModel.Remove(Item: IInterface);
+procedure TListModel.Move(const Item, Before: IInterface);
+var
+  IdxItem: integer;
+  IdxBefore: integer;
+  MoveItem: IInterface;
 begin
-  fSubject.BeginUpdate;
-  fItems.Delete(fItems.IndexOf(Item));
-  fSubject.EndUpdate;
+  if fItems <> nil then
+  begin
+    IdxItem := fItems.IndexOf(Item);
+    if IdxItem >= 0 then
+    begin
+      Subject.BeginUpdate;
+      MoveItem := fItems[IdxItem];
+      fItems.Delete(IdxItem);
+      IdxBefore := fItems.IndexOf(Before);
+      if IdxBefore >0 then
+        fItems.Insert(IdxBefore, MoveItem);
+      Subject.EndUpdate;
+    end;
+  end;  { if }
 end;
 
-constructor TListModel.Create;
+procedure TListModel.Remove(const Item: IInterface);
 begin
-  inherited Create;
+  if fItems <> nil then
+  begin
+    Subject.BeginUpdate;
+    fItems.Remove(Item);
+    Subject.EndUpdate;
+  end;
 end;
 
 destructor TListModel.Destroy;
@@ -219,9 +312,29 @@ end;
 
 { TStringListModel }
 
-function TStringListModel.GetItem(Idx: Integer): IString;
+function TStringListModel.StringListModelGetItem(Idx: Integer): IString;
 begin
   Result := Items[Idx] as IString;
+end;
+
+procedure TStringListModel.Accept(const Visitor: IVisitor);
+begin
+
+end;
+
+procedure TStringListModel.CreateCommandSet(var ACommandSet: ICommandSet);
+begin
+
+end;
+
+procedure TStringListModel.CreateSelection(var ASelection: ISelection);
+begin
+
+end;
+
+destructor TStringListModel.Destroy;
+begin
+  inherited Destroy;
 end;
 
 { TStringSelection }
@@ -237,6 +350,11 @@ end;
 procedure TStringSelection.Clear;
 begin
 
+end;
+
+function TStringSelection.GetCount: integer;
+begin
+  Result := fItems.Count;
 end;
 
 procedure TStringSelection.RemoveItem(const Item: IInterface);
@@ -270,6 +388,78 @@ constructor TStringSelection.Create(const Model: IStringListModel);
 begin
   inherited Create;
   fModel := Model;
+end;
+
+{ TCommand }
+
+procedure TCommand.BindSelection(const Selection: ISelection);
+begin
+  fSelection := Selection;
+end;
+
+procedure TCommand.Accept(const Visitor: IVisitor);
+begin
+  (Visitor as ICommandVisitor).VisitComand(self);
+end;
+
+{ TCommandSet }
+
+function TCommandSet.GetCount: integer;
+begin
+  if fItems <> nil then
+    Result := fItems.Count
+  else
+    Result := 0;
+end;
+
+procedure TCommandSet.Accept(const Visitor: IVisitor);
+var
+  i: integer;
+begin
+  for i := 0 to fItems.Count-1 do
+    (fItems[i] as IVisited).Accept(Visitor);
+end;
+
+procedure TCommandSet.Update(Subject: IInterface);
+begin
+  // do nothing yet
+end;
+
+constructor TCommandSet.Create;
+begin
+  inherited Create;
+  fItems := TInterfaceList.Create;
+end;
+
+{ TMVPModel }
+
+function TMVPModel.GetCommandSet: ICommandSet;
+begin
+  Result := fCommandSet;
+end;
+
+function TMVPModel.GetCurrentSelection: ISelection;
+begin
+  Result := fCurrentSelection;
+end;
+
+procedure TMVPModel.BindSelection;
+begin
+  (fCurrentSelection as ISubject).Attach(fCommandSet as IObserver);
+end;
+
+constructor TMVPModel.Create;
+begin
+  inherited Create;
+  fSubject := TSubject.Create(self);
+  CreateSelection(fCurrentSelection);
+  CreateCommandSet(fCommandSet);
+  BindSelection;
+end;
+
+destructor TMVPModel.Destroy;
+begin
+  inherited Destroy;
 end;
 
 end.
