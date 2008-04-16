@@ -55,15 +55,19 @@ type
   
   TCommand = class(TInterfacedObject, ICommand, IVisited)
   private
+    fEnabled: Boolean;
     fSelection: ISelection;
     procedure BindSelection(const Selection: ISelection);
+    function GetEnabled: Boolean;
   protected
+    property Selection: ISelection read fSelection;
     // IVisited
     procedure Accept(const Visitor: IVisitor); virtual;
     // ICommand
     function Execute: Boolean; virtual; abstract;
-    function GetEnabled: Boolean; virtual; abstract;
     function GetText: string; virtual; abstract;
+  public
+    constructor Create(Enabled: Boolean); virtual;
   end;
   
   
@@ -78,7 +82,7 @@ type
     property Count: integer read GetCount;
     property Items: IInterfaceList read fItems;
     // IObserver
-    procedure Update(Subject: IInterface);
+    procedure Update(const ASubject: IInterface); virtual;
     // ISubject
     property Subject: ISubject read fSubject implements ISubject;
   public
@@ -144,9 +148,68 @@ type
   end;
 
 
+  TStringModelCommandSet = class(TCommandSet)
+  protected
+    // IObserver
+    procedure Update(const ASubject: IInterface); override;
+  public
+    destructor Destroy; override;
+  end;
+  
+  
+  TStringVisitor = class(TInterfacedObject, IStringVisitor)
+  private
+    fTheString: IString;
+  protected
+    // IStringVisitor
+    function GetTheString: IString; virtual;
+    procedure VisitString(const Str: IString); virtual;
+  end;
+
+  
+  TStringMoveVisitor = class(TStringVisitor, IStringMoveVisitor)
+  private
+    fCanDemote: Boolean;
+    fCanPromote: Boolean;
+    fModel: IStringListModel;
+    function GetCanDemote: Boolean;
+    function GetCanPromote: Boolean;
+  protected
+    procedure VisitString(const Str: IString); override;
+  public
+    constructor Create(const Model: IStringListModel); virtual;
+  end;
+
+
+  TPromoteStringCommand = class(TCommand)
+  private
+    fModel: Pointer;
+    function GetModel: IStringListModel;
+  protected
+    function Execute: Boolean; override;
+    function GetText: string; override;
+  public
+    constructor Create(Enabled: Boolean; const Model: IStringListModel); reintroduce; virtual;
+  end;
+
+
+  TDemoteStringCommand = class(TCommand)
+  private
+    fModel: Pointer;
+    function GetModel: IStringListModel;
+  protected
+    function Execute: Boolean; override;
+    function GetText: string; override;
+  public
+    constructor Create(Enabled: Boolean; const Model: IStringListModel); reintroduce; virtual;
+  end;
+
 
 
 implementation
+
+uses
+  Math;
 
 { TSubject }
 
@@ -397,9 +460,20 @@ begin
   fSelection := Selection;
 end;
 
+function TCommand.GetEnabled: Boolean;
+begin
+  Result := fEnabled;
+end;
+
 procedure TCommand.Accept(const Visitor: IVisitor);
 begin
   (Visitor as ICommandVisitor).VisitComand(self);
+end;
+
+constructor TCommand.Create(Enabled: Boolean);
+begin
+  inherited Create;
+  fEnabled := Enabled;
 end;
 
 { TCommandSet }
@@ -420,7 +494,7 @@ begin
     (fItems[i] as IVisited).Accept(Visitor);
 end;
 
-procedure TCommandSet.Update(Subject: IInterface);
+procedure TCommandSet.Update(const ASubject: IInterface);
 begin
   // do nothing yet
 end;
@@ -460,6 +534,186 @@ end;
 destructor TMVPModel.Destroy;
 begin
   inherited Destroy;
+end;
+
+{ TStringModelCommandSet }
+
+procedure TStringModelCommandSet.Update(const ASubject: IInterface);
+var
+  ObjSelection: ISelection;
+  ObjVisited: IVisited;
+  ObjModel: IStringListModel;
+  Visitor: IStringMoveVisitor;
+  Command: ICommand;
+begin
+  ASubject.QueryInterface(ISelection, ObjSelection);
+  if ObjSelection <> nil then
+  begin
+    Items.Clear;
+    // We are only interested in a single selection. We don't have a
+    // mechanism for multi-select yet.
+    if ObjSelection.Count = 1 then
+    begin
+      ObjSelection.QueryInterface(IVisited, ObjVisited);
+      if ObjVisited <> nil then
+      begin
+        ObjVisited.QueryInterface(IStringListModel, ObjModel);
+        if ObjModel <> nil then
+        begin
+          Visitor := TStringMoveVisitor.Create(ObjModel);
+          ObjVisited.Accept(Visitor);
+          // This will only give commands that are applicable. So in a Menu the
+          // available items will keep changing.
+{
+          if Visitor.CanPromote then
+          begin
+            Command := TPromoteStringCommand.Create(True, ObjModel);
+            Command.BindSelection(ObjSelection);
+            Items.Add(Command);
+          end;
+          if Visitor.CanDemote then
+          begin
+            Command := TDemoteStringCommand.Create(True, ObjModel);
+            Command.BindSelection(ObjSelection);
+            Items.Add(Command);
+          end;
+}
+
+          // In this case it will return all commands, but only the applicable
+          // ones will be Enabled. I like this idea more.
+          Command := TPromoteStringCommand.Create(Visitor.CanPromote, ObjModel);
+          Command.BindSelection(ObjSelection);
+          Items.Add(Command);
+
+          Command := TDemoteStringCommand.Create(Visitor.CanDemote, ObjModel);
+          Command.BindSelection(ObjSelection);
+          Items.Add(Command);
+        end;
+      end;
+    end;
+    Subject.Notify;
+  end;
+end;
+
+destructor TStringModelCommandSet.Destroy;
+begin
+  inherited Destroy;
+end;
+
+{ TStringVisitor }
+
+function TStringVisitor.GetTheString: IString;
+begin
+  Result := fTheString;
+end;
+
+procedure TStringVisitor.VisitString(const Str: IString);
+begin
+  fTheString := Str;
+end;
+
+{ TStringMoveVisitor }
+
+function TStringMoveVisitor.GetCanDemote: Boolean;
+begin
+  Result := fCanDemote;
+end;
+
+function TStringMoveVisitor.GetCanPromote: Boolean;
+begin
+  Result := fCanPromote;
+end;
+
+procedure TStringMoveVisitor.VisitString(const Str: IString);
+begin
+  inherited VisitString(Str);
+  fCanPromote := fModel.IndexOf(Str) > 0;
+  fCanDemote := fModel.IndexOf(Str) < (fModel.Count - 1)
+end;
+
+constructor TStringMoveVisitor.Create(const Model: IStringListModel);
+begin
+  inherited Create;
+  fModel := Model;
+end;
+
+
+{ TPromoteStringCommand }
+
+function TPromoteStringCommand.GetModel: IStringListModel;
+begin
+  Result := IStringListModel(fModel);
+end;
+
+function TPromoteStringCommand.Execute: Boolean;
+var
+  Visitor: IStringVisitor;
+  BeforeIdx: Integer;
+begin
+  Visitor := TStringVisitor.Create;
+  try
+    (Selection as IVisited).Accept(Visitor);
+    BeforeIdx := Max(GetModel.IndexOf(Visitor.TheString) - 1, 0);
+    GetModel.Move(Visitor.TheString, GetModel.Item[BeforeIdx]);
+    Result := True;
+  except
+    Result := False;
+  end;
+end;
+
+function TPromoteStringCommand.GetText: string;
+begin
+  Result := 'Promote String';
+end;
+
+constructor TPromoteStringCommand.Create(Enabled: Boolean;
+  const Model: IStringListModel);
+begin
+  inherited Create(Enabled);
+  fModel := Pointer(Model);
+end;
+
+{ TDemoteStringCommand }
+
+function TDemoteStringCommand.GetModel: IStringListModel;
+begin
+  Result := IStringListModel(fModel);
+end;
+
+function TDemoteStringCommand.Execute: Boolean;
+var
+  Visitor: IStringVisitor;
+  BeforeIdx: Integer;
+begin
+  Visitor := TStringVisitor.Create;
+  try
+    (Selection as IVisited).Accept(Visitor);
+    BeforeIdx := GetModel.IndexOf(Visitor.TheString) + 2;
+    if BeforeIdx > GetModel.Count - 1 then
+    begin
+      (GetModel as ISubject).BeginUpdate;
+      GetModel.Remove(Visitor.TheString);
+      GetModel.Add(Visitor.TheString);
+      (GetModel as ISubject).EndUpdate;
+    end
+    else
+      GetModel.Move(Visitor.TheString, GetModel.Item[BeforeIdx]);
+    Result := True;
+  except
+    Result := False;
+  end;
+end;
+
+function TDemoteStringCommand.GetText: string;
+begin
+  Result := 'Demote String';
+end;
+
+constructor TDemoteStringCommand.Create(Enabled: Boolean;
+  const Model: IStringListModel);
+begin
+  inherited Create(Enabled);
+  fModel := Pointer(Model);
 end;
 
 end.

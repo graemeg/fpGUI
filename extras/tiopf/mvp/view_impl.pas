@@ -12,14 +12,14 @@ type
   TListBoxView = class(TfpgListBox, IObserver)
   private
     procedure IObserver.Update = ObserverUpdate;
-    procedure ObserverUpdate(Subject: IInterface);
+    procedure ObserverUpdate(const ASubject: IInterface);
   end;
 
 
   TComboBoxView = class(TfpgComboBox, IObserver)
   private
     procedure IObserver.Update = ObserverUpdate;
-    procedure ObserverUpdate(Subject: IInterface);
+    procedure ObserverUpdate(const ASubject: IInterface);
   end;
 
 
@@ -27,12 +27,12 @@ implementation
 
 { TListBoxView }
 
-procedure TListBoxView.ObserverUpdate(Subject: IInterface);
+procedure TListBoxView.ObserverUpdate(const ASubject: IInterface);
 var
   Obj: IListModel;
   i: integer;
 begin
-  Subject.QueryInterface(IListModel, Obj);
+  ASubject.QueryInterface(IListModel, Obj);
   if Obj <> nil then
   begin
     Items.BeginUpdate;
@@ -45,12 +45,12 @@ end;
 
 { TComboBoxView }
 
-procedure TComboBoxView.ObserverUpdate(Subject: IInterface);
+procedure TComboBoxView.ObserverUpdate(const ASubject: IInterface);
 var
   Obj: IListModel;
   i: integer;
 begin
-  Subject.QueryInterface(IListModel, Obj);
+  ASubject.QueryInterface(IListModel, Obj);
   if Obj <> nil then
   begin
     Items.BeginUpdate;

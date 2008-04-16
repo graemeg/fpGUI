@@ -18,7 +18,7 @@ type
   
   IObserver = interface(IInterface)
   ['{16CD208B-5F37-41FC-82A4-BFDD16DB3203}']
-    procedure Update(Subject: IInterface);
+    procedure Update(const ASubject: IInterface);
   end;
   
   
@@ -139,7 +139,10 @@ type
 
   IStringVisitor = interface(IVisitor)
   ['{DA12355F-0727-41B3-9080-DDAF20797FC5}']
+    function GetTheString: IString;
     procedure VisitString(const Str: IString);
+    property TheString: IString
+             read GetTheString;
   end;
   
   

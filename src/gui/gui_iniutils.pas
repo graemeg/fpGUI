@@ -218,8 +218,13 @@ begin
   //  writeInteger(LINISection, 'WindowState', ord(AForm.WindowState));
   //  if AForm.WindowState = wsNormal then
   //  begin
-  writeInteger(LINISection, 'Top', AForm.Top);
-  writeInteger(LINISection, 'Left', AForm.Left);
+  
+  // A work-around while WindowState is not implemented
+  if (AForm.Top >= 0) or (AForm.Left >= 0) then
+  begin
+    writeInteger(LINISection, 'Top', AForm.Top);
+    writeInteger(LINISection, 'Left', AForm.Left);
+  end;
   if AForm.Sizeable then
   begin
     writeInteger(LINISection, 'Height', AForm.Height);
