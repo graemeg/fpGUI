@@ -8,7 +8,7 @@ interface
 
 uses
   tiGUIUtils, tiDialogs, tiGUIINI, tiGenericEditMediators, tiGUIConstants, 
-    tiGenericListMediators, tiCompositeMediators; 
+    tiGenericListMediators, tiCompositeMediators, tiRtfReport; 
 
 implementation
 

@@ -21,7 +21,7 @@
     <License Value="Mozilla Public License v1.1
 "/>
     <Version Major="2" Release="4"/>
-    <Files Count="7">
+    <Files Count="8">
       <Item1>
         <Filename Value="gui/tiGUIUtils.pas"/>
         <UnitName Value="tiGUIUtils"/>
@@ -50,6 +50,10 @@
         <Filename Value="gui/tiCompositeMediators.pas"/>
         <UnitName Value="tiCompositeMediators"/>
       </Item7>
+      <Item8>
+        <Filename Value="gui/tiRtfReport.pas"/>
+        <UnitName Value="tiRtfReport"/>
+      </Item8>
     </Files>
     <RequiredPkgs Count="3">
       <Item1>
