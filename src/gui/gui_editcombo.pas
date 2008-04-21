@@ -278,8 +278,6 @@ begin
         else
         begin
           FSelectedItem := -1;
-          if Assigned(FDropDown) then
-            FDropDown.Close;
           for i := 0 to FItems.Count - 1 do
           begin
             if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
@@ -317,7 +315,7 @@ end;
 
 function TfpgAbstractEditCombo.HasText: boolean;
 begin
-  Result := FocusItem > 0;
+  Result := FFocusItem > 0;
 end;
 
 procedure TfpgAbstractEditCombo.DoDropDown;
@@ -517,7 +515,7 @@ begin
           if FSelectedItem > -1 then
             SetText(Items[FSelectedItem])
           else
-            SetText('');
+            SetText(FText);
           FSelectedItem:= -4;      // detects return has been pressed (must be 4 due to number of repaints)
           if FNewItem and (FAllowNew = anYes) then
             FItems.Add(FText);
@@ -537,7 +535,7 @@ begin
     FSelOffset := 0;
   end;
 
-  if consumed then
+  if consumed and hasChanged then
     RePaint;
 
   if hasChanged then
