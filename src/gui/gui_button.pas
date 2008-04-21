@@ -455,6 +455,9 @@ procedure TfpgButton.Click;
 var
   pform: TfpgForm;
 begin
+  FDown    := False;
+  FClicked := False;
+
   pform := WidgetParentForm(self);
   if pform <> nil then
     pform.ModalResult := ModalResult;
