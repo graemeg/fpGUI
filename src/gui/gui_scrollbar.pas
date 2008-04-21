@@ -51,7 +51,7 @@ type
     FScrollbarDownPart: TfpgScrollBarPart;
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
-    procedure   SetPosition(const AValue: integer);
+    procedure   SetSBPosition(const AValue: integer);
     procedure   Step(ASteps: Integer);
     procedure   StepPage(ASteps: Integer);
     procedure   StepStart;
@@ -86,7 +86,7 @@ type
     destructor  Destroy; override;
     procedure   RepaintSlider;
     property    PageSize: integer read FPageSize write FPageSize default 5;
-    property    Position: integer read FPosition write SetPosition default 10;
+    property    Position: integer read FPosition write SetSBPosition default 10;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
 //    property    LargeChange: Integer read FLargeChange write FLargeChange default 0;
     property    Min: integer read FMin write SetMin default 0;
@@ -175,7 +175,7 @@ begin
     StepStart;
 end;
 
-procedure TfpgScrollBar.SetPosition(const AValue: integer);
+procedure TfpgScrollBar.SetSBPosition(const AValue: integer);
 begin
   if AValue < FMin then
     FPosition := FMin
@@ -200,12 +200,12 @@ end;
 
 procedure TfpgScrollBar.StepStart;
 begin
-  SetPosition(FMin)
+  SetSBPosition(FMin)
 end;
 
 procedure TfpgScrollBar.StepEnd;
 begin
-  SetPosition(FMax);
+  SetSBPosition(FMax);
 end;
 
 procedure TfpgScrollBar.ScrollTimer(Sender: TObject);

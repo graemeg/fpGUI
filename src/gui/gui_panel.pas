@@ -42,10 +42,7 @@ type
     FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
     procedure   SetPanelStyle(const AValue: TPanelStyle);
-    function    GetBackgroundColor: Tfpgcolor;
-    procedure   SetBackgroundColor(const AValue: Tfpgcolor);
   protected
-    property    BackgroundColor: TfpgColor read GetBackgroundColor write SetBackgroundColor;
     property    Style: TPanelStyle read FPanelStyle write SetPanelStyle default bsRaised;
   public
     constructor Create(AOwner: TComponent); override;
@@ -78,8 +75,6 @@ type
     procedure   SetLayout(const AValue: TLayout);
     function    GetText: string;
     procedure   SetText(const AValue: string);
-    function    GetTextColor: Tfpgcolor;
-    procedure   SetTextColor(const AValue: Tfpgcolor);
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
     function    GetLineSpace: integer;
@@ -101,7 +96,7 @@ type
     property    Layout: TLayout read GetLayout write SetLayout default tlCenter;
     property    Style;
     property    Text: string read GetText write SetText;
-    property    TextColor: Tfpgcolor read GetTextColor write SetTextColor;
+    property    TextColor;
     property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
     property    Margin: integer read GetMargin write SetMargin default 2;
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
@@ -118,8 +113,6 @@ type
     procedure   SetAlignment(const AValue: TAlignment);
     function    GetText: string;
     procedure   SetText(const AValue: string);
-    function    GetTextColor: Tfpgcolor;
-    procedure   SetTextColor(const AValue: Tfpgcolor);
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
     function    GetMargin: integer;
@@ -136,7 +129,7 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Style;
     property    Text: string read GetText write SetText;
-    property    TextColor: Tfpgcolor read GetTextColor write SetTextColor;
+    property    TextColor;
     property    Margin: integer read GetMargin write SetMargin default 2;
     property    OnClick;
     property    OnDoubleClick;
@@ -210,20 +203,6 @@ begin
   Repaint;
 end;
 
-function TfpgAbstractPanel.GetBackgroundColor: Tfpgcolor;
-begin
-  Result := FBackgroundColor;
-end;
-
-procedure TfpgAbstractPanel.SetBackgroundColor(const AValue: Tfpgcolor);
-begin
-  if FBackgroundColor <> AValue then
-  begin
-    FBackgroundColor := AValue;
-    Repaint;
-  end;
-end;
-
 constructor TfpgAbstractPanel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -247,8 +226,6 @@ begin
 end;
 
 procedure TfpgBevel.HandlePaint;
-var
-  r: TfpgRect;
 begin
   Canvas.BeginDraw;
   inherited HandlePaint;
@@ -335,20 +312,6 @@ begin
   end;
 end;
 
-function TfpgPanel.GetTextColor: Tfpgcolor;
-begin
-  Result := FTextColor;
-end;
-
-procedure TfpgPanel.SetTextColor(const AValue: Tfpgcolor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
-    Repaint;
-  end;
-end;
-
 function TfpgPanel.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
@@ -404,7 +367,6 @@ begin
 end;
 procedure TfpgPanel.HandlePaint;
 var
-  r: TfpgRect;
   lTxtFlags: TFTextFlags;
 begin
   Canvas.BeginDraw;
@@ -504,20 +466,6 @@ begin
   if FText <> AValue then
   begin
     FText := AValue;
-    Repaint;
-  end;
-end;
-
-function TfpgGroupBox.GetTextColor: Tfpgcolor;
-begin
-  Result := FTextColor;
-end;
-
-procedure TfpgGroupBox.SetTextColor(const AValue: Tfpgcolor);
-begin
-  if FTextColor <> AValue then
-  begin
-    FTextColor := AValue;
     Repaint;
   end;
 end;

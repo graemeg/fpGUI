@@ -35,7 +35,7 @@ type
     FMaxItems: Word;
     FShowFullPath: boolean;
     FParentMenuItem: TfpgPopupMenu;
-    FIniFilePath: string;
+//    FIniFilePath: string;
     FOnClick: TMRUClickEvent;
     procedure   SetMaxItems(const AValue: Word);
 //    procedure   SetIniFilePath(const AValue: string);
@@ -80,8 +80,10 @@ procedure TfpgMRU.SetMaxItems(const AValue: Word);
 begin
   if AValue <> FMaxItems then
   begin
-    if AValue < 1 then FMaxItems := 1
+    if AValue < 1 then
+      FMaxItems := 1
     else
+    begin
       if AValue > MaxInt then
         FMaxItems := High(Word) - 1
       else
@@ -95,6 +97,7 @@ begin
           FItems.EndUpdate;
         end;
       end;
+    end;  { if/else }
   end;
 end;
 

@@ -56,7 +56,7 @@ type
     procedure   DoChange;
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
-    procedure   SetPosition(const AValue: integer);
+    procedure   SetTBPosition(const AValue: integer);
     procedure   SetSliderSize(const AValue: integer);
     procedure   FixMinMaxOrder;
     procedure   FixPositionLimits;
@@ -71,7 +71,7 @@ type
     property    BackgroundColor;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 10;
-    property    Position: integer read FPosition write SetPosition default 0;
+    property    Position: integer read FPosition write SetTBPosition default 0;
     property    SliderSize: integer read FSliderSize write SetSliderSize default 11;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    TabOrder;
@@ -97,7 +97,7 @@ type
     FFont: TfpgFont;
     procedure   SetMax(const AValue: integer);
     procedure   SetMin(const AValue: integer);
-    procedure   SetPosition(const AValue: integer);
+    procedure   SetTBPosition(const AValue: integer);
     procedure   SetShowPosition(const AValue: boolean);
     function    GetTextWidth: TfpgCoord;
   protected
@@ -113,7 +113,7 @@ type
     destructor  Destroy; override;
   published
     property    BackgroundColor;
-    property    Position: integer read FPosition write SetPosition default 0;
+    property    Position: integer read FPosition write SetTBPosition default 0;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
@@ -151,7 +151,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgTrackBarExtra.SetPosition(const AValue: integer);
+procedure TfpgTrackBarExtra.SetTBPosition(const AValue: integer);
 begin
   if FPosition = AValue then
     Exit; //==>
@@ -377,7 +377,7 @@ begin
   else
     FMax := AValue;
   if FPosition > FMax then
-    SetPosition(FMax);
+    SetTBPosition(FMax);
 end;
 
 procedure TfpgTrackBar.SetMin(const AValue: integer);
@@ -389,10 +389,10 @@ begin
   else
     FMin := AValue;
   if FPosition < FMin then
-    SetPosition(FMin);
+    SetTBPosition(FMin);
 end;
 
-procedure TfpgTrackBar.SetPosition(const AValue: integer);
+procedure TfpgTrackBar.SetTBPosition(const AValue: integer);
 begin
   if AValue < FMin then
     FPosition := FMin

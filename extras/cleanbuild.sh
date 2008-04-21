@@ -1,5 +1,4 @@
-cd ..
-find lib/ examples/ \( -name '*.o' -o -name '*.ppu' -o -name '*.a' \) -exec rm {} \+
+./cleanall.sh
 cd src
 ./build.sh
 cd ../examples/apps/uidesigner

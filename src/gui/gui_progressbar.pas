@@ -39,14 +39,14 @@ type
     FFont: TfpgFont;
     procedure   SetMax(const AValue: longint);
     procedure   SetMin(const AValue: longint);
-    procedure   SetPosition(const AValue: longint);
+    procedure   SetPBPosition(const AValue: longint);
     procedure   SetShowCaption(const AValue: boolean);
     procedure   SetStep(const AValue: longint);
   protected
     procedure   HandlePaint; override;
     property    Max: longint read FMax write SetMax default 100;
     property    Min: longint read FMin write SetMin default 0;
-    property    Position: longint read FPosition write SetPosition default 0;
+    property    Position: longint read FPosition write SetPBPosition default 0;
     property    Step: longint read FStep write SetStep;
 //    property    FontName: string read GetFontName write SetFontName;
     property    ShowCaption: boolean read FShowCaption write SetShowCaption;
@@ -104,7 +104,7 @@ begin
 	RePaint;
 end;
 
-procedure TfpgCustomProgressBar.SetPosition(const AValue: longint);
+procedure TfpgCustomProgressBar.SetPBPosition(const AValue: longint);
 begin
   if FPosition = AValue then
     Exit; //==>
