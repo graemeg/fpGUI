@@ -19,7 +19,6 @@
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
-      <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
@@ -31,17 +30,17 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="tiOPFfpGUI"/>
+        <PackageName Value="fpgui_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="fpgui_package"/>
+        <PackageName Value="tiOPFfpGUI"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="7">
       <Unit0>
-        <Filename Value="demo_07.lpr"/>
+        <Filename Value="demo_08.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="demo_07"/>
+        <UnitName Value="demo_08"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
@@ -49,10 +48,30 @@
         <UnitName Value="frm_main"/>
       </Unit1>
       <Unit2>
+        <Filename Value="Client_HardCodedVisitors_Svr.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Client_HardCodedVisitors_Svr"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="Client_AutoMap_Svr.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Client_AutoMap_Svr"/>
+      </Unit3>
+      <Unit4>
         <Filename Value="Client_BOM.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Client_BOM"/>
-      </Unit2>
+      </Unit4>
+      <Unit5>
+        <Filename Value="Client_DBIndependentVisitors_Svr.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Client_DBIndependentVisitors_Svr"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="mediators.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="mediators"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -608,15 +608,19 @@ begin
 end;
 
 procedure TCompositeStringGridMediator.RebuildStringGrid;
+var
+  i: integer;
 begin
+  writeln('RebuildStringGrid');
   { This rebuilds the whole list. Not very efficient. }
-//  View.BeginUpdate;
+  View.BeginUpdate;
   try
     FMediatorList.Clear;
-//    View.Columns.Clear;
+    for i := View.ColumnCount to 1 do
+      View.DeleteColumn(i);
     CreateSubMediators;
   finally
-//    View.EndUpdate;
+    View.EndUpdate;
   end;
 
 //  { Do nothing. Can be implement as you see fit. A simple example is given
