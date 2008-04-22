@@ -513,7 +513,7 @@ var
     s := Copy(s, p+1, Length(s));
     s := StringReplace(s, '.po', '.inc', [rfIgnoreCase]);
     Result := 'lang_' + s;
-    writeln('  Newfile: ', cCorelib + Result);
+//    writeln('  Newfile: ', cCorelib + Result);
   end;
   
 begin

@@ -1,6 +1,4 @@
-# translation of FPGUI. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.  
-# 
-# 
+# translation of FPGUI. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.    
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"

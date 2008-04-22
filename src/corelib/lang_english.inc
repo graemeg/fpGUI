@@ -150,4 +150,19 @@ rsLongOct                = 'October';
 rsLongNov                = 'November';
 rsLongDec                = 'December';
 
+{
+// Locale settings
+rsThousandSeparator     = ',';
+rsDecimalSeparator      = '.';
+rsDateSeparator         = '-';
+rsTimeSeparator         = ':';
+rsListSeparator         = ',';
+rsCurrencyString        = '$';
+rsShortDateFormat       = 'yyyy-mm-dd';
+rsLongDateFormat        = 'dd" "mmmm" "yyyy';
+rsTimeAMString          = 'AM';
+rsTimePMString          = 'PM';
+rsShortTimeFormat       = 'hh:nn';
+rsLongTimeFormat        = 'hh:nn:ss';
+}
 
