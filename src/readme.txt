@@ -73,7 +73,7 @@ so doesn't read the standard fpc.cfg file.
  * Navigate the menus to: Options|Directories and select the 'Units'
    tab.
  * Now enter the following directories replacing the relevant parts with
-   you actual paths. The example below is valid on my system only.
+   your actual paths. The example below is valid on my system only.
    I was using FPC 2.2.0 under Linux and the X11 corelib backend.
   
     /opt/fpc_2.2.0/lib/fpc/2.2.0/units/i386-linux/*
