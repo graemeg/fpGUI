@@ -5,43 +5,43 @@ rsLanguage               = 'Deutsch';
 
 // Buttons
 rsOK                     = 'OK';
-rsCancel                 = 'Abbruch';
+rsCancel                 = 'Abbrechen';
 rsHelp                   = 'Hilfe';
-rsOpen                   = 'ffnen';
+rsOpen                   = 'Öffnen';
 rsSave                   = 'Speichern';
-rsCreate                 = 'Erzeugen';
-rsChange                 = 'Wechseln';
+rsCreate                 = 'Anlegen';
+rsChange                 = 'Ändern';
 rsFind                   = 'Finden';
 rsSearch                 = 'Suchen';
 rsReplace                = 'Ersetzen';
-rsConfirm                = 'Besttigungs';
+rsConfirm                = 'Bestätigen';
 rsAll                    = 'Alle';
-rsSelect                 = 'Auswahl';
+rsSelect                 = 'Ausgewählte';
 rsYes                    = 'Ja';
 rsNo                     = 'Nein';
-rsAbort                  = 'bergehen';
+rsAbort                  = 'Abbrechen';
 rsRetry                  = 'Wiederholen';
-rsIgnore                 = 'Ignorieren';
-rsClose                  = 'Schlieáen';
-rsInsert                 = 'Einfgen';
+rsIgnore                 = 'Übergehen';
+rsClose                  = 'Schließen';
+rsInsert                 = 'Einfügen';
 rsEdit                   = 'Bearbeiten';
-rsDelete                 = 'Lschen';
-rsExit                   = 'Exit';
-rsYesToAll               = 'Yes to All';
-rsNoToAll                = 'No to All';
-rsCut                    = 'Cut';
-rsCopy                   = 'Copy';
-rsPaste                  = 'Paste';
+rsDelete                 = 'Löschen';
+rsExit                   = 'Verlassen';
+rsYesToAll               = 'Ja zu allem';
+rsNoToAll                = 'Nein zu allem';
+rsCut                    = 'Ausschneiden';
+rsCopy                   = 'Kopieren';
+rsPaste                  = 'Einfügen';
 
 
 // Captions
 rsError                  = 'Fehler';
-rsCriticalError          = 'Schwerer Fehler';
+rsCriticalError          = 'Kritischer Fehler';
 rsInformation            = 'Information';
-rsConfirmation           = 'Bestätigen';
+rsConfirmation           = 'Bestätigung';
 rsWarning                = 'Warnung';
-rsMessage                = 'Nachricht';
-rsAbout                  = 'About %s';
+rsMessage                = 'Meldung';
+rsAbout                  = 'Über %s';
 
 
 // Standard file filters
@@ -49,106 +49,106 @@ rsAllFiles               = 'Alle Dateien';
 
 
 // CreateDir Dialog
-rsCreateDirectory        = 'Verzeichnis erstellen';
-rsEnterNewDirectory      = 'Neuenr Verzeichnisname';
-rsCannotCreateDir        = 'Verzeichnis kann nicht erzeugt werden';
+rsCreateDirectory        = 'Verzeichnis anlegen';
+rsEnterNewDirectory      = 'Verzeichnisname eingeben';
+rsCannotCreateDir        = 'Kann Verzeichnis nicht anlegen';
 
 
 // Font Dialog
-rsSelectAFont            = 'Wählen Sie eine Schriftart';
+rsSelectAFont            = 'Schriftart auswählen';
 rsName                   = 'Name';
-rsCollection             = 'Collection';
+rsCollection             = 'Sammlung';
 rsSize                   = 'Größe';
 rsStyle                  = 'Stil';
 rsItalic                 = 'Kursiv';
 rsBold                   = 'Fett';
 rsUnderScore             = 'Unterstrichen';
-rsTypeface               = 'Typeface';
-rsAntiAliasing           = 'Anti aliasing';
+rsTypeface               = 'Schriftart';
+rsAntiAliasing           = 'Antialiasing';
 rsExampleText            = 'Beispieltext';
-rsCollectionAllFonts     = 'All Fonts';
-rsCollectionRecentlyUsed = 'Recently Used';
-rsCollectionFavourites   = 'Favourites';
-rsCollectionFixedWidth   = 'Fixed Width';
-rsCollectionSans         = 'Sans';
-rsCollectionSerif        = 'Serif';
-rsCollectionFontAliases  = 'Font Aliases';
+rsCollectionAllFonts     = 'Alle Schriften';
+rsCollectionRecentlyUsed = 'Zuletzt verwendet';
+rsCollectionFavourites   = 'Favoriten';
+rsCollectionFixedWidth   = 'Feste Breite';
+rsCollectionSans         = 'Serifenlos';
+rsCollectionSerif        = 'Serifenbehaftet';
+rsCollectionFontAliases  = 'Font-Aliase';
 
 
 // Open Dialog
-rsOpenAFile              = 'Öffnen einer Datei';
+rsOpenAFile              = 'Eine Datei öffnen';
 rsFileName               = 'Dateiname';
-rsFileType               = 'Dateityp';
+rsFileType               = 'Art der Datei';
 rsDrive                  = 'Laufwerk';
 rsFiles                  = 'Dateien';
 rsDirectories            = 'Verzeichnisse';
-rsShowHidden             = 'Show hidden files';
-rsFileSelection          = 'File Selection';
-rsFileModifiedTime       = 'Mod. Time';
-rsFileAttributes         = 'Attributes';
-rsFileRights             = 'Rights';
-rsFileOwner              = 'Owner';
-rsFileGroup              = 'Group';
+rsShowHidden             = 'Zeige versteckte Dateien';
+rsFileSelection          = 'Dateiauswahl';
+rsFileModifiedTime       = 'Änderungszeit';
+rsFileAttributes         = 'Attribute';
+rsFileRights             = 'Rechte';
+rsFileOwner              = 'Eigentümer';
+rsFileGroup              = 'Gruppe';
 
 
 // Save Dialog
-rsSaveAFile              = 'Datei speichern';
+rsSaveAFile              = 'Datei speichern unter';
 
 
 // User Dialog
-rsUserName               = 'User name';
-rsPassword               = 'Password';
-rsDatabase               = 'Database';
+rsUserName               = 'Username';
+rsPassword               = 'Passwort';
+rsDatabase               = 'Datenbank';
 
 
 // Error messages
-rsErrListMustBeEmpty     = 'Liste müssen leer sein';
-rsErrCouldNotOpenDir     = 'Could not open the directory <%s>';
-rsErrItemOfWrongType     = 'Item is not of <%s> type!';
-rsErrFailedToCreateDir   = 'Failed to create the directory <%s>';
-rsErrNotAssigned         = '<%s> not assigned';
+rsErrListMustBeEmpty     = 'Liste muß leer sein';
+rsErrCouldNotOpenDir     = 'Konnte Verzeichnis <%> nicht anlegen';
+rsErrItemOfWrongType     = 'Eintrag ist nicht vom Typ <%s>!';
+rsErrFailedToCreateDir   = 'Konnte Verzeichnis <%s> nicht anlegen';
+rsErrNotAssigned         = '<%s> nicht zugewiesen';
 
 
 // Calendar Combo & Dialog
 rsShortMon               = 'Mon';
-rsShortTue               = 'Tue';
-rsShortWed               = 'Wed';
-rsShortThu               = 'Thu';
-rsShortFri               = 'Fri';
-rsShortSat               = 'Sat';
-rsShortSun               = 'Sun';
-rsLongMon                = 'Monday';
-rsLongTue                = 'Tuesday';
-rsLongWed                = 'Wednesday';
-rsLongThu                = 'Thursday';
-rsLongFri                = 'Friday';
-rsLongSat                = 'Saturday';
-rsLongSun                = 'Sunday';
-rsToday                  = 'Today';
+rsShortTue               = 'Die';
+rsShortWed               = 'Mit';
+rsShortThu               = 'Don';
+rsShortFri               = 'Fre';
+rsShortSat               = 'Sam';
+rsShortSun               = 'Son';
+rsLongMon                = 'Montag';
+rsLongTue                = 'Dienstag';
+rsLongWed                = 'Mittwoch';
+rsLongThu                = 'Donnerstag';
+rsLongFri                = 'Freitag';
+rsLongSat                = 'Samstag';
+rsLongSun                = 'Sonntag';
+rsToday                  = 'Heute';
 rsShortJan               = 'Jan';
 rsShortFeb               = 'Feb';
-rsShortMar               = 'Mar';
+rsShortMar               = 'Mrz';
 rsShortApr               = 'Apr';
-rsShortMay               = 'May';
+rsShortMay               = 'Mai';
 rsShortJun               = 'Jun';
 rsShortJul               = 'Jul';
 rsShortAug               = 'Aug';
 rsShortSep               = 'Sep';
-rsShortOct               = 'Oct';
+rsShortOct               = 'Okt';
 rsShortNov               = 'Nov';
-rsShortDec               = 'Dec';
-rsLongJan                = 'January';
-rsLongFeb                = 'February';
-rsLongMar                = 'March';
+rsShortDec               = 'Dez';
+rsLongJan                = 'Januar';
+rsLongFeb                = 'Februar';
+rsLongMar                = 'März';
 rsLongApr                = 'April';
-rsLongMay                = 'May';
-rsLongJun                = 'June';
-rsLongJul                = 'July';
+rsLongMay                = 'Mai';
+rsLongJun                = 'Juni';
+rsLongJul                = 'Juli';
 rsLongAug                = 'August';
 rsLongSep                = 'September';
-rsLongOct                = 'October';
+rsLongOct                = 'Oktober';
 rsLongNov                = 'November';
-rsLongDec                = 'December';
+rsLongDec                = 'Dezember';
 
 
 

@@ -1,494 +1,495 @@
 # translation of PACKAGE.
 # Copyright (C) 2008 Free Software Foundation, Inc.
 # <>, 2008.
-# 
-# 
+#
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2008-03-18 00:05+0200\n"
-"Last-Translator:  <>\n"
-"Language-Team: \n"
+"PO-Revision-Date: 2008-04-22 09:59+0100\n"
+"Last-Translator: Joerg Braun <jb@toolbox-mag.de>\n"
+"Language-Team: Joerg Braun <jb@toolbox-mag.de>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=\n"
-"Content-Transfer-Encoding: \n"
-"Plural-Forms: "
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
 
 #: gfx_constants:rslanguage
 msgid "English"
-msgstr ""
+msgstr "Englisch"
 
 #: gfx_constants:rsok
 msgid "OK"
-msgstr ""
+msgstr "Ok"
 
 #: gfx_constants:rscancel
 msgid "Cancel"
-msgstr ""
+msgstr "Abbrechen"
 
 #: gfx_constants:rshelp
 msgid "Help"
-msgstr ""
+msgstr "Hilfe"
 
 #: gfx_constants:rsopen
 msgid "Open"
-msgstr ""
+msgstr "Öffnen"
 
 #: gfx_constants:rssave
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 #: gfx_constants:rscreate
 msgid "Create"
-msgstr ""
+msgstr "Anlegen"
 
 #: gfx_constants:rschange
 msgid "Change"
-msgstr ""
+msgstr "Ändern"
 
 #: gfx_constants:rsfind
 msgid "Find"
-msgstr ""
+msgstr "Finden"
 
 #: gfx_constants:rssearch
 msgid "Search"
-msgstr ""
+msgstr "Suchen"
 
 #: gfx_constants:rsreplace
 msgid "Replace"
-msgstr ""
+msgstr "Ersetzen"
 
 #: gfx_constants:rsconfirm
 msgid "Confirm"
-msgstr ""
+msgstr "Bestätigen"
 
 #: gfx_constants:rsall
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
 #: gfx_constants:rsselect
 msgid "Select"
-msgstr ""
+msgstr "Ausgewählte"
 
 #: gfx_constants:rsyes
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: gfx_constants:rsno
 msgid "No"
-msgstr ""
+msgstr "Nein"
 
 #: gfx_constants:rsabort
 msgid "Abort"
-msgstr ""
+msgstr "Abbrechen"
 
 #: gfx_constants:rsretry
 msgid "Retry"
-msgstr ""
+msgstr "Wiederholen"
 
 #: gfx_constants:rsignore
 msgid "Ignore"
-msgstr ""
+msgstr "Übergehen"
 
 #: gfx_constants:rsclose
 msgid "Close"
-msgstr ""
+msgstr "Schließen"
 
 #: gfx_constants:rsinsert
 msgid "Insert"
-msgstr ""
+msgstr "Einfügen"
 
 #: gfx_constants:rsedit
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
 #: gfx_constants:rsdelete
 msgid "Delete"
-msgstr ""
+msgstr "Löschen"
 
 #: gfx_constants:rsexit
 msgid "Exit"
-msgstr ""
+msgstr "Verlassen"
 
 #: gfx_constants:rsyestoall
 msgid "Yes to All"
-msgstr ""
+msgstr "Ja zu allem"
 
 #: gfx_constants:rsnotoall
 msgid "No to All"
-msgstr ""
+msgstr "Nein zu allem"
 
 #: gfx_constants:rscut
 msgid "Cut"
-msgstr ""
+msgstr "Ausschneiden"
 
 #: gfx_constants:rscopy
 msgid "Copy"
-msgstr ""
+msgstr "Kopieren"
 
 #: gfx_constants:rspaste
 msgid "Paste"
-msgstr ""
+msgstr "Einfügen"
 
 #: gfx_constants:rserror
 msgid "Error"
-msgstr ""
+msgstr "Fehler"
 
 #: gfx_constants:rscriticalerror
 msgid "Critical Error"
-msgstr ""
+msgstr "Kritischer Fehler"
 
 #: gfx_constants:rsinformation
 msgid "Information"
-msgstr ""
+msgstr "Information"
 
 #: gfx_constants:rsconfirmation
 msgid "Confirmation"
-msgstr ""
+msgstr "Bestätigung"
 
 #: gfx_constants:rswarning
 msgid "Warning"
-msgstr ""
+msgstr "Warnung"
 
 #: gfx_constants:rsmessage
 msgid "Message"
-msgstr ""
+msgstr "Meldung"
 
 #: gfx_constants:rsabout
 msgid "About %s"
-msgstr ""
+msgstr "Über %s"
 
 #: gfx_constants:rsallfiles
 msgid "All Files"
-msgstr ""
+msgstr "Alle Dateien"
 
 #: gfx_constants:rscreatedirectory
 msgid "Create directory"
-msgstr ""
+msgstr "Verzeichnis anlegen"
 
 #: gfx_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr ""
+msgstr "Verzeichnisname eingeben"
 
 #: gfx_constants:rscannotcreatedir
 msgid "Cannot create directory"
-msgstr ""
+msgstr "Kann Verzeichnis nicht anlegen"
 
 #: gfx_constants:rsselectafont
 msgid "Select a font"
-msgstr ""
+msgstr "Schriftart auswählen"
 
 #: gfx_constants:rsname
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: gfx_constants:rscollection
 msgid "Collection"
-msgstr ""
+msgstr "Sammlung"
 
 #: gfx_constants:rssize
 msgid "Size"
-msgstr ""
+msgstr "Größe"
 
 #: gfx_constants:rsstyle
 msgid "Style"
-msgstr ""
+msgstr "Stil"
 
 #: gfx_constants:rsitalic
 msgid "Italic"
-msgstr ""
+msgstr "Kursiv"
 
 #: gfx_constants:rsbold
 msgid "Bold"
-msgstr ""
+msgstr "Fett"
 
 #: gfx_constants:rsunderscore
 msgid "UnderScore"
-msgstr ""
+msgstr "Unterstrichen"
 
 #: gfx_constants:rstypeface
 msgid "Typeface"
-msgstr ""
+msgstr "Schriftart"
 
 #: gfx_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr ""
+msgstr "Antialiasing"
 
 #: gfx_constants:rsexampletext
 msgid "Example Text"
-msgstr ""
+msgstr "Beispieltext"
 
 #: gfx_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr ""
+msgstr "Alle Schriften"
 
 #: gfx_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr ""
+msgstr "Zuletzt verwendet"
 
 #: gfx_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr ""
+msgstr "Favoriten"
 
 #: gfx_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr ""
+msgstr "Feste Breite"
 
 #: gfx_constants:rscollectionsans
 msgid "Sans"
-msgstr ""
+msgstr "Serifenlos"
 
 #: gfx_constants:rscollectionserif
 msgid "Serif"
-msgstr ""
+msgstr "Serifenbehaftet"
 
 #: gfx_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr ""
+msgstr "Font-Aliase"
 
 #: gfx_constants:rsopenafile
 msgid "Open a file"
-msgstr ""
+msgstr "Eine Datei öffnen"
 
 #: gfx_constants:rsfilename
 msgid "Filename"
-msgstr ""
+msgstr "Dateiname"
 
 #: gfx_constants:rsfiletype
 msgid "Type of file"
-msgstr ""
+msgstr "Art der Datei"
 
 #: gfx_constants:rsdrive
 msgid "Drive"
-msgstr ""
+msgstr "Laufwerk"
 
 #: gfx_constants:rsfiles
 msgid "Files"
-msgstr ""
+msgstr "Dateien"
 
 #: gfx_constants:rsdirectories
 msgid "Directories"
-msgstr ""
+msgstr "Verzeichnisse"
 
 #: gfx_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr ""
+msgstr "Zeige versteckte Dateien"
 
 #: gfx_constants:rsfileselection
 msgid "File Selection"
-msgstr ""
+msgstr "Dateiauswahl"
 
 #: gfx_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr ""
+msgstr "Änderungszeit"
 
 #: gfx_constants:rsfileattributes
 msgid "Attributes"
-msgstr ""
+msgstr "Attribute"
 
 #: gfx_constants:rsfilerights
 msgid "Rights"
-msgstr ""
+msgstr "Rechte"
 
 #: gfx_constants:rsfileowner
 msgid "Owner"
-msgstr ""
+msgstr "Eigentümer"
 
 #: gfx_constants:rsfilegroup
 msgid "Group"
-msgstr ""
+msgstr "Gruppe"
 
 #: gfx_constants:rssaveafile
 msgid "Save file as"
-msgstr ""
+msgstr "Datei speichern unter"
 
 #: gfx_constants:rsusername
 msgid "User name"
-msgstr ""
+msgstr "Username"
 
 #: gfx_constants:rspassword
 msgid "Password"
-msgstr ""
+msgstr "Passwort"
 
 #: gfx_constants:rsdatabase
 msgid "Database"
-msgstr ""
+msgstr "Datenbank"
 
 #: gfx_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr ""
+msgstr "Liste muß leer sein"
 
 #: gfx_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr ""
+msgstr "Konnte Verzeichnis <%> nicht anlegen"
 
 #: gfx_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr ""
+msgstr "Eintrag ist nicht vom Typ <%s>!"
 
 #: gfx_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr ""
+msgstr "Konnte Verzeichnis <%s> nicht anlegen"
 
 #: gfx_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr ""
+msgstr "<%s> nicht zugewiesen"
 
 #: gfx_constants:rsshortmon
 msgid "Mon"
-msgstr ""
+msgstr "Mon"
 
 #: gfx_constants:rsshorttue
 msgid "Tue"
-msgstr ""
+msgstr "Die"
 
 #: gfx_constants:rsshortwed
 msgid "Wed"
-msgstr ""
+msgstr "Mit"
 
 #: gfx_constants:rsshortthu
 msgid "Thu"
-msgstr ""
+msgstr "Don"
 
 #: gfx_constants:rsshortfri
 msgid "Fri"
-msgstr ""
+msgstr "Fre"
 
 #: gfx_constants:rsshortsat
 msgid "Sat"
-msgstr ""
+msgstr "Sam"
 
 #: gfx_constants:rsshortsun
 msgid "Sun"
-msgstr ""
+msgstr "Son"
 
 #: gfx_constants:rslongmon
 msgid "Monday"
-msgstr ""
+msgstr "Montag"
 
 #: gfx_constants:rslongtue
 msgid "Tuesday"
-msgstr ""
+msgstr "Dienstag"
 
 #: gfx_constants:rslongwed
 msgid "Wednesday"
-msgstr ""
+msgstr "Mittwoch"
 
 #: gfx_constants:rslongthu
 msgid "Thursday"
-msgstr ""
+msgstr "Donnerstag"
 
 #: gfx_constants:rslongfri
 msgid "Friday"
-msgstr ""
+msgstr "Freitag"
 
 #: gfx_constants:rslongsat
 msgid "Saturday"
-msgstr ""
+msgstr "Samstag"
 
 #: gfx_constants:rslongsun
 msgid "Sunday"
-msgstr ""
+msgstr "Sonntag"
 
 #: gfx_constants:rstoday
 msgid "Today"
-msgstr ""
+msgstr "Heute"
 
 #: gfx_constants:rsshortjan
 msgid "Jan"
-msgstr ""
+msgstr "Jan"
 
 #: gfx_constants:rsshortfeb
 msgid "Feb"
-msgstr ""
+msgstr "Feb"
 
 #: gfx_constants:rsshortmar
 msgid "Mar"
-msgstr ""
+msgstr "Mrz"
 
 #: gfx_constants:rsshortapr
 msgid "Apr"
-msgstr ""
+msgstr "Apr"
 
 #: gfx_constants:rsshortmay
 msgid "May"
-msgstr ""
+msgstr "Mai"
 
 #: gfx_constants:rsshortjun
 msgid "Jun"
-msgstr ""
+msgstr "Jun"
 
 #: gfx_constants:rsshortjul
 msgid "Jul"
-msgstr ""
+msgstr "Jul"
 
 #: gfx_constants:rsshortaug
 msgid "Aug"
-msgstr ""
+msgstr "Aug"
 
 #: gfx_constants:rsshortsep
 msgid "Sep"
-msgstr ""
+msgstr "Sep"
 
 #: gfx_constants:rsshortoct
 msgid "Oct"
-msgstr ""
+msgstr "Okt"
 
 #: gfx_constants:rsshortnov
 msgid "Nov"
-msgstr ""
+msgstr "Nov"
 
 #: gfx_constants:rsshortdec
 msgid "Dec"
-msgstr ""
+msgstr "Dez"
 
 #: gfx_constants:rslongjan
 msgid "January"
-msgstr ""
+msgstr "Januar"
 
 #: gfx_constants:rslongfeb
 msgid "February"
-msgstr ""
+msgstr "Februar"
 
 #: gfx_constants:rslongmar
 msgid "March"
-msgstr ""
+msgstr "März"
 
 #: gfx_constants:rslongapr
 msgid "April"
-msgstr ""
+msgstr "April"
 
 #: gfx_constants:rslongmay
 msgid "May"
-msgstr ""
+msgstr "Mai"
 
 #: gfx_constants:rslongjun
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 #: gfx_constants:rslongjul
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 #: gfx_constants:rslongaug
 msgid "August"
-msgstr ""
+msgstr "August"
 
 #: gfx_constants:rslongsep
 msgid "September"
-msgstr ""
+msgstr "September"
 
 #: gfx_constants:rslongoct
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 #: gfx_constants:rslongnov
 msgid "November"
-msgstr ""
+msgstr "November"
 
 #: gfx_constants:rslongdec
 msgid "December"
-msgstr ""
+msgstr "Dezember"
 

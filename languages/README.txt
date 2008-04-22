@@ -6,8 +6,8 @@ Search for all *.fi.po files. They are simple text files, with an easy format.
 Edit them with programs like kbabel or gtranslator.
 Run 'sh localize.sh' script in the tools directory to update translations.
 
-Send the updated xxx.fi.po files to graemeg.lists@gmail.com.
-Do not send diffs for .po files.
+Send the updated xxx.fi.po file in a zip archive to graemeg@gmail.com.
+Do not send diffs for .po files!
 
 
 Now the background:
