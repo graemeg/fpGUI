@@ -1,191 +1,415 @@
-# translation of PACKAGE.
-# Copyright (C) 2008 Free Software Foundation, Inc.
-# <>, 2008.
-# 
-# 
+# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.  
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2008-03-18 00:04+0200\n"
-"Last-Translator:  <>\n"
-"Language-Team: \n"
+"PO-Revision-Date: 2008-04-22 15:45+0200\n"
+"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
+"Language-Team: Afrikaans\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=\n"
-"Content-Transfer-Encoding: \n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: "
 
-#: gfx_constants:rslanguage
-msgid "English"
-msgstr ""
-
-#: gfx_constants:rsok
-msgid "OK"
-msgstr ""
-
-#: gfx_constants:rscancel
-msgid "Cancel"
-msgstr ""
-
-#: gfx_constants:rshelp
-msgid "Help"
-msgstr ""
-
-#: gfx_constants:rsopen
-msgid "Open"
-msgstr ""
-
-#: gfx_constants:rssave
-msgid "Save"
-msgstr ""
-
-#: gfx_constants:rscreate
-msgid "Create"
-msgstr ""
-
-#: gfx_constants:rschange
-msgid "Change"
-msgstr ""
-
-#: gfx_constants:rsfind
-msgid "Find"
-msgstr ""
-
-#: gfx_constants:rssearch
-msgid "Search"
-msgstr ""
-
-#: gfx_constants:rsreplace
-msgid "Replace"
-msgstr ""
-
-#: gfx_constants:rsconfirm
-msgid "Confirm"
-msgstr ""
-
-#: gfx_constants:rsall
-msgid "All"
-msgstr ""
-
-#: gfx_constants:rsselect
-msgid "Select"
-msgstr ""
-
-#: gfx_constants:rsyes
-msgid "Yes"
-msgstr ""
-
-#: gfx_constants:rsno
-msgid "No"
+#: gfx_constants:rserrnotassigned
+msgid "<%s> not assigned"
 msgstr ""
 
 #: gfx_constants:rsabort
 msgid "Abort"
 msgstr ""
 
-#: gfx_constants:rsretry
-msgid "Retry"
-msgstr ""
-
-#: gfx_constants:rsignore
-msgid "Ignore"
-msgstr ""
-
-#: gfx_constants:rsclose
-msgid "Close"
-msgstr ""
-
-#: gfx_constants:rsinsert
-msgid "Insert"
-msgstr ""
-
-#: gfx_constants:rsedit
-msgid "Edit"
-msgstr ""
-
-#: gfx_constants:rsdelete
-msgid "Delete"
-msgstr ""
-
-#: gfx_constants:rsexit
-msgid "Exit"
-msgstr ""
-
-#: gfx_constants:rsyestoall
-msgid "Yes to All"
-msgstr ""
-
-#: gfx_constants:rsnotoall
-msgid "No to All"
-msgstr ""
-
-#: gfx_constants:rscut
-msgid "Cut"
-msgstr ""
-
-#: gfx_constants:rscopy
-msgid "Copy"
-msgstr ""
-
-#: gfx_constants:rspaste
-msgid "Paste"
-msgstr ""
-
-#: gfx_constants:rserror
-msgid "Error"
-msgstr ""
-
-#: gfx_constants:rscriticalerror
-msgid "Critical Error"
-msgstr ""
-
-#: gfx_constants:rsinformation
-msgid "Information"
-msgstr ""
-
-#: gfx_constants:rsconfirmation
-msgid "Confirmation"
-msgstr ""
-
-#: gfx_constants:rswarning
-msgid "Warning"
-msgstr ""
-
-#: gfx_constants:rsmessage
-msgid "Message"
-msgstr ""
-
 #: gfx_constants:rsabout
 msgid "About %s"
+msgstr ""
+
+#: gfx_constants:rsall
+msgid "All"
 msgstr ""
 
 #: gfx_constants:rsallfiles
 msgid "All Files"
 msgstr ""
 
-#: gfx_constants:rscreatedirectory
-msgid "Create directory"
+#: gfx_constants:rscollectionallfonts
+msgid "All Fonts"
 msgstr ""
 
-#: gfx_constants:rsenternewdirectory
-msgid "Enter new directory name"
+#: gfx_constants:rsantialiasing
+msgid "Anti aliasing"
+msgstr ""
+
+#: gfx_constants:rsshortapr
+msgid "Apr"
+msgstr ""
+
+#: gfx_constants:rslongapr
+msgid "April"
+msgstr ""
+
+#: gfx_constants:rsfileattributes
+msgid "Attributes"
+msgstr ""
+
+#: gfx_constants:rsshortaug
+msgid "Aug"
+msgstr ""
+
+#: gfx_constants:rslongaug
+msgid "August"
+msgstr ""
+
+#: gfx_constants:rsbold
+msgid "Bold"
+msgstr ""
+
+#: gfx_constants:rscancel
+msgid "Cancel"
 msgstr ""
 
 #: gfx_constants:rscannotcreatedir
 msgid "Cannot create directory"
 msgstr ""
 
-#: gfx_constants:rsselectafont
-msgid "Select a font"
+#: gfx_constants:rschange
+msgid "Change"
+msgstr ""
+
+#: gfx_constants:rsclose
+msgid "Close"
+msgstr ""
+
+#: gfx_constants:rscollection
+msgid "Collection"
+msgstr ""
+
+#: gfx_constants:rsconfirm
+msgid "Confirm"
+msgstr ""
+
+#: gfx_constants:rsconfirmation
+msgid "Confirmation"
+msgstr ""
+
+#: gfx_constants:rscopy
+msgid "Copy"
+msgstr ""
+
+#: gfx_constants:rserrcouldnotopendir
+msgid "Could not open the directory <%s>"
+msgstr ""
+
+#: gfx_constants:rscreate
+msgid "Create"
+msgstr ""
+
+#: gfx_constants:rscreatedirectory
+msgid "Create directory"
+msgstr ""
+
+#: gfx_constants:rscriticalerror
+msgid "Critical Error"
+msgstr ""
+
+#: gfx_constants:rscut
+msgid "Cut"
+msgstr ""
+
+#: gfx_constants:rsdatabase
+msgid "Database"
+msgstr ""
+
+#: gfx_constants:rsshortdec
+msgid "Dec"
+msgstr ""
+
+#: gfx_constants:rslongdec
+msgid "December"
+msgstr ""
+
+#: gfx_constants:rsdelete
+msgid "Delete"
+msgstr ""
+
+#: gfx_constants:rsdirectories
+msgid "Directories"
+msgstr ""
+
+#: gfx_constants:rsdrive
+msgid "Drive"
+msgstr ""
+
+#: gfx_constants:rsedit
+msgid "Edit"
+msgstr ""
+
+#: gfx_constants:rslanguage
+msgid "English"
+msgstr ""
+
+#: gfx_constants:rsenternewdirectory
+msgid "Enter new directory name"
+msgstr ""
+
+#: gfx_constants:rserror
+msgid "Error"
+msgstr ""
+
+#: gfx_constants:rsexampletext
+msgid "Example Text"
+msgstr ""
+
+#: gfx_constants:rsexit
+msgid "Exit"
+msgstr ""
+
+#: gfx_constants:rserrfailedtocreatedir
+msgid "Failed to create the directory <%s>"
+msgstr ""
+
+#: gfx_constants:rscollectionfavourites
+msgid "Favourites"
+msgstr ""
+
+#: gfx_constants:rsshortfeb
+msgid "Feb"
+msgstr ""
+
+#: gfx_constants:rslongfeb
+msgid "February"
+msgstr ""
+
+#: gfx_constants:rsfileselection
+msgid "File Selection"
+msgstr ""
+
+#: gfx_constants:rsfilename
+msgid "Filename"
+msgstr ""
+
+#: gfx_constants:rsfiles
+msgid "Files"
+msgstr ""
+
+#: gfx_constants:rsfind
+msgid "Find"
+msgstr ""
+
+#: gfx_constants:rscollectionfixedwidth
+msgid "Fixed Width"
+msgstr ""
+
+#: gfx_constants:rscollectionfontaliases
+msgid "Font Aliases"
+msgstr ""
+
+#: gfx_constants:rsshortfri
+msgid "Fri"
+msgstr ""
+
+#: gfx_constants:rslongfri
+msgid "Friday"
+msgstr ""
+
+#: gfx_constants:rsfilegroup
+msgid "Group"
+msgstr ""
+
+#: gfx_constants:rshelp
+msgid "Help"
+msgstr ""
+
+#: gfx_constants:rsignore
+msgid "Ignore"
+msgstr ""
+
+#: gfx_constants:rsinformation
+msgid "Information"
+msgstr ""
+
+#: gfx_constants:rsinsert
+msgid "Insert"
+msgstr ""
+
+#: gfx_constants:rsitalic
+msgid "Italic"
+msgstr ""
+
+#: gfx_constants:rserritemofwrongtype
+msgid "Item is not of <%s> type!"
+msgstr ""
+
+#: gfx_constants:rsshortjan
+msgid "Jan"
+msgstr ""
+
+#: gfx_constants:rslongjan
+msgid "January"
+msgstr ""
+
+#: gfx_constants:rsshortjul
+msgid "Jul"
+msgstr ""
+
+#: gfx_constants:rslongjul
+msgid "July"
+msgstr ""
+
+#: gfx_constants:rsshortjun
+msgid "Jun"
+msgstr ""
+
+#: gfx_constants:rslongjun
+msgid "June"
+msgstr ""
+
+#: gfx_constants:rserrlistmustbeempty
+msgid "List must be empty"
+msgstr ""
+
+#: gfx_constants:rsshortmar
+msgid "Mar"
+msgstr ""
+
+#: gfx_constants:rslongmar
+msgid "March"
+msgstr ""
+
+#: gfx_constants:rsshortmay
+msgid "May"
+msgstr ""
+
+#: gfx_constants:rsmessage
+msgid "Message"
+msgstr ""
+
+#: gfx_constants:rsfilemodifiedtime
+msgid "Mod. Time"
+msgstr ""
+
+#: gfx_constants:rsshortmon
+msgid "Mon"
+msgstr ""
+
+#: gfx_constants:rslongmon
+msgid "Monday"
 msgstr ""
 
 #: gfx_constants:rsname
 msgid "Name"
 msgstr ""
 
-#: gfx_constants:rscollection
-msgid "Collection"
+#: gfx_constants:rsno
+msgid "No"
+msgstr ""
+
+#: gfx_constants:rsnotoall
+msgid "No to All"
+msgstr ""
+
+#: gfx_constants:rsshortnov
+msgid "Nov"
+msgstr ""
+
+#: gfx_constants:rslongnov
+msgid "November"
+msgstr ""
+
+#: gfx_constants:rsok
+msgid "OK"
+msgstr ""
+
+#: gfx_constants:rsshortoct
+msgid "Oct"
+msgstr ""
+
+#: gfx_constants:rslongoct
+msgid "October"
+msgstr ""
+
+#: gfx_constants:rsopen
+msgid "Open"
+msgstr ""
+
+#: gfx_constants:rsopenafile
+msgid "Open a file"
+msgstr ""
+
+#: gfx_constants:rsfileowner
+msgid "Owner"
+msgstr ""
+
+#: gfx_constants:rspassword
+msgid "Password"
+msgstr ""
+
+#: gfx_constants:rspaste
+msgid "Paste"
+msgstr ""
+
+#: gfx_constants:rscollectionrecentlyused
+msgid "Recently Used"
+msgstr ""
+
+#: gfx_constants:rsreplace
+msgid "Replace"
+msgstr ""
+
+#: gfx_constants:rsretry
+msgid "Retry"
+msgstr ""
+
+#: gfx_constants:rsfilerights
+msgid "Rights"
+msgstr ""
+
+#: gfx_constants:rscollectionsans
+msgid "Sans"
+msgstr ""
+
+#: gfx_constants:rsshortsat
+msgid "Sat"
+msgstr ""
+
+#: gfx_constants:rslongsat
+msgid "Saturday"
+msgstr ""
+
+#: gfx_constants:rssave
+msgid "Save"
+msgstr ""
+
+#: gfx_constants:rssaveafile
+msgid "Save file as"
+msgstr ""
+
+#: gfx_constants:rssearch
+msgid "Search"
+msgstr ""
+
+#: gfx_constants:rsselect
+msgid "Select"
+msgstr ""
+
+#: gfx_constants:rsselectafont
+msgid "Select a font"
+msgstr ""
+
+#: gfx_constants:rsshortsep
+msgid "Sep"
+msgstr ""
+
+#: gfx_constants:rslongsep
+msgid "September"
+msgstr ""
+
+#: gfx_constants:rscollectionserif
+msgid "Serif"
+msgstr ""
+
+#: gfx_constants:rsshowhidden
+msgid "Show hidden files"
 msgstr ""
 
 #: gfx_constants:rssize
@@ -196,299 +420,67 @@ msgstr ""
 msgid "Style"
 msgstr ""
 
-#: gfx_constants:rsitalic
-msgid "Italic"
-msgstr ""
-
-#: gfx_constants:rsbold
-msgid "Bold"
-msgstr ""
-
-#: gfx_constants:rsunderscore
-msgid "UnderScore"
-msgstr ""
-
-#: gfx_constants:rstypeface
-msgid "Typeface"
-msgstr ""
-
-#: gfx_constants:rsantialiasing
-msgid "Anti aliasing"
-msgstr ""
-
-#: gfx_constants:rsexampletext
-msgid "Example Text"
-msgstr ""
-
-#: gfx_constants:rscollectionallfonts
-msgid "All Fonts"
-msgstr ""
-
-#: gfx_constants:rscollectionrecentlyused
-msgid "Recently Used"
-msgstr ""
-
-#: gfx_constants:rscollectionfavourites
-msgid "Favourites"
-msgstr ""
-
-#: gfx_constants:rscollectionfixedwidth
-msgid "Fixed Width"
-msgstr ""
-
-#: gfx_constants:rscollectionsans
-msgid "Sans"
-msgstr ""
-
-#: gfx_constants:rscollectionserif
-msgid "Serif"
-msgstr ""
-
-#: gfx_constants:rscollectionfontaliases
-msgid "Font Aliases"
-msgstr ""
-
-#: gfx_constants:rsopenafile
-msgid "Open a file"
-msgstr ""
-
-#: gfx_constants:rsfilename
-msgid "Filename"
-msgstr ""
-
-#: gfx_constants:rsfiletype
-msgid "Type of file"
-msgstr ""
-
-#: gfx_constants:rsdrive
-msgid "Drive"
-msgstr ""
-
-#: gfx_constants:rsfiles
-msgid "Files"
-msgstr ""
-
-#: gfx_constants:rsdirectories
-msgid "Directories"
-msgstr ""
-
-#: gfx_constants:rsshowhidden
-msgid "Show hidden files"
-msgstr ""
-
-#: gfx_constants:rsfileselection
-msgid "File Selection"
-msgstr ""
-
-#: gfx_constants:rsfilemodifiedtime
-msgid "Mod. Time"
-msgstr ""
-
-#: gfx_constants:rsfileattributes
-msgid "Attributes"
-msgstr ""
-
-#: gfx_constants:rsfilerights
-msgid "Rights"
-msgstr ""
-
-#: gfx_constants:rsfileowner
-msgid "Owner"
-msgstr ""
-
-#: gfx_constants:rsfilegroup
-msgid "Group"
-msgstr ""
-
-#: gfx_constants:rssaveafile
-msgid "Save file as"
-msgstr ""
-
-#: gfx_constants:rsusername
-msgid "User name"
-msgstr ""
-
-#: gfx_constants:rspassword
-msgid "Password"
-msgstr ""
-
-#: gfx_constants:rsdatabase
-msgid "Database"
-msgstr ""
-
-#: gfx_constants:rserrlistmustbeempty
-msgid "List must be empty"
-msgstr ""
-
-#: gfx_constants:rserrcouldnotopendir
-msgid "Could not open the directory <%s>"
-msgstr ""
-
-#: gfx_constants:rserritemofwrongtype
-msgid "Item is not of <%s> type!"
-msgstr ""
-
-#: gfx_constants:rserrfailedtocreatedir
-msgid "Failed to create the directory <%s>"
-msgstr ""
-
-#: gfx_constants:rserrnotassigned
-msgid "<%s> not assigned"
-msgstr ""
-
-#: gfx_constants:rsshortmon
-msgid "Mon"
-msgstr ""
-
-#: gfx_constants:rsshorttue
-msgid "Tue"
-msgstr ""
-
-#: gfx_constants:rsshortwed
-msgid "Wed"
-msgstr ""
-
-#: gfx_constants:rsshortthu
-msgid "Thu"
-msgstr ""
-
-#: gfx_constants:rsshortfri
-msgid "Fri"
-msgstr ""
-
-#: gfx_constants:rsshortsat
-msgid "Sat"
-msgstr ""
-
 #: gfx_constants:rsshortsun
 msgid "Sun"
-msgstr ""
-
-#: gfx_constants:rslongmon
-msgid "Monday"
-msgstr ""
-
-#: gfx_constants:rslongtue
-msgid "Tuesday"
-msgstr ""
-
-#: gfx_constants:rslongwed
-msgid "Wednesday"
-msgstr ""
-
-#: gfx_constants:rslongthu
-msgid "Thursday"
-msgstr ""
-
-#: gfx_constants:rslongfri
-msgid "Friday"
-msgstr ""
-
-#: gfx_constants:rslongsat
-msgid "Saturday"
 msgstr ""
 
 #: gfx_constants:rslongsun
 msgid "Sunday"
 msgstr ""
 
+#: gfx_constants:rsshortthu
+msgid "Thu"
+msgstr ""
+
+#: gfx_constants:rslongthu
+msgid "Thursday"
+msgstr ""
+
 #: gfx_constants:rstoday
 msgid "Today"
 msgstr ""
 
-#: gfx_constants:rsshortjan
-msgid "Jan"
+#: gfx_constants:rsshorttue
+msgid "Tue"
 msgstr ""
 
-#: gfx_constants:rsshortfeb
-msgid "Feb"
+#: gfx_constants:rslongtue
+msgid "Tuesday"
 msgstr ""
 
-#: gfx_constants:rsshortmar
-msgid "Mar"
+#: gfx_constants:rsfiletype
+msgid "Type of file"
 msgstr ""
 
-#: gfx_constants:rsshortapr
-msgid "Apr"
+#: gfx_constants:rstypeface
+msgid "Typeface"
 msgstr ""
 
-#: gfx_constants:rsshortmay
-msgid "May"
+#: gfx_constants:rsunderscore
+msgid "UnderScore"
 msgstr ""
 
-#: gfx_constants:rsshortjun
-msgid "Jun"
+#: gfx_constants:rsusername
+msgid "User name"
 msgstr ""
 
-#: gfx_constants:rsshortjul
-msgid "Jul"
+#: gfx_constants:rswarning
+msgid "Warning"
 msgstr ""
 
-#: gfx_constants:rsshortaug
-msgid "Aug"
+#: gfx_constants:rsshortwed
+msgid "Wed"
 msgstr ""
 
-#: gfx_constants:rsshortsep
-msgid "Sep"
+#: gfx_constants:rslongwed
+msgid "Wednesday"
 msgstr ""
 
-#: gfx_constants:rsshortoct
-msgid "Oct"
+#: gfx_constants:rsyes
+msgid "Yes"
 msgstr ""
 
-#: gfx_constants:rsshortnov
-msgid "Nov"
-msgstr ""
-
-#: gfx_constants:rsshortdec
-msgid "Dec"
-msgstr ""
-
-#: gfx_constants:rslongjan
-msgid "January"
-msgstr ""
-
-#: gfx_constants:rslongfeb
-msgid "February"
-msgstr ""
-
-#: gfx_constants:rslongmar
-msgid "March"
-msgstr ""
-
-#: gfx_constants:rslongapr
-msgid "April"
-msgstr ""
-
-#: gfx_constants:rslongmay
-msgid "May"
-msgstr ""
-
-#: gfx_constants:rslongjun
-msgid "June"
-msgstr ""
-
-#: gfx_constants:rslongjul
-msgid "July"
-msgstr ""
-
-#: gfx_constants:rslongaug
-msgid "August"
-msgstr ""
-
-#: gfx_constants:rslongsep
-msgid "September"
-msgstr ""
-
-#: gfx_constants:rslongoct
-msgid "October"
-msgstr ""
-
-#: gfx_constants:rslongnov
-msgid "November"
-msgstr ""
-
-#: gfx_constants:rslongdec
-msgid "December"
+#: gfx_constants:rsyestoall
+msgid "Yes to All"
 msgstr ""
 
