@@ -1,10 +1,12 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.  
+# 
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2008-04-22 15:45+0200\n"
+"PO-Revision-Date: 2008-04-23 08:35+0200\n"
 "Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
 "Language-Team: Afrikaans\n"
 "MIME-Version: 1.0\n"
@@ -18,19 +20,19 @@ msgstr ""
 
 #: gfx_constants:rsabort
 msgid "Abort"
-msgstr ""
+msgstr "Прервать"
 
 #: gfx_constants:rsabout
 msgid "About %s"
-msgstr ""
+msgstr "Информация о %s"
 
 #: gfx_constants:rsall
 msgid "All"
-msgstr ""
+msgstr "Все"
 
 #: gfx_constants:rsallfiles
 msgid "All Files"
-msgstr ""
+msgstr "Все файлы"
 
 #: gfx_constants:rscollectionallfonts
 msgid "All Fonts"
@@ -66,19 +68,19 @@ msgstr ""
 
 #: gfx_constants:rscancel
 msgid "Cancel"
-msgstr ""
+msgstr "Отмена"
 
 #: gfx_constants:rscannotcreatedir
 msgid "Cannot create directory"
-msgstr ""
+msgstr "Невозможно создать директорию"
 
 #: gfx_constants:rschange
 msgid "Change"
-msgstr ""
+msgstr "Изменить"
 
 #: gfx_constants:rsclose
 msgid "Close"
-msgstr ""
+msgstr "Закрыть"
 
 #: gfx_constants:rscollection
 msgid "Collection"
@@ -86,15 +88,15 @@ msgstr ""
 
 #: gfx_constants:rsconfirm
 msgid "Confirm"
-msgstr ""
+msgstr "Подтвердить"
 
 #: gfx_constants:rsconfirmation
 msgid "Confirmation"
-msgstr ""
+msgstr "Подтверждение"
 
 #: gfx_constants:rscopy
 msgid "Copy"
-msgstr ""
+msgstr "Копировать"
 
 #: gfx_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
@@ -102,19 +104,19 @@ msgstr ""
 
 #: gfx_constants:rscreate
 msgid "Create"
-msgstr ""
+msgstr "Создать"
 
 #: gfx_constants:rscreatedirectory
 msgid "Create directory"
-msgstr ""
+msgstr "Создать директорию"
 
 #: gfx_constants:rscriticalerror
 msgid "Critical Error"
-msgstr ""
+msgstr "Критическая ошибка"
 
 #: gfx_constants:rscut
 msgid "Cut"
-msgstr ""
+msgstr "Вырезать"
 
 #: gfx_constants:rsdatabase
 msgid "Database"
@@ -130,7 +132,7 @@ msgstr ""
 
 #: gfx_constants:rsdelete
 msgid "Delete"
-msgstr ""
+msgstr "Удалить"
 
 #: gfx_constants:rsdirectories
 msgid "Directories"
@@ -142,19 +144,19 @@ msgstr ""
 
 #: gfx_constants:rsedit
 msgid "Edit"
-msgstr ""
+msgstr "Редактировать"
 
 #: gfx_constants:rslanguage
 msgid "English"
-msgstr ""
+msgstr "Русский"
 
 #: gfx_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr ""
+msgstr "Укажите имя новой директории"
 
 #: gfx_constants:rserror
 msgid "Error"
-msgstr ""
+msgstr "Ошибка"
 
 #: gfx_constants:rsexampletext
 msgid "Example Text"
@@ -162,7 +164,7 @@ msgstr ""
 
 #: gfx_constants:rsexit
 msgid "Exit"
-msgstr ""
+msgstr "Выход"
 
 #: gfx_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
@@ -194,7 +196,7 @@ msgstr ""
 
 #: gfx_constants:rsfind
 msgid "Find"
-msgstr ""
+msgstr "Найти"
 
 #: gfx_constants:rscollectionfixedwidth
 msgid "Fixed Width"
@@ -218,19 +220,19 @@ msgstr ""
 
 #: gfx_constants:rshelp
 msgid "Help"
-msgstr ""
+msgstr "Справка"
 
 #: gfx_constants:rsignore
 msgid "Ignore"
-msgstr ""
+msgstr "Пропустить"
 
 #: gfx_constants:rsinformation
 msgid "Information"
-msgstr ""
+msgstr "Информация"
 
 #: gfx_constants:rsinsert
 msgid "Insert"
-msgstr ""
+msgstr "Вставка"
 
 #: gfx_constants:rsitalic
 msgid "Italic"
@@ -282,7 +284,7 @@ msgstr ""
 
 #: gfx_constants:rsmessage
 msgid "Message"
-msgstr ""
+msgstr "Сообщение"
 
 #: gfx_constants:rsfilemodifiedtime
 msgid "Mod. Time"
@@ -302,11 +304,11 @@ msgstr ""
 
 #: gfx_constants:rsno
 msgid "No"
-msgstr ""
+msgstr "Нет"
 
 #: gfx_constants:rsnotoall
 msgid "No to All"
-msgstr ""
+msgstr "Нет для всех"
 
 #: gfx_constants:rsshortnov
 msgid "Nov"
@@ -318,7 +320,7 @@ msgstr ""
 
 #: gfx_constants:rsok
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: gfx_constants:rsshortoct
 msgid "Oct"
@@ -330,7 +332,7 @@ msgstr ""
 
 #: gfx_constants:rsopen
 msgid "Open"
-msgstr ""
+msgstr "Открыть"
 
 #: gfx_constants:rsopenafile
 msgid "Open a file"
@@ -346,7 +348,7 @@ msgstr ""
 
 #: gfx_constants:rspaste
 msgid "Paste"
-msgstr ""
+msgstr "Вставить"
 
 #: gfx_constants:rscollectionrecentlyused
 msgid "Recently Used"
@@ -354,11 +356,11 @@ msgstr ""
 
 #: gfx_constants:rsreplace
 msgid "Replace"
-msgstr ""
+msgstr "Заменить"
 
 #: gfx_constants:rsretry
 msgid "Retry"
-msgstr ""
+msgstr "Повторить"
 
 #: gfx_constants:rsfilerights
 msgid "Rights"
@@ -378,7 +380,7 @@ msgstr ""
 
 #: gfx_constants:rssave
 msgid "Save"
-msgstr ""
+msgstr "Сохранить"
 
 #: gfx_constants:rssaveafile
 msgid "Save file as"
@@ -386,11 +388,11 @@ msgstr ""
 
 #: gfx_constants:rssearch
 msgid "Search"
-msgstr ""
+msgstr "Поиск"
 
 #: gfx_constants:rsselect
 msgid "Select"
-msgstr ""
+msgstr "Выбрать"
 
 #: gfx_constants:rsselectafont
 msgid "Select a font"
@@ -466,7 +468,7 @@ msgstr ""
 
 #: gfx_constants:rswarning
 msgid "Warning"
-msgstr ""
+msgstr "Внимание"
 
 #: gfx_constants:rsshortwed
 msgid "Wed"
@@ -478,9 +480,9 @@ msgstr ""
 
 #: gfx_constants:rsyes
 msgid "Yes"
-msgstr ""
+msgstr "Да"
 
 #: gfx_constants:rsyestoall
 msgid "Yes to All"
-msgstr ""
+msgstr "Да для всех"
 
