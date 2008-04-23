@@ -783,7 +783,10 @@ end;
 destructor TfpgApplication.Destroy;
 var
   i: integer;
+  frm: TfpgWindow;
 begin
+  DestroyComponents;    // 2008-04-23: Is this right??
+
   for i := 0 to (fpgNamedFonts.Count - 1) do
     TNamedFontItem(fpgNamedFonts.Items[i]).Free;
   fpgNamedFonts.Free;
@@ -818,7 +821,7 @@ begin
     uMsgQueueList.Delete(i);
   end;
   uMsgQueueList.Free;
-
+  
   inherited Destroy;
 end;
 

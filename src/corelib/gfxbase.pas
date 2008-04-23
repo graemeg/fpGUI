@@ -434,6 +434,7 @@ type
     function    Screen_dpi_x: integer; virtual; abstract;
     function    Screen_dpi_y: integer; virtual; abstract;
     function    Screen_dpi: integer; virtual; abstract;
+    procedure   Terminate;
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
@@ -1896,10 +1897,17 @@ procedure TfpgApplicationBase.CreateForm(AFormClass: TComponentClass;
 begin
   try
     AForm := TfpgWindowBase(AFormClass.Create(self));
+    if FMainForm = nil then
+      FMainForm := AForm;
   except
     AForm := nil;
     raise;
   end;
+end;
+
+procedure TfpgApplicationBase.Terminate;
+begin
+  Terminated := True;
 end;
 
 { TfpgClipboardBase }

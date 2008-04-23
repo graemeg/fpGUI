@@ -30,13 +30,17 @@ uses
 
 type
   TWindowPosition = (wpUser, wpAuto, wpScreenCenter);
-
+  TCloseAction = (caNone, caHide, caFree{, caMinimize});
+  
+  TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
+  TFormCloseQueryEvent = procedure(Sender: TObject; var CanClose: boolean) of object;
 
   TfpgForm = class(TfpgWidget)
   private
     FFullScreen: boolean;
     FOnActivate: TNotifyEvent;
-    FOnClose: TNotifyEvent;
+    FOnClose: TFormCloseEvent;
+    FOnCloseQuery: TFormCloseQueryEvent;
     FOnCreate: TNotifyEvent;
     FOnDeactivate: TNotifyEvent;
     FOnDestroy: TNotifyEvent;
@@ -63,7 +67,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
-    procedure   DoOnClose; virtual;
+    procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; virtual;
@@ -71,6 +75,7 @@ type
     procedure   Hide;
     function    ShowModal: integer;
     procedure   Close;
+    function    CloseQuery: boolean; virtual;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: integer read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
@@ -81,7 +86,8 @@ type
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
-    property    OnClose: TNotifyEvent read FOnClose write FOnClose;
+    property    OnClose: TFormCloseEvent read FOnClose write FOnClose;
+    property    OnCloseQuery: TFormCloseQueryEvent read FOnCloseQuery write FOnCloseQuery;
     property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
     property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
@@ -204,7 +210,7 @@ end;
 
 constructor TfpgForm.Create(AOwner: TComponent);
 begin
-  inherited;
+  inherited Create(AOwner);
   FWindowPosition  := wpAuto;
   FWindowTitle     := '';
   FSizeable        := True;
@@ -326,28 +332,59 @@ begin
     FOnDestroy(self);
 end;
 
-procedure TfpgForm.DoOnClose;
+procedure TfpgForm.DoOnClose(var CloseAction: TCloseAction);
 begin
   if Assigned(FOnClose) then
-    OnClose(self);
+    OnClose(self, CloseAction);
 end;
 
 procedure TfpgForm.Hide;
 begin
-  HandleHide;
+  Visible := False;
+//  HandleHide;
   if ModalResult = 0 then
     ModalResult := -1;
 end;
 
 procedure TfpgForm.Close;
+var
+  CloseAction: TCloseAction;
+  IsMainForm: Boolean;
 begin
-  DoOnClose;
+  if CloseQuery then  // May we close the form? User could override decision
+  begin
+    IsMainForm := fpgApplication.MainForm = self;
+    if IsMainForm then
+      CloseAction := caFree
+    else
+      CloseAction := caHide;
 
-  Hide;
-  fpgApplication.RemoveComponent(self);
+    // execute event handler - maybe user wants to modify it.
+    DoOnClose(CloseAction);
+    // execute action according to close action
+    case CloseAction of
+      caHide:
+        begin
+          Hide;
+        end;
+        // fpGUI Forms don't have a WindowState property yet!
+//      caMinimize: WindowState := wsMinimized;
+      caFree:
+        begin
+          HandleHide;
+          fpgApplication.RemoveComponent(self);
+          if IsMainForm then
+            fpgApplication.Terminate;
+        end;
+    end;  { case CloseAction }
+  end;  { if CloseQuery }
+end;
 
-  if fpgApplication.MainForm = self then
-    fpgApplication.Terminated := True;
+function TfpgForm.CloseQuery: boolean;
+begin
+  Result := True;
+  if Assigned(FOnCloseQuery) then
+    FOnCloseQuery(self, Result);
 end;
 
 
