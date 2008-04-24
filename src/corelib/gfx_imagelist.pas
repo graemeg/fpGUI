@@ -66,8 +66,8 @@ type
   public
     constructor Create;
     destructor  Destroy; override;
-    procedure   AddItemFromFile(AFileName: String; AIndex: word);
-    procedure   AddImage(AImage: TfpgImage; AIndex: word);
+    procedure   AddItemFromFile(AFileName: String; AIndex: word = -1);
+    procedure   AddImage(AImage: TfpgImage; AIndex: word = -1);
     procedure   RemoveIndex(AIndex: integer);
     function    GetMaxItem: word;
     property    Item[AIndex: integer]: TfpgImageItem read GetItem write SetItem;
@@ -146,9 +146,19 @@ begin
   {$IFDEF DEBUG}
   writeln('TfpgImageList.AddItemFromFile');
   {$ENDIF}
+  
+  if not FileExists(AFileName) then
+    Exit;
+  
   AImageItem := TfpgImageItem.Create;
   AImageItem.LoadFromFile(AFileName);
-  Item[AIndex] := AImageItem;
+  if AIndex > -1 then
+    Item[AIndex] := AImageItem
+  else
+  begin
+    FList.Add(AImageItem);
+    AImageItem.Index := GetMaxItem+1;
+  end;
 end;
 
 procedure TfpgImageList.AddImage(AImage: TfpgImage; AIndex: word);
@@ -157,7 +167,13 @@ var
 begin
   AImageItem := TfpgImageItem.Create;
   AImageItem.Image := AImage;
-  Item[AIndex] := AImageItem;
+  if AIndex > -1 then
+    Item[AIndex] := AImageItem
+  else
+  begin
+    FList.Add(AImageItem);
+    AImageItem.Index := GetMaxItem+1;
+  end;
 end;
 
 procedure TfpgImageList.RemoveIndex(AIndex: integer);
@@ -177,7 +193,7 @@ function TfpgImageList.GetMaxItem: word;
 var
   ACounter: integer;
 begin
-  result := 0;
+  result := -1;
   for ACounter := 0 to FList.Count - 1 do
     if TfpgImageItem(FList[ACounter]).Index > result then
       result := TfpgImageItem(FList[ACounter]).Index;
