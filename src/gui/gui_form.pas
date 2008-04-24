@@ -372,9 +372,11 @@ begin
       caFree:
         begin
           HandleHide;
-          fpgApplication.RemoveComponent(self);
           if IsMainForm then
-            fpgApplication.Terminate;
+            fpgApplication.Terminate
+          else
+            // We can't free ourselves, somebody else needs to do it
+            fpgPostMessage(Self, fpgApplication, FPGM_CLOSE);
         end;
     end;  { case CloseAction }
   end;  { if CloseQuery }

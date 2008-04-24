@@ -188,7 +188,7 @@ type
     FFocusedWindow: THANDLE;
     function    DoGetFontFaceList: TStringList; override;
   public
-    constructor Create(const aparams: string); override;
+    constructor Create(const AParams: string); override;
     function    DoMessagesPending: boolean;
     procedure   DoWaitWindowMessage(atimeoutms: integer);
     procedure   DoFlush;
@@ -903,8 +903,9 @@ begin
   Result.Sort;
 end;
 
-constructor TfpgApplicationImpl.Create(const aparams: string);
+constructor TfpgApplicationImpl.Create(const AParams: string);
 begin
+  inherited Create(AParam);
   FIsInitialized  := False;
   FDisplay        := Windows.GetDC(0);
   Terminated := False;

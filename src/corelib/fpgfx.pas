@@ -197,6 +197,7 @@ type
     FOnException: TExceptionEvent;
     FStopOnException: Boolean;
     procedure   SetupLocalizationStrings;
+    procedure   InternalMsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -760,12 +761,11 @@ begin
   FDisplayParams  := AParams;
   FScreenWidth    := -1;
   FScreenHeight   := -1;
-  FModalFormStack := TList.Create;
   FMessageHookList := TFPList.Create;
   FStopOnException := False;
   
   try
-    inherited Create(aparams);
+    inherited Create(AParams);
 
     if IsInitialized then
     begin
@@ -783,9 +783,15 @@ end;
 destructor TfpgApplication.Destroy;
 var
   i: integer;
-  frm: TfpgWindow;
+  frm: TfpgWindowBase;
 begin
-  DestroyComponents;    // 2008-04-23: Is this right??
+  for i := FFormList.Count - 1 downto 0 do
+  begin
+    frm := TfpgWindowBase(FFormList.Items[i]);
+    FFormList.Remove(frm);
+    frm.Free;
+  end;
+  FFormList.Free;
 
   for i := 0 to (fpgNamedFonts.Count - 1) do
     TNamedFontItem(fpgNamedFonts.Items[i]).Free;
@@ -929,6 +935,16 @@ begin
   LongMonthNames[12] := rsLongDec;
   
 
+end;
+
+procedure TfpgApplication.InternalMsgClose(var msg: TfpgMessageRec);
+begin
+  writeln('InternalMsgClose received');
+  if Assigned(msg.Sender) then
+  begin
+    FFormList.Remove(msg.Sender);
+    TfpgWindowBase(msg.Sender).Free;
+  end;
 end;
 
 procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);

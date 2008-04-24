@@ -234,7 +234,7 @@ type
     FLastKeySym: TKeySym;   // Used for KeyRelease event
     function    DoGetFontFaceList: TStringList; override;
   public
-    constructor Create(const aparams: string); override;
+    constructor Create(const AParams: string); override;
     destructor  Destroy; override;
     function    DoMessagesPending: boolean;
     procedure   DoWaitWindowMessage(atimeoutms: integer);
@@ -684,8 +684,9 @@ begin
   Result.Sort;
 end;
 
-constructor TfpgApplicationImpl.Create(const aparams: string);
+constructor TfpgApplicationImpl.Create(const AParams: string);
 begin
+  inherited Create(AParams);
   FIsInitialized    := False;
   FDisplay          := XOpenDisplay(PChar(aparams));
   
