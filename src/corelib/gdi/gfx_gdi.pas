@@ -905,7 +905,7 @@ end;
 
 constructor TfpgApplicationImpl.Create(const AParams: string);
 begin
-  inherited Create(AParam);
+  inherited Create(AParams);
   FIsInitialized  := False;
   FDisplay        := Windows.GetDC(0);
   Terminated := False;
