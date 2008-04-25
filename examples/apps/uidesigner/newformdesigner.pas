@@ -426,7 +426,7 @@ begin
     btn.Text      := '';
     btn.Focusable := False;
     btn.OnClick   := @OnPaletteClick;
-    btn.GroupIndex := 1;
+    btn.AllowDown := True;
     btn.AllowAllUp := True;
     chlPalette.Items.AddObject(wgc.WidgetClass.ClassName, wgc);
 

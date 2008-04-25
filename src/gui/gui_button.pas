@@ -80,13 +80,20 @@ type
     procedure   SetCommand(ACommand: ICommand); // ICommandHolder interface
     property    Down: Boolean read FDown write SetDown;
     property    Font: TfpgFont read FFont;
+    { Buttons behave like toggle buttons. This is an alias for GroupIndex > 0 }
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
   published
+    { When buttons are in a toggle state (GroupIndex > 0), are all buttons in the group
+      allowed to be up. }
     property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp default False;
     property    BackgroundColor default clButtonFace;
     property    Default: boolean read FDefault write SetDefault default False;
+    { The button will not show focus. It might also have a different down state (look).
+      This is similar to Focusable = False, but the appearance of the down state might differ. }
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    { Used in combination with AllowDown and AllowAllUp. Allows buttons in the same
+      group to work together. }
     property    GroupIndex: integer read FGroupIndex write FGroupIndex default 0;
     property    ImageMargin: integer read FImageMargin write SetImageMargin default 3;
     property    ImageName: string read FImageName write SetImageName;
@@ -208,7 +215,7 @@ begin
   FText         := 'Button';
   FFont         := fpgGetFont('#Label1');
   FHeight       := FFont.Height + 8;
-  FWidth        := 75;
+  FWidth        := 80;
   FFocusable    := True;
   FTextColor    := Parent.TextColor;
   FBackgroundColor := clButtonFace;
@@ -455,8 +462,11 @@ procedure TfpgButton.Click;
 var
   pform: TfpgForm;
 begin
-  FDown    := False;
-  FClicked := False;
+  if (not AllowDown) then
+  begin
+    FDown    := False;
+    FClicked := False;
+  end;
 
   pform := WidgetParentForm(self);
   if pform <> nil then

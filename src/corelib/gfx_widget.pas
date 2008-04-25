@@ -118,6 +118,7 @@ type
     property    Visible: boolean read FVisible write SetVisible default True;
     property    Enabled: boolean read FEnabled write SetEnabled default True;
     property    TabOrder: integer read FTabOrder write FTabOrder;
+    { Is the widget allowed to receive keyboard focus. }
     property    Focusable: boolean read FFocusable write FFocusable default False;
     property    Focused: boolean read FFocused write FFocused default False;
     property    Anchors: TAnchors read FAnchors write FAnchors;
