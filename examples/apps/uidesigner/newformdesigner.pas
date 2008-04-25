@@ -635,11 +635,13 @@ end;
 
 procedure TfrmProperties.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = keyEnter) or (keycode = keyF11) then
+  if keycode = keyF11 then
   begin
     if maindsgn.selectedform <> nil then
+    begin
       maindsgn.selectedform.Form.SetFocus;
-//      GfxActivateWindow(maindsgn.selectedform.Form.WinHandle);
+      maindsgn.selectedform.Form.ActivateWindow;
+    end;
     consumed := True;
   end
   else

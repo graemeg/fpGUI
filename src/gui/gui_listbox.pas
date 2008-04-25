@@ -471,7 +471,7 @@ begin
           FocusItem := ItemCount;
         end;
 
-    keyReturn:
+    keyReturn, keyPEnter:
         begin
           if FocusItem > 0 then
             DoSelect;

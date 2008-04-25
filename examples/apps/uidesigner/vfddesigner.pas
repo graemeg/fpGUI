@@ -778,20 +778,24 @@ begin
             SelectNextWidget(True); // tab forward
         end;
 
-    keyF1: ShowMessage('ENTER, F11: switch to Properties' + LineEnding +
+    keyF1:
+      ShowMessage('F11: switch to Properties' + LineEnding +
         'TAB, SHIFT+TAB: select next widget' + LineEnding +
-        'F2: edit widget order' + LineEnding +
-        'F4: edit items' + LineEnding
-        , 'Small help');
+        'F2: edit widget order' + LineEnding {+
+        'F4: edit items' + LineEnding}, 'Small help');
 
-    keyF2: EditWidgetOrder;
+    keyF2:
+      EditWidgetOrder;
 
-    //KEY_F4: if PropertyForm.btnEdit.Visible then PropertyForm.btnEdit.Click;
+    //keyF4:
+      //if frmProperties.btnEdit.Visible then
+        //frmProperties.btnEdit.Click;
 
-    keyF11,
-    keyEnter:
-      frmProperties.SetFocus;
-//      GfxActivateWindow(frmProperties.WinHandle);
+    keyF11:
+      begin
+        frmProperties.SetFocus;
+        frmProperties.ActivateWindow;
+      end;
     else
       consumed := False;
   end;
@@ -1132,8 +1136,7 @@ end;
 procedure TFormDesigner.OnPropPosEdit(Sender: TObject);
 var
   frm: TEditPositionForm;
-  btn: TfpgButton;
-  ax,
+  ax: TfpgCoord;
   ay: TfpgCoord;
   wg: TfpgWidget;
   n: integer;
@@ -1168,14 +1171,8 @@ begin
   if wg = nil then
     wg := Form;
 
-  btn      := TfpgButton(Sender);
   frm      := TEditPositionForm.Create(nil);
-  btn.WindowToScreen(btn, pt);
-//  GfxGetAbsolutePosition(btn.WinHandle, btn.Width, 0, ax, ay);
-  ax := pt.X;
-  ay := pt.Y;
-  frm.Left := ax;
-  frm.Top  := ay;
+
   if Sender = frmProperties.btnLeft then
   begin
     frm.lbPos.Text := 'Left:';

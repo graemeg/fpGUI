@@ -179,7 +179,7 @@ end;
 procedure TfpgCheckBox.HandleKeyRelease(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = keySpace) or (keycode = keyReturn) then
+  if (keycode = keySpace) or (keycode = keyReturn) or (keycode = keyPEnter) then
   begin
     consumed := True;
     Checked := not FChecked;

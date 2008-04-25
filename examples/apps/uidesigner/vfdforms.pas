@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -49,7 +49,7 @@ type
     l2: TfpgLabel;
     edClass: TfpgEdit;
     edName: TfpgEdit;
-    btnOK,
+    btnOK: TfpgButton;
     btnCancel: TfpgButton;
     procedure AfterCreate; override;
     procedure OnButtonClick(Sender: TObject);
@@ -57,10 +57,13 @@ type
 
 
   TNewFormForm = class(TVFDDialog)
+  private
+    procedure OnedNameKeyPressed(Sender: TObject; var KeyCode: word;
+      var ShiftState: TShiftState; var Consumed: boolean);
   public
     l1: TfpgLabel;
     edName: TfpgEdit;
-    btnOK,
+    btnOK: TfpgButton;
     btnCancel: TfpgButton;
     procedure AfterCreate; override;
     procedure OnButtonClick(Sender: TObject);
@@ -68,10 +71,13 @@ type
 
 
   TEditPositionForm = class(TVFDDialog)
+  private
+    procedure edPosKeyPressed(Sender: TObject; var KeyCode: word;
+      var ShiftState: TShiftState; var Consumed: boolean);
   public
     lbPos: TfpgLabel;
     edPos: TfpgEdit;
-    btnOK,
+    btnOK: TfpgButton;
     btnCancel: TfpgButton;
     procedure AfterCreate; override;
     procedure OnButtonClick(Sender: TObject);
@@ -134,7 +140,8 @@ implementation
 uses
   vfdmain,
   fpgfx,
-  gui_iniutils;
+  gui_iniutils,
+  gfx_constants;
 
 
 { TPaletteForm }
@@ -198,6 +205,13 @@ end;
 
 { TNewFormForm }
 
+procedure TNewFormForm.OnedNameKeyPressed(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyEnter) or (KeyCode = keyPEnter) then
+    btnOK.Click;
+end;
+
 procedure TNewFormForm.AfterCreate;
 begin
   inherited AfterCreate;
@@ -208,8 +222,9 @@ begin
   l1           := CreateLabel(self, 8, 8, 'Form name:');
   edName       := CreateEdit(self, 8, 28, 180, 0);
   edName.Text  := 'frm';
-  btnOK        := CreateButton(self, 196, 8, 80, 'OK', @OnButtonClick);
-  btnCancel    := CreateButton(self, 196, 36, 80, 'Cancel', @OnButtonClick);
+  edName.OnKeyPress := @OnedNameKeyPressed;
+  btnOK        := CreateButton(self, 196, 8, 80, rsOK, @OnButtonClick);
+  btnCancel    := CreateButton(self, 196, 36, 80, rsCancel, @OnButtonClick);
 end;
 
 procedure TNewFormForm.OnButtonClick(Sender: TObject);
@@ -222,6 +237,13 @@ end;
 
 { TEditPositionForm }
 
+procedure TEditPositionForm.edPosKeyPressed(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyEnter) or (KeyCode = keyPEnter) then
+    btnOK.Click;
+end;
+
 procedure TEditPositionForm.AfterCreate;
 begin
   inherited AfterCreate;
@@ -233,12 +255,9 @@ begin
 
   lbPos           := CreateLabel(self, 8, 8, 'Pos:      ');
   edPos           := CreateEdit(self, 8, 28, 80, 0);
-  btnOK           := CreateButton(self, 100, 8, 75, 'OK', @OnButtonClick);
-  btnCancel       := CreateButton(self, 100, 36, 75, 'Cancel', @OnButtonClick);
-  btnOK.ImageName := 'stdimg.ok';
-  btnOK.ShowImage := True;
-  btnCancel.ImageName := 'stdimg.cancel';
-  btnCancel.ShowImage := True;
+  edPos.OnKeyPress := @edPosKeyPressed;
+  btnOK           := CreateButton(self, 98, 8, 80, rsOK, @OnButtonClick);
+  btnCancel       := CreateButton(self, 98, 36, 80, rsCancel, @OnButtonClick);
 end;
 
 procedure TEditPositionForm.OnButtonClick(Sender: TObject);

@@ -510,7 +510,7 @@ begin
           hasChanged := True;
         end;
 
-    keyReturn:
+    keyReturn, keyPEnter:
         begin
           if FSelectedItem > -1 then
             SetText(Items[FSelectedItem])

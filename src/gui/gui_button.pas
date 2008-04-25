@@ -400,7 +400,7 @@ end;
 
 procedure TfpgButton.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = keyReturn) or (keycode = keySpace) then
+  if (keycode = keyReturn) or (keycode = keySpace) or (keycode = keyPEnter) then
   begin
     DoPush;
     Consumed := True;
@@ -411,7 +411,7 @@ end;
 
 procedure TfpgButton.HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
-  if (keycode = keyReturn) or (keycode = keySpace) then
+  if (keycode = keyReturn) or (keycode = keySpace) or (keycode = keyPEnter) then
   begin
     DoRelease(1, 1); // fake co-ordinates to it executes the Click
     Consumed := True;

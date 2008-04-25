@@ -1046,7 +1046,7 @@ begin
     consumed := True;
 
     case keycode of
-      keyReturn:
+      keyReturn, keyPEnter:
           begin
             ls  := UTF8Copy(FLines[FCursorline - 1], 1, FCursorPos);
             ls2 := UTF8Copy(FLines[FCursorline - 1], FCursorPos + 1, UTF8Length(FLines[FCursorline - 1]));
