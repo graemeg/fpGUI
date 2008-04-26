@@ -91,6 +91,11 @@ type
 
 
   TGeneralPropertyEditor = class(TVFDPropertyEditor)
+  private
+    FOrigValue: string;
+    procedure EditExit(Sender: TObject);
+    procedure EditKeyPressed(Sender: TObject; var KeyCode: word;
+      var ShiftState: TShiftState; var Consumed: boolean);
   public
     etype: TGPEType;
     edit: TfpgEdit;
@@ -274,13 +279,33 @@ end;
 
 { TGeneralPropertyEditor }
 
+procedure TGeneralPropertyEditor.EditExit(Sender: TObject);
+begin
+  if FOrigValue <> edit.Text then
+    edit.Text := FOrigvalue;
+end;
+
+procedure TGeneralPropertyEditor.EditKeyPressed(Sender: TObject;
+  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
+  begin
+    UpdateProperty(nil);
+    FOrigValue := edit.Text;
+  end
+  else
+    inherited;
+end;
+
 procedure TGeneralPropertyEditor.CreateLayout;
 begin
   Anchors       := [anTop, anLeft, anRight];
   Edit          := TfpgEdit.Create(self);
   Edit.SetPosition(0, 0, Width, Height);
   Edit.Anchors  := Anchors;
-  Edit.OnChange := @UpdateProperty;
+//  Edit.OnChange := @UpdateProperty;
+  Edit.OnKeyPress := @EditKeyPressed;
+  Edit.OnExit :=@EditExit;
   Edit.Visible := True;
 end;
 
@@ -301,10 +326,12 @@ end;
 procedure TGeneralPropertyEditor.LoadValue(wg: TfpgWidget);
 begin
   case etype of
-    gptInteger: LoadIntValue(wg);
+    gptInteger:
+      LoadIntValue(wg);
     else
       LoadStrValue(wg);
   end;
+  FOrigValue := edit.Text;
 end;
 
 procedure TGeneralPropertyEditor.StoreIntValue(wg: TfpgWidget);
