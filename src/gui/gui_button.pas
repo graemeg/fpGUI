@@ -253,7 +253,6 @@ var
   lBtnFlags: TFButtonFlags;
   clr: TfpgColor;
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
 //  Canvas.Clear(FBackgroundColor);  // Do we need this?
   Canvas.ClearClipRect;
@@ -342,7 +341,6 @@ begin
     x := 3;
 
   fpgStyle.DrawString(Canvas, x+pofs, y+pofs, AText, Enabled);
-  Canvas.EndDraw;
 end;
 
 procedure TfpgButton.DoPush;

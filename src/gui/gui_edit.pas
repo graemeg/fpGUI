@@ -363,8 +363,6 @@ var
   end;
   
 begin
-  Canvas.BeginDraw;
-
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
   case BorderStyle of
@@ -415,8 +413,6 @@ begin
       DrawSelection;
     fpgCaret.UnSetCaret(Canvas);
   end;
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgCustomEdit.HandleKeyChar(var AText: TfpgChar;

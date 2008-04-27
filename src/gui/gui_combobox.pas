@@ -563,7 +563,6 @@ procedure TfpgAbstractComboBox.HandlePaint;
 var
   r: TfpgRect;
 begin
-  Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -606,8 +605,6 @@ begin
   // Draw select item's text
   if HasText then
     fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgAbstractComboBox.PaintInternalButton;

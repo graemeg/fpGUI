@@ -742,7 +742,6 @@ var
   c: integer;
   s: string;
 begin
-  Canvas.BeginDraw;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
   Canvas.DrawControlFrame(r);
@@ -846,8 +845,6 @@ begin
                          FVScrollBar.Width,
                          FHScrollBar.Height);
   end;
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgMemo.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);

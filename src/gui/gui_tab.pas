@@ -188,10 +188,8 @@ end;
 
 procedure TfpgTabSheet.HandlePaint;
 begin
-  Canvas.BeginDraw;
-//  inherited HandlePaint;
+  inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
-  Canvas.EndDraw;
 end;
 
 constructor TfpgTabSheet.Create(AOwner: TComponent);
@@ -549,9 +547,7 @@ end;
 
 procedure TfpgPageControl.HandlePaint;
 begin
-  Canvas.BeginDraw;
-//  inherited HandlePaint;
-  
+  inherited HandlePaint;
   if SortPages then
     OrderSheets;
   Canvas.ClearClipRect;
@@ -562,8 +558,6 @@ begin
     Canvas.SetColor(clInactiveWgFrame);
   Canvas.DrawRectangle(0, 0, Width, Height);
   RePaintTitles;
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgPageControl.HandleShow;

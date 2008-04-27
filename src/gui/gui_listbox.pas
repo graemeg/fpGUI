@@ -561,7 +561,6 @@ var
   n: integer;
   r: TfpgRect;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.ClearClipRect;
   
@@ -615,7 +614,7 @@ begin
     Canvas.FillRectangle(r);
 
     // This is just a test.
-    // BlueCurve theme  :)
+    // Bluecurve theme  :)
     if (n = FFocusItem) and FFocused then
     begin
       // outer dark border
@@ -652,8 +651,6 @@ begin
     r.SetBottom(Height - FMargin);
     Canvas.FillRectangle(r);
   end;
-
-  Canvas.EndDraw;
 end;
 
 constructor TfpgBaseListBox.Create(AOwner: TComponent);

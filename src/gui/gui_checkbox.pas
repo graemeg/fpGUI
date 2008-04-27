@@ -115,7 +115,6 @@ var
   ix: integer;
   img: TfpgImage;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
   
   Canvas.SetColor(FBackgroundColor);
@@ -156,8 +155,6 @@ begin
     ty := 0;
   Canvas.SetTextColor(FTextColor);
   fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgCheckBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);

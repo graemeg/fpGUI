@@ -227,7 +227,6 @@ end;
 
 procedure TfpgBevel.HandlePaint;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
 
   Canvas.Clear(BackgroundColor);
@@ -264,8 +263,6 @@ begin
     Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   if Shape in [bsBox, bsFrame, bsBottomLine] then
     Canvas.DrawLine(0, Height - 1, Width, Height - 1);
-
-  Canvas.EndDraw;
 end;
 
 {TfpgPanel}
@@ -369,7 +366,6 @@ procedure TfpgPanel.HandlePaint;
 var
   lTxtFlags: TFTextFlags;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
 
   Canvas.Clear(BackgroundColor);
@@ -418,8 +414,6 @@ begin
       Include(lTxtFlags, txtVCenter);
     end;
   Canvas.DrawText(FMargin, FMargin, Width - FMargin * 2, Height - FMargin * 2, FText, lTxtFlags, FLineSpace);
-
-  Canvas.EndDraw;
 end;
 
 constructor TfpgPanel.Create(Aowner: TComponent);
@@ -502,7 +496,6 @@ var
   lTxtFlags: TFTextFlags;
   w: integer;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
 
   Canvas.Clear(Parent.BackgroundColor);
@@ -614,8 +607,6 @@ begin
         Canvas.DrawText(w + FMargin, 0, FText, lTxtFlags);
       end;
     end;
-
-  Canvas.EndDraw;
 end;
 
 constructor TfpgGroupBox.Create(Aowner: TComponent);

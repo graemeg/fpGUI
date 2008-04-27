@@ -215,7 +215,6 @@ var
   r: TfpgRect;
   lTxtFlags: TFTextFlags;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -233,7 +232,7 @@ begin
       Include(lTxtFlags, txtRight);
     taCenter:
       Include(lTxtFlags, txtHCenter);
-    end;
+  end;
   case FLayout of
     tlTop:
       Include(lTxtFlags, txtTop);
@@ -241,10 +240,8 @@ begin
       Include(lTxtFlags, txtBottom);
     tlCenter:
       Include(lTxtFlags, txtVCenter);
-    end;
-
+  end;
   FTextHeight := Canvas.DrawText(0, 0, Width, Height, FText, lTxtFlags);
-  Canvas.EndDraw;
 end;
 
 end.

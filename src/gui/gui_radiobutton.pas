@@ -165,7 +165,6 @@ var
   img: TfpgImage;
   ix: integer;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
 
   Canvas.SetColor(FBackgroundColor);
@@ -206,8 +205,6 @@ begin
     ty := 0;
   Canvas.SetTextColor(FTextColor);
   fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
-
-  Canvas.EndDraw;
 end;
 
 procedure TfpgRadioButton.HandleLMouseDown(x, y: integer;

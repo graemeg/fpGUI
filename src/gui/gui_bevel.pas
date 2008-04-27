@@ -15,6 +15,16 @@
       Defines a Bevel control. Also known as a Panel or Frame control.
 }
 
+
+
+{ **********************************************************
+
+          DO NOT USE!  THIS UNIT IS DEPRECATED.
+
+    Use gui_panel.pas instead.
+
+  *********************************************************}
+  
 unit gui_bevel;
 
 {$mode objfpc}{$H+}
@@ -95,7 +105,6 @@ end;
 
 procedure TfpgBevel.HandlePaint;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
   Canvas.Clear(BackgroundColor);
   
@@ -131,8 +140,6 @@ begin
     Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   if Shape in [bsBox, bsFrame, bsBottomLine] then
     Canvas.DrawLine(0, Height - 1, Width, Height - 1);
-
-  Canvas.EndDraw;
 end;
 
 constructor TfpgBevel.Create(AOwner: TComponent);

@@ -52,7 +52,6 @@ type
     property    ShowCaption: boolean read FShowCaption write SetShowCaption;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     procedure   StepIt;
     procedure   StepBy(AStep: integer);
     property    Font: TfpgFont read FFont;
@@ -148,8 +147,7 @@ var
   x: TfpgCoord;
   y: TfpgCoord;
 begin
-  Canvas.BeginDraw;
-//  inherited HandlePaint;
+  inherited HandlePaint;
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
   
@@ -193,7 +191,6 @@ begin
     Canvas.Font := FFont;
   	Canvas.DrawString(x, y, txt);
   end;
-  Canvas.EndDraw;
 end;
 
 constructor TfpgCustomProgressBar.Create(AOwner: TComponent);
@@ -210,11 +207,6 @@ begin
   FTextColor := Parent.TextColor;
   FShowCaption := False;
   FFont     := fpgStyle.DefaultFont;
-end;
-
-destructor TfpgCustomProgressBar.Destroy;
-begin
-  inherited Destroy;
 end;
 
 procedure TfpgCustomProgressBar.StepIt;

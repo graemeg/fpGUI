@@ -353,7 +353,6 @@ var
   n, y: integer;
   tw: integer;
 begin
-  Canvas.BeginDraw;
   inherited HandlePaint;
 
   Canvas.SetFont(FFont);
@@ -367,7 +366,6 @@ begin
       Canvas.DrawString(10, y, FLines[n]);
     Inc(y, FLineHeight);
   end;
-  Canvas.EndDraw;
 end;
 
 procedure TfpgMessageBox.HandleShow;

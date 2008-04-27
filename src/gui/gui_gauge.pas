@@ -315,7 +315,7 @@ begin
     Angle := Angle * 3.6; // Percentage to degrees
     Canvas.SetColor(TfpgColor($425d9b));
     FillArcGradient (Canvas,Left, Top, Width, Height , 90, -Angle,TfpgColor($425d9b),TfpgColor($98b2ed));
-    end;
+  end;
 end;
 
 procedure TfpgGauge.NeedleDraw;
@@ -404,7 +404,7 @@ end;
 procedure TfpgGauge.HandlePaint;
 begin
   inherited HandlePaint;
-  Canvas.BeginDraw(True);
+//  Canvas.BeginDraw(True);
   {Paint Background and adjust FClientRect according style and BorderStyle}
   BackgroundDraw;
   {Paint foreground according selected Kind}
@@ -422,7 +422,7 @@ begin
   {Add Text if required}
   if ShowText then
     TextDraw;
-  Canvas.EndDraw;
+//  Canvas.EndDraw;
 end;
 
 procedure TfpgGauge.SetGaugeKind(AValue: TGaugeKind);
