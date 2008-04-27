@@ -667,7 +667,7 @@ var
   bytes_after: culong;
 begin
   Result := False;
-  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, False, XA_ATOM, @atomtype, @format, @nitems,
+  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, TBool(False), XA_ATOM, @atomtype, @format, @nitems,
              @bytes_after, @Atoms);
 
   if (atomtype = XA_ATOM) and (format = 32) then begin
@@ -734,7 +734,7 @@ var
   bytes_after: culong;
 begin
   Result := False;
-  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, False, XA_ATOM, @atomtype, @format, @nitems,
+  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, TBool(False), XA_ATOM, @atomtype, @format, @nitems,
              @bytes_after, @Windows);
 
   if (atomtype = XA_WINDOW) and (format = 32) then begin
@@ -760,7 +760,7 @@ var
   Utf8Str: PChar;
 begin
   Result := False;
-  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, False, XA_ATOM, @atomtype, @format, @nitems,
+  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, TBool(False), XA_ATOM, @atomtype, @format, @nitems,
              @bytes_after, @Utf8Str);
 
   if (atomtype = XA_WINDOW) and (format = 32) then begin
@@ -786,7 +786,7 @@ var
   bytes_after: culong;
 begin
   Result := False;
-  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, False, XA_ATOM, @atomtype, @format, @nitems,
+  XGetWindowProperty (FDisplay, AWindow, AProperty, 0, MaxInt, TBool(False), XA_ATOM, @atomtype, @format, @nitems,
              @bytes_after, @Cards);
 
   if (atomtype = XA_CARDINAL) and (format = 32) then begin

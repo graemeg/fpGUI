@@ -12,7 +12,7 @@ uses
   Classes,
   SysUtils,
   fpgfx,
-  gfxbase, fpcanvas;
+  gfxbase{, fpcanvas};
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
 function  LoadImage_BMP(const AFileName: string): TfpgImage;

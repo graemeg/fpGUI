@@ -487,7 +487,7 @@ begin
   begin
     XGetWindowProperty(xapplication.Display, ev.xselection.requestor,
         ev.xselection._property, 0, 16000,
-        false, // delete
+        TBool(false), // delete
         0, // type
         @actual, @format, @count, @remaining,
         @data);
@@ -1323,7 +1323,7 @@ begin
   mask := 0;
   if FWindowType in [wtPopup] then
   begin
-    attr.Override_Redirect := longbool(1);
+    attr.Override_Redirect := TBool(True);
     mask := CWOverrideRedirect;
   end;
 
@@ -1605,7 +1605,7 @@ end;
 procedure TfpgWindowImpl.CaptureMouse;
 begin
   XGrabPointer(xapplication.Display, FWinHandle,
-      False,
+      TBool(False),
       ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask,
       GrabModeAsync,
       GrabModeAsync,
