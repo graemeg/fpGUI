@@ -155,6 +155,7 @@ begin
     else
       ActiveWidget.SetFocus;
   end;
+
   if Assigned(FOnActivate) then
     FOnActivate(self);
 end;
@@ -170,10 +171,8 @@ end;
 
 procedure TfpgForm.HandlePaint;
 begin
-  Canvas.BeginDraw;
-  inherited;
+  inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
-  Canvas.EndDraw(0, 0, FWidth, FHeight);
 end;
 
 procedure TfpgForm.AdjustWindowStyle;

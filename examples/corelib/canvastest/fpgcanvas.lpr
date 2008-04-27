@@ -21,27 +21,32 @@ type
   private
     bmp: TfpgImage;
     dst: TfpgImage;
+    procedure FormPaint(Sender: TObject);
+    procedure CustomPaintJob;
   protected
     procedure HandlePaint; override;
   public
     procedure AfterCreate; override;
+    procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
   end;
 
 { TMainForm }
 
-procedure TMainForm.HandlePaint;
+procedure TMainForm.FormPaint(Sender: TObject);
+begin
+  CustomPaintJob;
+end;
+
+// We can now call all the paint methods from HandlePaint or
+// the OnPaint event.fpgcanvas
+procedure TMainForm.CustomPaintJob;
 var
   r: TfpgRect;
   fnt: TfpgFont;
   y: integer;
   c: TfpgColor;
 begin
-  // Enable double buffering. Must be before 'inherited' to prevent form
-  // clearing itself.
-  Canvas.BeginDraw;
-  inherited HandlePaint;
-
   // Testing Rectangles
   Canvas.SetColor(clBlack);
   r.SetRect(0, 0, 1, 1);
@@ -53,7 +58,7 @@ begin
   r.Width     := 50;
   r.Height    := 50;
   Canvas.DrawRectangle(r);
-  
+
   r.Left      := 120;
   Canvas.SetLineStyle(2, lsDash);
   Canvas.DrawRectangle(r);
@@ -84,7 +89,7 @@ begin
 
 
   // Testing Text and Fonts
-  y := 60;  
+  y := 60;
   Canvas.SetTextColor(clBlack);
   Canvas.DrawString(5, y, 'This text must be black and default font (' + fpgApplication.DefaultFont.FontDesc + ')');
   Canvas.SetTextColor(clRed);
@@ -119,7 +124,7 @@ begin
   r.Top := 140;
   Canvas.DrawButtonFace(r, [btnIsEmbedded]);
   Canvas.DrawString(385, 140, '= [btnIsEmbedded]');
-  
+
   Canvas.DrawString(45, y, 'DrawControlFrame():');
   y := y + Canvas.Font.Height;
   Canvas.DrawControlFrame(5, y, 200, 23);
@@ -133,14 +138,14 @@ begin
   Canvas.DrawImagePart(150, 210, bmp, 0, 0, 32, 21);
   Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
   Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
-  
+
   Canvas.StretchDraw(150, 240, 300, 50, bmp);
 
   Canvas.DrawImage(150, 300, dst);
   Canvas.StretchDraw(180, 300, 70, 70, dst);
   Canvas.StretchDraw(265, 300, 230, 25, bmp);
-  
-  
+
+
   // testing accuracy of line/rectangle drawing
   Canvas.SetColor(clBlack);
   Canvas.SetLineStyle(1, lsSolid);
@@ -159,8 +164,8 @@ begin
   Canvas.Pixels[9,5] := c;
   c := Canvas.Pixels[150 + (32*4) + 3, 199];   // should be lightblue like color
   Canvas.Pixels[10,5] := c;
-  
-  
+
+
   // Arc drawing tests
   Canvas.SetColor(clBlack);
   Canvas.DrawRectangle(5, 235, 50, 50);
@@ -176,7 +181,12 @@ begin
   r.SetRect(265, 340, 185, 35);
   Canvas.GradientFill(r, clBlue, clMagenta, gdHorizontal);
 
-  Canvas.EndDraw;
+end;
+
+procedure TMainForm.HandlePaint;
+begin
+  inherited HandlePaint;
+//  CustomPaintJob;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -196,6 +206,12 @@ begin
   dst := LoadImage_BMP('gears2.bmp');
   dst.CreateMaskFromSample(0,0);
   dst.UpdateImage;
+end;
+
+procedure TMainForm.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  OnPaint := @FormPaint;
 end;
 
 procedure TMainForm.BeforeDestruction;

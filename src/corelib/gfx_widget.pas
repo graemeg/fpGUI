@@ -573,7 +573,7 @@ end;
 procedure TfpgWidget.RePaint;
 begin
   if HasHandle then
-    HandlePaint;
+    fpgSendMessage(self, self, FPGM_PAINT);
 end;
 
 procedure TfpgWidget.SetFocus;
