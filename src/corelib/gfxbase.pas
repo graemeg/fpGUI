@@ -412,7 +412,7 @@ type
   end;
 
 
-  TfpgApplicationBase = class(TObject)
+  TfpgApplicationBase = class(TComponent)
   private
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
@@ -420,7 +420,6 @@ type
     function    GetFormCount: integer;
     function    GetTopModalForm: TfpgWindowBase;
   protected
-    FFormList: TList;
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
     FModalFormStack: TList;
@@ -1860,19 +1859,18 @@ end;
 
 constructor TfpgApplicationBase.Create(const AParams: string);
 begin
-  inherited Create;
+  inherited Create(nil);
   FModalFormStack := TList.Create;
-  FFormList       := TList.Create;
 end;
 
 function TfpgApplicationBase.GetFormCount: integer;
 begin
-  Result := FFormList.Count;
+  Result := ComponentCount;
 end;
 
 function TfpgApplicationBase.GetForm(Index: Integer): TfpgWindowBase;
 begin
-  Result := TfpgWindowBase(FFormList.Items[Index]);
+  Result := TfpgWindowBase(Components[Index]);
 end;
 
 function TfpgApplicationBase.GetFontFaceList: TStringList;
@@ -1915,8 +1913,7 @@ procedure TfpgApplicationBase.CreateForm(AFormClass: TComponentClass;
   var AForm: TfpgWindowBase);
 begin
   try
-    AForm := TfpgWindowBase(AFormClass.Create(nil));
-    FFormList.Add(AForm);
+    AForm := TfpgWindowBase(AFormClass.Create(self));
     if FMainForm = nil then
       FMainForm := AForm;
   except

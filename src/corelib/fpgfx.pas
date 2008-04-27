@@ -785,13 +785,7 @@ var
   i: integer;
   frm: TfpgWindowBase;
 begin
-  for i := FFormList.Count - 1 downto 0 do
-  begin
-    frm := TfpgWindowBase(FFormList.Items[i]);
-    FFormList.Remove(frm);
-    frm.Free;
-  end;
-  FFormList.Free;
+  DestroyComponents;  // while message queue is still active
 
   for i := 0 to (fpgNamedFonts.Count - 1) do
     TNamedFontItem(fpgNamedFonts.Items[i]).Free;
@@ -939,10 +933,12 @@ end;
 
 procedure TfpgApplication.InternalMsgClose(var msg: TfpgMessageRec);
 begin
-  writeln('InternalMsgClose received');
+//  writeln('InternalMsgClose received');
   if Assigned(msg.Sender) then
   begin
-    FFormList.Remove(msg.Sender);
+    if csDestroying in TComponent(msg.Sender).ComponentState then
+      Exit;
+    RemoveComponent(TfpgWindowBase(msg.Sender));
     TfpgWindowBase(msg.Sender).Free;
   end;
 end;
