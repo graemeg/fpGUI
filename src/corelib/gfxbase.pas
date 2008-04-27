@@ -2087,7 +2087,7 @@ begin
   // find insert position in FSpecialDirs where we can insert all parts
   // of aDirectory.
   i := 0;
-  // We have to user UpperCase() because under Windows aDirectory's drive
+  // We have to use UpperCase() because under Windows aDirectory's drive
   // letter could be lower case, but Win API returns initial drive letters
   // in upper case, so the second test could never be false causing
   // Index out of bounds error further down.
