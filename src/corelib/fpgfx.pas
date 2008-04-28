@@ -1489,12 +1489,12 @@ begin
   if (btnIsPressed in AFlags) then
   begin
     if (btnIsEmbedded in AFlags) then
-      ACanvas.SetColor(clHilite1)
+      ACanvas.SetColor(clHilite2)
     else
       ACanvas.SetColor(clShadow2);
   end
   else
-    ACanvas.SetColor(clHilite1);
+    ACanvas.SetColor(clHilite2);
   ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
   ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
 
