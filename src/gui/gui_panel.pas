@@ -36,14 +36,18 @@ type
 
   TPanelStyle = (bsLowered, bsRaised);
 
+  TPanelBorder = (bsSingle, bsDouble);
 
   TfpgAbstractPanel = class(TfpgWidget)
   private
     FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
+    FPanelBorder: TPanelBorder;
     procedure   SetPanelStyle(const AValue: TPanelStyle);
+    procedure   SetPanelBorder(const AValue: TPanelBorder);
   protected
     property    Style: TPanelStyle read FPanelStyle write SetPanelStyle default bsRaised;
+    property    BorderStyle: TPanelBorder read FPanelBorder write SetPanelBorder default bsSingle;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -55,6 +59,7 @@ type
     procedure   HandlePaint; override;
   published
     property    BackgroundColor;
+    property    BorderStyle;
     property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
     property    Style;
     property    OnClick;
@@ -92,6 +97,7 @@ type
   published
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
     property    BackgroundColor;
+    property    BorderStyle;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Layout: TLayout read GetLayout write SetLayout default tlCenter;
     property    Style;
@@ -126,6 +132,7 @@ type
   published
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
     property    BackgroundColor;
+    property    BorderStyle;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Style;
     property    Text: string read GetText write SetText;
@@ -197,10 +204,20 @@ end;
 
 procedure TfpgAbstractPanel.SetPanelStyle(const AValue: TPanelStyle);
 begin
-  if FPanelStyle = AValue then
-    Exit; //==>
-  FPanelStyle := AValue;
-  Repaint;
+  if FPanelStyle <> AValue then
+  begin
+    FPanelStyle := AValue;
+    Repaint;
+  end;
+end;
+
+procedure TfpgAbstractPanel.SetPanelBorder(const AValue: TPanelBorder);
+begin
+  if FPanelBorder <> AValue then
+  begin
+    FPanelBorder := AValue;
+    Repaint;
+  end;
 end;
 
 constructor TfpgAbstractPanel.Create(AOwner: TComponent);
@@ -208,6 +225,7 @@ begin
   inherited Create(AOwner);
   FPanelShape      := bsBox;
   FPanelStyle      := bsRaised;
+  FPanelBorder     := bsSingle;
   FWidth           := 80;
   FHeight          := 80;
   FFocusable       := True;  // otherwise children can't get focus
@@ -234,16 +252,29 @@ begin
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
   //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
-  Canvas.SetLineStyle(1, lsSolid);
+  if FPanelBorder = bsSingle then
+    Canvas.SetLineStyle(1, lsSolid)
+  else
+    Canvas.SetLineStyle(2, lsSolid);
 
   if Style = bsRaised then
     Canvas.SetColor(clHilite2)
   else
     Canvas.SetColor(clShadow2);
 
-  if Shape in [bsBox, bsFrame, bsTopLine] then
-    Canvas.DrawLine(0, 0, Width - 1, 0);
-  if Shape in [bsBox, bsFrame, bsLeftLine] then
+  if Shape in [bsBox] then
+    if FPanelBorder = bsSingle then
+      Canvas.DrawLine(0, 0, Width - 1, 0)
+    else
+      Canvas.DrawLine(0, 1, Width - 1, 1);
+  if Shape in [bsFrame, bsTopLine] then
+      Canvas.DrawLine(0, 0, Width - 1, 0);
+  if Shape in [bsBox] then
+    if FPanelBorder = bsSingle then
+      Canvas.DrawLine(0, 1, 0, Height - 1)
+    else
+      Canvas.DrawLine(1, 1, 1, Height - 1);
+  if Shape in [bsFrame, bsLeftLine] then
     Canvas.DrawLine(0, 1, 0, Height - 1);
   if Shape in [bsFrame, bsRightLine] then
     Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
@@ -373,15 +404,26 @@ begin
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
   //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
-  Canvas.SetLineStyle(1, lsSolid);
+  if FPanelBorder = bsSingle then
+    Canvas.SetLineStyle(1, lsSolid)
+  else
+    Canvas.SetLineStyle(2, lsSolid);
 
   if Style = bsRaised then
     Canvas.SetColor(clHilite2)
   else
     Canvas.SetColor(clShadow2);
 
-  Canvas.DrawLine(0, 0, Width - 1, 0);
-  Canvas.DrawLine(0, 1, 0, Height - 1);
+  if FPanelBorder = bsSingle then
+  begin
+    Canvas.DrawLine(0, 0, Width - 1, 0);
+    Canvas.DrawLine(0, 1, 0, Height - 1);
+  end
+  else
+  begin
+    Canvas.DrawLine(0, 1, Width - 1, 1);
+    Canvas.DrawLine(1, 1, 1, Height - 1);
+  end;
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
@@ -508,15 +550,26 @@ begin
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
   //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
-  Canvas.SetLineStyle(1, lsSolid);
+  if FPanelBorder = bsSingle then
+    Canvas.SetLineStyle(1, lsSolid)
+  else
+    Canvas.SetLineStyle(2, lsSolid);
 
   if Style = bsRaised then
     Canvas.SetColor(clHilite2)
   else
     Canvas.SetColor(clShadow2);
 
-  Canvas.DrawLine(0, 5, Width - 1, 5);
-  Canvas.DrawLine(0, 6, 0, Height - 1);
+  if FPanelBorder = bsSingle then
+  begin
+    Canvas.DrawLine(0, 5, Width - 1, 5);
+    Canvas.DrawLine(0, 6, 0, Height - 1);
+  end
+  else
+  begin
+    Canvas.DrawLine(0, 6, Width - 1, 6);
+    Canvas.DrawLine(1, 6, 1, Height - 1);
+  end;
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
@@ -543,8 +596,16 @@ begin
         else
           Canvas.SetColor(clShadow2);
 
-        Canvas.DrawLine(5, 0, w + 5, 0);
-        Canvas.DrawLine(5, 0, 5, 6);
+        if FPanelBorder = bsSingle then
+        begin
+          Canvas.DrawLine(5, 0, w + 5, 0);
+          Canvas.DrawLine(5, 0, 5, 6);
+        end
+        else
+        begin
+          Canvas.DrawLine(5, 1, w + 5, 1);
+          Canvas.DrawLine(6, 0, 6, 7);
+        end;
 
         if Style = bsRaised then
           Canvas.SetColor(clShadow2)
@@ -568,8 +629,16 @@ begin
         else
           Canvas.SetColor(clShadow2);
 
-        Canvas.DrawLine(w, 0, Width - 5, 0);
-        Canvas.DrawLine(w, 0, w, 6);
+        if FPanelBorder = bsSingle then
+        begin
+          Canvas.DrawLine(w, 0, Width - 5, 0);
+          Canvas.DrawLine(w, 0, w, 6);
+        end
+        else
+        begin
+          Canvas.DrawLine(w, 1, Width - 5, 1);
+          Canvas.DrawLine(w + 1, 0, w + 1, 7);
+        end;
 
         if Style = bsRaised then
           Canvas.SetColor(clShadow2)
@@ -593,15 +662,23 @@ begin
         else
           Canvas.SetColor(clShadow2);
 
-        Canvas.DrawLine(w, 0, w + FFont.TextWidth(FText) + FMargin * 2, 0);
-        Canvas.DrawLine(w, 0, w, 6);
+        if FPanelBorder = bsSingle then
+        begin
+          Canvas.DrawLine(w, 0, w + FFont.TextWidth(FText) + FMargin * 2, 0);
+          Canvas.DrawLine(w, 0, w, 6);
+        end
+        else
+        begin
+          Canvas.DrawLine(w, 1, w + FFont.TextWidth(FText) + FMargin * 2, 1);
+          Canvas.DrawLine(w + 1, 0, w + 1, 7);
+        end;
 
         if Style = bsRaised then
           Canvas.SetColor(clShadow2)
         else
           Canvas.SetColor(clHilite2);
 
-        Canvas.DrawLine(w + FFont.TextWidth(FText) + FMargin * 2, 0, w + FFont.TextWidth(FText) + FMargin * 2, 6);
+        Canvas.DrawLine(w + FFont.TextWidth(FText) + FMargin * 2 - 1, 0, w + FFont.TextWidth(FText) + FMargin * 2 - 1, 6);
 
         Include(lTxtFlags, txtHCenter);
         Canvas.DrawText(w + FMargin, 0, FText, lTxtFlags);

@@ -59,6 +59,7 @@ type
     RB_Lowered: TfpgRadioButton;
     Bt_Quit: TfpgButton;
     cbxShape: TfpgComboBox;
+    cbxBorder: TfpgComboBox;
     procedure RB_LeftChange(Sender: TObject);
     procedure RB_CenterChange(Sender: TObject);
     procedure RB_RightChange(Sender: TObject);
@@ -83,6 +84,7 @@ type
     procedure RB_LoweredChange(Sender: TObject);
     procedure Bt_QuitClick(Sender: TObject);
     procedure cbxShapeChange(Sender: TObject);
+    procedure cbxBorderChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -230,6 +232,22 @@ begin
     B_Bevel.Shape := TPanelShape((Sender as TfpgComboBox).FocusItem-1);
 end;
 
+procedure TfrmMain.cbxBorderChange(Sender: TObject);
+begin
+  if cbxBorder.FocusItem = 1 then
+  begin
+    B_Bevel.BorderStyle     := bsSingle;
+    P_Panel.BorderStyle     := bsSingle;
+    G_GroupBox.BorderStyle  := bsSingle;
+  end
+  else
+  begin
+    B_Bevel.BorderStyle     := bsDouble;
+    P_Panel.BorderStyle     := bsDouble;
+    G_GroupBox.BorderStyle  := bsDouble;
+  end;
+end;
+
 constructor TfrmMain.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -320,7 +338,7 @@ begin
   RB_Raised.Checked := True;
   RB_Lowered     := CreateRadioButton(B_Style, 20, 40, 'Lowered');
   RB_Lowered.OnChange := @RB_LoweredChange;
-  Bt_Quit        := CreateButton(Self, 250, 550, 100, 'Quit', @Bt_QuitClick);
+  Bt_Quit        := CreateButton(Self, 250, 555, 100, 'Quit', @Bt_QuitClick);
   
   cbxShape := CreateComboBox(self, 250, 500, 100, nil);
   cbxShape.Items.Add('bsBox');
@@ -332,6 +350,12 @@ begin
   cbxShape.Items.Add('bsSpacer');
   cbxShape.FocusItem := 1;
   cbxShape.OnChange := @cbxShapeChange;
+  
+  cbxBorder := CreateComboBox(self, 250, 528, 100, nil);
+  cbxBorder.Items.Add('bsSingle');
+  cbxBorder.Items.Add('bsDouble');
+  cbxBorder.FocusItem := 1;
+  cbxBorder.OnChange := @cbxBorderChange;
 end;
 
 end.
