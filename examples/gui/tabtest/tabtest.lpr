@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, fpgfx, gfx_widget, gfxbase, gui_form, gui_tab, gui_button,
-  gui_label, gui_edit, gui_checkbox;
+  gui_label, gui_edit, gui_checkbox, gui_combobox;
 
 type
   TMainForm = class(TfpgForm)
@@ -20,10 +20,12 @@ type
     tsFour: TfpgTabSheet;
     btn2, btn3, btn4: TfpgButton;
     chkSort: TfpgCheckBox;
+    cbTabPos: TfpgComboBox;
     procedure   btnQuitClick(Sender: TObject);
     procedure   btn2Click(Sender: TObject);
     procedure   btn3Click(Sender: TObject);
     procedure   chkSortChange(Sender: TObject);
+    procedure   cbTabPosChanged(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -55,6 +57,14 @@ procedure TMainForm.chkSortChange(Sender: TObject);
 begin
   pcMain.SortPages := chkSort.Checked;
   btn3.Enabled := not chkSort.Checked;
+end;
+
+procedure TMainForm.cbTabPosChanged(Sender: TObject);
+begin
+  if cbTabPos.FocusItem = 1 then
+    pcMain.TabPosition := tpTop
+  else
+    pcMain.TabPosition := tpBottom;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -108,6 +118,12 @@ begin
   
   chkSort := CreateCheckBox(self, 190, 320, 'Sort Tabs');
   chkSort.OnChange := @chkSortChange;
+  
+  cbTabPos := CreateComboBox(self, 300, 320, 80, nil);
+  cbTabPos.Items.Add('tpTop');
+  cbTabPos.Items.Add('tpBottom');
+  cbTabPos.FocusItem := 1;
+  cbTabPos.OnChange := @cbTabPosChanged;
 end;
 
 procedure MainProc;
