@@ -535,7 +535,6 @@ end;
 procedure TfpgGroupBox.HandlePaint;
 var
   r: TfpgRect;
-  lTxtFlags: TFTextFlags;
   w: integer;
 begin
   inherited HandlePaint;
@@ -582,7 +581,6 @@ begin
   Canvas.SetTextColor(FTextColor);
   Canvas.SetFont(Font);
   
-  lTxtFlags:= [txtTop];
   case FAlignment of
     taLeftJustify:
       begin
@@ -613,9 +611,7 @@ begin
           Canvas.SetColor(clHilite2);
 
         Canvas.DrawLine(w + 5, 0, w + 5, 6);
-
-        Include(lTxtFlags, txtLeft);
-        Canvas.DrawText(FMargin + 5, 0, FText, lTxtFlags);
+        Canvas.DrawText(FMargin + 5, 0, FText);
       end;
     taRightJustify:
       begin
@@ -646,9 +642,7 @@ begin
           Canvas.SetColor(clHilite2);
 
         Canvas.DrawLine(Width - 6, 0, Width - 6, 6);
-
-        Include(lTxtFlags, txtRight);
-        Canvas.DrawText(Width - FFont.TextWidth(FText) - FMargin - 5, 0, FText, lTxtFlags);
+        Canvas.DrawText(Width - FFont.TextWidth(FText) - FMargin - 5, 0, FText);
       end;
     taCenter:
       begin
@@ -679,9 +673,7 @@ begin
           Canvas.SetColor(clHilite2);
 
         Canvas.DrawLine(w + FFont.TextWidth(FText) + FMargin * 2 - 1, 0, w + FFont.TextWidth(FText) + FMargin * 2 - 1, 6);
-
-        Include(lTxtFlags, txtHCenter);
-        Canvas.DrawText(w + FMargin, 0, FText, lTxtFlags);
+        Canvas.DrawText(w + FMargin, 0, FText);
       end;
     end;
 end;

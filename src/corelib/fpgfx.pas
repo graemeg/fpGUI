@@ -158,8 +158,8 @@ type
     procedure   DrawDirectionArrow(r: TfpgRect; direction: integer);
     procedure   DrawFocusRect(r: TfpgRect);
     function    DrawText(x, y, w, h: TfpgCoord; AText: string; AFlags: TFTextFlags; ALineSpace: integer = 2): integer;
-    function    DrawText(x, y: TfpgCoord; AText: string; AFlags: TFTextFlags; ALineSpace: integer = 2): integer;
-    function    DrawText(r: TfpgRect; AText: string; AFlags: TFTextFlags; ALineSpace: integer = 2): integer;
+    function    DrawText(x, y: TfpgCoord; AText: string; ALineSpace: integer = 2): integer;
+    function    DrawText(r: TfpgRect; AText: string; AFlags: TFTextFlags = [txtLeft, txtTop]; ALineSpace: integer = 2): integer;
   end;
 
 
@@ -1152,7 +1152,7 @@ begin
 end;
 
 function TfpgCanvas.DrawText(x, y, w, h: TfpgCoord; AText: string; AFlags: TFTextFlags;
-                ALineSpace: integer = 2): integer;
+                ALineSpace: integer): integer;
 var
   wtxt, htxt, i, wt, l: integer;
   wraptxt: string;
@@ -1346,14 +1346,13 @@ begin
   end;
 end;
 
-function TfpgCanvas.DrawText(x, y: TfpgCoord; AText: string; AFlags: TFTextFlags;
-                ALineSpace: integer = 2): integer;
+function TfpgCanvas.DrawText(x, y: TfpgCoord; AText: string; ALineSpace: integer = 2): integer;
 begin
-  Result := DrawText(x, y, 0, 0, AText, AFlags, ALineSpace);
+  Result := DrawText(x, y, 0, 0, AText, [txtLeft, txtTop], ALineSpace);
 end;
 
 function TfpgCanvas.DrawText(r: TfpgRect; AText: string; AFlags: TFTextFlags;
-                ALineSpace: integer = 2): integer;
+                ALineSpace: integer): integer;
 begin
   Result := DrawText(r.Left, r.Top, r.Width, r.Height, AText, AFlags, ALineSpace);
 end;
