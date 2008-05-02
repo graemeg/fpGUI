@@ -40,6 +40,7 @@ type
 
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
+  TextFlagsDflt = [txtLeft, txtTop];
 
   // Used for the internal message queue
   cMessageQueueSize = 512;
@@ -157,9 +158,9 @@ type
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
     procedure   DrawDirectionArrow(r: TfpgRect; direction: integer);
     procedure   DrawFocusRect(r: TfpgRect);
-    function    DrawText(x, y, w, h: TfpgCoord; AText: string; AFlags: TFTextFlags; ALineSpace: integer = 2): integer;
-    function    DrawText(x, y: TfpgCoord; AText: string; ALineSpace: integer = 2): integer;
-    function    DrawText(r: TfpgRect; AText: string; AFlags: TFTextFlags = [txtLeft, txtTop]; ALineSpace: integer = 2): integer;
+    function    DrawText(x, y, w, h: TfpgCoord; AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
+    function    DrawText(x, y: TfpgCoord; AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
+    function    DrawText(r: TfpgRect; AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
   end;
 
 
@@ -1151,11 +1152,11 @@ begin
   fpgStyle.DrawFocusRect(self, r);
 end;
 
-function TfpgCanvas.DrawText(x, y, w, h: TfpgCoord; AText: string; AFlags: TFTextFlags;
+function TfpgCanvas.DrawText(x, y, w, h: TfpgCoord; AText: TfpgString; AFlags: TFTextFlags;
                 ALineSpace: integer): integer;
 var
   wtxt, htxt, i, wt, l: integer;
-  wraptxt: string;
+  wraptxt: TfpgString;
   wraplst: TStringList;
 begin
   if (txtWrap in AFlags) then
@@ -1346,13 +1347,14 @@ begin
   end;
 end;
 
-function TfpgCanvas.DrawText(x, y: TfpgCoord; AText: string; ALineSpace: integer = 2): integer;
+function TfpgCanvas.DrawText(x, y: TfpgCoord; AText: TfpgString;
+    AFlags: TFTextFlags; ALineSpace: integer): integer;
 begin
-  Result := DrawText(x, y, 0, 0, AText, [txtLeft, txtTop], ALineSpace);
+  Result := DrawText(x, y, 0, 0, AText, AFlags, ALineSpace);
 end;
 
-function TfpgCanvas.DrawText(r: TfpgRect; AText: string; AFlags: TFTextFlags;
-                ALineSpace: integer): integer;
+function TfpgCanvas.DrawText(r: TfpgRect; AText: TfpgString; AFlags: TFTextFlags;
+    ALineSpace: integer): integer;
 begin
   Result := DrawText(r.Left, r.Top, r.Width, r.Height, AText, AFlags, ALineSpace);
 end;
