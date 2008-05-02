@@ -644,6 +644,16 @@ begin
     OrderSheets;
   Canvas.ClearClipRect;
   Canvas.Clear(FBackgroundColor);
+  
+  // To make it more visible in the UI Designer
+  if csDesigning in ComponentState then
+  begin
+    Canvas.SetColor(clInactiveWgFrame);
+    Canvas.DrawRectangle(0, 0, Width, Height);
+    Canvas.SetTextColor(clText1);
+    Canvas.DrawString(2, 2, Name + ': ' + Classname);
+  end;
+  
   if TabPosition = tpBottom then
   begin
     if Focused then
