@@ -380,9 +380,10 @@ end;
 function TColumnsGrid.GetRowCount: Longword;
 begin
   try
+    // Yes, it must be ColumnCount and *not* RowCount!
     Result := dbgrid.ColumnCount;
   except
-    Result := inherited GetRowCount;
+    Result := inherited GetColumnCount;
   end;
 end;
 

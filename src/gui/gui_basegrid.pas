@@ -146,6 +146,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   AfterConstruction; override;
     procedure   Update;
     procedure   BeginUpdate;
     procedure   EndUpdate;
@@ -1080,6 +1081,7 @@ end;
 
 constructor TfpgBaseGrid.Create(AOwner: TComponent);
 begin
+  Updating;
   inherited Create(AOwner);
   Focusable   := True;
   Width       := 120;
@@ -1129,6 +1131,12 @@ begin
   FFont.Free;
   FHeaderFont.Free;
   inherited Destroy;
+end;
+
+procedure TfpgBaseGrid.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  Updated;
 end;
 
 procedure TfpgBaseGrid.Update;

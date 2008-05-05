@@ -177,6 +177,9 @@ begin
       dec(n);
     end;
   end;
+  
+  if csUpdating in ComponentState then
+    Exit;
   UpdateScrollBars;
   RePaint;
 end;
@@ -191,6 +194,8 @@ begin
     FocusRow := FRowCount;
   end;
   DoSetRowCount(AValue);  // could be implemented by descendants
+  if csUpdating in ComponentState then
+    Exit;
   UpdateScrollBars;
   RePaint;
 end;
@@ -273,8 +278,8 @@ constructor TfpgCustomGrid.Create(AOwner: TComponent);
 begin
   FColumns := TList.Create;
   inherited Create(AOwner);
-  ColumnCount := 5;
-  RowCount    := 5;
+  ColumnCount := 0;
+  RowCount    := 0;
 end;
 
 destructor TfpgCustomGrid.Destroy;

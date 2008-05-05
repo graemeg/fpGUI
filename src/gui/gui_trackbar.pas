@@ -378,6 +378,7 @@ begin
     FMax := AValue;
   if FPosition > FMax then
     SetTBPosition(FMax);
+  Repaint;
 end;
 
 procedure TfpgTrackBar.SetMin(const AValue: integer);
@@ -390,6 +391,7 @@ begin
     FMin := AValue;
   if FPosition < FMin then
     SetTBPosition(FMin);
+  Repaint;
 end;
 
 procedure TfpgTrackBar.SetTBPosition(const AValue: integer);
@@ -403,6 +405,7 @@ begin
 
   if HasHandle then
     DrawSlider(False);
+  Repaint;
 end;
 
 procedure TfpgTrackBar.SetShowPosition(const AValue: boolean);
