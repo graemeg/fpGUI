@@ -236,6 +236,8 @@ begin
 end;
 
 function TfpgForm.ShowModal: integer;
+var
+  CloseAction: TCloseAction;
 begin
   FWindowType := wtModalForm;
   fpgApplication.PushModalForm(self);
@@ -256,6 +258,12 @@ begin
 
   fpgApplication.PopModalForm;
   Result := ModalResult;
+  
+  if ModalResult <> 0 then
+  begin
+    CloseAction := caFree; // Dummy variable - we do nothing with it
+    DoOnClose(CloseAction); // Simply so the OnClose event fires.
+  end;
 end;
 
 procedure TfpgForm.MsgClose(var msg: TfpgMessageRec);
