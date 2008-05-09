@@ -1314,7 +1314,7 @@ begin
   if HandleIsValid then
     Exit; //==>
 
-  if aparent <> nil then
+  if AParent <> nil then
     pwh := TfpgWindowImpl(AParent).WinHandle
   else
     pwh := xapplication.RootWindow;
@@ -1328,7 +1328,6 @@ begin
   end;
 
   AdjustWindowStyle;
-
   wh := XCreateWindow(xapplication.Display, pwh,
     FLeft, FTop, FWidth, FHeight, 0,
     CopyFromParent,

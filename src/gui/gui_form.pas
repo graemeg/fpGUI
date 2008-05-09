@@ -242,6 +242,7 @@ begin
   ModalResult     := 0;
 
   Show;
+
   // processing messages until this form ends.
   // delivering the remaining messages
   fpgApplication.ProcessMessages;

@@ -418,6 +418,9 @@ var
   newf: integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
+  
+  if ComponentCount = 0 then
+    Exit; // We have no menu items in MainMenu.
 
   if not Focused then
     ActivateMenu;

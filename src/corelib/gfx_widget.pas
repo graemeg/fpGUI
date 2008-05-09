@@ -261,7 +261,7 @@ begin
 
   inherited Create(AOwner);
 
-  // This is for components that are create at runtime, after it's
+  // This is for components that are created at runtime, after it's
   // parent has already been shown.
   if (Parent <> nil) and (Parent.HasHandle) then
   begin
@@ -532,15 +532,16 @@ var
   c: TComponent;
 begin
   FOnScreen := True;
-  FVisible := True;
+//  FVisible := True;
 
   AllocateWindowHandle;
-  DoSetWindowVisible(True);
+  DoSetWindowVisible(FVisible);
 
   for n := 0 to ComponentCount - 1 do
   begin
     c := Components[n];
-    if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) then
+    if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) and
+      (TfpgWidget(c).FOnScreen = False) then
       TfpgWidget(c).HandleShow;
   end;
 end;
