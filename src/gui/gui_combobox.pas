@@ -229,10 +229,13 @@ end;
 
 procedure TfpgBaseComboBox.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
+var
+  old: integer;
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
   if not consumed then
   begin
+    old := FocusItem;
     case keycode of
       keyDown:
         begin
@@ -241,6 +244,8 @@ begin
           else
           begin
             FocusItem := FocusItem + 1;
+            if old <> FocusItem then
+              DoOnChange;
             consumed := True;
           end;
         end;
@@ -248,6 +253,8 @@ begin
       keyUp:
         begin
           FocusItem := FocusItem - 1;
+          if old <> FocusItem then
+            DoOnChange;
           consumed := True;
         end;
     end;  { case }
