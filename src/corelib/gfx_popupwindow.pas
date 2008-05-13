@@ -290,11 +290,22 @@ var
   pt: TPoint;
 begin
   PopupListAdd(self);
-  // translate coordinates
-  pt    := WindowToScreen(AWidget, Point(x, y));
-  // reposition
-  Left  := pt.X;
-  Top   := pt.Y;
+  
+  if AWidget <> nil then
+  begin
+    // translate coordinates - window to screen
+    pt    := WindowToScreen(AWidget, Point(x, y));
+    // reposition
+    Left  := pt.X;
+    Top   := pt.Y;
+  end
+  else
+  begin
+    // no translation needed, they are already in screen coordinates
+    Left  := x;
+    Top   := y;
+  end;
+  
   // and show
   HandleShow;
 end;
