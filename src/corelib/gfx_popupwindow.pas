@@ -49,7 +49,8 @@ type
     procedure   DoOnClose; virtual;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);
+    procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord); overload;
+    procedure   ShowAt(x, y: TfpgCoord); overload;
     procedure   Close; virtual;
     property    DontCloseWidget: TfpgWidget read FDontCloseWidget write FDontCloseWidget;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
@@ -308,6 +309,11 @@ begin
   
   // and show
   HandleShow;
+end;
+
+procedure TfpgPopupWindow.ShowAt(x, y: TfpgCoord);
+begin
+  ShowAt(nil, x, y);
 end;
 
 procedure TfpgPopupWindow.Close;
