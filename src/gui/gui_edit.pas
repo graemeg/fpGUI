@@ -48,8 +48,8 @@ type
     FOnChange: TNotifyEvent;
     FMaxLength: integer;
     FSelecting: Boolean;
-    procedure   AdjustCursor;
-    function    CursorPosToCharPos(x, y: integer): integer;
+    procedure   AdjustVisibleText;
+    function    PointToCharPos(x, y: integer): integer;
     procedure   DeleteSelection;
     procedure   DoCopy;
     procedure   DoPaste;
@@ -67,13 +67,17 @@ type
     procedure   SetDefaultPopupMenuItemsState;
   protected
     FMouseDragPos: integer;
+    FTextOffset: integer;
     FDrawOffset: integer;
+    FVisibleText: TfpgString;
     FSideMargin: integer;
     FSelStart: integer;
     FSelOffset: integer;
-    FCursorPos: integer;
+    FCursorPos: integer; // Caret position (characters)
+    FCursorX: integer;   // Caret position (pixels)
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -242,67 +246,72 @@ end;
 
 { TfpgCustomEdit }
 
-procedure TfpgCustomEdit.AdjustCursor;
+procedure TfpgCustomEdit.AdjustVisibleText;
+// Converts caret position from characters to pixels (FCursorPos -> FCursorX)
+// Calculates visible text and it's drawing offset based on the caret position
 var
   tw: integer;
+  fvc, lvc: integer; // first/last visible characters
   VisibleWidth: integer;
 begin
   tw           := FFont.TextWidth(UTF8Copy(GetDrawText, 1, FCursorPos));
   VisibleWidth := (FWidth - 2 * FSideMargin);
 
-  if tw - FDrawOffset > VisibleWidth - 2 then
-    FDrawOffset := tw - VisibleWidth + 2
-  else if tw - FDrawOffset < 0 then
+  if tw - FTextOffset > VisibleWidth - 2 then
+    FTextOffset := tw - VisibleWidth + 2
+  else if tw - FTextOffset < 0 then
   begin
-    FDrawOffset := tw;
+    FTextOffset := tw;
     if tw <> 0 then
-      Dec(FDrawOffset, 2);
+      Dec(FTextOffset, 2);
   end;
+
+  FCursorX := tw - FTextOffset + FSideMargin;
+
+  { vvzh: we could use single pass through the text instead of two PointToCharPos calls
+    in order to make this piece of code faster, but this would require code duplication.
+    Moreover, we could use this single pass to calculate FVisibleText and FXXXOffset too,
+    thus making this procedure about 5 times faster, but much less readable/meaningfull. }
+  fvc := PointToCharPos(FSideMargin, 0);
+  lvc := PointToCharPos(FWidth - FSideMargin, 0) + 1;
+  FVisibleText := UTF8Copy(GetDrawText, fvc, lvc - fvc + 1);
+  FDrawOffset  := FTextOffset - FFont.TextWidth(UTF8Copy(GetDrawText, 1, fvc - 1));
 end;
 
-function TfpgCustomEdit.CursorPosToCharPos(x, y: integer): integer;
+function TfpgCustomEdit.PointToCharPos(x, y: integer): integer;
 var
   n: integer;
-  cpx: integer;
-  cx: integer;
+  cx: integer; // character X position
+  bestcx: integer;
   dtext: string;
   tw, dpos: integer;
-  // tc: Cardinal;
   ch: TfpgChar;
 begin
-  // searching the appropriate character position
   ch     := '';
   dtext  := GetDrawText;
-  cpx    := FFont.TextWidth(UTF8Copy(dtext, 1, FCursorPos)) - FDrawOffset + FSideMargin;
-  Result := FCursorPos;
-  
-  // tc := fpgGetTickCount;
-  {for n := 0 to UTF8Length(dtext) do
-  begin
-    cx := FFont.TextWidth(UTF8Copy(dtext, 1, n)) - FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
-    begin
-      cpx    := cx;
-      Result := n;
-    end;
-  end;}
-  
+  if x > 0 then // bestcx < cx minimum
+    bestcx := Low(cx) + 1 + x
+  else          // bestcx > cx maximum
+    bestcx := High(cx) - 1 + x;
+    
   tw   := 0;
-  n    := 0;
   dpos := 0;
+  n    := 0;
+  Result := n;
+  // searching the appropriate character position
   while dpos <= Length(dtext) do
   begin
     dpos := UTF8CharAtByte(dtext, dpos, ch);
     tw := tw + FFont.TextWidth(ch);
-    cx := tw - FDrawOffset + FSideMargin;
-    if abs(cx - x) < abs(cpx - x) then
+    cx := tw - FTextOffset + FSideMargin;
+    if abs(cx - x) < abs(bestcx - x) then
     begin
-      cpx    := cx;
+      bestcx := cx;
       Result := n;
-    end;
+    end else
+      Exit; //==>
     Inc(n);
   end;
-  // writeln(fpgGetTickCount - tc);
 end;
 
 procedure TfpgCustomEdit.SetBorderStyle(const AValue: TfpgEditBorderStyle);
@@ -351,14 +360,14 @@ var
       len := -len;
     end;
     tw  := FFont.TextWidth(UTF8copy(dtext, 1, st));
-    tw2 := FFont.TextWidth(UTF8copy(dtext, 1, st + len));
+    tw2 := tw + FFont.TextWidth(UTF8copy(dtext, st + 1, len));
 
     Canvas.SetColor(lcolor);
-    Canvas.FillRectangle(-FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
-    r.SetRect(-FDrawOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
+    Canvas.FillRectangle(-FTextOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
+    r.SetRect(-FTextOffset + FSideMargin + tw, 3, tw2 - tw, FFont.Height);
     Canvas.AddClipRect(r);
     Canvas.SetTextColor(clWhite);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, FVisibleText, Enabled);
     Canvas.ClearClipRect;
   end;
   
@@ -391,10 +400,11 @@ begin
 
   Canvas.FillRectangle(r);
   dtext := GetDrawText;
+  
   Canvas.SetFont(FFont);
   Canvas.SetTextColor(FTextColor);
-  fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, dtext, Enabled);
-
+  // fpgStyle.DrawString(Canvas, -FTextOffset + FSideMargin, 3, dtext, Enabled);
+  fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, FVisibleText, Enabled);
 
   if Focused then
   begin
@@ -403,8 +413,7 @@ begin
       DrawSelection;
 
     // drawing cursor
-    tw := FFont.TextWidth(UTF8copy(dtext, 1, FCursorPos));
-    fpgCaret.SetCaret(Canvas, -FDrawOffset + FSideMargin + tw, 3, fpgCaret.Width, FFont.Height);
+    fpgCaret.SetCaret(Canvas, FCursorX, 3, fpgCaret.Width, FFont.Height);
   end
   else
   begin
@@ -413,6 +422,12 @@ begin
       DrawSelection;
     fpgCaret.UnSetCaret(Canvas);
   end;
+end;
+
+procedure TfpgCustomEdit.HandleResize(awidth, aheight: TfpgCoord);
+begin
+  inherited HandleResize(awidth, aheight);
+  AdjustVisibleText;
 end;
 
 procedure TfpgCustomEdit.HandleKeyChar(var AText: TfpgChar;
@@ -427,7 +442,7 @@ begin
   if not consumed then
   begin
     // Handle only printable characters
-    // Note: This is now UTF-8 compliant!
+    // UTF-8 characters beyond ANSI range are supposed to be printable
     if ((Ord(AText[1]) > 31) and (Ord(AText[1]) < 127)) or (Length(AText) > 1) then
     begin
       if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
@@ -436,7 +451,7 @@ begin
         UTF8Insert(s, FText, FCursorPos + 1);
         Inc(FCursorPos);
         FSelStart := FCursorPos;
-        AdjustCursor;
+        AdjustVisibleText;
       end;
       consumed := True;
     end;
@@ -481,6 +496,7 @@ begin
         begin
           DoCopy;
           DeleteSelection;
+          AdjustVisibleText;
           hasChanged := True;
         end;
   else
@@ -538,7 +554,7 @@ begin
 
     if Consumed then
     begin
-      AdjustCursor;
+      AdjustVisibleText;
 
       FSelecting := (ssShift in shiftstate);
 
@@ -580,7 +596,7 @@ begin
     if Consumed then
     begin
       StopSelection;
-      AdjustCursor;
+      AdjustVisibleText;
     end;
   end;  { if }
 
@@ -604,10 +620,11 @@ var
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
-  cp := CursorPosToCharPos(x, y);
+  cp := PointToCharPos(x, y);
 
   FMouseDragPos := cp;
   FCursorPos    := cp;
+  AdjustVisibleText;
 
   if (ssShift in shiftstate) then
     FSelOffset := FCursorPos - FSelStart
@@ -635,14 +652,14 @@ begin
   if (btnstate and MOUSE_LEFT) = 0 then
     Exit;
     
-  cp := CursorPosToCharPos(x, y);
+  cp := PointToCharPos(x, y);
 
   //FMouseDragPos := cp;
   FSelOffset := cp - FSelStart;
   if FCursorPos <> cp then
   begin
     FCursorPos := cp;
-    AdjustCursor;
+    AdjustVisibleText;
     Repaint;
   end;
 end;
@@ -713,7 +730,7 @@ begin
   FCursorPos        := UTF8Length(FText);
   FSelStart         := FCursorPos;
   FSelOffset        := 0;
-  FDrawOffset       := 0;
+  FTextOffset       := 0;
   FPasswordMode     := False;
   FBorderStyle      := bsDefault;
   FPopupMenu        := nil;
@@ -749,6 +766,7 @@ begin
   if FPasswordMode = AValue then
     Exit; //==>
   FPasswordMode := AValue;
+  AdjustVisibleText;
   RePaint;
 end;
 
@@ -763,6 +781,7 @@ begin
   FFont := fpgGetFont(AValue);
   if Height < FFont.Height + 6 then
     Height:= FFont.Height + 6;
+  AdjustVisibleText;
   RePaint;
 end;
 
@@ -787,9 +806,9 @@ begin
   FCursorPos  := UTF8Length(FText);
   FSelStart   := FCursorPos;
   FSelOffset  := 0;
-  FDrawOffset := 0;
+  FTextOffset := 0;
 
-  AdjustCursor;
+  AdjustVisibleText;
   RePaint;
 end;
 
@@ -901,7 +920,8 @@ begin
 
   UTF8Insert(s, FText, FCursorPos + 1);
   FCursorPos := FCursorPos + UTF8Length(s);
-  AdjustCursor;
+  FSelStart  := FCursorPos;
+  AdjustVisibleText;
   Repaint;
 end;
 
@@ -918,6 +938,7 @@ begin
   FSelStart   := 0;
   FSelOffset  := UTF8Length(FText);
   FCursorPos  := FSelOffset;
+  AdjustVisibleText;
   Repaint;
 end;
 
@@ -929,6 +950,7 @@ end;
 procedure TfpgCustomEdit.ClearSelection;
 begin
   DeleteSelection;
+  AdjustVisibleText;
   RePaint;
 end;
 
@@ -941,6 +963,7 @@ procedure TfpgCustomEdit.CutToClipboard;
 begin
   DoCopy;
   DeleteSelection;
+  AdjustVisibleText;
   RePaint;
 end;
 
