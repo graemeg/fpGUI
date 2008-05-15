@@ -223,6 +223,7 @@ type
     procedure   DoColumnClick(Column: TfpgLVColumn; Button: Integer);
     procedure   HandleHeaderMouseMove(x, y: Integer; btnstate: word; Shiftstate: TShiftState);
   protected
+    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -274,7 +275,7 @@ type
 
 { TfpgLVItems }
 
-function Min(AInt, BInt: Integer): INteger;
+function Min(AInt, BInt: Integer): Integer;
 begin
   if AInt < Bint then
     Result := AInt
@@ -865,6 +866,14 @@ begin
 
 end;
 
+procedure TfpgListView.MsgPaint(var msg: TfpgMessageRec);
+begin
+  // Optimises painting and prevents Begin[End]Draw and OnPaint event firing
+  // in not needed.
+  if FUpdateCount = 0 then
+    inherited MsgPaint(msg);
+end;
+
 procedure TfpgListView.HandleMouseScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
 var
@@ -1191,23 +1200,16 @@ begin
   
 end;
 
-
 procedure TfpgListView.HandlePaint;
 var
  ClipRect: TfpgRect;
 begin
-  if FUpdateCount > 0 then
-    Exit;
-
-  Canvas.BeginDraw;
-
   UpdateScrollBarPositions;
-
   fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
   
-  ClipRect.Top := 2;
-  ClipRect.Left := 2;
-  ClipRect.Width := Width -4;
+  ClipRect.Top    := 2;
+  ClipRect.Left   := 2;
+  ClipRect.Width  := Width -4;
   ClipRect.Height := Height -4;
   
   if ShowHeaders then
@@ -1235,16 +1237,12 @@ begin
     Dec(ClipRect.Height, FhScrollBar.Height);
     
   Canvas.SetClipRect(ClipRect);
-  
   PaintItems;
-  
-  Canvas.EndDraw;
 end;
 
 procedure TfpgListView.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
-
   UpdateScrollBarPositions;
 end;
 
@@ -1600,7 +1598,7 @@ begin
   if bVisible and tVisible then
     Exit;
   
-  if  (iBottom >= FVScrollBar.Position + GetItemAreaHeight) then
+  if (iBottom >= FVScrollBar.Position + GetItemAreaHeight) then
     FVScrollBar.Position := iBottom - GetItemAreaHeight
   else
     FVScrollBar.Position := iTop;
