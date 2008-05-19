@@ -44,7 +44,6 @@ var
   FontSmoothingType: Cardinal;
 
 type
-  TfpgGContext = HDC;
 
   // forward declaration
   TfpgWindowImpl = class;
@@ -93,9 +92,9 @@ type
     FDrawing: boolean;
     FBufferBitmap: HBitmap;
     FDrawWindow: TfpgWindowImpl;
-    Fgc: TfpgGContext;
-    fBufgc: TfpgGContext;
-    FWinGC: TfpgGContext;
+    Fgc: TfpgDCHandle;
+    fBufgc: TfpgDCHandle;
+    FWinGC: TfpgDCHandle;
     FBackgroundColor: TfpgColor;
     FCurFontRes: TfpgFontResourceImpl;
     FClipRect: TfpgRect;
@@ -132,6 +131,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    property    DCHandle: TfpgDCHandle read Fgc;
   public
     constructor Create; override;
     destructor  Destroy; override;

@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -56,38 +56,34 @@ type
   end;
   
   
-  { TfpgCustomGrid }
-
   TfpgCustomGrid = class(TfpgBaseGrid)
   protected
-    FRowCount: Longword;
+    FRowCount: Integer;
     FColumns: TList;
     procedure   SetTextColor(const AValue: TfpgColor); override;
     function    GetColumns(AIndex: integer): TfpgGridColumn; virtual;
     procedure   DoDeleteColumn(ACol: integer); virtual;
     procedure   DoSetRowCount(AValue: integer); virtual;
     function    DoCreateColumnClass: TfpgGridColumn; virtual;
-    function    GetColumnCount: Longword; override;
-    procedure   SetColumnCount(const AValue: Longword); virtual;
-    function    GetRowCount: Longword; override;
-    procedure   SetRowCount(const AValue: LongWord); virtual;
-    function    GetColumnWidth(ACol: Longword): integer; override;
-    procedure   SetColumnWidth(ACol: Longword; const AValue: integer); override;
-    function    GetColumnBackgroundColor(ACol: Longword): TfpgColor; override;
-    procedure   SetColumnBackgroundColor(ACol: Longword; const AValue: TfpgColor); override;
-    function    GetColumnTextColor(ACol: Longword): TfpgColor; override;
-    procedure   SetColumnTextColor(ACol: Longword; const AValue: TfpgColor); override;
-    function    GetHeaderText(ACol: Longword): string; override;
-    property    RowCount: Longword read GetRowCount write SetRowCount;
-    property    ColumnCount: Longword read GetColumnCount write SetColumnCount;
-    { Columns AIndex is 1-based. }
+    function    GetColumnCount: Integer; override;
+    procedure   SetColumnCount(const AValue: Integer); virtual;
+    function    GetRowCount: Integer; override;
+    procedure   SetRowCount(const AValue: Integer); virtual;
+    function    GetColumnWidth(ACol: Integer): integer; override;
+    procedure   SetColumnWidth(ACol: Integer; const AValue: integer); override;
+    function    GetColumnBackgroundColor(ACol: Integer): TfpgColor; override;
+    procedure   SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor); override;
+    function    GetColumnTextColor(ACol: Integer): TfpgColor; override;
+    procedure   SetColumnTextColor(ACol: Integer; const AValue: TfpgColor); override;
+    function    GetHeaderText(ACol: Integer): string; override;
+    property    RowCount: Integer read GetRowCount write SetRowCount;
+    property    ColumnCount: Integer read GetColumnCount write SetColumnCount;
     property    Columns[AIndex: integer]: TfpgGridColumn read GetColumns;
 //    property AlternateColor: TColor read FAlternateColor write SetAlternateColor stored IsAltColorStored;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn; virtual;
-    { AIndex is 1-based. }
     procedure   DeleteColumn(AIndex: integer); virtual;
     procedure   MoveColumn(oldindex, newindex: integer); virtual;
   end;
@@ -106,7 +102,7 @@ end;
 
 { TfpgCustomGrid }
 
-function TfpgCustomGrid.GetRowCount: Longword;
+function TfpgCustomGrid.GetRowCount: Integer;
 begin
   Result := FRowCount;
 end;
@@ -125,16 +121,16 @@ end;
 
 function TfpgCustomGrid.GetColumns(AIndex: integer): TfpgGridColumn;
 begin
-  if (AIndex < 1) or (AIndex > FColumns.Count) then
+  if (AIndex < 0) or (AIndex > FColumns.Count-1) then
     Result := nil
   else
-    Result := TfpgGridColumn(FColumns[AIndex-1]);
+    Result := TfpgGridColumn(FColumns[AIndex]);
 end;
 
 procedure TfpgCustomGrid.DoDeleteColumn(ACol: integer);
 begin
-  TfpgGridColumn(FColumns.Items[ACol-1]).Free;
-  FColumns.Delete(ACol-1);
+  TfpgGridColumn(FColumns.Items[ACol]).Free;
+  FColumns.Delete(ACol);
 end;
 
 procedure TfpgCustomGrid.DoSetRowCount(AValue: integer);
@@ -147,14 +143,14 @@ begin
   Result := TfpgGridColumn.Create;
 end;
 
-function TfpgCustomGrid.GetColumnCount: Longword;
+function TfpgCustomGrid.GetColumnCount: Integer;
 begin
   Result := FColumns.Count;
 end;
 
-procedure TfpgCustomGrid.SetColumnCount(const AValue: Longword);
+procedure TfpgCustomGrid.SetColumnCount(const AValue: Integer);
 var
-  n: Longword;
+  n: Integer;
 begin
   n := FColumns.Count;
   if (n = AValue) or (AValue < 0) then
@@ -171,6 +167,7 @@ begin
   end
   else
   begin
+    // removing columns
     while n > AValue do
     begin
       DoDeleteColumn(n);
@@ -184,35 +181,34 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomGrid.SetRowCount(const AValue: Longword);
+procedure TfpgCustomGrid.SetRowCount(const AValue: Integer);
 begin
   if FRowCount = AValue then
     Exit; //==>
   FRowCount := AValue;
-  if FocusRow > FRowCount then
-  begin
-    FocusRow := FRowCount;
-  end;
+  if FocusRow > FRowCount-1 then
+    FocusRow := FRowCount-1;
   DoSetRowCount(AValue);  // could be implemented by descendants
+
   if csUpdating in ComponentState then
     Exit;
   UpdateScrollBars;
   RePaint;
 end;
 
-function TfpgCustomGrid.GetColumnWidth(ACol: Longword): integer;
+function TfpgCustomGrid.GetColumnWidth(ACol: Integer): integer;
 begin
-  if (ACol > 0) and (ACol <= ColumnCount) then
-    Result := TfpgGridColumn(FColumns[ACol-1]).Width
+  if (ACol >= 0) and (ACol < ColumnCount) then
+    Result := TfpgGridColumn(FColumns[ACol]).Width
   else
     result := DefaultColWidth;
 end;
 
-procedure TfpgCustomGrid.SetColumnWidth(ACol: Longword; const AValue: integer);
+procedure TfpgCustomGrid.SetColumnWidth(ACol: Integer; const AValue: integer);
 var
   lCol: TfpgGridColumn;
 begin
-  lCol := TfpgGridColumn(FColumns[ACol-1]);
+  lCol := TfpgGridColumn(FColumns[ACol]);
   
   if lCol.Width <> AValue then
   begin
@@ -225,19 +221,19 @@ begin
   end;
 end;
 
-function TfpgCustomGrid.GetColumnBackgroundColor(ACol: Longword): TfpgColor;
+function TfpgCustomGrid.GetColumnBackgroundColor(ACol: Integer): TfpgColor;
 begin
-  if (ACol > 0) and (ACol <= ColumnCount) then
-    Result := TfpgGridColumn(FColumns[ACol-1]).FBackgroundColor
+  if (ACol >= 0) and (ACol < ColumnCount) then
+    Result := TfpgGridColumn(FColumns[ACol]).FBackgroundColor
   else
     result := BackgroundColor;
 end;
 
-procedure TfpgCustomGrid.SetColumnBackgroundColor(ACol: Longword; const AValue: TfpgColor);
+procedure TfpgCustomGrid.SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor);
 var
   lCol: TfpgGridColumn;
 begin
-  lCol := TfpgGridColumn(FColumns[ACol-1]);
+  lCol := TfpgGridColumn(FColumns[ACol]);
 
   if lCol.FBackgroundColor <> AValue then
   begin
@@ -247,19 +243,19 @@ begin
   end;
 end;
 
-function TfpgCustomGrid.GetColumnTextColor(ACol: Longword): TfpgColor;
+function TfpgCustomGrid.GetColumnTextColor(ACol: Integer): TfpgColor;
 begin
-  if (ACol > 0) and (ACol <= ColumnCount) then
-    Result := TfpgGridColumn(FColumns[ACol-1]).FTextColor
+  if (ACol >= 0) and (ACol < ColumnCount) then
+    Result := TfpgGridColumn(FColumns[ACol]).FTextColor
   else
     result := TextColor;
 end;
 
-procedure TfpgCustomGrid.SetColumnTextColor(ACol: Longword; const AValue: TfpgColor);
+procedure TfpgCustomGrid.SetColumnTextColor(ACol: Integer; const AValue: TfpgColor);
 var
   lCol: TfpgGridColumn;
 begin
-  lCol := TfpgGridColumn(FColumns[ACol-1]);
+  lCol := TfpgGridColumn(FColumns[ACol]);
 
   if lCol.FTextColor <> AValue then
   begin
@@ -269,9 +265,9 @@ begin
   end;
 end;
 
-function TfpgCustomGrid.GetHeaderText(ACol: Longword): string;
+function TfpgCustomGrid.GetHeaderText(ACol: Integer): string;
 begin
-  Result := TfpgGridColumn(FColumns[ACol-1]).Title;
+  Result := TfpgGridColumn(FColumns[ACol]).Title;
 end;
 
 constructor TfpgCustomGrid.Create(AOwner: TComponent);

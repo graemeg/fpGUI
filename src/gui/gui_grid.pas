@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -39,43 +39,14 @@ uses
   gui_customgrid;
   
 type
-{
-  TfpgGrid = class(TfpgCustomGrid)
-  public
-    property    Font;
-    property    HeaderFont;
-  published
-    property    Columns;
-    property    DefaultColWidth;
-    property    DefaultRowHeight;
-    property    FontDesc;
-    property    HeaderFontDesc;
-    property    BackgroundColor;
-    property    FocusCol;
-    property    FocusRow;
-    property    RowSelect;
-    property    ColumnCount;
-    property    RowCount;
-    property    ShowHeader;
-    property    ShowGrid;
-    property    HeaderHeight;
-    property    ColResizing;
-    property    ColumnWidth;
-    property    OnFocusChange;
-    property    OnRowChange;
-    property    OnDoubleClick;
-  end;
-}
-  
-  { TfpgFileGrid }
 
   TfpgFileGrid = class(TfpgCustomGrid)
   private
     FFileList: TfpgFileList;
     FFixedFont: TfpgFont;
   protected
-    function    GetRowCount: Longword; override;
-    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
+    function    GetRowCount: Integer; override;
+    procedure   DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -111,33 +82,31 @@ type
 
   TfpgCustomStringGrid = class(TfpgCustomGrid)
   private
-    function    GetCell(ACol, ARow: Longword): string;
-    function    GetColumnTitle(ACol: Longword): string;
-    function    GetObjects(ACol, ARow: Longword): TObject;
-    procedure   SetCell(ACol, ARow: Longword; const AValue: string);
-    procedure   SetColumnTitle(ACol: Longword; const AValue: string);
-    procedure   SetObjects(ACol, ARow: Longword; const AValue: TObject);
+    function    GetCell(ACol, ARow: Integer): string;
+    function    GetColumnTitle(ACol: Integer): string;
+    function    GetObjects(ACol, ARow: Integer): TObject;
+    procedure   SetCell(ACol, ARow: Integer; const AValue: string);
+    procedure   SetColumnTitle(ACol: Integer; const AValue: string);
+    procedure   SetObjects(ACol, ARow: Integer; const AValue: TObject);
   protected
-    function    GetColumnWidth(ACol: Longword): integer; override;
-    procedure   SetColumnWidth(ACol: Longword; const AValue: integer); override;
-    function    GetColumns(AIndex: Longword): TfpgStringColumn; reintroduce;
+    function    GetColumnWidth(ACol: Integer): integer; override;
+    procedure   SetColumnWidth(ACol: Integer; const AValue: integer); override;
+    function    GetColumns(AIndex: Integer): TfpgStringColumn; reintroduce;
     procedure   DoDeleteColumn(ACol: integer); override;
     procedure   DoSetRowCount(AValue: integer); override;
     function    DoCreateColumnClass: TfpgStringColumn; reintroduce; override;
-    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
-    { AIndex is 1-based. }
-    property    Columns[AIndex: Longword]: TfpgStringColumn read GetColumns;
+    procedure   DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
+    property    Columns[AIndex: Integer]: TfpgStringColumn read GetColumns;
   public
     constructor Create(AOwner: TComponent); override;
     function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify;
         AbackgroundColor: TfpgColor = clDefault; ATextColor: TfpgColor = clDefault): TfpgStringColumn; overload;
-    { ACol and ARow is 1-based. }
-    property    Cells[ACol, ARow: Longword]: string read GetCell write SetCell;
-    property    Objects[ACol, ARow: Longword]: TObject read GetObjects write SetObjects;
-    property    ColumnTitle[ACol: Longword]: string read GetColumnTitle write SetColumnTitle;
-    property    ColumnWidth[ACol: Longword]: integer read GetColumnWidth write SetColumnWidth;
-    property    ColumnBackgroundColor[ACol: Longword]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
-    property    ColumnTextColor[ACol: Longword]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
+    property    Cells[ACol, ARow: Integer]: string read GetCell write SetCell;
+    property    Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
+    property    ColumnTitle[ACol: Integer]: string read GetColumnTitle write SetColumnTitle;
+    property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
+    property    ColumnBackgroundColor[ACol: Integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
+    property    ColumnTextColor[ACol: Integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
 //    property    Cols[index: Integer]: TStrings read GetCols write SetCols;
 //    property    Rows[index: Integer]: TStrings read GetRows write SetRows;
   end;
@@ -192,12 +161,12 @@ end;
 
 { TfpgFileGrid }
 
-function TfpgFileGrid.GetRowCount: Longword;
+function TfpgFileGrid.GetRowCount: Integer;
 begin
   Result := FFileList.Count;
 end;
 
-procedure TfpgFileGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);
+procedure TfpgFileGrid.DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState);
 const
   picture_width = 20;
 var
@@ -215,13 +184,13 @@ begin
   y := ARect.Top;// + 1;
   s := '';
 
-  if (e.EntryType = etDir) and (ACol = 1) then
+  if (e.EntryType = etDir) and (ACol = 0) then
     Canvas.SetFont(HeaderFont)
   else
     Canvas.SetFont(Font);
 
   case ACol of
-    1:  begin
+    0:  begin
           if e.EntryType = etDir then
             img := fpgImages.GetImage('stdimg.folder')          // Do NOT localize
           else if e.IsExecutable then
@@ -238,16 +207,16 @@ begin
           s := e.Name;
         end;
         
-    2:  begin
+    1:  begin
           s := FormatFloat('###,###,###,##0', e.size);
           x := ARect.Right - Font.TextWidth(s) - 1;
           if x < (ARect.Left + 2) then
             x := ARect.Left + 2;
         end;
 
-    3:  s := FormatDateTime('yyyy-mm-dd hh:nn', e.ModTime);
+    2:  s := FormatDateTime('yyyy-mm-dd hh:nn', e.ModTime);
 
-    4:  begin
+    3:  begin
           if FFileList.HasFileMode then // on unix
             s := e.Mode
           else                          // on windows
@@ -259,8 +228,8 @@ begin
   
   if FFileList.HasFileMode then // unix
     case ACol of
-      5:  s := e.Owner;
-      6:  s := e.Group;
+      4:  s := e.Owner;
+      5:  s := e.Group;
     end;
   
   // centre text in row height
@@ -289,7 +258,8 @@ begin
     AddColumn(rsFileRights, 78);
     AddColumn(rsFileOwner, 54);
     AddColumn(rsFileGroup, 54);
-  end else
+  end
+  else
     AddColumn(rsFileAttributes, 78);
     
   RowSelect := True;
@@ -325,93 +295,93 @@ end;
 
 { TfpgCustomStringGrid }
 
-function TfpgCustomStringGrid.GetCell(ACol, ARow: Longword): string;
+function TfpgCustomStringGrid.GetCell(ACol, ARow: Integer): string;
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
-  if ARow > RowCount then
+  if ARow > RowCount-1 then
     Exit; //==>
-  Result := TfpgStringColumn(FColumns.Items[ACol-1]).Cells[ARow-1];
+  Result := TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow];
 end;
 
-function TfpgCustomStringGrid.GetColumnTitle(ACol: Longword): string;
+function TfpgCustomStringGrid.GetColumnTitle(ACol: Integer): string;
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
-  Result := TfpgStringColumn(FColumns.Items[ACol-1]).Title;
+  Result := TfpgStringColumn(FColumns.Items[ACol]).Title;
 end;
 
-function TfpgCustomStringGrid.GetObjects(ACol, ARow: Longword): TObject;
+function TfpgCustomStringGrid.GetObjects(ACol, ARow: Integer): TObject;
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
-  if ARow > RowCount then
+  if ARow > RowCount-1 then
     Exit; //==>
-  Result := TfpgStringColumn(FColumns.Items[ACol-1]).Cells.Objects[ARow-1];
+  Result := TfpgStringColumn(FColumns.Items[ACol]).Cells.Objects[ARow];
 end;
 
-function TfpgCustomStringGrid.GetColumnWidth(ACol: Longword): integer;
+function TfpgCustomStringGrid.GetColumnWidth(ACol: Integer): integer;
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
-  Result := TfpgStringColumn(FColumns.Items[ACol-1]).Width;
+  Result := TfpgStringColumn(FColumns.Items[ACol]).Width;
 end;
 
-procedure TfpgCustomStringGrid.SetCell(ACol, ARow: Longword;
+procedure TfpgCustomStringGrid.SetCell(ACol, ARow: Integer;
   const AValue: string);
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
-  if ARow > RowCount then
+  if ARow > RowCount-1 then
     Exit; //==>
-  if TfpgStringColumn(FColumns.Items[ACol-1]).Cells[ARow-1] <> AValue then
+  if TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow] <> AValue then
   begin
     BeginUpdate;
-    TfpgStringColumn(FColumns.Items[ACol-1]).Cells[ARow-1] := AValue;
+    TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow] := AValue;
     EndUpdate;
   end;
 end;
 
-procedure TfpgCustomStringGrid.SetColumnTitle(ACol: Longword; const AValue: string);
+procedure TfpgCustomStringGrid.SetColumnTitle(ACol: Integer; const AValue: string);
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
   BeginUpdate;
-  TfpgStringColumn(FColumns.Items[ACol-1]).Title := AValue;
+  TfpgStringColumn(FColumns.Items[ACol]).Title := AValue;
   EndUpdate;
 end;
 
-procedure TfpgCustomStringGrid.SetObjects(ACol, ARow: Longword;
+procedure TfpgCustomStringGrid.SetObjects(ACol, ARow: Integer;
   const AValue: TObject);
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
-  if ARow > RowCount then
+  if ARow > RowCount-1 then
     Exit; //==>
-  TfpgStringColumn(FColumns.Items[ACol-1]).Cells.Objects[ARow-1] := AValue;
+  TfpgStringColumn(FColumns.Items[ACol]).Cells.Objects[ARow] := AValue;
 end;
 
-procedure TfpgCustomStringGrid.SetColumnWidth(ACol: Longword; const AValue: integer);
+procedure TfpgCustomStringGrid.SetColumnWidth(ACol: Integer; const AValue: integer);
 begin
-  if ACol > ColumnCount then
+  if ACol > ColumnCount-1 then
     Exit; //==>
   BeginUpdate;
-  TfpgStringColumn(FColumns.Items[ACol-1]).Width := AValue;
+  TfpgStringColumn(FColumns.Items[ACol]).Width := AValue;
   EndUpdate;
 end;
 
-function TfpgCustomStringGrid.GetColumns(AIndex: Longword): TfpgStringColumn;
+function TfpgCustomStringGrid.GetColumns(AIndex: Integer): TfpgStringColumn;
 begin
-  if (AIndex < 1) or (AIndex > ColumnCount) then
+  if (AIndex < 0) or (AIndex > ColumnCount-1) then
     Result := nil
   else
-    Result := TfpgStringColumn(FColumns.Items[AIndex-1]);
+    Result := TfpgStringColumn(FColumns.Items[AIndex]);
 end;
 
 procedure TfpgCustomStringGrid.DoDeleteColumn(ACol: integer);
 begin
-  TfpgStringColumn(FColumns.Items[ACol-1]).Free;
-  FColumns.Delete(ACol-1);
+  TfpgStringColumn(FColumns.Items[ACol]).Free;
+  FColumns.Delete(ACol);
 end;
 
 procedure TfpgCustomStringGrid.DoSetRowCount(AValue: integer);
@@ -439,7 +409,7 @@ begin
   Result := TfpgStringColumn.Create;
 end;
 
-procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect;
+procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: Integer; ARect: TfpgRect;
     AFlags: TfpgGridDrawState);
 var
   x: TfpgCoord;
@@ -497,7 +467,7 @@ begin
   else
     Result.TextColor:= ATextColor;
     
-  for r := 1 to RowCount do
+  for r := 0 to RowCount-1 do
     Result.Cells.Append('');
   Updated;
 end;

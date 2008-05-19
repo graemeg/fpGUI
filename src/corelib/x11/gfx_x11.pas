@@ -136,8 +136,8 @@ type
   private
     FDrawing: boolean;
     FDrawWindow: TfpgWindowImpl;
-    FBufferPixmap: TPixmap;
-    FDrawHandle: TXID;
+    FBufferPixmap: TfpgDCHandle;
+    FDrawHandle: TfpgDCHandle;
     Fgc: TfpgGContext;
     FCurFontRes: TfpgFontResourceImpl;
     FClipRect: TfpgRect;
@@ -174,6 +174,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    property    DCHandle: TfpgDCHandle read FDrawHandle;
   public
     constructor Create; override;
     destructor  Destroy; override;
@@ -261,8 +262,6 @@ type
   end;
   
   
-  { TfpgFileListImpl }
-
   TfpgFileListImpl = class(TfpgFileListBase)
     function    EncodeModeString(FileMode: longword): TFileModeString;
     function    GetUserName(uid: integer): string;
@@ -281,7 +280,7 @@ uses
   {$if defined(linux) and defined(cpu386)}libc,{$endif}
   fpgfx,
   gfx_widget,
-  gui_form, // remove this!!!!!
+  gui_form,
   cursorfont,
   gfx_popupwindow,
   xatom,      // used for XA_WM_NAME

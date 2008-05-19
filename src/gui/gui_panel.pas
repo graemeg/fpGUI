@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -51,6 +51,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   end;
+  
 
   TfpgBevel = class(TfpgAbstractPanel)
   private
@@ -65,6 +66,7 @@ type
     property    OnClick;
     property    OnDoubleClick;
   end;
+  
 
   TfpgPanel = class(TfpgAbstractPanel)
   private
@@ -109,6 +111,7 @@ type
     property    OnClick;
     property    OnDoubleClick;
   end;
+  
 
   TfpgGroupBox = class(TfpgAbstractPanel)
   private

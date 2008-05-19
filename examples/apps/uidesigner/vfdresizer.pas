@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -31,10 +31,10 @@ type
   TwgResizer = class(TfpgWidget)
   protected
     wgdesigner: TObject;
-    procedure HandlePaint; override;
-    procedure HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
-    procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
-    procedure HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
+    procedure   HandlePaint; override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
   public
     direction: integer;
     FDragging: boolean;
@@ -43,8 +43,10 @@ type
     constructor Create(ACompDesigner: TObject; adirection: integer); reintroduce;
     procedure   Show;
   end;
+  
 
 implementation
+
 
 uses
   vfddesigner,
@@ -54,10 +56,7 @@ uses
 
 procedure TwgResizer.HandlePaint;
 begin
-  Canvas.BeginDraw;
-  inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
-  Canvas.EndDraw;
 end;
 
 procedure TwgResizer.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);

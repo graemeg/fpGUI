@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -41,7 +41,7 @@ type
     line: string;
     lineindex: integer;
   public
-    procedure nextline;
+    procedure   NextLine;
   public
     constructor Create(const FormName, FormHead, FormBody: string);
     destructor  Destroy; override;
@@ -52,14 +52,16 @@ type
   end;
 
 
-function GetIdentifier(var s: string): string;
-function GetStringValue(var s: string): string;
+function  GetIdentifier(var s: string): string;
+function  GetStringValue(var s: string): string;
 procedure SkipSpaces(var s: string);
-function CheckSymbol(var s: string; const sym: string): boolean;
-function GetIntValue(var s: string): integer;
-function GetBoolValue(var s: string): boolean;
+function  CheckSymbol(var s: string; const sym: string): boolean;
+function  GetIntValue(var s: string): integer;
+function  GetBoolValue(var s: string): boolean;
+
 
 implementation
+
 
 { TVFDFormParser }
 
@@ -69,7 +71,7 @@ begin
   ffd       := nil;
   BodyLines := TStringList.Create;
   BodyLines.Text := FormBody;
-  lineindex := 0;
+  lineindex := -1;
 end;
 
 destructor TVFDFormParser.Destroy;
@@ -78,13 +80,13 @@ begin
   inherited;
 end;
 
-procedure TVFDFormParser.nextline;
+procedure TVFDFormParser.NextLine;
 begin
   repeat
     Inc(lineindex);
-    eob := (lineindex > BodyLines.Count);
+    eob := (lineindex > BodyLines.Count-1);
     if not eob then
-      line := trim(bodylines.Strings[lineindex - 1])
+      line := trim(bodylines.Strings[lineindex])
     else
       line := '';
   until eob or (line <> '');
@@ -94,16 +96,12 @@ function TVFDFormParser.ParseForm: TFormDesigner;
 begin
   ffd           := TFormDesigner.Create;
   ffd.Form.Name := fformname;
-
   // parsing line by line
   // the unknown lines will be "other properties"
-  lineindex := 0;
-  nextline;
-
+  lineindex := -1;
+  NextLine;
   ParseFormProperties;
-
   ParseFormWidgets;
-
   Result := ffd;
 end;
 
@@ -250,10 +248,8 @@ begin
   while not eob and (pos('.CREATE(', UpperCase(line)) = 0) do
   begin
     lok := ReadWGProperty(line, ffd.Form, VFDFormWidget);
-
     if not lok then
       ffd.FormOther := ffd.FormOther + line + LineEnding;
-
     NextLine;
   end;
 end;
@@ -307,7 +303,7 @@ begin
 
       wg  := nil;
       wgc := nil;
-      for n := 1 to VFDWidgetCount do
+      for n := 0 to VFDWidgetCount-1 do
       begin
         wgc := VFDWidget(n);
         if wgclassuc = UpperCase(wgc.WidgetClass.ClassName) then
@@ -532,7 +528,7 @@ begin
 
   if not lok then
     if wgc <> nil then
-      for n := 1 to wgc.PropertyCount do
+      for n := 0 to wgc.PropertyCount-1 do
       begin
         lok := wgc.GetProperty(n).ParseSourceLine(wg, line);
         if lok then

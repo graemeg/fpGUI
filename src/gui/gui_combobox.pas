@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -60,7 +60,6 @@ type
   TfpgComboOption = (wo_FocusItemTriggersOnChange);
   TfpgComboOptions = set of TfpgComboOption;
 
-  { TfpgBaseComboBox }
 
   TfpgBaseComboBox = class(TfpgWidget)
   private
@@ -79,8 +78,10 @@ type
     FFocusItem: integer;
     FItems: TStringList;
     procedure   InternalOnClose(Sender: TObject);
+    procedure   InternalItemsChanged(Sender: TObject); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnChange; virtual;
+    procedure   DoOnDropDown; virtual;
     procedure   DoDropDown; virtual; abstract;
     procedure   DoOnCloseUp; virtual;
     function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
@@ -98,8 +99,6 @@ type
     property    Font: TfpgFont read FFont;
   end;
   
-
-  { TfpgAbstractComboBox }
 
   TfpgAbstractComboBox = class(TfpgBaseComboBox)
   private
@@ -193,9 +192,9 @@ begin
   Result := FFont.FontDesc;
 end;
 
-{ Focusitem is 1 based and NOT 0 based like the Delphi ItemIndex property.
-  So at startup, FocusItem = 0 which means nothing is selected. If FocusItem = 1
-  it means the first item is selected etc. }
+{ Focusitem is 0 based like the Delphi ItemIndex property.
+  So at startup, FocusItem = -1 which means nothing is selected. If
+  FocusItem = 0 it means the first item is selected etc. }
 procedure TfpgBaseComboBox.SetFocusItem(const AValue: integer);
 begin
   if FFocusItem = AValue then
@@ -203,10 +202,10 @@ begin
   FFocusItem := AValue;
 
   // do some limit check corrections
-  if FFocusItem < 0 then
-    FFocusItem := 0   // nothing is selected
-  else if FFocusItem > FItems.Count then
-    FFocusItem := FItems.Count;
+  if FFocusItem < -1 then
+    FFocusItem := -1   // nothing is selected
+  else if FFocusItem > FItems.Count-1 then
+    FFocusItem := FItems.Count-1;
 
   RePaint;
   if wo_FocusItemTriggersOnChange in FOptions then
@@ -218,13 +217,19 @@ begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   if Height < FFont.Height + 6 then
-    Height:= FFont.Height + 6;
+    Height := FFont.Height + 6;
   RePaint;
 end;
 
 procedure TfpgBaseComboBox.InternalOnClose(Sender: TObject);
 begin
   DoOnCloseUp;
+end;
+
+procedure TfpgBaseComboBox.InternalItemsChanged(Sender: TObject);
+begin
+  if FItems.Count = 0 then
+    FocusItem := -1;
 end;
 
 procedure TfpgBaseComboBox.HandleKeyPress(var keycode: word;
@@ -267,6 +272,12 @@ begin
     FOnChange(self);
 end;
 
+procedure TfpgBaseComboBox.DoOnDropDown;
+begin
+  if Assigned(OnDropDown) then
+    FOnDropDown(self);
+end;
+
 procedure TfpgBaseComboBox.DoOnCloseUp;
 begin
   if Assigned(OnCloseUp) then
@@ -298,18 +309,15 @@ begin
 
   Result.Left   := AComboBox.Left;
   Result.Width  := ADropDown.Width;
-
-//  writeln('H:', fpgApplication.ScreenHeight, '  W:', fpgApplication.ScreenWidth);
-//  writeln('Point x:', pt.x, '  y:', pt.y);
-//  PrintRect(Result);
 end;
 
 constructor TfpgBaseComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDropDownCount := 8;
-  FFocusItem := 0; // nothing is selected
+  FFocusItem := -1; // nothing is selected
   FItems  := TStringList.Create;
+  FItems.OnChange := @InternalItemsChanged;
   FFont   := fpgGetFont('#List');
   FOptions := [];
   FOnChange := nil;
@@ -329,12 +337,12 @@ procedure TComboboxDropdownWindow.SetFirstItem;
 var
   i: integer;
 begin
-  // If FocusItem is less than DropDownCount FirsItem = 1
-  if ListBox.FocusItem <= FCallerWidget.DropDownCount then
-    ListBox.SetFirstItem(1)
+  // If FocusItem is less than DropDownCount FirsItem = 0
+  if ListBox.FocusItem+1 <= FCallerWidget.DropDownCount then
+    ListBox.SetFirstItem(0)
   // If FocusItem is in the last DropDownCount of items
-  else if (ListBox.ItemCount - ListBox.FocusItem) < FCallerWidget.DropDownCount then
-    ListBox.SetFirstItem(ListBox.ItemCount - FCallerWidget.DropDownCount+1)
+  else if (ListBox.ItemCount - (ListBox.FocusItem+1)) < FCallerWidget.DropDownCount then
+    ListBox.SetFirstItem(ListBox.ItemCount - FCallerWidget.DropDownCount)
   else
   // Try and centre FocusItem in the drow down window
     ListBox.SetFirstItem(ListBox.FocusItem - (FCallerWidget.DropDownCount div 2));
@@ -405,15 +413,15 @@ end;
 
 function TfpgAbstractComboBox.GetText: string;
 begin
-  if (FocusItem > 0) and (FocusItem <= FItems.Count) then
-    Result := Items.Strings[FocusItem-1]
+  if (FocusItem >= 0) and (FocusItem < FItems.Count) then
+    Result := Items.Strings[FocusItem]
   else
     Result := '';
 end;
 
 function TfpgAbstractComboBox.HasText: boolean;
 begin
-  Result := FocusItem > 0;
+  Result := FocusItem >= 0;
 end;
 
 procedure TfpgAbstractComboBox.DoDropDown;
@@ -449,8 +457,8 @@ begin
     r := GetDropDownPos(Parent, self, ddw);  // find suitable position
     ddw.Height := r.Height;  // in case GetDropDownPos resized us
     
-    if (FItems.Count > 0) and Assigned(OnDropDown) then
-      OnDropDown(self);
+    if (FItems.Count > 0) then
+      DoOnDropDown;
     ddw.OnClose := @InternalOnClose;
     
     ddw.ShowAt(Parent, r.Left, r.Top);
@@ -477,25 +485,25 @@ var
   i: integer;
 begin
   if AValue = '' then
-    SetFocusItem(0)  // nothing selected
+    SetFocusItem(-1)  // nothing selected
   else
   begin
-    for i := 0 to FItems.Count - 1 do
+    for i := 0 to FItems.Count-1 do
     begin
       if SameText(Items.Strings[i], AValue) then
       begin
-        SetFocusItem(i+1); // our FocusItem is 1-based. TStringList is 0-based.
-        Exit;
+        SetFocusItem(i);
+        Exit; //==>
       end;
     end;
     // if we get here, we didn't find a match
-    SetFocusItem(0);
+    SetFocusItem(-1);
   end;
 end;
 
 procedure TfpgAbstractComboBox.SetWidth(const AValue: TfpgCoord);
 begin
-  inherited;
+  inherited SetWidth(AValue);
   CalculateInternalButtonRect;
   RePaint;
 end;
@@ -514,7 +522,7 @@ end;
 
 procedure TfpgAbstractComboBox.SetHeight(const AValue: TfpgCoord);
 begin
-  inherited;
+  inherited SetHeight(AValue);
   CalculateInternalButtonRect;
   RePaint;
 end;
@@ -541,17 +549,17 @@ var
   NewIndex: Integer;
 begin
   if (FDropDown <> nil) and FDropDown.Visible then
-    Exit;
+    Exit; //==>
   if Items.Count < 1 then
-    Exit;
+    Exit; //==>
 
   NewIndex := FocusItem + Delta;
 
-  if NewIndex > Items.Count then
-    NewIndex := Items.Count;
+  if NewIndex > Items.Count-1 then
+    NewIndex := Items.Count-1;
     
-  if NewIndex < 1 then
-    NewIndex := 1;
+  if NewIndex < 0 then
+    NewIndex := 0;
     
   if NewIndex <> FocusItem then
   begin
@@ -651,8 +659,8 @@ begin
   FBackgroundColor  := clBoxColor;
   FTextColor        := Parent.TextColor;
   FWidth            := 120;
-  FHeight           := Font.Height + 6;
   FMargin           := 3;
+  FHeight           := Font.Height + (2*FMargin);
   FFocusable        := True;
   FBtnPressed       := False;
 
@@ -667,7 +675,7 @@ end;
 
 procedure TfpgAbstractComboBox.Update;
 begin
-  FFocusItem := 0;
+  FFocusItem := -1;
   Repaint;
 end;
 

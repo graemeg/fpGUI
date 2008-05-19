@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -31,14 +31,18 @@ uses
   vfdforms;
 
 type
+
   TItemEditorForm = class(TVFDDialog)
+  private
+    procedure btnClearClicked(Sender: TObject);
+    procedure OnButtonClick(Sender: TObject);
   public
     l1: TfpgLabel;
     edItems: TfpgMemo;
-    btnOK,
+    btnOK: TfpgButton;
     btnCancel: TfpgButton;
+    btnClear: TfpgButton;
     procedure AfterCreate; override;
-    procedure OnButtonClick(Sender: TObject);
   end;
 
 
@@ -61,13 +65,23 @@ begin
   with edItems do
   begin
     SetPosition(8, 24, 344, 168);
-    Anchors := [anLeft, anTop, anRight, anBottom];
+    Anchors := AllAnchors;
   end;
 
-  btnOK         := CreateButton(self, 8, 200, 105, 'OK', @OnButtonClick);
+  btnClear := CreateButton(self, 8, 200, 80, 'Clear', @btnClearClicked);
+  btnClear.Anchors := [anLeft, anBottom];
+
+  btnOK         := CreateButton(self, btnClear.Right + 4, 200, 80, 'OK', @OnButtonClick);
   btnOK.Anchors := [anLeft, anBottom];
-  btnCancel     := CreateButton(self, 244, 200, 105, 'Cancel', @OnButtonClick);
+
+  btnCancel     := CreateButton(self, Width-84, 200, 80, 'Cancel', @OnButtonClick);
   btnCancel.Anchors := [anRight, anBottom];
+  
+end;
+
+procedure TItemEditorForm.btnClearClicked(Sender: TObject);
+begin
+  edItems.Lines.Clear;
 end;
 
 procedure TItemEditorForm.OnButtonClick(Sender: TObject);

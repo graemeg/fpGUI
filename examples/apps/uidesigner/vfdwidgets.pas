@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -79,7 +79,7 @@ end;
 
 function VFDWidget(ind: integer): TVFDWidgetClass;
 begin
-  Result := TVFDWidgetClass(FVFDWidgets[ind - 1]);
+  Result := TVFDWidgetClass(FVFDWidgets[ind]);
 end;
 
 procedure RegisterVFDWidget(awc: TVFDWidgetClass);
@@ -352,6 +352,7 @@ begin
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('Position', TPropertyInteger, '');
+  wc.AddProperty('ShowCaption', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.progressbar';
   RegisterVFDWidget(wc);
 
@@ -362,6 +363,7 @@ begin
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Orientation', TPropertyEnum, '');
   wc.AddProperty('Position', TPropertyInteger, '');
+  wc.AddProperty('ShowPosition', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.trackbar';
   RegisterVFDWidget(wc);

@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -56,8 +56,8 @@ type
 
   TColumnsGrid = class(TfpgCustomGrid)
   protected
-    function    GetRowCount: Longword; override;
-    procedure   DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);  override;
+    function    GetRowCount: Integer; override;
+    procedure   DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState);  override;
   public
     dbgrid: TfpgStringGrid;
     constructor Create(AOwner: TComponent); override;
@@ -66,7 +66,7 @@ type
 
   TColumnEditForm = class(TfpgForm)
   private
-    procedure GridRowChange(Sender: TObject; row: Longword);
+    procedure GridRowChange(Sender: TObject; row: Integer);
     procedure EditChange(Sender: TObject);
     procedure NewButtonClick(Sender: TObject);
     procedure DeleteButtonClick(Sender: TObject);
@@ -284,12 +284,12 @@ begin
   {@VFD_BODY_END: ColumnEditForm}
 end;
 
-procedure TColumnEditForm.GridRowChange(Sender: TObject; row: Longword);
+procedure TColumnEditForm.GridRowChange(Sender: TObject; row: Integer);
 var
   i: integer;
   c: TfpgStringColumn;
 begin
-  c := dbgrid.Columns[row{ - 1}];
+  c := dbgrid.Columns[row];
   if c = nil then
     Exit;
 
@@ -298,11 +298,11 @@ begin
   edCOLWIDTH.Text  := IntToStr(c.Width);
   case c.Alignment of
     taRightJustify:
-        i := 2;
-    taCenter:
-        i := 3
-    else
         i := 1;
+    taCenter:
+        i := 2
+    else
+        i := 0;
   end;
   chlALIGN.FocusItem := i;
 end;
@@ -311,15 +311,15 @@ procedure TColumnEditForm.SaveColumn(row: integer);
 var
   c: TfpgStringColumn;
 begin
-  c := dbgrid.Columns[row{ - 1}];
+  c := dbgrid.Columns[row];
   if c = nil then
     Exit;
 
   c.Title      := edTITLE.Text;
   c.Width      := StrToIntDef(edCOLWIDTH.Text, 30);
   case chlALIGN.FocusItem of
-    2: c.Alignment := taRightJustify;
-    3: c.Alignment := taCenter;
+    1: c.Alignment := taRightJustify;
+    2: c.Alignment := taCenter;
     else
       c.Alignment  := taLeftJustify;
   end;
@@ -330,7 +330,7 @@ end;
 
 procedure TColumnEditForm.EditChange(Sender: TObject);
 begin
-  if grid.FocusRow < 1 then
+  if grid.FocusRow < 0 then
     Exit;
 
   SaveColumn(grid.FocusRow);
@@ -359,14 +359,14 @@ procedure TColumnEditForm.UpDownButtonClick(Sender: TObject);
 begin
   if Sender = btnUP then
   begin
-    if grid.FocusRow > 1 then
+    if grid.FocusRow > 0 then
     begin
       dbgrid.MoveColumn(grid.FocusRow - 1, grid.FocusRow - 2);
       grid.FocusRow := grid.FocusRow - 1;
       grid.Update;
     end;
   end
-  else if grid.FocusRow < grid.RowCount then
+  else if grid.FocusRow < grid.RowCount-1 then
   begin
     dbgrid.MoveColumn(grid.FocusRow - 1, grid.FocusRow);
     grid.FocusRow := grid.FocusRow + 1;
@@ -377,7 +377,7 @@ end;
 
 { TColumnsGrid }
 
-function TColumnsGrid.GetRowCount: Longword;
+function TColumnsGrid.GetRowCount: Integer;
 begin
   try
     // Yes, it must be ColumnCount and *not* RowCount!
@@ -387,7 +387,7 @@ begin
   end;
 end;
 
-procedure TColumnsGrid.DrawCell(ARow, ACol: Longword; ARect: TfpgRect; AFlags: TfpgGridDrawState);
+procedure TColumnsGrid.DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState);
 var
   s: string;
   x: integer;
@@ -404,10 +404,10 @@ begin
   x := ARect.Left + 1;
 
   case ACol of
-    1:  s := IntToStr(ARow);
-    2:  s := c.Title;
-    3:  s := IntToStr(c.Width);
-    4:  case c.Alignment of
+    0:  s := IntToStr(ARow);
+    1:  s := c.Title;
+    2:  s := IntToStr(c.Width);
+    3:  case c.Alignment of
           taRightJustify:
               s := 'Right';
           taCenter:
@@ -506,7 +506,7 @@ begin
   Result := '';
   with TfpgStringGrid(wg) do
   begin
-    for f := 1 to ColumnCount do
+    for f := 0 to ColumnCount-1 do
     begin
       c := Columns[f];
       case c.Alignment of

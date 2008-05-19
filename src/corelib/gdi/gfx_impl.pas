@@ -9,6 +9,7 @@ uses
   
 type
     TfpgWinHandle = HWND;
+    TfpgDCHandle  = HDC;
 
 implementation
 

@@ -77,8 +77,7 @@ begin
   FHelpSubMenu.AddMenuItem('Test Russian text -> Òåñò', '', @miMenuItemSelected);
 
   // Create main menu bar
-  FMenuBar := TfpgMenuBar.Create(self);
-  FMenuBar.SetPosition(0, 0, Width, FMenuBar.Height);
+  FMenuBar := CreateMenuBar(self);
   FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
   FMenuBar.AddMenuItem('&Edit', nil).SubMenu := FEditSubMenu;
   FMenuBar.AddMenuItem('&Windows', nil);

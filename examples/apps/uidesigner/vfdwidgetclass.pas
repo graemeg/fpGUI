@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -133,7 +133,7 @@ end;
 
 function TVFDWidgetClass.GetProperty(ind: integer): TVFDWidgetProperty;
 begin
-  Result := TVFDWidgetProperty(FProps[ind - 1]);
+  Result := TVFDWidgetProperty(FProps[ind]);
 end;
 
 function TVFDWidgetClass.PropertyCount: integer;

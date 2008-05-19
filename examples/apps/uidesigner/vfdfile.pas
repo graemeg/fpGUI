@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -46,20 +46,21 @@ type
     NewFormsDecl: string;
     NewFormsImpl: string;
     constructor Create;
-    destructor Destroy; override;
-    function LoadFile(fname: string): boolean;
-    procedure AddBlock(aposition: integer; ablockid, aformname, ablockdata: string);
-    function BlockCount: integer;
-    function Block(index: integer): TVFDFileBlock;
-    procedure FreeBlocks;
-    function GetBlocks: integer;   // parse file
-    function MergeBlocks: string;  // store file
-    procedure AddNewFormDecl(formname, formheadblock: string);
-    procedure AddNewFormImpl(formname, formbody: string);
-    function FindFormBlock(blockid, formname: string): TVFDFileBlock;
-    procedure SetFormData(formname, headblock, bodyblock: string);
-    procedure NewFileSkeleton(unitname: string);
+    destructor  Destroy; override;
+    function    LoadFile(fname: string): boolean;
+    procedure   AddBlock(aposition: integer; ablockid, aformname, ablockdata: string);
+    function    BlockCount: integer;
+    function    Block(index: integer): TVFDFileBlock;
+    procedure   FreeBlocks;
+    function    GetBlocks: integer;   // parse file
+    function    MergeBlocks: string;  // store file
+    procedure   AddNewFormDecl(formname, formheadblock: string);
+    procedure   AddNewFormImpl(formname, formbody: string);
+    function    FindFormBlock(blockid, formname: string): TVFDFileBlock;
+    procedure   SetFormData(formname, headblock, bodyblock: string);
+    procedure   NewFileSkeleton(unitname: string);
   end;
+  
 
 implementation
 
@@ -109,9 +110,9 @@ end;
 function TVFDFile.Block(index: integer): TVFDFileBlock;
 begin
   Result := nil;
-  if (index < 1) or (index > FBlocks.Count) then
+  if (index < 0) or (index > FBlocks.Count-1) then
     Exit;
-  Result := TVFDFileBlock(FBlocks[index - 1]);
+  Result := TVFDFileBlock(FBlocks[index]);
 end;
 
 function TVFDFile.BlockCount: integer;
@@ -141,7 +142,7 @@ var
   fb: TVFDFileBlock;
 begin
   Result := nil;
-  for n := 1 to BlockCount do
+  for n := 0 to BlockCount-1 do
   begin
     fb := Block(n);
     if (fb.BlockID = blockid) and (UpperCase(fb.FormName) = UpperCase(formname)) then
@@ -156,7 +157,7 @@ procedure TVFDFile.FreeBlocks;
 var
   n: integer;
 begin
-  for n := 0 to FBlocks.Count - 1 do
+  for n := 0 to FBlocks.Count-1 do
     TVFDFileBlock(FBlocks[n]).Free;
   FBlocks.Clear;
   NewFormsDecl := '';
@@ -338,10 +339,8 @@ begin
   end;
 
   if not newsaved and (NewFormsImpl <> '') then
-    rs := rs + NewFormsImpl// do not loose new form data.
-  ;
+    rs := rs + NewFormsImpl;  // do not loose new form data.
 
-  //writeln(rs);
   Result := rs;
 end;
 

@@ -55,7 +55,7 @@ type
 
 function TMyDBLoginDlg.GetDatabase: TfpgString;
 begin
-  Result := aStringList.ValueFromIndex[cbDatabases.FocusItem-1];
+  Result := aStringList.ValueFromIndex[cbDatabases.FocusItem];
 end;
 
 procedure TMyDBLoginDlg.PopulateComboDb;
@@ -64,9 +64,9 @@ var
 begin
   aStringList.Clear;
   aStringList.Add('Database1=192.168.0.1:/data/db1.gdb');
-  aStringList.Add('Database2=192.168.0.10:/data/live.gdb');
-  aStringList.Add('Database3=192.168.0.150:/data/sometest.gdb');
-  aStringList.Add('Database4=192.168.0.200:c:\MyData\test.gdb');
+  aStringList.Add('Database2=192.168.0.10:/data/db2.gdb');
+  aStringList.Add('Database3=192.168.0.150:/data/db3.gdb');
+  aStringList.Add('Database4=192.168.0.200:c:\MyData\db4.gdb');
   cbDatabases.Items.Clear;
   for i := 0 to aStringList.Count-1 do
     cbDatabases.Items.Add(aStringList.Names[i]);

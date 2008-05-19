@@ -3,8 +3,6 @@
 {$IFDEF read_interface}
 
 
-{ TfpgPromptUserDialog }
-
   TfpgPromptUserDialog = class(TfpgBaseDialog)
   private
     lblTitle: TfpgLabel;

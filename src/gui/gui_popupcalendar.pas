@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -54,8 +54,6 @@ type
   TfpgOnDateSetEvent = procedure(Sender: TObject; const ADate: TDateTime) of object;
   
 
-  { TfpgPopupCalendar }
-
   TfpgPopupCalendar = class(TfpgPopupWindow)
   private
     FMonthOffset: integer;
@@ -78,7 +76,7 @@ type
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
-    function    CalculateCellDay(const ACol, ARow: LongWord): Word;
+    function    CalculateCellDay(const ACol, ARow: Integer): Integer;
     procedure   SetDateElement(Index: integer; const AValue: Word);
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
@@ -115,8 +113,6 @@ type
   end;
   
   
-  { TfpgCalendarCombo }
-
   TfpgCalendarCombo = class(TfpgAbstractComboBox)
   private
     FDate: TDateTime;
@@ -166,18 +162,18 @@ uses
 procedure TfpgPopupCalendar.PopulateDays;
 var
   r, c: integer;
-  lCellDay: Word;
+  lCellDay: Integer;
 begin
   grdName1.BeginUpdate;
-  for r := 0 to 6 do
-    for c := 1 to 7 do
+  for r := -1 to 5 do
+    for c := 0 to 6 do
     begin
-      if r = 0 then
-        grdName1.ColumnTitle[c] := ShortDayNames[c]
+      if r = -1 then
+        grdName1.ColumnTitle[c] := ShortDayNames[c+1]  // ShortDayNames is 1-based indexing
       else
       begin
         lCellDay := CalculateCellDay(c, r);
-        if lCellDay = 0 then
+        if lCellDay = -1 then
           grdName1.Cells[c, r] := ''
         else
           grdName1.Cells[c, r] := IntToStr(lCellDay);
@@ -246,11 +242,11 @@ begin
   FMonthOffset := 2 - DayOfWeek(lTheFirst);
 end;
 
-function TfpgPopupCalendar.CalculateCellDay(const ACol, ARow: LongWord): Word;
+function TfpgPopupCalendar.CalculateCellDay(const ACol, ARow: Integer): Integer;
 begin
-  Result :=  FMonthOffset + (ACol-1) + (ARow-1) * 7;
+  Result :=  FMonthOffset + ACol + ARow * 7;
   if (Result < 1) or (Result > MonthDays[IsLeapYear(Year), Month]) then
-    Result := 0;
+    Result := -1;
 end;
 
 procedure TfpgPopupCalendar.SetDateElement(Index: integer; const AValue: Word);
@@ -352,8 +348,8 @@ begin
     edtMonth.Text := LongMonthNames[Month];
     DecodeDate(FDate, lY, lM, lD);
 
-    grdName1.FocusCol := (lD - FMonthOffset) mod 7 + 1;
-    grdName1.FocusRow := (lD - FMonthOffset) div 7 + 1;
+    grdName1.FocusCol := (lD - FMonthOffset) mod 7{ + 1};
+    grdName1.FocusRow := (lD - FMonthOffset) div 7{ + 1};
   end;
 end;
 
@@ -634,16 +630,17 @@ begin
   end;
 
   {@VFD_BODY_END: fpgPopupCalendar}
-  
+{
   // Setup localization
   // UI Designer doesn't support resource strings yet!
-  grdName1.ColumnTitle[1] := rsShortSun;
-  grdName1.ColumnTitle[2] := rsShortMon;
-  grdName1.ColumnTitle[3] := rsShortTue;
-  grdName1.ColumnTitle[4] := rsShortWed;
-  grdName1.ColumnTitle[5] := rsShortThu;
-  grdName1.ColumnTitle[6] := rsShortFri;
-  grdName1.ColumnTitle[7] := rsShortSat;
+  grdName1.ColumnTitle[0] := rsShortSun;
+  grdName1.ColumnTitle[1] := rsShortMon;
+  grdName1.ColumnTitle[2] := rsShortTue;
+  grdName1.ColumnTitle[3] := rsShortWed;
+  grdName1.ColumnTitle[4] := rsShortThu;
+  grdName1.ColumnTitle[5] := rsShortFri;
+  grdName1.ColumnTitle[6] := rsShortSat;
+}
   btnToday.Text := rsToday;
 end;
 
@@ -771,7 +768,7 @@ begin
     FDropDown := TfpgPopupCalendar.Create(nil, FocusRootWidget);
     ddw := TfpgPopupCalendar(FDropDown);
     ddw.DontCloseWidget := self;
-  { Set to false CloseOnSelect to leave opened popup calendar menu}
+    { Set to false CloseOnSelect to leave opened popup calendar menu }
     ddw.CloseOnSelect := CloseOnSelect;
     ddw.CallerWidget  := self;
 
@@ -782,8 +779,8 @@ begin
     ddw.MaxDate       := FMaxDate;
     ddw.DateValue     := FDate;
     ddw.ShowAt(Parent, Left, Top+Height);
-{ I added this call to UpdateCalendar because sometimes after btnTodayClicked event,
-  reopeing the dropdown menu gave an empty calendar}
+    { I added this call to UpdateCalendar because sometimes after
+      btnTodayClicked event, reopeing the dropdown menu gave an empty calendar }
     ddw.UpdateCalendar; //slapshot
     ddw.PopupFrame    := True;
     ddw.OnValueSet    := @InternalOnValueSet;

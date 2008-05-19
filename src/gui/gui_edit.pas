@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -75,6 +75,7 @@ type
     FSelOffset: integer;
     FCursorPos: integer; // Caret position (characters)
     FCursorX: integer;   // Caret position (pixels)
+    procedure   DoOnChange; virtual;
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
@@ -457,8 +458,7 @@ begin
     end;
 
     if prevval <> Text then
-      if Assigned(FOnChange) then
-        FOnChange(self);
+      DoOnChange;
   end;
   
   if consumed then
@@ -853,6 +853,12 @@ begin
         itm.Enabled := Text <> '';
     end;
   end;
+end;
+
+procedure TfpgCustomEdit.DoOnChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(self);
 end;
 
 procedure TfpgCustomEdit.ShowDefaultPopupMenu(const x, y: integer;

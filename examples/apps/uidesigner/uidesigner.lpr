@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      The starting unit for the uiDesigner project.
+      The starting unit for the UI Designer project.
 }
 
 program uidesigner;

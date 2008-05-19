@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -62,10 +62,10 @@ type
 
   TPropertyStringList = class(TVFDWidgetProperty)
   public
-    function ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
-    function GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
-    function GetValueText(wg: TfpgWidget): string; override;
-    function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+    function  ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
+    function  GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function  GetValueText(wg: TfpgWidget): string; override;
+    function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
     procedure OnExternalEdit(wg: TfpgWidget); override;
   end;
 
@@ -79,10 +79,8 @@ type
   end;
   
   
-  { TPropertyFontDesc }
-
   TPropertyFontDesc = class(TPropertyString)
-    function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+    function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
     procedure OnExternalEdit(wg: TfpgWidget); override;
   end;
 
@@ -151,19 +149,19 @@ uses
   fpgfx,
   gui_dialogs;
 
+
 procedure EditStringList(sl: TStringList);
 var
-  frmie: TItemEditorForm;
+  frm: TItemEditorForm;
 begin
-  frmie := TItemEditorForm.Create(nil);
-  //GfxGetAbsolutePosition(PropertyForm.btnEdit.WinHandle, PropertyForm.btnEdit.width, 0, ax,ay);
-  //frmie.Left := ax;
-  //frmie.Top := ay;
-
-  frmie.edItems.Lines.Assign(sl);
-  if frmie.ShowModal = 1 then
-    sl.Assign(frmie.edItems.Lines);
-  frmie.Free;
+  frm := TItemEditorForm.Create(nil);
+  try
+    frm.edItems.Lines.Assign(sl);
+    if frm.ShowModal = 1 then
+      sl.Assign(frm.edItems.Lines);
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure GetEnumPropValueList(wg: TObject; const APropName: string; sl: TStringList);
@@ -377,11 +375,18 @@ var
   f: integer;
 begin
   sl := TStringList(GetObjectProp(wg, Name, TStrings));
+  if not Assigned(sl) then
+    raise Exception.Create('Failed to find TStrings type property.');
 
   Result := '';
 
-  for f := 0 to sl.Count - 1 do
-    Result := Result + ident + Name + '.Add(' + QuotedStr(sl.Strings[f]) + ');' + LineEnding;
+  //if sl.Text <> '' then
+  //begin
+    //writeln('Text = <', sl.Text, '>');
+    //writeln('StringList.Count = ', sl.Count);
+    for f := 0 to sl.Count - 1 do
+      Result := Result + ident + Name + '.Add(' + QuotedStr(sl.Strings[f]) + ');' + LineEnding;
+  //end;
 end;
 
 function TPropertyStringList.GetValueText(wg: TfpgWidget): string;
@@ -389,6 +394,8 @@ var
   sl: TStringList;
 begin
   sl     := TStringList(GetObjectProp(wg, Name, TStrings));
+  if not Assigned(sl) then
+    raise Exception.Create('Failed to find TStrings type property.');
   Result := '[' + IntToStr(sl.Count) + ' lines]';
 end;
 
@@ -397,6 +404,8 @@ var
   sl: TStringList;
 begin
   sl := TStringList(GetObjectProp(wg, Name, TStrings));
+  if not Assigned(sl) then
+    raise Exception.Create('Failed to find TStrings type property.');
   EditStringList(sl);
 end;
 
@@ -424,6 +433,8 @@ begin
   if Result then
   begin
     sl := TStringList(GetObjectProp(wg, Name, TStrings));
+    if not Assigned(sl) then
+      raise Exception.Create('Failed to find TStrings type property.');
     sl.Add(sval);
   end;
 end;
@@ -498,12 +509,10 @@ begin
 //    Exit;
   if widget = nil then
     Exit;
-  Canvas.BeginDraw;
   Canvas.Clear(clBoxColor);
   Canvas.GetWinRect(r);
   Canvas.SetTextColor(clText1);
   prop.DrawValue(Widget, Canvas, r, 0);
-  Canvas.EndDraw;
 end;
 
 procedure TExternalPropertyEditor.CreateLayout;
@@ -616,12 +625,12 @@ begin
   sv := GetEnumProp(wg, prop.Name);
   sl := TStringList.Create;
   GetEnumPropValueList(wg, prop.Name, sl);
-  fi := 1;
+  fi := 0;
   for i := 0 to sl.Count - 1 do
   begin
     chl.Items.Add(sl.Strings[i]);
     if UpperCase(sv) = UpperCase(sl.Strings[i]) then
-      fi := i + 1;
+      fi := i;
   end;
   chl.FocusItem := fi;
   sl.Free;
@@ -642,9 +651,9 @@ begin
   chl.Items.Add('True');
   chl.Items.Add('False');
   if b = 1 then
-    chl.FocusItem := 1
+    chl.FocusItem := 0
   else
-    chl.FocusItem := 2;
+    chl.FocusItem := 1;
 end;
 
 procedure TBooleanPropertyEditor.StoreValue(wg: TfpgWidget);

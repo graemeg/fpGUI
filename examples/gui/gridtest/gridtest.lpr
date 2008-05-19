@@ -34,13 +34,21 @@ type
     chkDisabled: TfpgCheckBox;
     edtTopRow: TfpgEditInteger;
     btnTopRow: TfpgButton;
+    btnAddFive: TfpgButton;
+    btnAddOne: TfpgButton;
+    btnFiveOnly: TfpgButton;
     {@VFD_HEAD_END: MainForm}
+    procedure StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton;
+      AShift: TShiftState; const AMousePos: TPoint);
+    procedure   btnAddFiveClicked(Sender: TObject);
+    procedure   btnAddOneClicked(Sender: TObject);
+    procedure   btnFiveOnlyClicked(Sender: TObject);
     procedure   chkDisabledChange(Sender: TObject);
     procedure   chkRowSelectChange(Sender: TObject);
     procedure   chkShowHeaderChange(Sender: TObject);
     procedure   chkShowGridChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
-    procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Longword;
+    procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Integer;
         const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure   btnTopRowClicked(Sender: TObject);
   public
@@ -50,6 +58,30 @@ type
 {@VFD_NEWFORM_DECL}
 
 { TMainForm }
+
+procedure TMainForm.StringGridDoubleClicked(Sender: TObject;
+  AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+var
+  lCol, lRow: integer;
+begin
+  StringGrid.MouseToCell(AMousePos.X, AMousePos.Y, lCol, lRow);
+  StringGrid.Cells[lCol, lRow] := Format('(c%d,r%d)', [lCol, lRow]);
+end;
+
+procedure TMainForm.btnAddFiveClicked(Sender: TObject);
+begin
+  StringGrid.RowCount := StringGrid.RowCount + 5;
+end;
+
+procedure TMainForm.btnAddOneClicked(Sender: TObject);
+begin
+  StringGrid.RowCount := StringGrid.RowCount + 1;
+end;
+
+procedure TMainForm.btnFiveOnlyClicked(Sender: TObject);
+begin
+  StringGrid.RowCount := 5;
+end;
 
 procedure TMainForm.chkDisabledChange(Sender: TObject);
 begin
@@ -77,7 +109,7 @@ begin
 end;
 
 procedure TMainForm.stringgridDrawCell(Sender: TObject; const ARow,
-  ACol: Longword; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
+  ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
   var ADefaultDrawing: boolean);
 begin
   if (ACol = 1) and (ARow = 3) then
@@ -93,7 +125,7 @@ end;
 
 procedure TMainForm.btnTopRowClicked(Sender: TObject);
 begin
-  if edtTopRow.Value < 1 then
+  if edtTopRow.Value < 0 then
     Exit;
   stringgrid.TopRow := edtTopRow.Value;
 end;
@@ -104,7 +136,7 @@ var
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(351, 214, 566, 350);
+  SetPosition(351, 214, 515, 350);
   WindowTitle := 'Grid control test';
   WindowPosition := wpScreenCenter;
 
@@ -112,7 +144,7 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(476, 320, 80, 25);
+    SetPosition(425, 320, 80, 25);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -124,11 +156,12 @@ begin
   with stringgrid do
   begin
     Name := 'stringgrid';
-    SetPosition(10, 10, 426, 250);
+    SetPosition(10, 10, 375, 250);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    AddColumn('Column 0', 65);
     AddColumn('Column 1', 100, taLeftJustify);
     AddColumn('Col 2', 50, taCenter);
-    AddColumn('New', 150, taRightJustify);
+    AddColumn('Numbers', 150, taRightJustify);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     RowCount := 17;
@@ -143,12 +176,14 @@ begin
     TextColor:= clBlue;
     ColumnTextColor[1] := clRed;
     // add some text
-    Cells[1, 1] := '(r1,c1)';
+    Cells[0, 0] := '[c0, r0]';
+    Cells[1, 1] := '[c1, r1]';
     Cells[1, 3] := 'Custom';
     Cells[2, 3] := 'Hello';
-    Cells[3, 1] := '(r1,c3)';
+    Cells[3, 1] := '[c3, r1]';
     // Add custom painting
-    OnDrawCell := @stringgridDrawCell;
+    OnDrawCell := @StringGridDrawCell;
+    OnDoubleClick := @StringGridDoubleClicked;
   end;
 
   chkShowHeader := TfpgCheckBox.Create(self);
@@ -168,7 +203,7 @@ begin
   with chkShowGrid do
   begin
     Name := 'chkShowGrid';
-    SetPosition(110, 320, 100, 24);
+    SetPosition(114, 320, 92, 24);
     Anchors := [anLeft,anBottom];
     Checked := True;
     FontDesc := '#Label1';
@@ -213,7 +248,7 @@ begin
   with btnTopRow do
   begin
     Name := 'btnTopRow';
-    SetPosition(76, 280, 91, 24);
+    SetPosition(72, 280, 91, 23);
     Anchors := [anLeft,anBottom];
     Text := 'Set TopRow';
     FontDesc := '#Label1';
@@ -222,9 +257,48 @@ begin
     OnClick := @btnTopRowClicked;
   end;
 
+  btnAddFive := TfpgButton.Create(self);
+  with btnAddFive do
+  begin
+    Name := 'btnAddFive';
+    SetPosition(188, 280, 80, 23);
+    Anchors := [anLeft,anBottom];
+    Text := 'Add 5 lines';
+    FontDesc := '#Label1';
+    ImageName := '';
+    TabOrder := 8;
+    OnClick := @btnAddFiveClicked;
+  end;
+
+  btnAddOne := TfpgButton.Create(self);
+  with btnAddOne do
+  begin
+    Name := 'btnAddOne';
+    SetPosition(272, 280, 80, 23);
+    Anchors := [anLeft,anBottom];
+    Text := 'Add 1 line';
+    FontDesc := '#Label1';
+    ImageName := '';
+    TabOrder := 9;
+    OnClick := @btnAddOneClicked;
+  end;
+
+  btnFiveOnly := TfpgButton.Create(self);
+  with btnFiveOnly do
+  begin
+    Name := 'btnFiveOnly';
+    SetPosition(356, 280, 80, 23);
+    Anchors := [anLeft,anBottom];
+    Text := '5 lines only';
+    FontDesc := '#Label1';
+    ImageName := '';
+    TabOrder := 10;
+    OnClick := @btnFiveOnlyClicked;
+  end;
+
   {@VFD_BODY_END: MainForm}
 
-  for r := 1 to stringgrid.RowCount do
+  for r := 0 to stringgrid.RowCount-1 do
     stringgrid.Cells[3, r] := IntToStr(r);
 
 end;

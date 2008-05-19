@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -75,7 +75,6 @@ type
     previewmenu: TfpgPopupMenu;
     {@VFD_HEAD_END: frmMain}
     mru: TfpgMRU;
-    
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    GetSelectedWidget: TVFDWidgetClass;
@@ -89,11 +88,11 @@ type
   TPropertyList = class(TObject)
   private
     FList: TList;
+    function    GetCount: integer;
   public
     Widget: TfpgWidget;
     constructor Create;
     destructor  Destroy; override;
-    function    GetCount: integer;
     procedure   Clear;
     property    Count: integer read GetCount;
     procedure   AddItem(aProp: TVFDWidgetProperty);
@@ -346,7 +345,7 @@ begin
     SetPosition(116, 60, 200, 22);
     Items.Add('-');
     FontDesc := '#List';
-    FocusItem := 1;
+    FocusItem := 0;
   end;
 
   filemenu := TfpgPopupMenu.Create(self);
@@ -415,7 +414,7 @@ begin
 
 
   x := 0;
-  for n := 1 to VFDWidgetCount do
+  for n := 0 to VFDWidgetCount-1 do
   begin
     wgc           := VFDWidget(n);
     btn           := TwgPaletteButton.Create(wgpalette);
@@ -457,12 +456,10 @@ begin
   if TwgPaletteButton(Sender).Down then
   begin
     s := TwgPaletteButton(Sender).VFDWidget.WidgetClass.ClassName;
-    i := chlPalette.Items.IndexOf(s);
-    if i >= 0 then
-      chlPalette.FocusItem := i + 1;
-  end
-  else
-    chlPalette.FocusItem := 1;
+    chlPalette.FocusItem := chlPalette.Items.IndexOf(s);
+  end;
+  if chlPalette.FocusItem = -1 then
+    chlPalette.FocusItem := 0;
 end;
 
 { TfrmProperties }
@@ -665,20 +662,11 @@ end;
 
 procedure TPropertyList.AddItem(aProp: TVFDWidgetProperty);
 begin
-  {
-  result := TPropertyLine.Create;
-  result.name := aPropName;
-  result.propclass := apropclass;
-  result.value := aPropName;
-}
   FList.Add(aProp);
 end;
 
 procedure TPropertyList.Clear;
- //var
- //  n : integer;
 begin
-  //for n:=0 to FList.Count-1 do TObject(FList[n]).Free;
   FList.Clear;
 end;
 
@@ -702,17 +690,17 @@ end;
 
 function TPropertyList.GetItem(index: integer): TVFDWidgetProperty;
 begin
-  if (index < 1) or (index > Count) then
+  if (index < 0) or (index > Count-1) then
     Result := nil
   else
-    Result := TVFDWidgetProperty(FList[index - 1]);
+    Result := TVFDWidgetProperty(FList[index]);
 end;
 
 { TwgPropertyList }
 
 constructor TwgPropertyList.Create(AOwner: TComponent);
 begin
-  inherited;
+  inherited Create(AOwner);
   NameWidth       := 80;
   editor          := nil;
   OnChange        := @OnRowChange;
@@ -741,10 +729,9 @@ var
   prop: TVFDWidgetProperty;
   r: TfpgRect;
 begin
-  //inherited;
   prop := Props.GetItem(num);
   if prop = nil then
-    Exit;
+    Exit; //==>
 
   x  := rect.left;
   y  := rect.top;
@@ -782,9 +769,7 @@ end;
 
 procedure TwgPropertyList.OnUpdateProperty(Sender: TObject);
 begin
-//  writeln('updating property...');
   editor.StoreValue(props.Widget);
-//  props.Widget.UpdateWindowPosition;
 end;
 
 procedure TwgPropertyList.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -887,8 +872,8 @@ end;
 
 function TfrmMain.GetSelectedWidget: TVFDWidgetClass;
 begin
-  if chlPalette.FocusItem > 1 then
-    Result := TVFDWidgetClass(chlPalette.Items.Objects[chlPalette.FocusItem - 1])
+  if chlPalette.FocusItem > 0 then
+    Result := TVFDWidgetClass(chlPalette.Items.Objects[chlPalette.FocusItem])
   else
     Result := nil;
 end;
@@ -899,7 +884,7 @@ var
 begin
   if wgc = nil then
   begin
-    chlPalette.FocusItem := 1;
+    chlPalette.FocusItem := 0;
     for n := 0 to wgpalette.ComponentCount - 1 do
       if wgpalette.Components[n] is TwgPaletteButton then
         TwgPaletteButton(wgpalette.Components[n]).Down := False;
@@ -943,10 +928,7 @@ end;
 
 procedure TwgPalette.HandlePaint;
 begin
-//  inherited HandlePaint;
-  Canvas.BeginDraw;
   Canvas.Clear(clWindowBackground);
-  Canvas.EndDraw;
 end;
 
 

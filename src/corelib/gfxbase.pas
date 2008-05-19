@@ -524,15 +524,15 @@ type
     destructor  Destroy; override;
     function    Count: integer;
     function    CurrentSpecialDir: integer;
-    property    HasFileMode: boolean read FHasFileMode;
     function    ReadDirectory(const aDirectory: TfpgString = ''): boolean;
     procedure   Clear;
     procedure   Sort(AOrder: TFileListSortOrder);
-    property    Entry[i: integer]: TFileEntry read GetEntry;
-    property    SpecialDirs: TStringList read FSpecialDirs;
     property    DirectoryName: TfpgString read FDirectoryName;
+    property    Entry[i: integer]: TFileEntry read GetEntry;
     property    FileMask: TfpgString read FFileMask write FFileMask;
+    property    HasFileMode: boolean read FHasFileMode;
     property    ShowHidden: boolean read FShowHidden write FShowHidden;
+    property    SpecialDirs: TStringList read FSpecialDirs;
   end;
 
 
@@ -2050,10 +2050,10 @@ end;
 
 function TfpgFileListBase.GetEntry(i: integer): TFileEntry;
 begin
-  if (i < 1) or (i > FEntries.Count) then
+  if (i < 0) or (i > FEntries.Count-1) then
     Result := nil
   else
-    Result := TFileEntry(FEntries[i-1]);
+    Result := TFileEntry(FEntries[i]);
 end;
 
 function TfpgFileListBase.InitializeEntry(sr: TSearchRec): TFileEntry;

@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -32,8 +32,6 @@ uses
   gui_scrollbar;
 
 type
-
-  { TfpgMemo }
 
   TfpgMemo = class(TfpgWidget)
   private
@@ -77,8 +75,8 @@ type
     function    VisibleWidth: integer;
     procedure   VScrollBarMove(Sender: TObject; position: integer);
     procedure   HScrollBarMove(Sender: TObject; position: integer);
-    procedure   SetText(const AValue: string);
-    function    GetText: string;
+    procedure   SetText(const AValue: TfpgString);
+    function    GetText: TfpgString;
     procedure   SetCursorLine(aValue: integer);
     procedure   UpdateScrollBarCoords;
   protected
@@ -102,7 +100,7 @@ type
     property    LineHeight: integer read FLineHeight;
     property    MaxLength: integer read FMaxLength write FMaxLength;
     property    TabWidth: integer read FTabWidth write FTabWidth;
-    property    Text: string read GetText write SetText;
+    property    Text: TfpgString read GetText write SetText;
     property    UseTabs: boolean read FUseTabs write FUseTabs default False;
   published
     property    BackgroundColor default clBoxColor;
@@ -192,7 +190,7 @@ var
   MaxLine: integer;
   yp: integer;
 begin
-  if (aValue < 1) or (aValue = FCursorLine) then
+  if (aValue < 0) or (aValue = FCursorLine) then
     Exit; // wrong value
   if aValue < FFirstLine then
   begin
@@ -204,7 +202,7 @@ begin
   end;
   yp      := 2;
   MaxLine := 0;
-  for i := FFirstLine to LineCount do
+  for i := FFirstLine to LineCount-1 do
   begin
     yp := yp + LineHeight;
     if yp > Height then
@@ -274,14 +272,14 @@ begin
   FTabWidth   := 4;
 
   FLines      := TfpgMemoStrings.Create(self);
-  FFirstLine  := 1;
-  FCursorLine := 1;
+  FFirstLine  := 0;
+  FCursorLine := 0;
 
   FCursorPos    := 0;
   FSelStartPos  := FCursorPos;
   FSelEndPos    := 0;
-  FSelStartLine := 0;
-  FSelEndLine   := 0;
+  FSelStartLine := -1;
+  FSelEndLine   := -1;
 
   FDrawOffset    := 0;
   FMouseDragging := False;
@@ -311,7 +309,7 @@ var
   lw: TfpgCoord;
 begin
   FLongestLineWidth := 0;
-  for n := 1 to LineCount do
+  for n := 0 to LineCount-1 do
   begin
     lw := FFont.TextWidth(getlinetext(n));
     if lw > FlongestLineWidth then
@@ -335,7 +333,7 @@ var
   len: integer;
   st: integer;
 begin
-  if FSelEndLine < 1 then
+  if FSelEndLine < 0 then
     Exit;
 
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
@@ -351,6 +349,7 @@ begin
     selep := FSelStartPos;
     selsl := FSelEndLine;
     selsp := FSelEndPos;
+
   end;
 
   for n := selsl to selel do
@@ -378,11 +377,11 @@ begin
   end;
 
   for n := selsl + 1 to selel do
-    FLines.Delete(selsl);
+    FLines.Delete(n);
 
   FCursorPos  := selsp;
   FCursorLine := selsl;
-  FSelEndLine := 0;
+  FSelEndLine := -1;
 end;
 
 procedure TfpgMemo.DoCopy;
@@ -397,7 +396,7 @@ var
   st: integer;
   s: string;
 begin
-  if FSelEndLine < 1 then
+  if FSelEndLine < 0 then
     Exit;
 
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
@@ -528,11 +527,11 @@ begin
   if FCursorline - FFirstLine + 1 > VisibleLines then
     FFirstLine := FCursorline - VisibleLines + 1;
 
-  if FFirstLine + VisibleLines > LineCount then
+  if (FFirstLine + VisibleLines) > LineCount then
   begin
     FFirstLine := LineCount - VisibleLines + 1;
-    if FFirstline < 1 then
-      FFirstLine := 1;
+    if FFirstline < 0 then
+      FFirstLine := 0;
   end;
 
   UpdateScrollbars;
@@ -583,12 +582,12 @@ begin
 
   if FVScrollBar.Visible then
   begin
-    FVScrollBar.Min        := 1;
+    FVScrollBar.Min        := 0;
     // TODO: Look at calculation of vlines value to improve this!
     if LineCount > 0 then
     begin
       FVScrollBar.SliderSize := VisibleLines / LineCount;
-      FVScrollBar.Max        := LineCount - VisibleLines + 1;
+      FVScrollBar.Max        := LineCount - VisibleLines;
     end
     else
     begin
@@ -610,10 +609,10 @@ end;
 
 function TfpgMemo.GetLineText(linenum: integer): string;
 begin
-  if LineCount < 1 then
+  if LineCount = 0 then
     FLines.Add('');
-  if (linenum >= 1) and (linenum <= LineCount) then
-    Result := FLines.Strings[linenum - 1]
+  if (linenum >= 0) and (linenum < LineCount) then
+    Result := FLines.Strings[linenum]
   else
     Result := '';
 end;
@@ -627,7 +626,7 @@ end;
 
 procedure TfpgMemo.SetLineText(linenum: integer; Value: string);
 begin
-  FLines.Strings[linenum - 1] := Value;
+  FLines.Strings[linenum] := Value;
 end;
 
 function TfpgMemo.GetCursorX: integer;
@@ -774,7 +773,7 @@ begin
   end;
 
   yp := 3;
-  for n := FFirstline to LineCount do
+  for n := FFirstline to LineCount-1 do
   begin
     ls := GetLineText(n);
     if FUseTabs then
@@ -802,7 +801,7 @@ begin
     if Focused then
     begin
       // drawing selection
-      if (FSelEndLine > 0) and (selsl <= n) and (selel >= n) then
+      if (FSelEndLine > -1) and (selsl <= n) and (selel >= n) then
       begin
         if selsl < n then
           st  := 0
@@ -863,6 +862,8 @@ begin
   begin
     if (FMaxLength <= 0) or (UTF8Length(FLines.Text) < FMaxLength) then
     begin
+      if FCursorLine < 0 then
+        FCursorLine := 0;
       DeleteSelection;
       ls := GetLineText(FCursorLine);
       UTF8Insert(s, ls, FCursorPos + 1);
@@ -870,7 +871,7 @@ begin
       Inc(FCursorPos);
       FSelStartPos  := FCursorPos;
       FSelStartLine := FCursorLine;
-      FSelEndLine   := 0;
+      FSelEndLine   := -1;
       AdjustCursor;
     end;
 
@@ -897,7 +898,7 @@ var
   begin
     FSelStartLine := FCursorLine;
     FSelStartPos  := FCursorPos;
-    FSelEndLine   := 0;
+    FSelEndLine   := -1;
   end;
   
 begin
@@ -967,7 +968,7 @@ begin
       keyUp:
       begin  // up
         cx := GetCursorX;
-        if FCursorLine > 1 then
+        if FCursorLine > 0 then
         begin
           Dec(FCursorline);
           SetCPByX(cx);
@@ -977,7 +978,7 @@ begin
       keyDown:
       begin
         cx := GetCursorX;
-        if FCursorLine < LineCount then
+        if FCursorLine < (LineCount-1) then
         begin
           Inc(FCursorline);
           SetCPByX(cx);
@@ -987,35 +988,35 @@ begin
       keyHome:
       begin
         if (ssCtrl in shiftstate) then
-          FCursorLine := 1;
+          FCursorLine := 0;
         FCursorPos := 0;
       end;
 
       keyEnd:
       begin
         if (ssCtrl in shiftstate) then
-          FCursorLine := LineCount;
+          FCursorLine := LineCount-1;
         FCursorPos := UTF8Length(CurrentLine);
       end;
 
       keyPageUp:
-        if FCursorLine > 1 then
+        if FCursorLine > 0 then
         begin
           cx := GetCursorX;
           Dec(FCursorLine, VisibleLines);
-          if FCursorLine < 1 then
-            FCursorLine := 1;
+          if FCursorLine < 0 then
+            FCursorLine := 0;
           SetCPByX(cx);
         end;
 
       keyPageDown:
       begin
         cx := GetCursorX;
-        if FCursorLine < LineCount then
+        if FCursorLine < (LineCount-1) then
         begin
           Inc(FCursorline, VisibleLines);
-          if FCursorLine > LineCount then
-            FCursorLine := LineCount;
+          if FCursorLine > (LineCount-1) then
+            FCursorLine := LineCount-1;
           SetCPByX(cx);
         end;
       end;
@@ -1043,16 +1044,18 @@ begin
     consumed := True;
 
     case keycode of
-      keyReturn, keyPEnter:
+      keyReturn,
+      keyPEnter:
           begin
-            ls  := UTF8Copy(FLines[FCursorline - 1], 1, FCursorPos);
-            ls2 := UTF8Copy(FLines[FCursorline - 1], FCursorPos + 1, UTF8Length(FLines[FCursorline - 1]));
-            FLines.Insert(FCursorLine - 1, ls);
+            ls  := UTF8Copy(FLines[FCursorline], 1, FCursorPos);
+            ls2 := UTF8Copy(FLines[FCursorline], FCursorPos + 1, UTF8Length(FLines[FCursorline]));
+            FLines.Insert(FCursorLine, ls);
             Inc(FCursorLine);
             SetLineText(FCursorLine, ls2);
             FCursorPos := 0;
             hasChanged := True;
           end;
+
       keyBackSpace:
           begin
             if FCursorPos > 0 then
@@ -1062,13 +1065,13 @@ begin
               SetLineText(FCursorLine, ls);
               Dec(FCursorPos);
             end
-            else if FCursorLine > 1 then
+            else if FCursorLine > 0 then
             begin
-              ls         := CurrentLine;
-              FLines.Delete(FCursorLine - 1);
+              ls := CurrentLine;
+              FLines.Delete(FCursorLine);
               Dec(FCursorLine);
-              FCursorPos := UTF8Length(FLines.Strings[FCursorLine - 1]);
-              FLines.Strings[FCursorLine - 1] := FLines.Strings[FCursorLine - 1] + ls;
+              FCursorPos := UTF8Length(FLines.Strings[FCursorLine]);
+              FLines.Strings[FCursorLine] := FLines.Strings[FCursorLine] + ls;
             end;
             hasChanged := True;
           end;
@@ -1076,21 +1079,22 @@ begin
       keyDelete:
           begin
             ls := GetLineText(FCursorLine);
-            if FSelEndLine > 0 then
+            if FSelEndLine > -1 then
               DeleteSelection
             else if FCursorPos < UTF8Length(ls) then
             begin
               UTF8Delete(ls, FCursorPos + 1, 1);
               SetLineText(FCursorLine, ls);
             end
-            else if FCursorLine < LineCount then
+            else if FCursorLine < (LineCount-1) then
             begin
-              ls2 := FLines.Strings[FCursorLine];
+              ls2 := FLines.Strings[FCursorLine+1];
               FLines.Delete(FCursorLine);
-              FLines.Strings[FCursorLine - 1] := ls + ls2;
+              FLines.Strings[FCursorLine] := ls + ls2;
             end;
             hasChanged := True;
           end;
+
       keyTab:
           begin
             if FUseTabs then
@@ -1150,8 +1154,8 @@ begin
 
   // searching the appropriate character position
   lnum := FFirstLine + (y - FSideMargin) div LineHeight;
-  if lnum > LineCount then
-    lnum := LineCount;
+  if lnum > (LineCount-1) then
+    lnum := LineCount-1;
 
   ls  := GetLineText(lnum);
   cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
@@ -1181,7 +1185,7 @@ begin
   begin
     FSelStartLine := lnum;
     FSelStartPos  := cp;
-    FSelEndLine   := 0;
+    FSelEndLine   := -1;
   end;
   Repaint;
 end;
@@ -1203,8 +1207,8 @@ begin
 
   // searching the appropriate character position
   lnum := FFirstLine + (y - FSideMargin) div LineHeight;
-  if lnum > LineCount then
-    lnum := LineCount;
+  if lnum > LineCount-1 then
+    lnum := LineCount-1;
 
   ls  := GetLineText(lnum);
   cpx := FFont.TextWidth(UTF8Copy(ls, 1, FCursorPos)) - FDrawOffset + FSideMargin;
@@ -1326,10 +1330,10 @@ begin
   else
     inc(FFirstLine, abs(delta));  // scroll down
 
-  if FFirstLine > LineCount - VisibleLines + 1 then
-    FFirstLine := LineCount - VisibleLines + 1;
-  if FFirstLine < 1 then
-    FFirstLine := 1;
+  if FFirstLine > LineCount - VisibleLines{ + 1} then
+    FFirstLine := LineCount - VisibleLines {+ 1};
+  if FFirstLine < 0 then
+    FFirstLine := 0;
 
   if FHScrollBar.Visible then
   begin
@@ -1365,26 +1369,26 @@ begin
     Result := '';
 end;
 
-function TfpgMemo.GetText: string;
+function TfpgMemo.GetText: TfpgString;
 var
   n: integer;
-  s: string;
+  s: TfpgString;
 begin
   s := '';
-  for n := 1 to LineCount do
+  for n := 0 to LineCount-1 do
   begin
-    if n > 1 then
+    if n > 0 then
       s := s + #13#10;
     s := s + GetLineText(n);
   end;
   Result := s;
 end;
 
-procedure TfpgMemo.SetText(const AValue: string);
+procedure TfpgMemo.SetText(const AValue: TfpgString);
 var
   n: integer;
-  c: string[2];
-  s: string;
+  c: TfpgChar;
+  s: TfpgString;
 begin
   FLines.Clear;
   s := '';
@@ -1410,10 +1414,10 @@ begin
 
   FDrawOffset   := 0;
   FCursorPos    := 0;
-  FCursorLine   := 1;
+  FCursorLine   := 0;
   FSelStartLine := FCursorLine;
   FSelStartPos  := FCursorPos;
-  FSelEndLine   := 0;
+  FSelEndLine   := -1;
 
   AdjustCursor;
   Repaint;

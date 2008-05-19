@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -52,6 +52,7 @@ type
     FOnSelect: TNotifyEvent;
     FPopupFrame: boolean;
     FAutoHeight: boolean;
+    FUpdateCount: Integer;
     function    GetFontDesc: string;
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
@@ -65,12 +66,13 @@ type
     FMouseDragging: boolean;
     FFirstItem: integer;
     FMargin: integer;
+    procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   UpdateScrollBar;
     procedure   FollowFocus;
     function    ListHeight: TfpgCoord;
     function    ScrollBarWidth: TfpgCoord;
     function    PageLength: integer;
-    procedure   ScrollBarMove(Sender: TObject; position: integer);
+    procedure   ScrollBarMove(Sender: TObject; APosition: integer);
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
     procedure   DoChange;
     procedure   DoSelect;
@@ -89,22 +91,23 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   BeginUpdate;
+    procedure   EndUpdate;
     procedure   Update;
     function    ItemCount: integer; virtual;
     function    RowHeight: integer; virtual;
     procedure   SetFirstItem(item: integer);
     property    Font: TfpgFont read FFont;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property    OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
-    property    OnScroll: TNotifyEvent read FOnScroll write FOnScroll;
     property    OnKeyPress; // to allow to detect return or tab key has been pressed
+    property    OnScroll: TNotifyEvent read FOnScroll write FOnScroll;
+    property    OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
   end;
 
 
   // Listbox containg strings - the normal listbox as we know it. Used by
   // component developers.
   TfpgTextListBox = class(TfpgBaseListBox)
-  private
   protected
     FItems: TStringList;
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
@@ -246,20 +249,28 @@ function TfpgListBoxStrings.Add(const s: String): Integer;
 begin
   Result := inherited Add(s);
   if Assigned(ListBox) and (ListBox.HasHandle) then
+  begin
     ListBox.UpdateScrollBar;
+    ListBox.Invalidate;
+  end;
 end;
 
 procedure TfpgListBoxStrings.Delete(Index: Integer);
 begin
   inherited Delete(Index);
   if Assigned(ListBox) and (ListBox.HasHandle) then
+  begin
     ListBox.UpdateScrollBar;
+    ListBox.Invalidate;
+  end;
 end;
 
 procedure TfpgListBoxStrings.Clear;
 begin
   inherited Clear;
-  ListBox.FocusItem := 0;
+  ListBox.FocusItem := -1;
+  ListBox.UpdateScrollBar;
+  ListBox.Invalidate;
 end;
 
 
@@ -279,19 +290,19 @@ begin
 
   old := FFocusItem;
   // do some sanity checks
-  if AValue < 0 then  // zero is a valid focusitem (no selection)
-    FFocusItem := 1
-  else if AValue > ItemCount then
-    FFocusItem := ItemCount
+  if AValue < -1 then  // -1 is a valid focusitem (no selection)
+    FFocusItem := -1
+  else if AValue > ItemCount-1 then
+    FFocusItem := ItemCount-1
   else
     FFocusItem := AValue;
     
   if FFocusItem = old then
     Exit; //==>
     
-  if FFocusItem <= 1 then
-    FFirstItem := 1;
-
+  if FFocusItem <= 0 then
+    FFirstItem := 0;
+    
   FollowFocus;
   UpdateScrollbar;
   RePaint;
@@ -340,6 +351,13 @@ begin
   Height := (PageLength * RowHeight) + (2 * FMargin);
 end;
 
+procedure TfpgBaseListBox.MsgPaint(var msg: TfpgMessageRec);
+begin
+  // Optimising painting and preventing OnPaint from firing if not needed
+  if FUpdateCount = 0 then
+    inherited MsgPaint(msg);
+end;
+
 procedure TfpgBaseListBox.SetFirstItem(item: integer);
 begin
   FFirstItem := item;
@@ -351,16 +369,16 @@ var
   pn : integer;
 begin
   pn := PageLength;
-  FScrollBar.Visible := PageLength < ItemCount;
+  FScrollBar.Visible := PageLength < ItemCount-1;
 
   if FScrollBar.Visible then
   begin
-    FScrollBar.Min := 1;
+    FScrollBar.Min := 0;
     if ItemCount <> 0 then
       FScrollBar.SliderSize := pn / ItemCount
     else
       FScrollBar.SliderSize := 1;
-    FScrollBar.Max := ItemCount-pn+1;
+    FScrollBar.Max := ItemCount-1-pn;
     FScrollBar.Position := FFirstItem;
     FScrollBar.RepaintSlider;
   end;
@@ -368,14 +386,11 @@ end;
 
 procedure TfpgBaseListBox.FollowFocus;
 var
-  n : integer;
-  h : TfpgCoord;
+  n: integer;
+  h: TfpgCoord;
 begin
   if FFocusItem < FFirstItem then
-  begin
-    FFirstItem := FFocusItem;
-    UpdateScrollBar;
-  end
+    FFirstItem := FFocusItem
   else
   begin
     h := 0;
@@ -385,11 +400,14 @@ begin
       if h > ListHeight then
       begin
         FFirstItem := n+1;
-        UpdateScrollBar;
-        break;
+        Break;
       end;
     end;
   end;
+  
+  if FFirstItem < 0 then
+    FFirstItem := 0;
+  UpdateScrollBar;
 end;
 
 function TfpgBaseListBox.ListHeight: TfpgCoord;
@@ -407,12 +425,12 @@ end;
 
 function TfpgBaseListBox.PageLength: integer;
 begin
-  result := Trunc(ListHeight / RowHeight);
+  result := (ListHeight div RowHeight)-1; // component height minus 1 line
 end;
 
-procedure TfpgBaseListBox.ScrollBarMove(Sender: TObject; position: integer);
+procedure TfpgBaseListBox.ScrollBarMove(Sender: TObject; APosition: integer);
 begin
-  FFirstItem := position;
+  FFirstItem := APosition;
   Repaint;
   if Assigned(FOnScroll) then
     FOnScroll(self);
@@ -420,9 +438,6 @@ end;
 
 procedure TfpgBaseListBox.DoChange;
 begin
-  {$IFDEF DEBUG}
-  writeln(Name + '.OnChange assigned');
-  {$ENDIF}
   if Assigned(OnChange) then
     FOnChange(self);
 end;
@@ -441,39 +456,51 @@ begin
   case keycode of
     keyUp:
         begin
-          if FFocusItem > 1 then
+          if FFocusItem > 0 then
             FocusItem := FFocusItem - 1;
         end;
            
     keyDown:
         begin
-          if FFocusItem < ItemCount then
+          if FFocusItem < (ItemCount-1) then
             FocusItem := FFocusItem + 1;
         end;
 
     keyPageUp:
         begin
-          FocusItem := FFocusItem - PageLength;
+          if ItemCount > 0 then
+          begin
+            if ((FFocusItem - PageLength) < 0) then
+              FocusItem := 0
+            else
+              FocusItem := FFocusItem - PageLength;
+          end;
         end;
 
     keyPageDown:
         begin
-          FocusItem := FFocusItem + PageLength;
+          if ItemCount > 0 then
+          begin
+            if (FFocusItem + PageLength) > ItemCount-1 then
+              FocusItem := ItemCount - 1
+            else
+              FocusItem := FFocusItem + PageLength;
+          end;
         end;
 
     keyHome:
         begin
-          FocusItem := 1;
+          FocusItem := 0;
         end;
 
     keyEnd:
         begin
-          FocusItem := ItemCount;
+          FocusItem := ItemCount-1;
         end;
 
     keyReturn, keyPEnter:
         begin
-          if FocusItem > 0 then
+          if FocusItem > -1 then
             DoSelect;
           consumed := false; // to allow the forms to detect it
         end;
@@ -495,10 +522,7 @@ begin
 end;
 
 procedure TfpgBaseListBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
-var
-  r: TfpgRect;
 begin
-  r.SetRect(Left, Top, Width, Height);
   inherited HandleLMouseUp(x, y, shiftstate);
   if ItemCount < 1 then
     Exit; //==>
@@ -520,8 +544,8 @@ begin
     Exit; //==>
 
   NewFocus := FFirstItem + Trunc((y - FMargin) / RowHeight);
-  if NewFocus < 1 then
-    NewFocus := 1;
+  if NewFocus < 0 then
+    NewFocus := 0;
 
   FocusItem := NewFocus;
 end;
@@ -536,10 +560,10 @@ begin
   else                // scroll up
     FFirstItem := FFirstItem - abs(delta);
 
-  if FFirstItem + PageLength > ItemCount then
-    FFirstItem := ItemCount - PageLength + 1;
-  if FFirstItem < 1 then
-    FFirstItem := 1;
+  if FFirstItem + PageLength > (ItemCount-1) then
+    FFirstItem := ItemCount  - 1 - PageLength;
+  if FFirstItem < 0 then
+    FFirstItem := 0;
   if pfi <> FFirstItem then
   begin
     UpdateScrollBar;
@@ -561,6 +585,9 @@ var
   n: integer;
   r: TfpgRect;
 begin
+  //if FUpdateCount > 0 then
+    //Exit; //==>
+
   inherited HandlePaint;
   Canvas.ClearClipRect;
   
@@ -591,7 +618,11 @@ begin
 
   r.Height := RowHeight;
 
-  for n := FFirstItem to ItemCount do
+  if ItemCount = 0 then
+    Exit; //==>
+  if FFirstItem = -1 then
+    FFirstItem := 0;
+  for n := FFirstItem to ItemCount-1 do
   begin
     if n = FFocusItem then
     begin
@@ -661,11 +692,12 @@ begin
   FTextColor          := Parent.TextColor;
 
   FFocusable      := True;
-  FFocusItem      := 0;
-  FFirstItem      := 1;
+  FFocusItem      := -1;
+  FFirstItem      := 0;
   FWidth          := 80;
   FHeight         := 80;
   FMargin         := 2;
+  FUpdateCount    := 0;
   FMouseDragging  := False;
   FPopupFrame     := False;
   FHotTrack       := False;
@@ -685,10 +717,24 @@ begin
   inherited Destroy;
 end;
 
+procedure TfpgBaseListBox.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TfpgBaseListBox.EndUpdate;
+begin
+  if FUpdateCount = 0 then
+    Exit; //==>
+  Dec(FUpdateCount);
+  if FUpdateCount = 0 then
+    Repaint;
+end;
+
 procedure TfpgBaseListBox.Update;
 begin
-  FFirstItem := 1;
-  FFocusItem := 1;
+  FFirstItem := -1;
+  FFocusItem := -1;
   UpdateScrollBar;
   Repaint;
 end;
@@ -717,9 +763,9 @@ end;
 
 procedure TfpgTextListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
 begin
-  if num < 1 then
-    Exit;
-  fpgStyle.DrawString(Canvas, rect.left+2, rect.top+1, FItems.Strings[num-1], Enabled);
+  //if num < 0 then
+    //Exit; //==>
+  fpgStyle.DrawString(Canvas, rect.left+2, rect.top+1, FItems.Strings[num], Enabled);
 end;
 
 procedure TfpgTextListBox.HandleKeyChar(var AText: TfpgChar;
@@ -727,12 +773,12 @@ procedure TfpgTextListBox.HandleKeyChar(var AText: TfpgChar;
 var
   i: integer;
 begin
-  // if user press a key then it will search the stringlist for a word
-  // beginning with such as letter
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) and (FFocusItem > 0) or (Length(AText) > 1 ) then
-    for i := FFocusItem to FItems.Count do
+  // If the user pressed a key then it will search the stringlist for a word
+  // beginning with that letter
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) and (FFocusItem > -1) or (Length(AText) > 1 ) then
+    for i := FFocusItem to FItems.Count-1 do
     begin
-      if SameText(LeftStr(FItems.Strings[i-1], Length(AText)), AText) then
+      if SameText(LeftStr(FItems.Strings[i], Length(AText)), AText) then
       begin
         FocusItem := i;
         Consumed := True;
@@ -746,7 +792,7 @@ constructor TfpgTextListBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FItems := TfpgListBoxStrings.Create(self);
-  FFocusItem := 0;
+  FFocusItem := -1;
 end;
 
 destructor TfpgTextListBox.Destroy;
@@ -762,8 +808,8 @@ end;
 
 function TfpgTextListBox.Text: string;
 begin
-  if (ItemCount > 0) and (FocusItem <> 0) then
-    result := FItems[FocusItem-1]
+  if (ItemCount > 0) and (FocusItem <> -1) then
+    result := FItems[FocusItem]
   else
     result := '';
 end;
@@ -798,7 +844,7 @@ end;
 
 function TfpgBaseColorListBox.GetColor: TfpgColor;
 begin
-  Result := TColorItem(FItems.Items[FocusItem-1]).ColorValue;
+  Result := TColorItem(FItems.Items[FocusItem]).ColorValue;
 end;
 
 procedure TfpgBaseColorListBox.SetColor(const AValue: TfpgColor);
@@ -806,12 +852,12 @@ var
   i: integer;
 begin
   if GetColor = AValue then
-    Exit;
+    Exit; //==>
   for i := 0 to FItems.Count-1 do
   begin
     if TColorItem(FItems.Items[i]).ColorValue = AValue then
     begin
-      FocusItem := i+1;
+      FocusItem := i;
       Exit;
     end;
   end;
@@ -1022,7 +1068,7 @@ begin
           FItems.Add(TColorItem.Create('clYellowGreen', clYellowGreen));
         end;
   end;
-  FocusItem := 1;
+  FocusItem := 0;
   FollowFocus;
   UpdateScrollbar;
 end;
@@ -1036,13 +1082,13 @@ begin
   FItems.Clear;
 end;
 
-procedure TfpgBaseColorListBox.DrawItem (num: integer; rect: TfpgRect; flags: integer );
+procedure TfpgBaseColorListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
 var
   itm: TColorItem;
 begin
-  if num < 1 then
-    Exit;
-  itm := TColorItem(FItems.Items[num-1]);
+  if num < 0 then
+    Exit; //==>
+  itm := TColorItem(FItems.Items[num]);
   // color box
   Canvas.SetColor(itm.ColorValue);
   Canvas.FillRectangle(rect.Left + 2, rect.Top + 4, FColorBoxWidth, FColorboxHeight);
@@ -1053,7 +1099,7 @@ begin
     fpgStyle.DrawString(Canvas, FColorboxWidth + 8 + rect.left, rect.top+1, itm.ColorName, Enabled);
 end;
 
-constructor TfpgBaseColorListBox.Create (AOwner: TComponent );
+constructor TfpgBaseColorListBox.Create(AOwner: TComponent);
 begin
   inherited Create (AOwner );
   FColorBoxWidth := 35;

@@ -57,9 +57,9 @@ begin
 
   memo.Lines.Add('Memo Test0');
   memo.Lines.Add('Memo Test1');
-  //memo.Lines.Add('Memo Test2');
-  //memo.Lines.Add('Memo Test3');
-  //memo.Lines.Add('Memo Test4');
+  memo.Lines.Add('Memo Test2');
+  memo.Lines.Add('Memo Test3');
+  memo.Lines.Add('Memo Test4');
   memo.Lines.Insert(1,'0 Before 1 after');
   //memo.Lines.Delete(1);
   //memo.Lines.Text := 'Dude'+LineEnding+'What''s mine say?'+LineEnding;;

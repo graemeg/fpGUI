@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -161,18 +161,7 @@ begin
   clist.Top     := 22;
   clist.Height  := Height - clist.top - 2;
   clist.Anchors := [anLeft, anRight, anTop, anBottom];
-
   clist.Items.Add('-');
-{
-  clist.Items.Add('Label');
-  clist.Items.Add('Edit');
-  clist.Items.Add('Button');
-  clist.Items.Add('CheckBox');
-  clist.Items.Add('ComboBox');
-  clist.Items.Add('Memo');
-  clist.Items.Add('ListBox');
-  clist.Items.Add('[OTHER]');
-}
   clist.OnChange := @(maindsgn.OnPaletteChange);
 end;
 
@@ -360,8 +349,8 @@ end;
 
 procedure TWidgetOrderForm.OnButtonClick(Sender: TObject);
 var
-  i,
-  n,
+  i: integer;
+  n: integer;
   myilev: integer;
 
   function IdentLevel(astr: string): integer;
@@ -388,16 +377,16 @@ begin
   begin
     // up / down
     i := list.FocusItem;
-    if i < 1 then
+    if i < 0 then
       Exit;
 
-    myilev := IdentLevel(list.Items[i - 1]);
+    myilev := IdentLevel(list.Items[i]);
 
     if Sender = btnUP then
     begin
-      if (i > 1) and (IdentLevel(list.Items[i - 2]) = myilev) then
+      if (i > 0) and (IdentLevel(list.Items[i - 1]) = myilev) then
       begin
-        list.Items.Move(i - 1, i - 2);
+        list.Items.Move(i, i - 1);
 
         n := i;
         while (n < list.Items.Count) and (IdentLevel(list.Items[n]) > myilev) do
@@ -410,24 +399,21 @@ begin
       end;
     end
     else if Sender = btnDOWN then
-      if (i < list.Items.Count) then
+      if (i < list.Items.Count-1) then
       begin
-        //list.Items.Move(i-1,i);
-
         n := i;
         while (n < list.Items.Count) and (IdentLevel(list.Items[n]) > myilev) do
-          Inc(n)//list.Items.Move(n,n-1);
-        ;
+          Inc(n);
 
-        if (i = n) and (i < list.Items.Count - 1) and (IdentLevel(list.Items[i + 1]) > myilev) then
+        if (i = n) and (i < list.Items.Count-1) and (IdentLevel(list.Items[i]) > myilev) then
           Exit;
 
-        if (n > list.Items.Count - 1) then
-          Exit;
+        if (n > list.Items.Count-1) then
+          Exit; //==>
 
         while (n >= i) do
         begin
-          list.Items.Move(n, n - 1);
+          list.Items.Move(n, n + 1);
           Dec(n);
         end;
 
@@ -444,16 +430,15 @@ begin
   begin
     ModalResult := 2;
     consumed    := True;
-  end
-  else
-    inherited HandleKeyPress(keycode, shiftstate, consumed);
+  end;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfrmVFDSetup.LoadSettings;
 begin
-  chlGrid.FocusItem := gINI.ReadInteger('Options', 'GridResolution', 2);
+  chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 2);
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
-  cbFullPath.Checked := gINI.ReadBool('Options', 'ShowFullPath', True);
+  cbFullPath.Checked      := gINI.ReadBool('Options', 'ShowFullPath', True);
 end;
 
 procedure TfrmVFDSetup.SaveSettings;

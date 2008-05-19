@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -138,8 +138,6 @@ type
   end;
   
   
-  { TfpgFileDialog }
-
   TfpgFileDialog = class(TfpgBaseDialog)
   private
     chlDir: TfpgComboBox;
@@ -159,7 +157,7 @@ type
     procedure   SetFilter(const Value: string);
     function    GetShowHidden: boolean;
     procedure   SetShowHidden(const Value: boolean);
-    procedure   ListChanged(Sender: TObject; ARow: Longword);
+    procedure   ListChanged(Sender: TObject; ARow: Integer);
     procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   InitializeComponents;
     procedure   ProcessFilterString;
@@ -508,14 +506,13 @@ end;
 procedure TfpgFontSelectDialog.CreateFontList;
 var
   fl: TStringList;
-  i: integer;
 begin
-  lbFaces.Items.Clear;
+  lbFaces.BeginUpdate;
   fl := fpgApplication.GetFontFaceList;
-  for i := 0 to fl.Count-1 do
-    lbFaces.Items.Add(fl[i]);
+  lbFaces.Items.Assign(fl);
   fl.Free;
-  lbFaces.FocusItem := 1;
+  lbFaces.FocusItem := 0;
+  lbFaces.EndUpdate;
 end;
 
 procedure TfpgFontSelectDialog.CreateFontAliasList;
@@ -523,12 +520,14 @@ var
   fl: TStringList;
   i: integer;
 begin
-  lbFaces.Items.Clear;
+  lbFaces.BeginUpdate;
   fl := fpgGetNamedFontList;
+  lbFaces.Items.Clear;
   for i := 0 to fl.Count-1 do
     lbFaces.Items.Add(fl.Names[i]);
   fl.Free;
-  lbFaces.FocusItem := 1
+  lbFaces.FocusItem := 0;
+  lbFaces.EndUpdate;
 end;
 
 procedure TfpgFontSelectDialog.SetupUI(AMode: Byte);
@@ -537,23 +536,23 @@ begin
   case FMode of
     1:  // Normal Fonts
       begin
-        lblSize.Enabled := True;
-        lblTypeFace.Enabled := True;
-        lbSize.Enabled := True;
-        cbBold.Enabled := True;
-        cbItalic.Enabled := True;
-        cbUnderline.Enabled := True;
-        cbAntiAlias.Enabled := True;
+        lblSize.Enabled       := True;
+        lblTypeFace.Enabled   := True;
+        lbSize.Enabled        := True;
+        cbBold.Enabled        := True;
+        cbItalic.Enabled      := True;
+        cbUnderline.Enabled   := True;
+        cbAntiAlias.Enabled   := True;
       end;
     2:  // Font Aliases
       begin
-        lblSize.Enabled := False;
-        lblTypeFace.Enabled := False;
-        lbSize.Enabled := False;
-        cbBold.Enabled := False;
-        cbItalic.Enabled := False;
-        cbUnderline.Enabled := False;
-        cbAntiAlias.Enabled := False;
+        lblSize.Enabled       := False;
+        lblTypeFace.Enabled   := False;
+        lbSize.Enabled        := False;
+        cbBold.Enabled        := False;
+        cbItalic.Enabled      := False;
+        cbUnderline.Enabled   := False;
+        cbAntiAlias.Enabled   := False;
       end;
   end;
 end;
@@ -589,7 +588,6 @@ procedure TfpgFontSelectDialog.SetFontDesc(Desc: string);
 var
   cp: integer;
   c: char;
-  i: integer;
   token: string;
   prop: string;
   propval: string;
@@ -619,9 +617,9 @@ var
     i: integer;
   begin
     lbCollection.FocusItem := lbCollection.ItemCount;
-    for i := 1 to lbFaces.ItemCount do
+    for i := 0 to lbFaces.ItemCount-1 do
     begin
-      if SameText(lbFaces.Items[i-1], Desc) then
+      if SameText(lbFaces.Items[i], Desc) then
       begin
         lbFaces.FocusItem := i;
         Exit; //==>
@@ -651,16 +649,13 @@ begin
   cbAntiAlias.Checked := True;
 
   NextToken;
-  i := lbFaces.Items.IndexOf(token);
-  if i >= 0 then
-    lbFaces.FocusItem := i+1;
+  lbFaces.FocusItem := lbFaces.Items.IndexOf(token);
+  
   if c = '-' then
   begin
     NextC;
     NextToken;
-    i := lbSize.Items.IndexOf(token);
-    if i >= 0 then
-      lbSize.FocusItem := i+1;
+    lbSize.FocusItem := lbSize.Items.IndexOf(token);
   end;
 
   while c = ':' do
@@ -728,7 +723,7 @@ begin
     Text := fpgAddColon(rsCollection);
   end;
 
-  { TODO : This need to be implemented at some stage. }
+  { TODO : This need to be fully implemented at some stage. }
   lbCollection := TfpgListBox.Create(self);
   with lbCollection do
   begin
@@ -743,7 +738,7 @@ begin
     Items.Add(rsCollectionSans);
     Items.Add(rsCollectionSerif);
     Items.Add(rsCollectionFontAliases);
-    FocusItem := 1;
+    FocusItem := 0;
     OnChange := @OnCollectionChanged;
 //    Enabled := False;
   end;
@@ -779,7 +774,6 @@ begin
   begin
     Name := 'lbSize';
     SetPosition(401, 28, 52, 236);
-    { We need to improve this! }
     Items.Add('6');
     Items.Add('7');
     Items.Add('8');
@@ -877,7 +871,7 @@ end;
 
 { TfpgFileDialog }
 
-procedure TfpgFileDialog.ListChanged(Sender: TObject; ARow: Longword);
+procedure TfpgFileDialog.ListChanged(Sender: TObject; ARow: Integer);
 var
   s: string;
 begin
@@ -1049,10 +1043,7 @@ begin
   ActiveWidget := grid;
   FileName := '';
   SetFilter(rsAllFiles + ' (*)|*');
-  // we don't want chlFilter to call FilterChange
-  chlFilter.OnChange := nil;
-  chlFilter.FocusItem := 1;
-  chlFilter.OnChange := @FilterChange; // restore event handler
+  chlFilter.FocusItem := 0;
 end;
 
 procedure TfpgFileDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -1213,13 +1204,13 @@ begin
   // we don't want chlDir to call DirChange while populating items
   chlDir.OnChange := nil;
   chlDir.Items.Assign(grid.FileList.SpecialDirs);
-  chlDir.FocusItem := grid.FileList.CurrentSpecialDir + 1;
+  chlDir.FocusItem := grid.FileList.CurrentSpecialDir;
   chlDir.OnChange := @DirChange; // restore event handler
 
   if fsel <> '' then
     SelectFile(fsel)
   else
-    grid.FocusRow := 1;
+    grid.FocusRow := 0;
     
   grid.Update;
   grid.SetFocus;
@@ -1229,7 +1220,7 @@ function TfpgFileDialog.SelectFile(const AFilename: string): boolean;
 var
   n: integer;
 begin
-  for n := 1 to grid.FileList.Count do
+  for n := 0 to grid.FileList.Count-1 do
   begin
     if grid.FileList.Entry[n].Name = AFilename then
     begin
@@ -1280,6 +1271,7 @@ begin
       FFilterList.Add(fm);
     end;
   until (fs = '') or (fm = ''); { repeat/until }
+  chlFilter.FocusItem := 0; // first filter
   // restore event handler
   chlFilter.OnChange := @FilterChange;
 end;
@@ -1289,8 +1281,8 @@ var
   i: integer;
 begin
   i := chlFilter.FocusItem;
-  if (i > 0) and (i <= FFilterList.Count) then
-    Result := FFilterList[i-1]
+  if (i >= 0) and (i < FFilterList.Count) then
+    Result := FFilterList[i]
   else
     Result := '*';
 end;

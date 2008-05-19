@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -62,12 +62,12 @@ type
     FOnClick: TNotifyEvent;
     FSeparator: boolean;
     FSubMenu: TfpgPopupMenu;
-    FText: string;
+    FText: TfpgString;
     FVisible: boolean;
     procedure   SetEnabled(const AValue: boolean);
     procedure   SetHotKeyDef(const AValue: TfpgHotKeyDef);
     procedure   SetSeparator(const AValue: boolean);
-    procedure   SetText(const AValue: string);
+    procedure   SetText(const AValue: TfpgString);
     procedure   SetVisible(const AValue: boolean);
   public
     constructor Create(AOwner: TComponent); override;
@@ -77,7 +77,7 @@ type
     procedure   DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord);
     function    GetCommand: ICommand;
     procedure   SetCommand(ACommand: ICommand);
-    property    Text: string read FText write SetText;
+    property    Text: TfpgString read FText write SetText;
     property    HotKeyDef: TfpgHotKeyDef read FHotKeyDef write SetHotKeyDef;
     property    Separator: boolean read FSeparator write SetSeparator;
     property    Visible: boolean read FVisible write SetVisible;
@@ -128,8 +128,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Close; override;
-    function    AddMenuItem(const AMenuName: string; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
-    function    MenuItemByName(const AMenuName: string): TfpgMenuItem;
+    function    AddMenuItem(const AMenuName: TfpgString; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
+    function    MenuItemByName(const AMenuName: TfpgString): TfpgMenuItem;
     function    MenuItem(const AMenuPos: integer): TfpgMenuItem;  // added to allow for localization
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
@@ -176,7 +176,9 @@ type
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
   end;
 
-function CreateMenuBar(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMenuBar;
+
+function CreateMenuBar(AOwner: TfpgWidget; x, y, w, h: TfpgCoord): TfpgMenuBar; overload;
+function CreateMenuBar(AOwner: TfpgWidget): TfpgMenuBar; overload;
 
 
 implementation
@@ -184,23 +186,34 @@ implementation
 var
   uFocusedPopupMenu: TfpgPopupMenu;
 
-function CreateMenuBar(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMenuBar;
+function CreateMenuBar(AOwner: TfpgWidget; x, y, w, h: TfpgCoord): TfpgMenuBar;
 begin
+  if AOwner = nil then
+    raise Exception.Create('MenuBar component must have an Owner assigned');
   Result       := TfpgMenuBar.Create(AOwner);
   Result.Left  := x;
   Result.Top   := y;
-  Result.Width := w;
+  if w = 0 then
+    Result.Width := AOwner.Width
+  else
+    Result.Width := w;
   if h > 0 then
     Result.Height := h;
+end;
+
+function CreateMenuBar(AOwner: TfpgWidget): TfpgMenuBar;
+begin
+  Result := CreateMenuBar(AOwner, 0, 0, 0, 0);
 end;
 
 
 { TfpgMenuItem }
 
-procedure TfpgMenuItem.SetText(const AValue: string);
+procedure TfpgMenuItem.SetText(const AValue: TfpgString);
 begin
-  if FText=AValue then exit;
-  FText:=AValue;
+  if FText = AValue then
+    Exit; //==>
+  FText := AValue;
 end;
 
 procedure TfpgMenuItem.SetVisible(const AValue: boolean);
@@ -358,10 +371,10 @@ end;
 
 function TfpgMenuBar.VisibleItem(ind: integer): TfpgMenuItem;
 begin
-  if (ind < 1) or (ind > FItems.Count) then
+  if (ind < 0) or (ind > FItems.Count-1) then
     Result := nil
   else
-    Result := TfpgMenuItem(FItems.Items[ind-1]);
+    Result := TfpgMenuItem(FItems.Items[ind]);
 end;
 
 procedure TfpgMenuBar.HandleShow;
@@ -488,7 +501,7 @@ begin
   Canvas.SetColor(clHilite1);
   Canvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
 
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
     DrawColumn(n, n = FocusItem);
   Canvas.EndDraw;
 end;
@@ -498,8 +511,8 @@ begin
   inherited Create(AOwner);
   FItems := TList.Create;
   FBeforeShow       := nil;
-  FFocusItem        := 0;
-  FPrevFocusItem    := 0;
+  FFocusItem        := -1;
+  FPrevFocusItem    := -1;
   FFocusable        := False;
   FBackgroundColor  := Parent.BackgroundColor;
   FTextColor        := Parent.TextColor;
@@ -520,7 +533,7 @@ end;
 
 function TfpgMenuBar.ItemWidth(mi: TfpgMenuItem): integer;
 begin
-  Result := fpgStyle.MenuFont.TextWidth(mi.Text) + 2*6;
+  Result := fpgStyle.MenuFont.TextWidth(mi.Text) + (2*6);
 end;
 
 procedure TfpgMenuBar.DrawColumn(col: integer; focus: boolean);
@@ -532,7 +545,7 @@ begin
   Canvas.BeginDraw;
   r.SetRect(2, 1, 1, fpgStyle.MenuFont.Height+1);
 
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
   begin
     mi := VisibleItem(n);
     r.width := ItemWidth(mi);
@@ -579,10 +592,10 @@ var
   w: integer;
   n: integer;
 begin
-  Result := 1;
+  Result := 0;
   w := 0;
-  n := 1;
-  while (w <= x) and (n <= VisibleCount) do
+  n := 0;
+  while (w <= x) and (n < VisibleCount) do
   begin
     Result := n;
     inc(w, ItemWidth(VisibleItem(n)));
@@ -595,10 +608,10 @@ var
   n: integer;
 begin
   Result := 0;
-  if index < 1 then
+  if index < 0 then
     Exit; //==>
-  n := 1;
-  while (n <= VisibleCount) and (n < index) do
+  n := 0;
+  while (n < VisibleCount) and (n < index) do
   begin
     Inc(result, ItemWidth(VisibleItem(n)));
     inc(n);
@@ -617,11 +630,10 @@ begin
     ActivateMenu;
     // showing the submenu
     mi.SubMenu.ShowAt(self, GetItemPosX(FocusItem)+2, fpgStyle.MenuFont.Height+4);
-    mi.SubMenu.OpenerPopup := nil;
-    mi.SubMenu.OpenerMenuBar := self;
-    mi.SubMenu.DontCloseWidget := self;
-
-    uFocusedPopupMenu := mi.SubMenu;
+    mi.SubMenu.OpenerPopup      := nil;
+    mi.SubMenu.OpenerMenuBar    := self;
+    mi.SubMenu.DontCloseWidget  := self;
+    uFocusedPopupMenu           := mi.SubMenu;
     RePaint;
   end
   else
@@ -636,7 +648,7 @@ var
   n: integer;
 begin
   // Close all previous popups
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
     with VisibleItem(n) do
     begin
       if (SubMenu <> nil) and (SubMenu.HasHandle) then
@@ -650,7 +662,7 @@ var
   mi: TfpgMenuItem;
 begin
   Result := True;
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
   begin
     mi := VisibleItem(n);
     if (mi.SubMenu <> nil) and (mi.SubMenu.HasHandle) then
@@ -666,7 +678,7 @@ var
   n: integer;
 begin
   Result := -1;
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
   begin
     with VisibleItem(n) do
     begin
@@ -745,7 +757,7 @@ var
   n: integer;
 begin
   // Close all previous popups
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
   with VisibleItem(n) do
   begin
     if (SubMenu <> nil) and (SubMenu.HasHandle) then
@@ -758,10 +770,10 @@ var
   n: integer;
 begin
   Result := 2;
-  if index < 1 then
+  if index < 0 then
     Exit; //==>
-  n := 1;
-  while (n <= VisibleCount) and (n < index) do
+  n := 0;
+  while (n < VisibleCount) and (n < index) do
   begin
     Inc(Result, ItemHeight(VisibleItem(n)));
     inc(n);
@@ -778,7 +790,7 @@ begin
     Exit; //==>
 
   newf := CalcMouseRow(y);
-  if newf < 1 then
+  if newf < 0 then
     Exit; //==>
 
   if newf = FFocusItem then
@@ -797,9 +809,8 @@ begin
   r.SetRect(0, 0, Width, Height);
   if not PtInRect(r, Point(x, y)) then
   begin
-//    writeln('Pointer out of bounds.');
     ClosePopups;
-    Exit;
+    Exit; //==>
   end;
 end;
 
@@ -812,7 +823,7 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
   newf := CalcMouseRow(y);
-  if newf < 1 then
+  if newf < 0 then
     Exit;
 
   if not VisibleItem(newf).Selectable then
@@ -853,69 +864,75 @@ begin
   consumed := true;
   case keycode of
     keyUp:
-           begin // up
-             trycnt := 2;
-             i := FFocusItem-1;
-             repeat
-               while (i >= 1) and not VisibleItem(i).Selectable do dec(i);
+        begin // up
+          trycnt := 2;
+          i := FFocusItem-1;
+          repeat
+            while (i >= 0) and not VisibleItem(i).Selectable do
+              dec(i);
 
-               if i >= 1 then break;
+            if i >= 0 then
+              break;  //==>
 
-               i := VisibleCount;
-               dec(trycnt);
-             until trycnt > 0;
+            i := VisibleCount-1;
+            dec(trycnt);
+          until trycnt > 0;
 
-             if i >= 1 then FFocusItem := i;
-           end;
+          if i >= 0 then
+            FFocusItem := i;
+        end;
+        
     keyDown:
-           begin // down
+        begin // down
+          trycnt := 2;
+          i := FFocusItem+1;
+          repeat
+            while (i < VisibleCount) and not VisibleItem(i).Selectable do
+              inc(i);
+            if i < VisibleCount then
+              Break;  //==>
+            i := 0;
+            dec(trycnt);
+          until trycnt > 0;
 
-             trycnt := 2;
-             i := FFocusItem+1;
-             repeat
-               while (i <= VisibleCount) and not VisibleItem(i).Selectable do inc(i);
-
-               if i <= VisibleCount then break;
-
-               i := 1;
-               dec(trycnt);
-             until trycnt > 0;
-
-             if i <= VisibleCount then FFocusItem := i;
-
-           end;
+          if i < VisibleCount then
+            FFocusItem := i;
+        end;
+        
     keyReturn:
-           begin
-             DoSelect;
-           end;
+        begin
+          DoSelect;
+        end;
 
     keyLeft:
-           begin
-             if OpenerMenubar <> nil then OpenerMenubar.HandleKeyPress(keycode, shiftstate, consumed);
-           end;
+        begin
+          if OpenerMenubar <> nil then
+            OpenerMenubar.HandleKeyPress(keycode, shiftstate, consumed);
+        end;
 
     keyRight:
-           begin
-             if OpenerMenubar <> nil then OpenerMenubar.HandleKeyPress(keycode, shiftstate, consumed);
-             // VisibleItem(FFocusItem).SubMenu <> nil then DoSelect;
-           end;
+        begin
+          if OpenerMenubar <> nil then
+            OpenerMenubar.HandleKeyPress(keycode, shiftstate, consumed);
+          // VisibleItem(FFocusItem).SubMenu <> nil then DoSelect;
+        end;
 
     keyBackSpace:
-           begin
-             //if self.OpenerPopup <> nil then
-             Close;
-           end;
+        begin
+          //if self.OpenerPopup <> nil then
+          Close;
+        end;
 
     keyEscape:
-           begin
-             Close;
-             op := OpenerPopup;
-             while op <> nil do
-             begin
-               op.Close;
-               op := op.OpenerPopup;
-             end;
-           end;
+        begin
+          Close;
+          op := OpenerPopup;
+          while op <> nil do
+          begin
+            op.Close;
+            op := op.OpenerPopup;
+          end;
+        end;
   else
     consumed := false;
   end;
@@ -927,7 +944,7 @@ begin
     // normal char
     s := chr(keycode and $00FF) + chr((keycode and $FF00) shr 8);
     i := SearchItemByAccel(s);
-    if i > 0 then
+    if i >= 0 then
     begin
       FFocusItem := i;
       FollowFocus;
@@ -948,7 +965,7 @@ begin
   Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
   Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
 
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
     DrawRow(n, n = FFocusItem);
 
   Canvas.EndDraw;
@@ -956,7 +973,6 @@ end;
 
 procedure TfpgPopupMenu.HandleShow;
 begin
-//  CaptureMouse;
   PrepareToShow;
   inherited HandleShow;
 end;
@@ -966,7 +982,6 @@ begin
   {$IFDEF DEBUG}
   writeln(Classname, '.HandleClose');
   {$ENDIF}
-//  ReleaseMouse;
   inherited HandleClose;
 end;
 
@@ -977,10 +992,10 @@ end;
 
 function TfpgPopupMenu.VisibleItem(ind: integer): TfpgMenuItem;
 begin
-  if (ind < 1) or (ind > FItems.Count) then
+  if (ind < 0) or (ind > FItems.Count-1) then
     Result := nil
   else
-    Result := TfpgMenuItem(FItems.Items[ind-1]);
+    Result := TfpgMenuItem(FItems.Items[ind]);
 end;
 
 procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect);
@@ -1028,7 +1043,7 @@ begin
   Canvas.BeginDraw;
   r.SetRect(FMargin, FMargin, FWidth-(2*FMargin), FHeight-(2*FMargin));
 
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
   begin
     mi := VisibleItem(n);
 
@@ -1092,7 +1107,7 @@ var
   n: integer;
 begin
   result := -1;
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
   begin
     with VisibleItem(n) do
     begin
@@ -1111,7 +1126,6 @@ begin
   {$IFDEF DEBUG}
   writeln(Classname, '.HandleMouseEnter');
   {$ENDIF}
-//  CaptureMouse;
   inherited HandleMouseEnter;
 end;
 
@@ -1121,9 +1135,8 @@ begin
   writeln(Classname, '.HandleMouseExit');
   {$ENDIF}
   inherited HandleMouseExit;
-  FFocusItem := 0;
+  FFocusItem := -1;
   Repaint;
-//  ReleaseMouse;
 end;
 
 // Collecting visible items and measuring sizes
@@ -1157,7 +1170,7 @@ begin
   tw            := 0;   // text width
   hkw           := 0;   // hotkey width
   FSymbolWidth  := 0;
-  for n := 1 to VisibleCount do
+  for n := 0 to VisibleCount-1 do
   begin
     mi  := VisibleItem(n);
     x   := ItemHeight(mi);
@@ -1193,12 +1206,12 @@ begin
   Result := n;
 
   // sanity check
-  if y < 1 then
+  if y < 0 then
     Exit
   else
-    n := 1;
+    n := 0;
     
-  while (h <= y) and (n <= VisibleCount) do
+  while (h <= y) and (n < VisibleCount) do
   begin
     Result := n;
     inc(h, ItemHeight(VisibleItem(n)));
@@ -1220,7 +1233,7 @@ begin
   FSymbolWidth      := FMenuFont.Height+2;
 
   FBeforeShow   := nil;
-  FFocusItem    := 0;
+  FFocusItem    := -1;
   OpenerPopup   := nil;
   OpenerMenubar := nil;
 end;
@@ -1230,7 +1243,6 @@ begin
   {$IFDEF DEBUG}
   writeln(Classname, '.Destroy');
   {$ENDIF}
-//  ReleaseMouse;
   FItems.Free;
   inherited Destroy;
 end;
@@ -1267,7 +1279,7 @@ begin
   end;
 end;
 
-function TfpgPopupMenu.AddMenuItem(const AMenuName: string;
+function TfpgPopupMenu.AddMenuItem(const AMenuName: TfpgString;
     const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
 begin
   result := TfpgMenuItem.Create(self);
@@ -1283,7 +1295,7 @@ begin
   end;
 end;
 
-function TfpgPopupMenu.MenuItemByName(const AMenuName: string): TfpgMenuItem;
+function TfpgPopupMenu.MenuItemByName(const AMenuName: TfpgString): TfpgMenuItem;
 var
   i: integer;
 begin

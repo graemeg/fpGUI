@@ -1,5 +1,5 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
@@ -38,8 +38,8 @@ type
 
   TMainDesigner = class(TObject)
   private
-    procedure SetEditedFileName(const Value: string);
-    procedure  LoadGridResolution;
+    procedure   SetEditedFileName(const Value: string);
+    procedure   LoadGridResolution;
   protected
     FDesigners: TList;
     FFile: TVFDFile;
@@ -137,23 +137,21 @@ begin
     TFormDesigner(FDesigners[n]).Free;
   end;
   FDesigners.Clear;
-
+  
   if not fpgFileExists(fname) then
   begin
     ShowMessage('File does not exists.', 'Error loading form');
     Exit;
   end;
 
-  Writeln('loading file...');
-
   FFile.LoadFile(fname);
   FFile.GetBlocks;
 
-  for n := 1 to FFile.BlockCount do
+  for n := 0 to FFile.BlockCount-1 do
   begin
     bl := FFile.Block(n);
     if bl.BlockID = 'VFD_HEAD_BEGIN' then
-      for m := n + 1 to FFile.BlockCount do
+      for m := n + 1 to FFile.BlockCount-1 do
       begin
         bl2 := FFile.Block(m);
         if (bl2.BlockID = 'VFD_BODY_BEGIN') and (bl2.FormName = bl.FormName) then
@@ -213,7 +211,7 @@ begin
     FFile.NewFileSkeleton(uname);
   end;
 
-  for n := 1 to DesignerCount do
+  for n := 0 to DesignerCount-1 do
   begin
     fd := Designer(n);
     FFile.SetFormData(fd.Form.Name, fd.GetFormSourceDecl, fd.GetFormSourceImpl);
@@ -229,11 +227,11 @@ begin
     finally
       CloseFile(ff);
     end;
-    // frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + fname;
-    //    everything is done by SetEditedFileName (EditedFileName := ...)
     frmMain.mru.AddItem(fname);
   except
-    Writeln('Form save I/O failure.');
+    on E: Exception do
+      raise Exception.Create('Form save I/O failure in TMainDesigner.OnSaveFile.' + #13 +
+          E.Message);
   end;
 end;
 
@@ -277,7 +275,6 @@ var
   fd: TFormDesigner;
   nfrm: TNewFormForm;
 begin
-  Writeln('new form');
   nfrm := TNewFormForm.Create(nil);
   if nfrm.ShowModal = 1 then
     if nfrm.edName.Text <> '' then
@@ -292,8 +289,6 @@ begin
 end;
 
 procedure TMainDesigner.CreateWindows;
- //var
- //  fd : TFormDesigner;
 begin
   frmMain := TfrmMain.Create(nil);
   frmMain.WindowTitle := 'fpGUI Designer v' + program_version;
@@ -301,12 +296,6 @@ begin
 
   frmProperties := TfrmProperties.Create(nil);
   frmProperties.Show;
-
-  //  fd := TFormDesigner.Create;
-  //  fd.Form.Name := 'frmNewForm';
-  //  fd.Form.WindowTitle := u8('frmNewForm');
-  //  FDesigners.Add(fd);
-  //  fd.Show;
 end;
 
 constructor TMainDesigner.Create;
@@ -338,7 +327,6 @@ end;
 
 procedure TMainDesigner.SelectForm(aform: TFormDesigner);
 begin
-  //Writeln('selected...');
   if (SelectedForm <> nil) and (SelectedForm <> aform) then
     SelectedForm.DeSelectAll;
   SelectedForm := aform;
@@ -347,9 +335,9 @@ end;
 function TMainDesigner.Designer(index: integer): TFormDesigner;
 begin
   Result := nil;
-  if (index < 1) or (index > FDesigners.Count) then
+  if (index < 0) or (index > FDesigners.Count-1) then
     Exit;
-  Result := TFormDesigner(FDesigners[index - 1]);
+  Result := TFormDesigner(FDesigners[index]);
 end;
 
 function TMainDesigner.DesignerCount: integer;
@@ -366,14 +354,14 @@ begin
   repeat
     Inc(i);
     s := 'Form' + IntToStr(i);
-    n := 1;
-    while (n <= DesignerCount) do
+    n := 0;
+    while (n < DesignerCount) do
     begin
       if Designer(n).Form.Name = s then
         Break;
       Inc(n);
     end;
-  until n > DesignerCount;
+  until n > DesignerCount-1;
   Result := s;
 end;
 
@@ -382,8 +370,6 @@ var
   fd: TFormDesigner;
   fp: TVFDFormParser;
 begin
-  Writeln('CreateParseForm: ', FormName);
-
   fp := TVFDFormParser.Create(FormName, FormHead, FormBody);
   fd := fp.ParseForm;
   fp.Free;
@@ -446,10 +432,10 @@ end;
 
 procedure TMainDesigner.LoadGridResolution;
 begin
-  case gINI.ReadInteger('Options', 'GridResolution', 2) of
-    1: GridResolution := 2;
-    2: GridResolution := 4;
-    3: GridResolution := 8;
+  case gINI.ReadInteger('Options', 'GridResolution', 1) of
+    0: GridResolution := 2;
+    1: GridResolution := 4;
+    2: GridResolution := 8;
   end;
 end;
 

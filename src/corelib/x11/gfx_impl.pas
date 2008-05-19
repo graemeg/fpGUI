@@ -9,6 +9,8 @@ uses
   
 type
     TfpgWinHandle = TXID;
+    TfpgDCHandle  = TXID;
+
 
 implementation
 

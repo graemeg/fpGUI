@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -49,7 +49,7 @@ type
   TOtherWidget = class(TfpgWidget)
   protected
     FFont: TfpgFont;
-    procedure HandlePaint; override;
+    procedure   HandlePaint; override;
   public
     wgClassName: string;
     constructor Create(AOwner: TComponent); override;
@@ -61,7 +61,7 @@ type
 
   TDesignedForm = class(TfpgForm)
   public
-    procedure AfterCreate; override;
+    procedure   AfterCreate; override;
   end;
 
 
@@ -145,9 +145,6 @@ implementation
 uses
   vfdmain, TypInfo;
 
-type
-  // used to get to SetDesigning() in Form Designer
-  TComponentFriendClass = class(TComponent);
 
 { TWidgetDesigner }
 
@@ -439,13 +436,13 @@ begin
   FWidgets := TList.Create;
   FWasDrag := False;
 
-  OneClickMove := True; //false;
+  OneClickMove := True;
 
-  FForm      := TDesignedForm.Create(nil);
-  FForm.FormDesigner := self;
-  FForm.Name := maindsgn.NewFormName;
-  FForm.WindowTitle := FForm.Name;
-  FFormOther := '';
+  FForm               := TDesignedForm.Create(nil);
+  FForm.FormDesigner  := self;
+  FForm.Name          := maindsgn.NewFormName;
+  FForm.WindowTitle   := FForm.Name;
+  FFormOther          := '';
 end;
 
 destructor TFormDesigner.Destroy;
@@ -543,7 +540,7 @@ var
   n, dir: integer;
   cd, scd: TWidgetDesigner;
 begin
-  if FWidgets.Count < 1 then
+  if FWidgets.Count = 0 then
     Exit;
 
   if fw then
@@ -894,7 +891,7 @@ end;
 
 procedure TFormDesigner.OnPaletteChange(Sender: TObject);
 begin
-  if PaletteForm.clist.FocusItem > 1 then
+  if PaletteForm.clist.FocusItem > 0 then
     FForm.MouseCursor := mcCross
   else
     FForm.MouseCursor := mcDefault;
@@ -936,18 +933,18 @@ begin
     wgc := scd.FVFDClass;
 
   n := frmProperties.lstProps.FocusItem;
-  if (n > 0) and (PropList.GetItem(n) <> nil) then
+  if (n >= 0) and (PropList.GetItem(n) <> nil) then
     lastpropname := PropList.GetItem(n).Name
   else
     lastpropname := '';
 
-  i := 0;
+  i := -1;
 
   if PropList.Widget <> wg then
   begin
     frmProperties.lstProps.ReleaseEditor;
     PropList.Clear;
-    for n := 1 to wgc.PropertyCount do
+    for n := 0 to wgc.PropertyCount-1 do
     begin
       PropList.AddItem(wgc.GetProperty(n));
       if UpperCase(wgc.GetProperty(n).Name) = UpperCase(lastPropName) then
@@ -955,7 +952,7 @@ begin
     end;
     PropList.Widget := wg;
     frmProperties.lstProps.Update;
-    if i > 0 then
+    if i > -1 then
       frmProperties.lstProps.FocusItem := i;
   end;
 
@@ -1475,7 +1472,7 @@ begin
     s := s + ident + 'Anchors := ' + ts + LineEnding;
   end;
 
-  for n := 1 to wgc.PropertyCount do
+  for n := 0 to wgc.PropertyCount-1 do
     s := s + wgc.GetProperty(n).GetPropertySource(wg, ident);
 
   {
@@ -1642,7 +1639,6 @@ begin
   WindowPosition := wpUser;
   WindowTitle := 'New Form';
   SetPosition(300, 150, 300, 250);
-//  TComponentFriendClass(self).SetDesigning(True);
 end;
 
 
@@ -1652,9 +1648,6 @@ procedure TOtherWidget.HandlePaint;
 var
   s: string;
 begin
-  Canvas.BeginDraw;
-  inherited HandlePaint;
-
   Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(FFont);
   Canvas.SetColor(clWidgetFrame);
@@ -1662,8 +1655,6 @@ begin
   Canvas.SetTextColor(clText1);
   s := Name + ': ' + wgClassName;
   Canvas.DrawString(2, 2, s);
-  
-  Canvas.EndDraw;
 end;
 
 constructor TOtherWidget.Create(AOwner: TComponent);

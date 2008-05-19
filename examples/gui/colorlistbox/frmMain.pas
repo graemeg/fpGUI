@@ -83,7 +83,7 @@ begin
   cbName1.Items.Add('cpStandardColors');
   cbName1.Items.Add('cpSystemColors');
   cbName1.Items.Add('cpWebColors');
-  cbName1.FocusItem := 1;
+  cbName1.FocusItem := 0;
   cbName1.OnChange := @cbName1Change;
 end;
 

@@ -127,7 +127,10 @@ end;
 
 function UTF8Length(const s: string): integer;
 begin
-  Result := UTF8Length(PChar(s),length(s));
+  if s = '' then
+    Result := length(s)
+  else
+    Result := UTF8Length(PChar(s),length(s));
 end;
 
 function UTF8Length(p: PChar; ByteCount: integer): integer;
