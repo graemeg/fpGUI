@@ -559,7 +559,7 @@ procedure SortRect(var left, top, right, bottom: integer);
 implementation
 
 uses
-  fpgfx,  // needed for fpgApplication
+  fpgfx,  // needed for fpgApplication & fpgNamedColor
   gfx_utils, // needed for fpgFileList
   gfx_constants,
   typinfo;
@@ -764,27 +764,39 @@ begin
 end;
 
 function fpgGetRed(const AColor: TfpgColor): word;
+var
+  c: TfpgColor;
 begin
+  c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word((AColor shr 16) and $FF);
+  Result := Word((c shr 16) and $FF);
 end;
 
 function fpgGetGreen(const AColor: TfpgColor): word;
+var
+  c: TfpgColor;
 begin
+  c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word((AColor shr 8) and $FF);
+  Result := Word((c shr 8) and $FF);
 end;
 
 function fpgGetBlue(const AColor: TfpgColor): word;
+var
+  c: TfpgColor;
 begin
+  c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word(AColor and $FF);
+  Result := Word(c and $FF);
 end;
 
 function fpgGetAlpha(const AColor: TfpgColor): word;
+var
+  c: TfpgColor;
 begin
+  c := fpgColorToRGB(AColor);
   // AARRGGBB format
-  Result := Word((AColor shr 32) and $FF);
+  Result := Word((c shr 32) and $FF);
 end;
 
 function fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
