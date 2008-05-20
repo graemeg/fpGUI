@@ -4,6 +4,8 @@ Revision history:
 
   2005-09-01: First release by Graeme Geldenhuys (graemeg@gmail.com)
   2007-08-27: Ported the code to the fpGUI toolkit.  [Graeme]
+  2008-05-20: Updates due to fpGUI components now being 0-based. [Graeme]
+
 
 Purpose:
   Abstract mediating views for GUI list controls. This allows you to use
@@ -42,10 +44,9 @@ type
     Selected Object. }
   TUpdateMode = (umSelectedObject, umObjectList);
 
+
   { Abstract class that observes a list object }
-
-  { TListMediator }
-
+  
   TListMediator = class(TtiObject)
   private
     FObjectList: TtiObjectList;
@@ -71,7 +72,6 @@ type
     constructor CreateCustom(pObjectList: TtiObjectList; pView: TfpgWidget); virtual;
     destructor  Destroy; override;
     procedure   Update(pSubject: TtiObject); override;
-
     { Called from GUI to trigger events }
     procedure   HandleDeleteItem; virtual;
     procedure   HandleListChanged; virtual;
@@ -79,7 +79,7 @@ type
     procedure   MenuItemAddClick(Sender: TObject); virtual;
     procedure   MenuItemEditClick(Sender: TObject); virtual;
     procedure   MenuItemDeleteClick(Sender: TObject); virtual;
-
+    //
     property    SelectedObject: TtiObject read FSelectedObject write SetSelectedObject;
     property    ShowDeleted: Boolean read FShowDeleted write SetShowDeleted;
     property    Model: TtiObjectList read GetModel write SetModel;
@@ -149,16 +149,16 @@ begin
   
   if Value = nil then
   begin
-    View.FocusItem := 0;
-    exit; //==>
+    View.FocusItem := -1;
+    Exit; //==>
   end;
 
-  for i := 0 to Pred(Model.Count) do
+  for i := 0 to Model.Count-1 do
   begin
     if Value.OID.AsString = Model.Items[i].OID.AsString then
     begin
-      View.FocusItem := i+1;  // fpGUI is 1-based
-      exit; //==>
+      View.FocusItem := i;
+      Break; //==>
     end;
   end;
 end;
@@ -172,7 +172,7 @@ procedure TListBoxMediator.HandleSelectionChanged;
 var
   i: integer;
 begin
-  if View.FocusItem = 0 then
+  if View.FocusItem = -1 then
     FSelectedObject := nil
   else
   begin
@@ -183,7 +183,7 @@ begin
       FObserversInTransit.Assign(FSelectedObject.ObserverList);
 
     // Assign Newly selected item to SelectedObject Obj.
-    FSelectedObject := TtiObject(View.Items.Objects[View.FocusItem-1]);
+    FSelectedObject := TtiObject(View.Items.Objects[View.FocusItem]);
 
     { If an object was selected, copy the old item's observer List
       to the new item's observer List. }
@@ -191,7 +191,7 @@ begin
       FSelectedObject.ObserverList.Assign(FObserversInTransit);
 
     { set the observers's Subject property to the selected object }
-    for i := 0 to FSelectedObject.ObserverList.Count - 1 do
+    for i := 0 to FSelectedObject.ObserverList.Count-1 do
     begin
       TMediatorView(FSelectedObject.ObserverList.Items[i]).Subject :=
           FSelectedObject;
@@ -209,18 +209,18 @@ var
   ptr: TNotifyEvent;
   selected: integer;
 begin
-  selected := 0;
-  if (Model.CountNotDeleted) >= View.FocusItem then
+  selected := -1;
+  if (Model.CountNotDeleted) >= View.FocusItem+1 then
   begin
     selected := View.FocusItem;
   end;
 
   ptr := View.OnChange;
   View.OnChange := nil;
-  View.Items.BeginUpdate;
+  View.BeginUpdate;
   try
     View.Items.Clear;
-    for i := 0 to Pred(Model.Count) do
+    for i := 0 to Model.Count-1 do
     begin
       if (not Model.Items[i].Deleted) or
          (ShowDeleted and Model.Items[i].Deleted) then
@@ -230,13 +230,13 @@ begin
     end;
     if Model.CountNotDeleted > 0 then
     begin
-      if selected = 0 then
-        selected := 1;
+      if selected = -1 then
+        selected := 0;
       View.FocusItem := selected;
     end;
   finally
-    View.Items.EndUpdate;
-    view.Update;
+    View.EndUpdate;
+    View.Update;
     View.OnChange := ptr;
     HandleSelectionChanged;
   end;
@@ -245,10 +245,8 @@ end;
 
 procedure TListBoxMediator.RestoreBookmark;
 begin
-  if OldPos > View.Items.Count then
-    NewPos := View.Items.Count
-  else if OldPos = 0 then
-    NewPos := 0
+  if OldPos > View.Items.Count-1 then
+    NewPos := View.Items.Count-1
   else
     NewPos := OldPos;
   View.FocusItem := NewPos;
@@ -268,18 +266,17 @@ var
   i: integer;
 begin
   inherited SetSelectedObject(Value);
-  
   if Value = nil then
   begin
-    View.FocusItem := 0;
-    exit; //==>
+    View.FocusItem := -1;
+    Exit; //==>
   end;
-  
-  for i := 0 to Pred(Model.Count) do
+
+  for i := 0 to Model.Count-1 do
   begin
     if Value = Model.Items[i] then
     begin
-      View.FocusItem := i+1;  // fpGUI is 1-based
+      View.FocusItem := i;
       exit; //==>
     end;
   end;
@@ -295,19 +292,19 @@ procedure TComboBoxMediator.HandleSelectionChanged;
 var
   i: integer;
 begin
-  if View.FocusItem = 0 then
+  if View.FocusItem = -1 then
     SelectedObject := nil
   else
   begin
     if Assigned(SelectedObject) then
       FObserversInTransit.Assign(SelectedObject.ObserverList);
 
-    SelectedObject := TtiObject(View.Items.Objects[View.FocusItem-1]);
+    SelectedObject := TtiObject(View.Items.Objects[View.FocusItem]);
 
     if FObserversInTransit.Count > 0 then
       SelectedObject.ObserverList.Assign(FObserversInTransit);
 
-    for i := 0 to SelectedObject.ObserverList.Count - 1 do
+    for i := 0 to SelectedObject.ObserverList.Count-1 do
     begin
       TMediatorView(SelectedObject.ObserverList.Items[i]).Subject :=
           SelectedObject;
@@ -324,8 +321,8 @@ var
   ptr: TNotifyEvent;
   selected: integer;
 begin
-  selected := 0;
-  if (Model.CountNotDeleted-1) >= View.FocusItem then
+  selected := -1;
+  if Model.CountNotDeleted >= View.FocusItem+1 then
     selected := View.FocusItem;
 
   ptr := View.OnChange;
@@ -333,7 +330,7 @@ begin
   View.Items.BeginUpdate;
   try
     View.Items.Clear;
-    for i := 0 to Pred(Model.Count) do
+    for i := 0 to Model.Count-1 do
     begin
       if (not Model.Items[i].Deleted) or
          (ShowDeleted and Model.Items[i].Deleted) then
@@ -343,13 +340,13 @@ begin
     end;
     if Model.CountNotDeleted > 0 then
     begin
-      if selected = 0 then
-        selected := 1;
+      if selected = -1 then
+        selected := 0;
       View.FocusItem := selected;
     end;
   finally
     View.Items.EndUpdate;
-    View.FocusItem := 1;
+    View.FocusItem := 0;
     View.OnChange := ptr;
     HandleSelectionChanged;
   end;

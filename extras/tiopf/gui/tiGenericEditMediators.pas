@@ -3,6 +3,7 @@
 Revision history:
   2005-08-17: First release by Graeme Geldenhuys (graemeg@gmail.com)
   2007-08-24: Ported the code to the fpGUI toolkit.  [Graeme]
+  2008-05-20: Updates due to fpGUI components now being 0-based. [Graeme]
 
 Purpose:
   Abstract mediating view and Mediator Factory. This allows you to use
@@ -219,7 +220,7 @@ type
     FMediatingViewClass: TMediatingViewClass;
     FName: string;
   public
-    constructor CreateExt( pName: String; pMediatingClass: TMediatingViewClass );
+    constructor CreateExt(pName: String; pMediatingClass: TMediatingViewClass);
     property    Name: string read FName write FName;
     property    MediatingViewClass: TMediatingViewClass read FMediatingViewClass write FMediatingViewClass;
   end;
@@ -241,9 +242,6 @@ type
 
 
   { Factory class to register and create your mediating views }
-
-  { TMediatorFactory }
-
   TMediatorFactory = class(TObject)
   private
     MappingList: TStringList;
@@ -268,10 +266,9 @@ uses
   SysUtils
   ,TypInfo
   ,tiExcept
-//  ,Dialogs    { MessageDlg }
-  ,gui_dialogs    // for ShowMessage
-  ,tiGUIConstants // for error color
-  ,gfxbase      // for predefined colors
+  ,gui_dialogs      // for TfpgMessageDialog
+  ,tiGUIConstants   // for error color
+  ,gfxbase          // for predefined colors
   ;
 
 var
@@ -465,7 +462,7 @@ begin
   { Get the name formatting correct }
   lName := Format(cName, [UpperCase(pSubject.ClassName), UpperCase(pFieldName), UpperCase(pComponentClass.ClassName)]);
   { Does the Type exist in the list? }
-  i := MappingList.IndexOf( lName );
+  i := MappingList.IndexOf(lName);
   if i <> -1 then
     Result := TMediatorViewMapping(MappingList.Objects[i]).MediatingViewClass
   else
@@ -477,8 +474,8 @@ function TMediatorFactory.GetMediatorClass(pSubject: TtiObject; pComponentClass:
 begin
   Result := FindMediatorClass(pSubject, pComponentClass, pFieldName);
   if not Assigned(Result) then
-    raise Exception.Create('No mediator registered for:' + #13#10 +
-        '  Component: ' + pComponentClass.ClassName + #13#10 +
+    raise Exception.Create('No mediator registered for:' + LineEnding +
+        '  Component: ' + pComponentClass.ClassName + LineEnding +
         '  FieldName: ' + pSubject.ClassName + '.' + pFieldName);
 end;
 
@@ -498,9 +495,8 @@ begin
   begin   { If yes, notify the user }
     { We cannot raise an exception as this will be called in the Initialization
       section of a unit. FPC's exception handling may not have been loaded yet! }
-//    MessageDlg('Registering a duplicate Mediator View Type <' + FieldName + '> with ' + ClassName,
-//        mtInformation, [mbOK], 0);
-    ShowMessage('Registering a duplicate Mediator View Type <' + FieldName + '> with ' + ClassName);
+    TfpgMessageDialog.Information('',
+        'Registering a duplicate Mediator View Type <' + FieldName + '> with ' + ClassName);
   end
   else
   begin   { If no, then add it to the list }
@@ -681,9 +677,8 @@ end;
 
 procedure TMediatorComboBoxView.ObjectToGui;
 begin
-  // NOTE:  FocusItem is 1 based!!
   EditControl.FocusItem :=
-      EditControl.Items.IndexOf(Subject.PropValue[FieldName]) +1;
+      EditControl.Items.IndexOf(Subject.PropValue[FieldName]);
 end;
 
 
@@ -739,9 +734,7 @@ procedure TMediatorDynamicComboBoxView.SetList(const AValue: TtiObjectList);
 begin
   if FList = AValue then
     Exit; //==>
-
   FList := AValue;
-
   InternalListRefresh;
 end;
 
@@ -838,10 +831,10 @@ var
 begin
   if not DataAndPropertyValid then
     Exit; //==>
-  if EditControl.FocusItem < 1 then
+  if EditControl.FocusItem < 0 then
     Exit; //==>
 
-  lValue := TtiObject(FList.Items[EditControl.FocusItem-1]);
+  lValue := TtiObject(FList.Items[EditControl.FocusItem]);
 
   lPropType := typinfo.PropType(Subject, FieldName);
   if lPropType = tkClass then
@@ -859,7 +852,7 @@ begin
   SetOnChangeActive(false);
 
   //  Set the index only (We're assuming the item is present in the list)
-  EditControl.FocusItem := 0;
+  EditControl.FocusItem := -1;
   if FSubject = nil then
     Exit; //==>
 
@@ -875,7 +868,7 @@ begin
   for i := 0 to FList.Count - 1 do
     if FList.Items[i] = lValue then
     begin
-      EditControl.FocusItem := i+1; // Control is 1-based
+      EditControl.FocusItem := i;
       Break; //==>
     end;
 
