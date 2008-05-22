@@ -85,6 +85,7 @@ type
     property    TextColor;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
+    // events
     property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
     property    OnClose: TFormCloseEvent read FOnClose write FOnClose;
     property    OnCloseQuery: TFormCloseQueryEvent read FOnCloseQuery write FOnCloseQuery;
@@ -93,6 +94,7 @@ type
     property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
     property    OnHide: TNotifyEvent read FOnHide write FOnHide;
     property    OnPaint;
+    property    OnResize;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   end;
 

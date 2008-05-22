@@ -33,8 +33,6 @@ type
   TfpgEditBorderStyle = (bsNone, bsDefault, bsSingle);
 
 
-  { TfpgCustomEdit }
-
   TfpgCustomEdit = class(TfpgWidget)
   private
     FAutoSelect: Boolean;
@@ -115,6 +113,7 @@ type
 
   TfpgEdit = class(TfpgCustomEdit)
   public
+    property    Font;
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
     property    AutoSelect;
@@ -136,8 +135,6 @@ type
     property    OnPaint;
   end;
 
-
-  { TfpgBaseNumericEdit }
 
   TfpgBaseNumericEdit = class(TfpgCustomEdit)
   private
@@ -237,7 +234,8 @@ begin
   Result       := TfpgEdit.Create(AOwner);
   Result.Left  := x;
   Result.Top   := y;
-  Result.Width := w;
+  if w > 0 then
+    Result.Width := w;
   if h < TfpgEdit(Result).FFont.Height + 6 then
     Result.Height:= TfpgEdit(Result).FFont.Height + 6
   else
@@ -404,7 +402,6 @@ begin
   
   Canvas.SetFont(FFont);
   Canvas.SetTextColor(FTextColor);
-  // fpgStyle.DrawString(Canvas, -FTextOffset + FSideMargin, 3, dtext, Enabled);
   fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, FVisibleText, Enabled);
 
   if Focused then

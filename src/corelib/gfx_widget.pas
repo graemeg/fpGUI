@@ -16,8 +16,6 @@ type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
 
 
-  { TfpgWidget }
-
   TfpgWidget = class(TfpgWindow)
   private
     FAlignRect: TfpgRect;
@@ -32,6 +30,7 @@ type
     FOnMouseUp: TMouseButtonEvent;
     FOnPaint: TPaintEvent;
     FOnKeyPress: TKeyPressEvent;
+    FOnResize: TNotifyEvent;
     FOnScreen: boolean;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
   protected
@@ -93,17 +92,18 @@ type
     procedure   MoveAndResize(aleft, atop, awidth, aheight: TfpgCoord);
     procedure   RePaint;
     { property events }
-    property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
-    property    OnEnter: TNotifyEvent read FOnEnter write FOnEnter;
-    property    OnExit: TNotifyEvent read FOnExit write FOnExit;
-    property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
-    property    OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
-    property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
-    property    OnMouseDown: TMouseButtonEvent read FOnMouseDown write FOnMouseDown;
-    property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
+    property    OnEnter: TNotifyEvent read FOnEnter write FOnEnter;
+    property    OnExit: TNotifyEvent read FOnExit write FOnExit;
     property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
+    property    OnMouseDown: TMouseButtonEvent read FOnMouseDown write FOnMouseDown;
+    property    OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
+    property    OnMouseExit: TNotifyEvent read FOnMouseExit write FOnMouseExit;
+    property    OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
+    property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
+    property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
+    property    OnResize: TNotifyEvent read FOnResize write FOnResize;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -867,6 +867,8 @@ begin
   begin
     FFormDesigner.Dispatch(msg);
   end;
+  if Assigned(FOnResize) then
+    FOnResize(Self);
 end;
 
 procedure TfpgWidget.HandleResize(awidth, aheight: TfpgCoord);
