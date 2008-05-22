@@ -1699,7 +1699,7 @@ begin
   end;
   // Xft uses smallint to return text extent information, so we have to
   // check if the text width is small enough to fit into smallint range
-  if DoGetTextWidthClassic('W') * Length(txt) < High(smallint) then
+  if DoGetTextWidthClassic('W') * UTF8Length(txt) < High(smallint) then
     Result := DoGetTextWidthClassic(txt)
   else
     Result := DoGetTextWidthWorkaround(txt);

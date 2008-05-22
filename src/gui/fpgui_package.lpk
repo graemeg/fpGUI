@@ -159,6 +159,7 @@
       </Item32>
       <Item33>
         <Filename Value="gui_panel.pas"/>
+        <UnitName Value="gui_panel"/>
       </Item33>
     </Files>
     <LazDoc Paths="../../docs/xml/gui/"/>

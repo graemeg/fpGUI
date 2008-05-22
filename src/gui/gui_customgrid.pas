@@ -170,7 +170,7 @@ begin
     // removing columns
     while n > AValue do
     begin
-      DoDeleteColumn(n);
+      DoDeleteColumn(n-1);
       dec(n);
     end;
   end;
