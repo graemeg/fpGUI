@@ -101,9 +101,13 @@ type
   TfpgWindowImpl = class;
   
 
+  { TfpgFontResourceImpl }
+
   TfpgFontResourceImpl = class(TfpgFontResourceBase)
   private
     FFontData: PXftFont;
+    function    DoGetTextWidthClassic(const txt: string): integer;
+    function    DoGetTextWidthWorkaround(const txt: string): integer;
   protected
     property    Handle: PXftFont read FFontData;
   public
@@ -283,8 +287,8 @@ uses
   gui_form,
   cursorfont,
   gfx_popupwindow,
-  xatom,      // used for XA_WM_NAME
-  gfx_utf8utils;
+  xatom,          // used for XA_WM_NAME
+  gfx_utf8utils;  // used for GetTextWidth
 
 var
   xapplication: TfpgApplication;
@@ -1626,6 +1630,32 @@ end;
 
 { TfpgFontResourceImpl }
 
+function TfpgFontResourceImpl.DoGetTextWidthClassic(const txt: string): integer;
+var
+  extents: TXGlyphInfo;
+begin
+  XftTextExtentsUTF8(xapplication.display, FFontData, PChar(txt), Length(txt), extents);
+  Result := extents.xOff;
+end;
+
+function TfpgFontResourceImpl.DoGetTextWidthWorkaround(const txt: string): integer;
+var
+  extents: TXGlyphInfo;
+  ch: TfpgChar;
+  dpos: integer;
+  s: string;
+begin
+  Result := 0;
+  dpos   := 1;
+  while dpos <= Length(txt) do
+  begin
+    dpos := UTF8CharAtByte(txt, dpos, ch);
+    s := ch;
+    XftTextExtentsUTF8(xapplication.display, FFontData, PChar(s), Length(ch), extents);
+    Inc(Result, extents.xOff);
+  end;
+end;
+
 constructor TfpgFontResourceImpl.Create(const afontdesc: string);
 begin
   FFontData := XftFontOpenName(xapplication.display, xapplication.DefaultScreen, PChar(afontdesc));
@@ -1661,16 +1691,18 @@ begin
 end;
 
 function TfpgFontResourceImpl.GetTextWidth(const txt: string): integer;
-var
-  extents: TXGlyphInfo;
 begin
   if length(txt) < 1 then
   begin
     Result := 0;
     Exit;
   end;
-  XftTextExtentsUTF8(xapplication.display, FFontData, PChar(txt), Length(txt), extents);
-  Result := extents.xOff;
+  // Xft uses smallint to return text extent information, so we have to
+  // check if the text width is small enough to fit into smallint range
+  if DoGetTextWidthClassic('W') * Length(txt) < High(smallint) then
+    Result := DoGetTextWidthClassic(txt)
+  else
+    Result := DoGetTextWidthWorkaround(txt);
 end;
 
 { TfpgCanvasImpl }
