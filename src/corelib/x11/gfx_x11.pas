@@ -1747,7 +1747,7 @@ begin
     // This occurs every now and again with TfpgMemo and InvertCaret painting!
     // Investigate this.
     if not TfpgWindowImpl(awin).HasHandle then
-      raise Exception.Create('  Window doesn''t have a Handle');
+      raise Exception.Create('Window doesn''t have a Handle');
   end;
   
   XGetGeometry(xapplication.display, TfpgWindowImpl(awin).FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);

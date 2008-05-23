@@ -182,20 +182,20 @@ begin
   lbl.TextColor := clBlue;
   lbl.WrapText := True;
 
-  cbPeople := TfpgComboBox.Create(self);
-  cbPeople.Top          := AgeTrackBar.Bottom + 17;
-  cbPeople.Left         := 7;
-  cbPeople.Width        := 200;
-  cbPeople.Hint := 'Shows objects from the object list';
-
   lbPeople := TfpgListBox.Create(self);
-  lbPeople.Top          := cbPeople.Bottom + 7;
-  lbPeople.Left         := cbPeople.Left;
+  lbPeople.Top          := AgeTrackBar.Bottom + 17;
+  lbPeople.Left         := 7;
   lbPeople.Height       := 200;
   lbPeople.Width        := 200;
   lbPeople.Hint := 'Shows objects from the object list';
 
-  chkShowDeleted := CreateCheckBox(self, cbPeople.Right + 50, cbPeople.Top, 'Show Deleted');
+  cbPeople := TfpgComboBox.Create(self);
+  cbPeople.Top          := AgeTrackBar.Bottom + 17;
+  cbPeople.Left         := lbPeople.Right + 15;
+  cbPeople.Width        := 200;
+  cbPeople.Hint := 'Shows objects from the object list';
+
+  chkShowDeleted := CreateCheckBox(self, cbPeople.Left, lbPeople.Bottom-20, 'Show Deleted');
 
 end;
 
