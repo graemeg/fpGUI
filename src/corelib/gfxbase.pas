@@ -1415,7 +1415,10 @@ end;
 
 function TfpgFontBase.TextWidth(const txt: string): integer;
 begin
-  Result := FFontRes.GetTextWidth(txt);
+  if Length(txt) = 0 then
+    Result := 0
+  else
+    Result := FFontRes.GetTextWidth(txt);
 end;
 
 function TfpgFontBase.Ascent: integer;

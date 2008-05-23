@@ -41,22 +41,29 @@ end;
 // returns substring
 function UTF8Copy(const s: string; StartCharIndex, CharCount: integer): string;
 var
- StartBytePos: PChar;
- EndBytePos: PChar;
- MaxBytes: PtrInt;
+  StartBytePos: PChar;
+  EndBytePos: PChar;
+  MaxBytes: PtrInt;
 begin
- StartBytePos := UTF8CharStart(PChar(s),length(s),StartCharIndex-1);
- if StartBytePos = nil then
-   Result := ''
- else
- begin
-   MaxBytes := PtrInt(PChar(s)+length(s)-StartBytePos);
-   EndBytePos := UTF8CharStart(StartBytePos,MaxBytes,CharCount);
-   if EndBytePos = nil then
-     Result := copy(s,StartBytePos-PChar(s)+1,MaxBytes)
-   else
-     Result := copy(s,StartBytePos-PChar(s)+1,EndBytePos-StartBytePos);
- end;
+  Result := '';
+  // Some sanity checks
+  if (Length(s) = 0) then
+    Exit; //==>
+  if CharCount = 0 then
+    Exit; //==>
+    
+  StartBytePos := UTF8CharStart(PChar(s),length(s),StartCharIndex-1);
+  if StartBytePos = nil then
+    Result := ''
+  else
+  begin
+    MaxBytes := PtrInt(PChar(s)+length(s)-StartBytePos);
+    EndBytePos := UTF8CharStart(StartBytePos,MaxBytes,CharCount);
+    if EndBytePos = nil then
+      Result := copy(s,StartBytePos-PChar(s)+1,MaxBytes)
+    else
+      Result := copy(s,StartBytePos-PChar(s)+1,EndBytePos-StartBytePos);
+  end;
 end;
 
 function UTF8CStringToUTF8String(SourceStart: PChar; SourceLen: SizeInt): string;
