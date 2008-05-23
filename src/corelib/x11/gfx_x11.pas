@@ -1641,17 +1641,15 @@ end;
 function TfpgFontResourceImpl.DoGetTextWidthWorkaround(const txt: string): integer;
 var
   extents: TXGlyphInfo;
-  ch: TfpgChar;
+  ch: string;
   dpos: integer;
-  s: string;
 begin
   Result := 0;
   dpos   := 1;
   while dpos <= Length(txt) do
   begin
     dpos := UTF8CharAtByte(txt, dpos, ch);
-    s := ch;
-    XftTextExtentsUTF8(xapplication.display, FFontData, PChar(s), Length(ch), extents);
+    XftTextExtentsUTF8(xapplication.display, FFontData, PChar(ch), Length(ch), extents);
     Inc(Result, extents.xOff);
   end;
 end;
@@ -1699,7 +1697,7 @@ begin
   end;
   // Xft uses smallint to return text extent information, so we have to
   // check if the text width is small enough to fit into smallint range
-  if DoGetTextWidthClassic('W') * UTF8Length(txt) < High(smallint) then
+  if DoGetTextWidthClassic('W') * Length(txt) < High(smallint) then
     Result := DoGetTextWidthClassic(txt)
   else
     Result := DoGetTextWidthWorkaround(txt);
