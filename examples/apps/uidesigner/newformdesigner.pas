@@ -453,13 +453,15 @@ var
   s: string;
   i: integer;
 begin
+  i := -1;
   if TwgPaletteButton(Sender).Down then
   begin
     s := TwgPaletteButton(Sender).VFDWidget.WidgetClass.ClassName;
-    chlPalette.FocusItem := chlPalette.Items.IndexOf(s);
+    i := chlPalette.Items.IndexOf(s);
   end;
-  if chlPalette.FocusItem = -1 then
-    chlPalette.FocusItem := 0;
+  if i = -1 then
+    i := 0; // select the '-' item
+  chlPalette.FocusItem := i;
 end;
 
 { TfrmProperties }

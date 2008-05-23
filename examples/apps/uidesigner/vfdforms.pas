@@ -99,14 +99,6 @@ type
     procedure   AfterCreate; override;
     procedure   OnButtonClick(Sender: TObject);
   end;
-  
-
-  TPaletteForm = class(TfpgForm)
-  public
-    clab: TfpgLabel;
-    clist: TfpgListBox;
-    procedure AfterCreate; override;
-  end;
 
 
   TfrmVFDSetup = class(TfpgForm)
@@ -132,8 +124,6 @@ type
   end;
 
 
-var
-  PaletteForm: TPaletteForm;
 
 implementation
 
@@ -142,28 +132,6 @@ uses
   fpgfx,
   gui_iniutils,
   gfx_constants;
-
-
-{ TPaletteForm }
-
-procedure TPaletteForm.AfterCreate;
-begin
-  inherited AfterCreate;
-  WindowPosition := wpUser;
-  WindowTitle := 'Palette';
-  SetPosition(10, 450, 110, 220);
-
-  clab := CreateLabel(self, 3, 3, 'Widget Palette:');
-
-  clist         := TfpgListBox.Create(self);
-  clist.Left    := 1;
-  clist.Width   := Width - 2;
-  clist.Top     := 22;
-  clist.Height  := Height - clist.top - 2;
-  clist.Anchors := [anLeft, anRight, anTop, anBottom];
-  clist.Items.Add('-');
-  clist.OnChange := @(maindsgn.OnPaletteChange);
-end;
 
 
 { TInsertCustomForm }

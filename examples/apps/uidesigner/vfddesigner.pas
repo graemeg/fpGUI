@@ -56,7 +56,7 @@ type
   end;
 
 
-  TFormDesigner = class;
+  TFormDesigner = class;    // forward declaration
 
 
   TDesignedForm = class(TfpgForm)
@@ -120,9 +120,7 @@ type
     procedure   DeleteWidgets;
     procedure   EditWidgetOrder;
     procedure   EditTabOrder;
-//    procedure PutControlByName(x, y: integer; cname: string);
     procedure   InsertWidget(pwg: TfpgWidget; x, y: integer; wgc: TVFDWidgetClass);
-    procedure   OnPaletteChange(Sender: TObject);
     procedure   UpdatePropWin;
     procedure   OnPropTextChange(Sender: TObject);
     procedure   OnPropNameChange(Sender: TObject);
@@ -802,99 +800,6 @@ begin
       MoveResizeWidgets(0, 0, dx, dy)
     else
       MoveResizeWidgets(dx, dy, 0, 0);
-end;
-
-(*
-procedure TFormDesigner.PutControlByName(x, y: integer; cname: string);
-var
-  wg: TfpgWidget;
-  wgd: TWidgetDesigner;
-  wgcname: string;
-  newname: string;
-  cfrm: TInsertCustomForm;
-begin
-  wgcname := UpperCase(cname);
-
-  Writeln('Putting control: ', wgcname);
-
-  wg      := nil;
-  newname := 'Widget';
-  if wgcname = 'LABEL' then
-  begin
-    newname := GenerateNewName('lbLabel');
-    wg      := CreateLabel(FForm, x, y, newname);
-  end
-  else if wgcname = 'EDIT' then
-  begin
-    newname := GenerateNewName('edEdit');
-    wg      := CreateEdit(FForm, x, y, 150, 0);
-    TfpgEdit(wg).Text := newname;
-  end
-  else if wgcname = 'BUTTON' then
-  begin
-    newname := GenerateNewName('btnButton');
-    wg      := CreateButton(FForm, x, y, 105, newname, nil);
-  end
-  else if wgcname = 'CHECKBOX' then
-  begin
-    newname := GenerateNewName('cbCheck');
-    wg      := CreateCheckBox(FForm, x, y, newname);
-  end
-  else if wgcname = 'MEMO' then
-  begin
-    newname := GenerateNewName('edMemo');
-    wg      := TfpgMemo.Create(FForm);
-    wg.SetPosition(x, y, 120, 80);
-    TfpgMemo(wg).Text := newname;
-  end
-  else if wgcname = 'TEXTLISTBOX' then
-  begin
-    newname := GenerateNewName('lstList');
-    wg      := TfpgListBox.Create(FForm);
-    wg.SetPosition(x, y, 160, 200);
-    TfpgListBox(wg).Items.Add(newname);
-  end
-  else if wgcname = 'COMBOBOX' then
-  begin
-    newname := GenerateNewName('cbComboBox');
-    wg      := CreateComboBox(FForm, x, y, 150, nil);
-    TfpgComboBox(wg).Items.Add(newname);
-  end
-  else
-  begin
-    // custom component
-    cfrm := TInsertCustomForm.Create(nil);
-    if cfrm.ShowModal = 1 then
-    begin
-      newname := cfrm.edName.Text;
-      if newname = '' then
-        newname := GenerateNewName(cfrm.edClass.Text);
-      wg := TOtherWidget.Create(FForm);
-      TOtherWidget(wg).wgClassName := cfrm.edClass.Text;
-      wg.SetPosition(x, y, 200, 24);
-    end;
-    cfrm.Free;
-
-  end;
-
-  if wg <> nil then
-  begin
-    wg.Name     := newname;
-    wgd         := AddWidget(wg, nil);
-    wg.Visible  := True;
-    DeSelectAll;
-    wgd.Selected := True;
-    UpdatePropWin;
-  end;
-end;
-*)
-
-procedure TFormDesigner.OnPaletteChange(Sender: TObject);
-begin
-  if PaletteForm.clist.FocusItem > 0 then
-    FForm.MouseCursor := mcCross
-  else
-    FForm.MouseCursor := mcDefault;
 end;
 
 procedure TFormDesigner.UpdatePropWin;

@@ -60,7 +60,6 @@ type
     procedure   OnNewFile(Sender: TObject);
     procedure   OnSaveFile(Sender: TObject);
     procedure   OnLoadFile(Sender: TObject);
-    procedure   OnPaletteChange(Sender: TObject);
     procedure   OnPropTextChange(Sender: TObject);
     procedure   OnPropNameChange(Sender: TObject);
     procedure   OnPropPosEdit(Sender: TObject);
@@ -263,11 +262,6 @@ procedure TMainDesigner.OnPropTextChange(Sender: TObject);
 begin
   if SelectedForm <> nil then
     SelectedForm.OnPropTextChange(Sender);
-end;
-
-procedure TMainDesigner.OnPaletteChange(Sender: TObject);
-begin
-
 end;
 
 procedure TMainDesigner.OnNewForm(Sender: TObject);
