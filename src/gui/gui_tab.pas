@@ -463,6 +463,7 @@ var
   lp: integer;
   toffset: integer;
   dx: integer;
+  lTxtFlags: TFTextFlags;
 begin
   if not HasHandle then
     Exit; //==>
@@ -475,6 +476,9 @@ begin
     Exit;
   Canvas.BeginDraw;
   Canvas.SetTextColor(TextColor);
+  lTxtFlags := TextFlagsDflt;
+  if not Enabled then
+    Exclude(lTxtFlags, txtEnabled);
 
   case TabPosition of
     tpBottom:
@@ -610,9 +614,9 @@ begin
             r2.Width := ButtonWidth(h.Text);
             r3 := DrawTab(r2, h = ActivePage);
 
-            // paint text
+            // paint text on non-active tabs
             if h <> ActivePage then
-              Canvas.DrawString(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin+toffset, GetTabText(h.Text));
+              Canvas.DrawText(lp + (ButtonWidth(h.Text) div 2) - FFont.TextWidth(GetTabText(h.Text)) div 2, FMargin+toffset, GetTabText(h.Text), lTxtFlags);
 
             r2.Left := r2.Left + r2.Width;
             lp := lp + ButtonWidth(h.Text);
@@ -630,7 +634,7 @@ begin
 
           // Draw text of ActivePage, because we didn't before.
           DrawTab(r3, false, 2);
-          Canvas.DrawText(r3.Left+4, r3.Top+3, r3.Width, r3.Height, ActivePage.Text, [txtLeft, txtTop]);
+          Canvas.DrawText(r3.Left+4, r3.Top+3, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
         end;
   end;
   

@@ -220,9 +220,15 @@ begin
   r.SetRect(0, 0, Width, Height);
   Canvas.Clear(FBackgroundColor);
   Canvas.SetFont(Font);
-  Canvas.SetTextColor(FTextColor);
+  if Enabled then
+    Canvas.SetTextColor(FTextColor)
+  else
+    Canvas.SetTextColor(clShadow1);
   
   lTxtFlags:= [];
+  if Enabled then
+    Include(lTxtFlags, txtEnabled);
+    
   if FWrapText then
     Include(lTxtFlags, txtWrap);
   case FAlignment of

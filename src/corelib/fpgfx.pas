@@ -40,7 +40,7 @@ type
 
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
-  TextFlagsDflt = [txtLeft, txtTop];
+  TextFlagsDflt = [txtLeft, txtTop, txtEnabled];
 
   // Used for the internal message queue
   cMessageQueueSize = 512;
@@ -1158,7 +1158,9 @@ var
   wtxt, htxt, i, wt, l: integer;
   wraptxt: TfpgString;
   wraplst: TStringList;
+  lEnabled: Boolean;
 begin
+  lEnabled := txtEnabled in AFlags;
   if (txtWrap in AFlags) then
   begin
     wraplst := TStringList.Create;
@@ -1292,57 +1294,60 @@ begin
         end;
     end;
     htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
+    // Now paint the actual text
     for i := 0 to Pred(wraplst.Count) do
     begin
       l :=  (Font.Height + ALineSpace) * i;
       wtxt := Font.TextWidth(wraplst[i]);
       if (txtLeft in AFlags) and (txtTop in AFlags) then
-        fpgStyle.DrawString(self, x, y + l, wraplst[i]);
+        fpgStyle.DrawString(self, x, y + l, wraplst[i], lEnabled);
       if (txtLeft in AFlags) and (txtVCenter in AFlags) then
-        fpgStyle.DrawString(self, x, y + l + (h - htxt) div 2, wraplst[i]);
+        fpgStyle.DrawString(self, x, y + l + (h - htxt) div 2, wraplst[i], lEnabled);
       if (txtLeft in AFlags) and (txtBottom in AFlags) then
-        fpgStyle.DrawString(self, x, y + l + h - htxt, wraplst[i]);
+        fpgStyle.DrawString(self, x, y + l + h - htxt, wraplst[i], lEnabled);
       if (txtHCenter in AFlags) and (txtTop in AFlags) then
-        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l, wraplst[i]);
+        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l, wraplst[i], lEnabled);
       if (txtHCenter in AFlags) and (txtVCenter in AFlags) then
-        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + (h - htxt) div 2, wraplst[i]);
+        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + (h - htxt) div 2, wraplst[i], lEnabled);
       if (txtHCenter in AFlags) and (txtBottom in AFlags) then
-        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + h - htxt, wraplst[i]);
+        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + h - htxt, wraplst[i], lEnabled);
       if (txtRight in AFlags) and (txtTop in AFlags) then
-        fpgStyle.DrawString(self, x + w - wtxt, y + l, wraplst[i]);
+        fpgStyle.DrawString(self, x + w - wtxt, y + l, wraplst[i], lEnabled);
       if (txtRight in AFlags) and (txtVCenter in AFlags) then
-        fpgStyle.DrawString(self, x + w - wtxt, y + l + (h - htxt) div 2, wraplst[i]);
+        fpgStyle.DrawString(self, x + w - wtxt, y + l + (h - htxt) div 2, wraplst[i], lEnabled);
       if (txtRight in AFlags) and (txtBottom in AFlags) then
-        fpgStyle.DrawString(self, x + w - wtxt, y + l + h - htxt, wraplst[i]);
+        fpgStyle.DrawString(self, x + w - wtxt, y + l + h - htxt, wraplst[i], lEnabled);
     end;
     wraplst.Free;
   end
   else
   begin
+    // No wraping was required
     wtxt := self.Font.TextWidth(AText);
     htxt := self.Font.Height;
     if (txtAutoSize in AFlags) or (w = 0) then
       w := wtxt;
     if (txtAutoSize in AFlags) or (h = 0) then
       h := htxt;
+    // Now lets paint the actual text
     if (txtLeft in AFlags) and (txtTop in AFlags) then
-      fpgStyle.DrawString(self, x, y, AText);
+      fpgStyle.DrawString(self, x, y, AText, lEnabled);
     if (txtLeft in AFlags) and (txtVCenter in AFlags) then
-      fpgStyle.DrawString(self, x, y + (h - htxt) div 2, AText);
+      fpgStyle.DrawString(self, x, y + (h - htxt) div 2, AText, lEnabled);
     if (txtLeft in AFlags) and (txtBottom in AFlags) then
-      fpgStyle.DrawString(self, x, y + h - htxt, AText);
+      fpgStyle.DrawString(self, x, y + h - htxt, AText, lEnabled);
     if (txtHCenter in AFlags) and (txtTop in AFlags) then
-      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y, AText);
+      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y, AText, lEnabled);
     if (txtHCenter in AFlags) and (txtVCenter in AFlags) then
-      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + (h - htxt) div 2, AText);
+      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + (h - htxt) div 2, AText, lEnabled);
     if (txtHCenter in AFlags) and (txtBottom in AFlags) then
-      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + h - htxt, AText);
+      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + h - htxt, AText, lEnabled);
     if (txtRight in AFlags) and (txtTop in AFlags) then
-      fpgStyle.DrawString(self, x + w - wtxt, y, AText);
+      fpgStyle.DrawString(self, x + w - wtxt, y, AText, lEnabled);
     if (txtRight in AFlags) and (txtVCenter in AFlags) then
-      fpgStyle.DrawString(self, x + w - wtxt, y + (h - htxt) div 2, AText);
+      fpgStyle.DrawString(self, x + w - wtxt, y + (h - htxt) div 2, AText, lEnabled);
     if (txtRight in AFlags) and (txtBottom in AFlags) then
-      fpgStyle.DrawString(self, x + w - wtxt, y + h - htxt, AText);
+      fpgStyle.DrawString(self, x + w - wtxt, y + h - htxt, AText, lEnabled);
   Result := htxt;
   end;
 end;
