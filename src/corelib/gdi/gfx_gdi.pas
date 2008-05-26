@@ -93,7 +93,7 @@ type
     FBufferBitmap: HBitmap;
     FDrawWindow: TfpgWindowImpl;
     Fgc: TfpgDCHandle;
-    fBufgc: TfpgDCHandle;
+    FBufgc: TfpgDCHandle;
     FWinGC: TfpgDCHandle;
     FBackgroundColor: TfpgColor;
     FCurFontRes: TfpgFontResourceImpl;
@@ -1434,8 +1434,7 @@ begin
     DeleteObject(FPen);
     DeleteObject(FClipRegion);
 
-    if FastDoubleBuffer = False then
-      TryFreeBackBuffer;
+    TryFreeBackBuffer;
       
     Windows.ReleaseDC(FDrawWindow.FWinHandle, FWingc);
 
