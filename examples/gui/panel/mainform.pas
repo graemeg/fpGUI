@@ -14,7 +14,8 @@ uses
   gui_label,
   gui_panel,
   gui_radiobutton,
-  gui_combobox;
+  gui_combobox,
+  gui_checkbox;
 
 type
   TfrmMain = class(TfpgForm)
@@ -60,6 +61,8 @@ type
     Bt_Quit: TfpgButton;
     cbxShape: TfpgComboBox;
     cbxBorder: TfpgComboBox;
+    chkEnabled: TfpgCheckBox;
+    procedure chkEnabledChanged(Sender: TObject);
     procedure RB_LeftChange(Sender: TObject);
     procedure RB_CenterChange(Sender: TObject);
     procedure RB_RightChange(Sender: TObject);
@@ -90,6 +93,13 @@ type
   end;
 
 implementation
+
+procedure TfrmMain.chkEnabledChanged(Sender: TObject);
+begin
+  P_Panel.Enabled := chkEnabled.Checked;
+  B_Bevel.Enabled := chkEnabled.Checked;
+  G_GroupBox.Enabled := chkEnabled.Checked;
+end;
 
 procedure TfrmMain.RB_LeftChange(Sender: TObject);
 begin
@@ -333,11 +343,15 @@ begin
   RB_Green       := CreateRadioButton(B_TextColor, 20, 70, 'Text green');
   RB_Green.OnChange := @RB_GreenChange;
   B_Style        := CreateBevel(Self, 50, 500, 180, 80, bsBox, bsRaised);
-  RB_Raised      := CreateRadioButton(B_Style, 20, 20, 'Raised');
+  RB_Raised      := CreateRadioButton(B_Style, 20, 10, 'Raised');
   RB_Raised.OnChange := @RB_RaisedChange;
   RB_Raised.Checked := True;
-  RB_Lowered     := CreateRadioButton(B_Style, 20, 40, 'Lowered');
+  RB_Lowered     := CreateRadioButton(B_Style, 20, 30, 'Lowered');
   RB_Lowered.OnChange := @RB_LoweredChange;
+  chkEnabled := CreateCheckBox(B_Style, 20, 50, 'Enabled');
+  chkEnabled.Checked := True;
+  chkEnabled.OnChange := @chkEnabledChanged;
+  
   Bt_Quit        := CreateButton(Self, 250, 555, 100, 'Quit', @Bt_QuitClick);
   
   cbxShape := CreateComboBox(self, 250, 500, 100, nil);
