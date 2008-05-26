@@ -30,7 +30,7 @@ uses
   gui_menu;
 
 type
-  TfpgEditBorderStyle = (bsNone, bsDefault, bsSingle);
+  TfpgEditBorderStyle = (ebsNone, ebsDefault, ebsSingle);
 
 
   TfpgCustomEdit = class(TfpgWidget)
@@ -93,7 +93,7 @@ type
     procedure   HandleKillFocus; override;
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
-    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default bsDefault;
+    property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    Font: TfpgFont read FFont;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
@@ -493,16 +493,16 @@ begin
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
   case BorderStyle of
-    bsNone:
+    ebsNone:
         begin
           // do nothing
         end;
-    bsDefault:
+    ebsDefault:
         begin
           Canvas.DrawControlFrame(r);
           InflateRect(r, -2, -2);
         end;
-    bsSingle:
+    ebsSingle:
         begin
           Canvas.SetColor(clShadow2);
           Canvas.DrawRectangle(r);
@@ -865,7 +865,7 @@ begin
   FSelOffset        := 0;
   FTextOffset       := 0;
   FPasswordMode     := False;
-  FBorderStyle      := bsDefault;
+  FBorderStyle      := ebsDefault;
   FPopupMenu        := nil;
   FDefaultPopupMenu := nil;
   FOnChange         := nil;

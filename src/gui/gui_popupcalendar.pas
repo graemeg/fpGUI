@@ -528,7 +528,7 @@ begin
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
-    BorderStyle := bsSingle;
+    BorderStyle := ebsSingle;
   end;
 
   btnYearUp := TfpgButton.Create(self);
@@ -567,7 +567,7 @@ begin
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
-    BorderStyle := bsSingle;
+    BorderStyle := ebsSingle;
   end;
 
   btnMonthUp := TfpgButton.Create(self);
