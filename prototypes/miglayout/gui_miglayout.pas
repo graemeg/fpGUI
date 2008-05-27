@@ -5,7 +5,7 @@ unit gui_miglayout;
 interface
 
 uses
-  Classes, SysUtils, gui_bevel, gfxbase;
+  Classes, SysUtils, gui_panel, gfxbase;
   
 type
 
@@ -13,7 +13,7 @@ type
 
   TfpgLayoutPanel = class(TfpgBevel)
   protected
-    procedure HandleResize(awidth, aheight: TfpgCoord); override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Add(AComponent: TComponent; AConstraint: string);

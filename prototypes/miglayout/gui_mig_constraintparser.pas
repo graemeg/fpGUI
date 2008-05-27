@@ -52,12 +52,12 @@ begin
     begin
       if (part = 'ltr') or (part = 'rtl') or (part = 'lefttoright') or (part = 'righttoleft') then
       begin
-        result.LeftToRight := part[1] = 'l';
+        result.LeftToRight_prop := part[1] = 'l';
         parts[i] := ''; // so we don't process it again
       end;
       if (part = 'ttb') or (part = 'btt') or (part = 'toptobottom') or (part = 'bottomtotop') then
       begin
-        result.TopToBottom := part[1] = 't';
+        result.TopToBottom_prop := part[1] = 't';
         parts[i] := ''; // so we don't process it again
       end;
     end;
