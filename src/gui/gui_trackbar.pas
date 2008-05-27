@@ -571,7 +571,7 @@ begin
 
   if Orientation = orVertical then
   begin
-    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btnIsEmbedded]);
+    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded]);
     Canvas.EndDraw(0, Width, Width, Height - Width - Width);
   end
   else

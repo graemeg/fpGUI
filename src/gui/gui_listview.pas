@@ -1273,8 +1273,8 @@ begin
     Column := Columns.Column[I];
     if Column.Visible then
     begin
-      Flags := [btnIsEmbedded];
-      if Column.FDown then Flags := Flags + [btnIsPressed];
+      Flags := [btfIsEmbedded];
+      if Column.FDown then Flags := Flags + [btfIsPressed];
       cRect.Top := cTop;
       cRect.Left := cLeft;
       cRect.Width := Column.Width;

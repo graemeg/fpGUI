@@ -1470,7 +1470,7 @@ procedure TfpgTreeview.DrawHeader(ACol: integer; ARect: TfpgRect;
   AFlags: integer);
 begin
   // Here we can implement a head style check
-  Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
+  Canvas.DrawButtonFace(ARect, [btfIsEmbedded]);
 end;
 
 procedure TfpgTreeview.HandleKeyPress(var keycode: word;

@@ -294,13 +294,13 @@ var
 begin
   if Pressed then
   begin
-    Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded, btnIsPressed]);
+    Canvas.DrawButtonFace(x, y, w, h, [btfIsEmbedded, btfIsPressed]);
     dx := 1;
     dy := 1;
   end
   else
   begin
-    Canvas.DrawButtonFace(x, y, w, h, [btnIsEmbedded]);
+    Canvas.DrawButtonFace(x, y, w, h, [btfIsEmbedded]);
     dx := 0;
     dy := 0;
   end;
@@ -389,12 +389,12 @@ begin
   // Paint the slider button
   if Orientation = orVertical then
   begin
-    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btnIsEmbedded]);
+    Canvas.DrawButtonFace(0, Width + FSliderPos, Width, FSliderLength, [btfIsEmbedded]);
     Canvas.EndDraw(0, Width, Width, Height - Width - Width);
   end
   else
   begin
-    Canvas.DrawButtonFace(Height + FSliderPos, 0, FSliderLength, Height, [btnIsEmbedded]);
+    Canvas.DrawButtonFace(Height + FSliderPos, 0, FSliderLength, Height, [btfIsEmbedded]);
     Canvas.EndDraw(Height, 0, Width - Height - Height, Height);
   end;
 end;

@@ -325,7 +325,7 @@ var
   x: integer;
 begin
   // Here we can implement a head style check
-  Canvas.DrawButtonFace(ARect, [btnIsEmbedded]);
+  Canvas.DrawButtonFace(ARect, [btfIsEmbedded]);
   r := ARect;
   InflateRect(r, -2, -2);
   Canvas.AddClipRect(r);  // text may not overshoot header border

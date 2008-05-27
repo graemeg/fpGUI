@@ -261,16 +261,16 @@ begin
 
   lBtnFlags := [];
   if FDown then
-    Include(lBtnFlags, btnIsPressed);
+    Include(lBtnFlags, btfIsPressed);
 
   if FFocused and (not FEmbedded) then
-    Include(lBtnFlags, btnHasFocus);
+    Include(lBtnFlags, btfHasFocus);
 
   if FEmbedded then
-    Include(lBtnFlags, btnIsEmbedded);
+    Include(lBtnFlags, btfIsEmbedded);
 
   if FDefault then
-    Include(lBtnFlags, btnIsDefault);
+    Include(lBtnFlags, btfIsDefault);
 
   if FBackgroundColor <> clButtonFace then
   begin

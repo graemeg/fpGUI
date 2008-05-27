@@ -719,7 +719,7 @@ begin
   InflateRect(ar, -2, -2);
   if FBtnPressed then
   begin
-    Include(btnflags, btnIsPressed);
+    Include(btnflags, btfIsPressed);
     OffsetRect(ar, 1, 1);
   end;
   // paint button face

@@ -29,8 +29,8 @@ type
   TAnchor  = (anLeft, anRight, anTop, anBottom);
   TAnchors = set of TAnchor;
 
-  TFButtonFlags = set of (btnIsEmbedded, btnIsDefault, btnIsPressed,
-    btnIsSelected, btnHasFocus, btnHasParentColor);
+  TFButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
+    btfIsSelected, btfHasFocus, btfHasParentColor);
     
   TFTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter, txtBottom, txtWrap, txtEnabled,
     txtAutoSize);
@@ -1476,13 +1476,13 @@ var
   r: TfpgRect;
 begin
   r.SetRect(x, y, w, h);
-  if btnIsDefault in AFlags then
+  if btfIsDefault in AFlags then
   begin
     ACanvas.SetColor(clBlack);
     ACanvas.SetLineStyle(1, lsSolid);
     ACanvas.DrawRectangle(r);
     InflateRect(r, -1, -1);
-    Exclude(AFlags, btnIsDefault);
+    Exclude(AFlags, btfIsDefault);
     fpgStyle.DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, AFlags);
     Exit; //==>
   end;
@@ -1492,9 +1492,9 @@ begin
   ACanvas.FillRectangle(x, y, w, h);
 
   // Left and Top (outer)
-  if (btnIsPressed in AFlags) then
+  if (btfIsPressed in AFlags) then
   begin
-    if (btnIsEmbedded in AFlags) then
+    if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clHilite2)
     else
       ACanvas.SetColor(clShadow2);
@@ -1513,9 +1513,9 @@ begin
   //end;
 
   // Right and Bottom (outer)
-  if (btnIsPressed in AFlags) then
+  if (btfIsPressed in AFlags) then
   begin
-    if (btnIsEmbedded in AFlags) then
+    if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clHilite1)
     else
       ACanvas.SetColor(clShadow2);
@@ -1526,9 +1526,9 @@ begin
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
 
   // Right and Bottom (inner)
-  if btnIsPressed in AFlags then
+  if btfIsPressed in AFlags then
   begin
-    if (btnIsEmbedded in AFlags) then
+    if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clButtonFace)
     else
       ACanvas.SetColor(clHilite1);
