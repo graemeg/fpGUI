@@ -1153,7 +1153,7 @@ begin
   end;
 
   if (FWindowType <> wtChild) and not (waSizeable in FWindowAttributes) then
-    FWinStyle := FWinStyle and not (WS_SIZEBOX or WS_MAXIMIZEBOX or WS_MINIMIZEBOX);
+    FWinStyle := FWinStyle and not (WS_SIZEBOX or WS_MAXIMIZEBOX);
 
   FWinStyle := FWinStyle or WS_CLIPCHILDREN or WS_CLIPSIBLINGS;
 
