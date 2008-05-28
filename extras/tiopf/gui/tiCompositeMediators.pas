@@ -21,13 +21,20 @@ uses
   
 type
 
+  { Event object used for OnBeforeSetupField event. Is used to allow formatting
+    of fields before written to listview Caption or Items. }
+  TOnBeforeSetupField = procedure(AObject: TtiObject;
+    const AFieldName: string; var AValue: string) of object;
+
   { Composite mediator for TfpgListView }
   TCompositeListViewMediator = class(TtiObject)
   private
+    FOnBeforeSetupField: TOnBeforeSetupField;
     function    GetSelectedObject: TtiObject;
     procedure   SetSelectedObject(const AValue: TtiObject);
     procedure   SetShowDeleted(const AValue: Boolean);
     procedure   DoCreateItemMediator(AData: TtiObject);
+    procedure   SetOnBeforeSetupField(const Value: TOnBeforeSetupField);
   protected
     FIsObserving: Boolean;
     FDisplayNames: string;
@@ -43,11 +50,15 @@ type
     function    DataAndPropertyValid(const AData: TtiObject): Boolean;
   public
     constructor Create; override;
-    constructor CreateCustom(AModel: TtiObjectList; AView: TfpgListView; ADisplayNames: string; IsObserving: Boolean = True);
+    constructor CreateCustom(AModel: TtiObjectList; AView: TfpgListView; ADisplayNames: string; IsObserving: Boolean = True); overload;
+    constructor CreateCustom(AModel: TtiObjectList; AView: TfpgListView;
+      AOnBeforeSetupField: TOnBeforeSetupField; ADisplayNames: string; IsObserving: Boolean = True); overload;
     procedure   BeforeDestruction; override;
     procedure   Update(ASubject: TtiObject); override;
     { Called from the GUI to trigger events }
     procedure   HandleSelectionChanged; virtual;
+    { Event handler to allow formatting of fields before they are written. }
+    property    OnBeforeSetupField: TOnBeforeSetupField read FOnBeforeSetupField write SetOnBeforeSetupField;
   published
     property    View: TfpgListView read FView;
     property    Model: TtiObjectList read FModel;
@@ -61,15 +72,15 @@ type
   { Composite mediator for TfpgStringGrid }
   TCompositeStringGridMediator = class(TtiObject)
   private
-    FDisplayNames: string;
-    FIsObserving: boolean;
-    FShowDeleted: Boolean;
     function    GetSelectedObjected: TtiObject;
     procedure   SetSelectedObject(const AValue: TtiObject);
     procedure   SetShowDeleted(const AValue: Boolean);
     procedure   DoCreateItemMediator(AData: TtiObject); overload;
     procedure   DoCreateItemMediator(AData: TtiObject; pRowIdx : Integer); overload;
   protected
+    FDisplayNames: string;
+    FIsObserving: boolean;
+    FShowDeleted: Boolean;
     FView: TfpgStringGrid;
     FModel: TtiObjectList;
     FMediatorList: TObjectList;
@@ -95,6 +106,9 @@ type
     section so it can be overridden. }
   TListViewListItemMediator = class(TtiObject)
   private
+    FOnBeforeSetupField: TOnBeforeSetupField;
+    procedure SetOnBeforeSetupField(const Value: TOnBeforeSetupField);
+  protected
     FModel: TtiObject;
     FView: TfpgLVItem;
     FDisplayNames: string;
@@ -102,8 +116,12 @@ type
     procedure   SetupFields; virtual;
   public
     constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem; const ADisplayNames: string; IsObserving: Boolean = True);
+    constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem;
+      AOnBeforeSetupField: TOnBeforeSetupField; const ADisplayNames: string; IsObserving: Boolean = True); overload;
     procedure   BeforeDestruction; override;
     procedure   Update(ASubject: TtiObject); override;
+    { Event handler to allow formatting of fields before they are written. }
+    property    OnBeforeSetupField: TOnBeforeSetupField read FOnBeforeSetupField write SetOnBeforeSetupField;
   published
     property    View: TfpgLVItem read FView;
     property    Model: TtiObject read FModel;
@@ -119,6 +137,7 @@ type
     FView: TfpgStringGrid;
     FModel: TtiObject;
     FRowIndex: Integer;
+  protected
 //    procedure   SetupFields;
   public
     constructor CreateCustom(AModel: TtiObject; AGrid: TfpgStringGrid; ADisplayNames: string; pRowIndex: integer; IsObserving: Boolean = True);
@@ -229,9 +248,9 @@ var
   lFieldName: string;
 begin
   Assert(FModel = ASubject);
-  for i := 0 to tiNumToken(FDisplayNames, cFieldDelimiter)-1 do
+  for i := 1 to tiNumToken(FDisplayNames, cFieldDelimiter) do
   begin
-    lField := tiToken(FDisplayNames, cFieldDelimiter, i+1);
+    lField := tiToken(FDisplayNames, cFieldDelimiter, i);
     lFieldName := tiFieldName(lField);
     
     FView.Cells[i, FRowIndex] := FModel.PropValue[lFieldName];
@@ -241,18 +260,54 @@ end;
 
 { TListViewListItemMediator }
 
+constructor TListViewListItemMediator.CreateCustom(AModel: TtiObject;
+  AView: TfpgLVItem; AOnBeforeSetupField: TOnBeforeSetupField;
+  const ADisplayNames: string; IsObserving: Boolean);
+begin
+  inherited Create;
+  FModel              := AModel;
+  FView               := AView;
+  FDisplayNames       := ADisplayNames;
+  FOnBeforeSetupField := AOnBeforeSetupField;
+
+  SetupFields;
+
+  if IsObserving then
+    FModel.AttachObserver(self);
+end;
+
+procedure TListViewListItemMediator.SetOnBeforeSetupField(
+  const Value: TOnBeforeSetupField);
+begin
+  FOnBeforeSetupField := Value;
+end;
+
 procedure TListViewListItemMediator.SetupFields;
 var
   c: integer;
   lField: string;
+  lMemberName: string;
+  lValue: string;
 begin
   lField := tiToken(FDisplayNames, cFieldDelimiter, 1);
-  FView.Caption := FModel.PropValue[tiFieldName(lField)];
+  lMemberName := tiFieldName(lField);
+  lValue := FModel.PropValue[lMemberName];
+
+  if Assigned(FOnBeforeSetupField) then
+    FOnBeforeSetupField(FModel, lMemberName, lValue);
+
+  FView.Caption := lValue;
 
   for c := 2 to tiNumToken(FDisplayNames, cFieldDelimiter) do
   begin
     lField := tiToken(FDisplayNames, cFieldDelimiter, c);
-    FView.SubItems.Add(FModel.PropValue[tiFieldName(lField)]);
+    lMemberName := tiFieldName(lField);
+    lValue := FModel.PropValue[lMemberName];
+
+    if Assigned(FOnBeforeSetupField) then
+      FOnBeforeSetupField(FModel, lMemberName, lValue);
+
+    FView.SubItems.Add(lValue);
   end;
 end;
 
@@ -260,12 +315,12 @@ constructor TListViewListItemMediator.CreateCustom(AModel: TtiObject;
   AView: TfpgLVItem; const ADisplayNames: string; IsObserving: Boolean);
 begin
   inherited Create;
-  FModel        := AModel;
-  FView         := AView;
-  FDisplayNames := ADisplayNames;
+  FModel              := AModel;
+  FView               := AView;
+  FDisplayNames       := ADisplayNames;
 
   SetupFields;
-  
+
   if IsObserving then
     FModel.AttachObserver(self);
 end;
@@ -282,20 +337,39 @@ procedure TListViewListItemMediator.Update(ASubject: TtiObject);
 var
   c: integer;
   lField: string;
+  lMemberName: string;
+  lValue: string;
 begin
   Assert(FModel = ASubject);
   
   lField := tiToken(DisplayNames, cFieldDelimiter, 1);
-  FView.Caption := FModel.PropValue[tiFieldName(lField)];
+  lMemberName := tiFieldName(lField);
+  lValue := FModel.PropValue[lMemberName];
+
+  if Assigned(FOnBeforeSetupField) then
+    FOnBeforeSetupField(FModel, lMemberName, lValue);
+
+  FView.Caption := lValue;
 
   for c := 2 to tiNumToken(DisplayNames, cFieldDelimiter) do
   begin
     lField := tiToken(DisplayNames, cFieldDelimiter, c);
-    FView.SubItems[c-2] := FModel.PropValue[tiFieldName(lField)];
+    lMemberName := tiFieldName(lField);
+    lValue := FModel.PropValue[lMemberName];
+
+    if Assigned(FOnBeforeSetupField) then
+      FOnBeforeSetupField(FModel, lMemberName, lValue);
+    FView.SubItems[c-2] := lValue;
   end;
 end;
 
 { TCompositeListViewMediator }
+
+procedure TCompositeListViewMediator.SetOnBeforeSetupField(
+  const Value: TOnBeforeSetupField);
+begin
+  FOnBeforeSetupField := Value;
+end;
 
 procedure TCompositeListViewMediator.SetSelectedObject(const AValue: TtiObject);
 var
@@ -349,7 +423,7 @@ begin
   li := TfpgLVItem.Create(FView.Items);
   li.UserData := AData;
   FView.Items.Add(li);
-  m := TListViewListItemMediator.CreateCustom(AData, li, FDisplayNames, FIsObserving);
+  m := TListViewListItemMediator.CreateCustom(AData, li, FOnBeforeSetupField, FDisplayNames, FIsObserving);
   FMediatorList.Add(m);
 end;
 
@@ -424,6 +498,36 @@ constructor TCompositeListViewMediator.Create;
 begin
   inherited Create;
   FObserversInTransit := TList.Create;
+end;
+
+constructor TCompositeListViewMediator.CreateCustom(AModel: TtiObjectList;
+  AView: TfpgListView; AOnBeforeSetupField: TOnBeforeSetupField;
+  ADisplayNames: string; IsObserving: Boolean);
+begin
+  Create; // don't forget this
+
+  FModel        := AModel;
+  FView         := AView;
+  FMediatorList := TObjectList.Create;
+  FIsObserving  := IsObserving;
+  FDisplayNames := ADisplayNames;
+  FShowDeleted  := False;
+
+  Assert(Assigned(AOnBeforeSetupField), 'OnBeforeSetupField not assigned');
+  FOnBeforeSetupField := AOnBeforeSetupField;
+
+  SetupGUIandObject;
+
+  { TODO: This must be improved. If no ADisplayNames value maybe default to a
+   single column listview using the Caption property }
+  if (ADisplayNames <> '') and (tiNumToken(ADisplayNames, cFieldDelimiter) > 0) then
+  begin
+    CreateSubMediators;
+  end;
+
+  if IsObserving then
+    FModel.AttachObserver(self);
+  
 end;
 
 constructor TCompositeListViewMediator.CreateCustom(AModel: TtiObjectList;
@@ -588,6 +692,7 @@ begin
     else
       lColumnTotalWidth := lColumnTotalWidth + FView.ColumnWidth[i] + 20;
   end;
+  
   for i := 0 to FModel.Count-1 do
   begin
     if not FModel.Items[i].Deleted or FShowDeleted then
@@ -665,7 +770,8 @@ end;
 procedure TCompositeStringGridMediator.BeforeDestruction;
 begin
   FMediatorList.Free;
-  FModel.DetachObserver(Self);
+  if Assigned(FModel) then
+    FModel.DetachObserver(Self);
   FModel  := nil;
   FView   := nil;
   
