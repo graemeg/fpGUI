@@ -255,7 +255,12 @@ begin
       fpgWaitWindowMessage;
     until (ModalResult <> 0) or (not Visible);
   except
-    fpgApplication.HandleException(self);
+    on E: Exception do
+    begin
+      ModalResult := -1;
+      Visible := False;
+      fpgApplication.HandleException(self);
+    end;
   end;
 
   fpgApplication.PopModalForm;
