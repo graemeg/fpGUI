@@ -687,8 +687,8 @@ begin
     FView.ColumnTitle[i]  := tiFieldCaption(lField);
 
     //resize the last column to fill the grid.
-    if i = tiNumToken(FDisplayNames, cFieldDelimiter) then
-      FView.ColumnWidth[i] := FView.Width - lColumnTotalWidth + 10
+    if i = tiNumToken(FDisplayNames, cFieldDelimiter)-1 then
+      FView.ColumnWidth[i] := FView.Width - (lColumnTotalWidth + 10)
     else
       lColumnTotalWidth := lColumnTotalWidth + FView.ColumnWidth[i] + 20;
   end;
@@ -759,9 +759,7 @@ begin
 
   SetupGUIandObject;
   if (FDisplayNames <> '') and (tiNumToken(ADisplayNames, cFieldDelimiter) > 0) then
-  begin
     CreateSubMediators;
-  end;
 
   if IsObserving then
     FModel.AttachObserver(Self);
