@@ -12,7 +12,7 @@ uses
     gui_radiobutton, gui_trackbar, gui_tab, gui_basegrid, gui_listview, 
     gui_customgrid, gui_progressbar, gui_menu, gui_style, gui_grid, gui_tree, 
     gui_iniutils, gui_mru, fpgui_db, gui_popupcalendar, gui_gauge, 
-    gui_editcombo, gui_hyperlink, gui_panel; 
+    gui_editcombo, gui_hyperlink, gui_panel, gui_animation; 
 
 implementation
 
