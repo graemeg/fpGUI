@@ -915,7 +915,8 @@ begin
     style         := CS_HREDRAW or CS_VREDRAW or CS_OWNDC or CS_DBLCLKS;
     lpfnWndProc   := WndProc(@fpgWindowProc);
     hInstance     := MainInstance;
-    hIcon         := LoadIcon(0, IDI_APPLICATION);
+    // hIcon         := LoadIcon(0, IDI_APPLICATION);
+    hIcon         := LoadIcon(hInstance, 'MAINICON');
     hCursor       := LoadCursor(0, IDC_ARROW);
     hbrBackground := 0; //COLOR_WINDOW;
     lpszClassName := 'FPGWIN';
