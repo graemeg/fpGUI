@@ -184,6 +184,7 @@ type
     destructor  Destroy; override;
     procedure   GuiToObject; override;
     procedure   ObjectToGui; override;
+    procedure   RefreshList; virtual;
     property    List: TtiObjectList read FList write SetList;
   end;
   
@@ -873,6 +874,11 @@ begin
     end;
 
   SetOnChangeActive(true);
+end;
+
+procedure TMediatorDynamicComboBoxView.RefreshList;
+begin
+  InternalListRefresh;
 end;
 
 { TMediatorCheckBoxView }
