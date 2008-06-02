@@ -627,6 +627,13 @@ begin
   InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
 
+  if Enabled then
+    Canvas.SetColor(FBackgroundColor)
+  else
+    Canvas.SetColor(clWindowBackground);
+
+  Canvas.FillRectangle(r);
+
   // paint the fake dropdown button
   PaintInternalButton;
 
