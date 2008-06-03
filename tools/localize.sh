@@ -6,7 +6,8 @@
 # updating the translated .po files.
 #
 # This script
-# - converts all compiled .rst files to .po files,
+# - builds the tools if required
+# - converts all compiled .rst files to .po files
 # - updates all translated xx.po files
 #
 
@@ -48,6 +49,9 @@ for idx in ${!RSTFILES[@]}; do
     ./updatepofiles.exe $RSTDIR/languages/$POFILE.po
   fi
 done
+
+# generate new include files from the updated .po files.
+./generateincfiles.exe ..
 
 exit 0
 

@@ -196,11 +196,6 @@ begin
 end;
 
 function ParamsValid: boolean;
-var
-  i: Integer;
-  Filename: String;
-  Ext: String;
-  Name: string;
 begin
   Result := false;
   if ParamCount < 1 then
@@ -337,22 +332,27 @@ begin
   SrcFile:=TStringList.Create;
   SrcFile.LoadFromFile(Filename);
   
-  if (SrcFile.Count>0) and (copy(SrcFile[0],1,3)=UTF8FileHeader) then begin
+  if (SrcFile.Count>0) and (copy(SrcFile[0],1,3)=UTF8FileHeader) then
+  begin
     Result.UTF8Header:=copy(SrcFile[0],1,3);
     SrcFile[0]:=copy(SrcFile[0],4,length(SrcFile[0]));
   end;
   
   Line:=0;
-  while Line<SrcFile.Count do begin
-    if (SrcFile[Line]='') then begin
+  while Line<SrcFile.Count do
+  begin
+    if (SrcFile[Line]='') then
+    begin
       // empty line
       inc(Line);
     end
-    else begin
+    else
+    begin
       // message
       MsgItem:=ReadMessageItem(SrcFile,Line);
       // ignore doubles
-      if (Result.Tree.FindKey(MsgItem,@CompareMsgItems)<>nil) then begin
+      if (Result.Tree.FindKey(MsgItem,@CompareMsgItems)<>nil) then
+      begin
         Dispose(MsgItem);
         continue;
       end;
@@ -407,27 +407,14 @@ end;
 procedure WriteIncludeFile(PoFile: TPoFile; const Filename: string);
 var
   DestFile: TStringList;
-  OldDestFile: TStringList;
-  Save: Boolean;
   i: integer;
   oMsg: TMsgItemClass;
 begin
   DestFile := TStringList.Create;
-{
-  Save:=true;
-  if FileExists(Filename) then begin
-    OldDestFile:=TStringList.Create;
-    OldDestFile.LoadFromFile(Filename);
-    if OldDestFile.Text=DestFile.Text then Save:=false;
-    OldDestFile.Free;
-  end;
-  if Save then
-    DestFile.SaveToFile(Filename);
-}
   for i := 0 to PoFile.Items.Count - 1 do
   begin
     oMsg := TMsgItemClass(PoFile.Items[i]);
-    DestFile.Add(Format('%s  =  ''%s'';', [oMsg.Identifier, oMsg.Value]));
+    DestFile.Add(Format('%s  =  %s;', [oMsg.Identifier, QuotedStr(oMsg.Value)]));
   end;
   DestFile.SaveToFile(Filename);
   DestFile.Free;
