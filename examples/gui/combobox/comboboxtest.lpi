@@ -53,13 +53,14 @@
   <CompilerOptions>
     <Version Value="5"/>
     <SearchPaths>
-      <OtherUnitFiles Value="/home/graemeg/programming/fpgui.wc/examples/gui/common/"/>
+      <OtherUnitFiles Value="../common/"/>
     </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>
     <Other>
-      <CustomOptions Value="-FUunits"/>
+      <CustomOptions Value="-FUunits
+"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
