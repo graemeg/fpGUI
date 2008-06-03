@@ -39,12 +39,16 @@ type
     lblName4: TfpgLabel;
     cbAllowNew: TfpgComboBox;
     {@VFD_HEAD_END: MainForm}
-    procedure AfterCreate; override;
+    constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
 
 implementation
+
+uses
+  RandomData;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -69,9 +73,16 @@ begin
 end;
 
 procedure TMainForm.btnAdd1Clicked(Sender: TObject);
+var
+  Gender: TGender;
+  n: string;
 begin
-  Combo1.Items.Add(Format('Item %2d', [Combo1.Items.Count]));
-  EditCombo1.Items.Add(Format('Item %2d', [EditCombo1.Items.Count]));
+  Gender := TGender(Random(2));
+  n := RandomFullName(Gender);
+  Combo1.Items.Add(n);
+  EditCombo1.Items.Add(n);
+  Combo1.Items.Sort;
+  EditCombo1.Items.Sort;
 end;
 
 procedure TMainForm.btnFocusClicked(Sender: TObject);
@@ -91,12 +102,24 @@ end;
 procedure TMainForm.btnAdd10Clicked(Sender: TObject);
 var
   i: integer;
+  Gender: TGender;
+  n: string;
 begin
   for i := 1 to 10 do
   begin
-    Combo1.Items.Add(Format('Item %2d', [Combo1.Items.Count]));
-    EditCombo1.Items.Add(Format('Item %2d', [EditCombo1.Items.Count]));
+    Gender := TGender(Random(2));
+    n := RandomFullName(Gender);
+    Combo1.Items.Add(n);
+    EditCombo1.Items.Add(n);
   end;
+  Combo1.Items.Sort;
+  EditCombo1.Items.Sort;
+end;
+
+constructor TMainForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Randomize;
 end;
 
 procedure TMainForm.AfterCreate;

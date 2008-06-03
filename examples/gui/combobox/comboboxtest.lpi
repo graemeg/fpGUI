@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_package"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="comboboxtest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -43,10 +43,18 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_main"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="../common/randomdata.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RandomData"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
+    <SearchPaths>
+      <OtherUnitFiles Value="/home/graemeg/programming/fpgui.wc/examples/gui/common/"/>
+    </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>
