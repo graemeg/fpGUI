@@ -6,6 +6,11 @@ rsLanguage               = 'Português';
 // Buttons
 rsOK                     = 'OK';
 rsCancel                 = 'Cancelar';
+
+
+// General messages
+rsNewItemDetected       = 'A new item has been detected.';
+rsAddNewItem            = 'Would you like to add the new item <%s> to the list?';
 rsHelp                   = 'Ajuda';
 rsOpen                   = 'Abir';
 rsSave                   = 'Salvar';
@@ -151,4 +156,9 @@ rsLongNov                = 'November';
 rsLongDec                = 'December';
 
 
+
+
+// General messages
+rsNewItemDetected       = 'A new item has been detected.';
+rsAddNewItem            = 'Would you like to add the new item <%s> to the list?';
 

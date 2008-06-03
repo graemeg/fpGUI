@@ -23,6 +23,11 @@ rsAbort                  = 'Abortar';
 rsRetry                  = 'Reintentar';
 rsIgnore                 = 'Ignorar';
 rsClose                  = 'Cerrar';
+
+
+// General messages
+rsNewItemDetected       = 'A new item has been detected.';
+rsAddNewItem            = 'Would you like to add the new item <%s> to the list?';
 rsInsert                 = 'Insertar';
 rsEdit                   = 'Editar';
 rsDelete                 = 'Borrar';
@@ -151,4 +156,9 @@ rsLongNov                = 'November';
 rsLongDec                = 'December';
 
 
+
+
+// General messages
+rsNewItemDetected       = 'A new item has been detected.';
+rsAddNewItem            = 'Would you like to add the new item <%s> to the list?';
 
