@@ -1121,7 +1121,7 @@ type
     class procedure AboutFPGui(const ATitle: string = '');
     class function Critical(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
     class function Information(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
-    class function Question(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
+    class function Question(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbYes, mbNo]; ADefaultButton: TfpgMsgDlgBtn = mbNo): TfpgMsgDlgBtn;
     class function Warning(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
     property    InformativeText: string read GetInformativeText write SetInformativeText;
     property    Text: string read FText write SetText;
@@ -1393,6 +1393,7 @@ end;
 constructor TfpgMessageDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
   FButtonList := TList.Create;
   FMaxLineWidth := 400;
   FFont         := fpgGetFont('#Label1');

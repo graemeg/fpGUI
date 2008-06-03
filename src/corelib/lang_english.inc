@@ -166,3 +166,8 @@ rsShortTimeFormat       = 'hh:nn';
 rsLongTimeFormat        = 'hh:nn:ss';
 }
 
+
+// General messages
+rsNewItemDetected       = 'A new item has been detected.';
+rsAddNewItem            = 'Would you like to add the new item <%s> to the list?';
+

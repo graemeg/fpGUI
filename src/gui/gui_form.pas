@@ -65,11 +65,11 @@ type
     procedure   HandleMove(x, y: TfpgCoord); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   AfterConstruction; override;
-    procedure   BeforeDestruction; override;
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   AfterConstruction; override;
+    procedure   BeforeDestruction; override;
     procedure   AfterCreate; virtual;
     procedure   Show;
     procedure   Hide;
@@ -222,8 +222,6 @@ begin
   FMinHeight       := 32;
   FModalResult     := 0;
   FFullScreen      := False;
-
-  AfterCreate;
 end;
 
 procedure TfpgForm.AfterCreate;
@@ -336,6 +334,7 @@ end;
 procedure TfpgForm.AfterConstruction;
 begin
   inherited AfterConstruction;
+  AfterCreate;
   if Assigned(FOnCreate) then
     FOnCreate(self);
 end;

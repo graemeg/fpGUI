@@ -474,3 +474,11 @@ msgstr ""
 msgid "December"
 msgstr ""
 
+#: gfx_constants:rsnewitemdetected
+msgid "A new item has been detected."
+msgstr ""
+
+#: gfx_constants:rsaddnewitem
+msgid "Would you like to add the new item <%s> to the list?"
+msgstr ""
+

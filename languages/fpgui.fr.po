@@ -16,6 +16,10 @@ msgstr ""
 msgid "<%s> not assigned"
 msgstr ""
 
+#: gfx_constants:rsnewitemdetected
+msgid "A new item has been detected."
+msgstr ""
+
 #: gfx_constants:rsabort
 msgid "Abort"
 msgstr ""
@@ -474,6 +478,10 @@ msgstr ""
 
 #: gfx_constants:rslongwed
 msgid "Wednesday"
+msgstr ""
+
+#: gfx_constants:rsaddnewitem
+msgid "Would you like to add the new item <%s> to the list?"
 msgstr ""
 
 #: gfx_constants:rsyes

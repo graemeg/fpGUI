@@ -141,7 +141,9 @@ implementation
 
 uses
   gui_listbox,
+  gui_dialogs,
   gfx_UTF8utils,
+  gfx_constants,
   math;
 
 var
@@ -272,7 +274,28 @@ begin
         begin
           if Assigned(FDropDown) then
             FDropDown.Close;
-          inc(FSelectedItem);      // with FSelectedItem set to -2 for delete key and -4 for return key
+          case FSelectedItem of
+            -3:
+              begin
+              FSelectedItem:= -1;
+              Self.SetFocus;
+              end;
+            -2:
+              begin
+              case FAllowNew of
+                anNo:
+                  if FSelectedItem = -2 then
+                  begin
+                    UTF8Delete(FText, FCursorPos, 1);
+                    Dec(FCursorPos);
+                  end;
+
+                anAsk,
+                anYes:
+                  FNewItem:= True;
+              end;
+              end;
+          end;
         end
         else
         begin
@@ -298,9 +321,7 @@ begin
             anAsk,
             anYes:
               if FSelectedItem = -1 then
-              begin
                 FNewItem:= True;
-              end;
           end;  { case }
         end; { if/else }
     FCursorPos := UTF8Length(FText);
@@ -470,8 +491,8 @@ begin
     DoOnChange;
 
   if consumed then
-    RePaint
-  else
+    RePaint;
+//  else
     inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
@@ -489,6 +510,7 @@ begin
         begin
           if HasText then
             FocusItem := -1;
+          FSelectedItem := -3;      // detects backspace has been pressed
           if FCursorPos > 0 then
           begin
             UTF8Delete(FText, FCursorPos, 1);
@@ -511,11 +533,17 @@ begin
           if FSelectedItem > -1 then
             SetText(Items[FSelectedItem])
           else
-            SetText(FText);
-          FSelectedItem := -4;      // detects return has been pressed (must be 4 due to number of repaints)
-          if FNewItem and (FAllowNew = anYes) then
-            FItems.Add(FText);
-          DoOnDropDown;
+            FocusItem:= -1;
+          FSelectedItem := -4;      // detects return has been pressed
+          if FNewItem then
+            case FAllowNew of
+              anYes:
+                FItems.Add(FText);
+              anAsk:
+                if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
+                  FItems.Add(FText);
+              end;
+          FDropDown.Close;
         end;
 
     else

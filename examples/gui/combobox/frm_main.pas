@@ -16,6 +16,7 @@ type
 
   TMainForm = class(TfpgForm)
   private
+    procedure rbChanged(Sender: TObject);
     procedure cbAutoCompleteChanged(Sender: TObject);
     procedure cbAutoDropDownChanged(Sender: TObject);
     procedure cbAllowNewChanged(Sender: TObject);
@@ -38,6 +39,10 @@ type
     lblName3: TfpgLabel;
     lblName4: TfpgLabel;
     cbAllowNew: TfpgComboBox;
+    grpBox: TfpgGroupBox;
+    rbName1: TfpgRadioButton;
+    rbName2: TfpgRadioButton;
+    rbName3: TfpgRadioButton;
     {@VFD_HEAD_END: MainForm}
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -51,6 +56,15 @@ uses
   RandomData;
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.rbChanged(Sender: TObject);
+begin
+  if Sender is TfpgRadioButton then
+  begin
+    Combo1.DropDownCount := TfpgRadioButton(Sender).Tag;
+    EditCombo1.DropDownCount := TfpgRadioButton(Sender).Tag;
+  end;
+end;
 
 procedure TMainForm.cbAutoCompleteChanged(Sender: TObject);
 begin
@@ -126,7 +140,7 @@ procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(345, 220, 344, 260);
+  SetPosition(345, 220, 484, 260);
   WindowTitle := 'ComboBox test';
   WindowPosition := wpScreenCenter;
 
@@ -193,7 +207,7 @@ begin
   with Combo1 do
   begin
     Name := 'Combo1';
-    SetPosition(8, 24, 168, 21);
+    SetPosition(8, 24, 168, 22);
     FontDesc := '#List';
     TabOrder := 6;
   end;
@@ -256,7 +270,7 @@ begin
   with cbAllowNew do
   begin
     Name := 'cbAllowNew';
-    SetPosition(220, 212, 100, 21);
+    SetPosition(220, 212, 100, 22);
     FontDesc := '#List';
     Items.Add('anNo');
     Items.Add('anYes');
@@ -264,6 +278,50 @@ begin
     TabOrder := 13;
     OnChange := @cbAllowNewChanged;
     FocusItem := 0;
+  end;
+
+  grpBox := TfpgGroupBox.Create(self);
+  with grpBox do
+  begin
+    Name := 'grpBox';
+    SetPosition(328, 28, 144, 108);
+    Text := 'Dropdown Count:';
+  end;
+
+  rbName1 := TfpgRadioButton.Create(grpBox);
+  with rbName1 do
+  begin
+    Name := 'rbName1';
+    SetPosition(16, 24, 80, 20);
+    FontDesc := '#Label1';
+    Text := '8 items';
+    Tag := 8;
+    Checked := True;
+    OnChange := @rbChanged;
+  end;
+
+  rbName2 := TfpgRadioButton.Create(grpBox);
+  with rbName2 do
+  begin
+    Name := 'rbName2';
+    SetPosition(16, 44, 80, 20);
+    FontDesc := '#Label1';
+    TabOrder := 1;
+    Text := '12 items';
+    Tag := 12;
+    OnChange := @rbChanged;
+  end;
+
+  rbName3 := TfpgRadioButton.Create(grpBox);
+  with rbName3 do
+  begin
+    Name := 'rbName3';
+    SetPosition(16, 64, 80, 20);
+    FontDesc := '#Label1';
+    TabOrder := 2;
+    Text := '25 items';
+    Tag := 25;
+    OnChange := @rbChanged;
   end;
 
   {@VFD_BODY_END: MainForm}
