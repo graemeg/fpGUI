@@ -775,16 +775,17 @@ var
 begin
   // If the user pressed a key then it will search the stringlist for a word
   // beginning with that letter
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) and (FFocusItem > -1) or (Length(AText) > 1 ) then
-    for i := FFocusItem to FItems.Count-1 do
-    begin
-      if SameText(LeftStr(FItems.Strings[i], Length(AText)), AText) then
+  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1 ) then
+    if FFocusItem > -1 then
+      for i := FFocusItem to FItems.Count-1 do
       begin
-        FocusItem := i;
-        Consumed := True;
-        break;
-      end;
-    end;  { for }
+        if SameText(LeftStr(FItems.Strings[i], Length(AText)), AText) then
+        begin
+          FocusItem := i;
+          Consumed := True;
+          break;
+        end;
+      end;  { for }
   inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
