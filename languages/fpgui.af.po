@@ -1,10 +1,12 @@
 # translation of FPGUI. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.    
+# 
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2008-04-22 16:06+0200\n"
+"PO-Revision-Date: 2008-06-04 00:03+0200\n"
 "Last-Translator:  <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -14,11 +16,11 @@ msgstr ""
 
 #: gfx_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr ""
+msgstr "<%s> is nie toegewys nie"
 
 #: gfx_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr ""
+msgstr "'n Nuwe item is opgespoor."
 
 #: gfx_constants:rsabort
 msgid "Abort"
@@ -46,7 +48,7 @@ msgstr "Anti-aliasing"
 
 #: gfx_constants:rsshortapr
 msgid "Apr"
-msgstr ""
+msgstr "Apr"
 
 #: gfx_constants:rslongapr
 msgid "April"
@@ -54,7 +56,7 @@ msgstr "April"
 
 #: gfx_constants:rsfileattributes
 msgid "Attributes"
-msgstr ""
+msgstr "Eienskape"
 
 #: gfx_constants:rsshortaug
 msgid "Aug"
@@ -62,7 +64,7 @@ msgstr "Aug"
 
 #: gfx_constants:rslongaug
 msgid "August"
-msgstr ""
+msgstr "Augustus"
 
 #: gfx_constants:rsbold
 msgid "Bold"
@@ -102,7 +104,7 @@ msgstr "Kopieer"
 
 #: gfx_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr ""
+msgstr "Kon nie die lêergids <%s> oop maak nie"
 
 #: gfx_constants:rscreate
 msgid "Create"
@@ -122,11 +124,11 @@ msgstr "Sny"
 
 #: gfx_constants:rsdatabase
 msgid "Database"
-msgstr ""
+msgstr "Databasis"
 
 #: gfx_constants:rsshortdec
 msgid "Dec"
-msgstr ""
+msgstr "Des"
 
 #: gfx_constants:rslongdec
 msgid "December"
@@ -138,11 +140,11 @@ msgstr "Skrap"
 
 #: gfx_constants:rsdirectories
 msgid "Directories"
-msgstr ""
+msgstr "Lêergidse"
 
 #: gfx_constants:rsdrive
 msgid "Drive"
-msgstr ""
+msgstr "Dryf"
 
 #: gfx_constants:rsedit
 msgid "Edit"
@@ -170,11 +172,11 @@ msgstr "Staak"
 
 #: gfx_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr ""
+msgstr "Kon nie die lêergids <%s> skep nie"
 
 #: gfx_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr ""
+msgstr "Gunstelinge"
 
 #: gfx_constants:rsshortfeb
 msgid "Feb"
@@ -182,19 +184,19 @@ msgstr "Feb"
 
 #: gfx_constants:rslongfeb
 msgid "February"
-msgstr ""
+msgstr "Februarie"
 
 #: gfx_constants:rsfileselection
 msgid "File Selection"
-msgstr ""
+msgstr "Lêer seleksie"
 
 #: gfx_constants:rsfilename
 msgid "Filename"
-msgstr ""
+msgstr "Lêer naam"
 
 #: gfx_constants:rsfiles
 msgid "Files"
-msgstr ""
+msgstr "Lêers"
 
 #: gfx_constants:rsfind
 msgid "Find"
@@ -202,15 +204,15 @@ msgstr "Vind"
 
 #: gfx_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr ""
+msgstr "Vaste wydte"
 
 #: gfx_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr ""
+msgstr "Font Kenname"
 
 #: gfx_constants:rsshortfri
 msgid "Fri"
-msgstr "Vry"
+msgstr "Vr"
 
 #: gfx_constants:rslongfri
 msgid "Friday"
@@ -242,7 +244,7 @@ msgstr "Kursief"
 
 #: gfx_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr ""
+msgstr "Die item is nie van <%s> tiepe nie!"
 
 #: gfx_constants:rsshortjan
 msgid "Jan"
@@ -270,7 +272,7 @@ msgstr "Junie"
 
 #: gfx_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr ""
+msgstr "Lys moet leeg wees"
 
 #: gfx_constants:rsshortmar
 msgid "Mar"
@@ -290,11 +292,11 @@ msgstr "Boodskap"
 
 #: gfx_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr ""
+msgstr "Wysigings Tyd"
 
 #: gfx_constants:rsshortmon
 msgid "Mon"
-msgstr "Maan"
+msgstr "Ma"
 
 #: gfx_constants:rslongmon
 msgid "Monday"
@@ -314,11 +316,11 @@ msgstr "Nee vir Alles"
 
 #: gfx_constants:rsshortnov
 msgid "Nov"
-msgstr ""
+msgstr "Nov"
 
 #: gfx_constants:rslongnov
 msgid "November"
-msgstr ""
+msgstr "November"
 
 #: gfx_constants:rsok
 msgid "OK"
@@ -338,15 +340,15 @@ msgstr "Open"
 
 #: gfx_constants:rsopenafile
 msgid "Open a file"
-msgstr ""
+msgstr "Maak 'n leêr op"
 
 #: gfx_constants:rsfileowner
 msgid "Owner"
-msgstr ""
+msgstr "Eienaar"
 
 #: gfx_constants:rspassword
 msgid "Password"
-msgstr ""
+msgstr "Wagwoord"
 
 #: gfx_constants:rspaste
 msgid "Paste"
@@ -354,7 +356,7 @@ msgstr "Plak"
 
 #: gfx_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr ""
+msgstr "Onlangs gebruik"
 
 #: gfx_constants:rsreplace
 msgid "Replace"
@@ -366,19 +368,19 @@ msgstr "Herprobeer"
 
 #: gfx_constants:rsfilerights
 msgid "Rights"
-msgstr ""
+msgstr "Regte"
 
 #: gfx_constants:rscollectionsans
 msgid "Sans"
-msgstr ""
+msgstr "Sans"
 
 #: gfx_constants:rsshortsat
 msgid "Sat"
-msgstr ""
+msgstr "Sa"
 
 #: gfx_constants:rslongsat
 msgid "Saturday"
-msgstr ""
+msgstr "Saterdag"
 
 #: gfx_constants:rssave
 msgid "Save"
@@ -386,7 +388,7 @@ msgstr "Stoor"
 
 #: gfx_constants:rssaveafile
 msgid "Save file as"
-msgstr ""
+msgstr "Stoor 'n lêer as"
 
 #: gfx_constants:rssearch
 msgid "Search"
@@ -410,11 +412,11 @@ msgstr "September"
 
 #: gfx_constants:rscollectionserif
 msgid "Serif"
-msgstr ""
+msgstr "Serif"
 
 #: gfx_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr ""
+msgstr "Wys versteekte lêers"
 
 #: gfx_constants:rssize
 msgid "Size"
@@ -426,19 +428,19 @@ msgstr "Steil"
 
 #: gfx_constants:rsshortsun
 msgid "Sun"
-msgstr ""
+msgstr "So"
 
 #: gfx_constants:rslongsun
 msgid "Sunday"
-msgstr ""
+msgstr "Sondag"
 
 #: gfx_constants:rsshortthu
 msgid "Thu"
-msgstr ""
+msgstr "Do"
 
 #: gfx_constants:rslongthu
 msgid "Thursday"
-msgstr ""
+msgstr "Donderdag"
 
 #: gfx_constants:rstoday
 msgid "Today"
@@ -446,15 +448,15 @@ msgstr "Vandag"
 
 #: gfx_constants:rsshorttue
 msgid "Tue"
-msgstr ""
+msgstr "Di"
 
 #: gfx_constants:rslongtue
 msgid "Tuesday"
-msgstr ""
+msgstr "Dinsdag"
 
 #: gfx_constants:rsfiletype
 msgid "Type of file"
-msgstr ""
+msgstr "Tipe Leêr"
 
 #: gfx_constants:rstypeface
 msgid "Typeface"
@@ -466,7 +468,7 @@ msgstr "Onderstreep"
 
 #: gfx_constants:rsusername
 msgid "User name"
-msgstr ""
+msgstr "Gebruikers naam"
 
 #: gfx_constants:rswarning
 msgid "Warning"
@@ -474,15 +476,15 @@ msgstr "Waarskuwing"
 
 #: gfx_constants:rsshortwed
 msgid "Wed"
-msgstr ""
+msgstr "Wo"
 
 #: gfx_constants:rslongwed
 msgid "Wednesday"
-msgstr ""
+msgstr "Woensdag"
 
 #: gfx_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr ""
+msgstr "Wil jy die nuwe item <%s> in die lys bylas?"
 
 #: gfx_constants:rsyes
 msgid "Yes"
