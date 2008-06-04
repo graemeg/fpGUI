@@ -62,6 +62,7 @@ type
     FTextColor: TfpgColor;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
     procedure   SetTextColor(const AValue: TfpgColor); virtual;
+    function    GetClientBounds: TfpgRect; virtual;
     function    GetParent: TfpgWidget; reintroduce;
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
@@ -215,6 +216,11 @@ begin
     FTextColor := AValue;
     Repaint;
   end;
+end;
+
+function TfpgWidget.GetClientBounds: TfpgRect;
+begin
+  Result.SetRect(0, 0, Width, Height);
 end;
 
 function TfpgWidget.GetParent: TfpgWidget;
@@ -909,10 +915,7 @@ var
 begin
   if (csLoading in ComponentState) then
     Exit;  //==>
-  FAlignRect.Top    := 0;
-  FAlignRect.Left   := 0;
-  FAlignRect.Width  := Width;
-  FAlignRect.Height := Height;
+  FAlignRect := GetClientBounds;
 
   DoAlign(alTop);
   DoAlign(alBottom);

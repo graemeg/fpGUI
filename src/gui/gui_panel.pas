@@ -38,11 +38,13 @@ type
 
   TPanelBorder = (bsSingle, bsDouble);
 
+
   TfpgAbstractPanel = class(TfpgWidget)
   private
     FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
     FPanelBorder: TPanelBorder;
+    function    GetClientBounds: TfpgRect; override;
     procedure   SetPanelStyle(const AValue: TPanelStyle);
     procedure   SetPanelBorder(const AValue: TPanelBorder);
   protected
@@ -128,6 +130,7 @@ type
     procedure   SetMargin(const AValue: integer);
   protected
     FFont: TfpgFont;
+    function    GetClientBounds: TfpgRect; override;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -204,6 +207,11 @@ end;
 
 
 {TfpgAbstractPanel}
+
+function TfpgAbstractPanel.GetClientBounds: TfpgRect;
+begin
+  Result.SetRect(2, 2, Width - 4, Height - 4);
+end;
 
 procedure TfpgAbstractPanel.SetPanelStyle(const AValue: TPanelStyle);
 begin
@@ -536,6 +544,14 @@ begin
     FMargin := AValue;
     Repaint;
   end;
+end;
+
+function TfpgGroupBox.GetClientBounds: TfpgRect;
+var
+  h: integer;
+begin
+  h := FFont.Height + 4;
+  Result.SetRect(2, h, Width - 4, Height - (h + 2));
 end;
 
 procedure TfpgGroupBox.HandlePaint;

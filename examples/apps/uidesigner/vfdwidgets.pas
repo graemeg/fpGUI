@@ -417,6 +417,7 @@ begin
   wc          := TVFDWidgetClass.Create(TOtherWidget);
   wc.NameBase := 'Custom';
   wc.WidgetIconName := 'vfd.other';
+  wc.Container := True;
   RegisterVFDWidget(wc);
   VFDOtherWidget := wc;
 end;

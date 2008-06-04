@@ -125,7 +125,7 @@ begin
   begin
     Canvas.SetColor(clText1);
     Canvas.SetLineStyle(1, lsDot);
-    Canvas.DrawRectangle(1, 1, Width-1, Height-1);
+    Canvas.DrawRectangle(1, 1, Width-2, Height-2);
   end;
   Canvas.SetLineStyle(1, lsSolid);
 
