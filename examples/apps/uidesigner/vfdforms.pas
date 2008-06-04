@@ -118,9 +118,8 @@ type
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
     {@VFD_HEAD_END: frmVFDSetup}
-    constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     procedure   AfterCreate; override;
+    procedure   BeforeDestruction; override;
   end;
 
 
@@ -422,26 +421,14 @@ begin
   ModalResult := 1;
 end;
 
-constructor TfrmVFDSetup.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  Name := 'frmVFDSetup';
-  gINI.ReadFormState(self);
-  LoadSettings;
-end;
-
-destructor TfrmVFDSetup.Destroy;
-begin
-  gINI.WriteFormState(self);
-  inherited Destroy;
-end;
-
 procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
+  Name := 'frmVFDSetup';
   SetPosition(394, 399, 252, 184);
   WindowTitle := 'General settings';
   WindowPosition := wpScreenCenter;
+  gINI.ReadFormState(self);
 
   lb1 := TfpgLabel.Create(self);
   with lb1 do
@@ -531,6 +518,14 @@ begin
   end;
 
   {@VFD_BODY_END: frmVFDSetup}
+
+  LoadSettings;
+end;
+
+procedure TfrmVFDSetup.BeforeDestruction;
+begin
+  gINI.WriteFormState(self);
+  inherited BeforeDestruction;
 end;
 
 

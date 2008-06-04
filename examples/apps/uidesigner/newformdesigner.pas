@@ -75,11 +75,10 @@ type
     previewmenu: TfpgPopupMenu;
     {@VFD_HEAD_END: frmMain}
     mru: TfpgMRU;
-    constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     function    GetSelectedWidget: TVFDWidgetClass;
     procedure   SetSelectedWidget(wgc: TVFDWidgetClass);
     procedure   AfterCreate; override;
+    procedure   BeforeDestruction; override;
     procedure   OnPaletteClick(Sender: TObject);
     property    SelectedWidget: TVFDWidgetClass read GetSelectedWidget write SetSelectedWidget;
   end;
@@ -138,9 +137,8 @@ type
     btnTop, btnLeft, btnWidth, btnHeight: TfpgButton;
     btnAnLeft, btnAnTop, btnAnRight, btnAnBottom: TfpgButton;
     lstProps: TwgPropertyList;
-    constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
     procedure   AfterCreate; override;
+    procedure   BeforeDestruction; override;
   end;
 
 
@@ -281,6 +279,7 @@ begin
   SetPosition(84, 123, 695, 87);
   WindowTitle := 'frmMain';
   WindowPosition := wpUser;
+  gINI.ReadFormState(self);
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
@@ -448,6 +447,12 @@ begin
   mru.LoadMRU;
 end;
 
+procedure TfrmMain.BeforeDestruction;
+begin
+  gINI.WriteFormState(self);
+  inherited BeforeDestruction;
+end;
+
 procedure TfrmMain.OnPaletteClick(Sender: TObject);
 var
   s: string;
@@ -471,6 +476,11 @@ var
   x, x2, w, y, gap: integer;
 begin
   inherited;
+  Name := 'frmProperties';
+  WindowPosition := wpUser;
+  WindowTitle := 'Properties';
+  SetPosition(43, 150, 250, 450);
+  gINI.ReadFormState(self);
 
   fpgImages.AddMaskedBMP(
     'vfd.anchorleft', @vfd_anchorleft,
@@ -488,16 +498,11 @@ begin
     'vfd.anchorbottom', @vfd_anchorbottom,
     sizeof(vfd_anchorbottom), 0, 0);
 
-
-  WindowPosition := wpUser;
-  WindowTitle := 'Properties';
-  SetPosition(43, 150, 250, 450);
-
-  x   := 3;
-  x2  := x + 50;
-  gap := 20;
-  w := Width - x2;
-  y := 3;
+  x     := 3;
+  x2    := x + 50;
+  gap   := 20;
+  w     := Width - x2;
+  y     := 3;
 
   l1      := CreateLabel(self, 0, y, 'Class:');
   lbClass := CreateLabel(self, x2, y, 'CLASS');
@@ -632,6 +637,12 @@ begin
   edOther.OnChange := @(maindsgn.OnOtherChange);
 end;
 
+procedure TfrmProperties.BeforeDestruction;
+begin
+  gINI.WriteFormState(self);
+  inherited BeforeDestruction;
+end;
+
 procedure TfrmProperties.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   if keycode = keyF11 then
@@ -642,22 +653,8 @@ begin
       maindsgn.selectedform.Form.ActivateWindow;
     end;
     consumed := True;
-  end
-  else
-    inherited;
-end;
-
-constructor TfrmProperties.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  Name := 'frmProperties';
-  gINI.ReadFormState(self);
-end;
-
-destructor TfrmProperties.Destroy;
-begin
-  gINI.WriteFormState(self);
-  inherited Destroy;
+  end;
+  inherited;
 end;
 
 { TPropertyList }
@@ -857,19 +854,6 @@ procedure TfrmMain.miMRUClick(Sender: TObject; const FileName: string);
 begin
   maindsgn.EditedFileName := FileName;
   maindsgn.OnLoadFile(maindsgn);
-end;
-
-constructor TfrmMain.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  Name := 'frmMain';
-  gINI.ReadFormState(self);
-end;
-
-destructor TfrmMain.Destroy;
-begin
-  gINI.WriteFormState(self);
-  inherited Destroy;
 end;
 
 function TfrmMain.GetSelectedWidget: TVFDWidgetClass;
