@@ -76,7 +76,7 @@ type
     procedure   SetSelectedObject(const AValue: TtiObject);
     procedure   SetShowDeleted(const AValue: Boolean);
     procedure   DoCreateItemMediator(AData: TtiObject); overload;
-    procedure   DoCreateItemMediator(AData: TtiObject; pRowIdx : Integer); overload;
+    procedure   DoCreateItemMediator(AData: TtiObject; ARowIdx : Integer); overload;
   protected
     FDisplayNames: string;
     FIsObserving: boolean;
@@ -140,7 +140,7 @@ type
   protected
 //    procedure   SetupFields;
   public
-    constructor CreateCustom(AModel: TtiObject; AGrid: TfpgStringGrid; ADisplayNames: string; pRowIndex: integer; IsObserving: Boolean = True);
+    constructor CreateCustom(AModel: TtiObject; AGrid: TfpgStringGrid; ADisplayNames: string; ARowIndex: integer; IsObserving: Boolean = True);
     procedure   BeforeDestruction; override;
     procedure   Update(ASubject: TtiObject); override;
   published
@@ -222,13 +222,15 @@ end;
 //end;
 
 
-constructor TStringGridRowMediator.CreateCustom(AModel: TtiObject; AGrid : TfpgStringGrid; ADisplayNames: string; pRowIndex : integer; IsObserving: Boolean);
+constructor TStringGridRowMediator.CreateCustom(AModel: TtiObject;
+    AGrid: TfpgStringGrid; ADisplayNames: string; ARowIndex: integer;
+    IsObserving: Boolean);
 begin
   inherited Create;
   FModel        := AModel;
   FView         := AGrid;
   FDisplayNames := ADisplayNames;
-  FRowIndex     := pRowIndex;
+  FRowIndex     := ARowIndex;
 
   if IsObserving then
     FModel.AttachObserver(self);
@@ -248,11 +250,10 @@ var
   lFieldName: string;
 begin
   Assert(FModel = ASubject);
-  for i := 1 to tiNumToken(FDisplayNames, cFieldDelimiter) do
+  for i := 0 to tiNumToken(FDisplayNames, cFieldDelimiter)-1 do
   begin
-    lField := tiToken(FDisplayNames, cFieldDelimiter, i);
+    lField := tiToken(FDisplayNames, cFieldDelimiter, i+1);
     lFieldName := tiFieldName(lField);
-    
     FView.Cells[i, FRowIndex] := FModel.PropValue[lFieldName];
   end;
 end;
@@ -654,21 +655,20 @@ begin
   DataAndPropertyValid(AData);
 end;
 
-procedure TCompositeStringGridMediator.DoCreateItemMediator(AData: TtiObject; pRowIdx: Integer);
+procedure TCompositeStringGridMediator.DoCreateItemMediator(AData: TtiObject; ARowIdx: Integer);
 var
   i: Integer;
   lField: string;
   lFieldName: string;
   lMediatorView: TStringGridRowMediator;
 begin
-  FView.Objects[0, pRowIdx] := AData;
-  for i := 1 to tiNumToken(FDisplayNames, cFieldDelimiter) do
+  FView.Objects[0, ARowIdx] := AData;
+  for i := 0 to tiNumToken(FDisplayNames, cFieldDelimiter)-1 do
   begin
-    lField := tiToken(FDisplayNames, cFieldDelimiter, i);
+    lField := tiToken(FDisplayNames, cFieldDelimiter, i+1);
     lFieldName := tiFieldName(lField);
-    FView.Cells[i-1, pRowIdx] := AData.PropValue[lFieldName];
-    
-    lMediatorView := TStringGridRowMediator.CreateCustom(AData, FView, FDisplayNames, pRowIdx, FIsObserving);
+    FView.Cells[i, ARowIdx] := AData.PropValue[lFieldName];
+    lMediatorView := TStringGridRowMediator.CreateCustom(AData, FView, FDisplayNames, ARowIdx, FIsObserving);
     FMediatorList.Add(lMediatorView);
   end;
 end;
@@ -695,7 +695,7 @@ begin
   
   for i := 0 to FModel.Count-1 do
   begin
-    if not FModel.Items[i].Deleted or FShowDeleted then
+    if (not FModel.Items[i].Deleted) or FShowDeleted then
       DoCreateItemMediator(FModel.Items[i], i);
   end;
 end;
@@ -772,7 +772,6 @@ begin
     FModel.DetachObserver(Self);
   FModel  := nil;
   FView   := nil;
-  
   inherited BeforeDestruction;
 end;
 
