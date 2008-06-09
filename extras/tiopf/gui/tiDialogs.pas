@@ -31,6 +31,13 @@ uses
   procedure tiShowVariant(AValue: Variant; pHeading: string = 'Show variant');
   // Show the contents of a stream
   procedure tiShowStream(const AValue: TStream; const pHeading: string = 'Show stream');
+  // Show a <Yes>, <No> dialog box, and return true if <Yes> was selected
+  function tiAppConfirmation(const AMessage: string): boolean; overload;
+  function tiAppConfirmation(const AMessage: string; const AValues: array of const): boolean; overload;
+  // Show a message
+  procedure tiAppMessage(const AMessage: string);
+  // Show a warning
+  procedure tiAppWarning(const AMessage: string);
 
 
 implementation
@@ -140,6 +147,27 @@ begin
   finally
     lStringStream.Free;
   end;
+end;
+
+function tiAppConfirmation(const AMessage: string): boolean;
+begin
+  Result := TfpgMessageDialog.Question('', AMessage) = mbYes
+end;
+
+function tiAppConfirmation(const AMessage: string;
+  const AValues: array of const): boolean;
+begin
+  Result := tiAppConfirmation(Format(AMessage, AValues));
+end;
+
+procedure tiAppMessage(const AMessage: string);
+begin
+  TfpgMessageDialog.Information('', AMessage);
+end;
+
+procedure tiAppWarning(const AMessage: string);
+begin
+  TfpgMessageDialog.Warning('', AMessage);
 end;
 
 end.

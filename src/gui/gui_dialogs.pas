@@ -189,7 +189,7 @@ type
 {$define read_interface}
 {$undef read_implementation}
 
-
+{$I logo.inc}
 {$I messagedialog.inc}
 {$I newdirdialog.inc}
 {$I promptuserdialog.inc}

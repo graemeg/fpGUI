@@ -662,12 +662,12 @@ var
   lFieldName: string;
   lMediatorView: TStringGridRowMediator;
 begin
-  FView.Objects[0, ARowIdx] := AData;
+  FView.Objects[0, ARowIdx] := AData;   // set Object reference inside grid
   for i := 0 to tiNumToken(FDisplayNames, cFieldDelimiter)-1 do
   begin
     lField := tiToken(FDisplayNames, cFieldDelimiter, i+1);
     lFieldName := tiFieldName(lField);
-    FView.Cells[i, ARowIdx] := AData.PropValue[lFieldName];
+    FView.Cells[i, ARowIdx] := AData.PropValue[lFieldName];  // set Cell text
     lMediatorView := TStringGridRowMediator.CreateCustom(AData, FView, FDisplayNames, ARowIdx, FIsObserving);
     FMediatorList.Add(lMediatorView);
   end;
@@ -678,6 +678,7 @@ var
   i: integer;
   lField: string;
   lColumnTotalWidth: integer;
+  row: integer;
 begin
   lColumnTotalWidth := 0;
   for i := 0 to tiNumToken(FDisplayNames, cFieldDelimiter)-1 do
@@ -693,10 +694,14 @@ begin
       lColumnTotalWidth := lColumnTotalWidth + FView.ColumnWidth[i] + 20;
   end;
   
-  for i := 0 to FModel.Count-1 do
+  row := 0; // keep track of last grid row used
+  for i := 0 to FModel.Count-1 do // loop through all items
   begin
     if (not FModel.Items[i].Deleted) or FShowDeleted then
-      DoCreateItemMediator(FModel.Items[i], i);
+    begin
+      DoCreateItemMediator(FModel.Items[i], row);
+      inc(row);
+    end;
   end;
 end;
 
@@ -705,7 +710,10 @@ begin
   //Setup default properties for the StringGrid
   FView.RowSelect     := True;
   FView.ColumnCount   := tiNumToken(FDisplayNames, cFieldDelimiter);
-  FView.RowCount      := FModel.Count;
+  if FShowDeleted then
+    FView.RowCount := FModel.Count
+  else
+    FView.RowCount := FModel.CountNotDeleted;
 end;
 
 procedure TCompositeStringGridMediator.RebuildStringGrid;
@@ -715,9 +723,10 @@ begin
   { This rebuilds the whole list. Not very efficient. }
   View.BeginUpdate;
   try
+    SetupGUIandObject;
     FMediatorList.Clear;
-    for i := View.ColumnCount-1 downto 0 do
-      View.DeleteColumn(i);
+//    for i := View.ColumnCount-1 downto 0 do
+//      View.DeleteColumn(i);
     CreateSubMediators;
   finally
     View.EndUpdate;
@@ -777,6 +786,7 @@ end;
 
 procedure TCompositeStringGridMediator.Update(ASubject: TtiObject);
 begin
+  writeln('Mediator.Update');
   Assert(FModel = ASubject);
   RebuildStringGrid;
 end;
