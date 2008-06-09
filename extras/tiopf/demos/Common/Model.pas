@@ -17,6 +17,18 @@ type
   TPerson = class;
   TPersonList = class;
 
+
+  { Undo feature for TPerson }
+  TPersonMemento = class(TObject)
+  private
+    FOID: string;
+    FObjectState: TPerObjectState;
+    FName: string;
+    FAge: integer;
+    FGender: TGender;
+  end;
+
+
   { TPerson - The subject being observed }
   TPerson = class(TtiObject)
   private
@@ -24,16 +36,19 @@ type
     FName: string;
     FAge: integer;
     function    GetGenderGUI: string;
+    function    GetMemento: TPersonMemento;
     procedure   SetGender(const AValue: TGender);
     procedure   SetGenderGUI(const AValue: string);
     procedure   SetName(const Value: string);
     procedure   SetAge(const Value: integer);
+    procedure   SetMemento(const AValue: TPersonMemento);
   protected
     function    GetCaption: string; override;
   public
     constructor Create; override;
     function    IsValid(const pErrors: TtiObjectErrors): Boolean; override;
     procedure   NotifyObservers; override; 
+    property    Memento: TPersonMemento read GetMemento write SetMemento;
     property    Gender: TGender read FGender write SetGender;
   published
     property    Name: string read FName write SetName;
@@ -53,7 +68,7 @@ type
     procedure   Add(const pObject: TPerson); reintroduce;
   end;
   
-  
+
 function GeneratePersonList: TPersonList;
 
 
@@ -104,7 +119,7 @@ begin
   if Name = '' then
     pErrors.AddError('Name', cNameMissing);
 
-  if Age < 1 then
+  if (Age < 1) or (Age > 100) then
     pErrors.AddError('Age', cAgeOutofRange);
 
   Result := pErrors.Count = 0;
@@ -128,6 +143,18 @@ begin
   { If you don't use BeginUpdate and EndUpdate, you need to call NotifyObserver
     to they can be updated. }
 //  NotifyObservers;
+end;
+
+procedure TPerson.SetMemento(const AValue: TPersonMemento);
+begin
+  // Update the Person state from the memento. Only if their OID's match.
+  if (OID.AsString = AValue.FOID) then
+  begin
+    FName        := AValue.FName;
+    FAge         := AValue.FAge;
+    FGender      := AValue.FGender;
+    ObjectState  := AValue.FObjectState;
+  end;
 end;
 
 function TPerson.GetCaption: string;
@@ -161,6 +188,17 @@ end;
 function TPerson.GetGenderGUI: string;
 begin
   result := cGender[FGender];
+end;
+
+function TPerson.GetMemento: TPersonMemento;
+begin
+  // Create a new memento, store the Centre state and return it.
+  Result := TPersonMemento.Create;
+  Result.FOID         := OID.AsString;
+  Result.FObjectState := ObjectState;
+  Result.FName        := FName;
+  Result.FAge         := FAge;
+  Result.FGender      := FGender;
 end;
 
 procedure TPerson.SetGenderGUI(const AValue: string);

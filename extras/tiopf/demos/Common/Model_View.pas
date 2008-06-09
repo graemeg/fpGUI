@@ -14,10 +14,22 @@ uses
   ;
 
 type
-  { TEdit - Name }
+  { TfpgEdit - Name }
   TPerson_Name_TextEdit_View = class(TMediatorEditView)
+  private
+    procedure OnTextChanged(Sender: TObject);
   protected
     procedure SetupGUIandObject; override;
+  end;
+  
+  { TfpgEdit - Age }
+  TPerson_Age_TextEdit_View = class(TMediatorEditView)
+  private
+    procedure OnTextChanged(Sender: TObject);
+  protected
+    procedure SetupGUIandObject; override;
+    procedure GuiToObject; override;
+    procedure ObjectToGui; override;
   end;
 
 
@@ -66,14 +78,22 @@ type
 
 implementation
 
+uses
+  Model, SysUtils;
 
 { TPersonNameView }
+
+procedure TPerson_Name_TextEdit_View.OnTextChanged(Sender: TObject);
+begin
+  GUIChanged;
+end;
 
 procedure TPerson_Name_TextEdit_View.SetupGUIandObject;
 begin
   inherited;
   { The Name field my only contain 25 characters max. }
   EditControl.MaxLength := 25;
+  EditControl.OnChange := @OnTextChanged;
 end;
 
 
@@ -131,6 +151,34 @@ procedure TPerson_Age_TrackBar_Mediator.SetupGUIandObject;
 begin
   inherited SetupGUIandObject;
   EditControl.Max := 100;
+end;
+
+{ TPerson_Age_TextEdit_View }
+
+procedure TPerson_Age_TextEdit_View.OnTextChanged(Sender: TObject);
+begin
+  GUIChanged;
+end;
+
+procedure TPerson_Age_TextEdit_View.SetupGUIandObject;
+begin
+  inherited SetupGUIandObject;
+  EditControl.MaxLength := 3;
+  EditControl.OnChange := @OnTextChanged;
+end;
+
+procedure TPerson_Age_TextEdit_View.GuiToObject;
+begin
+  inherited GuiToObject;
+  // manual example without RTTI
+//  TPerson(Subject).Age := StrToInt(EditControl.Text);
+end;
+
+procedure TPerson_Age_TextEdit_View.ObjectToGui;
+begin
+  inherited ObjectToGui;
+  // manual example without RTTI
+//  EditControl.Text := IntToStr(TPerson(Subject).Age);
 end;
 
 initialization
