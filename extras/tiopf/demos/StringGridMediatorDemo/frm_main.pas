@@ -76,18 +76,26 @@ begin
 end;
 
 procedure TMainForm.btnAddClicked(Sender: TObject);
+var
+  lData: TPerson;
 begin
-
+  lData := TPerson.CreateNew;
+  lData.Name := 'New Name';
+  lData.Age := 12;
+  FList.Add(lData);
 end;
 
 procedure TMainForm.btnEditClicked(Sender: TObject);
 begin
+  if medGrid.SelectedObject = nil then
+    Exit;
   EditPerson(TPerson(medGrid.SelectedObject));
 end;
 
 procedure TMainForm.btnDeleteClicked(Sender: TObject);
 begin
-
+  medGrid.SelectedObject.Deleted := True;
+  FList.NotifyObservers;
 end;
 
 procedure TMainForm.btnUpdateClicked(Sender: TObject);
@@ -112,6 +120,8 @@ var
   lData: TPerson;
 begin
   lData := medGrid.SelectedObject as TPerson;
+  if lData = nil then
+    Exit;
   edtName.Text  := lData.Name;
   edtAge.Text   := IntToStr(lData.Age);
 end;
@@ -218,7 +228,7 @@ begin
     ImageName := '';
     TabOrder := 7;
     OnClick := @btnAddClicked;
-    Enabled := False;
+//    Enabled := False;
   end;
 
   btnEdit := TfpgButton.Create(self);
@@ -243,7 +253,7 @@ begin
     ImageName := '';
     TabOrder := 9;
     OnClick := @btnDeleteClicked;
-    Enabled := False;
+//    Enabled := False;
   end;
 
   btnRetrieve := TfpgButton.Create(self);
