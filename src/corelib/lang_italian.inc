@@ -125,35 +125,33 @@ rsLongFri                = 'Venerdì';
 rsLongSat                = 'Sabato';
 rsLongSun                = 'Domenica';
 rsToday                  = 'Oggi';
-rsShortJan               = 'Jan';
+rsShortJan               = 'Gen';
 rsShortFeb               = 'Feb';
 rsShortMar               = 'Mar';
 rsShortApr               = 'Apr';
-rsShortMay               = 'May';
-rsShortJun               = 'Jun';
-rsShortJul               = 'Jul';
-rsShortAug               = 'Aug';
-rsShortSep               = 'Sep';
-rsShortOct               = 'Oct';
+rsShortMay               = 'Mag';
+rsShortJun               = 'Giu';
+rsShortJul               = 'Lug';
+rsShortAug               = 'Ago';
+rsShortSep               = 'Set';
+rsShortOct               = 'Ott';
 rsShortNov               = 'Nov';
-rsShortDec               = 'Dec';
-rsLongJan                = 'January';
-rsLongFeb                = 'February';
-rsLongMar                = 'March';
-rsLongApr                = 'April';
-rsLongMay                = 'May';
-rsLongJun                = 'June';
-rsLongJul                = 'July';
-rsLongAug                = 'August';
-rsLongSep                = 'September';
-rsLongOct                = 'October';
-rsLongNov                = 'November';
-rsLongDec                = 'December';
-
-
-
+rsShortDec               = 'Dic';
+rsLongJan                = 'Gennaio';
+rsLongFeb                = 'Febbraio';
+rsLongMar                = 'Marzo';
+rsLongApr                = 'Aprile';
+rsLongMay                = 'Maggio';
+rsLongJun                = 'Giugno';
+rsLongJul                = 'Luglio';
+rsLongAug                = 'Agosto';
+rsLongSep                = 'Settembre';
+rsLongOct                = 'Ottobre';
+rsLongNov                = 'Novembre';
+rsLongDec                = 'Dicembre';
 
 // General messages
-rsNewItemDetected       = 'A new item has been detected.';
-rsAddNewItem            = 'Would you like to add the new item <%s> to the list?';
+rsNewItemDetected       = 'E'' stato rilevato un nuovo elemento.';
+rsAddNewItem            = 'Vorresti aggiungere il nuovo elemento <%s> alla lista?';
+
 
