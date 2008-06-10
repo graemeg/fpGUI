@@ -217,12 +217,9 @@ begin
 //  if Assigned(FocusRootWidget) then
 //    FocusRootWidget.ReleaseMouse;  // for internal ListBox
 
-  FocusRootWidget   := OriginalFocusRoot;
-  OriginalFocusRoot := nil;
+  if Assigned(CallerWidget) then
+    CallerWidget.SetFocus;
   inherited HandleHide;
-
-  if Assigned(FocusRootWidget) then
-    FocusRootWidget.SetFocus;
 end;
 
 constructor TDropDownWindow.Create(AOwner: TComponent);
@@ -262,72 +259,7 @@ var
   i: integer;
 begin
   if FAutoCompletion then
-  begin
-    if (FocusItem >= 0) and (FocusItem <= FItems.Count-1) then
-    begin
-      FText := FItems.Strings[FocusItem];
-      FSelectedItem:= FocusItem;
-    end
-    else
-      if FText <> '' then
-        if FSelectedItem < -1 then
-        begin
-          if Assigned(FDropDown) then
-            FDropDown.Close;
-          case FSelectedItem of
-            -3:
-              begin
-              FSelectedItem:= -1;
-              Self.SetFocus;
-              end;
-            -2:
-              begin
-              case FAllowNew of
-                anNo:
-                  if FSelectedItem = -2 then
-                  begin
-                    UTF8Delete(FText, FCursorPos, 1);
-                    Dec(FCursorPos);
-                  end;
-
-                anAsk,
-                anYes:
-                  FNewItem:= True;
-              end;
-              end;
-          end;
-        end
-        else
-        begin
-          FSelectedItem := -1;
-          for i := 0 to FItems.Count - 1 do
-          begin
-            if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
-            begin
-              FSelectedItem := i;
-              if AutoDropDown then
-                DoDropDown;
-              Break;
-            end;
-          end;
-          case FAllowNew of
-            anNo:
-              if FSelectedItem = -1 then
-              begin
-                UTF8Delete(FText, FCursorPos, 1);
-                Dec(FCursorPos);
-              end;
-              
-            anAsk,
-            anYes:
-              if FSelectedItem = -1 then
-                FNewItem:= True;
-          end;  { case }
-        end; { if/else }
-    FCursorPos := UTF8Length(FText);
-    FSelStart := FCursorPos;
-    Result := FText;
-  end
+    Result := FText
   else
     if (FocusItem >= 0) and (FocusItem <= FItems.Count-1) then
       Result := FItems.Strings[FocusItem]
@@ -411,6 +343,7 @@ begin
     if Items[i]= TDropDownWindow(FDropDown).ListBox.Items[TDropDownWindow(FDropDown).ListBox.FocusItem] then
     begin
       FocusItem := i;
+      FText:= TDropDownWindow(FDropDown).ListBox.Items[TDropDownWindow(FDropDown).ListBox.FocusItem];
       Break;
     end;
   end;
@@ -436,6 +369,7 @@ begin
       if SameText(UTF8Copy(Items.Strings[i], 1, UTF8Length(AVAlue)), AValue) then
       begin
         FocusItem := i;
+        FText:= AValue;
         Exit; //==>
       end;
     end;
@@ -469,6 +403,7 @@ procedure TfpgAbstractEditCombo.HandleKeyChar(var AText: TfpgChar;
 var
   s: TfpgChar;
   prevval: string;
+  i: integer;
 begin
   prevval   := FText;
   s         := AText;
@@ -483,6 +418,34 @@ begin
       UTF8Insert(s, FText, FCursorPos + UTF8Length(s));
       Inc(FCursorPos);
       FSelStart := FCursorPos;
+      if Assigned(FDropDown) then
+        FDropDown.Close;
+      FSelectedItem := -1;
+      for i := 0 to FItems.Count-1 do
+        if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+        begin
+          FSelectedItem:= i;
+          if AutoDropDown then
+            DoDropDown;
+          Break;
+        end;
+      if FSelectedItem = -1 then
+        if FAllowNew = anNo then
+        begin
+          UTF8Delete(FText, FCursorPos, 1);
+          Dec(FCursorPos);
+          FSelStart := FCursorPos;
+          for i := 0 to FItems.Count-1 do
+            if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+            begin
+              FSelectedItem:= i;
+              if AutoDropDown then
+                DoDropDown;
+              Break;
+            end;
+        end
+        else
+          FNewItem:= True;
     end;
     consumed := True;
   end;
@@ -500,6 +463,7 @@ procedure TfpgAbstractEditCombo.HandleKeyPress(var keycode: word;
     var shiftstate: TShiftState; var consumed: boolean);
 var
   hasChanged: boolean;
+  i: integer;
 begin
   hasChanged := False;
 
@@ -508,23 +472,35 @@ begin
   case keycode of
     keyBackSpace:
         begin
-          if HasText then
-            FocusItem := -1;
-          FSelectedItem := -3;      // detects backspace has been pressed
           if FCursorPos > 0 then
           begin
             UTF8Delete(FText, FCursorPos, 1);
             Dec(FCursorPos);
-            hasChanged := True;
+            FSelStart := FCursorPos;
+          if Assigned(FDropDown) then
+            FDropDown.Close;
+          FSelectedItem := -1;
+          for i := 0 to FItems.Count-1 do
+            if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+            begin
+              FSelectedItem:= i;
+              if AutoDropDown then
+                DoDropDown;
+              Break;
+            end;
+          hasChanged := True;
           end;
         end;
 
     keyDelete:
         begin
-          if HasText then
+          if FAllowNew <> anNo then
+          begin
             FocusItem := -1;
-          FSelectedItem := -2;      // detects delete has been pressed
-          hasChanged := True;
+            FSelectedItem := -1;
+            FNewItem:= True;
+            hasChanged := True;
+          end;
         end;
 
     keyReturn,
@@ -534,16 +510,23 @@ begin
             SetText(Items[FSelectedItem])
           else
             FocusItem:= -1;
-          FSelectedItem := -4;      // detects return has been pressed
           if FNewItem then
             case FAllowNew of
               anYes:
                 FItems.Add(FText);
               anAsk:
                 if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
-                  FItems.Add(FText);
+                  FItems.Add(FText)
+                else
+                  begin
+                  FNewItem:= False;
+                  FocusItem := -1;
+                  FText:= '';
+                  end;
               end;
-          FDropDown.Close;
+          hasChanged := True;
+          if Assigned(FDropDown) then
+            FDropDown.Close;
         end;
 
     else
