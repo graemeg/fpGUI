@@ -96,6 +96,7 @@ type
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
   public
     constructor CreateCustom(pEditControl: TfpgWidget; pSubject: TtiObject; pFieldName: string; pGuiFieldName: string = 'Text'); reintroduce;
+    destructor  Destroy; override;
     property    EditControl: TfpgEdit read GetEditControl write SetEditControl;
     class function ComponentClass: TClass; override;
   end;
@@ -547,6 +548,13 @@ constructor TMediatorEditView.CreateCustom(pEditControl: TfpgWidget;
   pSubject: TtiObject; pFieldName: string; pGuiFieldName: string);
 begin
   inherited;
+end;
+
+destructor TMediatorEditView.Destroy;
+begin
+  if Assigned(EditControl.OnChange) then
+    EditControl.OnChange := nil;
+  inherited Destroy;
 end;
 
 class function TMediatorEditView.ComponentClass: TClass;

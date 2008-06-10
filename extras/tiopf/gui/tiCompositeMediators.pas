@@ -786,7 +786,6 @@ end;
 
 procedure TCompositeStringGridMediator.Update(ASubject: TtiObject);
 begin
-  writeln('Mediator.Update');
   Assert(FModel = ASubject);
   RebuildStringGrid;
 end;
