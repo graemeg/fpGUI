@@ -1,2472 +1,1745 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0"?>
 <fpdoc-descriptions>
-<package name="CoreLib">
-
-<!--
+  <package name="CoreLib">
+    <!--
   ====================================================================
     fpgfx
   ====================================================================
 -->
-
-<module name="fpgfx">
-<short></short>
-<descr>
-</descr>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="SysUtils">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gfxbase">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gfx_x11">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration type Visibility: default -->
-<element name="TOrientation">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TOrientation.orVertical">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TOrientation.orHorizontal">
-<short></short>
-</element>
-
-<!-- enumeration type Visibility: default -->
-<element name="TAlign">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAlign.alNone">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAlign.alTop">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAlign.alBottom">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAlign.alLeft">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAlign.alRight">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAlign.alClient">
-<short></short>
-</element>
-
-<!-- enumeration type Visibility: default -->
-<element name="TAnchor">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAnchor.anLeft">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAnchor.anRight">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAnchor.anTop">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TAnchor.anBottom">
-<short></short>
-</element>
-
-<!-- set type Visibility: default -->
-<element name="TAnchors">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- set type Visibility: default -->
-<element name="TFButtonFlags">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFButtonFlags.btnIsEmbedded">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFButtonFlags.btnIsDefault">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFButtonFlags.btnIsPressed">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFButtonFlags.btnIsSelected">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFButtonFlags.btnHasFocus">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFButtonFlags.btnHasParentColor">
-<short></short>
-</element>
-
-<!-- enumeration type Visibility: default -->
-<element name="TMouseButton">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TMouseButton.mbLeft">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TMouseButton.mbRight">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TMouseButton.mbMiddle">
-<short></short>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="AllAnchors">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="cMessageQueueSize">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="fpGUIVersion">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constant Visibility: default -->
-<element name="fpGUIName">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TIntKeyPressEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntKeyPressEvent.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntKeyPressEvent.keycode">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntKeyPressEvent.shiftstate">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntKeyPressEvent.consumed">
-<short></short>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TIntMouseEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntMouseEvent.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntMouseEvent.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntMouseEvent.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntMouseEvent.button">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TIntMouseEvent.shiftstate">
-<short></short>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TKeyEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TKeyEvent.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TKeyEvent.AKey">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TKeyEvent.AShift">
-<short></short>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TKeyCharEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TKeyCharEvent.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TKeyCharEvent.AKeyChar">
-<short></short>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TMouseButtonEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseButtonEvent.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseButtonEvent.AButton">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseButtonEvent.AShift">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseButtonEvent.AMousePos">
-<short></short>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TMouseMoveEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseMoveEvent.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseMoveEvent.AShift">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseMoveEvent.AMousePos">
-<short></short>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TMouseWheelEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseWheelEvent.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseWheelEvent.AShift">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseWheelEvent.AWheelDelta">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TMouseWheelEvent.AMousePos">
-<short></short>
-</element>
-
-<!-- procedure type Visibility: default -->
-<element name="TPaintEvent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TPaintEvent.Sender">
-<short></short>
-</element>
-
-<!-- record type Visibility: default -->
-<element name="TSizeParams">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TSizeParams.min_width">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TSizeParams.max_width">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TSizeParams.min_height">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="TSizeParams.max_height">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgFontResource">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgFontResource.FFontDesc">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgFontResource.FRefCount">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgFontResource.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgFontResource.Create.afontdesc">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgFontResource.IncRefCount">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgFontResource.IncRefCount.Result">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgFontResource.DecRefCount">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgFontResource.DecRefCount.Result">
-<short></short>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgFontResource.FontDesc">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgFont">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgFont.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgFont.Create.afontres">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgFont.Create.afontdesc">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgFont.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgCanvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgWindow">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWindow.SetParent">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWindow.SetParent.AValue">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TfpgWindow.GetParent">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgWindow.GetParent.Result">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TfpgWindow.GetCanvas">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgWindow.GetCanvas.Result">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgWindow.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWindow.Create.AOwner">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgWindow.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWindow.Parent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWindow.Canvas">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWindow.WinHandle">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgImage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgImage.ImageFromRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgImage.ImageFromRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImage.ImageFromRect.ARect">
-<short></short>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgImages">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgImages.FImages">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgImages.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgImages.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgImages.AddImage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgImages.AddImage.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddImage.imgid">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddImage.img">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgImages.DeleteImage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgImages.DeleteImage.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.DeleteImage.imgid">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.DeleteImage.freeimg">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgImages.GetImage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgImages.GetImage.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.GetImage.imgid">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgImages.AddBMP">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgImages.AddBMP.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddBMP.imgid">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddBMP.bmpdata">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddBMP.bmpsize">
-<short></short>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgImages.AddMaskedBMP">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgImages.AddMaskedBMP.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddMaskedBMP.imgid">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddMaskedBMP.bmpdata">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddMaskedBMP.bmpsize">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddMaskedBMP.mcx">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.AddMaskedBMP.mcy">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgImages.ListImages">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgImages.ListImages.sl">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgCanvas.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.Create.awin">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgCanvas.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgCanvas.DrawButtonFace">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawButtonFace.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawButtonFace.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawButtonFace.w">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawButtonFace.h">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawButtonFace.AFlags">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawButtonFace.r">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgCanvas.DrawControlFrame">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawControlFrame.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawControlFrame.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawControlFrame.w">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawControlFrame.h">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawControlFrame.r">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgCanvas.DrawDirectionArrow">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawDirectionArrow.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawDirectionArrow.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawDirectionArrow.w">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawDirectionArrow.h">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawDirectionArrow.direction">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawDirectionArrow.r">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgCanvas.DrawFocusRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCanvas.DrawFocusRect.r">
-<short></short>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgStyle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: public -->
-<element name="TfpgStyle.DefaultFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: public -->
-<element name="TfpgStyle.MenuFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: public -->
-<element name="TfpgStyle.MenuAccelFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: public -->
-<element name="TfpgStyle.MenuDisabledFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgStyle.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgStyle.DrawButtonFace">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawButtonFace.ACanvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawButtonFace.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawButtonFace.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawButtonFace.w">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawButtonFace.h">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawButtonFace.AFlags">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgStyle.DrawControlFrame">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawControlFrame.ACanvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawControlFrame.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawControlFrame.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawControlFrame.w">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawControlFrame.h">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgStyle.DrawDirectionArrow">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawDirectionArrow.ACanvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawDirectionArrow.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawDirectionArrow.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawDirectionArrow.w">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawDirectionArrow.h">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawDirectionArrow.direction">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgStyle.DrawString">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawString.ACanvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawString.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawString.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawString.AText">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawString.AEnabled">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgStyle.DrawFocusRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawFocusRect.ACanvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgStyle.DrawFocusRect.r">
-<short></short>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgApplication">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgApplication.FDisplayParams">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgApplication.FScreenWidth">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgApplication.FScreenHeight">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgApplication.FDefaultFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgApplication.FFontResList">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgApplication.FreeFontRes">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgApplication.FreeFontRes.afontres">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgApplication.InternalInit">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgApplication.RunMessageLoop">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgApplication.WaitWindowMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgApplication.WaitWindowMessage.atimeoutms">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgApplication.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgApplication.Create.aparams">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgApplication.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: public -->
-<element name="TfpgApplication.GetFont">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgApplication.GetFont.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgApplication.GetFont.afontdesc">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgApplication.Initialize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgApplication.Run">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgApplication.Flush">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgApplication.ProcessMessages">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgApplication.ScreenWidth">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgApplication.ScreenHeight">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgApplication.DefaultFont">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgTimer">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgTimer.FEnabled">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgTimer.FNextAlarm">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgTimer.FInterval">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgTimer.FOnTimer">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgTimer.SetEnabled">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgTimer.SetEnabled.AValue">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgTimer.SetInterval">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgTimer.SetInterval.AValue">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgTimer.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgTimer.Create.ainterval">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgTimer.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgTimer.CheckAlarm">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgTimer.CheckAlarm.ctime">
-<short></short>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgTimer.Enabled">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgTimer.NextAlarm">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgTimer.Interval">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgTimer.OnTimer">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgCaret">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FEnabled">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FVisible">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FInterval">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FCanvas">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FTop">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FLeft">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FWidth">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FHeight">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgCaret.FTimer">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgCaret.OnTimerTime">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCaret.OnTimerTime.Sender">
-<short></short>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgCaret.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgCaret.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgCaret.SetCaret">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCaret.SetCaret.acanvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCaret.SetCaret.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCaret.SetCaret.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCaret.SetCaret.w">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCaret.SetCaret.h">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgCaret.UnSetCaret">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgCaret.UnSetCaret.acanvas">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgCaret.InvertCaret">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgCaret.Width">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgCaret.Height">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="fpgStyle">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="fpgCaret">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="fpgImages">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgApplication">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgApplication.Result">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgGetFont">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgGetFont.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgGetFont.afontdesc">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgWaitWindowMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgPostMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgPostMessage.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgPostMessage.Dest">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgPostMessage.MsgCode">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgPostMessage.aparams">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgSendMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSendMessage.Sender">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSendMessage.Dest">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSendMessage.MsgCode">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSendMessage.aparams">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgDeliverMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgDeliverMessage.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgDeliverMessages">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgGetFirstMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgGetFirstMessage.Result">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgDeleteFirstMessage">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgColorToRGB">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgColorToRGB.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgColorToRGB.col">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgGetNamedColor">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgGetNamedColor.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgGetNamedColor.col">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgSetNamedColor">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSetNamedColor.colorid">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSetNamedColor.rgbvalue">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgGetNamedFontDesc">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgGetNamedFontDesc.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgGetNamedFontDesc.afontid">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgSetNamedFont">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSetNamedFont.afontid">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSetNamedFont.afontdesc">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgInitTimers">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgCheckTimers">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgClosestTimer">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgClosestTimer.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgClosestTimer.ctime">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgClosestTimer.amaxtime">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgGetTickCount">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgGetTickCount.Result">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="InflateRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="InflateRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="InflateRect.Rect">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="InflateRect.dx">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="InflateRect.dy">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="OffsetRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="OffsetRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="OffsetRect.Rect">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="OffsetRect.dx">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="OffsetRect.dy">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="CenterPoint">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="CenterPoint.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="CenterPoint.Rect">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgRect.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgRect.ALeft">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgRect.ATop">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgRect.AWidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgRect.AHeight">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="PrintRect">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="PrintRect.Rect">
-<short></short>
-</element>
-
-</module> <!-- fpgfx -->
-
-</package>
+    <module name="fpgfx">
+      <short/>
+      <descr/>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="SysUtils">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="gfxbase">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="gfx_x11">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration type Visibility: default -->
+      <element name="TOrientation">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TOrientation.orVertical">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TOrientation.orHorizontal">
+        <short/>
+      </element>
+      <!-- enumeration type Visibility: default -->
+      <element name="TAlign">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAlign.alNone">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAlign.alTop">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAlign.alBottom">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAlign.alLeft">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAlign.alRight">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAlign.alClient">
+        <short/>
+      </element>
+      <!-- enumeration type Visibility: default -->
+      <element name="TAnchor">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAnchor.anLeft">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAnchor.anRight">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAnchor.anTop">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TAnchor.anBottom">
+        <short/>
+      </element>
+      <!-- set type Visibility: default -->
+      <element name="TAnchors">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- set type Visibility: default -->
+      <element name="TFButtonFlags">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFButtonFlags.btnIsEmbedded">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFButtonFlags.btnIsDefault">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFButtonFlags.btnIsPressed">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFButtonFlags.btnIsSelected">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFButtonFlags.btnHasFocus">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFButtonFlags.btnHasParentColor">
+        <short/>
+      </element>
+      <!-- enumeration type Visibility: default -->
+      <element name="TMouseButton">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TMouseButton.mbLeft">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TMouseButton.mbRight">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TMouseButton.mbMiddle">
+        <short/>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="AllAnchors">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="cMessageQueueSize">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="fpGUIVersion">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- constant Visibility: default -->
+      <element name="fpGUIName">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TIntKeyPressEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntKeyPressEvent.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntKeyPressEvent.keycode">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntKeyPressEvent.shiftstate">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntKeyPressEvent.consumed">
+        <short/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TIntMouseEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntMouseEvent.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntMouseEvent.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntMouseEvent.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntMouseEvent.button">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TIntMouseEvent.shiftstate">
+        <short/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TKeyEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TKeyEvent.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TKeyEvent.AKey">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TKeyEvent.AShift">
+        <short/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TKeyCharEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TKeyCharEvent.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TKeyCharEvent.AKeyChar">
+        <short/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TMouseButtonEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseButtonEvent.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseButtonEvent.AButton">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseButtonEvent.AShift">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseButtonEvent.AMousePos">
+        <short/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TMouseMoveEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseMoveEvent.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseMoveEvent.AShift">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseMoveEvent.AMousePos">
+        <short/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TMouseWheelEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseWheelEvent.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseWheelEvent.AShift">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseWheelEvent.AWheelDelta">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TMouseWheelEvent.AMousePos">
+        <short/>
+      </element>
+      <!-- procedure type Visibility: default -->
+      <element name="TPaintEvent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TPaintEvent.Sender">
+        <short/>
+      </element>
+      <!-- record type Visibility: default -->
+      <element name="TSizeParams">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TSizeParams.min_width">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TSizeParams.max_width">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TSizeParams.min_height">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="TSizeParams.max_height">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgFontResource">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgFontResource.FFontDesc">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgFontResource.FRefCount">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgFontResource.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgFontResource.Create.afontdesc">
+        <short/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgFontResource.IncRefCount">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgFontResource.IncRefCount.Result">
+        <short/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgFontResource.DecRefCount">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgFontResource.DecRefCount.Result">
+        <short/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgFontResource.FontDesc">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgFont">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgFont.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgFont.Create.afontres">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgFont.Create.afontdesc">
+        <short/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgFont.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgCanvas">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgWindow">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWindow.SetParent">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWindow.SetParent.AValue">
+        <short/>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TfpgWindow.GetParent">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgWindow.GetParent.Result">
+        <short/>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TfpgWindow.GetCanvas">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgWindow.GetCanvas.Result">
+        <short/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgWindow.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWindow.Create.AOwner">
+        <short/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgWindow.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWindow.Parent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWindow.Canvas">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWindow.WinHandle">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgImage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgImage.ImageFromRect">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgImage.ImageFromRect.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImage.ImageFromRect.ARect">
+        <short/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgImages">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgImages.FImages">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgImages.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgImages.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgImages.AddImage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgImages.AddImage.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddImage.imgid">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddImage.img">
+        <short/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgImages.DeleteImage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgImages.DeleteImage.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.DeleteImage.imgid">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.DeleteImage.freeimg">
+        <short/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgImages.GetImage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgImages.GetImage.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.GetImage.imgid">
+        <short/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgImages.AddBMP">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgImages.AddBMP.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddBMP.imgid">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddBMP.bmpdata">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddBMP.bmpsize">
+        <short/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgImages.AddMaskedBMP">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgImages.AddMaskedBMP.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddMaskedBMP.imgid">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddMaskedBMP.bmpdata">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddMaskedBMP.bmpsize">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddMaskedBMP.mcx">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.AddMaskedBMP.mcy">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgImages.ListImages">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgImages.ListImages.sl">
+        <short/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgCanvas.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.Create.awin">
+        <short/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgCanvas.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgCanvas.DrawButtonFace">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawButtonFace.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawButtonFace.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawButtonFace.w">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawButtonFace.h">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawButtonFace.AFlags">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawButtonFace.r">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgCanvas.DrawControlFrame">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawControlFrame.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawControlFrame.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawControlFrame.w">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawControlFrame.h">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawControlFrame.r">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgCanvas.DrawDirectionArrow">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawDirectionArrow.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawDirectionArrow.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawDirectionArrow.w">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawDirectionArrow.h">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawDirectionArrow.direction">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawDirectionArrow.r">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgCanvas.DrawFocusRect">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCanvas.DrawFocusRect.r">
+        <short/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgStyle">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: public -->
+      <element name="TfpgStyle.DefaultFont">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: public -->
+      <element name="TfpgStyle.MenuFont">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: public -->
+      <element name="TfpgStyle.MenuAccelFont">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: public -->
+      <element name="TfpgStyle.MenuDisabledFont">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgStyle.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgStyle.DrawButtonFace">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawButtonFace.ACanvas">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawButtonFace.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawButtonFace.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawButtonFace.w">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawButtonFace.h">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawButtonFace.AFlags">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgStyle.DrawControlFrame">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawControlFrame.ACanvas">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawControlFrame.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawControlFrame.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawControlFrame.w">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawControlFrame.h">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgStyle.DrawDirectionArrow">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawDirectionArrow.ACanvas">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawDirectionArrow.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawDirectionArrow.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawDirectionArrow.w">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawDirectionArrow.h">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawDirectionArrow.direction">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgStyle.DrawString">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawString.ACanvas">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawString.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawString.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawString.AText">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawString.AEnabled">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgStyle.DrawFocusRect">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawFocusRect.ACanvas">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgStyle.DrawFocusRect.r">
+        <short/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgApplication">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgApplication.FDisplayParams">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgApplication.FScreenWidth">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgApplication.FScreenHeight">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgApplication.FDefaultFont">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgApplication.FFontResList">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgApplication.FreeFontRes">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgApplication.FreeFontRes.afontres">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgApplication.InternalInit">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgApplication.RunMessageLoop">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgApplication.WaitWindowMessage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgApplication.WaitWindowMessage.atimeoutms">
+        <short/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgApplication.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgApplication.Create.aparams">
+        <short/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgApplication.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: public -->
+      <element name="TfpgApplication.GetFont">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgApplication.GetFont.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgApplication.GetFont.afontdesc">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgApplication.Initialize">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgApplication.Run">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgApplication.Flush">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgApplication.ProcessMessages">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgApplication.ScreenWidth">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgApplication.ScreenHeight">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgApplication.DefaultFont">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgTimer">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgTimer.FEnabled">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgTimer.FNextAlarm">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgTimer.FInterval">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgTimer.FOnTimer">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgTimer.SetEnabled">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgTimer.SetEnabled.AValue">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgTimer.SetInterval">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgTimer.SetInterval.AValue">
+        <short/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgTimer.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgTimer.Create.ainterval">
+        <short/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgTimer.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgTimer.CheckAlarm">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgTimer.CheckAlarm.ctime">
+        <short/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgTimer.Enabled">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgTimer.NextAlarm">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgTimer.Interval">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgTimer.OnTimer">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgCaret">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FEnabled">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FVisible">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FInterval">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FCanvas">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FTop">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FLeft">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FWidth">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FHeight">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgCaret.FTimer">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgCaret.OnTimerTime">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCaret.OnTimerTime.Sender">
+        <short/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgCaret.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgCaret.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgCaret.SetCaret">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCaret.SetCaret.acanvas">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCaret.SetCaret.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCaret.SetCaret.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCaret.SetCaret.w">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCaret.SetCaret.h">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgCaret.UnSetCaret">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgCaret.UnSetCaret.acanvas">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgCaret.InvertCaret">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgCaret.Width">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgCaret.Height">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="fpgStyle">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="fpgCaret">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="fpgImages">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgApplication">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgApplication.Result">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgGetFont">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgGetFont.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgGetFont.afontdesc">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgWaitWindowMessage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgPostMessage">
+        <short>Posts a message to the event queue</short>
+        <descr>fpgPostMessage posts a message to the event queue, but doesn't wait for it to compelete. It returns immediately.</descr>
+        <errors/>
+        <seealso>
+	  <link id="fpgSendMessage"/>
+	</seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgPostMessage.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgPostMessage.Dest">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgPostMessage.MsgCode">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgPostMessage.aparams">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgSendMessage">
+        <short>Sends a message to the event queue</short>
+        <descr>fpgSendMessage sends a message to the event queue and waits for it to complete before it returns.</descr>
+        <errors/>
+        <seealso>
+	  <link id="fpgPostMessage"/>
+	</seealso>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSendMessage.Sender">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSendMessage.Dest">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSendMessage.MsgCode">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSendMessage.aparams">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgDeliverMessage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgDeliverMessage.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgDeliverMessages">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgGetFirstMessage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgGetFirstMessage.Result">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgDeleteFirstMessage">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgColorToRGB">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgColorToRGB.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgColorToRGB.col">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgGetNamedColor">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgGetNamedColor.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgGetNamedColor.col">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgSetNamedColor">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSetNamedColor.colorid">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSetNamedColor.rgbvalue">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgGetNamedFontDesc">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgGetNamedFontDesc.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgGetNamedFontDesc.afontid">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgSetNamedFont">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSetNamedFont.afontid">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgSetNamedFont.afontdesc">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgInitTimers">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="fpgCheckTimers">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgClosestTimer">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgClosestTimer.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgClosestTimer.ctime">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgClosestTimer.amaxtime">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgGetTickCount">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgGetTickCount.Result">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="InflateRect">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="InflateRect.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="InflateRect.Rect">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="InflateRect.dx">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="InflateRect.dy">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="OffsetRect">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="OffsetRect.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="OffsetRect.Rect">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="OffsetRect.dx">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="OffsetRect.dy">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="CenterPoint">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="CenterPoint.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="CenterPoint.Rect">
+        <short/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="fpgRect">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="fpgRect.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgRect.ALeft">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgRect.ATop">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgRect.AWidth">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="fpgRect.AHeight">
+        <short/>
+      </element>
+      <!-- procedure Visibility: default -->
+      <element name="PrintRect">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="PrintRect.Rect">
+        <short/>
+      </element>
+    </module>
+    <!-- fpgfx -->
+  </package>
 </fpdoc-descriptions>

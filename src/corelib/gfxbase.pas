@@ -1938,7 +1938,13 @@ begin
 end;
 
 procedure TfpgApplicationBase.Terminate;
+var
+  i: integer;
 begin
+  // make sure all forms are closed before main form
+  for i := FormCount - 1 downto 0 do
+    if Forms[i] <> MainForm then
+      fpgSendMessage(Self, Forms[i], FPGM_CLOSE); // SendMessage waits for it to complete. Post doesn't.
   Terminated := True;
 end;
 

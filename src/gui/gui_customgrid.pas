@@ -298,7 +298,7 @@ begin
   Result.Backgroundcolor := clBoxcolor;
   Result.TextColor := TextColor;
   FColumns.Add(Result);
-  
+
   if csUpdating in ComponentState then
     Exit; //==>
     

@@ -95,6 +95,7 @@ type
     function    VisibleHeight: integer;
     procedure   SetFirstRow(const AValue: Integer);
   protected
+    property    UpdateCount: integer read FUpdateCount;
     procedure   UpdateScrollBars; virtual;
     function    GetHeaderText(ACol: Integer): string; virtual;
     function    GetColumnWidth(ACol: Integer): integer; virtual;
@@ -1148,6 +1149,7 @@ end;
 procedure TfpgBaseGrid.BeginUpdate;
 begin
   Inc(FUpdateCount);
+  Updating;
 end;
 
 procedure TfpgBaseGrid.EndUpdate;
@@ -1156,7 +1158,10 @@ begin
   begin
     Dec(FUpdateCount);
     if FUpdateCount = 0 then
+    begin
+      Updated;
       RePaint;
+    end;
   end;
 end;
 

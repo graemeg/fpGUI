@@ -235,7 +235,6 @@
   keyNewSheqelSign gfxbase/keynewsheqelsign.html
   keyDongSign gfxbase/keydongsign.html
   keyEuroSign gfxbase/keyeurosign.html
-  FPG_DEFAULT_FONT_DESC gfxbase/fpg_default_font_desc.html
   UserNamedColorStart gfxbase/usernamedcolorstart.html
   clAqua gfxbase/claqua.html
   clBlack gfxbase/clblack.html
@@ -350,7 +349,7 @@
   clLightCyan gfxbase/cllightcyan.html
   clLightGoldenrodYellow gfxbase/cllightgoldenrodyellow.html
   clLightGreen gfxbase/cllightgreen.html
-  clLightGrey gfxbase/cllightgrey.html
+  clLightGray gfxbase/cllightgray.html
   clLightPink gfxbase/cllightpink.html
   clLightSalmon gfxbase/cllightsalmon.html
   clLightSeaGreen gfxbase/cllightseagreen.html
@@ -426,12 +425,14 @@
   TClipboardKeyType gfxbase/tclipboardkeytype.html
   TfpgMsgParmMouse gfxbase/tfpgmsgparmmouse.html
   TfpgMsgParmKeyboard gfxbase/tfpgmsgparmkeyboard.html
+  TfpgMsgParmUser gfxbase/tfpgmsgparmuser.html
   TfpgMessageParams gfxbase/tfpgmessageparams.html
   TfpgMessageRec gfxbase/tfpgmessagerec.html
   PfpgMessageRec gfxbase/pfpgmessagerec.html
   TfpgLineStyle gfxbase/tfpglinestyle.html
   TFileEntryType gfxbase/tfileentrytype.html
   TFileListSortOrder gfxbase/tfilelistsortorder.html
+  TFileModeString gfxbase/tfilemodestring.html
   TfpgRect gfxbase/tfpgrect.html
    Top gfxbase/tfpgrect.top.html
    Left gfxbase/tfpgrect.left.html
@@ -571,7 +572,6 @@
    LineStyle gfxbase/tfpgcanvasbase.linestyle.html
    LineWidth gfxbase/tfpgcanvasbase.linewidth.html
   TfpgComponent gfxbase/tfpgcomponent.html
-   FComponentState gfxbase/tfpgcomponent.fcomponentstate.html
    TagPointer gfxbase/tfpgcomponent.tagpointer.html
   TfpgWindowBase gfxbase/tfpgwindowbase.html
    FMouseCursor gfxbase/tfpgwindowbase.fmousecursor.html
@@ -611,6 +611,7 @@
    UpdateWindowPosition gfxbase/tfpgwindowbase.updatewindowposition.html
    MoveWindow gfxbase/tfpgwindowbase.movewindow.html
    WindowToScreen gfxbase/tfpgwindowbase.windowtoscreen.html
+   ActivateWindow gfxbase/tfpgwindowbase.activatewindow.html
    CaptureMouse gfxbase/tfpgwindowbase.capturemouse.html
    ReleaseMouse gfxbase/tfpgwindowbase.releasemouse.html
    SetFullscreen gfxbase/tfpgwindowbase.setfullscreen.html
@@ -642,6 +643,9 @@
    Screen_dpi_x gfxbase/tfpgapplicationbase.screen_dpi_x.html
    Screen_dpi_y gfxbase/tfpgapplicationbase.screen_dpi_y.html
    Screen_dpi gfxbase/tfpgapplicationbase.screen_dpi.html
+   Terminate gfxbase/tfpgapplicationbase.terminate.html
+   FormCount gfxbase/tfpgapplicationbase.formcount.html
+   Forms gfxbase/tfpgapplicationbase.forms.html
    IsInitialized gfxbase/tfpgapplicationbase.isinitialized.html
    TopModalForm gfxbase/tfpgapplicationbase.topmodalform.html
    MainForm gfxbase/tfpgapplicationbase.mainform.html
@@ -657,18 +661,20 @@
   TFileEntry gfxbase/tfileentry.html
    Create gfxbase/tfileentry.create.html
    Name gfxbase/tfileentry.name.html
-   Extention gfxbase/tfileentry.extention.html
+   Extension gfxbase/tfileentry.extension.html
    Size gfxbase/tfileentry.size.html
    EntryType gfxbase/tfileentry.entrytype.html
    IsLink gfxbase/tfileentry.islink.html
-   Attributes gfxbase/tfileentry.attributes.html
-   Mode gfxbase/tfileentry.mode.html
-   ModTime gfxbase/tfileentry.modtime.html
-   OwnerID gfxbase/tfileentry.ownerid.html
-   GroupID gfxbase/tfileentry.groupid.html
    LinkTarget gfxbase/tfileentry.linktarget.html
+   IsExecutable gfxbase/tfileentry.isexecutable.html
+   ModTime gfxbase/tfileentry.modtime.html
+   Mode gfxbase/tfileentry.mode.html
+   Owner gfxbase/tfileentry.owner.html
+   Group gfxbase/tfileentry.group.html
+   Attributes gfxbase/tfileentry.attributes.html
   TfpgFileListBase gfxbase/tfpgfilelistbase.html
    FSpecialDirs gfxbase/tfpgfilelistbase.fspecialdirs.html
+   FHasFileMode gfxbase/tfpgfilelistbase.fhasfilemode.html
    InitializeEntry gfxbase/tfpgfilelistbase.initializeentry.html
    PopulateSpecialDirs gfxbase/tfpgfilelistbase.populatespecialdirs.html
    Create gfxbase/tfpgfilelistbase.create.html
@@ -678,11 +684,12 @@
    ReadDirectory gfxbase/tfpgfilelistbase.readdirectory.html
    Clear gfxbase/tfpgfilelistbase.clear.html
    Sort gfxbase/tfpgfilelistbase.sort.html
-   Entry gfxbase/tfpgfilelistbase.entry.html
-   SpecialDirs gfxbase/tfpgfilelistbase.specialdirs.html
    DirectoryName gfxbase/tfpgfilelistbase.directoryname.html
+   Entry gfxbase/tfpgfilelistbase.entry.html
    FileMask gfxbase/tfpgfilelistbase.filemask.html
+   HasFileMode gfxbase/tfpgfilelistbase.hasfilemode.html
    ShowHidden gfxbase/tfpgfilelistbase.showhidden.html
+   SpecialDirs gfxbase/tfpgfilelistbase.specialdirs.html
   KeycodeToText gfxbase/keycodetotext.html
   CheckClipboardKey gfxbase/checkclipboardkey.html
   fpgColorToRGBTriple gfxbase/fpgcolortorgbtriple.html
@@ -694,6 +701,7 @@
   fpgGetAvgColor gfxbase/fpggetavgcolor.html
   PtInRect gfxbase/ptinrect.html
   SortRect gfxbase/sortrect.html
+  FPG_DEFAULT_FONT_DESC gfxbase/fpg_default_font_desc.html
  gfx_x11 gfx_x11/index.html
   IconBitmapWidth gfx_x11/iconbitmapwidth.html
   IconBitmapHeight gfx_x11/iconbitmapheight.html
@@ -770,6 +778,7 @@
    SetPixel gfx_x11/tfpgcanvasimpl.setpixel.html
    DoDrawArc gfx_x11/tfpgcanvasimpl.dodrawarc.html
    DoFillArc gfx_x11/tfpgcanvasimpl.dofillarc.html
+   DCHandle gfx_x11/tfpgcanvasimpl.dchandle.html
    Create gfx_x11/tfpgcanvasimpl.create.html
    Destroy gfx_x11/tfpgcanvasimpl.destroy.html
   TfpgWindowImpl gfx_x11/tfpgwindowimpl.html
@@ -789,6 +798,7 @@
    DoSetMouseCursor gfx_x11/tfpgwindowimpl.dosetmousecursor.html
    WinHandle gfx_x11/tfpgwindowimpl.winhandle.html
    Create gfx_x11/tfpgwindowimpl.create.html
+   ActivateWindow gfx_x11/tfpgwindowimpl.activatewindow.html
    CaptureMouse gfx_x11/tfpgwindowimpl.capturemouse.html
    ReleaseMouse gfx_x11/tfpgwindowimpl.releasemouse.html
    SetFullscreen gfx_x11/tfpgwindowimpl.setfullscreen.html
@@ -809,8 +819,6 @@
    xia_targets gfx_x11/tfpgapplicationimpl.xia_targets.html
    InputMethod gfx_x11/tfpgapplicationimpl.inputmethod.html
    InputContext gfx_x11/tfpgapplicationimpl.inputcontext.html
-   LastClickWindow gfx_x11/tfpgapplicationimpl.lastclickwindow.html
-   LastWinClickTime gfx_x11/tfpgapplicationimpl.lastwinclicktime.html
    FLastKeySym gfx_x11/tfpgapplicationimpl.flastkeysym.html
    DoGetFontFaceList gfx_x11/tfpgapplicationimpl.dogetfontfacelist.html
    Create gfx_x11/tfpgapplicationimpl.create.html
@@ -832,12 +840,16 @@
    DoSetText gfx_x11/tfpgclipboardimpl.dosettext.html
    InitClipboard gfx_x11/tfpgclipboardimpl.initclipboard.html
   TfpgFileListImpl gfx_x11/tfpgfilelistimpl.html
+   EncodeModeString gfx_x11/tfpgfilelistimpl.encodemodestring.html
+   GetUserName gfx_x11/tfpgfilelistimpl.getusername.html
+   GetGroupName gfx_x11/tfpgfilelistimpl.getgroupname.html
+   Create gfx_x11/tfpgfilelistimpl.create.html
    InitializeEntry gfx_x11/tfpgfilelistimpl.initializeentry.html
    PopulateSpecialDirs gfx_x11/tfpgfilelistimpl.populatespecialdirs.html
  gfx_gdi gfx_gdi/index.html
   WM_MOUSEWHEEL gfx_gdi/wm_mousewheel.html
   VER_PLATFORM_WIN32_CE gfx_gdi/ver_platform_win32_ce.html
-  TfpgGContext gfx_gdi/tfpggcontext.html
+  CLEARTYPE_QUALITY gfx_gdi/cleartype_quality.html
   TfpgFontResourceImpl gfx_gdi/tfpgfontresourceimpl.html
    OpenFontByDesc gfx_gdi/tfpgfontresourceimpl.openfontbydesc.html
    Handle gfx_gdi/tfpgfontresourceimpl.handle.html
@@ -878,6 +890,7 @@
    SetPixel gfx_gdi/tfpgcanvasimpl.setpixel.html
    DoDrawArc gfx_gdi/tfpgcanvasimpl.dodrawarc.html
    DoFillArc gfx_gdi/tfpgcanvasimpl.dofillarc.html
+   DCHandle gfx_gdi/tfpgcanvasimpl.dchandle.html
    Create gfx_gdi/tfpgcanvasimpl.create.html
    Destroy gfx_gdi/tfpgcanvasimpl.destroy.html
   TfpgWindowImpl gfx_gdi/tfpgwindowimpl.html
@@ -898,6 +911,7 @@
    DoSetMouseCursor gfx_gdi/tfpgwindowimpl.dosetmousecursor.html
    WinHandle gfx_gdi/tfpgwindowimpl.winhandle.html
    Create gfx_gdi/tfpgwindowimpl.create.html
+   ActivateWindow gfx_gdi/tfpgwindowimpl.activatewindow.html
    CaptureMouse gfx_gdi/tfpgwindowimpl.capturemouse.html
    ReleaseMouse gfx_gdi/tfpgwindowimpl.releasemouse.html
   TfpgApplicationImpl gfx_gdi/tfpgapplicationimpl.html
@@ -915,8 +929,6 @@
    hcr_wait gfx_gdi/tfpgapplicationimpl.hcr_wait.html
    hcr_hand gfx_gdi/tfpgapplicationimpl.hcr_hand.html
    FFocusedWindow gfx_gdi/tfpgapplicationimpl.ffocusedwindow.html
-   LastClickWindow gfx_gdi/tfpgapplicationimpl.lastclickwindow.html
-   LastWinClickTime gfx_gdi/tfpgapplicationimpl.lastwinclicktime.html
    DoGetFontFaceList gfx_gdi/tfpgapplicationimpl.dogetfontfacelist.html
    Create gfx_gdi/tfpgapplicationimpl.create.html
    DoMessagesPending gfx_gdi/tfpgapplicationimpl.domessagespending.html
@@ -934,19 +946,26 @@
    DoSetText gfx_gdi/tfpgclipboardimpl.dosettext.html
    InitClipboard gfx_gdi/tfpgclipboardimpl.initclipboard.html
   TfpgFileListImpl gfx_gdi/tfpgfilelistimpl.html
+   EncodeAttributesString gfx_gdi/tfpgfilelistimpl.encodeattributesstring.html
+   Create gfx_gdi/tfpgfilelistimpl.create.html
+   InitializeEntry gfx_gdi/tfpgfilelistimpl.initializeentry.html
    PopulateSpecialDirs gfx_gdi/tfpgfilelistimpl.populatespecialdirs.html
   UnicodeEnabledOS gfx_gdi/unicodeenabledos.html
   WinVersion gfx_gdi/winversion.html
+  FontSmoothingType gfx_gdi/fontsmoothingtype.html
  fpgfx fpgfx/index.html
   AllAnchors fpgfx/allanchors.html
+  TextFlagsDflt fpgfx/textflagsdflt.html
   cMessageQueueSize fpgfx/cmessagequeuesize.html
   fpGUIVersion fpgfx/fpguiversion.html
   fpGUIName fpgfx/fpguiname.html
   TOrientation fpgfx/torientation.html
   TAlign fpgfx/talign.html
+  TLayout fpgfx/tlayout.html
   TAnchor fpgfx/tanchor.html
   TAnchors fpgfx/tanchors.html
   TFButtonFlags fpgfx/tfbuttonflags.html
+  TFTextFlags fpgfx/tftextflags.html
   TMouseButton fpgfx/tmousebutton.html
   TIntKeyPressEvent fpgfx/tintkeypressevent.html
   TIntMouseEvent fpgfx/tintmouseevent.html
@@ -957,6 +976,7 @@
   TMouseMoveEvent fpgfx/tmousemoveevent.html
   TMouseWheelEvent fpgfx/tmousewheelevent.html
   TPaintEvent fpgfx/tpaintevent.html
+  TExceptionEvent fpgfx/texceptionevent.html
   TSizeParams fpgfx/tsizeparams.html
   TfpgFontResource fpgfx/tfpgfontresource.html
    FFontDesc fpgfx/tfpgfontresource.ffontdesc.html
@@ -995,6 +1015,7 @@
    DrawControlFrame fpgfx/tfpgcanvas.drawcontrolframe.html
    DrawDirectionArrow fpgfx/tfpgcanvas.drawdirectionarrow.html
    DrawFocusRect fpgfx/tfpgcanvas.drawfocusrect.html
+   DrawText fpgfx/tfpgcanvas.drawtext.html
   TfpgStyle fpgfx/tfpgstyle.html
    DefaultFont fpgfx/tfpgstyle.defaultfont.html
    MenuFont fpgfx/tfpgstyle.menufont.html
@@ -1031,9 +1052,13 @@
    ProcessMessages fpgfx/tfpgapplication.processmessages.html
    SetMessageHook fpgfx/tfpgapplication.setmessagehook.html
    UnsetMessageHook fpgfx/tfpgapplication.unsetmessagehook.html
+   HandleException fpgfx/tfpgapplication.handleexception.html
+   ShowException fpgfx/tfpgapplication.showexception.html
+   DefaultFont fpgfx/tfpgapplication.defaultfont.html
    ScreenWidth fpgfx/tfpgapplication.screenwidth.html
    ScreenHeight fpgfx/tfpgapplication.screenheight.html
-   DefaultFont fpgfx/tfpgapplication.defaultfont.html
+   StopOnException fpgfx/tfpgapplication.stoponexception.html
+   OnException fpgfx/tfpgapplication.onexception.html
   TfpgTimer fpgfx/tfpgtimer.html
    Create fpgfx/tfpgtimer.create.html
    Destroy fpgfx/tfpgtimer.destroy.html
@@ -1155,6 +1180,7 @@
   UTF8Pos gfx_utf8utils/utf8pos.html
   UTF8Delete gfx_utf8utils/utf8delete.html
   UTF8Insert gfx_utf8utils/utf8insert.html
+  UTF8CharAtByte gfx_utf8utils/utf8charatbyte.html
  gfx_widget gfx_widget/index.html
   TFocusSearchDirection gfx_widget/tfocussearchdirection.html
   TfpgWidget gfx_widget/tfpgwidget.html
@@ -1185,6 +1211,7 @@
    FTextColor gfx_widget/tfpgwidget.ftextcolor.html
    SetBackgroundColor gfx_widget/tfpgwidget.setbackgroundcolor.html
    SetTextColor gfx_widget/tfpgwidget.settextcolor.html
+   GetClientBounds gfx_widget/tfpgwidget.getclientbounds.html
    GetParent gfx_widget/tfpgwidget.getparent.html
    SetParent gfx_widget/tfpgwidget.setparent.html
    SetEnabled gfx_widget/tfpgwidget.setenabled.html
@@ -1214,17 +1241,18 @@
    HandleHide gfx_widget/tfpgwidget.handlehide.html
    MoveAndResize gfx_widget/tfpgwidget.moveandresize.html
    RePaint gfx_widget/tfpgwidget.repaint.html
-   OnPaint gfx_widget/tfpgwidget.onpaint.html
-   OnEnter gfx_widget/tfpgwidget.onenter.html
-   OnExit gfx_widget/tfpgwidget.onexit.html
-   OnMouseExit gfx_widget/tfpgwidget.onmouseexit.html
-   OnMouseEnter gfx_widget/tfpgwidget.onmouseenter.html
-   OnMouseMove gfx_widget/tfpgwidget.onmousemove.html
-   OnMouseDown gfx_widget/tfpgwidget.onmousedown.html
-   OnMouseUp gfx_widget/tfpgwidget.onmouseup.html
    OnClick gfx_widget/tfpgwidget.onclick.html
    OnDoubleClick gfx_widget/tfpgwidget.ondoubleclick.html
+   OnEnter gfx_widget/tfpgwidget.onenter.html
+   OnExit gfx_widget/tfpgwidget.onexit.html
    OnKeyPress gfx_widget/tfpgwidget.onkeypress.html
+   OnMouseDown gfx_widget/tfpgwidget.onmousedown.html
+   OnMouseEnter gfx_widget/tfpgwidget.onmouseenter.html
+   OnMouseExit gfx_widget/tfpgwidget.onmouseexit.html
+   OnMouseMove gfx_widget/tfpgwidget.onmousemove.html
+   OnMouseUp gfx_widget/tfpgwidget.onmouseup.html
+   OnPaint gfx_widget/tfpgwidget.onpaint.html
+   OnResize gfx_widget/tfpgwidget.onresize.html
    Create gfx_widget/tfpgwidget.create.html
    Destroy gfx_widget/tfpgwidget.destroy.html
    SetFocus gfx_widget/tfpgwidget.setfocus.html
@@ -1265,11 +1293,13 @@
    HandleClose gfx_popupwindow/tfpgpopupwindow.handleclose.html
    ProcessPopupFrame gfx_popupwindow/tfpgpopupwindow.processpopupframe.html
    DoPaintPopupFrame gfx_popupwindow/tfpgpopupwindow.dopaintpopupframe.html
+   DoOnClose gfx_popupwindow/tfpgpopupwindow.doonclose.html
    Create gfx_popupwindow/tfpgpopupwindow.create.html
    ShowAt gfx_popupwindow/tfpgpopupwindow.showat.html
    Close gfx_popupwindow/tfpgpopupwindow.close.html
    DontCloseWidget gfx_popupwindow/tfpgpopupwindow.dontclosewidget.html
    PopupFrame gfx_popupwindow/tfpgpopupwindow.popupframe.html
+   OnClose gfx_popupwindow/tfpgpopupwindow.onclose.html
   ClosePopups gfx_popupwindow/closepopups.html
   PopupListFirst gfx_popupwindow/popuplistfirst.html
   PopupListFind gfx_popupwindow/popuplistfind.html
@@ -1414,6 +1444,11 @@
   rsLongOct gfx_constants/index-1.html#rslongoct
   rsLongNov gfx_constants/index-1.html#rslongnov
   rsLongDec gfx_constants/index-1.html#rslongdec
+  rsNewItemDetected gfx_constants/index-1.html#rsnewitemdetected
+  rsAddNewItem gfx_constants/index-1.html#rsaddnewitem
+  DOUBLECLICK_MS gfx_constants/doubleclick_ms.html
+  DOUBLECLICK_DISTANCE gfx_constants/doubleclick_distance.html
+  ONE_MILISEC gfx_constants/one_milisec.html
   fpgAddColon gfx_constants/fpgaddcolon.html
  gfx_pofiles gfx_pofiles/index.html
   TPOFileItem gfx_pofiles/tpofileitem.html
@@ -1620,7 +1655,6 @@
 3PLineWidth r
 #CoreLib.gfxbase.TfpgComponent TComponent
 1VFTagPointer
-2VFComponentState
 3PTagPointer rw
 #CoreLib.gfxbase.TfpgWindowBase #CoreLib.gfxbase.TfpgComponent
 1VFParent
@@ -1662,6 +1696,7 @@
 3MUpdateWindowPosition
 3MMoveWindow
 3MWindowToScreen
+3MActivateWindow
 3MCaptureMouse
 3MReleaseMouse
 3MSetFullscreen
@@ -1680,6 +1715,8 @@
 #CoreLib.gfxbase.TfpgApplicationBase TComponent
 1VFMainForm
 1VFTerminated
+1MGetForm
+1MGetFormCount
 1MGetTopModalForm
 2VFOnIdle
 2VFIsInitialized
@@ -1696,6 +1733,9 @@
 3MScreen_dpi_x
 3MScreen_dpi_y
 3MScreen_dpi
+3MTerminate
+3PFormCount r
+3PForms r
 3PIsInitialized r
 3PTopModalForm r
 3PMainForm rw
@@ -1709,29 +1749,31 @@
 3MCreate
 3PText rw
 #CoreLib.gfxbase.TFileEntry TObject
-1VFAttributes
 1VFEntryType
-1VFExtention
-1VFGroupID
+1VFExtension
+1VFName
+1VFModTime
+1VFSize
 1VFIsLink
 1VFLinkTarget
-1VFMode
-1VFModTime
-1VFName
-1VFOwnerID
-1VFSize
+1VFIsExecutable
+1VFModeString
+1VFOwner
+1VFGroup
+1VFAttrString
 3MCreate
 3PName rw
-3PExtention rw
+3PExtension rw
 3PSize rw
 3PEntryType rw
 3PIsLink rw
-3PAttributes rw
-3PMode rw
-3PModTime rw
-3POwnerID rw
-3PGroupID rw
 3PLinkTarget rw
+3PIsExecutable rw
+3PModTime rw
+3PMode rw
+3POwner rw
+3PGroup rw
+3PAttributes rw
 #CoreLib.gfxbase.TfpgFileListBase TObject
 1VFEntries
 1VFDirectoryName
@@ -1742,6 +1784,7 @@
 1MGetEntry
 1MHasAttrib
 2VFSpecialDirs
+2VFHasFileMode
 2MInitializeEntry
 2MPopulateSpecialDirs
 3MCreate
@@ -1751,13 +1794,16 @@
 3MReadDirectory
 3MClear
 3MSort
-3PEntry r
-3PSpecialDirs r
 3PDirectoryName r
+3PEntry r
 3PFileMask rw
+3PHasFileMode r
 3PShowHidden rw
+3PSpecialDirs r
 #CoreLib.gfx_x11.TfpgFontResourceImpl #CoreLib.gfxbase.TfpgFontResourceBase
 1VFFontData
+1MDoGetTextWidthClassic
+1MDoGetTextWidthWorkaround
 2PHandle r
 3MCreate
 3MDestroy
@@ -1815,6 +1861,7 @@
 2MSetPixel
 2MDoDrawArc
 2MDoFillArc
+2PDCHandle r
 3MCreate
 3MDestroy
 #CoreLib.gfx_x11.TfpgWindowImpl #CoreLib.gfxbase.TfpgWindowBase
@@ -1834,6 +1881,7 @@
 2MDoSetMouseCursor
 2PWinHandle r
 3MCreate
+3MActivateWindow
 3MCaptureMouse
 3MReleaseMouse
 3MSetFullscreen
@@ -1860,8 +1908,6 @@
 2Vxia_targets
 2VInputMethod
 2VInputContext
-2VLastClickWindow
-2VLastWinClickTime
 2VFLastKeySym
 2MDoGetFontFaceList
 3MCreate
@@ -1884,6 +1930,10 @@
 2MDoSetText
 2MInitClipboard
 #CoreLib.gfx_x11.TfpgFileListImpl #CoreLib.gfxbase.TfpgFileListBase
+0MEncodeModeString
+0MGetUserName
+0MGetGroupName
+0MCreate
 0MInitializeEntry
 0MPopulateSpecialDirs
 #CoreLib.gfx_gdi.TfpgFontResourceImpl #CoreLib.gfxbase.TfpgFontResourceBase
@@ -1914,7 +1964,7 @@
 1VFBufferBitmap
 1VFDrawWindow
 1VFgc
-1VfBufgc
+1VFBufgc
 1VFWinGC
 1VFBackgroundColor
 1VFCurFontRes
@@ -1951,6 +2001,7 @@
 2MSetPixel
 2MDoDrawArc
 2MDoFillArc
+2PDCHandle r
 3MCreate
 3MDestroy
 #CoreLib.gfx_gdi.TfpgWindowImpl #CoreLib.gfxbase.TfpgWindowBase
@@ -1973,6 +2024,7 @@
 2MDoSetMouseCursor
 2PWinHandle r
 3MCreate
+3MActivateWindow
 3MCaptureMouse
 3MReleaseMouse
 #CoreLib.gfx_gdi.TfpgApplicationImpl #CoreLib.gfxbase.TfpgApplicationBase
@@ -1990,8 +2042,6 @@
 2Vhcr_wait
 2Vhcr_hand
 2VFFocusedWindow
-2VLastClickWindow
-2VLastWinClickTime
 2MDoGetFontFaceList
 3MCreate
 3MDoMessagesPending
@@ -2009,6 +2059,9 @@
 2MDoSetText
 2MInitClipboard
 #CoreLib.gfx_gdi.TfpgFileListImpl #CoreLib.gfxbase.TfpgFileListBase
+0MEncodeAttributesString
+0MCreate
+0MInitializeEntry
 0MPopulateSpecialDirs
 #CoreLib.fpgfx.TfpgFontResource #CoreLib.gfx_x11.TfpgFontResourceImpl
 2VFFontDesc
@@ -2048,6 +2101,7 @@
 3MDrawControlFrame
 3MDrawDirectionArrow
 3MDrawFocusRect
+3MDrawText
 #CoreLib.fpgfx.TfpgStyle .TObject
 3VDefaultFont
 3VMenuFont
@@ -2065,7 +2119,10 @@
 0VListener
 0VMsgCode
 #CoreLib.fpgfx.TfpgApplication #CoreLib.gfx_x11.TfpgApplicationImpl
+1VFOnException
+1VFStopOnException
 1MSetupLocalizationStrings
+1MInternalMsgClose
 2VFDisplayParams
 2VFScreenWidth
 2VFScreenHeight
@@ -2085,9 +2142,13 @@
 3MProcessMessages
 3MSetMessageHook
 3MUnsetMessageHook
+3MHandleException
+3MShowException
+3PDefaultFont r
 3PScreenWidth r
 3PScreenHeight r
-3PDefaultFont r
+3PStopOnException rw
+3POnException rw
 #CoreLib.fpgfx.TfpgTimer TObject
 1VFEnabled
 1VFNextAlarm
@@ -2200,6 +2261,7 @@
 1VFOnMouseUp
 1VFOnPaint
 1VFOnKeyPress
+1VFOnResize
 1VFOnScreen
 1MSetActiveWidget
 2MMsgPaint
@@ -2229,6 +2291,7 @@
 2VFTextColor
 2MSetBackgroundColor
 2MSetTextColor
+2MGetClientBounds
 2MGetParent
 2MSetParent
 2MSetEnabled
@@ -2258,17 +2321,18 @@
 2MHandleHide
 2MMoveAndResize
 2MRePaint
-2POnPaint rw
-2POnEnter rw
-2POnExit rw
-2POnMouseExit rw
-2POnMouseEnter rw
-2POnMouseMove rw
-2POnMouseDown rw
-2POnMouseUp rw
 2POnClick rw
 2POnDoubleClick rw
+2POnEnter rw
+2POnExit rw
 2POnKeyPress rw
+2POnMouseDown rw
+2POnMouseEnter rw
+2POnMouseExit rw
+2POnMouseMove rw
+2POnMouseUp rw
+2POnPaint rw
+2POnResize rw
 3MCreate
 3MDestroy
 3MSetFocus
@@ -2291,6 +2355,7 @@
 3PTextColor rw
 #CoreLib.gfx_popupwindow.TfpgPopupWindow #CoreLib.gfx_widget.TfpgWidget
 1VFDontCloseWidget
+1VFOnClose
 1VFPopupFrame
 1MSetPopupFrame
 2MMsgClose
@@ -2298,11 +2363,13 @@
 2MHandleClose
 2MProcessPopupFrame
 2MDoPaintPopupFrame
+2MDoOnClose
 3MCreate
 3MShowAt
 3MClose
 3PDontCloseWidget rw
 3PPopupFrame rw
+3POnClose rw
 #CoreLib.gfx_imagelist.EItemExists Exception
 #CoreLib.gfx_imagelist.TfpgImageItem TObject
 1VFImage

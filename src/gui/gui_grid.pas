@@ -469,7 +469,9 @@ begin
     
   for r := 0 to RowCount-1 do
     Result.Cells.Append('');
-  Updated;
+
+  if UpdateCount = 0 then
+    Updated;  // if we called .BeginUpdate then don't clear csUpdating here
 end;
 
 end.
