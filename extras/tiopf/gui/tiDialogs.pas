@@ -38,6 +38,8 @@ uses
   procedure tiAppMessage(const AMessage: string);
   // Show a warning
   procedure tiAppWarning(const AMessage: string);
+  // Show a error message
+  procedure tiAppError(const AMessage: string);
 
 
 implementation
@@ -168,6 +170,11 @@ end;
 procedure tiAppWarning(const AMessage: string);
 begin
   TfpgMessageDialog.Warning('', AMessage);
+end;
+
+procedure tiAppError(const AMessage: string);
+begin
+  TfpgMessageDialog.Critical('', AMessage);
 end;
 
 end.
