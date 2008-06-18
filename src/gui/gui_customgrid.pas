@@ -64,6 +64,7 @@ type
     function    GetColumns(AIndex: integer): TfpgGridColumn; virtual;
     procedure   DoDeleteColumn(ACol: integer); virtual;
     procedure   DoSetRowCount(AValue: integer); virtual;
+    procedure   DoAfterAddColumn(ACol: integer); virtual;
     function    DoCreateColumnClass: TfpgGridColumn; virtual;
     function    GetColumnCount: Integer; override;
     procedure   SetColumnCount(const AValue: Integer); virtual;
@@ -135,7 +136,13 @@ end;
 
 procedure TfpgCustomGrid.DoSetRowCount(AValue: integer);
 begin
-  // do nothing
+  // do nothing yet
+end;
+
+procedure TfpgCustomGrid.DoAfterAddColumn(ACol: integer);
+begin
+  // do nothing yet
+  // update empty cells in descendants
 end;
 
 function TfpgCustomGrid.DoCreateColumnClass: TfpgGridColumn;
@@ -291,14 +298,17 @@ begin
 end;
 
 function TfpgCustomGrid.AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn;
+var
+  i: integer;
 begin
   Result := DoCreateColumnClass;
   Result.Title := ATitle;
   Result.Width := AWidth;
   Result.Backgroundcolor := clBoxcolor;
   Result.TextColor := TextColor;
-  FColumns.Add(Result);
-
+  i := FColumns.Add(Result);
+  DoAfterAddColumn(i);  // update empty cells in descendants
+  
   if csUpdating in ComponentState then
     Exit; //==>
     

@@ -94,6 +94,7 @@ type
     function    GetColumns(AIndex: Integer): TfpgStringColumn; reintroduce;
     procedure   DoDeleteColumn(ACol: integer); override;
     procedure   DoSetRowCount(AValue: integer); override;
+    procedure   DoAfterAddColumn(ACol: integer); override;
     function    DoCreateColumnClass: TfpgStringColumn; reintroduce; override;
     procedure   DrawCell(ARow, ACol: Integer; ARect: TfpgRect; AFlags: TfpgGridDrawState); override;
     property    Columns[AIndex: Integer]: TfpgStringColumn read GetColumns;
@@ -105,8 +106,8 @@ type
     property    Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
     property    ColumnTitle[ACol: Integer]: string read GetColumnTitle write SetColumnTitle;
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
-    property    ColumnBackgroundColor[ACol: Integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
-    property    ColumnTextColor[ACol: Integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
+    property    ColumnBackgroundColor;
+    property    ColumnTextColor;
 //    property    Cols[index: Integer]: TStrings read GetCols write SetCols;
 //    property    Rows[index: Integer]: TStrings read GetRows write SetRows;
   end;
@@ -404,6 +405,16 @@ begin
   end;
 end;
 
+procedure TfpgCustomStringGrid.DoAfterAddColumn(ACol: integer);
+var
+  r: integer;
+begin
+  inherited DoAfterAddColumn(ACol);
+  // initialize cells for existing rows
+  for r := 0 to RowCount-1 do
+    TfpgStringColumn(FColumns.Items[ACol]).Cells.Append('');
+end;
+
 function TfpgCustomStringGrid.DoCreateColumnClass: TfpgStringColumn;
 begin
   Result := TfpgStringColumn.Create;
@@ -450,8 +461,6 @@ end;
 
 function TfpgCustomStringGrid.AddColumn(ATitle: string; AWidth: integer;
     AAlignment: TAlignment; ABackgroundColor: TfpgColor; ATextColor: TfpgColor): TfpgStringColumn;
-var
-  r: integer;
 begin
   Updating;
   Result := TfpgStringColumn(inherited AddColumn(ATitle, AWidth));
@@ -467,9 +476,6 @@ begin
   else
     Result.TextColor:= ATextColor;
     
-  for r := 0 to RowCount-1 do
-    Result.Cells.Append('');
-
   if UpdateCount = 0 then
     Updated;  // if we called .BeginUpdate then don't clear csUpdating here
 end;
