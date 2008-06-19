@@ -108,7 +108,7 @@ type
     y: TfpgCoord;
     Buttons: word;
     shiftstate: TShiftState;
-    delta: word;
+    delta: Integer;
   end;
 
 
