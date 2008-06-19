@@ -100,7 +100,7 @@ end;
 
 procedure TMainForm.MsgDeActivate(var msg: TfpgMessageRec);
 begin
-  Writeln('Window is Deactivate message');
+  Writeln('Window Deactivate message');
 end;
 
 procedure TMainForm.MsgClose(var msg: TfpgMessageRec);
@@ -127,19 +127,16 @@ end;
 
 procedure TMainForm.MsgResize(var msg: TfpgMessageRec);
 begin
-  Writeln('Resize');
+  Writeln('Resize message');
   FWidth  := msg.Params.rect.Width;
   FHeight := msg.Params.rect.Height;
-
-  WriteLn('Window has been resized. New width: ',
-    Width, ' x ', Height);
-//    '; new client width: ', ClientWidth, ' x ', ClientHeight);
-
+  WriteLn('  Window has been resized. New size: ', Width, ' x ', Height);
 end;
 
 procedure TMainForm.MsgMove(var msg: TfpgMessageRec);
 begin
-  WriteLn('Window has been moved to ', msg.Params.rect.Left, '/', msg.Params.rect.Top);
+  Writeln('Move message');
+  WriteLn('  Window has been moved to (', msg.Params.rect.Left, ',', msg.Params.rect.Top, ')');
 end;
 
 procedure TMainForm.MsgKeyChar(var msg: TfpgMessageRec);
@@ -192,7 +189,7 @@ end;
 
 procedure TMainForm.MsgDoubleClick(var msg: TfpgMessageRec);
 begin
-  Writeln('Mouse doubleclick');
+  Writeln('Mouse doubleclick message');
 end;
 
 procedure TMainForm.MsgMouseEnter(var msg: TfpgMessageRec);
@@ -207,7 +204,7 @@ end;
 
 procedure TMainForm.MsgScroll(var msg: TfpgMessageRec);
 var
-  delta: smallint;
+  delta: Integer;
 begin
   delta := msg.Params.mouse.delta;
   Writeln('Mouse scroll delta=' + IntToStr(delta) + ' button=' + IntToStr(msg.Params.mouse.Buttons));

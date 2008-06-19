@@ -1315,9 +1315,9 @@ begin
   SetCursor(hc);
 end;
 
-constructor TfpgWindowImpl.Create(aowner: TComponent);
+constructor TfpgWindowImpl.Create(AOwner: TComponent);
 begin
-  inherited;
+  inherited Create(AOwner);
   FWinHandle := 0;
 end;
 

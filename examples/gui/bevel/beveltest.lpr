@@ -11,7 +11,7 @@ uses
   fpgfx,
   gui_form,
   gui_button,
-  gui_bevel,
+  gui_panel,
   gui_label;
   
 type
@@ -57,19 +57,19 @@ end;
 
 procedure TMainForm.btnShapesClick(Sender: TObject);
 var
-  next: TBevelShape;
+  next: TPanelShape;
 begin
-  if Bevel.Shape = High(TBevelShape) then
-    Bevel.Shape := Low(TBevelShape)
+  if Bevel.Shape = High(TPanelShape) then
+    Bevel.Shape := Low(TPanelShape)
   else
-    Bevel.Shape := TBevelShape(Ord(Bevel.Shape) + 1);
-  lblShape.Text := 'Shape is ' + GetEnumName(TypeInfo(TBevelShape), Ord(Bevel.Shape));
+    Bevel.Shape := TPanelShape(Ord(Bevel.Shape) + 1);
+  lblShape.Text := 'Shape is ' + GetEnumName(TypeInfo(TPanelShape), Ord(Bevel.Shape));
   
-  if Bevel.Shape = High(TBevelShape) then
-    next := Low(TBevelShape)
+  if Bevel.Shape = High(TPanelShape) then
+    next := Low(TPanelShape)
   else
-    next := TBevelShape(Ord(Bevel.Shape) + 1);
-  btnShapes.Text := GetEnumName(TypeInfo(TBevelShape), Ord(next));
+    next := TPanelShape(Ord(Bevel.Shape) + 1);
+  btnShapes.Text := GetEnumName(TypeInfo(TPanelShape), Ord(next));
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
