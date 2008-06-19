@@ -379,6 +379,7 @@ begin
     begin
       FDown := False;
       RePaint;
+      fpgApplication.ProcessMessages;
       if PtInRect(r, Point(x, y)) then
         Click;
     end;
@@ -386,10 +387,13 @@ begin
   else
   begin
     if FDown and FClicked then
+    begin
+      FDown := False;
+      RePaint;
+      fpgApplication.ProcessMessages;
       if PtInRect(r, Point(x, y)) then
         Click;
-    FDown := False;
-    RePaint;
+    end;
   end;
 
   FClickOnPush := False;
