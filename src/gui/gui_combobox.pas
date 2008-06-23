@@ -77,6 +77,8 @@ type
     FInternalBtnRect: TfpgRect;
     FFocusItem: integer;
     FItems: TStringList;
+    FBtnPressed: Boolean;
+    procedure   CalculateInternalButtonRect; virtual;
     procedure   InternalOnClose(Sender: TObject);
     procedure   InternalItemsChanged(Sender: TObject); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -84,6 +86,7 @@ type
     procedure   DoOnDropDown; virtual;
     procedure   DoDropDown; virtual; abstract;
     procedure   DoOnCloseUp; virtual;
+    procedure   PaintInternalButton; virtual;
     function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
@@ -96,6 +99,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     property    Font: TfpgFont read FFont;
   end;
   
@@ -103,10 +107,8 @@ type
   TfpgAbstractComboBox = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
-    procedure   CalculateInternalButtonRect;
   protected
     FMargin: integer;
-    FBtnPressed: Boolean;
     FDropDown: TfpgPopupWindow;
     procedure   DoDropDown; override;
     function    GetText: string; virtual;
@@ -120,7 +122,6 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
-    procedure   PaintInternalButton; virtual;
     property    Text: string read GetText write SetText;
   public
     constructor Create(AOwner: TComponent); override;
@@ -221,6 +222,11 @@ begin
   RePaint;
 end;
 
+procedure TfpgBaseComboBox.CalculateInternalButtonRect;
+begin
+  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
+end;
+
 procedure TfpgBaseComboBox.InternalOnClose(Sender: TObject);
 begin
   DoOnCloseUp;
@@ -284,6 +290,36 @@ begin
     OnCloseUp(self);
 end;
 
+procedure TfpgBaseComboBox.PaintInternalButton;
+var
+  ar: TfpgRect;
+  btnflags: TFButtonFlags;
+begin
+  Canvas.BeginDraw;
+  btnflags := [];
+  ar := FInternalBtnRect;
+  InflateRect(ar, -2, -2);
+  if FBtnPressed then
+  begin
+    Include(btnflags, btfIsPressed);
+    OffsetRect(ar, 1, 1);
+  end;
+  // paint button face
+  fpgStyle.DrawButtonFace(Canvas,
+      FInternalBtnRect.Left,
+      FInternalBtnRect.Top,
+      FInternalBtnRect.Width,
+      FInternalBtnRect.Height, btnflags);
+  if Enabled then
+    Canvas.SetColor(clText1)
+  else
+    Canvas.SetColor(clShadow1);
+
+  // paint arrow
+  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, 1);
+  Canvas.EndDraw(FInternalBtnRect);
+end;
+
 function TfpgBaseComboBox.GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect;
 var
   pt: TPoint;
@@ -320,6 +356,7 @@ begin
   FItems.OnChange := @InternalItemsChanged;
   FFont   := fpgGetFont('#List');
   FOptions := [];
+  FBtnPressed := False;
   FOnChange := nil;
 end;
 
@@ -330,6 +367,11 @@ begin
   inherited Destroy;
 end;
 
+procedure TfpgBaseComboBox.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
+begin
+  inherited SetPosition(aleft, atop, awidth, aheight);
+  CalculateInternalButtonRect
+end;
 
 { TComboboxDropdownWindow }
 
@@ -515,11 +557,6 @@ begin
     RePaint
 end;
 
-procedure TfpgAbstractComboBox.CalculateInternalButtonRect;
-begin
-  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2, Height-4);
-end;
-
 procedure TfpgAbstractComboBox.SetHeight(const AValue: TfpgCoord);
 begin
   inherited SetHeight(AValue);
@@ -622,37 +659,6 @@ begin
     fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
 end;
 
-procedure TfpgAbstractComboBox.PaintInternalButton;
-var
-  ar: TfpgRect;
-  btnflags: TFButtonFlags;
-begin
-  Canvas.BeginDraw;
-  btnflags := [];
-  ar := FInternalBtnRect;
-  InflateRect(ar, -2, -2);
-  if FBtnPressed then
-  begin
-    Include(btnflags, btfIsPressed);
-    OffsetRect(ar, 1, 1);
-  end;
-  // paint button face
-  fpgStyle.DrawButtonFace(Canvas,
-      FInternalBtnRect.Left,
-      FInternalBtnRect.Top,
-      FInternalBtnRect.Width,
-      FInternalBtnRect.Height, btnflags);
-  if Enabled then
-    Canvas.SetColor(clText1)
-  else
-  begin
-    Canvas.SetColor(clShadow1);
-  end;
-  // paint arrow
-  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, 1);
-  Canvas.EndDraw(FInternalBtnRect);
-end;
-
 constructor TfpgAbstractComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -662,7 +668,6 @@ begin
   FMargin           := 3;
   FHeight           := Font.Height + (2*FMargin);
   FFocusable        := True;
-  FBtnPressed       := False;
 
   CalculateInternalButtonRect;
 end;

@@ -81,6 +81,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleShow; override;
     procedure   HandlePaint; override;
     property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
@@ -569,6 +570,15 @@ begin
     UpdateScrollBar;
     Repaint;
   end;
+end;
+
+procedure TfpgBaseListBox.HandleResize(awidth, aheight: TfpgCoord);
+begin
+  inherited HandleResize(awidth, aheight);
+  if (csLoading in ComponentState) then
+    Exit;
+  UpdateScrollbarCoords;
+  UpdateScrollBar;
 end;
 
 procedure TfpgBaseListBox.HandleShow;

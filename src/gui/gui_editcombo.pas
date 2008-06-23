@@ -76,10 +76,8 @@ type
     procedure   SetAllowNew(const AValue: TAllowNew);
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
-    procedure   CalculateInternalButtonRect;
   protected
     FMargin: integer;
-    FBtnPressed: Boolean;
     FDropDown: TfpgPopupWindow;
     FDrawOffset: integer;
     FSelStart: integer;
@@ -97,12 +95,11 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
-    procedure   PaintInternalButton; virtual;
     property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
     property    AutoDropDown: Boolean read FAutoDropDown write FAutoDropDown default False;
     property    AllowNew: TAllowNew read FAllowNew write SetAllowNew default anNo;
-    property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clBoxColor;
-    property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
+    property    BackgroundColor default clBoxColor;
+    property    TextColor default clText1;
     property    Text: string read GetText write SetText;
   public
     constructor Create(AOwner: TComponent); override;
@@ -383,12 +380,6 @@ begin
   inherited SetWidth(AValue);
   CalculateInternalButtonRect;
   RePaint;
-end;
-
-procedure TfpgAbstractEditCombo.CalculateInternalButtonRect;
-begin
-  FInternalBtnRect.SetRect(Width - Min(Height, 20), 2, Min(Height, 20)-2,
-      Height-4);
 end;
 
 procedure TfpgAbstractEditCombo.SetHeight(const AValue: TfpgCoord);
@@ -726,35 +717,6 @@ begin
   Canvas.EndDraw;
 end;
 
-procedure TfpgAbstractEditCombo.PaintInternalButton;
-var
-  ar: TfpgRect;
-  btnflags: TFButtonFlags;
-begin
-  Canvas.BeginDraw;
-  btnflags := [];
-  ar := FInternalBtnRect;
-  InflateRect(ar, -2, -2);
-  if FBtnPressed then
-  begin
-    Include(btnflags, btfIsPressed);
-    OffsetRect(ar, 1, 1);
-  end;
-  // paint button face
-  fpgStyle.DrawButtonFace(Canvas,
-      FInternalBtnRect.Left,
-      FInternalBtnRect.Top,
-      FInternalBtnRect.Width,
-      FInternalBtnRect.Height, btnflags);
-  if Enabled then
-    Canvas.SetColor(clText1)
-  else
-    Canvas.SetColor(clShadow1);
-  // paint arrow
-  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, 1);
-  Canvas.EndDraw(FInternalBtnRect);
-end;
-
 constructor TfpgAbstractEditCombo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -764,7 +726,6 @@ begin
   FHeight           := Font.Height + 6;
   FMargin           := 3;
   FFocusable        := True;
-  FBtnPressed       := False;
   FAutocompletion   := False;
   FAutoDropDown     := False;
   FAllowNew         := anNo;

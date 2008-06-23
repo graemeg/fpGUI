@@ -1,1373 +1,953 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0"?>
 <fpdoc-descriptions>
-<package name="CoreLib">
-
-<!--
+  <package name="CoreLib">
+    <!--
   ====================================================================
     gfx_widget
   ====================================================================
 -->
-
-<module name="gfx_widget">
-<short></short>
-<descr>
-</descr>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="SysUtils">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="fpgfx">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gfxbase">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration type Visibility: default -->
-<element name="TFocusSearchDirection">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFocusSearchDirection.fsdFirst">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFocusSearchDirection.fsdLast">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFocusSearchDirection.fsdNext">
-<short></short>
-</element>
-
-<!-- enumeration value Visibility: default -->
-<element name="TFocusSearchDirection.fsdPrev">
-<short></short>
-</element>
-
-<!-- object Visibility: default -->
-<element name="TfpgWidget">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FAlignRect">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnDoubleClick">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnMouseDown">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnMouseEnter">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnMouseExit">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnMouseMove">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnMouseUp">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnPaint">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: private -->
-<element name="TfpgWidget.FOnScreen">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgPaint">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgPaint.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgResize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgResize.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgMove">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgMove.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgKeyChar">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgKeyChar.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgKeyPress">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgKeyPress.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgKeyRelease">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgKeyRelease.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgMouseDown">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgMouseDown.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgMouseUp">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgMouseUp.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgMouseMove">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgMouseMove.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgDoubleClick">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgDoubleClick.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgMouseEnter">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgMouseEnter.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgMouseExit">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgMouseExit.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.MsgMouseScroll">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MsgMouseScroll.msg">
-<short></short>
-</element>
-
-<!-- procedure Visibility: private -->
-<element name="TfpgWidget.SetActiveWidget">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetActiveWidget.AValue">
-<short></short>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FFormDesigner">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FVisible">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FEnabled">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FFocusable">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FFocused">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FTabOrder">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FAnchors">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FActiveWidget">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FAlign">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: protected -->
-<element name="TfpgWidget.FHint">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TfpgWidget.GetParent">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgWidget.GetParent.Result">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.SetParent">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetParent.AValue">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.SetEnabled">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetEnabled.AValue">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.SetVisible">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetVisible.AValue">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.DoAlign">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.DoAlign.aalign">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandlePaint">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleResize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleResize.awidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleResize.aheight">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleMove">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMove.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMove.y">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleKeyChar">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyChar.AText">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyChar.shiftstate">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyChar.consumed">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleKeyPress">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyPress.keycode">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyPress.shiftstate">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyPress.consumed">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleKeyRelease">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyRelease.keycode">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyRelease.shiftstate">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleKeyRelease.consumed">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleSetFocus">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleKillFocus">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleLMouseDown">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleLMouseDown.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleLMouseDown.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleLMouseDown.shiftstate">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleRMouseDown">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleRMouseDown.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleRMouseDown.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleRMouseDown.shiftstate">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleLMouseUp">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleLMouseUp.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleLMouseUp.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleLMouseUp.shiftstate">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleRMouseUp">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleRMouseUp.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleRMouseUp.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleRMouseUp.shiftstate">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleMouseMove">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseMove.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseMove.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseMove.btnstate">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseMove.shiftstate">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleDoubleClick">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleDoubleClick.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleDoubleClick.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleDoubleClick.button">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleDoubleClick.shiftstate">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleMouseEnter">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleMouseExit">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleMouseScroll">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseScroll.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseScroll.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseScroll.shiftstate">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleMouseScroll.delta">
-<short></short>
-</element>
-
-<!-- function Visibility: protected -->
-<element name="TfpgWidget.FindFocusWidget">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="TfpgWidget.FindFocusWidget.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.FindFocusWidget.startwg">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.FindFocusWidget.direction">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleAlignments">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleAlignments.dwidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.HandleAlignments.dheight">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleShow">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.InternalHandleShow">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.HandleHide">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.MoveAndResize">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResize.aleft">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResize.atop">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResize.awidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResize.aheight">
-<short></short>
-</element>
-
-<!-- procedure Visibility: protected -->
-<element name="TfpgWidget.RePaint">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: protected -->
-<element name="TfpgWidget.OnPaint">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: protected -->
-<element name="TfpgWidget.OnMouseExit">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: protected -->
-<element name="TfpgWidget.OnMouseEnter">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: protected -->
-<element name="TfpgWidget.OnMouseMove">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: protected -->
-<element name="TfpgWidget.OnMouseDown">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: protected -->
-<element name="TfpgWidget.OnMouseUp">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: protected -->
-<element name="TfpgWidget.OnDoubleClick">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- constructor Visibility: public -->
-<element name="TfpgWidget.Create">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.Create.AOwner">
-<short></short>
-</element>
-
-<!-- destructor Visibility: public -->
-<element name="TfpgWidget.Destroy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgWidget.SetFocus">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgWidget.KillFocus">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgWidget.MoveAndResizeBy">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResizeBy.dx">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResizeBy.dy">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResizeBy.dw">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.MoveAndResizeBy.dh">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgWidget.SetPosition">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetPosition.aleft">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetPosition.atop">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetPosition.awidth">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="TfpgWidget.SetPosition.aheight">
-<short></short>
-</element>
-
-<!-- procedure Visibility: public -->
-<element name="TfpgWidget.Invalidate">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.FormDesigner">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Parent">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.ActiveWidget">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Visible">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Enabled">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.TabOrder">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Focusable">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Focused">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Anchors">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Align">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- property Visibility: public -->
-<element name="TfpgWidget.Hint">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- variable Visibility: default -->
-<element name="FocusRootWidget">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- function Visibility: default -->
-<element name="FindKeyboardFocus">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="FindKeyboardFocus.Result">
-<short></short>
-</element>
-
-</module> <!-- gfx_widget -->
-
-</package>
+    <module name="gfx_widget">
+      <short/>
+      <descr/>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="Classes">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="SysUtils">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="fpgfx">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- unresolved type reference Visibility: default -->
+      <element name="gfxbase">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration type Visibility: default -->
+      <element name="TFocusSearchDirection">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFocusSearchDirection.fsdFirst">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFocusSearchDirection.fsdLast">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFocusSearchDirection.fsdNext">
+        <short/>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFocusSearchDirection.fsdPrev">
+        <short/>
+      </element>
+      <!-- object Visibility: default -->
+      <element name="TfpgWidget">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FAlignRect">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnDoubleClick">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnMouseDown">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnMouseEnter">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnMouseExit">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnMouseMove">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnMouseUp">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnPaint">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: private -->
+      <element name="TfpgWidget.FOnScreen">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgPaint">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgPaint.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgResize">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgResize.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgMove">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgMove.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgKeyChar">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgKeyChar.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgKeyPress">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgKeyPress.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgKeyRelease">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgKeyRelease.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgMouseDown">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgMouseDown.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgMouseUp">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgMouseUp.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgMouseMove">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgMouseMove.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgDoubleClick">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgDoubleClick.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgMouseEnter">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgMouseEnter.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgMouseExit">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgMouseExit.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.MsgMouseScroll">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MsgMouseScroll.msg">
+        <short/>
+      </element>
+      <!-- procedure Visibility: private -->
+      <element name="TfpgWidget.SetActiveWidget">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetActiveWidget.AValue">
+        <short/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FFormDesigner">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FVisible">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FEnabled">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FFocusable">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FFocused">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FTabOrder">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FAnchors">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FActiveWidget">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FAlign">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: protected -->
+      <element name="TfpgWidget.FHint">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TfpgWidget.GetParent">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgWidget.GetParent.Result">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.SetParent">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetParent.AValue">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.SetEnabled">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetEnabled.AValue">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.SetVisible">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetVisible.AValue">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.DoAlign">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.DoAlign.aalign">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandlePaint">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleResize">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleResize.awidth">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleResize.aheight">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleMove">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMove.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMove.y">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleKeyChar">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyChar.AText">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyChar.shiftstate">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyChar.consumed">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleKeyPress">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyPress.keycode">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyPress.shiftstate">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyPress.consumed">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleKeyRelease">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyRelease.keycode">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyRelease.shiftstate">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleKeyRelease.consumed">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleSetFocus">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleKillFocus">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleLMouseDown">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleLMouseDown.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleLMouseDown.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleLMouseDown.shiftstate">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleRMouseDown">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleRMouseDown.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleRMouseDown.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleRMouseDown.shiftstate">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleLMouseUp">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleLMouseUp.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleLMouseUp.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleLMouseUp.shiftstate">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleRMouseUp">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleRMouseUp.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleRMouseUp.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleRMouseUp.shiftstate">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleMouseMove">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseMove.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseMove.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseMove.btnstate">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseMove.shiftstate">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleDoubleClick">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleDoubleClick.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleDoubleClick.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleDoubleClick.button">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleDoubleClick.shiftstate">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleMouseEnter">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleMouseExit">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleMouseScroll">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseScroll.x">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseScroll.y">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseScroll.shiftstate">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleMouseScroll.delta">
+        <short/>
+      </element>
+      <!-- function Visibility: protected -->
+      <element name="TfpgWidget.FindFocusWidget">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="TfpgWidget.FindFocusWidget.Result">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.FindFocusWidget.startwg">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.FindFocusWidget.direction">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleAlignments">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleAlignments.dwidth">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.HandleAlignments.dheight">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleShow">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.InternalHandleShow">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.HandleHide">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.MoveAndResize">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResize.aleft">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResize.atop">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResize.awidth">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResize.aheight">
+        <short/>
+      </element>
+      <!-- procedure Visibility: protected -->
+      <element name="TfpgWidget.RePaint">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: protected -->
+      <element name="TfpgWidget.OnPaint">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: protected -->
+      <element name="TfpgWidget.OnMouseExit">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: protected -->
+      <element name="TfpgWidget.OnMouseEnter">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: protected -->
+      <element name="TfpgWidget.OnMouseMove">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: protected -->
+      <element name="TfpgWidget.OnMouseDown">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: protected -->
+      <element name="TfpgWidget.OnMouseUp">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: protected -->
+      <element name="TfpgWidget.OnDoubleClick">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- constructor Visibility: public -->
+      <element name="TfpgWidget.Create">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.Create.AOwner">
+        <short/>
+      </element>
+      <!-- destructor Visibility: public -->
+      <element name="TfpgWidget.Destroy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgWidget.SetFocus">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgWidget.KillFocus">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgWidget.MoveAndResizeBy">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResizeBy.dx">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResizeBy.dy">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResizeBy.dw">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.MoveAndResizeBy.dh">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgWidget.SetPosition">
+        <short>Sets the position and size of the component.</short>
+        <descr>Sets the position and size of the component. It also fires the Resize message. If you are setting up a component like a button on a form, you don't really want the resize event to fire for the button, before the form is displayed (visible). In that case, rather use the components Top, Left, Width and Height properties.</descr>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetPosition.aleft">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetPosition.atop">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetPosition.awidth">
+        <short/>
+      </element>
+      <!-- argument Visibility: default -->
+      <element name="TfpgWidget.SetPosition.aheight">
+        <short/>
+      </element>
+      <!-- procedure Visibility: public -->
+      <element name="TfpgWidget.Invalidate">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.FormDesigner">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Parent">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.ActiveWidget">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Visible">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Enabled">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.TabOrder">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Focusable">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Focused">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Anchors">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Align">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- property Visibility: public -->
+      <element name="TfpgWidget.Hint">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- variable Visibility: default -->
+      <element name="FocusRootWidget">
+        <short/>
+        <descr/>
+        <seealso/>
+      </element>
+      <!-- function Visibility: default -->
+      <element name="FindKeyboardFocus">
+        <short/>
+        <descr/>
+        <errors/>
+        <seealso/>
+      </element>
+      <!-- function result Visibility: default -->
+      <element name="FindKeyboardFocus.Result">
+        <short/>
+      </element>
+    </module>
+    <!-- gfx_widget -->
+  </package>
 </fpdoc-descriptions>

@@ -90,7 +90,7 @@ type
     procedure   HandleShow; virtual;
     procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
-    procedure   MoveAndResize(aleft, atop, awidth, aheight: TfpgCoord);
+    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   RePaint;
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
@@ -954,14 +954,24 @@ begin
   RePaint;
 end;
 
-procedure TfpgWidget.MoveAndResize(aleft, atop, awidth, aheight: TfpgCoord);
+procedure TfpgWidget.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
-  if (aleft <> FLeft) or (atop <> FTop) then
-    HandleMove(aleft, atop);
-  if (awidth <> FWidth) or (aheight <> FHeight) then
-    HandleResize(awidth, aheight);
-
-  UpdateWindowPosition;
+  if HasHandle then
+  begin
+    if (aleft <> FLeft) or (atop <> FTop) then
+      HandleMove(aleft, atop);
+    if (awidth <> FWidth) or (aheight <> FHeight) then
+      HandleResize(awidth, aheight);
+    UpdateWindowPosition;
+  end
+  else
+  begin
+    // When the widget is created, it's position will be applied
+    FLeft   := ALeft;
+    FTop    := ATop;
+    FWidth  := AWidth;
+    FHeight := AHeight;
+  end;
 end;
 
 procedure TfpgWidget.MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
