@@ -57,7 +57,7 @@ uses
 
 type
   // widget options
-  TfpgComboOption = (wo_FocusItemTriggersOnChange);
+  TfpgComboOption = (wo_FocusItemTriggersOnChange, wo_AllowUserBlank);
   TfpgComboOptions = set of TfpgComboOption;
 
 
@@ -236,6 +236,7 @@ procedure TfpgBaseComboBox.InternalItemsChanged(Sender: TObject);
 begin
   if FItems.Count = 0 then
     FocusItem := -1;
+  Repaint;
 end;
 
 procedure TfpgBaseComboBox.HandleKeyPress(var keycode: word;
@@ -263,7 +264,10 @@ begin
 
       keyUp:
         begin
-          FocusItem := FocusItem - 1;
+          if (FocusItem = 0) and (wo_AllowUserBlank in FOptions) then
+            FocusItem := FocusItem - 1
+          else if FocusItem > 0 then
+            FocusItem := FocusItem - 1;
           if old <> FocusItem then
             DoOnChange;
           consumed := True;
