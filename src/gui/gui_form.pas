@@ -293,6 +293,12 @@ begin
   inherited HandleShow;
   if Assigned(FOnShow) then
     FOnShow(self);
+  {$IFDEF UNIX}
+  { TODO : A temporary work-around because XLib doesn't sent a Resize event
+    when the form is created. It's clever enough to size the form beforehand,
+    but without this call the Alignment code doesn't execute. }
+  inherited HandleResize(FWidth, FHeight);
+  {$ENDIF}
 end;
 
 procedure TfpgForm.HandleMove(x, y: TfpgCoord);
