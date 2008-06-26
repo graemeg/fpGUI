@@ -104,7 +104,7 @@ type
   end;
   
 
-  TfpgAbstractComboBox = class(TfpgBaseComboBox)
+  TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
   protected
@@ -130,7 +130,7 @@ type
   end;
 
 
-  TfpgComboBox = class(TfpgAbstractComboBox)
+  TfpgComboBox = class(TfpgBaseStaticCombo)
   published
     property    BackgroundColor default clBoxColor;
     property    DropDownCount;
@@ -166,7 +166,7 @@ type
   { This is the class representing the dropdown window of the combo box. }
   TComboboxDropdownWindow = class(TfpgPopupWindow)
   private
-    FCallerWidget: TfpgAbstractComboBox;
+    FCallerWidget: TfpgBaseStaticCombo;
     FListBox: TfpgListBox;
     procedure   SetFirstItem;
   protected
@@ -174,7 +174,7 @@ type
     procedure   HandleShow; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
-    constructor Create(AOwner: TComponent; ACallerWidget: TfpgAbstractComboBox); reintroduce;
+    constructor Create(AOwner: TComponent; ACallerWidget: TfpgBaseStaticCombo); reintroduce;
     property    ListBox: TfpgListBox read FListBox;
   end;
 
@@ -420,7 +420,7 @@ begin
   end
 end;
 
-constructor TComboboxDropdownWindow.Create(AOwner: TComponent; ACallerWidget: TfpgAbstractComboBox);
+constructor TComboboxDropdownWindow.Create(AOwner: TComponent; ACallerWidget: TfpgBaseStaticCombo);
 begin
   inherited Create(nil);
   Name := '_ComboboxDropdownWindow';
@@ -455,9 +455,9 @@ begin
     Result.Items.Assign(AList);
 end;
 
-{ TfpgAbstractComboBox }
+{ TfpgBaseStaticCombo }
 
-function TfpgAbstractComboBox.GetText: string;
+function TfpgBaseStaticCombo.GetText: string;
 begin
   if (FocusItem >= 0) and (FocusItem < FItems.Count) then
     Result := Items.Strings[FocusItem]
@@ -465,12 +465,12 @@ begin
     Result := '';
 end;
 
-function TfpgAbstractComboBox.HasText: boolean;
+function TfpgBaseStaticCombo.HasText: boolean;
 begin
   Result := FocusItem >= 0;
 end;
 
-procedure TfpgAbstractComboBox.DoDropDown;
+procedure TfpgBaseStaticCombo.DoDropDown;
 var
   ddw: TComboboxDropdownWindow;
   rowcount: integer;
@@ -521,12 +521,12 @@ begin
   end;
 end;
 
-procedure TfpgAbstractComboBox.InternalBtnClick(Sender: TObject);
+procedure TfpgBaseStaticCombo.InternalBtnClick(Sender: TObject);
 begin
   DoDropDown;
 end;
 
-procedure TfpgAbstractComboBox.SetText(const AValue: string);
+procedure TfpgBaseStaticCombo.SetText(const AValue: string);
 var
   i: integer;
 begin
@@ -547,28 +547,28 @@ begin
   end;
 end;
 
-procedure TfpgAbstractComboBox.SetWidth(const AValue: TfpgCoord);
+procedure TfpgBaseStaticCombo.SetWidth(const AValue: TfpgCoord);
 begin
   inherited SetWidth(AValue);
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgAbstractComboBox.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgBaseStaticCombo.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
   if consumed then
     RePaint
 end;
 
-procedure TfpgAbstractComboBox.SetHeight(const AValue: TfpgCoord);
+procedure TfpgBaseStaticCombo.SetHeight(const AValue: TfpgCoord);
 begin
   inherited SetHeight(AValue);
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgAbstractComboBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgBaseStaticCombo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   // button state is down only if user clicked in the button rectangle.
@@ -577,14 +577,14 @@ begin
   DoDropDown;
 end;
 
-procedure TfpgAbstractComboBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TfpgBaseStaticCombo.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
   PaintInternalButton;
 end;
 
-procedure TfpgAbstractComboBox.HandleMouseScroll(x, y: integer;
+procedure TfpgBaseStaticCombo.HandleMouseScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
 var
   NewIndex: Integer;
@@ -609,13 +609,13 @@ begin
   end;
 end;
 
-procedure TfpgAbstractComboBox.HandleResize(awidth, aheight: TfpgCoord);
+procedure TfpgBaseStaticCombo.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   CalculateInternalButtonRect;
 end;
 
-procedure TfpgAbstractComboBox.HandlePaint;
+procedure TfpgBaseStaticCombo.HandlePaint;
 var
   r: TfpgRect;
 begin
@@ -663,7 +663,7 @@ begin
     fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
 end;
 
-constructor TfpgAbstractComboBox.Create(AOwner: TComponent);
+constructor TfpgBaseStaticCombo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FBackgroundColor  := clBoxColor;
@@ -676,13 +676,13 @@ begin
   CalculateInternalButtonRect;
 end;
 
-destructor TfpgAbstractComboBox.Destroy;
+destructor TfpgBaseStaticCombo.Destroy;
 begin
   FDropDown.Free;
   inherited Destroy;
 end;
 
-procedure TfpgAbstractComboBox.Update;
+procedure TfpgBaseStaticCombo.Update;
 begin
   FFocusItem := -1;
   Repaint;

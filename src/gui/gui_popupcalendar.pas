@@ -113,7 +113,7 @@ type
   end;
   
   
-  TfpgCalendarCombo = class(TfpgAbstractComboBox)
+  TfpgCalendarCombo = class(TfpgBaseStaticCombo)
   private
     FDate: TDateTime;
     FDateFormat: string;

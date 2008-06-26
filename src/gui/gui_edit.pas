@@ -33,7 +33,7 @@ type
   TfpgEditBorderStyle = (ebsNone, ebsDefault, ebsSingle);
 
 
-  TfpgCustomEdit = class(TfpgWidget)
+  TfpgBaseEdit = class(TfpgWidget)
   private
     FAutoSelect: Boolean;
     FHideSelection: Boolean;
@@ -115,7 +115,7 @@ type
   end;
 
 
-  TfpgEdit = class(TfpgCustomEdit)
+  TfpgEdit = class(TfpgBaseEdit)
   public
     property    Font;
     property    PopupMenu;  // UI Designer doesn't fully support it yet
@@ -140,7 +140,7 @@ type
   end;
 
 
-  TfpgBaseNumericEdit = class(TfpgCustomEdit)
+  TfpgBaseNumericEdit = class(TfpgBaseEdit)
   private
     fOldColor: TfpgColor;
     fAlignment: TAlignment;
@@ -186,8 +186,6 @@ type
   end;
 
 
-  { TfpgEditInteger }
-
   TfpgEditInteger = class(TfpgBaseNumericEdit)
   protected
     function    GetValue: integer; virtual;
@@ -200,8 +198,6 @@ type
      property   Value: integer read GetValue write SetValue;
   end;
 
-
-  { TfpgEditFloat }
 
   TfpgEditFloat = class(TfpgBaseNumericEdit)
   protected
@@ -246,15 +242,15 @@ begin
     Result.Height:= h;
 end;
 
-{ TfpgCustomEdit }
+{ TfpgBaseEdit }
 
-procedure TfpgCustomEdit.Adjust(UsePxCursorPos: boolean = false);
+procedure TfpgBaseEdit.Adjust(UsePxCursorPos: boolean = false);
 begin
   AdjustTextOffset(False);
   AdjustDrawingInfo;
 end;
 
-procedure TfpgCustomEdit.AdjustTextOffset(UsePxCursorPos: boolean);
+procedure TfpgBaseEdit.AdjustTextOffset(UsePxCursorPos: boolean);
 {If UsePxCursorPos then determines FCursorPos from FCursorPx (that holds mouse pointer coordinates)
  Calculates exact FCursorPx (relative to the widget bounding box) from FCursorPos
  Calculates FTextOffset based on FCursorPx}
@@ -322,7 +318,7 @@ begin
   FCursorPx := tw - FTextOffset + FSideMargin;
 end;
 
-procedure TfpgCustomEdit.AdjustDrawingInfo;
+procedure TfpgBaseEdit.AdjustDrawingInfo;
 // Calculates FVisSelStartPx, FVisSelEndPx, FVisibleText, FDrawOffset
 var
   // fvc, lvc: integer; // first/last visible characters
@@ -406,7 +402,7 @@ begin
   FDrawOffset := FTextOffset - FDrawOffset;
 end;
 
-{function TfpgCustomEdit.PointToCharPos(x, y: integer): integer;
+{function TfpgBaseEdit.PointToCharPos(x, y: integer): integer;
 var
   n: integer;
   cx: integer; // character X position
@@ -442,7 +438,7 @@ begin
   end;
 end;}
 
-procedure TfpgCustomEdit.SetBorderStyle(const AValue: TfpgEditBorderStyle);
+procedure TfpgBaseEdit.SetBorderStyle(const AValue: TfpgEditBorderStyle);
 begin
   if FBorderStyle = AValue then
     Exit; //==>
@@ -450,14 +446,14 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomEdit.SetHideSelection(const AValue: Boolean);
+procedure TfpgBaseEdit.SetHideSelection(const AValue: Boolean);
 begin
   if FHideSelection = AValue then
     Exit;
   FHideSelection := AValue;
 end;
 
-procedure TfpgCustomEdit.HandlePaint;
+procedure TfpgBaseEdit.HandlePaint;
 var
   r: TfpgRect;
   tw, tw2, st, len: integer;
@@ -541,13 +537,13 @@ begin
   end;
 end;
 
-procedure TfpgCustomEdit.HandleResize(awidth, aheight: TfpgCoord);
+procedure TfpgBaseEdit.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   AdjustDrawingInfo;
 end;
 
-procedure TfpgCustomEdit.HandleKeyChar(var AText: TfpgChar;
+procedure TfpgBaseEdit.HandleKeyChar(var AText: TfpgChar;
   var shiftstate: TShiftState; var consumed: Boolean);
 var
   s: TfpgChar;
@@ -583,7 +579,7 @@ begin
   inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
-procedure TfpgCustomEdit.HandleKeyPress(var keycode: word;
+procedure TfpgBaseEdit.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   hasChanged: boolean;
@@ -726,7 +722,7 @@ begin
       FOnChange(self);
 end;
 
-procedure TfpgCustomEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgBaseEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 {var
   cp: integer;}
 begin
@@ -759,7 +755,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomEdit.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgBaseEdit.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleRMouseDown(x, y, shiftstate);
   if Assigned(PopupMenu) then
@@ -768,7 +764,7 @@ begin
     ShowDefaultPopupMenu(x, y, ShiftState);
 end;
 
-procedure TfpgCustomEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
+procedure TfpgBaseEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   cp: integer;
 begin
@@ -797,7 +793,7 @@ begin
   end;
 end;
 
-procedure TfpgCustomEdit.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
+procedure TfpgBaseEdit.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
 begin
   // button is always Mouse_Left, but lets leave this test here for good measure
   if button = MOUSE_LEFT then
@@ -806,7 +802,7 @@ begin
     inherited;
 end;
 
-procedure TfpgCustomEdit.HandleMouseEnter;
+procedure TfpgBaseEdit.HandleMouseEnter;
 begin
   inherited HandleMouseEnter;
   if (csDesigning in ComponentState) then
@@ -815,7 +811,7 @@ begin
     MouseCursor := mcIBeam;
 end;
 
-procedure TfpgCustomEdit.HandleMouseExit;
+procedure TfpgBaseEdit.HandleMouseExit;
 begin
   inherited HandleMouseExit;
   if (csDesigning in ComponentState) then
@@ -823,21 +819,21 @@ begin
   MouseCursor := mcDefault;
 end;
 
-procedure TfpgCustomEdit.HandleSetFocus;
+procedure TfpgBaseEdit.HandleSetFocus;
 begin
   inherited HandleSetFocus;
   if AutoSelect then
     SelectAll;
 end;
 
-procedure TfpgCustomEdit.HandleKillFocus;
+procedure TfpgBaseEdit.HandleKillFocus;
 begin
   inherited HandleKillFocus;
   if AutoSelect then
     FSelOffset := 0;
 end;
 
-function TfpgCustomEdit.GetDrawText: string;
+function TfpgBaseEdit.GetDrawText: string;
 begin
   if not PassWordMode then
     Result := FText
@@ -845,7 +841,7 @@ begin
     Result := StringOfChar('*', UTF8Length(FText));
 end;
 
-constructor TfpgCustomEdit.Create(AOwner: TComponent);
+constructor TfpgBaseEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FFont             := fpgGetFont('#Edit1');  // owned object !
@@ -871,7 +867,7 @@ begin
   FOnChange         := nil;
 end;
 
-destructor TfpgCustomEdit.Destroy;
+destructor TfpgBaseEdit.Destroy;
 begin
   if Assigned(FDefaultPopupMenu) then
     FDefaultPopupMenu.Free;
@@ -879,7 +875,7 @@ begin
   inherited Destroy;
 end;
 
-function TfpgCustomEdit.SelectionText: string;
+function TfpgBaseEdit.SelectionText: string;
 begin
   if FSelOffset <> 0 then
   begin
@@ -894,7 +890,7 @@ begin
     Result := '';
 end;
 
-procedure TfpgCustomEdit.SetPasswordMode (const AValue: boolean );
+procedure TfpgBaseEdit.SetPasswordMode (const AValue: boolean );
 begin
   if FPasswordMode = AValue then
     Exit; //==>
@@ -903,12 +899,12 @@ begin
   RePaint;
 end;
 
-function TfpgCustomEdit.GetFontDesc: string;
+function TfpgBaseEdit.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
 end;
 
-procedure TfpgCustomEdit.SetFontDesc(const AValue: string);
+procedure TfpgBaseEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
@@ -918,7 +914,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomEdit.SetText(const AValue: string);
+procedure TfpgBaseEdit.SetText(const AValue: string);
 var
   s: string;
 begin
@@ -945,27 +941,27 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomEdit.DefaultPopupCut(Sender: TObject);
+procedure TfpgBaseEdit.DefaultPopupCut(Sender: TObject);
 begin
   CutToClipboard;
 end;
 
-procedure TfpgCustomEdit.DefaultPopupCopy(Sender: TObject);
+procedure TfpgBaseEdit.DefaultPopupCopy(Sender: TObject);
 begin
   CopyToClipboard;
 end;
 
-procedure TfpgCustomEdit.DefaultPopupPaste(Sender: TObject);
+procedure TfpgBaseEdit.DefaultPopupPaste(Sender: TObject);
 begin
   PasteFromClipboard
 end;
 
-procedure TfpgCustomEdit.DefaultPopupClearAll(Sender: TObject);
+procedure TfpgBaseEdit.DefaultPopupClearAll(Sender: TObject);
 begin
   Clear;
 end;
 
-procedure TfpgCustomEdit.SetDefaultPopupMenuItemsState;
+procedure TfpgBaseEdit.SetDefaultPopupMenuItemsState;
 var
   i: integer;
   itm: TfpgMenuItem;
@@ -988,13 +984,13 @@ begin
   end;
 end;
 
-procedure TfpgCustomEdit.DoOnChange;
+procedure TfpgBaseEdit.DoOnChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(self);
 end;
 
-procedure TfpgCustomEdit.ShowDefaultPopupMenu(const x, y: integer;
+procedure TfpgBaseEdit.ShowDefaultPopupMenu(const x, y: integer;
   const shiftstate: TShiftState);
 var
   itm: TfpgMenuItem;
@@ -1017,7 +1013,7 @@ begin
   FDefaultPopupMenu.ShowAt(self, x, y);
 end;
 
-procedure TfpgCustomEdit.DeleteSelection;
+procedure TfpgBaseEdit.DeleteSelection;
 begin
   if FSelOffset <> 0 then
   begin
@@ -1036,14 +1032,14 @@ begin
   end;
 end;
 
-procedure TfpgCustomEdit.DoCopy;
+procedure TfpgBaseEdit.DoCopy;
 begin
   if FSelOffset = 0 then
     Exit; //==>
   fpgClipboard.Text := SelectionText;
 end;
 
-procedure TfpgCustomEdit.DoPaste;
+procedure TfpgBaseEdit.DoPaste;
 var
   s: string;
 begin
@@ -1064,14 +1060,14 @@ begin
   Repaint;
 end;
 
-procedure TfpgCustomEdit.SetAutoSelect(const AValue: Boolean);
+procedure TfpgBaseEdit.SetAutoSelect(const AValue: Boolean);
 begin
   if FAutoSelect = AValue then
     Exit; //==>
   FAutoSelect := AValue;
 end;
 
-procedure TfpgCustomEdit.SelectAll;
+procedure TfpgBaseEdit.SelectAll;
 begin
   FSelecting  := True;
   FSelStart   := 0;
@@ -1081,24 +1077,24 @@ begin
   Repaint;
 end;
 
-procedure TfpgCustomEdit.Clear;
+procedure TfpgBaseEdit.Clear;
 begin
   Text := '';
 end;
 
-procedure TfpgCustomEdit.ClearSelection;
+procedure TfpgBaseEdit.ClearSelection;
 begin
   DeleteSelection;
   Adjust;
   RePaint;
 end;
 
-procedure TfpgCustomEdit.CopyToClipboard;
+procedure TfpgBaseEdit.CopyToClipboard;
 begin
   DoCopy;
 end;
 
-procedure TfpgCustomEdit.CutToClipboard;
+procedure TfpgBaseEdit.CutToClipboard;
 begin
   DoCopy;
   DeleteSelection;
@@ -1106,7 +1102,7 @@ begin
   RePaint;
 end;
 
-procedure TfpgCustomEdit.PasteFromClipboard;
+procedure TfpgBaseEdit.PasteFromClipboard;
 begin
   DoPaste;
 end;

@@ -35,7 +35,7 @@ type
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
   TFormCloseQueryEvent = procedure(Sender: TObject; var CanClose: boolean) of object;
 
-  TfpgForm = class(TfpgWidget)
+  TfpgBaseForm = class(TfpgWidget)
   private
     FFullScreen: boolean;
     FOnActivate: TNotifyEvent;
@@ -48,7 +48,7 @@ type
     FOnShow: TNotifyEvent;
   protected
     FModalResult: integer;
-    FParentForm: TfpgForm;
+    FParentForm: TfpgBaseForm;
     FWindowPosition: TWindowPosition;
     FWindowTitle: string;
     FSizeable: boolean;
@@ -66,23 +66,10 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
-  public
-    constructor Create(AOwner: TComponent); override;
-    procedure   AfterConstruction; override;
-    procedure   BeforeDestruction; override;
-    procedure   AfterCreate; virtual;
-    procedure   Show;
-    procedure   Hide;
-    function    ShowModal: integer;
-    procedure   Close;
-    function    CloseQuery: boolean; virtual;
+
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: integer read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
-  published
-    { TODO : Refactor this to a TfpgCustomForm and only surface it here }
-    property    BackgroundColor;
-    property    TextColor;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
     // events
@@ -93,9 +80,39 @@ type
     property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
     property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
     property    OnHide: TNotifyEvent read FOnHide write FOnHide;
+    property    OnShow: TNotifyEvent read FOnShow write FOnShow;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure   AfterConstruction; override;
+    procedure   BeforeDestruction; override;
+    procedure   AfterCreate; virtual;
+    procedure   Show;
+    procedure   Hide;
+    function    ShowModal: integer;
+    procedure   Close;
+    function    CloseQuery: boolean; virtual;
+  end;
+  
+  
+  TfpgForm = class(TfpgBaseForm)
+  published
+    property    BackgroundColor;
+    property    FullScreen;
+    property    ModalResult;
+    property    Sizeable;
+    property    TextColor;
+    property    WindowPosition;
+    property    WindowTitle;
+    property    OnActivate;
+    property    OnClose;
+    property    OnCloseQuery;
+    property    OnCreate;
+    property    OnDeactivate;
+    property    OnDestroy;
+    property    OnHide;
     property    OnPaint;
     property    OnResize;
-    property    OnShow: TNotifyEvent read FOnShow write FOnShow;
+    property    OnShow;
   end;
 
 
@@ -132,15 +149,15 @@ begin
   Result := nil;
 end;
 
-{ TfpgForm }
+{ TfpgBaseForm }
 
-procedure TfpgForm.SetWindowTitle(const ATitle: string);
+procedure TfpgBaseForm.SetWindowTitle(const ATitle: string);
 begin
   FWindowTitle := ATitle;
   inherited SetWindowTitle(ATitle);
 end;
 
-procedure TfpgForm.MsgActivate(var msg: TfpgMessageRec);
+procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
 begin
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
@@ -162,7 +179,7 @@ begin
     FOnActivate(self);
 end;
 
-procedure TfpgForm.MsgDeActivate(var msg: TfpgMessageRec);
+procedure TfpgBaseForm.MsgDeActivate(var msg: TfpgMessageRec);
 begin
   ClosePopups;
   if ActiveWidget <> nil then
@@ -171,13 +188,13 @@ begin
     FOnDeactivate(self);
 end;
 
-procedure TfpgForm.HandlePaint;
+procedure TfpgBaseForm.HandlePaint;
 begin
   inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
 end;
 
-procedure TfpgForm.AdjustWindowStyle;
+procedure TfpgBaseForm.AdjustWindowStyle;
 begin
   if fpgApplication.MainForm = nil then
     fpgApplication.MainForm := self;
@@ -203,13 +220,13 @@ begin
     Exclude(FWindowAttributes, waFullScreen);
 end;
 
-procedure TfpgForm.SetWindowParameters;
+procedure TfpgBaseForm.SetWindowParameters;
 begin
   inherited;
   DoSetWindowTitle(FWindowTitle);
 end;
 
-constructor TfpgForm.Create(AOwner: TComponent);
+constructor TfpgBaseForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWindowPosition  := wpAuto;
@@ -224,18 +241,18 @@ begin
   FFullScreen      := False;
 end;
 
-procedure TfpgForm.AfterCreate;
+procedure TfpgBaseForm.AfterCreate;
 begin
   // for the user
 end;
 
-procedure TfpgForm.Show;
+procedure TfpgBaseForm.Show;
 begin
   FVisible := True;
   HandleShow;
 end;
 
-function TfpgForm.ShowModal: integer;
+function TfpgBaseForm.ShowModal: integer;
 var
   lCloseAction: TCloseAction;
 begin
@@ -271,24 +288,24 @@ begin
   end;
 end;
 
-procedure TfpgForm.MsgClose(var msg: TfpgMessageRec);
+procedure TfpgBaseForm.MsgClose(var msg: TfpgMessageRec);
 begin
   HandleClose;
 end;
 
-procedure TfpgForm.HandleClose;
+procedure TfpgBaseForm.HandleClose;
 begin
   Close;
 end;
 
-procedure TfpgForm.HandleHide;
+procedure TfpgBaseForm.HandleHide;
 begin
   if Assigned(FOnHide) then
     FOnHide(self);
   inherited HandleHide;
 end;
 
-procedure TfpgForm.HandleShow;
+procedure TfpgBaseForm.HandleShow;
 begin
   inherited HandleShow;
   if Assigned(FOnShow) then
@@ -301,19 +318,19 @@ begin
   {$ENDIF}
 end;
 
-procedure TfpgForm.HandleMove(x, y: TfpgCoord);
+procedure TfpgBaseForm.HandleMove(x, y: TfpgCoord);
 begin
   ClosePopups;
   inherited HandleMove(x, y);
 end;
 
-procedure TfpgForm.HandleResize(awidth, aheight: TfpgCoord);
+procedure TfpgBaseForm.HandleResize(awidth, aheight: TfpgCoord);
 begin
   ClosePopups;
   inherited HandleResize(awidth, aheight);
 end;
 
-procedure TfpgForm.HandleKeyPress(var keycode: word;
+procedure TfpgBaseForm.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 var
   i: integer;
@@ -337,7 +354,7 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
-procedure TfpgForm.AfterConstruction;
+procedure TfpgBaseForm.AfterConstruction;
 begin
   inherited AfterConstruction;
   AfterCreate;
@@ -345,20 +362,20 @@ begin
     FOnCreate(self);
 end;
 
-procedure TfpgForm.BeforeDestruction;
+procedure TfpgBaseForm.BeforeDestruction;
 begin
   inherited BeforeDestruction;
   if Assigned(FOnDestroy) then
     FOnDestroy(self);
 end;
 
-procedure TfpgForm.DoOnClose(var CloseAction: TCloseAction);
+procedure TfpgBaseForm.DoOnClose(var CloseAction: TCloseAction);
 begin
   if Assigned(FOnClose) then
     OnClose(self, CloseAction);
 end;
 
-procedure TfpgForm.Hide;
+procedure TfpgBaseForm.Hide;
 begin
   Visible := False;
 //  HandleHide;
@@ -366,7 +383,7 @@ begin
     ModalResult := -1;
 end;
 
-procedure TfpgForm.Close;
+procedure TfpgBaseForm.Close;
 var
   CloseAction: TCloseAction;
   IsMainForm: Boolean;
@@ -402,7 +419,7 @@ begin
   end;  { if CloseQuery }
 end;
 
-function TfpgForm.CloseQuery: boolean;
+function TfpgBaseForm.CloseQuery: boolean;
 begin
   Result := True;
   if Assigned(FOnCloseQuery) then

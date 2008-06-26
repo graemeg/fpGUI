@@ -64,7 +64,7 @@ type
   TAllowNew = (anNo, anYes, anAsk);
 
 
-  TfpgAbstractEditCombo = class(TfpgBaseComboBox)
+  TfpgBaseEditCombo = class(TfpgBaseComboBox)
   private
     FAutoCompletion: Boolean;
     FAutoDropDown: Boolean;
@@ -106,11 +106,10 @@ type
     destructor  Destroy; override;
     procedure   Update;
     property    NewText: boolean read FNewItem;
-    property    OnKeyPress;
   end;
 
 
-  TfpgEditCombo = class(TfpgAbstractEditCombo)
+  TfpgEditCombo = class(TfpgBaseEditCombo)
   published
     property    AutoCompletion;
     property    AutoDropDown;
@@ -127,6 +126,7 @@ type
     property    OnChange;
     property    OnCloseUp;
     property    OnDropDown;
+    property    OnKeyPress;
   end;
 
 
@@ -243,15 +243,15 @@ begin
     Result.Items.Assign(AList);
 end;
 
-{ TfpgAbstractEditCombo }
+{ TfpgBaseEditCombo }
 
-procedure TfpgAbstractEditCombo.SetAllowNew(const AValue: TAllowNew);
+procedure TfpgBaseEditCombo.SetAllowNew(const AValue: TAllowNew);
 begin
   if FAllowNew <> AValue then
     FAllowNew := AValue;
 end;
 
-function TfpgAbstractEditCombo.GetText: string;
+function TfpgBaseEditCombo.GetText: string;
 var
   i: integer;
 begin
@@ -264,12 +264,12 @@ begin
       Result := '';
 end;
 
-function TfpgAbstractEditCombo.HasText: boolean;
+function TfpgBaseEditCombo.HasText: boolean;
 begin
   Result := FFocusItem >= 0;
 end;
 
-procedure TfpgAbstractEditCombo.DoDropDown;
+procedure TfpgBaseEditCombo.DoDropDown;
 var
   ddw: TDropDownWindow;
   rowcount, i: integer;
@@ -326,12 +326,12 @@ begin
   end;
 end;
 
-procedure TfpgAbstractEditCombo.InternalBtnClick(Sender: TObject);
+procedure TfpgBaseEditCombo.InternalBtnClick(Sender: TObject);
 begin
   DoDropDown;
 end;
 
-procedure TfpgAbstractEditCombo.InternalListBoxSelect(Sender: TObject);
+procedure TfpgBaseEditCombo.InternalListBoxSelect(Sender: TObject);
 var
   i: Integer;
 begin
@@ -350,7 +350,7 @@ begin
     Repaint;
 end;
 
-procedure TfpgAbstractEditCombo.SetText(const AValue: string);
+procedure TfpgBaseEditCombo.SetText(const AValue: string);
 var
   i: integer;
 begin
@@ -375,21 +375,21 @@ begin
   end;
 end;
 
-procedure TfpgAbstractEditCombo.SetWidth(const AValue: TfpgCoord);
+procedure TfpgBaseEditCombo.SetWidth(const AValue: TfpgCoord);
 begin
   inherited SetWidth(AValue);
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgAbstractEditCombo.SetHeight(const AValue: TfpgCoord);
+procedure TfpgBaseEditCombo.SetHeight(const AValue: TfpgCoord);
 begin
   inherited SetHeight(AValue);
   CalculateInternalButtonRect;
   RePaint;
 end;
 
-procedure TfpgAbstractEditCombo.HandleKeyChar(var AText: TfpgChar;
+procedure TfpgBaseEditCombo.HandleKeyChar(var AText: TfpgChar;
     var shiftstate: TShiftState; var consumed: Boolean);
 var
   s: TfpgChar;
@@ -450,7 +450,7 @@ begin
     inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
-procedure TfpgAbstractEditCombo.HandleKeyPress(var keycode: word;
+procedure TfpgBaseEditCombo.HandleKeyPress(var keycode: word;
     var shiftstate: TShiftState; var consumed: boolean);
 var
   hasChanged: boolean;
@@ -540,7 +540,7 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
-procedure TfpgAbstractEditCombo.HandleLMouseDown(x, y: integer;
+procedure TfpgBaseEditCombo.HandleLMouseDown(x, y: integer;
     shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
@@ -558,7 +558,7 @@ begin
     end;
 end;
 
-procedure TfpgAbstractEditCombo.HandleLMouseUp(x, y: integer;
+procedure TfpgBaseEditCombo.HandleLMouseUp(x, y: integer;
     shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
@@ -566,13 +566,13 @@ begin
   PaintInternalButton;
 end;
 
-procedure TfpgAbstractEditCombo.HandleResize(awidth, aheight: TfpgCoord);
+procedure TfpgBaseEditCombo.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   CalculateInternalButtonRect;
 end;
 
-procedure TfpgAbstractEditCombo.HandlePaint;
+procedure TfpgBaseEditCombo.HandlePaint;
 var
   r: TfpgRect;
   tw, tw2, st, len: integer;
@@ -717,7 +717,7 @@ begin
   Canvas.EndDraw;
 end;
 
-constructor TfpgAbstractEditCombo.Create(AOwner: TComponent);
+constructor TfpgBaseEditCombo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FBackgroundColor  := clBoxColor;
@@ -741,13 +741,13 @@ begin
   CalculateInternalButtonRect;
 end;
 
-destructor TfpgAbstractEditCombo.Destroy;
+destructor TfpgBaseEditCombo.Destroy;
 begin
   FDropDown.Free;
   inherited Destroy;
 end;
 
-procedure TfpgAbstractEditCombo.Update;
+procedure TfpgBaseEditCombo.Update;
 begin
   FFocusItem := -1;
   Repaint;
