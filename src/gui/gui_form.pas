@@ -321,6 +321,11 @@ begin
 end;
 
 procedure TfpgBaseForm.HandleShow;
+{$IFDEF LINUX}
+var
+  dw: integer;
+  dh: integer;
+{$ENDIF}
 begin
   inherited HandleShow;
   if Assigned(FOnShow) then
@@ -329,7 +334,10 @@ begin
   { TODO : A temporary work-around because XLib doesn't sent a Resize event
     when the form is created. It's clever enough to size the form beforehand,
     but without this call the Alignment code doesn't execute. }
-  inherited HandleResize(FWidth, FHeight);
+
+//  dw      := FPrevWidth - FWidth;
+//  dh      := FPrevHeight - FHeight;
+//  HandleAlignments(0, 0);
   {$ENDIF}
 end;
 

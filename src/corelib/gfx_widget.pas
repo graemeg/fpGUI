@@ -890,9 +890,15 @@ begin
 end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
+var
+  dw: integer;
+  dh: integer;
 begin
 //  writeln('MsgResize - ', Classname);
+  dw      := msg.Params.rect.Width - FWidth;
+  dh      := msg.Params.rect.Height - FHeight;
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
+  HandleAlignments(dw, dh);
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
