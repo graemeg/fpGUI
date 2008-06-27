@@ -284,6 +284,7 @@ begin
   FDontCloseWidget := nil;
   Parent := nil;
   FPopupFrame := False;
+  FIsContainer := True;
 end;
 
 procedure TfpgPopupWindow.ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord);

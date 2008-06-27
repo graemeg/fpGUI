@@ -358,9 +358,14 @@ type
     FLeft: TfpgCoord;
     FWidth: TfpgCoord;
     FHeight: TfpgCoord;
+    FPrevTop: TfpgCoord;
+    FPrevLeft: TfpgCoord;
+    FPrevWidth: TfpgCoord;
+    FPrevHeight: TfpgCoord;
     FMinWidth: TfpgCoord;
     FMinHeight: TfpgCoord;
     FCanvas: TfpgCanvasBase;
+    FDirty: Boolean;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
@@ -377,6 +382,8 @@ type
     procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
+    procedure   SetTop(const AValue: TfpgCoord); virtual;
+    procedure   SetLeft(const AValue: TfpgCoord); virtual;
     procedure   SetHeight(const AValue: TfpgCoord); virtual;
     procedure   SetWidth(const AValue: TfpgCoord); virtual;
   public
@@ -400,8 +407,8 @@ type
     property    HasHandle: boolean read HandleIsValid;
     property    WindowType: TWindowType read FWindowType write FWindowType;
     property    WindowAttributes: TWindowAttributes read FWindowAttributes write FWindowAttributes;
-    property    Left: TfpgCoord read FLeft write FLeft;
-    property    Top: TfpgCoord read FTop write FTop;
+    property    Left: TfpgCoord read FLeft write SetLeft;
+    property    Top: TfpgCoord read FTop write SetTop;
     property    Width: TfpgCoord read FWidth write SetWidth;
     property    Height: TfpgCoord read FHeight write SetHeight;
     property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
@@ -947,24 +954,47 @@ begin
   DoSetWindowTitle(ATitle);
 end;
 
+procedure TfpgWindowBase.SetTop(const AValue: TfpgCoord);
+begin
+  if FTop = AValue then
+    Exit;
+  FPrevTop := FTop;
+  FTop := AValue;
+  FDirty := True;
+end;
+
+procedure TfpgWindowBase.SetLeft(const AValue: TfpgCoord);
+begin
+  if FLeft = AValue then
+    Exit;
+  FPrevLeft := FHeight;
+  FLeft := AValue;
+  FDirty := True;
+end;
+
 procedure TfpgWindowBase.SetHeight(const AValue: TfpgCoord);
 begin
   if FHeight = AValue then
     Exit;
+  FPrevHeight := FHeight;
   FHeight := AValue;
+  FDirty := True;
 end;
 
 procedure TfpgWindowBase.SetWidth(const AValue: TfpgCoord);
 begin
   if FWidth = AValue then
     Exit;
+  FPrevWidth := FWidth;
   FWidth := AValue;
+  FDirty := True;
 end;
 
 constructor TfpgWindowBase.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
+  FDirty := True;
 end;
 
 procedure TfpgWindowBase.AfterConstruction;

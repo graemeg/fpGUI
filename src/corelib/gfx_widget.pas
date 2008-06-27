@@ -60,6 +60,7 @@ type
     FHint: string;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
+    FIsContainer: Boolean;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
     procedure   SetTextColor(const AValue: TfpgColor); virtual;
     function    GetClientBounds: TfpgRect; virtual;
@@ -67,9 +68,11 @@ type
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
     procedure   SetVisible(const AValue: boolean); virtual;
-    procedure   DoAlign(aalign: TAlign);
+    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
+    procedure   DoAlign(AAlign: TAlign);
+    procedure   DoResize;
     procedure   HandlePaint; virtual;
-    procedure   HandleResize(awidth, aheight: TfpgCoord); virtual;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
@@ -116,6 +119,7 @@ type
     property    FormDesigner: TObject read FFormDesigner write FFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
+    property    IsContainer: Boolean read FIsContainer;
     property    Visible: boolean read FVisible write SetVisible default True;
     property    Enabled: boolean read FEnabled write SetEnabled default True;
     property    TabOrder: integer read FTabOrder write FTabOrder;
@@ -200,6 +204,24 @@ begin
     end;
 end;
 
+procedure TfpgWidget.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
+var
+  dw: integer;
+  dh: integer;
+begin
+//  writeln('DoUpdateWindowPosition - ', Classname);
+  dw      := FWidth - FPrevWidth;
+  dh      := FHeight - FPrevHeight;
+
+  if IsContainer and FDirty then
+    HandleAlignments(dw, dh);
+
+  inherited DoUpdateWindowPosition(aleft, atop, awidth, aheight);
+  if FDirty and ((dw <> 0) or (dh <> 0)) then
+    DoResize;
+  FDirty := False;
+end;
+
 procedure TfpgWidget.SetBackgroundColor(const AValue: TfpgColor);
 begin
   if FBackgroundColor <> AValue then
@@ -241,16 +263,17 @@ begin
   Loading;
   {$endif}
 
-  FOnScreen   := False;
-  FVisible    := True;
-  FActiveWidget := nil;
-  FEnabled      := True;
-  FFocusable  := False;
-  FFocused    := False;
-  FTabOrder   := 0;
-  FAnchors    := [anLeft, anTop];
-  FAlign      := alNone;
-  FHint       := '';
+  FIsContainer    := False;
+  FOnScreen       := False;
+  FVisible        := True;
+  FActiveWidget   := nil;
+  FEnabled        := True;
+  FFocusable      := False;
+  FFocused        := False;
+  FTabOrder       := 0;
+  FAnchors        := [anLeft, anTop];
+  FAlign          := alNone;
+  FHint           := '';
   FBackgroundColor := clWindowBackground;
   FTextColor  := clText1;
 
@@ -868,25 +891,13 @@ end;
 
 procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
 begin
+//  writeln('MsgResize - ', Classname);
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
   end;
-  if Assigned(FOnResize) then
-    FOnResize(Self);
-end;
-
-procedure TfpgWidget.HandleResize(awidth, aheight: TfpgCoord);
-var
-  dw: integer;
-  dh: integer;
-begin
-  dw      := awidth - FWidth;
-  dh      := aheight - FHeight;
-  FWidth  := Max(awidth, FMinWidth);
-  FHeight := Max(aheight, FMinHeight);
-  HandleAlignments(dw, dh);
+  DoResize;
 end;
 
 procedure TfpgWidget.MsgMove(var msg: TfpgMessageRec);
@@ -898,10 +909,17 @@ begin
   end;
 end;
 
+procedure TfpgWidget.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+//  writeln('HandleResize - ', Classname);
+  Width  := Max(awidth, FMinWidth);
+  Height := Max(aheight, FMinHeight);
+end;
+
 procedure TfpgWidget.HandleMove(x, y: TfpgCoord);
 begin
-  FLeft := x;
-  FTop  := y;
+  Left := x;
+  Top  := y;
 end;
 
 procedure TfpgWidget.HandleAlignments(dwidth, dheight: TfpgCoord);
@@ -915,6 +933,7 @@ var
 begin
   if (csLoading in ComponentState) then
     Exit;  //==>
+//  writeln('HandleAlignments - ', Classname);
   FAlignRect := GetClientBounds;
 
   DoAlign(alTop);
@@ -958,19 +977,19 @@ procedure TfpgWidget.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
   if HasHandle then
   begin
-    if (aleft <> FLeft) or (atop <> FTop) then
-      HandleMove(aleft, atop);
-    if (awidth <> FWidth) or (aheight <> FHeight) then
-      HandleResize(awidth, aheight);
+    if (ALeft <> FLeft) or (ATop <> FTop) then
+      HandleMove(ALeft, ATop);
+    if (AWidth <> FWidth) or (AHeight <> FHeight) then
+      HandleResize(AWidth, AHeight);
     UpdateWindowPosition;
   end
   else
   begin
     // When the widget is created, it's position will be applied
-    FLeft   := ALeft;
-    FTop    := ATop;
-    FWidth  := AWidth;
-    FHeight := AHeight;
+    Left   := ALeft;
+    Top    := ATop;
+    Width  := AWidth;
+    Height := AHeight;
   end;
 end;
 
@@ -1008,7 +1027,7 @@ begin
   end;
 end;
 
-procedure TfpgWidget.DoAlign(aalign: TAlign);
+procedure TfpgWidget.DoAlign(AAlign: TAlign);
 var
   alist: TList;
   w: TfpgWidget;
@@ -1019,7 +1038,7 @@ begin
     if Components[n] is TfpgWidget then
     begin
       w := TfpgWidget(Components[n]);
-      if w.Align = aalign then
+      if w.Align = AAlign then
         alist.Add(w);
     end;
 
@@ -1062,6 +1081,12 @@ begin
   end;
 
   alist.Free;
+end;
+
+procedure TfpgWidget.DoResize;
+begin
+  if Assigned(FOnResize) then
+    FOnResize(Self);
 end;
 
 procedure TfpgWidget.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);

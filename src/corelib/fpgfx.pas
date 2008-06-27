@@ -43,10 +43,10 @@ const
   TextFlagsDflt = [txtLeft, txtTop, txtEnabled];
 
   // Used for the internal message queue
-  cMessageQueueSize = 512;
+  cMessageQueueSize = 1024;
 
   // version and name constants
-  fpGUIVersion = '0.6.1';
+  fpGUIVersion = '0.6.2';
   fpGUIName    = 'fpGUI Toolkit';
 
 

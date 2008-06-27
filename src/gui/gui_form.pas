@@ -55,6 +55,8 @@ type
     procedure   AdjustWindowStyle; override;
     procedure   SetWindowParameters; override;
     procedure   SetWindowTitle(const ATitle: string); override;
+    procedure   SetHeight(const AValue: TfpgCoord); override;
+    procedure   SetWidth(const AValue: TfpgCoord); override;
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
@@ -66,7 +68,7 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
-
+    // properties
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: integer read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
@@ -157,6 +159,18 @@ begin
   inherited SetWindowTitle(ATitle);
 end;
 
+procedure TfpgBaseForm.SetHeight(const AValue: TfpgCoord);
+begin
+  if Sizeable then
+    inherited SetHeight(AValue);
+end;
+
+procedure TfpgBaseForm.SetWidth(const AValue: TfpgCoord);
+begin
+  if Sizeable then
+    inherited SetWidth(AValue);
+end;
+
 procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
 begin
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
@@ -239,6 +253,7 @@ begin
   FMinHeight       := 32;
   FModalResult     := 0;
   FFullScreen      := False;
+  FIsContainer     := True;
 end;
 
 procedure TfpgBaseForm.AfterCreate;

@@ -32,12 +32,12 @@ type
   TfpgMRU = class(TComponent)
   private
     FItems: TStringList;
-    FMaxItems: Word;
+    FMaxItems: Integer;
     FShowFullPath: boolean;
     FParentMenuItem: TfpgPopupMenu;
 //    FIniFilePath: string;
     FOnClick: TMRUClickEvent;
-    procedure   SetMaxItems(const AValue: Word);
+    procedure   SetMaxItems(const AValue: Integer);
 //    procedure   SetIniFilePath(const AValue: string);
     procedure   SetParentMenuItem(const AValue: TfpgPopupMenu);
     procedure   SetShowFullPath(const AValue: boolean);
@@ -56,7 +56,7 @@ type
     function    RemoveItem(const FileName : string) : boolean;
     procedure   LoadMRU;
   published
-    property    MaxItems: Word read FMaxItems write SetMaxItems default 4;
+    property    MaxItems: Integer read FMaxItems write SetMaxItems default 4;
 //    property    IniFilePath: string read FIniFilePath write SetIniFilePath;
     property    ShowFullPath: boolean read FShowFullPath write SetShowFullPath default True;
     property    ParentMenuItem: TfpgPopupMenu read FParentMenuItem write SetParentMenuItem;
@@ -76,7 +76,7 @@ type
 
 { TfpgMRU }
 
-procedure TfpgMRU.SetMaxItems(const AValue: Word);
+procedure TfpgMRU.SetMaxItems(const AValue: Integer);
 begin
   if AValue <> FMaxItems then
   begin
@@ -84,8 +84,8 @@ begin
       FMaxItems := 1
     else
     begin
-      if AValue > MaxInt then
-        FMaxItems := High(Word) - 1
+      if AValue > High(Word) then // 65535 should be enough
+        FMaxItems := High(Word)
       else
       begin
         FMaxItems := AValue;

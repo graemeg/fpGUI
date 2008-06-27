@@ -200,6 +200,7 @@ begin
   FFocusable := True;
   FBackgroundColor := Parent.BackgroundColor;
   FTextColor := Parent.TextColor;
+  FIsContainer := True;
 end;
 
 destructor TfpgTabSheet.Destroy;
@@ -784,6 +785,7 @@ begin
   FPages  := TList.Create;
   FWidth  := 150;
   FHeight := 100;
+  FIsContainer := True;
 
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;

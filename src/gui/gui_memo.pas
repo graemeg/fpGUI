@@ -126,15 +126,26 @@ type
   TfpgMemoStrings = class(TStringList)
   protected
     Memo: TfpgMemo;
+    procedure   RefreshMemo;
   public
     constructor Create(AMemo: TfpgMemo); reintroduce;
     destructor  Destroy; override;
     function    Add(const s: String): Integer; override;
-    procedure   Delete(Index: Integer); override;
     procedure   Clear; override;
+    procedure   Delete(Index: Integer); override;
+    procedure   Insert(Index: Integer; const S: string); override;
   end;
 
 { TfpgMemoStrings }
+
+procedure TfpgMemoStrings.RefreshMemo;
+begin
+  if Assigned(Memo) and (Memo.HasHandle) then
+  begin
+    Memo.Invalidate;
+    Memo.UpdateScrollBars;
+  end;
+end;
 
 constructor TfpgMemoStrings.Create(AMemo: TfpgMemo);
 begin
@@ -151,22 +162,27 @@ end;
 function TfpgMemoStrings.Add(const s: String): Integer;
 begin
   Result := inherited Add(s);
-  if Assigned(Memo) and (Memo.HasHandle) then
-    Memo.Invalidate;
+  RefreshMemo;
 end;
 
 procedure TfpgMemoStrings.Delete(Index: Integer);
 begin
+//  writeln('Delete''s Index = ', Index);
   inherited Delete(Index);
-  if Assigned(Memo) and (Memo.HasHandle) then
-    Memo.Invalidate;
+  RefreshMemo;
+end;
+
+procedure TfpgMemoStrings.Insert(Index: Integer; const S: string);
+begin
+//  writeln('Insert''s Index = ', Index);
+  inherited Insert(Index, S);
+  RefreshMemo;
 end;
 
 procedure TfpgMemoStrings.Clear;
 begin
   inherited Clear;
-  if Assigned(Memo) and (Memo.HasHandle) then
-    Memo.Invalidate;
+  RefreshMemo;
 end;
 
 
@@ -349,7 +365,6 @@ begin
     selep := FSelStartPos;
     selsl := FSelEndLine;
     selsp := FSelEndPos;
-
   end;
 
   for n := selsl to selel do
@@ -376,7 +391,7 @@ begin
     SetLineText(selsl, ls);
   end;
 
-  for n := selsl + 1 to selel do
+  for n := selsl to selel do
     FLines.Delete(n);
 
   FCursorPos  := selsp;

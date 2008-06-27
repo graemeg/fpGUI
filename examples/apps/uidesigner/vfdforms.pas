@@ -127,7 +127,6 @@ type
 implementation
 
 uses
-  vfdmain,
   fpgfx,
   gui_iniutils,
   gfx_constants;

@@ -241,6 +241,7 @@ begin
   FHeight          := 80;
   FFocusable       := True;  // otherwise children can't get focus
   FBackgroundColor := Parent.BackgroundColor;
+  FIsContainer     := True;
 end;
 
 {TfpgBevel}
