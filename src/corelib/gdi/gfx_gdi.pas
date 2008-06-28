@@ -708,7 +708,7 @@ begin
 
             msgp.mouse.shiftstate := GetKeyboardShiftState;
 
-            if uMsg = WM_MouseMove then
+            if uMsg = WM_MOUSEMOVE then
               w.DoMouseEnterLeaveCheck(w, uMsg, wParam, lParam);
 
             if mcode <> 0 then
@@ -1030,74 +1030,60 @@ end;
 
 { TfpgWindowImpl }
 var
-  // these are required for Windows MouseEnter & MouseExit detection.
+  // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
-  uLastWindow: TfpgWindowImpl;
   
 function TfpgWindowImpl.DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wParam, lParam: Cardinal): Boolean;
-
-  //----------------------
-  function CursorInDifferentWindow: Boolean;
-  var
-    pt: Windows.POINT;
-  begin
-    pt.x := LoWord(lParam);
-    pt.y := HiWord(lParam);
-
-    // only WM_MOUSEWHEEL uses screen coordinates!!!
-    if uMsg <> WM_MOUSEWHEEL then
-      Windows.ClientToScreen(FWinHandle, @pt);
-
-    Result := WindowFromPoint(pt) <> uLastWindowHndl;
-  end;
-
 var
-  pt: Windows.POINT;
+  pt, spt: Windows.POINT;
   msgp: TfpgMessageParams;
-  b: boolean;
+  CursorInDifferentWindow: boolean;
+  CurrentWindowHndl: TfpgWinHandle;
+  LastWindow: TfpgWindowImpl;
+
 begin
-  b := CursorInDifferentWindow;
-  FillChar(msgp, sizeof(msgp), 0);
+  // vvzh: this method currently cannot receive mouse events when mouse pointer
+  // is outside of the application window. We could try to play with
+  // TrackMouseEvent to catch such events and then
+  //  - send FPGM_MOUSEEXIT/FPGM_MOUSEENTER
+  //  - set uLastWindowHndl to 0
+  // An example:
+  // var tme: TTrackMouseEvent;
+  // tme.cbSize := SizeOf(tme);
+  // tme.hwndTrack := m_hWnd;
+  // tme.dwFlags := TME_LEAVE or TME_HOVER;
+  // tme.dwHoverTime := 1;
+  // TrackMouseEvent(tme);
+  
   pt.x := LoWord(lParam);
   pt.y := HiWord(lParam);
-  if (not b) and (not FMouseInWindow) then
-  begin
-    if not CursorInDifferentWindow then
-    begin
-      FMouseInWindow := True;
-//      writeln('GFX: MouseEnter detected');
-      fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
-    end;
-    Result := uMsg <> WM_MOUSEMOVE;
-  end
+  spt := pt;
+  // only WM_MOUSEWHEEL uses screen coordinates!!!
+  if uMsg = WM_MOUSEWHEEL then
+    Windows.ScreenToClient(FWinHandle, @pt)
   else
-  begin
-//    writeln('... in else part... (', pt.x, ',', pt.y, ')');
-    if uMsg = WM_MOUSEWHEEL then
-      Windows.ScreenToClient(FWinHandle, @pt);
-    // we should change the Width and Height to ClientWidth, ClientHeight
-    if (pt.x <= 0) or (pt.y <= 0) or (pt.x >= Width) or
-        (pt.y >= Height) or CursorInDifferentWindow then
-      FMouseInWindow := False;
+    Windows.ClientToScreen(FWinHandle, @spt);
 
-    if not FMouseInWindow then
+  CurrentWindowHndl := WindowFromPoint(spt);
+  CursorInDifferentWindow := (CurrentWindowHndl <> uLastWindowHndl);
+  
+  if CursorInDifferentWindow then
+  begin
+    FillChar(msgp, sizeof(msgp), 0);
+    msgp.mouse.x := pt.x;
+    msgp.mouse.y := pt.y;
+    LastWindow := GetMyWidgetFromHandle(uLastWindowHndl);
+    // check if last window still exits. eg: Dialog window could be closed.
+    if LastWindow <> nil then
     begin
-      msgp.mouse.x := LoWord(lParam);
-      msgp.mouse.y := HiWord(lParam);
 //      writeln('GFX: MouseExit detected');
-      if uLastWindow <> nil then
-      begin
-        // check if last window still exits. eg: Dialog window could be closed.
-        if GetMyWidgetFromHandle(uLastWindowHndl) <> nil then
-          fpgSendMessage(nil, uLastWindow, FPGM_MOUSEEXIT, msgp);
-      end;
-      Result := False;
-    end
-    else
-      Result := True;
+      fpgSendMessage(nil, LastWindow, FPGM_MOUSEEXIT, msgp);
+    end;
+//    writeln('GFX: MouseEnter detected');
+    fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
   end;
-  uLastWindowHndl := FWinHandle;
-  uLastWindow := AWindow;
+
+  uLastWindowHndl := CurrentWindowHndl;
 end;
 
 procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);

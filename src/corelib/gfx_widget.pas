@@ -16,6 +16,8 @@ type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
 
 
+  { TfpgWidget }
+
   TfpgWidget = class(TfpgWindow)
   private
     FAlignRect: TfpgRect;
@@ -63,7 +65,6 @@ type
     FIsContainer: Boolean;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
     procedure   SetTextColor(const AValue: TfpgColor); virtual;
-    function    GetClientBounds: TfpgRect; virtual;
     function    GetParent: TfpgWidget; reintroduce;
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
@@ -93,7 +94,6 @@ type
     procedure   HandleShow; virtual;
     procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
-    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   RePaint;
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
@@ -111,8 +111,12 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    function    GetClientBounds: TfpgRect; virtual;
+    function    GetBoundsRect: TfpgRect; virtual;
+    procedure   Realign;
     procedure   SetFocus;
     procedure   KillFocus;
+    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
@@ -243,6 +247,16 @@ end;
 function TfpgWidget.GetClientBounds: TfpgRect;
 begin
   Result.SetRect(0, 0, Width, Height);
+end;
+
+function TfpgWidget.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, Width+1, Height+1);
+end;
+
+procedure TfpgWidget.Realign;
+begin
+  HandleAlignments(0, 0);
 end;
 
 function TfpgWidget.GetParent: TfpgWidget;
