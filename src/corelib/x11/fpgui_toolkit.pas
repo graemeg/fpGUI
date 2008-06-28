@@ -16,7 +16,8 @@ uses
     gui_editcombo, gui_edit, gui_form, gui_gauge, gui_grid, gui_hyperlink, 
     gui_iniutils, gui_label, gui_listbox, gui_listview, gui_memo, gui_menu, 
     gui_mru, gui_panel, gui_popupcalendar, gui_progressbar, gui_radiobutton, 
-    gui_scrollbar, gui_style, gui_tab, gui_trackbar, gui_tree, fpgui_db; 
+    gui_scrollbar, gui_style, gui_tab, gui_trackbar, gui_tree, fpgui_db, 
+    gui_splitter; 
 
 implementation
 

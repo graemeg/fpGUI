@@ -28,7 +28,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="2"/>
-    <Files Count="70">
+    <Files Count="71">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -309,6 +309,9 @@
         <Filename Value="../../gui/db/fpgui_db.pas"/>
         <UnitName Value="fpgui_db"/>
       </Item70>
+      <Item71>
+        <Filename Value="../../gui/gui_splitter.pas"/>
+      </Item71>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">
