@@ -55,8 +55,6 @@ type
     procedure   AdjustWindowStyle; override;
     procedure   SetWindowParameters; override;
     procedure   SetWindowTitle(const ATitle: string); override;
-    procedure   SetHeight(const AValue: TfpgCoord); override;
-    procedure   SetWidth(const AValue: TfpgCoord); override;
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
@@ -157,18 +155,6 @@ procedure TfpgBaseForm.SetWindowTitle(const ATitle: string);
 begin
   FWindowTitle := ATitle;
   inherited SetWindowTitle(ATitle);
-end;
-
-procedure TfpgBaseForm.SetHeight(const AValue: TfpgCoord);
-begin
-  if Sizeable then
-    inherited SetHeight(AValue);
-end;
-
-procedure TfpgBaseForm.SetWidth(const AValue: TfpgCoord);
-begin
-  if Sizeable then
-    inherited SetWidth(AValue);
 end;
 
 procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
