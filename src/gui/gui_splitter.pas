@@ -175,10 +175,10 @@ begin
     case Align of
       alLeft, alRight:
 //          FControl.Width  := FNewSize; // (1)
-         FControl.MoveAndResize(FControl.Left, FControl.Top, FNewSize, FControl.Height); // (2)
+         FControl.SetPosition(FControl.Left, FControl.Top, FNewSize, FControl.Height); // (2)
       alTop, alBottom:
 //          FControl.Height := FNewSize; // (1)
-         FControl.MoveAndResize(FControl.Left, FControl.Top, FControl.Width, FNewSize);  // (2)
+         FControl.SetPosition(FControl.Left, FControl.Top, FControl.Width, FNewSize);  // (2)
     end;
 //    FControl.UpdateWindowPosition; // (1)
     // vvzh:
@@ -257,6 +257,9 @@ begin
   if Assigned(FControl) then
   begin
     ReleaseMouse;
+    // vvzh: Maybe the following check should be done by ReleaseMouse?
+    if not PtInRect(GetClientBounds, Point(x, y)) then
+      HandleMouseExit;
     // if ResizeStyle in [rsLine, rsPattern] then DrawLine;
     UpdateControlSize;
     {writeln('LT: ', FControl.Left, ':', FControl.Width, '  ', Self.Left, ':', Self.Width);

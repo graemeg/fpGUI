@@ -94,6 +94,7 @@ type
     procedure   HandleShow; virtual;
     procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
+    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   RePaint;
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
@@ -116,7 +117,6 @@ type
     procedure   Realign;
     procedure   SetFocus;
     procedure   KillFocus;
-    procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????

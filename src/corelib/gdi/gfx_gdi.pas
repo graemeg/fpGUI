@@ -138,10 +138,16 @@ type
   end;
 
 
+  { TfpgWindowImpl }
+
   TfpgWindowImpl = class(TfpgWindowBase)
   private
     FMouseInWindow: boolean;
+    FNonFullscreenRect: TfpgRect;
+    FNonFullscreenStyle: longword;
+    FFullscreenIsSet: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wParam, lParam: Cardinal): Boolean;
+    procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
   protected
     FWinHandle: TfpgWinHandle;
     FModalForWin: TfpgWindowImpl;
@@ -165,6 +171,7 @@ type
     procedure   ActivateWindow; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
+    procedure   SetFullscreen(AValue: Boolean); override;
   end;
 
 
@@ -387,6 +394,37 @@ begin
   end;
 end;
 
+procedure GetWindowBorderDimensions(const w: TfpgWindowBase; var dx, dy: integer);
+var
+  bx: integer;  // left/right border width
+  by: integer;  // top/bottom border height
+  bt: integer;  // title bar
+begin
+  bx := 0;
+  by := 0;
+  bt := 0;
+
+  if w.WindowType in [wtWindow, wtModalForm] then
+  begin
+    if w is TfpgForm then
+    begin
+      if TfpgForm(w).Sizeable then
+      begin
+        bx := GetSystemMetrics(SM_CXSIZEFRAME);
+        by := GetSystemMetrics(SM_CYSIZEFRAME);
+      end
+      else
+      begin
+        bx := GetSystemMetrics(SM_CXFIXEDFRAME);
+        by := GetSystemMetrics(SM_CYFIXEDFRAME);
+      end;
+    end;
+    bt := GetSystemMetrics(SM_CYCAPTION);
+  end;
+  dx := (2 * bx);
+  dy := (2 * by) + bt;
+end;
+
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 var
   w: TfpgWindowImpl;
@@ -409,37 +447,6 @@ var
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
 
-    procedure GetWindowBorderDimentions(const w: TfpgWindowBase; var dx, dy: integer);
-    var
-      bx: integer;  // left/right border width
-      by: integer;  // top/bottom border height
-      bt: integer;  // title bar
-    begin
-      bx := 0;
-      by := 0;
-      bt := 0;
-
-      if w.WindowType in [wtWindow, wtModalForm] then
-      begin
-        if w is TfpgForm then
-        begin
-          if TfpgForm(w).Sizeable then
-          begin
-            bx := GetSystemMetrics(SM_CXSIZEFRAME);
-            by := GetSystemMetrics(SM_CYSIZEFRAME);
-          end
-          else
-          begin
-            bx := GetSystemMetrics(SM_CXFIXEDFRAME);
-            by := GetSystemMetrics(SM_CYFIXEDFRAME);
-          end;
-        end;
-        bt := GetSystemMetrics(SM_CYCAPTION);
-      end;
-      dx := (2 * bx);
-      dy := (2 * by) + bt;
-    end;
-
     procedure SetWin32SizePoint(AWidth, AHeight: integer; var pt: TPoint);
     var
       IntfWidth: integer;
@@ -454,7 +461,7 @@ var
       IntfWidth   := AWidth;
       IntfHeight  := AHeight;
       
-      GetWindowBorderDimentions(w, dx, dy);
+      GetWindowBorderDimensions(w, dx, dy);
       Inc(IntfWidth, dx);
       Inc(IntfHeight, dy);
 
@@ -573,6 +580,10 @@ begin
             msgp.keyboard.keychar := UTF8Encode(WideChar(wParam));
             fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
           end;
+          
+          // Allow Alt+F4 and other system key combinations
+          if (uMsg = WM_SYSKEYUP) or (uMsg = WM_SYSKEYDOWN) then
+            Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
     WM_SETCURSOR:
@@ -582,7 +593,7 @@ begin
           if (lParam and $FFFF) <= 1 then
             w.DoSetMouseCursor
           else
-            Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
+            Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
         end;
 
     WM_LBUTTONDBLCLK,
@@ -1003,6 +1014,7 @@ var
 begin
   GetWindowRect(GetDesktopWindow, r);
   Result := r.Right - r.Left;
+  // Result := Windows.GetSystemMetrics(SM_CXSCREEN);
 end;
 
 function TfpgApplicationImpl.GetScreenHeight: TfpgCoord;
@@ -1011,6 +1023,7 @@ var
 begin
   GetWindowRect(GetDesktopWindow, r);
   Result := r.Bottom - r.Top;
+  // Result := Windows.GetSystemMetrics(SM_CYSCREEN);
 end;
 
 function TfpgApplicationImpl.Screen_dpi_x: integer;
@@ -1086,6 +1099,65 @@ begin
   uLastWindowHndl := CurrentWindowHndl;
 end;
 
+procedure TfpgWindowImpl.WindowSetFullscreen(aFullScreen, aUpdate: boolean);
+begin
+  if aFullScreen = FFullscreenIsSet then
+    Exit; //==>
+  if aFullScreen then
+  begin
+    // backup current bounds and style
+    FNonFullscreenStyle := FWinStyle;
+    FNonFullscreenRect.SetRect(Left, Top, Width, Height);
+    // vvzh: the following lines are the workaround for bug. When calling
+    // WindowSetFullscreen from TfpgWindowImpl.DoAllocateWindowHandle,
+    // Left and Top are equal to -2147483648. As the result, if
+    // we set FullScreen := True at the form creation time and then
+    // call SetFullScreen(False) the form disappears, because it is moved
+    // to (-2147483648; -2147483648).
+    if FNonFullscreenRect.Left < 0 then
+      FNonFullscreenRect.Left := 0;
+    if FNonFullscreenRect.Top < 0 then
+      FNonFullscreenRect.Top := 0;
+    
+    Left      := 0;
+    Top       := 0;
+    Width     := wapplication.GetScreenWidth;
+    Height    := wapplication.GetScreenHeight;
+    
+    if aUpdate then
+      UpdateWindowPosition;
+
+    FWinStyle := WS_POPUP or WS_SYSMENU;
+    
+    if aUpdate then
+    begin
+      SetWindowLong(FWinHandle, GWL_STYLE, FWinStyle);
+      {According to MSDN, call SetWindowPos to apply changes made by SetWindowLong.
+      uFlags should be SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_FRAMECHANGED}
+      SetWindowPos(FWinHandle,0,0,0,0,0,SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_FRAMECHANGED);
+      ShowWindow(FWinHandle, SW_SHOW);
+    end;
+  end else
+  begin
+    FWinStyle := FNonFullscreenStyle;
+    if aUpdate then
+    begin
+      SetWindowLong(FWinHandle, GWL_STYLE, FWinStyle);
+      SetWindowPos(FWinHandle,0,0,0,0,0,SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_FRAMECHANGED);
+      ShowWindow(FWinHandle, SW_SHOW);
+    end;
+
+    Left   := FNonFullscreenRect.Left;
+    Top    := FNonFullscreenRect.Top;
+    Width  := FNonFullscreenRect.Width;
+    Height := FNonFullscreenRect.Height;
+    
+    if aUpdate then
+      UpdateWindowPosition;
+  end;
+  FFullscreenIsSet := aFullScreen;
+end;
+
 procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
   wcname: string;
@@ -1143,6 +1215,9 @@ begin
     FWinStyle := FWinStyle and not (WS_SIZEBOX or WS_MAXIMIZEBOX);
 
   FWinStyle := FWinStyle or WS_CLIPCHILDREN or WS_CLIPSIBLINGS;
+  
+  if waFullScreen in FWindowAttributes then
+    WindowSetFullscreen(True, False);
 
   wname   := '';
   rwidth  := FWidth;
@@ -1305,6 +1380,7 @@ constructor TfpgWindowImpl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
+  FFullscreenIsSet := false;
 end;
 
 procedure TfpgWindowImpl.ActivateWindow;
@@ -1325,16 +1401,25 @@ begin
 //  if GfxFirstPopup <> nil then SetCapture(GfxFirstPopup^.wg.WinHandle);
 end;
 
+procedure TfpgWindowImpl.SetFullscreen(AValue: Boolean);
+begin
+  inherited SetFullscreen(AValue);
+  WindowSetFullscreen(AValue, True);
+end;
+
 function TfpgWindowImpl.HandleIsValid: boolean;
 begin
   Result := FWinHandle > 0;
 end;
 
 procedure TfpgWindowImpl.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
+var
+  bx, by: integer;
 begin
+  GetWindowBorderDimensions(Self, bx, by);
   Windows.SetWindowPos(
     WinHandle, HWND_TOP,
-    aleft, atop, awidth, aheight,
+    aleft, atop, awidth + bx, aheight + by,
     SWP_NOZORDER);// or SWP_NOREDRAW);
 end;
 
