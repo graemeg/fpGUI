@@ -1601,14 +1601,10 @@ end;
 procedure TfpgCanvasImpl.DoSetColor(cl: TfpgColor);
 begin
   DeleteObject(FBrush);
-  DeleteObject(FPen);
-
   FWindowsColor := fpgColorToWin(cl);
-
   FBrush := CreateSolidBrush(FWindowsColor);
-  FPen   := CreatePen(FintLineStyle, FLineWidth, FWindowsColor);
+  DoSetLineStyle(FLineWidth, FLineStyle);
   SelectObject(Fgc, FBrush);
-  SelectObject(Fgc, FPen);
 end;
 
 procedure TfpgCanvasImpl.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
