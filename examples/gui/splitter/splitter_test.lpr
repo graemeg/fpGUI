@@ -8,12 +8,14 @@ uses
   {$ENDIF}{$ENDIF}
   SysUtils, Classes, gfxbase, fpgfx,
   gui_form, gui_memo, gui_listbox,
-  gui_panel, gui_progressbar, gui_splitter, fpgui_toolkit;
+  gui_panel, gui_progressbar, gui_splitter, gui_checkbox;
 
 type
   { TfrmSplitterTest }
 
   TfrmSplitterTest = class(TfpgForm)
+  private
+    procedure CheckBoxChanged(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: frmSplitterTest}
     lstChoice: TfpgListBox;
@@ -25,6 +27,7 @@ type
     spl3: TfpgSplitter;
     pbName1: TfpgProgressBar;
     spl4: TfpgSplitter;
+    cbShowGrabBar: TfpgCheckBox;
     {@VFD_HEAD_END: frmSplitterTest}
     procedure AfterCreate; override;
   end;
@@ -32,6 +35,11 @@ type
 {@VFD_NEWFORM_DECL}
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TfrmSplitterTest.CheckBoxChanged(Sender: TObject);
+begin
+  //
+end;
 
 procedure TfrmSplitterTest.AfterCreate;
 begin
@@ -56,7 +64,7 @@ begin
   with spl1 do
   begin
     Name := 'spl1';
-    SetPosition(159, 0, 2, 212);
+    SetPosition(159, 0, 8, 212);
     Align := alLeft;
   end;
 
@@ -76,7 +84,7 @@ begin
   with spl2 do
   begin
     Name := 'spl2';
-    SetPosition(165, 90, 257, 2);
+    SetPosition(165, 90, 257, 8);
     Align := alTop;
   end;
 
@@ -100,12 +108,22 @@ begin
     Text := 'Panel';
     Align := alRight;
   end;
+  
+  cbShowGrabBar := TfpgCheckBox.Create(pnlName1);
+  with cbShowGrabBar do
+  begin
+    Name := 'cbShowGrabBar';
+    SetPosition(4, 4, 120, 23);
+    Text := 'Show GrabBar';
+    Checked := True;
+    OnChange :=@CheckBoxChanged;
+  end;
 
   spl3 := TfpgSplitter.Create(self);
   with spl3 do
   begin
     Name := 'spl3';
-    SetPosition(422, 0, 2, 208);
+    SetPosition(422, 0, 8, 208);
     Align := alRight;
   end;
 
@@ -122,7 +140,7 @@ begin
   with spl4 do
   begin
     Name := 'spl4';
-    SetPosition(0, 211, 554, 2);
+    SetPosition(0, 211, 554, 8);
     Align := alBottom;
   end;
   

@@ -27,16 +27,20 @@ uses
   fpgfx,
   gfxbase,
   gfx_widget;
+  
+const
+  clColorGrabBar = $839EFE; // Pale navy blue
+  cSplitterWidth = 8;
 
 type
 
   NaturalNumber = 1..High(Integer);
 
-  { TfpgSplitter }
 
   TfpgSplitter = class(TfpgWidget)
   private
     FAutoSnap: Boolean;
+    FColorGrabBar: TfpgColor;
     FControl: TfpgWidget;
     FDownPos: TPoint;
     FMinSize: NaturalNumber;
@@ -44,10 +48,12 @@ type
     FNewSize: Integer;
     FOldSize: Integer;
     FSplit: Integer;
-    procedure   CalcSplitSize(X, Y: Integer; var NewSize, Split: Integer);
+    FMouseOver: Boolean;
+    procedure   CalcSplitSize(X, Y: Integer; out NewSize, Split: Integer);
     function    FindControl: TfpgWidget;
+    procedure   SetColorGrabBar(const AValue: TfpgColor);
     procedure   UpdateControlSize;
-    procedure   UpdateSize(X, Y: Integer);
+    procedure   UpdateSize(const X, Y: Integer);
   protected
     function    DoCanResize(var NewSize: Integer): Boolean; virtual;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -57,9 +63,12 @@ type
     procedure   HandleMouseExit; override;
     procedure   HandlePaint; override;
     procedure   StopSizing; dynamic;
+    Procedure   DrawGrabBar(ARect: TfpgRect); virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+  published
+    property    ColorGrabBar: TfpgColor read FColorGrabBar write SetColorGrabBar default clColorGrabBar;
   end;
 
 function CreateSplitter(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
@@ -80,7 +89,7 @@ end;
 
 { TfpgSplitter }
 
-procedure TfpgSplitter.CalcSplitSize(X, Y: Integer; var NewSize, Split: Integer);
+procedure TfpgSplitter.CalcSplitSize(X, Y: Integer; out NewSize, Split: Integer);
 var
   S: Integer;
 begin
@@ -151,17 +160,27 @@ begin
   Result := nil;
 end;
 
+procedure TfpgSplitter.SetColorGrabBar(const AValue: TfpgColor);
+begin
+  if FColorGrabBar = AValue then
+    Exit; //==>
+  FColorGrabBar := AValue;
+  Repaint;
+end;
+
 procedure TfpgSplitter.UpdateControlSize;
 begin
   if FNewSize <> FOldSize then
   begin
     case Align of
-      alLeft, alRight: // FControl.Width  := FNewSize; // (1)
+      alLeft, alRight:
+//          FControl.Width  := FNewSize; // (1)
          FControl.MoveAndResize(FControl.Left, FControl.Top, FNewSize, FControl.Height); // (2)
-      alTop, alBottom: // FControl.Height := FNewSize; // (1)
+      alTop, alBottom:
+//          FControl.Height := FNewSize; // (1)
          FControl.MoveAndResize(FControl.Left, FControl.Top, FControl.Width, FNewSize);  // (2)
     end;
-    // FControl.UpdateWindowPosition; // (1)
+//    FControl.UpdateWindowPosition; // (1)
     // vvzh:
     // Lines marked with (1) work wrong under Linux (e.g. folding/unfolding Memo1)
     // Lines marked with (2) work OK under both platforms. Why?
@@ -171,7 +190,7 @@ begin
   end;
 end;
 
-procedure TfpgSplitter.UpdateSize(X, Y: Integer);
+procedure TfpgSplitter.UpdateSize(const X, Y: Integer);
 begin
   CalcSplitSize(X, Y, FNewSize, FSplit);
 end;
@@ -269,22 +288,49 @@ end;
 
 procedure TfpgSplitter.HandleMouseEnter;
 begin
+  FMouseOver := True;
   if Align in [alBottom, alTop] then
     MouseCursor := mcSizeNS
   else
     MouseCursor := mcSizeEW;
+  Repaint;
 end;
 
 procedure TfpgSplitter.HandleMouseExit;
 begin
+  FMouseOver := False;
   if FControl = nil then
     MouseCursor := mcDefault;
+  Repaint;
 end;
 
 procedure TfpgSplitter.HandlePaint;
+var
+  lRect: TfpgRect;
 begin
   Canvas.SetColor(clWindowBackground);
   Canvas.FillRectangle(GetClientBounds);
+  
+  case Align of
+    alRight,
+    alLeft:
+        begin
+          lRect.Top    := Height div 4;
+          lRect.SetBottom(Height div 4 * 3);
+          lRect.Left   := 1;
+          lRect.SetRight(6);
+        end;
+
+    alTop,
+    alBottom:
+        begin
+          lRect.Left   := Width div 4;
+          lRect.SetRight(Width div 4 * 3);
+          lRect.Top    := 1;
+          lRect.SetBottom(6);
+        end;
+    end;
+  DrawGrabBar(lRect);
 end;
 
 procedure TfpgSplitter.StopSizing;
@@ -304,16 +350,116 @@ begin
     FOnMoved(Self);}
 end;
 
+procedure TfpgSplitter.DrawGrabBar(ARect: TfpgRect);
+var
+  lFillRect: TfpgRect;
+  lSaveColor: TfpgColor;
+begin
+  lSaveColor := Canvas.Color;
+
+  // Draw the outline of the rectangle
+  Canvas.Color := clGray;
+  Canvas.DrawRectangle(ARect);
+
+  // If the mouse is over the splitter bar, then fill the grab bar part
+  // with colour.
+  if FMouseOver then
+  begin
+    lFillRect := ARect;
+    InflateRect(lFillRect, -1, -1);
+    Canvas.Color := FColorGrabBar;
+    Canvas.FillRectangle(lFillRect);
+  end;
+
+  // Draw a shadow around the inside of the grab bar
+  Canvas.Color := clWhite;
+  Canvas.DrawLine(ARect.Left+1, ARect.Top+1, ARect.Right, ARect.Top+1);
+  Canvas.DrawLine(ARect.Left+1, ARect.Top+1, ARect.Left+1, ARect.Bottom);
+
+  // Draw some texture inside the grab bar
+  Canvas.SetLineStyle(1, lsDot);
+  if Align in [alLeft, alRight] then
+  begin
+    Canvas.DrawLine(ARect.Left+3, ARect.Top+15, ARect.Left+3, ARect.Bottom-15);
+    Canvas.Color := clGray;
+    Canvas.DrawLine(ARect.Left+4, ARect.Top+16, ARect.Left+4, ARect.Bottom-16);
+  end
+  else
+  begin
+    Canvas.DrawLine(ARect.Left+15, ARect.Top+3, ARect.Right-15, ARect.Top+3);
+    Canvas.Color := clGray;
+    Canvas.DrawLine(ARect.Left+16, ARect.Top+4, ARect.Right-16, ARect.Top+4);
+  end;
+
+  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.Color := clBlack;
+
+  { TODO : Improve the look of the triangles }
+  case Align of
+    alRight:
+        begin
+          // Draw the top triangle
+          Canvas.FillTriangle(ARect.Left+2, ARect.Top+5,
+                              ARect.Left+2, ARect.Top+10,
+                              ARect.Left+4, ARect.Top+7);
+          // Draw the bottom triangle
+          Canvas.FillTriangle(ARect.Left+2, ARect.Bottom-5,
+                              ARect.Left+2, ARect.Bottom-10,
+                              ARect.Left+4, ARect.Bottom-7);
+        end;
+
+    alLeft:
+        begin
+          // Draw the top triangle
+          Canvas.FillTriangle(ARect.Right-2, ARect.Top+5,
+                              ARect.Right-2, ARect.Top+10,
+                              ARect.Right-4, ARect.Top+7);
+          // Draw the bottom triangle
+          Canvas.FillTriangle(ARect.Right-2, ARect.Bottom-5,
+                              ARect.Right-2, ARect.Bottom-10,
+                              ARect.Right-4, ARect.Bottom-7);
+        end;
+
+    alBottom:
+        begin
+          // Draw the left triangle
+          Canvas.FillTriangle(ARect.Left+5,   ARect.Top+2,
+                              ARect.Left+10,  ARect.Top+2,
+                              ARect.Left+7,   ARect.Top+4);
+          // Draw the right triangle
+          Canvas.FillTriangle(ARect.Right-5,  ARect.Top+2,
+                              ARect.Right-10, ARect.Top+2,
+                              ARect.Right-7,  ARect.Top+4);
+        end;
+
+    alTop:
+        begin
+          // Draw the left triangle
+          Canvas.FillTriangle(ARect.Left+5,   ARect.Bottom-1,
+                              ARect.Left+10,  ARect.Bottom-1,
+                              ARect.Left+7,   ARect.Bottom-4);
+          // Draw the right triangle
+          Canvas.FillTriangle(ARect.Right-5,  ARect.Bottom-1,
+                              ARect.Right-10, ARect.Bottom-1,
+                              ARect.Right-7,  ARect.Bottom-4);
+        end;
+  end;
+
+  Canvas.Color := lSaveColor;
+end;
+
 constructor TfpgSplitter.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FAutoSnap := True;
   Height := 100;
   Align := alLeft;
-  Width := 2;
+  Width := cSplitterWidth;
   FMinSize := 30;
   // FResizeStyle := rsPattern;
   FOldSize := -1;
+  FMouseOver := False;
+  FColorGrabBar := clColorGrabBar;
 end;
 
 destructor TfpgSplitter.Destroy;
