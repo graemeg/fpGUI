@@ -1338,14 +1338,10 @@ end;
 
 procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);
 begin
-  {$ifdef wince}
-  Windows.SetWindowText(WinHandle, PWideChar(Utf8Decode(ATitle)));
-  {$else}
   if UnicodeEnabledOS then
     Windows.SetWindowTextW(WinHandle, PWideChar(Utf8Decode(ATitle)))
   else
     Windows.SetWindowText(WinHandle, PChar(Utf8ToAnsi(ATitle)));
-  {$endif}
 end;
 
 procedure TfpgWindowImpl.DoSetMouseCursor;

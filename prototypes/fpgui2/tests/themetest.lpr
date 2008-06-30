@@ -18,7 +18,7 @@ uses
   gfx_extinterpolation,
   gui_trackbar,
   gui_style,
-  gui_dialogs, fpgui_toolkit;
+  gui_dialogs;
 
 type
   { Note:
@@ -49,7 +49,7 @@ type
     destructor  Destroy; override;
     { this property is only for demo purposes! }
     property    ThemeImage: TfpgImage read image write SetThemeImage;
-    property    Masked: Boolean read FMasked write FMasked;
+    property    Masked: Boolean read FMasked write FMasked default False;
     property    ThemeBorder: Integer read FThemeBorder write FThemeBorder default 3;
   end;
 
@@ -429,6 +429,7 @@ var
   iy, y: integer;
   w: integer;
   pofs: integer;
+  ow, oh: integer;
 begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
@@ -448,16 +449,9 @@ begin
       State := 0;
   end;
 
-  //if Assigned(image) then
-  //begin
-    //try
-    //image.CreateMaskFromSample(0, 0);
-    //image.UpdateImage;
-    //except
-      //raise Exception.Create('Failed to create ImageMask in TThemeButton');
-    //end;
-  //end;
-  PaintPartScaledImage(image, Canvas, 0, 0, 32, 21, Width, Height, FThemeBorder, state, FMasked);
+  ow := image.Width div 5;  // 5 states
+  oh := image.Height;
+  PaintPartScaledImage(image, Canvas, 0, 0, ow, oh, Width, Height, FThemeBorder, state, FMasked);
 (*
   x := 0;
   { left }
@@ -646,14 +640,12 @@ begin
   vista := TThemeButton.Create(self);
   vista.Left         := 20;
   vista.Top          := 145;
-  vista.Width        := 100;
-  vista.Height       := 26;
+  vista.Width        := 101;  //75;
+  vista.Height       := 41;   //24;
   vista.TextColor    := clWhite;
   vista.FontDesc     := 'Arial-10:bold';
   vista.Text         := 'Vista';
   bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/vista/button.bmp'));
-  bmp.CreateMaskFromSample(0, 0);
-  bmp.UpdateImage;
   vista.ThemeImage := bmp;
 
   styledbutton := TStyledButton.Create(self);
