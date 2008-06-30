@@ -17,7 +17,8 @@ uses
   gfx_imgfmt_bmp,
   gfx_extinterpolation,
   gui_trackbar,
-  gui_style;
+  gui_style,
+  gui_dialogs, fpgui_toolkit;
 
 type
   { Note:
@@ -27,6 +28,8 @@ type
   { Concept theme button }
   TThemeButton = class(TfpgButton)
   private
+    FMasked: Boolean;
+    FThemeBorder: Integer;
     State: integer;
       // 0 - normal
       // 1 - hover
@@ -46,6 +49,8 @@ type
     destructor  Destroy; override;
     { this property is only for demo purposes! }
     property    ThemeImage: TfpgImage read image write SetThemeImage;
+    property    Masked: Boolean read FMasked write FMasked;
+    property    ThemeBorder: Integer read FThemeBorder write FThemeBorder default 3;
   end;
 
 
@@ -109,6 +114,7 @@ type
     FIndex: integer;
     procedure   TrackBarChange(Sender: TObject; APosition: integer);
     procedure   btnCloseClick(Sender: TObject);
+    procedure   ButtonClicked(Sender: TObject);
     procedure   CreateButtons;
     procedure   CreateScrollbars;
   protected
@@ -174,7 +180,7 @@ end;
 
 
 
-  procedure PaintPartScaledImage(Image: TfpgImage; Canvas: TfpgCanvas; x, y: TfpgCoord; OrigWidth, OrigHeight: TfpgCoord; NewWidth, NewHeight: TfpgCoord; Border: TfpgCoord; ImgIndex: integer);
+  procedure PaintPartScaledImage(Image: TfpgImage; Canvas: TfpgCanvas; x, y: TfpgCoord; OrigWidth, OrigHeight: TfpgCoord; NewWidth, NewHeight: TfpgCoord; Border: TfpgCoord; ImgIndex: integer; Masked: Boolean = False);
   var
     rect: TfpgRect;
     img: TfpgImage;
@@ -188,7 +194,12 @@ end;
     // top-left
     rect.SetRect(0, 0, Border, Border);
     part := img.ImageFromRect(rect);
-    Canvas.StretchDraw(x, y, Border, Border, part);
+    if Masked then
+    begin
+      part.CreateMaskFromSample(0, 0);
+      part.UpdateImage;
+    end;
+    Canvas.DrawImage(x, y, part);
 
     // left
     rect.SetRect(0, Border, Border, OrigHeight-(Border*2));
@@ -198,7 +209,12 @@ end;
     // bottom-left
     rect.SetRect(0, OrigHeight-Border, Border, Border);
     part := img.ImageFromRect(rect);
-    Canvas.StretchDraw(x, y+(NewHeight-Border), Border, Border, part);
+    if Masked then
+    begin
+      part.CreateMaskFromSample(0, Border-1);
+      part.UpdateImage;
+    end;
+    Canvas.DrawImage(x, y+(NewHeight-Border), part);
 
     // bottom
     rect.SetRect(Border, OrigHeight-Border, OrigWidth-(Border*2), Border);
@@ -208,7 +224,12 @@ end;
     // bottom-right
     rect.SetRect(OrigWidth-Border, OrigHeight-Border, Border, Border);
     part := img.ImageFromRect(rect);
-    Canvas.StretchDraw(x+(NewWidth-Border), y+(NewHeight-Border), Border, Border, part);
+    if Masked then
+    begin
+      part.CreateMaskFromSample(Border-1, Border-1);
+      part.UpdateImage;
+    end;
+    Canvas.DrawImage(x+(NewWidth-Border), y+(NewHeight-Border), part);
 
     // right
     rect.SetRect(OrigWidth-Border, Border, Border, OrigHeight-(Border*2));
@@ -218,7 +239,12 @@ end;
     // top-right
     rect.SetRect(OrigWidth-Border, 0, Border, Border);
     part := img.ImageFromRect(rect);
-    Canvas.StretchDraw(x+(NewWidth-Border), y, Border, Border, part);
+    if Masked then
+    begin
+      part.CreateMaskFromSample(Border-1, 0);
+      part.UpdateImage;
+    end;
+    Canvas.DrawImage(x+(NewWidth-Border), y, part);
 
     // top
     rect.SetRect(Border, 0, OrigWidth-(Border*2), Border);
@@ -431,7 +457,7 @@ begin
       //raise Exception.Create('Failed to create ImageMask in TThemeButton');
     //end;
   //end;
-  PaintPartScaledImage(image, Canvas, 0, 0, 32, 21, Width, Height, 3, state);
+  PaintPartScaledImage(image, Canvas, 0, 0, 32, 21, Width, Height, FThemeBorder, state, FMasked);
 (*
   x := 0;
   { left }
@@ -553,10 +579,10 @@ begin
   Width := 75;
   Height := 21;
   State := 0;
+  FMasked := False;
+  FThemeBorder := 3;
 
   image := LoadImage_BMP(SetDirSeparators('../../../images/themes/luna/button.bmp'));
-  image.CreateMaskFromSample(0, 0);
-  image.UpdateImage;
   if not Assigned(image) then
      writeln('Image is nil');
 end;
@@ -581,6 +607,11 @@ begin
   Close;
 end;
 
+procedure TMainForm.ButtonClicked(Sender: TObject);
+begin
+  ShowMessage('Hello world!');
+end;
+
 procedure TMainForm.CreateButtons;
 var
   bmp: TfpgImage;
@@ -600,6 +631,8 @@ begin
   xpluna.Top          := 45;
   xpluna.Width        := 75;
   xpluna.Text         := 'XP Luna (-)';
+  xpluna.Masked := True;
+  xpluna.OnClick := @ButtonClicked;
 
   xpsilver := TThemeButton.Create(self);
   xpsilver.Left       := 230;
@@ -607,9 +640,8 @@ begin
   xpsilver.Width      := 75;
   xpsilver.Text       := 'XP Silver (+)';
   bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/button.bmp'));
-  bmp.CreateMaskFromSample(0, 0);
-  bmp.UpdateImage;
   xpsilver.ThemeImage := bmp;
+  xpsilver.Masked := True;
 
   vista := TThemeButton.Create(self);
   vista.Left         := 20;
