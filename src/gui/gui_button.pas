@@ -34,6 +34,7 @@ type
   TfpgBaseButton = class(TfpgWidget, ICommandHolder)
   private
     FCommand: ICommand;
+    FFlat: Boolean;
     FImageName: string;
     FClicked: Boolean;
     FShowImage: Boolean;
@@ -44,6 +45,7 @@ type
     function    GetFontDesc: string;
     procedure   SetDefault(const AValue: boolean);
     procedure   SetEmbedded(const AValue: Boolean);
+    procedure   SetFlat(const AValue: Boolean);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetImageName(const AValue: string);
     procedure   SetText(const AValue: string);
@@ -64,6 +66,7 @@ type
     FText: string;
     FFont: TfpgFont;
     FDefault: boolean;
+    FState: integer;  // 0 - normal  // 1 - hover
     procedure   SetShowImage(AValue: Boolean);
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -82,6 +85,7 @@ type
     { The button will not show focus. It might also have a different down state (look).
       This is similar to Focusable = False, but the appearance of the down state might differ. }
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
+    property    Flat: Boolean read FFlat write SetFlat default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     { Used in combination with AllowDown and AllowAllUp. Allows buttons in the same
       group to work together. }
@@ -110,6 +114,7 @@ type
     property    Default;
     property    Down;
     property    Embedded;
+    property    Flat;
     property    FontDesc;
     property    GroupIndex;
     property    ImageMargin;
@@ -219,6 +224,15 @@ begin
   FEmbedded := AValue;
 end;
 
+procedure TfpgBaseButton.SetFlat(const AValue: Boolean);
+begin
+  if FFlat = AValue then
+    Exit; //==>
+  FFlat := AValue;
+  if FFlat then
+    FDefault := False;  // you can't have it all!
+end;
+
 procedure TfpgBaseButton.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
@@ -251,6 +265,7 @@ begin
   FEmbedded     := False;
   FDefault      := False;
   FAllowAllUp   := False;
+  FState        := 0;
 end;
 
 destructor TfpgBaseButton.Destroy;
@@ -286,7 +301,16 @@ begin
   if FEmbedded then
     Include(lBtnFlags, btfIsEmbedded);
 
-  if FDefault then
+  // In the UI Designer we want the button more visible
+  if not (csDesigning in ComponentState) then
+  begin
+    if FFlat and (FState = 1) then  // mouse over
+      Include(lBtnFlags, btfHover)
+    else if FFlat then
+      Include(lBtnFlags, btfFlat);
+  end;
+
+  if not FFlat and FDefault then
     Include(lBtnFlags, btfIsDefault);
 
   if FBackgroundColor <> clButtonFace then
@@ -460,20 +484,38 @@ end;
 procedure TfpgBaseButton.HandleMouseExit;
 begin
   inherited HandleMouseExit;
+  if (csDesigning in ComponentState) then
+    Exit;
+  if Enabled then
+    FState := 0;
   if FDown and (not AllowDown) then
   begin
     FDown := False;
-    RePaint;
+    Repaint;
+  end
+  else if FFlat then
+  begin
+    if Enabled then
+      Repaint;
   end;
 end;
 
 procedure TfpgBaseButton.HandleMouseEnter;
 begin
   inherited HandleMouseEnter;
+  if (csDesigning in ComponentState) then
+    Exit;
+  if Enabled then
+    FState := 1;
   if FClicked and (not AllowDown) then
   begin
     FDown := True;
-    RePaint;
+    Repaint;
+  end
+  else if FFlat then
+  begin
+    if Enabled then
+      Repaint;
   end;
 end;
 

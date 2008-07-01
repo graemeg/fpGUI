@@ -258,6 +258,7 @@ begin
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('AllowAllUp', TPropertyBoolean, '');
   wc.AddProperty('Embedded', TPropertyBoolean, 'No focus rectangle will be drawn. eg: Toolbar buttons');
+  wc.AddProperty('Flat', TPropertyBoolean, 'Only draw button borders when mouse hovers over button');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
   wc.AddProperty('ImageMargin', TPropertyInteger, '');

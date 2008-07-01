@@ -30,7 +30,7 @@ type
   TAnchors = set of TAnchor;
 
   TFButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
-    btfIsSelected, btfHasFocus, btfHasParentColor);
+    btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
     
   TFTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter, txtBottom, txtWrap, txtEnabled,
     txtAutoSize);
@@ -1474,8 +1474,11 @@ end;
 procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
 var
   r: TfpgRect;
+  lDoDraw: Boolean;
 begin
   r.SetRect(x, y, w, h);
+  lDoDraw := False;
+  
   if btfIsDefault in AFlags then
   begin
     ACanvas.SetColor(clBlack);
@@ -1491,6 +1494,9 @@ begin
   ACanvas.SetLineStyle(1, lsSolid);
   ACanvas.FillRectangle(x, y, w, h);
 
+  if (btfFlat in AFlags) and not (btfIsPressed in AFlags) then
+    Exit; // no need to go further
+
   // Left and Top (outer)
   if (btfIsPressed in AFlags) then
   begin
@@ -1501,6 +1507,7 @@ begin
   end
   else
     ACanvas.SetColor(clHilite2);
+
   ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
   ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
 
@@ -1522,6 +1529,7 @@ begin
   end
   else
     ACanvas.SetColor(clShadow2);
+    
   ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
 
@@ -1535,6 +1543,7 @@ begin
   end
   else
     ACanvas.SetColor(clShadow1);
+
   ACanvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right
   ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left, r.Bottom-1);   // bottom
 end;
