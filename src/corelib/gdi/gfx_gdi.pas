@@ -146,6 +146,7 @@ type
     FNonFullscreenRect: TfpgRect;
     FNonFullscreenStyle: longword;
     FFullscreenIsSet: boolean;
+    FSkipResizeMessage: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
   protected
@@ -734,6 +735,9 @@ begin
 
     WM_SIZE:
         begin
+          if w.FSkipResizeMessage then
+            Exit;
+            
           // note that WM_SIZING allows some control on sizeing
           //writeln('WM_SIZE: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
           msgp.rect.Width  := smallint(lParam and $FFFF);
@@ -1169,6 +1173,8 @@ var
 begin
   if FWinHandle > 0 then
     Exit; //==>
+    
+  FSkipResizeMessage := True;
 
   FWinStyle   := WS_OVERLAPPEDWINDOW;
   FWinStyleEx := WS_EX_APPWINDOW;
@@ -1264,6 +1270,7 @@ begin
 
   // the forms require some adjustments before the Window appears
   SetWindowParameters;
+  FSkipResizeMessage := False;
 end;
 
 procedure TfpgWindowImpl.DoReleaseWindowHandle;
@@ -1285,6 +1292,7 @@ var
 begin
   if AValue then
   begin
+    FSkipResizeMessage := True;
     BringWindowToTop(FWinHandle);
 
     if FWindowType in [wtPopup] then
@@ -1300,6 +1308,7 @@ begin
       FTop  := r.Top;
     end;
     Windows.UpdateWindow(FWinHandle);
+    FSkipResizeMessage := False;
   end
   else
     Windows.ShowWindow(FWinHandle, SW_HIDE);
@@ -1412,11 +1421,13 @@ procedure TfpgWindowImpl.DoUpdateWindowPosition(aleft, atop, awidth, aheight: Tf
 var
   bx, by: integer;
 begin
+  FSkipResizeMessage := True;
   GetWindowBorderDimensions(Self, bx, by);
   Windows.SetWindowPos(
     WinHandle, HWND_TOP,
     aleft, atop, awidth + bx, aheight + by,
     SWP_NOZORDER);// or SWP_NOREDRAW);
+  FSkipResizeMessage := False;
 end;
 
 { TfpgCanvasImpl }
