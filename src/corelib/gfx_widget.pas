@@ -257,6 +257,7 @@ end;
 procedure TfpgWidget.Realign;
 begin
   HandleAlignments(0, 0);
+  RePaint;
 end;
 
 function TfpgWidget.GetParent: TfpgWidget;
@@ -989,8 +990,6 @@ begin
         wg.MoveAndResizeBy(dx, dy, dw, dh);
       end;
     end;  { if }
-
-  RePaint;
 end;
 
 procedure TfpgWidget.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
