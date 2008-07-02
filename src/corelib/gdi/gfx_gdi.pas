@@ -1418,15 +1418,16 @@ begin
 end;
 
 procedure TfpgWindowImpl.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
-var
-  bx, by: integer;
+//var
+//  bx, by: integer;
 begin
   FSkipResizeMessage := True;
-  GetWindowBorderDimensions(Self, bx, by);
+//  GetWindowBorderDimensions(Self, bx, by);
   Windows.SetWindowPos(
     WinHandle, HWND_TOP,
-    aleft, atop, awidth + bx, aheight + by,
+    aleft, atop, awidth {+ bx}, aheight {+ by},
     SWP_NOZORDER);// or SWP_NOREDRAW);
+  Windows.InvalidateRect(WinHandle, nil, True);
   FSkipResizeMessage := False;
 end;
 
