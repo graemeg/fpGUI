@@ -261,9 +261,10 @@ begin
   wc.AddProperty('Flat', TPropertyBoolean, 'Only draw button borders when mouse hovers over button');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
-  wc.AddProperty('ImageMargin', TPropertyInteger, '');
+  wc.AddProperty('ImageLayout', TPropertyEnum, 'Which side of the button contains the image');
+  wc.AddProperty('ImageMargin', TPropertyInteger, 'Space between image and border, -1 centers image/text');
   wc.AddProperty('ImageName', TPropertyString, '');
-  wc.AddProperty('ImageSpacing', TPropertyInteger, '');
+  wc.AddProperty('ImageSpacing', TPropertyInteger, 'Space between image and text, -1 centers text');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
   wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
