@@ -276,7 +276,7 @@ var
 begin
   {@VFD_BODY_BEGIN: frmMain}
   Name := 'frmMain';
-  SetPosition(84, 123, 695, 87);
+  SetPosition(84, 123, 728, 87);
   WindowTitle := 'frmMain';
   WindowPosition := wpUser;
   gINI.ReadFormState(self);
@@ -285,7 +285,7 @@ begin
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 696, 24);
+    SetPosition(0, 0, 729, 24);
     Anchors := [anLeft,anRight,anTop];
   end;
 
@@ -332,7 +332,7 @@ begin
   with wgpalette do
   begin
     Name := 'wgpalette';
-    SetPosition(116, 28, 580, 28);
+    SetPosition(116, 28, 613, 28);
     Anchors := [anLeft,anRight,anTop];
     Focusable := False;
   end;

@@ -575,6 +575,7 @@ var
   n: integer;
   c: TComponent;
 begin
+//  writeln('Widget.HandleShow - ', ClassName, '  x:', Left, ' y:', Top, ' w:', Width, ' h:', Height);
   FOnScreen := True;
 //  FVisible := True;
 
@@ -897,6 +898,7 @@ end;
 
 procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
 begin
+//  writeln('TfpgWidget.MsgPaint - ', Classname);
   Canvas.BeginDraw;
   HandlePaint;
   if Assigned(FOnPaint) then

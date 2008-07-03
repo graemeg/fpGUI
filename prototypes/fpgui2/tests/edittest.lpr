@@ -68,6 +68,7 @@ type
     procedure checkbox1Changed(Sender: TObject);
     procedure TrackBarChanged(Sender: TObject; APosition: integer);
     procedure xpsilverClick(Sender: TObject);
+    procedure Combo1Changed(Sender: TObject);
   public
     label1: TfpgLabel;
     label2: TfpgLabel;
@@ -311,6 +312,17 @@ begin
     BackgroundColor := clWindowBackground;
 end;
 
+procedure TMainForm.Combo1Changed(Sender: TObject);
+begin
+  // ilImageLeft, ilImageTop, ilImageRight, ilImageBottom
+  case combo1.FocusItem of
+    0:  btn.ImageLayout := ilImageLeft;
+    1:  btn.ImageLayout := ilImageTop;
+    2:  btn.ImageLayout := ilImageRight;
+    3:  btn.ImageLayout := ilImageBottom;
+  end;
+end;
+
 procedure TMainForm.Trackbar1Changed(Sender: TObject; APosition: integer);
 begin
   progress.Position := APosition;
@@ -427,14 +439,19 @@ begin
   btn           := CreateButton(self, 10, 130, 75, 'Close', @btnCloseClick);
   btn.ImageName := 'stdimg.close';
   btn.ShowImage := True;
+  btn.Height := 55;
 
-  combo1 := CreateComboBox(self, 10, 160, 120, nil);
+  combo1 := CreateComboBox(self, 10, 200, 120, nil);
   combo1.BackgroundColor := clYellow;
-  combo1.TextColor := clRed;
-  for i := 1 to 5 do
-    combo1.Items.Add(Format('Items %.2d', [i]));
+  combo1.TextColor := clBlue;
+  combo1.Items.Add('ilImageLeft');
+  combo1.Items.Add('ilImageTop');
+  combo1.Items.Add('ilImageRight');
+  combo1.Items.Add('ilImageBottom');
+  combo1.FocusItem := 0;
+  combo1.OnChange := @Combo1Changed;
 
-  combo2 := CreateComboBox(self, 10, 190, 120, nil);
+  combo2 := CreateComboBox(self, 10, 230, 120, nil);
   for i := 1 to 20 do
     combo2.Items.Add(Format('Items %.2d', [i]));
 

@@ -200,6 +200,12 @@ begin
     'vfd.combodateedit', @stdimg_vfd_dateedit,
     sizeof(stdimg_vfd_dateedit),
     0, 0);
+    
+  fpgImages.AddMaskedBMP(
+    'vfd.bevel', @stdimg_vfd_bevel,
+    sizeof(stdimg_vfd_bevel),
+    0, 0);
+
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -332,6 +338,16 @@ begin
   wc.AddProperty('ShowGrid', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.stringgrid';
+  RegisterVFDWidget(wc);
+
+  // Bevel
+  wc           := TVFDWidgetClass.Create(TfpgBevel);
+  wc.NameBase  := 'bvlName';
+  wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
+  wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
+  wc.AddProperty('Shape', TPropertyEnum, 'Box, Frame, TopLine, Spacer etc..');
+  wc.WidgetIconName := 'vfd.bevel';
+  wc.Container := True;
   RegisterVFDWidget(wc);
 
   // Panel

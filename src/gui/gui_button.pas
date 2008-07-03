@@ -484,7 +484,6 @@ var
 
 begin
 //  inherited HandlePaint;
-//  Canvas.Clear(FBackgroundColor);  // Do we need this?
   Canvas.ClearClipRect;
 
   r.SetRect(0, 0, Width, Height);

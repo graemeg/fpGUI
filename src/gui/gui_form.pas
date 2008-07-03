@@ -159,6 +159,7 @@ end;
 
 procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
 begin
+//  writeln('BaseForm - MsgActivate');
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
     FocusRootWidget := self;
@@ -307,24 +308,10 @@ begin
 end;
 
 procedure TfpgBaseForm.HandleShow;
-{$IFDEF LINUX}
-var
-  dw: integer;
-  dh: integer;
-{$ENDIF}
 begin
   inherited HandleShow;
   if Assigned(FOnShow) then
     FOnShow(self);
-  {$IFDEF UNIX}
-  { TODO : A temporary work-around because XLib doesn't sent a Resize event
-    when the form is created. It's clever enough to size the form beforehand,
-    but without this call the Alignment code doesn't execute. }
-
-//  dw      := FPrevWidth - FWidth;
-//  dh      := FPrevHeight - FHeight;
-//  HandleAlignments(0, 0);
-  {$ENDIF}
 end;
 
 procedure TfpgBaseForm.HandleMove(x, y: TfpgCoord);

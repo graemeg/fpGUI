@@ -306,6 +306,19 @@ begin
     Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   if Shape in [bsBox, bsFrame, bsBottomLine] then
     Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+    
+  // To make it more visible in the UI Designer
+  if csDesigning in ComponentState then
+  begin
+    if Shape in [bsSpacer] then
+    begin
+      Canvas.SetColor(clInactiveWgFrame);
+      Canvas.SetLineStyle(1, lsDash);
+      Canvas.DrawRectangle(0, 0, Width, Height);
+//      Canvas.SetTextColor(clText1);
+//      Canvas.DrawString(2, 2, Name + ': ' + Classname);
+    end;
+  end;
 end;
 
 {TfpgPanel}
