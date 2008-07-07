@@ -73,8 +73,8 @@ begin
   begin
     Name := 'mmSource';
     SetPosition(164, 0, 257, 90);
-    Lines.Add('Memo1 Line #1');
-    Lines.Add('Memo1 Line #2');
+    Lines.Add('Memo has a MinHeight=30 so the splitter');
+    Lines.Add('snap effect will not take affect - as expected.');
     FontDesc := '#Edit1';
     TabOrder := 2;
     Align := alTop;

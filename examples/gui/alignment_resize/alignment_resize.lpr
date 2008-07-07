@@ -76,7 +76,7 @@ begin
   SetPosition(316, 186, 467, 284);
   WindowTitle := 'Runtime resize/alignment test';
   WindowPosition := wpScreenCenter;
-  Sizeable := False;
+//  Sizeable := False;
 
   btnName1 := TfpgButton.Create(self);
   with btnName1 do
@@ -213,6 +213,7 @@ begin
     SetPosition(272, 104, 184, 164);
     FontDesc := '#Edit1';
     TabOrder := 8;
+    Anchors := AllAnchors;
   end;
 
   {@VFD_BODY_END: MainForm}

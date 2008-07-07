@@ -286,6 +286,8 @@ begin
   FBackgroundColor := clBoxColor;
   FUseTabs    := False;
   FTabWidth   := 4;
+  FMinWidth   := 20;
+  FMinHeight  := 30;
 
   FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 0;

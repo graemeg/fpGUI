@@ -350,6 +350,8 @@ type
   private
     FParent: TfpgWindowBase;
     procedure   SetMouseCursor(const AValue: TMouseCursor);
+    function    ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
+    function    ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
   protected
     FMouseCursor: TMouseCursor;
     FWindowType: TWindowType;
@@ -364,6 +366,8 @@ type
     FPrevHeight: TfpgCoord;
     FMinWidth: TfpgCoord;
     FMinHeight: TfpgCoord;
+    FMaxHeight: TfpgCoord;
+    FMaxWidth: TfpgCoord;
     FCanvas: TfpgCanvasBase;
     FDirty: Boolean;
     function    HandleIsValid: boolean; virtual; abstract;
@@ -413,6 +417,8 @@ type
     property    Height: TfpgCoord read FHeight write SetHeight;
     property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
     property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
+    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth;
+    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight;
     property    Canvas: TfpgCanvasBase read GetCanvas;
     property    Parent: TfpgWindowBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
@@ -919,6 +925,24 @@ begin
   DoSetMouseCursor;
 end;
 
+function TfpgWindowBase.ConstraintWidth(NewWidth: TfpgCoord): TfpgCoord;
+begin
+  Result := NewWidth;
+  if (MaxWidth >= MinWidth) and (Result > MaxWidth) and (MaxWidth > 0) then
+    Result := MaxWidth;
+  if Result < MinWidth then
+    Result := MinWidth;
+end;
+
+function TfpgWindowBase.ConstraintHeight(NewHeight: TfpgCoord): TfpgCoord;
+begin
+  Result := NewHeight;
+  if (MaxHeight >= MinHeight) and (Result > MaxHeight) and (MaxHeight > 0) then
+    Result := MaxHeight;
+  if Result < MinHeight then
+    Result := MinHeight;
+end;
+
 procedure TfpgWindowBase.SetParent(const AValue: TfpgWindowBase);
 begin
   FParent := AValue;
@@ -958,36 +982,56 @@ procedure TfpgWindowBase.SetTop(const AValue: TfpgCoord);
 begin
   if FTop = AValue then
     Exit;
-  FPrevTop := FTop;
+  // if we don't have a handle we are still setting up, so actual value and
+  // previous value must be the same.
+  if HasHandle then
+    FPrevTop := FTop
+  else
+    FPrevTop := AValue;
   FTop := AValue;
-  FDirty := True;
+  FDirty := FTop <> FPrevTop;
 end;
 
 procedure TfpgWindowBase.SetLeft(const AValue: TfpgCoord);
 begin
   if FLeft = AValue then
     Exit;
-  FPrevLeft := FHeight;
+  // if we don't have a handle we are still setting up, so actual value and
+  // previous value must be the same.
+  if HasHandle then
+    FPrevLeft := FHeight
+  else
+    FPrevLeft := AValue;
   FLeft := AValue;
-  FDirty := True;
+  FDirty := FLeft <> FPrevLeft;
 end;
 
 procedure TfpgWindowBase.SetHeight(const AValue: TfpgCoord);
 begin
   if FHeight = AValue then
     Exit;
-  FPrevHeight := FHeight;
-  FHeight := AValue;
-  FDirty := True;
+  // if we don't have a handle we are still setting up, so actual value and
+  // previous value must be the same.
+  if HasHandle then
+    FPrevHeight := FHeight
+  else
+    FPrevHeight := AValue;
+  FHeight := ConstraintHeight(AValue);
+  FDirty := FHeight <> FPrevHeight;
 end;
 
 procedure TfpgWindowBase.SetWidth(const AValue: TfpgCoord);
 begin
   if FWidth = AValue then
     Exit;
-  FPrevWidth := FWidth;
-  FWidth := AValue;
-  FDirty := True;
+  // if we don't have a handle we are still setting up, so actual value and
+  // previous value must be the same.
+  if HasHandle then
+    FPrevWidth := FWidth
+  else
+    FPrevWidth := AValue;
+  FWidth := ConstraintWidth(AValue);
+  FDirty := FWidth <> FPrevWidth;
 end;
 
 constructor TfpgWindowBase.Create(AOwner: TComponent);
@@ -995,6 +1039,8 @@ begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
   FDirty := True;
+  FMaxWidth := 0;
+  FMaxHeight := 0;
 end;
 
 procedure TfpgWindowBase.AfterConstruction;

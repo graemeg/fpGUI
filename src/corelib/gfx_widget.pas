@@ -90,7 +90,7 @@ type
     procedure   HandleMouseExit; virtual;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); virtual;
     function    FindFocusWidget(startwg: TfpgWidget; direction: TFocusSearchDirection): TfpgWidget;
-    procedure   HandleAlignments(dwidth, dheight: TfpgCoord); virtual;
+    procedure   HandleAlignments(const dwidth, dheight: TfpgCoord); virtual;
     procedure   HandleShow; virtual;
     procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
@@ -117,7 +117,7 @@ type
     procedure   Realign;
     procedure   SetFocus;
     procedure   KillFocus;
-    procedure   MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
+    procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
     property    FormDesigner: TObject read FFormDesigner write FFormDesigner;
@@ -218,12 +218,20 @@ begin
   dh      := FHeight - FPrevHeight;
 
   if IsContainer and FDirty then
+  begin
+//    writeln('DoUpdateWindowPosition ', Classname, ' - w:', dw, ' h:', dh);
     HandleAlignments(dw, dh);
+  end;
 
   inherited DoUpdateWindowPosition(aleft, atop, awidth, aheight);
   if FDirty and ((dw <> 0) or (dh <> 0)) then
     DoResize;
-  FDirty := False;
+
+  // We have now handled the difference between old and new values, so reset
+  // them here not to affect the next iteration.
+  FPrevWidth  := FWidth;
+  FPrevHeight := FHeight;
+  FDirty      := False;
 end;
 
 procedure TfpgWidget.SetBackgroundColor(const AValue: TfpgColor);
@@ -911,7 +919,6 @@ var
   dw: integer;
   dh: integer;
 begin
-//  writeln('MsgResize - ', Classname);
   dw      := msg.Params.rect.Width - FWidth;
   dh      := msg.Params.rect.Height - FHeight;
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
@@ -925,7 +932,7 @@ end;
 
 procedure TfpgWidget.MsgMove(var msg: TfpgMessageRec);
 begin
-  HandleMove(msg.Params.rect.left, msg.Params.rect.top);
+  HandleMove(msg.Params.rect.Left, msg.Params.rect.Top);
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
@@ -935,8 +942,8 @@ end;
 procedure TfpgWidget.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
 //  writeln('HandleResize - ', Classname);
-  Width  := Max(awidth, FMinWidth);
-  Height := Max(aheight, FMinHeight);
+  Width  := Max(AWidth, FMinWidth);
+  Height := Max(AHeight, FMinHeight);
 end;
 
 procedure TfpgWidget.HandleMove(x, y: TfpgCoord);
@@ -945,7 +952,7 @@ begin
   Top  := y;
 end;
 
-procedure TfpgWidget.HandleAlignments(dwidth, dheight: TfpgCoord);
+procedure TfpgWidget.HandleAlignments(const dwidth, dheight: TfpgCoord);
 var
   n: integer;
   wg: TfpgWidget;
@@ -996,6 +1003,7 @@ end;
 
 procedure TfpgWidget.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
 begin
+//  writeln('MoveAndResize: ', Classname, ' t:', ATop, ' l:', ALeft, ' w:', AWidth, ' h:', aHeight);
   if HasHandle then
   begin
     if (ALeft <> FLeft) or (ATop <> FTop) then
@@ -1014,7 +1022,7 @@ begin
   end;
 end;
 
-procedure TfpgWidget.MoveAndResizeBy(dx, dy, dw, dh: TfpgCoord);
+procedure TfpgWidget.MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
 begin
   if (dx <> 0) or (dy <> 0) or
     (dw <> 0) or (dh <> 0) then

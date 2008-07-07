@@ -310,6 +310,7 @@ end;
 procedure TfpgBaseForm.HandleShow;
 begin
   inherited HandleShow;
+  HandleAlignments(0, 0);
   if Assigned(FOnShow) then
     FOnShow(self);
 end;
