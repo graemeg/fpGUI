@@ -4,7 +4,8 @@ program listviewtest;
 
 uses
   Classes, fpgfx, sysutils ,
-  gui_listview, gui_form, gui_button, gui_edit, gfxbase, gui_checkbox;
+  gui_listview, gui_form, gui_button, gui_edit, gfxbase, gui_checkbox,
+  fpgui_toolkit;
   
 type
 

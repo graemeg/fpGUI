@@ -239,12 +239,12 @@ end;
 procedure TfrmMain.cbxShapeChange(Sender: TObject);
 begin
   if Sender is TfpgComboBox then
-    B_Bevel.Shape := TPanelShape((Sender as TfpgComboBox).FocusItem-1);
+    B_Bevel.Shape := TPanelShape((Sender as TfpgComboBox).FocusItem);
 end;
 
 procedure TfrmMain.cbxBorderChange(Sender: TObject);
 begin
-  if cbxBorder.FocusItem = 1 then
+  if cbxBorder.FocusItem = 0 then
   begin
     B_Bevel.BorderStyle     := bsSingle;
     P_Panel.BorderStyle     := bsSingle;
@@ -362,13 +362,13 @@ begin
   cbxShape.Items.Add('bsLeftLine');
   cbxShape.Items.Add('bsRightLine');
   cbxShape.Items.Add('bsSpacer');
-  cbxShape.FocusItem := 1;
+  cbxShape.FocusItem := 0;
   cbxShape.OnChange := @cbxShapeChange;
   
   cbxBorder := CreateComboBox(self, 250, 528, 100, nil);
   cbxBorder.Items.Add('bsSingle');
   cbxBorder.Items.Add('bsDouble');
-  cbxBorder.FocusItem := 1;
+  cbxBorder.FocusItem := 0;
   cbxBorder.OnChange := @cbxBorderChange;
 end;
 

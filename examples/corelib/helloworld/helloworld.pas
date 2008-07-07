@@ -22,7 +22,7 @@ uses
   Classes
   ,fpGFX
   ,GFXBase
-  ;
+  , fpgui_toolkit;
 
 const
   HelloWorldString: String = 'Hello, world!';

@@ -450,7 +450,7 @@ begin
   Width     := 500;
   Height    := 400;
   MinWidth  := 300;
-  MinHeight := 300;
+  MinHeight := 160;
   WindowPosition := wpScreenCenter;
 
   lblName1 := TfpgLabel.Create(self);

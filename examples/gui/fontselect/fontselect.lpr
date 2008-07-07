@@ -14,7 +14,7 @@ uses
   gui_listbox,
   gui_edit,
   gui_label,
-  gfx_constants;
+  gfx_constants, fpgui_toolkit;
   
   
 resourcestring

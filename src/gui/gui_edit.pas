@@ -193,9 +193,18 @@ type
     procedure   Format; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
   published
-     property   Alignment;
-     property   NegativeColor;
-     property   Value: integer read GetValue write SetValue;
+    property    Alignment;
+    property    NegativeColor;
+    property    Value: integer read GetValue write SetValue;
+    property    TabOrder;
+    property    TextColor;
+    property    OnChange;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
   end;
 
 
@@ -205,10 +214,19 @@ type
     procedure   SetValue(const AValue: extended); virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
   published
-     property   Alignment;
-     property   NegativeColor;
-     property   DecimalSeparator;
-     property   Value: extended read GetValue write SetValue;
+    property    Alignment;
+    property    NegativeColor;
+    property    DecimalSeparator;
+    property    Value: extended read GetValue write SetValue;
+    property    TabOrder;
+    property    TextColor;
+    property    OnChange;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
   end;
 
 

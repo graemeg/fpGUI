@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, fpgfx, gui_form, gui_label, gui_edit, gui_button, gui_radiobutton,
-  gui_listbox, gfxbase;
+  gui_listbox, gfxbase, gui_checkbox;
 
 type
 
@@ -18,10 +18,12 @@ type
     procedure btnQuitClicked(Sender: TObject);
     procedure rbClicked(Sender: TObject);
     procedure lbChange(Sender: TObject);
+    procedure chbPasswdChanged(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     lblName1: TfpgLabel;
     edtText: TfpgEdit;
+    chbPasswd: TfpgCheckBox;
     lblName2: TfpgLabel;
     lblName3: TfpgLabel;
     edtInteger: TfpgEditInteger;
@@ -60,6 +62,11 @@ begin
   edtInteger.NegativeColor := lbNegativeColor.Color;
 end;
 
+procedure TMainForm.chbPasswdChanged(Sender: TObject);
+begin
+  edtText.PasswordMode := chbPasswd.Checked;
+end;
+
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
@@ -83,15 +90,26 @@ begin
     Name := 'edtText';
     SetPosition(24, 28, 120, 22);
     TabOrder := 1;
-    Text := '';
+    Text := 'Hello World!';
     FontDesc := '#Edit1';
+  end;
+
+  chbPasswd := TfpgCheckBox.Create(self);
+  with chbPasswd do
+  begin
+    Name := 'chbPasswd';
+    SetPosition(24, 55, 152, 20);
+    FontDesc := '#Label1';
+    TabOrder := 2;
+    Text := 'Password Mode';
+    OnChange :=@chbPasswdChanged;
   end;
 
   lblName2 := TfpgLabel.Create(self);
   with lblName2 do
   begin
     Name := 'lblName2';
-    SetPosition(8, 68, 80, 16);
+    SetPosition(8, 88, 80, 16);
     FontDesc := '#Label1';
     Text := 'Integer Edit';
   end;
@@ -100,7 +118,7 @@ begin
   with lblName3 do
   begin
     Name := 'lblName3';
-    SetPosition(8, 124, 80, 16);
+    SetPosition(8, 144, 80, 16);
     FontDesc := '#Label1';
     Text := 'Float Edit';
   end;
@@ -109,14 +127,14 @@ begin
   with edtInteger do
   begin
     Name := 'edtInteger';
-    SetPosition(24, 88, 120, 22);
+    SetPosition(24, 108, 120, 22);
   end;
 
   edtFloat := TfpgEditFloat.Create(self);
   with edtFloat do
   begin
     Name := 'edtFloat';
-    SetPosition(24, 144, 120, 22);
+    SetPosition(24, 164, 120, 22);
   end;
 
   btnQuit := TfpgButton.Create(self);

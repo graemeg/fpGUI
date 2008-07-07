@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, fpgfx, gfx_widget, gfxbase, gui_form, gui_tab, gui_button,
-  gui_label, gui_edit, gui_checkbox, gui_combobox;
+  gui_label, gui_edit, gui_checkbox, gui_combobox, fpgui_toolkit;
 
 type
   TMainForm = class(TfpgForm)
@@ -61,7 +61,7 @@ end;
 
 procedure TMainForm.cbTabPosChanged(Sender: TObject);
 begin
-  if cbTabPos.FocusItem = 1 then
+  if cbTabPos.FocusItem = 0 then
     pcMain.TabPosition := tpTop
   else
     pcMain.TabPosition := tpBottom;
@@ -117,12 +117,14 @@ begin
   btn3.Anchors := [anLeft, anBottom];
   
   chkSort := CreateCheckBox(self, 190, 320, 'Sort Tabs');
+  chkSort.Anchors := [anBottom, anLeft];
   chkSort.OnChange := @chkSortChange;
   
   cbTabPos := CreateComboBox(self, 300, 320, 80, nil);
   cbTabPos.Items.Add('tpTop');
   cbTabPos.Items.Add('tpBottom');
-  cbTabPos.FocusItem := 1;
+  cbTabPos.FocusItem := 0;
+  cbTabPos.Anchors := [anBottom, anLeft];
   cbTabPos.OnChange := @cbTabPosChanged;
 end;
 

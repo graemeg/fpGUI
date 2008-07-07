@@ -7,8 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
-  fpgfx,
   gfxbase,
+  fpgfx,
   gui_form,
   gfx_imgfmt_bmp;
 
@@ -113,16 +113,16 @@ begin
   Canvas.DrawButtonFace(r, []);
   Canvas.DrawString(385, 20, '= []');
   r.Top := 50;
-  Canvas.DrawButtonFace(r, [btnIsDefault]);
+  Canvas.DrawButtonFace(r, [btfIsDefault]);
   Canvas.DrawString(385, 50, '= [btnIsDefault]');
   r.Top := 80;
-  Canvas.DrawButtonFace(r, [btnIsPressed]);
+  Canvas.DrawButtonFace(r, [btfIsPressed]);
   Canvas.DrawString(385, 80, '= [btnIsPressed]');
   r.Top := 110;
-  Canvas.DrawButtonFace(r, [btnIsEmbedded, btnIsPressed]);
+  Canvas.DrawButtonFace(r, [btfIsEmbedded, btfIsPressed]);
   Canvas.DrawString(385, 110, '= [embed & press]');
   r.Top := 140;
-  Canvas.DrawButtonFace(r, [btnIsEmbedded]);
+  Canvas.DrawButtonFace(r, [btfIsEmbedded]);
   Canvas.DrawString(385, 140, '= [btnIsEmbedded]');
 
   Canvas.DrawString(45, y, 'DrawControlFrame():');

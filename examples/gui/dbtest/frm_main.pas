@@ -22,6 +22,7 @@ type
     procedure   btnLastClick(Sender: TObject);
     procedure   ButtonEnter(Sender: TObject);
     procedure   ButtonExit(Sender: TObject);
+    procedure   FormShow(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     btnQuit: TfpgButton;
@@ -85,10 +86,31 @@ begin
   lblStatusBar.Text := '';
 end;
 
-constructor TMainForm.Create(AOwner: TComponent);
+procedure TMainForm.FormShow(Sender: TObject);
 var
   x: Integer;
   s: string;
+begin
+  dblblName.DataSource    := DataSource;
+  dblblName.DataField     := 'Name';
+  dblblEMail.DataSource   := DataSource;
+  dblblEMail.DataField    := 'Address';
+
+  DataSet.Open;
+  while not DataSet.EOF do
+  begin
+    SetLength(s, 0);
+    for x := 0 to DataSet.FieldCount - 2 do
+      s := s + DataSet.Fields[x].AsString + ', ';
+    s := s + DataSet.Fields[DataSet.FieldCount - 1].AsString;
+    lstName1.Items.Add(s);
+    DataSet.Next;
+  end;
+  DataSet.First;
+end;
+
+constructor TMainForm.Create(AOwner: TComponent);
+//var
 //  fields: TDbfFieldDefs;
 begin
   inherited Create(AOwner);
@@ -113,22 +135,7 @@ begin
   DataSource          := TDataSource.Create(Self);
   DataSource.DataSet  := DataSet;
 
-  dblblName.DataSource    := DataSource;
-  dblblName.DataField     := 'Name';
-  dblblEMail.DataSource   := DataSource;
-  dblblEMail.DataField    := 'Address';
-
-  DataSet.Open;
-  while not DataSet.EOF do
-  begin
-    SetLength(s, 0);
-    for x := 0 to DataSet.FieldCount - 2 do
-      s := s + DataSet.Fields[x].AsString + ', ';
-    s := s + DataSet.Fields[DataSet.FieldCount - 1].AsString;
-    lstName1.Items.Add(s);
-    DataSet.Next;
-  end;
-  DataSet.First;
+  OnShow :=@FormShow;
 end;
 
 destructor TMainForm.Destroy;
