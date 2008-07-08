@@ -50,6 +50,11 @@ type
     next: PfpgTreeColumnWidth;
     width: word;
   end;
+  
+  // forward declaration
+  TfpgTreeNode = class;
+  
+  TfpgTreeNodeFindMethod = procedure(ANode: TfpgTreeNode; var AFound: boolean) of object;
 
 
   TfpgTreeNode = class(TObject)
@@ -84,7 +89,8 @@ type
     function    AppendText(AText: string): TfpgTreeNode;
     function    Count: integer;
     function    CountRecursive: integer;
-    function    FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode;
+    function    FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode; overload;
+    function    FindSubNode(ATreeNodeFindMethod: TfpgTreeNodeFindMethod): TfpgTreeNode; overload;
     function    GetMaxDepth: integer;
     function    GetMaxVisibleDepth: integer;
     procedure   Append(aValue: TfpgTreeNode);
@@ -414,6 +420,35 @@ begin
       h := h.next;
     end;
   end;  { if/else }
+end;
+
+function TfpgTreeNode.FindSubNode(ATreeNodeFindMethod: TfpgTreeNodeFindMethod): TfpgTreeNode;
+var
+  lFound: Boolean;
+  h: TfpgTreeNode;
+begin
+  result := nil;
+  lFound := False;
+  if not Assigned(ATreeNodeFindMethod) then
+    Exit; //==>
+
+  h := FirstSubNode;
+  while h <> nil do
+  begin
+    ATreeNodeFindMethod(h, lFound);
+    if lFound then
+    begin
+      result := h;
+      Exit; //==>
+    end;
+    if h.Count > 0 then
+    begin
+      result := h.FirstSubNode.FindSubNode(ATreeNodeFindMethod);
+      if result <> nil then
+        Exit; //==>
+    end;
+    h := h.next;
+  end;
 end;
 
 function TfpgTreeNode.AppendText(AText: string): TfpgTreeNode;

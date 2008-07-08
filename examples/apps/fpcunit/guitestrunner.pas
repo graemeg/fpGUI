@@ -24,6 +24,7 @@ type
     testsCounter: Integer;
     skipsCounter: Integer;
     testSuite: TTest;
+    temptest: TTest;
     // ITestListener
     procedure AddFailure(ATest: TTest; AFailure: TTestFailure);
     procedure AddError(ATest: TTest; AError: TTestFailure);
@@ -39,6 +40,9 @@ type
     procedure btnQuitClicked(Sender: TObject);
     procedure btnClearClicked(Sender: TObject);
     procedure btnRunClicked(Sender: TObject);
+    procedure FindByData(ANode: TfpgTreeNode; var AFound: boolean);
+    function  FindNode(ATest: TTest): TfpgTreeNode;
+    procedure ResetNodeColors(ANode: TfpgTreeNode; var AFound: boolean);
   public
     {@VFD_HEAD_BEGIN: GUITestRunnerForm}
     pbName1: TfpgProgressBar;
@@ -68,17 +72,26 @@ implementation
 
 procedure TGUITestRunnerForm.AddFailure(ATest: TTest; AFailure: TTestFailure);
 begin
-  MemoLog(AFailure.ExceptionMessage);
+  MemoLog('Failure in ' + ATest.TestName + ': ' + AFailure.ExceptionMessage);
 end;
 
 procedure TGUITestRunnerForm.AddError(ATest: TTest; AError: TTestFailure);
 begin
-  MemoLog(AError.ExceptionMessage);
+  MemoLog('Error in ' + ATest.TestName + ': ' + AError.ExceptionMessage);
 end;
 
 procedure TGUITestRunnerForm.StartTest(ATest: TTest);
+var
+  Node: TfpgTreeNode;
 begin
-
+//  MemoLog('StartTest');
+  Node := FindNode(ATest);
+  if Assigned(Node) then
+  begin
+    Node.TextColor := clBlue;
+    tvTests.Invalidate;
+    fpgApplication.ProcessMessages;
+  end;
 end;
 
 procedure TGUITestRunnerForm.EndTest(ATest: TTest);
@@ -172,16 +185,59 @@ end;
 procedure TGUITestRunnerForm.btnClearClicked(Sender: TObject);
 begin
   memName1.Lines.Clear;
+  tvTests.RootNode.FindSubNode(@ResetNodeColors);
+  tvTests.Invalidate;
+  fpgApplication.ProcessMessages;
 end;
 
 procedure TGUITestRunnerForm.btnRunClicked(Sender: TObject);
 begin
-  if (tvTests.Selection <> nil) and (tvTests.Selection.Data <> nil) then
+  if tvTests.Selection = nil then
+  begin
+    TfpgMessageDialog.Critical('No selection', 'Please select a test case first.');
+    Exit; //==>
+  end;
+  
+  if (tvTests.Selection.Data <> nil) then
   begin
     testSuite := TTest(tvTests.Selection.Data);
 //    tvTests.Selection.Collapse;
+    RunTest(testSuite);
   end;
-  RunTest(testSuite);
+end;
+
+procedure TGUITestRunnerForm.FindByData(ANode: TfpgTreeNode; var AFound: boolean);
+begin
+  AFound := TTest(ANode.Data) = temptest;
+//  if AFound then
+//    MemoLog('Found Node ' + ANode.Text);
+end;
+
+function TGUITestRunnerForm.FindNode(ATest: TTest): TfpgTreeNode;
+var
+  h: TfpgTreeNode;
+begin
+  result := nil;
+  
+  // short circut test
+  if (tvTests.Selection.Next <> nil) and (tvTests.Selection.Next.Data <> nil) and (TTest(tvTests.Selection.Next.Data) = ATest) then
+  begin
+    result := tvTests.Selection.Next;
+    Exit; //==>
+  end;
+  
+  // recursive search
+  try
+    temptest := ATest;
+    result := tvTests.RootNode.FindSubNode(@FindByData);
+  finally
+    temptest := nil;
+  end;
+end;
+
+procedure TGUITestRunnerForm.ResetNodeColors(ANode: TfpgTreeNode; var AFound: boolean);
+begin
+  ANode.TextColor := clUnset;
 end;
 
 constructor TGUITestRunnerForm.Create(AOwner: TComponent);
