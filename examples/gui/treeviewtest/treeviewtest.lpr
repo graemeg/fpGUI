@@ -13,7 +13,7 @@ uses
   gui_tree,
   gui_checkbox,
   gfxbase,
-  gfx_imagelist, fpgui_toolkit;
+  gfx_imagelist;
 
 type
 
