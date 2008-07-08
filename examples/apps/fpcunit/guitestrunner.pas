@@ -5,16 +5,33 @@ unit GuiTestRunner;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
+  SysUtils, Classes,
+  // fpGUI toolkit
+  gfxbase, fpgfx, gui_edit, gfx_widget, gui_form, gui_label, gui_button,
   gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_panel, gui_popupcalendar, gui_gauge;
+  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, gui_progressbar,
+  gui_radiobutton, gui_tab, gui_menu, gui_panel, gui_popupcalendar,
+  gui_gauge,
+  // FPCUnit support
+  fpcunit, testregistry;
 
 type
 
-  TGUITestRunnerForm = class(TfpgForm)
+  TGUITestRunnerForm = class(TfpgForm, ITestListener)
+  private
+    failureCounter: Integer;
+    errorCounter: Integer;
+    testsCounter: Integer;
+    skipsCounter: Integer;
+    // ITestListener
+    procedure AddFailure(ATest: TTest; AFailure: TTestFailure);
+    procedure AddError(ATest: TTest; AError: TTestFailure);
+    procedure StartTest(ATest: TTest);
+    procedure EndTest(ATest: TTest);
+    procedure StartTestSuite(ATestSuite: TTestSuite);
+    procedure EndTestSuite(ATestSuite: TTestSuite);
+    //
+    procedure MemoLog(LogEntry: string);
   public
     {@VFD_HEAD_BEGIN: GUITestRunnerForm}
     pbName1: TfpgProgressBar;
@@ -39,6 +56,41 @@ type
 implementation
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TGUITestRunnerForm.AddFailure(ATest: TTest; AFailure: TTestFailure);
+begin
+
+end;
+
+procedure TGUITestRunnerForm.AddError(ATest: TTest; AError: TTestFailure);
+begin
+
+end;
+
+procedure TGUITestRunnerForm.StartTest(ATest: TTest);
+begin
+
+end;
+
+procedure TGUITestRunnerForm.EndTest(ATest: TTest);
+begin
+
+end;
+
+procedure TGUITestRunnerForm.StartTestSuite(ATestSuite: TTestSuite);
+begin
+
+end;
+
+procedure TGUITestRunnerForm.EndTestSuite(ATestSuite: TTestSuite);
+begin
+
+end;
+
+procedure TGUITestRunnerForm.MemoLog(LogEntry: string);
+begin
+  memName1.Lines.Add(TimeToStr(Now) + ' - ' + LogEntry);
+end;
 
 procedure TGUITestRunnerForm.AfterCreate;
 begin
