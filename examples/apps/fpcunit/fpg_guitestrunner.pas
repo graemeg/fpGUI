@@ -177,6 +177,8 @@ var
 begin
   n := tvTests.RootNode.AppendText('All Tests');
   BuildTree(n, GetTestRegistry);
+  n.Data := GetTestRegistry;
+//  n.Text := 'All Tests (count=' + IntToStr(GetTestRegistry.CountTestCases) + ')';
 end;
 
 procedure TGUITestRunnerForm.btnQuitClicked(Sender: TObject);
