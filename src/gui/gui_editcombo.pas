@@ -67,7 +67,6 @@ type
   TfpgBaseEditCombo = class(TfpgBaseComboBox)
   private
     FAutoCompletion: Boolean;
-    FAutoDropDown: Boolean;
     FAllowNew: TAllowNew;
     FText: string;
     FSelectedItem: integer;
@@ -76,6 +75,8 @@ type
     procedure   SetAllowNew(const AValue: TAllowNew);
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
+    procedure   InternalListBoxKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState;
+                var consumed: Boolean);
   protected
     FMargin: integer;
     FDropDown: TfpgPopupWindow;
@@ -96,7 +97,6 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
-    property    AutoDropDown: Boolean read FAutoDropDown write FAutoDropDown default False;
     property    AllowNew: TAllowNew read FAllowNew write SetAllowNew default anNo;
     property    BackgroundColor default clBoxColor;
     property    TextColor default clText1;
@@ -112,7 +112,6 @@ type
   TfpgEditCombo = class(TfpgBaseEditCombo)
   published
     property    AutoCompletion;
-    property    AutoDropDown;
     property    AllowNew;
     property    BackgroundColor;
     property    DropDownCount;
@@ -151,6 +150,7 @@ type
   TDropDownWindow = class(TfpgPopupWindow)
   private
     FCallerWidget: TfpgWidget;
+    ListBox:    TfpgListBox;
   protected
     procedure   HandlePaint; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
@@ -159,7 +159,6 @@ type
     procedure   HandleHide; override;
   public
     constructor Create(AOwner: TComponent); override;
-    ListBox:    TfpgListBox;
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   end;
 
@@ -284,6 +283,7 @@ begin
     ddw.Width := Width;
     ddw.CallerWidget := self;
     ddw.ListBox.OnSelect := @InternalListBoxSelect;
+    ddw.ListBox.OnKeyPress := @InternalListBoxKeyPress;
 
     // Assign combobox text items to internal listbox
     if FAutoCompletion then
@@ -340,11 +340,31 @@ begin
     if Items[i]= TDropDownWindow(FDropDown).ListBox.Items[TDropDownWindow(FDropDown).ListBox.FocusItem] then
     begin
       FocusItem := i;
-      FText:= TDropDownWindow(FDropDown).ListBox.Items[TDropDownWindow(FDropDown).ListBox.FocusItem];
+      FSelectedItem:= i;
+      FText:= Items[i];
       Break;
     end;
   end;
   FDropDown.Close;
+
+  if HasHandle then
+    Repaint;
+end;
+
+procedure TfpgBaseEditCombo.InternalListBoxKeyPress(Sender: TObject; var keycode: word;
+          var shiftstate: TShiftState; var consumed: Boolean);
+var
+  i: Integer;
+begin
+  if ((keycode = keyUp) or (keycode = keyDown)) and (TDropDownWindow(FDropDown).ListBox.FocusItem > -1) then
+    for i := 0 to Items.Count-1 do
+    begin
+      if Items[i]= TDropDownWindow(FDropDown).ListBox.Items[TDropDownWindow(FDropDown).ListBox.FocusItem] then
+      begin
+        FSelectedItem:= i;
+        Break;
+      end;
+    end;
 
   if HasHandle then
     Repaint;
@@ -367,6 +387,7 @@ begin
       begin
         FocusItem := i;
         FText:= AValue;
+        Repaint;
         Exit; //==>
       end;
     end;
@@ -402,7 +423,7 @@ begin
 
   // Handle only printable characters
   // Note: This is now UTF-8 compliant!
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
+  if Enabled and (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
   begin
     if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
     begin
@@ -416,8 +437,7 @@ begin
         if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
         begin
           FSelectedItem:= i;
-          if AutoDropDown then
-            DoDropDown;
+          DoDropDown;
           Break;
         end;
       if FSelectedItem = -1 then
@@ -430,8 +450,7 @@ begin
             if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
             begin
               FSelectedItem:= i;
-              if AutoDropDown then
-                DoDropDown;
+              DoDropDown;
               Break;
             end;
         end
@@ -458,71 +477,73 @@ var
 begin
   hasChanged := False;
 
-  consumed := True;
+  if not Enabled then
+    consumed := False
+  else
+  begin
+    consumed := True;
 
-  case keycode of
-    keyBackSpace:
-        begin
-          if FCursorPos > 0 then
+    case keycode of
+      keyBackSpace:
           begin
-            UTF8Delete(FText, FCursorPos, 1);
-            Dec(FCursorPos);
-            FSelStart := FCursorPos;
-          if Assigned(FDropDown) then
-            FDropDown.Close;
-          FSelectedItem := -1;
-          for i := 0 to FItems.Count-1 do
-            if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+            if FCursorPos > 0 then
             begin
-              FSelectedItem:= i;
-              if AutoDropDown then
-                DoDropDown;
-              Break;
-            end;
-          hasChanged := True;
-          end;
-        end;
-
-    keyDelete:
-        begin
-          if FAllowNew <> anNo then
-          begin
-            FocusItem := -1;
+              UTF8Delete(FText, FCursorPos, 1);
+              Dec(FCursorPos);
+              FSelStart := FCursorPos;
+            if Assigned(FDropDown) then
+              FDropDown.Close;
             FSelectedItem := -1;
-            FNewItem:= True;
-            hasChanged := True;
-          end;
-        end;
-
-    keyReturn,
-    keyPEnter:
-        begin
-          if FSelectedItem > -1 then
-            SetText(Items[FSelectedItem])
-          else
-            FocusItem:= -1;
-          if FNewItem then
-            case FAllowNew of
-              anYes:
-                FItems.Add(FText);
-              anAsk:
-                if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
-                  FItems.Add(FText)
-                else
-                  begin
-                  FNewItem:= False;
-                  FocusItem := -1;
-                  FText:= '';
-                  end;
+            for i := 0 to FItems.Count-1 do
+              if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+              begin
+                FSelectedItem:= i;
+                DoDropDown;
+                Break;
               end;
-          hasChanged := True;
-          if Assigned(FDropDown) then
-            FDropDown.Close;
-        end;
+            hasChanged := True;
+            end;
+          end;
+      keyDelete:
+          begin
+            if FAllowNew <> anNo then
+            begin
+              FocusItem := -1;
+              FSelectedItem := -1;
+              FNewItem:= True;
+              hasChanged := True;
+            end;
+          end;
 
-    else
-    begin
-      Consumed := False;
+      keyReturn,
+      keyPEnter:
+          begin
+            if FSelectedItem > -1 then
+              SetText(Items[FSelectedItem])
+            else
+              FocusItem:= -1;
+            if FNewItem then
+              case FAllowNew of
+                anYes:
+                  FItems.Add(FText);
+                anAsk:
+                  if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
+                    FItems.Add(FText)
+                  else
+                    begin
+                    FNewItem:= False;
+                    FocusItem := -1;
+                    FText:= '';
+                    end;
+                end;
+            hasChanged := True;
+            if Assigned(FDropDown) then
+              FDropDown.Close;
+          end;
+      else
+      begin
+        Consumed := False;
+      end;
     end;
   end;
 
@@ -727,7 +748,6 @@ begin
   FMargin           := 3;
   FFocusable        := True;
   FAutocompletion   := False;
-  FAutoDropDown     := False;
   FAllowNew         := anNo;
 
   FText             := '';

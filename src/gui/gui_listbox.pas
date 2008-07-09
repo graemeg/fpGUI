@@ -792,7 +792,6 @@ begin
         if SameText(LeftStr(FItems.Strings[i], Length(AText)), AText) then
         begin
           FocusItem := i;
-          Consumed := True;
           break;
         end;
       end;  { for }

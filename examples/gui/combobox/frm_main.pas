@@ -18,7 +18,6 @@ type
   private
     procedure rbChanged(Sender: TObject);
     procedure cbAutoCompleteChanged(Sender: TObject);
-    procedure cbAutoDropDownChanged(Sender: TObject);
     procedure cbAllowNewChanged(Sender: TObject);
     procedure btnAdd1Clicked(Sender: TObject);
     procedure btnFocusClicked(Sender: TObject);
@@ -35,7 +34,6 @@ type
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
     EditCombo1: TfpgEditCombo;
-    cbAutoDropdown: TfpgCheckBox;
     lblName3: TfpgLabel;
     lblName4: TfpgLabel;
     cbAllowNew: TfpgComboBox;
@@ -69,11 +67,6 @@ end;
 procedure TMainForm.cbAutoCompleteChanged(Sender: TObject);
 begin
   EditCombo1.AutoCompletion := cbAutoComplete.Checked;
-end;
-
-procedure TMainForm.cbAutoDropDownChanged(Sender: TObject);
-begin
-  EditCombo1.AutoDropDown := cbAutoDropdown.Checked;
 end;
 
 procedure TMainForm.cbAllowNewChanged(Sender: TObject);
@@ -237,17 +230,6 @@ begin
     SetPosition(8, 88, 168, 21);
   end;
 
-  cbAutoDropdown := TfpgCheckBox.Create(self);
-  with cbAutoDropdown do
-  begin
-    Name := 'cbAutoDropdown';
-    SetPosition(216, 188, 120, 19);
-    FontDesc := '#Label1';
-    TabOrder := 9;
-    Text := 'Auto Dropdown';
-    OnChange := @cbAutoDropDownChanged;
-  end;
-
   lblName3 := TfpgLabel.Create(self);
   with lblName3 do
   begin
@@ -270,7 +252,7 @@ begin
   with cbAllowNew do
   begin
     Name := 'cbAllowNew';
-    SetPosition(220, 212, 100, 22);
+    SetPosition(220, 196, 100, 22);
     FontDesc := '#List';
     Items.Add('anNo');
     Items.Add('anYes');
@@ -293,10 +275,10 @@ begin
   begin
     Name := 'rbName1';
     SetPosition(16, 24, 80, 20);
+    Checked := True;
     FontDesc := '#Label1';
     Text := '8 items';
     Tag := 8;
-    Checked := True;
     OnChange := @rbChanged;
   end;
 
