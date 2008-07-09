@@ -11,7 +11,7 @@ uses
   gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
   gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, gui_progressbar,
   gui_radiobutton, gui_tab, gui_menu, gui_panel, gui_popupcalendar,
-  gui_gauge,
+  gui_gauge, gui_splitter,
   // FPCUnit support
   fpcunit, testregistry, testdecorator;
 
@@ -45,10 +45,12 @@ type
     procedure ResetNodeColors(ANode: TfpgTreeNode; var AFound: boolean);
   public
     {@VFD_HEAD_BEGIN: GUITestRunnerForm}
+    bvlTree: TfpgBevel;
+    bvlButtons: TfpgBevel;
+    bvlResults: TfpgBevel;
+    splitter: TfpgSplitter;
     pbName1: TfpgProgressBar;
-    cbName1: TfpgComboBox;
     btnRun: TfpgButton;
-    lblName1: TfpgLabel;
     lblName2: TfpgLabel;
     lblRuns: TfpgLabel;
     lblName4: TfpgLabel;
@@ -61,7 +63,7 @@ type
     btnQuit: TfpgButton;
     {@VFD_HEAD_END: GUITestRunnerForm}
     constructor Create(AOwner: TComponent); override;
-    procedure AfterCreate; override;
+    procedure   AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -250,32 +252,59 @@ procedure TGUITestRunnerForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: GUITestRunnerForm}
   Name := 'GUITestRunnerForm';
-  SetPosition(372, 260, 359, 547);
+  SetPosition(305, 196, 359, 547);
   WindowTitle := 'GUI Test Runner';
 
-  pbName1 := TfpgProgressBar.Create(self);
+  bvlTree := TfpgBevel.Create(self);
+  with bvlTree do
+  begin
+    Name := 'bvlTree';
+    SetPosition(4, 8, 348, 364);
+    Shape := bsSpacer;
+    MinHeight := 200;
+    Align := alClient;
+  end;
+
+  bvlButtons := TfpgBevel.Create(self);
+  with bvlButtons do
+  begin
+    Name := 'bvlButtons';
+    SetPosition(4, 505, 348, 40);
+    Shape := bsTopLine;
+    Align := alBottom;
+  end;
+
+  bvlResults := TfpgBevel.Create(self);
+  with bvlResults do
+  begin
+    Name := 'bvlResults';
+    SetPosition(4, 392, 348, 103);
+    Shape := bsSpacer;
+    Align := alBottom;
+    MinHeight := 45;
+  end;
+
+  splitter := TfpgSplitter.Create(self);
+  with splitter do
+  begin
+    Name := 'splitter';
+    SetPosition(2, 376, 353, 8);
+    Align := alBottom;
+  end;
+
+  pbName1 := TfpgProgressBar.Create(bvlTree);
   with pbName1 do
   begin
     Name := 'pbName1';
-    SetPosition(8, 64, 340, 22);
+    SetPosition(8, 40, 332, 22);
     Anchors := [anLeft,anRight,anTop];
   end;
 
-  cbName1 := TfpgComboBox.Create(self);
-  with cbName1 do
-  begin
-    Name := 'cbName1';
-    SetPosition(16, 24, 244, 22);
-    Anchors := [anLeft,anRight,anTop];
-    FontDesc := '#List';
-    TabOrder := 1;
-  end;
-
-  btnRun := TfpgButton.Create(self);
+  btnRun := TfpgButton.Create(bvlTree);
   with btnRun do
   begin
     Name := 'btnRun';
-    SetPosition(268, 24, 80, 24);
+    SetPosition(260, 8, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Run';
     FontDesc := '#Label1';
@@ -284,95 +313,85 @@ begin
     OnClick := @btnRunClicked;
   end;
 
-  lblName1 := TfpgLabel.Create(self);
-  with lblName1 do
-  begin
-    Name := 'lblName1';
-    SetPosition(4, 4, 236, 16);
-    FontDesc := '#Label2';
-    Text := 'TestCase';
-  end;
-
-  lblName2 := TfpgLabel.Create(self);
+  lblName2 := TfpgLabel.Create(bvlTree);
   with lblName2 do
   begin
     Name := 'lblName2';
-    SetPosition(8, 96, 40, 16);
+    SetPosition(8, 72, 40, 16);
     FontDesc := '#Label2';
     Text := 'Runs:';
   end;
 
-  lblRuns := TfpgLabel.Create(self);
+  lblRuns := TfpgLabel.Create(bvlTree);
   with lblRuns do
   begin
     Name := 'lblRuns';
-    SetPosition(48, 96, 55, 16);
+    SetPosition(48, 72, 55, 16);
     FontDesc := '#Label1';
     Text := '---';
   end;
 
-  lblName4 := TfpgLabel.Create(self);
+  lblName4 := TfpgLabel.Create(bvlTree);
   with lblName4 do
   begin
     Name := 'lblName4';
-    SetPosition(120, 96, 44, 16);
+    SetPosition(120, 72, 44, 16);
     FontDesc := '#Label2';
     Text := 'Errors:';
   end;
 
-  lblErrors := TfpgLabel.Create(self);
+  lblErrors := TfpgLabel.Create(bvlTree);
   with lblErrors do
   begin
     Name := 'lblErrors';
-    SetPosition(166, 96, 55, 16);
+    SetPosition(166, 72, 55, 16);
     FontDesc := '#Label1';
     Text := '---';
   end;
 
-  lblName6 := TfpgLabel.Create(self);
+  lblName6 := TfpgLabel.Create(bvlTree);
   with lblName6 do
   begin
     Name := 'lblName6';
-    SetPosition(232, 96, 60, 16);
+    SetPosition(232, 72, 60, 16);
     FontDesc := '#Label2';
     Text := 'Failures:';
   end;
 
-  lblFailures := TfpgLabel.Create(self);
+  lblFailures := TfpgLabel.Create(bvlTree);
   with lblFailures do
   begin
     Name := 'lblFailures';
-    SetPosition(292, 96, 55, 16);
+    SetPosition(292, 72, 55, 16);
     FontDesc := '#Label1';
     Text := '---';
   end;
 
-  tvTests := TfpgTreeView.Create(self);
+  tvTests := TfpgTreeView.Create(bvlTree);
   with tvTests do
   begin
     Name := 'tvTests';
-    SetPosition(8, 120, 340, 268);
+    SetPosition(8, 96, 332, 265);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     TabOrder := 3;
   end;
 
-  memName1 := TfpgMemo.Create(self);
+  memName1 := TfpgMemo.Create(bvlResults);
   with memName1 do
   begin
     Name := 'memName1';
-    SetPosition(8, 400, 340, 113);
-    Anchors := [anLeft,anRight,anBottom];
+    SetPosition(8, 2, 332, 94);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Edit1';
     TabOrder := 4;
   end;
 
-  btnClear := TfpgButton.Create(self);
+  btnClear := TfpgButton.Create(bvlButtons);
   with btnClear do
   begin
     Name := 'btnClear';
-    SetPosition(8, 517, 80, 24);
-    Anchors := [anLeft,anBottom];
+    SetPosition(8, 8, 80, 24);
     Text := 'Clear';
     FontDesc := '#Label1';
     ImageName := '';
@@ -380,12 +399,11 @@ begin
     OnClick := @btnClearClicked;
   end;
 
-  btnQuit := TfpgButton.Create(self);
+  btnQuit := TfpgButton.Create(bvlButtons);
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(268, 517, 80, 24);
-    Anchors := [anRight,anBottom];
+    SetPosition(260, 8, 80, 24);
     Text := 'Quit';
     FontDesc := '#Label1';
     ImageName := '';
@@ -394,6 +412,7 @@ begin
   end;
 
   {@VFD_BODY_END: GUITestRunnerForm}
+  
 end;
 
 
