@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpgfx, gui_form, gui_label, gui_edit, gui_button, gui_radiobutton,
+  Classes, SysUtils, fpgfx, gui_form, gui_label, gui_edit, gui_button, gui_radiobutton,
   gui_listbox, gfxbase, gui_checkbox;
 
 type
@@ -18,19 +18,29 @@ type
     procedure btnQuitClicked(Sender: TObject);
     procedure rbClicked(Sender: TObject);
     procedure lbChange(Sender: TObject);
+    procedure edtIntegerChange(Sender: TObject);
+    procedure edtFloatChange(Sender: TObject);
+    procedure edtCurrencyChange(Sender: TObject);
     procedure chbPasswdChanged(Sender: TObject);
+    procedure chbSpaceChange(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     lblName1: TfpgLabel;
     edtText: TfpgEdit;
     chbPasswd: TfpgCheckBox;
     lblName2: TfpgLabel;
+    l_integervalue: TfpgLabel;
     lblName3: TfpgLabel;
+    l_floatvalue: TfpgLabel;
+    lblName4: TfpgLabel;
+    l_currvalue: TfpgLabel;
     edtInteger: TfpgEditInteger;
     edtFloat: TfpgEditFloat;
+    edtCurrency: TfpgEditCurrency;
     btnQuit: TfpgButton;
     rbPoint: TfpgRadioButton;
     rbComma: TfpgRadioButton;
+    chbSpace: TfpgCheckBox;
     lbNegativeColor: TfpgColorListBox;
     lblNegativeColor: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
@@ -50,10 +60,42 @@ end;
 procedure TMainForm.rbClicked(Sender: TObject);
 begin
   if Sender is TfpgRadioButton then
-    if (Sender as TfpgRadioButton).tag = 0 then
-      edtFloat.DecimalSeparator := '.'
-    else
-      edtFloat.DecimalSeparator := ',';
+    case (Sender as TfpgRadioButton).tag of
+      0:
+        begin
+          edtFloat.DecimalSeparator := '.';
+          edtCurrency.DecimalSeparator := '.';
+          if chbSpace.Checked then
+          begin
+            edtInteger.ThousandSeparator := ' ';
+            edtFloat.ThousandSeparator := ' ';
+            edtCurrency.ThousandSeparator := ' ';
+          end
+          else
+          begin
+            edtInteger.ThousandSeparator := ',';
+            edtFloat.ThousandSeparator := ',';
+            edtCurrency.ThousandSeparator := ',';
+          end;
+        end;
+      1:
+        begin
+          edtFloat.DecimalSeparator := ',';
+          edtCurrency.DecimalSeparator := ',';
+          if chbSpace.Checked then
+          begin
+            edtInteger.ThousandSeparator := ' ';
+            edtFloat.ThousandSeparator := ' ';
+            edtCurrency.ThousandSeparator := ' ';
+          end
+          else
+          begin
+            edtInteger.ThousandSeparator := '.';
+            edtFloat.ThousandSeparator := '.';
+            edtCurrency.ThousandSeparator := '.';
+          end;
+        end;
+      end;
 end;
 
 procedure TMainForm.lbChange(Sender: TObject);
@@ -62,16 +104,46 @@ begin
   edtInteger.NegativeColor := lbNegativeColor.Color;
 end;
 
+procedure TMainForm.edtIntegerChange(Sender: TObject);
+begin
+  l_integervalue.Text := IntToStr(edtInteger.Value);
+end;
+
+procedure TMainForm.edtFloatChange(Sender: TObject);
+begin
+  l_floatvalue.Text := FloatToStr(edtFloat.Value);
+end;
+
+procedure TMainForm.edtCurrencyChange(Sender: TObject);
+begin
+  l_currvalue.Text := CurrToStr(edtCurrency.Value);
+end;
+
 procedure TMainForm.chbPasswdChanged(Sender: TObject);
 begin
   edtText.PasswordMode := chbPasswd.Checked;
+end;
+
+procedure TMainForm.chbSpaceChange(Sender: TObject);
+begin
+  if chbSpace.Checked then
+    begin
+    edtInteger.ThousandSeparator := ' ';
+    edtFloat.ThousandSeparator := ' ';
+    edtCurrency.ThousandSeparator := ' ';
+    end
+  else
+    if rbPoint.Checked then
+      edtInteger.ThousandSeparator := ','
+    else
+      edtInteger.ThousandSeparator := '.';
 end;
 
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(376, 202, 392, 239);
+  SetPosition(376, 202, 392, 300);
   WindowTitle := 'Edit components';
   WindowPosition := wpScreenCenter;
 
@@ -113,6 +185,15 @@ begin
     FontDesc := '#Label1';
     Text := 'Integer Edit';
   end;
+  
+  l_integervalue := TfpgLabel.Create(self);
+  with l_integervalue do
+  begin
+    Name := 'l_integervalue';
+    SetPosition(90, 88, 80, 16);
+    FontDesc := '#Label1';
+    Text := '';
+  end;
 
   lblName3 := TfpgLabel.Create(self);
   with lblName3 do
@@ -123,11 +204,41 @@ begin
     Text := 'Float Edit';
   end;
 
+  l_floatvalue := TfpgLabel.Create(self);
+  with l_floatvalue do
+  begin
+    Name := 'l_floatvalue';
+    SetPosition(90, 144, 80, 16);
+    FontDesc := '#Label1';
+    Text := '';
+  end;
+
+  lblName4 := TfpgLabel.Create(self);
+  with lblName4 do
+  begin
+    Name := 'lblName4';
+    SetPosition(8, 200, 80, 16);
+    FontDesc := '#Label1';
+    Text := 'Currency Edit';
+  end;
+
+  l_currvalue := TfpgLabel.Create(self);
+  with l_currvalue do
+  begin
+    Name := 'l_currvalue';
+    SetPosition(90, 200, 80, 16);
+    FontDesc := '#Label1';
+    Text := '';
+  end;
+
   edtInteger := TfpgEditInteger.Create(self);
   with edtInteger do
   begin
     Name := 'edtInteger';
     SetPosition(24, 108, 120, 22);
+    ShowThousand := True;
+    ThousandSeparator := ',';
+    onChange := @edtIntegerChange;
   end;
 
   edtFloat := TfpgEditFloat.Create(self);
@@ -135,13 +246,28 @@ begin
   begin
     Name := 'edtFloat';
     SetPosition(24, 164, 120, 22);
+    ShowThousand := True;
+    ThousandSeparator := ',';
+    Decimals := 6;
+    onChange := @edtFloatChange;
+  end;
+
+  edtCurrency := TfpgEditCurrency.Create(self);
+  with edtCurrency do
+  begin
+    Name := 'edtCurrency';
+    SetPosition(24, 220, 120, 22);
+    ShowThousand := True;
+    ThousandSeparator := ',';
+    Decimals := 2;
+    onChange := @edtCurrencyChange;
   end;
 
   btnQuit := TfpgButton.Create(self);
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(296, 199, 75, 24);
+    SetPosition(296, 250, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -154,7 +280,7 @@ begin
   with rbPoint do
   begin
     Name := 'rbPoint';
-    SetPosition(160, 136, 184, 20);
+    SetPosition(170, 136, 184, 20);
     Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 1;
@@ -168,7 +294,7 @@ begin
   with rbComma do
   begin
     Name := 'rbComma';
-    SetPosition(160, 160, 196, 20);
+    SetPosition(170, 160, 196, 20);
     FontDesc := '#Label1';
     GroupIndex := 1;
     TabOrder := 8;
@@ -177,6 +303,16 @@ begin
     OnChange := @rbClicked;
   end;
 
+  chbSpace := TfpgCheckBox.Create(self);
+  with chbSpace do
+  begin
+    Name := 'chbSpace';
+    SetPosition(170, 200, 200, 20);
+    FontDesc := '#Label1';
+    Text := 'Space as ThousandSeparator';
+    OnChange := @chbSpaceChange;
+  end;
+  
   lbNegativeColor := TfpgColorListBox.Create(self);
   with lbNegativeColor do
   begin
