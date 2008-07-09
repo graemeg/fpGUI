@@ -252,14 +252,14 @@ procedure TGUITestRunnerForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: GUITestRunnerForm}
   Name := 'GUITestRunnerForm';
-  SetPosition(305, 196, 359, 547);
+  SetPosition(305, 196, 530, 547);
   WindowTitle := 'GUI Test Runner';
 
   bvlTree := TfpgBevel.Create(self);
   with bvlTree do
   begin
     Name := 'bvlTree';
-    SetPosition(4, 8, 348, 364);
+    SetPosition(4, 8, 512, 364);
     Shape := bsSpacer;
     MinHeight := 200;
     Align := alClient;
@@ -269,7 +269,7 @@ begin
   with bvlButtons do
   begin
     Name := 'bvlButtons';
-    SetPosition(4, 505, 348, 40);
+    SetPosition(4, 505, 516, 40);
     Shape := bsTopLine;
     Align := alBottom;
   end;
@@ -278,7 +278,7 @@ begin
   with bvlResults do
   begin
     Name := 'bvlResults';
-    SetPosition(4, 392, 348, 103);
+    SetPosition(4, 392, 516, 103);
     Shape := bsSpacer;
     Align := alBottom;
     MinHeight := 45;
@@ -288,7 +288,7 @@ begin
   with splitter do
   begin
     Name := 'splitter';
-    SetPosition(2, 376, 353, 8);
+    SetPosition(2, 376, 521, 8);
     Align := alBottom;
   end;
 
@@ -296,7 +296,7 @@ begin
   with pbName1 do
   begin
     Name := 'pbName1';
-    SetPosition(8, 40, 332, 22);
+    SetPosition(8, 40, 496, 22);
     Anchors := [anLeft,anRight,anTop];
   end;
 
@@ -304,7 +304,7 @@ begin
   with btnRun do
   begin
     Name := 'btnRun';
-    SetPosition(260, 8, 80, 24);
+    SetPosition(424, 8, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Run';
     FontDesc := '#Label1';
@@ -371,7 +371,7 @@ begin
   with tvTests do
   begin
     Name := 'tvTests';
-    SetPosition(8, 96, 332, 265);
+    SetPosition(8, 96, 496, 265);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     TabOrder := 3;
@@ -381,7 +381,7 @@ begin
   with memName1 do
   begin
     Name := 'memName1';
-    SetPosition(8, 2, 332, 94);
+    SetPosition(8, 2, 500, 94);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Edit1';
     TabOrder := 4;
@@ -403,7 +403,8 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(260, 8, 80, 24);
+    SetPosition(428, 8, 80, 24);
+    Anchors := [anRight,anTop];
     Text := 'Quit';
     FontDesc := '#Label1';
     ImageName := '';
