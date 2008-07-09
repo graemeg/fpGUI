@@ -25,6 +25,7 @@ type
     skipsCounter: Integer;
     testSuite: TTest;
     temptest: TTest;
+    barColor: TfpgColor;
     // ITestListener
     procedure AddFailure(ATest: TTest; AFailure: TTestFailure);
     procedure AddError(ATest: TTest; AError: TTestFailure);
@@ -73,13 +74,71 @@ implementation
 {@VFD_NEWFORM_IMPL}
 
 procedure TGUITestRunnerForm.AddFailure(ATest: TTest; AFailure: TTestFailure);
+var
+  FailureNode, node: TfpgTreeNode;
 begin
-  MemoLog('Failure in ' + ATest.TestName + ': ' + AFailure.ExceptionMessage);
+  MemoLog('failed - ' + ATest.TestName);
+  FailureNode := FindNode(ATest);
+  if not Assigned(FailureNode) then
+    memolog('  Failed to find node');
+  if Assigned(FailureNode) then
+  begin
+    node := FailureNode.AppendText('Message: ' + AFailure.ExceptionMessage);
+//    node.ImageIndex := 4;
+//    node.SelectedIndex := 4;
+    node.TextColor := clFuchsia;
+    node := FailureNode.AppendText('Exception: ' + AFailure.ExceptionClassName);
+//    node.ImageIndex := 4;
+//    node.SelectedIndex := 4;
+    node.TextColor := clFuchsia;
+//    PaintNodeFailure(FailureNode);
+  end;
+  Inc(failureCounter);
+  if errorCounter = 0 then
+    barColor := clFuchsia; // Error color takes preference
+
+  tvTests.Invalidate;
 end;
 
 procedure TGUITestRunnerForm.AddError(ATest: TTest; AError: TTestFailure);
+var
+  ErrorNode, node: TfpgTreeNode;
 begin
-  MemoLog('Error in ' + ATest.TestName + ': ' + AError.ExceptionMessage);
+  MemoLog('error - ' + ATest.TestName);
+  ErrorNode := FindNode(ATest);
+  if Assigned(ErrorNode) then
+  begin
+    node := ErrorNode.AppendText('Exception message: ' + AError.ExceptionMessage);
+    node.TextColor := clRed;
+//    node.ImageIndex := 4;
+//    node.SelectedIndex := 4;
+    node := ErrorNode.AppendText('Exception class: ' + AError.ExceptionClassName);
+    node.TextColor := clRed;
+//    node.ImageIndex := 4;
+//    node.SelectedIndex := 4;
+    if (AError.SourceUnitName <> '') and
+      (AError.FailedMethodName <> '')
+    then
+    begin
+      node := ErrorNode.AppendText('Unit name: ' + AError.SourceUnitName);
+      node.TextColor := clRed;
+//      node.ImageIndex := 11;
+//      node.SelectedIndex := 11;
+      node := ErrorNode.AppendText('Method name: ' + AError.FailedMethodName);
+      node.TextColor := clRed;
+//      node.ImageIndex := 11;
+//      node.SelectedIndex := 11;
+      node := ErrorNode.AppendText('Line number: ' + IntToStr(AError.LineNumber));
+      node.TextColor := clRed;
+//      node.ImageIndex := 11;
+//      node.SelectedIndex := 11;
+    end;
+//    PaintNodeError(ErrorNode);
+  end;
+  Inc(errorCounter);
+  barColor := clRed;
+
+  tvTests.Invalidate;
 end;
 
 procedure TGUITestRunnerForm.StartTest(ATest: TTest);
@@ -87,13 +146,16 @@ var
   Node: TfpgTreeNode;
 begin
 //  MemoLog('StartTest');
+
   Node := FindNode(ATest);
   if Assigned(Node) then
   begin
-    Node.TextColor := clBlue;
+    Node.Clear;
+//    Node.TextColor := clBlue;
     tvTests.Invalidate;
     fpgApplication.ProcessMessages;
   end;
+
 end;
 
 procedure TGUITestRunnerForm.EndTest(ATest: TTest);
