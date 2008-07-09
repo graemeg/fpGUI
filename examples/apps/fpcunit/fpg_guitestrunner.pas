@@ -1,4 +1,4 @@
-unit GuiTestRunner;
+unit fpg_GuiTestRunner;
 
 {$mode objfpc}{$H+}
 

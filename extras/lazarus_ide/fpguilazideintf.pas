@@ -99,7 +99,7 @@ begin
 
   // create program source
   le := LineEnding;
-  NewSource := 'program fpGUIProject1;'+le
+  NewSource := 'program Project1;'+le
     +le
     +'{$mode objfpc}{$H+}'+le
     +le
@@ -158,7 +158,7 @@ begin
   AProject.MainFile.SetSourceText(NewSource);
 
   // add
-  AProject.AddPackageDependency('fpgui_package');
+  AProject.AddPackageDependency('fpgui_toolkit');
 
   // compiler options
   AProject.LazCompilerOptions.UseLineInfoUnit := True;

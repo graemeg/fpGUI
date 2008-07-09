@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="3">
-    <Name Value="guitestrunner_fpgui"/>
-    <Author Value="Graeme Geldenhuys"/>
+    <Name Value="idefpguitestrunner"/>
     <CompilerOptions>
       <Version Value="5"/>
       <SearchPaths>
+        <OtherUnitFiles Value="../../examples/apps/fpcunit/"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
@@ -15,21 +15,28 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="FPCUnit GUI Test Runner application built with fpGUI"/>
-    <License Value="Modified LGPL"/>
-    <Version Minor="1"/>
     <Files Count="1">
       <Item1>
-        <Filename Value="fpg_guitestrunner.pas"/>
+        <Filename Value="regfpguitestrunner.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="regfpguitestrunner"/>
       </Item1>
     </Files>
-    <RequiredPkgs Count="1">
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="3">
       <Item1>
-        <PackageName Value="fpgui_toolkit"/>
+        <PackageName Value="fpcunitide"/>
       </Item1>
+      <Item2>
+        <PackageName Value="IDEIntf"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item3>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)/"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>

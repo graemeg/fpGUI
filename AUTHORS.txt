@@ -1,17 +1,17 @@
 
  Here is a list of people that have contributed in some way towards
  the fpGUI project.
- 
-
-Original Authors (not active anymore)
--------------------------------------
-Sebastian Guenther <sg@freepascal.org>
-Viktor Nagy <nvitya@freemail.hu>
 
 
 Core Developer
 --------------
 Graeme Geldenhuys <graemeg@gmail.com>
+ 
+
+Implementation inspired by works from
+-------------------------------------
+Sebastian Guenther <sg@freepascal.org>
+Viktor Nagy <nvitya@freemail.hu>
 
 
 Contributors
@@ -24,7 +24,7 @@ Antonio Sanguigni - various & Italian translation
 Vladimir Zhirov - various & Russian translation
 Alexsander Rosa - Portuguese translation
 Horacio Jamilis - Spanish translation
-
+Michael van Canneyt
 
            ______________.o0O0o.______________
            
