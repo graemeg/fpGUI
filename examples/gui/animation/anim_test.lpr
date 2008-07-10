@@ -9,7 +9,7 @@ uses
   Classes, SysUtils,
   // fpGUI
   fpgfx, gui_form, gfxbase, gui_button,
-  gui_label, gui_trackbar, gui_animation, fpgui_toolkit;
+  gui_label, gui_trackbar, gui_animation;
 
 type
 

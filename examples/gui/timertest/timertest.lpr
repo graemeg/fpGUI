@@ -6,8 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, fpgfx, gfxbase, gui_form, gui_button, gui_label,
-  fpgui_toolkit;
+  Classes, SysUtils, fpgfx, gfxbase, gui_form, gui_button, gui_label;
 
 type
   TMainForm = class(TfpgForm)

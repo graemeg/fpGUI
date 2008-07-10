@@ -11,8 +11,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, gfxbase, fpgfx, gui_form, gui_popupcalendar, gui_edit,
-  gui_button, gui_label, gfx_popupwindow, gui_combobox, gui_checkbox, dateutils,
-  fpgui_toolkit;
+  gui_button, gui_label, gfx_popupwindow, gui_combobox, gui_checkbox, dateutils;
 
 type
   TMainForm = class(TfpgForm)

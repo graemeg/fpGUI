@@ -12,7 +12,7 @@ uses
   gui_form,
   gui_button,
   gui_panel,
-  gui_label, fpgui_toolkit;
+  gui_label;
   
 type
   TMainForm = class(TfpgForm)

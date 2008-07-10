@@ -13,7 +13,7 @@ uses
   gui_form,
   gui_grid,
   gui_checkbox,
-  gui_button, fpgui_toolkit;
+  gui_button;
 
 type
 

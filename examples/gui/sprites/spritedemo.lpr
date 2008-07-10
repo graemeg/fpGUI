@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
-  gfxbase, fpgfx, gui_form, gfx_imgfmt_bmp, fpgui_toolkit;
+  gfxbase, fpgfx, gui_form, gfx_imgfmt_bmp;
 
 type
 

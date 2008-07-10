@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, fpgfx, gfx_widget, gfxbase, gui_form, gui_tab, gui_button,
-  gui_label, gui_edit, gui_checkbox, gui_combobox, fpgui_toolkit;
+  gui_label, gui_edit, gui_checkbox, gui_combobox;
 
 type
   TMainForm = class(TfpgForm)

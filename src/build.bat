@@ -1,2 +1,2 @@
-fpc -dRELEASE -dGDI @extrafpc.cfg gui\fpgui_package.pas
+fpc -dRELEASE -dGDI @extrafpc.cfg corelib\gdi\fpgui_toolkit.pas
 
