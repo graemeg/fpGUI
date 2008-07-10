@@ -40,17 +40,17 @@ type
   TfpgImageItem = class(TObject)
   private
     FImage: TfpgImage;
-    FIndex: word;
+    FIndex: integer;
     FImageList: TfpgImageList;
     procedure   SetImageList(AImageList: TfpgImageList);
-    procedure   SetIndex(AIndex: word);
+    procedure   SetIndex(AIndex: integer);
     procedure   SetImage(AImage: TfpgImage);
   public
     constructor Create; overload;
-    constructor Create(AImageList: TfpgImageList; AIndex: word; AImage: TfpgImage); overload;
-    constructor Create(AFileName: string; AIndex: word); overload;
+    constructor Create(AImageList: TfpgImageList; AIndex: integer; AImage: TfpgImage); overload;
+    constructor Create(AFileName: string; AIndex: integer); overload;
     destructor  Destroy; override;
-    property    Index: word read FIndex write SetIndex;
+    property    Index: integer read FIndex write SetIndex;
     property    Image: TfpgImage read FImage write SetImage;
     property    ImageList: TfpgImageList read FImageList write SetImageList;
     procedure   LoadFromFile(AFileName: String);
@@ -66,10 +66,10 @@ type
   public
     constructor Create;
     destructor  Destroy; override;
-    procedure   AddItemFromFile(AFileName: String; AIndex: word = -1);
-    procedure   AddImage(AImage: TfpgImage; AIndex: word = -1);
+    procedure   AddItemFromFile(AFileName: String; AIndex: integer = -1);
+    procedure   AddImage(AImage: TfpgImage; AIndex: integer = -1);
     procedure   RemoveIndex(AIndex: integer);
-    function    GetMaxItem: word;
+    function    GetMaxItem: integer;
     property    Item[AIndex: integer]: TfpgImageItem read GetItem write SetItem;
   end;
 
@@ -131,15 +131,15 @@ end;
 
 destructor TfpgImageList.Destroy;
 var
-  ACounter: integer;
+  i: integer;
 begin
-  for ACounter := 0 to FList.Count - 1 do
-    TfpgImageItem(FList[ACounter]).Destroy;  // frees images
+  for i := 0 to FList.Count - 1 do
+    TfpgImageItem(FList[i]).Destroy;  // frees images
   FList.Destroy;
   inherited Destroy
 end;
 
-procedure TfpgImageList.AddItemFromFile(AFileName: String; AIndex: word);
+procedure TfpgImageList.AddItemFromFile(AFileName: String; AIndex: integer);
 var
   AImageItem: TfpgImageItem;
 begin
@@ -161,7 +161,7 @@ begin
   end;
 end;
 
-procedure TfpgImageList.AddImage(AImage: TfpgImage; AIndex: word);
+procedure TfpgImageList.AddImage(AImage: TfpgImage; AIndex: integer);
 var
   AImageItem: TfpgImageItem;
 begin
@@ -189,7 +189,7 @@ begin
   end;
 end;
 
-function TfpgImageList.GetMaxItem: word;
+function TfpgImageList.GetMaxItem: integer;
 var
   ACounter: integer;
 begin
@@ -216,7 +216,7 @@ begin
   end;
 end;
 
-procedure TfpgImageItem.SetIndex(AIndex: word);
+procedure TfpgImageItem.SetIndex(AIndex: integer);
 begin
   {$IFDEF DEBUG}
   writeln('TfpgImageItem.SetIndex');
@@ -248,7 +248,7 @@ begin
   FImage    := nil;
 end;
 
-constructor TfpgImageItem.Create(AImageList: TfpgImageList; AIndex: word;
+constructor TfpgImageItem.Create(AImageList: TfpgImageList; AIndex: integer;
     AImage: TfpgImage);
 begin
   if AImageList = nil then
@@ -259,7 +259,7 @@ begin
   ImageList   := AImageList;
 end;
 
-constructor TfpgImageItem.Create(AFileName: string; AIndex: word);
+constructor TfpgImageItem.Create(AFileName: string; AIndex: integer);
 begin
   {$IFDEF DEBUG}
   writeln('TfpgImageItem.Create(', AFileName, ',', AIndex, ')');

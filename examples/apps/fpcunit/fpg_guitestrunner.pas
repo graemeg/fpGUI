@@ -11,7 +11,7 @@ uses
   gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
   gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, gui_progressbar,
   gui_radiobutton, gui_tab, gui_menu, gui_panel, gui_popupcalendar,
-  gui_gauge, gui_splitter,
+  gui_gauge, gui_splitter, gfx_imagelist,
   // FPCUnit support
   fpcunit, testregistry, testdecorator;
 
@@ -26,6 +26,12 @@ type
     testSuite: TTest;
     temptest: TTest;
     barColor: TfpgColor;
+    FImagelist: TfpgImageList;
+    img0: TfpgImage;
+    img1: TfpgImage;
+    img2: TfpgImage;
+    img3: TfpgImage;
+    img4: TfpgImage;
     // ITestListener
     procedure AddFailure(ATest: TTest; AFailure: TTestFailure);
     procedure AddError(ATest: TTest; AError: TTestFailure);
@@ -44,6 +50,7 @@ type
     procedure FindByData(ANode: TfpgTreeNode; var AFound: boolean);
     function  FindNode(ATest: TTest): TfpgTreeNode;
     procedure ResetNodeColors(ANode: TfpgTreeNode; var AFound: boolean);
+    procedure PopulateImageList;
   public
     {@VFD_HEAD_BEGIN: GUITestRunnerForm}
     bvlTree: TfpgBevel;
@@ -64,6 +71,7 @@ type
     btnQuit: TfpgButton;
     {@VFD_HEAD_END: GUITestRunnerForm}
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterCreate; override;
   end;
 
@@ -71,7 +79,12 @@ type
 
 implementation
 
+uses
+  gfx_imgfmt_bmp;
+
 {@VFD_NEWFORM_IMPL}
+
+{$I treeimages.inc}
 
 procedure TGUITestRunnerForm.AddFailure(ATest: TTest; AFailure: TTestFailure);
 var
@@ -219,12 +232,13 @@ begin
   begin
     node := ARootNode.AppendText(ASuite.Test[i].TestName);
     node.Data := ASuite.Test[i];
+    node.ImageIndex := 0;
     if ASuite.Test[i] is TTestSuite then
       BuildTree(node, TTestSuite(ASuite.Test[i]))
     else
       if TObject(ASuite.Test[i]).InheritsFrom(TTestDecorator) then
         BuildTree(node, TTestSuite(TTestDecorator(ASuite.Test[i]).Test));
-//    node.ImageIndex := 12;
+
 //    node.SelectedIndex := 12;
 //    node.StateIndex := ord(tsChecked);
   end;
@@ -306,10 +320,39 @@ begin
   ANode.TextColor := clUnset;
 end;
 
+procedure TGUITestRunnerForm.PopulateImageList;
+begin
+  img0 := CreateImage_BMP(@fpcunit_circle_grey, sizeof(fpcunit_circle_grey) );
+  FImagelist.AddImage(img0, 0);
+
+  img1 := CreateImage_BMP(@fpcunit_circle_green, sizeof(fpcunit_circle_green) );
+  FImagelist.AddImage(img1, 1);
+
+  img2 := CreateImage_BMP(@fpcunit_circle_red, sizeof(fpcunit_circle_red) );
+  FImagelist.AddImage(img2, 2);
+
+  img3 := CreateImage_BMP(@fpcunit_information, sizeof(fpcunit_information) );
+  FImagelist.AddImage(img3, 3);
+
+  img4 := CreateImage_BMP(@fpcunit_bug, sizeof(fpcunit_bug) );
+  FImagelist.AddImage(img4, 4);
+end;
+
 constructor TGUITestRunnerForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   OnCreate := @FormCreate;
+
+  // create and populate the imagelist
+  FImagelist := TfpgImageList.Create;
+  PopulateImageList;
+end;
+
+destructor TGUITestRunnerForm.Destroy;
+begin
+  tvTests.ImageList := nil;
+  FImagelist.Free;
+  inherited Destroy;
 end;
 
 procedure TGUITestRunnerForm.AfterCreate;
@@ -439,6 +482,8 @@ begin
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     TabOrder := 3;
+//    ImageList := FImagelist;
+//    ShowImages := True;
   end;
 
   memName1 := TfpgMemo.Create(bvlResults);
