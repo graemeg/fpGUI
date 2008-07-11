@@ -1056,8 +1056,9 @@ var
   msgp: TfpgMessageParams;
   CursorInDifferentWindow: boolean;
   CurrentWindowHndl: TfpgWinHandle;
+  MouseCaptureWHndl: TfpgWinHandle;
   LastWindow: TfpgWindowImpl;
-
+  CurrentWindow: TfpgWindowImpl;
 begin
   // vvzh: this method currently cannot receive mouse events when mouse pointer
   // is outside of the application window. We could try to play with
@@ -1071,9 +1072,9 @@ begin
   // tme.dwFlags := TME_LEAVE or TME_HOVER;
   // tme.dwHoverTime := 1;
   // TrackMouseEvent(tme);
-  
-  pt.x := LoWord(lParam);
-  pt.y := HiWord(lParam);
+
+  pt.x := GET_X_LPARAM(lParam);
+  pt.y := GET_Y_LPARAM(lParam);
   spt := pt;
   // only WM_MOUSEWHEEL uses screen coordinates!!!
   if uMsg = WM_MOUSEWHEEL then
@@ -1092,14 +1093,18 @@ begin
     LastWindow := GetMyWidgetFromHandle(uLastWindowHndl);
     // check if last window still exits. eg: Dialog window could be closed.
     if LastWindow <> nil then
-    begin
-//      writeln('GFX: MouseExit detected');
       fpgSendMessage(nil, LastWindow, FPGM_MOUSEEXIT, msgp);
-    end;
-//    writeln('GFX: MouseEnter detected');
-    fpgSendMessage(nil, AWindow, FPGM_MOUSEENTER, msgp);
-  end;
 
+    // if some window captured mouse input, we should not send mouse events to other windows
+    MouseCaptureWHndl := GetCapture;
+    if (MouseCaptureWHndl = 0) or (MouseCaptureWHndl = CurrentWindowHndl) then
+    begin
+      CurrentWindow := GetMyWidgetFromHandle(CurrentWindowHndl);
+      if (CurrentWindow <> nil) then
+        fpgSendMessage(nil, CurrentWindow, FPGM_MOUSEENTER, msgp);
+    end;
+  end;
+  
   uLastWindowHndl := CurrentWindowHndl;
 end;
 

@@ -1609,7 +1609,8 @@ procedure TfpgWindowImpl.CaptureMouse;
 begin
   XGrabPointer(xapplication.Display, FWinHandle,
       TBool(False),
-      ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask,
+      ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask
+        or EnterWindowMask or LeaveWindowMask,
       GrabModeAsync,
       GrabModeAsync,
       None,

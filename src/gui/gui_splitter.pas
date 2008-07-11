@@ -257,9 +257,6 @@ begin
   if Assigned(FControl) then
   begin
     ReleaseMouse;
-    // vvzh: Maybe the following check should be done by ReleaseMouse?
-    if not PtInRect(GetClientBounds, Point(x, y)) then
-      HandleMouseExit;
     // if ResizeStyle in [rsLine, rsPattern] then DrawLine;
     UpdateControlSize;
     {writeln('LT: ', FControl.Left, ':', FControl.Width, '  ', Self.Left, ':', Self.Width);
