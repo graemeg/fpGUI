@@ -41,7 +41,8 @@ uses
   gfxbase,
   fpgfx,
   gfx_imagelist,
-  gui_scrollbar;
+  gui_scrollbar,
+  gui_menu;
   
 type
 
@@ -169,9 +170,11 @@ type
     function    GetNodeHeightSum: integer;
     function    MaxNodeWidth: integer;
     function    GetNodeHeight: integer;
-    function    GetNodeWidth(ANode: TfpgTreeNode): integer; // width of a node inclusive image
+    // width of a node inclusive image
+    function    GetNodeWidth(ANode: TfpgTreeNode): integer;
     function    NodeIsVisible(ANode: TfpgTreeNode): boolean;
-    function    GetAbsoluteNodeTop(ANode: TfpgTreeNode): integer; // returns the node-top in pixels
+    // returns the node-top in pixels
+    function    GetAbsoluteNodeTop(ANode: TfpgTreeNode): integer;
     function    GetColumnLeft(AIndex: integer): integer;
     procedure   PreCalcColumnLeft;
     procedure   VScrollbarScroll(Sender: TObject; position: integer);
@@ -182,9 +185,11 @@ type
     procedure   FreeAllTreeNodes;
   protected
     FColumnLeft: TList;
+    FPopupMenu: TfpgPopupMenu;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
@@ -195,17 +200,21 @@ type
     procedure   DoExpand(ANode: TfpgTreeNode); virtual;
     function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
-    function    SpaceToVisibleNext(aNode: TfpgTreeNode): integer; // the nodes between the given node and the direct next node
+    // the nodes between the given node and the direct next node
+    function    SpaceToVisibleNext(aNode: TfpgTreeNode): integer;
     function    StepToRoot(aNode: TfpgTreeNode): integer;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   SetColumnWidth(AIndex, AWidth: word);
-    function    GetColumnWidth(AIndex: word): word; // the width of a column - aIndex of the rootnode = 0
+    // the width of a column - aIndex of the rootnode = 0
+    function    GetColumnWidth(AIndex: word): word;
     property    Font: TfpgFont read FFont;
+    // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
     property    ImageList: TfpgImageList read FImageList write FImageList;
+    property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth default 15;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -393,6 +402,7 @@ begin
     h := FirstSubNode;
     while h <> nil do
     begin
+//      writeln('h.Text = ', h.Text);
       if h.Text = AText then
       begin
         result := h;
@@ -529,8 +539,8 @@ begin
   i := 0;
   while h <> nil do
   begin
-    h := h.next;
     inc(i);
+    h := h.next;
   end;
   result := i;
 end;
@@ -544,9 +554,9 @@ begin
   i := 0;
   while h <> nil do
   begin
+    inc(i); // current node
     i := i + h.CountRecursive; // increases i by the count of the subnodes of the subnode
     h := h.next;
-    inc(i); // and the subnode...
   end;
   result := i;
 end;
@@ -1201,6 +1211,13 @@ begin
   RePaint;
 end;
 
+procedure TfpgTreeView.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleRMouseDown(x, y, shiftstate);
+  if Assigned(PopupMenu) then
+    PopupMenu.ShowAt(self, x, y);
+end;
+
 procedure TfpgTreeview.HandleDoubleClick(x, y: integer; button: word;
   shiftstate: TShiftState);
 begin
@@ -1762,11 +1779,10 @@ end;
 
 destructor TfpgTreeView.Destroy;
 begin
-  ClearColumnLeft;
+  if Assigned(FColumnLeft) then
+    ClearColumnLeft;
   FFont.Free;
-  
   FreeAllTreeNodes;
-
   inherited Destroy;
 end;
 

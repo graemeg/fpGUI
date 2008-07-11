@@ -1736,7 +1736,7 @@ var
   i: integer;
   img: TfpgImage;
 begin
-  for i :=  FImages.Count-1 downto 0 do
+  for i := FImages.Count-1 downto 0 do
   begin
     img := TfpgImage(FImages.Objects[i]);
     FImages.Delete(i);

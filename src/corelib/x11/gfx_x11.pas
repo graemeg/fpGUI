@@ -650,6 +650,7 @@ function TfpgApplicationImpl.StartComposing(const Event: TXEvent): TKeySym;
 var
   l: integer;
 begin
+  // Xutf8LookupString returns the size of FComposeBuffer in bytes.
   l := Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
         SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus);
   SetLength(FComposeBuffer, l);

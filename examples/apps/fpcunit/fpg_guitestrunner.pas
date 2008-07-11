@@ -27,11 +27,7 @@ type
     temptest: TTest;
     barColor: TfpgColor;
     FImagelist: TfpgImageList;
-    img0: TfpgImage;
-    img1: TfpgImage;
-    img2: TfpgImage;
-    img3: TfpgImage;
-    img4: TfpgImage;
+    FPopupMenu: TfpgPopupMenu;
     // ITestListener
     procedure AddFailure(ATest: TTest; AFailure: TTestFailure);
     procedure AddError(ATest: TTest; AError: TTestFailure);
@@ -51,6 +47,11 @@ type
     function  FindNode(ATest: TTest): TfpgTreeNode;
     procedure ResetNodeColors(ANode: TfpgTreeNode; var AFound: boolean);
     procedure PopulateImageList;
+    procedure CreatePopupMenu;
+    procedure miCollapseAll(Sender: TObject);
+    procedure miExpandAll(Sender: TObject);
+    procedure miCollapseNode(Sender: TObject);
+    procedure miExpandNode(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: GUITestRunnerForm}
     bvlTree: TfpgBevel;
@@ -84,7 +85,15 @@ uses
 
 {@VFD_NEWFORM_IMPL}
 
+resourcestring
+  uiCollapseAll       = 'Collapse All';
+  uiExpandAll         = 'Expand All';
+  uiCollapse          = 'Collapse';
+  uiExpand            = 'Expand';
+
+// used images
 {$I treeimages.inc}
+
 
 procedure TGUITestRunnerForm.AddFailure(ATest: TTest; AFailure: TTestFailure);
 var
@@ -92,17 +101,16 @@ var
 begin
   MemoLog('failed - ' + ATest.TestName);
   FailureNode := FindNode(ATest);
+  FailureNode.ImageIndex := 3;
   if not Assigned(FailureNode) then
     memolog('  Failed to find node');
   if Assigned(FailureNode) then
   begin
     node := FailureNode.AppendText('Message: ' + AFailure.ExceptionMessage);
-//    node.ImageIndex := 4;
-//    node.SelectedIndex := 4;
+    node.ImageIndex := 4;
     node.TextColor := clFuchsia;
     node := FailureNode.AppendText('Exception: ' + AFailure.ExceptionClassName);
-//    node.ImageIndex := 4;
-//    node.SelectedIndex := 4;
+    node.ImageIndex := 4;
     node.TextColor := clFuchsia;
 //    PaintNodeFailure(FailureNode);
   end;
@@ -119,32 +127,28 @@ var
 begin
   MemoLog('error - ' + ATest.TestName);
   ErrorNode := FindNode(ATest);
+  ErrorNode.ImageIndex := 2;
   if Assigned(ErrorNode) then
   begin
     node := ErrorNode.AppendText('Exception message: ' + AError.ExceptionMessage);
     node.TextColor := clRed;
-//    node.ImageIndex := 4;
-//    node.SelectedIndex := 4;
+    node.ImageIndex := 4;
     node := ErrorNode.AppendText('Exception class: ' + AError.ExceptionClassName);
     node.TextColor := clRed;
-//    node.ImageIndex := 4;
-//    node.SelectedIndex := 4;
+    node.ImageIndex := 4;
     if (AError.SourceUnitName <> '') and
       (AError.FailedMethodName <> '')
     then
     begin
       node := ErrorNode.AppendText('Unit name: ' + AError.SourceUnitName);
       node.TextColor := clRed;
-//      node.ImageIndex := 11;
-//      node.SelectedIndex := 11;
+      node.ImageIndex := 5;
       node := ErrorNode.AppendText('Method name: ' + AError.FailedMethodName);
       node.TextColor := clRed;
-//      node.ImageIndex := 11;
-//      node.SelectedIndex := 11;
+      node.ImageIndex := 5;
       node := ErrorNode.AppendText('Line number: ' + IntToStr(AError.LineNumber));
       node.TextColor := clRed;
-//      node.ImageIndex := 11;
-//      node.SelectedIndex := 11;
+      node.ImageIndex := 5;
     end;
 //    PaintNodeError(ErrorNode);
   end;
@@ -152,23 +156,24 @@ begin
   barColor := clRed;
 
   tvTests.Invalidate;
+  fpgApplication.ProcessMessages;
 end;
 
 procedure TGUITestRunnerForm.StartTest(ATest: TTest);
 var
   Node: TfpgTreeNode;
 begin
-//  MemoLog('StartTest');
-
+//  writeln(ATest.TestName, '...');
   Node := FindNode(ATest);
   if Assigned(Node) then
   begin
     Node.Clear;
-//    Node.TextColor := clBlue;
+    Node.ImageIndex := 1; // green
     tvTests.Invalidate;
     fpgApplication.ProcessMessages;
-  end;
-
+  end
+  else
+    writeln('  Failed to find Node for test');
 end;
 
 procedure TGUITestRunnerForm.EndTest(ATest: TTest);
@@ -252,9 +257,12 @@ var
   n: TfpgTreeNode;
 begin
   n := tvTests.RootNode.AppendText('All Tests');
+  n.ImageIndex := 6;
   BuildTree(n, GetTestRegistry);
   n.Data := GetTestRegistry;
-//  n.Text := 'All Tests (count=' + IntToStr(GetTestRegistry.CountTestCases) + ')';
+
+  // Popup Menu support is still experimental
+//  CreatePopupMenu;
 end;
 
 procedure TGUITestRunnerForm.btnQuitClicked(Sender: TObject);
@@ -265,7 +273,10 @@ end;
 procedure TGUITestRunnerForm.btnClearClicked(Sender: TObject);
 begin
   memName1.Lines.Clear;
-  tvTests.RootNode.FindSubNode(@ResetNodeColors);
+//  tvTests.RootNode.FindSubNode(@ResetNodeColors);
+
+  tvTests.RootNode.FirstSubNode.Clear;
+  BuildTree(tvTests.RootNode.FirstSubNode, GetTestRegistry);
   tvTests.Invalidate;
   fpgApplication.ProcessMessages;
 end;
@@ -288,6 +299,7 @@ end;
 
 procedure TGUITestRunnerForm.FindByData(ANode: TfpgTreeNode; var AFound: boolean);
 begin
+  writeln('...', ANode.Text);
   AFound := TTest(ANode.Data) = temptest;
 //  if AFound then
 //    MemoLog('Found Node ' + ANode.Text);
@@ -300,16 +312,17 @@ begin
   result := nil;
   
   // short circut test
-  if (tvTests.Selection.Next <> nil) and (tvTests.Selection.Next.Data <> nil) and (TTest(tvTests.Selection.Next.Data) = ATest) then
-  begin
-    result := tvTests.Selection.Next;
-    Exit; //==>
-  end;
-  
+  //if (tvTests.Selection.Next <> nil) and (tvTests.Selection.Next.Data <> nil) and (TTest(tvTests.Selection.Next.Data) = ATest) then
+  //begin
+    //result := tvTests.Selection.Next;
+    //Exit; //==>
+  //end;
+
   // recursive search
   try
     temptest := ATest;
-    result := tvTests.RootNode.FindSubNode(@FindByData);
+    //result := tvTests.RootNode.FindSubNode(@FindByData);
+    result := tvTests.RootNode.FindSubNode(ATest.TestName, True);
   finally
     temptest := nil;
   end;
@@ -321,21 +334,67 @@ begin
 end;
 
 procedure TGUITestRunnerForm.PopulateImageList;
+var
+  img: TfpgImage;
 begin
-  img0 := CreateImage_BMP(@fpcunit_circle_grey, sizeof(fpcunit_circle_grey) );
-  FImagelist.AddImage(img0, 0);
+  img := CreateImage_BMP(@fpcunit_circle_grey, sizeof(fpcunit_circle_grey) );
+  FImagelist.AddImage(img, 0);
 
-  img1 := CreateImage_BMP(@fpcunit_circle_green, sizeof(fpcunit_circle_green) );
-  FImagelist.AddImage(img1, 1);
+  img := CreateImage_BMP(@fpcunit_circle_green, sizeof(fpcunit_circle_green) );
+  FImagelist.AddImage(img, 1);
 
-  img2 := CreateImage_BMP(@fpcunit_circle_red, sizeof(fpcunit_circle_red) );
-  FImagelist.AddImage(img2, 2);
+  img := CreateImage_BMP(@fpcunit_circle_red, sizeof(fpcunit_circle_red) );
+  FImagelist.AddImage(img, 2);
 
-  img3 := CreateImage_BMP(@fpcunit_information, sizeof(fpcunit_information) );
-  FImagelist.AddImage(img3, 3);
+  img := CreateImage_BMP(@fpcunit_circle_fuchsia, sizeof(fpcunit_circle_fuchsia) );
+  FImagelist.AddImage(img, 3);
 
-  img4 := CreateImage_BMP(@fpcunit_bug, sizeof(fpcunit_bug) );
-  FImagelist.AddImage(img4, 4);
+  img := CreateImage_BMP(@fpcunit_bug, sizeof(fpcunit_bug) );
+  FImagelist.AddImage(img, 4);
+
+  img := CreateImage_BMP(@fpcunit_information, sizeof(fpcunit_information) );
+  FImagelist.AddImage(img, 5);
+
+  img := CreateImage_BMP(@fpcunit_xtao_16, sizeof(fpcunit_xtao_16) );
+  FImagelist.AddImage(img, 6);
+end;
+
+procedure TGUITestRunnerForm.CreatePopupMenu;
+var
+  itm: TfpgMenuItem;
+begin
+  FPopupMenu := TfpgPopupMenu.Create(nil);
+
+  itm := FPopupMenu.AddMenuItem(uiCollapseAll, '', @miCollapseAll);
+  itm.Name := 'pmCollapseAll';
+  itm := FPopupMenu.AddMenuItem(uiExpandAll, '', @miExpandAll);
+  itm.Name := 'pmExpandAll';
+  itm := FPopupMenu.AddMenuItem(uiCollapse, '', @miCollapseNode);
+  itm.Name := 'pmCollapse';
+  itm := FPopupMenu.AddMenuItem(uiExpand, '', @miExpandNode);
+  itm.Name := 'pmExpand';
+  
+  tvTests.PopupMenu := FPopupMenu;
+end;
+
+procedure TGUITestRunnerForm.miCollapseAll(Sender: TObject);
+begin
+  tvTests.RootNode.Collapse;
+end;
+
+procedure TGUITestRunnerForm.miExpandAll(Sender: TObject);
+begin
+  tvTests.RootNode.Expand;
+end;
+
+procedure TGUITestRunnerForm.miCollapseNode(Sender: TObject);
+begin
+  tvTests.Selection.Collapse;
+end;
+
+procedure TGUITestRunnerForm.miExpandNode(Sender: TObject);
+begin
+  tvTests.Selection.Expand;
 end;
 
 constructor TGUITestRunnerForm.Create(AOwner: TComponent);
@@ -482,8 +541,8 @@ begin
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     TabOrder := 3;
-//    ImageList := FImagelist;
-//    ShowImages := True;
+    ImageList := FImagelist;
+    ShowImages := True;
   end;
 
   memName1 := TfpgMemo.Create(bvlResults);

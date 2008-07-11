@@ -15,7 +15,7 @@ uses
   gfxbase{, fpcanvas};
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
-function  LoadImage_BMP(const AFileName: string): TfpgImage;
+function  LoadImage_BMP(const AFileName: String): TfpgImage;
 function  CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
 
 implementation
@@ -26,11 +26,11 @@ begin
   ReadImage_BMP(Result, bmp, bmpsize);
 end;
 
-function LoadImage_BMP(const AFileName: string): TfpgImage;
+function LoadImage_BMP(const AFileName: String): TfpgImage;
 var
   AFile: file of char;
   AImageData: Pointer;
-  AImageDataSize: longint;
+  AImageDataSize: integer;
 begin
   Result := nil;
   if not FileExists(AFileName) then
@@ -40,6 +40,7 @@ begin
   FileMode := fmOpenRead; // read-only
   Reset(AFile);
   AImageDataSize := FileSize(AFile);
+  AImageData := nil;
   GetMem(AImageData, AImageDataSize);
   try
     BlockRead(AFile, AImageData^, AImageDataSize);
@@ -92,10 +93,6 @@ type
  // Every line padded to 32 bits
  // The lines stored bottom-up
 
-type
-  PByte     = ^byte;
-  Pword     = ^word;
-  Plongword = ^longword;
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
 var
@@ -109,8 +106,8 @@ var
   b: byte;
   bit: byte;
   bcnt: byte;
-  linecnt: longword;
-  pixelcnt: longword;
+  linecnt: integer;
+  pixelcnt: integer;
   pdest: Plongword;
   depth: integer;
 
@@ -168,7 +165,7 @@ begin
 
     pcol     := ppal;
     pixelcnt := 0;
-    while integer(p) < integer(pdata) do
+    while (p) < (pdata) do
     begin
       pcol^ := Plongword(p)^;
       //Writeln('color: ',HexStr(pcol^,8));

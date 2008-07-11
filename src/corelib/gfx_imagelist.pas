@@ -28,6 +28,7 @@ interface
 uses
   Classes,
   SysUtils,
+  gfxbase,
   fpgfx;
   
 type
@@ -48,12 +49,12 @@ type
   public
     constructor Create; overload;
     constructor Create(AImageList: TfpgImageList; AIndex: integer; AImage: TfpgImage); overload;
-    constructor Create(AFileName: string; AIndex: integer); overload;
+    constructor Create(AFileName: TfpgString; AIndex: integer); overload;
     destructor  Destroy; override;
     property    Index: integer read FIndex write SetIndex;
     property    Image: TfpgImage read FImage write SetImage;
     property    ImageList: TfpgImageList read FImageList write SetImageList;
-    procedure   LoadFromFile(AFileName: String);
+    procedure   LoadFromFile(AFileName: TfpgString);
   end;
 
 
@@ -66,7 +67,7 @@ type
   public
     constructor Create;
     destructor  Destroy; override;
-    procedure   AddItemFromFile(AFileName: String; AIndex: integer = -1);
+    procedure   AddItemFromFile(AFileName: TfpgString; AIndex: integer = -1);
     procedure   AddImage(AImage: TfpgImage; AIndex: integer = -1);
     procedure   RemoveIndex(AIndex: integer);
     function    GetMaxItem: integer;
@@ -78,22 +79,23 @@ type
 implementation
 
 uses
-  gfx_imgfmt_bmp;
+  gfx_imgfmt_bmp,
+  gfx_utils;
 
 { TfpgImageList }
 
 function TfpgImageList.GetFListIndex(AIndex: Integer): Integer;
 var
-  ACounter: integer;
+  i: integer;
 begin
   {$IFDEF DEBUG}
   writeln('TfpgImageList.GetFListIndex');
   {$ENDIF}
   result := -1;
-  for ACounter := 0 to FList.Count - 1 do
-    if TfpgImageItem(FList[ACounter]).Index = AIndex then
+  for i := 0 to FList.Count - 1 do
+    if TfpgImageItem(FList[i]).Index = AIndex then
     begin
-      result := ACounter;
+      result := i;
       Break;  //==>
     end;
 end;
@@ -133,13 +135,13 @@ destructor TfpgImageList.Destroy;
 var
   i: integer;
 begin
-  for i := 0 to FList.Count - 1 do
+  for i := FList.Count-1 downto 0 do
     TfpgImageItem(FList[i]).Destroy;  // frees images
   FList.Destroy;
   inherited Destroy
 end;
 
-procedure TfpgImageList.AddItemFromFile(AFileName: String; AIndex: integer);
+procedure TfpgImageList.AddItemFromFile(AFileName: TfpgString; AIndex: integer);
 var
   AImageItem: TfpgImageItem;
 begin
@@ -147,8 +149,8 @@ begin
   writeln('TfpgImageList.AddItemFromFile');
   {$ENDIF}
   
-  if not FileExists(AFileName) then
-    Exit;
+  if not fpgFileExists(AFileName) then
+    Exit; //==>
   
   AImageItem := TfpgImageItem.Create;
   AImageItem.LoadFromFile(AFileName);
@@ -191,12 +193,12 @@ end;
 
 function TfpgImageList.GetMaxItem: integer;
 var
-  ACounter: integer;
+  i: integer;
 begin
   result := -1;
-  for ACounter := 0 to FList.Count - 1 do
-    if TfpgImageItem(FList[ACounter]).Index > result then
-      result := TfpgImageItem(FList[ACounter]).Index;
+  for i := 0 to FList.Count - 1 do
+    if TfpgImageItem(FList[i]).Index > result then
+      result := TfpgImageItem(FList[i]).Index;
 end;
 
 { TfpgImageItem }
@@ -234,17 +236,13 @@ begin
   {$IFDEF DEBUG}
   writeln('TfpgImageItem.SetImage');
   {$ENDIF}
-  if AImage <> FImage then
-  begin
-    FImage := AImage;
-    FImage.CreateMaskFromSample(0,0);
-  end;
+  FImage := AImage;
 end;
 
 constructor TfpgImageItem.Create;
 begin
   ImageList := nil;
-  FIndex    := 0;
+  FIndex    := -1;
   FImage    := nil;
 end;
 
@@ -259,7 +257,7 @@ begin
   ImageList   := AImageList;
 end;
 
-constructor TfpgImageItem.Create(AFileName: string; AIndex: integer);
+constructor TfpgImageItem.Create(AFileName: TfpgString; AIndex: integer);
 begin
   {$IFDEF DEBUG}
   writeln('TfpgImageItem.Create(', AFileName, ',', AIndex, ')');
@@ -275,7 +273,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgImageItem.LoadFromFile(AFileName: String);
+procedure TfpgImageItem.LoadFromFile(AFileName: TfpgString);
 begin
   {$IFDEF DEBUG}
   writeln('TfpgImageItem.LoadFromFile');
