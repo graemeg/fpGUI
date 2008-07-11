@@ -134,6 +134,7 @@ type
     property    ShowHeader;
     property    TabOrder;
     property    TopRow;
+//    property    VisibleRows;
     property    OnCanSelectCell;
     property    OnDrawCell;
     property    OnDoubleClick;
@@ -423,32 +424,38 @@ end;
 procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: Integer; ARect: TfpgRect;
     AFlags: TfpgGridDrawState);
 var
-  x: TfpgCoord;
+  Flags: TFTextFlags;
+  txt: string;
 begin
   if Cells[ACol, ARow] <> '' then
   begin
-    if not Enabled then
+    txt := Cells[ACol, ARow];
+    Flags:= [];
+    if Enabled then
+      Include(Flags,txtEnabled)
+    else
       Canvas.SetTextColor(clShadow1);
 
     case Columns[ACol].Alignment of
       taLeftJustify:
-          begin
-            x := ARect.Left + 1;
-          end;
+        Include(Flags,txtLeft);
       taCenter:
-          begin
-            x := (ARect.Width - Font.TextWidth(Cells[ACol, ARow])) div 2;
-            Inc(x, ARect.Left);
-          end;
+        Include(Flags,txtHCenter);
       taRightJustify:
-          begin
-            x := ARect.Right - Font.TextWidth(Cells[ACol, ARow]) - 1;
-            if x < (ARect.Left + 1) then
-              x := ARect.Left + 1;
-          end;
+        Include(Flags,txtRight);
     end;  { case }
+    
+    case Columns[ACol].Layout of
+      tlTop:
+        Include(Flags,txtTop);
+      tlCenter:
+        Include(Flags,txtVCenter);
+      tlBottom:
+        Include(Flags,txtBottom);
+    end;
 
-    Canvas.DrawString(x, ARect.Top+1, Cells[ACol, ARow]);
+    with ARect,Columns[ACol] do
+      Canvas.DrawText(Left+HMargin,Top,Right-Left-HMargin,Bottom-Top, txt, Flags);
   end;
 end;
 

@@ -42,6 +42,8 @@ type
   TfpgGridColumn = class(TObject)
   private
     FAlignment: TAlignment;
+    FLayout: TLayout;
+    FHMargin: Integer;
     FTitle: string;
     FWidth: integer;
     FBackgroundColor: TfpgColor;
@@ -51,7 +53,9 @@ type
     property    Width: integer read FWidth write FWidth;
     property    Title: string read FTitle write FTitle;
     property    Alignment: TAlignment read FAlignment write FAlignment;
+    property    Layout: TLayout read FLayout write FLayout;
     property    BackgroundColor: TfpgColor read FBackgroundColor write FBackgroundColor;
+    property    HMargin: Integer read FHMargin write FHMargin;
     property    TextColor: TfpgColor read FTextColor write FTextColor;
   end;
   
@@ -99,6 +103,8 @@ begin
   Width     := 65;
   Title     := '';
   Alignment := taLeftJustify;
+  Layout := tlCenter;
+  HMargin := 2;
 end;
 
 { TfpgCustomGrid }
