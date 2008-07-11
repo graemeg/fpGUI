@@ -97,6 +97,7 @@ type
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
@@ -502,6 +503,13 @@ begin
   FWrapText         := False;
   FLineSpace        := 2;
   FMargin           := 2;
+end;
+
+destructor TfpgPanel.Destroy;
+begin
+  FText := '';
+  FFont.Free;
+  inherited Destroy;
 end;
 
 {TfpgGroupBox}
