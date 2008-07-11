@@ -67,6 +67,9 @@ type
     property    Style;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnMouseDown;
+    property    OnMouseUp;
+    property    OnPaint;
   end;
   
 

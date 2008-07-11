@@ -134,7 +134,7 @@ type
     property    ShowHeader;
     property    TabOrder;
     property    TopRow;
-//    property    VisibleRows;
+    property    VisibleRows;
     property    OnCanSelectCell;
     property    OnDrawCell;
     property    OnDoubleClick;

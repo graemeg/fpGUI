@@ -140,6 +140,7 @@ type
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
     property    ColumnBackgroundColor[ACol: Integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
     property    ColumnTextColor[ACol: Integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
+    property    VisibleRows: Integer read VisibleLines;
     property    TopRow: Integer read FFirstRow write SetFirstRow;
     property    OnDrawCell: TfpgDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;

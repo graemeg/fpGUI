@@ -109,6 +109,7 @@ type
     property    TabOrder;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnKeyPress;
   end;
 
 
