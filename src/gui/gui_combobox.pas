@@ -99,7 +99,6 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     property    Font: TfpgFont read FFont;
   end;
   
@@ -120,7 +119,6 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
-    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     property    Text: string read GetText write SetText;
   public
@@ -371,12 +369,6 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgBaseComboBox.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
-begin
-  inherited SetPosition(aleft, atop, awidth, aheight);
-  CalculateInternalButtonRect
-end;
-
 { TComboboxDropdownWindow }
 
 procedure TComboboxDropdownWindow.SetFirstItem;
@@ -551,7 +543,6 @@ procedure TfpgBaseStaticCombo.SetWidth(const AValue: TfpgCoord);
 begin
   inherited SetWidth(AValue);
   CalculateInternalButtonRect;
-  RePaint;
 end;
 
 procedure TfpgBaseStaticCombo.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -565,7 +556,6 @@ procedure TfpgBaseStaticCombo.SetHeight(const AValue: TfpgCoord);
 begin
   inherited SetHeight(AValue);
   CalculateInternalButtonRect;
-  RePaint;
 end;
 
 procedure TfpgBaseStaticCombo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -607,12 +597,6 @@ begin
     FocusItem := NewIndex;
     RePaint;
   end;
-end;
-
-procedure TfpgBaseStaticCombo.HandleResize(awidth, aheight: TfpgCoord);
-begin
-  inherited HandleResize(awidth, aheight);
-  CalculateInternalButtonRect;
 end;
 
 procedure TfpgBaseStaticCombo.HandlePaint;
