@@ -21,6 +21,7 @@ type
     procedure TestNext;
     procedure TestPrev;
     procedure TestAppendText;
+    procedure TestFindSubNode_Text;
   end; 
 
 implementation
@@ -50,19 +51,28 @@ end;
 
 procedure TTestTreeview.TestCountRecursive;
 var
-  n: TfpgTreeNode;
+  n1, n2: TfpgTreeNode;
 begin
+  { root
+      |--n1
+      |  |--n1.1
+      |--n2
+         |--n2.1
+         |--n2.2
+  }
   AssertEquals('Failed on 1', 0, FTree.RootNode.CountRecursive);
-  FTree.RootNode.AppendText('n1');
+  n1 := FTree.RootNode.AppendText('n1');
   AssertEquals('Failed on 2', 1, FTree.RootNode.CountRecursive);
-  n := FTree.RootNode.AppendText('n2');
+  n2 := FTree.RootNode.AppendText('n2');
   AssertEquals('Failed on 3', 2, FTree.RootNode.CountRecursive);
-  n.AppendText('n2.1');
+  n2.AppendText('n2.1');
   AssertEquals('Failed on 4', 3, FTree.RootNode.CountRecursive);
-  n.AppendText('n2.2');
+  n2.AppendText('n2.2');
   AssertEquals('Failed on 5', 4, FTree.RootNode.CountRecursive);
-//  FTree.RootNode.Remove(n);
-//  AssertEquals('Failed on 6', 1, FTree.RootNode.Count);
+  n1.AppendText('n1.1');
+  AssertEquals('Failed on 6', 5, FTree.RootNode.CountRecursive);
+  FTree.RootNode.Remove(n2); // removing 3 nodes
+  AssertEquals('Failed on 6', 2, FTree.RootNode.CountRecursive);
 end;
 
 procedure TTestTreeview.TestNext;
@@ -102,8 +112,57 @@ begin
   AssertEquals('Failed on 3', 2, FTree.RootNode.Count);
 end;
 
-initialization
+procedure TTestTreeview.TestFindSubNode_Text;
+var
+  n1, n2, n3: TfpgTreeNode;
+  r: TfpgTreeNode;
+begin
+  { root
+      |--n1
+      |  |--n1.1
+      |
+      |--n2
+      |  |--n2.1
+      |  |  |--n2.1.1
+      |  |
+      |  |--n2.2
+      |
+      |--n3
+  }
+  AssertTrue('Failed on 1', FTree.RootNode.FindSubNode('n1', False) = nil);
 
-  RegisterTest(TTestTreeview); 
+  n1 := FTree.RootNode.AppendText('n1');
+  AssertTrue('Failed on 2', FTree.RootNode.FindSubNode('n1', False) = n1);
+  AssertTrue('Failed on 3', FTree.RootNode.FindSubNode('n1', True) = n1);
+
+  n2 := FTree.RootNode.AppendText('n2');
+  AssertTrue('Failed on 4', FTree.RootNode.FindSubNode('n2', False) = n2);
+  AssertTrue('Failed on 5', FTree.RootNode.FindSubNode('n2', True) = n2);
+
+  r := n2.AppendText('n2.1');
+  AssertTrue('Failed on 6', FTree.RootNode.FindSubNode('n2.1', False) = nil);
+  AssertTrue('Failed on 7', FTree.RootNode.FindSubNode('n2.1', True) = r);
+
+  r := n2.AppendText('n2.2');
+  AssertTrue('Failed on 8', FTree.RootNode.FindSubNode('n2.2', False) = nil);
+  AssertTrue('Failed on 9', FTree.RootNode.FindSubNode('n2.2', True) = r);
+  
+  n3 := FTree.RootNode.AppendText('n3');
+  AssertTrue('Failed on 10', FTree.RootNode.FindSubNode('n3', False) = n3);
+  AssertTrue('Failed on 11', FTree.RootNode.FindSubNode('n3', True) = n3);
+
+  r := n1.AppendText('n1.1');
+  AssertTrue('Failed on 12', FTree.RootNode.FindSubNode('n1.1', False) = nil);
+  AssertTrue('Failed on 13', FTree.RootNode.FindSubNode('n1.1', True) = r);
+
+  r := n2.FindSubNode('n2.1', True).AppendText('n2.1.1');
+  AssertTrue('Failed on 14', FTree.RootNode.FindSubNode('n2.1.1', False) = nil);
+  AssertTrue('Failed on 15', FTree.RootNode.FindSubNode('n2.1.1', True) = r);
+end;
+
+
+initialization
+  RegisterTest(TTestTreeview);
+  
 end.
 

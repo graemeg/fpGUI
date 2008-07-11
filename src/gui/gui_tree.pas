@@ -12,7 +12,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Defines a basic Treeview control and Node classes.
+      Defines a basic Treeview control and Node classes. The treeview
+      keeps track of the nodes in a double-linked list structure.
+      Each Node as .prev and .next property pointing to it's neighbours.
 }
 
 unit gui_tree;
@@ -406,16 +408,16 @@ begin
       if h.Text = AText then
       begin
         result := h;
-        exit;
+        Exit; //==>
       end;
       if h.count > 0 then
       begin
-        result := h.FirstSubNode.FindSubNode(AText, ARecursive);
+        result := h.FindSubNode(AText, ARecursive);
         if result <> nil then
-          exit;
+          Exit; //==>
       end;
       h := h.next;
-    end;
+    end;  { while }
   end
   else
   begin
@@ -453,7 +455,7 @@ begin
     end;
     if h.Count > 0 then
     begin
-      result := h.FirstSubNode.FindSubNode(ATreeNodeFindMethod);
+      result := h.FindSubNode(ATreeNodeFindMethod);
       if result <> nil then
         Exit; //==>
     end;

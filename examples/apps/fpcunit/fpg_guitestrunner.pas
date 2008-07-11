@@ -99,13 +99,15 @@ procedure TGUITestRunnerForm.AddFailure(ATest: TTest; AFailure: TTestFailure);
 var
   FailureNode, node: TfpgTreeNode;
 begin
-  MemoLog('failed - ' + ATest.TestName);
+//  MemoLog('failed - ' + ATest.TestName);
   FailureNode := FindNode(ATest);
-  FailureNode.ImageIndex := 3;
   if not Assigned(FailureNode) then
-    memolog('  Failed to find node');
-  if Assigned(FailureNode) then
   begin
+    memolog('BUG: Failed to find node for <' + ATest.TestName + '>');
+  end
+  else
+  begin
+    FailureNode.ImageIndex := 3;
     node := FailureNode.AppendText('Message: ' + AFailure.ExceptionMessage);
     node.ImageIndex := 4;
     node.TextColor := clFuchsia;
@@ -125,11 +127,15 @@ procedure TGUITestRunnerForm.AddError(ATest: TTest; AError: TTestFailure);
 var
   ErrorNode, node: TfpgTreeNode;
 begin
-  MemoLog('error - ' + ATest.TestName);
+//  MemoLog('error - ' + ATest.TestName);
   ErrorNode := FindNode(ATest);
-  ErrorNode.ImageIndex := 2;
-  if Assigned(ErrorNode) then
+  if not Assigned(ErrorNode) then
   begin
+    memolog('BUG: Failed to find node for <' + ATest.TestName + '>');
+  end
+  else
+  begin
+    ErrorNode.ImageIndex := 2;
     node := ErrorNode.AppendText('Exception message: ' + AError.ExceptionMessage);
     node.TextColor := clRed;
     node.ImageIndex := 4;
@@ -263,6 +269,9 @@ begin
 
   // Popup Menu support is still experimental
 //  CreatePopupMenu;
+
+  // Focus on first node
+  tvTests.Selection := n;
 end;
 
 procedure TGUITestRunnerForm.btnQuitClicked(Sender: TObject);
