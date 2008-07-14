@@ -53,7 +53,7 @@ type
       mtCustom);
       
   TfpgMsgDlgBtn = (mbNoButton, mbOK, mbCancel, mbYes, mbNo, mbAbort,
-      mbRetry, mbIgnore, mbYesToAll, mbNoToAll, mbHelp, mbClose);
+      mbRetry, mbIgnore, mbAll, mbNoToAll, mbYesToAll, mbHelp, mbClose);
       
   TfpgMsgDlgButtons = set of TfpgMsgDlgBtn;
 
@@ -66,7 +66,7 @@ const
 
   cMsgDlgBtnText: array[TfpgMsgDlgBtn] of string =
       ( '', rsOK, rsCancel, rsYes, rsNo, rsAbort, rsRetry, rsIgnore,
-        rsYesToAll, rsNoToAll, rsHelp, rsClose );
+        rsAll, rsNoToAll, rsYesToAll, rsHelp, rsClose );
 
 type
 
@@ -389,7 +389,7 @@ begin
   FButton := TfpgButton.Create(self);
   FButton.Text    := cMsgDlgBtnText[mbOK];
   FButton.Width   := 75;
-  FButton.ModalResult := Ord(mbOK);
+  FButton.ModalResult := mrOK;
 end;
 
 destructor TfpgMessageBox.Destroy;
@@ -423,12 +423,12 @@ end;
 
 procedure TfpgBaseDialog.btnOKClick(Sender: TObject);
 begin
-  ModalResult := 1;
+  ModalResult := mrOK;
 end;
 
 procedure TfpgBaseDialog.btnCancelClick(Sender: TObject);
 begin
-  ModalResult := 2;
+  ModalResult := mrCancel;
   Close;
 end;
 
@@ -948,7 +948,7 @@ begin
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.folderup';   // Do NOT localize
-    ModalResult := 0;
+    ModalResult := mrNone;
     Focusable := False;
     OnClick := @UpDirClick;
   end;
@@ -961,7 +961,7 @@ begin
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.foldernew';    // Do NOT localize
-    ModalResult := 0;
+    ModalResult := mrNone;
     Focusable := False;
     OnClick := @btnDirNewClicked;
   end;
@@ -974,7 +974,7 @@ begin
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.hidden';   // Do NOT localize
-    ModalResult := 0;
+    ModalResult := mrNone;
     Focusable := False;
     GroupIndex := 1;
     AllowAllUp := True;
@@ -1095,10 +1095,10 @@ begin
 
   if not FOpenMode or fpgFileExists(edFileName.Text) then
   begin
-    ModalResult := 1;
+    ModalResult := mrOK;
   end;
 
-  if ModalResult = 1 then
+  if ModalResult = mrOK then
     // FileName := fpgExpandFileName(edFileName.Text);
     FileName := grid.FileList.DirectoryName + edFileName.Text;
 end;

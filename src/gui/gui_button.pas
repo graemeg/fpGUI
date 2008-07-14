@@ -46,7 +46,7 @@ type
     FClickOnPush: Boolean;
     FGroupIndex: integer;
     FAllowAllUp: boolean;
-    FModalResult: integer;
+    FModalResult: TfpgModalResult;
     function    GetFontDesc: string;
     procedure   SetDefault(const AValue: boolean);
     procedure   SetEmbedded(const AValue: Boolean);
@@ -100,7 +100,7 @@ type
     property    ImageName: string read FImageName write SetImageName;
     property    ImageSpacing: integer read FImageSpacing write SetImageSpacing default -1;
     property    ImageLayout: TImageLayout read FImageLayout write SetImageLayout default ilImageLeft;
-    property    ModalResult: integer read FModalResult write FModalResult default 0;
+    property    ModalResult: TfpgModalResult read FModalResult write FModalResult default mrNone;
     property    ShowImage: Boolean read FShowImage write SetShowImage default True;
     property    Text: string read FText write SetText;
   public
@@ -270,7 +270,7 @@ begin
   FImageLayout  := ilImageLeft;
   FImageMargin  := 3;   // image is 3 pixels from edge of button. -1 will centre image.
   FImageSpacing := -1;  // text is centered in remaining space
-  FModalResult  := 0;
+  FModalResult  := mrNone;
   FEmbedded     := False;
   FDefault      := False;
   FAllowAllUp   := False;

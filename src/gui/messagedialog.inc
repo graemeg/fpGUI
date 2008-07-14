@@ -148,15 +148,15 @@ var
       { TODO : At some stage the StyleManager can give us the correct button
         order based on the OS and Window Manager. }
       Result := 3;
-      sl.Add(cMsgDlgBtnText[mbYes] + '=' + IntToStr(Ord(mbYes)));
-      sl.Add(cMsgDlgBtnText[mbNo] + '=' + IntToStr(Ord(mbNo)));
-      sl.Add(cMsgDlgBtnText[mbCancel] + '=' + IntToStr(Ord(mbCancel)));
+      sl.Add(cMsgDlgBtnText[mbYes] + '=' + IntToStr(mrYes));
+      sl.Add(cMsgDlgBtnText[mbNo] + '=' + IntToStr(mrNo));
+      sl.Add(cMsgDlgBtnText[mbCancel] + '=' + IntToStr(mrCancel));
       case DefaultButton of
         mbYes:    lDefault := 0;
         mbNo:     lDefault := 1;
         mbCancel: lDefault := 2;
       end;
-      Exit;
+      Exit; //==>
     end;
     
     // if we got here, try all known buttons.
@@ -165,6 +165,8 @@ var
       if i in Buttons then
       begin
         inc(Result);
+        { TODO : How could we improve this to stay in sync with TfpgModalResult values
+          like mrOK, mrCancel etc... }
         sl.Add(cMsgDlgBtnText[i] + '=' + IntToStr(Ord(i)));
         if i = DefaultButton then
           lDefault := Result-1;
@@ -300,7 +302,7 @@ procedure TfpgMessageDialog.HandleKeyPress(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
   if keycode = keyEscape then   // Esc cancels the dialog
-    ModalResult := Ord(mbCancel)
+    ModalResult := mrCancel
   else
     inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;

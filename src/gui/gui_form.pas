@@ -47,7 +47,7 @@ type
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
   protected
-    FModalResult: integer;
+    FModalResult: TfpgModalResult;
     FParentForm: TfpgBaseForm;
     FWindowPosition: TWindowPosition;
     FWindowTitle: string;
@@ -68,7 +68,7 @@ type
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
     // properties
     property    Sizeable: boolean read FSizeable write FSizeable;
-    property    ModalResult: integer read FModalResult write FModalResult;
+    property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
@@ -238,7 +238,7 @@ begin
   FTextColor       := clText1;
   FMinWidth        := 32;
   FMinHeight       := 32;
-  FModalResult     := 0;
+  FModalResult     := mrNone;
   FFullScreen      := False;
   FIsContainer     := True;
 end;
@@ -260,7 +260,7 @@ var
 begin
   FWindowType := wtModalForm;
   fpgApplication.PushModalForm(self);
-  ModalResult     := 0;
+  ModalResult := mrNone;
 
   Show;
 
@@ -270,7 +270,7 @@ begin
   try
     repeat
       fpgWaitWindowMessage;
-    until (ModalResult <> 0) or (not Visible);
+    until (ModalResult <> mrNone) or (not Visible);
   except
     on E: Exception do
     begin
@@ -283,7 +283,7 @@ begin
   fpgApplication.PopModalForm;
   Result := ModalResult;
   
-  if ModalResult <> 0 then
+  if ModalResult <> mrNone then
   begin
     lCloseAction := caFree; // Dummy variable - we do nothing with it
     DoOnClose(lCloseAction); // Simply so the OnClose event fires.
@@ -376,7 +376,7 @@ procedure TfpgBaseForm.Hide;
 begin
   Visible := False;
 //  HandleHide;
-  if ModalResult = 0 then
+  if ModalResult = mrNone then
     ModalResult := -1;
 end;
 

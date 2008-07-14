@@ -36,12 +36,12 @@ type
     txtAutoSize);
 
   TMouseButton = (mbLeft, mbRight, mbMiddle);
-
+  
 
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
   TextFlagsDflt = [txtLeft, txtTop, txtEnabled];
-
+  
   // Used for the internal message queue
   cMessageQueueSize = 1024;
 

@@ -27,11 +27,12 @@ uses
   gfx_impl;
 
 type
-  TfpgCoord   = integer;     // we might use floating point coordinates in the future...
-  TfpgColor   = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
-  TfpgString  = type string;
-  TfpgChar    = type string[4];
-
+  TfpgCoord       = integer;     // we might use floating point coordinates in the future...
+  TfpgColor       = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
+  TfpgString      = type string;
+  TfpgChar        = type string[4];
+  TfpgModalResult = Low(integer)..High(integer);
+  
   TRGBTriple = record
     Red: word;
     Green: word;
@@ -80,6 +81,19 @@ const
 
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
+
+  { TfpgModalResult values }
+  mrNone     = 0;
+  mrOk       = mrNone + 1;
+  mrCancel   = mrOk + 1;
+  mrYes      = mrCancel + 1;
+  mrNo       = mrYes + 1;
+  mrAbort    = mrNo + 1;
+  mrRetry    = mrAbort + 1;
+  mrIgnore   = mrRetry + 1;
+  mrAll      = mrIgnore + 1;
+  mrNoToAll  = mrAll + 1;
+  mrYesToAll = mrNoToAll + 1;
 
 var
   FPG_DEFAULT_FONT_DESC: string = 'Arial-10:antialias=true';
