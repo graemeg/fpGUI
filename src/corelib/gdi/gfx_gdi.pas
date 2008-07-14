@@ -176,6 +176,8 @@ type
   end;
 
 
+  { TfpgApplicationImpl }
+
   TfpgApplicationImpl = class(TfpgApplicationBase)
   protected
     FDisplay: HDC;
@@ -194,6 +196,14 @@ type
     hcr_wait: HCURSOR;
     hcr_hand: HCURSOR;
     FFocusedWindow: THANDLE;
+    { FHiddenWindow serves as parent for modal forms,
+      ensuring they don't have taskbar button. It is created
+      on-demand and should be accessed via GetHiddenWindow. }
+    FHiddenWindow: HWND;
+    { To avoid problems, window classes should be accessible
+      from RegisterClass call till the program is terminated. }
+    HiddenWndClass: TWndClass;
+    function    GetHiddenWindow: HWND;
     function    DoGetFontFaceList: TStringList; override;
   public
     constructor Create(const AParams: string); override;
@@ -918,6 +928,28 @@ begin
   Result.Sort;
 end;
 
+function TfpgApplicationImpl.GetHiddenWindow: HWND;
+begin
+  if (FHiddenWindow = 0) then
+  begin
+    with HiddenWndClass do
+    begin
+      style         := 0;
+      lpfnWndProc   := WndProc(@DefWindowProc);
+      hInstance     := MainInstance;
+      hIcon         := 0;
+      hCursor       := 0;
+      hbrBackground := 0;
+      lpszClassName := 'FPGHIDDEN';
+    end;
+    Windows.RegisterClass(@HiddenWndClass);
+
+    FHiddenWindow := CreateWindow('FPGHIDDEN', '',
+      DWORD(WS_POPUP), 0, 0, 0, 0, 0, 0, MainInstance, nil);
+  end;
+  Result := FHiddenWindow;
+end;
+
 constructor TfpgApplicationImpl.Create(const AParams: string);
 begin
   inherited Create(AParams);
@@ -962,6 +994,8 @@ begin
   hcr_crosshair := LoadCursor(0, IDC_CROSS);
   hcr_wait      := LoadCursor(0, IDC_WAIT);
   hcr_hand      := LoadCursor(0, IDC_HAND);
+
+  FHiddenWindow := 0;
 
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
@@ -1208,6 +1242,8 @@ begin
 
   if FWindowType = wtModalForm then
   begin
+    // set parent window to special hidden window. It helps to hide window taskbar button.
+    FParentWinHandle := wapplication.GetHiddenWindow;
     // for modal windows, this is necessary
     FWinStyle   := WS_OVERLAPPEDWINDOW or WS_POPUPWINDOW;
     FWinStyle   := FWinStyle and not (WS_MINIMIZEBOX);
@@ -2094,19 +2130,21 @@ end;
 
 procedure TfpgClipboardImpl.InitClipboard;
 begin
+  {$WARNING This does not work! 'FPGUI' window class was not registered,
+  so CreateWindowEx always returns 0}
   FClipboardWndHandle := Windows.CreateWindowEx(
-      0,			  // extended window style
-      'FPGUI',  // registered class name
-      nil,			// window name
-      0,			  // window style
-      0,			  // horizontal position of window
-      0,			  // vertical position of window
-      10,			  // window width
-      10,       // window height
-      0,        // handle to parent or owner window
-      0,        // menu handle or child identifier
+      0,            // extended window style
+      'FPGUI',      // registered class name
+      nil,          // window name
+      0,            // window style
+      0,            // horizontal position of window
+      0,            // vertical position of window
+      10,           // window width
+      10,           // window height
+      0,            // handle to parent or owner window
+      0,            // menu handle or child identifier
       MainInstance, // handle to application instance
-      nil       // window-creation data
+      nil           // window-creation data
       );
 end;
 
