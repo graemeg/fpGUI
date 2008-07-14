@@ -24,6 +24,7 @@ interface
 uses
   SysUtils,
   Classes,
+  contnrs,
   vfdwidgetclass,
   vfdprops,
   typinfo;
@@ -65,7 +66,7 @@ uses
 
 var
   FVFDFormWidget: TVFDWidgetClass;
-  FVFDWidgets: TList;
+  FVFDWidgets: TObjectList;
 
 function VFDFormWidget: TVFDWidgetClass;
 begin
@@ -442,10 +443,11 @@ end;
 
 
 initialization
-    FVFDWidgets := TList.Create;
+    FVFDWidgets := TObjectList.Create;
 
 finalization
     FVFDWidgets.Free;
+    FVFDFormWidget.Free;
     
 end.
 

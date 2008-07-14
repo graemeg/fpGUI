@@ -25,8 +25,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, fpgfx, vfdmain, vfdresizer, vfdforms,
   vfdfile, newformdesigner, vfdwidgets, vfdformparser, vfdeditors,
-  vfdwidgetclass, vfdutils, vfdprops, vfddesigner, vfdpropeditgrid,
-  fpgui_toolkit;
+  vfdwidgetclass, vfdutils, vfdprops, vfddesigner, vfdpropeditgrid;
 
 
 procedure MainProc;
@@ -44,6 +43,8 @@ begin
     // Note:  This needs improving!!
     fpgApplication.MainForm := frmMain;
     fpgApplication.Run;
+    
+    PropList.Free;
     
   finally
     maindsgn.Free;
