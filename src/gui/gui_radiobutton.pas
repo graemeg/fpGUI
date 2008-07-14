@@ -54,7 +54,7 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    function    FindNeighbor(direction: TFocusSearchDirection): TfpgRadioButton;
+    function    FindNeighbour(direction: TFocusSearchDirection): TfpgRadioButton;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -115,14 +115,15 @@ begin
   if FChecked and (Parent <> nil) then
   begin
     for i := 0 to Parent.ComponentCount-1 do
-    begin
-      wg := TfpgWidget(Parent.Components[i]);
-      if (wg <> nil) and (wg <> self) and (wg is TfpgRadioButton) and
-          (TfpgRadioButton(wg).GroupIndex = GroupIndex) then
+      if (Parent.Components[i] is TfpgWidget) then
       begin
-        TfpgRadioButton(wg).Checked := False;
-      end;
-    end;  { for }
+        wg := TfpgWidget(Parent.Components[i]);
+        if (wg <> nil) and (wg <> self) and (wg is TfpgRadioButton) and
+            (TfpgRadioButton(wg).GroupIndex = GroupIndex) then
+        begin
+          TfpgRadioButton(wg).Checked := False;
+        end;
+      end;  { if }
   end;  { if }
 
   RePaint;
@@ -234,18 +235,18 @@ begin
     keyUp, keyLeft:
       begin
         consumed := True;
-        nbr := FindNeighbor(fsdPrev);
+        nbr := FindNeighbour(fsdPrev);
         if nbr = Self then
-          nbr := FindNeighbor(fsdLast);
+          nbr := FindNeighbour(fsdLast);
         nbr.SetFocus;
         nbr.Checked := True;
       end;
     keyDown, keyRight:
       begin
         consumed := True;
-        nbr := FindNeighbor(fsdNext);
+        nbr := FindNeighbour(fsdNext);
         if nbr = Self then
-          nbr := FindNeighbor(fsdFirst);
+          nbr := FindNeighbour(fsdFirst);
         nbr.SetFocus;
         nbr.Checked := True;
       end;
@@ -272,7 +273,7 @@ begin
   inherited HandleKeyRelease(keycode, shiftstate, consumed);
 end;
 
-function TfpgRadioButton.FindNeighbor(direction: TFocusSearchDirection): TfpgRadioButton;
+function TfpgRadioButton.FindNeighbour(direction: TFocusSearchDirection): TfpgRadioButton;
 var
   i: integer;
   wg: TfpgWidget;
@@ -290,54 +291,57 @@ begin
     
     for i := 0 to Parent.ComponentCount-1 do
     begin
-      wg := TfpgWidget(Parent.Components[i]);
-      if (wg <> nil) and (wg is TfpgRadioButton) and
-         wg.Visible and wg.Enabled and wg.Focusable and
-         (TfpgRadioButton(wg).GroupIndex = GroupIndex) then
+      if (Parent.Components[i] is TfpgWidget) then
       begin
-        case direction of
-          fsdFirst:
-            if (wg.TabOrder < bestdtab) then
-            begin
-              Result   := TfpgRadioButton(wg);
-              bestdtab := wg.TabOrder;
-            end;
-              
-          fsdLast:
-            if (wg.TabOrder >= bestdtab) then
-            begin
-              Result   := TfpgRadioButton(wg);
-              bestdtab := wg.TabOrder;
-            end;
-        
-          fsdNext:
-            if wg = Self then
-              FoundIt := True
-            else
-            begin
-              if ((wg.TabOrder > Self.TabOrder) and (wg.TabOrder < bestdtab)) or
-                 ((wg.TabOrder = Self.TabOrder) and FoundIt) then
+        wg := TfpgWidget(Parent.Components[i]);
+        if (wg <> nil) and (wg is TfpgRadioButton) and
+           wg.Visible and wg.Enabled and wg.Focusable and
+           (TfpgRadioButton(wg).GroupIndex = GroupIndex) then
+        begin
+          case direction of
+            fsdFirst:
+              if (wg.TabOrder < bestdtab) then
               begin
                 Result   := TfpgRadioButton(wg);
                 bestdtab := wg.TabOrder;
               end;
-            end;
-            
-          fsdPrev:
-            if wg = Self then
-              FoundIt := True
-            else
-            begin
-              if ((wg.TabOrder < Self.TabOrder) and (wg.TabOrder >= bestdtab)) or
-                 ((wg.TabOrder = Self.TabOrder) and not FoundIt) then
+
+            fsdLast:
+              if (wg.TabOrder >= bestdtab) then
               begin
                 Result   := TfpgRadioButton(wg);
                 bestdtab := wg.TabOrder;
               end;
-            end;
-        end; { case }
-      end; { if }
-    end;  { for }
+
+            fsdNext:
+              if wg = Self then
+                FoundIt := True
+              else
+              begin
+                if ((wg.TabOrder > Self.TabOrder) and (wg.TabOrder < bestdtab)) or
+                   ((wg.TabOrder = Self.TabOrder) and FoundIt) then
+                begin
+                  Result   := TfpgRadioButton(wg);
+                  bestdtab := wg.TabOrder;
+                end;
+              end;
+
+            fsdPrev:
+              if wg = Self then
+                FoundIt := True
+              else
+              begin
+                if ((wg.TabOrder < Self.TabOrder) and (wg.TabOrder >= bestdtab)) or
+                   ((wg.TabOrder = Self.TabOrder) and not FoundIt) then
+                begin
+                  Result   := TfpgRadioButton(wg);
+                  bestdtab := wg.TabOrder;
+                end;
+              end;
+          end; { case }
+        end; { if }
+      end; { if is TfpgWidget }
+    end;  { for ComponentCount }
   end;  { if }
 end;
 
