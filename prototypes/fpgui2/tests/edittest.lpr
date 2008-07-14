@@ -421,7 +421,7 @@ begin
 
 //  writeln(UTF8Length(edit2.text));
 //  writeln(Length(edit2.text));
-  UTF8Insert('ö', edit2.Text, 15);
+//  UTF8Insert('ö', edit2.Text, 15);
 
   // left to right and right to left text in one
   // fpGUI doesn't handle this correctly yet.

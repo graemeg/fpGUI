@@ -84,7 +84,7 @@ type
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
-    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
@@ -872,9 +872,9 @@ begin
   RePaint;
 end;
 
-procedure TfpgBaseEdit.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgBaseEdit.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  inherited HandleRMouseDown(x, y, shiftstate);
+  inherited HandleRMouseUp(x, y, shiftstate);
   if Assigned(PopupMenu) then
     PopupMenu.ShowAt(self, x, y)
   else

@@ -373,7 +373,8 @@ var
   itm: TfpgMenuItem;
 begin
   FPopupMenu := TfpgPopupMenu.Create(nil);
-
+//  FPopupMenu.FreeNotification(self);
+  
   itm := FPopupMenu.AddMenuItem(uiCollapseAll, '', @miCollapseAll);
   itm.Name := 'pmCollapseAll';
   itm := FPopupMenu.AddMenuItem(uiExpandAll, '', @miExpandAll);

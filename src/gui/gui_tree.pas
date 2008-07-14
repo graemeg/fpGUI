@@ -191,7 +191,7 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
-    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
@@ -1213,9 +1213,9 @@ begin
   RePaint;
 end;
 
-procedure TfpgTreeView.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgTreeView.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  inherited HandleRMouseDown(x, y, shiftstate);
+  inherited HandleRMouseUp(x, y, shiftstate);
   if Assigned(PopupMenu) then
     PopupMenu.ShowAt(self, x, y);
 end;
