@@ -339,7 +339,7 @@ begin
   Result.Top   := y;
   Result.Width := w;
   Result.ShowThousand:= AShowThousand;
-//  Result.Decimals := ADecimals;
+  Result.Decimals := ADecimals;
   if h < TfpgEditFloat(Result).FFont.Height + 6 then
     Result.Height:= TfpgEditFloat(Result).FFont.Height + 6
   else
@@ -1752,10 +1752,10 @@ begin
           fText := fText + DecimalSeparator;
         if UTF8Length(fText)-Pos(DecimalSeparator, fText) < fDecimals then
           while UTF8Length(fText)-Pos(DecimalSeparator, fText) < fDecimals do
-            begin
+          begin
             fText := fText + '0';
             Inc(FCursorPos);
-            end;
+          end;
       end;
     end;
   inherited HandleKeyPress(keycode,shiftstate,consumed);

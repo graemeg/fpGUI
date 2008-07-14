@@ -656,7 +656,7 @@ var
   wg: TfpgWidget;
   dir: integer;
 begin
-  if Assigned(OnKeyPress) then
+  if Assigned(OnKeyPress) and FFocusable then
     OnKeyPress(self, keycode, shiftstate, consumed);
 
   if consumed then
@@ -739,7 +739,7 @@ procedure TfpgWidget.HandleSetFocus;
 var
   awg: TfpgWidget;
 begin
-  if not FFocused then
+  if not FFocused and FFocusable then
   begin
     FFocused := True;
     RePaint;

@@ -129,8 +129,8 @@ type
   end;
 
 
-function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList:TStringList;
-      h: TfpgCoord = 0): TfpgEditCombo;
+function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList:TStringList; ACompletion: boolean = False;
+      ANew: TAllowNew = anNo; h: TfpgCoord = 0): TfpgEditCombo;
 
 
 implementation
@@ -225,14 +225,16 @@ begin
   ListBox.PopupFrame := True;
 end;
 
-function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringList;
-      h: TfpgCoord = 0): TfpgEditCombo;
+function CreateEditCombo(AOwner: TComponent; x, y, w: TfpgCoord; AList:TStringList; ACompletion: boolean = False;
+      ANew: TAllowNew = anNo; h: TfpgCoord = 0): TfpgEditCombo;
 begin
   Result           := TfpgEditCombo.Create(AOwner);
   Result.Left      := x;
   Result.Top       := y;
   Result.Width     := w;
   Result.Focusable := True;
+  Result.AutoCompletion := ACompletion;
+  Result.AllowNew       := ANew;
   if h < TfpgEditCombo(Result).Font.Height + 6 then
     Result.Height:= TfpgEditCombo(Result).Font.Height + 6
   else
@@ -528,7 +530,10 @@ begin
                   FItems.Add(FText);
                 anAsk:
                   if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
-                    FItems.Add(FText)
+                    begin
+                    FItems.Add(FText);
+                    FocusItem := Pred(FItems.Count);
+                    end
                   else
                     begin
                     FNewItem:= False;
