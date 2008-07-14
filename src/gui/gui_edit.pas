@@ -245,7 +245,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
   end;
-  
+
   
   TfpgEditCurrency = class(TfpgBaseNumericEdit)
   private
@@ -285,7 +285,7 @@ function CreateEditInteger(AOwner: TComponent; x, y, w, h: TfpgCoord;
     AShowThousand: boolean= True): TfpgEditInteger;
 
 function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
-    AShowThousand: boolean= True): TfpgEditFloat;
+    AShowThousand: boolean= True; ADecimals: Integer= -1): TfpgEditFloat;
 
 function CreateEditCurrency(AOwner: TComponent; x, y, w, h: TfpgCoord;
     AShowThousand: boolean= True; ADecimals: Integer= 2): TfpgEditCurrency;
@@ -331,13 +331,15 @@ begin
     Result.Height:= h;
 end;
 
-function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord; AShowThousand: boolean= True): TfpgEditFloat;
+function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord; AShowThousand: boolean= True;
+         ADecimals: Integer= -1): TfpgEditFloat;
 begin
   Result       := TfpgEditFloat.Create(AOwner);
   Result.Left  := x;
   Result.Top   := y;
   Result.Width := w;
   Result.ShowThousand:= AShowThousand;
+//  Result.Decimals := ADecimals;
   if h < TfpgEditFloat(Result).FFont.Height + 6 then
     Result.Height:= TfpgEditFloat(Result).FFont.Height + 6
   else
@@ -1430,6 +1432,7 @@ end;
 constructor TfpgEditInteger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  fShowThousand := True;
 end;
 
 { TfpgEditFloat }
@@ -1439,8 +1442,14 @@ var
   txt: string;
 begin
   if fDecimals > 0 then
+  begin
     if Pos(DecimalSeparator, fText) > 0 then
       if UTF8Length(fText)-Pos(DecimalSeparator, fText) > fDecimals then
+        fText := Copy(fText, 1, UTF8Length(fText) - 1);
+  end
+  else
+    if fDecimals = 0 then
+      if Pos(DecimalSeparator, fText) > 0 then
         fText := Copy(fText, 1, UTF8Length(fText) - 1);
   if ShowThousand then
   begin
@@ -1502,7 +1511,21 @@ begin
         decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText)-Pos(DecimalSeparator, fText));
     end
     else
-      txt := fText;
+      txt := fText
+  else
+    if fDecimals = 0 then
+      if Pos(DecimalSeparator, fText) > 0 then
+        txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)))
+      else
+        txt := fText
+    else
+      if Pos(DecimalSeparator, fText) > 0 then
+      begin
+        txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)));
+        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText)-Pos(DecimalSeparator, fText));
+      end
+      else
+        txt := fText;
   if ShowThousand then
   begin
     if fText > '' then
@@ -1553,10 +1576,10 @@ end;
 
 procedure TfpgEditFloat.SetDecimals(AValue: integer);
 begin
-if AValue < 0 then
-  Exit; // =>
-if fDecimals <> AValue then
-  fDecimals := AValue
+  if AValue < -1 then
+    Exit; // =>
+  if fDecimals <> AValue then
+    fDecimals := AValue
 end;
 
 procedure TfpgEditFloat.Format;
@@ -1582,6 +1605,8 @@ end;
 constructor TfpgEditFloat.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  fDecimals := -1;
+  fShowThousand := True;
 end;
 
 { TfpgEditCurrency }
@@ -1705,10 +1730,10 @@ end;
 
 procedure TfpgEditCurrency.SetDecimals(AValue: integer);
 begin
-if (AValue < 0) or (AValue > 4) then
-  Exit; // =>
-if fDecimals <> AValue then
-  fDecimals := AValue
+  if (AValue < 0) or (AValue > 4) then
+    Exit; // =>
+  if fDecimals <> AValue then
+    fDecimals := AValue
 end;
 
 procedure TfpgEditCurrency.Format;
@@ -1754,6 +1779,7 @@ constructor TfpgEditCurrency.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   fDecimals := 2;
+  fShowThousand := True;
 end;
 
 

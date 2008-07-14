@@ -23,6 +23,7 @@ type
     procedure edtCurrencyChange(Sender: TObject);
     procedure chbPasswdChanged(Sender: TObject);
     procedure chbSpaceChange(Sender: TObject);
+    procedure chbFloatDecChange(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     lblName1: TfpgLabel;
@@ -41,6 +42,7 @@ type
     rbPoint: TfpgRadioButton;
     rbComma: TfpgRadioButton;
     chbSpace: TfpgCheckBox;
+    chbFloatDec: TfpgCheckBox;
     lbNegativeColor: TfpgColorListBox;
     lblNegativeColor: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
@@ -137,6 +139,14 @@ begin
       edtInteger.ThousandSeparator := ','
     else
       edtInteger.ThousandSeparator := '.';
+end;
+
+procedure TMainForm.chbFloatDecChange(Sender: TObject);
+begin
+  if chbFloatDec.Checked then
+    edtFloat.Decimals := 3
+  else
+    edtFloat.Decimals := -1;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -248,7 +258,6 @@ begin
     SetPosition(24, 164, 120, 22);
     ShowThousand := True;
     ThousandSeparator := ',';
-    Decimals := 6;
     onChange := @edtFloatChange;
   end;
 
@@ -267,7 +276,7 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(296, 250, 75, 24);
+    SetPosition(296, 260, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -311,6 +320,16 @@ begin
     FontDesc := '#Label1';
     Text := 'Space as ThousandSeparator';
     OnChange := @chbSpaceChange;
+  end;
+  
+  chbFloatDec := TfpgCheckBox.Create(Self);
+  with chbFloatDec do
+  begin
+    Name := 'chbFloatDec';
+    SetPosition(170, 220, 200, 20);
+    FontDesc := '#Label1';
+    Text := 'Limit EditFloat to 3 decimals';
+    OnChange := @chbFloatDecChange;
   end;
   
   lbNegativeColor := TfpgColorListBox.Create(self);
