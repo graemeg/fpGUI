@@ -110,11 +110,14 @@ begin
     FailureNode.ImageIndex := 3;
     node := FailureNode.AppendText('Message: ' + AFailure.ExceptionMessage);
     node.ImageIndex := 4;
-    node.TextColor := clFuchsia;
+//    node.TextColor := clFuchsia;
     node := FailureNode.AppendText('Exception: ' + AFailure.ExceptionClassName);
     node.ImageIndex := 4;
-    node.TextColor := clFuchsia;
-//    PaintNodeFailure(FailureNode);
+//    node.TextColor := clFuchsia;
+
+    node := node.Parent;
+    if Assigned(node) and (node.ImageIndex in [0, 1]) then
+      node.ImageIndex := 3;
   end;
   Inc(failureCounter);
   if errorCounter = 0 then
@@ -137,26 +140,29 @@ begin
   begin
     ErrorNode.ImageIndex := 2;
     node := ErrorNode.AppendText('Exception message: ' + AError.ExceptionMessage);
-    node.TextColor := clRed;
+//    node.TextColor := clRed;
     node.ImageIndex := 4;
     node := ErrorNode.AppendText('Exception class: ' + AError.ExceptionClassName);
-    node.TextColor := clRed;
+//    node.TextColor := clRed;
     node.ImageIndex := 4;
     if (AError.SourceUnitName <> '') and
       (AError.FailedMethodName <> '')
     then
     begin
       node := ErrorNode.AppendText('Unit name: ' + AError.SourceUnitName);
-      node.TextColor := clRed;
+//      node.TextColor := clRed;
       node.ImageIndex := 5;
       node := ErrorNode.AppendText('Method name: ' + AError.FailedMethodName);
-      node.TextColor := clRed;
+//      node.TextColor := clRed;
       node.ImageIndex := 5;
       node := ErrorNode.AppendText('Line number: ' + IntToStr(AError.LineNumber));
-      node.TextColor := clRed;
+//      node.TextColor := clRed;
       node.ImageIndex := 5;
     end;
-//    PaintNodeError(ErrorNode);
+
+    node := node.Parent;
+    if Assigned(node) and (node.ImageIndex in [0, 1, 3]) then
+      node.ImageIndex := 2;
   end;
   Inc(errorCounter);
   barColor := clRed;
@@ -167,14 +173,13 @@ end;
 
 procedure TGUITestRunnerForm.StartTest(ATest: TTest);
 var
-  Node: TfpgTreeNode;
+  n: TfpgTreeNode;
 begin
-//  writeln(ATest.TestName, '...');
-  Node := FindNode(ATest);
-  if Assigned(Node) then
+  n := FindNode(ATest);
+  if Assigned(n) then
   begin
-    Node.Clear;
-    Node.ImageIndex := 1; // green
+    n.Clear;
+    n.ImageIndex := 1; // green
     tvTests.Invalidate;
     fpgApplication.ProcessMessages;
   end
@@ -184,12 +189,22 @@ end;
 
 procedure TGUITestRunnerForm.EndTest(ATest: TTest);
 begin
-
+  inc(pbName1.Position, 1);
+  pbName1.Invalidate;
+  fpgApplication.ProcessMessages;
 end;
 
 procedure TGUITestRunnerForm.StartTestSuite(ATestSuite: TTestSuite);
+var
+  n: TfpgTreeNode;
 begin
-
+  n := FindNode(ATestSuite);
+  if Assigned(n) then
+  begin
+    n.ImageIndex := 1;  // green
+  end
+  else
+    writeln('  Failed to find TestSuite');
 end;
 
 procedure TGUITestRunnerForm.EndTestSuite(ATestSuite: TTestSuite);
@@ -302,6 +317,10 @@ begin
   begin
     testSuite := TTest(tvTests.Selection.Data);
 //    tvTests.Selection.Collapse;
+
+    pbName1.Position := 0;
+    pbName1.Max := testSuite.CountTestCases;
+
     RunTest(testSuite);
   end;
 end;
@@ -358,7 +377,9 @@ begin
   img := CreateImage_BMP(@fpcunit_circle_fuchsia, sizeof(fpcunit_circle_fuchsia) );
   FImagelist.AddImage(img, 3);
 
-  img := CreateImage_BMP(@fpcunit_bug, sizeof(fpcunit_bug) );
+  //img := CreateImage_BMP(@fpcunit_bug, sizeof(fpcunit_bug) );
+  //FImagelist.AddImage(img, 4);
+  img := CreateImage_BMP(@fpcunit_error, sizeof(fpcunit_error) );
   FImagelist.AddImage(img, 4);
 
   img := CreateImage_BMP(@fpcunit_information, sizeof(fpcunit_information) );

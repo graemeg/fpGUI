@@ -1257,7 +1257,7 @@ var
   YPos: integer;
   col: integer;
   ACenterPos: integer;
-  x,
+  x: integer;
   y: integer;
   AImageItem: TfpgImageItem;
   AVisibleHeight: integer;
@@ -1325,9 +1325,12 @@ begin
     w := GetColumnLeft(StepToRoot(h));
     ACenterPos := YPos - FYOffset + col + (GetNodeHeight div 2);
     YPos := YPos + GetNodeHeight;
+    i := GetColumnLeft(StepToRoot(h)) + GetNodeWidth(h);
 
-    if ACenterPos > (FHScrollbar.Position - GetNodeHeight) then
+    // only paint the node if it is fully visible
+    if i > FXOffset then
     begin
+//      writeln('painting node: ', h.Text);
       if h = Selection then // draw the selection rectangle and text
       begin
         if Focused then
@@ -1516,7 +1519,7 @@ begin
       end;
       break;  //==>
     end;
-  end;
+  end; { while h <> nil }
   Canvas.EndDraw;
 end;
 
