@@ -309,7 +309,7 @@ var
   lRect: TfpgRect;
 begin
   Canvas.SetColor(clWindowBackground);
-  Canvas.FillRectangle(GetClientBounds);
+  Canvas.FillRectangle(GetClientRect);
   
   case Align of
     alRight,

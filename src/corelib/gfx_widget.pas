@@ -112,7 +112,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    function    GetClientBounds: TfpgRect; virtual;
+    function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
     procedure   Realign;
     procedure   SetFocus;
@@ -252,7 +252,7 @@ begin
   end;
 end;
 
-function TfpgWidget.GetClientBounds: TfpgRect;
+function TfpgWidget.GetClientRect: TfpgRect;
 begin
   Result.SetRect(0, 0, Width, Height);
 end;
@@ -964,7 +964,7 @@ begin
   if (csLoading in ComponentState) then
     Exit;  //==>
 //  writeln('HandleAlignments - ', Classname);
-  FAlignRect := GetClientBounds;
+  FAlignRect := GetClientRect;
 
   DoAlign(alTop);
   DoAlign(alBottom);

@@ -44,7 +44,7 @@ type
     FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
     FPanelBorder: TPanelBorder;
-    function    GetClientBounds: TfpgRect; override;
+    function    GetClientRect: TfpgRect; override;
     procedure   SetPanelStyle(const AValue: TPanelStyle);
     procedure   SetPanelBorder(const AValue: TPanelBorder);
   protected
@@ -134,7 +134,7 @@ type
     procedure   SetMargin(const AValue: integer);
   protected
     FFont: TfpgFont;
-    function    GetClientBounds: TfpgRect; override;
+    function    GetClientRect: TfpgRect; override;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -212,7 +212,7 @@ end;
 
 {TfpgAbstractPanel}
 
-function TfpgAbstractPanel.GetClientBounds: TfpgRect;
+function TfpgAbstractPanel.GetClientRect: TfpgRect;
 begin
   Result.SetRect(2, 2, Width - 4, Height - 4);
 end;
@@ -571,7 +571,7 @@ begin
   end;
 end;
 
-function TfpgGroupBox.GetClientBounds: TfpgRect;
+function TfpgGroupBox.GetClientRect: TfpgRect;
 var
   h: integer;
 begin

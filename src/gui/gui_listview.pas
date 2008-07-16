@@ -205,7 +205,6 @@ type
     procedure   ItemChanged(AIndex: Integer);
     procedure   ItemsUpdated;
     //
-    function    GetClientRect: TfpgRect;
     function    GetVisibleColumnsWidth: Integer;
     function    GetItemAreaHeight: Integer;
     procedure   StartShiftSelection;
@@ -240,6 +239,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    function    GetClientRect: TfpgRect; override;
     procedure   BeginUpdate;
     procedure   EndUpdate;
     procedure   MakeItemVisible(AIndex: Integer; PartialOK: Boolean = False);
