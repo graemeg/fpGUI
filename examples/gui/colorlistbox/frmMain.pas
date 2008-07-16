@@ -74,10 +74,6 @@ begin
 end;
 
 procedure TMainForm.PopulatePaletteColorCombo;
-var
-  TypeData: PTypeData;
-  I: Integer;
-  S: string;
 begin
   cbName1.Items.Clear;
   cbName1.Items.Add('cpStandardColors');

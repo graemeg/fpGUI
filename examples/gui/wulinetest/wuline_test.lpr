@@ -67,7 +67,6 @@ procedure TMainForm.DrawSpokes(phase: double);
 var
   x1, y1, x2, y2: integer;
   theta: double;
-  img: TfpgImage;
 begin
   Canvas.BeginDraw;
 

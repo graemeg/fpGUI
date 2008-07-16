@@ -40,14 +40,13 @@ end;
 procedure TMainForm.AddBttn(Sender: TObject);
 var
   Item: TfpgLVItem;
-  I: Integer;
 begin
   FListView.BeginUpdate;
   FTmpListView.BeginUpdate;
   //FListView.Items.Capacity := FListView.Items.Capacity + 2000000;
   //for I := 0 to 1999999 do begin
     Item := FListView.ItemAdd;
-    Item.Caption :=FEdit.Text+IntToStr(FListView.Items.Count);
+    Item.Caption := FEdit.Text + IntToStr(FListView.Items.Count);
     Item.SubItems.Add('0');
     Item.SubItems.Add('1');
     Item.SubItems.Add('2');
@@ -56,7 +55,6 @@ begin
   //end;
   FListView.EndUpdate;
   FTmpListView.EndUpdate;
-
 end;
 
 procedure TMainForm.ShowHeadersChange(Sender: TObject);

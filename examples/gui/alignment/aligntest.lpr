@@ -15,7 +15,6 @@ type
     lblRight: array[1..3] of TfpgLabel;
     lblClient: TfpgLabel;
     lblNone: TfpgLabel;
-    AlignRect: TfpgRect;
   public
     procedure AfterCreate; override;
   end;

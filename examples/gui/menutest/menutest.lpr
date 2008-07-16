@@ -42,8 +42,6 @@ begin
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
-var
-  mi: TfpgMenuItem;
 begin
   inherited Create(AOwner);
   WindowTitle := 'Menu Test';

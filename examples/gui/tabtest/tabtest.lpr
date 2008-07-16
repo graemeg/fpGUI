@@ -18,7 +18,7 @@ type
     tsTwo: TfpgTabSheet;
     tsThree: TfpgTabSheet;
     tsFour: TfpgTabSheet;
-    btn2, btn3, btn4: TfpgButton;
+    btn2, btn3: TfpgButton;
     chkSort: TfpgCheckBox;
     cbTabPos: TfpgComboBox;
     procedure   btnQuitClick(Sender: TObject);

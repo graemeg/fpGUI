@@ -579,6 +579,8 @@ begin
         end;
       end;  { if/else }
       Canvas.FillRectangle(r);
+      // a possible future theme option
+//      Canvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
       mi.DrawText(Canvas, r.left+4, r.top+1);
       Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
