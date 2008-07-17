@@ -422,6 +422,8 @@ begin
   prevval   := FText;
   s         := AText;
   consumed  := False;
+  if FText = '' then
+    FNewItem := False;
 
   // Handle only printable characters
   // Note: This is now UTF-8 compliant!
