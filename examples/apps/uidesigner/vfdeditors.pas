@@ -49,6 +49,7 @@ type
 implementation
 
 uses
+  gfxbase,
   fpgfx;
 
 { TItemEditorForm }
@@ -87,9 +88,9 @@ end;
 procedure TItemEditorForm.OnButtonClick(Sender: TObject);
 begin
   if Sender = btnOK then
-    ModalResult := 1
+    ModalResult := mrOK
   else
-    ModalResult := 2;
+    ModalResult := mrCancel;
 end;
 
 

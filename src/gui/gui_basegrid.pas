@@ -698,7 +698,8 @@ begin
     Exit; //==>
   if csUpdating in ComponentState then
     Exit; //==>
-  UpdateScrollBars;
+  if HasHandle then
+    UpdateScrollBars;
 end;
 
 procedure TfpgBaseGrid.HandleKeyPress(var keycode: word;
