@@ -189,7 +189,7 @@ end;
 
 procedure TGUITestRunnerForm.EndTest(ATest: TTest);
 begin
-  inc(pbName1.Position, 1);
+  pbName1.Position := pbName1.Position + 1;
   pbName1.Invalidate;
   fpgApplication.ProcessMessages;
 end;
