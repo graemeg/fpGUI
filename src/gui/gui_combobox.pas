@@ -103,6 +103,8 @@ type
   end;
   
 
+  { TfpgBaseStaticCombo }
+
   TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
@@ -113,8 +115,7 @@ type
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
-    procedure   SetHeight(const AValue: TfpgCoord); override;
-    procedure   SetWidth(const AValue: TfpgCoord); override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -539,10 +540,13 @@ begin
   end;
 end;
 
-procedure TfpgBaseStaticCombo.SetWidth(const AValue: TfpgCoord);
+procedure TfpgBaseStaticCombo.HandleResize( AWidth, AHeight: TfpgCoord);
 begin
-  inherited SetWidth(AValue);
-  CalculateInternalButtonRect;
+  inherited HandleResize(AWidth, AHeight);
+  //FDirty is false in the first resize interation (before handle creation)
+  //so the hashandle check
+  if FDirty or not HasHandle then
+    CalculateInternalButtonRect;
 end;
 
 procedure TfpgBaseStaticCombo.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
@@ -550,12 +554,6 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
   if consumed then
     RePaint
-end;
-
-procedure TfpgBaseStaticCombo.SetHeight(const AValue: TfpgCoord);
-begin
-  inherited SetHeight(AValue);
-  CalculateInternalButtonRect;
 end;
 
 procedure TfpgBaseStaticCombo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);

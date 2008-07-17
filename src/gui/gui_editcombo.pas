@@ -64,6 +64,8 @@ type
   TAllowNew = (anNo, anYes, anAsk);
 
 
+  { TfpgBaseEditCombo }
+
   TfpgBaseEditCombo = class(TfpgBaseComboBox)
   private
     FAutoCompletion: Boolean;
@@ -88,13 +90,12 @@ type
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
-    procedure   SetHeight(const AValue: TfpgCoord); override;
-    procedure   SetWidth(const AValue: TfpgCoord); override;
+    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
-    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandlePaint; override;
     property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
     property    AllowNew: TAllowNew read FAllowNew write SetAllowNew default anNo;
@@ -398,18 +399,22 @@ begin
   end;
 end;
 
-procedure TfpgBaseEditCombo.SetWidth(const AValue: TfpgCoord);
+procedure TfpgBaseEditCombo.DoUpdateWindowPosition(aleft, atop, awidth,
+  aheight: TfpgCoord);
 begin
-  inherited SetWidth(AValue);
-  CalculateInternalButtonRect;
-  RePaint;
+  //This does not work because is not called before handle create
+  if FDirty then
+    CalculateInternalButtonRect;
+  inherited DoUpdateWindowPosition(aleft, atop, awidth, aheight);
 end;
 
-procedure TfpgBaseEditCombo.SetHeight(const AValue: TfpgCoord);
+procedure TfpgBaseEditCombo.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
-  inherited SetHeight(AValue);
-  CalculateInternalButtonRect;
-  RePaint;
+  inherited HandleResize(AWidth, AHeight);
+  //FDirty is false in the first resize interation (before handle creation)
+  //so the hashandle check
+  if FDirty or not HasHandle then
+    CalculateInternalButtonRect;
 end;
 
 procedure TfpgBaseEditCombo.HandleKeyChar(var AText: TfpgChar;
@@ -592,12 +597,6 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FBtnPressed := False;
   PaintInternalButton;
-end;
-
-procedure TfpgBaseEditCombo.HandleResize(awidth, aheight: TfpgCoord);
-begin
-  inherited HandleResize(awidth, aheight);
-  CalculateInternalButtonRect;
 end;
 
 procedure TfpgBaseEditCombo.HandlePaint;

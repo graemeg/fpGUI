@@ -369,6 +369,8 @@ procedure TfpgBaseListBox.UpdateScrollBar;
 var
   pn : integer;
 begin
+  if not HasHandle then
+    Exit; //==>
   pn := PageLength;
   FScrollBar.Visible := PageLength < ItemCount-1;
 

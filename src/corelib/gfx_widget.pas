@@ -73,7 +73,6 @@ type
     procedure   DoAlign(AAlign: TAlign);
     procedure   DoResize;
     procedure   HandlePaint; virtual;
-    procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
@@ -937,13 +936,6 @@ begin
   begin
     FFormDesigner.Dispatch(msg);
   end;
-end;
-
-procedure TfpgWidget.HandleResize(AWidth, AHeight: TfpgCoord);
-begin
-//  writeln('HandleResize - ', Classname);
-  Width  := Max(AWidth, FMinWidth);
-  Height := Max(AHeight, FMinHeight);
 end;
 
 procedure TfpgWidget.HandleMove(x, y: TfpgCoord);

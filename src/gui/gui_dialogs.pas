@@ -1113,9 +1113,9 @@ begin
   FSpacing    := 10;
 
   FFilterList := TStringList.Create;
-  
+
   InitializeComponents;
-  
+
   // position standard dialog buttons
   btnCancel.Left  := Width - FDefaultButtonWidth - FSpacing;
   btnCancel.Top   := Height - btnCancel.Height - FSpacing;

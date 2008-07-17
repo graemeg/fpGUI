@@ -360,6 +360,8 @@ type
   end;
 
 
+  { TfpgWindowBase }
+
   TfpgWindowBase = class(TfpgComponent)
   private
     FParent: TfpgWindowBase;
@@ -402,8 +404,9 @@ type
     procedure   SetWindowTitle(const ATitle: string); virtual;
     procedure   SetTop(const AValue: TfpgCoord); virtual;
     procedure   SetLeft(const AValue: TfpgCoord); virtual;
-    procedure   SetHeight(const AValue: TfpgCoord); virtual;
-    procedure   SetWidth(const AValue: TfpgCoord); virtual;
+    procedure   SetHeight(const AValue: TfpgCoord);
+    procedure   SetWidth(const AValue: TfpgCoord);
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
@@ -1003,7 +1006,7 @@ begin
   else
     FPrevTop := AValue;
   FTop := AValue;
-  FDirty := FTop <> FPrevTop;
+  FDirty := FDirty or (FTop <> FPrevTop);
 end;
 
 procedure TfpgWindowBase.SetLeft(const AValue: TfpgCoord);
@@ -1017,35 +1020,44 @@ begin
   else
     FPrevLeft := AValue;
   FLeft := AValue;
-  FDirty := FLeft <> FPrevLeft;
+  FDirty := FDirty or (FLeft <> FPrevLeft);
 end;
 
 procedure TfpgWindowBase.SetHeight(const AValue: TfpgCoord);
 begin
-  if FHeight = AValue then
-    Exit;
-  // if we don't have a handle we are still setting up, so actual value and
-  // previous value must be the same.
-  if HasHandle then
-    FPrevHeight := FHeight
-  else
-    FPrevHeight := AValue;
-  FHeight := ConstraintHeight(AValue);
-  FDirty := FHeight <> FPrevHeight;
+  HandleResize(Width, AValue);
 end;
 
 procedure TfpgWindowBase.SetWidth(const AValue: TfpgCoord);
 begin
-  if FWidth = AValue then
-    Exit;
-  // if we don't have a handle we are still setting up, so actual value and
-  // previous value must be the same.
-  if HasHandle then
-    FPrevWidth := FWidth
-  else
-    FPrevWidth := AValue;
-  FWidth := ConstraintWidth(AValue);
-  FDirty := FWidth <> FPrevWidth;
+  HandleResize(AValue, Height);
+end;
+
+procedure TfpgWindowBase.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  if FWidth <> AWidth then
+  begin
+    // if we don't have a handle we are still setting up, so actual value and
+    // previous value must be the same.
+    if HasHandle then
+      FPrevWidth := FWidth
+    else
+      FPrevWidth := AWidth;
+    FWidth := ConstraintWidth(AWidth);
+    FDirty := FDirty or (FWidth <> FPrevWidth);
+  end;
+
+  if FHeight <> AHeight then
+  begin
+    // if we don't have a handle we are still setting up, so actual value and
+    // previous value must be the same.
+    if HasHandle then
+      FPrevHeight := FHeight
+    else
+      FPrevHeight := AHeight;
+    FHeight := ConstraintHeight(AHeight);
+    FDirty := FDirty or (FHeight <> FPrevHeight);
+  end;
 end;
 
 constructor TfpgWindowBase.Create(AOwner: TComponent);
