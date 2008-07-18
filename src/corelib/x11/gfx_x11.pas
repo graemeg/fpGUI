@@ -199,7 +199,7 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
-    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
+    procedure   DoUpdateWindowPosition; override;
     procedure   DoSetMouseCursor; override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
@@ -1526,22 +1526,22 @@ begin
   Result.Y := dy;
 end;
 
-procedure TfpgWindowImpl.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
+procedure TfpgWindowImpl.DoUpdateWindowPosition;
 var
   w: longword;
   h: longword;
 begin
-  if awidth > 1 then
-    w := awidth
+  if FWidth > 1 then
+    w := FWidth
   else
     w := 1;
-  if aheight > 1 then
-    h := aheight
+  if FHeight > 1 then
+    h := FHeight
   else
     h := 1;
 
   if FWinHandle > 0 then
-    XMoveResizeWindow(xapplication.display, FWinHandle, aleft, atop, w, h);
+    XMoveResizeWindow(xapplication.display, FWinHandle, FLeft, FTop, w, h);
 end;
 
 procedure TfpgWindowImpl.DoSetMouseCursor;

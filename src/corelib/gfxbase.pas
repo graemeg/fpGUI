@@ -360,8 +360,6 @@ type
   end;
 
 
-  { TfpgWindowBase }
-
   TfpgWindowBase = class(TfpgComponent)
   private
     FParent: TfpgWindowBase;
@@ -387,7 +385,7 @@ type
     FCanvas: TfpgCanvasBase;
     FDirty: Boolean;
     function    HandleIsValid: boolean; virtual; abstract;
-    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual; abstract;
+    procedure   DoUpdateWindowPosition; virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
     procedure   DoReleaseWindowHandle; virtual; abstract;
     procedure   DoRemoveWindowLookup; virtual; abstract;
@@ -1102,7 +1100,7 @@ end;
 procedure TfpgWindowBase.UpdateWindowPosition;
 begin
   if HasHandle then
-    DoUpdateWindowPosition(FLeft, FTop, FWidth, FHeight);
+    DoUpdateWindowPosition;
 end;
 
 procedure TfpgWindowBase.MoveWindow(const x: TfpgCoord; const y: TfpgCoord);

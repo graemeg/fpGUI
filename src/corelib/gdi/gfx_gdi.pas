@@ -160,7 +160,7 @@ type
     procedure   DoRemoveWindowLookup; override;
     procedure   DoSetWindowVisible(const AValue: Boolean); override;
     function    HandleIsValid: boolean; override;
-    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
+    procedure   DoUpdateWindowPosition; override;
     procedure   DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord); override;
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     //procedure MoveToScreenCenter; override;
@@ -1458,7 +1458,7 @@ begin
   Result := FWinHandle > 0;
 end;
 
-procedure TfpgWindowImpl.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
+procedure TfpgWindowImpl.DoUpdateWindowPosition;
 var
   bx, by: integer;
 begin
@@ -1466,7 +1466,7 @@ begin
   GetWindowBorderDimensions(Self, bx, by);
   Windows.SetWindowPos(
     WinHandle, HWND_TOP,
-    aleft, atop, awidth + bx, aheight + by,
+    FLeft, FTop, FWidth + bx, FHeight + by,
     SWP_NOZORDER);// or SWP_NOREDRAW);
   Windows.InvalidateRect(WinHandle, nil, True);
   FSkipResizeMessage := False;

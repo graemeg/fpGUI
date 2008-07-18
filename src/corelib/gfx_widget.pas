@@ -69,7 +69,7 @@ type
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
     procedure   SetVisible(const AValue: boolean); virtual;
-    procedure   DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
+    procedure   DoUpdateWindowPosition; override;
     procedure   DoAlign(AAlign: TAlign);
     procedure   DoResize;
     procedure   HandlePaint; virtual;
@@ -207,7 +207,7 @@ begin
     end;
 end;
 
-procedure TfpgWidget.DoUpdateWindowPosition(aleft, atop, awidth, aheight: TfpgCoord);
+procedure TfpgWidget.DoUpdateWindowPosition;
 var
   dw: integer;
   dh: integer;
@@ -222,7 +222,7 @@ begin
     HandleAlignments(dw, dh);
   end;
 
-  inherited DoUpdateWindowPosition(aleft, atop, awidth, aheight);
+  inherited DoUpdateWindowPosition;
   if FDirty and ((dw <> 0) or (dh <> 0)) then
     DoResize;
 
