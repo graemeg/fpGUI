@@ -35,7 +35,6 @@ type
 
 procedure TMainForm.chkShowHiddenChanged(Sender: TObject);
 begin
-//  FGrid.
   FGrid.FileList.ShowHidden := chkShowHidden.Checked;
   FGrid.FileList.ReadDirectory('');
   fpgSendMessage(self, FGrid, FPGM_PAINT);
