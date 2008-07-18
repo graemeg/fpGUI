@@ -52,6 +52,8 @@ type
     procedure miExpandAll(Sender: TObject);
     procedure miCollapseNode(Sender: TObject);
     procedure miExpandNode(Sender: TObject);
+    procedure ResetCounters;
+    procedure UpdateCounters;
   public
     {@VFD_HEAD_BEGIN: GUITestRunnerForm}
     bvlTree: TfpgBevel;
@@ -120,6 +122,7 @@ begin
       node.ImageIndex := 3;
   end;
   Inc(failureCounter);
+  UpdateCounters;
   if errorCounter = 0 then
     barColor := clFuchsia; // Error color takes preference
 
@@ -165,6 +168,7 @@ begin
       node.ImageIndex := 2;
   end;
   Inc(errorCounter);
+  UpdateCounters;
   barColor := clRed;
 
   tvTests.Invalidate;
@@ -219,11 +223,9 @@ var
   FStartCrono: TDateTime;
 begin
   // Reset counters
-  failureCounter  := 0;
-  errorCounter    := 0;
-  testsCounter    := 0;
-  skipsCounter    := 0;
-
+  ResetCounters;
+  lblRuns.Text := IntToStr(ATest.CountTestCases);
+  
   lTestResult := TTestResult.Create;
   try
     lTestResult.AddListener(self);
@@ -297,6 +299,7 @@ end;
 procedure TGUITestRunnerForm.btnClearClicked(Sender: TObject);
 begin
   memName1.Lines.Clear;
+  ResetCounters;
 //  tvTests.RootNode.FindSubNode(@ResetNodeColors);
 
   tvTests.RootNode.FirstSubNode.Clear;
@@ -327,7 +330,7 @@ end;
 
 procedure TGUITestRunnerForm.FindByData(ANode: TfpgTreeNode; var AFound: boolean);
 begin
-  writeln('...', ANode.Text);
+//  writeln('...', ANode.Text);
   AFound := TTest(ANode.Data) = temptest;
 //  if AFound then
 //    MemoLog('Found Node ' + ANode.Text);
@@ -426,6 +429,25 @@ end;
 procedure TGUITestRunnerForm.miExpandNode(Sender: TObject);
 begin
   tvTests.Selection.Expand;
+end;
+
+procedure TGUITestRunnerForm.ResetCounters;
+begin
+  lblRuns.Text      := '---';
+  lblFailures.Text  := '---';
+  lblErrors.Text    := '---';
+  failureCounter    := 0;
+  errorCounter      := 0;
+  testsCounter      := 0;
+  skipsCounter      := 0;
+end;
+
+procedure TGUITestRunnerForm.UpdateCounters;
+begin
+  lblFailures.Text  := IntToStr(failureCounter);
+  lblErrors.Text    := IntToStr(errorCounter);
+//  testsCounter      := 0;
+//  skipsCounter      := 0;
 end;
 
 constructor TGUITestRunnerForm.Create(AOwner: TComponent);
