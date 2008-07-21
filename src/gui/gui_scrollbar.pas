@@ -404,6 +404,7 @@ var
   lPos: TfpgCoord;
 begin
   inherited;
+  CaptureMouse;
 
   if Orientation = orVertical then
   begin
@@ -493,6 +494,8 @@ var
   WasPressed: Boolean;
 begin
   inherited;
+  ReleaseMouse;
+  
   WasPressed := FScrollbarDownPart <> sbpNone;
   FScrollTimer.Enabled := False;
 
