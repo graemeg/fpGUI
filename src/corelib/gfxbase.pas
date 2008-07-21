@@ -360,6 +360,8 @@ type
   end;
 
 
+  { TfpgWindowBase }
+
   TfpgWindowBase = class(TfpgComponent)
   private
     FParent: TfpgWindowBase;
@@ -383,7 +385,8 @@ type
     FMaxHeight: TfpgCoord;
     FMaxWidth: TfpgCoord;
     FCanvas: TfpgCanvasBase;
-    FDirty: Boolean;
+    FSizeIsDirty: Boolean;
+    FPosIsDirty: Boolean;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
@@ -400,10 +403,11 @@ type
     procedure   AllocateWindowHandle;
     procedure   ReleaseWindowHandle;
     procedure   SetWindowTitle(const ATitle: string); virtual;
-    procedure   SetTop(const AValue: TfpgCoord); virtual;
-    procedure   SetLeft(const AValue: TfpgCoord); virtual;
+    procedure   SetTop(const AValue: TfpgCoord);
+    procedure   SetLeft(const AValue: TfpgCoord);
     procedure   SetHeight(const AValue: TfpgCoord);
     procedure   SetWidth(const AValue: TfpgCoord);
+    procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
   public
     // The standard constructor.
@@ -995,30 +999,12 @@ end;
 
 procedure TfpgWindowBase.SetTop(const AValue: TfpgCoord);
 begin
-  if FTop = AValue then
-    Exit;
-  // if we don't have a handle we are still setting up, so actual value and
-  // previous value must be the same.
-  if HasHandle then
-    FPrevTop := FTop
-  else
-    FPrevTop := AValue;
-  FTop := AValue;
-  FDirty := FDirty or (FTop <> FPrevTop);
+  HandleMove(Left, AValue);
 end;
 
 procedure TfpgWindowBase.SetLeft(const AValue: TfpgCoord);
 begin
-  if FLeft = AValue then
-    Exit;
-  // if we don't have a handle we are still setting up, so actual value and
-  // previous value must be the same.
-  if HasHandle then
-    FPrevLeft := FHeight
-  else
-    FPrevLeft := AValue;
-  FLeft := AValue;
-  FDirty := FDirty or (FLeft <> FPrevLeft);
+  HandleMove(AValue, Top);
 end;
 
 procedure TfpgWindowBase.SetHeight(const AValue: TfpgCoord);
@@ -1029,6 +1015,33 @@ end;
 procedure TfpgWindowBase.SetWidth(const AValue: TfpgCoord);
 begin
   HandleResize(AValue, Height);
+end;
+
+procedure TfpgWindowBase.HandleMove(x, y: TfpgCoord);
+begin
+  if FTop <> y then
+  begin
+    // if we don't have a handle we are still setting up, so actual value and
+    // previous value must be the same.
+    if HasHandle then
+      FPrevTop := FTop
+    else
+      FPrevTop := y;
+    FTop := y;
+    FPosIsDirty := FPosIsDirty or (FTop <> FPrevTop);
+  end;
+
+  if FLeft <> x then
+  begin
+    // if we don't have a handle we are still setting up, so actual value and
+    // previous value must be the same.
+    if HasHandle then
+      FPrevLeft := FHeight
+    else
+      FPrevLeft := x;
+    FLeft := x;
+    FPosIsDirty := FPosIsDirty or (FLeft <> FPrevLeft);
+  end;
 end;
 
 procedure TfpgWindowBase.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -1042,7 +1055,7 @@ begin
     else
       FPrevWidth := AWidth;
     FWidth := ConstraintWidth(AWidth);
-    FDirty := FDirty or (FWidth <> FPrevWidth);
+    FSizeIsDirty := FSizeIsDirty or (FWidth <> FPrevWidth);
   end;
 
   if FHeight <> AHeight then
@@ -1054,7 +1067,7 @@ begin
     else
       FPrevHeight := AHeight;
     FHeight := ConstraintHeight(AHeight);
-    FDirty := FDirty or (FHeight <> FPrevHeight);
+    FSizeIsDirty := FSizeIsDirty or (FHeight <> FPrevHeight);
   end;
 end;
 
@@ -1062,7 +1075,8 @@ constructor TfpgWindowBase.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
-  FDirty := True;
+  FPosIsDirty := True;
+  FSizeIsDirty := True;
   FMaxWidth := 0;
   FMaxHeight := 0;
 end;

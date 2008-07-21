@@ -73,7 +73,6 @@ type
     procedure   DoAlign(AAlign: TAlign);
     procedure   DoResize;
     procedure   HandlePaint; virtual;
-    procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
@@ -216,21 +215,22 @@ begin
   dw      := FWidth - FPrevWidth;
   dh      := FHeight - FPrevHeight;
 
-  if IsContainer and FDirty then
+  if IsContainer and FSizeIsDirty then
   begin
 //    writeln('DoUpdateWindowPosition ', Classname, ' - w:', dw, ' h:', dh);
     HandleAlignments(dw, dh);
   end;
 
   inherited DoUpdateWindowPosition;
-  if FDirty and ((dw <> 0) or (dh <> 0)) then
+  if (dw <> 0) or (dh <> 0) then
     DoResize;
 
   // We have now handled the difference between old and new values, so reset
   // them here not to affect the next iteration.
   FPrevWidth  := FWidth;
   FPrevHeight := FHeight;
-  FDirty      := False;
+  FSizeIsDirty:= False;
+  FPosIsDirty := False;
 end;
 
 procedure TfpgWidget.SetBackgroundColor(const AValue: TfpgColor);
@@ -936,12 +936,6 @@ begin
   begin
     FFormDesigner.Dispatch(msg);
   end;
-end;
-
-procedure TfpgWidget.HandleMove(x, y: TfpgCoord);
-begin
-  Left := x;
-  Top  := y;
 end;
 
 procedure TfpgWidget.HandleAlignments(const dwidth, dheight: TfpgCoord);

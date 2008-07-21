@@ -543,7 +543,7 @@ end;
 procedure TfpgBaseStaticCombo.HandleResize( AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
-  if FDirty then
+  if FSizeIsDirty then
     CalculateInternalButtonRect;
 end;
 

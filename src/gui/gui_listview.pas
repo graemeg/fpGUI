@@ -191,6 +191,7 @@ type
     FShowHeaders: Boolean;
     FResizingColumn: TfpgLVColumn;
     FMouseDownPoint: TPoint;
+    FScrollBarNeedsUpdate: Boolean;
     function    GetItemHeight: Integer;
     procedure   SetItemIndex(const AValue: Integer);
     procedure   SetItems(const AValue: TfpgLVItems);
@@ -1204,7 +1205,8 @@ procedure TfpgListView.HandlePaint;
 var
  ClipRect: TfpgRect;
 begin
-  UpdateScrollBarPositions;
+  //if FScrollBarNeedsUpdate then
+    UpdateScrollBarPositions;
   fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
   
   ClipRect.Top    := 2;
@@ -1243,7 +1245,7 @@ end;
 procedure TfpgListView.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
-  UpdateScrollBarPositions;
+  FScrollBarNeedsUpdate := FScrollBarNeedsUpdate or FSizeIsDirty;
 end;
 
 procedure TfpgListView.PaintHeaders;
@@ -1522,6 +1524,8 @@ begin
     FHScrollBar.UpdateWindowPosition;
   if FVScrollBar.Visible then
     FVScrollBar.UpdateWindowPosition;
+
+  FScrollBarNeedsUpdate := False;
 end;
 
 constructor TfpgListView.Create(AOwner: TComponent);
@@ -1552,6 +1556,7 @@ begin
   FSelectionShiftStart := -1;
   FSelectionFollowsFocus := True;
   FItemIndex := -1;
+  FScrollBarNeedsUpdate := True;
 end;
 
 destructor TfpgListView.Destroy;
