@@ -543,9 +543,7 @@ end;
 procedure TfpgBaseStaticCombo.HandleResize( AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
-  //FDirty is false in the first resize interation (before handle creation)
-  //so the hashandle check
-  if FDirty or not HasHandle then
+  if FDirty then
     CalculateInternalButtonRect;
 end;
 

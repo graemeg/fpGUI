@@ -90,7 +90,6 @@ type
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
-    procedure   DoUpdateWindowPosition; override;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
@@ -349,9 +348,8 @@ begin
     end;
   end;
   FDropDown.Close;
-
-  if HasHandle then
-    Repaint;
+  //Repaint will check if Handle is created
+  Repaint;
 end;
 
 procedure TfpgBaseEditCombo.InternalListBoxKeyPress(Sender: TObject; var keycode: word;
@@ -369,8 +367,8 @@ begin
       end;
     end;
 
-  if HasHandle then
-    Repaint;
+  //Repaint will check if Handle is created
+  Repaint;
 end;
 
 procedure TfpgBaseEditCombo.SetText(const AValue: string);
@@ -399,20 +397,10 @@ begin
   end;
 end;
 
-procedure TfpgBaseEditCombo.DoUpdateWindowPosition;
-begin
-  //This does not work because is not called before handle create
-  if FDirty then
-    CalculateInternalButtonRect;
-  inherited DoUpdateWindowPosition;
-end;
-
 procedure TfpgBaseEditCombo.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
-  //FDirty is false in the first resize interation (before handle creation)
-  //so the hashandle check
-  if FDirty or not HasHandle then
+  if FDirty then
     CalculateInternalButtonRect;
 end;
 
