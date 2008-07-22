@@ -154,6 +154,6 @@ rsLongDec                = 'Dezember';
 
 
 // General messages
-rsNewItemDetected       = 'A new item has been detected.';
-rsAddNewItem            = 'Would you like to add the new item <%s> to the list?';
+rsNewItemDetected       = 'Es wurde ein neuer Eintrag gefunden.';
+rsAddNewItem            = 'Soll der neue Eintrag <%s> in die Liste aufgenommen werden?';
 

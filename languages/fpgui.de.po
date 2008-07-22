@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2008-04-22 09:59+0100\n"
+"PO-Revision-Date: 2008-07-12 14:42+0100\n"
 "Last-Translator: Joerg Braun <jb@toolbox-mag.de>\n"
 "Language-Team: Joerg Braun <jb@toolbox-mag.de>\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr "<%s> nicht zugewiesen"
 
 #: gfx_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr ""
+msgstr "Es wurde ein neuer Eintrag gefunden."
 
 #: gfx_constants:rsabort
 msgid "Abort"
@@ -483,7 +483,7 @@ msgstr "Mittwoch"
 
 #: gfx_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr ""
+msgstr "Soll der neue Eintrag <%s> in die Liste aufgenommen werden?"
 
 #: gfx_constants:rsyes
 msgid "Yes"
