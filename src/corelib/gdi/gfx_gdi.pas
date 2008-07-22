@@ -203,10 +203,12 @@ type
     { To avoid problems, window classes should be accessible
       from RegisterClass call till the program is terminated. }
     HiddenWndClass: TWndClass;
+    ActivationHook: HHOOK;
     function    GetHiddenWindow: HWND;
     function    DoGetFontFaceList: TStringList; override;
   public
     constructor Create(const AParams: string); override;
+    destructor  Destroy; override;
     function    DoMessagesPending: boolean;
     procedure   DoWaitWindowMessage(atimeoutms: integer);
     procedure   DoFlush;
@@ -434,6 +436,32 @@ begin
   end;
   dx := (2 * bx);
   dy := (2 * by) + bt;
+end;
+
+function fpgCBTProc(nCode: longint; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
+begin
+  if nCode < 0 then
+  begin
+    Result := CallNextHookEx(wapplication.ActivationHook, nCode, wParam, lParam);
+    Exit; //==>
+  end;
+
+  if (nCode = HCBT_ACTIVATE) then
+  begin
+    // write('Hooked HCBT_ACTIVATE at '+IntToStr(wParam)+': ');
+    if (wapplication.TopModalForm <> nil) and
+       (wParam <> TfpgWindowImpl(wapplication.TopModalForm).FWinHandle) then
+    begin
+      // writeln('stopped');
+      SetActiveWindow(TfpgWindowImpl(wapplication.TopModalForm).FWinHandle);
+      Result := 1;
+    end else
+    begin
+      // writeln('passed');
+      Result := 0;
+    end;
+  end else
+    Result := CallNextHookEx(wapplication.ActivationHook, nCode, wParam, lParam);
 end;
 
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
@@ -837,9 +865,10 @@ begin
     WM_NCACTIVATE:
         begin
           {$IFDEF DEBUG}
-            writeln(w.ClassName + ': WM_NCACTIVATE');
+            write(w.ClassName + ': WM_NCACTIVATE ');
+            writeln(wParam);
           {$ENDIF}
-          if (Lo(wParam) = WA_INACTIVE) then
+          if (wParam = 0) then
             fpgSendMessage(nil, w, FPGM_DEACTIVATE)
           else
             fpgSendMessage(nil, w, FPGM_ACTIVATE);
@@ -853,24 +882,25 @@ begin
             if (PopupListFirst.ClassName <> 'TDropDownWindow') then
 //            if not (PopupListFirst is TfpgPopupWindow) then
               blockmsg := True;
-          end else
-          if (wapplication.TopModalForm <> nil) then
-          begin
-            if (wParam = 0) and (wapplication.TopModalForm = w) then
-            begin
-              {$IFDEF DEBUG}
-              writeln(' Blockmsg = True (part 2)');
-              {$ENDIF}
-              blockmsg := True;
-            end
-            else if (wParam <> 0) and (wapplication.TopModalForm <> w) then
-            begin
-              {$IFDEF DEBUG}
-              writeln(' Blockmsg = True (part 3)');
-              {$ENDIF}
-              blockmsg := True;
-            end;
           end;
+          //end else
+          //if (wapplication.TopModalForm <> nil) then
+          //begin
+            //if (wParam = 0) and (wapplication.TopModalForm = w) then
+            //begin
+              //{$IFDEF DEBUG}
+              //writeln(' Blockmsg = True (part 2)');
+              //{$ENDIF}
+              //blockmsg := True;
+            //end
+            //else if (wParam <> 0) and (wapplication.TopModalForm <> w) then
+            //begin
+              //{$IFDEF DEBUG}
+              //writeln(' Blockmsg = True (part 3)');
+              //{$ENDIF}
+              //blockmsg := True;
+            //end;
+          //end;
 
           if not blockmsg then
             Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -945,7 +975,7 @@ begin
     Windows.RegisterClass(@HiddenWndClass);
 
     FHiddenWindow := CreateWindow('FPGHIDDEN', '',
-      DWORD(WS_POPUP), 0, 0, 0, 0, 0, 0, MainInstance, nil);
+      DWORD(WS_POPUP), 0, 0, 0, 0, TfpgWindowImpl(MainForm).FWinHandle, 0, MainInstance, nil);
   end;
   Result := FHiddenWindow;
 end;
@@ -997,8 +1027,16 @@ begin
 
   FHiddenWindow := 0;
 
+  ActivationHook := SetWindowsHookEx(WH_CBT, HOOKPROC(@fpgCBTProc), 0, GetCurrentThreadId);
+
   FIsInitialized := True;
   wapplication   := TfpgApplication(self);
+end;
+
+destructor TfpgApplicationImpl.Destroy;
+begin
+  UnhookWindowsHookEx(ActivationHook);
+  inherited Destroy;
 end;
 
 function TfpgApplicationImpl.DoMessagesPending: boolean;
