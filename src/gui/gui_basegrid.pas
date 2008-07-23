@@ -41,11 +41,12 @@ type
   TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: Integer; var ACanSelect: boolean) of object;
   TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean) of object;
 
+  // widget options
+  TfpgGridOption = (go_HideFocusRect);
+  TfpgGridOptions = set of TfpgGridOption;
+
   // Column 2 is special just for testing purposes. Descendant classes will
   // override that special behavior anyway.
-
-  { TfpgBaseGrid }
-
   TfpgBaseGrid = class(TfpgWidget)
   private
     FColResizing: boolean;
@@ -75,6 +76,7 @@ type
     FVScrollBar: TfpgScrollBar;
     FHScrollBar: TfpgScrollBar;
     FUpdateCount: integer;
+    FOptions: TfpgGridOptions;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -142,6 +144,7 @@ type
     property    ColumnTextColor[ACol: Integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
     property    VisibleRows: Integer read VisibleLines;
     property    TopRow: Integer read FFirstRow write SetFirstRow;
+    property    Options: TfpgGridOptions read FOptions write FOptions default [];
     property    OnDrawCell: TfpgDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
@@ -603,7 +606,7 @@ begin
         r.Width := ColumnWidth[col];
         Canvas.SetClipRect(clipr);
 
-        if (row = FFocusRow) and (RowSelect or (col = FFocusCol)) then
+        if (row = FFocusRow) and (RowSelect or (col = FFocusCol)) and not (go_HideFocusRect in FOptions) then
         begin
           if FFocused then
           begin
@@ -1102,6 +1105,7 @@ begin
   FRowSelect  := False;
   FScrollBarStyle := ssAutoBoth;
   FUpdateCount    := 0;
+  FOptions    := [];
 
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');

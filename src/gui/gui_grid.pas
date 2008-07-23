@@ -127,6 +127,7 @@ type
     property    FontDesc;
     property    HeaderFontDesc;
     property    HeaderHeight;
+    property    Options;
     property    RowCount;
     property    RowSelect;
     property    ScrollBarStyle;
@@ -435,27 +436,25 @@ begin
     txt := Cells[ACol, ARow];
     Flags:= [];
     if not Enabled then
-      Include(Flags,txtDisabled)
-    else
-      Canvas.SetTextColor(clShadow1);
+      Include(Flags,txtDisabled);
 
     case Columns[ACol].Alignment of
       taLeftJustify:
-        Include(Flags,txtLeft);
+          Include(Flags,txtLeft);
       taCenter:
-        Include(Flags,txtHCenter);
+          Include(Flags,txtHCenter);
       taRightJustify:
-        Include(Flags,txtRight);
+          Include(Flags,txtRight);
     end;  { case }
     
     case Columns[ACol].Layout of
       tlTop:
-        Include(Flags,txtTop);
+          Include(Flags,txtTop);
       tlCenter:
-        Include(Flags,txtVCenter);
+          Include(Flags,txtVCenter);
       tlBottom:
-        Include(Flags,txtBottom);
-    end;
+          Include(Flags,txtBottom);
+    end;  { case }
 
     with ARect,Columns[ACol] do
       Canvas.DrawText(Left+HMargin,Top,Right-Left-HMargin,Bottom-Top, txt, Flags);

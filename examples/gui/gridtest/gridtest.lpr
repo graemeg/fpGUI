@@ -37,6 +37,7 @@ type
     btnAddFive: TfpgButton;
     btnAddOne: TfpgButton;
     btnFiveOnly: TfpgButton;
+    chkHideFocus: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton;
       AShift: TShiftState; const AMousePos: TPoint);
@@ -47,6 +48,7 @@ type
     procedure   chkRowSelectChange(Sender: TObject);
     procedure   chkShowHeaderChange(Sender: TObject);
     procedure   chkShowGridChange(Sender: TObject);
+    procedure   chkHideFocusChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Integer;
         const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
@@ -101,6 +103,15 @@ end;
 procedure TMainForm.chkShowGridChange(Sender: TObject);
 begin
   stringgrid.ShowGrid := chkShowGrid.Checked;
+end;
+
+procedure TMainForm.chkHideFocusChange(Sender: TObject);
+begin
+  if chkHideFocus.Checked then
+    stringgrid.Options := stringgrid.Options + [go_HideFocusRect]
+  else
+    stringgrid.Options := [];
+  stringgrid.Invalidate;
 end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
@@ -190,50 +201,62 @@ begin
   with chkShowHeader do
   begin
     Name := 'chkShowHeader';
-    SetPosition(10, 320, 100, 24);
-    Anchors := [anLeft,anBottom];
+    SetPosition(394, 12, 116, 24);
+    Anchors := [anRight,anTop];
     Checked := True;
     FontDesc := '#Label1';
     TabOrder := 2;
     Text := 'Show Header';
-    OnChange  := @chkShowHeaderChange;
+    OnChange := @chkShowHeaderChange;
   end;
 
   chkShowGrid := TfpgCheckBox.Create(self);
   with chkShowGrid do
   begin
     Name := 'chkShowGrid';
-    SetPosition(114, 320, 92, 24);
-    Anchors := [anLeft,anBottom];
+    SetPosition(394, 36, 120, 24);
+    Anchors := [anRight,anTop];
     Checked := True;
     FontDesc := '#Label1';
     TabOrder := 3;
     Text := 'Show Grid';
-    OnChange    := @chkShowGridChange;
+    OnChange := @chkShowGridChange;
   end;
 
   chkRowSelect := TfpgCheckBox.Create(self);
   with chkRowSelect do
   begin
     Name := 'chkRowSelect';
-    SetPosition(210, 320, 100, 24);
-    Anchors := [anLeft,anBottom];
+    SetPosition(394, 60, 116, 24);
+    Anchors := [anRight,anTop];
     FontDesc := '#Label1';
     TabOrder := 4;
     Text := 'Row Select';
-    OnChange    := @chkRowSelectChange;
+    OnChange := @chkRowSelectChange;
   end;
 
   chkDisabled := TfpgCheckBox.Create(self);
   with chkDisabled do
   begin
     Name := 'chkDisabled';
-    SetPosition(310, 320, 100, 24);
-    Anchors := [anLeft,anBottom];
+    SetPosition(394, 84, 116, 24);
+    Anchors := [anRight,anTop];
     FontDesc := '#Label1';
     TabOrder := 5;
     Text := 'Disabled';
-    OnChange    := @chkDisabledChange;
+    OnChange := @chkDisabledChange;
+  end;
+
+  chkHideFocus := TfpgCheckBox.Create(self);
+  with chkHideFocus do
+  begin
+    Name := 'chkHideFocus';
+    SetPosition(394, 108, 120, 20);
+    Anchors := [anRight,anTop];
+    FontDesc := '#Label1';
+    TabOrder := 6;
+    Text := 'Hide Focus';
+    OnChange := @chkHideFocusChange;
   end;
 
   edtTopRow := TfpgEditInteger.Create(self);
