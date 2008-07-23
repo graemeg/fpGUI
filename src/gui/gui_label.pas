@@ -226,8 +226,8 @@ begin
     Canvas.SetTextColor(clShadow1);
   
   lTxtFlags:= [];
-  if Enabled then
-    Include(lTxtFlags, txtEnabled);
+  if not Enabled then
+    Include(lTxtFlags, txtDisabled);
     
   if FWrapText then
     Include(lTxtFlags, txtWrap);

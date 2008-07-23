@@ -466,8 +466,8 @@ begin
   Canvas.SetFont(Font);
 
   lTxtFlags:= [];
-  if Enabled then
-    Include(lTxtFlags, txtEnabled);
+  if not Enabled then
+    Include(lTxtFlags, txtDisabled);
 
   if FWrapText then
     Include(lTxtFlags, txtWrap);
@@ -595,7 +595,7 @@ begin
   
   lTxtFlags := TextFlagsDflt;
   if not Enabled then
-    Exclude(lTxtFlags, txtEnabled);
+    Include(lTxtFlags, txtDisabled);
 
 //  Canvas.ClearClipRect;
 

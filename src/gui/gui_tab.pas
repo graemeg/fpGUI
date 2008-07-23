@@ -479,7 +479,7 @@ begin
   Canvas.SetTextColor(TextColor);
   lTxtFlags := TextFlagsDflt;
   if not Enabled then
-    Exclude(lTxtFlags, txtEnabled);
+    Include(lTxtFlags, txtDisabled);
 
   case TabPosition of
     tpBottom:

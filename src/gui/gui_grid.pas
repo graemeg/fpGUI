@@ -210,7 +210,10 @@ begin
         end;
         
     1:  begin
-          s := FormatFloat('###,###,###,##0', e.size);
+          if e.EntryType = etDir then
+            s := ''
+          else
+            s := FormatFloat('###,###,###,##0', e.Size);
           x := ARect.Right - Font.TextWidth(s) - 1;
           if x < (ARect.Left + 2) then
             x := ARect.Left + 2;
@@ -431,8 +434,8 @@ begin
   begin
     txt := Cells[ACol, ARow];
     Flags:= [];
-    if Enabled then
-      Include(Flags,txtEnabled)
+    if not Enabled then
+      Include(Flags,txtDisabled)
     else
       Canvas.SetTextColor(clShadow1);
 

@@ -32,7 +32,7 @@ type
   TFButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
     btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
     
-  TFTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter, txtBottom, txtWrap, txtEnabled,
+  TFTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter, txtBottom, txtWrap, txtDisabled,
     txtAutoSize);
 
   TMouseButton = (mbLeft, mbRight, mbMiddle);
@@ -40,7 +40,7 @@ type
 
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
-  TextFlagsDflt = [txtLeft, txtTop, txtEnabled];
+  TextFlagsDflt = [txtLeft, txtTop];
   
   // Used for the internal message queue
   cMessageQueueSize = 1024;
@@ -145,7 +145,11 @@ type
   end;
 
 
+  { TfpgCanvas }
+
   TfpgCanvas = class(TfpgCanvasImpl)
+  private
+    function    WrapLine(const s: TfpgString; aMaxLineWidth: integer): string;
   public
     constructor Create(awin: TfpgWindow); reintroduce;
     destructor  Destroy; override;
@@ -158,9 +162,9 @@ type
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
     procedure   DrawDirectionArrow(r: TfpgRect; direction: integer);
     procedure   DrawFocusRect(r: TfpgRect);
-    function    DrawText(x, y, w, h: TfpgCoord; AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
-    function    DrawText(x, y: TfpgCoord; AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
-    function    DrawText(r: TfpgRect; AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
+    function    DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
+    function    DrawText(x, y: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
+    function    DrawText(r: TfpgRect; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
   end;
 
 
@@ -337,6 +341,8 @@ procedure DumpStack;
 implementation
 
 uses
+  strutils,
+  math,
   gfx_imgfmt_bmp,
   gfx_stdimages,
   gfx_extinterpolation, // only so that it get auto compiled
@@ -353,6 +359,8 @@ var
   uClipboard: TfpgClipboard;
   uMsgQueueList: TList;
 
+const
+  txtWordDelims: set of char = [' ', #9, #13, #10];
 
 type
   TNamedFontItem = class
@@ -1098,6 +1106,48 @@ end;
 
 { TfpgCanvas }
 
+// Warning! This function is not supposed to handle existing line breaks,
+// it is only supposed to insert new ones when appropriate.
+function TfpgCanvas.WrapLine(const s: TfpgString; aMaxLineWidth: integer): string;
+var
+  i, n, ls: integer;
+  sub: string;
+  lw, tw: integer;
+begin
+  Result := '';
+  ls := Length(s);
+  lw := 0;
+  i  := 1;
+  while i <= ls do
+  begin
+    if (s[i] in txtWordDelims) then       // read the delimeter only
+    begin
+      sub := s[i];
+      Inc(i);
+    end else                              // read the whole word
+    begin
+      n := PosSetEx(txtWordDelims, s, i);
+      if n > 0 then
+      begin
+        sub := Copy(s, i, n-i);
+        i := n;
+      end else
+      begin
+        sub := Copy(s, i, MaxInt);
+        i := ls+1;
+      end;
+    end;
+    tw := Font.TextWidth(sub);            // wrap if needed
+    if (lw + tw > aMaxLineWidth) and (lw > 0) then
+    begin
+      lw := tw;
+      Result := Result + sLineBreak;
+    end else
+      Inc(lw, tw);
+    Result := Result + sub;
+  end;
+end;
+
 constructor TfpgCanvas.Create(awin: TfpgWindow);
 begin
   inherited Create;
@@ -1152,213 +1202,81 @@ begin
   fpgStyle.DrawFocusRect(self, r);
 end;
 
-function TfpgCanvas.DrawText(x, y, w, h: TfpgCoord; AText: TfpgString; AFlags: TFTextFlags;
-                ALineSpace: integer): integer;
+function TfpgCanvas.DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString;
+                AFlags: TFTextFlags; ALineSpace: integer): integer;
 var
-  wtxt, htxt, i, wt, l: integer;
-  wraptxt: TfpgString;
+  wtxt, htxt, i, nw, nx, ny, l: integer;
+  buf: TfpgString;
   wraplst: TStringList;
   lEnabled: Boolean;
 begin
-  lEnabled := txtEnabled in AFlags;
+  lEnabled := not (txtDisabled in AFlags);
+
+  // calculate longest word width to autosize properly
+  wtxt := 0;
+  if ((txtAutoSize in AFlags) or (w = 0)) then
+  begin
+    i := 1;
+    buf := ExtractSubstr(AText, i, txtWordDelims);
+    while buf <> '' do
+    begin
+      wtxt := Max(wtxt, Font.TextWidth(buf));
+      buf := ExtractSubstr(AText, i, txtWordDelims);
+    end;
+  end;
+  nw := Max(wtxt, w);
+  
+  wraplst := TStringList.Create;
+  wraplst.Text := AText;
+  
   if (txtWrap in AFlags) then
   begin
-    wraplst := TStringList.Create;
-    wtxt := 0;
-    htxt := 0;
-    wraptxt := AText;
-    while wraptxt > '' do
-      if UTF8Pos(' ', wraptxt) > 0 then
-        if (UTF8Pos(#13,wraptxt) > 0) then
-          if (UTF8Pos(#13,wraptxt) < UTF8Pos(' ',wraptxt)) then
-            if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt)))) > wtxt then
-            begin
-              wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt))));
-              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)));
-            end
-            else
-              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)))
-          else
-            if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt)))) > wtxt then
-            begin
-              wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt))));
-              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)));
-            end
-            else
-              wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)))
-        else
-          if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt)))) > wtxt then
-          begin
-            wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(' ',wraptxt))));
-            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)));
-          end
-          else
-            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(' ', wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(' ', wraptxt)))
-      else
-        if (UTF8Pos(#13,wraptxt) > 0) then
-          if Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt)))) > wtxt then
-          begin
-            wtxt := Font.TextWidth(UTF8Copy(wraptxt, 1, Pred(UTF8Pos(#13,wraptxt))));
-            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)));
-          end
-          else
-            wraptxt := UTF8Copy(wraptxt, Succ(UTF8Pos(#13, wraptxt)), UTF8Length(wraptxt) - Pred(UTF8Pos(#13, wraptxt)))
-        else
-          if Font.TextWidth(wraptxt) > wtxt then
-          begin
-            wtxt := Font.TextWidth(wraptxt);
-            wraptxt := '';
-          end
-          else
-            wraptxt := '';
-    if ((txtAutoSize in AFlags) or (w = 0)) and (wtxt > w) then
-      wt := wtxt
-    else
-      wt := w;
-    while AText > '' do
-    begin
-      if UTF8Pos(' ', AText) > 0 then
-        if (UTF8Pos(#13,AText) > 0) then
-          if (UTF8Pos(#13,AText) < UTF8Pos(' ',AText)) then
-          begin
-            if wraplst.Count > 0 then
-              if wraplst[Pred(wraplst.Count)] = '' then
-                wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
-              else
-                if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))) <= wt then
-                  wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
-                else
-                  wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))))
-            else
-              wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))));
-            wraplst.Add('');
-            AText := UTF8Copy(AText, Succ(UTF8Pos(#13, AText)), UTF8Length(AText) - Pred(UTF8Pos(#13, AText)));
-          end
-          else
-          begin
-            if wraplst.Count > 0 then
-              if wraplst[Pred(wraplst.Count)] = '' then
-                wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
-              else
-                if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))) <= wt then
-                  wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
-                else
-                  wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))))
-            else
-              wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
-            AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
-          end
-        else
-        begin
-          if wraplst.Count > 0 then
-            if wraplst[Pred(wraplst.Count)] = '' then
-              wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
-            else
-              if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))) <= wt then
-                wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText)))
-              else
-                wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))))
-          else
-            wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(' ', AText))));
-          AText := UTF8Copy(AText, Succ(UTF8Pos(' ', AText)), UTF8Length(AText) - Pred(UTF8Pos(' ', AText)));
-        end
-      else
-        if (UTF8Pos(#13,AText) > 0) then
-        begin
-          if wraplst.Count > 0 then
-            if wraplst[Pred(wraplst.Count)] = '' then
-              wraplst[Pred(wraplst.Count)] := UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
-            else
-              if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))) <= wt then
-                wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText)))
-              else
-                wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))))
-          else
-            wraplst.Add(UTF8Copy(AText, 1, Pred(UTF8Pos(#13, AText))));
-          wraplst.Add('');
-          AText := UTF8Copy(AText, Succ(UTF8Pos(#13, AText)), UTF8Length(AText) - Pred(UTF8Pos(#13, AText)));
-        end
-        else
-        begin
-          if wraplst.Count > 0 then
-            if wraplst[Pred(wraplst.Count)] = '' then
-              wraplst[Pred(wraplst.Count)] := AText
-            else
-              if Font.TextWidth(wraplst[Pred(wraplst.Count)] + ' ' + AText) <= wt then
-                wraplst[Pred(wraplst.Count)] := wraplst[Pred(wraplst.Count)] + ' ' + AText
-              else
-                wraplst.Add(AText)
-          else
-            wraplst.Add(AText);
-          AText := '';
-        end;
-    end;
-    htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
-    // Now paint the actual text
-    for i := 0 to Pred(wraplst.Count) do
-    begin
-      l :=  (Font.Height + ALineSpace) * i;
-      wtxt := Font.TextWidth(wraplst[i]);
-      if (txtLeft in AFlags) and (txtTop in AFlags) then
-        fpgStyle.DrawString(self, x, y + l, wraplst[i], lEnabled);
-      if (txtLeft in AFlags) and (txtVCenter in AFlags) then
-        fpgStyle.DrawString(self, x, y + l + (h - htxt) div 2, wraplst[i], lEnabled);
-      if (txtLeft in AFlags) and (txtBottom in AFlags) then
-        fpgStyle.DrawString(self, x, y + l + h - htxt, wraplst[i], lEnabled);
-      if (txtHCenter in AFlags) and (txtTop in AFlags) then
-        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l, wraplst[i], lEnabled);
-      if (txtHCenter in AFlags) and (txtVCenter in AFlags) then
-        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + (h - htxt) div 2, wraplst[i], lEnabled);
-      if (txtHCenter in AFlags) and (txtBottom in AFlags) then
-        fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + l + h - htxt, wraplst[i], lEnabled);
-      if (txtRight in AFlags) and (txtTop in AFlags) then
-        fpgStyle.DrawString(self, x + w - wtxt, y + l, wraplst[i], lEnabled);
-      if (txtRight in AFlags) and (txtVCenter in AFlags) then
-        fpgStyle.DrawString(self, x + w - wtxt, y + l + (h - htxt) div 2, wraplst[i], lEnabled);
-      if (txtRight in AFlags) and (txtBottom in AFlags) then
-        fpgStyle.DrawString(self, x + w - wtxt, y + l + h - htxt, wraplst[i], lEnabled);
-    end;
-    wraplst.Free;
-  end
-  else
-  begin
-    // No wraping was required
-    wtxt := self.Font.TextWidth(AText);
-    htxt := self.Font.Height;
-    if (txtAutoSize in AFlags) or (w = 0) then
-      w := wtxt;
-    if (txtAutoSize in AFlags) or (h = 0) then
-      h := htxt;
-    // Now lets paint the actual text
-    if (txtLeft in AFlags) and (txtTop in AFlags) then
-      fpgStyle.DrawString(self, x, y, AText, lEnabled);
-    if (txtLeft in AFlags) and (txtVCenter in AFlags) then
-      fpgStyle.DrawString(self, x, y + (h - htxt) div 2, AText, lEnabled);
-    if (txtLeft in AFlags) and (txtBottom in AFlags) then
-      fpgStyle.DrawString(self, x, y + h - htxt, AText, lEnabled);
-    if (txtHCenter in AFlags) and (txtTop in AFlags) then
-      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y, AText, lEnabled);
-    if (txtHCenter in AFlags) and (txtVCenter in AFlags) then
-      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + (h - htxt) div 2, AText, lEnabled);
-    if (txtHCenter in AFlags) and (txtBottom in AFlags) then
-      fpgStyle.DrawString(self, x + (w - wtxt) div 2, y + h - htxt, AText, lEnabled);
-    if (txtRight in AFlags) and (txtTop in AFlags) then
-      fpgStyle.DrawString(self, x + w - wtxt, y, AText, lEnabled);
-    if (txtRight in AFlags) and (txtVCenter in AFlags) then
-      fpgStyle.DrawString(self, x + w - wtxt, y + (h - htxt) div 2, AText, lEnabled);
-    if (txtRight in AFlags) and (txtBottom in AFlags) then
-      fpgStyle.DrawString(self, x + w - wtxt, y + h - htxt, AText, lEnabled);
-  Result := htxt;
+    for i := 0 to wraplst.Count-1 do
+      wraplst[i] := WrapLine(wraplst[i], nw);
+    // force line breaks
+    wraplst.Text := wraplst.Text;
   end;
+
+  htxt := (Font.Height * wraplst.Count) + (ALineSpace * Pred(wraplst.Count));
+  
+  // Now paint the actual text
+  for i := 0 to wraplst.Count-1 do
+  begin
+    l :=  (Font.Height + ALineSpace) * i;
+    wtxt := Font.TextWidth(wraplst[i]);
+
+    // horizontal alignment
+    if (txtRight in AFlags) then
+      nx := x + w - wtxt
+    else
+    if (txtHCenter in AFlags) then
+      nx := x + (w - wtxt) div 2
+    else // txtLeft is default
+      nx := x;
+      
+    // vertical alignment
+    if (txtBottom in AFlags) then
+      ny := y + l + h - htxt
+    else
+    if (txtVCenter in AFlags) then
+      ny := y + l + (h - htxt) div 2
+    else // txtTop is default
+      ny := y + l;
+
+    fpgStyle.DrawString(self, nx, ny, wraplst[i], lEnabled);
+  end;
+  
+  wraplst.Free;
+  Result := htxt;
 end;
 
-function TfpgCanvas.DrawText(x, y: TfpgCoord; AText: TfpgString;
+function TfpgCanvas.DrawText(x, y: TfpgCoord; const AText: TfpgString;
     AFlags: TFTextFlags; ALineSpace: integer): integer;
 begin
   Result := DrawText(x, y, 0, 0, AText, AFlags, ALineSpace);
 end;
 
-function TfpgCanvas.DrawText(r: TfpgRect; AText: TfpgString; AFlags: TFTextFlags;
+function TfpgCanvas.DrawText(r: TfpgRect; const AText: TfpgString; AFlags: TFTextFlags;
     ALineSpace: integer): integer;
 begin
   Result := DrawText(r.Left, r.Top, r.Width, r.Height, AText, AFlags, ALineSpace);
