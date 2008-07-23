@@ -482,12 +482,12 @@ type
   TfpgClipboardBase = class(TObject)
   protected
     FClipboardWndHandle: TfpgWinHandle;
-    function    DoGetText: string; virtual; abstract;
-    procedure   DoSetText(const AValue: string); virtual; abstract;
+    function    DoGetText: TfpgString; virtual; abstract;
+    procedure   DoSetText(const AValue: TfpgString); virtual; abstract;
     procedure   InitClipboard; virtual; abstract;
   public
     constructor Create;
-    property    Text: string read DoGetText write DoSetText;
+    property    Text: TfpgString read DoGetText write DoSetText;
   end;
 
 

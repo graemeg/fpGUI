@@ -259,9 +259,9 @@ type
   private
     FWaitingForSelection: Boolean;
   protected
-    FClipboardText: string;
-    function    DoGetText: string; override;
-    procedure   DoSetText(const AValue: string); override;
+    FClipboardText: TfpgString;
+    function    DoGetText: TfpgString; override;
+    procedure   DoSetText(const AValue: TfpgString); override;
     procedure   InitClipboard; override;
   end;
   
@@ -2241,7 +2241,7 @@ end;
 
 { TfpgClipboardImpl }
 
-function TfpgClipboardImpl.DoGetText: string;
+function TfpgClipboardImpl.DoGetText: TfpgString;
 begin
   XConvertSelection(xapplication.Display, xapplication.xia_clipboard,
       XA_STRING, xapplication.xia_clipboard, FClipboardWndHandle, 0);
@@ -2257,7 +2257,7 @@ begin
   Result := FClipboardText;
 end;
 
-procedure TfpgClipboardImpl.DoSetText(const AValue: string);
+procedure TfpgClipboardImpl.DoSetText(const AValue: TfpgString);
 begin
   FClipboardText := AValue;
   XSetSelectionOwner(xapplication.Display, xapplication.xia_clipboard,

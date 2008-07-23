@@ -138,8 +138,6 @@ type
   end;
 
 
-  { TfpgWindowImpl }
-
   TfpgWindowImpl = class(TfpgWindowBase)
   private
     FMouseInWindow: boolean;
@@ -175,8 +173,6 @@ type
     procedure   SetFullscreen(AValue: Boolean); override;
   end;
 
-
-  { TfpgApplicationImpl }
 
   TfpgApplicationImpl = class(TfpgApplicationBase)
   protected
@@ -223,14 +219,12 @@ type
 
   TfpgClipboardImpl = class(TfpgClipboardBase)
   protected
-    FClipboardText: string;
-    function    DoGetText: string; override;
-    procedure   DoSetText(const AValue: string); override;
+    FClipboardText: TfpgString;
+    function    DoGetText: TfpgString; override;
+    procedure   DoSetText(const AValue: TfpgString); override;
     procedure   InitClipboard; override;
   end;
 
-
-  { TfpgFileListImpl }
 
   TfpgFileListImpl = class(TfpgFileListBase)
     function    EncodeAttributesString(attrs: longword): TFileModeString;
@@ -2129,7 +2123,7 @@ end;
 
 { TfpgClipboardImpl }
 
-function TfpgClipboardImpl.DoGetText: string;
+function TfpgClipboardImpl.DoGetText: TfpgString;
 var
   h: THANDLE;
   p: PChar;
@@ -2155,7 +2149,7 @@ begin
   Result := FClipboardText;
 end;
 
-procedure TfpgClipboardImpl.DoSetText(const AValue: string);
+procedure TfpgClipboardImpl.DoSetText(const AValue: TfpgString);
 begin
   FClipboardText := AValue;
   if OpenClipboard(FClipboardWndHandle) then
