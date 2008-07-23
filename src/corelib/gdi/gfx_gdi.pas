@@ -267,9 +267,14 @@ begin
 end;
 
 function GetMyWidgetFromHandle(wh: TfpgWinHandle): TfpgWidget;
+var
+  wg: TfpgWidget;
 begin
-  if (wh <> 0) and (MainInstance = longword(GetWindowLong(wh, GWL_HINSTANCE))) then
-    Result := TfpgWidget(Windows.GetWindowLong(wh, GWL_USERDATA))
+  wg := TfpgWidget(Windows.GetWindowLong(wh, GWL_USERDATA));
+  if (wh <> 0) and (MainInstance = longword(GetWindowLong(wh, GWL_HINSTANCE)))
+    and (wg is TfpgWidget)
+  then
+    Result := wg
   else
     Result := nil;
 end;
@@ -555,7 +560,7 @@ begin
   w      := TfpgWindowImpl(Windows.GetWindowLong(hwnd, GWL_USERDATA));
   Result := 0;
 
-  if not Assigned(w) then
+  if not (w is TfpgWindowImpl) then
   begin
     {$IFDEF DEBUG} writeln('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -812,14 +817,14 @@ begin
             write(w.ClassName + ': ');
             writeln('WM_MOUSEWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
           {$ENDIF}
-          pt.x := LoWord(lparam);
-          pt.y := HiWord(lparam);
+          pt.x := GET_X_LPARAM(lParam);
+          pt.y := GET_Y_LPARAM(lParam);
           mw   := nil;
           h    := WindowFromPoint(pt);
           if h > 0 then  // get window mouse is hovering over
             mw := TfpgWindowImpl(Windows.GetWindowLong(h, GWL_USERDATA));
 
-          if mw <> nil then
+          if (mw is TfpgWindowImpl) then
           begin
             msgp.mouse.x := pt.x;
             msgp.mouse.y := pt.y;
