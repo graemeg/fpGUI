@@ -1107,7 +1107,8 @@ end;
 { TfpgCanvas }
 
 // Warning! This function is not supposed to handle existing line breaks,
-// it is only supposed to insert new ones when appropriate.
+// it is only supposed to insert new ones when appropriate. Also, this function
+// simply inserts line breaks, it doesn't split text lines etc...
 function TfpgCanvas.AddLineBreaks(const s: TfpgString; aMaxLineWidth: integer): string;
 var
   i, n, ls: integer;
@@ -1141,7 +1142,7 @@ begin
     if (lw + tw > aMaxLineWidth) and (lw > 0) then
     begin
       lw := tw;
-      Result := Result + sLineBreak;
+      Result := TrimRight(Result) + sLineBreak;
     end else
       Inc(lw, tw);
     Result := Result + sub;
