@@ -149,7 +149,7 @@ type
 
   TfpgCanvas = class(TfpgCanvasImpl)
   private
-    function    WrapLine(const s: TfpgString; aMaxLineWidth: integer): string;
+    function    AddLineBreaks(const s: TfpgString; aMaxLineWidth: integer): string;
   public
     constructor Create(awin: TfpgWindow); reintroduce;
     destructor  Destroy; override;
@@ -1108,7 +1108,7 @@ end;
 
 // Warning! This function is not supposed to handle existing line breaks,
 // it is only supposed to insert new ones when appropriate.
-function TfpgCanvas.WrapLine(const s: TfpgString; aMaxLineWidth: integer): string;
+function TfpgCanvas.AddLineBreaks(const s: TfpgString; aMaxLineWidth: integer): string;
 var
   i, n, ls: integer;
   sub: string;
@@ -1232,7 +1232,7 @@ begin
   if (txtWrap in AFlags) then
   begin
     for i := 0 to wraplst.Count-1 do
-      wraplst[i] := WrapLine(wraplst[i], nw);
+      wraplst[i] := AddLineBreaks(wraplst[i], nw);
     // force line breaks
     wraplst.Text := wraplst.Text;
   end;
