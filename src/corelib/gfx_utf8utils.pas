@@ -35,16 +35,19 @@ procedure Insert8(const Source: string; var S: string; Index: integer);
 implementation
 
 
+{ If it's a multibyte character, the first byte specifies the amount of bytes
+  used. All subsequent bytes will start with 10xxxxxx. It is assumed that p
+  points to the beginning of a single or multibyte character. }
 function UTF8CharacterLength(p: PChar): integer;
 begin
   if p <> nil then
   begin
-    if ord(p^) < %11000000 then
+    if ord(p^) < %11000000 then  //  00000000-01111111
     begin
       // regular single byte character (#0 is a character, this is pascal ;)
-      Result:=1;
+      Result := 1;
     end
-    else if ((ord(p^) and %11100000) = %11000000) then
+    else if ((ord(p^) and %11100000) = %11000000) then  //  11000010-11011111
     begin
       // could be 2 byte character
       if (ord(p[1]) and %11000000) = %10000000 then
@@ -52,32 +55,33 @@ begin
       else
         Result := 1;
     end
-    else if ((ord(p^) and %11110000) = %11100000) then
+    else if ((ord(p^) and %11110000) = %11100000) then  //  11100000-11101111
     begin
       // could be 3 byte character
       if ((ord(p[1]) and %11000000) = %10000000)
           and ((ord(p[2]) and %11000000) = %10000000) then
-        Result:=3
+        Result := 3
       else
-        Result:=1;
+        Result := 1;
     end
-    else if ((ord(p^) and %11111000) = %11110000) then
+    else if ((ord(p^) and %11111000) = %11110000) then  //  11110000-11110100
     begin
       // could be 4 byte character
       if ((ord(p[1]) and %11000000) = %10000000)
           and ((ord(p[2]) and %11000000) = %10000000)
           and ((ord(p[3]) and %11000000) = %10000000) then
-        Result:=4
+        Result := 4
       else
-        Result:=1;
+        Result := 1;
     end
     else
-      Result:=1;
+      Result := 1;
   end
   else
-    Result:=0;
+    Result := 0;
 end;
 
+{ Returns the character starting position as PChar in the UTF8Str string. }
 function UTF8CharStart(UTF8Str: PChar; Len, Index: integer): PChar;
 var
   CharLen: LongInt;
