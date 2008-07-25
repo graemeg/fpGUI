@@ -122,6 +122,8 @@ var
 begin
   dlg := TfpgFileDialog.Create(nil);
   try
+    if edFilename.Text <> '' then
+      dlg.Filename := edFilename.Text;
     if dlg.RunSaveFile then
       edFilename.Text := dlg.FileName;
   finally

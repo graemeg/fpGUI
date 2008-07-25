@@ -63,6 +63,9 @@ const
   mbOKCancel          = [mbOK, mbCancel];
   mbAbortRetryIgnore  = [mbAbort, mbRetry, mbIgnore];
 
+  // make Select File Dialog calls more readable
+  sfdOpen = True;
+  sfdSave = False;
 
   cMsgDlgBtnText: array[TfpgMsgDlgBtn] of string =
       ( '', rsOK, rsCancel, rsYes, rsNo, rsAbort, rsRetry, rsIgnore,
@@ -168,6 +171,7 @@ type
     procedure   btnDirNewClicked(Sender: TObject);
     procedure   edFilenameChanged(Sender: TObject);
     procedure   UpdateButtonState;
+    function    HighlightFile(const AFilename: string): boolean;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
@@ -176,7 +180,6 @@ type
     FileName: string;
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    function    SelectFile(const AFilename: string): boolean;
     function    RunOpenFile: boolean;
     function    RunSaveFile: boolean;
     property    Filter: string read FFilter write SetFilter;
@@ -201,6 +204,8 @@ procedure ShowMessage(AMessage: string; ACentreText: Boolean = False); overload;
 
 function SelectFontDialog(var FontDesc: string): boolean;
 
+function SelectFileDialog(aDialogType: boolean = sfdOpen;
+  const aFilter: TfpgString = ''): TfpgString;
 
 implementation
 
@@ -335,6 +340,34 @@ begin
   frm.Free;
 end;
 
+function SelectFileDialog(aDialogType: boolean = sfdOpen;
+  const aFilter: TfpgString = ''): TfpgString;
+var
+  dlg: TfpgFileDialog;
+  dres: boolean;
+  DefaultFilter: TfpgString;
+begin
+  DefaultFilter := rsAllFiles+' ('+AllFilesMask+')'+'|'+AllFilesMask;
+  dlg := TfpgFileDialog.Create(nil);
+  try
+    if aFilter = '' then
+      dlg.Filter := DefaultFilter
+    else
+      dlg.Filter := aFilter+'|'+DefaultFilter;
+
+    if aDialogType = sfdOpen then
+      dres := dlg.RunOpenFile
+    else
+      dres := dlg.RunSaveFile;
+    
+    if dres then
+      Result := dlg.FileName
+    else
+      Result := '';
+  finally
+    dlg.Free;
+  end;
+end;
 
 { TfpgMessageBox }
 
@@ -1208,7 +1241,7 @@ begin
   chlDir.OnChange := @DirChange; // restore event handler
 
   if fsel <> '' then
-    SelectFile(fsel)
+    HighlightFile(fsel)
   else
     grid.FocusRow := 0;
     
@@ -1216,7 +1249,7 @@ begin
   grid.SetFocus;
 end;
 
-function TfpgFileDialog.SelectFile(const AFilename: string): boolean;
+function TfpgFileDialog.HighlightFile(const AFilename: string): boolean;
 var
   n: integer;
 begin
@@ -1300,7 +1333,7 @@ begin
   SetCurrentDirectory(sdir);
   fname := ExtractFileName(FileName);
 
-  if not SelectFile(fname) then
+  if not HighlightFile(fname) then
     edFilename.Text := fname;
     
   WindowTitle     := rsOpenAFile;
@@ -1324,7 +1357,7 @@ begin
     sdir := '.';
   SetCurrentDirectory(sdir);
   fname := ExtractFileName(FileName);
-  if not SelectFile(fname) then
+  if not HighlightFile(fname) then
     edFilename.Text := fname;
 
   WindowTitle     := rsSaveAFile;
