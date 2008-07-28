@@ -55,259 +55,225 @@ Const
 
 
 procedure fpgCreateStandardImages;
-var
-  img : TfpgImage;
 begin
   // system images. Change these to the composite arrow bmp that includes
   // disabled state
-  img := fpgImages.AddBMP(
+  fpgImages.AddBMP(
             'sys.sb.up',
             @stdimg_arrow_up,
-      sizeof(stdimg_arrow_up) );
+      sizeof(stdimg_arrow_up));
 
-  img := fpgImages.AddBMP(
+  fpgImages.AddBMP(
             'sys.sb.down',
             @stdimg_arrow_down,
-      sizeof(stdimg_arrow_down) );
+      sizeof(stdimg_arrow_down));
 
-  img := fpgImages.AddBMP(
+  fpgImages.AddBMP(
             'sys.sb.left',
             @stdimg_arrow_left,
-      sizeof(stdimg_arrow_left) );
+      sizeof(stdimg_arrow_left));
 
-  img := fpgImages.AddBMP(
+  fpgImages.AddBMP(
             'sys.sb.right',
             @stdimg_arrow_right,
-      sizeof(stdimg_arrow_right) );
+      sizeof(stdimg_arrow_right));
       
-  img := fpgImages.AddMaskedBMP(  // 60x12 in total.  5 images of 12x12 each.
+  fpgImages.AddMaskedBMP(  // 60x12 in total.  5 images of 12x12 each.
             'sys.radiobuttons',
             @stdimg_radiobuttons,
-      sizeof(stdimg_radiobuttons),
-            0,0);
+      sizeof(stdimg_radiobuttons), 0,0);
 
-  img := fpgImages.AddBMP(  // 65x13 pixels. 5 images of 13x13 each.
+  fpgImages.AddBMP(  // 65x13 pixels. 5 images of 13x13 each.
             'sys.checkboxes',
             @stdimg_checkboxes,
       sizeof(stdimg_checkboxes));
 
 
   // General purpose images:
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.ok',
             @stdimg_btn_ok_16,
-      sizeof(stdimg_btn_ok_16),
-            0,0 );
+      sizeof(stdimg_btn_ok_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.cancel',
             @stdimg_btn_cancel_16,
-      sizeof(stdimg_btn_cancel_16), 0,0 );
+      sizeof(stdimg_btn_cancel_16), 0,0);
             
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.yes',
             @stdimg_choice_yes_16,
-      sizeof(stdimg_choice_yes_16),
-            0,0 );
+      sizeof(stdimg_choice_yes_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.no',
             @stdimg_choice_no_16,
-      sizeof(stdimg_choice_no_16),
-            0,0 );
+      sizeof(stdimg_choice_no_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.close',
             @stdimg_btn_close_16,
-      sizeof(stdimg_btn_close_16), 0,0 );
+      sizeof(stdimg_btn_close_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.quit',
             @stdimg_menu_quit_16,
-      sizeof(stdimg_menu_quit_16), 0,0 );
+      sizeof(stdimg_menu_quit_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.exit',
             @stdimg_menu_exit_16,
-      sizeof(stdimg_menu_exit_16),
-            0,0 );
+      sizeof(stdimg_menu_exit_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.configure',
             @stdimg_menu_preferences_16,
-      sizeof(stdimg_menu_preferences_16),
-            0,0 );
+      sizeof(stdimg_menu_preferences_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.document',
             @stdimg_document,
-      sizeof(stdimg_document),
-            0,0 );
+      sizeof(stdimg_document), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.search',
             @stdimg_search_16,
-      sizeof(stdimg_search_16),
-            0,0 );
+      sizeof(stdimg_search_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.refresh',
             @stdimg_refresh_16,
-      sizeof(stdimg_refresh_16),
-            0,0 );
+      sizeof(stdimg_refresh_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.font',
             @stdimg_font_16,
-      sizeof(stdimg_font_16),
-            15,0 );
+      sizeof(stdimg_font_16), 15,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.copy',
             @stdimg_edit_copy_16,
-      sizeof(stdimg_edit_copy_16),
-            15,0 );
+      sizeof(stdimg_edit_copy_16), 15,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.cut',
             @stdimg_edit_cut_16,
-      sizeof(stdimg_edit_cut_16),
-            0,0 );
+      sizeof(stdimg_edit_cut_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.paste',
             @stdimg_edit_paste_16,
-      sizeof(stdimg_edit_paste_16),
-            0,0 );
+      sizeof(stdimg_edit_paste_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.delete',
             @stdimg_edit_delete_16,
-      sizeof(stdimg_edit_delete_16),
-            0,0 );
+      sizeof(stdimg_edit_delete_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.edit',
             @stdimg_edit,
-      sizeof(stdimg_edit),
-            0,0 );
+      sizeof(stdimg_edit), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.folder',
             @stdimg_folder_16,
-      sizeof(stdimg_folder_16),
-            0,0 );
+      sizeof(stdimg_folder_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.foldernew',
             @stdimg_folder_new_16,
-      sizeof(stdimg_folder_new_16),
-            0,0 );
+      sizeof(stdimg_folder_new_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.folderopen',
             @stdimg_folder_open_16,
-      sizeof(stdimg_folder_open_16),
-            0,0 );
+      sizeof(stdimg_folder_open_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.folderup',
             @stdimg_folder_up_16,
-      sizeof(stdimg_folder_up_16),
-            0,0 );
+      sizeof(stdimg_folder_up_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.open',
             @stdimg_folder_open_16,
-      sizeof(stdimg_folder_open_16),
-            0,0 );
+      sizeof(stdimg_folder_open_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.save',
             @stdimg_menu_save_16,
-      sizeof(stdimg_menu_save_16),
-            0,0 );
+      sizeof(stdimg_menu_save_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.saveas',
             @stdimg_menu_saveas_16,
-      sizeof(stdimg_menu_saveas_16),
-            0,0 );
+      sizeof(stdimg_menu_saveas_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.saveall',
             @stdimg_menu_save_all_16,
-      sizeof(stdimg_menu_save_all_16),
-            0,0 );
+      sizeof(stdimg_menu_save_all_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.help',
             @stdimg_help_16,
-      sizeof(stdimg_help_16),
-            0,0 );
+      sizeof(stdimg_help_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.hidden',
             @stdimg_hidden,
-      sizeof(stdimg_hidden),
-            0,0 );
+      sizeof(stdimg_hidden), 0,0);
 
-  img := fpgImages.AddBMP(
+  fpgImages.AddBMP(
             'stdimg.link',
             @stdimg_link,
-      sizeof(stdimg_link)
-                     );
-  img := fpgImages.AddMaskedBMP(
+      sizeof(stdimg_link));
+      
+  fpgImages.AddMaskedBMP(
             'stdimg.add',
             @stdimg_list_add_16,
-      sizeof(stdimg_list_add_16),
-            0,0 );
+      sizeof(stdimg_list_add_16), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.remove',
             @stdimg_list_remove_16,
-      sizeof(stdimg_list_remove_16),
-            0,0 );
+      sizeof(stdimg_list_remove_16), 0,0);
             
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.executable',
             @stdimg_executable_16,
-      sizeof(stdimg_executable_16),
-            0, 0);
+      sizeof(stdimg_executable_16), 0,0);
 
 
   // Dialog icons
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.dlg.help',
             @stdimg_dialog_confirmation_32,
-      sizeof(stdimg_dialog_confirmation_32),
-            0,0 );
+      sizeof(stdimg_dialog_confirmation_32), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.dlg.info',
             @stdimg_dialog_information_32,
-      sizeof(stdimg_dialog_information_32),
-            0,0 );
+      sizeof(stdimg_dialog_information_32), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.dlg.warning',
             @stdimg_dialog_warning_32,
-      sizeof(stdimg_dialog_warning_32),
-            0,0 );
+      sizeof(stdimg_dialog_warning_32), 0,0);
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.dlg.critical',
             @stdimg_dialog_error_32,
-      sizeof(stdimg_dialog_error_32),
-            0,0 );
+      sizeof(stdimg_dialog_error_32), 0,0);
 
 {
   Here is a template for more images
 
-  img := fpgImages.AddMaskedBMP(
+  fpgImages.AddMaskedBMP(
             'stdimg.',
             @stdimg_,
-      sizeof(stdimg_), 0,0 );
+      sizeof(stdimg_), 0,0);
 }
 end;
 
