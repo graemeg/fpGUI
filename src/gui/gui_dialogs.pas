@@ -45,7 +45,7 @@ uses
   gui_edit,
   gui_grid,
   gui_combobox,
-  gui_bevel,
+  gui_panel,
   gui_memo;
 
 type
@@ -148,8 +148,7 @@ type
     btnUpDir: TfpgButton;
     btnDirNew: TfpgButton;
     btnShowHidden: TfpgButton;
-    panel1: TfpgBevel;
-    lbFileInfo: TfpgLabel;
+    pnlFileInfo: TfpgPanel;
     edFilename: TfpgEdit;
     chlFilter: TfpgComboBox;
     lb1: TfpgLabel;
@@ -919,7 +918,7 @@ begin
     edFileName.Text := grid.CurrentEntry.Name;
 
   UpdateButtonState;
-  lbFileInfo.Text := s;
+  pnlFileInfo.Text := s;
 end;
 
 procedure TfpgFileDialog.GridDblClicked(Sender: TObject; AButton: TMouseButton;
@@ -1016,22 +1015,16 @@ begin
 
   { Create lower Panel details }
   
-  panel1 := TfpgBevel.Create(self);
-  with panel1 do
+  pnlFileInfo := TfpgPanel.Create(self);
+  with pnlFileInfo do
   begin
+    Name := 'pnlFileInfo';
     SetPosition(8, 253, 622, 25);
     Anchors := [anLeft, anRight, anBottom];
-    Shape := bsBox;
+    Alignment := taLeftJustify;
+    Margin := 4;
     Style := bsLowered;
-  end;
-
-  lbFileInfo := TfpgLabel.Create(panel1);
-  with lbFileInfo do
-  begin
-    SetPosition(5, 4, 609, 16);
-    Anchors := [anLeft, anRight, anTop];
-    Text := ' ';
-    FontDesc := '#Label1';
+    Text := '';
   end;
 
   edFilename := TfpgEdit.Create(self);

@@ -10,7 +10,7 @@ uses
   fpgfx,
   gfxbase,
   gui_form,
-  gfx_imgfmt_bmp;
+  gfx_imgfmt_bmp, fpgui_toolkit;
   
 type
 
