@@ -523,17 +523,20 @@ begin
                 anYes:
                   FItems.Add(FText);
                 anAsk:
-                  if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
+                  begin
+                    if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
                     begin
-                    FItems.Add(FText);
-                    FocusItem := Pred(FItems.Count);
+                      FItems.Add(FText);
+                      FocusItem := Pred(FItems.Count);
                     end
-                  else
+                    else
                     begin
-                    FNewItem:= False;
-                    FocusItem := -1;
-                    FText:= '';
-                    end;
+                      FNewItem:= False;
+                      FocusItem := -1;
+                      FText:= '';
+                    end;  { if/else }
+                    Parent.ActivateWindow;
+                  end;
                 end;
             hasChanged := True;
             if Assigned(FDropDown) then
