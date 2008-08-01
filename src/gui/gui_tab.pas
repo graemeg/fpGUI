@@ -445,7 +445,7 @@ begin
   Canvas.DrawLine(r.Left+2, r.Top, r.Right-1, r.Top);
   Canvas.SetColor(clShadow1);
   Canvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);
-  Canvas.SetColor(clBlack);
+  Canvas.SetColor(clShadow2);
   Canvas.DrawLine(r.Right-1, r.Top+1, r.Right, r.Top+2);
   Canvas.DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-1);
 end;
