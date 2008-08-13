@@ -494,6 +494,8 @@ begin
               if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
               begin
                 FSelectedItem:= i;
+                if FNewItem then
+                  FNewItem:= False;
                 DoDropDown;
                 Break;
               end;
