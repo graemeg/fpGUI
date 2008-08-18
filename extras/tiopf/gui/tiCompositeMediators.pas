@@ -20,6 +20,18 @@ uses
 
   
 type
+  TtiMediatorFieldInfo = class
+  private
+    FWidth: integer;
+    FCaption: string;
+    FPropName: string;
+    FAlign: TAlignment;
+  public
+    property Caption : string read FCaption write FCaption;
+    property PropName : string read FPropName write FPropName;
+    property FieldWidth : integer read FWidth write FWidth;
+    property Alignment : TAlignment read FAlign write FAlign default taLeftJustify;
+  end;
 
   { Event object used for OnBeforeSetupField event. Is used to allow formatting
     of fields before written to listview Caption or Items. }
@@ -44,6 +56,8 @@ type
     FMediatorList: TObjectList;
     FObserversInTransit: TList;
     FSelectedObject: TtiObject;
+    FFieldsInfo : TStringList;
+    procedure   ParseDisplayNames;
     procedure   CreateSubMediators; virtual;
     procedure   SetupGUIandObject; virtual;
     procedure   RebuildList; virtual;
@@ -112,7 +126,6 @@ type
     FModel: TtiObject;
     FView: TfpgLVItem;
     FDisplayNames: string;
-  protected
     procedure   SetupFields; virtual;
   public
     constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem; const ADisplayNames: string; IsObserving: Boolean = True);
@@ -153,7 +166,7 @@ type
 function tiFieldName(const AField: string): string;
 function tiFieldWidth(const AField: string): integer;
 function tiFieldCaption(const AField: string): string;
-
+function tiFieldAlignment(const AField : string) : TAlignment;
 
 implementation
 
@@ -163,7 +176,7 @@ uses
   ,tiExcept
   ,tiGenericEditMediators
   ;
-  
+
 const
   cFieldDelimiter = ';';
   cBrackets = '()';
@@ -191,6 +204,37 @@ begin
     Result := 75  // default width
   else
     Result := StrToInt(tiToken(s, ',', 1));
+end;
+
+{ Extracts the alignment from the AField string which is in the format
+ fieldname(width,"field caption",a)  where a is the alignment character.
+ Legal values for the alignment character are :-
+ < - left aligned
+ > - right aligned
+ | - centre aligned
+  eg:  Quantity(25,"Qty",>)   will return: Qty with a width of 25 and
+ the column will be right-aligned. Width, Field Caption and alignment
+ are optional }
+function tiFieldAlignment(const AField : string) : TAlignment;
+var
+  s, a : string;
+  lAlignChar : Char;
+begin
+  result := taLeftJustify;
+  s := tiSubStr(AField, cBrackets[1], cBrackets[2], 1);
+  if trim(s) <> '' then
+  begin
+    a := tiToken(s, ',', 3);
+    if a <> '' then
+    begin
+      lAlignChar := a[1];
+      Case lAlignChar Of
+        '<' : Result := taLeftJustify;
+        '>' : Result := taRightJustify;
+        '|' : Result := taCenter;
+      end; { case }
+    end;
+  end;
 end;
 
 { Extract the field caption part from the AField string which is in the format
@@ -432,19 +476,22 @@ procedure TCompositeListViewMediator.CreateSubMediators;
 var
   c: integer;
   lc: TfpgLVColumn;
-  lField: string;
+  lInfo : TtiMediatorFieldInfo;
 begin
-  { Create column headers }
-  for c := 1 to tiNumToken(FDisplayNames, cFieldDelimiter) do
+  if View.Columns.Count = 0 then
   begin
-    lc := TfpgLVColumn.Create(FView.Columns);
-    lc.AutoSize   := False;
-    lField        := tiToken(FDisplayNames, cFieldDelimiter, c);
-    lc.Caption    := tiFieldCaption(lField);
-    lc.Width      := tiFieldWidth(lField);
-    FView.Columns.Add(lc);
+    { Create column headers }
+    for c := 0 to Pred(FFieldsInfo.Count) do
+    begin
+      lInfo := TtiMediatorFieldInfo(FFieldsInfo.Objects[c]);
+      lc := TfpgLVColumn.Create(View.Columns);
+      lc.AutoSize   := False;
+      lc.Caption    := lInfo.Caption;
+      lc.Width      := lInfo.FieldWidth;
+      lc.Alignment  := lInfo.Alignment;
+      View.Columns.Add(lc);
+    end;
   end;
-
   FModel.ForEach(@DoCreateItemMediator, FShowDeleted);
 end;
 
@@ -499,6 +546,7 @@ constructor TCompositeListViewMediator.Create;
 begin
   inherited Create;
   FObserversInTransit := TList.Create;
+  FFieldsInfo := TStringList.Create;
 end;
 
 constructor TCompositeListViewMediator.CreateCustom(AModel: TtiObjectList;
@@ -523,41 +571,44 @@ begin
    single column listview using the Caption property }
   if (ADisplayNames <> '') and (tiNumToken(ADisplayNames, cFieldDelimiter) > 0) then
   begin
+    ParseDisplayNames;
     CreateSubMediators;
   end;
 
   if IsObserving then
     FModel.AttachObserver(self);
-  
+
 end;
 
 constructor TCompositeListViewMediator.CreateCustom(AModel: TtiObjectList;
   AView: TfpgListView; ADisplayNames: string; IsObserving: Boolean);
 begin
   Create; // don't forget this
-  
+
   FModel        := AModel;
   FView         := AView;
   FMediatorList := TObjectList.Create;
   FIsObserving  := IsObserving;
   FDisplayNames := ADisplayNames;
   FShowDeleted  := False;
-  
+
   SetupGUIandObject;
 
   { TODO: This must be improved. If no ADisplayNames value, maybe default to a
    single column listview using the Caption property }
   if (ADisplayNames <> '') and (tiNumToken(ADisplayNames, cFieldDelimiter) > 0) then
   begin
+    ParseDisplayNames;
     CreateSubMediators;
   end;
-    
+
   if IsObserving then
     FModel.AttachObserver(self);
 end;
 
 procedure TCompositeListViewMediator.BeforeDestruction;
 begin
+  FFieldsInfo.Free;
   FObserversInTransit.Free;
   FMediatorList.Free;
   FModel.DetachObserver(self);
@@ -577,7 +628,6 @@ procedure TCompositeListViewMediator.HandleSelectionChanged;
 var
   i: integer;
 begin
-//  if View.SelCount = 0 then
   if View.ItemIndex = -1 then
     FSelectedObject := nil
   else
@@ -590,8 +640,7 @@ begin
       FObserversInTransit.Assign(FSelectedObject.ObserverList);
 
     // Assign Newly selected item to SelectedObject Obj.
-//    FSelectedObject := TtiObject(View.Selected.Data);
-    FSelectedObject := TtiObject(View.Items.Item[View.ItemIndex]);
+    FSelectedObject := TtiObject(View.Items.Item[View.ItemIndex].UserData);
 
     { If an object was selected, copy the old item's observer List
       to the new item's observer List. }
@@ -608,6 +657,24 @@ begin
     // execute the NotifyObservers event to update the observers.
     FSelectedObject.NotifyObservers;
   end;
+end;
+
+procedure TCompositeListViewMediator.ParseDisplayNames;
+Var
+  I : Integer;
+  lField : String;
+  lInfo : TtiMediatorFieldInfo;
+begin
+  for I := 1 to tiNumToken(FDisplayNames, cFieldDelimiter) do
+  begin
+    lField := tiToken(FDisplayNames, cFieldDelimiter, I);
+    lInfo := TtiMediatorFieldInfo.Create;
+    lInfo.PropName := tiFieldName(lField);
+    lInfo.Caption := tiFieldCaption(lField);
+    lInfo.FieldWidth := tiFieldWidth(lField);
+    lInfo.Alignment := tiFieldAlignment(lField);
+    FFieldsInfo.AddObject(lInfo.Caption + '=' + tiFieldName(lField), lInfo);
+  end; { Loop }
 end;
 
 { TCompositeStringGridMediator }
@@ -631,7 +698,7 @@ begin
     if TtiObject(FView.Objects[0, i]) = AValue then
     begin
       FView.FocusRow := i;
-      Break; //==>
+      Exit; //==>
     end;
   end;
 end;
@@ -678,7 +745,6 @@ var
   i: integer;
   lField: string;
   lColumnTotalWidth: integer;
-  row: integer;
 begin
   lColumnTotalWidth := 0;
   for i := 0 to tiNumToken(FDisplayNames, cFieldDelimiter)-1 do
@@ -694,14 +760,10 @@ begin
       lColumnTotalWidth := lColumnTotalWidth + FView.ColumnWidth[i] + 20;
   end;
   
-  row := 0; // keep track of last grid row used
   for i := 0 to FModel.Count-1 do // loop through all items
   begin
     if (not FModel.Items[i].Deleted) or FShowDeleted then
-    begin
-      DoCreateItemMediator(FModel.Items[i], row);
-      inc(row);
-    end;
+      DoCreateItemMediator(FModel.Items[i], i);
   end;
 end;
 
@@ -765,7 +827,7 @@ begin
   FIsObserving  := IsObserving;
   FDisplayNames := ADisplayNames;
   FShowDeleted  := False;
-
+  
   SetupGUIandObject;
   if (FDisplayNames <> '') and (tiNumToken(ADisplayNames, cFieldDelimiter) > 0) then
     CreateSubMediators;
@@ -789,7 +851,6 @@ begin
   Assert(FModel = ASubject);
   RebuildStringGrid;
 end;
-
 
 end.
 

@@ -8,7 +8,7 @@ uses
   SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
   gfx_widget, gui_form, gui_label, gui_button,
   gui_basegrid, gui_grid, gui_menu,
-  gui_panel, gui_popupcalendar, gui_gauge, model, tiCompositeMediators;
+  gui_panel, gui_popupcalendar, gui_gauge, Model, tiCompositeMediators;
 
 type
 

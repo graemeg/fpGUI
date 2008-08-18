@@ -13,6 +13,21 @@
         <Generate Value="Faster"/>
       </CodeGeneration>
       <Other>
+        <CustomOptions Value="-dLINK_CSVx
+-dLINK_TABx
+-dLINK_FBLx
+-dLINK_SQLDB_IB
+-dLINK_SQLDB_PQx
+-dLINK_SQLDB_Oraclex
+-dLINK_SQLDB_SQLLite3x
+-dLINK_SQLDB_ODBCx
+-dLINK_SQLDB_MySQL40x
+-dLINK_SQLDB_MySQL41x
+-dLINK_SQLDB_MySQL50x
+-dLINK_XMLLIGHTx
+-dLINK_ZEOS_FB15x
+-dUseCThreads
+"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
