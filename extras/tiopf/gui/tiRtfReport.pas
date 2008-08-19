@@ -2893,7 +2893,7 @@ begin
     if Token <> etDataset
     then raise TRtfException.Create('variable is not a dataset');
 
-    ADataset := TRtfDataset(integer(Value));
+    ADataset := TRtfDataset(ptrint(Value));
     ADataset := ADataset.ResolveNestedFields(ADataset, AFieldName, AFieldName);
     if AFieldName = '' then begin
       //Its a (nested) dataset
@@ -3738,7 +3738,7 @@ begin
           ARecord := nil;
           AHeader := nil;
           AFooter := nil;
-          ADataset := TRtfDataset(integer(AResultValue)); //Dirty!
+          ADataset := TRtfDataset(PtrInt(AResultValue)); //Dirty!
 
           for i := 0 to AItem.Count - 1 do begin
             ATemp := AItem[i];
@@ -4047,7 +4047,7 @@ begin
   if VarIsEmpty(AArgument.Value)
   then raise TRtfException.Create('OnCreateDataset did not return a dataset object');
 
-  AObject := TObject(integer(AArgument.Value));
+  AObject := TObject(Ptrint(AArgument.Value));
   ADataset := Datasets.Add(AObject, AAliasname, true);
   AArgument.Token := etDataset;
   AArgument.Value := integer(ADataset);
@@ -4149,7 +4149,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset]) then
     raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   if ATable.Bof then
   begin
     AArgument.Token := etLitTrue;
@@ -4167,7 +4167,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset]) then
     raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   if ATable.Eof then
   begin
     AArgument.Token := etLitTrue;
@@ -4186,7 +4186,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset])
   then raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   AArgument.Token := etLitInt;
   AArgument.Value := ATable.RecordCount
 end;
@@ -4196,7 +4196,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset])
   then raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   if ATable.IsEmpty then begin
     AArgument.Token := etLitTrue;
     AArgument.Value := true;
@@ -4211,7 +4211,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset])
   then raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   ATable.First;
 end;
 
@@ -4220,7 +4220,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset])
   then raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   ATable.Last;
 end;
 
@@ -4229,7 +4229,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset])
   then raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   ATable.Next;
 end;
 
@@ -4238,7 +4238,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset])
   then raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   ATable.Open;
 end;
 
@@ -4247,7 +4247,7 @@ var ATable: TRtfDataset;
 begin
   if not AArgument.Check(0,[etDataset])
   then raise TRtfException.Create(rsUnexpectedParameterType);
-  ATable := TRtfDataset(integer(AArgument[0].Value));
+  ATable := TRtfDataset(Ptrint(AArgument[0].Value));
   ATable.Prior;
 end;
 
