@@ -1034,9 +1034,11 @@ end;
 procedure TfpgBaseEdit.SetText(const AValue: string);
 var
   s: string;
+  prevval: TfpgString;
 begin
   if FText = AValue then
     Exit;
+  prevval := FText;
 
   if FMaxLength <> 0 then
   begin
@@ -1056,6 +1058,9 @@ begin
 
   Adjust;
   RePaint;
+
+  if prevval <> Text then
+    DoOnChange;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupCut(Sender: TObject);
@@ -1131,7 +1136,10 @@ begin
 end;
 
 procedure TfpgBaseEdit.DeleteSelection;
+var
+  prevval: TfpgString;
 begin
+  prevval := FText;
   if FSelOffset <> 0 then
   begin
     if FSelOffset < 0 then
@@ -1147,6 +1155,8 @@ begin
     FSelOffset := 0;
     FSelStart := FCursorPos;
   end;
+  if prevval <> Text then
+    DoOnChange;
 end;
 
 procedure TfpgBaseEdit.DoCopy;
@@ -1159,7 +1169,9 @@ end;
 procedure TfpgBaseEdit.DoPaste;
 var
   s: string;
+  prevval: TfpgString;
 begin
+  prevval := FText;
   DeleteSelection;
   s := fpgClipboard.Text;
 
@@ -1175,6 +1187,8 @@ begin
   FSelStart  := FCursorPos;
   Adjust;
   Repaint;
+  if prevval <> Text then
+    DoOnChange;
 end;
 
 procedure TfpgBaseEdit.SetAutoSelect(const AValue: Boolean);
