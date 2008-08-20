@@ -54,6 +54,7 @@ type
   end;
 
 
+  // A normal grid's column information now become rows of data.
   TColumnsGrid = class(TfpgCustomGrid)
   protected
     function    GetRowCount: Integer; override;
@@ -293,18 +294,30 @@ begin
   if c = nil then
     Exit;
 
-  lbCOLNO.Text     := IntToStr(row);
-  edTITLE.Text     := c.Title;
-  edCOLWIDTH.Text  := IntToStr(c.Width);
-  case c.Alignment of
-    taRightJustify:
-        i := 1;
-    taCenter:
-        i := 2
-    else
-        i := 0;
+  try
+    // disable event handlers
+    edTITLE.OnChange := nil;
+    edCOLWIDTH.OnChange := nil;
+    chlALIGN.OnChange := nil;
+
+    lbCOLNO.Text     := IntToStr(row);
+    edTITLE.Text     := c.Title;
+    edCOLWIDTH.Text  := IntToStr(c.Width);
+    case c.Alignment of
+      taRightJustify:
+          i := 1;
+      taCenter:
+          i := 2
+      else
+          i := 0;
+    end;
+    chlALIGN.FocusItem := i;
+  finally
+    // enable event handlers again.
+    edTITLE.OnChange    := @EditChange;
+    edCOLWIDTH.OnChange := @EditChange;
+    chlALIGN.OnChange   := @EditChange;
   end;
-  chlALIGN.FocusItem := i;
 end;
 
 procedure TColumnEditForm.SaveColumn(row: integer);
@@ -332,8 +345,7 @@ procedure TColumnEditForm.EditChange(Sender: TObject);
 begin
   if grid.FocusRow < 0 then
     Exit;
-
-  SaveColumn(grid.FocusRow);
+  SaveColumn(grid.FocusRow)
 end;
 
 procedure TColumnEditForm.NewButtonClick(Sender: TObject);

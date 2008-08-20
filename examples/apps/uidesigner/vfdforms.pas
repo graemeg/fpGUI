@@ -117,6 +117,8 @@ type
     cbFullPath: TfpgCheckBox;
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
+    eDefaultExt: TfpgEdit;
+    lblName3: TfpgLabel;
     {@VFD_HEAD_END: frmVFDSetup}
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
@@ -242,71 +244,79 @@ procedure TWidgetOrderForm.AfterCreate;
 begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: WidgetOrderForm}
-  SetPosition(100, 100, 312, 258);
+  Name := 'WidgetOrderForm';
+  SetPosition(534, 173, 312, 258);
   WindowTitle := 'Widget order';
   WindowPosition := wpScreenCenter;
 
   l1 := TfpgLabel.Create(self);
   with l1 do
   begin
+    Name := 'l1';
     SetPosition(4, 4, 108, 16);
-    Text := 'Form widget order:';
     FontDesc := '#Label1';
+    Text := 'Form widget order:';
   end;
 
   list := TfpgListBox.Create(self);
   with list do
   begin
+    Name := 'list';
     SetPosition(4, 24, 220, 228);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
+    TabOrder := 1;
   end;
 
   btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
+    Name := 'btnOK';
     SetPosition(232, 24, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'OK';
     FontDesc := '#Label1';
     ImageName := 'stdimg.ok';
-    ModalResult := 0;
+    TabOrder := 2;
     OnClick := @OnButtonClick;
   end;
 
   btnCancel := TfpgButton.Create(self);
   with btnCancel do
   begin
+    Name := 'btnCancel';
     SetPosition(232, 52, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'Cancel';
     FontDesc := '#Label1';
     ImageName := 'stdimg.cancel';
-    ModalResult := 0;
+    TabOrder := 3;
     OnClick := @OnButtonClick;
   end;
 
   btnUp := TfpgButton.Create(self);
   with btnUp do
   begin
+    Name := 'btnUp';
     SetPosition(232, 108, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'Up';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
+    TabOrder := 4;
     OnClick := @OnButtonClick;
   end;
 
   btnDown := TfpgButton.Create(self);
   with btnDown do
   begin
+    Name := 'btnDown';
     SetPosition(232, 136, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'Down';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
+    TabOrder := 5;
     OnClick := @OnButtonClick;
   end;
 
@@ -405,6 +415,7 @@ begin
   chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 2);
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
   cbFullPath.Checked      := gINI.ReadBool('Options', 'ShowFullPath', True);
+  eDefaultExt.Text:=gINI.ReadString('Options','DefaultFileExt','.pas');
 end;
 
 procedure TfrmVFDSetup.SaveSettings;
@@ -412,6 +423,7 @@ begin
   gINI.WriteInteger('Options', 'GridResolution', chlGrid.FocusItem);
   gINI.WriteInteger('Options', 'MRUFileCount', tbMRUFileCount.Position);
   gINI.WriteBool('Options', 'ShowFullPath', cbFullPath.Checked);
+  gINI.WriteString('Options','DefaultFileExt',eDefaultExt.Text);
 end;
 
 procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
@@ -424,7 +436,7 @@ procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
   Name := 'frmVFDSetup';
-  SetPosition(394, 399, 252, 184);
+  SetPosition(394, 399, 252, 217);
   WindowTitle := 'General settings';
   WindowPosition := wpScreenCenter;
   gINI.ReadFormState(self);
@@ -432,88 +444,117 @@ begin
   lb1 := TfpgLabel.Create(self);
   with lb1 do
   begin
+    Name := 'lb1';
     SetPosition(28, 28, 116, 16);
-    Text := 'Grid resolution:';
     FontDesc := '#Label1';
+    Text := 'Grid resolution:';
   end;
 
   chlGrid := TfpgComboBox.Create(self);
   with chlGrid do
   begin
+    Name := 'chlGrid';
     SetPosition(140, 24, 88, 22);
+    FontDesc := '#List';
     Items.Add('1');
     Items.Add('4');
     Items.Add('8');
-    FontDesc := '#List';
+    TabOrder := 1;
     FocusItem := 0;
   end;
 
   btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
-    SetPosition(92, 154, 75, 24);
+    Name := 'btnOK';
+    SetPosition(92, 187, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
     ImageName := 'stdimg.ok';
-    ModalResult := 0;
-    ShowImage := True;
+    TabOrder := 2;
     OnClick := @btnOKClick;
   end;
 
   btnCancel := TfpgButton.Create(self);
   with btnCancel do
   begin
-    SetPosition(171, 154, 75, 24);
+    Name := 'btnCancel';
+    SetPosition(171, 187, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
     ImageName := 'stdimg.cancel';
     ModalResult := -1;
-    ShowImage := True;
+    TabOrder := 3;
   end;
 
   lblRecentFiles := TfpgLabel.Create(self);
   with lblRecentFiles do
   begin
+    Name := 'lblRecentFiles';
     SetPosition(28, 88, 136, 16);
-    Text := 'Recent files count:';
     FontDesc := '#Label1';
+    Text := 'Recent files count:';
   end;
 
   tbMRUFileCount := TfpgTrackBar.Create(self);
   with tbMRUFileCount do
   begin
+    Name := 'tbMRUFileCount';
     SetPosition(156, 80, 76, 30);
-    Min := 2;
     Max := 10;
+    Min := 2;
     Position := 4;
-    Orientation := orHorizontal;
     ShowPosition := True;
+    TabOrder := 5;
   end;
 
   cbFullPath := TfpgCheckBox.Create(self);
   with cbFullPath do
   begin
+    Name := 'cbFullPath';
     SetPosition(24, 108, 204, 20);
-    Text := 'Show the full file path';
     FontDesc := '#Label1';
+    TabOrder := 6;
+    Text := 'Show the full file path';
   end;
 
   lblName1 := TfpgLabel.Create(self);
   with lblName1 do
   begin
+    Name := 'lblName1';
     SetPosition(8, 8, 176, 16);
-    Text := 'Form designer';
     FontDesc := '#Label2';
+    Text := 'Form designer';
   end;
 
   lblName2 := TfpgLabel.Create(self);
   with lblName2 do
   begin
+    Name := 'lblName2';
     SetPosition(8, 64, 232, 16);
-    Text := 'Open Recent menu settings';
     FontDesc := '#Label2';
+    Text := 'Open Recent menu settings';
+  end;
+
+  eDefaultExt := TfpgEdit.Create(self);
+  with eDefaultExt do
+  begin
+    Name := 'eDefaultExt';
+    SetPosition(28, 152, 120, 20);
+    TabOrder := 9;
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+
+  lblName3 := TfpgLabel.Create(self);
+  with lblName3 do
+  begin
+    Name := 'lblName3';
+    SetPosition(12, 132, 152, 14);
+    FontDesc := '#Label1';
+    Text := 'Default file extension:';
   end;
 
   {@VFD_BODY_END: frmVFDSetup}

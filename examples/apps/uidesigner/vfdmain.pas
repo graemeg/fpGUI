@@ -39,7 +39,7 @@ type
   TMainDesigner = class(TObject)
   private
     procedure   SetEditedFileName(const Value: string);
-    procedure   LoadGridResolution;
+    procedure   LoadDefaults;
   protected
     FDesigners: TList;
     FFile: TVFDFile;
@@ -85,6 +85,9 @@ uses
   gui_iniutils,
   gfx_utils;
 
+Var
+  DefaultPasExt : String = '.pas';
+
 { TMainDesigner }
 
 procedure TMainDesigner.OnNewFile(Sender: TObject);
@@ -116,7 +119,7 @@ begin
     afiledialog          := TfpgFileDialog.Create(nil);
     afiledialog.Filename := EditedFilename;
     afiledialog.WindowTitle := 'Open form file';
-    afiledialog.Filter   := 'Pascal source files (*.pas;*.inc;*.dpr;*.lpr)|*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
+    afiledialog.Filter   := 'Pascal source files (*.pp;*.pas;*.inc;*.dpr;*.lpr)|*.pp;*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
     if afiledialog.RunOpenFile then
     begin
       EditedFileName := aFileDialog.Filename;
@@ -180,11 +183,13 @@ begin
     afiledialog          := TfpgFileDialog.Create(nil);
     afiledialog.Filename := EditedFilename;
     afiledialog.WindowTitle := 'Save form source';
-    afiledialog.Filter   := 'Pascal source files (*.pas;*.inc;*.dpr;*.lpr)|*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
+    afiledialog.Filter   := 'Pascal source files (*.pp;*.pas;*.inc;*.dpr;*.lpr)|*.pp;*.pas;*.inc;*.dpr;*.lpr|All Files (*)|*';
     if afiledialog.RunSaveFile then
     begin
-      EditedFileName := aFileDialog.Filename;
-      fname          := EditedFilename;
+      fname:=aFileDialog.Filename;
+      if (ExtractFileExt(fname)='') then
+        fname:=fname+DefaultPasExt;
+      EditedFileName := fname;
     end
     else
       fname          := '';
@@ -300,7 +305,7 @@ begin
 
   // options
   SaveComponentNames := True;
-  LoadGridResolution;
+  LoadDefaults;
   
   FEditedFileName := '';
 end;
@@ -404,7 +409,7 @@ begin
   try
     if frm.ShowModal = 1 then
     begin
-      LoadGridResolution;
+      LoadDefaults;
       frmMain.mru.MaxItems      := gINI.ReadInteger('Options', 'MRUFileCount', 4);
       frmMain.mru.ShowFullPath  := gINI.ReadBool('Options', 'ShowFullPath', True);
     end;
@@ -424,13 +429,14 @@ begin
   frmMain.WindowTitle := 'fpGUI Designer v' + program_version + ' - ' + s;
 end;
 
-procedure TMainDesigner.LoadGridResolution;
+procedure TMainDesigner.LoadDefaults;
 begin
   case gINI.ReadInteger('Options', 'GridResolution', 1) of
     0: GridResolution := 2;
     1: GridResolution := 4;
     2: GridResolution := 8;
   end;
+  DefaultPasExt:=gINI.ReadString('Options','DefaultFileExt', '.pas');
 end;
 
 end.
