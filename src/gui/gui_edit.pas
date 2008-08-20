@@ -1285,6 +1285,7 @@ end;
 procedure TfpgBaseNumericEdit.HandlePaint;
 var
   x: TfpgCoord;
+  r: TfpgRect;
 begin
   if Alignment = taRightJustify then
   begin
@@ -1292,6 +1293,8 @@ begin
     inherited HandlePaint;
     //  Canvas.ClearClipRect;
     //  r.SetRect(0, 0, Width, Height);
+    r.SetRect(2, 2, Width - 4, Height - 4);
+    Canvas.SetClipRect(r);
     Canvas.Clear(BackgroundColor);
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);
