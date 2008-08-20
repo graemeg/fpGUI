@@ -4,6 +4,7 @@
 fpdoc --package=CoreLib \
   --format=html \
   --output=html/corelib/  \
+  --charset=UTF-8 \
   --content=html/corelib.cnt \
   --html-search=/fpgui/docs/search.html \
   --import=html/gui.cnt,../gui/ \
