@@ -80,12 +80,16 @@ type
   end;
 
 
+  { TfpgCustomStringGrid }
+
   TfpgCustomStringGrid = class(TfpgCustomGrid)
   private
     function    GetCell(ACol, ARow: Integer): string;
+    function    GetColumnAlignment(ACol: Integer): TAlignment;
     function    GetColumnTitle(ACol: Integer): string;
     function    GetObjects(ACol, ARow: Integer): TObject;
     procedure   SetCell(ACol, ARow: Integer; const AValue: string);
+    procedure   SetColumnAlignment(ACol: Integer; const AValue: TAlignment);
     procedure   SetColumnTitle(ACol: Integer; const AValue: string);
     procedure   SetObjects(ACol, ARow: Integer; const AValue: TObject);
   protected
@@ -106,6 +110,7 @@ type
     property    Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
     property    ColumnTitle[ACol: Integer]: string read GetColumnTitle write SetColumnTitle;
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
+    property    ColumnAlignment[ACol: Integer]: TAlignment read GetColumnAlignment write SetColumnAlignment;
     property    ColumnBackgroundColor;
     property    ColumnTextColor;
 //    property    Cols[index: Integer]: TStrings read GetCols write SetCols;
@@ -310,6 +315,13 @@ begin
   Result := TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow];
 end;
 
+function TfpgCustomStringGrid.GetColumnAlignment(ACol: Integer): TAlignment;
+begin
+  if ACol > ColumnCount-1 then
+    Exit; //==>
+  Result := TfpgStringColumn(FColumns.Items[ACol]).Alignment;
+end;
+
 function TfpgCustomStringGrid.GetColumnTitle(ACol: Integer): string;
 begin
   if ACol > ColumnCount-1 then
@@ -346,6 +358,16 @@ begin
     TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow] := AValue;
     EndUpdate;
   end;
+end;
+
+procedure TfpgCustomStringGrid.SetColumnAlignment(ACol: Integer;
+  const AValue: TAlignment);
+begin
+  if ACol > ColumnCount-1 then
+    Exit; //==>
+  BeginUpdate;
+  TfpgStringColumn(FColumns.Items[ACol]).Alignment := AValue;
+  EndUpdate;
 end;
 
 procedure TfpgCustomStringGrid.SetColumnTitle(ACol: Integer; const AValue: string);
