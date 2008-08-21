@@ -139,6 +139,11 @@ type
 procedure EditStringList(sl: TStringList);
 procedure GetEnumPropValueList(wg: TObject; const APropName: string; sl: TStringList);
 
+const
+  DefUndoOnPropExit = False;
+
+var
+  UndoOnPropExit: Boolean = DefUndoOnPropExit;
 
 implementation
 
@@ -280,7 +285,13 @@ end;
 procedure TGeneralPropertyEditor.EditExit(Sender: TObject);
 begin
   if FOrigValue <> edit.Text then
-    edit.Text := FOrigvalue;
+    if UndoOnPropExit then
+      edit.Text := FOrigvalue
+    else
+    begin
+      UpdateProperty(nil);
+      FOrigValue := edit.Text;
+    end;
 end;
 
 procedure TGeneralPropertyEditor.EditKeyPressed(Sender: TObject;
@@ -290,6 +301,10 @@ begin
   begin
     UpdateProperty(nil);
     FOrigValue := edit.Text;
+  end
+  else if (keycode=keyEscape) then
+  begin
+    edit.Text := FOrigValue;
   end
   else
     inherited;

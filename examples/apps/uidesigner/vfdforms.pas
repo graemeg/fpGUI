@@ -119,6 +119,7 @@ type
     lblName2: TfpgLabel;
     eDefaultExt: TfpgEdit;
     lblName3: TfpgLabel;
+    cbUndoOnExit: TfpgCheckBox;
     {@VFD_HEAD_END: frmVFDSetup}
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
@@ -131,7 +132,8 @@ implementation
 uses
   fpgfx,
   gui_iniutils,
-  gfx_constants;
+  gfx_constants,
+  vfdprops; // used to get Object Inspector defaults
 
 
 { TInsertCustomForm }
@@ -415,7 +417,8 @@ begin
   chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 2);
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
   cbFullPath.Checked      := gINI.ReadBool('Options', 'ShowFullPath', True);
-  eDefaultExt.Text:=gINI.ReadString('Options','DefaultFileExt','.pas');
+  eDefaultExt.Text        := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
+  cbUndoOnExit.Checked    := gINI.ReadBool('Options', 'UndoOnExit', UndoOnPropExit);
 end;
 
 procedure TfrmVFDSetup.SaveSettings;
@@ -423,7 +426,8 @@ begin
   gINI.WriteInteger('Options', 'GridResolution', chlGrid.FocusItem);
   gINI.WriteInteger('Options', 'MRUFileCount', tbMRUFileCount.Position);
   gINI.WriteBool('Options', 'ShowFullPath', cbFullPath.Checked);
-  gINI.WriteString('Options','DefaultFileExt',eDefaultExt.Text);
+  gINI.WriteString('Options', 'DefaultFileExt', eDefaultExt.Text);
+  gINI.WriteBool('Options', 'UndoOnExit', cbUndoOnExit.Checked);
 end;
 
 procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
@@ -436,7 +440,7 @@ procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
   Name := 'frmVFDSetup';
-  SetPosition(394, 399, 252, 217);
+  SetPosition(394, 399, 253, 225);
   WindowTitle := 'General settings';
   WindowPosition := wpScreenCenter;
   gINI.ReadFormState(self);
@@ -467,12 +471,12 @@ begin
   with btnOK do
   begin
     Name := 'btnOK';
-    SetPosition(92, 187, 75, 24);
+    SetPosition(93, 195, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
     ImageName := 'stdimg.ok';
-    TabOrder := 2;
+    TabOrder := 6;
     OnClick := @btnOKClick;
   end;
 
@@ -480,20 +484,20 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(171, 187, 75, 24);
+    SetPosition(172, 195, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
     ImageName := 'stdimg.cancel';
     ModalResult := -1;
-    TabOrder := 3;
+    TabOrder := 7;
   end;
 
   lblRecentFiles := TfpgLabel.Create(self);
   with lblRecentFiles do
   begin
     Name := 'lblRecentFiles';
-    SetPosition(28, 88, 136, 16);
+    SetPosition(28, 92, 124, 16);
     FontDesc := '#Label1';
     Text := 'Recent files count:';
   end;
@@ -502,21 +506,21 @@ begin
   with tbMRUFileCount do
   begin
     Name := 'tbMRUFileCount';
-    SetPosition(156, 80, 76, 30);
+    SetPosition(156, 84, 76, 30);
     Max := 10;
     Min := 2;
     Position := 4;
     ShowPosition := True;
-    TabOrder := 5;
+    TabOrder := 3;
   end;
 
   cbFullPath := TfpgCheckBox.Create(self);
   with cbFullPath do
   begin
     Name := 'cbFullPath';
-    SetPosition(24, 108, 204, 20);
+    SetPosition(24, 112, 204, 20);
     FontDesc := '#Label1';
-    TabOrder := 6;
+    TabOrder := 4;
     Text := 'Show the full file path';
   end;
 
@@ -533,7 +537,7 @@ begin
   with lblName2 do
   begin
     Name := 'lblName2';
-    SetPosition(8, 64, 232, 16);
+    SetPosition(8, 72, 232, 16);
     FontDesc := '#Label2';
     Text := 'Open Recent menu settings';
   end;
@@ -542,8 +546,8 @@ begin
   with eDefaultExt do
   begin
     Name := 'eDefaultExt';
-    SetPosition(28, 152, 120, 20);
-    TabOrder := 9;
+    SetPosition(28, 160, 68, 22);
+    TabOrder := 5;
     Text := '';
     FontDesc := '#Edit1';
   end;
@@ -552,9 +556,19 @@ begin
   with lblName3 do
   begin
     Name := 'lblName3';
-    SetPosition(12, 132, 152, 14);
+    SetPosition(12, 140, 152, 16);
+    FontDesc := '#Label2';
+    Text := 'Default file extension';
+  end;
+
+  cbUndoOnExit := TfpgCheckBox.Create(self);
+  with cbUndoOnExit do
+  begin
+    Name := 'cbUndoOnExit';
+    SetPosition(24, 48, 204, 18);
     FontDesc := '#Label1';
-    Text := 'Default file extension:';
+    TabOrder := 2;
+    Text := 'Undo on property editor exit';
   end;
 
   {@VFD_BODY_END: frmVFDSetup}

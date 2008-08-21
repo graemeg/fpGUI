@@ -26,6 +26,7 @@ uses
   SysUtils,
   gfx_widget,
   gui_dialogs,
+  vfdprops,
   vfdforms,
   vfddesigner,
   vfdfile,
@@ -436,7 +437,8 @@ begin
     1: GridResolution := 4;
     2: GridResolution := 8;
   end;
-  DefaultPasExt:=gINI.ReadString('Options','DefaultFileExt', '.pas');
+  DefaultPasExt   := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
+  UndoOnPropExit  := gINI.ReadBool('Options', 'UndoOnExit', DefUndoOnPropExit);
 end;
 
 end.
