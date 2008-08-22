@@ -1,5 +1,5 @@
-{ This file was automatically created by Lazarus. Do not edit!
-This source is only used to compile and install the package.
+{ This file was automatically created by Lazarus. do not edit!
+  This source is only used to compile and install the package.
  }
 
 unit tiOPFfpGUI; 
@@ -7,8 +7,8 @@ unit tiOPFfpGUI;
 interface
 
 uses
-  tiGUIUtils, tiDialogs, tiGUIINI, tiGenericEditMediators, tiGUIConstants, 
-    tiGenericListMediators, tiCompositeMediators, tiRtfReport; 
+  tiGUIUtils, tiDialogs, tiGUIINI, tiGUIConstants, tiRtfReport, tiMediators, 
+  tiListMediators;
 
 implementation
 

@@ -36,7 +36,7 @@
     <License Value="Mozilla Public License v1.1
 "/>
     <Version Major="2" Release="4"/>
-    <Files Count="8">
+    <Files Count="7">
       <Item1>
         <Filename Value="gui/tiGUIUtils.pas"/>
         <UnitName Value="tiGUIUtils"/>
@@ -50,25 +50,21 @@
         <UnitName Value="tiGUIINI"/>
       </Item3>
       <Item4>
-        <Filename Value="gui/tiGenericEditMediators.pas"/>
-        <UnitName Value="tiGenericEditMediators"/>
-      </Item4>
-      <Item5>
         <Filename Value="gui/tiGUIConstants.pas"/>
         <UnitName Value="tiGUIConstants"/>
-      </Item5>
-      <Item6>
-        <Filename Value="gui/tiGenericListMediators.pas"/>
-        <UnitName Value="tiGenericListMediators"/>
-      </Item6>
-      <Item7>
-        <Filename Value="gui/tiCompositeMediators.pas"/>
-        <UnitName Value="tiCompositeMediators"/>
-      </Item7>
-      <Item8>
+      </Item4>
+      <Item5>
         <Filename Value="gui/tiRtfReport.pas"/>
         <UnitName Value="tiRtfReport"/>
-      </Item8>
+      </Item5>
+      <Item6>
+        <Filename Value="gui/tiMediators.pas"/>
+        <UnitName Value="tiMediators"/>
+      </Item6>
+      <Item7>
+        <Filename Value="gui/tiListMediators.pas"/>
+        <UnitName Value="tiListMediators"/>
+      </Item7>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
