@@ -24,7 +24,7 @@ unit gui_tab;
     * Tab Styles (tab, button, flat button, angled)
     * Tab Position (top, bottom, left, right)
     * Better keyboard support
-    * Focus rectangle drawn on tabs itself.gui_tab
+    * Focus rectangle drawn on tabs itself
     * FindNextPage() must be implemented
 }
 

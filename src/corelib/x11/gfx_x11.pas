@@ -1392,7 +1392,7 @@ begin
   XSetWMNormalHints(xapplication.display, FWinHandle, @hints);
 
   if FWindowType <> wtChild then
-    // send close event instead of quitting the whole application...
+    // send close event instead of quiting the whole application...
     fpgApplication.netlayer.WindowAddProtocol(FWinHandle, xapplication.xia_wm_delete_window);
 
   // for modal windows, this is necessary

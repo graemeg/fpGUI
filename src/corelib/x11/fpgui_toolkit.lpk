@@ -17,6 +17,7 @@
         </SyntaxOptions>
       </Parsing>
       <CodeGeneration>
+        <SmartLinkUnit Value="True"/>
         <Generate Value="Faster"/>
       </CodeGeneration>
       <Other>
@@ -311,6 +312,7 @@
       </Item70>
       <Item71>
         <Filename Value="../../gui/gui_splitter.pas"/>
+        <UnitName Value="gui_splitter"/>
       </Item71>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
