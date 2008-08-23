@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgfx, fpg_guitestrunner, treeview_test;
+  fpgfx, fpg_guitestrunner, tcTreeview, tcMediatorView, tiOPFfpGUI;
 
 procedure MainProc;
 

@@ -1,4 +1,4 @@
-unit treeview_test;
+unit tcTreeview;
 
 {$mode objfpc}{$H+}
 
