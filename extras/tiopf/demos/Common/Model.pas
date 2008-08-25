@@ -44,6 +44,7 @@ type
     procedure   SetMemento(const AValue: TPersonMemento);
   protected
     function    GetCaption: string; override;
+    procedure   DoGetFieldBounds(const AFieldName: String; var MinValue, MaxValue: Integer; var HasBounds: Boolean); overload;
   public
     constructor Create; override;
     function    IsValid(const pErrors: TtiObjectErrors): Boolean; override;
@@ -162,6 +163,16 @@ begin
   Result := Name;
   if Deleted then
     Result := Result + ' (deleted)';
+end;
+
+procedure TPerson.DoGetFieldBounds(const AFieldName: String; var MinValue,
+  MaxValue: Integer; var HasBounds: Boolean);
+begin
+  inherited; // until I can figure this out
+{
+  HasBounds := True;
+}
+  // How do I check or set the Name property to max 25 character?
 end;
 
 constructor TPerson.Create;
