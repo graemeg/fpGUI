@@ -7,10 +7,10 @@ unit Model_View;
 interface
 
 uses
-  Classes
-  ,tiGenericEditMediators
-  ,tiGenericListMediators
-//  ,tiCompositeMediators
+  Classes, tiMediators
+//  , tiListMediators
+//  ,tiGenericEditMediators
+//  ,tiGenericListMediators
   ;
 
 type
@@ -28,8 +28,8 @@ type
     procedure OnTextChanged(Sender: TObject);
   protected
     procedure SetupGUIandObject; override;
-    procedure GuiToObject; override;
-    procedure ObjectToGui; override;
+    procedure DoGuiToObject; override;
+    procedure DoObjectToGui; override;
   end;
 
 
@@ -64,11 +64,11 @@ type
 
   { TPersonList_ComboBox_Mediator }
 
-  TPersonList_ComboBox_Mediator = class(TComboBoxMediator)
-  protected
-    procedure SetupGUIandObject; override;
-  end;
-  
+  //TPersonList_ComboBox_Mediator = class(TComboBoxMediator)
+  //protected
+    //procedure SetupGUIandObject; override;
+  //end;
+
 (*
   TPersonList_ListView_CompositeMediator = class(TCompositeListViewMediator)
   protected
@@ -79,7 +79,23 @@ type
 implementation
 
 uses
-  Model, SysUtils;
+  Model, SysUtils, tiBaseMediator, TypInfo, tiObject;
+  
+  
+procedure RegisterMediators;
+begin
+  // Fallbacks (generic)
+  gMediatorManager.RegisterMediator(TMediatorEditView,TTiObject,[tkSstring,tkAstring,tkinteger,tkFloat]);
+  gMediatorManager.RegisterMediator(TMediatorCheckBoxView,TTiObject,[tkBool]);
+  gMediatorManager.RegisterMediator(TMediatorComboboxView,TTiObject,[tkSString,tkAString]);
+  gMediatorManager.RegisterMediator(TMediatorStaticTextView,TTiObject);
+  gMediatorManager.RegisterMediator(TMediatorTrackBarView,TTiObject,[tkInteger]);
+  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView,TTiObject,[tkClass]);
+  gMediatorManager.RegisterMediator(TMediatorMemoView,TTiObject,[tksString,tkAString]);
+  // Specific
+//  gMediatorManager.RegisterMediator(TMediatorCalendarComboView,TLeerling,'DateOfBirth');
+//  gMediatorManager.RegisterMediator(TMediatorComboboxView,TLeerling,'Gender');
+end;
 
 { TPersonNameView }
 
@@ -120,12 +136,12 @@ end;
 
 { TPersonList_ComboBox_Mediator }
 
-procedure TPersonList_ComboBox_Mediator.SetupGUIandObject;
-begin
-  inherited SetupGUIandObject;
-//  View.Style := csDropDownList;
-//  View.ReadOnly := True;
-end;
+//procedure TPersonList_ComboBox_Mediator.SetupGUIandObject;
+//begin
+  //inherited SetupGUIandObject;
+////  View.Style := csDropDownList;
+////  View.ReadOnly := True;
+//end;
 
 
 { TPersonList_ListView_CompositeMediator }
@@ -167,33 +183,24 @@ begin
   EditControl.OnChange := @OnTextChanged;
 end;
 
-procedure TPerson_Age_TextEdit_View.GuiToObject;
+procedure TPerson_Age_TextEdit_View.DoGuiToObject;
 begin
-  inherited GuiToObject;
+  inherited DoGuiToObject;
   // manual example without RTTI
 //  TPerson(Subject).Age := StrToInt(EditControl.Text);
 end;
 
-procedure TPerson_Age_TextEdit_View.ObjectToGui;
+procedure TPerson_Age_TextEdit_View.DoObjectToGui;
 begin
-  inherited ObjectToGui;
+  inherited DoObjectToGui;
   // manual example without RTTI
 //  EditControl.Text := IntToStr(TPerson(Subject).Age);
 end;
 
+
 initialization
-  {-----------------------------------------------------------------------------
-    Register all your Mediator Views here
-      Params: ClassName and Property name of the business object as a string
-              Mediator View class
-  -----------------------------------------------------------------------------}
+  { Register all your Mediator Views here }
+  RegisterMediators;
   
-  // This is not used anymore and needs to be removed
-{
-  gMediatorFactory.RegisterMediatorClass('TPerson.Name'  ,TPerson_Name_TextEdit_View);
-  gMediatorFactory.RegisterMediatorClass('TPerson.Age'   ,TPerson_Age_SpinEdit_View);
-  gMediatorFactory.RegisterMediatorClass('TPerson.Age'   ,TPerson_Age_TrackBar_Mediator);
-  gMediatorFactory.RegisterMediatorClass('TPerson.Name'  ,TPerson_Name_Memo_Mediator);
-  gMediatorFactory.RegisterMediatorClass('TPerson.GenderGUI',TPerson_Gender_ComboBox_Mediator);
-}
 end.
+

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, gui_form, gui_button, gui_label, gui_edit, gui_trackbar,
-  gui_combobox, gui_memo, Model, tiGenericEditMediators;
+  gui_combobox, gui_memo, Model, tiFormMediator, Model_View;
 
 type
   TMainForm = class(TfpgForm)
@@ -25,12 +25,14 @@ type
     
     { The object we will be working with. }
     FPerson: TPerson;
+    { Form Mediator }
+    FMediator: TFormMediator;
     { Edit mediators }
-    FEditNameMediator: TMediatorEditView;
-//    FSpinEditAgeMediator: TMediatorSpinEditView;
-    FTrackBarAgeMediator: TMediatorTrackBarView;
-    FMemoNameMediator: TMediatorMemoView;
-    FComboBoxGenderMediator: TMediatorComboBoxView;
+//    FEditNameMediator: TMediatorEditView;
+////    FSpinEditAgeMediator: TMediatorSpinEditView;
+//    FTrackBarAgeMediator: TMediatorTrackBarView;
+//    FMemoNameMediator: TMediatorMemoView;
+//    FComboBoxGenderMediator: TMediatorComboBoxView;
 
     procedure   btnCloseClick(Sender: TObject);
     procedure   btnShowModelClick(Sender: TObject);
@@ -52,7 +54,6 @@ implementation
 
 uses
   gui_dialogs
-  ,Model_View
   ;
 
 { TMainForm }
@@ -77,7 +78,7 @@ end;
 
 procedure TMainForm.edtNameChange(Sender: TObject);
 begin
-  FEditNameMediator.GUIChanged;
+  //FEditNameMediator.GUIChanged;
 end;
 
 procedure TMainForm.edtAgeChange(Sender: TObject);
@@ -87,13 +88,13 @@ end;
 
 procedure TMainForm.AgeTrackBarChange(Sender: TObject; APosition: integer);
 begin
-  FTrackBarAgeMediator.GUIChanged;
+  //FTrackBarAgeMediator.GUIChanged;
 end;
 
 procedure TMainForm.cbGenderChange(Sender: TObject);
 begin
-  writeln('cbGenderChange');
-  FComboBoxGenderMediator.GUIChanged;
+  //writeln('cbGenderChange');
+  //FComboBoxGenderMediator.GUIChanged;
 end;
 
 procedure TMainForm.InitializeComponents;
@@ -227,11 +228,24 @@ end;
 
 procedure TMainForm.SetupMediators;
 begin
+{
   FEditNameMediator       := TPerson_Name_TextEdit_View.CreateCustom(edtName, FPerson, 'Name', 'Text');
 //  FSpinEditAgeMediator    := TPerson_Age_SpinEdit_View.CreateCustom(edtAge, FPerson, 'Age', 'Value');
   FTrackBarAgeMediator    := TPerson_Age_TrackBar_Mediator.CreateCustom(AgeTrackBar, FPerson, 'Age', 'Position');
   FMemoNameMediator       := TPerson_Name_Memo_Mediator.CreateCustom(memMemo, FPerson, 'Name', '');
   FComboBoxGenderMediator := TPerson_Gender_ComboBox_Mediator.CreateCustom(cbGender, FPerson, 'GenderGUI', 'Text');
+}
+  if not Assigned(FMediator) then
+  begin
+    FMediator := TFormMediator.Create(self);
+    FMediator.Name := 'DemoMediator';
+    FMediator.AddProperty('Name', edtName);
+    FMediator.AddProperty('Age', AgeTrackBar);
+    FMediator.AddProperty('Name', memMemo);
+    FMediator.AddProperty('GenderGUI', cbGender);
+  end;
+  FMediator.Subject := FPerson;
+  FMediator.Active := True;
 end;
 
 procedure TMainForm.SetupEventHandlers;
@@ -266,11 +280,11 @@ end;
 destructor TMainForm.Destroy;
 begin
   { free mediators - they will detach themselves }
-  FEditNameMediator.Free;
-//  FSpinEditAgeMediator.Free;
-  FTrackBarAgeMediator.Free;
-  FMemoNameMediator.Free;
-  FComboBoxGenderMediator.Free;
+//  FEditNameMediator.Free;
+////  FSpinEditAgeMediator.Free;
+//  FTrackBarAgeMediator.Free;
+//  FMemoNameMediator.Free;
+//  FComboBoxGenderMediator.Free;
 
   FPerson.Free;
   inherited Destroy;
