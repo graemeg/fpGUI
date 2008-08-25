@@ -7,109 +7,31 @@ unit Model_View;
 interface
 
 uses
-  Classes, tiMediators
-//  , tiListMediators
-//  ,tiGenericEditMediators
-//  ,tiGenericListMediators
+  Classes
+  ,tiMediators
   ;
 
 type
-  { TfpgEdit - Name }
-  TPerson_Name_TextEdit_View = class(TMediatorEditView)
-  private
-    procedure OnTextChanged(Sender: TObject);
-  protected
-    procedure SetupGUIandObject; override;
-  end;
-  
-  { TfpgEdit - Age }
-  TPerson_Age_TextEdit_View = class(TMediatorEditView)
-  private
-    procedure OnTextChanged(Sender: TObject);
-  protected
-    procedure SetupGUIandObject; override;
-    procedure DoGuiToObject; override;
-    procedure DoObjectToGui; override;
-  end;
-
-
-  { TSpinEdit - Age }
-{
-  TPerson_Age_SpinEdit_View = class(TMediatorSpinEditView)
-  protected
-    procedure SetupGUIandObject; override;
-  end;
-}
-
-  { TTrackBar - Age }
-  TPerson_Age_TrackBar_Mediator = class(TMediatorTrackBarView)
-  protected
-    procedure SetupGUIandObject; override;
-  end;
-  
-  
   { TMemo - Name }
   TPerson_Name_Memo_Mediator = class(TMediatorMemoView)
   protected
     procedure SetupGUIandObject; override;
   end;
   
-  
-  { TCombobox - Gender }
-  TPerson_Gender_ComboBox_Mediator = class(TMediatorComboBoxView)
-  protected
-    procedure SetupGUIandObject; override;
-  end;
-  
-
-  { TPersonList_ComboBox_Mediator }
-
-  //TPersonList_ComboBox_Mediator = class(TComboBoxMediator)
-  //protected
-    //procedure SetupGUIandObject; override;
-  //end;
-
-(*
-  TPersonList_ListView_CompositeMediator = class(TCompositeListViewMediator)
-  protected
-    procedure   SetupGUIandObject; override;
-  end;
-*)
 
 implementation
 
 uses
-  Model, SysUtils, tiBaseMediator, TypInfo, tiObject;
+  Model, tiBaseMediator;
   
   
 procedure RegisterMediators;
 begin
   // Fallbacks (generic)
-  gMediatorManager.RegisterMediator(TMediatorEditView,TTiObject,[tkSstring,tkAstring,tkinteger,tkFloat]);
-  gMediatorManager.RegisterMediator(TMediatorCheckBoxView,TTiObject,[tkBool]);
-  gMediatorManager.RegisterMediator(TMediatorComboboxView,TTiObject,[tkSString,tkAString]);
-  gMediatorManager.RegisterMediator(TMediatorStaticTextView,TTiObject);
-  gMediatorManager.RegisterMediator(TMediatorTrackBarView,TTiObject,[tkInteger]);
-  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView,TTiObject,[tkClass]);
-  gMediatorManager.RegisterMediator(TMediatorMemoView,TTiObject,[tksString,tkAString]);
+  RegisterFallBackMediators;
+
   // Specific
-//  gMediatorManager.RegisterMediator(TMediatorCalendarComboView,TLeerling,'DateOfBirth');
-//  gMediatorManager.RegisterMediator(TMediatorComboboxView,TLeerling,'Gender');
-end;
-
-{ TPersonNameView }
-
-procedure TPerson_Name_TextEdit_View.OnTextChanged(Sender: TObject);
-begin
-  GUIChanged;
-end;
-
-procedure TPerson_Name_TextEdit_View.SetupGUIandObject;
-begin
-  inherited;
-  { The Name field my only contain 25 characters max. }
-  EditControl.MaxLength := 25;
-  EditControl.OnChange := @OnTextChanged;
+  gMediatorManager.RegisterMediator(TPerson_Name_Memo_Mediator, TPerson, 'Name');
 end;
 
 
@@ -118,83 +40,7 @@ end;
 procedure TPerson_Name_Memo_Mediator.SetupGUIandObject;
 begin
   inherited SetupGUIandObject;
-  { The Name field my only contain 25 characters max. }
-//  EditControl.ReadOnly := True;
-  EditControl.Enabled := False;
-end;
-
-
-{ TPerson_Gender_ComboBox_Mediator }
-
-procedure TPerson_Gender_ComboBox_Mediator.SetupGUIandObject;
-begin
-  inherited SetupGUIandObject;
-//  EditControl.Style := csDropDownList;
-//  TComboBox(EditControl).ReadOnly := True;
-end;
-
-
-{ TPersonList_ComboBox_Mediator }
-
-//procedure TPersonList_ComboBox_Mediator.SetupGUIandObject;
-//begin
-  //inherited SetupGUIandObject;
-////  View.Style := csDropDownList;
-////  View.ReadOnly := True;
-//end;
-
-
-{ TPersonList_ListView_CompositeMediator }
-(*
-procedure TPersonList_ListView_CompositeMediator.SetupGUIandObject;
-begin
-  inherited SetupGUIandObject;
-//  View.OnCustomDrawItem := ListViewCustomDrawItem;
-end;
-*)
-
-{ TPerson_Age_SpinEdit_View }
-{
-procedure TPerson_Age_SpinEdit_View.SetupGUIandObject;
-begin
-  inherited SetupGUIandObject;
-  EditControl.MaxValue := 100;
-end;
-}
-{ TPerson_Age_TrackBar_Mediator }
-
-procedure TPerson_Age_TrackBar_Mediator.SetupGUIandObject;
-begin
-  inherited SetupGUIandObject;
-  EditControl.Max := 100;
-end;
-
-{ TPerson_Age_TextEdit_View }
-
-procedure TPerson_Age_TextEdit_View.OnTextChanged(Sender: TObject);
-begin
-  GUIChanged;
-end;
-
-procedure TPerson_Age_TextEdit_View.SetupGUIandObject;
-begin
-  inherited SetupGUIandObject;
-  EditControl.MaxLength := 3;
-  EditControl.OnChange := @OnTextChanged;
-end;
-
-procedure TPerson_Age_TextEdit_View.DoGuiToObject;
-begin
-  inherited DoGuiToObject;
-  // manual example without RTTI
-//  TPerson(Subject).Age := StrToInt(EditControl.Text);
-end;
-
-procedure TPerson_Age_TextEdit_View.DoObjectToGui;
-begin
-  inherited DoObjectToGui;
-  // manual example without RTTI
-//  EditControl.Text := IntToStr(TPerson(Subject).Age);
+  EditControl.Enabled := False; // fpGUI doesn't have a ReadOnly property yet
 end;
 
 

@@ -170,21 +170,21 @@ procedure TPerson.DoGetFieldBounds(const AFieldName: String; var MinValue,
 begin
   if AFieldName = 'Name' then
   begin
-    writeln('  Name - DoGetFieldBounds');
+//    writeln('  Name - DoGetFieldBounds');
     HasBounds := True;
     MinValue := 1;
     MaxValue := 25;
   end
   else if AFieldName = 'Age' then
   begin
-    writeln('  Age - DoGetFieldBounds');
+//    writeln('  Age - DoGetFieldBounds');
     HasBounds := True;
     MinValue := 1;
-    MaxValue := 95;
+    MaxValue := 100;
   end
   else
   begin
-    writeln('  unknown property <', AFieldName, '> - DoGetFieldBounds');
+//    writeln('  unknown property <', AFieldName, '> - DoGetFieldBounds');
     inherited DoGetFieldBounds(AFieldName, MinValue, MaxValue, HasBounds);
   end;
 end;

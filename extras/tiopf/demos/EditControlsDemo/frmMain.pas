@@ -17,7 +17,6 @@ type
     Label1: TfpgLabel;
     Label2: TfpgLabel;
     edtName: TfpgEdit;
-//    edtAge: TSpinEdit;
     AgeTrackBar: TfpgTrackBar;
     memMemo: TfpgMemo;
     cbGender: TfpgComboBox;
@@ -27,23 +26,12 @@ type
     FPerson: TPerson;
     { Form Mediator }
     FMediator: TFormMediator;
-    { Edit mediators }
-//    FEditNameMediator: TMediatorEditView;
-////    FSpinEditAgeMediator: TMediatorSpinEditView;
-//    FTrackBarAgeMediator: TMediatorTrackBarView;
-//    FMemoNameMediator: TMediatorMemoView;
-//    FComboBoxGenderMediator: TMediatorComboBoxView;
 
     procedure   btnCloseClick(Sender: TObject);
     procedure   btnShowModelClick(Sender: TObject);
     procedure   btnViaCodeClick(Sender: TObject);
-    procedure   edtNameChange(Sender: TObject);
-    procedure   edtAgeChange(Sender: TObject);
-    procedure   AgeTrackBarChange(Sender: TObject; APosition: integer);
-    procedure   cbGenderChange(Sender: TObject);
     procedure   InitializeComponents;
     procedure   SetupMediators;
-    procedure   SetupEventHandlers;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -74,27 +62,6 @@ begin
   FPerson.Name    := 'John Doe';
   FPerson.Age     := 23;
   FPerson.Gender  := genFemale;
-end;
-
-procedure TMainForm.edtNameChange(Sender: TObject);
-begin
-  //FEditNameMediator.GUIChanged;
-end;
-
-procedure TMainForm.edtAgeChange(Sender: TObject);
-begin
-//  FSpinEditAgeMediator.GUIChanged;
-end;
-
-procedure TMainForm.AgeTrackBarChange(Sender: TObject; APosition: integer);
-begin
-  //FTrackBarAgeMediator.GUIChanged;
-end;
-
-procedure TMainForm.cbGenderChange(Sender: TObject);
-begin
-  //writeln('cbGenderChange');
-  //FComboBoxGenderMediator.GUIChanged;
 end;
 
 procedure TMainForm.InitializeComponents;
@@ -177,17 +144,6 @@ begin
     TabOrder := 3;
   end;
   
-{
-  object edtAge: TSpinEdit
-    Left = 64
-    Height = 22
-    Top = 40
-    Width = 100
-    MaxValue = 0
-    TabOrder = 4
-  end
-}
-
   AgeTrackBar := TfpgTrackBar.Create(self);
   with AgeTrackBar do
   begin
@@ -195,10 +151,7 @@ begin
     Height := 41;
     Top := 72;
     Width := 150;
-//    ScrollStep := 10;
-//    Frequency := 10;
     Max := 100;
-//    ScalePos := trTop;
     ShowPosition := True;
     TabOrder := 5;
   end;
@@ -219,9 +172,6 @@ begin
     Left := 264;
     Height := 21;
     Top := 96;
-//    Width := 145;
-//    AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending];
-//    MaxLength := 0;
     TabOrder := 7;
   end;
 end;
@@ -229,16 +179,12 @@ end;
 procedure TMainForm.SetupMediators;
 begin
 {
-  FEditNameMediator       := TPerson_Name_TextEdit_View.CreateCustom(edtName, FPerson, 'Name', 'Text');
-//  FSpinEditAgeMediator    := TPerson_Age_SpinEdit_View.CreateCustom(edtAge, FPerson, 'Age', 'Value');
-  FTrackBarAgeMediator    := TPerson_Age_TrackBar_Mediator.CreateCustom(AgeTrackBar, FPerson, 'Age', 'Position');
-  FMemoNameMediator       := TPerson_Name_Memo_Mediator.CreateCustom(memMemo, FPerson, 'Name', '');
   FComboBoxGenderMediator := TPerson_Gender_ComboBox_Mediator.CreateCustom(cbGender, FPerson, 'GenderGUI', 'Text');
 }
   if not Assigned(FMediator) then
   begin
     FMediator := TFormMediator.Create(self);
-    FMediator.Name := 'DemoMediator';
+    FMediator.Name := 'DemoFormMediator';
     FMediator.AddProperty('Name', edtName);
     FMediator.AddProperty('Age', AgeTrackBar);
     FMediator.AddProperty('Name', memMemo);
@@ -246,15 +192,6 @@ begin
   end;
   FMediator.Subject := FPerson;
   FMediator.Active := True;
-end;
-
-procedure TMainForm.SetupEventHandlers;
-begin
-  { Setup generic OnChange event for all GUI controls. }
-  edtName.OnChange      := @edtNameChange;
-//  edtAge.OnChange       := @edtAgeChange;
-  AgeTrackBar.OnChange  := @AgeTrackBarChange;
-  cbGender.OnChange     := @cbGenderChange;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -279,13 +216,7 @@ end;
 
 destructor TMainForm.Destroy;
 begin
-  { free mediators - they will detach themselves }
-//  FEditNameMediator.Free;
-////  FSpinEditAgeMediator.Free;
-//  FTrackBarAgeMediator.Free;
-//  FMemoNameMediator.Free;
-//  FComboBoxGenderMediator.Free;
-
+  // TFormMediator (FMediator) get free'd automatically because it's a TComponent
   FPerson.Free;
   inherited Destroy;
 end;
@@ -296,7 +227,7 @@ begin
   { The only trick here is to not let the OnChange events fire
     before the mediators are not set up!! }
   SetupMediators;
-  SetupEventHandlers;
+
   // This will cause all components to update at once
   FPerson.NotifyObservers;
 end;

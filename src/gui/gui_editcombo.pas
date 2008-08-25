@@ -125,6 +125,8 @@ type
     property    OnChange;
     property    OnCloseUp;
     property    OnDropDown;
+    property    OnEnter;
+    property    OnExit;
     property    OnKeyPress;
   end;
 

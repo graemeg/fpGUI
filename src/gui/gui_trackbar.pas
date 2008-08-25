@@ -122,6 +122,8 @@ type
     property    TabOrder;
     property    TextColor;
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
+    property    OnEnter;
+    property    OnExit;
   end;
   
 

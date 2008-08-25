@@ -97,6 +97,7 @@ type
   end;
 }
 
+
   { Base class to handle TfpgTrackBar controls }
   TMediatorTrackBarView = class(TMediatorView)
   private
@@ -118,22 +119,25 @@ type
   private
     FEditControl: TfpgComboBox;
     function    GetGUIControl: TComponent; override;
-    procedure   SetGUIControl(const AValue: TComponent);override;
+    procedure   SetGUIControl(const AValue: TComponent); override;
   protected
+    procedure   SetupGUIandObject; override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
     procedure   DoObjectToGui; override;
   public
-    Constructor Create; override;
+    constructor Create; override;
     property    EditControl: TfpgComboBox read FEditControl write FEditControl;
     class function ComponentClass: TClass; override;
   end;
 
 
-  // Sets ItemIndex based on integer property
+  { Sets ItemIndex based on integer property }
   TMediatorItemComboBoxView = class(TMediatorComboBoxView)
-  Protected
-    Procedure DoGUIToObject; override;
-    Procedure DoObjectToGUI; override;
+  protected
+    Procedure   DoGUIToObject; override;
+    Procedure   DoObjectToGUI; override;
+  public
+    constructor Create; override;
   end;
 
 
@@ -182,6 +186,10 @@ type
   end;
 
 
+// Registering generic mediators which can handle most cases by default.
+procedure RegisterFallBackMediators;
+
+
 implementation
 uses
   SysUtils
@@ -196,16 +204,27 @@ const
   cErrorListHasNotBeenAssigned   = 'List has not been assigned';
 
 
+procedure RegisterFallBackMediators;
+begin
+  gMediatorManager.RegisterMediator(TMediatorEditView, TtiObject, [tkSstring,tkAstring,tkinteger,tkFloat]);
+  gMediatorManager.RegisterMediator(TMediatorCheckBoxView, TtiObject, [tkBool]);
+  gMediatorManager.RegisterMediator(TMediatorComboboxView, TtiObject, [tkSString,tkAString]);
+  gMediatorManager.RegisterMediator(TMediatorStaticTextView, TtiObject);
+  gMediatorManager.RegisterMediator(TMediatorTrackBarView, TtiObject, [tkInteger]);
+  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TtiObject, [tkClass]);
+  gMediatorManager.RegisterMediator(TMediatorMemoView, TtiObject, [tksString,tkAString]);
+end;
+
 { TMediatorEditView }
 
 function TMediatorEditView.GetGUIControl: TComponent;
 begin
-  Result:=FeditControl;
+  Result := FEditControl;
 end;
 
 procedure TMediatorEditView.SetGUIControl(const AValue: TComponent);
 begin
-  FEditControl:=AValue as TfpgEdit;
+  FEditControl := AValue as TfpgEdit;
   Inherited;
 end;
 
@@ -347,18 +366,17 @@ end;
 
 function TMediatorTrackBarView.GetGUIControl: TComponent;
 begin
-  Result:=FEditControl;
+  Result := FEditControl;
 end;
 
 procedure TMediatorTrackBarView.SetGUIControl(const AValue: TComponent);
 begin
-  FEditControl:=AValue as TfpgTrackBar;
-  Inherited;
+  FEditControl := AValue as TfpgTrackBar;
+  inherited;
 end;
 
 procedure TMediatorTrackBarView.DoTrackBarChanged(Sender: TObject; APosition: integer);
 begin
-//  writeln(' executing - DoTrackBarChanged');
   GUIChanged;
 end;
 
@@ -373,12 +391,9 @@ begin
     FEditControl.Max := Ma;
   end;
   if ObjectUpdateMoment in [ouOnChange,ouCustom] then
-  begin
-//    writeln('  Trackbar: setting OnChange event handler');
-    FEditControl.OnChange := @DoTrackBarChanged;
-  end;
-//  else
-//    FeditControl.OnExit := @DoOnChange;
+    FEditControl.OnChange := @DoTrackBarChanged
+  else
+    FeditControl.OnExit := @DoOnChange;
 end;
 
 constructor TMediatorTrackBarView.Create;
@@ -411,6 +426,15 @@ begin
   inherited;
 end;
 
+procedure TMediatorComboBoxView.SetupGUIandObject;
+begin
+  inherited SetupGUIandObject;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
+end;
+
 procedure TMediatorComboBoxView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
 var
   oError: TtiObjectError;
@@ -433,7 +457,7 @@ end;
 constructor TMediatorComboBoxView.Create;
 begin
   inherited Create;
-  GuiFieldName:='FocusItem';
+  GuiFieldName := 'Text'; //'FocusItem';
 end;
 
 procedure TMediatorComboBoxView.DoObjectToGui;
@@ -710,7 +734,13 @@ end;
 
 procedure TMediatorItemComboBoxView.DoObjectToGUI;
 begin
-  EditCOntrol.FocusItem:=GetOrdProp(Subject,FieldName);
+  EditCOntrol.FocusItem := GetOrdProp(Subject,FieldName);
+end;
+
+constructor TMediatorItemComboBoxView.Create;
+begin
+  inherited Create;
+  GuiFieldName := 'FocusItem';
 end;
 
 end.
