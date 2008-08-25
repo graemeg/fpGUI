@@ -103,6 +103,9 @@ type
     FEditControl: TfpgTrackBar;
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
+    procedure   DoTrackBarChanged(Sender: TObject; APosition: integer);
+  protected
+    procedure   SetupGUIandObject; override;
   public
     Constructor Create; override;
     property    EditControl: TfpgTrackBar read FEditControl write FEditControl;
@@ -118,10 +121,10 @@ type
     procedure   SetGUIControl(const AValue: TComponent);override;
   protected
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+    procedure   DoObjectToGui; override;
   public
     Constructor Create; override;
     property    EditControl: TfpgComboBox read FEditControl write FEditControl;
-    procedure   DoObjectToGui; override;
     class function ComponentClass: TClass; override;
   end;
 
@@ -227,26 +230,25 @@ end;
 
 procedure TMediatorEditView.SetupGUIandObject;
 var
-  Mi,Ma : Integer;
+  Mi, Ma: Integer;
 begin
   inherited;
   if Subject.GetFieldBounds(FieldName,Mi,Ma) and (Ma>0) then
-    FEditControl.MaxLength:=Ma;
-  if ObjectUpdateMoment in [ouOnchange,ouCustom] then
-    FeditControl.OnChange:=@DoOnChange
+    FEditControl.MaxLength := Ma;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FeditControl.OnChange := @DoOnChange
   else
-    FeditControl.OnExit:=@DoOnChange
+    FeditControl.OnExit := @DoOnChange;
 end;
 
-procedure TMediatorEditView.SetObjectUpdateMoment(
-  const AValue: TObjectUpdateMoment);
+procedure TMediatorEditView.SetObjectUpdateMoment(const AValue: TObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
-  If Assigned(FEditControl) then
+  if Assigned(FEditControl) then
     If ObjectUpdateMoment in [ouOnchange,ouCustom] then
-      FeditControl.OnChange:=@DoOnChange
+      FeditControl.OnChange := @DoOnChange
     else
-      FeditControl.OnExit:=@DoOnChange
+      FeditControl.OnExit := @DoOnChange;
 end;
 
 constructor TMediatorEditView.Create;
@@ -354,10 +356,35 @@ begin
   Inherited;
 end;
 
+procedure TMediatorTrackBarView.DoTrackBarChanged(Sender: TObject; APosition: integer);
+begin
+//  writeln(' executing - DoTrackBarChanged');
+  GUIChanged;
+end;
+
+procedure TMediatorTrackBarView.SetupGUIandObject;
+var
+  Mi, Ma: Integer;
+begin
+  inherited;
+  if Subject.GetFieldBounds(FieldName,Mi,Ma) and (Ma>0) then
+  begin
+    FEditControl.Min := Mi;
+    FEditControl.Max := Ma;
+  end;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+  begin
+//    writeln('  Trackbar: setting OnChange event handler');
+    FEditControl.OnChange := @DoTrackBarChanged;
+  end;
+//  else
+//    FeditControl.OnExit := @DoOnChange;
+end;
+
 constructor TMediatorTrackBarView.Create;
 begin
-  Inherited;
-  GuiFieldName:='Position';
+  inherited;
+  GuiFieldName := 'Position';
 end;
 
 class function TMediatorTrackBarView.ComponentClass: TClass;
@@ -375,13 +402,13 @@ end;
 
 function TMediatorComboBoxView.GetGUIControl: TComponent;
 begin
-  Result:=FeditControl;
+  Result := FEditControl;
 end;
 
 procedure TMediatorComboBoxView.SetGUIControl(const AValue: TComponent);
 begin
-  FEditControl:=AValue as TfpgComboBox;
-  Inherited;
+  FEditControl := AValue as TfpgComboBox;
+  inherited;
 end;
 
 procedure TMediatorComboBoxView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
@@ -629,18 +656,18 @@ end;
 constructor TMediatorStaticTextView.Create;
 begin
   inherited Create;
-  GuiFieldName:='Text';
+  GuiFieldName := 'Text';
 end;
 
 function TMediatorStaticTextView.GetGUIControl: TComponent;
 begin
-  Result:=FEditControl;
+  Result := FEditControl;
 end;
 
 procedure TMediatorStaticTextView.SetGUIControl(const AValue: TComponent);
 begin
-  FEditControl:=AValue as TfpgLabel;
-  Inherited;
+  FEditControl := AValue as TfpgLabel;
+  inherited;
 end;
 
 class function TMediatorStaticTextView.ComponentClass: TClass;
@@ -653,19 +680,19 @@ end;
 
 function TMediatorCalendarComboView.GetGUIControl: TComponent;
 begin
-  Result:=FEditControl;
+  Result := FEditControl;
 end;
 
 procedure TMediatorCalendarComboView.SetGUIControl(const AValue: TComponent);
 begin
-  FEditControl:= AValue as TfpgCalendarCombo;
-  Inherited;
+  FEditControl := AValue as TfpgCalendarCombo;
+  inherited;
 end;
 
 constructor TMediatorCalendarComboView.Create;
 begin
   inherited Create;
-  GUIFieldName:='DateValue';
+  GUIFieldName := 'DateValue';
 end;
 
 class function TMediatorCalendarComboView.ComponentClass: TClass;
