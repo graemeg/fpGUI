@@ -49,6 +49,9 @@ const
   fpGUIVersion = '0.6.2';
   fpGUIName    = 'fpGUI Toolkit';
 
+const
+  txtWordDelims: set of char = [' ', #9, #13, #10];
+
 
 type
   { *******************************************
@@ -358,9 +361,6 @@ var
   uApplication: TfpgApplication;
   uClipboard: TfpgClipboard;
   uMsgQueueList: TList;
-
-const
-  txtWordDelims: set of char = [' ', #9, #13, #10];
 
 type
   TNamedFontItem = class

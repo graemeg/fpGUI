@@ -1,6 +1,6 @@
 ./cleanall.sh
-cd src
+cd ../src
 ./build.sh
-cd ../examples/apps/uidesigner
+cd ../uidesigner
 fpc @extrafpc.cfg uidesigner.lpr
 
