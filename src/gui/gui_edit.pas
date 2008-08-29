@@ -65,6 +65,7 @@ type
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
+    procedure   HintTimerFired(Sender: TObject);
   protected
     FSideMargin: integer;
     FMouseDragPos: integer;
@@ -77,6 +78,8 @@ type
     FVisibleText: TfpgString;
     FVisSelStartPx: integer;
     FVisSelEndPx: integer;
+    FHintTimer: TfpgTimer;
+    FMousePoint: TPoint;
     procedure   DoOnChange; virtual;
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
@@ -295,7 +298,8 @@ implementation
 
 uses
   gfx_UTF8utils,
-  gfx_constants;
+  gfx_constants,
+  gui_hint;
 
 const
   // internal popupmenu item names
@@ -885,20 +889,20 @@ procedure TfpgBaseEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate
 var
   cp: integer;
 begin
-  if (btnstate and MOUSE_LEFT) = 0 then
-    Exit;
-
-  {cp := PointToCharPos(x, y);
-
-  //FMouseDragPos := cp;
-  FSelOffset := cp - FSelStart;
-  if FCursorPos <> cp then
+  FMousePoint := Point(x+2, y+2);
+  if (btnstate and MOUSE_LEFT) = 0 then // Left button not down
   begin
-    FCursorPos := cp;
-    Adjust;
-    Repaint;
-  end;}
-  
+    if FShowHint then
+    begin
+      if FHintTimer.Enabled then
+        FHintTimer.Reset    // keep reseting while mouse is moving to prevent hint from showing
+      else
+        HideHint;
+    end
+    else
+      Exit; //==>
+  end;
+
   cp := FCursorPos;
   FCursorPx := x;
   AdjustTextOffset(True);
@@ -921,6 +925,7 @@ end;
 
 procedure TfpgBaseEdit.HandleMouseEnter;
 begin
+  FHintTimer.Enabled := Enabled and FShowHint;
   inherited HandleMouseEnter;
   if (csDesigning in ComponentState) then
     Exit;
@@ -930,6 +935,7 @@ end;
 
 procedure TfpgBaseEdit.HandleMouseExit;
 begin
+  FHintTimer.Enabled := False;
   inherited HandleMouseExit;
   if (csDesigning in ComponentState) then
     Exit;
@@ -982,10 +988,14 @@ begin
   FPopupMenu        := nil;
   FDefaultPopupMenu := nil;
   FOnChange         := nil;
+
+  FHintTimer := TfpgTimer.Create(1500);
+  FHintTimer.OnTimer := @HintTimerFired;
 end;
 
 destructor TfpgBaseEdit.Destroy;
 begin
+  FHintTimer.Free;
   if Assigned(FDefaultPopupMenu) then
     FDefaultPopupMenu.Free;
   FFont.Free;
@@ -1104,6 +1114,12 @@ begin
         itm.Enabled := Text <> '';
     end;
   end;
+end;
+
+procedure TfpgBaseEdit.HintTimerFired(Sender: TObject);
+begin
+  DisplayHint(WindowToScreen(Self, FMousePoint), FHint);
+  FHintTimer.Enabled := False;
 end;
 
 procedure TfpgBaseEdit.DoOnChange;

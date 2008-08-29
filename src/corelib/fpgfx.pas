@@ -246,11 +246,14 @@ type
     procedure   SetEnabled(const AValue: boolean);
     procedure   SetInterval(const AValue: integer);
   public
+    { AInterval is in milliseconds. }
     constructor Create(ainterval: integer);
     destructor  Destroy; override;
     procedure   CheckAlarm(ctime: TDateTime);
+    procedure   Reset;
     property    Enabled: boolean read FEnabled write SetEnabled;
     property    NextAlarm: TDateTime read FNextAlarm;
+    { Interval is in milliseconds. }
     property    Interval: integer read FInterval write SetInterval;
     property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
   end;
@@ -667,6 +670,12 @@ begin
     if Assigned(FOnTimer) then
       FOnTimer(self);
   end;
+end;
+
+procedure TfpgTimer.Reset;
+begin
+  Enabled := False;
+  Enabled := True;
 end;
 
 function fpgApplication: TfpgApplication;

@@ -60,6 +60,7 @@ type
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
     FHint: string;
+    FShowHint: boolean;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
@@ -131,6 +132,7 @@ type
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
     property    Hint: string read FHint write FHint;
+    property    ShowHint: boolean read FShowHint write FShowHint default False;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
   end;
@@ -145,7 +147,7 @@ function FindKeyboardFocus: TfpgWidget;
 implementation
 
 uses
-  math, gfx_constants;
+  math, gfx_constants, gui_hint;
 
 
 var
@@ -832,7 +834,8 @@ begin
   {$IFDEF DEBUG}
   writeln('TfpgWidget.HandleMouseExit: ' + ClassName);
   {$ENDIF}
-  // do nothing yet
+  if FShowHint then
+    HideHint;
 end;
 
 procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
