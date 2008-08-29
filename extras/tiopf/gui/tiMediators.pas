@@ -37,12 +37,11 @@ type
   protected
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
-  protected
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
     procedure   SetupGUIandObject; override;
     procedure   SetObjectUpdateMoment (Const AValue : TObjectUpdateMoment); override;
   public
-    Constructor Create; override;
+    constructor Create; override;
     constructor CreateCustom(pEditControl: TfpgWidget; pSubject: TtiObject; pFieldName: string; pGuiFieldName: string = 'Text'); reintroduce;
     destructor  Destroy; override;
     property    EditControl: TfpgEdit read FEditControl write FEditControl;
@@ -54,9 +53,9 @@ type
   TMediatorCheckBoxView = class(TMediatorView)
   private
     FEditControl: TfpgCheckBox;
+  protected
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
-  protected
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
   public
     Constructor Create; override;
@@ -69,9 +68,9 @@ type
   TMediatorStaticTextView = class(TMediatorView)
   private
     FEditControl: TfpgLabel;
+  protected
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
-  protected
     procedure   SetupGUIandObject; override;
   public
     Constructor Create; override;
@@ -102,10 +101,10 @@ type
   TMediatorTrackBarView = class(TMediatorView)
   private
     FEditControl: TfpgTrackBar;
-    function    GetGUIControl: TComponent; override;
-    procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   DoTrackBarChanged(Sender: TObject; APosition: integer);
   protected
+    function    GetGUIControl: TComponent; override;
+    procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   SetupGUIandObject; override;
   public
     Constructor Create; override;
@@ -118,9 +117,9 @@ type
   TMediatorComboBoxView = class(TMediatorView)
   private
     FEditControl: TfpgComboBox;
+  protected
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent); override;
-  protected
     procedure   SetupGUIandObject; override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
     procedure   DoObjectToGui; override;
@@ -150,9 +149,9 @@ type
     procedure   SetListObject(const AValue: TtiObjectList); override;
     procedure   SetOnChangeActive(AValue: Boolean); virtual;
     procedure   SetupGUIandObject; override;
-  public
     procedure   DoGuiToObject; override;
     procedure   DoObjectToGui; override;
+  public
     procedure   RefreshList; virtual;
   end;
   
@@ -161,14 +160,14 @@ type
   TMediatorMemoView = class(TMediatorView)
   private
     FEditControl: TfpgMemo;
+  protected
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
-  protected
     procedure   SetupGUIandObject; override;
-  public
-    property    EditControl: TfpgMemo read FEditControl write FEditControl;
     procedure   DoObjectToGui; override;
     procedure   DoGuiToObject; override;
+  public
+    property    EditControl: TfpgMemo read FEditControl write FEditControl;
     class function ComponentClass: TClass; override;
   end;
 
@@ -177,6 +176,7 @@ type
   TMediatorCalendarComboView = class(TMediatorView)
   private
     FEditControl: TfpgCalendarCombo;
+  protected
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
   public
