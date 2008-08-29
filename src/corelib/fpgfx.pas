@@ -1382,6 +1382,8 @@ begin
   fpgSetNamedColor(clUnset, $D0D0FF);
   fpgSetNamedColor(clMenuText, $000000);
   fpgSetNamedColor(clMenuDisabled, $909090);
+  fpgSetNamedColor(clHintWindow, $FFFFBF);
+
 
   // Global Font Objects
   DefaultFont      := fpgGetFont(fpgGetNamedFontDesc('Label1'));

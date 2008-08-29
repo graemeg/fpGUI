@@ -62,7 +62,7 @@
   clUnset               = TfpgColor(cl_BaseNamedColor + 24); // $80000018;
   clMenuText            = TfpgColor(cl_BaseNamedColor + 25); // $80000019;
   clMenuDisabled        = TfpgColor(cl_BaseNamedColor + 26); // $8000001A;
-//  clHintWindow          = TfpgColor(cl
+  clHintWindow          = TfpgColor(cl_BaseNamedColor + 27); // $8000001B;
 
 
 
