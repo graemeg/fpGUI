@@ -1001,7 +1001,6 @@ begin
   if not Assigned(FHintWindow) then
   begin
     FHintWindow := HintWindowClass.Create(nil);
-    writeln('HintWindow.Classname=', FHintWindow.ClassName);
     TfpgHintWindow(FHintWindow).Visible := False;
   end;
 end;
