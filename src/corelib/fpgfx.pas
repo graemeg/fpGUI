@@ -626,7 +626,7 @@ end;
 
 procedure TfpgTimer.SetEnabled(const AValue: boolean);
 begin
-  if not FEnabled and AValue then
+  if (not FEnabled) and AValue then
     FNextAlarm := now + interval * ONE_MILISEC;
   FEnabled := AValue;
 end;

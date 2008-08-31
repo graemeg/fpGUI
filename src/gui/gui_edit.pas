@@ -713,6 +713,8 @@ var
 
 begin
   hasChanged := False;
+  FHintTimer.Enabled := False;
+
 
   Consumed := True;
   case CheckClipBoardKey(keycode, shiftstate) of
@@ -844,24 +846,10 @@ begin
 end;
 
 procedure TfpgBaseEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
-{var
-  cp: integer;}
 begin
+  FHintTimer.Enabled := False;
   inherited HandleLMouseDown(x, y, shiftstate);
 
-  {cp := PointToCharPos(x, y);
-  FMouseDragPos := cp;
-  FCursorPos    := cp;
-  if (ssShift in shiftstate) then
-    FSelOffset := FCursorPos - FSelStart
-  else
-  begin
-    FSelStart  := cp;
-    FSelOffset := 0;
-  end;
-  Adjust;
-  Repaint;}
-  
   FCursorPx := x;
   AdjustTextOffset(True);
   FMouseDragPos := FCursorPos;
@@ -895,12 +883,11 @@ begin
     if FShowHint then
     begin
       if FHintTimer.Enabled then
-        FHintTimer.Reset    // keep reseting while mouse is moving to prevent hint from showing
+        FHintTimer.Reset  // keep reseting to prevent hint from showing
       else
         HideHint;
-    end
-    else
-      Exit; //==>
+    end;
+    Exit; //==>
   end;
 
   cp := FCursorPos;

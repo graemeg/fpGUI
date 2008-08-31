@@ -547,6 +547,9 @@ end;
 
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
 begin
+  {$IFDEF DEBUG}
+  writeln('MsgMouseEnter');
+  {$ENDIF}
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);
@@ -561,6 +564,9 @@ end;
 
 procedure TfpgWidget.MsgMouseExit(var msg: TfpgMessageRec);
 begin
+  {$IFDEF DEBUG}
+  writeln('MsgMouseExit');
+  {$ENDIF}
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);

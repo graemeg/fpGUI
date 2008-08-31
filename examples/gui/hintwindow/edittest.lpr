@@ -617,13 +617,13 @@ begin
   rb_time_1.OnChange:= @rb_time_1Change;
 
   rb_time_2 := CreateRadioButton(p_time,10,50,'2 seconds');
-  rb_time_2.Checked:= True;
   rb_time_2.OnChange:= @rb_time_2Change;
 
   rb_time_3 := CreateRadioButton(p_time,80,25,'3 seconds');
   rb_time_3.OnChange:= @rb_time_3Change;
 
   rb_time_5 := CreateRadioButton(p_time,80,50,'5 seconds');
+  rb_time_5.Checked:= True;
   rb_time_5.OnChange:= @rb_time_5Change;
 
   p_color := TfpgPanel.Create(self);

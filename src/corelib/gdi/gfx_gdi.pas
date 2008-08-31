@@ -247,6 +247,8 @@ uses
 var
   wapplication: TfpgApplication;
   MouseFocusedWH: HWND;
+  OldMousePos: TPoint;  // used to detect fake MouseMove events
+
 
 // some required keyboard functions
 {$INCLUDE gdikeys.inc}
@@ -481,7 +483,7 @@ var
   mcode: integer;
   wmsg: TMsg;
   PaintStruct: TPaintStruct;
-  
+
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
 
@@ -647,11 +649,33 @@ begin
           if uMsg <> WM_MOUSEMOVE then
             writeln('fpGFX/GDI: Found a mouse button event');
           {$ENDIF}
-//          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-//          {$IFDEF DEBUG} writeln('Mouse Move or Button Click'); {$ENDIF}
-          msgp.mouse.x := smallint(lParam and $FFFF);
-          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
+//          msgp.mouse.x := smallint(lParam and $FFFF);
+//          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
+          msgp.mouse.x := GET_X_LPARAM(lParam);
+          msgp.mouse.y := GET_Y_LPARAM(lParam);
 
+          if uMsg = WM_MOUSEMOVE then
+          begin
+            {$IFDEF DEBUG}
+            Writeln('old x=', OldMousePos.x, ' y=', OldMousePos.y);
+            writeln('new x=', msgp.mouse.x, ' y=', msgp.mouse.y);
+            writeln('---');
+            {$ENDIF}
+            // Check for fake MouseMove messages - Windows sucks!
+            if (OldMousePos.x = msgp.mouse.x) and
+               (OldMousePos.y = msgp.mouse.y) then
+            begin
+              {$IFDEF DEBUG}
+              writeln('We received fake MouseMove messages');
+              {$ENDIF}
+              Exit; //==>
+            end
+            else
+            begin
+              OldMousePos.x := msgp.mouse.x;
+              OldMousePos.y := msgp.mouse.y;
+            end;
+          end;
           { This closes popup windows when you click the mouse elsewhere }
           if uMsg = WM_LBUTTONDOWN then
           begin
@@ -688,7 +712,9 @@ begin
           begin
             case uMsg of
               WM_MOUSEMOVE:
-                  mcode := FPGM_MOUSEMOVE;
+                  begin
+                    mcode := FPGM_MOUSEMOVE;
+                  end;
 
               WM_LBUTTONDBLCLK,
               WM_LBUTTONDOWN,
@@ -696,7 +722,7 @@ begin
               WM_RBUTTONDOWN:
                   begin
                     {$IFDEF DEBUG}
-                    writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonDown event');
+                    writeln('fpGUI/GDI:', w.ClassName + ': MouseButtonDown event');
                     {$ENDIF}
                     // This is temporary and we should try and move it to
                     // the UI Designer code instead.

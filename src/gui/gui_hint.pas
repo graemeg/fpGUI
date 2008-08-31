@@ -2,6 +2,8 @@ unit gui_hint;
 
 {$mode objfpc}{$H+}
 
+{.$Define Debug}
+
 interface
 
 uses
@@ -40,7 +42,7 @@ type
     property    LTextColor: TfpgColor write SetLTextColor default clBlack;
     property    LBackgroundColor: TfpgColor write SetLBackgroundColor default clHintWindow;
     property    ShadowColor: TfpgColor write SetShadowColor default clGray;
-    property    Time: Integer write SetTime default 2000;
+    property    Time: Integer write SetTime default 5000;
   end;
 
 
@@ -64,6 +66,9 @@ implementation
 
 procedure DisplayHint(Pt: TPoint; AHint: string);
 begin
+  {$IFDEF DEBUG}
+  writeln('DisplayHint');
+  {$ENDIF}
   if Assigned(F_Hint) and F_Hint.Visible then
     Exit; //==>  Nothing to do
 
@@ -85,6 +90,9 @@ end;
 
 procedure HideHint;
 begin
+  {$IFDEF DEBUG}
+  writeln('HideHint');
+  {$ENDIF}
   if Assigned(F_Hint) and F_Hint.Visible then
     F_Hint.Hide;
 end;
@@ -99,13 +107,16 @@ end;
 
 procedure TF_Hint.FormHide(Sender: TObject);
 begin
+  T_Chrono.Enabled := False;
   if Assigned(F_Shadow) then
     F_Shadow.Hide;
 end;
 
 procedure TF_Hint.T_ChronoFini(Sender: TObject);
 begin
-  T_Chrono.Enabled:= False;
+  {$IFDEF DEBUG}
+  writeln('TF_Hint.T_ChronoFini timer fired');
+  {$ENDIF}
   Hide;
 end;
 
@@ -124,10 +135,10 @@ end;
 procedure TF_Hint.SetTime(AValue: Integer);
 begin
   if FTime <> AValue then
-    begin
+  begin
     FTime := AValue;
     T_Chrono.Interval := FTime;
-    end;
+  end;
 end;
 
 procedure TF_Hint.SetLTextColor(AValue: Tfpgcolor);
@@ -162,7 +173,7 @@ begin
   FMargin := 3;
   FBorder := 1;
   FShadow := 5;
-  FTime := 2000;
+  FTime := 5000;
   L_Hint := CreateLabel(Self, FBorder, FBorder, '', Width - FBorder * 2, Height - FBorder * 2, taCenter, tlCenter);
   L_Hint.BackgroundColor := clHintWindow;
   L_Hint.OnClick := @T_ChronoFini;

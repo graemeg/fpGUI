@@ -30,7 +30,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="2"/>
-    <Files Count="69">
+    <Files Count="70">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -307,6 +307,10 @@
         <Filename Value="..\..\gui\gui_splitter.pas"/>
         <UnitName Value="gui_splitter"/>
       </Item69>
+      <Item70>
+        <Filename Value="..\..\gui\gui_hint.pas"/>
+        <UnitName Value="gui_hint"/>
+      </Item70>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>
     <RequiredPkgs Count="1">
