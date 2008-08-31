@@ -148,8 +148,6 @@ type
   end;
 
 
-  { TfpgCanvas }
-
   TfpgCanvas = class(TfpgCanvasImpl)
   private
     function    AddLineBreaks(const s: TfpgString; aMaxLineWidth: integer): string;
@@ -198,14 +196,16 @@ type
   end;
 
 
-  { TfpgApplication }
-
   TfpgApplication = class(TfpgApplicationImpl)
   private
+    FHintPause: Integer;
     FOnException: TExceptionEvent;
     FStopOnException: Boolean;
+    FHintWindow: TfpgWindow;
+    procedure   SetHintPause(const AValue: Integer);
     procedure   SetupLocalizationStrings;
     procedure   InternalMsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
+    procedure   CreateHintWindow;
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -221,15 +221,19 @@ type
     constructor Create(const AParams: string = ''); override;
     destructor  Destroy; override;
     function    GetFont(const afontdesc: string): TfpgFont;
-    procedure   Initialize;
-    procedure   Run;
+    procedure   ActivateHint(APos: TPoint; AHint: TfpgString);
     procedure   Flush;
-    procedure   ProcessMessages;
-    procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
-    procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     procedure   HandleException(Sender: TObject);
+    procedure   HideHint;
+    procedure   Initialize;
+    procedure   ProcessMessages;
+    procedure   Run;
+    procedure   SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     procedure   ShowException(E: Exception);
+    procedure   UnsetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
     property    DefaultFont: TfpgFont read FDefaultFont;
+    property    HintPause: Integer read FHintPause write SetHintPause;
+    property    HintWindow: TfpgWindow read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
@@ -355,7 +359,8 @@ uses
   gfx_translations,
   gfx_constants,
   gfx_UTF8utils,
-  gui_dialogs;
+  gui_dialogs,
+  gui_hint;
 
 var
   fpgTimers: TList;
@@ -781,6 +786,8 @@ begin
   FScreenHeight   := -1;
   FMessageHookList := TFPList.Create;
   FStopOnException := False;
+  FHintWindow     := nil;
+  FHintPause      := 1500;  // 1.5 seconds
   
   try
     inherited Create(AParams);
@@ -803,6 +810,12 @@ var
   i: integer;
   frm: TfpgWindowBase;
 begin
+  if Assigned(FHintWindow) then
+  begin
+    HideHint;
+    FHintWindow.Free;
+  end;
+    
   DestroyComponents;  // while message queue is still active
 
   for i := 0 to (fpgNamedFonts.Count - 1) do
@@ -881,6 +894,23 @@ begin
   end;
 end;
 
+procedure TfpgApplication.ActivateHint(APos: TPoint; AHint: TfpgString);
+var
+  wnd: TfpgHintWindow;
+  w: Integer;
+  h: Integer;
+begin
+  wnd := TfpgHintWindow(FHintWindow);
+  if Assigned(wnd) and wnd.Visible then
+    Exit; //==>  Nothing to do
+
+  wnd.Text := AHint;
+  w := wnd.Font.TextWidth(AHint) + (wnd.Border * 2) + (wnd.Margin * 2);
+  h := wnd.Font.Height + (wnd.Border * 2) + (wnd.Margin * 2);
+  wnd.SetPosition(APos.X, APos.Y, w, h);
+  wnd.Show;
+end;
+
 procedure TfpgApplication.Initialize;
 begin
   { TODO : Remember to process parameters!! }
@@ -949,6 +979,11 @@ begin
 
 end;
 
+procedure TfpgApplication.SetHintPause(const AValue: Integer);
+begin
+  FHintPause := AValue;
+end;
+
 procedure TfpgApplication.InternalMsgClose(var msg: TfpgMessageRec);
 begin
 //  writeln('InternalMsgClose received');
@@ -958,6 +993,16 @@ begin
       Exit;
     RemoveComponent(TfpgWindowBase(msg.Sender));
     TfpgWindowBase(msg.Sender).Free;
+  end;
+end;
+
+procedure TfpgApplication.CreateHintWindow;
+begin
+  if not Assigned(FHintWindow) then
+  begin
+    FHintWindow := HintWindowClass.Create(nil);
+    writeln('HintWindow.Classname=', FHintWindow.ClassName);
+    TfpgHintWindow(FHintWindow).Visible := False;
   end;
 end;
 
@@ -986,6 +1031,7 @@ begin
   // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
   SetupLocalizationStrings;
+  CreateHintWindow;
 end;
 
 procedure TfpgApplication.Flush;
@@ -1054,6 +1100,15 @@ begin
   // Note: We should not terminate when we receive EAbort exceptions.
   if (not (ExceptObject is EAbort)) and StopOnException then
     Terminated := True;
+end;
+
+procedure TfpgApplication.HideHint;
+begin
+  {$IFDEF DEBUG}
+  writeln('HideHint');
+  {$ENDIF}
+  if Assigned(FHintWindow) and TfpgHintWindow(FHintWindow).Visible then
+    TfpgHintWindow(FHintWindow).Hide;
 end;
 
 procedure TfpgApplication.ShowException(E: Exception);

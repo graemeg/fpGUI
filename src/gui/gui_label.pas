@@ -45,10 +45,10 @@ type
     function    GetFontDesc: string;
     procedure   SetAutoSize(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
-    procedure   SetText(const AValue: string);
+    procedure   SetText(const AValue: TfpgString);
     procedure   ResizeLabel;
   protected
-    FText: string;
+    FText: TfpgString;
     FFont: TfpgFont;
     FTextHeight: integer;
     procedure   HandlePaint; override;
@@ -57,7 +57,7 @@ type
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
     property    Layout: TLayout read FLayout write SetLayout default tlTop;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    Text: string read FText write SetText;
+    property    Text: TfpgString read FText write SetText;
     property    LineSpace: integer read FLineSpace write FLineSpace default 2;
   public
     constructor Create(AOwner: TComponent); override;
@@ -169,7 +169,7 @@ begin
   ResizeLabel;
 end;
 
-procedure TfpgCustomLabel.SetText(const AValue: string);
+procedure TfpgCustomLabel.SetText(const AValue: TfpgString);
 begin
   if FText <> AValue then
   begin

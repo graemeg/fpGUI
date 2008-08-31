@@ -885,7 +885,7 @@ begin
       if FHintTimer.Enabled then
         FHintTimer.Reset  // keep reseting to prevent hint from showing
       else
-        HideHint;
+        fpgApplication.HideHint;
     end;
     Exit; //==>
   end;
@@ -976,7 +976,7 @@ begin
   FDefaultPopupMenu := nil;
   FOnChange         := nil;
 
-  FHintTimer := TfpgTimer.Create(1500);
+  FHintTimer := TfpgTimer.Create(fpgApplication.HintPause);
   FHintTimer.OnTimer := @HintTimerFired;
 end;
 
@@ -1105,7 +1105,8 @@ end;
 
 procedure TfpgBaseEdit.HintTimerFired(Sender: TObject);
 begin
-  DisplayHint(WindowToScreen(Self, FMousePoint), FHint);
+//  Writeln('TfpgBaseEdit.HintTimerFired');
+  fpgApplication.ActivateHint(WindowToScreen(Self, FMousePoint), FHint);
   FHintTimer.Enabled := False;
 end;
 

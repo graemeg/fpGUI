@@ -1,3 +1,20 @@
+{
+    fpGUI  -  Free Pascal GUI Toolkit
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Defines a window that gets used to display help hints (aka a HintWindow)
+}
+
 unit gui_hint; 
 
 {$mode objfpc}{$H+}
@@ -7,14 +24,16 @@ unit gui_hint;
 interface
 
 uses
-  Classes, SysUtils,
-  fpgfx, gfxbase,
-  gui_form, gui_label;
+  Classes,
+  SysUtils,
+  fpgfx,
+  gfxbase,
+  gui_form,
+  gui_label;
   
 type
-  TF_Hint = class(TfpgForm)
+  TfpgHintWindow = class(TfpgForm)
   private
-    FText: string;
     FFont: TfpgFont;
     FTime: Integer;
     FShadow: Integer;
@@ -24,6 +43,8 @@ type
     T_Chrono: TfpgTimer;
     procedure   FormShow(Sender: TObject);
     procedure   FormHide(Sender: TObject);
+    function    GetText: TfpgString;
+    procedure   SetText(const AValue: TfpgString);
     procedure   T_ChronoFini(Sender: TObject);
     procedure   SetShadow(AValue: Integer);
     procedure   SetBorder(AValue: Integer);
@@ -32,10 +53,12 @@ type
     procedure   SetLBackgroundColor(AValue: Tfpgcolor);
     procedure   SetShadowColor(AValue: TfpgColor);
   protected
-    property    Font: TfpgFont read FFont;
+    procedure   HandleShow; override;
   public
     constructor Create(AOwner: TComponent); override;
-    property    Text: string read FText write FText;
+    procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
+    property    Font: TfpgFont read FFont;
+    property    Text: TfpgString read GetText write SetText;
     property    Shadow: Integer read FShadow write SetShadow default 5;
     property    Border: Integer read FBorder write SetBorder default 1;
     property    Margin: Integer read FMargin write FMargin default 3;
@@ -46,73 +69,50 @@ type
   end;
 
 
-  TF_Shadow = class(TfpgForm)
-  public
-    constructor Create(AOwner: TComponent); override;
-  end;
-
+  TfpgHintWindowClass = class of TfpgHintWindow;
 
 var
-  F_Hint: TF_Hint;
-  F_Shadow: TF_Shadow;
-
-
-procedure DisplayHint(Pt: TPoint; AHint: string);
-procedure HideHint;
+  HintWindowClass: TfpgHintWindowClass = TfpgHintWindow;
 
 
 implementation
 
-
-procedure DisplayHint(Pt: TPoint; AHint: string);
-begin
-  {$IFDEF DEBUG}
-  writeln('DisplayHint');
-  {$ENDIF}
-  if Assigned(F_Hint) and F_Hint.Visible then
-    Exit; //==>  Nothing to do
-
-  with F_Hint do
-  begin
-    L_Hint.Text := AHint;
-    Width := FFont.TextWidth(AHint) + (Border * 2) + (Margin * 2);
-    Height := FFont.Height + (Border * 2) + (Margin * 2);
-    if Shadow > 0 then
-    begin
-      F_Shadow.SetPosition(Pt.X+Shadow, Pt.Y+Shadow, Width, Height);
-      F_Shadow.Show;
-    end;
-    L_Hint.SetPosition(Border, Border, Width - (Border * 2), Height - (Border * 2));
-    SetPosition(Pt.X, Pt.Y, Width, Height);
-    Show;
+type
+  TF_Shadow = class(TfpgForm)
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
-end;
-
-procedure HideHint;
-begin
-  {$IFDEF DEBUG}
-  writeln('HideHint');
-  {$ENDIF}
-  if Assigned(F_Hint) and F_Hint.Visible then
-    F_Hint.Hide;
-end;
+  
+  
+var
+  F_Shadow: TF_Shadow;
 
 
-{ TF_Hint }
+{ TfpgHintWindow }
 
-procedure TF_Hint.FormShow(Sender: TObject);
+procedure TfpgHintWindow.FormShow(Sender: TObject);
 begin
   T_Chrono.Enabled:= True;
 end;
 
-procedure TF_Hint.FormHide(Sender: TObject);
+procedure TfpgHintWindow.FormHide(Sender: TObject);
 begin
   T_Chrono.Enabled := False;
   if Assigned(F_Shadow) then
     F_Shadow.Hide;
 end;
 
-procedure TF_Hint.T_ChronoFini(Sender: TObject);
+function TfpgHintWindow.GetText: TfpgString;
+begin
+  Result := L_Hint.Text;
+end;
+
+procedure TfpgHintWindow.SetText(const AValue: TfpgString);
+begin
+  L_Hint.Text := AValue;
+end;
+
+procedure TfpgHintWindow.T_ChronoFini(Sender: TObject);
 begin
   {$IFDEF DEBUG}
   writeln('TF_Hint.T_ChronoFini timer fired');
@@ -120,19 +120,19 @@ begin
   Hide;
 end;
 
-procedure TF_Hint.SetShadow(AValue: Integer);
+procedure TfpgHintWindow.SetShadow(AValue: Integer);
 begin
   if FShadow <> AValue then
     FShadow := AValue;
 end;
 
-procedure TF_Hint.SetBorder(AValue: Integer);
+procedure TfpgHintWindow.SetBorder(AValue: Integer);
 begin
   if FBorder <> AValue then
     FBorder := AValue;
 end;
 
-procedure TF_Hint.SetTime(AValue: Integer);
+procedure TfpgHintWindow.SetTime(AValue: Integer);
 begin
   if FTime <> AValue then
   begin
@@ -141,32 +141,41 @@ begin
   end;
 end;
 
-procedure TF_Hint.SetLTextColor(AValue: Tfpgcolor);
+procedure TfpgHintWindow.SetLTextColor(AValue: Tfpgcolor);
 begin
   if L_Hint.TextColor <> AValue then
     L_Hint.TextColor := AValue
 end;
 
-procedure TF_Hint.SetLBackgroundColor(AValue: Tfpgcolor);
+procedure TfpgHintWindow.SetLBackgroundColor(AValue: Tfpgcolor);
 begin
   if L_Hint.BackgroundColor <> AValue then
     L_Hint.BackgroundColor := AValue
 end;
 
-procedure TF_Hint.SetShadowColor(AValue: Tfpgcolor);
+procedure TfpgHintWindow.SetShadowColor(AValue: Tfpgcolor);
 begin
   if F_Shadow.BackgroundColor <> AValue then
     F_Shadow.BackgroundColor := AValue;
 end;
 
-constructor TF_Hint.Create(AOwner: TComponent);
+procedure TfpgHintWindow.HandleShow;
+begin
+  // This is so the Shadow Window is below the Hint Window.
+  if Shadow > 0 then
+  begin
+    F_Shadow.SetPosition(Left+Shadow, Top+Shadow, Width, Height);
+    F_Shadow.Show;
+  end;
+  inherited HandleShow;
+end;
+
+constructor TfpgHintWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Name := 'F_Hint';
   WindowPosition := wpUser;
   WindowType := wtPopup;
-//  WindowAttributes := [waBorderless];
-//  BorderLess := True;
   Sizeable := False;
   BackgroundColor:= clBlack;
   FFont := fpgGetFont('#Label1');
@@ -184,13 +193,18 @@ begin
   OnHide := @FormHide;
 end;
 
+procedure TfpgHintWindow.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
+begin
+  inherited SetPosition(aleft, atop, awidth, aheight);
+  L_Hint.SetPosition(Border, Border, Width - (Border * 2), Height - (Border * 2));
+end;
+
 constructor TF_Shadow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Name := 'F_Shadow';
   WindowPosition := wpUser;
   WindowType := wtPopup;
-//  BorderLess := True;
   Sizeable := False;
   BackgroundColor := clGray;
 end;

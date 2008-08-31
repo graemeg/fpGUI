@@ -15,6 +15,7 @@ type
 
   TMainForm = class(TfpgForm)
   private
+    function  GetHintWnd: TfpgHintWindow;
     procedure btnQuitClicked(Sender: TObject);
     procedure rbClicked(Sender: TObject);
     procedure lbChange(Sender: TObject);
@@ -105,6 +106,11 @@ type
 
 
 {@VFD_NEWFORM_IMPL}
+
+function TMainForm.GetHintWnd: TfpgHintWindow;
+begin
+  Result := TfpgHintWindow(fpgApplication.HintWindow);
+end;
 
 procedure TMainForm.btnQuitClicked(Sender: TObject);
 begin
@@ -222,133 +228,133 @@ end;
 procedure TMainForm.rb_border_1Change(Sender: TObject);
 begin
   if rb_border_1.Checked then
-    F_Hint.Border := 1;
+    GetHintWnd.Border := 1;
 end;
 
 procedure TMainForm.rb_border_2Change(Sender: TObject);
 begin
   if rb_border_2.Checked then
-    F_Hint.Border := 2;
+    GetHintWnd.Border := 2;
 end;
 
 procedure TMainForm.rb_border_3Change(Sender: TObject);
 begin
   if rb_border_3.Checked then
-    F_Hint.Border := 3;
+    GetHintWnd.Border := 3;
 end;
 
 procedure TMainForm.rb_border_5Change(Sender: TObject);
 begin
   if rb_border_5.Checked then
-    F_Hint.Border := 5;
+    GetHintWnd.Border := 5;
 end;
 
 procedure TMainForm.rb_margin_1Change(Sender: TObject);
 begin
   if rb_margin_1.Checked then
-    F_Hint.Margin := 1;
+    GetHintWnd.Margin := 1;
 end;
 
 procedure TMainForm.rb_margin_2Change(Sender: TObject);
 begin
   if rb_margin_2.Checked then
-    F_Hint.Margin := 2;
+    GetHintWnd.Margin := 2;
 end;
 
 procedure TMainForm.rb_margin_3Change(Sender: TObject);
 begin
   if rb_margin_3.Checked then
-    F_Hint.Margin := 3;
+    GetHintWnd.Margin := 3;
 end;
 
 procedure TMainForm.rb_margin_5Change(Sender: TObject);
 begin
   if rb_margin_5.Checked then
-    F_Hint.Margin := 5;
+    GetHintWnd.Margin := 5;
 end;
 
 procedure TMainForm.rb_time_1Change(Sender: TObject);
 begin
   if rb_time_1.Checked then
-    F_Hint.Time := 1000;
+    GetHintWnd.Time := 1000;
 end;
 
 procedure TMainForm.rb_time_2Change(Sender: TObject);
 begin
   if rb_time_2.Checked then
-    F_Hint.Time := 2000;
+    GetHintWnd.Time := 2000;
 end;
 
 procedure TMainForm.rb_time_3Change(Sender: TObject);
 begin
   if rb_time_3.Checked then
-    F_Hint.Time := 3000;
+    GetHintWnd.Time := 3000;
 end;
 
 procedure TMainForm.rb_time_5Change(Sender: TObject);
 begin
   if rb_time_5.Checked then
-    F_Hint.Time := 5000;
+    GetHintWnd.Time := 5000;
 end;
 
 procedure TMainForm.rb_color_blackChange(Sender: TObject);
 begin
   if rb_color_black.Checked then
-    F_Hint.LTextColor := clBlack;
+    GetHintWnd.LTextColor := clBlack;
 end;
 
 procedure TMainForm.rb_color_redChange(Sender: TObject);
 begin
   if rb_color_red.Checked then
-    F_Hint.LTextColor := clRed;
+    GetHintWnd.LTextColor := clRed;
 end;
 
 procedure TMainForm.rb_color_greenChange(Sender: TObject);
 begin
   if rb_color_green.Checked then
-    F_Hint.LTextColor := clGreen;
+    GetHintWnd.LTextColor := clGreen;
 end;
 
 procedure TMainForm.rb_color_blueChange(Sender: TObject);
 begin
   if rb_color_blue.Checked then
-    F_Hint.LTextColor := clBlue;
+    GetHintWnd.LTextColor := clBlue;
 end;
 
 procedure TMainForm.rb_bgcolor_yellowChange(Sender: TObject);
 begin
   if rb_bgcolor_yellow.Checked then
-    F_Hint.LBackgroundColor := TfpgColor($ffffbf); //clYellow;
+    GetHintWnd.LBackgroundColor := TfpgColor($ffffbf); //clYellow;
 end;
 
 procedure TMainForm.rb_bgcolor_whiteChange(Sender: TObject);
 begin
   if rb_bgcolor_white.Checked then
-    F_Hint.LBackgroundColor := clWhite;
+    GetHintWnd.LBackgroundColor := clWhite;
 end;
 
 procedure TMainForm.rb_bgcolor_greenChange(Sender: TObject);
 begin
   if rb_bgcolor_green.Checked then
-    F_Hint.LBackgroundColor := clPaleGreen;
+    GetHintWnd.LBackgroundColor := clPaleGreen;
 end;
 
 procedure TMainForm.rb_bgcolor_blueChange(Sender: TObject);
 begin
   if rb_bgcolor_blue.Checked then
-    F_Hint.LBackgroundColor := clLightBlue;
+    GetHintWnd.LBackgroundColor := clLightBlue;
 end;
 
 procedure TMainForm.rb_shadowcolor_grayChange(Sender: TObject);
 begin
   if rb_shadowcolor_gray.Checked then
-    F_Hint.ShadowColor := clGray;
+    GetHintWnd.ShadowColor := clGray;
 end;
 
 procedure TMainForm.rb_shadowcolor_blackChange(Sender: TObject);
 begin
   if rb_shadowcolor_black.Checked then
-    F_Hint.ShadowColor := clBlack;
+    GetHintWnd.ShadowColor := clBlack;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -692,8 +698,6 @@ begin
   chbShowHint := CreateCheckBox(Self,200,500,'Show hint');
   chbShowhint.OnChange:= @chbShowHintChange;
 
-  F_Hint := TF_Hint.Create(nil);
-  F_Hint.Visible := False;
 
   {@VFD_BODY_END: MainForm}
   
@@ -703,10 +707,32 @@ begin
     rbComma.Checked := True;
 end;
 
+
+type
+  { A very simple custom hint window. }
+  TMyHintWindow = class(TfpgHintWindow)
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+{ TMyHintWindow }
+
+constructor TMyHintWindow.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  MinWidth  := 400;
+  MinHeight := 200;
+end;
+
+
 procedure MainProc;
 var
   frm: TMainForm;
 begin
+  // To apply custom hint window, uncomment the two lines below
+//  fpgApplication;
+//  HintWindowClass := TMyHintWindow;
+
   fpgApplication.Initialize;
   frm := TMainForm.Create(nil);
   try
@@ -716,6 +742,7 @@ begin
     frm.Free;
   end;
 end;
+
 
 begin
   MainProc;

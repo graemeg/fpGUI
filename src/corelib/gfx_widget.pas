@@ -841,7 +841,7 @@ begin
   writeln('TfpgWidget.HandleMouseExit: ' + ClassName);
   {$ENDIF}
   if FShowHint then
-    HideHint;
+    fpgApplication.HideHint;
 end;
 
 procedure TfpgWidget.HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint);
