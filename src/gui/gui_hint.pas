@@ -70,6 +70,7 @@ type
 
 
   TfpgHintWindowClass = class of TfpgHintWindow;
+  
 
 var
   HintWindowClass: TfpgHintWindowClass = TfpgHintWindow;
@@ -78,14 +79,14 @@ var
 implementation
 
 type
-  TF_Shadow = class(TfpgForm)
+  TfpgHintShadow = class(TfpgForm)
   public
     constructor Create(AOwner: TComponent); override;
   end;
   
   
 var
-  F_Shadow: TF_Shadow;
+  uShadowForm: TfpgHintShadow;
 
 
 { TfpgHintWindow }
@@ -98,8 +99,8 @@ end;
 procedure TfpgHintWindow.FormHide(Sender: TObject);
 begin
   T_Chrono.Enabled := False;
-  if Assigned(F_Shadow) then
-    F_Shadow.Hide;
+  if Assigned(uShadowForm) then
+    uShadowForm.Hide;
 end;
 
 function TfpgHintWindow.GetText: TfpgString;
@@ -155,8 +156,8 @@ end;
 
 procedure TfpgHintWindow.SetShadowColor(AValue: Tfpgcolor);
 begin
-  if F_Shadow.BackgroundColor <> AValue then
-    F_Shadow.BackgroundColor := AValue;
+  if uShadowForm.BackgroundColor <> AValue then
+    uShadowForm.BackgroundColor := AValue;
 end;
 
 procedure TfpgHintWindow.HandleShow;
@@ -164,8 +165,8 @@ begin
   // This is so the Shadow Window is below the Hint Window.
   if Shadow > 0 then
   begin
-    F_Shadow.SetPosition(Left+Shadow, Top+Shadow, Width, Height);
-    F_Shadow.Show;
+    uShadowForm.SetPosition(Left+Shadow, Top+Shadow, Width, Height);
+    uShadowForm.Show;
   end;
   inherited HandleShow;
 end;
@@ -188,7 +189,7 @@ begin
   L_Hint.OnClick := @T_ChronoFini;
   T_Chrono := TfpgTimer.Create(FTime);
   T_Chrono.OnTimer := @T_ChronoFini;
-  F_Shadow:= TF_Shadow.Create(nil);
+  uShadowForm:= TfpgHintShadow.Create(nil);
   OnShow := @FormShow;
   OnHide := @FormHide;
 end;
@@ -199,7 +200,7 @@ begin
   L_Hint.SetPosition(Border, Border, Width - (Border * 2), Height - (Border * 2));
 end;
 
-constructor TF_Shadow.Create(AOwner: TComponent);
+constructor TfpgHintShadow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Name := 'F_Shadow';
