@@ -11,13 +11,13 @@
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=""/>
-      <UseAppBundle Value="False"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
@@ -30,14 +30,13 @@
     <RequiredPackages Count="1">
       <Item1>
         <PackageName Value="tiOPFfpGUI"/>
-        <MinVersion Major="2" Release="3" Valid="True"/>
       </Item1>
     </RequiredPackages>
     <Units Count="5">
       <Unit0>
-        <Filename Value="editmediators.lpr"/>
+        <Filename Value="demo_listmediators.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="editmediators"/>
+        <UnitName Value="demo_listmediators"/>
       </Unit0>
       <Unit1>
         <Filename Value="frmMain.pas"/>
@@ -45,19 +44,19 @@
         <UnitName Value="frmMain"/>
       </Unit1>
       <Unit2>
-        <Filename Value="../Common/Model_View.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="Model_View"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="../Common/Constants.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="Constants"/>
-      </Unit3>
-      <Unit4>
         <Filename Value="../Common/Model.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Model"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../Common/Model_View.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Model_View"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../Common/Constants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Constants"/>
       </Unit4>
     </Units>
   </ProjectOptions>
@@ -66,6 +65,17 @@
     <SearchPaths>
       <OtherUnitFiles Value="../Common/"/>
     </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <CStyleOperator Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+    </CodeGeneration>
+    <Linking>
+      <LinkSmart Value="True"/>
+    </Linking>
     <Other>
       <CustomOptions Value="-FUunits
 "/>

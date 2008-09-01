@@ -81,33 +81,30 @@ uses
 
 function GeneratePersonList: TPersonList;
 var
-  lList: TPersonList;
   lData: TPerson;
 begin
-  lList := TPersonList.Create;
+  Result := TPersonList.Create;
 
   lData := TPerson.Create;
   lData.Name    := 'Graeme Geldenhuys';
   lData.Age     := 23;
-  lList.Add(lData);
+  Result.Add(lData);
 
   lData := TPerson.Create;
   lData.Name    := 'Peter Hinrichsen';
   lData.Age     := 34;
-  lList.Add(lData);
+  Result.Add(lData);
 
-  lData := TPerson.Create;
-  lData.Name    := 'Ian Krigsman';
-  lData.Age     := 45;
-  lData.Deleted := True;
-  lList.Add(lData);
+  //lData := TPerson.Create;
+  //lData.Name    := 'Ian Krigsman';
+  //lData.Age     := 45;
+  //lData.Deleted := True;
+  //Result.Add(lData);
 
   lData := TPerson.Create;
   lData.Name    := 'John Guthrie';
   lData.Age     := 56;
-  lList.Add(lData);
-
-  Result := lList;
+  Result.Add(lData);
 end;
 
 
