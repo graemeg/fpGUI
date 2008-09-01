@@ -13,7 +13,7 @@ uses
   Classes
   ,SysUtils
   ,tiBaseMediator
-  ,Contnrs        { TObjectList }
+//  ,Contnrs        { TObjectList }
   ,gui_listview   { TfpgListView }
   ,gui_grid       { TfpgStringGrid }
   ,tiObject
@@ -40,7 +40,7 @@ type
   public
     constructor CreateCustom(AModel: TtiObjectList; AView: TfpgListView; ADisplayNames: string; AIsObserving: Boolean = True); overload;
     constructor CreateCustom(AModel: TtiObjectList; AView: TfpgListView; AOnBeforeSetupField: TOnBeforeSetupField; ADisplayNames: string; AIsObserving: Boolean = True); overload;
-    class function ComponentClass: TClass; virtual;
+    class function ComponentClass: TClass; override;
     Constructor Create; override;
     Destructor Destroy; override;
     { Called from the GUI to trigger events }
@@ -71,7 +71,7 @@ type
     procedure   RebuildList;override;
   public
     constructor CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; AIsObserving: Boolean = True);
-    class function ComponentClass: TClass; virtual;
+    class function ComponentClass: TClass; override;
   published
     property    View: TfpgStringGrid read FView Write SetView;
     property    SelectedObject: TtiObject read GetSelectedObject write SetSelectedObject;
@@ -115,16 +115,6 @@ type
 
 implementation
 
-uses
-  tiUtils
-  ,typinfo
-  ,tiExcept
-  ;
-
-
-{ ---------------------------------------------------------------------
-  ListView
-  --------------------------------------------------------------------- }
 
 { TListViewMediator }
 
@@ -188,12 +178,10 @@ begin
 end;
 
 procedure TListViewMediator.CreateColumns;
-
 var
   c: integer;
   lc: TfpgLVColumn;
   lInfo : TtiMediatorFieldInfo;
-
 begin
   if View.Columns.Count = 0 then
   begin
@@ -226,7 +214,8 @@ end;
 procedure TListViewMediator.RebuildList;
 begin
   MediatorList.Clear;
-  ClearList;
+//  ClearList;
+
   { This rebuilds the whole list. Not very efficient. You can always override
     this in your mediators to create a more optimised rebuild. }
   View.BeginUpdate;
@@ -235,7 +224,7 @@ begin
     View.Items.Clear;
     CreateSubMediators;
   finally
-  View.EndUpdate;
+    View.EndUpdate;
   end;
 end;
 
@@ -389,9 +378,6 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------------
-  StringGrid
-  --------------------------------------------------------------------- }
 
 { TStringGridMediator }
 
