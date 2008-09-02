@@ -65,7 +65,6 @@ type
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
-    procedure   HintTimerFired(Sender: TObject);
   protected
     FSideMargin: integer;
     FMouseDragPos: integer;
@@ -78,8 +77,6 @@ type
     FVisibleText: TfpgString;
     FVisSelStartPx: integer;
     FVisSelEndPx: integer;
-    FHintTimer: TfpgTimer;
-    FMousePoint: TPoint;
     procedure   DoOnChange; virtual;
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
@@ -877,16 +874,9 @@ procedure TfpgBaseEdit.HandleMouseMove(x, y: integer; btnstate: word; shiftstate
 var
   cp: integer;
 begin
-  FMousePoint := Point(x+2, y+2);
   if (btnstate and MOUSE_LEFT) = 0 then // Left button not down
   begin
-    if FShowHint then
-    begin
-      if FHintTimer.Enabled then
-        FHintTimer.Reset  // keep reseting to prevent hint from showing
-      else
-        fpgApplication.HideHint;
-    end;
+    inherited HandleMouseMove(x, y, btnstate, shiftstate);
     Exit; //==>
   end;
 
@@ -912,7 +902,6 @@ end;
 
 procedure TfpgBaseEdit.HandleMouseEnter;
 begin
-  FHintTimer.Enabled := Enabled and FShowHint;
   inherited HandleMouseEnter;
   if (csDesigning in ComponentState) then
     Exit;
@@ -922,7 +911,6 @@ end;
 
 procedure TfpgBaseEdit.HandleMouseExit;
 begin
-  FHintTimer.Enabled := False;
   inherited HandleMouseExit;
   if (csDesigning in ComponentState) then
     Exit;
@@ -976,8 +964,6 @@ begin
   FDefaultPopupMenu := nil;
   FOnChange         := nil;
 
-  FHintTimer := TfpgTimer.Create(fpgApplication.HintPause);
-  FHintTimer.OnTimer := @HintTimerFired;
 end;
 
 destructor TfpgBaseEdit.Destroy;
@@ -1101,13 +1087,6 @@ begin
         itm.Enabled := Text <> '';
     end;
   end;
-end;
-
-procedure TfpgBaseEdit.HintTimerFired(Sender: TObject);
-begin
-//  Writeln('TfpgBaseEdit.HintTimerFired');
-  fpgApplication.ActivateHint(WindowToScreen(Self, FMousePoint), FHint);
-  FHintTimer.Enabled := False;
 end;
 
 procedure TfpgBaseEdit.DoOnChange;

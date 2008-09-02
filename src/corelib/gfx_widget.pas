@@ -61,15 +61,20 @@ type
     FAlign: TAlign;
     FHint: string;
     FShowHint: boolean;
+    FParentShowHint: boolean;
+    FHintTimer: TfpgTimer;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
+    FMousePoint: TPoint;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
     procedure   SetTextColor(const AValue: TfpgColor); virtual;
     function    GetParent: TfpgWidget; reintroduce;
     procedure   SetParent(const AValue: TfpgWidget); reintroduce;
     procedure   SetEnabled(const AValue: boolean); virtual;
     procedure   SetVisible(const AValue: boolean); virtual;
+    procedure   SetShowHint(const AValue: boolean); virtual;
+    procedure   SetParentShowHint(const AValue: boolean); virtual;
     procedure   DoUpdateWindowPosition; override;
     procedure   DoAlign(AAlign: TAlign);
     procedure   DoResize;
@@ -95,6 +100,7 @@ type
     procedure   HandleHide; virtual;
     procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
     procedure   RePaint;
+    procedure   HintTimerFired(Sender: TObject);
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
@@ -132,7 +138,8 @@ type
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
     property    Hint: string read FHint write FHint;
-    property    ShowHint: boolean read FShowHint write FShowHint default False;
+    property    ShowHint: boolean read FShowHint write SetShowHint default False;
+    property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
   end;
@@ -206,6 +213,20 @@ begin
       HandleHide;
       FOnScreen := True;
     end;
+end;
+
+procedure TfpgWidget.SetShowHint(const AValue: boolean);
+begin
+  if FShowHint <> AValue then
+    FShowHint := AValue;
+  if FShowHint then
+    FParentShowHint := False;
+end;
+
+procedure TfpgWidget.SetParentShowHint(const AValue: boolean);
+begin
+  if FParentShowHint <> AValue then
+    FParentShowHint := AValue;
 end;
 
 procedure TfpgWidget.DoUpdateWindowPosition;
@@ -298,8 +319,13 @@ begin
   FAnchors        := [anLeft, anTop];
   FAlign          := alNone;
   FHint           := '';
+  FShowHint       := False;
+  FParentShowHint := True;
   FBackgroundColor := clWindowBackground;
   FTextColor  := clText1;
+
+  FHintTimer := TfpgTimer.Create(fpgApplication.HintPause);
+  FHintTimer.OnTimer := @HintTimerFired;
 
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
   begin
@@ -310,7 +336,10 @@ begin
     Parent := nil;
 
   if Parent <> nil then
+  begin
     FWindowType := wtChild;
+    FShowHint   := Parent.ShowHint;
+  end;
 
   inherited Create(AOwner);
 
@@ -637,6 +666,12 @@ begin
     fpgSendMessage(self, self, FPGM_PAINT);
 end;
 
+procedure TfpgWidget.HintTimerFired(Sender: TObject);
+begin
+  fpgApplication.ActivateHint(WindowToScreen(Self, FMousePoint), FHint);
+  FHintTimer.Enabled := False;
+end;
+
 procedure TfpgWidget.SetFocus;
 begin
   HandleSetFocus;
@@ -819,7 +854,21 @@ end;
 
 procedure TfpgWidget.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 begin
-  // do nothing yet
+  FMousePoint := Point(x+2, y+2);
+  if Assigned(Parent) then
+  begin
+    if fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.ShowHint)) and (FHint <> '') then
+      if FHintTimer.Enabled then
+        FHintTimer.Reset    // keep reseting to prevent hint from showing
+      else
+        fpgApplication.HideHint;
+  end
+  else
+    if fpgApplication.ShowHint and FShowHint and (FHint <> '') then
+      if FHintTimer.Enabled then
+        FHintTimer.Reset    // keep reseting to prevent hint from showing
+      else
+        fpgApplication.HideHint;
 end;
 
 procedure TfpgWidget.HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState);
@@ -832,7 +881,11 @@ begin
   {$IFDEF DEBUG}
   writeln('TfpgWidget.HandleMouseEnter: ' + ClassName);
   {$ENDIF}
-  // do nothing yet
+  if Assigned(Parent) then
+    FHintTimer.Enabled := Enabled and fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.ShowHint)) and (FHint <> '')
+  else
+    FHintTimer.Enabled := Enabled and fpgApplication.ShowHint and FShowHint and (FHint <> '');
+writeln('TfpgWidget.HandleMouseEnter:  HintTimer.Enabled=', FHintTimer.Enabled);
 end;
 
 procedure TfpgWidget.HandleMouseExit;
@@ -840,6 +893,7 @@ begin
   {$IFDEF DEBUG}
   writeln('TfpgWidget.HandleMouseExit: ' + ClassName);
   {$ENDIF}
+  FHintTimer.Enabled := False;
   if FShowHint then
     fpgApplication.HideHint;
 end;

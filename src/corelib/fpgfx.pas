@@ -199,6 +199,7 @@ type
   TfpgApplication = class(TfpgApplicationImpl)
   private
     FHintPause: Integer;
+    FShowHint: boolean;
     FOnException: TExceptionEvent;
     FStopOnException: Boolean;
     FHintWindow: TfpgWindow;
@@ -236,6 +237,7 @@ type
     property    HintWindow: TfpgWindow read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
+    property    ShowHint: boolean read FShowHint write FShowHint default True;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
     property    OnException: TExceptionEvent read FOnException write FOnException;
   end;
@@ -597,6 +599,7 @@ var
   i: integer;
   s: string;
 begin
+  s := '';
   for i := 0 to iCallTrace+1 do
     s := s + '  ';
   writeln(s + AMessage);
@@ -788,6 +791,7 @@ begin
   FStopOnException := False;
   FHintWindow     := nil;
   FHintPause      := 1500;  // 1.5 seconds
+  FShowHint       := True;
   
   try
     inherited Create(AParams);
@@ -808,7 +812,6 @@ end;
 destructor TfpgApplication.Destroy;
 var
   i: integer;
-  frm: TfpgWindowBase;
 begin
   if Assigned(FHintWindow) then
   begin
@@ -1458,11 +1461,9 @@ end;
 procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
 var
   r: TfpgRect;
-  lDoDraw: Boolean;
 begin
   r.SetRect(x, y, w, h);
-  lDoDraw := False;
-  
+
   if btfIsDefault in AFlags then
   begin
     ACanvas.SetColor(clBlack);

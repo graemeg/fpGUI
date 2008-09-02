@@ -395,7 +395,7 @@ begin
     dlg.WindowTitle     := ATitle;
     dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
-    dlg.ShowModal;
+    Result := TfpgMsgDlgBtn(dlg.ShowModal);
   finally
     dlg.Free;
   end;
