@@ -234,6 +234,7 @@ begin
   wc.NameBase := 'lblName';
   wc.AddProperty('Alignment', TPropertyEnum, 'Horizontal text alignment');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the label text');
+  wc.AddProperty('Hint', TPropertyString, '');
   wc.AddProperty('Layout', TPropertyEnum, 'Vertical text layout');
   wc.AddProperty('Text', TPropertyString, 'Label text');
   wc.AddProperty('WrapText', TPropertyBoolean, 'If True text will wrap when it doesn''t fit the width');
@@ -268,6 +269,7 @@ begin
   wc.AddProperty('Flat', TPropertyBoolean, 'Only draw button borders when mouse hovers over button');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
+  wc.AddProperty('Hint', TPropertyString, '');
   wc.AddProperty('ImageLayout', TPropertyEnum, 'Which side of the button contains the image');
   wc.AddProperty('ImageMargin', TPropertyInteger, 'Space between image and border, -1 centers image/text');
   wc.AddProperty('ImageName', TPropertyString, '');

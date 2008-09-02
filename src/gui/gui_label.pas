@@ -26,7 +26,6 @@ uses
   SysUtils,
   gfxbase,
   fpgfx,
-  gfx_UTF8utils,
   gfx_widget;
 
 type
@@ -73,8 +72,10 @@ type
     property    AutoSize;
     property    BackgroundColor;
     property    FontDesc;
+    property    Hint;
     property    Layout;
     property    LineSpace;
+    property    ShowHint;
     property    Text;
     property    TextColor;
     property    Width;
@@ -211,7 +212,6 @@ end;
 
 procedure TfpgCustomLabel.HandlePaint;
 var
-  i: integer;
   r: TfpgRect;
   lTxtFlags: TFTextFlags;
 begin

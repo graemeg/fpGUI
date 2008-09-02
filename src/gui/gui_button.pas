@@ -124,11 +124,13 @@ type
     property    Flat;
     property    FontDesc;
     property    GroupIndex;
+    property    Hint;
     property    ImageLayout;
     property    ImageMargin;
     property    ImageName;
     property    ImageSpacing;
     property    ModalResult;
+    property    ShowHint;
     property    ShowImage;
     property    Text;
     property    TextColor;

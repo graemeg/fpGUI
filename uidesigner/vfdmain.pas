@@ -84,7 +84,8 @@ implementation
 uses
   vfdformparser,
   gui_iniutils,
-  gfx_utils;
+  gfx_utils,
+  fpgfx;
 
 Var
   DefaultPasExt : String = '.pas';
@@ -439,6 +440,7 @@ begin
   end;
   DefaultPasExt   := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
   UndoOnPropExit  := gINI.ReadBool('Options', 'UndoOnExit', DefUndoOnPropExit);
+  fpgApplication.HintPause := 1000;
 end;
 
 end.

@@ -279,6 +279,7 @@ begin
   SetPosition(84, 123, 728, 87);
   WindowTitle := 'frmMain';
   WindowPosition := wpUser;
+  ShowHint := True;
   gINI.ReadFormState(self);
 
   MainMenu := TfpgMenuBar.Create(self);
@@ -299,6 +300,7 @@ begin
     ImageMargin := -1;
     ImageName := 'vfd.newform';
     Focusable := False;
+    Hint := 'Create a new form';
     OnClick   := @(maindsgn.OnNewForm);
   end;
 
@@ -312,6 +314,7 @@ begin
     ImageMargin := -1;
     ImageName := 'stdimg.open';
     Focusable := False;
+    Hint := 'Open a file';
     OnClick   := @(maindsgn.OnLoadFile);
   end;
 
@@ -325,6 +328,7 @@ begin
     ImageMargin := -1;
     ImageName := 'stdimg.save';
     Focusable := False;
+    Hint := 'Save the current form design';
     OnClick   := @(maindsgn.OnSaveFile);
   end;
 
@@ -422,6 +426,7 @@ begin
     btn.ImageName := wgc.WidgetIconName;
     btn.ImageMargin := -1;
     btn.Text      := '';
+    btn.Hint      := wgc.WidgetClass.ClassName;
     btn.Focusable := False;
     btn.OnClick   := @OnPaletteClick;
     btn.AllowDown := True;
