@@ -885,7 +885,6 @@ begin
     FHintTimer.Enabled := Enabled and fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.ShowHint)) and (FHint <> '')
   else
     FHintTimer.Enabled := Enabled and fpgApplication.ShowHint and FShowHint and (FHint <> '');
-writeln('TfpgWidget.HandleMouseEnter:  HintTimer.Enabled=', FHintTimer.Enabled);
 end;
 
 procedure TfpgWidget.HandleMouseExit;
