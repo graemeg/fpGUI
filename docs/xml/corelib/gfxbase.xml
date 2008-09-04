@@ -107,7 +107,7 @@ but grabs the input focus until it has closed.</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtPopup">
-        <short>This window will normall not have a titlebar or window borders and will 
+        <short>This window will normally not have a titlebar or window borders and will 
 appear above other windows. It is used for example in the dropdown window of a 
 ComboBox or a tooltip window.</short>
       </element>
