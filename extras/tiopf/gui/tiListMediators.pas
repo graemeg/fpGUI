@@ -13,9 +13,9 @@ uses
   Classes
   ,SysUtils
   ,tiBaseMediator
-//  ,Contnrs        { TObjectList }
-  ,gui_listview   { TfpgListView }
-  ,gui_grid       { TfpgStringGrid }
+  ,gui_listview
+  ,gui_grid
+  ,gui_listbox
   ,tiObject
   ;
 
@@ -43,9 +43,7 @@ type
     class function ComponentClass: TClass; override;
     Constructor Create; override;
     Destructor Destroy; override;
-    { Called from the GUI to trigger events }
-    procedure   HandleSelectionChanged; virtual;
-    { Event handler to allow formatting of fields before they are written. }
+    procedure HandleSelectionChanged; override;
   published
     property    View: TfpgListView read FView Write SetView;
   end;
@@ -67,8 +65,8 @@ type
     procedure CreateColumns; override;
     Function  GetGuiControl : TComponent; override;
     Procedure SetGuiControl (Const AValue : TComponent); override;
-    procedure   SetupGUIandObject; override;
-    procedure   RebuildList;override;
+    procedure SetupGUIandObject; override;
+    procedure RebuildList;override;
   public
     constructor CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; AIsObserving: Boolean = True);
     class function ComponentClass: TClass; override;
@@ -110,6 +108,31 @@ type
   published
     property View: TfpgStringGrid read FView;
     Property RowIndex : Integer Read FRowIndex;
+  end;
+
+
+  { Used for presenting a list of objects in a TfpgListBox component. }
+  TListBoxMediator = class(TCustomListMediator)
+  private
+    FView: TfpgListBox;
+    FSelectedObject: TtiObject;
+    FObserversInTransit: TList;
+  protected
+    function GetGUIControl: TComponent; override;
+    function GetSelectedObject: TtiObject; override;
+    procedure SetGUIControl(const AValue: TComponent);override;
+    procedure SetSelectedObject(const AValue: TtiObject); override;
+    procedure CreateColumns; override;
+    procedure ClearList; override;
+    procedure DoCreateItemMediator(AData: TtiObject; ARowIdx: integer); override;
+    procedure RebuildList; override;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+    class function CompositeMediator: Boolean; override;
+    class function ComponentClass: TClass; override;
+    procedure HandleSelectionChanged; override;
+    property View: TfpgListBox read FView;
   end;
 
 
@@ -265,7 +288,6 @@ begin
   inherited;
 end;
 
-{ TODO: This is not working 100% yet. Be warned! }
 procedure TListViewMediator.HandleSelectionChanged;
 var
   i: integer;
@@ -532,6 +554,143 @@ begin
     end;
 end;
 
+
+{ TListBoxMediator }
+
+function TListBoxMediator.GetGUIControl: TComponent;
+begin
+  Result := FView;
+end;
+
+function TListBoxMediator.GetSelectedObject: TtiObject;
+begin
+  Result := FSelectedObject;
+end;
+
+procedure TListBoxMediator.SetGUIControl(const AValue: TComponent);
+begin
+  FView := AValue as TfpgListBox;
+  inherited SetGUIControl(AValue);
+end;
+
+procedure TListBoxMediator.SetSelectedObject(const AValue: TtiObject);
+begin
+  FSelectedObject := AValue;
+end;
+
+procedure TListBoxMediator.CreateColumns;
+begin
+  // do nothing
+end;
+
+procedure TListBoxMediator.ClearList;
+begin
+
+end;
+
+procedure TListBoxMediator.DoCreateItemMediator(AData: TtiObject;
+  ARowIdx: integer);
+begin
+
+end;
+
+procedure TListBoxMediator.RebuildList;
+var
+  i: Integer;
+  ptr: TNotifyEvent;
+  selected: integer;
+begin
+  selected := -1;
+  if (Model.CountNotDeleted) >= View.FocusItem+1 then
+  begin
+    selected := View.FocusItem;
+  end;
+
+  ptr := View.OnChange;
+  View.OnChange := nil;
+  View.BeginUpdate;
+  try
+    View.Items.Clear;
+    for i := 0 to Model.Count-1 do
+    begin
+      if (not Model.Items[i].Deleted) or
+         (ShowDeleted and Model.Items[i].Deleted) then
+      begin
+        View.Items.AddObject(Model.Items[i].Caption, Model.Items[i]);
+      end;
+    end;
+    if Model.CountNotDeleted > 0 then
+    begin
+      if selected = -1 then
+        selected := 0;
+      View.FocusItem := selected;
+    end;
+  finally
+    View.EndUpdate;
+    View.Update;
+    View.OnChange := ptr;
+    HandleSelectionChanged;
+  end;
+end;
+
+constructor TListBoxMediator.Create;
+begin
+  inherited Create;
+  FSelectedObject := nil;
+  FObserversInTransit := TList.Create;
+end;
+
+destructor TListBoxMediator.Destroy;
+begin
+  FObserversInTransit.Free;
+  inherited Destroy;
+end;
+
+class function TListBoxMediator.CompositeMediator: Boolean;
+begin
+  Result := False;
+end;
+
+class function TListBoxMediator.ComponentClass: TClass;
+begin
+  Result := TfpgListBox;
+end;
+
+{$Note Refactor this as it's the same as TListView.HandleSelectionChanged, except
+  for one single line. }
+procedure TListBoxMediator.HandleSelectionChanged;
+var
+  i: integer;
+begin
+  if View.FocusItem = -1 then
+    SelectedObject := nil
+  else
+  begin
+    { If an item is already selected, assign the item's List of observers to a
+      temporary container. This is done so that the same observers can be
+      assigned to the new item. }
+    if Assigned(FSelectedObject) then
+      FObserversInTransit.Assign(FSelectedObject.ObserverList);
+
+    // Assign Newly selected item to SelectedObject Obj.
+    FSelectedObject := TtiObject(View.Items.Objects[View.FocusItem]);
+
+    { If an object was selected, copy the old item's observer List
+      to the new item's observer List. }
+    if FObserversInTransit.Count > 0 then
+      FSelectedObject.ObserverList.Assign(FObserversInTransit);
+
+    { set the observers's Subject property to the selected object }
+    for i := 0 to FSelectedObject.ObserverList.Count-1 do
+    begin
+      TMediatorView(FSelectedObject.ObserverList.Items[i]).Subject :=
+          FSelectedObject;
+    end;
+
+    // execute the NotifyObservers event to update the observers.
+    FSelectedObject.NotifyObservers;
+  end;
+end;
 
 end.
 

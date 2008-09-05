@@ -36,7 +36,7 @@ type
     FEditControl: TfpgEdit;
   protected
     function    GetGUIControl: TComponent; override;
-    procedure   SetGUIControl(const AValue: TComponent);override;
+    procedure   SetGUIControl(const AValue: TComponent); override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
     procedure   SetupGUIandObject; override;
     procedure   SetObjectUpdateMoment (Const AValue : TObjectUpdateMoment); override;
@@ -225,7 +225,7 @@ end;
 procedure TMediatorEditView.SetGUIControl(const AValue: TComponent);
 begin
   FEditControl := AValue as TfpgEdit;
-  Inherited;
+  inherited SetGUIControl(AValue);
 end;
 
 procedure TMediatorEditView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
@@ -423,7 +423,7 @@ end;
 procedure TMediatorComboBoxView.SetGUIControl(const AValue: TComponent);
 begin
   FEditControl := AValue as TfpgComboBox;
-  inherited;
+  inherited SetGUIControl(AValue);
 end;
 
 procedure TMediatorComboBoxView.SetupGUIandObject;
@@ -492,7 +492,7 @@ end;
 procedure TMediatorMemoView.SetGUIControl(const AValue: TComponent);
 begin
   FEditControl:=AValue as TfpgMemo;
-  Inherited;
+  inherited SetGUIControl(AValue);
 end;
 
 procedure TMediatorMemoView.SetupGUIandObject;
@@ -635,7 +635,7 @@ end;
 procedure TMediatorCheckBoxView.SetGUIControl(const AValue: TComponent);
 begin
   FEditControl:=AValue as TfpgCheckBox;
-  Inherited;
+  inherited SetGUIControl(AValue);
 end;
 
 procedure TMediatorCheckBoxView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
@@ -691,7 +691,7 @@ end;
 procedure TMediatorStaticTextView.SetGUIControl(const AValue: TComponent);
 begin
   FEditControl := AValue as TfpgLabel;
-  inherited;
+  inherited SetGUIControl(AValue);
 end;
 
 class function TMediatorStaticTextView.ComponentClass: TClass;
@@ -710,7 +710,7 @@ end;
 procedure TMediatorCalendarComboView.SetGUIControl(const AValue: TComponent);
 begin
   FEditControl := AValue as TfpgCalendarCombo;
-  inherited;
+  inherited SetGUIControl(AValue);
 end;
 
 constructor TMediatorCalendarComboView.Create;
