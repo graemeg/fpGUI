@@ -32,7 +32,7 @@
         <PackageName Value="tiOPFfpGUI"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="demo_adrsbook_mgm.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -56,13 +56,18 @@
       <Unit4>
         <Filename Value="frmcontactmaint.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="frmcontactmaint"/>
+        <UnitName Value="frmContactMaint"/>
       </Unit4>
       <Unit5>
         <Filename Value="frmcitylist.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="frmCityList"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="frmcitymaint.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frmCityMaint"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -70,10 +75,13 @@
     <Parsing>
       <SyntaxOptions>
         <CStyleOperator Value="False"/>
+        <AllowLabel Value="False"/>
+        <CPPInline Value="False"/>
       </SyntaxOptions>
     </Parsing>
     <Other>
-      <CustomOptions Value="-FUunits"/>
+      <CustomOptions Value="-FUunits
+"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

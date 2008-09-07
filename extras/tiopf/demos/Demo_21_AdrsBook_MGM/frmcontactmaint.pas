@@ -1,4 +1,4 @@
-unit frmcontactmaint;
+unit frmContactMaint;
 
 {$mode objfpc}{$H+}
 

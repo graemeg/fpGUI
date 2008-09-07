@@ -33,9 +33,10 @@ type
     procedure SetSelectedObject(const AValue: TtiObject);override;
     procedure CreateColumns; override;
     procedure DoCreateItemMediator(AData: TtiObject; ARowIdx : Integer); override;
-    Function  GetGuiControl : TComponent; override;
-    Procedure SetGuiControl (Const AValue : TComponent); override;
+    function  GetGuiControl : TComponent; override;
+    procedure SetGuiControl (Const AValue : TComponent); override;
     procedure SetupGUIandObject; override;
+    procedure ClearList; override;
     procedure RebuildList; override;
   public
     constructor CreateCustom(AModel: TtiObjectList; AView: TfpgListView; ADisplayNames: string; AIsObserving: Boolean = True); overload;
@@ -43,7 +44,7 @@ type
     class function ComponentClass: TClass; override;
     Constructor Create; override;
     Destructor Destroy; override;
-    procedure HandleSelectionChanged; override;
+    procedure HandleSelectionChanged; {override;}
   published
     property    View: TfpgListView read FView Write SetView;
   end;
@@ -131,7 +132,7 @@ type
     destructor Destroy; override;
     class function CompositeMediator: Boolean; override;
     class function ComponentClass: TClass; override;
-    procedure HandleSelectionChanged; override;
+    procedure HandleSelectionChanged; {override;}
     property View: TfpgListBox read FView;
   end;
 
@@ -232,6 +233,11 @@ begin
 //  FView.RowSelect         := True;
 //  FView.AutoSize          := False;
 //  FView.ScrollBars        := ssAutoBoth;
+end;
+
+procedure TListViewMediator.ClearList;
+begin
+  View.Items.Clear;
 end;
 
 procedure TListViewMediator.RebuildList;

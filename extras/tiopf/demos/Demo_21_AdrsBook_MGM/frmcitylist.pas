@@ -5,12 +5,10 @@ unit frmCityList;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_panel, gui_popupcalendar, gui_gauge,
+  SysUtils, Classes, gfxbase, fpgfx,
+  gfx_widget, gui_form, gui_button,
+  gui_grid, gui_dialogs, gui_menu,
+  gui_panel,
   tiFormMediator, model;
 
 type
@@ -29,6 +27,7 @@ type
     FMediator: TFormMediator;
     procedure SetData(const AValue: TCityList);
     procedure SetupMediators;
+    procedure btnEditClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
     procedure AfterConstruction; override;
@@ -43,7 +42,7 @@ procedure ShowCities(const AList: TCityList);
 implementation
 
 uses
-  tiListMediators;
+  tiListMediators, frmCityMaint{, tiDialogs};
 
 
 procedure ShowCities(const AList: TCityList);
@@ -70,6 +69,22 @@ begin
   end;
   FMediator.Subject := FData;
   FMediator.Active := True;
+end;
+
+procedure TCityListForm.btnEditClicked(Sender: TObject);
+var
+  c: TCity;
+begin
+  c := TCity(TStringGridMediator(FMediator.FindByComponent(grdName1).Mediator).SelectedObject);
+//  tiShowString(c.AsDebugString);
+
+  if not Assigned(c) then
+    Exit; //==>
+
+  if EditCity(c) then
+  begin
+    // we can save contact here
+  end;
 end;
 
 procedure TCityListForm.SetData(const AValue: TCityList);
@@ -114,6 +129,7 @@ begin
     FontDesc := '#Label1';
     ImageName := '';
     TabOrder := 1;
+    OnClick := @btnEditClicked;
   end;
 
   btnDelete := TfpgButton.Create(bvlName1);

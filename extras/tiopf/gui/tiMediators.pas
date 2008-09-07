@@ -508,8 +508,10 @@ end;
 
 procedure TMediatorDynamicComboBoxView.SetListObject(const AValue: TtiObjectList);
 begin
-  Inherited;
+  inherited;
   InternalListRefresh;
+  if Assigned(ValueList) then
+    EditControl.Enabled := ValueList.Count > 0;
 end;
 
 procedure TMediatorDynamicComboBoxView.InternalListRefresh;
@@ -565,7 +567,9 @@ begin
   if UseInternalOnChange then
     EditControl.OnChange := @DoOnChange; // default OnChange event handler
 
-  EditControl.Enabled   := (ValueList.Count > 0);
+  {$Note As far as I can see, ValueList is always going to be nil here! - Graeme }
+  if ValueList <> nil then
+    EditControl.Enabled := (ValueList.Count > 0);
 end;
 
 procedure TMediatorDynamicComboBoxView.DoGuiToObject;
