@@ -64,6 +64,7 @@ type
   protected
     FRowCount: Integer;
     FColumns: TList;
+    procedure   HandleSetFocus; override;
     procedure   SetTextColor(const AValue: TfpgColor); override;
     function    GetColumns(AIndex: integer): TfpgGridColumn; virtual;
     procedure   DoDeleteColumn(ACol: integer); virtual;
@@ -112,6 +113,17 @@ end;
 function TfpgCustomGrid.GetRowCount: Integer;
 begin
   Result := FRowCount;
+end;
+
+procedure TfpgCustomGrid.HandleSetFocus;
+begin
+  inherited HandleSetFocus;
+  if (GetRowCount > 0) and (FocusRow = -1) then
+  begin
+    FocusRow := 0;
+    FocusCol := 0;
+    Repaint;
+  end;
 end;
 
 procedure TfpgCustomGrid.SetTextColor(const AValue: TfpgColor);

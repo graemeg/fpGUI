@@ -129,8 +129,8 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HeaderFont: TfpgFont read FHeaderFont;
     property    HeaderFontDesc: string read GetHeaderFontDesc write SetHeaderFontDesc;
-    property    FocusCol: Integer read FFocusCol write SetFocusCol;
-    property    FocusRow: Integer read FFocusRow write SetFocusRow;
+    property    FocusCol: Integer read FFocusCol write SetFocusCol default -1;
+    property    FocusRow: Integer read FFocusRow write SetFocusRow default -1;
     property    RowSelect: boolean read FRowSelect write SetRowSelect;
     property    ColumnCount: Integer read GetColumnCount;
     property    RowCount: Integer read GetRowCount;
@@ -1093,9 +1093,9 @@ begin
   Focusable   := True;
   Width       := 120;
   Height      := 80;
-  FFocusCol   := 0;
+  FFocusCol   := -1;
   FPrevCol    := -1;
-  FFocusRow   := 0;
+  FFocusRow   := -1;
   FPrevRow    := -1;
   FFirstRow   := 0;
   FFirstCol   := 0;
