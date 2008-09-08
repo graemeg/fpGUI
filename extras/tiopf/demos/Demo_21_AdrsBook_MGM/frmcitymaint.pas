@@ -23,11 +23,13 @@ type
     cbCountry: TfpgComboBox;
     btnSave: TfpgButton;
     btnCancel: TfpgButton;
+    btnDebug: TfpgButton;
     {@VFD_HEAD_END: CityEditForm}
     FMediator: TFormMediator;
     FData: TCity;
     procedure SetData(const AValue: TCity);
     procedure SetupMediators;
+    procedure btnDebugClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
     property  Data: TCity read FData write SetData;
@@ -41,7 +43,7 @@ function EditCity(AData: TCity): boolean;
 implementation
 
 uses
-  tiBaseMediator, tiMediators, contactmanager, typinfo;
+  tiBaseMediator, tiMediators, contactmanager, typinfo, tiDialogs;
 
 
 function EditCity(AData: TCity): boolean;
@@ -82,11 +84,16 @@ begin
   FMediator.Active := True;
 end;
 
+procedure TCityEditForm.btnDebugClicked(Sender: TObject);
+begin
+  tiShowString(FData.AsDebugString);
+end;
+
 procedure TCityEditForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: CityEditForm}
   Name := 'CityEditForm';
-  SetPosition(673, 204, 260, 186);
+  SetPosition(673, 204, 350, 186);
   WindowTitle := 'City Maintenance';
 
   lblName1 := TfpgLabel.Create(self);
@@ -95,6 +102,7 @@ begin
     Name := 'lblName1';
     SetPosition(8, 8, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'City name:';
   end;
 
@@ -114,6 +122,7 @@ begin
     Name := 'lblName2';
     SetPosition(8, 52, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'ZIP code:';
   end;
 
@@ -133,6 +142,7 @@ begin
     Name := 'lblName3';
     SetPosition(8, 96, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Country:';
   end;
 
@@ -149,10 +159,11 @@ begin
   with btnSave do
   begin
     Name := 'btnSave';
-    SetPosition(92, 156, 80, 24);
+    SetPosition(182, 156, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Save';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 6;
     ModalResult := mrOK;
@@ -162,13 +173,27 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(176, 156, 80, 24);
+    SetPosition(266, 156, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 7;
     ModalResult := mrCancel;
+  end;
+
+  btnDebug := TfpgButton.Create(self);
+  with btnDebug do
+  begin
+    Name := 'btnDebug';
+    SetPosition(8, 156, 100, 24);
+    Text := 'Debug (Show)';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 8;
+    OnClick := @btnDebugClicked;
   end;
 
   {@VFD_BODY_END: CityEditForm}

@@ -39,7 +39,7 @@ function gContactManager: TContactManager;
 implementation
 
 uses
-  SysUtils;
+  SysUtils, tiObject;
 
 var
   uContactManager: TContactManager;
@@ -65,6 +65,8 @@ end;
 { TContactManager }
 
 procedure TContactManager.PopulateCountries;
+var
+  i: integer;
 begin
   FCountryList.Add(TCountry.CreateNew('za', 'South Africa'));
   FCountryList.Add(TCountry.CreateNew('gb', 'Great Britain'));
@@ -72,11 +74,16 @@ begin
   FCountryList.Add(TCountry.CreateNew('fr', 'France'));
   FCountryList.Add(TCountry.CreateNew('us', 'United States'));
   FCountryList.Add(TCountry.CreateNew('gr', 'Germany'));
+
+  { reset ObjectState property }
+  for i := 0 to FCountryList.Count - 1 do
+    FCountryList[i].ObjectState := posClean;
 end;
 
 procedure TContactManager.PopulateCities;
 var
   c: TCity;
+  i: integer;
 begin
   c:= TCity.CreateNew;
   c.Name:= 'Somerset West';
@@ -143,6 +150,10 @@ begin
   c.ZIP := 'BC5 7WN';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['uk'], True));
   FCityList.Add(c);
+
+  { reset ObjectState property }
+  for i := 0 to FCityList.Count - 1 do
+    FCityList[i].ObjectState := posClean;
 end;
 
 function TContactManager.GenPhone: string;
@@ -196,9 +207,11 @@ begin
       A.Telephone1:= GenPhone;
       If Random(2)>0 then
          A.Telephone2:= GenPhone;
+      A.Dirty := False;
       C.AddressList.Add(A);
     end;
     C.Comments := 'My name is ' + C.FirstName + '.';
+    C.ObjectState := posClean;
     FContactList.Add(C);
   end;
 end;

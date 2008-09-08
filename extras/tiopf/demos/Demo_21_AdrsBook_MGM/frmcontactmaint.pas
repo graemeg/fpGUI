@@ -34,11 +34,13 @@ type
     btnAdd: TfpgButton;
     btnEdit: TfpgButton;
     btnDelete: TfpgButton;
+    btnDebug: TfpgButton;
     {@VFD_HEAD_END: ContactEditForm}
     FMediator: TFormMediator;
     FAdrsMediator: TFormMediator;
     procedure SetData(const AValue: TContact);
     procedure SetupMediators;
+    procedure btnDebugClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
     property  Data: TContact read FData write SetData;
@@ -52,7 +54,7 @@ function EditContact(AData: TContact): Boolean;
 implementation
 
 uses
-  contactmanager;
+  contactmanager, tiDialogs;
 
 
 function EditContact(AData: TContact): Boolean;
@@ -95,6 +97,11 @@ begin
   FAdrsMediator.Active := True;
 end;
 
+procedure TContactEditForm.btnDebugClicked(Sender: TObject);
+begin
+  tiShowString(FData.AsDebugString);
+end;
+
 procedure TContactEditForm.SetData(const AValue: TContact);
 begin
   if FData=AValue then exit;
@@ -115,6 +122,7 @@ begin
     Name := 'lblName1';
     SetPosition(8, 8, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Firstname:';
   end;
 
@@ -134,6 +142,7 @@ begin
     Name := 'lblName2';
     SetPosition(8, 52, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Lastname:';
   end;
 
@@ -153,6 +162,7 @@ begin
     Name := 'lblName3';
     SetPosition(8, 96, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'EMail:';
   end;
 
@@ -172,6 +182,7 @@ begin
     Name := 'lblName4';
     SetPosition(8, 140, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Mobile:';
   end;
 
@@ -191,6 +202,7 @@ begin
     Name := 'lblName5';
     SetPosition(8, 184, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Comments:';
   end;
 
@@ -210,6 +222,7 @@ begin
     Name := 'lblName6';
     SetPosition(264, 8, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Addresses:';
   end;
 
@@ -229,6 +242,7 @@ begin
     SetPosition(364, 300, 80, 24);
     Text := 'Save';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 12;
     ModalResult := mrOK;
@@ -241,6 +255,7 @@ begin
     SetPosition(448, 300, 80, 24);
     Text := 'Cancel';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 13;
     ModalResult := mrCancel;
@@ -253,6 +268,7 @@ begin
     SetPosition(264, 152, 52, 24);
     Text := 'Add';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 14;
   end;
@@ -264,6 +280,7 @@ begin
     SetPosition(320, 152, 52, 24);
     Text := 'Edit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 15;
   end;
@@ -275,8 +292,22 @@ begin
     SetPosition(376, 152, 52, 24);
     Text := 'Delete';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 16;
+  end;
+
+  btnDebug := TfpgButton.Create(self);
+  with btnDebug do
+  begin
+    Name := 'btnDebug';
+    SetPosition(8, 300, 100, 24);
+    Text := 'Debug (Show)';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 17;
+    OnClick := @btnDebugClicked;
   end;
 
   {@VFD_BODY_END: ContactEditForm}

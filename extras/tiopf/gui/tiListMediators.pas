@@ -177,11 +177,9 @@ end;
 
 function TListViewMediator.GetSelectedObject: TtiObject;
 begin
-//  if FView.SelCount = 0 then
   if FView.ItemIndex = -1 then
     Result := nil
   else
-//    FSelectedObject := TtiObject(FView.Selected.Data);
     Result := TtiObject(FView.Items.Item[FView.ItemIndex].UserData);
 end;
 
@@ -411,11 +409,15 @@ end;
 
 function TStringGridMediator.GetSelectedObject: TtiObject;
 begin
+  if FView.RowCount = 0 then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
   if FView.FocusRow = -1 then
-//  if FView.Selection.Top = 0 then
     Result := nil
   else
-//    Result := TtiObject(FView.Objects[1, FView.Selection.Top]);
     Result := TtiObject(FView.Objects[0, FView.FocusRow]);
 end;
 
