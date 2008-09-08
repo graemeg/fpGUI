@@ -1,54 +1,56 @@
-unit frmCityList;
+unit frmCountryList;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx,
-  gfx_widget, gui_form, gui_button,
-  gui_grid, gui_dialogs, gui_menu,
-  gui_panel,
-  tiFormMediator, model;
+  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
+  gfx_widget, gui_form, gui_label, gui_button,
+  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
+  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
+  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
+  gui_panel, gui_popupcalendar, gui_gauge,
+  model, tiFormMediator;
 
 type
 
-  TCityListForm = class(TfpgForm)
+  TCountryListForm = class(TfpgForm)
   private
-    {@VFD_HEAD_BEGIN: CityListForm}
+    {@VFD_HEAD_BEGIN: CountryListForm}
     bvlName1: TfpgBevel;
     btnAdd: TfpgButton;
     btnEdit: TfpgButton;
     btnDelete: TfpgButton;
     grdName1: TfpgStringGrid;
     btnCancel: TfpgButton;
-    {@VFD_HEAD_END: CityListForm}
-    FData: TCityList;
+    {@VFD_HEAD_END: CountryListForm}
+    FData: TCountryList;
     FMediator: TFormMediator;
-    procedure SetData(const AValue: TCityList);
+    procedure SetData(const AValue: TCountryList);
     procedure SetupMediators;
     procedure btnEditClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
-    property Data: TCityList read FData write SetData;
+    property Data: TCountryList read FData write SetData;
   end;
 
 {@VFD_NEWFORM_DECL}
 
-procedure ShowCities(const AList: TCityList);
+procedure ShowCountries(const AList: TCountryList);
 
 
 implementation
 
 uses
-  tiListMediators, frmCityMaint{, tiDialogs};
+  tiListMediators{, frmCountryMaint};
 
 
-procedure ShowCities(const AList: TCityList);
+procedure ShowCountries(const AList: TCountryList);
 var
-  frm: TCityListForm;
+  frm: TCountryListForm;
 begin
-  frm := TCityListForm.Create(nil);
+  frm := TCountryListForm.Create(nil);
   try
     frm.SetData(AList);
     frm.ShowModal;
@@ -59,46 +61,35 @@ end;
 
 {@VFD_NEWFORM_IMPL}
 
-procedure TCityListForm.SetupMediators;
+procedure TCountryListForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
     FMediator := TFormMediator.Create(self);
-    FMediator.AddComposite('Name(110);Zip(80);CountryAsString(150)', grdName1);
+    FMediator.AddComposite('ISO(60);Name(110)', grdName1);
   end;
   FMediator.Subject := FData;
   FMediator.Active := True;
 end;
 
-procedure TCityListForm.btnEditClicked(Sender: TObject);
-var
-  c: TCity;
+procedure TCountryListForm.btnEditClicked(Sender: TObject);
 begin
-  c := TCity(TStringGridMediator(FMediator.FindByComponent(grdName1).Mediator).SelectedObject);
-//  tiShowString(c.AsDebugString);
-
-  if not Assigned(c) then
-    Exit; //==>
-
-  if EditCity(c) then
-  begin
-    // we can save contact here
-  end;
+  //
 end;
 
-procedure TCityListForm.SetData(const AValue: TCityList);
+procedure TCountryListForm.SetData(const AValue: TCountryList);
 begin
   if FData=AValue then exit;
   FData:=AValue;
   SetupMediators;
 end;
 
-procedure TCityListForm.AfterCreate;
+procedure TCountryListForm.AfterCreate;
 begin
-  {@VFD_BODY_BEGIN: CityListForm}
-  Name := 'CityListForm';
+  {@VFD_BODY_BEGIN: CountryListForm}
+  Name := 'CountryListForm';
   SetPosition(412, 278, 421, 315);
-  WindowTitle := 'City Listing';
+  WindowTitle := 'Country Listing';
 
   bvlName1 := TfpgBevel.Create(self);
   with bvlName1 do
@@ -116,6 +107,7 @@ begin
     SetPosition(12, 4, 52, 24);
     Text := 'Add';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
   end;
 
@@ -126,6 +118,7 @@ begin
     SetPosition(68, 4, 52, 24);
     Text := 'Edit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 1;
     OnClick := @btnEditClicked;
@@ -138,6 +131,7 @@ begin
     SetPosition(124, 4, 52, 24);
     Text := 'Delete';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 2;
   end;
@@ -159,12 +153,13 @@ begin
     SetPosition(332, 276, 80, 24);
     Text := 'Cancel';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 2;
     ModalResult := mrOK;
   end;
 
-  {@VFD_BODY_END: CityListForm}
+  {@VFD_BODY_END: CountryListForm}
 end;
 
 

@@ -255,9 +255,9 @@ begin
   if Subject.GetFieldBounds(FieldName,Mi,Ma) and (Ma>0) then
     FEditControl.MaxLength := Ma;
   if ObjectUpdateMoment in [ouOnChange,ouCustom] then
-    FeditControl.OnChange := @DoOnChange
+    FEditControl.OnChange := @DoOnChange
   else
-    FeditControl.OnExit := @DoOnChange;
+    FEditControl.OnExit := @DoOnChange;
 end;
 
 procedure TMediatorEditView.SetObjectUpdateMoment(const AValue: TObjectUpdateMoment);
@@ -499,6 +499,14 @@ procedure TMediatorMemoView.SetupGUIandObject;
 begin
   inherited;
   EditControl.Lines.Clear;
+
+  //if UseInternalOnChange then
+    //EditControl.OnChange := @DoOnChange; // default OnChange event handler
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
+
 //  EditControl.ScrollBars := ssVertical;
 //  EditControl.WordWrap   := True;
 end;

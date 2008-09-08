@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, Classes, gfxbase, fpgfx, gfx_widget, gui_form, gui_button,
-  gui_grid, gui_checkbox, gui_panel, gui_listview, Model, tiFormMediator;
+  gui_grid, gui_checkbox, gui_panel, gui_listview, gui_listbox,
+  Model, tiFormMediator, tiMediators;
 
 type
 
@@ -15,11 +16,13 @@ type
     { The object we will be working with. }
     FPersonList: TPersonList;
     FMediator: TFormMediator;
+    medCombo: TMediatorComboBoxView;
 
     procedure btnViaCodeChangeClick(Sender: TObject);
     procedure btnQuitClicked(Sender: TObject);
     procedure btnViaCodeAddClick(Sender: TObject);
     procedure btnShowModelClick(Sender: TObject);
+    procedure btnShowDeletedClick(Sender: TObject);
     procedure SetupMediators;
   public
     {@VFD_HEAD_BEGIN: MainForm}
@@ -32,6 +35,8 @@ type
     btnName4: TfpgButton;
     btnQuit: TfpgButton;
     cbName1: TfpgCheckBox;
+    lstName1: TfpgListBox;
+    cbName2: TfpgComboBox;
     {@VFD_HEAD_END: MainForm}
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -82,6 +87,14 @@ begin
   tiShowString(FPersonList.AsDebugString);
 end;
 
+procedure TMainForm.btnShowDeletedClick(Sender: TObject);
+var
+  med: TMediatorView;
+begin
+  med := FMediator.FindByComponent(grdName1).Mediator;
+  tiShowString(TStringGridMediator(med).SelectedObject.AsDebugString);
+end;
+
 procedure TMainForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
@@ -90,9 +103,12 @@ begin
     FMediator.Name := 'DemoFormMediator';
     FMediator.AddComposite('Name(150,"Name",<);Age(50,"Age",>);GenderGUI(80,"Gender",|)', grdName1);
 //    FMediator.AddComposite('Name(150,"Name",<);Age(75,"Age",>);GenderGUI(50,"Gender",|)', lvName1);
+    FMediator.AddProperty('Name', lstName1);
   end;
   FMediator.Subject := FPersonList;
   FMediator.Active := True;
+
+  medCombo := TMediatorComboBoxView.CreateCustom(cbName1, FPerson);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -127,7 +143,7 @@ begin
   with lvName1 do
   begin
     Name := 'lvName1';
-    SetPosition(8, 52, 292, 220);
+    SetPosition(8, 52, 292, 112);
     ShowHeaders := True;
   end;
 
@@ -139,6 +155,7 @@ begin
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     TabOrder := 1;
+    Tag := 99;
   end;
 
   pnlName1 := TfpgPanel.Create(self);
@@ -162,6 +179,7 @@ begin
     SetPosition(8, 296, 120, 24);
     Text := 'Add via Code';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 3;
     OnClick := @btnViaCodeAddClick;
@@ -174,6 +192,7 @@ begin
     SetPosition(8, 324, 120, 24);
     Text := 'Change via Code';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 4;
     OnClick := @btnViaCodeChangeClick;
@@ -186,6 +205,7 @@ begin
     SetPosition(132, 324, 96, 24);
     Text := 'Show Model';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 5;
     OnClick := @btnShowModelClick;
@@ -198,8 +218,10 @@ begin
     SetPosition(232, 324, 80, 24);
     Text := 'Delete';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 6;
+    OnClick := @btnShowDeletedClick;
   end;
 
   btnQuit := TfpgButton.Create(self);
@@ -209,6 +231,7 @@ begin
     SetPosition(528, 324, 80, 24);
     Text := 'Quit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 7;
     OnClick := @btnQuitClicked;
@@ -222,6 +245,25 @@ begin
     FontDesc := '#Label1';
     TabOrder := 8;
     Text := 'Show Deleted';
+    OnClick := @btnShowDeletedClick;
+  end;
+
+  lstName1 := TfpgListBox.Create(self);
+  with lstName1 do
+  begin
+    Name := 'lstName1';
+    SetPosition(8, 168, 228, 120);
+    FontDesc := '#List';
+    TabOrder := 9;
+  end;
+
+  cbName2 := TfpgComboBox.Create(self);
+  with cbName2 do
+  begin
+    Name := 'cbName2';
+    SetPosition(320, 276, 204, 22);
+    FontDesc := '#List';
+    TabOrder := 10;
   end;
 
   {@VFD_BODY_END: MainForm}
@@ -230,6 +272,7 @@ end;
 
 initialization
   gMediatorManager.RegisterMediator(TStringGridMediator, TtiObjectList);
+//  gMediatorManager.RegisterMediator(TListBoxMediator, TPersonList);
 //  gMediatorManager.RegisterMediator(TListViewMediator, TtiObjectList);
 
 end.

@@ -4,14 +4,11 @@
     <Name Value="tiOPFfpGUI"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="8"/>
       <SearchPaths>
         <OtherUnitFiles Value="gui/"/>
         <UnitOutputDirectory Value="../../lib"/>
       </SearchPaths>
-      <CodeGeneration>
-        <Generate Value="Faster"/>
-      </CodeGeneration>
       <Other>
         <CustomOptions Value="-dLINK_CSVx
 -dLINK_TABx

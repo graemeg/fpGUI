@@ -7,29 +7,32 @@ interface
 uses
   SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
   gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
+  gui_basegrid, gui_grid, gui_dialogs, gui_menu,
   gui_panel, gui_popupcalendar, gui_gauge, tiFormMediator;
 
 type
-
+  { The main application window }
   TMainForm = class(TfpgForm)
   private
-    FMediator: TFormMediator;
-
     {@VFD_HEAD_BEGIN: MainForm}
     grdContacts: TfpgStringGrid;
     btnAdd: TfpgButton;
     btnEdit: TfpgButton;
     btnDelete: TfpgButton;
-    btnCityList: TfpgButton;
-    btnName5: TfpgButton;
+    MainMenu: TfpgMenuBar;
+    miFile: TfpgPopupMenu;
+    miEdit: TfpgPopupMenu;
+    miSystem: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
+    FMediator: TFormMediator;
     procedure FormShow(Sender: TObject);
     procedure SetupMediators;
+    procedure miEditAddClick(Sender: TObject);
     procedure miEditEditClick(Sender: TObject);
-    procedure btnShowCityList(Sender: TObject);
+    procedure miEditDeleteClick(Sender: TObject);
+    procedure miSystemCityList(Sender: TObject);
+    procedure miSystemCountryList(Sender: TObject);
+    procedure miFileExit(Sender: TObject);
   public
     procedure AfterCreate; override;
     procedure AfterConstruction; override;
@@ -42,7 +45,7 @@ implementation
 
 uses
   model, contactmanager, tiListMediators, tiBaseMediator, frmcontactmaint,
-  frmcitylist, tiDialogs;
+  frmcitylist, frmcountrylist;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -56,10 +59,15 @@ begin
   if not Assigned(FMediator) then
   begin
     FMediator := TFormMediator.Create(self);
-    FMediator.AddComposite('FirstName;LastName(130);EMail(180);Mobile(130);Comments', grdContacts);
+    FMediator.AddComposite('FirstName;LastName(130);EMail(180);Mobile(130);Comments(200)', grdContacts);
   end;
   FMediator.Subject := gContactManager.ContactList;
   FMediator.Active := True;
+end;
+
+procedure TMainForm.miEditAddClick(Sender: TObject);
+begin
+  //
 end;
 
 procedure TMainForm.miEditEditClick(Sender: TObject);
@@ -78,23 +86,39 @@ begin
   end;
 end;
 
-procedure TMainForm.btnShowCityList(Sender: TObject);
+procedure TMainForm.miEditDeleteClick(Sender: TObject);
+begin
+  //
+end;
+
+procedure TMainForm.miSystemCityList(Sender: TObject);
 begin
   ShowCities(gContactManager.CityList);
+end;
+
+procedure TMainForm.miSystemCountryList(Sender: TObject);
+begin
+  ShowCountries(gContactManager.CountryList);
+end;
+
+procedure TMainForm.miFileExit(Sender: TObject);
+begin
+  Close;
 end;
 
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(373, 273, 708, 456);
+  SetPosition(373, 273, 540, 404);
   WindowTitle := 'Demo 21: Address Book Demo using MGM';
 
   grdContacts := TfpgStringGrid.Create(self);
   with grdContacts do
   begin
     Name := 'grdContacts';
-    SetPosition(20, 36, 516, 336);
+    SetPosition(12, 56, 516, 336);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
   end;
@@ -103,20 +127,23 @@ begin
   with btnAdd do
   begin
     Name := 'btnAdd';
-    SetPosition(572, 48, 80, 24);
+    SetPosition(12, 28, 52, 24);
     Text := 'Add';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 1;
+    OnClick := @miEditAddClick;
   end;
 
   btnEdit := TfpgButton.Create(self);
   with btnEdit do
   begin
     Name := 'btnEdit';
-    SetPosition(572, 76, 80, 24);
+    SetPosition(68, 28, 52, 24);
     Text := 'Edit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 2;
     OnClick := @miEditEditClick;
@@ -126,37 +153,56 @@ begin
   with btnDelete do
   begin
     Name := 'btnDelete';
-    SetPosition(572, 104, 80, 24);
+    SetPosition(124, 28, 52, 24);
     Text := 'Delete';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 3;
+    OnClick := @miEditDeleteClick;
   end;
 
-  btnCityList := TfpgButton.Create(self);
-  with btnCityList do
+  MainMenu := TfpgMenuBar.Create(self);
+  with MainMenu do
   begin
-    Name := 'btnCityList';
-    SetPosition(576, 164, 80, 24);
-    Text := 'City List';
-    FontDesc := '#Label1';
-    ImageName := '';
-    TabOrder := 4;
-    OnClick := @btnShowCityList;
+    Name := 'MainMenu';
+    SetPosition(0, 0, 540, 24);
+    Anchors := [anLeft,anRight,anTop];
   end;
 
-  btnName5 := TfpgButton.Create(self);
-  with btnName5 do
+  miFile := TfpgPopupMenu.Create(self);
+  with miFile do
   begin
-    Name := 'btnName5';
-    SetPosition(576, 192, 80, 24);
-    Text := 'Button';
-    FontDesc := '#Label1';
-    ImageName := '';
-    TabOrder := 5;
+    Name := 'miFile';
+    SetPosition(344, 136, 120, 20);
+    AddMenuItem('E&xit', 'Alt+F4', @miFileExit);
+  end;
+
+  miEdit := TfpgPopupMenu.Create(self);
+  with miEdit do
+  begin
+    Name := 'miEdit';
+    SetPosition(344, 156, 120, 20);
+    AddMenuItem('Add Contact', '', @miEditAddClick).Enabled := False;
+    AddMenuItem('Edit Contact', '', @miEditEditClick);
+    AddMenuItem('Delete Contact', '', @miEditDeleteClick).Enabled := False;
+  end;
+
+  miSystem := TfpgPopupMenu.Create(self);
+  with miSystem do
+  begin
+    Name := 'miSystem';
+    SetPosition(344, 176, 120, 20);
+    AddMenuItem('City List', '', @miSystemCityList);
+    AddMenuItem('Country List', '', @miSystemCountryList);
   end;
 
   {@VFD_BODY_END: MainForm}
+
+  // setup main menu
+  MainMenu.AddMenuItem('&File', nil).SubMenu := miFile;
+  MainMenu.AddMenuItem('&Edit', nil).SubMenu := miEdit;
+  MainMenu.AddMenuItem('&System', nil).SubMenu := miSystem;
 end;
 
 procedure TMainForm.AfterConstruction;
@@ -177,5 +223,6 @@ initialization
   gMediatorManager.RegisterMediator(TStringGridMediator, TContactList);
   gMediatorManager.RegisterMediator(TListViewMediator, TAddressList);
   gMediatorManager.RegisterMediator(TStringGridMediator, TCityList);
+  gMediatorManager.RegisterMediator(TStringGridMediator, TCountryList);
 
 end.

@@ -6,7 +6,8 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpgfx, frmmain, frmcontactmaint, frmCityList, frmcitymaint;
+  Classes, fpgfx, frmmain, frmcontactmaint, frmCityList, frmcitymaint,
+  frmcountrylist;
 
 
 

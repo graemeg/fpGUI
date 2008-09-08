@@ -80,46 +80,67 @@ var
 begin
   c:= TCity.CreateNew;
   c.Name:= 'Somerset West';
+  c.ZIP := '7130';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['za'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'Cape Town';
+  c.ZIP := '8000';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['za'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'Pretoria';
+  c.ZIP := '0001';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['za'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'Durban';
+  c.ZIP := '2000';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['za'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'London';
+  c.ZIP := 'EC9 5NW';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['gb'], True));
+
   FCityList.Add(c);
   c:= TCity.CreateNew;
   c.Name:= 'Watford';
+  c.ZIP := 'NW9 7BJ';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['gb'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'Frankfurt';
+  c.ZIP := 'FK2000';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['gr'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'New York';
+  c.ZIP := 'NY2008';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['us'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'San Fransisco';
+  c.ZIP := 'SF2500';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['us'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'Paris';
+  c.ZIP := 'PRS007';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['fr'], True));
   FCityList.Add(c);
+
   c:= TCity.CreateNew;
   c.Name:= 'Big City';
+  c.ZIP := 'BC5 7WN';
   c.Country:= TCountry(FCountryList.FindByProps(['ISO'], ['uk'], True));
   FCityList.Add(c);
 end;
@@ -177,6 +198,7 @@ begin
          A.Telephone2:= GenPhone;
       C.AddressList.Add(A);
     end;
+    C.Comments := 'My name is ' + C.FirstName + '.';
     FContactList.Add(C);
   end;
 end;

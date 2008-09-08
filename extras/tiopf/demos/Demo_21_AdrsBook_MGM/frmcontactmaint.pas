@@ -201,6 +201,7 @@ begin
     SetPosition(8, 200, 216, 80);
     FontDesc := '#Edit1';
     TabOrder := 9;
+    Lines.text := 'Hello';
   end;
 
   lblName6 := TfpgLabel.Create(self);
