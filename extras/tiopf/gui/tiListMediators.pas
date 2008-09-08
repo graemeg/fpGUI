@@ -44,7 +44,7 @@ type
     class function ComponentClass: TClass; override;
     Constructor Create; override;
     Destructor Destroy; override;
-    procedure HandleSelectionChanged; {override;}
+    procedure HandleSelectionChanged; override;
   published
     property    View: TfpgListView read FView Write SetView;
   end;
@@ -132,7 +132,7 @@ type
     destructor Destroy; override;
     class function CompositeMediator: Boolean; override;
     class function ComponentClass: TClass; override;
-    procedure HandleSelectionChanged; {override;}
+    procedure HandleSelectionChanged; override;
     property View: TfpgListBox read FView;
   end;
 
