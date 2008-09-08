@@ -403,12 +403,12 @@ var
 begin
   ctime := now;
   i := 0;
-
-  while i <  fpgTimers.Count do
+  while i < fpgTimers.Count do
   begin
     if fpgTimers[i] = nil then
       fpgTimers.Delete(i)
-    else begin
+    else
+    begin
       TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
       Inc(i);
     end;
@@ -673,7 +673,7 @@ begin
     // set the next alarm point
     if interval > 0 then
       while FNextAlarm <= ctime do
-        FNextAlarm := FNextAlarm + interval * ONE_MILISEC;
+        FNextAlarm := FNextAlarm + (interval * ONE_MILISEC);
 
     if Assigned(FOnTimer) then
       FOnTimer(self);
