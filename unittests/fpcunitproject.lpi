@@ -35,7 +35,7 @@
         <PackageName Value="guitestrunner_fpgui"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="2">
       <Unit0>
         <Filename Value="fpcunitproject.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -46,21 +46,13 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="tcTreeview"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="tests/tcmediatorview.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="tcMediatorView"/>
-      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
+    <Version Value="8"/>
     <SearchPaths>
       <OtherUnitFiles Value="tests/"/>
     </SearchPaths>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
     <Other>
       <CustomOptions Value="-FUunits
 "/>
