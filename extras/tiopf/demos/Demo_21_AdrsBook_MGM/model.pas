@@ -14,23 +14,17 @@ uses
   
 type
 
-  { TMarkObject }
-
   TMarkObject = class(TtiObject)
   protected
     procedure Mark;
   end;
   
   
-  { TMarkObjectList }
-
   TMarkObjectList = class(TtiObjectList)
   protected
     procedure Mark;
   end;
 
-
-  { TCountry }
 
   TCountry = class(TMarkObject)
   private
@@ -48,8 +42,6 @@ type
   end;
   
   
-  { TCountryList }
-
   TCountryList = class(TMarkObjectList)
   protected
     function GetItems(i: integer): TCountry; reintroduce;
@@ -60,8 +52,6 @@ type
   end;
 
   
-  { TCity }
-
   TCity = class(TMarkObject)
   private
     FZIP: string;
@@ -71,6 +61,8 @@ type
     procedure SetCountry(const AValue: TCountry);
     procedure SetName(const AValue: string);
     procedure SetZIP(const AValue: string);
+  protected
+    function GetCaption: string; override;
   public
     procedure AssignClassProps(ASource: TtiObject); override;
   published
@@ -81,8 +73,6 @@ type
   end;
   
   
-  { TCityList }
-
   TCityList = class(TMarkObjectList)
   protected
     function GetItems(i: integer): TCity; reintroduce;
@@ -93,14 +83,24 @@ type
   end;
   
   
-  { TAddressType }
-
   TAddressType = class(TMarkObject)
   private
     FName: string;
     procedure SetName(const AValue: string);
+  protected
+    function GetCaption: string; override;
   published
     property Name: string read FName write SetName;
+  end;
+
+
+  TAddressTypeList = class(TMarkObjectList)
+  protected
+    function GetItems(i: integer): TAddressType; reintroduce;
+    procedure SetItems(i: integer; const AValue: TAddressType); reintroduce;
+  public
+    function Add(const AObject: TAddressType): integer; reintroduce;
+    property Items[i: integer]: TAddressType read GetItems write SetItems; default;
   end;
 
 
@@ -137,8 +137,6 @@ type
   end;
   
   
-  { TAddressList }
-
   TAddressList = class(TMarkObjectList)
   protected
     function GetItems(i: integer): TAddress; reintroduce;
@@ -149,8 +147,6 @@ type
   end;
 
   
-  { TContact }
-
   TContact = class(TMarkObject)
   private
     FAddressList: TAddressList;
@@ -177,8 +173,6 @@ type
   end;
   
   
-  { TContactList }
-
   TContactList = class(TMarkObjectList)
   protected
     function GetItems(i: integer): TContact; reintroduce;
@@ -189,18 +183,6 @@ type
   end;
   
   
-  { TContactAddressList }
-
-  TContactAddressList = class(TAddressList)
-  protected
-    function GetOwner: TContact; reintroduce;
-    procedure SetOwner(const AValue: TContact); reintroduce;
-  public
-    property Owner: TContact read GetOwner write SetOwner;
-  end;
-
-
-
 
 implementation
 
@@ -297,6 +279,11 @@ begin
   EndUpdate;
 end;
 
+function TCity.GetCaption: string;
+begin
+  Result := Name;
+end;
+
 procedure TCity.AssignClassProps(ASource: TtiObject);
 begin
   FCountry:= TCity(ASource).Country; // reference only
@@ -313,6 +300,11 @@ begin
   FName:= AValue;
   Mark;
   EndUpdate;
+end;
+
+function TAddressType.GetCaption: string;
+begin
+  Result := Name;
 end;
 
 { TAddress }
@@ -494,6 +486,7 @@ end;
 function TCountryList.Add(const AObject: TCountry): integer;
 begin
   Result:= inherited Add(AObject);
+  NotifyObservers;
 end;
 
 { TCityList }
@@ -511,6 +504,7 @@ end;
 function TCityList.Add(const AObject: TCity): integer;
 begin
   result:= inherited Add(AObject);
+  NotifyObservers;
 end;
 
 { TAddressList }
@@ -528,6 +522,7 @@ end;
 function TAddressList.Add(const AObject: TAddress): integer;
 begin
   result:= inherited Add(AObject);
+  NotifyObservers;
 end;
 
 { TContactList }
@@ -545,20 +540,27 @@ end;
 function TContactList.Add(const AObject: TContact): integer;
 begin
   result:= inherited Add(AObject);
+  NotifyObservers;
 end;
 
-{ TContactAddressList }
 
-function TContactAddressList.GetOwner: TContact;
+{ TAddressTypeList }
+
+function TAddressTypeList.GetItems(i: integer): TAddressType;
 begin
-  result:= TContact(inherited GetOwner);
+  result := TAddressType(inherited GetItems(i));
 end;
 
-procedure TContactAddressList.SetOwner(const AValue: TContact);
+procedure TAddressTypeList.SetItems(i: integer; const AValue: TAddressType);
 begin
-  inherited SetOwner(AValue);
+  inherited SetItems(i, AValue);
 end;
 
+function TAddressTypeList.Add(const AObject: TAddressType): integer;
+begin
+  result := inherited Add(AObject);
+  NotifyObservers;
+end;
 
 end.
 

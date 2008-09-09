@@ -32,7 +32,7 @@
         <PackageName Value="tiOPFfpGUI"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="9">
       <Unit0>
         <Filename Value="demo_adrsbook_mgm.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -73,6 +73,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frmCountryList"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="frmaddressmaint.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frmAddressMaint"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

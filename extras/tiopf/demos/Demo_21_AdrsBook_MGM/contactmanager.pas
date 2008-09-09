@@ -15,6 +15,7 @@ type
 
   TContactManager = class(TMarkObject)
   private
+    FAddressTypeList: TAddressTypeList;
     FCityList: TCityList;
     FContactList: TContactList;
     FCountryList: TCountryList;
@@ -26,6 +27,7 @@ type
     destructor Destroy; override;
     procedure PopulateContacts;
   published
+    property AddressTypeList: TAddressTypeList read FAddressTypeList;
     property CountryList: TCountryList read FCountryList;
     property CityList: TCityList read FCityList;
     property ContactList: TContactList read FContactList;
@@ -166,12 +168,14 @@ end;
 constructor TContactManager.Create;
 begin
   inherited Create;
-  FCountryList:= TCountryList.Create;
-  FCountryList.Owner:= self;
-  FCityList:= TCityList.Create;
-  FCityList.Owner:= self;
-  FContactList:= TContactList.Create;
-  FContactList.Owner:= self;
+  FAddressTypeList := TAddressTypeList.Create;
+  FAddressTypeList.Owner := self;
+  FCountryList := TCountryList.Create;
+  FCountryList.Owner := self;
+  FCityList := TCityList.Create;
+  FCityList.Owner := self;
+  FContactList := TContactList.Create;
+  FContactList.Owner := self;
 end;
 
 destructor TContactManager.Destroy;
@@ -179,6 +183,7 @@ begin
   FContactList.Free;
   FCityList.Free;
   FCountryList.Free;
+  FAddressTypeList.Free;
   inherited Destroy;
 end;
 

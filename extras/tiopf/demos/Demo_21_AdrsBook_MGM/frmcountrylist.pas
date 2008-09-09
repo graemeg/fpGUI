@@ -109,6 +109,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
+    Enabled := False;
   end;
 
   btnEdit := TfpgButton.Create(bvlName1);
@@ -122,6 +123,7 @@ begin
     ImageName := '';
     TabOrder := 1;
     OnClick := @btnEditClicked;
+    Enabled := False;
   end;
 
   btnDelete := TfpgButton.Create(bvlName1);
@@ -134,6 +136,7 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 2;
+    Enabled := False;
   end;
 
   grdName1 := TfpgStringGrid.Create(self);

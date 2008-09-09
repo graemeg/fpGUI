@@ -32,6 +32,7 @@ type
     procedure miEditDeleteClick(Sender: TObject);
     procedure miSystemCityList(Sender: TObject);
     procedure miSystemCountryList(Sender: TObject);
+    procedure miSystemAddressTypeList(Sender: TObject);
     procedure miFileExit(Sender: TObject);
   public
     procedure AfterCreate; override;
@@ -44,8 +45,8 @@ type
 implementation
 
 uses
-  model, contactmanager, tiListMediators, tiBaseMediator, frmcontactmaint,
-  frmcitylist, frmcountrylist;
+  model, contactmanager, tiListMediators, tiBaseMediator, tiMediators,
+  frmcontactmaint, frmcitylist, frmcountrylist;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -66,8 +67,14 @@ begin
 end;
 
 procedure TMainForm.miEditAddClick(Sender: TObject);
+var
+  c: TContact;
 begin
-  //
+  c := TContact.CreateNew;
+  if EditContact(c) then
+    gContactManager.ContactList.Add(c)
+  else
+    c.Free;
 end;
 
 procedure TMainForm.miEditEditClick(Sender: TObject);
@@ -99,6 +106,11 @@ end;
 procedure TMainForm.miSystemCountryList(Sender: TObject);
 begin
   ShowCountries(gContactManager.CountryList);
+end;
+
+procedure TMainForm.miSystemAddressTypeList(Sender: TObject);
+begin
+  // ShowAddressTypeList(gContactManager.AddressTypeList);
 end;
 
 procedure TMainForm.miFileExit(Sender: TObject);
@@ -160,6 +172,7 @@ begin
     ImageName := '';
     TabOrder := 3;
     OnClick := @miEditDeleteClick;
+    Enabled := False;
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
@@ -195,6 +208,7 @@ begin
     SetPosition(344, 176, 120, 20);
     AddMenuItem('City List', '', @miSystemCityList);
     AddMenuItem('Country List', '', @miSystemCountryList);
+    AddMenuItem('Address Type List', '', @miSystemAddressTypeList).Enabled := False;
   end;
 
   {@VFD_BODY_END: MainForm}
@@ -220,9 +234,13 @@ end;
 
 
 initialization
+  RegisterFallBackMediators;
+
   gMediatorManager.RegisterMediator(TStringGridMediator, TContactList);
   gMediatorManager.RegisterMediator(TListViewMediator, TAddressList);
   gMediatorManager.RegisterMediator(TStringGridMediator, TCityList);
   gMediatorManager.RegisterMediator(TStringGridMediator, TCountryList);
+  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TCity, 'Country');
+  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TAddressType, 'AddressType');
 
 end.

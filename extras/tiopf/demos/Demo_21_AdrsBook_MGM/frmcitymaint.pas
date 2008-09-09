@@ -43,7 +43,7 @@ function EditCity(AData: TCity): boolean;
 implementation
 
 uses
-  tiBaseMediator, tiMediators, contactmanager, typinfo, tiDialogs;
+  tiBaseMediator, contactmanager, typinfo, tiDialogs;
 
 
 function EditCity(AData: TCity): boolean;
@@ -72,9 +72,6 @@ procedure TCityEditForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    RegisterFallBackMediators;
-    gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TCity, 'Country');
-
     FMediator := TFormMediator.Create(self);
     FMediator.AddProperty('Name', edName);
     FMediator.AddProperty('ZIP', edZIP);

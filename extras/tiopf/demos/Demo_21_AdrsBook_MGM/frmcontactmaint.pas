@@ -8,14 +8,12 @@ uses
   SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
   gfx_widget, gui_form, gui_label, gui_button,
   gui_listview, gui_memo,
-  model, tiFormMediator,
-  tiMediators;
+  model, tiFormMediator;
 
 type
 
   TContactEditForm = class(TfpgForm)
   private
-    FData: TContact;
     {@VFD_HEAD_BEGIN: ContactEditForm}
     lblName1: TfpgLabel;
     edFName: TfpgEdit;
@@ -36,11 +34,13 @@ type
     btnDelete: TfpgButton;
     btnDebug: TfpgButton;
     {@VFD_HEAD_END: ContactEditForm}
+    FData: TContact;
     FMediator: TFormMediator;
     FAdrsMediator: TFormMediator;
     procedure SetData(const AValue: TContact);
     procedure SetupMediators;
     procedure btnDebugClicked(Sender: TObject);
+    procedure btnEditClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
     property  Data: TContact read FData write SetData;
@@ -54,7 +54,7 @@ function EditContact(AData: TContact): Boolean;
 implementation
 
 uses
-  contactmanager, tiDialogs;
+  contactmanager, tiDialogs, frmAddressMaint, tiListMediators;
 
 
 function EditContact(AData: TContact): Boolean;
@@ -77,7 +77,6 @@ procedure TContactEditForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    RegisterFallBackMediators;
     FMediator := TFormMediator.Create(self);
     FMediator.AddProperty('FirstName', edFName);
     FMediator.AddProperty('LastName', edLName);
@@ -100,6 +99,22 @@ end;
 procedure TContactEditForm.btnDebugClicked(Sender: TObject);
 begin
   tiShowString(FData.AsDebugString);
+end;
+
+procedure TContactEditForm.btnEditClicked(Sender: TObject);
+var
+  obj: TAddress;
+begin
+  obj := TAddress(TListViewMediator(FAdrsMediator.FindByComponent(lvAddresses).Mediator).SelectedObject);
+//  tiShowString(obj.AsDebugString);
+
+  if not Assigned(obj) then
+    Exit; //==>
+
+  if EditAddress(obj) then
+  begin
+    // do nothing
+  end;
 end;
 
 procedure TContactEditForm.SetData(const AValue: TContact);
@@ -271,6 +286,7 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 14;
+    Enabled := False;
   end;
 
   btnEdit := TfpgButton.Create(self);
@@ -283,6 +299,7 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 15;
+    OnClick := @btnEditClicked;
   end;
 
   btnDelete := TfpgButton.Create(self);
@@ -295,6 +312,7 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 16;
+    Enabled := False;
   end;
 
   btnDebug := TfpgButton.Create(self);
