@@ -710,7 +710,7 @@ var
 
 begin
   hasChanged := False;
-  FHintTimer.Enabled := False;
+  fpgApplication.HideHint;
 
 
   Consumed := True;
@@ -844,7 +844,7 @@ end;
 
 procedure TfpgBaseEdit.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
-  FHintTimer.Enabled := False;
+  fpgApplication.HideHint;
   inherited HandleLMouseDown(x, y, shiftstate);
 
   FCursorPx := x;
@@ -968,7 +968,6 @@ end;
 
 destructor TfpgBaseEdit.Destroy;
 begin
-  FHintTimer.Free;
   if Assigned(FDefaultPopupMenu) then
     FDefaultPopupMenu.Free;
   FFont.Free;

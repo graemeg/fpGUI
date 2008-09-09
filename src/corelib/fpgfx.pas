@@ -110,6 +110,7 @@ type
 
   // forward declaration
   TfpgCanvas = class;
+  TfpgTimer = class;
 
 
   TfpgWindow = class(TfpgWindowImpl)
@@ -203,10 +204,15 @@ type
     FOnException: TExceptionEvent;
     FStopOnException: Boolean;
     FHintWindow: TfpgWindow;
+    FHintTimer: TfpgTimer;
+    FHintWidget: TfpgWindow;
+    FHintPos: TPoint;
     procedure   SetHintPause(const AValue: Integer);
     procedure   SetupLocalizationStrings;
     procedure   InternalMsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
+    procedure   InternalMsgHintTimer(var msg: TfpgMessageRec); message FPGM_HINTTIMER;
     procedure   CreateHintWindow;
+    procedure   HintTimerFired(Sender: TObject);
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -361,6 +367,7 @@ uses
   gfx_translations,
   gfx_constants,
   gfx_UTF8utils,
+  gfx_widget,
   gui_dialogs,
   gui_hint;
 
@@ -789,10 +796,11 @@ begin
   FScreenHeight   := -1;
   FMessageHookList := TFPList.Create;
   FStopOnException := False;
-  FHintWindow     := nil;
+  FHintWindow     := nil;   // popup window with Hint text
   FHintPause      := 1500;  // 1.5 seconds
+  FHintWidget     := nil;   // widget the mouse is over and whos hint text we need.
   FShowHint       := True;
-  
+
   try
     inherited Create(AParams);
 
@@ -999,6 +1007,28 @@ begin
   end;
 end;
 
+procedure TfpgApplication.InternalMsgHintTimer(var msg: TfpgMessageRec);
+begin
+//  writeln('InternalMsgHintTimer msg');
+  if (msg.Params.user.Param1 < 2) then
+  begin
+    { MouseEnter occured }
+    FHintTimer.Enabled := Boolean(msg.Params.user.Param1);
+    FHintWidget := TfpgWindow(msg.Sender);
+  end
+  else
+  begin
+    { Handle mouse move information }
+    FHintPos.X := msg.Params.user.Param2;
+    FHintPos.Y := msg.Params.user.Param3;
+    FHintWidget := TfpgWindow(msg.Sender);
+    if FHintTimer.Enabled then
+      FHintTimer.Reset    // keep reseting to prevent hint from showing
+    else
+      HideHint;
+  end;
+end;
+
 procedure TfpgApplication.CreateHintWindow;
 begin
   if not Assigned(FHintWindow) then
@@ -1006,6 +1036,16 @@ begin
     FHintWindow := HintWindowClass.Create(nil);
     TfpgHintWindow(FHintWindow).Visible := False;
   end;
+end;
+
+procedure TfpgApplication.HintTimerFired(Sender: TObject);
+var
+  w: TfpgWidget;
+begin
+//  writeln('HintTimerFired...');
+  w := TfpgWidget(FHintWidget);
+  ActivateHint(w.WindowToScreen(w, FHintPos), w.Hint);
+  FHintTimer.Enabled := False;
 end;
 
 procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
@@ -1034,6 +1074,9 @@ begin
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
   SetupLocalizationStrings;
   CreateHintWindow;
+
+  FHintTimer := TfpgTimer.Create(HintPause);
+  FHintTimer.OnTimer := @HintTimerFired;
 end;
 
 procedure TfpgApplication.Flush;
@@ -1109,6 +1152,7 @@ begin
   {$IFDEF DEBUG}
   writeln('HideHint');
   {$ENDIF}
+  FHintTimer.Enabled := False;
   if Assigned(FHintWindow) and TfpgHintWindow(FHintWindow).Visible then
     TfpgHintWindow(FHintWindow).Hide;
 end;

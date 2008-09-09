@@ -77,6 +77,7 @@ const
   FPGM_RESIZE      = 15;
   FPGM_MOVE        = 16;
   FPGM_POPUPCLOSE  = 17;
+  FPGM_HINTTIMER   = 18;
   FPGM_KILLME      = High(Integer);
 
   // The special keys, based on the well-known keyboard scan codes
