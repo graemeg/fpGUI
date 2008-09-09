@@ -47,11 +47,11 @@ begin
   //for I := 0 to 1999999 do begin
     Item := FListView.ItemAdd;
     Item.Caption := FEdit.Text + IntToStr(FListView.Items.Count);
-    Item.SubItems.Add('0');
-    Item.SubItems.Add('1');
-    Item.SubItems.Add('2');
-    Item.SubItems.Add('3');
-    Item.SubItems.Add('4');
+    Item.SubItems.Add('c0');
+    Item.SubItems.Add('c1');
+    Item.SubItems.Add('c2');
+    Item.SubItems.Add('c3');
+    Item.SubItems.Add('c4');
   //end;
   FListView.EndUpdate;
   FTmpListView.EndUpdate;

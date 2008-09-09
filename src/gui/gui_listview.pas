@@ -1330,7 +1330,7 @@ begin
   FirstIndex := (FVScrollBar.Position) div ItemHeight;
   LastIndex := (FVScrollBar.Position+GetItemAreaHeight) div ItemHeight;
 
-  if LastIndex > Fitems.Count-1 then
+  if LastIndex > FItems.Count-1 then
     LastIndex := FItems.Count-1;
     
   cBottom := 2 + ((LastIndex+1 - FirstIndex) * ItemHeight);
@@ -1340,7 +1340,6 @@ begin
     
   oClipRect := Canvas.GetClipRect;
 
-  
   for I := FirstIndex to LastIndex do
   begin
     ItemState := [];
@@ -1392,7 +1391,7 @@ begin
     begin
       if lisSelected in ItemState then
         Canvas.TextColor := clSelectionText;
-      for J := 0 to FColumns.Count -1 do
+      for J := 0 to FColumns.Count-1 do
       begin
         if FColumns.Column[J].Visible then
         begin
@@ -1407,7 +1406,7 @@ begin
             ColumnIndex := J;
           if ColumnIndex = 0 then
             TheText := Item.Caption
-          else if Item.SubItems.Count > ColumnIndex then
+          else if Item.SubItems.Count >= ColumnIndex then
             TheText := Item.SubItems.Strings[ColumnIndex-1]
           else
             TheText := '';
