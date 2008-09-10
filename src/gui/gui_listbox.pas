@@ -131,7 +131,9 @@ type
     property    FontDesc;
     property    HotTrack;
     property    Items;
+    property    ParentShowHint;
     property    PopupFrame;
+    property    ShowHint;
     property    TabOrder;
     property    TextColor;
   end;

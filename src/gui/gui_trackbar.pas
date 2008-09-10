@@ -117,6 +117,8 @@ type
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
+    property    ParentShowHint;
+    property    ShowHint;
     property    ShowPosition: boolean read FShowPosition write SetShowPosition default False;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    TabOrder;

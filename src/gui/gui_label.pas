@@ -75,6 +75,7 @@ type
     property    Hint;
     property    Layout;
     property    LineSpace;
+    property    ParentShowHint;
     property    ShowHint;
     property    Text;
     property    TextColor;

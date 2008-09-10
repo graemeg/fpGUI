@@ -140,6 +140,8 @@ type
     property    FontDesc;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
+    property    ParentShowHint;
+    property    ShowHint;
     { Clicking on calendar Today button will close the popup calendar by default }
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
     property    TabOrder;

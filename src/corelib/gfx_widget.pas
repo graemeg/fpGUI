@@ -35,6 +35,7 @@ type
     FOnResize: TNotifyEvent;
     FOnScreen: boolean;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
+    function    IsShowHintStored: boolean;
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -135,7 +136,7 @@ type
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
     property    Hint: string read FHint write FHint;
-    property    ShowHint: boolean read FShowHint write SetShowHint default False;
+    property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
@@ -197,6 +198,11 @@ begin
     FActiveWidget.HandleSetFocus;
 end;
 
+function TfpgWidget.IsShowHintStored: boolean;
+begin
+  Result := not ParentShowHint;
+end;
+
 procedure TfpgWidget.SetVisible(const AValue: boolean);
 begin
   if FVisible = AValue then
@@ -224,6 +230,8 @@ procedure TfpgWidget.SetParentShowHint(const AValue: boolean);
 begin
   if FParentShowHint <> AValue then
     FParentShowHint := AValue;
+  if FParentShowHint then
+    FShowHint := False;
 end;
 
 procedure TfpgWidget.DoUpdateWindowPosition;

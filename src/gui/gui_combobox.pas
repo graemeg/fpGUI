@@ -138,6 +138,8 @@ type
     property    Height;
     property    Items;
     property    Options;
+    property    ParentShowHint;
+    property    ShowHint;
     property    TabOrder;
     property    Text;
     property    TextColor;

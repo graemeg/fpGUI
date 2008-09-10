@@ -488,16 +488,19 @@ var
 begin
   PropInfo := GetPropInfo(wg.ClassType, Name);
   i := GetOrdProp(wg, Name);
-  if PropInfo^.Default <> i then
+  if IsStoredProp(wg, PropInfo) then
   begin
-    if i = 1 then
-      s := 'True'
+    if PropInfo^.Default <> i then
+    begin
+      if i = 1 then
+        s := 'True'
+      else
+        s := 'False';
+      Result := ident + Name + ' := ' + s + ';' + LineEnding;
+    end
     else
-      s := 'False';
-    Result := ident + Name + ' := ' + s + ';' + LineEnding;
-  end
-  else
-    Result := '';
+      Result := '';
+  end;
 end;
 
 function TPropertyBoolean.GetValueText(wg: TfpgWidget): string;

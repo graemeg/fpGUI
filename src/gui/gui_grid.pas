@@ -133,11 +133,13 @@ type
     property    HeaderFontDesc;
     property    HeaderHeight;
     property    Options;
+    property    ParentShowHint;
     property    RowCount;
     property    RowSelect;
     property    ScrollBarStyle;
     property    ShowGrid;
     property    ShowHeader;
+    property    ShowHint;
     property    TabOrder;
     property    TopRow;
     property    VisibleRows;

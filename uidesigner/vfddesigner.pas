@@ -892,68 +892,6 @@ begin
     btnAnRight.Down  := anRight in wg.Anchors;
     btnAnBottom.Down := anBottom in wg.Anchors;
   end;
-
-  Exit;
-  {
-  with PropertyForm do
-  begin
-    if wg is TOtherWidget then lbClass.Text8 := TOtherWidget(wg).wgClassName
-                          else lbClass.Text8 := wg.ClassName;
-
-    edName.Text8 := wg.Name;
-
-    lbLeft.Text8 := IntToStr(wg.Left);
-    lbTop.Text8 := IntToStr(wg.Top);
-    lbWidth.Text8 := IntToStr(wg.Width);
-    lbHeight.Text8 := IntToStr(wg.Height);
-
-    cbAL.Checked := anLeft in wg.Anchors;
-    cbAT.Checked := anTop in wg.Anchors;
-    cbAR.Checked := anRight in wg.Anchors;
-    cbAB.Checked := anBottom in wg.Anchors;
-
-    btxt  := true;
-    bedit := false;
-    lbText.Text := u8('Text:');
-
-    if wg is TGfxForm then edText.Text := TGfxForm(wg).WindowTitle
-    else if wg is TwgLabel then edText.Text := TwgLabel(wg).Text
-    else if wg is TwgEdit  then edText.Text := TwgEdit(wg).Text
-    else if wg is TwgButton then edText.Text := TwgButton(wg).Text
-    else if wg is TwgCheckBox then edText.Text := TwgCheckBox(wg).Text
-    else btxt := false;
-
-    if not btxt and ((wg is TwgMemo) or (wg is TwgChoiceList) or (wg is TwgTextListBox))
-    then
-    begin
-      bedit := true;
-      lbText.Text := u8('Items:');
-      btnEdit.Text := u8('Edit items...');
-    end
-    else if (wg is TwgDBGrid) then
-    begin
-      bedit := true;
-      //lbText.Text := u8('Items:');
-      btnEdit.Text := u8('Edit columns...');
-    end;
-
-    if scd <> nil then
-    begin
-      edOther.Text := str8to16(scd.other.Text);
-    end
-    else
-    begin
-      edOther.Text := str8to16(FFormOther);
-    end;
-
-    edText.Visible := btxt;
-    lbText.Visible := btxt;
-    btnEdit.Visible := bedit;
-    edName.Visible := (wgcnt < 2);
-    edOther.Visible := (wgcnt < 2);
-
-  end; // with PropertyForm
-}
 end;
 
 procedure TFormDesigner.OnPropTextChange(Sender: TObject);
@@ -1228,12 +1166,16 @@ end;
 
 function TFormDesigner.GetFormSourceImpl: string;
 var
-  s: string;
+  s: TfpgString;
   sl: TStringList;
   n: integer;
   wd: TWidgetDesigner;
   wg: TfpgWidget;
   wgclass, pwgname: string;
+
+  t: TfpgString;
+  i: integer;
+  PropInfo: PPropInfo;
 begin
   s := '';
 
@@ -1266,6 +1208,21 @@ begin
   end;
 }
   s := s + '  WindowTitle := ' + QuotedStr(FForm.WindowTitle) + ';' + LineEnding;
+
+  // ShowHint property - This is ugly, Form's properties or not handled well!!
+  PropInfo := GetPropInfo(FForm.ClassType, 'ShowHint');
+  i := GetOrdProp(FForm, 'ShowHint');
+  if IsStoredProp(FForm, PropInfo) then
+  begin
+    if PropInfo^.Default <> i then
+    begin
+      if i = 1 then
+        t := 'True'
+      else
+        t := 'False';
+      s := s + '  ShowHint := ' + t + ';' + LineEnding;
+    end;
+  end;
 
   //adding other form properties, idented
   sl      := TStringList.Create;

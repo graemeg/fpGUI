@@ -227,6 +227,7 @@ begin
   wc.NameBase := 'frm';
   wc.AddProperty('WindowTitle', TPropertyString, '');
 //  wc.AddProperty('WindowPosition', TPropertyEnum, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   FVFDFormWidget := wc;
 
   // Label
@@ -236,6 +237,8 @@ begin
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the label text');
   wc.AddProperty('Hint', TPropertyString, '');
   wc.AddProperty('Layout', TPropertyEnum, 'Vertical text layout');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Text', TPropertyString, 'Label text');
   wc.AddProperty('WrapText', TPropertyBoolean, 'If True text will wrap when it doesn''t fit the width');
   wc.WidgetIconName := 'vfd.label';
@@ -248,6 +251,8 @@ begin
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.edit';
   RegisterVFDWidget(wc);
 
@@ -256,6 +261,8 @@ begin
   wc.NameBase := 'memName';
   wc.AddProperty('Lines', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.memo';
   RegisterVFDWidget(wc);
@@ -275,6 +282,8 @@ begin
   wc.AddProperty('ImageName', TPropertyString, '');
   wc.AddProperty('ImageSpacing', TPropertyInteger, 'Space between image and text, -1 centers text');
   wc.AddProperty('ModalResult', TPropertyInteger, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.button';
@@ -285,6 +294,8 @@ begin
   wc.NameBase := 'cbName';
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.WidgetIconName := 'vfd.checkbox';
@@ -296,6 +307,8 @@ begin
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.WidgetIconName := 'vfd.radiobutton';
@@ -306,6 +319,8 @@ begin
   wc.NameBase := 'cbName';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Items', TPropertyStringList, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.combobox';
   RegisterVFDWidget(wc);
@@ -314,6 +329,8 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgCalendarCombo);
   wc.NameBase := 'calName';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.combodateedit';
   RegisterVFDWidget(wc);
@@ -324,7 +341,9 @@ begin
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('HotTrack', TPropertyBoolean, '');
   wc.AddProperty('Items', TPropertyStringList, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('PopupFrame', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.listbox';
   RegisterVFDWidget(wc);
@@ -335,9 +354,11 @@ begin
   wc.AddProperty('Columns', TPropertyDBColumns, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, '');
   wc.AddProperty('HeaderFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('RowCount', TPropertyInteger, '');
   wc.AddProperty('RowSelect', TPropertyBoolean, '');
   wc.AddProperty('ShowHeader', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowGrid', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.stringgrid';
@@ -347,8 +368,10 @@ begin
   wc           := TVFDWidgetClass.Create(TfpgBevel);
   wc.NameBase  := 'bvlName';
   wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
   wc.AddProperty('Shape', TPropertyEnum, 'Box, Frame, TopLine, Spacer etc..');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.bevel';
   wc.Container := True;
   RegisterVFDWidget(wc);
@@ -360,6 +383,8 @@ begin
   wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
   wc.AddProperty('LineSpace', TPropertyInteger, 'Line spacing between wrapped caption');
   wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, '');
   wc.AddProperty('Text', TPropertyString, 'The panel caption');
   wc.AddProperty('WrapText', TPropertyBoolean, 'Should the panel text be wrapped');
@@ -372,8 +397,10 @@ begin
   wc.NameBase := 'pbName';
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Max', TPropertyInteger, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('Position', TPropertyInteger, '');
   wc.AddProperty('ShowCaption', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.progressbar';
   RegisterVFDWidget(wc);
 
@@ -383,6 +410,8 @@ begin
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Orientation', TPropertyEnum, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Position', TPropertyInteger, '');
   wc.AddProperty('ShowPosition', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
@@ -393,7 +422,9 @@ begin
   wc := TVFDWidgetClass.Create(TfpgListView);
   wc.NameBase := 'lvName';
   wc.AddProperty('MultiSelect', TPropertyBoolean, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.listview';
   RegisterVFDWidget(wc);
@@ -403,8 +434,10 @@ begin
   wc.NameBase := 'tvName';
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('FontDesc',TPropertyFontDesc, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ScrollWheelDelta', TPropertyInteger, 'Scroll amount with mouse wheel');
   wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowImages',TPropertyBoolean, 'Boolean value');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('TreeLineStyle', TPropertyEnum, '');
@@ -415,6 +448,8 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgPageControl);
   wc.NameBase := 'pcName';
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('SortPages', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('Style', TPropertyEnum, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
@@ -428,7 +463,9 @@ begin
   wc.AddProperty('Kind', TPropertyEnum, '');
   wc.AddProperty('MinValue', TPropertyInteger, '');
   wc.AddProperty('MaxValue', TPropertyInteger, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('Progress', TPropertyInteger, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowText', TPropertyBoolean, 'Boolean value');
   wc.WidgetIconName := 'vfd.gauge';
   RegisterVFDWidget(wc);

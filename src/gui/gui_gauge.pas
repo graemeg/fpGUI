@@ -83,15 +83,17 @@ type
   published
     property    Align;
     property    Anchors;
-    property    SecondColor: TfpgColor read FSecondColor write SetSecondColor default clWhite;
     property    BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
     property    Color: TfpgColor read FColor write FColor default clButtonFace;
     property    Enabled;
     property    FirstColor: TfpgColor read FFirstColor write SetFirstColor default clBlack;
     property    Kind: TGaugeKind read FKind write SetGaugeKind default gkHorizontalBar;
-    property    MinValue: Longint read FMin write SetMin default 0;
     property    MaxValue: Longint read FMax write SetMax default 100;
+    property    MinValue: Longint read FMin write SetMin default 0;
+    property    ParentShowHint;
     property    Progress: Longint read FPosition write SetProgress;
+    property    SecondColor: TfpgColor read FSecondColor write SetSecondColor default clWhite;
+    property    ShowHint;
     property    ShowText: Boolean read FShowText write SetShowText default True;
     property    Visible;
   end;

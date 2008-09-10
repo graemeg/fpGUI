@@ -65,6 +65,8 @@ type
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
+    property    ParentShowHint;
+    property    ShowHint;
     property    TabOrder;
     property    Text: string read FText write SetText;
     property    TextColor;

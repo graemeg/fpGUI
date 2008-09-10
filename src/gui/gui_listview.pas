@@ -247,15 +247,17 @@ type
     function    ItemAdd: TfpgLVItem;
   published
     property    Columns: TfpgLVColumns read FColumns;
-    property    Items: TfpgLVItems read FItems write SetItems;
-    property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
-    property    ShowHeaders: Boolean read FShowHeaders write SetShowHeaders;
-    property    MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
-    property    VScrollBar: TfpgScrollBar read FVScrollBar;
     property    HScrollBar: TfpgScrollBar read FHScrollBar;
     property    ItemHeight: Integer read GetItemHeight;
     property    ItemIndex: Integer read FItemIndex write SetItemIndex;
+    property    Items: TfpgLVItems read FItems write SetItems;
+    property    MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
+    property    ParentShowHint;
+    property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
+    property    ShowHeaders: Boolean read FShowHeaders write SetShowHeaders;
+    property    ShowHint;
     property    TabOrder;
+    property    VScrollBar: TfpgScrollBar read FVScrollBar;
     property    OnColumnClick: TfpgLVColumnClickEvent read FOnColumnClick write SetOnColumnClick;
     property    OnPaintColumn: TfpgLVPaintColumnEvent read FOnPaintColumn write FOnPaintColumn;
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;

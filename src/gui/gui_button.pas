@@ -130,6 +130,7 @@ type
     property    ImageName;
     property    ImageSpacing;
     property    ModalResult;
+    property    ParentShowHint;
     property    ShowHint;
     property    ShowImage;
     property    Text;

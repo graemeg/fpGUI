@@ -64,7 +64,9 @@ type
     property    ShowCaption;
     property    Max;
     property    Min;
+    property    ParentShowHint;
     property    Position;
+    property    ShowHint;
     property    Step;
     property    TextColor;
   end;

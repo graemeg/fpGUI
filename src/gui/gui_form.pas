@@ -100,6 +100,7 @@ type
     property    FullScreen;
     property    ModalResult;
     property    Sizeable;
+    property    ShowHint;
     property    TextColor;
     property    WindowPosition;
     property    WindowTitle;

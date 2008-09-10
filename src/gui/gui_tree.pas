@@ -222,8 +222,10 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    IndentNodeWithNoImage: boolean read FIndentNodeWithNoImage write SetIndentNodeWithNoImage default True;
     property    NoImageIndent: integer read FNoImageIndent write FNoImageIndent default 16;
+    property    ParentShowHint;
     property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta default 15;
     property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
+    property    ShowHint;
     property    ShowImages: boolean read FShowImages write SetShowImages default False;
     property    TabOrder;
     property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor default clShadow1;
