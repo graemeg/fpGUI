@@ -849,6 +849,7 @@ begin
   msgp.user.Param2 := x+10;
   msgp.user.Param3 := y+2;
 
+  { Only send message if really needed. }
   if Assigned(Parent) then
   begin
     if fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.ShowHint)) and (FHint <> '') then
