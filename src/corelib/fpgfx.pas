@@ -780,7 +780,7 @@ end;
 
 procedure fpgWaitWindowMessage;
 begin
-  fpgApplication.WaitWindowMessage(0);
+  fpgApplication.WaitWindowMessage(500);
 end;
 
 function fpgGetFont(const afontdesc: string): TfpgFont;
