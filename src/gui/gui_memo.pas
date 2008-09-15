@@ -29,7 +29,8 @@ uses
   gfxbase,
   fpgfx,
   gfx_widget,
-  gui_scrollbar;
+  gui_scrollbar,
+  gui_menu;
 
 type
 
@@ -58,6 +59,7 @@ type
     FHScrollBar: TfpgScrollBar;
     FWrapping: boolean;
     FLongestLineWidth: TfpgCoord;
+    FPopupMenu: TfpgPopupMenu;
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
     procedure   RecalcLongestLine;
@@ -83,6 +85,7 @@ type
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleResize(dwidth, dheight: integer); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
@@ -102,6 +105,7 @@ type
     property    TabWidth: integer read FTabWidth write FTabWidth;
     property    Text: TfpgString read GetText write SetText;
     property    UseTabs: boolean read FUseTabs write FUseTabs default False;
+    property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
     property    BackgroundColor default clBoxColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -276,7 +280,7 @@ end;
 
 constructor TfpgMemo.Create(AOwner: TComponent);
 begin
-  inherited;
+  inherited Create(AOwner);
   Focusable   := True;
   FFont       := fpgGetFont('#Edit1');
   FHeight     := FFont.Height * 3 + 4;
@@ -1210,6 +1214,13 @@ begin
     FSelEndLine   := -1;
   end;
   Repaint;
+end;
+
+procedure TfpgMemo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleRMouseUp(x, y, shiftstate);
+  if Assigned(PopupMenu) then
+    PopupMenu.ShowAt(self, x, y);
 end;
 
 procedure TfpgMemo.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
