@@ -79,7 +79,8 @@ begin
 
   if lDir = '' then
     lDir := GetAppConfigDir(False);
-  lDir := lDir + PathDelim;
+  if not (lDir[Length(lDir)] = PathDelim) then
+    lDir := lDir + PathDelim;
 
   { We used a non-Global config dir, so should be able to create the dir }
   if not ForceDirectories(lDir) then
