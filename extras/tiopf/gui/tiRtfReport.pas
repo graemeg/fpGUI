@@ -1,18 +1,17 @@
 {
 
 Revision history:
-
-  05-07-2005: First release by Marius Ellen (mariusellen@home.nl)
+  2005-07-05: First release by Marius Ellen (mariusellen@home.nl)
   2007-04-18: Ported to Free Pascal and fpGUI by Graeme Geldenhuys (graemeg@gmail.com)
 
 Purpose:
-  Create reports with Rtf documents with access to dataset and framework objects. 
+  Create reports with RTF documents with access to dataset and framework objects.
 
 ToDo:
   Better exception handling. (saw some unexpected errors while parsing)
     corrupting the resulting rtf.
-  Show errors when trying to past eof in a tiPerObjList (its now ignored)
-  Suppress null dates (0 date are displayed as xx-xx-1899)
+  Show errors when trying to past eof in a TtiObjectList (its now ignored)
+  Suppress null dates (0 date are displayed as 1899-xx-xx)
 
   And if anybody got ideas for this section, please email them!
 }
