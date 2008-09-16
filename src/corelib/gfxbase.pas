@@ -512,10 +512,6 @@ type
     FOwner: TfpgString;
     FGroup: TfpgString;
     FAttrString: TFileModeString;
-    {FMode: longword; // unix
-    FOwnerID: integer; // unix
-    FGroupID: integer; // unix
-    FAttributes: longword; // windows}
   public
     constructor Create;
     property    Name: string read FName write FName;
@@ -530,10 +526,6 @@ type
     property    Owner: TfpgString read FOwner write FOwner;
     property    Group: TfpgString read FGroup write FGroup;
     property    Attributes: TFileModeString read FAttrString write FAttrString;
-    {property    Attributes: longword read FAttributes write FAttributes;
-    property    Mode: longword read FMode write FMode;  // only used by unix OS's
-    property    OwnerID: integer read FOwnerID write FOwnerID;
-    property    GroupID: integer read FGroupID write FGroupID;}
   end;
 
 

@@ -113,6 +113,19 @@ type
   end;
   
   
+  { A standard push button component.
+
+    If you want toolbar style buttons you need to set the following properties:
+    AllowAllUp = True; AllowDown = True;
+    and each button's GroupIndex must be greater than 0, but not the same as any
+    other button.
+
+    If you want toggle buttons - only one button my be down at a time:
+    Set AllowAllUp = False and AllowDown = True
+    AllowDown = True will automatically set the GroupIndex = 1. If you want more
+    than one set of toggle buttons in a Parent, you need to manually set the
+    GroupIndex property instead. All buttons with the same GroupIndex work
+    together. }
   TfpgButton = class(TfpgBaseButton)
   published
     property    AllowAllUp;

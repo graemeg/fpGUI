@@ -2,9 +2,10 @@
 <CONFIG>
   <Package Version="3">
     <Name Value="fpgui_toolkit"/>
+    <AddToProjectUsesSection Value="False"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="8"/>
       <SearchPaths>
         <OtherUnitFiles Value="../;../../gui/;../../gui/db/"/>
         <UnitOutputDirectory Value="../../../lib"/>
@@ -18,7 +19,6 @@
       </Parsing>
       <CodeGeneration>
         <SmartLinkUnit Value="True"/>
-        <Generate Value="Faster"/>
       </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
