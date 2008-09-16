@@ -19,20 +19,15 @@ type
   private
     FForm: TfpgForm;
     FMemoLog: TfpgMemo;
-    FToolBar: TfpgPanel;
+    FToolBar: TfpgBevel;
     FPopupMenu: TfpgPopupMenu;
-    FSeveritySubMenu: TfpgPopupMenu;
-    FLogMenuItem: TfpgMenuItem;
     FViewLogMenuItem: TfpgMenuItem;
-    FWordWrapMenuItem: TfpgMenuItem;
     function    GetFormParent: TfpgWidget;
     procedure   SetFormParent(const AValue: TfpgWidget);
     function    CreateForm: TfpgForm;
     procedure   FormClearMenuItemClick(Sender: TObject);
     procedure   FormWordWrapMenuItemClick(Sender: TObject);
-    procedure   FormLogMenuItemClick(Sender: TObject);
     procedure   FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure   FormLogLevelMenuItemClick(Sender: TObject);
     procedure   FormLogLevelButtonClick(Sender: TObject);
     procedure   DoViewLogFile(Sender: TObject);
     procedure   DoOnPopup(Sender: TObject);
@@ -71,6 +66,8 @@ end;
 destructor TtiLogToGUI.Destroy;
 begin
 //  writeln('>> TtiLogToGUI.Destroy');
+  if Assigned(FForm) then
+    FForm.Free;
   FForm := nil;
   inherited Destroy;
 //  writeln('<< TtiLogToGUI.Destroy');
@@ -96,10 +93,10 @@ begin
   FPopupMenu.Name           := 'PopupMenu';
   FPopupMenu.BeforeShow     := @DoOnPopup;
 
-  FToolBar                  := TfpgPanel.Create(FForm);
+  FToolBar                  := TfpgBevel.Create(FForm);
   FToolBar.Name             := 'ToolBar';
-  FToolBar.SetPosition(0, 0, FForm.Width, 29);
-  FToolBar.Text             := '';
+  FToolBar.SetPosition(0, 0, FForm.Width, 30);
+  FToolbar.Shape            := bsSpacer;
   FToolBar.Align            := alTop;
   FToolBar.TabOrder         := 1;
 
@@ -115,44 +112,31 @@ begin
 //  FMemoLog.WordWrap         := False;
   FMemoLog.Lines.Clear;
 
+  { Setup popup menu items}
   FViewLogMenuItem          := FPopupMenu.AddMenuItem('View log file', '', @DoViewLogFile);
   FViewLogMenuItem.Name     := 'Viewlogfile1';
-
   lMenuItem                 := FPopupMenu.AddMenuItem('-', '', nil);
   lMenuItem.Name            := 'N1';
-
   lMenuItem                 := FPopupMenu.AddMenuItem('Clear', '', @FormClearMenuItemClick);
   lMenuItem.Name            := 'ClearMenuItem';
+  lMenuItem                 := FPopupMenu.AddMenuItem('Word wrap', '', @FormWordWrapMenuItemClick);
+  lMenuItem.Name            := 'WordWrapMenuItem';
+  lMenuItem.Enabled         := False;
 
-  FWordWrapMenuItem         := FPopupMenu.AddMenuItem('Word wrap', '', @FormWordWrapMenuItemClick);
-  FWordWrapMenuItem.Name    := 'WordWrapMenuItem';
-  FWordWrapMenuItem.Enabled := False;
-
-  FLogMenuItem              := FPopupMenu.AddMenuItem('Log', '', @FormLogMenuItemClick);
-  FLogMenuItem.Name         := 'LogMenuItem';
-
-  FSeveritySubMenu          := TfpgPopupMenu.Create(FForm);
-  FSeveritySubMenu.Name    := 'SeveritySubMenu';
-  for lLogSev := Low(TtiLogSeverity) to High(TtiLogSeverity) do
-  begin
-    lMenuItem              := FSeveritySubMenu.AddMenuItem(cTILogSeverityStrings[lLogSev], '', @FormLogLevelMenuItemClick);
-    lMenuItem.Tag          := Ord(lLogSev);
-  end;
-  FLogMenuItem.SubMenu := FSeveritySubMenu;
-
-  x := 0;
+  { Setup severity toolbar buttons }
+  x := 1;
   for lLogSev := Low(TtiLogSeverity) to High(TtiLogSeverity) do
   begin
     lToolButton           := TfpgButton.Create(FToolBar);
-    lToolButton.SetPosition(x, 0, 50, 30);
+    lToolButton.SetPosition(x, 1, 50, 28);
     lToolButton.Text      := cTILogSeverityStrings[lLogSev];
     lToolButton.Tag       := Ord(lLogSev);
-    lToolButton.AllowDown := True;
-    lToolButton.AllowAllUp := True;
+    lToolButton.AllowAllUp := True; // enables toggle button mode
+    lToolButton.GroupIndex := Ord(lLogSev) + 1; // enables toggle button mode
     lToolButton.Down      := lLogSev in GLog.SevToLog;
     lToolButton.OnClick   := @FormLogLevelButtonClick;
     lToolButton.Focusable := False;
-    Inc(x, 50);
+    Inc(x, 51);
   end;
   
  Result := FForm;
@@ -272,54 +256,9 @@ begin
     //FMemoLog.ScrollBars := ssBoth;
 end;
 
-procedure TtiLogToGUI.FormLogMenuItemClick(Sender: TObject);
-var
-  i: integer;
-begin
-  //for i := 0 to FLogMenuItem.Count - 1 do
-    //FLogMenuItem.Items[i].Checked := TtiLogSeverity(FLogMenuItem.Items[i].Tag) in GLog.SevToLog;
-end;
-
 procedure TtiLogToGUI.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-//  CanClose := False;
-  //FForm.WindowState := wsMinimized;
-end;
-
-procedure TtiLogToGUI.FormLogLevelMenuItemClick(Sender: TObject);
-var
-  lLogSev: TtiLogSeverity;
-  lLogChecked: boolean;
-  i: integer;
-  lFound: boolean;
-begin
-  if not (Sender is TfpgMenuItem) then
-    Exit; //==>
-
-  lLogSev := TtiLogSeverity(TfpgWidget(Sender).Tag);
-  //TfpgMenuItem(Sender).Checked := not TMenuItem(Sender).Checked;
-  //lLogChecked := TMenuItem(Sender).Checked;
-
-  lFound := False;
-  i := FToolBar.ComponentCount-1;
-  while (i > 0) and not lFound do
-  begin
-    if FToolBar.Components[i] is TfpgButton then
-    begin
-      lFound := TfpgButton(FToolBar.Components[i]).Tag = TfpgWidget(Sender).Tag;
-      if lFound then
-      begin
-        TfpgButton(FToolbar.Components[i]).Down := not TfpgButton(FToolbar.Components[i]).Down;
-        lLogChecked := TfpgButton(FToolbar.Components[i]).Down;
-      end;
-    end;
-//    FToolBar.Buttons[TMenuItem(Sender).Tag].Down := lLogChecked;
-  end;
-
-  if lLogChecked then
-    GLog.SevToLog := GLog.SevToLog + [lLogSev]
-  else
-    GLog.SevToLog := GLog.SevToLog - [lLogSev];
+  CanClose := False;
 end;
 
 procedure TtiLogToGUI.FormLogLevelButtonClick(Sender: TObject);
@@ -358,15 +297,12 @@ end;
 
 procedure TtiLogToGUI.DoOnPopup(Sender: TObject);
 begin
-  FViewLogMenuItem.Visible:=
+  { If we are logging to file as well, then enable the menu option }
+  FViewLogMenuItem.Enabled :=
     (GLog.LogToFileName <> '') and
     (FileExists(GLog.LogToFileName));
 end;
 
-
-//initialization
-  //if gCommandLineParams.IsParam(csLogVisual) then
-    //GLog.RegisterLog(TtiLogToGUI);
 
 end.
 

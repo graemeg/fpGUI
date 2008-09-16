@@ -2,6 +2,7 @@
 <CONFIG>
   <Package Version="3">
     <Name Value="tiOPFfpGUI"/>
+    <AddToProjectUsesSection Value="False"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
       <Version Value="8"/>
@@ -9,6 +10,11 @@
         <OtherUnitFiles Value="gui/"/>
         <UnitOutputDirectory Value="../../lib"/>
       </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <CStyleOperator Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <Other>
         <CustomOptions Value="-dLINK_CSVx
 -dLINK_TABx
@@ -33,7 +39,7 @@
     <License Value="Mozilla Public License v1.1
 "/>
     <Version Major="2" Release="4"/>
-    <Files Count="7">
+    <Files Count="8">
       <Item1>
         <Filename Value="gui/tiGUIUtils.pas"/>
         <UnitName Value="tiGUIUtils"/>
@@ -62,6 +68,10 @@
         <Filename Value="gui/tiListMediators.pas"/>
         <UnitName Value="tiListMediators"/>
       </Item7>
+      <Item8>
+        <Filename Value="gui/tiLogToGUI.pas"/>
+        <UnitName Value="tiLogToGUI"/>
+      </Item8>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
