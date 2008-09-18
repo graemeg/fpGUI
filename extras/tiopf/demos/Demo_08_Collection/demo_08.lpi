@@ -28,15 +28,12 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="fpgui_package"/>
-      </Item1>
-      <Item2>
         <PackageName Value="tiOPFfpGUI"/>
-      </Item2>
+      </Item1>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="6">
       <Unit0>
         <Filename Value="demo_08.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -67,24 +64,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Client_DBIndependentVisitors_Svr"/>
       </Unit5>
-      <Unit6>
-        <Filename Value="mediators.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="mediators"/>
-      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
+    <Version Value="8"/>
     <Parsing>
       <SyntaxOptions>
         <AllowLabel Value="False"/>
         <CPPInline Value="False"/>
       </SyntaxOptions>
     </Parsing>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
     <Other>
       <CustomOptions Value="-FUunits
 -dUseCThreads"/>

@@ -10,24 +10,12 @@ uses
   gui_listbox, gui_memo, gui_combobox, gui_grid, 
   gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
   gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_bevel, Client_BOM, mediators;
+  gui_bevel, Client_BOM, tiFormMediator;
 
 type
 
   TMainForm = class(TfpgForm)
   private
-    FClients: TClients;
-    FmedClients: TClient_StringGrid_Mediator;
-    procedure   MainFormShow(Sender: TObject);
-    procedure   CreateTable;
-    procedure   DropTable;
-    function    TableExists: boolean;
-    procedure   btnInsertRowClick(Sender: TObject);
-    procedure   btnDeleteRowClick(Sender: TObject);
-    procedure   btnSaveClick(Sender: TObject);
-    procedure   btnReadClick(Sender: TObject);
-    procedure   btnShowClick(Sender: TObject);
-  public
     {@VFD_HEAD_BEGIN: MainForm}
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
@@ -42,6 +30,19 @@ type
     btnRead: TfpgButton;
     grdCollection: TfpgStringGrid;
     {@VFD_HEAD_END: MainForm}
+    FClients: TClients;
+    FMediator: TFormMediator;
+    procedure   MainFormShow(Sender: TObject);
+    procedure   CreateTable;
+    procedure   DropTable;
+    procedure   CreateMediators;
+    function    TableExists: boolean;
+    procedure   btnInsertRowClick(Sender: TObject);
+    procedure   btnDeleteRowClick(Sender: TObject);
+    procedure   btnSaveClick(Sender: TObject);
+    procedure   btnReadClick(Sender: TObject);
+    procedure   btnShowClick(Sender: TObject);
+  public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterCreate; override;
@@ -59,15 +60,22 @@ uses
   ,tiOID
   ,tiDialogs
   ,tiConstants
+  ,tiBaseMediator
+  ,tiListMediators
+  ,tiLog
   ;
 
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.MainFormShow(Sender: TObject);
 begin
+  Log('Creating mediators');
+  CreateMediators;
   // Drop and re-create to be sure we start with the correct structure
+  Log('Testing if table exists');
   if TableExists then
   begin
+    Log('  Should we drop and recreate the tables');
     if TfpgMessageDialog.Question(ApplicationName, 'Must we delete existing data?', mbYesNo) = mbYes then
     begin
       DropTable;
@@ -99,6 +107,25 @@ begin
   gTIOPFManager.DropTable('Client');
 end;
 
+procedure TMainForm.CreateMediators;
+begin
+  if not Assigned(FMediator) then
+  begin
+    FMediator := TFormMediator.Create(self);
+    FMediator.AddComposite('ClientName(200,"Client name");ClientID(80,"Client ID")', grdCollection);
+  end;
+  FMediator.Subject := FClients;
+  FMediator.Active := True;
+
+  //FmedClients := TClient_StringGrid_Mediator.CreateCustom(FClients, grdCollection, 'ClientName(200,"Client name");ClientID(80,"Client ID")');
+  //FClients.NotifyObservers;
+
+  //LV.AddColumn(LVDeriveOID, 'OID', 270);
+  //LV.AddColumn('ClientName', vttkString, 'Client name', 200);
+  //LV.AddColumn('ClientID',   vttkString, 'Client ID', 80);
+  //LV.Data:= FClients;
+end;
+
 function TMainForm.TableExists: boolean;
 var
   LDBMetaData: TtiDBMetaData;
@@ -108,7 +135,9 @@ begin
   try
     LDatabase := gTIOPFManager.DefaultDBConnectionPool.Lock;
     try
+//      Log('  Reading meta data of tables');
       LDatabase.ReadMetaDataTables(LDBMetaData);
+//      log('  Finding the table <Client>');
       result := LDBMetaData.FindByTableName('Client') <> nil;
     finally
       gTIOPFManager.DefaultDBConnectionPool.UnLock(LDatabase);
@@ -124,7 +153,6 @@ var
 begin
   LClient:= TClient.CreateNew;
   FClients.Add(LClient);
-  //LV.Refresh(LClient);
 end;
 
 procedure TMainForm.btnDeleteRowClick(Sender: TObject);
@@ -143,9 +171,6 @@ procedure TMainForm.btnReadClick(Sender: TObject);
 begin
   FClients.Clear;
   FClients.Read;
-  //LV.Refresh;
-  FmedClients := TClient_StringGrid_Mediator.CreateCustom(FClients, grdCollection, 'ClientName(200,"Client name");ClientID(80,"Client ID")');
-  FClients.NotifyObservers;
 end;
 
 procedure TMainForm.btnShowClick(Sender: TObject);
@@ -159,19 +184,11 @@ begin
   WindowTitle := 'Connected to ' + gTIOPFManager.DefaultDBConnectionName;
   FClients := TClients.Create;
   OnShow := @MainFormShow;
-  
-  //FmedClients := TClient_StringGrid_Mediator.CreateCustom(FClients, grdCollection, 'ClientName(200,"Client name");ClientID(80,"Client ID")');
-  //FClients.NotifyObservers;
-
-  //LV.AddColumn(LVDeriveOID, 'OID', 270);
-  //LV.AddColumn('ClientName', vttkString, 'Client name', 200);
-  //LV.AddColumn('ClientID',   vttkString, 'Client ID', 80);
-  //LV.Data:= FClients;
 end;
 
 destructor TMainForm.Destroy;
 begin
-  FmedClients.Free;
+  FMediator.Active := False;
   FClients.Free;
   inherited Destroy;
 end;
@@ -306,5 +323,7 @@ begin
   {@VFD_BODY_END: MainForm}
 end;
 
+initialization
+  gMediatorManager.RegisterMediator(TStringGridMediator, TClients);
 
 end.
