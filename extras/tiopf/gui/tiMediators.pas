@@ -206,13 +206,14 @@ const
 
 procedure RegisterFallBackMediators;
 begin
-  gMediatorManager.RegisterMediator(TMediatorEditView, TtiObject, [tkSstring,tkAstring,tkinteger,tkFloat]);
+  gMediatorManager.RegisterMediator(TMediatorEditView, TtiObject, [tkSString,tkAString,tkInteger,tkFloat]);
   gMediatorManager.RegisterMediator(TMediatorCheckBoxView, TtiObject, [tkBool]);
   gMediatorManager.RegisterMediator(TMediatorComboboxView, TtiObject, [tkSString,tkAString]);
   gMediatorManager.RegisterMediator(TMediatorStaticTextView, TtiObject);
   gMediatorManager.RegisterMediator(TMediatorTrackBarView, TtiObject, [tkInteger]);
   gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TtiObject, [tkClass]);
-  gMediatorManager.RegisterMediator(TMediatorMemoView, TtiObject, [tksString,tkAString]);
+  gMediatorManager.RegisterMediator(TMediatorMemoView, TtiObject, [tkSString,tkAString]);
+  gMediatorManager.RegisterMediator(TMediatorCalendarComboView, TtiObject, [tkFloat]);
 end;
 
 { TMediatorEditView }

@@ -3,6 +3,11 @@
   the -lv parameter is passed on the command line
   
   This in normally controlled by the tiLogReg unit.
+
+  *** NOTE ***
+  If you application doesn't terminate when you activated LogToGUI, it probably
+  means a TThread.WaitFor deadlock occured. In that case, call ReleaseLog()
+  after fpgApplication.Run in you project's *.lpr file.
 }
 unit tiLogToGUI;
 
