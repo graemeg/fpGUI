@@ -71,6 +71,7 @@ procedure TMainForm.MainFormShow(Sender: TObject);
 begin
   Log('Creating mediators');
   CreateMediators;
+
   // Drop and re-create to be sure we start with the correct structure
   Log('Testing if table exists');
   if TableExists then
@@ -169,8 +170,10 @@ end;
 
 procedure TMainForm.btnReadClick(Sender: TObject);
 begin
+  FMediator.Active := False;
   FClients.Clear;
   FClients.Read;
+  FMediator.Active := True;
 end;
 
 procedure TMainForm.btnShowClick(Sender: TObject);
