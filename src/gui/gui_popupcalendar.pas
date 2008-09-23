@@ -56,13 +56,6 @@ type
 
   TfpgPopupCalendar = class(TfpgPopupWindow)
   private
-    FMonthOffset: integer;
-    FDate: TDateTime;
-    FMaxDate: TDateTime;
-    FMinDate: TDateTime;
-    FCallerWidget: TfpgWidget;
-    FOnValueSet: TfpgOnDateSetEvent;
-    FCloseOnSelect: boolean;
     {@VFD_HEAD_BEGIN: fpgPopupCalendar}
     edtYear: TfpgEdit;
     btnYearUp: TfpgButton;
@@ -73,6 +66,13 @@ type
     btnToday: TfpgButton;
     grdName1: TfpgStringGrid;
     {@VFD_HEAD_END: fpgPopupCalendar}
+    FMonthOffset: integer;
+    FDate: TDateTime;
+    FMaxDate: TDateTime;
+    FMinDate: TDateTime;
+    FCallerWidget: TfpgWidget;
+    FOnValueSet: TfpgOnDateSetEvent;
+    FCloseOnSelect: boolean;
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
