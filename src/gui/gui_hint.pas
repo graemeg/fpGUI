@@ -56,6 +56,7 @@ type
     procedure   HandleShow; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     property    Font: TfpgFont read FFont;
     property    Text: TfpgString read GetText write SetText;
@@ -194,6 +195,13 @@ begin
   OnHide := @FormHide;
 end;
 
+destructor TfpgHintWindow.Destroy;
+begin
+  T_Chrono.Free;
+  FFont.Free;
+  inherited Destroy;
+end;
+
 procedure TfpgHintWindow.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
 begin
   inherited SetPosition(aleft, atop, awidth, aheight);
@@ -209,6 +217,10 @@ begin
   Sizeable := False;
   BackgroundColor := clGray;
 end;
+
+initialization
+finalization
+  FreeAndNil(uShadowForm);
 
 end.
 
