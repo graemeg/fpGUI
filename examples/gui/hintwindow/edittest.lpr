@@ -26,6 +26,7 @@ type
     procedure chbSpaceChange(Sender: TObject);
     procedure chbFloatDecChange(Sender: TObject);
     procedure chbShowHintChange(Sender: TObject);
+    procedure chbAppShowHintChange(Sender: TObject);
     procedure rb_border_1Change(Sender: TObject);
     procedure rb_border_2Change(Sender: TObject);
     procedure rb_border_3Change(Sender: TObject);
@@ -98,6 +99,7 @@ type
     rb_shadowcolor_gray: TfpgRadioButton;
     rb_shadowcolor_black: TfpgRadioButton;
     chbShowHint: TfpgCheckBox;
+    chbAppShowHint: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
@@ -209,20 +211,12 @@ end;
 
 procedure TMainForm.chbShowHintChange(Sender: TObject);
 begin
-  if chbShowHint.Checked then
-  begin
-    edtText.ShowHint := True;
-    edtInteger.ShowHint := True;
-    edtFloat.ShowHint := True;
-    edtCurrency.ShowHint := True;
-  end
-  else
-  begin
-    edtText.ShowHint := False;
-    edtInteger.ShowHint := False;
-    edtFloat.ShowHint := False;
-    edtCurrency.ShowHint := False;
-  end;
+  self.ShowHint := chbShowHint.Checked;
+end;
+
+procedure TMainForm.chbAppShowHintChange(Sender: TObject);
+begin
+  fpgApplication.ShowHint := chbAppShowHint.Checked;
 end;
 
 procedure TMainForm.rb_border_1Change(Sender: TObject);
@@ -361,7 +355,7 @@ procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(376, 202, 392, 550);
+  SetPosition(376, 202, 392, 570);
   WindowTitle := 'Edit components';
   WindowPosition := wpScreenCenter;
 
@@ -489,7 +483,7 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(296, 520, 75, 24);
+    SetPosition(296, 540, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -695,9 +689,13 @@ begin
   rb_shadowcolor_black := CreateRadioButton(p_shadowcolor,80,25,'Black');
   rb_shadowcolor_black.OnChange:= @rb_shadowcolor_blackChange;
 
-  chbShowHint := CreateCheckBox(Self,200,500,'Show hint');
+  chbShowHint := CreateCheckBox(Self,200,495,'Form.ShowHint');
+  chbShowHint.Checked := self.ShowHint;
   chbShowhint.OnChange:= @chbShowHintChange;
 
+  chbAppShowHint := CreateCheckBox(Self,200,515,'Application.ShowHint');
+  chbAppShowHint.Checked := fpgApplication.ShowHint;
+  chbAppShowhint.OnChange:= @chbAppShowHintChange;
 
   {@VFD_BODY_END: MainForm}
   
