@@ -272,7 +272,7 @@ end;
 
 procedure TfpgWidget.SetTextColor(const AValue: TfpgColor);
 begin
-  if FBackgroundColor <> AValue then
+  if FTextColor <> AValue then
   begin
     FTextColor := AValue;
     Repaint;

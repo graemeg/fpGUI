@@ -919,6 +919,9 @@ begin
   wnd.Text := AHint;
   w := wnd.Font.TextWidth(AHint) + (wnd.Border * 2) + (wnd.Margin * 2);
   h := wnd.Font.Height + (wnd.Border * 2) + (wnd.Margin * 2);
+  { prevents hint from going off the right screen edge }
+  if (APos.X + w) > ScreenWidth then
+    APos.X:= ScreenWidth - w;
   wnd.SetPosition(APos.X, APos.Y, w, h);
   wnd.Show;
 end;
