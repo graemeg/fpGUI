@@ -36,7 +36,8 @@ type
     txtAutoSize);
 
   TMouseButton = (mbLeft, mbRight, mbMiddle);
-  
+
+  TArrowDirection = (adUp, adDown, adLeft, adRight);
 
 const
   AllAnchors = [anLeft, anRight, anTop, anBottom];
@@ -161,8 +162,8 @@ type
     procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord);
     procedure   DrawControlFrame(r: TfpgRect);
-    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
-    procedure   DrawDirectionArrow(r: TfpgRect; direction: integer);
+    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection);
+    procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection);
     procedure   DrawFocusRect(r: TfpgRect);
     function    DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
     function    DrawText(x, y: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
@@ -184,7 +185,7 @@ type
     destructor  Destroy; override;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
-    procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer); virtual;
+    procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
   end;
@@ -1298,12 +1299,12 @@ begin
   DrawControlFrame(r.Left, r.Top, r.Width, r.Height);
 end;
 
-procedure TfpgCanvas.DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: integer);
+procedure TfpgCanvas.DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection);
 begin
   fpgStyle.DrawDirectionArrow(self, x, y, w, h, direction);
 end;
 
-procedure TfpgCanvas.DrawDirectionArrow(r: TfpgRect; direction: integer);
+procedure TfpgCanvas.DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection);
 begin
   DrawDirectionArrow(r.Left, r.Top, r.Width, r.Height, direction);
 end;
@@ -1599,7 +1600,7 @@ begin
   ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left+1, r.Bottom-1);   // bottom (inner)
 end;
 
-procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: integer);
+procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection);
 var
   peekx: integer;
   peeky: integer;
@@ -1611,10 +1612,10 @@ begin
   side   := (w div 4) + 1;
   margin := side + 1;
 
-  if direction < 2 then  // vertical
+  if direction in [adUp, adDown] then  // vertical
   begin
     peekx := x + (w div 2);
-    if direction = 1 then  // down
+    if direction = adDown then  // down
     begin
       peeky := y + h - margin;
       basey := peeky - side;
@@ -1629,7 +1630,7 @@ begin
   else // horizontal
   begin
     peeky := y + (h div 2);
-    if direction = 3 then  // right
+    if direction = adRight then  // right
     begin
       peekx := x + w - margin;
       basex := peekx - side;

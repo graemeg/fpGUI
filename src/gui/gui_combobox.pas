@@ -323,7 +323,7 @@ begin
     Canvas.SetColor(clShadow1);
 
   // paint arrow
-  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, 1);
+  fpgStyle.DrawDirectionArrow(Canvas, ar.Left, ar.Top, ar.Width, ar.Height, adDown);
   Canvas.EndDraw(FInternalBtnRect);
 end;
 
