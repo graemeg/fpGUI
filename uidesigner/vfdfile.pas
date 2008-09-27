@@ -25,7 +25,7 @@ interface
 uses
   SysUtils,
   Classes,
-  gfx_utils;
+  fpg_utils;
 
 type
   TVFDFileBlock = class
@@ -351,8 +351,8 @@ begin
     '{$mode objfpc}{$H+}' + LineEnding + LineEnding +
     'interface' + LineEnding + LineEnding +
     'uses' + LineEnding +
-    '  SysUtils, Classes, gfxbase, fpgfx, gui_edit, ' + LineEnding +
-    '  gfx_widget, gui_form, gui_label, gui_button,' + LineEnding +
+    '  SysUtils, Classes, fpg_base, fpg_main, fpg_widget,' + LineEnding +
+    '  gui_edit, gui_form, gui_label, gui_button,' + LineEnding +
     '  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, ' + LineEnding +
     '  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, ' + LineEnding +
     '  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,' + LineEnding +

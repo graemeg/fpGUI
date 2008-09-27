@@ -25,9 +25,9 @@ interface
 
 uses
   Classes,
-  gfx_widget,
-  gfxbase,
-  fpgfx;
+  fpg_base,
+  fpg_main,
+  fpg_widget;
 
 type
 
@@ -77,8 +77,8 @@ implementation
 
 uses
   SysUtils,
-  gfx_imgfmt_bmp,
-  gfx_utils;
+  fpg_imgfmt_bmp,
+  fpg_utils;
 
 
 { TfpgBaseImgAnim }

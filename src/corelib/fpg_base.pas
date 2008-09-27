@@ -15,7 +15,7 @@
       The Big Bang starts here!  The starting unit for fpGUI.
 }
 
-unit gfxbase;
+unit fpg_base;
 
 {$mode objfpc}{$H+}
 
@@ -24,7 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
-  gfx_impl;
+  fpg_impl;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -584,9 +584,9 @@ procedure SortRect(var left, top, right, bottom: integer);
 implementation
 
 uses
-  fpgfx,  // needed for fpgApplication & fpgNamedColor
-  gfx_utils, // needed for fpgFileList
-  gfx_constants,
+  fpg_main,  // needed for fpgApplication & fpgNamedColor
+  fpg_utils, // needed for fpgFileList
+  fpg_constants,
   typinfo;
 
 

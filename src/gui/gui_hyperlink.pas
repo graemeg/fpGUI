@@ -26,9 +26,9 @@ interface
 uses
   Classes,
   Sysutils,
-  gui_label,
-  fpgfx,
-  gfxbase;
+  fpg_base,
+  fpg_main,
+  gui_label;
 
 type
 
@@ -65,7 +65,7 @@ end;
 implementation
 
 uses
-  gfx_utils;
+  fpg_utils;
 
 
 { TfpgHyperlink }

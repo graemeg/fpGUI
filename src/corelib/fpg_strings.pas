@@ -1,9 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Unit to handle WideString (UTF-16) strings.
-
-    Copyright (C) 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,6 +10,9 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Unit to handle WideString (UTF-16) strings.
 }
 
 
@@ -21,7 +22,7 @@
  //   Graeme:  I'm experimenting with something again.
 
 
-unit gfx_strings;
+unit fpg_strings;
 
 {$mode objfpc}{$H+}
 

@@ -24,7 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
-  gfx_widget,
+  fpg_widget,
   gui_dialogs,
   vfdprops,
   vfdforms,
@@ -84,8 +84,8 @@ implementation
 uses
   vfdformparser,
   gui_iniutils,
-  gfx_utils,
-  fpgfx;
+  fpg_utils,
+  fpg_main;
 
 Var
   DefaultPasExt : String = '.pas';

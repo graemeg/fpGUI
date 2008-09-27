@@ -50,10 +50,10 @@ interface
 uses
   Classes,
   SysUtils,
-  gfx_widget,
-  gfxbase,
-  fpgfx,
-  gfx_popupwindow;
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  fpg_popupwindow;
 
 type
   // widget options

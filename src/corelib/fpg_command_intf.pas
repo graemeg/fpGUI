@@ -3,7 +3,7 @@
   know what design patterns are. The Command pattern is very similar to
   Delphi's TAction feature.
 }
-unit gfx_command_intf;
+unit fpg_command_intf;
 
 {$mode objfpc}{$H+}
 

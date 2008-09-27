@@ -27,9 +27,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
   gui_scrollbar;
   
 type
@@ -158,6 +158,7 @@ type
     procedure   EndUpdate;
     procedure   MouseToCell(X, Y: Integer; var ACol, ARow: Integer);
   end;
+
 
 implementation
 

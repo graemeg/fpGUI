@@ -1,8 +1,22 @@
-{ 
-  BMP format image parser
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      BMP format image parser
 }
 
-unit gfx_imgfmt_bmp;
+
+unit fpg_imgfmt_bmp;
 
 {$mode objfpc}{$H+}
 
@@ -11,14 +25,16 @@ interface
 uses
   Classes,
   SysUtils,
-  fpgfx,
-  gfxbase{, fpcanvas};
+  fpg_main,
+  fpg_base;
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
 function  LoadImage_BMP(const AFileName: String): TfpgImage;
 function  CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
 
+
 implementation
+
 
 function CreateImage_BMP(bmp: Pointer; bmpsize: longword): TfpgImage;
 begin

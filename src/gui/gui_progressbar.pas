@@ -24,9 +24,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget;
+  fpg_base,
+  fpg_main,
+  fpg_widget;
   
 type
   TfpgCustomProgressBar = class(TfpgWidget)
@@ -71,7 +71,9 @@ type
     property    TextColor;
   end;
 
+
 implementation
+
 
 { TfpgCustomProgressBar }
 

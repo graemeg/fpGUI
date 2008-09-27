@@ -32,9 +32,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget;
+  fpg_base,
+  fpg_main,
+  fpg_widget;
 
 type
   TScrollNotifyEvent = procedure(Sender: TObject; position: integer) of object;

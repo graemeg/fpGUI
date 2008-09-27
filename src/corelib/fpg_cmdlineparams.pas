@@ -14,11 +14,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-unit gfx_cmdlineparams;
+unit fpg_cmdlineparams;
 
 {$mode objfpc}{$H+}
 
 interface
+
 uses
   Classes;
 

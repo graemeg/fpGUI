@@ -1,4 +1,21 @@
-unit gfx_widget;
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      The base widget, which all GUI widgets inherit from.
+}
+
+unit fpg_widget;
 
 {$mode objfpc}{$H+}
 
@@ -9,14 +26,12 @@ interface
 uses
   Classes,
   SysUtils,
-  fpgfx,
-  gfxbase;
+  fpg_main,
+  fpg_base;
 
 type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
 
-
-  { TfpgWidget }
 
   TfpgWidget = class(TfpgWindow)
   private
@@ -152,7 +167,7 @@ function FindKeyboardFocus: TfpgWidget;
 implementation
 
 uses
-  math, gfx_constants, gui_hint;
+  math, fpg_constants, gui_hint;
 
 
 var

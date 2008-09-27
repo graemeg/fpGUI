@@ -29,82 +29,82 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="2"/>
-    <Files Count="72">
+    <Files Count="71">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
       </Item1>
       <Item2>
-        <Filename Value="../fpgfx.pas"/>
-        <UnitName Value="fpgfx"/>
+        <Filename Value="../fpg_base.pas"/>
+        <UnitName Value="fpg_base"/>
       </Item2>
       <Item3>
-        <Filename Value="../gfxbase.pas"/>
-        <UnitName Value="gfxbase"/>
+        <Filename Value="../fpg_main.pas"/>
+        <UnitName Value="fpg_main"/>
       </Item3>
       <Item4>
-        <Filename Value="../gfx_cmdlineparams.pas"/>
-        <UnitName Value="gfx_cmdlineparams"/>
+        <Filename Value="../fpg_cmdlineparams.pas"/>
+        <UnitName Value="fpg_cmdlineparams"/>
       </Item4>
       <Item5>
-        <Filename Value="../gfx_command_intf.pas"/>
-        <UnitName Value="gfx_command_intf"/>
+        <Filename Value="../fpg_command_intf.pas"/>
+        <UnitName Value="fpg_command_intf"/>
       </Item5>
       <Item6>
-        <Filename Value="../gfx_constants.pas"/>
-        <UnitName Value="gfx_constants"/>
+        <Filename Value="../fpg_constants.pas"/>
+        <UnitName Value="fpg_constants"/>
       </Item6>
       <Item7>
-        <Filename Value="../gfx_extinterpolation.pas"/>
-        <UnitName Value="gfx_extinterpolation"/>
+        <Filename Value="../fpg_extinterpolation.pas"/>
+        <UnitName Value="fpg_extinterpolation"/>
       </Item7>
       <Item8>
-        <Filename Value="../gfx_imagelist.pas"/>
-        <UnitName Value="gfx_imagelist"/>
+        <Filename Value="../fpg_imagelist.pas"/>
+        <UnitName Value="fpg_imagelist"/>
       </Item8>
       <Item9>
-        <Filename Value="../gfx_imgfmt_bmp.pas"/>
-        <UnitName Value="gfx_imgfmt_bmp"/>
+        <Filename Value="../fpg_imgfmt_bmp.pas"/>
+        <UnitName Value="fpg_imgfmt_bmp"/>
       </Item9>
       <Item10>
-        <Filename Value="../gfx_msgqueue.inc"/>
+        <Filename Value="../fpg_msgqueue.inc"/>
         <Type Value="Include"/>
       </Item10>
       <Item11>
-        <Filename Value="../gfx_pofiles.pas"/>
-        <UnitName Value="gfx_pofiles"/>
+        <Filename Value="../fpg_pofiles.pas"/>
+        <UnitName Value="fpg_pofiles"/>
       </Item11>
       <Item12>
-        <Filename Value="../gfx_popupwindow.pas"/>
-        <UnitName Value="gfx_popupwindow"/>
+        <Filename Value="../fpg_popupwindow.pas"/>
+        <UnitName Value="fpg_popupwindow"/>
       </Item12>
       <Item13>
-        <Filename Value="../gfx_stdimages.pas"/>
-        <UnitName Value="gfx_stdimages"/>
+        <Filename Value="../fpg_stdimages.pas"/>
+        <UnitName Value="fpg_stdimages"/>
       </Item13>
       <Item14>
-        <Filename Value="../gfx_stringhashlist.pas"/>
-        <UnitName Value="gfx_stringhashlist"/>
+        <Filename Value="../fpg_stringhashlist.pas"/>
+        <UnitName Value="fpg_stringhashlist"/>
       </Item14>
       <Item15>
-        <Filename Value="../gfx_translations.pas"/>
-        <UnitName Value="gfx_translations"/>
+        <Filename Value="../fpg_translations.pas"/>
+        <UnitName Value="fpg_translations"/>
       </Item15>
       <Item16>
-        <Filename Value="../gfx_utf8utils.pas"/>
-        <UnitName Value="gfx_UTF8utils"/>
+        <Filename Value="../fpg_stringutils.pas"/>
+        <UnitName Value="fpg_stringutils"/>
       </Item16>
       <Item17>
-        <Filename Value="../gfx_utils.pas"/>
-        <UnitName Value="gfx_utils"/>
+        <Filename Value="../fpg_utils.pas"/>
+        <UnitName Value="fpg_utils"/>
       </Item17>
       <Item18>
-        <Filename Value="../gfx_widget.pas"/>
-        <UnitName Value="gfx_widget"/>
+        <Filename Value="../fpg_widget.pas"/>
+        <UnitName Value="fpg_widget"/>
       </Item18>
       <Item19>
-        <Filename Value="../gfx_wuline.pas"/>
-        <UnitName Value="gfx_wuline"/>
+        <Filename Value="../fpg_wuline.pas"/>
+        <UnitName Value="fpg_wuline"/>
       </Item19>
       <Item20>
         <Filename Value="../keys.inc"/>
@@ -147,28 +147,28 @@
         <Type Value="Include"/>
       </Item29>
       <Item30>
-        <Filename Value="gfx_impl.pas"/>
-        <UnitName Value="gfx_impl"/>
+        <Filename Value="fpg_impl.pas"/>
+        <UnitName Value="fpg_impl"/>
       </Item30>
       <Item31>
-        <Filename Value="gfx_utils_impl.inc"/>
+        <Filename Value="fpg_utils_impl.inc"/>
         <Type Value="Include"/>
       </Item31>
       <Item32>
-        <Filename Value="gfx_x11.pas"/>
-        <UnitName Value="gfx_x11"/>
+        <Filename Value="fpg_x11.pas"/>
+        <UnitName Value="fpg_x11"/>
       </Item32>
       <Item33>
-        <Filename Value="_netlayer.pas"/>
-        <UnitName Value="_netlayer"/>
+        <Filename Value="fpg_netlayer_x11.pas"/>
+        <UnitName Value="fpg_netlayer_x11"/>
       </Item33>
       <Item34>
-        <Filename Value="x11_keyconv.pas"/>
-        <UnitName Value="x11_keyconv"/>
+        <Filename Value="fpg_keyconv_x11.pas"/>
+        <UnitName Value="fpg_keyconv_x11"/>
       </Item34>
       <Item35>
-        <Filename Value="x11_xft.pas"/>
-        <UnitName Value="x11_xft"/>
+        <Filename Value="fpg_xft_x11.pas"/>
+        <UnitName Value="fpg_xft_x11"/>
       </Item35>
       <Item36>
         <Filename Value="../../gui/promptuserdialog.inc"/>
@@ -183,141 +183,137 @@
         <UnitName Value="gui_basegrid"/>
       </Item38>
       <Item39>
-        <Filename Value="../../gui/gui_bevel.pas"/>
-        <UnitName Value="gui_bevel"/>
-      </Item39>
-      <Item40>
         <Filename Value="../../gui/gui_button.pas"/>
         <UnitName Value="gui_button"/>
-      </Item40>
-      <Item41>
+      </Item39>
+      <Item40>
         <Filename Value="../../gui/gui_checkbox.pas"/>
         <UnitName Value="gui_checkbox"/>
-      </Item41>
-      <Item42>
+      </Item40>
+      <Item41>
         <Filename Value="../../gui/gui_combobox.pas"/>
         <UnitName Value="gui_combobox"/>
-      </Item42>
-      <Item43>
+      </Item41>
+      <Item42>
         <Filename Value="../../gui/gui_customgrid.pas"/>
         <UnitName Value="gui_customgrid"/>
-      </Item43>
-      <Item44>
+      </Item42>
+      <Item43>
         <Filename Value="../../gui/gui_dialogs.pas"/>
         <UnitName Value="gui_dialogs"/>
-      </Item44>
-      <Item45>
+      </Item43>
+      <Item44>
         <Filename Value="../../gui/gui_editcombo.pas"/>
         <UnitName Value="gui_editcombo"/>
-      </Item45>
-      <Item46>
+      </Item44>
+      <Item45>
         <Filename Value="../../gui/gui_edit.pas"/>
         <UnitName Value="gui_edit"/>
-      </Item46>
-      <Item47>
+      </Item45>
+      <Item46>
         <Filename Value="../../gui/gui_form.pas"/>
         <UnitName Value="gui_form"/>
-      </Item47>
-      <Item48>
+      </Item46>
+      <Item47>
         <Filename Value="../../gui/gui_gauge.pas"/>
         <UnitName Value="gui_gauge"/>
-      </Item48>
-      <Item49>
+      </Item47>
+      <Item48>
         <Filename Value="../../gui/gui_grid.pas"/>
         <UnitName Value="gui_grid"/>
-      </Item49>
-      <Item50>
+      </Item48>
+      <Item49>
         <Filename Value="../../gui/gui_hyperlink.pas"/>
         <UnitName Value="gui_hyperlink"/>
-      </Item50>
-      <Item51>
+      </Item49>
+      <Item50>
         <Filename Value="../../gui/gui_iniutils.pas"/>
         <UnitName Value="gui_iniutils"/>
-      </Item51>
-      <Item52>
+      </Item50>
+      <Item51>
         <Filename Value="../../gui/gui_label.pas"/>
         <UnitName Value="gui_label"/>
-      </Item52>
-      <Item53>
+      </Item51>
+      <Item52>
         <Filename Value="../../gui/gui_listbox.pas"/>
         <UnitName Value="gui_listbox"/>
-      </Item53>
-      <Item54>
+      </Item52>
+      <Item53>
         <Filename Value="../../gui/gui_listview.pas"/>
         <UnitName Value="gui_listview"/>
-      </Item54>
-      <Item55>
+      </Item53>
+      <Item54>
         <Filename Value="../../gui/gui_memo.pas"/>
         <UnitName Value="gui_memo"/>
-      </Item55>
-      <Item56>
+      </Item54>
+      <Item55>
         <Filename Value="../../gui/gui_menu.pas"/>
         <UnitName Value="gui_menu"/>
-      </Item56>
-      <Item57>
+      </Item55>
+      <Item56>
         <Filename Value="../../gui/gui_mru.pas"/>
         <UnitName Value="gui_mru"/>
-      </Item57>
-      <Item58>
+      </Item56>
+      <Item57>
         <Filename Value="../../gui/gui_panel.pas"/>
         <UnitName Value="gui_panel"/>
-      </Item58>
-      <Item59>
+      </Item57>
+      <Item58>
         <Filename Value="../../gui/gui_popupcalendar.pas"/>
         <UnitName Value="gui_popupcalendar"/>
-      </Item59>
-      <Item60>
+      </Item58>
+      <Item59>
         <Filename Value="../../gui/gui_progressbar.pas"/>
         <UnitName Value="gui_progressbar"/>
-      </Item60>
-      <Item61>
+      </Item59>
+      <Item60>
         <Filename Value="../../gui/gui_radiobutton.pas"/>
         <UnitName Value="gui_radiobutton"/>
-      </Item61>
-      <Item62>
+      </Item60>
+      <Item61>
         <Filename Value="../../gui/gui_scrollbar.pas"/>
         <UnitName Value="gui_scrollbar"/>
-      </Item62>
-      <Item63>
+      </Item61>
+      <Item62>
         <Filename Value="../../gui/gui_style.pas"/>
         <UnitName Value="gui_style"/>
-      </Item63>
-      <Item64>
+      </Item62>
+      <Item63>
         <Filename Value="../../gui/gui_tab.pas"/>
         <UnitName Value="gui_tab"/>
-      </Item64>
-      <Item65>
+      </Item63>
+      <Item64>
         <Filename Value="../../gui/gui_trackbar.pas"/>
         <UnitName Value="gui_trackbar"/>
-      </Item65>
-      <Item66>
+      </Item64>
+      <Item65>
         <Filename Value="../../gui/gui_tree.pas"/>
         <UnitName Value="gui_tree"/>
+      </Item65>
+      <Item66>
+        <Filename Value="../../gui/logo.inc"/>
+        <Type Value="Include"/>
       </Item66>
       <Item67>
-        <Filename Value="../../gui/logo.inc"/>
+        <Filename Value="../../gui/messagedialog.inc"/>
         <Type Value="Include"/>
       </Item67>
       <Item68>
-        <Filename Value="../../gui/messagedialog.inc"/>
+        <Filename Value="../../gui/newdirdialog.inc"/>
         <Type Value="Include"/>
       </Item68>
       <Item69>
-        <Filename Value="../../gui/newdirdialog.inc"/>
-        <Type Value="Include"/>
-      </Item69>
-      <Item70>
         <Filename Value="../../gui/db/fpgui_db.pas"/>
         <UnitName Value="fpgui_db"/>
-      </Item70>
-      <Item71>
+      </Item69>
+      <Item70>
         <Filename Value="../../gui/gui_splitter.pas"/>
         <UnitName Value="gui_splitter"/>
-      </Item71>
-      <Item72>
+      </Item70>
+      <Item71>
         <Filename Value="../../gui/gui_hint.pas"/>
         <UnitName Value="gui_hint"/>
-      </Item72>
+      </Item71>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">

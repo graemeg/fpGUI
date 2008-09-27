@@ -39,10 +39,10 @@ interface
 uses
   Classes,
   SysUtils,
-  gfx_widget,
-  gfxbase,
-  fpgfx,
-  gfx_imagelist,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  fpg_imagelist,
   gui_scrollbar,
   gui_menu;
   

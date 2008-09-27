@@ -24,7 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
-  gfx_widget,
+  fpg_widget,
   gui_form,
   gui_label,
   gui_edit,

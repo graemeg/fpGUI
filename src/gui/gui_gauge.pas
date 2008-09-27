@@ -24,9 +24,9 @@ interface
 
 uses
   Classes, SysUtils, math,
-  fpgfx,
-  gfxbase,
-  gfx_widget;
+  fpg_base,
+  fpg_main,
+  fpg_widget;
 
 type
 
@@ -107,7 +107,7 @@ function CreateGauge (AOwner: TComponent; ALeft, ATop, AWidth,
 implementation
 
 uses
-  gfx_wuline;
+  fpg_wuline;
 
 { This procedure draws a filled arc with a color gradient  -
   to be moved in CanvasBase? }

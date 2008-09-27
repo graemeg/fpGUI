@@ -25,8 +25,8 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  gfx_widget;
+  fpg_base,
+  fpg_widget;
 
 type
   TWindowPosition = (wpUser, wpAuto, wpScreenCenter);
@@ -123,8 +123,8 @@ function WidgetParentForm(wg: TfpgWidget): TfpgForm;
 implementation
 
 uses
-  fpgfx,
-  gfx_popupwindow,
+  fpg_main,
+  fpg_popupwindow,
   gui_menu;
   
 type

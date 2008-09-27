@@ -32,8 +32,8 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
+  fpg_base,
+  fpg_main,
   gui_basegrid;
   
 type

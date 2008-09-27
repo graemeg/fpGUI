@@ -1,15 +1,29 @@
 {
-  Standard fpGUI images that will be used in things like Message,
-  FileOpen, FileSave dialogs, Buttons, etc..
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Standard fpGUI images that will be used in things like Message,
+      FileOpen, FileSave dialogs, Buttons, etc..
 }
-unit gfx_stdimages;
+
+unit fpg_stdimages;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  fpgfx;
+  fpg_main;
 
 procedure fpgCreateStandardImages;
 

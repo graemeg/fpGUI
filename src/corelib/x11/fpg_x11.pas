@@ -1,4 +1,21 @@
-unit gfx_x11;
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      This unit implements X11 / Xlib support for fpGUI.
+}
+
+unit fpg_x11;
 
 {$mode objfpc}{$H+}
 
@@ -13,10 +30,10 @@ uses
   Xlib,
   XUtil,
   ctypes,
-  x11_xft,
-  _netlayer,
-  gfxbase,
-  gfx_impl;
+  fpg_xft_x11,
+  fpg_netlayer_x11,
+  fpg_base,
+  fpg_impl;
   
 const
   IconBitmapWidth = 16;
@@ -282,13 +299,13 @@ uses
   baseunix,
   // Graeme: temporary. libc is not available for FreeBSD.
   {$if defined(linux) and defined(cpu386)}libc,{$endif}
-  fpgfx,
-  gfx_widget,
-  gui_form,
+  fpg_main,
+  fpg_widget,
+  fpg_popupwindow,
+  fpg_stringutils,  // used for GetTextWidth
+  gui_form,         // for modal event support
   cursorfont,
-  gfx_popupwindow,
-  xatom,          // used for XA_WM_NAME
-  gfx_utf8utils;  // used for GetTextWidth
+  xatom;            // used for XA_WM_NAME
 
 var
   xapplication: TfpgApplication;

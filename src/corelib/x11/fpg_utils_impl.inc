@@ -1,4 +1,4 @@
-{%mainunit gfx_utils.pas}
+{%mainunit fpg_utils.pas}
 
 uses
   Unix;

@@ -19,14 +19,14 @@
       Here is an implementation in C++
         http://www.codeproject.com/gdi/antialias.asp
 }
-unit gfx_wuline;
+unit fpg_wuline;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, gfxbase, fpgfx;
+  Classes, SysUtils, fpg_base, fpg_main;
 
 
 procedure WuLine(ACanvas: TfpgCanvas; Point1, Point2: TPoint; AColor: TfpgColor);

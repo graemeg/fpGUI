@@ -52,8 +52,8 @@ function gINI(const AFileName: string = ''): TfpgINIFile;
 implementation
 
 uses
-  fpgfx
-  ,gfx_constants;
+  fpg_main,
+  fpg_constants;
 
 var
   uINI: TfpgINIFile;

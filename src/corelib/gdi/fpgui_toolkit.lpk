@@ -36,76 +36,76 @@
         <Type Value="Include"/>
       </Item1>
       <Item2>
-        <Filename Value="..\fpgfx.pas"/>
-        <UnitName Value="fpgfx"/>
+        <Filename Value="..\fpg_base.pas"/>
+        <UnitName Value="fpg_base"/>
       </Item2>
       <Item3>
-        <Filename Value="..\gfxbase.pas"/>
-        <UnitName Value="gfxbase"/>
+        <Filename Value="..\fpg_main.pas"/>
+        <UnitName Value="fpg_main"/>
       </Item3>
       <Item4>
-        <Filename Value="..\gfx_cmdlineparams.pas"/>
-        <UnitName Value="gfx_cmdlineparams"/>
+        <Filename Value="..\fpg_cmdlineparams.pas"/>
+        <UnitName Value="fpg_cmdlineparams"/>
       </Item4>
       <Item5>
-        <Filename Value="..\gfx_command_intf.pas"/>
-        <UnitName Value="gfx_command_intf"/>
+        <Filename Value="..\fpg_command_intf.pas"/>
+        <UnitName Value="fpg_command_intf"/>
       </Item5>
       <Item6>
-        <Filename Value="..\gfx_constants.pas"/>
-        <UnitName Value="gfx_constants"/>
+        <Filename Value="..\fpg_constants.pas"/>
+        <UnitName Value="fpg_constants"/>
       </Item6>
       <Item7>
-        <Filename Value="..\gfx_extinterpolation.pas"/>
-        <UnitName Value="gfx_extinterpolation"/>
+        <Filename Value="..\fpg_extinterpolation.pas"/>
+        <UnitName Value="fpg_extinterpolation"/>
       </Item7>
       <Item8>
-        <Filename Value="..\gfx_imagelist.pas"/>
-        <UnitName Value="gfx_imagelist"/>
+        <Filename Value="..\fpg_imagelist.pas"/>
+        <UnitName Value="fpg_imagelist"/>
       </Item8>
       <Item9>
-        <Filename Value="..\gfx_imgfmt_bmp.pas"/>
-        <UnitName Value="gfx_imgfmt_bmp"/>
+        <Filename Value="..\fpg_imgfmt_bmp.pas"/>
+        <UnitName Value="fpg_imgfmt_bmp"/>
       </Item9>
       <Item10>
-        <Filename Value="..\gfx_msgqueue.inc"/>
+        <Filename Value="..\fpg_msgqueue.inc"/>
         <Type Value="Include"/>
       </Item10>
       <Item11>
-        <Filename Value="..\gfx_pofiles.pas"/>
-        <UnitName Value="gfx_pofiles"/>
+        <Filename Value="..\fpg_pofiles.pas"/>
+        <UnitName Value="fpg_pofiles"/>
       </Item11>
       <Item12>
-        <Filename Value="..\gfx_popupwindow.pas"/>
-        <UnitName Value="gfx_popupwindow"/>
+        <Filename Value="..\fpg_popupwindow.pas"/>
+        <UnitName Value="fpg_popupwindow"/>
       </Item12>
       <Item13>
-        <Filename Value="..\gfx_stdimages.pas"/>
-        <UnitName Value="gfx_stdimages"/>
+        <Filename Value="..\fpg_stdimages.pas"/>
+        <UnitName Value="fpg_stdimages"/>
       </Item13>
       <Item14>
-        <Filename Value="..\gfx_stringhashlist.pas"/>
-        <UnitName Value="gfx_stringhashlist"/>
+        <Filename Value="..\fpg_stringhashlist.pas"/>
+        <UnitName Value="fpg_stringhashlist"/>
       </Item14>
       <Item15>
-        <Filename Value="..\gfx_translations.pas"/>
-        <UnitName Value="gfx_translations"/>
+        <Filename Value="..\fpg_translations.pas"/>
+        <UnitName Value="fpg_translations"/>
       </Item15>
       <Item16>
-        <Filename Value="..\gfx_utf8utils.pas"/>
-        <UnitName Value="gfx_UTF8utils"/>
+        <Filename Value="..\fpg_stringutils.pas"/>
+        <UnitName Value="fpg_stringutils"/>
       </Item16>
       <Item17>
-        <Filename Value="..\gfx_utils.pas"/>
-        <UnitName Value="gfx_utils"/>
+        <Filename Value="..\fpg_utils.pas"/>
+        <UnitName Value="fpg_utils"/>
       </Item17>
       <Item18>
-        <Filename Value="..\gfx_widget.pas"/>
-        <UnitName Value="gfx_widget"/>
+        <Filename Value="..\fpg_widget.pas"/>
+        <UnitName Value="fpg_widget"/>
       </Item18>
       <Item19>
-        <Filename Value="..\gfx_wuline.pas"/>
-        <UnitName Value="gfx_wuline"/>
+        <Filename Value="..\fpg_wuline.pas"/>
+        <UnitName Value="fpg_wuline"/>
       </Item19>
       <Item20>
         <Filename Value="..\keys.inc"/>
@@ -288,19 +288,19 @@
         <UnitName Value="fpgui_db"/>
       </Item64>
       <Item65>
-        <Filename Value="gfx_utils_impl.inc"/>
+        <Filename Value="fpg_utils_impl.inc"/>
         <Type Value="Include"/>
       </Item65>
       <Item66>
-        <Filename Value="gfx_gdi.pas"/>
-        <UnitName Value="gfx_gdi"/>
+        <Filename Value="fpg_gdi.pas"/>
+        <UnitName Value="fpg_gdi"/>
       </Item66>
       <Item67>
-        <Filename Value="gfx_impl.pas"/>
-        <UnitName Value="gfx_impl"/>
+        <Filename Value="fpg_impl.pas"/>
+        <UnitName Value="fpg_impl"/>
       </Item67>
       <Item68>
-        <Filename Value="gdikeys.inc"/>
+        <Filename Value="fpg_keys_gdi.inc"/>
         <Type Value="Include"/>
       </Item68>
       <Item69>

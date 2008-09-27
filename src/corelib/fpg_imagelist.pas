@@ -17,7 +17,7 @@
       treeview etc.
 }
 
-unit gfx_imagelist;
+unit fpg_imagelist;
 
 {$mode objfpc}{$H+}
 
@@ -28,8 +28,8 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx;
+  fpg_base,
+  fpg_main;
   
 type
 
@@ -79,8 +79,8 @@ type
 implementation
 
 uses
-  gfx_imgfmt_bmp,
-  gfx_utils;
+  fpg_imgfmt_bmp,
+  fpg_utils;
 
 { TfpgImageList }
 

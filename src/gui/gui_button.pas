@@ -24,10 +24,10 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
-  gfx_command_intf;
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  fpg_command_intf;
 
 type
 
@@ -404,55 +404,55 @@ procedure TfpgBaseButton.HandlePaint;
         end;
       end
     else // if ImageLayout in [ilImageTop, ilImageBottom] then
-      begin
+    begin
       TextX := (Width - textWidth) div 2;
       // center horizontaly
       if FShowImage and assigned (FImage) then
-        begin
+      begin
         ImageX := (Width - FImage.Width) div 2;
         // vertical places if image and text
         if FImageMargin = -1 then
-          begin  // Free space between border and image is the same as between border and text
+        begin  // Free space between border and image is the same as between border and text
           if FImageSpacing = -1 then // free space between image/text = border/text = border/image
-            begin
+          begin
             w := (Height - FImage.Height - textHeight) div 3;
             if w < 3 then  // minimal margin from border for rectangle/focusrect/...
               w := 3;
             if FImageLayout = ilImageTop then
-              begin
+            begin
               ImageY := w;
               TextY := Height - w - textHeight;
-              end
+            end
             else // if FImageLayout = ilImageBottom then
-              begin
+            begin
               ImageY := Height - w - FImage.Height;
               TextY := w;
-              end;
-            end
+            end;
+          end
           else // fixed space between image/text
-            begin
+          begin
             w := (Height - FImageSpacing - FImage.Height - textHeight) div 2;
             if w < 3 then  // minimal margin from border for rectangle/focusrect/...
               w := 3;
             if FImageLayout = ilImageTop then
-              begin
+            begin
               ImageY := w;
               TextY := w + FImage.Height + FImageSpacing;
-              end
+            end
             else // if FImageLayout = ilImageRight then
-              begin
+            begin
               ImageY := Height - w - FImage.Height;
               TextY := w;
-              end;
             end;
-          end
+          end;
+        end
         else  // Fixed image
-          begin
+        begin
           if FImageLayout = ilImageTop then
-            begin
+          begin
             ImageY := FImageMargin + 3;
             if FImageSpacing = -1 then
-              begin
+            begin
               w := (Height - FImage.Height - ImageY - textHeight) div 2;
               if w < 0 then
                 w := 0;
@@ -460,33 +460,33 @@ procedure TfpgBaseButton.HandlePaint;
             else
               w := FImageSpacing;
             TextY := ImageY + FImage.Height + w;
-            end
+          end
           else // if FImageLayout = ilImageRight then
-            begin
+          begin
             ImageY := Height - FImageMargin - 3 - FImage.Height;
             if FImageSpacing = -1 then
-              begin
+            begin
               w := (Height - FImageMargin - FImage.Height - textHeight) div 2;
               if w < 3 then
                 w := 3;
               TextY := w;
-              end
+            end
             else
-              begin
+            begin
               textY := ImageY - textHeight - FImageSpacing;
               if textY < 3 then
                 textY := 3;
-              end;
-            end;
+             end;
           end;
-        end
+        end;
+      end
       else
-        begin  // no image,
+      begin  // no image,
         ImageY := 0;
         ImageX := 0;
         TextY := (Height - textHeight) div 2;
-        end;
       end;
+    end;
   end;
 
 

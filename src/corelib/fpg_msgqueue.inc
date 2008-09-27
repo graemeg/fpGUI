@@ -1,6 +1,6 @@
-{%mainunit fpgfx.pas}
+{%mainunit fpg_main.pas}
 
-// fpGFX internal message queue implementation
+// fpGUI internal message queue implementation
 
 type
   // a simlpe linked list implementation

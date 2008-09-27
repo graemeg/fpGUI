@@ -1,11 +1,28 @@
-unit gfx_utils;
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Abstracted OS specific function to work in a cross-platfrom manner.
+}
+
+unit fpg_utils;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, gfxbase;
+  Classes, SysUtils, fpg_base;
 
 // *** Platform specific functions ***
 
@@ -37,7 +54,7 @@ implementation
 
 
 // Platform specific encoding handling functions
-{$I gfx_utils_impl.inc}
+{$I fpg_utils_impl.inc}
 
 
 

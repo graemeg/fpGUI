@@ -24,9 +24,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
   gui_scrollbar;
   
 type
@@ -268,7 +268,7 @@ type
 implementation
 
 uses
-  gfx_constants;
+  fpg_constants;
   
 
 type

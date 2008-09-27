@@ -24,8 +24,8 @@ interface
 uses
   Classes,
   SysUtils,
-  fpgfx,
-  gfx_widget,
+  fpg_main,
+  fpg_widget,
   gui_form,
   vfddesigner,
   vfdwidgetclass,

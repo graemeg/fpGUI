@@ -1,21 +1,34 @@
-unit gfx_extinterpolation;
-
 {
-Some more interpolation filters for TfpgCanvas.StretchDraw:
-Bessel, Gaussian and Sinc are infinite impulse response (IIR),
-the others are finite impulse response (FIR). The implementation
-of Bessel and Sinc are windowed with Blackman filter.
+    fpGUI  -  Free Pascal GUI Library
 
-This unit was ported from fcl-image which is part of FPC. A few
-more filters have also been added.
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Some more interpolation filters for TfpgCanvas.StretchDraw:
+      Bessel, Gaussian and Sinc are infinite impulse response (IIR),
+      the others are finite impulse response (FIR). The implementation
+      of Bessel and Sinc are windowed with Blackman filter.
+
+      This unit was ported from fcl-image which is part of FPC. A few
+      more filters have also been added.
 }
+
+unit fpg_extinterpolation;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, gfxbase;
+  Classes, SysUtils, fpg_base;
 
 type
 

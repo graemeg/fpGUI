@@ -1,21 +1,36 @@
 {
-  Constants used throughout fpGUI will be defined here. This includes
-  language constants for localization.
-  
-  You only need to changes these defines if you want the default fpGUI language
-  to be something other than English.
-  
-  Soon the lang_*.inc files will be auto generated from the actual *.po files.
-  At which point only the .po files need to be maintained.
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Constants used throughout fpGUI will be defined here. This includes
+      language constants for localization.
+
+      You only need to changes these defines if you want the default
+      fpGUI language to be something other than English.
+
+      Soon the lang_*.inc files will be auto generated from the
+      actual *.po files. At which point only the .po files need
+      to be maintained.
 }
-unit gfx_constants;
+
+unit fpg_constants;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  SysUtils, gfxbase;
+  SysUtils, fpg_base;
 
 resourcestring
 

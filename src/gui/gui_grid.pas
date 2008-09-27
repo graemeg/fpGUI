@@ -33,8 +33,8 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
+  fpg_base,
+  fpg_main,
   gui_basegrid,
   gui_customgrid;
   
@@ -157,7 +157,7 @@ function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCoun
 implementation
 
 uses
-  gfx_constants;
+  fpg_constants;
 
 function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;
 begin

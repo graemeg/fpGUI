@@ -34,11 +34,11 @@ interface
 uses
   Classes,
   SysUtils,
-  gfx_widget,
-  gui_scrollbar,
-  gfxbase,
-  fpgfx;
-  
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  gui_scrollbar;
+
 type
 
   // My thinking was that we could use this class as the base class for anything

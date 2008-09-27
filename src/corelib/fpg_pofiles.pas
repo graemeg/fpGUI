@@ -1,7 +1,19 @@
 {
+    fpGUI  -  Free Pascal GUI Library
 
-  Abstract:
-    Methods and classes for loading translations/localizations from po files.
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Methods and classes for loading translations/localizations from po files.
+
 
   Example 1: Load a specific .po file:
 
@@ -30,7 +42,8 @@
       MessageDlg('Title','Text',mtInformation,[mbOk,mbCancel,mbYes],0);
     end;
 }
-unit gfx_pofiles;
+
+unit fpg_pofiles;
 
 {$mode objfpc}{$H+}{$INLINE ON}
 
@@ -42,7 +55,7 @@ uses
   Classes,
   SysUtils,
   Contnrs,
-  gfx_stringhashlist;
+  fpg_stringhashlist;
 
 type
   TPOFileItem = class(TObject)
@@ -90,10 +103,12 @@ procedure DebugLn(const s1, s2: string);
 procedure DebugLn(const s1, s2, s3: string);
 procedure DebugLn(const s1, s2, s3, s4: string);
 
+
 implementation
 
 uses
-  gfx_UTF8utils;
+  fpg_stringutils;
+
 
 procedure DebugLn(const s1: string);
 begin

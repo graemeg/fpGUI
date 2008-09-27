@@ -28,7 +28,7 @@ interface
 uses
   Classes,
   db,
-  gfx_widget,
+  fpg_widget,
   gui_label{, gui_edit};
   
 type

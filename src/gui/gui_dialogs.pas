@@ -33,10 +33,10 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_imgfmt_bmp,
-  gfx_constants,
+  fpg_base,
+  fpg_main,
+  fpg_imgfmt_bmp,
+  fpg_constants,
   gui_form,
   gui_button,
   gui_label,
@@ -210,9 +210,9 @@ function SelectFileDialog(aDialogType: boolean = sfdOpen;
 implementation
 
 uses
-  gfx_widget,
-  gfx_utils,
-  gfx_utf8utils
+  fpg_widget,
+  fpg_utils,
+  fpg_stringutils
   {$IFDEF MSWINDOWS}
   ,Windows   // used by File Dialog
   {$ENDIF}

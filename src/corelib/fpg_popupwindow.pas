@@ -16,7 +16,7 @@
       ComboBox and Calendar controls.
 }
 
-unit gfx_popupwindow;
+unit fpg_popupwindow;
 
 {$mode objfpc}{$H+}
 
@@ -27,10 +27,10 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
-  gfx_impl;
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  fpg_impl;
   
 type
 

@@ -15,7 +15,7 @@
       This defines the CoreLib backend interface to the Windows GDI API.
 }
 
-unit gfx_gdi;
+unit fpg_gdi;
 
 {$mode objfpc}{$H+}
 
@@ -27,8 +27,8 @@ uses
   Windows,
   Classes,
   SysUtils,
-  gfxbase,
-  gfx_impl;
+  fpg_base,
+  fpg_impl;
 
 { Constants missing on windows unit }
 const
@@ -237,12 +237,13 @@ type
 implementation
 
 uses
-  fpgfx,
-  gfx_widget,
-  gui_form, // how can we remove this dependency?
-  gfx_UTF8Utils,
-  math,
-  gfx_popupwindow;
+  fpg_main,
+  fpg_widget,
+  fpg_popupwindow,
+  fpg_stringutils,
+  gui_form,
+  math;
+
 
 var
   wapplication: TfpgApplication;
@@ -251,7 +252,7 @@ var
 
 
 // some required keyboard functions
-{$INCLUDE gdikeys.inc}
+{$INCLUDE fpg_keys_gdi.inc}
 
 function fpgColorToWin(col: TfpgColor): longword;
 var

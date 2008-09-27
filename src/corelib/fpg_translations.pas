@@ -1,8 +1,21 @@
 {
-    Methods and classes for loading the translations/localizations.
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Methods and classes for loading the translations/localizations.
 }
 
-unit gfx_translations;
+unit fpg_translations;
 
 {$mode objfpc}{$H+}
 
@@ -50,8 +63,8 @@ implementation
 
 uses
   GetText
-  ,gfx_pofiles
-  ,gfx_utils
+  ,fpg_pofiles
+  ,fpg_utils
   ;
   
 

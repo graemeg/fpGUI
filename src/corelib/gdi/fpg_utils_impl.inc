@@ -1,7 +1,8 @@
-{%mainunit gfx_utils.pas}
+{%mainunit fpg_utils.pas}
 
 uses
-  Registry, Shellapi;
+  Registry,
+  Shellapi;
   
 // GDI specific implementations of encoding functions
 

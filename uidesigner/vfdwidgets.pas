@@ -41,7 +41,7 @@ var
 implementation
 
 uses
-  fpgfx,
+  fpg_main,
   vfddesigner,
   gui_form,
   gui_label,

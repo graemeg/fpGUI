@@ -24,8 +24,8 @@ interface
 uses
   SysUtils,
   Classes,
-  gfxbase,
-  gfx_widget,
+  fpg_base,
+  fpg_widget,
   gui_form,
   gui_label,
   gui_button,
@@ -167,7 +167,7 @@ var
 implementation
 
 uses
-  fpgfx,
+  fpg_main,
   vfdmain,
   gui_iniutils,
   gui_dialogs;

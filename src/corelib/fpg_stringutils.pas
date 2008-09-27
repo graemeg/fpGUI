@@ -1,8 +1,22 @@
 {
-  Some handly UTF8 functions copied from the Lazarus LCL. Comes from the
-  LCLProc unit. Surely we can move this into FPC?
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Some handly UTF8 functions copied from the Lazarus LCL. Comes from the
+      LCLProc unit. Surely we can move this into FPC?
 }
-unit gfx_UTF8utils;
+
+unit fpg_stringutils;
 
 {$mode objfpc}{$H+}
 

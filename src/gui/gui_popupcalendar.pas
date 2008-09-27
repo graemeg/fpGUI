@@ -45,9 +45,17 @@ unit gui_popupcalendar;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_button, gui_combobox, gui_grid,
-  gui_dialogs, gfx_popupwindow;
+  SysUtils,
+  Classes,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  fpg_popupwindow,
+  gui_edit,
+  gui_button,
+  gui_combobox,
+  gui_grid,
+  gui_dialogs;
 
 type
 
@@ -155,9 +163,9 @@ type
 implementation
 
 uses
-  gui_scrollbar
-  ,gfx_constants
-  ;
+  gui_scrollbar,
+  fpg_constants;
+
 
 {@VFD_NEWFORM_IMPL}
 

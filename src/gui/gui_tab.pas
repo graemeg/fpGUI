@@ -33,9 +33,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
   gui_button;
   
 type
@@ -138,7 +138,7 @@ type
 implementation
 
 uses
-  gfx_UTF8utils;
+  fpg_stringutils;
   
   
 // compare function used by FPages.Sort

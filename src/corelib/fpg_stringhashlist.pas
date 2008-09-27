@@ -1,32 +1,33 @@
 {
- *****************************************************************************
- *                                                                           *
- *  This file is part of the Lazarus Component Library (LCL)                 *
- *                                                                           *
- *  See the file COPYING.modifiedLGPL, included in this distribution,        *
- *  for details about the copyright.                                         *
- *                                                                           *
- *  This program is distributed in the hope that it will be useful,          *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                     *
- *                                                                           *
- *****************************************************************************
+    fpGUI  -  Free Pascal GUI Library
 
-  Thanks to Markus Waldenburg.
-  
-  Ported this unit to fpGUI by Graeme Geldenhuys.
-  TStringHashList is supposed to be faster than FPC's TFPObjectHashTable. This
-  unit is used in gfx_pofile unit.
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      This file was originally part of the Lazarus Component Library (LCL).
+      Thanks to Markus Waldenburg.
+
+      Ported this unit to fpGUI by Graeme Geldenhuys.
+      TStringHashList is supposed to be faster than FPC's TFPObjectHashTable.
+      This unit is used in fpg_pofile unit.
 }
-unit gfx_stringhashlist;
+
+unit fpg_stringhashlist;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, gfx_constants;
+  Classes, SysUtils, fpg_constants;
 
 type
   PStringHashItem = ^TStringHashItem;

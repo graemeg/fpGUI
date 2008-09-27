@@ -26,9 +26,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
   gui_scrollbar,
   gui_menu;
 
@@ -127,9 +127,8 @@ function CreateMemo(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMemo;
 implementation
 
 uses
-  gfx_UTF8utils;
-  
-  
+  fpg_stringutils;
+
 type
   // custom stringlist that will notify the memo of item changes
   TfpgMemoStrings = class(TStringList)

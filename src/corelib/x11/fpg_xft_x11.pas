@@ -1,24 +1,23 @@
 {
-    fpGFX  -  Free Pascal Graphics Library
-    Copyright (C) 2006-2007 by Graeme Geldenhuys
-      member of the fpGFX development team.
+    fpGUI  -  Free Pascal GUI Library
 
-    Xft interface functions
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
 
-    See the file COPYING.fpGFX, included in this distribution,
-    for details about the copyright.
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- **********************************************************************}
+    Description:
+      Xft interface functions
+}
 
-
-unit x11_xft;
+unit fpg_xft_x11;
 
 {$mode objfpc}{$H+}
-
 {$linklib Xft}
 
 interface

@@ -1,18 +1,21 @@
 {
-    fpGFX  -  Free Pascal Graphics Library
+   fpGUI  -  Free Pascal GUI Library
 
-    Win32 GDI target implementation: Keycode translation helpers
+   Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+   distribution, for details of the copyright.
 
-    See the file COPYING.modifiedLGPL, included in this distribution,
-    for details about the copyright.
+   See the file COPYING.modifiedLGPL, included in this distribution,
+   for details about redistributing fpGUI.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- **********************************************************************}
+   Description:
+     Win32 GDI target implementation: Keycode translation helpers
+}
 
-{%mainunit gfx_gdi.pas}
+{%mainunit fpg_gdi.pas}
 
 function VirtKeyToKeycode(VirtKey: Byte): Word;
 const

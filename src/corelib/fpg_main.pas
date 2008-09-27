@@ -1,4 +1,21 @@
-unit fpgfx;
+{
+    fpGUI  -  Free Pascal GUI Library
+
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      The main unit trying everything together in corelib.
+}
+
+unit fpg_main;
 
 {$mode objfpc}{$H+}
 
@@ -9,14 +26,14 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase
+  fpg_base
   // This is the only place we have such IFDEF!!! Is this ok, or must we
   // implement it like we have done for the previous version of fpGFX?
   {$IFDEF MSWINDOWS}
-  ,gfx_gdi
+  ,fpg_gdi
   {$ENDIF}
   {$IFDEF UNIX}
-  ,gfx_x11
+  ,fpg_x11
   {$ENDIF}
   ;
 
@@ -362,13 +379,13 @@ implementation
 uses
   strutils,
   math,
-  gfx_imgfmt_bmp,
-  gfx_stdimages,
-  gfx_extinterpolation, // only so that it get auto compiled
-  gfx_translations,
-  gfx_constants,
-  gfx_UTF8utils,
-  gfx_widget,
+  fpg_imgfmt_bmp,
+  fpg_stdimages,
+  fpg_extinterpolation, // only so that it get auto compiled
+  fpg_translations,
+  fpg_constants,
+  fpg_stringutils,
+  fpg_widget,
   gui_dialogs,
   gui_hint;
 
@@ -394,7 +411,7 @@ begin
   FontDesc := AFontDesc;
 end;
 
-{$include gfx_msgqueue.inc}
+{$include fpg_msgqueue.inc}
 
 // Timer support
 

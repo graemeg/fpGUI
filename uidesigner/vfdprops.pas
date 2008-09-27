@@ -24,8 +24,8 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  gfx_widget,
+  fpg_base,
+  fpg_widget,
   vfdwidgetclass,
   gui_edit,
   gui_button,
@@ -151,7 +151,7 @@ uses
   TypInfo,
   vfdformparser,
   vfdeditors,
-  fpgfx,
+  fpg_main,
   gui_dialogs;
 
 

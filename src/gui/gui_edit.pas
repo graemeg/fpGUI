@@ -24,9 +24,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
   gui_menu;
 
 type
@@ -296,8 +296,8 @@ function CreateEditCurrency(AOwner: TComponent; x, y, w, h: TfpgCoord;
 implementation
 
 uses
-  gfx_UTF8utils,
-  gfx_constants,
+  fpg_stringutils,
+  fpg_constants,
   gui_hint;
 
 const

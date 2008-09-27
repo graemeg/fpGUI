@@ -24,9 +24,9 @@ interface
 uses
   Classes,
   SysUtils,
-  fpgfx,
-  gfxbase,
-  gfx_widget;
+  fpg_base,
+  fpg_main,
+  fpg_widget;
 
 type
 
@@ -76,7 +76,9 @@ type
   
 function CreateRadioButton(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgRadioButton;
 
+
 implementation
+
 
 function CreateRadioButton(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgRadioButton;
 begin

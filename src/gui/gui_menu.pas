@@ -33,12 +33,12 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
-  gfx_popupwindow,
-  gfx_UTF8utils,
-  gfx_command_intf;
+  fpg_base,
+  fpg_main,
+  fpg_widget,
+  fpg_popupwindow,
+  fpg_stringutils,
+  fpg_command_intf;
   
 type
   TfpgHotKeyDef = string;

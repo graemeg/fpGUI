@@ -25,9 +25,9 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_widget,
+  fpg_base,
+  fpg_main,
+  fpg_widget,
   gui_form,
   gui_dialogs,
   gui_label,
@@ -141,7 +141,8 @@ type
 implementation
 
 uses
-  vfdmain, TypInfo;
+  vfdmain,
+  TypInfo;
 
 
 { TWidgetDesigner }

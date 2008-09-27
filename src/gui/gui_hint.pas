@@ -26,8 +26,8 @@ interface
 uses
   Classes,
   SysUtils,
-  fpgfx,
-  gfxbase,
+  fpg_base,
+  fpg_main,
   gui_form,
   gui_label;
   

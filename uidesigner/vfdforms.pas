@@ -24,8 +24,8 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  gfx_widget,
+  fpg_base,
+  fpg_widget,
   gui_form,
   gui_label,
   gui_edit,
@@ -130,9 +130,9 @@ type
 implementation
 
 uses
-  fpgfx,
+  fpg_main,
   gui_iniutils,
-  gfx_constants,
+  fpg_constants,
   vfdprops; // used to get Object Inspector defaults
 
 

@@ -24,9 +24,9 @@ interface
 uses
   Classes,
   SysUtils,
-  fpgfx,
-  gfxbase,
-  gfx_widget;
+  fpg_base,
+  fpg_main,
+  fpg_widget;
   
 const
   clColorGrabBar = $839EFE; // Pale navy blue

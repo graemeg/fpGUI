@@ -24,7 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
-  gfx_widget,
+  fpg_widget,
   gui_label,
   gui_button,
   gui_memo,
@@ -49,8 +49,8 @@ type
 implementation
 
 uses
-  gfxbase,
-  fpgfx;
+  fpg_base,
+  fpg_main;
 
 { TItemEditorForm }
 
