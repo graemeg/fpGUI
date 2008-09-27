@@ -167,7 +167,8 @@ function FindKeyboardFocus: TfpgWidget;
 implementation
 
 uses
-  math, fpg_constants, gui_hint;
+  fpg_constants,
+  fpg_hint;
 
 
 var

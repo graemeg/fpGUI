@@ -27,9 +27,9 @@ uses
   fpg_base,
   fpg_widget,
   vfdwidgetclass,
-  gui_edit,
-  gui_button,
-  gui_combobox;
+  fpg_edit,
+  fpg_button,
+  fpg_combobox;
 
 type
 
@@ -152,7 +152,7 @@ uses
   vfdformparser,
   vfdeditors,
   fpg_main,
-  gui_dialogs;
+  fpg_dialogs;
 
 
 procedure EditStringList(sl: TStringList);

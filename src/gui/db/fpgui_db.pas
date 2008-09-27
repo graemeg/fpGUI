@@ -29,7 +29,7 @@ uses
   Classes,
   db,
   fpg_widget,
-  gui_label{, gui_edit};
+  fpg_label{, fpg_edit};
   
 type
 

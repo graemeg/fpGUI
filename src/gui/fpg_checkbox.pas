@@ -15,7 +15,7 @@
       Defines a CheckBox control. Also known as a Check Button control.
 }
 
-unit gui_checkbox;
+unit fpg_checkbox;
 
 {$mode objfpc}{$H+}
 

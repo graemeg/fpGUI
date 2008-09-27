@@ -26,7 +26,7 @@ uses
   SysUtils,
   fpg_main,
   fpg_widget,
-  gui_form,
+  fpg_form,
   vfddesigner,
   vfdwidgetclass,
   vfdwidgets;

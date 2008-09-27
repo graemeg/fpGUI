@@ -16,7 +16,7 @@
       controls.
 }
 
-unit gui_form;
+unit fpg_form;
 
 {$mode objfpc}{$H+}
 
@@ -125,7 +125,7 @@ implementation
 uses
   fpg_main,
   fpg_popupwindow,
-  gui_menu;
+  fpg_menu;
   
 type
   // to access protected methods

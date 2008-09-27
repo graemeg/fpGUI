@@ -352,11 +352,11 @@ begin
     'interface' + LineEnding + LineEnding +
     'uses' + LineEnding +
     '  SysUtils, Classes, fpg_base, fpg_main, fpg_widget,' + LineEnding +
-    '  gui_edit, gui_form, gui_label, gui_button,' + LineEnding +
-    '  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, ' + LineEnding +
-    '  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, ' + LineEnding +
-    '  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,' + LineEnding +
-    '  gui_panel, gui_popupcalendar, gui_gauge;' + LineEnding + LineEnding +
+    '  fpg_edit, fpg_form, fpg_label, fpg_button,' + LineEnding +
+    '  fpg_listbox, fpg_memo, fpg_combobox, fpg_basegrid, fpg_grid, ' + LineEnding +
+    '  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar, ' + LineEnding +
+    '  fpg_progressbar, fpg_radiobutton, fpg_tab, fpg_menu,' + LineEnding +
+    '  fpg_panel, fpg_popupcalendar, fpg_gauge;' + LineEnding + LineEnding +
     'type' + LineEnding + LineEnding +
     '{@VFD_NEWFORM_DECL}' + LineEnding + LineEnding +
     'implementation' + LineEnding + LineEnding +

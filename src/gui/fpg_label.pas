@@ -15,7 +15,7 @@
       Defines a basic Label control. Also known as a Caption component.
 }
 
-unit gui_label;
+unit fpg_label;
 
 {$mode objfpc}{$H+}
 

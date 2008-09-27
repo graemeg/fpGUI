@@ -15,7 +15,7 @@
       Defines a Text Edit control. Also known a Text Entry control.
 }
 
-unit gui_edit;
+unit fpg_edit;
 
 {$mode objfpc}{$H+}
 
@@ -27,7 +27,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  gui_menu;
+  fpg_menu;
 
 type
   TfpgEditBorderStyle = (ebsNone, ebsDefault, ebsSingle);
@@ -298,7 +298,7 @@ implementation
 uses
   fpg_stringutils,
   fpg_constants,
-  gui_hint;
+  fpg_hint;
 
 const
   // internal popupmenu item names

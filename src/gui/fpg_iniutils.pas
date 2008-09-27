@@ -16,7 +16,7 @@
       information.
 }
 
-unit gui_iniutils;
+unit fpg_iniutils;
 
 {$mode objfpc}{$H+}
 
@@ -26,7 +26,7 @@ uses
   Classes,
   SysUtils,
   IniFiles,
-  gui_form;
+  fpg_form;
 
 type
 

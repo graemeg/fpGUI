@@ -15,7 +15,7 @@
       Defines a window that gets used to display help hints (aka a HintWindow)
 }
 
-unit gui_hint; 
+unit fpg_hint;
 
 {$mode objfpc}{$H+}
 
@@ -28,8 +28,8 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
-  gui_form,
-  gui_label;
+  fpg_form,
+  fpg_label;
   
 type
   TfpgHintWindow = class(TfpgForm)

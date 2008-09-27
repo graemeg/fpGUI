@@ -17,7 +17,7 @@
       demo for image examples.
 }
 
-unit gui_animation;
+unit fpg_animation;
 
 {$mode objfpc}{$H+}
 

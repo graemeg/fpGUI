@@ -15,7 +15,7 @@
       Defines a Radio Button control.
 }
 
-unit gui_radiobutton;
+unit fpg_radiobutton;
 
 {$mode objfpc}{$H+}
 

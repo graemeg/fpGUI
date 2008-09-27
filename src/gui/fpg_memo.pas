@@ -15,7 +15,7 @@
       Defines a Memo control. Also known as a multi-line text edit control.
 }
 
-unit gui_memo;
+unit fpg_memo;
 
 {$mode objfpc}{$H+}
 
@@ -29,8 +29,8 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  gui_scrollbar,
-  gui_menu;
+  fpg_scrollbar,
+  fpg_menu;
 
 type
 

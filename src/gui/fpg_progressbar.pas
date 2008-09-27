@@ -15,7 +15,7 @@
       Defines a component for a progress bar.
 }
 
-unit gui_progressbar;
+unit fpg_progressbar;
 
 {$mode objfpc}{$H+}
 

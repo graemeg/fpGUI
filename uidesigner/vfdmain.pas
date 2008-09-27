@@ -25,7 +25,7 @@ uses
   Classes,
   SysUtils,
   fpg_widget,
-  gui_dialogs,
+  fpg_dialogs,
   vfdprops,
   vfdforms,
   vfddesigner,
@@ -83,7 +83,7 @@ implementation
 
 uses
   vfdformparser,
-  gui_iniutils,
+  fpg_iniutils,
   fpg_utils,
   fpg_main;
 

@@ -15,7 +15,7 @@
       Defines a Splitter control.
 }
 
-unit gui_splitter;
+unit fpg_splitter;
 
 {$mode objfpc}{$H+}
 

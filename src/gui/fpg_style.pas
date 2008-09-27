@@ -17,7 +17,7 @@
       This is still work in progress!
 }
 
-unit gui_style;
+unit fpg_style;
 
 {$mode objfpc}{$H+}
 

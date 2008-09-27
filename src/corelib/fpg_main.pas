@@ -386,8 +386,8 @@ uses
   fpg_constants,
   fpg_stringutils,
   fpg_widget,
-  gui_dialogs,
-  gui_hint;
+  fpg_dialogs,
+  fpg_hint;
 
 var
   fpgTimers: TList;

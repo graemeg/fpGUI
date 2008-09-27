@@ -149,120 +149,120 @@
         <Type Value="Include"/>
       </Item30>
       <Item31>
-        <Filename Value="..\..\gui\gui_animation.pas"/>
-        <UnitName Value="gui_animation"/>
+        <Filename Value="..\..\gui\fpg_animation.pas"/>
+        <UnitName Value="fpg_animation"/>
       </Item31>
       <Item32>
-        <Filename Value="..\..\gui\gui_basegrid.pas"/>
-        <UnitName Value="gui_basegrid"/>
+        <Filename Value="..\..\gui\fpg_basegrid.pas"/>
+        <UnitName Value="fpg_basegrid"/>
       </Item32>
       <Item33>
-        <Filename Value="..\..\gui\gui_button.pas"/>
-        <UnitName Value="gui_button"/>
+        <Filename Value="..\..\gui\fpg_button.pas"/>
+        <UnitName Value="fpg_button"/>
       </Item33>
       <Item34>
-        <Filename Value="..\..\gui\gui_checkbox.pas"/>
-        <UnitName Value="gui_checkbox"/>
+        <Filename Value="..\..\gui\fpg_checkbox.pas"/>
+        <UnitName Value="fpg_checkbox"/>
       </Item34>
       <Item35>
-        <Filename Value="..\..\gui\gui_combobox.pas"/>
-        <UnitName Value="gui_combobox"/>
+        <Filename Value="..\..\gui\fpg_combobox.pas"/>
+        <UnitName Value="fpg_combobox"/>
       </Item35>
       <Item36>
-        <Filename Value="..\..\gui\gui_customgrid.pas"/>
-        <UnitName Value="gui_customgrid"/>
+        <Filename Value="..\..\gui\fpg_customgrid.pas"/>
+        <UnitName Value="fpg_customgrid"/>
       </Item36>
       <Item37>
-        <Filename Value="..\..\gui\gui_dialogs.pas"/>
-        <UnitName Value="gui_dialogs"/>
+        <Filename Value="..\..\gui\fpg_dialogs.pas"/>
+        <UnitName Value="fpg_dialogs"/>
       </Item37>
       <Item38>
-        <Filename Value="..\..\gui\gui_editcombo.pas"/>
-        <UnitName Value="gui_editcombo"/>
+        <Filename Value="..\..\gui\fpg_editcombo.pas"/>
+        <UnitName Value="fpg_editcombo"/>
       </Item38>
       <Item39>
-        <Filename Value="..\..\gui\gui_edit.pas"/>
-        <UnitName Value="gui_edit"/>
+        <Filename Value="..\..\gui\fpg_edit.pas"/>
+        <UnitName Value="fpg_edit"/>
       </Item39>
       <Item40>
-        <Filename Value="..\..\gui\gui_form.pas"/>
-        <UnitName Value="gui_form"/>
+        <Filename Value="..\..\gui\fpg_form.pas"/>
+        <UnitName Value="fpg_form"/>
       </Item40>
       <Item41>
-        <Filename Value="..\..\gui\gui_gauge.pas"/>
-        <UnitName Value="gui_gauge"/>
+        <Filename Value="..\..\gui\fpg_gauge.pas"/>
+        <UnitName Value="fpg_gauge"/>
       </Item41>
       <Item42>
-        <Filename Value="..\..\gui\gui_grid.pas"/>
-        <UnitName Value="gui_grid"/>
+        <Filename Value="..\..\gui\fpg_grid.pas"/>
+        <UnitName Value="fpg_grid"/>
       </Item42>
       <Item43>
-        <Filename Value="..\..\gui\gui_hyperlink.pas"/>
-        <UnitName Value="gui_hyperlink"/>
+        <Filename Value="..\..\gui\fpg_hyperlink.pas"/>
+        <UnitName Value="fpg_hyperlink"/>
       </Item43>
       <Item44>
-        <Filename Value="..\..\gui\gui_iniutils.pas"/>
-        <UnitName Value="gui_iniutils"/>
+        <Filename Value="..\..\gui\fpg_iniutils.pas"/>
+        <UnitName Value="fpg_iniutils"/>
       </Item44>
       <Item45>
-        <Filename Value="..\..\gui\gui_label.pas"/>
-        <UnitName Value="gui_label"/>
+        <Filename Value="..\..\gui\fpg_label.pas"/>
+        <UnitName Value="fpg_label"/>
       </Item45>
       <Item46>
-        <Filename Value="..\..\gui\gui_listbox.pas"/>
-        <UnitName Value="gui_listbox"/>
+        <Filename Value="..\..\gui\fpg_listbox.pas"/>
+        <UnitName Value="fpg_listbox"/>
       </Item46>
       <Item47>
-        <Filename Value="..\..\gui\gui_listview.pas"/>
-        <UnitName Value="gui_listview"/>
+        <Filename Value="..\..\gui\fpg_listview.pas"/>
+        <UnitName Value="fpg_listview"/>
       </Item47>
       <Item48>
-        <Filename Value="..\..\gui\gui_memo.pas"/>
-        <UnitName Value="gui_memo"/>
+        <Filename Value="..\..\gui\fpg_memo.pas"/>
+        <UnitName Value="fpg_memo"/>
       </Item48>
       <Item49>
-        <Filename Value="..\..\gui\gui_menu.pas"/>
-        <UnitName Value="gui_menu"/>
+        <Filename Value="..\..\gui\fpg_menu.pas"/>
+        <UnitName Value="fpg_menu"/>
       </Item49>
       <Item50>
-        <Filename Value="..\..\gui\gui_mru.pas"/>
-        <UnitName Value="gui_mru"/>
+        <Filename Value="..\..\gui\fpg_mru.pas"/>
+        <UnitName Value="fpg_mru"/>
       </Item50>
       <Item51>
-        <Filename Value="..\..\gui\gui_panel.pas"/>
-        <UnitName Value="gui_panel"/>
+        <Filename Value="..\..\gui\fpg_panel.pas"/>
+        <UnitName Value="fpg_panel"/>
       </Item51>
       <Item52>
-        <Filename Value="..\..\gui\gui_popupcalendar.pas"/>
-        <UnitName Value="gui_popupcalendar"/>
+        <Filename Value="..\..\gui\fpg_popupcalendar.pas"/>
+        <UnitName Value="fpg_popupcalendar"/>
       </Item52>
       <Item53>
-        <Filename Value="..\..\gui\gui_progressbar.pas"/>
-        <UnitName Value="gui_progressbar"/>
+        <Filename Value="..\..\gui\fpg_progressbar.pas"/>
+        <UnitName Value="fpg_progressbar"/>
       </Item53>
       <Item54>
-        <Filename Value="..\..\gui\gui_radiobutton.pas"/>
-        <UnitName Value="gui_radiobutton"/>
+        <Filename Value="..\..\gui\fpg_radiobutton.pas"/>
+        <UnitName Value="fpg_radiobutton"/>
       </Item54>
       <Item55>
-        <Filename Value="..\..\gui\gui_scrollbar.pas"/>
-        <UnitName Value="gui_scrollbar"/>
+        <Filename Value="..\..\gui\fpg_scrollbar.pas"/>
+        <UnitName Value="fpg_scrollbar"/>
       </Item55>
       <Item56>
-        <Filename Value="..\..\gui\gui_style.pas"/>
-        <UnitName Value="gui_style"/>
+        <Filename Value="..\..\gui\fpg_style.pas"/>
+        <UnitName Value="fpg_style"/>
       </Item56>
       <Item57>
-        <Filename Value="..\..\gui\gui_tab.pas"/>
-        <UnitName Value="gui_tab"/>
+        <Filename Value="..\..\gui\fpg_tab.pas"/>
+        <UnitName Value="fpg_tab"/>
       </Item57>
       <Item58>
-        <Filename Value="..\..\gui\gui_trackbar.pas"/>
-        <UnitName Value="gui_trackbar"/>
+        <Filename Value="..\..\gui\fpg_trackbar.pas"/>
+        <UnitName Value="fpg_trackbar"/>
       </Item58>
       <Item59>
-        <Filename Value="..\..\gui\gui_tree.pas"/>
-        <UnitName Value="gui_tree"/>
+        <Filename Value="..\..\gui\fpg_tree.pas"/>
+        <UnitName Value="fpg_tree"/>
       </Item59>
       <Item60>
         <Filename Value="..\..\gui\logo.inc"/>
@@ -297,12 +297,12 @@
         <Type Value="Include"/>
       </Item67>
       <Item68>
-        <Filename Value="..\..\gui\gui_splitter.pas"/>
-        <UnitName Value="gui_splitter"/>
+        <Filename Value="..\..\gui\fpg_splitter.pas"/>
+        <UnitName Value="fpg_splitter"/>
       </Item68>
       <Item69>
-        <Filename Value="..\..\gui\gui_hint.pas"/>
-        <UnitName Value="gui_hint"/>
+        <Filename Value="..\..\gui\fpg_hint.pas"/>
+        <UnitName Value="fpg_hint"/>
       </Item69>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>

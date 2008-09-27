@@ -15,7 +15,7 @@
       Standard dialogs used by fpGUI based applications.
 }
 
-unit gui_dialogs;
+unit fpg_dialogs;
 
 {$mode objfpc}{$H+}
 
@@ -37,16 +37,16 @@ uses
   fpg_main,
   fpg_imgfmt_bmp,
   fpg_constants,
-  gui_form,
-  gui_button,
-  gui_label,
-  gui_listbox,
-  gui_checkbox,
-  gui_edit,
-  gui_grid,
-  gui_combobox,
-  gui_panel,
-  gui_memo;
+  fpg_form,
+  fpg_button,
+  fpg_label,
+  fpg_listbox,
+  fpg_checkbox,
+  fpg_edit,
+  fpg_grid,
+  fpg_combobox,
+  fpg_panel,
+  fpg_memo;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,

@@ -16,7 +16,7 @@
       popup windows like Calender Combobox, or directly in a Form.
 }
 
-unit gui_popupcalendar;
+unit fpg_popupcalendar;
 
 {$mode objfpc}{$H+}
 
@@ -51,11 +51,11 @@ uses
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
-  gui_edit,
-  gui_button,
-  gui_combobox,
-  gui_grid,
-  gui_dialogs;
+  fpg_edit,
+  fpg_button,
+  fpg_combobox,
+  fpg_grid,
+  fpg_dialogs;
 
 type
 
@@ -163,7 +163,7 @@ type
 implementation
 
 uses
-  gui_scrollbar,
+  fpg_scrollbar,
   fpg_constants;
 
 

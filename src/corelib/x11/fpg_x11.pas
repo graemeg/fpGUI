@@ -303,7 +303,7 @@ uses
   fpg_widget,
   fpg_popupwindow,
   fpg_stringutils,  // used for GetTextWidth
-  gui_form,         // for modal event support
+  fpg_form,         // for modal event support
   cursorfont,
   xatom;            // used for XA_WM_NAME
 

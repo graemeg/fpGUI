@@ -25,9 +25,9 @@ uses
   Classes,
   SysUtils,
   fpg_widget,
-  gui_label,
-  gui_button,
-  gui_memo,
+  fpg_label,
+  fpg_button,
+  fpg_memo,
   vfdforms;
 
 type

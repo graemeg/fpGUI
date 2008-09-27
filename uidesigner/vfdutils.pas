@@ -25,12 +25,12 @@ uses
   Classes,
   SysUtils,
   fpg_widget,
-  gui_form,
-  gui_label,
-  gui_edit,
-  gui_button,
-  gui_memo,
-  gui_checkbox;
+  fpg_form,
+  fpg_label,
+  fpg_edit,
+  fpg_button,
+  fpg_memo,
+  fpg_checkbox;
 
 
 procedure SetWidgetText(wg: TfpgWidget; txt: string);

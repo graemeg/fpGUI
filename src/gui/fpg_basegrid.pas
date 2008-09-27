@@ -16,7 +16,7 @@
       component.
 }
 
-unit gui_basegrid;
+unit fpg_basegrid;
 
 {$mode objfpc}{$H+}
 
@@ -30,7 +30,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  gui_scrollbar;
+  fpg_scrollbar;
   
 type
 

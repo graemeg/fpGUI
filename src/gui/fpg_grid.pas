@@ -15,7 +15,7 @@
       Defines a File Grid and String Grid. Both are decendants of Custom Grid.
 }
 
-unit gui_grid;
+unit fpg_grid;
 
 {$mode objfpc}{$H+}
 
@@ -35,8 +35,8 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
-  gui_basegrid,
-  gui_customgrid;
+  fpg_basegrid,
+  fpg_customgrid;
   
 type
 

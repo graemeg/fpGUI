@@ -15,7 +15,7 @@
       Defines a Listview control.
 }
 
-unit gui_listview;
+unit fpg_listview;
 
 {$mode objfpc}{$H+}
 
@@ -27,7 +27,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  gui_scrollbar;
+  fpg_scrollbar;
   
 type
   TfpgListView    = class;

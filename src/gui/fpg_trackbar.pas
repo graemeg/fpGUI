@@ -15,7 +15,7 @@
       Defines two types of TrackBar controls. Also known as Slider controls.
 }
 
-unit gui_trackbar;
+unit fpg_trackbar;
 
 {$mode objfpc}{$H+}
 

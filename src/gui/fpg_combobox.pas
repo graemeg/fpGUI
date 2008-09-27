@@ -15,7 +15,7 @@
       Defines a ComboBox control. Also known as a Choice List control.
 }
 
-unit gui_combobox;
+unit fpg_combobox;
 
 {$mode objfpc}{$H+}
 
@@ -159,7 +159,7 @@ function CreateComboBox(AOwner: TComponent; x, y, w: TfpgCoord; AList: TStringLi
 implementation
 
 uses
-  gui_listbox,
+  fpg_listbox,
   math;
   
 var

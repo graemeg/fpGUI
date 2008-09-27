@@ -16,14 +16,14 @@
       inserted in the File menu.
 }
 
-unit gui_mru;
+unit fpg_mru;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, gui_menu;
+  Classes, SysUtils, fpg_menu;
   
 type
 
@@ -67,7 +67,7 @@ type
 implementation
 
 uses
-  gui_iniutils;
+  fpg_iniutils;
 
 type
   //to be able to recognize MRU menu item when deleting

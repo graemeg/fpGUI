@@ -15,7 +15,7 @@
       Defines a MainMenu Bar, Popup Menu and Menu Item controls.
 }
 
-unit gui_menu;
+unit fpg_menu;
 
 {$mode objfpc}{$H+}
 

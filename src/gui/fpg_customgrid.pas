@@ -15,7 +15,7 @@
       Defines a Custom Grid control and basic Column class.
 }
 
-unit gui_customgrid; 
+unit fpg_customgrid;
 
 {$mode objfpc}{$H+}
 
@@ -34,7 +34,7 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
-  gui_basegrid;
+  fpg_basegrid;
   
 type
 

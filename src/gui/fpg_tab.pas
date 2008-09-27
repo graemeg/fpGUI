@@ -15,7 +15,7 @@
       Defines a Page Control and Tab Sheets.
 }
 
-unit gui_tab;
+unit fpg_tab;
 
 {$mode objfpc}{$H+}
 
@@ -36,7 +36,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  gui_button;
+  fpg_button;
   
 type
   // forward declaration

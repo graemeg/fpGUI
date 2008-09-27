@@ -16,7 +16,7 @@
       This control can also draw itself like a GroupBox component.
 }
 
-unit gui_panel;
+unit fpg_panel;
 
 {$mode objfpc}{$H+}
 

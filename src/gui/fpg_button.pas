@@ -15,7 +15,7 @@
       Defines a push button control.
 }
 
-unit gui_button;
+unit fpg_button;
 
 {$mode objfpc}{$H+}
 
@@ -162,7 +162,7 @@ function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
 implementation
 
 uses
-  gui_form; {$Note Try and remove this gui_form dependency.}
+  fpg_form; {$Note Try and remove this fpg_form dependency.}
 
 function CreateButton(AOwner: TComponent; x, y, w: TfpgCoord; AText: string;
   AOnClickEvent: TNotifyEvent; AImage: string): TfpgButton;

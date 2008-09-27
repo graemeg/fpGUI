@@ -15,7 +15,7 @@
       Defines a edit ComboBox control with auto-complete feature.
 }
 
-unit gui_editcombo;
+unit fpg_editcombo;
 
 {$mode objfpc}{$H+}
 
@@ -58,7 +58,7 @@ uses
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
-  gui_combobox;
+  fpg_combobox;
 
 type
   TAllowNew = (anNo, anYes, anAsk);
@@ -140,8 +140,8 @@ implementation
 uses
   fpg_stringutils,
   fpg_constants,
-  gui_listbox,
-  gui_dialogs,
+  fpg_listbox,
+  fpg_dialogs,
   math;
 
 var

@@ -26,14 +26,14 @@ uses
   SysUtils,
   fpg_base,
   fpg_widget,
-  gui_form,
-  gui_label,
-  gui_edit,
-  gui_button,
-  gui_listbox,
-  gui_combobox,
-  gui_trackbar,
-  gui_checkbox;
+  fpg_form,
+  fpg_label,
+  fpg_edit,
+  fpg_button,
+  fpg_listbox,
+  fpg_combobox,
+  fpg_trackbar,
+  fpg_checkbox;
 
 type
 
@@ -131,7 +131,7 @@ implementation
 
 uses
   fpg_main,
-  gui_iniutils,
+  fpg_iniutils,
   fpg_constants,
   vfdprops; // used to get Object Inspector defaults
 

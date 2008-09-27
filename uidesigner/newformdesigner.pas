@@ -26,16 +26,16 @@ uses
   Classes,
   fpg_base,
   fpg_widget,
-  gui_form,
-  gui_label,
-  gui_button,
-  gui_edit,
-  gui_listbox,
-  gui_memo,
-  gui_combobox,
-  gui_menu,
-  gui_mru,
-  gui_hyperlink,
+  fpg_form,
+  fpg_label,
+  fpg_button,
+  fpg_edit,
+  fpg_listbox,
+  fpg_memo,
+  fpg_combobox,
+  fpg_menu,
+  fpg_mru,
+  fpg_hyperlink,
   vfdwidgetclass,
   vfdwidgets;
 
@@ -169,8 +169,8 @@ implementation
 uses
   fpg_main,
   vfdmain,
-  gui_iniutils,
-  gui_dialogs;
+  fpg_iniutils,
+  fpg_dialogs;
 
 
 // Anchor images

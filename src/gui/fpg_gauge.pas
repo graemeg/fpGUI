@@ -16,7 +16,7 @@
       Dial, Pie etc.
 }
 
-unit gui_gauge;
+unit fpg_gauge;
 
 {$mode objfpc}{$H+}
 

@@ -16,7 +16,7 @@
       control has been implemented.
 }
 
-unit gui_listbox;
+unit fpg_listbox;
 
 {$mode objfpc}{$H+}
 
@@ -37,7 +37,7 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  gui_scrollbar;
+  fpg_scrollbar;
 
 type
 

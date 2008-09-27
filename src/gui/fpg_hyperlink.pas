@@ -17,7 +17,7 @@
 }
 
 
-unit gui_hyperlink;
+unit fpg_hyperlink;
 
 {$mode objfpc}{$H+}
 
@@ -28,7 +28,7 @@ uses
   Sysutils,
   fpg_base,
   fpg_main,
-  gui_label;
+  fpg_label;
 
 type
 

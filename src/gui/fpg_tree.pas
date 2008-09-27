@@ -17,7 +17,7 @@
       Each Node as .prev and .next property pointing to it's neighbours.
 }
 
-unit gui_tree;
+unit fpg_tree;
 
 {$mode objfpc}{$H+}
 
@@ -43,8 +43,8 @@ uses
   fpg_main,
   fpg_widget,
   fpg_imagelist,
-  gui_scrollbar,
-  gui_menu;
+  fpg_scrollbar,
+  fpg_menu;
   
 type
 

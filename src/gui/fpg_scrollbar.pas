@@ -15,7 +15,7 @@
       Defines Scrollbar controls.
 }
 
-unit gui_scrollbar;
+unit fpg_scrollbar;
 
 {$mode objfpc}{$H+}
 

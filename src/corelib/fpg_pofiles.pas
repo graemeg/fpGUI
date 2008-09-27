@@ -54,7 +54,6 @@ interface
 uses
   Classes,
   SysUtils,
-  Contnrs,
   fpg_stringhashlist;
 
 type
