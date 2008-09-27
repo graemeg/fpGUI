@@ -1,4 +1,4 @@
-unit gfx_impl;
+unit fpg_impl;
 
 {$mode objfpc}{$H+}
 

@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
+  <Package Version="3">
     <PathDelim Value="\"/>
     <Name Value="fpgui_toolkit"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="8"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <OtherUnitFiles Value="..\;..\..\gui\;..\..\gui\db\"/>
@@ -18,9 +18,6 @@
           <CPPInline Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <CodeGeneration>
-        <Generate Value="Faster"/>
-      </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -30,7 +27,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="2"/>
-    <Files Count="70">
+    <Files Count="69">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -160,157 +157,153 @@
         <UnitName Value="gui_basegrid"/>
       </Item32>
       <Item33>
-        <Filename Value="..\..\gui\gui_bevel.pas"/>
-        <UnitName Value="gui_bevel"/>
-      </Item33>
-      <Item34>
         <Filename Value="..\..\gui\gui_button.pas"/>
         <UnitName Value="gui_button"/>
-      </Item34>
-      <Item35>
+      </Item33>
+      <Item34>
         <Filename Value="..\..\gui\gui_checkbox.pas"/>
         <UnitName Value="gui_checkbox"/>
-      </Item35>
-      <Item36>
+      </Item34>
+      <Item35>
         <Filename Value="..\..\gui\gui_combobox.pas"/>
         <UnitName Value="gui_combobox"/>
-      </Item36>
-      <Item37>
+      </Item35>
+      <Item36>
         <Filename Value="..\..\gui\gui_customgrid.pas"/>
         <UnitName Value="gui_customgrid"/>
-      </Item37>
-      <Item38>
+      </Item36>
+      <Item37>
         <Filename Value="..\..\gui\gui_dialogs.pas"/>
         <UnitName Value="gui_dialogs"/>
-      </Item38>
-      <Item39>
+      </Item37>
+      <Item38>
         <Filename Value="..\..\gui\gui_editcombo.pas"/>
         <UnitName Value="gui_editcombo"/>
-      </Item39>
-      <Item40>
+      </Item38>
+      <Item39>
         <Filename Value="..\..\gui\gui_edit.pas"/>
         <UnitName Value="gui_edit"/>
-      </Item40>
-      <Item41>
+      </Item39>
+      <Item40>
         <Filename Value="..\..\gui\gui_form.pas"/>
         <UnitName Value="gui_form"/>
-      </Item41>
-      <Item42>
+      </Item40>
+      <Item41>
         <Filename Value="..\..\gui\gui_gauge.pas"/>
         <UnitName Value="gui_gauge"/>
-      </Item42>
-      <Item43>
+      </Item41>
+      <Item42>
         <Filename Value="..\..\gui\gui_grid.pas"/>
         <UnitName Value="gui_grid"/>
-      </Item43>
-      <Item44>
+      </Item42>
+      <Item43>
         <Filename Value="..\..\gui\gui_hyperlink.pas"/>
         <UnitName Value="gui_hyperlink"/>
-      </Item44>
-      <Item45>
+      </Item43>
+      <Item44>
         <Filename Value="..\..\gui\gui_iniutils.pas"/>
         <UnitName Value="gui_iniutils"/>
-      </Item45>
-      <Item46>
+      </Item44>
+      <Item45>
         <Filename Value="..\..\gui\gui_label.pas"/>
         <UnitName Value="gui_label"/>
-      </Item46>
-      <Item47>
+      </Item45>
+      <Item46>
         <Filename Value="..\..\gui\gui_listbox.pas"/>
         <UnitName Value="gui_listbox"/>
-      </Item47>
-      <Item48>
+      </Item46>
+      <Item47>
         <Filename Value="..\..\gui\gui_listview.pas"/>
         <UnitName Value="gui_listview"/>
-      </Item48>
-      <Item49>
+      </Item47>
+      <Item48>
         <Filename Value="..\..\gui\gui_memo.pas"/>
         <UnitName Value="gui_memo"/>
-      </Item49>
-      <Item50>
+      </Item48>
+      <Item49>
         <Filename Value="..\..\gui\gui_menu.pas"/>
         <UnitName Value="gui_menu"/>
-      </Item50>
-      <Item51>
+      </Item49>
+      <Item50>
         <Filename Value="..\..\gui\gui_mru.pas"/>
         <UnitName Value="gui_mru"/>
-      </Item51>
-      <Item52>
+      </Item50>
+      <Item51>
         <Filename Value="..\..\gui\gui_panel.pas"/>
         <UnitName Value="gui_panel"/>
-      </Item52>
-      <Item53>
+      </Item51>
+      <Item52>
         <Filename Value="..\..\gui\gui_popupcalendar.pas"/>
         <UnitName Value="gui_popupcalendar"/>
-      </Item53>
-      <Item54>
+      </Item52>
+      <Item53>
         <Filename Value="..\..\gui\gui_progressbar.pas"/>
         <UnitName Value="gui_progressbar"/>
-      </Item54>
-      <Item55>
+      </Item53>
+      <Item54>
         <Filename Value="..\..\gui\gui_radiobutton.pas"/>
         <UnitName Value="gui_radiobutton"/>
-      </Item55>
-      <Item56>
+      </Item54>
+      <Item55>
         <Filename Value="..\..\gui\gui_scrollbar.pas"/>
         <UnitName Value="gui_scrollbar"/>
-      </Item56>
-      <Item57>
+      </Item55>
+      <Item56>
         <Filename Value="..\..\gui\gui_style.pas"/>
         <UnitName Value="gui_style"/>
-      </Item57>
-      <Item58>
+      </Item56>
+      <Item57>
         <Filename Value="..\..\gui\gui_tab.pas"/>
         <UnitName Value="gui_tab"/>
-      </Item58>
-      <Item59>
+      </Item57>
+      <Item58>
         <Filename Value="..\..\gui\gui_trackbar.pas"/>
         <UnitName Value="gui_trackbar"/>
-      </Item59>
-      <Item60>
+      </Item58>
+      <Item59>
         <Filename Value="..\..\gui\gui_tree.pas"/>
         <UnitName Value="gui_tree"/>
+      </Item59>
+      <Item60>
+        <Filename Value="..\..\gui\logo.inc"/>
+        <Type Value="Include"/>
       </Item60>
       <Item61>
-        <Filename Value="..\..\gui\logo.inc"/>
+        <Filename Value="..\..\gui\messagedialog.inc"/>
         <Type Value="Include"/>
       </Item61>
       <Item62>
-        <Filename Value="..\..\gui\messagedialog.inc"/>
+        <Filename Value="..\..\gui\newdirdialog.inc"/>
         <Type Value="Include"/>
       </Item62>
       <Item63>
-        <Filename Value="..\..\gui\newdirdialog.inc"/>
-        <Type Value="Include"/>
-      </Item63>
-      <Item64>
         <Filename Value="..\..\gui\db\fpgui_db.pas"/>
         <UnitName Value="fpgui_db"/>
-      </Item64>
-      <Item65>
+      </Item63>
+      <Item64>
         <Filename Value="fpg_utils_impl.inc"/>
         <Type Value="Include"/>
-      </Item65>
-      <Item66>
+      </Item64>
+      <Item65>
         <Filename Value="fpg_gdi.pas"/>
         <UnitName Value="fpg_gdi"/>
-      </Item66>
-      <Item67>
+      </Item65>
+      <Item66>
         <Filename Value="fpg_impl.pas"/>
         <UnitName Value="fpg_impl"/>
-      </Item67>
-      <Item68>
+      </Item66>
+      <Item67>
         <Filename Value="fpg_keys_gdi.inc"/>
         <Type Value="Include"/>
-      </Item68>
-      <Item69>
+      </Item67>
+      <Item68>
         <Filename Value="..\..\gui\gui_splitter.pas"/>
         <UnitName Value="gui_splitter"/>
-      </Item69>
-      <Item70>
+      </Item68>
+      <Item69>
         <Filename Value="..\..\gui\gui_hint.pas"/>
         <UnitName Value="gui_hint"/>
-      </Item70>
+      </Item69>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>
     <RequiredPkgs Count="1">
