@@ -241,7 +241,7 @@ uses
   fpg_widget,
   fpg_popupwindow,
   fpg_stringutils,
-  gui_form,
+  fpg_form,
   math;
 
 
