@@ -25,7 +25,7 @@ interface
 
 uses
   Classes, SysUtils, contnrs, TypInfo{, Jpeg},
-  Db, Variants, tiObject, gfxbase;
+  Db, Variants, tiObject, fpg_base;
 
 type
   TtiRtfParser = class;
@@ -448,7 +448,7 @@ implementation
 
 uses
   math        // IntPower() function
-  ,fpgfx      // fpgApplication.HandleExeception()
+  ,fpg_main   // fpgApplication.HandleExeception()
   ;
 
 resourcestring

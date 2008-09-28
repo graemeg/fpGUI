@@ -10,11 +10,10 @@ unit tiDialogs;
 interface
 
 uses
-  Classes
-  ,SysUtils
-  ,Variants
-  ;
-  
+  Classes,
+  SysUtils,
+  Variants;
+
   
   // Call showMessage, but accepts a variant. Good for debugging.
   procedure tiShowMessage(const AArray: Array of Const); overload;
@@ -45,13 +44,13 @@ uses
 implementation
 
 uses
-  fpgfx
-  ,gui_form
-  ,gui_memo
-  ,tiGUIINI
-  ,tiUtils
-  ,gui_dialogs
-  ;
+  fpg_main,
+  fpg_form,
+  fpg_memo,
+  fpg_dialogs,
+  tiGUIINI,
+  tiUtils;
+
 
 procedure tiShowMessage(const AArray: array of const);
 const

@@ -5,7 +5,7 @@ unit tiGUIConstants;
 interface
 
 uses
-  gfxbase
+  fpg_base
   ;
 
 const

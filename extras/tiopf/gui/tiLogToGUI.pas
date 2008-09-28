@@ -15,8 +15,15 @@ unit tiLogToGUI;
 
 interface
 uses
-  Classes, SysUtils,
-  gfx_widget, gui_form, gui_memo, gui_menu, gui_panel, gui_button, fpgfx,
+  Classes,
+  SysUtils,
+  fpg_widget,
+  fpg_form,
+  fpg_memo,
+  fpg_menu,
+  fpg_panel,
+  fpg_button,
+  fpg_main,
   tiLog;
 
 type
@@ -50,7 +57,7 @@ type
 
 implementation
 uses
-  gfxbase,
+  fpg_base,
   tiUtils,
   tiGUIUtils,
   tiCommandLineParams,

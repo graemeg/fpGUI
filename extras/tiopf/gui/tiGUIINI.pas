@@ -10,7 +10,7 @@ unit tiGUIINI;
 interface
 uses
   tiINI
-  ,gui_form
+  ,fpg_form
   ;
 
 type
@@ -26,7 +26,7 @@ function gGUIINI(const AFileName: string = ''): TtiGuiINIFile;
 
 implementation
 uses
-  fpgfx
+  fpg_main
   ;
 
 var

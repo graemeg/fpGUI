@@ -17,15 +17,15 @@ uses
   tiObject
   ,Classes
   ,tiBaseMediator
-  ,fpgfx
-  ,gfx_widget
-  ,gui_edit
-  ,gui_checkbox
-  ,gui_label
-  ,gui_trackbar
-  ,gui_combobox
-  ,gui_memo
-  ,gui_popupcalendar
+  ,fpg_main
+  ,fpg_widget
+  ,fpg_edit
+  ,fpg_checkbox
+  ,fpg_label
+  ,fpg_trackbar
+  ,fpg_combobox
+  ,fpg_memo
+  ,fpg_popupcalendar
   ;
 
 type
@@ -195,9 +195,9 @@ uses
   SysUtils
   ,TypInfo
   ,tiExcept
-  ,gui_dialogs      // for TfpgMessageDialog
+  ,fpg_dialogs      // for TfpgMessageDialog
+  ,fpg_base         // for predefined colors
   ,tiGUIConstants   // for error color
-  ,gfxbase          // for predefined colors
   ;
 
 const

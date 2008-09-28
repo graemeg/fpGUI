@@ -13,9 +13,9 @@ uses
   Classes,
   SysUtils,
   tiBaseMediator,
-  gui_listview,
-  gui_grid,
-  gui_listbox,
+  fpg_listview,
+  fpg_grid,
+  fpg_listbox,
   tiObject;
 
 type
