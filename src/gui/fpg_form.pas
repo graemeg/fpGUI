@@ -263,26 +263,28 @@ begin
   fpgApplication.PushModalForm(self);
   ModalResult := mrNone;
 
-  Show;
-
-  // processing messages until this form ends.
-  // delivering the remaining messages
-  fpgApplication.ProcessMessages;
   try
-    repeat
-      fpgWaitWindowMessage;
-    until (ModalResult <> mrNone) or (not Visible);
-  except
-    on E: Exception do
-    begin
-      ModalResult := -1;
-      Visible := False;
-      fpgApplication.HandleException(self);
-    end;
-  end;
-
-  fpgApplication.PopModalForm;
-  Result := ModalResult;
+    Show;
+    // processing messages until this form ends.
+    // delivering the remaining messages
+    fpgApplication.ProcessMessages;
+    try
+      repeat
+        fpgWaitWindowMessage;
+      until (ModalResult <> mrNone) or (not Visible);
+    except
+      on E: Exception do
+      begin
+        ModalResult := -1;
+        Visible := False;
+        fpgApplication.HandleException(self);
+      end;
+    end;  { try..except }
+  finally
+    { we have to pop the form even in an error occurs }
+    fpgApplication.PopModalForm;
+    Result := ModalResult;
+  end;  { try..finally }
   
   if ModalResult <> mrNone then
   begin
