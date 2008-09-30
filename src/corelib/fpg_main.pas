@@ -1897,6 +1897,8 @@ var
   x, y: TfpgCoord;
   ix, iy: TfpgCoord;
 begin
+  SortRect(ARect);
+
   Result := TfpgImage.Create;
   Result.AllocateImage(ColorDepth, ARect.Width, ARect.Height);
   Result.UpdateImage;

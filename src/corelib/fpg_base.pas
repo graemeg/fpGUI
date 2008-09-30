@@ -317,7 +317,7 @@ type
     procedure   DrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
     procedure   DrawArc(x, y, w, h: TfpgCoord; a1, a2: double);
     procedure   StretchDraw (x, y, w, h: TfpgCoord; ASource: TfpgImageBase);
-    procedure   CopyRect(x, y: TfpgCoord; ACanvas: TfpgCanvasBase; var SourceRect: TRect);
+    procedure   CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase; var ASrcRect: TfpgRect);
     procedure   DrawString(x, y: TfpgCoord; const txt: string);
     procedure   FillRectangle(x, y, w, h: TfpgCoord); overload;
     procedure   FillRectangle(r: TfpgRect); overload;
@@ -424,6 +424,7 @@ type
     procedure   UpdateWindowPosition;
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+    function    HasParent: Boolean; override;
     procedure   ActivateWindow; virtual; abstract;
     procedure   CaptureMouse; virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
@@ -579,6 +580,7 @@ function  fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
 { Points }
 function  PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
 procedure SortRect(var ARect: TRect);
+procedure SortRect(var ARect: TfpgRect);
 procedure SortRect(var left, top, right, bottom: integer);
 
 implementation
@@ -846,6 +848,24 @@ begin
             (APoint.y < ARect.Bottom);
 end;
 
+procedure SortRect(var ARect: TRect);
+begin
+  with ARect do
+    SortRect(left, top, right, bottom);
+end;
+
+procedure SortRect(var ARect: TfpgRect);
+var
+  r: TfpgCoord;
+  b: TfpgCoord;
+begin
+  r := ARect.Right;
+  b := ARect.Bottom;
+  SortRect(ARect.Left, ARect.Top, r, b);
+  ARect.SetRight(r);
+  ARect.SetBottom(b);
+end;
+
 procedure SortRect(var left, top, right, bottom: integer);
 var
   r: integer;
@@ -862,12 +882,6 @@ begin
     top     := bottom;
     bottom  := r;
   end;
-end;
-
-procedure SortRect(var ARect: TRect);
-begin
-  with ARect do
-    SortRect(left, top, right, bottom);
 end;
 
 // This function uses RTTI to automatically set the default values of properties.
@@ -1123,6 +1137,11 @@ begin
   Result := DoWindowToScreen(ASource, AScreenPos);
 end;
 
+function TfpgWindowBase.HasParent: Boolean;
+begin
+  Result := FParent <> nil;
+end;
+
 procedure TfpgWindowBase.SetFullscreen(AValue: Boolean);
 begin
   if AValue then
@@ -1299,19 +1318,23 @@ begin
   end;
 end;
 
-procedure TfpgCanvasBase.CopyRect(x, y: TfpgCoord; ACanvas: TfpgCanvasBase;
-  var SourceRect: TRect);
+procedure TfpgCanvasBase.CopyRect(ADest_x, ADest_y: TfpgCoord; ASrcCanvas: TfpgCanvasBase;
+  var ASrcRect: TfpgRect);
 var
-  xx, r, t: TfpgCoord;
+  x, sx, y, sy: TfpgCoord;
 begin
-  SortRect(SourceRect);
-  with SourceRect do
-    for r := left to right do
+  SortRect(ASrcRect);
+  // X position of source
+  for sx := ASrcRect.Left to ASrcRect.Right do
+  begin
+    x := ADest_x + (sx - ASrcRect.Left);  // calc dest x
+    // Y position of source
+    for sy := ASrcRect.Top to ASrcRect.Bottom do
     begin
-      xx := r - left + x;
-      for t := bottom to top do
-        Pixels[xx, (t - bottom + y)] := ACanvas.Pixels[r, t];
+      y := ADest_y + (sy - ASrcRect.Top); // calc dest y
+      Pixels[x, y] := ASrcCanvas.Pixels[sx, sy];
     end;
+  end;
 end;
 
 procedure TfpgCanvasBase.DrawString(x, y: TfpgCoord; const txt: string);
