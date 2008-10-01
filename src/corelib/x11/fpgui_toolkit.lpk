@@ -8,7 +8,7 @@
       <Version Value="8"/>
       <SearchPaths>
         <OtherUnitFiles Value="../;../../gui/;../../gui/db/"/>
-        <UnitOutputDirectory Value="../../../lib"/>
+        <UnitOutputDirectory Value="../../../lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
@@ -28,7 +28,7 @@
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="6" Release="2"/>
+    <Version Minor="6" Release="3"/>
     <Files Count="71">
       <Item1>
         <Filename Value="../stdimages.inc"/>

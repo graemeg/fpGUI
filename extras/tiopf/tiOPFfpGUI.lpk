@@ -8,7 +8,7 @@
       <Version Value="8"/>
       <SearchPaths>
         <OtherUnitFiles Value="gui/"/>
-        <UnitOutputDirectory Value="../../lib"/>
+        <UnitOutputDirectory Value="../../lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
@@ -38,7 +38,7 @@
 "/>
     <License Value="Mozilla Public License v1.1
 "/>
-    <Version Major="2" Release="4"/>
+    <Version Major="2" Release="5"/>
     <Files Count="8">
       <Item1>
         <Filename Value="gui/tiGUIUtils.pas"/>
