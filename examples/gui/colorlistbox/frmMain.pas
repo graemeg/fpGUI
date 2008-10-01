@@ -5,12 +5,9 @@ unit frmMain;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_bevel, gui_popupcalendar, gui_gauge, gui_editcombo;
+  SysUtils, Classes, fpg_base, fpg_main,
+  fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_listbox, fpg_combobox, fpg_dialogs, fpg_checkbox;
 
 type
 

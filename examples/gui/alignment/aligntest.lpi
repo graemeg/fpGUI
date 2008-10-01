@@ -39,14 +39,11 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
+    <Version Value="8"/>
     <SearchPaths>
       <IncludeFiles Value="../src/"/>
       <OtherUnitFiles Value="../src/"/>
     </SearchPaths>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
     <Other>
       <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>

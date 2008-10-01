@@ -28,8 +28,7 @@
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="fpgui_package"/>
-        <MinVersion Minor="5" Valid="True"/>
+        <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
     <Units Count="1">
@@ -41,10 +40,7 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
+    <Version Value="8"/>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="True"/>

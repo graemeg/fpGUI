@@ -5,8 +5,8 @@ unit frmMain;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gfx_widget, gui_form, gui_button,
-  gui_grid, gui_checkbox, gui_panel, gui_listview, gui_listbox,
+  SysUtils, Classes, fpg_base, fpg_main, fpg_widget, fpg_form, fpg_button,
+  fpg_grid, fpg_checkbox, fpg_panel, fpg_listview, fpg_listbox, fpg_combobox,
   Model, tiFormMediator, tiMediators;
 
 type
@@ -108,7 +108,7 @@ begin
   FMediator.Subject := FPersonList;
   FMediator.Active := True;
 
-  medCombo := TMediatorComboBoxView.CreateCustom(cbName1, FPerson);
+//  medCombo := TMediatorComboBoxView.CreateCustom(cbName1, FPerson);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);

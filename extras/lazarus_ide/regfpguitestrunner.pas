@@ -84,7 +84,7 @@ begin
       Add('  cthreads,');
       Add('  {$ENDIF}{$ENDIF}');
       Add('  Classes,');
-      Add('  fpgfx, fpg_guitestrunner;');
+      Add('  fpg_main, fpg_guitestrunner;');
       Add('');
       Add('procedure MainProc;');
       Add('');

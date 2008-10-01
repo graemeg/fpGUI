@@ -5,9 +5,9 @@ unit frm_main;
 interface
 
 uses
-  SysUtils, Classes, fpgfx,
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_memo, gui_dialogs;
+  SysUtils, Classes,
+  fpg_main, fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_memo, fpg_dialogs;
 
 type
 

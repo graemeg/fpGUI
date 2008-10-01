@@ -6,19 +6,18 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, Sysutils
-  { you can add units after this },
-  fpgfx,
-  gfxbase,
-  gui_form,
-  gui_button,
-  gui_progressbar,
-  gui_trackbar,
-  gui_label,
-  gfx_imgfmt_bmp,
-  gui_edit,
-  gui_bevel,
-  gui_gauge;
+  Classes, Sysutils,
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_button,
+  fpg_progressbar,
+  fpg_trackbar,
+  fpg_label,
+  fpg_imgfmt_bmp,
+  fpg_edit,
+  fpg_panel,
+  fpg_gauge;
 
 type
 

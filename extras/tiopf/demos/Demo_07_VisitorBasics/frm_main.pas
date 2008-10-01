@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes,
-  fpgfx, gui_form, gui_button,
+  fpg_main, fpg_form, fpg_button,
   Client_BOM;
 
 type

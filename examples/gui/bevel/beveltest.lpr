@@ -8,11 +8,11 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   typinfo,
-  fpgfx,
-  gui_form,
-  gui_button,
-  gui_panel,
-  gui_label;
+  fpg_main,
+  fpg_form,
+  fpg_button,
+  fpg_panel,
+  fpg_label;
   
 type
   TMainForm = class(TfpgForm)

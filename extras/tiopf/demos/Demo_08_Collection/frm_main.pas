@@ -5,12 +5,12 @@ unit frm_main;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_bevel, Client_BOM, tiFormMediator;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_listbox, fpg_memo, fpg_combobox, fpg_grid,
+  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar,
+  fpg_progressbar, fpg_radiobutton, fpg_tab, fpg_menu,
+  fpg_panel, Client_BOM, tiFormMediator;
 
 type
 

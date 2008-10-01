@@ -5,9 +5,9 @@ unit frmContactMaint;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listview, gui_memo,
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_listview, fpg_memo,
   model, tiFormMediator;
 
 type

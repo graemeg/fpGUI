@@ -6,9 +6,9 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  SysUtils, Classes, gfxbase, fpgfx,
-  gui_form, gui_memo, gui_listbox,
-  gui_panel, gui_progressbar, gui_splitter, gui_checkbox;
+  SysUtils, Classes, fpg_base, fpg_main,
+  fpg_form, fpg_memo, fpg_listbox,
+  fpg_panel, fpg_progressbar, fpg_splitter, fpg_checkbox;
 
 type
   { TfrmSplitterTest }

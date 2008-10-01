@@ -5,9 +5,9 @@ unit frmCityMaint;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_dialogs, gui_combobox,
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_dialogs, fpg_combobox,
   model, tiFormMediator;
 
 type

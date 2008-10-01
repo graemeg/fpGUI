@@ -7,14 +7,14 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgfx,
-  gui_form,
-  gui_dialogs,
-  gui_button,
-  gui_listbox,
-  gui_edit,
-  gui_label,
-  gfx_constants;
+  fpg_main,
+  fpg_form,
+  fpg_dialogs,
+  fpg_button,
+  fpg_listbox,
+  fpg_edit,
+  fpg_label,
+  fpg_constants;
   
   
 resourcestring

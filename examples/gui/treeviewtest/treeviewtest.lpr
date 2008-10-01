@@ -8,12 +8,12 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   SysUtils,
-  fpgfx,
-  gui_form,
-  gui_tree,
-  gui_checkbox,
-  gfxbase,
-  gfx_imagelist;
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_tree,
+  fpg_checkbox,
+  fpg_imagelist;
 
 type
 
@@ -60,6 +60,8 @@ begin
   imagelist := TfpgImageList.Create;
   imagelist.AddItemFromFile(SetDirSeparators('../../../images/folder_16.bmp'), 0);
   imagelist.AddItemFromFile(SetDirSeparators('../../../images/menu_preferences_16.bmp'), 1);
+  imagelist.Item[1].Image.CreateMaskFromSample(0, 0);
+  imagelist.Item[1].Image.UpdateImage;
 
   // create a treeview
   tree := TfpgTreeView.Create(self);

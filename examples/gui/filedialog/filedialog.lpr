@@ -7,13 +7,13 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  gfxbase,
-  fpgfx,
-  gui_form,
-  gui_dialogs,
-  gui_button,
-  gui_edit,
-  gui_label;
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_dialogs,
+  fpg_button,
+  fpg_edit,
+  fpg_label;
 
 
 type

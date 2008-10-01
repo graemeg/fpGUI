@@ -8,8 +8,8 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
   // fpGUI
-  fpgfx, gui_form, gfxbase, gui_button,
-  gui_label, gui_trackbar, gui_animation;
+  fpg_base, fpg_main, fpg_form, fpg_button,
+  fpg_label, fpg_trackbar, fpg_animation;
 
 type
 

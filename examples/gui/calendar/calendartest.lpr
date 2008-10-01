@@ -10,8 +10,9 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, gfxbase, fpgfx, gui_form, gui_popupcalendar, gui_edit,
-  gui_button, gui_label, gfx_popupwindow, gui_combobox, gui_checkbox, dateutils;
+  Classes, SysUtils,
+  fpg_base, fpg_main, fpg_form, fpg_popupcalendar, fpg_edit,
+  fpg_button, fpg_label, fpg_popupwindow, fpg_combobox, fpg_checkbox, dateutils;
 
 type
   TMainForm = class(TfpgForm)

@@ -5,8 +5,8 @@ unit frmMain;
 interface
 
 uses
-  Classes, SysUtils, gui_form, gui_button, gui_label, gui_edit, gui_trackbar,
-  gui_combobox, gui_memo, Model, tiFormMediator, Model_View;
+  Classes, SysUtils, fpg_form, fpg_button, fpg_label, fpg_edit, fpg_trackbar,
+  fpg_combobox, fpg_memo, Model, tiFormMediator, Model_View;
 
 type
   TMainForm = class(TfpgForm)
@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  gui_dialogs
+  fpg_dialogs
   ;
 
 { TMainForm }

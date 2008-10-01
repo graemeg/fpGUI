@@ -107,7 +107,7 @@ begin
     +'  {$IFDEF UNIX}{$IFDEF UseCThreads}'+le
     +'  cthreads,'+le
     +'  {$ENDIF}{$ENDIF}'+le
-    +'  Classes, fpgfx, gui_form;'+le
+    +'  Classes, fpg_main, fpg_form;'+le
     +le
     +'type'+le
     +le

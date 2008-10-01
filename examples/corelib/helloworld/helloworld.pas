@@ -1,9 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    HelloWorld  -  GFX Hello World application
-
-    Copyright (C) 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,6 +10,9 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      A simple hello world application that only uses canvas painting.
 }
 
 program HelloWorld;
@@ -19,10 +20,9 @@ program HelloWorld;
 {$mode objfpc}{$H+}
 
 uses
-  Classes
-  ,fpGFX
-  ,GFXBase
-  , fpgui_toolkit;
+  Classes,
+  fpg_base,
+  fpg_main;
 
 const
   HelloWorldString: String = 'Hello, world!';

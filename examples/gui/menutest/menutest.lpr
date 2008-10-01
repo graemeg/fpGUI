@@ -7,10 +7,10 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgfx,
-  gui_form,
-  gui_menu,
-  gui_edit;
+  fpg_main,
+  fpg_form,
+  fpg_menu,
+  fpg_edit;
 
 type
   TMainForm = class(TfpgForm)

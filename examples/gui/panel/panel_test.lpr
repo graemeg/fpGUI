@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgfx,
+  fpg_main,
   MainForm;
 
 procedure MainProc;

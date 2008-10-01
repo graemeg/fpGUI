@@ -5,10 +5,10 @@ unit frmmain;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_basegrid, gui_grid, gui_dialogs, gui_menu,
-  gui_panel, gui_popupcalendar, gui_gauge, tiFormMediator;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_basegrid, fpg_grid, fpg_dialogs, fpg_menu,
+  fpg_panel, fpg_popupcalendar, fpg_gauge, tiFormMediator;
 
 type
   { The main application window }

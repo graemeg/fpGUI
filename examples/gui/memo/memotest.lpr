@@ -8,12 +8,12 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   typinfo,
-  fpgfx,
-  gfxbase,
-  gui_form,
-  gui_button,
-  gui_label,
-  gui_memo;
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_button,
+  fpg_label,
+  fpg_memo;
   
 type
 
@@ -64,7 +64,7 @@ begin
   //memo.Lines.Delete(1);
   //memo.Lines.Text := 'Dude'+LineEnding+'What''s mine say?'+LineEnding;;
   //memo.Lines.Text := memo.Lines.Text + 'Sweet'+LineEnding;
-  //memo.lines.LoadFromFile('/home/andrew/programming/groupprojects/fpgui/src/gui/gui_memo.pas');
+  //memo.lines.LoadFromFile('/home/andrew/programming/groupprojects/fpgui/src/gui/fpg_memo.pas');
   //memo.lines.LoadFromFile('/usr/share/dict/cracklib-small');
   {memo.lines.Add(memo.lines.text);
   memo.lines.Add(memo.lines.text);

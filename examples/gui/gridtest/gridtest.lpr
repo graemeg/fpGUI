@@ -8,15 +8,15 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gui_form,
-  gui_basegrid,
-  gui_grid,
-  gui_button,
-  gui_checkbox,
-  gui_tab,
-  gui_edit;
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_basegrid,
+  fpg_grid,
+  fpg_button,
+  fpg_checkbox,
+  fpg_tab,
+  fpg_edit;
 
 
 type
@@ -128,7 +128,7 @@ begin
     ADefaultDrawing := False;
     StringGrid.Canvas.SetColor(clGreen);
     fpgStyle.DrawDirectionArrow(StringGrid.Canvas, ARect.Left, ARect.Top,
-        ARect.Height, ARect.Height, 3);
+        ARect.Height, ARect.Height, adRight);
     StringGrid.Canvas.SetTextColor(clTeal);
     StringGrid.Canvas.DrawString(ARect.Height + ARect.Left + 2, ARect.Top, StringGrid.Cells[ACol, ARow]);
   end;

@@ -6,8 +6,9 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, fpgfx, gfxbase, gui_form, gui_button, gui_panel, gui_label,
-  gui_radiobutton, gui_memo;
+  Classes, SysUtils,
+  fpg_base, fpg_main, fpg_form, fpg_button, fpg_panel, fpg_label,
+  fpg_radiobutton, fpg_memo;
 
 type
 

@@ -7,11 +7,11 @@ interface
 uses
   SysUtils, Classes,
   // fpGUI toolkit
-  gfxbase, fpgfx, gui_edit, gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, gui_progressbar,
-  gui_radiobutton, gui_tab, gui_menu, gui_panel, gui_popupcalendar,
-  gui_gauge, gui_splitter, gfx_imagelist,
+  fpg_base, fpg_main, fpg_edit, fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_listbox, fpg_memo, fpg_combobox, fpg_basegrid, fpg_grid,
+  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar, fpg_progressbar,
+  fpg_radiobutton, fpg_tab, fpg_menu, fpg_panel, fpg_popupcalendar,
+  fpg_gauge, fpg_splitter, fpg_imagelist,
   // FPCUnit support
   fpcunit, testregistry, testdecorator;
 
@@ -83,7 +83,7 @@ type
 implementation
 
 uses
-  gfx_imgfmt_bmp;
+  fpg_imgfmt_bmp;
 
 {@VFD_NEWFORM_IMPL}
 

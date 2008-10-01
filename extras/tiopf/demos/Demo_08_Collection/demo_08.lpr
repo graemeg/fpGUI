@@ -10,7 +10,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, fpgfx, frm_main,
+  Classes, SysUtils, fpg_main, frm_main,
   Client_DBIndependentVisitors_Svr, Client_BOM,
   Client_AutoMap_Svr, Client_HardCodedVisitors_Svr, tiOPFManager,
   tiConstants{, tiLog, tiLogToConsole};

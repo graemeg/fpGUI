@@ -28,8 +28,7 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="fpgui_package"/>
-        <MinVersion Minor="5" Release="1" Valid="True"/>
+        <PackageName Value="fpgui_toolkit"/>
       </Item1>
       <Item2>
         <PackageName Value="tiOPF"/>
@@ -48,10 +47,7 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
+    <Version Value="8"/>
     <Other>
       <CustomOptions Value="-FUunits
 -dUseCThreads

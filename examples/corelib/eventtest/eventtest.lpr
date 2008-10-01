@@ -6,7 +6,10 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, GFXBase, fpGFX, gfx_widget;
+  Classes, SysUtils,
+  fpg_base,
+  fpg_main,
+  fpg_widget;
   
 
 const

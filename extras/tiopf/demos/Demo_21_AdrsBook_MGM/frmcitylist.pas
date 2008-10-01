@@ -5,10 +5,10 @@ unit frmCityList;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx,
-  gfx_widget, gui_form, gui_button,
-  gui_grid, gui_dialogs, gui_menu,
-  gui_panel,
+  SysUtils, Classes, fpg_base, fpg_main,
+  fpg_widget, fpg_form, fpg_button,
+  fpg_grid, fpg_dialogs, fpg_menu,
+  fpg_panel,
   tiFormMediator, model;
 
 type

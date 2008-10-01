@@ -9,8 +9,8 @@ unit commands;
 interface
 
 uses
-  gfx_command_intf,
-  gui_memo;
+  fpg_command_intf,
+  fpg_memo;
   
 type
   // non reference counted interface
@@ -40,7 +40,7 @@ type
 implementation
 
 uses
-  fpgfx, SysUtils;
+  fpg_main, SysUtils;
 
 { TNullInterfacedObject }
 

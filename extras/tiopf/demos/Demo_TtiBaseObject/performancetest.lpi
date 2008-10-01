@@ -32,7 +32,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="performancetest"/>
         <CursorPos X="1" Y="13"/>
-        <TopLine Value="1"/>
+        <TopLine Value="43"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
@@ -47,7 +47,7 @@
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="/opt/fpc_2.2.0/src/packages/fcl-base/src/inc/custapp.pp"/>
+        <Filename Value="../../../../../../../../opt/fpc_2.2.0/src/packages/fcl-base/src/inc/custapp.pp"/>
         <UnitName Value="CustApp"/>
         <CursorPos X="3" Y="26"/>
         <TopLine Value="11"/>
@@ -70,14 +70,14 @@
       <Unit5>
         <Filename Value="../../../../../3rdParty/tiOPF2/Source/Core/tiBaseObject.pas"/>
         <UnitName Value="tiBaseObject"/>
-        <CursorPos X="1" Y="658"/>
-        <TopLine Value="631"/>
+        <CursorPos X="1" Y="128"/>
+        <TopLine Value="94"/>
         <EditorIndex Value="3"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="/opt/fpc_2.2.0/src/rtl/inc/objpash.inc"/>
+        <Filename Value="../../../../../../../../opt/fpc_2.2.0/src/rtl/inc/objpash.inc"/>
         <CursorPos X="29" Y="220"/>
         <TopLine Value="212"/>
         <EditorIndex Value="1"/>
@@ -85,7 +85,7 @@
         <Loaded Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="/opt/fpc_2.2.0/src/rtl/inc/objpas.inc"/>
+        <Filename Value="../../../../../../../../opt/fpc_2.2.0/src/rtl/inc/objpas.inc"/>
         <CursorPos X="9" Y="709"/>
         <TopLine Value="705"/>
         <EditorIndex Value="2"/>
@@ -112,10 +112,7 @@
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
+    <Version Value="8"/>
     <Other>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

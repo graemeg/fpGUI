@@ -7,15 +7,15 @@ interface
 uses
   Classes,
   SysUtils,
-  fpgfx,
-  gfxbase,
-  gui_form,
-  gui_button,
-  gui_label,
-  gui_panel,
-  gui_radiobutton,
-  gui_combobox,
-  gui_checkbox;
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_button,
+  fpg_label,
+  fpg_panel,
+  fpg_radiobutton,
+  fpg_combobox,
+  fpg_checkbox;
 
 type
   TfrmMain = class(TfpgForm)

@@ -12,14 +12,14 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgfx,
-  gui_form,
-  gui_dialogs,
-  gui_button,
-  gui_label,
-  gui_popupcalendar,
-  gui_combobox,
-  gui_edit;
+  fpg_main,
+  fpg_form,
+  fpg_dialogs,
+  fpg_button,
+  fpg_label,
+  fpg_popupcalendar,
+  fpg_combobox,
+  fpg_edit;
   
 type
   // forward declaration

@@ -9,10 +9,10 @@ program bitmaptest;
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gfx_imgfmt_bmp,
-  gui_form;
+  fpg_base,
+  fpg_main,
+  fpg_imgfmt_bmp,
+  fpg_form;
 
 type
 
