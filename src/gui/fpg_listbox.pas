@@ -29,6 +29,9 @@ unit fpg_listbox;
     * Color Listbox: User Defined color palette support.
 }
 
+{ Comment out this define, to remove BlueCurve 3d look for selected items }
+{$Define BlueCurve}
+
 interface
 
 uses
@@ -658,6 +661,31 @@ begin
     end;  { if/else }
     Canvas.FillRectangle(r);
 
+    {$IFNDEF BlueCurve}
+    if (n = FFocusItem) and FFocused then
+    begin
+      if n = FFocusItem then
+      begin
+        if FFocused then
+        begin
+          Canvas.SetColor(clSelection);
+          Canvas.SetTextColor(clSelectionText);
+        end
+        else
+        begin
+          Canvas.SetColor(clInactiveSel);
+          Canvas.SetTextColor(clInactiveSelText);
+        end;
+      end
+      else
+      begin
+        Canvas.SetColor(FBackgroundColor);
+        Canvas.SetTextColor(clText1);
+      end;  { if/else }
+      Canvas.FillRectangle(r);
+    end;
+    {$ELSE}
+
     // This is just a test.
     // Bluecurve theme  :)
     if (n = FFocusItem) and FFocused then
@@ -681,6 +709,7 @@ begin
       // reset rectangle
       InflateRect(r, 2, 2);
     end;
+    {$ENDIF}
 
     DrawItem(n, r, 0);
     inc(r.Top, RowHeight);
