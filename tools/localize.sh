@@ -27,7 +27,7 @@ if [ "@"$FPCTARGET == "@" ]; then
 fi
 
 RSTFILES=(
-  ".. gfx_constants fpgui"
+  ".. fpg_constants fpgui"
 #  "ideintf objinspstrconsts"
 #  "components/codetools codetoolsstrconsts"
 #  "lcl lclstrconsts"

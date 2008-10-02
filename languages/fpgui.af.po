@@ -14,483 +14,483 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: "
 
-#: gfx_constants:rserrnotassigned
+#: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
 msgstr "<%s> is nie toegewys nie"
 
-#: gfx_constants:rsnewitemdetected
+#: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
 msgstr "'n Nuwe item is opgespoor."
 
-#: gfx_constants:rsabort
+#: fpg_constants:rsabort
 msgid "Abort"
 msgstr "Staak"
 
-#: gfx_constants:rsabout
+#: fpg_constants:rsabout
 msgid "About %s"
 msgstr "Aangaande %s"
 
-#: gfx_constants:rsall
+#: fpg_constants:rsall
 msgid "All"
 msgstr "Alles"
 
-#: gfx_constants:rsallfiles
+#: fpg_constants:rsallfiles
 msgid "All Files"
 msgstr "Alle Lêers"
 
-#: gfx_constants:rscollectionallfonts
+#: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
 msgstr "Alle Lettertipes"
 
-#: gfx_constants:rsantialiasing
+#: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
 msgstr "Anti-aliasing"
 
-#: gfx_constants:rsshortapr
+#: fpg_constants:rsshortapr
 msgid "Apr"
 msgstr "Apr"
 
-#: gfx_constants:rslongapr
+#: fpg_constants:rslongapr
 msgid "April"
 msgstr "April"
 
-#: gfx_constants:rsfileattributes
+#: fpg_constants:rsfileattributes
 msgid "Attributes"
 msgstr "Eienskape"
 
-#: gfx_constants:rsshortaug
+#: fpg_constants:rsshortaug
 msgid "Aug"
 msgstr "Aug"
 
-#: gfx_constants:rslongaug
+#: fpg_constants:rslongaug
 msgid "August"
 msgstr "Augustus"
 
-#: gfx_constants:rsbold
+#: fpg_constants:rsbold
 msgid "Bold"
 msgstr "Vetdruk"
 
-#: gfx_constants:rscancel
+#: fpg_constants:rscancel
 msgid "Cancel"
 msgstr "Kanselleer"
 
-#: gfx_constants:rscannotcreatedir
+#: fpg_constants:rscannotcreatedir
 msgid "Cannot create directory"
 msgstr "Kan nie die lêergids skep nie"
 
-#: gfx_constants:rschange
+#: fpg_constants:rschange
 msgid "Change"
 msgstr "Verander"
 
-#: gfx_constants:rsclose
+#: fpg_constants:rsclose
 msgid "Close"
 msgstr "Sluit"
 
-#: gfx_constants:rscollection
+#: fpg_constants:rscollection
 msgid "Collection"
 msgstr "Versameling"
 
-#: gfx_constants:rsconfirm
+#: fpg_constants:rsconfirm
 msgid "Confirm"
 msgstr "Bevestig"
 
-#: gfx_constants:rsconfirmation
+#: fpg_constants:rsconfirmation
 msgid "Confirmation"
 msgstr "Bevestiging"
 
-#: gfx_constants:rscopy
+#: fpg_constants:rscopy
 msgid "Copy"
 msgstr "Kopieer"
 
-#: gfx_constants:rserrcouldnotopendir
+#: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
 msgstr "Kon nie die lêergids <%s> oop maak nie"
 
-#: gfx_constants:rscreate
+#: fpg_constants:rscreate
 msgid "Create"
 msgstr "Skep"
 
-#: gfx_constants:rscreatedirectory
+#: fpg_constants:rscreatedirectory
 msgid "Create directory"
 msgstr "Skep 'n lêergids"
 
-#: gfx_constants:rscriticalerror
+#: fpg_constants:rscriticalerror
 msgid "Critical Error"
 msgstr "Kritiese Fout"
 
-#: gfx_constants:rscut
+#: fpg_constants:rscut
 msgid "Cut"
 msgstr "Sny"
 
-#: gfx_constants:rsdatabase
+#: fpg_constants:rsdatabase
 msgid "Database"
 msgstr "Databasis"
 
-#: gfx_constants:rsshortdec
+#: fpg_constants:rsshortdec
 msgid "Dec"
 msgstr "Des"
 
-#: gfx_constants:rslongdec
+#: fpg_constants:rslongdec
 msgid "December"
 msgstr "Desember"
 
-#: gfx_constants:rsdelete
+#: fpg_constants:rsdelete
 msgid "Delete"
 msgstr "Skrap"
 
-#: gfx_constants:rsdirectories
+#: fpg_constants:rsdirectories
 msgid "Directories"
 msgstr "Lêergidse"
 
-#: gfx_constants:rsdrive
+#: fpg_constants:rsdrive
 msgid "Drive"
 msgstr "Dryf"
 
-#: gfx_constants:rsedit
+#: fpg_constants:rsedit
 msgid "Edit"
 msgstr "Redigeer"
 
-#: gfx_constants:rslanguage
+#: fpg_constants:rslanguage
 msgid "English"
 msgstr "Afrikaans"
 
-#: gfx_constants:rsenternewdirectory
+#: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
 msgstr "Geen 'n nuwe lêergids naam"
 
-#: gfx_constants:rserror
+#: fpg_constants:rserror
 msgid "Error"
 msgstr "Fout"
 
-#: gfx_constants:rsexampletext
+#: fpg_constants:rsexampletext
 msgid "Example Text"
 msgstr "Teks Voorbeeld"
 
-#: gfx_constants:rsexit
+#: fpg_constants:rsexit
 msgid "Exit"
 msgstr "Staak"
 
-#: gfx_constants:rserrfailedtocreatedir
+#: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
 msgstr "Kon nie die lêergids <%s> skep nie"
 
-#: gfx_constants:rscollectionfavourites
+#: fpg_constants:rscollectionfavourites
 msgid "Favourites"
 msgstr "Gunstelinge"
 
-#: gfx_constants:rsshortfeb
+#: fpg_constants:rsshortfeb
 msgid "Feb"
 msgstr "Feb"
 
-#: gfx_constants:rslongfeb
+#: fpg_constants:rslongfeb
 msgid "February"
 msgstr "Februarie"
 
-#: gfx_constants:rsfileselection
+#: fpg_constants:rsfileselection
 msgid "File Selection"
 msgstr "Lêer seleksie"
 
-#: gfx_constants:rsfilename
+#: fpg_constants:rsfilename
 msgid "Filename"
 msgstr "Lêer naam"
 
-#: gfx_constants:rsfiles
+#: fpg_constants:rsfiles
 msgid "Files"
 msgstr "Lêers"
 
-#: gfx_constants:rsfind
+#: fpg_constants:rsfind
 msgid "Find"
 msgstr "Vind"
 
-#: gfx_constants:rscollectionfixedwidth
+#: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
 msgstr "Vaste wydte"
 
-#: gfx_constants:rscollectionfontaliases
+#: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
 msgstr "Font Kenname"
 
-#: gfx_constants:rsshortfri
+#: fpg_constants:rsshortfri
 msgid "Fri"
 msgstr "Vr"
 
-#: gfx_constants:rslongfri
+#: fpg_constants:rslongfri
 msgid "Friday"
 msgstr "Vrydag"
 
-#: gfx_constants:rsfilegroup
+#: fpg_constants:rsfilegroup
 msgid "Group"
 msgstr "Groep"
 
-#: gfx_constants:rshelp
+#: fpg_constants:rshelp
 msgid "Help"
 msgstr "Help"
 
-#: gfx_constants:rsignore
+#: fpg_constants:rsignore
 msgid "Ignore"
 msgstr "Ignoreer"
 
-#: gfx_constants:rsinformation
+#: fpg_constants:rsinformation
 msgid "Information"
 msgstr "Informasie"
 
-#: gfx_constants:rsinsert
+#: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Invoeg"
 
-#: gfx_constants:rsitalic
+#: fpg_constants:rsitalic
 msgid "Italic"
 msgstr "Kursief"
 
-#: gfx_constants:rserritemofwrongtype
+#: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
 msgstr "Die item is nie van <%s> tiepe nie!"
 
-#: gfx_constants:rsshortjan
+#: fpg_constants:rsshortjan
 msgid "Jan"
 msgstr "Jan"
 
-#: gfx_constants:rslongjan
+#: fpg_constants:rslongjan
 msgid "January"
 msgstr "Januarie"
 
-#: gfx_constants:rsshortjul
+#: fpg_constants:rsshortjul
 msgid "Jul"
 msgstr "Jul"
 
-#: gfx_constants:rslongjul
+#: fpg_constants:rslongjul
 msgid "July"
 msgstr "Julie"
 
-#: gfx_constants:rsshortjun
+#: fpg_constants:rsshortjun
 msgid "Jun"
 msgstr "Jun"
 
-#: gfx_constants:rslongjun
+#: fpg_constants:rslongjun
 msgid "June"
 msgstr "Junie"
 
-#: gfx_constants:rserrlistmustbeempty
+#: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
 msgstr "Lys moet leeg wees"
 
-#: gfx_constants:rsshortmar
+#: fpg_constants:rsshortmar
 msgid "Mar"
 msgstr "Mar"
 
-#: gfx_constants:rslongmar
+#: fpg_constants:rslongmar
 msgid "March"
 msgstr "Maart"
 
-#: gfx_constants:rsshortmay
+#: fpg_constants:rsshortmay
 msgid "May"
 msgstr "Mei"
 
-#: gfx_constants:rsmessage
+#: fpg_constants:rsmessage
 msgid "Message"
 msgstr "Boodskap"
 
-#: gfx_constants:rsfilemodifiedtime
+#: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
 msgstr "Wysigings Tyd"
 
-#: gfx_constants:rsshortmon
+#: fpg_constants:rsshortmon
 msgid "Mon"
 msgstr "Ma"
 
-#: gfx_constants:rslongmon
+#: fpg_constants:rslongmon
 msgid "Monday"
 msgstr "Maandag"
 
-#: gfx_constants:rsname
+#: fpg_constants:rsname
 msgid "Name"
 msgstr "Naam"
 
-#: gfx_constants:rsno
+#: fpg_constants:rsno
 msgid "No"
 msgstr "Nee"
 
-#: gfx_constants:rsnotoall
+#: fpg_constants:rsnotoall
 msgid "No to All"
 msgstr "Nee vir Alles"
 
-#: gfx_constants:rsshortnov
+#: fpg_constants:rsshortnov
 msgid "Nov"
 msgstr "Nov"
 
-#: gfx_constants:rslongnov
+#: fpg_constants:rslongnov
 msgid "November"
 msgstr "November"
 
-#: gfx_constants:rsok
+#: fpg_constants:rsok
 msgid "OK"
 msgstr "Goed"
 
-#: gfx_constants:rsshortoct
+#: fpg_constants:rsshortoct
 msgid "Oct"
 msgstr "Okt"
 
-#: gfx_constants:rslongoct
+#: fpg_constants:rslongoct
 msgid "October"
 msgstr "Oktober"
 
-#: gfx_constants:rsopen
+#: fpg_constants:rsopen
 msgid "Open"
 msgstr "Open"
 
-#: gfx_constants:rsopenafile
+#: fpg_constants:rsopenafile
 msgid "Open a file"
 msgstr "Maak 'n leêr op"
 
-#: gfx_constants:rsfileowner
+#: fpg_constants:rsfileowner
 msgid "Owner"
 msgstr "Eienaar"
 
-#: gfx_constants:rspassword
+#: fpg_constants:rspassword
 msgid "Password"
 msgstr "Wagwoord"
 
-#: gfx_constants:rspaste
+#: fpg_constants:rspaste
 msgid "Paste"
 msgstr "Plak"
 
-#: gfx_constants:rscollectionrecentlyused
+#: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
 msgstr "Onlangs gebruik"
 
-#: gfx_constants:rsreplace
+#: fpg_constants:rsreplace
 msgid "Replace"
 msgstr "Vervang"
 
-#: gfx_constants:rsretry
+#: fpg_constants:rsretry
 msgid "Retry"
 msgstr "Herprobeer"
 
-#: gfx_constants:rsfilerights
+#: fpg_constants:rsfilerights
 msgid "Rights"
 msgstr "Regte"
 
-#: gfx_constants:rscollectionsans
+#: fpg_constants:rscollectionsans
 msgid "Sans"
 msgstr "Sans"
 
-#: gfx_constants:rsshortsat
+#: fpg_constants:rsshortsat
 msgid "Sat"
 msgstr "Sa"
 
-#: gfx_constants:rslongsat
+#: fpg_constants:rslongsat
 msgid "Saturday"
 msgstr "Saterdag"
 
-#: gfx_constants:rssave
+#: fpg_constants:rssave
 msgid "Save"
 msgstr "Stoor"
 
-#: gfx_constants:rssaveafile
+#: fpg_constants:rssaveafile
 msgid "Save file as"
 msgstr "Stoor 'n lêer as"
 
-#: gfx_constants:rssearch
+#: fpg_constants:rssearch
 msgid "Search"
 msgstr "Soek"
 
-#: gfx_constants:rsselect
+#: fpg_constants:rsselect
 msgid "Select"
 msgstr "Kies"
 
-#: gfx_constants:rsselectafont
+#: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Kies 'n lettertipe"
 
-#: gfx_constants:rsshortsep
+#: fpg_constants:rsshortsep
 msgid "Sep"
 msgstr "Sept"
 
-#: gfx_constants:rslongsep
+#: fpg_constants:rslongsep
 msgid "September"
 msgstr "September"
 
-#: gfx_constants:rscollectionserif
+#: fpg_constants:rscollectionserif
 msgid "Serif"
 msgstr "Serif"
 
-#: gfx_constants:rsshowhidden
+#: fpg_constants:rsshowhidden
 msgid "Show hidden files"
 msgstr "Wys versteekte lêers"
 
-#: gfx_constants:rssize
+#: fpg_constants:rssize
 msgid "Size"
 msgstr "Groote"
 
-#: gfx_constants:rsstyle
+#: fpg_constants:rsstyle
 msgid "Style"
 msgstr "Steil"
 
-#: gfx_constants:rsshortsun
+#: fpg_constants:rsshortsun
 msgid "Sun"
 msgstr "So"
 
-#: gfx_constants:rslongsun
+#: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Sondag"
 
-#: gfx_constants:rsshortthu
+#: fpg_constants:rsshortthu
 msgid "Thu"
 msgstr "Do"
 
-#: gfx_constants:rslongthu
+#: fpg_constants:rslongthu
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: gfx_constants:rstoday
+#: fpg_constants:rstoday
 msgid "Today"
 msgstr "Vandag"
 
-#: gfx_constants:rsshorttue
+#: fpg_constants:rsshorttue
 msgid "Tue"
 msgstr "Di"
 
-#: gfx_constants:rslongtue
+#: fpg_constants:rslongtue
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: gfx_constants:rsfiletype
+#: fpg_constants:rsfiletype
 msgid "Type of file"
 msgstr "Tipe Leêr"
 
-#: gfx_constants:rstypeface
+#: fpg_constants:rstypeface
 msgid "Typeface"
 msgstr "Letterbeeld"
 
-#: gfx_constants:rsunderscore
+#: fpg_constants:rsunderscore
 msgid "UnderScore"
 msgstr "Onderstreep"
 
-#: gfx_constants:rsusername
+#: fpg_constants:rsusername
 msgid "User name"
 msgstr "Gebruikers naam"
 
-#: gfx_constants:rswarning
+#: fpg_constants:rswarning
 msgid "Warning"
 msgstr "Waarskuwing"
 
-#: gfx_constants:rsshortwed
+#: fpg_constants:rsshortwed
 msgid "Wed"
 msgstr "Wo"
 
-#: gfx_constants:rslongwed
+#: fpg_constants:rslongwed
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: gfx_constants:rsaddnewitem
+#: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
 msgstr "Wil jy die nuwe item <%s> in die lys bylas?"
 
-#: gfx_constants:rsyes
+#: fpg_constants:rsyes
 msgid "Yes"
 msgstr "Ja"
 
-#: gfx_constants:rsyestoall
+#: fpg_constants:rsyestoall
 msgid "Yes to All"
 msgstr "Ja vir Alles"
 
