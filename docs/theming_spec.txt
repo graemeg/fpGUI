@@ -1,0 +1,38 @@
+This is a mini theme specification I have so far. I still need to work 
+on the finer details, but I believe it's a start.
+
+- Composite images for each themed component
+- A text file describing the layout of each of those composite images.
+- The text file will also contain a lot more metadata. Things like:
+  * Theme name & description
+  * Author of theme (credits)
+  * Theme version
+  * Controls that are themed.
+  * Composite image layout information per control (image count, state
+    count, border width etc.)
+  * Gradients used in theme. For example the background color of a Form,
+    PageControl or Panel. Also specifying starting and ending colors.
+    Direction of gradient. Gradient Type (linear, radial, box etc).
+  * Recommended Fonts
+  * Font colors
+  * whatever else we can think of!
+- Themes will be contained in a zip archive (or some non-solid archive
+  method) and data will be read directly as if it was a file system. No
+  prior decompression is required. I already helped develop a component
+  which can do this with the zip format.
+- Create some theme designer which will generate the theme archive and
+  will also generate the theme text file containing all the metadata. A
+  graphics artist must be able to use this tool and not just developers. 
+- There will be some default themes in fpGUI, that are not based on 
+  composite images. These will always be available in fpGUI apps and 
+  switchable at application startup with -style=<themename> parameter.
+  Built in themes will be:
+    * Win2000
+    * ClearLook (look-alike)
+    * Motif
+    * BlueCurve (look-alike as was done in RedHat 9)
+    * WinXP might be built in, otherwise it will be available as a 
+      image based theme. Silver and Lunar colours.
+
+
+
