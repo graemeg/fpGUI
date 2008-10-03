@@ -40,7 +40,6 @@ type
     FPopupMenu: TfpgPopupMenu;
     FDefaultPopupMenu: TfpgPopupMenu;
     FText: string;
-    FFont: TfpgFont;
     FPasswordMode: Boolean;
     FBorderStyle: TfpgEditBorderStyle;
     FOnChange: TNotifyEvent;
@@ -66,6 +65,7 @@ type
     procedure   DefaultPopupClearAll(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
   protected
+    FFont: TfpgFont;
     FSideMargin: integer;
     FMouseDragPos: integer;
     FSelStart: integer;
@@ -94,7 +94,6 @@ type
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
-    property    Font: TfpgFont read FFont;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
     property    MaxLength: Integer read FMaxLength write FMaxLength;
@@ -112,12 +111,12 @@ type
     procedure   CopyToClipboard;
     procedure   CutToClipboard;
     procedure   PasteFromClipboard;
+    property    Font: TfpgFont read FFont;
   end;
 
 
   TfpgEdit = class(TfpgBaseEdit)
   public
-    property    Font;
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
     property    AutoSelect;
@@ -182,7 +181,6 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
-    property    Text;   { this should become Value }
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -199,7 +197,8 @@ type
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
-     property   Text;
+    property    OldColor;
+    property    Text;
   published
     property    Alignment;
     property    NegativeColor;
@@ -219,33 +218,37 @@ type
 
   TfpgEditFloat = class(TfpgBaseNumericEdit)
   private
-    fDecimals: integer;
+    FDecimals: integer;
+    FFixedDecimals: boolean;
   protected
     function    GetValue: extended; virtual;
     procedure   SetValue(const AValue: extended); virtual;
     procedure   SetShowThousand;
-    procedure   SetDecimals(AValue: integer);
+    procedure   SetDecimals(const AValue: integer);
+    procedure   SetFixedDecimals(const AValue: boolean);
     procedure   Format; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
-     property   Text;
+    property    OldColor;
+    property    Text;
   published
     property    Alignment;
     property    Decimals: integer read fDecimals write SetDecimals;
-    property    NegativeColor;
     property    DecimalSeparator;
-    property    Value: extended read GetValue write SetValue;
-    property    ShowThousand;
-    property    TabOrder;
-    property    TextColor;
-    property    ThousandSeparator;
+    property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals;
+    property    NegativeColor;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
+    property    ShowThousand;
+    property    TabOrder;
+    property    TextColor;
+    property    ThousandSeparator;
+    property    Value: extended read GetValue write SetValue;
   end;
 
 
@@ -262,12 +265,12 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
+    property    OldColor;
     property    Text;
   published
     property    Alignment;
     property    Decimals: integer read fDecimals write SetDecimals;
     property    NegativeColor;
-    property    OldColor;
     property    DecimalSeparator;
     property    ThousandSeparator;
     property    ShowThousand;
@@ -1356,6 +1359,7 @@ procedure TfpgEditInteger.SetValue(const AValue: integer);
 begin
   try
     Text := IntToStr(AValue);
+    Format;
   except
     on E: EConvertError do
       Text := '';
@@ -1575,12 +1579,18 @@ begin
   end;
 end;
 
-procedure TfpgEditFloat.SetDecimals(AValue: integer);
+procedure TfpgEditFloat.SetDecimals(const AValue: integer);
 begin
   if AValue < -1 then
     Exit; // =>
-  if fDecimals <> AValue then
-    fDecimals := AValue
+  if FDecimals <> AValue then
+    FDecimals := AValue
+end;
+
+procedure TfpgEditFloat.SetFixedDecimals(const AValue: boolean);
+begin
+  if FFixedDecimals <> AValue then
+    FFixedDecimals := AValue;
 end;
 
 procedure TfpgEditFloat.Format;
@@ -1606,8 +1616,9 @@ end;
 constructor TfpgEditFloat.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  fDecimals := -1;
-  fShowThousand := True;
+  FDecimals := -1;
+  FFixedDecimals := False;
+  FShowThousand := True;
 end;
 
 { TfpgEditCurrency }
@@ -1729,14 +1740,11 @@ begin
           Inc(FCursorPos);
           end;
     end;
-    if AValue < 0 then
-      TextColor := NegativeColor
-    else
-      TextColor := OldColor;
   except
     on E: EConvertError do
       Text := '';
   end;
+  Format;
 end;
 
 procedure TfpgEditCurrency.SetShowThousand;

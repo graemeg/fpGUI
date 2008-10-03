@@ -149,8 +149,10 @@ type
     property    Text;
     property    TextColor;
     property    TabOrder;
+    property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
+    property    OnMouseUp;
     property    OnClick;
   end;
 

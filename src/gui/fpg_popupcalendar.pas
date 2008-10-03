@@ -23,11 +23,9 @@ unit fpg_popupcalendar;
 {.$Define DEBUG} // while developing the component
 
 {
-    ***********************************************************
-    **********   This is still under development!   ***********
-    ***********************************************************
-
-    It needs lots of testing and debugging.
+    *****************************************************************
+    **********   This is still under heavy development!   ***********
+    *****************************************************************
 }
 
 
