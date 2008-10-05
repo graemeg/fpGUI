@@ -29,7 +29,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="3"/>
-    <Files Count="72">
+    <Files Count="73">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -318,6 +318,10 @@
         <Filename Value="../../gui/fpg_spinedit.pas"/>
         <UnitName Value="fpg_spinedit"/>
       </Item72>
+      <Item73>
+        <Filename Value="../fpg_extgraphics.pas"/>
+        <UnitName Value="fpg_extgraphics"/>
+      </Item73>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">

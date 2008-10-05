@@ -195,6 +195,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean=False); override;
     property    DCHandle: TfpgDCHandle read FDrawHandle;
   public
     constructor Create; override;
@@ -1918,6 +1919,23 @@ begin
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
+procedure TfpgCanvasImpl.DoDrawPolygon(Points: fpg_base.PPoint; NumPts: Integer; Winding: boolean);
+var
+  PointArray: PXPoint;
+  i: integer;
+begin
+  { convert TPoint to TXPoint }
+  GetMem(PointArray, SizeOf(TXPoint)*(NumPts+1)); // +1 for return line
+  for i := 0 to NumPts-1 do
+  begin
+    PointArray[i].x := Points[i].x;
+    PointArray[i].y := Points[i].y;
+  end;
+  XFillPolygon(xapplication.display, FDrawHandle, Fgc, PointArray, NumPts, CoordModeOrigin, X.Complex);
+  if PointArray <> nil then
+    FreeMem(PointArray);
+end;
+
 procedure TfpgCanvasImpl.BufferFreeTimer(Sender: TObject);
 begin
   {$IFDEF DEBUG}
@@ -2039,14 +2057,11 @@ procedure TfpgCanvasImpl.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 var
   pts: array[1..3] of TXPoint;
 begin
-  pts[1].x := x1;
-  pts[1].y := y1;
-  pts[2].x := x2;
-  pts[2].y := y2;
-  pts[3].x := x3;
-  pts[3].y := y3;
+  pts[1].x := x1;   pts[1].y := y1;
+  pts[2].x := x2;   pts[2].y := y2;
+  pts[3].x := x3;   pts[3].y := y3;
 
-  XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, 0, 0);
+  XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
 end;
 
 procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);

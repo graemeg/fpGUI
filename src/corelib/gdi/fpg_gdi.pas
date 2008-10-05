@@ -87,6 +87,8 @@ type
   end;
 
 
+  { TfpgCanvasImpl }
+
   TfpgCanvasImpl = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
@@ -131,6 +133,7 @@ type
     procedure   SetPixel(X, Y: integer; const AValue: TfpgColor); override;
     procedure   DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
     procedure   DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended); override;
+    procedure   DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean = False); override;
     property    DCHandle: TfpgDCHandle read Fgc;
   public
     constructor Create; override;
@@ -1677,6 +1680,13 @@ begin
   {$IFNDEF wince}
   Windows.Pie(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
   {$ENDIF}
+end;
+
+procedure TfpgCanvasImpl.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
+//var
+//  pts: array of TPoint;
+begin
+  Windows.Polygon(Fgc, Points, NumPts);
 end;
 
 procedure TfpgCanvasImpl.DoPutBufferToScreen(x, y, w, h: TfpgCoord);

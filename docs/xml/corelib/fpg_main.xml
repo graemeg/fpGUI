@@ -3,10 +3,10 @@
   <package name="CoreLib">
     <!--
   ====================================================================
-    fpgfx
+    fpg_main
   ====================================================================
 -->
-    <module name="fpgfx">
+    <module name="fpg_main">
       <short/>
       <descr/>
       <!-- unresolved type reference Visibility: default -->
@@ -22,13 +22,13 @@
         <seealso/>
       </element>
       <!-- unresolved type reference Visibility: default -->
-      <element name="gfxbase">
+      <element name="fpg_base">
         <short/>
         <descr/>
         <seealso/>
       </element>
       <!-- unresolved type reference Visibility: default -->
-      <element name="gfx_x11">
+      <element name="fpg_x11">
         <short/>
         <descr/>
         <seealso/>
@@ -1740,6 +1740,6 @@
         <short/>
       </element>
     </module>
-    <!-- fpgfx -->
+    <!-- fpg_main -->
   </package>
 </fpdoc-descriptions>

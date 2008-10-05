@@ -30,8 +30,8 @@ unit fpg_spinedit;
 { TODO : Step size needs to be implemented (small and large) }
 { TODO : PgUp/PgDn keyboard needs to be supported. }
 { TODO : Improve Timer and Step support. If the mouse is kept down on
-         a button, it should increment by small steps. After as certain
-         period, it should start inrementing by large steps. }
+         a button, it should increment by small steps. After a certain
+         period, it should start incrementing by large steps. }
 { TODO : Text cursor positioning should be fixed. }
 
 interface
@@ -48,7 +48,6 @@ uses
 
 type
 
-  { TfpgSpinEdit }
 
   TfpgAbstractSpinEdit = class(TfpgBevel)
   private
@@ -59,17 +58,24 @@ type
     FTimer: TfpgTimer;
     FUp: Boolean;
     FDown: Boolean;
+    procedure   SetButtonWidth(const AValue: integer);
   protected
     FButtonWidth: integer;
-    function GetButtonsBackgroundColor: TfpgColor;
-    procedure SetButtonsBackgroundColor(const AValue: Tfpgcolor);
-    procedure SetArrowUpColor(const AValue: Tfpgcolor);
-    procedure SetArrowDownColor(const AValue: Tfpgcolor);
-    procedure ButtonUpPaint(Sender: TObject);
-    procedure ButtonDownPaint(Sender: TObject);
-    property ButtonsBackgroundColor: Tfpgcolor read GetButtonsBackgroundColor write SetButtonsBackgroundColor default clButtonFace;
-    property ArrowUpColor: TfpgColor read FArrowUpColor write SetArrowUpColor;
-    property ArrowDownColor: TfpgColor read FArrowDownColor write SetArrowDownColor;
+    procedure   ResizeChildren; virtual;
+    procedure   HandlePaint; override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
+    function    IsMinLimitReached: Boolean; virtual; abstract;
+    function    IsMaxLimitReached: Boolean; virtual; abstract;
+    function    GetButtonsBackgroundColor: TfpgColor;
+    procedure   SetButtonsBackgroundColor(const AValue: Tfpgcolor);
+    procedure   SetArrowUpColor(const AValue: Tfpgcolor);
+    procedure   SetArrowDownColor(const AValue: Tfpgcolor);
+    procedure   ButtonUpPaint(Sender: TObject);
+    procedure   ButtonDownPaint(Sender: TObject);
+    property    ButtonsBackgroundColor: Tfpgcolor read GetButtonsBackgroundColor write SetButtonsBackgroundColor default clButtonFace;
+    property    ArrowUpColor: TfpgColor read FArrowUpColor write SetArrowUpColor;
+    property    ArrowDownColor: TfpgColor read FArrowDownColor write SetArrowDownColor;
+    property    ButtonWidth: integer read FButtonWidth write SetButtonWidth default 13;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -84,12 +90,15 @@ type
     FValue: extended;
     procedure EnableButtons;
   protected
+    function IsMinLimitReached: Boolean; override;
+    function IsMaxLimitReached: Boolean; override;
     function GetEditBackgroundColor: TfpgColor;
     function GetTextColor: TfpgColor;
     function GetNegativeColor: TfpgColor;
     function GetFontDesc: string;
     function GetDecimals: integer;
     function GetFixedDecimals: Boolean;
+    procedure ResizeChildren; override;
     procedure SetEditBackgroundColor(const AValue: Tfpgcolor);
     procedure SetTextColor(const AValue: Tfpgcolor);
     procedure SetNegativeColor(const AValue: Tfpgcolor);
@@ -137,10 +146,13 @@ type
     FValue: integer;
     procedure EnableButtons;
   protected
+    function IsMinLimitReached: Boolean; override;
+    function IsMaxLimitReached: Boolean; override;
     function GetEditBackgroundColor: TfpgColor;
     function GetTextColor: TfpgColor;
     function GetNegativeColor: TfpgColor;
     function GetFontDesc: string;
+    procedure ResizeChildren; override;
     procedure SetEditBackgroundColor(const AValue: Tfpgcolor);
     procedure SetTextColor(const AValue: Tfpgcolor);
     procedure SetNegativeColor(const AValue: Tfpgcolor);
@@ -163,6 +175,7 @@ type
   published
     property EditBackgroundColor: Tfpgcolor read GetEditBackgroundColor write SetEditBackgroundColor default clBoxColor;
     property ButtonsBackgroundColor;
+    property ButtonWidth;
     property TextColor: Tfpgcolor read GetTextColor write SetTextColor;
     property NegativeColor: TfpgColor read GetNegativeColor write SetNegativeColor;
     property ArrowUpColor;
@@ -181,21 +194,21 @@ function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: in
 
 implementation
 
+uses
+  fpg_extgraphics, math;
+
 
 function CreateSpinEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: extended = 0; AMaxValue: extended = 100; AIncrement: extended = 1; ADecimals: integer = 1; AValue: extended = 0): TfpgSpinEditFloat;
+var
+  newh: TfpgCoord;
 begin
   Result       := TfpgSpinEditFloat.Create(AOwner);
-  Result.Left  := x;
-  Result.Top   := y;
-  Result.Width := w;
   if h < Result.FEdit.Font.Height + 6 then
-    Result.Height := Result.FEdit.Font.Height + 6
+    newh := Result.FEdit.Font.Height + 6
   else
-    Result.Height := h;
-  Result.FEdit.Height := Result.Height;
-  Result.FEdit.Width := Result.Width - Result.FButtonWidth;
-  Result.FButtonUp.Left := Result.Width - Result.FButtonWidth;
-  Result.FButtonDown.Left := Result.Width - Result.FButtonWidth;
+    newh := h;
+  Result.SetPosition(x, y, w, newh);
+
   if AMaxValue > AMinValue then
   begin
     Result.MinValue := AMinValue;
@@ -208,19 +221,16 @@ begin
 end;
 
 function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: integer = 0; AMaxValue: integer = 100; AIncrement: integer = 1; AValue: integer = 0): TfpgSpinEdit;
+var
+  newh: TfpgCoord;
 begin
   Result       := TfpgSpinEdit.Create(AOwner);
-  Result.Left  := x;
-  Result.Top   := y;
-  Result.Width := w;
   if h < Result.FEdit.Font.Height + 6 then
-    Result.Height := Result.FEdit.Font.Height + 6
+    newh := Result.FEdit.Font.Height + 6
   else
-    Result.Height := h;
-  Result.FEdit.Height := Result.Height;
-  Result.FEdit.Width := Result.Width - Result.FButtonWidth;
-  Result.FButtonUp.Left := Result.Width - Result.FButtonWidth;
-  Result.FButtonDown.Left := Result.Width - Result.FButtonWidth;
+    newh := h;
+  Result.SetPosition(x, y, w, newh);
+
   if AMaxValue > AMinValue then
   begin
     Result.MinValue := AMinValue;
@@ -233,6 +243,39 @@ end;
 
 
 { TfpgAbstractSpinEdit }
+
+procedure TfpgAbstractSpinEdit.SetButtonWidth(const AValue: integer);
+begin
+  if FButtonWidth = AValue then
+    Exit;
+  FButtonWidth := AValue;
+  { Apply some limits for sanity sake }
+  if FButtonWidth < 5 then
+    FButtonWidth := 5;
+
+  ResizeChildren;
+  RePaint;
+end;
+
+procedure TfpgAbstractSpinEdit.ResizeChildren;
+begin
+  FButtonUp.SetPosition(Width - FButtonWidth, 0, FButtonWidth, Height div 2);
+  FButtonDown.SetPosition(Width - FButtonWidth, Height div 2, FButtonWidth, Height div 2);
+end;
+
+procedure TfpgAbstractSpinEdit.HandlePaint;
+begin
+    Canvas.Clear(BackgroundColor);
+    if FButtonUp.HasHandle then
+      fpgPostMessage(self, FButtonUp, FPGM_PAINT);
+//    FButtonDown.Invalidate;
+end;
+
+procedure TfpgAbstractSpinEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  ResizeChildren;
+end;
 
 function TfpgAbstractSpinEdit.GetButtonsBackgroundColor: TfpgColor;
 begin
@@ -260,24 +303,53 @@ begin
     FArrowDownColor := AValue;
 end;
 
-procedure TfpgAbstractSpinEdit.ButtonUpPaint(Sender: TObject);
+function GetButtonRect(AButton: TfpgButton): TRect;
+var
+  r: TfpgRect;
 begin
-  if TfpgButton(Sender).Enabled then
-    TfpgButton(Sender).Canvas.SetColor(FArrowUpColor)
-  else
-    TfpgButton(Sender).Canvas.SetColor(clShadow1);
+  r := AButton.GetClientRect;
 
-  fpgStyle.DrawDirectionArrow(TfpgButton(Sender).Canvas, 0, 0, TfpgButton(Sender).Width - 3, TfpgButton(Sender).Height, adUp);
+  InflateRect(r, -1, -1); // button borders
+  if AButton.Down then
+    OffsetRect(r, 1, 1);
+
+  // TfpgRect to TRect
+  Result.Left := r.Left;
+  Result.Top := r.Top;
+  Result.Right := r.Right;
+  Result.Bottom := r.Bottom;
+end;
+
+procedure TfpgAbstractSpinEdit.ButtonUpPaint(Sender: TObject);
+var
+  btn: TfpgButton;
+  r: TRect;
+begin
+  btn := TfpgButton(Sender);
+  if btn.Enabled then
+    btn.Canvas.SetColor(FArrowUpColor)
+  else
+    btn.Canvas.SetColor(clShadow1);
+
+  r := GetButtonRect(btn);
+  PaintTriangle(btn.Canvas, r, degtorad(90.0));
+//  fpgStyle.DrawDirectionArrow(btn.Canvas, r.Top, r.Left, r.Width, r.Height, adUp);
 end;
 
 procedure TfpgAbstractSpinEdit.ButtonDownPaint(Sender: TObject);
+var
+  btn: TfpgButton;
+  r: TRect;
 begin
-  if TfpgButton(Sender).Enabled then
-    TfpgButton(Sender).Canvas.SetColor(FArrowDownColor)
+  btn := TfpgButton(Sender);
+  if btn.Enabled {and (not IsMinLimitReached)} then
+    btn.Canvas.SetColor(FArrowDownColor)
   else
-    TfpgButton(Sender).Canvas.SetColor(clShadow1);
+    btn.Canvas.SetColor(clShadow1);
 
-  fpgStyle.DrawDirectionArrow(TfpgButton(Sender).Canvas, 0, 0, TfpgButton(Sender).Width - 3, TfpgButton(Sender).Height, adDown);
+  r := GetButtonRect(btn);
+  PaintTriangle(btn.Canvas, r, degtorad(270.0));
+//  fpgStyle.DrawDirectionArrow(TfpgButton(Sender).Canvas, 0, 0, TfpgButton(Sender).Width - 3, TfpgButton(Sender).Height, adDown);
 end;
 
 constructor TfpgAbstractSpinEdit.Create(AOwner: TComponent);
@@ -299,7 +371,7 @@ begin
   FButtonDown := TfpgButton.Create(Self);
   with FButtonDown do
   begin
-    SetPosition(Width - FButtonWidth, (Height div 2) + 1, FButtonWidth, (Height div 2) - 1);
+    SetPosition(Width - FButtonWidth, Height div 2, FButtonWidth, Height div 2);
     Text      := '';
     BackgroundColor := clButtonFace;
     Focusable := False;
@@ -333,6 +405,16 @@ begin
   end;
 end;
 
+function TfpgSpinEditFloat.IsMinLimitReached: Boolean;
+begin
+  Result := Value = MinValue;
+end;
+
+function TfpgSpinEditFloat.IsMaxLimitReached: Boolean;
+begin
+  Result := Value = MaxValue;
+end;
+
 function TfpgSpinEditFloat.GetEditBackgroundColor: TfpgColor;
 begin
   Result := FEdit.BackgroundColor;
@@ -361,6 +443,12 @@ end;
 function TfpgSpinEditFloat.GetFixedDecimals: Boolean;
 begin
   Result := FEdit.FixedDecimals;
+end;
+
+procedure TfpgSpinEditFloat.ResizeChildren;
+begin
+  FEdit.SetPosition(0, 0, Width - FButtonWidth, Height);
+  inherited ResizeChildren;
 end;
 
 procedure TfpgSpinEditFloat.SetEditBackgroundColor(const AValue: Tfpgcolor);
@@ -610,22 +698,34 @@ end;
 
 procedure TfpgSpinEdit.EnableButtons;
 begin
-  if FValue + FIncrement < FMaxValue then
+  if not IsMaxLimitReached then
     FButtonUp.Enabled := True
   else
   begin
+    FButtonUp.Enabled := False;
     FUp := False;
     if Assigned(FTimer) then
       FTimer.Enabled := False;
   end;
-  if FValue - FIncrement > FMinValue then
+  if not IsMinLimitReached then
     FButtonDown.Enabled := True
   else
   begin
+    FButtonDown.Enabled := False;
     FDown := False;
     if Assigned(FTimer) then
       FTimer.Enabled := False;
   end;
+end;
+
+function TfpgSpinEdit.IsMinLimitReached: Boolean;
+begin
+  Result := Value = MinValue;
+end;
+
+function TfpgSpinEdit.IsMaxLimitReached: Boolean;
+begin
+  Result:= Value = MaxValue;
 end;
 
 function TfpgSpinEdit.GetEditBackgroundColor: TfpgColor;
@@ -646,6 +746,12 @@ end;
 function TfpgSpinEdit.GetFontDesc: string;
 begin
   Result := FEdit.FontDesc;
+end;
+
+procedure TfpgSpinEdit.ResizeChildren;
+begin
+  FEdit.SetPosition(0, 0, Width - FButtonWidth, Height);
+  inherited ResizeChildren;
 end;
 
 procedure TfpgSpinEdit.SetEditBackgroundColor(const AValue: Tfpgcolor);

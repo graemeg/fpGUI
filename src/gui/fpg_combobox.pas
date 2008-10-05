@@ -305,7 +305,13 @@ begin
   Canvas.BeginDraw;
   btnflags := [];
   ar := FInternalBtnRect;
-  InflateRect(ar, -2, -2);
+
+  { The bounding rectangle for the arrow }
+  ar.Width := 8;
+  ar.Height := 6;
+  ar.Left := FInternalBtnRect.Left + ((FInternalBtnRect.Width-ar.Width) div 2);
+  ar.Top := FInternalBtnRect.Top + ((FInternalBtnRect.Height-ar.Height) div 2);
+
   if FBtnPressed then
   begin
     Include(btnflags, btfIsPressed);

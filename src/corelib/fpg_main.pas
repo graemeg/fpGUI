@@ -364,6 +364,7 @@ function  OffsetRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
 function  CenterPoint(const Rect: TRect): TPoint;
 function  CenterPoint(const Rect: TfpgRect): TPoint;
 function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
+function  fpgRectToRect(const ARect: TfpgRect): TRect;
 
 // Debug rountines
 procedure PrintRect(const Rect: TRect);
@@ -387,7 +388,8 @@ uses
   fpg_stringutils,
   fpg_widget,
   fpg_dialogs,
-  fpg_hint;
+  fpg_hint,
+  fpg_extgraphics;
 
 var
   fpgTimers: TList;
@@ -554,6 +556,14 @@ end;
 function fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
 begin
   Result.SetRect(ALeft, ATop, AWidth, AHeight);
+end;
+
+function fpgRectToRect(const ARect: TfpgRect): TRect;
+begin
+  Result.Left   := ARect.Left;
+  Result.Top    := ARect.Top;
+  Result.Right  := ARect.Right;
+  Result.Bottom := ARect.Bottom;
 end;
 
 procedure PrintRect(const Rect: TRect);
@@ -1622,13 +1632,19 @@ end;
 
 procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection);
 var
+{
   peekx: integer;
   peeky: integer;
   basex: integer;
   basey: integer;
   side: integer;
   margin: integer;
+}
+  rad: Extended;
+  r: TRect;
+  r2: TfpgRect;
 begin
+{
   side   := (w div 4) + 1;
   margin := side + 1;
 
@@ -1662,6 +1678,21 @@ begin
     end;
     ACanvas.FillTriangle(peekx, peeky, basex, peeky - side, basex, peeky + side);
   end;
+}
+
+  r2.SetRect(x, y, w, h);
+  r := fpgRectToRect(r2);
+
+  if direction = adRight then
+    rad := DegToRad(0)
+  else if direction = adUp then
+    rad := DegToRad(90)
+  else if direction = adLeft then
+    rad := DegToRad(180)
+  else
+    rad := DegToRad(270);
+
+  PaintTriangle(ACanvas, r, rad);
 end;
 
 procedure TfpgStyle.DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord;
