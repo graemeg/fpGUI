@@ -525,7 +525,10 @@ begin
             if FNewItem then
               case FAllowNew of
                 anYes:
-                  FItems.Add(FText);
+                  begin
+                    FItems.Add(FText);
+                    FocusItem := Pred(FItems.Count);
+                  end;
                 anAsk:
                   begin
                     if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
