@@ -34,7 +34,7 @@ type
   TfpgModalResult = Low(integer)..High(integer);
 
   PPoint = ^TPoint;
-  
+
   TRGBTriple = record
     Red: word;
     Green: word;
@@ -135,7 +135,7 @@ type
     shiftstate: TShiftState;
   end;
 
-  
+
   TfpgMsgParmUser = record
     Param1: Integer;
     Param2: Integer;
@@ -2277,7 +2277,7 @@ var
 begin
   // FSpecialDirs under Windows will be all available drive letters.
   // FSpecialDirs under Linux is the root (/)
-  
+
   // find insert position in FSpecialDirs where we can insert all parts
   // of aDirectory.
   i := 0;
