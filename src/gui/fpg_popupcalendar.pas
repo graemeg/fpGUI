@@ -31,13 +31,10 @@ unit fpg_popupcalendar;
 
 { todo: Support highlighting special days. }
 { todo: Support custom colors. }
-{ todo: Must be able to switch the first day of the week. }
 { todo: Create a TfpgDateTimeEdit component with options for Date, Time or Date & Time. }
 { todo: Changing months and checking min/max limits takes into account the
         original date, not the selected day in the grid. It should use the
         selected day in grid. }
-{ todo: Paint previous and next months days in grey. Visiblity of these must
-        be user selectable. }
 { todo: Paint days out of min/max range in grey. }
 
 interface
@@ -52,6 +49,7 @@ uses
   fpg_edit,
   fpg_button,
   fpg_combobox,
+  fpg_basegrid,
   fpg_grid,
   fpg_dialogs;
 
@@ -76,9 +74,12 @@ type
     FDate: TDateTime;
     FMaxDate: TDateTime;
     FMinDate: TDateTime;
+    FWeekStartDay: integer;
     FCallerWidget: TfpgWidget;
     FOnValueSet: TfpgOnDateSetEvent;
     FCloseOnSelect: boolean;
+    FThisMonthDays: array[0..6,0..5] of boolean;
+    FWeeklyHoliday: integer;
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
@@ -87,6 +88,8 @@ type
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
     procedure   SetMinDate(const AValue: TDateTime);
+    procedure   SetWeekStartDay(const AValue: integer);
+    procedure   SetWeeklyHoliday(const AValue: integer);
     procedure   SetCloseOnSelect(const AValue: boolean);
     procedure   UpdateCalendar;
     procedure   btnYearUpClicked(Sender: TObject);
@@ -96,6 +99,7 @@ type
     procedure   btnTodayClicked(Sender: TObject);
     procedure   grdName1DoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   grdName1KeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   grdName1DrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure   TearDown;
   protected
     FOrigFocusWin: TfpgWidget;
@@ -116,6 +120,8 @@ type
     property    DateValue: TDateTime read FDate write SetDateValue;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
+    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay;
+    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday;
   end;
   
   
@@ -125,12 +131,16 @@ type
     FDateFormat: string;
     FMaxDate: TDateTime;
     FMinDate: TDateTime;
+    FWeekStartDay: integer;
+    FWeeklyHoliday: integer;
     FCloseOnSelect: boolean;
     procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime);
     procedure   SetDateFormat(const AValue: string);
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
     procedure   SetMinDate(const AValue: TDateTime);
+    procedure   SetWeekStartDay(const AValue: integer);
+    procedure   SetWeeklyHoliday(const AValue: integer);
     procedure   SetText(const AValue: string); override;
     function    GetText: string; override;
     procedure   SetCloseOnSelect(const AValue: boolean);
@@ -146,6 +156,8 @@ type
     property    FontDesc;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
+    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay;
+    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday;
     property    ParentShowHint;
     property    ShowHint;
     { Clicking on calendar Today button will close the popup calendar by default }
@@ -177,14 +189,11 @@ begin
     for c := 0 to 6 do
     begin
       if r = -1 then
-        grdName1.ColumnTitle[c] := ShortDayNames[c+1]  // ShortDayNames is 1-based indexing
+        grdName1.ColumnTitle[c] := ShortDayNames[Succ((c+FWeekStartDay) mod 7)]  // ShortDayNames is 1-based indexing
       else
       begin
         lCellDay := CalculateCellDay(c, r);
-        if lCellDay = -1 then
-          grdName1.Cells[c, r] := ''
-        else
-          grdName1.Cells[c, r] := IntToStr(lCellDay);
+        grdName1.Cells[c, r] := IntToStr(lCellDay);
       end;
     end;
   grdName1.EndUpdate;
@@ -202,6 +211,38 @@ begin
   // Pass the grid event on to the TfpgPopupCalender instance.
   HandleKeyPress(KeyCode, ShiftState, consumed);
   Consumed := True;
+end;
+
+procedure TfpgPopupCalendar.grdName1DrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect;
+          const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+var
+  FntNorm,FntBold: TfpgFont;
+begin
+  with grdName1 do
+  begin
+    FntNorm:= fpgApplication.GetFont('arial-9');
+    FntBold:= fpgApplication.GetFont('arial-9:bold');
+    if FThisMonthDays[ACol,ARow] then
+      if (ACol = FocusCol) and (ARow = FocusRow) then
+        Canvas.SetTextColor(clWhite)
+      else
+        Canvas.SetTextColor(clText1)
+    else
+      if (ACol = FocusCol) and (ARow = FocusRow) then
+        Canvas.SetTextColor(clWhite)
+      else
+        Canvas.SetTextColor(clShadow1);
+    if FWeeklyHoliday >= FWeekStartDay then
+      if ACol = FWeeklyHoliday - FWeekStartDay then
+        Canvas.Font := FntBold
+      else
+        Canvas.Font := FntNorm
+    else
+      if ACol = FWeeklyHoliday - FWeekStartDay + 7 then
+        Canvas.Font := FntBold
+      else
+        Canvas.Font := FntNorm;
+  end;
 end;
 
 procedure TfpgPopupCalendar.TearDown;
@@ -252,9 +293,26 @@ end;
 
 function TfpgPopupCalendar.CalculateCellDay(const ACol, ARow: Integer): Integer;
 begin
-  Result :=  FMonthOffset + ACol + ARow * 7;
-  if (Result < 1) or (Result > MonthDays[IsLeapYear(Year), Month]) then
-    Result := -1;
+  if (FMonthOffset + FWeekStartDay) > 1 then
+    Result :=  FMonthOffset - 7 + FWeekStartDay + ACol + ARow * 7
+  else
+    Result :=  FMonthOffset + FWeekStartDay + ACol + ARow * 7;
+  if Result < 1 then
+  begin
+    if Month > 1 then
+      Result := MonthDays[IsLeapYear(Year), Pred(Month)] + Result
+    else
+      Result := 31 + Result;
+    FThisMonthDays[ACol,ARow] := False;
+  end
+  else
+    if Result > MonthDays[IsLeapYear(Year), Month] then
+    begin
+      Result := Result - MonthDays[IsLeapYear(Year), Month];
+      FThisMonthDays[ACol,ARow] := False;
+    end
+    else
+      FThisMonthDays[ACol,ARow] := True;
 end;
 
 procedure TfpgPopupCalendar.SetDateElement(Index: integer; const AValue: Word);
@@ -337,6 +395,18 @@ begin
   end;
 end;
 
+procedure TfpgPopupCalendar.SetWeekStartDay(const AValue: integer);
+begin
+  if FWeekStartDay <> AValue then
+    FWeekStartDay := AValue;
+end;
+
+procedure TfpgPopupCalendar.SetWeeklyHoliday(const AValue: integer);
+begin
+  if FWeeklyHoliday <> AValue then
+    FWeeklyHoliday := AValue;
+end;
+
 procedure TfpgPopupCalendar.SetCloseOnSelect(const AValue: boolean);
 begin
   if FCloseOnSelect = AValue then
@@ -356,8 +426,11 @@ begin
     edtMonth.Text := LongMonthNames[Month];
     DecodeDate(FDate, lY, lM, lD);
 
-    grdName1.FocusCol := (lD - FMonthOffset) mod 7{ + 1};
-    grdName1.FocusRow := (lD - FMonthOffset) div 7{ + 1};
+    grdName1.FocusCol := (lD - FMonthOffset - FWeekStartDay) mod 7;
+    grdName1.FocusRow := (lD - FMonthOffset - FWeekStartDay) div 7;
+    if (FMonthOffset + FWeekStartDay) > 1 then
+      grdName1.FocusRow := grdName1.FocusRow + 1;
+    grdName1.Invalidate;
   end;
 end;
 
@@ -514,6 +587,7 @@ begin
   FOrigFocusWin := AOrigFocusWin;
   AfterCreate;
   FDate := Date;
+  FWeekStartDay := 0;
   FMonthOffset := 0;
   FCloseOnSelect := True;
   UpdateCalendar;
@@ -635,6 +709,7 @@ begin
     ScrollBarStyle := ssNone;
     OnDoubleClick := @grdName1DoubleClick;
     OnKeyPress := @grdName1KeyPress;
+    OnDrawCell := @grdName1DrawCell;
   end;
 
   {@VFD_BODY_END: fpgPopupCalendar}
@@ -695,6 +770,18 @@ begin
     FDate := FMinDate;
     Repaint;
   end;
+end;
+
+procedure TfpgCalendarCombo.SetWeekStartDay(const AValue: integer);
+begin
+  if FWeekStartDay <> AValue then
+    FWeekStartDay := AValue;
+end;
+
+procedure TfpgCalendarCombo.SetWeeklyHoliday(const AValue: integer);
+begin
+  if FWeeklyHoliday <> AValue then
+    FWeeklyHoliday := AValue;
 end;
 
 procedure TfpgCalendarCombo.SetText(const AValue: string);
@@ -786,6 +873,8 @@ begin
     ddw.MinDate       := FMinDate;
     ddw.MaxDate       := FMaxDate;
     ddw.DateValue     := FDate;
+    ddw.WeekStartDay  := FWeekStartDay;
+    ddw.WeeklyHoliday := FWeeklyHoliday;
     ddw.ShowAt(Parent, Left, Top+Height);
     { I added this call to UpdateCalendar because sometimes after
       btnTodayClicked event, reopeing the dropdown menu gave an empty calendar }

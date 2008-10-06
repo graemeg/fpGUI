@@ -254,7 +254,7 @@ begin
     case keycode of
       keyDown:
         begin
-          if (shiftstate = [ssAlt]) then
+          if (ssAlt in shiftstate) then
             DoDropDown
           else
           begin

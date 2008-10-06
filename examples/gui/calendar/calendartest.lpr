@@ -22,6 +22,8 @@ type
     procedure   btnTodayClicked(Sender: TObject);
     procedure   btnMinDateClicked(Sender: TObject);
     procedure   btnMaxDateClicked(Sender: TObject);
+    procedure   cbWHolidayChange(Sender: TObject);
+    procedure   cbName1Change(Sender: TObject);
     procedure   DoDropDown;
     procedure   cbCloseOnSelectChanged(Sender: TObject);
     procedure   DrawCalendar(month, year: integer);
@@ -32,6 +34,8 @@ type
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
     cbName1: TfpgComboBox;
+    lblWHoliday: TfpgLabel;
+    cbWHoliday: TfpgComboBox;
     cal: TfpgCalendarCombo;
     btnDateFormat: TfpgButton;
     edtDateFormat: TfpgEdit;
@@ -153,7 +157,6 @@ procedure TMainForm.btnMaxDateClicked(Sender: TObject);
 var
   old: string;
 begin
-{
   old := ShortDateFormat;
   ShortDateFormat := 'yyyy-mm-dd';
   try
@@ -161,8 +164,18 @@ begin
   finally
     ShortDateFormat := old;
   end;
-  }
-  DrawCalendar(StrToInt(edtMaxDate.Text), 2008);
+
+//  DrawCalendar(StrToInt(edtMaxDate.Text), 2008);
+end;
+
+procedure TMainForm.cbWHolidayChange(Sender: TObject);
+begin
+  cal.WeeklyHoliday := cbWHoliday.FocusItem;
+end;
+
+procedure TMainForm.cbName1Change(Sender: TObject);
+begin
+  cal.WeekStartDay := cbName1.FocusItem;
 end;
 
 procedure TMainForm.DoDropDown;
@@ -228,6 +241,31 @@ begin
     Text := '*****   This still needs some testing  *****';
     TextColor := clRed;
   end;
+  
+  lblWHoliday := TfpgLabel.Create(self);
+  with lblWHoliday do
+  begin
+    Name := 'lblWHoliday';
+    SetPosition(200, 16, 100, 16);
+    FontDesc := '#Label2';
+    Text := 'Weekly holiday';
+  end;
+
+  cbWHoliday := TfpgComboBox.Create(self);
+  with cbWHoliday do
+  begin
+    Name := 'cbWHoliday';
+    SetPosition(300, 16, 120, 23);
+    FontDesc := '#List';
+    Items.Add('Sun');
+    Items.Add('Mon');
+    Items.Add('Tue');
+    Items.Add('Wed');
+    Items.Add('Thu');
+    Items.Add('Fri');
+    Items.Add('Sat');
+    OnChange := @cbWHolidayChange;
+  end;
 
   cbName1 := TfpgComboBox.Create(self);
   with cbName1 do
@@ -243,6 +281,7 @@ begin
     Items.Add('Fri');
     Items.Add('Sat');
     TabOrder := 4;
+    OnChange := @cbName1Change;
   end;
 
   cal := TfpgCalendarCombo.Create(self);
@@ -252,7 +291,7 @@ begin
     SetPosition(132, 196, 120, 23);
     FontDesc := '#List';
     TabOrder := 5;
-    DateFormat := 'yyyy-mm-dd';
+    DateFormat := 'dd-mmm-yyyy';
   end;
 
   btnDateFormat := TfpgButton.Create(self);
@@ -293,7 +332,7 @@ begin
     Name := 'lblName4';
     SetPosition(12, 148, 96, 15);
     FontDesc := '#Label1';
-    Text := 'Normal Combo:';
+    Text := 'Week start day';
   end;
 
   lblName5 := TfpgLabel.Create(self);
