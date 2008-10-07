@@ -200,6 +200,7 @@ begin
   T_Chrono.Free;
   FFont.Free;
   inherited Destroy;
+  uShadowForm.Destroy;
 end;
 
 procedure TfpgHintWindow.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
@@ -218,9 +219,6 @@ begin
   BackgroundColor := clGray;
 end;
 
-initialization
-finalization
-  FreeAndNil(uShadowForm);
 
 end.
 
