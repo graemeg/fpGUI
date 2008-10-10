@@ -26,6 +26,7 @@ type
     {@VFD_HEAD_END: MainForm}
     FMediator: TFormMediator;
     procedure FormShow(Sender: TObject);
+    procedure GridDoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure SetupMediators;
     procedure miEditAddClick(Sender: TObject);
     procedure miEditEditClick(Sender: TObject);
@@ -53,6 +54,12 @@ uses
 procedure TMainForm.FormShow(Sender: TObject);
 begin
 // do nothing yet
+end;
+
+procedure TMainForm.GridDoubleClicked(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+begin
+  miEditEditClick(nil);
 end;
 
 procedure TMainForm.SetupMediators;
@@ -133,6 +140,7 @@ begin
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
+    OnDoubleClick := @GridDoubleClicked;
   end;
 
   btnAdd := TfpgButton.Create(self);
