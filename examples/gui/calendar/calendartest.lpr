@@ -12,43 +12,40 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
   fpg_base, fpg_main, fpg_form, fpg_popupcalendar, fpg_edit,
-  fpg_button, fpg_label, fpg_popupwindow, fpg_combobox, fpg_checkbox, dateutils;
+  fpg_button, fpg_label, fpg_popupwindow, fpg_combobox, fpg_checkbox,
+  fpg_panel, dateutils;
 
 type
   TMainForm = class(TfpgForm)
   private
-    procedure   btnDownClicked(Sender: TObject);
     procedure   btnDateFormatClicked(Sender: TObject);
     procedure   btnTodayClicked(Sender: TObject);
     procedure   btnMinDateClicked(Sender: TObject);
     procedure   btnMaxDateClicked(Sender: TObject);
     procedure   cbWHolidayChange(Sender: TObject);
     procedure   cbName1Change(Sender: TObject);
-    procedure   DoDropDown;
     procedure   cbCloseOnSelectChanged(Sender: TObject);
+    procedure   btnClearClicked(Sender: TObject);
     procedure   DrawCalendar(month, year: integer);
   public
     {@VFD_HEAD_BEGIN: MainForm}
-    edtName1: TfpgEdit;
-    btnName1: TfpgButton;
-    lblName1: TfpgLabel;
-    lblName2: TfpgLabel;
-    cbName1: TfpgComboBox;
+    btnClear: TfpgButton;
     lblWHoliday: TfpgLabel;
     cbWHoliday: TfpgComboBox;
+    cbName1: TfpgComboBox;
     cal: TfpgCalendarCombo;
     btnDateFormat: TfpgButton;
     edtDateFormat: TfpgEdit;
-    lblName3: TfpgLabel;
     lblName4: TfpgLabel;
     lblName5: TfpgLabel;
     btnToday: TfpgButton;
-    lblName6: TfpgLabel;
     edtMinDate: TfpgEdit;
     edtMaxDate: TfpgEdit;
     btnMinDate: TfpgButton;
     btnMaxDate: TfpgButton;
     cbCloseOnSelect: TfpgCheckBox;
+    lblName1: TfpgLabel;
+    bvlName1: TfpgBevel;
     {@VFD_HEAD_END: MainForm}
     FDropDown: TfpgPopupCalendar;
     procedure   AfterCreate; override;
@@ -61,6 +58,12 @@ type
 procedure TMainForm.cbCloseOnSelectChanged(Sender: TObject);
 begin
   cal.CloseOnSelect := TfpgCheckBox(Sender).Checked;
+end;
+
+procedure TMainForm.btnClearClicked(Sender: TObject);
+begin
+  cbWHoliday.FocusItem := -1;
+  cal.WeeklyHoliday := -1;
 end;
 
 type
@@ -125,11 +128,6 @@ begin
   writeln('-----');
 end;
 
-procedure TMainForm.btnDownClicked(Sender: TObject);
-begin
-  DoDropDown;
-end;
-
 procedure TMainForm.btnDateFormatClicked(Sender: TObject);
 begin
   cal.DateFormat := edtDateFormat.Text;
@@ -178,76 +176,36 @@ begin
   cal.WeekStartDay := cbName1.FocusItem;
 end;
 
-procedure TMainForm.DoDropDown;
-begin
-  if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
-  begin
-    FDropDown     := TfpgPopupCalendar.Create(nil, edtName1);
-    FDropDown.ShowAt(self, edtName1.Left, edtName1.Top+edtName1.Height);
-    FDropDown.PopupFrame:= True;
-  end
-  else
-  begin
-    FDropDown.Close;
-    FreeAndNil(FDropDown);
-  end;
-end;
-
 procedure TMainForm.AfterCreate;
 begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(286, 234, 470, 253);
+  SetPosition(286, 234, 372, 275);
   WindowTitle := 'fpGUI Calendar Test';
   WindowPosition := wpUser;
 
-  edtName1 := TfpgEdit.Create(self);
-  with edtName1 do
+  btnClear := TfpgButton.Create(self);
+  with btnClear do
   begin
-    Name := 'edtName1';
-    SetPosition(16, 48, 120, 22);
-    Text := '';
-    FontDesc := '#Edit1';
-  end;
-
-  btnName1 := TfpgButton.Create(self);
-  with btnName1 do
-  begin
-    Name := 'btnName1';
-    SetPosition(136, 48, 19, 22);
-    Text := '';
+    Name := 'btnClear';
+    SetPosition(256, 32, 59, 23);
+    Text := 'Clear';
     FontDesc := '#Label1';
-    ImageName := 'sys.sb.down';
+    Hint := '';
+    ImageName := '';
+    ShowImage := False;
     TabOrder := 1;
-    OnClick := @btnDownClicked;
+    OnClick := @btnClearClicked;
   end;
 
-  lblName1 := TfpgLabel.Create(self);
-  with lblName1 do
-  begin
-    Name := 'lblName1';
-    SetPosition(16, 32, 80, 16);
-    FontDesc := '#Label1';
-    Text := 'Enter a date:';
-  end;
-
-  lblName2 := TfpgLabel.Create(self);
-  with lblName2 do
-  begin
-    Name := 'lblName2';
-    SetPosition(16, 100, 276, 16);
-    FontDesc := '#Label2';
-    Text := '*****   This still needs some testing  *****';
-    TextColor := clRed;
-  end;
-  
   lblWHoliday := TfpgLabel.Create(self);
   with lblWHoliday do
   begin
     Name := 'lblWHoliday';
-    SetPosition(200, 16, 100, 16);
-    FontDesc := '#Label2';
+    SetPosition(24, 36, 100, 16);
+    FontDesc := '#Label1';
+    Hint := '';
     Text := 'Weekly holiday';
   end;
 
@@ -255,7 +213,7 @@ begin
   with cbWHoliday do
   begin
     Name := 'cbWHoliday';
-    SetPosition(300, 16, 120, 23);
+    SetPosition(132, 32, 120, 23);
     FontDesc := '#List';
     Items.Add('Sun');
     Items.Add('Mon');
@@ -264,6 +222,7 @@ begin
     Items.Add('Thu');
     Items.Add('Fri');
     Items.Add('Sat');
+    TabOrder := 5;
     OnChange := @cbWHolidayChange;
   end;
 
@@ -271,7 +230,7 @@ begin
   with cbName1 do
   begin
     Name := 'cbName1';
-    SetPosition(132, 144, 120, 23);
+    SetPosition(132, 64, 120, 23);
     FontDesc := '#List';
     Items.Add('Sun');
     Items.Add('Mon');
@@ -281,6 +240,7 @@ begin
     Items.Add('Fri');
     Items.Add('Sat');
     TabOrder := 4;
+    FocusItem := 0;
     OnChange := @cbName1Change;
   end;
 
@@ -288,19 +248,23 @@ begin
   with cal do
   begin
     Name := 'cal';
-    SetPosition(132, 196, 120, 23);
+    SetPosition(132, 224, 120, 23);
     FontDesc := '#List';
     TabOrder := 5;
-    DateFormat := 'dd-mmm-yyyy';
+    DateFormat := 'dd mmm yyyy';
+    DayColor := clBlue;
+    HolidayColor := clRed;
+    SelectedColor:= clYellow;
   end;
 
   btnDateFormat := TfpgButton.Create(self);
   with btnDateFormat do
   begin
     Name := 'btnDateFormat';
-    SetPosition(388, 148, 75, 23);
+    SetPosition(232, 116, 75, 23);
     Text := 'Set Format';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 6;
     OnClick := @btnDateFormatClicked;
@@ -310,28 +274,19 @@ begin
   with edtDateFormat do
   begin
     Name := 'edtDateFormat';
-    SetPosition(288, 148, 92, 22);
+    SetPosition(132, 116, 92, 22);
     TabOrder := 7;
     Text := 'yy-mm-d';
     FontDesc := '#Edit1';
-  end;
-
-  lblName3 := TfpgLabel.Create(self);
-  with lblName3 do
-  begin
-    Name := 'lblName3';
-    SetPosition(160, 48, 287, 15);
-    FontDesc := '#Label1';
-    Text := '<----  This one is fake. It only used the';
-    TextColor := clBlue;
   end;
 
   lblName4 := TfpgLabel.Create(self);
   with lblName4 do
   begin
     Name := 'lblName4';
-    SetPosition(12, 148, 96, 15);
+    SetPosition(24, 68, 96, 15);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Week start day';
   end;
 
@@ -339,8 +294,9 @@ begin
   with lblName5 do
   begin
     Name := 'lblName5';
-    SetPosition(12, 200, 104, 15);
+    SetPosition(8, 228, 104, 15);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Calendar Combo:';
   end;
 
@@ -348,28 +304,20 @@ begin
   with btnToday do
   begin
     Name := 'btnToday';
-    SetPosition(388, 120, 75, 23);
+    SetPosition(256, 224, 59, 23);
     Text := 'Today';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 11;
     OnClick := @btnTodayClicked;
-  end;
-
-  lblName6 := TfpgLabel.Create(self);
-  with lblName6 do
-  begin
-    Name := 'lblName6';
-    SetPosition(192, 63, 246, 16);
-    FontDesc := '#Label1';
-    Text := 'calendar window part.';
   end;
 
   edtMinDate := TfpgEdit.Create(self);
   with edtMinDate do
   begin
     Name := 'edtMinDate';
-    SetPosition(288, 176, 92, 22);
+    SetPosition(132, 144, 92, 22);
     TabOrder := 13;
     Text := '2005-01-01';
     FontDesc := '#Edit1';
@@ -379,7 +327,7 @@ begin
   with edtMaxDate do
   begin
     Name := 'edtMaxDate';
-    SetPosition(288, 204, 92, 22);
+    SetPosition(132, 172, 92, 22);
     TabOrder := 14;
     Text := '2009-01-01';
     FontDesc := '#Edit1';
@@ -389,9 +337,10 @@ begin
   with btnMinDate do
   begin
     Name := 'btnMinDate';
-    SetPosition(388, 176, 75, 23);
+    SetPosition(232, 144, 75, 23);
     Text := 'Min Date';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 15;
     OnClick := @btnMinDateClicked;
@@ -401,9 +350,10 @@ begin
   with btnMaxDate do
   begin
     Name := 'btnMaxDate';
-    SetPosition(388, 204, 75, 23);
+    SetPosition(232, 172, 75, 23);
     Text := 'Max Date';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 16;
     OnClick := @btnMaxDateClicked;
@@ -413,12 +363,31 @@ begin
   with cbCloseOnSelect do
   begin
     Name := 'cbCloseOnSelect';
-    SetPosition(328, 88, 120, 20);
+    SetPosition(128, 92, 236, 20);
     Checked := True;
     FontDesc := '#Label1';
     TabOrder := 17;
-    Text := 'Close on select';
+    Text := 'Close combo on date selection';
     OnChange := @cbCloseOnSelectChanged;
+  end;
+
+  lblName1 := TfpgLabel.Create(self);
+  with lblName1 do
+  begin
+    Name := 'lblName1';
+    SetPosition(8, 8, 144, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Calendar Settings';
+  end;
+
+  bvlName1 := TfpgBevel.Create(self);
+  with bvlName1 do
+  begin
+    Name := 'bvlName1';
+    SetPosition(8, 204, 350, 2);
+    Anchors := [anLeft,anRight,anTop];
+    Style := bsLowered;
   end;
 
   {@VFD_BODY_END: MainForm}

@@ -80,6 +80,9 @@ type
     FCloseOnSelect: boolean;
     FThisMonthDays: array[0..6,0..5] of boolean;
     FWeeklyHoliday: integer;
+    FDayColor: TfpgColor;
+    FHolidayColor: TfpgColor;
+    FSelectedColor: TfpgColor;
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
@@ -90,6 +93,9 @@ type
     procedure   SetMinDate(const AValue: TDateTime);
     procedure   SetWeekStartDay(const AValue: integer);
     procedure   SetWeeklyHoliday(const AValue: integer);
+    procedure   SetDayColor(const AValue: TfpgColor);
+    procedure   SetHolidayColor(const AValue: TfpgColor);
+    procedure   SetSelectedColor(const AValue: TfpgColor);
     procedure   SetCloseOnSelect(const AValue: boolean);
     procedure   UpdateCalendar;
     procedure   btnYearUpClicked(Sender: TObject);
@@ -120,8 +126,11 @@ type
     property    DateValue: TDateTime read FDate write SetDateValue;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
-    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay;
-    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday;
+    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay default 0;
+    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
+    property    DayColor: TfpgColor read FDayColor write SetDayColor;
+    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
+    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
   end;
   
   
@@ -133,6 +142,9 @@ type
     FMinDate: TDateTime;
     FWeekStartDay: integer;
     FWeeklyHoliday: integer;
+    FDayColor: TfpgColor;
+    FHolidayColor: TfpgColor;
+    FSelectedColor: TfpgColor;
     FCloseOnSelect: boolean;
     procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime);
     procedure   SetDateFormat(const AValue: string);
@@ -141,6 +153,9 @@ type
     procedure   SetMinDate(const AValue: TDateTime);
     procedure   SetWeekStartDay(const AValue: integer);
     procedure   SetWeeklyHoliday(const AValue: integer);
+    procedure   SetDayColor(const AValue: TfpgColor);
+    procedure   SetHolidayColor(const AValue: TfpgColor);
+    procedure   SetSelectedColor(const AValue: TfpgColor);
     procedure   SetText(const AValue: string); override;
     function    GetText: string; override;
     procedure   SetCloseOnSelect(const AValue: boolean);
@@ -156,8 +171,11 @@ type
     property    FontDesc;
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
-    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay;
-    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday;
+    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay default 0;
+    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
+    property    DayColor: TfpgColor read FDayColor write SetDayColor;
+    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
+    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
     property    ParentShowHint;
     property    ShowHint;
     { Clicking on calendar Today button will close the popup calendar by default }
@@ -224,22 +242,28 @@ begin
     FntBold:= fpgApplication.GetFont('arial-9:bold');
     if FThisMonthDays[ACol,ARow] then
       if (ACol = FocusCol) and (ARow = FocusRow) then
-        Canvas.SetTextColor(clWhite)
+        Canvas.SetTextColor(FSelectedColor)
       else
-        Canvas.SetTextColor(clText1)
+        Canvas.SetTextColor(FDayColor)
     else
       if (ACol = FocusCol) and (ARow = FocusRow) then
-        Canvas.SetTextColor(clWhite)
+        Canvas.SetTextColor(FSelectedColor)
       else
         Canvas.SetTextColor(clShadow1);
     if FWeeklyHoliday >= FWeekStartDay then
       if ACol = FWeeklyHoliday - FWeekStartDay then
-        Canvas.Font := FntBold
+      begin
+        Canvas.Font := FntBold;
+        Canvas.SetTextColor(FHolidayColor);
+      end
       else
         Canvas.Font := FntNorm
     else
-      if ACol = FWeeklyHoliday - FWeekStartDay + 7 then
-        Canvas.Font := FntBold
+      if (FWeeklyHoliday > -1) and (ACol = FWeeklyHoliday - FWeekStartDay + 7) then
+      begin
+        Canvas.Font := FntBold;
+        Canvas.SetTextColor(FHolidayColor);
+      end
       else
         Canvas.Font := FntNorm;
   end;
@@ -405,6 +429,24 @@ procedure TfpgPopupCalendar.SetWeeklyHoliday(const AValue: integer);
 begin
   if FWeeklyHoliday <> AValue then
     FWeeklyHoliday := AValue;
+end;
+
+procedure TfpgPopupCalendar.SetDayColor(const AValue: TfpgColor);
+begin
+  if FDayColor <> AValue then
+    FDayColor := AValue;
+end;
+
+procedure TfpgPopupCalendar.SetHolidayColor(const AValue: TfpgColor);
+begin
+  if FHolidayColor <> AValue then
+    FHolidayColor := AValue;
+end;
+
+procedure TfpgPopupCalendar.SetSelectedColor(const AValue: TfpgColor);
+begin
+  if FSelectedColor <> AValue then
+    FSelectedColor := AValue;
 end;
 
 procedure TfpgPopupCalendar.SetCloseOnSelect(const AValue: boolean);
@@ -588,6 +630,10 @@ begin
   AfterCreate;
   FDate := Date;
   FWeekStartDay := 0;
+  FWeeklyHoliday := -1;
+  FDayColor := clText1;
+  FHolidayColor := clText1;
+  FSelectedColor := clWhite;
   FMonthOffset := 0;
   FCloseOnSelect := True;
   UpdateCalendar;
@@ -784,6 +830,24 @@ begin
     FWeeklyHoliday := AValue;
 end;
 
+procedure TfpgCalendarCombo.SetSelectedColor(const AValue: TfpgColor);
+begin
+  if FSelectedColor <> AValue then
+    FSelectedColor := AValue;
+end;
+
+procedure TfpgCalendarCombo.SetDayColor(const AValue: TfpgColor);
+begin
+  if FDayColor <> AValue then
+    FDayColor := AValue;
+end;
+
+procedure TfpgCalendarCombo.SetHolidayColor(const AValue: TfpgColor);
+begin
+  if FHolidayColor <> AValue then
+    FHolidayColor := AValue;
+end;
+
 procedure TfpgCalendarCombo.SetText(const AValue: string);
 begin
   try
@@ -818,6 +882,7 @@ begin
   inherited Create(AOwner);
   FMinDate := EncodeDate(1900, 01, 01);
   FMaxDate := EncodeDate(2100, 01, 31);
+  FWeeklyHoliday := -1;
   FDate := Now;
   FCloseOnSelect := True;
   DateFormat := ShortDateFormat;
@@ -875,6 +940,9 @@ begin
     ddw.DateValue     := FDate;
     ddw.WeekStartDay  := FWeekStartDay;
     ddw.WeeklyHoliday := FWeeklyHoliday;
+    ddw.DayColor        := FDayColor;
+    ddw.HolidayColor    := FHolidayColor;
+    ddw.SelectedColor   := FSelectedColor;
     ddw.ShowAt(Parent, Left, Top+Height);
     { I added this call to UpdateCalendar because sometimes after
       btnTodayClicked event, reopeing the dropdown menu gave an empty calendar }
