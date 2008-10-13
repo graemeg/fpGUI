@@ -300,18 +300,17 @@ var
   lValue: string;
 begin
   lMemberName := FFieldsInfo[0].PropName;
-  lValue      := FModel.PropValue[lMemberName];
+  lValue      := Model.PropValue[lMemberName];
   if Assigned(OnBeforeSetupField) then
-    OnBeforeSetupField(FModel, lMemberName, lValue);
+    OnBeforeSetupField(Model, lMemberName, lValue);
   FView.Caption := lValue;
   for c := 1 to FFieldsInfo.Count - 1 do
   begin
     lMemberName := FFieldsInfo[c].PropName;
-    lValue      := FModel.PropValue[lMemberName];
+    lValue      := Model.PropValue[lMemberName];
     if Assigned(OnBeforeSetupField) then
-      OnBeforeSetupField(FModel, lMemberName, lValue);
+      OnBeforeSetupField(Model, lMemberName, lValue);
     FView.SubItems.Add(lValue);
-    writeln('SubItems.Add for ', lMemberName, ' with value <', lValue, '>');
   end;
 end;
 
@@ -323,7 +322,7 @@ end;
 constructor TListViewListItemMediator.CreateCustom(AModel: TtiObject; AView: TfpgLVItem; AOnBeforeSetupField: TOnBeforeSetupField; const AFieldsInfo: TtiMediatorFieldInfoList; IsObserving: Boolean);
 begin
   inherited Create;
-  FModel      := AModel;
+  Model      := AModel;
   FView       := AView;
   FFieldsInfo := AFieldsInfo;
   OnBeforeSetupField := AOnBeforeSetupField;
@@ -333,8 +332,8 @@ end;
 
 procedure TListViewListItemMediator.BeforeDestruction;
 begin
-  FModel.DetachObserver(self);
-  FModel := nil;
+  Model.DetachObserver(self);
+  Model := nil;
   FView  := nil;
   inherited BeforeDestruction;
 end;
@@ -345,21 +344,21 @@ var
   lMemberName: string;
   lValue: string;
 begin
-  Assert(FModel = ASubject);
+  Assert(Model = ASubject);
 
   lMemberName := FFieldsInfo[0].PropName;
-  lValue      := FModel.PropValue[lMemberName];
+  lValue      := Model.PropValue[lMemberName];
   if Assigned(OnBeforeSetupField) then
-    OnBeforeSetupField(FModel, lMemberName, lValue);
+    OnBeforeSetupField(Model, lMemberName, lValue);
 
   FView.Caption := lValue;
 
   for c := 1 to FFieldsInfo.Count - 1 do
   begin
     lMemberName := FFieldsInfo[c].PropName;
-    lValue      := FModel.PropValue[lMemberName];
+    lValue      := Model.PropValue[lMemberName];
     if Assigned(OnBeforeSetupField) then
-      OnBeforeSetupField(FModel, lMemberName, lValue);
+      OnBeforeSetupField(Model, lMemberName, lValue);
     FView.SubItems[c - 1] := lValue;
   end;
 end;
@@ -493,7 +492,7 @@ end;
 constructor TStringGridRowMediator.CreateCustom(AModel: TtiObject; AGrid: TfpgStringGrid; const AFieldsInfo: TtiMediatorFieldInfoList; ARowIndex: integer; IsObserving: Boolean);
 begin
   inherited Create;
-  FModel      := AModel;
+  Model      := AModel;
   FView       := AGrid;
   FFieldsInfo := AFieldsInfo;
   FRowIndex   := ARowIndex;
@@ -505,13 +504,13 @@ var
   i: integer;
   lvalue, lFieldName: string;
 begin
-  Assert(FModel = ASubject);
+  Assert(Model = ASubject);
   for i := 0 to FFieldsInfo.Count - 1 do
   begin
     lFieldName := FFieldsInfo[I].PropName;
-    lValue     := FModel.PropValue[lFieldName];
+    lValue     := Model.PropValue[lFieldName];
     if Assigned(OnBeforeSetupField) then
-      OnBeforeSetupField(FModel, lFieldName, lValue);
+      OnBeforeSetupField(Model, lFieldName, lValue);
     FView.Cells[i, FRowIndex] := lValue;
   end;
 end;
