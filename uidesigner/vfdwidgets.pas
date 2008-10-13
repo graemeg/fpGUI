@@ -43,6 +43,7 @@ implementation
 uses
   fpg_main,
   vfddesigner,
+  fpg_widget,
   fpg_form,
   fpg_label,
   fpg_edit,
@@ -62,7 +63,38 @@ uses
   fpg_tab,
   fpg_popupcalendar,
   fpg_gauge,
-  vfdpropeditgrid;
+  vfdpropeditgrid,
+  vfdmain;
+
+type
+  TVFDPageControlWidgetClass = class(TVFDWidgetClass)
+  private
+    FWidget: TfpgPageControl;
+    procedure AddTabSClicked(Sender: TObject);
+    procedure DeleteTabClicked(Sender: TObject);
+  public
+    function CreatePopupMenu(AWidget: TfpgWidget): TfpgPopupMenu; override;
+  end;
+
+{ TVFDPageControlWidgetClass }
+
+procedure TVFDPageControlWidgetClass.AddTabSClicked(Sender: TObject);
+begin
+  FWidget.AppendTabSheet('TabSheet' + IntToStr(FWidget.PageCount));
+end;
+
+procedure TVFDPageControlWidgetClass.DeleteTabClicked(Sender: TObject);
+begin
+  FWidget.RemoveTabSheet(FWidget.ActivePage);
+end;
+
+function TVFDPageControlWidgetClass.CreatePopupMenu(AWidget: TfpgWidget): TfpgPopupMenu;
+begin
+  FWidget := TfpgPageControl(AWidget);
+  Result := TfpgPopupMenu.Create(nil);
+  Result.AddMenuItem('Add Tab', '', @AddTabSClicked);
+  Result.AddMenuItem('Delete Tab', '', @DeleteTabClicked);
+end;
 
 var
   FVFDFormWidget: TVFDWidgetClass;
@@ -445,8 +477,9 @@ begin
   RegisterVFDWidget(wc);
   
   // PageControl
-  wc          := TVFDWidgetClass.Create(TfpgPageControl);
+  wc          := TVFDPageControlWidgetClass.Create(TfpgPageControl);
   wc.NameBase := 'pcName';
+  wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
@@ -456,6 +489,13 @@ begin
   wc.AddProperty('TabPosition', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.pagecontrol';
   RegisterVFDWidget(wc);
+
+  // TabSheet
+  //wc          := TVFDWidgetClass.Create(TfpgTabSheet);
+  //wc.NameBase := 'tsName';
+  //wc.AddProperty('Text', TPropertyString, 'The tab title');
+  //wc.WidgetIconName := 'vfd.tabsheet';
+  //RegisterVFDWidget(wc);
 
   // Gauge
   wc          := TVFDWidgetClass.Create(TfpgGauge);

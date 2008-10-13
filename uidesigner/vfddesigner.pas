@@ -37,6 +37,7 @@ uses
   fpg_memo,
   fpg_combobox,
   fpg_checkbox,
+  fpg_menu,
   vfdresizer,
   vfdforms,
   vfdeditors,
@@ -142,7 +143,8 @@ implementation
 
 uses
   vfdmain,
-  TypInfo;
+  TypInfo,
+  fpg_tab;
 
 
 { TWidgetDesigner }
@@ -309,6 +311,7 @@ var
   pwg: TfpgWidget;
   shift: boolean;
   x, y: integer;
+  pmenu: TfpgPopupMenu;
 begin
 //  writeln('TFormDesigner.MsgMouseUp');
   msg.Stop  := True;
@@ -369,6 +372,19 @@ begin
   end;
 
   UpdatePropWin;
+
+  if msg.Params.mouse.Buttons = 3 then {right mouse button }
+  begin
+    if TfpgWidget(msg.Dest).ClassType = TfpgPageControl then
+    begin
+      writeln('Right click on page control');
+      wgd := WidgetDesigner(TfpgWidget(msg.dest));
+      if wgd <> nil then
+        pmenu := wgd.FVFDClass.CreatePopupMenu(TfpgWidget(msg.dest));
+        if Assigned(pmenu) then
+          pmenu.ShowAt(wgd.Widget, msg.Params.mouse.x, msg.Params.mouse.y);
+    end;
+  end;
 end;
 
 procedure TFormDesigner.MsgMouseMove(var msg: TfpgMessageRec);

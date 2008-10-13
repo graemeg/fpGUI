@@ -60,9 +60,10 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterConstruction; override;
-    property    Text: string read GetText write SetText;
     property    PageIndex: Integer read GetPageIndex write SetPageIndex;
     property    PageControl: TfpgPageControl read GetPageControl;
+  published
+    property    Text: string read GetText write SetText;
   end;
 
 
@@ -117,6 +118,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    AppendTabSheet(ATitle: string): TfpgTabSheet;
+    procedure   RemoveTabSheet(ATabSheet: TfpgTabSheet);
     property    PageCount: Integer read GetPageCount;
     property    ActivePage: TfpgTabSheet read FActivePage write SetActivePage;
     property    Pages[AIndex: integer]: TfpgTabSheet read GetPage;
@@ -248,6 +250,8 @@ end;
 
 procedure TfpgPageControl.RemovePage(const APage: TfpgTabSheet);
 begin
+  if APage = nil then
+    Exit;
   FPages.Remove(APage);
   {$Note This still needs to be fixed.}
   if APage = FActivePage then
@@ -262,6 +266,8 @@ end;
 
 procedure TfpgPageControl.SetActivePageIndex(const AValue: integer);
 begin
+  if FPages.Count = 0 then
+    exit;
   if (AValue >= 0) or (AValue < FPages.Count) then
     ActivePage := TfpgTabSheet(FPages[AValue]);
 end;
@@ -685,6 +691,7 @@ var
   lp: integer;  // left position
   bw: integer;  // button width
 begin
+//  writeln('>> TfpgPageControl.HandleLMouseUp');
   h := TfpgTabSheet(FPages.First);
   if h = nil then
     Exit; //==>
@@ -696,6 +703,7 @@ begin
   case TabPosition of
     tpTop:
         begin
+//          writeln(' TabPosition = tpTop');
           if (y > FMargin) and (y < ButtonHeight) then
           begin
             while h <> nil do
@@ -837,6 +845,11 @@ begin
   Result := TfpgTabSheet.Create(self);
   Result.Text := ATitle;
   InsertPage(Result);
+end;
+
+procedure TfpgPageControl.RemoveTabSheet(ATabSheet: TfpgTabSheet);
+begin
+  RemovePage(ATabSheet);
 end;
 
 end.

@@ -26,7 +26,8 @@ uses
   SysUtils,
   fpg_base,
   fpg_main,
-  fpg_widget;
+  fpg_widget,
+  fpg_menu;
 
 type
   TWidgetClass = class of TfpgWidget;
@@ -82,6 +83,7 @@ type
     function    PropertyCount: integer;
     function    GetProperty(ind: integer): TVFDWidgetProperty;
     function    CreateWidget(AOwner: TComponent): TfpgWidget;
+    function    CreatePopupMenu(AWidget: TfpgWidget): TfpgPopupMenu; virtual;
   end;
 
 
@@ -119,6 +121,12 @@ function TVFDWidgetClass.CreateWidget(AOwner: TComponent): TfpgWidget;
 begin
   Result := WidgetClass.Create(AOwner);
   TComponentFriendClass(Result).SetDesigning(True);
+end;
+
+function TVFDWidgetClass.CreatePopupMenu(AWidget: TfpgWidget): TfpgPopupMenu;
+begin
+  { descendant classed can implement this as needed }
+  Result := nil;
 end;
 
 destructor TVFDWidgetClass.Destroy;
