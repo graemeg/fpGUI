@@ -652,7 +652,7 @@ end;
 
 procedure TfpgPageControl.HandlePaint;
 begin
-  inherited HandlePaint;
+//  inherited HandlePaint;
   if SortPages then
     OrderSheets;
   Canvas.ClearClipRect;
@@ -663,8 +663,11 @@ begin
   begin
     Canvas.SetColor(clInactiveWgFrame);
     Canvas.DrawRectangle(0, 0, Width, Height);
-    Canvas.SetTextColor(clText1);
-    Canvas.DrawString(2, 2, Name + ': ' + Classname);
+    if PageCount = 0 then
+    begin
+      Canvas.SetTextColor(clText1);
+      Canvas.DrawString(2, 2, Name + ': ' + Classname);
+    end;
   end;
   
   if TabPosition = tpBottom then

@@ -80,11 +80,13 @@ type
 
 procedure TVFDPageControlWidgetClass.AddTabSClicked(Sender: TObject);
 begin
+  Exit;
   FWidget.AppendTabSheet('TabSheet' + IntToStr(FWidget.PageCount));
 end;
 
 procedure TVFDPageControlWidgetClass.DeleteTabClicked(Sender: TObject);
 begin
+  Exit;
   FWidget.RemoveTabSheet(FWidget.ActivePage);
 end;
 
@@ -92,8 +94,10 @@ function TVFDPageControlWidgetClass.CreatePopupMenu(AWidget: TfpgWidget): TfpgPo
 begin
   FWidget := TfpgPageControl(AWidget);
   Result := TfpgPopupMenu.Create(nil);
-  Result.AddMenuItem('Add Tab', '', @AddTabSClicked);
-  Result.AddMenuItem('Delete Tab', '', @DeleteTabClicked);
+  { TODO : These are disabled for now, because a TabSheet component is used
+           instead of a menu item - for adding tabs. }
+  Result.AddMenuItem('Add Tab', '', @AddTabSClicked).Enabled := False;
+  Result.AddMenuItem('Delete Tab', '', @DeleteTabClicked).Enabled := False;
 end;
 
 var
@@ -239,6 +243,11 @@ begin
     sizeof(stdimg_vfd_bevel),
     0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'vfd.tabsheet', @stdimg_vfd_tabsheet,
+    sizeof(stdimg_vfd_tabsheet),
+    0, 0);
+
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -264,7 +273,7 @@ begin
 
   // Label
   wc          := TVFDWidgetClass.Create(TfpgLabel);
-  wc.NameBase := 'lblName';
+  wc.NameBase := 'Label';
   wc.AddProperty('Alignment', TPropertyEnum, 'Horizontal text alignment');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the label text');
   wc.AddProperty('Hint', TPropertyString, '');
@@ -278,7 +287,7 @@ begin
 
   // Edit
   wc          := TVFDWidgetClass.Create(TfpgEdit);
-  wc.NameBase := 'edtName';
+  wc.NameBase := 'Edit';
 //  wc.AddProperty('Color', TPropertyColor, 'Text color');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
@@ -290,7 +299,7 @@ begin
 
   // Memo
   wc          := TVFDWidgetClass.Create(TfpgMemo);
-  wc.NameBase := 'memName';
+  wc.NameBase := 'Memo';
   wc.AddProperty('Lines', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -301,7 +310,7 @@ begin
 
   // Button
   wc          := TVFDWidgetClass.Create(TfpgButton);
-  wc.NameBase := 'btnName';
+  wc.NameBase := 'Button';
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('AllowAllUp', TPropertyBoolean, '');
   wc.AddProperty('Embedded', TPropertyBoolean, 'No focus rectangle will be drawn. eg: Toolbar buttons');
@@ -323,7 +332,7 @@ begin
 
   // CheckBox
   wc          := TVFDWidgetClass.Create(TfpgCheckBox);
-  wc.NameBase := 'cbName';
+  wc.NameBase := 'CheckBox';
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -335,7 +344,7 @@ begin
 
   // RadioButton
   wc          := TVFDWidgetClass.Create(TfpgRadioButton);
-  wc.NameBase := 'rbName';
+  wc.NameBase := 'RadioButton';
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
@@ -348,7 +357,7 @@ begin
 
   // ComboBox
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
-  wc.NameBase := 'cbName';
+  wc.NameBase := 'ComboBox';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -359,7 +368,7 @@ begin
 
   // Calendar ComboBox
   wc          := TVFDWidgetClass.Create(TfpgCalendarCombo);
-  wc.NameBase := 'calName';
+  wc.NameBase := 'CalendarCombo';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
@@ -369,7 +378,7 @@ begin
 
   // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
-  wc.NameBase := 'lstName';
+  wc.NameBase := 'ListBox';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('HotTrack', TPropertyBoolean, '');
   wc.AddProperty('Items', TPropertyStringList, '');
@@ -382,7 +391,7 @@ begin
 
   // StringGrid
   wc := TVFDWidgetClass.Create(TfpgStringGrid);
-  wc.NameBase := 'grdName';
+  wc.NameBase := 'Grid';
   wc.AddProperty('Columns', TPropertyDBColumns, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, '');
   wc.AddProperty('HeaderFontDesc', TPropertyFontDesc, '');
@@ -398,7 +407,7 @@ begin
 
   // Bevel
   wc           := TVFDWidgetClass.Create(TfpgBevel);
-  wc.NameBase  := 'bvlName';
+  wc.NameBase  := 'Bevel';
   wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
@@ -410,7 +419,7 @@ begin
 
   // Panel
   wc           := TVFDWidgetClass.Create(TfpgPanel);
-  wc.NameBase  := 'pnlName';
+  wc.NameBase  := 'Panel';
   wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
   wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
   wc.AddProperty('LineSpace', TPropertyInteger, 'Line spacing between wrapped caption');
@@ -426,7 +435,7 @@ begin
   
   // ProgressBar
   wc          := TVFDWidgetClass.Create(TfpgProgressBar);
-  wc.NameBase := 'pbName';
+  wc.NameBase := 'ProgressBar';
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -438,7 +447,7 @@ begin
 
   // TrackBar
   wc          := TVFDWidgetClass.Create(TfpgTrackBar);
-  wc.NameBase := 'tbName';
+  wc.NameBase := 'TrackBar';
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Orientation', TPropertyEnum, '');
@@ -452,7 +461,7 @@ begin
 
   // ListView
   wc := TVFDWidgetClass.Create(TfpgListView);
-  wc.NameBase := 'lvName';
+  wc.NameBase := 'ListView';
   wc.AddProperty('MultiSelect', TPropertyBoolean, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
@@ -463,7 +472,7 @@ begin
 
   // Treeview
   wc := TVFDWidgetClass.Create(TfpgTreeView);
-  wc.NameBase := 'tvName';
+  wc.NameBase := 'TreeView';
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('FontDesc',TPropertyFontDesc, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -478,7 +487,7 @@ begin
   
   // PageControl
   wc          := TVFDPageControlWidgetClass.Create(TfpgPageControl);
-  wc.NameBase := 'pcName';
+  wc.NameBase := 'PageControl';
   wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -488,18 +497,20 @@ begin
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('TabPosition', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.pagecontrol';
+  wc.Container := True;
   RegisterVFDWidget(wc);
 
   // TabSheet
-  //wc          := TVFDWidgetClass.Create(TfpgTabSheet);
-  //wc.NameBase := 'tsName';
-  //wc.AddProperty('Text', TPropertyString, 'The tab title');
-  //wc.WidgetIconName := 'vfd.tabsheet';
-  //RegisterVFDWidget(wc);
+  wc          := TVFDWidgetClass.Create(TfpgTabSheet);
+  wc.NameBase := 'TabSheet';
+  wc.AddProperty('Text', TPropertyString, 'The tab title');
+  wc.WidgetIconName := 'vfd.tabsheet';
+  wc.Container := True;
+  RegisterVFDWidget(wc);
 
   // Gauge
   wc          := TVFDWidgetClass.Create(TfpgGauge);
-  wc.NameBase := 'gauName';
+  wc.NameBase := 'Gauge';
   wc.AddProperty('Kind', TPropertyEnum, '');
   wc.AddProperty('MinValue', TPropertyInteger, '');
   wc.AddProperty('MaxValue', TPropertyInteger, '');

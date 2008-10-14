@@ -193,8 +193,9 @@ begin
   begin
     Name := 'lblName1';
     SetPosition(12, 16, 255, 31);
-    Text := 'fpGUI UI Designer';
     FontDesc := 'Arial-20';
+    Hint := '';
+    Text := 'fpGUI UI Designer';
   end;
 
   lblVersion := TfpgLabel.Create(self);
@@ -202,8 +203,9 @@ begin
   begin
     Name := 'lblVersion';
     SetPosition(150, 56, 175, 16);
-    Text := 'Version:  %s';
     FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Version:  %s';
   end;
 
   btnName1 := TfpgButton.Create(self);
@@ -214,8 +216,10 @@ begin
     Anchors := [anRight,anBottom];
     Text := 'Close';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.close';
     ModalResult := 1;
+    TabOrder := 2;
   end;
 
   lblName3 := TfpgLabel.Create(self);
@@ -223,8 +227,9 @@ begin
   begin
     Name := 'lblName3';
     SetPosition(12, 100, 241, 14);
-    Text := 'Written by Graeme Geldenhuys';
     FontDesc := 'Arial-9';
+    Hint := '';
+    Text := 'Written by Graeme Geldenhuys';
   end;
 
   lblName4 := TfpgHyperlink.Create(self);
@@ -245,8 +250,9 @@ begin
   begin
     Name := 'lblCompiled';
     SetPosition(12, 132, 191, 13);
-    Text := 'Compiled on:  %s';
     FontDesc := 'Arial-8';
+    Hint := '';
+    Text := 'Compiled on:  %s';
   end;
 
   {@VFD_BODY_END: frmAbout}
@@ -276,17 +282,17 @@ var
 begin
   {@VFD_BODY_BEGIN: frmMain}
   Name := 'frmMain';
-  SetPosition(84, 123, 728, 87);
+  SetPosition(84, 123, 754, 87);
   WindowTitle := 'frmMain';
-  WindowPosition := wpUser;
   ShowHint := True;
+  WindowPosition := wpUser;
   gINI.ReadFormState(self);
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 729, 24);
+    SetPosition(0, 0, 755, 24);
     Anchors := [anLeft,anRight,anTop];
   end;
 
@@ -297,10 +303,11 @@ begin
     SetPosition(4, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
+    Hint := 'Create a new form';
     ImageMargin := -1;
     ImageName := 'vfd.newform';
+    TabOrder := 1;
     Focusable := False;
-    Hint := 'Create a new form';
     OnClick   := @(maindsgn.OnNewForm);
   end;
 
@@ -311,10 +318,11 @@ begin
     SetPosition(30, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
+    Hint := 'Open a file';
     ImageMargin := -1;
     ImageName := 'stdimg.open';
+    TabOrder := 2;
     Focusable := False;
-    Hint := 'Open a file';
     OnClick   := @(maindsgn.OnLoadFile);
   end;
 
@@ -325,10 +333,11 @@ begin
     SetPosition(56, 28, 25, 24);
     Text := '';
     FontDesc := '#Label1';
+    Hint := 'Save the current form design';
     ImageMargin := -1;
     ImageName := 'stdimg.save';
+    TabOrder := 3;
     Focusable := False;
-    Hint := 'Save the current form design';
     OnClick   := @(maindsgn.OnSaveFile);
   end;
 
@@ -336,7 +345,7 @@ begin
   with wgpalette do
   begin
     Name := 'wgpalette';
-    SetPosition(116, 28, 613, 28);
+    SetPosition(116, 28, 639, 28);
     Anchors := [anLeft,anRight,anTop];
     Focusable := False;
   end;
@@ -346,8 +355,9 @@ begin
   begin
     Name := 'chlPalette';
     SetPosition(116, 60, 200, 22);
-    Items.Add('-');
     FontDesc := '#List';
+    Items.Add('-');
+    TabOrder := 5;
     FocusItem := 0;
   end;
 
