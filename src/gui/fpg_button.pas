@@ -152,6 +152,7 @@ type
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
+    property    OnMouseMove;
     property    OnMouseUp;
     property    OnClick;
   end;

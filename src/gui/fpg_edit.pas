@@ -213,6 +213,7 @@ type
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
+    property    OnMouseMove;
   end;
 
 
@@ -244,6 +245,7 @@ type
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
+    property    OnMouseMove;
     property    ShowThousand;
     property    TabOrder;
     property    TextColor;
@@ -290,7 +292,7 @@ function CreateEditInteger(AOwner: TComponent; x, y, w, h: TfpgCoord;
     AShowThousand: boolean= True): TfpgEditInteger;
 
 function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
-    AShowThousand: boolean= True; ADecimals: Integer= -1): TfpgEditFloat;
+    AShowThousand: boolean= True; ADecimals: Integer= -1; AFixedDecimals: boolean= False): TfpgEditFloat;
 
 function CreateEditCurrency(AOwner: TComponent; x, y, w, h: TfpgCoord;
     AShowThousand: boolean= True; ADecimals: Integer= 2): TfpgEditCurrency;
@@ -338,7 +340,7 @@ begin
 end;
 
 function CreateEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord; AShowThousand: boolean= True;
-         ADecimals: Integer= -1): TfpgEditFloat;
+         ADecimals: Integer= -1; AFixedDecimals: boolean= False): TfpgEditFloat;
 begin
   Result       := TfpgEditFloat.Create(AOwner);
   Result.Left  := x;
@@ -346,6 +348,7 @@ begin
   Result.Width := w;
   Result.ShowThousand:= AShowThousand;
   Result.Decimals := ADecimals;
+  Result.FFixedDecimals:= AFixedDecimals;
   if h < TfpgEditFloat(Result).FFont.Height + 6 then
     Result.Height:= TfpgEditFloat(Result).FFont.Height + 6
   else
@@ -1494,7 +1497,10 @@ end;
 procedure TfpgEditFloat.SetValue(const AValue: extended);
 begin
   try
-    Text := FloatToStr(AValue);
+    if FFixedDecimals then
+      Text := FloatToStrF(AValue, ffFixed, 18, FDecimals)
+    else
+      Text := FloatToStr(AValue);
   except
     on E: EConvertError do
       Text := '';

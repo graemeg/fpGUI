@@ -112,9 +112,11 @@ type
     procedure SetMaxValue(const AValue: extended);
     procedure SetMinValue(const AValue: extended);
     procedure SetIncrement(const AValue: extended);
+    procedure SetLargeIncrement(const AValue: extended);
     procedure SetValue(const AValue: extended);
     procedure SetDecimals(const AValue: integer);
     procedure SetFixedDecimals(const AValue: Boolean);
+    procedure SetHint(const AValue: string);
     procedure ButtonUpClick(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
     procedure ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -123,6 +125,9 @@ type
     procedure ButtonDownMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
     procedure EditExit(Sender: TObject);
+    procedure MouseEnter(Sender: TObject);
+    procedure MouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
+    procedure MouseExit(Sender: TObject);
     procedure TimerStep(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -137,10 +142,11 @@ type
     property MaxValue: extended read FMaxValue write SetMaxValue;
     property MinValue: extended read FMinValue write SetMinValue;
     property Increment: extended read FIncrement write SetIncrement;
-    property LargeIncrement: extended read FLargeIncrement write FLargeIncrement;
+    property LargeIncrement: extended read FLargeIncrement write SetLargeIncrement;
     property Value: extended read FValue write SetValue;
     property Decimals: integer read GetDecimals write SetDecimals;
     property FixedDecimals: Boolean read GetFixedDecimals write SetFixedDecimals;
+    property Hint: string read FHint write SetHint;
   end;
 
 
@@ -169,7 +175,9 @@ type
     procedure SetMaxValue(const AValue: integer);
     procedure SetMinValue(const AValue: integer);
     procedure SetIncrement(const AValue: integer);
+    procedure SetLargeIncrement(const AValue: integer);
     procedure SetValue(const AValue: integer);
+    procedure SetHint(const AValue: string);
     procedure ButtonUpClick(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
     procedure ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -178,6 +186,9 @@ type
     procedure ButtonDownMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
     procedure EditExit(Sender: TObject);
+    procedure MouseEnter(Sender: TObject);
+    procedure MouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
+    procedure MouseExit(Sender: TObject);
     procedure TimerStep(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -193,16 +204,18 @@ type
     property MaxValue: integer read FMaxValue write SetMaxValue default 100;
     property MinValue: integer read FMinValue write SetMinValue default 0;
     property Increment: integer read FIncrement write SetIncrement default 1;
-    property LargeIncrement: integer read FLargeIncrement write FLargeIncrement default 10;
+    property LargeIncrement: integer read FLargeIncrement write SetLargeIncrement default 10;
     property Value: integer read FValue write SetValue default 0;
+    property Hint: string read FHint write SetHint;
   end;
 
 
 function CreateSpinEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
-         AMinValue: extended = 0; AMaxValue: extended = 100; AIncrement: extended = 1; ADecimals: integer = 1;
-         AValue: extended = 0): TfpgSpinEditFloat;
+         AMinValue: extended = 0; AMaxValue: extended = 100; AIncrement: extended = 1; ALargeIncrement: extended = 10.0;
+         ADecimals: integer = 1; AValue: extended = 0; AFixedDecimals: boolean= False): TfpgSpinEditFloat;
 function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: integer = 0;
-         AMaxValue: integer = 100; AIncrement: integer = 1; AValue: integer = 0): TfpgSpinEdit;
+         AMaxValue: integer = 100; AIncrement: integer = 1; ALargeIncrement: integer = 10;
+         AValue: integer = 0): TfpgSpinEdit;
 
 
 implementation
@@ -212,8 +225,8 @@ uses
 
 
 function CreateSpinEditFloat(AOwner: TComponent; x, y, w, h: TfpgCoord;
-         AMinValue: extended = 0; AMaxValue: extended = 100; AIncrement: extended = 1; ADecimals: integer = 1;
-         AValue: extended = 0): TfpgSpinEditFloat;
+         AMinValue: extended = 0; AMaxValue: extended = 100; AIncrement: extended = 1; ALargeIncrement: extended = 10.0;
+         ADecimals: integer = 1; AValue: extended = 0; AFixedDecimals: boolean= False): TfpgSpinEditFloat;
 var
   newh: TfpgCoord;
 begin
@@ -230,13 +243,16 @@ begin
     Result.MaxValue := AMaxValue;
   end;
   Result.Increment := AIncrement;
+  Result.LargeIncrement := ALargeIncrement;
   Result.FEdit.Decimals := ADecimals;
+  Result.FEdit.FixedDecimals := AFixedDecimals;
   if (AValue <= Result.MaxValue) and (AValue >= Result.MinValue) then
     Result.Value := AValue;
 end;
 
 function CreateSpinEdit(AOwner: TComponent; x, y, w, h: TfpgCoord; AMinValue: integer = 0;
-         AMaxValue: integer = 100; AIncrement: integer = 1; AValue: integer = 0): TfpgSpinEdit;
+         AMaxValue: integer = 100; AIncrement: integer = 1; ALargeIncrement: integer = 10;
+         AValue: integer = 0): TfpgSpinEdit;
 var
   newh: TfpgCoord;
 begin
@@ -253,6 +269,7 @@ begin
     Result.MaxValue := AMaxValue;
   end;
   Result.Increment := AIncrement;
+  Result.LargeIncrement := ALargeIncrement;
   if (AValue <= Result.MaxValue) and (AValue >= Result.MinValue) then
     Result.Value := AValue;
 end;
@@ -538,7 +555,18 @@ end;
 procedure TfpgSpinEditFloat.SetIncrement(const AValue: extended);
 begin
   if FIncrement <> AValue then
+  begin
     FIncrement := AValue;
+    if FLargeIncrement < AValue then
+      FLargeIncrement := AValue;
+  end;
+end;
+
+procedure TfpgSpinEditFloat.SetLargeIncrement(const AValue: extended);
+begin
+  if FLargeIncrement <> AValue then
+    if FIncrement <= AValue then
+      FLargeIncrement := AValue;
 end;
 
 procedure TfpgSpinEditFloat.SetValue(const AValue: extended);
@@ -562,7 +590,20 @@ end;
 procedure TfpgSpinEditFloat.SetFixedDecimals(const AValue: Boolean);
 begin
   if FEdit.FixedDecimals <> AValue then
+  begin
     FEdit.FixedDecimals := AValue;
+    FEdit.Text:= FloatToStrF(FEdit.Value, ffFixed, 18, FEdit.Decimals);
+  end;
+end;
+
+procedure TfpgSpinEditFloat.SetHint(const AValue: string);
+begin
+  if Hint <> AValue then
+  begin
+    FEdit.Hint := AValue;
+    FButtonUp.Hint := AValue;
+    FButtonDown.Hint := AValue;
+  end;
 end;
 
 procedure TfpgSpinEditFloat.ButtonUpClick(Sender: TObject);
@@ -663,6 +704,73 @@ begin
   EnableButtons;
 end;
 
+procedure TfpgSpinEditFloat.MouseEnter(Sender: TObject);
+var
+  msgp: TfpgMessageParams;
+  b: boolean;
+begin
+  fillchar(msgp, sizeof(msgp), 0);
+  if Sender is TfpgEditFloat then
+    with Sender as TfpgEditFloat do
+      if Assigned(Parent) then
+        b := Enabled and fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '')
+      else
+        b := Enabled and fpgApplication.ShowHint and FShowHint and (FHint <> '');
+  if Sender is TfpgButton then
+    with Sender as TfpgButton do
+      if Assigned(Parent) then
+        b := Enabled and fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '')
+      else
+        b := Enabled and fpgApplication.ShowHint and FShowHint and (FHint <> '');
+
+  msgp.user.Param1 := Ord(b);
+  fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+end;
+
+procedure TfpgSpinEditFloat.MouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
+var
+  msgp: TfpgMessageParams;
+begin
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.user.Param1 := 2;
+  msgp.user.Param2 := AMousePos.x+10;
+  msgp.user.Param3 := AMousePos.y+2;
+
+  { Only send message if really needed. }
+  if Sender is TfpgEditFloat then
+    with Sender as TfpgEditFloat do
+      if Assigned(Parent) then
+      begin
+        if fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+      end
+      else
+        if fpgApplication.ShowHint and FShowHint and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+  if Sender is TfpgButton then
+    with Sender as TfpgButton do
+      if Assigned(Parent) then
+      begin
+        if fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+      end
+      else
+        if fpgApplication.ShowHint and FShowHint and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+end;
+
+procedure TfpgSpinEditFloat.MouseExit(Sender: TObject);
+begin
+  if Sender is TfpgEditFloat then
+    with Sender as TfpgEditFloat do
+      if FShowHint then
+        fpgApplication.HideHint;
+  if Sender is TfpgButton then
+    with Sender as TfpgButton do
+      if FShowHint then
+        fpgApplication.HideHint;
+end;
+
 procedure TfpgSpinEditFloat.TimerStep(Sender: TObject);
 begin
   if FUp then
@@ -708,6 +816,7 @@ begin
 
   FEdit.Decimals := 1;
   FEdit.Value    := FValue;
+  FEdit.FixedDecimals  := False;
 
   FButtonUp.OnClick := @ButtonUpClick;
   FButtonDown.OnClick := @ButtonDownClick;
@@ -715,8 +824,18 @@ begin
   FButtonUp.OnMouseUp := @ButtonUpMouseUp;
   FButtonDown.OnMouseDown := @ButtonDownMouseDown;
   FButtonDown.OnMouseUp := @ButtonDownMouseUp;
-  FEdit.OnKeyPress := @EditKeyPress;
-  FEdit.OnExit   := @EditExit;
+  FEdit.OnKeyPress  := @EditKeyPress;
+  FEdit.OnExit      := @EditExit;
+  FEdit.OnMouseEnter:= @MouseEnter;
+  FButtonUp.OnMouseEnter:= @MouseEnter;
+  FButtonDown.OnMouseEnter:= @MouseEnter;
+  FEdit.OnMouseMove:= @MouseMove;
+  FButtonUp.OnMouseMove:= @MouseMove;
+  FButtonDown.OnMouseMove:= @MouseMove;
+  FEdit.OnMouseExit:= @MouseExit;
+  FButtonUp.OnMouseExit:= @MouseExit;
+  FButtonDown.OnMouseExit:= @MouseExit;
+
   FTimer.OnTimer := @TimerStep;
   EnableButtons;
 end;
@@ -846,7 +965,18 @@ end;
 procedure TfpgSpinEdit.SetIncrement(const AValue: integer);
 begin
   if FIncrement <> AValue then
+  begin
     FIncrement := AValue;
+    if FLargeIncrement < AValue then
+      FLargeIncrement := AValue;
+  end;
+end;
+
+procedure TfpgSpinEdit.SetLargeIncrement(const AValue: integer);
+begin
+  if FLargeIncrement <> AValue then
+    if FIncrement <= AValue then
+      FLargeIncrement := AValue;
 end;
 
 procedure TfpgSpinEdit.SetValue(const AValue: integer);
@@ -856,6 +986,16 @@ begin
     FValue      := AValue;
     FEdit.Value := FValue;
     EnableButtons;
+  end;
+end;
+
+procedure TfpgSpinEdit.SetHint(const AValue: string);
+begin
+  if FHint <> AValue then
+  begin
+    FEdit.Hint := AValue;
+    FButtonUp.Hint := AValue;
+    FButtonDown.Hint := AValue;
   end;
 end;
 
@@ -876,6 +1016,7 @@ begin
   FUp := True;
   FTimer.Enabled := True;
   FSteps := 0;
+  FTempIncrement := Increment;
 end;
 
 procedure TfpgSpinEdit.ButtonUpMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -891,6 +1032,7 @@ begin
   FDown          := True;
   FTimer.Enabled := True;
   FSteps := 0;
+  FTempIncrement := Increment;
 end;
 
 procedure TfpgSpinEdit.ButtonDownMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -957,6 +1099,73 @@ begin
   EnableButtons;
 end;
 
+procedure TfpgSpinEdit.MouseEnter(Sender: TObject);
+var
+  msgp: TfpgMessageParams;
+  b: boolean;
+begin
+  fillchar(msgp, sizeof(msgp), 0);
+  if Sender is TfpgEditInteger then
+    with Sender as TfpgEditInteger do
+      if Assigned(Parent) then
+        b := Enabled and fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '')
+      else
+        b := Enabled and fpgApplication.ShowHint and FShowHint and (FHint <> '');
+  if Sender is TfpgButton then
+    with Sender as TfpgButton do
+      if Assigned(Parent) then
+        b := Enabled and fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '')
+      else
+        b := Enabled and fpgApplication.ShowHint and FShowHint and (FHint <> '');
+
+  msgp.user.Param1 := Ord(b);
+  fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+end;
+
+procedure TfpgSpinEdit.MouseMove(Sender: TObject; AShift: TShiftState; const AMousePos: TPoint);
+var
+  msgp: TfpgMessageParams;
+begin
+  fillchar(msgp, sizeof(msgp), 0);
+  msgp.user.Param1 := 2;
+  msgp.user.Param2 := AMousePos.x+10;
+  msgp.user.Param3 := AMousePos.y+2;
+
+  { Only send message if really needed. }
+  if Sender is TfpgEditInteger then
+    with Sender as TfpgEditInteger do
+      if Assigned(Parent) then
+      begin
+        if fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+      end
+      else
+        if fpgApplication.ShowHint and FShowHint and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+  if Sender is TfpgButton then
+    with Sender as TfpgButton do
+      if Assigned(Parent) then
+      begin
+        if fpgApplication.ShowHint and (FShowHint or (FParentShowHint and Parent.Parent.ShowHint)) and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+      end
+      else
+        if fpgApplication.ShowHint and FShowHint and (FHint <> '') then
+          fpgPostMessage(Sender, fpgApplication, FPGM_HINTTIMER, msgp);
+end;
+
+procedure TfpgSpinEdit.MouseExit(Sender: TObject);
+begin
+  if Sender is TfpgEditInteger then
+    with Sender as TfpgEditInteger do
+      if FShowHint then
+        fpgApplication.HideHint;
+  if Sender is TfpgButton then
+    with Sender as TfpgButton do
+      if FShowHint then
+        fpgApplication.HideHint;
+end;
+
 procedure TfpgSpinEdit.TimerStep(Sender: TObject);
 begin
   if FUp then
@@ -1008,8 +1217,18 @@ begin
   FButtonUp.OnMouseUp := @ButtonUpMouseUp;
   FButtonDown.OnMouseDown := @ButtonDownMouseDown;
   FButtonDown.OnMouseUp := @ButtonDownMouseUp;
-  FEdit.OnKeyPress := @EditKeyPress;
-  FEdit.OnExit   := @EditExit;
+  FEdit.OnKeyPress  := @EditKeyPress;
+  FEdit.OnExit      := @EditExit;
+  FEdit.OnMouseEnter:= @MouseEnter;
+  FButtonUp.OnMouseEnter:= @MouseEnter;
+  FButtonDown.OnMouseEnter:= @MouseEnter;
+  FEdit.OnMouseMove:= @MouseMove;
+  FButtonUp.OnMouseMove:= @MouseMove;
+  FButtonDown.OnMouseMove:= @MouseMove;
+  FEdit.OnMouseExit:= @MouseExit;
+  FButtonUp.OnMouseExit:= @MouseExit;
+  FButtonDown.OnMouseExit:= @MouseExit;
+
   FTimer.OnTimer := @TimerStep;
   EnableButtons;
 end;
