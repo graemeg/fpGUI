@@ -104,6 +104,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   Clear;
     procedure   Update;
     property    NewText: boolean read FNewItem;
   end;
@@ -768,6 +769,12 @@ destructor TfpgBaseEditCombo.Destroy;
 begin
   FDropDown.Free;
   inherited Destroy;
+end;
+
+procedure TfpgBaseEditCombo.Clear;
+begin
+  Text := '';
+  Items.Clear;
 end;
 
 procedure TfpgBaseEditCombo.Update;
