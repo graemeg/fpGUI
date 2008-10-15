@@ -31,14 +31,14 @@ uses
   // Show the contents of a stream
   procedure tiShowStream(const AValue: TStream; const pHeading: string = 'Show stream');
   // Show a <Yes>, <No> dialog box, and return true if <Yes> was selected
-  function tiAppConfirmation(const AMessage: string): boolean; overload;
+  function tiAppConfirmation(const AMessage: string; ATitle: string = ''): boolean; overload;
   function tiAppConfirmation(const AMessage: string; const AValues: array of const): boolean; overload;
   // Show a message
-  procedure tiAppMessage(const AMessage: string);
+  procedure tiAppMessage(const AMessage: string; ATitle: string = '');
   // Show a warning
-  procedure tiAppWarning(const AMessage: string);
+  procedure tiAppWarning(const AMessage: string; ATitle: string = '');
   // Show a error message
-  procedure tiAppError(const AMessage: string);
+  procedure tiAppError(const AMessage: string; ATitle: string = '');
 
 
 implementation
@@ -150,9 +150,9 @@ begin
   end;
 end;
 
-function tiAppConfirmation(const AMessage: string): boolean;
+function tiAppConfirmation(const AMessage: string; ATitle: string = ''): boolean;
 begin
-  Result := TfpgMessageDialog.Question('', AMessage) = mbYes
+  Result := TfpgMessageDialog.Question(ATitle, AMessage) = mbYes
 end;
 
 function tiAppConfirmation(const AMessage: string;
@@ -161,19 +161,19 @@ begin
   Result := tiAppConfirmation(Format(AMessage, AValues));
 end;
 
-procedure tiAppMessage(const AMessage: string);
+procedure tiAppMessage(const AMessage: string; ATitle: string = '');
 begin
-  TfpgMessageDialog.Information('', AMessage);
+  TfpgMessageDialog.Information(ATitle, AMessage);
 end;
 
-procedure tiAppWarning(const AMessage: string);
+procedure tiAppWarning(const AMessage: string; ATitle: string = '');
 begin
-  TfpgMessageDialog.Warning('', AMessage);
+  TfpgMessageDialog.Warning(ATitle, AMessage);
 end;
 
-procedure tiAppError(const AMessage: string);
+procedure tiAppError(const AMessage: string; ATitle: string = '');
 begin
-  TfpgMessageDialog.Critical('', AMessage);
+  TfpgMessageDialog.Critical(ATitle, AMessage);
 end;
 
 end.
