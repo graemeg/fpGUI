@@ -91,6 +91,7 @@ type
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
+    procedure   HandleSetFocus; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -402,6 +403,21 @@ begin
   inherited HandleResize(AWidth, AHeight);
   if FSizeIsDirty then
     CalculateInternalButtonRect;
+end;
+
+procedure TfpgBaseEditCombo.HandleSetFocus;
+var
+  i: integer;
+begin
+  inherited HandleSetFocus;
+  if FText > '' then
+    for i := 0 to Items.Count-1 do
+      if SameText(UTF8Copy(Items.Strings[i], 1, UTF8Length(FText)), FText) then
+      begin
+        FSelectedItem := i;
+        FNewItem := False;
+        Exit; //==>
+      end;
 end;
 
 procedure TfpgBaseEditCombo.HandleKeyChar(var AText: TfpgChar;
