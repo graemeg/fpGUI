@@ -1028,7 +1028,6 @@ end;
 
 procedure TfpgApplication.InternalMsgClose(var msg: TfpgMessageRec);
 begin
-//  writeln('InternalMsgClose received');
   if Assigned(msg.Sender) then
   begin
     if csDestroying in TComponent(msg.Sender).ComponentState then

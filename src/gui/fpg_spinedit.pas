@@ -106,7 +106,7 @@ type
     function GetFixedDecimals: Boolean;
     procedure ResizeChildren; override;
     procedure SetEditBackgroundColor(const AValue: Tfpgcolor);
-    procedure SetTextColor(const AValue: Tfpgcolor);
+    procedure SetTextColor(const AValue: Tfpgcolor); override;
     procedure SetNegativeColor(const AValue: Tfpgcolor);
     procedure SetFontDesc(const AValue: string);
     procedure SetMaxValue(const AValue: extended);
@@ -169,7 +169,7 @@ type
     function GetFontDesc: string;
     procedure ResizeChildren; override;
     procedure SetEditBackgroundColor(const AValue: Tfpgcolor);
-    procedure SetTextColor(const AValue: Tfpgcolor);
+    procedure SetTextColor(const AValue: Tfpgcolor); override;
     procedure SetNegativeColor(const AValue: Tfpgcolor);
     procedure SetFontDesc(const AValue: string);
     procedure SetMaxValue(const AValue: integer);

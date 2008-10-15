@@ -142,8 +142,7 @@ uses
   fpg_stringutils,
   fpg_constants,
   fpg_listbox,
-  fpg_dialogs,
-  math;
+  fpg_dialogs;
 
 var
   OriginalFocusRoot: TfpgWidget;
@@ -256,8 +255,6 @@ begin
 end;
 
 function TfpgBaseEditCombo.GetText: string;
-var
-  i: integer;
 begin
   if FAutoCompletion then
     Result := FText

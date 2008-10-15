@@ -470,7 +470,7 @@ type
     procedure   PushModalForm(AForm: TfpgWindowBase);
     procedure   PopModalForm;
     function    PrevModalForm: TfpgWindowBase;
-    procedure   CreateForm(AFormClass: TComponentClass; var AForm: TfpgWindowBase);
+    procedure   CreateForm(AFormClass: TComponentClass; out AForm: TfpgWindowBase);
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
     function    Screen_dpi_x: integer; virtual; abstract;
@@ -2101,7 +2101,7 @@ begin
 end;
 
 procedure TfpgApplicationBase.CreateForm(AFormClass: TComponentClass;
-  var AForm: TfpgWindowBase);
+  out AForm: TfpgWindowBase);
 begin
   try
     AForm := TfpgWindowBase(AFormClass.Create(self));
