@@ -3,9 +3,6 @@
     Abstract mediating view and Mediator Factory. This allows you to use
     standard edit components and make them object-aware.  See the demo
     application for usage.
-
-  ToDo:
-    * As soon as TfpgSpinEdit has been implemented, port the SpinEdit mediator
 }
 
 unit tiMediators;
@@ -26,6 +23,7 @@ uses
   ,fpg_combobox
   ,fpg_memo
   ,fpg_popupcalendar
+  ,fpg_spinedit
   ;
 
 type
@@ -58,7 +56,7 @@ type
     procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
   public
-    Constructor Create; override;
+    constructor Create; override;
     property    EditControl: TfpgCheckBox read FEditControl write FEditControl;
     class function ComponentClass: TClass; override;
   end;
@@ -73,28 +71,40 @@ type
     procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   SetupGUIandObject; override;
   public
-    Constructor Create; override;
+    constructor Create; override;
     property    EditControl: TfpgLabel read FEditControl write FEditControl;
     class function ComponentClass: TClass; override;
   end;
 
 
-  { Base class to handle TSpinEdit controls }
-{
+  { Base class to handle TfpgSpinEdit controls }
   TMediatorSpinEditView = class(TMediatorView)
   private
-    function    GetEditControl: TSpinEdit;
-    procedure   OnLostFocus(Sender: TObject);
-    procedure   SetEditControl(const AValue: TSpinEdit);
+    FEditControl: TfpgSpinEdit;
   protected
-    procedure   SetupGUIandObject; override;
+    function    GetGUIControl: TComponent; override;
+    procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
   public
-    property    EditControl: TSpinEdit read GetEditControl write SetEditControl;
-    procedure   GuiToObject; override;
+    constructor Create; override;
+    property    EditControl: TfpgSpinEdit read FEditControl write FEditControl;
     class function ComponentClass: TClass; override;
   end;
-}
+
+
+  { Base class to handle TfpgSpinEditFloat controls }
+  TMediatorSpinEditFloatView = class(TMediatorView)
+  private
+    FEditControl: TfpgSpinEditFloat;
+  protected
+    function    GetGUIControl: TComponent; override;
+    procedure   SetGUIControl(const AValue: TComponent);override;
+    procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+  public
+    constructor Create; override;
+    property    EditControl: TfpgSpinEditFloat read FEditControl write FEditControl;
+    class function ComponentClass: TClass; override;
+  end;
 
 
   { Base class to handle TfpgTrackBar controls }
@@ -180,7 +190,7 @@ type
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
   public
-    Constructor Create; override;
+    constructor Create; override;
     property    EditControl: TfpgCalendarCombo read FEditControl write FEditControl;
     class function ComponentClass: TClass; override;
   end;
@@ -214,6 +224,8 @@ begin
   gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TtiObject, [tkClass]);
   gMediatorManager.RegisterMediator(TMediatorMemoView, TtiObject, [tkSString,tkAString]);
   gMediatorManager.RegisterMediator(TMediatorCalendarComboView, TtiObject, [tkFloat]);
+  gMediatorManager.RegisterMediator(TMediatorSpinEditView, TtiObject, [tkInteger]);
+  gMediatorManager.RegisterMediator(TMediatorSpinEditFloatView, TtiObject, [tkFloat]);
 end;
 
 { TMediatorEditView }
@@ -297,50 +309,21 @@ end;
 
 
 { TMediatorSpinEditView}
-(*
+
 class function TMediatorSpinEditView.ComponentClass: TClass;
 begin
-  Result := TSpinEdit;
+  Result := TfpgSpinEdit;
 end;
 
-
-procedure TMediatorSpinEditView.GuiToObject;
+function TMediatorSpinEditView.GetGUIControl: TComponent;
 begin
-  { Control is busy clearing the value before replacing it with what the user
-    typed. }
-  if (TSpinEdit(EditControl).Text = '') then
-    Exit; //==>
-
-  { continue as normal }
-  inherited;
+  Result := FEditControl;
 end;
 
-function TMediatorSpinEditView.GetEditControl: TSpinEdit;
+procedure TMediatorSpinEditView.SetGUIControl(const AValue: TComponent);
 begin
-  Result := TSpinEdit(FEditControl);
-end;
-
-procedure TMediatorSpinEditView.OnLostFocus(Sender: TObject);
-begin
-  if (TSpinEdit(EditControl).Text = '') then
-  begin
-    { Default the EditControl to a valid value }
-    TSpinEdit(EditControl).Value := 0;
-    GUIChanged;
-  end;
-end;
-
-procedure TMediatorSpinEditView.SetEditControl(const AValue: TSpinEdit);
-begin
-  FEditControl := AValue;
-end;
-
-
-procedure TMediatorSpinEditView.SetupGUIandObject;
-begin
-  inherited;
-  TSpinEdit(EditControl).Text := '';
-  TSpinEdit(EditControl).OnExit := OnLostFocus;
+  FEditControl := AValue as TfpgSpinEdit;
+  inherited SetGUIControl(AValue);
 end;
 
 procedure TMediatorSpinEditView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
@@ -352,16 +335,22 @@ begin
   oError := pErrors.FindByErrorProperty(FieldName);
   if oError <> nil then
   begin
-    EditControl.Color  := clError;
+    EditControl.BackgroundColor  := clError;
     EditControl.Hint   := oError.ErrorMessage;
   end
   else
   begin
-    EditControl.Color  := ColorToRGB(clWindow);
+    EditControl.BackgroundColor  := clWindowBackground;
     EditControl.Hint   := '';
   end;
 end;
-*)
+
+constructor TMediatorSpinEditView.Create;
+begin
+  inherited Create;
+  GuiFieldName := 'Value';
+end;
+
 
 { TMediatorTrackBarView}
 
@@ -754,6 +743,49 @@ constructor TMediatorItemComboBoxView.Create;
 begin
   inherited Create;
   GuiFieldName := 'FocusItem';
+end;
+
+{ TMediatorSpinEditFloatView }
+
+function TMediatorSpinEditFloatView.GetGUIControl: TComponent;
+begin
+  Result := FEditControl;
+end;
+
+procedure TMediatorSpinEditFloatView.SetGUIControl(const AValue: TComponent);
+begin
+  FEditControl := AValue as TfpgSpinEditFloat;
+  inherited SetGUIControl(AValue);
+end;
+
+procedure TMediatorSpinEditFloatView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
+var
+  oError: TtiObjectError;
+begin
+  inherited UpdateGuiValidStatus(pErrors);
+
+  oError := pErrors.FindByErrorProperty(FieldName);
+  if oError <> nil then
+  begin
+    EditControl.BackgroundColor  := clError;
+    EditControl.Hint   := oError.ErrorMessage;
+  end
+  else
+  begin
+    EditControl.BackgroundColor  := clWindowBackground;
+    EditControl.Hint   := '';
+  end;
+end;
+
+constructor TMediatorSpinEditFloatView.Create;
+begin
+  inherited Create;
+  GuiFieldName := 'Value';
+end;
+
+class function TMediatorSpinEditFloatView.ComponentClass: TClass;
+begin
+  Result := TfpgSpinEditFloat;
 end;
 
 end.
