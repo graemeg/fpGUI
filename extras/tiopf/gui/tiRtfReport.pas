@@ -7,14 +7,11 @@ Revision history:
 Purpose:
   Create reports with RTF documents with access to dataset and framework objects.
 
-ToDo:
-  Better exception handling. (saw some unexpected errors while parsing)
-    corrupting the resulting rtf.
-  Show errors when trying to past eof in a TtiObjectList (its now ignored)
-  Suppress null dates (0 date are displayed as 1899-xx-xx)
-
-  And if anybody got ideas for this section, please email them!
 }
+
+{ TODO :  Better exception handling. (saw some unexpected errors while parsing) corrupting the resulting rtf. }
+{ TODO :  Show errors when trying to past eof in a TtiObjectList (its now ignored) }
+{ TODO :  Suppress null dates (0 date are displayed as 1899-xx-xx) }
 
 unit tiRtfReport;
 
@@ -209,7 +206,7 @@ type
   public
     destructor Destroy; override;
     function Find(AName: string): TRtfDataset; overload;
-    function Find(AName: string; var AFieldName: string): TRtfDataset; overload;
+    function Find(AName: string; out AFieldName: string): TRtfDataset; overload;
     function Add(ADataset: TObject; AName: string; AFreeDataset: boolean = false): TRtfDataset;
     property Items[Index: integer]: TRtfDataset read GetItem; default;
 
@@ -343,11 +340,16 @@ type
     procedure UdfShortMonthName(AArgument: TRtfArgument);
     procedure UdfLongDayName(AArgument: TRtfArgument);
     procedure UdfLongMonthName(AArgument: TRtfArgument);
+    { year as string }
     procedure UdfSYear(AArgument: TRtfArgument);
+    { month as string }
     procedure UdfSMonth(AArgument: TRtfArgument);
+    { day as string }
     procedure UdfSDay(AArgument: TRtfArgument);
+    { string to date }
     procedure UdfStod(AArgument: TRtfArgument);
-    procedure UdfDtos(AArgument: TRtfArgument);
+    { date to string }
+    procedure UdfDtoS(AArgument: TRtfArgument);
     procedure UdfDateToStr(AArgument: TRtfArgument);
     procedure UdfTimeToStr(AArgument: TRtfArgument);
     procedure UdfDateTimeToStr(AArgument: TRtfArgument);
@@ -1894,9 +1896,10 @@ begin
   end;
 end;
 
-function TRtfDataset.Find(AName: string; var AFieldName: string): TRtfDataset;
+function TRtfDataset.Find(AName: string; out AFieldName: string): TRtfDataset;
 //Find the requested dataset
-var ATableName: string;
+var
+  ATableName: string;
   AIndex, i: integer;
 begin
   //MainTable must be in the list of tables
@@ -2089,7 +2092,8 @@ procedure TRtfArgument.ParseExpression(AExpression: string);
 //Add token to the argument list. Parameters surrounded by parentheses will
 //be added to the nested arguments. This will make a nice argument tree.
 //Constant .9 wont be parse, but that's ok
-var FSourcePtr, p, TokenStart: PChar;
+var
+  FSourcePtr, p, TokenStart: PChar;
   ALastArgument, ALast: TRtfArgument;
   AInts: array[0..6]of integer;
   ASeps: array[0..6]of char;
@@ -2114,7 +2118,7 @@ begin
 
     TokenStart := p;
     case P^ of
-      'A'..'Z', 'a'..'z', '_', '@': begin //De '@' voor referentie variabelen (nieuw)
+      'A'..'Z', 'a'..'z', '_', '@': begin // The '@' infront of a reference variable
         Inc(p);
         ALast := nil;
         while P^ in['A'..'Z', 'a'..'z', '0'..'9', '_', '.', '@']do Inc(p);
@@ -4390,7 +4394,7 @@ begin
   then raise TRtfException.Create(rsUnexpectedParameterType);
   DecodeDate(AArgument[0].Value, AYear, AMonth, ADay);
   AArgument.Token := etLitInt;
-  AArgument.Value := AYear;
+  AArgument.Value := ADay;
 end;
 
 procedure TtiRtfParser.UdfMonth(AArgument: TRtfArgument);
@@ -4410,7 +4414,7 @@ begin
   then raise TRtfException.Create(rsUnexpectedParameterType);
   DecodeDate(AArgument[0].Value, AYear, AMonth, ADay);
   AArgument.Token := etLitInt;
-  AArgument.Value := ADay;
+  AArgument.Value := AYear;
 end;
 
 procedure TtiRtfParser.UdfShortDayName(AArgument: TRtfArgument);
@@ -4460,7 +4464,7 @@ begin
   then raise TRtfException.Create(rsUnexpectedParameterType);
   DecodeDate(AArgument[0].Value, AYear, AMonth, ADay);
   AArgument.Token := etLitString;
-  AArgument.Value := Format('%0.4d',[AYear]);
+  AArgument.Value := Format('%0.2d',[ADay]);
 end;
 
 procedure TtiRtfParser.UdfSMonth(AArgument: TRtfArgument);
@@ -4480,7 +4484,7 @@ begin
   then raise TRtfException.Create(rsUnexpectedParameterType);
   DecodeDate(AArgument[0].Value, AYear, AMonth, ADay);
   AArgument.Token := etLitString;
-  AArgument.Value := Format('%0.2d',[ADay]);
+  AArgument.Value := Format('%0.4d',[AYear]);
 end;
 
 procedure TtiRtfParser.UdfStod(AArgument: TRtfArgument);
@@ -4511,7 +4515,7 @@ begin
   AArgument.Value := FormatDateTime(AFormat, AArgument[0].Value);
 end;
 
-procedure TtiRtfParser.UdfDtos(AArgument: TRtfArgument);
+procedure TtiRtfParser.UdfDtoS(AArgument: TRtfArgument);
 begin
   UdfDateTimeTo(AArgument, 'YYYYMMDD');
 end;
@@ -4582,9 +4586,11 @@ begin
 end;
 
 procedure TtiRtfParser.UdfPicture(AArgument: TRtfArgument);
+{
 var
   APicture: TPicture;
   AFilename: string;
+}
 begin
 (*
   if not AArgument.Check(0,[etLitString])

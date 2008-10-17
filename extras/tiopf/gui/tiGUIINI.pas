@@ -2,10 +2,7 @@ unit tiGUIINI;
 
 {$mode objfpc}{$H+}
 
-{
-  TODO:
-    * When TfpgForm supports FormState property, implement the remaining functions
-}
+{ TODO: When TfpgForm supports FormState property, implement the remaining functions. }
 
 interface
 uses
