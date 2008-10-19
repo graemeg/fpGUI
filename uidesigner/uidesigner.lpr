@@ -36,12 +36,15 @@ begin
     PropList := TPropertyList.Create;
     maindsgn := TMainDesigner.Create;
     maindsgn.CreateWindows;
+
+    // Note:  This needs improving!!
+    fpgApplication.MainForm := frmMain;
+
+    { If file passed in as param, load it! }
     maindsgn.EditedFileName := ParamStr(1);
     if FileExists(maindsgn.EditedFileName) then
       maindsgn.OnLoadFile(maindsgn);
 
-    // Note:  This needs improving!!
-    fpgApplication.MainForm := frmMain;
     fpgApplication.Run;
     
     PropList.Free;
