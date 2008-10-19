@@ -842,6 +842,7 @@ var
   KeySym: TKeySym;
   Popup: TfpgWidget;
   status: TStatus;
+  needToWait: boolean;
 
   // debug purposes only
   procedure PrintKeyEvent(const event: TXEvent);
@@ -883,9 +884,11 @@ var
   
 begin
   xfd := XConnectionNumber(display);
-
+  XFlush(display);
+(*
   repeat
-    if (atimeoutms >= 0) and (XPending(display) <= 0) then
+
+    if (atimeoutms >= 0) and (XPending(display) < 1) then   { there are no X messages }
     begin
       if Assigned(FOnIdle) then
         OnIdle(self);
@@ -894,14 +897,37 @@ begin
       // Poll would be better but FPC has no official poll interface (if I'm right)
       fpFD_ZERO(rfds);
       fpFD_SET(xfd, rfds);
-      r := fpSelect(xfd + 1, @rfds, nil, nil, atimeoutms);
+      r := fpSelect(xfd + 1, @rfds, nil, nil, {atimeoutms} 50);
 
-      if r <= 0 then
+      if r < 1 then
         Exit; // no event received.
     end;
-    XNextEvent(display, @ev);
+
+   XNextEvent(display, @ev);
   until (not XFilterEvent(@ev, X.None));
-  
+*)
+
+  needToWait := True;
+  if XPending(display) > 0 then // We have a X message to process
+  begin
+    XNextEvent(display, @ev);
+    needToWait := False;
+  end;
+
+  if needToWait then  // No X messages to process (we are idle). So do a timeout wait
+  begin
+    if Assigned(FOnIdle) then
+      OnIdle(self);
+    fpFD_ZERO(rfds);
+    fpFD_SET(xfd, rfds);
+    r := fpSelect(xfd + 1, @rfds, nil, nil, {atimeoutms} 50);
+    if r <> 0 then  // We got a X event or the timeout happened
+      XNextEvent(display, @ev)
+    else
+      Exit; // nothing further to do here!
+  end;
+
+
   // if the event filter returns true then it ate the message
   if Assigned(FEventFilter) and FEventFilter(ev) then
     exit; // no more processing required for that event
