@@ -71,11 +71,16 @@ procedure fpgDeleteFirstMessage;
 var
   e: TMessageListElement;
 begin
-  e := UsedFirstMessage;
-  if e <> nil then
-  begin
-    MsgListRemoveElement(e, UsedFirstMessage, UsedLastMessage);
-    MsgListInsertElement(e, FreeFirstMessage, FreeLastMessage);
+  fpgApplication.Lock;
+  try
+    e := UsedFirstMessage;
+    if e <> nil then
+    begin
+      MsgListRemoveElement(e, UsedFirstMessage, UsedLastMessage);
+      MsgListInsertElement(e, FreeFirstMessage, FreeLastMessage);
+    end;
+  finally
+    fpgApplication.Unlock;
   end;
 end;
 
@@ -113,17 +118,21 @@ var
 begin
   if Dest = nil then
     Exit; //==>
-
-  p := fpgAllocateMessage;
-  if p <> nil then
-  begin
-    p^.MsgCode := MsgCode;
-    p^.Sender  := Sender;
-    p^.Dest    := Dest;
-    p^.Params  := aparams;
-  end
-  else
-    Writeln('THE MESSAGE QUEUE IS FULL.');
+  fpgApplication.Lock;
+  try
+    p := fpgAllocateMessage;
+    if p <> nil then
+    begin
+      p^.MsgCode := MsgCode;
+      p^.Sender  := Sender;
+      p^.Dest    := Dest;
+      p^.Params  := aparams;
+    end
+    else
+      Writeln('THE MESSAGE QUEUE IS FULL.');
+  finally
+    fpgApplication.Unlock;
+  end;
 end;
 
 procedure fpgPostMessage(Sender, Dest: TObject; MsgCode: integer); overload;
@@ -133,16 +142,21 @@ begin
   if Dest = nil then
     Exit; //==>
 
-  p := fpgAllocateMessage;
-  if p <> nil then
-  begin
-    p^.MsgCode := MsgCode;
-    p^.Sender  := Sender;
-    p^.Dest    := Dest;
-    p^.Stop    := False;
-  end
-  else
-    Writeln('THE MESSAGE QUEUE IS FULL.');
+  fpgApplication.Lock;
+  try
+    p := fpgAllocateMessage;
+    if p <> nil then
+    begin
+      p^.MsgCode := MsgCode;
+      p^.Sender  := Sender;
+      p^.Dest    := Dest;
+      p^.Stop    := False;
+    end
+    else
+      Writeln('THE MESSAGE QUEUE IS FULL.');
+  finally
+    fpgApplication.Unlock;
+  end;
 end;
 
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer; var aparams: TfpgMessageParams); overload;

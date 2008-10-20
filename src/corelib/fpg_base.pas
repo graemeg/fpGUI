@@ -24,7 +24,8 @@ interface
 uses
   Classes,
   SysUtils,
-  fpg_impl;
+  fpg_impl,
+  syncobjs; // TCriticalSection usage
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -456,6 +457,7 @@ type
   private
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
+    FCritSect: TCriticalSection;
     function    GetForm(Index: Integer): TfpgWindowBase;
     function    GetFormCount: integer;
     function    GetTopModalForm: TfpgWindowBase;
@@ -466,6 +468,7 @@ type
     function    DoGetFontFaceList: TStringList; virtual; abstract;
   public
     constructor Create(const AParams: string); virtual; reintroduce;
+    destructor  Destroy; override;
     function    GetFontFaceList: TStringList;
     procedure   PushModalForm(AForm: TfpgWindowBase);
     procedure   PopModalForm;
@@ -477,6 +480,8 @@ type
     function    Screen_dpi_y: integer; virtual; abstract;
     function    Screen_dpi: integer; virtual; abstract;
     procedure   Terminate;
+    procedure   Lock;
+    procedure   Unlock;
     property    FormCount: integer read GetFormCount;
     property    Forms[Index: Integer]: TfpgWindowBase read GetForm;
     property    IsInitialized: boolean read FIsInitialized;
@@ -2052,6 +2057,13 @@ constructor TfpgApplicationBase.Create(const AParams: string);
 begin
   inherited Create(nil);
   FModalFormStack := TList.Create;
+  FCritSect := TCriticalSection.Create;
+end;
+
+destructor TfpgApplicationBase.Destroy;
+begin
+  FCritSect.Free;
+  inherited Destroy;
 end;
 
 function TfpgApplicationBase.GetFormCount: integer;
@@ -2122,6 +2134,16 @@ begin
     if Forms[i] <> MainForm then
       fpgSendMessage(Self, Forms[i], FPGM_CLOSE); // SendMessage waits for it to complete. Post doesn't.
   Terminated := True;
+end;
+
+procedure TfpgApplicationBase.Lock;
+begin
+  FCritSect.Enter;
+end;
+
+procedure TfpgApplicationBase.Unlock;
+begin
+  FCritSect.Leave;
 end;
 
 { TfpgClipboardBase }
