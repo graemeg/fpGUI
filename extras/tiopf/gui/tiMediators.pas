@@ -192,6 +192,7 @@ type
   protected
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
+    procedure   SetupGUIandObject; override;
   public
     constructor Create; override;
     property    EditControl: TfpgCalendarCombo read FEditControl write FEditControl;
@@ -734,6 +735,15 @@ procedure TMediatorCalendarComboView.SetGUIControl(const AValue: TComponent);
 begin
   FEditControl := AValue as TfpgCalendarCombo;
   inherited SetGUIControl(AValue);
+end;
+
+procedure TMediatorCalendarComboView.SetupGUIandObject;
+begin
+  inherited SetupGUIandObject;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
 end;
 
 constructor TMediatorCalendarComboView.Create;
