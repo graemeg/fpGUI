@@ -55,6 +55,7 @@ type
     FButtonDown: TfpgButton;
     FArrowUpColor: Tfpgcolor;
     FArrowDownColor: Tfpgcolor;
+    FOnChange: TNotifyEvent;
     FTimer: TfpgTimer;
     FUp: Boolean;
     FDown: Boolean;
@@ -63,6 +64,7 @@ type
     procedure   SetButtonWidth(const AValue: integer);
   protected
     FButtonWidth: integer;
+    procedure   DoOnChange; virtual;
     procedure   ResizeChildren; virtual;
     procedure   HandlePaint; override;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
@@ -80,6 +82,7 @@ type
     property    ArrowDownColor: TfpgColor read FArrowDownColor write SetArrowDownColor;
     property    ButtonWidth: integer read FButtonWidth write SetButtonWidth default 13;
     property    StepsSpeedUp: integer read FSpeedUpSteps write SetSpeedUp;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -147,6 +150,13 @@ type
     property Decimals: integer read GetDecimals write SetDecimals;
     property FixedDecimals: Boolean read GetFixedDecimals write SetFixedDecimals;
     property Hint: string read FHint write SetHint;
+    property    OnChange;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
   end;
 
 
@@ -207,6 +217,13 @@ type
     property LargeIncrement: integer read FLargeIncrement write SetLargeIncrement default 10;
     property Value: integer read FValue write SetValue default 0;
     property Hint: string read FHint write SetHint;
+    property    OnChange;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnPaint;
   end;
 
 
@@ -288,6 +305,12 @@ begin
 
   ResizeChildren;
   RePaint;
+end;
+
+procedure TfpgAbstractSpinEdit.DoOnChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(self);
 end;
 
 procedure TfpgAbstractSpinEdit.ResizeChildren;
@@ -609,13 +632,19 @@ end;
 procedure TfpgSpinEditFloat.ButtonUpClick(Sender: TObject);
 begin
   if FValue + FIncrement <= FMaxValue then
+  begin
     Value := FValue + FIncrement;
+    DoOnChange;
+  end;
 end;
 
 procedure TfpgSpinEditFloat.ButtonDownClick(Sender: TObject);
 begin
   if FValue - FIncrement >= FMinValue then
+  begin
     Value := FValue - FIncrement;
+    DoOnChange;
+  end;
 end;
 
 procedure TfpgSpinEditFloat.ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -783,6 +812,7 @@ begin
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnChange;
     end;
   end
   else if FDown then
@@ -795,6 +825,7 @@ begin
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnChange;
     end;
   end;
   EnableButtons;
@@ -1003,12 +1034,14 @@ procedure TfpgSpinEdit.ButtonUpClick(Sender: TObject);
 begin
   if FValue + FIncrement <= FMaxValue then
     Value := FValue + FIncrement;
+  DoOnChange;
 end;
 
 procedure TfpgSpinEdit.ButtonDownClick(Sender: TObject);
 begin
   if FValue - FIncrement >= FMinValue then
     Value := FValue - FIncrement;
+  DoOnChange;
 end;
 
 procedure TfpgSpinEdit.ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -1178,6 +1211,7 @@ begin
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnchange;
     end;
   end
   else if FDown then
@@ -1190,6 +1224,7 @@ begin
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnChange;
     end;
   end;
   EnableButtons;

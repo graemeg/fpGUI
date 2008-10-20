@@ -55,6 +55,7 @@ type
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+    procedure   SetupGUIandObject; override;
   public
     constructor Create; override;
     property    EditControl: TfpgCheckBox read FEditControl write FEditControl;
@@ -85,6 +86,7 @@ type
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+    procedure   SetupGUIandObject; override;
   public
     constructor Create; override;
     property    EditControl: TfpgSpinEdit read FEditControl write FEditControl;
@@ -100,6 +102,7 @@ type
     function    GetGUIControl: TComponent; override;
     procedure   SetGUIControl(const AValue: TComponent);override;
     procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+    procedure   SetupGUIandObject; override;
   public
     constructor Create; override;
     property    EditControl: TfpgSpinEditFloat read FEditControl write FEditControl;
@@ -343,6 +346,15 @@ begin
     EditControl.BackgroundColor  := clWindowBackground;
     EditControl.Hint   := '';
   end;
+end;
+
+procedure TMediatorSpinEditView.SetupGUIandObject;
+begin
+  inherited SetupGUIandObject;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
 end;
 
 constructor TMediatorSpinEditView.Create;
@@ -659,6 +671,15 @@ begin
   end;
 end;
 
+procedure TMediatorCheckBoxView.SetupGUIandObject;
+begin
+  inherited SetupGUIandObject;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
+end;
+
 constructor TMediatorCheckBoxView.Create;
 begin
   inherited Create;
@@ -775,6 +796,15 @@ begin
     EditControl.BackgroundColor  := clWindowBackground;
     EditControl.Hint   := '';
   end;
+end;
+
+procedure TMediatorSpinEditFloatView.SetupGUIandObject;
+begin
+  inherited SetupGUIandObject;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
 end;
 
 constructor TMediatorSpinEditFloatView.Create;

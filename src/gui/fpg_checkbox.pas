@@ -61,6 +61,8 @@ type
     property    Text: string read FText write SetText;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnEnter;
+    property    OnExit;
   end;
 
 
