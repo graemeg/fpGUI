@@ -477,8 +477,8 @@ begin
   end;
   FVisSelStartPx := vend; // because we stop the search
   FVisSelEndPx   := vend; // after last visible character is found
-  bestfx := High(chx) - 1 + vstart;
-  bestlx := Low(chx)  + 1 + vend;
+  bestfx := Low(chx) + 1 + vstart;
+  bestlx := Low(chx) + 1 + vend;
 
   dtext := GetDrawText;
   ch    := '';
@@ -488,7 +488,7 @@ begin
   {fvc   := 0;
   lvc   := 0;}
   FDrawOffset := 0;
-  while dpos <= Length(dtext) do
+  while dpos < Length(dtext) do
   begin
     pdp := dpos;
     dpos := UTF8CharAtByte(dtext, dpos, ch);
