@@ -65,6 +65,8 @@ type
     property    BorderStyle;
     property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
     property    Style;
+    property    ParentShowHint;
+    property    ShowHint;
     property    OnClick;
     property    OnDoubleClick;
     property    OnMouseDown;
@@ -115,6 +117,8 @@ type
     property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
     property    Margin: integer read GetMargin write SetMargin default 2;
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
+    property    ParentShowHint;
+    property    ShowHint;
     property    OnClick;
     property    OnDoubleClick;
   end;
@@ -149,6 +153,8 @@ type
     property    Text: string read GetText write SetText;
     property    TextColor;
     property    Margin: integer read GetMargin write SetMargin default 2;
+    property    ParentShowHint;
+    property    ShowHint;
     property    OnClick;
     property    OnDoubleClick;
   end;
