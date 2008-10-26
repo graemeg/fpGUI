@@ -294,6 +294,9 @@ type
   end;
 
 
+function fpgColorToX(col: TfpgColor): longword;
+
+
 implementation
 
 uses
