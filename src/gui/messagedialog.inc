@@ -367,7 +367,7 @@ var
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
-    dlg.FDialogType     := mtWarning;
+    dlg.FDialogType     := mtError;
     dlg.FButtons        := AButtons;
     dlg.Text            := ATitle;
     dlg.InformativeText := AText;

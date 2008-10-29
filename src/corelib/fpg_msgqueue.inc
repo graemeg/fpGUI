@@ -129,7 +129,7 @@ begin
       p^.Params  := aparams;
     end
     else
-      Writeln('THE MESSAGE QUEUE IS FULL.');
+      raise Exception.Create('THE fpGUI MESSAGE QUEUE IS FULL.');
   finally
     fpgApplication.Unlock;
   end;
@@ -153,7 +153,7 @@ begin
       p^.Stop    := False;
     end
     else
-      Writeln('THE MESSAGE QUEUE IS FULL.');
+      raise Exception.Create('THE fpGUI MESSAGE QUEUE IS FULL.');
   finally
     fpgApplication.Unlock;
   end;

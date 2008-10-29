@@ -15,7 +15,6 @@ uses
   tiBaseMediator,
   fpg_listview,
   fpg_grid,
-  fpg_listbox,
   tiObject;
 
 type
@@ -458,6 +457,7 @@ end;
 
 procedure TStringGridMediator.RebuildList;
 begin
+//  writeln('--- TStringGridMediator.RebuildList');
   { This rebuilds the whole list. Not very efficient. }
   View.BeginUpdate;
   try
