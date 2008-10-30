@@ -354,7 +354,7 @@ end;
 
 procedure TAddress.AssignClassProps(ASource: TtiObject);
 begin
-  FAddressType.Assign(ASource);
+  FAddressType := TAddress(ASource).AddressType;  // reference only
   FCity:= TAddress(ASource).City;  // reference only
 end;
 
@@ -370,11 +370,11 @@ end;
 
 procedure TAddress.SetAddressType(const AValue: TAddressType);
 begin
-  if FAddressType.Name = AValue.Name then
+  if FAddressType = AValue then
     Exit; //==>
   
   BeginUpdate;
-  FAddressType.Assign(AValue);
+  FAddressType := AValue;
   Mark;
   EndUpdate;
 end;
@@ -486,7 +486,6 @@ end;
 function TCountryList.Add(const AObject: TCountry): integer;
 begin
   Result:= inherited Add(AObject);
-  NotifyObservers;
 end;
 
 { TCityList }
@@ -504,7 +503,6 @@ end;
 function TCityList.Add(const AObject: TCity): integer;
 begin
   result:= inherited Add(AObject);
-  NotifyObservers;
 end;
 
 { TAddressList }
@@ -522,7 +520,6 @@ end;
 function TAddressList.Add(const AObject: TAddress): integer;
 begin
   result:= inherited Add(AObject);
-  NotifyObservers;
 end;
 
 { TContactList }
@@ -540,7 +537,6 @@ end;
 function TContactList.Add(const AObject: TContact): integer;
 begin
   result:= inherited Add(AObject);
-  NotifyObservers;
 end;
 
 
@@ -559,7 +555,6 @@ end;
 function TAddressTypeList.Add(const AObject: TAddressType): integer;
 begin
   result := inherited Add(AObject);
-  NotifyObservers;
 end;
 
 end.

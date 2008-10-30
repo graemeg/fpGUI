@@ -87,8 +87,10 @@ end;
 procedure TMainForm.miEditEditClick(Sender: TObject);
 var
   c: TContact;
+  rowmed: TStringGridRowMediator;
 begin
-  c := TContact(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
+  rowmed := TStringGridRowMediator(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
+  c := TContact(rowmed.Model);
 //  tiShowString(c.AsDebugString);
 
   if not Assigned(c) then

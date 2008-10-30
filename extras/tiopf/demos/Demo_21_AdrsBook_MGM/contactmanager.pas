@@ -21,6 +21,7 @@ type
     FCountryList: TCountryList;
     procedure PopulateCountries;
     procedure PopulateCities;
+    procedure PopulateAddressTypes;
     function GenPhone: string;
   public
     constructor Create; override;
@@ -158,6 +159,28 @@ begin
     FCityList[i].ObjectState := posClean;
 end;
 
+procedure TContactManager.PopulateAddressTypes;
+var
+  a: TAddressType;
+  i: integer;
+begin
+  a := TAddressType.CreateNew;
+  a.Name := 'Home';
+  FAddressTypeList.Add(a);
+
+  a := TAddressType.CreateNew;
+  a.Name := 'Work';
+  FAddressTypeList.Add(a);
+
+  a := TAddressType.CreateNew;
+  a.Name := 'Postal';
+  FAddressTypeList.Add(a);
+
+  { reset ObjectState property }
+  for i := 0 to FAddressTypeList.Count - 1 do
+    FAddressTypeList[i].ObjectState := posClean;
+end;
+
 function TContactManager.GenPhone: string;
 begin
   result:= '+27 ' + IntToStr(Random(9)) + IntToStr(Random(9)) + ' '
@@ -170,10 +193,13 @@ begin
   inherited Create;
   FAddressTypeList := TAddressTypeList.Create;
   FAddressTypeList.Owner := self;
+
   FCountryList := TCountryList.Create;
   FCountryList.Owner := self;
+
   FCityList := TCityList.Create;
   FCityList.Owner := self;
+
   FContactList := TContactList.Create;
   FContactList.Owner := self;
 end;
@@ -195,7 +221,8 @@ var
 begin
   PopulateCountries;
   PopulateCities;
-  for I:= 1 to 10 do
+  PopulateAddressTypes;
+  for I := 1 to 10 do
   begin
     C:= TContact.CreateNew;
     C.FirstName:= FirstNames[I];
@@ -205,6 +232,7 @@ begin
     for J:= 1 to 1+Random(2) do
     begin
       A:= TAddress.CreateNew;
+      A.AddressType := FAddressTypeList[Random(3)];
       A.Street := StreetNames[1+Random(10)];
       A.Nr     := Random(100)+1;
       A.City   := FCityList[Random(10)];
