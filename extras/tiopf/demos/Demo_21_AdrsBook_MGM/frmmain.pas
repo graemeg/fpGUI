@@ -5,10 +5,12 @@ unit frmmain;
 interface
 
 uses
-  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
-  fpg_widget, fpg_form, fpg_label, fpg_button,
-  fpg_basegrid, fpg_grid, fpg_dialogs, fpg_menu,
-  fpg_panel, fpg_popupcalendar, fpg_gauge, tiFormMediator;
+  SysUtils, Classes,
+  { fpGUI Toolkit }
+  fpg_base, fpg_main, fpg_widget, fpg_form, fpg_button,
+  fpg_grid, fpg_dialogs, fpg_menu,
+  { tiOPF }
+  tiFormMediator;
 
 type
   { The main application window }
@@ -47,7 +49,7 @@ implementation
 
 uses
   model, contactmanager, tiListMediators, tiBaseMediator, tiMediators,
-  frmcontactmaint, frmcitylist, frmcountrylist;
+  frmcontactmaint, frmcitylist, frmcountrylist, tiDialogs, tiObject;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -89,22 +91,45 @@ var
   c: TContact;
   rowmed: TStringGridRowMediator;
 begin
+  if grdContacts.FocusRow < 0 then
+  begin
+    tiAppError('You need to select a Contact first');
+    Exit;
+  end;
   rowmed := TStringGridRowMediator(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
   c := TContact(rowmed.Model);
-//  tiShowString(c.AsDebugString);
 
   if not Assigned(c) then
     Exit; //==>
 
   if EditContact(c) then
   begin
-    // we can save contact here
+    // we can save contact here if we wanted
   end;
 end;
 
 procedure TMainForm.miEditDeleteClick(Sender: TObject);
+var
+  c: TContact;
+  rowmed: TStringGridRowMediator;
 begin
-  //
+  if grdContacts.FocusRow < 0 then
+  begin
+    tiAppError('You need to select a Contact first');
+    Exit;
+  end;
+  rowmed := TStringGridRowMediator(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
+  c := TContact(rowmed.Model);
+
+  if tiAppConfirmation('Are you sure you want to delete <%s>', [c.FirstName + ' ' + c.LastName]) then
+  begin
+    { We can't use .Deleted property here, because we don't actually save
+      changes. This means the ObjectState will only be posDelete and not
+      posDeleted, which is what .FreeDeleted is looking for. }
+//    c.Deleted := True;
+    c.ObjectState := posDeleted;
+    gContactManager.ContactList.FreeDeleted;
+  end;
 end;
 
 procedure TMainForm.miSystemCityList(Sender: TObject);
@@ -182,7 +207,6 @@ begin
     ImageName := '';
     TabOrder := 3;
     OnClick := @miEditDeleteClick;
-    Enabled := False;
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
@@ -206,9 +230,9 @@ begin
   begin
     Name := 'miEdit';
     SetPosition(344, 156, 120, 20);
-    AddMenuItem('Add Contact', '', @miEditAddClick).Enabled := False;
+    AddMenuItem('Add Contact', '', @miEditAddClick);
     AddMenuItem('Edit Contact', '', @miEditEditClick);
-    AddMenuItem('Delete Contact', '', @miEditDeleteClick).Enabled := False;
+    AddMenuItem('Delete Contact', '', @miEditDeleteClick);
   end;
 
   miSystem := TfpgPopupMenu.Create(self);

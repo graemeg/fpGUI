@@ -91,6 +91,7 @@ type
     destructor  Destroy; override;
     function    AddColumn(ATitle: string; AWidth: integer): TfpgGridColumn; virtual;
     procedure   DeleteColumn(AIndex: integer); virtual;
+    procedure   DeleteRow(AIndex: integer); virtual;
     procedure   MoveColumn(oldindex, newindex: integer); virtual;
   end;
   
@@ -349,6 +350,14 @@ begin
     if HasHandle then
       Update;
   end;
+end;
+
+procedure TfpgCustomGrid.DeleteRow(AIndex: integer);
+begin
+  if (AIndex < 0) or (AIndex > FRowCount-1) then
+    Exit;
+  { This is just some sanity checking. Actual row deletion must occur in
+    descendant classed. See TfpgStringGrid for an example. }
 end;
 
 procedure TfpgCustomGrid.MoveColumn(oldindex, newindex: integer);

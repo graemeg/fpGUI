@@ -106,6 +106,7 @@ type
     constructor Create(AOwner: TComponent); override;
     function    AddColumn(ATitle: string; AWidth: integer; AAlignment: TAlignment = taLeftJustify;
         AbackgroundColor: TfpgColor = clDefault; ATextColor: TfpgColor = clDefault): TfpgStringColumn; overload;
+    procedure   DeleteRow(AIndex: integer); override;
     property    Cells[ACol, ARow: Integer]: string read GetCell write SetCell;
     property    Objects[ACol, ARow: Integer]: TObject read GetObjects write SetObjects;
     property    ColumnTitle[ACol: Integer]: string read GetColumnTitle write SetColumnTitle;
@@ -511,6 +512,20 @@ begin
     
   if UpdateCount = 0 then
     Updated;  // if we called .BeginUpdate then don't clear csUpdating here
+end;
+
+procedure TfpgCustomStringGrid.DeleteRow(AIndex: integer);
+var
+  c: integer;
+begin
+  inherited DeleteRow(AIndex);  // does sanity checks
+  for c := 0 to FColumns.Count-1 do
+  begin
+    TfpgStringColumn(FColumns[c]).Cells.Delete(AIndex);
+  end;
+  FRowCount := FRowCount-1;
+  if HasHandle then
+    Update;
 end;
 
 end.

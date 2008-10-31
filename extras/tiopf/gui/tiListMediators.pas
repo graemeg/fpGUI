@@ -441,8 +441,7 @@ end;
 
 procedure TStringGridMediator.DoDeleteItemMediator(AIndex: Integer; AMediator: TListItemMediator);
 begin
-  {$Warning Implement DeleteColRow in StringGrid }
-//  FView.DeleteColRow(False,AIndex+1);
+  FView.DeleteRow(AIndex);
   inherited DoDeleteItemMediator(AIndex, AMediator);
 end;
 

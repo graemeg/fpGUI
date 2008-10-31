@@ -123,7 +123,6 @@ type
     procedure SetTelephone2(const AValue: string);
   public
     constructor Create; override;
-    destructor Destroy; override;
     procedure AssignClassProps(ASource: TtiObject); override;
   published
     property Street: string read FStreet write SetStreet;
@@ -342,20 +341,13 @@ end;
 constructor TAddress.Create;
 begin
   inherited Create;
-  FAddressType:= TAddressType.Create;
-  FAddressType.Owner:= self;
-end;
-
-destructor TAddress.Destroy;
-begin
-  FreeAndNil(FAddressType);
-  inherited Destroy;
+  FAddressType := nil;
 end;
 
 procedure TAddress.AssignClassProps(ASource: TtiObject);
 begin
   FAddressType := TAddress(ASource).AddressType;  // reference only
-  FCity:= TAddress(ASource).City;  // reference only
+  FCity := TAddress(ASource).City;  // reference only
 end;
 
 procedure TAddress.SetNr(const AValue: integer);

@@ -32,18 +32,20 @@ type
     chkShowGrid: TfpgCheckBox;
     chkRowSelect: TfpgCheckBox;
     chkDisabled: TfpgCheckBox;
+    chkHideFocus: TfpgCheckBox;
     edtTopRow: TfpgEditInteger;
     btnTopRow: TfpgButton;
     btnAddFive: TfpgButton;
     btnAddOne: TfpgButton;
     btnFiveOnly: TfpgButton;
-    chkHideFocus: TfpgCheckBox;
+    btnDelRow: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton;
       AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnAddFiveClicked(Sender: TObject);
     procedure   btnAddOneClicked(Sender: TObject);
     procedure   btnFiveOnlyClicked(Sender: TObject);
+    procedure   btnDelRowClicked(Sender: TObject);
     procedure   chkDisabledChange(Sender: TObject);
     procedure   chkRowSelectChange(Sender: TObject);
     procedure   chkShowHeaderChange(Sender: TObject);
@@ -83,6 +85,11 @@ end;
 procedure TMainForm.btnFiveOnlyClicked(Sender: TObject);
 begin
   StringGrid.RowCount := 5;
+end;
+
+procedure TMainForm.btnDelRowClicked(Sender: TObject);
+begin
+  stringgrid.DeleteRow(stringgrid.FocusRow);
 end;
 
 procedure TMainForm.chkDisabledChange(Sender: TObject);
@@ -159,6 +166,7 @@ begin
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.Quit';
     OnClick := @btnQuitClick;
   end;
@@ -169,7 +177,6 @@ begin
     Name := 'stringgrid';
     SetPosition(10, 10, 375, 250);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    AddColumn('Column 0', 65);
     AddColumn('Column 1', 100, taLeftJustify);
     AddColumn('Col 2', 50, taCenter);
     AddColumn('Numbers', 150, taRightJustify);
@@ -177,6 +184,7 @@ begin
     HeaderFontDesc := '#GridHeader';
     RowCount := 17;
     TabOrder := 1;
+    AddColumn('Column 0', 65);
     // Alignment test
     Cells[1, 2] := 'left';
     Cells[2, 2] := 'center';
@@ -275,6 +283,7 @@ begin
     Anchors := [anLeft,anBottom];
     Text := 'Set TopRow';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 7;
     OnClick := @btnTopRowClicked;
@@ -284,10 +293,11 @@ begin
   with btnAddFive do
   begin
     Name := 'btnAddFive';
-    SetPosition(188, 280, 80, 23);
+    SetPosition(168, 280, 80, 23);
     Anchors := [anLeft,anBottom];
     Text := 'Add 5 lines';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 8;
     OnClick := @btnAddFiveClicked;
@@ -297,10 +307,11 @@ begin
   with btnAddOne do
   begin
     Name := 'btnAddOne';
-    SetPosition(272, 280, 80, 23);
+    SetPosition(252, 280, 80, 23);
     Anchors := [anLeft,anBottom];
     Text := 'Add 1 line';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 9;
     OnClick := @btnAddOneClicked;
@@ -310,13 +321,27 @@ begin
   with btnFiveOnly do
   begin
     Name := 'btnFiveOnly';
-    SetPosition(356, 280, 80, 23);
+    SetPosition(336, 280, 80, 23);
     Anchors := [anLeft,anBottom];
     Text := '5 lines only';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 10;
     OnClick := @btnFiveOnlyClicked;
+  end;
+
+  btnDelRow := TfpgButton.Create(self);
+  with btnDelRow do
+  begin
+    Name := 'btnDelRow';
+    SetPosition(168, 308, 80, 23);
+    Text := 'Delete Row';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 12;
+    OnClick := @btnDelRowClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
