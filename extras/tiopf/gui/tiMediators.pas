@@ -546,11 +546,10 @@ begin
     end;
   except
     on E: Exception do
-      raise Exception.CreateFmt('Error adding list items to combobox ' +
+      raise EMediator.CreateFmt('Error adding list items to combobox ' +
                                  'Message: %s, Item Property Name: %s',
                                  [E.message, FieldName]);
   end;
-
   ObjectToGui;
 end;
 
@@ -616,13 +615,13 @@ begin
     Exit; //==>
 
   if not Assigned(ValueList) then
-    raise EtiOPFProgrammerException.Create(cErrorListHasNotBeenAssigned);
+    raise EMediator.Create(cErrorListHasNotBeenAssigned);
 
   lPropType := typinfo.PropType(Subject, FieldName);
   if lPropType = tkClass then
     lValue := TtiObject(typinfo.GetObjectProp(Subject, FieldName))
   else
-    raise Exception.Create('Property is not a class type!');
+    raise EMediator.Create('Property is not a class type!');
 
   for i := 0 to ValueList.Count - 1 do
     if ValueList.Items[i] = lValue then
