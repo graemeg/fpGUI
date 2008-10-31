@@ -91,7 +91,6 @@ type
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
-    procedure   HandleSetFocus; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
@@ -106,6 +105,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Clear;
+    procedure   SetFocus;
     procedure   Update;
     property    NewText: boolean read FNewItem;
   end;
@@ -405,21 +405,6 @@ begin
     CalculateInternalButtonRect;
 end;
 
-procedure TfpgBaseEditCombo.HandleSetFocus;
-var
-  i: integer;
-begin
-  inherited HandleSetFocus;
-  if FText > '' then
-    for i := 0 to Items.Count-1 do
-      if SameText(UTF8Copy(Items.Strings[i], 1, UTF8Length(FText)), FText) then
-      begin
-        FSelectedItem := i;
-        FNewItem := False;
-        Exit; //==>
-      end;
-end;
-
 procedure TfpgBaseEditCombo.HandleKeyChar(var AText: TfpgChar;
     var shiftstate: TShiftState; var consumed: Boolean);
 var
@@ -548,12 +533,12 @@ begin
                     if TfpgMessageDialog.Question(rsNewItemDetected, Format(rsAddNewItem, [FText])) = mbYes then
                     begin
                       FItems.Add(FText);
-                      FocusItem := Pred(FItems.Count);
+                      FFocusItem := Pred(FItems.Count);
                     end
                     else
                     begin
                       FNewItem:= False;
-                      FocusItem := -1;
+                      FFocusItem := -1;
                       FText:= '';
                     end;  { if/else }
                     Parent.ActivateWindow;
@@ -788,6 +773,21 @@ procedure TfpgBaseEditCombo.Clear;
 begin
   Text := '';
   Items.Clear;
+end;
+
+procedure TfpgBaseEditCombo.SetFocus;
+var
+  i: integer;
+begin
+  HandleSetFocus;
+  if FText > '' then
+    for i := 0 to Items.Count-1 do
+      if SameText(UTF8Copy(Items.Strings[i], 1, UTF8Length(FText)), FText) then
+      begin
+        FSelectedItem := i;
+        FNewItem := False;
+        Exit; //==>
+      end;
 end;
 
 procedure TfpgBaseEditCombo.Update;
