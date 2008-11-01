@@ -1,10 +1,12 @@
 # translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.  
+# 
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2008-04-22 15:45+0200\n"
+"PO-Revision-Date: 2008-11-02 00:44+0200\n"
 "Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
 "Language-Team: Afrikaans\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +24,7 @@ msgstr ""
 
 #: fpg_constants:rsabort
 msgid "Abort"
-msgstr ""
+msgstr "Abortar"
 
 #: fpg_constants:rsabout
 msgid "About %s"
@@ -30,11 +32,11 @@ msgstr ""
 
 #: fpg_constants:rsall
 msgid "All"
-msgstr ""
+msgstr "Todos"
 
 #: fpg_constants:rsallfiles
 msgid "All Files"
-msgstr ""
+msgstr "Todos os arquivos"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
@@ -66,35 +68,35 @@ msgstr ""
 
 #: fpg_constants:rsbold
 msgid "Bold"
-msgstr ""
+msgstr "Negrito"
 
 #: fpg_constants:rscancel
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #: fpg_constants:rscannotcreatedir
 msgid "Cannot create directory"
-msgstr ""
+msgstr "Não foi possível criar diretório"
 
 #: fpg_constants:rschange
 msgid "Change"
-msgstr ""
+msgstr "Editar"
 
 #: fpg_constants:rsclose
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 #: fpg_constants:rscollection
 msgid "Collection"
-msgstr ""
+msgstr "Coleção"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmar"
 
 #: fpg_constants:rsconfirmation
 msgid "Confirmation"
-msgstr ""
+msgstr "Confirmação"
 
 #: fpg_constants:rscopy
 msgid "Copy"
@@ -106,15 +108,15 @@ msgstr ""
 
 #: fpg_constants:rscreate
 msgid "Create"
-msgstr ""
+msgstr "Criar"
 
 #: fpg_constants:rscreatedirectory
 msgid "Create directory"
-msgstr ""
+msgstr "Criar diretório"
 
 #: fpg_constants:rscriticalerror
 msgid "Critical Error"
-msgstr ""
+msgstr "Erro Crítico"
 
 #: fpg_constants:rscut
 msgid "Cut"
@@ -134,11 +136,11 @@ msgstr ""
 
 #: fpg_constants:rsdelete
 msgid "Delete"
-msgstr ""
+msgstr "Deletar"
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
-msgstr ""
+msgstr "Diretórios"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -146,27 +148,27 @@ msgstr ""
 
 #: fpg_constants:rsedit
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: fpg_constants:rslanguage
 msgid "English"
-msgstr ""
+msgstr "Português"
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
-msgstr ""
+msgstr "Digite o nome do novo diretório"
 
 #: fpg_constants:rserror
 msgid "Error"
-msgstr ""
+msgstr "Erro"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
-msgstr ""
+msgstr "Texto de Exemplo"
 
 #: fpg_constants:rsexit
 msgid "Exit"
-msgstr ""
+msgstr "Sair"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
@@ -190,15 +192,15 @@ msgstr ""
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr ""
+msgstr "Nome do arquivo"
 
 #: fpg_constants:rsfiles
 msgid "Files"
-msgstr ""
+msgstr "Arquivos"
 
 #: fpg_constants:rsfind
 msgid "Find"
-msgstr ""
+msgstr "Encontrar"
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
@@ -222,23 +224,23 @@ msgstr ""
 
 #: fpg_constants:rshelp
 msgid "Help"
-msgstr ""
+msgstr "Ajuda"
 
 #: fpg_constants:rsignore
 msgid "Ignore"
-msgstr ""
+msgstr "Ignorar"
 
 #: fpg_constants:rsinformation
 msgid "Information"
-msgstr ""
+msgstr "Informação"
 
 #: fpg_constants:rsinsert
 msgid "Insert"
-msgstr ""
+msgstr "Inserir"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
-msgstr ""
+msgstr "Itálico"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
@@ -270,7 +272,7 @@ msgstr ""
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr ""
+msgstr "Lista deve estar vazio"
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
@@ -286,7 +288,7 @@ msgstr ""
 
 #: fpg_constants:rsmessage
 msgid "Message"
-msgstr ""
+msgstr "Mensagem"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
@@ -302,15 +304,15 @@ msgstr ""
 
 #: fpg_constants:rsname
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: fpg_constants:rsno
 msgid "No"
-msgstr ""
+msgstr "Não"
 
 #: fpg_constants:rsnotoall
 msgid "No to All"
-msgstr ""
+msgstr "Não para todos"
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
@@ -322,7 +324,7 @@ msgstr ""
 
 #: fpg_constants:rsok
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
@@ -334,11 +336,11 @@ msgstr ""
 
 #: fpg_constants:rsopen
 msgid "Open"
-msgstr ""
+msgstr "Abir"
 
 #: fpg_constants:rsopenafile
 msgid "Open a file"
-msgstr ""
+msgstr "Abrir um arquivo"
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
@@ -358,11 +360,11 @@ msgstr ""
 
 #: fpg_constants:rsreplace
 msgid "Replace"
-msgstr ""
+msgstr "Substituir"
 
 #: fpg_constants:rsretry
 msgid "Retry"
-msgstr ""
+msgstr "Retentar"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
@@ -382,23 +384,23 @@ msgstr ""
 
 #: fpg_constants:rssave
 msgid "Save"
-msgstr ""
+msgstr "Salvar"
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
-msgstr ""
+msgstr "Salvar arquivo como"
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr ""
+msgstr "Pesquisar"
 
 #: fpg_constants:rsselect
 msgid "Select"
-msgstr ""
+msgstr "Selecionar"
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr ""
+msgstr "Selecione a fonte"
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
@@ -414,15 +416,15 @@ msgstr ""
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr ""
+msgstr "Mostrar arquivos ocultos"
 
 #: fpg_constants:rssize
 msgid "Size"
-msgstr ""
+msgstr "Tamanho"
 
 #: fpg_constants:rsstyle
 msgid "Style"
-msgstr ""
+msgstr "Estilo"
 
 #: fpg_constants:rsshortsun
 msgid "Sun"
@@ -454,7 +456,7 @@ msgstr ""
 
 #: fpg_constants:rsfiletype
 msgid "Type of file"
-msgstr ""
+msgstr "Tipo de arquivo"
 
 #: fpg_constants:rstypeface
 msgid "Typeface"
@@ -462,7 +464,7 @@ msgstr ""
 
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
-msgstr ""
+msgstr "Sublinhado"
 
 #: fpg_constants:rsusername
 msgid "User name"
@@ -470,7 +472,7 @@ msgstr ""
 
 #: fpg_constants:rswarning
 msgid "Warning"
-msgstr ""
+msgstr "Advertência"
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
@@ -486,9 +488,9 @@ msgstr ""
 
 #: fpg_constants:rsyes
 msgid "Yes"
-msgstr ""
+msgstr "Sim"
 
 #: fpg_constants:rsyestoall
 msgid "Yes to All"
-msgstr ""
+msgstr "Sim para todos"
 
