@@ -70,6 +70,7 @@ type
     procedure RebuildList; override;
   public
     constructor CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; AIsObserving: Boolean = True);
+    destructor Destroy; override;
     class function ComponentClass: TClass; override;
     function GetObjectFromRow(ARow: Integer): TtiObject;
   published
@@ -507,6 +508,13 @@ begin
   GUIControl   := AGrid;
   CreateSubMediators;
   IsObserving  := AIsObserving;
+end;
+
+destructor TStringGridMediator.Destroy;
+begin
+  IsObserving := False;
+  FView       := nil;
+  inherited Destroy;
 end;
 
 class function TStringGridMediator.ComponentClass: TClass;
