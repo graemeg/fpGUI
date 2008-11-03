@@ -106,7 +106,7 @@ var
   obj: TAddress;
 begin
   obj := TAddress(TListViewMediator(FAdrsMediator.FindByComponent(lvAddresses).Mediator).SelectedObject);
-//  tiShowString(obj.AsDebugString);
+  tiShowString(obj.AsDebugString);
 
   if not Assigned(obj) then
     Exit; //==>

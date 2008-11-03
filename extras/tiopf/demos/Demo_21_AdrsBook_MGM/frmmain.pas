@@ -89,15 +89,13 @@ end;
 procedure TMainForm.miEditEditClick(Sender: TObject);
 var
   c: TContact;
-  rowmed: TStringGridRowMediator;
 begin
   if grdContacts.FocusRow < 0 then
   begin
     tiAppError('You need to select a Contact first');
     Exit;
   end;
-  rowmed := TStringGridRowMediator(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
-  c := TContact(rowmed.Model);
+  c := TContact(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
 
   if not Assigned(c) then
     Exit; //==>
@@ -111,15 +109,13 @@ end;
 procedure TMainForm.miEditDeleteClick(Sender: TObject);
 var
   c: TContact;
-  rowmed: TStringGridRowMediator;
 begin
   if grdContacts.FocusRow < 0 then
   begin
     tiAppError('You need to select a Contact first');
     Exit;
   end;
-  rowmed := TStringGridRowMediator(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
-  c := TContact(rowmed.Model);
+  c := TContact(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
 
   if tiAppConfirmation('Are you sure you want to delete <%s>', [c.FirstName + ' ' + c.LastName]) then
   begin
