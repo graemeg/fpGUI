@@ -156,7 +156,9 @@ type
   { TComboBox observing a list and setting a Object property }
   TMediatorDynamicComboBoxView = class(TMediatorComboBoxView)
   private
+    FDisplayFieldName: string;
     FExternalOnChange: TNotifyEvent;
+    function    GetDisplayFieldName: string;
     procedure   InternalListRefresh;
   protected
     procedure   SetListObject(const AValue: TtiObjectList); override;
@@ -166,6 +168,7 @@ type
     procedure   DoObjectToGui; override;
   public
     procedure   RefreshList; virtual;
+    property    DisplayFieldName: string read GetDisplayFieldName write FDisplayFieldName;
   end;
   
 
@@ -216,6 +219,9 @@ uses
 
 const
   cErrorListHasNotBeenAssigned   = 'List has not been assigned';
+  cErrorPropertyNotClass         = 'Property is not a class type!';
+  cErrorAddingItemToCombobox     = 'Error adding list items to combobox ' +
+                                   'Message: %s, Item Property Name: %s';
 
 
 procedure RegisterFallBackMediators;
@@ -541,16 +547,19 @@ begin
 
   try
     for i := 0 to ValueList.Count - 1 do
-    begin
-      lItems.Add(ValueList.Items[i].Caption);
-    end;
+      lItems.AddObject(GetStrProp(ValueList.Items[i], DisplayFieldName), ValueList.Items[i]);
   except
     on E: Exception do
-      raise EMediator.CreateFmt('Error adding list items to combobox ' +
-                                 'Message: %s, Item Property Name: %s',
-                                 [E.message, FieldName]);
+      RaiseMediatorError(cErrorAddingItemToCombobox,[E.message, FieldName]);
   end;
   ObjectToGui;
+end;
+
+function TMediatorDynamicComboBoxView.GetDisplayFieldName: string;
+begin
+  Result := FDisplayFieldName;
+  if (Result = '') then
+    Result := 'Caption'; // Do not localize.
 end;
 
 procedure TMediatorDynamicComboBoxView.SetOnChangeActive(AValue: Boolean);
@@ -598,7 +607,7 @@ begin
   if lPropType = tkClass then
     typinfo.SetObjectProp(Subject, FieldName, lValue)
   else
-    raise EtiOPFProgrammerException.Create('Error property type not a Class');
+    RaiseMediatorError(cErrorPropertyNotClass);
 end;
 
 procedure TMediatorDynamicComboBoxView.DoObjectToGui;
@@ -615,13 +624,13 @@ begin
     Exit; //==>
 
   if not Assigned(ValueList) then
-    raise EMediator.Create(cErrorListHasNotBeenAssigned);
+    RaiseMediatorError(cErrorListHasNotBeenAssigned);
 
   lPropType := typinfo.PropType(Subject, FieldName);
   if lPropType = tkClass then
     lValue := TtiObject(typinfo.GetObjectProp(Subject, FieldName))
   else
-    raise EMediator.Create('Property is not a class type!');
+    RaiseMediatorError(cErrorPropertyNotClass);
 
   for i := 0 to ValueList.Count - 1 do
     if ValueList.Items[i] = lValue then
