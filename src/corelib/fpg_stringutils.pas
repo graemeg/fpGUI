@@ -35,7 +35,7 @@ function  UTF8Length(p: PChar; ByteCount: integer): integer;
 function  UTF8Pos(const SearchForText, SearchInText: string): integer;
 procedure UTF8Delete(var S: string; Index, Size: integer);
 procedure UTF8Insert(const Source: string; var S: string; Index: integer);
-function  UTF8CharAtByte(const s: string; BytePos: integer; var aChar: string): integer;
+function  UTF8CharAtByte(const s: string; const BytePos: integer; out aChar: string): integer;
 
 
 // short form (alias or convenience) functions for the UTF8 ones above
@@ -269,8 +269,7 @@ begin
   S := b + Source + e;
 end;
 
-function UTF8CharAtByte(const s: string; BytePos: integer;
-  var aChar: string): integer;
+function UTF8CharAtByte(const s: string; const BytePos: integer; out aChar: string): integer;
 var
   CharLen: Integer;
 begin

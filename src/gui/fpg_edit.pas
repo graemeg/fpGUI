@@ -450,7 +450,6 @@ end;
 procedure TfpgBaseEdit.AdjustDrawingInfo;
 // Calculates FVisSelStartPx, FVisSelEndPx, FVisibleText, FDrawOffset
 var
-  // fvc, lvc: integer; // first/last visible characters
   vtstartbyte, vtendbyte: integer; // visible characters' start/end in utf-8 string, bytes
   bestfx, bestlx: integer;
   dtext: string;
@@ -485,10 +484,9 @@ begin
   chnum := 0;
   tw    := 0;
   dpos  := 0;
-  {fvc   := 0;
-  lvc   := 0;}
+
   FDrawOffset := 0;
-  while dpos < Length(dtext) do
+  while dpos <= Length(dtext) do
   begin
     pdp := dpos;
     dpos := UTF8CharAtByte(dtext, dpos, ch);
