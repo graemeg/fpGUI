@@ -445,7 +445,7 @@ begin
   if Mode = 2 then
     r.Height := r.Height - 1;
 
-  Canvas.SetColor(clButtonFace);
+  Canvas.SetColor(clWindowBackground);
   Canvas.FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
   Canvas.SetColor(clHilite2);
   Canvas.DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
