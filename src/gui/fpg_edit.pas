@@ -143,37 +143,39 @@ type
 
   TfpgBaseNumericEdit = class(TfpgBaseEdit)
   private
-    fOldColor: TfpgColor;
-    fAlignment: TAlignment;
-    fDecimalSeparator: char;
-    fNegativeColor: TfpgColor;
-    fThousandSeparator: char;
-    fShowThousand: boolean;
+    FDecimals: integer;
+    FOldColor: TfpgColor;
+    FAlignment: TAlignment;
+    FDecimalseparator: char;
+    FNegativeColor: TfpgColor;
+    FThousandSeparator: char;
+    FShowThousand: boolean;
     procedure   SetOldColor(const AValue: TfpgColor);
     procedure   SetAlignment(const AValue: TAlignment);
     procedure   SetDecimalSeparator(const AValue: char);
     procedure   SetNegativeColor(const AValue: TfpgColor);
     procedure   SetThousandSeparator(const AValue: char);
+    procedure   SetShowThousand;
   protected
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandlePaint; override;
-    procedure   Format; virtual;
+    procedure   FormatEdit; virtual;
     procedure   Justify; virtual; // to implement in derived classes
-    property    OldColor: TfpgColor read fOldColor write SetOldColor;
-    property    Alignment: TAlignment read fAlignment write SetAlignment default taRightJustify;
+    property    OldColor: TfpgColor read FOldColor write SetOldColor;
+    property    Alignment: TAlignment read FAlignment write SetAlignment default taRightJustify;
     property    AutoSelect;
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
     {Someone likes to use English operating system but localized decimal and thousand separators
      Still to implement !!}
-    property    DecimalSeparator: char read fDecimalSeparator write SetDecimalSeparator;
-    property    ThousandSeparator: char read fThousandSeparator write SetThousandSeparator;
-    property    NegativeColor: TfpgColor read fNegativeColor write SetNegativeColor;
+    property    DecimalSeparator: char read FDecimalseparator write SetDecimalSeparator;
+    property    ThousandSeparator: char read FThousandSeparator write SetThousandSeparator;
+    property    NegativeColor: TfpgColor read FNegativeColor write SetNegativeColor;
     property    HideSelection;
 //    property    MaxLength;  { probably MaxValue and MinValue }
     property    TabOrder;
     property    TextColor;
-    property    ShowThousand: boolean read fShowThousand write fShowThousand default False;
+    property    ShowThousand: boolean read FShowThousand write FShowThousand default False;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -192,15 +194,13 @@ type
   protected
     function    GetValue: integer; virtual;
     procedure   SetValue(const AValue: integer); virtual;
-    procedure   SetShowThousand;
-    procedure   Format; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
+    property    Alignment;
     property    OldColor;
     property    Text;
   published
-    property    Alignment;
     property    NegativeColor;
     property    Value: integer read GetValue write SetValue;
     property    ShowThousand;
@@ -219,23 +219,20 @@ type
 
   TfpgEditFloat = class(TfpgBaseNumericEdit)
   private
-    FDecimals: integer;
     FFixedDecimals: boolean;
   protected
     function    GetValue: extended; virtual;
     procedure   SetValue(const AValue: extended); virtual;
-    procedure   SetShowThousand;
     procedure   SetDecimals(const AValue: integer);
     procedure   SetFixedDecimals(const AValue: boolean);
-    procedure   Format; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
+    property    Alignment;
     property    OldColor;
     property    Text;
   published
-    property    Alignment;
-    property    Decimals: integer read fDecimals write SetDecimals;
+    property    Decimals: integer read FDecimals write SetDecimals;
     property    DecimalSeparator;
     property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals;
     property    NegativeColor;
@@ -255,23 +252,19 @@ type
 
 
   TfpgEditCurrency = class(TfpgBaseNumericEdit)
-  private
-    fDecimals: integer;
   protected
     function    GetValue: Currency; virtual;
     procedure   SetValue(const AValue: Currency); virtual;
-    procedure   SetShowThousand;
     procedure   SetDecimals(AValue: integer);
-    procedure   Format; override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
+    property    Alignment;
     property    OldColor;
     property    Text;
   published
-    property    Alignment;
-    property    Decimals: integer read fDecimals write SetDecimals;
+    property    Decimals: integer read FDecimals write SetDecimals;
     property    NegativeColor;
     property    DecimalSeparator;
     property    ThousandSeparator;
@@ -504,7 +497,6 @@ begin
     if abs(chx - vstart) < abs(bestfx - vstart) then
     begin
       bestfx := chx;
-      // fvc    := chnum;
       vtstartbyte := pdp;
       FDrawOffset := ptw;
     end;
@@ -512,7 +504,6 @@ begin
     if abs(chx - vend) < abs(bestlx - vend) then
     begin
       bestlx := chx;
-      // lvc    := chnum;
       vtendbyte := UTF8CharAtByte(dtext, dpos, ch); // plus one more character
     end else
       break; // we can safely break after last visible character is found
@@ -544,7 +535,7 @@ begin
     bestcx := Low(cx) + 1 + x
   else          // bestcx > cx maximum
     bestcx := High(cx) - 1 + x;
-    
+
   tw   := 0;
   dpos := 0;
   n    := 0;
@@ -609,7 +600,7 @@ var
     fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, FVisibleText, Enabled);
     Canvas.ClearClipRect;
   end;
-  
+
 begin
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -696,7 +687,7 @@ begin
     if prevval <> Text then
       DoOnChange;
   end;
-  
+
   if consumed then
     RePaint;
 
@@ -798,7 +789,7 @@ begin
         FSelOffset := FCursorPos - FSelStart
       else
         StopSelection;
-        
+
       Adjust;
     end;
   end; // movement key checking
@@ -1118,7 +1109,7 @@ begin
     itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
     itm.Name := ipmClearAll;
   end;
-  
+
   SetDefaultPopupMenuItemsState;
   FDefaultPopupMenu.ShowAt(self, x, y);
 end;
@@ -1230,32 +1221,113 @@ end;
 
 procedure TfpgBaseNumericEdit.SetOldColor(const AValue: TfpgColor);
 begin
-  if fOldColor=AValue then exit;
-  fOldColor:=AValue;
+  if FOldColor=AValue then exit;
+  FOldColor:=AValue;
 end;
 
 procedure TfpgBaseNumericEdit.SetAlignment(const AValue: TAlignment);
 begin
-  if fAlignment=AValue then exit;
-  fAlignment:=AValue;
+  if FAlignment=AValue then exit;
+  FAlignment:=AValue;
 end;
 
 procedure TfpgBaseNumericEdit.SetDecimalSeparator(const AValue: char);
 begin
-  if fDecimalSeparator=AValue then exit;
-  fDecimalSeparator:=AValue;
+  if FDecimalseparator=AValue then exit;
+  FDecimalseparator:=AValue;
 end;
 
 procedure TfpgBaseNumericEdit.SetNegativeColor(const AValue: TfpgColor);
 begin
-  if fNegativeColor=AValue then exit;
-  fNegativeColor:=AValue;
+  if FNegativeColor=AValue then exit;
+  FNegativeColor:=AValue;
 end;
 
 procedure TfpgBaseNumericEdit.SetThousandSeparator(const AValue: char);
 begin
-  if fThousandSeparator=AValue then exit;
-  fThousandSeparator:=AValue;
+  if FThousandSeparator=AValue then exit;
+  FThousandSeparator:=AValue;
+end;
+
+procedure TfpgBaseNumericEdit.SetShowThousand;
+var
+	i,long: integer;
+  txt, texte, decimal: string;
+begin
+  if FDecimals > 0 then
+    if Pos(DecimalSeparator, fText) > 0 then
+    begin
+      txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)));
+      if UTF8Length(fText)-Pos(DecimalSeparator, fText) > FDecimals then
+        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), FDecimals)
+      else
+        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText)-Pos(DecimalSeparator, fText));
+    end
+    else
+      txt := fText
+  else
+    if FDecimals = 0 then
+      if Pos(DecimalSeparator, fText) > 0 then
+        txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)))
+      else
+        txt := fText
+    else
+      if Pos(DecimalSeparator, fText) > 0 then
+      begin
+        txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)));
+        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText)-Pos(DecimalSeparator, fText));
+      end
+      else
+        txt := fText;
+  if ShowThousand then
+  begin
+    if fText > '' then
+      if fText[1] = '-' then
+        txt:= UTF8Copy(txt, 2, UTF8Length(txt)-1);
+  	long := UTF8Length(txt);
+  	if long = 0 then
+  		texte := ''
+  	else
+  	begin
+      for i := 1 to UTF8Length(txt) do
+        if txt[i] = ThousandSeparator then
+        begin
+          txt:= UTF8Copy(txt, 1, i - 1) + UTF8Copy(txt, i + 1, long - i);
+          dec(long);
+        end;
+  		i := 0;
+  		texte := '';
+  		repeat
+  			if i > 0 then
+  				if ((i mod 3) = 0) and (txt[UTF8Length(txt)-UTF8Length(texte)] <> ThousandSeparator) then
+          begin
+  					texte := ThousandSeparator + texte;
+            UTF8Insert(texte, txt, FCursorPos + 1);
+            if fText[1] = '-' then
+            begin
+              if Pred(FCursorPos) <= UTF8Length(texte) then
+                Inc(FCursorPos);
+            end
+            else
+              if FCursorPos <= UTF8Length(texte) then
+                Inc(FCursorPos);
+          end;
+  			texte := Copy(txt, long - i, 1) + texte;
+  			inc(i);
+  		until i = long;
+  	end;
+  if fText > '' then
+    if fText[1] = '-' then
+      if Pos(DecimalSeparator, fText) > 0 then
+        fText := '-' + texte + DecimalSeparator + decimal
+      else
+        fText := '-' + texte
+    else
+      if Pos(DecimalSeparator, fText) > 0 then
+        fText := texte + DecimalSeparator + decimal
+      else
+        fText := texte + decimal;
+  end;
 end;
 
 procedure TfpgBaseNumericEdit.Justify;
@@ -1267,7 +1339,7 @@ procedure TfpgBaseNumericEdit.HandleKeyChar(var AText: TfpgChar;
   var shiftstate: TShiftState; var consumed: Boolean);
 begin
   inherited HandleKeyChar(AText, shiftstate, consumed);
-  Format; // just call format virtual procedure to have a simple way to manage polymorphism here
+  FormatEdit; // just call FormatEdit virtual procedure to have a simple way to manage polymorphism here
 end;
 
 procedure TfpgBaseNumericEdit.HandlePaint;
@@ -1296,8 +1368,9 @@ begin
   inherited;
 end;
 
-procedure TfpgBaseNumericEdit.Format;
+procedure TfpgBaseNumericEdit.FormatEdit;
 begin
+  SetShowThousand;
   // Colour negative number
   if LeftStr(Text,1) = '-' then
     TextColor := NegativeColor
@@ -1308,7 +1381,7 @@ end;
 constructor TfpgBaseNumericEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  fAlignment := taRightJustify;
+  FAlignment := taRightJustify;
   DecimalSeparator := SysUtils.DecimalSeparator;
   ThousandSeparator := SysUtils.ThousandSeparator;
   NegativeColor := clRed;
@@ -1360,66 +1433,11 @@ procedure TfpgEditInteger.SetValue(const AValue: integer);
 begin
   try
     Text := IntToStr(AValue);
-    Format;
+    FormatEdit;
   except
     on E: EConvertError do
       Text := '';
   end;
-end;
-
-procedure TfpgEditInteger.SetShowThousand;
-var
-	i,long: integer;
-  txt, texte: string;
-begin
-  if ShowThousand then
-  begin
-    if fText > '' then
-      if fText[1] = '-' then
-        txt:= UTF8Copy(fText, 2, UTF8Length(fText)-1)
-      else
-        txt:= fText;
-  	long := UTF8Length(txt);
-  	if long = 0 then
-  		texte := ''
-  	else
-  	begin
-      for i := 1 to UTF8Length(txt) do
-        if txt[i] = ThousandSeparator then
-          Exit;                               // avoids additional separators when pressing return
-  		i := 0;
-  		texte := '';
-  		repeat
-  			if i > 0 then
-  				if ((i mod 3) = 0) and (txt[UTF8Length(txt)-UTF8Length(texte)] <> ThousandSeparator) then
-          begin
-  					texte := ThousandSeparator + texte;
-            UTF8Insert(texte, txt, FCursorPos + 1);
-            if fText[1] = '-' then
-            begin
-              if Pred(FCursorPos) <= UTF8Length(texte) then
-                Inc(FCursorPos);
-            end
-            else
-              if FCursorPos <= UTF8Length(texte) then
-                Inc(FCursorPos);
-          end;
-  			texte := Copy(txt, long - i, 1) + texte;
-  			inc(i);
-  		until i = long;
-  	end;
-  if fText > '' then
-    if fText[1] = '-' then
-      fText:= '-' + texte
-    else
-      fText := texte;
-  end;
-end;
-
-procedure TfpgEditInteger.Format;
-begin
-  SetShowThousand;
-  inherited Format;
 end;
 
 procedure TfpgEditInteger.HandleKeyChar(var AText: TfpgChar;
@@ -1433,12 +1451,14 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
+  Repaint;
 end;
 
 constructor TfpgEditInteger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  fShowThousand := True;
+  FShowThousand := True;
+  FDecimals := 0;
 end;
 
 { TfpgEditFloat }
@@ -1447,14 +1467,14 @@ function TfpgEditFloat.GetValue: extended;
 var
   txt: string;
 begin
-  if fDecimals > 0 then
+  if FDecimals > 0 then
   begin
     if Pos(DecimalSeparator, fText) > 0 then
-      if UTF8Length(fText)-Pos(DecimalSeparator, fText) > fDecimals then
+      if UTF8Length(fText)-Pos(DecimalSeparator, fText) > FDecimals then
         fText := Copy(fText, 1, UTF8Length(fText) - 1);
   end
   else
-    if fDecimals = 0 then
+    if FDecimals = 0 then
       if Pos(DecimalSeparator, fText) > 0 then
         fText := Copy(fText, 1, UTF8Length(fText) - 1);
   if ShowThousand then
@@ -1505,84 +1525,6 @@ begin
   end;
 end;
 
-procedure TfpgEditFloat.SetShowThousand;
-var
-	i,long: integer;
-  txt, texte, decimal: string;
-begin
-  if fDecimals > 0 then
-    if Pos(DecimalSeparator, fText) > 0 then
-    begin
-      txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)));
-      if UTF8Length(fText)-Pos(DecimalSeparator, fText) > fDecimals then
-        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), fDecimals)
-      else
-        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText)-Pos(DecimalSeparator, fText));
-    end
-    else
-      txt := fText
-  else
-    if fDecimals = 0 then
-      if Pos(DecimalSeparator, fText) > 0 then
-        txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)))
-      else
-        txt := fText
-    else
-      if Pos(DecimalSeparator, fText) > 0 then
-      begin
-        txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)));
-        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText)-Pos(DecimalSeparator, fText));
-      end
-      else
-        txt := fText;
-  if ShowThousand then
-  begin
-    if fText > '' then
-      if fText[1] = '-' then
-        txt:= UTF8Copy(txt, 2, UTF8Length(txt)-1);
-  	long := UTF8Length(txt);
-  	if long = 0 then
-  		texte := ''
-  	else
-  	begin
-      for i := 1 to UTF8Length(txt) do
-        if txt[i] = ThousandSeparator then
-          Exit;                               // avoids additional separators when pressing return
-  		i := 0;
-  		texte := '';
-  		repeat
-  			if i > 0 then
-  				if ((i mod 3) = 0) and (txt[UTF8Length(txt)-UTF8Length(texte)] <> ThousandSeparator) then
-          begin
-  					texte := ThousandSeparator + texte;
-            UTF8Insert(texte, txt, FCursorPos + 1);
-            if fText[1] = '-' then
-            begin
-              if Pred(FCursorPos) <= UTF8Length(texte) then
-                Inc(FCursorPos);
-            end
-            else
-              if FCursorPos <= UTF8Length(texte) then
-                Inc(FCursorPos);
-          end;
-  			texte := Copy(txt, long - i, 1) + texte;
-  			inc(i);
-  		until i = long;
-  	end;
-  if fText > '' then
-    if fText[1] = '-' then
-      if Pos(DecimalSeparator, fText) > 0 then
-        fText := '-' + texte + DecimalSeparator + decimal
-      else
-        fText := '-' + texte
-    else
-      if Pos(DecimalSeparator, fText) > 0 then
-        fText := texte + DecimalSeparator + decimal
-      else
-        fText := texte + decimal;
-  end;
-end;
-
 procedure TfpgEditFloat.SetDecimals(const AValue: integer);
 begin
   if AValue < -1 then
@@ -1597,12 +1539,6 @@ begin
     FFixedDecimals := AValue;
 end;
 
-procedure TfpgEditFloat.Format;
-begin
-  SetShowThousand;
-  inherited Format;
-end;
-
 procedure TfpgEditFloat.HandleKeyChar(var AText: TfpgChar;
   var shiftstate: TShiftState; var consumed: Boolean);
 var
@@ -1615,6 +1551,7 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
+  Repaint;
 end;
 
 constructor TfpgEditFloat.Create(AOwner: TComponent);
@@ -1631,9 +1568,9 @@ function TfpgEditCurrency.GetValue: Currency;
 var
   txt: string;
 begin
-  if fDecimals > 0 then
+  if FDecimals > 0 then
     if Pos(DecimalSeparator, fText) > 0 then
-      if UTF8Length(fText)-Pos(DecimalSeparator, fText) > fDecimals then
+      if UTF8Length(fText)-Pos(DecimalSeparator, fText) > FDecimals then
         fText := Copy(fText, 1, UTF8Length(fText) - 1);
   if ShowThousand then
   begin
@@ -1730,15 +1667,15 @@ begin
         FCursorPos := FCursorPos + Succ(Length(decimal));
       end;
     end;
-    if fDecimals > 0 then
+    if FDecimals > 0 then
     begin
       if Pos(DecimalSeparator, fText) = 0 then
         begin
         fText := fText + DecimalSeparator;
         Inc(FCursorPos);
         end;
-      if UTF8Length(fText)-Pos(DecimalSeparator, fText) < fDecimals then
-        while UTF8Length(fText)-Pos(DecimalSeparator, fText) < fDecimals do
+      if UTF8Length(fText)-Pos(DecimalSeparator, fText) < FDecimals then
+        while UTF8Length(fText)-Pos(DecimalSeparator, fText) < FDecimals do
           begin
           fText := fText + '0';
           Inc(FCursorPos);
@@ -1748,100 +1685,30 @@ begin
     on E: EConvertError do
       Text := '';
   end;
-  Format;
-end;
-
-procedure TfpgEditCurrency.SetShowThousand;
-var
-	i,long: integer;
-  txt, texte, decimal: string;
-begin
-  if fDecimals > 0 then
-    if Pos(DecimalSeparator, fText) > 0 then
-    begin
-      txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)));
-      if UTF8Length(fText)-Pos(DecimalSeparator, fText) > fDecimals then
-        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), fDecimals)
-      else
-        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText)-Pos(DecimalSeparator, fText));
-    end
-    else
-      txt := fText;
-  if ShowThousand then
-  begin
-    if fText > '' then
-      if fText[1] = '-' then
-        txt:= UTF8Copy(txt, 2, UTF8Length(txt)-1);
-  	long := UTF8Length(txt);
-  	if long = 0 then
-  		texte := ''
-  	else
-  	begin
-      for i := 1 to UTF8Length(txt) do
-        if txt[i] = ThousandSeparator then
-          Exit;                               // avoids additional separators when pressing return
-  		i := 0;
-  		texte := '';
-  		repeat
-  			if i > 0 then
-  				if ((i mod 3) = 0) and (txt[UTF8Length(txt)-UTF8Length(texte)] <> ThousandSeparator) then
-          begin
-  					texte := ThousandSeparator + texte;
-            UTF8Insert(texte, txt, FCursorPos + 1);
-            if fText[1] = '-' then
-            begin
-              if Pred(FCursorPos) <= UTF8Length(texte) then
-                Inc(FCursorPos);
-            end
-            else
-              if FCursorPos <= UTF8Length(texte) then
-                Inc(FCursorPos);
-          end;
-  			texte := Copy(txt, long - i, 1) + texte;
-  			inc(i);
-  		until i = long;
-  	end;
-  if fText > '' then
-    if fText[1] = '-' then
-      if Pos(DecimalSeparator, fText) > 0 then
-        fText := '-' + texte + DecimalSeparator + decimal
-      else
-        fText := '-' + texte
-    else
-      if Pos(DecimalSeparator, fText) > 0 then
-        fText := texte + DecimalSeparator + decimal
-      else
-        fText := texte + decimal;
-  end;
+  FormatEdit;
 end;
 
 procedure TfpgEditCurrency.SetDecimals(AValue: integer);
 begin
   if (AValue < 0) or (AValue > 4) then
     Exit; // =>
-  if fDecimals <> AValue then
-    fDecimals := AValue
-end;
-
-procedure TfpgEditCurrency.Format;
-begin
-  SetShowThousand;
-  inherited Format;
+  if FDecimals <> AValue then
+    FDecimals := AValue
 end;
 
 procedure TfpgEditCurrency.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
 begin
   case keycode of
     keyReturn, keyPEnter, keyTab:
-      if fDecimals > 0 then
+      if FDecimals > 0 then
       begin
         if Pos(DecimalSeparator, fText) = 0 then
           begin
           fText := fText + DecimalSeparator;
           Inc(FCursorPos);
           end;
-        if UTF8Length(fText)-Pos(DecimalSeparator, fText) < fDecimals then
-          while UTF8Length(fText)-Pos(DecimalSeparator, fText) < fDecimals do
+        if UTF8Length(fText)-Pos(DecimalSeparator, fText) < FDecimals then
+          while UTF8Length(fText)-Pos(DecimalSeparator, fText) < FDecimals do
           begin
             fText := fText + '0';
             Inc(FCursorPos);
@@ -1868,8 +1735,8 @@ end;
 constructor TfpgEditCurrency.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  fDecimals := 2;
-  fShowThousand := True;
+  FDecimals := 2;
+  FShowThousand := True;
 end;
 
 
