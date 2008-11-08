@@ -44,7 +44,6 @@ type
     FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
     FPanelBorder: TPanelBorder;
-    function    GetClientRect: TfpgRect; override;
     procedure   SetPanelStyle(const AValue: TPanelStyle);
     procedure   SetPanelBorder(const AValue: TPanelBorder);
   protected
@@ -52,6 +51,7 @@ type
     property    BorderStyle: TPanelBorder read FPanelBorder write SetPanelBorder default bsSingle;
   public
     constructor Create(AOwner: TComponent); override;
+    function    GetClientRect: TfpgRect; override;
   end;
   
 

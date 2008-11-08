@@ -110,6 +110,7 @@ type
     procedure   ClearSelection;
     procedure   CopyToClipboard;
     procedure   CutToClipboard;
+    function    GetClientRect: TfpgRect; override;
     procedure   PasteFromClipboard;
     property    Font: TfpgFont read FFont;
   end;
@@ -146,15 +147,15 @@ type
     FDecimals: integer;
     FOldColor: TfpgColor;
     FAlignment: TAlignment;
-    FDecimalseparator: char;
+    FDecimalseparator: TfpgChar;
     FNegativeColor: TfpgColor;
-    FThousandSeparator: char;
+    FThousandSeparator: TfpgChar;
     FShowThousand: boolean;
     procedure   SetOldColor(const AValue: TfpgColor);
     procedure   SetAlignment(const AValue: TAlignment);
-    procedure   SetDecimalSeparator(const AValue: char);
+    procedure   SetDecimalSeparator(const AValue: TfpgChar);
     procedure   SetNegativeColor(const AValue: TfpgColor);
-    procedure   SetThousandSeparator(const AValue: char);
+    procedure   SetThousandSeparator(const AValue: TfpgChar);
     procedure   SetShowThousand;
   protected
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
@@ -168,8 +169,8 @@ type
     property    BorderStyle;
     {Someone likes to use English operating system but localized decimal and thousand separators
      Still to implement !!}
-    property    DecimalSeparator: char read FDecimalseparator write SetDecimalSeparator;
-    property    ThousandSeparator: char read FThousandSeparator write SetThousandSeparator;
+    property    DecimalSeparator: TfpgChar read FDecimalseparator write SetDecimalSeparator;
+    property    ThousandSeparator: TfpgChar read FThousandSeparator write SetThousandSeparator;
     property    NegativeColor: TfpgColor read FNegativeColor write SetNegativeColor;
     property    HideSelection;
 //    property    MaxLength;  { probably MaxValue and MinValue }
@@ -1212,6 +1213,15 @@ begin
   RePaint;
 end;
 
+function TfpgBaseEdit.GetClientRect: TfpgRect;
+begin
+  case BorderStyle of
+    ebsNone:      inherited GetClientRect;
+    ebsDefault:   Result.SetRect(2, 2, Width-4, Height-4);
+    ebsSingle:    Result.SetRect(1, 1, Width-2, Height-2);
+  end;
+end;
+
 procedure TfpgBaseEdit.PasteFromClipboard;
 begin
   DoPaste;
@@ -1231,7 +1241,7 @@ begin
   FAlignment:=AValue;
 end;
 
-procedure TfpgBaseNumericEdit.SetDecimalSeparator(const AValue: char);
+procedure TfpgBaseNumericEdit.SetDecimalSeparator(const AValue: TfpgChar);
 begin
   if FDecimalseparator=AValue then exit;
   FDecimalseparator:=AValue;
@@ -1243,7 +1253,7 @@ begin
   FNegativeColor:=AValue;
 end;
 
-procedure TfpgBaseNumericEdit.SetThousandSeparator(const AValue: char);
+procedure TfpgBaseNumericEdit.SetThousandSeparator(const AValue: TfpgChar);
 begin
   if FThousandSeparator=AValue then exit;
   FThousandSeparator:=AValue;
@@ -1349,23 +1359,19 @@ var
 begin
   if Alignment = taRightJustify then
   begin
-    Canvas.BeginDraw;
     inherited HandlePaint;
-    //  Canvas.ClearClipRect;
-    //  r.SetRect(0, 0, Width, Height);
-    r.SetRect(2, 2, Width - 4, Height - 4);
+    r := GetClientRect;
     Canvas.SetClipRect(r);
     Canvas.Clear(BackgroundColor);
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);
-    x := Width - Font.TextWidth(Text) - 3;
-    Canvas.DrawString(x,3,Text);
-    Canvas.EndDraw;
+    x := r.Right - Font.TextWidth(Text) - 1;  // 1 is the spacing from client edge
+    Canvas.DrawString(x,r.Top+1,Text);
     if Focused then
-      fpgCaret.SetCaret(Canvas, x + Font.TextWidth(Text) - 1, 3, fpgCaret.Width, Font.Height);
+      fpgCaret.SetCaret(Canvas, x + Font.TextWidth(Text) - 1, r.Top+1, fpgCaret.Width, Font.Height);
   end
   else
-  inherited;
+    inherited;
 end;
 
 procedure TfpgBaseNumericEdit.FormatEdit;
@@ -1545,8 +1551,8 @@ var
   n: integer;
 begin
   n := Ord(AText[1]);
-  if ((n >= 48) and (n <= 57) or (n = Ord('-')) and (Pos(AText[1], Self.Text) <= 0))
-     or ((n = Ord(Self.DecimalSeparator)) and (Pos(AText[1], Self.Text) <= 0)) then
+  if ((n >= 48) and (n <= 57) or (n = Ord('-')) and (Pos(AText[1], Text) <= 0))
+     or ((AText = DecimalSeparator) and (Pos(AText[1], Text) <= 0)) then
     consumed := False
   else
     consumed := True;
@@ -1724,8 +1730,8 @@ var
   n: integer;
 begin
   n := Ord(AText[1]);
-  if ((n >= 48) and (n <= 57) or (n = Ord('-')) and (Pos(AText[1], Self.Text) <= 0))
-     or ((n = Ord(Self.DecimalSeparator)) and (Pos(AText[1], Self.Text) <= 0)) then
+  if ((n >= 48) and (n <= 57) or (n = Ord('-')) and (Pos(AText[1], Text) <= 0))
+     or ((AText = DecimalSeparator) and (Pos(AText[1], Text) <= 0)) then
     consumed := False
   else
     consumed := True;
