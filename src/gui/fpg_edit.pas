@@ -1525,6 +1525,7 @@ begin
       Text := FloatToStrF(AValue, ffFixed, 18, FDecimals)
     else
       Text := FloatToStr(AValue);
+    FormatEdit;
   except
     on E: EConvertError do
       Text := '';
@@ -1619,79 +1620,12 @@ var
   txt, texte, decimal: string;
 begin
   try
-    fText := CurrToStr(AValue);
-    if ShowThousand then
-    begin
-      if Pos(DecimalSeparator, fText) = 0 then
-        txt := fText
-      else
-        begin
-        txt := UTF8Copy(fText, 1, Pred(Pos(DecimalSeparator, fText)));
-        decimal := UTF8Copy(fText, Succ(Pos(DecimalSeparator, fText)), UTF8Length(fText) - Pos(DecimalSeparator, fText));
-        end;
-      if AValue < 0 then
-        txt:= UTF8Copy(txt, 2, UTF8Length(txt)-1);
-    	long := UTF8Length(txt);
-  		i := 0;
-  		texte := '';
-  		repeat
-  			if i > 0 then
-  				if ((i mod 3) = 0) and (txt[UTF8Length(txt)-UTF8Length(texte)] <> ThousandSeparator) then
-          begin
-  					texte := ThousandSeparator + texte;
-            if AValue < 0 then
-            begin
-              if Pred(FCursorPos) <= UTF8Length(texte) then
-                Inc(FCursorPos);
-            end
-            else
-              if FCursorPos <= UTF8Length(texte) then
-                Inc(FCursorPos);
-          end;
-  			texte := Copy(txt, long - i, 1) + texte;
-  			inc(i);
-  		until i = long;
-      if Pos(DecimalSeparator, fText) = 0 then
-      begin
-        if AValue < 0 then
-        begin
-          fText := '-' + texte;
-          Inc(FCursorPos);
-        end
-        else
-          fText := texte;
-      end
-      else
-      begin
-        if AValue < 0 then
-        begin
-          fText := '-' + texte + DecimalSeparator + decimal;
-          Inc(FCursorPos);
-        end
-        else
-          fText := texte + DecimalSeparator + decimal;
-        FCursorPos := FCursorPos + Succ(Length(decimal));
-      end;
-    end;
-    if FDecimals > 0 then
-    begin
-      if Pos(DecimalSeparator, fText) = 0 then
-        begin
-        fText := fText + DecimalSeparator;
-        Inc(FCursorPos);
-        end;
-      if UTF8Length(fText)-Pos(DecimalSeparator, fText) < FDecimals then
-        while UTF8Length(fText)-Pos(DecimalSeparator, fText) < FDecimals do
-          begin
-          fText := fText + '0';
-          Inc(FCursorPos);
-          end;
-    end;
+    Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
+    FormatEdit;
   except
     on E: EConvertError do
       Text := '';
   end;
-  FormatEdit;
 end;
 
 procedure TfpgEditCurrency.SetDecimals(AValue: integer);
