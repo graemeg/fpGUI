@@ -45,9 +45,9 @@ type
     FOnChange: TNotifyEvent;
     FMaxLength: integer;
     FSelecting: Boolean;
-    procedure   Adjust(UsePxCursorPos: boolean = false);
-    procedure   AdjustTextOffset(UsePxCursorPos: boolean);
-    procedure   AdjustDrawingInfo;
+    procedure   Adjust(UsePxCursorPos: boolean = false); virtual;
+    procedure   AdjustTextOffset(UsePxCursorPos: boolean); virtual;
+    procedure   AdjustDrawingInfo; virtual;
     // function    PointToCharPos(x, y: integer): integer;
     procedure   DeleteSelection;
     procedure   DoCopy;
@@ -151,6 +151,8 @@ type
     FNegativeColor: TfpgColor;
     FThousandSeparator: TfpgChar;
     FShowThousand: boolean;
+    procedure   AdjustTextOffset(UsePxCursorPos: boolean); override;
+    procedure   AdjustDrawingInfo; override;
     procedure   SetOldColor(const AValue: TfpgColor);
     procedure   SetAlignment(const AValue: TAlignment);
     procedure   SetDecimalSeparator(const AValue: TfpgChar);
@@ -158,7 +160,6 @@ type
     procedure   SetThousandSeparator(const AValue: TfpgChar);
     procedure   SetShowThousand;
   protected
-    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandlePaint; override;
     procedure   FormatEdit; virtual;
     procedure   Justify; virtual; // to implement in derived classes
@@ -196,6 +197,8 @@ type
     function    GetValue: integer; virtual;
     procedure   SetValue(const AValue: integer); virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleSetFocus; override;
+    procedure   HandleKillFocus; override;
   public
     constructor Create(AOwner: TComponent); override;
     property    Alignment;
@@ -227,6 +230,8 @@ type
     procedure   SetDecimals(const AValue: integer);
     procedure   SetFixedDecimals(const AValue: boolean);
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleSetFocus; override;
+    procedure   HandleKillFocus; override;
   public
     constructor Create(AOwner: TComponent); override;
     property    Alignment;
@@ -259,6 +264,8 @@ type
     procedure   SetDecimals(AValue: integer);
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
+    procedure   HandleSetFocus; override;
+    procedure   HandleKillFocus; override;
   public
     constructor Create(AOwner: TComponent); override;
     property    Alignment;
@@ -1229,6 +1236,174 @@ end;
 
 { TfpgBaseNumericEdit }
 
+procedure TfpgBaseNumericEdit.AdjustTextOffset(UsePxCursorPos: boolean);
+{If UsePxCursorPos then determines FCursorPos from FCursorPx (that holds mouse pointer coordinates)
+ Calculates exact FCursorPx (relative to the widget bounding box) from FCursorPos
+ Calculates FTextOffset based on FCursorPx}
+var
+  dtext: string;
+  ch: string;     // current character
+  chnum: integer; // its ordinal number
+  chx: integer;   // its X position relative to widget
+  bestchx: integer; // chx, nearest to the mouse position (indicated by FCursorPx if UsePxCursorPos = True)
+  tw: integer;      // total characters width, that becomes FCursorPx relative to the beginning of the text
+  ptw: integer;
+  dpos: integer;  // helps to pass through an utf-8 string quickly
+  VisibleWidth: integer; // width of the edit field minus side margins
+begin
+  if UsePxCursorPos then
+  begin
+    if FCursorPx > 0 then // bestchx < chx minimum
+      bestchx := Low(chx)  + 1 + FCursorPx
+    else                  // bestchx > chx maximum
+      bestchx := High(chx) - 1 + FCursorPx;
+  end else
+    FCursorPx := 0;
+
+  dtext := GetDrawText;
+  ch    := '';
+  chnum := 0;
+  tw    := 0;
+  dpos  := 0;
+
+  while dpos <= Length(dtext) do
+  begin
+    dpos := UTF8CharAtByte(dtext, dpos, ch);
+    ptw := tw;
+    tw  := tw + FFont.TextWidth(ch);
+    case FAlignment of
+    taLeftJustify:
+      chx := tw - FTextOffset + FSideMargin;
+    taRightJustify:
+      chx := tw - FTextOffset - FSideMargin + Width - 2 - FFont.TextWidth(dtext);
+    end;
+    if UsePxCursorPos then
+    begin
+      if abs(chx - FCursorPx) < abs(bestchx - FCursorPx) then
+      begin
+        bestchx := chx;
+        FCursorPos := chnum;
+      end else
+      begin
+        tw := ptw;
+        break;
+      end;
+    end else
+    begin
+      if chnum >= FCursorPos then
+        break;
+    end;
+    Inc(chnum);
+  end;
+
+  VisibleWidth := (FWidth - 2 * FSideMargin);
+  if tw - FTextOffset > VisibleWidth - 2 then
+    FTextOffset := tw - VisibleWidth + 2
+  else if tw - FTextOffset < 0 then
+  begin
+    FTextOffset := tw;
+    if tw <> 0 then
+      Dec(FTextOffset, 2);
+  end;
+
+  case FAlignment of
+  taLeftJustify:
+    FCursorPx := tw - FTextOffset + FSideMargin;
+  taRightJustify:
+    FCursorPx := tw - FTextOffset - FSideMargin + Width - FFont.TextWidth(dtext);
+  end;
+end;
+
+procedure TfpgBaseNumericEdit.AdjustDrawingInfo;
+// Calculates FVisSelStartPx, FVisSelEndPx, FVisibleText, FDrawOffset
+var
+  vtstartbyte, vtendbyte: integer; // visible characters' start/end in utf-8 string, bytes
+  bestfx, bestlx: integer;
+  dtext: string;
+  ch: string;     // current character
+  chnum: integer; // its ordinal number
+  chx: integer;   // its X position relative to widget
+  tw: integer;    // total characters width, that becomes FCursorPx relative to the beginning of the text
+  ptw: integer;   // total width on the previous step
+  dpos: integer;  // helps to pass through an utf-8 string quickly
+  pdp: integer;   // dpos on the previous step
+  vstart, vend: integer;    // visible area start and end, pixels
+  slstart, slend: integer;  // selection start and end, pixels
+begin
+  vstart  := FSideMargin;
+  vend    := FWidth - FSideMargin;
+  if FSelOffset > 0 then
+  begin
+    slstart := FSelStart;
+    slend   := FSelStart + FSelOffset;
+  end else
+  begin
+    slstart := FSelStart + FSelOffset;
+    slend   := FSelStart;
+  end;
+  FVisSelStartPx := vend; // because we stop the search
+  FVisSelEndPx   := vend; // after last visible character is found
+  bestfx := Low(chx) + 1 + vstart;
+  bestlx := Low(chx) + 1 + vend;
+
+  dtext := GetDrawText;
+  ch    := '';
+  chnum := 0;
+  tw    := 0;
+  dpos  := 0;
+
+  FDrawOffset := 0;
+  while dpos <= Length(dtext) do
+  begin
+    pdp := dpos;
+    dpos := UTF8CharAtByte(dtext, dpos, ch);
+    ptw := tw;
+    tw  := tw + FFont.TextWidth(ch);
+    case FAlignment of
+    taLeftJustify:
+      chx := tw - FTextOffset + FSideMargin;
+    taRightJustify:
+      chx := tw - FTextOffset - FSideMargin + Width - 2 - FFont.TextWidth(dtext);
+    end;
+
+    // calculate selection-related fields
+    if chnum = slstart then
+      FVisSelStartPx := chx;
+    if chnum = slend then
+      FVisSelEndPx := chx;
+
+    // search for the first/last visible characters
+    if abs(chx - vstart) < abs(bestfx - vstart) then
+    begin
+      bestfx := chx;
+      vtstartbyte := pdp;
+      case FAlignment of
+      taLeftJustify:
+        FDrawOffset := ptw;
+      taRightJustify:
+        FDrawOffset := ptw + Width - 2 - FFont.TextWidth(dtext);
+      end;
+    end;
+    // in small edit field the same character can be both the first and the last, so no 'else' allowed
+    if abs(chx - vend) < abs(bestlx - vend) then
+    begin
+      bestlx := chx;
+      vtendbyte := UTF8CharAtByte(dtext, dpos, ch); // plus one more character
+    end else
+      break; // we can safely break after last visible character is found
+    Inc(chnum);
+  end;
+
+  if FVisSelStartPx < vstart then
+    FVisSelStartPx := vstart;
+  if FVisSelEndPx > vend then
+    FVisSelEndPx := vend;
+
+  // FVisibleText := UTF8Copy(dtext, fvc, lvc - fvc + 2);
+  FVisibleText := Copy(dtext, vtstartbyte, vtendbyte - vtstartbyte);
+  FDrawOffset := FTextOffset - FDrawOffset;
+end;
+
 procedure TfpgBaseNumericEdit.SetOldColor(const AValue: TfpgColor);
 begin
   if FOldColor=AValue then exit;
@@ -1345,17 +1520,37 @@ begin
   //based on Alignment property this method will align the derived edit correctly.
 end;
 
-procedure TfpgBaseNumericEdit.HandleKeyChar(var AText: TfpgChar;
-  var shiftstate: TShiftState; var consumed: Boolean);
-begin
-  inherited HandleKeyChar(AText, shiftstate, consumed);
-  FormatEdit; // just call FormatEdit virtual procedure to have a simple way to manage polymorphism here
-end;
-
 procedure TfpgBaseNumericEdit.HandlePaint;
 var
   x: TfpgCoord;
   r: TfpgRect;
+
+  // paint selection rectangle
+  procedure DrawSelection;
+  var
+    lcolor: TfpgColor;
+    r: TfpgRect;
+  begin
+    if Focused then
+    begin
+      lcolor := clSelection;
+      Canvas.SetTextColor(clSelectionText);
+    end
+    else
+    begin
+      lcolor := clInactiveSel;
+      Canvas.SetTextColor(clText1);
+    end;
+
+    r.SetRect(FVisSelStartPx, 3, FVisSelEndPx - FVisSelStartPx, FFont.Height);
+    Canvas.SetColor(lcolor);
+    Canvas.FillRectangle(r);
+    Canvas.SetTextColor(clWhite);
+    Canvas.AddClipRect(r);
+    fpgStyle.DrawString(Canvas, -FDrawOffset - FSideMargin, 3, FVisibleText, Enabled);
+    Canvas.ClearClipRect;
+  end;
+
 begin
   if Alignment = taRightJustify then
   begin
@@ -1368,7 +1563,12 @@ begin
     x := r.Right - Font.TextWidth(Text) - 1;  // 1 is the spacing from client edge
     Canvas.DrawString(x,r.Top+1,Text);
     if Focused then
-      fpgCaret.SetCaret(Canvas, x + Font.TextWidth(Text) - 1, r.Top+1, fpgCaret.Width, Font.Height);
+    begin
+      // drawing selection
+      if FSelOffset <> 0 then
+        DrawSelection;
+      fpgCaret.SetCaret(Canvas, FCursorPx - FSideMargin, r.Top+1, fpgCaret.Width, Font.Height);
+    end;
   end
   else
     inherited;
@@ -1457,7 +1657,32 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
-  Repaint;
+end;
+
+procedure TfpgEditInteger.HandleSetFocus;
+begin
+  try
+    if GetValue = 0 then
+      Text := ''
+    else
+      Text := IntToStr(GetValue);
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+  inherited HandleSetFocus;
+end;
+
+procedure TfpgEditInteger.HandleKillFocus;
+begin
+  try
+    Text := IntToStr(GetValue);
+    FormatEdit;
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+  inherited HandleKillFocus;
 end;
 
 constructor TfpgEditInteger.Create(AOwner: TComponent);
@@ -1558,7 +1783,38 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
-  Repaint;
+end;
+
+procedure TfpgEditFloat.HandleSetFocus;
+begin
+  try
+    if GetValue = 0 then
+      Text := ''
+    else
+      if FFixedDecimals then
+        Text := FloatToStrF(GetValue, ffFixed, 18, FDecimals)
+      else
+        Text := FloatToStr(GetValue);
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+  inherited HandleSetFocus;
+end;
+
+procedure TfpgEditFloat.HandleKillFocus;
+begin
+  try
+    if FFixedDecimals then
+      Text := FloatToStrF(GetValue, ffFixed, 18, FDecimals)
+    else
+      Text := FloatToStr(GetValue);
+    FormatEdit;
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+  inherited HandleKillFocus;
 end;
 
 constructor TfpgEditFloat.Create(AOwner: TComponent);
@@ -1615,9 +1871,6 @@ begin
 end;
 
 procedure TfpgEditCurrency.SetValue(const AValue: Currency);
-var
-	i,long: integer;
-  txt, texte, decimal: string;
 begin
   try
     Text := FloatToStrF(AValue, ffFixed, -1, FDecimals);
@@ -1670,6 +1923,32 @@ begin
   else
     consumed := True;
   inherited HandleKeyChar(AText, shiftstate, consumed);
+end;
+
+procedure TfpgEditCurrency.HandleSetFocus;
+begin
+  try
+    if GetValue = 0 then
+      Text := ''
+    else
+      Text := FloatToStrF(GetValue, ffFixed, -1, FDecimals);
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+  inherited HandleSetFocus;
+end;
+
+procedure TfpgEditCurrency.HandleKillFocus;
+begin
+  try
+    Text := FloatToStrF(GetValue, ffFixed, -1, FDecimals);
+    FormatEdit;
+  except
+    on E: EConvertError do
+      Text := '';
+  end;
+  inherited HandleKillFocus;
 end;
 
 constructor TfpgEditCurrency.Create(AOwner: TComponent);
