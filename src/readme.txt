@@ -31,14 +31,11 @@ applications.
 
  * Start Lazarus
  * Select Components->Open Package File (*.lpk) and select the
-    src/corelib/<your platform>/fpgfx_package.lpk
-   In you case the .lpk file will be in the x11 directory. A new
-   dialog will appear - click Compile.
- * Select Components->Open Package File (*.lpk) again and select
-   the
-     src/gui/fpgui_package.lpk
+    src/corelib/<your platform>/fpgui_toolkit.lpk
+   Under Linux/FreeBSD the .lpk file will be in the 'x11' directory.
+   Under Windows the .lpk file will be in the 'gdi' directory.
    A new dialog will appear - click Compile.
- * Lazarus has now compiled both packages and will keep track of
+ * Lazarus has now compiled the package and will keep track of
    all the compiled units and paths.
  * Now lets open a project. Select Project->Open Project and select
    any project in the examples/gui directory. Select the *.lpi file.
