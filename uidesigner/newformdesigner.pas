@@ -56,6 +56,8 @@ type
   TfrmMain = class(TfpgForm)
   private
     FFileOpenRecent: TfpgMenuItem;
+    procedure   FormShow(Sender: TObject);
+    procedure   PaletteBarResized(Sender: TObject);
     procedure   miHelpAboutClick(Sender: TObject);
     procedure   miHelpAboutGUI(Sender: TObject);
     procedure   miMRUClick(Sender: TObject; const FileName: string);
@@ -75,6 +77,7 @@ type
     previewmenu: TfpgPopupMenu;
     {@VFD_HEAD_END: frmMain}
     mru: TfpgMRU;
+    constructor Create(AOwner: TComponent); override;
     function    GetSelectedWidget: TVFDWidgetClass;
     procedure   SetSelectedWidget(wgc: TVFDWidgetClass);
     procedure   AfterCreate; override;
@@ -276,24 +279,25 @@ end;
 procedure TfrmMain.AfterCreate;
 var
   n: integer;
-  x: integer;
+  x, y: integer;
   wgc: TVFDWidgetClass;
   btn: TwgPaletteButton;
 begin
   {@VFD_BODY_BEGIN: frmMain}
   Name := 'frmMain';
-  SetPosition(84, 123, 754, 87);
+  SetPosition(84, 123, 754, 92);
   WindowTitle := 'frmMain';
   ShowHint := True;
   WindowPosition := wpUser;
-  gINI.ReadFormState(self);
+  MinHeight := 82;
+  MinWidth := 315;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 755, 24);
-    Anchors := [anLeft,anRight,anTop];
+    SetPosition(0, 0, 753, 24);
+    Align := alTop;
   end;
 
   btnNewForm := TfpgButton.Create(self);
@@ -345,16 +349,19 @@ begin
   with wgpalette do
   begin
     Name := 'wgpalette';
-    SetPosition(116, 28, 639, 28);
-    Anchors := [anLeft,anRight,anTop];
+    SetPosition(152, 28, 600, 62);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    //    Width := self.Width - Left - 3;
     Focusable := False;
+    OnResize := @PaletteBarResized;
   end;
 
   chlPalette := TfpgComboBox.Create(self);
   with chlPalette do
   begin
     Name := 'chlPalette';
-    SetPosition(116, 60, 200, 22);
+    SetPosition(4, 67, 144, 22);
+    Anchors := [anLeft,anBottom];
     FontDesc := '#List';
     Items.Add('-');
     TabOrder := 5;
@@ -427,12 +434,13 @@ begin
 
 
   x := 0;
+  y := 0;
   for n := 0 to VFDWidgetCount-1 do
   begin
     wgc           := VFDWidget(n);
     btn           := TwgPaletteButton.Create(wgpalette);
     btn.VFDWidget := wgc;
-    btn.SetPosition(x, 0, 30, 28);
+    btn.SetPosition(x, y, 30, 28);
     btn.ImageName := wgc.WidgetIconName;
     btn.ImageMargin := -1;
     btn.Text      := '';
@@ -444,7 +452,13 @@ begin
     chlPalette.Items.AddObject(wgc.WidgetClass.ClassName, wgc);
 
     Inc(x, 32);
+    if (x+30) >= wgpalette.Width then
+    begin
+      x := 0;
+      Inc(y, 30);
+    end;
   end;
+
   chlPalette.Items.Sort;
   MainMenu.AddMenuItem('&File', nil).SubMenu     := filemenu;
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := setmenu;
@@ -854,6 +868,33 @@ begin
   editor.SetPosition(x, editor.Top, Width - ScrollBarWidth - x, editor.Height);
 end;
 
+procedure TfrmMain.FormShow(Sender: TObject);
+begin
+  gINI.ReadFormState(self);
+  UpdateWindowPosition;
+end;
+
+procedure TfrmMain.PaletteBarResized(Sender: TObject);
+var
+  btn: TwgPaletteButton;
+  x, y, n: integer;
+begin
+  x := 0;
+  y := 0;
+  for n := 0 to wgPalette.ComponentCount-1 do
+  begin
+    btn := wgPalette.Components[n] as TwgPaletteButton;
+    btn.SetPosition(x, y, 30, 28);
+
+    Inc(x, 32);
+    if (x+30) >= wgpalette.Width then
+    begin
+      x := 0;
+      Inc(y, 30);
+    end;
+  end;
+end;
+
 procedure TfrmMain.miHelpAboutClick(Sender: TObject);
 begin
   TfrmAbout.Execute;
@@ -869,6 +910,12 @@ procedure TfrmMain.miMRUClick(Sender: TObject; const FileName: string);
 begin
   maindsgn.EditedFileName := FileName;
   maindsgn.OnLoadFile(maindsgn);
+end;
+
+constructor TfrmMain.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  OnShow := @FormShow;
 end;
 
 function TfrmMain.GetSelectedWidget: TVFDWidgetClass;

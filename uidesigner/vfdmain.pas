@@ -85,7 +85,8 @@ uses
   vfdformparser,
   fpg_iniutils,
   fpg_utils,
-  fpg_main;
+  fpg_main,
+  fpg_hint;
 
 Var
   DefaultPasExt : String = '.pas';
@@ -441,6 +442,7 @@ begin
   DefaultPasExt   := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
   UndoOnPropExit  := gINI.ReadBool('Options', 'UndoOnExit', DefUndoOnPropExit);
   fpgApplication.HintPause := 1000;
+  TfpgHintWindow(fpgApplication.HintWindow).Shadow := 0;
 end;
 
 end.
