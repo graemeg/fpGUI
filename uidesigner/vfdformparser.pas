@@ -58,6 +58,7 @@ procedure SkipSpaces(var s: string);
 function  CheckSymbol(var s: string; const sym: string): boolean;
 function  GetIntValue(var s: string): integer;
 function  GetBoolValue(var s: string): boolean;
+function  GetFloatValue(var s: string): extended;
 
 
 implementation
@@ -155,6 +156,23 @@ begin
     Delete(s, 1, 4)
   else
     Delete(s, 1, 5);
+end;
+
+function GetFloatValue(var s: string): extended;
+var
+  n: integer;
+  ns: string;
+begin
+  SkipSpaces(s);
+  ns := '';
+  n  := 1;
+  while (n <= length(s)) and (s[n] in ['0'..'9', '-', '.']) do
+  begin
+    ns := ns + s[n];
+    Inc(n);
+  end;
+  Result := StrToFloatDef(ns, 0.0);
+  Delete(s, 1, length(ns));
 end;
 
 function GetStringValue(var s: string): string;

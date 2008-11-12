@@ -51,6 +51,15 @@ type
   end;
 
 
+  TPropertyFloat = class(TVFDWidgetProperty)
+  public
+    function ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
+    function GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function GetValueText(wg: TfpgWidget): string; override;
+    function CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+  end;
+
+
   TPropertyEnum = class(TVFDWidgetProperty)
   public
     function ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
@@ -85,7 +94,7 @@ type
   end;
 
 
-  TGPEType = (gptInteger, gptString);
+  TGPEType = (gptInteger, gptString, gptFloat);
 
 
   TGeneralPropertyEditor = class(TVFDPropertyEditor)
@@ -104,6 +113,8 @@ type
     procedure StoreIntValue(wg: TfpgWidget);
     procedure LoadStrValue(wg: TfpgWidget);
     procedure StoreStrValue(wg: TfpgWidget);
+    procedure LoadFloatValue(wg: TfpgWidget);
+    procedure StoreFloatValue(wg: TfpgWidget);
   end;
 
 
@@ -340,9 +351,11 @@ procedure TGeneralPropertyEditor.LoadValue(wg: TfpgWidget);
 begin
   case etype of
     gptInteger:
-      LoadIntValue(wg);
+        LoadIntValue(wg);
+    gptFloat:
+        LoadFloatValue(wg);
     else
-      LoadStrValue(wg);
+        LoadStrValue(wg);
   end;
   FOrigValue := edit.Text;
 end;
@@ -368,12 +381,32 @@ begin
   SetStrProp(wg, prop.Name, s);
 end;
 
+procedure TGeneralPropertyEditor.LoadFloatValue(wg: TfpgWidget);
+begin
+  edit.Text := FloatToStr(GetFloatProp(wg, prop.Name));
+end;
+
+procedure TGeneralPropertyEditor.StoreFloatValue(wg: TfpgWidget);
+var
+  i: extended;
+begin
+  try
+    i := StrToFloat(edit.Text);
+    SetFloatProp(wg, Prop.Name, i);
+  except
+    // error
+  end;
+end;
+
 procedure TGeneralPropertyEditor.StoreValue(wg: TfpgWidget);
 begin
   case etype of
-    gptInteger: StoreIntValue(wg);
+    gptInteger:
+        StoreIntValue(wg);
+    gptFloat:
+        StoreFloatValue(wg);
     else
-      StoreStrValue(wg);
+        StoreStrValue(wg);
   end;
 end;
 
@@ -693,6 +726,48 @@ begin
   s := GetStrProp(wg, Name);
   if SelectFontDialog(s) then
     SetStrProp(wg, Name, s);
+end;
+
+{ TPropertyFloat }
+
+function TPropertyFloat.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;
+var
+  s: string;
+  ival: extended;
+begin
+  s      := line;
+  Result := False;
+  if UpperCase(GetIdentifier(s)) <> UpperCase(Name) then
+    Exit;
+
+  Result := CheckSymbol(s, ':=');
+  if Result then
+  begin
+    ival   := GetFloatValue(s);
+    Result := CheckSymbol(s, ';');
+  end
+  else
+    ival   := 0.0;
+
+  if Result then
+    SetFloatProp(wg, Name, ival);
+end;
+
+function TPropertyFloat.GetPropertySource(wg: TfpgWidget; const ident: string): string;
+begin
+  Result := ident + Name + ' := ' + FloatToStr(GetFloatProp(wg, Name)) + ';' + LineEnding
+end;
+
+function TPropertyFloat.GetValueText(wg: TfpgWidget): string;
+begin
+  Result := FloatToStr(GetFloatProp(wg, Name));
+end;
+
+function TPropertyFloat.CreateEditor(AOwner: TComponent): TVFDPropertyEditor;
+begin
+  Result := TGeneralPropertyEditor.Create(AOwner, self);
+  with TGeneralPropertyEditor(Result) do
+    etype := gptFloat;
 end;
 
 end.

@@ -23,7 +23,7 @@ unit fpg_stringutils;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, fpg_base;
 
 
 function  UTF8CharacterLength(p: PChar): integer;
@@ -44,6 +44,8 @@ function  Length8(const s: string): integer;
 function  Pos8(const SearchForText, SearchInText: string): integer;
 procedure Delete8(var S: string; Index, Size: integer);
 procedure Insert8(const Source: string; var S: string; Index: integer);
+
+function  fpgCharAt(const s: TfpgString; Index: integer): TfpgChar;
 
 
 implementation
@@ -308,6 +310,11 @@ end;
 procedure Insert8(const Source: string; var S: string; Index: integer);
 begin
   UTF8Insert(Source, S, Index);
+end;
+
+function fpgCharAt(const s: TfpgString; Index: integer): TfpgChar;
+begin
+  Result := UTF8Copy(s, Index, 1);
 end;
 
 

@@ -16,16 +16,6 @@ type
 
   TMainForm = class(TfpgForm)
   private
-    procedure btnQuitClicked(Sender: TObject);
-    procedure rbClicked(Sender: TObject);
-    procedure lbChange(Sender: TObject);
-    procedure edtIntegerChange(Sender: TObject);
-    procedure edtFloatChange(Sender: TObject);
-    procedure edtCurrencyChange(Sender: TObject);
-    procedure chbPasswdChanged(Sender: TObject);
-    procedure chbSpaceChange(Sender: TObject);
-    procedure chbFloatDecChange(Sender: TObject);
-  public
     {@VFD_HEAD_BEGIN: MainForm}
     lblName1: TfpgLabel;
     edtText: TfpgEdit;
@@ -47,6 +37,16 @@ type
     lbNegativeColor: TfpgColorListBox;
     lblNegativeColor: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
+    procedure btnQuitClicked(Sender: TObject);
+    procedure rbClicked(Sender: TObject);
+    procedure lbChange(Sender: TObject);
+    procedure edtIntegerChange(Sender: TObject);
+    procedure edtFloatChange(Sender: TObject);
+    procedure edtCurrencyChange(Sender: TObject);
+    procedure chbPasswdChanged(Sender: TObject);
+    procedure chbSpaceChange(Sender: TObject);
+    procedure chbFloatDecChange(Sender: TObject);
+  public
     procedure AfterCreate; override;
   end;
 
@@ -66,36 +66,36 @@ begin
     case (Sender as TfpgRadioButton).tag of
       0:
         begin
-          edtFloat.DecimalSeparator := '.';
-          edtCurrency.DecimalSeparator := '.';
+          edtFloat.CustomDecimalSeparator := '.';
+          edtCurrency.CustomDecimalSeparator := '.';
           if chbSpace.Checked then
           begin
-            edtInteger.ThousandSeparator := ' ';
-            edtFloat.ThousandSeparator := ' ';
-            edtCurrency.ThousandSeparator := ' ';
+            edtInteger.CustomThousandSeparator := ' ';
+            edtFloat.CustomThousandSeparator := ' ';
+            edtCurrency.CustomThousandSeparator := ' ';
           end
           else
           begin
-            edtInteger.ThousandSeparator := ',';
-            edtFloat.ThousandSeparator := ',';
-            edtCurrency.ThousandSeparator := ',';
+            edtInteger.CustomThousandSeparator := ',';
+            edtFloat.CustomThousandSeparator := ',';
+            edtCurrency.CustomThousandSeparator := ',';
           end;
         end;
       1:
         begin
-          edtFloat.DecimalSeparator := ',';
-          edtCurrency.DecimalSeparator := ',';
+          edtFloat.CustomDecimalSeparator := ',';
+          edtCurrency.CustomDecimalSeparator := ',';
           if chbSpace.Checked then
           begin
-            edtInteger.ThousandSeparator := ' ';
-            edtFloat.ThousandSeparator := ' ';
-            edtCurrency.ThousandSeparator := ' ';
+            edtInteger.CustomThousandSeparator := ' ';
+            edtFloat.CustomThousandSeparator := ' ';
+            edtCurrency.CustomThousandSeparator := ' ';
           end
           else
           begin
-            edtInteger.ThousandSeparator := '.';
-            edtFloat.ThousandSeparator := '.';
-            edtCurrency.ThousandSeparator := '.';
+            edtInteger.CustomThousandSeparator := '.';
+            edtFloat.CustomThousandSeparator := '.';
+            edtCurrency.CustomThousandSeparator := '.';
           end;
         end;
       end;
@@ -130,16 +130,26 @@ end;
 procedure TMainForm.chbSpaceChange(Sender: TObject);
 begin
   if chbSpace.Checked then
-    begin
-    edtInteger.ThousandSeparator := ' ';
-    edtFloat.ThousandSeparator := ' ';
-    edtCurrency.ThousandSeparator := ' ';
-    end
+  begin
+    edtInteger.CustomThousandSeparator := ' ';
+    edtFloat.CustomThousandSeparator := ' ';
+    edtCurrency.CustomThousandSeparator := ' ';
+  end
   else
+  begin
     if rbPoint.Checked then
-      edtInteger.ThousandSeparator := ','
+    begin
+      edtInteger.CustomThousandSeparator := ',';
+      edtFloat.CustomThousandSeparator := ',';
+      edtCurrency.CustomThousandSeparator := ',';
+    end
     else
-      edtInteger.ThousandSeparator := '.';
+    begin
+      edtInteger.CustomThousandSeparator := '.';
+      edtFloat.CustomThousandSeparator := '.';
+      edtCurrency.CustomThousandSeparator := '.';
+    end;
+  end;
 end;
 
 procedure TMainForm.chbFloatDecChange(Sender: TObject);
@@ -164,6 +174,7 @@ begin
     Name := 'lblName1';
     SetPosition(8, 8, 196, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Text Edit';
   end;
 
@@ -185,7 +196,7 @@ begin
     FontDesc := '#Label1';
     TabOrder := 2;
     Text := 'Password Mode';
-    OnChange :=@chbPasswdChanged;
+    OnChange := @chbPasswdChanged;
   end;
 
   lblName2 := TfpgLabel.Create(self);
@@ -194,15 +205,17 @@ begin
     Name := 'lblName2';
     SetPosition(8, 88, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Integer Edit';
   end;
-  
+
   l_integervalue := TfpgLabel.Create(self);
   with l_integervalue do
   begin
     Name := 'l_integervalue';
     SetPosition(90, 88, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := '';
   end;
 
@@ -212,6 +225,7 @@ begin
     Name := 'lblName3';
     SetPosition(8, 144, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Float Edit';
   end;
 
@@ -221,6 +235,7 @@ begin
     Name := 'l_floatvalue';
     SetPosition(90, 144, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := '';
   end;
 
@@ -230,6 +245,7 @@ begin
     Name := 'lblName4';
     SetPosition(8, 200, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Currency Edit';
   end;
 
@@ -239,6 +255,7 @@ begin
     Name := 'l_currvalue';
     SetPosition(90, 200, 80, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := '';
   end;
 
@@ -247,9 +264,10 @@ begin
   begin
     Name := 'edtInteger';
     SetPosition(24, 108, 120, 22);
-    ShowThousand := True;
-    ThousandSeparator := ',';
-    onChange := @edtIntegerChange;
+    TabOrder := 9;
+    FontDesc := '#Edit1';
+    Value := 12345;
+    OnChange := @edtIntegerChange;
   end;
 
   edtFloat := TfpgEditFloat.Create(self);
@@ -257,9 +275,10 @@ begin
   begin
     Name := 'edtFloat';
     SetPosition(24, 164, 120, 22);
-    ShowThousand := True;
-    ThousandSeparator := ',';
-    onChange := @edtFloatChange;
+    TabOrder := 10;
+    FontDesc := '#Edit1';
+    Value := 12345.1234;
+    OnChange := @edtFloatChange;
   end;
 
   edtCurrency := TfpgEditCurrency.Create(self);
@@ -267,10 +286,10 @@ begin
   begin
     Name := 'edtCurrency';
     SetPosition(24, 220, 120, 22);
-    ShowThousand := True;
-    ThousandSeparator := ',';
-    Decimals := 2;
-    onChange := @edtCurrencyChange;
+    TabOrder := 11;
+    FontDesc := '#Edit1';
+    Value := 12345.12;
+    OnChange := @edtCurrencyChange;
   end;
 
   btnQuit := TfpgButton.Create(self);
@@ -281,6 +300,7 @@ begin
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 6;
     OnClick := @btnQuitClicked;
@@ -319,20 +339,22 @@ begin
     Name := 'chbSpace';
     SetPosition(170, 200, 200, 20);
     FontDesc := '#Label1';
+    TabOrder := 15;
     Text := 'Space as ThousandSeparator';
     OnChange := @chbSpaceChange;
   end;
-  
-  chbFloatDec := TfpgCheckBox.Create(Self);
+
+  chbFloatDec := TfpgCheckBox.Create(self);
   with chbFloatDec do
   begin
     Name := 'chbFloatDec';
     SetPosition(170, 220, 200, 20);
     FontDesc := '#Label1';
+    TabOrder := 16;
     Text := 'Limit EditFloat to 3 decimals';
     OnChange := @chbFloatDecChange;
   end;
-  
+
   lbNegativeColor := TfpgColorListBox.Create(self);
   with lbNegativeColor do
   begin
@@ -348,12 +370,13 @@ begin
     Name := 'lblNegativeColor';
     SetPosition(196, 8, 188, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Choose color for negative num.';
   end;
 
   {@VFD_BODY_END: MainForm}
   
-  if edtFloat.DecimalSeparator = '.' then
+  if edtFloat.CustomDecimalSeparator = '.' then
     rbPoint.Checked := True
   else
     rbComma.Checked := True;

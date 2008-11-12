@@ -248,6 +248,21 @@ begin
     sizeof(stdimg_vfd_tabsheet),
     0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'vfd.editinteger', @stdimg_vfd_editinteger,
+    sizeof(stdimg_vfd_editinteger),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.editfloat', @stdimg_vfd_editfloat,
+    sizeof(stdimg_vfd_editfloat),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.editcurrency', @stdimg_vfd_editcurrency,
+    sizeof(stdimg_vfd_editcurrency),
+    0, 0);
+
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -521,6 +536,50 @@ begin
   wc.WidgetIconName := 'vfd.gauge';
   RegisterVFDWidget(wc);
 
+
+  // Integer Edit
+  wc          := TVFDWidgetClass.Create(TfpgEditInteger);
+  wc.NameBase := 'EditInteger';
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
+//  wc.AddProperty('CustomThousandSeparator', TPropertyString, 'Thousand separator character');
+  wc.AddProperty('Value', TPropertyInteger, 'Initial value');
+  wc.WidgetIconName := 'vfd.editinteger';
+  RegisterVFDWidget(wc);
+
+  // Float Edit
+  wc          := TVFDWidgetClass.Create(TfpgEditFloat);
+  wc.NameBase := 'EditFloat';
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('Value', TPropertyFloat, 'Initial value');
+  wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
+  wc.AddProperty('FixedDecimals', TPropertyBoolean, '');
+  wc.Addproperty('Decimals', TPropertyInteger, '');
+//  wc.AddProperty('CustomDecimalSeparator', TPropertyString, 'Decimal separator character');
+//  wc.AddProperty('CustomThousandSeparator', TPropertyString, 'Thousand separator character');
+  wc.WidgetIconName := 'vfd.editfloat';
+  RegisterVFDWidget(wc);
+
+  // Currency Edit
+  wc          := TVFDWidgetClass.Create(TfpgEditCurrency);
+  wc.NameBase := 'EditCurrency';
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('Value', TPropertyFloat, 'Initial value');
+  wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
+  wc.Addproperty('Decimals', TPropertyInteger, '');
+//  wc.AddProperty('CustomDecimalSeparator', TPropertyString, 'Decimal separator character');
+//  wc.AddProperty('CustomThousandSeparator', TPropertyString, 'Thousand separator character');
+  wc.WidgetIconName := 'vfd.editcurrency';
+  RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
   wc          := TVFDWidgetClass.Create(TOtherWidget);
