@@ -202,7 +202,6 @@ type
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
-    property    Alignment;
     property    OldColor;
     property    Text;
   published
@@ -238,7 +237,6 @@ type
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
-    property    Alignment;
     property    OldColor;
     property    Text;
   published
@@ -275,7 +273,6 @@ type
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
-    property    Alignment;
     property    OldColor;
     property    Text;
   published
