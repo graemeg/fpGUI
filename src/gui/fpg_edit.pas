@@ -1500,7 +1500,6 @@ begin
   				if ((i mod 3) = 0) and (fpgCharAt(txt,UTF8Length(txt)-UTF8Length(texte)) <> FThousandSeparator) then
           begin
   					texte := FThousandSeparator + texte;
-            UTF8Insert(texte, txt, FCursorPos + 1);
             if fText[1] = '-' then
             begin
               if Pred(FCursorPos) <= UTF8Length(texte) then
