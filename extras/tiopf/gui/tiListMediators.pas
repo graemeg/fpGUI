@@ -144,7 +144,7 @@ begin
     if TtiObject(FView.Items.Item[i].UserData) = AValue then
     begin
       FView.ItemIndex := i;
-      HandleSelectionChanged;
+      HandleSelectionChanged;   {$Note Is this line required?}
       Exit; //==>
     end;
 end;

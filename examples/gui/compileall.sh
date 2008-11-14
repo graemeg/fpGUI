@@ -5,7 +5,7 @@ do
   DIR=`dirname $f`
   PROJECT=`basename $f`
   LPRNAME=`basename $PROJECT .lpr`
-  echo Doing $LPRNAME
+  echo Doing $LPRNAME in $DIR
   cd $DIR
   if [ ! -d units ]; then
     echo 'Missing units dir'

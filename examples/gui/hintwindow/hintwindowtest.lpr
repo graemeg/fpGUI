@@ -1,4 +1,4 @@
-program edittest;
+program hintwindowtest;
 
 {$mode objfpc}{$H+}
 
@@ -126,36 +126,36 @@ begin
     case (Sender as TfpgRadioButton).tag of
       0:
         begin
-          edtFloat.DecimalSeparator := '.';
-          edtCurrency.DecimalSeparator := '.';
+          edtFloat.CustomDecimalSeparator := '.';
+          edtCurrency.CustomDecimalSeparator := '.';
           if chbSpace.Checked then
           begin
-            edtInteger.ThousandSeparator := ' ';
-            edtFloat.ThousandSeparator := ' ';
-            edtCurrency.ThousandSeparator := ' ';
+            edtInteger.CustomThousandSeparator := ' ';
+            edtFloat.CustomThousandSeparator := ' ';
+            edtCurrency.CustomThousandSeparator := ' ';
           end
           else
           begin
-            edtInteger.ThousandSeparator := ',';
-            edtFloat.ThousandSeparator := ',';
-            edtCurrency.ThousandSeparator := ',';
+            edtInteger.CustomThousandSeparator := ',';
+            edtFloat.CustomThousandSeparator := ',';
+            edtCurrency.CustomThousandSeparator := ',';
           end;
         end;
       1:
         begin
-          edtFloat.DecimalSeparator := ',';
-          edtCurrency.DecimalSeparator := ',';
+          edtFloat.CustomDecimalSeparator := ',';
+          edtCurrency.CustomDecimalSeparator := ',';
           if chbSpace.Checked then
           begin
-            edtInteger.ThousandSeparator := ' ';
-            edtFloat.ThousandSeparator := ' ';
-            edtCurrency.ThousandSeparator := ' ';
+            edtInteger.CustomThousandSeparator := ' ';
+            edtFloat.CustomThousandSeparator := ' ';
+            edtCurrency.CustomThousandSeparator := ' ';
           end
           else
           begin
-            edtInteger.ThousandSeparator := '.';
-            edtFloat.ThousandSeparator := '.';
-            edtCurrency.ThousandSeparator := '.';
+            edtInteger.CustomThousandSeparator := '.';
+            edtFloat.CustomThousandSeparator := '.';
+            edtCurrency.CustomThousandSeparator := '.';
           end;
         end;
       end;
@@ -191,15 +191,15 @@ procedure TMainForm.chbSpaceChange(Sender: TObject);
 begin
   if chbSpace.Checked then
     begin
-    edtInteger.ThousandSeparator := ' ';
-    edtFloat.ThousandSeparator := ' ';
-    edtCurrency.ThousandSeparator := ' ';
+    edtInteger.CustomThousandSeparator := ' ';
+    edtFloat.CustomThousandSeparator := ' ';
+    edtCurrency.CustomThousandSeparator := ' ';
     end
   else
     if rbPoint.Checked then
-      edtInteger.ThousandSeparator := ','
+      edtInteger.CustomThousandSeparator := ','
     else
-      edtInteger.ThousandSeparator := '.';
+      edtInteger.CustomThousandSeparator := '.';
 end;
 
 procedure TMainForm.chbFloatDecChange(Sender: TObject);
@@ -451,7 +451,7 @@ begin
     Name := 'edtInteger';
     SetPosition(24, 108, 120, 22);
     ShowThousand := True;
-    ThousandSeparator := ',';
+    CustomThousandSeparator := ',';
     onChange := @edtIntegerChange;
     Hint := 'integer edit control';
   end;
@@ -462,7 +462,7 @@ begin
     Name := 'edtFloat';
     SetPosition(24, 164, 120, 22);
     ShowThousand := True;
-    ThousandSeparator := ',';
+    CustomThousandSeparator := ',';
     onChange := @edtFloatChange;
     Hint := 'float edit control';
   end;
@@ -473,7 +473,7 @@ begin
     Name := 'edtCurrency';
     SetPosition(24, 220, 120, 22);
 //    ShowThousand := True;
-    ThousandSeparator := ',';
+    CustomThousandSeparator := ',';
 //    Decimals := 2;
     Value := -123.45;
     onChange := @edtCurrencyChange;
@@ -700,7 +700,7 @@ begin
 
   {@VFD_BODY_END: MainForm}
   
-  if edtFloat.DecimalSeparator = '.' then
+  if edtFloat.CustomDecimalSeparator = '.' then
     rbPoint.Checked := True
   else
     rbComma.Checked := True;
