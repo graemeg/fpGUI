@@ -1024,6 +1024,7 @@ end;
 procedure TfpgApplication.SetHintPause(const AValue: Integer);
 begin
   FHintPause := AValue;
+  FHintTimer.Interval := FHintPause;
 end;
 
 procedure TfpgApplication.InternalMsgClose(var msg: TfpgMessageRec);

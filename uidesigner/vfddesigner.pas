@@ -706,10 +706,9 @@ const
   cDivider = ' : ';
 var
   frm: TWidgetOrderForm;
-  n, fi, i: integer;
+  n, fi: integer;
   cd: TWidgetDesigner;
   identlevel: integer;
-  s: string;
   taborder: integer;
 
   procedure AddChildWidgets(pwg: TfpgWidget; slist: TStrings);
@@ -993,13 +992,10 @@ end;
 procedure TFormDesigner.OnPropPosEdit(Sender: TObject);
 var
   frm: TEditPositionForm;
-  ax: TfpgCoord;
-  ay: TfpgCoord;
   wg: TfpgWidget;
   n: integer;
   cd: TWidgetDesigner;
   posval: integer;
-  pt: TPoint;
 
   procedure SetNewPos(awg: TfpgWidget; pval: integer);
   begin
@@ -1028,7 +1024,7 @@ begin
   if wg = nil then
     wg := Form;
 
-  frm      := TEditPositionForm.Create(nil);
+  frm := TEditPositionForm.Create(nil);
 
   if Sender = frmProperties.btnLeft then
   begin
@@ -1076,8 +1072,7 @@ begin
       SetNewPos(FForm, posval);
       FForm.UpdateWindowPosition;
     end;
-
-  end;
+  end; { if }
 
   UpdatePropWin;
 end;

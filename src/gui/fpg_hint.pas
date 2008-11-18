@@ -60,7 +60,7 @@ type
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
     property    Font: TfpgFont read FFont;
     property    Text: TfpgString read GetText write SetText;
-    property    Shadow: Integer read FShadow write SetShadow default 5;
+    property    Shadow: Integer read FShadow write SetShadow default 0;
     property    Border: Integer read FBorder write SetBorder default 1;
     property    Margin: Integer read FMargin write FMargin default 3;
     property    LTextColor: TfpgColor write SetLTextColor default clBlack;
@@ -183,7 +183,7 @@ begin
   FFont := fpgGetFont('#Label1');
   FMargin := 3;
   FBorder := 1;
-  FShadow := 5;
+  FShadow := 0; // no shadow by default
   FTime := 5000;
   L_Hint := CreateLabel(Self, FBorder, FBorder, '', Width - FBorder * 2, Height - FBorder * 2, taCenter, tlCenter);
   L_Hint.BackgroundColor := clHintWindow;
