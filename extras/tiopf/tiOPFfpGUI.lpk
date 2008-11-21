@@ -18,8 +18,8 @@
       <Other>
         <CustomOptions Value="-dLINK_CSVx
 -dLINK_TABx
--dLINK_FBL
--dLINK_SQLDB_IBx
+-dLINK_FBLx
+-dLINK_SQLDB_IB
 -dLINK_SQLDB_PQx
 -dLINK_SQLDB_Oraclex
 -dLINK_SQLDB_SQLLite3x
