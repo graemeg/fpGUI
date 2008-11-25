@@ -145,16 +145,16 @@ type
     constructor Create(AOwner: TComponent); override;
     property    Font: TfpgFont read FFont;
   published
-    property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
+    property    Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property    BackgroundColor;
     property    BorderStyle;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    Style;
-    property    Text: string read GetText write SetText;
-    property    TextColor;
     property    Margin: integer read GetMargin write SetMargin default 2;
     property    ParentShowHint;
     property    ShowHint;
+    property    Style;
+    property    Text: string read GetText write SetText;
+    property    TextColor;
     property    OnClick;
     property    OnDoubleClick;
   end;

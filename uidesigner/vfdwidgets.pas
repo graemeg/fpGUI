@@ -263,6 +263,11 @@ begin
     sizeof(stdimg_vfd_editcurrency),
     0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'vfd.groupbox', @stdimg_vfd_groupbox,
+    sizeof(stdimg_vfd_groupbox),
+    0, 0);
+
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -408,7 +413,7 @@ begin
   wc := TVFDWidgetClass.Create(TfpgStringGrid);
   wc.NameBase := 'Grid';
   wc.AddProperty('Columns', TPropertyDBColumns, '');
-  wc.AddProperty('FontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('HeaderFontDesc', TPropertyFontDesc, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('RowCount', TPropertyInteger, '');
@@ -436,18 +441,34 @@ begin
   wc           := TVFDWidgetClass.Create(TfpgPanel);
   wc.NameBase  := 'Panel';
   wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
   wc.AddProperty('LineSpace', TPropertyInteger, 'Line spacing between wrapped caption');
   wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
-  wc.AddProperty('Style', TPropertyEnum, '');
+  wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
   wc.AddProperty('Text', TPropertyString, 'The panel caption');
   wc.AddProperty('WrapText', TPropertyBoolean, 'Should the panel text be wrapped');
   wc.WidgetIconName := 'vfd.panel';
   wc.Container := True;
   RegisterVFDWidget(wc);
-  
+
+  // GroupBox
+  wc           := TVFDWidgetClass.Create(TfpgGroupBox);
+  wc.NameBase  := 'GroupBox';
+  wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
+  wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('Text', TPropertyString, 'The panel caption');
+  wc.WidgetIconName := 'vfd.groupbox';
+  wc.Container := True;
+  RegisterVFDWidget(wc);
+
   // ProgressBar
   wc          := TVFDWidgetClass.Create(TfpgProgressBar);
   wc.NameBase := 'ProgressBar';
