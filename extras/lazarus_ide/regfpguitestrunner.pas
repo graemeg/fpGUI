@@ -5,7 +5,7 @@ unit regfpguitestrunner;
 interface
 
 uses
-  Classes, SysUtils,LazIDEIntf, ProjectIntf, Controls, Forms;
+  Classes, SysUtils, lazideintf, ProjectIntf, Controls, Forms;
   
 Type
 
