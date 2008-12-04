@@ -1,8 +1,16 @@
 @echo off
-; I don't know how to store the output to a variable:  fpctarget=`fpc -iTP`-`fpc -iTO`
-if exist ..\lib\i386-win32\nul.x goto exists
-echo "Creating missing directory ..\lib\i386-win32"
-mkdir ..\lib\i386-win32
+
+rem We use FPC to found out the Platform and OS to create a lib output path
+fpc -iTP > tmpvar
+set /p myplatform= < tmpvar
+fpc -iTO > tmpvar
+set /p myos= < tmpvar
+del tmpvar
+
+if exist ..\lib\%myplatform%-%myos%\nul.x goto exists
+
+echo Creating missing directory ..\lib\%myplatform%-%myos%
+mkdir ..\lib\%myplatform%-%myos%
 goto end
 
 :exists
