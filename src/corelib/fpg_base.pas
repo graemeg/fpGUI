@@ -45,7 +45,7 @@ type
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
 
-  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop, waFullScreen, waBorderless);
+  TWindowAttribute = (waSizeable, waAutoPos, waScreenCenterPos, waStayOnTop, waFullScreen, waBorderless, waUnblockableMessages, waX11SkipWMHints);
   TWindowAttributes = set of TWindowAttribute;
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
@@ -453,6 +453,8 @@ type
   end;
 
 
+  { TfpgApplicationBase }
+
   TfpgApplicationBase = class(TComponent)
   private
     FMainForm: TfpgWindowBase;
@@ -473,6 +475,7 @@ type
     procedure   PushModalForm(AForm: TfpgWindowBase);
     procedure   PopModalForm;
     function    PrevModalForm: TfpgWindowBase;
+    function    RemoveWindowFromModalStack(AForm: TfpgWindowBase): Integer;
     procedure   CreateForm(AFormClass: TComponentClass; out AForm: TfpgWindowBase);
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
@@ -2110,6 +2113,11 @@ begin
     Exit;
 
   Result := TfpgWindowBase(FModalFormStack.Items[FModalFormStack.Count-2]);
+end;
+
+function TfpgApplicationBase.RemoveWindowFromModalStack (AForm: TfpgWindowBase): Integer;
+begin
+  Result := FModalFormStack.Remove(AForm);
 end;
 
 procedure TfpgApplicationBase.CreateForm(AFormClass: TComponentClass;

@@ -317,7 +317,7 @@ var
   I: Integer;
   ANetAtom: TNetAtomEnum;
 begin
-  if WindowGetPropertyAtom(FRootWindow, FNetAtoms[naSUPPORTED], AtomCount, Atoms) = False then;// Exit;
+  if WindowGetPropertyAtom(FRootWindow, FNetAtoms[naSUPPORTED], AtomCount, Atoms) = False then Exit;
   //WriteLn('RootWindow Atom Count = ',AtomCount);
   FillChar(FAtomSupported, SizeOf(Boolean) * Length(FAtomSupported), 0);;
   for I := 0 to AtomCount-1 do begin

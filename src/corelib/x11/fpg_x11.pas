@@ -714,7 +714,7 @@ begin
   inherited Create(AParams);
   FIsInitialized    := False;
   FDisplay          := XOpenDisplay(PChar(aparams));
-  
+
   if FDisplay = nil then
     raise Exception.Create('fpGUI-X11: Could not open the display. Is your X11 server running?');
 
@@ -1050,7 +1050,7 @@ begin
           if xapplication.TopModalForm <> nil then
           begin
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
+            if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
 
@@ -1128,7 +1128,7 @@ begin
           if xapplication.TopModalForm <> nil then
           begin
             ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) then
+            if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
           if not blockmsg then
@@ -1163,7 +1163,7 @@ begin
               begin
                 // This is ugly!!!!!!!!!!!!!!!
                 ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
-                if (ew <> nil) and (xapplication.TopModalForm <> ew) then
+                if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                   blockmsg := true;
               end;
           
@@ -1372,7 +1372,7 @@ begin
 
   FillChar(attr, sizeof(attr), 0);
   mask := 0;
-  if FWindowType in [wtPopup] then
+  if (FWindowType in [wtPopup]) or (waX11SkipWMHints in FWindowAttributes) then
   begin
     attr.Override_Redirect := TBool(True);
     mask := CWOverrideRedirect;
@@ -1465,7 +1465,7 @@ begin
     fpgApplication.netlayer.WindowSetType(FWinHandle, [nwtSplash]);
 
   // process Borderless forms
-  if ((FWindowType = wtWindow) or (FWindowType = wtModalForm)) and (waBorderless in FWindowAttributes) then
+  if ((FWindowType = wtWindow) or (FWindowType = wtModalForm)) and (waBorderless in FWindowAttributes) and not (waX11SkipWMHints in FWindowAttributes) then
   begin
     prop := X.None;
     prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', longbool(0));

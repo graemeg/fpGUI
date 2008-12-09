@@ -35,6 +35,8 @@ type
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
   TFormCloseQueryEvent = procedure(Sender: TObject; var CanClose: boolean) of object;
 
+  { TfpgBaseForm }
+
   TfpgBaseForm = class(TfpgWidget)
   private
     FFullScreen: boolean;
@@ -83,6 +85,7 @@ type
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
     procedure   AfterCreate; virtual;
@@ -242,6 +245,12 @@ begin
   FModalResult     := mrNone;
   FFullScreen      := False;
   FIsContainer     := True;
+end;
+
+destructor TfpgBaseForm.Destroy;
+begin
+  fpgApplication.RemoveWindowFromModalStack(Self);
+  inherited Destroy;
 end;
 
 procedure TfpgBaseForm.AfterCreate;
