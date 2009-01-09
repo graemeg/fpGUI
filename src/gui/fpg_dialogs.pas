@@ -158,7 +158,9 @@ type
     FFilterList: TStringList;
     FFilter: string;
     procedure   SetFilter(const Value: string);
+    function    GetFontDesc: string;
     function    GetShowHidden: boolean;
+    procedure   SetFontDesc(const AValue: string);
     procedure   SetShowHidden(const Value: boolean);
     procedure   ListChanged(Sender: TObject; ARow: Integer);
     procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -183,6 +185,7 @@ type
     function    RunOpenFile: boolean;
     function    RunSaveFile: boolean;
     property    Filter: string read FFilter write SetFilter;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
   
@@ -196,6 +199,7 @@ type
 {$I messagedialog.inc}
 {$I newdirdialog.inc}
 {$I promptuserdialog.inc}
+{$I selectdirdialog.inc}
 
 
 
@@ -206,6 +210,7 @@ function SelectFontDialog(var FontDesc: string): boolean;
 
 function SelectFileDialog(aDialogType: boolean = sfdOpen;
   const aFilter: TfpgString = ''): TfpgString;
+
 
 implementation
 
@@ -949,9 +954,20 @@ begin
   ProcessFilterString;
 end;
 
+function TfpgFileDialog.GetFontDesc: string;
+begin
+  Result := grid.FontDesc;
+end;
+
 function TfpgFileDialog.GetShowHidden: boolean;
 begin
   Result := btnShowHidden.Down;
+end;
+
+procedure TfpgFileDialog.SetFontDesc(const AValue: string);
+begin
+  if grid.FontDesc <> AValue then
+    grid.FontDesc := AValue;
 end;
 
 procedure TfpgFileDialog.SetShowHidden(const Value: boolean);
@@ -973,7 +989,7 @@ begin
   grid := TfpgFileGrid.Create(self);
   with grid do
   begin
-    SetPosition(8, 44, 622, 203);
+    SetPosition(8, 44, 622, 200);
     Anchors := [anLeft, anRight, anTop, anBottom];
     OnRowChange := @ListChanged;
     OnDoubleClick := @GridDblClicked;
@@ -1058,7 +1074,7 @@ begin
   lb1 := TfpgLabel.Create(self);
   with lb1 do
   begin
-    SetPosition(8, 283, 80, 16);
+    SetPosition(8, 283, 622, 16);
     Anchors := [anLeft, anBottom];
     Text := fpgAddColon(rsFileName);
     FontDesc := '#Label1';
@@ -1067,7 +1083,7 @@ begin
   lb2 := TfpgLabel.Create(self);
   with lb2 do
   begin
-    SetPosition(8, 327, 64, 16);
+    SetPosition(8, 327, 622, 16);
     Anchors := [anLeft, anBottom];
     Text := fpgAddColon(rsFileType);
     FontDesc := '#Label1';
@@ -1380,6 +1396,7 @@ end;
 {$I messagedialog.inc}
 {$I newdirdialog.inc}
 {$I promptuserdialog.inc}
+{$I selectdirdialog.inc}
 
 
 
