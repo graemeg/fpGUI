@@ -46,7 +46,8 @@ uses
   fpg_grid,
   fpg_combobox,
   fpg_panel,
-  fpg_memo;
+  fpg_memo,
+  fpg_tree;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
@@ -207,9 +208,8 @@ procedure ShowMessage(AMessage, ATitle: string; ACentreText: Boolean = False); o
 procedure ShowMessage(AMessage: string; ACentreText: Boolean = False); overload;
 
 function SelectFontDialog(var FontDesc: string): boolean;
-
-function SelectFileDialog(aDialogType: boolean = sfdOpen;
-  const aFilter: TfpgString = ''): TfpgString;
+function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''): TfpgString;
+function SelectDirDialog(const AStartDir: TfpgString = ''): TfpgString;
 
 
 implementation
@@ -345,8 +345,7 @@ begin
   frm.Free;
 end;
 
-function SelectFileDialog(aDialogType: boolean = sfdOpen;
-  const aFilter: TfpgString = ''): TfpgString;
+function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''): TfpgString;
 var
   dlg: TfpgFileDialog;
   dres: boolean;
@@ -369,6 +368,19 @@ begin
       Result := dlg.FileName
     else
       Result := '';
+  finally
+    dlg.Free;
+  end;
+end;
+
+function SelectDirDialog(const AStartDir: TfpgString): TfpgString;
+var
+  dlg: TfpgSelectDirDialog;
+begin
+  dlg := TfpgSelectDirDialog.Create(nil);
+  try
+    dlg.ShowModal;
+    Result := '';
   finally
     dlg.Free;
   end;

@@ -1,4 +1,4 @@
-{%mainunit gui_dialogs.pas}
+{%mainunit fpg_dialogs.pas}
 
 {$IFDEF read_interface}
 

@@ -1,4 +1,4 @@
-{%mainunit gui_dialogs.pas}
+{%mainunit fpg_dialogs.pas}
 
 {$IFDEF read_interface}
 
@@ -9,6 +9,7 @@
   private
     lblTitle: TfpgLabel;
     edDirectory: TfpgEdit;
+    tv: TfpgTreeView;
     function    GetDirectory: TfpgString;
   public
     constructor Create(AOwner: TComponent); override;
@@ -30,6 +31,16 @@ end;
 constructor TfpgSelectDirDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  lblTitle := CreateLabel(self, 8, 8, rsEnterNewDirectory);
+  edDirectory := CreateEdit(self, 8, 28, 270, 0);
+  edDirectory.Anchors := [anLeft, anTop, anRight];
+
+  tv := TfpgTreeView.Create(self);
+  with tv do
+  begin
+    Name := 'tv';
+    SetPosition(8, 28, 270, 250);
+  end;
 
   // reposition buttons
   btnCancel.Left  := Width-FDefaultButtonWidth-FSpacing;
@@ -41,7 +52,6 @@ begin
   edDirectory.TabOrder  := 1;
   btnOK.TabOrder        := 2;
   btnCancel.TabOrder    := 3;
-
 end;
 
 {$ENDIF read_implementation}
