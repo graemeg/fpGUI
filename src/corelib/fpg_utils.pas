@@ -45,7 +45,8 @@ function  fpgGetCurrentDir: TfpgString;
 function  fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
 function  fpgExpandFileName(const FileName: TfpgString): TfpgString;
 function  fpgFileExists(const FileName: TfpgString): Boolean;
-
+function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+function  fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
 
 
 implementation
@@ -109,6 +110,52 @@ end;
 function fpgFileExists(const FileName: TfpgString): Boolean;
 begin
   Result := FileExists(fpgToOSEncoding(FileName));
+end;
+
+function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+begin
+  if (Path <> '') and (Path[length(Path)] <> PathDelim) then
+    Result := Path + PathDelim
+  else
+    Result := Path;
+end;
+
+{function fpgHasSubDirs returns True if the directory passed has subdirectories}
+function fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
+var
+  FileInfo: TSearchRec;
+  FCurrentDir: TfpgString;
+begin
+  //Assume No
+  Result := False;
+  if Dir <> '' then
+  begin
+    FCurrentDir := fpgAppendPathDelim(Dir);
+    FCurrentDir := FCurrentDir + AllFilesMask;
+    try
+      if fpgFindFirst(FCurrentDir, faAnyFile or $00000080, FileInfo) = 0 then
+        repeat
+          if FileInfo.Name = '' then
+            Continue;
+
+            // check if special file
+          if ((FileInfo.Name = '.') or (FileInfo.Name = '..')) or
+            // unix dot directories (aka hidden directories)
+            ((FileInfo.Name[1] in ['.']) and AShowHidden) or
+            // check Hidden attribute
+            (((faHidden and FileInfo.Attr) > 0) and AShowHidden) then
+            Continue;
+
+          Result := ((faDirectory and FileInfo.Attr) > 0);
+
+          //We found at least one non special dir, that's all we need.
+          if Result then
+            break;
+        until fpgFindNext(FileInfo) <> 0;
+    finally
+      FindClose(FileInfo);
+    end;
+  end;
 end;
 
 

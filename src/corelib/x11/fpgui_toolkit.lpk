@@ -29,7 +29,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="3"/>
-    <Files Count="73">
+    <Files Count="74">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -303,25 +303,29 @@
         <Type Value="Include"/>
       </Item68>
       <Item69>
-        <Filename Value="../../gui/db/fpgui_db.pas"/>
-        <UnitName Value="fpgui_db"/>
+        <Filename Value="../../gui/selectdirdialog.inc"/>
+        <Type Value="Include"/>
       </Item69>
       <Item70>
-        <Filename Value="../../gui/fpg_splitter.pas"/>
-        <UnitName Value="fpg_splitter"/>
+        <Filename Value="../../gui/db/fpgui_db.pas"/>
+        <UnitName Value="fpgui_db"/>
       </Item70>
       <Item71>
-        <Filename Value="../../gui/fpg_hint.pas"/>
-        <UnitName Value="fpg_hint"/>
+        <Filename Value="../../gui/fpg_splitter.pas"/>
+        <UnitName Value="fpg_splitter"/>
       </Item71>
       <Item72>
-        <Filename Value="../../gui/fpg_spinedit.pas"/>
-        <UnitName Value="fpg_spinedit"/>
+        <Filename Value="../../gui/fpg_hint.pas"/>
+        <UnitName Value="fpg_hint"/>
       </Item72>
       <Item73>
+        <Filename Value="../../gui/fpg_spinedit.pas"/>
+        <UnitName Value="fpg_spinedit"/>
+      </Item73>
+      <Item74>
         <Filename Value="../fpg_extgraphics.pas"/>
         <UnitName Value="fpg_extgraphics"/>
-      </Item73>
+      </Item74>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">

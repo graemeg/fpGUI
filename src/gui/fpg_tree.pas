@@ -74,7 +74,7 @@ type
     FPrev: TfpgTreeNode;
     FSelColor: TfpgColor;
     FSelTextColor: TfpgColor;
-    FText: string;
+    FText: TfpgString;
     FTextColor: TfpgColor;
     procedure   SetCollapsed(const AValue: boolean);
     procedure   SetInactSelColor(const AValue: TfpgColor);
@@ -82,14 +82,14 @@ type
     procedure   SetParent(const AValue: TfpgTreeNode);
     procedure   SetSelColor(const AValue: TfpgColor);
     procedure   SetSelTextColor(const AValue: TfpgColor);
-    procedure   SetText(const AValue: string);
+    procedure   SetText(const AValue: TfpgString);
     procedure   SetTextColor(const AValue: TfpgColor);
     procedure   DoRePaint;
   public
     constructor Create;
     destructor  Destroy; override;
     // node related
-    function    AppendText(AText: string): TfpgTreeNode;
+    function    AppendText(AText: TfpgString): TfpgTreeNode;
     function    Count: integer;
     function    CountRecursive: integer;
     function    FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode; overload;
@@ -117,7 +117,7 @@ type
     property    Next: TfpgTreeNode read FNext write FNext;
     property    Parent: TfpgTreeNode read FParent write SetParent;
     property    Prev: TfpgTreeNode read FPrev write FPrev;
-    property    Text: string read FText write SetText;
+    property    Text: TfpgString read FText write SetText;
     // color settings
     property    InactSelColor: TfpgColor read FInactSelColor write SetInactSelColor;
     property    InactSelTextColor: TfpgColor read FInactSelTextColor write SetInactSelTextColor;
@@ -302,9 +302,9 @@ begin
   end;
 end;
 
-procedure TfpgTreeNode.SetText(const AValue: string);
+procedure TfpgTreeNode.SetText(const AValue: TfpgString);
 begin
-  if aValue <> FText then
+  if AValue <> FText then
   begin
     FText := aValue;
     DoRePaint;
@@ -465,7 +465,7 @@ begin
   end;
 end;
 
-function TfpgTreeNode.AppendText(AText: string): TfpgTreeNode;
+function TfpgTreeNode.AppendText(AText: TfpgString): TfpgTreeNode;
 var
   h: TfpgTreeNode;
 begin
