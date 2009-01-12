@@ -391,13 +391,17 @@ end;
 procedure TStringGridMediator.SetSelectedObject(const AValue: TtiObject);
 var
   i: integer;
+  o: TObject;
 begin
   for i := 0 to FView.RowCount - 1 do
-    if TtiObject(FView.Objects[0, i]) = AValue then
+  begin
+    o := FView.Objects[0, i];
+    if Assigned(o) and (TtiObject(o) = AValue) then
     begin
       FView.FocusRow := i;
       Exit; //==>
     end;
+  end;  { for }
 end;
 
 procedure TStringGridMediator.SetView(const AValue: TfpgStringGrid);
