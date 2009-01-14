@@ -7,22 +7,22 @@
 
   TfpgSelectDirDialog = class(TfpgBaseDialog)
   private
-    lblTitle: TfpgLabel;
     tv: TfpgTreeView;
-    FDir: TfpgString;
     FRootDir: TfpgString;
-    procedure lblTitleDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    FShowHidden: Boolean;
     function    GetAbsolutePath(Node: TfpgTreeNode): TfpgString;
     procedure   InitializeTreeview;
-    procedure   SetDir(const AValue: TfpgString);
     procedure   SetRootDir(const AValue: TfpgString);
     procedure   AddDirectories(Node: TfpgTreeNode; Dir: TfpgString);
+    procedure   NodeExpanded(Sender: TObject; ANode: TfpgTreeNode);
+    {$IFDEF MSWINDOWS}
+    procedure   AddWindowsDriveLetters;
+    {$ENDIF}
   public
+    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
     { return the selected directory }
     function    SelectedDir: TfpgString;
-    { The selected/opened directory }
-    property    Directory: TfpgString read FDir write SetDir;
     { Directory the treeview starts from }
     property    RootDirectory: TfpgString read FRootDir write SetRootDir;
   end;
@@ -33,12 +33,6 @@
 
 
 {$IFDEF read_implementation}
-
-procedure TfpgSelectDirDialog.lblTitleDblClicked(Sender: TObject;
-  AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-begin
-  InitializeTreeview;
-end;
 
 function TfpgSelectDirDialog.GetAbsolutePath(Node: TfpgTreeNode): TfpgString;
 begin
@@ -62,12 +56,7 @@ begin
   {$IFDEF MSWINDOWS}
   RootDirectory := 'C:\';
   {$ENDIF}
-end;
-
-procedure TfpgSelectDirDialog.SetDir(const AValue: TfpgString);
-begin
-  if FDir=AValue then exit;
-  FDir:=AValue;
+  tv.RootNode.Expand;
 end;
 
 procedure TfpgSelectDirDialog.SetRootDir(const AValue: TfpgString);
@@ -99,19 +88,15 @@ begin
   { Add the Subdirectories to Root nodes }
 //  lNode := TV.Items.GetFirstNode;
   lNode := RootNode;
-  writeln('Directories found:');
   while lNode <> nil do
   begin
-    write('.');
     AddDirectories(lNode, lNode.Text);
     lNode := lNode.Next;
 //    lNode := lNode.GetNextSibling;
   end;
-  writeln(' ');
 
   { Set the original root node as the selected node. }
   tv.Selection := RootNode;
-//  TV.Selected := RootNode;
 end;
 
 { Adds Subdirectories to a passed node if they exist }
@@ -163,18 +148,50 @@ begin
 //            NewNode := TV.Items.AddChild(Node, SortList[i]);
             // if subdirectories then indicate so.
 { Todo: Fix this by adding HasChildren to Treeview }
-//            NewNode.HasChildren := fpgHasSubDirs(fpgAppendPathDelim(Dir) + NewNode.Text, FShowHidden);
+            NewNode.HasChildren := fpgHasSubDirs(fpgAppendPathDelim(Dir) + NewNode.Text, FShowHidden);
           end;
         finally
           SortList.Free;
         end;
       end;  { if FindFirst... }
     finally
-      FindClose(FileInfo);
+      SysUtils.FindClose(FileInfo);
     end;
   end;  { if Dir... }
   //if Node.Level = 0 then
     //Node.Text := Dir;
+end;
+
+procedure TfpgSelectDirDialog.NodeExpanded(Sender: TObject; ANode: TfpgTreeNode);
+begin
+  if ANode.Count = 0 then
+    AddDirectories(ANode, GetAbsolutePath(ANode));
+end;
+
+{$IFDEF MSWINDOWS}
+procedure TfpgSelectDirDialog.AddWindowsDriveLetters;
+const
+  MAX_DRIVES = 25;
+var
+  n: integer;
+  drvs: string;
+begin
+  // making drive list, skipping drives A: and B:
+  n := 2;
+  while n <= MAX_DRIVES do
+  begin
+    drvs := chr(n + Ord('A')) + ':\';
+    if Windows.GetDriveType(PChar(drvs)) <> 1 then
+      TV.RootNode.AppendText(drvs);
+    Inc(n);
+  end;
+end;
+{$ENDIF}
+
+constructor TfpgSelectDirDialog.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FShowHidden := False;
 end;
 
 procedure TfpgSelectDirDialog.AfterCreate;
@@ -185,14 +202,12 @@ begin
   WindowTitle := 'Select a Directory';    { TODO : Localize this!! }
   WindowPosition := wpScreenCenter;
 
-  lblTitle := CreateLabel(self, FSpacing, FSpacing, rsEnterNewDirectory);
-  lblTitle.OnDoubleClick :=@lblTitleDblClicked;
-
   tv := TfpgTreeView.Create(self);
   with tv do
   begin
     Name := 'tv';
-    SetPosition(FSpacing, 28, 288, 300);
+    SetPosition(FSpacing, FSpacing, 288, 322);
+    OnExpand :=@NodeExpanded;
   end;
 
   // reposition buttons
@@ -205,6 +220,8 @@ begin
   tv.TabOrder         := 1;
   btnOK.TabOrder      := 2;
   btnCancel.TabOrder  := 3;
+
+  InitializeTreeview;
 end;
 
 function TfpgSelectDirDialog.SelectedDir: TfpgString;

@@ -76,6 +76,7 @@ type
     FSelTextColor: TfpgColor;
     FText: TfpgString;
     FTextColor: TfpgColor;
+    FHasChildren: Boolean;
     procedure   SetCollapsed(const AValue: boolean);
     procedure   SetInactSelColor(const AValue: TfpgColor);
     procedure   SetInactSelTextColor(const AValue: TfpgColor);
@@ -85,6 +86,7 @@ type
     procedure   SetText(const AValue: TfpgString);
     procedure   SetTextColor(const AValue: TfpgColor);
     procedure   DoRePaint;
+    procedure   SetHasChildren(const AValue: Boolean);
   public
     constructor Create;
     destructor  Destroy; override;
@@ -118,6 +120,8 @@ type
     property    Parent: TfpgTreeNode read FParent write SetParent;
     property    Prev: TfpgTreeNode read FPrev write FPrev;
     property    Text: TfpgString read FText write SetText;
+          { determines the + or - image in the treeview }
+    property    HasChildren: Boolean read FHasChildren write SetHasChildren;
     // color settings
     property    InactSelColor: TfpgColor read FInactSelColor write SetInactSelColor;
     property    InactSelTextColor: TfpgColor read FInactSelTextColor write SetInactSelTextColor;
@@ -130,8 +134,6 @@ type
   TfpgTreeExpandEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
   
   
-  { TfpgTreeView }
-
   TfpgTreeView = class(TfpgWidget)
   private
     FImageList: TfpgImageList;
@@ -325,6 +327,15 @@ begin
   // todo
 end;
 
+procedure TfpgTreeNode.SetHasChildren(const AValue: Boolean);
+begin
+  if FHasChildren <> AValue then
+  begin
+    FHasChildren := AValue;
+    DoRePaint;
+  end;
+end;
+
 constructor TfpgTreeNode.Create;
 begin
   FData           := nil;
@@ -332,11 +343,13 @@ begin
   FLastSubNode    := nil;
   FText           := '';
   FImageIndex     := -1;
-  
+  FCollapsed      := True;
+  FHasChildren    := False;
+
   FParent     := nil;
   FNext       := nil;
   FPrev       := nil;
-  
+
   FSelColor           := clUnset;
   FSelTextColor       := clUnset;
   FTextColor          := clUnset;
@@ -1161,7 +1174,7 @@ begin
       if (x >= w - GetColumnWidth(i1) div 2 - 3) and (x <= w - GetColumnWidth(i1) div 2 + 6) then
       // collapse or expand?
       begin // yes
-        if node.Count > 0 then
+        if (node.Count > 0) or node.HasChildren then
         begin
           if node.Collapsed then
           begin
@@ -1389,7 +1402,7 @@ begin
       end;  { if/else }
 
       Canvas.SetLineStyle(1, FTreeLineStyle);
-      if h.Count > 0 then   // do we have subnodes?
+      if (h.Count > 0) or h.HasChildren then   // do we have subnodes?
       begin
         // small horizontal line above rectangle for first subnode (with children) only
         if (h <> RootNode.FirstSubNode) then
@@ -1408,7 +1421,7 @@ begin
         
         Canvas.SetColor(clText1);
 
-        if h.Collapsed then
+        if h.Collapsed {or h.HasChildren} then
         begin
           // draw a "+"
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 - 1, ACenterPos + 1, w - FXOffset - GetColumnWidth(i1) div 2 + 4, ACenterPos + 1);
@@ -1433,10 +1446,10 @@ begin
       if h.prev <> nil then
       begin
         // line up to the previous node
-        if h.prev.count > 0 then
+        if (h.prev.count > 0) {or h.prev.HasChildren} then
         begin
           // take the previous subnode rectangle in account
-          if h.count > 0 then
+          if (h.count > 0) or h.HasChildren then
             // we have a subnode rectangle
             Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 4, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - (SpaceToVisibleNext(h.prev) * GetNodeHeight) + 5)
           else
@@ -1445,7 +1458,7 @@ begin
         else
         begin
           // previous node has no subnodes
-          if h.count > 0 then
+          if (h.count > 0) or h.HasChildren then
             // we have a subnode rectangle
             Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - 3, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - SpaceToVisibleNext(h.prev) * GetNodeHeight + 1)
           else
@@ -1454,7 +1467,7 @@ begin
       end
       else
       begin
-        if h.count > 0 then
+        if (h.count > 0) or h.HasChildren then
           // take the subnode rectangle in account
           Canvas.DrawLine(w - FXOffset - GetColumnWidth(i1) div 2 + 1,ACenterPos - 3, w - FXOffset - GetColumnWidth(i1) div 2 + 1, ACenterPos - GetNodeHeight div 2 + 3)
         else
@@ -1500,7 +1513,7 @@ begin
         if h.next <> nil then
         begin
           h := h.next;
-          if h.prev.count > 0 then
+          if (h.prev.count > 0) {or h.prev.HasChildren} then
           begin
             x := w - FXOffset - GetColumnWidth(i1) div 2 + 1;
             y := GetAbsoluteNodeTop(h.prev) - FYOffset + 5 + (GetNodeHeight div 2);

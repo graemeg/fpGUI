@@ -34,6 +34,9 @@ procedure fpgOpenURL(const aURL: TfpgString);
 // *** Common functions for all platforms ***
 
 function  fpgAddTrailingValue(const ALine, AValue: TfpgString; ADuplicates: boolean = true): TfpgString;
+function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+function  fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
+function  fpgAllFilesMask: TfpgString;
 
 
 // RTL wrapper filesystem functions with platform independant encoding
@@ -45,8 +48,6 @@ function  fpgGetCurrentDir: TfpgString;
 function  fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
 function  fpgExpandFileName(const FileName: TfpgString): TfpgString;
 function  fpgFileExists(const FileName: TfpgString): Boolean;
-function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
-function  fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
 
 
 implementation
@@ -131,7 +132,7 @@ begin
   if Dir <> '' then
   begin
     FCurrentDir := fpgAppendPathDelim(Dir);
-    FCurrentDir := FCurrentDir + AllFilesMask;
+    FCurrentDir := FCurrentDir + fpgAllFilesMask;
     try
       if fpgFindFirst(FCurrentDir, faAnyFile or $00000080, FileInfo) = 0 then
         repeat
@@ -158,6 +159,15 @@ begin
   end;
 end;
 
+function fpgAllFilesMask: TfpgString;
+begin
+  {$Note In FPC 2.2.2 onwards we can use AllFilesMask which is part of RTL }
+  {$IFDEF WINDOWS}
+  Result := '*.*';
+  {$ELSE}
+  Result := '*';
+  {$ENDIF}
+end;
 
 end.
 

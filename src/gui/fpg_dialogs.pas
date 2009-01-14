@@ -219,7 +219,7 @@ uses
   fpg_utils,
   fpg_stringutils
   {$IFDEF MSWINDOWS}
-  ,Windows   // used by File Dialog
+  ,Windows   // used by File Dialog & Select Dir Dialog
   {$ENDIF}
   ,DateUtils
   ;
@@ -379,8 +379,10 @@ var
 begin
   dlg := TfpgSelectDirDialog.Create(nil);
   try
-    dlg.ShowModal;
-    Result := '';
+    if dlg.ShowModal = mrOK then
+      Result := dlg.SelectedDir
+    else
+      Result := '';
   finally
     dlg.Free;
   end;
