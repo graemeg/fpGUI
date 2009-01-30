@@ -1,4 +1,4 @@
-{%mainunit gfx_constants.pas}
+{%mainunit fpg_constants.pas}
 
 rsLanguage               = 'Français';
 

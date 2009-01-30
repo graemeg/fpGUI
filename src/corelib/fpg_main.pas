@@ -231,6 +231,7 @@ type
     procedure   InternalMsgHintTimer(var msg: TfpgMessageRec); message FPGM_HINTTIMER;
     procedure   CreateHintWindow;
     procedure   HintTimerFired(Sender: TObject);
+    procedure SetShowHint(const AValue: boolean);
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -261,7 +262,7 @@ type
     property    HintWindow: TfpgWindow read FHintWindow;
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
-    property    ShowHint: boolean read FShowHint write FShowHint default True;
+    property    ShowHint: boolean read FShowHint write SetShowHint default True;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
     property    OnException: TExceptionEvent read FOnException write FOnException;
   end;
@@ -382,10 +383,8 @@ uses
   math,
   fpg_imgfmt_bmp,
   fpg_stdimages,
-  fpg_extinterpolation, // only so that it get auto compiled
   fpg_translations,
   fpg_constants,
-  fpg_stringutils,
   fpg_widget,
   fpg_dialogs,
   fpg_hint,
@@ -1073,10 +1072,18 @@ procedure TfpgApplication.HintTimerFired(Sender: TObject);
 var
   w: TfpgWidget;
 begin
+  w := nil;
 //  writeln('HintTimerFired...');
   w := TfpgWidget(FHintWidget);
-  ActivateHint(w.WindowToScreen(w, FHintPos), w.Hint);
+  if Assigned(w) then
+    ActivateHint(w.WindowToScreen(w, FHintPos), w.Hint);
   FHintTimer.Enabled := False;
+end;
+
+procedure TfpgApplication.SetShowHint(const AValue: boolean);
+begin
+//writeln('>> SetShowHint to :', AValue);
+  FShowHint := AValue;
 end;
 
 procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
