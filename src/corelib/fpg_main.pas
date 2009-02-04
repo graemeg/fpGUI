@@ -231,7 +231,7 @@ type
     procedure   InternalMsgHintTimer(var msg: TfpgMessageRec); message FPGM_HINTTIMER;
     procedure   CreateHintWindow;
     procedure   HintTimerFired(Sender: TObject);
-    procedure SetShowHint(const AValue: boolean);
+    procedure   SetShowHint(const AValue: boolean);
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -1075,8 +1075,15 @@ begin
   w := nil;
 //  writeln('HintTimerFired...');
   w := TfpgWidget(FHintWidget);
-  if Assigned(w) then
-    ActivateHint(w.WindowToScreen(w, FHintPos), w.Hint);
+  try
+    if Assigned(w) then
+      ActivateHint(w.WindowToScreen(w, FHintPos), w.Hint);
+  except
+    // silence it!
+    { TODO : FHintWidget probably went out of scope just as timer fired. Try
+      and detect such cases better! }
+  end;
+
   FHintTimer.Enabled := False;
 end;
 

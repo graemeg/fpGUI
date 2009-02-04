@@ -1,6 +1,4 @@
-# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.  
-# 
-# 
+# translation of PACKAGE. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.    
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"

@@ -81,6 +81,7 @@ const
   FPGM_MOVE        = 16;
   FPGM_POPUPCLOSE  = 17;
   FPGM_HINTTIMER   = 18;
+  FPGM_CUSTOM      = 50000;
   FPGM_KILLME      = High(Integer);
 
   // The special keys, based on the well-known keyboard scan codes
@@ -1145,8 +1146,7 @@ begin
   DoMoveWindow(x, y);
 end;
 
-function TfpgWindowBase.WindowToScreen(ASource: TfpgWindowBase;
-  const AScreenPos: TPoint): TPoint;
+function TfpgWindowBase.WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 begin
   Result := DoWindowToScreen(ASource, AScreenPos);
 end;
