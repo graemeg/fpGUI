@@ -392,8 +392,9 @@ begin
     FFocusRow := 0;
   if FFocusRow > RowCount-1 then
     FFocusRow := RowCount-1;
-    
-  FollowFocus;
+
+//  FollowFocus;
+  Update;
   CheckFocusChange;
 end;
 
@@ -1150,7 +1151,10 @@ end;
 
 procedure TfpgBaseGrid.Update;
 begin
-  UpdateScrollBars;
+  if csUpdating in ComponentState then
+    Exit;
+
+//  UpdateScrollBars;
   FollowFocus;
   RePaint;
 end;

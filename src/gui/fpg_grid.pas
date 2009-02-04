@@ -116,6 +116,7 @@ type
     property    ColumnTextColor;
 //    property    Cols[index: Integer]: TStrings read GetCols write SetCols;
 //    property    Rows[index: Integer]: TStrings read GetRows write SetRows;
+    procedure   Clear;
   end;
 
 
@@ -526,6 +527,17 @@ begin
   FRowCount := FRowCount-1;
   if HasHandle then
     Update;
+end;
+
+procedure TfpgCustomStringGrid.Clear;
+var
+  i: integer;
+begin
+  for i := FColumns.Count-1 downto 0 do
+    TfpgStringColumn(FColumns[i]).Free;
+  FColumns.Clear;
+  FRowCount := 0;
+  Update;
 end;
 
 end.

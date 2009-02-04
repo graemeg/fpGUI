@@ -123,7 +123,8 @@ begin
   begin
     FocusRow := 0;
     FocusCol := 0;
-    Repaint;
+//    Repaint;
+    Update;
   end;
 end;
 
@@ -136,7 +137,8 @@ begin
   begin
     TfpgGridColumn(FColumns.Items[i]).TextColor := AValue;
   end;
-  Repaint;
+//  Repaint;
+  Update;
 end;
 
 function TfpgCustomGrid.GetColumns(AIndex: integer): TfpgGridColumn;
@@ -203,10 +205,12 @@ begin
   
   // graemeg 2008-07-18: I believe after all the repaint and event fixes
   //   this check is not required anymore.
-//  if csUpdating in ComponentState then
-//    Exit;
-  UpdateScrollBars;
-  RePaint;
+  //if csUpdating in ComponentState then
+    //Exit;
+  Update;
+  //UpdateScrollBars;
+  //RePaint;
+
 end;
 
 procedure TfpgCustomGrid.SetRowCount(const AValue: Integer);
@@ -220,10 +224,11 @@ begin
 
   // graemeg 2008-07-18: I believe after all the repaint and event fixes
   //   this check is not required anymore.
-//  if csUpdating in ComponentState then
-//    Exit;
-  UpdateScrollBars;
-  RePaint;
+  //if csUpdating in ComponentState then
+    //Exit;
+  Update;
+//  UpdateScrollBars;
+//  RePaint;
 end;
 
 function TfpgCustomGrid.GetColumnWidth(ACol: Integer): integer;
@@ -246,8 +251,9 @@ begin
       lCol.Width := 1
     else
       lCol.Width := AValue;
-    UpdateScrollBars;
-    Repaint;
+    Update;
+    //UpdateScrollBars;
+    //Repaint;
   end;
 end;
 
@@ -268,8 +274,8 @@ begin
   if lCol.FBackgroundColor <> AValue then
   begin
     lCol.FBackgroundColor := AValue;
-//    UpdateScrollBars;
-    Repaint;
+    Update;
+    //Repaint;
   end;
 end;
 
@@ -332,11 +338,11 @@ begin
   i := FColumns.Add(Result);
   DoAfterAddColumn(i);  // update empty cells in descendants
   
-  if csUpdating in ComponentState then
-    Exit; //==>
-    
-  UpdateScrollBars;
-  RePaint;
+  //if csUpdating in ComponentState then
+    //Exit; //==>
+  Update;
+  //UpdateScrollBars;
+  //RePaint;
 end;
 
 procedure TfpgCustomGrid.DeleteColumn(AIndex: integer);

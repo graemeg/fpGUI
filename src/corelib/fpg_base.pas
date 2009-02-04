@@ -81,7 +81,7 @@ const
   FPGM_MOVE        = 16;
   FPGM_POPUPCLOSE  = 17;
   FPGM_HINTTIMER   = 18;
-  FPGM_CUSTOM      = 50000;
+  FPGM_USER        = 50000;
   FPGM_KILLME      = High(Integer);
 
   // The special keys, based on the well-known keyboard scan codes
@@ -603,7 +603,6 @@ implementation
 uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
-  fpg_constants,
   typinfo;
 
 
