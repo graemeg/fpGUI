@@ -816,7 +816,9 @@ begin
     case keycode of
       keyBackSpace:
           begin
-            if FCursorPos > 0 then
+            if FSelOffset <> 0 then
+              DeleteSelection
+            else if FCursorPos > 0 then
             begin
               UTF8Delete(FText, FCursorPos, 1);
               Dec(FCursorPos);

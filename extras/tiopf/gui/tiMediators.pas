@@ -229,9 +229,10 @@ begin
   gMediatorManager.RegisterMediator(TMediatorEditView, TtiObject, [tkSString,tkAString,tkInteger,tkFloat]);
   gMediatorManager.RegisterMediator(TMediatorCheckBoxView, TtiObject, [tkBool]);
   gMediatorManager.RegisterMediator(TMediatorComboboxView, TtiObject, [tkSString,tkAString]);
+  gMediatorManager.RegisterMediator(TMediatorItemComboBoxView, TtiObject, [tkInteger, tkEnumeration]);
+  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TtiObject, [tkClass]);
   gMediatorManager.RegisterMediator(TMediatorStaticTextView, TtiObject);
   gMediatorManager.RegisterMediator(TMediatorTrackBarView, TtiObject, [tkInteger]);
-  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TtiObject, [tkClass]);
   gMediatorManager.RegisterMediator(TMediatorMemoView, TtiObject, [tkSString,tkAString]);
   gMediatorManager.RegisterMediator(TMediatorCalendarComboView, TtiObject, [tkFloat]);
   gMediatorManager.RegisterMediator(TMediatorSpinEditView, TtiObject, [tkInteger]);
