@@ -193,10 +193,17 @@ end;
 { TfpgWidget }
 
 procedure TfpgWidget.SetEnabled(const AValue: boolean);
+var
+  i: integer;
 begin
   if FEnabled = AValue then
     Exit; //==>
   FEnabled := AValue;
+  for i := 0 to ComponentCount - 1 do
+  begin
+    if Components[i] is TfpgWidget then
+      TfpgWidget(Components[i]).Enabled := self.Enabled;
+  end;
   RePaint;
 end;
 
