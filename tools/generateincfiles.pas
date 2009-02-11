@@ -411,10 +411,20 @@ var
   oMsg: TMsgItemClass;
 begin
   DestFile := TStringList.Create;
+  DestFile.Add('{%mainunit fpg_constants.pas}');
+  DestFile.Add('');
+  DestFile.Add('{ This file is auto generated!  DO NOT EDIT. }');
+  DestFile.Add('{ Only exception is the default language English - lang_en.inc  }');
+  DestFile.Add('');
   for i := 0 to PoFile.Items.Count - 1 do
   begin
     oMsg := TMsgItemClass(PoFile.Items[i]);
     DestFile.Add(Format('%s  =  %s;', [oMsg.Identifier, QuotedStr(oMsg.Value)]));
+    { ***** Handle special cases ***** }
+
+    // Long and Short month May has the same text so one gets lost. Add it back.
+    if SameText(oMsg.Identifier, 'rsShortMay') then
+      DestFile.Add(Format('%s  =  %s;', ['rsLongMay', QuotedStr(oMsg.Value)]));
   end;
   DestFile.SaveToFile(Filename);
   DestFile.Free;
@@ -499,8 +509,8 @@ var
     p := Pos('.', s);
     s := Copy(s, p+1, Length(s));
     s := StringReplace(s, '.po', '.inc', [rfIgnoreCase]);
-    Result := 'lang_' + s;
-//    writeln('  Newfile: ', cCorelib + Result);
+    Result := BaseDir + cCorelib + 'lang_' + s;
+//    writeln('  Newfile: ', Result);
   end;
   
 begin

@@ -824,7 +824,7 @@ begin
   FMessageHookList := TFPList.Create;
   FStopOnException := False;
   FHintWindow     := nil;   // popup window with Hint text
-  FHintPause      := 1500;  // 1.5 seconds
+  FHintPause      := DEFAULT_HINT_PAUSE;
   FHintWidget     := nil;   // widget the mouse is over and whos hint text we need.
   FShowHint       := True;
 

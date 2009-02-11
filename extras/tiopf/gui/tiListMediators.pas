@@ -197,6 +197,7 @@ begin
       lc.AutoSize  := False;
       lc.Caption   := lInfo.Caption;
       lc.Width     := lInfo.FieldWidth;
+//      lc.CaptionAlignment:= lInfo.Alignment;
       lc.Alignment := lInfo.Alignment;
       lc.Resizable := True;
       View.Columns.Add(lc);

@@ -49,28 +49,28 @@ resourcestring
 
 
 {$IF defined(de)}
-  {$I lang_german.inc}
+  {$I lang_de.inc}
   
 {$ELSEIF defined(ru)}
-  {$I lang_russian.inc}
+  {$I lang_ru.inc}
   
 {$ELSEIF defined(fr)}
-  {$I lang_french.inc}
+  {$I lang_fr.inc}
   
 {$ELSEIF defined(pt)}
-  {$I lang_portuguese.inc}
+  {$I lang_pt.inc}
   
 {$ELSEIF defined(af)}
-  {$I lang_afrikaans.inc}
+  {$I lang_af.inc}
 
 {$ELSEIF defined(it)}
-  {$I lang_italian.inc}
+  {$I lang_it.inc}
 
 {$ELSEIF defined(es)}
-  {$I lang_spanish.inc}
+  {$I lang_es.inc}
 
 {$ELSE}
-  {$I lang_english.inc}
+  {$I lang_en.inc}
 {$IFEND}
 
 
@@ -86,10 +86,12 @@ const
   
 
   { Double click support }
-  DOUBLECLICK_MS = 320; // the max time between left-clicks for doubleclick
-  DOUBLECLICK_DISTANCE = 5; // max distance between points when doing doubleclick
+  DOUBLECLICK_MS = 320; // the max time between left-clicks for doubleclick in milliseconds
+  DOUBLECLICK_DISTANCE = 5; // max distance between points when doing doubleclick in pixels
 
   ONE_MILISEC = 1/MSecsPerDay;
+
+  DEFAULT_HINT_PAUSE = 500;   // in milliseconds
   
 
 { This is so that when we support LTR and RTL languages, the colon will be
