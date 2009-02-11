@@ -14,11 +14,11 @@ msgstr ""
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr ""
+msgstr "Значение <%s> не определено"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr ""
+msgstr "Обнаружен новый элемент"
 
 #: fpg_constants:rsabort
 msgid "Abort"
@@ -38,35 +38,35 @@ msgstr "Все файлы"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr ""
+msgstr "Все шрифты"
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
-msgstr ""
+msgstr "Сглаживание"
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
-msgstr ""
+msgstr "Апр"
 
 #: fpg_constants:rslongapr
 msgid "April"
-msgstr ""
+msgstr "Апрель"
 
 #: fpg_constants:rsfileattributes
 msgid "Attributes"
-msgstr ""
+msgstr "Атрибуты"
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
-msgstr ""
+msgstr "Авг"
 
 #: fpg_constants:rslongaug
 msgid "August"
-msgstr ""
+msgstr "Август"
 
 #: fpg_constants:rsbold
 msgid "Bold"
-msgstr ""
+msgstr "Жирный"
 
 #: fpg_constants:rscancel
 msgid "Cancel"
@@ -86,7 +86,7 @@ msgstr "Закрыть"
 
 #: fpg_constants:rscollection
 msgid "Collection"
-msgstr ""
+msgstr "Группа"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -102,7 +102,7 @@ msgstr "Копировать"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr ""
+msgstr "Невозможно открыть директорию <%s>"
 
 #: fpg_constants:rscreate
 msgid "Create"
@@ -122,15 +122,15 @@ msgstr "Вырезать"
 
 #: fpg_constants:rsdatabase
 msgid "Database"
-msgstr ""
+msgstr "База данных"
 
 #: fpg_constants:rsshortdec
 msgid "Dec"
-msgstr ""
+msgstr "Дек"
 
 #: fpg_constants:rslongdec
 msgid "December"
-msgstr ""
+msgstr "Декабрь"
 
 #: fpg_constants:rsdelete
 msgid "Delete"
@@ -138,11 +138,11 @@ msgstr "Удалить"
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
-msgstr ""
+msgstr "Директории"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
-msgstr ""
+msgstr "Диск"
 
 #: fpg_constants:rsedit
 msgid "Edit"
@@ -162,7 +162,7 @@ msgstr "Ошибка"
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
-msgstr ""
+msgstr "Пример текста"
 
 #: fpg_constants:rsexit
 msgid "Exit"
@@ -170,31 +170,31 @@ msgstr "Выход"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr ""
+msgstr "Невозможно создать директорию <%s>"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr ""
+msgstr "Избранные"
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
-msgstr ""
+msgstr "Фев"
 
 #: fpg_constants:rslongfeb
 msgid "February"
-msgstr ""
+msgstr "Февраль"
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr ""
+msgstr "Выбор файла"
 
 #: fpg_constants:rsfilename
 msgid "Filename"
-msgstr ""
+msgstr "Имя файла"
 
 #: fpg_constants:rsfiles
 msgid "Files"
-msgstr ""
+msgstr "Файлы"
 
 #: fpg_constants:rsfind
 msgid "Find"
@@ -202,23 +202,23 @@ msgstr "Найти"
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr ""
+msgstr "Моноширинные"
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
-msgstr ""
+msgstr "Псевдонимы шрифтов"
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
-msgstr ""
+msgstr "Пт"
 
 #: fpg_constants:rslongfri
 msgid "Friday"
-msgstr ""
+msgstr "Пятница"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
-msgstr ""
+msgstr "Группа"
 
 #: fpg_constants:rshelp
 msgid "Help"
@@ -238,51 +238,51 @@ msgstr "Вставка"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
-msgstr ""
+msgstr "Курсив"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr ""
+msgstr "Тип элемента отличается от <%s>!"
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
-msgstr ""
+msgstr "Янв"
 
 #: fpg_constants:rslongjan
 msgid "January"
-msgstr ""
+msgstr "Январь"
 
 #: fpg_constants:rsshortjul
 msgid "Jul"
-msgstr ""
+msgstr "Июл"
 
 #: fpg_constants:rslongjul
 msgid "July"
-msgstr ""
+msgstr "Июль"
 
 #: fpg_constants:rsshortjun
 msgid "Jun"
-msgstr ""
+msgstr "Июн"
 
 #: fpg_constants:rslongjun
 msgid "June"
-msgstr ""
+msgstr "Июнь"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
-msgstr ""
+msgstr "Список должен быть пустым"
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
-msgstr ""
+msgstr "Мар"
 
 #: fpg_constants:rslongmar
 msgid "March"
-msgstr ""
+msgstr "Март"
 
 #: fpg_constants:rsshortmay
 msgid "May"
-msgstr ""
+msgstr "Май"
 
 #: fpg_constants:rsmessage
 msgid "Message"
@@ -290,19 +290,19 @@ msgstr "Сообщение"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr ""
+msgstr "Изменен"
 
 #: fpg_constants:rsshortmon
 msgid "Mon"
-msgstr ""
+msgstr "Пн"
 
 #: fpg_constants:rslongmon
 msgid "Monday"
-msgstr ""
+msgstr "Понедельник"
 
 #: fpg_constants:rsname
 msgid "Name"
-msgstr ""
+msgstr "Название"
 
 #: fpg_constants:rsno
 msgid "No"
@@ -314,11 +314,11 @@ msgstr "Нет для всех"
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
-msgstr ""
+msgstr "Ноя"
 
 #: fpg_constants:rslongnov
 msgid "November"
-msgstr ""
+msgstr "Ноябрь"
 
 #: fpg_constants:rsok
 msgid "OK"
@@ -326,11 +326,11 @@ msgstr "OK"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr ""
+msgstr "Окт"
 
 #: fpg_constants:rslongoct
 msgid "October"
-msgstr ""
+msgstr "Октябрь"
 
 #: fpg_constants:rsopen
 msgid "Open"
@@ -338,15 +338,15 @@ msgstr "Открыть"
 
 #: fpg_constants:rsopenafile
 msgid "Open a file"
-msgstr ""
+msgstr "Открыть файл"
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
-msgstr ""
+msgstr "Владелец"
 
 #: fpg_constants:rspassword
 msgid "Password"
-msgstr ""
+msgstr "Пароль"
 
 #: fpg_constants:rspaste
 msgid "Paste"
@@ -354,7 +354,7 @@ msgstr "Вставить"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr ""
+msgstr "Ранее использованные"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
@@ -366,19 +366,19 @@ msgstr "Повторить"
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
-msgstr ""
+msgstr "Права"
 
 #: fpg_constants:rscollectionsans
 msgid "Sans"
-msgstr ""
+msgstr "Sans"
 
 #: fpg_constants:rsshortsat
 msgid "Sat"
-msgstr ""
+msgstr "Суб"
 
 #: fpg_constants:rslongsat
 msgid "Saturday"
-msgstr ""
+msgstr "Суббота"
 
 #: fpg_constants:rssave
 msgid "Save"
@@ -386,7 +386,7 @@ msgstr "Сохранить"
 
 #: fpg_constants:rssaveafile
 msgid "Save file as"
-msgstr ""
+msgstr "Сохранить файл как"
 
 #: fpg_constants:rssearch
 msgid "Search"
@@ -398,75 +398,75 @@ msgstr "Выбрать"
 
 #: fpg_constants:rsselectafont
 msgid "Select a font"
-msgstr ""
+msgstr "Выбор шрифта"
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
-msgstr ""
+msgstr "Сен"
 
 #: fpg_constants:rslongsep
 msgid "September"
-msgstr ""
+msgstr "Сентябрь"
 
 #: fpg_constants:rscollectionserif
 msgid "Serif"
-msgstr ""
+msgstr "Serif"
 
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
-msgstr ""
+msgstr "Показывать скрытые файлы"
 
 #: fpg_constants:rssize
 msgid "Size"
-msgstr ""
+msgstr "Размер"
 
 #: fpg_constants:rsstyle
 msgid "Style"
-msgstr ""
+msgstr "Стиль"
 
 #: fpg_constants:rsshortsun
 msgid "Sun"
-msgstr ""
+msgstr "Вс"
 
 #: fpg_constants:rslongsun
 msgid "Sunday"
-msgstr ""
+msgstr "Воскресенье"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
-msgstr ""
+msgstr "Чт"
 
 #: fpg_constants:rslongthu
 msgid "Thursday"
-msgstr ""
+msgstr "Четверг"
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr ""
+msgstr "Сегодня"
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
-msgstr ""
+msgstr "Вт"
 
 #: fpg_constants:rslongtue
 msgid "Tuesday"
-msgstr ""
+msgstr "Вторник"
 
 #: fpg_constants:rsfiletype
 msgid "Type of file"
-msgstr ""
+msgstr "Тип файла"
 
 #: fpg_constants:rstypeface
 msgid "Typeface"
-msgstr ""
+msgstr "Начертание"
 
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
-msgstr ""
+msgstr "Подчеркнутый"
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr ""
+msgstr "Имя пользователя"
 
 #: fpg_constants:rswarning
 msgid "Warning"
@@ -474,15 +474,15 @@ msgstr "Внимание"
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
-msgstr ""
+msgstr "Ср"
 
 #: fpg_constants:rslongwed
 msgid "Wednesday"
-msgstr ""
+msgstr "Среда"
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr ""
+msgstr "Добавить новый элемент <%s> в список?"
 
 #: fpg_constants:rsyes
 msgid "Yes"
