@@ -80,6 +80,8 @@ type
     FVisibleText: TfpgString;
     FVisSelStartPx: integer;
     FVisSelEndPx: integer;
+    function    GetMarginAdjustment: integer; virtual;
+    procedure   DrawSelection; virtual;
     procedure   DoOnChange; virtual;
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandlePaint; override;
@@ -121,7 +123,13 @@ type
   end;
 
 
-  TfpgEdit = class(TfpgBaseEdit)
+  TfpgBaseTextEdit = class(TfpgBaseEdit)
+  protected
+    procedure   HandlePaint; override;
+  end;
+
+
+  TfpgEdit = class(TfpgBaseTextEdit)
   public
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
@@ -167,6 +175,7 @@ type
     procedure   SetThousandSeparator(const AValue: TfpgChar);
     procedure   SetShowThousand;
   protected
+    function    GetMarginAdjustment: integer; override;
     procedure   HandlePaint; override;
     procedure   FormatEdit; virtual;
     procedure   Justify; virtual; // to implement in derived classes
@@ -594,36 +603,38 @@ begin
   FHideSelection := AValue;
 end;
 
+// paint selection rectangle
+procedure TfpgBaseEdit.DrawSelection;
+var
+  lcolor: TfpgColor;
+  rs: TfpgRect;
+  r: TfpgRect;
+begin
+  r := Canvas.GetClipRect;  // contains adjusted size based on borders
+
+  if Focused then
+  begin
+    lcolor := clSelection;
+    Canvas.SetTextColor(clSelectionText);
+  end
+  else
+  begin
+    lcolor := clInactiveSel;
+    Canvas.SetTextColor(clText1);
+  end;
+
+  rs.SetRect(FVisSelStartPx, r.Top + FHeightMargin, FVisSelEndPx - FVisSelStartPx, FFont.Height);
+  Canvas.SetColor(lcolor);
+  Canvas.FillRectangle(rs);
+  Canvas.SetTextColor(clWhite);
+  Canvas.AddClipRect(rs);
+  fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
+  Canvas.ClearClipRect;
+end;
+
 procedure TfpgBaseEdit.HandlePaint;
 var
   r: TfpgRect;
-
-  // paint selection rectangle
-  procedure DrawSelection;
-  var
-    lcolor: TfpgColor;
-    rs: TfpgRect;
-  begin
-    if Focused then
-    begin
-      lcolor := clSelection;
-      Canvas.SetTextColor(clSelectionText);
-    end
-    else
-    begin
-      lcolor := clInactiveSel;
-      Canvas.SetTextColor(clText1);
-    end;
-
-    rs.SetRect(FVisSelStartPx, r.Top + FHeightMargin, FVisSelEndPx - FVisSelStartPx, FFont.Height);
-    Canvas.SetColor(lcolor);
-    Canvas.FillRectangle(rs);
-    Canvas.SetTextColor(clWhite);
-    Canvas.AddClipRect(rs);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, r.Top + FHeightMargin, FVisibleText, Enabled);
-    Canvas.ClearClipRect;
-  end;
-
 begin
   Canvas.ClearClipRect;
   r.SetRect(0, 0, Width, Height);
@@ -650,29 +661,9 @@ begin
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
-
   Canvas.FillRectangle(r);
 
   Canvas.SetFont(FFont);
-  Canvas.SetTextColor(FTextColor);
-  fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, r.Top + FHeightMargin, FVisibleText, Enabled);
-
-  if Focused then
-  begin
-    // drawing selection
-    if FSelOffset <> 0 then
-      DrawSelection;
-
-    // drawing cursor
-    fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, FFont.Height);
-  end
-  else
-  begin
-    // drawing selection
-    if (AutoSelect = False) and (FSelOffset <> 0) and (HideSelection = False) then
-      DrawSelection;
-    fpgCaret.UnSetCaret(Canvas);
-  end;
 end;
 
 procedure TfpgBaseEdit.HandleResize(awidth, aheight: TfpgCoord);
@@ -1144,6 +1135,11 @@ begin
   end;
 end;
 
+function TfpgBaseEdit.GetMarginAdjustment: integer;
+begin
+  Result := FSideMargin;
+end;
+
 procedure TfpgBaseEdit.DoOnChange;
 begin
   if Assigned(FOnChange) then
@@ -1283,6 +1279,45 @@ end;
 procedure TfpgBaseEdit.PasteFromClipboard;
 begin
   DoPaste;
+end;
+
+{ TfpgBaseTextEdit }
+
+procedure TfpgBaseTextEdit.HandlePaint;
+var
+  r: TfpgRect;
+begin
+  inherited HandlePaint;
+  r := Canvas.GetClipRect;    // contains adjusted size based on borders
+
+  if (FVisibleText = '') and not Focused then
+  begin
+    Canvas.SetTextColor(clShadow1);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FHint, Enabled);
+  end
+  else
+  begin
+    Canvas.SetTextColor(FTextColor);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
+  end;
+
+  if Focused then
+  begin
+    // drawing selection
+    if FSelOffset <> 0 then
+      DrawSelection;
+
+    // drawing cursor
+    fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, FFont.Height);
+  end
+  else
+  begin
+    // drawing selection
+    if (AutoSelect = False) and (FSelOffset <> 0) and (HideSelection = False) then
+      DrawSelection;
+    fpgCaret.UnSetCaret(Canvas);
+  end;
+
 end;
 
 { TfpgBaseNumericEdit }
@@ -1575,6 +1610,12 @@ begin
   end;
 end;
 
+function TfpgBaseNumericEdit.GetMarginAdjustment: integer;
+begin
+  // Due to numeric edits being right aligned, the margin is negative
+  Result := -FSideMargin;
+end;
+
 procedure TfpgBaseNumericEdit.Justify;
 begin
   //based on Alignment property this method will align the derived edit correctly.
@@ -1584,44 +1625,24 @@ procedure TfpgBaseNumericEdit.HandlePaint;
 var
   x: TfpgCoord;
   r: TfpgRect;
-
-  // paint selection rectangle
-  procedure DrawSelection;
-  var
-    lcolor: TfpgColor;
-    rs: TfpgRect;
-  begin
-    if Focused then
-    begin
-      lcolor := clSelection;
-      Canvas.SetTextColor(clSelectionText);
-    end
-    else
-    begin
-      lcolor := clInactiveSel;
-      Canvas.SetTextColor(clText1);
-    end;
-
-    rs.SetRect(FVisSelStartPx, r.Top + FHeightMargin, FVisSelEndPx - FVisSelStartPx, FFont.Height);
-    Canvas.SetColor(lcolor);
-    Canvas.FillRectangle(rs);
-    Canvas.SetTextColor(clWhite);
-    Canvas.AddClipRect(rs);
-    fpgStyle.DrawString(Canvas, -FDrawOffset - FSideMargin, r.Top + FHeightMargin, FVisibleText, Enabled);
-    Canvas.ClearClipRect;
-  end;
-
 begin
+  inherited HandlePaint;
+
   if Alignment = taRightJustify then
   begin
-    inherited HandlePaint;
     r := GetClientRect;
     Canvas.SetClipRect(r);
-    Canvas.Clear(BackgroundColor);
+
+    if Enabled then
+      Canvas.SetColor(FBackgroundColor)
+    else
+      Canvas.SetColor(clWindowBackground);
+    Canvas.FillRectangle(r);
+
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);
     x := r.Width - Font.TextWidth(Text) - FSideMargin;
-    Canvas.DrawString(x,r.Top + FHeightMargin,Text);
+    fpgStyle.DrawString(Canvas, x, r.Top + FHeightMargin, Text, Enabled);
     if Focused then
     begin
       // drawing selection
@@ -1629,9 +1650,7 @@ begin
         DrawSelection;
       fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, Font.Height);
     end;
-  end
-  else
-    inherited;
+  end;
 end;
 
 procedure TfpgBaseNumericEdit.FormatEdit;
