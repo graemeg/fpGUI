@@ -354,7 +354,7 @@ begin
   if FAutoHeight= AValue then
     Exit; //==>
   FAutoHeight := AValue;
-  Height := (PageLength * RowHeight) + (2 * FMargin);
+  Height := (Succ(PageLength) * RowHeight) + (2 * FMargin);
 end;
 
 procedure TfpgBaseListBox.MsgPaint(var msg: TfpgMessageRec);

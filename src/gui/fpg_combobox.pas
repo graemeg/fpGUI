@@ -74,10 +74,12 @@ type
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
   protected
+    FMargin: integer;
     FInternalBtnRect: TfpgRect;
     FFocusItem: integer;
     FItems: TStringList;
     FBtnPressed: Boolean;
+    procedure   SetMargin(const AValue: integer);
     procedure   CalculateInternalButtonRect; virtual;
     procedure   InternalOnClose(Sender: TObject);
     procedure   InternalItemsChanged(Sender: TObject); virtual;
@@ -93,6 +95,7 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    Options: TfpgComboOptions read FOptions write FOptions;
+    property    Margin: integer read FMargin write SetMargin default 3;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnCloseUp: TNotifyEvent read FOnCloseUp write FOnCloseUp;
     property    OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
@@ -103,13 +106,10 @@ type
   end;
   
 
-  { TfpgBaseStaticCombo }
-
   TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
     procedure   InternalBtnClick(Sender: TObject);
   protected
-    FMargin: integer;
     FDropDown: TfpgPopupWindow;
     procedure   DoDropDown; override;
     function    GetText: string; virtual;
@@ -137,6 +137,7 @@ type
     property    FontDesc;
     property    Height;
     property    Items;
+    property    Margin;
     property    Options;
     property    ParentShowHint;
     property    ShowHint;
@@ -220,9 +221,17 @@ procedure TfpgBaseComboBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
-  if Height < FFont.Height + 6 then
-    Height := FFont.Height + 6;
+  if Height < FFont.Height + (FMargin * 2) then
+    Height := FFont.Height + (FMargin * 2);
   RePaint;
+end;
+
+procedure TfpgBaseComboBox.SetMargin(const AValue: integer);
+begin
+  if (FMargin = AValue) or (AValue <= 0) then
+    Exit; //=>
+  FMargin := AValue;
+  Height := FFont.Height + (FMargin * 2);
 end;
 
 procedure TfpgBaseComboBox.CalculateInternalButtonRect;
@@ -364,6 +373,7 @@ constructor TfpgBaseComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDropDownCount := 8;
+  FMargin := 3;
   FFocusItem := -1; // nothing is selected
   FItems  := TStringList.Create;
   FItems.OnChange := @InternalItemsChanged;
@@ -449,10 +459,10 @@ begin
   Result.Width     := w;
   Result.Focusable := True;
 
-  if h < TfpgComboBox(Result).FFont.Height + 6 then
-    Result.Height:= TfpgComboBox(Result).FFont.Height + 6
+  if h < TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2) then
+    Result.Height := TfpgComboBox(Result).FFont.Height + (Result.FMargin * 2)
   else
-    Result.Height:= h;
+    Result.Height := h;
 
   if Assigned(AList) then
     Result.Items.Assign(AList);
@@ -659,7 +669,6 @@ begin
   FBackgroundColor  := clBoxColor;
   FTextColor        := Parent.TextColor;
   FWidth            := 120;
-  FMargin           := 3;
   FHeight           := Font.Height + (2*FMargin);
   FFocusable        := True;
 

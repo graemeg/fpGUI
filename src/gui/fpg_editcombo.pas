@@ -80,7 +80,6 @@ type
     procedure   InternalListBoxKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState;
                 var consumed: Boolean);
   protected
-    FMargin: integer;
     FDropDown: TfpgPopupWindow;
     FDrawOffset: integer;
     FSelStart: integer;
@@ -113,14 +112,15 @@ type
 
   TfpgEditCombo = class(TfpgBaseEditCombo)
   published
-    property    AutoCompletion;
     property    AllowNew;
+    property    AutoCompletion;
     property    BackgroundColor;
     property    DropDownCount;
     property    FocusItem;
     property    FontDesc;
     property    Height;
     property    Items;
+    property    Margin;
     property    Text;
     property    TextColor;
     property    Width;
@@ -238,8 +238,8 @@ begin
   Result.Focusable := True;
   Result.AutoCompletion := ACompletion;
   Result.AllowNew       := ANew;
-  if h < TfpgEditCombo(Result).Font.Height + 6 then
-    Result.Height:= TfpgEditCombo(Result).Font.Height + 6
+  if h < TfpgEditCombo(Result).Font.Height + (Result.FMargin * 2) then
+    Result.Height := TfpgEditCombo(Result).Font.Height + (Result.FMargin * 2)
   else
     Result.Height:= h;
 
@@ -731,7 +731,7 @@ begin
       // drawing cursor
       FCursorPos:= UTF8Length(FText);
       tw := Font.TextWidth(UTF8Copy(FText, 1, FCursorPos));
-      fpgCaret.SetCaret(Canvas, -FDrawOffset + FMargin + tw, 3, fpgCaret.Width, Font.Height);
+      fpgCaret.SetCaret(Canvas, -FDrawOffset + FMargin + tw, FMargin, fpgCaret.Width, Font.Height);
     end
     else
       fpgCaret.UnSetCaret(Canvas);

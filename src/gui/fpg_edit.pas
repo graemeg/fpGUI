@@ -59,6 +59,8 @@ type
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
+    procedure   SetSideMargin(const AValue: integer);
+    procedure   SetHeightMargin(const AValue: integer);
     procedure   DefaultPopupCut(Sender: TObject);
     procedure   DefaultPopupCopy(Sender: TObject);
     procedure   DefaultPopupPaste(Sender: TObject);
@@ -67,6 +69,7 @@ type
   protected
     FFont: TfpgFont;
     FSideMargin: integer;
+    FHeightMargin: integer;
     FMouseDragPos: integer;
     FSelStart: integer;
     FSelOffset: integer;
@@ -113,6 +116,8 @@ type
     function    GetClientRect: TfpgRect; override;
     procedure   PasteFromClipboard;
     property    Font: TfpgFont read FFont;
+    property    SideMargin: integer read FSideMargin write SetSideMargin default 3;
+    property    HeightMargin: integer read FHeightMargin write SetHeightMargin default 2;
   end;
 
 
@@ -124,11 +129,13 @@ type
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
     property    FontDesc;
+    property    HeightMargin;
     property    HideSelection;
     property    MaxLength;
-    property    PasswordMode;
     property    ParentShowHint;
+    property    PasswordMode;
     property    ShowHint;
+    property    SideMargin;
     property    TabOrder;
     property    Text;
     property    TextColor;
@@ -310,8 +317,7 @@ implementation
 
 uses
   fpg_stringutils,
-  fpg_constants,
-  fpg_hint;
+  fpg_constants;
 
 const
   // internal popupmenu item names
@@ -328,8 +334,8 @@ begin
   Result.Top   := y;
   if w > 0 then
     Result.Width := w;
-  if h < TfpgEdit(Result).FFont.Height + 6 then
-    Result.Height:= TfpgEdit(Result).FFont.Height + 6
+  if h < TfpgEdit(Result).FFont.Height + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEdit(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
 end;
@@ -341,8 +347,8 @@ begin
   Result.Top   := y;
   Result.Width := w;
   Result.ShowThousand:= AShowThousand;
-  if h < TfpgEditInteger(Result).FFont.Height + 6 then
-    Result.Height:= TfpgEditInteger(Result).FFont.Height + 6
+  if h < TfpgEditInteger(Result).FFont.Height + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEditInteger(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
 end;
@@ -357,8 +363,8 @@ begin
   Result.ShowThousand:= AShowThousand;
   Result.Decimals := ADecimals;
   Result.FFixedDecimals:= AFixedDecimals;
-  if h < TfpgEditFloat(Result).FFont.Height + 6 then
-    Result.Height:= TfpgEditFloat(Result).FFont.Height + 6
+  if h < TfpgEditFloat(Result).FFont.Height + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEditFloat(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
 end;
@@ -372,8 +378,8 @@ begin
   Result.Width    := w;
   Result.ShowThousand:= AShowThousand;
   Result.Decimals := ADecimals;
-  if h < TfpgEditCurrency(Result).FFont.Height + 6 then
-    Result.Height:= TfpgEditCurrency(Result).FFont.Height + 6
+  if h < TfpgEditCurrency(Result).FFont.Height + 4 + (Result.FHeightMargin * 2) then
+    Result.Height := TfpgEditCurrency(Result).FFont.Height + 4 + (Result.FHeightMargin * 2)
   else
     Result.Height:= h;
 end;
@@ -401,6 +407,7 @@ var
   ptw: integer;
   dpos: integer;  // helps to pass through an utf-8 string quickly
   VisibleWidth: integer; // width of the edit field minus side margins
+  r: TfpgRect;
 begin
   if UsePxCursorPos then
   begin
@@ -442,7 +449,8 @@ begin
     Inc(chnum);
   end;
 
-  VisibleWidth := (FWidth - 2 * FSideMargin);
+  r := GetClientRect;
+  VisibleWidth := (r.Width - (2 * FSideMargin));
   if tw - FTextOffset > VisibleWidth - 2 then
     FTextOffset := tw - VisibleWidth + 2
   else if tw - FTextOffset < 0 then
@@ -594,7 +602,7 @@ var
   procedure DrawSelection;
   var
     lcolor: TfpgColor;
-    r: TfpgRect;
+    rs: TfpgRect;
   begin
     if Focused then
     begin
@@ -607,12 +615,12 @@ var
       Canvas.SetTextColor(clText1);
     end;
 
-    r.SetRect(FVisSelStartPx, 3, FVisSelEndPx - FVisSelStartPx, FFont.Height);
+    rs.SetRect(FVisSelStartPx, r.Top + FHeightMargin, FVisSelEndPx - FVisSelStartPx, FFont.Height);
     Canvas.SetColor(lcolor);
-    Canvas.FillRectangle(r);
+    Canvas.FillRectangle(rs);
     Canvas.SetTextColor(clWhite);
-    Canvas.AddClipRect(r);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, FVisibleText, Enabled);
+    Canvas.AddClipRect(rs);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, r.Top + FHeightMargin, FVisibleText, Enabled);
     Canvas.ClearClipRect;
   end;
 
@@ -647,7 +655,7 @@ begin
 
   Canvas.SetFont(FFont);
   Canvas.SetTextColor(FTextColor);
-  fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, 3, FVisibleText, Enabled);
+  fpgStyle.DrawString(Canvas, -FDrawOffset + FSideMargin, r.Top + FHeightMargin, FVisibleText, Enabled);
 
   if Focused then
   begin
@@ -656,7 +664,7 @@ begin
       DrawSelection;
 
     // drawing cursor
-    fpgCaret.SetCaret(Canvas, FCursorPx, 3, fpgCaret.Width, FFont.Height);
+    fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, FFont.Height);
   end
   else
   begin
@@ -958,7 +966,7 @@ begin
   inherited Create(AOwner);
   FFont             := fpgGetFont('#Edit1');  // owned object !
   Focusable         := True;
-  FHeight           := FFont.Height + 6;
+  FHeight           := FFont.Height + 8;     // (BorderStyle + HeightMargin) * 2
   FWidth            := 120;
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := clBoxColor;
@@ -966,6 +974,7 @@ begin
   FSelecting        := False;
   FHideSelection    := True;
   FSideMargin       := 3;
+  FHeightMargin     := 2;
   FMaxLength        := 0; // no limit
   FText             := '';
   FCursorPos        := UTF8Length(FText);
@@ -1021,8 +1030,17 @@ procedure TfpgBaseEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
-  if Height < FFont.Height + 6 then
-    Height:= FFont.Height + 6;
+  case BorderStyle of
+    ebsNone:
+      if Height < FFont.Height + (FHeightMargin * 2) then
+        Height:= FFont.Height + (FHeightMargin * 2);
+    ebsDefault:
+      if Height < FFont.Height + 4 + (FHeightMargin * 2) then
+        Height:= FFont.Height + 4 + (FHeightMargin * 2);
+    ebsSingle:
+      if Height < FFont.Height + 2 + (FHeightMargin * 2) then
+        Height:= FFont.Height + 2 + (FHeightMargin * 2);
+  end;
   Adjust;
   RePaint;
 end;
@@ -1057,6 +1075,30 @@ begin
 
   if prevval <> Text then
     DoOnChange;
+end;
+
+procedure TfpgBaseEdit.SetSideMargin(const AValue: integer);
+begin
+  if (FSideMargin = AValue) or (AValue <= 0) then
+    Exit; //=>
+  FSideMargin := AValue;
+  Repaint;
+end;
+
+procedure TfpgBaseEdit.SetHeightMargin(const AValue: integer);
+begin
+  if (FHeightMargin = AValue) or (AValue <= 0) then
+    Exit; //=>
+  FHeightMargin := AValue;
+  case BorderStyle of
+    ebsNone:
+      Height:= FFont.Height + (FHeightMargin * 2);
+    ebsDefault:
+      Height:= FFont.Height + 4 + (FHeightMargin * 2);
+    ebsSingle:
+      Height:= FFont.Height + 2 + (FHeightMargin * 2);
+    end;
+  Repaint;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupCut(Sender: TObject);
@@ -1259,6 +1301,7 @@ var
   ptw: integer;
   dpos: integer;  // helps to pass through an utf-8 string quickly
   VisibleWidth: integer; // width of the edit field minus side margins
+  r: TfpgRect;
 begin
   if UsePxCursorPos then
   begin
@@ -1274,6 +1317,7 @@ begin
   chnum := 0;
   tw    := 0;
   dpos  := 0;
+  r := GetClientRect;
 
   while dpos <= Length(dtext) do
   begin
@@ -1284,7 +1328,7 @@ begin
     taLeftJustify:
       chx := tw - FTextOffset + FSideMargin;
     taRightJustify:
-      chx := tw - FTextOffset - FSideMargin + Width - 2 - FFont.TextWidth(dtext);
+      chx := tw - FTextOffset - FSideMargin + r.Width - FFont.TextWidth(dtext);
     end;
     if UsePxCursorPos then
     begin
@@ -1305,7 +1349,7 @@ begin
     Inc(chnum);
   end;
 
-  VisibleWidth := (FWidth - 2 * FSideMargin);
+  VisibleWidth := (r.Width - (2 * FSideMargin));
   if tw - FTextOffset > VisibleWidth - 2 then
     FTextOffset := tw - VisibleWidth + 2
   else if tw - FTextOffset < 0 then
@@ -1319,7 +1363,7 @@ begin
   taLeftJustify:
     FCursorPx := tw - FTextOffset + FSideMargin;
   taRightJustify:
-    FCursorPx := tw - FTextOffset - FSideMargin + Width - FFont.TextWidth(dtext);
+    FCursorPx := tw - FTextOffset - FSideMargin + r.Width - FFont.TextWidth(dtext);
   end;
 end;
 
@@ -1338,6 +1382,7 @@ var
   pdp: integer;   // dpos on the previous step
   vstart, vend: integer;    // visible area start and end, pixels
   slstart, slend: integer;  // selection start and end, pixels
+  r: TfpgRect;
 begin
   vstart  := FSideMargin;
   vend    := FWidth - FSideMargin;
@@ -1361,6 +1406,7 @@ begin
   tw    := 0;
   dpos  := 0;
 
+  r := GetClientRect;
   FDrawOffset := 0;
   while dpos <= Length(dtext) do
   begin
@@ -1372,7 +1418,7 @@ begin
     taLeftJustify:
       chx := tw - FTextOffset + FSideMargin;
     taRightJustify:
-      chx := tw - FTextOffset - FSideMargin + Width - 2 - FFont.TextWidth(dtext);
+      chx := tw - FTextOffset - FSideMargin + r.Width - FFont.TextWidth(dtext);
     end;
 
     // calculate selection-related fields
@@ -1390,7 +1436,7 @@ begin
       taLeftJustify:
         FDrawOffset := ptw;
       taRightJustify:
-        FDrawOffset := ptw + Width - 2 - FFont.TextWidth(dtext);
+        FDrawOffset := ptw + r.Width - FFont.TextWidth(dtext);
       end;
     end;
     // in small edit field the same character can be both the first and the last, so no 'else' allowed
@@ -1543,7 +1589,7 @@ var
   procedure DrawSelection;
   var
     lcolor: TfpgColor;
-    r: TfpgRect;
+    rs: TfpgRect;
   begin
     if Focused then
     begin
@@ -1556,12 +1602,12 @@ var
       Canvas.SetTextColor(clText1);
     end;
 
-    r.SetRect(FVisSelStartPx, 3, FVisSelEndPx - FVisSelStartPx, FFont.Height);
+    rs.SetRect(FVisSelStartPx, r.Top + FHeightMargin, FVisSelEndPx - FVisSelStartPx, FFont.Height);
     Canvas.SetColor(lcolor);
-    Canvas.FillRectangle(r);
+    Canvas.FillRectangle(rs);
     Canvas.SetTextColor(clWhite);
-    Canvas.AddClipRect(r);
-    fpgStyle.DrawString(Canvas, -FDrawOffset - FSideMargin, 3, FVisibleText, Enabled);
+    Canvas.AddClipRect(rs);
+    fpgStyle.DrawString(Canvas, -FDrawOffset - FSideMargin, r.Top + FHeightMargin, FVisibleText, Enabled);
     Canvas.ClearClipRect;
   end;
 
@@ -1574,14 +1620,14 @@ begin
     Canvas.Clear(BackgroundColor);
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);
-    x := r.Right - Font.TextWidth(Text) - 1;  // 1 is the spacing from client edge
-    Canvas.DrawString(x,r.Top+1,Text);
+    x := r.Width - Font.TextWidth(Text) - FSideMargin;
+    Canvas.DrawString(x,r.Top + FHeightMargin,Text);
     if Focused then
     begin
       // drawing selection
       if FSelOffset <> 0 then
         DrawSelection;
-      fpgCaret.SetCaret(Canvas, FCursorPx - FSideMargin, r.Top+1, fpgCaret.Width, Font.Height);
+      fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, Font.Height);
     end;
   end
   else
