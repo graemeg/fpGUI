@@ -75,7 +75,6 @@ type
     function GetObjectFromRow(ARow: Integer): TtiObject;
   published
     property View: TfpgStringGrid read FView write SetView;
-    property SelectedObject: TtiObject read GetSelectedObject write SetSelectedObject;
   end;
 
 
