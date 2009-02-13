@@ -40,9 +40,62 @@ type
     procedure   SetObjectUpdateMoment (Const AValue : TObjectUpdateMoment); override;
   public
     constructor Create; override;
-    constructor CreateCustom(pEditControl: TfpgWidget; pSubject: TtiObject; pFieldName: string; pGuiFieldName: string = 'Text'); reintroduce;
     destructor  Destroy; override;
     property    EditControl: TfpgEdit read FEditControl write FEditControl;
+    class function ComponentClass: TClass; override;
+  end;
+
+
+  { TMediatorEditIntegerView }
+  TMediatorEditIntegerView = class(TMediatorView)
+  private
+    FEditControl: TfpgEditInteger;
+  protected
+    function    GetGUIControl: TComponent; override;
+    procedure   SetGUIControl(const AValue: TComponent); override;
+    procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+    procedure   SetupGUIandObject; override;
+    procedure   SetObjectUpdateMoment (Const AValue : TObjectUpdateMoment); override;
+  public
+    constructor Create; override;
+    destructor  Destroy; override;
+    property    EditControl: TfpgEditInteger read FEditControl write FEditControl;
+    class function ComponentClass: TClass; override;
+  end;
+
+
+  { TMediatorEditFloatView }
+  TMediatorEditFloatView = class(TMediatorView)
+  private
+    FEditControl: TfpgEditFloat;
+  protected
+    function    GetGUIControl: TComponent; override;
+    procedure   SetGUIControl(const AValue: TComponent); override;
+    procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+    procedure   SetupGUIandObject; override;
+    procedure   SetObjectUpdateMoment (Const AValue : TObjectUpdateMoment); override;
+  public
+    constructor Create; override;
+    destructor  Destroy; override;
+    property    EditControl: TfpgEditFloat read FEditControl write FEditControl;
+    class function ComponentClass: TClass; override;
+  end;
+
+
+  { TMediatorEditCurrencyView }
+  TMediatorEditCurrencyView = class(TMediatorView)
+  private
+    FEditControl: TfpgEditCurrency;
+  protected
+    function    GetGUIControl: TComponent; override;
+    procedure   SetGUIControl(const AValue: TComponent); override;
+    procedure   UpdateGuiValidStatus(pErrors: TtiObjectErrors); override;
+    procedure   SetupGUIandObject; override;
+    procedure   SetObjectUpdateMoment (Const AValue : TObjectUpdateMoment); override;
+  public
+    constructor Create; override;
+    destructor  Destroy; override;
+    property    EditControl: TfpgEditCurrency read FEditControl write FEditControl;
     class function ComponentClass: TClass; override;
   end;
 
@@ -211,7 +264,6 @@ implementation
 uses
   SysUtils
   ,TypInfo
-  ,tiExcept
   ,fpg_dialogs      // for TfpgMessageDialog
   ,fpg_base         // for predefined colors
   ,tiGUIConstants   // for error color
@@ -227,6 +279,9 @@ const
 procedure RegisterFallBackMediators;
 begin
   gMediatorManager.RegisterMediator(TMediatorEditView, TtiObject, [tkSString,tkAString,tkInteger,tkFloat]);
+  gMediatorManager.RegisterMediator(TMediatorEditIntegerView, TtiObject, [tkInteger]);
+  gMediatorManager.RegisterMediator(TMediatorEditFloatView, TtiObject, [tkFloat]);
+  gMediatorManager.RegisterMediator(TMediatorEditCurrencyView, TtiObject, [tkFloat]);
   gMediatorManager.RegisterMediator(TMediatorCheckBoxView, TtiObject, [tkBool]);
   gMediatorManager.RegisterMediator(TMediatorComboboxView, TtiObject, [tkSString,tkAString]);
   gMediatorManager.RegisterMediator(TMediatorItemComboBoxView, TtiObject, [tkInteger, tkEnumeration]);
@@ -297,13 +352,7 @@ end;
 constructor TMediatorEditView.Create;
 begin
   inherited Create;
-  GuiFieldName:='Text';
-end;
-
-constructor TMediatorEditView.CreateCustom(pEditControl: TfpgWidget;
-  pSubject: TtiObject; pFieldName: string; pGuiFieldName: string);
-begin
-  inherited;
+  GuiFieldName := 'Text';
 end;
 
 destructor TMediatorEditView.Destroy;
@@ -835,6 +884,216 @@ end;
 class function TMediatorSpinEditFloatView.ComponentClass: TClass;
 begin
   Result := TfpgSpinEditFloat;
+end;
+
+{ TMediatorEditIntegerView }
+
+function TMediatorEditIntegerView.GetGUIControl: TComponent;
+begin
+  Result:= FEditControl;
+end;
+
+procedure TMediatorEditIntegerView.SetGUIControl(const AValue: TComponent);
+begin
+  FEditControl := AValue as TfpgEditInteger;
+  //inherited SetGUIControl(AValue);
+end;
+
+procedure TMediatorEditIntegerView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
+var
+  oError: TtiObjectError;
+begin
+  inherited UpdateGuiValidStatus(pErrors);
+
+  oError := pErrors.FindByErrorProperty(FieldName);
+  if oError <> nil then
+  begin
+    EditControl.BackgroundColor  := clError;
+    EditControl.Hint   := oError.ErrorMessage;
+  end
+  else
+  begin
+    EditControl.BackgroundColor  := clBoxColor;
+    EditControl.Hint   := '';
+  end;
+end;
+
+procedure TMediatorEditIntegerView.SetupGUIandObject;
+begin
+  inherited;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
+end;
+
+procedure TMediatorEditIntegerView.SetObjectUpdateMoment(
+  const AValue: TObjectUpdateMoment);
+begin
+  inherited SetObjectUpdateMoment(AValue);
+  if Assigned(FEditControl) then
+    If ObjectUpdateMoment in [ouOnchange,ouCustom] then
+      FEditControl.OnChange := @DoOnChange
+    else
+      FEditControl.OnExit := @DoOnChange;
+end;
+
+constructor TMediatorEditIntegerView.Create;
+begin
+  inherited Create;
+  GUIFieldName := 'Value';
+end;
+
+destructor TMediatorEditIntegerView.Destroy;
+begin
+  if Assigned(EditControl) and Assigned(EditControl.OnChange) then
+    EditControl.OnChange := nil;
+  inherited Destroy;
+end;
+
+class function TMediatorEditIntegerView.ComponentClass: TClass;
+begin
+  Result := TfpgEditInteger;
+end;
+
+
+{ TMediatorEditFloatView }
+function TMediatorEditFloatView.GetGUIControl: TComponent;
+begin
+  Result:= FEditControl;
+end;
+
+procedure TMediatorEditFloatView.SetGUIControl(const AValue: TComponent);
+begin
+  FEditControl := AValue as TfpgEditFloat;
+  //inherited SetGUIControl(AValue);
+end;
+
+procedure TMediatorEditFloatView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
+var
+  oError: TtiObjectError;
+begin
+  inherited UpdateGuiValidStatus(pErrors);
+
+  oError := pErrors.FindByErrorProperty(FieldName);
+  if oError <> nil then
+  begin
+    EditControl.BackgroundColor  := clError;
+    EditControl.Hint   := oError.ErrorMessage;
+  end
+  else
+  begin
+    EditControl.BackgroundColor  := clBoxColor;
+    EditControl.Hint   := '';
+  end;
+end;
+
+procedure TMediatorEditFloatView.SetupGUIandObject;
+begin
+  inherited;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
+end;
+
+procedure TMediatorEditFloatView.SetObjectUpdateMoment(
+  const AValue: TObjectUpdateMoment);
+begin
+  inherited SetObjectUpdateMoment(AValue);
+  if Assigned(FEditControl) then
+    If ObjectUpdateMoment in [ouOnchange,ouCustom] then
+      FEditControl.OnChange := @DoOnChange
+    else
+      FEditControl.OnExit := @DoOnChange;
+end;
+
+constructor TMediatorEditFloatView.Create;
+begin
+  inherited Create;
+  GUIFieldName := 'Value';
+end;
+
+destructor TMediatorEditFloatView.Destroy;
+begin
+  if Assigned(EditControl) and Assigned(EditControl.OnChange) then
+    EditControl.OnChange := nil;
+  inherited Destroy;
+end;
+
+class function TMediatorEditFloatView.ComponentClass: TClass;
+begin
+  Result := TfpgEditFloat;
+end;
+
+{ TMediatorEditCurrencyView }
+
+function TMediatorEditCurrencyView.GetGUIControl: TComponent;
+begin
+  Result:= FEditControl;
+end;
+
+procedure TMediatorEditCurrencyView.SetGUIControl(const AValue: TComponent);
+begin
+  FEditControl := AValue as TfpgEditCurrency;
+  //inherited SetGUIControl(AValue);
+end;
+
+procedure TMediatorEditCurrencyView.UpdateGuiValidStatus(pErrors: TtiObjectErrors);
+var
+  oError: TtiObjectError;
+begin
+  inherited UpdateGuiValidStatus(pErrors);
+
+  oError := pErrors.FindByErrorProperty(FieldName);
+  if oError <> nil then
+  begin
+    EditControl.BackgroundColor  := clError;
+    EditControl.Hint   := oError.ErrorMessage;
+  end
+  else
+  begin
+    EditControl.BackgroundColor  := clBoxColor;
+    EditControl.Hint   := '';
+  end;
+end;
+
+procedure TMediatorEditCurrencyView.SetupGUIandObject;
+begin
+  inherited;
+  if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    FEditControl.OnChange := @DoOnChange
+  else
+    FEditControl.OnExit := @DoOnChange;
+end;
+
+procedure TMediatorEditCurrencyView.SetObjectUpdateMoment(
+  const AValue: TObjectUpdateMoment);
+begin
+  inherited SetObjectUpdateMoment(AValue);
+  if Assigned(FEditControl) then
+    If ObjectUpdateMoment in [ouOnchange,ouCustom] then
+      FEditControl.OnChange := @DoOnChange
+    else
+      FEditControl.OnExit := @DoOnChange;
+end;
+
+constructor TMediatorEditCurrencyView.Create;
+begin
+  inherited Create;
+  GUIFieldName := 'Value';
+end;
+
+destructor TMediatorEditCurrencyView.Destroy;
+begin
+  if Assigned(EditControl) and Assigned(EditControl.OnChange) then
+    EditControl.OnChange := nil;
+  inherited Destroy;
+end;
+
+class function TMediatorEditCurrencyView.ComponentClass: TClass;
+begin
+  Result := TfpgEditCurrency;
 end;
 
 end.
