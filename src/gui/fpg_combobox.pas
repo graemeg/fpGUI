@@ -660,7 +660,12 @@ begin
 
   // Draw select item's text
   if HasText then
-    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
+    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
+  else
+  begin
+    Canvas.SetTextColor(clShadow1);
+    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Hint, Enabled);
+  end;
 end;
 
 constructor TfpgBaseStaticCombo.Create(AOwner: TComponent);
