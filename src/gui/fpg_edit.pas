@@ -124,8 +124,14 @@ type
 
 
   TfpgBaseTextEdit = class(TfpgBaseEdit)
+  private
+    FExtraHint: string;
+    procedure   SetExtraHint(const AValue: string);
   protected
     procedure   HandlePaint; override;
+    property    ExtraHint: string read FExtraHint write SetExtraHint;
+  public
+    constructor Create(AOwner: TComponent); override;
   end;
 
 
@@ -136,6 +142,7 @@ type
     property    AutoSelect;
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
+    property    ExtraHint;
     property    FontDesc;
     property    HeightMargin;
     property    HideSelection;
@@ -1293,7 +1300,7 @@ begin
   if (FVisibleText = '') and not Focused then
   begin
     Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FHint, Enabled);
+    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
   end
   else
   begin
@@ -1318,6 +1325,20 @@ begin
     fpgCaret.UnSetCaret(Canvas);
   end;
 
+end;
+
+constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FExtraHint := '';
+end;
+
+procedure TfpgBaseTextEdit.SetExtraHint(const AValue: string);
+begin
+  if FExtraHint = AValue then
+    Exit; //==>
+  FExtraHint := AValue;
+  Repaint;
 end;
 
 { TfpgBaseNumericEdit }

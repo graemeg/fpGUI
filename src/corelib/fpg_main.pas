@@ -1712,6 +1712,8 @@ end;
 procedure TfpgStyle.DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord;
   AText: string; AEnabled: boolean);
 begin
+  if AText = '' then
+    Exit; //==>
   if not AEnabled then
   begin
     ACanvas.SetTextColor(clHilite1);

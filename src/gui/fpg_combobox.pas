@@ -108,7 +108,9 @@ type
 
   TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
+    FExtraHint: string;
     procedure   InternalBtnClick(Sender: TObject);
+    procedure   SetExtraHint(const AValue: string);
   protected
     FDropDown: TfpgPopupWindow;
     procedure   DoDropDown; override;
@@ -122,6 +124,7 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandlePaint; override;
     property    Text: string read GetText write SetText;
+    property    ExtraHint: string read FExtraHint write SetExtraHint;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -133,6 +136,7 @@ type
   published
     property    BackgroundColor default clBoxColor;
     property    DropDownCount;
+    property    ExtraHint;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -539,6 +543,14 @@ begin
   DoDropDown;
 end;
 
+procedure TfpgBaseStaticCombo.SetExtraHint(const AValue: string);
+begin
+  if FExtraHint = AValue then
+    Exit; //==>
+  FExtraHint := AValue;
+  Repaint;
+end;
+
 procedure TfpgBaseStaticCombo.SetText(const AValue: string);
 var
   i: integer;
@@ -664,7 +676,7 @@ begin
   else
   begin
     Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Hint, Enabled);
+    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
   end;
 end;
 
@@ -676,6 +688,7 @@ begin
   FWidth            := 120;
   FHeight           := Font.Height + (2*FMargin);
   FFocusable        := True;
+  FExtraHint        := '';
 
   CalculateInternalButtonRect;
 end;
