@@ -98,11 +98,11 @@ type
     function    FindSubNode(ATreeNodeFindMethod: TfpgTreeNodeFindMethod): TfpgTreeNode; overload;
     function    GetMaxDepth: integer;
     function    GetMaxVisibleDepth: integer;
-    procedure   Append(aValue: TfpgTreeNode);
+    procedure   Append(var aValue: TfpgTreeNode);
     procedure   Clear;  // remove all nodes recursively
     procedure   Collapse;
     procedure   Expand;
-    procedure   Remove(aNode: TfpgTreeNode);
+    procedure   Remove(var aNode: TfpgTreeNode);
     procedure   UnregisterSubNode(aNode: TfpgTreeNode);
     // parent color settings
     function    ParentInactSelColor: TfpgColor;
@@ -361,6 +361,7 @@ destructor TfpgTreeNode.Destroy;
 begin
   if FParent <> nil then
     FParent.UnregisterSubNode(self);
+  Clear;
   FData       := nil;
   FParent     := nil;
   FNext       := nil;
@@ -393,7 +394,7 @@ begin
   end;
 end;
 
-procedure TfpgTreeNode.Append(aValue: TfpgTreeNode);
+procedure TfpgTreeNode.Append(var aValue: TfpgTreeNode);
 begin
   aValue.Parent := self;
   aValue.Next   := nil;
@@ -578,7 +579,7 @@ begin
   result := i;
 end;
 
-procedure TfpgTreeNode.Remove(aNode: TfpgTreeNode);
+procedure TfpgTreeNode.Remove(var aNode: TfpgTreeNode);
 begin
   if FirstSubNode = aNode then
   begin
@@ -587,8 +588,11 @@ begin
       FFirstSubNode.Prev := nil;
   end
   else
+  begin
     if aNode.prev <> nil then
       aNode.Prev.next := aNode.next;
+  end;
+
   if LastSubNode = aNode then
   begin
     FLastSubNode := aNode.prev;
@@ -596,20 +600,28 @@ begin
       FLastSubNode.next := nil;
   end
   else
+  begin
     if aNode.next <> nil then
       aNode.next.prev := aNode.prev;
+  end;
+
   aNode.prev := nil;
   aNode.next := nil;
   aNode.parent := nil;
 end;
 
 procedure TfpgTreeNode.Clear;
+var
+  n: TfpgTreeNode;
+  tn: TfpgTreeNode;
 begin
-  while FirstSubNode <> nil do
+  n := LastSubNode;
+  while n <> nil do
   begin
-    if FirstSubNode.Count > 0 then
-      FirstSubNode.Clear;
-    Remove(FirstSubNode);
+    tn := n;
+    n := n.prev;
+    Remove(tn);
+    tn.Free;
   end;
 end;
 
@@ -1081,30 +1093,8 @@ begin
 end;
 
 procedure TfpgTreeView.FreeAllTreeNodes;
-var
-  n: TfpgTreeNode;
-  list: TList;
 begin
-  list := TList.Create;
-  n := RootNode.FirstSubNode;
-  list.Add(n);
-  
-  while n <> nil do
-  begin
-    // todo: this only frees of the first level of nodes!!!!
-    n := n.next;
-    list.Add(n);
-  end;
-
-//  writeln('NodeCount = ', list.Count);
-  while list.Count > 0 do
-  begin
-    n := TfpgTreeNode(list.Last);
-    list.Remove(n);
-    n.Free;
-  end;
-  list.Clear;
-  list.Free;
+  RootNode.Clear;
 end;
 
 procedure TfpgTreeview.HandleResize(awidth, aheight: TfpgCoord);
@@ -1800,9 +1790,13 @@ end;
 destructor TfpgTreeView.Destroy;
 begin
   if Assigned(FColumnLeft) then
+  begin
     ClearColumnLeft;
+    FColumnLeft.Free;
+  end;
   FFont.Free;
   FreeAllTreeNodes;
+  FRootNode.Free;
   inherited Destroy;
 end;
 
