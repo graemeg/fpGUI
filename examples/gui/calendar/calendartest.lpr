@@ -18,16 +18,6 @@ uses
 type
   TMainForm = class(TfpgForm)
   private
-    procedure   btnDateFormatClicked(Sender: TObject);
-    procedure   btnTodayClicked(Sender: TObject);
-    procedure   btnMinDateClicked(Sender: TObject);
-    procedure   btnMaxDateClicked(Sender: TObject);
-    procedure   cbWHolidayChange(Sender: TObject);
-    procedure   cbName1Change(Sender: TObject);
-    procedure   cbCloseOnSelectChanged(Sender: TObject);
-    procedure   btnClearClicked(Sender: TObject);
-    procedure   DrawCalendar(month, year: integer);
-  public
     {@VFD_HEAD_BEGIN: MainForm}
     btnClear: TfpgButton;
     lblWHoliday: TfpgLabel;
@@ -47,6 +37,16 @@ type
     lblName1: TfpgLabel;
     bvlName1: TfpgBevel;
     {@VFD_HEAD_END: MainForm}
+    procedure   btnDateFormatClicked(Sender: TObject);
+    procedure   btnTodayClicked(Sender: TObject);
+    procedure   btnMinDateClicked(Sender: TObject);
+    procedure   btnMaxDateClicked(Sender: TObject);
+    procedure   cbWHolidayChange(Sender: TObject);
+    procedure   cbName1Change(Sender: TObject);
+    procedure   cbCloseOnSelectChanged(Sender: TObject);
+    procedure   btnClearClicked(Sender: TObject);
+    procedure   DrawCalendar(month, year: integer);
+  public
     FDropDown: TfpgPopupCalendar;
     procedure   AfterCreate; override;
   end;

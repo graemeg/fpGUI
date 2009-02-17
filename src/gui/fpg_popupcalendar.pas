@@ -108,6 +108,7 @@ type
     procedure   grdName1DrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure   TearDown;
   protected
+    FntNorm, FntBold: TfpgFont;
     FOrigFocusWin: TfpgWidget;
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -116,6 +117,7 @@ type
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   public
     constructor Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget); reintroduce;
+    destructor  Destroy; override;
     procedure   AfterCreate;
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
     property    Day: Word index 1 read GetDateElement write SetDateElement;
@@ -235,13 +237,9 @@ end;
 
 procedure TfpgPopupCalendar.grdName1DrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect;
           const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
-var
-  FntNorm,FntBold: TfpgFont;
 begin
   with grdName1 do
   begin
-    FntNorm:= fpgApplication.GetFont('arial-9');
-    FntBold:= fpgApplication.GetFont('arial-9:bold');
     if FThisMonthDays[ACol,ARow] then
       if (ACol = FocusCol) and (ARow = FocusRow) then
         Canvas.SetTextColor(FSelectedColor)
@@ -462,19 +460,24 @@ procedure TfpgPopupCalendar.UpdateCalendar;
 var
   lD, lM, lY: Word;
 begin
-  if (FDate >= FMinDate) and (FDate <= FMaxDate) then
-  begin
-    CalculateMonthOffset;
-    PopulateDays;
-    edtYear.Text := IntToStr(Year);
-    edtMonth.Text := LongMonthNames[Month];
-    DecodeDate(FDate, lY, lM, lD);
+  try
+    grdName1.BeginUpdate;
+    if (FDate >= FMinDate) and (FDate <= FMaxDate) then
+    begin
+      CalculateMonthOffset;
+      PopulateDays;
+      edtYear.Text := IntToStr(Year);
+      edtMonth.Text := LongMonthNames[Month];
+      DecodeDate(FDate, lY, lM, lD);
 
-    grdName1.FocusCol := (lD - FMonthOffset - FWeekStartDay) mod 7;
-    grdName1.FocusRow := (lD - FMonthOffset - FWeekStartDay) div 7;
-    if (FMonthOffset + FWeekStartDay) > 1 then
-      grdName1.FocusRow := grdName1.FocusRow + 1;
-    grdName1.Invalidate;
+      grdName1.FocusCol := (lD - FMonthOffset - FWeekStartDay) mod 7;
+      grdName1.FocusRow := (lD - FMonthOffset - FWeekStartDay) div 7;
+      if (FMonthOffset + FWeekStartDay) > 1 then
+        grdName1.FocusRow := grdName1.FocusRow + 1;
+//      grdName1.Invalidate;
+    end;
+  finally
+    grdName1.EndUpdate;
   end;
 end;
 
@@ -628,6 +631,9 @@ end;
 constructor TfpgPopupCalendar.Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget);
 begin
   inherited Create(AOwner);
+  FntNorm:= fpgApplication.GetFont('arial-9');
+  FntBold:= fpgApplication.GetFont('arial-9:bold');
+
   FOrigFocusWin := AOrigFocusWin;
   AfterCreate;
   FDate := Date;
@@ -639,6 +645,13 @@ begin
   FMonthOffset := 0;
   FCloseOnSelect := True;
   UpdateCalendar;
+end;
+
+destructor TfpgPopupCalendar.Destroy;
+begin
+  FntBold.Free;
+  FntNorm.Free;
+  inherited Destroy;
 end;
 
 procedure TfpgPopupCalendar.AfterCreate;
@@ -927,6 +940,7 @@ var
 begin
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
+    FreeAndNil(FDropDown);  // safety measure
     FDropDown := TfpgPopupCalendar.Create(nil, FocusRootWidget);
     ddw := TfpgPopupCalendar(FDropDown);
     ddw.DontCloseWidget := self;
