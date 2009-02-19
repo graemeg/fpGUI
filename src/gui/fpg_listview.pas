@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -1205,17 +1205,14 @@ end;
 
 procedure TfpgListView.HandlePaint;
 var
- ClipRect: TfpgRect;
+  ClipRect: TfpgRect;
 begin
   //if FScrollBarNeedsUpdate then
     UpdateScrollBarPositions;
   fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
   
-  ClipRect.Top    := 2;
-  ClipRect.Left   := 2;
-  ClipRect.Width  := Width -4;
-  ClipRect.Height := Height -4;
-  
+  ClipRect.SetRect(2, 2, Width-4, Height-4);
+
   if ShowHeaders then
   begin
     PaintHeaders;
@@ -1225,7 +1222,8 @@ begin
   
   Canvas.SetClipRect(ClipRect);
 
-  // this paints the small square remaining below the vscrollbar and to the right of the hscrollbar
+  // This paints the small square remaining below the vscrollbar
+  // and to the right of the hscrollbar
   if FVScrollBar.Visible and FHScrollBar.Visible then
   begin
     Canvas.Color := clButtonFace;
@@ -1369,7 +1367,8 @@ begin
       else
         Canvas.Color := clInactiveSel;
     end
-    else Canvas.Color := clListBox;
+    else
+      Canvas.Color := clListBox;
 
     Canvas.FillRectangle(ItemRect);
     Exclude(PaintPart, lvppBackground);
@@ -1416,9 +1415,12 @@ begin
           tLeft := ItemRect.Left;
           tWidth := Canvas.Font.TextWidth(TheText);
           case FColumns.Column[J].Alignment of
-            taRightJustify: Inc(tLeft, FColumns.Column[J].Width - tWidth - 5);
-            taCenter: Inc(tLeft, (FColumns.Column[J].Width - tWidth - 5) div 2);
-            taLeftJustify: Inc(tLeft, 5);
+            taRightJustify:
+                Inc(tLeft, FColumns.Column[J].Width - tWidth - 5);
+            taCenter:
+                Inc(tLeft, (FColumns.Column[J].Width - tWidth - 5) div 2);
+            taLeftJustify:
+                Inc(tLeft, 5);
           end;
 
           fpgStyle.DrawString(Canvas, tLeft, ItemRect.Top+2, TheText, Enabled);
@@ -1438,7 +1440,8 @@ begin
     Dec(vBottom, FHScrollBar.Height);
     
   // the painted items haven't fully covered the visible area
-  if vBottom > cBottom then begin
+  if vBottom > cBottom then
+  begin
     ItemRect.Left := 2;
     ItemRect.Top := cBottom;
     ItemRect.SetBottom(vBottom);
