@@ -35,7 +35,7 @@ type
   protected
     function GetCaption: string; override;
   public
-    constructor CreateNew(const AISO: string; const AName: string); overload; reintroduce;
+    constructor CreateNew(const AISO: string; const AName: string); reintroduce; overload;
   published
     property ISO: string read FISO write SetISO;
     property Name: string read FName write SetName;
