@@ -116,6 +116,7 @@ type
     property    AutoCompletion;
     property    BackgroundColor;
     property    DropDownCount;
+    property    ExtraHint;
     property    FocusItem;
     property    FontDesc;
     property    Height;
@@ -695,7 +696,12 @@ begin
   if not AutoCompletion then
   begin
     if HasText then
-      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled);
+      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
+    else
+      begin
+      Canvas.SetTextColor(clShadow1);
+      fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
+      end;
   end
   else
   begin

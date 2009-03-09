@@ -69,10 +69,12 @@ type
     FOnCloseUp: TNotifyEvent;
     FOnDropDown: TNotifyEvent;
     FOptions: TfpgComboOptions;
+    FExtraHint: string;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
+    procedure   SetExtraHint(const AValue: string);
   protected
     FMargin: integer;
     FInternalBtnRect: TfpgRect;
@@ -91,6 +93,7 @@ type
     procedure   PaintInternalButton; virtual;
     function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
+    property    ExtraHint: string read FExtraHint write SetExtraHint;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
@@ -108,9 +111,7 @@ type
 
   TfpgBaseStaticCombo = class(TfpgBaseComboBox)
   private
-    FExtraHint: string;
     procedure   InternalBtnClick(Sender: TObject);
-    procedure   SetExtraHint(const AValue: string);
   protected
     FDropDown: TfpgPopupWindow;
     procedure   DoDropDown; override;
@@ -124,7 +125,6 @@ type
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandlePaint; override;
     property    Text: string read GetText write SetText;
-    property    ExtraHint: string read FExtraHint write SetExtraHint;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -228,6 +228,14 @@ begin
   if Height < FFont.Height + (FMargin * 2) then
     Height := FFont.Height + (FMargin * 2);
   RePaint;
+end;
+
+procedure TfpgBaseComboBox.SetExtraHint(const AValue: string);
+begin
+  if FExtraHint = AValue then
+    Exit; //==>
+  FExtraHint := AValue;
+  Repaint;
 end;
 
 procedure TfpgBaseComboBox.SetMargin(const AValue: integer);
@@ -385,6 +393,7 @@ begin
   FOptions := [];
   FBtnPressed := False;
   FOnChange := nil;
+  FExtraHint := '';
 end;
 
 destructor TfpgBaseComboBox.Destroy;
@@ -543,14 +552,6 @@ begin
   DoDropDown;
 end;
 
-procedure TfpgBaseStaticCombo.SetExtraHint(const AValue: string);
-begin
-  if FExtraHint = AValue then
-    Exit; //==>
-  FExtraHint := AValue;
-  Repaint;
-end;
-
 procedure TfpgBaseStaticCombo.SetText(const AValue: string);
 var
   i: integer;
@@ -688,7 +689,6 @@ begin
   FWidth            := 120;
   FHeight           := Font.Height + (2*FMargin);
   FFocusable        := True;
-  FExtraHint        := '';
 
   CalculateInternalButtonRect;
 end;
