@@ -15,6 +15,15 @@
       Defines a Text Edit control. Also known a Text Entry control.
 }
 
+// Future enhancements:
+{ TODO -cEventHandler : OnSetText - same as OnSetValue but before SetValue. }
+{ TODO -cEventHandler : OnGetText - Returns a string used for displaying in GUI. May be different to Value property.
+                         Add extra parameter so we know if we need to display the formatted text
+                         or the 'value' text. The latter is for when the component has focus. }
+{ TODO -cEventHandler : OnTextEdited - per character evaluation. }
+{ TODO -cEventHandler : OnSetValue - fired after ENTER but before Value is set. AValue can be rejected or changed. }
+{ TODO -cEventHandler : OnDataEntered - fired after new value has been accepted and Value property has been set. }
+
 unit fpg_edit;
 
 {$mode objfpc}{$H+}
