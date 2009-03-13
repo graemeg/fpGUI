@@ -369,8 +369,6 @@ type
   end;
 
 
-  { TfpgWindowBase }
-
   TfpgWindowBase = class(TfpgComponent)
   private
     FParent: TfpgWindowBase;
