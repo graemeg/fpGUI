@@ -746,7 +746,8 @@ begin
   FHotTrack       := False;
   FAutoHeight     := False;
 
-  FScrollBar          := TfpgScrollBar.Create(self);
+  FScrollBar      := TfpgScrollBar.Create(self);
+  FScrollBar.Name := '_BaseListBoxScrollBar';
   FScrollBar.OnScroll := @ScrollBarMove;
 
   FOnChange := nil;

@@ -268,6 +268,11 @@ begin
     sizeof(stdimg_vfd_groupbox),
     0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'vfd.combodatecheckedit', @stdimg_vfd_combodatecheckedit,
+    sizeof(stdimg_vfd_combodatecheckedit),
+    0, 0);
+
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -389,11 +394,26 @@ begin
   // Calendar ComboBox
   wc          := TVFDWidgetClass.Create(TfpgCalendarCombo);
   wc.NameBase := 'CalendarCombo';
+  wc.AddProperty('DateFormat', TPropertyString, 'Standard RTL date formatting applies');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.combodateedit';
+  RegisterVFDWidget(wc);
+
+  // Calendar ComboBox Checkbox
+  wc          := TVFDWidgetClass.Create(TfpgCalendarCheckCombo);
+  wc.NameBase := 'CalendarCombo';
+  wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
+  wc.AddProperty('DateFormat', TPropertyString, 'Standard RTL date formatting applies');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.combodatecheckedit';
   RegisterVFDWidget(wc);
 
   // ListBox

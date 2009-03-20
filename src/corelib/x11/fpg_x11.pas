@@ -118,8 +118,6 @@ type
   TfpgWindowImpl = class;
   
 
-  { TfpgFontResourceImpl }
-
   TfpgFontResourceImpl = class(TfpgFontResourceBase)
   private
     FFontData: PXftFont;
@@ -949,7 +947,11 @@ begin
 
 
   {$IFDEF DEBUG}
-  WriteLn('Event ',GetXEventName(ev._type),': ', ev._type,' window: ', ev.xany.window);
+  w := FindWindowByHandle(ev.xany.window);
+  if not Assigned(w) then
+    WriteLn('Event ',GetXEventName(ev._type),'(', ev._type,') window: ', IntToHex(ev.xany.window,7))
+  else
+    WriteLn('Event ',GetXEventName(ev._type),'(', ev._type,') window: ', IntToHex(ev.xany.window,7), ' name:', w.Name);
 //  PrintKeyEvent(ev);  { debug purposes only }
   {$ENDIF}
 
@@ -989,11 +991,16 @@ begin
           msgp.keyboard.keycode     := KeySymToKeycode(KeySym);
           msgp.keyboard.shiftstate  := ConvertShiftState(ev.xkey.state);
 
+          // By default X11 sends keyboard event to window under mouse cursor.
+          // We need to get the corrected "focused" widget instead.
           kwg := FindKeyboardFocus;
           if kwg <> nil then
             w := kwg
           else
           begin
+            {$IFDEF DEBUG}
+            writeln('ERR: We couldn''t find keyboard focused window. Using event window instead!');
+            {$ENDIF}
             w := FindWindowByHandle(ev.xkey.window);
             if not Assigned(w) then
               ReportLostWindow(ev);

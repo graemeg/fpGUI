@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -30,7 +30,7 @@ uses
   
 type
 
-  TfpgCheckBox = class(TfpgWidget)
+  TfpgBaseCheckBox = class(TfpgWidget)
   private
     FChecked: boolean;
     FOnChange: TNotifyEvent;
@@ -42,25 +42,34 @@ type
     procedure   SetChecked(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
+    procedure   DoOnChange;
   protected
     procedure   HandlePaint; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    property    Checked: boolean read FChecked write SetChecked default False;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Text: string read FText write SetText;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
+  end;
+
+
+  TfpgCheckBox = class(TfpgBaseCheckBox)
   published
     property    BackgroundColor;
-    property    Checked: boolean read FChecked write SetChecked default False;
-    property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Checked;
+    property    FontDesc;
     property    ParentShowHint;
     property    ShowHint;
     property    TabOrder;
-    property    Text: string read FText write SetText;
+    property    Text;
     property    TextColor;
-    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnChange;
     property    OnEnter;
     property    OnExit;
   end;
@@ -68,7 +77,9 @@ type
 
 function CreateCheckBox(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgCheckBox;
 
+
 implementation
+
 
 function CreateCheckBox(AOwner: TComponent; x, y: TfpgCoord; AText: string): TfpgCheckBox;
 begin
@@ -79,9 +90,9 @@ begin
   Result.Width  := Result.Font.TextWidth(Result.Text) + 24;
 end;
 
-{ TfpgCheckBox }
+{ TfpgBaseCheckBox }
 
-procedure TfpgCheckBox.SetChecked(const AValue: boolean);
+procedure TfpgBaseCheckBox.SetChecked(const AValue: boolean);
 begin
   if FChecked = AValue then
     Exit; //==>
@@ -89,19 +100,19 @@ begin
   RePaint;
 end;
 
-function TfpgCheckBox.GetFontDesc: string;
+function TfpgBaseCheckBox.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
 end;
 
-procedure TfpgCheckBox.SetFontDesc(const AValue: string);
+procedure TfpgBaseCheckBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
   RePaint;
 end;
 
-procedure TfpgCheckBox.SetText(const AValue: string);
+procedure TfpgBaseCheckBox.SetText(const AValue: string);
 begin
   if FText = AValue then
     Exit; //==>
@@ -109,7 +120,13 @@ begin
   RePaint;
 end;
 
-procedure TfpgCheckBox.HandlePaint;
+procedure TfpgBaseCheckBox.DoOnChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(self);
+end;
+
+procedure TfpgBaseCheckBox.HandlePaint;
 var
   r: TfpgRect;
   ty: integer;
@@ -159,31 +176,29 @@ begin
   fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
 end;
 
-procedure TfpgCheckBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+procedure TfpgBaseCheckBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   FIsPressed := True;
   Repaint;
 end;
 
-procedure TfpgCheckBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+procedure TfpgBaseCheckBox.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FIsPressed := False;
   Checked := not FChecked;
-  if Assigned(FOnChange) then
-    FOnChange(self);
+  DoOnChange;
 end;
 
-procedure TfpgCheckBox.HandleKeyRelease(var keycode: word;
+procedure TfpgBaseCheckBox.HandleKeyRelease(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
 begin
   if (keycode = keySpace) or (keycode = keyReturn) or (keycode = keyPEnter) then
   begin
     consumed := True;
     Checked := not FChecked;
-    if Assigned(FOnChange) then
-      FOnChange(self);
+    DoOnChange;
   end;
 
   if consumed then
@@ -192,7 +207,7 @@ begin
   inherited HandleKeyRelease(keycode, shiftstate, consumed);
 end;
 
-constructor TfpgCheckBox.Create(AOwner: TComponent);
+constructor TfpgBaseCheckBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText       := 'CheckBox';
@@ -208,7 +223,7 @@ begin
   FOnChange   := nil;
 end;
 
-destructor TfpgCheckBox.Destroy;
+destructor TfpgBaseCheckBox.Destroy;
 begin
   FFont.Free;
   inherited Destroy;

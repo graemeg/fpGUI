@@ -51,7 +51,8 @@ uses
   fpg_combobox,
   fpg_basegrid,
   fpg_grid,
-  fpg_dialogs;
+  fpg_dialogs{,
+  fpg_checkbox};
 
 type
 
@@ -148,7 +149,6 @@ type
     FHolidayColor: TfpgColor;
     FSelectedColor: TfpgColor;
     FCloseOnSelect: boolean;
-    procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime);
     procedure   SetDateFormat(const AValue: string);
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
@@ -162,6 +162,7 @@ type
     function    GetText: string; override;
     procedure   SetCloseOnSelect(const AValue: boolean);
   protected
+    procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime); virtual;
     function    HasText: boolean; override;
     procedure   DoDropDown; override;
   public
@@ -189,6 +190,27 @@ type
     property    OnEnter;
     property    OnExit;
   end;
+
+
+  TfpgCalendarCheckCombo = class(TfpgCalendarCombo)
+  private
+//    FCheckBox: TfpgCheckbox;
+    FChecked: boolean;
+    FCheckBoxRect: TfpgRect;
+    procedure   InternalCheckBoxChanged(Sender: TObject);
+    procedure   SetChecked(const AValue: Boolean);
+  protected
+    procedure   DoDrawText(const ARect: TfpgRect); override;
+    procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime); override;
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property    Checked: Boolean read FChecked write SetChecked;
+    property    OnKeyPress;
+  end;
+
 
 {@VFD_NEWFORM_DECL}
 
@@ -974,5 +996,121 @@ begin
     FreeAndNil(FDropDown);
   end;
 end;
+
+{ TfpgCalendarCheckCombo }
+
+procedure TfpgCalendarCheckCombo.InternalCheckBoxChanged(Sender: TObject);
+begin
+  RePaint;
+end;
+
+procedure TfpgCalendarCheckCombo.SetChecked(const AValue: Boolean);
+begin
+  if AValue = FChecked then
+    Exit; //==>
+  FChecked := Avalue;
+  InternalCheckBoxChanged(nil);
+end;
+
+procedure TfpgCalendarCheckCombo.DoDrawText(const ARect: TfpgRect);
+var
+  lRect: TfpgRect;
+  flags: TFTextFlags;
+  lColor: TfpgColor;
+begin
+  lRect := ARect;
+  lRect.Left := lRect.Left+FCheckBoxRect.Width + 1;
+  lRect.Width := lRect.Width - (FCheckBoxRect.Width + 1) - FMargin;
+  flags := [txtRight, txtVCenter];
+  if HasText then
+  begin
+    if not FChecked then
+      Canvas.SetTextColor(clShadow1)
+    else
+    begin
+      if Focused then
+        Canvas.SetTextColor(clSelectionText)
+      else
+        Canvas.SetTextColor(TextColor);
+    end;
+    fpgStyle.DrawString(Canvas, lRect.Left {FMargin+1}, {lRect.Top }FMargin, Text, Enabled);
+  end
+  else
+  begin
+    Canvas.SetTextColor(clShadow1);
+    fpgStyle.DrawString(Canvas, lRect.Left {FMargin+1}, {lRect.Top} FMargin, ExtraHint, Enabled);
+  end;
+end;
+
+procedure TfpgCalendarCheckCombo.InternalOnValueSet(Sender: TObject;
+  const ADate: TDateTime);
+begin
+  inherited InternalOnValueSet(Sender, ADate);
+  Checked := True;
+//  InternalCheckBoxChanged(nil);
+end;
+
+procedure TfpgCalendarCheckCombo.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  if keycode = keyEscape then
+  begin
+    consumed := True;
+    Checked := False;
+  end;
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
+procedure TfpgCalendarCheckCombo.HandlePaint;
+var
+  r: TfpgRect;
+  img: TfpgImage;
+  ix: integer;
+begin
+  inherited HandlePaint;
+
+  r := FCheckBoxRect;
+  OffsetRect(r, 2, 2);
+//  r.SetRect(4, 4, 17, 17);
+//  PrintRect(r);
+
+  // calculate which image to paint.
+  if Enabled then
+  begin
+    ix := Ord(FChecked);
+    //if FIsPressed then
+      //Inc(ix, 2);
+  end
+  else
+    ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
+
+  // paint the check (in this case a X)
+//  tx := r.right + 8;
+  img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize
+  Canvas.DrawImagePart(r.Left, r.Top, img, ix*13, 0, 13, 13);
+end;
+
+constructor TfpgCalendarCheckCombo.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FChecked := True;
+  FCheckBoxRect.SetRect(2, 2, 17, 17);
+{
+  FCheckBox := TfpgCheckBox.Create(self);
+  with FCheckbox do
+  begin
+    Name := '_IntCheckBox';
+    SetPosition(2, 2, 18, 17);
+    Checked := True;
+    FontDesc := '#Label1';
+    Text := '';
+//    BackgroundColor := self.BackgroundColor;
+    BackgroundColor := clMagenta;
+    Focusable := False;
+    OnChange := @InternalCheckBoxChanged;
+  end;
+}
+end;
+
 
 end.

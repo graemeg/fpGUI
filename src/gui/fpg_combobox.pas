@@ -115,6 +115,7 @@ type
   protected
     FDropDown: TfpgPopupWindow;
     procedure   DoDropDown; override;
+    procedure   DoDrawText(const ARect: TfpgRect); virtual;
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
@@ -167,8 +168,6 @@ uses
   fpg_listbox,
   math;
   
-var
-  OriginalFocusRoot: TfpgWidget;
 
 type
   { This is the class representing the dropdown window of the combo box. }
@@ -455,6 +454,7 @@ begin
   FCallerWidget := ACallerWidget;
 
   FListBox := CreateListBox(self, 0, 0, 80, 100);
+  FListbox.Name := '_ComboboxDropdownWindowListBox';
   FListBox.PopupFrame := True;
   FListBox.Items.Assign(FCallerWidget.Items);
   FListBox.FocusItem := FCallerWidget.FocusItem;
@@ -511,7 +511,6 @@ begin
     writeln('.... creating');
     {$ENDIF}
     FreeAndNil(FDropDown);
-    OriginalFocusRoot := FocusRootWidget;
 
     FDropDown := TComboboxDropdownWindow.Create(nil, self);
     ddw := TComboboxDropdownWindow(FDropDown);
@@ -544,6 +543,18 @@ begin
     ddw := TComboboxDropdownWindow(FDropDown);
     ddw.Close;
     FreeAndNil(FDropDown);
+  end;
+end;
+
+procedure TfpgBaseStaticCombo.DoDrawText(const ARect: TfpgRect);
+begin
+  // Draw select item's text
+  if HasText then
+    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
+  else
+  begin
+    Canvas.SetTextColor(clShadow1);
+    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
   end;
 end;
 
@@ -584,7 +595,7 @@ procedure TfpgBaseStaticCombo.HandleKeyPress(var keycode: word; var shiftstate: 
 begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
   if consumed then
-    RePaint
+    RePaint;
 end;
 
 procedure TfpgBaseStaticCombo.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -671,14 +682,7 @@ begin
   end;
   Canvas.FillRectangle(r);
 
-  // Draw select item's text
-  if HasText then
-    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
-  else
-  begin
-    Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
-  end;
+  DoDrawText(r);
 end;
 
 constructor TfpgBaseStaticCombo.Create(AOwner: TComponent);
