@@ -174,7 +174,7 @@ msgstr "Le répertoire <%s> n''a pas pu être ouvert"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr "Favorites"
+msgstr "Favoris"
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
@@ -286,7 +286,7 @@ msgstr "Mai"
 
 #: fpg_constants:rsmessage
 msgid "Message"
-msgstr "Messagev"
+msgstr "Message"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
@@ -326,11 +326,11 @@ msgstr "OK"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr ""
+msgstr "Oct"
 
 #: fpg_constants:rslongoct
 msgid "October"
-msgstr "Oct"
+msgstr "Octobre"
 
 #: fpg_constants:rsopen
 msgid "Open"
@@ -390,7 +390,7 @@ msgstr "Sauver sous"
 
 #: fpg_constants:rssearch
 msgid "Search"
-msgstr "Sauver"
+msgstr "Chercher"
 
 #: fpg_constants:rsselect
 msgid "Select"

@@ -689,7 +689,7 @@ begin
   with edtYear do
   begin
     Name := 'edtYear';
-    SetPosition(0, 0, 52, 22);
+    SetPosition(0, 0, 37, 22);
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
@@ -700,7 +700,7 @@ begin
   with btnYearUp do
   begin
     Name := 'btnYearUp';
-    SetPosition(52, 0, 13, 11);
+    SetPosition(37, 0, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -714,7 +714,7 @@ begin
   with btnYearDown do
   begin
     Name := 'btnYearDown';
-    SetPosition(52, 11, 13, 11);
+    SetPosition(37, 11, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -728,7 +728,7 @@ begin
   with edtMonth do
   begin
     Name := 'edtMonth';
-    SetPosition(65, 0, 115, 22);
+    SetPosition(50, 0, 100, 22);
     Text := '';
     FontDesc := '#Edit1';
     Focusable := False;
@@ -739,7 +739,7 @@ begin
   with btnMonthUp do
   begin
     Name := 'btnMonthUp';
-    SetPosition(180, 0, 13, 11);
+    SetPosition(150, 0, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -753,7 +753,7 @@ begin
   with btnMonthDown do
   begin
     Name := 'btnMonthDown';
-    SetPosition(180, 11, 13, 11);
+    SetPosition(150, 11, 13, 11);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -767,7 +767,7 @@ begin
   with btnToday do
   begin
     Name := 'btnToday';
-    SetPosition(194, 0, 40, 22);
+    SetPosition(164, 0, 70, 22);
     Text := 'Today';
     FontDesc := '#Label1';
     Focusable := True;
