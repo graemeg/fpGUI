@@ -284,8 +284,6 @@ type
   
   TfpgFileListImpl = class(TfpgFileListBase)
     function    EncodeModeString(FileMode: longword): TFileModeString;
-    function    GetUserName(uid: integer): string;
-    function    GetGroupName(gid: integer): string;
     constructor Create; override;
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
@@ -299,8 +297,7 @@ implementation
 
 uses
   baseunix,
-  // Graeme: temporary. libc is not available for FreeBSD.
-  {$if defined(linux) and defined(cpu386)}libc,{$endif}
+  users,  { for *nix user and group name support }
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
@@ -2364,50 +2361,11 @@ begin
   end;
 end;
 
-{$if defined(linux) and defined(cpu386)}
-function TfpgFileListImpl.GetUserName(uid: integer): string;
-var
-  p: PPasswd;
-begin
-  p := getpwuid(uid);
-  if p <> nil then
-    result := p^.pw_name
-  else
-    result := '';
-end;
-{$else}
-// Still need to find an alternative for FreeBSD as we can't use the libc unit.
-function TfpgFileListImpl.GetUserName(uid: integer): string;
-begin
-  result := IntToStr(uid);
-end;
-{$endif}
-
 constructor TfpgFileListImpl.Create;
 begin
   inherited Create;
   FHasFileMode := true;
 end;
-
-{$if defined(linux) and defined(cpu386)}
-function TfpgFileListImpl.GetGroupName(gid: integer): string;
-var
-  p: PGroup;
-begin
-  p := getgrgid(gid);
-  if p <> nil then
-    result := p^.gr_name;
-end;
-
-{$else}
-// Still need to find an alternative for FreeBSD as we can't use the libc unit.
-function TfpgFileListImpl.GetGroupName(gid: integer): string;
-begin
-  result := IntToStr(gid);
-end;
-
-
-{$endif}
 
 function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
 var
@@ -2425,8 +2383,8 @@ begin
     Fpstat(PChar(fullname), info);
     {Result.GroupID     := info.st_gid;
     Result.OwnerID      := info.st_uid;}
-    Result.Owner        := GetUserName(info.st_uid);
-    Result.Group        := GetGroupName(info.st_uid);
+    Result.Owner        := GetUserName(TUID(info.st_uid));
+    Result.Group        := GetGroupName(TGID(info.st_uid));
   end;
 end;
 
