@@ -196,25 +196,28 @@ var
   r: TfpgRect;
   I, MaxI, W, H, ZeroL: Integer;
   s: TfpgString;
+  ltxtflags: TFTextFlags;
 begin
   if not FShowNum then
     Exit; //==>
   w := GetClientRect.Width - FSpace - 1;
   H := TfpgBaseTextEdit(Owner).FChrH;
   MaxI := TfpgBaseTextEdit(Owner).FVisLines;
+  ltxtflags := [txtRight, txtVCenter];
+  Canvas.SetFont(TfpgBaseTextEdit(Owner).FFont);
+  r.SetRect(2, 0, W, H);
 
   for i := 0 to MaxI do
   begin
-    writeln('i=', i);
+//    writeln('i=', i);
     if FZeroStart then
       S := IntToStr(FStartNum + i - 1)
     else
       S := IntToStr(FStartNum + i);
     for ZeroL := Length(S) to FDigits do
       S := '0' + S;
-    r.SetRect(2, I * H, W, (I * H) + H);
-//    Canvas.FillRectangle(r);
-    Canvas.DrawText(r, S);
+    r.Top := i * h;
+    Canvas.DrawText(r, S, ltxtflags);
   end;
 end;
 

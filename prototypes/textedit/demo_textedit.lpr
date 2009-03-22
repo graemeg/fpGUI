@@ -50,6 +50,8 @@ type
     Button3: TfpgButton;
     chkShowGutter: TfpgCheckBox;
     chkLineNumbers: TfpgCheckBox;
+    Label2: TfpgLabel;
+    btnChangeFont: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     t1: TMyThread;
     t2: TMyThread;
@@ -63,6 +65,7 @@ type
     procedure   btn1(Sender: TObject);
     procedure   btn2(Sender: TObject);
     procedure   btn3(Sender: TObject);
+    procedure   ChangeFontClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure AfterCreate; override;
@@ -170,8 +173,8 @@ begin
     begin
       t := fpgGetTickCount;
       TextEdit.Lines.LoadFromFile(s);
-      Label1.Text := Format('%d ticks', [fpgGetTickCount - t]);
       TextEdit.Invalidate;
+      Label2.Text := Format('%d ticks', [fpgGetTickCount - t]);
     end;
   end;
   fpgApplication.ProcessMessages;
@@ -192,6 +195,15 @@ begin
   t3 := TMyThread.CreateCustom(ProgressBar3);
 end;
 
+procedure TMainForm.ChangeFontClicked(Sender: TObject);
+var
+  fnt: string;
+begin
+  fnt := TextEdit.FontDesc;
+  if SelectFontDialog(fnt) then
+    TextEdit.FontDesc := fnt;
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -205,7 +217,7 @@ procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(319, 180, 594, 346);
+  SetPosition(319, 180, 594, 455);
   WindowTitle := 'Memo test';
   WindowPosition := wpScreenCenter;
 
@@ -213,7 +225,7 @@ begin
   with memo do
   begin
     Name := 'memo';
-    SetPosition(6, 116, 280, 170);
+    SetPosition(6, 172, 280, 235);
     Anchors := [anLeft,anTop,anBottom];
     Lines.Add('Memo Test0');
     Lines.Add('Memo Test1');
@@ -254,14 +266,14 @@ begin
   with TextEdit do
   begin
     Name := 'TextEdit';
-    SetPosition(300, 164, 280, 170);
+    SetPosition(300, 172, 280, 235);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Lines.Add('Memo Test0');
     Lines.Add('Memo Test1');
     Lines.Add('Memo Test2');
     Lines.Add('Memo Test3');
     Lines.Add('Memo Test4');
-    //FontDesc := '#Edit1';
+    //    FontDesc := '#Edit1';
     FontDesc := 'Bitstream Vera Sans Mono-10';
     //    Lines.Insert(1,'0 Beforje 1 after');
     ParentShowHint := True;
@@ -331,7 +343,7 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(12, 304, 172, 16);
+    SetPosition(52, 417, 172, 16);
     Anchors := [anLeft,anBottom];
     Alignment := taCenter;
     FontDesc := '#Label2';
@@ -464,12 +476,49 @@ begin
   begin
     Name := 'chkLineNumbers';
     SetPosition(416, 108, 120, 20);
+    Checked := True;
     FontDesc := '#Label1';
     ParentShowHint := True;
     TabOrder := 15;
     Text := 'Show Line Numbers';
-    Checked := True;
     OnChange := @ShowLineNumbers;
+  end;
+
+  Label2 := TfpgLabel.Create(self);
+  with Label2 do
+  begin
+    Name := 'Label2';
+    SetPosition(348, 416, 176, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label2';
+    Hint := '';
+    Layout := tlTop;
+    ParentShowHint := True;
+    Text := 'Label';
+    WrapText := False;
+  end;
+
+  btnChangeFont := TfpgButton.Create(self);
+  with btnChangeFont do
+  begin
+    Name := 'btnChangeFont';
+    SetPosition(312, 76, 80, 24);
+    Text := 'Font...';
+    AllowAllUp := False;
+    Embedded := False;
+    Flat := False;
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    Hint := '';
+    ImageLayout := ilImageLeft;
+    ImageMargin := 3;
+    ImageName := '';
+    ImageSpacing := -1;
+    ModalResult := 0;
+    ParentShowHint := True;
+    ShowImage := True;
+    TabOrder := 17;
+    OnClick := @ChangeFontClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
