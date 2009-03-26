@@ -57,7 +57,8 @@ uses
 type
 
   TfpgOnDateSetEvent = procedure(Sender: TObject; const ADate: TDateTime) of object;
-  
+  TfpgOnCheckboxChangedEvent = procedure(Sender: TObject; const AIsChecked: Boolean) of object;
+
 
   TfpgPopupCalendar = class(TfpgPopupWindow)
   private
@@ -197,17 +198,23 @@ type
 //    FCheckBox: TfpgCheckbox;
     FChecked: boolean;
     FCheckBoxRect: TfpgRect;
+    FCheckboxChanged: TfpgOnCheckboxChangedEvent;
     procedure   InternalCheckBoxChanged(Sender: TObject);
     procedure   SetChecked(const AValue: Boolean);
+    procedure   DoCheckboxChanged;
   protected
     procedure   DoDrawText(const ARect: TfpgRect); override;
     procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
+    procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
     property    Checked: Boolean read FChecked write SetChecked;
+    property    OnCheckboxChanged: TfpgOnCheckboxChangedEvent read FCheckboxChanged write FCheckboxChanged;
     property    OnKeyPress;
   end;
 
@@ -1012,6 +1019,12 @@ begin
   InternalCheckBoxChanged(nil);
 end;
 
+procedure TfpgCalendarCheckCombo.DoCheckboxChanged;
+begin
+  if Assigned(FCheckboxChanged) then
+    FCheckboxChanged(self, FChecked);
+end;
+
 procedure TfpgCalendarCheckCombo.DoDrawText(const ARect: TfpgRect);
 var
   lRect: TfpgRect;
@@ -1057,44 +1070,64 @@ begin
   begin
     consumed := True;
     Checked := False;
+    DoCheckboxChanged;
   end;
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgCalendarCheckCombo.HandlePaint;
 var
-  r: TfpgRect;
   img: TfpgImage;
   ix: integer;
 begin
   inherited HandlePaint;
-
-  r := FCheckBoxRect;
-  OffsetRect(r, 2, 2);
-//  r.SetRect(4, 4, 17, 17);
-//  PrintRect(r);
-
   // calculate which image to paint.
   if Enabled then
-  begin
-    ix := Ord(FChecked);
-    //if FIsPressed then
-      //Inc(ix, 2);
-  end
+    ix := Ord(FChecked)
   else
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
   // paint the check (in this case a X)
-//  tx := r.right + 8;
   img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize
-  Canvas.DrawImagePart(r.Left, r.Top, img, ix*13, 0, 13, 13);
+  Canvas.DrawImagePart(FCheckBoxRect.Left, FCheckBoxRect.Top, img, ix*13, 0, 13, 13);
+end;
+
+procedure TfpgCalendarCheckCombo.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  FCheckBoxRect.Top := (AHeight - FCheckBoxRect.Height) div 2;
+  OffsetRect(FCheckboxRect, 0, 3);  // frame border must be taken into consideration
+end;
+
+procedure TfpgCalendarCheckCombo.HandleLMouseDown(x, y: integer;
+  shiftstate: TShiftState);
+begin
+  if PtInRect(FCheckBoxRect, Point(x,y)) then
+    // do nothing
+  else
+    inherited HandleLMouseDown(x, y, shiftstate);
+end;
+
+procedure TfpgCalendarCheckCombo.HandleLMouseUp(x, y: integer;
+  shiftstate: TShiftState);
+begin
+  if PtInRect(FCheckBoxRect, Point(x,y)) then
+  begin
+    Checked := not FChecked;
+    DoCheckboxChanged;
+  end
+  else
+    inherited HandleLMouseUp(x, y, shiftstate);
 end;
 
 constructor TfpgCalendarCheckCombo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FChecked := True;
-  FCheckBoxRect.SetRect(2, 2, 17, 17);
+  FCheckBoxRect.SetRect(2, 0, 17, 17);
+  FCheckboxRect.Top := (FHeight - FCheckBoxRect.Height) div 2;
+  OffsetRect(FCheckboxRect, 2, 3);  // frame border must be taken into consideration
+
 {
   FCheckBox := TfpgCheckBox.Create(self);
   with FCheckbox do
