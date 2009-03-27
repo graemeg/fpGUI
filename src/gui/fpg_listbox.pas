@@ -50,6 +50,7 @@ type
   TfpgBaseListBox = class(TfpgWidget)
   private
     FHotTrack: boolean;
+    FDragToReorder: boolean;
     FOnChange: TNotifyEvent;
     FOnScroll: TNotifyEvent;
     FOnSelect: TNotifyEvent;
@@ -79,6 +80,7 @@ type
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); virtual;
     procedure   DoChange;
     procedure   DoSelect;
+    procedure   Exchange(Index1, Index2: Integer); virtual; abstract;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed : boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -92,6 +94,7 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    HotTrack: boolean read FHotTrack write FHotTrack;
     property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
+    property    DragToReorder: boolean read FDragToReorder write FDragToReorder default False;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -115,6 +118,7 @@ type
   protected
     FItems: TStringList;
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
+    procedure   Exchange(Index1, Index2: Integer); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     property    Items: TStringList read FItems;
   public
@@ -130,6 +134,7 @@ type
   published
     property    AutoHeight;
     property    BackgroundColor default clListBox;
+    property    DragToReorder;
     property    FocusItem;
     property    FontDesc;
     property    HotTrack;
@@ -169,6 +174,7 @@ type
   protected
     FItems: TList;
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
+    procedure   Exchange(Index1, Index2: Integer); override;
 //    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     property    Items: TList read FItems;
     property    Color: TfpgColor read GetColor write SetColor;
@@ -178,7 +184,6 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    ItemCount: integer; override;
-
   end;
   
   
@@ -188,6 +193,7 @@ type
     property    BackgroundColor default clListBox;
     property    Color;
     property    ColorPalette;
+    property    DragToReorder;
     property    FocusItem;
     property    FontDesc;
     property    HotTrack;
@@ -555,6 +561,9 @@ begin
   if NewFocus < 0 then
     NewFocus := 0;
 
+  if FDragToReorder and FMouseDragging and (NewFocus<ItemCount) then
+    Exchange(FocusItem, NewFocus);
+
   FocusItem := NewFocus;
 end;
 
@@ -745,6 +754,7 @@ begin
   FPopupFrame     := False;
   FHotTrack       := False;
   FAutoHeight     := False;
+  FDragToReorder  := False;
 
   FScrollBar      := TfpgScrollBar.Create(self);
   FScrollBar.Name := '_BaseListBoxScrollBar';
@@ -810,6 +820,11 @@ begin
   //if num < 0 then
     //Exit; //==>
   fpgStyle.DrawString(Canvas, rect.left+2, rect.top+1, FItems.Strings[num], Enabled);
+end;
+
+procedure TfpgTextListBox.Exchange (Index1, Index2: Integer);
+begin
+  Items.Exchange(Index1, Index2);
 end;
 
 procedure TfpgTextListBox.HandleKeyChar(var AText: TfpgChar;
@@ -1141,6 +1156,11 @@ begin
   // color text
   if FShowColorNames then
     fpgStyle.DrawString(Canvas, FColorboxWidth + 8 + rect.left, rect.top+1, itm.ColorName, Enabled);
+end;
+
+procedure TfpgBaseColorListBox.Exchange (Index1, Index2: Integer);
+begin
+  Items.Exchange(Index1, Index2);
 end;
 
 constructor TfpgBaseColorListBox.Create(AOwner: TComponent);

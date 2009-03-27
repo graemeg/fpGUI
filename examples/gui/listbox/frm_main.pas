@@ -18,6 +18,7 @@ type
   TMainForm = class(TfpgForm)
   private
     procedure cbHotTrackChanged(Sender: TObject);
+    procedure ckhReorderChanged(Sender: TObject);
     procedure btnAdd1Clicked(Sender: TObject);
     procedure btnFocusClicked(Sender: TObject);
     procedure btnClearClicked(Sender: TObject);
@@ -31,6 +32,7 @@ type
     btnAdd1: TfpgButton;
     memName1: TfpgMemo;
     cbHotTrack: TfpgCheckBox;
+    chkReorder: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
@@ -44,6 +46,11 @@ implementation
 procedure TMainForm.cbHotTrackChanged(Sender: TObject);
 begin
   lstName1.HotTrack := cbHotTrack.Checked;
+end;
+
+procedure TMainForm.ckhReorderChanged(Sender: TObject);
+begin
+  lstName1.DragToReorder := not lstName1.DragToReorder;
 end;
 
 procedure TMainForm.btnAdd1Clicked(Sender: TObject);
@@ -82,17 +89,21 @@ begin
   with lstName1 do
   begin
     Name := 'lstName1';
-    SetPosition(12, 12, 128, 168);
+    SetPosition(12, 12, 140, 168);
     FontDesc := '#List';
+    HotTrack := False;
+    PopupFrame := False;
+    TabOrder := 0;
   end;
 
   btnAdd10 := TfpgButton.Create(self);
   with btnAdd10 do
   begin
     Name := 'btnAdd10';
-    SetPosition(204, 28, 92, 23);
+    SetPosition(172, 28, 92, 23);
     Text := 'Add 10 items';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 1;
     OnClick := @btnAdd10Clicked;
@@ -102,9 +113,10 @@ begin
   with btnClear do
   begin
     Name := 'btnClear';
-    SetPosition(204, 56, 92, 23);
+    SetPosition(172, 56, 92, 23);
     Text := 'Clear Items';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 2;
     OnClick := @btnClearClicked;
@@ -114,9 +126,10 @@ begin
   with btnFocus do
   begin
     Name := 'btnFocus';
-    SetPosition(204, 84, 92, 23);
+    SetPosition(172, 84, 92, 23);
     Text := 'FocusItem = 2';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 3;
     OnClick := @btnFocusClicked;
@@ -126,9 +139,10 @@ begin
   with btnAdd1 do
   begin
     Name := 'btnAdd1';
-    SetPosition(204, 112, 92, 23);
+    SetPosition(172, 112, 92, 23);
     Text := 'Add 1 item';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 4;
     OnClick := @btnAdd1Clicked;
@@ -147,11 +161,22 @@ begin
   with cbHotTrack do
   begin
     Name := 'cbHotTrack';
-    SetPosition(204, 140, 120, 19);
+    SetPosition(172, 140, 120, 19);
     FontDesc := '#Label1';
     TabOrder := 6;
     Text := 'Track Focus';
     OnChange := @cbHotTrackChanged;
+  end;
+
+  chkReorder := TfpgCheckBox.Create(self);
+  with chkReorder do
+  begin
+    Name := 'chkReorder';
+    SetPosition(172, 160, 120, 20);
+    FontDesc := '#Label1';
+    TabOrder := 7;
+    Text := 'Drag to reorder';
+    OnChange := @ckhReorderChanged;
   end;
 
   {@VFD_BODY_END: MainForm}

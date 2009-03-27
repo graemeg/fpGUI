@@ -14,6 +14,7 @@ type
   TMainForm = class(TfpgForm)
   private
     procedure chkColorNameChange(Sender: TObject);
+    procedure ckdReorderChanged(Sender: TObject);
     procedure cbName1Change(Sender: TObject);
     procedure btnName1Clicked(Sender: TObject);
     procedure SetBGColor(Sender: TObject);
@@ -29,6 +30,7 @@ type
     btnName4: TfpgButton;
     lblName1: TfpgLabel;
     chkColorName: TfpgCheckBox;
+    chkReorder: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
@@ -47,6 +49,11 @@ uses
 procedure TMainForm.chkColorNameChange(Sender: TObject);
 begin
   lbColorPick.ShowColorNames := chkColorName.Checked;
+end;
+
+procedure TMainForm.ckdReorderChanged(Sender: TObject);
+begin
+  lbColorPick.DragToReorder := not lbColorPick.DragToReorder;
 end;
 
 procedure TMainForm.cbName1Change(Sender: TObject);
@@ -94,6 +101,7 @@ begin
     Name := 'cbName1';
     SetPosition(12, 36, 172, 22);
     FontDesc := '#List';
+    TabOrder := 0;
   end;
 
   lblName4 := TfpgLabel.Create(self);
@@ -102,6 +110,7 @@ begin
     Name := 'lblName4';
     SetPosition(12, 16, 168, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Predefined Color Palettes';
   end;
 
@@ -109,9 +118,10 @@ begin
   with btnName1 do
   begin
     Name := 'btnName1';
-    SetPosition(12, 180, 171, 24);
+    SetPosition(12, 192, 171, 24);
     Text := 'Set Form.Background';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 7;
     OnClick := @btnName1Clicked;
@@ -132,6 +142,7 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 9;
     BackgroundColor := clBlue;
@@ -146,6 +157,7 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 10;
     BackgroundColor := clPurple;
@@ -160,6 +172,7 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 11;
     BackgroundColor := clSteelBlue;
@@ -172,6 +185,7 @@ begin
     Name := 'lblName1';
     SetPosition(12, 76, 164, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Set FocusItem Color';
   end;
 
@@ -179,12 +193,23 @@ begin
   with chkColorName do
   begin
     Name := 'chkColorName';
-    SetPosition(12, 140, 164, 20);
+    SetPosition(12, 140, 180, 20);
     Checked := True;
     FontDesc := '#Label1';
     TabOrder := 8;
     Text := 'Show Color Names';
     OnChange := @chkColorNameChange;
+  end;
+
+  chkReorder := TfpgCheckBox.Create(self);
+  with chkReorder do
+  begin
+    Name := 'chkReorder';
+    SetPosition(12, 160, 180, 20);
+    FontDesc := '#Label1';
+    TabOrder := 9;
+    Text := 'Drag to reorder';
+    OnChange := @ckdReorderChanged;
   end;
 
   {@VFD_BODY_END: MainForm}
