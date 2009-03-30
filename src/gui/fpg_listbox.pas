@@ -548,6 +548,7 @@ end;
 procedure TfpgBaseListBox.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   NewFocus: Integer;
+  i: Integer;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
@@ -561,8 +562,17 @@ begin
   if NewFocus < 0 then
     NewFocus := 0;
 
-  if FDragToReorder and FMouseDragging and (NewFocus<ItemCount) then
-    Exchange(FocusItem, NewFocus);
+  if FDragToReorder and FMouseDragging then
+  begin
+    if NewFocus > ItemCount-1 then
+      NewFocus := ItemCount-1;
+    if FocusItem < NewFocus then
+      for i := FocusItem to NewFocus-1 do
+        Exchange(i, i+1)
+    else if FocusItem > NewFocus then
+      for i := FocusItem-1 downto NewFocus do
+        Exchange(i+1, i);
+  end;
 
   FocusItem := NewFocus;
 end;
