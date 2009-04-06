@@ -5,7 +5,7 @@ unit gui_miglayout;
 interface
 
 uses
-  Classes, SysUtils, gui_panel, gfxbase;
+  Classes, SysUtils, fpg_panel, fpg_base;
   
 type
 
@@ -22,7 +22,7 @@ type
 implementation
 
 uses
-  fpgfx;
+  fpg_main;
 
 { TfpgLayoutPanel }
 
