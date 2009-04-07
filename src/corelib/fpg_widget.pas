@@ -514,6 +514,7 @@ var
   mb: TMouseButton;
   IsDblClick: boolean;
 begin
+//  writeln('TfpgWidget.MsgMouseUp');
   if FFormDesigner <> nil then
   begin
     FFormDesigner.Dispatch(msg);

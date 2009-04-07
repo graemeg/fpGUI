@@ -554,6 +554,7 @@ begin
   wc.AddProperty('TabPosition', TPropertyEnum, '');
   wc.WidgetIconName := 'vfd.pagecontrol';
   wc.Container := True;
+  wc.BlockMouseMsg := False;
   RegisterVFDWidget(wc);
 
   // TabSheet

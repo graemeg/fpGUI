@@ -314,7 +314,6 @@ var
   pmenu: TfpgPopupMenu;
 begin
 //  writeln('TFormDesigner.MsgMouseUp');
-  msg.Stop  := True;
   FDragging := False;
 
   shift := (ssShift in msg.Params.mouse.shiftstate);
@@ -326,6 +325,12 @@ begin
     pwg := FForm
   else if not wgd.FVFDClass.Container then
     wgc := nil;
+
+  // Should we block mouse msg to actual widget?
+  if Assigned(wgd) then
+    msg.Stop := wgd.FVFDClass.BlockMouseMsg
+  else
+    msg.Stop := True;
 
   if wgc <> nil then
   begin
@@ -373,18 +378,18 @@ begin
 
   UpdatePropWin;
 
-  if msg.Params.mouse.Buttons = 3 then {right mouse button }
-  begin
-    if TfpgWidget(msg.Dest).ClassType = TfpgPageControl then
-    begin
-      writeln('Right click on page control');
-      wgd := WidgetDesigner(TfpgWidget(msg.dest));
-      if wgd <> nil then
-        pmenu := wgd.FVFDClass.CreatePopupMenu(TfpgWidget(msg.dest));
-        if Assigned(pmenu) then
-          pmenu.ShowAt(wgd.Widget, msg.Params.mouse.x, msg.Params.mouse.y);
-    end;
-  end;
+  //if msg.Params.mouse.Buttons = 3 then {right mouse button }
+  //begin
+    //if TfpgWidget(msg.Dest).ClassType = TfpgPageControl then
+    //begin
+      //writeln('Right click on page control');
+      //wgd := WidgetDesigner(TfpgWidget(msg.dest));
+      //if wgd <> nil then
+        //pmenu := wgd.FVFDClass.CreatePopupMenu(TfpgWidget(msg.dest));
+        //if Assigned(pmenu) then
+          //pmenu.ShowAt(wgd.Widget, msg.Params.mouse.x, msg.Params.mouse.y);
+    //end;
+  //end;
 end;
 
 procedure TFormDesigner.MsgMouseMove(var msg: TfpgMessageRec);
