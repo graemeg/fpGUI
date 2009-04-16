@@ -30,13 +30,9 @@ uses
   fpg_widget,
   fpg_form,
   fpg_dialogs,
-  fpg_label,
-  fpg_edit,
-  fpg_button,
   fpg_listbox,
   fpg_memo,
   fpg_combobox,
-  fpg_checkbox,
   fpg_menu,
   vfdresizer,
   vfdforms,
@@ -143,8 +139,7 @@ implementation
 
 uses
   vfdmain,
-  TypInfo,
-  fpg_tab;
+  TypInfo;
 
 
 { TWidgetDesigner }
@@ -311,7 +306,6 @@ var
   pwg: TfpgWidget;
   shift: boolean;
   x, y: integer;
-  pmenu: TfpgPopupMenu;
 begin
 //  writeln('TFormDesigner.MsgMouseUp');
   FDragging := False;
@@ -712,7 +706,6 @@ const
 var
   frm: TWidgetOrderForm;
   n, fi: integer;
-  cd: TWidgetDesigner;
   identlevel: integer;
   taborder: integer;
 

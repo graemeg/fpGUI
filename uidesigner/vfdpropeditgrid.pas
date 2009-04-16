@@ -37,7 +37,6 @@ uses
   fpg_basegrid,
   fpg_grid,
   fpg_checkbox,
-  vfdforms,
   vfdwidgetclass,
   vfdprops,
   vfdformparser;
