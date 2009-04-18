@@ -77,6 +77,7 @@ type
     WidgetIconName: string;
     NameBase: string;
     Container: boolean;
+    BlockMouseMsg: boolean;
     constructor Create(aClass: TWidgetClass);
     destructor  Destroy; override;
     function    AddProperty(apropname: string; apropclass: TVFDPropertyClass; desc: string): TVFDWidgetProperty;
@@ -115,6 +116,7 @@ begin
   Description := '';
   NameBase    := 'Widget';
   Container   := False;
+  BlockMouseMsg := True;
 end;
 
 function TVFDWidgetClass.CreateWidget(AOwner: TComponent): TfpgWidget;

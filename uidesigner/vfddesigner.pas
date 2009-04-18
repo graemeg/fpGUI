@@ -30,13 +30,9 @@ uses
   fpg_widget,
   fpg_form,
   fpg_dialogs,
-  fpg_label,
-  fpg_edit,
-  fpg_button,
   fpg_listbox,
   fpg_memo,
   fpg_combobox,
-  fpg_checkbox,
   fpg_menu,
   vfdresizer,
   vfdforms,
@@ -143,8 +139,7 @@ implementation
 
 uses
   vfdmain,
-  TypInfo,
-  fpg_tab;
+  TypInfo;
 
 
 { TWidgetDesigner }
@@ -311,10 +306,8 @@ var
   pwg: TfpgWidget;
   shift: boolean;
   x, y: integer;
-  pmenu: TfpgPopupMenu;
 begin
 //  writeln('TFormDesigner.MsgMouseUp');
-  msg.Stop  := True;
   FDragging := False;
 
   shift := (ssShift in msg.Params.mouse.shiftstate);
@@ -326,6 +319,12 @@ begin
     pwg := FForm
   else if not wgd.FVFDClass.Container then
     wgc := nil;
+
+  // Should we block mouse msg to actual widget?
+  if Assigned(wgd) then
+    msg.Stop := wgd.FVFDClass.BlockMouseMsg
+  else
+    msg.Stop := True;
 
   if wgc <> nil then
   begin
@@ -373,18 +372,18 @@ begin
 
   UpdatePropWin;
 
-  if msg.Params.mouse.Buttons = 3 then {right mouse button }
-  begin
-    if TfpgWidget(msg.Dest).ClassType = TfpgPageControl then
-    begin
-      writeln('Right click on page control');
-      wgd := WidgetDesigner(TfpgWidget(msg.dest));
-      if wgd <> nil then
-        pmenu := wgd.FVFDClass.CreatePopupMenu(TfpgWidget(msg.dest));
-        if Assigned(pmenu) then
-          pmenu.ShowAt(wgd.Widget, msg.Params.mouse.x, msg.Params.mouse.y);
-    end;
-  end;
+  //if msg.Params.mouse.Buttons = 3 then {right mouse button }
+  //begin
+    //if TfpgWidget(msg.Dest).ClassType = TfpgPageControl then
+    //begin
+      //writeln('Right click on page control');
+      //wgd := WidgetDesigner(TfpgWidget(msg.dest));
+      //if wgd <> nil then
+        //pmenu := wgd.FVFDClass.CreatePopupMenu(TfpgWidget(msg.dest));
+        //if Assigned(pmenu) then
+          //pmenu.ShowAt(wgd.Widget, msg.Params.mouse.x, msg.Params.mouse.y);
+    //end;
+  //end;
 end;
 
 procedure TFormDesigner.MsgMouseMove(var msg: TfpgMessageRec);
@@ -707,7 +706,6 @@ const
 var
   frm: TWidgetOrderForm;
   n, fi: integer;
-  cd: TWidgetDesigner;
   identlevel: integer;
   taborder: integer;
 
