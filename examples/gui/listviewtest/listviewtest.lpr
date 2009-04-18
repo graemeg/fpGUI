@@ -8,8 +8,6 @@ uses
   
 type
 
-  { TMainForm }
-
   TMainForm = class(TfpgForm)
   private
     FEdit: TfpgEdit;
@@ -18,7 +16,6 @@ type
     FTmpListView: TfpgListView;
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
-    
     procedure CloseBttn(Sender: TObject);
     procedure AddBttn(Sender: TObject);
     procedure ShowHeadersChange(Sender: TObject);

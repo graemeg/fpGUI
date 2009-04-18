@@ -69,7 +69,7 @@ type
     procedure ClearList; override;
     procedure RebuildList; override;
   public
-    constructor CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; AIsObserving: Boolean = True);
+    constructor CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; AIsObserving: Boolean = True); reintroduce; overload;
     destructor Destroy; override;
     class function ComponentClass: TClass; override;
     function GetObjectFromRow(ARow: Integer): TtiObject;
@@ -89,8 +89,8 @@ type
     FView: TfpgLVItem;
     procedure SetupFields; virtual;
   public
-    constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem; const AFieldsInfo: TtiMediatorFieldInfoList; IsObserving: Boolean = True);
-    constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem; AOnBeforeSetupField: TOnBeforeSetupField; const AFieldsInfo: TtiMediatorFieldInfoList; IsObserving: Boolean = True); overload;
+    constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem; const AFieldsInfo: TtiMediatorFieldInfoList; IsObserving: Boolean = True); reintroduce; overload;
+    constructor CreateCustom(AModel: TtiObject; AView: TfpgLVItem; AOnBeforeSetupField: TOnBeforeSetupField; const AFieldsInfo: TtiMediatorFieldInfoList; IsObserving: Boolean = True); reintroduce; overload;
     procedure BeforeDestruction; override;
     procedure Update(ASubject: TtiObject); override;
   published
@@ -263,6 +263,7 @@ destructor TListViewMediator.Destroy;
 begin
   IsObserving := False;
   FView       := nil;
+  FObserversInTransit.Free;
   inherited;
 end;
 
