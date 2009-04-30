@@ -3233,7 +3233,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- object Visibility: default -->
       <element name="TfpgFontResourceBase">
-        <short/>
+        <short>Encapsulates the resources of a font</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -4123,8 +4123,9 @@ Gaussian, Sinc etc... These decendant filters are used in the
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgCanvasBase.DrawRectangle">
-        <short/>
-        <descr/>
+        <short>Draws a rectangle.</short>
+        <descr>
+          <printshort id="TfpgCanvasBase.DrawRectangle"/> You can specify the size of the rectangle via X, Y, Width and Height parameters or via a TfpgRect parameter.</descr>
         <errors/>
         <seealso/>
       </element>
@@ -4150,8 +4151,9 @@ Gaussian, Sinc etc... These decendant filters are used in the
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgCanvasBase.DrawLine">
-        <short/>
-        <descr/>
+        <short>Draws a line</short>
+        <descr>
+          <printshort id="TfpgCanvasbase.DrawLine"/>. This method draws a line from (x1,y1) to (x2,y2), but does not draw the last pixel. All supported backends follow the Microsoft API and doesn't draw the last pixel. This optimises consecutive lines being drawn without overlapping pixels.</descr>
         <errors/>
         <seealso/>
       </element>
@@ -5428,6 +5430,25 @@ Right. And the Top is always smaller than the Bottom.
       <!-- argument Visibility: default -->
       <element name="SortRect.bottom">
         <short/>
+      </element>
+      <element name="TfpgCanvasBase.DrawLineClipped">
+        <short>Draws a line inside a clip rectangle</short>
+        <descr>
+          <p>
+            <printshort id="TfpgCanvasBase.DrawLineClipped"/>. This procedure clips a line to the AClipRect boundaries and
+ then calls the DrawLine procedure with the clipped coordinates.  If the line
+ lies completely outside of the clip boundary, then the Line routine is not
+ called.  This procedure uses the well known Cohen-Sutherland line clipping
+ algorithm to clip each coordinate.
+</p>
+          <p>Use this if you did not what to change the Canvas.ClipRegion for some reason.
+ For a detailed explanation see:  http://www.nondot.org/~sabre/graphpro/line6.html
+</p>
+        </descr>
+      </element>
+      <element name="TfpgCanvasBase.ClipLine">
+        <short>Clips the line based on AClipRect boundaries.</short>
+        <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
       </element>
     </module>
     <!-- gfxbase -->
