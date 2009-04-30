@@ -2,121 +2,12 @@
 <fpdoc-descriptions>
 <package name="CoreLib">
 
-<!--
-  ====================================================================
-    gfx_wuline
-  ====================================================================
--->
-
-<module name="gfx_wuline">
+<module name="fpg_wuline">
 <short></short>
 <descr>
 </descr>
 
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="SysUtils">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gfxbase">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="fpgfx">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="WuLine">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="WuLine.ACanvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="WuLine.Point1">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="WuLine.Point2">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="WuLine.AColor">
-<short></short>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="DrawWuCircle">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="DrawWuCircle.Canvas">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="DrawWuCircle.x">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="DrawWuCircle.y">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="DrawWuCircle.r">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="DrawWuCircle.AColor">
-<short></short>
-</element>
-
-</module> <!-- gfx_wuline -->
+</module>
 
 </package>
 </fpdoc-descriptions>

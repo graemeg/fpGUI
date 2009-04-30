@@ -2,44 +2,11 @@
 <fpdoc-descriptions>
 <package name="CoreLib">
 
-<!--
-  ====================================================================
-    gfx_utils
-  ====================================================================
--->
-
-<module name="gfx_utils">
+<module name="fpg_utils">
 <short>Utility functions.</short>
 <descr>Utility functions used throughout fpGUI. Some have common
 implementations and some have platform specific implementations.
 </descr>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="Classes">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="SysUtils">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- unresolved type reference Visibility: default -->
-<element name="gfxbase">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
 
 <!-- function Visibility: default -->
 <element name="fpgToOSEncoding">
@@ -47,20 +14,6 @@ implementations and some have platform specific implementations.
 <descr>This function is specific to filesystem strings like Paths, Filenames
  and Directories.
 </descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgToOSEncoding.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgToOSEncoding.aString">
-<short></short>
 </element>
 
 <!-- function Visibility: default -->
@@ -69,20 +22,6 @@ implementations and some have platform specific implementations.
 <descr>This function is specific to filesystem strings like Paths, Filenames
  and Directories.
 </descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgFromOSEncoding.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgFromOSEncoding.aString">
-<short></short>
 </element>
 
 <!-- procedure Visibility: default -->
@@ -91,10 +30,6 @@ implementations and some have platform specific implementations.
 <descr>On each platform, this function will try and find the appropriate (system
  default) web browser.
 </descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 <!-- argument Visibility: default -->
@@ -107,15 +42,6 @@ implementations and some have platform specific implementations.
 <short>If ALine is not '', add the trailing value AValue</short>
 <descr>If ALine is not '', add the trailing value AValue
 </descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgAddTrailingValue.Result">
-<short></short>
 </element>
 
 <!-- argument Visibility: default -->
@@ -133,138 +59,7 @@ implementations and some have platform specific implementations.
 <short>Are duplicate AValue's allowed</short>
 </element>
 
-<!-- function Visibility: default -->
-<element name="fpgFindFirst">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgFindFirst.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgFindFirst.Path">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgFindFirst.Attr">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgFindFirst.Rslt">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgFindNext">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgFindNext.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgFindNext.Rslt">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgGetCurrentDir">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgGetCurrentDir.Result">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgSetCurrentDir">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgSetCurrentDir.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgSetCurrentDir.NewDir">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgExpandFileName">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgExpandFileName.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgExpandFileName.FileName">
-<short></short>
-</element>
-
-<!-- function Visibility: default -->
-<element name="fpgFileExists">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-<!-- function result Visibility: default -->
-<element name="fpgFileExists.Result">
-<short></short>
-</element>
-
-<!-- argument Visibility: default -->
-<element name="fpgFileExists.FileName">
-<short></short>
-</element>
-
-</module> <!-- gfx_utils -->
+</module> 
 
 </package>
 </fpdoc-descriptions>

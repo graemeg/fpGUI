@@ -1,41 +1,11 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
   <package name="GUI">
-    <module name="gui_hyperlink">
+    <module name="fpg_hyperlink">
       <short>A label component that can launch a web browser</short>
       <descr>This component acts like a link found in a web page. You can assign a
 target URL and if the user clicks on the component, it will launch a web browser
 using the target URL as destination.</descr>
-      <!-- unresolved type reference Visibility: default -->
-      <element name="Classes">
-        <short/>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- unresolved type reference Visibility: default -->
-      <element name="Sysutils">
-        <short/>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- unresolved type reference Visibility: default -->
-      <element name="gui_label">
-        <short/>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- unresolved type reference Visibility: default -->
-      <element name="fpgfx">
-        <short/>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- unresolved type reference Visibility: default -->
-      <element name="gfxbase">
-        <short/>
-        <descr/>
-        <seealso/>
-      </element>
       <element name="TfpgHyperlink">
         <short>A <var>TfpgCustomLabel</var> descendant that implements hyperlink support</short>
         <descr>This is a class to implement a hyperlink. Of course, such as all 

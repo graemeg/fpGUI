@@ -2,38 +2,12 @@
 <fpdoc-descriptions>
 <package name="CoreLib">
 
-<!--
-  ====================================================================
-    gfx_stdimages
-  ====================================================================
--->
-
-<module name="gfx_stdimages">
+<module name="fpg_stdimages">
 <short></short>
 <descr>
 </descr>
 
-<!-- unresolved type reference Visibility: default -->
-<element name="fpgfx">
-<short></short>
-<descr>
-</descr>
-<seealso>
-</seealso>
-</element>
-
-<!-- procedure Visibility: default -->
-<element name="fpgCreateStandardImages">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
-</element>
-
-</module> <!-- gfx_stdimages -->
+</module>
 
 </package>
 </fpdoc-descriptions>

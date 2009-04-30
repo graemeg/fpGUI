@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="GUI">
+
+<module name="fpg_dialogs">
+<short>Various dialogs used by fpGUI based applications.</short>
+<descr>
+</descr>
+
+<!-- object Visibility: default -->
+<element name="TfpgMessageBox">
+<short>A standard message box dialog.</short>
+<descr>
+A standard message box dialog. It is used by the global <link id="ShowMessage"/>
+function.
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgMessageBox.SetMessage">
+<short>Sets the message to be displayed.</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgBaseDialog">
+<short>An abstract dialog which forms the basis of other dialogs.</short>
+<descr>
+This dialog implements the two basic buttons (OK, Cancel) and also some 
+keyboard support like Escape to close the dialog.
+</descr>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgFontSelectDialog">
+<short>A standard font selection dialog.</short>
+<descr>
+It also contains a Collection listbox which gets automatically populated 
+based on the available fonts. There are two custom collections called 
+<i>Favourites</i> and <i>Recently Used</i> which list your own selection of 
+fonts. <i>Font Aliases</i> will list all registered font aliases used by the
+application, including the default font aliases used by fpGUI (eg: #Edit2 = 
+'Courier New-10').
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TfpgFontSelectDialog.SetSampleText">
+<short>The sample text or font preview text to be shown.</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TfpgFileDialog">
+<short>File Open or File Save dialog.</short>
+<descr>
+This dialog acts as both the <i>File Open</i> or <i>File Save</i> dialog used
+in fpGUI applications. The specific one needed can be launched by the 
+<link id="TfpgFileDialog.RunOpenFile"/> or the <link id="TfpgFileDialog.RunSaveFile"/>
+methods.
+</descr>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TfpgFileDialog.FileName">
+<short>The filename selected by the user.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFileDialog.SelectFile">
+<short>Select specified file at startup.</short>
+<descr>
+When the dialog is opened the file specified is pre selected.
+</descr>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFileDialog.RunOpenFile">
+<short>Open the dialog as a File Open dialog.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TfpgFileDialog.RunSaveFile">
+<short>Open the dialog as File Save dialog.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TfpgFileDialog.Filter">
+<short>File mask filters available in the dialog.</short>
+<descr>
+<p>
+The filter consists out of two parts separated by a | sign. If more than
+one filter needs to be specified each filter is also separated by a | sign.
+The format for a single filter is: &lt;description&gt;|&lt;filemask&gt;
+The format for multiple filters are: &lt;description&gt;|&lt;filemask&gt;|&lt;description&gt;|&lt;filemask&gt;|&lt;description&gt;|&lt;filemask&gt;
+</p>
+<p>
+ Example:<br/>
+ <ul>
+   <li><p>'All Files (*)|*'</p></li>
+   <li><p>'All Files (*)|*|Object Pascal (*.pas)|*.pas'</p></li>
+ </ul>
+</p>
+<p>           
+A filemask can also contain more than one mask separated by a ; sign.<br/>
+eg: 'Object Pascal|*.pas;*.lpi;*.pp'
+</p>
+</descr>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TfpgFileDialog.ShowHidden">
+<short>If set to True the dialog will list hidden files as well.</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="ShowMessage">
+<short>Displays a message box with an OK button.</short>
+<descr>
+Call ShowMessage to display a simple message box with an OK button. If ATitle is
+not specified the caption of the message box will be 'Message'.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ShowMessage.AMessage">
+<short>AMessage parameter is the message string that appears in the message box.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="ShowMessage.ATitle">
+<short>ATitle parameter is the string that appears as the caption of the message box.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="SelectFontDialog">
+<short>A convenience function to show the font selection dialog.</short>
+<seealso>
+  <link id="TfpgFontSelectDialog"/>
+</seealso>
+</element>
+
+</module>
+
+</package>
+</fpdoc-descriptions>

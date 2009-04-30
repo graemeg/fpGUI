@@ -6,7 +6,7 @@
     gfxbase
   ====================================================================
 -->
-    <module name="gfxbase">
+    <module name="fpg_base">
       <short>The base unit and starting point of fpGUI</short>
       <descr>
         <p>This unit contains all the abstract classes for the CoreLib code
@@ -17,18 +17,7 @@ of fpGUI. It also defines many types and constants used throughout the toolkit.
 defined in this unit.
 </p>
       </descr>
-      <!-- unresolved type reference Visibility: default -->
-      <element name="Classes">
-        <short/>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- unresolved type reference Visibility: default -->
-      <element name="SysUtils">
-        <short/>
-        <descr/>
-        <seealso/>
-      </element>
+
       <!-- alias type Visibility: default -->
       <element name="TfpgCoord">
         <short>A custom type used to represent X and Y coordinates.</short>
