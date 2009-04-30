@@ -5,6 +5,7 @@ fpdoc --package=CoreLib \
   --format=html \
   --output=html/corelib/  \
   --charset=UTF-8 \
+  --footer-date='yyyy-mm-dd' \
   --content=html/corelib.cnt \
   --html-search=/fpgui/docs/search.html \
   --import=html/gui.cnt,../gui/ \

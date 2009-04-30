@@ -72,10 +72,10 @@
    DefaultButton fpg_dialogs/tfpgmessagedialog.defaultbutton.html
    DialogType fpg_dialogs/tfpgmessagedialog.dialogtype.html
   TfpgNewDirDialog fpg_dialogs/tfpgnewdirdialog.html
-   Create fpg_dialogs/tfpgbasedialog.create.html
+   Create fpg_dialogs/tfpgnewdirdialog.create.html
    Directory fpg_dialogs/tfpgnewdirdialog.directory.html
   TfpgPromptUserDialog fpg_dialogs/tfpgpromptuserdialog.html
-   Create fpg_dialogs/tfpgbasedialog.create.html
+   Create fpg_dialogs/tfpgpromptuserdialog.create.html
    Authenticate fpg_dialogs/tfpgpromptuserdialog.authenticate.html
    Wiggle fpg_dialogs/tfpgpromptuserdialog.wiggle.html
    UserID fpg_dialogs/tfpgpromptuserdialog.userid.html
@@ -87,7 +87,7 @@
    Create fpg_dialogs/tfpgpromptuserdbdialog.create.html
    Destroy fpg_dialogs/tfpgpromptuserdbdialog.destroy.html
   TfpgSelectDirDialog fpg_dialogs/tfpgselectdirdialog.html
-   Create fpg_dialogs/tfpgbasedialog.create.html
+   Create fpg_dialogs/tfpgselectdirdialog.create.html
    AfterCreate fpg_dialogs/tfpgselectdirdialog.aftercreate.html
    SelectedDir fpg_dialogs/tfpgselectdirdialog.selecteddir.html
    RootDirectory fpg_dialogs/tfpgselectdirdialog.rootdirectory.html

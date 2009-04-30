@@ -1273,8 +1273,8 @@
    FIsContainer fpg_widget/tfpgwidget.fiscontainer.html
    SetBackgroundColor fpg_widget/tfpgwidget.setbackgroundcolor.html
    SetTextColor fpg_widget/tfpgwidget.settextcolor.html
-   GetParent fpg_main/tfpgwindow.getparent.html
-   SetParent fpg_main/tfpgwindow.setparent.html
+   GetParent fpg_widget/tfpgwidget.getparent.html
+   SetParent fpg_widget/tfpgwidget.setparent.html
    SetEnabled fpg_widget/tfpgwidget.setenabled.html
    SetVisible fpg_widget/tfpgwidget.setvisible.html
    SetShowHint fpg_widget/tfpgwidget.setshowhint.html
@@ -1316,8 +1316,8 @@
    OnMouseUp fpg_widget/tfpgwidget.onmouseup.html
    OnPaint fpg_widget/tfpgwidget.onpaint.html
    OnResize fpg_widget/tfpgwidget.onresize.html
-   Create fpg_main/tfpgwindow.create.html
-   Destroy fpg_main/tfpgwindow.destroy.html
+   Create fpg_widget/tfpgwidget.create.html
+   Destroy fpg_widget/tfpgwidget.destroy.html
    GetClientRect fpg_widget/tfpgwidget.getclientrect.html
    GetBoundsRect fpg_widget/tfpgwidget.getboundsrect.html
    Realign fpg_widget/tfpgwidget.realign.html
@@ -1327,7 +1327,7 @@
    SetPosition fpg_widget/tfpgwidget.setposition.html
    Invalidate fpg_widget/tfpgwidget.invalidate.html
    FormDesigner fpg_widget/tfpgwidget.formdesigner.html
-   Parent fpg_main/tfpgwindow.parent.html
+   Parent fpg_widget/tfpgwidget.parent.html
    ActiveWidget fpg_widget/tfpgwidget.activewidget.html
    IsContainer fpg_widget/tfpgwidget.iscontainer.html
    Visible fpg_widget/tfpgwidget.visible.html
