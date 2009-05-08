@@ -59,9 +59,7 @@ implementation
 uses
   fpg_base,
   tiUtils,
-  tiGUIUtils,
   tiCommandLineParams,
-  tiGUIConstants,
   tiDialogs;
 
 

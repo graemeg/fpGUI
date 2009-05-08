@@ -1,6 +1,39 @@
 {
   This program searches for *.bmp files in the current directory and
   outputs to stdout the bmp files found as byte array constants.
+
+  Here are a few usage examples:
+
+  1)
+  ./updatestdimgs > ../src/corelib/stdimages.inc
+
+  This takes whatever .bmp file are in the current directory. Creates
+  byte array constants and outputs them to an include file.
+
+
+  2)
+  ./updatestdimgs -v -u myimages -m 0,0 -p myapp > /tmp/myimages.pas
+
+  This takes all .bmp images in current directory. (-v) Produces
+  verbose output at images are processed. (-u) generate a complete
+  unit for the images including registration code. (-m) if the images
+  have a transparency mask, what pixel should be used by default as
+  the transparency color. (-p) Use the "myapp" as the prefix to all
+  image constants. And lastly take all the stdout output and pipe it
+  into a file called myimages.pas
+
+  PS:
+  -o for the output file parameter still has some bugs, so I would
+  suggest you use piping (.... > outfile.inc) instead.
+
+
+  3)
+  ./updatestdimgs -v -i themes/silver/ > /tmp/mysilvertheme.inc
+
+  This takes all .bmp files in the themes/silver/ directory and generates
+  byte array constants using the default "usr" prefix and outputs to
+  stdout. We then pipe the output to mysilvertheme.inc file.
+
 }
 program updatestdimgs;
 
@@ -148,7 +181,7 @@ type
                    '{$mode objfpc}{$H+}'              +LineEnding+LineEnding+
                    'interface'                        +LineEnding+LineEnding+
                    'uses'                             +LineEnding+
-                   '  fpgfx;'                         +LineEnding+LineEnding+
+                   '  fpg_main;'                      +LineEnding+LineEnding+
                    'procedure InitializeCustomImages;'+LineEnding+LineEnding+
                    'implementation';
       AssignFile(f, FOutputFile);
