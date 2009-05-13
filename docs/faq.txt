@@ -1,0 +1,62 @@
+
+This file contains some general hints and tips especially when
+running applications under Linux where the desktop managers can
+vary greatly.
+
+
+Gnome
+=====
+
+*  Q: Why is my text so blurry in fpGUI based applications, but it's fine
+   for other Gnome applications?
+
+   A: Gnome up to v2.22.3 doesn't create a ~/.fonts.conf file when you
+   adjust your desktop font settings. KDE does handle this correctly.
+   The blurry fonts are more prominent on LCD screens where subpixel 
+   anti-aliasing makes a huge difference to the fonts appearance and how
+   sharp they look. If you run know and experience this problem, then
+   simply create a ~/.fonts.conf file that contains the following text.
+
+   ----------------[ .fonts.conf ]---------------------
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+ <match target="font" >
+  <edit mode="assign" name="rgba" >
+   <const>rgb</const>
+  </edit>
+ </match>
+ <match target="font" >
+  <edit mode="assign" name="hinting" >
+   <bool>true</bool>
+  </edit>
+ </match>
+ <match target="font" >
+  <edit mode="assign" name="hintstyle" >
+   <const>hintfull</const>
+  </edit>
+ </match>
+ <match target="font" >
+  <edit mode="assign" name="antialias" >
+   <bool>true</bool>
+  </edit>
+ </match>
+</fontconfig>
+   -------------------[ end ]-------------------
+
+
+
+FVMW2
+=====
+* Modal forms in FVWM2 window manager by default don't have any titlebar
+  or window borders. This is very annoying and makes that the user can't
+  resize or move those windows.  To enable the window decorations you 
+  need to uncomment the following line in the ~/.fvwm/globalfeel file:
+  
+     Style * DecorateTransient
+
+
+
+
+    -=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
