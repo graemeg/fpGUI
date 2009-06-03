@@ -237,14 +237,14 @@ type
     property    OldColor;
     property    Text;
   published
+    property    CustomThousandSeparator;
     property    NegativeColor;
-    property    Value: integer read GetValue write SetValue;
     property    ParentShowHint;
     property    ShowHint;
     property    ShowThousand default True;
     property    TabOrder;
     property    TextColor;
-    property    CustomThousandSeparator;
+    property    Value: integer read GetValue write SetValue;
     property    OnChange;
     property    OnEnter;
     property    OnExit;

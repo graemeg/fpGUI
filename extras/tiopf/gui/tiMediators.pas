@@ -331,7 +331,7 @@ var
   Mi, Ma: Integer;
 begin
   inherited;
-  if Subject.GetFieldBounds(FieldName,Mi,Ma) and (Ma>0) then
+  if Subject.GetFieldBounds(FieldName, Mi, Ma) and (Ma > 0) then
     FEditControl.MaxLength := Ma;
   if ObjectUpdateMoment in [ouOnChange,ouCustom] then
     FEditControl.OnChange := @DoOnChange
@@ -406,8 +406,15 @@ begin
 end;
 
 procedure TMediatorSpinEditView.SetupGUIandObject;
+var
+  Mi, Ma: Integer;
 begin
   inherited SetupGUIandObject;
+  if Subject.GetFieldBounds(FieldName, Mi, Ma) then
+  begin
+    FEditControl.MinValue := Mi;
+    FEditControl.MaxValue := Ma;
+  end;
   if ObjectUpdateMoment in [ouOnChange,ouCustom] then
     FEditControl.OnChange := @DoOnChange
   else
@@ -444,7 +451,7 @@ var
   Mi, Ma: Integer;
 begin
   inherited;
-  if Subject.GetFieldBounds(FieldName,Mi,Ma) and (Ma>0) then
+  if Subject.GetFieldBounds(FieldName, Mi, Ma) then
   begin
     FEditControl.Min := Mi;
     FEditControl.Max := Ma;
@@ -796,8 +803,15 @@ begin
 end;
 
 procedure TMediatorCalendarComboView.SetupGUIandObject;
+var
+  Mi, Ma: TDateTime;
 begin
   inherited SetupGUIandObject;
+  if Subject.GetFieldBounds(FieldName, Mi, Ma) then
+  begin
+    FEditControl.MinDate := Mi;
+    FEditControl.MaxDate := Ma;
+  end;
   if ObjectUpdateMoment in [ouOnChange,ouCustom] then
     FEditControl.OnChange := @DoOnChange
   else
@@ -867,8 +881,15 @@ begin
 end;
 
 procedure TMediatorSpinEditFloatView.SetupGUIandObject;
+var
+  Mi, Ma: Integer;
 begin
   inherited SetupGUIandObject;
+  if Subject.GetFieldBounds(FieldName, Mi, Ma) then
+  begin
+    FEditControl.MinValue := Mi;
+    FEditControl.MaxValue := Ma;
+  end;
   if ObjectUpdateMoment in [ouOnChange,ouCustom] then
     FEditControl.OnChange := @DoOnChange
   else
