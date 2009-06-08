@@ -98,6 +98,7 @@ type
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
@@ -724,8 +725,7 @@ begin
   inherited HandleKeyChar(AText, shiftstate, consumed);
 end;
 
-procedure TfpgBaseEdit.HandleKeyPress(var keycode: word;
-  var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgBaseEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 var
   hasChanged: boolean;
 
@@ -738,7 +738,6 @@ var
 begin
   hasChanged := False;
   fpgApplication.HideHint;
-
 
   Consumed := True;
   case CheckClipBoardKey(keycode, shiftstate) of
@@ -761,7 +760,6 @@ begin
   else
     Consumed := False;
   end;
-
 
   if not Consumed then
   begin
@@ -864,7 +862,7 @@ begin
   if consumed then
     RePaint
   else
-    inherited;
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   if hasChanged then
     if Assigned(FOnChange) then
@@ -888,6 +886,16 @@ begin
   end;
   AdjustDrawingInfo;
   RePaint;
+end;
+
+procedure TfpgBaseEdit.HandleRMouseDown(x, y: integer;
+  shiftstate: TShiftState);
+begin
+  // keyMenu was pressed
+  if shiftstate = [ssExtra1] then
+    HandleRMouseUp(x, y, [])
+  else
+    inherited HandleRMouseDown(x, y, shiftstate);
 end;
 
 procedure TfpgBaseEdit.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);

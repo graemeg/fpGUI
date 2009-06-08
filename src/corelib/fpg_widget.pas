@@ -744,9 +744,8 @@ begin
 }
       keyMenu:
         begin
-          { TODO : We could improve the X,Y coordinates. Not really sure how
-            Menu Key should handle that. }
-          HandleRMouseDown(Width div 2, Height div 2, []);
+          // ssExtra1 is a signal that keyMenu was used.
+          HandleRMouseDown(Width div 2, Height div 2, [ssExtra1]);
         end;
   end;
 

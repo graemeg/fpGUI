@@ -35,7 +35,6 @@ type
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
   TFormCloseQueryEvent = procedure(Sender: TObject; var CanClose: boolean) of object;
 
-  { TfpgBaseForm }
 
   TfpgBaseForm = class(TfpgWidget)
   private
