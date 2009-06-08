@@ -97,53 +97,11 @@ function  TranslateUnitResourceStrings(const ResUnitName, AFilename: string): bo
 function  UTF8ToSystemCharSet(const s: string): string; {$ifndef MultiLocale} inline;{$endif}
 
 
-procedure DebugLn(const s1: string);
-procedure DebugLn(const s1, s2: string);
-procedure DebugLn(const s1, s2, s3: string);
-procedure DebugLn(const s1, s2, s3, s4: string);
-
-
 implementation
 
 uses
+  fpg_main,
   fpg_stringutils;
-
-
-procedure DebugLn(const s1: string);
-begin
-  { TODO : Improve this to work under Windows GUI apps as well.}
-  writeln(s1);
-end;
-
-procedure DebugLn(const s1, s2: string);
-begin
-  writeln(s1 + s2);
-end;
-
-procedure DebugLn(const s1, s2, s3: string);
-begin
-  writeln(s1 + s2 + s3);
-end;
-
-procedure DebugLn(const s1, s2, s3, s4: string);
-begin
-  writeln(s1 + s2 + s3 + s4);
-end;
-
-
-procedure DumpExceptionBackTrace;
-var
-  FrameCount: integer;
-  Frames: PPointer;
-  FrameNumber: integer;
-begin
-  DebugLn('  Stack trace:');
-  DebugLn(BackTraceStrFunc(ExceptAddr));
-  FrameCount := ExceptFrameCount;
-  Frames     := ExceptFrames;
-  for FrameNumber := 0 to FrameCount - 1 do
-    DebugLn(BackTraceStrFunc(Frames[FrameNumber]));
-end;
 
 
 function UTF8ToSystemCharSet(const s: string): string; {$ifndef MultiLocale} inline;
@@ -275,7 +233,7 @@ begin
     begin
       DebugLn('Exception while translating ', ResUnitName);
       DebugLn(e.Message);
-      DumpExceptionBackTrace;
+      DumpStack;
     end;
   end;
 end;

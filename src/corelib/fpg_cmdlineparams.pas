@@ -14,6 +14,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
+{ TODO : Make sure Unicode parameter handling is supported. }
+
 unit fpg_cmdlineparams;
 
 {$mode objfpc}{$H+}

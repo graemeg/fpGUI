@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Abstracted OS specific function to work in a cross-platfrom manner.
+      Abstracted OS specific function to work in a cross-platform manner.
 }
 
 unit fpg_utils;
@@ -22,74 +22,77 @@ unit fpg_utils;
 interface
 
 uses
-  Classes, SysUtils, fpg_base;
+  Classes,
+  SysUtils,
+  fpg_base;
 
 // *** Platform specific functions ***
 
-function  fpgToOSEncoding(aString: TfpgString): string;
-function  fpgFromOSEncoding(aString: string): TfpgString;
+function fpgToOSEncoding(aString: TfpgString): string;
+function fpgFromOSEncoding(aString: string): TfpgString;
 procedure fpgOpenURL(const aURL: TfpgString);
 
 
 // *** Common functions for all platforms ***
 
-function  fpgAddTrailingValue(const ALine, AValue: TfpgString; ADuplicates: boolean = true): TfpgString;
-function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
-function  fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
-function  fpgAllFilesMask: TfpgString;
+function fpgAddTrailingValue(const ALine, AValue: TfpgString; ADuplicates: Boolean = True): TfpgString;
+function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+function fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
+function fpgAllFilesMask: TfpgString;
+function fpgConvertLineEndings(const s: TfpgString): TfpgString;
 
 
-// RTL wrapper filesystem functions with platform independant encoding
-// These functions are common for all platforms and rely on fpgXXXPlatformEncoding
+ // RTL wrapper filesystem functions with platform independant encoding
+ // These functions are common for all platforms and rely on fpgXXXPlatformEncoding
 
-function  fpgFindFirst(const Path: TfpgString; Attr: Longint; out Rslt: TSearchRec): Longint;
-function  fpgFindNext(var Rslt: TSearchRec): Longint;
-function  fpgGetCurrentDir: TfpgString;
-function  fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
-function  fpgExpandFileName(const FileName: TfpgString): TfpgString;
-function  fpgFileExists(const FileName: TfpgString): Boolean;
+function fpgFindFirst(const Path: TfpgString; Attr: longint; out Rslt: TSearchRec): longint;
+function fpgFindNext(var Rslt: TSearchRec): longint;
+function fpgGetCurrentDir: TfpgString;
+function fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
+function fpgExpandFileName(const FileName: TfpgString): TfpgString;
+function fpgFileExists(const FileName: TfpgString): Boolean;
+function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
+function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 
 
 implementation
 
-{ No USES clause is allowed here! Add it to the include file shown below. }
+ { No USES clause is allowed here! Add it to the include file shown below. }
 
 
-// Platform specific encoding handling functions
+ // Platform specific encoding handling functions
 {$I fpg_utils_impl.inc}
 
 
-
-function fpgAddTrailingValue(const ALine, AValue: TfpgString; ADuplicates: boolean = true): TfpgString;
+function fpgAddTrailingValue(const ALine, AValue: TfpgString; ADuplicates: Boolean = True): TfpgString;
 begin
   if ALine = '' then
   begin
-    result := ALine;
+    Result := ALine;
     Exit; //==>
   end;
 
   if ADuplicates then
   begin
-    result := ALine + AValue;
+    Result := ALine + AValue;
     Exit; //==>
   end;
 
   if (not SameText(Copy(ALine, Length(ALine) - Length(AValue) + 1, Length(AValue)), AValue)) then
-    result := ALine + AValue
+    Result := ALine + AValue
   else
-    result := ALine;
+    Result := ALine;
 end;
 
-function fpgFindFirst(const Path: TfpgString; Attr: Longint; out
-  Rslt: TSearchRec): Longint;
+function fpgFindFirst(const Path: TfpgString; Attr: longint; out Rslt: TSearchRec): longint;
 begin
-  Result := FindFirst(fpgToOSEncoding(Path), Attr, Rslt);
+  Result    := FindFirst(fpgToOSEncoding(Path), Attr, Rslt);
   Rslt.Name := fpgFromOSEncoding(Rslt.Name);
 end;
 
-function fpgFindNext(var Rslt: TSearchRec): Longint;
+function fpgFindNext(var Rslt: TSearchRec): longint;
 begin
-  Result := FindNext(Rslt);
+  Result    := FindNext(Rslt);
   Rslt.Name := fpgFromOSEncoding(Rslt.Name);
 end;
 
@@ -111,6 +114,16 @@ end;
 function fpgFileExists(const FileName: TfpgString): Boolean;
 begin
   Result := FileExists(fpgToOSEncoding(FileName));
+end;
+
+function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
+begin
+  Result := DirectoryExists(fpgToOSEncoding(ADirectory));
+end;
+
+function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
+begin
+  Result := ExtractFileDir(fpgToOSEncoding(FileName));
 end;
 
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
@@ -168,6 +181,32 @@ begin
   Result := '*';
   {$ENDIF}
 end;
+
+function fpgConvertLineEndings(const s: TfpgString): TfpgString;
+var
+  i: integer;
+  EndingStart: longint;
+begin
+  Result := s;
+  i      := 1;
+  while (i <= length(Result)) do
+    if Result[i] in [#10, #13] then
+    begin
+      EndingStart := i;
+      Inc(i);
+      if (i <= length(Result)) and (Result[i] in [#10, #13]) and (Result[i] <> Result[i - 1]) then
+        Inc(i);
+      if (length(LineEnding) <> i - EndingStart) or (LineEnding <> copy(Result, EndingStart, length(LineEnding))) then
+      begin
+        // line end differs => replace with current LineEnding
+        Result := copy(Result, 1, EndingStart - 1) + LineEnding + copy(Result, i, length(Result));
+        i      := EndingStart + length(LineEnding);
+      end;
+    end
+    else
+      Inc(i);
+end;
+
 
 end.
 

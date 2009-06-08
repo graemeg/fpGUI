@@ -375,6 +375,12 @@ function  PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 procedure PrintCallTraceDbgLn(const AMessage: string);
 procedure DumpStack;
 
+{ These methods are safe to use even on Windows gui applications. }
+procedure DebugLn(const s1: TfpgString);
+procedure DebugLn(const s1, s2: TfpgString);
+procedure DebugLn(const s1, s2, s3: TfpgString);
+procedure DebugLn(const s1, s2, s3, s4: TfpgString);
+
 
 implementation
 
@@ -388,7 +394,10 @@ uses
   fpg_widget,
   fpg_dialogs,
   fpg_hint,
-  fpg_extgraphics;
+  fpg_extgraphics,
+  fpg_utils,
+  fpg_stringutils,
+  fpg_cmdlineparams;
 
 var
   fpgTimers: TList;
@@ -397,6 +406,8 @@ var
   uApplication: TfpgApplication;
   uClipboard: TfpgClipboard;
   uMsgQueueList: TList;
+  uDebugText: ^Text;
+  uDebugTextAllocated: Boolean;
 
 type
   TNamedFontItem = class
@@ -565,6 +576,75 @@ begin
   Result.Bottom := ARect.Bottom;
 end;
 
+procedure InitializeDebugOutput;
+var
+  DebugFileName: string;
+
+  function GetDebugFileName: string;
+  var
+    EnvVarName: string;
+  begin
+    Result := '';
+    // first try to find the log file name in the command line parameters
+    if gCommandLineParams.IsParam('debuglog') then
+      Result := gCommandLineParams.GetParam('debuglog')
+    else
+    begin
+      // if not found yet, then try to find in the environment variable
+      EnvVarName  := ApplicationName + '_debuglog';
+      Result      := GetEnvironmentVariable(EnvVarName);
+    end;
+    if (Result <> '') then
+      Result := fpgExpandFileName(Result);
+  end;
+
+begin
+  uDebugText := nil;
+  DebugFileName := GetDebugFileName;
+  if (DebugFileName <> '') and
+     (fpgDirectoryExists(fpgExtractFileDir(DebugFileName))) then
+  begin
+    new(uDebugText);
+    try
+      Assign(uDebugText^, DebugFileName);
+      if fpgFileExists(DebugFileName) then
+        Append(uDebugText^)
+      else
+        Rewrite(uDebugText^);
+    except
+      Freemem(uDebugText);
+      uDebugText := nil;
+      // Add extra line ending: a dialog will be shown in Windows gui application
+      writeln(StdOut, 'Cannot open file: ', DebugFileName+LineEnding);
+    end;
+  end;
+  if uDebugText = nil then
+  begin
+    if TextRec(Output).Mode = fmClosed then
+      uDebugText := nil
+    else
+      uDebugText := @Output;
+    uDebugTextAllocated := False;
+  end else
+    uDebugTextAllocated := True;
+end;
+
+procedure CloseDebugOutput;
+begin
+  if uDebugTextAllocated then
+  begin
+    Close(uDebugText^);
+    Dispose(uDebugText);
+    uDebugTextAllocated := False;
+  end;
+  uDebugText := nil;
+end;
+
+procedure FinalizeDebugOutput;
+begin
+  CloseDebugOutput;
+end;
+
 procedure PrintRect(const Rect: TRect);
 begin
   writeln('Rect left=', Rect.Left, ' top=', Rect.Top, ' right=', Rect.Right,
@@ -662,6 +742,28 @@ begin
         Writeln(stdout,BackTraceStrFunc(ExceptFrames[i]));
     end;
   Writeln(stdout,'');
+end;
+
+procedure DebugLn(const s1: TfpgString);
+begin
+  if not Assigned(uDebugText) then
+    Exit; //==>
+  writeln(uDebugText^, fpgConvertLineEndings(s1));
+end;
+
+procedure DebugLn(const s1, s2: TfpgString);
+begin
+  DebugLn(s1 + s2);
+end;
+
+procedure DebugLn(const s1, s2, s3: TfpgString);
+begin
+  DebugLn(s1 + s2 + s3);
+end;
+
+procedure DebugLn(const s1, s2, s3, s4: TfpgString);
+begin
+  DebugLn(s1 + s2 + s3 + s4);
 end;
 
 { TfpgTimer }
@@ -1971,11 +2073,13 @@ initialization
   fpgCaret        := nil;
   fpgImages       := nil;
   iCallTrace      := -1;
+  InitializeDebugOutput;
   fpgInitMsgQueue;
 
 finalization;
   uClipboard.Free;
   uApplication.Free;
+  FinalizeDebugOutput;
 
 end.
 
