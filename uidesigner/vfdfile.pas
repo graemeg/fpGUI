@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -83,12 +83,13 @@ var
   s: string;
 begin
   s :=
-    '  T' + formname + ' = class(TfpgForm)' + LineEnding +
-    '  public' + LineEnding +
-    '    {@VFD_HEAD_BEGIN: ' + formname + '}' + LineEnding +
-    formheadblock +
-    '    {@VFD_HEAD_END: ' + formname + '}' + LineEnding +
-    '    procedure AfterCreate; override;' + LineEnding
+      '  T' + formname + ' = class(TfpgForm)' + LineEnding +
+      '  private' + LineEnding +
+      '    {@VFD_HEAD_BEGIN: ' + formname + '}' + LineEnding
+    + formheadblock +
+      '    {@VFD_HEAD_END: ' + formname + '}' + LineEnding +
+      '  public' + LineEnding +
+      '    procedure AfterCreate; override;' + LineEnding
     + '  end;' + LineEnding + LineEnding;
   NewFormsDecl := NewFormsDecl + s;
 end;
@@ -100,9 +101,11 @@ begin
   s := LineEnding + LineEnding +
     'procedure T' + formname + '.AfterCreate;' + LineEnding +
     'begin' + LineEnding +
+    '  {%region ''Auto-generated GUI code'' -fold}' + LineEnding +
     '  {@VFD_BODY_BEGIN: ' + formname + '}' + LineEnding +
     formbody +
     '  {@VFD_BODY_END: ' + formname + '}' + LineEnding +
+    '  {%endregion}' + LineEnding +
     'end;' + LineEnding;
   NewFormsImpl := NewFormsImpl + s;
 end;
@@ -351,12 +354,7 @@ begin
     '{$mode objfpc}{$H+}' + LineEnding + LineEnding +
     'interface' + LineEnding + LineEnding +
     'uses' + LineEnding +
-    '  SysUtils, Classes, fpg_base, fpg_main, fpg_widget,' + LineEnding +
-    '  fpg_edit, fpg_form, fpg_label, fpg_button,' + LineEnding +
-    '  fpg_listbox, fpg_memo, fpg_combobox, fpg_basegrid, fpg_grid, ' + LineEnding +
-    '  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar, ' + LineEnding +
-    '  fpg_progressbar, fpg_radiobutton, fpg_tab, fpg_menu,' + LineEnding +
-    '  fpg_panel, fpg_popupcalendar, fpg_gauge;' + LineEnding + LineEnding +
+    '  SysUtils, Classes, fpg_base, fpg_main, fpg_form;' + LineEnding + LineEnding +
     'type' + LineEnding + LineEnding +
     '{@VFD_NEWFORM_DECL}' + LineEnding + LineEnding +
     'implementation' + LineEnding + LineEnding +
