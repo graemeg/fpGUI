@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2008 Graeme Geldenhuys
+  Copyright (C) 2009 by Graeme Geldenhuys
 
   This library is free software; you can redistribute it and/or modify it
   under the terms of the GNU Library General Public License as published by
@@ -126,12 +126,14 @@ begin
     +le
     +'procedure TMainForm.AfterCreate;'+le
     +'begin'+le
+    +'  {%region ''Auto-generated GUI code'' -fold}' + le
     +'  {@VFD_BODY_BEGIN: MainForm}'+le
     +'  Name := ''MainForm'';'+le
     +'  SetPosition(316, 186, 300, 250);'+le
     +'  WindowTitle := ''MainForm'';'+le
     +le
     +'  {@VFD_BODY_END: MainForm}'+le
+    +'  {%endregion}' + le
     +'end;'+le
     +le
     +le
