@@ -184,6 +184,7 @@ uses
 
 procedure TfrmAbout.AfterCreate;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: frmAbout}
   Name := 'frmAbout';
   SetPosition(378, 267, 276, 180);
@@ -259,6 +260,7 @@ begin
   end;
 
   {@VFD_BODY_END: frmAbout}
+  {%endregion}
 end;
 
 class procedure TfrmAbout.Execute;
@@ -275,7 +277,6 @@ begin
   end;
 end;
 
-
 procedure TfrmMain.AfterCreate;
 var
   n: integer;
@@ -283,6 +284,7 @@ var
   wgc: TVFDWidgetClass;
   btn: TwgPaletteButton;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: frmMain}
   Name := 'frmMain';
   SetPosition(84, 123, 754, 92);
@@ -431,7 +433,7 @@ begin
   end;
 
   {@VFD_BODY_END: frmMain}
-
+  {%endregion}
 
   x := 0;
   y := 0;
@@ -504,6 +506,7 @@ procedure TfrmProperties.AfterCreate;
 var
   x, x2, w, y, gap: integer;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   inherited;
   Name := 'frmProperties';
   WindowPosition := wpUser;
@@ -664,6 +667,7 @@ begin
   edOther.Anchors  := [anLeft, anRight, anBottom];
   edOther.FontDesc := '#Edit2';
   edOther.OnChange := @(maindsgn.OnOtherChange);
+  {%endregion}
 end;
 
 procedure TfrmProperties.BeforeDestruction;

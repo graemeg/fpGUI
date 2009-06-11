@@ -30,13 +30,10 @@ uses
   fpg_label,
   fpg_edit,
   fpg_button,
-  fpg_listbox,
-  fpg_memo,
   fpg_combobox,
   fpg_customgrid,
   fpg_basegrid,
   fpg_grid,
-  fpg_checkbox,
   vfdwidgetclass,
   vfdprops,
   vfdformparser;
@@ -115,6 +112,7 @@ end;
 
 procedure TColumnEditForm.AfterCreate;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: ColumnEditForm}
   Name := 'ColumnEditForm';
   SetPosition(270, 267, 511, 269);
@@ -282,6 +280,7 @@ begin
   end;
 
   {@VFD_BODY_END: ColumnEditForm}
+  {%endregion}
 end;
 
 procedure TColumnEditForm.GridRowChange(Sender: TObject; row: Integer);

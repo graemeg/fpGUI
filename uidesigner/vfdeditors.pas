@@ -56,6 +56,7 @@ uses
 
 procedure TItemEditorForm.AfterCreate;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   inherited;
   WindowTitle := 'Items';
   SetPosition(0, 0, 360, 230);
@@ -77,7 +78,7 @@ begin
 
   btnCancel     := CreateButton(self, Width-84, 200, 80, 'Cancel', @OnButtonClick);
   btnCancel.Anchors := [anRight, anBottom];
-  
+  {%endregion}
 end;
 
 procedure TItemEditorForm.btnClearClicked(Sender: TObject);
