@@ -48,7 +48,13 @@ var
 begin
   with Installer do begin
     P := AddPackage('fpgui');
-    P.Version := '0.6_svn';
+    P.Version := '0.6.3';
+    P.Author := 'Graeme Geldenhuys';
+    P.Email := 'graemeg@gmail.com';
+    P.License := 'Modified LGPL';
+    P.Description := 'fpGUI Toolkit - a custom written GUI toolkit for Free Pascal.';
+
+//    P.Dependencies.Add('fcl');
     { Fill in more package details here }
 
     { This shouldn't really be here.  fpmake will install to the local
@@ -88,9 +94,19 @@ begin
     P.IncludePath.Add('gui');
 
     { todo: add unit and include dependency for all }
+    P.Sources.AddSrcFiles('corelib/*.pas');
+    P.Sources.AddSrcFiles('gui/*.pas');
+    if Defaults.OS in AllUnixOSes
+      then P.Sources.AddSrcFiles('corelib/x11/*.pas')
+      else P.Sources.AddSrcFiles('corelib/gdi/*.pas');
 
     { x11 and gdi common }
-    T := P.Targets.AddUnit('fpg_impl.pas');
+//    if Defaults.OS in AllUnixOSes
+//      then
+ P.Targets.AddUnit('corelib/x11/fpg_impl.pas', AllWindowsOSes);
+//      else
+ P.Targets.AddUnit('corelib/gdi/fpg_impl.pas', AllUnixOSes);
+//    T := P.Targets.AddUnit('fpg_impl.pas');
 
     { corelib/x11 }
     T := P.Targets.AddUnit('fpg_keyconv_x11.pas', AllUnixOSes);
@@ -127,6 +143,9 @@ begin
     T := P.Targets.AddUnit('fpg_extinterpolation.pas');
     T := P.Targets.AddUnit('fpg_pofiles.pas');
     T := P.Targets.AddUnit('fpg_stringutils.pas');
+
+    { corelib include files }
+//    T := P.Sources.AddSrc('keys.inc');
 
     { gui/db }
     T := P.Targets.AddUnit('fpgui_db.pas');
