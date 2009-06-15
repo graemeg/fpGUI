@@ -140,6 +140,7 @@ uses
 
 procedure TInsertCustomForm.AfterCreate;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   inherited;
   WindowPosition := wpScreenCenter;
   WindowTitle := 'Insert Custom Widget';
@@ -152,6 +153,7 @@ begin
   edName    := CreateEdit(self, 8, 68, 150, 0);
   btnOK     := CreateButton(self, 180, 20, 100, 'OK', @OnButtonClick);
   btnCancel := CreateButton(self, 180, 52, 100, 'Cancel', @OnButtonClick);
+  {%endregion}
 end;
 
 procedure TInsertCustomForm.OnButtonClick(Sender: TObject);

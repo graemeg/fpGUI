@@ -3,33 +3,14 @@ program demo_textedit;
 {$mode objfpc}{$H+}
 
 uses
-//  {$IFDEF UNIX}{$IFDEF UseCThreads}
-  cthreads,
-//  {$ENDIF}{$ENDIF}
   Classes,
   typinfo,
   Sysutils,
-  fpg_base,
-  fpg_main,
-  fpg_form,
-  fpg_button,
-  fpg_label,
+  fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
   fpg_memo, fpg_dialogs, fpg_utils, fpg_radiobutton,
-  fpg_progressbar, fpg_textedit, fpg_checkbox;
+  fpg_textedit, fpg_checkbox, fpg_panel;
   
 type
-
-  TMyThread = class(TThread)
-  private
-    bar: TfpgProgressBar;
-    pos: integer;
-    procedure UpdateGUI;
-  protected
-    procedure Execute; override;
-  public
-    constructor CreateCustom(pb: TfpgProgressBar);
-  end;
-
 
   TMainForm = class(TfpgForm)
   private
@@ -42,62 +23,26 @@ type
     rbRight: TfpgRadioButton;
     rbBoth: TfpgRadioButton;
     Label1: TfpgLabel;
-    ProgressBar2: TfpgProgressBar;
-    ProgressBar1: TfpgProgressBar;
-    ProgressBar3: TfpgProgressBar;
-    Button1: TfpgButton;
-    Button2: TfpgButton;
-    Button3: TfpgButton;
     chkShowGutter: TfpgCheckBox;
     chkLineNumbers: TfpgCheckBox;
     Label2: TfpgLabel;
     btnChangeFont: TfpgButton;
+    Label3: TfpgLabel;
+    Label4: TfpgLabel;
+    Bevel2: TfpgBevel;
     {@VFD_HEAD_END: MainForm}
-    t1: TMyThread;
-    t2: TMyThread;
-    t3: TMyThread;
     procedure   ShowGutterChanged(Sender: TObject);
     procedure   ShowLineNumbers(Sender: TObject);
     procedure   AppExceptions(Sender: TObject; E: Exception);
     procedure   btnQuitClick(Sender: TObject);
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   btnLoadClicked(Sender: TObject);
-    procedure   btn1(Sender: TObject);
-    procedure   btn2(Sender: TObject);
-    procedure   btn3(Sender: TObject);
     procedure   ChangeFontClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure AfterCreate; override;
   end;
 
-{ TMyThread }
-
-procedure TMyThread.UpdateGUI;
-begin
-  bar.Position := pos;
-end;
-
-procedure TMyThread.Execute;
-begin
-  pos := -1;
-  while not Terminated do
-  begin
-    inc(pos);
-    Synchronize(@UpdateGUI);
-    sleep(200);
-    if pos >= 100 then
-      break;
-  end;
-end;
-
-constructor TMyThread.CreateCustom(pb: TfpgProgressBar);
-begin
-  Create(True);
-  bar := pb;
-  FreeOnTerminate := True;
-  Suspended := False;
-end;
 
 { TMainForm }
 
@@ -180,21 +125,6 @@ begin
   fpgApplication.ProcessMessages;
 end;
 
-procedure TMainForm.btn1(Sender: TObject);
-begin
-  t1 := TMyThread.CreateCustom(ProgressBar1);
-end;
-
-procedure TMainForm.btn2(Sender: TObject);
-begin
-  t2 := TMyThread.CreateCustom(ProgressBar2);
-end;
-
-procedure TMainForm.btn3(Sender: TObject);
-begin
-  t3 := TMyThread.CreateCustom(ProgressBar3);
-end;
-
 procedure TMainForm.ChangeFontClicked(Sender: TObject);
 var
   fnt: string;
@@ -218,7 +148,7 @@ begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
   SetPosition(319, 180, 594, 455);
-  WindowTitle := 'Memo test';
+  WindowTitle := 'TextEdit (new Memo) test';
   WindowPosition := wpScreenCenter;
 
   memo := TfpgMemo.Create(self);
@@ -233,7 +163,6 @@ begin
     Lines.Add('Memo Test3');
     Lines.Add('Memo Test4');
     FontDesc := '#Edit1';
-    ParentShowHint := True;
     TabOrder := 0;
     //    FontDesc := 'Arial-15';
     //    Lines.Insert(1,'0 Before 1 after');
@@ -243,21 +172,12 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(310, 10, 80, 23);
-    Text := 'Button';
-    AllowAllUp := False;
-    Embedded := False;
-    Flat := False;
+    SetPosition(492, 64, 92, 23);
+    Anchors := [anRight,anTop];
+    Text := 'Quit';
     FontDesc := '#Label1';
-    GroupIndex := 0;
     Hint := '';
-    ImageLayout := ilImageLeft;
-    ImageMargin := 3;
     ImageName := 'stdimg.quit';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ParentShowHint := True;
-    ShowImage := True;
     TabOrder := 1;
     OnClick := @btnQuitClick;
   end;
@@ -283,21 +203,12 @@ begin
   with btnLoad do
   begin
     Name := 'btnLoad';
-    SetPosition(312, 44, 80, 24);
-    Text := 'Load';
-    AllowAllUp := False;
-    Embedded := False;
-    Flat := False;
+    SetPosition(492, 8, 92, 24);
+    Anchors := [anRight,anTop];
+    Text := 'Load File...';
     FontDesc := '#Label1';
-    GroupIndex := 0;
     Hint := '';
-    ImageLayout := ilImageLeft;
-    ImageMargin := 3;
     ImageName := '';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ParentShowHint := True;
-    ShowImage := True;
     TabOrder := 3;
     OnClick := @btnLoadClicked;
   end;
@@ -306,10 +217,9 @@ begin
   with rbLeft do
   begin
     Name := 'rbLeft';
-    SetPosition(416, 8, 120, 20);
+    SetPosition(20, 28, 120, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
-    ParentShowHint := True;
     TabOrder := 4;
     Text := 'Left';
   end;
@@ -318,10 +228,9 @@ begin
   with rbRight do
   begin
     Name := 'rbRight';
-    SetPosition(416, 32, 120, 20);
+    SetPosition(20, 52, 120, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
-    ParentShowHint := True;
     TabOrder := 5;
     Text := 'Right';
   end;
@@ -330,11 +239,10 @@ begin
   with rbBoth do
   begin
     Name := 'rbBoth';
-    SetPosition(416, 56, 120, 20);
+    SetPosition(20, 76, 120, 20);
     Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 0;
-    ParentShowHint := True;
     TabOrder := 6;
     Text := 'Both';
   end;
@@ -348,124 +256,15 @@ begin
     Alignment := taCenter;
     FontDesc := '#Label2';
     Hint := '';
-    Layout := tlTop;
-    ParentShowHint := True;
     Text := 'Label';
-    WrapText := False;
-  end;
-
-  ProgressBar2 := TfpgProgressBar.Create(self);
-  with ProgressBar2 do
-  begin
-    Name := 'ProgressBar2';
-    SetPosition(12, 48, 254, 22);
-    Min := 0;
-    Max := 100;
-    ParentShowHint := True;
-    Position := 0;
-    ShowCaption := False;
-  end;
-
-  ProgressBar1 := TfpgProgressBar.Create(self);
-  with ProgressBar1 do
-  begin
-    Name := 'ProgressBar1';
-    SetPosition(12, 20, 254, 22);
-    Min := 0;
-    Max := 100;
-    ParentShowHint := True;
-    Position := 0;
-    ShowCaption := False;
-  end;
-
-  ProgressBar3 := TfpgProgressBar.Create(self);
-  with ProgressBar3 do
-  begin
-    Name := 'ProgressBar3';
-    SetPosition(12, 76, 254, 22);
-    Min := 0;
-    Max := 100;
-    ParentShowHint := True;
-    Position := 0;
-    ShowCaption := False;
-  end;
-
-  Button1 := TfpgButton.Create(self);
-  with Button1 do
-  begin
-    Name := 'Button1';
-    SetPosition(276, 20, 20, 20);
-    Text := '';
-    AllowAllUp := False;
-    Embedded := False;
-    Flat := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    ImageLayout := ilImageLeft;
-    ImageMargin := 3;
-    ImageName := '';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ParentShowHint := True;
-    ShowImage := True;
-    TabOrder := 11;
-    OnClick := @btn1;
-  end;
-
-  Button2 := TfpgButton.Create(self);
-  with Button2 do
-  begin
-    Name := 'Button2';
-    SetPosition(276, 48, 20, 20);
-    Text := '';
-    AllowAllUp := False;
-    Embedded := False;
-    Flat := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    ImageLayout := ilImageLeft;
-    ImageMargin := 3;
-    ImageName := '';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ParentShowHint := True;
-    ShowImage := True;
-    TabOrder := 12;
-    OnClick := @btn2;
-  end;
-
-  Button3 := TfpgButton.Create(self);
-  with Button3 do
-  begin
-    Name := 'Button3';
-    SetPosition(276, 76, 20, 20);
-    Text := '';
-    AllowAllUp := False;
-    Embedded := False;
-    Flat := False;
-    FontDesc := '#Label1';
-    GroupIndex := 0;
-    Hint := '';
-    ImageLayout := ilImageLeft;
-    ImageMargin := 3;
-    ImageName := '';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ParentShowHint := True;
-    ShowImage := True;
-    TabOrder := 13;
-    OnClick := @btn3;
   end;
 
   chkShowGutter := TfpgCheckBox.Create(self);
   with chkShowGutter do
   begin
     Name := 'chkShowGutter';
-    SetPosition(416, 84, 120, 20);
+    SetPosition(168, 28, 120, 20);
     FontDesc := '#Label1';
-    ParentShowHint := True;
     TabOrder := 14;
     Text := 'Show Gutter';
     OnChange :=@ShowGutterChanged;
@@ -475,10 +274,9 @@ begin
   with chkLineNumbers do
   begin
     Name := 'chkLineNumbers';
-    SetPosition(416, 108, 120, 20);
+    SetPosition(168, 52, 120, 20);
     Checked := True;
     FontDesc := '#Label1';
-    ParentShowHint := True;
     TabOrder := 15;
     Text := 'Show Line Numbers';
     OnChange := @ShowLineNumbers;
@@ -489,36 +287,53 @@ begin
   begin
     Name := 'Label2';
     SetPosition(348, 416, 176, 16);
+    Anchors := [anLeft,anRight,anBottom];
     Alignment := taCenter;
     FontDesc := '#Label2';
     Hint := '';
-    Layout := tlTop;
-    ParentShowHint := True;
     Text := 'Label';
-    WrapText := False;
   end;
 
   btnChangeFont := TfpgButton.Create(self);
   with btnChangeFont do
   begin
     Name := 'btnChangeFont';
-    SetPosition(312, 76, 80, 24);
+    SetPosition(492, 36, 92, 24);
+    Anchors := [anRight,anTop];
     Text := 'Font...';
-    AllowAllUp := False;
-    Embedded := False;
-    Flat := False;
     FontDesc := '#Label1';
-    GroupIndex := 0;
     Hint := '';
-    ImageLayout := ilImageLeft;
-    ImageMargin := 3;
     ImageName := '';
-    ImageSpacing := -1;
-    ModalResult := 0;
-    ParentShowHint := True;
-    ShowImage := True;
     TabOrder := 17;
     OnClick := @ChangeFontClicked;
+  end;
+
+  Label3 := TfpgLabel.Create(self);
+  with Label3 do
+  begin
+    Name := 'Label3';
+    SetPosition(8, 8, 112, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Side to Load';
+  end;
+
+  Label4 := TfpgLabel.Create(self);
+  with Label4 do
+  begin
+    Name := 'Label4';
+    SetPosition(156, 8, 124, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'General Options';
+  end;
+
+  Bevel2 := TfpgBevel.Create(self);
+  with Bevel2 do
+  begin
+    Name := 'Bevel2';
+    SetPosition(140, 8, 16, 148);
+    Shape := bsLeftLine;
   end;
 
   {@VFD_BODY_END: MainForm}
