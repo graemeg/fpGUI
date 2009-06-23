@@ -33,7 +33,7 @@ type
   // forward declaration
   TfpgBaseTextEdit = class;
 
-  TfpgGutter = class(TfpgBevel)
+  TfpgGutter = class(TfpgWidget)
   private
     FDigits: Integer;
     FShowNum: Boolean;
@@ -230,6 +230,12 @@ end;
 procedure TfpgGutter.HandlePaint;
 begin
   inherited HandlePaint;
+  Canvas.Clear(clWindowBackground);
+  // Gutter right border
+  Canvas.SetColor(clHilite2);
+  Canvas.DrawLine(Width - 2, 0, Width - 2, Height - 1);
+  Canvas.SetColor(clShadow1);
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   DrawLineNums;
 end;
 
@@ -242,7 +248,6 @@ begin
   FStartNum := 1;
   FZeroStart := False;
   Width := 35;
-  Shape := bsRightLine;
 end;
 
 function TfpgGutter.GetClientRect: TfpgRect;
