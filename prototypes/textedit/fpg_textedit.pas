@@ -26,7 +26,7 @@ unit fpg_textedit;
 interface
 
 uses
-  Classes, SysUtils, fpg_base, fpg_main, fpg_widget, fpg_panel,
+  Classes, SysUtils, fpg_base, fpg_main, fpg_widget,
   fpg_scrollbar;
 
 type
@@ -48,6 +48,7 @@ type
     procedure   SetZeroStart(const AValue: Boolean);
   protected
     procedure   HandlePaint; override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
   public
     constructor CreateGutter(AOwner: TfpgBaseTextEdit);
     function    GetClientRect: TfpgRect; override;
@@ -114,6 +115,7 @@ type
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     { -- local widget functions -- }
@@ -237,6 +239,20 @@ begin
   Canvas.SetColor(clShadow1);
   Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   DrawLineNums;
+end;
+
+procedure TfpgGutter.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+    delta: smallint);
+var
+  msg: TfpgMessageParams;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  fillchar(msg, sizeof(msg), 0);  // zero out the record - initialize it
+  msg.mouse.x := x;
+  msg.mouse.y := y;
+  msg.mouse.shiftstate := shiftstate;
+  msg.mouse.delta := delta;
+  fpgPostMessage(self, (Owner as TfpgBaseTextEdit).FVScrollBar, FPGM_SCROLL, msg);
 end;
 
 constructor TfpgGutter.CreateGutter(AOwner: TfpgBaseTextEdit);
@@ -800,6 +816,20 @@ writeln(' shiftstate not detected');
     FSelected := True;
   end;
   Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+    delta: smallint);
+var
+  msg: TfpgMessageParams;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  fillchar(msg, sizeof(msg), 0);  // zero out the record - initialize it
+  msg.mouse.x := x;
+  msg.mouse.y := y;
+  msg.mouse.shiftstate := shiftstate;
+  msg.mouse.delta := delta;
+  fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word;
