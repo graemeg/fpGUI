@@ -184,19 +184,23 @@ var
   tx: integer;
   img: TfpgImage;
   ix: integer;
+  cliprect: TfpgRect;
 begin
   inherited HandlePaint;
 
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(0, 0, Width, Height);
   Canvas.SetFont(Font);
+  cliprect.SetRect(1, 1, Width-2, Height-2);
 
   if FFocused then
   begin
     Canvas.SetColor(clText1);
     Canvas.SetLineStyle(1, lsDot);
-    Canvas.DrawRectangle(1, 1, Width-2, Height-2);
+    Canvas.DrawRectangle(cliprect);
+    InflateRect(cliprect, 1, 1);
   end;
+  Canvas.SetClipRect(cliprect);
   Canvas.SetLineStyle(1, lsSolid);
 
   if FBoxLayout = tbLeftBox then
@@ -223,7 +227,7 @@ begin
     inc(r.left, 2);
   end
   else
-    tx := 0;
+    tx := 3;  // leave space for focus rectangle
   inc(r.top, 1);
   // paint the radio button
   img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize
@@ -233,6 +237,9 @@ begin
   if ty < 0 then
     ty := 0;
   Canvas.SetTextColor(FTextColor);
+  Canvas.ClearClipRect;
+  cliprect.SetRect(tx, ty, Width-FBoxSize-8, cliprect.Height);
+  Canvas.SetClipRect(cliprect);
   fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
 end;
 
