@@ -183,13 +183,16 @@ begin
   else
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
-  // paint the check (in this case a X)
+  // calc the text offset and checkbox offset
   if FBoxLayout = tbLeftBox then
-    tx := r.right + 8
+  begin
+    tx := r.right + 8;
+    inc(r.left, 2);
+  end
   else
     tx := 0;
-  inc(r.left, 2);
   inc(r.top, 1);
+  // paint the check (in this case a X)
   img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize
   Canvas.DrawImagePart(r.Left, r.Top, img, ix*13, 0, 13, 13);
 

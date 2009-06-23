@@ -30,8 +30,6 @@ uses
 
 type
 
-  { TfpgRadioButton }
-
   TfpgRadioButton = class(TfpgWidget)
   private
     FAutoSize: boolean;
@@ -218,13 +216,16 @@ begin
   else
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
-  // paint the radio button
+  // calc the text offset and radiobutton offset
   if FBoxLayout = tbLeftBox then
-    tx := r.right + 8
+  begin
+    tx := r.right + 8;
+    inc(r.left, 2);
+  end
   else
     tx := 0;
-  inc(r.left, 2);
   inc(r.top, 1);
+  // paint the radio button
   img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize
   Canvas.DrawImagePart(r.Left, r.Top, img, ix*12, 0, 12, 12);
 
