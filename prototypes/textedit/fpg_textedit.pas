@@ -35,6 +35,7 @@ type
 
   TfpgGutter = class(TfpgWidget)
   private
+    FOwner: TfpgBaseTextEdit; // convenience reference variable
     FDigits: Integer;
     FShowNum: Boolean;
     FSpace: Integer;
@@ -202,11 +203,11 @@ var
 begin
   if not FShowNum then
     Exit; //==>
-  w := GetClientRect.Width - FSpace - 1;
-  H := TfpgBaseTextEdit(Owner).FChrH;
-  MaxI := TfpgBaseTextEdit(Owner).FVisLines;
+  w         := GetClientRect.Width - FSpace - 1;
+  H         := FOwner.FChrH;
+  MaxI      := FOwner.FVisLines;
   ltxtflags := [txtRight, txtVCenter];
-  Canvas.SetFont(TfpgBaseTextEdit(Owner).FFont);
+  Canvas.SetFont(FOwner.FFont);
   r.SetRect(2, 0, W, H);
 
   for i := 0 to MaxI do
@@ -252,12 +253,13 @@ begin
   msg.mouse.y := y;
   msg.mouse.shiftstate := shiftstate;
   msg.mouse.delta := delta;
-  fpgPostMessage(self, (Owner as TfpgBaseTextEdit).FVScrollBar, FPGM_SCROLL, msg);
+  fpgPostMessage(self, FOwner.FVScrollBar, FPGM_SCROLL, msg);
 end;
 
 constructor TfpgGutter.CreateGutter(AOwner: TfpgBaseTextEdit);
 begin
   inherited Create(AOwner);
+  FOwner := AOwner;
   FDigits := 0;
   FShowNum := True;
   FSpace := 2;
@@ -269,7 +271,7 @@ end;
 function TfpgGutter.GetClientRect: TfpgRect;
 begin
   Result := inherited GetClientRect;
-  Result.Width := Result.Width - 2; // bsRightLine takes up two pixels
+  Result.Width := Result.Width - 2; // border right line takes up two pixels
 end;
 
 { TfpgBaseTextEdit }
