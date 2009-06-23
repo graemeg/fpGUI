@@ -93,6 +93,7 @@ type
     procedure   HandleShow; override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
+    procedure   HandleHide; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -735,6 +736,12 @@ procedure TfpgMemo.HandleMouseExit;
 begin
   inherited HandleMouseExit;
   MouseCursor := mcDefault;
+end;
+
+procedure TfpgMemo.HandleHide;
+begin
+  fpgCaret.UnSetCaret (Canvas);
+  inherited;
 end;
 
 procedure TfpgMemo.VScrollBarMove(Sender: TObject; position: integer);
