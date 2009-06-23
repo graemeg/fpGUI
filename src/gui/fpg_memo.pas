@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -93,6 +93,7 @@ type
     procedure   HandleShow; override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
+    procedure   HandleHide; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -735,6 +736,12 @@ procedure TfpgMemo.HandleMouseExit;
 begin
   inherited HandleMouseExit;
   MouseCursor := mcDefault;
+end;
+
+procedure TfpgMemo.HandleHide;
+begin
+  fpgCaret.UnSetCaret(Canvas);
+  inherited;
 end;
 
 procedure TfpgMemo.VScrollBarMove(Sender: TObject; position: integer);

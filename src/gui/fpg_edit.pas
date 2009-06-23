@@ -106,6 +106,7 @@ type
     procedure   HandleMouseExit; override;
     procedure   HandleSetFocus; override;
     procedure   HandleKillFocus; override;
+    procedure   HandleHide; override;
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
@@ -968,6 +969,12 @@ begin
     FSelOffset := 0;
 end;
 
+procedure TfpgBaseEdit.HandleHide;
+begin
+  fpgCaret.UnSetCaret (Canvas);
+  inherited;
+end;
+
 function TfpgBaseEdit.GetDrawText: string;
 begin
   if not PassWordMode then
@@ -1330,7 +1337,6 @@ begin
     // drawing selection
     if FSelOffset <> 0 then
       DrawSelection;
-
     // drawing cursor
     fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, FFont.Height);
   end
@@ -1341,7 +1347,6 @@ begin
       DrawSelection;
     fpgCaret.UnSetCaret(Canvas);
   end;
-
 end;
 
 constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
@@ -1681,12 +1686,21 @@ begin
     Canvas.SetTextColor(TextColor);
     x := r.Width - Font.TextWidth(Text) - FSideMargin;
     fpgStyle.DrawString(Canvas, x, r.Top + FHeightMargin, Text, Enabled);
+
     if Focused then
     begin
       // drawing selection
       if FSelOffset <> 0 then
         DrawSelection;
-      fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, Font.Height);
+      // drawing cursor
+      fpgCaret.SetCaret(Canvas, FCursorPx, r.Top + FHeightMargin, fpgCaret.Width, FFont.Height);
+    end
+    else
+    begin
+      // drawing selection
+      if (AutoSelect = False) and (FSelOffset <> 0) and (HideSelection = False) then
+        DrawSelection;
+      fpgCaret.UnSetCaret(Canvas);
     end;
   end;
 end;

@@ -30,8 +30,6 @@ uses
 
 type
 
-  { TfpgRadioButton }
-
   TfpgRadioButton = class(TfpgWidget)
   private
     FAutoSize: boolean;
@@ -40,9 +38,12 @@ type
     FGroupIndex: integer;
     FOnChange: TNotifyEvent;
     FText: string;
+    FBoxLayout: TBoxLayout;
     FBoxSize: integer;
     FIsPressed: boolean;
+    function    GetBoxLayout: TBoxLayout;
     function    GetFontDesc: string;
+    procedure   SetBoxLayout(const AValue: TBoxLayout);
     procedure   SetAutoSize(const AValue: boolean);
     procedure   SetChecked(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
@@ -64,6 +65,7 @@ type
     property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    BoxLayout: TBoxLayout read GetBoxLayout write SetBoxLayout default tbLeftBox;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
     property    ParentShowHint;
     property    ShowHint;
@@ -91,9 +93,22 @@ end;
 
 { TfpgRadioButton }
 
+function TfpgRadioButton.GetBoxLayout: TBoxLayout;
+begin
+  Result := FBoxLayout;
+end;
+
 function TfpgRadioButton.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
+end;
+
+procedure TfpgRadioButton.SetBoxLayout(const AValue: TBoxLayout);
+begin
+  if FBoxLayout = AValue then
+    Exit; //==>
+  FBoxLayout := AValue;
+  RePaint;
 end;
 
 procedure TfpgRadioButton.SetAutoSize(const AValue: boolean);
@@ -169,22 +184,29 @@ var
   tx: integer;
   img: TfpgImage;
   ix: integer;
+  cliprect: TfpgRect;
 begin
   inherited HandlePaint;
 
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(0, 0, Width, Height);
   Canvas.SetFont(Font);
+  cliprect.SetRect(1, 1, Width-2, Height-2);
 
   if FFocused then
   begin
     Canvas.SetColor(clText1);
     Canvas.SetLineStyle(1, lsDot);
-    Canvas.DrawRectangle(1, 1, Width-2, Height-2);
+    Canvas.DrawRectangle(cliprect);
+    InflateRect(cliprect, 1, 1);
   end;
+  Canvas.SetClipRect(cliprect);
   Canvas.SetLineStyle(1, lsSolid);
 
-  r.SetRect(2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize);
+  if FBoxLayout = tbLeftBox then
+    r.SetRect(2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize)
+  else
+    r.SetRect(Width - FBoxSize - 2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize);
   if r.top < 0 then
     r.top := 0;
 
@@ -198,10 +220,16 @@ begin
   else
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
-  // paint the radio button
-  tx := r.right + 8;
-  inc(r.left, 2);
+  // calc the text offset and radiobutton offset
+  if FBoxLayout = tbLeftBox then
+  begin
+    tx := r.right + 8;
+    inc(r.left, 2);
+  end
+  else
+    tx := 3;  // leave space for focus rectangle
   inc(r.top, 1);
+  // paint the radio button
   img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize
   Canvas.DrawImagePart(r.Left, r.Top, img, ix*12, 0, 12, 12);
 
@@ -209,6 +237,9 @@ begin
   if ty < 0 then
     ty := 0;
   Canvas.SetTextColor(FTextColor);
+  Canvas.ClearClipRect;
+  cliprect.SetRect(tx, ty, Width-FBoxSize-8, cliprect.Height);
+  Canvas.SetClipRect(cliprect);
   fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
 end;
 
@@ -365,6 +396,7 @@ begin
   FIsPressed  := False;
   FAutoSize   := False;
   FOnChange   := nil;
+  FBoxLayout  := tbLeftBox;
 end;
 
 destructor TfpgRadioButton.Destroy;

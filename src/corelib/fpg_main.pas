@@ -42,6 +42,7 @@ type
 
   TAlign = (alNone, alTop, alBottom, alLeft, alRight, alClient);
   TLayout = (tlTop, tlCenter, tlBottom);
+  TBoxLayout = (tbLeftBox, tbRightBox);
 
   TAnchor  = (anLeft, anRight, anTop, anBottom);
   TAnchors = set of TAnchor;
@@ -753,17 +754,17 @@ end;
 
 procedure DebugLn(const s1, s2: TfpgString);
 begin
-  DebugLn(s1 + s2);
+  DebugLn(s1 + ' ' + s2);
 end;
 
 procedure DebugLn(const s1, s2, s3: TfpgString);
 begin
-  DebugLn(s1 + s2 + s3);
+  DebugLn(s1 + ' ' + s2  + ' ' + s3);
 end;
 
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 begin
-  DebugLn(s1 + s2 + s3 + s4);
+  DebugLn(s1 + ' ' + s2 + ' ' + s3 + ' ' + s4);
 end;
 
 { TfpgTimer }
