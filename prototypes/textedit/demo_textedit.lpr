@@ -117,8 +117,7 @@ begin
     if rbRight.Checked or rbBoth.Checked then
     begin
       t := fpgGetTickCount;
-      TextEdit.Lines.LoadFromFile(s);
-      TextEdit.Invalidate;
+      TextEdit.LoadFromFile(s);
       Label2.Text := Format('%d ticks', [fpgGetTickCount - t]);
     end;
   end;

@@ -5,12 +5,13 @@
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
-        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <AutoCreateForms Value="False"/>
       <TargetFileExt Value=""/>
       <Title Value="demo_textedit"/>
+      <UseAppBundle Value="False"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -47,6 +48,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)/"/>
+    </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <CStyleOperator Value="False"/>
@@ -63,6 +67,13 @@
       <CustomOptions Value="-FUunits
 "/>
       <CompilerPath Value="$(CompPath)"/>
+      <ExecuteBefore>
+        <CompileReasons Compile="False" Build="False" Run="False"/>
+      </ExecuteBefore>
+      <ExecuteAfter>
+        <CompileReasons Compile="False" Build="False" Run="False"/>
+      </ExecuteAfter>
     </Other>
+    <CompileReasons Compile="False" Build="False" Run="False"/>
   </CompilerOptions>
 </CONFIG>

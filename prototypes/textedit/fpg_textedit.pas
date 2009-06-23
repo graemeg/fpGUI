@@ -142,6 +142,8 @@ type
     procedure   Clear;
     procedure   ScrollTo(X, Y: Integer);
     procedure   DeleteSelection;
+    procedure   SaveToFile(const AFileName: TfpgString);
+    procedure   LoadFromFile(const AFileName: TfpgString);
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
     property    ScrollPos_V: Integer read GetVScrollPos write SetVScrollPos;
     property    TopLine: Integer read FTopLine;
@@ -165,7 +167,7 @@ type
 implementation
 
 uses
-  fpg_dialogs{, fpg_constants}, fpg_stringutils;
+  fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils;
 
 { TfpgGutter }
 
@@ -1298,6 +1300,46 @@ end;
 procedure TfpgBaseTextEdit.DeleteSelection;
 begin
   { TODO : Implement DeleteSelection }
+end;
+
+procedure TfpgBaseTextEdit.SaveToFile(const AFileName: TfpgString);
+var
+  BuffList: TStringList;
+  SLine: TfpgString;
+  I, P: Integer;
+  Replace: Boolean;
+begin
+  BuffList := TStringList.Create;
+  try
+    BuffList.Assign(FLines);
+    for I := 0 to pred(BuffList.Count) do
+    begin
+      SLine := BuffList[I];
+      P := UTF8Length(SLine);
+      Replace := (P > 0) and (SLine <> '');
+      if Replace then
+      begin
+        while (fpgCharAt(SLine, P) = ' ') do
+        begin
+          UTF8Delete(SLine, P, 1);
+          P := UTF8Length(SLine);
+        end;
+        BuffList[I] := SLine;
+      end;
+    end;
+    BuffList.SaveToFile(AFileName);
+  finally
+    BuffList.Free;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.LoadFromFile(const AFileName: TfpgString);
+begin
+  if not fpgFileExists(AFileName) then
+    Exit; //==>
+  Clear;
+  FLines.LoadFromFile(AFileName);
+  Invalidate;
 end;
 
 
