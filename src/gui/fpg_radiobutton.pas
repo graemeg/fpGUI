@@ -40,9 +40,12 @@ type
     FGroupIndex: integer;
     FOnChange: TNotifyEvent;
     FText: string;
+    FBoxLayout: TBoxLayout;
     FBoxSize: integer;
     FIsPressed: boolean;
+    function    GetBoxLayout: TBoxLayout;
     function    GetFontDesc: string;
+    procedure   SetBoxLayout(const AValue: TBoxLayout);
     procedure   SetAutoSize(const AValue: boolean);
     procedure   SetChecked(const AValue: boolean);
     procedure   SetFontDesc(const AValue: string);
@@ -64,6 +67,7 @@ type
     property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    BoxLayout: TBoxLayout read GetBoxLayout write SetBoxLayout default tbLeftBox;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
     property    ParentShowHint;
     property    ShowHint;
@@ -91,9 +95,22 @@ end;
 
 { TfpgRadioButton }
 
+function TfpgRadioButton.GetBoxLayout: TBoxLayout;
+begin
+  Result := FBoxLayout;
+end;
+
 function TfpgRadioButton.GetFontDesc: string;
 begin
   Result := FFont.FontDesc;
+end;
+
+procedure TfpgRadioButton.SetBoxLayout(const AValue: TBoxLayout);
+begin
+  if FBoxLayout = AValue then
+    Exit; //==>
+  FBoxLayout := AValue;
+  RePaint;
 end;
 
 procedure TfpgRadioButton.SetAutoSize(const AValue: boolean);
@@ -184,7 +201,10 @@ begin
   end;
   Canvas.SetLineStyle(1, lsSolid);
 
-  r.SetRect(2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize);
+  if FBoxLayout = tbLeftBox then
+    r.SetRect(2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize)
+  else
+    r.SetRect(Width - FBoxSize - 2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize);
   if r.top < 0 then
     r.top := 0;
 
@@ -199,7 +219,10 @@ begin
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
   // paint the radio button
-  tx := r.right + 8;
+  if FBoxLayout = tbLeftBox then
+    tx := r.right + 8
+  else
+    tx := 0;
   inc(r.left, 2);
   inc(r.top, 1);
   img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize
@@ -365,6 +388,7 @@ begin
   FIsPressed  := False;
   FAutoSize   := False;
   FOnChange   := nil;
+  FBoxLayout  := tbLeftBox;
 end;
 
 destructor TfpgRadioButton.Destroy;

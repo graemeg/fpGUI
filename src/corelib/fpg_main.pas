@@ -42,6 +42,7 @@ type
 
   TAlign = (alNone, alTop, alBottom, alLeft, alRight, alClient);
   TLayout = (tlTop, tlCenter, tlBottom);
+  TBoxLayout = (tbLeftBox, tbRightBox);
 
   TAnchor  = (anLeft, anRight, anTop, anBottom);
   TAnchors = set of TAnchor;
