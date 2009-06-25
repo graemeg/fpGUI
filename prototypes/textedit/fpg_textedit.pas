@@ -26,15 +26,16 @@ unit fpg_textedit;
 interface
 
 uses
-  Classes, SysUtils, fpg_base, fpg_main, fpg_widget, fpg_panel,
+  Classes, SysUtils, fpg_base, fpg_main, fpg_widget,
   fpg_scrollbar;
 
 type
   // forward declaration
   TfpgBaseTextEdit = class;
 
-  TfpgGutter = class(TfpgBevel)
+  TfpgGutter = class(TfpgWidget)
   private
+    FOwner: TfpgBaseTextEdit; // convenience reference variable
     FDigits: Integer;
     FShowNum: Boolean;
     FSpace: Integer;
@@ -48,6 +49,7 @@ type
     procedure   SetZeroStart(const AValue: Boolean);
   protected
     procedure   HandlePaint; override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
   public
     constructor CreateGutter(AOwner: TfpgBaseTextEdit);
     function    GetClientRect: TfpgRect; override;
@@ -114,6 +116,7 @@ type
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     { -- local widget functions -- }
@@ -139,6 +142,8 @@ type
     procedure   Clear;
     procedure   ScrollTo(X, Y: Integer);
     procedure   DeleteSelection;
+    procedure   SaveToFile(const AFileName: TfpgString);
+    procedure   LoadFromFile(const AFileName: TfpgString);
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
     property    ScrollPos_V: Integer read GetVScrollPos write SetVScrollPos;
     property    TopLine: Integer read FTopLine;
@@ -162,7 +167,7 @@ type
 implementation
 
 uses
-  fpg_dialogs{, fpg_constants}, fpg_stringutils;
+  fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils;
 
 { TfpgGutter }
 
@@ -200,11 +205,11 @@ var
 begin
   if not FShowNum then
     Exit; //==>
-  w := GetClientRect.Width - FSpace - 1;
-  H := TfpgBaseTextEdit(Owner).FChrH;
-  MaxI := TfpgBaseTextEdit(Owner).FVisLines;
+  w         := GetClientRect.Width - FSpace - 1;
+  H         := FOwner.FChrH;
+  MaxI      := FOwner.FVisLines;
   ltxtflags := [txtRight, txtVCenter];
-  Canvas.SetFont(TfpgBaseTextEdit(Owner).FFont);
+  Canvas.SetFont(FOwner.FFont);
   r.SetRect(2, 0, W, H);
 
   for i := 0 to MaxI do
@@ -230,25 +235,45 @@ end;
 procedure TfpgGutter.HandlePaint;
 begin
   inherited HandlePaint;
+  Canvas.Clear(clWindowBackground);
+  // Gutter right border
+  Canvas.SetColor(clHilite2);
+  Canvas.DrawLine(Width - 2, 0, Width - 2, Height - 1);
+  Canvas.SetColor(clShadow1);
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   DrawLineNums;
+end;
+
+procedure TfpgGutter.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+    delta: smallint);
+var
+  msg: TfpgMessageParams;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  fillchar(msg, sizeof(msg), 0);  // zero out the record - initialize it
+  msg.mouse.x := x;
+  msg.mouse.y := y;
+  msg.mouse.shiftstate := shiftstate;
+  msg.mouse.delta := delta;
+  fpgPostMessage(self, FOwner.FVScrollBar, FPGM_SCROLL, msg);
 end;
 
 constructor TfpgGutter.CreateGutter(AOwner: TfpgBaseTextEdit);
 begin
   inherited Create(AOwner);
+  FOwner := AOwner;
   FDigits := 0;
   FShowNum := True;
   FSpace := 2;
   FStartNum := 1;
   FZeroStart := False;
   Width := 35;
-  Shape := bsRightLine;
 end;
 
 function TfpgGutter.GetClientRect: TfpgRect;
 begin
   Result := inherited GetClientRect;
-  Result.Width := Result.Width - 2; // bsRightLine takes up two pixels
+  Result.Width := Result.Width - 2; // border right line takes up two pixels
 end;
 
 { TfpgBaseTextEdit }
@@ -797,6 +822,20 @@ writeln(' shiftstate not detected');
   Invalidate;
 end;
 
+procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+    delta: smallint);
+var
+  msg: TfpgMessageParams;
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  fillchar(msg, sizeof(msg), 0);  // zero out the record - initialize it
+  msg.mouse.x := x;
+  msg.mouse.y := y;
+  msg.mouse.shiftstate := shiftstate;
+  msg.mouse.delta := delta;
+  fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
+end;
+
 procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word;
     var shiftstate: TShiftState; var consumed: boolean);
 var
@@ -1261,6 +1300,46 @@ end;
 procedure TfpgBaseTextEdit.DeleteSelection;
 begin
   { TODO : Implement DeleteSelection }
+end;
+
+procedure TfpgBaseTextEdit.SaveToFile(const AFileName: TfpgString);
+var
+  BuffList: TStringList;
+  SLine: TfpgString;
+  I, P: Integer;
+  Replace: Boolean;
+begin
+  BuffList := TStringList.Create;
+  try
+    BuffList.Assign(FLines);
+    for I := 0 to pred(BuffList.Count) do
+    begin
+      SLine := BuffList[I];
+      P := UTF8Length(SLine);
+      Replace := (P > 0) and (SLine <> '');
+      if Replace then
+      begin
+        while (fpgCharAt(SLine, P) = ' ') do
+        begin
+          UTF8Delete(SLine, P, 1);
+          P := UTF8Length(SLine);
+        end;
+        BuffList[I] := SLine;
+      end;
+    end;
+    BuffList.SaveToFile(AFileName);
+  finally
+    BuffList.Free;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.LoadFromFile(const AFileName: TfpgString);
+begin
+  if not fpgFileExists(AFileName) then
+    Exit; //==>
+  Clear;
+  FLines.LoadFromFile(AFileName);
+  Invalidate;
 end;
 
 
