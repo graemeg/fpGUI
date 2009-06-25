@@ -483,7 +483,7 @@ begin
     end;  { case }
 
     with ARect,Columns[ACol] do
-      Canvas.DrawText(Left+HMargin,Top,Right-Left-HMargin,Bottom-Top, txt, Flags);
+      Canvas.DrawText(Left+HMargin, Top, Right-Left-(HMargin*2), Bottom-Top, txt, Flags);
   end;
 end;
 
