@@ -1,12 +1,12 @@
-# translation of FPGUI. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.      
+# translation of FPGUI. Copyright (C) 2008 Free Software Foundation, Inc. <>, 2008.        
 msgid ""
 msgstr ""
 "Project-Id-Version: FPGUI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
-"PO-Revision-Date: 2008-06-04 00:03+0200\n"
+"PO-Revision-Date: 2009-06-26 14:51+0200\n"
 "Last-Translator:  <>\n"
-"Language-Team: \n"
+"Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
@@ -171,6 +171,10 @@ msgstr "Staak"
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
 msgstr "Kon nie die lêergids <%s> skep nie"
+
+#: fpg_constants:rsfalse
+msgid "False"
+msgstr "Onwaar"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
@@ -443,6 +447,10 @@ msgstr "Donderdag"
 #: fpg_constants:rstoday
 msgid "Today"
 msgstr "Vandag"
+
+#: fpg_constants:rstrue
+msgid "True"
+msgstr "Waar"
 
 #: fpg_constants:rsshorttue
 msgid "Tue"

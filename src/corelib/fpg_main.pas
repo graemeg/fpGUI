@@ -1119,8 +1119,11 @@ begin
   LongMonthNames[10] := rsLongOct;
   LongMonthNames[11] := rsLongNov;
   LongMonthNames[12] := rsLongDec;
-  
 
+  SetLength(TrueBoolStrs,1);
+  SetLength(FalseBoolStrs,1);
+  TrueBoolStrs[0]   := rsTrue;
+  FalseBoolStrs[0]  := rsFalse;
 end;
 
 procedure TfpgApplication.SetHintPause(const AValue: Integer);

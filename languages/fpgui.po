@@ -158,6 +158,10 @@ msgstr ""
 msgid "Failed to create the directory <%s>"
 msgstr ""
 
+#: fpg_constants:rsfalse
+msgid "False"
+msgstr ""
+
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
 msgstr ""
@@ -432,6 +436,10 @@ msgstr ""
 
 #: fpg_constants:rstoday
 msgid "Today"
+msgstr ""
+
+#: fpg_constants:rstrue
+msgid "True"
 msgstr ""
 
 #: fpg_constants:rsshorttue
