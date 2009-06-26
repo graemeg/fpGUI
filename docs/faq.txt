@@ -14,8 +14,10 @@ Gnome
    adjust your desktop font settings. KDE does handle this correctly.
    The blurry fonts are more prominent on LCD screens where subpixel 
    anti-aliasing makes a huge difference to the fonts appearance and how
-   sharp they look. If you run know and experience this problem, then
+   sharp they look. If you run Gnome Desktop and experience this problem, then
    simply create a ~/.fonts.conf file that contains the following text.
+   Gnome applications seem to get there font settings from some other
+   registry, whereas XLib+Xft based applications need the .fonts.conf file.
 
    ----------------[ .fonts.conf ]---------------------
 <?xml version="1.0"?>

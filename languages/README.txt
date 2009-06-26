@@ -1,13 +1,12 @@
 Quick Start for translators:
 ----------------------------
-
 For example finnish translation:
 Search for all *.fi.po files. They are simple text files, with an easy format.
 Edit them with programs like kbabel or gtranslator.
-Run 'sh localize.sh' script in the tools directory to update translations.
+Run 'localize.sh' script in the tools directory to update translations.
 
 Send the updated xxx.fi.po file in a zip archive to graemeg@gmail.com.
-Do not send diffs for .po files!
+Do NOT send diffs for .po files!
 
 
 Now the background:
@@ -36,6 +35,9 @@ required languages to a fpgui.xx.po file. For the xx see the gettext unit
 in the procedure TranslateResourceStrings. All translation .po files are 
 in UTF-8 encoding.
 
+
+fpGUI Toolkit currently supports the following translations:
+------------------------------------------------------------
 english:           fpgui.en.po
 german:            fpgui.de.po
 russian:           fpgui.ru.po

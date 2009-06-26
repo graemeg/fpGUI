@@ -1,0 +1,1 @@
+Do not delete this file, otherwise Git will remove this directory.
