@@ -150,9 +150,9 @@ type
   // simple data class containing color information
   TColorItem = class(TObject)
   public
-    constructor Create(const AColorName: string; const AColorValue: TfpgColor);
     ColorName: string;
     ColorValue: TfpgColor;
+    constructor Create(const AColorName: string; const AColorValue: TfpgColor);
   end;
 
 
