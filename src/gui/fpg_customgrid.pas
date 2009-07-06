@@ -217,18 +217,15 @@ procedure TfpgCustomGrid.SetRowCount(const AValue: Integer);
 begin
   if FRowCount = AValue then
     Exit; //==>
-  FRowCount := AValue;
-  if FocusRow > FRowCount-1 then
-    FocusRow := FRowCount-1;
-  DoSetRowCount(AValue);  // could be implemented by descendants
-
-  // graemeg 2008-07-18: I believe after all the repaint and event fixes
-  //   this check is not required anymore.
-  //if csUpdating in ComponentState then
-    //Exit;
-  Update;
-//  UpdateScrollBars;
-//  RePaint;
+  BeginUpdate;
+  try
+    FRowCount := AValue;
+    if FocusRow > FRowCount-1 then
+      FocusRow := FRowCount-1;
+    DoSetRowCount(AValue);  // could be implemented by descendants
+  finally
+    EndUpdate;
+  end;
 end;
 
 function TfpgCustomGrid.GetColumnWidth(ACol: Integer): integer;

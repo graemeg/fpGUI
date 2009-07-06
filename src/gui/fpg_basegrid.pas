@@ -1153,8 +1153,6 @@ procedure TfpgBaseGrid.Update;
 begin
   if csUpdating in ComponentState then
     Exit;
-
-//  UpdateScrollBars;
   FollowFocus;
   RePaint;
 end;
@@ -1173,7 +1171,8 @@ begin
     if FUpdateCount = 0 then
     begin
       Updated;
-      RePaint;
+//      RePaint;
+      Update;
     end;
   end;
 end;
