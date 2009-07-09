@@ -243,55 +243,38 @@ begin
           deletelen  := endp - startp + length(endmarker);
         end
         else
-          dropmarker := True// error: end marker did not found
+        begin
+          dropmarker := True; // error: end marker did not found
           //Writeln('file error: ',endmarker,' marker wasn''t found.');
           // block length = 0
-        ;
+        end;
       end;
 
       Delete(FParsedData, startp, deletelen);
-
       if not dropmarker then
         AddBlock(startp, bname, formname, datablock);
-
     end;
-
   until startp <= 0;
 
   //writeln(FParsedData);
-
   Result := BlockCount;
 end;
 
 function TVFDFile.LoadFile(fname: string): boolean;
 var
-  ff: file;
-  s: string;
-  cnt: integer;
+  fs: TFileStream;
 begin
   Result := False;
-  AssignFile(ff, fpgToOSEncoding(fname));
+  fs := TFileStream.Create(fpgToOSEncoding(fname), fmOpenRead);
   try
-    Reset(ff, 1);
-  except
-    Exit;
-  end;
-
-  FFileData := '';
-  try
-    while not EOF(ff) do
-    begin
-      SetLength(s, 4096);
-      BlockRead(ff, s[1], length(s), cnt);
-      FFileData := FFileData + copy(s, 1, cnt);
-      if cnt < length(s) then
-        break;
-    end;
+    FFileData := ''; // make sure it is empty
+    SetLength(FFileData, fs.Size);
+    fs.Read(FFileData[1], fs.Size);
+    //Writeln('data length: ',fs.Size);
     Result := True;
   finally
-    CloseFile(ff);
+    fs.Free;
   end;
-  //Writeln('data length: ',length(FFileData));
 end;
 
 function TVFDFile.MergeBlocks: string;
