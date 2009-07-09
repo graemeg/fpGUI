@@ -64,6 +64,9 @@ type
 
 implementation
 
+const
+  cBlockPrefix = '{@VFD_';
+
 { TVFDFile }
 
 procedure TVFDFile.AddBlock(aposition: integer; ablockid, aformname, ablockdata: string);
@@ -160,7 +163,7 @@ procedure TVFDFile.FreeBlocks;
 var
   n: integer;
 begin
-  for n := 0 to FBlocks.Count-1 do
+  for n := FBlocks.Count-1 downto 0 do
     TVFDFileBlock(FBlocks[n]).Free;
   FBlocks.Clear;
   NewFormsDecl := '';
@@ -170,30 +173,23 @@ end;
 function TVFDFile.GetBlocks: integer;
 var
   n: integer;
-
   s: string;
-
   startp, endp: integer;
   formname: string;
   bname, startmarker, endmarker: string;
   datablock: string;
   deletelen: integer;
-
   dropmarker: boolean;
 begin
   FreeBlocks;
-
   FParsedData := FFileData;
 
   // searching blocks:
-
   repeat
-
     bname     := '';
     formname  := '';
     datablock := '';
-
-    s      := '{@VFD_';
+    s      := cBlockPrefix;
     startp := pos(s, FParsedData);
     if startp > 0 then
     begin
@@ -221,7 +217,6 @@ begin
 //      Writeln('marker: ', startmarker);
 
       // block marker ?
-
       endmarker := '';
       if bname = 'VFD_HEAD_BEGIN' then //or (bname = 'VFD_BODY_BEGIN') then
         endmarker := '{@VFD_HEAD_END: ' + formname + '}'
@@ -285,9 +280,7 @@ var
   fb: TVFDFileBlock;
   startmarker, endmarker: string;
   iblock: string;
-
   newsaved: boolean;
-
 begin
   //  Writeln('merging blocks: ');
   newsaved := False;
