@@ -12,7 +12,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Some Pascal source code parsing functionality.
+      This unit contains the Form Parser - used when loading a new
+      form .pas file.
 }
 
 unit vfdformparser;
@@ -33,22 +34,21 @@ uses
 
 type
   TVFDFormParser = class(TObject)
-  protected
+  private
     ffd: TFormDesigner;
     fformname: string;
     BodyLines: TStringList;
     eob: boolean;
     line: string;
     lineindex: integer;
-  public
+    procedure   ParseFormProperties;
+    procedure   ParseFormWidgets;
     procedure   NextLine;
+    function    ReadWGProperty(propline: string; wg: TfpgWidget; wgc: TVFDWidgetClass): boolean;
   public
     constructor Create(const FormName, FormHead, FormBody: string);
     destructor  Destroy; override;
     function    ParseForm: TFormDesigner;
-    procedure   ParseFormProperties;
-    procedure   ParseFormWidgets;
-    function    ReadWGProperty(propline: string; wg: TfpgWidget; wgc: TVFDWidgetClass): boolean;
   end;
 
 
@@ -181,11 +181,11 @@ var
   quot: boolean;
   c, prevc: char;
   ccode: string;
-  ids: string;
+//  ids: string;
 begin
   Result := '';
-  ids    := GetIdentifier(s);
-  if ids <> '' then
+//  ids    := GetIdentifier(s);
+//  if ids <> '' then
 {    if ids = 'u8' then
     begin
       if not CheckSymbol(s, '(') then
