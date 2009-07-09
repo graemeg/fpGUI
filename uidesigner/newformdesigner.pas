@@ -146,7 +146,7 @@ type
 
 
   TfrmAbout = class(TfpgForm)
-  public
+  private
     {@VFD_HEAD_BEGIN: frmAbout}
     lblName1: TfpgLabel;
     lblVersion: TfpgLabel;
@@ -155,6 +155,7 @@ type
     lblName4: TfpgHyperlink;
     lblCompiled: TfpgLabel;
     {@VFD_HEAD_END: frmAbout}
+  public
     procedure AfterCreate; override;
     class procedure Execute;
   end;
@@ -206,7 +207,8 @@ begin
   with lblVersion do
   begin
     Name := 'lblVersion';
-    SetPosition(150, 56, 175, 16);
+    SetPosition(62, 48, 195, 20);
+    Alignment := taRightJustify;
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Version:  %s';
