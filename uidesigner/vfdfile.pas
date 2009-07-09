@@ -38,20 +38,20 @@ type
   
 
   TVFDFile = class
-  protected
-    FFileData: string;
+  private
     FParsedData: string;
     FBlocks: TList;
-  public
+    FFileData: string;
     NewFormsDecl: string;
     NewFormsImpl: string;
+    procedure   FreeBlocks;
+    procedure   AddBlock(aposition: integer; ablockid, aformname, ablockdata: string);
+  public
     constructor Create;
     destructor  Destroy; override;
     function    LoadFile(fname: string): boolean;
-    procedure   AddBlock(aposition: integer; ablockid, aformname, ablockdata: string);
     function    BlockCount: integer;
     function    Block(index: integer): TVFDFileBlock;
-    procedure   FreeBlocks;
     function    GetBlocks: integer;   // parse file
     function    MergeBlocks: string;  // store file
     procedure   AddNewFormDecl(formname, formheadblock: string);
