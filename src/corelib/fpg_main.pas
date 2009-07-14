@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -20,6 +20,9 @@ unit fpg_main;
 {$mode objfpc}{$H+}
 
 {.$Define DEBUG}
+
+{ TODO : Remove IFDEF in Interface uses clause }
+{ TODO : Implement font size adjustments for each platform. eg: linux=10pt & windows=8pt }
 
 interface
 

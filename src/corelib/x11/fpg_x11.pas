@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -20,6 +20,8 @@ unit fpg_x11;
 {$mode objfpc}{$H+}
 
 {.$Define DEBUG}
+
+{ TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 
 interface
 
