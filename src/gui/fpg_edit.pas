@@ -60,7 +60,7 @@ type
     // function    PointToCharPos(x, y: integer): integer;
     procedure   DeleteSelection;
     procedure   DoCopy;
-    procedure   DoPaste;
+    procedure   DoPaste(const AText: TfpgString);
     procedure   SetAutoSelect(const AValue: Boolean);
     procedure   SetBorderStyle(const AValue: TfpgEditBorderStyle);
     procedure   SetHideSelection(const AValue: Boolean);
@@ -121,12 +121,13 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    SelectionText: string;
+    function    GetClientRect: TfpgRect; override;
     procedure   SelectAll;
     procedure   Clear;
     procedure   ClearSelection;
     procedure   CopyToClipboard;
     procedure   CutToClipboard;
-    function    GetClientRect: TfpgRect; override;
+    procedure   InsertAtCursorPos(const AText: TfpgString);
     procedure   PasteFromClipboard;
     property    Font: TfpgFont read FFont;
     property    SideMargin: integer read FSideMargin write SetSideMargin default 3;
@@ -748,7 +749,7 @@ begin
         end;
     ckPaste:
         begin
-          DoPaste;
+          DoPaste(fpgClipboard.Text);
           hasChanged := True;
         end;
     ckCut:
@@ -1231,14 +1232,14 @@ begin
   fpgClipboard.Text := SelectionText;
 end;
 
-procedure TfpgBaseEdit.DoPaste;
+procedure TfpgBaseEdit.DoPaste(const AText: TfpgString);
 var
   s: string;
   prevval: TfpgString;
 begin
   prevval := FText;
   DeleteSelection;
-  s := fpgClipboard.Text;
+  s := AText;
 
   if (FMaxLength > 0) then
     if UTF8Length(FText) + UTF8Length(s) > FMaxLength then
@@ -1298,6 +1299,12 @@ begin
   RePaint;
 end;
 
+procedure TfpgBaseEdit.InsertAtCursorPos(const AText: TfpgString);
+begin
+  if AText <> '' then
+    DoPaste(AText);
+end;
+
 function TfpgBaseEdit.GetClientRect: TfpgRect;
 begin
   case BorderStyle of
@@ -1309,7 +1316,7 @@ end;
 
 procedure TfpgBaseEdit.PasteFromClipboard;
 begin
-  DoPaste;
+  DoPaste(fpgClipboard.Text);
 end;
 
 { TfpgBaseTextEdit }
