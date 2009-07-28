@@ -43,6 +43,7 @@ uses
   fpg_listbox,
   fpg_checkbox,
   fpg_edit,
+  fpg_basegrid,
   fpg_grid,
   fpg_combobox,
   fpg_panel,
@@ -201,6 +202,7 @@ type
 {$I newdirdialog.inc}
 {$I promptuserdialog.inc}
 {$I selectdirdialog.inc}
+{$I charmapdialog.inc}
 
 
 
@@ -1411,7 +1413,7 @@ end;
 {$I newdirdialog.inc}
 {$I promptuserdialog.inc}
 {$I selectdirdialog.inc}
-
+{$I charmapdialog.inc}
 
 
 end.
