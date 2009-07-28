@@ -17,6 +17,9 @@
       actual character code.
 }
 
+{ TODO : This unit needs to be localized }
+{ TODO : This dialog needs to be incorporated with TfpgEdit popup menu. }
+
 {%mainunit fpg_dialogs.pas}
 
 {$IFDEF read_interface}

@@ -1185,7 +1185,6 @@ var
 begin
   if not Assigned(FDefaultPopupMenu) then
   begin
-    { todo: This text needs to be localized }
     FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
     itm := FDefaultPopupMenu.AddMenuItem(rsCut, '', @DefaultPopupCut);
     itm.Name := ipmCut;
