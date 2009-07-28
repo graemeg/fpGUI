@@ -633,7 +633,7 @@ begin
           Include(drawstate, gdFocused);
         if (row = FFocusRow) and (col = FFocusCol) then
           Include(drawstate, gdSelected);
-          
+
         if DoDrawCellEvent(row, col, r, drawstate) then
           DrawCell(row, col, r, drawstate);
 

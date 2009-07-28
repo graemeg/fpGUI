@@ -1522,9 +1522,8 @@ begin
     // vertical alignment
     if (txtBottom in AFlags) then
       ny := y + l + h - htxt
-    else
-    if (txtVCenter in AFlags) then
-      ny := y + l + (h - htxt) div 2
+    else if (txtVCenter in AFlags) then
+      ny := y + l + ((h - htxt) div 2)
     else // txtTop is default
       ny := y + l;
 

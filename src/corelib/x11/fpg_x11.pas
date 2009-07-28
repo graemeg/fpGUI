@@ -1718,7 +1718,6 @@ destructor TfpgFontResourceImpl.Destroy;
 begin
   if HandleIsValid then
     XftFontClose(xapplication.Display, FFontData);
-
   inherited;
 end;
 
