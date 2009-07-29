@@ -563,7 +563,7 @@ end;
 
 procedure TfpgSpinEditFloat.SetMinValue(const AValue: extended);
 begin
-  if (FMinValue <> AValue) and (AValue < FMinValue) then
+  if (FMinValue <> AValue) and (AValue < FMaxValue) then
   begin
     FMinValue := AValue;
     if FValue < FMinValue then
@@ -806,7 +806,7 @@ begin
   begin
     if FValue + FTempIncrement <= FMaxValue then
     begin
-      Value       := FValue + FTempIncrement;
+      FValue       := FValue + FTempIncrement;
       FEdit.Value := FValue;
       if FSteps <= FSpeedUpSteps then
         Inc(FSteps);
