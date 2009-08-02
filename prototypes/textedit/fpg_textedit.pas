@@ -76,7 +76,10 @@ type
     FVisLines: Integer;
     FVisCols: Integer;
     StartNo, EndNo, StartOffs, EndOffs: Integer;
-    FSelStartNo, FSelEndNo, FSelStartOffs, FSelEndOffs: Integer;
+    // Selection start and end line number
+    FSelStartNo, FSelEndNo: Integer;
+    // Selection start and end column
+    FSelStartOffs, FSelEndOffs: Integer;
     FTabWidth: Integer;
     HPos, VPos, XSize, YSize: Integer;
     FMaxScrollH: Integer;
@@ -168,6 +171,41 @@ implementation
 
 uses
   fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils;
+
+
+function GetNextWord(SLine: TfpgString; var PosX: Integer): Boolean;
+const
+  ValidChars = ['a'..'z', 'A'..'Z', '0'..'9', '#'];
+var
+  I, RetX: Integer;
+  FindNext: Boolean;
+  c: TfpgChar;
+begin
+  Result := False;
+  if PosX > UTF8Length(SLine) then Exit;
+  FindNext := False;
+  RetX := 0;
+  for I := PosX to UTF8Length(SLine) do
+  begin
+    c := fpgCharAt(SLine, I);
+    { TODO -cUnicode Error : We need to fix c[i] usage. Also improve ValidChars definition. }
+    if not FindNext and not (c[1] in ValidChars) then
+    begin
+      FindNext := True;
+      Continue;
+    end;
+    if FindNext and (c[1] in ValidChars) then
+    begin
+      RetX := I;
+      Result := True;
+      Break;
+    end;
+  end;
+  if RetX < 1 then
+    Result := False;
+  PosX := RetX;
+end;
+
 
 { TfpgGutter }
 
@@ -577,8 +615,43 @@ procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const
     end;
   end;
 
+  procedure CtrlKeyRightKey;
+  var
+    S: TfpgString;
+    I: Integer;
+    NotFindIt: Boolean;
+  begin
+    if CaretPos.Y <= pred(FLines.Count) then
+    begin
+      NotFindIt := True;
+      while NotFindIt do
+      begin
+        S := FLines[CaretPos.Y];
+        I := CaretPos.X;
+        if GetNextWord(S, I) then
+        begin
+          CaretPos.X := I - 1;
+          NotFindIt := False;
+        end
+        else
+        begin
+          CaretPos.Y := CaretPos.Y + 1;
+          CaretPos.X := 0;
+          NotFindIt := False;
+        end;
+        if CaretPos.Y > pred(FLines.Count) then
+        begin
+          NotFindIt := False;
+          CaretPos.X := 0;
+        end;
+      end;
+    end
+    else
+      CaretPos.X := 0;
+  end;
+
 begin
-  writeln('>> KeyboardCaretNav');
+  writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav >>');
   case AKeyCode of
     keyLeft:
         begin
@@ -589,10 +662,6 @@ begin
             begin
               if CaretPos.Y <= pred(FLines.Count) then
               begin
-              writeln('********');
-                //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-                //DrawLine(Canvas, CaretPos.Y, GliphY);
-                //DrawCaret(CaretPos.X, CaretPos.Y + 1, False);
                 if (ssCtrl in ShiftState) and (CaretPos.Y > 0) then
                 begin
                   CaretPos.Y := CaretPos.Y - 1;
@@ -601,36 +670,18 @@ begin
                   begin
                     FSelEndNo := CaretPos.Y;
                     FSelEndOffs := CaretPos.X;
-//                    DrawVisible;
                   end;
                   Exit;
                 end;
               end;
               CaretPos.Y := CaretPos.Y - 1;
               CaretPos.X := Length(FLines[CaretPos.Y]);
-              //if not FSelected then
-              //begin
-                //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-                //DrawLine(Canvas, CaretPos.X, GliphY);
-              //end else
-                //DrawVisible;
             end
             else
             begin
               CaretPos.X := 0;
-              //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-              //if not FSelected then
-                //DrawLine(Canvas, CaretPos.Y, GliphY)
-              //else
-                //DrawVisible;
             end;
           end;
-          //else
-          //begin
-            //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-            //DrawLine(Canvas, CaretPos.Y, GliphY);
-            //DrawCaret(CaretPos.X, CaretPos.Y, True);
-          //end;
           if ssShift in ShiftState then
           begin
             if not FSelected then
@@ -646,7 +697,8 @@ begin
                 CtrlKeyLeftKey
               else
                 FSelEndOffs := CaretPos.X;
-            end else
+            end
+            else
             begin
               FSelEndNo := CaretPos.Y;
               if ssCtrl in ShiftState then
@@ -660,27 +712,23 @@ begin
                   FSelEndOffs := Length(FLines[FSelEndNo]) - 1;
                   CaretPos.X := FSelEndOffs;
                 end;
-              end else
+              end
+              else
               begin
                 FSelEndOffs := 0;
                 CaretPos.X := 0;
               end;
             end;
             FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
-            //DrawVisible;
             Exit;
           end;
           if FSelected then
           begin
             FSelected := False;
-            //DrawVisible;
-            //DrawCaret(CaretPos.X, CaretPos.Y, True);
           end;
           if ssCtrl in ShiftState then
           begin
             CtrlKeyLeftKey;
-            //DrawVisible;
-            //DrawCaret(CaretPos.X, CaretPos.Y, True);
           end;
           FSelStartNo := CaretPos.Y;
           FSelStartOffs := CaretPos.X;
@@ -688,10 +736,85 @@ begin
 
     keyRight:
         begin
+          writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav >>>  keyRight');
+          CaretPos.X := CaretPos.X + 1;
+          if CaretPos.X > FMaxScrollH then
+          begin
+            FMaxScrollH := FMaxScrollH + 2;
+            UpdateScrollBars;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              FSelected := True;
+              FSelStartNo := CaretPos.Y;
+              FSelStartOffs := CaretPos.X - 1;
+              if ssCtrl in ShiftState then
+                CtrlKeyRightKey;
+              FSelEndNo := CaretPos.Y;
+              FSelEndOffs := CaretPos.X;
+            end
+            else
+            begin
+              if ssCtrl in ShiftState then
+                CtrlKeyRightKey;
+              FSelEndNo := CaretPos.Y;
+              FSelEndOffs := CaretPos.X;
+            end;
+            FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+            Exit;
+          end;
+          if FSelected then
+          begin
+            FSelected := False;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            CtrlKeyRightKey;
+          end;
+          FSelStartNo := CaretPos.Y;
+          FSelStartOffs := CaretPos.X;
         end;
 
     keyUp:
         begin
+          if CaretPos.x = 0 then Exit;
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y - 1;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+            FSelStartNo := CaretPos.Y;
+            Exit;
+          end;
+          if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y - 1;
+            UpdateScrollBars;
+            FSelStartNo := CaretPos.Y;
+            Exit;
+          end;
+          if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y - 1;
+            if not FSelected then
+            begin
+              FSelStartNo := CaretPos.Y + 1;
+              FSelStartOffs := CaretPos.X;
+              FSelEndNo := CaretPos.X;
+              FSelEndOffs := CaretPos.X;
+              FSelected := True;
+            end else
+            begin
+              FSelEndNo := CaretPos.Y;
+              FSelEndOffs := CaretPos.X;
+              FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+            end;
+          end;
         end;
 
     keyDown:
@@ -710,7 +833,7 @@ begin
         begin
         end;
   end;
-  writeln('<< KeyboardCaretNav');
+  writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav <<');
 end;
 
 procedure TfpgBaseTextEdit.InitMemoObjects;

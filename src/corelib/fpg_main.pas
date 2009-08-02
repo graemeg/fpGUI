@@ -400,7 +400,6 @@ uses
   fpg_hint,
   fpg_extgraphics,
   fpg_utils,
-  fpg_stringutils,
   fpg_cmdlineparams;
 
 var
