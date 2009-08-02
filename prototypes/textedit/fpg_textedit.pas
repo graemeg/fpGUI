@@ -779,6 +779,42 @@ begin
 
     keyUp:
         begin
+          if CaretPos.x = 0 then Exit;
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y - 1;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+            FSelStartNo := CaretPos.Y;
+            Exit;
+          end;
+          if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y - 1;
+            UpdateScrollBars;
+            FSelStartNo := CaretPos.Y;
+            Exit;
+          end;
+          if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y - 1;
+            if not FSelected then
+            begin
+              FSelStartNo := CaretPos.Y + 1;
+              FSelStartOffs := CaretPos.X;
+              FSelEndNo := CaretPos.X;
+              FSelEndOffs := CaretPos.X;
+              FSelected := True;
+            end else
+            begin
+              FSelEndNo := CaretPos.Y;
+              FSelEndOffs := CaretPos.X;
+              FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+            end;
+          end;
         end;
 
     keyDown:
