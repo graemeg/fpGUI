@@ -636,7 +636,8 @@ procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const
         else
         begin
           CaretPos.Y := CaretPos.Y + 1;
-          CaretPos.X := 1;
+          CaretPos.X := 0;
+          NotFindIt := False;
         end;
         if CaretPos.Y > pred(FLines.Count) then
         begin
