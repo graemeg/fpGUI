@@ -67,13 +67,6 @@
       <CustomOptions Value="-FUunits
 "/>
       <CompilerPath Value="$(CompPath)"/>
-      <ExecuteBefore>
-        <CompileReasons Compile="False" Build="False" Run="False"/>
-      </ExecuteBefore>
-      <ExecuteAfter>
-        <CompileReasons Compile="False" Build="False" Run="False"/>
-      </ExecuteAfter>
     </Other>
-    <CompileReasons Compile="False" Build="False" Run="False"/>
   </CompilerOptions>
 </CONFIG>
