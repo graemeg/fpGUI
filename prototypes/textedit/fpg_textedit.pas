@@ -76,7 +76,10 @@ type
     FVisLines: Integer;
     FVisCols: Integer;
     StartNo, EndNo, StartOffs, EndOffs: Integer;
-    FSelStartNo, FSelEndNo, FSelStartOffs, FSelEndOffs: Integer;
+    // Selection start and end line number
+    FSelStartNo, FSelEndNo: Integer;
+    // Selection start and end column
+    FSelStartOffs, FSelEndOffs: Integer;
     FTabWidth: Integer;
     HPos, VPos, XSize, YSize: Integer;
     FMaxScrollH: Integer;
