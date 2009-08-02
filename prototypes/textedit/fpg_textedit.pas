@@ -661,10 +661,6 @@ begin
             begin
               if CaretPos.Y <= pred(FLines.Count) then
               begin
-              writeln('********');
-                //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-                //DrawLine(Canvas, CaretPos.Y, GliphY);
-                //DrawCaret(CaretPos.X, CaretPos.Y + 1, False);
                 if (ssCtrl in ShiftState) and (CaretPos.Y > 0) then
                 begin
                   CaretPos.Y := CaretPos.Y - 1;
@@ -673,36 +669,18 @@ begin
                   begin
                     FSelEndNo := CaretPos.Y;
                     FSelEndOffs := CaretPos.X;
-//                    DrawVisible;
                   end;
                   Exit;
                 end;
               end;
               CaretPos.Y := CaretPos.Y - 1;
               CaretPos.X := Length(FLines[CaretPos.Y]);
-              //if not FSelected then
-              //begin
-                //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-                //DrawLine(Canvas, CaretPos.X, GliphY);
-              //end else
-                //DrawVisible;
             end
             else
             begin
               CaretPos.X := 0;
-              //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-              //if not FSelected then
-                //DrawLine(Canvas, CaretPos.Y, GliphY)
-              //else
-                //DrawVisible;
             end;
           end;
-          //else
-          //begin
-            //GliphY := (CaretPos.Y - FTopLine) * FChrH;
-            //DrawLine(Canvas, CaretPos.Y, GliphY);
-            //DrawCaret(CaretPos.X, CaretPos.Y, True);
-          //end;
           if ssShift in ShiftState then
           begin
             if not FSelected then
@@ -741,20 +719,15 @@ begin
               end;
             end;
             FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
-            //DrawVisible;
             Exit;
           end;
           if FSelected then
           begin
             FSelected := False;
-            //DrawVisible;
-            //DrawCaret(CaretPos.X, CaretPos.Y, True);
           end;
           if ssCtrl in ShiftState then
           begin
             CtrlKeyLeftKey;
-            //DrawVisible;
-            //DrawCaret(CaretPos.X, CaretPos.Y, True);
           end;
           FSelStartNo := CaretPos.Y;
           FSelStartOffs := CaretPos.X;
@@ -769,11 +742,6 @@ begin
             FMaxScrollH := FMaxScrollH + 2;
             UpdateScrollBars;
           end;
-//          if CaretPos.x <= pred(FLines.Count) then
-//          begin
-//            GliphY := (CaretPos.x - FTopLine) * FChrH;
-//            DrawLine(Canvas, CaretPos.x, GliphY);
-//          end;
           if ssShift in ShiftState then
           begin
             if not FSelected then
@@ -794,21 +762,16 @@ begin
               FSelEndOffs := CaretPos.X;
             end;
             FSelected := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
-//            DrawVisible;
             Exit;
           end;
           if FSelected then
           begin
             FSelected := False;
-//            DrawVisible;
-//            DrawCaret(CaretPos.Y, CaretPos.X, True);
           end;
           if ssCtrl in ShiftState then
           begin
             CtrlKeyRightKey;
-//            DrawVisible;
           end;
-//          DrawCaret(CaretPos.Y, CaretPos.X, True);
           FSelStartNo := CaretPos.Y;
           FSelStartOffs := CaretPos.X;
         end;
