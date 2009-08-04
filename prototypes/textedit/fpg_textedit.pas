@@ -790,15 +790,16 @@ begin
             end;
             FSelStartNo := CaretPos.Y;
             Exit;
-          end;
-          if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          end
+          else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y - 1;
-            UpdateScrollBars;
+            {$Note This does not work. The view must scroll and caret pos stay the same. }
+            VScrollBarMove(self, FVScrollBar.Position-1);
             FSelStartNo := CaretPos.Y;
             Exit;
-          end;
-          if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
+          end
+          else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y - 1;
             if not FSelected then
