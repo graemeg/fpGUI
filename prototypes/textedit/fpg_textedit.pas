@@ -819,6 +819,45 @@ begin
 
     keyDown:
         begin
+          if CaretPos.Y >= FLines.Count then
+            Exit;
+          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y + 1;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+            FSelStartNo := CaretPos.Y;
+            Exit;
+          end
+          else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y + 1;
+            {$Note This does not work. The view must scroll and caret pos stay the same. }
+            VScrollBarMove(self, FVScrollBar.Position+1);
+            FSelStartNo := CaretPos.Y;
+            Exit;
+          end
+          else if not (ssCtrl in ShiftState) and (ssShift in ShiftState) then
+          begin
+            CaretPos.Y := CaretPos.Y + 1;
+            if not FSelected then
+            begin
+              FSelStartNo   := CaretPos.Y - 1;
+              FSelStartOffs := CaretPos.X;
+              FSelEndNo     := CaretPos.Y;
+              FSelEndOffs   := CaretPos.X;
+              FSelected     := True;
+            end
+            else
+            begin
+              FSelEndNo     := CaretPos.Y;
+              FSelEndOffs   := CaretPos.X;
+              FSelected     := (FSelStartNo <> FSelEndNo) or (FSelStartOffs <> FSelEndOffs);
+            end;
+          end;
         end;
 
     keyHome:
