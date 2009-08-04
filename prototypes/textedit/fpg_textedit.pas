@@ -736,7 +736,6 @@ begin
 
     keyRight:
         begin
-          writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav >>>  keyRight');
           CaretPos.X := CaretPos.X + 1;
           if CaretPos.X > FMaxScrollH then
           begin
@@ -779,7 +778,8 @@ begin
 
     keyUp:
         begin
-          if CaretPos.x = 0 then Exit;
+          if CaretPos.Y = 0 then
+            Exit;
           if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y - 1;
@@ -809,7 +809,8 @@ begin
               FSelEndNo := CaretPos.X;
               FSelEndOffs := CaretPos.X;
               FSelected := True;
-            end else
+            end
+            else
             begin
               FSelEndNo := CaretPos.Y;
               FSelEndOffs := CaretPos.X;
