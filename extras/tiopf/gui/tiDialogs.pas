@@ -98,6 +98,8 @@ begin
   lMemo := TfpgMemo.Create(lForm);
   try
     lForm.WindowTitle := pHeading;
+    lForm.Width       := 300;
+    lForm.Height      := 300;
     lForm.WindowPosition := wpScreenCenter;
     lForm.Name        := 'FormShowStrings';
     lMemo.Lines.Assign(AStrings);
