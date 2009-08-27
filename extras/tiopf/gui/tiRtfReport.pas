@@ -2901,7 +2901,7 @@ begin
     if AFieldName = '' then begin
       //Its a (nested) dataset
       Token := etDataset;
-      Value := integer(ADataset);
+      Value := PtrInt(ADataset);
     end
     else ResolveFieldValue(ADataset, AFieldName);
   end else begin
@@ -2927,7 +2927,7 @@ begin
   else begin
     //Its a dataset or objectlist reference
     Token := etDataset;
-    Value := integer(ADataset);
+    Value := PtrInt(ADataset);
   end;
 end;
 
@@ -4053,7 +4053,7 @@ begin
   AObject := TObject(Ptrint(AArgument.Value));
   ADataset := Datasets.Add(AObject, AAliasname, true);
   AArgument.Token := etDataset;
-  AArgument.Value := integer(ADataset);
+  AArgument.Value := PtrInt(ADataset);
 end;
 
 procedure TtiRtfParser.UdfLower(AArgument: TRtfArgument);
