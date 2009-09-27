@@ -27,7 +27,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="3"/>
-    <Files Count="71">
+    <Files Count="73">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -312,6 +312,14 @@
         <Filename Value="..\fpg_extgraphics.pas"/>
         <UnitName Value="fpg_extgraphics"/>
       </Item71>
+      <Item72>
+        <Filename Value="..\..\gui\fpg_colormapping.pas"/>
+        <UnitName Value="fpg_ColorMapping"/>
+      </Item72>
+      <Item73>
+        <Filename Value="..\..\gui\fpg_colorwheel.pas"/>
+        <UnitName Value="fpg_ColorWheel"/>
+      </Item73>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>
     <RequiredPkgs Count="1">
