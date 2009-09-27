@@ -1007,6 +1007,7 @@
   TOrientation fpg_main/torientation.html
   TAlign fpg_main/talign.html
   TLayout fpg_main/tlayout.html
+  TBoxLayout fpg_main/tboxlayout.html
   TAnchor fpg_main/tanchor.html
   TAnchors fpg_main/tanchors.html
   TFButtonFlags fpg_main/tfbuttonflags.html
@@ -1159,6 +1160,7 @@
   PrintCallTrace fpg_main/printcalltrace.html
   PrintCallTraceDbgLn fpg_main/printcalltracedbgln.html
   DumpStack fpg_main/dumpstack.html
+  DebugLn fpg_main/debugln.html
   fpgStyle fpg_main/fpgstyle.html
   fpgCaret fpg_main/fpgcaret.html
   fpgImages fpg_main/fpgimages.html
@@ -1352,12 +1354,15 @@
   fpgAppendPathDelim fpg_utils/fpgappendpathdelim.html
   fpgHasSubDirs fpg_utils/fpghassubdirs.html
   fpgAllFilesMask fpg_utils/fpgallfilesmask.html
+  fpgConvertLineEndings fpg_utils/fpgconvertlineendings.html
   fpgFindFirst fpg_utils/fpgfindfirst.html
   fpgFindNext fpg_utils/fpgfindnext.html
   fpgGetCurrentDir fpg_utils/fpggetcurrentdir.html
   fpgSetCurrentDir fpg_utils/fpgsetcurrentdir.html
   fpgExpandFileName fpg_utils/fpgexpandfilename.html
   fpgFileExists fpg_utils/fpgfileexists.html
+  fpgDirectoryExists fpg_utils/fpgdirectoryexists.html
+  fpgExtractFileDir fpg_utils/fpgextractfiledir.html
  fpg_popupwindow fpg_popupwindow/index.html
   TfpgPopupWindow fpg_popupwindow/tfpgpopupwindow.html
    MsgClose fpg_popupwindow/tfpgpopupwindow.msgclose.html
@@ -1437,6 +1442,7 @@
   rsexampletext fpg_constants/index-1.html#rsexampletext
   rsexit fpg_constants/index-1.html#rsexit
   rserrfailedtocreatedir fpg_constants/index-1.html#rserrfailedtocreatedir
+  rsfalse fpg_constants/index-1.html#rsfalse
   rscollectionfavourites fpg_constants/index-1.html#rscollectionfavourites
   rsshortfeb fpg_constants/index-1.html#rsshortfeb
   rslongfeb fpg_constants/index-1.html#rslongfeb
@@ -1506,6 +1512,7 @@
   rsshortthu fpg_constants/index-1.html#rsshortthu
   rslongthu fpg_constants/index-1.html#rslongthu
   rstoday fpg_constants/index-1.html#rstoday
+  rstrue fpg_constants/index-1.html#rstrue
   rsshorttue fpg_constants/index-1.html#rsshorttue
   rslongtue fpg_constants/index-1.html#rslongtue
   rsfiletype fpg_constants/index-1.html#rsfiletype
@@ -1542,7 +1549,6 @@
   EPOFileError fpg_pofiles/epofileerror.html
   TranslateUnitResourceStrings fpg_pofiles/translateunitresourcestrings.html
   UTF8ToSystemCharSet fpg_pofiles/utf8tosystemcharset.html
-  DebugLn fpg_pofiles/debugln.html
   SystemCharSetIsUTF8 fpg_pofiles/systemcharsetisutf8.html
  fpg_translations fpg_translations/index.html
   PTranslation fpg_translations/ptranslation.html
