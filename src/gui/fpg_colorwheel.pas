@@ -39,12 +39,14 @@ type
     FWhiteAreaPercent: longint; // 0 to 50 percent of circle radius that is pure white
     FOnChange: TNotifyEvent;
     FImage: TfpgImage; // cached colorwheel image
+    FRecalcWheel: Boolean; // should chached FImage be recalculated
     procedure   HSFromPoint(X, Y: longint; out H: longint; out S: double);
     procedure   DrawCursor;
     procedure   SetMarginWidth(NewWidth: longint);
     procedure   SetCursorSize(NewSize: longint);
     procedure   SetValueBar(AValueBar: TfpgValueBar);
     procedure   SetWhiteAreaPercent(WhiteAreaPercent: longint);
+    procedure   SetBackgroundColor(const AValue: TfpgColor); override;
     procedure   Notification(AComponent: TComponent; Operation: TOperation); override;
     function    DrawWidth: longint;
     function    DrawHeight: longint;
@@ -204,9 +206,11 @@ begin
     Exit;  //==>
   end;
 
-  if FImage = nil then
+  if (FImage = nil) or FRecalcWheel then
   begin
-    // we must only do this once, because it's very slow
+    // we must only do this when needed, because it's very slow
+    if FImage <> nil then
+      FImage.Free;
     FImage := TfpgImage.Create;
     FImage.AllocateImage(32, DrawWidth, DrawHeight);
     FImage.UpdateImage;
@@ -229,6 +233,7 @@ begin
           FImage.Colors[x, y] := fpgColorToRGB(BackgroundColor);
       end;
     end;
+    FRecalcWheel := False;
   end
   else
   begin
@@ -281,6 +286,7 @@ begin
   Height := 100;
   Name   := 'ColorWheel';
   FWhiteAreaPercent := 10;
+  FRecalcWheel := True;
 end;
 
 destructor TfpgColorWheel.Destroy;
@@ -377,6 +383,12 @@ begin
 
   FWhiteAreaPercent := WhiteAreaPercent;
   Invalidate;
+end;
+
+procedure TfpgColorWheel.SetBackgroundColor(const AValue: TfpgColor);
+begin
+  FRecalcWheel := True;
+  inherited SetBackgroundColor(AValue);
 end;
 
 procedure TfpgColorWheel.Notification(AComponent: TComponent; Operation: TOperation);
