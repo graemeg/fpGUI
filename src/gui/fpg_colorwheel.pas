@@ -62,9 +62,9 @@ type
   published
     property    BackgroundColor;
     property    ValueBar: TfpgValueBar Read FValueBar Write SetValueBar;
-    property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth;
-    property    CursorSize: longint Read FCursorSize Write SetCursorSize;
-    property    WhiteAreaPercent: longint Read FWhiteAreaPercent Write SetWhiteAreaPercent;
+    property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth default 5;
+    property    CursorSize: longint Read FCursorSize Write SetCursorSize default 5;
+    property    WhiteAreaPercent: longint Read FWhiteAreaPercent Write SetWhiteAreaPercent default 10;
     property    OnChange: TNotifyEvent Read FOnChange Write FOnChange;
   end;
 
