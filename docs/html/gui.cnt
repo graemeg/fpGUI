@@ -91,6 +91,10 @@
    AfterCreate fpg_dialogs/tfpgselectdirdialog.aftercreate.html
    SelectedDir fpg_dialogs/tfpgselectdirdialog.selecteddir.html
    RootDirectory fpg_dialogs/tfpgselectdirdialog.rootdirectory.html
+  TCharMapForm fpg_dialogs/tcharmapform.html
+   AfterCreate fpg_dialogs/tcharmapform.aftercreate.html
+   NewText fpg_dialogs/tcharmapform.newtext.html
+  fpgShowCharMap fpg_dialogs/fpgshowcharmap.html
   ShowMessage fpg_dialogs/showmessage.html
   SelectFontDialog fpg_dialogs/selectfontdialog.html
   SelectFileDialog fpg_dialogs/selectfiledialog.html
@@ -110,6 +114,74 @@
    TextColor fpg_hyperlink/tfpghyperlink.textcolor.html
    URL fpg_hyperlink/tfpghyperlink.url.html
    OnClick fpg_hyperlink/tfpghyperlink.onclick.html
+ fpg_ColorMapping fpg_colormapping/index.html
+  RGBToHSV fpg_colormapping/rgbtohsv.html
+  HSVToRGB fpg_colormapping/hsvtorgb.html
+ fpg_ColorWheel fpg_colorwheel/index.html
+  TfpgColorWheel fpg_colorwheel/tfpgcolorwheel.html
+   FValueBar fpg_colorwheel/tfpgcolorwheel.fvaluebar.html
+   FHue fpg_colorwheel/tfpgcolorwheel.fhue.html
+   FSaturation fpg_colorwheel/tfpgcolorwheel.fsaturation.html
+   FMarginWidth fpg_colorwheel/tfpgcolorwheel.fmarginwidth.html
+   FCursorSize fpg_colorwheel/tfpgcolorwheel.fcursorsize.html
+   FWhiteAreaPercent fpg_colorwheel/tfpgcolorwheel.fwhiteareapercent.html
+   FOnChange fpg_colorwheel/tfpgcolorwheel.fonchange.html
+   FImage fpg_colorwheel/tfpgcolorwheel.fimage.html
+   HSFromPoint fpg_colorwheel/tfpgcolorwheel.hsfrompoint.html
+   DrawCursor fpg_colorwheel/tfpgcolorwheel.drawcursor.html
+   SetMarginWidth fpg_colorwheel/tfpgcolorwheel.setmarginwidth.html
+   SetCursorSize fpg_colorwheel/tfpgcolorwheel.setcursorsize.html
+   SetValueBar fpg_colorwheel/tfpgcolorwheel.setvaluebar.html
+   SetWhiteAreaPercent fpg_colorwheel/tfpgcolorwheel.setwhiteareapercent.html
+   Notification fpg_colorwheel/tfpgcolorwheel.notification.html
+   DrawWidth fpg_colorwheel/tfpgcolorwheel.drawwidth.html
+   DrawHeight fpg_colorwheel/tfpgcolorwheel.drawheight.html
+   Change fpg_colorwheel/tfpgcolorwheel.change.html
+   HandlePaint fpg_colorwheel/tfpgcolorwheel.handlepaint.html
+   HandleLMouseDown fpg_colorwheel/tfpgcolorwheel.handlelmousedown.html
+   HandleMouseMove fpg_colorwheel/tfpgcolorwheel.handlemousemove.html
+   HandleLMouseUp fpg_colorwheel/tfpgcolorwheel.handlelmouseup.html
+   Create fpg_colorwheel/tfpgcolorwheel.create.html
+   Destroy fpg_colorwheel/tfpgcolorwheel.destroy.html
+   Hue fpg_colorwheel/tfpgcolorwheel.hue.html
+   Saturation fpg_colorwheel/tfpgcolorwheel.saturation.html
+   SetSelectedColor fpg_colorwheel/tfpgcolorwheel.setselectedcolor.html
+   BackgroundColor fpg_colorwheel/tfpgcolorwheel.backgroundcolor.html
+   ValueBar fpg_colorwheel/tfpgcolorwheel.valuebar.html
+   MarginWidth fpg_colorwheel/tfpgcolorwheel.marginwidth.html
+   CursorSize fpg_colorwheel/tfpgcolorwheel.cursorsize.html
+   WhiteAreaPercent fpg_colorwheel/tfpgcolorwheel.whiteareapercent.html
+   OnChange fpg_colorwheel/tfpgcolorwheel.onchange.html
+  TfpgValueBar fpg_colorwheel/tfpgvaluebar.html
+   FColorWheel fpg_colorwheel/tfpgvaluebar.fcolorwheel.html
+   FHue fpg_colorwheel/tfpgvaluebar.fhue.html
+   FSaturation fpg_colorwheel/tfpgvaluebar.fsaturation.html
+   FValue fpg_colorwheel/tfpgvaluebar.fvalue.html
+   FMarginWidth fpg_colorwheel/tfpgvaluebar.fmarginwidth.html
+   FCursorHeight fpg_colorwheel/tfpgvaluebar.fcursorheight.html
+   FOnChange fpg_colorwheel/tfpgvaluebar.fonchange.html
+   DrawCursor fpg_colorwheel/tfpgvaluebar.drawcursor.html
+   SetMarginWidth fpg_colorwheel/tfpgvaluebar.setmarginwidth.html
+   SetValue fpg_colorwheel/tfpgvaluebar.setvalue.html
+   SetCursorHeight fpg_colorwheel/tfpgvaluebar.setcursorheight.html
+   GetSelectedColor fpg_colorwheel/tfpgvaluebar.getselectedcolor.html
+   Change fpg_colorwheel/tfpgvaluebar.change.html
+   DrawWidth fpg_colorwheel/tfpgvaluebar.drawwidth.html
+   DrawHeight fpg_colorwheel/tfpgvaluebar.drawheight.html
+   ValueFromY fpg_colorwheel/tfpgvaluebar.valuefromy.html
+   DrawLine fpg_colorwheel/tfpgvaluebar.drawline.html
+   HandlePaint fpg_colorwheel/tfpgvaluebar.handlepaint.html
+   HandleLMouseDown fpg_colorwheel/tfpgvaluebar.handlelmousedown.html
+   HandleMouseMove fpg_colorwheel/tfpgvaluebar.handlemousemove.html
+   HandleLMouseUp fpg_colorwheel/tfpgvaluebar.handlelmouseup.html
+   Create fpg_colorwheel/tfpgvaluebar.create.html
+   SetHS fpg_colorwheel/tfpgvaluebar.seths.html
+   BackgroundColor fpg_colorwheel/tfpgvaluebar.backgroundcolor.html
+   Value fpg_colorwheel/tfpgvaluebar.value.html
+   SelectedColor fpg_colorwheel/tfpgvaluebar.selectedcolor.html
+   MarginWidth fpg_colorwheel/tfpgvaluebar.marginwidth.html
+   CursorHeight fpg_colorwheel/tfpgvaluebar.cursorheight.html
+   OnChange fpg_colorwheel/tfpgvaluebar.onchange.html
 
 :classes
 #GUI.fpg_dialogs.TfpgMessageBox TfpgForm
@@ -285,6 +357,23 @@
 3MAfterCreate
 3MSelectedDir
 3PRootDirectory rw
+#GUI.fpg_dialogs.TCharMapForm TfpgForm
+1VStringGrid1
+1VButton1
+1VlblCharInfo
+1VedText
+1VlblText
+1VpnlChar
+1MFormShow
+1MStringGrid1FocusChange
+1MStringGrid1DrawCell
+1MStringGrid1CanSelectCell
+1MStringGrid1DoubleClick
+1MFillCharMap
+1MButton1Clicked
+1MGetNewText
+3MAfterCreate
+3PNewText r
 #GUI.fpg_hyperlink.TfpgHyperlink TfpgCustomLabel
 1VfHotTrackColor
 1VfOldColor
@@ -307,3 +396,67 @@
 4PTextColor
 4PURL rw
 4POnClick
+#GUI.fpg_ColorWheel.TfpgColorWheel #CoreLib.fpg_widget.TfpgWidget
+2VFValueBar
+2VFHue
+2VFSaturation
+2VFMarginWidth
+2VFCursorSize
+2VFWhiteAreaPercent
+2VFOnChange
+2VFImage
+2MHSFromPoint
+2MDrawCursor
+2MSetMarginWidth
+2MSetCursorSize
+2MSetValueBar
+2MSetWhiteAreaPercent
+2MNotification
+2MDrawWidth
+2MDrawHeight
+2MChange
+2MHandlePaint
+2MHandleLMouseDown
+2MHandleMouseMove
+2MHandleLMouseUp
+3MCreate
+3MDestroy
+3PHue r
+3PSaturation r
+3MSetSelectedColor
+4PBackgroundColor
+4PValueBar rw
+4PMarginWidth rw
+4PCursorSize rw
+4PWhiteAreaPercent rw
+4POnChange rw
+#GUI.fpg_ColorWheel.TfpgValueBar #CoreLib.fpg_widget.TfpgWidget
+2VFColorWheel
+2VFHue
+2VFSaturation
+2VFValue
+2VFMarginWidth
+2VFCursorHeight
+2VFOnChange
+2MDrawCursor
+2MSetMarginWidth
+2MSetValue
+2MSetCursorHeight
+2MGetSelectedColor
+2MChange
+2MDrawWidth
+2MDrawHeight
+2MValueFromY
+2MDrawLine
+2MHandlePaint
+2MHandleLMouseDown
+2MHandleMouseMove
+2MHandleLMouseUp
+3MCreate
+3MSetHS
+4PBackgroundColor
+4PValue rw
+4PSelectedColor r
+4PMarginWidth rw
+4PCursorHeight rw
+4POnChange rw

@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="GUI">
+    <module name="fpg_colorwheel">
+      <short>The unit contains a ColorWheel and ValueBar component.</short>
+      <descr>
+        <p>
+          <b>Using the components:</b>
+        </p>
+        <p>Normally, you use both a color wheel and a value bar.
+</p>
+        <ol>
+          <li>Put a color wheel on your form.</li>
+          <li>Put a value bar on your form beside the wheel.</li>
+          <li>Set the ColorWheel's ValueBar property to the ValueBar component
+   you just put on the form.</li>
+        </ol>
+        <p>The two components are now linked together. When a selection is
+made in the color wheel the value bar will update to show the range
+for that selection.
+</p>
+        <p>
+          <b>Note:</b> you won't see the colors in the UI Designer. Colors will
+only be displayed at runtime.</p>
+        <p>
+          <b>Reading and setting the color:</b>
+        </p>
+        <p>To set the color being displayed, use the SetSelectedColor method
+           of the color wheel.</p>
+        <p>To read the color selected, read the SelectedColor property
+           of the ValueBar.</p>
+        <p>If you want to know when the user picks a color, you
+           can use the OnChange event in the ValueBar.</p>
+      </descr>
+      <element name="TfpgColorWheel">
+        <short>A colorwheel component.</short>
+        <descr>This component draws a ColorWheel at runtime. This allows the user to select the Hue and Saturation values in the HSV color range.</descr>
+      </element>
+      <element name="TfpgColorWheel.CursorSize">
+        <short>Size of the crosshair.</short>
+        <descr>If the cursor size is set too big it will just 'clip' to the edge of the control. You can use this effect to get full cross hairs by making the CursorSize large.</descr>
+      </element>
+      <element name="TfpgColorWheel.MarginWidth">
+        <short>The width of the black area around the wheel.</short>
+        <descr>
+          <p>The margin is there so that when the cross hair is on the edge of the wheel, the complete cross hair can be drawn, without being clipped. It makes selecting colors on the edge of the colorwheel easier.</p>
+          <p>If the margin is set too large, the colorwheel will not be drawn / displayed.</p>
+        </descr>
+      </element>
+      <element name="TfpgColorWheel.WhiteAreaPercent">
+        <short>The percentage from the centre of the wheel.</short>
+        <descr>The percentage of the radius from the centre of the wheel, that is held for pure white.This makes it possible to easily select the color white. The percentage range is 0% - 50% of the colorwheel. The cross hair will also snap to the centre of the wheel when it enters this radius range.</descr>
+      </element>
+      <element name="TfpgColorWheel.OnChange">
+        <short>This event is triggered when a new color has been selected in the wheel.</short>
+      </element>
+      <element name="TfpgColorWheel.ValueBar">
+        <short>Used to link the ColorWheel to the ValueBar component.</short>
+        <seealso>
+          <link id="TfpgValueBar"/>
+        </seealso>
+      </element>
+      <element name="TfpgColorWheel.Hue">
+        <short>Hue value of selected color.</short>
+      </element>
+      <element name="TfpgColorWheel.Saturation">
+        <short>Saturation value of selected color.</short>
+      </element>
+      <element name="TfpgColorWheel.SetSelectedColor">
+        <short>Sets a new color value programatically.</short>
+      </element>
+      <element name="TfpgValueBar">
+        <short>A ValueBar component.</short>
+        <descr>At runtime, this component draws a ValueBar. It allows the user to select the brightness (Value) color in the HSV colorspace. This components works with the TfpgColorWheel component to set the full HSV color values.</descr>
+      </element>
+      <element name="TfpgValueBar.Value">
+        <short>Currently selected Value</short>
+        <descr>The Value color range is from 0.0 to 1.0, where 0 is black and 1 is the brightest.</descr>
+      </element>
+      <element name="TfpgValueBar.SelectedColor">
+        <short>The selected HSV color but in TfpgColor format.</short>
+      </element>
+      <element name="TfpgValueBar.MarginWidth">
+        <short>Margin width around the ValueBar.</short>
+      </element>
+      <element name="TfpgValueBar.OnChange">
+        <short>Event is triggered when a new color is selected.</short>
+      </element>
+      <element name="TfpgValueBar.CursorHeight">
+        <short>The height of the selection cursor.</short>
+      </element>
+      <element name="TfpgValueBar.SetHS">
+        <short>Sets the Hue and Saturation values.</short>
+        <descr>This method is normally called by the <link id="TfpgColorWheel"/> component. These components work together to specify the full HSV color.</descr>
+      </element>
+    </module>
+  </package>
+</fpdoc-descriptions>

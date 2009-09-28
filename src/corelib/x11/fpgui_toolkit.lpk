@@ -29,7 +29,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="6" Release="3"/>
-    <Files Count="75">
+    <Files Count="77">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -330,6 +330,14 @@
         <Filename Value="../../gui/charmapdialog.inc"/>
         <Type Value="Include"/>
       </Item75>
+      <Item76>
+        <Filename Value="../../gui/fpg_colormapping.pas"/>
+        <UnitName Value="fpg_ColorMapping"/>
+      </Item76>
+      <Item77>
+        <Filename Value="../../gui/fpg_colorwheel.pas"/>
+        <UnitName Value="fpg_ColorWheel"/>
+      </Item77>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">
