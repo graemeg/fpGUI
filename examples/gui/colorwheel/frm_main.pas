@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_widget,
   fpg_edit, fpg_form, fpg_label, fpg_button,
-  fpg_dialogs, fpg_menu,
+  fpg_dialogs, fpg_menu, fpg_checkbox,
   fpg_panel, fpg_ColorWheel;
 
 type
@@ -31,12 +31,23 @@ type
     edR: TfpgEdit;
     edG: TfpgEdit;
     edB: TfpgEdit;
+    Label7: TfpgLabel;
+    Label8: TfpgLabel;
+    Bevel2: TfpgBevel;
+    Label9: TfpgLabel;
+    chkCrossHair: TfpgCheckBox;
+    chkBGColor: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
+    FViaRGB: Boolean; // to prevent recursive changes
     procedure btnQuitClicked(Sender: TObject);
-    procedure btnGetColorClicked(Sender: TObject);
+    procedure chkCrossHairChange(Sender: TObject);
+    procedure chkBGColorChange(Sender: TObject);
+    procedure UpdateHSVComponents;
+    procedure UpdateRGBComponents;
     procedure ColorChanged(Sender: TObject);
     procedure RGBChanged(Sender: TObject);
   public
+    constructor Create(AOwner: TComponent); override;
     procedure AfterCreate; override;
   end;
 
@@ -49,7 +60,9 @@ implementation
 
 procedure TMainForm.ColorChanged(Sender: TObject);
 begin
-  btnGetColorClicked(nil);
+  UpdateHSVComponents;
+  if not FViaRGB then
+    UpdateRGBComponents;
 end;
 
 procedure TMainForm.RGBChanged(Sender: TObject);
@@ -57,12 +70,19 @@ var
   rgb: TRGBTriple;
   c: TfpgColor;
 begin
+  FViaRGB := True;  // revent recursive updates
   rgb.Red := StrToInt(edR.Text);
   rgb.Green := StrToInt(edG.Text);
   rgb.Blue := StrToInt(edB.Text);
   c := RGBTripleTofpgColor(rgb);
-  ColorWheel1.SetSelectedColor(c);
-  btnGetColorClicked(nil);
+  ColorWheel1.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
+  FViaRGB := False;
+end;
+
+constructor TMainForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FViaRGB := False;
 end;
 
 procedure TMainForm.btnQuitClicked(Sender: TObject);
@@ -70,7 +90,29 @@ begin
   Close;
 end;
 
-procedure TMainForm.btnGetColorClicked(Sender: TObject);
+procedure TMainForm.chkCrossHairChange(Sender: TObject);
+begin
+  if chkCrossHair.Checked then
+    ColorWheel1.CursorSize := 400
+  else
+    ColorWheel1.CursorSize := 5;
+end;
+
+procedure TMainForm.chkBGColorChange(Sender: TObject);
+begin
+  if chkBGColor.Checked then
+  begin
+    ColorWheel1.BackgroundColor := clBrown;
+    ValueBar1.BackgroundColor := clBrown;
+  end
+  else
+  begin
+    ColorWheel1.BackgroundColor := clWindowBackground;
+    ValueBar1.BackgroundColor := clWindowBackground;
+  end;
+end;
+
+procedure TMainForm.UpdateHSVComponents;
 begin
   edH.Text := IntToStr(ColorWheel1.Hue);
   edS.Text := FormatFloat('0.000', ColorWheel1.Saturation);
@@ -78,11 +120,23 @@ begin
   Bevel1.BackgroundColor := ValueBar1.SelectedColor;
 end;
 
+procedure TMainForm.UpdateRGBComponents;
+var
+  rgb: TRGBTriple;
+  c: TfpgColor;
+begin
+  c := ValueBar1.SelectedColor;
+  rgb := fpgColorToRGBTriple(c);
+  edR.Text := IntToStr(rgb.Red);
+  edG.Text := IntToStr(rgb.Green);
+  edB.Text := IntToStr(rgb.Blue);
+end;
+
 procedure TMainForm.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(330, 202, 542, 411);
+  SetPosition(349, 242, 537, 411);
   WindowTitle := 'ColorWheel test app';
   WindowPosition := wpUser;
 
@@ -90,7 +144,7 @@ begin
   with Button1 do
   begin
     Name := 'Button1';
-    SetPosition(448, 376, 80, 26);
+    SetPosition(447, 376, 80, 26);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
@@ -105,7 +159,6 @@ begin
   begin
     Name := 'ColorWheel1';
     SetPosition(20, 20, 272, 244);
-    OnChange  := @ColorChanged;
   end;
 
   ValueBar1 := TfpgValueBar.Create(self);
@@ -127,7 +180,8 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(140, 284, 52, 18);
+    SetPosition(116, 284, 52, 18);
+    Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Hue';
@@ -137,7 +191,8 @@ begin
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(140, 316, 52, 18);
+    SetPosition(116, 316, 52, 18);
+    Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Sat';
@@ -147,7 +202,8 @@ begin
   with Label3 do
   begin
     Name := 'Label3';
-    SetPosition(140, 344, 52, 18);
+    SetPosition(116, 344, 52, 18);
+    Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Val';
@@ -157,37 +213,41 @@ begin
   with edH do
   begin
     Name := 'edH';
-    SetPosition(196, 280, 56, 26);
+    SetPosition(172, 280, 56, 26);
     TabOrder := 8;
     Text := '';
     FontDesc := '#Edit1';
+    BackgroundColor := clWindowBackground;
   end;
 
   edS := TfpgEdit.Create(self);
   with edS do
   begin
     Name := 'edS';
-    SetPosition(196, 308, 56, 26);
+    SetPosition(172, 308, 56, 26);
     TabOrder := 9;
     Text := '';
     FontDesc := '#Edit1';
+    BackgroundColor := clWindowBackground;
   end;
 
   edV := TfpgEdit.Create(self);
   with edV do
   begin
     Name := 'edV';
-    SetPosition(196, 336, 56, 26);
+    SetPosition(172, 336, 56, 26);
     TabOrder := 10;
     Text := '';
     FontDesc := '#Edit1';
+    BackgroundColor := clWindowBackground;
   end;
 
   Label4 := TfpgLabel.Create(self);
   with Label4 do
   begin
     Name := 'Label4';
-    SetPosition(284, 284, 56, 18);
+    SetPosition(236, 284, 56, 18);
+    Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Red';
@@ -197,7 +257,8 @@ begin
   with Label5 do
   begin
     Name := 'Label5';
-    SetPosition(284, 316, 56, 18);
+    SetPosition(236, 316, 56, 18);
+    Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Green';
@@ -207,7 +268,8 @@ begin
   with Label6 do
   begin
     Name := 'Label6';
-    SetPosition(284, 344, 56, 18);
+    SetPosition(236, 344, 56, 18);
+    Alignment := taRightJustify;
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Blue';
@@ -217,7 +279,7 @@ begin
   with edR do
   begin
     Name := 'edR';
-    SetPosition(364, 280, 44, 26);
+    SetPosition(296, 280, 44, 26);
     TabOrder := 13;
     Text := '255';
     FontDesc := '#Edit1';
@@ -228,7 +290,7 @@ begin
   with edG do
   begin
     Name := 'edG';
-    SetPosition(364, 308, 44, 26);
+    SetPosition(296, 308, 44, 26);
     TabOrder := 14;
     Text := '255';
     FontDesc := '#Edit1';
@@ -239,11 +301,72 @@ begin
   with edB do
   begin
     Name := 'edB';
-    SetPosition(364, 336, 44, 26);
+    SetPosition(296, 336, 44, 26);
     TabOrder := 15;
     Text := '255';
     FontDesc := '#Edit1';
     OnExit := @RGBChanged;
+  end;
+
+  Label7 := TfpgLabel.Create(self);
+  with Label7 do
+  begin
+    Name := 'Label7';
+    SetPosition(108, 3, 80, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'ColorWheel';
+  end;
+
+  Label8 := TfpgLabel.Create(self);
+  with Label8 do
+  begin
+    Name := 'Label8';
+    SetPosition(304, 3, 64, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'ValueBar';
+  end;
+
+  Bevel2 := TfpgBevel.Create(self);
+  with Bevel2 do
+  begin
+    Name := 'Bevel2';
+    SetPosition(388, 8, 2, 260);
+    Style := bsLowered;
+  end;
+
+  Label9 := TfpgLabel.Create(self);
+  with Label9 do
+  begin
+    Name := 'Label9';
+    SetPosition(400, 3, 128, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Custom Options';
+  end;
+
+  chkCrossHair := TfpgCheckBox.Create(self);
+  with chkCrossHair do
+  begin
+    Name := 'chkCrossHair';
+    SetPosition(396, 32, 128, 20);
+    FontDesc := '#Label1';
+    TabOrder := 20;
+    Text := 'Large CrossHair';
+    OnChange  := @chkCrossHairChange;
+  end;
+
+  chkBGColor := TfpgCheckBox.Create(self);
+  with chkBGColor do
+  begin
+    Name := 'chkBGColor';
+    SetPosition(396, 56, 132, 20);
+    FontDesc := '#Label1';
+    TabOrder := 21;
+    Text := 'New BG Color';
+    OnChange  := @chkBGColorChange;
   end;
 
   {@VFD_BODY_END: MainForm}
