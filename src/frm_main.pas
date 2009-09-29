@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
-  fpg_tree, fpg_splitter, fpg_menu, fpg_memo;
+  fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button;
 
 type
 
@@ -29,6 +29,7 @@ type
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
+    btnIndex: TfpgButton;
     FHelpFile: TfpgString;
     {@VFD_HEAD_END: MainForm}
     procedure MainFormShow(Sender: TObject);
@@ -37,6 +38,7 @@ type
     procedure miHelpProdInfoClicked(Sender: TObject);
     procedure miHelpAboutFPGui(Sender: TObject);
     procedure SetHelpFile(const AValue: TfpgString);
+    procedure btnShowIndex(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure AfterCreate; override;
@@ -50,11 +52,13 @@ implementation
 uses
   fpg_dialogs, fpg_constants;
 
+
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.MainFormShow(Sender: TObject);
 begin
   bvlBody.Realign;
+
 end;
 
 procedure TMainForm.miFileQuitClicked(Sender: TObject);
@@ -96,6 +100,15 @@ begin
   FHelpFile := AValue;
 end;
 
+procedure TMainForm.btnShowIndex(Sender: TObject);
+var
+  Count: integer;
+  i: integer;
+  s: TfpgString;
+begin
+//
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -134,7 +147,7 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 0, 222, 300);
-    ActivePageIndex := 3;
+    ActivePageIndex := 1;
     TabOrder := 0;
     Align := alLeft;
   end;
@@ -255,6 +268,19 @@ begin
     AddMenuItem('-', '', nil);
     AddMenuItem('About fpGUI Toolkit', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
+  end;
+
+  btnIndex := TfpgButton.Create(tsIndex);
+  with btnIndex do
+  begin
+    Name := 'btnIndex';
+    SetPosition(120, 0, 80, 24);
+    Text := 'Show';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 1;
+    OnClick := @btnShowIndex;
   end;
 
   {@VFD_BODY_END: MainForm}

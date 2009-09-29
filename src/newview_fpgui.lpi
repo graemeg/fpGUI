@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="6">
       <Unit0>
         <Filename Value="newview_fpgui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -43,6 +43,26 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_main"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="DataTypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DataTypes"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="HelpFileHeader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpFileHeader"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="HelpWindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpWindow"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="IPFEscapeCodes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IPFEscapeCodes"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
