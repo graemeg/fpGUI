@@ -150,22 +150,16 @@ begin
 end;
 
 procedure THelpFile.ReadHeader;
-var
-  p: PByte;
-  pend: PByte;
 begin
-writeln('DEBUG:  THelpFile.ReadHeader >>>>');
-  p := _Data;
-  pend := _Data + SizeOf(_Header);
-  writeln('SizeOf(_Header) = ', SizeOf(_Header));
+ProfileEvent('THelpFile.ReadHeader >>>>');
   Move(_Data^, _Header, SizeOf(_Header));
-//  MemCopy(_Data, _Header, sizeof(_Header));
+ProfileEvent('title=' + _Header.title);
 
   if _Header.ID <> $5348 then
     raise EHelpFileException.Create( 'File doesn''t appear to be an OS/2 Help document (header ID not correct)' );
 
   _Title := _Header.Title;
-writeln('DEBUG:  THelpFile.ReadHeader <<<<<');
+ProfileEvent('THelpFile.ReadHeader <<<<<');
 end;
 
 constructor THelpFile.Create( const FileName: string;
@@ -329,6 +323,7 @@ type
 
 procedure THelpFile.ReadFontTable;
 begin
+  { TODO : ReadFontTable }
 end;
 
 procedure THelpFile.GetImages( ImageOffsets: TList;
@@ -341,6 +336,7 @@ begin
   Images.Clear;
   for ListIndex:= 0 to ImageOffsets.Count - 1 do
   begin
+    { TODO -oGraeme : Double check pointer conversion }
     ImageOffset := longint( ImageOffsets[ ListIndex ] );
     try
       Bitmap:= THelpBitmap.CreateFromHelpFile( _Data

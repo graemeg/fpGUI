@@ -2,6 +2,9 @@ unit nvUtilities;
 
 {$mode objfpc}{$H+}
 
+// disable to remove debugging output
+{$Define DEBUG}
+
 interface
 
 uses
