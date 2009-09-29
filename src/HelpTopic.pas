@@ -1,5 +1,7 @@
 Unit HelpTopic;
 
+{$mode objfpc}{$H+}
+
 // NewView - a new OS/2 Help Viewer
 // Copyright 2001 Aaron Lawrence (aaronl at consultant dot com)
 // This software is released under the Gnu Public License - see readme.txt
@@ -13,7 +15,7 @@ Interface
 // RichTextView.
 
 uses
-  Classes, OS2Def, DataTypes, Graphics, HelpWindow, HelpFileHeader;
+  Classes, DataTypes, HelpWindow, HelpFileHeader;
 
 Type
   THelpLink = class
@@ -41,13 +43,13 @@ Type
 
   pSlotArray = ^SlotArray;
 
-  TTopic = class
+  TTopic = class(TObject)
   protected
     _pTOCEntry: pTTOCEntryStart;
     _Slots: pSlotArray;
     _NumSlots: longint;
     _NumSlotsUsed: longint;
-    _Title: pstring;
+    _Title: string;
     _GlobalDictionary: TList;
 
     _ShowInContents: boolean;
@@ -105,16 +107,7 @@ Type
     procedure GetContentsWindowRect( ContentsRect: THelpWindowRect );
 
   public
-
     Links: TList; // only valid after GetText
-
-    property ShowInContents: boolean read _ShowInContents;
-    property ContentsLevel: integer read _ContentsLevel;
-    property ContentsGroupIndex: longint read _ContentsGroupIndex;
-
-    function CountWord( DictIndex: integer ): longint;
-    function ContainsWord( DictIndex: integer ): boolean;
-
     // Used externally
     HelpFile: TObject;
     Index: longint;
@@ -123,6 +116,13 @@ Type
     ExcludedInSearch: boolean;
 
     SearchRelevance: longint;
+
+    property ShowInContents: boolean read _ShowInContents;
+    property ContentsLevel: integer read _ContentsLevel;
+    property ContentsGroupIndex: longint read _ContentsGroupIndex;
+
+    function CountWord( DictIndex: integer ): longint;
+    function ContainsWord( DictIndex: integer ): boolean;
   end;
 
 // Compares two topics for purposes of sorting by
@@ -133,8 +133,10 @@ Implementation
 
 uses
   SysUtils,
+{
   ACLUtility, ACLStringUtility, ACLPCharUtility,
   ACLString, ACLProfile,
+}
   IPFEscapeCodes;
 
 const
@@ -184,7 +186,7 @@ var
 
   Slot: THelpTopicSlot;
 begin
-  _Title:= nil;
+  _Title := '';
   _GlobalDictionary:= Dictionary;
   _ContentsGroupIndex := 0;
 
@@ -269,32 +271,31 @@ begin
   begin
     for LinkIndex:= 0 to Links.Count - 1 do
     begin
-      Link:= Links[ LinkIndex ];
+      Link := THelpLink(Links[ LinkIndex ]);
       Link.Destroy;
     end;
     Links.Destroy;
   end;
-  FreePString( _Title );
   FreeMem( _Slots, _NumSlots * sizeof( THelpTopicSlot ) );
 end;
 
 procedure TTopic.SetTitle( const NewValue: string );
 begin
-  FreePString( _Title );
-  _Title:= NewPString( NewValue );
+  _Title := NewValue;
 end;
 
 procedure TTopic.SetTitleFromMem( const p: pointer; const Len: byte );
 begin
-  FreePString( _Title );
-  GetMem( _Title, Len + 1 );
-  _Title^[ 0 ] := char( Len );
-  MemCopy( p, _Title + 1, Len );
+  //DisposeStr( _Title );
+  //GetMem( _Title, Len + 1 );
+  //_Title^[ 0 ] := char( Len );
+  SetString(_Title, p, Len);
+//  MemCopy( p, _Title + 1, Len );
 end;
 
 function TTopic.GetTitle: string;
 begin
-  Result:= _Title^;
+  Result:= _Title;
 end;
 
 function SubstituteAngleBrackets( const s: string ): string;
@@ -415,7 +416,7 @@ begin
       Links.Add( Link );
     end
     else
-      Link := Links[ LinkIndex ];
+      Link := THelpLink(Links[ LinkIndex ]);
 
     OutputString := '<link '
                  + IntToStr( LinkIndex )
@@ -534,7 +535,7 @@ begin
         Links.Add( Link );
       end
       else
-        Link := Links[ LinkIndex ];
+        Link := THelpLink(Links[ LinkIndex ]);
 
       // If it's not an automatic link
       // then put code in to show it.
@@ -573,7 +574,7 @@ begin
         Links.Add( Link );
       end
       else
-        Link := Links[ LinkIndex ];
+        Link := THelpLink(Links[ LinkIndex ]);
 
       if InFixedFont then
       begin
@@ -683,7 +684,7 @@ var
   pData: pInt8;
   pSlotEnd: pInt8;
 
-  S: TAString;
+  S: string;
   Word: string;
 
   GlobalDictIndex: int32;
@@ -703,7 +704,7 @@ begin
   if Links = nil then
     Links:= TList.Create;
 
-  S:= TAString.Create;
+  S := '';
 {  Text:= StrNew( S.AsPChar );
   S.Destroy;
   exit;}
@@ -719,7 +720,7 @@ begin
   for SlotIndex := 0 to _NumSlots - 1 do
   begin
     Spacing:= true;
-    Slot := _Slots[ SlotIndex ];
+    Slot := THelpTopicSlot(_Slots[ SlotIndex ]);
 
     pData := Slot.pData;
 
@@ -743,7 +744,7 @@ begin
           Word := '';
 
         Word:= SubstituteAngleBrackets( Word );
-        if HighlightWords[ GlobalDictIndex ] > 0 then
+        if HighlightWords^[ GlobalDictIndex ] > 0 then
           StringToAdd := '<red>' + Word + '<black>'
         else
           StringToAdd := Word;
@@ -824,15 +825,14 @@ begin
         end; // case code of...
         DebugString := DebugString + ']';
         if ShowCodes then
-          S.AddString( DebugString );
+          S := S + DebugString;
       end;
 
-      S.AddString( StringToAdd );
+      S := S + StringToAdd;
     end; // for slotindex = ...
   end;
 
-  Text:= StrNew( S.AsPChar );
-  S.Destroy;
+  Text := PChar(S);
 end;
 
 function TTopic.SearchForWord( DictIndex: integer;
@@ -853,7 +853,7 @@ begin
   Result := 0;
   for SlotIndex := 0 to _NumSlots - 1 do
   begin
-    Slot := _Slots[ SlotIndex ];
+    Slot := THelpTopicSlot(_Slots[ SlotIndex ]);
 
     pData := Slot.pData;
 
@@ -946,8 +946,8 @@ function TopicRelevanceCompare( Item1, Item2: pointer ): longint;
 var
   Topic1, Topic2: TTopic;
 begin
-  Topic1 := Item1;
-  Topic2 := Item2;
+  Topic1 := TTopic(Item1);
+  Topic2 := TTopic(Item2);
 
   if Topic1.SearchRelevance > Topic2.SearchRelevance then
     Result := -1
