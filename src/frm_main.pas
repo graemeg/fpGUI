@@ -30,19 +30,25 @@ type
     miBookmarks: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     btnIndex: TfpgButton;
-    FHelpFile: TfpgString;
     {@VFD_HEAD_END: MainForm}
-    procedure MainFormShow(Sender: TObject);
-    procedure miFileQuitClicked(Sender: TObject);
-    procedure miFileOpenClicked(Sender: TObject);
-    procedure miHelpProdInfoClicked(Sender: TObject);
-    procedure miHelpAboutFPGui(Sender: TObject);
-    procedure SetHelpFile(const AValue: TfpgString);
-    procedure btnShowIndex(Sender: TObject);
+    FHelpFile: TfpgString;
+    Files: TList; // current open help files.
+    procedure   MainFormShow(Sender: TObject);
+    procedure   miFileQuitClicked(Sender: TObject);
+    procedure   miFileOpenClicked(Sender: TObject);
+    procedure   miHelpProdInfoClicked(Sender: TObject);
+    procedure   miHelpAboutFPGui(Sender: TObject);
+    procedure   SetHelpFile(const AValue: TfpgString);
+    procedure   btnShowIndex(Sender: TObject);
+    procedure   FileOpen;
+    function    OpenFile(const AFileNames: string): boolean;
+    procedure   OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
+
   public
     constructor Create(AOwner: TComponent); override;
-    procedure AfterCreate; override;
-    property HelpFile: TfpgString read FHelpFile write SetHelpFile;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
+//    property    HelpFile: TfpgString read FHelpFile write SetHelpFile;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -50,7 +56,7 @@ type
 implementation
 
 uses
-  fpg_dialogs, fpg_constants;
+  fpg_dialogs, fpg_constants, nvUtilities, HelpFile;
 
 
 {@VFD_NEWFORM_IMPL}
@@ -67,20 +73,8 @@ begin
 end;
 
 procedure TMainForm.miFileOpenClicked(Sender: TObject);
-var
-  dlg: TfpgFileDialog;
 begin
-  dlg := TfpgFileDialog.Create(nil);
-  try
-    dlg.Filter := 'INF Help (.inf)|*.inf|HLP Help (.hlp)|*.hlp';
-    // and a catch all filter
-    dlg.Filter := dlg.Filter + '|(' + rsAllFiles + ' (*)|*';
-
-    if dlg.RunOpenFile then
-      HelpFile := dlg.FileName;
-  finally
-    dlg.Free;
-  end;
+  FileOpen;
 end;
 
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
@@ -109,10 +103,62 @@ begin
 //
 end;
 
+procedure TMainForm.FileOpen;
+var
+  dlg: TfpgFileDialog;
+begin
+  dlg := TfpgFileDialog.Create(nil);
+  try
+    dlg.WindowTitle := 'Open Help File';
+    dlg.Filter := 'Help Files (*.hlp, *.inf)|*.inf;*.hlp ';
+    // and a catch all filter
+    dlg.Filter := dlg.Filter + '|(' + rsAllFiles + ' (*)|*';
+
+    if dlg.RunOpenFile then
+    begin
+//      FHelpFile := dlg.FileName;
+      OpenFile(dlg.Filename);
+      { TODO -oGraeme : Add support for multiple files. }
+//      OpenFile( ListToString( dlg.FileNames, '+' ) );
+    end;
+  finally
+    dlg.Free;
+  end;
+end;
+
+function TMainForm.OpenFile(const AFileNames: string): boolean;
+var
+  lFilename: string;
+  FullFilePath: string;
+  HelpFile: THelpFile;
+begin
+  ProfileEvent('OpenFile');
+  lFilename := AFilenames;
+  ProfileEvent( 'File: ' + lFileName );
+  FullFilePath := ExpandFileName(lFilename);
+  ProfileEvent( '  Full path: ' + FullFilePath );
+  ProfileEvent( '  Loading: ' + lFilename );
+
+  HelpFile := THelpFile.Create(lFileName, @OnHelpFileLoadProgress);
+
+end;
+
+procedure TMainForm.OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
+begin
+  //
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   OnShow  := @MainFormShow;
+  Files := TList.Create;
+end;
+
+destructor TMainForm.Destroy;
+begin
+  Files.Free;
+  inherited Destroy;
 end;
 
 procedure TMainForm.AfterCreate;
