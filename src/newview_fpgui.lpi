@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="12">
       <Unit0>
         <Filename Value="newview_fpgui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -68,6 +68,31 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpTopic"/>
       </Unit6>
+      <Unit7>
+        <Filename Value="CompareWordUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompareWordUnit"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="SearchTable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SearchTable"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="TextSearchQuery.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TextSearchQuery"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="nvUtilities.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="nvUtilities"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="nvNullObjects.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="nvNullObjects"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

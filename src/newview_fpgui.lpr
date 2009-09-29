@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow, IPFEscapeCodes,
-  HelpTopic;
+  HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery, nvUtilities,
+  nvNullObjects;
 
 
 procedure MainProc;
