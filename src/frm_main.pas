@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
-  fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button;
+  fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button, HelpFile;
 
 type
 
@@ -43,6 +43,10 @@ type
     procedure   FileOpen;
     function    OpenFile(const AFileNames: string): boolean;
     procedure   OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
+    procedure   LoadNotes(AHelpFile: THelpFile);
+    procedure   LoadContents;
+    // Used in loading contents
+    procedure AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
 
   public
     constructor Create(AOwner: TComponent); override;
@@ -53,10 +57,13 @@ type
 
 {@VFD_NEWFORM_DECL}
 
+const
+  cTitle = 'fpGUI Help Viewer';
+
 implementation
 
 uses
-  fpg_dialogs, fpg_constants, nvUtilities, HelpFile;
+  fpg_dialogs, fpg_constants, nvUtilities, HelpTopic;
 
 
 {@VFD_NEWFORM_IMPL}
@@ -131,6 +138,7 @@ var
   lFilename: string;
   FullFilePath: string;
   HelpFile: THelpFile;
+  FileIndex: integer;
 begin
   ProfileEvent('OpenFile');
   lFilename := AFilenames;
@@ -140,12 +148,89 @@ begin
   ProfileEvent( '  Loading: ' + lFilename );
 
   HelpFile := THelpFile.Create(lFileName, @OnHelpFileLoadProgress);
+  Files.Add(HelpFile);
 
+//  WindowTitle := cTitle + ' - ' + THelpFile( Files[ 0 ] ).Title;
+  WindowTitle := cTitle + ' - ' + HelpFile.Title;
+  fpgApplication.ProcessMessages;
+
+  for FileIndex:= 0 to Files.Count - 1 do
+  begin
+    HelpFile := THelpFile(Files[ FileIndex ]);
+    LoadNotes( HelpFile );
+  end;
+
+  LoadContents;
 end;
 
 procedure TMainForm.OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
 begin
   //
+end;
+
+procedure TMainForm.LoadNotes(AHelpFile: THelpFile);
+begin
+//  NotesFileName:= ChangeFileExt( HelpFile.FileName, '.nte' );
+
+end;
+
+procedure TMainForm.LoadContents;
+var
+  FileIndex: integer;
+  HelpFile: THelpFile;
+  TopicIndex: integer;
+  Node: TfpgTreeNode;
+  Topic: TTopic;
+begin
+  ProfileEvent( 'Load contents outline' );
+
+  tvContents.RootNode.Clear;
+
+  ProfileEvent( 'Loop files' );
+
+  Node := nil;
+
+  for FileIndex:= 0 to Files.Count - 1 do
+  begin
+    HelpFile:= THelpFile(Files[ FileIndex ]);
+    ProfileEvent( 'File ' + IntToStr( FileIndex ) );
+    TopicIndex:= 0;
+    while TopicIndex < HelpFile.TopicCount do
+    begin
+      Topic := HelpFile.Topics[ TopicIndex ];
+      if Topic.ShowInContents then
+      begin
+        if Topic.ContentsLevel = 1 then
+        begin
+          Node := tvContents.RootNode.AppendText(Topic.Title);
+          Node.Data := Topic;
+          inc( TopicIndex );
+        end
+        else
+        begin
+          // child nodes
+          AddChildNodes( HelpFile,
+                         Node,
+                         Topic.ContentsLevel,
+                         TopicIndex );
+          Node := nil;
+
+        end;
+      end
+      else
+      begin
+        inc( TopicIndex );
+      end;
+    end;
+  end;
+end;
+
+procedure TMainForm.AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode;
+  ALevel: longint; var ATopicIndex: longint);
+begin
+  //
+  ProfileEvent('SubNode with TopicIndex of ' + IntToStr(ATopicIndex));
+  inc( ATopicIndex );
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
