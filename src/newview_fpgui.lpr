@@ -6,7 +6,8 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow, IPFEscapeCodes;
+  Classes, fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow, IPFEscapeCodes,
+  HelpTopic;
 
 
 procedure MainProc;

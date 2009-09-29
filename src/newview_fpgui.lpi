@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="newview_fpgui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -63,6 +63,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="IPFEscapeCodes"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="HelpTopic.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpTopic"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
