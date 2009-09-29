@@ -24,7 +24,7 @@ Type
   end;
 
 type
-  THelpFile = class
+  THelpFile = class(TObject)
   protected
     _Data: pointer;
     _DataLen: longint;
@@ -150,13 +150,22 @@ begin
 end;
 
 procedure THelpFile.ReadHeader;
+var
+  p: PByte;
+  pend: PByte;
 begin
-  MemCopy(_Data, _Header, sizeof(_Header));
+writeln('DEBUG:  THelpFile.ReadHeader >>>>');
+  p := _Data;
+  pend := _Data + SizeOf(_Header);
+  writeln('SizeOf(_Header) = ', SizeOf(_Header));
+  Move(_Data^, _Header, SizeOf(_Header));
+//  MemCopy(_Data, _Header, sizeof(_Header));
 
   if _Header.ID <> $5348 then
     raise EHelpFileException.Create( 'File doesn''t appear to be an OS/2 Help document (header ID not correct)' );
 
   _Title := _Header.Title;
+writeln('DEBUG:  THelpFile.ReadHeader <<<<<');
 end;
 
 constructor THelpFile.Create( const FileName: string;
