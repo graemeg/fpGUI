@@ -18,7 +18,7 @@ uses
   Classes, DataTypes, HelpWindow, HelpFileHeader;
 
 Type
-  THelpLink = class
+  THelpLink = class(TObject)
     TopicIndex: longint;
     GroupIndex: longint; // -1 if not specified
     Automatic: boolean;
@@ -31,7 +31,7 @@ Type
     destructor Destroy; override;
   end;
 
-  THelpTopicSlot = record
+  THelpTopicSlot = packed record
     pData: pInt8;
     Size: longint;
     pLocalDictionary: Int16ArrayPointer;

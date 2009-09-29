@@ -14,8 +14,7 @@ uses
   DataTypes;
 
 Type
-  PHelpFileHeader = ^THelpFileHeader;
-  THelpFileHeader = record
+  THelpFileHeader = packed record
     ID: int16;           // ID magic word (5348h = "HS")
     unknown1: int8;      // unknown purpose, could be third letter of ID
     flags: int8;         // probably a flag word...
@@ -54,9 +53,10 @@ Type
     reserved: array[ 0..2 ] of int32; // for future use. set to zero.
     title: array[ 0..47 ] of char;    // ASCII title of database
   end;
-             
+  pTHelpFileHeader = ^THelpFileHeader;
+
 Type
-  TTOCEntryStart = record
+  TTOCEntryStart = packed record
     length: int8; // length of the entry including this byte
     flags: int8; // flag byte, description folows (MSB first)
              // bit1 haschildren;  // following nodes are a higher level
@@ -70,14 +70,14 @@ Type
   end;
   pTTOCEntryStart = ^TTOCEntryStart;
 
-  TExtendedTOCEntry = record
+  TExtendedTOCEntry = packed record
     w1: int8;
     w2: int8;
   end;
   pExtendedTOCEntry = ^TExtendedTOCEntry;
 
-  TTOCEntryOffsetArray =  array[ 0..0 ] of int32;
-  pTTOCEntryOffsetArray = ^ TTOCEntryOffsetArray;
+  TTOCEntryOffsetArray =  packed array[ 0..0 ] of int32;
+  pTTOCEntryOffsetArray = ^TTOCEntryOffsetArray;
 
 Const
   TOCEntryExtended = 32;
@@ -85,14 +85,14 @@ Const
   TOCEntryHasChildren = 128;
 
 type
-  THelpXYPair = record
+  THelpXYPair = packed record
     Flags: int8;
     X: int16;
     Y: int16;
   end;
   pHelpXYPair = ^ THelpXYPair;
 
-  TSlotHeader = record
+  TSlotHeader = packed record
     stuff: int8; // always 0??
     localdictpos: int32; // file offset of the local dictionary
     nlocaldict: int8; // number of entries in the local dict
