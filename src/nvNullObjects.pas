@@ -30,18 +30,10 @@ type
   end;
 
 
-procedure ProfileEvent(const AString: string);
-
 
 implementation
 
 
-procedure ProfileEvent(const AString: string);
-begin
-  {$IFDEF DEBUG}
-  writeln('DEBUG:  ', AString);
-  {$ENDIF}
-end;
 
 { TImageList }
 

@@ -27,6 +27,8 @@ Function ExtractNextValueNoTrim(
 
 // Alias method which is the same as Move() but with less confusing name
 procedure MemCopy(const src; var dest; size: SizeInt);
+// Allows for debug output and quite disable of output
+procedure ProfileEvent(const AString: string);
 
 
 implementation
@@ -71,6 +73,12 @@ begin
   Move(src, dest, size);
 end;
 
+procedure ProfileEvent(const AString: string);
+begin
+  {$IFDEF DEBUG}
+  writeln('DEBUG:  ', AString);
+  {$ENDIF}
+end;
 
 end.
 
