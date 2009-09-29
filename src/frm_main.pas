@@ -227,10 +227,41 @@ end;
 
 procedure TMainForm.AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode;
   ALevel: longint; var ATopicIndex: longint);
+var
+  Topic: TTopic;
+  Node: TfpgTreeNode;
 begin
-  //
   ProfileEvent('SubNode with TopicIndex of ' + IntToStr(ATopicIndex));
-  inc( ATopicIndex );
+
+  Node := nil;
+  while ATopicIndex < AHelpFile.TopicCount do
+  begin
+    Topic := AHelpFile.Topics[ ATopicIndex ];
+    if Topic.ShowInContents then
+    begin
+      if Topic.ContentsLevel < ALevel then
+        break;
+
+      if Topic.ContentsLevel = ALevel then
+      begin
+        Node := AParentNode.AppendText(Topic.Title);
+        Node.Data := Topic;
+        inc( ATopicIndex );
+      end
+      else
+      begin
+        AddChildNodes( AHelpFile,
+                       Node,
+                       Topic.ContentsLevel,
+                       ATopicIndex );
+        Node := nil;
+      end
+    end
+    else
+    begin
+      inc( ATopicIndex );
+    end;
+  end;  { while }
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
