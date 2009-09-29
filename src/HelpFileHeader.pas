@@ -14,6 +14,7 @@ uses
   DataTypes;
 
 Type
+  PHelpFileHeader = ^THelpFileHeader;
   THelpFileHeader = record
     ID: int16;           // ID magic word (5348h = "HS")
     unknown1: int8;      // unknown purpose, could be third letter of ID

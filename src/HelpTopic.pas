@@ -191,7 +191,7 @@ begin
   _ContentsGroupIndex := 0;
 
   _pTOCEntry := pTOCEntry;
-  _NumSlots:= pTOCEntry ^. numslots;
+  _NumSlots:= pTOCEntry^.numslots;
 
   GetMem( _Slots, _NumSlots * sizeof( THelpTopicSlot ) );
 
