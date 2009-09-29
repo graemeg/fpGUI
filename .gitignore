@@ -1,3 +1,4 @@
-.[oa]
-.ppu
+*.[oa]
+*.ppu
+*.lps
 units
