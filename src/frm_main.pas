@@ -29,14 +29,18 @@ type
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
+    FHelpFile: TfpgString;
     {@VFD_HEAD_END: MainForm}
     procedure MainFormShow(Sender: TObject);
     procedure miFileQuitClicked(Sender: TObject);
+    procedure miFileOpenClicked(Sender: TObject);
     procedure miHelpProdInfoClicked(Sender: TObject);
     procedure miHelpAboutFPGui(Sender: TObject);
+    procedure SetHelpFile(const AValue: TfpgString);
   public
     constructor Create(AOwner: TComponent); override;
     procedure AfterCreate; override;
+    property HelpFile: TfpgString read FHelpFile write SetHelpFile;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -44,7 +48,7 @@ type
 implementation
 
 uses
-  fpg_dialogs;
+  fpg_dialogs, fpg_constants;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -58,6 +62,23 @@ begin
   Close;
 end;
 
+procedure TMainForm.miFileOpenClicked(Sender: TObject);
+var
+  dlg: TfpgFileDialog;
+begin
+  dlg := TfpgFileDialog.Create(nil);
+  try
+    dlg.Filter := 'INF Help (.inf)|*.inf|HLP Help (.hlp)|*.hlp';
+    // and a catch all filter
+    dlg.Filter := dlg.Filter + '|(' + rsAllFiles + ' (*)|*';
+
+    if dlg.RunOpenFile then
+      HelpFile := dlg.FileName;
+  finally
+    dlg.Free;
+  end;
+end;
+
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
 begin
   TfpgMessageDialog.Information('Product Information', 'Created by Graeme Geldenhuys');
@@ -66,6 +87,13 @@ end;
 procedure TMainForm.miHelpAboutFPGui(Sender: TObject);
 begin
   TfpgMessageDialog.AboutFPGui;
+end;
+
+procedure TMainForm.SetHelpFile(const AValue: TfpgString);
+begin
+  if FHelpFile = AValue then
+    Exit; //==>
+  FHelpFile := AValue;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -195,7 +223,7 @@ begin
   begin
     Name := 'miFile';
     SetPosition(244, 28, 132, 20);
-    AddMenuItem('Open...', '', nil);
+    AddMenuItem('Open...', '', @miFileOpenClicked);
     AddMenuitem('-', '', nil);
     AddMenuItem('Quit', '', @miFileQuitClicked);
   end;
