@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow, IPFEscapeCodes,
   HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery, nvUtilities,
-  nvNullObjects;
+  nvNullObjects, HelpFile;
 
 
 procedure MainProc;

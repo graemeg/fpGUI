@@ -1,5 +1,7 @@
 Unit HelpFile;
 
+{$mode objfpc}{$H+}
+
 // NewView - a new OS/2 Help Viewer
 // Copyright 2001 Aaron Lawrence (aaronl at consultant dot com)
 // This software is released under the Gnu Public License - see readme.txt
@@ -9,10 +11,12 @@ Interface
 // Encapsulates the basic reading of a help file's structure.
 
 uses
-  classes, BseDos, os2def, SysUtils, Graphics,
-  DataTypes,
-  HelpFileHeader, HelpTopic, HelpBitmap, ACLUtility,
-  TextSearchQuery, SearchTable, CompareWordUnit;
+  Classes, SysUtils, DataTypes,
+  HelpFileHeader, HelpTopic,
+//  HelpBitmap,
+  TextSearchQuery, SearchTable, CompareWordUnit,
+  // this unit is used to fake image support untill fpGUI has this implemented.
+  nvNullObjects;
 
 Type
 
@@ -32,7 +36,7 @@ type
     _Title: string;
     _Header: THelpFileHeader;
 
-    _Topics: TList; // of TTopics
+    _Topics: TList; // of TTopic
 
     _Dictionary: TList; // pointers to strings.
 
@@ -42,7 +46,7 @@ type
     _SearchTable: TSearchTable;
 
     procedure InitMembers;
-    procedure ReadFile( Filename: string );
+    procedure ReadFile(const AFilename: string );
 
     procedure ReadHeader;
     procedure ReadContents;
@@ -59,6 +63,7 @@ type
     function GetDictionaryWord( Index: longint ): string;
 
   public
+    HighlightWords: Int32ArrayPointer;
     constructor Create( const FileName: string;
                         UpdateProgress: TProgressCallback );
 
@@ -79,24 +84,21 @@ type
     function IndexOfTopic( Topic: TTopic ): longint;
 
     property SearchTable: TSearchTable read _SearchTable;
-
-    HighlightWords: Int32ArrayPointer;
   end;
 
 // Returns helpfile that the given topic is within
 Function TopicFile( Topic: TTopic ): THelpFile;
 
+
 Implementation
 
 uses
-  Dialogs, Forms,
-  BseErr,
-  ACLFileUtility, ACLStringUtility, ACLFileIOUtility, ACLProfile,
-  ACLPCharUtility, ACLDialogs,
-  HelpWindow;
+  //ACLFileUtility, ACLStringUtility, ACLFileIOUtility, ACLProfile,
+  //ACLPCharUtility, ACLDialogs,
+  HelpWindow, nvUtilities;
 
 // Load "missing" bitmap
-{$R Images}
+//{.$R Images}
 
 Function TopicFile( Topic: TTopic ): THelpFile;
 Begin
@@ -114,62 +116,47 @@ begin
   _Index:= TStringList.Create;
 end;
 
-procedure THelpFile.ReadFile( Filename: string );
+procedure THelpFile.ReadFile(const AFilename: string );
 var
-  OpenAction: ULong;
-  rc: APIRET;
-  szName: Cstring;
-  F: HFILE;
-  FileInfo: FILESTATUS3;
+  AFile: File of char;
 begin
-  _FileName:= Filename;
-  if not FileExists( Filename ) then
-    raise EHelpFileException.Create( 'File not found' );
+  _FileName:= AFilename;
+  if not FileExists( AFilename ) then
+    raise EHelpFileException.CreateFmt('File <%s> not found', [AFilename]);
 
-  szName:= FileName;
-  rc:= DosOpen( szName,
-                F,
-                OpenAction,
-                0, // file size - irrelevant, not creating,
-                0, // attrs - ''
-                OPEN_ACTION_OPEN_IF_EXISTS,
-                OPEN_SHARE_DENYNONE + OPEN_ACCESS_READONLY,
-                nil ); // no eas
-  if rc<> 0 then
-  begin
-    case rc of
-      ERROR_FILE_NOT_FOUND: // crap, this doesn't actually occur!
-        raise EHelpFileException.Create( 'File not found' );
-
-      ERROR_ACCESS_DENIED:
-        raise EHelpFileException.Create( 'Access denied' );
-
-      ERROR_SHARING_VIOLATION:
-        raise EHelpFileException.Create( 'File in use by another program' );
-
-      else
-        raise EHelpFileException.Create( 'File open error' );
+  AssignFile(AFile, Filename);
+  try
+    FileMode := fmOpenRead; // read-only
+    {$i-}
+    Reset(AFile);
+    {$i+}
+    if IOResult <> 0 then
+    begin
+      case IOResult of
+        2:      raise EHelpFileException.Create( 'File not found' );
+        5:      raise EHelpFileException.Create( 'Access denied' );
+        else
+          raise EHelpFileException.CreateFmt( 'File open error. IO Error is <%d>', [IOResult] );
+      end;
     end;
-  end;
 
-  DosQueryFileInfo( F,
-                    FIL_STANDARD,
-                    FileInfo,
-                    sizeof( FileInfo ) );
-  _DataLen:= FileInfo.cbFile; // file size
-  GetMem( _Data, _DataLen );
-  MyRead( F, _Data, _DataLen );
-  DosClose( F );
+    _DataLen := FileSize(AFile);  // in bytes
+    _Data := nil;
+    GetMem( _Data, _DataLen );    // allocate enough memory
+    BlockRead(AFile, _Data^, _DataLen);
+  finally
+    CloseFile(AFile);
+  end;
 end;
 
 procedure THelpFile.ReadHeader;
 begin
-  MemCopy( _Data, Addr( _Header ), sizeof( _Header ) );
+  MemCopy(_Data, _Header, sizeof(_Header));
 
   if _Header.ID <> $5348 then
     raise EHelpFileException.Create( 'File doesn''t appear to be an OS/2 Help document (header ID not correct)' );
 
-  _Title:= StrPas( _Header.Title );
+  _Title := _Header.Title;
 end;
 
 constructor THelpFile.Create( const FileName: string;
@@ -293,30 +280,32 @@ type
 
 procedure THelpFile.ReadIndex;
 var
-  IndexIndex: longint; // I can't resist :-)
+  IndexIndex: longint;
   pEntryHeader: ^TIndexEntryHeader;
   EntryText: string;
   IndexTitleLen: longint;
   p: pointer;
 begin
-  p:= _Data + _Header.indexstart;
+  p := _Data + _Header.indexstart;
 
   for IndexIndex:= 0 to longint( _Header.nindex ) - 1 do
   begin
-    pEntryHeader:= p;
+    pEntryHeader := p;
     IndexTitleLen:= pEntryHeader^.TextLength;
     inc( p, sizeof( TIndexEntryHeader ) );
 
-    GetMemString( p, EntryText, IndexTitleLen );
+    { TODO -oGraeme : Double check this later }
+    EntryText := PChar(p);
+//    GetMemString( p, EntryText, IndexTitleLen );
+
     if ( pEntryHeader^.flags and 2 ) > 0 then
       EntryText:= '- ' + EntryText;
     if pEntryHeader^.TOCIndex < _Topics.Count then
-      _Index.AddObject( EntryText, _Topics[ pEntryHeader^.TOCIndex ] )
+      _Index.AddObject( EntryText, TTopic(_Topics[ pEntryHeader^.TOCIndex ]) )
     else
 //      raise EHelpFileException.Create( 'Error reading help file index - out of range topic reference' );
       ; // pass! something special
-    inc( p, IndexTitleLen
-            + pEntryHeader^.NumberOfRoots ); // skip 'roots' for index search
+    inc( p, IndexTitleLen + pEntryHeader^.NumberOfRoots ); // skip 'roots' for index search
   end;
 
 end;
@@ -362,13 +351,12 @@ begin
 
     Images.Add( Bitmap, nil );
     Bitmap.Destroy;
-
   end;
 end;
 
 function THelpFile.GetTopic( Index: longint ): TTopic;
 begin
-  Result:= _Topics[ Index ];
+  Result:= TTopic(_Topics[ Index ]);
 end;
 
 function THelpFile.GetTopicCount: longint;
