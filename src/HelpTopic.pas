@@ -137,7 +137,7 @@ uses
   ACLUtility, ACLStringUtility, ACLPCharUtility,
   ACLString, ACLProfile,
 }
-  IPFEscapeCodes;
+  IPFEscapeCodes, nvUtilities;
 
 const
   IPFStyleTags : array [ 0..6 ] of string =
@@ -716,6 +716,7 @@ begin
 
   for SlotIndex := 0 to _NumSlots - 1 do
   begin
+ProfileEvent('Processing SlotIndex ' + IntToStr(SlotIndex));
     Spacing:= true;
     Slot := THelpTopicSlot(_Slots[ SlotIndex ]);
 
@@ -731,6 +732,7 @@ begin
 
       if LocalDictIndex < Slot.LocalDictSize then
       begin
+ProfileEvent('Normal word lookup');
         // Normal word lookup
         GlobalDictIndex := Slot.pLocalDictionary^[ LocalDictIndex ];
 
@@ -742,7 +744,9 @@ begin
 
         Word:= SubstituteAngleBrackets( Word );
         if HighlightWords^[ GlobalDictIndex ] > 0 then
-          StringToAdd := '<red>' + Word + '<black>'
+// graemeg: temp change
+//          StringToAdd := '<red>' + Word + '<black>'
+          StringToAdd := Word
         else
           StringToAdd := Word;
 
@@ -754,6 +758,7 @@ begin
       end
       else
       begin
+ProfileEvent('Special code');
         // special code
         DebugString := '[' + IntToHex( LocalDictIndex, 2 );
         case LocalDictIndex of
@@ -829,6 +834,7 @@ begin
     end; // for slotindex = ...
   end;
 
+ProfileEvent(S);
   Text := PChar(S);
 end;
 
