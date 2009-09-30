@@ -38,6 +38,7 @@ type
     procedure   miFileOpenClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
+    procedure   miDebugHeader(Sender: TObject);
     procedure   SetHelpFile(const AValue: TfpgString);
     procedure   btnShowIndex(Sender: TObject);
     procedure   FileOpen;
@@ -92,6 +93,27 @@ end;
 procedure TMainForm.miHelpAboutFPGui(Sender: TObject);
 begin
   TfpgMessageDialog.AboutFPGui;
+end;
+
+procedure TMainForm.miDebugHeader(Sender: TObject);
+var
+  f: THelpFile;
+  i: integer;
+begin
+  Memo1.Lines.Clear;
+  f := THelpFile(Files[0]);
+  with Memo1.Lines do
+  begin
+    Add('Filename: ' + f.Filename);
+    Add('----------');
+    Add('Title: ' + f.Title);
+    Add('DictionaryCount:' + IntToStr(f.DictionaryCount));
+    Add('TopicCount: ' + IntToStr(f.TopicCount));
+    Add(' ');
+    Add('Dictionary contents:');
+    for i := 0 to f.DictionaryCount-1 do
+      Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
+  end;
 end;
 
 procedure TMainForm.SetHelpFile(const AValue: TfpgString);
@@ -182,7 +204,7 @@ var
   Node: TfpgTreeNode;
   Topic: TTopic;
 begin
-  ProfileEvent( 'Load contents outline' );
+  ProfileEvent( 'Load contents treeview' );
 
   tvContents.RootNode.Clear;
 
@@ -195,6 +217,7 @@ begin
     HelpFile:= THelpFile(Files[ FileIndex ]);
     ProfileEvent( 'File ' + IntToStr( FileIndex ) );
     TopicIndex:= 0;
+    ProfileEvent('TopicCount=' + IntToStr(HelpFile.TopicCount));
     while TopicIndex < HelpFile.TopicCount do
     begin
       Topic := HelpFile.Topics[ TopicIndex ];
@@ -202,6 +225,7 @@ begin
       begin
         if Topic.ContentsLevel = 1 then
         begin
+          ProfileEvent('  > Topic (level 1): ' + Topic.Title);
           Node := tvContents.RootNode.AppendText(Topic.Title);
           Node.Data := Topic;
           inc( TopicIndex );
@@ -427,6 +451,8 @@ begin
     SetPosition(244, 100, 132, 20);
     AddMenuItem('Contents...', '', nil);
     AddMenuItem('Help using help', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Debug: Header', '', @miDebugHeader);
     AddMenuItem('-', '', nil);
     AddMenuItem('About fpGUI Toolkit', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);

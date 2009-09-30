@@ -106,7 +106,26 @@
       <IncludeFiles Value="$(ProjOutDir)/"/>
       <UnitOutputDirectory Value="units"/>
     </SearchPaths>
+    <Parsing>
+      <Style Value="1"/>
+      <SyntaxOptions>
+        <CStyleOperator Value="False"/>
+        <AllowLabel Value="False"/>
+        <CPPInline Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="True"/>
+      </Debugging>
+    </Linking>
     <Other>
+      <CustomOptions Value="-O-"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
