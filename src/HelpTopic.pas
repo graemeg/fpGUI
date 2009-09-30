@@ -50,7 +50,7 @@ Type
     _NumSlots: longint;
     _NumSlotsUsed: longint;
     _Title: string;
-    _GlobalDictionary: TList;
+    _GlobalDictionary: TStringList;
 
     _ShowInContents: boolean;
     _ContentsLevel: integer;
@@ -81,10 +81,10 @@ Type
   public
     constructor Create( FileData: pointer;
                         const FileHeader: THelpFileHeader;
-                        Dictionary: TList;
+                        Dictionary: TStringList;
                         pTOCEntry: pTTOCEntryStart );
 
-    destructor destroy; override;
+    destructor Destroy; override;
 
     property Title: string read GetTitle write SetTitle;
     procedure SetTitleFromMem( const p: pointer; const Len: byte );
@@ -169,7 +169,7 @@ end;
 
 constructor TTopic.Create( FileData: pointer;
                            const FileHeader: THelpFileHeader;
-                           Dictionary: TList;
+                           Dictionary: TStringList;
                            pTOCEntry: pTTOCEntryStart );
 var
   pExtendedInfo: pExtendedTOCEntry;
@@ -179,28 +179,26 @@ var
   XY: THelpXYPair;
   p: pbyte;
 
-  Flags: byte;
-
+  lFlags: byte;
   pSlotOffsets: Int32ArrayPointer;
   pSlotData: pSlotHeader;
-
   Slot: THelpTopicSlot;
 begin
   _Title := '';
-  _GlobalDictionary:= Dictionary;
+  _GlobalDictionary := Dictionary;
   _ContentsGroupIndex := 0;
 
   _pTOCEntry := pTOCEntry;
   _NumSlots:= pTOCEntry^.numslots;
 
-  GetMem( _Slots, _NumSlots * sizeof( THelpTopicSlot ) );
+  GetMem( _Slots, _NumSlots * sizeof(THelpTopicSlot));
 
   _NumSlotsUsed := 0;
 
-  Flags:= _pTOCEntry ^. flags;
+  lFlags:= _pTOCEntry^.flags;
   p:= pInt8( _pTOCEntry ) + sizeof( TTOCEntryStart );
 
-  if ( Flags and TOCEntryExtended ) > 0 then
+  if ( lFlags and TOCEntryExtended ) > 0 then
   begin
     pExtendedInfo := pExtendedTOCEntry( p );
     inc( p, sizeof( TExtendedTOCEntry ) );
@@ -256,8 +254,8 @@ begin
   else
     Title:= '(No title)';
 
-  _ContentsLevel:= ( Flags and $f );
-  _ShowInContents:= Flags and TOCEntryHidden = 0;
+  _ContentsLevel:= ( lFlags and $f );
+  _ShowInContents:= (lFlags and TOCEntryHidden) = 0;
   if _ContentsLevel = 0 then
     _ShowInContents := false; // hmmm....
 end;
@@ -735,11 +733,11 @@ begin
       if LocalDictIndex < Slot.LocalDictSize then
       begin
         // Normal word lookup
-        GlobalDictIndex:= Slot.pLocalDictionary^[ LocalDictIndex ];
+        GlobalDictIndex := Slot.pLocalDictionary^[ LocalDictIndex ];
 
         // normal lookup
         if GlobalDictIndex < _GlobalDictionary.Count then
-          Word := pstring( _GlobalDictionary[ GlobalDictIndex ] )^
+          Word := _GlobalDictionary[ GlobalDictIndex ]
         else
           Word := '';
 

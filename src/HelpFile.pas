@@ -28,21 +28,15 @@ type
   protected
     _Data: pointer;
     _DataLen: longint;
-
     _pSlotData: pInt16;
     _SlotDataSize: longint;
-
     _FileName: string;
     _Title: string;
     _Header: THelpFileHeader;
-
     _Topics: TList; // of TTopic
-
-    _Dictionary: TList; // pointers to strings.
-
+    _Dictionary: TStringList;
     _SlotOffsets: Int32ArrayPointer;
     _Index: TStringList;
-
     _SearchTable: TSearchTable;
 
     procedure InitMembers;
@@ -110,8 +104,7 @@ begin
   _pSlotData := nil;
   _SlotDataSize := 0;
 
-//  _Dictionary:= TStringList.Create;
-  _Dictionary:= TList.Create;
+  _Dictionary:= TStringList.Create;
   _Topics:= TList.Create;
   _Index:= TStringList.Create;
 end;
@@ -220,14 +213,13 @@ begin
 
   for TopicIndex:= 0 to _Topics.Count - 1 do
     TTopic( _Topics[ TopicIndex ] ).Destroy;
-  _Topics.Destroy;
+  _Topics.Free;
 
-  _Index.Destroy;
+  _Index.Free;
 
-  _Dictionary.Destroy;
+  _Dictionary.Free;
 
-  _SearchTable.Destroy;
-
+  _SearchTable.Free;
 end;
 
 procedure THelpFile.ReadContents;
@@ -236,11 +228,11 @@ var
   EntryIndex: longint;
   pEntry: pTTOCEntryStart;
 begin
-  _Topics.Capacity:= _Header.ntoc;
+  _Topics.Capacity := _Header.ntoc;
 
   pEntry:= _Data + _Header.tocstart;
 
-  for EntryIndex:= 0 to integer( _Header.ntoc ) - 1 do
+  for EntryIndex := 0 to integer( _Header.ntoc ) - 1 do
   begin
     Topic:= TTopic.Create( _Data,
                            _Header,
@@ -252,24 +244,28 @@ begin
 
     _Topics.Add( Topic );
 
-    inc( pEntry, pEntry ^. Length );
+    inc( pEntry, pEntry^.Length );
   end;
 end;
 
 procedure THelpFile.ReadDictionary;
 var
   i: longint;
-  Len: int8;
   p: pbyte;
+  c: array[0..255] of char;
+  b: byte;
+  s: string;
 begin
-  P:= _Data + _Header.dictstart;
-  for i:= 0 to integer( _Header.ndict ) - 1 do
+  p := _Data + _Header.dictstart;   // set starting position
+  for i := 0 to _header.ndict-1 do
   begin
-    Len:= p^ - 1;
-    p^ := Len; // adjust so we can use as  a string
-//    S:= StrNPas( P, RecordLen-1 );
-    _Dictionary.Add( P );
-    inc( P, Len + 1 );
+    FillChar(c, sizeof(c),0);       // fill string with NUL chars
+    Move(p^, b, sizeof(b));         // read string length value
+    Inc(p, sizeof(b));              // move pointer
+    Move(p^, c, b-1);               // read string of dictionary
+    Inc(p, b-1);                    // move pointer
+    s := StrPas(@c);
+    _Dictionary.Add(s);
   end;
 end;
 
@@ -381,7 +377,7 @@ end;
 
 function THelpFile.GetDictionaryWord( Index: longint ): string;
 begin
-  Result := pstring( _Dictionary[ Index ] )^;
+  Result := _Dictionary[Index];
 end;
 
 Initialization
