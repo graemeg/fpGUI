@@ -30,8 +30,10 @@ type
     miBookmarks: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     btnIndex: TfpgButton;
+    btnGo: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     Files: TList; // current open help files.
+    Debug: boolean;
     procedure   MainFormShow(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
@@ -40,6 +42,8 @@ type
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
     procedure   btnShowIndex(Sender: TObject);
+    procedure   btnGoClicked(Sender: TObject);
+    procedure   tvContentsChange(Sender: TObject);
     procedure   MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure   FileOpen;
     function    OpenFile(const AFileNames: string): boolean;
@@ -51,6 +55,7 @@ type
     procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
     procedure   ClearNotes;
     procedure   SaveNotes(AHelpFile: THelpFile);
+    procedure   DisplayTopic;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -133,6 +138,17 @@ begin
 //
 end;
 
+procedure TMainForm.btnGoClicked(Sender: TObject);
+begin
+  if tvContents.Selection <> nil then
+    DisplayTopic;
+end;
+
+procedure TMainForm.tvContentsChange(Sender: TObject);
+begin
+  DisplayTopic;
+end;
+
 procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
   CloseFile;
@@ -203,6 +219,7 @@ begin
   WindowTitle := cTitle + ' - No file';
   tvContents.Selection := nil;
   tvContents.RootNode.Clear;
+  tvContents.Invalidate;
   Memo1.Lines.Clear;
 
   // First save notes. It's important we do this first
@@ -261,6 +278,7 @@ begin
     while TopicIndex < HelpFile.TopicCount do
     begin
       Topic := HelpFile.Topics[ TopicIndex ];
+      Topic.HelpFile := HelpFile;
       if Topic.ShowInContents then
       begin
         if Topic.ContentsLevel = 1 then
@@ -338,11 +356,59 @@ begin
   { TODO -oGraeme : Implement me }
 end;
 
+procedure TMainForm.DisplayTopic;
+var
+  text: PChar;
+  ImageIndices: TList;
+  LinkIndex: longint;
+  Link: THelpLink;
+  HelpFile: THelpFile;
+  Topic: TTopic;
+Begin
+  writeln('DisplayTopic >>>>');
+  if tvContents.Selection = nil then
+  begin
+    ShowMessage('You must select a topic first by double clicking it.');
+    Exit;  //==>
+  end
+  else
+    Topic := TTopic(tvContents.Selection.Data);
+  writeln('Got Topic from Treeview');
+
+  Memo1.Lines.Clear;
+  ImageIndices := TList.Create;
+
+  writeln('Cleared memo...');
+
+  HelpFile := TopicFile(Topic);
+  if HelpFile = nil then
+    raise Exception.Create('Failed to get active HelpFile from Topic');
+
+  if HelpFile.HighlightWords <> nil then
+    writeln('highlightwords is ok');
+  Text := nil;
+  writeln('Debug = ', Debug);
+  if ImageIndices <> nil then
+    writeln('ImageIndices initialized');
+  Topic.GetText(HelpFile.HighlightWords,
+                Debug,
+                Text,
+                ImageIndices );
+
+  { TODO -oGraeme : We do not support images yet }
+  ImageIndices.Free;
+
+  Memo1.Lines.Text := Text;
+  StrDispose( Text );
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   OnShow  := @MainFormShow;
   Files := TList.Create;
+  { TODO -oGraeme : Make Debug a menu option }
+  Debug := False;
 end;
 
 destructor TMainForm.Destroy;
@@ -384,7 +450,7 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 0, 222, 300);
-    ActivePageIndex := 1;
+    ActivePageIndex := 0;
     TabOrder := 0;
     Align := alLeft;
   end;
@@ -430,6 +496,8 @@ begin
     ShowImages := True;
     TabOrder := 0;
     Align := alClient;
+    ScrollWheelDelta := 30;
+//    OnChange  := @tvContentsChange;
   end;
 
   tvIndex := TfpgTreeView.Create(tsIndex);
@@ -521,6 +589,20 @@ begin
     ImageName := '';
     TabOrder := 1;
     OnClick := @btnShowIndex;
+  end;
+
+  btnGo := TfpgButton.Create(tsContents);
+  with btnGo do
+  begin
+    Name := 'btnGo';
+    SetPosition(164, 4, 48, 26);
+    Anchors := [anRight,anTop];
+    Text := 'Go';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 1;
+    OnClick := @btnGoClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
