@@ -39,7 +39,7 @@ Type
   end;
   pHelpTopicSlot = ^ THelpTopicSlot;
 
-  SlotArray = array[ 0..0 ] of THelpTopicSlot;
+  SlotArray = packed array[ 0..0 ] of THelpTopicSlot;
 
   pSlotArray = ^SlotArray;
 

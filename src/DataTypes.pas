@@ -20,10 +20,10 @@ type
   pInt8 = ^byte;
   ULong = Cardinal;
 
-  PCharArray = array[ 0..0 ] of PCHar;
-  Int32Array = array[ 0..0 ] of Int32;
-  Int16Array = array[ 0..0 ] of Int16;
-  Int8Array = array[ 0..0 ] of Int8;
+  PCharArray = packed array[ 0..0 ] of PCHar;
+  Int32Array = packed array[ 0..0 ] of Int32;
+  Int16Array = packed array[ 0..0 ] of Int16;
+  Int8Array = packed array[ 0..0 ] of Int8;
 
   PCharArrayPointer = ^PCharArray;
   Int32ArrayPointer = ^Int32Array;
