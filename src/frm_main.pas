@@ -31,29 +31,30 @@ type
     miHelp: TfpgPopupMenu;
     btnIndex: TfpgButton;
     {@VFD_HEAD_END: MainForm}
-    FHelpFile: TfpgString;
     Files: TList; // current open help files.
     procedure   MainFormShow(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
+    procedure   miFileCloseClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
-    procedure   SetHelpFile(const AValue: TfpgString);
     procedure   btnShowIndex(Sender: TObject);
+    procedure   MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure   FileOpen;
     function    OpenFile(const AFileNames: string): boolean;
+    procedure   CloseFile;
     procedure   OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
     procedure   LoadNotes(AHelpFile: THelpFile);
     procedure   LoadContents;
     // Used in loading contents
-    procedure AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
-
+    procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
+    procedure   ClearNotes;
+    procedure   SaveNotes(AHelpFile: THelpFile);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterCreate; override;
-//    property    HelpFile: TfpgString read FHelpFile write SetHelpFile;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -85,6 +86,11 @@ begin
   FileOpen;
 end;
 
+procedure TMainForm.miFileCloseClicked(Sender: TObject);
+begin
+  CloseFile;
+end;
+
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
 begin
   TfpgMessageDialog.Information('Product Information', 'Created by Graeme Geldenhuys');
@@ -101,6 +107,7 @@ var
   i: integer;
 begin
   Memo1.Lines.Clear;
+  Memo1.Lines.BeginUpdate;
   f := THelpFile(Files[0]);
   with Memo1.Lines do
   begin
@@ -114,13 +121,7 @@ begin
     for i := 0 to f.DictionaryCount-1 do
       Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
   end;
-end;
-
-procedure TMainForm.SetHelpFile(const AValue: TfpgString);
-begin
-  if FHelpFile = AValue then
-    Exit; //==>
-  FHelpFile := AValue;
+  Memo1.Lines.EndUpdate;
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
@@ -130,6 +131,11 @@ var
   s: TfpgString;
 begin
 //
+end;
+
+procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
+begin
+  CloseFile;
 end;
 
 procedure TMainForm.FileOpen;
@@ -169,13 +175,16 @@ begin
   ProfileEvent( '  Full path: ' + FullFilePath );
   ProfileEvent( '  Loading: ' + lFilename );
 
+  CloseFile;
+
   HelpFile := THelpFile.Create(lFileName, @OnHelpFileLoadProgress);
   Files.Add(HelpFile);
 
-//  WindowTitle := cTitle + ' - ' + THelpFile( Files[ 0 ] ).Title;
-  WindowTitle := cTitle + ' - ' + HelpFile.Title;
+  WindowTitle := cTitle + ' - ' + THelpFile( Files[ 0 ] ).Title;
+//  WindowTitle := cTitle + ' - ' + HelpFile.Title;
   fpgApplication.ProcessMessages;
 
+  { TODO -oGraeme : Load previous notes here }
   for FileIndex:= 0 to Files.Count - 1 do
   begin
     HelpFile := THelpFile(Files[ FileIndex ]);
@@ -183,6 +192,37 @@ begin
   end;
 
   LoadContents;
+  tvContents.Selection := tvContents.RootNode.FirstSubNode;
+end;
+
+procedure TMainForm.CloseFile;
+var
+  FileIndex: longint;
+  lHelpFile: THelpFile;
+begin
+  WindowTitle := cTitle + ' - No file';
+  tvContents.Selection := nil;
+  tvContents.RootNode.Clear;
+  Memo1.Lines.Clear;
+
+  // First save notes. It's important we do this first
+  // since we scan all notes each time to find the ones
+  // belonging to this file.
+  for FileIndex := 0 to Files.Count - 1 do
+  begin
+    lHelpFile := THelpFile(Files[FileIndex]);
+    SaveNotes( lHelpFile );
+  end;
+
+  // Now destroy help files
+  for FileIndex := 0 to Files.Count - 1 do
+  begin
+    lHelpFile := THelpFile(Files[FileIndex]);
+    lHelpFile.Free;
+  end;
+
+  Files.Clear;
+  ClearNotes;
 end;
 
 procedure TMainForm.OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
@@ -288,6 +328,16 @@ begin
   end;  { while }
 end;
 
+procedure TMainForm.ClearNotes;
+begin
+  { TODO -oGraeme : Implement me }
+end;
+
+procedure TMainForm.SaveNotes(AHelpFile: THelpFile);
+begin
+  { TODO -oGraeme : Implement me }
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -309,6 +359,7 @@ begin
   SetPosition(602, 274, 560, 360);
   WindowTitle := 'fpGUI Help Viewer';
   WindowPosition := wpUser;
+  OnCloseQuery  := @MainFormCloseQuery;
 
   bvlStatusBar := TfpgBevel.Create(self);
   with bvlStatusBar do
@@ -423,6 +474,7 @@ begin
     Name := 'miFile';
     SetPosition(244, 28, 132, 20);
     AddMenuItem('Open...', '', @miFileOpenClicked);
+    AddMenuItem('Close', '', @miFileCloseClicked);
     AddMenuitem('-', '', nil);
     AddMenuItem('Quit', '', @miFileQuitClicked);
   end;
