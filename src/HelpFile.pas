@@ -148,7 +148,7 @@ ProfileEvent('THelpFile.ReadHeader >>>>');
   Move(_Data^, _Header, SizeOf(_Header));
 ProfileEvent('title=' + _Header.title);
 
-  if _Header.ID <> $5348 then
+  if _Header.ID <> $5348 then  // 'HS'
     raise EHelpFileException.Create( 'File doesn''t appear to be an OS/2 Help document (header ID not correct)' );
 
   _Title := _Header.Title;

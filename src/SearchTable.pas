@@ -16,7 +16,7 @@ uses
 // it seems to be correct but it's difficult to test.
 
 type
-  TSearchTable = class
+  TSearchTable = class(TObject)
   protected
     _Data: pointer;
     _Entries: TList; // pointers to panel flag records

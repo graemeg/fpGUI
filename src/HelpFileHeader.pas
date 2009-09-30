@@ -16,16 +16,15 @@ uses
 Type
   THelpFileHeader = packed record
     ID: int16;           // ID magic word (5348h = "HS")
-    unknown1: int8;      // unknown purpose, could be third letter of ID
-    flags: int8;         // probably a flag word...
+    unknown1: byte;      // unknown purpose, could be third letter of ID
+    flags: byte;         // probably a flag word...
                          //  bit 0: set if INF style file
                          //  bit 4: set if HLP style file
                          // patching this byte allows reading HLP files
                          // using the VIEW command, while help files 
                          // seem to work with INF settings here as well.
-    hdrsize: int16;      // total size of header
-    unknown2: int16;     // unknown purpose
-
+    hdrsize: word;       // total size of header
+    unknown2: word;      // unknown purpose
     ntoc: int16;         // number of entries in the tocarray
     tocstart: int32;     // file offset of the start of the toc
     toclen: int32;       // number of bytes in file occupied by the toc
@@ -37,7 +36,7 @@ Type
     nindex: int16;       // number of index entries
     indexstart: int32;   // 32 bit file offset to index table
     indexlen: int32;     // size of index table
-    unknown3: array[ 0..9 ] of int8; // unknown purpose
+    unknown3: array[0..9] of byte; // unknown purpose
     searchstart: int32;  // 32 bit file offset of full text search table
     searchlen: int32;    // size of full text search table
     nslots: int16;       // number of "slots"
@@ -46,11 +45,11 @@ Type
     ndict: int16;        // number of entries in the dictionary
     dictstart: int32;    // file offset of the start of the dictionary
     imgstart: int32;     // file offset of image data
-    unknown4: int8;     // unknown purpose
+    unknown4: byte;      // unknown purpose
     nlsstart: int32;     // 32 bit file offset of NLS table
     nlslen: int32;       // size of NLS table
     extstart: int32;     // 32 bit file offset of extended data block
-    reserved: array[ 0..2 ] of int32; // for future use. set to zero.
+    reserved: array[0..11] of byte; // for future use. set to zero.
     title: array[ 0..47 ] of char;    // ASCII title of database
   end;
   pTHelpFileHeader = ^THelpFileHeader;
@@ -59,20 +58,27 @@ Type
   TTOCEntryStart = packed record
     length: int8; // length of the entry including this byte
     flags: int8; // flag byte, description folows (MSB first)
-             // bit1 haschildren;  // following nodes are a higher level
-             // bit1 hidden;       // this entry doesn't appear in VIEW.EXE's
-                                   // presentation of the toc
-             // bit1 extended;     // extended entry format
-             // bit1 stuff;        // ??
-             // int4 level;        // nesting level
-    numSlots: int8; // number of "slots" occupied by the text for
-                                // this toc entry
+                 // bit7 haschildren;  // following nodes are a higher level
+                 // bit6 hidden;       // this entry doesn't appear in VIEW.EXE's
+                                       // presentation of the toc
+                 // bit5 extended;     // extended entry format
+                 // bit4 stuff;        // ??
+                 // int4 level;        // nesting level
+    numSlots: int8; // number of "slots" occupied by the text for this toc entry
   end;
   pTTOCEntryStart = ^TTOCEntryStart;
 
   TExtendedTOCEntry = packed record
-    w1: int8;
-    w2: int8;
+    w1: byte;
+               // bit 3: Window controls are specified
+               // bit 2: Viewport
+               // bit 1: Size is specified.
+               // bit 0: Position is specified.
+    w2: byte;
+               // bit 3:
+               // bit 2: Group is specified.
+               // bit 1
+               // bit 0: Clear (all windows before display)
   end;
   pExtendedTOCEntry = ^TExtendedTOCEntry;
 
@@ -80,9 +86,11 @@ Type
   pTTOCEntryOffsetArray = ^TTOCEntryOffsetArray;
 
 Const
-  TOCEntryExtended = 32;
-  TOCEntryHidden = 64;
-  TOCEntryHasChildren = 128;
+  TOCEntryExtended      = $20; { extended entry format }
+  TOCEntryHidden        = $40; { this entry doesn't appear in VIEW.EXE's presentation of the toc }
+  TOCEntryHasChildren   = $80; { following nodes are a higher level }
+  TOCEntryLevelMask     = $0f;
+
 
 type
   THelpXYPair = packed record

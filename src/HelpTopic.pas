@@ -217,14 +217,14 @@ begin
 
     if ( pExtendedInfo^.w2 and 4 ) > 0 then
     begin
-      _ContentsGroupIndex := pint16( p )^;
+      _ContentsGroupIndex := pint16(p)^;
       // read group
-      inc( p, sizeof( int16 ) );
+      inc(p, sizeof(int16));
     end;
   end;
 
   // Read slot indices
-  for i:= 0 to _NumSlots - 1 do
+  for i := 0 to _NumSlots-1 do
   begin
     SlotNumber:= pint16( p )^;
     if SlotNumber < FileHeader.nslots then
@@ -234,9 +234,9 @@ begin
       pSlotData := pSlotHeader( FileData + pSlotOffsets^[ SlotNumber ] );
 
       Slot.pData := pInt8( pSlotData + sizeof( TSlotHeader ) );
-      Slot.pLocalDictionary := FileData + pSlotData ^.localDictPos;
-      Slot.LocalDictSize := pSlotData ^. nLocalDict;
-      Slot.Size := pSlotData ^. ntext;
+      Slot.pLocalDictionary := FileData + pSlotData^.localDictPos;
+      Slot.LocalDictSize := pSlotData^.nLocalDict;
+      Slot.Size := pSlotData^.ntext;
 
       _Slots^[ _NumSlotsUsed ] := Slot;
       inc( _NumSlotsUsed );
@@ -245,8 +245,7 @@ begin
     inc( p, sizeof( int16 ) );
   end;
 
-  titleLen:= _pTOCEntry ^.length
-             - ( longword( p ) - longword( _pTOCEntry ) );
+  titleLen := _pTOCEntry^.length - ( longword(p) - longword(_pTOCEntry) );
 
   // Read title
   if TitleLen > 0 then
