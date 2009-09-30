@@ -65,6 +65,7 @@ Type
                  // bit4 stuff;        // ??
                  // int4 level;        // nesting level
     numSlots: int8; // number of "slots" occupied by the text for this toc entry
+    Slots    : record end;
   end;
   pTTOCEntryStart = ^TTOCEntryStart;
 
