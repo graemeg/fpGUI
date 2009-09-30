@@ -245,6 +245,7 @@ begin
                            _Header,
                            _Dictionary,
                            pEntry );
+    _Topics.Add(Topic);
   end;
   SetLength(tocarray, 0);
   exit;
