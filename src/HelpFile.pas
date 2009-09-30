@@ -245,30 +245,32 @@ begin
                            _Header,
                            _Dictionary,
                            pEntry );
+    Topic.HelpFile := Self;
+    Topic.Index := EntryIndex;
     _Topics.Add(Topic);
   end;
   SetLength(tocarray, 0);
   exit;
 //----------------------------------
 
-  pEntry:= _Data + _Header.tocstart;
+  //pEntry:= _Data + _Header.tocstart;
 
-writeln('----------- old method ');
-  for EntryIndex := 0 to _Header.ntoc-1 do
-  begin
-    Topic:= TTopic.Create( _Data,
-                           _Header,
-                           _Dictionary,
-                           pEntry );
+//writeln('----------- old method ');
+  //for EntryIndex := 0 to _Header.ntoc-1 do
+  //begin
+    //Topic:= TTopic.Create( _Data,
+                           //_Header,
+                           //_Dictionary,
+                           //pEntry );
 
-    Topic.HelpFile := Self;
-    Topic.Index := EntryIndex;
+    //Topic.HelpFile := Self;
+    //Topic.Index := EntryIndex;
 
-    _Topics.Add( Topic );
+    //_Topics.Add( Topic );
 
-    inc( pEntry, pEntry^.Length );
-    writeln('Topic ' + IntToStr(EntryIndex) + ' length = ' + IntToStr(pEntry^.Length));
-  end;
+    //inc( pEntry, pEntry^.Length );
+    //writeln('Topic ' + IntToStr(EntryIndex) + ' length = ' + IntToStr(pEntry^.Length));
+  //end;
 end;
 
 procedure THelpFile.ReadDictionary;
