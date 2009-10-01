@@ -6,8 +6,8 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow, IPFEscapeCodes,
-  HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery, nvUtilities,
+  Classes, EpikTimer, fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow,
+  IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery, nvUtilities,
   nvNullObjects, HelpFile;
 
 

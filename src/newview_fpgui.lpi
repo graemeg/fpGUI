@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="13">
+    <Units Count="14">
       <Unit0>
         <Filename Value="newview_fpgui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -98,12 +98,18 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="nvNullObjects"/>
       </Unit12>
+      <Unit13>
+        <Filename Value="../../../../../../opt/git/dunit2/3rdparty/epiktimer/epiktimer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EpikTimer"/>
+      </Unit13>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="/opt/git/dunit2/3rdparty/epiktimer/"/>
       <UnitOutputDirectory Value="units"/>
     </SearchPaths>
     <Parsing>

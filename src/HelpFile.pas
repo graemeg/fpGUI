@@ -240,7 +240,6 @@ begin
   for EntryIndex := 0 to _Header.ntoc-1 do
   begin
     pEntry := _Data + tocarray[EntryIndex];
-    writeln('pEntry^.length = ', IntToStr(pEntry^.Length) + ' NumSlots=' + IntToStr(pEntry^.numSlots));
     Topic := TTopic.Create( _Data,
                            _Header,
                            _Dictionary,

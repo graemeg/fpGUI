@@ -105,18 +105,28 @@ const
 implementation
 
 uses
-  fpg_dialogs, fpg_constants, nvUtilities, HelpTopic;
+  fpg_dialogs, fpg_constants, nvUtilities, HelpTopic, EpikTimer;
 
 
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.MainFormShow(Sender: TObject);
+var
+  s, e: TDateTime;
+  t: TEpikTimer;
 begin
   bvlBody.Realign;
 
   if Paramcount > 0 then
   begin
+    t := TEpikTimer.Create(nil);
+    t.Start;
+//    s := now;
     OpenFile(ParamStr(1));
+//    e := now;
+    t.Stop;
+    writeln(t.ElapsedDHMS);
+//    writeln(FormatDateTime('mm:ss.zz', e-s));
   end;
 end;
 
@@ -489,7 +499,7 @@ var
   HelpFile: THelpFile;
   Topic: TTopic;
 Begin
-  writeln('DisplayTopic >>>>');
+  ProfileEvent('DisplayTopic >>>>');
   if tvContents.Selection = nil then
   begin
     ShowMessage('You must select a topic first by clicking it.');
@@ -497,23 +507,23 @@ Begin
   end
   else
     Topic := TTopic(tvContents.Selection.Data);
-  writeln('Got Topic from Treeview');
+  ProfileEvent('Got Topic from Treeview');
 
   Memo1.Lines.Clear;
   ImageIndices := TList.Create;
 
-  writeln('Cleared memo...');
+  ProfileEvent('Cleared memo...');
 
   HelpFile := TopicFile(Topic);
   if HelpFile = nil then
     raise Exception.Create('Failed to get active HelpFile from Topic');
 
   if HelpFile.HighlightWords <> nil then
-    writeln('highlightwords is ok');
+    ProfileEvent('highlightwords is ok');
   Text := nil;
-  writeln('Debug = ', Debug);
+  ProfileEvent('Debug = ' + BoolToStr(Debug));
   if ImageIndices <> nil then
-    writeln('ImageIndices initialized');
+    ProfileEvent('ImageIndices initialized');
   Topic.GetText(HelpFile.HighlightWords,
                 Debug,
                 Text,
