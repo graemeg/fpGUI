@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
   fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button, fpg_listbox,
-  fpg_label, fpg_edit, fpg_radiobutton,
+  fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar,
   HelpFile;
 
 type
@@ -51,9 +51,18 @@ type
     RadioButton6: TfpgRadioButton;
     lbSearchResults: TfpgListBox;
     Label3: TfpgLabel;
+    ProgressBar: TfpgProgressBar;
+    lblStatus: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
     Files: TList; // current open help files.
     Debug: boolean;
+
+    // while loading... so owe can display progress
+    LoadingFilenameList: TStringList;
+    LoadingFileIndex: integer;
+    LoadingTotalSize: longint;
+    LoadingSizeSoFar: longint;
+
     procedure   MainFormShow(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
@@ -76,6 +85,12 @@ type
     procedure   ClearNotes;
     procedure   SaveNotes(AHelpFile: THelpFile);
     procedure   DisplayTopic;
+    procedure   ResetProgress;
+    procedure   SetStatus(const AText: TfpgString);
+    function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
+    // Given a "filename" which may include a path, find it in various paths and extensions
+    function FindHelpFile(AFileName: TfpgString ): TfpgString;
+
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -99,6 +114,10 @@ procedure TMainForm.MainFormShow(Sender: TObject);
 begin
   bvlBody.Realign;
 
+  if Paramcount > 0 then
+  begin
+    OpenFile(ParamStr(1));
+  end;
 end;
 
 procedure TMainForm.miFileQuitClicked(Sender: TObject);
@@ -199,25 +218,95 @@ end;
 
 function TMainForm.OpenFile(const AFileNames: string): boolean;
 var
+  HelpFiles: TList;
+  HelpFile: THelpFile;
   lFilename: string;
   FullFilePath: string;
-  HelpFile: THelpFile;
   FileIndex: integer;
+  lFileSize: longint;
+  RemainingFileNames: string;
 begin
   ProfileEvent('OpenFile >>>');
-  lFilename := AFilenames;
-  ProfileEvent( 'File: ' + lFileName );
-  FullFilePath := ExpandFileName(lFilename);
-  ProfileEvent( '  Full path: ' + FullFilePath );
-  ProfileEvent( '  Loading: ' + lFilename );
+  lbHistory.Items.Clear;
 
+  HelpFiles := TList.Create;
+  ProfileEvent( 'Translate environment vars' );
+  RemainingFileNames := TranslateEnvironmentVar(AFilenames);
+
+  LoadingFilenameList := TStringList.Create;
+  LoadingTotalSize := 0;
+
+  while RemainingFileNames <> '' do
+  begin
+    lFileName := ExtractNextValue(RemainingFileNames, '+');
+    ProfileEvent( '  File: ' + lFileName );
+    FullFilePath := FindHelpFile(lFilename);
+    if FullFilePath <> '' then
+    begin
+      lFileName := FullFilePath;
+      lFileSize := GetFileSize(lFilename);
+      inc(LoadingTotalSize, lFileSize);
+    end;
+    ProfileEvent( '  Full path: ' + FullFilePath );
+    LoadingFilenameList.Values[lFileName] := IntToStr(lFileSize);
+  end;
+
+  LoadingSizeSoFar := 0;
+  for FileIndex := 0 to LoadingFilenameList.Count - 1 do
+  begin
+    lFilename := LoadingFilenameList.Names[FileIndex];
+    ProfileEvent( '  Loading: ' + lFilename );
+    try
+      LoadingFileIndex := FileIndex;
+      HelpFile := THelpFile.Create(lFileName, @OnHelpFileLoadProgress);
+      inc(LoadingSizeSoFar, StrToInt(LoadingFilenameList.Values[lFileName]));
+      HelpFiles.Add(HelpFile);
+    except
+      on E: Exception do
+      begin
+        if E is EHelpFileException then
+          ShowMessage( 'Could not open ' + lFileName + ': ' + E.Message )
+        else
+          ShowMessage( 'An error occurred loading ' + lFileName
+                       + '. It may be an damaged help file '
+                       + 'or there may be a bug in this program.' + #10 + #10 + E.Message );
+        Result := False;
+        // cleanup memory used
+        while HelpFiles.Count > 0 do
+        begin
+          HelpFile := THelpFile(HelpFiles[0]);
+          HelpFile.Free;
+          HelpFiles.Delete(0);
+        end;
+        LoadingFilenameList.Free;
+        HelpFiles.Free;
+        ResetProgress;
+        Exit;  //==>
+      end { exception }
+    end; { try/except }
+  end;  { for FileIndex... }
+
+  // Now that we have successfully loaded the new help file(s)
+  // close the existing one.
   CloseFile;
 
-  HelpFile := THelpFile.Create(lFileName, @OnHelpFileLoadProgress);
-  Files.Add(HelpFile);
+  Files.Assign(HelpFiles);
+//  AssignList(HelpFiles, Files);
+  ProgressBar.Position:= 50;
+  SetStatus( 'Displaying... ' );
+  fpgApplication.ProcessMessages;
+
+  LoadingFilenameList.Free;
+  HelpFiles.Free;
+  Result := True;
 
   WindowTitle := cTitle + ' - ' + THelpFile( Files[ 0 ] ).Title;
   fpgApplication.ProcessMessages;
+
+  { TODO -oGraeme : Do MRU files list handling here }
+
+  ProgressBar.Position := 51;
+  SetStatus( 'Loading notes... ' );
 
   { TODO -oGraeme : Load previous notes here }
   for FileIndex:= 0 to Files.Count - 1 do
@@ -226,8 +315,29 @@ begin
     LoadNotes( HelpFile );
   end;
 
+  ProgressBar.Position := 55;
+  SetStatus( 'Display contents... ' );
   LoadContents;
+
+  if tvContents.RootNode.Count = 1 then
+  begin
+    ProfileEvent( '  Expand first node' );
+    // Contents has only one top level node... expand it
+    tvContents.RootNode.FirstSubNode.Expand;
+  end;
+
+  ProgressBar.Position:= 57;
+  SetStatus( 'Display first topic... ' );
+  ProfileEvent( '  Display first topic' );
   tvContents.Selection := tvContents.RootNode.FirstSubNode;
+  tvContents.Invalidate;
+  btnGoClicked(nil);
+
+  { TODO -oGraeme : Load Index here }
+  lbSearchResults.Items.Clear;
+
+  ProgressBar.Position := 100;
+  SetStatus( 'Done' );
 end;
 
 procedure TMainForm.CloseFile;
@@ -416,6 +526,33 @@ Begin
   StrDispose( Text );
 end;
 
+procedure TMainForm.ResetProgress;
+begin
+  { TODO -oGraeme : implement ResetProgress }
+end;
+
+procedure TMainForm.SetStatus(const AText: TfpgString);
+begin
+  lblStatus.Text := AText;
+end;
+
+function TMainForm.TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
+var
+  EnvironmentVarValue: string;
+begin
+  EnvironmentVarValue := GetEnvironmentVariable(UpperCase(AFilenames));
+  if EnvironmentVarValue <> '' then
+    Result := EnvironmentVarValue
+  else
+    Result := AFileNames;
+end;
+
+function TMainForm.FindHelpFile(AFileName: TfpgString): TfpgString;
+begin
+  { TODO -oGraeme : Implement FindHelpFile()}
+  Result := AFilename;
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -427,7 +564,6 @@ end;
 
 destructor TMainForm.Destroy;
 begin
-  Files.Free;
   inherited Destroy;
 end;
 
@@ -464,7 +600,7 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 0, 260, 328);
-    ActivePageIndex := 0;
+    ActivePageIndex := 4;
     TabOrder := 0;
     Align := alLeft;
   end;
@@ -821,6 +957,25 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Search results:';
+  end;
+
+  ProgressBar := TfpgProgressBar.Create(bvlStatusBar);
+  with ProgressBar do
+  begin
+    Name := 'ProgressBar';
+    SetPosition(501, 2, 150, 16);
+    Anchors := [anRight,anBottom];
+  end;
+
+  lblStatus := TfpgLabel.Create(bvlStatusBar);
+  with lblStatus do
+  begin
+    Name := 'lblStatus';
+    SetPosition(4, 2, 380, 16);
+    Anchors := [anLeft,anRight,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := '';
   end;
 
   {@VFD_BODY_END: MainForm}
