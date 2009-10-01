@@ -32,6 +32,8 @@ Function ExtractNextValueNoTrim(
 procedure MemCopy(const src; var dest; size: SizeInt);
 // Allows for debug output and quite disable of output
 procedure ProfileEvent(const AString: string);
+// Return AFilename's size in bytes
+function GetFileSize(const AFilename: string): integer;
 
 
 implementation
@@ -81,6 +83,19 @@ begin
   {$IFDEF DEBUG}
   writeln('DEBUG:  ', AString);
   {$ENDIF}
+end;
+
+function GetFileSize(const AFilename: string): integer;
+var
+  f: File;
+begin
+  Result := 0;
+  Assign(f, AFileName);
+  {$i-}
+  Reset(f);
+  {$i+}
+  Result := FileSize(f);
+  CloseFile(f);
 end;
 
 end.
