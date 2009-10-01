@@ -6,7 +6,9 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
-  fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button, HelpFile;
+  fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button, fpg_listbox,
+  fpg_label, fpg_edit, fpg_radiobutton,
+  HelpFile;
 
 type
 
@@ -19,6 +21,7 @@ type
     tsContents: TfpgTabSheet;
     tsIndex: TfpgTabSheet;
     tsSearch: TfpgTabSheet;
+    tsNotes: TfpgTabSheet;
     tsHistory: TfpgTabSheet;
     tvContents: TfpgTreeView;
     tvIndex: TfpgTreeView;
@@ -31,6 +34,23 @@ type
     miHelp: TfpgPopupMenu;
     btnIndex: TfpgButton;
     btnGo: TfpgButton;
+    ListBox1: TfpgListBox;
+    btnNotesAdd: TfpgButton;
+    btnNotesEdit: TfpgButton;
+    btnNotesDel: TfpgButton;
+    btnNotesGoto: TfpgButton;
+    lbHistory: TfpgListBox;
+    Label1: TfpgLabel;
+    edSearchText: TfpgEdit;
+    Label2: TfpgLabel;
+    RadioButton1: TfpgRadioButton;
+    RadioButton2: TfpgRadioButton;
+    RadioButton3: TfpgRadioButton;
+    RadioButton4: TfpgRadioButton;
+    RadioButton5: TfpgRadioButton;
+    RadioButton6: TfpgRadioButton;
+    lbSearchResults: TfpgListBox;
+    Label3: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
     Files: TList; // current open help files.
     Debug: boolean;
@@ -184,7 +204,7 @@ var
   HelpFile: THelpFile;
   FileIndex: integer;
 begin
-  ProfileEvent('OpenFile');
+  ProfileEvent('OpenFile >>>');
   lFilename := AFilenames;
   ProfileEvent( 'File: ' + lFileName );
   FullFilePath := ExpandFileName(lFilename);
@@ -197,7 +217,6 @@ begin
   Files.Add(HelpFile);
 
   WindowTitle := cTitle + ' - ' + THelpFile( Files[ 0 ] ).Title;
-//  WindowTitle := cTitle + ' - ' + HelpFile.Title;
   fpgApplication.ProcessMessages;
 
   { TODO -oGraeme : Load previous notes here }
@@ -278,12 +297,10 @@ begin
     while TopicIndex < HelpFile.TopicCount do
     begin
       Topic := HelpFile.Topics[ TopicIndex ];
-      Topic.HelpFile := HelpFile;
       if Topic.ShowInContents then
       begin
         if Topic.ContentsLevel = 1 then
         begin
-          ProfileEvent('  > Topic (level 1): ' + Topic.Title);
           Node := tvContents.RootNode.AppendText(Topic.Title);
           Node.Data := Topic;
           inc( TopicIndex );
@@ -296,7 +313,6 @@ begin
                          Topic.ContentsLevel,
                          TopicIndex );
           Node := nil;
-
         end;
       end
       else
@@ -313,8 +329,6 @@ var
   Topic: TTopic;
   Node: TfpgTreeNode;
 begin
-  ProfileEvent('SubNode with TopicIndex of ' + IntToStr(ATopicIndex));
-
   Node := nil;
   while ATopicIndex < AHelpFile.TopicCount do
   begin
@@ -368,7 +382,7 @@ Begin
   writeln('DisplayTopic >>>>');
   if tvContents.Selection = nil then
   begin
-    ShowMessage('You must select a topic first by double clicking it.');
+    ShowMessage('You must select a topic first by clicking it.');
     Exit;  //==>
   end
   else
@@ -422,7 +436,7 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(602, 274, 560, 360);
+  SetPosition(602, 274, 654, 386);
   WindowTitle := 'fpGUI Help Viewer';
   WindowPosition := wpUser;
   OnCloseQuery  := @MainFormCloseQuery;
@@ -431,7 +445,7 @@ begin
   with bvlStatusBar do
   begin
     Name := 'bvlStatusBar';
-    SetPosition(0, 340, 559, 20);
+    SetPosition(0, 366, 653, 20);
     Anchors := [anLeft,anRight,anBottom];
     Style := bsLowered;
   end;
@@ -440,7 +454,7 @@ begin
   with bvlBody do
   begin
     Name := 'bvlBody';
-    SetPosition(0, 31, 559, 308);
+    SetPosition(0, 31, 653, 334);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Shape := bsSpacer;
   end;
@@ -449,7 +463,7 @@ begin
   with PageControl1 do
   begin
     Name := 'PageControl1';
-    SetPosition(0, 0, 222, 300);
+    SetPosition(0, 0, 260, 328);
     ActivePageIndex := 0;
     TabOrder := 0;
     Align := alLeft;
@@ -459,7 +473,7 @@ begin
   with tsContents do
   begin
     Name := 'tsContents';
-    SetPosition(3, 24, 216, 273);
+    SetPosition(3, 24, 254, 301);
     Text := 'Contents';
   end;
 
@@ -467,7 +481,7 @@ begin
   with tsIndex do
   begin
     Name := 'tsIndex';
-    SetPosition(3, 24, 216, 273);
+    SetPosition(3, 24, 254, 301);
     Text := 'Index';
   end;
 
@@ -475,15 +489,23 @@ begin
   with tsSearch do
   begin
     Name := 'tsSearch';
-    SetPosition(3, 24, 216, 273);
+    SetPosition(3, 24, 254, 301);
     Text := 'Search';
+  end;
+
+  tsNotes := TfpgTabSheet.Create(PageControl1);
+  with tsNotes do
+  begin
+    Name := 'tsNotes';
+    SetPosition(3, 24, 254, 301);
+    Text := 'Notes';
   end;
 
   tsHistory := TfpgTabSheet.Create(PageControl1);
   with tsHistory do
   begin
     Name := 'tsHistory';
-    SetPosition(3, 24, 216, 273);
+    SetPosition(3, 24, 254, 301);
     Text := 'History';
   end;
 
@@ -491,30 +513,30 @@ begin
   with tvContents do
   begin
     Name := 'tvContents';
-    SetPosition(23, 44, 158, 172);
+    SetPosition(4, 32, 242, 264);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
+    ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
-    Align := alClient;
-    ScrollWheelDelta := 30;
-//    OnChange  := @tvContentsChange;
+    //    OnChange  := @tvContentsChange;
   end;
 
   tvIndex := TfpgTreeView.Create(tsIndex);
   with tvIndex do
   begin
     Name := 'tvIndex';
-    SetPosition(16, 28, 182, 196);
+    SetPosition(4, 32, 242, 264);
+    Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     TabOrder := 0;
-    Align := alClient;
   end;
 
   Splitter1 := TfpgSplitter.Create(bvlBody);
   with Splitter1 do
   begin
     Name := 'Splitter1';
-    SetPosition(228, 4, 8, 284);
+    SetPosition(265, 4, 8, 284);
     Align := alLeft;
   end;
 
@@ -532,7 +554,7 @@ begin
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 560, 24);
+    SetPosition(0, 0, 654, 24);
     Anchors := [anLeft,anRight,anTop];
   end;
 
@@ -540,7 +562,7 @@ begin
   with miFile do
   begin
     Name := 'miFile';
-    SetPosition(244, 28, 132, 20);
+    SetPosition(292, 28, 132, 20);
     AddMenuItem('Open...', '', @miFileOpenClicked);
     AddMenuItem('Close', '', @miFileCloseClicked);
     AddMenuitem('-', '', nil);
@@ -551,7 +573,7 @@ begin
   with miSettings do
   begin
     Name := 'miSettings';
-    SetPosition(244, 52, 132, 20);
+    SetPosition(292, 52, 132, 20);
     AddMenuItem('Options...', '', nil);
   end;
 
@@ -559,7 +581,7 @@ begin
   with miBookmarks do
   begin
     Name := 'miBookmarks';
-    SetPosition(244, 76, 132, 20);
+    SetPosition(292, 76, 132, 20);
     AddMenuItem('Add..', '', nil);
     AddMenuItem('Show', '', nil);
   end;
@@ -568,7 +590,7 @@ begin
   with miHelp do
   begin
     Name := 'miHelp';
-    SetPosition(244, 100, 132, 20);
+    SetPosition(292, 100, 132, 20);
     AddMenuItem('Contents...', '', nil);
     AddMenuItem('Help using help', '', nil);
     AddMenuItem('-', '', nil);
@@ -582,8 +604,9 @@ begin
   with btnIndex do
   begin
     Name := 'btnIndex';
-    SetPosition(120, 0, 80, 24);
-    Text := 'Show';
+    SetPosition(166, 4, 80, 24);
+    Anchors := [anRight,anTop];
+    Text := 'Go to';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -595,14 +618,209 @@ begin
   with btnGo do
   begin
     Name := 'btnGo';
-    SetPosition(164, 4, 48, 26);
+    SetPosition(166, 4, 80, 24);
     Anchors := [anRight,anTop];
-    Text := 'Go';
+    Text := 'Go to';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 1;
     OnClick := @btnGoClicked;
+  end;
+
+  ListBox1 := TfpgListBox.Create(tsNotes);
+  with ListBox1 do
+  begin
+    Name := 'ListBox1';
+    SetPosition(4, 32, 242, 264);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#List';
+    HotTrack := False;
+    PopupFrame := False;
+    TabOrder := 0;
+  end;
+
+  btnNotesAdd := TfpgButton.Create(tsNotes);
+  with btnNotesAdd do
+  begin
+    Name := 'btnNotesAdd';
+    SetPosition(4, 4, 24, 24);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := 0;
+    ImageName := 'stdimg.add';
+    TabOrder := 1;
+  end;
+
+  btnNotesEdit := TfpgButton.Create(tsNotes);
+  with btnNotesEdit do
+  begin
+    Name := 'btnNotesEdit';
+    SetPosition(32, 4, 24, 24);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := 0;
+    ImageName := 'stdimg.edit';
+    TabOrder := 2;
+  end;
+
+  btnNotesDel := TfpgButton.Create(tsNotes);
+  with btnNotesDel do
+  begin
+    Name := 'btnNotesDel';
+    SetPosition(60, 4, 24, 24);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := 0;
+    ImageName := 'stdimg.remove';
+    TabOrder := 3;
+  end;
+
+  btnNotesGoto := TfpgButton.Create(tsNotes);
+  with btnNotesGoto do
+  begin
+    Name := 'btnNotesGoto';
+    SetPosition(166, 4, 80, 24);
+    Anchors := [anRight,anTop];
+    Text := 'Go to';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 4;
+  end;
+
+  lbHistory := TfpgListBox.Create(tsHistory);
+  with lbHistory do
+  begin
+    Name := 'lbHistory';
+    SetPosition(4, 8, 242, 288);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#List';
+    HotTrack := False;
+    PopupFrame := False;
+    TabOrder := 0;
+  end;
+
+  Label1 := TfpgLabel.Create(tsSearch);
+  with Label1 do
+  begin
+    Name := 'Label1';
+    SetPosition(4, 4, 120, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Search for:';
+  end;
+
+  edSearchText := TfpgEdit.Create(tsSearch);
+  with edSearchText do
+  begin
+    Name := 'edSearchText';
+    SetPosition(4, 20, 242, 24);
+    Anchors := [anLeft,anRight,anTop];
+    TabOrder := 1;
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+
+  Label2 := TfpgLabel.Create(tsSearch);
+  with Label2 do
+  begin
+    Name := 'Label2';
+    SetPosition(4, 48, 172, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Criteria:';
+  end;
+
+  RadioButton1 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton1 do
+  begin
+    Name := 'RadioButton1';
+    SetPosition(12, 68, 192, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 3;
+    Text := 'This section';
+  end;
+
+  RadioButton2 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton2 do
+  begin
+    Name := 'RadioButton2';
+    SetPosition(12, 88, 192, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 4;
+    Text := 'Marked sections';
+  end;
+
+  RadioButton3 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton3 do
+  begin
+    Name := 'RadioButton3';
+    SetPosition(12, 108, 192, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 5;
+    Text := 'All sections';
+  end;
+
+  RadioButton4 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton4 do
+  begin
+    Name := 'RadioButton4';
+    SetPosition(12, 128, 192, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 6;
+    Text := 'Index';
+  end;
+
+  RadioButton5 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton5 do
+  begin
+    Name := 'RadioButton5';
+    SetPosition(12, 148, 192, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 7;
+    Text := 'Marked libraries';
+  end;
+
+  RadioButton6 := TfpgRadioButton.Create(tsSearch);
+  with RadioButton6 do
+  begin
+    Name := 'RadioButton6';
+    SetPosition(12, 168, 192, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 0;
+    TabOrder := 8;
+    Text := 'All libraries';
+  end;
+
+  lbSearchResults := TfpgListBox.Create(tsSearch);
+  with lbSearchResults do
+  begin
+    Name := 'lbSearchResults';
+    SetPosition(4, 220, 242, 76);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#List';
+    HotTrack := False;
+    PopupFrame := False;
+    TabOrder := 9;
+  end;
+
+  Label3 := TfpgLabel.Create(tsSearch);
+  with Label3 do
+  begin
+    Name := 'Label3';
+    SetPosition(4, 200, 196, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Search results:';
   end;
 
   {@VFD_BODY_END: MainForm}
