@@ -94,12 +94,12 @@ Type
     //   should be highlighted
     // ShowCodes: indicates debugging: hex output of escape
     //   codes will be included
-    // Text: The output is written to here.
+    // AText: The output is written to here.
     // ImageOffsets: For each image that occurs in the text,
     //   the help file offset will be written to this list.
     procedure GetText( HighLightWords: Int32ArrayPointer;
                        ShowCodes: boolean;
-                       Var Text: PChar;
+                       var AText: string;
                        ImageOffsets: TList );
     function SearchForWord( DictIndex: integer;
                             StopAtFirstOccurrence: boolean ): longint;
@@ -667,67 +667,44 @@ end;
 // Main translation function. Turns the IPF data into
 // a text string. Translates formatting codes into tags
 // as for Rich Text Viewer.
-// Uses TAString for speed without length limits
-// - string is too short
-// - PChar is slow to concatenate (unless you keep track of the insert point)
-// - AnsiString is slow
-procedure TTopic.GetText( HighLightWords: Int32ArrayPointer;
-                          ShowCodes: boolean;
-                          Var Text: PChar;
-                          ImageOffsets: TList );
+procedure TTopic.GetText(HighLightWords: Int32ArrayPointer; ShowCodes: boolean;
+    var AText: string; ImageOffsets: TList);
 var
   SlotIndex: integer;
   Slot: THelpTopicSlot;
   pData: pInt8;
   pSlotEnd: pInt8;
-
   S: string;
   Word: string;
-
   GlobalDictIndex: int32;
-
   Spacing: boolean;
   InFixedFont: boolean;
-
   WordsOnLine: longint;
-
   StringToAdd: string;
   LocalDictIndex: int8;
   DebugString: string;
   EscapeDebugString: string;
-
   LinkIndex: longint;
 begin
   if Links = nil then
-    Links:= TList.Create;
-
+    Links := TList.Create;
   S := '';
-{  Text:= StrNew( S.AsPChar );
-  S.Destroy;
-  exit;}
-
+  LinkIndex := 0;
+  InFixedFont := false;  // ? Not sure... this could be reset at start of slot
+  WordsOnLine := 0;
   ImageOffsets.Clear;
-
-  LinkIndex:= 0;
-
-  InFixedFont:= false;  // ? Not sure... this could be reset at start of slot
-
-  WordsOnLine:= 0;
 
   for SlotIndex := 0 to _NumSlots - 1 do
   begin
-ProfileEvent('Processing SlotIndex ' + IntToStr(SlotIndex));
-    Spacing:= true;
+    ProfileEvent('Processing SlotIndex ' + IntToStr(SlotIndex));
+    Spacing := true;
     Slot := THelpTopicSlot(_Slots[ SlotIndex ]);
-
     pData := Slot.pData;
-
     pSlotEnd := pData + Slot.Size;
 
     while pData < pSlotEnd do
     begin
       LocalDictIndex := pData^;
-
       StringToAdd := '';
 
       if LocalDictIndex < Slot.LocalDictSize then
@@ -743,11 +720,10 @@ ProfileEvent('Normal word lookup');
           Word := '';
 
         Word:= SubstituteAngleBrackets( Word );
-        if HighlightWords^[ GlobalDictIndex ] > 0 then
-// graemeg: temp change
-//          StringToAdd := '<red>' + Word + '<black>'
-          StringToAdd := Word
-        else
+        { TODO -ograemeg : Temp change disabling highlight words }
+        //if HighlightWords^[ GlobalDictIndex ] > 0 then
+        //  StringToAdd := '<red>' + Word + '<black>'
+        //else
           StringToAdd := Word;
 
         if Spacing then
@@ -835,7 +811,7 @@ ProfileEvent('Special code');
   end;
 
 ProfileEvent(S);
-  Text := PChar(S);
+  AText := S;
 end;
 
 function TTopic.SearchForWord( DictIndex: integer;
