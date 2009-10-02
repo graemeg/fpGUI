@@ -1,0 +1,635 @@
+  OS/2 2.0 Information Presentation Facility (IPF) Data Format - version 2
+  ----------------------------------------------------------------------- -
+
+  *** introduction to version 1 ***
+
+  Having become extremely frustrated by VIEW.EXE's penchant for windows
+  that come and go, without even opening large enough to see everything
+  in them, I thought I'd try to turn .INF files into something more
+  conventional.  While I don't have code to offer, I can tell you what I
+  learned about .INF format--it was enough to produce more-or-less
+  readable more-or-less plaintext from .INFs.
+
+  I offer this in the hope that somebody will give the community a
+  really nice, tasteful, convenient, doesn't-use-too-much-screen-real-estate
+  .INF browser to replace VIEW.EXE.
+
+  All of this was developed by looking at .INF files without any
+  documentation of the format except what VIEW.EXE showed for a
+  particular feature.
+
+  I don't have a lot of personal interest in refining this document with
+  additional escape sequences, etc., but I would be happy to correspond
+  with someone who wanted to fill in the details, or to clarify anything
+  that may be confusing.  If someone could point us to an official document
+  describing the format that would be most helpful.
+
+  -- Carl Hauser (chauser.parc@xerox.com)
+
+
+  *** introduction to version 2 ***
+
+  The original document contained most of the real tricky stuff in the file
+  format (especially the compression algorithm) so going on from there was
+  mainly a task of creating lots of help files using the IPFC and the
+  decompiling them again to see what came out.
+
+  I fixed a few minor bugs in the description of the header which was
+  extended to describe the entire structure I believe to be the header
+  (because variable data starts afterwards).
+
+  A number of escape codes have also been added and the descriptions of
+  others have been refined. There are still a lot of question marks about
+  the format, but this description already allows disassembling the text
+  into ASCII form in a fairly true-to-life format (including indentations
+  etc.).
+
+  Further research should go into the way multiple windows are handled
+  (I didn't work on that because I have never required multiple window
+  displays in my help files and therefore am not familiar with the concepts).
+  Font usage and graphics linking could also use some more fiddling around.
+
+  -- Marcus Groeber (marcusg@ph-cip.uni-koeln.de - Fidonet 2:243/8605.1)
+
+  *** introduction to version 3 ***
+
+  Just a bit of an update and flesh out ;-)
+
+  -- Peter Childs (pjchilds@apanix.apana.org.au)
+
+  *** Version 4 ****
+
+  Further additions as found while writing NewView
+
+  -- Aaron Lawrence
+
+  **** Types ****
+
+     All numeric quantities are least-significant-byte first in the file
+     (little-endian).
+
+     bit1       1 bit boolean           \  used only for explaining
+     int4       4 bit unsigned integer  /  packed structures
+     char8      8 bit character (ASCII more-or-less)
+     int8       8 bit unsigned integer
+     int16      16 bit unsigned integer
+     int32      32 bit unsigned integer
+
+  **** The File Header ****
+
+      Starting at file offset 0 the following structure can overlay the file
+      to provide some starting values:
+          {
+            int16 ID;           // ID magic word (5348h = "HS")
+            int8  unknown1;     // unknown purpose, could be third letter of ID
+            int8  flags;        // probably a flag word...
+                                //  bit 0: set if INF style file
+                                //  bit 4: set if HLP style file
+                                // patching this byte allows reading HLP files
+                                // using the VIEW command, while help files
+                                // seem to work with INF settings here as well.
+            int16 hdrsize;      // total size of header
+            int16 unknown2;     // unknown purpose
+            int16 ntoc;         // 16 bit number of entries in the tocarray
+            int32 tocstrtablestart;  // 32 bit file offset of the start of the
+                                     // toc entries (this is redundant info;
+                                     // the individual offsets are stored starting
+                                     // at tocstart)
+            int32 tocstrlen;    // number of bytes in file occupied by the
+                                // table-of-contents entries
+            int32 tocstart;     // 32 bit file offset of the start of tocarray
+            int16 nres;         // number of panels with ressource numbers
+            int32 resstart;     // 32 bit file offset of ressource number table
+            int16 nname;        // number of panels with textual name
+            int32 namestart;    // 32 bit file offset to panel name table
+            int16 nindex;       // number of index entries
+            int32 indexstart;   // 32 bit file offset to index table
+            int32 indexlen;     // size of index table
+            int8  unknown3[10]; // unknown purpose
+            int32 searchstart;  // 32 bit file offset of full text search table
+            int32 searchlen;    // size of full text search table
+            int16 nslots;       // number of "slots"
+            int32 slotsstart;   // file offset of the slots array
+            int32 dictlen;      // number of bytes occupied by the "dictionary"
+            int16 ndict;        // number of entries in the dictionary
+            int32 dictstart;    // file offset of the start of the dictionary
+            int32 imgstart;     // file offset of image data
+            int8  unknown4;     // unknown purpose
+            int32 nlsstart;     // 32 bit file offset of NLS table
+            int32 nlslen;       // size of NLS table
+            int32 extstart;     // 32 bit file offset of extended data block
+            int8  unknown5[12]; // unknown purpose
+            char8 title[48];    // ASCII title of database
+          }
+
+  **** The table of contents entries ****
+
+      Beginning at each file offset, tocentrystart[i]:
+          {
+             int8 len;          // length of the entry including this byte (but not including extended data?)
+             int8 flags;        // flag byte, description folows (MSB first)
+             // bit7 haschildren;  // following nodes are a higher level
+             // bit6 hidden;       // this entry doesn't appear in VIEW.EXE's
+                                   // presentation of the toc
+             // bit5 extended;     // extended entry format
+             // bit4         // ??
+             // int4 level;        // nesting level
+             int8 ntocslots;    // number of "slots" occupied by the text for
+                                // this toc entry
+          }
+
+      if the "extended" bit is not 1, this is immediately followed by
+
+          {
+             int16 tocslots[ntocslots]; // indices of the slots that make up
+                                        // the article for this entry
+             char8 title[];             // the remainder of the tocentry
+                                        // until len bytes have been used [not
+                                        // zero terminated]
+          }
+
+      if extended is 1 there are intervening bytes that describe
+      the kind, size and position of the window in which to display the
+      article. First, there are two flag bytes:
+          {
+             int8 w1;
+               // bit 3: Window controls are specified
+               // bit 2: Viewport
+               // bit 1: Size is specified.
+               // bit 0: Position is specified.
+             int8 w2;
+               // bit 3:
+               // bit 2: Group is specified.
+               // bit 1
+               // bit 0: Clear (all windows before display)
+          }
+      Then the following optional fields may appear, as specified by w1:
+
+      Origin ( 5 bytes )
+          {
+             int8 Flags;
+               // bits 4-7: X position type
+               // bits 0-3: Y position type
+             int16 XPosition; // meaning depends on type
+             int16 YPosition;
+          }
+
+      Position types are:
+        0 = absolute character
+        1 = relative %
+        2 = absolute pixel
+        3 = absolute points
+           For these types, the position is simply a number.
+           If one of the positions is not specified then the type will be 0
+           and the value will be -1 (65535)
+
+        4 = dynamic
+           For this type the position is one of the following values:
+             1: left
+             2: right
+             4: top;
+             8: bottom
+             16: center.
+
+      Size ( 5 bytes )
+          {
+             int8 Flags;
+               // bits 4-7: Width type
+               // bits 0-3: Height type
+             int16 Width;
+             int16 Height;
+          }
+
+      Width/height type are same as position types, above, except that dynamic is not used.
+
+      Window controls ( 2 bytes )
+        0, 112 means everything is turned off.
+        8, 103 means no scroll bars IIRC
+
+      Group ( 2 bytes )
+          {
+             int16 GroupNumber;
+          }
+        GroupNumber is basically a 'frame' or window number.
+
+
+      Here's a C code fragment for computing the number of bytes to skip
+          int bytestoskip = 0;
+          if (w1 & 0x8) { bytestoskip += 2 };
+          if (w1 & 0x1) { bytestoskip += 5 };
+          if (w1 & 0x2) { bytestoskip += 5 };
+          if (w2 & 0x4) { bytestoskip += 2 };
+
+      skip over bytestoskip bytes (after w2) and find the tocslots and title
+      as in the non-extended case.
+
+  **** The table of contents array ****
+
+      Beginning at file offset tocstart, this structure can overlay the
+      file:
+          {
+             int32  tocentrystart[ntoc];       // array of file offsets of
+                                               // tocentries (above)
+          }
+
+  **** The Slots array ****
+
+      Beginning at file offset slotsstart (provided by the file header) find
+          {
+             int32 slots[nslots];       // file offset of the article
+                                        // corresponding  to this slot
+          }
+
+  **** The Dictionary ****
+
+      Beginning at  file offset dictstart (provided by the file header) and
+      continuing until ndict entries have been read (and dictlen bytes have
+      been consumed from the file) find a sequence of length-preceeded
+      strings.  Note that the length includes the length byte (not Pascal
+      compatible!).  Build a table mapping i to the ith string.
+          {
+             char8*     strings[ndict];
+          }
+
+  **** The Article entries ****
+
+      Beginning at file offset slots[i] the following structure can overlay
+      the file:
+          {
+             int8       stuff;          // ?? [always seen 0]
+             int32      localdictpos;   // file offset of the local dictionary
+             int8       nlocaldict;     // number of entries in the local dict
+             int16      ntext;          // number of bytes in the text
+             int8       text[ntext];    // encoded text of the article
+          }
+
+  **** The Local dictionary ****
+
+      Beginning at file position localdictpos (for each article) there is an
+      array:
+          {
+             int16      localwords[nlocaldict];
+          }
+
+  **** The Text ****
+
+      The text for an article then consists of words obtained by referencing
+      strings[localwords[text[i]]] for i in (0..ntext), with the following
+      exceptions.  If text[i] is greater than nlocaldict it means
+
+         0xfa => end-of-paragraph, sets spacing to TRUE if not in monospace
+         0xfb => [unknown]
+         0xfc => spacing = !spacing
+         0xfd => line break (outside an example: ".br",
+                   sets spacing to TRUE if not in a
+                   monospace example)
+         0xfe => space
+         0xff => escape sequence                        // see below
+
+      When spacing is true, each word needs a space put after it.  When
+      false, the words are abutted and spaces are supplied using 0xfe or the
+      dictionary.  Examples are entered and left with 0xff escape sequences.
+      The variable "spacing" is initially (start of every article slot) TRUE.
+
+  **** 0xff escape sequences ****
+
+      These are used to change fonts, make cross references, enter and leave
+      examples, etc.  The general format is
+          {
+             int8       FF;             // always equals 0xff
+             int8       esclen;         // length of the sequence (including
+                                        // esclen but excluding FF)
+             int8       escCode;        // which escape function
+          }
+
+     escCodes I have partially deciphered are
+
+          0x01 =>               unknown
+
+          0x02 or 0x11 =>       (esclen==3) set left margin.
+               or 0x12          0x11 always starts a new line. Arguments
+                                  {
+                                     int8  margin;   // in spaces, 0=no margin
+                                  }
+                                note: in an IPF source, you must code
+                                :lm margin=256. to reset the left margin.
+
+          0x03 =>               (esclen==3) set right margin. Arguments
+                                  {
+                                     int8  margin;   // in spaces, 1=no margin
+                                  }
+
+          0x04 =>               (esclen==3) change style. Arguments
+                                  {
+                                     int8  style;    // 1,2,3: same as :hp#.
+                                                     // 4,5,6: same as :hp5,6,7.
+                                                     // 0 returns to plain text
+                                  }
+
+          0x05 =>               (esclen varies) beginning of cross
+                                reference.  The next two bytes of the
+                                escape sequence are an int16 index of
+                                the tocentrystart array.  The
+                                remaining bytes (if any) describe the size,
+                                position and characteristics of the
+                                window created when the
+                                cross-reference is followed by VIEW.
+                                Flag1 bit 7: 'split' window
+
+                                      bit 6: autolink
+                                      bit 3: window controls specified
+                                      bit 2: viewport
+                                      bit 1: target size supplied
+                                      bit 0: target position supplied
+                                Flag2 bit 0: ?
+                                      bit 1: dependent
+                                      bit 2: group supplied
+
+
+          0x06 =>               unknown
+
+          0x07 =>               (esclen==4) footnote start (:fn. tag). Arguments:
+                                  {
+                                     int16  toc;  // toc entry number of text
+                                  }
+                                footnotes end with 0x08
+
+          0x08 =>               (escLen==2) end of cross reference
+                                introduced by escape code 0x05 or 0x07
+
+          0x09 =>               unknown
+
+          0x0A =>               unknown
+
+          0x0B =>               (escLen==2) begin monosp. example.  set
+                                spacing to FALSE
+
+          0x0C =>               (escLen==2) end monosp. example.  set
+                                spacing to TRUE
+
+          0x0D =>               (escLen==2) special text colors. Arguments:
+                                  {
+                                     int8  color;   // 1,2,3: same as :hp4,8,9.
+                                                    // 0: default color
+                                  }
+
+          0x0E =>               Bitmap.
+                                  {
+                                     int8  flags;
+                                       4: runin flag
+                                       3: fit (scale) to window
+                                       2: align center
+                                       1: align right
+                                       0: always set?
+                                     int32 bitmapStartOffset;
+                                  }
+                                e.g. first bitmap always has offset 0
+
+          0x0F =>               if esclen==5 an inlined cross
+                                reference: the title of the referenced
+                                article becomes part of the text.
+                                This is probably the case even if
+                                esclen is not 5, but I don't know the
+                                decoding.  In the case that esclen is
+                                5, I don't know the purpose of the
+                                byte following the escCode, but the
+                                two bytes after that are an int16
+                                index of the tocentrystart array.
+
+          0x10 =>               [special link, reftype=launch]
+                                {
+                                  int8 unknown; ?
+                                  char launch_string[ esclen - 3 ];
+                                }
+
+
+          0x13 or 0x14 =>       (esclen==2) Set foreground (0x13)
+                                and background (0x14) color.  Arguments:
+                                  {
+                                     int8  color;
+                                       \\ 0 - default
+                                       \\ 1 - blue
+                                       \\ 2 - red
+                                       \\ 3 - ??
+                                       \\ 4 - green
+                                       \\ 5 - cyan
+                                       \\ 6 - yellow
+                                       \\ 7 - neutral
+                                  }
+
+          0x15 =>               unknown
+
+          0x16 =>               [special link, reftype=inform]
+
+          0x17 =>               hide text (:hide. tag). Arguments:
+                                  {
+                                     char8 key[];  // key required to show text
+                                  }
+
+          0x18 =>               end of hidden text (:ehide.)
+
+          0x19 =>               (esclen==3) change font. Arguments
+                                  {
+                                     int8  fontTableIndex (?);
+                                  }
+
+          0x1A =>               (escLen==3) begin :lines. sequence.  set
+                                spacing to FALSE.  Arguments
+                                  {
+                                     int8  alignment; // 1,2,4=left,right,center
+                                  }
+
+          0x1B =>               (escLen==2) end :lines. sequence.  set
+                                spacing to TRUE
+
+          0x1C =>               (escLen==2) Set left margin to current
+                                position.  Margin is reset at end of
+                                paragraph.
+
+          0x1F =>               [special link, reftype=hd database=...]
+
+          0x20 =>               (esclen==4) :ddf. tag. Arguments:
+                                  {
+                                     int16  res;  // value of res attribute
+                                  }
+
+      The font used in the text is the normal IBM extended character set,
+      including line graphics and some of the characters below 32.
+
+  **** The ressource number array ****
+
+      Beginning at file offset resstart, this structure can overlay the
+      file:
+          {
+              int16  res[nres];         // ressource number of panels
+              int16  toc[nres];         // toc entry number of panel
+          }
+
+  **** The text name array ****
+
+      Beginning at file offset namestart, this structure can overlay the
+      file:
+          {
+              int16  name[nres];        // index to panel name in dictionary
+              int16  toc[nres];         // toc entry number of panel
+          }
+
+  **** The index table ****
+
+      Beginning at file offset indexstart, a structure like the following
+      is stored for each of the nindex words (in alphabetical order).
+          {
+              int8  nword;              // size of name
+              int8  level;              // ? indent level
+                                        // bit 6 set: global entry
+                                        // bit 1 set: indent (:i2.)
+                                           bit 0 always set?
+              int8  number of roots;  // number of root references following
+              int16 toc;                // toc entry number of panel
+              char8 word[nword];        // index word [not zero-terminated]
+
+              there are n roots following:
+              int32 synonyms;           // 32 bit file offset to start of synonyms referencing this word
+          }
+
+  **** The extended data block ****
+
+      Not yet decoded.  This block has a size of 64 bytes and contains various
+      pointers to font names, names of externel databases etc.
+
+  **** The full text search table ****
+
+      Not yet decoded.  This table is supressed when "/S" is specified on
+      the IPFC command line.
+
+      In addition to data in...
+
+      RLE:
+
+      byte  RLEType; // ? always 1?
+
+      Then a sequence of blocks, until all data used:
+
+      byte Header;
+        // bits 0-6 are N
+        // bit 7:
+        //   0: there are N + 1 repeats of next byte.
+        //   1: N + 1 blocks of 'as is' data follow.
+        // except
+        //   value $80 means (?) the next byte contains the data byte,
+        //   and the next 2 bytes after that contain a 16 bit repeat number.
+
+
+      e.g. 04 00 means 5 repeats of 0
+           83 12 34 56 78 means the literal data 12 34 56 78
+           80 00 62 01 means $162 repeats of 0
+      byte DataByte; // with escapes
+           // bit 7 set means there are actually N+1 (=bits0-6) bytes of data to follow
+           // 0 means there is a single byte of data to follow (e.g. when the byte > 80)
+        ( optionally ) byte[ N+1 ] data
+      int16 Number of zeroes to follow
+  **** Image data ****
+
+      Beginning at file offset imgstart, this data is a series of compressed
+      OS/2 bitmaps.
+      Each starts with a BITMAPFILEHEADER:
+        {
+           int16 usType;     // 'bM' for bitmap
+           int32 cbSize;     // total bitmap size including header
+                             // BEFORE compression: not correct in this context
+           int16 xHotspot;   // only for icons/pointers, not relevant here?
+           int16 yHotspot;
+           int16 offBits;    // offset to the actual bitmap data bits
+           BITMAPINFOHEADER bmp; // further bitmap data:
+             int32 cbFix;    // length of bitmapinfo header structure (12)
+                             // (including this field)
+             int16 cx;       // bitmap width
+             int16 cy;       // bitmap height
+             int16 cPlanes;  // num bitplanes - always 1 AFAIK
+             int16 bitCount; // bits per pixel e.g. 4 = 16 colors
+
+           RGB  palette[ N ]; // 2 ^ bitCount * 3 bytes
+
+           bitmapData;       // in a special IPF format:
+              int32 totalLength; // not including this field, but including the next
+              int16 bitmapSize; // total size of memory required
+                                // for uncompressed bitmap i.e.
+                                // bytes per line rounded up to longword (4byte)
+                                // x rows
+                                // (This info is redundant)
+
+           Followed by a series of blocks each up to 64k uncompressed.
+           Blocks:
+              int16 dataLength; // length of data following (including data type field)
+
+              int8  dataType;   // 0 = uncompressed
+                                   2 = compressed
+              data...
+              Compression is LZW (Lempel Ziv XX?)
+
+        }
+
+  **** NLS table ****
+
+      Not yet decoded. This table contains informations specific to the
+      language and codepage the document was prepared in. It seems to contain
+      some bitfields as well that might be used for character classification.
+
+Appendix 1: Some useful translations from IBM Extended ASCII to normal ASCII
+
+      One other transformation I had to make was of the character box
+      characters of the IBM extended ASCII set.  These characters appear in strings
+      in the dicitonary.  They are given here in octal together with their translation.
+
+          020, 021      => blank seems satisfactory
+          037           => solid down arrow: used to give direction to
+                                a line in the syntax diagrams
+          0263          => vertical bar
+          0264          => left connector: vertical bar with short
+                                horizontal bar extending left from the
+                                center
+          0277, 0300    => top right or bottom left corner; one is
+                                one, the other is the other and I
+                                can't tell which from my translation
+          0301          => up connector: horizontal line with vertical
+                                line extending up from the center
+          0302          => down connector: horizontal line with
+                                vertical line extending down from the
+                                center
+          0303          => right connector: vertical bar with short
+                                horizontal bar extending right from
+                                the center
+          0304          => horizontal bar
+          0305          => cross connector, i.e. looks like + only
+                                slightly larger to connect with
+                                adjacent chars
+          0331, 0332    => top left or bottom right corner; one is
+                                one, the other is the other and I
+                                can't tell which from my translation
+
+
+Appendix 2:  Style codes for escCode 0x04 and 0x0D
+
+      escCode 0x04 implements font changes associated with the :hp# IPF source tag.
+
+          :hp1 is italic font
+          :hp2 is bold font
+          :hp3 is bold italic font
+          :hp5 is normal underlined font
+          :hp6 is italic underlined font
+          :hp7 is bold underlined font
+
+     tags :hp4, :hp8, and :hp9 introduce different colored text which is encoded in
+     the .inf or .hlp file using escCode 0x0D.  On my monitor normal text is dark blue.
+
+          :hp4 text is light blue
+          :hp8 text is red
+          :hp9 text is magenta
+
+
+
+History:
+October 22, 1992: version for initial posting (inf01.doc)
+July 12, 1993: second version (refer to introduction for changes) (inf02.doc)
+July 18, 1993: added appendices to the second version (inf02a.doc)
+
