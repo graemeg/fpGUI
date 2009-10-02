@@ -135,7 +135,8 @@
       </Debugging>
     </Linking>
     <Other>
-      <CustomOptions Value="-O-"/>
+      <CustomOptions Value="-O-
+-dTimingX"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

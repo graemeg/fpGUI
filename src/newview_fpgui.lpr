@@ -6,9 +6,11 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, EpikTimer, fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow,
-  IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery, nvUtilities,
-  nvNullObjects, HelpFile;
+  Classes,
+  {$IFDEF Timing}EpikTimer,{$ENDIF}
+  fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow,
+  IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery,
+  nvUtilities, nvNullObjects, HelpFile;
 
 
 procedure MainProc;

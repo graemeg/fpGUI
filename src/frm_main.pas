@@ -89,7 +89,7 @@ type
     procedure   SetStatus(const AText: TfpgString);
     function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
     // Given a "filename" which may include a path, find it in various paths and extensions
-    function FindHelpFile(AFileName: TfpgString ): TfpgString;
+    function    FindHelpFile(AFileName: TfpgString ): TfpgString;
 
   public
     constructor Create(AOwner: TComponent); override;
@@ -105,28 +105,34 @@ const
 implementation
 
 uses
-  fpg_dialogs, fpg_constants, nvUtilities, HelpTopic, EpikTimer;
+  fpg_dialogs, fpg_constants, nvUtilities, HelpTopic
+  {$IFDEF Timing}
+  ,EpikTimer
+  {$ENDIF}
+  ;
 
 
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.MainFormShow(Sender: TObject);
+{$IFDEF Timing}
 var
-  s, e: TDateTime;
   t: TEpikTimer;
+{$ENDIF}
 begin
   bvlBody.Realign;
 
   if Paramcount > 0 then
   begin
+    {$IFDEF Timing}
     t := TEpikTimer.Create(nil);
     t.Start;
-//    s := now;
+    {$ENDIF}
     OpenFile(ParamStr(1));
-//    e := now;
+    {$IFDEF Timing}
     t.Stop;
     writeln(t.ElapsedDHMS);
-//    writeln(FormatDateTime('mm:ss.zz', e-s));
+    {$ENDIF}
   end;
 end;
 
