@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="15">
       <Unit0>
         <Filename Value="newview_fpgui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -103,6 +103,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="EpikTimer"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="../docs/inf04.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
