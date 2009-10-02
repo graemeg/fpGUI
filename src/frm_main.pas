@@ -492,7 +492,7 @@ end;
 
 procedure TMainForm.DisplayTopic;
 var
-  text: PChar;
+  lText: String;
   ImageIndices: TList;
   LinkIndex: longint;
   Link: THelpLink;
@@ -520,20 +520,19 @@ Begin
 
   if HelpFile.HighlightWords <> nil then
     ProfileEvent('highlightwords is ok');
-  Text := nil;
+  lText := '';
   ProfileEvent('Debug = ' + BoolToStr(Debug));
   if ImageIndices <> nil then
     ProfileEvent('ImageIndices initialized');
   Topic.GetText(HelpFile.HighlightWords,
                 Debug,
-                Text,
+                lText,
                 ImageIndices );
 
   { TODO -oGraeme : We do not support images yet }
   ImageIndices.Free;
 
-  Memo1.Lines.Text := Text;
-  StrDispose( Text );
+  Memo1.Lines.Text := lText;
 end;
 
 procedure TMainForm.ResetProgress;
