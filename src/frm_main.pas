@@ -74,6 +74,9 @@ type
     procedure   btnGoClicked(Sender: TObject);
     procedure   tvContentsChange(Sender: TObject);
     procedure   MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
+    procedure   PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
+    procedure   tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   FileOpen;
     function    OpenFile(const AFileNames: string): boolean;
     procedure   CloseFile;
@@ -90,7 +93,6 @@ type
     function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
     // Given a "filename" which may include a path, find it in various paths and extensions
     function    FindHelpFile(AFileName: TfpgString ): TfpgString;
-
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -212,6 +214,28 @@ end;
 procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
   CloseFile;
+end;
+
+procedure TMainForm.PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
+begin
+  if NewActiveSheet = tsIndex then
+  begin
+    if lbIndex.Items.Count = 0 then
+      btnShowIndex(nil);
+  end;
+end;
+
+procedure TMainForm.tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+begin
+  if tvContents.Selection <> nil then
+    DisplayTopic;
+end;
+
+procedure TMainForm.lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+begin
+  DisplayTopic;
 end;
 
 procedure TMainForm.FileOpen;
@@ -511,14 +535,28 @@ var
   Topic: TTopic;
 Begin
   ProfileEvent('DisplayTopic >>>>');
-  if tvContents.Selection = nil then
-  begin
-    ShowMessage('You must select a topic first by clicking it.');
-    Exit;  //==>
-  end
-  else
-    Topic := TTopic(tvContents.Selection.Data);
-  ProfileEvent('Got Topic from Treeview');
+  case PageControl1.ActivePageIndex of
+    0:  begin
+          if tvContents.Selection = nil then
+          begin
+            ShowMessage('You must select a topic first by clicking it.');
+            Exit;  //==>
+          end
+          else
+            Topic := TTopic(tvContents.Selection.Data);
+          ProfileEvent('Got Topic from Treeview');
+        end;
+    1:  begin
+          if lbIndex.FocusItem = -1 then
+          begin
+            ShowMessage('You must select a index first by clicking it.');
+            Exit;  //==>
+          end
+          else
+            Topic := TTopic(lbIndex.Items.Objects[lbIndex.FocusItem]);
+          ProfileEvent('Got Topic from Index listbox');
+        end;
+  end;
 
   Memo1.Lines.Clear;
   ImageIndices := TList.Create;
@@ -619,9 +657,10 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 0, 260, 328);
-    ActivePageIndex := 4;
+    ActivePageIndex := 1;
     TabOrder := 0;
     Align := alLeft;
+    OnChange  := @PageControl1Change;
   end;
 
   tsContents := TfpgTabSheet.Create(PageControl1);
@@ -675,6 +714,7 @@ begin
     ShowImages := True;
     TabOrder := 0;
     //    OnChange  := @tvContentsChange;
+    OnDoubleClick  := @tvContentsDoubleClick;
   end;
 
   Splitter1 := TfpgSplitter.Create(bvlBody);
@@ -863,7 +903,7 @@ begin
   with edSearchText do
   begin
     Name := 'edSearchText';
-    SetPosition(4, 20, 242, 24);
+    SetPosition(4, 20, 242, 26);
     Anchors := [anLeft,anRight,anTop];
     TabOrder := 1;
     Text := '';
@@ -997,6 +1037,7 @@ begin
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 1;
+    OnDoubleClick  := @lbIndexDoubleClick;
   end;
 
   {@VFD_BODY_END: MainForm}
