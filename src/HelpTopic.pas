@@ -31,22 +31,25 @@ Type
     destructor Destroy; override;
   end;
 
-  THelpTopicSlot = packed record
-    pData: pInt8;
-    Size: longint;
-    pLocalDictionary: Int16ArrayPointer;
-    LocalDictSize: int8;
+  // Handy structure to keep slot information: this doesn't actually overlay
+  // anywhere in INF file. This structure is used for quick text retrieval when
+  // user clicks on TOC treeview in UI
+  THelpTopicSlot = record
+    pData: pInt8;                         // Pointer to actual Slot structure in INF file.
+    Size: longint;                        // Number of bytes in the text for this Slot (slotheader.ntext)
+    pLocalDictionary: Int16ArrayPointer;  // Pointer to Slot's local dictionary
+    LocalDictSize: int8;                  // Number of entries in the local dictionary
   end;
   pHelpTopicSlot = ^ THelpTopicSlot;
 
   SlotArray = packed array[ 0..0 ] of THelpTopicSlot;
-
   pSlotArray = ^SlotArray;
+
 
   TTopic = class(TObject)
   protected
     _pTOCEntry: pTTOCEntryStart;
-    _Slots: pSlotArray;
+    _Slots: pSlotArray;            // Array of THelpTopicSlot's related to this topic
     _NumSlots: longint;
     _NumSlotsUsed: longint;
     _Title: string;
@@ -79,15 +82,19 @@ Type
                                       Var LinkIndex: longint );
 
   public
-    constructor Create( FileData: pointer;
-                        const FileHeader: THelpFileHeader;
-                        Dictionary: TStringList;
-                        pTOCEntry: pTTOCEntryStart );
-
-    destructor Destroy; override;
-
-    property Title: string read GetTitle write SetTitle;
-    procedure SetTitleFromMem( const p: pointer; const Len: byte );
+    Links: TList;         // only valid after GetText
+    HelpFile: TObject;    // Used externally
+    Index: longint;       // Used externally
+    FoundInSearch: boolean;
+    ExcludedInSearch: boolean;
+    SearchRelevance: longint;
+    constructor Create(FileData: pointer;
+                       const FileHeader: THelpFileHeader;
+                       Dictionary: TStringList;
+                       pTOCEntry: pTTOCEntryStart);
+    destructor  Destroy; override;
+    property    Title: string read GetTitle write SetTitle;
+    procedure   SetTitleFromMem( const p: pointer; const Len: byte );
 
     // Main function for retrieving text for topic.
     // HighlightWords: array indicating whether words
@@ -97,32 +104,17 @@ Type
     // AText: The output is written to here.
     // ImageOffsets: For each image that occurs in the text,
     //   the help file offset will be written to this list.
-    procedure GetText( HighLightWords: Int32ArrayPointer;
+    procedure   GetText( HighLightWords: Int32ArrayPointer;
                        ShowCodes: boolean;
                        var AText: string;
                        ImageOffsets: TList );
-    function SearchForWord( DictIndex: integer;
-                            StopAtFirstOccurrence: boolean ): longint;
-
-    procedure GetContentsWindowRect( ContentsRect: THelpWindowRect );
-
-  public
-    Links: TList; // only valid after GetText
-    // Used externally
-    HelpFile: TObject;
-    Index: longint;
-
-    FoundInSearch: boolean;
-    ExcludedInSearch: boolean;
-
-    SearchRelevance: longint;
-
-    property ShowInContents: boolean read _ShowInContents;
-    property ContentsLevel: integer read _ContentsLevel;
-    property ContentsGroupIndex: longint read _ContentsGroupIndex;
-
-    function CountWord( DictIndex: integer ): longint;
-    function ContainsWord( DictIndex: integer ): boolean;
+    function    SearchForWord( DictIndex: integer; StopAtFirstOccurrence: boolean ): longint;
+    procedure   GetContentsWindowRect( ContentsRect: THelpWindowRect );
+    property    ShowInContents: boolean read _ShowInContents;
+    property    ContentsLevel: integer read _ContentsLevel;
+    property    ContentsGroupIndex: longint read _ContentsGroupIndex;
+    function    CountWord( DictIndex: integer ): longint;
+    function    ContainsWord( DictIndex: integer ): boolean;
   end;
 
 // Compares two topics for purposes of sorting by
@@ -734,7 +726,7 @@ ProfileEvent('Normal word lookup');
       end
       else
       begin
-ProfileEvent('Special code');
+        ProfileEvent('Special code');
         // special code
         DebugString := '[' + IntToHex( LocalDictIndex, 2 );
         case LocalDictIndex of
@@ -810,7 +802,7 @@ ProfileEvent('Special code');
     end; // for slotindex = ...
   end;
 
-ProfileEvent(S);
+  ProfileEvent(S);
   AText := S;
 end;
 

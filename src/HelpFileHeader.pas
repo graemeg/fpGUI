@@ -86,7 +86,7 @@ Type
   TTOCEntryOffsetArray =  packed array[ 0..0 ] of int32;
   pTTOCEntryOffsetArray = ^TTOCEntryOffsetArray;
 
-Const
+const
   TOCEntryExtended      = $20; { extended entry format }
   TOCEntryHidden        = $40; { this entry doesn't appear in VIEW.EXE's presentation of the toc }
   TOCEntryHasChildren   = $80; { following nodes are a higher level }
@@ -102,10 +102,10 @@ type
   pHelpXYPair = ^ THelpXYPair;
 
   TSlotHeader = packed record
-    stuff: int8; // always 0??
-    localdictpos: int32; // file offset of the local dictionary
-    nlocaldict: int8; // number of entries in the local dict
-    ntext: int16; // number of bytes in the text
+    stuff: int8;              // always 0??
+    localdictpos: int32;      // file offset of the local dictionary
+    nlocaldict: int8;         // number of entries in the local dict
+    ntext: int16;             // number of bytes in the text
   end;
   pSlotHeader = ^TSlotHeader;
 
