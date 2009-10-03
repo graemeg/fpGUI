@@ -222,10 +222,11 @@ begin
     if SlotNumber < FileHeader.nslots then
     begin
       pSlotOffsets := FileData + FileHeader.slotsstart;
-
+      // point to correct slot offset
       pSlotData := pSlotHeader( FileData + pSlotOffsets^[ SlotNumber ] );
-
-      Slot.pData := pInt8( pSlotData + sizeof( TSlotHeader ) );
+      if pSlotData^.stuff <> Byte(0) then
+        raise Exception.Create('We are NOT at the correct location in the file for the SlotHeader structure!');
+      Slot.pData := pInt8(pSlotData) + sizeof(TSlotHeader);
       Slot.pLocalDictionary := FileData + pSlotData^.localDictPos;
       Slot.LocalDictSize := pSlotData^.nLocalDict;
       Slot.Size := pSlotData^.ntext;
