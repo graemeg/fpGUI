@@ -179,19 +179,19 @@ begin
   _Title := '';
   _GlobalDictionary := Dictionary;
   _ContentsGroupIndex := 0;
-
   _pTOCEntry := pTOCEntry;
-  _NumSlots:= pTOCEntry^.numslots;
+  _NumSlots := pTOCEntry^.numslots;
+  _NumSlotsUsed := 0;
 
   GetMem( _Slots, _NumSlots * sizeof(THelpTopicSlot));
 
-  _NumSlotsUsed := 0;
 
   lFlags:= _pTOCEntry^.flags;
   p:= pInt8( _pTOCEntry ) + sizeof( TTOCEntryStart );
 
   if ( lFlags and TOCEntryExtended ) > 0 then
   begin
+    ProfileEvent('Processing Extended Topic Entry');
     pExtendedInfo := pExtendedTOCEntry( p );
     inc( p, sizeof( TExtendedTOCEntry ) );
 
@@ -205,23 +205,24 @@ begin
 
     if ( pExtendedInfo^.w1 and 8 ) > 0 then
       // skip window controls
-      inc( p, 2 );
+      inc( p, sizeof(word) );
 
     if ( pExtendedInfo^.w2 and 4 ) > 0 then
     begin
       _ContentsGroupIndex := pint16(p)^;
       // read group
-      inc(p, sizeof(int16));
+      inc(p, sizeof(word));
     end;
   end;
 
+  // offset of slots in INF file
+  pSlotOffsets := FileData + FileHeader.slotsstart;
   // Read slot indices
   for i := 0 to _NumSlots-1 do
   begin
     SlotNumber:= pint16( p )^;
-    if SlotNumber < FileHeader.nslots then
+    if SlotNumber < FileHeader.nslots then   // ??? graeme: I don't see the point of this check
     begin
-      pSlotOffsets := FileData + FileHeader.slotsstart;
       // point to correct slot offset
       pSlotData := pSlotHeader( FileData + pSlotOffsets^[ SlotNumber ] );
       if pSlotData^.stuff <> Byte(0) then
@@ -231,13 +232,13 @@ begin
       Slot.LocalDictSize := pSlotData^.nLocalDict;
       Slot.Size := pSlotData^.ntext;
 
-      _Slots^[ _NumSlotsUsed ] := Slot;
+      _Slots^[ _NumSlotsUsed ] := Slot;   // insert Slot record into handy slot array
       inc( _NumSlotsUsed );
-
     end;
-    inc( p, sizeof( int16 ) );
+    // move p pointer to next item in SlotArray - until we reach _NumSlots-1 item
+    inc(p, sizeof(word));
   end;
-
+  // Calculate the remainder of the tocentry length - that is the bytes used for TOC topic (title) text
   titleLen := _pTOCEntry^.length - ( longword(p) - longword(_pTOCEntry) );
 
   // Read title
@@ -246,10 +247,10 @@ begin
   else
     Title:= '(No title)';
 
-  _ContentsLevel:= ( lFlags and $f );
+  _ContentsLevel:= (lFlags and TOCEntryLevelMask);
   _ShowInContents:= (lFlags and TOCEntryHidden) = 0;
   if _ContentsLevel = 0 then
-    _ShowInContents := false; // hmmm....
+    _ShowInContents := false; // just a little fallback case
 end;
 
 destructor TTopic.Destroy;
@@ -689,7 +690,6 @@ begin
 
   for SlotIndex := 0 to _NumSlots - 1 do
   begin
-    ProfileEvent('Processing SlotIndex ' + IntToStr(SlotIndex));
     Spacing := true;
     Slot := THelpTopicSlot(_Slots[ SlotIndex ]);
     pData := Slot.pData;
@@ -702,10 +702,8 @@ begin
 
       if LocalDictIndex < Slot.LocalDictSize then
       begin
-ProfileEvent('Normal word lookup');
-        // Normal word lookup
+        // Normal word lookup: local dict i item = global dict i item
         GlobalDictIndex := Slot.pLocalDictionary^[ LocalDictIndex ];
-
         // normal lookup
         if GlobalDictIndex < _GlobalDictionary.Count then
           Word := _GlobalDictionary[ GlobalDictIndex ]
@@ -727,7 +725,6 @@ ProfileEvent('Normal word lookup');
       end
       else
       begin
-        ProfileEvent('Special code');
         // special code
         DebugString := '[' + IntToHex( LocalDictIndex, 2 );
         case LocalDictIndex of
