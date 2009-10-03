@@ -290,7 +290,7 @@ begin
           ShowMessage( 'Could not open ' + lFileName + ': ' + E.Message )
         else
           ShowMessage( 'An error occurred loading ' + lFileName
-                       + '. It may be an damaged help file '
+                       + '. It may be a damaged help file '
                        + 'or there may be a bug in this program.' + #10 + #10 + E.Message );
         Result := False;
         // cleanup memory used
@@ -523,7 +523,6 @@ Begin
 
   Memo1.Lines.Clear;
   ImageIndices := TList.Create;
-
   ProfileEvent('Cleared memo...');
 
   HelpFile := TopicFile(Topic);
@@ -533,13 +532,13 @@ Begin
   if HelpFile.HighlightWords <> nil then
     ProfileEvent('highlightwords is ok');
   lText := '';
-  ProfileEvent('Debug = ' + BoolToStr(Debug));
+  ProfileEvent('Debug show hex values = ' + BoolToStr(Debug));
   if ImageIndices <> nil then
     ProfileEvent('ImageIndices initialized');
   Topic.GetText(HelpFile.HighlightWords,
                 Debug,
                 lText,
-                ImageIndices );
+                ImageIndices);
 
   { TODO -oGraeme : We do not support images yet }
   ImageIndices.Free;
