@@ -240,7 +240,7 @@ begin
   for EntryIndex := 0 to _Header.ntoc-1 do
   begin
     pEntry := _Data + tocarray[EntryIndex];
-    Topic := TTopic.Create( _Data,
+    Topic := TTopic.Create(_Data,
                            _Header,
                            _Dictionary,
                            pEntry );
@@ -288,49 +288,50 @@ begin
     Inc(p, sizeof(b));              // move pointer
     Move(p^, c, b-1);               // read string of dictionary
     Inc(p, b-1);                    // move pointer
-    s := StrPas(@c);
+    s := c;
     _Dictionary.Add(s);
   end;
 end;
 
 type
-  TIndexEntryHeader = record
+  TIndexEntryHeader = packed record
     TextLength: int8;
     Flags: int8;
     NumberOfRoots: int8;
     TOCIndex: int16;
   end;
 
+
 procedure THelpFile.ReadIndex;
 var
   IndexIndex: longint;
   pEntryHeader: ^TIndexEntryHeader;
   EntryText: string;
-  IndexTitleLen: longint;
+  IndexTitleLen: byte;
   p: pointer;
+  iword: array[0..255] of char;
 begin
   p := _Data + _Header.indexstart;
-
+  ProfileEvent('Number of indexes = ' + IntToStr(_Header.nindex));
   for IndexIndex:= 0 to longint( _Header.nindex ) - 1 do
   begin
     pEntryHeader := p;
     IndexTitleLen:= pEntryHeader^.TextLength;
     inc( p, sizeof( TIndexEntryHeader ) );
 
-    { TODO -oGraeme : Double check this later }
-    EntryText := PChar(p);
-//    GetMemString( p, EntryText, IndexTitleLen );
+    FillChar(iword, Length(iword), 0);
+    Move(p^, iword, IndexTitleLen);
+    EntryText := iword;
 
     if ( pEntryHeader^.flags and 2 ) > 0 then
       EntryText:= '- ' + EntryText;
     if pEntryHeader^.TOCIndex < _Topics.Count then
       _Index.AddObject( EntryText, TTopic(_Topics[ pEntryHeader^.TOCIndex ]) )
     else
-//      raise EHelpFileException.Create( 'Error reading help file index - out of range topic reference' );
+      //raise EHelpFileException.Create( 'Error reading help file index - out of range topic reference' );
       ; // pass! something special
     inc( p, IndexTitleLen + pEntryHeader^.NumberOfRoots ); // skip 'roots' for index search
   end;
-
 end;
 
 type

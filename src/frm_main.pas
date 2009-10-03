@@ -189,8 +189,14 @@ var
   Count: integer;
   i: integer;
   s: TfpgString;
+  f: THelpFile;
 begin
-//
+  f := THelpFile(Files[0]);
+  tvIndex.RootNode.Clear;
+  for i := 0 to f.Index.Count-1 do
+  begin
+    tvIndex.RootNode.AppendText(f.Index[i]);
+  end;
 end;
 
 procedure TMainForm.btnGoClicked(Sender: TObject);
