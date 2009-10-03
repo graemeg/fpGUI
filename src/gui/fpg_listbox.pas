@@ -144,6 +144,7 @@ type
     property    ShowHint;
     property    TabOrder;
     property    TextColor;
+    property    OnDoubleClick;
   end;
   
   
