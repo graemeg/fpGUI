@@ -176,8 +176,9 @@ begin
     Add('Filename: ' + f.Filename);
     Add('----------');
     Add('Title: ' + f.Title);
-    Add('DictionaryCount:' + IntToStr(f.DictionaryCount));
-    Add('TopicCount: ' + IntToStr(f.TopicCount));
+    Add('Dictionary count:' + IntToStr(f.DictionaryCount));
+    Add('Topic count: ' + IntToStr(f.TopicCount));
+    Add('Index count: ' + IntToStr(f.Index.Count));
     Add(' ');
     Add('Dictionary contents:');
     for i := 0 to f.DictionaryCount-1 do
