@@ -24,7 +24,6 @@ type
     tsNotes: TfpgTabSheet;
     tsHistory: TfpgTabSheet;
     tvContents: TfpgTreeView;
-    tvIndex: TfpgTreeView;
     Splitter1: TfpgSplitter;
     Memo1: TfpgMemo;
     MainMenu: TfpgMenuBar;
@@ -53,6 +52,7 @@ type
     Label3: TfpgLabel;
     ProgressBar: TfpgProgressBar;
     lblStatus: TfpgLabel;
+    lbIndex: TfpgListBox;
     {@VFD_HEAD_END: MainForm}
     Files: TList; // current open help files.
     Debug: boolean;
@@ -192,11 +192,10 @@ var
   f: THelpFile;
 begin
   f := THelpFile(Files[0]);
-  tvIndex.RootNode.Clear;
+  lbIndex.Items.Clear;
   for i := 0 to f.Index.Count-1 do
-  begin
-    tvIndex.RootNode.AppendText(f.Index[i]);
-  end;
+    lbIndex.Items.AddObject(f.Index[i], f.Topics[i]);
+  lbIndex.Invalidate
 end;
 
 procedure TMainForm.btnGoClicked(Sender: TObject);
@@ -678,16 +677,6 @@ begin
     //    OnChange  := @tvContentsChange;
   end;
 
-  tvIndex := TfpgTreeView.Create(tsIndex);
-  with tvIndex do
-  begin
-    Name := 'tvIndex';
-    SetPosition(4, 32, 242, 264);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#Label1';
-    TabOrder := 0;
-  end;
-
   Splitter1 := TfpgSplitter.Create(bvlBody);
   with Splitter1 do
   begin
@@ -996,6 +985,18 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     Text := '';
+  end;
+
+  lbIndex := TfpgListBox.Create(tsIndex);
+  with lbIndex do
+  begin
+    Name := 'lbIndex';
+    SetPosition(4, 32, 242, 264);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#List';
+    HotTrack := False;
+    PopupFrame := False;
+    TabOrder := 1;
   end;
 
   {@VFD_BODY_END: MainForm}
