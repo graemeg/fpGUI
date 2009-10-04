@@ -206,19 +206,13 @@ destructor THelpFile.Destroy;
 var
   TopicIndex: longint;
 begin
-  FreeMem( HighlightWords,
-           _Dictionary.Count * sizeof( longint ) );
-
+  FreeMem( HighlightWords, _Dictionary.Count * sizeof( longint ) );
   FreeMem( _Data, _DataLen );
-
   for TopicIndex:= 0 to _Topics.Count - 1 do
     TTopic( _Topics[ TopicIndex ] ).Destroy;
   _Topics.Free;
-
   _Index.Free;
-
   _Dictionary.Free;
-
   _SearchTable.Free;
 end;
 
