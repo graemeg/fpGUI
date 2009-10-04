@@ -27,12 +27,15 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="fpgui_toolkit"/>
+        <PackageName Value="utf8tools"/>
       </Item1>
+      <Item2>
+        <PackageName Value="fpgui_toolkit"/>
+      </Item2>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="16">
       <Unit0>
         <Filename Value="newview_fpgui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -107,6 +110,11 @@
         <Filename Value="../docs/inf04.txt"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
+      <Unit15>
+        <Filename Value="SearchUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SearchUnit"/>
+      </Unit15>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -10,7 +10,7 @@ uses
   {$IFDEF Timing}EpikTimer,{$ENDIF}
   fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow,
   IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery,
-  nvUtilities, nvNullObjects, HelpFile;
+  nvUtilities, nvNullObjects, HelpFile, SearchUnit, utf8tools;
 
 
 procedure MainProc;
