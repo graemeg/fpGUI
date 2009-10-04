@@ -3,12 +3,12 @@ unit nvUtilities;
 {$mode objfpc}{$H+}
 
 // disable to remove debugging output
-{.$Define DEBUG}
+{$Define DEBUG}
 
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, fpg_base;
 
 const
  { TODO -oGraeme : Should this change to LineEnding (platfrom dependant) }
@@ -35,8 +35,15 @@ procedure ProfileEvent(const AString: string);
 // Return AFilename's size in bytes
 function GetFileSize(const AFilename: string): integer;
 
+function IsDigit(const AChar: TfpgChar): boolean;
+function IsAlpha(const AChar: TfpgChar): boolean;
+
 
 implementation
+
+uses
+  character // from utf8tools package (pulls in LCL requirement which we MUST change)
+  ;
 
 
 Function ExtractNextValue( var S: string;
@@ -96,6 +103,16 @@ begin
   {$i+}
   Result := FileSize(f);
   CloseFile(f);
+end;
+
+function IsDigit(const AChar: TfpgChar): boolean;
+begin
+  Result := TCharacter.IsDigit(AChar);
+end;
+
+function IsAlpha(const AChar: TfpgChar): boolean;
+begin
+  Result := TCharacter.IsLetter(AChar);
 end;
 
 end.
