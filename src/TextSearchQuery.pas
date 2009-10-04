@@ -25,6 +25,8 @@ Type
   end;
 
   TTextSearchQuery = class
+  private
+    procedure Cleanup;
   protected
     Terms: TList;
     function GetTerm( Index: longint ): TSearchTerm;
@@ -50,6 +52,7 @@ var
   CombineMethod: TSearchTermCombineMethod;
   lTerm: TSearchTerm;
 begin
+  inherited Create;
   Terms := TList.Create;
   try
     RemainingSearchString := Uppercase( SearchString );
@@ -84,24 +87,40 @@ begin
       Terms.Add( lTerm );
     end;
   except
-    Destroy; // clean up
-    raise; // reraise exception
+      while Terms.Count > 0 do
+      begin
+        lTerm := TSearchTerm(Terms.Last);
+        Terms.Remove(lTerm);
+        lTerm.Free;
+      end;
+      Terms.Free;
+      raise; // reraise exception
   end;
 end;
 
 destructor TTextSearchQuery.Destroy;
+begin
+  Cleanup;
+  inherited Destroy;
+end;
+
+procedure TTextSearchQuery.Cleanup;
 var
   i: TSearchTerm;
 begin
-  while Terms.Count > 0 do
+  if Assigned(Terms) then
   begin
-    i := TSearchTerm(Terms.Last);
-    Terms.Remove(i);
-    i.Free;
+  while Terms.Count > 0 do
+    begin
+      i := TSearchTerm(Terms.Last);
+      Terms.Remove(i);
+      i.Free;
+    end;
+
+    //  DestroyListObjects( Terms );
+    Terms.Free;
   end;
 
-//  DestroyListObjects( Terms );
-  Terms.Destroy;
 end;
 
 function TTextSearchQuery.GetTerm( index: longint ): TSearchTerm;
