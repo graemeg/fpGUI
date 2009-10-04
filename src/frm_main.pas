@@ -53,6 +53,7 @@ type
     ProgressBar: TfpgProgressBar;
     lblStatus: TfpgLabel;
     lbIndex: TfpgListBox;
+    btnSearch: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     Files: TList; // current open help files.
     Debug: boolean;
@@ -73,10 +74,13 @@ type
     procedure   btnShowIndex(Sender: TObject);
     procedure   btnGoClicked(Sender: TObject);
     procedure   tvContentsChange(Sender: TObject);
+    procedure   MainFormException(Sender: TObject; E: Exception);
     procedure   MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure   PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
     procedure   tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   btnSearchClicked(Sender: TObject);
     procedure   FileOpen;
     function    OpenFile(const AFileNames: string): boolean;
     procedure   CloseFile;
@@ -111,10 +115,15 @@ uses
   {$IFDEF Timing}
   ,EpikTimer
   {$ENDIF}
-  ;
+  ,TextSearchQuery, SearchUnit;
 
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.MainFormException(Sender: TObject; E: Exception);
+begin
+  TfpgMessageDialog.Critical('An unexpected error occurred.', E.Message);
+end;
 
 procedure TMainForm.MainFormShow(Sender: TObject);
 {$IFDEF Timing}
@@ -237,6 +246,78 @@ procedure TMainForm.lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   DisplayTopic;
+end;
+
+procedure TMainForm.lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+begin
+  DisplayTopic;
+end;
+
+procedure TMainForm.btnSearchClicked(Sender: TObject);
+var
+  Query: TTextSearchQuery;
+  SearchText: TfpgString;
+  SearchResults: TList;
+  TopicIndex: integer;
+  Topic: TTopic;
+  FileIndex: integer;
+  HelpFile: THelpFile;
+begin
+  SearchText:= trim(edSearchText.Text);
+  if SearchText = '' then
+    Exit;  //==>
+
+  try
+    Query := TTextSearchQuery.Create( SearchText );
+  except
+    on e: ESearchSyntaxError do
+    begin
+      ShowMessage( 'Error in search syntax: '
+                   + e.Message );
+      exit;
+    end;
+  end;
+
+  SearchResults := TList.Create;
+
+  // Search open help file
+  for FileIndex := 0 to Files.Count - 1 do
+  begin
+    HelpFile := THelpFile(Files[ FileIndex ]);
+    SearchHelpFile( HelpFile,
+                    Query,
+                    SearchResults,             // SearchResults get populated
+                    HelpFile.HighlightWords ); // HighlightWords get populate here!
+  end;
+
+  // Sort results across all files by relevance
+  SearchResults.Sort( @TopicRelevanceCompare );
+
+  // Load topics into search results list.
+  lbSearchResults.BeginUpdate;
+  lbSearchResults.Items.Clear;
+  for TopicIndex := 0 to SearchResults.Count - 1 do
+  begin
+    Topic := TTopic(SearchResults[ TopicIndex ]);
+    lbSearchResults.Items.AddObject( Topic.Title
+                                          + ' ['
+                                          + IntToStr( Topic.SearchRelevance )
+                                          + ']',
+                                          Topic );
+  end;
+
+  lbSearchResults.FocusItem := -1;
+  lbSearchResults.EndUpdate;
+  fpgApplication.ProcessMessages; // make sure list gets displayed
+
+  Query.Free;
+  SearchResults.Free;
+
+  if lbSearchResults.Items.Count > 0 then
+    lbSearchResults.FocusItem := 0
+  else
+    lbSearchResults.Items.Add( '(No matches found for "' + SearchText + '")' );
 end;
 
 procedure TMainForm.FileOpen;
@@ -537,7 +618,7 @@ var
 Begin
   ProfileEvent('DisplayTopic >>>>');
   case PageControl1.ActivePageIndex of
-    0:  begin
+    0:  begin // TOC tab
           if tvContents.Selection = nil then
           begin
             ShowMessage('You must select a topic first by clicking it.');
@@ -547,7 +628,7 @@ Begin
             Topic := TTopic(tvContents.Selection.Data);
           ProfileEvent('Got Topic from Treeview');
         end;
-    1:  begin
+    1:  begin // Index tab
           if lbIndex.FocusItem = -1 then
           begin
             ShowMessage('You must select a index first by clicking it.');
@@ -556,6 +637,16 @@ Begin
           else
             Topic := TTopic(lbIndex.Items.Objects[lbIndex.FocusItem]);
           ProfileEvent('Got Topic from Index listbox');
+        end;
+    2:  begin // Search tab
+          if lbSearchResults.FocusItem = -1 then
+          begin
+            ShowMessage('You must select a search result first by clicking it.');
+            Exit;  //==>
+          end
+          else
+            Topic := TTopic(lbSearchResults.Items.Objects[lbSearchResults.FocusItem]);
+          ProfileEvent('Got Topic from Search Results listbox');
         end;
   end;
 
@@ -614,6 +705,7 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  fpgApplication.OnException  := @MainFormException;
   OnShow  := @MainFormShow;
   Files := TList.Create;
   { TODO -oGraeme : Make Debug a menu option }
@@ -658,7 +750,7 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 0, 260, 328);
-    ActivePageIndex := 1;
+    ActivePageIndex := 2;
     TabOrder := 0;
     Align := alLeft;
     OnChange  := @PageControl1Change;
@@ -904,7 +996,7 @@ begin
   with edSearchText do
   begin
     Name := 'edSearchText';
-    SetPosition(4, 20, 242, 26);
+    SetPosition(4, 20, 210, 26);
     Anchors := [anLeft,anRight,anTop];
     TabOrder := 1;
     Text := '';
@@ -997,6 +1089,7 @@ begin
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 9;
+    OnDoubleClick  := @lbSearchResultsDoubleClick;
   end;
 
   Label3 := TfpgLabel.Create(tsSearch);
@@ -1039,6 +1132,20 @@ begin
     PopupFrame := False;
     TabOrder := 1;
     OnDoubleClick  := @lbIndexDoubleClick;
+  end;
+
+  btnSearch := TfpgButton.Create(tsSearch);
+  with btnSearch do
+  begin
+    Name := 'btnSearch';
+    SetPosition(220, 20, 28, 26);
+    Anchors := [anRight,anTop];
+    Text := 'Go';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 11;
+    OnClick := @btnSearchClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
