@@ -2,6 +2,7 @@
 <CONFIG>
   <Package Version="3">
     <Name Value="fpgui_richtext"/>
+    <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
       <Version Value="8"/>
       <SearchPaths>
@@ -24,10 +25,17 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="1">
+    <Description Value="RichTextView component"/>
+    <License Value="LGPL2 with static linking exception."/>
+    <Version Minor="1"/>
+    <Files Count="2">
       <Item1>
         <Filename Value="RichTextDocumentUnit.pas"/>
       </Item1>
+      <Item2>
+        <Filename Value="ACLStringUtility.pas"/>
+        <UnitName Value="ACLStringUtility"/>
+      </Item2>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
@@ -40,7 +48,7 @@
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)"/>
+      <UnitPath Value="$(PkgOutDir)/"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>

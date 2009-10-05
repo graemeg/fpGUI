@@ -7,7 +7,7 @@ unit fpgui_richtext;
 interface
 
 uses
-  RichTextDocumentUnit, LazarusPackageIntf;
+  RichTextDocumentUnit, ACLStringUtility, LazarusPackageIntf;
 
 implementation
 

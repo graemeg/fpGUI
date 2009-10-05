@@ -11,6 +11,8 @@ uses
   ;
 
 type
+  COUNTRYCODE = string[2];
+
   TTagType = ( ttInvalid,
                ttBold, ttBoldOff,
                ttItalic, ttItalicOff,
@@ -74,7 +76,7 @@ function ExtractPreviousTextElement( const TextStart: PChar;
 
 // Parse a color name or value (#hexval). Returns true if valid
 function GetTagColor( const ColorParam: string;
-                      var Color: TColor ): boolean;
+                      var Color: TfpgColor ): boolean;
 
 function GetTagTextAlignment( const AlignParam: string;
                               const Default: TTextAlignment ): TTextAlignment;
@@ -121,7 +123,7 @@ Implementation
 uses
 //  BseDOS, // for NLS/case mapping
   SysUtils
-//  ,ACLStringUtility
+  ,ACLStringUtility
   ;
 
 const
@@ -496,7 +498,7 @@ begin
 end;
 
 function GetTagColor( const ColorParam: string;
-                      var Color: TColor ): boolean;
+                      var Color: TfpgColor ): boolean;
 var
   ColorIndex: longint;
 begin
@@ -555,9 +557,6 @@ var
   pMatchStart: pchar;
   pMatchStartNext: pchar;
   MatchIndex: longint;
-
-  CountryData: COUNTRYCODE;
-  CaseMap: array[ Low( Char )..High( Char ) ] of char;
   C: Char;
 begin
   if Length( Text ) = 0 then
@@ -570,24 +569,9 @@ begin
   end;
 
   P := pRichText;
-
   MatchIndex := 1;
 
-  // Get case mapping of all chars (only SBCS)
-
-  CountryData.Country := 0; // default country
-  CountryData.CodePage := 0; // default codepage
-
-  // fill array with all chars
-  for C := Low( CaseMap ) to High( CaseMap ) do
-    CaseMap[ C ] := C;
-
-  DosMapCase( sizeof( CaseMap ),
-              CountryData,
-              CaseMap );
-
   // Now search, case insensitively
-
   while true do
   begin
     Element := ExtractNextTextElement( P, NextP );
@@ -607,8 +591,7 @@ begin
 
       else
       begin
-        if   CaseMap[ Element.Character ]
-           = CaseMap[ Text[ MatchIndex ] ] then
+        if Uppercase(Element.Character) = UpperCase(Text[Matchindex]) then
         begin
           // found a match
           if MatchIndex = 1 then
