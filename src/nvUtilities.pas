@@ -41,9 +41,9 @@ function IsAlpha(const AChar: TfpgChar): boolean;
 
 implementation
 
-uses
-  character // from utf8tools package (pulls in LCL requirement which we MUST change)
-  ;
+//uses
+//  character // from utf8tools package (pulls in LCL requirement which we MUST change)
+//  ;
 
 
 Function ExtractNextValue( var S: string;
@@ -107,12 +107,19 @@ end;
 
 function IsDigit(const AChar: TfpgChar): boolean;
 begin
-  Result := TCharacter.IsDigit(AChar);
+  { TODO -oGraeme -cunicode : Not utf-8 compliant. }
+  Result := ( AChar>='0' ) and ( AChar<='9' );
+  //Result := TCharacter.IsDigit(AChar);
 end;
 
 function IsAlpha(const AChar: TfpgChar): boolean;
-begin
-  Result := TCharacter.IsLetter(AChar);
+var
+  UppercaseC: TfpgChar;
+Begin
+  { TODO -oGraeme -cunicode : Not utf-8 compliant. }
+  UppercaseC := UpperCase( AChar );
+  Result := ( UppercaseC >= 'A' ) and ( UppercaseC <= 'Z' );
+  //Result := TCharacter.IsLetter(AChar);
 end;
 
 end.

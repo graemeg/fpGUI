@@ -27,13 +27,10 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="utf8tools"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpgui_toolkit"/>
-      </Item2>
+      </Item1>
     </RequiredPackages>
     <Units Count="16">
       <Unit0>
