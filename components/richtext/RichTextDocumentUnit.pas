@@ -64,19 +64,12 @@ Function ExtractTag( Var TextPointer: PChar ): TTag;
 // Returns tag ending at TextPointer
 // (Expects textpointer is currently pointing at the >)
 // and moves TextPointer to the first char of the tag
-Function ExtractPreviousTag( const TextStart: PChar;
-                             Var TextPointer: PChar ): TTag;
-
-function ExtractNextTextElement( TextPointer: PChar;
-                                 Var NextElement: PChar ): TTextElement;
-
-function ExtractPreviousTextElement( const TextStart: PChar;
-                                     TextPointer: PChar;
-                                     Var NextElement: PChar ): TTextElement;
+Function ExtractPreviousTag( const TextStart: PChar; Var TextPointer: PChar ): TTag;
+function ExtractNextTextElement( TextPointer: PChar; Var NextElement: PChar ): TTextElement;
+function ExtractPreviousTextElement( const TextStart: PChar; TextPointer: PChar; Var NextElement: PChar ): TTextElement;
 
 // Parse a color name or value (#hexval). Returns true if valid
-function GetTagColor( const ColorParam: string;
-                      var Color: TfpgColor ): boolean;
+function GetTagColor( const ColorParam: string; var Color: TfpgColor ): boolean;
 
 function GetTagTextAlignment( const AlignParam: string;
                               const Default: TTextAlignment ): TTextAlignment;
@@ -350,8 +343,7 @@ begin
 
 end;
 
-function ExtractNextTextElement( TextPointer: PChar;
-                                 Var NextElement: PChar ): TTextElement;
+function ExtractNextTextElement( TextPointer: PChar; Var NextElement: PChar ): TTextElement;
 var
   TheChar: Char;
   NextChar: char;
