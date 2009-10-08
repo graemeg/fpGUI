@@ -37,6 +37,10 @@ function GetFileSize(const AFilename: string): integer;
 
 function IsDigit(const AChar: TfpgChar): boolean;
 function IsAlpha(const AChar: TfpgChar): boolean;
+function Between( const Value: longint; const Limit1: longint; const Limit2: longint ): boolean;
+
+
+Operator = (ARect: TRect; BRect: TRect): boolean;
 
 
 implementation
@@ -120,6 +124,22 @@ Begin
   UppercaseC := UpperCase( AChar );
   Result := ( UppercaseC >= 'A' ) and ( UppercaseC <= 'Z' );
   //Result := TCharacter.IsLetter(AChar);
+end;
+
+function Between( const Value: longint; const Limit1: longint; const Limit2: longint ): boolean;
+begin
+  if Limit1 < Limit2 then
+    Result:= ( Value >= Limit1 ) and ( Value <= Limit2 )
+  else
+    Result:= ( Value >= Limit2 ) and ( Value <= Limit1 )
+end;
+
+operator = (ARect: TRect; BRect: TRect): boolean;
+begin
+  result :=  (ARect.Top   = BRect.Top) and
+             (ARect.Left  = BRect.Left) and
+             (ARect.Bottom = BRect.Bottom) and
+             (ARect.Right = BRect.Right);
 end;
 
 end.

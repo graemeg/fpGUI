@@ -7,14 +7,9 @@ unit fpgui_richtext;
 interface
 
 uses
-  RichTextDocumentUnit, ACLStringUtility, LazarusPackageIntf;
+    RichTextDocumentUnit, ACLStringUtility, CanvasFontManager, RichTextStyleUnit, 
+  nvUtilities, RichTextLayoutUnit, RichTextDisplayUnit, RichTextView;
 
 implementation
 
-procedure Register; 
-begin
-end; 
-
-initialization
-  RegisterPackage('fpgui_richtext', @Register); 
 end.

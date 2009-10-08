@@ -2,11 +2,12 @@
 <CONFIG>
   <Package Version="3">
     <Name Value="fpgui_richtext"/>
+    <AddToProjectUsesSection Value="False"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
       <Version Value="8"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
         <Style Value="1"/>
@@ -28,16 +29,40 @@
     <Description Value="RichTextView component"/>
     <License Value="LGPL2 with static linking exception."/>
     <Version Minor="1"/>
-    <Files Count="2">
+    <Files Count="8">
       <Item1>
         <Filename Value="RichTextDocumentUnit.pas"/>
+        <UnitName Value="RichTextDocumentUnit"/>
       </Item1>
       <Item2>
         <Filename Value="ACLStringUtility.pas"/>
         <UnitName Value="ACLStringUtility"/>
       </Item2>
+      <Item3>
+        <Filename Value="CanvasFontManager.pas"/>
+        <UnitName Value="CanvasFontManager"/>
+      </Item3>
+      <Item4>
+        <Filename Value="RichTextStyleUnit.pas"/>
+        <UnitName Value="RichTextStyleUnit"/>
+      </Item4>
+      <Item5>
+        <Filename Value="nvUtilities.pas"/>
+        <UnitName Value="nvUtilities"/>
+      </Item5>
+      <Item6>
+        <Filename Value="RichTextLayoutUnit.pas"/>
+        <UnitName Value="RichTextLayoutUnit"/>
+      </Item6>
+      <Item7>
+        <Filename Value="RichTextDisplayUnit.pas"/>
+        <UnitName Value="RichTextDisplayUnit"/>
+      </Item7>
+      <Item8>
+        <Filename Value="RichTextView.pas"/>
+        <UnitName Value="RichTextView"/>
+      </Item8>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="fpgui_toolkit"/>

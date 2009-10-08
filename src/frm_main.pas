@@ -8,7 +8,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
   fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button, fpg_listbox,
   fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar,
-  HelpFile;
+  HelpFile, RichTextView;
 
 type
 
@@ -25,7 +25,7 @@ type
     tsHistory: TfpgTabSheet;
     tvContents: TfpgTreeView;
     Splitter1: TfpgSplitter;
-    Memo1: TfpgMemo;
+    Memo1: TRichTextView;
     MainMenu: TfpgMenuBar;
     miFile: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
@@ -177,6 +177,7 @@ var
   f: THelpFile;
   i: integer;
 begin
+{
   Memo1.Lines.Clear;
   Memo1.Lines.BeginUpdate;
   f := THelpFile(Files[0]);
@@ -194,6 +195,7 @@ begin
       Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
   end;
   Memo1.Lines.EndUpdate;
+}
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
@@ -476,7 +478,8 @@ begin
   tvContents.Selection := nil;
   tvContents.RootNode.Clear;
   tvContents.Invalidate;
-  Memo1.Lines.Clear;
+  Memo1.Clear;
+//  Memo1.Lines.Clear;
 
   // First save notes. It's important we do this first
   // since we scan all notes each time to find the ones
@@ -650,7 +653,8 @@ Begin
         end;
   end;
 
-  Memo1.Lines.Clear;
+//  Memo1.Clear;
+//  Memo1.Lines.Clear;
   ImageIndices := TList.Create;
   ProfileEvent('Cleared memo...');
 
@@ -672,7 +676,8 @@ Begin
   { TODO -oGraeme : We do not support images yet }
   ImageIndices.Free;
 
-  Memo1.Lines.Text := lText;
+  Memo1.AddText(PChar(lText));
+//  Memo1.Lines.Text := lText;
 end;
 
 procedure TMainForm.ResetProgress;
@@ -818,12 +823,12 @@ begin
     Align := alLeft;
   end;
 
-  Memo1 := TfpgMemo.Create(bvlBody);
+  Memo1 := TRichTextView.Create(bvlBody);
   with Memo1 do
   begin
     Name := 'Memo1';
     SetPosition(276, 36, 244, 232);
-    FontDesc := '#Edit1';
+//    FontDesc := '#Edit1';
     TabOrder := 2;
     Align := alClient;
   end;
