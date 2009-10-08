@@ -719,6 +719,7 @@ end;
 
 destructor TMainForm.Destroy;
 begin
+  Files.Free;
   inherited Destroy;
 end;
 
