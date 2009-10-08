@@ -47,15 +47,24 @@ Implementation
 procedure FillInt32Array( pArray: Int32ArrayPointer;
                           Size: longint;
                           Value: Int32 );
+var
+  i: integer;
 begin
   assert( Size > 0 );
-  Asm
-    Mov EAX, Value
-    Mov EDI, pArray
-    Mov ECX, Size
-    CLD        // direction = up
-    REP STOSD   // store double word, until ECX = 0
-  End;
+  if Size < 1 then
+    Exit;
+  for i := 0 to Size-1 do
+  begin
+    pArray^[i] := Value;
+  end;
+
+  //Asm
+  //  Mov EAX, Value
+  //  Mov EDI, pArray
+  //  Mov ECX, Size
+  //  CLD        // direction = up
+  //  REP STOSD   // store double word, until ECX = 0
+  //End;
 end;
 
 Initialization
