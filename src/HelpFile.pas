@@ -221,15 +221,11 @@ var
   Topic: TTopic;
   EntryIndex: longint;
   pEntry: pTTOCEntryStart;
-  tocarray: array of Int32;
+  tocarray: ^Int32;
   p: PByte;
 begin
   _Topics.Capacity := _Header.ntoc;
-
-//--------------------------------- experimental >>
-  SetLength(tocarray, _Header.ntoc);
   p := _Data + _Header.tocoffsetsstart;
-
   Move(p, tocarray, SizeOf(tocarray));
   for EntryIndex := 0 to _Header.ntoc-1 do
   begin
@@ -242,28 +238,6 @@ begin
     Topic.Index := EntryIndex;
     _Topics.Add(Topic);
   end;
-  SetLength(tocarray, 0);
-  exit;
-//----------------------------------
-
-  //pEntry:= _Data + _Header.tocstart;
-
-//writeln('----------- old method ');
-  //for EntryIndex := 0 to _Header.ntoc-1 do
-  //begin
-    //Topic:= TTopic.Create( _Data,
-                           //_Header,
-                           //_Dictionary,
-                           //pEntry );
-
-    //Topic.HelpFile := Self;
-    //Topic.Index := EntryIndex;
-
-    //_Topics.Add( Topic );
-
-    //inc( pEntry, pEntry^.Length );
-    //writeln('Topic ' + IntToStr(EntryIndex) + ' length = ' + IntToStr(pEntry^.Length));
-  //end;
 end;
 
 procedure THelpFile.ReadDictionary;
