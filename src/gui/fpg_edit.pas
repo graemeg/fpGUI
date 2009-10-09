@@ -54,6 +54,7 @@ type
     FOnChange: TNotifyEvent;
     FMaxLength: integer;
     FSelecting: Boolean;
+    FReadOnly: Boolean;
     procedure   Adjust(UsePxCursorPos: boolean = false); virtual;
     procedure   AdjustTextOffset(UsePxCursorPos: boolean); virtual;
     procedure   AdjustDrawingInfo; virtual;
@@ -75,6 +76,7 @@ type
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
+    procedure   SetReadOnly(const AValue: Boolean);
   protected
     FFont: TfpgFont;
     FSideMargin: integer;
@@ -115,6 +117,7 @@ type
     property    MaxLength: Integer read FMaxLength write FMaxLength;
     property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
+    property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property    Text: String read FText write SetText;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
   public
@@ -996,6 +999,7 @@ begin
   FAutoSelect       := True;
   FSelecting        := False;
   FHideSelection    := True;
+  FReadOnly         := False;
   FSideMargin       := 3;
   FHeightMargin     := 2;
   FMaxLength        := 0; // no limit
@@ -1165,6 +1169,12 @@ begin
         itm.Enabled := Text <> '';
     end;
   end;
+end;
+
+procedure TfpgBaseEdit.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly = AValue then exit;
+  FReadOnly := AValue;
 end;
 
 function TfpgBaseEdit.GetMarginAdjustment: integer;
