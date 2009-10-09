@@ -385,6 +385,8 @@ procedure DebugLn(const s1, s2: TfpgString);
 procedure DebugLn(const s1, s2, s3: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 
+// operator overloading of some useful structures
+operator = (a: TRect; b: TRect): boolean;
 
 implementation
 
@@ -767,6 +769,17 @@ end;
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 begin
   DebugLn(s1 + ' ' + s2 + ' ' + s3 + ' ' + s4);
+end;
+
+operator = (a: TRect; b: TRect): boolean;
+begin
+  if    (a.Top    = b.Top)
+    and (a.Left   = b.Left)
+    and (a.Bottom = b.Bottom)
+    and (a.Right  = b.Right) then
+    Result := True
+  else
+    Result := False;
 end;
 
 { TfpgTimer }
