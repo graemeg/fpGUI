@@ -46,8 +46,6 @@ Type
 
   TRichTextView = class;
 
-  TLinkEvent = procedure( Sender: TRichTextView; Link: string ) of object;
-
 
   TRichTextView = Class( TfpgWidget )
   private
