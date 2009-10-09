@@ -26,6 +26,7 @@ type
     tvContents: TfpgTreeView;
     Splitter1: TfpgSplitter;
     Memo1: TRichTextView;
+//    Memo1: TfpgMemo;
     MainMenu: TfpgMenuBar;
     miFile: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
@@ -71,6 +72,7 @@ type
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
+    procedure   miDebugHex(Sender: TObject);
     procedure   btnShowIndex(Sender: TObject);
     procedure   btnGoClicked(Sender: TObject);
     procedure   tvContentsChange(Sender: TObject);
@@ -196,6 +198,12 @@ begin
   end;
   Memo1.Lines.EndUpdate;
 }
+end;
+
+procedure TMainForm.miDebugHex(Sender: TObject);
+begin
+  Debug := not Debug;
+  DisplayTopic;
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
@@ -653,7 +661,7 @@ Begin
         end;
   end;
 
-//  Memo1.Clear;
+  Memo1.Clear;
 //  Memo1.Lines.Clear;
   ImageIndices := TList.Create;
   ProfileEvent('Cleared memo...');
@@ -812,8 +820,8 @@ begin
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
-    //    OnChange  := @tvContentsChange;
-    OnDoubleClick  := @tvContentsDoubleClick;
+        OnChange  := @tvContentsChange;
+    //OnDoubleClick  := @tvContentsDoubleClick;
   end;
 
   Splitter1 := TfpgSplitter.Create(bvlBody);
@@ -824,12 +832,20 @@ begin
     Align := alLeft;
   end;
 
+  //Memo1 := TfpgMemo.Create(bvlBody);
+  //with Memo1 do
+  //begin
+  //  Name := 'Memo1';
+  //  SetPosition(276, 36, 244, 232);
+  //  FontDesc := '#Edit1';
+  //  TabOrder := 2;
+  //  Align := alClient;
+  //end;
   Memo1 := TRichTextView.Create(bvlBody);
   with Memo1 do
   begin
     Name := 'Memo1';
     SetPosition(276, 36, 244, 232);
-//    FontDesc := '#Edit1';
     TabOrder := 2;
     Align := alClient;
   end;
@@ -879,6 +895,7 @@ begin
     AddMenuItem('Help using help', '', nil);
     AddMenuItem('-', '', nil);
     AddMenuItem('Debug: Header', '', @miDebugHeader);
+    AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
     AddMenuItem('-', '', nil);
     AddMenuItem('About fpGUI Toolkit', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
