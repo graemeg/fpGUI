@@ -131,22 +131,16 @@ var
   NewMarginX: longint;
 
   procedure DrawTextBlock;
-  var
-    PhysX: longint;
   begin
-writeln('**** DrawTextBlock *****');
-    PhysX := X div FontWidthPrecisionFactor;
-    FontManager.Canvas.DrawText(PhysX, Y, StringToDraw);
-writeln('  PhysX=', PhysX, '   Y=', Y, '  String=', StringToDraw);
+writeln('  **** DrawTextBlock *****');
     DrawRichTextString( FontManager,
-                        PhysX,
-                        Y,
+                        X,         // value gets adjusted by the time it returns
+                        Y,         // value gets adjusted by the time it returns
                         PChar(StringToDraw),
                         Length(StringToDraw),
                         Selected,
                         Style.Color,
                         Style.BackgroundColor );
-    X := PhysX * FontWidthPrecisionFactor;
     StringToDraw := '';
   end;
 
