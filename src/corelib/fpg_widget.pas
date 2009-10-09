@@ -132,6 +132,7 @@ type
     destructor  Destroy; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
+    function    InDesigner: boolean;
     procedure   Realign;
     procedure   SetFocus;
     procedure   KillFocus;
@@ -310,6 +311,11 @@ end;
 function TfpgWidget.GetBoundsRect: TfpgRect;
 begin
   Result.SetRect(Left, Top, Width+1, Height+1);
+end;
+
+function TfpgWidget.InDesigner: boolean;
+begin
+  Result := (FFormDesigner <> nil)
 end;
 
 procedure TfpgWidget.Realign;
