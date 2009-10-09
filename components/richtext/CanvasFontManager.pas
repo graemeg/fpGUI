@@ -521,29 +521,6 @@ begin
     result := FaceName; // no substitution
 end;
 
-// NOTE!!! Not currently used or working...
-// Find a font with exact width and height
-//------------------------------------------------------------------------
-function FindXYSizeFont( const Face: TFontFace;
-                         const XSize: longint;
-                         const YSize: longint ): TLogicalFont;
-var
-  SizeIndex: longint;
-  F: TLogicalFont;
-begin
-  for SizeIndex := 0 to Face.Sizes.Count - 1 do
-  begin
-    F := TLogicalFont(Face.Sizes[ SizeIndex ]);
-    if     ( F.lMaxbaselineExt = YSize )
-       and ( F.lAveCharWidth = XSize ) then
-    begin
-      // found exact match
-      //FontInfo.lMaxbaselineExt := F.lMaxbaselineExt;
-      //FontInfo.lAveCharWidth := F.lAveCharWidth;
-      //Result.FontType := ftBitmap;
-    end;
-  end;
-end;
 
 // Ask OS/2 dummy font window to convert a font spec
 // into a FONTMETRICS.
