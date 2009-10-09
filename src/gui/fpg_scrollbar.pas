@@ -126,9 +126,6 @@ end;
 
 procedure TfpgScrollBar.HandlePaint;
 begin
-  // Do NOT localize
-  Canvas.BeginDraw;
-  
   if Orientation = orVertical then
   begin
     DrawButton(0, 0, Width, Width, 'sys.sb.up', FScrollbarDownPart = sbpUpBack);
@@ -141,7 +138,6 @@ begin
   end;
 
   DrawSlider(True);
-  Canvas.EndDraw;
 end;
 
 procedure TfpgScrollBar.RepaintSlider;
