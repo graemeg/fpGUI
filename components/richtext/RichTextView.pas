@@ -671,7 +671,7 @@ writeln('DEBUG:  TRichTextView.HandlePaint >>>');
   end;
 
   Assert(FLayout <> nil, 'FLayout may not be nil at this point!');
-//  Draw( 0, FLayout.FNumLines );
+  Draw( 0, FLayout.FNumLines );
   Canvas.ClearClipRect;
 
   if FNeedHScroll then
