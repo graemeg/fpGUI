@@ -54,7 +54,7 @@ type
   TfpgMenuBar = class;
   
   
-  TfpgMenuItem = class(TComponent, ICommandHolder)
+  TfpgMenuItem = class(TfpgComponent, ICommandHolder)
   private
     FCommand: ICommand;
     FEnabled: boolean;
@@ -64,11 +64,13 @@ type
     FSubMenu: TfpgPopupMenu;
     FText: TfpgString;
     FVisible: boolean;
+    FChecked: boolean;
     procedure   SetEnabled(const AValue: boolean);
     procedure   SetHotKeyDef(const AValue: TfpgHotKeyDef);
     procedure   SetSeparator(const AValue: boolean);
     procedure   SetText(const AValue: TfpgString);
     procedure   SetVisible(const AValue: boolean);
+    procedure   SetChecked(const AValue: boolean);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Click;
@@ -77,6 +79,7 @@ type
     procedure   DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord);
     function    GetCommand: ICommand;
     procedure   SetCommand(ACommand: ICommand);
+    property    Checked: boolean read FChecked write SetChecked;
     property    Text: TfpgString read FText write SetText;
     property    HotKeyDef: TfpgHotKeyDef read FHotKeyDef write SetHotKeyDef;
     property    Separator: boolean read FSeparator write SetSeparator;
@@ -220,6 +223,12 @@ procedure TfpgMenuItem.SetVisible(const AValue: boolean);
 begin
   if FVisible=AValue then exit;
   FVisible:=AValue;
+end;
+
+procedure TfpgMenuItem.SetChecked(const AValue: boolean);
+begin
+  if FChecked = AValue then exit;
+  FChecked := AValue;
 end;
 
 procedure TfpgMenuItem.SetHotKeyDef(const AValue: TfpgHotKeyDef);
