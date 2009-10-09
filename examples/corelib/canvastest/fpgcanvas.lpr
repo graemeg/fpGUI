@@ -92,6 +92,12 @@ begin
   y := 60;
   Canvas.SetTextColor(clBlack);
   Canvas.DrawString(5, y, 'This text must be black and default font (' + fpgApplication.DefaultFont.FontDesc + ')');
+
+  // red dot indicates top/left corner of where previous text was started
+  Canvas.Pixels[5,y] := clRed;
+//  Canvas.DrawLine(5,y-4, 5,y+5);
+//  Canvas.DrawLine(1,y, 10, y);
+
   Canvas.SetTextColor(clRed);
   y := y + Canvas.Font.Height;  // fonts are different sizes on differet OS's
   Canvas.DrawString(5, y, 'This text must be red.');
