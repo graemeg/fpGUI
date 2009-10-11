@@ -7,6 +7,7 @@
     <CompilerOptions>
       <Version Value="8"/>
       <SearchPaths>
+        <OtherUnitFiles Value="../../src/"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -29,7 +30,7 @@
     <Description Value="RichTextView component"/>
     <License Value="LGPL2 with static linking exception."/>
     <Version Minor="1"/>
-    <Files Count="8">
+    <Files Count="7">
       <Item1>
         <Filename Value="RichTextDocumentUnit.pas"/>
         <UnitName Value="RichTextDocumentUnit"/>
@@ -47,21 +48,17 @@
         <UnitName Value="RichTextStyleUnit"/>
       </Item4>
       <Item5>
-        <Filename Value="nvUtilities.pas"/>
-        <UnitName Value="nvUtilities"/>
-      </Item5>
-      <Item6>
         <Filename Value="RichTextLayoutUnit.pas"/>
         <UnitName Value="RichTextLayoutUnit"/>
-      </Item6>
-      <Item7>
+      </Item5>
+      <Item6>
         <Filename Value="RichTextDisplayUnit.pas"/>
         <UnitName Value="RichTextDisplayUnit"/>
-      </Item7>
-      <Item8>
+      </Item6>
+      <Item7>
         <Filename Value="RichTextView.pas"/>
         <UnitName Value="RichTextView"/>
-      </Item8>
+      </Item7>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
