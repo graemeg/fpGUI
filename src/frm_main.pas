@@ -693,7 +693,6 @@ Begin
   end;
 
   Memo1.Clear;
-//  Memo1.Lines.Clear;
   ImageIndices := TList.Create;
   ProfileEvent('Cleared memo...');
 
@@ -716,7 +715,6 @@ Begin
   ImageIndices.Free;
 
   Memo1.AddText(PChar(lText));
-//  Memo1.Lines.Text := lText;
 end;
 
 procedure TMainForm.ResetProgress;
@@ -864,15 +862,6 @@ begin
     Align := alLeft;
   end;
 
-  //Memo1 := TfpgMemo.Create(bvlBody);
-  //with Memo1 do
-  //begin
-  //  Name := 'Memo1';
-  //  SetPosition(276, 36, 244, 232);
-  //  FontDesc := '#Edit1';
-  //  TabOrder := 2;
-  //  Align := alClient;
-  //end;
   Memo1 := TRichTextView.Create(bvlBody);
   with Memo1 do
   begin
