@@ -6,8 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
-  fpg_tree, fpg_splitter, fpg_menu, fpg_memo, fpg_button, fpg_listbox,
-  fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar,
+  fpg_tree, fpg_splitter, fpg_menu, fpg_button, fpg_listbox,
+  fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar, fpg_mru,
   HelpFile, RichTextView;
 
 type
@@ -32,6 +32,7 @@ type
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
+    miOpenRecentMenu: TfpgPopupMenu;
     btnIndex: TfpgButton;
     btnGo: TfpgButton;
     ListBox1: TfpgListBox;
@@ -58,6 +59,8 @@ type
     {@VFD_HEAD_END: MainForm}
     Files: TList; // current open help files.
     Debug: boolean;
+    mru: TfpgMRU;
+    FFileOpenRecent: TfpgMenuItem;
 
     // while loading... so owe can display progress
     LoadingFilenameList: TStringList;
@@ -66,6 +69,7 @@ type
     LoadingSizeSoFar: longint;
 
     procedure   MainFormShow(Sender: TObject);
+    procedure   MainFormDestroy(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
@@ -73,6 +77,7 @@ type
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
+    procedure   miMRUClick(Sender: TObject; const FileName: String);
     procedure   btnShowIndex(Sender: TObject);
     procedure   btnGoClicked(Sender: TObject);
     procedure   tvContentsChange(Sender: TObject);
