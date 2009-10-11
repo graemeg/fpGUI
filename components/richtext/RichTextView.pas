@@ -670,6 +670,9 @@ writeln('DEBUG:  TRichTextView.HandlePaint >>>');
     Exit; //==>
   end;
 
+  if Length(FText) = 0 then
+    exit;   // no need to paint anything further.
+
   Assert(FLayout <> nil, 'FLayout may not be nil at this point!');
   Draw( 0, FLayout.FNumLines );
   Canvas.ClearClipRect;
