@@ -269,8 +269,9 @@ procedure TMainForm.PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabS
 begin
   if NewActiveSheet = tsIndex then
   begin
-    if lbIndex.Items.Count = 0 then
-      btnShowIndex(nil);
+    if Files.Count > 0 then
+      if lbIndex.Items.Count = 0 then
+        btnShowIndex(nil);
   end;
 end;
 
