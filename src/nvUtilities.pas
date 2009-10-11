@@ -3,7 +3,7 @@ unit nvUtilities;
 {$mode objfpc}{$H+}
 
 // disable to remove debugging output
-{$Define DEBUG}
+{.$Define DEBUG}
 
 interface
 
@@ -45,7 +45,9 @@ Operator = (ARect: TRect; BRect: TRect): boolean;
 
 implementation
 
-//uses
+uses
+  fpg_utils
+  ;
 //  character // from utf8tools package (pulls in LCL requirement which we MUST change)
 //  ;
 
@@ -101,8 +103,9 @@ var
   f: File;
 begin
   Result := 0;
-  Assign(f, AFileName);
   {$i-}
+  FileMode := 0; // read-only
+  Assign(f, fpgToOSEncoding(AFileName));
   Reset(f);
   {$i+}
   Result := FileSize(f);
