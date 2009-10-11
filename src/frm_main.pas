@@ -118,11 +118,17 @@ const
 implementation
 
 uses
-  fpg_dialogs, fpg_constants, nvUtilities, HelpTopic
+  fpg_dialogs
+  ,fpg_constants
+  ,fpg_iniutils
+  ,nvUtilities
+  ,HelpTopic
   {$IFDEF Timing}
   ,EpikTimer
   {$ENDIF}
-  ,TextSearchQuery, SearchUnit;
+  ,TextSearchQuery
+  ,SearchUnit
+  ;
 
 
 {@VFD_NEWFORM_IMPL}
@@ -152,6 +158,18 @@ begin
     writeln(t.ElapsedDHMS);
     {$ENDIF}
   end;
+  // restore previous window position and size
+  gINI.ReadFormState(self);
+  PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
+  UpdateWindowPosition;
+end;
+
+procedure TMainForm.MainFormDestroy(Sender: TObject);
+begin
+  // save splitter position
+  gINI.WriteInteger('Options', 'SplitterLeft', PageControl1.Width);
+  // save form size and position
+  gINI.WriteFormState(self);
 end;
 
 procedure TMainForm.miFileQuitClicked(Sender: TObject);
@@ -209,6 +227,11 @@ procedure TMainForm.miDebugHex(Sender: TObject);
 begin
   Debug := not Debug;
   DisplayTopic;
+end;
+
+procedure TMainForm.miMRUClick(Sender: TObject; const FileName: String);
+begin
+  OpenFile(FileName);
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
@@ -349,6 +372,7 @@ begin
     if dlg.RunOpenFile then
     begin
 //      FHelpFile := dlg.FileName;
+      mru.AddItem(dlg.Filename);
       OpenFile(dlg.Filename);
       { TODO -oGraeme : Add support for multiple files. }
 //      OpenFile( ListToString( dlg.FileNames, '+' ) );
@@ -725,6 +749,7 @@ begin
   inherited Create(AOwner);
   fpgApplication.OnException  := @MainFormException;
   OnShow  := @MainFormShow;
+  OnDestroy :=@MainFormDestroy;
   Files := TList.Create;
   { TODO -oGraeme : Make Debug a menu option }
   Debug := False;
@@ -871,6 +896,8 @@ begin
     AddMenuItem('Open...', '', @miFileOpenClicked);
     AddMenuItem('Close', '', @miFileCloseClicked);
     AddMenuitem('-', '', nil);
+    FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
+    AddMenuitem('-', '', nil);
     AddMenuItem('Quit', '', @miFileQuitClicked);
   end;
 
@@ -905,6 +932,14 @@ begin
     AddMenuItem('About fpGUI Toolkit', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
   end;
+
+  miOpenRecentMenu := TfpgPopupMenu.Create(self);
+  with miOpenRecentMenu do
+  begin
+    Name := 'miOpenRecentMenu';
+    SetPosition(293, 124, 132, 20);
+  end;
+
 
   btnIndex := TfpgButton.Create(tsIndex);
   with btnIndex do
@@ -1184,9 +1219,19 @@ begin
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := miSettings;
   MainMenu.AddMenuItem('&Bookmarks', nil).SubMenu := miBookmarks;
   MainMenu.AddMenuItem('&Help', nil).SubMenu := miHelp;
+  FFileOpenRecent.SubMenu := miOpenRecentMenu;
 
   // correct default visible tabsheet
   PageControl1.ActivePageIndex := 0;
+
+  // most recently used files
+  mru := TfpgMRU.Create(self);
+  mru.ParentMenuItem  := miOpenRecentMenu;
+  mru.OnClick         :=@miMRUClick;
+  mru.MaxItems        := gINI.ReadInteger('Options', 'MRUFileCount', 8);
+  mru.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
+  mru.LoadMRU;
+
 end;
 
 
