@@ -201,26 +201,27 @@ procedure TMainForm.miDebugHeader(Sender: TObject);
 var
   f: THelpFile;
   i: integer;
+  sl: TStringList;
 begin
-{
-  Memo1.Lines.Clear;
-  Memo1.Lines.BeginUpdate;
+  Memo1.Clear;
+  sl := TStringList.Create;
   f := THelpFile(Files[0]);
-  with Memo1.Lines do
+  with sl do
   begin
-    Add('Filename: ' + f.Filename);
-    Add('----------');
-    Add('Title: ' + f.Title);
-    Add('Dictionary count:' + IntToStr(f.DictionaryCount));
-    Add('Topic count: ' + IntToStr(f.TopicCount));
-    Add('Index count: ' + IntToStr(f.Index.Count));
+    Add('<b><u>Filename:</u></b> <red>' + f.Filename + '<black>');
+    Add('');
+    Add('<b>Title:</b> ' + f.Title);
+    Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
+    Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
+    Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
     Add(' ');
-    Add('Dictionary contents:');
-    for i := 0 to f.DictionaryCount-1 do
-      Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
+    //Add('Dictionary contents:');
+    //for i := 0 to f.DictionaryCount-1 do
+    //  Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
   end;
-  Memo1.Lines.EndUpdate;
-}
+  Memo1.AddText(PChar(sl.Text));
+//  Memo1.Lines.EndUpdate;
+  sl.Free;
 end;
 
 procedure TMainForm.miDebugHex(Sender: TObject);
