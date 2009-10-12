@@ -139,6 +139,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="True"/>
+        <UseHeaptrc Value="True"/>
       </Debugging>
     </Linking>
     <Other>
