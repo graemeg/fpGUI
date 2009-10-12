@@ -26,7 +26,6 @@ type
     tvContents: TfpgTreeView;
     Splitter1: TfpgSplitter;
     Memo1: TRichTextView;
-//    Memo1: TfpgMemo;
     MainMenu: TfpgMenuBar;
     miFile: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
@@ -373,7 +372,6 @@ begin
 
     if dlg.RunOpenFile then
     begin
-//      FHelpFile := dlg.FileName;
       mru.AddItem(dlg.Filename);
       OpenFile(dlg.Filename);
       { TODO -oGraeme : Add support for multiple files. }
@@ -518,7 +516,6 @@ begin
   tvContents.RootNode.Clear;
   tvContents.Invalidate;
   Memo1.Clear;
-//  Memo1.Lines.Clear;
 
   // First save notes. It's important we do this first
   // since we scan all notes each time to find the ones
@@ -794,7 +791,7 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 0, 260, 328);
-    ActivePageIndex := 2;
+    ActivePageIndex := 4;
     TabOrder := 0;
     Align := alLeft;
     OnChange  := @PageControl1Change;
@@ -850,7 +847,7 @@ begin
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
-        OnChange  := @tvContentsChange;
+    OnChange  := @tvContentsChange;
     //OnDoubleClick  := @tvContentsDoubleClick;
   end;
 
@@ -866,7 +863,7 @@ begin
   with Memo1 do
   begin
     Name := 'Memo1';
-    SetPosition(276, 36, 244, 232);
+    SetPosition(368, 192, 244, 92);
     TabOrder := 2;
     Align := alClient;
   end;
@@ -896,7 +893,7 @@ begin
   with miSettings do
   begin
     Name := 'miSettings';
-    SetPosition(292, 52, 132, 20);
+    SetPosition(292, 76, 132, 20);
     AddMenuItem('Options...', '', nil);
   end;
 
@@ -904,7 +901,7 @@ begin
   with miBookmarks do
   begin
     Name := 'miBookmarks';
-    SetPosition(292, 76, 132, 20);
+    SetPosition(292, 100, 132, 20);
     AddMenuItem('Add..', '', nil);
     AddMenuItem('Show', '', nil);
   end;
@@ -913,7 +910,7 @@ begin
   with miHelp do
   begin
     Name := 'miHelp';
-    SetPosition(292, 100, 132, 20);
+    SetPosition(292, 124, 132, 20);
     AddMenuItem('Contents...', '', nil);
     AddMenuItem('Help using help', '', nil);
     AddMenuItem('-', '', nil);
@@ -928,9 +925,8 @@ begin
   with miOpenRecentMenu do
   begin
     Name := 'miOpenRecentMenu';
-    SetPosition(293, 124, 132, 20);
+    SetPosition(309, 52, 132, 20);
   end;
-
 
   btnIndex := TfpgButton.Create(tsIndex);
   with btnIndex do
@@ -1217,6 +1213,7 @@ begin
 
   // most recently used files
   mru := TfpgMRU.Create(self);
+  mru.Name := 'MRU';
   mru.ParentMenuItem  := miOpenRecentMenu;
   mru.OnClick         :=@miMRUClick;
   mru.MaxItems        := gINI.ReadInteger('Options', 'MRUFileCount', 8);
