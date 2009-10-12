@@ -89,7 +89,7 @@ type
     procedure   btnSearchClicked(Sender: TObject);
     procedure   FileOpen;
     function    OpenFile(const AFileNames: string): boolean;
-    procedure   CloseFile;
+    procedure   CloseFile(const ADestroying: boolean = False);
     procedure   OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
     procedure   LoadNotes(AHelpFile: THelpFile);
     procedure   LoadContents;
@@ -260,7 +260,7 @@ end;
 
 procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
-  CloseFile;
+  CloseFile(True);
 end;
 
 procedure TMainForm.PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
@@ -505,16 +505,19 @@ begin
   SetStatus( 'Done' );
 end;
 
-procedure TMainForm.CloseFile;
+procedure TMainForm.CloseFile(const ADestroying: boolean = False);
 var
   FileIndex: longint;
   lHelpFile: THelpFile;
 begin
-  WindowTitle := cTitle + ' - No file';
   tvContents.Selection := nil;
   tvContents.RootNode.Clear;
-  tvContents.Invalidate;
-  RichView.Clear;
+  RichView.Clear(ADestroying);
+  if not ADestroying then
+  begin
+    WindowTitle := cTitle + ' - No file';
+    tvContents.Invalidate;
+  end;
 
   // First save notes. It's important we do this first
   // since we scan all notes each time to find the ones
@@ -756,7 +759,7 @@ var
   FileIndex: integer;
   lHelpFile: THelpFile;
 begin
-  FFileOpenRecent := nil;
+  FFileOpenRecent := nil;   // it was a reference only
   if (Files <> nil) and (Files.Count > 0) then
   begin
     // Now destroy help files

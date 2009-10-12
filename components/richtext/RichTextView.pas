@@ -258,7 +258,7 @@ Type
     procedure   AddText( Text: PChar; ADelay: boolean = False );
     procedure   AddParagraph( Text: PChar );
     procedure   AddSelectedParagraph( Text: PChar );
-    procedure   Clear;
+    procedure   Clear(const ADestroying: boolean = False);
     procedure   InsertText( CharIndexToInsertAt: longword; TextToInsert: PChar );
     property    Text: PChar read FText;
     property    TextEnd: longint read GetTextEnd;
@@ -1607,15 +1607,20 @@ begin
   StrDispose( NewText );
 end;
 
-Procedure TRichTextView.Clear;
+Procedure TRichTextView.Clear(const ADestroying: boolean = False);
 begin
   ClearSelection;
   FText[ 0 ] := #0;
   FTopCharIndex := 0;
-  Layout;
-  if FLayout.FNumLines > 1 then
-    raise Exception.Create('FLayout.FNumLines should have been 0 but it was ' + IntToStr(FLayout.FNumLines));
-//  RePaint;
+  if ADestroying then // component is shutting down
+    FLayout.Free
+  else
+  begin
+    Layout;
+    if FLayout.FNumLines > 1 then
+      raise Exception.Create('FLayout.FNumLines should have been 0 but it was ' + IntToStr(FLayout.FNumLines));
+    RePaint;
+  end;
 end;
 
 //procedure TRichTextView.SetBorder( BorderStyle: TBorderStyle );
