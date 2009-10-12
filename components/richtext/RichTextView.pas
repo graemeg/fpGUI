@@ -50,7 +50,16 @@ Type
   TRichTextView = Class( TfpgWidget )
   private
     FPopupMenu: TfpgPopupMenu;
-    procedure FVScrollbarScroll(Sender: TObject; position: integer);
+    procedure   FVScrollbarScroll(Sender: TObject; position: integer);
+    procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
+    Procedure   CreateDefaultMenu;
+    Procedure   SelectAllMIClick( Sender: TObject );
+    Procedure   CopyMIClick( Sender: TObject );
+    Procedure   RefreshMIClick( Sender: TObject );
+    Procedure   WordWrapMIClick( Sender: TObject );
+    Procedure   SmoothScrollMIClick( Sender: TObject );
+    Procedure   DebugMIClick( Sender: TObject );
+    Procedure   DefaultMenuPopup( Sender: TObject );
   protected
     FFontManager: TCanvasFontManager;
     FRichTextSettings: TRichTextSettings;
@@ -121,6 +130,7 @@ Type
     procedure HandlePaint; override;
     procedure HandleHide; override;
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
 
     //procedure ScanEvent( Var KeyCode: TKeyCode;
     //                     RepeatCount: Byte ); override;
@@ -241,17 +251,6 @@ Type
     Procedure SetImages( Images: TfpgImageList );
     Procedure Notification( AComponent: TComponent;
                             Operation: TOperation ); override;
-
-    // Default Menu
-    Procedure CreateDefaultMenu;
-    Procedure SelectAllMIClick( Sender: TObject );
-    Procedure CopyMIClick( Sender: TObject );
-    Procedure RefreshMIClick( Sender: TObject );
-    Procedure WordWrapMIClick( Sender: TObject );
-    Procedure SmoothScrollMIClick( Sender: TObject );
-    Procedure DebugMIClick( Sender: TObject );
-    Procedure DefaultMenuPopup( Sender: TObject );
-
   Public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; Override;
@@ -711,6 +710,15 @@ writeln('HandleKeyPress');
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TRichTextView.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleRMouseUp(x, y, shiftstate);
+  if Assigned(PopupMenu) then
+    PopupMenu.ShowAt(self, x, y)
+  else
+    ShowDefaultPopupMenu(x, y, ShiftState);
+end;
+
 Destructor TRichTextView.Destroy;
 Begin
   FDefaultMenu.Free;
@@ -784,6 +792,14 @@ end;
 procedure TRichTextView.FVScrollbarScroll(Sender: TObject; position: integer);
 begin
   SetVerticalPosition(position);
+end;
+
+procedure TRichTextView.ShowDefaultPopupMenu(const x, y: integer;
+  const shiftstate: TShiftState);
+begin
+  if not Assigned(FDefaultMenu) then
+    CreateDefaultMenu;
+  FDefaultMenu.ShowAt(x, y);
 end;
 
 procedure TRichTextView.DoAllocateWindowHandle(AParent: TfpgWindowBase);
