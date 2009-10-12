@@ -9,7 +9,7 @@
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
-      <Title Value="newview_fpgui"/>
+      <Title Value="docview"/>
       <UseAppBundle Value="False"/>
     </General>
     <VersionInfo>
@@ -37,9 +37,9 @@
     </RequiredPackages>
     <Units Count="16">
       <Unit0>
-        <Filename Value="newview_fpgui.lpr"/>
+        <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="newview_fpgui"/>
+        <UnitName Value="docview"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
@@ -121,8 +121,7 @@
     <Version Value="8"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
-      <OtherUnitFiles Value="/home/graemeg/Desktop/newview/components/richtext/"/>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>

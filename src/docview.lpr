@@ -1,4 +1,4 @@
-program newview_fpgui;
+program docview;
 
 {$mode objfpc}{$H+}
 
