@@ -116,7 +116,6 @@ Type
 
     procedure DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     Procedure CreateWnd;
-    Procedure DisposeWnd;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure UpdateScrollBarCoords;
     procedure HandlePaint; override;
@@ -837,11 +836,6 @@ writeln('DEBUG:  TRichTextView.CreateWnd >>>>');
     // we haven't yet done a layout
     Layout;
 writeln('DEBUG:  TRichTextView.CreateWnd <<<<');
-end;
-
-Procedure TRichTextView.DisposeWnd;
-begin
-
 end;
 
 procedure TRichTextView.HandleResize(AWidth, AHeight: TfpgCoord);
