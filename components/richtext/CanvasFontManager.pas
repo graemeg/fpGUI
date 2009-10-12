@@ -43,7 +43,7 @@ Type
   TPCharWidthArray = ^TCharWidthArray;
 
   // Used internally for storing full info on font
-  TLogicalFont= Class( TfpgComponent )
+  TLogicalFont = class(TComponent)
   public
     FaceName: String; // user-selected name
     UseFaceName: String; // after substitutions.
@@ -653,6 +653,7 @@ destructor TCanvasFontManager.Destroy;
 var
   i: integer;
   Font: TLogicalFont;
+  face: TFontFace;
 begin
   // select default font so none of our logical fonts are in use
   FCanvas.Font := fpgApplication.DefaultFont;
@@ -661,11 +662,19 @@ begin
   for i := 0 to FLogicalFonts.Count - 1 do
   begin
     Font := TLogicalFont(FLogicalFonts[ i ]);
-    //if not GpiDeleteSetID( FCanvas.Handle, Font.ID ) then
-    //  rc := WinGetLastError( AppHandle );
     Font.Free;
   end;
+  FLogicalFonts.Clear;
   FLogicalFonts.Free;
+
+  // TCanvasFontManager asked for FontFaces to be created, so lets take responsibility to destroy it.
+  for i := 0 to FontFaces.Count-1 do
+  begin
+    face := TFontFace(Fontfaces[i]);
+    face.Free;
+  end;
+  FontFaces.Clear;
+  FontFaces.Free;
   inherited Destroy;
 end;
 
@@ -903,16 +912,10 @@ end;
 procedure TCanvasFontManager.SelectFont( Font: TLogicalFont;
                                          Scale: longint );
 var
-  aHDC: integer;
-  //xRes: LongInt;
-  //yRes: LongInt;
-  //aSizeF: SIZEF;
   f: TfpgFont;
   s: string;
 begin
-writeln('TCanvasFontManager.SelectFont >>>>>>>>>');
   // Select the logical font
-  //GpiSetCharSet( FCanvas.Handle, Font.ID );
   if Font.FontType = ftOutline then
   begin
     s := Font.FaceName + '-' + IntToStr(Font.PointSize);
@@ -922,24 +925,9 @@ writeln('TCanvasFontManager.SelectFont >>>>>>>>>');
       s := s + ':italic';
     if faUnderScore in Font.Attributes then
       s := s + ':underline';
+
     f := fpgGetFont(s);
-    writeln('    fontdesc=', s);
     FCanvas.Font := f;
-  //  // For outline fonts, also set character Box
-  //  aHDC := GpiQueryDevice( FCanvas.Handle );
-  //  DevQueryCaps( aHDC,
-  //                CAPS_HORIZONTAL_FONT_RES,
-  //                1,
-  //                xRes );
-  //  DevQueryCaps( aHDC,
-  //                CAPS_VERTICAL_FONT_RES,
-  //                1,
-  //                yRes );
-  //
-  //  aSizeF.CX := 65536 * xRes* Font.PointSize Div 72 * Scale;
-  //  aSizeF.CY := 65536 * yRes* Font.PointSize Div 72 * Scale;
-  //
-  //  GpiSetCharBox( FCanvas.Handle, aSizeF );
   end;
 end;
 
@@ -1023,6 +1011,7 @@ begin
 
   SelectFont( Font, 1 );
   FCurrentFontSpec := FontSpec;
+  FCurrentFont.Free;
   FCurrentFont := Font;
 end;
 
@@ -1135,5 +1124,6 @@ begin
   FCanvas.DrawString(Point.X, Point.Y, t);
   Point.x := Point.X + Canvas.Font.TextWidth(t);
 end;
+
 
 end.
