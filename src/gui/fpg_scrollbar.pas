@@ -126,6 +126,7 @@ end;
 
 procedure TfpgScrollBar.HandlePaint;
 begin
+  Canvas.BeginDraw; // Do not remove - Scrollbars do painting outside HandlePaint as well!
   if Orientation = orVertical then
   begin
     DrawButton(0, 0, Width, Width, 'sys.sb.up', FScrollbarDownPart = sbpUpBack);
@@ -138,6 +139,7 @@ begin
   end;
 
   DrawSlider(True);
+  Canvas.EndDraw;   // Do not remove - Scrollbars do painting outside HandlePaint as well!
 end;
 
 procedure TfpgScrollBar.RepaintSlider;
