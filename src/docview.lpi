@@ -6,7 +6,7 @@
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
       </Flags>
-      <SessionStorage Value="InProjectDir"/>
+      <SessionStorage Value="InIDEConfig"/>
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
       <Title Value="docview"/>
