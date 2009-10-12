@@ -131,6 +131,7 @@ Type
     procedure HandleHide; override;
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
 
     //procedure ScanEvent( Var KeyCode: TKeyCode;
     //                     RepeatCount: Byte ); override;
@@ -565,7 +566,9 @@ end;
 
 Procedure TRichTextView.DebugMIClick( Sender: TObject );
 begin
-  Debug := not Debug;
+//  Debug := not Debug;
+  writeln('VScrollbar.Position=', FVScrollbar.Position, '  min/max=', FVScrollbar.Min, '/', FVScrollbar.Max);
+  writeln('FNeedHScroll=', FNeedHScroll, '   FNeedVScroll=', FNeedVScroll);
 end;
 
 Procedure TRichTextView.DefaultMenuPopup( Sender: TObject );
@@ -717,6 +720,18 @@ begin
     PopupMenu.ShowAt(self, x, y)
   else
     ShowDefaultPopupMenu(x, y, ShiftState);
+end;
+
+procedure TRichTextView.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
+  delta: smallint);
+begin
+  inherited HandleMouseScroll(x, y, shiftstate, delta);
+  if delta < 0 then
+    // scroll up
+    SetVerticalPosition(FVScrollbar.Position - FVScrollbar.ScrollStep)
+  else
+    // scroll down
+    SetVerticalPosition(FVScrollbar.Position + FVScrollbar.ScrollStep);
 end;
 
 Destructor TRichTextView.Destroy;
@@ -1104,7 +1119,7 @@ Function TRichTextView.GetTextAreaWidth: longint;
 begin
   Result := Width;
   //if FBorderStyle <> bsNone then
-  //  dec( Result, 4 );
+  dec( Result, 4 ); // borders of component
   dec( Result, FScrollBarWidth ); // always allow space for vscrollbar
 end;
 
@@ -1114,28 +1129,22 @@ var
   MaxDisplayWidth: longint;
   AvailableHeight: longint;
 Begin
-
   // Calculate used and available width
   AvailableWidth := GetTextAreaWidth;
-
-  MaxDisplayWidth := FLayout.Width div FontWidthPrecisionFactor;
+  MaxDisplayWidth := FLayout.Width; // div FontWidthPrecisionFactor;
 
   // Defaults
   FNeedVScroll := false;
   FNeedHScroll := false;
 
   // Horizontal scroll setup
-  if MaxDisplayWidth
-     > AvailableWidth then
+  if MaxDisplayWidth > AvailableWidth then
     FNeedHScroll := true;
 
-  FHScrollbar.SliderSize := AvailableWidth;
+//  FHScrollbar.SliderSize := AvailableWidth div 2;
   FHScrollbar.Min := 0;
-
   if FNeedHScroll then
-  begin
-    FHScrollbar.Max := MaxDisplayWidth;
-  end
+    FHScrollbar.Max := MaxDisplayWidth
   else
   begin
     FHScrollBar.Position := 0;
@@ -1144,58 +1153,44 @@ Begin
 
   // Calculate available height.
   // Note: this depends on whether a h scroll bar is needed.
-
-  AvailableHeight := Height;
-  //if FBorderStyle <> bsNone then
-  //  dec( AvailableHeight, 4 );
-  if FNeedHScroll then
-    dec( AvailableHeight, FScrollBarWidth );
-
-  // Vertical scroll setup
-
+  AvailableHeight := GetTextAreaHeight; // this includes borders and scrollbars
   if FLayout.Height > AvailableHeight then
     FNeedVScroll := true;
-
-  FVScrollBar.SliderSize := AvailableHeight;
   FVScrollBar.Min := 0;
-
   if FNeedVScroll then
-  begin
-    FVScrollBar.Max := FLayout.Height - 1;
-  end
+    FVScrollBar.Max := (FLayout.Height - AvailableHeight) + FScrollbarWidth
   else
   begin
     FVScrollBar.Position := 0;
     FVScrollBar.Max := 0;
   end;
 
-  FHScrollBar.ScrollStep := 15; // pixels
+  FHScrollBar.ScrollStep :=  25; // pixels
   FHScrollBar.PageSize := AvailableWidth div 2;
-  FVScrollBar.ScrollStep := 1; // not used (line up/down calculated explicitly)
-  FVScrollBar.PageSize := GetTextAreaHeight div 2;
+  FVScrollBar.ScrollStep := 25; // not used (line up/down calculated explicitly)
+  FVScrollBar.PageSize := AvailableHeight div 2;
 
   // Physical horizontal scroll setup
+  FHScrollbar.Enabled := FNeedHScroll;
   FHScrollbar.Visible := FNeedHScroll;
   FHScrollbar.Left := 0;
   FHScrollbar.Top := Height - FScrollBarWidth;
-  FHScrollbar.Width := Width - FScrollBarWidth;
   FHScrollbar.Height := FScrollbarWidth;
+  if FNeedVScroll then
+    FHScrollbar.Width := Width - FScrollBarWidth
+  else
+    FHScrollbar.Width := Width;
 
   // Physical vertical scroll setup
-  FVScrollbar.Visible := True;
+  FVScrollbar.Visible := FNeedVScroll;
   FVScrollbar.Enabled := FNeedVScroll;
   FVScrollbar.Left := Width - FScrollbarWidth;
   FVScrollbar.Top := 0;
   FVScrollbar.Width := FScrollbarWidth;
-
   if FNeedHScroll then
-  begin
     FVScrollbar.Height := Height - FScrollbarWidth
-  end
   else
-  begin
     FVScrollbar.Height := Height;
-  end;
 
   // Initialise scroll
   FYScroll := FVScrollBar.Position;
@@ -1488,11 +1483,10 @@ end;
 *)
 
 Procedure TRichTextView.DoVerticalScroll( NewY: longint );
-
-var
-  ScrollDistance: longint;
+//var
+//  ScrollDistance: longint;
 begin
-  FYScroll := NewY;
+  FYScroll := 0 - NewY;
 
   if not Visible then
   begin
@@ -1500,7 +1494,7 @@ begin
     exit;
   end;
 
-  ScrollDistance := FYScroll - FLastYScroll;
+//  ScrollDistance := FYScroll - FLastYScroll;
 
   { TODO -ograeme -cscrolling : Implement vertical scrolling here }
   //ScrollControlRect( Self,
