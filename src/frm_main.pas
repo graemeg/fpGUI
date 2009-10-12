@@ -25,7 +25,7 @@ type
     tsHistory: TfpgTabSheet;
     tvContents: TfpgTreeView;
     Splitter1: TfpgSplitter;
-    Memo1: TRichTextView;
+    RichView: TRichTextView;
     MainMenu: TfpgMenuBar;
     miFile: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
@@ -112,7 +112,7 @@ type
 {@VFD_NEWFORM_DECL}
 
 const
-  cTitle = 'fpGUI Help Viewer';
+  cTitle = 'Documentation Viewer';
 
 implementation
 
@@ -202,7 +202,7 @@ var
   i: integer;
   sl: TStringList;
 begin
-  Memo1.Clear;
+  RichView.Clear;
   sl := TStringList.Create;
   f := THelpFile(Files[0]);
   with sl do
@@ -218,8 +218,7 @@ begin
     //for i := 0 to f.DictionaryCount-1 do
     //  Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
   end;
-  Memo1.AddText(PChar(sl.Text));
-//  Memo1.Lines.EndUpdate;
+  RichView.AddText(PChar(sl.Text));
   sl.Free;
 end;
 
@@ -515,7 +514,7 @@ begin
   tvContents.Selection := nil;
   tvContents.RootNode.Clear;
   tvContents.Invalidate;
-  Memo1.Clear;
+  RichView.Clear;
 
   // First save notes. It's important we do this first
   // since we scan all notes each time to find the ones
@@ -689,7 +688,7 @@ Begin
         end;
   end;
 
-  Memo1.Clear;
+  RichView.Clear;
   ImageIndices := TList.Create;
   ProfileEvent('Cleared memo...');
 
@@ -711,7 +710,7 @@ Begin
   { TODO -oGraeme : We do not support images yet }
   ImageIndices.Free;
 
-  Memo1.AddText(PChar(lText));
+  RichView.AddText(PChar(lText));
 end;
 
 procedure TMainForm.ResetProgress;
@@ -859,10 +858,10 @@ begin
     Align := alLeft;
   end;
 
-  Memo1 := TRichTextView.Create(bvlBody);
-  with Memo1 do
+  RichView := TRichTextView.Create(bvlBody);
+  with RichView do
   begin
-    Name := 'Memo1';
+    Name := 'RichView';
     SetPosition(368, 192, 244, 92);
     TabOrder := 2;
     Align := alClient;
