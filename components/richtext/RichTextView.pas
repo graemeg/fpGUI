@@ -526,47 +526,16 @@ end;
 
 Procedure TRichTextView.CreateDefaultMenu;
 begin
-  FDefaultMenu := TfpgPopupMenu.Create( self );
+  FDefaultMenu := TfpgPopupMenu.Create(nil);
   FDefaultMenu.OnShow := @DefaultMenuPopup;
 
-  //FSelectAllMI := TfpgMenuItem.Create( self );
-  //FSelectAllMI.Text := 'Select &All';
-  //FSelectAllMI.OnClick := @SelectAllMIClick;
-  //FDefaultMenu.Items.Add( FSelectAllMI );
   FSelectAllMI := FDefaultMenu.AddMenuItem('Select &All', '', @SelectAllMIClick);
-
-  //FCopyMI := TMenuItem.Create( self );
-  //FCopyMI.Caption := '&Copy';
-  //FCopyMI.OnClick := CopyMIClick;
-  //FDefaultMenu.Items.Add( FCopyMI );
   FCopyMI := FDefaultMenu.AddMenuItem('&Copy', '', @CopyMIClick);
-
   FDefaultMenu.AddMenuItem('-', '', nil);
-
-  //FRefreshMI := TMenuItem.Create( self );
-  //FRefreshMI.Caption := '&Refresh';
-  //FRefreshMI.OnClick := RefreshMIClick;
-  //FDefaultMenu.Items.Add( FRefreshMI );
   FRefreshMI := FDefaultMenu.AddMenuItem('&Refresh', '', @RefreshMIClick);
-
   FDefaultMenu.AddMenuItem('-', '', nil);
-
-  //FSmoothScrollMI := TMenuItem.Create( self );
-  //FSmoothScrollMI.Caption := '&Smooth Scrolling';
-  //FSmoothScrollMI.OnClick := SmoothScrollMIClick;
-  //FDefaultMenu.Items.Add( FSmoothScrollMI );
   FSmoothScrollMI := FDefaultMenu.AddMenuItem('&Smooth Scrolling', '', @SmoothScrollMIClick);
-
-  //FWordWrapMI := TMenuItem.Create( self );
-  //FWordWrapMI.Caption := '&Word Wrap';
-  //FWordWrapMI.OnClick := WordWrapMIClick;
-  //FDefaultMenu.Items.Add( FWordWrapMI );
   FWordWrapMI := FDefaultMenu.AddMenuItem('&Word Wrap', '', @WordWrapMIClick);
-
-  //FDebugMI := TMenuItem.Create( self );
-  //FDebugMI.Caption := '&Debug';
-  //FDebugMI.OnClick := DebugMIClick;
-  //FDefaultMenu.Items.Add( FDebugMI );
   FDebugMI := FDefaultMenu.AddMenuItem('&Debug', '', @DebugMIClick);
 end;
 
@@ -744,6 +713,7 @@ end;
 
 Destructor TRichTextView.Destroy;
 Begin
+  FDefaultMenu.Free;
   // destroy the font manager NOW
   // while the canvas is still valid
   // (it will be freed in TControl.DisposeWnd)
