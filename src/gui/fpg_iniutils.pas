@@ -166,16 +166,16 @@ var
 begin
   Assert(AForm <> nil, Format(rsErrNotAssigned, ['pForm']));
   LINISection := AForm.Name + 'State';
-  // Read form position, -1 if not stored in registry
+  // Read form position, -1 if not stored in ini file
   LTop        := readInteger(LINISection, 'Top', -1);
   LLeft       := readInteger(LINISection, 'Left', -1);
-  // The form pos was found in the registr
+  // The form pos was found in the ini file
   if (LTop <> -1) and (LLeft <> -1) then
   begin
     AForm.Top  := readInteger(LINISection, 'Top', AForm.Top);
     AForm.Left := readInteger(LINISection, 'Left', AForm.Left);
     AForm.WindowPosition := wpUser;
-    // No form pos in the registry, so default to screen center
+    // No form pos in the ini file, so default to screen center
   end
   else if Assigned(fpgApplication.MainForm) and (fpgApplication.MainForm <> AForm) then
     AForm.WindowPosition := wpAuto
