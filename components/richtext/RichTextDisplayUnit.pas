@@ -132,7 +132,6 @@ var
 
   procedure DrawTextBlock;
   begin
-writeln('  **** DrawTextBlock *****');
     DrawRichTextString( FontManager,
                         X,         // value gets adjusted by the time it returns
                         Y,         // value gets adjusted by the time it returns
@@ -146,7 +145,6 @@ writeln('  **** DrawTextBlock *****');
 
 
 begin
-writeln('DrawRichTextLine >>>');
   P := Line.Text;
   EndP := Line.Text + Line.Length;
 
@@ -267,7 +265,6 @@ writeln('DrawRichTextLine >>>');
   end;
 
   DrawTextBlock;
-  writeln('DrawRichTextLine <<<');
 end;
 
 Procedure DrawRichTextLayout( var FontManager: TCanvasFontManager;
@@ -283,8 +280,6 @@ Var
   Y: longint;
   BottomOfLine: longint;
 begin
-writeln('DEBUG:  DrawRichTextLayout >>>>');
-writeln('  Layout.FNumLines = ', Layout.FNumLines);
   assert( StartLine >= 0 );
   assert( StartLine <= Layout.FNumLines );
   assert( EndLine >= 0 );
@@ -296,16 +291,10 @@ writeln('  Layout.FNumLines = ', Layout.FNumLines);
     exit;
 
   Y := StartPoint.Y + Layout.FRichTextSettings.Margins.Top;
-writeln('  StartPoint.Y = ', StartPoint.Y);
-writeln('  StartPoint.X = ', StartPoint.X);
-writeln('  Y = ', Y);
-
   LineIndex := 0;
 
   repeat
     Line := Layout.FLines^[ LineIndex ];
-writeln('  Line.Height = ', Line.Height);
-//    Line.Height := 18;
     BottomOfLine := Y + Line.Height + 1; // bottom pixel row is top + height + 1
 
     if // the line is in the range to be drawn
@@ -340,7 +329,6 @@ writeln('  Line.Height = ', Line.Height);
       break;
 
   until false;
-writeln('DEBUG:  DrawRichTextLayout <<<<');
 End;
 
 Procedure PrintRichTextLayout( var FontManager: TCanvasFontManager;
