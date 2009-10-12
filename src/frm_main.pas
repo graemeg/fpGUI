@@ -752,7 +752,21 @@ begin
 end;
 
 destructor TMainForm.Destroy;
+var
+  FileIndex: integer;
+  lHelpFile: THelpFile;
 begin
+  FFileOpenRecent := nil;
+  if (Files <> nil) and (Files.Count > 0) then
+  begin
+    // Now destroy help files
+    for FileIndex := 0 to Files.Count - 1 do
+    begin
+      lHelpFile := THelpFile(Files[FileIndex]);
+      lHelpFile.Free;
+    end;
+  end;
+  Files.Clear;
   Files.Free;
   inherited Destroy;
 end;
