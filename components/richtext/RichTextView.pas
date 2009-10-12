@@ -611,8 +611,8 @@ constructor TRichTextView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Name := 'RichTextView';
-  FWidth := 100;
-  FHeight := 100;
+  FWidth := 150;
+  FHeight := 70;
   FFocusable := True;
 
   FNeedVScroll := False;
@@ -649,8 +649,28 @@ Var
   CornerRect: TfpgRect;
   DrawRect: TfpgRect;
   TextRect: TfpgRect;
+  x: integer;
+
+  // Just for fun! :-)
+  procedure DesignerPainting(const AText: string; AColor: TfpgColor; AFontDesc: TfpgString = '');
+  var
+    oldf: TfpgString;
+  begin
+    oldf := '';
+    if AFontDesc <> '' then
+    begin
+      oldf := Canvas.Font.FontDesc; // save original font
+      Canvas.Font := fpgGetFont(AFontDesc); // set new font
+    end;
+    Canvas.TextColor := AColor; // set new color
+    Canvas.DrawString(x, 10, AText);
+    x := x + Canvas.Font.TextWidth(AText);  // calc x offset for next text
+    if oldf <> '' then
+      Canvas.Font := fpgGetFont(oldf);  // restore original font
+  end;
+
 begin
-writeln('DEBUG:  TRichTextView.HandlePaint >>>');
+  ProfileEvent('TRichTextView.HandlePaint >>>');
   Canvas.ClearClipRect;
   DrawBorder;
 
@@ -664,7 +684,14 @@ writeln('DEBUG:  TRichTextView.HandlePaint >>>');
   if InDesigner then
   begin
     Canvas.TextColor := clInactiveWgFrame;
-    Canvas.DrawString(10, 10, '<Rich text will appear here>');
+    x := 10;
+    DesignerPainting('<', clInactiveWgFrame);
+    DesignerPainting('rich', clBlack, 'Arial-10:bold');
+    DesignerPainting(' text', clRed, 'Arial-10:italic');
+    DesignerPainting(' ', clInactiveWgFrame);
+    DesignerPainting('will', clBlue, 'Arial-10:underline');
+    DesignerPainting(' appear here>', clInactiveWgFrame);
+//    Canvas.DrawString(10, 10, '<rich text will appear here>');
     Canvas.ClearClipRect;
     Exit; //==>
   end;
@@ -686,7 +713,7 @@ writeln('DEBUG:  TRichTextView.HandlePaint >>>');
     Canvas.Color := clButtonFace;
     Canvas.FillRectangle(CornerRect);
   end;
-writeln('DEBUG:  TRichTextView.HandlePaint <<<<');
+//writeln('DEBUG:  TRichTextView.HandlePaint <<<');
 end;
 
 procedure TRichTextView.HandleHide;
