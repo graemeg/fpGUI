@@ -753,7 +753,7 @@ end;
 procedure TCanvasFontManager.RegisterFont( Font: TLogicalFont );
 var
 //  fa: FATTRS;
-  rc: LONG;
+  rc: longint;
 begin
   FLogicalFonts.Add( Font );
   Font.ID := FLogicalFonts.Count + 1; // add 1 to stay out of Sibyl's way

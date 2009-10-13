@@ -11,8 +11,9 @@ Interface
 // Encapsulates the basic reading of a help file's structure.
 
 uses
-  Classes, SysUtils, DataTypes,
-  HelpFileHeader, HelpTopic,
+  Classes, SysUtils,
+  IPFFileFormatUnit,
+  HelpTopic,
 //  HelpBitmap,
   TextSearchQuery, SearchTable, CompareWordUnit,
   // this unit is used to fake image support untill fpGUI has this implemented.
@@ -28,14 +29,14 @@ type
   protected
     _Data: pointer;
     _DataLen: longint;
-    _pSlotData: pInt16;
+    _pSlotData: pUInt16;
     _SlotDataSize: longint;
     _FileName: string;
     _Title: string;
     _Header: THelpFileHeader;
     _Topics: TList; // of TTopic
     _Dictionary: TStringList;
-    _SlotOffsets: Int32ArrayPointer;
+    _SlotOffsets: UInt32ArrayPointer;
     _Index: TStringList;
     _SearchTable: TSearchTable;
 
@@ -57,7 +58,7 @@ type
     function GetDictionaryWord( Index: longint ): string;
 
   public
-    HighlightWords: Int32ArrayPointer;
+    HighlightWords: UInt32ArrayPointer;
     constructor Create( const FileName: string;
                         UpdateProgress: TProgressCallback );
 
@@ -223,7 +224,7 @@ var
   Topic: TTopic;
   EntryIndex: longint;
   pEntry: pTTOCEntryStart;
-  tocarray: ^Int32;
+  tocarray: ^UInt32;
   p: PByte;
 begin
   _Topics.Capacity := _Header.ntoc;
@@ -265,10 +266,10 @@ end;
 
 type
   TIndexEntryHeader = packed record
-    TextLength: int8;
-    Flags: int8;
-    NumberOfRoots: int8;
-    TOCIndex: int16;
+    TextLength: uint8;
+    Flags: uint8;
+    NumberOfRoots: uint8;
+    TOCIndex: uint16;
   end;
 
 
@@ -307,9 +308,9 @@ end;
 type
   HelpFontSpec = class
     FaceName: array[ 0..32 ] of char;
-    Height: int16;
-    Width: int16;
-    Codepage: int16;
+    Height: uint16;
+    Width: uint16;
+    Codepage: uint16;
   end;
 
 procedure THelpFile.ReadFontTable;

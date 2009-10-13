@@ -12,7 +12,7 @@ Interface
 
 uses
   Classes,
-  HelpFile, TextSearchQuery, DataTypes;
+  HelpFile, TextSearchQuery, IPFFileFormatUnit;
 
 const
   // match weightings
@@ -33,7 +33,7 @@ type
   procedure SearchHelpFile( HelpFile: THelpFile;
                             Query: TTextSearchQuery;
                             Results: TList;
-                            HighlightWords: Int32ArrayPointer );
+                            HighlightWords: UInt32ArrayPointer );
 
 
 Implementation
@@ -50,14 +50,14 @@ uses
 // at the same position
 procedure SearchDictionary( HelpFile: THelpFile;
                             SearchWord: string;
-                            Results: Int32ArrayPointer );
+                            Results: UInt32ArrayPointer );
 var
   DictIndex: integer;
   DictWord: string;
   WordRelevance: longint;
 begin
   SearchWord:= UpperCase( SearchWord );
-  FillInt32Array( Results, HelpFile.DictionaryCount, 0 );
+  FillUInt32Array( Results, HelpFile.DictionaryCount, 0 );
 
   for DictIndex:= 0 to HelpFile.DictionaryCount - 1 do
   begin
@@ -70,7 +70,7 @@ end;
 // Search titles of topics for given searchword
 procedure SearchTopicTitles( HelpFile: THelpFile;
                              SearchWord: string;
-                             Results: Int32ArrayPointer );
+                             Results: UInt32ArrayPointer );
 var
   TopicIndex: longint;
   Title: string;
@@ -107,7 +107,7 @@ end;
 // Search index entries for given searchword
 procedure SearchIndex( HelpFile: THelpFile;
                        SearchWord: string;
-                       Results: Int32ArrayPointer );
+                       Results: UInt32ArrayPointer );
 var
   IndexIndex: longint;
   IndexEntry: string;
@@ -170,18 +170,18 @@ end;}
 procedure SearchHelpFile( HelpFile: THelpFile;
                           Query: TTextSearchQuery;
                           Results: TList;
-                          HighlightWords: Int32ArrayPointer );
+                          HighlightWords: UInt32ArrayPointer );
 var
   Topic: TTopic;
   TopicIndex: longint;
   TermIndex: longint;
   Term: TSearchTerm;
-  TopicMatches: Int32ArrayPointer;
-  TopicRelevancesForTerm: Int32ArrayPointer;
+  TopicMatches: UInt32ArrayPointer;
+  TopicRelevancesForTerm: UInt32ArrayPointer;
   TopicMatchedTerm: boolean;
 
   WordRelevance: longint;
-  DictionaryRelevances: Int32ArrayPointer;
+  DictionaryRelevances: UInt32ArrayPointer;
   DictIndex: longint;
   TopicRelevanceForTerm: longint;
   TopicWordCount: longint;
@@ -197,7 +197,7 @@ begin
 
   if HighlightWords <> nil then
     // Clear the highlightwords array
-    FillInt32Array( HighlightWords, HelpFile.DictionaryCount, 0 );
+    FillUInt32Array( HighlightWords, HelpFile.DictionaryCount, 0 );
 
   // Get memory for dictionary/topic relevance arrays
   GetMem( DictionaryRelevances, HelpFile.DictionaryCount * sizeof( longint ) );
@@ -208,7 +208,7 @@ begin
   begin
     Term := Query.Term[ TermIndex ];
 
-    FillInt32Array( TopicRelevancesForTerm, HelpFile.TopicCount, 0 );
+    FillUInt32Array( TopicRelevancesForTerm, HelpFile.TopicCount, 0 );
 
     // Search the dictionary for matches.
     SearchDictionary( HelpFile, Term.Text, DictionaryRelevances );

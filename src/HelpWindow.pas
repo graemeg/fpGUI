@@ -12,7 +12,7 @@ Interface
 // and functions relevant to helpwindow dimensions.
 
 uses
-  DataTypes, HelpFileHeader;
+  IPFFileFormatUnit;
 
 const
   ptCharacters = 0;
@@ -52,7 +52,7 @@ begin
   Height:= -1;
 end;
                  
-function GetPos( const PositionType: int8;
+function GetPos( const PositionType: uint8;
                  const Value: longint ): longint;
 begin
   case PositionType of
@@ -78,8 +78,8 @@ end;
 procedure ReadHelpPosition( const XY: THelpXYPair;
                             Var Rect: THelpWindowRect );
 var
-  XPositionType: int8;
-  YPositionType: int8;
+  XPositionType: uint8;
+  YPositionType: uint8;
 begin
   // read origin
   XPositionType:= XY.Flags div 16;

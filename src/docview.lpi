@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="22">
+    <Units Count="23">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -142,6 +142,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="IPFFileFormatUnit"/>
       </Unit21>
+      <Unit22>
+        <Filename Value="HelpWindowDimensions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpWindowDimensions"/>
+      </Unit22>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

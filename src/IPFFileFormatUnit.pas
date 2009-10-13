@@ -40,6 +40,8 @@ type
   EWindowsHelpFormatException = class( Exception )
   end;
 
+  TProgressCallback = procedure(n, outof: integer; AMessage: string) of object;
+
 var
   ErrorCorruptHelpFile: string;
 

@@ -9,7 +9,7 @@ Unit SearchTable;
 Interface
 
 uses
-  Classes, DataTypes;
+  Classes, IPFFileFormatUnit;
 
 // Code to read and use IPF search tables
 // NB The RLE decompression was arrived at by trial and error
@@ -28,11 +28,11 @@ type
 
     Procedure Check1ByteOfFlags( b: byte;
                                  StartingIndex: longint;
-                                 Results: Int32ArrayPointer );
+                                 Results: UInt32ArrayPointer );
 
     procedure DoRLESearch( p: pbyte;
                            pDataEnd: pointer;
-                           Results: Int32ArrayPointer );
+                           Results: UInt32ArrayPointer );
 
   public
     constructor Create( Data: pointer;
@@ -41,8 +41,8 @@ type
                         TopicCount: longint );
     destructor Destroy; override;
 
-    procedure Search( DictIndex: int16;
-                      Results: Int32ArrayPointer );
+    procedure Search( DictIndex: uint16;
+                      Results: UInt32ArrayPointer );
 
   end;
 
@@ -70,8 +70,8 @@ end;
 procedure TSearchTable.ReadEntries;
 var
   pWordRecord: pointer;
-  RecordLen: int16;
-  WordIndex: int16;
+  RecordLen: uint16;
+  WordIndex: uint16;
 begin
   pWordRecord:= _Data;
 
@@ -80,9 +80,9 @@ begin
     _Entries.Add( pWordRecord );
 
     if _RecordLengthIs16Bit then
-      RecordLen:= pint16( pWordRecord )^
+      RecordLen:= puint16( pWordRecord )^
     else // 8 bit
-      RecordLen:= pint8( pWordRecord )^;
+      RecordLen:= puint8( pWordRecord )^;
     inc( pWordRecord, RecordLen );
   end;
 end;
@@ -95,7 +95,7 @@ end;
 // that are set.
 Procedure TSearchTable.Check1ByteOfFlags( b: byte;
                                           StartingIndex: longint;
-                                          Results: Int32ArrayPointer );
+                                          Results: UInt32ArrayPointer );
 var
   TopicIndex: longint;
 begin
@@ -113,7 +113,7 @@ end;
 // running til pDataEnd. Update topic entries in Results.
 procedure TSearchTable.DoRLESearch( p: pbyte;
                                     pDataEnd: pointer;
-                                    Results: Int32ArrayPointer );
+                                    Results: UInt32ArrayPointer );
 var
   TopicIndex: integer;
 
@@ -140,7 +140,7 @@ begin
       if thebyte = 0 then
       begin
         // 16 bit repeat of zeroes??
-        N := pint16( p )^ + 1;
+        N := puint16( p )^ + 1;
         inc( p, 2 );
         inc( TopicIndex, N );
       end
@@ -204,32 +204,32 @@ end;
 // This function finds uses of the given word (DictIndex)
 // using the search table. Results[ topic ] is set to
 // non-zero for topics which contain the word.
-procedure TSearchTable.Search( DictIndex: int16;
-                               Results: Int32ArrayPointer );
+procedure TSearchTable.Search( DictIndex: uint16;
+                               Results: UInt32ArrayPointer );
 var
   TopicIndex: integer;
   pWordRecord: pointer;
-  RecordLen: int16;
-  CompressionCode: int8;
+  RecordLen: uint16;
+  CompressionCode: uint8;
   pData: pointer;
   pDataEnd: pointer;
-  Flags: int8;
+  Flags: uint8;
 begin
-  FillInt32Array( Results, _TopicCount, 0 );
+  FillUInt32Array( Results, _TopicCount, 0 );
 
   pWordRecord:= _Entries[ DictIndex ];
 
   // Check search table format
   if _RecordLengthIs16Bit then
   begin
-    RecordLen:= pint16( pWordRecord )^;
-    CompressionCode:= pint8( pWordRecord + 2 )^;
+    RecordLen:= puint16( pWordRecord )^;
+    CompressionCode:= puint8( pWordRecord + 2 )^;
     pData:= pWordRecord + 3;
   end
   else // 8 bit
   begin
-    RecordLen:= pint8( pWordRecord )^;
-    CompressionCode:= pint8( pWordRecord + 1 )^;
+    RecordLen:= puint8( pWordRecord )^;
+    CompressionCode:= puint8( pWordRecord + 1 )^;
     pData:= pWordRecord + 2;
   end;
 
@@ -240,7 +240,7 @@ begin
       ;
 
     1: // used in all panels
-      FillInt32Array( Results, _TopicCount, 1 );
+      FillUInt32Array( Results, _TopicCount, 1 );
 
     2: // RLE
       begin
@@ -252,18 +252,18 @@ begin
     3: // list of topics containing word
       while pData < pDataEnd do
       begin
-        TopicIndex:= pint16( pData )^;
+        TopicIndex:= puint16( pData )^;
         Results^[ TopicIndex ] := 1;
         inc( pData, 2 );
       end;
 
     4: // list of topics NOT containing word
     begin
-      FillInt32Array( Results, _TopicCount, 1 );
+      FillUInt32Array( Results, _TopicCount, 1 );
 
       while pData < pDataEnd do
       begin
-        TopicIndex:= pint16( pData )^;
+        TopicIndex:= puint16( pData )^;
         Results^[ TopicIndex ] := 0;
         inc( pData, 2 );
       end;
@@ -276,13 +276,13 @@ begin
         TopicIndex:= 0
       else
       begin
-        TopicIndex:= pInt16( pData )^ * 8;
+        TopicIndex:= puInt16( pData )^ * 8;
         inc( pData, 2  );
       end;
 
       while pData < pDataEnd do
       begin
-        Flags:= pInt8( pData )^;
+        Flags:= puInt8( pData )^;
         Check1ByteOfFlags( Flags,
                            TopicIndex,
                            Results );
@@ -293,5 +293,5 @@ begin
   end;
 end;
 
-Initialization
-End.
+
+end.

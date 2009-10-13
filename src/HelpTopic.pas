@@ -15,7 +15,7 @@ Interface
 // RichTextView.
 
 uses
-  Classes, DataTypes, HelpWindow, HelpFileHeader;
+  Classes, HelpWindow, IPFFileFormatUnit;
 
 Type
   THelpLink = class(TObject)
@@ -35,10 +35,10 @@ Type
   // anywhere in INF file. This structure is used for quick text retrieval when
   // user clicks on TOC treeview in UI
   THelpTopicSlot = record
-    pData: pInt8;                         // Pointer to actual Slot structure in INF file.
+    pData: pUInt8;                         // Pointer to actual Slot structure in INF file.
     Size: longint;                        // Number of bytes in the text for this Slot (slotheader.ntext)
-    pLocalDictionary: Int16ArrayPointer;  // Pointer to Slot's local dictionary
-    LocalDictSize: int8;                  // Number of entries in the local dictionary
+    pLocalDictionary: UInt16ArrayPointer;  // Pointer to Slot's local dictionary
+    LocalDictSize: uint8;                  // Number of entries in the local dictionary
   end;
   pHelpTopicSlot = ^ THelpTopicSlot;
 
@@ -72,7 +72,7 @@ Type
                                   Var DebugString: string;
                                   Var ImageOffsets: TList;
                                   Var LinkIndex: longint );
-    procedure TranslateIPFEscapeCode( Var pData: pInt8;
+    procedure TranslateIPFEscapeCode( Var pData: pUInt8;
                                       Var OutputString: string;
                                       Var DebugString: string;
                                       Var Spacing: boolean;
@@ -104,7 +104,7 @@ Type
     // AText: The output is written to here.
     // ImageOffsets: For each image that occurs in the text,
     //   the help file offset will be written to this list.
-    procedure   GetText( HighLightWords: Int32ArrayPointer;
+    procedure   GetText( HighLightWords: UInt32ArrayPointer;
                        ShowCodes: boolean;
                        var AText: string;
                        ImageOffsets: TList );
@@ -167,12 +167,12 @@ var
   pExtendedInfo: pExtendedTOCEntry;
   titleLen: integer;
   i: longint;
-  SlotNumber: int16;
+  SlotNumber: uint16;
   XY: THelpXYPair;
   p: pbyte;
 
   lFlags: byte;
-  pSlotOffsets: Int32ArrayPointer;
+  pSlotOffsets: UInt32ArrayPointer;
   pSlotData: pSlotHeader;
   Slot: THelpTopicSlot;
 begin
@@ -187,7 +187,7 @@ begin
 
 
   lFlags:= _pTOCEntry^.flags;
-  p:= pInt8( _pTOCEntry ) + sizeof( TTOCEntryStart );
+  p:= pUInt8( _pTOCEntry ) + sizeof( TTOCEntryStart );
 
   if ( lFlags and TOCEntryExtended ) > 0 then
   begin
@@ -209,7 +209,7 @@ begin
 
     if ( pExtendedInfo^.w2 and 4 ) > 0 then
     begin
-      _ContentsGroupIndex := pint16(p)^;
+      _ContentsGroupIndex := puint16(p)^;
       // read group
       inc(p, sizeof(word));
     end;
@@ -220,14 +220,14 @@ begin
   // Read slot indices
   for i := 0 to _NumSlots-1 do
   begin
-    SlotNumber:= pint16( p )^;
+    SlotNumber:= puint16( p )^;
     if SlotNumber < FileHeader.nslots then   // ??? graeme: I don't see the point of this check
     begin
       // point to correct slot offset
       pSlotData := pSlotHeader( FileData + pSlotOffsets^[ SlotNumber ] );
       if pSlotData^.stuff <> Byte(0) then
         raise Exception.Create('We are NOT at the correct location in the file for the SlotHeader structure!');
-      Slot.pData := pInt8(pSlotData) + sizeof(TSlotHeader);
+      Slot.pData := puInt8(pSlotData) + sizeof(TSlotHeader);
       Slot.pLocalDictionary := FileData + pSlotData^.localDictPos;
       Slot.LocalDictSize := pSlotData^.nLocalDict;
       Slot.Size := pSlotData^.ntext;
@@ -349,13 +349,13 @@ Procedure TTopic.ProcessLinkedImage( Var pData: pByte;
                                      Var ImageOffsets: TList;
                                      Var LinkIndex: longint );
 var
-  EscapeLen: int8;
-  EscapeCode: int8;
-  SubEscapeCode: int8;
+  EscapeLen: uint8;
+  EscapeCode: uint8;
+  SubEscapeCode: uint8;
   BitmapOffset: longword;
-  BitmapFlags: int8;
+  BitmapFlags: uint8;
   Link: THelpLink;
-  LinkTopicIndex: int16;
+  LinkTopicIndex: uint16;
 begin
   LinkTopicIndex := -1;
   while true do
@@ -366,12 +366,12 @@ begin
       HPART_DEFINE:
       begin
         BitmapFlags := ( pData + 3 )^;
-        BitmapOffset:= pint32( pData + 4 )^;
+        BitmapOffset:= puint32( pData + 4 )^;
       end;
 
       HPART_HDREF: // define whole bitmap topic link?
       begin
-        LinkTopicIndex := pInt16( pData + 3 )^;
+        LinkTopicIndex := puInt16( pData + 3 )^;
       end
       else
       begin
@@ -418,7 +418,7 @@ begin
 
 end;
 
-procedure TTopic.TranslateIPFEscapeCode( Var pData: pInt8;
+procedure TTopic.TranslateIPFEscapeCode( Var pData: pUInt8;
                                          Var OutputString: string;
                                          Var DebugString: string;
                                          Var Spacing: boolean;
@@ -427,22 +427,22 @@ procedure TTopic.TranslateIPFEscapeCode( Var pData: pInt8;
                                          Var ImageOffsets: TList;
                                          Var LinkIndex: longint );
 var
-  EscapeLen: int8;
-  EscapeCode: int8;
+  EscapeLen: uint8;
+  EscapeCode: uint8;
 
   Link: THelpLink;
-  LinkFlags1: int8;
-  LinkFlags2: int8;
+  LinkFlags1: uint8;
+  LinkFlags2: uint8;
   LinkDataIndex: longint;
   pLinkXY: pHelpXYPair;
 
-  Margin: int8;
+  Margin: uint8;
   EscCodeDataIndex: longint;
 
-  pLinkData: pInt8;
+  pLinkData: puInt8;
 
   BitmapOffset: longword;
-  BitmapFlags: int8;
+  BitmapFlags: uint8;
 
 begin
   EscapeLen:= pData^;
@@ -479,7 +479,7 @@ begin
       begin
         Link:= THelpLink.Create;
         Link.HelpFile := HelpFile;
-        Link.TopicIndex:= pInt16( pData + 2 )^;
+        Link.TopicIndex:= puInt16( pData + 2 )^;
         if EscapeLen >= 6 then
         begin
           LinkFlags1:= ( pData + 4 ) ^;
@@ -508,8 +508,8 @@ begin
           if ( LinkFlags2 and 4 ) > 0 then
           begin
             // group specified
-            Link.GroupIndex:= pint16( pLinkData )^;
-            inc( LinkDataIndex, sizeof( int16 ) );
+            Link.GroupIndex:= puint16( pLinkData )^;
+            inc( LinkDataIndex, sizeof( uint16 ) );
           end;
 
           if ( LinkFlags1 and 64 ) > 0 then
@@ -559,7 +559,7 @@ begin
       begin
         Link:= THelpLink.Create;
         Link.HelpFile := HelpFile;
-        Link.TopicIndex:= pInt16( pData + 2 )^;
+        Link.TopicIndex:= puInt16( pData + 2 )^;
         Link.GroupIndex := -2;
         SetFootnoteRect( Link.Rect );
         Links.Add( Link );
@@ -609,7 +609,7 @@ begin
     $0e: // bitmap
     begin
       BitmapFlags := ( pData + 2 )^;
-      BitmapOffset:= pint32( pData + 3 )^;
+      BitmapOffset:= puint32( pData + 3 )^;
 
       OutputString := GetImageText( BitmapOffset,
                                     BitmapFlags,
@@ -661,21 +661,21 @@ end;
 // Main translation function. Turns the IPF data into
 // a text string. Translates formatting codes into tags
 // as for Rich Text Viewer.
-procedure TTopic.GetText(HighLightWords: Int32ArrayPointer; ShowCodes: boolean;
+procedure TTopic.GetText(HighLightWords: UInt32ArrayPointer; ShowCodes: boolean;
     var AText: string; ImageOffsets: TList);
 var
   SlotIndex: integer;
   Slot: THelpTopicSlot;
-  pData: pInt8;
-  pSlotEnd: pInt8;
+  pData: puInt8;
+  pSlotEnd: puInt8;
   S: string;
   Word: string;
-  GlobalDictIndex: int32;
+  GlobalDictIndex: uint32;
   Spacing: boolean;
   InFixedFont: boolean;
   WordsOnLine: longint;
   StringToAdd: string;
-  LocalDictIndex: int8;
+  LocalDictIndex: uint8;
   DebugString: string;
   EscapeDebugString: string;
   LinkIndex: longint;
@@ -810,14 +810,14 @@ function TTopic.SearchForWord( DictIndex: integer;
 var
   SlotIndex: integer;
   Slot: THelpTopicSlot;
-  pData: pInt8;
-  pSlotEnd: pInt8;
+  pData: puInt8;
+  pSlotEnd: puInt8;
 
   EscapeLen: longint;
 
-  GlobalDictIndex: int32;
+  GlobalDictIndex: uint32;
 
-  LocalDictIndex: int8;
+  LocalDictIndex: uint8;
 begin
   Result := 0;
   for SlotIndex := 0 to _NumSlots - 1 do
