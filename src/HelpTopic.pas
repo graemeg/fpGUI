@@ -463,7 +463,7 @@ begin
     begin
       // set left margin
       Margin:= ( pData + 2 )^;
-      OutputString := '<margin ' + IntToStr( Margin ) + '>';
+      OutputString := '<leftmargin ' + IntToStr( Margin ) + '>';
     end;
 
     $04:
