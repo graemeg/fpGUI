@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="23">
+    <Units Count="22">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -44,109 +44,104 @@
         <UnitName Value="frm_main"/>
       </Unit1>
       <Unit2>
-        <Filename Value="DataTypes.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="DataTypes"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="HelpFileHeader.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpFileHeader"/>
-      </Unit3>
-      <Unit4>
         <Filename Value="HelpWindow.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpWindow"/>
-      </Unit4>
-      <Unit5>
+      </Unit2>
+      <Unit3>
         <Filename Value="IPFEscapeCodes.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="IPFEscapeCodes"/>
-      </Unit5>
-      <Unit6>
+      </Unit3>
+      <Unit4>
         <Filename Value="HelpTopic.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpTopic"/>
-      </Unit6>
-      <Unit7>
+      </Unit4>
+      <Unit5>
         <Filename Value="HelpFile.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpFile"/>
-      </Unit7>
-      <Unit8>
+      </Unit5>
+      <Unit6>
         <Filename Value="CompareWordUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CompareWordUnit"/>
-      </Unit8>
-      <Unit9>
+      </Unit6>
+      <Unit7>
         <Filename Value="SearchTable.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SearchTable"/>
-      </Unit9>
-      <Unit10>
+      </Unit7>
+      <Unit8>
         <Filename Value="TextSearchQuery.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="TextSearchQuery"/>
-      </Unit10>
-      <Unit11>
+      </Unit8>
+      <Unit9>
         <Filename Value="nvUtilities.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="nvUtilities"/>
-      </Unit11>
-      <Unit12>
+      </Unit9>
+      <Unit10>
         <Filename Value="nvNullObjects.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="nvNullObjects"/>
-      </Unit12>
-      <Unit13>
+      </Unit10>
+      <Unit11>
         <Filename Value="../../../../../opt/git/dunit2/3rdparty/epiktimer/epiktimer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="EpikTimer"/>
-      </Unit13>
-      <Unit14>
+      </Unit11>
+      <Unit12>
         <Filename Value="../docs/inf04.txt"/>
         <IsPartOfProject Value="True"/>
-      </Unit14>
-      <Unit15>
+      </Unit12>
+      <Unit13>
         <Filename Value="SearchUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SearchUnit"/>
-      </Unit15>
-      <Unit16>
+      </Unit13>
+      <Unit14>
         <Filename Value="../components/richtext/RichTextStyleUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RichTextStyleUnit"/>
-      </Unit16>
-      <Unit17>
+      </Unit14>
+      <Unit15>
         <Filename Value="../components/richtext/CanvasFontManager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CanvasFontManager"/>
-      </Unit17>
-      <Unit18>
+      </Unit15>
+      <Unit16>
         <Filename Value="../components/richtext/ACLStringUtility.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ACLStringUtility"/>
-      </Unit18>
-      <Unit19>
+      </Unit16>
+      <Unit17>
         <Filename Value="../components/richtext/RichTextDocumentUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RichTextDocumentUnit"/>
-      </Unit19>
-      <Unit20>
+      </Unit17>
+      <Unit18>
         <Filename Value="../components/richtext/RichTextView.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RichTextView"/>
-      </Unit20>
-      <Unit21>
+      </Unit18>
+      <Unit19>
         <Filename Value="../components/richtext/RichTextLayoutUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RichTextLayoutUnit"/>
-      </Unit21>
-      <Unit22>
+      </Unit19>
+      <Unit20>
         <Filename Value="../components/richtext/RichTextDisplayUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RichTextDisplayUnit"/>
-      </Unit22>
+      </Unit20>
+      <Unit21>
+        <Filename Value="IPFFileFormatUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IPFFileFormatUnit"/>
+      </Unit21>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
