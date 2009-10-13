@@ -14,7 +14,7 @@ Uses
 Const
   // This defines the fraction of a pixel that
   // font character widths will be given in
-  FontWidthPrecisionFactor = 1; //256;  // 256 seems to be specific to OS/2 API
+  FontWidthPrecisionFactor = 1; // 256 seems to be specific to OS/2 API
 
 Type
   {Standard Font types}
@@ -29,7 +29,8 @@ Type
   {Standard Font character Set}
   TFontCharSet=(fcsSBCS,fcsDBCS,fcsMBCS);  {Single,Double,mixed Byte}
 
-  // a user-oriented specification of a font;
+
+  // a user-oriented specification of a font; not an actual structure in the INF file
   TFontSpec = record
     FaceName: string[ 64 ];
     PointSize: integer; // if 0 then use x/y size
@@ -45,11 +46,11 @@ Type
   // Used internally for storing full info on font
   TLogicalFont = class(TComponent)
   public
-    FaceName: String; // user-selected name
-    UseFaceName: String; // after substitutions.
+    FaceName: string; // user-selected name
+    UseFaceName: string; // after substitutions.
 
     // Selected bits of FONTMETRICS
-    fsSelection: word;
+    fsSelection: word; //USHORT;
 
     FontType: TFontType;
     FixedWidth: boolean;
@@ -59,10 +60,10 @@ Type
 
     // this can be nil if not already fetched
     pCharWidthArray: TPCharWidthArray;
-    lMaxbaselineExt: longint;
-    lAveCharWidth: longint;
-    lMaxCharInc: longint;
-    lMaxDescender: longint;
+    lMaxbaselineExt: longint; //LONG;
+    lAveCharWidth: longint; //LONG;
+    lMaxCharInc: longint; //LONG;
+    lMaxDescender: longint; //LONG;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -90,7 +91,6 @@ Type
     FDefaultFontSpec: TFontSpec;
     FCurrentFont: TLogicalFont;
     FAllowBitmapFonts: boolean;
-  protected
     function    CreateFont( const FontSpec: TFontSpec ): TLogicalFont;
     function    GetFont( const FontSpec: TFontSpec ): TLogicalFont;
     procedure   RegisterFont( Font: TLogicalFont );
@@ -100,7 +100,7 @@ Type
     // load metrics if needed
     procedure   EnsureMetricsLoaded;
   public
-    constructor Create( Canvas: TfpgCanvas; AllowBitmapFonts: boolean; AWidget: TfpgWidget ); reintroduce;
+    constructor Create(Canvas: TfpgCanvas; AllowBitmapFonts: boolean; AWidget: TfpgWidget); reintroduce;
     destructor  Destroy; override;
     // Set the font for the associated canvas.
     procedure   SetFont( const FontSpec: TFontSpec );
@@ -133,50 +133,18 @@ procedure FPGuiFontToFontSpec( Font: TfpgFont; Var FontSpec: TFontSpec );
   // For bitmap fonts the logical font definition includes pointsize
   // For outline fonts the defn is only face+attr; in this case
   // selectfont also ses the 'CharBox' according to the point size.
-Implementation
+
+implementation
 
 uses
-//  PMWin, PMGpi, OS2Def, PmDev,
   SysUtils
   ,ACLStringUtility
   ,nvUtilities
   ;
 
-{
-Imports
-  Function GpiQueryCharStringPosAt( PS: Hps;
-                              StartPoint: PPointL;
-                              Options: ULONG;
-                              Count: LONG;
-                              TheString: PChar;
-                              IncrementsArray: PLONG;
-                              CharacterPoints: PPointL ): BOOL;
-    ApiEntry; 'PMGPI' Index 585;
-  Function GpiQueryCharStringPos( PS: Hps;
-                              Options: ULONG;
-                              Count: LONG;
-                              TheString: PChar;
-                              IncrementsArray: PLONG;
-                              CharacterPoints: PPointL ): BOOL;
-    ApiEntry; 'PMGPI' Index 584;
-end;
-}
-
-Type
-  // A little pretend window to send font name.size
-  // and get definite font info back. (See .CreateFont)
-  TFontWindow = class( TfpgWidget )
-  protected
-    procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
-  public
-//    procedure CreateWnd; override;
-    function SetPPFontNameSize( Const FNS: String ): Boolean;
-  end;
 
 var
   FontFaces: TList = nil; // of TFontface
-  //FontWindow: TFontWindow;
-
   DefaultOutlineFixedFace: TFontFace;
   DefaultOutlineProportionalFace: TFontFace;
 
@@ -191,7 +159,7 @@ end;
 
 destructor TFontface.Destroy;
 begin
-  Sizes.Destroy;
+  Sizes.Free;
 end;
 
 // TLogicalFont
@@ -217,28 +185,6 @@ begin
   inherited Destroy;
 end;
 
-// TFontWindow
-//------------------------------------------------------------------------
-
-procedure TFontWindow.DoAllocateWindowHandle(AParent: TfpgWindowBase);
-begin
-  inherited DoAllocateWindowHandle(AParent);
-end;
-
-Function TFontWindow.SetPPFontNameSize( Const FNS: String ): Boolean;
-//Var
-//  CS: Cstring;
-Begin
-  Result := True;
-  { TODO -ograemeg -cAPI call : port API to fpGUI }
-  //CS := FNS;
-  //Result := WinSetPresParam( Handle,
-  //                           PP_FONTNAMESIZE,
-  //                           Length( CS ) + 1,
-  //                           CS );
-End;
-
-//------------------------------------------------------------------------
 
 // Convert a fpGUI Toolkit font to a FontSpec
 //------------------------------------------------------------------------
@@ -326,7 +272,6 @@ begin
   begin
     Face := TFontFace(FontFaces[ FaceIndex ]);
 
-//    if StringsSame( Face.Name, Name ) then
     if pos(UpperCase(name), UpperCase(Face.Name)) > 0 then
     begin
       Result := Face;
@@ -494,8 +439,6 @@ begin
   PPString := IntToStr( PointSize) + '.' + FaceName;
 
   PPString := ModifyFontName( PPString, [] );
-  //If Not FontWindow.SetPPFontNameSize( PPString ) Then
-  //  Exit;
 end;
 
 // Provide outline substitutes for some common bitmap fonts
@@ -518,7 +461,6 @@ begin
   else
     result := FaceName; // no substitution
 end;
-
 
 // Ask OS/2 dummy font window to convert a font spec
 // into a FONTMETRICS.
@@ -576,50 +518,6 @@ begin
   if Fontinfo = '' then
     // nothing found se use default font of fpGUI
     FontInfo := fpgApplication.DefaultFont.FontDesc;
-
-  //// First just ask GPI to give us a font
-  //AskOS2FontDetails( FaceName,
-  //                   PointSize,
-  //                   Attributes,
-  //                   FontInfo );
-  //
-  //if not FixedWidth then
-  //  // OK, whatever it gave us.
-  //  exit;
-  //
-  //// we want a fixed width font...
-  //if ( FontInfo.fsType and FM_TYPE_FIXED ) <> 0 then
-  //  // got a suitable font
-  //  exit;
-  //
-  //// the stoopid freaking OS/2 GPI has given us
-  //// a proportional font for that size
-  //if DefaultOutlineFixedFace <> nil then
-  //  // use the default fixed width outline face
-  //  AskOS2FontDetails( DefaultOutlineFixedFace.pName^,
-  //                     PointSize,
-  //                     Attributes,
-  //                     FontInfo );
-  //
-  //
-  //if ( FontInfo.fsType and FM_TYPE_FIXED ) <> 0 then
-  //  // got a suitable font
-  //  exit;
-  //
-  //// still got a proportional font,
-  //// or we didn't have any fixed width outline face
-  //// so see what we can find in the way of a bitmap fixed font
-  //
-  //BestBitmapFontMatch := GetClosestBitmapFixedFont( PointSize );
-  //if BestBitmapFontMatch <> nil then
-  //begin
-  //  FontInfo.lMaxbaseLineExt := BestBitmapFontMatch.lMaxbaselineExt;
-  //  FontInfo.lAveCharWidth := BestBitmapFontMatch.lAveCharWidth;
-  //  FontInfo.fsDefn := 0;
-  //  FontInfo.szFaceName := BestBitmapFontMatch.pFaceName^;
-  //end;
-  //// else - there are no fixed fonts of any kind on the system. Oh dear.
-
 end;
 
 //------------------------------------------------------------------------
@@ -815,13 +713,6 @@ begin
                        FontInfo );
 
     Result.UseFaceName := FontInfo;
-//    AssignStr( Result.UseFaceName, FontInfo.FaceName );
-
-    // We may actually get a bitmap OR an outline font back
-    //If ( FontInfo.fsDefn And FM_DEFN_OUTLINE ) <> 0 Then
-    //  Result.FontType := ftOutline
-    //else
-    //  Result.FontType := ftBitmap;
   end
   else
   begin
@@ -854,7 +745,7 @@ begin
     //  fsSelection := fsSelection or FM_SEl_OUTlINE;
   end;
 
-  Result.pCharWidthArray := nil;
+  Result.pCharWidthArray := Nil;
 end;
 
 // Register the given logical font with GPI and store for later use
@@ -862,7 +753,7 @@ end;
 procedure TCanvasFontManager.RegisterFont( Font: TLogicalFont );
 var
 //  fa: FATTRS;
-  rc: LongInt;
+  rc: LONG;
 begin
   FLogicalFonts.Add( Font );
   Font.ID := FLogicalFonts.Count + 1; // add 1 to stay out of Sibyl's way
