@@ -57,6 +57,43 @@ type
                      taRight,
                      taCenter );
 
+const
+  TagStr: array[ ttInvalid .. ttEnd ] of string =
+  (
+    '', //
+    'b',
+    '/b',
+    'i',
+    '/i',
+    'u',
+    '/u',
+    'tt',
+    '/tt',
+    'h1',
+    'h2',
+    'h3',
+    '/h',
+    'color',
+    '/color',
+    'backcolor',
+    '/backcolor',
+    'red',
+    'blue',
+    'green',
+    'black',
+    'wrap',
+    'align',
+    'link',
+    '/link',
+    'leftmargin',
+    'rightmargin',
+    'image',
+    'font',
+    '/font',
+    ''
+  );
+
+
 // Returns tag pointed to by TextPointer and
 // moves TextPointer to the first char after the tag.
 Function ExtractTag( Var TextPointer: PChar ): TTag;
@@ -120,41 +157,6 @@ uses
   ;
 
 const
-  TagStr: array[ ttInvalid .. ttEnd ] of string =
-  (
-    '', //
-    'b',
-    '/b',
-    'i',
-    '/i',
-    'u',
-    '/u',
-    'tt',
-    '/tt',
-    'h1',
-    'h2',
-    'h3',
-    '/h',
-    'color',
-    '/color',
-    'backcolor',
-    '/backcolor',
-    'red',
-    'blue',
-    'green',
-    'black',
-    'wrap',
-    'align',
-    'link',
-    '/link',
-    'leftmargin',
-    'rightmargin',
-    'image',
-    'font',
-    '/font',
-    ''
-  );
-
   StandardColors: array[ 0..7 ] of TStandardColor =
   (
     ( Name : 'white' ; Color: clWhite   ),
@@ -237,7 +239,7 @@ begin
       exit;
     end;
 
-    if CurrentChar = DoubleQuote then
+    if CurrentChar = CharDoubleQuote then
     begin
       if not InQuote then
       begin
@@ -246,7 +248,8 @@ begin
       else
       begin
         // Could be escaped quote ""
-        if ( TextPointer + 1 ) ^ = DoubleQuote then
+//        if (TextPointer + 1 )^ = DoubleQuote then
+        if ( TextPointer + 1 ) ^ = CharDoubleQuote then
         begin
           // yes it is
           inc( TextPointer ); // skip second one
@@ -305,7 +308,7 @@ begin
       exit;
     end;
 
-    if CurrentChar = DoubleQuote then
+    if CurrentChar = CharDoubleQuote then
     begin
       if not InQuote then
       begin
@@ -319,7 +322,7 @@ begin
           // start of text... somethin weird
           InQuote := false;
         end
-        else if ( TextPointer - 1 ) ^ = DoubleQuote then
+        else if ( TextPointer - 1 ) ^ = CharDoubleQuote then
         begin
           // yes it is
           dec( TextPointer ); // skip second one
