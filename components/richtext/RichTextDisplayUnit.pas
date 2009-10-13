@@ -13,7 +13,7 @@ uses
 
 // Selection start and end should both be nil if no selection is to be applied
 Procedure DrawRichTextLayout( var FontManager: TCanvasFontManager;
-                              var Layout: TRichTextLayout;
+                              Layout: TRichTextLayout;
                               const SelectionStart: PChar;
                               const SelectionEnd: PChar;
                               const StartLine: longint;
@@ -39,6 +39,7 @@ uses
   ,RichTextDocumentUnit
   ,fpg_base
   ,fpg_main
+  ,nvUtilities
   ;
 
 // For the given point in the text, update selected if the point
@@ -85,6 +86,7 @@ procedure DrawRichTextString( var FontManager: TCanvasFontManager; var X: longin
 var
   Point: TPoint;
 begin
+ProfileEvent('DEBUG:  DrawRichTextString >>>');
   if Len = 0 then
     exit;
 
@@ -103,6 +105,7 @@ begin
   end;
   FontManager.DrawString( Point, Len, S );
   X := Point.X;
+ProfileEvent('DEBUG:  DrawRichTextString <<<');
 end;
 
 var
@@ -112,7 +115,7 @@ var
 // Draw the specified line at the specified
 // (physical) location
 Procedure DrawRichTextLine( var FontManager: TCanvasFontManager;
-    var Layout: TRichTextLayout; SelectionStart: PChar; SelectionEnd: PChar;
+    Layout: TRichTextLayout; SelectionStart: PChar; SelectionEnd: PChar;
     Line: TLayoutLine; Start: TPoint );
 var
   X, Y: longint;
@@ -145,6 +148,7 @@ var
 
 
 begin
+ProfileEvent('DEBUG:  DrawRichTextLine >>>');
   P := Line.Text;
   EndP := Line.Text + Line.Length;
 
@@ -203,6 +207,7 @@ begin
         // Now do the drawing
         if Element.ElementType = teImage then
         begin
+          ProfileEvent('DEBUG:  DrawRichTextLine - skipping image drawing (not implemented yet)');
           DrawTextBlock;
           TextBlockStart := NextP;
 
@@ -253,7 +258,7 @@ begin
           inc( X, FontManager.CharWidth( ' ' )  );
 
         Layout.PerformStyleTag( Element.Tag, Style, X );
-        NewMarginX := ( Start.X + Style.LeftMargin ) * FontWidthPrecisionFactor;
+        NewMarginX := ( Start.X + Style.LeftMargin ){ * FontWidthPrecisionFactor};
         if NewMarginX > X then
         begin
           //skip across...
@@ -265,10 +270,11 @@ begin
   end;
 
   DrawTextBlock;
+ProfileEvent('DEBUG:  DrawRichTextLine <<<');
 end;
 
 Procedure DrawRichTextLayout( var FontManager: TCanvasFontManager;
-                              var Layout: TRichTextLayout;
+                              Layout: TRichTextLayout;
                               const SelectionStart: PChar;
                               const SelectionEnd: PChar;
                               const StartLine: longint;
@@ -280,6 +286,7 @@ Var
   Y: longint;
   BottomOfLine: longint;
 begin
+ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
   assert( StartLine >= 0 );
   assert( StartLine <= Layout.FNumLines );
   assert( EndLine >= 0 );
@@ -329,6 +336,7 @@ begin
       break;
 
   until false;
+ProfileEvent('DEBUG:  DrawRichTextLayout <<<');
 End;
 
 Procedure PrintRichTextLayout( var FontManager: TCanvasFontManager;

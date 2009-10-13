@@ -8,10 +8,11 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   {$IFDEF Timing}EpikTimer,{$ENDIF}
-  fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow,
-  IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery,
-  nvUtilities, nvNullObjects, HelpFile, SearchUnit,
-  fpg_cmdlineparams, customstyle;
+  fpg_main, frm_main, DataTypes, HelpFileHeader, HelpWindow, IPFEscapeCodes,
+  HelpTopic, CompareWordUnit, SearchTable, TextSearchQuery, nvUtilities,
+  nvNullObjects, HelpFile, SearchUnit, fpg_cmdlineparams, customstyle,
+  RichTextStyleUnit, CanvasFontManager, ACLStringUtility, RichTextDocumentUnit,
+  RichTextView, RichTextLayoutUnit, RichTextDisplayUnit;
 
 
 procedure MainProc;

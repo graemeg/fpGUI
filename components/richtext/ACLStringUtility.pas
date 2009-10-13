@@ -8,10 +8,23 @@ Uses
   Classes;
 
 const
-  EndLine= chr(13)+chr(10);
-  TwoEndLines= chr(13)+chr(10)+chr(13)+chr(10);
-  Quote = '''';
-  DoubleQuote = '"';
+  CharTAB = chr(9);
+  CharCR = chr(13);
+  CharLF = chr(10);
+  CharSingleQuote = '''';
+  CharDoubleQuote = '"';
+
+  EndLine = CharCR + CharLF;
+
+  StrTAB = CharTAB;
+  StrCR = CharCR;
+  StrLF = CharLF;
+  StrCRLF = StrCR + StrLF;
+  StrSingleQuote = CharSingleQuote;
+  StrDoubleQuote = CharDoubleQuote;
+
+TYPE
+    TSetOfChars = set of char;
 
 // ----------- Character testing functions -----------------------
 
@@ -84,9 +97,6 @@ Function StrQuote( const s: string ): string;
 // Returns S without single quotes
 Function StrUnQuote( const s: string ): string;
 
-// Returns S in double quotes
-Function StrDoubleQuote( const s: string ): string;
-
 // Returns S in double quotes,
 // with any double quotes in S duplicated
 Function StrFullDoubleQuote( const s: string ): string;
@@ -145,6 +155,17 @@ procedure GetNextValue(
            var Index: longint;
            var Value: string;
            const Seperator: char );
+
+// Extract all fields in a String delimited by whitespace (blank or tab).
+// use double quotes if you need blanks in the strings
+Procedure StrExtractStringsQuoted(Var aResult: TStrings; const aReceiver: String);
+
+// Extract all fields in a String given a set of delimiter characters and
+// an optional escape character usable to escape field delimits.
+// Example:
+//     StrExtractStrings('1x2x3\x4', 'x', '\') ->
+//     returns 4 strings: '1', '', '2' and '3x4'
+procedure StrExtractStrings(var aResult : TStrings; const aReceiver: String; const aSetOfChars: TSetOfChars; const anEscapeChar: char);
 
 // Removes and returns the first value in a separated
 // value list (removes quotes if found)
@@ -221,8 +242,6 @@ Function PCharDiff( const a: PChar; const b: Pchar ): longword;
 // trims spaces and carriage returns of the end of Text
 procedure TrimWhitespace( Text: PChar );
 
-type
-  TSetOfChars = set of char;
 
 function TrimChars( const s: string;
                     chars: TSetOfChars ): string;
@@ -451,7 +470,7 @@ end;
 // Returns S in single quotes
 Function StrQuote( const s: string ): string;
 begin
-  Result := Quote + s + Quote;
+  Result := StrSingleQuote + s + StrSingleQuote;
 end;
 
 // Returns S without double quotes
@@ -461,26 +480,21 @@ begin
   if S = '' then
     exit;
 
-  if Result[ 1 ] = Quote then
+  if Result[ 1 ] = StrSingleQuote then
     Delete( Result, 1, 1 );
 
   if Result = '' then
     exit;
 
-  if Result[ Length( Result ) ] = Quote then
+  if Result[ Length( Result ) ] = StrSingleQuote then
     Delete( Result, Length( Result ), 1 );
-end;
-
-Function StrDoubleQuote( const s: string ): string;
-begin
-  Result := DoubleQuote + s + DoubleQuote;
 end;
 
 Function StrFullDoubleQuote( const s: string ): string;
 begin
-  Result := DoubleQuote
+  Result := StrDoubleQuote
             + InsertDuplicateChars( s, '"' )
-            + DoubleQuote;
+            + StrDoubleQuote;
 end;
 
 // Returns S without double quotes
@@ -490,13 +504,13 @@ begin
   if S = '' then
     exit;
 
-  if Result[ 1 ] = DoubleQuote then
+  if Result[ 1 ] = StrDoubleQuote then
     Delete( Result, 1, 1 );
 
   if Result = '' then
     exit;
 
-  if Result[ Length( Result ) ] = DoubleQuote then
+  if Result[ Length( Result ) ] = StrDoubleQuote then
     Delete( Result, Length( Result ), 1 );
 end;
 
@@ -599,11 +613,11 @@ begin
 
   // Remove quotes if present
   if Result <> '' then
-    if Result[ 1 ] = DoubleQuote then
+    if Result[ 1 ] = StrDoubleQuote then
       Delete( Result, 1, 1 );
 
   if Result <> '' then
-    if Result[ length( Result ) ] = DoubleQuote then
+    if Result[ length( Result ) ] = StrDoubleQuote then
       Delete( Result, length( Result ), 1 );
 end;
 
@@ -643,6 +657,204 @@ begin
   end;
   TrimRight( Value );
 end;
+
+Procedure StrExtractStringsQuoted(Var aResult: TStrings; const aReceiver: String);
+Var
+  tmpState : (WHITESPACE, INSIDE, START_QUOTE, INSIDE_QUOTED, INSIDE_QUOTED_START_QUOTE);
+  tmpCurrentParsePosition : Integer;
+  tmpCurrentChar : Char;
+  tmpPart : String;
+
+Begin
+  if (length(aReceiver) < 1) then exit;
+
+  tmpState := WHITESPACE;
+  tmpPart := '';
+
+  tmpCurrentParsePosition := 1;
+
+  for tmpCurrentParsePosition:=1 to length(aReceiver) do
+  begin
+    tmpCurrentChar := aReceiver[tmpCurrentParsePosition];
+
+    Case tmpCurrentChar of
+      ' ', StrTAB :
+      begin
+
+        Case tmpState of
+
+          WHITESPACE :
+          begin
+            // nothing
+          end;
+
+          INSIDE :
+          begin
+            aResult.add(tmpPart);
+            tmpPart := '';
+            tmpState := WHITESPACE;
+          end;
+
+          INSIDE_QUOTED :
+          begin
+            tmpPart := tmpPart + tmpCurrentChar;
+          end;
+
+          START_QUOTE :
+          begin
+            tmpPart := tmpPart + tmpCurrentChar;
+            tmpState := INSIDE_QUOTED;
+          end;
+
+          INSIDE_QUOTED_START_QUOTE :
+          begin
+            aResult.add(tmpPart);
+            tmpPart := '';
+            tmpState := WHITESPACE;
+          end;
+        end;
+      end;
+
+      StrDoubleQuote :
+      begin
+
+        Case tmpState of
+
+          WHITESPACE :
+          begin
+            tmpState := START_QUOTE;
+          end;
+
+          INSIDE :
+          begin
+            aResult.add(tmpPart);
+            tmpPart := '';
+            tmpState := START_QUOTE;
+          end;
+
+          INSIDE_QUOTED :
+          begin
+            tmpState := INSIDE_QUOTED_START_QUOTE;
+          end;
+
+          START_QUOTE :
+          begin
+            tmpState := INSIDE_QUOTED_START_QUOTE;
+          end;
+
+          INSIDE_QUOTED_START_QUOTE :
+          begin
+            tmpPart := tmpPart + tmpCurrentChar;
+            tmpState := INSIDE_QUOTED;
+          end;
+        end;
+      end;
+
+      else
+      begin
+        Case tmpState of
+
+          WHITESPACE :
+          begin
+            tmpPart := tmpPart + tmpCurrentChar;
+            tmpState := INSIDE;
+          end;
+
+          INSIDE, INSIDE_QUOTED :
+          begin
+            tmpPart := tmpPart + tmpCurrentChar;
+          end;
+
+          START_QUOTE :
+          begin
+            tmpPart := tmpPart + tmpCurrentChar;
+            tmpState := INSIDE_QUOTED;
+          end;
+
+          INSIDE_QUOTED_START_QUOTE :
+          begin
+            aResult.add(tmpPart);
+            tmpPart := tmpCurrentChar;
+            tmpState := INSIDE;
+          end;
+        end;
+      end;
+
+    end;
+  end;
+
+  Case tmpState of
+    WHITESPACE, START_QUOTE : {nothing to do};
+
+    INSIDE, INSIDE_QUOTED, INSIDE_QUOTED_START_QUOTE :
+    begin
+      aResult.add(tmpPart);
+    end;
+  end;
+end;
+
+Procedure PrivateStrExtractStrings(   Var aResult: TStrings;
+                                      const aReceiver: String;
+                                      const aSetOfChars: TSetOfChars;
+                                      const anEscapeChar: char;
+                                      const anIgnoreEmptyFlag : boolean);
+Var
+  i : Integer;
+  tmpChar,tmpNextChar : Char;
+  tmpPart: String;
+Begin
+  if (length(aReceiver) < 1) then exit;
+
+  tmpPart := '';
+
+  i := 1;
+  while i <= length(aReceiver) do
+  begin
+    tmpChar := aReceiver[i];
+    if i < length(aReceiver) then
+      tmpNextChar := aReceiver[i+1]
+    else
+      tmpNextChar := #0;
+
+    if (tmpChar = anEscapeChar) and (tmpNextChar = anEscapeChar) then
+    begin
+      tmpPart := tmpPart + anEscapeChar;
+      i := i + 2;
+    end
+    else
+      if (tmpChar = anEscapeChar) and (tmpNextChar IN aSetOfChars) then
+      begin
+        tmpPart := tmpPart + tmpNextChar;
+        i := i + 2;
+      end
+      else
+        if (tmpChar IN aSetOfChars) then
+        begin
+          if (NOT anIgnoreEmptyFlag) OR ('' <> tmpPart) then
+          begin
+            aResult.add(tmpPart);
+          end;
+          tmpPart := '';
+          i := i + 1;
+        end
+        else
+          begin
+          tmpPart := tmpPart + tmpChar;
+          i := i + 1;
+        end;
+  end;
+
+  if (NOT anIgnoreEmptyFlag) OR ('' <> tmpPart) then
+  begin
+    aResult.add(tmpPart);
+  end;
+end;
+
+procedure StrExtractStrings(Var aResult: TStrings; Const aReceiver: String; const aSetOfChars: TSetOfChars; const anEscapeChar: char);
+begin
+  PrivateStrExtractStrings(aResult, aReceiver, aSetOfChars, anEscapeChar, false);
+end;
+
 
 Function IsDigit( const c: char ): boolean;
 Begin

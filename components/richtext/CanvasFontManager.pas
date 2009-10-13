@@ -139,6 +139,7 @@ uses
 //  PMWin, PMGpi, OS2Def, PmDev,
   SysUtils
   ,ACLStringUtility
+  ,nvUtilities
   ;
 
 {
@@ -325,7 +326,8 @@ begin
   begin
     Face := TFontFace(FontFaces[ FaceIndex ]);
 
-    if StringsSame( Face.Name, Name ) then
+//    if StringsSame( Face.Name, Name ) then
+    if pos(UpperCase(name), UpperCase(Face.Name)) > 0 then
     begin
       Result := Face;
       exit;
@@ -935,8 +937,12 @@ var
   AFont: TLogicalFont;
   FontIndex: integer;
 begin
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont >>>');
+ProfileEvent('               FLogicalFonts.Count=' + intToStr(FLogicalFonts.Count));
+try
   for FontIndex := 0 to FLogicalFonts.Count - 1 do
   begin
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont   1 of 6');
     AFont := TLogicalFont(FLogicalFonts[ FontIndex ]);
     if AFont.PointSize = FontSpec.PointSize then
     begin
@@ -944,11 +950,16 @@ begin
          or (     ( AFont.lAveCharWidth = FontSpec.XSize )
               and ( AFont.lMaxbaselineExt = FontSpec.YSize ) ) then
       begin
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont   2');
         if AFont.Attributes = FontSpec.Attributes then
         begin
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont   3');
           // search name last since it's the slowest thing
+ProfileEvent('            AFont.FaceName=' + AFont.FaceName);
+ProfileEvent('         FontSpec.FaceName=' + FontSpec.FaceName);
           if AFont.FaceName = FontSpec.FaceName then
           begin
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont   4');
             // Found a logical font already created
             Result := AFont;
             // done
@@ -959,12 +970,20 @@ begin
     end;
   end;
 
+
+except
+  on E: Exception do
+    ProfileEvent('Unexpected error occured. Error: ' + E.Message);
+end;
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont   5');
   // Need to create new logical font
   Result := CreateFont( FontSpec );
   if Result <> nil then
   begin
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont   6');
     RegisterFont( Result );
   end;
+ProfileEvent('DEBUG:  TCanvasFontManager.GetFont <<<');
 end;
 
 // Set the current font for the canvas to match the given
@@ -975,25 +994,32 @@ var
   Font: TLogicalFont;
   lDefaultFontSpec: TFontSpec;
 begin
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont >>>>');
   //if FCurrentFontSpec = FontSpec then
   if (FCurrentFontSpec.FaceName = FontSpec.FaceName) and
      (FCurrentFontSpec.PointSize = FontSpec.PointSize) and
      (FCurrentFontSpec.Attributes = FontSpec.Attributes) then
     // same font
     exit;
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   1 of 9');
 
   Font := GetFont( FontSpec );
 
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   2');
   if Font = nil then
   begin
     // ack! Pfffbt! Couldn't find the font.
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   3');
 
     // Try to get the default font
     Font := GetFont( FDefaultFontSpec );
     if Font = nil then
     begin
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   4');
       FPGuiFontToFontSpec( fpgApplication.DefaultFont, lDefaultFontSpec );
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   5');
       Font := GetFont( lDefaultFontSpec );
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   6');
       if Font = nil then
         // Jimminy! We can't even get the default system font
         raise Exception.Create( 'Could not access default font '
@@ -1005,10 +1031,14 @@ begin
 
   end;
 
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   7');
   SelectFont( Font, 1 );
   FCurrentFontSpec := FontSpec;
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   8');
   FCurrentFont.Free;
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont   9');
   FCurrentFont := Font;
+ProfileEvent('DEBUG:  TCanvasFontManager.SetFont <<<<');
 end;
 
 // Get the widths of all characters for current font
@@ -1080,7 +1110,8 @@ begin
   EnsureMetricsLoaded;
   Result := FCurrentFont.pCharWidthArray^[ C ];
   { TODO -ograemeg -chard-coded result : This is a temporary hard-code }
-  result := fpgApplication.DefaultFont.TextWidth(C);
+//  result := fpgApplication.DefaultFont.TextWidth(C);
+  Result := FCurrentFont.lAveCharWidth;
 end;
 
 function TCanvasFontManager.AverageCharWidth: longint;

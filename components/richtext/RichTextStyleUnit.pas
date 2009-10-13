@@ -111,7 +111,7 @@ type
   end;
 
 //  pRichTextSettings = ^TRichTextSettings;
-  Procedure ApplyStyle( const Style: TTextDrawStyle;
+  Procedure ApplyStyle( var Style: TTextDrawStyle;
                         FontManager: TCanvasFontManager );
 
   Procedure ApplyStyleTag( const Tag: TTag;
@@ -134,10 +134,16 @@ uses
 //  , ACLProfile
   ;
 
-Procedure ApplyStyle( const Style: TTextDrawStyle; FontManager: TCanvasFontManager );
+Procedure ApplyStyle( var Style: TTextDrawStyle; FontManager: TCanvasFontManager );
 begin
+ProfileEvent('DEBUG:  ApplyStyle >>>');
+  assert(FontManager <> nil, 'FontManager should not have been nil');
+ProfileEvent('DEBUG:  ApplyStyle  - setting font to...');
+ProfileEvent('                      ' + Style.Font.FaceName);
   FontManager.SetFont( Style.Font );
+ProfileEvent('DEBUG:  ApplyStyle  - setting text color');
   FontManager.Canvas.TextColor := Style.Color;
+ProfileEvent('DEBUG:  ApplyStyle <<<');
 end;
 
 Procedure ApplyStyleTag( Const Tag: TTag;
@@ -155,10 +161,12 @@ var
   ParseIndex: longint;
   XSizeStr: string;
   YSizeStr: string;
+  tmpFontParts : TStringList;
 
   MarginSize: longint;
   ParsePoint: longint;
 begin
+ProfileEvent('DEBUG:  ApplyStyleTag >>>');
   case Tag.TagType of
     ttBold:
       Include( Style.Font.Attributes, faBold );
@@ -189,17 +197,24 @@ begin
 
     ttFont:
     begin
-      ParseIndex := 1;
-      GetNextQuotedValue( Tag.Arguments, ParseIndex, FontFaceName, DoubleQuote );
-      GetNextQuotedValue( Tag.Arguments, ParseIndex, FontSizeString, DoubleQuote );
+      tmpFontParts := TStringList.Create;
+      StrExtractStringsQuoted(tmpFontParts, Tag.Arguments);
+      FontFaceName := tmpFontParts[0];
+      FontSizeString := tmpFontParts[1];
+      tmpFontParts.Destroy;
+
       NewStyle := Style;
       try
         NewStyle.Font.FaceName := FontFaceName;
 
         if Pos( 'x', FontSizeString ) > 0 then
         begin
-          XSizeStr := ExtractNextValue( FontSizeString, 'x' );
-          YSizeStr := FontSizeString;
+          tmpFontParts := TStringList.Create;
+          StrExtractStrings(tmpFontParts, FontSizeString, ['x'], #0);
+          XSizeStr := tmpFontParts[0];
+          YSizeStr := tmpFontParts[1];
+          tmpFontParts.Destroy;
+
           NewStyle.Font.XSize := StrToInt( XSizeStr );
           NewStyle.Font.YSize := StrToInt( YSizeStr );
           NewStyle.Font.PointSize := 0;
@@ -251,18 +266,24 @@ begin
     ttSetLeftMargin,
     ttSetRightMargin:
     begin
+      tmpFontParts := TStringList.Create;
+      StrExtractStrings(tmpFontParts, Tag.Arguments, [' '], #0);
+      MarginParam1 := tmpFontParts[0];
+
       ParsePoint := 1;
-      GetNextValue( Tag.Arguments, ParsePoint, MarginParam1, ' ' );
       if     ( Tag.TagType = ttSetLeftMargin )
          and ( MarginParam1 = 'here' ) then
       begin
-        Style.LeftMargin := X div FontWidthPrecisionFactor;
+        Style.LeftMargin := X {div FontWidthPrecisionFactor};
       end
       else
       begin
         try
           MarginSize := StrToInt( MarginParam1 );
-          GetNextValue( Tag.Arguments, ParsePoint, MarginParam2, ' ' );
+          if tmpFontParts.Count > 1 then   // do we have a second parameter
+            MarginParam2 := tmpFontParts[1]
+          else
+            MarginParam2 := '';
           if MarginParam2 = 'pixels' then
             NewMargin := MarginSize
 
@@ -293,12 +314,13 @@ begin
           Style.RightMargin := Settings.Margins.Right
                                + NewMargin;
       end;
-    end;
+      tmpFontParts.Free;
+    end;  { teSet[left|right]margin }
 
-  end;
+  end;  { case Tag.TagType }
 
   ApplyStyle( Style, FontManager );
-
+ProfileEvent('DEBUG:  ApplyStyleTag <<<');
 end;
 
 function GetDefaultStyle( const Settings: TRichTextSettings ): TTextDrawStyle;
@@ -504,11 +526,11 @@ End;
 
 Procedure TRichTextSettings.SetHeading1Font( NewFont: TfpgFont );
 begin
-  ProfileEvent( 'TRichTextSettings.SetHeading1Font' );
+//  ProfileEvent( 'TRichTextSettings.SetHeading1Font' );
   AssignFont( FHeading1Font, NewFont );
 
-  if FHeading1FOnt = nil then
-    ProfileEvent( '  Set to nil' );
+//  if FHeading1FOnt = nil then
+//    ProfileEvent( '  Set to nil' );
 
 end;
 

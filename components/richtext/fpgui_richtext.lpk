@@ -19,6 +19,8 @@
         </SyntaxOptions>
       </Parsing>
       <CodeGeneration>
+        <TargetCPU Value="i386"/>
+        <TargetOS Value="Linux"/>
         <Optimizations>
           <OptimizationLevel Value="0"/>
         </Optimizations>

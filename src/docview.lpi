@@ -27,15 +27,12 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="fpgui_richtext"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fpgui_toolkit"/>
-      </Item2>
+      </Item1>
     </RequiredPackages>
-    <Units Count="16">
+    <Units Count="23">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -115,17 +112,54 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="SearchUnit"/>
       </Unit15>
+      <Unit16>
+        <Filename Value="../components/richtext/RichTextStyleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextStyleUnit"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="../components/richtext/CanvasFontManager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CanvasFontManager"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="../components/richtext/ACLStringUtility.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ACLStringUtility"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="../components/richtext/RichTextDocumentUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextDocumentUnit"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="../components/richtext/RichTextView.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextView"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="../components/richtext/RichTextLayoutUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextLayoutUnit"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="../components/richtext/RichTextDisplayUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextDisplayUnit"/>
+      </Unit22>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="../components/richtext/"/>
       <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <CStyleOperator Value="False"/>
+        <IncludeAssertionCode Value="True"/>
         <AllowLabel Value="False"/>
         <CPPInline Value="False"/>
       </SyntaxOptions>
@@ -135,15 +169,10 @@
         <OptimizationLevel Value="0"/>
       </Optimizations>
     </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="True"/>
-        <UseHeaptrc Value="True"/>
-      </Debugging>
-    </Linking>
     <Other>
       <CustomOptions Value="-O-
--dTimingX"/>
+-dTimingX
+"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

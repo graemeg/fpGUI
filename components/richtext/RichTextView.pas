@@ -618,7 +618,6 @@ end;
 procedure TRichTextView.HandlePaint;
 Var
   CornerRect: TfpgRect;
-  DrawRect: TfpgRect;
   TextRect: TfpgRect;
   x: integer;
 
@@ -644,14 +643,15 @@ begin
   ProfileEvent('TRichTextView.HandlePaint >>>');
   Canvas.ClearClipRect;
   DrawBorder;
-
+writeln('DEBUG:  TRichTextView.HandlePaint   1');
   TextRect := GetTextAreaRect;
-  DrawRect := GetDrawRect;
   Canvas.SetClipRect(TextRect);
 
+ProfileEvent('DEBUG:  TRichTextView.HandlePaint   2');
   Canvas.Color := BackgroundColor;
   Canvas.FillRectangle(TextRect);
 
+ProfileEvent('DEBUG:  TRichTextView.HandlePaint   3');
   if InDesigner then
   begin
     Canvas.TextColor := clInactiveWgFrame;
@@ -670,8 +670,11 @@ begin
   if Length(FText) = 0 then
     exit;   // no need to paint anything further.
 
+ProfileEvent('DEBUG:  TRichTextView.HandlePaint   4');
   Assert(FLayout <> nil, 'FLayout may not be nil at this point!');
   Draw( 0, FLayout.FNumLines );
+//  Canvas.DrawText(8, 8, GetTextAreaWidth-FScrollbarWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
+ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
   Canvas.ClearClipRect;
 
   if FNeedHScroll then
@@ -684,19 +687,19 @@ begin
     Canvas.Color := clButtonFace;
     Canvas.FillRectangle(CornerRect);
   end;
-//writeln('DEBUG:  TRichTextView.HandlePaint <<<');
+ProfileEvent('DEBUG:  TRichTextView.HandlePaint <<<');
 end;
 
 procedure TRichTextView.HandleHide;
 begin
-  fpgCaret.UnSetCaret (Canvas);
+//  fpgCaret.UnSetCaret (Canvas);
   inherited HandleHide;
 end;
 
 procedure TRichTextView.HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
   var consumed: boolean);
 begin
-writeln('HandleKeyPress');
+ProfileEvent('HandleKeyPress');
   case keycode of
     keyPageDown:
         begin
@@ -825,7 +828,7 @@ end;
 
 Procedure TRichTextView.CreateWnd;
 begin
-writeln('DEBUG:  TRichTextView.CreateWnd >>>>');
+ProfileEvent('DEBUG:  TRichTextView.CreateWnd >>>>');
   if InDesigner then
     exit;
 
@@ -863,7 +866,7 @@ writeln('DEBUG:  TRichTextView.CreateWnd >>>>');
   if FLayoutRequired then
     // we haven't yet done a layout
     Layout;
-writeln('DEBUG:  TRichTextView.CreateWnd <<<<');
+ProfileEvent('DEBUG:  TRichTextView.CreateWnd <<<<');
 end;
 
 procedure TRichTextView.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -933,45 +936,50 @@ Procedure TRichTextView.Layout;
 Var
   DrawWidth: longint;
 begin
-writeln('DEBUG:  TRichTextView.Layout >>>>');
+ProfileEvent('DEBUG:  TRichTextView.Layout >>>>');
   FLayoutRequired := true;
 
   if InDesigner then
     exit;
   if WinHandle = 0 then
     exit;
-
+ProfileEvent('DEBUG:  TRichTextView.Layout    1 of 6');
   FSelectionEnd := -1;
   FSelectionStart := -1;
   RemoveCursor;
 
+ProfileEvent('DEBUG:  TRichTextView.Layout    2');
   DrawWidth := GetTextAreaRect.Width;
 
   try
-    FLayout := nil;
     if Assigned(FLayout) then
     begin
-      writeln('DEBUG:  Before***  FLayout.FNumLines = ', FLayout.FNumLines);
+ProfileEvent('DEBUG:  TRichTextView.Layout    3');
       FLayout.Free;
       FLayout := nil;
     end;
   except
+    // this is only every a issue under 64bit. FLayout can suddenly not be referenced anymore
     on E: Exception do
-      raise Exception.Create('Failed to free FLayout. Error msg: ' + E.Message);
+      ProfileEvent('ERROR:  Failed to free FLayout.  Error Msg: ' + E.Message);
+//      raise Exception.Create('Failed to free FLayout. Error msg: ' + E.Message);
   end;
 
+ProfileEvent('DEBUG:  TRichTextView.Layout    4');
   FLayout := TRichTextLayout.Create( FText,
                                      FImages,
                                      FRichTextSettings,
                                      FFontManager,
                                      DrawWidth );
-writeln('DEBUG:  After***  FLayout.FNumLines = ', FLayout.FNumLines);
+
+ProfileEvent('DEBUG:  TRichTextView.Layout    5');
 
   SetupScrollBars;
+ProfileEvent('DEBUG:  TRichTextView.Layout    6');
   RefreshCursorPosition;
 
   FLayoutRequired := false;
-writeln('DEBUG:  TRichTextView.Layout <<<<');
+ProfileEvent('DEBUG:  TRichTextView.Layout <<<<');
 End;
 
 procedure TRichTextView.GetFirstVisibleLine( Var LineIndex: longint;
@@ -1052,6 +1060,7 @@ Var
   SelectionEndP: PChar;
   Temp: longint;
 begin
+ProfileEvent('DEBUG:  TRichTextView.Draw >>>');
   DrawRect := GetTextAreaRect;
   if StartLine > EndLine then
   begin
@@ -1082,6 +1091,7 @@ begin
                       EndLine,
                       Point(X, Y)
                       );
+ProfileEvent('DEBUG:  TRichTextView.Draw <<<');
 End;
 
 // This gets the area of the control that we can draw on
@@ -1273,12 +1283,12 @@ begin
     CursorHeight := DrawHeight - Y + 1;
   end;
 
-  fpgCaret.SetCaret(Canvas, TextRect.Left + X, TextRect.Bottom + Y, 2, CursorHeight);
+//  fpgCaret.SetCaret(Canvas, TextRect.Left + X, TextRect.Bottom + Y, 2, CursorHeight);
 end;
 
 procedure TRichTextView.RemoveCursor;
 begin
-  fpgCaret.UnSetCaret(Canvas);
+//  fpgCaret.UnSetCaret(Canvas);
 end;
 
 Function TRichTextView.GetLineDownPosition: longint;
@@ -1409,7 +1419,7 @@ begin
   Result := FVScrollBar.Position
             - Offset;
 
-  if Offset < FLayout.FLines^[ FirstVisibleLine ].Height div 2 then
+  if Offset < (FLayout.FLines^[ FirstVisibleLine ].Height div 2) then
     // more than half the line was already displayed so
     if FirstVisibleLine > 0 then
       // AND to make next line up visible
@@ -1573,8 +1583,13 @@ end;
 
 // ADelay = True means that we hold off on redoing the Layout and Painting.
 Procedure TRichTextView.AddText( Text: PChar; ADelay: boolean );
+var
+  s: string;
 begin
-  AddAndResize( FText, Text );
+  s := Text;
+  // Warning: Hack Alert! replace some strange Bell character found in some INF files
+  s := SubstituteChar(s, Chr($07), Chr($20) );
+  AddAndResize( FText, PChar(s) );
   if not ADelay then
   begin
     Layout;
@@ -1606,9 +1621,7 @@ begin
   ClearSelection;
   FText[ 0 ] := #0;
   FTopCharIndex := 0;
-  if ADestroying then // component is shutting down
-    FLayout.Free
-  else
+  if not ADestroying then
   begin
     Layout;
     if FLayout.FNumLines > 1 then

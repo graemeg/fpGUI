@@ -206,6 +206,7 @@ destructor THelpFile.Destroy;
 var
   TopicIndex: longint;
 begin
+writeln('DEBUG:  THelpFile.Destroy >>>>');
   FreeMem( HighlightWords, _Dictionary.Count * sizeof( longint ) );
   FreeMem( _Data, _DataLen );
   for TopicIndex:= 0 to _Topics.Count - 1 do
@@ -214,6 +215,7 @@ begin
   _Index.Free;
   _Dictionary.Free;
   _SearchTable.Free;
+writeln('DEBUG:  THelpFile.Destroy <<<<<');
 end;
 
 procedure THelpFile.ReadContents;

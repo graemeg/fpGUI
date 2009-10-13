@@ -165,10 +165,12 @@ end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
 begin
+writeln('DEBUG:  TMainForm.MainFormDestroy >>>>');
   // save splitter position
   gINI.WriteInteger('Options', 'SplitterLeft', PageControl1.Width);
   // save form size and position
   gINI.WriteFormState(self);
+writeln('DEBUG:  TMainForm.MainFormDestroy <<<<');
 end;
 
 procedure TMainForm.miFileQuitClicked(Sender: TObject);
@@ -260,7 +262,9 @@ end;
 
 procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
+writeln('DEBUG:  TMainForm.MainFormCloseQuery >>>>>');
   CloseFile(True);
+writeln('DEBUG:  TMainForm.MainFormCloseQuery <<<<<');
 end;
 
 procedure TMainForm.PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
@@ -713,6 +717,8 @@ Begin
   { TODO -oGraeme : We do not support images yet }
   ImageIndices.Free;
 
+//  writeln(lText);
+//  writeln('-----------------------------');
   RichView.AddText(PChar(lText));
 end;
 
@@ -759,6 +765,7 @@ var
   FileIndex: integer;
   lHelpFile: THelpFile;
 begin
+writeln('DEBUG:  TMainForm.Destroy >>>>');
   FFileOpenRecent := nil;   // it was a reference only
   if (Files <> nil) and (Files.Count > 0) then
   begin
@@ -771,7 +778,9 @@ begin
   end;
   Files.Clear;
   Files.Free;
+writeln('DEBUG:  TMainForm.Destroy   1');
   inherited Destroy;
+writeln('DEBUG:  TMainForm.Destroy <<<<');
 end;
 
 procedure TMainForm.AfterCreate;
@@ -1235,7 +1244,6 @@ begin
   mru.MaxItems        := gINI.ReadInteger('Options', 'MRUFileCount', 8);
   mru.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
   mru.LoadMRU;
-
 end;
 
 

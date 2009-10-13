@@ -63,7 +63,7 @@ Type
   public
     // Internal layout data
     FLines: ^TLinesArray;
-    FNumLines: longword;
+    FNumLines: longint;
     FRichTextSettings: TRichTextSettings;
     // Drawing functions
     Procedure PerformStyleTag( Const Tag: TTag;
@@ -138,17 +138,20 @@ constructor TRichTextLayout.Create(Text: PChar; Images: TfpgImageList;
 var
   DefaultFontSpec: TFontSpec;
 Begin
+ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
   Inherited Create;
   FRichTextSettings := RichTextSettings;
   FImages := Images;
   FText := Text;
   FAllocatedNumLines := 10;
+ProfileEvent('DEBUG:  TRichTextLayout.Create   1 of 4');
   GetMem( FLines, FAllocatedNumLines * sizeof( TLayoutLine ) );
   FNumLines := 0;
   FLinks := TStringList.Create;
   FLinks.Duplicates := dupIgnore;
   FFontManager := FontManager;
   FLayoutWidth := Width * FontWidthPrecisionFactor;
+ProfileEvent('DEBUG:  TRichTextLayout.Create   2');
   FHorizontalImageScale := 1;
   FVerticalImageScale := 1;
   //FHorizontalImageScale :=   FFontManager.Canvas.HorizontalResolution
@@ -158,14 +161,16 @@ Begin
 
   // use normal font for default font when specified fonts can't be found
   FPGuiFontToFontSpec( RichTextSettings.NormalFont, DefaultFontSpec );
+ProfileEvent('DEBUG:  TRichTextLayout.Create   3');
   FFontManager.DefaultFontSpec := DefaultFontSpec;
+ProfileEvent('DEBUG:  TRichTextLayout.Create   4');
   Layout;
+ProfileEvent('DEBUG:  TRichTextLayout.Create <<<<');
 End;
 
 Destructor TRichTextLayout.Destroy;
 Begin
-  Finalize(FLines);
-  FreeMem( FLines); //, FAllocatedNumLines * sizeof( TLayoutLine ) );
+  FreeMem( Flines, FAllocatedNumLines * sizeof( TLayoutLine ) );
   FLines := nil;
   FLinks.Free;
   Inherited Destroy;
@@ -186,18 +191,20 @@ begin
   end;
   FLines^[ FNumLines ] := Line;
   inc( FNumLines );
-  writeln('          DEBUG:  TRichTextLayout.AddLineStart: FNumLines =', FNumLines);
+  ProfileEvent('          DEBUG:  TRichTextLayout.AddLineStart: FNumLines =' + intToStr(FNumLines));
 end;
 
 Procedure TRichTextLayout.PerformStyleTag( Const Tag: TTag;
                                            Var Style: TTextDrawStyle;
                                            const X: longint );
 begin
+ProfileEvent('DEBUG:  TRichTextLayout.PerformStyleTag >>>');
   ApplyStyleTag( Tag,
                  Style,
                  FFontManager,
                  FRichTextSettings,
                  X );
+ProfileEvent('DEBUG:  TRichTextLayout.PerformStyleTag <<<');
 end;
 
 // Check the current font specifications and see if the
@@ -288,10 +295,12 @@ Var
   end;
 
 begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   FNumLines := 0;
   FWidth := 0;
   FHeight := FRichTextSettings.Margins.Top;
   Style := GetDefaultStyle( FRichTextSettings );
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    1 of 10');
   ApplyStyle( Style, FFontManager );
   CurrentLinkIndex := -1;
   P := FText; // P is the current search position
@@ -310,19 +319,23 @@ begin
   WordStarted := false;
   DisplayedCharsSinceFontChange := false;
 
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    2');
   repeat
     CurrentElement := ExtractNextTextElement( P, NextP );
     assert( NextP > P );
     OnBreak := false;
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    3');
     case CurrentElement.ElementType of
       teWordBreak:
       begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teWordBreak (' + CurrentLine.Text + ')');
         CurrentCharWidth := FFontManager.CharWidth( ' ' );
         OnBreak := true;
       end;
 
       teLineBreak:
       begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teLineBreak');
         DoLine( P, NextP, WordStartX + WordX );
 
         // remember start of line
@@ -336,6 +349,7 @@ begin
 
       teTextEnd:
       begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teTextEnd');
         DoLine( P, NextP, WordStartX + WordX );
 
         // end of text, done
@@ -344,6 +358,8 @@ begin
 
       teImage:
       begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teImage');
+
         BitmapHeight := 0;
         try
           BitmapIndex := StrToInt( CurrentElement.Tag.Arguments );
@@ -363,6 +379,7 @@ begin
 
       teText:
       begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teText');
         // Normal (non-leading-space) character
         CurrentCharWidth := FFontManager.CharWidth( CurrentElement.Character );
         WordStarted := true;
@@ -370,9 +387,11 @@ begin
 
       teStyle:
       begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teStyle');
         case CurrentElement.Tag.TagType of
           ttBeginLink:
           begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teStyle.ttBeginLink');
             CurrentLinkIndex := FLinks.Add( CurrentElement.Tag.Arguments );
             P := NextP;
             continue;
@@ -380,6 +399,7 @@ begin
 
           ttEndLink:
           begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teStyle.ttEndLink');
             CurrentLinkIndex := -1;
             P := NextP;
             continue;
@@ -387,9 +407,11 @@ begin
 
           ttSetLeftMargin: // SPECIAL CASE... could affect display immediately
           begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teStyle.ttSetLeftMargin');
             PerformStyleTag( CurrentElement.Tag, Style, WordstartX + WordX );
-            if Style.LeftMargin * FontWidthPrecisionFactor < WordStartX then
+            if Style.LeftMargin {* FontWidthPrecisionFactor} < WordStartX then
             begin
+ProfileEvent('we are already post the margin being set???? Style.LeftMargin=' + intToStr(Style.LeftMargin));
               // we're already past the margin being set
               if pos( 'breakifpast', CurrentElement.Tag.Arguments ) > 0 then
               begin
@@ -412,31 +434,49 @@ begin
               continue;
             end;
 
+ProfileEvent('CurrentCharWidth (margin) before = ' + IntToStr(CurrentCharWidth));
             // skip across to the new margin
-            CurrentCharWidth := (Style.LeftMargin * FontWidthPrecisionFactor)
+            CurrentCharWidth := (Style.LeftMargin {* FontWidthPrecisionFactor})
                                 - WordStartX - WordX;
+ProfileEvent('CurrentCharWidth (margin) after = ' + IntToStr(CurrentCharWidth));
             // BUT! Don't treat it as a space, because you would not
             // expect wrapping to take place in a margin change...
-            // at least not for IPF (NewView) :)
+            // at least not for IPF  :)
 
-          end;
+          end;  { teSetLeftMargin }
 
           else
           begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    teStyle case..else');
+
             // before processing the tag see if font height needs updating
             if DisplayedCharsSinceFontChange then
               CheckFontHeights( CurrentLine );
 
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    3.1 of 5');
             if     ( CurrentElement.Tag.TagType = ttItalicOff )
                and ( faItalic in Style.Font.Attributes ) then
+            begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    3.2');
               if not FFontManager.IsFixed then
+              begin
                 // end of italic; add a space
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    3.3');
                 inc( WordX, FFontManager.CharWidth( ' ' ) );
+              end;
+            end;
 
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    3.4');
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    tagtype str=' + TagStr[CurrentElement.Tag.TagType]);
+if CurrentElement.Tag.TagType = ttInvalid then
+  writeln('<' + CurrentElement.Character + '>                              tagtype = ttInvalid');
+if CurrentElement.Tag.TagType = ttEnd then
+  ProfileEvent('                                  tagtype = ttEnd');
             PerformStyleTag( CurrentElement.Tag,
                              Style,
                              WordX );
 
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    3.5');
             DisplayedCharsSinceFontChange := false;
             P := NextP;
             continue; // continue loop
@@ -449,6 +489,7 @@ begin
 
     if OnBreak then
     begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    4');
       // we just processed a space
       if WordStarted then
       begin
@@ -476,6 +517,7 @@ begin
     // (or leading spaces)
     if not Style.Wrap then
     begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    5');
       // No alignment
       // We don't care about how wide it gets
       inc( WordX, CurrentCharWidth );
@@ -492,6 +534,7 @@ begin
 
     DoWrap := false;
 
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    6');
     // Calculate position of end of character
     // see if char would exceed width
     if (WordStartX + WordX + CurrentCharWidth) >= WrapX then
@@ -507,6 +550,7 @@ begin
 
     if DoWrap then
     begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    7');
       if LineWordsCompleted = 0 then
       begin
         // the first word did not fit on the line. so draw
@@ -549,6 +593,7 @@ begin
       end
       else
       begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    8');
         // Normal wrap; at least one word fitted on the line
         CurrentLine.Wrapped := true;
 
@@ -570,6 +615,7 @@ begin
     end
     else
     begin
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    9');
       // Character fits.
       inc( WordX, CurrentCharWidth );
       DisplayedCharsSinceFontChange := true;
@@ -581,8 +627,10 @@ begin
 
     P := NextP;
   until false; // loop is exited by finding end of text
+ProfileEvent('DEBUG:  TRichTextLayout.Layout    10');
 
   inc( FHeight, FRichTextSettings.Margins.Bottom );
+ProfileEvent('DEBUG:  TRichTextLayout.Layout  <<<<');
 End;
 
 Function TRichTextLayout.GetStartX( Style: TTextDrawStyle;
