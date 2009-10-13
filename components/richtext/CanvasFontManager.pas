@@ -416,6 +416,7 @@ Var
   fl: TStringList;
   f: TfpgFont;
 begin
+  fl := nil;
   FontFaces := TList.Create;
   fl := fpgApplication.GetFontFaceList;
 
@@ -428,8 +429,7 @@ begin
       Font := TLogicalFont.Create( nil );
       Font.FaceName := fl[T];
       f := fpgGetFont(Font.FaceName + '-10');
-//      FamilyName := pfm^[ T ].szFamilyName;
-      if (pos('Courier', Font.FaceName) > 0) or (pos('Mono', Font.FaceName) > 0) then
+      if (pos('COURIER', UpperCase(Font.FaceName)) > 0) or (pos('MONO', UpperCase(Font.FaceName)) > 0) then
         Font.FixedWidth := True;
       Font.lAveCharWidth := f.TextWidth('g');
       Font.lMaxbaselineExt := f.Height;
@@ -456,10 +456,6 @@ begin
 
   // pick some for defaults
   GetDefaultFonts;
-
-  //FontWindow := TFontWindow.Create( Nil );
-  //FontWindow.OwnerDraw := True;
-  //FontWindow.CreateWnd;
 end;
 
 // Add .subscript to font name for attributes
