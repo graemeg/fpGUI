@@ -835,7 +835,7 @@ begin
   //Result.lMaxCharInc := FontInfo.lMaxCharInc;
   Result.lMaxBaseLineExt := FontSpec.YSize;
   Result.lAveCharWidth := FontSpec.XSize;
-  Result.lMaxCharInc := FontSpec.YSize;
+  Result.lMaxCharInc := FontSpec.XSize;
 
   // Set style flags
   with Result do
