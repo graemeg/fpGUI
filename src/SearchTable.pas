@@ -3,7 +3,7 @@ Unit SearchTable;
 {$mode objfpc}{$H+}
 
 // NewView - a new OS/2 Help Viewer
-// Copyright 2001 Aaron Lawrence (aaronl at consultant dot com)
+// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
 // This software is released under the Gnu Public License - see readme.txt
 
 Interface
@@ -41,6 +41,7 @@ type
                         TopicCount: longint );
     destructor Destroy; override;
 
+    // Sets Results to 1 for occurrences of DictIndex
     procedure Search( DictIndex: uint16;
                       Results: UInt32ArrayPointer );
 
@@ -80,9 +81,9 @@ begin
     _Entries.Add( pWordRecord );
 
     if _RecordLengthIs16Bit then
-      RecordLen:= puint16( pWordRecord )^
+      RecordLen:= pUInt16( pWordRecord )^
     else // 8 bit
-      RecordLen:= puint8( pWordRecord )^;
+      RecordLen:= pUInt8( pWordRecord )^;
     inc( pWordRecord, RecordLen );
   end;
 end;
@@ -140,7 +141,7 @@ begin
       if thebyte = 0 then
       begin
         // 16 bit repeat of zeroes??
-        N := puint16( p )^ + 1;
+        N := pUInt16( p )^ + 1;
         inc( p, 2 );
         inc( TopicIndex, N );
       end
@@ -216,20 +217,19 @@ var
   Flags: uint8;
 begin
   FillUInt32Array( Results, _TopicCount, 0 );
-
   pWordRecord:= _Entries[ DictIndex ];
 
   // Check search table format
   if _RecordLengthIs16Bit then
   begin
-    RecordLen:= puint16( pWordRecord )^;
-    CompressionCode:= puint8( pWordRecord + 2 )^;
+    RecordLen:= pUInt16( pWordRecord )^;
+    CompressionCode:= pUInt8( pWordRecord + 2 )^;
     pData:= pWordRecord + 3;
   end
   else // 8 bit
   begin
-    RecordLen:= puint8( pWordRecord )^;
-    CompressionCode:= puint8( pWordRecord + 1 )^;
+    RecordLen:= pUInt8( pWordRecord )^;
+    CompressionCode:= pUInt8( pWordRecord + 1 )^;
     pData:= pWordRecord + 2;
   end;
 
@@ -243,19 +243,21 @@ begin
       FillUInt32Array( Results, _TopicCount, 1 );
 
     2: // RLE
-      begin
-        DoRLESearch( pData,
-                     pDataEnd,
-                     Results );
-      end;
+    begin
+      DoRLESearch( pData,
+                   pDataEnd,
+                   Results );
+    end;
 
     3: // list of topics containing word
+    begin
       while pData < pDataEnd do
       begin
-        TopicIndex:= puint16( pData )^;
+        TopicIndex:= pUInt16( pData )^;
         Results^[ TopicIndex ] := 1;
         inc( pData, 2 );
       end;
+    end;
 
     4: // list of topics NOT containing word
     begin
@@ -263,7 +265,7 @@ begin
 
       while pData < pDataEnd do
       begin
-        TopicIndex:= puint16( pData )^;
+        TopicIndex:= pUInt16( pData )^;
         Results^[ TopicIndex ] := 0;
         inc( pData, 2 );
       end;
@@ -276,13 +278,13 @@ begin
         TopicIndex:= 0
       else
       begin
-        TopicIndex:= puInt16( pData )^ * 8;
+        TopicIndex:= pUInt16( pData )^ * 8;
         inc( pData, 2  );
       end;
 
       while pData < pDataEnd do
       begin
-        Flags:= puInt8( pData )^;
+        Flags:= pUInt8( pData )^;
         Check1ByteOfFlags( Flags,
                            TopicIndex,
                            Results );
