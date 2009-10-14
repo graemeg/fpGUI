@@ -14,33 +14,37 @@ uses
   SysUtils;
 
 type
-  uint32 = longword;
-  uint16 = word;
-  uint8 = byte;
-  pUInt16 = ^ uint16;
-  pUInt32 = ^ uint32;
-  pUInt8 = ^ uint8;
+  uint32  = longword;
+  uint16  = word;
+  uint8   = byte;
+  pUInt16 = ^uint16;
+  pUInt32 = ^uint32;
+  pUInt8  = ^uint8;
 
-  PCharArray = packed array[ 0..0 ] of PCHar;
+  PCharArray  = packed array[ 0..0 ] of PCHar;
   UInt32Array = packed array[ 0..0 ] of UInt32;
   UInt16Array = packed array[ 0..0 ] of UInt16;
-  UInt8Array = packed array[ 0..0 ] of UInt8;
+  UInt8Array  = packed array[ 0..0 ] of UInt8;
 
-  PCharArrayPointer = ^ PCharArray;
-  UInt32ArrayPointer = ^ UInt32Array;
-  UInt16ArrayPointer = ^ UInt16Array;
-  UInt8ArrayPointer = ^ UInt8Array;
+  PCharArrayPointer   = ^PCharArray;
+  UInt32ArrayPointer  = ^UInt32Array;
+  UInt16ArrayPointer  = ^UInt16Array;
+  UInt8ArrayPointer   = ^UInt8Array;
 
   TBooleanArray = array[ 0..0 ] of boolean;
   BooleanArrayPointer = ^TBooleanArray;
 
+
   EHelpFileException = class( Exception )
   end;
+
 
   EWindowsHelpFormatException = class( Exception )
   end;
 
+
   TProgressCallback = procedure(n, outof: integer; AMessage: string) of object;
+
 
 var
   ErrorCorruptHelpFile: string;
