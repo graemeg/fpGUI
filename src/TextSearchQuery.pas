@@ -3,7 +3,7 @@ Unit TextSearchQuery;
 {$mode objfpc}{$H+}
 
 // NewView - a new OS/2 Help Viewer
-// Copyright 2001 Aaron Lawrence (aaronl at consultant dot com)
+// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
 // This software is released under the Gnu Public License - see readme.txt
 
 Interface
@@ -17,75 +17,100 @@ Type
   ESearchSyntaxError = class( Exception )
   end;
 
-  TSearchTermCombineMethod = ( cmOr, cmAnd, cmNot );
+  TSearchTermCombineMethod =
+  (
+    cmOptional,
+    cmRequired,
+    cmExcluded
+  );
 
-  TSearchTerm = class
+  TSearchTerm = class(TObject)
+  public
     Text: string;
+    Parts: TStringList;
     CombineMethod: TSearchTermCombineMethod;
+    constructor Create( const TheText: string;
+                        const TheCombineMethod: TSearchTermCombineMethod );
+    destructor Destroy; override;
   end;
 
-  TTextSearchQuery = class
-  private
-    procedure Cleanup;
+
+  TTextSearchQuery = class(TObject)
   protected
     Terms: TList;
     function GetTerm( Index: longint ): TSearchTerm;
     function GetTermCount: longint;
   public
-    constructor Create( SearchString: string );
-    destructor Destroy; override;
-
-    property Term[ Index: longint ]: TSearchTerm read GetTerm;
-    property TermCount: longint read GetTermCount;
+    constructor Create( const SearchString: string );
+    destructor  Destroy; override;
+    property    Term[ Index: longint ]: TSearchTerm read GetTerm;
+    property    TermCount: longint read GetTermCount;
   end;
 
-Implementation
+
+implementation
 
 uses
-  nvUtilities;
-//  ACLStringUtility, ACLUtility, Dialogs;
+  nvUtilities
+  ,ACLStringUtility
+  ;
 
-constructor TTextSearchQuery.Create( SearchString: string );
+
+const
+  QueryErrorMissingWord1 = 'No search word given after';
+  QueryErrorMissingWord2 = ' before ';
+
+
+constructor TTextSearchQuery.Create( const SearchString: string );
 var
-  SearchWord: string;
-  RemainingSearchString: string;
+  TermText: string;
   CombineMethod: TSearchTermCombineMethod;
   lTerm: TSearchTerm;
+  tmpTerms : TStringList;
+  i : integer;
 begin
   inherited Create;
   Terms := TList.Create;
   try
-    RemainingSearchString := Uppercase( SearchString );
-    while RemainingSearchString <> '' do
-    begin
-      SearchWord := ExtractNextValue( RemainingSearchString, ' ' );
+    tmpTerms := TStringList.Create;
+    StrExtractStringsQuoted(tmpTerms, SearchString);
 
-      // Check for modifiers + (word must be matched)
-      // and - (word must not be matched)
-      case SearchWord[ 1 ] of
+    for i := 0 to tmpTerms.count-1 do
+    begin
+      TermText := tmpTerms[i];
+
+      // Check for modifiers:
+      //  + word must be matched
+      //  - word must not be matched
+      case TermText[ 1 ] of
        '+':
-         CombineMethod := cmAnd;
+         CombineMethod := cmRequired;
        '-':
-         CombineMethod := cmNot;
+         CombineMethod := cmExcluded;
        else
-         CombineMethod := cmOr;
+         CombineMethod := cmOptional;
       end;
-      if CombineMethod <> cmOr then
+
+      if CombineMethod <> cmOptional then
       begin
         // delete + or -
-        if Length( SearchWord ) = 1 then
-          raise ESearchSyntaxError.Create( 'No search word given after "'
-                                           + SearchWord + '" before "'
-                                           + RemainingSearchString
-                                           + '"' );
-        Delete( SearchWord, 1, 1 );
+        if Length( TermText ) = 1 then
+          if (i < tmpTerms.count-1) then
+            raise ESearchSyntaxError.Create( QueryErrorMissingWord1
+                                             + StrInDoubleQuotes(TermText)
+                                             + QueryErrorMissingWord2
+                                             + StrInDoubleQuotes(tmpTerms[i+1]) )
+          else
+            raise ESearchSyntaxError.Create( QueryErrorMissingWord1
+                                             + StrInDoubleQuotes(TermText));
+        Delete( TermText, 1, 1 );
       end;
 
-      lTerm := TSearchTerm.Create;
-      lTerm.Text := SearchWord;
-      lTerm.CombineMethod := CombineMethod;
+      lTerm := TSearchTerm.Create( TermText,
+                                  CombineMethod );
       Terms.Add( lTerm );
     end;
+    tmpTerms.Free;
   except
       while Terms.Count > 0 do
       begin
@@ -100,27 +125,9 @@ end;
 
 destructor TTextSearchQuery.Destroy;
 begin
-  Cleanup;
+  DestroyListObjects( Terms );
+  Terms.Free;
   inherited Destroy;
-end;
-
-procedure TTextSearchQuery.Cleanup;
-var
-  i: TSearchTerm;
-begin
-  if Assigned(Terms) then
-  begin
-  while Terms.Count > 0 do
-    begin
-      i := TSearchTerm(Terms.Last);
-      Terms.Remove(i);
-      i.Free;
-    end;
-
-    //  DestroyListObjects( Terms );
-    Terms.Free;
-  end;
-
 end;
 
 function TTextSearchQuery.GetTerm( index: longint ): TSearchTerm;
@@ -133,5 +140,69 @@ begin
   Result := Terms.Count;
 end;
 
-Initialization
-End.
+constructor TSearchTerm.Create( const TheText: string;
+                                const TheCombineMethod: TSearchTermCombineMethod );
+var
+  TermParseIndex: longint;
+  TermChar: char;
+  TermPart: string;
+begin
+  Parts := TStringList.Create;
+
+  Text := TheText;
+  CombineMethod := TheCombineMethod;
+
+  // Break out each part of the term as IPF does:
+  // consecutive alphanumeric chars become a "word"
+  // but each symbol is a separate word, and symbols break
+  // up alphanumerics into multiple words. e.g.
+  // CAKE_SAUSAGE becomes three words in IPF,
+  // one each for "CAKE" "_" and "SAUSAGE"
+
+  TermParseIndex := 1;
+  while TermParseIndex <= Length( Text ) do
+  begin
+    // collect alphanumeric chars
+    TermPart := '';
+    while TermParseIndex <= Length( Text ) do
+    begin
+      TermChar := Text[ TermParseIndex ];
+      if  (    IsAlpha( TermChar )
+            or IsDigit( TermChar ) ) then
+      begin
+        // alpha numeric, collect it
+        TermPart := TermPart + TermChar;
+        inc( TermParseIndex );
+      end
+      else
+      begin
+        // not alpha numeric, so stop
+        break;
+      end;
+    end;
+    if Length( TermPart ) > 0 then
+    begin
+      Parts.Add( TermPart ); // add collected alphanumeric part
+    end;
+
+    if TermParseIndex <= Length( Text ) then
+    begin
+      // must be a symbol,
+      // each symbol (excluding space) is an individual item
+      if Text[ TermParseIndex ] <> ' ' then
+        Parts.Add( Text[ TermParseIndex ] );
+      inc( TermParseIndex );
+    end;
+
+  end;
+
+end;
+
+destructor TSearchTerm.Destroy;
+begin
+  Parts.Free;
+  inherited Destroy;
+end;
+
+
+end.
