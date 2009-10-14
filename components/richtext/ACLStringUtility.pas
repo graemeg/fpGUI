@@ -23,13 +23,25 @@ const
   StrSingleQuote = CharSingleQuote;
   StrDoubleQuote = CharDoubleQuote;
 
-TYPE
-    TSetOfChars = set of char;
-
-// ----------- Character testing functions -----------------------
-
 type
+  TSetOfChars = set of char;
+
   TCharMatchFunction = function( const a: char ): boolean;
+
+
+  TSerializableStringList = class(TObject)
+  private
+    stringList: TStringList;
+  public
+    constructor Create;
+    destructor  Destroy; override;
+    function    getCount : LongInt;
+    function    get(const anIndex : LongInt) : String;
+    function    getSerializedString : String;
+    procedure   add(const aString : String);
+    procedure   readValuesFromSerializedString(const aSerializedString : String);
+  end;
+
 
 // Returns true if c is a digit 0..9
 Function IsDigit( const c: char ): boolean;
@@ -103,6 +115,11 @@ Function StrFullDoubleQuote( const s: string ): string;
 
 // Returns S without double quotes
 Function StrUnDoubleQuote( const s: string ): string;
+// Returns aString enclosed in single quotes
+Function StrInSingleQuotes(const aString : String) : String;
+// Returns aString enclosed in double quotes
+Function StrInDoubleQuotes(const aString : String) : String;
+
 
 //
 
@@ -137,6 +154,17 @@ Function StrEnds( const endStr: string; const s: string ): boolean;
 
 // Returns first word from S
 Function StrFirstWord( const S: String ): string;
+
+// prefixes all occurences of one of the chars in aReceiver with
+// anEscape char if the escapeChar itself is found, then it is doubled
+Function StrEscapeAllCharsBy(Const aReceiver: String; const aSetOfChars: TSetOfChars; const anEscapeChar: char): String;
+
+// Trims punctuation characters from start and end of s
+// such as braces, periods, commas.
+procedure TrimPunctuation( var s: string );
+
+// Returns true if S contains a URL.  MAY MODIFY CONTENTS OF S
+function CheckAndEncodeURL( var s: string ): boolean;
 
 // ------------ Seperated value utilities ---------------------
 
@@ -185,8 +213,7 @@ Procedure ParseConfigLine( const S: string;
                            var KeyValue: string );
 
 // Removes spaces around the separator in the given string
-Procedure RemoveSeparatorSpaces( var S: string;
-                                 const Separator:string );
+Procedure RemoveSeparatorSpaces( var S: string; const Separator:string );
 
 {$ifdef os2}
 // ------------ Ansi String utilities ------------------------
@@ -292,13 +319,20 @@ function MatchValueParam( const Param: string;
 // Return true if param matches the form
 // /Flag
 // dash (-) can be used instead of slash (/)
-function MatchFlagParam( const Param: string;
-                         const Flag: string ): boolean;
+function MatchFlagParam( const Param: string; const Flag: string ): boolean;
 
-Implementation
+// returns true if the String starts with the provided one
+// this is case INsensitive
+function StrStartsWithIgnoringCase(const aReceiver: String; const aStartString: String): Boolean;
+
+function StrIsEmptyOrSpaces(const AText: string): boolean;
+
+implementation
 
 Uses
-  SysUtils;//, ACLUtility;
+  SysUtils
+  ,nvUtilities
+  ;
 
 // ---------------------- Pascal String Utilities ---------------------------------------
 
@@ -512,6 +546,16 @@ begin
 
   if Result[ Length( Result ) ] = StrDoubleQuote then
     Delete( Result, Length( Result ), 1 );
+end;
+
+Function StrInSingleQuotes(const aString : String) : String;
+begin
+  Result := StrSingleQuote + aString + StrSingleQuote;
+end;
+
+Function StrInDoubleQuotes(const aString : String) : String;
+begin
+  Result := StrDoubleQuote + aString + StrDoubleQuote;
 end;
 
 Function SubstituteChar( const S: string; const Find: Char; const Replace: Char ): string;
@@ -1035,6 +1079,157 @@ Begin
     Result:= temp;
 End;
 
+Function StrEscapeAllCharsBy(Const aReceiver: String; const aSetOfChars: TSetOfChars; const anEscapeChar: char): String;
+Var
+  i : Integer;
+  tmpChar : Char;
+Begin
+  Result := '';
+
+  for i := 1 To length(aReceiver) do
+  begin
+    tmpChar := aReceiver[i];
+
+    if (tmpChar = anEscapeChar) or (tmpChar IN aSetOfChars) then
+      result := result + anEscapeChar + tmpChar
+    else
+      result := result + tmpChar;
+  end;
+end;
+
+const
+  StartPunctuationChars: set of char =
+    [ '(', '[', '{', '<', '''', '"' ];
+
+  EndPunctuationChars: set of char =
+    [ ')', ']', '}', '>', '''', '"', '.', ',', ':', ';', '!', '?' ];
+
+procedure TrimPunctuation( var s: string );
+var
+  ChangesMade: boolean;
+  c: Char;
+begin
+  while Length(s) > 0 do
+  begin
+    ChangesMade := false;
+    c := s[1];
+    if c in StartPunctuationChars then
+    begin
+      ChangesMade := true;
+      Delete(s, 1, 1);
+    end;
+
+    if Length(s) = 0 then
+      exit;
+
+    c := s[Length(s)];
+    if c in EndPunctuationChars then
+    begin
+      ChangesMade := true;
+      Delete(s, Length(s), 1);
+    end;
+
+    if not ChangesMade then
+      exit; // done
+  end;
+end;
+
+function IsDomainName( const s: string; StartingAt: longint ): boolean;
+var
+  DotPos: longint;
+  t: string;
+begin
+  Result := false;
+  t := Copy(s, StartingAt+1, Length(s));
+
+  // must be a dot in the domain...
+  DotPos := pos('.', t);
+  if DotPos = 0 then
+    // nope
+    exit;
+
+  // must be some text between start and dot,
+  // and between dot and end
+  // ie. a.b not .b or a.
+
+  if DotPos = Length(t) then
+    // no b;
+    exit;
+
+  Result := true;
+end;
+
+function IsEmailAddress( const s: string ): boolean;
+var
+  AtPos: longint;
+  SecondAtPos: longint;
+begin
+  result := false;
+  // must be a @...
+  AtPos := pos('@', s);
+  if AtPos = 0 then
+    // no @
+    exit;
+  if AtPos = 1 then
+    // can't be the first char though
+    exit;
+
+  // there is? There must be only one though...
+  SecondAtPos := LastDelimiter('@', s);
+  if (SecondAtPos <> AtPos) then
+    // there's a second @
+    exit;
+
+  Result := IsDomainName( s, AtPos + 1 );
+end;
+
+function CheckAndEncodeURL( var s: string ): boolean;
+  // simple userfriendly routine
+  function StartsWith(const s:string; const text: string): boolean;
+  begin
+    Result := pos(text, s) = 1;
+  end;
+
+begin
+
+  if StartsWith(s, 'www.') then
+  begin
+    if not IsDomainName( s, 4 ) then
+      exit;
+    Insert('http://', s, 1);
+    Result := true;
+    exit;
+  end;
+
+  if StartsWith(s, 'ftp.') then
+  begin
+    if not IsDomainName( s, 4 ) then
+      exit;
+    Insert('ftp://', s, 1);
+    Result := true;
+    exit;
+  end;
+
+  if    StartsWith(s, 'http://' )
+     or StartsWith(s, 'https://' )
+     or StartsWith(s, 'ftp://' )
+     or StartsWith(s, 'mailto:' )
+     or StartsWith(s, 'news:' ) then
+  begin
+    Result := true;
+    exit;
+  end;
+
+  if IsEmailAddress( s ) then
+  begin
+    Insert('mailto:', s, 1);
+    Result := true;
+    exit;
+  end;
+
+  Result := false;
+end;
+
 Function IncrementNumberedString( StartString: string ): string;
 Var
   Number: string;
@@ -1445,6 +1640,90 @@ begin
                          Flag );
 end;
 
-Initialization
+function StrStartsWithIgnoringCase(const aReceiver: String; const aStartString: String): Boolean;
+var
+  tmpStringPos : integer;
+  tmpStartStringLength : integer;
+begin
+  tmpStartStringLength := Length(aStartString);
+
+  if Length(aReceiver) < tmpStartStringLength then
+  begin
+    result := false;
+    exit;
+  end;
+
+  for tmpStringPos := 1 to tmpStartStringLength do
+  begin
+    if UpCase(aReceiver[tmpStringPos]) <> UpCase(aStartString[tmpStringPos]) then
+    begin
+      result := false;
+      exit;
+    end;
+  end;
+
+  result := true;
+end;
+
+function StrIsEmptyOrSpaces(const AText: string): boolean;
+begin
+  Result := Trim(AText) = '';
+end;
+
+{ TSerializableStringList }
+
+constructor TSerializableStringList.Create;
+begin
+  LogEvent(LogObjConstDest, 'TSerializableStringList createdestroy');
+  inherited Create;
+  stringList := TStringList.Create;
+end;
+
+destructor TSerializableStringList.Destroy;
+begin
+  LogEvent(LogObjConstDest, 'TSerializableStringList destroy');
+  stringList.Free;
+  inherited Destroy;
+end;
+
+function TSerializableStringList.getCount: LongInt;
+begin
+  Result := stringlist.Count;
+end;
+
+function TSerializableStringList.get(const anIndex: LongInt): String;
+begin
+  Result := stringList[anIndex];
+end;
+
+function TSerializableStringList.getSerializedString: String;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 0 to stringList.count-1 do
+  begin
+    if (i > 0) then result := result + '&';
+    Result := Result + StrEscapeAllCharsBy(stringList[i], ['&'], '\');
+  end;
+end;
+
+procedure TSerializableStringList.add(const aString: String);
+begin
+  stringList.add(aString);
+end;
+
+procedure TSerializableStringList.readValuesFromSerializedString(const aSerializedString: String);
+begin
+  if length(aSerializedString) < 1 then
+    exit;
+  LogEvent(LogObjConstDest, 'readValuesFromSerializedString');
+  stringList.Clear;
+  LogEvent(LogObjConstDest, 'readValuesFromSerializedString clear done');
+  StrExtractStrings(stringList, aSerializedString, ['&'], '\');
+end;
+
+initialization
   InitHexDigitMap;
+
 End.
