@@ -19,10 +19,6 @@ uses
   // this unit is used to fake image support untill fpGUI has this implemented.
   nvNullObjects;
 
-Type
-
-  EHelpFileException = class( Exception )
-  end;
 
 type
   THelpFile = class(TObject)
@@ -90,7 +86,7 @@ Implementation
 uses
   //ACLFileUtility, ACLStringUtility, ACLFileIOUtility, ACLProfile,
   //ACLPCharUtility, ACLDialogs,
-  HelpWindow, nvUtilities;
+  HelpWindowDimensions, nvUtilities;
 
 // Load "missing" bitmap
 //{.$R Images}
