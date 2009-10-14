@@ -15,7 +15,7 @@ Interface
 // RichTextView.
 
 uses
-  Classes, HelpWindow, IPFFileFormatUnit;
+  Classes, HelpWindowDimensions, IPFFileFormatUnit;
 
 Type
   THelpLink = class(TObject)

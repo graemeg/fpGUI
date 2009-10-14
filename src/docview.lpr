@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   {$IFDEF Timing}EpikTimer,{$ENDIF}
-  fpg_main, frm_main, HelpWindow, IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable,
+  fpg_main, frm_main, IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable,
   TextSearchQuery, nvUtilities, nvNullObjects, HelpFile, SearchUnit, fpg_cmdlineparams,
   customstyle, IPFFileFormatUnit, HelpWindowDimensions, RichTextStyleUnit,
   CanvasFontManager, ACLStringUtility, RichTextDocumentUnit, RichTextView,
