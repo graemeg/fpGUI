@@ -46,8 +46,8 @@ type
   TProgressCallback = procedure(n, outof: integer; AMessage: string) of object;
 
 
-var
-  ErrorCorruptHelpFile: string;
+const
+  ErrorCorruptHelpFile = 'Corrupt help file, or something similar';
 
 const
   INF_HEADER_ID = $5348;
@@ -76,7 +76,7 @@ Type
     nindex: uint16;       // number of index entries
     indexstart: uint32;   // 32 bit file offset to index table
     indexlen: uint32;     // size of index table
-    unknown3: array[ 0..9 ] of uint8; // unknown purpose
+    unknown3: array[ 0..9 ] of byte; // unknown purpose
     searchstart: uint32;  // 31 bit file offset of full text search table
                           // Note: top bit indicates 32 bit search record!
     searchlen: uint32;    // size of full text search table
@@ -86,11 +86,11 @@ Type
     ndict: uint16;        // number of entries in the dictionary
     dictstart: uint32;    // file offset of the start of the dictionary
     imgstart: uint32;     // file offset of image data
-    unknown4: uint8;      // unknown purpose
+    unknown4: byte;       // unknown purpose
     nlsstart: uint32;     // 32 bit file offset of NLS table
     nlslen: uint32;       // size of NLS table
     extstart: uint32;     // 32 bit file offset of extended data block
-    reserved: array[ 0..2 ] of uint32; // for future use. set to zero.
+    reserved: array[ 0..11 ] of byte; // for future use. set to zero.
     title: array[ 0..47 ] of char;    // ASCII title of database
   end;
   TPHelpFileHeader = ^THelpFileHeader;
@@ -116,7 +116,7 @@ Type
 
 Type
   TTOCEntryStart = packed record
-    length: uint8; // length of the entry including this byte
+    length: uint8; // length of the entry including this byte (but not including extended data)
     flags: uint8; // flag byte, description folows (MSB first)
                   // bit8 haschildren;  // following nodes are a higher level
                   // bit7 hidden;       // this entry doesn't appear in VIEW.EXE's
@@ -296,8 +296,6 @@ function OrAllUInt32Array( pArray: UInt32ArrayPointer;
 
 Implementation
 
-uses
-  nvUtilities;
 
 // Operations on int32 arrays
 // -----------------------------------------------------------
@@ -382,7 +380,7 @@ procedure CopyUInt32Array( pSource: UInt32ArrayPointer;
                            pDest: UInt32ArrayPointer;
                            Size: longint );
 begin
-  MemCopy( pSource, pDest, Size * sizeof( uint32 ) );
+  Move(pSource^, PDest^, Size * SizeOf(LongInt));
 end;
 
 procedure NotOrUInt32Array( pSource: UInt32ArrayPointer;
