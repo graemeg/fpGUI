@@ -210,8 +210,13 @@ begin
 end;
 
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
+var
+  s: TfpgString;
 begin
-  TfpgMessageDialog.Information('Product Information', 'Created by Graeme Geldenhuys');
+  s := 'fpGUI ' + rsDVTitle + LineEnding + LineEnding
+      + 'Created by Graeme Geldenhuys' + LineEnding
+      + 'Version 1.0  -  ' + {$I %date%} + ' ' + {$I %time%};
+  TfpgMessageDialog.Information('Product Information', s);
 end;
 
 procedure TMainForm.miHelpAboutFPGui(Sender: TObject);
