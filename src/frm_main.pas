@@ -161,6 +161,11 @@ begin
   gINI.ReadFormState(self);
   PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
   UpdateWindowPosition;
+
+  Settings.NormalFont := fpgStyle.DefaultFont;
+  Settings.FixedFont := fpgStyle.FixedFont;
+  Settings.SearchDirectories := TStringList.Create;
+
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);

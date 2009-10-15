@@ -510,9 +510,9 @@ end;
 
 
 Initialization
-  Settings.NormalFont := fpgStyle.DefaultFont;
-  Settings.FixedFont := fpgStyle.FixedFont;
-  Settings.SearchDirectories := TStringList.Create;
+  //Settings.NormalFont := fpgStyle.DefaultFont;
+  //Settings.FixedFont := fpgStyle.FixedFont;
+  //Settings.SearchDirectories := TStringList.Create;
 
 Finalization
   Settings.NormalFont.Free;
