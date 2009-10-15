@@ -1549,12 +1549,14 @@ end;
 Procedure TRichTextView.SetVerticalPosition( NewY: longint );
 begin
   FVScrollbar.Position := NewY;
+  FVScrollbar.RepaintSlider;
   DoVerticalScroll( FVScrollbar.Position );
 end;
 
 Procedure TRichTextView.SetHorizontalPosition( NewX: longint );
 begin
   FHScrollbar.Position := NewX;
+  FHScrollbar.RepaintSlider;
   DoHorizontalScroll( FHScrollbar.Position );
 end;
 
