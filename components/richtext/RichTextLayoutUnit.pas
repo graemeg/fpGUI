@@ -150,7 +150,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Create   1 of 4');
   FLinks := TStringList.Create;
   FLinks.Duplicates := dupIgnore;
   FFontManager := FontManager;
-  FLayoutWidth := Width * FontWidthPrecisionFactor;
+  FLayoutWidth := Width;
 ProfileEvent('DEBUG:  TRichTextLayout.Create   2');
   FHorizontalImageScale := 1;
   FVerticalImageScale := 1;
