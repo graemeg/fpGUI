@@ -61,11 +61,16 @@ type
     mru: TfpgMRU;
     FFileOpenRecent: TfpgMenuItem;
 
-    // while loading... so owe can display progress
     LoadingFilenameList: TStringList;
     LoadingFileIndex: integer;
     LoadingTotalSize: longint;
     LoadingSizeSoFar: longint;
+    AllFilesWordSequences: TList; // of lists; one per open file; of possible word sequences
+    CurrentOpenFiles: TList; // current open help files.
+    MainTitle: string;
+    InIndexSearch: boolean; // true while searching index
+    IndexLoaded: boolean;
+    ContentsLoaded: boolean;
 
     procedure   MainFormShow(Sender: TObject);
     procedure   MainFormDestroy(Sender: TObject);
@@ -87,12 +92,22 @@ type
     procedure   lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnSearchClicked(Sender: TObject);
+    procedure   DisplaySelectedSearchResultTopic;
+    procedure   EnableControls;
+    procedure   ClearAllWordSequences;
+    procedure   DoSearch;
+    procedure   SetWaitCursor;
+    procedure   ClearWaitCursor;
+    procedure   SetMainCaption;
+    procedure   DisplayFiles(NewFiles: TList; var FirstContentsNode: TfpgTreeNode);
     procedure   FileOpen;
-    function    OpenFile(const AFileNames: string): boolean;
+    function    LoadFiles(const aFileNames: TStrings; aHelpFiles: TList): boolean;
+    function    OpenFiles(const FileNames: TStrings; const AWindowTitle: string; const DisplayFirstTopic: boolean): boolean;
+    function    OpenFile(const AFileName: string; const AWindowTitle: string; const DisplayFirstTopic: boolean): boolean;
     procedure   CloseFile(const ADestroying: boolean = False);
     procedure   OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
     procedure   LoadNotes(AHelpFile: THelpFile);
-    procedure   LoadContents;
+    procedure   LoadContents(AFiles: TList; var FirstNode: TfpgTreeNode);
     // Used in loading contents
     procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
     procedure   ClearNotes;
@@ -101,8 +116,6 @@ type
     procedure   ResetProgress;
     procedure   SetStatus(const AText: TfpgString);
     function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
-    // Given a "filename" which may include a path, find it in various paths and extensions
-    function    FindHelpFile(AFileName: TfpgString ): TfpgString;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -111,8 +124,6 @@ type
 
 {@VFD_NEWFORM_DECL}
 
-const
-  cTitle = 'Documentation Viewer';
 
 implementation
 
@@ -121,12 +132,17 @@ uses
   ,fpg_constants
   ,fpg_iniutils
   ,nvUtilities
+  ,ACLStringUtility
   ,HelpTopic
   {$IFDEF Timing}
   ,EpikTimer
   {$ENDIF}
   ,TextSearchQuery
   ,SearchUnit
+  ,dvconstants
+  ,IPFFileFormatUnit
+  ,SettingsUnit
+  ,dvHelpers
   ;
 
 
@@ -151,7 +167,7 @@ begin
     t := TEpikTimer.Create(nil);
     t.Start;
     {$ENDIF}
-    OpenFile(ParamStr(1));
+    OpenFile(ParamStr(1), '', True);
     {$IFDEF Timing}
     t.Stop;
     writeln(t.ElapsedDHMS);
@@ -237,7 +253,7 @@ end;
 
 procedure TMainForm.miMRUClick(Sender: TObject; const FileName: String);
 begin
-  OpenFile(FileName);
+  OpenFile(FileName, '', True);
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
@@ -250,7 +266,8 @@ begin
   f := THelpFile(Files[0]);
   lbIndex.Items.Clear;
   for i := 0 to f.Index.Count-1 do
-    lbIndex.Items.AddObject(f.Index[i], f.Topics[i]);
+
+    lbIndex.Items.AddObject(F.Index.GetTopic(i).Title, f.Topics[i]);
   lbIndex.Invalidate
 end;
 
@@ -302,48 +319,105 @@ begin
 end;
 
 procedure TMainForm.btnSearchClicked(Sender: TObject);
+begin
+  DoSearch;
+end;
+
+procedure TMainForm.DisplaySelectedSearchResultTopic;
+begin
+  //
+end;
+
+procedure TMainForm.EnableControls;
+begin
+  //
+end;
+
+procedure TMainForm.ClearAllWordSequences;
 var
-  Query: TTextSearchQuery;
-  SearchText: TfpgString;
-  SearchResults: TList;
-  TopicIndex: integer;
-  Topic: TTopic;
-  FileIndex: integer;
+  i: longint;
+  FileWordSequences: TList;
   HelpFile: THelpFile;
 begin
-  SearchText:= trim(edSearchText.Text);
+  if AllFilesWordSequences = nil then
+    exit;
+
+  for i := 0 to AllFilesWordSequences.Count - 1 do
+  begin
+    FileWordSequences := TList(AllFilesWordSequences[ i ]);
+    HelpFile := THelpFile(CurrentOpenFiles[ i ]);
+    ClearWordSequences( FileWordSequences, HelpFile.DictionaryCount );
+    FileWordSequences.Free;
+  end;
+  AllFilesWordSequences.Clear;
+end;
+
+procedure TMainForm.DoSearch;
+var
+  SearchResults: TList;
+  SearchText: string;
+  FileIndex: longint;
+  HelpFile: THelpFile;
+  TopicIndex: longint;
+  Topic: TTopic;
+  FileWordSequences: TList;
+  Query: TTextSearchQuery;
+begin
+  SearchText := Trim(edSearchText.Text);
+  lbSearchResults.Items.Clear;
+
   if SearchText = '' then
-    Exit;  //==>
+    exit;
+
+  lbSearchResults.Items.Add(rsDVSearchingMsg);
+  SetStatus(rsDVSearchingMsg);
 
   try
     Query := TTextSearchQuery.Create( SearchText );
   except
     on e: ESearchSyntaxError do
     begin
-      ShowMessage( 'Error in search syntax: '
-                   + e.Message );
+      TfpgMessageDialog.Critical( rsSearch,  rsDVSearchSyntaxError + e.Message );
       exit;
     end;
   end;
 
+  ClearAllWordSequences;
+
+  SetWaitCursor;
+
   SearchResults := TList.Create;
 
   // Search open help file
-  for FileIndex := 0 to Files.Count - 1 do
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
   begin
-    HelpFile := THelpFile(Files[ FileIndex ]);
-    SearchHelpFile( HelpFile,
-                    Query,
-                    SearchResults,             // SearchResults get populated
-                    HelpFile.HighlightWords ); // HighlightWords get populate here!
+    HelpFile := THelpFile(CurrentOpenFiles[ FileIndex ]);
+    FileWordSequences := TList.Create;
+    try
+      SearchHelpFile( HelpFile,
+                      Query,
+                      SearchResults,
+                      FileWordSequences );
+    except
+      on E: EHelpFileException do
+      begin
+        TfpgMessageDialog.Critical(rsError , E.Message);
+        Query.Destroy;
+        ClearWaitCursor;
+        exit;
+      end;
+    end;
+
+    AllFilesWordSequences.Add( FileWordSequences );
   end;
 
   // Sort results across all files by relevance
   SearchResults.Sort( @TopicRelevanceCompare );
 
   // Load topics into search results list.
-  lbSearchResults.BeginUpdate;
+  lbSearchResults.Items.BeginUpdate;
   lbSearchResults.Items.Clear;
+
   for TopicIndex := 0 to SearchResults.Count - 1 do
   begin
     Topic := TTopic(SearchResults[ TopicIndex ]);
@@ -354,17 +428,92 @@ begin
                                           Topic );
   end;
 
-  lbSearchResults.FocusItem := -1;
-  lbSearchResults.EndUpdate;
-  fpgApplication.ProcessMessages; // make sure list gets displayed
+  EnableControls;
+//  if lbSearchResults.Items.Count > 0 then
+    // there are some search matches, so highlight words
+//    ViewHighlightSearchWordsMI.Checked := true;
 
-  Query.Free;
-  SearchResults.Free;
+  lbSearchResults.FocusItem := -1;
+  lbSearchResults.Items.EndUpdate;
+
+  Query.Destroy;
+  SearchResults.Destroy;
 
   if lbSearchResults.Items.Count > 0 then
-    lbSearchResults.FocusItem := 0
+  begin
+    lbSearchResults.FocusItem := 0;
+  end
   else
-    lbSearchResults.Items.Add( '(No matches found for "' + SearchText + '")' );
+  begin
+    lbSearchResults.Items.Add( Format(rsDVNoMatchesFound, [SearchText]));
+//    RefreshWindows( Windows ); // update to remove old highlights
+  end;
+  SetStatus( Format(rsDVSearchFoundMsg, [lbSearchResults.Items.Count])
+      + StrInDoubleQuotes(SearchText));
+
+  ClearWaitCursor;
+  DisplaySelectedSearchResultTopic;
+end;
+
+procedure TMainForm.SetWaitCursor;
+begin
+  //
+end;
+
+procedure TMainForm.ClearWaitCursor;
+begin
+  //
+end;
+
+procedure TMainForm.SetMainCaption;
+begin
+  WindowTitle:= MainTitle;
+  fpgApplication.ProcessMessages;
+end;
+
+procedure TMainForm.DisplayFiles(NewFiles: TList; var FirstContentsNode: TfpgTreeNode);
+var
+  HelpFile: THelpFile;
+  FileIndex: longint;
+begin
+  LogEvent(LogStartup, 'DisplayFiles' );
+  // Now load the various parts of the file(s)
+  // into the user interface
+  ProgressBar.Position := 52;
+  SetStatus( rsDVDisplaying );
+
+  // Add our open files in the global filelist
+  { TODO -ograeme : implement global filelist support }
+  //for FileIndex := 0 to NewFiles.Count - 1 do
+  //begin
+  //  HelpFile := NewFiles[ FileIndex ];
+  //  GlobalFilelist.AddFile( HelpFile.Filename, Frame.Handle );
+  //  // LoadNotes( HelpFile );
+  //  LoadBookmarks( HelpFile );
+  //end;
+
+  { TODO -ograeme : update notes display }
+  //UpdateNotesDisplay;
+
+  { TODO -ograeme : bookmarks }
+  //BuildBookmarksMenu;
+  //UpdateBookmarksForm;
+
+  ProgressBar.Position := 55;
+
+  ContentsLoaded := false;
+  IndexLoaded := false;
+
+  LoadContents( NewFiles, FirstContentsNode );
+
+  ProgressBar.Position := 75;
+
+  // LoadIndex;
+
+  ProgressBar.Position := 100;
+  SetStatus( rsDVDone );
+
+  LogEvent(LogStartup, 'DisplayFiles Done' );
 end;
 
 procedure TMainForm.FileOpen;
@@ -373,145 +522,218 @@ var
 begin
   dlg := TfpgFileDialog.Create(nil);
   try
-    dlg.WindowTitle := 'Open Help File';
-    dlg.Filter := 'Help Files (*.hlp, *.inf)|*.inf;*.hlp ';
+    { TODO -ograemeg -cSettings : Use settings.lastopendirectory }
+    dlg.WindowTitle := rsDVOpenHelpFile;
+    dlg.Filter := rsDVHelpFiles + ' (*.hlp, *.inf)|*.inf;*.hlp ';
     // and a catch all filter
     dlg.Filter := dlg.Filter + '|(' + rsAllFiles + ' (*)|*';
 
     if dlg.RunOpenFile then
     begin
       mru.AddItem(dlg.Filename);
-      OpenFile(dlg.Filename);
-      { TODO -oGraeme : Add support for multiple files. }
-//      OpenFile( ListToString( dlg.FileNames, '+' ) );
+      Settings.LastOpenDirectory := ExtractFilePath(dlg.Filename);
+      OpenFile(dlg.Filename, '', true);
     end;
+    { TODO -oGraeme : Add support for multiple files. }
   finally
     dlg.Free;
   end;
 end;
 
-function TMainForm.OpenFile(const AFileNames: string): boolean;
+function TMainForm.LoadFiles(const aFileNames: TStrings; aHelpFiles: TList): boolean;
 var
-  HelpFiles: TList;
   HelpFile: THelpFile;
-  lFilename: string;
+  FileIndex, i: longint;
+  FileName: string;
   FullFilePath: string;
-  FileIndex: integer;
-  lFileSize: longint;
-  RemainingFileNames: string;
 begin
-  ProfileEvent('OpenFile >>>');
-  lbHistory.Items.Clear;
-
-  HelpFiles := TList.Create;
-  ProfileEvent( 'Translate environment vars' );
-  RemainingFileNames := TranslateEnvironmentVar(AFilenames);
-
+  LogEvent(LogStartup, 'LoadFiles' );
   LoadingFilenameList := TStringList.Create;
-  LoadingTotalSize := 0;
 
-  while RemainingFileNames <> '' do
-  begin
-    lFileName := ExtractNextValue(RemainingFileNames, '+');
-    ProfileEvent( '  File: ' + lFileName );
-    FullFilePath := FindHelpFile(lFilename);
-    if FullFilePath <> '' then
-    begin
-      lFileName := FullFilePath;
-      lFileSize := GetFileSize(lFilename);
-      inc(LoadingTotalSize, lFileSize);
-    end;
-    ProfileEvent( '  Full path: ' + FullFilePath );
-    LoadingFilenameList.Values[lFileName] := IntToStr(lFileSize);
-  end;
+// RBRi  TranslateIPFEnvironmentVars( FileNames, LoadingFilenameList );
+  for i := 0 to aFileNames.Count - 1 do
+    LoadingFilenameList.Add(aFileNames[i]);
 
-  LoadingSizeSoFar := 0;
+  LogEvent(LogStartup, 'Finding files' );
+  ProgressBar.Visible := True;
+
+  // now find full file paths,
+  // and also the total file size for progress display
   for FileIndex := 0 to LoadingFilenameList.Count - 1 do
   begin
-    lFilename := LoadingFilenameList.Names[FileIndex];
-    ProfileEvent( '  Loading: ' + lFilename );
+    FileName := LoadingFilenameList[ FileIndex ];
+    LogEvent(LogStartup, '  File: ' + FileName );
+
+    // Find the help file, if possible
+    if Filename = OWN_HELP_MARKER then
+    begin
+      FullFilePath := GetOwnHelpFileName;
+    end
+    else
+    begin
+      FullFilePath := FindHelpFile( Filename );
+    end;
+
+    if FullFilePath <> '' then
+    begin
+      LogEvent(LogStartup, '    Full path: ' + FullFilePath );
+    end
+    else
+    begin
+      LogEvent(LogStartup, '    File not found' );
+      FullFilePath := FileName; // we'll complain later.
+    end;
+    LoadingFilenameList[ FileIndex ] := FullFilePath;
+  end;
+
+  // Now actually load the files
+  for FileIndex := 0 to LoadingFilenameList.Count - 1 do
+  begin
+    Filename := LoadingFilenameList[ FileIndex ];
+    LogEvent(LogStartup, '  Loading: ' + Filename );
     try
       LoadingFileIndex := FileIndex;
-      HelpFile := THelpFile.Create(lFileName, @OnHelpFileLoadProgress);
-      inc(LoadingSizeSoFar, StrToInt(LoadingFilenameList.Values[lFileName]));
-      HelpFiles.Add(HelpFile);
+
+      // load the file
+      HelpFile := THelpFile.Create( FileName );
+      if Settings.FixedFontSubstitution then
+         HelpFile.SetupFontSubstitutes( Settings.FixedFontSubstitutes );
+
+      aHelpFiles.Add( HelpFile );
+
     except
       on E: Exception do
       begin
-        if E is EHelpFileException then
-          ShowMessage( 'Could not open ' + lFileName + ': ' + E.Message )
-        else
-          ShowMessage( 'An error occurred loading ' + lFileName
-                       + '. It may be a damaged help file '
-                       + 'or there may be a bug in this program.' + #10 + #10 + E.Message );
-        Result := False;
-        // cleanup memory used
-        while HelpFiles.Count > 0 do
+
+        if E is EWindowsHelpFormatException then
         begin
-          HelpFile := THelpFile(HelpFiles[0]);
-          HelpFile.Free;
-          HelpFiles.Delete(0);
+          { TODO -ograeme -cnice to have : Implement opening Windows help }
+          //OpenWindowsHelp( Filename );
+        end
+        else
+        begin
+          TfpgMessageDialog.Critical( rsDVOpenHelpFile,
+                      Format(rsDVCouldNotOpen, [Filename])
+                      + ': '
+                      + E.Message );
         end;
+
+        // back out of the load process
+        Result := false;
+
+        DestroyListObjects( aHelpFiles );
+
         LoadingFilenameList.Free;
-        HelpFiles.Free;
         ResetProgress;
-        Exit;  //==>
-      end { exception }
-    end; { try/except }
-  end;  { for FileIndex... }
+        exit;
+      end
+    end;
+  end;
+
+  LoadingFilenameList.Free;
+  Result := true;
+end;
+
+{ Open the file or list of files in FileNames
+  Set the window title if given, otherwise get it from first file }
+function TMainForm.OpenFiles(const FileNames: TStrings;
+  const AWindowTitle: string; const DisplayFirstTopic: boolean): boolean;
+var
+  tmpHelpFiles: TList;
+  FirstContentsNode: TfpgTreeNode;
+begin
+  LogEvent(LogStartup, 'OpenFiles' );
+
+  //if not OKToCloseFile then
+  //  exit;
+
+  SetWaitCursor;
+  tmpHelpFiles := TList.Create;
+
+// RBRi Translate
+  if not LoadFiles(FileNames, tmpHelpFiles) then
+  begin
+    ClearWaitCursor;
+    tmpHelpFiles.Free;
+    exit;
+  end;
+
+  Result := true;
+
+  lbSearchResults.Items.Clear;
+  { TODO : page history support }
+//  PageHistory.Clear;
+//  CurrentHistoryIndex := -1;
 
   // Now that we have successfully loaded the new help file(s)
   // close the existing one.
   CloseFile;
 
-  Files.Assign(HelpFiles);
-//  AssignList(HelpFiles, Files);
-  ProgressBar.Position:= 50;
-  SetStatus( 'Displaying... ' );
-  fpgApplication.ProcessMessages;
+  AssignList(tmpHelpFiles, CurrentOpenFiles );
 
-  LoadingFilenameList.Free;
-  HelpFiles.Free;
-  Result := True;
+  ProgressBar.Position := 50;
+  SetStatus( rsDVDisplaying );
 
-  WindowTitle := cTitle + ' - ' + THelpFile( Files[ 0 ] ).Title;
-  fpgApplication.ProcessMessages;
+//  AddCurrentToMRUFiles;
 
-  { TODO -oGraeme : Do MRU files list handling here }
+  if AWindowTitle = '' then
+    MainTitle := THelpFile( CurrentOpenFiles[ 0 ] ).Title
+  else
+    MainTitle := AWindowTitle;
+  SetMainCaption;
 
-  ProgressBar.Position := 51;
-  SetStatus( 'Loading notes... ' );
+  // Now load the various parts of the file(s)
+  // into the user interface
+  tvContents.RootNode.Clear;
 
-  { TODO -oGraeme : Load previous notes here }
-  for FileIndex:= 0 to Files.Count - 1 do
+  DisplayFiles( tmpHelpFiles, FirstContentsNode );
+
+  //if CmdLineParameters.getHelpManagerFlag then
+  //  ShowLeftPanel := Settings.ShowLeftPanel_Help
+  //else
+  //  ShowLeftPanel := Settings.ShowLeftPanel_Standalone;
+
+  // Select first contents node if there is one
+  if FirstContentsNode <> nil then
   begin
-    HelpFile := THelpFile(Files[ FileIndex ]);
-    LoadNotes( HelpFile );
+    LogEvent(LogStartup, '  Select first node' );
+    tvContents.Selection := FirstContentsNode;
+    tvContents.SetFocus;
   end;
 
-  ProgressBar.Position := 55;
-  SetStatus( 'Display contents... ' );
-  LoadContents;
+  ClearWaitCursor;
 
-  if tvContents.RootNode.Count = 1 then
+  ResetProgress;
+
+//  NotebookOnPageChanged( self ); // ensure e.g. index loaded
+
+  EnableControls;
+
+  if DisplayFirstTopic then
   begin
-    ProfileEvent( '  Expand first node' );
-    // Contents has only one top level node... expand it
-    tvContents.RootNode.FirstSubNode.Expand;
+    LogEvent(LogStartup, 'Display first topic' );
+    { TODO -oGraeme : Improved Display Topic method }
+//    DisplaySelectedContentsTopic;
+    DisplayTopic;
   end;
 
-  ProgressBar.Position:= 57;
-  SetStatus( 'Display first topic... ' );
-  ProfileEvent( '  Display first topic' );
-  tvContents.Selection := tvContents.RootNode.FirstSubNode;
-  tvContents.Invalidate;
-  btnGoClicked(nil);
+  LogEvent(LogStartup, 'OpenFiles complete' );
+end;
 
-  { TODO -oGraeme : Load Index here }
-  lbSearchResults.Items.Clear;
-
-  ProgressBar.Position := 100;
-  SetStatus( 'Done' );
+{ Open a single file }
+function TMainForm.OpenFile(const AFileName: string; const AWindowTitle: string;
+    const DisplayFirstTopic: boolean): boolean;
+var
+  tmpFileNames: TStringList;
+begin
+  tmpFileNames := TStringList.Create;
+  { TODO -ograemeg -copen files : Implement ParseAndExpandFilenames }
+  tmpFileNames.Add(AFileName);
+//  ParseAndExpandFileNames(FileName, tmpFileNames);
+  Result := OpenFiles( tmpFileNames,
+                       AWindowTitle,
+                       DisplayFirstTopic );
+  tmpFileNames.Destroy;
 end;
 
 procedure TMainForm.CloseFile(const ADestroying: boolean = False);
@@ -524,7 +746,7 @@ begin
   RichView.Clear(ADestroying);
   if not ADestroying then
   begin
-    WindowTitle := cTitle + ' - No file';
+    WindowTitle := rsDVTitle + ' - ' + rsDVNoFile;
     tvContents.Invalidate;
   end;
 
@@ -559,7 +781,7 @@ begin
 
 end;
 
-procedure TMainForm.LoadContents;
+procedure TMainForm.LoadContents(AFiles: TList; var FirstNode: TfpgTreeNode);
 var
   FileIndex: integer;
   HelpFile: THelpFile;
@@ -567,17 +789,16 @@ var
   Node: TfpgTreeNode;
   Topic: TTopic;
 begin
-  ProfileEvent( 'Load contents treeview' );
+  LogEvent(LogStartup, 'Load contents outline');
+  // we don't clear treeview here in case we need to load more files later.
+  LogEvent(LogStartup, 'Loop files');
 
-  tvContents.RootNode.Clear;
-
-  ProfileEvent( 'Loop files' );
-
+  FirstNode := nil;
   Node := nil;
 
-  for FileIndex:= 0 to Files.Count - 1 do
+  for FileIndex:= 0 to AFiles.Count - 1 do
   begin
-    HelpFile:= THelpFile(Files[ FileIndex ]);
+    HelpFile:= THelpFile(AFiles[ FileIndex ]);
     ProfileEvent( 'File ' + IntToStr( FileIndex ) );
     TopicIndex:= 0;
     ProfileEvent('TopicCount=' + IntToStr(HelpFile.TopicCount));
@@ -590,6 +811,8 @@ begin
         begin
           Node := tvContents.RootNode.AppendText(Topic.Title);
           Node.Data := Topic;
+          if FirstNode = nil then
+            FirstNode := Node;
           inc( TopicIndex );
         end
         else
@@ -608,6 +831,28 @@ begin
       end;
     end;
   end;
+  LogEvent(LogStartup, '  EndUpdate' );
+
+  if Settings.OpenWithExpandedContents then
+  begin
+    LogEvent(LogStartup, '  Expand all contents' );
+    tvContents.RootNode.Expand;
+    node := tvContents.RootNode.Next;
+    while node <> nil do
+    begin
+      node.Expand;
+      node := tvContents.RootNode.Next;
+    end;
+  end
+  else
+  begin
+    LogEvent(LogStartup, '  Expand first node' );
+    // Contents has only one top level node... expand it
+    FirstNode.Expand;
+  end;
+
+  ContentsLoaded := true;
+  LogEvent(LogStartup, '  Contents loaded' );
 end;
 
 procedure TMainForm.AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode;
@@ -714,10 +959,16 @@ Begin
   ProfileEvent('Debug show hex values = ' + BoolToStr(Debug));
   if ImageIndices <> nil then
     ProfileEvent('ImageIndices initialized');
-  Topic.GetText(HelpFile.HighlightWords,
-                Debug,
-                lText,
-                ImageIndices);
+  //Topic.GetText(HelpFile.HighlightWords,
+  //              Debug,
+  //              lText,
+  //              ImageIndices);
+  Topic.GetText( nil {HighlightWordSequences},
+                  Debug {ShowCodes},
+                  False {ShowWordIndices},
+                  lText {TopicText},
+                  ImageIndices,
+                  nil {Highlights} );
 
   { TODO -oGraeme : We do not support images yet }
   ImageIndices.Free;
@@ -730,6 +981,8 @@ end;
 procedure TMainForm.ResetProgress;
 begin
   { TODO -oGraeme : implement ResetProgress }
+  ProgressBar.Visible := False;
+  ProgressBar.Position := 0;
 end;
 
 procedure TMainForm.SetStatus(const AText: TfpgString);
@@ -748,12 +1001,6 @@ begin
     Result := AFileNames;
 end;
 
-function TMainForm.FindHelpFile(AFileName: TfpgString): TfpgString;
-begin
-  { TODO -oGraeme : Implement FindHelpFile()}
-  Result := AFilename;
-end;
-
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -761,6 +1008,8 @@ begin
   OnShow  := @MainFormShow;
   OnDestroy :=@MainFormDestroy;
   Files := TList.Create;
+  AllFilesWordSequences := TList.Create;
+  CurrentOpenFiles := TList.Create;
   { TODO -oGraeme : Make Debug a menu option }
   Debug := False;
 end;
@@ -772,17 +1021,9 @@ var
 begin
 writeln('DEBUG:  TMainForm.Destroy >>>>');
   FFileOpenRecent := nil;   // it was a reference only
-  if (Files <> nil) and (Files.Count > 0) then
-  begin
-    // Now destroy help files
-    for FileIndex := 0 to Files.Count - 1 do
-    begin
-      lHelpFile := THelpFile(Files[FileIndex]);
-      lHelpFile.Free;
-    end;
-  end;
-  Files.Clear;
-  Files.Free;
+  DestroyListAndObjects(Files);
+  DestroyListAndObjects(AllFilesWordSequences);
+  DestroyListAndObjects(CurrentOpenFiles);
 writeln('DEBUG:  TMainForm.Destroy   1');
   inherited Destroy;
 writeln('DEBUG:  TMainForm.Destroy <<<<');

@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="24">
+    <Units Count="27">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -152,6 +152,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="SettingsUnit"/>
       </Unit23>
+      <Unit24>
+        <Filename Value="HelpWindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpWindow"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="dvconstants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="dvconstants"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="dvHelpers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="dvHelpers"/>
+      </Unit26>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
