@@ -5,7 +5,7 @@ unit nvNullObjects;
 interface
 
 uses
-  contnrs, SysUtils;
+  contnrs, Classes, SysUtils;
 
 type
   EHelpBitmapException = class(Exception);
@@ -22,7 +22,7 @@ type
 
   THelpBitmap = class(TObject)
   public
-    class function CreateFromHelpFile(AData: pointer): THelpBitmap;
+    constructor CreateFromHelpFile( FileHandle: TFileStream; Offset: longint );
     procedure LoadFromResourceName(const AName: string);
   end;
 
@@ -41,9 +41,10 @@ end;
 
 { THelpBitmap }
 
-class function THelpBitmap.CreateFromHelpFile(AData: pointer): THelpBitmap;
+
+constructor THelpBitmap.CreateFromHelpFile(FileHandle: TFileStream; Offset: longint);
 begin
-  Result := nil;
+  inherited Create;
 end;
 
 procedure THelpBitmap.LoadFromResourceName(const AName: string);
