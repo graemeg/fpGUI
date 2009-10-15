@@ -45,6 +45,9 @@ Function ExtractNextValueNoTrim(
            var S: string;
            const Separator: string ): string;
 
+function AllocateMemory( const Size: ValUInt ): pointer;
+procedure DeallocateMemory( Var P: pointer );
+
 // Alias method which is the same as Move() but with less confusing name
 procedure MemCopy(const src; var dest; size: SizeInt);
 // Allows for debug output and quite disable of output
@@ -179,6 +182,26 @@ Begin
     Result := S;
     S := '';
   end;
+end;
+
+function AllocateMemory( const Size: ValUInt ): pointer;
+begin
+  GetMem( Result, size + sizeof( Size ) );
+  PtrUInt(Result^) := Size;
+  inc( Result, sizeof( Size ) );
+end;
+
+procedure DeallocateMemory( Var P: pointer );
+var
+  Size: ValUInt;
+begin
+  if P = nil then
+    exit;
+
+  dec( P, sizeof( size ) );
+  Size := ValUInt(P^);
+  FreeMem( P, Size + sizeof( Size ) );
+  P := nil;
 end;
 
 procedure MemCopy(const src; var dest; size: SizeInt);
