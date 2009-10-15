@@ -42,15 +42,17 @@ procedure SearchHelpFile( HelpFile: THelpFile;
                           WordSequences: TList );
 
 // clear a lsit of word sequences (as produced by above)
-procedure ClearWordSequences( WordSequences: TList;
-                              DictionaryCount: longint );
+procedure ClearWordSequences( WordSequences: TList;  DictionaryCount: longint );
 
 Implementation
 
 uses
-  SysUtils,
-//  ACLUtility, ACLStringUtility,
-  HelpTopic, CompareWordUnit, nvUtilities;
+  SysUtils
+  ,HelpTopic
+  ,CompareWordUnit
+  ,nvUtilities
+  ,ACLStringUtility
+  ;
 
 type
   TSearchType = ( stGeneral, stStarts, stExactMatch, stEnds );
@@ -69,17 +71,16 @@ begin
   WordSequence.Clear;
 end;
 
-procedure ClearWordSequences( WordSequence: TList;
-                              DictionaryCount: longint );
+procedure ClearWordSequences( WordSequences: TList; DictionaryCount: longint );
 var
   SequenceIndex: longint;
-  WordSequence: TList;
+  lWordSequence: TList;
 begin
   for SequenceIndex := 0 to WordSequences.Count - 1 do
   begin
-    WordSequence := WordSequences[ SequenceIndex ];
-    ClearWordSequence( WordSequence, DictionaryCount );
-    WordSequence.Destroy;
+    lWordSequence := TList(WordSequences[ SequenceIndex ]);
+    ClearWordSequence( lWordSequence, DictionaryCount );
+    lWordSequence.Destroy;
   end;
   WordSequences.Clear;
 end;
@@ -123,13 +124,12 @@ procedure SearchDictionary( HelpFile: THelpFile;
                             Results: UInt32ArrayPointer );
 var
   DictIndex: integer;
-  pDictWord: pstring;
+  DictWord: string;
 begin
   for DictIndex := 0 to HelpFile.DictionaryCount - 1 do
   begin
-    pDictWord := HelpFile.DictionaryWordPtrs[ DictIndex ];
-    Results[ DictIndex ] := CompareWord( SearchWord,
-                                         pDictWord^ );
+    DictWord := HelpFile.DictionaryWords[ DictIndex ];
+    Results^[ DictIndex ] := CompareWord( SearchWord, DictWord );
   end;
 end;
 
@@ -140,15 +140,15 @@ procedure SearchDictionaryExact( HelpFile: THelpFile;
                                  Results: UInt32ArrayPointer );
 var
   DictIndex: integer;
-  pDictWord: pstring;
+  DictWord: string;
 begin
   FillUInt32Array( Results, HelpFile.DictionaryCount, 0 );
 
   for DictIndex := 0 to HelpFile.DictionaryCount - 1 do
   begin
-    pDictWord := HelpFile.DictionaryWordPtrs[ DictIndex ];
-    if StrEqualIgnoringCase( SearchWord, pDictWord^ ) then
-      Results[ DictIndex ] := mwExactWord;
+    DictWord := HelpFile.DictionaryWords[ DictIndex ];
+    if SameText( SearchWord, DictWord ) then
+      Results^[ DictIndex ] := mwExactWord;
   end;
 end;
 
@@ -167,7 +167,7 @@ begin
   begin
     DictWord := HelpFile.DictionaryWords[ DictIndex ];
     if StrStartsWithIgnoringCase(DictWord, SearchWord) then
-      Results[ DictIndex ] := MatchedWordRelevance( SearchWord, DictWord );
+      Results^[ DictIndex ] := MatchedWordRelevance( SearchWord, DictWord );
   end;
 end;
 
@@ -249,9 +249,7 @@ begin
 end;
 
 // Search index entries for given searchword
-procedure SearchIndex( HelpFile: THelpFile;
-                       SearchWord: string;
-                       Results: UInt32ArrayPointer );
+procedure SearchIndex( HelpFile: THelpFile; SearchWord: string; Results: UInt32ArrayPointer );
 var
   IndexIndex: longint;
   IndexEntry: string;
@@ -267,7 +265,7 @@ begin
 
   for IndexIndex := 0 to HelpFile.Index.Count - 1 do
   begin
-    IndexEntry := HelpFile.Index.GetLabels.ValuePtrs[IndexIndex];
+    IndexEntry := HelpFile.Index.GetLabels[IndexIndex];
     IndexEntryWordIndex := 0;
 
     tmpIndexWords.Clear;
@@ -364,7 +362,7 @@ begin
                     TopicCount );
 
   FillUInt32Array( TopicRelevances, TopicCount, 0);
-  FillUInt32Array( TopicsExcluded, TopicCountt, 0);
+  FillUInt32Array( TopicsExcluded, TopicCount, 0);
 
   for TermIndex := 0 to Query.TermCount - 1 do
   begin
@@ -473,7 +471,7 @@ begin
     LogEvent(LogSearch, 'Checking for sequences' );
     for TopicIndex := 0 to TopicCount - 1 do
     begin
-      if TopicsMatchingTerm[ TopicIndex ] > 0 then
+      if TopicsMatchingTerm^[ TopicIndex ] > 0 then
       begin
         Topic := HelpFile.Topics[ TopicIndex ];
         // Topic text contained a match for the all the parts
@@ -489,7 +487,7 @@ begin
         TopicRelevanceForTerm :=
           TopicRelevanceForTerm div Term.Parts.Count; // divide to bring back into scale
 
-        TopicsMatchingTerm[ TopicIndex ] := TopicRelevanceForTerm;
+        TopicsMatchingTerm^[ TopicIndex ] := TopicRelevanceForTerm;
 
       end;
     end;
@@ -497,9 +495,8 @@ begin
     if WordSequences = nil then
     begin
       // we don't need to keep the sequence
-      ClearWordSequence( TermWordSequence,
-                         HelpFile.DictionaryCount );
-      TermWordSequence.Destroy;
+      ClearWordSequence( TermWordSequence, HelpFile.DictionaryCount );
+      TermWordSequence.Free;
     end;
 
     // Search titles and index
@@ -546,10 +543,10 @@ begin
 
   for TopicIndex := 0 to TopicCount - 1 do
   begin
-    if TopicsExcluded[ TopicIndex ] = 0 then
+    if TopicsExcluded^[ TopicIndex ] = 0 then
     begin
       Topic := HelpFile.Topics[ TopicIndex ];
-      Topic.SearchRelevance := TopicRelevances[ TopicIndex ];
+      Topic.SearchRelevance := TopicRelevances^[ TopicIndex ];
       if Topic.SearchRelevance > 0 then
       begin
         Results.Add( Topic );

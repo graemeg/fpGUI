@@ -113,7 +113,7 @@ type
 
   TTopic = class(TObject)
   protected
-    _FileHandle: TFileStream; // HFILE;
+    _FileHandle: TFileStream;
     _pTOCEntry: pTTOCEntryStart;
     _pSlotOffsets: UInt32ArrayPointer;
     _Slots: TList;
@@ -173,7 +173,7 @@ type
     constructor Create( var FileHandle: TFileStream;
                         pSlotOffsets: UInt32ArrayPointer;
                         Dictionary: TStringList;
-                        pTOCEntry: pTTOCEntryStart;
+                        var pTOCEntry: pTTOCEntryStart;
                         FontTable: TList;
                         ReferencedFiles: TStrings );
     destructor Destroy; override;
@@ -332,7 +332,7 @@ end;
 constructor TTopic.Create( var FileHandle: TFileStream;
                            pSlotOffsets: UInt32ArrayPointer;
                            Dictionary: TStringList;
-                           pTOCEntry: pTTOCEntryStart;
+                           var pTOCEntry: pTTOCEntryStart;
                            FontTable: TList;
                            ReferencedFiles: TStrings );
 var
@@ -340,9 +340,7 @@ var
   titleLen: integer;
   XY: THelpXYPair;
   p: pbyte;
-
   Flags: byte;
-
 begin
   _FileHandle := FileHandle;
   _pSlotOffsets := pSlotOffsets;
@@ -352,9 +350,9 @@ begin
   _ContentsGroupIndex := 0;
 
   _pTOCEntry := pTOCEntry;
-  _NumSlots := pTOCEntry^. numslots;
+  _NumSlots := pTOCEntry^.numslots;
 
-  Flags := _pTOCEntry^. flags;
+  Flags := _pTOCEntry^.flags;
   p := pUInt8( _pTOCEntry ) + sizeof( TTOCEntryStart );
 
   if ( Flags and TOCEntryExtended ) > 0 then
@@ -380,18 +378,18 @@ begin
 
     if ( pExtendedInfo^.w2 and 4 ) > 0 then
     begin
-      _ContentsGroupIndex := pUInt16( p )^;
+      _ContentsGroupIndex := pUInt16(p)^;
       // read group
       inc( p, sizeof( uint16 ) );
     end;
   end;
 
   // skip slot numbers for now.
-  _pSlotNumbers := puint16( p );
+  _pSlotNumbers := pUInt16(p);
   inc( p, _NumSlots * sizeof( uint16 ) );
 
-  titleLen := _pTOCEntry^.length
-              - ( longword( p ) - longword( _pTOCEntry ) );
+  // Calculate the remainder of the tocentry length - that is the bytes used for TOC topic (title) text
+  titleLen := _pTOCEntry^.length - ( longword( p ) - longword( _pTOCEntry ) );
 
   // Read title
   if TitleLen > 0 then
@@ -1310,7 +1308,7 @@ begin
         if Slot.pLocalDictionary = nil then
           // allocate memory
           Slot.pLocalDictionary := GetMem(expected);
-        bytes := _FileHandle.Read(Slot.pLocalDictionary, expected);
+        bytes := _FileHandle.Read(Slot.pLocalDictionary^, expected);
         if bytes <> expected then
           raise EHelpFileException.Create('Failed to read complete slot dictionary');
 
@@ -1320,7 +1318,7 @@ begin
         if Slot.pData = nil then
           // allocate memory
           Slot.pData := GetMem(expected);
-        bytes := _FileHandle.Read(Slot.pData, expected);
+        bytes := _FileHandle.Read(Slot.pData^, expected);
         if bytes <> expected then
           raise EHelpFileException.Create('Failed to read complete slot data (text)');
 
