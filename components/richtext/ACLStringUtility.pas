@@ -325,6 +325,10 @@ function MatchFlagParam( const Param: string; const Flag: string ): boolean;
 // this is case INsensitive
 function StrStartsWithIgnoringCase(const aReceiver: String; const aStartString: String): Boolean;
 
+// returns true if the String ends with the provided one
+// this is case INsensitive
+function StrEndsWithIgnoringCase(const aReceiver: String; const anEndString: String): Boolean;
+
 function StrIsEmptyOrSpaces(const AText: string): boolean;
 
 implementation
@@ -1660,6 +1664,34 @@ begin
       result := false;
       exit;
     end;
+  end;
+
+  result := true;
+end;
+
+Function StrEndsWithIgnoringCase(const aReceiver: String; const anEndString: String): Boolean;
+Var
+  tmpStringPos : Longint;
+  tmpMatchPos : Longint;
+Begin
+  tmpStringPos := length(aReceiver);
+  tmpMatchPos := length(anEndString);
+
+  if tmpMatchPos > tmpStringPos then
+  begin
+    result := false;
+    exit;
+  end;
+
+  while tmpMatchPos > 0 do
+  begin
+    if upcase(aReceiver[tmpStringPos]) <> upcase(anEndString[tmpMatchPos]) then
+    begin
+      result := false;
+      exit;
+    end;
+    dec(tmpMatchPos);
+    dec(tmpStringPos);
   end;
 
   result := true;
