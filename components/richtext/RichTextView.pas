@@ -970,7 +970,7 @@ ProfileEvent('DEBUG:  TRichTextView.Layout    4');
                                      FImages,
                                      FRichTextSettings,
                                      FFontManager,
-                                     DrawWidth );
+                                     DrawWidth-(FScrollbarWidth*6) );
 
 ProfileEvent('DEBUG:  TRichTextView.Layout    5');
 
