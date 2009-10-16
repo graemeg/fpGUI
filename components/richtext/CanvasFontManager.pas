@@ -140,6 +140,7 @@ uses
   SysUtils
   ,ACLStringUtility
   ,nvUtilities
+  ,fpg_stringutils
   ;
 
 
@@ -1037,8 +1038,54 @@ end;
 procedure TCanvasFontManager.DrawString(var Point: TPoint; const Length: longint; const S: PChar);
 var
   t: string;
+
+  // Seaches <AValue> and replaces <ADel> with <AIns>. Case sensitive.
+  function tiStrTran(AValue, ADel, AIns : string): string;
+  var
+    i : integer;
+    sToChange : string;
+  begin
+    result := '';
+    sToChange := AValue;
+    i := UTF8Pos(ADel, sToChange);
+    while i <> 0 do
+    begin
+      result := result + UTF8Copy(sToChange, 1, i-1) + AIns;
+      UTF8Delete(sToChange, 1, i+UTF8length(ADel)-1);
+      i := UTF8Pos(ADel, sToChange);
+    end;
+    result := result + sToChange;
+  end;
+
 begin
   t := s;
+
+// Hack Alert #2: replace strange table chars with something we can actually see
+  //s := SubstituteChar(s, Chr(218), Char('+') );   // top-left corner
+  //s := SubstituteChar(s, Chr(196), Char('-') );   // horz row deviders
+  //s := SubstituteChar(s, Chr(194), Char('-') );   // centre top T connection
+  //s := SubstituteChar(s, Chr(191), Char('+') );   // top-right corner
+  //s := SubstituteChar(s, Chr(192), Char('+') );   // bot-left corner
+  //s := SubstituteChar(s, Chr(193), Char('-') );   // centre bottom inverted T
+  //s := SubstituteChar(s, Chr(197), Char('+') );
+  //s := SubstituteChar(s, Chr(179), Char('|') );  //
+  //s := SubstituteChar(s, Chr(195), Char('|') );
+  //s := SubstituteChar(s, Chr(180), Char('|') );
+  //s := SubstituteChar(s, Chr(217), Char('+') );   // bot-right corner
+  t := tiStrTran(t, Char(179), '│' );
+  t := tiStrTran(t, Char(180), '┤' );
+  t := tiStrTran(t, Char(191), '┐' );
+  t := tiStrTran(t, Char(192), '└' );
+  t := tiStrTran(t, Char(193), '┴' );
+  t := tiStrTran(t, Char(194), '┬' );
+  t := tiStrTran(t, Char(195), '├' );
+  t := tiStrTran(t, Char(196), '─' );
+  t := tiStrTran(t, Char(197), '┼' );
+  t := tiStrTran(t, Char(217), '┘' );
+  t := tiStrTran(t, Char(218), '┌' );
+
+
+
   FCanvas.DrawString(Point.X, Point.Y, t);
   Point.x := Point.X + Canvas.Font.TextWidth(t);
 end;
