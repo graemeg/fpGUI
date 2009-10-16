@@ -199,6 +199,7 @@ type
   TfpgStyle = class
   public
     DefaultFont: TfpgFont;
+    FixedFont: TfpgFont;
     MenuFont: TfpgFont;
     MenuAccelFont: TfpgFont;
     MenuDisabledFont: TfpgFont;
@@ -1356,7 +1357,7 @@ destructor TfpgFont.Destroy;
 begin
   if TfpgFontResource(FFontRes).DecRefCount <= 0 then
     fpgApplication.FreeFontRes(TfpgFontResource(FFontRes));
-  inherited;
+  inherited Destroy;
 end;
 
 { TfpgFontResource }
@@ -1653,6 +1654,7 @@ begin
 
   // Global Font Objects
   DefaultFont      := fpgGetFont(fpgGetNamedFontDesc('Label1'));
+  FixedFont        := fpgGetFont(fpgGetNamedFontDesc('Edit2'));
   MenuFont         := fpgGetFont(fpgGetNamedFontDesc('Menu'));
   MenuAccelFont    := fpgGetFont(fpgGetNamedFontDesc('MenuAccel'));
   MenuDisabledFont := fpgGetFont(fpgGetNamedFontDesc('MenuDisabled'));
@@ -1661,6 +1663,7 @@ end;
 destructor TfpgStyle.Destroy;
 begin
   DefaultFont.Free;
+  FixedFont.Free;
   MenuFont.Free;
   MenuAccelFont.Free;
   MenuDisabledFont.Free;
