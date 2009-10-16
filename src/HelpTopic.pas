@@ -2544,7 +2544,7 @@ begin
 
         // normal lookup
         if GlobalDictIndex < _GlobalDictionary.Count then
-          StringToAdd := pstring( _GlobalDictionary[ GlobalDictIndex ] )^
+          StringToAdd := _GlobalDictionary[ GlobalDictIndex ]
         else
           StringToAdd := '';
 
