@@ -869,7 +869,7 @@ var
   OutputString: string;
 begin
   EscapeLen := pData^;
-  EscapeCode := (pData + 1) ^;
+  EscapeCode := (pData + 1)^;
   OutputString := '';
 
   case EscapeCode of
@@ -908,7 +908,7 @@ begin
 
     ecHighlight1:
     begin
-      StyleCode := ( pData + 2 ) ^;
+      StyleCode := ( pData + 2 )^;
       if StyleCode <= High( IPFHighlight1Tags ) then
         OutputString := IPFHighlight1Tags[ StyleCode ];
       if StyleCode = 0 then
@@ -917,7 +917,7 @@ begin
 
     ecHighlight2:
     begin
-      StyleCode := ( pData + 2 ) ^;
+      StyleCode := ( pData + 2 )^;
       if StyleCode <= High( IPFHighlight2Tags ) then
         OutputString := IPFHighlight2Tags[ StyleCode ];
 
