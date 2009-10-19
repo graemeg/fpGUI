@@ -566,9 +566,10 @@ end;
 
 Procedure TRichTextView.DebugMIClick( Sender: TObject );
 begin
-//  Debug := not Debug;
-  writeln('VScrollbar.Position=', FVScrollbar.Position, '  min/max=', FVScrollbar.Min, '/', FVScrollbar.Max);
-  writeln('FNeedHScroll=', FNeedHScroll, '   FNeedVScroll=', FNeedVScroll);
+  Debug := not Debug;
+//  writeln('VScrollbar.Position=', FVScrollbar.Position, '  min/max=', FVScrollbar.Min, '/', FVScrollbar.Max);
+//  writeln('FNeedHScroll=', FNeedHScroll, '   FNeedVScroll=', FNeedVScroll);
+  RePaint;
 end;
 
 Procedure TRichTextView.DefaultMenuPopup( Sender: TObject );
@@ -672,8 +673,10 @@ ProfileEvent('DEBUG:  TRichTextView.HandlePaint   3');
 
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   4');
   Assert(FLayout <> nil, 'FLayout may not be nil at this point!');
-  Draw( 0, FLayout.FNumLines );
-//  Canvas.DrawText(8, 8, GetTextAreaWidth-FScrollbarWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
+  if not Debug then
+    Draw( 0, FLayout.FNumLines )
+  else
+    Canvas.DrawText(8, 8, GetTextAreaWidth-FScrollbarWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
   Canvas.ClearClipRect;
 
