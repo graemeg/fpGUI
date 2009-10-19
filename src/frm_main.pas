@@ -81,6 +81,7 @@ type
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
+    procedure   miFileSaveTopicAsIPF(Sender: TObject);
     procedure   miMRUClick(Sender: TObject; const FileName: String);
     procedure   btnShowIndex(Sender: TObject);
     procedure   btnGoClicked(Sender: TObject);
@@ -254,6 +255,155 @@ procedure TMainForm.miDebugHex(Sender: TObject);
 begin
   Debug := not Debug;
   DisplayTopic;
+end;
+
+procedure TMainForm.miFileSaveTopicAsIPF(Sender: TObject);
+var
+  F: TextFile;
+  T: TTopic;
+  dlg: TfpgFileDialog;
+  H: THelpFile;
+  i: integer;
+  filename: string;
+  imglist: TList;
+begin
+(*
+  H := THelpFile(CurrentOpenFiles[0]);
+
+  FileName := ChangeFileExt( ExtractFileName( H.Filename ), '.ipf' );
+  if not DoSaveFileDialog( FileSaveTitle,
+                       'IPF' + '|*.ipf',
+                       Filename,
+                       Settings.LastSaveDirectory,
+                       Filename ) then
+    exit;
+  if FileExists( Filename ) then
+    if not DoConfirmDlg( FileSaveTitle,
+                         ReplaceFilePromptA
+                         + Filename
+                         + ReplaceFilePromptB ) then
+      exit;
+
+  ImageOffsets := TList.Create;
+
+  AssignFile( F, FileName );
+  Rewrite( F );
+  WriteLn( F, ':userdoc.' );
+
+  // We can't tell if some levels of the contents were
+  // merged into the text of topics. So we just assume all are visible
+  WriteLn( F, ':docprof toc=123456.' );
+
+  ResourceIDs := TList.Create;
+
+  WriteLn( F, ':title.' + H.Title );
+
+  for i := 0 to H.TopicCount - 1 do
+  begin
+    T := H.Topics[ i ];
+
+    SetProgress( i div 2, H.TopicCount , 'Saving text...' );
+
+    WriteLn( F, '' );
+
+
+    if T.ContentsLevel = 0 then
+    begin
+      // perhaps it means footnote?
+      //      Level := 1;
+      Write( F, ':fn id=fn' + IntToStr( i ) + '.' ); // use index as id
+
+      T.SaveToIPF( F, ImageOffsets );
+
+      WriteLn( F, '' );
+      WriteLn( F, ':efn.' );
+    end
+    else
+    begin
+      Write( F, ':h' + IntToStr( T.ContentsLevel ) );
+      Write( F, ' id=' + IntToStr( i ) ); // use index as id
+
+      H.FindResourceIDsForTopic( T, ResourceIDs );
+      if ResourceIDs.Count > 0 then
+      begin
+        Write( F, ' res=' + IntToStr( longint( ResourceIDs[ 0 ] ) ) );
+      end;
+
+      if not T.ShowInContents then
+        Write( F, ' hide' );
+
+      if T.ContentsGroupIndex > 0 then
+        Write( F, ' group=' + IntToStr( T.ContentsGroupIndex ) );
+
+      Write( F, '.' ); // end of header
+      WriteLn( F, T.Title );
+
+      T.SaveToIPF( F, ImageOffsets );
+    end;
+
+
+
+  end;
+
+  ResourceIDs.Destroy;
+
+  WriteLn( F, ':euserdoc.' );
+  System.Close( F );
+
+  // Now write images
+
+  for i := 0 to ImageOffsets.Count - 1 do
+  begin
+    ImageOffset := longint( ImageOffsets[ i ] );
+
+    SetProgress( i div 2 + ImageOffsets.Count div 2,
+                 ImageOffsets.Count ,
+                 'Saving images...' );
+
+    Image := H.GetImage( ImageOffset );
+
+    if Image <> nil then
+    begin
+      Image.SaveToFile( ExtractFilePath( Filename )
+                        + 'img'
+                        + IntToStr( i )
+                        + '.bmp' );
+      Image.Destroy;
+    end;
+
+  end;
+
+  ResetProgress;
+  SetStatus( 'Save complete' );
+  ImageOffsets.Destroy;
+*)
+
+
+
+  //-----------------------------
+  if tvContents.Selection = nil then
+    Exit; //-->
+
+  T := TTopic(tvContents.Selection.Data);
+  if T <> nil then
+  begin
+    dlg := TfpgFileDialog.Create(nil);
+    try
+      dlg.FileName := T.Title + '.ipf';
+      if dlg.RunSaveFile then
+      begin
+        imglist := TList.Create;
+        AssignFile( F, dlg.FileName );
+        Rewrite( F );
+        T.SaveToIPF(F, imglist);
+        System.Close(F);
+        imglist.free;
+        dlg.Close;
+        dlg.Free;
+      end;
+    finally
+    end;
+  end;
 end;
 
 procedure TMainForm.miMRUClick(Sender: TObject; const FileName: String);
@@ -1158,6 +1308,7 @@ begin
     Name := 'miFile';
     SetPosition(292, 28, 132, 20);
     AddMenuItem('Open...', '', @miFileOpenClicked);
+    AddMenuItem('Save current Topic to IPF...', '', @miFileSaveTopicAsIPF);
     AddMenuItem('Close', '', @miFileCloseClicked);
     AddMenuitem('-', '', nil);
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
