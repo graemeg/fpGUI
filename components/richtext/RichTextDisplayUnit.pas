@@ -80,9 +80,9 @@ begin
 end;
 
 // Draw a string at the given location with given color/selected state
-procedure DrawRichTextString( var FontManager: TCanvasFontManager; var X: longint;
-    Y: longint; S: PChar; Len: longint; Selected: Boolean; PenColor: TfpgColor;
-    BackColor: TfpgColor );
+procedure DrawRichTextString( var FontManager: TCanvasFontManager; Layout: TRichTextLayout;
+    var X: longint; Y: longint; S: PChar; Len: longint; Selected: Boolean;
+    PenColor: TfpgColor; BackColor: TfpgColor );
 var
   Point: TPoint;
 begin
@@ -103,6 +103,10 @@ ProfileEvent('DEBUG:  DrawRichTextString >>>');
     FontManager.Canvas.Color := BackColor;
     FontManager.Canvas.TextColor := PenColor;
   end;
+  if FontManager.Canvas.Color <> Layout.FRichTextSettings.DefaultBackgroundColor then
+    FontManager.Canvas.FillRectangle(x, y,
+        FontManager.Canvas.Font.TextWidth(s),
+        FontManager.Canvas.Font.Height);
   FontManager.DrawString( Point, Len, S );
   X := Point.X;
 ProfileEvent('DEBUG:  DrawRichTextString <<<');
@@ -135,14 +139,14 @@ var
 
   procedure DrawTextBlock;
   begin
-    DrawRichTextString( FontManager,
+    DrawRichTextString( FontManager, Layout,
                         X,         // value gets adjusted by the time it returns
                         Y,         // value gets adjusted by the time it returns
                         PChar(StringToDraw),
                         Length(StringToDraw),
                         Selected,
                         Style.Color,
-                        Style.BackgroundColor );
+                        Style.BackgroundColor);
     StringToDraw := '';
   end;
 
