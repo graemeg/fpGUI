@@ -111,6 +111,7 @@ Type
     ConfirmWinHelp: boolean;
     GlobalSearchLocation: TGlobalSearchLocation;
     SearchDirectories: TStringList;
+    IPFTopicSaveAsEscaped: boolean;
   end;
 
 // global procs
@@ -275,6 +276,7 @@ begin
         ToolbarStyle := tsImagesAndText;
 
       ConfirmWinHelp := ReadBool( GeneralSection, 'ConfirmWinHelp', true );
+      IPFTopicSaveAsEscaped := ReadBool(GeneralSection, 'IPFTopicSaveAsEscaped', true);
 
       Count := ReadInteger( SearchSection, 'CustomDirCount', 0 );
 
@@ -401,6 +403,7 @@ begin
 
       WriteString( GeneralSection, 'ToolbarStyle', SettingString );
       WriteBool( GeneralSection, 'ConfirmWinHelp', ConfirmWinHelp );
+      WriteBool( GeneralSection, 'IPFTopicSaveAsEscaped', IPFTopicSaveAsEscaped);
       WriteInteger( SearchSection, 'CustomDirCount', SearchDirectories.Count );
 
       SearchDirectories.Sorted := true;
@@ -504,6 +507,7 @@ Begin
 //  aStrings.Add('ToolbarBackgroundImageFilename: ' + Settings.ToolbarBackgroundImageFilename);
   // ToolbarStyle: TToolbarStyle;
   aStrings.Add('ConfirmWinHelp: ' + boolToStr(Settings.ConfirmWinHelp));
+  aStrings.Add('IPFTopicSaveAsEscaped: ' + BoolToStr(Settings.IPFTopicSaveAsEscaped));
   // GlobalSearchLocation: TGlobalSearchLocation;
   // SearchDirectories: TStringList;
 end;

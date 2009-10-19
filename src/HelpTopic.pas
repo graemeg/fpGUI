@@ -2549,20 +2549,35 @@ begin
         else
           StringToAdd := '';
 
-        if Length( StringToAdd ) = 1 then
+        if (Length( StringToAdd ) = 1) and Settings.IPFTopicSaveAsEscaped then
         begin
           // could be symbol
           c := StringToAdd[ 1 ];
           case C of
             '&': StringToAdd := '&amp.';
             '''': StringToAdd := '&apos.';
-//            '*': StringToAdd := '&asterisk.';
+            '*': StringToAdd := '&asterisk.';
             '@': StringToAdd := '&atsign.';
             '\': StringToAdd := '&bsl.';
             '^': StringToAdd := '&caret.';
             '"': StringToAdd := '&osq.';
             ':': StringToAdd := '&colon.';
             '.': StringToAdd := '&per.';
+            '(': StringToAdd := '&lpar.';
+            ')': StringToAdd := '&rpar.';
+            '/': StringToAdd := '&slash.';
+            ',': StringToAdd := '&comma.';
+            '-': StringToAdd := '&hyphen.';
+            '_': StringToAdd := '&us.';
+            '~': StringToAdd := '&tilde.';
+            '+': StringToAdd := '&plus.';
+            '>': StringToAdd := '&gt.';
+            ';': StringToAdd := '&semi.';
+       Chr($da): StringToAdd := '+';
+       Chr($c4): StringToAdd := '-';
+       Chr($b3): StringToAdd := '|';
+       Chr($c3): StringToAdd := '|';
+       Chr($bf): StringToAdd := '+';
           end;
         end;
 
