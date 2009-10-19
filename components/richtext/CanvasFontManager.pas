@@ -1061,30 +1061,45 @@ begin
   t := s;
 
 // Hack Alert #2: replace strange table chars with something we can actually see
-  //s := SubstituteChar(s, Chr(218), Char('+') );   // top-left corner
-  //s := SubstituteChar(s, Chr(196), Char('-') );   // horz row deviders
-  //s := SubstituteChar(s, Chr(194), Char('-') );   // centre top T connection
-  //s := SubstituteChar(s, Chr(191), Char('+') );   // top-right corner
-  //s := SubstituteChar(s, Chr(192), Char('+') );   // bot-left corner
-  //s := SubstituteChar(s, Chr(193), Char('-') );   // centre bottom inverted T
-  //s := SubstituteChar(s, Chr(197), Char('+') );
-  //s := SubstituteChar(s, Chr(179), Char('|') );  //
-  //s := SubstituteChar(s, Chr(195), Char('|') );
-  //s := SubstituteChar(s, Chr(180), Char('|') );
-  //s := SubstituteChar(s, Chr(217), Char('+') );   // bot-right corner
-  t := tiStrTran(t, Char(179), '│' );
-  t := tiStrTran(t, Char(180), '┤' );
-  t := tiStrTran(t, Char(191), '┐' );
-  t := tiStrTran(t, Char(192), '└' );
-  t := tiStrTran(t, Char(193), '┴' );
-  t := tiStrTran(t, Char(194), '┬' );
-  t := tiStrTran(t, Char(195), '├' );
-  t := tiStrTran(t, Char(196), '─' );
-  t := tiStrTran(t, Char(197), '┼' );
-  t := tiStrTran(t, Char(217), '┘' );
-  t := tiStrTran(t, Char(218), '┌' );
+  //t := SubstituteChar(t, Chr(218), Char('+') );   // top-left corner
+  //t := SubstituteChar(t, Chr(196), Char('-') );   // horz row deviders
+  //t := SubstituteChar(t, Chr(194), Char('-') );   // centre top T connection
+  //t := SubstituteChar(t, Chr(191), Char('+') );   // top-right corner
+  //t := SubstituteChar(t, Chr(192), Char('+') );   // bot-left corner
+  //t := SubstituteChar(t, Chr(193), Char('-') );   // centre bottom inverted T
+  //t := SubstituteChar(t, Chr(197), Char('+') );
+  //t := SubstituteChar(t, Chr(179), Char('|') );  //
+  //t := SubstituteChar(t, Chr(195), Char('|') );
+  //t := SubstituteChar(t, Chr(180), Char('|') );
+  //t := SubstituteChar(t, Chr(217), Char('+') );   // bot-right corner
 
-
+  // it's cheaper to first check for the char than actually running full tiStrTran
+  // CodePage 437 (kind-of) to Unicode mapping
+    t := tiStrTran(t, Char(16), '>' );
+    t := tiStrTran(t, Char(17), '<' );
+    t := tiStrTran(t, Char($1f), '▼' );
+//  if pos(t, Char(179)) > 0 then
+    t := tiStrTran(t, Char(179), '│' );
+//  if pos(t, Char(180)) > 0 then
+    t := tiStrTran(t, Char(180), '┤' );
+//  if pos(t, Char(191)) > 0 then
+    t := tiStrTran(t, Char(191), '┐' );
+//  if pos(t, Char(192)) > 0 then
+    t := tiStrTran(t, Char(192), '└' );
+//  if pos(t, Char(193)) > 0 then
+    t := tiStrTran(t, Char(193), '┴' );
+//  if pos(t, Char(194)) > 0 then
+    t := tiStrTran(t, Char(194), '┬' );
+//  if pos(t, Char(195)) > 0 then
+    t := tiStrTran(t, Char(195), '├' );
+//  if pos(t, Char(196)) > 0 then
+    t := tiStrTran(t, Char(196), '─' );
+//  if pos(t, Char(197)) > 0 then
+    t := tiStrTran(t, Char(197), '┼' );
+//  if pos(t, Char(217)) > 0 then
+    t := tiStrTran(t, Char(217), '┘' );
+//  if pos(t, Char(218)) > 0 then
+    t := tiStrTran(t, Char(218), '┌' );
 
   FCanvas.DrawString(Point.X, Point.Y, t);
   Point.x := Point.X + Canvas.Font.TextWidth(t);
