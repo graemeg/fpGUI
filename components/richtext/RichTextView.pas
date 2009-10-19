@@ -51,6 +51,7 @@ Type
   private
     FPopupMenu: TfpgPopupMenu;
     procedure   FVScrollbarScroll(Sender: TObject; position: integer);
+    procedure   FHScrollbarScroll(Sender: TObject; position: integer);
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     Procedure   CreateDefaultMenu;
     Procedure   SelectAllMIClick( Sender: TObject );
@@ -197,7 +198,9 @@ Type
     Procedure DrawBorder;
     Procedure Draw( StartLine, EndLine: longint );
 
+    // Rectangle (GetClientRect) minus scrollbars (if they are enabled)
     Function GetDrawRect: TfpgRect;
+    // Rectangle minus scrollbars (GetDrawRect), minus extra 2px border all round
     Function GetTextAreaRect: TfpgRect;
     Function GetTextAreaHeight: longint;
     Function GetTextAreaWidth: longint;
@@ -255,6 +258,7 @@ Type
   Public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; Override;
+    // rect (of component) minus frame borders - normally 2 pixels all round
     function    GetClientRect: TfpgRect; override;
     procedure   AddText( Text: PChar; ADelay: boolean = False );
     procedure   AddParagraph( Text: PChar );
@@ -620,6 +624,7 @@ procedure TRichTextView.HandlePaint;
 Var
   CornerRect: TfpgRect;
   TextRect: TfpgRect;
+  DrawRect: TfpgRect;
   x: integer;
 
   // Just for fun! :-)
@@ -645,12 +650,13 @@ begin
   Canvas.ClearClipRect;
   DrawBorder;
 writeln('DEBUG:  TRichTextView.HandlePaint   1');
-  TextRect := GetTextAreaRect;
-  Canvas.SetClipRect(TextRect);
+  DrawRect := GetDrawRect;
+  Canvas.Color := BackgroundColor;
+  Canvas.FillRectangle(DrawRect);
 
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   2');
-  Canvas.Color := BackgroundColor;
-  Canvas.FillRectangle(TextRect);
+  TextRect := GetTextAreaRect;
+  Canvas.SetClipRect(TextRect);
 
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   3');
   if InDesigner then
@@ -680,11 +686,11 @@ ProfileEvent('DEBUG:  TRichTextView.HandlePaint   4');
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
   Canvas.ClearClipRect;
 
-  if FNeedHScroll then
+  if FHScrollbar.Visible and FVScrollbar.Visible then
   begin
     // blank out corner between scrollbars
-    CornerRect.Left := Width - FScrollBarWidth;
-    CornerRect.Top := FScrollBarWidth;
+    CornerRect.Left := Width - 2 - FScrollBarWidth;
+    CornerRect.Top := Height - 2 - FScrollBarWidth;
     CornerRect.Width := FScrollBarWidth;
     CornerRect.Height := FScrollBarWidth;
     Canvas.Color := clButtonFace;
@@ -815,6 +821,11 @@ begin
   SetVerticalPosition(position);
 end;
 
+procedure TRichTextView.FHScrollbarScroll(Sender: TObject; position: integer);
+begin
+  SetHorizontalPosition(position);
+end;
+
 procedure TRichTextView.ShowDefaultPopupMenu(const x, y: integer;
   const shiftstate: TShiftState);
 begin
@@ -915,9 +926,9 @@ begin
   HWidth  := Width - 4;
 
   if FVScrollBar.Visible then
-    Dec(HWidth, FVScrollBar.Width);
+    Dec(HWidth, FScrollbarWidth);
   if FHScrollBar.Visible then
-    Dec(VHeight, FHScrollBar.Height);
+    Dec(VHeight, FScrollbarWidth);
 
   FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
   FHScrollBar.Left    := 2;
@@ -1106,7 +1117,7 @@ begin
     exit;
 
   if FNeedHScroll then
-    inc( Result.Height, FScrollbarWidth );
+    dec( Result.Height, FScrollbarWidth );
 
   if FNeedVScroll then
     dec( Result.Width, FScrollbarWidth );
@@ -1117,7 +1128,7 @@ end;
 Function TRichTextView.GetTextAreaRect: TfpgRect;
 begin
   Result := GetDrawRect;
-//  InflateRect(Result, -2, -2);
+  InflateRect(Result, -2, -2);
 end;
 
 Function TRichTextView.GetTextAreaHeight: longint;
@@ -1144,7 +1155,7 @@ var
 Begin
   // Calculate used and available width
   AvailableWidth := GetTextAreaWidth;
-  MaxDisplayWidth := FLayout.Width; // div FontWidthPrecisionFactor;
+  MaxDisplayWidth := FLayout.Width;
 
   // Defaults
   FNeedVScroll := false;
@@ -1166,7 +1177,7 @@ Begin
 
   // Calculate available height.
   // Note: this depends on whether a h scroll bar is needed.
-  AvailableHeight := GetTextAreaHeight; // this includes borders and scrollbars
+  AvailableHeight := GetTextAreaHeight; // this includes borders and scrollbars and small margin
   if FLayout.Height > AvailableHeight then
     FNeedVScroll := true;
   FVScrollBar.Min := 0;
@@ -1186,22 +1197,22 @@ Begin
   // Physical horizontal scroll setup
   FHScrollbar.Visible := FNeedHScroll;
   FHScrollbar.Enabled := FNeedHScroll;
-  FHScrollbar.Left := 0;
-  FHScrollbar.Top := Height - FScrollBarWidth - 2;
+  FHScrollbar.Left := 2;
+  FHScrollbar.Top := Height - 2 - FScrollBarWidth;
   FHScrollbar.Height := FScrollbarWidth;
   if FNeedVScroll then
-    FHScrollbar.Width := Width - FScrollBarWidth - 2
+    FHScrollbar.Width := Width - 4 - FScrollBarWidth
   else
     FHScrollbar.Width := Width - 4;
 
   // Physical vertical scroll setup
   FVScrollbar.Visible := FNeedVScroll;
   FVScrollbar.Enabled := FNeedVScroll;
-  FVScrollbar.Left := Width - FScrollbarWidth - 2;
+  FVScrollbar.Left := Width - 2 - FScrollbarWidth;
   FVScrollbar.Top := 2;
   FVScrollbar.Width := FScrollbarWidth;
   if FNeedHScroll then
-    FVScrollbar.Height := Height - FScrollbarWidth -2
+    FVScrollbar.Height := Height - 4 - FScrollbarWidth
   else
     FVScrollbar.Height := Height - 4;
 
@@ -1211,7 +1222,8 @@ Begin
   FXScroll := FHScrollBar.Position;
   FLastXScroll := FXScroll;
 
-  FVScrollbar.OnScroll  := @FVScrollbarScroll;
+  FVScrollbar.OnScroll := @FVScrollbarScroll;
+  FHScrollbar.OnScroll := @FHScrollbarScroll;
 End;
 
 Procedure TRichTextView.SetupCursor;
