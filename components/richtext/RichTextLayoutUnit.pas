@@ -287,7 +287,7 @@ Var
     CurrentLine.Wrapped := false;
     assert( CurrentLinkIndex >= -1 );
     assert( CurrentLinkIndex < FLinks.Count );
-    WordStartX := Style.LeftMargin * FontWidthPrecisionFactor;
+    WordStartX := Style.LeftMargin{ * FontWidthPrecisionFactor};
     // next line
     // reset words completed count
     LineWordsCompleted := 0;
@@ -297,7 +297,7 @@ Var
 begin
 ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   FNumLines := 0;
-  FWidth := 0;
+  FWidth := FRichTextSettings.Margins.Left;
   FHeight := FRichTextSettings.Margins.Top;
   Style := GetDefaultStyle( FRichTextSettings );
   ApplyStyle( Style, FFontManager );
@@ -311,9 +311,9 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   CurrentLine.Width := 0;
   CurrentLine.LinkIndex := -1;
   CurrentLine.Wrapped := false;
-  WordStartX := Style.LeftMargin * FontWidthPrecisionFactor;
+  WordStartX := Style.LeftMargin{ * FontWidthPrecisionFactor};
   WordX := 0;
-  WrapX := FLayoutWidth - (FRichTextSettings.Margins.Right * FontWidthPrecisionFactor);
+  WrapX := FLayoutWidth - (FRichTextSettings.Margins.Right{ * FontWidthPrecisionFactor});
   LineWordsCompleted := 0;
   WordStarted := false;
   DisplayedCharsSinceFontChange := false;
