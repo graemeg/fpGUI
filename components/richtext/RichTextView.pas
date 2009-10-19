@@ -1594,6 +1594,23 @@ begin
   s := Text;
   // Warning: Hack Alert! replace some strange Bell character found in some INF files
   s := SubstituteChar(s, Chr($07), Chr($20) );
+
+//// Hack Alert #2: replace strange table chars with something we can actually see
+//  s := SubstituteChar(s, Chr(218), Char('+') );   // top-left corner
+//  s := SubstituteChar(s, Chr(196), Char('-') );   // horz row deviders
+//  s := SubstituteChar(s, Chr(194), Char('-') );   // centre top T connection
+//  s := SubstituteChar(s, Chr(191), Char('+') );   // top-right corner
+//  s := SubstituteChar(s, Chr(192), Char('+') );   // bot-left corner
+//  s := SubstituteChar(s, Chr(193), Char('-') );   // centre bottom inverted T
+//  s := SubstituteChar(s, Chr(197), Char('+') );
+//  s := SubstituteChar(s, Chr(179), Char('|') );  //
+//  s := SubstituteChar(s, Chr(195), Char('|') );
+//  s := SubstituteChar(s, Chr(180), Char('|') );
+//  s := SubstituteChar(s, Chr(217), Char('+') );   // bot-right corner
+
+
+
+
   AddAndResize( FText, PChar(s) );
   if not ADelay then
   begin
