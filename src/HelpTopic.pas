@@ -1157,14 +1157,15 @@ begin
         // valid font index
         pFontSpec := _FontTable[ FontIndex ];
 
-        if pFontSpec = SubstituteFixedFont then
+//        if pFontSpec = SubstituteFixedFont then
+        if pFontSpec^.Codepage = High(word) then // Substitute Fixed Font detected
         begin
           OutputString := '<tt>';
           State.FontState := fsFixed;
         end
         else
         begin
-          pFontSpec := _FontTable[ FontIndex ];
+//          pFontSpec := _FontTable[ FontIndex ];
           FaceName := StrNPas( pFontSpec^.FaceName, sizeof(pFontSpec^.FaceName) );
           // arbitrarily and capriciously use specified height * 2/3
           // as the point size - seems to correspond to what original

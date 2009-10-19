@@ -1138,6 +1138,9 @@ var
   tmpSubstitutionItems : TStringList;
   tmpCounter : integer;
   tmpDimensionParts : TStringList;
+  s: string;
+  PointSize: word;
+  cp: integer;
 begin
   ParseFontTable; // (re)load table from raw data
 
@@ -1170,13 +1173,19 @@ begin
             for i := 0 to _FontTable.Count - 1 do
             begin
               pFontSpec := _FontTable[ i ];
-              if StrNPas( pFontSpec^.FaceName, sizeof( pFontSpec^.FaceName ) ) = FontName then
+              cp := pFontSpec^.Codepage;
+              s := StrNPas( pFontSpec^.FaceName, sizeof( pFontSpec^.FaceName ) );
+              if s = FontName then
               begin
                 // same face name...
-                if ( W = pFontSpec^. Height ) and ( H = pFontSpec^. Width ) then
+                // this formula seems to give a simulated pointsize compared to
+                // what the original VIEW program intended.
+                PointSize := (pFontSpec^.Height * 2) div 3;
+                if ( H = PointSize ) then
                 begin
                   // match
-                  _FontTable[ i ] := SubstituteFixedFont;
+                  pFontSpec^.Codepage := High(word); // font substitute marker added
+//                  _FontTable[ i ] := SubstituteFixedFont;
                 end;
               end;
             end;
@@ -1187,7 +1196,7 @@ begin
     end;
   end;
 
-  tmpSubstitutionItems.Destroy;
+  tmpSubstitutionItems.Free;
 end;
 
 
