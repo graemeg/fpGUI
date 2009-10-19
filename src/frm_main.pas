@@ -117,6 +117,7 @@ type
     procedure   ResetProgress;
     procedure   SetStatus(const AText: TfpgString);
     function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
+    procedure   RefreshFontSubstitutions;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -1646,6 +1647,22 @@ begin
   mru.MaxItems        := gINI.ReadInteger('Options', 'MRUFileCount', 8);
   mru.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
   mru.LoadMRU;
+end;
+
+procedure TMainForm.RefreshFontSubstitutions;
+var
+  FileIndex: longint;
+  HelpFile: THelpFile;
+begin
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
+  begin
+    HelpFile := THelpFile(CurrentOpenFiles[ FileIndex ]);
+
+    if Settings.FixedFontSubstitution then
+      HelpFile.SetupFontSubstitutes( Settings.FixedFontSubstitutes )
+    else
+      HelpFile.SetupFontSubstitutes( '' );
+  end;
 end;
 
 
