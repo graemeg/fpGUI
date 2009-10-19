@@ -184,16 +184,20 @@ begin
   Settings.FixedFont := fpgStyle.FixedFont;
   Settings.SearchDirectories := TStringList.Create;
 
+  LogEvent(LogSettings, 'Loading settings');
+  LoadSettings;
+
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
 begin
-writeln('DEBUG:  TMainForm.MainFormDestroy >>>>');
   // save splitter position
   gINI.WriteInteger('Options', 'SplitterLeft', PageControl1.Width);
   // save form size and position
   gINI.WriteFormState(self);
-writeln('DEBUG:  TMainForm.MainFormDestroy <<<<');
+  LogEvent(LogSettings, 'Save settings');
+  SaveSettings;
+  LogEvent(LogSettings, 'Save settings done');
 end;
 
 procedure TMainForm.miFileQuitClicked(Sender: TObject);
@@ -746,6 +750,7 @@ begin
   for FileIndex := 0 to LoadingFilenameList.Count - 1 do
   begin
     Filename := LoadingFilenameList[ FileIndex ];
+    mru.AddItem(FileName);
     LogEvent(LogStartup, '  Loading: ' + Filename );
     try
       LoadingFileIndex := FileIndex;
