@@ -107,7 +107,7 @@ Type
     FImages: TfpgImageList;
 
     // Selection scrolling
-    FScrollTimer: TfpgTimer;
+    //FScrollTimer: TfpgTimer;
     FOldMousePoint: TPoint;
     FScrollingDirection: TScrollingDirection;
 
@@ -758,7 +758,7 @@ Begin
   if Assigned(FLayout) then
     FreeAndNil(FLayout);
 
-  FScrollTimer.Free;
+  //FScrollTimer.Free;
   if not InDesigner then
   begin
     RemoveCursor;
@@ -872,8 +872,8 @@ ProfileEvent('DEBUG:  TRichTextView.CreateWnd >>>>');
   FVScrollBar.Orientation := orVertical;
   FVScrollbar.SetPosition(Width-2-FScrollbarWidth, 2, FScrollbarWidth, Height-4-FScrollbarWidth);
 
-  FScrollTimer := TfpgTimer.Create( 100 );
-  FScrollTimer.OnTimer := @OnScrollTimer;
+//  FScrollTimer := TfpgTimer.Create( 100 );
+//  FScrollTimer.OnTimer := @OnScrollTimer;
 
 //  FLinkCursor := GetLinkCursor;
 
@@ -1546,7 +1546,7 @@ begin
     exit;
   end;
 
-  ScrollDistance := FXScroll - FLastXScroll;
+//  ScrollDistance := FXScroll - FLastXScroll;
 
   { TODO -ograemeg -cscrolling : Implement horizontal scrolling }
   //ScrollControlRect( Self,
