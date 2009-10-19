@@ -138,10 +138,7 @@ Procedure ApplyStyle( var Style: TTextDrawStyle; FontManager: TCanvasFontManager
 begin
 ProfileEvent('DEBUG:  ApplyStyle >>>');
   assert(FontManager <> nil, 'FontManager should not have been nil');
-ProfileEvent('DEBUG:  ApplyStyle  - setting font to...');
-ProfileEvent('                      ' + Style.Font.FaceName);
   FontManager.SetFont( Style.Font );
-ProfileEvent('DEBUG:  ApplyStyle  - setting text color');
   FontManager.Canvas.TextColor := Style.Color;
 ProfileEvent('DEBUG:  ApplyStyle <<<');
 end;
