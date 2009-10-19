@@ -1184,26 +1184,26 @@ Begin
   FVScrollBar.PageSize := AvailableHeight div 2;
 
   // Physical horizontal scroll setup
-  FHScrollbar.Enabled := FNeedHScroll;
   FHScrollbar.Visible := FNeedHScroll;
+  FHScrollbar.Enabled := FNeedHScroll;
   FHScrollbar.Left := 0;
-  FHScrollbar.Top := Height - FScrollBarWidth;
+  FHScrollbar.Top := Height - FScrollBarWidth - 2;
   FHScrollbar.Height := FScrollbarWidth;
   if FNeedVScroll then
-    FHScrollbar.Width := Width - FScrollBarWidth
+    FHScrollbar.Width := Width - FScrollBarWidth - 2
   else
-    FHScrollbar.Width := Width;
+    FHScrollbar.Width := Width - 4;
 
   // Physical vertical scroll setup
   FVScrollbar.Visible := FNeedVScroll;
   FVScrollbar.Enabled := FNeedVScroll;
-  FVScrollbar.Left := Width - FScrollbarWidth;
-  FVScrollbar.Top := 0;
+  FVScrollbar.Left := Width - FScrollbarWidth - 2;
+  FVScrollbar.Top := 2;
   FVScrollbar.Width := FScrollbarWidth;
   if FNeedHScroll then
-    FVScrollbar.Height := Height - FScrollbarWidth
+    FVScrollbar.Height := Height - FScrollbarWidth -2
   else
-    FVScrollbar.Height := Height;
+    FVScrollbar.Height := Height - 4;
 
   // Initialise scroll
   FYScroll := FVScrollBar.Position;
