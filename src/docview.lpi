@@ -153,19 +153,19 @@
         <UnitName Value="SettingsUnit"/>
       </Unit23>
       <Unit24>
-        <Filename Value="HelpWindow.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="HelpWindow"/>
-      </Unit24>
-      <Unit25>
         <Filename Value="dvconstants.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dvconstants"/>
-      </Unit25>
-      <Unit26>
+      </Unit24>
+      <Unit25>
         <Filename Value="dvHelpers.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="dvHelpers"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="HelpWindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpWindow"/>
       </Unit26>
     </Units>
   </ProjectOptions>
