@@ -30,6 +30,7 @@ type
     miFile: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
+    miDebug: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     miOpenRecentMenu: TfpgPopupMenu;
     btnIndex: TfpgButton;
@@ -1347,11 +1348,17 @@ begin
     AddMenuItem('Contents...', '', nil);
     AddMenuItem('Help using help', '', nil);
     AddMenuItem('-', '', nil);
-    AddMenuItem('Debug: Header', '', @miDebugHeader);
-    AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
-    AddMenuItem('-', '', nil);
     AddMenuItem('About fpGUI Toolkit', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
+  end;
+
+  miDebug := TfpgPopupMenu.Create(self);
+  with miDebug do
+  begin
+    Name := 'miDebug';
+    SetPosition(292, 148, 132, 20);
+    AddMenuItem('Debug: Header', '', @miDebugHeader);
+    AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
   end;
 
   miOpenRecentMenu := TfpgPopupMenu.Create(self);
@@ -1639,6 +1646,7 @@ begin
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := miSettings;
   MainMenu.AddMenuItem('&Bookmarks', nil).SubMenu := miBookmarks;
   MainMenu.AddMenuItem('&Help', nil).SubMenu := miHelp;
+  MainMenu.AddMenuItem('&Debug', nil).SubMenu := miDebug;
   FFileOpenRecent.SubMenu := miOpenRecentMenu;
 
   // correct default visible tabsheet
