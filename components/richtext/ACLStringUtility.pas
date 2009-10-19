@@ -123,7 +123,7 @@ Function StrInDoubleQuotes(const aString : String) : String;
 
 //
 
-// Substitutes given character
+// Substitutes given character - placing all occurences of AFind char.
 Function SubstituteChar( const S: string; const Find: Char; const Replace: Char ): string;
 
 // Returns the count rightmost chars of S
