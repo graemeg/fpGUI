@@ -1,0 +1,31 @@
+
+Registering the INF file format and fpGUI Documentation Viewer 
+with Linux is pretty straight forward. Simply execute the following
+commands for a console window.
+
+Steps:
+------
+1   $ cd <fpgui>        <-- replace <fpgui> the the appropriate 
+                            directory location on you system.
+
+2.  $ cp images/docview-48x48.png ~/.icons/docview.png
+
+3.  $ cp images/inf-book-28x48.png ~/.icons/inf-help.png
+
+4.  $ cp install/docview.desktop ~/.local/share/applications/
+
+5.  $ cp docview-mime.xml ~/.local/share/mime/packages
+
+6.  $ update-mime-database
+
+Gnome now knows the mime type for *.inf files. Now to setup the new default
+icon Nautilus will show for *.inf files, you need to do these two steps.
+
+
+7.  $ mkdir ~/.icons/gnome/48x48/mimetypes
+
+8.  $ ln -s ~/.icons/inf-help.png ~/.icons/gnome/48x48/mimetypes/gnome-mime-application-inf.png
+
+Now you are all done!
+
+

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=fpGUI DocView
+Comment=A INF Documentation Viewer
+Exec=docview %f
+Terminal=false
+Type=Application
+Icon=docview.png
+Categories=Utility;Application;
+StartupWMClass=docview
+MimeType=application/x-inf;
+
+
