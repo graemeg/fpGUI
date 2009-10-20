@@ -33,8 +33,8 @@ type
     miFile: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
-    miDebug: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
+    miDebug: TfpgPopupMenu;
     miOpenRecentMenu: TfpgPopupMenu;
     btnIndex: TfpgButton;
     btnGo: TfpgButton;
@@ -93,6 +93,8 @@ type
     procedure   btnShowIndex(Sender: TObject);
     procedure   btnGoClicked(Sender: TObject);
     procedure   tvContentsChange(Sender: TObject);
+    procedure   edSearchTextKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   lbSearchResultsKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   MainFormException(Sender: TObject; E: Exception);
     procedure   MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure   PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
@@ -449,6 +451,31 @@ end;
 procedure TMainForm.tvContentsChange(Sender: TObject);
 begin
   DisplayTopic(nil);
+end;
+
+procedure TMainForm.edSearchTextKeyPress(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
+  begin
+    Consumed := True;
+    btnSearch.Click;
+  end
+  else if (KeyCode = keyDown) then
+  begin
+    Consumed := True;
+    lbSearchResults.SetFocus;
+  end;
+end;
+
+procedure TMainForm.lbSearchResultsKeyPress(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
+  begin
+    Consumed := True;
+    DisplayTopic(nil);
+  end
 end;
 
 procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -1430,7 +1457,7 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 0, 260, 328);
-    ActivePageIndex := 4;
+    ActivePageIndex := 2;
     TabOrder := 0;
     Align := alLeft;
     OnChange  := @PageControl1Change;
@@ -1697,6 +1724,7 @@ begin
     TabOrder := 1;
     Text := '';
     FontDesc := '#Edit1';
+    OnKeyPress :=@edSearchTextKeyPress;
   end;
 
   Label2 := TfpgLabel.Create(tsSearch);
@@ -1718,6 +1746,7 @@ begin
     GroupIndex := 0;
     TabOrder := 3;
     Text := 'This section';
+    Enabled := False;
   end;
 
   RadioButton2 := TfpgRadioButton.Create(tsSearch);
@@ -1729,6 +1758,7 @@ begin
     GroupIndex := 0;
     TabOrder := 4;
     Text := 'Marked sections';
+    Enabled := False;
   end;
 
   RadioButton3 := TfpgRadioButton.Create(tsSearch);
@@ -1736,10 +1766,12 @@ begin
   begin
     Name := 'RadioButton3';
     SetPosition(12, 108, 192, 20);
+    Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 0;
     TabOrder := 5;
     Text := 'All sections';
+    Enabled := False;
   end;
 
   RadioButton4 := TfpgRadioButton.Create(tsSearch);
@@ -1751,6 +1783,7 @@ begin
     GroupIndex := 0;
     TabOrder := 6;
     Text := 'Index';
+    Enabled := False;
   end;
 
   RadioButton5 := TfpgRadioButton.Create(tsSearch);
@@ -1762,6 +1795,7 @@ begin
     GroupIndex := 0;
     TabOrder := 7;
     Text := 'Marked libraries';
+    Enabled := False;
   end;
 
   RadioButton6 := TfpgRadioButton.Create(tsSearch);
@@ -1773,6 +1807,7 @@ begin
     GroupIndex := 0;
     TabOrder := 8;
     Text := 'All libraries';
+    Enabled := False;
   end;
 
   lbSearchResults := TfpgListBox.Create(tsSearch);
@@ -1785,7 +1820,8 @@ begin
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 9;
-    OnDoubleClick  := @lbSearchResultsDoubleClick;
+    OnDoubleClick := @lbSearchResultsDoubleClick;
+    OnKeyPress := @lbSearchResultsKeyPress;
   end;
 
   Label3 := TfpgLabel.Create(tsSearch);
