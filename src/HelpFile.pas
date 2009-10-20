@@ -602,7 +602,7 @@ begin
     //  Pascal string have length excluding length byte)
     if p >= pEnd then
       // ran off end of data
-      raise EHelpFileException.Create( ErrorCorruptHelpFile );
+      raise EHelpFileException.Create( 'Error reading help file dictionary' );
 
 
     FillChar(c, sizeof(c), 0);      // fill string with NUL chars
@@ -627,29 +627,27 @@ begin
 end;
 
 type
-  TIndexEntryHeader = record
+  TIndexEntryHeader = packed record
     TextLength: uint8;
     Flags: uint8;
     NumberOfRoots: uint8;
     TOCIndex: uint16;
   end;
+  pTIndexEntryHeader = ^TIndexEntryHeader;
 
 procedure THelpFile.ReadIndex;
 var
   IndexIndex: longint; // I can't resist :-)
-  pEntryHeader: ^TIndexEntryHeader;
+  pEntryHeader: pTIndexEntryHeader;
   EntryText: string;
   IndexTitleLen: longint;
-  p: pointer;
-  pEnd: pointer;
+  p: pByte;
+  pEnd: pByte;
   pIndexData: pointer;
-
   tmpIndexEntry: TIndexEntry;
 begin
   LogEvent(LogParse, 'Read index');
-
   _Index := TIndex.Create;
-
   if _pHeader^.nindex = 0 then
     exit; // explicit check required since ndict is unsigned
 
@@ -665,13 +663,14 @@ begin
   begin
     if p >= pEnd then
       // ran off end of data
-      raise EHelpFileException.Create( ErrorCorruptHelpFile );
+      raise EHelpFileException.Create( 'Error reading help file index' );
 
-    pEntryHeader := p;
+    pEntryHeader := pTIndexEntryHeader(p);
     IndexTitleLen := pEntryHeader^.TextLength;
     inc( p, sizeof( TIndexEntryHeader ) );
 
     EntryText := '';
+    SetString(EntryText, PChar(p), IndexTitleLen);
 
     if pEntryHeader^.TOCIndex < _Topics.Count then
     begin
