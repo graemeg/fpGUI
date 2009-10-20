@@ -8,9 +8,12 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
   fpg_tree, fpg_splitter, fpg_menu, fpg_button, fpg_listbox,
   fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar, fpg_mru,
-  HelpFile, RichTextView;
+  HelpFile, RichTextView, HelpTopic;
 
 type
+  // Used by Index ListBox. We can generate a custom Index if the help file
+  // doesn't contain it's own index entries.
+  TListType = ( ltContents, ltIndex );
 
   TMainForm = class(TfpgForm)
   private
@@ -56,6 +59,7 @@ type
     lblStatus: TfpgLabel;
     lbIndex: TfpgListBox;
     btnSearch: TfpgButton;
+    IndexSearchEdit: TfpgEdit;
     {@VFD_HEAD_END: MainForm}
     Files: TList; // current open help files.
     Debug: boolean;
@@ -72,6 +76,8 @@ type
     InIndexSearch: boolean; // true while searching index
     IndexLoaded: boolean;
     ContentsLoaded: boolean;
+    DisplayedIndex: TStringList; // duplicate of index listbox, for fast case insensitive searching
+
 
     procedure   MainFormShow(Sender: TObject);
     procedure   MainFormDestroy(Sender: TObject);
@@ -110,15 +116,17 @@ type
     procedure   OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
     procedure   LoadNotes(AHelpFile: THelpFile);
     procedure   LoadContents(AFiles: TList; var FirstNode: TfpgTreeNode);
+    procedure   LoadIndex;
     // Used in loading contents
     procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
     procedure   ClearNotes;
     procedure   SaveNotes(AHelpFile: THelpFile);
-    procedure   DisplayTopic;
+    procedure   DisplayTopic(ATopic: TTopic = nil);
     procedure   ResetProgress;
     procedure   SetStatus(const AText: TfpgString);
     function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
     procedure   RefreshFontSubstitutions;
+    procedure   DisplaySelectedIndexTopic;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -136,7 +144,6 @@ uses
   ,fpg_iniutils
   ,nvUtilities
   ,ACLStringUtility
-  ,HelpTopic
   {$IFDEF Timing}
   ,EpikTimer
   {$ENDIF}
@@ -192,6 +199,7 @@ end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
 begin
+  DisplayedIndex.Free;
   // save splitter position
   gINI.WriteInteger('Options', 'SplitterLeft', PageControl1.Width);
   // save form size and position
@@ -260,7 +268,7 @@ end;
 procedure TMainForm.miDebugHex(Sender: TObject);
 begin
   Debug := not Debug;
-  DisplayTopic;
+  DisplayTopic(nil);
 end;
 
 procedure TMainForm.miFileSaveTopicAsIPF(Sender: TObject);
@@ -435,12 +443,12 @@ end;
 procedure TMainForm.btnGoClicked(Sender: TObject);
 begin
   if tvContents.Selection <> nil then
-    DisplayTopic;
+    DisplayTopic(nil);
 end;
 
 procedure TMainForm.tvContentsChange(Sender: TObject);
 begin
-  DisplayTopic;
+  DisplayTopic(nil);
 end;
 
 procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -454,9 +462,9 @@ procedure TMainForm.PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabS
 begin
   if NewActiveSheet = tsIndex then
   begin
-    if Files.Count > 0 then
-      if lbIndex.Items.Count = 0 then
-        btnShowIndex(nil);
+      if not IndexLoaded then
+        LoadIndex;
+      IndexSearchEdit.SetFocus;
   end;
 end;
 
@@ -464,19 +472,19 @@ procedure TMainForm.tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   if tvContents.Selection <> nil then
-    DisplayTopic;
+    DisplayTopic(nil);
 end;
 
 procedure TMainForm.lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
-  DisplayTopic;
+  DisplayTopic(nil);
 end;
 
 procedure TMainForm.lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
-  DisplayTopic;
+  DisplayTopic(nil);
 end;
 
 procedure TMainForm.btnSearchClicked(Sender: TObject);
@@ -669,7 +677,7 @@ begin
 
   ProgressBar.Position := 75;
 
-  // LoadIndex;
+  LoadIndex;
 
   ProgressBar.Position := 100;
   SetStatus( rsDVDone );
@@ -876,7 +884,7 @@ begin
     LogEvent(LogStartup, 'Display first topic' );
     { TODO -oGraeme : Improved Display Topic method }
 //    DisplaySelectedContentsTopic;
-    DisplayTopic;
+    DisplayTopic(nil);
   end;
 
   LogEvent(LogStartup, 'OpenFiles complete' );
@@ -920,6 +928,8 @@ begin
     lHelpFile := THelpFile(Files[FileIndex]);
     SaveNotes( lHelpFile );
   end;
+
+  DisplayedIndex.Clear;
 
   // Now destroy help files
   for FileIndex := 0 to Files.Count - 1 do
@@ -1017,6 +1027,193 @@ begin
   LogEvent(LogStartup, '  Contents loaded' );
 end;
 
+// Gets the contents from each file. Sorts it alphabetically.
+// Merges all the sorted contents and indexes together, alphabetically.
+procedure TMainForm.LoadIndex;
+var
+  tmpHelpFile: THelpFile;
+  tmpTextCompareResult: integer;
+  FileIndex: longint;
+  Contents: TList;
+  ContentsLists: TList; // of tlist
+  tmpIndexLists: TList; // of tstringlist
+  ContentsNextIndex: array[ 0..255 ] of longint;
+  IndexNextIndex: array[ 0..255 ] of longint;
+  Topic: TTopic;
+  ListEntry: string;
+  LowestEntry: string;
+  LastEntry: string;
+  tmpLowestEntryListIndex: longint;
+  tmpLowestEntryListType: TListType;
+  tmpLowestEntryTopic: TTopic;
+  tmpIndex: TStringList;
+  i: longint;
+begin
+  LogEvent(LogStartup, 'Create index' );
+  SetWaitCursor;
+  LogEvent(LogStartup, '  Get/sort lists' );
+
+  ProgressBar.Position := 70;
+  SetStatus( 'Building index... ' );
+
+  ContentsLists := TList.Create;
+  tmpIndexLists := TList.Create;
+
+  // collect the contents and index lists from the files
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
+  begin
+    tmpHelpFile := THelpFile(CurrentOpenFiles[ FileIndex ]);
+    ProgressBar.Position := 70 + 10 * FileIndex div CurrentOpenFiles.Count;
+
+    if Settings.IndexStyle in [ isAlphabetical, isFull ] then
+    begin
+      Contents := TList.Create;
+      Contents.Capacity := tmpHelpFile.TopicCount;  // speeds up inserts
+      // copy [contents] topic list
+      for i := 0 to tmpHelpFile.TopicCount - 1 do
+      begin
+        Topic := tmpHelpFile.Topics[ i ];
+        if Topic.ShowInContents then
+          Contents.Add( Topic );
+      end;
+      // sort by title
+      Contents.Sort( @TopicTitleCompare );
+      ContentsLists.Add( Contents );
+      // initialise list index
+      ContentsNextIndex[ ContentsLists.Count - 1 ] := 0;
+    end;
+
+    if Settings.IndexStyle in [ isFileOnly, isFull ] then
+    begin
+      tmpIndexLists.Add(tmpHelpFile.Index.GetLabels);
+      IndexNextIndex[ tmpIndexLists.Count - 1 ] := 0;
+    end;
+  end;
+
+  // Unlike contents, we do clear the index (even if we are adding more files)
+  // because we need to re-merge the whole thing
+  DisplayedIndex.Clear;
+  ProgressBar.Position := 80;
+
+  LogEvent(LogStartup, '  Merge lists' );
+  LastEntry := '';
+  while true do
+  begin
+    LowestEntry := '';
+    tmpLowestEntryListIndex := -1;
+    // Find alphabetically lowest (remaining) topic
+    // first, look in contents lists
+    LogEvent(LogDebug, '  Merge contents' );
+    for i := 0 to ContentsLists.Count - 1 do
+    begin
+      Contents := TList(ContentsLists.Items[i]);
+      if ContentsNextIndex[i] < Contents.Count then
+      begin
+        // list is not yet finished, get next entry
+        Topic := TTopic(Contents[ ContentsNextIndex[i] ]);
+        ListEntry := Topic.Title;
+
+        if LowestEntry <> '' then
+          tmpTextCompareResult := CompareText( ListEntry, LowestEntry )
+        else
+          tmpTextCompareResult := -1;
+
+        if tmpTextCompareResult < 0 then
+        begin
+          // this index entry comes before the lowest one so far
+          LowestEntry := ListEntry;
+          tmpLowestEntryListIndex := i;
+          tmpLowestEntryListType := ltContents;
+          tmpLowestEntryTopic := Topic;
+        end;
+      end;
+    end;
+
+    // look in indices
+    LogEvent(LogDebug, '  Merge indices' );
+    for i := 0 to tmpIndexLists.Count - 1 do
+    begin
+      LogEvent(LogDebug, '  Merge indices ' + IntToStr(i) );
+      tmpIndex := TStringList(tmpIndexLists.Items[i]);
+      if IndexNextIndex[i] < tmpIndex.Count then
+      begin
+        // list is not yet finished, get next entry
+        ListEntry := tmpIndex.Strings[ IndexNextIndex[i] ];
+        LogEvent(LogDebug, '    indices ListEntry=' + ListEntry );
+        if LowestEntry <> '' then
+          tmpTextCompareResult := CompareText( ListEntry, LowestEntry )
+        else
+          tmpTextCompareResult := -1;
+
+        if tmpTextCompareResult < 0 then
+        begin
+          // this index entry comes before the lowest one so far
+          LowestEntry := ListEntry;
+          tmpLowestEntryListIndex := i;
+          tmpLowestEntryListType := ltIndex;
+
+          LogEvent(LogDebug, '  Merge indices ' + tmpIndex.Objects[ IndexNextIndex[i] ].ClassName);
+          tmpLowestEntryTopic := TIndexEntry( tmpIndex.Objects[ IndexNextIndex[i] ] ).getTopic;
+        end;
+      end;
+    end;
+
+    if tmpLowestEntryListIndex = -1 then
+      // we're out
+      break;
+
+    if LowestEntry <> LastEntry then
+      // add, if different from last
+      DisplayedIndex.AddObject( LowestEntry, tmpLowestEntryTopic );
+    LastEntry := LowestEntry;
+
+    if tmpLowestEntryListType = ltContents then
+    begin
+      inc( ContentsNextIndex[ tmpLowestEntryListIndex ] );
+    end
+    else
+    begin
+      // found in one of indices.
+      // Check for subsequent indented strings
+      tmpIndex := TStringList(tmpIndexLists[ tmpLowestEntryListIndex ]);
+
+      i := IndexNextIndex[ tmpLowestEntryListIndex ] + 1;
+      while i < tmpIndex.Count do
+      begin
+        ListEntry := tmpIndex.Strings[ i ];
+        if ListEntry = '' then
+          break;
+
+        if ListEntry[ 1 ] <> ' ' then
+          // not indented, stop looking
+          break;
+
+        // found one,
+        Topic := TIndexEntry(tmpIndex.Objects[ i ]).getTopic;
+        DisplayedIndex.AddObject( ListEntry, Topic );
+        inc( i );
+      end;
+      IndexNextIndex[ tmpLowestEntryListIndex ] := i;
+    end;
+  end;
+
+  ProgressBar.Position := 95;
+  LogEvent(LogStartup, '  Display index (count = ' + IntToStr(DisplayedIndex.Count) + ')');
+
+  // Now display the final index list
+  lbIndex.Items.Assign( DisplayedIndex );
+
+  LogEvent(LogStartup, '  Tidy up' );
+  tmpIndexLists.Free;
+  DestroyListAndObjects( ContentsLists );
+  IndexLoaded := true;
+
+  ClearWaitCursor;
+
+  SetStatus( 'Index loaded' );
+  LogEvent(LogStartup, '  Done' );
+end;
+
 procedure TMainForm.AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode;
   ALevel: longint; var ATopicIndex: longint);
 var
@@ -1064,7 +1261,7 @@ begin
   { TODO -oGraeme : Implement me }
 end;
 
-procedure TMainForm.DisplayTopic;
+procedure TMainForm.DisplayTopic(ATopic: TTopic);
 var
   lText: String;
   ImageIndices: TList;
@@ -1074,38 +1271,46 @@ var
   Topic: TTopic;
 Begin
   ProfileEvent('DisplayTopic >>>>');
-  case PageControl1.ActivePageIndex of
-    0:  begin // TOC tab
-          if tvContents.Selection = nil then
-          begin
-            ShowMessage('You must select a topic first by clicking it.');
-            Exit;  //==>
-          end
-          else
-            Topic := TTopic(tvContents.Selection.Data);
-          ProfileEvent('Got Topic from Treeview');
-        end;
-    1:  begin // Index tab
-          if lbIndex.FocusItem = -1 then
-          begin
-            ShowMessage('You must select a index first by clicking it.');
-            Exit;  //==>
-          end
-          else
-            Topic := TTopic(lbIndex.Items.Objects[lbIndex.FocusItem]);
-          ProfileEvent('Got Topic from Index listbox');
-        end;
-    2:  begin // Search tab
-          if lbSearchResults.FocusItem = -1 then
-          begin
-            ShowMessage('You must select a search result first by clicking it.');
-            Exit;  //==>
-          end
-          else
-            Topic := TTopic(lbSearchResults.Items.Objects[lbSearchResults.FocusItem]);
-          ProfileEvent('Got Topic from Search Results listbox');
-        end;
-  end;
+  if ATopic = nil then
+  begin
+    case PageControl1.ActivePageIndex of
+      0:  begin // TOC tab
+            if tvContents.Selection = nil then
+            begin
+              ShowMessage('You must select a topic first by clicking it.');
+              Exit;  //==>
+            end
+            else
+              Topic := TTopic(tvContents.Selection.Data);
+            ProfileEvent('Got Topic from Treeview');
+          end;
+      1:  begin // Index tab
+            if lbIndex.FocusItem = -1 then
+            begin
+              ShowMessage('You must select a index first by clicking it.');
+              Exit;  //==>
+            end
+            else
+              Topic := TTopic(lbIndex.Items.Objects[lbIndex.FocusItem]);
+            ProfileEvent('Got Topic from Index listbox');
+          end;
+      2:  begin // Search tab
+            if lbSearchResults.FocusItem = -1 then
+            begin
+              ShowMessage('You must select a search result first by clicking it.');
+              Exit;  //==>
+            end
+            else
+              Topic := TTopic(lbSearchResults.Items.Objects[lbSearchResults.FocusItem]);
+            ProfileEvent('Got Topic from Search Results listbox');
+          end;
+    end;
+  end  // case..
+  else
+    Topic := ATopic;  // use topic passed in as a parameter
+
+  if Topic = nil then
+    raise Exception.Create('Unable to locate the Topic');
 
   RichView.Clear;
   ImageIndices := TList.Create;
@@ -1172,6 +1377,7 @@ begin
   Files := TList.Create;
   AllFilesWordSequences := TList.Create;
   CurrentOpenFiles := TList.Create;
+  DisplayedIndex := TStringList.Create;
   { TODO -oGraeme : Make Debug a menu option }
   Debug := False;
 end;
@@ -1638,6 +1844,17 @@ begin
     OnClick := @btnSearchClicked;
   end;
 
+  IndexSearchEdit := TfpgEdit.Create(tsIndex);
+  with IndexSearchEdit do
+  begin
+    Name := 'IndexSearchEdit';
+    SetPosition(4, 4, 152, 24);
+    Anchors := [anLeft,anRight,anTop];
+    TabOrder := 2;
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+
   {@VFD_BODY_END: MainForm}
   {%endregion}
 
@@ -1676,6 +1893,16 @@ begin
     else
       HelpFile.SetupFontSubstitutes( '' );
   end;
+end;
+
+procedure TMainForm.DisplaySelectedIndexTopic;
+var
+  Topic: TTopic;
+Begin
+  if lbIndex.FocusItem = -1 then
+    exit;
+  Topic := DisplayedIndex.Objects[ lbIndex.FocusItem ] as TTopic;
+  DisplayTopic( Topic );
 end;
 
 
