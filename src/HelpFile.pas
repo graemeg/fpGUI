@@ -28,12 +28,12 @@ type
     topic: TTopic;
     flags: uint8;
   public
-    CONSTRUCTOR Create(aName: String; aTopic: TTopic; aFlags: uint8);
-    DESTRUCTOR Destroy; override;
-    PROPERTY getTopic: TTopic read topic;
-    FUNCTION getLabel: String;
-    FUNCTION isGlobal: boolean;
-    FUNCTION getLevel: integer;
+    constructor Create(aName: String; aTopic: TTopic; aFlags: uint8);
+    destructor  Destroy; override;
+    property    getTopic: TTopic read topic;
+    function    getLabel: String;
+    function    isGlobal: boolean;
+    function    getLevel: integer;
   end;
 
 
@@ -41,12 +41,12 @@ type
   private
     entries: TStringList;
   public
-    CONSTRUCTOR Create;
-    DESTRUCTOR Destroy; override;
-    FUNCTION Count: longint;
-    FUNCTION GetLabels: TStringList;
-    FUNCTION GetTopic(aPos: longint): TTopic;
-    PROCEDURE Add(anIndexEntry: TIndexEntry);
+    constructor Create;
+    destructor  Destroy; override;
+    function    Count: longint;
+    function    GetLabels: TStringList;
+    function    GetTopic(aPos: longint): TTopic;
+    procedure   Add(anIndexEntry: TIndexEntry);
   end;
 
 
@@ -217,7 +217,7 @@ const
   begin
     LogEvent(LogObjConstDest, 'TIndexEntry.Destroy');
     topic := nil;
-    // inherited Destroy;
+    inherited Destroy;
   end;
 
 
@@ -312,7 +312,7 @@ const
 
   PROCEDURE TIndex.add(anIndexEntry: TIndexEntry);
   begin
-    // LogEvent(LogDebug, 'TIndex.add(' + aName + ', ' + anIndexEntry.ClassName);
+//    LogEvent(LogDebug, 'TIndex.add(' + anIndexEntry.getLabel + ', ' + anIndexEntry.ClassName + ')');
     entries.AddObject(anIndexEntry.getLabel, anIndexEntry);
   end;
 
