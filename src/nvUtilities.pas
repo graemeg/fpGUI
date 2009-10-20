@@ -37,13 +37,9 @@ procedure LogEvent(const aLogAspect: LogAspect; const anEventDescription: String
 
 // Removes and returns the first value in a separated
 // value list (removes quotes if found)
-Function ExtractNextValue(
-          var S: string;
-          const Separator: string ): string;
+Function ExtractNextValue(var S: string; const Separator: string ): string;
 
-Function ExtractNextValueNoTrim(
-           var S: string;
-           const Separator: string ): string;
+Function ExtractNextValueNoTrim(var S: string; const Separator: string ): string;
 
 function AllocateMemory( const Size: ValUInt ): pointer;
 procedure DeallocateMemory( Var P: pointer );
