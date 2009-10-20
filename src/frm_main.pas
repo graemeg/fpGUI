@@ -129,6 +129,8 @@ type
     function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
     procedure   RefreshFontSubstitutions;
     procedure   DisplaySelectedIndexTopic;
+    procedure   ProcessCommandLineParams;
+    procedure   ShowParamHelp;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -144,11 +146,9 @@ uses
   fpg_dialogs
   ,fpg_constants
   ,fpg_iniutils
+  ,fpg_cmdlineparams
   ,nvUtilities
   ,ACLStringUtility
-  {$IFDEF Timing}
-  ,EpikTimer
-  {$ENDIF}
   ,TextSearchQuery
   ,SearchUnit
   ,dvconstants
@@ -157,6 +157,10 @@ uses
   ,dvHelpers
   ;
 
+const
+  cLongName   = 'fpGUI Documentation Viewer';
+  cCreatedBy  = 'Created by Graeme Geldenhuys';
+  cVersion    = 'Version 1.0';
 
 {@VFD_NEWFORM_IMPL}
 
@@ -166,25 +170,9 @@ begin
 end;
 
 procedure TMainForm.MainFormShow(Sender: TObject);
-{$IFDEF Timing}
-var
-  t: TEpikTimer;
-{$ENDIF}
 begin
   bvlBody.Realign;
 
-  if Paramcount > 0 then
-  begin
-    {$IFDEF Timing}
-    t := TEpikTimer.Create(nil);
-    t.Start;
-    {$ENDIF}
-    OpenFile(ParamStr(1), '', True);
-    {$IFDEF Timing}
-    t.Stop;
-    writeln(t.ElapsedDHMS);
-    {$ENDIF}
-  end;
   // restore previous window position and size
   gINI.ReadFormState(self);
   PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
@@ -197,6 +185,7 @@ begin
   LogEvent(LogSettings, 'Loading settings');
   LoadSettings;
 
+  ProcessCommandLineParams;
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
@@ -230,9 +219,10 @@ procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
 var
   s: TfpgString;
 begin
-  s := 'fpGUI ' + rsDVTitle + LineEnding + LineEnding
-      + 'Created by Graeme Geldenhuys' + LineEnding
-      + 'Version 1.0  -  ' + {$I %date%} + ' ' + {$I %time%};
+  s :=  cLongName + LineEnding + LineEnding
+      + cCreatedBy
+      + cVersion + '  -  '+  {$I %date%} + ' ' + {$I %time%};
+
   TfpgMessageDialog.Information('Product Information', s);
 end;
 
@@ -927,9 +917,7 @@ begin
   { TODO -ograemeg -copen files : Implement ParseAndExpandFilenames }
   tmpFileNames.Add(AFileName);
 //  ParseAndExpandFileNames(FileName, tmpFileNames);
-  Result := OpenFiles( tmpFileNames,
-                       AWindowTitle,
-                       DisplayFirstTopic );
+  Result := OpenFiles( tmpFileNames, AWindowTitle, DisplayFirstTopic );
   tmpFileNames.Destroy;
 end;
 
@@ -1051,6 +1039,7 @@ begin
   end;
 
   ContentsLoaded := true;
+  tvContents.Invalidate;
   LogEvent(LogStartup, '  Contents loaded' );
 end;
 
@@ -1367,8 +1356,8 @@ Begin
   { TODO -oGraeme : We do not support images yet }
   ImageIndices.Free;
 
-//  writeln(lText);
-//  writeln('-----------------------------');
+  //writeln(lText);
+  //writeln('-----------------------------');
   RichView.AddText(PChar(lText));
 end;
 
@@ -1430,7 +1419,7 @@ begin
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
   SetPosition(602, 274, 654, 386);
-  WindowTitle := 'fpGUI Help Viewer';
+  WindowTitle := 'fpGUI Documentation Viewer';
   WindowPosition := wpUser;
   OnCloseQuery  := @MainFormCloseQuery;
 
@@ -1939,6 +1928,50 @@ Begin
     exit;
   Topic := DisplayedIndex.Objects[ lbIndex.FocusItem ] as TTopic;
   DisplayTopic( Topic );
+end;
+
+procedure TMainForm.ProcessCommandLineParams;
+var
+  showtopic: boolean;
+begin
+  // always load file first, otherwise show help
+  if ParamCount > 0 then
+  begin
+    if gCommandLineParams.IsParam('h') then
+      ShowParamHelp
+    else
+    begin
+      showtopic := not gCommandLineParams.IsParam('s');
+      OpenFile(ParamStr(1), '', showtopic);
+    end;
+  end;
+
+  // now process all other parameters
+  if gCommandLineParams.IsParam('s') then
+  begin
+    edSearchText.Text := gCommandLineParams.GetParam('s');
+    PageControl1.ActivePage := tsSearch;
+    btnSearch.Click;
+  end;
+end;
+
+procedure TMainForm.ShowParamHelp;
+const
+  le = LineEnding;
+var
+  s: string;
+begin
+  s := '<font "Arial" 12><b>' + cLongName + '</b></font>' + le
+       + cVersion + le + le
+       + 'Supported command line parameters:' + le + le
+       + '<tt>'
+       + '  <<filename>   Load the help file <<filename>' + le
+       + '  -h           Show this help' + le
+       + '  -s<<text>     Search for <<text> in open help files' + le
+       + '  -t<<id>       Open Topic with ID equal to <<id>' + le
+       + '</tt>'
+       ;
+  RichView.AddText(PChar(s));
 end;
 
 
