@@ -96,6 +96,7 @@ type
     function    CountRecursive: integer;
     function    FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode; overload;
     function    FindSubNode(ATreeNodeFindMethod: TfpgTreeNodeFindMethod): TfpgTreeNode; overload;
+    function    FindSubNode(AData: TObject; ARecursive: Boolean): TfpgTreeNode; overload;
     function    GetMaxDepth: integer;
     function    GetMaxVisibleDepth: integer;
     procedure   Append(var aValue: TfpgTreeNode);
@@ -477,6 +478,45 @@ begin
     end;
     h := h.next;
   end;
+end;
+
+function TfpgTreeNode.FindSubNode(AData: TObject; ARecursive: Boolean): TfpgTreeNode;
+var
+  h: TfpgTreeNode;
+begin
+  result := nil;
+  if ARecursive then
+  begin
+    h := FirstSubNode;
+    while h <> nil do
+    begin
+      if TObject(h.Data) = AData then
+      begin
+        result := h;
+        Exit; //==>
+      end;
+      if h.count > 0 then
+      begin
+        result := h.FindSubNode(AData, ARecursive);
+        if result <> nil then
+          Exit; //==>
+      end;
+      h := h.next;
+    end;  { while }
+  end
+  else
+  begin
+    h := FirstSubNode;
+    while h <> nil do
+    begin
+      if TObject(h.Data) = AData then
+      begin
+        result := h;
+        break;
+      end;
+      h := h.next;
+    end;
+  end;  { if/else }
 end;
 
 function TfpgTreeNode.AppendText(AText: TfpgString): TfpgTreeNode;
