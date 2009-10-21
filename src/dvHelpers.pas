@@ -17,6 +17,10 @@ function FindHelpFile(const AFilename: string): string;
 
 implementation
 
+uses
+  fpg_utils
+  ;
+
 
 function GetOwnHelpFileName: String;
 //var
@@ -31,7 +35,7 @@ begin
   //result := FindDefaultLanguageHelpFile('NewView', tmpLanguage);
 
   { TODO -oGraeme -cown help : Improve own help file location }
-  result := ExtractFilePath(ParamStr(0)) + 'docview.inf';
+  result := fpgExtractFilePath(ParamStr(0)) + 'docview.inf';
 end;
 
 // Given a "filename" which may include a path, find it in various paths and extensions
