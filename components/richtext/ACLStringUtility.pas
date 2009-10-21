@@ -870,26 +870,26 @@ Begin
       i := i + 2;
     end
     else
-      if (tmpChar = anEscapeChar) and (tmpNextChar IN aSetOfChars) then
+      if (tmpChar = anEscapeChar) and (tmpNextChar in aSetOfChars) then
       begin
         tmpPart := tmpPart + tmpNextChar;
         i := i + 2;
       end
       else
-        if (tmpChar IN aSetOfChars) then
+      begin
+        if (tmpChar in aSetOfChars) then
         begin
           if (NOT anIgnoreEmptyFlag) OR ('' <> tmpPart) then
-          begin
             aResult.add(tmpPart);
-          end;
           tmpPart := '';
           i := i + 1;
         end
         else
-          begin
+        begin
           tmpPart := tmpPart + tmpChar;
           i := i + 1;
         end;
+      end;  { if/else }
   end;
 
   if (NOT anIgnoreEmptyFlag) OR ('' <> tmpPart) then
