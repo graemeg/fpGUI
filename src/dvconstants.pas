@@ -4,6 +4,14 @@ unit dvconstants;
 
 interface
 
+const
+  { DO NOT LOCALIZE }
+  HelpPathEnvironmentVar = 'HELP';
+  BookshelfEnvironmentVar = 'BOOKSHELF';
+  HELP_FILE_DELIMITER = '+';
+  HELP_FILE_EXTENSION = ExtensionSeparator + 'hlp';
+  INF_FILE_EXTENSION = ExtensionSeparator + 'inf';
+
 
 resourcestring
   rsDVTitle = 'Documentation Viewer';
