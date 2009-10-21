@@ -56,19 +56,27 @@ function IsAlpha(const AChar: TfpgChar): boolean;
 function Between( const Value: longint; const Limit1: longint; const Limit2: longint ): boolean;
 
 
-Operator = (ARect: TRect; BRect: TRect): boolean;
+operator = (ARect: TRect; BRect: TRect): boolean;
 
 // Destroy the objects stored in List and clear the list.
-Procedure ClearListAndObjects( List: TList );
+procedure ClearListAndObjects( List: TList );
 // Destroy the objects stored in the list and then destroy the list itself
 // And set the reference to nil
-Procedure DestroyListAndObjects( Var List: TList );
+procedure DestroyListAndObjects( Var List: TList );
 // Destroy the objects stored in the list.
 // You probably want to use one of the two functions above.
-Procedure DestroyListObjects( List: TList );
+procedure DestroyListObjects( List: TList );
 
-Procedure AddList( Source, Dest: TList );
-Procedure AssignList( Source, Dest: TList );
+procedure AddList( Source, Dest: TList );
+procedure AssignList( Source, Dest: TList );
+
+procedure ListFilesInDirectory(const aDirectory: String; const aFilter: String; const aWithDirectoryFlag: boolean; var aList: TStrings);
+
+// add all file name parts of aFileNameString to the aResult
+// check for containing environment vars
+// and include all help files if the environment var points
+// to a directory
+procedure ParseAndExpandFileNames(const aFileNameString: String; aResult: TStrings);
 
 
 
@@ -86,9 +94,8 @@ uses
   fpg_utils
   ,fpg_main
   ,ACLStringUtility
+  ,dvconstants
   ;
-//  character // from utf8tools package (pulls in LCL requirement which we MUST change)
-//  ;
 
   Function GetAspectPrefix(const aLogAspect: LogAspect): String;
   Begin
@@ -309,7 +316,83 @@ begin
   AddList( Source, Dest );
 end;
 
+procedure ListFilesInDirectory(const aDirectory: String; const aFilter: String;
+    const aWithDirectoryFlag: boolean; var aList: TStrings);
+var
+  tmpRC: longint;
+  tmpSearchResults: TSearchRec;
+  tmpMask: String;
+  tmpFilterParts : TStringList;
+  tmpDirectory: String;
+  i: integer;
+begin
+  tmpFilterParts := TStringList.Create;
 
+  StrExtractStrings(tmpFilterParts, aFilter, [PathSeparator], #0);
+
+  for i:=0 to tmpFilterParts.count-1 do
+  begin
+    tmpMask := tmpFilterParts[i];
+    tmpDirectory := IncludeTrailingPathDelimiter(aDirectory);
+    tmpRC := fpgFindFirst(tmpDirectory + tmpMask, faAnyFile, tmpSearchResults);
+
+    while tmpRC = 0 do
+    begin
+      if (tmpSearchResults.Attr and faDirectory) = 0 then
+      begin
+        if (aWithDirectoryFlag) then
+          aList.Add(tmpDirectory + tmpSearchResults.Name)
+        else
+          aList.Add(tmpSearchResults.Name);
+      end;
+
+      tmpRC := fpgFindNext(tmpSearchResults);
+    end;
+
+    FindClose(tmpSearchResults);
+  end;
+  tmpFilterParts.Destroy;
+end;
+
+procedure ParseAndExpandFileNames(const aFileNameString: String; aResult: TStrings);
+var
+  i: longint;
+  tmpFileNamesList: TStringList;
+  tmpItem: String;
+  tmpEnvironmentVarValue: string;
+begin
+  LogEvent(LogDebug, 'ParseAndExpandFileNames "' + aFileNameString + '"');
+  tmpFileNamesList := TStringList.Create;
+
+  StrExtractStrings(tmpFileNamesList, aFileNameString, [HELP_FILE_DELIMITER, PathSeparator], #0);
+  for i := 0 to tmpFileNamesList.Count - 1 do
+  begin
+    tmpItem := tmpFileNamesList[i];
+
+    // is this a environment var
+    tmpEnvironmentVarValue := GetEnvironmentVariable(tmpItem);
+    if tmpEnvironmentVarValue <> '' then      // environment var exists
+    begin
+      LogEvent(LogStartup, '    Environment var found; translated to: "' + tmpEnvironmentVarValue + '"');
+      ParseAndExpandFileNames(tmpEnvironmentVarValue, aResult);
+    end
+    else if fpgDirectoryExists(tmpItem) then
+    begin
+      ListFilesInDirectory(tmpItem, '*' + INF_FILE_EXTENSION, true, aResult);
+    end
+    else
+    begin
+      aResult.Add(tmpItem);
+    end;
+  end;
+
+  tmpFileNamesList.Free;
+end;
+
+{$IFDEF DEBUG}
+initialization
+  SetLogAspects('LogDebug,LogStartup');
+{$ENDIF}
 
 end.
 
