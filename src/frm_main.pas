@@ -77,7 +77,7 @@ type
     IndexLoaded: boolean;
     ContentsLoaded: boolean;
     DisplayedIndex: TStringList; // duplicate of index listbox, for fast case insensitive searching
-
+    CurrentTopic: TTopic; // so we can get easy access to current topic viewed
 
     procedure   MainFormShow(Sender: TObject);
     procedure   MainFormDestroy(Sender: TObject);
@@ -501,7 +501,7 @@ end;
 procedure TMainForm.lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
-  DisplayTopic(nil);
+  DisplaySelectedSearchResultTopic;
 end;
 
 procedure TMainForm.btnSearchClicked(Sender: TObject);
@@ -510,8 +510,16 @@ begin
 end;
 
 procedure TMainForm.DisplaySelectedSearchResultTopic;
+var
+  Topic: TTopic;
 begin
-  //
+  if lbSearchResults.FocusItem = -1 then
+    exit;
+  if lbSearchResults.Items.Objects[lbSearchResults.FocusItem] = nil then
+    // the "no results" place holder
+    exit;
+  Topic := lbSearchResults.Items.Objects[lbSearchResults.FocusItem] as TTopic;
+  DisplayTopic( Topic );
 end;
 
 procedure TMainForm.EnableControls;
@@ -914,11 +922,9 @@ var
   tmpFileNames: TStringList;
 begin
   tmpFileNames := TStringList.Create;
-  { TODO -ograemeg -copen files : Implement ParseAndExpandFilenames }
-  tmpFileNames.Add(AFileName);
-//  ParseAndExpandFileNames(FileName, tmpFileNames);
+  ParseAndExpandFileNames(AFileName, tmpFileNames);
   Result := OpenFiles( tmpFileNames, AWindowTitle, DisplayFirstTopic );
-  tmpFileNames.Destroy;
+  tmpFileNames.Free;
 end;
 
 procedure TMainForm.CloseFile(const ADestroying: boolean = False);
@@ -1328,11 +1334,13 @@ Begin
   if Topic = nil then
     raise Exception.Create('Unable to locate the Topic');
 
+  CurrentTopic:= Topic;
+
   RichView.Clear;
   ImageIndices := TList.Create;
   ProfileEvent('Cleared memo...');
 
-  HelpFile := TopicFile(Topic);
+  HelpFile := TopicFile(CurrentTopic);
   if HelpFile = nil then
     raise Exception.Create('Failed to get active HelpFile from Topic');
 
@@ -1342,11 +1350,8 @@ Begin
   ProfileEvent('Debug show hex values = ' + BoolToStr(Debug));
   if ImageIndices <> nil then
     ProfileEvent('ImageIndices initialized');
-  //Topic.GetText(HelpFile.HighlightWords,
-  //              Debug,
-  //              lText,
-  //              ImageIndices);
-  Topic.GetText( nil {HighlightWordSequences},
+
+  CurrentTopic.GetText( nil {HighlightWordSequences},
                   Debug {ShowCodes},
                   False {ShowWordIndices},
                   lText {TopicText},
@@ -1359,6 +1364,8 @@ Begin
   //writeln(lText);
   //writeln('-----------------------------');
   RichView.AddText(PChar(lText));
+
+  tvContents.Selection := tvContents.RootNode.FindSubNode(CurrentTopic, True);
 end;
 
 procedure TMainForm.ResetProgress;
@@ -1404,6 +1411,7 @@ var
   lHelpFile: THelpFile;
 begin
 writeln('DEBUG:  TMainForm.Destroy >>>>');
+  CurrentTopic := nil;  // it was a reference only
   FFileOpenRecent := nil;   // it was a reference only
   DestroyListAndObjects(Files);
   DestroyListAndObjects(AllFilesWordSequences);
@@ -1934,11 +1942,13 @@ procedure TMainForm.ProcessCommandLineParams;
 var
   showtopic: boolean;
 begin
-  // always load file first, otherwise show help
   if ParamCount > 0 then
   begin
     if gCommandLineParams.IsParam('h') then
-      ShowParamHelp
+    begin
+      ShowParamHelp;
+      Exit;
+    end
     else
     begin
       showtopic := not gCommandLineParams.IsParam('s');
