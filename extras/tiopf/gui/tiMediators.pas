@@ -251,7 +251,7 @@ const
 
 procedure RegisterFallBackMediators;
 begin
-  gMediatorManager.RegisterMediator(TtiControlMediatorView, TtiObject, [tkSString,tkAString,tkInteger,tkFloat]);
+  gMediatorManager.RegisterMediator(TtiEditMediatorView, TtiObject, [tkSString,tkAString,tkInteger,tkFloat]);
   gMediatorManager.RegisterMediator(TtiEditIntegerMediatorView, TtiObject, [tkInteger]);
   gMediatorManager.RegisterMediator(TtiEditFloatMediatorView, TtiObject, [tkFloat]);
   gMediatorManager.RegisterMediator(TtiEditCurrencyMediatorView, TtiObject, [tkFloat]);
