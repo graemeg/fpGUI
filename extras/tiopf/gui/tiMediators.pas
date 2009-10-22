@@ -202,12 +202,14 @@ type
   
 
   { Base class to handle TfpgMemo controls }
-  TtiMemoMediatorView = class(TtiBaseEditMediatorView)
+  TtiMemoMediatorView = class(TtiControlMediatorView)
   protected
     procedure   SetupGUIandObject; override;
     procedure   DoObjectToGui; override;
     procedure   DoGuiToObject; override;
+    procedure   SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment); override;
   public
+    constructor Create; override;
     function    View: TfpgMemo; reintroduce;
     class function ComponentClass: TClass; override;
   end;
@@ -251,7 +253,7 @@ const
 
 procedure RegisterFallBackMediators;
 begin
-  gMediatorManager.RegisterMediator(TtiEditMediatorView, TtiObject, [tkSString,tkAString,tkInteger,tkFloat]);
+  gMediatorManager.RegisterMediator(TtiEditMediatorView, TtiObject, [tkSString,tkAString,tkLString,tkWString,tkUString,tkInteger,tkFloat]);
   gMediatorManager.RegisterMediator(TtiEditIntegerMediatorView, TtiObject, [tkInteger]);
   gMediatorManager.RegisterMediator(TtiEditFloatMediatorView, TtiObject, [tkFloat]);
   gMediatorManager.RegisterMediator(TtiEditCurrencyMediatorView, TtiObject, [tkFloat]);
@@ -261,7 +263,7 @@ begin
   gMediatorManager.RegisterMediator(TtiDynamicComboBoxMediatorView, TtiObject, [tkClass]);
   gMediatorManager.RegisterMediator(TtiStaticTextMediatorView, TtiObject);
   gMediatorManager.RegisterMediator(TtiTrackBarMediatorView, TtiObject, [tkInteger]);
-  gMediatorManager.RegisterMediator(TtiMemoMediatorView, TtiObject, [tkSString,tkAString]);
+  gMediatorManager.RegisterMediator(TtiMemoMediatorView, TtiObject, [tkSString,tkAString,tkLString,tkWString,tkUString]);
   gMediatorManager.RegisterMediator(TtiCalendarComboMediatorView, TtiObject, [tkFloat]);
   gMediatorManager.RegisterMediator(TtiSpinEditMediatorView, TtiObject, [tkInteger]);
   gMediatorManager.RegisterMediator(TtiSpinEditFloatMediatorView, TtiObject, [tkFloat]);
@@ -342,7 +344,7 @@ end;
 
 class function TtiControlMediatorView.ComponentClass: TClass;
 begin
-  Result := TfpgEdit;
+  Result := TfpgWidget;
 end;
 
 { TtiBaseEditMediatorView }
@@ -557,6 +559,23 @@ begin
   Subject.PropValue[FieldName] := View.Lines.Text;
 end;
 
+procedure TtiMemoMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
+begin
+  inherited SetObjectUpdateMoment(AValue);
+  if View <> nil then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+      View.OnChange := @DoOnChange
+    else
+      View.OnExit := @DoOnChange;
+end;
+
+constructor TtiMemoMediatorView.Create;
+begin
+  inherited Create;
+//  FControlReadOnlyColor := clWindowBackground;
+  GUIFieldName := 'Lines';
+end;
+
 function TtiMemoMediatorView.View: TfpgMemo;
 begin
   Result := TfpgMemo(inherited View);
@@ -570,7 +589,7 @@ end;
 procedure TtiMemoMediatorView.SetupGUIandObject;
 begin
   inherited SetupGUIandObject;
-  View.Lines.Clear;
+  View.Lines.Text := '';
 end;
 
 
