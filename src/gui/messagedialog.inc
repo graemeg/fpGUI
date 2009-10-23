@@ -470,7 +470,7 @@ begin
   Height    := 400;
   MinWidth  := 300;
   MinHeight := 160;
-  WindowPosition := wpScreenCenter;
+  WindowPosition := wpOneThirdDown;
 
   lblName1 := TfpgLabel.Create(self);
   with lblName1 do

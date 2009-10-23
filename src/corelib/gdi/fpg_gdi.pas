@@ -1370,6 +1370,12 @@ begin
     FLeft := (wapplication.ScreenWidth - FWidth) div 2;
     FTop  := (wapplication.ScreenHeight - FHeight) div 2;
     DoMoveWindow(FLeft, FTop);
+  end
+  else if waOneThirdDownPos in FWindowAttributes then
+  begin
+    FLeft := (wapplication.ScreenWidth - FWidth) div 2;
+    FTop  := (wapplication.ScreenHeight - FHeight) div 3;
+    DoMoveWindow(FLeft, FTop);
   end;
 
   if waStayOnTop in FWindowAttributes then
@@ -1409,7 +1415,8 @@ begin
       Windows.ShowWindow(FWinHandle, SW_SHOWNORMAL);
 
     if (waAutoPos in FWindowAttributes) or
-      (waScreenCenterPos in FWindowAttributes) then
+      (waScreenCenterPos in FWindowAttributes) or
+      (waOneThirdDownPos in FWindowAttributes) then
     begin
       GetWindowRect(FWinHandle, r);
       FLeft := r.Left;

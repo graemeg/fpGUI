@@ -429,7 +429,7 @@ end;
 constructor TfpgMessageBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowPosition := wpScreenCenter;
+  WindowPosition := wpOneThirdDown;
   Sizeable := False;
   
   FLines        := TStringList.Create;
@@ -508,7 +508,7 @@ begin
   Height    := 400;
   MinWidth  := 300;
   MinHeight := 300;
-  WindowPosition := wpScreenCenter;
+  WindowPosition := wpOneThirdDown;
   FSpacing  := 6;
   FDefaultButtonWidth := 80;
 

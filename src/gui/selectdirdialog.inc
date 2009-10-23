@@ -200,7 +200,7 @@ begin
   Name := 'fpgSelectDirDialog';
   SetPosition(20, 20, 300, 370);
   WindowTitle := 'Select a Directory';    { TODO : Localize this!! }
-  WindowPosition := wpScreenCenter;
+  WindowPosition := wpOneThirdDown;
 
   tv := TfpgTreeView.Create(self);
   with tv do

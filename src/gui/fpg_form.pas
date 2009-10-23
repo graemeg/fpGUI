@@ -29,7 +29,7 @@ uses
   fpg_widget;
 
 type
-  TWindowPosition = (wpUser, wpAuto, wpScreenCenter);
+  TWindowPosition = (wpUser, wpAuto, wpScreenCenter, wpOneThirdDown);
   TCloseAction = (caNone, caHide, caFree{, caMinimize});
   
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
@@ -212,6 +212,11 @@ begin
     Include(FWindowAttributes, waScreenCenterPos)
   else
     Exclude(FWindowAttributes, waScreenCenterPos);
+
+  if FWindowPosition = wpOneThirdDown then
+    Include(FWindowAttributes, waOneThirdDownPos)
+  else
+    Exclude(FWindowAttributes, waOneThirdDownPos);
 
   if FSizeable then
     Include(FWindowAttributes, waSizeable)

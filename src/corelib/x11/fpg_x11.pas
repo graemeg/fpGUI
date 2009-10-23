@@ -1421,9 +1421,15 @@ begin
   if waScreenCenterPos in FWindowAttributes then
   begin
     hints.flags := hints.flags or PPosition;
-
     FLeft := (xapplication.ScreenWidth - FWidth) div 2;
     FTop  := (xapplication.ScreenHeight - FHeight) div 2;
+    DoMoveWindow(FLeft, FTop);
+  end
+  else if waOneThirdDownPos in FWindowAttributes then
+  begin
+    hints.flags := hints.flags or PPosition;
+    FLeft := (xapplication.ScreenWidth - FWidth) div 2;
+    FTop  := (xapplication.ScreenHeight - FHeight) div 3;
     DoMoveWindow(FLeft, FTop);
   end;
 

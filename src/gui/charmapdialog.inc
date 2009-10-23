@@ -185,7 +185,7 @@ begin
   Name := 'CharMapForm';
   SetPosition(316, 186, 377, 390);
   WindowTitle := 'Character Map';
-  WindowPosition := wpAuto;
+  WindowPosition := wpOneThirdDown;
   OnShow  := @FormShow;
 
   StringGrid1 := TfpgStringGrid.Create(self);
