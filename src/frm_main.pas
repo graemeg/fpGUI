@@ -239,7 +239,7 @@ var
 begin
   RichView.Clear;
   sl := TStringList.Create;
-  f := THelpFile(Files[0]);
+  f := THelpFile(CurrentOpenFiles[0]);
   with sl do
   begin
     Add('<b><u>Filename:</u></b> <red>' + f.Filename + '<black>');
