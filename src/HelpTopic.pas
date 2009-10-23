@@ -1295,7 +1295,7 @@ begin
         bytes := _FileHandle.Read(SlotHeader, SizeOf(TSlotHeader));
         if bytes <> SizeOf(TSlotHeader) then
           // couldn't read slot header
-          raise EHelpFileException.Create( ErrorCorruptHelpFile );
+          raise EHelpFileException.Create( 'Failed to load Topic Slots.' );
 
         // Create slot object
         Slot := THelpTopicSlot.Create;

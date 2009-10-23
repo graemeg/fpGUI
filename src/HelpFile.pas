@@ -493,8 +493,8 @@ begin
   if _pHeader^.ID <> INF_HEADER_ID then
   begin
     // not an OS/2 help file.
-    if _pHeader^.ID = $5f3f then
-      raise EWindowsHelpFormatException.Create( 'Win16' );
+    if (Byte(_pHeader^.ID[0]) = $5f) and (Byte(_pHeader^.ID[1]) = $3f) then
+      raise EWindowsHelpFormatException.Create( 'It seems we have a Win16 help file!' );
 
     raise EHelpFileException.Create( FileErrorInvalidHeader );
   end;

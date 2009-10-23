@@ -50,21 +50,20 @@ const
   ErrorCorruptHelpFile = 'Corrupt help file, or something similar';
 
 const
-  INF_HEADER_ID = $5348;
+  INF_HEADER_ID = 'HSP';
 
 Type
   THelpFileHeader = packed record
-    ID: uint16;           // ID magic word (5348h = "HS")
-    unknown1: uint8;      // unknown purpose, could be third letter of ID
+    ID: array[0..2] of ansichar; // ID magic word "HSP"
     flags: uint8;         // probably a flag word...
-                          //  bit 0: set if INF style file
-                          //  bit 4: set if HLP style file
+                          // [0x01] bit 0: set if INF style file
+                          // [0x10] bit 4: set if HLP style file
                           // patching this byte allows reading HLP files
                           // using the VIEW command, while help files
                           // seem to work with INF settings here as well.
     hdrsize: uint16;      // total size of header
-    unknown2: uint16;     // unknown purpose
-
+    version_hi: uint8;
+    version_lo: uint8;
     ntoc: uint16;         // number of entries in the tocarray
     tocstart: uint32;     // file offset of the start of the toc
     toclen: uint32;       // number of bytes in file occupied by the toc
@@ -76,7 +75,9 @@ Type
     nindex: uint16;       // number of index entries
     indexstart: uint32;   // 32 bit file offset to index table
     indexlen: uint32;     // size of index table
-    unknown3: array[ 0..9 ] of byte; // unknown purpose
+    icmdCount: uint16;    // number of icmd index items
+    icmdOffset: uint32;   // file offset to icmd index items
+    icmdSize: uint32;     // size of icmd index table
     searchstart: uint32;  // 31 bit file offset of full text search table
                           // Note: top bit indicates 32 bit search record!
     searchlen: uint32;    // size of full text search table
@@ -86,12 +87,13 @@ Type
     ndict: uint16;        // number of entries in the dictionary
     dictstart: uint32;    // file offset of the start of the dictionary
     imgstart: uint32;     // file offset of image data
-    unknown4: byte;       // unknown purpose
+    maxCVTIndex: byte;    // highest index inside panel's local dictionary,
+                          // always seems to be 245
     nlsstart: uint32;     // 32 bit file offset of NLS table
     nlslen: uint32;       // size of NLS table
     extstart: uint32;     // 32 bit file offset of extended data block
     reserved: array[ 0..11 ] of byte; // for future use. set to zero.
-    title: array[ 0..47 ] of char;    // ASCII title of database
+    title: array[ 0..47 ] of ansichar;    // ASCII title of database
   end;
   TPHelpFileHeader = ^THelpFileHeader;
 
