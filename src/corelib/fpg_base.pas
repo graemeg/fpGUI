@@ -102,6 +102,9 @@ const
   mrNoToAll  = mrAll + 1;
   mrYesToAll = mrNoToAll + 1;
 
+  { Default fpGUI help viewer }
+  FPG_HELPVIEWER = 'docview';
+
 var
   FPG_DEFAULT_FONT_DESC: string = 'Arial-10:antialias=true';
 
@@ -462,14 +465,21 @@ type
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
     FCritSect: TCriticalSection;
+    FHelpType: THelpType;
+    FHelpContext: THelpContext;
+    FHelpWord: TfpgString;
+    FHelpKey: word;
+    FHelpFile: TfpgString;
     function    GetForm(Index: Integer): TfpgWindowBase;
     function    GetFormCount: integer;
     function    GetTopModalForm: TfpgWindowBase;
+    function    GetHelpFile: TfpgString;
   protected
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
     FModalFormStack: TList;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
+    function    GetHelpViewer: TfpgString; virtual;
   public
     constructor Create(const AParams: string); virtual; reintroduce;
     destructor  Destroy; override;
@@ -487,8 +497,16 @@ type
     procedure   Terminate;
     procedure   Lock;
     procedure   Unlock;
+    procedure   InvokeHelp;
+    function    ContextHelp(const HelpContext: THelpContext): Boolean;
+    function    KeywordHelp(const HelpKeyword: string): Boolean;
     property    FormCount: integer read GetFormCount;
     property    Forms[Index: Integer]: TfpgWindowBase read GetForm;
+    property    HelpContext: THelpContext read FHelpContext write FHelpContext;
+    property    HelpFile: TfpgString read GetHelpFile write FHelpFile;
+    property    HelpKey: word read FHelpKey write FHelpKey default keyF1;
+    property    HelpType: THelpType read FHelpType write FHelpType default htContext;
+    property    HelpWord: TfpgString read FHelpWord write FHelpWord;
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
@@ -604,7 +622,8 @@ implementation
 uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
-  typinfo;
+  typinfo,
+  process;
 
 
 const
@@ -2056,11 +2075,32 @@ begin
     Result := TFpgWindowBase(FModalFormStack.Items[FModalFormStack.Count-1]);
 end;
 
+function TfpgApplicationBase.GetHelpFile: TfpgString;
+begin
+  Result := FHelpFile;
+  //if Result = '' then
+  //begin
+    { TODO : Should we extend this to try the <applicationname>.inf as a help file? }
+  //end;
+end;
+
+function TfpgApplicationBase.GetHelpViewer: TfpgString;
+var
+  ext: TfpgString;
+begin
+  // Default location is in same directory as current running application
+  // This location might change in the future.
+  ext := ExtractFileExt(ParamStr(0));
+  Result := fpgExtractFilePath(ParamStr(0)) + FPG_HELPVIEWER + ext;
+end;
+
 constructor TfpgApplicationBase.Create(const AParams: string);
 begin
   inherited Create(nil);
   FModalFormStack := TList.Create;
   FCritSect := TCriticalSection.Create;
+  FHelpKey := keyF1;
+  FHelpType := htContext;
 end;
 
 destructor TfpgApplicationBase.Destroy;
@@ -2152,6 +2192,48 @@ end;
 procedure TfpgApplicationBase.Unlock;
 begin
   FCritSect.Leave;
+end;
+
+procedure TfpgApplicationBase.InvokeHelp;
+begin
+  if HelpType = htKeyword then
+    KeywordHelp(HelpWord)
+  else
+    ContextHelp(HelpContext);
+end;
+
+function TfpgApplicationBase.ContextHelp(const HelpContext: THelpContext): Boolean;
+var
+  p: TProcess;
+begin
+  { TODO -oGraeme : Support HelpContext in docview }
+  p := TProcess.Create(nil);
+  try
+    if fpgFileExists(HelpFile) then
+      p.CommandLine := GetHelpViewer + ' ' + HelpFile
+    else
+      p.CommandLine := GetHelpViewer;
+    p.Execute;
+  finally
+    p.Free;
+  end;
+end;
+
+function TfpgApplicationBase.KeywordHelp(const HelpKeyword: string): Boolean;
+var
+  p: TProcess;
+begin
+  { TODO -oGraeme : Support HelpKeyword in docview }
+  p := TProcess.Create(nil);
+  try
+    if fpgFileExists(HelpFile) then
+      p.CommandLine := GetHelpViewer + ' ' + HelpFile
+    else
+      p.CommandLine := GetHelpViewer;
+    p.Execute;
+  finally
+    p.Free;
+  end;
 end;
 
 { TfpgClipboardBase }
