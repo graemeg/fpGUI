@@ -999,10 +999,9 @@ begin
   for i := 0 to _pExtendedHeader^.Numdatabase - 1 do
   begin
     pLength := p; // length byte, including itself
-    SetString(DatabaseName, p+1, pLength^-1);
-//    GetMemString( p + 1, DatabaseName, ( pLength ^ ) - 1 );
+    SetString(DatabaseName, p+1, pLength^-1); // use length value minus the length byte to get the string length
     _ReferencedFiles.Add( DatabaseName );
-    inc( p, pLength^ ); // skip to next entry
+    inc( p, pLength^ ); // skip to next entry using full length (including length byte)
   end;
   FreeMem( pData );
 end;
