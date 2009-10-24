@@ -10,7 +10,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, IPFFileFormatUnit, IPFEscapeCodes, CustApp, readheader,
-  filestreamhelper, readextfiles;
+  filestreamhelper, readextfiles, readstrings;
 
 type
 
@@ -55,6 +55,7 @@ begin
     FOut.WriteLn(Format('File name: %s (%d bytes)', [ExtractFileName(ParamStr(1)), FIn.Size]));
     ProcessHeader(FIn, FOut);
     ProcessExtFiles(FIn, FOut);
+    ProcessStringsTable(FIn, FOut);
   finally
     FIn.Free;
     FOut.Free;
