@@ -1,3 +1,6 @@
+{
+  Dumps the structure of an OS/2 IPF help file
+}
 program docdump;
 
 {$mode objfpc}{$H+}
@@ -7,7 +10,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, IPFFileFormatUnit, IPFEscapeCodes, CustApp, readheader,
-  filestreamhelper;
+  filestreamhelper, readextfiles;
 
 type
 
@@ -51,6 +54,7 @@ begin
   try
     FOut.WriteLn(Format('File name: %s (%d bytes)', [ExtractFileName(ParamStr(1)), FIn.Size]));
     ProcessHeader(FIn, FOut);
+    ProcessExtFiles(FIn, FOut);
   finally
     FIn.Free;
     FOut.Free;
@@ -78,6 +82,7 @@ end;
 
 var
   Application: TDocDump;
+
 
 begin
   Application:=TDocDump.Create(nil);

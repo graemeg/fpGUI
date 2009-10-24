@@ -1,3 +1,6 @@
+{
+  Dump the INF header & extended header structures to a text file
+}
 unit readheader;
 
 {$mode objfpc}{$H+}
@@ -5,14 +8,17 @@ unit readheader;
 interface
 
 uses
-  Classes, SysUtils, filestreamhelper;
+  Classes, SysUtils, filestreamhelper, IPFFileFormatUnit;
 
 procedure ProcessHeader(AIn: TFileStream; AOut: TFileTextStream);
 
+var
+  hdr: THelpFileHeader;
+  eHdr: TExtendedHelpFileHeader;
+
+
 implementation
 
-uses
-  IPFFileFormatUnit;
 
 type
   TWord = record
@@ -36,8 +42,6 @@ type
 
 procedure ProcessHeader(AIn: TFileStream; AOut: TFileTextStream);
 var
-  hdr: THelpFileHeader;
-  eHdr: TExtendedHelpFileHeader;
   bytes: integer;
   s: string;
   w: TWord;
