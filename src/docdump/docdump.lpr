@@ -11,7 +11,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, IPFFileFormatUnit, IPFEscapeCodes, CustApp, readheader,
   filestreamhelper, readextfiles, readstrings, iterator_intf, iterator_impl,
-  readnlsdata;
+  readnlsdata, readfonts;
 
 type
 
@@ -58,6 +58,7 @@ begin
     ProcessExtFiles(FIn, FOut);
     ProcessStringsTable(FIn, FOut);
     ProcessNLSData(FIn, FOut);
+    ProcessFonts(FIn, FOut);
   finally
     FIn.Free;
     FOut.Free;

@@ -171,7 +171,7 @@ type
   pSlotHeader = ^TSlotHeader;
 
   THelpFontSpec = packed record
-    FaceName: array[ 0..32 ] of char;
+    FaceName: array[ 0..32 ] of ansichar;
     Height: uint16;
     Width: uint16;
     Codepage: uint16;
