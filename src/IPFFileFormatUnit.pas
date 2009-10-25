@@ -206,6 +206,25 @@ type
     bits: array[0..31] of uint8;  // high-order bits first
   end;
 
+  TPanelControls = packed record
+    ControlCount: uint16;   // number of ControlDef records
+    GroupCount: uint16;     // number of GroupDef records
+    GroupIndex: uint16;     // for cover page
+    Reserved: uint16;
+  end;
+
+  TControlDef = packed record
+    CtrlType: uint16;       // type of control
+    ResourceID: uint16;     // resource id (panel) it belongs to
+    { variable length data follows, contains button text }
+    // DictString: array of char;
+  end;
+
+  TControlGroupDef = packed record
+    Count: uint16;          // number of indexes into ControlDef records
+    { variable length data follows }
+    // index[count] of type uint16
+  end;
 
 // List of IPF escape codes. 
 
