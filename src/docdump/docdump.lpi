@@ -23,7 +23,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <Units Count="8">
+    <Units Count="11">
       <Unit0>
         <Filename Value="docdump.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -63,6 +63,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="readstrings"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="iterator_impl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="iterator_impl"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="iterator_intf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="iterator_intf"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="readnlsdata.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readnlsdata"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -10,7 +10,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, IPFFileFormatUnit, IPFEscapeCodes, CustApp, readheader,
-  filestreamhelper, readextfiles, readstrings;
+  filestreamhelper, readextfiles, readstrings, iterator_intf, iterator_impl,
+  readnlsdata;
 
 type
 
@@ -56,6 +57,7 @@ begin
     ProcessHeader(FIn, FOut);
     ProcessExtFiles(FIn, FOut);
     ProcessStringsTable(FIn, FOut);
+    ProcessNLSData(FIn, FOut);
   finally
     FIn.Free;
     FOut.Free;
