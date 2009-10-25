@@ -178,6 +178,35 @@ type
   end;
   pTHelpFontSpec = ^THelpFontSpec;
 
+  TNlsHeader = packed record
+    NlsSize: uint16;
+    NlsType: uint8;
+    NlsFormat: uint8;
+  end;
+
+  TNlsCountryDef = packed record
+    { if the following is true then...
+      NlsHeader.size = 10
+      NlsHeader.type = NLSRecType.CONTROL
+      NlsHeader.format = 0
+    }
+    Value: uint16;      // =256
+    Code: uint16;       // country code
+    Page: uint16;       // code page
+    Reserved: uint16;
+  end;
+
+  // Single-byte character set
+  TSbcsNlsGrammerDef = packed record
+    { if the following is true then...
+      NlsHeader.size = 36
+      NlsHeader.type = NLSRecType.WORD || NLSRecType.GRAPHIC
+      NlsHeader.format = 0
+    }
+    bits: array[0..31] of uint8;  // high-order bits first
+  end;
+
+
 // List of IPF escape codes. 
 
 const
