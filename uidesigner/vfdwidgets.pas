@@ -623,6 +623,43 @@ begin
   wc.WidgetIconName := 'vfd.editcurrency';
   RegisterVFDWidget(wc);
 
+  { TODO : UI Designer still has problems with components that have child components. }
+  // Spin Edit
+  //wc          := TVFDWidgetClass.Create(TfpgSpinEdit);
+  //wc.NameBase := 'SpinEdit';
+  //wc.AddProperty('ButtonWidth', TPropertyInteger, 'Spin button width');
+  //wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  //wc.Addproperty('Hint', TPropertyString, '');
+  //wc.AddProperty('Increment', TPropertyInteger, 'Increment value on short press');
+  //wc.AddProperty('LargeIncrement', TPropertyInteger, 'Large increment value on long press');
+  //wc.AddProperty('MaxValue', TPropertyInteger, 'Maximum value');
+  //wc.AddProperty('MinValue', TPropertyInteger, 'Minimum value');
+  //wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  //wc.AddProperty('Value', TPropertyInteger, 'Initial value');
+  //wc.WidgetIconName := 'vfd.editinteger';
+  //RegisterVFDWidget(wc);
+
+  // Spin Edit Float
+  //wc          := TVFDWidgetClass.Create(TfpgSpinEditFloat);
+  //wc.NameBase := 'SpinEditFloat';
+  //wc.AddProperty('ButtonWidth', TPropertyInteger, 'Spin button width');
+  //wc.Addproperty('Decimals', TPropertyInteger, '');
+  //wc.Addproperty('FixedDecimals', TPropertyBoolean, '');
+  //wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  //wc.Addproperty('Hint', TPropertyString, '');
+  //wc.AddProperty('Increment', TPropertyFloat, 'Increment value on short press');
+  //wc.AddProperty('LargeIncrement', TPropertyFloat, 'Large increment value on long press');
+  //wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  //wc.AddProperty('MaxValue', TPropertyFloat, 'Maximum value');
+  //wc.AddProperty('MinValue', TPropertyFloat, 'Minimum value');
+  //wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('Value', TPropertyFloat, 'Initial value');
+  //wc.WidgetIconName := 'vfd.editfloat';
+  //RegisterVFDWidget(wc);
+
   // Other - do not delete!!! this should be the last...
   wc          := TVFDWidgetClass.Create(TOtherWidget);
   wc.NameBase := 'Custom';
