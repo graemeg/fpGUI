@@ -51,6 +51,7 @@ type
     FOnScreen: boolean;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
+    procedure   SetFormDesigner(const AValue: TObject);
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -139,7 +140,7 @@ type
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
-    property    FormDesigner: TObject read FFormDesigner write FFormDesigner;
+    property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
@@ -212,7 +213,7 @@ procedure TfpgWidget.SetActiveWidget(const AValue: TfpgWidget);
 begin
   if FActiveWidget = AValue then
     Exit; //==>
-  if FFormDesigner <> nil then
+  if InDesigner then
     Exit; //==>
   
   if FActiveWidget <> nil then
@@ -225,6 +226,18 @@ end;
 function TfpgWidget.IsShowHintStored: boolean;
 begin
   Result := not ParentShowHint;
+end;
+
+procedure TfpgWidget.SetFormDesigner(const AValue: TObject);
+var
+  i: integer;
+begin
+  FFormDesigner := AValue;
+  for i := 0 to ComponentCount-1 do
+  begin
+    if (Components[i] is TfpgWidget) and (TfpgWidget(Components[i]).Parent = self) then
+      TfpgWidget(Components[i]).FormDesigner := AValue;
+  end;
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -424,7 +437,7 @@ var
   consumed: boolean;
   wg: TfpgWidget;
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -454,7 +467,7 @@ var
   consumed: boolean;
   wg: TfpgWidget;
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -481,7 +494,7 @@ procedure TfpgWidget.MsgMouseDown(var msg: TfpgMessageRec);
 var
   mb: TMouseButton;
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     // dispatching message to designer
     FFormDesigner.Dispatch(msg);
@@ -521,7 +534,7 @@ var
   IsDblClick: boolean;
 begin
 //  writeln('TfpgWidget.MsgMouseUp');
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -578,7 +591,7 @@ end;
 
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -611,7 +624,7 @@ begin
   {$IFDEF DEBUG}
   writeln('MsgMouseEnter');
   {$ENDIF}
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -628,7 +641,7 @@ begin
   {$IFDEF DEBUG}
   writeln('MsgMouseExit');
   {$ENDIF}
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -1019,7 +1032,7 @@ begin
   dh      := msg.Params.rect.Height - FHeight;
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
   HandleAlignments(dw, dh);
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
   end;
@@ -1029,7 +1042,7 @@ end;
 procedure TfpgWidget.MsgMove(var msg: TfpgMessageRec);
 begin
   HandleMove(msg.Params.rect.Left, msg.Params.rect.Top);
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
   end;
