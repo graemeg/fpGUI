@@ -90,6 +90,7 @@ type
     procedure   SetVisible(const AValue: boolean); virtual;
     procedure   SetShowHint(const AValue: boolean); virtual;
     procedure   SetParentShowHint(const AValue: boolean); virtual;
+    procedure   SetHint(const AValue: string); virtual;
     procedure   DoUpdateWindowPosition; override;
     procedure   DoAlign(AAlign: TAlign);
     procedure   DoResize;
@@ -152,7 +153,7 @@ type
     property    Focused: boolean read FFocused write FFocused default False;
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
-    property    Hint: string read FHint write FHint;
+    property    Hint: string read FHint write SetHint;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
@@ -269,6 +270,11 @@ begin
     FParentShowHint := AValue;
   if FParentShowHint then
     FShowHint := False;
+end;
+
+procedure TfpgWidget.SetHint(const AValue: string);
+begin
+  FHint := AValue;
 end;
 
 procedure TfpgWidget.DoUpdateWindowPosition;

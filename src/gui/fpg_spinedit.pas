@@ -53,8 +53,8 @@ type
   private
     FButtonUp: TfpgButton;
     FButtonDown: TfpgButton;
-    FArrowUpColor: Tfpgcolor;
-    FArrowDownColor: Tfpgcolor;
+    FArrowUpColor: TfpgColor;
+    FArrowDownColor: TfpgColor;
     FOnChange: TNotifyEvent;
     FTimer: TfpgTimer;
     FUp: Boolean;
@@ -119,7 +119,7 @@ type
     procedure SetValue(const AValue: extended);
     procedure SetDecimals(const AValue: integer);
     procedure SetFixedDecimals(const AValue: Boolean);
-    procedure SetHint(const AValue: string);
+    procedure SetHint(const AValue: string); override;
     procedure ButtonUpClick(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
     procedure ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -137,6 +137,7 @@ type
   published
     property EditBackgroundColor: Tfpgcolor read GetEditBackgroundColor write SetEditBackgroundColor default clBoxColor;
     property ButtonsBackgroundColor;
+    property ButtonWidth;
     property TextColor: Tfpgcolor read GetTextColor write SetTextColor;
     property NegativeColor: TfpgColor read GetNegativeColor write SetNegativeColor;
     property ArrowUpColor;
@@ -149,7 +150,7 @@ type
     property Value: extended read FValue write SetValue;
     property Decimals: integer read GetDecimals write SetDecimals;
     property FixedDecimals: Boolean read GetFixedDecimals write SetFixedDecimals;
-    property Hint: string read FHint write SetHint;
+    property TabOrder;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -217,6 +218,7 @@ type
     property LargeIncrement: integer read FLargeIncrement write SetLargeIncrement default 10;
     property Value: integer read FValue write SetValue default 0;
     property Hint: string read FHint write SetHint;
+    property TabOrder;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -621,12 +623,11 @@ end;
 
 procedure TfpgSpinEditFloat.SetHint(const AValue: string);
 begin
-  if Hint <> AValue then
-  begin
-    FEdit.Hint := AValue;
-    FButtonUp.Hint := AValue;
-    FButtonDown.Hint := AValue;
-  end;
+  inherited SetHint(AValue);
+  // let child component use the same hint
+  FEdit.Hint := AValue;
+  FButtonUp.Hint := AValue;
+  FButtonDown.Hint := AValue;
 end;
 
 procedure TfpgSpinEditFloat.ButtonUpClick(Sender: TObject);
