@@ -716,7 +716,7 @@ var
 begin
   dlg := TfpgFileDialog.Create(nil);
   try
-    { TODO -ograemeg -cSettings : Use settings.lastopendirectory }
+    dlg.InitialDir := Settings.LastOpenDirectory;
     dlg.WindowTitle := rsDVOpenHelpFile;
     dlg.Filter := rsDVHelpFiles + ' (*.hlp, *.inf)|*.inf;*.hlp ';
     // and a catch all filter
