@@ -159,10 +159,12 @@ type
     FOpenMode: boolean;
     FFilterList: TStringList;
     FFilter: string;
+    FInitialDir: string;
     procedure   SetFilter(const Value: string);
     function    GetFontDesc: string;
     function    GetShowHidden: boolean;
     procedure   SetFontDesc(const AValue: string);
+    procedure   SetInitialDir(const AValue: string);
     procedure   SetShowHidden(const Value: boolean);
     procedure   ListChanged(Sender: TObject; ARow: Integer);
     procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -188,6 +190,7 @@ type
     function    RunSaveFile: boolean;
     property    Filter: string read FFilter write SetFilter;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    InitialDir: string read FInitialDir write SetInitialDir;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
   
@@ -984,6 +987,15 @@ procedure TfpgFileDialog.SetFontDesc(const AValue: string);
 begin
   if grid.FontDesc <> AValue then
     grid.FontDesc := AValue;
+end;
+
+procedure TfpgFileDialog.SetInitialDir(const AValue: string);
+begin
+  if FInitialDir <> AValue then
+  begin
+    FInitialDir := AValue;
+    SetCurrentDirectory(FInitialDir);
+  end;
 end;
 
 procedure TfpgFileDialog.SetShowHidden(const Value: boolean);
