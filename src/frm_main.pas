@@ -239,21 +239,26 @@ var
 begin
   RichView.Clear;
   sl := TStringList.Create;
-  f := THelpFile(CurrentOpenFiles[0]);
-  with sl do
+  RichView.AddText(PChar('FileCount = ' + IntToStr(CurrentOpenFiles.Count)));
+  for i := 0 to CurrentOpenFiles.Count-1 do
   begin
-    Add('<b><u>Filename:</u></b> <red>' + f.Filename + '<black>');
-    Add('');
-    Add('<b>Title:</b> ' + f.Title);
-    Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
-    Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
-    Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
-    Add(' ');
-    //Add('Dictionary contents:');
-    //for i := 0 to f.DictionaryCount-1 do
-    //  Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
+    f := THelpFile(CurrentOpenFiles[i]);
+    sl.Clear;
+    with sl do
+    begin
+      Add('<b><u>Filename:</u></b> <red>' + f.Filename + '<black>');
+      Add('');
+      Add('<b>Title:</b> ' + f.Title);
+      Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
+      Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
+      Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
+      Add(' ');
+      //Add('Dictionary contents:');
+      //for i := 0 to f.DictionaryCount-1 do
+      //  Add('[' + IntToStr(i) + '] = <' + f.DictionaryWords[i] + '>');
+    end;
+    RichView.AddParagraph(PChar(sl.Text));
   end;
-  RichView.AddText(PChar(sl.Text));
   sl.Free;
 end;
 
