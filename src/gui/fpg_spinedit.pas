@@ -75,6 +75,7 @@ type
     procedure   SetArrowUpColor(const AValue: Tfpgcolor);
     procedure   SetArrowDownColor(const AValue: Tfpgcolor);
     procedure   SetSpeedUp(const AValue: integer);
+    procedure   DisableTimer;
     procedure   ButtonUpPaint(Sender: TObject);
     procedure   ButtonDownPaint(Sender: TObject);
     property    ButtonsBackgroundColor: Tfpgcolor read GetButtonsBackgroundColor write SetButtonsBackgroundColor default clButtonFace;
@@ -367,6 +368,14 @@ begin
     FSpeedUpSteps := AValue;
 end;
 
+procedure TfpgAbstractSpinEdit.DisableTimer;
+begin
+  FUp:= False;
+  FDown:= False;
+  if Assigned(FTimer) then
+    FTimer.Enabled:= False;
+end;
+
 function GetButtonRect(AButton: TfpgButton): TRect;
 var
   r: TfpgRect;
@@ -452,34 +461,23 @@ end;
 
 procedure TfpgSpinEditFloat.EnableButtons;
 begin
-  if not IsMaxLimitReached then
-    FButtonUp.Enabled := True
+  FButtonUp.Enabled := True;
+  FButtonDown.Enabled := True;
+  if IsMaxLimitReached then
+    FButtonUp.Enabled := False
   else
-  begin
-//    FButtonUp.Enabled := False;
-    FUp := False;
-    if Assigned(FTimer) then
-      FTimer.Enabled := False;
-  end;
-  if not IsMinLimitReached then
-    FButtonDown.Enabled := True
-  else
-  begin
-//    FButtonDown.Enabled := False;
-    FDown := False;
-    if Assigned(FTimer) then
-      FTimer.Enabled := False;
-  end;
+    if IsMinLimitReached then
+      FButtonDown.Enabled := False;
 end;
 
 function TfpgSpinEditFloat.IsMinLimitReached: Boolean;
 begin
-  Result := Value = MinValue;
+  Result := FValue = FMinValue;
 end;
 
 function TfpgSpinEditFloat.IsMaxLimitReached: Boolean;
 begin
-  Result := Value = MaxValue;
+  Result := FValue = FMaxValue;
 end;
 
 function TfpgSpinEditFloat.GetEditBackgroundColor: TfpgColor;
@@ -561,7 +559,6 @@ begin
       FValue      := FMaxValue;
       FEdit.Value := FValue;
     end;
-    EnableButtons;
   end;
 end;
 
@@ -575,7 +572,6 @@ begin
       FValue      := FMinValue;
       FEdit.Value := FValue;
     end;
-    EnableButtons;
   end;
 end;
 
@@ -636,32 +632,32 @@ procedure TfpgSpinEditFloat.ButtonUpClick(Sender: TObject);
 begin
   if FValue + FIncrement <= FMaxValue then
   begin
-    Value := FValue + FIncrement;
-    DoOnChange;
-    EnableButtons;
+    FValue := FValue + FIncrement;
+    FEdit.Value := FValue;
   end
   else if not IsMaxLimitReached then
   begin
-    Value := FMaxValue;
-    DoOnChange;
-    EnableButtons;
+    FValue := FMaxValue;
+    FEdit.Value := FValue;
   end;
+  DoOnChange;
+  EnableButtons;
 end;
 
 procedure TfpgSpinEditFloat.ButtonDownClick(Sender: TObject);
 begin
   if FValue - FIncrement >= FMinValue then
   begin
-    Value := FValue - FIncrement;
-    DoOnChange;
-    EnableButtons;
+    FValue := FValue - FIncrement;
+    FEdit.Value := FValue;
   end
   else if not IsMinLimitReached then
   begin
-    Value := FMinValue;
-    DoOnChange;
-    EnableButtons;
+    FValue := FMinValue;
+    FEdit.Value := FValue;
   end;
+  DoOnChange;
+  EnableButtons;
 end;
 
 procedure TfpgSpinEditFloat.ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -674,9 +670,7 @@ end;
 
 procedure TfpgSpinEditFloat.ButtonUpMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 begin
-  FUp := False;
-  if Assigned(FTimer) then
-    FTimer.Enabled := False;
+  DisableTimer;
 end;
 
 procedure TfpgSpinEditFloat.ButtonDownMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -689,9 +683,7 @@ end;
 
 procedure TfpgSpinEditFloat.ButtonDownMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 begin
-  FDown := False;
-  if Assigned(FTimer) then
-    FTimer.Enabled := False;
+  DisableTimer;
 end;
 
 procedure TfpgSpinEditFloat.EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
@@ -823,39 +815,45 @@ begin
   begin
     if FValue + FTempIncrement <= FMaxValue then
     begin
-      Value       := FValue + FTempIncrement;
+      FValue       := FValue + FTempIncrement;
       FEdit.Value := FValue;
       if FSteps <= FSpeedUpSteps then
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnChange;
+      if FValue= FMaxValue then
+        DisableTimer;
     end
-    else if FValue < FMaxValue then
+    else if not IsMaxLimitReached then
     begin
-      Value := FMaxValue;
+      FValue := FMaxValue;
       FEdit.Value := FValue;
+      DoOnChange;
+      DisableTimer;
     end;
-    DoOnChange;
-    EnableButtons;
   end
   else if FDown then
   begin
     if FValue - FTempIncrement >= FMinValue then
     begin
-      Value      := FValue - FTempIncrement;
+      FValue      := FValue - FTempIncrement;
       FEdit.Value := FValue;
       if FSteps <= FSpeedUpSteps then
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnChange;
+      if FValue= FMinValue then
+        DisableTimer;
     end
-    else if FValue > FMinValue then
+    else if not IsMinLimitReached then
     begin
-      Value := FMinValue;
+      FValue := FMinValue;
       FEdit.Value := FValue;
+      DoOnChange;
+      DisableTimer;
     end;
-    DoOnChange;
-    EnableButtons;
   end;
 end;
 
@@ -904,34 +902,23 @@ end;
 
 procedure TfpgSpinEdit.EnableButtons;
 begin
-  if not IsMaxLimitReached then
-    FButtonUp.Enabled := True
+  FButtonUp.Enabled := True;
+  FButtonDown.Enabled := True;
+  if IsMaxLimitReached then
+    FButtonUp.Enabled := False
   else
-  begin
-//    FButtonUp.Enabled := False;
-    FUp := False;
-    if Assigned(FTimer) then
-      FTimer.Enabled := False;
-  end;
-  if not IsMinLimitReached then
-    FButtonDown.Enabled := True
-  else
-  begin
-//    FButtonDown.Enabled := False;
-    FDown := False;
-    if Assigned(FTimer) then
-      FTimer.Enabled := False;
-  end;
+    if IsMinLimitReached then
+      FButtonDown.Enabled := False;
 end;
 
 function TfpgSpinEdit.IsMinLimitReached: Boolean;
 begin
-  Result := Value = MinValue;
+  Result := FValue = FMinValue;
 end;
 
 function TfpgSpinEdit.IsMaxLimitReached: Boolean;
 begin
-  Result:= Value = MaxValue;
+  Result:= FValue = FMaxValue;
 end;
 
 function TfpgSpinEdit.GetEditBackgroundColor: TfpgColor;
@@ -1003,7 +990,6 @@ begin
       FValue      := FMaxValue;
       FEdit.Value := FValue;
     end;
-    EnableButtons;
   end;
 end;
 
@@ -1017,7 +1003,6 @@ begin
       FValue      := FMinValue;
       FEdit.Value := FValue;
     end;
-    EnableButtons;
   end;
 end;
 
@@ -1062,32 +1047,32 @@ procedure TfpgSpinEdit.ButtonUpClick(Sender: TObject);
 begin
   if FValue + FIncrement <= FMaxValue then
   begin
-     Value := FValue + FIncrement;
-    DoOnChange;
-    EnableButtons;
+    Value := FValue + FIncrement;
+    FEdit.Value:= FValue;
   end
   else if not IsMaxLimitReached then
   begin
     Value := FMaxValue;
-    DoOnChange;
-    EnableButtons;
+    FEdit.Value:= FValue;
   end;
+  DoOnChange;
+  EnableButtons;
 end;
 
 procedure TfpgSpinEdit.ButtonDownClick(Sender: TObject);
 begin
   if FValue - FIncrement >= FMinValue then
   begin
-     Value := FValue - FIncrement;
-    DoOnChange;
-    EnableButtons;
+    Value := FValue - FIncrement;
+    FEdit.Value:= FValue;
   end
   else if not IsMinLimitReached then
   begin
     Value := FMinValue;
-    DoOnChange;
-    EnableButtons;
+    FEdit.Value:= FValue;
   end;
+  DoOnChange;
+  EnableButtons;
 end;
 
 procedure TfpgSpinEdit.ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -1100,10 +1085,7 @@ end;
 
 procedure TfpgSpinEdit.ButtonUpMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 begin
-  FUp := False;
-  FTempIncrement := Increment;
-  if Assigned(FTimer) then
-    FTimer.Enabled := False;
+  DisableTimer;
 end;
 
 procedure TfpgSpinEdit.ButtonDownMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -1116,10 +1098,7 @@ end;
 
 procedure TfpgSpinEdit.ButtonDownMouseUp(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 begin
-  FDown := False;
-  FTempIncrement := Increment;
-  if Assigned(FTimer) then
-    FTimer.Enabled := False;
+  DisableTimer;
 end;
 
 procedure TfpgSpinEdit.EditKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
@@ -1251,39 +1230,45 @@ begin
   begin
     if FValue + FTempIncrement <= FMaxValue then
     begin
-      Value       := FValue + FTempIncrement;
+      FValue       := FValue + FTempIncrement;
       FEdit.Value := FValue;
       if FSteps <= FSpeedUpSteps then
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnChange;
+      if FValue= FMaxValue then
+        DisableTimer;
     end
-    else if FValue < FMaxValue then
+    else if not IsMaxLimitreached then
     begin
-      Value := FMaxValue;
+      FValue := FMaxValue;
       FEdit.Value := FValue;
+      DoOnChange;
+      DisableTimer;
     end;
-    DoOnChange;
-    EnableButtons;
   end
   else if FDown then
   begin
     if FValue - FTempIncrement >= FMinValue then
     begin
-      Value       := FValue - FTempIncrement;
+      FValue       := FValue - FTempIncrement;
       FEdit.Value := FValue;
       if FSteps <= FSpeedUpSteps then
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
+      DoOnChange;
+      if FValue= FMinValue then
+        DisableTimer;
     end
-    else if FValue > FMinValue then
+    else
     begin
-      Value := FMinValue;
+      FValue := FMinValue;
       FEdit.Value := FValue;
+      DoOnChange;
+      DisableTimer;
     end;
-    DoOnChange;
-    EnableButtons;
   end;
 end;
 
