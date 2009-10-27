@@ -452,18 +452,20 @@ end;
 
 procedure TfpgSpinEditFloat.EnableButtons;
 begin
-  if FValue + FIncrement < FMaxValue then
+  if not IsMaxLimitReached then
     FButtonUp.Enabled := True
   else
   begin
+//    FButtonUp.Enabled := False;
     FUp := False;
     if Assigned(FTimer) then
       FTimer.Enabled := False;
   end;
-  if FValue - FIncrement > FMinValue then
+  if not IsMinLimitReached then
     FButtonDown.Enabled := True
   else
   begin
+//    FButtonDown.Enabled := False;
     FDown := False;
     if Assigned(FTimer) then
       FTimer.Enabled := False;
@@ -636,6 +638,13 @@ begin
   begin
     Value := FValue + FIncrement;
     DoOnChange;
+    EnableButtons;
+  end
+  else if not IsMaxLimitReached then
+  begin
+    Value := FMaxValue;
+    DoOnChange;
+    EnableButtons;
   end;
 end;
 
@@ -645,6 +654,13 @@ begin
   begin
     Value := FValue - FIncrement;
     DoOnChange;
+    EnableButtons;
+  end
+  else if not IsMinLimitReached then
+  begin
+    Value := FMinValue;
+    DoOnChange;
+    EnableButtons;
   end;
 end;
 
@@ -807,29 +823,40 @@ begin
   begin
     if FValue + FTempIncrement <= FMaxValue then
     begin
-      FValue       := FValue + FTempIncrement;
+      Value       := FValue + FTempIncrement;
       FEdit.Value := FValue;
       if FSteps <= FSpeedUpSteps then
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
-      DoOnChange;
+    end
+    else if FValue < FMaxValue then
+    begin
+      Value := FMaxValue;
+      FEdit.Value := FValue;
     end;
+    DoOnChange;
+    EnableButtons;
   end
   else if FDown then
   begin
     if FValue - FTempIncrement >= FMinValue then
     begin
-      FValue      := FValue - FTempIncrement;
+      Value      := FValue - FTempIncrement;
       FEdit.Value := FValue;
       if FSteps <= FSpeedUpSteps then
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
-      DoOnChange;
+    end
+    else if FValue > FMinValue then
+    begin
+      Value := FMinValue;
+      FEdit.Value := FValue;
     end;
+    DoOnChange;
+    EnableButtons;
   end;
-  EnableButtons;
 end;
 
 constructor TfpgSpinEditFloat.Create(AOwner: TComponent);
@@ -881,7 +908,7 @@ begin
     FButtonUp.Enabled := True
   else
   begin
-    FButtonUp.Enabled := False;
+//    FButtonUp.Enabled := False;
     FUp := False;
     if Assigned(FTimer) then
       FTimer.Enabled := False;
@@ -890,7 +917,7 @@ begin
     FButtonDown.Enabled := True
   else
   begin
-    FButtonDown.Enabled := False;
+//    FButtonDown.Enabled := False;
     FDown := False;
     if Assigned(FTimer) then
       FTimer.Enabled := False;
@@ -1034,15 +1061,33 @@ end;
 procedure TfpgSpinEdit.ButtonUpClick(Sender: TObject);
 begin
   if FValue + FIncrement <= FMaxValue then
-    Value := FValue + FIncrement;
-  DoOnChange;
+  begin
+     Value := FValue + FIncrement;
+    DoOnChange;
+    EnableButtons;
+  end
+  else if not IsMaxLimitReached then
+  begin
+    Value := FMaxValue;
+    DoOnChange;
+    EnableButtons;
+  end;
 end;
 
 procedure TfpgSpinEdit.ButtonDownClick(Sender: TObject);
 begin
   if FValue - FIncrement >= FMinValue then
-    Value := FValue - FIncrement;
-  DoOnChange;
+  begin
+     Value := FValue - FIncrement;
+    DoOnChange;
+    EnableButtons;
+  end
+  else if not IsMinLimitReached then
+  begin
+    Value := FMinValue;
+    DoOnChange;
+    EnableButtons;
+  end;
 end;
 
 procedure TfpgSpinEdit.ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -1212,8 +1257,14 @@ begin
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
-      DoOnchange;
+    end
+    else if FValue < FMaxValue then
+    begin
+      Value := FMaxValue;
+      FEdit.Value := FValue;
     end;
+    DoOnChange;
+    EnableButtons;
   end
   else if FDown then
   begin
@@ -1225,10 +1276,15 @@ begin
         Inc(FSteps);
       if FSteps > FSpeedUpSteps then
         FTempIncrement := LargeIncrement;
-      DoOnChange;
+    end
+    else if FValue > FMinValue then
+    begin
+      Value := FMinValue;
+      FEdit.Value := FValue;
     end;
+    DoOnChange;
+    EnableButtons;
   end;
-  EnableButtons;
 end;
 
 constructor TfpgSpinEdit.Create(AOwner: TComponent);
