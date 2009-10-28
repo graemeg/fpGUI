@@ -654,7 +654,7 @@ begin
   ProfileEvent('TRichTextView.HandlePaint >>>');
   Canvas.ClearClipRect;
   DrawBorder;
-writeln('DEBUG:  TRichTextView.HandlePaint   1');
+ProfileEvent('DEBUG:  TRichTextView.HandlePaint   1');
   DrawRect := GetDrawRect;
   Canvas.Color := BackgroundColor;
   Canvas.FillRectangle(DrawRect);
@@ -762,7 +762,7 @@ begin
   inherited HandleLMouseDown(x, y, shiftstate);
   Position := FindPoint( X, Y, Line, Offset, Link );
   FClickedLink := Link;
-  writeln('Pos=', Ord(Position), '  link=', Link);
+//  writeln('Pos=', Ord(Position), '  link=', Link);
 end;
 
 procedure TRichTextView.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
