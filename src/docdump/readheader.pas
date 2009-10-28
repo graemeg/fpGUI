@@ -26,8 +26,6 @@ type
     b2: AnsiChar;
   end;
 
-  Unsigned_31 = 0 .. (1 shl 31) - 1;  // 31 bit type
-
   TOverlayID = packed record
     b1: Byte;
     b2: Byte;
