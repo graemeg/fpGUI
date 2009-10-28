@@ -164,7 +164,7 @@ uses
 const
   cLongName   = 'fpGUI Documentation Viewer';
   cCreatedBy  = 'Created by Graeme Geldenhuys';
-  cVersion    = 'Version 1.0';
+  cVersion    = 'Version 1.0 (alpha)';
 
 {@VFD_NEWFORM_IMPL}
 
@@ -274,7 +274,7 @@ var
   s: TfpgString;
 begin
   s :=  cLongName + LineEnding + LineEnding
-      + cCreatedBy
+      + cCreatedBy + LineEnding
       + cVersion + '  -  '+  {$I %date%} + ' ' + {$I %time%};
 
   TfpgMessageDialog.Information('Product Information', s);
@@ -477,18 +477,19 @@ begin
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
-var
-  Count: integer;
-  i: integer;
-  s: TfpgString;
-  f: THelpFile;
+//var
+//  Count: integer;
+//  i: integer;
+//  s: TfpgString;
+//  f: THelpFile;
 begin
-  f := THelpFile(Files[0]);
-  lbIndex.Items.Clear;
-  for i := 0 to f.Index.Count-1 do
-
-    lbIndex.Items.AddObject(F.Index.GetTopic(i).Title, f.Topics[i]);
-  lbIndex.Invalidate
+  DisplaySelectedIndexTopic;
+  //f := THelpFile(Files[0]);
+  //lbIndex.Items.Clear;
+  //for i := 0 to f.Index.Count-1 do
+  //
+  //  lbIndex.Items.AddObject(F.Index.GetTopic(i).Title, f.Topics[i]);
+  //lbIndex.Invalidate
 end;
 
 procedure TMainForm.btnGoClicked(Sender: TObject);
@@ -708,8 +709,8 @@ begin
   lbSearchResults.FocusItem := -1;
   lbSearchResults.Items.EndUpdate;
 
-  Query.Destroy;
-  SearchResults.Destroy;
+  Query.Free;
+  SearchResults.Free;
 
   if lbSearchResults.Items.Count > 0 then
   begin
