@@ -20,6 +20,9 @@ type
   pUInt16 = ^uint16;
   pUInt32 = ^uint32;
   pUInt8  = ^uint8;
+  Unsigned_31 = 0 .. (1 shl 31) - 1;  // 31-bit type
+  Unsigned_4  = 0 .. (1 shl 4) - 1;   // 4-bit type
+
 
   PCharArray  = packed array[ 0..0 ] of PCHar;
   UInt32Array = packed array[ 0..0 ] of UInt32;

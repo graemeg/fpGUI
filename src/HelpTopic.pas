@@ -397,7 +397,7 @@ begin
   else
     Title := DefaultTitle;
 
-  _ContentsLevel := ( Flags and $f );
+  _ContentsLevel := ( Flags and TOCEntryLevelMask );
   _ShowInContents := Flags and TOCEntryHidden = 0;
   if _ContentsLevel = 0 then
     _ShowInContents := false; // hmmm....

@@ -55,8 +55,7 @@ constructor TSearchTable.Create( Data: pointer;
                                  TopicCount: longint );
 begin
   _Data := Data;
-  _RecordLengthIs16Bit :=
-    RecordLengthIs16Bit;
+  _RecordLengthIs16Bit := RecordLengthIs16Bit;
   _Entries := TList.Create;
   _DictionaryCount := DictionaryCount;
   _TopicCount := TopicCount;
