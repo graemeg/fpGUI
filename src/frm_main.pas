@@ -1370,6 +1370,8 @@ var
   Link: THelpLink;
   HelpFile: THelpFile;
   Topic: TTopic;
+  HighlightWordSequences: TList;
+  FileIndex: integer;
 Begin
   ProfileEvent('DisplayTopic >>>>');
   if ATopic = nil then
@@ -1425,12 +1427,22 @@ Begin
 
   if HelpFile.HighlightWords <> nil then
     ProfileEvent('highlightwords is ok');
+
+  if (AllFilesWordSequences.Count > 0) // ie we have done a search...
+     {and ViewHighlightSearchWordsMI.Checked} then
+  begin
+    FileIndex := CurrentOpenFiles.IndexOf( HelpFile );
+    HighlightWordSequences := TList(AllFilesWordSequences[ FileIndex ]);
+  end
+  else
+    HighlightWordSequences :=  nil;
+
   lText := '';
   ProfileEvent('Debug show hex values = ' + BoolToStr(Debug));
   if ImageIndices <> nil then
     ProfileEvent('ImageIndices initialized');
 
-  CurrentTopic.GetText( nil {HighlightWordSequences},
+  CurrentTopic.GetText( HighlightWordSequences,
                   Debug {ShowCodes},
                   False {ShowWordIndices},
                   lText {TopicText},
