@@ -79,6 +79,7 @@ type
     DisplayedIndex: TStringList; // duplicate of index listbox, for fast case insensitive searching
     CurrentTopic: TTopic; // so we can get easy access to current topic viewed
 
+    procedure   RichViewClickLink(Sender: TRichTextView; Link: string);
     procedure   MainFormShow(Sender: TObject);
     procedure   MainFormDestroy(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
@@ -131,6 +132,10 @@ type
     procedure   DisplaySelectedIndexTopic;
     procedure   ProcessCommandLineParams;
     procedure   ShowParamHelp;
+    function    FindTopicForLink( Link: THelpLink ): TTopic;
+    function    FindTopicByResourceID( ID: word ): TTopic;
+
+
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -167,6 +172,55 @@ const
 procedure TMainForm.MainFormException(Sender: TObject; E: Exception);
 begin
   TfpgMessageDialog.Critical('An unexpected error occurred.', E.Message);
+end;
+
+procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
+var
+  LinkIndex: integer;
+  lLink: THelpLink;
+  lHelp: THelpFile;
+  i: integer;
+  lTopic: TTopic;
+  lFound: Boolean;
+begin
+  // TODO: process other types of links (external, application etc...) too!
+
+    LinkIndex := StrToInt( Link );
+    lLink := THelpLink(CurrentTopic.Links[LinkIndex]);
+    lTopic := FindTopicForLink(lLink);
+    if lTopic <> nil then
+      DisplayTopic(lTopic);
+    exit;
+
+    lHelp := THelpFile(lLink.HelpFile);
+    lTopic := nil;
+    lFound := False;
+    for i := 0 to CurrentOpenFiles.Count-1 do
+    begin
+      lHelp := THelpFile(CurrentOpenFiles[i]);
+      lTopic := lHelp.Topics[LinkIndex];
+      if lTopic <> nil then
+      begin
+        lFound := True;
+        writeln('Found Topic! ', lTopic.Title);
+        break;
+
+      end;
+      if lFound then
+        break;
+    end;
+    if lTopic <> nil then
+    begin
+      writeln('Displaying topic <', lTopic.Title, '>');
+      DisplayTopic(lTopic);
+    end;
+    //lLink := SourceWindow.Topic.Links[ LinkIndex ];
+    //
+    //PostMsg( Self.Handle,
+    //         WM_FOLLOWLINK,
+    //         longint( Link ),
+    //         longint( SourceWindow ) );
+
 end;
 
 procedure TMainForm.MainFormShow(Sender: TObject);
@@ -1371,6 +1425,7 @@ Begin
   RichView.AddText(PChar(lText));
 
   tvContents.Selection := tvContents.RootNode.FindSubNode(CurrentTopic, True);
+  tvContents.Invalidate;
 end;
 
 procedure TMainForm.ResetProgress;
@@ -1534,6 +1589,7 @@ begin
     SetPosition(368, 192, 244, 92);
     TabOrder := 2;
     Align := alClient;
+    OnClickLink:=@RichViewClickLink;
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
@@ -1954,6 +2010,8 @@ begin
       ShowParamHelp;
       Exit;
     end
+    else if gCommandLineParams.IsParam('debuglog') then
+      // do nothing
     else
     begin
       showtopic := not gCommandLineParams.IsParam('s');
@@ -1984,9 +2042,50 @@ begin
        + '  -h           Show this help' + le
        + '  -s<<text>     Search for <<text> in open help files' + le
        + '  -t<<id>       Open Topic with ID equal to <<id>' + le
+       + '  -debuglog <<filename> Log information to a file' + le
        + '</tt>'
        ;
   RichView.AddText(PChar(s));
+end;
+
+// Find the target topic for the given link
+function TMainForm.FindTopicForLink(Link: THelpLink): TTopic;
+var
+  HelpFile: THelpFile;
+begin
+  HelpFile := Link.HelpFile as THelpFile;
+  if Link is TFootnoteHelpLink then
+  begin
+    Result := HelpFile.Topics[ TFootnoteHelpLink( Link ).TopicIndex ];
+  end
+  else if Link is TInternalHelpLink then
+  begin
+    Result := HelpFile.Topics[ TInternalHelpLink( Link ).TopicIndex ];
+  end
+  else if Link is THelpLinkByResourceID then
+  begin
+    Result := FindTopicByResourceID( THelpLinkByResourceID( Link ).ResourceID );
+  end
+end;
+
+// Find topic specified by numeric resource ID, in all open files
+function TMainForm.FindTopicByResourceID(ID: word): TTopic;
+var
+  FileIndex: longint;
+  HelpFile: THelpFile;
+begin
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
+  begin
+    HelpFile := THelpFile(CurrentOpenFiles[ id ]);
+
+    Result := HelpFile.FindTopicByResourceID( ID );
+    if Result <> nil then
+      // found
+      exit;
+  end;
+
+  // not found.
+  Result := nil;
 end;
 
 

@@ -46,6 +46,9 @@ Type
 
   TRichTextView = class;
 
+  // reimplement class
+  TLinkEvent = procedure( Sender: TRichTextView; Link: string ) of object;
+
 
   TRichTextView = Class( TfpgWidget )
   private
@@ -133,6 +136,8 @@ Type
     procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
+    procedure HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
 
     //procedure ScanEvent( Var KeyCode: TKeyCode;
     //                     RepeatCount: Byte ); override;
@@ -746,6 +751,29 @@ begin
     SetVerticalPosition(FVScrollbar.Position + FVScrollbar.ScrollStep);
 end;
 
+procedure TRichTextView.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
+var
+  Line: longint;
+  Offset: longint;
+  Link: string;
+  Position: TTextPosition;
+  Shift: boolean;
+begin
+  inherited HandleLMouseDown(x, y, shiftstate);
+  Position := FindPoint( X, Y, Line, Offset, Link );
+  FClickedLink := Link;
+  writeln('Pos=', Ord(Position), '  link=', Link);
+end;
+
+procedure TRichTextView.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleLMouseUp(x, y, shiftstate);
+  if FClickedLink <> '' then
+    if Assigned( FOnClickLink ) then
+      FOnClickLink( Self, FClickedLink );
+  FClickedLink := ''; // reset link
+end;
+
 Destructor TRichTextView.Destroy;
 Begin
   FDefaultMenu.Free;
@@ -1026,7 +1054,7 @@ begin
 
   TextHeight := GetTextAreaHeight;
 
-  YToFind := Height - YToFind;
+//  YToFind := Height - YToFind;
 
   //if FBorderStyle = bsSingle then
   //begin
@@ -1034,7 +1062,7 @@ begin
   //  dec( XToFind, 2 );
   //end;
 
-  if YToFind < 0 then
+  if YToFind < 3 then
   begin
     // above the top
     Result := tpAboveTextArea;

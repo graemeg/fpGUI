@@ -44,7 +44,7 @@ Type
   TRichTextLayout = class;
 
 
-  TLinkEvent = procedure( Sender: TRichTextLayout; Link: string ) of object;
+//  TLinkEvent = procedure( Sender: TRichTextLayout; Link: string ) of object;
 
 
   TRichTextLayout = class(TObject)
