@@ -1435,13 +1435,21 @@ begin
   end;
 end;
 
-Procedure AddAndResize( Var Text: PChar;
-                        const AddText: PChar );
+Procedure AddAndResize( Var Text: PChar; const AddText: PChar );
+var
+ s: string;
+ s1, s2: string;
 begin
-  CheckPCharSize( Text,
-                  strlen( Text )
-                  + strlen( AddText ) );
-  StrCat( Text, AddText );
+  //CheckPCharSize( Text,
+  //                strlen( Text )
+  //                + strlen( AddText ) );
+  //StrCat( Text, AddText );
+  s1 := Text;
+  s2 := AddText;
+  s := s1 + s2;
+  StrDispose(Text);
+  Text := StrAlloc(length(s) + 1);
+  StrPCopy(Text, s);
 end;
 
 Procedure StrCopyAndResize( Var Dest: PChar;
