@@ -49,7 +49,7 @@ Type
   TPCharWidthArray = ^TCharWidthArray;
 
   // Used internally for storing full info on font
-  TLogicalFont = class(TComponent)
+  TLogicalFont = class(TObject)
   public
     FaceName: string; // user-selected name
     UseFaceName: string; // after substitutions.
@@ -70,7 +70,7 @@ Type
     lMaxCharInc: longint; //LONG;
     lMaxDescender: longint; //LONG;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create;
     destructor Destroy; override;
   end;
 
@@ -171,9 +171,8 @@ end;
 // TLogicalFont
 //------------------------------------------------------------------------
 
-constructor TLogicalFont.Create(AOwner: TComponent);
+constructor TLogicalFont.Create;
 begin
-  inherited Create(AOwner);
   FontType := ftOutline;
   PointSize := 10;
   Attributes := [];
@@ -379,7 +378,7 @@ begin
   Begin
     For T := 0 To Count - 1 Do
     Begin
-      Font := TLogicalFont.Create( nil );
+      Font := TLogicalFont.Create;
       Font.FaceName := fl[T];
       f := fpgGetFont(Font.FaceName + '-10');
       if (pos('COURIER', UpperCase(Font.FaceName)) > 0) or (pos('MONO', UpperCase(Font.FaceName)) > 0) then
@@ -435,7 +434,7 @@ function CreateFontBasic( const FaceName: string; const PointSize: integer ): TL
 var
   PPString: string;
 begin
-  Result := TLogicalFont.Create( nil );
+  Result := TLogicalFont.Create;
   if FindFaceName( FaceName ) = nil then
     Exit;  //==>
   Result.PointSize := PointSize; // will use later if the result was an outline font...
@@ -547,6 +546,8 @@ begin
   // get system default font spec
   // as default default ;)
   FPGuiFontToFontSpec( fpgApplication.DefaultFont, FDefaultFontSpec );
+  if FDefaultFontSpec.FaceName = '' then
+    raise Exception.Create('For some reason we could not create a FDefaultFontSpec instance');
 end;
 
 // Destructor
@@ -595,6 +596,7 @@ var
   FontInfo: string;
   FixedWidth: boolean;
 begin
+ProfileEvent('>>>>  TCanvasFontManager.CreateFont >>>>');
   Face := nil;
   RemoveBoldFromSelection := false;
   RemoveItalicFromSelection := false;
@@ -613,9 +615,11 @@ begin
     UseFaceName := SubstituteBitmapFontToOutline( FontSpec.FaceName )
   else
     UseFaceName := FontSpec.FaceName;
+ProfileEvent('UseFaceName=' + UseFaceName);
 
   if FontSpec.Attributes <> [] then
   begin
+profileevent('FontSpec.Attributes are not blank');
     BaseFontIsBitmapFont := false;
     if FAllowBitmapFonts then
     begin
@@ -631,6 +635,7 @@ begin
 
     If not BaseFontIsBitmapFont Then
     begin
+profileevent('we seem to be looking for a outline font');
       // Result is an outline font so look for specific bold/italic fonts
       if     ( faBold in FontSpec.Attributes )
          and ( faItalic in FontSpec.Attributes ) then
@@ -680,6 +685,12 @@ begin
     // so find unmodified, we will use simulation bits
     Face := FindFaceName( UseFaceName );
 
+  // Oh shit!
+  if Face = nil then
+    // didn't find a styled face (or no styles set)
+    // so find unmodified, we will use simulation bits
+    Face := FindFaceName( 'Sans' );   // something very generic
+
   if not FAllowBitmapFonts then
     if Assigned(Face) and (Face.FontType = ftBitmap) then
       // we aren't allowed bitmaps, but that's what this
@@ -692,13 +703,15 @@ begin
 
   if Face = nil then
   begin
+profileevent('Could not find the specified font name. Bummer! + early exit');
     // Could not find the specified font name. Bummer.
     Result := nil;
     exit;
   end;
 
+profileevent('******* Now create the TLogicalFont instance');
   // OK now we have found the font face...
-  Result := TLogicalFont.Create( nil );
+  Result := TLogicalFont.Create;
   Result.PointSize    := FontSpec.PointSize; // will use later if the result was an outline font...
   Result.FaceName     := FontSpec.FaceName;
   Result.UseFaceName  := Face.Name;
@@ -751,7 +764,12 @@ begin
     //  fsSelection := fsSelection or FM_SEl_OUTlINE;
   end;
 
+profileevent('  Result.FaceName=' + Result.FaceName);
+profileevent('  Result.PointSize=' + IntToStr(Result.PointSize));
+profileevent('  Result.UseFaceName=' + Result.UseFaceName);
+
   Result.pCharWidthArray := Nil;
+  ProfileEvent('<<<<  TCanvasFontManager.CreateFont');
 end;
 
 // Register the given logical font with GPI and store for later use
@@ -833,9 +851,12 @@ function TCanvasFontManager.GetFont( const FontSpec: TFontSpec ): TLogicalFont;
 var
   AFont: TLogicalFont;
   FontIndex: integer;
+  sub: string;
 begin
 ProfileEvent('DEBUG:  TCanvasFontManager.GetFont >>>');
-ProfileEvent('               FLogicalFonts.Count=' + intToStr(FLogicalFonts.Count));
+ProfileEvent('Received FontSpec: Facename=' + FontSpec.FaceName);
+ProfileEvent('                   PointSize=' + IntToStr(FontSpec.PointSize));
+ProfileEvent('FLogicalFonts.Count=' + intToStr(FLogicalFonts.Count));
 try
   for FontIndex := 0 to FLogicalFonts.Count - 1 do
   begin
@@ -849,7 +870,7 @@ try
         if AFont.Attributes = FontSpec.Attributes then
         begin
           // search name last since it's the slowest thing
-ProfileEvent('            AFont.FaceName=' + AFont.FaceName);
+ProfileEvent('            AFont.UseFaceName=' + AFont.UseFaceName);
 ProfileEvent('         FontSpec.FaceName=' + FontSpec.FaceName);
           if AFont.FaceName = FontSpec.FaceName then
           begin
@@ -857,19 +878,32 @@ ProfileEvent('         FontSpec.FaceName=' + FontSpec.FaceName);
             Result := AFont;
             // done
             exit;
+          end
+          else
+          begin
+            // Still nothing! Lets try known substitute font names
+            sub := SubstituteBitmapFontToOutline(FontSpec.FaceName);
+ProfileEvent('           substitute font=' + sub);
+            if AFont.FaceName = sub then
+            begin
+              // Found a logical font already created
+              Result := AFont;
+              // done
+              profileevent('TCanvasFontManager.GetFont <<<<<  exit early we found a font');
+              exit;
+            end;
           end;
         end;
       end;
     end;
   end;
-
-
 except
   { TODO -oGraeme -cknow bug : An Access Violation error occurs often here! No idea why? }
   on E: Exception do
     ProfileEvent('Unexpected error occured. Error: ' + E.Message);
 end;
 
+  ProfileEvent('Now we need to create a new logical font');
   // Need to create new logical font
   Result := CreateFont( FontSpec );
   if Result <> nil then
@@ -901,9 +935,14 @@ ProfileEvent('DEBUG:  TCanvasFontManager.SetFont >>>>');
     // ack! Pfffbt! Couldn't find the font.
 
     // Try to get the default font
+    writeln('---------- here goes nothing -------------');
     Font := GetFont( FDefaultFontSpec );
     if Font = nil then
     begin
+      writeln('******* We should never get here!!!! Defaut font should always exist.');
+      writeln('FDefaultFontSpec:');
+      writeln('  FaceName=', FDefaultFontSpec.FaceName);
+      writeln('  Size=', FDefaultFontSpec.PointSize);
       FPGuiFontToFontSpec( fpgApplication.DefaultFont, lDefaultFontSpec );
       Font := GetFont( lDefaultFontSpec );
       if Font = nil then
