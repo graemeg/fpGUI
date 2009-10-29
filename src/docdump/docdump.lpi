@@ -100,7 +100,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
       <OtherUnitFiles Value="../"/>
-      <UnitOutputDirectory Value="units"/>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)/"/>
     </SearchPaths>
     <Other>
       <CompilerPath Value="$(CompPath)"/>

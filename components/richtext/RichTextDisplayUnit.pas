@@ -178,7 +178,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
 
   TextBlockStart := P;
 
-  Y := Start.Y + Line.MaxDescender;
+  Y := Start.Y + Line.MaxDescender; // co-ordinates are from top/left, so do we need descender? [Graeme]
 
   while P < EndP do
   begin
@@ -203,7 +203,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
         begin
           // we haven't yet started drawing:
           // so work out alignment
-          X := Start.X * FontWidthPrecisionFactor
+          X := Start.X{ * FontWidthPrecisionFactor}
                + Layout.GetStartX( Style, Line );
           StartedDrawing := true;
         end;
@@ -306,7 +306,7 @@ ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
 
   repeat
     Line := Layout.FLines^[ LineIndex ];
-    BottomOfLine := Y + Line.Height + 1; // bottom pixel row is top + height + 1
+    BottomOfLine := Y {+ Line.Height} + 1; // bottom pixel row is top + height + 1
 
     if // the line is in the range to be drawn
            ( LineIndex >= StartLine )
