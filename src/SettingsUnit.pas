@@ -15,6 +15,7 @@ Uses
   Classes
   ,fpg_base
   ,fpg_main
+  ,CanvasFontManager
   ;
 
 Const
@@ -69,8 +70,8 @@ Const
   ApplicationFontIndex = 0;
   NumFontSettings = 1;
 
-  DefaultTopicFont = 'Arial-10';
-  DefaultTopicFixedFont = 'Courier New-10';
+  DefaultTopicFont = DefaultTopicFont + '-' + DefaultTopicFontSize;
+  DefaultTopicFixedFont = DefaultTopicFixedFont + '-10' + DefaultTopicFixedFontSize;
 
 
 Type

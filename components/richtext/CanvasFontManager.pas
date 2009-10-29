@@ -15,6 +15,11 @@ Const
   // This defines the fraction of a pixel that
   // font character widths will be given in
   FontWidthPrecisionFactor = 1; // 256 seems to be specific to OS/2 API
+  DefaultTopicFont = 'Sans';
+  DefaultTopicFontSize = '10';
+  DefaultTopicFixedFont = 'Courier New';
+  DefaultTopicFixedFontSize = '10';
+
 
 Type
   {Standard Font types}
@@ -345,7 +350,7 @@ begin
     DefaultOutlineFixedFace := GetFirstOutlineFace( true ); // first fixed outline face
   end;
 
-  DefaultOutlineProportionalFace := FindFaceName( 'Arial' );
+  DefaultOutlineProportionalFace := FindFaceName( DefaultTopicFont );
   if DefaultOutlineProportionalFace = nil then
   begin
     DefaultOutlineProportionalFace := GetFirstOutlineFace( false ); // first prop outline face
@@ -448,17 +453,17 @@ end;
 function SubstituteBitmapFontToOutline( const FaceName: string ): string;
 begin
   if StringsSame( FaceName, 'Helv' ) then
-    result := 'Arial'
+    result := DefaultTopicFont
   else if StringsSame( FaceName, 'Helvetica' ) then
-    result := 'Arial'
+    result := DefaultTopicFont
   else if StringsSame( FaceName, 'Tms Rmn' ) then
     result := 'Times New Roman'
   else if StringsSame( FaceName, 'System Proportional' ) then
-    result := 'Arial'
+    result := DefaultTopicFont
   else if StringsSame( FaceName, 'System Monospaced' ) then
-    result := 'Courier New'
+    result := DefaultTopicFixedFont
   else if StringsSame( FaceName, 'System VIO' ) then
-    result := 'Courier New'
+    result := DefaultTopicFixedFont
   else
     result := FaceName; // no substitution
 end;
@@ -676,7 +681,7 @@ begin
     Face := FindFaceName( UseFaceName );
 
   if not FAllowBitmapFonts then
-    if Face.FontType = ftBitmap then
+    if Assigned(Face) and (Face.FontType = ftBitmap) then
       // we aren't allowed bitmaps, but that's what this
       // face is. So use the default outline face of the
       // appropriate width type
