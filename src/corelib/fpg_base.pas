@@ -227,6 +227,7 @@ type
   protected
     FFontDesc: string;
     FFontRes: TfpgFontResourceBase;
+    function    GetIsFixedWidth: boolean; virtual;
   public
     function    TextWidth(const txt: string): integer;
     function    Ascent: integer;
@@ -235,6 +236,7 @@ type
     property    FontDesc: string read FFontDesc;
     property    FontRes: TfpgFontResourceBase read FFontRes;
     property    Handle: TfpgFontResourceBase read FFontRes;
+    property    IsFixedWidth: boolean read GetIsFixedWidth;
   end;
 
 
@@ -1615,6 +1617,17 @@ begin
 end;
 
 { TfpgFontBase }
+
+function TfpgFontBase.GetIsFixedWidth: boolean;
+begin
+  // very crude but handy as a fallback option
+  if (Pos('mono', Lowercase(FFontDesc)) > 0) or
+     (Pos('courier', Lowercase(FFontDesc)) > 0) or
+     (Pos('fixed', Lowercase(FFontDesc)) > 0) then
+    Result := True
+  else
+    Result := False;
+end;
 
 function TfpgFontBase.TextWidth(const txt: string): integer;
 begin
