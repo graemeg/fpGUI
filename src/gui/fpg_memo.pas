@@ -864,6 +864,10 @@ begin
       Break;
   end;  { for }
 
+  // Special case because it never entered the for loop above
+  if (LineCount = 0) and Focused then
+    fpgCaret.SetCaret(Canvas, FSideMargin, 3, fpgCaret.Width, FFont.Height);
+
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);
     
