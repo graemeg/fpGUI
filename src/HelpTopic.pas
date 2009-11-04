@@ -1728,7 +1728,8 @@ begin
 
           IPF_INVERT_SPACING:
           begin
-            State.Spacing := not State.Spacing;
+            if not State.InCharGraphics then
+              State.Spacing := not State.Spacing;
           end;
 
           IPF_LINEBREAK:
