@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -853,14 +853,14 @@ end;
 
 function TfpgTreeview.VisibleWidth: integer;
 begin
-  Result := Width - 2;
+  Result := Width - 2; // border width = 2 pixels
   if FVScrollbar.Visible then
      dec(Result, FVScrollbar.Width);
 end;
 
 function TfpgTreeview.VisibleHeight: integer;
 begin
-  Result := Height - 2;
+  Result := Height - 2; // border width = 2 pixels
   if FShowColumns then
     dec(Result, FColumnHeight);
   if FHScrollbar.Visible then
@@ -1086,9 +1086,9 @@ begin
   {$IFDEF DEBUG}
   writeln(Classname, '.UpdateScrollbars');
   {$ENDIF}
-  FVScrollbar.Visible := VisibleHeight < GetNodeHeightSum * GetNodeHeight;
+  FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
   FVScrollbar.Min := 0;
-  FVScrollbar.Max := (GetNodeHeightSum - 1) * GetNodeHeight;
+  FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
   FHScrollbar.Min := 0;
   FHScrollbar.Max := MaxNodeWidth - VisibleWidth + FVScrollbar.Width;
   FHScrollbar.Visible := MaxNodeWidth > Width - 2;
@@ -1097,13 +1097,18 @@ begin
     FVScrollbar.Position := 0;
     FVScrollBar.RepaintSlider;
     FYOffset := 0;
-  end;
+  end
+  else
+    FVScrollBar.RepaintSlider;
+
   if not FHScrollbar.Visible then
   begin
     FHScrollbar.Position := 0;
     FHScrollBar.RepaintSlider;
     FXOffset := 0;
-  end;
+  end
+  else
+    FHScrollBar.RepaintSlider;
 end;
 
 procedure TfpgTreeview.ResetScrollbar;
@@ -1655,21 +1660,25 @@ end;
 
 procedure TfpgTreeview.HandleMouseScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
+var
+  i: integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
   if delta > 0 then
   begin
     inc(FYOffset, FScrollWheelDelta);
-    if FYOffset > VisibleHeight then
-      FYOffset := VisibleHeight;
+    i := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
+    if FYOffset > i then
+      FYOffset := i;
+    inc(FVScrollbar.Position, FScrollWheelDelta);
   end
   else
   begin
     dec(FYOffset, FScrollWheelDelta);
     if FYOffset < 0 then
       FYOffset := 0;
+    dec(FVScrollbar.Position, FScrollWheelDelta);
   end;
-    
   UpdateScrollbars;
   RePaint;
 end;
@@ -1805,7 +1814,7 @@ begin
   FHScrollbar.OnScroll    := @HScrollbarScroll;
   FHScrollbar.Visible     := False;
   FHScrollbar.Position    := 0;
-  FHScrollbar.SliderSize  := 0.2;
+  FHScrollbar.SliderSize  := 0.5;
   
   FVScrollbar := TfpgScrollbar.Create(self);
   FVScrollbar.Orientation := orVertical;
