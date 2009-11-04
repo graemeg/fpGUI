@@ -1633,7 +1633,8 @@ var
 begin
   s := Text;
   // Warning: Hack Alert! replace some strange Bell character found in some INF files
-  s := SubstituteChar(s, Chr($07), Chr($20) );
+//  s := SubstituteChar(s, Chr($07), Chr($20) );
+  s := StringReplace(s, Chr($07), '•', [rfReplaceAll, rfIgnoreCase]);
 
 //// Hack Alert #2: replace strange table chars with something we can actually see
 //  s := SubstituteChar(s, Chr(218), Char('+') );   // top-left corner
