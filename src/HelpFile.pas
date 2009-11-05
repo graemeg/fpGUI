@@ -51,6 +51,9 @@ type
 
 
   THelpFile = class(TObject)
+  private
+    function GetStringResourceIDCount: integer;
+    function GetNumericResourceIDCount: integer;
   protected
     _Filename : string;
     _FileSize : longint;
@@ -130,6 +133,8 @@ type
     property Topics[ Index: longint ]: TTopic read GetTopic;
     property TopicList: TList read _Topics;
     property TopicCount: longint read GetTopicCount;
+    property StringResourceIDCount: integer read GetStringResourceIDCount;
+    property NumericResourceIDCount: integer read GetNumericResourceIDCount;
     property Index: TIndex read GetIndex;
     property Filename: string read _FileName;
 
@@ -342,6 +347,16 @@ const
 Function TopicFile( Topic: TTopic ): THelpFile;
 Begin
   Result := Topic.HelpFile as THelpFile;
+end;
+
+function THelpFile.GetStringResourceIDCount: integer;
+begin
+  Result := _pHeader^.nname;
+end;
+
+function THelpFile.GetNumericResourceIDCount: integer;
+begin
+  Result := _pHeader^.nres;
 end;
 
 procedure THelpFile.InitMembers;
@@ -743,9 +758,11 @@ begin
     exit;
 
   if _pResourceData = nil then
+  begin
     ReadFileBlock( _pResourceData,
                    _pHeader^.resstart,
-                   _pHeader^.nres * sizeof( uint16 ) * 2 ); // list of IDs, list of topics
+                   (_pHeader^.nres * sizeof( uint16 )) * 2 ); // list of IDs, list of topics
+  end;
 
   pResourceIDs := _pResourceData;
   pTopicIndices := _pResourceData
