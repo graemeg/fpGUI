@@ -2224,11 +2224,16 @@ function TfpgApplicationBase.ContextHelp(const AHelpContext: THelpContext): Bool
 var
   p: TProcess;
 begin
-  { TODO -oGraeme -cHelp System : Support AHelpContext in docview }
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
-      p.CommandLine := GetHelpViewer + ' ' + HelpFile
+    begin
+      if AHelpContext = 0 then
+        p.CommandLine := GetHelpViewer + ' ' + HelpFile
+      else
+        p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -n ' + IntToStr(AHelpContext);
+//writeln('DEBUG:  TfpgApplicationBase.ContextHelp > ', p.CommandLine);
+    end
     else
       p.CommandLine := GetHelpViewer;
     p.Execute;
@@ -2241,11 +2246,13 @@ function TfpgApplicationBase.KeywordHelp(const AHelpKeyword: string): Boolean;
 var
   p: TProcess;
 begin
-  { TODO -oGraeme -cHelp System : Support AHelpKeyword in docview }
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
-      p.CommandLine := GetHelpViewer + ' ' + HelpFile
+    begin
+      p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -s ' + AHelpKeyword;
+//writeln('DEBUG:  TfpgApplicationBase.ContextHelp > ', p.CommandLine);
+    end
     else
       p.CommandLine := GetHelpViewer;
     p.Execute;
