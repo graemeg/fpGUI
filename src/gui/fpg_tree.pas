@@ -1670,14 +1670,16 @@ begin
     i := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
     if FYOffset > i then
       FYOffset := i;
-    inc(FVScrollbar.Position, FScrollWheelDelta);
+    i := FVScrollbar.Position + FScrollWheelDelta;
+    FVScrollbar.Position := i;
   end
   else
   begin
     dec(FYOffset, FScrollWheelDelta);
     if FYOffset < 0 then
       FYOffset := 0;
-    dec(FVScrollbar.Position, FScrollWheelDelta);
+    i := FVScrollbar.Position - FScrollWheelDelta;
+    FVScrollbar.Position := i;
   end;
   UpdateScrollbars;
   RePaint;
