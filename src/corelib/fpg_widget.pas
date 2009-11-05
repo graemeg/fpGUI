@@ -135,6 +135,7 @@ type
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
     function    InDesigner: boolean;
+    procedure   InvokeHelp; virtual;
     procedure   Realign;
     procedure   SetFocus;
     procedure   KillFocus;
@@ -335,6 +336,28 @@ end;
 function TfpgWidget.InDesigner: boolean;
 begin
   Result := (FFormDesigner <> nil)
+end;
+
+procedure TfpgWidget.InvokeHelp;
+begin
+  case HelpType of
+    htKeyword:
+      if HelpKeyword <> '' then
+      begin
+        fpgApplication.KeywordHelp(HelpKeyword);
+        Exit; //==>
+      end;
+    htContext:
+      if HelpContext <> 0 then
+      begin
+        fpgApplication.ContextHelp(HelpContext);
+        Exit; //==>
+      end;
+  end;
+  if Parent <> nil then
+    Parent.InvokeHelp
+  else
+    fpgApplication.InvokeHelp;
 end;
 
 procedure TfpgWidget.Realign;

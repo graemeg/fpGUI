@@ -372,8 +372,19 @@ type
   TfpgComponent = class(TComponent)
   private
     FTagPointer: Pointer;
+    FHelpContext: THelpContext;
+    FHelpKeyword: TfpgString;
+    FHelpType: THelpType;
+  protected
+    procedure   SetHelpContext(const AValue: THelpContext); virtual;
+    procedure   SetHelpKeyword(const AValue: TfpgString); virtual;
   public
+    constructor Create(AOwner: TComponent); override;
     property    TagPointer: Pointer read FTagPointer write FTagPointer;
+  published
+    property    HelpContext: THelpContext read FHelpContext write SetHelpContext default 0;
+    property    HelpKeyword: TfpgString read FHelpKeyword write SetHelpKeyword;
+    property    HelpType: THelpType read FHelpType write FHelpType default htKeyword;
   end;
 
 
@@ -460,16 +471,11 @@ type
   end;
 
 
-  { TfpgApplicationBase }
-
-  TfpgApplicationBase = class(TComponent)
+  TfpgApplicationBase = class(TfpgComponent)
   private
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
     FCritSect: TCriticalSection;
-    FHelpType: THelpType;
-    FHelpContext: THelpContext;
-    FHelpWord: TfpgString;
     FHelpKey: word;
     FHelpFile: TfpgString;
     function    GetForm(Index: Integer): TfpgWindowBase;
@@ -500,15 +506,13 @@ type
     procedure   Lock;
     procedure   Unlock;
     procedure   InvokeHelp;
-    function    ContextHelp(const HelpContext: THelpContext): Boolean;
-    function    KeywordHelp(const HelpKeyword: string): Boolean;
+    function    ContextHelp(const AHelpContext: THelpContext): Boolean;
+    function    KeywordHelp(const AHelpKeyword: string): Boolean;
     property    FormCount: integer read GetFormCount;
     property    Forms[Index: Integer]: TfpgWindowBase read GetForm;
-    property    HelpContext: THelpContext read FHelpContext write FHelpContext;
+    property    HelpContext: THelpContext read FHelpContext write SetHelpContext;
     property    HelpFile: TfpgString read GetHelpFile write FHelpFile;
     property    HelpKey: word read FHelpKey write FHelpKey default keyF1;
-    property    HelpType: THelpType read FHelpType write FHelpType default htContext;
-    property    HelpWord: TfpgString read FHelpWord write FHelpWord;
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
@@ -2209,17 +2213,18 @@ end;
 
 procedure TfpgApplicationBase.InvokeHelp;
 begin
+  { TODO -oGraeme -cHelp System : We should probably try ActiveForm and ActiveWidget help first. }
   if HelpType = htKeyword then
-    KeywordHelp(HelpWord)
+    KeywordHelp(HelpKeyword)
   else
     ContextHelp(HelpContext);
 end;
 
-function TfpgApplicationBase.ContextHelp(const HelpContext: THelpContext): Boolean;
+function TfpgApplicationBase.ContextHelp(const AHelpContext: THelpContext): Boolean;
 var
   p: TProcess;
 begin
-  { TODO -oGraeme : Support HelpContext in docview }
+  { TODO -oGraeme -cHelp System : Support AHelpContext in docview }
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
@@ -2232,11 +2237,11 @@ begin
   end;
 end;
 
-function TfpgApplicationBase.KeywordHelp(const HelpKeyword: string): Boolean;
+function TfpgApplicationBase.KeywordHelp(const AHelpKeyword: string): Boolean;
 var
   p: TProcess;
 begin
-  { TODO -oGraeme : Support HelpKeyword in docview }
+  { TODO -oGraeme -cHelp System : Support AHelpKeyword in docview }
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
@@ -2557,6 +2562,33 @@ begin
   end;
   FEntries.Free;
   FEntries := newl;
+end;
+
+{ TfpgComponent }
+
+procedure TfpgComponent.SetHelpContext(const AValue: THelpContext);
+begin
+  if not (csLoading in ComponentState) then
+    FHelpType := htContext;
+  if FHelpContext = AValue then
+    Exit; //==>
+  FHelpContext := AValue;
+end;
+
+procedure TfpgComponent.SetHelpKeyword(const AValue: TfpgString);
+begin
+  if not (csLoading in ComponentState) then
+    FHelpType := htKeyword;
+  if FHelpKeyword = AValue then
+    Exit; //==>
+  FHelpKeyword := AValue;
+end;
+
+constructor TfpgComponent.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FHelpType     := htKeyword;
+  FHelpContext  := 0;
 end;
 
 end.

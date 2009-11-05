@@ -34,6 +34,9 @@ type
   
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
   TFormCloseQueryEvent = procedure(Sender: TObject; var CanClose: boolean) of object;
+  TfpgHelpEvent = function(AHelpType: THelpType; AHelpContext: THelpContext;
+       const AHelpKeyword: String; const AHelpFile: String;
+       var AHandled: Boolean): Boolean of object;
 
 
   TfpgBaseForm = class(TfpgWidget)
@@ -47,6 +50,7 @@ type
     FOnDestroy: TNotifyEvent;
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
+    FOnHelp: TfpgHelpEvent;
   protected
     FModalResult: TfpgModalResult;
     FParentForm: TfpgBaseForm;
@@ -67,6 +71,7 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
+    function    DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext; const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean; virtual;
     // properties
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
@@ -80,6 +85,7 @@ type
     property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
     property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
+    property    OnHelp: TfpgHelpEvent read FOnHelp write FOnHelp;
     property    OnHide: TNotifyEvent read FOnHide write FOnHide;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   public
@@ -88,6 +94,7 @@ type
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
     procedure   AfterCreate; virtual;
+    procedure   InvokeHelp; override;
     procedure   Show;
     procedure   Hide;
     function    ShowModal: integer;
@@ -262,6 +269,18 @@ begin
   // for the user
 end;
 
+procedure TfpgBaseForm.InvokeHelp;
+var
+  lEventHandled: Boolean;
+  lSucceeded: Boolean;
+begin
+  lEventHandled := False;
+  lSucceeded := False;
+  lSucceeded := DoOnHelp(HelpType, HelpContext, HelpKeyword, fpgApplication.HelpFile, lEventHandled);
+  if (not lSucceeded) or (not lEventHandled) then
+    inherited InvokeHelp;
+end;
+
 procedure TfpgBaseForm.Show;
 begin
   FVisible := True;
@@ -386,6 +405,13 @@ procedure TfpgBaseForm.DoOnClose(var CloseAction: TCloseAction);
 begin
   if Assigned(FOnClose) then
     OnClose(self, CloseAction);
+end;
+
+function TfpgBaseForm.DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext;
+  const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean;
+begin
+  if Assigned(FOnHelp) then
+    Result := FOnHelp(AHelpType, AHelpContext, AHelpKeyword, AHelpFile, AHandled);
 end;
 
 procedure TfpgBaseForm.Hide;
