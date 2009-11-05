@@ -135,6 +135,8 @@ type
     procedure   ShowParamHelp;
     function    FindTopicForLink( Link: THelpLink ): TTopic;
     function    FindTopicByResourceID( ID: word ): TTopic;
+    function    FindTopicByName(const AName: string): TTopic;
+
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -164,7 +166,7 @@ uses
 const
   cLongName   = 'fpGUI Documentation Viewer';
   cCreatedBy  = 'Created by Graeme Geldenhuys';
-  cVersion    = 'Version 1.0 (alpha)';
+  cVersion    = 'Version 0.7 (alpha)';
 
 {@VFD_NEWFORM_IMPL}
 
@@ -306,6 +308,8 @@ begin
       Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
       Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
       Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
+      Add('<b>String resource id count:</b> ' + IntToStr(f.StringResourceIDCount));
+      Add('<b>Numeric resource id count:</b> ' + IntToStr(f.NumericResourceIDCount));
       Add(' ');
       //Add('Dictionary contents:');
       //for i := 0 to f.DictionaryCount-1 do
@@ -530,9 +534,7 @@ end;
 
 procedure TMainForm.MainFormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
-writeln('DEBUG:  TMainForm.MainFormCloseQuery >>>>>');
   CloseFile(True);
-writeln('DEBUG:  TMainForm.MainFormCloseQuery <<<<<');
 end;
 
 procedure TMainForm.PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
@@ -2035,29 +2037,51 @@ end;
 procedure TMainForm.ProcessCommandLineParams;
 var
   showtopic: boolean;
+  t: TTopic;
 begin
   if ParamCount > 0 then
   begin
     if gCommandLineParams.IsParam('h') then
     begin
       ShowParamHelp;
-      Exit;
+      Exit; //==>
     end
     else if gCommandLineParams.IsParam('debuglog') then
       // do nothing
     else
     begin
-      showtopic := not gCommandLineParams.IsParam('s');
+//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - Open file...');
+      showtopic := not gCommandLineParams.IsParam('k');
       OpenFile(ParamStr(1), '', showtopic);
     end;
   end;
 
   // now process all other parameters
-  if gCommandLineParams.IsParam('s') then
+  if gCommandLineParams.IsParam('k') then
   begin
-    edSearchText.Text := gCommandLineParams.GetParam('s');
+//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - Keyword Search string');
+    { Search for a string }
+    edSearchText.Text := gCommandLineParams.GetParam('k');
     PageControl1.ActivePage := tsSearch;
     btnSearch.Click;
+  end
+  else if gCommandLineParams.IsParam('n') then
+  begin
+    { Display topic with numeric topic id }
+//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - Display numeric topic id');
+    t := FindTopicByResourceID(StrToInt(gCommandLineParams.GetParam('n')));
+//if not Assigned(t) then
+//  writeln(Format('Failed to find topic <%s>', [gCommandLineParams.GetParam('n')]));
+    DisplayTopic(t);
+  end
+  else if gCommandLineParams.IsParam('s') then
+  begin
+//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - display string topic id');
+    { Display topic with string topic id }
+    t := FindTopicByName(gCommandLineParams.GetParam('s'));
+//if not Assigned(t) then
+//  writeln(Format('Failed to find topic <%s>', [gCommandLineParams.GetParam('k')]));
+    DisplayTopic(t);
   end;
 end;
 
@@ -2071,10 +2095,11 @@ begin
        + cVersion + le + le
        + 'Supported command line parameters:' + le + le
        + '<tt>'
-       + '  <<filename>   Load the help file <<filename>' + le
-       + '  -h           Show this help' + le
-       + '  -s<<text>     Search for <<text> in open help files' + le
-       + '  -t<<id>       Open Topic with ID equal to <<id>' + le
+       + '  <<filename>       Load the help file <<filename>' + le
+       + '  -h                Show this help' + le
+       + '  -k <<text>        Search for keyword <<text> in open help files' + le
+       + '  -n <<id>          Open Topic with numeric ID equal to <<id>' + le
+       + '  -s <<id>          Open Topic with string ID equal to <<id>' + le
        + '  -debuglog <<filename> Log information to a file' + le
        + '</tt>'
        ;
@@ -2109,7 +2134,7 @@ var
 begin
   for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
   begin
-    HelpFile := THelpFile(CurrentOpenFiles[ id ]);
+    HelpFile := THelpFile(CurrentOpenFiles[ FileIndex ]);
 
     Result := HelpFile.FindTopicByResourceID( ID );
     if Result <> nil then
@@ -2117,6 +2142,24 @@ begin
       exit;
   end;
 
+  // not found.
+  Result := nil;
+end;
+
+function TMainForm.FindTopicByName(const AName: string): TTopic;
+var
+  FileIndex: longint;
+  HelpFile: THelpFile;
+begin
+  Result := nil;
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
+  begin
+    HelpFile := THelpFile(CurrentOpenFiles[ FileIndex ]);
+    Result := HelpFile.FindTopicByLocalName(AName);
+    if Result <> nil then
+      // found
+      exit; //==>
+  end;
   // not found.
   Result := nil;
 end;
