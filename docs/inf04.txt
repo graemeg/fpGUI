@@ -126,16 +126,16 @@
 
       Beginning at each file offset, tocentrystart[i]:
           {
-             int8 len;          // length of the entry including this byte (but not including extended data?)
-             int8 flags;        // flag byte, description folows (MSB first)
+             int8 len;             // length of the entry including this byte (but not including extended data?)
+             int8 flags;           // flag byte, description folows (MSB first)
              // bit7 haschildren;  // following nodes are a higher level
              // bit6 hidden;       // this entry doesn't appear in VIEW.EXE's
                                    // presentation of the toc
              // bit5 extended;     // extended entry format
-             // bit4         // ??
+             // bit4               // ??
              // int4 level;        // nesting level
-             int8 ntocslots;    // number of "slots" occupied by the text for
-                                // this toc entry
+             int8 ntocslots;       // number of "slots" occupied by the text for
+                                   // this toc entry
           }
 
       if the "extended" bit is not 1, this is immediately followed by
