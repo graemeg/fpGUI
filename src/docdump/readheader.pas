@@ -83,7 +83,7 @@ begin
     AOut.WriteLn(Format('  ipfheader.icmdSize:          %8.8x (%0:7d bytes)    : size of icmd index table', [hdr.icmdSize]));
     t1 := TOverlaySearchStart(hdr.searchstart);
     i := t1.SearchOffset;
-    AOut.WriteLn(Format('  ipfheader.searchstart :31    %8.8x (%0:7d bytes)    : 31 bit file offset of full text search table', [i, i]));
+    AOut.WriteLn(Format('  ipfheader.searchstart :31    %8.8x (%0:7d bytes)    : 31bit file offset of full text search table', [i, i]));
     if t1.IsRec16bitSize then
       s := 'search rec is 16bit size'
     else
