@@ -558,7 +558,13 @@ end;
 procedure TMainForm.lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
-  DisplayTopic(nil);
+  InIndexSearch := True;  // prevent edit.OnChange from executing too
+  try
+    IndexSearchEdit.Text := lbIndex.Items[lbIndex.FocusItem];
+    DisplayTopic(nil);
+  finally
+    InIndexSearch := False;
+  end;
 end;
 
 procedure TMainForm.lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton;
@@ -577,7 +583,7 @@ var
   tmpMatchIndex: longint;
   tmpSearchText: string;
   i: longint;
-Begin
+begin
   if InIndexSearch then
     exit;
 
