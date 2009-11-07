@@ -1,0 +1,51 @@
+
+  DocView todo list.
+
+Legend
+======
+[ ] - not started yet
+[o] - started but not complete
+[x] - completed task.
+
+
+Todo list
+=========
+[o] - Fixes suggish scrolling. I think it's a recursive position event on the
+      vertical scrollbar causing the problem.
+      (*** It's much better already ***)
+[ ] - Text wrapping in RichTextView is not 100% correct
+[ ] - Access Violation when the application terminates.
+[ ] - Ever growing list of fonts used while loading new topics.
+[ ] - Settings / Customization dialog is needed.
+[ ] - Open Recent Files doesn't always get populated, or gets cleared for some
+      reason.
+[ ] - Change mouse cursor when over hyperlinks in RichTextView
+[o] - Implement a ipfdump program. Already started work on this and is called
+      docdump in the src directory.
+[ ] - Implement a IPF Compiler in Object Pascal
+[ ] - Text is not selectable in RichTextView. I imagine people want to
+      copy & paste examples. Although "Save current Topic" already exists.
+[ ] - Communication between application and docview. Both directions. Possible
+      solutions is Pipes or IPC unit.
+[ ] - Create help file for DocView listing all supported features etc..
+[ ] - 
+
+[x] - Display topic by ID via command line parameters
+[x] - 'Could not load topic slots' message when trying to view some topics.
+[x] - Extend compiler or INF file format for larged Word Index list. Currently
+      LCL documentation needs to be split in two, to compile. (this was an issue
+      with the Open Watcom WIPFC - limit is now set to 65000 entries)
+[x] - Clicking in index list should set the text in the index search edit box.
+
+
+fpdoc IPF todo list
+===================
+[ ] - Class declaration in overview page is missing. Like HTML output.
+[ ] - Class inheritance tree must be shown in overview page. Like HTML output.
+[ ] - 
+[ ] - 
+[ ] - 
+
+
+
+
