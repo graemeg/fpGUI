@@ -11,7 +11,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils, IPFFileFormatUnit, IPFEscapeCodes, CustApp, readheader,
   filestreamhelper, readextfiles, readstrings, iterator_intf, iterator_impl,
-  readnlsdata, readfonts, readcontrols, readtoc;
+  readnlsdata, readfonts, readcontrols, readtoc, u_Tools;
 
 type
 

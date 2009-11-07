@@ -353,9 +353,9 @@ begin
   _NumSlots := pTOCEntry^.numslots;
 
   Flags := _pTOCEntry^.flags;
-  p := pUInt8( _pTOCEntry ) + sizeof( TTOCEntryStart );
+  p := pByte( _pTOCEntry ) + sizeof( TTOCEntryStart );
 
-  if ( Flags and TOCEntryExtended ) > 0 then
+  if ( Flags and TOCEntryExtended ) = TOCEntryExtended then
   begin
     pExtendedInfo := pExtendedTOCEntry( p );
     inc( p, sizeof( TExtendedTOCEntry ) );
@@ -1279,7 +1279,7 @@ begin
       // Read slot data
       pSlotNumber := _pSlotNumbers;
 
-      for i := 0 to _NumSlots - 1 do
+      for i := 1 to _NumSlots do
       begin
         SlotNumber := pSlotNumber^;
 
