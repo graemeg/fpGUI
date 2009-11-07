@@ -80,6 +80,7 @@ type
     CurrentTopic: TTopic; // so we can get easy access to current topic viewed
 
     procedure   RichViewClickLink(Sender: TRichTextView; Link: string);
+    procedure   IndexSearchEditKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   MainFormShow(Sender: TObject);
     procedure   MainFormDestroy(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
@@ -103,6 +104,7 @@ type
     procedure   lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnSearchClicked(Sender: TObject);
+    procedure   IndexSearchEditOnChange(Sender: TObject);
     procedure   DisplaySelectedSearchResultTopic;
     procedure   UpdateLocationPanel;
     procedure   EnableControls;
@@ -222,6 +224,16 @@ begin
     //         longint( Link ),
     //         longint( SourceWindow ) );
 
+end;
+
+procedure TMainForm.IndexSearchEditKeyPress(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyEnter) or (KeyCode = keyPEnter) then
+  begin
+    Consumed := True;
+    DisplaySelectedIndexTopic;
+  end;
 end;
 
 procedure TMainForm.MainFormShow(Sender: TObject);
@@ -481,19 +493,8 @@ begin
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
-//var
-//  Count: integer;
-//  i: integer;
-//  s: TfpgString;
-//  f: THelpFile;
 begin
   DisplaySelectedIndexTopic;
-  //f := THelpFile(Files[0]);
-  //lbIndex.Items.Clear;
-  //for i := 0 to f.Index.Count-1 do
-  //
-  //  lbIndex.Items.AddObject(F.Index.GetTopic(i).Title, f.Topics[i]);
-  //lbIndex.Invalidate
 end;
 
 procedure TMainForm.btnGoClicked(Sender: TObject);
@@ -569,6 +570,39 @@ end;
 procedure TMainForm.btnSearchClicked(Sender: TObject);
 begin
   DoSearch;
+end;
+
+procedure TMainForm.IndexSearchEditOnChange(Sender: TObject);
+var
+  tmpMatchIndex: longint;
+  tmpSearchText: string;
+  i: longint;
+Begin
+  if InIndexSearch then
+    exit;
+
+  tmpMatchIndex := -1;
+  tmpSearchText := trim(IndexSearchEdit.Text);
+
+  for i := 0 to DisplayedIndex.Count - 1 do
+  begin
+    if StrStartsWithIgnoringCase(DisplayedIndex[i], tmpSearchText) then
+    begin
+      tmpMatchIndex := i;
+      break;
+    end;
+  end;
+
+  if tmpMatchIndex = -1 then
+    exit;
+
+  InIndexSearch:= true;
+
+
+  if lbIndex.FocusItem <> tmpMatchIndex then
+    lbIndex.FocusItem := tmpMatchIndex;
+
+  InIndexSearch:= false;
 end;
 
 procedure TMainForm.DisplaySelectedSearchResultTopic;
@@ -1654,6 +1688,8 @@ begin
     TabOrder := 2;
     Text := '';
     FontDesc := '#Edit1';
+    OnChange := @IndexSearchEditOnChange;
+    OnKeyPress :=@IndexSearchEditKeyPress;
   end;
 
   tsSearch := TfpgTabSheet.Create(PageControl1);
