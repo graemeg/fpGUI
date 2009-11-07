@@ -1324,7 +1324,7 @@ begin
           raise EHelpFileException.Create('Failed to read complete slot data (text)');
 
         _Slots.Add( Slot );
-        inc( pSlotNumber, sizeof( UInt16 ) );
+        inc( pByte(pSlotNumber), sizeof( UInt16 ) );
       end;
     except
       on E: EHelpFileException do
