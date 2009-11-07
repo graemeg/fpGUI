@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="26">
+    <Units Count="27">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -162,6 +162,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpWindow"/>
       </Unit25>
+      <Unit26>
+        <Filename Value="../TODO.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
