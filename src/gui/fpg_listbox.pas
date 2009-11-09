@@ -216,7 +216,6 @@ type
   TfpgListBoxStrings = class(TStringList)
   protected
     ListBox: TfpgTextListBox;
-    procedure   SetUpdateState(Updating: Boolean); override;
   public
     constructor Create(AListBox: TfpgTextListBox);
     destructor  Destroy; override;
@@ -239,12 +238,6 @@ end;
 
 { TfpgListBoxStrings }
 
-procedure TfpgListBoxStrings.SetUpdateState(Updating: Boolean);
-begin
-  inherited SetUpdateState(Updating);
-  // do nothing extra for now
-end;
-
 constructor TfpgListBoxStrings.Create(AListBox: TfpgTextListBox);
 begin
   inherited Create;
@@ -260,6 +253,8 @@ end;
 function TfpgListBoxStrings.Add(const s: String): Integer;
 begin
   Result := inherited Add(s);
+  if UpdateCount > 0 then
+      Exit;
   if Assigned(ListBox) and (ListBox.HasHandle) then
   begin
     ListBox.UpdateScrollBar;
@@ -270,6 +265,8 @@ end;
 procedure TfpgListBoxStrings.Delete(Index: Integer);
 begin
   inherited Delete(Index);
+  if UpdateCount > 0 then
+      Exit;
   if Assigned(ListBox) and (ListBox.HasHandle) then
   begin
     ListBox.UpdateScrollBar;
@@ -280,6 +277,8 @@ end;
 procedure TfpgListBoxStrings.Clear;
 begin
   inherited Clear;
+  if UpdateCount > 0 then
+      Exit;
   ListBox.FocusItem := -1;
   ListBox.UpdateScrollBar;
   ListBox.Invalidate;
@@ -622,7 +621,7 @@ var
   r: TfpgRect;
 begin
   //if FUpdateCount > 0 then
-    //Exit; //==>
+  //  Exit; //==>
 
   inherited HandlePaint;
   Canvas.ClearClipRect;
