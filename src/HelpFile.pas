@@ -446,12 +446,12 @@ end;
 
 procedure THelpFile.Open;
 begin
+  LogEvent(LogDebug, 'Open File >>');
   if not FileExists( _Filename ) then
     raise EHelpFileException.Create( FileErrorNotFound );
 
   try
-  _Handle := TFileStream.Create(_FileName, fmOpenRead);
-
+    _Handle := TFileStream.Create(_FileName, fmOpenRead or fmShareDenyWrite);
   except
     on E: Exception do
       raise EHelpFileException.Create(E.Message);
@@ -471,6 +471,7 @@ begin
     //end;
 
   _FileSize := GetFileSize(_Filename);
+  LogEvent(LogDebug, 'Open File  <<');
 end;
 
 procedure THelpFile.Close;

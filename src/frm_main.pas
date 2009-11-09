@@ -966,7 +966,6 @@ begin
   SetWaitCursor;
   tmpHelpFiles := TList.Create;
 
-// RBRi Translate
   if not LoadFiles(FileNames, tmpHelpFiles) then
   begin
     ClearWaitCursor;
@@ -1344,7 +1343,9 @@ begin
   LogEvent(LogStartup, '  Display index (count = ' + IntToStr(DisplayedIndex.Count) + ')');
 
   // Now display the final index list
+  lbIndex.BeginUpdate;
   lbIndex.Items.Assign( DisplayedIndex );
+  lbIndex.EndUpdate;
 
   LogEvent(LogStartup, '  Tidy up' );
   tmpIndexLists.Free;
