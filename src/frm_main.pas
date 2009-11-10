@@ -86,6 +86,7 @@ type
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
+    procedure   miConfigureClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
@@ -163,6 +164,7 @@ uses
   ,IPFFileFormatUnit
   ,SettingsUnit
   ,dvHelpers
+  ,frm_configuration
   ;
 
 const
@@ -281,6 +283,11 @@ end;
 procedure TMainForm.miFileCloseClicked(Sender: TObject);
 begin
   CloseFile;
+end;
+
+procedure TMainForm.miConfigureClicked(Sender: TObject);
+begin
+  ShowConfigForm;
 end;
 
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
@@ -1987,7 +1994,7 @@ begin
   begin
     Name := 'miSettings';
     SetPosition(292, 76, 132, 20);
-    AddMenuItem('Options...', '', nil);
+    AddMenuItem('Options...', '', @miConfigureClicked);
   end;
 
   miBookmarks := TfpgPopupMenu.Create(self);

@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="27">
+    <Units Count="28">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -166,6 +166,11 @@
         <Filename Value="../TODO.txt"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
+      <Unit27>
+        <Filename Value="frm_configuration.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_configuration"/>
+      </Unit27>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -190,7 +195,7 @@
     </CodeGeneration>
     <Other>
       <CustomOptions Value="-O-
-"/>
+-Fu/home/graemeg/programming/fpgui/lib/i386-win32aa/"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
