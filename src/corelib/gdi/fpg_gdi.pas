@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -487,6 +487,7 @@ var
   mcode: integer;
   wmsg: TMsg;
   PaintStruct: TPaintStruct;
+  TmpW: widestring;
 
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
@@ -621,7 +622,8 @@ begin
             fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
           else if uMsg = WM_CHAR then
           begin
-            msgp.keyboard.keychar := UTF8Encode(WideChar(wParam));
+            tmpW := WideChar(wParam);
+            msgp.keyboard.keychar := UTF8Encode(tmpW);
             fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
           end;
           
