@@ -3102,8 +3102,9 @@ end;
 
 procedure TRtfColorList.Clear;
 begin
-  inherited;
-  Add(0, 0, 0); //Dummy color..
+  inherited Clear;
+  { TODO -oGraeme : Not sure why this was here, so I removed it. 2009-11-10 }
+//  Add(0, 0, 0); //Dummy color..
 end;
 
 function TRtfColorList.Add(ARed, AGreen, ABlue: integer): integer;
@@ -4630,8 +4631,4 @@ begin
 end;
 
 end.
-
-
-
-
 
