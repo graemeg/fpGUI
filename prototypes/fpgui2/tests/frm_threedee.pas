@@ -10,12 +10,9 @@ unit frm_threedee;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_bevel;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_widget, fpg_form, fpg_label, fpg_button, fpg_dialogs,
+  fpg_checkbox, fpg_trackbar, fpg_progressbar, fpg_menu;
 
 type
 
@@ -69,8 +66,8 @@ type
 implementation
 
 uses
-  gfx_UTF8utils,
-  gfx_imgfmt_bmp;
+  fpg_stringutils,
+  fpg_imgfmt_bmp;
   
 const
   clM2DarkBlue = $187EC0;
