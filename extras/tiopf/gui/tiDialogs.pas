@@ -9,7 +9,8 @@ interface
 uses
   Classes,
   SysUtils,
-  Variants;
+  Variants,
+  fpg_base;
 
   
   // Call showMessage, but accepts a variant. Good for debugging.
@@ -18,24 +19,24 @@ uses
 
   
   // Show the contents of a TStringList - for debugging
-  procedure tiShowStringList(const pStringList: TStringList; const pHeading: string = 'Show string list');
+  procedure tiShowStringList(const AStringList: TStringList; const AHeading: TfpgString = 'Show string list');
   // Show the contents of a TStrings - for debugging
-  procedure tiShowStrings(const AStrings: TStrings; const pHeading: string = 'Show strings');
+  procedure tiShowStrings(const AStrings: TStrings; const AHeading: TfpgString = 'Show strings');
   // Show a long string - for debugging
-  procedure tiShowString(const AStr: string; const pHeading: string = 'Show string');
+  procedure tiShowString(const AStr: TfpgString; const AHeading: TfpgString = 'Show string');
   // Show a variant array of variants - for debugging
-  procedure tiShowVariant(AValue: Variant; pHeading: string = 'Show variant');
+  procedure tiShowVariant(AValue: Variant; AHeading: TfpgString = 'Show variant');
   // Show the contents of a stream
-  procedure tiShowStream(const AValue: TStream; const pHeading: string = 'Show stream');
+  procedure tiShowStream(const AValue: TStream; const AHeading: TfpgString = 'Show stream');
   // Show a <Yes>, <No> dialog box, and return true if <Yes> was selected
-  function tiAppConfirmation(const AMessage: string; ATitle: string = ''): boolean; overload;
-  function tiAppConfirmation(const AMessage: string; const AValues: array of const): boolean; overload;
+  function tiAppConfirmation(const AMessage: TfpgString; ATitle: TfpgString = ''): boolean; overload;
+  function tiAppConfirmation(const AMessage: TfpgString; const AValues: array of const): boolean; overload;
   // Show a message
-  procedure tiAppMessage(const AMessage: string; ATitle: string = '');
+  procedure tiAppMessage(const AMessage: TfpgString; ATitle: TfpgString = '');
   // Show a warning
-  procedure tiAppWarning(const AMessage: string; ATitle: string = '');
+  procedure tiAppWarning(const AMessage: TfpgString; ATitle: TfpgString = '');
   // Show a error message
-  procedure tiAppError(const AMessage: string; ATitle: string = '');
+  procedure tiAppError(const AMessage: TfpgString; ATitle: TfpgString = '');
 
   // A type of notification window that will disappear by it self
   procedure tiProcessing(const AMessage: TfpgString);
@@ -144,12 +145,12 @@ begin
   ShowMessage(VarToStr(AValue));
 end;
 
-procedure tiShowStringList(const pStringList: TStringList; const pHeading: string);
+procedure tiShowStringList(const AStringList: TStringList; const AHeading: TfpgString);
 begin
-  tiShowStrings(pStringList, pHeading);
+  tiShowStrings(AStringList, AHeading);
 end;
 
-procedure tiShowStrings(const AStrings: TStrings; const pHeading: string);
+procedure tiShowStrings(const AStrings: TStrings; const AHeading: TfpgString);
 var
   lForm: TfpgForm;
   lMemo: TfpgMemo;
@@ -157,7 +158,7 @@ begin
   lForm := TfpgForm.Create(nil);
   lMemo := TfpgMemo.Create(lForm);
   try
-    lForm.WindowTitle := pHeading;
+    lForm.WindowTitle := AHeading;
     lForm.Width       := 300;
     lForm.Height      := 300;
     lForm.WindowPosition := wpScreenCenter;
@@ -174,28 +175,28 @@ begin
   end;
 end;
 
-procedure tiShowString(const AStr: string; const pHeading: string);
+procedure tiShowString(const AStr: TfpgString; const AHeading: TfpgString);
 var
   lSL: TStringList;
 begin
   lSL := TStringList.Create;
   try
     lSL.Text := AStr;
-    tiShowStringList(lSL, pHeading);
+    tiShowStringList(lSL, AHeading);
   finally
     lSL.Free;
   end;
 end;
 
-procedure tiShowVariant(AValue: Variant; pHeading: string);
+procedure tiShowVariant(AValue: Variant; AHeading: TfpgString);
 var
   ls: string;
 begin
   ls := tiVariantArrayToString(AValue);
-  tiShowString(ls, pHeading);
+  tiShowString(ls, AHeading);
 end;
 
-procedure tiShowStream(const AValue: TStream; const pHeading: string);
+procedure tiShowStream(const AValue: TStream; const AHeading: TfpgString);
 var
   lStringStream: TStringStream;
 begin
@@ -203,34 +204,34 @@ begin
   try
     AValue.Position := 0;
     lStringStream.CopyFrom(AValue, AValue.Size);
-    tiShowString(lStringStream.DataString, pHeading);
+    tiShowString(lStringStream.DataString, AHeading);
   finally
     lStringStream.Free;
   end;
 end;
 
-function tiAppConfirmation(const AMessage: string; ATitle: string = ''): boolean;
+function tiAppConfirmation(const AMessage: TfpgString; ATitle: TfpgString = ''): boolean;
 begin
   Result := TfpgMessageDialog.Question(ATitle, AMessage) = mbYes
 end;
 
-function tiAppConfirmation(const AMessage: string;
+function tiAppConfirmation(const AMessage: TfpgString;
   const AValues: array of const): boolean;
 begin
   Result := tiAppConfirmation(Format(AMessage, AValues));
 end;
 
-procedure tiAppMessage(const AMessage: string; ATitle: string = '');
+procedure tiAppMessage(const AMessage: TfpgString; ATitle: TfpgString = '');
 begin
   TfpgMessageDialog.Information(ATitle, AMessage);
 end;
 
-procedure tiAppWarning(const AMessage: string; ATitle: string = '');
+procedure tiAppWarning(const AMessage: TfpgString; ATitle: TfpgString = '');
 begin
   TfpgMessageDialog.Warning(ATitle, AMessage);
 end;
 
-procedure tiAppError(const AMessage: string; ATitle: string = '');
+procedure tiAppError(const AMessage: TfpgString; ATitle: TfpgString = '');
 begin
   TfpgMessageDialog.Critical(ATitle, AMessage);
 end;
