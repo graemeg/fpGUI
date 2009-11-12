@@ -37,6 +37,9 @@ uses
   // Show a error message
   procedure tiAppError(const AMessage: string; ATitle: string = '');
 
+  // A type of notification window that will disappear by it self
+  procedure tiProcessing(const AMessage: TfpgString);
+  procedure tiEndProcessing;
 
 implementation
 
@@ -44,9 +47,66 @@ uses
   fpg_main,
   fpg_form,
   fpg_memo,
+  fpg_label,
   fpg_dialogs,
+  fpg_panel,
   tiGUIINI,
   tiUtils;
+
+var
+  pWorkingForm: TfpgForm;
+
+type
+  TProcessingForm = class(TfpgForm)
+  private
+    {@VFD_HEAD_BEGIN: ProcessingForm}
+    Bevel1: TfpgBevel;
+    lblMessage: TfpgLabel;
+    {@VFD_HEAD_END: ProcessingForm}
+  public
+    procedure AfterCreate; override;
+  end;
+
+{ TProcessingForm }
+
+procedure TProcessingForm.AfterCreate;
+begin
+  {%region 'Auto-generated GUI code' -fold}
+  {@VFD_BODY_BEGIN: ProcessingForm}
+  Name := 'ProcessingForm';
+  SetPosition(317, 177, 400, 150);
+  WindowTitle := 'Processing...';
+  WindowPosition := wpScreenCenter;
+  BackgroundColor := clHilite1;
+  WindowType := wtPopup;
+
+  Bevel1 := TfpgBevel.Create(self);
+  with Bevel1 do
+  begin
+    Name := 'Bevel1';
+    SetPosition(8, 4, 232, 80);
+    Align := alClient;
+  end;
+
+  lblMessage := TfpgLabel.Create(Bevel1);
+  with lblMessage do
+  begin
+    Name := 'lblMessage';
+    SetPosition(32, 28, 108, 32);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Layout := tlCenter;
+    Text := '...';
+    WrapText := True;
+    Align := alClient;
+    MouseCursor := mcHourGlass;
+  end;
+
+  {@VFD_BODY_END: ProcessingForm}
+  {%endregion}
+end;
+
 
 
 procedure tiShowMessage(const AArray: array of const);
@@ -173,6 +233,26 @@ end;
 procedure tiAppError(const AMessage: string; ATitle: string = '');
 begin
   TfpgMessageDialog.Critical(ATitle, AMessage);
+end;
+
+procedure tiProcessing(const AMessage: TfpgString);
+begin
+  if not Assigned(pWorkingForm) then
+  begin
+    pWorkingForm := TProcessingForm.Create(nil);
+    TProcessingForm(pWorkingForm).lblMessage.Text := AMessage;
+    pWorkingForm.Show;
+  end
+  else
+    TProcessingForm(pWorkingForm).lblMessage.Text := AMessage;
+  fpgApplication.ProcessMessages;
+end;
+
+procedure tiEndProcessing;
+begin
+  if Assigned(pWorkingForm) then
+    pWorkingForm.Close;
+  FreeAndNil(pWorkingForm);
 end;
 
 end.
