@@ -585,8 +585,12 @@ begin
 end;
 
 procedure TtiMemoMediatorView.SetupGUIandObject;
+var
+  Mi, Ma: integer;
 begin
   inherited SetupGUIandObject;
+  if Subject.GetFieldBounds(FieldName,Mi,Ma) and (Ma>0) then
+    View.MaxLength := Ma;
   View.Lines.Text := '';
 end;
 
