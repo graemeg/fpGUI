@@ -102,6 +102,7 @@ type
     procedure   PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
     procedure   tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   lbIndexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnSearchClicked(Sender: TObject);
     procedure   IndexSearchEditOnChange(Sender: TObject);
@@ -179,6 +180,16 @@ const
 procedure TMainForm.MainFormException(Sender: TObject; E: Exception);
 begin
   TfpgMessageDialog.Critical('An unexpected error occurred.', E.Message);
+end;
+
+procedure TMainForm.lbIndexKeyPress(Sender: TObject; var KeyCode: word;
+    var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
+  begin
+    Consumed := True;
+    DisplayTopic(nil);
+  end
 end;
 
 procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
@@ -1693,6 +1704,7 @@ begin
     PopupFrame := False;
     TabOrder := 1;
     OnDoubleClick  := @lbIndexDoubleClick;
+    OnKeyPress:=@lbIndexKeyPress;
   end;
 
   IndexSearchEdit := TfpgEdit.Create(tsIndex);
