@@ -150,7 +150,7 @@
       <Unit23>
         <Filename Value="dvconstants.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="dvconstants"/>
+        <UnitName Value="dvConstants"/>
       </Unit23>
       <Unit24>
         <Filename Value="dvHelpers.pas"/>

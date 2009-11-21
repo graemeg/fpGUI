@@ -1,4 +1,4 @@
-unit dvconstants;
+unit dvConstants;
 
 {$mode objfpc}{$H+}
 

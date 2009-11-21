@@ -38,7 +38,6 @@ Todo list
 [ ] - Options or Configuration dialog to set various things.
 [ ] - Hyperlinks on scrolled content doesn't work.
 [ ] - Implement popup window for "notes" hyperlinks.
-[ ] - MRU menu item doesn't seem to remember all opened documents.
 
 [x] - Display topic by ID via command line parameters
 [x] - 'Could not load topic slots' message when trying to view some topics.
@@ -46,6 +45,7 @@ Todo list
       LCL documentation needs to be split in two, to compile. (this was an issue
       with the Open Watcom WIPFC - limit is now set to 65000 entries)
 [x] - Clicking in index list should set the text in the index search edit box.
+[x] - MRU menu item doesn't seem to remember all opened documents.
 
 
 fpdoc IPF todo list
