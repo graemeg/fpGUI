@@ -29,6 +29,9 @@ resourcestring
   rsDVSearchFoundMsg = 'Found %d matches for ';
   rsDVCouldNotOpen = 'Could not open <%s>';
 
+const
+  hcConfigGeneralTab               = 510;
+  hcConfigFontsColorTab            = 520;
 
 implementation
 
