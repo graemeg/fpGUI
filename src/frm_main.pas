@@ -127,6 +127,7 @@ type
     // Used in loading contents
     procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
     procedure   ClearNotes;
+    procedure   ClearIndexComponents;
     procedure   SaveNotes(AHelpFile: THelpFile);
     procedure   DisplayTopic(ATopic: TTopic = nil);
     procedure   ResetProgress;
@@ -273,6 +274,7 @@ end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
 begin
+  ClearAllWordSequences;
   DisplayedIndex.Free;
   // save splitter position
   gINI.WriteInteger('Options', 'SplitterLeft', PageControl1.Width);
@@ -1095,7 +1097,8 @@ begin
     SaveNotes( lHelpFile );
   end;
 
-  DisplayedIndex.Clear;
+  ClearIndexComponents;
+  ClearAllWordSequences;
 
   // Now destroy help files
   for FileIndex := 0 to Files.Count - 1 do
@@ -1423,6 +1426,15 @@ end;
 procedure TMainForm.ClearNotes;
 begin
   { TODO -oGraeme : Implement me }
+end;
+
+procedure TMainForm.ClearIndexComponents;
+begin
+  IndexSearchEdit.Clear;
+  lbIndex.FocusItem := -1;
+  lbIndex.Items.Clear;
+  DisplayedIndex.Clear;
+  IndexLoaded := False;
 end;
 
 procedure TMainForm.SaveNotes(AHelpFile: THelpFile);
