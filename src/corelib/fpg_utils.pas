@@ -54,6 +54,7 @@ function fpgFileExists(const FileName: TfpgString): Boolean;
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
+function fpgExtractFileName(const FileName: TfpgString): TfpgString;
 
 
 implementation
@@ -130,6 +131,11 @@ end;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
 begin
   Result := ExtractFilePath(fpgToOSEncoding(Filename));
+end;
+
+function fpgExtractFileName(const FileName: TfpgString): TfpgString;
+begin
+  Result := ExtractFileName(fpgToOSEncoding(Filename));
 end;
 
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
