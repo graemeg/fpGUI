@@ -58,6 +58,7 @@ type
   private
     FCommand: ICommand;
     FEnabled: boolean;
+    FHint: TfpgString;
     FHotKeyDef: TfpgHotKeyDef;
     FOnClick: TNotifyEvent;
     FSeparator: boolean;
@@ -81,6 +82,7 @@ type
     procedure   SetCommand(ACommand: ICommand);
     property    Checked: boolean read FChecked write SetChecked;
     property    Text: TfpgString read FText write SetText;
+    property    Hint: TfpgString read FHint write FHint;
     property    HotKeyDef: TfpgHotKeyDef read FHotKeyDef write SetHotKeyDef;
     property    Separator: boolean read FSeparator write SetSeparator;
     property    Visible: boolean read FVisible write SetVisible;
