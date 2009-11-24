@@ -214,9 +214,10 @@ type
 
 
   { Base class to handle TfpgCalendarCombo controls }
-  TtiCalendarComboMediatorView = class(TtiBaseEditMediatorView)
+  TtiCalendarComboMediatorView = class(TtiControlMediatorView)
   protected
     procedure   SetupGUIandObject; override;
+    procedure   SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment); override;
   public
     constructor Create; override;
     function    View: TfpgCalendarCombo; reintroduce;
@@ -790,6 +791,17 @@ begin
     View.MinDate := Mi;
     View.MaxDate := Ma;
   end;
+end;
+
+procedure TtiCalendarComboMediatorView.SetObjectUpdateMoment(
+  const AValue: TtiObjectUpdateMoment);
+begin
+  inherited SetObjectUpdateMoment(AValue);
+  if View <> nil then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+      View.OnChange := @DoOnChange
+    else
+      View.OnExit := @DoOnChange;
 end;
 
 constructor TtiCalendarComboMediatorView.Create;
