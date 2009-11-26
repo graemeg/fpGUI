@@ -2,7 +2,7 @@
 
 # NOTE:  Cross compiling is from Linux to Windows 32-bit only
 
-CROSSFPC=/opt/fpc_2.2.5/win32/lib/fpc/2.2.5/ppcross386
+CROSSFPC=/opt/fpc_2.3.1/i386-win32/lib/fpc/2.3.1/ppcross386
 
 #fpctarget=`$CROSSFPC -iTP`-`fpc -iTO`
 #echo $fpctarget

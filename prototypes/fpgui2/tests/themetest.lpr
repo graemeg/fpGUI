@@ -8,17 +8,17 @@ uses
   {$ENDIF}{$ENDIF}
   Classes,
   SysUtils,
-  fpgfx,
-  gfxbase,
-  gui_form,
-  gui_scrollbar,
-  gui_button,
-  gui_label,
-  gfx_imgfmt_bmp,
-  gfx_extinterpolation,
-  gui_trackbar,
-  gui_style,
-  gui_dialogs;
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_scrollbar,
+  fpg_button,
+  fpg_label,
+  fpg_imgfmt_bmp,
+  fpg_extinterpolation,
+  fpg_trackbar,
+  fpg_style,
+  fpg_dialogs;
 
 type
   { Note:
@@ -142,21 +142,21 @@ begin
   buttonoptions.ButtonFeatures := [];
   
   if Enabled then
-    Include(buttonoptions.State, stEnabled);
-    
+    buttonoptions.State := buttonoptions.State + [stEnabled];
+
   if FDown then
-    Include(buttonoptions.State, stLowered)
+    buttonoptions.State := buttonoptions.State + [stLowered]
   else
-    Include(buttonoptions.State, stRaised);
+    buttonoptions.State := buttonoptions.State + [stRaised];
 
   if FFocused then
-    Include(buttonoptions.State, stHasFocus);
+    buttonoptions.State := buttonoptions.State + [stHasFocus];
 
   if FEmbedded then
-    Include(buttonoptions.ButtonFeatures, bfEmbedded);
+    buttonoptions.ButtonFeatures := buttonoptions.ButtonFeatures + [bfEmbedded];
 
   if FDefault then
-    Include(buttonoptions.ButtonFeatures, bfDefault);
+    buttonoptions.ButtonFeatures := buttonoptions.ButtonFeatures + [bfDefault];
 
   // Now let the Style do ALL the drawing. Nothing must be done here!
   FStyle.DrawControl(cePushButtonBevel, buttonoptions, Canvas, self);
