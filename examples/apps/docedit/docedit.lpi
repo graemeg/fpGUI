@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
-    <Version Value="6"/>
+    <Version Value="7"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
+        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value="./"/>
       <TargetFileExt Value=""/>
     </General>
     <VersionInfo>
@@ -31,7 +30,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="7">
       <Unit0>
         <Filename Value="docedit.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -58,27 +57,19 @@
         <UnitName Value="FPDEUtil"/>
       </Unit4>
       <Unit5>
-        <Filename Value="pkeditor.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="PkEditor"/>
-      </Unit5>
-      <Unit6>
         <Filename Value="doceditmsg.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="doceditmsg"/>
-      </Unit6>
-      <Unit7>
+      </Unit5>
+      <Unit6>
         <Filename Value="doceditopts.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="doceditopts"/>
-      </Unit7>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
+    <Version Value="8"/>
     <Other>
       <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>
