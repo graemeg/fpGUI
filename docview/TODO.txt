@@ -28,7 +28,16 @@ Todo list
 [ ] - Communication between application and docview. Both directions. Possible
       solutions is Pipes or IPC unit.
 [ ] - Create help file for DocView listing all supported features etc..
-[ ] - 
+[ ] - Searching for two words as-is does not seem to work.
+      eg: 'file descriptor' exists is fppoll help, but trying to search for
+      those two words doesn't find anything.
+[ ] - Sometimes searching for a word doesn't find help even though it exists.
+      eg: 'descriptor' doesn't find the help in fppoll topic, even though the
+      work is clearly in the topic contents.
+[ ] - Implement History tab and tracking - including Back & Next buttons.
+[ ] - Options or Configuration dialog to set various things.
+[ ] - Hyperlinks on scrolled content doesn't work.
+[ ] - Implement popup window for "notes" hyperlinks.
 
 [x] - Display topic by ID via command line parameters
 [x] - 'Could not load topic slots' message when trying to view some topics.
@@ -36,6 +45,7 @@ Todo list
       LCL documentation needs to be split in two, to compile. (this was an issue
       with the Open Watcom WIPFC - limit is now set to 65000 entries)
 [x] - Clicking in index list should set the text in the index search edit box.
+[x] - MRU menu item doesn't seem to remember all opened documents.
 
 
 fpdoc IPF todo list

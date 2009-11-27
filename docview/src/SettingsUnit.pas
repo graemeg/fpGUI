@@ -13,6 +13,7 @@ Interface
 
 Uses
   Classes
+  ,contnrs
   ,fpg_base
   ,fpg_main
   ,CanvasFontManager
@@ -75,7 +76,7 @@ Const
 
 
 Type
-  TIndexStyle = ( isFileOnly, isAlphabetical, isFull );
+  TIndexStyle = ( isAlphabetical, isFileOnly, isFull );
   TToolbarStyle = ( tsNone, tsImages, tsText, tsImagesAndText );
   TGlobalSearchLocation = ( gsHelpPaths, gsFixedDrives, gsSelectedHelpPaths, gsCustom );
 
@@ -89,7 +90,7 @@ Type
 
 
   TSettings = record
-    MRUList: TList;
+    MRUList: TObjectList;
     LastOpenDirectory: string;
     LastSaveDirectory: string;
     StartupHelp: boolean;
@@ -133,8 +134,7 @@ Uses
   ,nvUtilities
   ;
 
-Const
-  IniFileName = 'NewView.ini';
+const
   GeneralSection = 'General';
   FontsSection = 'Fonts';
   ColoursSection = 'Colours';
@@ -172,7 +172,7 @@ var
   i: longint;
   Count: longint;
   MRUFilename: string;
-  MRUFileTitle: string;
+//  MRUFileTitle: string;
 begin
   LogEvent(LogSettings, 'LoadSettings' );
   with gINI do
@@ -224,7 +224,7 @@ begin
         else
         begin
           // not valid
-          MRUItem.Destroy;
+          MRUItem.Free;
           MRUItem := nil;
         end;
       end;
@@ -459,9 +459,9 @@ begin
 
   if PreviousMRUIndex > -1 then
   begin
-    // is already in list, move to top of list
-    MRUItem := TMRUItem(Settings.MRUList[ PreviousMRUIndex ]);
-    Settings.MRUList.Delete( PreviousMRUIndex );
+    // is already in list. Get instance so we can move it to the top of list
+    MRUItem := TMRUItem(Settings.MRUList[PreviousMRUIndex]);
+    Settings.MRUList.Extract(MRUItem);
   end
   else
   begin
@@ -474,9 +474,7 @@ begin
   Settings.MRUList.Insert( 0, MRUItem );
   while Settings.MRUList.Count > MaxMRUListEntries do
   begin
-    MRUItem := TMRUItem(Settings.MRUList[ MaxMRUListEntries ]);
-    Settings.MRUList.Delete( MaxMRUListEntries );
-    MRUItem.Destroy;
+    Settings.MRUList.Remove(Settings.MRUList.Last);
   end;
 end;
 
@@ -515,6 +513,8 @@ end;
 
 
 Initialization
+  Settings.MRUList := TObjectList.Create;
+
   //Settings.NormalFont := fpgStyle.DefaultFont;
   //Settings.FixedFont := fpgStyle.FixedFont;
   //Settings.SearchDirectories := TStringList.Create;
@@ -523,5 +523,6 @@ Finalization
   Settings.NormalFont.Free;
   Settings.FixedFont.Free;
   Settings.SearchDirectories.Free;
+  Settings.MRUList.Free;
 
 End.

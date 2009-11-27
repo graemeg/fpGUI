@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
   fpg_tree, fpg_splitter, fpg_menu, fpg_button, fpg_listbox,
-  fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar, fpg_mru,
+  fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar,
   HelpFile, RichTextView, HelpTopic;
 
 type
@@ -59,11 +59,10 @@ type
     miBookmarks: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     miDebug: TfpgPopupMenu;
-    miOpenRecentMenu: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
+    miOpenRecentMenu: TfpgPopupMenu;
     Files: TList; // current open help files.
     Debug: boolean;
-    mru: TfpgMRU;
     FFileOpenRecent: TfpgMenuItem;
 
     LoadingFilenameList: TStringList;
@@ -86,12 +85,13 @@ type
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
+    procedure   miConfigureClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
     procedure   miFileSaveTopicAsIPF(Sender: TObject);
-    procedure   miMRUClick(Sender: TObject; const FileName: String);
+    procedure   OnMRUMenuItemClick(Sender: TObject);
     procedure   btnShowIndex(Sender: TObject);
     procedure   btnGoClicked(Sender: TObject);
     procedure   tvContentsChange(Sender: TObject);
@@ -102,6 +102,7 @@ type
     procedure   PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
     procedure   tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   lbIndexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnSearchClicked(Sender: TObject);
     procedure   IndexSearchEditOnChange(Sender: TObject);
@@ -126,6 +127,7 @@ type
     // Used in loading contents
     procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
     procedure   ClearNotes;
+    procedure   ClearIndexComponents;
     procedure   SaveNotes(AHelpFile: THelpFile);
     procedure   DisplayTopic(ATopic: TTopic = nil);
     procedure   ResetProgress;
@@ -138,7 +140,8 @@ type
     function    FindTopicForLink( Link: THelpLink ): TTopic;
     function    FindTopicByResourceID( ID: word ): TTopic;
     function    FindTopicByName(const AName: string): TTopic;
-
+    procedure   AddCurrentToMRUFiles;
+    procedure   CreateMRUMenuItems;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -155,6 +158,8 @@ uses
   ,fpg_constants
   ,fpg_iniutils
   ,fpg_cmdlineparams
+  ,fpg_utils
+  ,fpg_stringutils
   ,nvUtilities
   ,ACLStringUtility
   ,TextSearchQuery
@@ -163,6 +168,7 @@ uses
   ,IPFFileFormatUnit
   ,SettingsUnit
   ,dvHelpers
+  ,frm_configuration
   ;
 
 const
@@ -175,6 +181,16 @@ const
 procedure TMainForm.MainFormException(Sender: TObject; E: Exception);
 begin
   TfpgMessageDialog.Critical('An unexpected error occurred.', E.Message);
+end;
+
+procedure TMainForm.lbIndexKeyPress(Sender: TObject; var KeyCode: word;
+    var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
+  begin
+    Consumed := True;
+    DisplayTopic(nil);
+  end
 end;
 
 procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
@@ -251,13 +267,14 @@ begin
 
   LogEvent(LogSettings, 'Loading settings');
   LoadSettings;
-
+  CreateMRUMenuItems;
   ProcessCommandLineParams;
 
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
 begin
+  ClearAllWordSequences;
   DisplayedIndex.Free;
   // save splitter position
   gINI.WriteInteger('Options', 'SplitterLeft', PageControl1.Width);
@@ -281,6 +298,11 @@ end;
 procedure TMainForm.miFileCloseClicked(Sender: TObject);
 begin
   CloseFile;
+end;
+
+procedure TMainForm.miConfigureClicked(Sender: TObject);
+begin
+  ShowConfigForm;
 end;
 
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
@@ -487,9 +509,16 @@ begin
   end;
 end;
 
-procedure TMainForm.miMRUClick(Sender: TObject; const FileName: String);
+procedure TMainForm.OnMRUMenuItemClick(Sender: TObject);
+var
+  lTag: longint;
+  MenuItem: TfpgMenuItem;
+  MRUItem: TMRUItem;
 begin
-  OpenFile(FileName, '', True);
+  MenuItem := Sender as TfpgMenuItem;
+  lTag := MenuItem.Tag;
+  MRUItem := TMRUItem(Settings.MRUList[ lTag ]);
+  OpenFiles(MRUItem.FileNames, '', True);
 end;
 
 procedure TMainForm.btnShowIndex(Sender: TObject);
@@ -845,7 +874,6 @@ begin
 
     if dlg.RunOpenFile then
     begin
-      mru.AddItem(dlg.Filename);
       Settings.LastOpenDirectory := ExtractFilePath(dlg.Filename);
       OpenFile(dlg.Filename, '', true);
     end;
@@ -905,7 +933,6 @@ begin
   for FileIndex := 0 to LoadingFilenameList.Count - 1 do
   begin
     Filename := LoadingFilenameList[ FileIndex ];
-    mru.AddItem(FileName);
     LogEvent(LogStartup, '  Loading: ' + Filename );
     try
       LoadingFileIndex := FileIndex;
@@ -966,7 +993,6 @@ begin
   SetWaitCursor;
   tmpHelpFiles := TList.Create;
 
-// RBRi Translate
   if not LoadFiles(FileNames, tmpHelpFiles) then
   begin
     ClearWaitCursor;
@@ -990,7 +1016,7 @@ begin
   ProgressBar.Position := 50;
   SetStatus( rsDVDisplaying );
 
-//  AddCurrentToMRUFiles;
+  AddCurrentToMRUFiles;
 
   if AWindowTitle = '' then
     MainTitle := THelpFile( CurrentOpenFiles[ 0 ] ).Title
@@ -1071,7 +1097,8 @@ begin
     SaveNotes( lHelpFile );
   end;
 
-  DisplayedIndex.Clear;
+  ClearIndexComponents;
+  ClearAllWordSequences;
 
   // Now destroy help files
   for FileIndex := 0 to Files.Count - 1 do
@@ -1344,7 +1371,9 @@ begin
   LogEvent(LogStartup, '  Display index (count = ' + IntToStr(DisplayedIndex.Count) + ')');
 
   // Now display the final index list
+  lbIndex.BeginUpdate;
   lbIndex.Items.Assign( DisplayedIndex );
+  lbIndex.EndUpdate;
 
   LogEvent(LogStartup, '  Tidy up' );
   tmpIndexLists.Free;
@@ -1397,6 +1426,15 @@ end;
 procedure TMainForm.ClearNotes;
 begin
   { TODO -oGraeme : Implement me }
+end;
+
+procedure TMainForm.ClearIndexComponents;
+begin
+  IndexSearchEdit.Clear;
+  lbIndex.FocusItem := -1;
+  lbIndex.Items.Clear;
+  DisplayedIndex.Clear;
+  IndexLoaded := False;
 end;
 
 procedure TMainForm.SaveNotes(AHelpFile: THelpFile);
@@ -1541,19 +1579,14 @@ begin
 end;
 
 destructor TMainForm.Destroy;
-var
-  FileIndex: integer;
-  lHelpFile: THelpFile;
 begin
-writeln('DEBUG:  TMainForm.Destroy >>>>');
   CurrentTopic := nil;  // it was a reference only
   FFileOpenRecent := nil;   // it was a reference only
+  miOpenRecentMenu.Free;
   DestroyListAndObjects(Files);
   DestroyListAndObjects(AllFilesWordSequences);
   DestroyListAndObjects(CurrentOpenFiles);
-writeln('DEBUG:  TMainForm.Destroy   1');
   inherited Destroy;
-writeln('DEBUG:  TMainForm.Destroy <<<<');
 end;
 
 procedure TMainForm.AfterCreate;
@@ -1683,6 +1716,7 @@ begin
     PopupFrame := False;
     TabOrder := 1;
     OnDoubleClick  := @lbIndexDoubleClick;
+    OnKeyPress:=@lbIndexKeyPress;
   end;
 
   IndexSearchEdit := TfpgEdit.Create(tsIndex);
@@ -1986,7 +2020,7 @@ begin
   begin
     Name := 'miSettings';
     SetPosition(292, 76, 132, 20);
-    AddMenuItem('Options...', '', nil);
+    AddMenuItem('Options...', '', @miConfigureClicked);
   end;
 
   miBookmarks := TfpgPopupMenu.Create(self);
@@ -2019,15 +2053,15 @@ begin
     AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
   end;
 
-  miOpenRecentMenu := TfpgPopupMenu.Create(self);
+  {@VFD_BODY_END: MainForm}
+  {%endregion}
+
+  miOpenRecentMenu := TfpgPopupMenu.Create(nil);
   with miOpenRecentMenu do
   begin
     Name := 'miOpenRecentMenu';
     SetPosition(309, 52, 132, 20);
   end;
-
-  {@VFD_BODY_END: MainForm}
-  {%endregion}
 
   // hook up the sub-menus.
   MainMenu.AddMenuItem('&File', nil).SubMenu := miFile;
@@ -2039,15 +2073,6 @@ begin
 
   // correct default visible tabsheet
   PageControl1.ActivePageIndex := 0;
-
-  // most recently used files
-  mru := TfpgMRU.Create(self);
-  mru.Name := 'MRU';
-  mru.ParentMenuItem  := miOpenRecentMenu;
-  mru.OnClick         :=@miMRUClick;
-  mru.MaxItems        := gINI.ReadInteger('Options', 'MRUFileCount', 8);
-  mru.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
-  mru.LoadMRU;
 end;
 
 procedure TMainForm.RefreshFontSubstitutions;
@@ -2204,6 +2229,100 @@ begin
   end;
   // not found.
   Result := nil;
+end;
+
+// Add the current list of open files as
+// a Most Recently Used entry
+procedure TMainForm.AddCurrentToMRUFiles;
+var
+  tmpFilenames: TStringList;
+  i: longint;
+  tmpHelpFile: THelpFile;
+begin
+  tmpFilenames := TStringList.Create;
+
+  if CurrentOpenFiles.Count > 0 then
+  begin
+    for i := 0 to CurrentOpenFiles.Count - 1 do
+    begin
+      tmpHelpFile := THelpFile(CurrentOpenFiles[ i ]);
+      tmpFilenames.Add(tmpHelpFile.Filename);
+    end;
+
+    // update most-recently-used file list
+    tmpHelpFile := THelpFile(CurrentOpenFiles[ 0 ]);
+    AddToMRUList(tmpHelpFile.Title, tmpFilenames);
+  end;
+
+  // recreate menu
+  CreateMRUMenuItems;
+
+  tmpFilenames.Destroy;
+end;
+
+procedure TMainForm.CreateMRUMenuItems;
+var
+  MenuItem: TfpgMenuItem;
+  i: integer;
+  FileName: TfpgString;
+  FileNameIndex: longint;
+  MRUText: TfpgString;
+  MRUItem: TMRUItem;
+begin
+  FFileOpenRecent.SubMenu := nil;
+  miOpenRecentMenu.Free;
+  miOpenRecentMenu := TfpgPopupMenu.Create(nil);
+  FFileOpenRecent.SubMenu := miOpenRecentMenu;
+
+  // Add items for the MRU files
+  for i:= 0 to Settings.MRUList.Count -1 do
+  begin
+    MRUItem := TMRUItem(Settings.MRUList[ i ]);
+    MenuItem := miOpenRecentMenu.AddMenuItem('?', '', @OnMRUMenuItemClick);
+//    MenuItem.Name := 'MRUItem' + IntToStr( i ) + 'MI';
+
+    MRUText := MRUItem.Title;
+    if Trim( MRUText ) = '' then
+    begin
+      // Take the filenames, less path, as caption...
+      MRUText := '';
+      for FileNameIndex := 0 to MRUItem.Filenames.Count - 1 do
+      begin
+        FileName := MRUItem.Filenames[ FileNameIndex ];
+        FileName := fpgExtractFileName(FileName);
+        FileName := ChangeFileExt( FileName, '' );// remove extension
+
+        if FileNameIndex > 0 then
+        begin
+          MRUText := MRUText + HELP_FILE_DELIMITER;
+        end;
+        MRUText := MRUText + FileName;
+
+        // stop after 50 chars
+        if UTF8Length( MRUText ) > 50 then
+        begin
+          MRUText := MRUText + HELP_FILE_DELIMITER + ' ...';
+          break;
+        end;
+      end;
+    end;
+
+    MenuItem.Text := '&'
+                       + IntToStr( i + 1 )
+                       + '. '
+                       + MRUText;
+    if MRUItem.Filenames.Count = 1 then
+      MenuItem.Hint := MRUItem.Filenames[ 0 ]
+    else
+      MenuItem.Hint := MRUItem.Title
+                       + ' ('
+                       + IntToStr( MRUItem.Filenames.Count )
+                       + ' '
+                       + rsfiles
+                       + ')';
+
+    MenuItem.Tag := i;
+  end;
 end;
 
 
