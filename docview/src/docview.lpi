@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <Flags>
+        <SaveOnlyProjectUnits Value="True"/>
+      </Flags>
+      <SessionStorage Value="InIDEConfig"/>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <Title Value="docview"/>
+      <UseAppBundle Value="False"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="fpgui_toolkit"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="27">
+      <Unit0>
+        <Filename Value="docview.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="docview"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="frm_main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_main"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="IPFEscapeCodes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IPFEscapeCodes"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="HelpTopic.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpTopic"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="HelpFile.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpFile"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="CompareWordUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompareWordUnit"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="SearchTable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SearchTable"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="TextSearchQuery.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TextSearchQuery"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="nvUtilities.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="nvUtilities"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="nvNullObjects.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="nvNullObjects"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="../docs/inf04.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="SearchUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SearchUnit"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="../components/richtext/RichTextStyleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextStyleUnit"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="../components/richtext/CanvasFontManager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CanvasFontManager"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="../components/richtext/ACLStringUtility.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ACLStringUtility"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="../components/richtext/RichTextDocumentUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextDocumentUnit"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="../components/richtext/RichTextView.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextView"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="../components/richtext/RichTextLayoutUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextLayoutUnit"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="../components/richtext/RichTextDisplayUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RichTextDisplayUnit"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="IPFFileFormatUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IPFFileFormatUnit"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="HelpWindowDimensions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpWindowDimensions"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="NewViewConstantsUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NewViewConstantsUnit"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="SettingsUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SettingsUnit"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="dvconstants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="dvconstants"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="dvHelpers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="dvHelpers"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="HelpWindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpWindow"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="../TODO.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit26>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="../components/richtext/"/>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <CStyleOperator Value="False"/>
+        <IncludeAssertionCode Value="True"/>
+        <AllowLabel Value="False"/>
+        <CPPInline Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Other>
+      <CustomOptions Value="-O-
+"/>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+</CONFIG>
