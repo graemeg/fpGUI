@@ -55,7 +55,7 @@ Const
   NumFontSettings = 1;
 
 
-Type
+type
   TIndexStyle = ( isAlphabetical, isFileOnly, isFull );
   TToolbarStyle = ( tsNone, tsImages, tsText, tsImagesAndText );
   TGlobalSearchLocation = ( gsHelpPaths, gsFixedDrives, gsSelectedHelpPaths, gsCustom );

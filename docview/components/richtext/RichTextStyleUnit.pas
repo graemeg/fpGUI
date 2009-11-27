@@ -9,7 +9,8 @@ uses
 
 type
   TTextDrawStyle = record
-    Font: TFontSpec;
+    FontNameSize: TfpgString;
+    FontAttributes: TFontAttributes;
     Color: TfpgColor;
     BackgroundColor: TfpgColor;
     Alignment: TTextAlignment;
@@ -69,37 +70,23 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
-
     procedure BeginUpdate;
     procedure EndUpdate;
-
-    // Stream in/out
-    //Procedure ReadSCUResource( Const ResName: TResourceName;
-    //                           Var Data;
-    //                           DataLen: LongInt ); override;
-    //Function WriteSCUResource( Stream: TResourceStream ): boolean; override;
-
     property Margins: TRect read FMargins write SetMargins;
-
     property Heading1Font: TfpgFont read FHeading1Font write SetHeading1Font;
     property Heading2Font: TfpgFont read FHeading2Font write SetHeading2Font;
     property Heading3Font: TfpgFont read FHeading3Font write SetHeading3Font;
     property FixedFont: TfpgFont read FFixedFont write SetFixedFont;
     property NormalFont: TfpgFont read FNormalFont write SetNormalFont;
-
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
-
     property DefaultBackgroundColor: TfpgColor read FDefaultBackgroundColor write SetDefaultBackgroundColor;
     property DefaultColor: TfpgColor read FDefaultColor write SetDefaultColor;
-
     property DefaultAlignment: TTextAlignment read FDefaultAlignment write SetDefaultAlignment;
     property DefaultWrap: boolean read FDefaultWrap write SetDefaultWrap default True;
     property AtLeastOneWordBeforeWrap: boolean read FAtLeastOneWordBeforeWrap write SetAtLeastOneWordBeforeWrap;
-
     property MarginSizeStyle: TMarginSizeStyle read FMarginSizeStyle write SeTMarginSizeStyle;
     property MarginChar: longint read FMarginChar write SetMarginChar;
-
     // margins are exposed as individual properties here
     // since the Sibyl IDE cannot cope with editing a record property
     // within a class property (as in RichTextView)
@@ -134,11 +121,15 @@ uses
 //  , ACLProfile
   ;
 
-Procedure ApplyStyle( var Style: TTextDrawStyle; FontManager: TCanvasFontManager );
+Procedure ApplyStyle(var Style: TTextDrawStyle; FontManager: TCanvasFontManager);
+var
+  s: string;
 begin
 ProfileEvent('DEBUG:  ApplyStyle >>>');
   assert(FontManager <> nil, 'FontManager should not have been nil');
-  FontManager.SetFont( Style.Font );
+  s := Style.FontNameSize;
+  ApplyFontAttributes(s, Style.FontAttributes);
+  FontManager.SetFont(s);
   FontManager.Canvas.TextColor := Style.Color;
 ProfileEvent('DEBUG:  ApplyStyle <<<');
 end;
@@ -166,31 +157,31 @@ begin
 ProfileEvent('DEBUG:  ApplyStyleTag >>>');
   case Tag.TagType of
     ttBold:
-      Include( Style.Font.Attributes, faBold );
+      Include( Style.FontAttributes, faBold );
     ttBoldOff:
-      Exclude( Style.Font.Attributes, faBold );
+      Exclude( Style.FontAttributes, faBold );
     ttItalic:
-      Include( Style.Font.Attributes, faItalic );
+      Include( Style.FontAttributes, faItalic );
     ttItalicOff:
-      Exclude( Style.Font.Attributes, faItalic );
+      Exclude( Style.FontAttributes, faItalic );
     ttUnderline:
-      Include( Style.Font.Attributes, faUnderscore );
+      Include( Style.FontAttributes, faUnderscore );
     ttUnderlineOff:
-      Exclude( Style.Font.Attributes, faUnderscore );
+      Exclude( Style.FontAttributes, faUnderscore );
 
     ttFixedWidthOn:
-      FPGuiFontToFontSpec( Settings.FFixedFont, Style.Font );
+      Settings.FixedFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
     ttFixedWidthOff:
-      FPGuiFontToFontSpec( Settings.FNormalFont, Style.Font );
+      Settings.NormalFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
 
     ttHeading1:
-      FPGuiFontToFontSpec( Settings.FHeading1Font, Style.Font );
+      Settings.Heading1Font := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
     ttHeading2:
-      FPGuiFontToFontSpec( Settings.FHeading2Font, Style.Font );
+      Settings.Heading2Font := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
     ttHeading3:
-      FPGuiFontToFontSpec( Settings.FHeading3Font, Style.Font );
+      Settings.Heading3Font := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
     ttHeadingOff:
-      FPGuiFontToFontSpec( Settings.FNormalFont, Style.Font );
+      Settings.NormalFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
 
     ttFont:
     begin
@@ -201,39 +192,27 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
       tmpFontParts.Destroy;
 
       NewStyle := Style;
-      try
-        NewStyle.Font.FaceName := FontFaceName;
+      NewStyle.FontNameSize := FontFaceName;
 
-        if Pos( 'x', FontSizeString ) > 0 then
-        begin
-          tmpFontParts := TStringList.Create;
-          StrExtractStrings(tmpFontParts, FontSizeString, ['x'], #0);
-          XSizeStr := tmpFontParts[0];
-          YSizeStr := tmpFontParts[1];
-          tmpFontParts.Destroy;
+      if Pos( 'x', FontSizeString ) > 0 then
+      begin
+        tmpFontParts := TStringList.Create;
+        StrExtractStrings(tmpFontParts, FontSizeString, ['x'], #0);
+        XSizeStr := tmpFontParts[0];
+        YSizeStr := tmpFontParts[1];
+        tmpFontParts.Destroy;
+        NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + YSizeStr;
+      end
+      else
+        NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + FontSizeString;
 
-          NewStyle.Font.XSize := StrToInt( XSizeStr );
-          NewStyle.Font.YSize := StrToInt( YSizeStr );
-          NewStyle.Font.PointSize := 0;
-        end
-        else
-        begin
-          NewStyle.Font.PointSize := StrToInt( FontSizeString );
-        end;
-
-        if     ( NewStyle.Font.FaceName <> '' )
-           and ( NewStyle.Font.PointSize >= 1 ) then
-        begin
-          Style := NewStyle;
-        end;
-
-      except
-      end;
+      if ( NewStyle.FontNameSize <> '' ) then
+        Style := NewStyle;
     end;
 
     ttFontOff:
       // restore default
-      FPGuiFontToFontSpec( Settings.FNormalFont, Style.Font );
+      Settings.NormalFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
 
     ttColor:
       GetTagColor( Tag.Arguments, Style.Color );
@@ -320,11 +299,12 @@ end;
 function GetDefaultStyle( const Settings: TRichTextSettings ): TTextDrawStyle;
 begin
   FillChar(Result, SizeOf(TTextDrawStyle), 0);
-  FPGuiFontToFontSpec( Settings.NormalFont, Result.Font );
-  Result.Alignment := Settings.DefaultAlignment;
-  Result.Wrap := Settings.DefaultWrap;
-  Result.Color := Settings.DefaultColor;
-  Result.BackgroundColor := Settings.DefaultBackgroundColor;
+  Result.FontNameSize := DefaultTopicFont + '-10';
+  Result.FontAttributes := [];
+  Result.Alignment := Settings.FDefaultAlignment;
+  Result.Wrap := Settings.FDefaultWrap;
+  Result.Color := Settings.FDefaultColor;
+  Result.BackgroundColor := Settings.FDefaultBackgroundColor;
   Result.LeftMargin := Settings.Margins.Left;
   Result.RightMargin := Settings.Margins.Right;
 end;
@@ -492,14 +472,10 @@ end;
 
 Function FontSame( FontA: TfpgFont; FontB: TfpgFont ): boolean;
 begin
-  if    ( FontA = nil )
-     or ( FontB = nil ) then
-  begin
-    Result := FontA = FontB;
-    exit;
-  end;
-
-  Result := FontA.FontDesc = FontB.FontDesc;
+  if ( FontA = nil ) or ( FontB = nil ) then
+    Result := False
+  else
+    Result := FontA.FontDesc = FontB.FontDesc;
 end;
 
 Procedure TRichTextSettings.AssignFont(var AFont: TfpgFont; NewFont: TfpgFont );
@@ -518,12 +494,7 @@ End;
 
 Procedure TRichTextSettings.SetHeading1Font( NewFont: TfpgFont );
 begin
-//  ProfileEvent( 'TRichTextSettings.SetHeading1Font' );
   AssignFont( FHeading1Font, NewFont );
-
-//  if FHeading1FOnt = nil then
-//    ProfileEvent( '  Set to nil' );
-
 end;
 
 Procedure TRichTextSettings.SetHeading2Font( NewFont: TfpgFont );
@@ -631,6 +602,9 @@ begin
   end;
 end;
 
-Initialization
-  RegisterClasses( [ TRichTextSettings ] );
-End.
+
+initialization
+  RegisterClasses([TRichTextSettings]);
+
+end.
+

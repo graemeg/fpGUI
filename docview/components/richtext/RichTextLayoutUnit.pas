@@ -131,9 +131,7 @@ end;
 // Create a layout of the specified rich text.
 constructor TRichTextLayout.Create(Text: PChar; Images: TfpgImageList;
     RichTextSettings: TRichTextSettings; FontManager: TCanvasFontManager;
-    AWidth: longint);
-var
-  DefaultFontSpec: TFontSpec;
+    Width: longint);
 Begin
 ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
   inherited Create;
@@ -156,11 +154,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Create   2');
   //FVerticalImageScale   :=   FFontManager.Canvas.VerticalResolution
   //                         / Screen.Canvas.VerticalResolution;
 
-  // use normal font for default font when specified fonts can't be found
-  FPGuiFontToFontSpec( RichTextSettings.NormalFont, DefaultFontSpec );
 ProfileEvent('DEBUG:  TRichTextLayout.Create   3');
-  FFontManager.DefaultFontSpec := DefaultFontSpec;
-ProfileEvent('DEBUG:  TRichTextLayout.Create   4');
   Layout;
 ProfileEvent('DEBUG:  TRichTextLayout.Create <<<<');
 End;
@@ -432,7 +426,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
               CheckFontHeights( CurrentLine );
 
             if     ( CurrentElement.Tag.TagType = ttItalicOff )
-               and ( faItalic in Style.Font.Attributes ) then
+               and ( faItalic in Style.FontAttributes ) then
             begin
               if not FFontManager.IsFixed then
               begin
@@ -604,10 +598,8 @@ begin
       Result := Style.LeftMargin;
 
     taRight:
-      Result :=   Style.LeftMargin
-                + FLayoutWidth
-                - Style.RightMargin
-                - Line.Width;
+      Result :=   Style.LeftMargin + FLayoutWidth
+                - Style.RightMargin - Line.Width;
 
     taCenter:
       begin
@@ -616,10 +608,8 @@ begin
         // |<-lm->[aaaaaaaaaaaaaaa]<-space-><-rm->|
         // |<-----line width------>               |
         // space = layoutw-rm-linew
-        SpaceOnLine :=   FLayoutWidth
-                       - Style.RightMargin
-                       - Line.Width; // Note: line width includes left margin
-        Result :=   Style.LeftMargin + (SpaceOnLine div 2);
+        SpaceOnLine := FLayoutWidth - Style.RightMargin - Line.Width; // Note: line width includes left margin
+        Result := Style.LeftMargin + (SpaceOnLine div 2);
       end;
   end;
 end;
@@ -639,15 +629,18 @@ Var
   Style: TTextDrawStyle;
   NewMarginX: longint;
   StartedDrawing: boolean;
+  fstyle: string;
 begin
   Line  := TLayoutLine(FLines[ LineIndex ]);
   P     := Line.Text;
   EndP  := Line.Text + Line.Length;
   Style := Line.Style;
 
-  FFontManager.SetFont( Style.Font );
-  StartedDrawing := false;
+  fStyle := Style.FontNameSize;
+  ApplyFontAttributes(fStyle, Style.FontAttributes);
+  FFontManager.SetFont( fStyle );
 
+  StartedDrawing := false;
   Link := '';
   if Line.LinkIndex <> -1 then
     CurrentLink := FLinks[ Line.LinkIndex ]
@@ -703,14 +696,12 @@ begin
           else
           begin
             if     ( Element.Tag.TagType = ttItalicOff )
-               and ( faItalic in Style.Font.Attributes )
+               and ( faItalic in Style.FontAttributes )
                and ( not FFontManager.IsFixed ) then
               // end of italic; add a space
 //              inc( X, FFontManager.CharWidth( ' ' )  );
 
-            PerformStyleTag( Element.Tag,
-                             Style,
-                             X );
+            PerformStyleTag( Element.Tag, Style, X );
             NewMarginX := Style.LeftMargin;
             if NewMarginX > X then
             begin
@@ -738,13 +729,16 @@ Var
   Line: TLayoutLine;
   Style: TTextDrawStyle;
   NewMarginX: longint;
+  fStyle: string;
 begin
   Line := TLayoutLine(FLines[ LineIndex ]);
   P := Line.Text;
   EndP := Line.Text + Line.Length;
 
   Style := Line.Style;
-  FFontManager.SetFont( Style.Font );
+  fStyle := Style.FontNameSize;
+  ApplyFontAttributes(fStyle, Style.FontAttributes);
+  FFontManager.SetFont( fStyle );
 
   StartedDrawing := false;
 
@@ -767,7 +761,6 @@ begin
 
         if GetCharIndex( P ) - GetCharIndex( Line.Text ) >= Offset then
         begin
-          X := X;
           // found
           exit;
         end;
@@ -780,14 +773,12 @@ begin
       teStyle:
       begin
         if     ( Element.Tag.TagType = ttItalicOff )
-           and ( faItalic in Style.Font.Attributes )
+           and ( faItalic in Style.FontAttributes )
            and ( not FFontManager.IsFixed ) then
           // end of italic; add a space
 //          inc( X, FFontManager.CharWidth( ' ' )  );
 
-        PerformStyleTag( Element.Tag,
-                         Style,
-                         X );
+        PerformStyleTag( Element.Tag, Style, X );
 
         NewMarginX := Style.LeftMargin;
         if NewMarginX > X then
@@ -803,8 +794,6 @@ begin
   // went thru the whole line without finding the point,
   if not StartedDrawing then
     X := GetStartX( Style, Line );
-
-  X := X;
 end;
 
 function TRichTextLayout.GetLineFromPosition( YToFind: longint;
@@ -1003,6 +992,6 @@ begin
   end;
 end;
 
-Initialization
-End.
+
+end.
 

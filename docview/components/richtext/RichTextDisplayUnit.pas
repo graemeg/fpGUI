@@ -135,6 +135,7 @@ var
   Selected: boolean;
   NextSelected: boolean;
   NewMarginX: longint;
+  fStyle: string;
 
   procedure DrawTextBlock;
   begin
@@ -172,7 +173,9 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
   StringToDraw := '';
 
   Style := Line.Style;
-  FontManager.SetFont( Style.Font );
+  fStyle := Style.FontNameSize;
+  ApplyFontAttributes(fStyle, Style.FontAttributes);
+  FontManager.SetFont( fStyle );
   StartedDrawing := false;
 
   TextBlockStart := P;
@@ -222,21 +225,17 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
           begin
             Bitmap := Layout.Images.Item[BitmapIndex].Image;
 
-            BitmapRect.Left := X div FontWidthPrecisionFactor;
+            BitmapRect.Left := X;
             BitmapRect.Top := Start.Y;
             BitmapRect.Right := Trunc(BitmapRect.Left
-                                + Bitmap.Width
-                                  * Layout.HorizontalImageScale);
+                                + Bitmap.Width * Layout.HorizontalImageScale);
             BitmapRect.Bottom := Trunc(BitmapRect.Top
-                              + Bitmap.Height
-                                * Layout.VerticalImageScale);
+                              + Bitmap.Height * Layout.VerticalImageScale);
 
             FontManager.Canvas.StretchDraw(BitmapRect.Left, BitMapRect.Top,
                 BitmapRect.Right-BitMapRect.Left, BitMapRect.Bottom-BitMapRect.Top, Bitmap);
 
-            inc( X, trunc( Bitmap.Width
-                           * FontWidthPrecisionFactor
-                           * Layout.HorizontalImageScale ) );
+            inc( X, trunc( Bitmap.Width * Layout.HorizontalImageScale ) );
           end;
         end
         else
@@ -253,7 +252,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
         TextBlockStart := NextP;
 
         if     ( Element.Tag.TagType = ttItalicOff )
-           and ( faItalic in Style.Font.Attributes )
+           and ( faItalic in Style.FontAttributes )
            and ( not FontManager.IsFixed )
            then
           // end of italic; add a space

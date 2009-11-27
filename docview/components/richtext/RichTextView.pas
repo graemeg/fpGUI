@@ -928,12 +928,7 @@ ProfileEvent('DEBUG:  TRichTextView.CreateWnd >>>>');
   if InDesigner then
     exit;
 
-  { TODO -ograeme : I disabled bitmap fonts }
-  FFontManager := TCanvasFontManager.Create( Canvas,
-                                             False, // allow bitmap fonts
-                                             Self
-                                             );
-
+  FFontManager := TCanvasFontManager.Create(Canvas, Self);
   FLastLinkOver := '';
   FSelectionStart := -1;
   FSelectionEnd := -1;
