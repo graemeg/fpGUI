@@ -1,0 +1,421 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><head>
+
+	<title>ASCII, IBM Extended ASCII Character Set.</title>
+
+	<meta http-equiv="pics-label" content="(pics-1.1 &quot;http://www.icra.org/ratingsv02.html&quot; comment &quot;ICRAonline EN v2.0&quot; l gen true for &quot;http://www.web-wise-wizard.com/&quot; r (nz 1 vz 1 lz 1 oz 1 cz 1))">
+	<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1">
+	<meta http-equiv="Reply-to" content="http://www.web-wise-wizard.com/site-goodies/contact-us.html">
+	<meta http-equiv="Content-language" content="en">
+	<meta http-equiv="Content-Style-Type" content="text/css">
+	<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+
+	<link rel="stylesheet" type="text/css" href="ascii-ibm-extended-character-set_files/www-theme-1.css" title="skin1">
+	<link rel="alternate stylesheet" type="text/css" href="ascii-ibm-extended-character-set_files/www-theme-2.css" title="skin2">
+	<link rel="alternate stylesheet" type="text/css" href="ascii-ibm-extended-character-set_files/www-theme-3.css" title="skin3">
+	<link rel="alternate stylesheet" type="text/css" href="ascii-ibm-extended-character-set_files/www-theme-4.css" title="skin4">
+	<link rel="alternate stylesheet" type="text/css" href="ascii-ibm-extended-character-set_files/www-theme-5.css" title="skin5">
+	<link rel="alternate stylesheet" type="text/css" href="ascii-ibm-extended-character-set_files/www-theme-6.css" title="skin6">
+	<link rel="stylesheet" type="text/css" href="ascii-ibm-extended-character-set_files/www-content.css">
+
+
+	<script type="text/javascript">
+
+	<!-- HIDE FROM OLD BROWSERS
+
+	window.onerror = catchError;
+	var docDomain = (typeof(document.domain)=="unknown") ? "" : document.domain;		
+	var winCount = 0;
+
+	function catchError(errMess,pageAddr,lineNum) {
+
+		var nameVal = "line=" + escape(lineNum);
+		nameVal += "&error=" + escape(errMess);
+		nameVal += "&page=" + escape(pageAddr);
+		nameVal += "&appName=" + escape(navigator.appName);
+		nameVal += "&appVersion=" + escape(navigator.appVersion);
+		nameVal += "&userAgent=" + escape(navigator.userAgent);
+		nameVal += "&locPath=" + escape(location.pathname);
+		nameVal += "&docRef=" + escape(document.referrer);
+
+		if (docDomain.length) {
+			var url = "http://" + docDomain + "/cgi-bin/record-scripting-error.cgi?" + nameVal;
+			self.location.href = url;
+		} else {
+			winCount ++;
+			winName = "error" + winCount;
+			nameVal = unescape(nameVal);
+			nameVal = nameVal.replace(/&/g,"<br>");
+
+			errorWin = window.open('',winName,'scrollbars=yes');
+			errorWin.document.writeln(nameVal);
+			errorWin.document.close();
+		}
+
+		// RETURN FALSE TO INVOKE THE DEFAULT ERROR HANDLER AFTERWARDS
+		// RETURN TRUE TO BYPASS THE DEFAULT ERROR HANDLER AFTERWARDS
+		return (true);
+	}
+
+	// END HIDING -->
+
+	</script> 
+
+
+	<script type="text/javascript" src="ascii-ibm-extended-character-set_files/script-bin.js"></script>
+
+
+	<script type="text/javascript">
+
+	<!-- HIDE FROM OLD BROWSERS
+
+//=================================================================================
+
+	var wwwTitleArea = new Image(500,90);
+	wwwTitleArea.src = "../images/www-title-area.gif";
+	var internetToolbox = new Image(498,12);
+	internetToolbox.src = "../images/internet-toolbox.gif";
+	var pixClear = new Image(1,1);
+	pixClear.src = "../images/pixClear.gif";
+
+//=================================================================================
+
+	// PRELOAD TITLE IMAGE
+	var titleUrl = "dem/ascii-ibm/title.gif";
+	var titlePic = new Image ( 81,37 );
+	titlePic.src = titleUrl;
+
+
+	// PRELOAD 16 ASCII BLOCK IMAGES
+	var asciiName = new Array;
+	var asciiPath = "dem/ascii-ibm/";
+	var asciiExt = ".gif";
+	var asciiPics;
+	var numPics = 16;
+
+
+	asciiName = form_ascii_names ( numPics );
+	asciiPics = preload_ascii_blocks ( asciiPath, asciiName, asciiExt, numPics );
+
+
+	function form_ascii_names ( num_pics )
+	{
+		var ascii_names = new Array;
+
+		for ( var pic_num=0; pic_num<num_pics; pic_num++ )
+			{
+			var pic_str = "00" + pic_num;
+			pic_str = pic_str.substring ( pic_str.length-2, pic_str.length );
+			ascii_names[pic_num] = "ascii_" + pic_str;
+			}
+
+		return ( ascii_names );
+	}
+
+
+	function preload_ascii_blocks ( ascii_path, ascii_name, ascii_ext, num_pics )
+	{
+		ascii_pics = new Array;
+
+		for (var pic_num=0; pic_num<num_pics; pic_num++ )
+			{
+			ascii_pics[pic_num] = new Image (81,288);
+			ascii_pics[pic_num].src = ascii_path + ascii_name[pic_num] + ascii_ext;
+			}
+
+		return ( ascii_pics );
+	}
+
+//================================================================================
+
+	function display_pics ()
+	{
+		if ( pics_all_loaded () )
+			{
+			setTimeout ( "document_commands ()", 600 );
+
+			return;
+			}
+
+		setTimeout ( "display_pics ()", 500 );
+	}
+
+
+	function pics_all_loaded ()
+	{
+		var count = 0;
+
+		if ( titlePic.complete )
+			count++;
+
+		for ( var pic_num = 0; pic_num < numPics; pic_num++ )
+			if ( asciiPics[pic_num].complete )
+				count ++;
+
+		return ( ( count == ( numPics+1 ) ) );
+	}
+
+
+	function document_commands ()
+	{
+		for ( var title_num=0; title_num<4; title_num++ )
+			eval ( "document.title_" + title_num + ".src = titlePic.src" );
+
+		for ( var pic_num=0; pic_num<numPics; pic_num++ )
+			eval ( "document." + asciiName[pic_num] + ".src = asciiPics[" + pic_num + "].src" );
+	}
+
+//=================================================================================
+
+	function checkLocal(link) {
+	
+		var docDomain = ( typeof ( document.domain ) == "unknown" ) ? "" : document.domain;
+	
+		if (!docDomain.length) {
+
+			if (link.href.match(/http:\/\/webmaster.web-wise-wizard.com/i)) {
+				re = /http:\/\/webmaster.web-wise-wizard.com/i;
+				link.href = link.href.replace(re,"file:///D:/htdocs2/web-wise-wizard-4-wm/public_html/");
+				link.href = link.href + "index.html";
+			} else if (link.href.indexOf(".") < 0) {
+				link.href = link.href + "index.html";
+			}
+		}
+
+		return(true);
+	}
+
+//=================================================================================
+
+	function fullWindow(link) {
+
+		if (typeof(_fullWindow) == "function") {
+			return(!_fullWindow(link.href));
+		} else {
+			return(true);
+		}
+	}
+
+//=================================================================================
+
+	// END HIDING -->
+
+	</script>
+
+	<link rel="shortcut icon" href="http://www.web-wise-wizard.com/favicon.ico">
+
+	<style type="text/css">
+	<!--
+
+	.asciiOuter {
+		float:left;
+		margin-right:16px;
+	}
+
+	.asciiTable {
+		width:211px;
+		background-color:#FFFFFF;
+		border:1px solid #0000CC;
+		padding-bottom:0px;
+	}
+
+	.asciiTable th {
+		background-color:#0000CC;
+		color:#FFFFFF;
+		padding:0px;
+		padding-top:10px;
+		padding-bottom:12px;
+	}
+
+	.asciiTable .asciiTitle {
+		width:81px;
+		padding-top:12px;
+		padding-left:10px;
+		padding-right:10px;
+	}
+
+	.asciiTable .asciiMiddle {
+		text-align:center;
+		width:9px;
+	}
+
+	.asciiTable .asciiCell {
+		width:81px;
+		padding-left:10px;
+		padding-right:10px;
+	}
+
+	-->
+	</style>
+
+</head><body>
+
+
+
+
+
+
+	<!-- START OF MAIN CONTENT CONTAINER -->
+	<div id="mainContainer">
+
+
+	<!-- START OF MAIN CONTENT AREA -->
+	<div id="mainContent">
+
+
+	<!-- START OF PAGE TITLE AREA -->
+
+	<div class="alignCenter">
+	<h1 class="h1">ASCII/IBM Extended Character Set</h1>
+	</div>
+
+	<!-- END OF PAGE TITLE AREA -->
+
+
+	<!-- START OF PAGE CONTENT AREA -->
+
+	<p>&nbsp;</p>
+
+	<div class="asciiOuter"><table class="asciiTable" border="0" cellpadding="0" cellspacing="0">
+
+	<tbody><tr>
+	<th colspan="3">ASCII Standard Characters</th>
+	</tr>
+
+	<tr>
+	<td class="asciiTitle"><img src="ascii-ibm-extended-character-set_files/title.gif" alt="" height="37" width="81"></td>
+	<td>&nbsp;</td>
+	<td class="asciiTitle"><img src="ascii-ibm-extended-character-set_files/title.gif" alt="" height="37" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-00.gif" alt="ASCII Control Characters" height="288" width="81"></td>
+	<td rowspan="4" class="asciiMiddle"><img src="ascii-ibm-extended-character-set_files/pixBluCC.gif" alt="" height="1153" width="1"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-04.gif" alt="ASCII format" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-01.gif" alt="Plain Text" height="288" width="81"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-05.gif" alt="" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-02.gif" alt="Text File" height="288" width="81"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-06.gif" alt="Plain Text" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-03.gif" alt="American Standard Code For Information Interchange" height="288" width="81"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-07.gif" alt="Numerical Representation" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td colspan="3">&nbsp;</td>
+	</tr>
+
+	</tbody></table></div>
+
+
+	<div class="asciiOuter"><table class="asciiTable" border="0" cellpadding="0" cellspacing="0">
+
+	<tbody><tr>
+	<th colspan="3">IBM Extended Characters</th>
+	</tr>
+
+	<tr>
+	<td class="asciiTitle"><img src="ascii-ibm-extended-character-set_files/title.gif" alt="" height="37" width="81"></td>
+	<td>&nbsp;</td>
+	<td class="asciiTitle"><img src="ascii-ibm-extended-character-set_files/title.gif" alt="" height="37" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-08.gif" alt="" height="288" width="81"></td>
+	<td rowspan="4" class="asciiMiddle"><img src="ascii-ibm-extended-character-set_files/pixBluCC.gif" alt="" height="1153" width="1"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-12.gif" alt="" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-09.gif" alt="IBM Extended Character Set" height="288" width="81"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-13.gif" alt="Alphanumeric Characters" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-10.gif" alt="" height="288" width="81"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-14.gif" alt="" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-11.gif" alt="" height="288" width="81"></td>
+	<td class="asciiCell"><img src="ascii-ibm-extended-character-set_files/ascii-15.gif" alt="" height="288" width="81"></td>
+	</tr>
+
+	<tr>
+	<td colspan="3">&nbsp;</td>
+	</tr>
+
+	</tbody></table></div>
+
+
+	<h2 class="h2">These Tables ...</h2>
+
+	<p class="normText">These
+extended ASCII tables are a chart of all the original 7-bit, ASCII
+codes in the original ASCII Standard Character Set plus the IBM
+Extended Characters Set, each character value being stored in the
+eighth bit. The tables display the decimal values, the hexadecimal
+values and an accurate rendering of the actual characters. These
+extended ASCII character sets originated in the early IBP PC DOS system
+and because of this they can only be represented in bitmapped,
+graphical format on a web page.</p>
+
+	<h2 class="h2">History Of ...</h2>
+
+	<p class="normText">Once
+combined by IBM, the ASCII Standard Character Set and the IBM Extended
+Character Set became the on-board 'ROM-BIOS' character set for all IBM
+PC's and compatibles. It is in reality the DOS character set because
+Microsoft Windows and Web browsers each use their own character sets.</p>
+
+	<p class="normText">Like
+the dinosaur, the ASCII/IBM character set ruled the world of computing
+for many years until progress rendered it inadequate for modern day
+needs. In it's heyday we thought it was wonderful because it provided
+basic ASCII characters plus all these wonderful extended characters for
+making boxes and windows in DOS, something hitherto unheard of. I was
+never too sure about some of the foreign characters, perhaps an early
+attempt by IBM at internationalisation.</p>
+
+	<h2 class="h2">ASCII Meaning ...</h2>
+
+	<p class="normText">The
+acronym ASCII stands for American Standard Code For Information
+Interchange. If we remember that computers only understand numbers, the
+ASCII code is the numerical representation of the alpha/numeric
+characters understood by humans (e.g. '1,2,3' or 'A,B,C' or 'd,e,f',
+etc.). ASCII codes in the range 0...31 represent special, non-printing
+characters called Control Characters (e.g. 'c/r,l/f,f/f', etc.). ASCII
+was originally used with teletype machines and so many of the Control
+Character descriptions can be difficult to understand.</p>
+
+	<p class="normText">In
+more practical terms you may be asked to save a file in ASCII format
+and all this means that the file should be saved as a plain test file,
+without any formatting or Markup instructions contained in the file.
+Programs that are designed to handle plain text files are called text
+editors and these include Notepad, EditPad, etc. and they should not be
+confused with word processors like Microsoft Word.</p>
+
+
+	<!-- END OF PAGE CONTENT AREA -->
+	</div>
+
+	<!-- END OF MAIN CONTENT AREA -->
+	</div>
+
+	<!-- END OF MAIN CONTENT CONTAINER -->
+	</div>
+
+
+
+</body></html>
