@@ -9,7 +9,7 @@ uses
   Classes,
   fpg_main, frm_main, IPFEscapeCodes, HelpTopic, CompareWordUnit, SearchTable,
   TextSearchQuery, nvUtilities, nvNullObjects, HelpFile, SearchUnit,
-  fpg_cmdlineparams, fpgui_toolkit, customstyle, IPFFileFormatUnit, HelpWindowDimensions,
+  fpg_cmdlineparams, IPFFileFormatUnit, HelpWindowDimensions,
   NewViewConstantsUnit, SettingsUnit, RichTextStyleUnit, CanvasFontManager,
   ACLStringUtility, RichTextDocumentUnit, RichTextView, RichTextLayoutUnit,
   RichTextDisplayUnit, dvconstants, dvHelpers, frm_configuration;
