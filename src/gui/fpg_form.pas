@@ -57,8 +57,6 @@ type
     FWindowPosition: TWindowPosition;
     FWindowTitle: string;
     FSizeable: boolean;
-    procedure   AdjustWindowStyle; override;
-    procedure   SetWindowParameters; override;
     procedure   SetWindowTitle(const ATitle: string); override;
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
@@ -94,6 +92,8 @@ type
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
     procedure   AfterCreate; virtual;
+    procedure   AdjustWindowStyle; override;
+    procedure   SetWindowParameters; override;
     procedure   InvokeHelp; override;
     procedure   Show;
     procedure   Hide;

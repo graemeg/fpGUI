@@ -159,10 +159,10 @@ type
     procedure   SetDayColor(const AValue: TfpgColor);
     procedure   SetHolidayColor(const AValue: TfpgColor);
     procedure   SetSelectedColor(const AValue: TfpgColor);
-    procedure   SetText(const AValue: string); override;
-    function    GetText: string; override;
     procedure   SetCloseOnSelect(const AValue: boolean);
   protected
+    function    GetText: string; override;
+    procedure   SetText(const AValue: string); override;
     procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime); virtual;
     function    HasText: boolean; override;
     procedure   DoDropDown; override;
@@ -1029,7 +1029,6 @@ procedure TfpgCalendarCheckCombo.DoDrawText(const ARect: TfpgRect);
 var
   lRect: TfpgRect;
   flags: TFTextFlags;
-  lColor: TfpgColor;
 begin
   lRect := ARect;
   lRect.Left := lRect.Left+FCheckBoxRect.Width + 1;

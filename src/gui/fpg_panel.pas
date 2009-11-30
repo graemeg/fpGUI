@@ -139,10 +139,10 @@ type
     procedure   SetMargin(const AValue: integer);
   protected
     FFont: TfpgFont;
-    function    GetClientRect: TfpgRect; override;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
+    function    GetClientRect: TfpgRect; override;
     property    Font: TfpgFont read FFont;
   published
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;

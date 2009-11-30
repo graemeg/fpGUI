@@ -43,7 +43,6 @@ type
     procedure   SetPopupFrame(const AValue: boolean);
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
-    procedure   AdjustWindowStyle; override;
     procedure   HandleClose; virtual;
     procedure   HandleShow; override;
     procedure   ProcessPopupFrame; virtual;
@@ -52,6 +51,7 @@ type
     procedure   DoOnShow; virtual;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   AdjustWindowStyle; override;
     procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord); overload;
     procedure   ShowAt(x, y: TfpgCoord); overload;
     procedure   Close; virtual;

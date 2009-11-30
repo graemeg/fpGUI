@@ -151,6 +151,7 @@ type
     property Value: extended read FValue write SetValue;
     property Decimals: integer read GetDecimals write SetDecimals;
     property FixedDecimals: Boolean read GetFixedDecimals write SetFixedDecimals;
+    property Hint;
     property TabOrder;
     property    OnChange;
     property    OnEnter;
@@ -189,7 +190,7 @@ type
     procedure SetIncrement(const AValue: integer);
     procedure SetLargeIncrement(const AValue: integer);
     procedure SetValue(const AValue: integer);
-    procedure SetHint(const AValue: string);
+    procedure SetHint(const AValue: string); override;
     procedure ButtonUpClick(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
     procedure ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -218,7 +219,7 @@ type
     property Increment: integer read FIncrement write SetIncrement default 1;
     property LargeIncrement: integer read FLargeIncrement write SetLargeIncrement default 10;
     property Value: integer read FValue write SetValue default 0;
-    property Hint: string read FHint write SetHint;
+    property Hint;
     property TabOrder;
     property    OnChange;
     property    OnEnter;
@@ -1035,12 +1036,11 @@ end;
 
 procedure TfpgSpinEdit.SetHint(const AValue: string);
 begin
-  if FHint <> AValue then
-  begin
-    FEdit.Hint := AValue;
-    FButtonUp.Hint := AValue;
-    FButtonDown.Hint := AValue;
-  end;
+  inherited SetHint(AValue);
+  // let child component use the same hint
+  FEdit.Hint := AValue;
+  FButtonUp.Hint := AValue;
+  FButtonDown.Hint := AValue;
 end;
 
 procedure TfpgSpinEdit.ButtonUpClick(Sender: TObject);
