@@ -35,6 +35,16 @@ How to compile fpGUI
  Please see the readme.txt file in the "src" directory.
 
 
+System requirements under Linux
+===============================
+To be able to compile and link fpGUI based applications you need to install
+the following library dependencies. The packages will pull in all the other
+required packages too.
+
+  $ sudo apt-get install libX11-dev
+  $ sudo apt-get install libXft-dev
+
+
 
 -----
  Graeme Geldenhuys
