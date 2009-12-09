@@ -293,7 +293,6 @@ var
   p: integer;
   achar: string;
 begin
-//  writeln('DrawText  x:', x, '  y:', y);
   if not Enabled then
     ACanvas.SetFont(fpgStyle.MenuDisabledFont)
   else
@@ -307,12 +306,15 @@ begin
     if p > 0 then
     begin
       // first part of text before the & sign
-      ACanvas.DrawString(x, y, UTF8Copy(s, 1, p-1));
+//      ACanvas.DrawString(x, y, UTF8Copy(s, 1, p-1));
+      fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, 1, p-1), Enabled);
+
       inc(x, fpgStyle.MenuFont.TextWidth(UTF8Copy(s, 1, p-1)));
       if UTF8Copy(s, p+1, 1) = achar then
       begin
         // Do we need to paint a actual & sign (create via && in item text)
-        ACanvas.DrawString(x, y, achar);
+//        ACanvas.DrawString(x, y, achar);
+        fpgStyle.DrawString(ACanvas, x, y, achar, Enabled);
         inc(x, fpgStyle.MenuFont.TextWidth(achar));
       end
       else
@@ -320,7 +322,8 @@ begin
         // Draw the HotKey text
         if Enabled then
           ACanvas.SetFont(fpgStyle.MenuAccelFont);
-        ACanvas.DrawString(x, y, UTF8Copy(s, p+1, 1));
+//        ACanvas.DrawString(x, y, UTF8Copy(s, p+1, 1));
+        fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, p+1, 1), Enabled);
         inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, p+1, 1)));
         if Enabled then
           ACanvas.SetFont(fpgStyle.MenuFont);
@@ -331,7 +334,8 @@ begin
 
   // Draw the remaining text after the & sign
   if UTF8Length(s) > 0 then
-    ACanvas.DrawString(x, y, s);
+//    ACanvas.DrawString(x, y, s);
+    fpgStyle.DrawString(ACanvas, x, y, s, Enabled);
 end;
 
 function TfpgMenuItem.GetCommand: ICommand;
@@ -974,7 +978,7 @@ begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.Clear(BackgroundColor);
-  Canvas.SetColor(clWidgetFrame);
+  Canvas.SetColor(clWindowBackground);
   Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
   Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
 
@@ -1019,8 +1023,10 @@ var
 begin
   if mi.Separator then
   begin
-    Canvas.SetColor(clMenuText);
-    Canvas.DrawLine(rect.Left, rect.Top+2, rect.Right+1, rect.Top+2);
+    Canvas.SetColor(clShadow1);
+    Canvas.DrawLine(rect.Left+1, rect.Top+2, rect.Right, rect.Top+2);
+    Canvas.SetColor(clHilite2);
+    Canvas.DrawLine(rect.Left+1, rect.Top+3, rect.Right, rect.Top+3);
   end
   else
   begin
@@ -1031,7 +1037,8 @@ begin
     if mi.HotKeyDef <> '' then
     begin
       s := mi.HotKeyDef;
-      Canvas.DrawString(rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s);
+      fpgStyle.DrawString(Canvas, rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
+//      Canvas.DrawString(rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s);
     end;
 
     if mi.SubMenu <> nil then

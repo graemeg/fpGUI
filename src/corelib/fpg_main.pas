@@ -1623,25 +1623,25 @@ begin
 
   {$Note Refactor this so under Windows it can detect the system colors instead.
     Also under Linux (KDE and Gnome) we should be able to detect the system colors.}
-  fpgSetNamedColor(clWindowBackground, $D4D0C8);
+  fpgSetNamedColor(clWindowBackground, $D5D2CD);
   fpgSetNamedColor(clBoxColor, $FFFFFF);
-  fpgSetNamedColor(clShadow1, $808080);
-  fpgSetNamedColor(clShadow2, $404040);
-  fpgSetNamedColor(clHilite1, $E0E0E0);
-  fpgSetNamedColor(clHilite2, $FFFFFF);
+  fpgSetNamedColor(clShadow1, $848284);       // medium
+  fpgSetNamedColor(clShadow2, $424142);       // dark
+  fpgSetNamedColor(clHilite1, $E0E0E0);       // light
+  fpgSetNamedColor(clHilite2, $FFFFFF);       // white
   fpgSetNamedColor(clText1, $000000);
   fpgSetNamedColor(clText2, $000040);
   fpgSetNamedColor(clText3, $800000);
   fpgSetNamedColor(clText4, $404000);
-  fpgSetNamedColor(clSelection, $0A246A);
+  fpgSetNamedColor(clSelection, $08246A);
   fpgSetNamedColor(clSelectionText, $FFFFFF);
   fpgSetNamedColor(clInactiveSel, $D0D0FF);
   fpgSetNamedColor(clInactiveSelText, $000000);
   fpgSetNamedColor(clScrollBar, $E8E4DB);
-  fpgSetNamedColor(clButtonFace, $D4D0C8);
+  fpgSetNamedColor(clButtonFace, $D5D2CD);
   fpgSetNamedColor(clListBox, $FFFFFF);
   fpgSetNamedColor(clGridLines, $A0A0A0);
-  fpgSetNamedColor(clGridHeader, $D4D0C8);
+  fpgSetNamedColor(clGridHeader, $D5D2CD);
   fpgSetNamedColor(clWidgetFrame, $000000);
   fpgSetNamedColor(clInactiveWgFrame, $A0A0A0);
   fpgSetNamedColor(clTextCursor, $000000);
@@ -1839,7 +1839,7 @@ begin
     Exit; //==>
   if not AEnabled then
   begin
-    ACanvas.SetTextColor(clHilite1);
+    ACanvas.SetTextColor(clHilite2);
     ACanvas.DrawString(x+1, y+1, AText);
     ACanvas.SetTextColor(clShadow1);
   end;
