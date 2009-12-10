@@ -172,7 +172,8 @@ implementation
 
 uses
   fpg_constants,
-  fpg_hint;
+  fpg_hint,
+  fpg_menu;
 
 
 var
@@ -249,9 +250,13 @@ begin
   FVisible := AValue;
   if FOnScreen then
     if FVisible then
-      HandleShow
+    begin
+//      writeln('DEBUG:  TfpgWidget.SetVisible - handleshow');
+      HandleShow;
+    end
     else
     begin
+//      writeln('DEBUG:  TfpgWidget.SetVisible - handlehide');
       HandleHide;
       FOnScreen := True;
     end;
@@ -429,7 +434,7 @@ end;
 destructor TfpgWidget.Destroy;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgWidget.Destroy [', Classname, ']');
+  writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
   HandleHide;
   inherited;
@@ -693,19 +698,21 @@ var
   n: integer;
   c: TComponent;
 begin
-//  writeln('Widget.HandleShow - ', ClassName, '  x:', Left, ' y:', Top, ' w:', Width, ' h:', Height);
   FOnScreen := True;
-//  FVisible := True;
-
   AllocateWindowHandle;
   DoSetWindowVisible(FVisible);
 
   for n := 0 to ComponentCount - 1 do
   begin
     c := Components[n];
-    if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) and
-      (TfpgWidget(c).FOnScreen = False) then
-      TfpgWidget(c).HandleShow;
+    if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) then
+    begin
+      if not (c is TfpgPopupMenu) then  // these should not be created yet
+      begin
+        TfpgWidget(c).Visible := FVisible;
+        TfpgWidget(c).HandleShow;
+      end;
+    end;
   end;
 end;
 
