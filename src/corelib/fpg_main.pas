@@ -972,7 +972,10 @@ begin
     HideHint;
     FHintWindow.Free;
   end;
-    
+  FHintTimer.Enabled := False;
+  FHintTimer.OnTimer := nil;
+  FHintTimer.Free;
+
   DestroyComponents;  // while message queue is still active
 
   for i := 0 to (fpgNamedFonts.Count - 1) do
