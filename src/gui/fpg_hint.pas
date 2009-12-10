@@ -197,10 +197,11 @@ end;
 
 destructor TfpgHintWindow.Destroy;
 begin
+  T_Chrono.Enabled := False;
   T_Chrono.Free;
   FFont.Free;
   inherited Destroy;
-  uShadowForm.Destroy;
+  uShadowForm.Free;
 end;
 
 procedure TfpgHintWindow.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);

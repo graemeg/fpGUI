@@ -1456,7 +1456,7 @@ begin
     cfrm         := TInsertCustomForm.Create(nil);
     cfrm.edName.Text := GenerateNewName(wgc.NameBase);
     cfrm.edClass.Text := 'Tfpg';
-    if cfrm.ShowModal = 1 then
+    if cfrm.ShowModal = mrOK then
     begin
       newname      := cfrm.edName.Text;
       newClassName := cfrm.edClass.Text;
