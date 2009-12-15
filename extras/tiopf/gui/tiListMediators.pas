@@ -26,7 +26,7 @@ type
     function    GetSelectedObject: TtiObject; override;
     procedure   SetSelectedObject(const AValue: TtiObject); override;
     procedure   CreateColumns; override;
-    procedure   DoCreateItemMediator(AData: TtiObject; ARowIdx: integer); override;
+    function    DoCreateItemMediator(AData: TtiObject; ARowIdx: integer): TtiListItemMediator; override;
     procedure   DoDeleteItemMediator(AIndex: Integer; AMediator: TtiListItemMediator); override;
     procedure   SetupGUIandObject; override;
     procedure   ClearList; override;
@@ -47,7 +47,7 @@ type
   { Composite mediator for TfpgStringGrid }
   TtiStringGridMediatorView = class(TtiCustomListMediatorView)
   private
-    procedure   DoCreateItemMediator(AData: TtiObject; ARowIdx: integer); override;
+    function    DoCreateItemMediator(AData: TtiObject; ARowIdx: integer): TtiListItemMediator; override;
     procedure   DoDeleteItemMediator(AIndex: Integer; AMediator: TtiListItemMediator); override;
   protected
     function    GetSelectedObject: TtiObject; override;
@@ -131,10 +131,9 @@ begin
   Result := GetObjectFromItem(View.Items.Item[View.ItemIndex]);
 end;
 
-procedure TtiListViewMediatorView.DoCreateItemMediator(AData: TtiObject; ARowIdx: integer);
+function TtiListViewMediatorView.DoCreateItemMediator(AData: TtiObject; ARowIdx: integer): TtiListItemMediator;
 var
   li: TfpgLVItem;
-  m: TtiListViewListItemMediator;
 begin
   DataAndPropertyValid(AData);
   { Create ListItem and Mediator }
@@ -142,9 +141,9 @@ begin
   try
     li := TfpgLVItem.Create(View.Items);
     View.Items.Add(li);
-    m := TtiListViewListItemMediator.CreateCustom(AData, li, OnBeforeSetupField, FieldsInfo, Active);
-    li.UserData := m;
-    MediatorList.Add(m);
+    Result := TtiListViewListItemMediator.CreateCustom(AData, li, OnBeforeSetupField, FieldsInfo, Active);
+    li.UserData := Result;
+    MediatorList.Add(Result);
   finally
     View.EndUpdate;
   end;
@@ -395,11 +394,10 @@ begin
   end;  { for }
 end;
 
-procedure TtiStringGridMediatorView.DoCreateItemMediator(AData: TtiObject; ARowIdx: integer);
+function TtiStringGridMediatorView.DoCreateItemMediator(AData: TtiObject; ARowIdx: integer): TtiListItemMediator;
 var
   i: integer;
   lFieldName: string;
-  lMediatorView: TtiStringGridRowMediator;
 begin
   View.BeginUpdate;
   try
@@ -410,9 +408,9 @@ begin
       lFieldName := FieldsInfo[i].PropName;
       View.Cells[i, ARowIdx] := tiGetProperty(AData, lFieldName);  // set Cell text
     end;
-    lMediatorView := TtiStringGridRowMediator.CreateCustom(AData, View, FieldsInfo, ARowIdx, Active);
-    View.Objects[0, ARowIdx] := lMediatorView;   // set Object reference inside grid. It used to be AData.
-    MediatorList.Add(lMediatorView);
+    Result := TtiStringGridRowMediator.CreateCustom(AData, View, FieldsInfo, ARowIdx, Active);
+    View.Objects[0, ARowIdx] := Result;   // set Object reference inside grid. It used to be AData.
+    MediatorList.Add(Result);
   finally
     View.EndUpdate;
   end;
