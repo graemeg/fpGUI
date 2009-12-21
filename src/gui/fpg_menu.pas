@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -745,7 +745,7 @@ begin
   begin
     CloseSubMenus;
     // showing the submenu
-    mi.SubMenu.ShowAt(self, Width, GetItemPosY(FFocusItem));
+    mi.SubMenu.ShowAt(self, Width-5, GetItemPosY(FFocusItem)); // 5 is the menu overlap in pixels
     mi.SubMenu.OpenerPopup := self;
     mi.SubMenu.OpenerMenuBar := OpenerMenuBar;
     uFocusedPopupMenu := mi.SubMenu;
