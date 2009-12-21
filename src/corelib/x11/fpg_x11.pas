@@ -2388,10 +2388,19 @@ begin
     Result.IsExecutable := ((sr.Mode and $40) <> 0);
     Result.mode         := EncodeModeString(sr.Mode);
     Fpstat(PChar(fullname), info);
-    {Result.GroupID     := info.st_gid;
-    Result.OwnerID      := info.st_uid;}
-    Result.Owner        := GetUserName(TUID(info.st_uid));
-    Result.Group        := GetGroupName(TGID(info.st_uid));
+    // Especially if files are transfered on removable media the host system
+    // might not have those user or group ids. So name lookups will fail. This
+    // simply returns the ID's in such cases.
+    try
+      Result.Owner := GetUserName(TUID(info.st_uid));
+    except
+      Result.Owner := IntToStr(info.st_uid);
+    end;
+    try
+      Result.Group := GetGroupName(TGID(info.st_gid));
+    except
+      Result.Group := IntToStr(info.st_gid);
+    end;
   end;
 end;
 
