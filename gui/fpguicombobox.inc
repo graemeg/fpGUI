@@ -143,6 +143,7 @@ end;
 
 destructor TFCustomComboBox.Destroy;
 begin
+  FItems.Free;
   FDropDown.Free;
   inherited Destroy;
 end;
