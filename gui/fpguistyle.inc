@@ -817,11 +817,11 @@ procedure TBasicStyle.DrawPanel(Canvas: TFCanvas; const ARect: TRect;
   ABevelStyle: TBevelStyle);
 begin
   // bsPlain, bsLowered, bsRaised
-  if ABevelStyle = bsPlain then
-    DrawWindowBackground(Canvas, ARect)
-  else if ABevelStyle = bsLowered then
+//  if ABevelStyle = bsPlain then
+    DrawWindowBackground(Canvas, ARect);
+  if ABevelStyle = bsLowered then
     DrawSunkenOuterBorder(Canvas, ARect)
-  else
+  else if ABevelStyle = bsRaised then
     DrawRaisedOuterBorder(Canvas, ARect);
 //    Draw3DFrame(Canvas, ARect, cl3DHighlight, cl3DFace, cl3DFace, cl3DShadow);
 end;
