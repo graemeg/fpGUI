@@ -897,8 +897,8 @@ end;
 
 destructor TFCustomBitmap.Destroy;
 begin
-  if Assigned(Palette) then
-    Palette.Release;
+  if Assigned(FPalette) then
+    FPalette.Free;
   inherited Destroy;
 end;
 

@@ -386,8 +386,6 @@ begin
   BitMap.SetPixelsFromData(@ArrowBitmapData, 32);
   FImageCanvas.DrawImage(Bitmap, Point(0, 25));
   Bitmap.Free;
-
-  Palette.Release;
 end;
 
 destructor TBasicStyle.Destroy;
