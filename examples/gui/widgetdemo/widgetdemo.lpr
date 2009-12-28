@@ -76,7 +76,6 @@ type
     procedure   CreateBottomButtonLayout;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor  Destroy; override;
   end;
 
 
