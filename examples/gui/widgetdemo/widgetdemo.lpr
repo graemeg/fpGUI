@@ -64,6 +64,8 @@ type
     procedure   TranslateToEnglish;
     procedure   chkDisableClick(Sender: TObject);
   private
+    FLastStyle: string;
+    procedure   FreeStyleInstance;
     procedure   CreateTopMenu;
     procedure   CreateStyleCombo;
     procedure   CreateTopCheckboxLine;
@@ -74,6 +76,7 @@ type
     procedure   CreateBottomButtonLayout;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
   end;
 
 
@@ -98,9 +101,9 @@ procedure TWidgetDemoForm.cbStyleChanged(Sender: TObject);
 begin
   { I want to try something later with this }
 //  gStyleManager.SetStyle(cbStyle.Text);
-  if cbStyle.Text <> cDefaultStyle then
-    Style.Free;
+  FreeStyleInstance;
   Style := gStyleManager.CreateInstance(cbStyle.Text);
+  FLastStyle := cbStyle.Text;
   Redraw;
 end;
 
@@ -157,6 +160,12 @@ begin
   topRightGroupBox.Enabled    := not chkDisable.Checked;
   StringGrid.Enabled          := not chkDisable.Checked;
   bottomRightGroupBox.Enabled := not chkDisable.Checked;
+end;
+
+procedure TWidgetDemoForm.FreeStyleInstance;
+begin
+  if FLastStyle <> cDefaultStyle then
+    Style.Free;
 end;
 
 procedure TWidgetDemoForm.CreateTopMenu;

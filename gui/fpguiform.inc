@@ -115,10 +115,9 @@
 
 constructor TFCustomForm.Create(AOwner: TComponent);
 begin
-  if not Assigned(FStyle) then
-    FStyle := gStyleManager.DefaultStyle;
 
   inherited Create(AOwner);
+  FStyle := gStyleManager.DefaultStyle;
 
   FCanExpandWidth   := True;
   FCanExpandHeight  := True;
@@ -163,6 +162,9 @@ begin
   
   FWnd.Free;
   FWnd := nil;
+
+  if FStyle <> gStyleManager.DefaultStyle then
+    FStyle.Free;
 end;
 
 
