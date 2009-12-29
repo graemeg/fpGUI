@@ -908,8 +908,7 @@ end;
 
 procedure TfrmMain.miHelpAboutGUI(Sender: TObject);
 begin
-  ShowMessage('This product was created using ' + fpGUIName + ' v' +
-      fpGUIVersion, 'About fpGUI');
+  TfpgMessageDialog.AboutFPGui;
 end;
 
 procedure TfrmMain.miMRUClick(Sender: TObject; const FileName: string);
