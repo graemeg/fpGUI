@@ -513,7 +513,7 @@ begin
   Canvas.SetColor(clShadow1);
   Canvas.DrawLine(r.Left, r.Bottom-1, r.Right+1, r.Bottom-1);   // bottom
   // outer bottom line
-  Canvas.SetColor(clHilite1);
+  Canvas.SetColor(clWhite);
   Canvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
 
   for n := 0 to VisibleCount-1 do
