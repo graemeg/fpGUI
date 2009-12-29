@@ -203,8 +203,12 @@ type
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DoChange; virtual;
     procedure   DoExpand(ANode: TfpgTreeNode); virtual;
+    // only visual (visible) nodes
     function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    // any next node, even if node is collapsed
+    function    NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    function    PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
     // the nodes between the given node and the direct next node
     function    SpaceToVisibleNext(aNode: TfpgTreeNode): integer;
     function    StepToRoot(aNode: TfpgTreeNode): integer;
@@ -214,6 +218,8 @@ type
     procedure   SetColumnWidth(AIndex, AWidth: word);
     // the width of a column - aIndex of the rootnode = 0
     function    GetColumnWidth(AIndex: word): word;
+    procedure   GotoNextNodeUp;
+    procedure   GotoNextNodeDown;
     property    Font: TfpgFont read FFont;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
@@ -1052,6 +1058,20 @@ begin
     result := DefaultColumnWidth;
 end;
 
+procedure TfpgTreeView.GotoNextNodeUp;
+begin
+  if Selection = RootNode.FirstSubNode then
+    Exit;
+  Selection := PrevNode(Selection);
+end;
+
+procedure TfpgTreeView.GotoNextNodeDown;
+begin
+  if Selection = RootNode.LastSubNode then
+    Exit;
+  Selection := NextNode(Selection);
+end;
+
 procedure TfpgTreeview.PreCalcColumnLeft;
 var
   Aleft: TfpgCoord;
@@ -1745,6 +1765,58 @@ begin
     result  := ANode.Prev;
     ANode   := ANode.Prev;
     while (not ANode.Collapsed) and (ANode.Count > 0) do
+    begin
+      result  := ANode.LastSubNode;
+      ANode   := ANode.LastSubNode;
+    end;
+  end
+  else
+  begin
+    if ANode.Parent <> nil then
+      result := ANode.Parent
+    else
+      result := n;
+  end;
+end;
+
+function TfpgTreeView.NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
+  //----------------
+  procedure _FindNextNode;
+  begin
+    if ANode.Next <> nil then
+    begin
+      result := ANode.Next;
+    end
+    else
+    begin
+      while ANode.Next = nil do
+      begin
+        ANode := ANode.Parent;
+        if ANode = nil then
+          exit;  //==>
+      end;
+      result := ANode.Next;
+    end;
+  end;
+
+begin
+  result := nil;
+  if ANode.Count > 0 then
+    result := ANode.FirstSubNode
+  else
+    _FindNextNode;
+end;
+
+function TfpgTreeView.PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
+var
+  n: TfpgTreeNode;
+begin
+  n := ANode;
+  if ANode.Prev <> nil then
+  begin
+    result  := ANode.Prev;
+    ANode   := ANode.Prev;
+    while {(not ANode.Collapsed) and} (ANode.Count > 0) do
     begin
       result  := ANode.LastSubNode;
       ANode   := ANode.LastSubNode;
