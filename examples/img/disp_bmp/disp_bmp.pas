@@ -24,9 +24,9 @@ program Disp_BMP;
 uses
   Classes
   ,fpgfx
-  ,gfxbase
+  ,gfxbase, fpgfxpackage
   ,fpImg
-  ,BMPReader
+  ,BMPReader, fpimgpackage
   ;
 
 type
