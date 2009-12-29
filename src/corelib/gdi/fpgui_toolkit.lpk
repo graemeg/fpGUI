@@ -24,9 +24,9 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit
 "/>
-    <License Value="Modified LGPL
+    <License Value="LGPL 2 with static linking exception.
 "/>
-    <Version Minor="6" Release="3"/>
+    <Version Minor="7"/>
     <Files Count="73">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
