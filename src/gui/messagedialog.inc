@@ -369,6 +369,20 @@ begin
       dlg.WindowTitle := ATitle;
     dlg.Buttons := [mbOK];
     dlg.DefaultButton := mbOK;
+    dlg.Text := dlg.WindowTitle;
+    dlg.InformativeText := LineEnding + LineEnding
+                           + 'This program uses ' + fpGUIName + ' version ' + fpGUIVersion + '.'
+                           + LineEnding + LineEnding
+                           + fpGUIName + ' is intended for Open Source and Commercial applications. fpGUI'
+                           + ' uses the LGPL 2 license with a static linking exception - the same as the Free '
+                           + ' Pascal Compiler''s RTL.'
+                           + LineEnding + LineEnding
+                           + 'fpGUI is a Object Pascal toolkit for cross-platform application development. '
+                           + 'It provides single-source portability across Linux, MS Windows, *BSD '
+                           + 'and embedded devices like Embedded Linux and Windows CE.'
+                           + LineEnding + LineEnding
+                           + 'For more information, see the ' + fpGUIName + ' website at: '
+                           + 'http://opensoft.homeip.net/fpgui/';
     dlg.PrepareLayout;
     dlg.ShowModal;
   finally
