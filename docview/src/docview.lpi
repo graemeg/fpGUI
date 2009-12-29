@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="28">
+    <Units Count="29">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -171,6 +171,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_configuration"/>
       </Unit27>
+      <Unit28>
+        <Filename Value="arrows.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit28>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

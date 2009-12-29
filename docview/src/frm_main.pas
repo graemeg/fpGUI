@@ -72,6 +72,7 @@ type
     Files: TList; // current open help files.
     Debug: boolean;
     FFileOpenRecent: TfpgMenuItem;
+    FHistorySelection: Boolean;
 
     LoadingFilenameList: TStringList;
     LoadingFileIndex: integer;
@@ -85,7 +86,10 @@ type
     ContentsLoaded: boolean;
     DisplayedIndex: TStringList; // duplicate of index listbox, for fast case insensitive searching
     CurrentTopic: TTopic; // so we can get easy access to current topic viewed
+    CurrentHistoryIndex: integer;
 
+    procedure   btnBackHistClick(Sender: TObject);
+    procedure   btnFwdHistClick(Sender: TObject);
     procedure   btnPrevClick(Sender: TObject);
     procedure   btnNextClick(Sender: TObject);
     procedure   RichViewClickLink(Sender: TRichTextView; Link: string);
@@ -114,9 +118,12 @@ type
     procedure   lbIndexDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbIndexKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   lbHistoryDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   lbHistoryKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   btnSearchClicked(Sender: TObject);
     procedure   IndexSearchEditOnChange(Sender: TObject);
     procedure   DisplaySelectedSearchResultTopic;
+    procedure   NavigateToHistoryIndex(AIndex: integer);
     procedure   UpdateLocationPanel;
     procedure   EnableControls;
     procedure   ClearAllWordSequences;
@@ -147,6 +154,7 @@ type
     procedure   DisplaySelectedContentsTopic;
     procedure   DisplaySelectedIndexTopic;
     procedure   ProcessCommandLineParams;
+    procedure   SaveNavigatePoint;
     procedure   ShowParamHelp;
     function    FindTopicForLink( Link: THelpLink ): TTopic;
     function    FindTopicByResourceID( ID: word ): TTopic;
@@ -187,6 +195,8 @@ const
   cCreatedBy  = 'Created by Graeme Geldenhuys';
   cVersion    = 'Version 0.7 (alpha)';
 
+{$I arrows.inc}
+
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.MainFormException(Sender: TObject; E: Exception);
@@ -202,6 +212,26 @@ begin
     Consumed := True;
     DisplayTopic(nil);
   end
+end;
+
+procedure TMainForm.btnBackHistClick(Sender: TObject);
+begin
+  if CurrentHistoryIndex > 0 then
+  begin
+    NavigateToHistoryIndex(CurrentHistoryIndex - 1);
+    //lbHistory.FocusItem := CurrentHistoryIndex - 1;
+    //DisplayTopic(TTopic(lbHistory.Items.Objects[lbHistory.FocusItem]));
+  end;
+end;
+
+procedure TMainForm.btnFwdHistClick(Sender: TObject);
+begin
+  if CurrentHistoryIndex < lbHistory.Items.Count-1 then
+  begin
+    NavigateToHistoryIndex(CurrentHistoryIndex + 1);
+    //lbHistory.FocusItem := CurrentHistoryIndex + 1;
+    //DisplayTopic(TTopic(lbHistory.Items.Objects[lbHistory.FocusItem]));
+  end;
 end;
 
 procedure TMainForm.btnPrevClick(Sender: TObject);
@@ -602,10 +632,12 @@ procedure TMainForm.PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabS
 begin
   if NewActiveSheet = tsIndex then
   begin
-      if not IndexLoaded then
-        LoadIndex;
-      IndexSearchEdit.SetFocus;
-  end;
+    if not IndexLoaded then
+      LoadIndex;
+    IndexSearchEdit.SetFocus;
+  end
+  else if NewActiveSheet = tsHistory then
+    lbHistory.FocusItem := CurrentHistoryIndex;
 end;
 
 procedure TMainForm.tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton;
@@ -631,6 +663,34 @@ procedure TMainForm.lbSearchResultsDoubleClick(Sender: TObject; AButton: TMouseB
   AShift: TShiftState; const AMousePos: TPoint);
 begin
   DisplaySelectedSearchResultTopic;
+end;
+
+procedure TMainForm.lbHistoryDoubleClick(Sender: TObject;
+  AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+begin
+  try
+    FHistorySelection := True;
+    DisplayTopic(nil);
+    CurrentHistoryIndex := lbHistory.FocusItem;
+  finally
+    FHistorySelection := False;
+  end;
+end;
+
+procedure TMainForm.lbHistoryKeyPress(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
+  begin
+    Consumed := True;
+    try
+      FHistorySelection := True;
+      DisplayTopic(nil);
+      CurrentHistoryIndex := lbHistory.FocusItem;
+    finally
+      FHistorySelection := False;
+    end;
+  end
 end;
 
 procedure TMainForm.btnSearchClicked(Sender: TObject);
@@ -682,6 +742,18 @@ begin
     exit;
   Topic := lbSearchResults.Items.Objects[lbSearchResults.FocusItem] as TTopic;
   DisplayTopic( Topic );
+end;
+
+procedure TMainForm.NavigateToHistoryIndex(AIndex: integer);
+begin
+  try
+    FHistorySelection := True;
+    CurrentHistoryIndex := AIndex;
+    lbHistory.FocusItem := AIndex;
+    DisplayTopic(TTopic(lbHistory.Items.Objects[AIndex]));
+  finally
+    FHistorySelection := False;
+  end;
 end;
 
 procedure TMainForm.UpdateLocationPanel;
@@ -1034,9 +1106,8 @@ begin
   Result := true;
 
   lbSearchResults.Items.Clear;
-  { TODO : page history support }
-//  PageHistory.Clear;
-//  CurrentHistoryIndex := -1;
+  lbHistory.Items.Clear;
+  CurrentHistoryIndex := -1;
 
   // Now that we have successfully loaded the new help file(s)
   // close the existing one.
@@ -1085,9 +1156,8 @@ begin
   if DisplayFirstTopic then
   begin
     LogEvent(LogStartup, 'Display first topic' );
-    { TODO -oGraeme : Improved Display Topic method }
-//    DisplaySelectedContentsTopic;
-    DisplayTopic(nil);
+    DisplaySelectedContentsTopic;
+//    DisplayTopic(nil);
   end;
 
   LogEvent(LogStartup, 'OpenFiles complete' );
@@ -1518,6 +1588,16 @@ Begin
               Topic := TTopic(lbSearchResults.Items.Objects[lbSearchResults.FocusItem]);
             ProfileEvent('Got Topic from Search Results listbox');
           end;
+      4:  begin // History tab
+            if lbHistory.FocusItem = -1 then
+            begin
+              ShowMessage('You must select a history item first by clicking it.');
+              Exit;  //==>
+            end
+            else
+              Topic := TTopic(lbHistory.Items.Objects[lbHistory.FocusItem]);
+            ProfileEvent('Got Topic from History listbox');
+          end;
     end;
   end  // case..
   else
@@ -1526,7 +1606,7 @@ Begin
   if Topic = nil then
     raise Exception.Create('Unable to locate the Topic');
 
-  CurrentTopic:= Topic;
+  CurrentTopic := Topic;
 
   RichView.Clear;
   ImageIndices := TList.Create;
@@ -1569,6 +1649,7 @@ Begin
 
   tvContents.Selection := tvContents.RootNode.FindSubNode(CurrentTopic, True);
   tvContents.Invalidate;
+  SaveNavigatePoint;
   UpdateLocationPanel;
 end;
 
@@ -1605,8 +1686,28 @@ begin
   AllFilesWordSequences := TList.Create;
   CurrentOpenFiles := TList.Create;
   DisplayedIndex := TStringList.Create;
+  CurrentHistoryIndex := -1;
+  FHistorySelection := False;
   { TODO -oGraeme : Make Debug a menu option }
   Debug := False;
+
+  // load toolbar images
+  fpgImages.AddMaskedBMP(
+    'dv.arrowleft', @usr_arrow_left,
+    sizeof(usr_arrow_left), 0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'dv.arrowright', @usr_arrow_right,
+    sizeof(usr_arrow_right), 0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'dv.arrowup', @usr_arrow_up,
+    sizeof(usr_arrow_up), 0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'dv.arrowdown', @usr_arrow_down,
+    sizeof(usr_arrow_down), 0, 0);
+
 end;
 
 destructor TMainForm.Destroy;
@@ -1627,6 +1728,7 @@ begin
   Name := 'MainForm';
   SetPosition(602, 274, 654, 386);
   WindowTitle := 'fpGUI Documentation Viewer';
+  ShowHint := True;
   WindowPosition := wpUser;
   OnCloseQuery  := @MainFormCloseQuery;
 
@@ -2004,6 +2106,8 @@ begin
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 0;
+    OnDoubleClick := @lbHistoryDoubleClick;
+    OnKeyPress := @lbHistoryKeyPress;
   end;
 
   Splitter1 := TfpgSplitter.Create(bvlBody);
@@ -2102,7 +2206,7 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
-    Hint := '';
+    Hint := 'Open a new help file.';
     ImageMargin := 0;
     ImageName := 'stdimg.open';
     TabOrder := 0;
@@ -2119,7 +2223,7 @@ begin
     Embedded := True;
     FontDesc := '#Label1';
     GroupIndex := 1;
-    Hint := '';
+    Hint := 'Display or hide tabs';
     ImageName := '';
     TabOrder := 1;
     Enabled := False;
@@ -2133,10 +2237,11 @@ begin
     Text := '<';
     Embedded := True;
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
+    Hint := 'Previous history item.';
+    ImageMargin := 0;
+    ImageName := 'dv.arrowleft';
     TabOrder := 2;
-    Enabled := False;
+    OnClick := @btnBackHistClick;
   end;
 
   btnFwd := TfpgButton.Create(ToolBar);
@@ -2147,10 +2252,11 @@ begin
     Text := '>';
     Embedded := True;
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
+    Hint := 'Next history item.';
+    ImageMargin := 0;
+    ImageName := 'dv.arrowright';
     TabOrder := 3;
-    Enabled := False;
+    OnClick := @btnFwdHistClick;
   end;
 
   btnPrev := TfpgButton.Create(ToolBar);
@@ -2161,8 +2267,9 @@ begin
     Text := 'prev';
     Embedded := True;
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
+    Hint := 'Previous Topic.';
+    ImageMargin := 0;
+    ImageName := 'dv.arrowup';
     TabOrder := 4;
     OnClick := @btnPrevClick;
   end;
@@ -2175,8 +2282,9 @@ begin
     Text := 'next';
     Embedded := True;
     FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
+    Hint := 'Next Topic.';
+    ImageMargin := 0;
+    ImageName := 'dv.arrowdown';
     TabOrder := 5;
     OnClick :=@btnNextClick;
   end;
@@ -2189,7 +2297,7 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
-    Hint := '';
+    Hint := 'Display Product Information.';
     ImageMargin := -1;
     ImageName := 'stdimg.help';
     ImageSpacing := 0;
@@ -2199,6 +2307,12 @@ begin
 
   {@VFD_BODY_END: MainForm}
   {%endregion}
+
+  // remove toolbar button text
+  btnBack.Text := '';
+  btnFwd.Text := '';
+  btnNext.Text := '';
+  btnPrev.Text := '';
 
   miOpenRecentMenu := TfpgPopupMenu.Create(nil);
   with miOpenRecentMenu do
@@ -2248,7 +2362,7 @@ End;
 procedure TMainForm.DisplaySelectedIndexTopic;
 var
   Topic: TTopic;
-Begin
+begin
   if lbIndex.FocusItem = -1 then
     exit;
   Topic := DisplayedIndex.Objects[ lbIndex.FocusItem ] as TTopic;
@@ -2304,6 +2418,22 @@ begin
 //  writeln(Format('Failed to find topic <%s>', [gCommandLineParams.GetParam('k')]));
     DisplayTopic(t);
   end;
+end;
+
+procedure TMainForm.SaveNavigatePoint;
+begin
+  // if we selected an item from history listbox, don't record that save point
+  if FHistorySelection then
+    Exit;
+
+  // delete rest of history
+  while CurrentHistoryIndex < lbHistory.Items.Count-1 do
+    lbHistory.Items.Delete(CurrentHistoryIndex + 1);
+
+  if CurrentTopic <> nil then
+    lbHistory.Items.AddObject(CurrentTopic.Title, CurrentTopic);
+
+  inc(CurrentHistoryIndex);
 end;
 
 procedure TMainForm.ShowParamHelp;
