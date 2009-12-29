@@ -59,6 +59,14 @@ type
     miBookmarks: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     miDebug: TfpgPopupMenu;
+    ToolBar: TfpgBevel;
+    btnOpen: TfpgButton;
+    btnPanel: TfpgButton;
+    btnBack: TfpgButton;
+    btnFwd: TfpgButton;
+    btnPrev: TfpgButton;
+    btnNext: TfpgButton;
+    btnHelp: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     miOpenRecentMenu: TfpgPopupMenu;
     Files: TList; // current open help files.
@@ -78,6 +86,8 @@ type
     DisplayedIndex: TStringList; // duplicate of index listbox, for fast case insensitive searching
     CurrentTopic: TTopic; // so we can get easy access to current topic viewed
 
+    procedure   btnPrevClick(Sender: TObject);
+    procedure   btnNextClick(Sender: TObject);
     procedure   RichViewClickLink(Sender: TRichTextView; Link: string);
     procedure   IndexSearchEditKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   MainFormShow(Sender: TObject);
@@ -134,6 +144,7 @@ type
     procedure   SetStatus(const AText: TfpgString);
     function    TranslateEnvironmentVar(AFilenames: TfpgString): TfpgString;
     procedure   RefreshFontSubstitutions;
+    procedure   DisplaySelectedContentsTopic;
     procedure   DisplaySelectedIndexTopic;
     procedure   ProcessCommandLineParams;
     procedure   ShowParamHelp;
@@ -191,6 +202,26 @@ begin
     Consumed := True;
     DisplayTopic(nil);
   end
+end;
+
+procedure TMainForm.btnPrevClick(Sender: TObject);
+begin
+  if CurrentOpenFiles.Count > 0 then
+  begin
+    tvContents.GotoNextNodeUp;
+    tvContents.SetFocus;
+    DisplaySelectedContentsTopic;
+  end;
+end;
+
+procedure TMainForm.btnNextClick(Sender: TObject);
+begin
+  if CurrentOpenFiles.Count > 0 then
+  begin
+    tvContents.GotoNextNodeDown;
+    tvContents.SetFocus;
+    DisplaySelectedContentsTopic;
+  end;
 end;
 
 procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
@@ -1631,7 +1662,7 @@ begin
   with bvlBody do
   begin
     Name := 'bvlBody';
-    SetPosition(0, 25, 653, 340);
+    SetPosition(0, 55, 653, 310);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Shape := bsSpacer;
   end;
@@ -1640,7 +1671,7 @@ begin
   with PageControl1 do
   begin
     Name := 'PageControl1';
-    SetPosition(0, 12, 260, 316);
+    SetPosition(0, 16, 260, 276);
     ActivePageIndex := 4;
     TabOrder := 0;
     Align := alLeft;
@@ -1959,7 +1990,7 @@ begin
   with tsHistory do
   begin
     Name := 'tsHistory';
-    SetPosition(3, 24, 254, 289);
+    SetPosition(3, 24, 254, 249);
     Text := 'History';
   end;
 
@@ -1967,7 +1998,7 @@ begin
   with lbHistory do
   begin
     Name := 'lbHistory';
-    SetPosition(4, 8, 242, 276);
+    SetPosition(4, 8, 242, 236);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     HotTrack := False;
@@ -1979,7 +2010,7 @@ begin
   with Splitter1 do
   begin
     Name := 'Splitter1';
-    SetPosition(265, 4, 8, 284);
+    SetPosition(265, 120, 8, 168);
     Align := alLeft;
   end;
 
@@ -2005,7 +2036,7 @@ begin
   with miFile do
   begin
     Name := 'miFile';
-    SetPosition(292, 28, 132, 20);
+    SetPosition(292, 96, 132, 20);
     AddMenuItem('Open...', '', @miFileOpenClicked);
     AddMenuItem('Save current Topic to IPF...', '', @miFileSaveTopicAsIPF);
     AddMenuItem('Close', '', @miFileCloseClicked);
@@ -2019,7 +2050,7 @@ begin
   with miSettings do
   begin
     Name := 'miSettings';
-    SetPosition(292, 76, 132, 20);
+    SetPosition(292, 120, 132, 20);
     AddMenuItem('Options...', '', @miConfigureClicked);
   end;
 
@@ -2027,7 +2058,7 @@ begin
   with miBookmarks do
   begin
     Name := 'miBookmarks';
-    SetPosition(292, 100, 132, 20);
+    SetPosition(292, 144, 132, 20);
     AddMenuItem('Add..', '', nil);
     AddMenuItem('Show', '', nil);
   end;
@@ -2036,7 +2067,7 @@ begin
   with miHelp do
   begin
     Name := 'miHelp';
-    SetPosition(292, 124, 132, 20);
+    SetPosition(292, 168, 132, 20);
     AddMenuItem('Contents...', '', nil);
     AddMenuItem('Help using help', '', nil);
     AddMenuItem('-', '', nil);
@@ -2048,9 +2079,122 @@ begin
   with miDebug do
   begin
     Name := 'miDebug';
-    SetPosition(292, 148, 132, 20);
+    SetPosition(292, 192, 132, 20);
     AddMenuItem('Debug: Header', '', @miDebugHeader);
     AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
+  end;
+
+  ToolBar := TfpgBevel.Create(self);
+  with ToolBar do
+  begin
+    Name := 'ToolBar';
+    SetPosition(0, 25, 654, 28);
+    Anchors := [anLeft,anRight,anTop];
+    Style := bsLowered;
+    Shape := bsBottomLine;
+  end;
+
+  btnOpen := TfpgButton.Create(ToolBar);
+  with btnOpen do
+  begin
+    Name := 'btnOpen';
+    SetPosition(2, 1, 24, 24);
+    Text := '';
+    Embedded := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := 0;
+    ImageName := 'stdimg.open';
+    TabOrder := 0;
+    OnClick := @miFileOpenClicked;
+  end;
+
+  btnPanel := TfpgButton.Create(ToolBar);
+  with btnPanel do
+  begin
+    Name := 'btnPanel';
+    SetPosition(36, 1, 32, 24);
+    Text := 'pnl';
+    AllowAllUp := True;
+    Embedded := True;
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    Hint := '';
+    ImageName := '';
+    TabOrder := 1;
+    Enabled := False;
+  end;
+
+  btnBack := TfpgButton.Create(ToolBar);
+  with btnBack do
+  begin
+    Name := 'btnBack';
+    SetPosition(74, 1, 32, 24);
+    Text := '<';
+    Embedded := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 2;
+    Enabled := False;
+  end;
+
+  btnFwd := TfpgButton.Create(ToolBar);
+  with btnFwd do
+  begin
+    Name := 'btnFwd';
+    SetPosition(108, 1, 32, 24);
+    Text := '>';
+    Embedded := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 3;
+    Enabled := False;
+  end;
+
+  btnPrev := TfpgButton.Create(ToolBar);
+  with btnPrev do
+  begin
+    Name := 'btnPrev';
+    SetPosition(146, 1, 32, 24);
+    Text := 'prev';
+    Embedded := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 4;
+    OnClick := @btnPrevClick;
+  end;
+
+  btnNext := TfpgButton.Create(ToolBar);
+  with btnNext do
+  begin
+    Name := 'btnNext';
+    SetPosition(180, 1, 32, 24);
+    Text := 'next';
+    Embedded := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 5;
+    OnClick :=@btnNextClick;
+  end;
+
+  btnHelp := TfpgButton.Create(ToolBar);
+  with btnHelp do
+  begin
+    Name := 'btnHelp';
+    SetPosition(218, 1, 24, 24);
+    Text := '';
+    Embedded := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := -1;
+    ImageName := 'stdimg.help';
+    ImageSpacing := 0;
+    TabOrder := 6;
+    OnClick := @miHelpProdInfoClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
@@ -2091,6 +2235,16 @@ begin
   end;
 end;
 
+procedure TMainForm.DisplaySelectedContentsTopic;
+var
+  Topic: TTopic;
+Begin
+  if tvContents.Selection = nil then
+    Exit;
+  Topic := TTopic(tvContents.Selection.Data);
+  DisplayTopic(Topic);
+End;
+
 procedure TMainForm.DisplaySelectedIndexTopic;
 var
   Topic: TTopic;
@@ -2098,7 +2252,7 @@ Begin
   if lbIndex.FocusItem = -1 then
     exit;
   Topic := DisplayedIndex.Objects[ lbIndex.FocusItem ] as TTopic;
-  DisplayTopic( Topic );
+  DisplayTopic(Topic);
 end;
 
 procedure TMainForm.ProcessCommandLineParams;
