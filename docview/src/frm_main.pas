@@ -249,6 +249,7 @@ uses
 
 const
   cLongName   = 'fpGUI Documentation Viewer';
+  cShortName  = 'DocView';
   cCreatedBy  = 'Created by Graeme Geldenhuys';
   cVersion    = 'Version ' + FPGUI_VERSION;
 
@@ -561,9 +562,9 @@ procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
 var
   s: TfpgString;
 begin
-  s :=  cLongName + LineEnding + LineEnding
+  s :=  cShortName + '  -  ' + cLongName + LineEnding + LineEnding
       + cCreatedBy + LineEnding
-      + cVersion + '  -  '+  {$I %date%} + ' ' + {$I %time%};
+      + cVersion + '  -  ' +  {$I %date%} + ' ' + {$I %time%};
 
   TfpgMessageDialog.Information('Product Information', s);
 end;
