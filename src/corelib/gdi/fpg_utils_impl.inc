@@ -19,7 +19,9 @@ end;
 procedure fpgOpenURL(const aURL: TfpgString);
 begin
   try
+    {$IFNDEF wince}
     ShellExecute(0, 'open', PChar(aURL), nil, nil, 0) ;
+    {$ENDIF}
   except
     // do nothing
   end;

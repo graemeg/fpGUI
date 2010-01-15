@@ -250,6 +250,37 @@ var
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
 
+{$IFDEF wince}
+// A few tweaks to get fpGUI working on the Symbol MC1000 WinCE 4.2
+// *** Need to fix the hack in procedure TfpgWindowImpl.DoAllocateWindowHandle
+
+const
+  CS_OWNDC = 0;
+  WS_OVERLAPPEDWINDOW = WS_VISIBLE;
+  WS_POPUPWINDOW = 0;
+  WS_EX_APPWINDOW = 0;
+
+// From Lazarus wince\winext.pas:
+function GET_X_LPARAM(lp : Windows.LParam) : longint;
+  begin
+    result:=smallint(LOWORD(lp));
+  end;
+function GET_Y_LPARAM(lp : Windows.LParam) : longint;
+  begin
+    result:=smallint(HIWORD(lp));
+  end;
+
+// *** copied from Lazarus
+function MulDiv(nNumber, nNumerator, nDenominator: Integer): Integer;
+begin
+  if nDenominator = 0 then
+    Result := -1
+  else
+//  Result := MathRound( int64(nNumber) * int64(nNumerator) / nDenominator);
+    Result := Round( int64(nNumber) * int64(nNumerator) / nDenominator);
+end;
+{$ENDIF}
+
 function fpgColorToWin(col: TfpgColor): longword;
 var
   c: dword;
@@ -380,15 +411,23 @@ end;
 // returns true when the operating system is windows 2000 or newer
 function IsWin2kOrLater: Boolean;
 begin
+  {$IFDEF WinCE}
+  Result := false;
+  {$ELSE}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion >= 5);
+  {$ENDIF}
 end;
 
 // returns true when the operating system is windows XP or newer
 function IsWinXPOrLater: Boolean;
 begin
+  {$IFDEF WinCE}
+  Result := false;
+  {$ELSE}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and
      (((Win32MajorVersion = 5) and (Win32MinorVersion >= 1)) or
       ((Win32MajorVersion >= 6) and (Win32MinorVersion >= 0)));
+  {$ENDIF}
 end;
 
 function WinkeystateToShiftstate(keystate: cardinal): TShiftState;
@@ -958,8 +997,13 @@ end;
 { TfpgGDIApplication }
 
 // helper function for DoGetFontFaceList
+{$IFDEF wince}
+function MyFontEnumerator(var LogFont: ENUMLOGFONT; var TextMetric: NEWTEXTMETRIC;
+    FontType: Integer; data: LPARAM): Integer; CDecl;
+{$ELSE}
 function MyFontEnumerator(var LogFont: ENUMLOGFONTEX; var TextMetric: NEWTEXTMETRICEX;
     FontType: Integer; data: LPARAM): Integer; stdcall;
+{$ENDIF}
 var
   sl: TStringList;
   s: string;
@@ -978,7 +1022,11 @@ begin
   Result := TStringList.Create;
   FillChar(LFont, sizeof(LFont), 0);
   LFont.lfCharset := DEFAULT_CHARSET;
+  {$IFDEF wince}
+  EnumFontFamiliesW(Display, @LFont, @MyFontEnumerator, LongInt(result));
+  {$ELSE}
   EnumFontFamiliesEx(Display, @LFont, @MyFontEnumerator, LongInt(result), 0);
+  {$ENDIF}
   Result.Sort;
 end;
 
@@ -1092,10 +1140,15 @@ begin
   end;
 
   {$Note Incorporate Felipe's code from previous fpGUI in here. It handles WinCE and Windows just fine. }
+  {$IFDEF WinCE}
+  // No GetVersion
+  Windows.GetMessageW(@Msg, 0, 0, 0);   //NT
+  {$ELSE}
   if (GetVersion() < $80000000) then
     Windows.GetMessageW(@Msg, 0, 0, 0)   //NT
   else
     Windows.GetMessage(@Msg, 0, 0, 0);   //Win98
+  {$ENDIF}
 
   Windows.DispatchMessage(@msg);
 
@@ -1105,7 +1158,9 @@ end;
 
 procedure TfpgGDIApplication.DoFlush;
 begin
+  {$IFNDEF wince}
   GdiFlush;
+  {$ENDIF}
 end;
 
 function TfpgGDIApplication.GetScreenWidth: TfpgCoord;
@@ -1265,8 +1320,13 @@ end;
 
 procedure TfpgGDIWindow.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
+{$IFDEF wince}
+  wcname: widestring;
+  wname: widestring;
+{$ELSE}
   wcname: string;
   wname: string;
+{$ENDIF}
   mid: dword;
   rwidth: integer;
   rheight: integer;
@@ -1340,11 +1400,35 @@ begin
     r.Top    := FTop;
     r.Right  := FLeft + FWidth;
     r.Bottom := FTop + FHeight;
+    {$IFDEF wince}
+    AdjustWindowRectEx(@r, FWinStyle, False, FWinStyleEx);
+    {$ELSE}
     AdjustWindowRectEx(r, FWinStyle, False, FWinStyleEx);
+    {$ENDIF}
     rwidth   := r.Right - r.Left;
     rheight  := r.Bottom - r.Top;
   end;
 
+  {$IFDEF wince}
+  // *** This hack to get fpGUI working on the Symbol MC1000 WinCE 4.2 needs fixed ASAP!
+  FWinStyleEx := 276824064;
+  FWinStyle := 276824064;
+
+  FWinHandle := Windows.CreateWindowExW(
+    FWinStyleEx,     // extended window style
+    PWideChar(wcname),   // registered class name
+    PWideChar(wname),    // window name
+    FWinStyle,       // window style
+    FLeft,           // horizontal position of window
+    FTop,            // vertical position of window
+    rwidth,          // window width
+    rheight,         // window height
+    FParentWinHandle, // handle to parent or owner window
+    mid,             // menu handle or child identifier
+    MainInstance,    // handle to application instance
+    Self             // window-creation data
+    );
+  {$ELSE}
   FWinHandle := Windows.CreateWindowEx(
     FWinStyleEx,     // extended window style
     PChar(wcname),   // registered class name
@@ -1359,6 +1443,7 @@ begin
     MainInstance,    // handle to application instance
     Self             // window-creation data
     );
+  {$ENDIF}
 
   if waScreenCenterPos in FWindowAttributes then
   begin
@@ -1457,10 +1542,14 @@ end;
 
 procedure TfpgGDIWindow.DoSetWindowTitle(const atitle: string);
 begin
+  {$ifdef wince}
+  Windows.SetWindowText(WinHandle, PWideChar(Utf8Decode(ATitle)));
+  {$else}
   if UnicodeEnabledOS then
     Windows.SetWindowTextW(WinHandle, PWideChar(Utf8Decode(ATitle)))
   else
     Windows.SetWindowText(WinHandle, PChar(Utf8ToAnsi(ATitle)));
+  {$endif}
 end;
 
 procedure TfpgGDIWindow.DoSetMouseCursor;
@@ -1567,7 +1656,9 @@ begin
   if FDrawing and buffered and (FBufferBitmap > 0) then
   begin
     // check if the dimensions are ok
+    {$IFNDEF wince}
     GetBitmapDimensionEx(FBufferBitmap, bmsize);
+    {$ENDIF}
     FDrawWindow := TfpgGDIWindow(awin);
     DoGetWinRect(ARect);
     if (bmsize.cx <> (ARect.Right-ARect.Left+1)) or
@@ -1656,10 +1747,12 @@ begin
   if a2 = 0 then
     Exit; //==>
   {Stupid GDI must be told in which direction to draw}
+  {$IFNDEF wince}
   if a2 < 0 then
     Windows.SetArcDirection(FGc, AD_CLOCKWISE)
   else
     Windows.SetArcDirection(FGc, AD_COUNTERCLOCKWISE);
+  {$ENDIF}
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Arc(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
@@ -1674,10 +1767,12 @@ begin
   if a2 = 0 then
     Exit; //==>
   {Stupid GDI must be told in which direction to draw}
+  {$IFNDEF wince}
   if a2 < 0 then
     Windows.SetArcDirection(FGc, AD_CLOCKWISE)
   else
     Windows.SetArcDirection(FGc, AD_COUNTERCLOCKWISE);
+  {$ENDIF}
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Pie(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
@@ -1725,6 +1820,16 @@ procedure TfpgGDICanvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 var
   wr: Windows.TRect;
   r: TfpgRect;
+
+{$IFDEF WinCE}
+// *** copied from Lazarus
+function FrameRect(DC: HDC; const ARect: TRect; hBr: HBRUSH) : integer;
+begin
+//roozbeh....works for now!
+  Result := Integer(DrawFocusRect(DC,Arect));
+end;
+{$ENDIF}
+
 begin
   if FLineStyle = lsSolid then
   begin
@@ -1732,7 +1837,11 @@ begin
     wr.Top    := y;
     wr.Right  := x + w;
     wr.Bottom := y + h;
-    Windows.FrameRect(Fgc, wr, FBrush)  // this handles 1x1 rectangles
+    {$IFDEF WinCE}
+    FrameRect(Fgc, wr, FBrush);
+    {$ELSE}
+    Windows.FrameRect(Fgc, wr, FBrush); // this handles 1x1 rectangles
+    {$ENDIF}
   end
   else
   begin
@@ -1833,11 +1942,15 @@ begin
   case AStyle of
     lsDot:
       begin
+        {$IFNDEF wince}
         FPen := ExtCreatePen(PS_GEOMETRIC or PS_ENDCAP_FLAT or PS_USERSTYLE, FLineWidth, logBrush, Length(cDot), @cDot);
+        {$ENDIF}
       end;
     lsDash:
       begin
+        {$IFNDEF wince}
         FPen := ExtCreatePen(PS_GEOMETRIC or PS_ENDCAP_FLAT or PS_USERSTYLE, FLineWidth, logBrush, Length(cDash), @cDash);
+        {$ENDIF}
       end;
     lsSolid:
       begin
@@ -2030,7 +2143,11 @@ begin
         lf.lfQuality := DEFAULT_QUALITY;
   end;
 
+  {$IFDEF wince}
+  Result := CreateFontIndirectW(@lf);
+  {$ELSE}
   Result := CreateFontIndirectA(@lf);
+  {$ENDIF}
 end;
 
 function TfpgGDIFontResource.HandleIsValid: boolean;
@@ -2123,7 +2240,9 @@ begin
     biClrImportant  := 0;
   end;
 
+  {$IFNDEF wince}
   SetDIBits(wapplication.display, FBMPHandle, 0, aheight, aimgdata, bi, DIB_RGB_COLORS);
+  {$ENDIF}
 
   FIsTwoColor := (acolordepth = 1);
 end;
@@ -2162,7 +2281,9 @@ begin
   bi.bmColors[2] := $FFFFFF;
 
   pbi := @bi;
+  {$IFNDEF wince}
   SetDIBits(wapplication.display, FMaskHandle, 0, aheight, aimgdata, pbi^, DIB_RGB_COLORS);
+  {$ENDIF}
 end;
 
 { TfpgGDIClipboard }
@@ -2271,10 +2392,12 @@ begin
     while n <= MAX_DRIVES do
     begin
       drvs := chr(n+ord('A'))+':\';
+      {$IFNDEF wince}
       if Windows.GetDriveType(PChar(drvs)) <> 1 then
       begin
         FSpecialDirs.Add(drvs);
       end;
+      {$ENDIF}
       inc(n);
     end;
   end;

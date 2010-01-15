@@ -1231,8 +1231,16 @@ begin
   fpgStyle      := TfpgStyle.Create;
   fpgCaret      := TfpgCaret.Create;
   fpgImages     := TfpgImages.Create;
+  {$IFNDEF wince}
   fpgCreateStandardImages;
-  
+  (*  causes EBusError on Symbol MC1000 WinCE 4.2
+  see: http://wiki.freepascal.org/Windows_CE_Development_Notes
+  "Using ARM processors, some times you may get a EBusError exception with
+  a message about misaligned data access.  The following section explains
+  what this is and how to fix it."
+  *)
+  {$ENDIF}
+
   // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
   SetupLocalizationStrings;
