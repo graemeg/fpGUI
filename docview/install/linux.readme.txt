@@ -16,7 +16,7 @@ Steps:
 
 5.  $ cp docview-mime.xml ~/.local/share/mime/packages
 
-6.  $ update-mime-database
+6.  $ update-mime-database ~/.local/share/mime/
 
 Gnome now knows the mime type for *.inf files. Now to setup the new default
 icon Nautilus will show for *.inf files, you need to do these two steps.

@@ -1,6 +1,8 @@
 [Desktop Entry]
+Version=1.0
 Encoding=UTF-8
 Name=fpGUI DocView
+GenericName=INF Help Viewer
 Comment=A INF Documentation Viewer
 Exec=docview %f
 Terminal=false

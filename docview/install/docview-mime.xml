@@ -7,6 +7,7 @@
     <magic priority="50">
       <match type="string" offset="0" value="HSP"/>
     </magic>
+    <glob pattern="*.inf"/>
     <alias type="application/x-inf"/>
   </mime-type>
 </mime-info>
