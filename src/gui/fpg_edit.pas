@@ -164,6 +164,7 @@ type
     property    MaxLength;
     property    ParentShowHint;
     property    PasswordMode;
+    property    ReadOnly;
     property    ShowHint;
     property    SideMargin;
     property    TabOrder;
@@ -679,7 +680,7 @@ begin
   end;
   Canvas.SetClipRect(r);
 
-  if Enabled then
+  if Enabled and not ReadOnly then
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
@@ -703,7 +704,7 @@ begin
   prevval   := Text;
   s         := AText;
 
-  if not consumed then
+  if (not consumed) and (not ReadOnly) then
   begin
     // Handle only printable characters
     // UTF-8 characters beyond ANSI range are supposed to be printable
@@ -753,14 +754,18 @@ begin
     ckPaste:
         begin
           DoPaste(fpgClipboard.Text);
-          hasChanged := True;
+          if not ReadOnly then
+            hasChanged := True;
         end;
     ckCut:
         begin
           DoCopy;
           DeleteSelection;
-          Adjust;
-          hasChanged := True;
+          if not ReadOnly then
+          begin
+            Adjust;
+            hasChanged := True;
+          end;
         end;
   else
     Consumed := False;
@@ -831,30 +836,33 @@ begin
   begin
     consumed := True;
 
-    case keycode of
-      keyBackSpace:
-          begin
-            if FSelOffset <> 0 then
-              DeleteSelection
-            else if FCursorPos > 0 then
+   if not ReadOnly then
+   begin
+      case keycode of
+        keyBackSpace:
             begin
-              UTF8Delete(FText, FCursorPos, 1);
-              Dec(FCursorPos);
+              if FSelOffset <> 0 then
+                DeleteSelection
+              else if FCursorPos > 0 then
+              begin
+                UTF8Delete(FText, FCursorPos, 1);
+                Dec(FCursorPos);
+                hasChanged := True;
+              end;// backspace
+            end;
+
+
+        keyDelete:
+            begin
+              if FSelOffset <> 0 then
+                DeleteSelection
+              else if FCursorPos < UTF8Length(FText) then
+                UTF8Delete(FText, FCursorPos + 1, 1);
               hasChanged := True;
-            end;// backspace
-          end;
-
-
-      keyDelete:
-          begin
-            if FSelOffset <> 0 then
-              DeleteSelection
-            else if FCursorPos < UTF8Length(FText) then
-              UTF8Delete(FText, FCursorPos + 1, 1);
-            hasChanged := True;
-          end;
-      else
-        Consumed := False;
+            end;
+        else
+          Consumed := False;
+      end;
     end;
 
     if Consumed then
@@ -1198,12 +1206,16 @@ begin
     FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
     itm := FDefaultPopupMenu.AddMenuItem(rsCut, '', @DefaultPopupCut);
     itm.Name := ipmCut;
+    itm.Enabled := not ReadOnly;
     itm := FDefaultPopupMenu.AddMenuItem(rsCopy, '', @DefaultPopupCopy);
     itm.Name := ipmCopy;
     itm := FDefaultPopupMenu.AddMenuItem(rsPaste, '', @DefaultPopupPaste);
     itm.Name := ipmPaste;
+    itm.Enabled := not ReadOnly;
     itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
     itm.Name := ipmClearAll;
+
+    itm.Enabled := not ReadOnly;
   end;
 
   SetDefaultPopupMenuItemsState;
@@ -1214,6 +1226,8 @@ procedure TfpgBaseEdit.DeleteSelection;
 var
   prevval: TfpgString;
 begin
+  if ReadOnly then
+    Exit;
   prevval := FText;
   if FSelOffset <> 0 then
   begin
@@ -1246,6 +1260,8 @@ var
   s: string;
   prevval: TfpgString;
 begin
+  if ReadOnly then
+    Exit;
   prevval := FText;
   DeleteSelection;
   s := AText;
