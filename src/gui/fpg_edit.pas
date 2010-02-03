@@ -247,6 +247,7 @@ type
     property    CustomThousandSeparator;
     property    NegativeColor;
     property    ParentShowHint;
+    property    ReadOnly;
     property    ShowHint;
     property    ShowThousand default True;
     property    TabOrder;
@@ -289,6 +290,7 @@ type
     property    CustomThousandSeparator;
     property    Value: extended read GetValue write SetValue;
     property    ParentShowHint;
+    property    ReadOnly;
     property    ShowHint;
     property    OnChange;
     property    OnEnter;
@@ -322,6 +324,7 @@ type
     property    ShowThousand default True;
     property    Value: Currency read GetValue write SetValue;
     property    ParentShowHint;
+    property    ReadOnly;
     property    ShowHint;
     property    TabOrder;
     property    OnChange;
