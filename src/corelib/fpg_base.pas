@@ -510,7 +510,7 @@ type
     function    KeywordHelp(const AHelpKeyword: string): Boolean;
     property    FormCount: integer read GetFormCount;
     property    Forms[Index: Integer]: TfpgWindowBase read GetForm;
-    property    HelpContext: THelpContext read FHelpContext write SetHelpContext;
+    property    HelpContext;
     property    HelpFile: TfpgString read GetHelpFile write FHelpFile;
     property    HelpKey: word read FHelpKey write FHelpKey default keyF1;
     property    IsInitialized: boolean read FIsInitialized;
