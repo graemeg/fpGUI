@@ -560,7 +560,7 @@ var
   BitmapOffset: longword;
   BitmapFlags: uint8;
   Link: TInternalHelpLink;
-  LinkTopicIndex: uint16;
+  LinkTopicIndex: integer;
 begin
   LinkTopicIndex := -1;
   while true do
@@ -629,7 +629,7 @@ var
   SubEscapeCode: uint8;
   BitmapOffset: longword;
   BitmapFlags: uint8;
-  LinkTopicIndex: uint16;
+  LinkTopicIndex: integer;
 begin
   LinkTopicIndex := -1;
   while true do
