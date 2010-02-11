@@ -13,7 +13,6 @@
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
-          <CStyleOperator Value="False"/>
           <AllowLabel Value="False"/>
           <CPPInline Value="False"/>
         </SyntaxOptions>

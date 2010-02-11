@@ -692,7 +692,7 @@ begin
   spacing := '';
   inc(iCallTrace);
   for i := 0 to iCallTrace do
-    spacing := spacing + '  ';
+    spacing += '  ';
   FClassName := AClassName;
   FMethodName := AMethodName;
   {$IFDEF DEBUG}
@@ -721,14 +721,14 @@ var
 begin
   s := '';
   for i := 0 to iCallTrace+1 do
-    s := s + '  ';
+    s += '  ';
   writeln(s + AMessage);
 end;
 
 procedure DumpStack;
-Var
-  Message : String;
-  i : longint;
+var
+  lMessage: String;
+  i: longint;
 begin
   writeln(' Stack trace:');
 //  Dump_Stack(StdOut, get_frame);
@@ -736,15 +736,15 @@ begin
   Writeln(stdout,'An unhandled exception occurred at $',HexStr(Ptrint(ExceptAddr),sizeof(PtrInt)*2),' :');
   if ExceptObject is exception then
    begin
-     Message:=Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
-     Writeln(stdout,Message);
+     lMessage := Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
+     Writeln(stdout,lMessage);
    end
   else
    Writeln(stdout,'Exception object ',ExceptObject.ClassName,' is not of class Exception.');
   Writeln(stdout,BackTraceStrFunc(ExceptAddr));
   if (ExceptFrameCount>0) then
     begin
-      for i:=0 to ExceptFrameCount-1 do
+      for i := 0 to ExceptFrameCount-1 do
         Writeln(stdout,BackTraceStrFunc(ExceptFrames[i]));
     end;
   Writeln(stdout,'');
@@ -788,21 +788,21 @@ end;
 procedure TfpgTimer.SetEnabled(const AValue: boolean);
 begin
   if (not FEnabled) and AValue then
-    FNextAlarm := now + interval * ONE_MILISEC;
+    FNextAlarm := now + (interval * ONE_MILISEC);
   FEnabled := AValue;
 end;
 
 procedure TfpgTimer.SetInterval(const AValue: integer);
 begin
   FInterval := AValue;
-  FNextAlarm := now + FInterval * ONE_MILISEC;
+  FNextAlarm := now + (FInterval * ONE_MILISEC);
 end;
 
 constructor TfpgTimer.Create(ainterval: integer);
 begin
   FInterval := ainterval;
-  OnTimer  := nil;
-  FEnabled := False;
+  OnTimer   := nil;
+  FEnabled  := False;
   fpgTimers.Add(self);
 end;
 
@@ -826,7 +826,7 @@ begin
     // set the next alarm point
     if interval > 0 then
       while FNextAlarm <= ctime do
-        FNextAlarm := FNextAlarm + (interval * ONE_MILISEC);
+        FNextAlarm += (interval * ONE_MILISEC);
 
     if Assigned(FOnTimer) then
       FOnTimer(self);
@@ -1425,7 +1425,7 @@ begin
       Result := TrimRight(Result) + sLineBreak;
     end else
       Inc(lw, tw);
-    Result := Result + sub;
+    Result += sub;
   end;
 end;
 
