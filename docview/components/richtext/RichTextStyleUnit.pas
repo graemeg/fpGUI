@@ -61,8 +61,6 @@ type
     function GetMargin_Top: longint;
     Procedure SetMargin_Top( NewValue: longint );
     Procedure SetupComponent;
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
     Procedure AssignFont( Var Font: TfpgFont;
                           NewFont: TfpgFont );
 
@@ -70,6 +68,8 @@ type
     property Name;
 
   public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
 
     procedure BeginUpdate;
