@@ -1666,9 +1666,6 @@ Procedure TRichTextView.InsertText( CharIndexToInsertAt: longword;
 var
   NewText: PChar;
 begin
-  if CharIndexToInsertAt < 0 then
-    exit;
-
   NewText := StrAlloc( StrLen( FText ) + StrLen( TextToInsert ) + 1 );
   StrLCopy( NewText, FText, CharIndexToInsertAt );
   StrCat( NewText, TextToInsert );
