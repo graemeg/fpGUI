@@ -10,7 +10,6 @@
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
-      <Title Value="uiDesigner"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -114,6 +113,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
+    <SearchPaths>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <AllowLabel Value="False"/>
@@ -121,7 +123,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
-      <CustomOptions Value="-FUunits
+      <CustomOptions Value="
 "/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
