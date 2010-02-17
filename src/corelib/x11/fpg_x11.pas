@@ -1483,7 +1483,7 @@ begin
     prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', longbool(0));
     if prop = X.None then
     begin
-      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
+//      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
       // Set Override Redirect here!
       mwmhints.flags := 0;
     end
