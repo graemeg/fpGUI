@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Library
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -186,12 +186,8 @@ end;
 
 function fpgAllFilesMask: TfpgString;
 begin
-  {$Note In FPC 2.2.2 onwards we can use AllFilesMask which is part of RTL }
-  {$IFDEF WINDOWS}
-  Result := '*.*';
-  {$ELSE}
-  Result := '*';
-  {$ENDIF}
+  { Since FPC 2.2.2 we have the AllFilesMask variable, which is part of the RTL }
+  Result := AllFilesMask;
 end;
 
 function fpgConvertLineEndings(const s: TfpgString): TfpgString;
