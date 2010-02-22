@@ -3,15 +3,15 @@ fpGUI information
 =================
  This version of fpGUI is based on a implementation where every
  widget has a window handle. In other words every widget is actually
- an embedded window in the Form (yet another window).
-  
- Revision 127 was the last revision which still had the old design - one
- handle per Form.
- It has been tagged in SubVersion as /tags/single_handle_fpgui
- 
- From revision 227, the new design (multi-handle implementation) has
- become the new default implementation of fpGUI. It was a complete
- rewrite of the code.
+ an embedded window inside a top-level window (aka Form).
+
+ If you wanted to look at the old design of fpGUI - the one based on
+ a single handle per Form - then create a local branch based on the
+ tag 'single_handle_fpgui', or the slightly newer branch called 
+ 'v0.4_fixes'.
+
+ Release v0.5 and later is the new design (multi-handle implementation).
+ It was a complete rewrite of the code.
 
 
 
@@ -32,7 +32,8 @@ To install FPC under Debian/Ubuntu
 
 How to compile fpGUI
 ====================
- Please see the readme.txt file in the "src" directory.
+ Please see the INSTALL.txt file for detailed instructions.
+
 
 
 System requirements under Linux
@@ -46,7 +47,7 @@ required packages too.
 
 
 
------
- Graeme Geldenhuys
+Regards,
+ - Graeme Geldenhuys -
 
- 
+                   ============================================
