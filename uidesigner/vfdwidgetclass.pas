@@ -96,7 +96,7 @@ uses
 
 type
   // used to get to SetDesigning() in Form Designer
-  TComponentFriendClass = class(TComponent);
+  TWidgetFriendClass = class(TfpgWidget);
 
 
 { TVFDWidgetClass }
@@ -122,7 +122,7 @@ end;
 function TVFDWidgetClass.CreateWidget(AOwner: TComponent): TfpgWidget;
 begin
   Result := WidgetClass.Create(AOwner);
-  TComponentFriendClass(Result).SetDesigning(True);
+  TWidgetFriendClass(Result).SetDesigning(True);
 end;
 
 function TVFDWidgetClass.CreatePopupMenu(AWidget: TfpgWidget): TfpgPopupMenu;
