@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<packages>
+<package name="fpgui">
+ <version major="0" minor="6" micro="3" build="0"/>
+ <filename>fpgui-0.6.3-0.zip</filename>
+ <author>Graeme Geldenhuys</author>
+ <license>Modified LGPL</license>
+ <email>graemeg@gmail.com</email>
+ <description>fpGUI Toolkit - a custom written GUI toolkit for Free Pascal.</description>
+ <dependencies>
+  <dependency>
+   <package packagename="rtl"/>
+  </dependency>
+ </dependencies>
+</package>
+</packages>
