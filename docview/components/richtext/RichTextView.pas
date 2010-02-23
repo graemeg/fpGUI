@@ -687,7 +687,7 @@ ProfileEvent('DEBUG:  TRichTextView.HandlePaint   4');
   if not Debug then
     Draw( 0, FLayout.FNumLines )
   else
-    Canvas.DrawText(8, 8, GetTextAreaWidth-FScrollbarWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
+    Canvas.DrawText(8, 8, GetTextAreaWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
   Canvas.ClearClipRect;
 
