@@ -21,10 +21,8 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="fpGUI Toolkit
-"/>
-    <License Value="LGPL 2 with static linking exception.
-"/>
+    <Description Value="fpGUI Toolkit"/>
+    <License Value="LGPL 2 with static linking exception."/>
     <Version Minor="7"/>
     <Files Count="74">
       <Item1>
