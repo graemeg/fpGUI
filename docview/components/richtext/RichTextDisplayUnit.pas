@@ -371,13 +371,9 @@ begin
     // no text to draw
     exit;
 
-  Y := StartY
-       - Layout.FRichTextSettings.Margins.Top;
-
+  Y := StartY - Layout.FRichTextSettings.Margins.Top;
   Selected := false; // it's not going to change.
-
   LinesPrinted := 0;
-
   LineIndex := StartLine;
 
   repeat
