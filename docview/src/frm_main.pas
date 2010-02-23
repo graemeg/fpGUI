@@ -307,6 +307,9 @@ end;
 procedure TMainForm.IndexSearchEditKeyPress(Sender: TObject; var KeyCode: word;
   var ShiftState: TShiftState; var Consumed: boolean);
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   if (KeyCode = keyEnter) or (KeyCode = keyPEnter) then
   begin
     Consumed := True;
@@ -331,7 +334,6 @@ begin
   LoadSettings;
   CreateMRUMenuItems;
   ProcessCommandLineParams;
-
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
@@ -602,12 +604,18 @@ end;
 
 procedure TMainForm.tvContentsChange(Sender: TObject);
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   DisplayTopic(nil);
 end;
 
 procedure TMainForm.edSearchTextKeyPress(Sender: TObject; var KeyCode: word;
   var ShiftState: TShiftState; var Consumed: boolean);
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
   begin
     Consumed := True;
@@ -623,6 +631,9 @@ end;
 procedure TMainForm.lbSearchResultsKeyPress(Sender: TObject; var KeyCode: word;
   var ShiftState: TShiftState; var Consumed: boolean);
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
   begin
     Consumed := True;
@@ -650,6 +661,9 @@ end;
 procedure TMainForm.tvContentsDoubleClick(Sender: TObject; AButton: TMouseButton;
   AShift: TShiftState; const AMousePos: TPoint);
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   if tvContents.Selection <> nil then
     DisplayTopic(nil);
 end;
@@ -687,6 +701,9 @@ end;
 procedure TMainForm.lbHistoryKeyPress(Sender: TObject; var KeyCode: word;
   var ShiftState: TShiftState; var Consumed: boolean);
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
   begin
     Consumed := True;
@@ -817,6 +834,9 @@ var
   FileWordSequences: TList;
   Query: TTextSearchQuery;
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   SearchText := Trim(edSearchText.Text);
   lbSearchResults.Items.Clear;
 
@@ -1330,6 +1350,8 @@ var
   tmpIndex: TStringList;
   i: longint;
 begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
   LogEvent(LogStartup, 'Create index' );
   SetWaitCursor;
   LogEvent(LogStartup, '  Get/sort lists' );
@@ -1563,7 +1585,10 @@ var
   Topic: TTopic;
   HighlightWordSequences: TList;
   FileIndex: integer;
-Begin
+begin
+  if CurrentOpenFiles.Count = 0 then
+    Exit;
+
   ProfileEvent('DisplayTopic >>>>');
   if ATopic = nil then
   begin
@@ -1717,7 +1742,6 @@ begin
   fpgImages.AddMaskedBMP(
     'dv.arrowdown', @usr_arrow_down,
     sizeof(usr_arrow_down), 0, 0);
-
 end;
 
 destructor TMainForm.Destroy;
