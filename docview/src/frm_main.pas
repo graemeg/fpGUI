@@ -69,7 +69,7 @@ type
     btnHelp: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     miOpenRecentMenu: TfpgPopupMenu;
-    Files: TList; // current open help files.
+//    Files: TList; // current open help files.
     Debug: boolean;
     FFileOpenRecent: TfpgMenuItem;
     FHistorySelection: Boolean;
@@ -1128,8 +1128,6 @@ begin
 
   // Now load the various parts of the file(s)
   // into the user interface
-  tvContents.RootNode.Clear;
-
   DisplayFiles( tmpHelpFiles, FirstContentsNode );
 
   //if CmdLineParameters.getHelpManagerFlag then
@@ -1182,6 +1180,11 @@ var
 begin
   tvContents.Selection := nil;
   tvContents.RootNode.Clear;
+
+  lbSearchResults.Items.Clear;
+  edSearchText.Clear;
+  lbHistory.Items.Clear;
+
   RichView.Clear(ADestroying);
   if not ADestroying then
   begin
@@ -1192,9 +1195,9 @@ begin
   // First save notes. It's important we do this first
   // since we scan all notes each time to find the ones
   // belonging to this file.
-  for FileIndex := 0 to Files.Count - 1 do
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
   begin
-    lHelpFile := THelpFile(Files[FileIndex]);
+    lHelpFile := THelpFile(CurrentOpenFiles[FileIndex]);
     SaveNotes( lHelpFile );
   end;
 
@@ -1202,13 +1205,13 @@ begin
   ClearAllWordSequences;
 
   // Now destroy help files
-  for FileIndex := 0 to Files.Count - 1 do
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
   begin
-    lHelpFile := THelpFile(Files[FileIndex]);
+    lHelpFile := THelpFile(CurrentOpenFiles[FileIndex]);
     lHelpFile.Free;
   end;
 
-  Files.Clear;
+  CurrentOpenFiles.Clear;
   ClearNotes;
 end;
 
@@ -1682,7 +1685,7 @@ begin
   fpgApplication.OnException  := @MainFormException;
   OnShow  := @MainFormShow;
   OnDestroy :=@MainFormDestroy;
-  Files := TList.Create;
+//  Files := TList.Create;
   AllFilesWordSequences := TList.Create;
   CurrentOpenFiles := TList.Create;
   DisplayedIndex := TStringList.Create;
@@ -1715,7 +1718,7 @@ begin
   CurrentTopic := nil;  // it was a reference only
   FFileOpenRecent := nil;   // it was a reference only
   miOpenRecentMenu.Free;
-  DestroyListAndObjects(Files);
+//  DestroyListAndObjects(Files);
   DestroyListAndObjects(AllFilesWordSequences);
   DestroyListAndObjects(CurrentOpenFiles);
   inherited Destroy;
