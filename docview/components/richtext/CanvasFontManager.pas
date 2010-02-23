@@ -540,14 +540,17 @@ begin
   FCanvas := Canvas;
   FWidget := AWidget;
   FLogicalFonts := TList.Create;
-  FCurrentFontSpec.FaceName := 'Arial';
-  FCurrentFont := nil;
-  FAllowBitmapFonts := AllowBitmapFonts;
+
   // get system default font spec
   // as default default ;)
   FPGuiFontToFontSpec( fpgApplication.DefaultFont, FDefaultFontSpec );
   if FDefaultFontSpec.FaceName = '' then
     raise Exception.Create('For some reason we could not create a FDefaultFontSpec instance');
+
+  //  FCurrentFontSpec.FaceName := 'Arial';
+  FCurrentFontSpec.FaceName := FDefaultFontSpec.FaceName;
+  FCurrentFont := nil;
+  FAllowBitmapFonts := AllowBitmapFonts;
 end;
 
 // Destructor
@@ -935,7 +938,7 @@ ProfileEvent('DEBUG:  TCanvasFontManager.SetFont >>>>');
     // ack! Pfffbt! Couldn't find the font.
 
     // Try to get the default font
-    writeln('---------- here goes nothing -------------');
+//    writeln('---------- here goes nothing -------------');
     Font := GetFont( FDefaultFontSpec );
     if Font = nil then
     begin
@@ -978,17 +981,7 @@ begin
 
   // allocate memory for storing the char widths
   GetMem( FCurrentFont.pCharWidthArray, sizeof( TCharWidthArray ) );
-  //if not GpiQueryWidthTable( FCanvas.Handle,
-  //                           0, 256,
-  //                           FCurrentFont.pCharWidthArray^[ #0 ] ) then
-  //begin
-  //  raise Exception.Create( 'Error getting character width table: '
-  //                          + 'GpiQueryWidthTable error '
-  //                          + IntToStr( WinGetLastError( AppHandle ) ) );
-  //end;
 
-  // Convert all widths to positive!
-  // For unknown reason, sometimes GPI returns negative values...
   for TheChar := #0 to #255 do
   begin
     FCurrentFont.pCharWidthArray^[ TheChar ] := Abs( FCurrentFont.pCharWidthArray^[ TheChar ] );
@@ -1003,19 +996,9 @@ begin
     // For bitmap fonts, multiply by 256 manually
     for TheChar := #0 to #255 do
     begin
-      FCurrentFont.pCharWidthArray^[ TheChar ] :=
-        FCurrentFont.pCharWidthArray^[ TheChar ]
-        * FontWidthPrecisionFactor;
+      FCurrentFont.pCharWidthArray^[ TheChar ] := FCurrentFont.pCharWidthArray^[ TheChar ];
     end;
   end;
-
-  //GpiQueryFontMetrics( FCanvas.Handle,
-  //                     sizeof( fm ),
-  //                     fm );
-  //FCurrentFont.lMaxbaseLineExt := fm.lMaxbaselineExt;
-  //FCurrentFont.lAveCharWidth := fm.lAveCharWidth;
-  //FCurrentFont.lMaxCharInc := fm.lMaxCharInc;
-  //FCurrentFont.lMaxDescender := fm.lMaxDescender;
 end;
 
 procedure TCanvasFontManager.EnsureMetricsLoaded;
