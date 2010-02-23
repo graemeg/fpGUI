@@ -16,7 +16,7 @@ Todo list
 [ ] - Text wrapping in RichTextView is not 100% correct
 [ ] - Access Violation when the application terminates.
 [ ] - Ever growing list of fonts used while loading new topics.
-[ ] - Settings / Customization dialog is needed.
+[o] - Settings / Customization dialog is needed.
 [ ] - Open Recent Files doesn't always get populated, or gets cleared for some
       reason.
 [ ] - Change mouse cursor when over hyperlinks in RichTextView
