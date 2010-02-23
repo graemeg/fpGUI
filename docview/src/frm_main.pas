@@ -1784,7 +1784,7 @@ begin
   begin
     Name := 'PageControl1';
     SetPosition(0, 16, 260, 276);
-    ActivePageIndex := 4;
+    ActivePageIndex := 0;
     TabOrder := 0;
     Align := alLeft;
     OnChange  := @PageControl1Change;
@@ -1794,7 +1794,7 @@ begin
   with tsContents do
   begin
     Name := 'tsContents';
-    SetPosition(3, 24, 254, 301);
+    SetPosition(3, 24, 254, 249);
     Text := 'Contents';
   end;
 
@@ -1802,7 +1802,7 @@ begin
   with tvContents do
   begin
     Name := 'tvContents';
-    SetPosition(4, 32, 242, 264);
+    SetPosition(4, 32, 242, 212);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     ScrollWheelDelta := 60;
@@ -1830,7 +1830,7 @@ begin
   with tsIndex do
   begin
     Name := 'tsIndex';
-    SetPosition(3, 24, 254, 301);
+    SetPosition(3, 24, 254, 249);
     Text := 'Index';
   end;
 
@@ -1852,7 +1852,7 @@ begin
   with lbIndex do
   begin
     Name := 'lbIndex';
-    SetPosition(4, 32, 242, 264);
+    SetPosition(4, 32, 242, 212);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     HotTrack := False;
