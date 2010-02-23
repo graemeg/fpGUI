@@ -304,17 +304,21 @@ ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
   Y := StartPoint.Y + Layout.FRichTextSettings.Margins.Top;
   LineIndex := 0;
 
+  // debug only to show Margins.
+  //FontManager.Canvas.Color:= clBlue;
+  //FontManager.Canvas.DrawLine(0, y, 300, y);
+
   repeat
     Line := Layout.FLines^[ LineIndex ];
-    BottomOfLine := Y {+ Line.Height} + 1; // bottom pixel row is top + height + 1
+    BottomOfLine := Y;
 
     if // the line is in the range to be drawn
            ( LineIndex >= StartLine )
        and ( LineIndex <= EndLine )
 
        // and the line is within the cliprect
-       and ( BottomOfLine < FontManager.Canvas.GetClipRect.Bottom )
-       and ( Y            >=  FontManager.Canvas.GetClipRect.Top ) then
+       and ( BottomOfLine < FontManager.Canvas.GetClipRect.Bottom )        // -> so we can see partial lines at bottom scroll into the screen
+       and ( Y >=  FontManager.Canvas.GetClipRect.Top - Line.Height) then  // -> so we can see partial lines at top scroll off the screen
     begin
       // draw it. First decided whether selection is started or not.
       DrawRichTextLine( FontManager,
@@ -322,7 +326,7 @@ ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
                         SelectionStart,
                         SelectionEnd,
                         Line,
-                        Point( StartPoint.X, BottomOfLine ) );
+                        Point(StartPoint.X, Y) );
 
     end;
     inc( Y, Line.Height );
