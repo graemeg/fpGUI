@@ -102,6 +102,7 @@ type
     procedure   miConfigureClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
+    procedure   miHelpCmdLineParams(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
     procedure   miFileSaveTopicAsIPF(Sender: TObject);
@@ -155,7 +156,7 @@ type
     procedure   DisplaySelectedIndexTopic;
     procedure   ProcessCommandLineParams;
     procedure   SaveNavigatePoint;
-    procedure   ShowParamHelp;
+    procedure   ShowCmdLineParamHelp;
     function    FindTopicForLink( Link: THelpLink ): TTopic;
     function    FindTopicByResourceID( ID: word ): TTopic;
     function    FindTopicByName(const AName: string): TTopic;
@@ -380,6 +381,12 @@ end;
 procedure TMainForm.miHelpAboutFPGui(Sender: TObject);
 begin
   TfpgMessageDialog.AboutFPGui;
+end;
+
+procedure TMainForm.miHelpCmdLineParams(Sender: TObject);
+begin
+  CloseFile(False);
+  ShowCmdLineParamHelp;
 end;
 
 procedure TMainForm.miDebugHeader(Sender: TObject);
@@ -2177,8 +2184,9 @@ begin
     SetPosition(292, 168, 132, 20);
     AddMenuItem('Contents...', '', nil);
     AddMenuItem('Help using help', '', nil);
+    AddMenuItem('Command line parameters', '', @miHelpCmdLineParams);
     AddMenuItem('-', '', nil);
-    AddMenuItem('About fpGUI Toolkit', '', @miHelpAboutFPGui);
+    AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
   end;
 
@@ -2381,7 +2389,7 @@ begin
   begin
     if gCommandLineParams.IsParam('h') then
     begin
-      ShowParamHelp;
+      ShowCmdLineParamHelp;
       Exit; //==>
     end
     else if gCommandLineParams.IsParam('debuglog') then
@@ -2439,7 +2447,7 @@ begin
   inc(CurrentHistoryIndex);
 end;
 
-procedure TMainForm.ShowParamHelp;
+procedure TMainForm.ShowCmdLineParamHelp;
 const
   le = LineEnding;
 var
@@ -2450,7 +2458,7 @@ begin
        + 'Supported command line parameters:' + le + le
        + '<tt>'
        + '  <<filename>       Load the help file <<filename>' + le
-       + '  -h                Show this help' + le
+       + '  -h               Show this help' + le
        + '  -k <<text>        Search for keyword <<text> in open help files' + le
        + '  -n <<id>          Open Topic with numeric ID equal to <<id>' + le
        + '  -s <<id>          Open Topic with string ID equal to <<id>' + le
