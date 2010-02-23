@@ -1011,12 +1011,16 @@ begin
 end;
 
 function TCanvasFontManager.CharWidth( const C: Char ): longint;
+var
+  f: TfpgFont;
 begin
-  EnsureMetricsLoaded;
-  Result := FCurrentFont.pCharWidthArray^[ C ];
-  { TODO -ograemeg -chard-coded result : This is a temporary hard-code }
-//  result := fpgApplication.DefaultFont.TextWidth(C);
-  Result := FCurrentFont.lAveCharWidth;
+//  EnsureMetricsLoaded;
+//  Result := FCurrentFont.pCharWidthArray^[ C ];
+
+  { TODO -ograeme : This needs improvement: what about font attributes, and performance. }
+  f := fpgGetFont(FCurrentFont.FaceName + '-' + IntToStr(FCurrentFont.PointSize));
+  Result := f.TextWidth(C);
+  f.Free;
 end;
 
 function TCanvasFontManager.AverageCharWidth: longint;
