@@ -100,10 +100,10 @@ Type
     Function    GetCharIndex( P: PChar ): longint;
     Function    GetTextEnd: longint;
   Public
-    constructor Create( Text: PChar; Images: TfpgImageList; RichTextSettings: TRichTextSettings; FontManager: TCanvasFontManager; Width: longint );
-    Destructor  Destroy; Override;
-    property    TextEnd: longint read GetTextEnd;
+    constructor Create(Text: PChar; Images: TfpgImageList; RichTextSettings: TRichTextSettings; FontManager: TCanvasFontManager; AWidth: longint);
+    destructor  Destroy; Override;
     function    LinkFromIndex( const CharIndexToFind: longint): string;
+    property    TextEnd: longint read GetTextEnd;
     property    Images: TfpgImageList read FImages;
     property    Width: longint read FWidth;
     property    Height: longint read FHeight;
@@ -134,12 +134,12 @@ end;
 // Create a layout of the specified rich text.
 constructor TRichTextLayout.Create(Text: PChar; Images: TfpgImageList;
     RichTextSettings: TRichTextSettings; FontManager: TCanvasFontManager;
-    Width: longint);
+    AWidth: longint);
 var
   DefaultFontSpec: TFontSpec;
 Begin
 ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
-  Inherited Create;
+  inherited Create;
   FRichTextSettings := RichTextSettings;
   FImages := Images;
   FText := Text;
@@ -150,7 +150,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Create   1 of 4');
   FLinks := TStringList.Create;
   FLinks.Duplicates := dupIgnore;
   FFontManager := FontManager;
-  FLayoutWidth := Width;
+  FLayoutWidth := AWidth;
 ProfileEvent('DEBUG:  TRichTextLayout.Create   2');
   FHorizontalImageScale := 1;
   FVerticalImageScale := 1;
@@ -287,7 +287,7 @@ Var
     CurrentLine.Wrapped := false;
     assert( CurrentLinkIndex >= -1 );
     assert( CurrentLinkIndex < FLinks.Count );
-    WordStartX := Style.LeftMargin{ * FontWidthPrecisionFactor};
+    WordStartX := Style.LeftMargin;
     // next line
     // reset words completed count
     LineWordsCompleted := 0;
@@ -311,9 +311,9 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   CurrentLine.Width := 0;
   CurrentLine.LinkIndex := -1;
   CurrentLine.Wrapped := false;
-  WordStartX := Style.LeftMargin{ * FontWidthPrecisionFactor};
+  WordStartX := Style.LeftMargin;
   WordX := 0;
-  WrapX := FLayoutWidth - (FRichTextSettings.Margins.Right{ * FontWidthPrecisionFactor});
+  WrapX := FLayoutWidth - FRichTextSettings.Margins.Right;
   LineWordsCompleted := 0;
   WordStarted := false;
   DisplayedCharsSinceFontChange := false;
@@ -362,7 +362,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
         if IsValidBitmapIndex( BitmapIndex ) then
         begin
           Bitmap := FImages.Item[BitmapIndex].Image;
-          CurrentCharWidth := Trunc(Bitmap.Width * FontWidthPrecisionFactor * FHorizontalImageScale);
+          CurrentCharWidth := Trunc(Bitmap.Width * FHorizontalImageScale);
           WordStarted := true;
           BitmapHeight := Trunc(Bitmap.Height * FVerticalImageScale);
         end;
@@ -396,7 +396,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
           ttSetLeftMargin: // SPECIAL CASE... could affect display immediately
           begin
             PerformStyleTag( CurrentElement.Tag, Style, WordstartX + WordX );
-            if Style.LeftMargin {* FontWidthPrecisionFactor} < WordStartX then
+            if Style.LeftMargin < WordStartX then
             begin
               // we're already past the margin being set
               if pos( 'breakifpast', CurrentElement.Tag.Arguments ) > 0 then
@@ -421,8 +421,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
             end;
 
             // skip across to the new margin
-            CurrentCharWidth := (Style.LeftMargin {* FontWidthPrecisionFactor})
-                                - WordStartX - WordX;
+            CurrentCharWidth := Style.LeftMargin - WordStartX - WordX;
             // BUT! Don't treat it as a space, because you would not
             // expect wrapping to take place in a margin change...
             // at least not for IPF  :)

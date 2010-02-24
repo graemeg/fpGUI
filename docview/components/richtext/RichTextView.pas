@@ -206,9 +206,9 @@ Type
     // Rectangle (GetClientRect) minus scrollbars (if they are enabled)
     Function GetDrawRect: TfpgRect;
     // Rectangle minus scrollbars (GetDrawRect), minus extra 2px border all round
-    Function GetTextAreaRect: TfpgRect;
-    Function GetTextAreaHeight: longint;
-    Function GetTextAreaWidth: longint;
+    function GetTextAreaRect: TfpgRect;
+    function GetTextAreaHeight: longint;
+    function GetTextAreaWidth: longint;
 
     // Queries
     procedure GetFirstVisibleLine( Var LineIndex: longint; Var Offset: longint );
@@ -687,7 +687,7 @@ ProfileEvent('DEBUG:  TRichTextView.HandlePaint   4');
   if not Debug then
     Draw( 0, FLayout.FNumLines )
   else
-    Canvas.DrawText(8, 8, GetTextAreaWidth-FScrollbarWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
+    Canvas.DrawText(8, 8, GetTextAreaWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
   Canvas.ClearClipRect;
 
@@ -1012,7 +1012,7 @@ ProfileEvent('DEBUG:  TRichTextView.Layout    4');
                                      FImages,
                                      FRichTextSettings,
                                      FFontManager,
-                                     DrawWidth-(FScrollbarWidth*6) );
+                                     DrawWidth-(FScrollbarWidth{*6}) );
 
 ProfileEvent('DEBUG:  TRichTextView.Layout    5');
 
@@ -1159,20 +1159,14 @@ begin
   InflateRect(Result, -2, -2);
 end;
 
-Function TRichTextView.GetTextAreaHeight: longint;
-var
-  TextArea: TfpgRect;
+function TRichTextView.GetTextAreaHeight: longint;
 begin
-  TextArea := GetTextAreaRect;
-  Result := TextArea.Height;
+  Result := GetTextAreaRect.Height;
 end;
 
-Function TRichTextView.GetTextAreaWidth: longint;
+function TRichTextView.GetTextAreaWidth: longint;
 begin
-  Result := Width;
-  //if FBorderStyle <> bsNone then
-  dec( Result, 4 ); // borders of component
-  dec( Result, FScrollBarWidth ); // always allow space for vscrollbar
+  Result := GetTextAreaRect.Width;
 end;
 
 Procedure TRichTextView.SetupScrollbars;
@@ -1180,14 +1174,14 @@ var
   AvailableWidth: longint;
   MaxDisplayWidth: longint;
   AvailableHeight: longint;
-Begin
+begin
+  // Reset to defaults
+  FNeedVScroll := false;
+  FNeedHScroll := false;
+
   // Calculate used and available width
   AvailableWidth := GetTextAreaWidth;
   MaxDisplayWidth := FLayout.Width;
-
-  // Defaults
-  FNeedVScroll := false;
-  FNeedHScroll := false;
 
   // Horizontal scroll setup
   if MaxDisplayWidth > AvailableWidth then
