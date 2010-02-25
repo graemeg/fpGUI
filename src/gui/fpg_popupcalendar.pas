@@ -170,20 +170,21 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    BackgroundColor;
-    property    DateFormat: string read FDateFormat write SetDateFormat;
-    property    DateValue: TDateTime read FDate write SetDateValue;
-    property    FontDesc;
-    property    MinDate: TDateTime read FMinDate write SetMinDate;
-    property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
-    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay default 0;
-    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
-    property    DayColor: TfpgColor read FDayColor write SetDayColor;
-    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
-    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
-    property    ParentShowHint;
-    property    ShowHint;
     { Clicking on calendar Today button will close the popup calendar by default }
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
+    property    DateFormat: string read FDateFormat write SetDateFormat;
+    property    DateValue: TDateTime read FDate write SetDateValue;
+    property    DayColor: TfpgColor read FDayColor write SetDayColor;
+    property    FontDesc;
+    property    Hint;
+    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
+    property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
+    property    MinDate: TDateTime read FMinDate write SetMinDate;
+    property    ParentShowHint;
+    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
+    property    ShowHint;
+    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
+    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay default 0;
     property    TabOrder;
     property    OnChange;
     property    OnCloseUp;

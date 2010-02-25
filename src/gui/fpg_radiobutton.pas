@@ -65,6 +65,7 @@ type
     property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Hint;
     property    BoxLayout: TBoxLayout read GetBoxLayout write SetBoxLayout default tbLeftBox;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
     property    ParentShowHint;

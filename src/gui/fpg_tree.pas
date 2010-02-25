@@ -234,6 +234,7 @@ type
     property    ParentShowHint;
     property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta default 15;
     property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
+    property    Hint;
     property    ShowHint;
     property    ShowImages: boolean read FShowImages write SetShowImages default False;
     property    TabOrder;

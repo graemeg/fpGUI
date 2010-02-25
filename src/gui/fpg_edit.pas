@@ -161,6 +161,7 @@ type
     property    FontDesc;
     property    HeightMargin;
     property    HideSelection;
+    property    Hint;
     property    MaxLength;
     property    ParentShowHint;
     property    PasswordMode;
@@ -245,6 +246,7 @@ type
     property    Text;
   published
     property    CustomThousandSeparator;
+    property    Hint;
     property    NegativeColor;
     property    ParentShowHint;
     property    ReadOnly;
@@ -280,18 +282,19 @@ type
     property    OldColor;
     property    Text;
   published
-    property    Decimals: integer read FDecimals write SetDecimals default -1;
     property    CustomDecimalSeparator;
-    property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals default False;
-    property    NegativeColor;
-    property    ShowThousand default True;
-    property    TabOrder;
-    property    TextColor;
     property    CustomThousandSeparator;
-    property    Value: extended read GetValue write SetValue;
+    property    Decimals: integer read FDecimals write SetDecimals default -1;
+    property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals default False;
+    property    Hint;
+    property    NegativeColor;
     property    ParentShowHint;
     property    ReadOnly;
     property    ShowHint;
+    property    ShowThousand default True;
+    property    TabOrder;
+    property    TextColor;
+    property    Value: extended read GetValue write SetValue;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -317,16 +320,17 @@ type
     property    OldColor;
     property    Text;
   published
-    property    Decimals: integer read FDecimals write SetDecimals default 2;
-    property    NegativeColor;
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
-    property    ShowThousand default True;
-    property    Value: Currency read GetValue write SetValue;
+    property    Decimals: integer read FDecimals write SetDecimals default 2;
+    property    Hint;
+    property    NegativeColor;
     property    ParentShowHint;
     property    ReadOnly;
     property    ShowHint;
+    property    ShowThousand default True;
     property    TabOrder;
+    property    Value: Currency read GetValue write SetValue;
     property    OnChange;
     property    OnEnter;
     property    OnExit;

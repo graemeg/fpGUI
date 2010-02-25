@@ -69,9 +69,11 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    BackgroundColor;
+    property    Hint;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 10;
     property    Position: integer read FPosition write SetTBPosition default 0;
+    property    ShowHint;
     property    SliderSize: integer read FSliderSize write SetSliderSize default 11;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    TabOrder;
@@ -118,6 +120,7 @@ type
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
     property    ParentShowHint;
+    property    Hint;
     property    ShowHint;
     property    ShowPosition: boolean read FShowPosition write SetShowPosition default False;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;

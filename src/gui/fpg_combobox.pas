@@ -141,6 +141,7 @@ type
     property    FocusItem;
     property    FontDesc;
     property    Height;
+    property    Hint;
     property    Items;
     property    Margin;
     property    Options;

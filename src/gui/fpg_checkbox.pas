@@ -69,6 +69,7 @@ type
     property    BoxLayout;
     property    Checked;
     property    FontDesc;
+    property    Hint;
     property    ParentShowHint;
     property    ShowHint;
     property    TabOrder;

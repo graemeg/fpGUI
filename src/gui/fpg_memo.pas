@@ -110,6 +110,7 @@ type
   published
     property    BackgroundColor default clBoxColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Hint;
     property    Lines: TStringList read FLines;
     property    ParentShowHint;
     property    ShowHint;

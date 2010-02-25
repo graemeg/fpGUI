@@ -107,6 +107,7 @@ type
   published
     property    BackgroundColor;
     property    FullScreen;
+    property    Hint;
     property    ModalResult;
     property    Sizeable;
     property    ShowHint;

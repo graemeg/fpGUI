@@ -52,10 +52,12 @@ type
   published
     property    Autosize;
     property    FontDesc;
+    property    Hint;
     property    HotTrackColor: TfpgColor read fHotTrackColor write SetHotTrackColor;
     property    HotTrackFont: TfpgString read fHTFont write SetHotTrackFont;
     property    Text;
     property    TextColor;
+    property    ShowHint;
     property    URL: TfpgString read FUrl write SetURL;
     property    OnClick;
 end;

@@ -63,10 +63,11 @@ type
   published
     property    BackgroundColor;
     property    BorderStyle;
-    property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
-    property    Style;
+    property    Hint;
     property    ParentShowHint;
+    property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
     property    ShowHint;
+    property    Style;
     property    OnClick;
     property    OnDoubleClick;
     property    OnMouseDown;
@@ -110,15 +111,16 @@ type
     property    BackgroundColor;
     property    BorderStyle;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Hint;
     property    Layout: TLayout read GetLayout write SetLayout default tlCenter;
+    property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
+    property    Margin: integer read GetMargin write SetMargin default 2;
+    property    ParentShowHint;
+    property    ShowHint;
     property    Style;
     property    Text: string read GetText write SetText;
     property    TextColor;
-    property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
-    property    Margin: integer read GetMargin write SetMargin default 2;
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
-    property    ParentShowHint;
-    property    ShowHint;
     property    OnClick;
     property    OnDoubleClick;
   end;
@@ -149,6 +151,7 @@ type
     property    BackgroundColor;
     property    BorderStyle;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Hint;
     property    Margin: integer read GetMargin write SetMargin default 2;
     property    ParentShowHint;
     property    ShowHint;

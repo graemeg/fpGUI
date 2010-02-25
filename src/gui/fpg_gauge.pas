@@ -87,6 +87,7 @@ type
     property    Color: TfpgColor read FColor write FColor default clButtonFace;
     property    Enabled;
     property    FirstColor: TfpgColor read FFirstColor write SetFirstColor default clBlack;
+    property    Hint;
     property    Kind: TGaugeKind read FKind write SetGaugeKind default gkHorizontalBar;
     property    MaxValue: Longint read FMax write SetMax default 100;
     property    MinValue: Longint read FMin write SetMin default 0;
