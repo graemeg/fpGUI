@@ -293,6 +293,7 @@ begin
   wc.NameBase := 'frm';
   wc.AddProperty('WindowTitle', TPropertyString, '');
 //  wc.AddProperty('WindowPosition', TPropertyEnum, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   FVFDFormWidget := wc;
 
@@ -301,7 +302,7 @@ begin
   wc.NameBase := 'Label';
   wc.AddProperty('Alignment', TPropertyEnum, 'Horizontal text alignment');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the label text');
-  wc.AddProperty('Hint', TPropertyString, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Layout', TPropertyEnum, 'Vertical text layout');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
@@ -314,6 +315,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgEdit);
   wc.NameBase := 'Edit';
 //  wc.AddProperty('Color', TPropertyColor, 'Text color');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
@@ -325,6 +327,7 @@ begin
   // Memo
   wc          := TVFDWidgetClass.Create(TfpgMemo);
   wc.NameBase := 'Memo';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Lines', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -342,7 +345,7 @@ begin
   wc.AddProperty('Flat', TPropertyBoolean, 'Only draw button borders when mouse hovers over button');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
-  wc.AddProperty('Hint', TPropertyString, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ImageLayout', TPropertyEnum, 'Which side of the button contains the image');
   wc.AddProperty('ImageMargin', TPropertyInteger, 'Space between image and border, -1 centers image/text');
   wc.AddProperty('ImageName', TPropertyString, '');
@@ -360,6 +363,7 @@ begin
   wc.NameBase := 'CheckBox';
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
@@ -373,6 +377,7 @@ begin
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
@@ -384,6 +389,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
   wc.NameBase := 'ComboBox';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
@@ -396,6 +402,7 @@ begin
   wc.NameBase := 'CalendarCombo';
   wc.AddProperty('DateFormat', TPropertyString, 'Standard RTL date formatting applies');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
@@ -409,6 +416,7 @@ begin
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('DateFormat', TPropertyString, 'Standard RTL date formatting applies');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
@@ -420,6 +428,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgListBox);
   wc.NameBase := 'ListBox';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('HotTrack', TPropertyBoolean, '');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -435,6 +444,7 @@ begin
   wc.AddProperty('Columns', TPropertyDBColumns, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('HeaderFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('RowCount', TPropertyInteger, '');
   wc.AddProperty('RowSelect', TPropertyBoolean, '');
@@ -449,6 +459,7 @@ begin
   wc           := TVFDWidgetClass.Create(TfpgBevel);
   wc.NameBase  := 'Bevel';
   wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
   wc.AddProperty('Shape', TPropertyEnum, 'Box, Frame, TopLine, Spacer etc..');
@@ -462,6 +473,7 @@ begin
   wc.NameBase  := 'Panel';
   wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
   wc.AddProperty('LineSpace', TPropertyInteger, 'Line spacing between wrapped caption');
   wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
@@ -480,6 +492,7 @@ begin
   wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
   wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
@@ -492,6 +505,7 @@ begin
   // ProgressBar
   wc          := TVFDWidgetClass.Create(TfpgProgressBar);
   wc.NameBase := 'ProgressBar';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -504,6 +518,7 @@ begin
   // TrackBar
   wc          := TVFDWidgetClass.Create(TfpgTrackBar);
   wc.NameBase := 'TrackBar';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Orientation', TPropertyEnum, '');
@@ -518,6 +533,7 @@ begin
   // ListView
   wc := TVFDWidgetClass.Create(TfpgListView);
   wc.NameBase := 'ListView';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('MultiSelect', TPropertyBoolean, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
@@ -531,6 +547,7 @@ begin
   wc.NameBase := 'TreeView';
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('FontDesc',TPropertyFontDesc, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ScrollWheelDelta', TPropertyInteger, 'Scroll amount with mouse wheel');
   wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
@@ -546,6 +563,7 @@ begin
   wc.NameBase := 'PageControl';
   wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('SortPages', TPropertyBoolean, 'Boolean value');
@@ -568,6 +586,7 @@ begin
   // Gauge
   wc          := TVFDWidgetClass.Create(TfpgGauge);
   wc.NameBase := 'Gauge';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Kind', TPropertyEnum, '');
   wc.AddProperty('MinValue', TPropertyInteger, '');
   wc.AddProperty('MaxValue', TPropertyInteger, '');
@@ -582,6 +601,7 @@ begin
   // Integer Edit
   wc          := TVFDWidgetClass.Create(TfpgEditInteger);
   wc.NameBase := 'EditInteger';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -595,6 +615,7 @@ begin
   // Float Edit
   wc          := TVFDWidgetClass.Create(TfpgEditFloat);
   wc.NameBase := 'EditFloat';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -611,6 +632,7 @@ begin
   // Currency Edit
   wc          := TVFDWidgetClass.Create(TfpgEditCurrency);
   wc.NameBase := 'EditCurrency';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');

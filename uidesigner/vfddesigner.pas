@@ -1219,7 +1219,15 @@ begin
 }
   s := s + '  WindowTitle := ' + QuotedStr(FForm.WindowTitle) + ';' + LineEnding;
 
-  // ShowHint property - This is ugly, Form's properties or not handled well!!
+  // Hint property - This is ugly, Form's properties are not handled well!!
+  PropInfo := GetPropInfo(FForm.ClassType, 'Hint');
+  t := GetStrProp(FForm, 'Hint');
+  if IsStoredProp(FForm, PropInfo) then
+  begin
+    s := s + '  Hint := ' + QuotedStr(t) + ';' + LineEnding;
+  end;
+
+  // ShowHint property - This is ugly, Form's properties are not handled well!!
   PropInfo := GetPropInfo(FForm.ClassType, 'ShowHint');
   i := GetOrdProp(FForm, 'ShowHint');
   if IsStoredProp(FForm, PropInfo) then
