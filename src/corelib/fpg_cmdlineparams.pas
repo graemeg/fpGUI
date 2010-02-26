@@ -1,9 +1,9 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
     Unit to handle command line processing
 
-    Copyright (C) 2007 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2007 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
