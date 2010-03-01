@@ -144,6 +144,7 @@ type
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     function    GetClientRect: TfpgRect; override;
     property    Font: TfpgFont read FFont;
   published
@@ -754,6 +755,12 @@ begin
   FBackgroundColor  := Parent.BackgroundColor;
   FAlignment        := taLeftJustify;
   FMargin           := 2;
+end;
+
+destructor TfpgGroupBox.Destroy;
+begin
+  FFont.Free;
+  inherited Destroy;
 end;
 
 end.
