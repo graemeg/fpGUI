@@ -230,7 +230,7 @@ type
 
   TfpgX11Application = class(TfpgApplicationBase)
   private
-    FComposeBuffer: String[32];
+    FComposeBuffer: TfpgString;
     FComposeStatus: TStatus;
     FEventFilter: TX11EventFilter;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
@@ -669,10 +669,16 @@ function TfpgX11Application.StartComposing(const Event: TXEvent): TKeySym;
 var
   l: integer;
 begin
+  SetLength(FComposeBuffer, 20); // buffer set to some default size
   // Xutf8LookupString returns the size of FComposeBuffer in bytes.
   l := Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
-        SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus);
+        Length(FComposeBuffer), @Result, @FComposeStatus);
   SetLength(FComposeBuffer, l);
+  // if overflow occured, then previous SetLength() would have fixed the buffer
+  // size, so run Xutf8LookupString again to read correct value.
+  if FComposeStatus = XBufferOverflow then
+    Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
+        Length(FComposeBuffer), @Result, @FComposeStatus);
 end;
 
 function TfpgX11Application.DoGetFontFaceList: TStringList;
@@ -849,9 +855,9 @@ var
   procedure PrintKeyEvent(const event: TXEvent);
   var
     keysym: TKeySym;
-    compose_status: TXComposeStatus;
-    length: integer;
-    s: string[10];
+    icstatus: TStatus;
+    l: integer;
+    s: string;
   begin
     case event._type of
       X.KeyPress:
@@ -867,10 +873,12 @@ var
           writeln('not a key event ');
         end;
     end;
-    length := Xutf8LookupString(InputContext, @event.xkey, @s[1], 9, @keysym, @compose_status);
-    SetLength(s, length);
-    if((length > 0) and (length <=9)) then
-      writeln('result of xlookupstring [' + s + ']');
+    SetLength(s, 20);
+    l := Xutf8LookupString(InputContext, @event.xkey, @s[1], Length(s), @keysym, @icstatus);
+    SetLength(s, l);
+    if icstatus = XBufferOverflow then
+      Xutf8LookupString(InputContext, @event.xkey, @s[1], Length(s), @keysym, @icstatus);
+    writeln('result of xlookupstring [' + s + ']');
     writeln(Format('*** keysym [%s] ', [XKeysymToString(keysym)]));
   end;
 
