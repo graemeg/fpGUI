@@ -748,10 +748,9 @@ begin
   if InputMethod = nil then
     Exit;
 
-  InputContext := XCreateIC(InputMethod, [XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0]);
+  InputContext := XCreateIC(InputMethod, [XNInputStyle, XIMPreeditNothing or XIMStatusNothing, nil]);
   if InputContext = nil then
     Exit;
-
   FIsInitialized := True;
   xapplication := TfpgApplication(self);
 end;
