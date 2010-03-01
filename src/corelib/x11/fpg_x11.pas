@@ -535,7 +535,7 @@ begin
   e._type       := SelectionNotify;
   e.requestor   := ev.xselectionrequest.requestor;
   e.selection   := ev.xselectionrequest.selection;
-  e.selection   := xapplication.xia_clipboard;
+//  e.selection   := xapplication.xia_clipboard;
   e.target      := ev.xselectionrequest.target;
   e.time        := ev.xselectionrequest.time;
   e._property   := ev.xselectionrequest._property;
@@ -544,7 +544,7 @@ begin
   begin
     a := XA_STRING;
     XChangeProperty(xapplication.Display, e.requestor, e._property,
-		      XA_ATOM, sizeof(TAtom)*8, 0, PByte(@a), sizeof(TAtom));
+		      XA_ATOM, 32, PropModeReplace, PByte(@a), Sizeof(TAtom)); // I think last parameter is right?
   end
   else
   begin
