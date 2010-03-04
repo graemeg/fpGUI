@@ -444,6 +444,23 @@ begin
   wc.WidgetIconName := 'vfd.listbox';
   RegisterVFDWidget(wc);
 
+  // Color ListBox
+  wc          := TVFDWidgetClass.Create(TfpgColorListBox);
+  wc.NameBase := 'ColorListBox';
+  wc.AddProperty('AutoHeight', TPropertyBoolean, '');
+  wc.AddProperty('ColorPalette', TPropertyEnum, '');
+  wc.Addproperty('DragToReorder', TPropertyBoolean, '');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('HotTrack', TPropertyBoolean, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('PopupFrame', TPropertyBoolean, '');
+  wc.AddProperty('ShowColorNames', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.colorlistbox';
+  RegisterVFDWidget(wc);
+
   // StringGrid
   wc := TVFDWidgetClass.Create(TfpgStringGrid);
   wc.NameBase := 'Grid';
