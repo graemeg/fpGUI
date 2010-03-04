@@ -159,9 +159,9 @@ end;
 procedure TInsertCustomForm.OnButtonClick(Sender: TObject);
 begin
   if Sender = btnOK then
-    ModalResult := 1
+    ModalResult := mrOK
   else
-    ModalResult := 2;
+    ModalResult := mrCancel;
 end;
 
 { TNewFormForm }
@@ -191,9 +191,9 @@ end;
 procedure TNewFormForm.OnButtonClick(Sender: TObject);
 begin
   if Sender = btnOK then
-    ModalResult := 1
+    ModalResult := mrOK
   else
-    ModalResult := 2;
+    ModalResult := mrCancel;
 end;
 
 { TEditPositionForm }
@@ -224,9 +224,9 @@ end;
 procedure TEditPositionForm.OnButtonClick(Sender: TObject);
 begin
   if Sender = btnOK then
-    ModalResult := 1
+    ModalResult := mrOK
   else
-    ModalResult := 2;
+    ModalResult := mrCancel;
 end;
 
 { TWidgetOrderForm }
@@ -408,8 +408,8 @@ procedure TVFDDialog.HandleKeyPress(var keycode: word; var shiftstate: TShiftSta
 begin
   if keycode = keyEscape then
   begin
-    ModalResult := 2;
     consumed    := True;
+    ModalResult := mrCancel;
   end;
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
@@ -435,7 +435,7 @@ end;
 procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
 begin
   SaveSettings;
-  ModalResult := 1;
+  ModalResult := mrOK;
 end;
 
 procedure TfrmVFDSetup.AfterCreate;
