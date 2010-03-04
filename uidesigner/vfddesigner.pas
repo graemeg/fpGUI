@@ -82,9 +82,11 @@ type
 
 
   TFormDesigner = class(TObject)
+  private
+    FOneClickMove: boolean;
   protected
     FWidgets: TList;
-    FForm: TDesignedForm;
+    FForm: TfpgForm;
     FFormOther: string;
     FDragging: boolean;
     FDragPosX,
@@ -101,7 +103,6 @@ type
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   DesignerKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
   public
-    OneClickMove: boolean; // the widgets can be selected and dragged within one click
     constructor Create;
     destructor  Destroy; override;
     procedure   ClearForm;
@@ -130,7 +131,9 @@ type
     function    GetFormSourceDecl: string;
     function    GetFormSourceImpl: string;
     function    GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
-    property    Form: TDesignedForm read FForm;
+    // The widgets can be selected and dragged within one click
+    property    OneClickMove: boolean read FOneClickMove write FOneClickMove;
+    property    Form: TfpgForm read FForm;
     property    FormOther: string read FFormOther write FFormOther;
   end;
 
@@ -450,7 +453,7 @@ begin
   FWidgets := TList.Create;
   FWasDrag := False;
 
-  OneClickMove := True;
+  FOneClickMove := True;
 
   FForm               := TDesignedForm.Create(nil);
   FForm.FormDesigner  := self;
@@ -502,9 +505,8 @@ begin
 //  writeln('TFormDesigner.AddWidget');
   cd     := TWidgetDesigner.Create(self, wg, wgc);
   FWidgets.Add(cd);
-  //cd.Selected := true;
-  if wg is TDesignedForm then
-    TDesignedForm(wg).FormDesigner := self;
+  if wg is TfpgForm then
+    wg.FormDesigner := self;
   Result := cd;
 end;
 

@@ -33,7 +33,8 @@ uses
   fpg_listbox,
   fpg_combobox,
   fpg_trackbar,
-  fpg_checkbox;
+  fpg_checkbox,
+  fpg_panel;
 
 type
 
@@ -114,12 +115,16 @@ type
     btnCancel: TfpgButton;
     lblRecentFiles: TfpgLabel;
     tbMRUFileCount: TfpgTrackBar;
-    cbFullPath: TfpgCheckBox;
+    chkFullPath: TfpgCheckBox;
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
-    eDefaultExt: TfpgEdit;
+    edtDefaultExt: TfpgEdit;
     lblName3: TfpgLabel;
-    cbUndoOnExit: TfpgCheckBox;
+    chkUndoOnExit: TfpgCheckBox;
+    chkOneClick: TfpgCheckBox;
+    Bevel1: TfpgBevel;
+    Bevel2: TfpgBevel;
+    Bevel3: TfpgBevel;
     {@VFD_HEAD_END: frmVFDSetup}
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
@@ -251,6 +256,7 @@ begin
   Name := 'WidgetOrderForm';
   SetPosition(534, 173, 312, 258);
   WindowTitle := 'Widget order';
+  Hint := '';
   WindowPosition := wpScreenCenter;
 
   l1 := TfpgLabel.Create(self);
@@ -259,6 +265,7 @@ begin
     Name := 'l1';
     SetPosition(4, 4, 108, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Form widget order:';
   end;
 
@@ -269,6 +276,9 @@ begin
     SetPosition(4, 24, 220, 228);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
+    Hint := '';
+    HotTrack := False;
+    PopupFrame := False;
     TabOrder := 1;
   end;
 
@@ -280,6 +290,7 @@ begin
     Anchors := [anRight,anTop];
     Text := 'OK';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.ok';
     TabOrder := 2;
     OnClick := @OnButtonClick;
@@ -293,6 +304,7 @@ begin
     Anchors := [anRight,anTop];
     Text := 'Cancel';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.cancel';
     TabOrder := 3;
     OnClick := @OnButtonClick;
@@ -306,6 +318,7 @@ begin
     Anchors := [anRight,anTop];
     Text := 'Up';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 4;
     OnClick := @OnButtonClick;
@@ -319,6 +332,7 @@ begin
     Anchors := [anRight,anTop];
     Text := 'Down';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 5;
     OnClick := @OnButtonClick;
@@ -418,18 +432,18 @@ procedure TfrmVFDSetup.LoadSettings;
 begin
   chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 2);
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
-  cbFullPath.Checked      := gINI.ReadBool('Options', 'ShowFullPath', True);
-  eDefaultExt.Text        := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
-  cbUndoOnExit.Checked    := gINI.ReadBool('Options', 'UndoOnExit', UndoOnPropExit);
+  chkFullPath.Checked      := gINI.ReadBool('Options', 'ShowFullPath', True);
+  edtDefaultExt.Text        := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
+  chkUndoOnExit.Checked    := gINI.ReadBool('Options', 'UndoOnExit', UndoOnPropExit);
 end;
 
 procedure TfrmVFDSetup.SaveSettings;
 begin
   gINI.WriteInteger('Options', 'GridResolution', chlGrid.FocusItem);
   gINI.WriteInteger('Options', 'MRUFileCount', tbMRUFileCount.Position);
-  gINI.WriteBool('Options', 'ShowFullPath', cbFullPath.Checked);
-  gINI.WriteString('Options', 'DefaultFileExt', eDefaultExt.Text);
-  gINI.WriteBool('Options', 'UndoOnExit', cbUndoOnExit.Checked);
+  gINI.WriteBool('Options', 'ShowFullPath', chkFullPath.Checked);
+  gINI.WriteString('Options', 'DefaultFileExt', edtDefaultExt.Text);
+  gINI.WriteBool('Options', 'UndoOnExit', chkUndoOnExit.Checked);
 end;
 
 procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
@@ -442,17 +456,19 @@ procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
   Name := 'frmVFDSetup';
-  SetPosition(394, 399, 253, 225);
+  SetPosition(392, 386, 398, 283);
   WindowTitle := 'General settings';
+  Hint := '';
   WindowPosition := wpScreenCenter;
-  gINI.ReadFormState(self);
+  gINI.ReadFormState(self); // after form created but before creating widgets
 
   lb1 := TfpgLabel.Create(self);
   with lb1 do
   begin
     Name := 'lb1';
-    SetPosition(28, 28, 116, 16);
+    SetPosition(28, 32, 112, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Grid resolution:';
   end;
 
@@ -460,8 +476,9 @@ begin
   with chlGrid do
   begin
     Name := 'chlGrid';
-    SetPosition(140, 24, 88, 22);
+    SetPosition(144, 28, 88, 22);
     FontDesc := '#List';
+    Hint := '';
     Items.Add('1');
     Items.Add('4');
     Items.Add('8');
@@ -473,10 +490,11 @@ begin
   with btnOK do
   begin
     Name := 'btnOK';
-    SetPosition(93, 195, 75, 24);
+    SetPosition(238, 253, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.ok';
     TabOrder := 6;
     OnClick := @btnOKClick;
@@ -486,10 +504,11 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(172, 195, 75, 24);
+    SetPosition(317, 253, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.cancel';
     ModalResult := -1;
     TabOrder := 7;
@@ -499,8 +518,9 @@ begin
   with lblRecentFiles do
   begin
     Name := 'lblRecentFiles';
-    SetPosition(28, 92, 124, 16);
+    SetPosition(28, 132, 124, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := 'Recent files count:';
   end;
 
@@ -508,7 +528,8 @@ begin
   with tbMRUFileCount do
   begin
     Name := 'tbMRUFileCount';
-    SetPosition(156, 84, 76, 30);
+    SetPosition(156, 124, 76, 30);
+    Hint := '';
     Max := 10;
     Min := 2;
     Position := 4;
@@ -516,12 +537,13 @@ begin
     TabOrder := 3;
   end;
 
-  cbFullPath := TfpgCheckBox.Create(self);
-  with cbFullPath do
+  chkFullPath := TfpgCheckBox.Create(self);
+  with chkFullPath do
   begin
-    Name := 'cbFullPath';
-    SetPosition(24, 112, 204, 20);
+    Name := 'chkFullPath';
+    SetPosition(24, 156, 204, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 4;
     Text := 'Show the full file path';
   end;
@@ -532,6 +554,7 @@ begin
     Name := 'lblName1';
     SetPosition(8, 8, 176, 16);
     FontDesc := '#Label2';
+    Hint := '';
     Text := 'Form designer';
   end;
 
@@ -539,16 +562,18 @@ begin
   with lblName2 do
   begin
     Name := 'lblName2';
-    SetPosition(8, 72, 232, 16);
+    SetPosition(8, 108, 232, 16);
     FontDesc := '#Label2';
+    Hint := '';
     Text := 'Open Recent menu settings';
   end;
 
-  eDefaultExt := TfpgEdit.Create(self);
-  with eDefaultExt do
+  edtDefaultExt := TfpgEdit.Create(self);
+  with edtDefaultExt do
   begin
-    Name := 'eDefaultExt';
-    SetPosition(28, 160, 68, 22);
+    Name := 'edtDefaultExt';
+    SetPosition(28, 216, 68, 24);
+    Hint := '';
     TabOrder := 5;
     Text := '';
     FontDesc := '#Edit1';
@@ -558,19 +583,63 @@ begin
   with lblName3 do
   begin
     Name := 'lblName3';
-    SetPosition(12, 140, 152, 16);
+    SetPosition(12, 192, 152, 16);
     FontDesc := '#Label2';
+    Hint := '';
     Text := 'Default file extension';
   end;
 
-  cbUndoOnExit := TfpgCheckBox.Create(self);
-  with cbUndoOnExit do
+  chkUndoOnExit := TfpgCheckBox.Create(self);
+  with chkUndoOnExit do
   begin
-    Name := 'cbUndoOnExit';
-    SetPosition(24, 48, 204, 18);
+    Name := 'chkUndoOnExit';
+    SetPosition(24, 56, 204, 18);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 2;
     Text := 'Undo on property editor exit';
+  end;
+
+  chkOneClick := TfpgCheckBox.Create(self);
+  with chkOneClick do
+  begin
+    Name := 'chkOneClick';
+    SetPosition(24, 76, 224, 20);
+    Checked := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 12;
+    Text := 'One click select and move';
+  end;
+
+  Bevel1 := TfpgBevel.Create(self);
+  with Bevel1 do
+  begin
+    Name := 'Bevel1';
+    SetPosition(108, 4, 280, 14);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsBottomLine;
+  end;
+
+  Bevel2 := TfpgBevel.Create(self);
+  with Bevel2 do
+  begin
+    Name := 'Bevel2';
+    SetPosition(192, 104, 196, 14);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsBottomLine;
+  end;
+
+  Bevel3 := TfpgBevel.Create(self);
+  with Bevel3 do
+  begin
+    Name := 'Bevel3';
+    SetPosition(156, 188, 232, 14);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsBottomLine;
   end;
 
   {@VFD_BODY_END: frmVFDSetup}
@@ -580,6 +649,8 @@ end;
 
 procedure TfrmVFDSetup.BeforeDestruction;
 begin
+  // We don't put this in SaveSettings because it needs to be called even if
+  // user cancels the dialog with btnCancel or ESC key press.
   gINI.WriteFormState(self);
   inherited BeforeDestruction;
 end;
