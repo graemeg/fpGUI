@@ -433,6 +433,8 @@ begin
   // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
   wc.NameBase := 'ListBox';
+  wc.AddProperty('AutoHeight', TPropertyBoolean, '');
+  wc.Addproperty('DragToReorder', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('HotTrack', TPropertyBoolean, '');
@@ -628,6 +630,7 @@ begin
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ReadOnly', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
 //  wc.AddProperty('CustomThousandSeparator', TPropertyString, 'Thousand separator character');
@@ -642,6 +645,7 @@ begin
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ReadOnly', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Value', TPropertyFloat, 'Initial value');
   wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
@@ -659,6 +663,7 @@ begin
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ReadOnly', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Value', TPropertyFloat, 'Initial value');
   wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
