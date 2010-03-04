@@ -137,6 +137,7 @@ type
     property    DragToReorder;
     property    FocusItem;
     property    FontDesc;
+    property    Hint;
     property    HotTrack;
     property    Items;
     property    ParentShowHint;
@@ -197,10 +198,13 @@ type
     property    DragToReorder;
     property    FocusItem;
     property    FontDesc;
+    property    Hint;
     property    HotTrack;
     property    Items;
+    property    ParentShowHint;
     property    PopupFrame;
     property    ShowColorNames;
+    property    ShowHint;
     property    TabOrder;
     property    TextColor;
   end;
