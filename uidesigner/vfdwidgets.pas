@@ -164,6 +164,12 @@ begin
     0, 0);
 
   fpgImages.AddMaskedBMP(
+    'vfd.colorlistbox', @stdimg_vfd_colorlistbox,
+    sizeof(stdimg_vfd_colorlistbox),
+    0, 0);
+
+
+  fpgImages.AddMaskedBMP(
     'vfd.combobox', @stdimg_vfd_combobox,
     sizeof(stdimg_vfd_combobox),
     0, 0);
