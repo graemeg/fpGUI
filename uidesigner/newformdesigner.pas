@@ -403,7 +403,7 @@ begin
   begin
     Name := 'setmenu';
     SetPosition(464, 29, 120, 20);
-    AddMenuItem('General options ...', '', @(maindsgn.OnOptionsClick));
+    AddMenuItem('General options...', '', @(maindsgn.OnOptionsClick));
   end;
 
   miOpenRecentMenu := TfpgPopupMenu.Create(self);
@@ -418,8 +418,8 @@ begin
   begin
     Name := 'helpmenu';
     SetPosition(328, 52, 120, 20);
-    AddMenuItem('Product Information', '', @miHelpAboutClick);
-    AddMenuItem('About fpGUI', '', @miHelpAboutGUI);
+    AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutGUI);
+    AddMenuItem('Product Information...', '', @miHelpAboutClick);
   end;
 
   previewmenu := TfpgPopupMenu.Create(self);
