@@ -432,9 +432,10 @@ procedure TfrmVFDSetup.LoadSettings;
 begin
   chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 2);
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
-  chkFullPath.Checked      := gINI.ReadBool('Options', 'ShowFullPath', True);
-  edtDefaultExt.Text        := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
-  chkUndoOnExit.Checked    := gINI.ReadBool('Options', 'UndoOnExit', UndoOnPropExit);
+  chkFullPath.Checked     := gINI.ReadBool('Options', 'ShowFullPath', True);
+  edtDefaultExt.Text      := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
+  chkUndoOnExit.Checked   := gINI.ReadBool('Options', 'UndoOnExit', UndoOnPropExit);
+  chkOneClick.Checked     := gINI.ReadBool('Options', 'OneClickMove', True);
 end;
 
 procedure TfrmVFDSetup.SaveSettings;
@@ -444,6 +445,7 @@ begin
   gINI.WriteBool('Options', 'ShowFullPath', chkFullPath.Checked);
   gINI.WriteString('Options', 'DefaultFileExt', edtDefaultExt.Text);
   gINI.WriteBool('Options', 'UndoOnExit', chkUndoOnExit.Checked);
+  gINI.WriteBool('Options', 'OneClickMove', chkOneClick.Checked);
 end;
 
 procedure TfrmVFDSetup.btnOKClick(Sender: TObject);

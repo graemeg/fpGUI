@@ -87,8 +87,9 @@ uses
   fpg_utils,
   fpg_main;
 
-Var
+var
   DefaultPasExt : String = '.pas';
+  OneClickMove: Boolean;
 
 { TMainDesigner }
 
@@ -283,6 +284,7 @@ begin
       fd           := TFormDesigner.Create;
       fd.Form.Name := nfrm.edName.Text;
       fd.Form.WindowTitle := nfrm.edName.Text;
+      fd.OneClickMove := OneClickMove;
       FDesigners.Add(fd);
       fd.Show;
     end;
@@ -373,6 +375,7 @@ var
 begin
   fp := TVFDFormParser.Create(FormName, FormHead, FormBody);
   fd := fp.ParseForm;
+  fd.OneClickMove := OneClickMove;
   fp.Free;
 
   FDesigners.Add(fd);
@@ -440,6 +443,7 @@ begin
   end;
   DefaultPasExt   := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
   UndoOnPropExit  := gINI.ReadBool('Options', 'UndoOnExit', DefUndoOnPropExit);
+  OneClickMove    := gINI.ReadBool('Options', 'OneClickMove', True);
   fpgApplication.HintPause := 1000;
 end;
 
