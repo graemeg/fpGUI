@@ -130,7 +130,8 @@ end;
 procedure TfpgBaseImgAnim.SetEnabled(const AValue: boolean);
 begin
   inherited SetEnabled(AValue);
-  FTimer.Enabled := FEnabled;
+  if not (csDesigning in ComponentState) then
+    FTimer.Enabled := FEnabled;
 end;
 
 procedure TfpgBaseImgAnim.SetImageFilename(const AValue: TfpgString);
