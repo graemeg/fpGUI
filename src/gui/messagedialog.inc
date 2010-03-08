@@ -371,7 +371,7 @@ begin
     dlg.DefaultButton := mbOK;
     dlg.Text := dlg.WindowTitle;
     dlg.InformativeText := LineEnding + LineEnding
-                           + 'This program uses ' + fpGUIName + ' version ' + fpGUIVersion + '.'
+                           + 'This program uses ' + fpGUIName + ' version ' + fpGUI_Version + '.'
                            + LineEnding + LineEnding
                            + fpGUIName + ' is intended for Open Source and Commercial applications. fpGUI'
                            + ' uses the LGPL 2 license with a static linking exception - the same as the Free'

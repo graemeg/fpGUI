@@ -194,7 +194,7 @@ uses
 const
   cLongName   = 'fpGUI Documentation Viewer';
   cCreatedBy  = 'Created by Graeme Geldenhuys';
-  cVersion    = 'Version 0.7 (alpha)';
+  cVersion    = 'Version ' + FPGUI_VERSION;
 
 {$I arrows.inc}
 

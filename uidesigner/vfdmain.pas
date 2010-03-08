@@ -24,6 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
+  fpg_main,
   fpg_widget,
   fpg_dialogs,
   vfdprops,
@@ -33,7 +34,7 @@ uses
   newformdesigner;
 
 const
-  program_version = '0.7 beta';
+  program_version = FPGUI_VERSION;
 
 type
 
@@ -84,8 +85,7 @@ implementation
 uses
   vfdformparser,
   fpg_iniutils,
-  fpg_utils,
-  fpg_main;
+  fpg_utils;
 
 var
   DefaultPasExt : String = '.pas';
