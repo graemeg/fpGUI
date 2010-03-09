@@ -198,8 +198,7 @@
       </Optimizations>
     </CodeGeneration>
     <Other>
-      <CustomOptions Value="-O-
--Fu/home/graemeg/programming/fpgui/lib/i386-win32aa/"/>
+      <CustomOptions Value="-O-"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
