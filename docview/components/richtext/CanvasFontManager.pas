@@ -873,8 +873,8 @@ try
         if AFont.Attributes = FontSpec.Attributes then
         begin
           // search name last since it's the slowest thing
-ProfileEvent('            AFont.UseFaceName=' + AFont.UseFaceName);
-ProfileEvent('         FontSpec.FaceName=' + FontSpec.FaceName);
+//ProfileEvent('            AFont.UseFaceName=' + AFont.UseFaceName);
+//ProfileEvent('         FontSpec.FaceName=' + FontSpec.FaceName);
           if AFont.FaceName = FontSpec.FaceName then
           begin
             // Found a logical font already created
