@@ -177,6 +177,8 @@ begin
   PointSize := 10;
   Attributes := [];
   FixedWidth := False;
+  UseFaceName := '';
+  FaceName := '';
 end;
 
 // frees allocated memory, if any.
@@ -558,8 +560,8 @@ end;
 destructor TCanvasFontManager.Destroy;
 var
   i: integer;
-  Font: TLogicalFont;
-  face: TFontFace;
+  lFont: TLogicalFont;
+  lface: TFontFace;
 begin
   // select default font so none of our logical fonts are in use
   FCanvas.Font := fpgApplication.DefaultFont;
@@ -567,8 +569,8 @@ begin
   // delete each logical font and our record of it
   for i := 0 to FLogicalFonts.Count - 1 do
   begin
-    Font := TLogicalFont(FLogicalFonts[ i ]);
-    Font.Free;
+    lFont := TLogicalFont(FLogicalFonts[ i ]);
+    lFont.Free;
   end;
   FLogicalFonts.Clear;
   FLogicalFonts.Free;
@@ -576,8 +578,8 @@ begin
   // TCanvasFontManager asked for FontFaces to be created, so lets take responsibility to destroy it.
   for i := 0 to FontFaces.Count-1 do
   begin
-    face := TFontFace(Fontfaces[i]);
-    face.Free;
+    lface := TFontFace(Fontfaces[i]);
+    lface.Free;
   end;
   FontFaces.Clear;
   FontFaces.Free;
