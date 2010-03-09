@@ -689,7 +689,8 @@ var
   s: string;
   pc: PChar;
 begin
-  pfs := XftListFonts(Display, DefaultScreen, [FC_SCALABLE, FcTypeBool, 1, 0, FC_FAMILY, 0]);
+  // this now even returns non-scaleable fonts which is what we sometimes want.
+  pfs := XftListFonts(Display, DefaultScreen, [0, FC_FAMILY, 0]);
 
   if pfs = nil then
     Exit; //==>
