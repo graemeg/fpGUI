@@ -801,13 +801,7 @@ begin
     FOnColumnClick(Self, Column, Button);
 
   Column.FDown := True;
-  
-  if FUpdateCount = 0 then
-  begin
-    Canvas.BeginDraw(False);
-       PaintHeaders;
-    Canvas.EndDraw;//(2,2, width-4, Height-4);
-  end;
+  Repaint;
 end;
 
 procedure TfpgListView.HandleHeaderMouseMove(x, y: Integer; btnstate: word;
