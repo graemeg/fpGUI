@@ -59,7 +59,7 @@ const
   cMessageQueueSize = 1024;
 
   // version and name constants
-  {$I VERSION-FILE}  // this includes the auto generated:  fpGUI_Version = xxx
+  {$I VERSION_FILE.inc}  // this includes the auto generated:  fpGUI_Version = xxx
   fpGUIName    = 'fpGUI Toolkit';
 
 const

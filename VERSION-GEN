@@ -2,9 +2,9 @@
 
 if test -f AUTHORS.txt
 then
-  VF=VERSION-FILE
+  VF=VERSION_FILE.inc
 else
-  VF=../../../VERSION-FILE
+  VF=../../../VERSION_FILE.inc
 fi
 DEF_VER=v0.6
 
