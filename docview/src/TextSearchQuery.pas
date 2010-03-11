@@ -66,7 +66,7 @@ var
   TermText: string;
   CombineMethod: TSearchTermCombineMethod;
   lTerm: TSearchTerm;
-  tmpTerms : TStringList;
+  tmpTerms : TStrings;
   i : integer;
 begin
   inherited Create;

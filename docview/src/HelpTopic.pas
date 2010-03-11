@@ -559,7 +559,7 @@ var
   SubEscapeCode: uint8;
   BitmapOffset: longword;
   BitmapFlags: uint8;
-  Link: TInternalHelpLink;
+  Link: THelpLink;//TInternalHelpLink;
   LinkTopicIndex: integer;
 begin
   LinkTopicIndex := -1;
@@ -605,10 +605,10 @@ begin
   // Don't make it a link if we didn't find a
   // overall link code, i.e. degrade gracefully.
   if LinkTopicIndex > -1 then
-  begin
+  begin    
     if CreateLink( State.LinkIndex, Link, TInternalHelpLink ) then
     begin
-      Link.TopicIndex := LinkTopicIndex;
+      TInternalHelpLink(Link).TopicIndex := LinkTopicIndex;
     end;
 
     OutputString := GetBeginLink( State.LinkIndex )
@@ -838,9 +838,9 @@ var
   EscapeLen: uint8;
   EscapeCode: uint8;
 
-  Link: TInternalHelpLink;
-  FootnoteLink: TFootnoteHelpLink;
-  LinkByResourceID: THelpLinkByResourceID;
+  Link: THelpLink;              //TInternalHelpLink;
+  FootnoteLink: THelpLink;      //TFootnoteHelpLink;
+  LinkByResourceID: THelpLink;  //THelpLinkByResourceID;
 
   Margin: integer;
 
@@ -864,7 +864,7 @@ var
   ProgramPath: string;
   ProgramFilename: string;
   ProgramInfo : TSerializableStringList;
-  tmpProgramLinkParts : TStringList;
+  tmpProgramLinkParts : TStrings;
 
   OutputString: string;
 begin
@@ -932,17 +932,17 @@ begin
       CheckForAutoURL( AText, State );
       if CreateLink( State.LinkIndex, Link, TInternalHelpLink ) then
       begin
-        Link.TopicIndex := pUInt16( pData + 2 )^;
+        TInternalHelpLink(Link).TopicIndex := pUInt16( pData + 2 )^;
 
         if EscapeLen >= 6 then
         begin
-          GetExtraLinkData( Link, pData + 4 );
+          GetExtraLinkData( TInternalHelpLink(Link), pData + 4 );
         end;
       end;
 
       // If it's not an automatic link
       // then put code in to show it.
-      if not Link.Automatic then
+      if not TInternalHelpLink(Link).Automatic then
       begin
         OutputString := '<blue>'
                         + GetBeginLink( State.LinkIndex );
@@ -956,8 +956,8 @@ begin
       CheckForAutoURL( AText, State );
       if CreateLink( State.LinkIndex, FootnoteLink, TFootnoteHelpLink ) then
       begin
-        FootnoteLink.TopicIndex := pUInt16( pData + 2 )^;
-        State.FootnoteLink := FootnoteLink;
+        TFootnoteHelpLink(FootnoteLink).TopicIndex := pUInt16( pData + 2 )^;
+        State.FootnoteLink := TFootnoteHelpLink(FootnoteLink);
       end;
 
       OutputString := '<blue>' + GetBeginLink( State.LinkIndex );
@@ -970,11 +970,11 @@ begin
       CheckForAutoURL( AText, State );
       if CreateLink( State.LinkIndex, LinkByResourceID, THelpLinkByResourceID ) then
       begin
-        LinkByResourceID.ResourceID := pUInt16( pData + 2 )^;
+        THelpLinkByResourceID(LinkByResourceID).ResourceID := pUInt16( pData + 2 )^;
 
         if EscapeLen >= 6 then
         begin
-          GetExtraLinkData( LinkByResourceID, pData + 4 );
+          GetExtraLinkData( THelpLinkByResourceID(LinkByResourceID), pData + 4 );
         end;
       end;
 
@@ -2219,7 +2219,7 @@ var
 
   ProgramLink: string;
   ProgramPath: string;
-  tmpProgramLinkParts : TStringList;
+  tmpProgramLinkParts : TStrings;
 
   OutputString: string;
 begin

@@ -158,7 +158,7 @@ var
   ParseIndex: longint;
   XSizeStr: string;
   YSizeStr: string;
-  tmpFontParts : TStringList;
+  tmpFontParts : TStrings;
 
   MarginSize: longint;
   ParsePoint: longint;

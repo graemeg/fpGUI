@@ -118,7 +118,7 @@ uses
 
   Procedure SetLogAspects(const aCommaSeparatedListOfAspectNames : String);
   Var
-    tmpAspects : TStringList;
+    tmpAspects : TStrings;
     i : Integer;
   Begin
     tmpAspects := TStringList.Create;
@@ -322,7 +322,7 @@ var
   tmpRC: longint;
   tmpSearchResults: TSearchRec;
   tmpMask: String;
-  tmpFilterParts : TStringList;
+  tmpFilterParts : TStrings;
   tmpDirectory: String;
   i: integer;
 begin
@@ -357,7 +357,7 @@ end;
 procedure ParseAndExpandFileNames(const aFileNameString: String; aResult: TStrings);
 var
   i: longint;
-  tmpFileNamesList: TStringList;
+  tmpFileNamesList: TStrings;
   tmpItem: String;
   tmpEnvironmentVarValue: string;
 begin

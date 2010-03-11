@@ -31,7 +31,7 @@ type
 
   TSerializableStringList = class(TObject)
   private
-    stringList: TStringList;
+    stringList: TStrings;
   public
     constructor Create;
     destructor  Destroy; override;

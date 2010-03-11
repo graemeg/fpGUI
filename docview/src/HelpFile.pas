@@ -1151,9 +1151,9 @@ var
   H: longint;
   i: longint;
   pFontSpec: pTHelpFontSpec;
-  tmpSubstitutionItems : TStringList;
+  tmpSubstitutionItems : TStrings;
   tmpCounter : integer;
-  tmpDimensionParts : TStringList;
+  tmpDimensionParts : TStrings;
   s: string;
   PointSize: word;
   cp: integer;

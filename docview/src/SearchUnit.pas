@@ -202,7 +202,7 @@ var
   TitleWordIndex: longint;
   WordRelevance: longint;
   TitleWordRelevance: longint;
-  tmpTitleWords : TStringList;
+  tmpTitleWords : TStrings;
   i : integer;
 begin
   tmpTitleWords := TStringList.Create;
@@ -258,7 +258,7 @@ var
   IndexEntryWordIndex: longint;
   WordRelevance: longint;
   IndexEntryWordRelevance: longint;
-  tmpIndexWords : TStringList;
+  tmpIndexWords : TStrings;
   i : integer;
 begin
   tmpIndexWords := TStringList.Create;
