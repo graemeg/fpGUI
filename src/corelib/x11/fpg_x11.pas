@@ -52,6 +52,7 @@ type
   PInt = ^integer;
 
 
+  {$HINTS OFF}
   TXIC = record
     dummy: Pointer;
   end;
@@ -62,6 +63,7 @@ type
     dummy: Pointer;
   end;
   PXIM = ^TXIM;
+  {$HINTS ON}
 
 
   TXdbeSwapInfo = record
