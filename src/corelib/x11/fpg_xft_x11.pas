@@ -30,8 +30,15 @@ uses
   ;
 
 const
-  libXft = 'libXft.so';
-  fclib = 'libfontconfig.so';
+  {$IF Defined(DARWIN)}
+    libXft = 'libXft.dylib';
+    {$LINKLIB libXft}
+    fclib = 'libfontconfig.dylib';
+    {$LINKLIB libfontconfig}
+  {$ELSE}
+    libXft = 'libXft.so';
+    fclib = 'libfontconfig.so';
+  {$IFEND}
 
   
 type
