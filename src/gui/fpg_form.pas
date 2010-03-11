@@ -452,7 +452,7 @@ begin
             fpgApplication.Terminate
           else
             // We can't free ourselves, somebody else needs to do it
-            fpgPostMessage(Self, fpgApplication, FPGM_CLOSE);
+            fpgPostMessage(Self, fpgApplication, FPGM_FREEME);
         end;
     end;  { case CloseAction }
   end;  { if CloseQuery }

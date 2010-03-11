@@ -223,7 +223,7 @@ type
     FHintPos: TPoint;
     procedure   SetHintPause(const AValue: Integer);
     procedure   SetupLocalizationStrings;
-    procedure   InternalMsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
+    procedure   InternalMsgFreeMe(var msg: TfpgMessageRec); message FPGM_FREEME;
     procedure   InternalMsgHintTimer(var msg: TfpgMessageRec); message FPGM_HINTTIMER;
     procedure   CreateHintWindow;
     procedure   HintTimerFired(Sender: TObject);
@@ -1144,7 +1144,7 @@ begin
   FHintTimer.Interval := FHintPause;
 end;
 
-procedure TfpgApplication.InternalMsgClose(var msg: TfpgMessageRec);
+procedure TfpgApplication.InternalMsgFreeMe(var msg: TfpgMessageRec);
 begin
   if Assigned(msg.Sender) then
   begin
