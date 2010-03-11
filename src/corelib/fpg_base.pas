@@ -32,7 +32,7 @@ type
   TfpgColor       = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
   TfpgString      = type string;
   TfpgChar        = type string[4];
-  TfpgModalResult = Low(integer)..High(integer);
+  TfpgModalResult = Low(integer)..MaxInt;
 
   PPoint = ^TPoint;
 
@@ -83,13 +83,15 @@ const
   FPGM_MOVE        = 16;
   FPGM_POPUPCLOSE  = 17;
   FPGM_HINTTIMER   = 18;
+  FPGM_FREEME      = 19;
   FPGM_USER        = 50000;
-  FPGM_KILLME      = High(Integer);
+  FPGM_KILLME      = MaxInt;
 
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
 
   { TfpgModalResult values }
+  mrError    = -1;
   mrNone     = 0;
   mrOk       = mrNone + 1;
   mrCancel   = mrOk + 1;
