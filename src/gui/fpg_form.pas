@@ -308,7 +308,7 @@ begin
     except
       on E: Exception do
       begin
-        ModalResult := -1;
+        ModalResult := mrError;
         Visible := False;
         fpgApplication.HandleException(self);
       end;
@@ -418,9 +418,8 @@ end;
 procedure TfpgBaseForm.Hide;
 begin
   Visible := False;
-//  HandleHide;
-  if ModalResult = mrNone then
-    ModalResult := -1;
+  if ModalResult = mrNone then  // No modal Result was set, and we need something
+    ModalResult := mrError;     // other than mrNone to exit modal event loop
 end;
 
 procedure TfpgBaseForm.Close;
