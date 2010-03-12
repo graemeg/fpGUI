@@ -379,10 +379,17 @@ procedure TtiBaseEditMediatorView.SetObjectUpdateMoment(
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnchange,ouCustom] then
       THackBaseEdit(View).OnChange := @DoOnChange
     else
       THackBaseEdit(View).OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiBaseEditMediatorView.Create;
@@ -448,10 +455,17 @@ procedure TtiSpinEditMediatorView.SetObjectUpdateMoment(
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiSpinEditMediatorView.Create;
@@ -489,10 +503,17 @@ procedure TtiTrackBarMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectU
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoTrackBarChanged   // TfpgTrackBar has a different event signature
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiTrackBarMediatorView.Create;
@@ -539,10 +560,17 @@ procedure TtiComboBoxMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectU
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;  
+  end;
 end;
 
 
@@ -562,10 +590,17 @@ procedure TtiMemoMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdat
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiMemoMediatorView.Create;
@@ -731,10 +766,17 @@ procedure TtiCheckBoxMediatorView.SetObjectUpdateMoment(
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiCheckBoxMediatorView.Create;
@@ -798,10 +840,17 @@ procedure TtiCalendarComboMediatorView.SetObjectUpdateMoment(
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiCalendarComboMediatorView.Create;
@@ -858,10 +907,17 @@ procedure TtiSpinEditFloatMediatorView.SetObjectUpdateMoment(
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiSpinEditFloatMediatorView.Create;
