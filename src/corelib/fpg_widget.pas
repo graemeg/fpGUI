@@ -709,7 +709,6 @@ begin
     begin
       if not (c is TfpgPopupMenu) then  // these should not be created yet
       begin
-        TfpgWidget(c).Visible := FVisible;
         TfpgWidget(c).HandleShow;
       end;
     end;
