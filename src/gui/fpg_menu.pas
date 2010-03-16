@@ -160,7 +160,6 @@ type
     procedure   PrepareToShow;
     function    VisibleCount: integer;
     function    VisibleItem(ind: integer): TfpgMenuItem;
-    procedure   HandleShow; override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -392,12 +391,6 @@ begin
     Result := TfpgMenuItem(FItems.Items[ind]);
 end;
 
-procedure TfpgMenuBar.HandleShow;
-begin
-  PrepareToShow;
-  inherited HandleShow;
-end;
-
 procedure TfpgMenuBar.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
 var
   newf: integer;
@@ -504,6 +497,7 @@ var
   n: integer;
   r: TfpgRect;
 begin
+  PrepareToShow;
   Canvas.BeginDraw;
   inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
