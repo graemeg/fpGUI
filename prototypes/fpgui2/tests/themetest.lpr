@@ -562,7 +562,10 @@ begin
   inherited HandleMouseEnter;
   if Enabled then
   begin
-    State := 1;
+    if not FDown then
+      State := 1
+    else
+      State := 2;
     Repaint;
   end;
 end;
