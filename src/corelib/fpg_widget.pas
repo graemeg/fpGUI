@@ -405,6 +405,8 @@ begin
   FBackgroundColor := clWindowBackground;
   FTextColor  := clText1;
 
+  inherited Create(AOwner);
+
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
   begin
     Parent := TfpgWidget(AOwner);
@@ -418,8 +420,6 @@ begin
     FWindowType := wtChild;
     FShowHint   := Parent.ShowHint;
   end;
-
-  inherited Create(AOwner);
 
   // This is for components that are created at runtime, after it's
   // parent has already been shown.
@@ -718,9 +718,8 @@ end;
 procedure TfpgWidget.InternalHandleShow;
 begin
   FOnScreen := True;
-  FVisible := False;
   AllocateWindowHandle;
-  DoSetWindowVisible(False);
+  DoSetWindowVisible(FVisible);
 end;
 
 procedure TfpgWidget.HandleHide;
