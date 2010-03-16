@@ -510,7 +510,6 @@ begin
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
-  FFocusable        := True;  // otherwise children can't get focus
   FBackgroundColor  := Parent.BackgroundColor;
   FAlignment        := taCenter;
   FLayout           := tlCenter;
