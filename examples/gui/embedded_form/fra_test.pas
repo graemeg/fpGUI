@@ -66,8 +66,9 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MyFrame}
   Name := 'MyFrame';
-  SetPosition(380, 237, 200, 199);
+  SetPosition(380, 237, 200, 203);
   WindowTitle := 'MyFrame';
+  Hint := '';
 
   fraCheckBox1 := TfpgCheckBox.Create(self);
   with fraCheckBox1 do
@@ -75,6 +76,7 @@ begin
     Name := 'fraCheckBox1';
     SetPosition(8, 40, 120, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 0;
     Text := 'CheckBox';
   end;
@@ -94,7 +96,7 @@ begin
   with Button1 do
   begin
     Name := 'Button1';
-    SetPosition(104, 152, 80, 24);
+    SetPosition(104, 164, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Button';
     FontDesc := '#Label1';
@@ -107,8 +109,9 @@ begin
   with Memo1 do
   begin
     Name := 'Memo1';
-    SetPosition(12, 60, 172, 84);
+    SetPosition(12, 60, 172, 88);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    Hint := '';
     Lines.Add('');
     FontDesc := '#Edit1';
     TabOrder := 3;
