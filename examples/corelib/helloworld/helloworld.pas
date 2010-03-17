@@ -26,6 +26,7 @@ uses
 
 const
   HelloWorldString: String = 'Hello, world!';
+  ClickToClose: String = 'click to close';
 
 
 type
@@ -35,6 +36,7 @@ type
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
+    procedure   MsgMouseUp(var msg: TfpgMessageRec); message FPGM_MOUSEUP;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   Show;
@@ -55,36 +57,43 @@ begin
   DoSetWindowVisible(True);
   // We can't set a title if we don't have a window handle. So we do that here
   // and not in the constructor.
-  SetWindowTitle('fpGFX Hello World');
+  SetWindowTitle('fpGUI Hello World');
 end;
 
 procedure TMainWindow.MsgPaint(var msg: TfpgMessageRec);
 var
-  Color: TfpgColor;
   r: TfpgRect;
   i: Integer;
+  fnt: TfpgFont;
 begin
   Canvas.BeginDraw;  // begin double buffering
 
-  Color     := 0;
-  r.SetRect(0, 0, Width, 1);
-  for i := 0 to FHeight-1 do
-  begin
-    Color := $ff - (i * $ff) div FHeight;    // shades of Blue
-    Canvas.SetColor(Color);
-    r.Top := i;
-    Canvas.DrawRectangle(r);
+  r.SetRect(0, 0, Width, Height);
+  Canvas.GradientFill(r, clBlue, clBlack, gdVertical);
+
+  fnt := fpgGetFont('Arial-20');
+  try
+    Canvas.Font := fnt;
+
+    Canvas.SetTextColor(clBlack);
+    Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 + 1,
+      (Height - Canvas.Font.Height) div 2 + 1, HelloWorldString);
+
+    Canvas.SetTextColor(clWhite);
+    Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
+      (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
+  finally
+    fnt.Free;
   end;
 
-  Canvas.Font := fpgGetFont('Arial-30');
-
-  Canvas.SetTextColor(clBlack);
-  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 + 1,
-    (Height - Canvas.Font.Height) div 2 + 1, HelloWorldString);
-
-  Canvas.SetTextColor(clWhite);
-  Canvas.DrawString((Width - Canvas.Font.TextWidth(HelloWorldString)) div 2 - 1,
-    (Height - Canvas.Font.Height) div 2 - 1, HelloWorldString);
+  fnt := fpgGetFont('Arial-10');
+  try
+    Canvas.Font := fnt;
+    Canvas.DrawString((Width - Canvas.Font.TextWidth(ClickToClose)) div 2 - 1,
+      Height - (Canvas.Font.Height*2), ClickToClose);
+  finally
+    fnt.Free;
+  end;
 
   Canvas.EndDraw;
 end;
@@ -92,13 +101,18 @@ end;
 procedure TMainWindow.MsgClose(var msg: TfpgMessageRec);
 begin
   ReleaseWindowHandle;
-  Halt(0);
+  fpgApplication.Terminate;
 end;
 
 procedure TMainWindow.MsgResize(var msg: TfpgMessageRec);
 begin
   FWidth  := msg.Params.rect.Width;
   FHeight := msg.Params.rect.Height;
+end;
+
+procedure TMainWindow.MsgMouseUp(var msg: TfpgMessageRec);
+begin
+  MsgClose(msg);
 end;
 
 
@@ -108,6 +122,7 @@ var
 begin
   fpgApplication.Initialize;
   MainWindow := TMainWindow.Create(nil);
+  fpgApplication.MainForm := MainWindow;
   MainWindow.Show;
   fpgApplication.Run;
   MainWindow.Free;
