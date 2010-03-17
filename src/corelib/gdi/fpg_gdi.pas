@@ -453,9 +453,12 @@ var
 begin
   hdcDest:= CreateCompatibleDC(0);
   SelectObject(hdcDest, BMP);
-  if bi.bmiHeader.biBitCount = 1 then begin
+  if bi.bmiHeader.biBitCount = 1 then
+  begin
     SetDIBitsToDevice(hdcDest, 0, 0, awidth, aheight, 0, 0, 0, aheight, aimgdata, bi, DIB_RGB_COLORS);
-  end else begin
+  end
+  else
+  begin
     hdcSrc:= CreateCompatibleDC(0);
     hbmSrc:= CreateBitmap(awidth, aheight, 1, bi.bmiHeader.biBitCount, aimgdata);
     SelectObject(hdcSrc, hbmSrc);
@@ -465,7 +468,6 @@ begin
   end;
   DeleteDC(hdcDest);
 end;
-
 {$ENDIF}
 
 procedure GetWindowBorderDimensions(const w: TfpgWindowBase; var dx, dy: integer);
