@@ -444,6 +444,30 @@ begin
   end;
 end;
 
+{$IFDEF wince}
+procedure WinCESetDibBits(BMP: HBITMAP; awidth, aheight: Integer; aimgdata: Pointer; var bi: TBitmapInfo);
+var
+  hdcSrc, hdcDest: HDC;
+  hbmSrc: HBITMAP;
+  bm: BITMAP;
+begin
+  hdcDest:= CreateCompatibleDC(0);
+  SelectObject(hdcDest, BMP);
+  if bi.bmiHeader.biBitCount = 1 then begin
+    SetDIBitsToDevice(hdcDest, 0, 0, awidth, aheight, 0, 0, 0, aheight, aimgdata, bi, DIB_RGB_COLORS);
+  end else begin
+    hdcSrc:= CreateCompatibleDC(0);
+    hbmSrc:= CreateBitmap(awidth, aheight, 1, bi.bmiHeader.biBitCount, aimgdata);
+    SelectObject(hdcSrc, hbmSrc);
+    BitBlt(hdcDest, 0, 0, awidth, aheight, hdcSrc, 0, 0, SRCCOPY);
+    DeleteDC(hdcSrc);
+    DeleteObject(hbmSrc);
+  end;
+  DeleteDC(hdcDest);
+end;
+
+{$ENDIF}
+
 procedure GetWindowBorderDimensions(const w: TfpgWindowBase; var dx, dy: integer);
 var
   bx: integer;  // left/right border width
@@ -2242,6 +2266,8 @@ begin
 
   {$IFNDEF wince}
   SetDIBits(wapplication.display, FBMPHandle, 0, aheight, aimgdata, bi, DIB_RGB_COLORS);
+  {$else}
+  WinCESetDibBits(FBMPHandle, awidth, aheight, aimgdata, bi);
   {$ENDIF}
 
   FIsTwoColor := (acolordepth = 1);
@@ -2283,6 +2309,8 @@ begin
   pbi := @bi;
   {$IFNDEF wince}
   SetDIBits(wapplication.display, FMaskHandle, 0, aheight, aimgdata, pbi^, DIB_RGB_COLORS);
+  {$ELSE}
+  WinCESetDibBits(FMaskHandle, awidth, aheight, aimgdata, pbi^);
   {$ENDIF}
 end;
 
