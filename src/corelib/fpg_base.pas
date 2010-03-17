@@ -1911,7 +1911,7 @@ var
 begin
   p := FImageData;
   Inc(p, (FWidth * y) + x);
-  p^ := longword(AValue);
+  p^ := AValue;
 //  write(IntToHex(AValue, 6) + ' ');
 end;
 
