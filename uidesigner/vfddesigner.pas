@@ -161,6 +161,7 @@ begin
     Widget.MouseCursor := mcDefault;
 
   for n := 1 to 8 do
+  begin
     if FSelected then
       resizer[n] := TwgResizer.Create(self, n)
     else
@@ -169,6 +170,7 @@ begin
         resizer[n].Free;
       resizer[n] := nil;
     end;
+  end;
 
   UpdateResizerPositions;
 
@@ -181,6 +183,7 @@ constructor TWidgetDesigner.Create(AFormDesigner: TFormDesigner; wg: TfpgWidget;
 var
   n: integer;
 begin
+  inherited Create;
   FFormDesigner := AFormDesigner;
   FWidget       := wg;
   FVFDClass     := wgc;
@@ -1486,8 +1489,8 @@ begin
     if wgc.WidgetClass = TOtherWidget then
       TOtherWidget(wg).wgClassName := newclassname;
     wgd          := AddWidget(wg, wgc);
-    wg.Visible   := True;
     wg.SetPosition(x, y, wg.Width, wg.Height);
+    wg.Visible   := True;
     DeSelectAll;
     wgd.Selected := True;
     UpdatePropWin;
