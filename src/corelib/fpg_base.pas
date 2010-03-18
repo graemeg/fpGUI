@@ -415,6 +415,7 @@ type
     FCanvas: TfpgCanvasBase;
     FSizeIsDirty: Boolean;
     FPosIsDirty: Boolean;
+    FMouseCursorIsDirty: Boolean;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
@@ -1029,6 +1030,8 @@ end;
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
   DoAllocateWindowHandle(FParent);
+  if FMouseCursorIsDirty then
+    DoSetMouseCursor;
 end;
 
 procedure TfpgWindowBase.ReleaseWindowHandle;
@@ -1124,6 +1127,7 @@ constructor TfpgWindowBase.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
+  FMouseCursorIsDirty := False;
   FPosIsDirty := True;
   FSizeIsDirty := True;
   FMaxWidth := 0;
@@ -1566,6 +1570,8 @@ end;
 
 procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
 begin
+  if AFont = nil then
+    exit;
   FFont := AFont;
   DoSetFontRes(AFont.FFontRes);
 end;

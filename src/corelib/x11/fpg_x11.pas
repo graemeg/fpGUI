@@ -1620,8 +1620,11 @@ var
   shape: integer;
 begin
   if not HasHandle then
+  begin
+    FMouseCursorIsDirty := True;
     Exit; //==>
-    
+  end;
+
   case FMouseCursor of
     mcSizeEW:     shape := XC_sb_h_double_arrow;
     mcSizeNS:     shape := XC_sb_v_double_arrow;
@@ -1641,6 +1644,8 @@ begin
   xc := XCreateFontCursor(xapplication.Display, shape);
   XDefineCursor(xapplication.Display, FWinHandle, xc);
   XFreeCursor(xapplication.Display, xc);
+
+  FMouseCursorIsDirty := False;
 end;
 
 procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);

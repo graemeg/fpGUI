@@ -132,6 +132,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   AfterConstruction; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
     function    InDesigner: boolean;
@@ -420,15 +421,6 @@ begin
     FWindowType := wtChild;
     FShowHint   := Parent.ShowHint;
   end;
-
-  // This is for components that are created at runtime, after it's
-  // parent has already been shown.
-  if (Parent <> nil) and (Parent.HasHandle) then
-  begin
-    InternalHandleShow;
-  end;
-
-  Loaded;  // remove csLoading from ComponentState
 end;
 
 destructor TfpgWidget.Destroy;
@@ -438,6 +430,19 @@ begin
   {$ENDIF}
   HandleHide;
   inherited;
+end;
+
+procedure TfpgWidget.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  // This is for components that are created at runtime, after it's
+  // parent has already been shown.
+  if (Parent <> nil) and (Parent.HasHandle) then
+  begin
+    HandleShow;
+  end;
+
+  Loaded;  // remove csLoading from ComponentState
 end;
 
 procedure TfpgWidget.MsgKeyChar(var msg: TfpgMessageRec);
