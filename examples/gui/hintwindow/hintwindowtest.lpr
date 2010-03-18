@@ -11,9 +11,16 @@ uses
   fpg_radiobutton, fpg_listbox, fpg_checkbox, fpg_panel, fpg_hint;
 
 type
+  { A very simple custom hint window. }
+  TMyHintWindow = class(TfpgHintWindow)
+  private
+    procedure   FormPaint(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
 
-  { TMainForm }
 
+  { test application main form }
   TMainForm = class(TfpgForm)
   private
     function  GetHintWnd: TfpgHintWindow;
@@ -50,6 +57,8 @@ type
     procedure rb_bgcolor_blueChange(Sender: TObject);
     procedure rb_shadowcolor_grayChange(Sender: TObject);
     procedure rb_shadowcolor_blackChange(Sender: TObject);
+    procedure cbShadowChanged(Sender: TObject);
+    procedure chbCustomHintChanged(Sender: TObject);
   public
     {@VFD_HEAD_BEGIN: MainForm}
     lblName1: TfpgLabel;
@@ -97,10 +106,12 @@ type
     rb_bgcolor_green: TfpgRadioButton;
     rb_bgcolor_blue: TfpgRadioButton;
     p_shadowcolor: TfpgPanel;
+    cbShadow: TfpgCheckBox;
     rb_shadowcolor_gray: TfpgRadioButton;
     rb_shadowcolor_black: TfpgRadioButton;
     chbShowHint: TfpgCheckBox;
     chbAppShowHint: TfpgCheckBox;
+    chbCustomHint: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
@@ -295,49 +306,49 @@ end;
 procedure TMainForm.rb_color_blackChange(Sender: TObject);
 begin
   if rb_color_black.Checked then
-    GetHintWnd.LTextColor := clBlack;
+    GetHintWnd.TextColor := clBlack;
 end;
 
 procedure TMainForm.rb_color_redChange(Sender: TObject);
 begin
   if rb_color_red.Checked then
-    GetHintWnd.LTextColor := clRed;
+    GetHintWnd.TextColor := clRed;
 end;
 
 procedure TMainForm.rb_color_greenChange(Sender: TObject);
 begin
   if rb_color_green.Checked then
-    GetHintWnd.LTextColor := clGreen;
+    GetHintWnd.TextColor := clGreen;
 end;
 
 procedure TMainForm.rb_color_blueChange(Sender: TObject);
 begin
   if rb_color_blue.Checked then
-    GetHintWnd.LTextColor := clBlue;
+    GetHintWnd.TextColor := clBlue;
 end;
 
 procedure TMainForm.rb_bgcolor_yellowChange(Sender: TObject);
 begin
   if rb_bgcolor_yellow.Checked then
-    GetHintWnd.LBackgroundColor := TfpgColor($ffffbf); //clYellow;
+    GetHintWnd.BackgroundColor := clHintWindow;
 end;
 
 procedure TMainForm.rb_bgcolor_whiteChange(Sender: TObject);
 begin
   if rb_bgcolor_white.Checked then
-    GetHintWnd.LBackgroundColor := clWhite;
+    GetHintWnd.BackgroundColor := clWhite;
 end;
 
 procedure TMainForm.rb_bgcolor_greenChange(Sender: TObject);
 begin
   if rb_bgcolor_green.Checked then
-    GetHintWnd.LBackgroundColor := clPaleGreen;
+    GetHintWnd.BackgroundColor := clPaleGreen;
 end;
 
 procedure TMainForm.rb_bgcolor_blueChange(Sender: TObject);
 begin
   if rb_bgcolor_blue.Checked then
-    GetHintWnd.LBackgroundColor := clLightBlue;
+    GetHintWnd.BackgroundColor := clLightBlue;
 end;
 
 procedure TMainForm.rb_shadowcolor_grayChange(Sender: TObject);
@@ -350,6 +361,23 @@ procedure TMainForm.rb_shadowcolor_blackChange(Sender: TObject);
 begin
   if rb_shadowcolor_black.Checked then
     GetHintWnd.ShadowColor := clBlack;
+end;
+
+procedure TMainForm.cbShadowChanged(Sender: TObject);
+begin
+  if cbShadow.Checked then
+    GetHintWnd.Shadow := 2
+  else
+    GetHintWnd.Shadow := 0;
+end;
+
+procedure TMainForm.chbCustomHintChanged(Sender: TObject);
+begin
+  if chbCustomHint.Checked then
+    HintWindowClass := TMyHintWindow
+  else
+    HintWindowClass := TfpgHintWindow;
+  fpgApplication.RecreateHintWindow;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -375,9 +403,15 @@ begin
     Name := 'edtText';
     SetPosition(24, 28, 120, 22);
     TabOrder := 1;
-//    Text := 'Hello World!';
+    Text := 'A very long hint';
     FontDesc := '#Edit1';
-    Hint := 'generic edit control'
+    Hint := 'generic edit control generic edit control generic edit control ' +
+            'generic edit control generic edit control generic edit control ' +
+            'generic edit control generic edit control generic edit control ' +
+            'generic edit control generic edit control generic edit control ' +
+            'generic edit control generic edit control generic edit control ' +
+            'generic edit control generic edit control generic edit control ' +
+            'generic edit control. The end.';
   end;
 
   chbPasswd := TfpgCheckBox.Create(self);
@@ -452,7 +486,7 @@ begin
     SetPosition(24, 108, 120, 22);
     ShowThousand := True;
     CustomThousandSeparator := ',';
-    onChange := @edtIntegerChange;
+    OnChange := @edtIntegerChange;
     Hint := 'integer edit control';
   end;
 
@@ -463,7 +497,7 @@ begin
     SetPosition(24, 164, 120, 22);
     ShowThousand := True;
     CustomThousandSeparator := ',';
-    onChange := @edtFloatChange;
+    OnChange := @edtFloatChange;
     Hint := 'float edit control';
   end;
 
@@ -476,7 +510,7 @@ begin
     CustomThousandSeparator := ',';
 //    Decimals := 2;
     Value := -123.45;
-    onChange := @edtCurrencyChange;
+    OnChange := @edtCurrencyChange;
     Hint := 'currency edit control';
   end;
 
@@ -624,8 +658,8 @@ begin
   rb_time_3.OnChange:= @rb_time_3Change;
 
   rb_time_5 := CreateRadioButton(p_time,80,50,'5 seconds');
-  rb_time_5.Checked:= True;
   rb_time_5.OnChange:= @rb_time_5Change;
+  rb_time_5.Checked:= True;
 
   p_color := TfpgPanel.Create(self);
   with p_color do
@@ -660,7 +694,7 @@ begin
     Text := 'Hint background color';
   end;
   
-  rb_bgcolor_yellow := CreateRadioButton(p_bgcolor,10,25,'Yellow');
+  rb_bgcolor_yellow := CreateRadioButton(p_bgcolor,10,25,'Default');
   rb_bgcolor_yellow.Checked:= True;
   rb_bgcolor_yellow.OnChange:= @rb_bgcolor_yellowChange;
 
@@ -677,26 +711,32 @@ begin
   with p_shadowcolor do
   begin
     name := 'p_shadowcolor';
-    SetPosition(200,440,180,50);
+    SetPosition(200,440,180,80);
     Layout := tlTop;
     FontDesc := '#Label1';
     Text := 'Shadow color';
   end;
 
-  rb_shadowcolor_gray := CreateRadioButton(p_shadowcolor,10,25,'Gray');
+  cbShadow := CreateCheckBox(p_shadowcolor, 10, 25, 'Show Hint Shadow');
+  cbShadow.OnChange  := @cbShadowChanged;
+
+  rb_shadowcolor_gray := CreateRadioButton(p_shadowcolor,10,50,'Gray');
   rb_shadowcolor_gray.Checked:= True;
   rb_shadowcolor_gray.OnChange:= @rb_shadowcolor_grayChange;
 
-  rb_shadowcolor_black := CreateRadioButton(p_shadowcolor,80,25,'Black');
+  rb_shadowcolor_black := CreateRadioButton(p_shadowcolor,80,50,'Black');
   rb_shadowcolor_black.OnChange:= @rb_shadowcolor_blackChange;
 
-  chbShowHint := CreateCheckBox(Self,200,495,'Form.ShowHint');
+  chbShowHint := CreateCheckBox(Self,10,520,'Form.ShowHint');
   chbShowHint.Checked := self.ShowHint;
   chbShowhint.OnChange:= @chbShowHintChange;
 
-  chbAppShowHint := CreateCheckBox(Self,200,515,'Application.ShowHint');
+  chbAppShowHint := CreateCheckBox(Self,10,540,'Application.ShowHint');
   chbAppShowHint.Checked := fpgApplication.ShowHint;
   chbAppShowhint.OnChange:= @chbAppShowHintChange;
+
+  chbCustomHint := CreateCheckBox(self, 200, 520, 'Custom Hint Window');
+  chbCustomHint.OnChange  := @chbCustomHintChanged;
 
   {@VFD_BODY_END: MainForm}
   
@@ -707,20 +747,33 @@ begin
 end;
 
 
-type
-  { A very simple custom hint window. }
-  TMyHintWindow = class(TfpgHintWindow)
-  public
-    constructor Create(AOwner: TComponent); override;
-  end;
-
 { TMyHintWindow }
+
+{ Not so efficient, but good enough for this demo }
+procedure TMyHintWindow.FormPaint(Sender: TObject);
+var
+  img: TfpgImage;
+  r: TfpgRect;
+begin
+  r := GetClientRect;
+  InflateRect(r, -Border, -Border);
+  Canvas.GradientFill(r, clLavender, clWhite, gdVertical);
+  img := fpgImages.GetImage('stdimg.dlg.info');
+  Canvas.TextColor := clMagenta;
+  Canvas.DrawImage(10, 10, img);
+  Canvas.DrawText(img.Width + 10, 10+(img.Height div 2), 'I am a custom hint window');
+  Canvas.TextColor := TextColor;
+  Canvas.DrawText(GetClientRect, Text, [txtVCenter, txtHCenter, txtWrap]);
+  Canvas.DrawButtonFace(300, 165, 90, 25, []);
+end;
 
 constructor TMyHintWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  OnPaint  := @FormPaint;
   MinWidth  := 400;
   MinHeight := 200;
+  Border := 2;
 end;
 
 
