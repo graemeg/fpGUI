@@ -16,8 +16,14 @@
         <SyntaxOptions>
           <AllowLabel Value="False"/>
           <CPPInline Value="False"/>
+          <UseAnsiStrings Value="True"/>
         </SyntaxOptions>
       </Parsing>
+      <CodeGeneration>
+        <Optimizations>
+          <OptimizationLevel Value="0"/>
+        </Optimizations>
+      </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>

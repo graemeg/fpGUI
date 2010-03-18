@@ -120,14 +120,14 @@
       <SyntaxOptions>
         <AllowLabel Value="False"/>
         <CPPInline Value="False"/>
+        <UseAnsiStrings Value="True"/>
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
-      <SmartLinkUnit Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
     </CodeGeneration>
-    <Linking>
-      <LinkSmart Value="True"/>
-    </Linking>
     <Other>
       <CustomOptions Value="
 "/>
