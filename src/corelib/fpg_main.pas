@@ -244,6 +244,7 @@ type
     destructor  Destroy; override;
     function    GetFont(const afontdesc: string): TfpgFont;
     procedure   ActivateHint(APos: TPoint; AHint: TfpgString);
+    procedure   RecreateHintWindow;
     procedure   Flush;
     procedure   HandleException(Sender: TObject);
     procedure   HideHint;
@@ -964,6 +965,7 @@ begin
   begin
     HideHint;
     FHintWindow.Free;
+    FHintWindow := nil;
   end;
   FHintTimer.Enabled := False;
   FHintTimer.OnTimer := nil;
@@ -1062,9 +1064,28 @@ begin
   h := wnd.Font.Height + (wnd.Border * 2) + (wnd.Margin * 2);
   { prevents hint from going off the right screen edge }
   if (APos.X + w) > ScreenWidth then
+  begin
     APos.X:= ScreenWidth - w;
+    // just a few more sanity checks
+    if APos.X < 0 then
+      APos.X := 0;
+    if w > ScreenWidth then
+      w := ScreenWidth;
+  end;
   wnd.SetPosition(APos.X, APos.Y, w, h);
+  wnd.UpdateWindowPosition;
   wnd.Show;
+end;
+
+procedure TfpgApplication.RecreateHintWindow;
+begin
+  if Assigned(FHintWindow) then
+  begin
+    HideHint;
+    FHintWindow.Free;
+    FHintWindow := nil;
+  end;
+  CreateHintWindow;
 end;
 
 procedure TfpgApplication.Initialize;
