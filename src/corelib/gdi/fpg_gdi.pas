@@ -1436,9 +1436,9 @@ begin
   end;
 
   {$IFDEF wince}
-  // *** This hack to get fpGUI working on the Symbol MC1000 WinCE 4.2 needs fixed ASAP!
-  FWinStyleEx := 276824064;
-  FWinStyle := 276824064;
+  // required for some WinCE devices
+  FWinStyleEx := FWinStyleEx or WS_VISIBLE; // or WS_BORDER;
+  FWinStyle := FWinStyleEx;
 
   FWinHandle := Windows.CreateWindowExW(
     FWinStyleEx,     // extended window style
