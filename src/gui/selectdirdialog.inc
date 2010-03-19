@@ -35,16 +35,30 @@
 {$IFDEF read_implementation}
 
 function TfpgSelectDirDialog.GetAbsolutePath(Node: TfpgTreeNode): TfpgString;
+var
+  lResult: TfpgString;
 begin
-  Result := '';
+  lResult := '';
   while Node <> nil do
   begin
-    if Node.Text = PathDelim then
-      Result := Node.Text + Result
-    else
-      Result := Node.Text + PathDelim + Result;
+  {$IFDEF UNIX}
+    if (Node.Text = PathDelim) then
+      lResult := Node.Text + lResult
+    else if (Node.Text <> '') then
+      lResult := Node.Text + PathDelim + lResult;
+  {$ENDIF}
+  {$IFDEF MSWINDOWS}
+    if (Node.Text <> '') then
+    begin
+      if (Node.Text[Length(Node.Text)] = PathDelim) then
+        lResult := Node.Text + lResult
+      else
+        lResult := Node.Text + PathDelim + lResult;
+    end;
+  {$ENDIF}
     Node := Node.Parent;
   end;
+  Result := lResult;
 end;
 
 procedure TfpgSelectDirDialog.InitializeTreeview;
