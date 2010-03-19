@@ -48,20 +48,23 @@ type
 
   TfpgTabSheet = class(TfpgWidget)
   private
+    FPageControl: TfpgPageControl;	  
     FText: string;
+    FTabVisible: boolean;
     function    GetPageControl: TfpgPageControl;
     function    GetPageIndex: Integer;
     function    GetText: string;
     procedure   SetPageIndex(const AValue: Integer);
     procedure   SetText(const AValue: string);
+    procedure   SetPageControl(APageControl: TfpgPageControl);
   protected
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
-    procedure   AfterConstruction; override;
     property    PageIndex: Integer read GetPageIndex write SetPageIndex;
-    property    PageControl: TfpgPageControl read GetPageControl;
+    property    PageControl: TfpgPageControl read FPageControl write SetPageControl;
+    property    TabVisible: boolean read FTabVisible write FTabVisible;
   published
     property    Text: string read GetText write SetText;
   end;
@@ -202,26 +205,33 @@ constructor TfpgTabSheet.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FText := '';
+  FTabVisible:= True;
   FFocusable := True;
   FBackgroundColor := Parent.BackgroundColor;
   FTextColor := Parent.TextColor;
   FIsContainer := True;
+  if (AOwner <> nil) and (AOwner is TfpgPageControl) then
+  begin
+    FPageControl:=TfpgPageControl(AOwner);  
+    FPageControl.InsertPage(self);
+  end;
 end;
 
 destructor TfpgTabSheet.Destroy;
 begin
-  if Owner is TfpgPageControl then
-    TfpgPageControl(Owner).RemovePage(self);
+  if FPageControl <> nil then
+    FPageControl.RemovePage(self);
   inherited Destroy;
 end;
 
-procedure TfpgTabSheet.AfterConstruction;
+procedure TfpgTabSheet.SetPageControl(APageControl: TfpgPageControl);
 begin
-  inherited AfterConstruction;
-  if Owner is TfpgPageControl then
-    TfpgPageControl(Owner).InsertPage(self);
+   FPageControl:=APageControl;
+   if APageControl <> nil then
+    FPageControl.InsertPage(Self);
 end;
 
+  
 { TfpgPageControl }
 
 function TfpgPageControl.GetActivePageIndex: integer;
@@ -246,22 +256,44 @@ begin
   if FPages.IndexOf(APage) <> -1 then
     Exit; //==>   The page has already been added.
   FPages.Add(APage);
-  ActivePage := APage;
+  { TODO: This behaviour could maybe be controlled by a Options property }
+  if FPages.Count=1 then
+    ActivePage := APage;
 end;
 
 procedure TfpgPageControl.RemovePage(const APage: TfpgTabSheet);
+var
+  i: integer;
 begin
   if APage = nil then
-    Exit;
-  FPages.Remove(APage);
-  {$Note This still needs to be fixed.}
-  if APage = FActivePage then
+    Exit; // ==>
+  if FPages.Count =0 then
+    Exit; // ==>
+  
+  if FPages.Count > 1 then              
   begin
-//    FActivePage := FindNextPage(APage, True);
-//    if FPages.Count > 0 then
-      ActivePage := TfpgTabSheet(FPages.First);
-//    else
-//      ActivePage := nil;
+     i:=FPages.IndexOf(APage);
+     FPages.Remove(APage);
+    APage.PageControl:=nil;
+    APage.Visible:=false;
+    if i = ActivePageIndex then
+    begin	    
+      if i > FPages.Count-1 then
+         ActivePage:=TfpgTabSheet(FPages.Last)
+      else if i = 0 then
+        ActivePage:= TfpgTabSheet(FPages.First)
+      else
+        ActivePage:=TfpgTabSheet(FPages[i]);
+    end
+    else if i < ActivePageIndex then
+      ActivePage:=TfpgTabSheet(Pages[i-1]);	      
+  end      
+  else
+  begin
+    FPages.Remove(APage);
+    APage.PageControl := nil;
+    APage.Visible := False;
+    ActivePage := nil;
   end;
 end;
 
@@ -826,20 +858,13 @@ begin
 end;
 
 destructor TfpgPageControl.Destroy;
-var
-  ts: TfpgTabSheet;
+var i: integer;
 begin
   FOnChange := nil;
-  if FPages.Count > 0 then
-    FActivePage := TfpgTabSheet(FPages[0]);
-  ActiveWidget := nil;
-  while FPages.Count > 0 do
-  begin
-    ts := TfpgTabSheet(FPages.Last);
-    FPages.Remove(ts);
-    ts.Free;
-  end;
+  for i:=0 to FPages.Count-1 do
+    TfpgTabSheet(FPages[i]).PageControl:=nil;
   FPages.Free;
+  ActiveWidget := nil;
   FFirstTabButton := nil;
   inherited Destroy;
 end;
