@@ -46,6 +46,8 @@ procedure Delete8(var S: string; Index, Size: integer);
 procedure Insert8(const Source: string; var S: string; Index: integer);
 
 function  fpgCharAt(const s: TfpgString; Index: integer): TfpgChar;
+function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+function  fpgRemovePathDelim(const Path: TfpgString): TfpgString;
 
 
 implementation
@@ -317,6 +319,21 @@ begin
   Result := UTF8Copy(s, Index, 1);
 end;
 
+function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+begin
+  if (Path <> '') and (Path[Length(Path)] <> PathDelim) then
+    Result := Path + PathDelim
+  else
+    Result := Path;
+end;
+
+function fpgRemovePathDelim(const Path: TfpgString): TfpgString;
+begin
+  if (Path <> '') and (Path[Length(Path)] = PathDelim) then
+    Result := LeftStr(Path, Length(Path)-1)
+  else
+    Result := Path;
+end;
 
 end.
 
