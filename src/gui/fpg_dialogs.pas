@@ -384,6 +384,7 @@ var
 begin
   dlg := TfpgSelectDirDialog.Create(nil);
   try
+    dlg.SelectedDir := AStartDir;
     if dlg.ShowModal = mrOK then
       Result := dlg.SelectedDir
     else

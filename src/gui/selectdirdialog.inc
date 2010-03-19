@@ -15,14 +15,16 @@
     procedure   SetRootDir(const AValue: TfpgString);
     procedure   AddDirectories(Node: TfpgTreeNode; Dir: TfpgString);
     procedure   NodeExpanded(Sender: TObject; ANode: TfpgTreeNode);
+    function    GetSelectedDir: TfpgString;
+    procedure   SetSelectedDir(const AValue: TfpgString);
     {$IFDEF MSWINDOWS}
     procedure   AddWindowsDriveLetters;
     {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
-    { return the selected directory }
-    function    SelectedDir: TfpgString;
+    { return the selected directory or set initial selected dir }
+    property    SelectedDir: TfpgString read GetSelectedDir write SetSelectedDir;
     { Directory the treeview starts from }
     property    RootDirectory: TfpgString read FRootDir write SetRootDir;
   end;
@@ -182,6 +184,49 @@ begin
     AddDirectories(ANode, GetAbsolutePath(ANode));
 end;
 
+function TfpgSelectDirDialog.GetSelectedDir: TfpgString;
+begin
+  Result := '';
+  if tv.Selection <> nil then
+    Result := GetAbsolutePath(tv.Selection);
+end;
+
+procedure TfpgSelectDirDialog.SetSelectedDir(const AValue: TfpgString);
+var
+  s: TfpgString;
+  dir: TfpgString;
+  i: integer;
+  p: integer;
+  prevn, nextn: TfpgTreeNode;
+begin
+  if AValue = '' then
+    Exit;
+  s := fpgAppendPathDelim(AValue);
+  prevn := tv.RootNode;
+  nextn := prevn;
+  while nextn <> nil do
+  begin
+    if s = '' then
+      break;
+    i := UTF8Pos(PathDelim, s);
+    if i = 1 then
+      dir := PathDelim
+    else
+      dir := UTF8Copy(s, 1, i-1);
+    UTF8Delete(s, 1, i);    // delete leading dir + PathDelim
+    if (prevn = tv.RootNode) and (pos(':', dir) > 0) then
+      dir += PathDelim;     // Windows drive letter. eg: C:\  or  D:\  etc.
+    nextn := prevn.FindSubNode(dir, True);
+    if Assigned(nextn) then
+    begin
+      prevn := nextn;
+      prevn.Expand;
+      NodeExpanded(self, prevn);
+    end;
+  end;
+  tv.Selection := prevn;
+end;
+
 {$IFDEF MSWINDOWS}
 procedure TfpgSelectDirDialog.AddWindowsDriveLetters;
 const
@@ -238,12 +283,6 @@ begin
   InitializeTreeview;
 end;
 
-function TfpgSelectDirDialog.SelectedDir: TfpgString;
-begin
-  Result := '';
-  if tv.Selection <> nil then
-    Result := GetAbsolutePath(tv.Selection);
-end;
 
 {$ENDIF read_implementation}
 
