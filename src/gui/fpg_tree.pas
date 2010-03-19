@@ -783,13 +783,16 @@ end;
 procedure TfpgTreeview.SetSelection(const AValue: TfpgTreeNode);
 var
   n: TfpgTreeNode;
+  dy: integer;    // y delta - absolute top node
+  nh: integer;    // node height
+  vh: integer;    // visible height
 begin
-  if aValue <> FSelection then
+  if AValue <> FSelection then
   begin
-    FSelection := aValue;
-    if aValue <> nil then
+    FSelection := AValue;
+    if AValue <> nil then
     begin
-      n := aValue.parent;
+      n := AValue.Parent;
       while n <> nil do
       begin
         n.Expand;
@@ -797,17 +800,28 @@ begin
         n := n.parent;
       end;
     end;
-    
-    if GetAbsoluteNodeTop(Selection) + GetNodeHeight - FVScrollbar.Position > VisibleHeight then
+
+    dy := GetAbsoluteNodeTop(FSelection);
+    nh := GetNodeHeight;
+    vh := VisibleHeight;
+    if dy + nh - FVScrollbar.Position > vh then
     begin
-      FVScrollbar.Position := GetAbsoluteNodeTop(Selection) + GetNodeHeight - VisibleHeight;
+      if FVScrollBar.Max = 0 then    // the first time and no expansion happened before.
+        FVScrollBar.Max := dy + Height;
+      FVScrollbar.Position := dy + nh - vh;
       FYOffset := FVScrollbar.Position;
       UpdateScrollBars;
+      if FHScrollbar.Visible then    // HScrollbar appeared so we need to adjust position again
+      begin
+        FVScrollbar.Position := FVScrollbar.Position + FHScrollbar.Height;
+        FYOffset := FVScrollbar.Position;
+        UpdateScrollBars;
+      end;
     end;
     
-    if GetAbsoluteNodeTop(Selection) - FVScrollbar.Position < 0 then
+    if dy - FVScrollbar.Position < 0 then
     begin
-      FVScrollbar.Position := GetAbsoluteNodeTop(Selection);
+      FVScrollbar.Position := dy;
       FYOffset := FVScrollbar.Position;
       UpdateScrollbars;
     end;
@@ -1613,7 +1627,7 @@ begin
     keyRight:
       begin
         Consumed := True;
-        Selection.Collapsed := false;
+        Selection.Expand;
         DoExpand(Selection);
         ResetScrollbar;
         RePaint;
