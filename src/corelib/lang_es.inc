@@ -101,6 +101,7 @@ rssave  =  'Guardar';
 rssaveafile  =  'Guardar como';
 rssearch  =  'Buscar';
 rsselect  =  'Seleccionar';
+rsselectadirectory  =  'Seleccione un directorio';
 rsselectafont  =  'Seleccione una fuente';
 rsshortsep  =  'Sep';
 rslongsep  =  'September';

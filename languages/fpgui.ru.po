@@ -400,6 +400,10 @@ msgstr "Поиск"
 msgid "Select"
 msgstr "Выбрать"
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Выберите директорию"
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Выбор шрифта"

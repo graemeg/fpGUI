@@ -400,6 +400,10 @@ msgstr "Pesquisar"
 msgid "Select"
 msgstr "Selecionar"
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Selecione um diretório"
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Selecione a fonte"

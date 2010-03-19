@@ -101,6 +101,7 @@ rssave  =  'Stoor';
 rssaveafile  =  'Stoor ''n lêer as';
 rssearch  =  'Soek';
 rsselect  =  'Kies';
+rsselectadirectory  =  'Kies ''n lêergids';
 rsselectafont  =  'Kies ''n lettertipe';
 rsshortsep  =  'Sept';
 rslongsep  =  'September';

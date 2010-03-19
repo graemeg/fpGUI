@@ -213,7 +213,7 @@ begin
   inherited AfterCreate;
   Name := 'fpgSelectDirDialog';
   SetPosition(20, 20, 300, 370);
-  WindowTitle := 'Select a Directory';    { TODO : Localize this!! }
+  WindowTitle := rsSelectaDirectory;
   WindowPosition := wpOneThirdDown;
 
   tv := TfpgTreeView.Create(self);

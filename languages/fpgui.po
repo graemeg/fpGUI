@@ -490,3 +490,7 @@ msgstr ""
 msgid "Yes to All"
 msgstr ""
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr ""
+
