@@ -64,8 +64,10 @@ procedure TMainForm.cbTabPosChanged(Sender: TObject);
 begin
   if cbTabPos.FocusItem = 0 then
     pcMain.TabPosition := tpTop
+  else if cbTabPos.FocusItem = 1 then
+    pcMain.TabPosition := tpBottom
   else
-    pcMain.TabPosition := tpBottom;
+    pcMain.TabPosition := tpNone;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -124,6 +126,7 @@ begin
   cbTabPos := CreateComboBox(self, 300, 320, 80, nil);
   cbTabPos.Items.Add('tpTop');
   cbTabPos.Items.Add('tpBottom');
+  cbTabPos.Items.Add('tpNone');
   cbTabPos.FocusItem := 0;
   cbTabPos.Anchors := [anBottom, anLeft];
   cbTabPos.OnChange := @cbTabPosChanged;
