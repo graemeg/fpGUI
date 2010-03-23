@@ -80,6 +80,7 @@ type
     FActivePage: TfpgTabSheet;
     FMargin: integer;
     FFixedTabWidth: integer;
+    FFixedTabHeight: Integer;
     FPages: TList;
     FActivePageIndex: integer;
     FOnChange: TTabSheetChange;
@@ -102,6 +103,7 @@ type
     function    ButtonHeight: integer;
     function    ButtonWidth(AText: string): integer;
     procedure   SetFixedTabWidth(const AValue: integer);
+    procedure   SetFixedTabHeight(const AValue: integer);
     function    GetTabText(AText: string): string;
     procedure   LeftButtonClick(Sender: TObject);
     procedure   RightButtonClick(Sender: TObject);
@@ -131,6 +133,7 @@ type
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
     property    BackgroundColor;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
+    property    FixedTabHeight: integer read FFixedTabHeight write SetFixedTabHeight default 21;
     property    Hint;
     property    ParentShowHint;
     property    ShowHint;
@@ -371,6 +374,17 @@ begin
   if AValue > 5 then
   begin
     FFixedTabWidth := AValue;
+    RePaint;
+  end;
+end;
+
+procedure TfpgPageControl.SetFixedTabHeight(const AValue: integer);
+begin
+  if FFixedTabHeight = AValue then
+    Exit; //==>
+  if AValue > 5 then
+  begin
+    FFixedTabHeight := AValue;
     RePaint;
   end;
 end;
