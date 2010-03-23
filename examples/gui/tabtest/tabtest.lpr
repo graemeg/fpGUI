@@ -66,6 +66,10 @@ begin
     pcMain.TabPosition := tpTop
   else if cbTabPos.FocusItem = 1 then
     pcMain.TabPosition := tpBottom
+  else if cbTabPos.FocusItem = 2 then
+    pcMain.TabPosition := tpLeft
+  else if cbTabPos.FocusItem = 3 then
+    pcMain.TabPosition := tpRight
   else
     pcMain.TabPosition := tpNone;
 end;
@@ -87,6 +91,7 @@ begin
   pcMain.Width    := Width - 20;
   pcMain.Height   := 300;
   pcMain.Anchors  := [anLeft, anTop, anRight, anBottom];
+//  pcMain.FixedTabWidth:=150;
 
   // Tab One
   tsOne := TfpgTabSheet.Create(pcMain);
@@ -126,6 +131,8 @@ begin
   cbTabPos := CreateComboBox(self, 300, 320, 80, nil);
   cbTabPos.Items.Add('tpTop');
   cbTabPos.Items.Add('tpBottom');
+  cbTabPos.Items.Add('tpLeft');
+  cbTabPos.Items.Add('tpRight');
   cbTabPos.Items.Add('tpNone');
   cbTabPos.FocusItem := 0;
   cbTabPos.Anchors := [anBottom, anLeft];
