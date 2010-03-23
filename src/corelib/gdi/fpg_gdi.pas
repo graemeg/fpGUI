@@ -13,6 +13,10 @@
 
     Description:
       This defines the CoreLib backend interface to the Windows GDI API.
+
+      Win32 API Reference - http://msdn.microsoft.com/en-us/library/ff468919(VS.85).aspx
+      Windows CE 3.0 API Reference - http://msdn.microsoft.com/en-us/library/ms925466.aspx
+      FPC WinCE information - http://wiki.freepascal.org/WinCE_port
 }
 
 unit fpg_gdi;
