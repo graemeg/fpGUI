@@ -44,7 +44,7 @@ type
   TfpgPageControl = class;
   
   TfpgTabStyle    = (tsTabs, tsButtons, tsFlatButtons);
-  TfpgTabPosition = (tpTop, tpBottom, tpNone{, tpLeft, tpRight});
+  TfpgTabPosition = (tpTop, tpBottom, tpLeft, tpRight, tpNone);
 
 
   TfpgTabSheet = class(TfpgWidget)
@@ -84,8 +84,8 @@ type
     FPages: TList;
     FActivePageIndex: integer;
     FOnChange: TTabSheetChange;
-    FRightButton: TfpgButton;
-    FLeftButton: TfpgButton;
+    FRightButton: TfpgButton;         // bottom/right
+    FLeftButton: TfpgButton;          // left/top
     FFirstTabButton: TfpgTabSheet;
     FSortPages: boolean;
     FStyle: TfpgTabStyle;
@@ -578,12 +578,16 @@ begin
 end;
 
 procedure TfpgPageControl.RePaintTitles;
+const
+  TabHeight = 21;
 var
+  TabW, TabH: Integer;
   r2: TfpgRect;
   r3: TfpgRect;
   h: TfpgTabSheet;
   lp: integer;
   toffset: integer;
+  TextLeft, TextTop: Integer;
   dx: integer;
   lTxtFlags: TFTextFlags;
 begin
@@ -633,8 +637,8 @@ begin
             FFirstTabButton := h
           else
             h := FFirstTabButton;
-          FLeftButton.SetPosition(Width - FRightButton.Width * 2, Height - ButtonHeight, FRightButton.Height, FRightButton.Height);
-          FRightButton.SetPosition(Width - FrightButton.Width, Height - ButtonHeight, FRightButton.Height, FRightButton.Height);
+          FLeftButton.SetPosition(Width - (FRightButton.Width * 2), Height - ButtonHeight-FMargin, FRightButton.Height, FRightButton.Height);
+          FRightButton.SetPosition(Width - FrightButton.Width, Height - ButtonHeight-FMargin, FRightButton.Height, FRightButton.Height);
           FLeftButton.Visible   := True;
           FRightButton.Visible  := True;
         end
@@ -692,7 +696,7 @@ begin
             FFirstTabButton := h
           else
             h := FFirstTabButton;
-          FLeftButton.SetPosition(Width - FRightButton.Width * 2, FMargin, FRightButton.Height, FRightButton.Height);
+          FLeftButton.SetPosition(Width - (FRightButton.Width * 2), FMargin, FRightButton.Height, FRightButton.Height);
           FRightButton.SetPosition(Width - FrightButton.Width, FMargin, FRightButton.Height, FRightButton.Height);
           FLeftButton.Visible   := True;
           FRightButton.Visible  := True;
