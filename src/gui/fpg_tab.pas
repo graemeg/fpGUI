@@ -98,7 +98,7 @@ type
     procedure   SetActivePageIndex(const AValue: integer);
     procedure   SetActivePage(const AValue: TfpgTabSheet);
     function    MaxButtonWidthSum: integer;
-    function    MaxButtonHeight: integer;
+    function    MaxButtonHeightSum: integer;
     function    MaxButtonWidth: integer;
     function    ButtonHeight: integer;
     function    ButtonWidth(AText: string): integer;
@@ -335,7 +335,7 @@ begin
   end;
 end;
 
-function TfpgPageControl.MaxButtonHeight: integer;
+function TfpgPageControl.MaxButtonHeightSum: integer;
 begin
   result := PageCount * ButtonHeight;
 end;
@@ -878,6 +878,7 @@ begin
   FFocusable        := True;
   FOnChange         := nil;
   FFixedTabWidth    := 0;
+  FFixedTabHeight   := 21;
   FFirstTabButton   := nil;
   FStyle            := tsTabs;
   FTabPosition      := tpTop;
