@@ -346,11 +346,18 @@ var
    i: integer;
 begin
   Result := 0;
-  for i := 0 to FPages.Count-1 do
+  if FixedTabWidth > 0 then
   begin
-    t := TfpgTabSheet(FPages[i]);
-    if ButtonWidth(t.Text) > Result then
-      Result := ButtonWidth(t.Text);
+    Result := FixedTabWidth;
+  end
+  else
+  begin
+    for i := 0 to FPages.Count-1 do
+    begin
+      t := TfpgTabSheet(FPages[i]);
+      if ButtonWidth(t.Text) > Result then
+        Result := ButtonWidth(t.Text);
+    end;
   end;
 end;
 
