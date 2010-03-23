@@ -613,7 +613,7 @@ begin
   
   Canvas.BeginDraw;
   Canvas.SetTextColor(TextColor);
-  lTxtFlags := TextFlagsDflt;
+  lTxtFlags := [];
   if not Enabled then
     Include(lTxtFlags, txtDisabled);
 
@@ -641,6 +641,7 @@ begin
 
     tpBottom:
       begin
+        lTxtFlags += TextFlagsDflt;
         if MaxButtonWidthSum > (Width-(FMargin*2)) then
         begin
           if FFirstTabButton = nil then
@@ -700,6 +701,7 @@ begin
 
     tpTop:
       begin
+        lTxtFlags += TextFlagsDflt;
         if MaxButtonWidthSum > (Width-(FMargin*2)) then
         begin
           if FFirstTabButton = nil then
