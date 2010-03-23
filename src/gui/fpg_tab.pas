@@ -363,7 +363,10 @@ end;
 
 function TfpgPageControl.ButtonHeight: integer;
 begin
-  Result := FRightButton.Height;
+  if FFixedTabHeight > 0 then
+    result := FFixedTabHeight
+  else
+    result := FFont.Height + 10;   { TODO: correct this }
 end;
 
 function TfpgPageControl.ButtonWidth(AText: string): integer;
