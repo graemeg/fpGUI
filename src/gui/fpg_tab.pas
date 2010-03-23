@@ -600,6 +600,7 @@ var
   TextLeft, TextTop: Integer;
   dx: integer;
   lTxtFlags: TFTextFlags;
+  ActivePageVisible: Boolean;
 begin
   if not HasHandle then
     Exit; //==>
@@ -607,6 +608,11 @@ begin
   if PageCount = 0 then
     Exit; //==>
 
+  TabW:=FixedTabWidth;
+  TabH:=FixedTabHeight;
+  ActivePageVisible := false;
+  If TabH = 0 then
+    TabH := TabHeight;
   h := TfpgTabSheet(FPages.First);
   if h = nil then
     Exit; //==>
@@ -760,7 +766,58 @@ begin
         DrawTab(r3, false, 2);
         Canvas.DrawText(r3.Left+4, r3.Top+3, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
-  end;  { case }
+
+    tpRight:
+      begin
+        lTxtFlags += [txtVCenter, txtLeft];
+        lp := 0;
+        TabW := MaxButtonWidth;
+        r2.SetRect(Width - 2 - TabW, 2, TabW, 21);
+        while h <> nil do
+        begin
+          if h <> ActivePage then
+          begin
+            toffset := 4;
+            h.Visible := False;
+          end
+          else
+          begin
+            toffset := 2;
+            h.Visible := True;
+            { set tab content page (client area) size }
+            h.SetPosition(FMargin+2, FMargin+2, Width - ((FMargin+2)*2) - TabW, Height - ((FMargin+2)*2));
+          end;
+          // paint tab button
+          r3 := DrawTab(r2, h = ActivePage);
+
+          // paint text on non-active tabs
+          if h <> ActivePage then
+            Canvas.DrawText(r2.left+toffset, r2.Top, r2.Width, r2.Height, GetTabText(h.Text), lTxtFlags);
+          r2.Top += r2.Height;
+          lp := r2.Top;
+          if h <> TfpgTabSheet(FPages.Last) then
+            h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
+          else
+            h := nil;
+        end;
+        // Draw Page Control body rectangle (client area)
+        r2.Left    := 0;
+        r2.Top     := 0;
+        r2.Width   := Width - TabW;
+        r2.Height  := Height;
+        Canvas.DrawButtonFace(r2, []);
+
+        // Draw text of ActivePage, because we didn't before.
+        DrawTab(r3, false, 2);
+        Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
+      end;
+
+    tpLeft:
+      begin
+        //
+      end;
+  end; { case }
+
   Canvas.EndDraw;
 end;
 
