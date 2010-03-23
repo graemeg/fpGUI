@@ -522,8 +522,53 @@ begin
       Canvas.SetColor(clShadow2);
       Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right, r.Bottom-2);  // right rounded edge (1px)
       Canvas.DrawLine(r.Right, r.Bottom-2, r.Right, r.Top+1);       // right outer edge
-      Canvas.SetColor(clRed);
     end;
+
+  tpLeft:
+    begin
+      if Mode = 2 then
+      begin
+        r.Width := r.Width - 1;
+        r.Height:=r.Height+2;
+      end;
+      with Canvas do
+      begin
+        FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
+        SetColor(clHilite2);
+        DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
+        DrawLine(r.Left, r.Top+2, r.Left+2, r.Top);
+        DrawLine(r.Left+2, r.Top, r.Right-1, r.Top);
+        SetColor(clShadow1);
+        DrawLine(r.Left+2, r.Bottom-1, r.Right-1, r.Bottom-1);
+        SetColor(clShadow2);
+        DrawLine(r.Left+1, r.Bottom-1, r.Left+3, r.Bottom);
+        DrawLine(r.Left+2, r.Bottom, r.Right, r.Bottom);
+      end;
+    end;
+
+     tpRight:
+       begin
+         if Mode = 2 then
+           begin
+             r.Width:= r.Width + 1;
+             r.Height:=r.Height+2;
+           end;
+         With Canvas do
+           begin
+             FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
+             SetColor(clHilite2);
+             DrawLine(r.Left+1, r.Top, r.Right-2, r.Top);
+             SetColor(clShadow1);
+             DrawLine(r.Right-2,r.Top,r.Right-1,r.Top+1);
+             DrawLine(r.Left+2, r.Bottom-1, r.Right-2, r.Bottom-1);
+             DrawLine(r.Right-3, r.Bottom-1, r.Right-1, r.Bottom-3);
+             DrawLine(r.Right-1, r.Bottom-3, r.Right-1, r.Top);
+             SetColor(clShadow2);
+             DrawLine(r.Left+2,r.Bottom,r.Right-3, r.Bottom);
+             DrawLine(r.Right-3, r.Bottom, r.Right, r.Bottom-3);
+             DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-2);
+           end;
+       end;
   end; 
 end;
 
