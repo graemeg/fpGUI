@@ -395,7 +395,7 @@ begin
       inc(i);
     end;
     if FFont.TextWidth(s1) > (FFixedTabWidth-10) then
-      Delete(s1, length(s1), 1);    {$Note This must become a UTF8 function}
+      UTF8Delete(s1, UTF8Length(s1), 1);
     if Length(s1) > 0 then
       s1 := Trim(s1);
     Result := s1;
