@@ -60,6 +60,7 @@ type
     procedure   SetPageControl(APageControl: TfpgPageControl);
   protected
     procedure   HandlePaint; override;
+    procedure   SetName(const NewName: TComponentName); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -203,6 +204,19 @@ procedure TfpgTabSheet.HandlePaint;
 begin
   inherited HandlePaint;
   Canvas.Clear(FBackgroundColor);
+end;
+
+procedure TfpgTabSheet.SetName(const NewName: TComponentName);
+var
+  old: String;
+begin
+  old := NewName;
+  inherited SetName(NewName);
+  if (csDesigning in ComponentState) then
+  begin
+    if (Text = '') or (Text = old) then
+      Text := NewName;
+  end;
 end;
 
 constructor TfpgTabSheet.Create(AOwner: TComponent);
