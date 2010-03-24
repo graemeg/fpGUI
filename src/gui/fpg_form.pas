@@ -389,8 +389,8 @@ end;
 
 procedure TfpgBaseForm.AfterConstruction;
 begin
-  inherited AfterConstruction;
   AfterCreate;
+  inherited AfterConstruction;
   if Assigned(FOnCreate) then
     FOnCreate(self);
 end;
