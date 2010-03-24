@@ -94,7 +94,7 @@ type
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
-    procedure   InsertPage(const APage: TfpgTabSheet);
+    procedure   InsertPage(const APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
     procedure   RemovePage(const APage: TfpgTabSheet);
     procedure   SetActivePageIndex(const AValue: integer);
     procedure   SetActivePage(const AValue: TfpgTabSheet);
@@ -231,7 +231,7 @@ begin
   if (AOwner <> nil) and (AOwner is TfpgPageControl) then
   begin
     FPageControl:=TfpgPageControl(AOwner);  
-    FPageControl.InsertPage(self);
+    FPageControl.InsertPage(self, True);
   end;
 end;
 
@@ -244,8 +244,8 @@ end;
 
 procedure TfpgTabSheet.SetPageControl(APageControl: TfpgPageControl);
 begin
-   FPageControl:=APageControl;
-   if APageControl <> nil then
+  FPageControl := APageControl;
+  if APageControl <> nil then
     FPageControl.InsertPage(Self);
 end;
 
@@ -269,14 +269,20 @@ begin
   Result := FPages.Count;
 end;
 
-procedure TfpgPageControl.InsertPage(const APage: TfpgTabSheet);
+procedure TfpgPageControl.InsertPage(const APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
 begin
   if FPages.IndexOf(APage) <> -1 then
     Exit; //==>   The page has already been added.
   FPages.Add(APage);
   { TODO: This behaviour could maybe be controlled by a Options property }
   if FPages.Count=1 then
+  begin
+    if SuppressOnChangeEvent then
+      Loading;
     ActivePage := APage;
+    if SuppressOnChangeEvent then
+      Loaded;
+  end;
 end;
 
 procedure TfpgPageControl.RemovePage(const APage: TfpgTabSheet);
