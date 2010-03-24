@@ -112,7 +112,7 @@ type
     procedure   SetSortPages(const AValue: boolean);
     procedure   SetStyle(const AValue: TfpgTabStyle);
     procedure   SetTabPosition(const AValue: TfpgTabPosition);
-    procedure   DoChange(ATabSheet: TfpgTabSheet);
+    procedure   DoPageChange(ATabSheet: TfpgTabSheet);
     function    DrawTab(const rect: TfpgRect; const Selected: Boolean = False; const Mode: Integer = 1): TfpgRect;
   protected
     procedure   OrderSheets; // currently using bubblesort
@@ -332,6 +332,7 @@ begin
   if AValue <> nil then
     FActivePageIndex := FPages.IndexOf(AValue);
   RePaint;
+  DoPageChange(FActivePage);
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
@@ -497,8 +498,12 @@ begin
   RePaint;
 end;
 
-procedure TfpgPageControl.DoChange(ATabSheet: TfpgTabSheet);
+procedure TfpgPageControl.DoPageChange(ATabSheet: TfpgTabSheet);
 begin
+  if (csLoading in ComponentState) then
+    Exit;
+  if (csDesigning in ComponentState) then
+    Exit;
   if Assigned(FOnChange) then
     FOnChange(self, ATabSheet);
 end;
@@ -903,7 +908,6 @@ begin
            if h <> ActivePage then
            begin
               ActivePage := h;
-              DoChange(ActivePage);
            end;
            exit;
         end;  { if }
@@ -932,7 +936,6 @@ begin
           if ActivePage <> TfpgTabSheet(FPages.First) then
           begin
             ActivePage := TfpgTabSheet(FPages[i-1]);
-            DoChange(ActivePage);
           end;
         end;
 
@@ -941,7 +944,6 @@ begin
           if ActivePage <> TfpgTabSheet(FPages.Last) then
           begin
             ActivePage := TfpgTabSheet(FPages[i+1]);
-            DoChange(ActivePage);
           end;
         end;
 
