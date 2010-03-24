@@ -1154,7 +1154,6 @@ begin
   Result := newname;
 end;
 
-
 procedure TFormDesigner.MsgActivate(var msg: TfpgMessageRec);
 begin
   msg.Stop := True;
