@@ -799,18 +799,20 @@ begin
         end;
 
       keyRight:
-        if FCursorPos < UTF8Length(FText) then
         begin
           consumed := True;
-          Inc(FCursorPos);
+          if FCursorPos < UTF8Length(FText) then
+          begin
+            Inc(FCursorPos);
 
-          if (ssCtrl in shiftstate) then
-            // word search...
-            //                    while (FCursorPos < Length(FText)) and ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
-            //                      do Inc(FCursorPos);
-            //                    while (FCursorPos < Length(FText)) and not ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
-            //                      do Inc(FCursorPos);
-          ;
+            if (ssCtrl in shiftstate) then
+              // word search...
+              //                    while (FCursorPos < Length(FText)) and ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
+              //                      do Inc(FCursorPos);
+              //                    while (FCursorPos < Length(FText)) and not ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
+              //                      do Inc(FCursorPos);
+            ;
+          end;
         end;
 
       keyHome:
