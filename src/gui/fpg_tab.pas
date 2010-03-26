@@ -610,6 +610,7 @@ end;
 procedure TfpgPageControl.OrderSheets;
 begin
   FPages.Sort(@SortCompare);
+  FActivePageIndex := FPages.IndexOf(ActivePage);
 end;
 
 procedure TfpgPageControl.RePaintTitles;
