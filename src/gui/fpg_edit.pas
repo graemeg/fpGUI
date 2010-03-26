@@ -843,8 +843,6 @@ begin
 
   if not Consumed then
   begin
-    consumed := True;
-
    if not ReadOnly then
    begin
       case keycode of
@@ -858,8 +856,8 @@ begin
                 Dec(FCursorPos);
                 hasChanged := True;
               end;// backspace
+              Consumed := True;
             end;
-
 
         keyDelete:
             begin
@@ -868,10 +866,9 @@ begin
               else if FCursorPos < UTF8Length(FText) then
                 UTF8Delete(FText, FCursorPos + 1, 1);
               hasChanged := True;
+              Consumed := True;
             end;
-        else
-          Consumed := False;
-      end;
+      end;  { case }
     end;
 
     if Consumed then
