@@ -1159,6 +1159,8 @@ end;
 
 procedure TfpgBaseEdit.DefaultPopupClearAll(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit; //==>
   Clear;
 end;
 
@@ -1174,13 +1176,13 @@ begin
       itm := TfpgMenuItem(FDefaultPopupMenu.Components[i]);
       // enabled/disable menu items
       if itm.Name = ipmCut then
-        itm.Enabled := FSelOffset <> 0
+        itm.Enabled := (not ReadOnly) and (FSelOffset <> 0)
       else if itm.Name = ipmCopy then
         itm.Enabled := FSelOffset <> 0
       else if itm.Name = ipmPaste then
-        itm.Enabled := fpgClipboard.Text <> ''
+        itm.Enabled := (not ReadOnly) and (fpgClipboard.Text <> '')
       else if itm.Name = ipmClearAll then
-        itm.Enabled := Text <> '';
+        itm.Enabled := (not ReadOnly) and (Text <> '');
     end;
   end;
 end;
@@ -1212,16 +1214,12 @@ begin
     FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
     itm := FDefaultPopupMenu.AddMenuItem(rsCut, '', @DefaultPopupCut);
     itm.Name := ipmCut;
-    itm.Enabled := not ReadOnly;
     itm := FDefaultPopupMenu.AddMenuItem(rsCopy, '', @DefaultPopupCopy);
     itm.Name := ipmCopy;
     itm := FDefaultPopupMenu.AddMenuItem(rsPaste, '', @DefaultPopupPaste);
     itm.Name := ipmPaste;
-    itm.Enabled := not ReadOnly;
     itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
     itm.Name := ipmClearAll;
-
-    itm.Enabled := not ReadOnly;
   end;
 
   SetDefaultPopupMenuItemsState;
