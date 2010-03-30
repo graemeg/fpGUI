@@ -91,7 +91,6 @@ const
   {$I keys.inc}
 
   { TfpgModalResult values }
-  mrError    = -1;
   mrNone     = 0;
   mrOk       = mrNone + 1;
   mrCancel   = mrOk + 1;
