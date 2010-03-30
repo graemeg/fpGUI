@@ -44,6 +44,7 @@ type
     procedure   PrepareButtons;
   protected
     procedure   SetWindowTitle(const ATitle: string); override;
+    procedure   HandleClose; override;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -241,6 +242,13 @@ begin
   end
   else
     inherited SetWindowTitle(ATitle);
+end;
+
+procedure TfpgMessageDialog.HandleClose;
+begin
+  if ModalResult = mrNone then      // Form was close via the X (window frame) button
+    ModalResult := mrCancel;
+  inherited HandleClose;
 end;
 
 procedure TfpgMessageDialog.HandlePaint;
