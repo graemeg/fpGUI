@@ -381,8 +381,8 @@ begin
                            + ' It provides single-source portability across Linux, MS Windows, *BSD'
                            + ' and embedded devices like Embedded Linux and Windows CE.'
                            + LineEnding + LineEnding
-                           + 'For more information, see the ' + fpGUIName + ' website at:'
-                           + ' http://opensoft.homeip.net/fpgui/';
+                           + 'For more information, see the ' + fpGUIName + ' website at: '
+                           + fpGUIWebsite;
     dlg.PrepareLayout;
     dlg.ShowModal;
   finally
