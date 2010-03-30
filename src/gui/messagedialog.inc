@@ -59,10 +59,14 @@ type
     procedure   AfterCreate; override;
     class procedure About(const ATitle: string; const AText: string);
     class procedure AboutFPGui(const ATitle: string = '');
-    class function Critical(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
-    class function Information(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
-    class function Question(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbYes, mbNo]; ADefaultButton: TfpgMsgDlgBtn = mbNo): TfpgMsgDlgBtn;
-    class function Warning(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton): TfpgMsgDlgBtn;
+    { ACloseButton is when the user cancels the dialog via the Esc key or the X window button }
+    class function Critical(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton; ACloseButton: TfpgMsgDlgBtn = mbCancel): TfpgMsgDlgBtn;
+    { ACloseButton is when the user cancels the dialog via the Esc key or the X window button }
+    class function Information(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton; ACloseButton: TfpgMsgDlgBtn = mbCancel): TfpgMsgDlgBtn;
+    { ACloseButton is when the user cancels the dialog via the Esc key or the X window button }
+    class function Question(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbYes, mbNo]; ADefaultButton: TfpgMsgDlgBtn = mbNo; ACloseButton: TfpgMsgDlgBtn = mbCancel): TfpgMsgDlgBtn;
+    { ACloseButton is when the user cancels the dialog via the Esc key or the X window button }
+    class function Warning(const ATitle: string; const AText: string; AButtons: TfpgMsgDlgButtons = [mbOK]; ADefaultButton: TfpgMsgDlgBtn = mbNoButton; ACloseButton: TfpgMsgDlgBtn = mbCancel): TfpgMsgDlgBtn;
     property    InformativeText: string read GetInformativeText write SetInformativeText;
     property    Text: string read FText write SetText;
     property    Buttons: TfpgMsgDlgButtons read FButtons write SetButtons;
@@ -400,9 +404,10 @@ end;
 
 class function TfpgMessageDialog.Critical(const ATitle: string;
   const AText: string; AButtons: TfpgMsgDlgButtons;
-  ADefaultButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
+  ADefaultButton: TfpgMsgDlgBtn; ACloseButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
 var
   dlg: TfpgMessageDialog;
+  mr: TfpgModalResult;
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
@@ -413,7 +418,12 @@ begin
     dlg.WindowTitle     := ATitle;
     dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
-    Result := TfpgMsgDlgBtn(dlg.ShowModal);
+    mr := dlg.ShowModal;
+    // if there is a Cancel button, ignore ACloseButton.
+    if (mr = mrCancel) and (not (mbCancel in AButtons)) then
+      Result := ACloseButton
+    else
+      Result := TfpgMsgDlgBtn(mr);
   finally
     dlg.Free;
   end;
@@ -421,9 +431,10 @@ end;
 
 class function TfpgMessageDialog.Information(const ATitle: string;
   const AText: string; AButtons: TfpgMsgDlgButtons;
-  ADefaultButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
+  ADefaultButton: TfpgMsgDlgBtn; ACloseButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
 var
   dlg: TfpgMessageDialog;
+  mr: TfpgModalResult;
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
@@ -434,7 +445,12 @@ begin
     dlg.WindowTitle     := ATitle;
     dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
-    Result := TfpgMsgDlgBtn(dlg.ShowModal);
+    mr := dlg.ShowModal;
+    // if there is a Cancel button, ignore ACloseButton.
+    if (mr = mrCancel) and (not (mbCancel in AButtons)) then
+      Result := ACloseButton
+    else
+      Result := TfpgMsgDlgBtn(mr);
   finally
     dlg.Free;
   end;
@@ -442,9 +458,10 @@ end;
 
 class function TfpgMessageDialog.Question(const ATitle: string;
   const AText: string; AButtons: TfpgMsgDlgButtons;
-  ADefaultButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
+  ADefaultButton: TfpgMsgDlgBtn; ACloseButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
 var
   dlg: TfpgMessageDialog;
+  mr: TfpgModalResult;
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
@@ -455,7 +472,12 @@ begin
     dlg.WindowTitle     := ATitle;
     dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
-    Result := TfpgMsgDlgBtn(dlg.ShowModal);
+    mr := dlg.ShowModal;
+    // if there is a Cancel button, ignore ACloseButton.
+    if (mr = mrCancel) and (not (mbCancel in AButtons)) then
+      Result := ACloseButton
+    else
+      Result := TfpgMsgDlgBtn(mr);
   finally
     dlg.Free;
   end;
@@ -463,9 +485,10 @@ end;
 
 class function TfpgMessageDialog.Warning(const ATitle: string;
   const AText: string; AButtons: TfpgMsgDlgButtons;
-  ADefaultButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
+  ADefaultButton: TfpgMsgDlgBtn; ACloseButton: TfpgMsgDlgBtn): TfpgMsgDlgBtn;
 var
   dlg: TfpgMessageDialog;
+  mr: TfpgModalResult;
 begin
   dlg := TfpgMessageDialog.Create(nil);
   try
@@ -476,7 +499,12 @@ begin
     dlg.WindowTitle     := ATitle;
     dlg.FDefaultButton  := ADefaultButton;
     dlg.PrepareLayout;
-    Result := TfpgMsgDlgBtn(dlg.ShowModal);
+    mr := dlg.ShowModal;
+    // if there is a Cancel button, ignore ACloseButton.
+    if (mr = mrCancel) and (not (mbCancel in AButtons)) then
+      Result := ACloseButton
+    else
+      Result := TfpgMsgDlgBtn(mr);
   finally
     dlg.Free;
   end;
