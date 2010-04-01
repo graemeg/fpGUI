@@ -55,6 +55,7 @@ type
     FMaxLength: integer;
     FSelecting: Boolean;
     FReadOnly: Boolean;
+    FIgnoreMouseCursor: Boolean;
     procedure   Adjust(UsePxCursorPos: boolean = false); virtual;
     procedure   AdjustTextOffset(UsePxCursorPos: boolean); virtual;
     procedure   AdjustDrawingInfo; virtual;
@@ -114,6 +115,7 @@ type
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
+    property    IgnoreMouseCursor: Boolean read FIgnoreMouseCursor write FIgnoreMouseCursor default False;
     property    MaxLength: Integer read FMaxLength write FMaxLength;
     property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
@@ -162,6 +164,7 @@ type
     property    HeightMargin;
     property    HideSelection;
     property    Hint;
+    property    IgnoreMouseCursor;
     property    MaxLength;
     property    ParentShowHint;
     property    PasswordMode;
@@ -961,7 +964,7 @@ begin
   inherited HandleMouseEnter;
   if (csDesigning in ComponentState) then
     Exit;
-  if Enabled then
+  if Enabled and (not FIgnoreMouseCursor) then
     MouseCursor := mcIBeam;
 end;
 
@@ -1004,30 +1007,30 @@ end;
 constructor TfpgBaseEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFont             := fpgGetFont('#Edit1');  // owned object !
-  Focusable         := True;
-  FHeight           := FFont.Height + 8;     // (BorderStyle + HeightMargin) * 2
-  FWidth            := 120;
-  FTextColor        := Parent.TextColor;
-  FBackgroundColor  := clBoxColor;
-  FAutoSelect       := True;
-  FSelecting        := False;
-  FHideSelection    := True;
-  FReadOnly         := False;
-  FSideMargin       := 3;
-  FHeightMargin     := 2;
-  FMaxLength        := 0; // no limit
-  FText             := '';
-  FCursorPos        := UTF8Length(FText);
-  FSelStart         := FCursorPos;
-  FSelOffset        := 0;
-  FTextOffset       := 0;
-  FPasswordMode     := False;
-  FBorderStyle      := ebsDefault;
-  FPopupMenu        := nil;
-  FDefaultPopupMenu := nil;
-  FOnChange         := nil;
-
+  FFont               := fpgGetFont('#Edit1');  // owned object !
+  Focusable           := True;
+  FHeight             := FFont.Height + 8;     // (BorderStyle + HeightMargin) * 2
+  FWidth              := 120;
+  FTextColor          := Parent.TextColor;
+  FBackgroundColor    := clBoxColor;
+  FAutoSelect         := True;
+  FSelecting          := False;
+  FHideSelection      := True;
+  FReadOnly           := False;
+  FSideMargin         := 3;
+  FHeightMargin       := 2;
+  FMaxLength          := 0; // no limit
+  FText               := '';
+  FCursorPos          := UTF8Length(FText);
+  FSelStart           := FCursorPos;
+  FSelOffset          := 0;
+  FTextOffset         := 0;
+  FPasswordMode       := False;
+  FBorderStyle        := ebsDefault;
+  FIgnoreMouseCursor  := False;
+  FPopupMenu          := nil;
+  FDefaultPopupMenu   := nil;
+  FOnChange           := nil;
 end;
 
 destructor TfpgBaseEdit.Destroy;
