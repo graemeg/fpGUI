@@ -56,6 +56,7 @@ type
     FSelecting: Boolean;
     FReadOnly: Boolean;
     FIgnoreMouseCursor: Boolean;
+    FAutoSize: Boolean;
     procedure   Adjust(UsePxCursorPos: boolean = false); virtual;
     procedure   AdjustTextOffset(UsePxCursorPos: boolean); virtual;
     procedure   AdjustDrawingInfo; virtual;
@@ -112,6 +113,7 @@ type
     procedure   HandleHide; override;
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
+    property    AutoSize: Boolean read FAutoSize write FAutoSize default True;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
@@ -157,6 +159,7 @@ type
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
     property    AutoSelect;
+    property    AutoSize;
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
     property    ExtraHint;
@@ -1014,6 +1017,7 @@ begin
   FTextColor          := Parent.TextColor;
   FBackgroundColor    := clBoxColor;
   FAutoSelect         := True;
+  FAutoSize           := True;
   FSelecting          := False;
   FHideSelection      := True;
   FReadOnly           := False;
@@ -1074,16 +1078,19 @@ procedure TfpgBaseEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
-  case BorderStyle of
-    ebsNone:
-      if Height < FFont.Height + (FHeightMargin * 2) then
-        Height:= FFont.Height + (FHeightMargin * 2);
-    ebsDefault:
-      if Height < FFont.Height + 4 + (FHeightMargin * 2) then
-        Height:= FFont.Height + 4 + (FHeightMargin * 2);
-    ebsSingle:
-      if Height < FFont.Height + 2 + (FHeightMargin * 2) then
-        Height:= FFont.Height + 2 + (FHeightMargin * 2);
+  if AutoSize then
+  begin
+    case BorderStyle of
+      ebsNone:
+        if Height < FFont.Height + (FHeightMargin * 2) then
+          Height:= FFont.Height + (FHeightMargin * 2);
+      ebsDefault:
+        if Height < FFont.Height + 4 + (FHeightMargin * 2) then
+          Height:= FFont.Height + 4 + (FHeightMargin * 2);
+      ebsSingle:
+        if Height < FFont.Height + 2 + (FHeightMargin * 2) then
+          Height:= FFont.Height + 2 + (FHeightMargin * 2);
+    end;
   end;
   Adjust;
   RePaint;
