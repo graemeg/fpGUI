@@ -686,22 +686,28 @@ end;
 
 procedure TfpgPopupCalendar.AfterCreate;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: fpgPopupCalendar}
   Name := 'fpgPopupCalendar';
-  SetPosition(285, 249, 233, 142);
-//  WindowTitle := 'fpgPopupCalendar';
-//  Sizeable := False;
-//  WindowPosition := wpUser;
+  SetPosition(370, 182, 233, 142);
+  Hint := '';
+  //  WindowTitle := 'fpgPopupCalendar';
+  //  Sizeable := False;
+  //  WindowPosition := wpUser;
 
   edtYear := TfpgEdit.Create(self);
   with edtYear do
   begin
     Name := 'edtYear';
     SetPosition(0, 0, 37, 22);
+    AutoSize := False;
+    BorderStyle := ebsSingle;
+    Hint := '';
+    TabOrder := 1;
     Text := '';
     FontDesc := '#Edit1';
+    IgnoreMouseCursor := True;
     Focusable := False;
-    BorderStyle := ebsSingle;
   end;
 
   btnYearUp := TfpgButton.Create(self);
@@ -712,8 +718,10 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
+    TabOrder := 2;
     Focusable := False;
     OnClick := @btnYearUpClicked;
   end;
@@ -726,8 +734,10 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
+    TabOrder := 3;
     Focusable := False;
     OnClick := @btnYearDownClicked;
   end;
@@ -737,10 +747,14 @@ begin
   begin
     Name := 'edtMonth';
     SetPosition(50, 0, 100, 22);
+    AutoSize := False;
+    BorderStyle := ebsSingle;
+    Hint := '';
+    TabOrder := 4;
     Text := '';
     FontDesc := '#Edit1';
+    IgnoreMouseCursor := True;
     Focusable := False;
-    BorderStyle := ebsSingle;
   end;
 
   btnMonthUp := TfpgButton.Create(self);
@@ -751,8 +765,10 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
+    TabOrder := 5;
     Focusable := False;
     OnClick := @btnMonthUpClicked;
   end;
@@ -765,12 +781,14 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
+    TabOrder := 6;
     Focusable := False;
     OnClick := @btnMonthDownClicked;
   end;
-  
+
   btnToday := TfpgButton.Create(self);
   with btnToday do
   begin
@@ -778,6 +796,9 @@ begin
     SetPosition(164, 0, 70, 22);
     Text := 'Today';
     FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 7;
     Focusable := True;
     OnClick := @btnTodayClicked;
   end;
@@ -796,7 +817,10 @@ begin
     AddColumn('Sat', 33, taCenter);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
+    Hint := '';
     RowCount := 6;
+    RowSelect := False;
+    TabOrder := 8;
     ScrollBarStyle := ssNone;
     OnDoubleClick := @grdName1DoubleClick;
     OnKeyPress := @grdName1KeyPress;
@@ -804,6 +828,7 @@ begin
   end;
 
   {@VFD_BODY_END: fpgPopupCalendar}
+  {%endregion}
 {
   // Setup localization
   // UI Designer doesn't support resource strings yet!
