@@ -321,6 +321,9 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgEdit);
   wc.NameBase := 'Edit';
 //  wc.AddProperty('Color', TPropertyColor, 'Text color');
+  wc.AddProperty('AutoSelect', TPropertyBoolean, 'On receiving focus, auto select text');
+  wc.AddProperty('AutoSize', TPropertyBoolean, 'Change Height based on FontDesc being set');
+  wc.AddProperty('BorderStyle', TPropertyEnum, '');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
