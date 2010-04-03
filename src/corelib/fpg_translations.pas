@@ -26,6 +26,7 @@ interface
 uses
   Classes
   ,SysUtils
+  ,fpg_base
   ;
 
 
@@ -57,6 +58,7 @@ type
 
 
 procedure TranslateResourceStrings(const BaseAppName, BaseDirectory, CustomLang: string);
+function  fpgMatchLocale(const ALanguageID: TfpgString): boolean;
 
 
 implementation
@@ -65,6 +67,7 @@ uses
   GetText
   ,fpg_pofiles
   ,fpg_utils
+  ,fpg_main
   ;
   
 
@@ -165,6 +168,18 @@ begin
   if lpos > 0 then
     ALanguageID := Copy(ALanguageID, 0, lpos-1);
 end;
+
+function fpgMatchLocale(const ALanguageID: TfpgString): boolean;
+var
+  s: TfpgString;
+begin
+  s := ALanguageID;
+  FixLanguageIDs(s);
+  Result := s = SystemLanguageID1;
+  if not Result then
+    Result := s = SystemLanguageID2;
+end;
+
 
 { TTranslationList }
 
