@@ -41,11 +41,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
-    <Linking>
-      <Debugging>
-        <GenGProfCode Value="True"/>
-      </Debugging>
-    </Linking>
+    <SearchPaths>
+      <UnitOutputDirectory Value="units"/>
+    </SearchPaths>
     <Other>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

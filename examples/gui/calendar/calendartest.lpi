@@ -46,6 +46,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
+      <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

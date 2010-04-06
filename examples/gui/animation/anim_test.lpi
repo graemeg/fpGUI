@@ -42,8 +42,7 @@
   <CompilerOptions>
     <Version Value="8"/>
     <Other>
-      <CustomOptions Value="-FUunits
-"/>
+      <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
