@@ -171,12 +171,7 @@ begin
   m.Dest    := Dest;
   m.Params  := aparams;
 
-//  try
-    m.Dest.Dispatch(m)
-//  except
-//    on E: Exception do
-//      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
-//  end;
+  fpgDeliverMessage(m);
 end;
 
 procedure fpgSendMessage(Sender, Dest: TObject; MsgCode: integer); overload;
@@ -190,12 +185,7 @@ begin
   m.Sender  := Sender;
   m.Dest    := Dest;
 
-//  try
-    m.Dest.Dispatch(m)
-//  except
-//    on E: Exception do
-//      {$IFDEF DEBUG}writeln('fpgSendMessage Caught Exception: ' + E.Message){$ENDIF};
-//  end;
+  fpgDeliverMessage(m);
 end;
 
 procedure fpgDeliverMessage(var msg: TfpgMessageRec);
@@ -207,21 +197,16 @@ begin
     msg.Dest.Free
   else
   begin
-//    try
-      msg.Dest.Dispatch(msg);
-      if fpgApplication.FMessageHookList.Count > 0 then
+    msg.Dest.Dispatch(msg);
+    if fpgApplication.FMessageHookList.Count > 0 then
+    begin
+      for i := 0 to fpgApplication.FMessageHookList.Count - 1 do
       begin
-        for i := 0 to fpgApplication.FMessageHookList.Count - 1 do
-        begin
-          oItem := TMsgHookItem(fpgApplication.FMessageHookList.Items[i]);
-          if (msg.Dest = oItem.Dest) and (msg.MsgCode = oItem.MsgCode) then
-            oItem.Listener.Dispatch(msg);
-        end;
+        oItem := TMsgHookItem(fpgApplication.FMessageHookList.Items[i]);
+        if (msg.Dest = oItem.Dest) and (msg.MsgCode = oItem.MsgCode) then
+          oItem.Listener.Dispatch(msg);
       end;
-//    except
-//      on E: Exception do
-//        {$IFDEF DEBUG}writeln('fpgDeliverMessage Caught Exception: ' + E.Message){$ENDIF};
-//    end;
+    end;
   end;
 end;
 
