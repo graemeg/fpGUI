@@ -12,86 +12,68 @@ uses
   fpg_main,
   fpg_form,
   fpg_button,
-  fpg_label,
   fpg_memo;
   
 type
-
-  { TMainForm }
-
   TMainForm = class(TfpgForm)
   private
+    {@VFD_HEAD_BEGIN: MainForm}
     memo: TfpgMemo;
     btnQuit: TfpgButton;
-    procedure   btnQuitClick(Sender: TObject);
-    procedure   HandleResize(awidth, aheight: TfpgCoord); override;
+    {@VFD_HEAD_END: MainForm}
+    procedure   btnQuitClicked(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent); override;
+    procedure AfterCreate; override;
   end;
 
 { TMainForm }
 
-procedure TMainForm.btnQuitClick(Sender: TObject);
+procedure TMainForm.btnQuitClicked(Sender: TObject);
 begin
   Close;
 end;
 
-procedure TMainForm.HandleResize(awidth, aheight: TfpgCoord);
+procedure TMainForm.AfterCreate;
 begin
-  inherited HandleResize(awidth, aheight);
-  if Assigned(Memo) then
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(329, 251, 300, 201);
+  WindowTitle := 'Memo Test';
+  WindowPosition := wpOneThirdDown;
+
+  memo := TfpgMemo.Create(self);
+  with memo do
   begin
-    Memo.SetPosition(Memo.Left, Memo.Top, awidth-20, aheight- Memo.Top - 10);
-    btnQuit.Left := awidth - btnQuit.Width - 10;
-    btnQuit.UpdateWindowPosition;
+    Name := 'memo';
+    SetPosition(10, 40, 280, 150);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    Lines.Add('Memo Test0');
+    Lines.Add('Memo Test1');
+    Lines.Add('Memo Test2');
+    Lines.Add('Memo Test3');
+    Lines.Add('Memo Test4');
+    FontDesc := '#Edit1';
+    TabOrder := 0;
+    Lines.Insert(1, '0 Before 1 after');
   end;
+
+  btnQuit := TfpgButton.Create(self);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(208, 8, 80, 24);
+    Anchors := [anRight,anTop];
+    Text := 'Quit';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := 'stdimg.quit';
+    TabOrder := 1;
+    OnClick := @btnQuitClicked;
+  end;
+
+  {@VFD_BODY_END: MainForm}
 end;
 
-constructor TMainForm.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  WindowTitle := 'Memo test';
-  SetPosition(100, 100, 300, 300);
-
-  memo      :=  CreateMemo(self, 10, 40, 280, 150);
-
-  memo.Lines.Add('Memo Test0');
-  memo.Lines.Add('Memo Test1');
-  memo.Lines.Add('Memo Test2');
-  memo.Lines.Add('Memo Test3');
-  memo.Lines.Add('Memo Test4');
-  memo.Lines.Insert(1,'0 Before 1 after');
-  //memo.Lines.Delete(1);
-  //memo.Lines.Text := 'Dude'+LineEnding+'What''s mine say?'+LineEnding;;
-  //memo.Lines.Text := memo.Lines.Text + 'Sweet'+LineEnding;
-  //memo.lines.LoadFromFile('/home/andrew/programming/groupprojects/fpgui/src/gui/fpg_memo.pas');
-  //memo.lines.LoadFromFile('/usr/share/dict/cracklib-small');
-  {memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);}
-  {memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);}
-  {memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);
-  memo.lines.Add(memo.lines.text);}
- { memo.Lines.Text := memo.Lines.Text + memo.Lines.Text;
-  memo.Lines.Text := memo.Lines.Text + memo.Lines.Text;
-  memo.Lines.Text := memo.Lines.Text + memo.Lines.Text;
-  memo.Lines.Text := memo.Lines.Text + memo.Lines.Text;
-  memo.Lines.Text := memo.Lines.Text + memo.Lines.Text;
-  memo.Lines.Text := memo.Lines.Text + memo.Lines.Text; }
-  btnQuit   := CreateButton(self, 210, 10, 80, 'Quit', @btnQuitClick);
-  btnQuit.ImageName := 'stdimg.quit';
-  btnQuit.ShowImage := True;
-  
-  HandleResize(Width, Height);
-
-end;
 procedure MainProc;
 var
   frm: TMainForm;
