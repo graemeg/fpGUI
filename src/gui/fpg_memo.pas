@@ -403,8 +403,9 @@ begin
     SetLineText(selsl, ls);
   end;
 
-  for n := selsl to selel do
-    FLines.Delete(n);
+  //delete moves lines up, so delete same line number over and over.
+  for n := (selsl+1) to selel do
+    FLines.Delete(selsl+1);
 
   FCursorPos  := selsp;
   FCursorLine := selsl;
