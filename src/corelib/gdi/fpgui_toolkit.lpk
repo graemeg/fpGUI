@@ -8,7 +8,7 @@
       <Version Value="8"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="..\..\..\"/>
+        <IncludeFiles Value="..\..\"/>
         <OtherUnitFiles Value="..\;..\..\gui\;..\..\gui\db\"/>
         <UnitOutputDirectory Value="..\..\..\lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
