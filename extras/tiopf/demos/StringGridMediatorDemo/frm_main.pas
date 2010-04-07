@@ -5,17 +5,17 @@ unit frm_main;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_basegrid, gui_grid, gui_menu,
-  gui_panel, gui_popupcalendar, gui_gauge, Model, tiCompositeMediators;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_widget, fpg_form, fpg_label, fpg_button,
+  fpg_basegrid, fpg_grid, fpg_menu,
+  fpg_panel, fpg_popupcalendar, fpg_gauge, Model, tiListMediators;
 
 type
 
   TMainForm = class(TfpgForm)
   private
     FList: TPersonList;
-    medGrid: TCompositeStringGridMediator;
+    medGrid: TtiStringGridMediatorView;
     procedure   SetupMediators;
     procedure   ValidateData;
     procedure   btnAddClicked(Sender: TObject);
@@ -49,13 +49,13 @@ type
 implementation
 
 uses
-  gui_dialogs, frm_personmaint;
+  fpg_dialogs, frm_personmaint;
 
 {@VFD_NEWFORM_IMPL}
 
 procedure TMainForm.SetupMediators;
 begin
-  medGrid := TCompositeStringGridMediator.CreateCustom(FList, grdName1, 'Name(200);Age');
+  medGrid := TtiStringGridMediatorView.CreateCustom(FList, grdName1, 'Name(200);Age');
 end;
 
 procedure TMainForm.ValidateData;

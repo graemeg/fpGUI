@@ -155,7 +155,6 @@ begin
     Text := '...';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
   end;
 
   edtFPDoc := TfpgEdit.Create(self);
@@ -175,7 +174,6 @@ begin
     Text := '...';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
   end;
 
   cbShowHints := TfpgCheckBox.Create(self);
@@ -204,7 +202,7 @@ begin
     Text := 'OK';
     FontDesc := '#Label1';
     ImageName := 'stdimg.ok';
-    ModalResult := 1;
+    ModalResult := mrOK;
   end;
 
   btnCancel := TfpgButton.Create(self);
@@ -215,7 +213,7 @@ begin
     Text := 'Cancel';
     FontDesc := '#Label1';
     ImageName := 'stdimg.cancel';
-    ModalResult := 2;
+    ModalResult := mrCancel;
   end;
 
   lblName5 := TfpgLabel.Create(self);

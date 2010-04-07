@@ -5,8 +5,8 @@ unit frmMain;
 interface
 
 uses
-  Classes, SysUtils, gui_form, gui_button, gui_label, gui_edit, gui_trackbar,
-  gui_combobox, gui_checkbox, gui_listbox, Model,
+  Classes, SysUtils, fpg_form, fpg_button, fpg_label, fpg_edit, fpg_trackbar,
+  fpg_combobox, fpg_checkbox, fpg_listbox, Model,
   tiGenericEditMediators, tiGenericListMediators;
 
 type

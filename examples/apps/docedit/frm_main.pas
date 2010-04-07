@@ -275,7 +275,6 @@ begin
     Text := 'Quit';
     FontDesc := '#Label1';
     ImageName := 'stdimg.Quit';
-    ModalResult := 0;
     ShowImage := True;
     OnClick   := @btnQuitClicked;
   end;

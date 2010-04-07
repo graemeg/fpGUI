@@ -5,12 +5,9 @@ unit frm_personmaint;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_basegrid, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_panel, gui_popupcalendar, gui_gauge, model, model_view;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_form, fpg_label, fpg_button,
+  model, model_view;
 
 type
 

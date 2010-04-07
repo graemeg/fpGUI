@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
-    <Version Value="6"/>
+    <Version Value="7"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
+        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value="./"/>
       <TargetFileExt Value=""/>
     </General>
     <VersionInfo>
@@ -66,20 +65,18 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
+    <Version Value="8"/>
     <SearchPaths>
       <OtherUnitFiles Value="../Common/"/>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="True"/>
       </Debugging>
     </Linking>
     <Other>
-      <CustomOptions Value="-FUunits
+      <CustomOptions Value="
 "/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

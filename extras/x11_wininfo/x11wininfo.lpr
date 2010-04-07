@@ -204,7 +204,6 @@ begin
     ImageMargin := 3;
     ImageName := '';
     ImageSpacing := -1;
-    ModalResult := 0;
     ParentShowHint := True;
     ShowImage := True;
     TabOrder := 0;

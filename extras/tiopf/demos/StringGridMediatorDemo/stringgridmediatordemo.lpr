@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpgfx, frm_main, Model, Constants, tiOPFfpGUI, frm_personmaint,
+  Classes, fpg_main, frm_main, Model, Constants, tiOPFfpGUI, frm_personmaint,
   Model_View;
 
 
