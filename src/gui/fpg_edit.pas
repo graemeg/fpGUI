@@ -77,6 +77,7 @@ type
     procedure   DefaultPopupCopy(Sender: TObject);
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
+    procedure   DefaultPopupInsertFromCharmap(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
     procedure   SetReadOnly(const AValue: Boolean);
   protected
@@ -362,7 +363,8 @@ implementation
 
 uses
   fpg_stringutils,
-  fpg_constants;
+  fpg_constants,
+  fpg_dialogs;
 
 const
   // internal popupmenu item names
@@ -370,6 +372,7 @@ const
   ipmCopy       = 'miDefaultCopy';
   ipmPaste      = 'miDefaultPaste';
   ipmClearAll   = 'miDefaultClearAll';
+  ipmCharmap    = 'miDefaultCharmap';
 
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
@@ -1154,24 +1157,41 @@ end;
 
 procedure TfpgBaseEdit.DefaultPopupCut(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit;
   CutToClipboard;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupCopy(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit;
   CopyToClipboard;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupPaste(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit;
   PasteFromClipboard
 end;
 
 procedure TfpgBaseEdit.DefaultPopupClearAll(Sender: TObject);
 begin
   if ReadOnly then
-    Exit; //==>
+    Exit;
   Clear;
+end;
+
+procedure TfpgBaseEdit.DefaultPopupInsertFromCharmap(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  if ReadOnly then
+    Exit;
+  s := fpgShowCharMap;
+  if s <> '' then
+    DoPaste(s);
 end;
 
 procedure TfpgBaseEdit.SetDefaultPopupMenuItemsState;
@@ -1192,7 +1212,9 @@ begin
       else if itm.Name = ipmPaste then
         itm.Enabled := (not ReadOnly) and (fpgClipboard.Text <> '')
       else if itm.Name = ipmClearAll then
-        itm.Enabled := (not ReadOnly) and (Text <> '');
+        itm.Enabled := (not ReadOnly) and (Text <> '')
+      else if itm.Name = ipmCharmap then
+        itm.Enabled := (not ReadOnly);
     end;
   end;
 end;
@@ -1230,6 +1252,10 @@ begin
     itm.Name := ipmPaste;
     itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
     itm.Name := ipmClearAll;
+    itm := FDefaultPopupMenu.AddMenuItem('-', '', nil);
+    itm.Name := 'N1';
+    itm := FDefaultPopupMenu.AddMenuItem(rsInsertFromCharacterMap, '', @DefaultPopupInsertFromCharmap);
+    itm.Name := ipmCharmap;
   end;
 
   SetDefaultPopupMenuItemsState;
