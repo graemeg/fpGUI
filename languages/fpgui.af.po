@@ -80,6 +80,10 @@ msgstr "Kan nie die lêergids skep nie"
 msgid "Change"
 msgstr "Verander"
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Sluit"
@@ -239,6 +243,10 @@ msgstr "Informasie"
 #: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Invoeg"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -439,6 +447,10 @@ msgstr "So"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Sondag"
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"

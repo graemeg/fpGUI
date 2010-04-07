@@ -390,6 +390,10 @@ msgstr ""
 msgid "Select"
 msgstr ""
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr ""
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr ""
@@ -490,7 +494,15 @@ msgstr ""
 msgid "Yes to All"
 msgstr ""
 
-#: fpg_constants:rsselectadirectory
-msgid "Select a Directory"
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
+
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
 msgstr ""
 

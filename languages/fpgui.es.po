@@ -80,6 +80,10 @@ msgstr "No se puede crear la carpeta"
 msgid "Change"
 msgstr "Cambiar"
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Cerrar"
@@ -239,6 +243,10 @@ msgstr "Información"
 #: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Insertar"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -439,6 +447,10 @@ msgstr "Dom"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Domingo"
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
