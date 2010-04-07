@@ -17,7 +17,6 @@
       actual character code.
 }
 
-{ TODO : This unit needs to be localized }
 { TODO : This dialog needs to be incorporated with TfpgEdit popup menu. }
 
 {%mainunit fpg_dialogs.pas}
@@ -27,24 +26,26 @@
   TCharMapForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: CharMapForm}
-    StringGrid1: TfpgStringGrid;
-    Button1: TfpgButton;
+    grdCharacters: TfpgStringGrid;
+    btnClose: TfpgButton;
     lblCharInfo: TfpgLabel;
     edText: TfpgEdit;
     lblText: TfpgLabel;
     pnlChar: TfpgPanel;
     {@VFD_HEAD_END: CharMapForm}
-    procedure FormShow(Sender: TObject);
-    procedure StringGrid1FocusChange(Sender: TObject; ARow, ACol: integer);
-    procedure StringGrid1DrawCell(Sender: TObject; const ARow, ACol: integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
-    procedure StringGrid1CanSelectCell(Sender: TObject; const ARow, ACol: integer; var ACanSelect: boolean);
-    procedure StringGrid1DoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
-    procedure FillCharMap;
-    procedure Button1Clicked(Sender: TObject);
-    function GetNewText: TfpgString;
+    procedure   FormShow(Sender: TObject);
+    procedure   grdCharactersFocusChange(Sender: TObject; ARow, ACol: integer);
+    procedure   grdCharactersDrawCell(Sender: TObject; const ARow, ACol: integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+    procedure   grdCharactersCanSelectCell(Sender: TObject; const ARow, ACol: integer; var ACanSelect: boolean);
+    procedure   grdCharactersDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   grdCharactersKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   FillCharMap;
+    procedure   Button1Clicked(Sender: TObject);
+    function    GetNewText: TfpgString;
+    procedure   SetupCaptions;
   public
-    procedure AfterCreate; override;
-    property  NewText: TfpgString read GetNewText;
+    procedure   AfterCreate; override;
+    property    NewText: TfpgString read GetNewText;
   end;
 
 function fpgShowCharMap: TfpgString;
@@ -77,14 +78,14 @@ begin
   FillCharMap;
 end;
 
-procedure TCharMapForm.StringGrid1FocusChange(Sender: TObject; ARow, ACol: integer);
+procedure TCharMapForm.grdCharactersFocusChange(Sender: TObject; ARow, ACol: integer);
 var
   i: integer;
   tmp, tmp2: TfpgString;
 begin
   if (ARow > 0) and (ACol > 0) then
   begin
-    tmp  := StringGrid1.Cells[ACol, ARow];
+    tmp  := grdCharacters.Cells[ACol, ARow];
     tmp2 := '';
     // generate UTF-8 byte representation
     for i := 1 to Length(tmp) do
@@ -99,25 +100,25 @@ begin
   end;
 end;
 
-procedure TCharMapForm.StringGrid1DrawCell(Sender: TObject;
+procedure TCharMapForm.grdCharactersDrawCell(Sender: TObject;
   const ARow, ACol: integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
   var ADefaultDrawing: boolean);
 begin
   if (ARow = 0) or (ACol = 0) then
   begin
     ADefaultDrawing := False;
-    StringGrid1.Canvas.Color := clWindowBackground;
-    StringGrid1.Canvas.FillRectangle(ARect);
-    //StringGrid1.Canvas.DrawButtonFace(ARect, []);
-    StringGrid1.Canvas.TextColor := clText1;  //clGray;
-    StringGrid1.Canvas.DrawText(ARect, StringGrid1.Cells[ACol, ARow],
+    grdCharacters.Canvas.Color := clWindowBackground;
+    grdCharacters.Canvas.FillRectangle(ARect);
+    //grdCharacters.Canvas.DrawButtonFace(ARect, []);
+    grdCharacters.Canvas.TextColor := clText1;  //clGray;
+    grdCharacters.Canvas.DrawText(ARect, grdCharacters.Cells[ACol, ARow],
       [txtHCenter, txtVCenter]);
   end
   else
     ADefaultDrawing := True;
 end;
 
-procedure TCharMapForm.StringGrid1CanSelectCell(Sender: TObject;
+procedure TCharMapForm.grdCharactersCanSelectCell(Sender: TObject;
   const ARow, ACol: integer; var ACanSelect: boolean);
 begin
   if (ACol = 0) or (ARow = 0) then
@@ -126,10 +127,19 @@ begin
     ACanSelect := True;
 end;
 
-procedure TCharMapForm.StringGrid1DoubleClick(Sender: TObject;
+procedure TCharMapForm.grdCharactersDoubleClick(Sender: TObject;
   AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 begin
-  edText.Text := edText.Text + StringGrid1.Cells[StringGrid1.FocusCol, StringGrid1.FocusRow];
+  edText.Text := edText.Text + grdCharacters.Cells[grdCharacters.FocusCol, grdCharacters.FocusRow];
+end;
+
+procedure TCharMapForm.grdCharactersKeyPressed(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyEnter then
+  begin
+    edText.Text := edText.Text + grdCharacters.Cells[grdCharacters.FocusCol, grdCharacters.FocusRow];
+  end;
 end;
 
 procedure TCharMapForm.FillCharMap;
@@ -138,33 +148,33 @@ var
   j: byte;
   c: byte;
 begin
-  StringGrid1.BeginUpdate;
+  grdCharacters.BeginUpdate;
   try
-    StringGrid1.ColumnCount := 17;
-    StringGrid1.RowCount    := 17;
-    StringGrid1.ShowHeader  := False;
+    grdCharacters.ColumnCount := 17;
+    grdCharacters.RowCount    := 17;
+    grdCharacters.ShowHeader  := False;
     for i := 0 to 15 do
     begin
       for j := 0 to 15 do
       begin
-        StringGrid1.ColumnWidth[j] := 20;
+        grdCharacters.ColumnWidth[j] := 20;
         c := i shl 4 or j;
         if (c > 0) and (c < 128) then
-          StringGrid1.Cells[j + 1, i + 1] := chr(c)
+          grdCharacters.Cells[j + 1, i + 1] := chr(c)
         else
-          StringGrid1.Cells[j + 1, i + 1] :=
+          grdCharacters.Cells[j + 1, i + 1] :=
             chr($C0 or (i div $4)) + chr($80 or c mod $40);
       end;
-      StringGrid1.Cells[0, i + 1] := Format('%.2x +', [i]);
-      StringGrid1.Cells[i + 1, 0] := Format('%.2x', [i]);
+      grdCharacters.Cells[0, i + 1] := Format('%.2x +', [i]);
+      grdCharacters.Cells[i + 1, 0] := Format('%.2x', [i]);
     end;
-    StringGrid1.ColumnWidth[0]  := 30;
-    StringGrid1.ColumnWidth[16] := 20;
-    StringGrid1.Cells[0, 0]     := '00';
+    grdCharacters.ColumnWidth[0]  := 30;
+    grdCharacters.ColumnWidth[16] := 20;
+    grdCharacters.Cells[0, 0]     := '00';
   finally
-    StringGrid1.FocusCol := 1;
-    StringGrid1.FocusRow := 1;
-    StringGrid1.EndUpdate;
+    grdCharacters.FocusCol := 1;
+    grdCharacters.FocusRow := 1;
+    grdCharacters.EndUpdate;
   end;
 end;
 
@@ -178,6 +188,13 @@ begin
   Result := edText.Text;
 end;
 
+procedure TCharMapForm.SetupCaptions;
+begin
+  WindowTitle   := rsCharacterMap;
+  btnClose.Text := rsClose;
+  lblText.Text  := rsTextToInsert;
+end;
+
 procedure TCharMapForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -185,33 +202,36 @@ begin
   Name := 'CharMapForm';
   SetPosition(316, 186, 377, 390);
   WindowTitle := 'Character Map';
+  Hint := '';
   WindowPosition := wpOneThirdDown;
   OnShow  := @FormShow;
 
-  StringGrid1 := TfpgStringGrid.Create(self);
-  with StringGrid1 do
+  grdCharacters := TfpgStringGrid.Create(self);
+  with grdCharacters do
   begin
-    Name := 'StringGrid1';
+    Name := 'grdCharacters';
     SetPosition(4, 4, 368, 296);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
+    Hint := '';
     RowCount := 0;
     RowSelect := False;
     TabOrder := 0;
-    OnFocusChange := @StringGrid1FocusChange;
-    OnDrawCell := @StringGrid1DrawCell;
-    OnCanSelectCell := @StringGrid1CanSelectCell;
-    OnDoubleClick  := @StringGrid1DoubleClick;
+    OnFocusChange := @grdCharactersFocusChange;
+    OnDrawCell := @grdCharactersDrawCell;
+    OnCanSelectCell := @grdCharactersCanSelectCell;
+    OnDoubleClick  := @grdCharactersDoubleClick;
+    OnKeyPress  := @grdCharactersKeyPressed;
   end;
 
-  Button1 := TfpgButton.Create(self);
-  with Button1 do
+  btnClose := TfpgButton.Create(self);
+  with btnClose do
   begin
-    Name := 'Button1';
+    Name := 'btnClose';
     SetPosition(292, 360, 80, 24);
     Anchors := [anRight,anBottom];
-    Text := 'Close';
+    Text := 'btnClose';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -227,7 +247,7 @@ begin
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Label';
+    Text := 'lblCharInfo';
   end;
 
   edText := TfpgEdit.Create(self);
@@ -236,6 +256,7 @@ begin
     Name := 'edText';
     SetPosition(108, 326, 156, 24);
     Anchors := [anLeft,anBottom];
+    Hint := '';
     TabOrder := 3;
     Text := '';
     FontDesc := '#Edit1';
@@ -249,7 +270,7 @@ begin
     Anchors := [anLeft,anBottom];
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Text to Insert:';
+    Text := 'lblTextToInsert';
   end;
 
   pnlChar := TfpgPanel.Create(self);
@@ -259,12 +280,15 @@ begin
     SetPosition(292, 304, 60, 48);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := 'Arial-16:antialias=true';
+    Hint := '';
     Style := bsLowered;
     Text := '';
   end;
 
   {@VFD_BODY_END: CharMapForm}
   {%endregion}
+
+  SetupCaptions;
 end;
 
 
