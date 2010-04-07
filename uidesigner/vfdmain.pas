@@ -24,6 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
+  fpg_base,
   fpg_main,
   fpg_widget,
   fpg_dialogs,
@@ -278,7 +279,7 @@ var
   nfrm: TNewFormForm;
 begin
   nfrm := TNewFormForm.Create(nil);
-  if nfrm.ShowModal = 1 then
+  if nfrm.ShowModal = mrOK then
     if nfrm.edName.Text <> '' then
     begin
       fd           := TFormDesigner.Create;
@@ -412,7 +413,7 @@ var
 begin
   frm := TfrmVFDSetup.Create(nil);
   try
-    if frm.ShowModal = 1 then
+    if frm.ShowModal = mrOK then
     begin
       LoadDefaults;
       frmMain.mru.MaxItems      := gINI.ReadInteger('Options', 'MRUFileCount', 4);

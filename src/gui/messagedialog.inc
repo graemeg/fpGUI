@@ -170,9 +170,9 @@ var
       { TODO : At some stage the StyleManager can give us the correct button
         order based on the OS and Window Manager. }
       Result := 3;
-      sl.Add(cMsgDlgBtnText[mbYes] + '=' + IntToStr(mrYes));
-      sl.Add(cMsgDlgBtnText[mbNo] + '=' + IntToStr(mrNo));
-      sl.Add(cMsgDlgBtnText[mbCancel] + '=' + IntToStr(mrCancel));
+      sl.Add(cMsgDlgBtnText[mbYes] + '=' + IntToStr(Integer(mrYes)));
+      sl.Add(cMsgDlgBtnText[mbNo] + '=' + IntToStr(Integer(mrNo)));
+      sl.Add(cMsgDlgBtnText[mbCancel] + '=' + IntToStr(Integer(mrCancel)));
       case DefaultButton of
         mbYes:    lDefault := 0;
         mbNo:     lDefault := 1;
@@ -207,7 +207,7 @@ begin
     b       := TfpgButton.Create(self);
     b.Name  := 'DlgButton' + IntToStr(i+1);
     b.Text  := sl.Names[i];
-    b.ModalResult   := StrToInt(sl.ValueFromIndex[i]);
+    b.ModalResult   := TfpgModalResult(StrToInt(sl.ValueFromIndex[i]));
     if (i = lDefault) or (lcount = 1) then
       b.Default := True;
     FButtonList.Add(b);

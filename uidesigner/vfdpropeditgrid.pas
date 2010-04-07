@@ -227,7 +227,6 @@ begin
     Text := 'New';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
     OnClick := @NewButtonClick;
   end;
 
@@ -239,7 +238,6 @@ begin
     Text := 'Delete';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
     OnClick := @DeleteButtonClick;
   end;
 
@@ -251,7 +249,6 @@ begin
     Text := 'UP';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
     OnClick := @UpDownButtonClick;
   end;
 
@@ -263,7 +260,6 @@ begin
     Text := 'DOWN';
     FontDesc := '#Label1';
     ImageName := '';
-    ModalResult := 0;
     OnClick := @UpDownButtonClick;
   end;
 
@@ -275,7 +271,6 @@ begin
     Text := 'Close';
     FontDesc := '#Label1';
     ImageName := 'stdimg.close';
-    ModalResult := 0;
     OnClick := @CloseButtonClick;
   end;
 

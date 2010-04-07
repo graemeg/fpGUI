@@ -224,7 +224,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.close';
-    ModalResult := 1;
+    ModalResult := mrOK;
     TabOrder := 2;
   end;
 

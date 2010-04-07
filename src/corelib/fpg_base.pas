@@ -32,7 +32,6 @@ type
   TfpgColor       = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
   TfpgString      = type string;
   TfpgChar        = type string[4];
-  TfpgModalResult = Low(integer)..MaxInt;
 
   PPoint = ^TPoint;
 
@@ -58,6 +57,10 @@ type
                         gdHorizontal);  // Fill Horizontal
 
   TClipboardKeyType = (ckNone, ckCopy, ckPaste, ckCut);
+
+  // If you have to convert this to an Integer, mrNone = 0 etc.
+  TfpgModalResult = (mrNone, mrOK, mrCancel, mrYes, mrNo, mrAbort, mrRetry,
+      mrIgnore, mrAll, mrNoToAll, mrYesToAll);
 
 const
   MOUSE_LEFT       = 1;
@@ -89,19 +92,6 @@ const
 
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
-
-  { TfpgModalResult values }
-  mrNone     = 0;
-  mrOk       = mrNone + 1;
-  mrCancel   = mrOk + 1;
-  mrYes      = mrCancel + 1;
-  mrNo       = mrYes + 1;
-  mrAbort    = mrNo + 1;
-  mrRetry    = mrAbort + 1;
-  mrIgnore   = mrRetry + 1;
-  mrAll      = mrIgnore + 1;
-  mrNoToAll  = mrAll + 1;
-  mrYesToAll = mrNoToAll + 1;
 
   { Default fpGUI help viewer }
   FPG_HELPVIEWER = 'docview';

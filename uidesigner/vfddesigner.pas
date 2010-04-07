@@ -676,7 +676,7 @@ begin
   if fi <= frm.list.ItemCount then
     frm.list.FocusItem := fi;
 
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
   begin
     for n := 0 to FWidgets.Count - 1 do
       TWidgetDesigner(FWidgets.Items[n]).Widget.Visible := False;
@@ -747,7 +747,7 @@ begin
   if fi <= frm.list.ItemCount then
     frm.list.FocusItem := fi;
 
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
   begin
     taborder := 1;
     for n := 0 to frm.List.Items.Count - 1 do
@@ -1051,7 +1051,7 @@ begin
   end;
 
   posval := -9999;
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
     posval := StrToIntDef(frm.edPos.Text, -9999);
   frm.Free;
 
@@ -1422,7 +1422,7 @@ begin
   //frmie.Top := ay;
 
   frmie.edItems.Lines.Assign(sl);
-  if frmie.ShowModal = 1 then
+  if frmie.ShowModal = mrOK then
   begin
 //    Writeln('OK');
     sl.Assign(frmie.edItems.Lines);

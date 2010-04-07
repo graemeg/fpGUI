@@ -173,7 +173,7 @@ begin
   frm := TItemEditorForm.Create(nil);
   try
     frm.edItems.Lines.Assign(sl);
-    if frm.ShowModal = 1 then
+    if frm.ShowModal = mrOK then
       sl.Assign(frm.edItems.Lines);
   finally
     frm.Free;

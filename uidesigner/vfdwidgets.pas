@@ -360,7 +360,7 @@ begin
   wc.AddProperty('ImageMargin', TPropertyInteger, 'Space between image and border, -1 centers image/text');
   wc.AddProperty('ImageName', TPropertyString, '');
   wc.AddProperty('ImageSpacing', TPropertyInteger, 'Space between image and text, -1 centers text');
-  wc.AddProperty('ModalResult', TPropertyInteger, '');
+  wc.AddProperty('ModalResult', TPropertyEnum, 'Modal Result returned and overrides the OnClick event handler');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');

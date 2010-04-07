@@ -364,9 +364,9 @@ var
 
 begin
   if Sender = btnOK then
-    ModalResult := 1
+    ModalResult := mrOK
   else if Sender = btnCancel then
-    ModalResult := 2
+    ModalResult := mrCancel
   else
   begin
     // up / down
@@ -512,7 +512,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.cancel';
-    ModalResult := -1;
+    ModalResult := mrCancel;
     TabOrder := 7;
   end;
 

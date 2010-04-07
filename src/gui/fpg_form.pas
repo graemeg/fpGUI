@@ -97,7 +97,7 @@ type
     procedure   InvokeHelp; override;
     procedure   Show;
     procedure   Hide;
-    function    ShowModal: integer;
+    function    ShowModal: TfpgModalResult;
     procedure   Close;
     function    CloseQuery: boolean; virtual;
   end;
@@ -288,7 +288,7 @@ begin
   HandleShow;
 end;
 
-function TfpgBaseForm.ShowModal: integer;
+function TfpgBaseForm.ShowModal: TfpgModalResult;
 var
   lCloseAction: TCloseAction;
 begin

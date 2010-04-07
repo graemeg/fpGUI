@@ -342,7 +342,7 @@ begin
   Result := False;
   frm := TfpgFontSelectDialog.Create(nil);
   frm.SetFontDesc(FontDesc);
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
   begin
     FontDesc := frm.GetFontDesc;
     Result := True;
@@ -1228,7 +1228,7 @@ var
 begin
   dlg := TfpgNewDirDialog.Create(nil);
   try
-    if dlg.ShowModal = 1 then
+    if dlg.ShowModal = mrOK then
     begin
       if dlg.Directory <> '' then
       begin
@@ -1385,7 +1385,7 @@ begin
   btnOK.ImageName := 'stdimg.open';   // Do NOT localize
   btnOK.Text      := rsOpen;
 
-  if ShowModal = 1 then
+  if ShowModal = mrOK then
     Result := True
   else
     Result := False;
@@ -1409,7 +1409,7 @@ begin
   btnOK.ImageName := 'stdimg.save';   // Do NOT localize
   btnOK.Text      := rsSave;
 
-  if ShowModal = 1 then
+  if ShowModal = mrOK then
     Result := True
   else
     Result := False;
