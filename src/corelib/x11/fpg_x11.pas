@@ -302,7 +302,9 @@ implementation
 
 uses
   baseunix,
-  users,  { for *nix user and group name support }
+  {$IFNDEF DARWIN}
+  users,  { For unix user and group name support. Mac+X11 doesn't like this }
+  {$ENDIF}
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
@@ -2406,6 +2408,7 @@ begin
     // Especially if files are transfered on removable media the host system
     // might not have those user or group ids. So name lookups will fail. This
     // simply returns the ID's in such cases.
+    {$IFNDEF DARWIN}
     try
       Result.Owner := GetUserName(TUID(info.st_uid));
     except
@@ -2416,6 +2419,11 @@ begin
     except
       Result.Group := IntToStr(info.st_gid);
     end;
+    {$ELSE}
+      // Darwin (Mac-OS) can't seem to use users.pp unit from FPC. A bug in FPC?
+      Result.Owner := IntToStr(info.st_uid);
+      Result.Group := IntToStr(info.st_gid);
+    {$ENDIF}
   end;
 end;
 
