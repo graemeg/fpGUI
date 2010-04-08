@@ -2,6 +2,75 @@
   Release notes for fpGUI
   =======================
 
+v0.7.rc2  (2010-04-08)
+  - Localization of Character Map dialog.
+  - Insert from Character Map added to TfpgEdit default popup menu.
+  - ModalResults is now a enum type. Improved integration with UI
+    Designer.
+  - Memo: problems with deleting selected text is now fixed.
+  - Improved WinCE support, including reading BMP files.
+  - Fixed compilation of all example projects.
+  - Extended available properties that can be edited via the Object
+    Inspector of the UI Designer.
+  - Fixed issues where dialogs are closed via the window border X
+    button and not the available buttons in the dialog. Developer
+    can define behaviour of X close button.
+  - Improved TabSheet handling in UI Designer.
+  - Various improvements to TfpgPageControl and TfpgTabSheet. This
+    includes new tab positions: Bottom, Left, Right and None.
+  - SelectDirectory dialog was not working under Windows.
+  - Setting selected directory in SelectDirectory dialog now works.
+  - New mouse cursor demo.
+  - Improved the ability to customize the HintWindow. HintWindow
+    demo was extended to show how this can be done.
+  - Improved Visible property handling especially with child
+    components. Now only the parent Visible property is changed.
+  - tiOPF: correctly disable event handlers in edit mediators.
+  - Added a script which generates a fpGUI version number based on
+    Git repository information. Later this will be converted to
+    a object pascal console application.
+
+
+v0.7.rc1  (2010-03-04)
+  - FPC 2.4.0 compatible.
+  - Fully tested on 32-bit and 64-bit platforms. Tested on Linux,
+    Windows and the *BSD family.
+  - Mobile device support is back. Tested on ARM Linux and Windows
+    Mobile devices.
+  - fpGUI UI Designer has improved a lot and extended it's component
+    palette and Object Inspector.
+  - Various bug fixes, memory leaks and other enhancements have been
+    applied.
+  - Units have a more uniform naming style.
+  - Classes have a more uniform structure/hierarchy with base classes.
+  - Help support has been added to the core framework
+  - fpGUI now has it's own help file viewer called DocView.
+    Docview includes the following features:
+     - document annotation
+     - bookmarks
+     - browse history
+     - exporting articles to plain text or IPF format.
+     - full text search (including weighting of results to see how
+       relevant the results are)
+     - Font and Color customization
+     - Concatenation of help files at run-time so a library of help
+       files can be viewed simultaneously.
+     - Easy integration via the "external tools" feature of IDE's like
+       Lazarus or MSEide. This allows for context sensitive help.
+     - History of most recently viewed help files.
+     - Help file format used is the INF format (IBM's format used it
+       OS/2), which is very compact, incredibly fast and supports full
+       text search.
+  - A lot of new components have been added, including enhancements
+    to existing components.
+  - Various new dialogs have been added, which include Color Wheel, 
+    Character Map, Database Login etc.
+  - Improved integration with tiOPF project via the Model-GUI-Mediator
+    design pattern.
+  - Graphical FPCUnit unit test runner.
+  - Lots of new language translations for the core fpGUI library.
+  - A lot of new example projects demoing various GUI components.
+
 
 v0.6  (2008-02-17) revision 534
   - Added a new INI Utils unit which introduces ReadOnly ini support
