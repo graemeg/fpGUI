@@ -5,7 +5,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-18 00:00+0200\n"
 "PO-Revision-Date: 2009-06-26 14:51+0200\n"
-"Last-Translator:  <>\n"
+"Last-Translator: Graeme Geldenhuys <graemeg@gmail.com>\n"
 "Language-Team:  <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -82,7 +82,7 @@ msgstr "Verander"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr ""
+msgstr "Karakter Kaart"
 
 #: fpg_constants:rsclose
 msgid "Close"
@@ -246,7 +246,7 @@ msgstr "Invoeg"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr ""
+msgstr "Voeg in van Karakter Kaart"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -450,7 +450,7 @@ msgstr "Sondag"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr ""
+msgstr "Teks om in te voeg"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
