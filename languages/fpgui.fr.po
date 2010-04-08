@@ -82,7 +82,7 @@ msgstr "Modifier"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr ""
+msgstr "Table de caractères"
 
 #: fpg_constants:rsclose
 msgid "Close"
@@ -450,7 +450,7 @@ msgstr "Dimanche"
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr ""
+msgstr "Texte à insérer"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
