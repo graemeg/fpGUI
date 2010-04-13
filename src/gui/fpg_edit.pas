@@ -1394,7 +1394,7 @@ begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
 
-  if (FVisibleText = '') and not Focused then
+  if Enabled and (FVisibleText = '') and (not Focused) then
   begin
     Canvas.SetTextColor(clShadow1);
     fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
