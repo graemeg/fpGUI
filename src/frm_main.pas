@@ -31,10 +31,21 @@ type
     tsEditor2: TfpgTabSheet;
     Memo1: TfpgMemo;
     lblStatus: TfpgLabel;
+    mnuFile: TfpgPopupMenu;
+    mnuEdit: TfpgPopupMenu;
+    mnuSearch: TfpgPopupMenu;
+    mnuView: TfpgPopupMenu;
+    mnuProject: TfpgPopupMenu;
+    mnuRun: TfpgPopupMenu;
+    mnuTools: TfpgPopupMenu;
+    mnuSettings: TfpgPopupMenu;
+    mnuHelp: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
     procedure   FormShow(Sender: TObject);
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenFileClicked(Sender: TObject);
+    procedure   miAboutFPGuiClicked(Sender: TObject);
+    procedure   miAboutIDE(Sender: TObject);
     procedure   UpdateStatus(const AText: TfpgString);
   public
     constructor Create(AOwner: TComponent); override;
@@ -76,6 +87,16 @@ begin
   end;
 end;
 
+procedure TMainForm.miAboutFPGuiClicked(Sender: TObject);
+begin
+  TfpgMessageDialog.AboutFPGui;
+end;
+
+procedure TMainForm.miAboutIDE(Sender: TObject);
+begin
+  TfpgMessageDialog.Information('About fpGUI IDE', 'Created by Graeme Geldenhuys');
+end;
+
 procedure TMainForm.UpdateStatus(const AText: TfpgString);
 begin
   lblStatus.Text := AText;
@@ -109,7 +130,7 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(311, 121, 650, 358);
+  SetPosition(310, 206, 650, 358);
   WindowTitle := 'fpGUI IDE - %s';
   Hint := '';
   WindowPosition := wpOneThirdDown;
@@ -118,7 +139,7 @@ begin
   with pnlMenu do
   begin
     Name := 'pnlMenu';
-    SetPosition(0, 0, 648, 70);
+    SetPosition(0, 0, 648, 54);
     Hint := '';
     Shape := bsSpacer;
   end;
@@ -138,6 +159,7 @@ begin
     SetPosition(0, 24, 648, 28);
     Anchors := [anLeft,anRight,anTop];
     Hint := '';
+    Shape := bsSpacer;
   end;
 
   btnQuit := TfpgButton.Create(Bevel1);
@@ -208,7 +230,7 @@ begin
   with pnlClientArea do
   begin
     Name := 'pnlClientArea';
-    SetPosition(0, 53, 648, 280);
+    SetPosition(0, 57, 648, 248);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Hint := '';
     Shape := bsSpacer;
@@ -218,7 +240,7 @@ begin
   with pnlWindow do
   begin
     Name := 'pnlWindow';
-    SetPosition(200, 192, 212, 80);
+    SetPosition(192, 156, 212, 84);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'WindowPanel';
@@ -228,14 +250,14 @@ begin
   with Splitter1 do
   begin
     Name := 'Splitter1';
-    SetPosition(128, 172, 352, 8);
+    SetPosition(152, 140, 352, 8);
   end;
 
   pnlTool := TfpgPanel.Create(pnlClientArea);
   with pnlTool do
   begin
     Name := 'pnlTool';
-    SetPosition(28, 24, 112, 136);
+    SetPosition(28, 4, 112, 136);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'ToolPanel';
@@ -252,17 +274,18 @@ begin
   with pcEditor do
   begin
     Name := 'pcEditor';
-    SetPosition(244, 28, 324, 120);
+    SetPosition(208, 8, 324, 120);
     ActivePageIndex := 0;
     Hint := '';
     TabOrder := 5;
+    TabPosition := tpRight;
   end;
 
   tsEditor1 := TfpgTabSheet.Create(pcEditor);
   with tsEditor1 do
   begin
     Name := 'tsEditor1';
-    SetPosition(3, 24, 318, 93);
+    SetPosition(3, 3, 267, 114);
     Text := 'Editor1';
   end;
 
@@ -270,7 +293,7 @@ begin
   with tsEditor2 do
   begin
     Name := 'tsEditor2';
-    SetPosition(3, 24, 318, 93);
+    SetPosition(3, 3, 318, 114);
     Text := 'Editor2';
   end;
 
@@ -296,8 +319,122 @@ begin
     Text := '';
   end;
 
+  mnuFile := TfpgPopupMenu.Create(self);
+  with mnuFile do
+  begin
+    Name := 'mnuFile';
+    SetPosition(476, 56, 172, 20);
+    AddMenuItem('New...', '', nil);
+    AddMenuItem('Open...', '', nil);
+    AddMenuItem('Open Recent', '', nil);
+    AddMenuItem('Save...', '', nil);
+    AddMenuItem('Save As...', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Quit', '', @btnQuitClicked);
+  end;
+
+  mnuEdit := TfpgPopupMenu.Create(self);
+  with mnuEdit do
+  begin
+    Name := 'mnuEdit';
+    SetPosition(476, 24, 172, 20);
+    AddMenuItem('Cut', '', nil);
+    AddMenuItem('Copy', '', nil);
+    AddMenuItem('Paste', '', nil);
+  end;
+
+  mnuSearch := TfpgPopupMenu.Create(self);
+  with mnuSearch do
+  begin
+    Name := 'mnuSearch';
+    SetPosition(476, 98, 172, 20);
+    AddMenuItem('Find...', '', nil);
+    AddMenuItem('Find in Files...', '', nil);
+    AddMenuItem('Procedure List...', '', nil);
+  end;
+
+  mnuView := TfpgPopupMenu.Create(self);
+  with mnuView do
+  begin
+    Name := 'mnuView';
+    SetPosition(476, 119, 172, 20);
+    AddMenuItem('Todo List...', '', nil);
+  end;
+
+  mnuProject := TfpgPopupMenu.Create(self);
+  with mnuProject do
+  begin
+    Name := 'mnuProject';
+    SetPosition(476, 140, 172, 20);
+    AddMenuItem('Options...', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('New (empty)...', '', nil);
+    AddMenuItem('New from Template...', '', nil);
+    AddMenuItem('Open...', '', nil);
+    AddMenuItem('Open Recent', '', nil);
+    AddMenuItem('Save...', '', nil);
+    AddMenuItem('Save As...', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('View Source', '', nil);
+    AddMenuItem('Add editor file to Project', '', nil);
+  end;
+
+  mnuRun := TfpgPopupMenu.Create(self);
+  with mnuRun do
+  begin
+    Name := 'mnuRun';
+    SetPosition(476, 161, 172, 20);
+    AddMenuItem('Make', 'Ctrl+F9', nil);
+    AddMenuItem('Build All', 'Ctrl+Shift+F9', nil);
+    AddMenuItem('Make 1', 'Ctrl+Alt+1', nil);
+    AddMenuItem('Make 2', 'Ctrl+Alt+2', nil);
+    AddMenuItem('Make 3', 'Ctrl+Alt+3', nil);
+    AddMenuItem('Make 4', 'Ctrl+Alt+4', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Run', 'F9', nil);
+    AddMenuItem('Run Parameters...', '', nil);
+  end;
+
+  mnuTools := TfpgPopupMenu.Create(self);
+  with mnuTools do
+  begin
+    Name := 'mnuTools';
+    SetPosition(476, 182, 172, 20);
+    AddMenuItem('fpGUI UI Designer...', '', nil);
+    AddMenuItem('fpGUI DocView...', '', nil);
+  end;
+
+  mnuSettings := TfpgPopupMenu.Create(self);
+  with mnuSettings do
+  begin
+    Name := 'mnuSettings';
+    SetPosition(476, 203, 172, 20);
+    AddMenuItem('Configure IDE...', '', nil);
+  end;
+
+  mnuHelp := TfpgPopupMenu.Create(self);
+  with mnuHelp do
+  begin
+    Name := 'mnuHelp';
+    SetPosition(476, 224, 172, 20);
+    AddMenuItem('Contents...', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('About fpGUI Toolkit...', '', @miAboutFPGuiClicked);
+    AddMenuItem('About fpGUI IDE...', '', @miAboutIDE);
+  end;
+
   {@VFD_BODY_END: MainForm}
   {%endregion}
+
+  mainmenu.AddMenuItem('&File', nil).SubMenu := mnuFile;
+  mainmenu.AddMenuItem('&Edit', nil).SubMenu := mnuEdit;
+  mainmenu.AddMenuItem('&Search', nil).SubMenu := mnuSearch;
+  mainmenu.AddMenuItem('&View', nil).SubMenu := mnuView;
+  mainmenu.AddMenuItem('&Project', nil).SubMenu := mnuProject;
+  mainmenu.AddMenuItem('&Run', nil).SubMenu := mnuRun;
+  mainmenu.AddMenuItem('&Tools', nil).SubMenu := mnuTools;
+  mainmenu.AddMenuItem('&Settings', nil).SubMenu := mnuSettings;
+  mainmenu.AddMenuItem('&Help', nil).SubMenu := mnuHelp;
 end;
 
 
