@@ -1158,6 +1158,20 @@ begin
   SetLength(FalseBoolStrs,1);
   TrueBoolStrs[0]   := rsTrue;
   FalseBoolStrs[0]  := rsFalse;
+
+  // Dialog box button captions
+  cMsgDlgBtnText[mbOK]        := rsOK;
+  cMsgDlgBtnText[mbCancel]    := rsCancel;
+  cMsgDlgBtnText[mbYes]       := rsYes;
+  cMsgDlgBtnText[mbNo]        := rsNo;
+  cMsgDlgBtnText[mbAbort]     := rsAbort;
+  cMsgDlgBtnText[mbRetry]     := rsRetry;
+  cMsgDlgBtnText[mbIgnore]    := rsIgnore;
+  cMsgDlgBtnText[mbAll]       := rsAll;
+  cMsgDlgBtnText[mbNoToAll]   := rsNoToAll;
+  cMsgDlgBtnText[mbYesToAll]  := rsYesToAll;
+  cMsgDlgBtnText[mbHelp]      := rsHelp;
+  cMsgDlgBtnText[mbClose]     := rsClose;
 end;
 
 procedure TfpgApplication.SetHintPause(const AValue: Integer);

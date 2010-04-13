@@ -429,7 +429,7 @@ begin
   writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
   HandleHide;
-  inherited;
+  inherited Destroy;
 end;
 
 procedure TfpgWidget.AfterConstruction;
