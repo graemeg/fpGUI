@@ -1223,6 +1223,7 @@ procedure TfpgBaseEdit.SetReadOnly(const AValue: Boolean);
 begin
   if FReadOnly = AValue then exit;
   FReadOnly := AValue;
+  RePaint;
 end;
 
 function TfpgBaseEdit.GetMarginAdjustment: integer;
