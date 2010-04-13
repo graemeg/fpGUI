@@ -101,7 +101,10 @@ begin
     pcEditor.ActivePage.Text := fpgExtractFileName(s);
     n := tvProject.RootNode.FindSubNode('Units', True);
     if Assigned(n) then
-      n.AppendText(s);
+    begin
+      n := n.AppendText(pcEditor.ActivePage.Text);
+      tvProject.Selection := n;
+    end;
   end;
 end;
 
