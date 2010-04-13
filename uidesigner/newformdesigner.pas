@@ -839,6 +839,8 @@ begin
     NameDrag := False
   else
     inherited;
+  if (Editor <> nil) and (Editor.Visible) then
+    Editor.SetFocus;
 end;
 
 procedure TwgPropertyList.HandleMouseScroll(x, y: integer;

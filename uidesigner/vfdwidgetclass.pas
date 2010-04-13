@@ -47,6 +47,7 @@ type
     procedure   CreateLayout; virtual;
     procedure   LoadValue(wg: TfpgWidget); virtual;
     procedure   StoreValue(wg: TfpgWidget); virtual;
+    procedure   SetFocus; virtual;
   end;
 
 
@@ -237,6 +238,11 @@ begin
   // the property must be published !
   // PPropInfo := GetPropInfo(object, 'propname');
   // if PPropInfo^.PropType^.name =
+end;
+
+procedure TVFDPropertyEditor.SetFocus;
+begin
+  // do nothing
 end;
 
 end.

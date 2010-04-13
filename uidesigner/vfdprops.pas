@@ -115,6 +115,7 @@ type
     procedure StoreStrValue(wg: TfpgWidget);
     procedure LoadFloatValue(wg: TfpgWidget);
     procedure StoreFloatValue(wg: TfpgWidget);
+    procedure SetFocus; override;
   end;
 
 
@@ -124,6 +125,7 @@ type
     procedure CreateLayout; override;
     procedure LoadValue(wg: TfpgWidget); override;
     procedure StoreValue(wg: TfpgWidget); override;
+    procedure SetFocus; override;
   end;
   
   
@@ -396,6 +398,11 @@ begin
   except
     // error
   end;
+end;
+
+procedure TGeneralPropertyEditor.SetFocus;
+begin
+  Edit.SetFocus;
 end;
 
 procedure TGeneralPropertyEditor.StoreValue(wg: TfpgWidget);
@@ -690,6 +697,11 @@ end;
 procedure TChoicePropertyEditor.StoreValue(wg: TfpgWidget);
 begin
   SetEnumProp(wg, prop.Name, chl.Text);
+end;
+
+procedure TChoicePropertyEditor.SetFocus;
+begin
+  chl.SetFocus;
 end;
 
 { TBooleanPropertyEditor }
