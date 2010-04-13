@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
-  fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label;
+  fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
+  fpg_tree;
 
 type
 
@@ -22,9 +23,9 @@ type
     btnSaveAll: TfpgButton;
     pnlStatusBar: TfpgBevel;
     pnlClientArea: TfpgBevel;
-    pnlWindow: TfpgPanel;
+    pnlWindow: TfpgPageControl;
     Splitter1: TfpgSplitter;
-    pnlTool: TfpgPanel;
+    pnlTool: TfpgPageControl;
     Splitter2: TfpgSplitter;
     pcEditor: TfpgPageControl;
     tsEditor1: TfpgTabSheet;
@@ -40,6 +41,15 @@ type
     mnuTools: TfpgPopupMenu;
     mnuSettings: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
+    tsMessages: TfpgTabSheet;
+    tsScribble: TfpgTabSheet;
+    tsTerminal: TfpgTabSheet;
+    tsProject: TfpgTabSheet;
+    tsFiles: TfpgTabSheet;
+    tvProject: TfpgTreeView;
+    grdFiles: TfpgFileGrid;
+    grdMessages: TfpgStringGrid;
+    memScribble: TfpgMemo;
     {@VFD_HEAD_END: MainForm}
     procedure   FormShow(Sender: TObject);
     procedure   btnQuitClicked(Sender: TObject);
@@ -47,6 +57,8 @@ type
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
     procedure   UpdateStatus(const AText: TfpgString);
+    procedure   SetupProjectTree;
+    procedure   SetupFilesGrid;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -58,6 +70,7 @@ implementation
 
 uses
   fpg_dialogs
+  ,fpg_utils
   ;
 
 
@@ -76,6 +89,7 @@ end;
 procedure TMainForm.btnOpenFileClicked(Sender: TObject);
 var
   s: TfpgString;
+  n: TfpgTreeNode;
 begin
   s := SelectFileDialog(sfdOpen, Format(cFileFilterTemplate, ['Source Files', cSourceFiles, cSourceFiles]));
   if s <> '' then
@@ -84,6 +98,10 @@ begin
     Memo1.Lines.LoadFromFile(s);
     Memo1.Lines.EndUpdate;
     UpdateStatus(s);
+    pcEditor.ActivePage.Text := fpgExtractFileName(s);
+    n := tvProject.RootNode.FindSubNode('Units', True);
+    if Assigned(n) then
+      n.AppendText(s);
   end;
 end;
 
@@ -102,6 +120,24 @@ begin
   lblStatus.Text := AText;
 end;
 
+procedure TMainForm.SetupProjectTree;
+begin
+  tvProject.RootNode.AppendText('Units');
+  tvProject.RootNode.AppendText('Images');
+  tvProject.RootNode.AppendText('Help Files');
+  tvProject.RootNode.AppendText('Text');
+  tvProject.RootNode.AppendText('Other');
+end;
+
+procedure TMainForm.SetupFilesGrid;
+begin
+  grdFiles.FileList.FileMask := AllFilesMask;
+  grdFiles.FileList.ShowHidden := False;
+  grdFiles.FileList.ReadDirectory;
+  grdFiles.FileList.Sort(soFileName);
+  grdFiles.Invalidate;
+end;
+
 procedure TMainForm.FormShow(Sender: TObject);
 begin
   // outer containers
@@ -117,6 +153,9 @@ begin
   pcEditor.Align := alClient;
 
   pnlClientArea.Realign;
+
+  SetupProjectTree;
+  SetupFilesGrid;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -236,14 +275,14 @@ begin
     Shape := bsSpacer;
   end;
 
-  pnlWindow := TfpgPanel.Create(pnlClientArea);
+  pnlWindow := TfpgPageControl.Create(pnlClientArea);
   with pnlWindow do
   begin
     Name := 'pnlWindow';
-    SetPosition(192, 156, 212, 84);
-    FontDesc := '#Label1';
+    SetPosition(192, 156, 264, 84);
+    ActivePageIndex := 0;
     Hint := '';
-    Text := 'WindowPanel';
+    TabOrder := 1;
   end;
 
   Splitter1 := TfpgSplitter.Create(pnlClientArea);
@@ -253,14 +292,14 @@ begin
     SetPosition(152, 140, 352, 8);
   end;
 
-  pnlTool := TfpgPanel.Create(pnlClientArea);
+  pnlTool := TfpgPageControl.Create(pnlClientArea);
   with pnlTool do
   begin
     Name := 'pnlTool';
-    SetPosition(28, 4, 112, 136);
-    FontDesc := '#Label1';
+    SetPosition(12, 4, 140, 136);
+    ActivePageIndex := 0;
     Hint := '';
-    Text := 'ToolPanel';
+    TabOrder := 3;
   end;
 
   Splitter2 := TfpgSplitter.Create(pnlClientArea);
@@ -303,7 +342,7 @@ begin
     Name := 'Memo1';
     SetPosition(64, 16, 120, 52);
     Hint := '';
-    FontDesc := '#Edit1';
+    FontDesc := '#Edit2';
     TabOrder := 1;
     Align := alClient;
   end;
@@ -421,6 +460,94 @@ begin
     AddMenuItem('-', '', nil);
     AddMenuItem('About fpGUI Toolkit...', '', @miAboutFPGuiClicked);
     AddMenuItem('About fpGUI IDE...', '', @miAboutIDE);
+  end;
+
+  tsMessages := TfpgTabSheet.Create(pnlWindow);
+  with tsMessages do
+  begin
+    Name := 'tsMessages';
+    SetPosition(3, 24, 258, 57);
+    Text := 'Messages';
+  end;
+
+  tsScribble := TfpgTabSheet.Create(pnlWindow);
+  with tsScribble do
+  begin
+    Name := 'tsScribble';
+    SetPosition(3, 24, 258, 57);
+    Text := 'Scribble';
+  end;
+
+  tsTerminal := TfpgTabSheet.Create(pnlWindow);
+  with tsTerminal do
+  begin
+    Name := 'tsTerminal';
+    SetPosition(3, 24, 258, 57);
+    Text := 'Terminal';
+  end;
+
+  tsProject := TfpgTabSheet.Create(pnlTool);
+  with tsProject do
+  begin
+    Name := 'tsProject';
+    SetPosition(3, 24, 134, 109);
+    Text := 'Project';
+  end;
+
+  tsFiles := TfpgTabSheet.Create(pnlTool);
+  with tsFiles do
+  begin
+    Name := 'tsFiles';
+    SetPosition(3, 24, 134, 109);
+    Text := 'Files';
+  end;
+
+  tvProject := TfpgTreeView.Create(tsProject);
+  with tvProject do
+  begin
+    Name := 'tvProject';
+    SetPosition(1, 1, 132, 107);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 1;
+  end;
+
+  grdFiles := TfpgFileGrid.Create(tsFiles);
+  with grdFiles do
+  begin
+    Name := 'grdFiles';
+    SetPosition(1, 1, 131, 106);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+  end;
+
+  grdMessages := TfpgStringGrid.Create(tsMessages);
+  with grdMessages do
+  begin
+    Name := 'grdMessages';
+    SetPosition(0, 4, 258, 52);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    AddColumn('New', 258, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    Hint := '';
+    RowCount := 3;
+    RowSelect := True;
+    ShowHeader := False;
+    TabOrder := 1;
+  end;
+
+  memScribble := TfpgMemo.Create(tsScribble);
+  with memScribble do
+  begin
+    Name := 'memScribble';
+    SetPosition(0, 4, 257, 52);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    Hint := '';
+    Lines.Add('Make notes, use it as a clipboard');
+    Lines.Add('or type whatever you want...');
+    FontDesc := '#Edit2';
+    TabOrder := 1;
   end;
 
   {@VFD_BODY_END: MainForm}
