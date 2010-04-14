@@ -22,7 +22,6 @@ unit fpg_tab;
 {
   TODO:
     * Tab Styles (tab, button, flat button, angled)
-    * Tab Position (top, bottom, left, right)
     * Better keyboard support
     * Focus rectangle drawn on tabs itself
     * FindNextPage() must be implemented
@@ -69,6 +68,7 @@ type
     property    TabVisible: boolean read FTabVisible write FTabVisible;
   published
     property    Text: string read GetText write SetText;
+    property    OnPaint;
   end;
 
 
@@ -363,8 +363,8 @@ end;
 
 function TfpgPageControl.MaxButtonWidth: integer;
 var
-   t: TfpgTabSheet;
-   i: integer;
+  t: TfpgTabSheet;
+  i: integer;
 begin
   Result := 0;
   if FixedTabWidth > 0 then
@@ -531,80 +531,81 @@ begin
 
   Canvas.SetColor(clWindowBackground);
   case TabPosition of
-  tpTop:
-    begin  
-      Canvas.FillRectangle(r.Left, r.Top, r.Width, r.Height-2);     // fill tab background
-      Canvas.SetColor(clHilite2);
-      Canvas.DrawLine(r.Left, r.Bottom-2 , r.Left, r.Top+2);        // left edge
-      Canvas.DrawLine(r.Left, r.Top+2 , r.Left+2, r.Top);           // left rounder edge
-      Canvas.DrawLine(r.Left+2,  r.Top, r.Right-1, r.Top);          // top edge
-      Canvas.SetColor(clShadow1);
-      Canvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right inner edge
-      Canvas.SetColor(clShadow2);
-      Canvas.DrawLine(r.Right-1, r.Top+1, r.Right, r.Top+2);        // right rounded edge (1px)
-      Canvas.DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-1);       // right outer edge
-    end;
-  tpBottom:
-    begin
-      Canvas.FillRectangle(r.Left, r.Top, r.Width-2, r.Height-2);   // fill tab background
-      Canvas.SetColor(clHilite2);
-      Canvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom-1);           // left edge
-      Canvas.SetColor(clShadow2);
-      Canvas.DrawLine(r.Left+2,  r.Bottom, r.Right-1, r.Bottom);    // bottom outer edge
-      Canvas.SetColor(clShadow1);
-      Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right-1, r.Top+1);   // right inner edge
-      Canvas.DrawLine(r.Left+1,  r.Bottom-1, r.Right-1, r.Bottom-1);// bottom inner edge
-      Canvas.SetColor(clShadow2);
-      Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right, r.Bottom-2);  // right rounded edge (1px)
-      Canvas.DrawLine(r.Right, r.Bottom-2, r.Right, r.Top+1);       // right outer edge
-    end;
-
-  tpLeft:
-    begin
-      if Mode = 2 then
+    tpTop:
       begin
-        r.Width := r.Width - 1;
-        r.Height:=r.Height+2;
+        Canvas.FillRectangle(r.Left, r.Top, r.Width, r.Height-2);     // fill tab background
+        Canvas.SetColor(clHilite2);
+        Canvas.DrawLine(r.Left, r.Bottom-2 , r.Left, r.Top+2);        // left edge
+        Canvas.DrawLine(r.Left, r.Top+2 , r.Left+2, r.Top);           // left rounder edge
+        Canvas.DrawLine(r.Left+2,  r.Top, r.Right-1, r.Top);          // top edge
+        Canvas.SetColor(clShadow1);
+        Canvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right inner edge
+        Canvas.SetColor(clShadow2);
+        Canvas.DrawLine(r.Right-1, r.Top+1, r.Right, r.Top+2);        // right rounded edge (1px)
+        Canvas.DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-1);       // right outer edge
       end;
-      with Canvas do
-      begin
-        FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
-        SetColor(clHilite2);
-        DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
-        DrawLine(r.Left, r.Top+2, r.Left+2, r.Top);
-        DrawLine(r.Left+2, r.Top, r.Right-1, r.Top);
-        SetColor(clShadow1);
-        DrawLine(r.Left+2, r.Bottom-1, r.Right-1, r.Bottom-1);
-        SetColor(clShadow2);
-        DrawLine(r.Left+1, r.Bottom-1, r.Left+3, r.Bottom);
-        DrawLine(r.Left+2, r.Bottom, r.Right, r.Bottom);
-      end;
-    end;
 
-     tpRight:
-       begin
-         if Mode = 2 then
-           begin
-             r.Width:= r.Width + 1;
-             r.Height:=r.Height+2;
-           end;
-         With Canvas do
-           begin
-             FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
-             SetColor(clHilite2);
-             DrawLine(r.Left+1, r.Top, r.Right-2, r.Top);
-             SetColor(clShadow1);
-             DrawLine(r.Right-2,r.Top,r.Right-1,r.Top+1);
-             DrawLine(r.Left+2, r.Bottom-1, r.Right-2, r.Bottom-1);
-             DrawLine(r.Right-3, r.Bottom-1, r.Right-1, r.Bottom-3);
-             DrawLine(r.Right-1, r.Bottom-3, r.Right-1, r.Top);
-             SetColor(clShadow2);
-             DrawLine(r.Left+2,r.Bottom,r.Right-3, r.Bottom);
-             DrawLine(r.Right-3, r.Bottom, r.Right, r.Bottom-3);
-             DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-2);
-           end;
-       end;
-  end; 
+    tpBottom:
+      begin
+        Canvas.FillRectangle(r.Left, r.Top, r.Width-2, r.Height-2);   // fill tab background
+        Canvas.SetColor(clHilite2);
+        Canvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom-1);           // left edge
+        Canvas.SetColor(clShadow2);
+        Canvas.DrawLine(r.Left+2,  r.Bottom, r.Right-1, r.Bottom);    // bottom outer edge
+        Canvas.SetColor(clShadow1);
+        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right-1, r.Top+1);   // right inner edge
+        Canvas.DrawLine(r.Left+1,  r.Bottom-1, r.Right-1, r.Bottom-1);// bottom inner edge
+        Canvas.SetColor(clShadow2);
+        Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Right, r.Bottom-2);  // right rounded edge (1px)
+        Canvas.DrawLine(r.Right, r.Bottom-2, r.Right, r.Top+1);       // right outer edge
+      end;
+
+    tpLeft:
+      begin
+        if Mode = 2 then
+        begin
+          r.Width  := r.Width - 1;
+          r.Height := r.Height + 2;
+        end;
+        with Canvas do
+        begin
+          FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
+          SetColor(clHilite2);
+          DrawLine(r.Left, r.Bottom-2, r.Left, r.Top+2);
+          DrawLine(r.Left, r.Top+2, r.Left+2, r.Top);
+          DrawLine(r.Left+2, r.Top, r.Right-1, r.Top);
+          SetColor(clShadow1);
+          DrawLine(r.Left+2, r.Bottom-1, r.Right-1, r.Bottom-1);
+          SetColor(clShadow2);
+          DrawLine(r.Left+1, r.Bottom-1, r.Left+3, r.Bottom);
+          DrawLine(r.Left+2, r.Bottom, r.Right, r.Bottom);
+        end;
+      end;
+
+    tpRight:
+      begin
+        if Mode = 2 then
+        begin
+          r.Width  := r.Width + 1;
+          r.Height := r.Height + 2;
+        end;
+        with Canvas do
+        begin
+          FillRectangle(r.Left, r.Top, r.Width, r.Height-2);
+          SetColor(clHilite2);
+          DrawLine(r.Left+1, r.Top, r.Right-2, r.Top);
+          SetColor(clShadow1);
+          DrawLine(r.Right-2,r.Top,r.Right-1,r.Top+1);
+          DrawLine(r.Left+2, r.Bottom-1, r.Right-2, r.Bottom-1);
+          DrawLine(r.Right-3, r.Bottom-1, r.Right-1, r.Bottom-3);
+          DrawLine(r.Right-1, r.Bottom-3, r.Right-1, r.Top);
+          SetColor(clShadow2);
+          DrawLine(r.Left+2,r.Bottom,r.Right-3, r.Bottom);
+          DrawLine(r.Right-3, r.Bottom, r.Right, r.Bottom-3);
+          DrawLine(r.Right, r.Top+2, r.Right, r.Bottom-2);
+        end;
+      end;
+  end;  { case }
 end;
 
 procedure TfpgPageControl.OrderSheets;
@@ -840,7 +841,47 @@ begin
 
     tpLeft:
       begin
-        //
+        lTxtFlags += [txtVCenter, txtLeft];
+        lp := 0;
+        TabW := MaxButtonWidth;
+        r2.SetRect(2, 2, TabW, 21);
+        while h <> nil do
+        begin
+          if h <> ActivePage then
+          begin
+            toffset := 4;
+            h.Visible := False;
+          end
+          else
+          begin
+            toffset := 2;
+            h.Visible := True;
+            { set tab content page (client area) size }
+            h.SetPosition(FMargin+2+TabW, FMargin+2, Width - ((FMargin+2)*2) - TabW, Height - ((FMargin+2)*2));
+          end;
+          // paint tab button
+          r3 := DrawTab(r2, h = ActivePage);
+
+          // paint text on non-active tabs
+          if h <> ActivePage then
+            Canvas.DrawText(r2.left+toffset, r2.Top, r2.Width, r2.Height, GetTabText(h.Text), lTxtFlags);
+          r2.Top += r2.Height;
+          lp := r2.Top;
+          if h <> TfpgTabSheet(FPages.Last) then
+            h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
+          else
+            h := nil;
+        end;
+        // Draw Page Control body rectangle (client area)
+        r2.Left    := TabW;
+        r2.Top     := 0;
+        r2.Width   := Width - TabW;
+        r2.Height  := Height;
+        Canvas.DrawButtonFace(r2, []);
+
+        // Draw text of ActivePage, because we didn't before.
+        DrawTab(r3, false, 2);
+        Canvas.DrawText(r3.left+toffset, r3.Top, r3.Width, r3.Height, ActivePage.Text, lTxtFlags);
       end;
   end; { case }
 
@@ -880,8 +921,8 @@ var
   h: TfpgTabSheet;
   lp: integer;  // left position
   bw: integer;  // button width
-  topy: integer;      // topy & bottomy is the y-range to detect clicks
-  bottomy: integer;
+  bh: integer;  // button height
+  p1, p2: integer;    // tab boundaries for mouse click to take affect
 begin
 //  debugln('>> TfpgPageControl.HandleLMouseUp');
   h := TfpgTabSheet(FPages.First);
@@ -895,36 +936,73 @@ begin
   case TabPosition of
     tpTop:
       begin
-        topy  := FMargin;
-        bottomy   := ButtonHeight;
+        p1 := FMargin;
+        p2 := ButtonHeight;
       end;
+
     tpBottom:
       begin
-        topy  := Height - FMargin - Buttonheight;
-        bottomy   := Height - FMargin;
+        p1 := Height - FMargin - Buttonheight;
+        p2 := Height - FMargin;
+      end;
+
+    tpRight:
+      begin
+        p1 := Width - MaxButtonWidth;
+        p2 := Width;
+      end;
+
+    tpLeft:
+      begin
+        p1 := FMargin;
+        p2 := FMargin + MaxButtonWidth;
       end;
   end;
-  
-  if (y > topy) and (y < bottomy) then
+
+  if TabPosition in [tpTop, tpBottom] then
   begin
-     while h <> nil do
-     begin
-        bw := ButtonWidth(h.Text);  // initialize button width
-        if (x > lp) and (x < lp + bw) then
-        begin
-           if h <> ActivePage then
-           begin
+    if (y > p1) and (y < p2) then
+    begin
+       while h <> nil do
+       begin
+          bw := ButtonWidth(h.Text);  // initialize button width
+          if (x > lp) and (x < lp + bw) then
+          begin
+            if h <> ActivePage then
               ActivePage := h;
-           end;
-           exit;
+            exit;
+          end;  { if }
+          lp := lp + bw;
+          if h <> TfpgTabSheet(FPages.Last) then
+            h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
+          else
+            h := nil;
+       end;  { while }
+    end;  { if }
+  end;
+
+  if TabPosition in [tpLeft, tpRight] then
+  begin
+    if (x > p1) and (x < p2) then
+    begin
+      while h <> nil do
+      begin
+        bh := ButtonHeight;  // initialize button height
+        if (y > lp) and (y < lp + bh) then
+        begin
+          if h <> ActivePage then
+            ActivePage := h;
+          exit;
         end;  { if }
-        lp := lp + bw;
+        lp := lp + bh;
         if h <> TfpgTabSheet(FPages.Last) then
-           h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
+          h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
         else
-           h := nil;
-     end;  { while }
-  end;  { if }
+          h := nil;
+      end;  { while }
+    end;  { if }
+  end;
+
   inherited HandleLMouseUp(x, y, shiftstate);
 end;
 
