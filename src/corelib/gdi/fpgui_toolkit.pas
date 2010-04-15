@@ -7,7 +7,7 @@ unit fpgui_toolkit;
 interface
 
 uses
-  fpg_base, fpg_main, fpg_cmdlineparams, fpg_command_intf, fpg_constants, 
+    fpg_base, fpg_main, fpg_cmdlineparams, fpg_command_intf, fpg_constants, 
   fpg_extinterpolation, fpg_imagelist, fpg_imgfmt_bmp, fpg_pofiles, 
   fpg_popupwindow, fpg_stdimages, fpg_stringhashlist, fpg_translations, 
   fpg_stringutils, fpg_utils, fpg_widget, fpg_wuline, fpg_animation, 
@@ -17,7 +17,7 @@ uses
   fpg_menu, fpg_mru, fpg_panel, fpg_popupcalendar, fpg_progressbar, 
   fpg_radiobutton, fpg_scrollbar, fpg_style, fpg_tab, fpg_trackbar, fpg_tree, 
   fpgui_db, fpg_gdi, fpg_impl, fpg_splitter, fpg_hint, fpg_spinedit, 
-  fpg_extgraphics, fpg_ColorMapping, fpg_ColorWheel, fpg_interface;
+  fpg_extgraphics, fpg_ColorMapping, fpg_ColorWheel, fpg_interface, fpg_editbtn;
 
 implementation
 

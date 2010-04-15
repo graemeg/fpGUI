@@ -31,7 +31,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Minor="7"/>
-    <Files Count="74">
+    <Files Count="75">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -328,6 +328,10 @@
         <Filename Value="fpg_interface.pas"/>
         <UnitName Value="fpg_interface"/>
       </Item74>
+      <Item75>
+        <Filename Value="..\..\gui\fpg_editbtn.pas"/>
+        <UnitName Value="fpg_editbtn"/>
+      </Item75>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>
     <RequiredPkgs Count="1">
