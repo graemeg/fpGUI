@@ -210,6 +210,11 @@ begin
       sizeof(stdimg_folder_up_16), 0,0);
 
   fpgImages.AddMaskedBMP(
+            'stdimg.folderfile',
+            @stdimg_folder_open_file_16,
+      sizeof(stdimg_folder_open_file_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
             'stdimg.open',
             @stdimg_folder_open_16,
       sizeof(stdimg_folder_open_16), 0,0);
