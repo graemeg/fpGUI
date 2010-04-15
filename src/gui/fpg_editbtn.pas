@@ -58,12 +58,31 @@ type
     property Filter: TfpgString read FFilter write SetFilter;
     property TabOrder;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
-    //property OnEnter;
-    //property OnExit;
-    //property OnKeyPress;
-    //property OnMouseEnter;
-    //property OnMouseExit;
-    //property OnPaint;
+  end;
+
+
+  TfpgDirectoryEdit = class(TfpgPanel)
+  private
+    FEdit: TfpgEdit;
+    FButton: TfpgButton;
+    FOnButtonClick: TNotifyEvent;
+    FRootDirectory: TfpgString;
+    function GetDirectory: TfpgString;
+    procedure btnClick(Sender: TObject);
+    function GetExtraHint: TfpgString;
+    procedure SetDirectory(const AValue: TfpgString);
+    procedure SetExtraHint(const AValue: TfpgString);
+  protected
+    procedure HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure SetPosition(aleft, atop, awidth, aheight: TfpgCoord);override;
+  published
+    property Directory: TfpgString read GetDirectory write SetDirectory;
+    property ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
+    property RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
+    property TabOrder;
+    property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   end;
 
 
@@ -75,12 +94,16 @@ uses
   ,fpg_utils
   ;
 
+
+{ TfpgFileNameEdit }
+
 constructor TfpgFileNameEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth              := 140;
-  FHeight             := 24;
-  FFilter             := '';
+  Text            := '';
+  FWidth          := 140;
+  FHeight         := 24;
+  FFilter         := '';
 
   FEdit := TfpgEdit.Create(self);
   with FEdit do
@@ -98,7 +121,7 @@ begin
     Text := '';
     FontDesc := '#Label1';
     ImageMargin := -1;
-    ImageName := 'stdimg.folderopen';
+    ImageName := 'stdimg.folderfile';
     ImageSpacing := 0;
     TabOrder := 1;
     OnClick := @btnClick;
@@ -171,6 +194,109 @@ begin
 end;
 
 procedure TfpgFileNameEdit.HandlePaint;
+var
+  fnt: TfpgFont;
+begin
+  inherited HandlePaint;
+  // only so that it looks pretty in the UI Designer
+  if csDesigning in ComponentState then
+  begin
+    FEdit.Visible := False;
+    FButton.Visible := False;
+    Canvas.Clear(clBoxColor);
+    fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
+    fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
+    Canvas.TextColor := clText1;
+    fnt := fpgGetFont('DeJaVu-9:bold');
+    Canvas.SetFont(fnt);
+    Canvas.DrawText(Width - Height, 0, Height, Height, '···', [txtHCenter, txtVCenter]);
+    fnt.Free;
+  end;
+end;
+
+
+{ TfpgDirectoryEdit}
+
+constructor TfpgDirectoryEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Text            := '';
+  FWidth          := 140;
+  FHeight         := 24;
+
+  FEdit := TfpgEdit.Create(self);
+  with FEdit do
+  begin
+    Name := 'FEdit';
+    Text := '';
+    FontDesc := '#Edit1';
+    TabOrder := 0;
+  end;
+
+  FButton := TfpgButton.Create(self);
+  with FButton do
+  begin
+    Name := 'FButton';
+    Text := '';
+    FontDesc := '#Label1';
+    ImageMargin := -1;
+    ImageName := 'stdimg.folder';
+    ImageSpacing := 0;
+    TabOrder := 1;
+    OnClick := @btnClick;
+  end;
+end;
+
+procedure TfpgDirectoryEdit.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
+begin
+  inherited SetPosition(aleft, atop, awidth, aheight);
+  FEdit.SetPosition(0, 0, Width - Height, Height);
+  FButton.SetPosition(Width - Height, 0, Height, Height);
+end;
+
+function TfpgDirectoryEdit.GetDirectory: TfpgString;
+begin
+  Result := FEdit.Text;
+end;
+
+procedure TfpgDirectoryEdit.btnClick(Sender: TObject);
+var
+  dlg: TfpgSelectDirDialog;
+begin
+  dlg := TfpgSelectDirDialog.Create(nil);
+  try
+    if FRootDirectory <> '' then
+      dlg.RootDirectory := FRootDirectory;
+    dlg.SelectedDir := Directory;
+    if dlg.ShowModal = mrOK then
+    begin
+      FEdit.Text:= dlg.SelectedDir;
+    end;
+  finally
+    dlg.Free;
+  end;
+  if Assigned(OnButtonClick) then
+	  OnButtonClick(self);
+end;
+
+function TfpgDirectoryEdit.GetExtraHint: TfpgString;
+begin
+  Result := FEdit.ExtraHint;
+end;
+
+procedure TfpgDirectoryEdit.SetDirectory(const AValue: TfpgString);
+begin
+  FEdit.Text := AValue;
+end;
+
+procedure TfpgDirectoryEdit.SetExtraHint(const AValue: TfpgString);
+begin
+  FEdit.ExtraHint := AValue;
+end;
+
+procedure TfpgDirectoryEdit.HandlePaint;
 var
   fnt: TfpgFont;
 begin
