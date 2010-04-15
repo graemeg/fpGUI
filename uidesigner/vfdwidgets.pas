@@ -285,6 +285,10 @@ begin
     sizeof(stdimg_vfd_editfilename),
     0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'vfd.editdirectory', @stdimg_vfd_editdirectory,
+    sizeof(stdimg_vfd_editdirectory),
+    0, 0);
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -725,11 +729,21 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgFileNameEdit);
   wc.NameBase := 'FilenameEdit';
   wc.AddProperty('ExtraHint', TPropertyString, '');
-  wc.AddProperty('FileName', TPropertyString, 'Initial starting directory of the dialog');
+  wc.AddProperty('FileName', TPropertyString, 'Preset filename in edit component');
   wc.AddProperty('InitialDir', TPropertyString, 'Initial starting directory of the dialog');
   wc.AddProperty('Filter', TPropertyString, 'Filename filters used in the dialog');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.editfilename';
+  RegisterVFDWidget(wc);
+
+  // Directory Edit
+  wc          := TVFDWidgetClass.Create(TfpgDirectoryEdit);
+  wc.NameBase := 'DirectoryEdit';
+  wc.AddProperty('ExtraHint', TPropertyString, '');
+  wc.AddProperty('Directory', TPropertyString, 'Preset directory name in edit component');
+  wc.AddProperty('RootDirectory', TPropertyString, 'Initial starting directory of the dialog');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.editdirectory';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
