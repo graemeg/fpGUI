@@ -63,6 +63,7 @@ uses
   fpg_tab,
   fpg_popupcalendar,
   fpg_gauge,
+  fpg_editbtn,
   vfdpropeditgrid,
   vfdmain;
 
@@ -277,6 +278,11 @@ begin
   fpgImages.AddMaskedBMP(
     'vfd.combodatecheckedit', @stdimg_vfd_combodatecheckedit,
     sizeof(stdimg_vfd_combodatecheckedit),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.editfilename', @stdimg_vfd_editfilename,
+    sizeof(stdimg_vfd_editfilename),
     0, 0);
 
 end;
@@ -713,6 +719,16 @@ begin
   //wc.AddProperty('Value', TPropertyFloat, 'Initial value');
   //wc.WidgetIconName := 'vfd.editfloat';
   //RegisterVFDWidget(wc);
+
+  // Filename Edit
+  wc          := TVFDWidgetClass.Create(TfpgFileNameEdit);
+  wc.NameBase := 'FilenameEdit';
+  wc.AddProperty('FileName', TPropertyString, 'Initial starting directory of the dialog');
+  wc.AddProperty('InitialDir', TPropertyString, 'Initial starting directory of the dialog');
+  wc.AddProperty('Filter', TPropertyString, 'Filename filters used in the dialog');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.editfilename';
+  RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
   wc          := TVFDWidgetClass.Create(TOtherWidget);
