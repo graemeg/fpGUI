@@ -30,9 +30,11 @@ type
     Label3: TfpgLabel;
     Label4: TfpgLabel;
     Bevel2: TfpgBevel;
+    chkRightEdge: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure   ShowGutterChanged(Sender: TObject);
     procedure   ShowLineNumbers(Sender: TObject);
+    procedure   ShowRightEdge(Sender: TObject);
     procedure   AppExceptions(Sender: TObject; E: Exception);
     procedure   btnQuitClick(Sender: TObject);
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
@@ -40,7 +42,7 @@ type
     procedure   ChangeFontClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
-    procedure AfterCreate; override;
+    procedure   AfterCreate; override;
   end;
 
 
@@ -54,6 +56,11 @@ end;
 procedure TMainForm.ShowLineNumbers(Sender: TObject);
 begin
   TextEdit.GutterShowLineNumbers := chkLineNumbers.Checked;
+end;
+
+procedure TMainForm.ShowRightEdge(Sender: TObject);
+begin
+  TextEdit.RightEdge := chkRightEdge.Checked;
 end;
 
 procedure TMainForm.AppExceptions(Sender: TObject; E: Exception);
@@ -136,10 +143,8 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-
 //  HandleResize(Width, Height);
-
-  fpgApplication.OnException :=@AppExceptions;
+  fpgApplication.OnException := @AppExceptions;
 end;
 
 procedure TMainForm.AfterCreate;
@@ -148,6 +153,7 @@ begin
   Name := 'MainForm';
   SetPosition(319, 180, 594, 455);
   WindowTitle := 'TextEdit (new Memo) test';
+  Hint := '';
   WindowPosition := wpScreenCenter;
 
   memo := TfpgMemo.Create(self);
@@ -156,6 +162,7 @@ begin
     Name := 'memo';
     SetPosition(6, 172, 280, 235);
     Anchors := [anLeft,anTop,anBottom];
+    Hint := '';
     Lines.Add('Memo Test0');
     Lines.Add('Memo Test1');
     Lines.Add('Memo Test2');
@@ -219,6 +226,7 @@ begin
     SetPosition(20, 28, 120, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 4;
     Text := 'Left';
   end;
@@ -228,8 +236,10 @@ begin
   begin
     Name := 'rbRight';
     SetPosition(20, 52, 120, 20);
+    Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 5;
     Text := 'Right';
   end;
@@ -239,9 +249,9 @@ begin
   begin
     Name := 'rbBoth';
     SetPosition(20, 76, 120, 20);
-    Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 6;
     Text := 'Both';
   end;
@@ -262,20 +272,22 @@ begin
   with chkShowGutter do
   begin
     Name := 'chkShowGutter';
-    SetPosition(168, 28, 120, 20);
+    SetPosition(168, 28, 172, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 14;
     Text := 'Show Gutter';
-    OnChange :=@ShowGutterChanged;
+    OnChange := @ShowGutterChanged;
   end;
 
   chkLineNumbers := TfpgCheckBox.Create(self);
   with chkLineNumbers do
   begin
     Name := 'chkLineNumbers';
-    SetPosition(168, 52, 120, 20);
+    SetPosition(168, 52, 172, 20);
     Checked := True;
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 15;
     Text := 'Show Line Numbers';
     OnChange := @ShowLineNumbers;
@@ -332,7 +344,20 @@ begin
   begin
     Name := 'Bevel2';
     SetPosition(140, 8, 16, 148);
+    Hint := '';
     Shape := bsLeftLine;
+  end;
+
+  chkRightEdge := TfpgCheckBox.Create(self);
+  with chkRightEdge do
+  begin
+    Name := 'chkRightEdge';
+    SetPosition(168, 76, 172, 20);
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 16;
+    Text := 'Right Edge Line';
+    OnChange := @ShowRightEdge;
   end;
 
   {@VFD_BODY_END: MainForm}
