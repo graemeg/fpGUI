@@ -73,9 +73,12 @@ uses
 constructor TfpgFileNameEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FIsContainer := True;
-  FFocusable := False;
-  FFilter := '';
+  FWidth              := 140;
+  FHeight             := 24;
+  FIsContainer        := True;
+  FFocusable          := False;
+  FFilter             := '';
+
   FEdit := TfpgEdit.Create(self);
   with FEdit do
   begin
@@ -84,6 +87,7 @@ begin
     FontDesc := '#Edit1';
     TabOrder := 0;
   end;
+
   FButton := TfpgButton.Create(self);
   with FButton do
   begin
