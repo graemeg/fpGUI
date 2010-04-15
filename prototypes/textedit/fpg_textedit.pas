@@ -89,6 +89,8 @@ type
     FSelDrag: Boolean;
     FSelected, FSelMouseDwn: Boolean;
     FGutterPan: TfpgGutter;
+    FRightEdge: Boolean;
+    FRightEdgeCol: Integer;
     function    GetFontDesc: string;
     function    GetGutterShowLineNumbers: Boolean;
     function    GetGutterVisible: Boolean;
@@ -113,6 +115,8 @@ type
     procedure   UpdateGutterCoords;
     procedure   KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
     procedure   InitMemoObjects;
+    procedure SetRightEdge(const AValue: Boolean);
+    procedure SetRightEdgeCol(const AValue: Integer);
   protected
     { -- internal events -- }
     procedure   HandlePaint; override;
@@ -151,6 +155,8 @@ type
     property    ScrollPos_V: Integer read GetVScrollPos write SetVScrollPos;
     property    TopLine: Integer read FTopLine;
     property    VisibleLines: Integer read FVisLines;
+    property    RightEdge: Boolean read FRightEdge write SetRightEdge default False;
+    property    RightEdgeCol: Integer read FRightEdgeCol write SetRightEdgeCol default 80;
   end;
 
 
@@ -887,6 +893,30 @@ begin
   end;
 end;
 
+procedure TfpgBaseTextEdit.SetRightEdge(const AValue: Boolean);
+begin
+  if FRightEdge <> AValue then
+  begin
+    FRightEdge := AValue;
+    Invalidate;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.SetRightEdgeCol(const AValue: Integer);
+var
+  v: Integer;
+begin
+  v := AValue;
+  if v < 20 then v := 20;
+  if v > 160 then v := 160;
+  if FRightEdgeCol <> v then
+  begin
+    FRightEdgeCol := v;
+    if FRightEdge then
+      Invalidate;
+  end;
+end;
+
 procedure TfpgBaseTextEdit.HandlePaint;
 begin
 //  inherited HandlePaint;
@@ -1155,6 +1185,26 @@ begin
   Y := 0;
   cntVis := 1;
   GetSelBounds(StartNo, EndNo, StartOffs, EndOffs);
+
+  // Draw right edge line first, so text can draw over it.
+  if FRightEdge then
+  begin
+    if not FGutterPan.Visible then
+    begin
+      with Canvas do
+      begin
+        Canvas.Color := clShadow1; // FEnvironment.RightEdgeColor;
+        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW), GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW), GetClientRect.Height);
+      end;
+    end else
+      with Canvas do
+      begin
+        Canvas.Color := clShadow1; // FEnvironment.RightEdgeColor;
+        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, GetClientRect.Height);
+      end;
+  end;
+
+  // Draw lines of text
   for I := FTopLine to FTopLine + FVisLines do
   begin
     DrawLine(I, Y);
@@ -1163,27 +1213,6 @@ begin
     if cntVis > FVisLines then
       Break;  //==>
   end;
-  { todo: implement this }
-{
-  if FRightEdge then
-  begin
-    if not FGutterOpt.Visible then
-    begin
-      with Canvas do
-      begin
-        Pen.Color := FEnvironment.RightEdgeColor;
-        MoveTo((FRightEdgeCol * FChrW) - (HPos * FChrW), 0);
-        LineTo((FRightEdgeCol * FChrW) - (HPos * FChrW), ClientHeight);
-      end;
-    end else
-      with Canvas do
-      begin
-        Pen.Color := FEnvironment.RightEdgeColor;
-        MoveTo((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, 0);
-        LineTo((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, ClientHeight);
-      end;
-  end;
-}
 end;
 
 procedure TfpgBaseTextEdit.DrawLine(const I, Y: Integer);
@@ -1315,21 +1344,23 @@ end;
 constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Focusable   := True;
-  FFont       := fpgGetFont('#Edit1');
-  Width       := 320;
-  Height      := 240;
-  FLines      := TStringList.Create;
-  CaretPos.x  := 0;
-  CaretPos.y  := 0;
-  FTopLine    := 0;
-  FTabWidth   := 8;
-  FMaxScrollH := 0;
-  VPos        := 0;
-  HPos        := 0;
-  FTracking   := True;
-  FFullRedraw := False;
-  FSelected   := False;
+  Focusable     := True;
+  FFont         := fpgGetFont('#Edit1');
+  Width         := 320;
+  Height        := 240;
+  FLines        := TStringList.Create;
+  CaretPos.x    := 0;
+  CaretPos.y    := 0;
+  FTopLine      := 0;
+  FTabWidth     := 8;
+  FMaxScrollH   := 0;
+  VPos          := 0;
+  HPos          := 0;
+  FTracking     := True;
+  FFullRedraw   := False;
+  FSelected     := False;
+  FRightEdge    := False;
+  FRightEdgeCol := 80;
 
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
