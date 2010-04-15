@@ -12,7 +12,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      Defines a Text Edit control. Also known a Text Entry control.
+      This unit contains various "composite" components. Components that
+      work together as a single component.
 }
 
 unit fpg_editbtn;
@@ -28,10 +29,11 @@ uses
   ,fpg_widget
   ,fpg_edit
   ,fpg_button
+  ,fpg_panel
   ;
 
 type
-  TfpgFileNameEdit = class(TfpgWidget)
+  TfpgFileNameEdit = class(TfpgPanel)
   private
     FEdit: TfpgEdit;
     FButton: TfpgButton;
@@ -75,8 +77,6 @@ begin
   inherited Create(AOwner);
   FWidth              := 140;
   FHeight             := 24;
-  FIsContainer        := True;
-  FFocusable          := False;
   FFilter             := '';
 
   FEdit := TfpgEdit.Create(self);
