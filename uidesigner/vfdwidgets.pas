@@ -330,6 +330,7 @@ begin
   wc.AddProperty('AutoSelect', TPropertyBoolean, 'On receiving focus, auto select text');
   wc.AddProperty('AutoSize', TPropertyBoolean, 'Change Height based on FontDesc being set');
   wc.AddProperty('BorderStyle', TPropertyEnum, '');
+  wc.AddProperty('ExtraHint', TPropertyString, '');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
@@ -723,6 +724,7 @@ begin
   // Filename Edit
   wc          := TVFDWidgetClass.Create(TfpgFileNameEdit);
   wc.NameBase := 'FilenameEdit';
+  wc.AddProperty('ExtraHint', TPropertyString, '');
   wc.AddProperty('FileName', TPropertyString, 'Initial starting directory of the dialog');
   wc.AddProperty('InitialDir', TPropertyString, 'Initial starting directory of the dialog');
   wc.AddProperty('Filter', TPropertyString, 'Filename filters used in the dialog');
