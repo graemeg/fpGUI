@@ -94,8 +94,9 @@ begin
     Name := 'FButton';
     Text := '';
     FontDesc := '#Label1';
-    ImageMargin := 1;
+    ImageMargin := -1;
     ImageName := 'stdimg.folderopen';
+    ImageSpacing := 0;
     TabOrder := 1;
     OnClick := @btnClick;
   end;
