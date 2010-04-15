@@ -40,6 +40,8 @@ type
     FFilter: TfpgString;
     FOnButtonClick: TNotifyEvent;
     FInitialDir: TfpgString;
+    function GetExtraHint: TfpgString;
+    procedure SetExtraHint(const AValue: TfpgString);
     procedure SetFilter(const AValue: TfpgString);
     procedure btnClick(Sender: TObject);
     procedure SetFileName(const AValue: TfpgString);
@@ -50,6 +52,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure SetPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
   published
+    property ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
     property FileName: TfpgString read GetFileName write SetFileName;
     property InitialDir: TfpgString read FInitialDir write FInitialDir;
     property Filter: TfpgString read FFilter write SetFilter;
@@ -105,6 +108,16 @@ end;
 procedure TfpgFileNameEdit.SetFilter(const AValue: TfpgString);
 begin
   FFilter := AValue;
+end;
+
+function TfpgFileNameEdit.GetExtraHint: TfpgString;
+begin
+  Result := FEdit.ExtraHint;
+end;
+
+procedure TfpgFileNameEdit.SetExtraHint(const AValue: TfpgString);
+begin
+  FEdit.ExtraHint := AValue;
 end;
 
 procedure TfpgFileNameEdit.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
