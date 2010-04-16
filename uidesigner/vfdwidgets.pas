@@ -289,6 +289,11 @@ begin
     'vfd.editdirectory', @stdimg_vfd_editdirectory,
     sizeof(stdimg_vfd_editdirectory),
     0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.editfont', @stdimg_vfd_editfont,
+    sizeof(stdimg_vfd_editfont),
+    0, 0);
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -744,6 +749,14 @@ begin
   wc.AddProperty('RootDirectory', TPropertyString, 'Initial starting directory of the dialog');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.editdirectory';
+  RegisterVFDWidget(wc);
+
+  // Font Edit
+  wc          := TVFDWidgetClass.Create(TfpgFontEdit);
+  wc.NameBase := 'DirectoryEdit';
+  wc.AddProperty('FontDesc', TPropertyString, 'Specify a preset font description');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.editfont';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
