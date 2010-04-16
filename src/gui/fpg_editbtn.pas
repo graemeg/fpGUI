@@ -215,7 +215,7 @@ end;
 
 procedure TfpgFileNameEdit.HandlePaint;
 var
-  fnt: TfpgFont;
+  img: TfpgImage;
 begin
   inherited HandlePaint;
   // only so that it looks pretty in the UI Designer
@@ -227,12 +227,11 @@ begin
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
     Canvas.TextColor := clShadow1;
+    Canvas.SetFont(fpgApplication.DefaultFont);
     Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
-    Canvas.TextColor := clText1;
-    fnt := fpgGetFont('DeJaVu-9:bold');
-    Canvas.SetFont(fnt);
-    Canvas.DrawText(Width - Height, 0, Height, Height, '···', [txtHCenter, txtVCenter]);
-    fnt.Free;
+    img := fpgImages.GetImage('stdimg.folderfile'); // don't free the img instance - we only got a reference
+    if img <> nil then
+      Canvas.DrawImage(Width-Height+((Height-img.Width) div 2), (Height-img.Height) div 2, img);
   end;
 end;
 
@@ -318,7 +317,7 @@ end;
 
 procedure TfpgDirectoryEdit.HandlePaint;
 var
-  fnt: TfpgFont;
+  img: TfpgImage;
 begin
   inherited HandlePaint;
   // only so that it looks pretty in the UI Designer
@@ -330,12 +329,11 @@ begin
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
     Canvas.TextColor := clShadow1;
+    Canvas.SetFont(fpgApplication.DefaultFont);
     Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
-    Canvas.TextColor := clText1;
-    fnt := fpgGetFont('DeJaVu-9:bold');
-    Canvas.SetFont(fnt);
-    Canvas.DrawText(Width - Height, 0, Height, Height, '···', [txtHCenter, txtVCenter]);
-    fnt.Free;
+    img := fpgImages.GetImage('stdimg.folder'); // don't free the img instance - we only got a reference
+    if img <> nil then
+      Canvas.DrawImage(Width-Height+((Height-img.Width) div 2), (Height-img.Height) div 2, img);
   end;
 end;
 
@@ -383,10 +381,11 @@ begin
     fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
     fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
     Canvas.TextColor := clShadow1;
+    Canvas.SetFont(fpgApplication.DefaultFont);
     Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
-    img := fpgImages.GetImage('stdimg.font');
-    Canvas.DrawImage((Height-img.Height) div 2, (Width-img.Width) div 2, img);
-    img.Free;
+    img := fpgImages.GetImage('stdimg.font'); // don't free the img instance - we only got a reference
+    if img <> nil then
+      Canvas.DrawImage(Width-Height+((Height-img.Width) div 2), (Height-img.Height) div 2, img);
   end;
 end;
 
