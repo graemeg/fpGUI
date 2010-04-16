@@ -102,6 +102,11 @@ begin
             @stdimg_checkboxes,
       sizeof(stdimg_checkboxes));
 
+  fpgImages.AddMaskedBMP(
+            'stdimg.ellipse',
+            @stdimg_ellipse,
+      sizeof(stdimg_ellipse), 0,0);
+
 
   // General purpose images:
   fpgImages.AddMaskedBMP(
