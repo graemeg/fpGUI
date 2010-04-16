@@ -400,7 +400,7 @@ begin
   with FEdit do
   begin
     Name := 'FEdit';
-    Text := '';
+    Text := '#Edit1';
     FontDesc := '#Edit1';
     TabOrder := 0;
   end;
