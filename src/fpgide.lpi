@@ -36,7 +36,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="fpgide.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -47,6 +47,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_main"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="frm_configureide.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_configureide"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -71,17 +76,4 @@
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
-  <Debugging>
-    <Exceptions Count="3">
-      <Item1>
-        <Name Value="EAbort"/>
-      </Item1>
-      <Item2>
-        <Name Value="ECodetoolError"/>
-      </Item2>
-      <Item3>
-        <Name Value="EFOpenError"/>
-      </Item3>
-    </Exceptions>
-  </Debugging>
 </CONFIG>

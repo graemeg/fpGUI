@@ -7,8 +7,9 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
+  fpg_base,
   fpg_main,
-  frm_main;
+  frm_main, frm_configureide;
 
 
 procedure MainProc;
