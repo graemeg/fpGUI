@@ -86,6 +86,26 @@ type
   end;
 
 
+  TfpgFontEdit = class(TfpgPanel)
+  private
+    FEdit: TfpgEdit;
+    FButton: TfpgButton;
+    FOnButtonClick: TNotifyEvent;
+    procedure btnClick(Sender: TObject);
+  protected
+    function GetFontDesc: string; override;
+    procedure SetFontDesc(const AValue: string); override;
+    procedure HandlePaint; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure SetPosition(aleft, atop, awidth, aheight: TfpgCoord);override;
+  published
+    property FontDesc;
+    property TabOrder;
+    property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
+  end;
+
+
 implementation
 
 uses
@@ -319,6 +339,93 @@ begin
   end;
 end;
 
+
+{ TfpgFontEdit }
+
+procedure TfpgFontEdit.btnClick(Sender: TObject);
+var
+  f: TfpgString;
+begin
+  f := FontDesc;
+  if SelectFontDialog(f) then
+    FontDesc := f;
+  if Assigned(OnButtonClick) then
+	  OnButtonClick(self);
+end;
+
+function TfpgFontEdit.GetFontDesc: string;
+begin
+  Result := inherited GetFontDesc;
+  if Result <> FEdit.Text then  // user must have entered fontdesc directly
+  begin
+    Result := FEdit.Text;
+    SetFontDesc(Result); // update internal fontdesc to sync with FEdit value
+  end;
+end;
+
+procedure TfpgFontEdit.SetFontDesc(const AValue: string);
+begin
+  inherited SetFontDesc(AValue);
+  FEdit.Text := AValue;
+end;
+
+procedure TfpgFontEdit.HandlePaint;
+var
+  img: TfpgImage;
+begin
+  inherited HandlePaint;
+  // only so that it looks pretty in the UI Designer
+  if csDesigning in ComponentState then
+  begin
+    FEdit.Visible := False;
+    FButton.Visible := False;
+    Canvas.Clear(clBoxColor);
+    fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
+    fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
+    img := fpgImages.GetImage('stdimg.font');
+    Canvas.DrawImage((Height-img.Height) div 2, (Width-img.Width) div 2, img);
+    img.Free;
+  end;
+end;
+
+constructor TfpgFontEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  Text            := '';
+  FWidth          := 140;
+  FHeight         := 24;
+
+  FEdit := TfpgEdit.Create(self);
+  with FEdit do
+  begin
+    Name := 'FEdit';
+    Text := '';
+    FontDesc := '#Edit1';
+    TabOrder := 0;
+  end;
+
+  FButton := TfpgButton.Create(self);
+  with FButton do
+  begin
+    Name := 'FButton';
+    Text := '';
+    FontDesc := '#Label1';
+    ImageMargin := -1;
+    ImageName := 'stdimg.font';
+    ImageSpacing := 0;
+    TabOrder := 1;
+    OnClick := @btnClick;
+  end;
+end;
+
+procedure TfpgFontEdit.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
+begin
+  inherited SetPosition(aleft, atop, awidth, aheight);
+  FEdit.SetPosition(0, 0, Width - Height, Height);
+  FButton.SetPosition(Width - Height, 0, Height, Height);
+end;
 
 end.
 

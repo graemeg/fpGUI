@@ -91,8 +91,6 @@ type
     procedure   SetLayout(const AValue: TLayout);
     function    GetText: string;
     procedure   SetText(const AValue: string);
-    function    GetFontDesc: string;
-    procedure   SetFontDesc(const AValue: string);
     function    GetLineSpace: integer;
     procedure   SetLineSpace(const AValue: integer);
     function    GetMargin: integer;
@@ -101,6 +99,8 @@ type
     procedure   SetWrapText(const AValue: boolean);
   protected
     FFont: TfpgFont;
+    function    GetFontDesc: string; virtual;
+    procedure   SetFontDesc(const AValue: string); virtual;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
