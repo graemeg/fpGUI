@@ -15,6 +15,8 @@ procedure MainProc;
 var
   frm: TMainForm;
 begin
+  FPG_DEFAULT_FONT_DESC := 'DejaVu Sans-9:antialias=true';
+
   fpgApplication.Initialize;
   frm := TMainForm.Create(nil);
   try
