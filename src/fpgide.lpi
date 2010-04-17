@@ -36,7 +36,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="5">
       <Unit0>
         <Filename Value="fpgide.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -52,6 +52,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_configureide"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="ideconst.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ideconst"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="idemacros.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="idemacros"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
