@@ -33,7 +33,7 @@ uses
   ;
 
 type
-  TfpgFileNameEdit = class(TfpgPanel)
+  TfpgFileNameEdit = class(TfpgAbstractPanel)
   private
     FEdit: TfpgEdit;
     FButton: TfpgButton;
@@ -61,7 +61,7 @@ type
   end;
 
 
-  TfpgDirectoryEdit = class(TfpgPanel)
+  TfpgDirectoryEdit = class(TfpgAbstractPanel)
   private
     FEdit: TfpgEdit;
     FButton: TfpgButton;
@@ -120,7 +120,6 @@ uses
 constructor TfpgFileNameEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Text            := '';
   FWidth          := 140;
   FHeight         := 24;
   FFilter         := '';
@@ -249,7 +248,6 @@ end;
 constructor TfpgDirectoryEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Text            := '';
   FWidth          := 140;
   FHeight         := 24;
 
