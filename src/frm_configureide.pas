@@ -40,7 +40,13 @@ type
     edtExeExt: TfpgEdit;
     edtTarget: TfpgEdit;
     grdShortcuts: TfpgStringGrid;
+    tsSyntaxDefs: TfpgTabSheet;
+    tsFileFilters: TfpgTabSheet;
+    grdSyntaxDefs: TfpgStringGrid;
+    grdFileFilters: TfpgStringGrid;
     {@VFD_HEAD_END: ConfigureIDEForm}
+    procedure LoadSettings;
+    procedure SaveSettings;
   public
     procedure AfterCreate; override;
   end;
@@ -54,6 +60,8 @@ implementation
 
 uses
   fpg_dialogs
+  ,fpg_iniutils
+  ,ideconst
   ;
 
 procedure DisplayConfigureIDE;
@@ -63,10 +71,11 @@ var
 begin
   frm := TConfigureIDEForm.Create(nil);
   try
+    frm.LoadSettings;
     Result := frm.ShowModal = mrOK;
     if Result then
     begin
-      // save settings to INI file
+      frm.SaveSettings;
     end;
   finally
     frm.Free;
@@ -75,12 +84,38 @@ end;
 
 {@VFD_NEWFORM_IMPL}
 
+procedure TConfigureIDEForm.LoadSettings;
+begin
+  edtFPCDir.Directory := gINI.ReadString(cEnvironment, 'fpcDir', '');
+  edtFPGuiDir.Directory := gINI.ReadString(cEnvironment, 'fpGuiDir', '');
+  edtFPGuiLibDir.Directory := gINI.ReadString(cEnvironment, 'fpGuiLibDir', '${FPGUIDIR}lib/');
+  edtSyntaxDefDir.Directory := gINI.ReadString(cEnvironment, 'SyntaxDefDir', '${FPGUIDIR}apps/ide/syntaxdefs/');
+  edtTempateDir.Directory := gINI.ReadString(cEnvironment, 'TemplateDir', '${FPGUIDIR}apps/ide/templates/');
+  edtCompiler.Filename := gINI.ReadString(cEnvironment, 'Compiler', '');
+  edtDebugger.Filename := gINI.ReadString(cEnvironment, 'Debugger', 'gdb');
+  edtExeExt.Text := gINI.ReadString(cEnvironment, 'ExeExt', '');
+  edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', 'i386-linux');
+end;
+
+procedure TConfigureIDEForm.SaveSettings;
+begin
+  gINI.WriteString(cEnvironment, 'fpcDir', edtFPCDir.Directory);
+  gINI.WriteString(cEnvironment, 'fpGuiDir', edtFPGuiDir.Directory);
+  gINI.WriteString(cEnvironment, 'fpGuiLibDir', edtFPGuiLibDir.Directory);
+  gINI.WriteString(cEnvironment, 'SyntaxDefDir', edtSyntaxDefDir.Directory);
+  gINI.WriteString(cEnvironment, 'TemplateDir', edtTempateDir.Directory);
+  gINI.WriteString(cEnvironment, 'Compiler', edtCompiler.Filename);
+  gINI.WriteString(cEnvironment, 'Debugger', edtDebugger.Filename);
+  gINI.WriteString(cEnvironment, 'ExeExt', edtExeExt.Text);
+  gINI.WriteString(cEnvironment, 'Target', edtTarget.Text);
+end;
+
 procedure TConfigureIDEForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: ConfigureIDEForm}
   Name := 'ConfigureIDEForm';
-  SetPosition(332, 190, 532, 480);
+  SetPosition(332, 190, 578, 480);
   WindowTitle := 'Configure IDE';
   Hint := '';
   WindowPosition := wpOneThirdDown;
@@ -89,7 +124,7 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(448, 450, 80, 24);
+    SetPosition(494, 450, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
@@ -103,7 +138,7 @@ begin
   with btnOK do
   begin
     Name := 'btnOK';
-    SetPosition(364, 450, 80, 24);
+    SetPosition(410, 450, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
@@ -117,7 +152,7 @@ begin
   with pcSettings do
   begin
     Name := 'pcSettings';
-    SetPosition(4, 4, 524, 430);
+    SetPosition(4, 4, 570, 430);
     Anchors := [anLeft,anRight,anTop,anBottom];
     ActivePageIndex := 0;
     Hint := '';
@@ -129,7 +164,7 @@ begin
   with tsEnvironment do
   begin
     Name := 'tsEnvironment';
-    SetPosition(84, 3, 437, 424);
+    SetPosition(125, 3, 442, 424);
     Text := 'Environment';
   end;
 
@@ -137,7 +172,7 @@ begin
   with tsEditor do
   begin
     Name := 'tsEditor';
-    SetPosition(84, 3, 437, 424);
+    SetPosition(125, 3, 442, 424);
     Text := 'Editor';
   end;
 
@@ -145,7 +180,7 @@ begin
   with tsShortcuts do
   begin
     Name := 'tsShortcuts';
-    SetPosition(84, 3, 437, 424);
+    SetPosition(125, 3, 442, 424);
     Text := 'Shortcuts';
   end;
 
@@ -163,7 +198,8 @@ begin
   with edtFPCDir do
   begin
     Name := 'edtFPCDir';
-    SetPosition(8, 22, 348, 24);
+    SetPosition(8, 22, 424, 24);
+    Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     Directory := '';
     RootDirectory := '';
@@ -174,7 +210,8 @@ begin
   with edtFPGuiDir do
   begin
     Name := 'edtFPGuiDir';
-    SetPosition(8, 74, 348, 24);
+    SetPosition(8, 74, 424, 24);
+    Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     Directory := '';
     RootDirectory := '';
@@ -185,7 +222,8 @@ begin
   with edtFPGuiLibDir do
   begin
     Name := 'edtFPGuiLibDir';
-    SetPosition(8, 122, 348, 24);
+    SetPosition(8, 122, 424, 24);
+    Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     Directory := '${FPGUIDIR}lib/';
     RootDirectory := '';
@@ -196,7 +234,8 @@ begin
   with edtSyntaxDefDir do
   begin
     Name := 'edtSyntaxDefDir';
-    SetPosition(8, 170, 348, 24);
+    SetPosition(8, 170, 424, 24);
+    Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     Directory := '${FPGUIDIR}apps/ide/syntaxdefs/';
     RootDirectory := '';
@@ -207,7 +246,8 @@ begin
   with edtTempateDir do
   begin
     Name := 'edtTempateDir';
-    SetPosition(8, 218, 348, 24);
+    SetPosition(8, 218, 424, 24);
+    Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     Directory := '{FPGUIDIR}apps/ide/templates/';
     RootDirectory := '';
@@ -218,7 +258,8 @@ begin
   with edtCompiler do
   begin
     Name := 'edtCompiler';
-    SetPosition(8, 266, 348, 24);
+    SetPosition(8, 266, 424, 24);
+    Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     FileName := '/opt/fpc_2.4.1/${TARGET}/bin/fpc';
     InitialDir := '';
@@ -230,7 +271,8 @@ begin
   with edtDebugger do
   begin
     Name := 'edtDebugger';
-    SetPosition(8, 314, 348, 24);
+    SetPosition(8, 314, 426, 24);
+    Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
     FileName := 'gdb';
     InitialDir := '';
@@ -332,7 +374,8 @@ begin
   with FontEdit1 do
   begin
     Name := 'FontEdit1';
-    SetPosition(8, 22, 348, 24);
+    SetPosition(8, 22, 424, 24);
+    Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Edit1';
     TabOrder := 2;
   end;
@@ -365,7 +408,7 @@ begin
   with grdShortcuts do
   begin
     Name := 'grdShortcuts';
-    SetPosition(8, 8, 422, 408);
+    SetPosition(8, 8, 428, 408);
     Anchors := [anLeft,anRight,anTop,anBottom];
     AddColumn('Action', 180, taLeftJustify);
     AddColumn('Shortcut', 110, taLeftJustify);
@@ -374,6 +417,54 @@ begin
     HeaderFontDesc := '#GridHeader';
     Hint := '';
     RowCount := 10;
+    RowSelect := False;
+    TabOrder := 1;
+  end;
+
+  tsSyntaxDefs := TfpgTabSheet.Create(pcSettings);
+  with tsSyntaxDefs do
+  begin
+    Name := 'tsSyntaxDefs';
+    SetPosition(125, 3, 442, 424);
+    Text := 'Syntax Highlighting';
+  end;
+
+  tsFileFilters := TfpgTabSheet.Create(pcSettings);
+  with tsFileFilters do
+  begin
+    Name := 'tsFileFilters';
+    SetPosition(125, 3, 442, 424);
+    Text := 'File Filters';
+  end;
+
+  grdSyntaxDefs := TfpgStringGrid.Create(tsSyntaxDefs);
+  with grdSyntaxDefs do
+  begin
+    Name := 'grdSyntaxDefs';
+    SetPosition(8, 8, 428, 408);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    AddColumn('Syntax Definition File', 200, taLeftJustify);
+    AddColumn('File Mask', 200, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    Hint := '';
+    RowCount := 5;
+    RowSelect := False;
+    TabOrder := 1;
+  end;
+
+  grdFileFilters := TfpgStringGrid.Create(tsFileFilters);
+  with grdFileFilters do
+  begin
+    Name := 'grdFileFilters';
+    SetPosition(8, 8, 428, 408);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    AddColumn('Name', 150, taLeftJustify);
+    AddColumn('File Mask', 200, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    Hint := '';
+    RowCount := 5;
     RowSelect := False;
     TabOrder := 1;
   end;
