@@ -48,9 +48,9 @@ type
     function GetFileName: TfpgString;
   protected
     procedure HandlePaint; override;
+    procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure SetPosition(aleft, atop, awidth, aheight: TfpgCoord); override;
   published
     property ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
     property FileName: TfpgString read GetFileName write SetFileName;
@@ -74,9 +74,9 @@ type
     procedure SetExtraHint(const AValue: TfpgString);
   protected
     procedure HandlePaint; override;
+    procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure SetPosition(aleft, atop, awidth, aheight: TfpgCoord);override;
   published
     property Directory: TfpgString read GetDirectory write SetDirectory;
     property ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
@@ -96,9 +96,9 @@ type
     function GetFontDesc: string; override;
     procedure SetFontDesc(const AValue: string); override;
     procedure HandlePaint; override;
+    procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure SetPosition(aleft, atop, awidth, aheight: TfpgCoord);override;
   published
     property FontDesc;
     property TabOrder;
@@ -160,13 +160,6 @@ end;
 procedure TfpgFileNameEdit.SetExtraHint(const AValue: TfpgString);
 begin
   FEdit.ExtraHint := AValue;
-end;
-
-procedure TfpgFileNameEdit.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
-begin
-  inherited SetPosition(aleft, atop, awidth, aheight);
-  FEdit.SetPosition(0, 0, Width - Height, Height);
-  FButton.SetPosition(Width - Height, 0, Height, Height);
 end;
 
 procedure TfpgFileNameEdit.btnClick(Sender: TObject);
@@ -242,6 +235,21 @@ begin
   end;
 end;
 
+procedure TfpgFileNameEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  if csDesigning in ComponentState then
+  begin
+    FEdit.Visible := False;
+    FButton.Visible := False;
+  end
+  else
+  begin
+    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
+    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+  end;
+end;
+
 
 { TfpgDirectoryEdit}
 
@@ -272,13 +280,6 @@ begin
     TabOrder := 1;
     OnClick := @btnClick;
   end;
-end;
-
-procedure TfpgDirectoryEdit.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
-begin
-  inherited SetPosition(aleft, atop, awidth, aheight);
-  FEdit.SetPosition(0, 0, Width - Height, Height);
-  FButton.SetPosition(Width - Height, 0, Height, Height);
 end;
 
 function TfpgDirectoryEdit.GetDirectory: TfpgString;
@@ -351,6 +352,21 @@ begin
   end;
 end;
 
+procedure TfpgDirectoryEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  if csDesigning in ComponentState then
+  begin
+    FEdit.Visible := False;
+    FButton.Visible := False;
+  end
+  else
+  begin
+    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
+    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+  end;
+end;
+
 
 { TfpgFontEdit }
 
@@ -403,6 +419,21 @@ begin
   end;
 end;
 
+procedure TfpgFontEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  if csDesigning in ComponentState then
+  begin
+    FEdit.Visible := False;
+    FButton.Visible := False;
+  end
+  else
+  begin
+    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
+    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+  end;
+end;
+
 constructor TfpgFontEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -433,12 +464,6 @@ begin
   end;
 end;
 
-procedure TfpgFontEdit.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
-begin
-  inherited SetPosition(aleft, atop, awidth, aheight);
-  FEdit.SetPosition(0, 0, Width - Height, Height);
-  FButton.SetPosition(Width - Height, 0, Height, Height);
-end;
 
 end.
 
