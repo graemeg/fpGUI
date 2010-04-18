@@ -36,7 +36,8 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  fpg_button;
+  fpg_button,
+  fpg_menu;
   
 type
   // forward declaration
@@ -118,12 +119,14 @@ type
     procedure   DoPageChange(ATabSheet: TfpgTabSheet);
     procedure   DoTabSheetClosing(ATabSheet: TfpgTabSheet);
     function    DrawTab(const rect: TfpgRect; const Selected: Boolean = False; const Mode: Integer = 1): TfpgRect;
+    procedure   pmCloseTab(Sender: TObject);
   protected
     procedure   OrderSheets; // currently using bubblesort
     procedure   RePaintTitles; virtual;
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -623,6 +626,18 @@ begin
   end;  { case }
 end;
 
+procedure TfpgPageControl.pmCloseTab(Sender: TObject);
+var
+  ts: TfpgTabSheet;
+begin
+  ts := ActivePage;
+  if ts = nil then
+    Exit;
+  RemovePage(ts);
+  DoTabSheetClosing(ts);
+  ts.Free;
+end;
+
 procedure TfpgPageControl.OrderSheets;
 begin
   FPages.Sort(@SortCompare);
@@ -1019,6 +1034,18 @@ begin
   end;
 
   inherited HandleLMouseUp(x, y, shiftstate);
+end;
+
+procedure TfpgPageControl.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleRMouseUp(x, y, shiftstate);
+//  ShowDefaultPopupMenu(x, y, ShiftState);
+  if not Assigned(FPopupMenu) then
+  begin
+    FPopupMenu := TfpgPopupMenu.Create(self);
+    FPopupMenu.AddMenuItem('Close Tab', '', @pmCloseTab);
+  end;
+  FPopupMenu.ShowAt(self, x, y);
 end;
 
 procedure TfpgPageControl.HandleKeyPress(var keycode: word;
