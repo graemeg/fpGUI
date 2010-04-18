@@ -73,6 +73,7 @@ type
 
 
   TTabSheetChange = procedure(Sender: TObject; NewActiveSheet: TfpgTabSheet) of object;
+  TTabSheetClosing = procedure(Sender: TObject; ATabSheet: TfpgTabSheet) of object;
   
   
   TfpgPageControl = class(TfpgWidget)
@@ -82,6 +83,7 @@ type
     FMargin: integer;
     FFixedTabWidth: integer;
     FFixedTabHeight: Integer;
+    FOnClosingTabSheet: TTabSheetClosing;
     FPages: TList;
     FActivePageIndex: integer;
     FOnChange: TTabSheetChange;
@@ -91,6 +93,7 @@ type
     FSortPages: boolean;
     FStyle: TfpgTabStyle;
     FTabPosition: TfpgTabPosition;
+    FPopupMenu: TfpgPopupMenu;
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
@@ -113,6 +116,7 @@ type
     procedure   SetStyle(const AValue: TfpgTabStyle);
     procedure   SetTabPosition(const AValue: TfpgTabPosition);
     procedure   DoPageChange(ATabSheet: TfpgTabSheet);
+    procedure   DoTabSheetClosing(ATabSheet: TfpgTabSheet);
     function    DrawTab(const rect: TfpgRect; const Selected: Boolean = False; const Mode: Integer = 1): TfpgRect;
   protected
     procedure   OrderSheets; // currently using bubblesort
@@ -130,6 +134,7 @@ type
     property    ActivePage: TfpgTabSheet read FActivePage write SetActivePage;
     property    Pages[AIndex: integer]: TfpgTabSheet read GetPage;
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
+    property    OnClosingTabSheet: TTabSheetClosing read FOnClosingTabSheet write FOnClosingTabSheet;
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
     property    BackgroundColor;
@@ -512,6 +517,16 @@ begin
     Exit;
   if Assigned(FOnChange) then
     FOnChange(self, ATabSheet);
+end;
+
+procedure TfpgPageControl.DoTabSheetClosing(ATabSheet: TfpgTabSheet);
+begin
+  if (csLoading in ComponentState) then
+    Exit;
+  if (csDesigning in ComponentState) then
+    Exit;
+  if Assigned(FOnClosingTabSheet) then
+    FOnClosingTabSheet(self, ATabSheet);
 end;
 
 function TfpgPageControl.DrawTab(const rect: TfpgRect; const Selected: Boolean = False; const Mode: Integer = 1): TfpgRect;
