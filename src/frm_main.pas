@@ -29,7 +29,6 @@ type
     Splitter2: TfpgSplitter;
     pcEditor: TfpgPageControl;
     tsEditor1: TfpgTabSheet;
-    tsEditor2: TfpgTabSheet;
     Memo1: TfpgMemo;
     lblStatus: TfpgLabel;
     mnuFile: TfpgPopupMenu;
@@ -54,6 +53,7 @@ type
     procedure   FormShow(Sender: TObject);
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenFileClicked(Sender: TObject);
+    procedure   miFileSaveAs(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
@@ -137,6 +137,17 @@ begin
       n := n.AppendText(f);
       tvProject.Selection := n;
     end;
+  end;
+end;
+
+procedure TMainForm.miFileSaveAs(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  s := SelectFileDialog(sfdSave);
+  if s <> '' then
+  begin
+    TfpgMemo(pcEditor.ActivePage.Components[0]).Lines.SaveToFile(s);
   end;
 end;
 
@@ -390,14 +401,6 @@ begin
     Text := 'Editor1';
   end;
 
-  tsEditor2 := TfpgTabSheet.Create(pcEditor);
-  with tsEditor2 do
-  begin
-    Name := 'tsEditor2';
-    SetPosition(3, 3, 318, 114);
-    Text := 'Editor2';
-  end;
-
   Memo1 := TfpgMemo.Create(tsEditor1);
   with Memo1 do
   begin
@@ -429,7 +432,7 @@ begin
     AddMenuItem('Open...', '', nil);
     AddMenuItem('Open Recent', '', nil);
     AddMenuItem('Save...', '', nil);
-    AddMenuItem('Save As...', '', nil);
+    AddMenuItem('Save As...', '', @miFileSaveAs);
     AddMenuItem('-', '', nil);
     AddMenuItem('Quit', '', @btnQuitClicked);
   end;
