@@ -59,6 +59,9 @@ type
     procedure   miRunMake(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
+    procedure   miTest(Sender: TObject);
+    procedure   miProjectOpen(Sender: TObject);
+    procedure   miProjectSaveAs(Sender: TObject);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
@@ -83,12 +86,14 @@ uses
   ,frm_configureide
   ,frm_debug
   ,ideconst
+  ,Project
   ;
 
 
 const
   cFileFilterTemplate  = '%s (%s)|%s';
   cSourceFiles = '*.pas;*.pp;*.lpr';
+  cProjectFiles = '*.project';
 
 
 {@VFD_NEWFORM_IMPL}
@@ -153,6 +158,78 @@ begin
   if not Assigned(DebugForm) then
     fpgApplication.CreateForm(TDebugForm, DebugForm);
   DebugForm.Show;
+end;
+
+procedure TMainForm.miTest(Sender: TObject);
+var
+  i: integer;
+begin
+  FreeProject;
+
+  GProject.ProjectDir := '/media/flash16gig/programming/fpgide/src/';
+  GProject.ProjectName := 'fpgide';
+  GProject.MainUnit := 'fpgide.lpr';
+  GProject.TargetFile := '../fpgide${EXEEXT}';
+  GProject.DefaultMake := 1;
+  GProject.MakeOptions.Add('-l -Mobjfpc -Sh -Sc');
+  GProject.MakeOptions.Add('-gl -O-');
+  GProject.MakeOptions.Add('-B');
+  GProject.MakeOptions.Add('-O2 -XX -Xs -CX');
+  GProject.MacroNames.Add('TargetCPU=x86_64');
+  GProject.MacroNames.Add('TargetOS=linux');
+  GProject.MacroNames.Add('TargetCPU=i386');
+  GProject.MacroNames.Add('TargetOS=win32');
+  GProject.MacroNames.Add('FPGUI_DIR=/home/graemeg/programming/fpgui/');
+  GProject.MacroNames.Add('tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/');
+
+  if GProject.Save then
+    ShowMessage('Project saved');
+
+  FreeProject;
+  GProject.Load('/media/flash16gig/programming/fpgide/src/fpgide.project');
+
+  writeln('-------------- Project -----------------');
+  writeln('ProjectDir:        ', GProject.ProjectDir);
+  writeln('ProjectName:       ', GProject.ProjectName);
+  writeln('Mainunit:          ', GProject.MainUnit);
+  writeln('TargetFile:        ', GProject.TargetFile);
+  writeln('DefaultMake:       ', GProject.DefaultMake);
+  writeln('MakeOptions count: ', GProject.MakeOptions.Count);
+  for i := 0 to GProject.MakeOptions.Count-1 do
+    writeln(' #', i, '        ', GProject.MakeOptions[i]);
+  writeln('MacroNames count: ', GProject.MacroNames.Count);
+  for i := 0 to GProject.MacroNames.Count-1 do
+    writeln(' #', i, '        ', GProject.MacroNames[i]);
+
+  writeln('');
+  writeln('FPGUI_DIR = ', GProject.MacroNames.Values['FPGUI_DIR']);
+  writeln('');
+  writeln('        ------------------------ ');
+
+end;
+
+procedure TMainForm.miProjectOpen(Sender: TObject);
+var
+  s: TfpgString;
+  n: TfpgTreeNode;
+begin
+  s := SelectFileDialog(sfdOpen, Format(cFileFilterTemplate, ['Project Files', cProjectFiles, cProjectFiles]));
+  if s <> '' then
+  begin
+    CloseAllTabs;
+    FreeProject;
+    n := tvProject.RootNode.FindSubNode('Units', True);
+    if n <> nil then
+      n.Clear;
+    GProject.Load(s);
+    OpenEditorPage(GProject.ProjectDir + GProject.MainUnit);
+    AddMessage('Project loaded');
+  end;
+end;
+
+procedure TMainForm.miProjectSaveAs(Sender: TObject);
+begin
+
 end;
 
 procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
@@ -373,6 +450,7 @@ begin
     ImageMargin := 0;
     ImageName := 'stdimg.saveall';
     TabOrder := 4;
+    OnClick := @miTest;
   end;
 
   pnlStatusBar := TfpgBevel.Create(self);
@@ -524,10 +602,10 @@ begin
     AddMenuItem('-', '', nil);
     AddMenuItem('New (empty)...', '', nil);
     AddMenuItem('New from Template...', '', nil);
-    AddMenuItem('Open...', '', nil);
+    AddMenuItem('Open...', '', @miProjectOpen);
     AddMenuItem('Open Recent', '', nil);
     AddMenuItem('Save...', '', nil);
-    AddMenuItem('Save As...', '', nil);
+    AddMenuItem('Save As...', '', @miProjectSaveAs);
     AddMenuItem('-', '', nil);
     AddMenuItem('View Source', '', nil);
     AddMenuItem('Add editor file to Project', '', nil);
