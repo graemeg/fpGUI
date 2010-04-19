@@ -58,6 +58,7 @@ type
     procedure   miAboutIDE(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
+    procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
     procedure   SetupFilesGrid;
@@ -159,6 +160,19 @@ begin
   if not Assigned(DebugForm) then
     fpgApplication.CreateForm(TDebugForm, DebugForm);
   DebugForm.Show;
+end;
+
+procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
+var
+  n: TfpgTreeNode;
+begin
+  n := tvProject.RootNode.FindSubNode(ATabSheet, True);
+  if Assigned(n) then
+  begin
+    tvProject.RootNode.Remove(n);
+    n.Free;
+    tvProject.Invalidate;
+  end;
 end;
 
 procedure TMainForm.UpdateStatus(const AText: TfpgString);
@@ -365,6 +379,7 @@ begin
     Hint := '';
     TabOrder := 5;
     TabPosition := tpRight;
+    OnClosingTabSheet :=@TabSheetClosing;
   end;
 
   tsEditor1 := TfpgTabSheet.Create(pcEditor);
