@@ -2,10 +2,10 @@
 ProjectDir=/media/flash16gig/programming/fpgide/src/
 ProjectName=fpgide
 MainUnit=fpgide.lpr
-TargetFile=../fpgide${EXEEXT}
-DefaultMake=1
+TargetFile=fpgide
+DefaultMake=0
 MakeOptionsCount=4
-MakeOption1=-l -Mobjfpc -Sh -Sc
+MakeOption1=-l -Mobjfpc -Sch
 MakeOption2=-gl -O-
 MakeOption3=-B
 MakeOption4=-O2 -XX -Xs -CX
@@ -16,3 +16,7 @@ Macro3=TargetCPU=i386
 Macro4=TargetOS=win32
 Macro5=FPGUI_DIR=/home/graemeg/programming/fpgui/
 Macro6=tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/
+UnitDirsCount=2
+UnitDir1=.
+UnitDir2=/home/graemeg/programming/fpgui/lib/i386-linux/
+UnitOutputDir=units/i386-linux/
