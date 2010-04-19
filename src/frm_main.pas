@@ -169,9 +169,9 @@ begin
   GProject.ProjectDir := '/media/flash16gig/programming/fpgide/src/';
   GProject.ProjectName := 'fpgide';
   GProject.MainUnit := 'fpgide.lpr';
-  GProject.TargetFile := '../fpgide${EXEEXT}';
-  GProject.DefaultMake := 1;
-  GProject.MakeOptions.Add('-l -Mobjfpc -Sh -Sc');
+  GProject.TargetFile := 'fpgide';
+  GProject.DefaultMake := 0;
+  GProject.MakeOptions.Add('-l -Mobjfpc -Sch');
   GProject.MakeOptions.Add('-gl -O-');
   GProject.MakeOptions.Add('-B');
   GProject.MakeOptions.Add('-O2 -XX -Xs -CX');
@@ -181,6 +181,9 @@ begin
   GProject.MacroNames.Add('TargetOS=win32');
   GProject.MacroNames.Add('FPGUI_DIR=/home/graemeg/programming/fpgui/');
   GProject.MacroNames.Add('tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/');
+  GProject.UnitDirs.Add('.');
+  GProject.UnitDirs.Add('/home/graemeg/programming/fpgui/lib/i386-linux/');
+  GProject.UnitOutputDir := 'units/i386-linux/';
 
   if GProject.Save then
     ShowMessage('Project saved');
@@ -200,9 +203,11 @@ begin
   writeln('MacroNames count: ', GProject.MacroNames.Count);
   for i := 0 to GProject.MacroNames.Count-1 do
     writeln(' #', i, '        ', GProject.MacroNames[i]);
+  writeln('UnitDirs count: ', GProject.UnitDirs.Count);
+  for i := 0 to GProject.UnitDirs.Count-1 do
+    writeln(' #', i, '        ', GProject.UnitDirs[i]);
+  writeln('UnitOutputDir:     ', GProject.UnitOutputDir);
 
-  writeln('');
-  writeln('FPGUI_DIR = ', GProject.MacroNames.Values['FPGUI_DIR']);
   writeln('');
   writeln('        ------------------------ ');
 
@@ -720,7 +725,7 @@ begin
     Name := 'grdMessages';
     SetPosition(0, 4, 258, 52);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    AddColumn('New', 258, taLeftJustify);
+    AddColumn('New', 800, taLeftJustify);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
