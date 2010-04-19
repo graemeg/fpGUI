@@ -138,11 +138,32 @@ end;
 procedure TMainForm.miRunMake(Sender: TObject);
 var
   p: TProcess;
+  c: TfpgString;
+  i: integer;
 begin
   p := TProcess.Create(nil);
   p.ShowWindow := swoShowNormal;
-  p.CommandLine := gINI.ReadString(cEnvironment, 'Compiler', '') +
-      ' ' + '/tmp/' + pcEditor.ActivePage.Text;
+  p.CurrentDirectory := GProject.ProjectDir;
+  // build compilation string
+  c := gINI.ReadString(cEnvironment, 'Compiler', '') + ' ';
+  // unit dirs
+  for i := 0 to GProject.UnitDirs.Count-1 do
+    c := c + ' -Fu' + GProject.UnitDirs[i];
+  // unit output dir
+  c := c + ' -FU' + GProject.UnitOutputDir;
+  // target output file
+  c := c + ' -o' + GProject.TargetFile;
+  // make option - compiler flags
+  c := c + ' ' + GProject.MakeOptions[GProject.DefaultMake];
+  // unit to start compilation
+  c := c + ' ' + GProject.MainUnit;
+
+  writeln('');
+  writeln('Compile command:');
+  writeln('  ' + c);
+  AddMessage('Compile command: ' + c);
+
+  p.CommandLine := c;
   p.Execute;
   AddMessage('Compilation complete');
   p.Free;
