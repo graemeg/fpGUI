@@ -20,6 +20,7 @@ type
     FDefaultMake: integer;
     FMakeOptions: TStringList;
     FMacroNames: TStringList;
+    FUnitOutputDir: TfpgString;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -34,6 +35,7 @@ type
     property    MakeOptions: TStringList read FMakeOptions;
     property    MacroNames: TStringList read FMacroNames;
     property    UnitDirs: TStringList read FUnitDirs;
+    property    UnitOutputDir: TfpgString read FUnitOutputDir write FUnitOutputDir;
   end;
 
 
@@ -122,6 +124,8 @@ begin
   // unit search directories
   SaveList(UnitDirs, 'UnitDirsCount', 'UnitDir');
 
+  FIniFile.WriteString(cProjectOptions, 'UnitOutputDir', UnitOutputDir);
+
   Result := True;
 end;
 
@@ -166,6 +170,8 @@ begin
 
   // Load Unit search dirs
   LoadList(UnitDirs, 'UnitDirsCount', 'unitdir');
+
+  UnitOutputDir := FIniFile.ReadString(cProjectOptions, 'UnitOutputDir', 'units/i386-linux/');
 
   Result := True;
 end;
