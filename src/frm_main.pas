@@ -64,6 +64,7 @@ type
     procedure   SetupProjectTree;
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
+    procedure   CloseAllTabs;
     procedure   OpenEditorPage(const AFilename: TfpgString);
   public
     constructor Create(AOwner: TComponent); override;
@@ -194,6 +195,19 @@ procedure TMainForm.AddMessage(const AMsg: TfpgString);
 begin
   grdMessages.RowCount := grdMessages.RowCount + 1;
   grdMessages.Cells[0,grdMessages.RowCount-1] := AMsg;
+end;
+
+procedure TMainForm.CloseAllTabs;
+var
+  ts: TfpgTabSheet;
+  i: integer;
+begin
+  for i := 0 to pcEditor.PageCount-1 do
+  begin
+    ts := pcEditor.Pages[0];
+    pcEditor.RemoveTabSheet(ts);
+    ts.Free;
+  end;
 end;
 
 procedure TMainForm.OpenEditorPage(const AFilename: TfpgString);
