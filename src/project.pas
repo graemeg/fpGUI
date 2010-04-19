@@ -12,6 +12,7 @@ type
   private
     FProjectName: TfpgString;
     FMainUnit: TfpgString;
+    FUnitDirs: TStringList;
     FUnitList: TUnitList;
     FIniFile: TfpgINIFile;
     FProjectDir: TfpgString;
@@ -32,6 +33,7 @@ type
     property    DefaultMake: integer read FDefaultMake write FDefaultMake;
     property    MakeOptions: TStringList read FMakeOptions;
     property    MacroNames: TStringList read FMacroNames;
+    property    UnitDirs: TStringList read FUnitDirs;
   end;
 
 
@@ -73,10 +75,12 @@ begin
   FUnitList := TUnitList.Create;
   FMakeOptions := TStringList.Create;
   FMacroNames := TStringList.Create;
+  FUnitDirs := TStringList.Create;
 end;
 
 destructor TProject.Destroy;
 begin
+  FUnitDirs.Free;
   FMacroNames.Free;
   FMakeOptions.Free;
   FUnitList.Free;
@@ -85,8 +89,16 @@ begin
 end;
 
 function TProject.Save: Boolean;
-var
-  i: integer;
+
+  procedure SaveList(AList: TStringList; const CName, IName: TfpgString);
+  var
+    i: integer;
+  begin
+    FIniFile.WriteInteger(cProjectOptions, CName, AList.Count);
+    for i := 0 to AList.Count-1 do
+      FIniFile.WriteString(cProjectOptions, IName + IntToStr(i+1), AList[i]);
+  end;
+
 begin
   Result := False;
   if ProjectName = '' then
@@ -101,22 +113,37 @@ begin
   FIniFile.WriteString(cProjectOptions, 'TargetFile', TargetFile);
   FIniFile.WriteInteger(cProjectOptions, 'DefaultMake', DefaultMake);
 
-  FIniFile.WriteInteger(cProjectOptions, 'MakeOptionsCount', MakeOptions.Count);
-  for i := 0 to MakeOptions.Count-1 do
-    FIniFile.WriteString(cProjectOptions, 'MakeOption' + IntToStr(i+1), MakeOptions[i]);
+  // various make options
+  SaveList(MakeOptions, 'MakeOptionsCount', 'MakeOption');
 
-  FIniFile.WriteInteger(cProjectOptions, 'MacroCount', MacroNames.Count);
-  for i := 0 to MacroNames.Count-1 do
-    FIniFile.WriteString(cProjectOptions, 'Macro' + IntToStr(i+1), MacroNames[i]);
+  // macros definitions
+  SaveList(MacroNames, 'MacroCount', 'Macro');
+
+  // unit search directories
+  SaveList(UnitDirs, 'UnitDirsCount', 'UnitDir');
 
   Result := True;
 end;
 
 function TProject.Load(AProjectFile: TfpgString): Boolean;
 var
-  i: integer;
-  c: integer;
   s: TfpgString;
+
+  // CName = xxxCount & IName is the Item name
+  procedure LoadList(AList: TStringList; const CName, IName: TfpgString);
+  var
+    c: integer;
+    i: integer;
+  begin
+    c := FIniFile.ReadInteger(cProjectOptions, CName, 0);
+    for i := 0 to c-1 do
+    begin
+      s := FIniFile.ReadString(cProjectOptions, IName + IntToStr(i+1), '');
+      if s <> '' then
+        AList.Add(s);
+    end;
+  end;
+
 begin
   Result := False;
   if AProjectFile = '' then
@@ -131,21 +158,14 @@ begin
   TargetFile := FIniFile.ReadString(cProjectOptions, 'TargetFile', '');
   DefaultMake := FIniFile.ReadInteger(cProjectOptions, 'DefaultMake', 0);
 
-  c := FIniFile.ReadInteger(cProjectOptions, 'MakeOptionsCount', 0);
-  for i := 0 to c-1 do
-  begin
-    s := FIniFile.ReadString(cProjectOptions, 'MakeOption' + IntToStr(i+1), '');
-    if s <> '' then
-      MakeOptions.Add(s);
-  end;
+  // Load make options
+  LoadList(MakeOptions, 'MakeOptionsCount', 'MakeOption');
 
-  c := FIniFile.ReadInteger(cProjectOptions, 'MacroCount', 0);
-  for i := 0 to c-1 do
-  begin
-    s := FIniFile.ReadString(cProjectOptions, 'Macro' + IntToStr(i+1), '');
-    if s <> '' then
-      MacroNames.Add(s);
-  end;
+  // Load Macro definitions
+  LoadList(MacroNames, 'MacroCount', 'Macro');
+
+  // Load Unit search dirs
+  LoadList(UnitDirs, 'UnitDirsCount', 'unitdir');
 
   Result := True;
 end;
