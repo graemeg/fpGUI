@@ -8,6 +8,12 @@ uses
   Classes, SysUtils;
 
 const
+  cProjectExt     = '.project';
+
+  // Project Options
+  cProjectOptions  = 'ProjectOptions';
+  cOpenedUnits     = 'OpenedUnits';
+
   // INI Environment
   cEnvironment    = 'Environment';
   cEditor         = 'Editor';
