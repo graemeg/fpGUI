@@ -9,7 +9,7 @@ uses
   Classes,
   fpg_base,
   fpg_main,
-  frm_main, frm_configureide, ideconst, idemacros;
+  frm_main, frm_configureide, ideconst, idemacros, frm_debug;
 
 
 procedure MainProc;

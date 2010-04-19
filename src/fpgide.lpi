@@ -12,7 +12,6 @@
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
       <UseAppBundle Value="False"/>
-      <ResourceType Value="res"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -36,7 +35,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="6">
       <Unit0>
         <Filename Value="fpgide.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -62,6 +61,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="idemacros"/>
       </Unit4>
+      <Unit5>
+        <Filename Value="frm_debug.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_debug"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
