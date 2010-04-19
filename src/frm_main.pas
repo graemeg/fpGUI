@@ -56,12 +56,14 @@ type
     procedure   miFileSaveAs(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
+    procedure   miRunMake(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
     procedure   SetupFilesGrid;
+    procedure   AddMessage(const AMsg: TfpgString);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -72,10 +74,13 @@ type
 implementation
 
 uses
-  fpg_dialogs
+  process
+  ,fpg_iniutils
+  ,fpg_dialogs
   ,fpg_utils
   ,frm_configureide
   ,frm_debug
+  ,ideconst
   ;
 
 
@@ -119,6 +124,7 @@ begin
       TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.LoadFromFile(s);
       TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
       pcEditor.ActivePageIndex := i;
+      ts := pcEditor.ActivePage;
     end
     else
     begin
@@ -130,11 +136,11 @@ begin
       TfpgMemo(ts.Components[0]).Lines.EndUpdate;
     end;
     UpdateStatus(s);
-//    pcEditor.ActivePage.Text := fpgExtractFileName(s);
     n := tvProject.RootNode.FindSubNode('Units', True);
     if Assigned(n) then
     begin
       n := n.AppendText(f);
+      n.Data := ts;
       tvProject.Selection := n;
     end;
   end;
@@ -159,6 +165,19 @@ end;
 procedure TMainForm.miAboutIDE(Sender: TObject);
 begin
   TfpgMessageDialog.Information('About fpGUI IDE', 'Created by Graeme Geldenhuys');
+end;
+
+procedure TMainForm.miRunMake(Sender: TObject);
+var
+  p: TProcess;
+begin
+  p := TProcess.Create(nil);
+  p.ShowWindow := swoShowNormal;
+  p.CommandLine := gINI.ReadString(cEnvironment, 'Compiler', '') +
+      ' ' + '/tmp/' + pcEditor.ActivePage.Text;
+  p.Execute;
+  AddMessage('Compilation complete');
+  p.Free;
 end;
 
 procedure TMainForm.miConfigureIDE(Sender: TObject);
@@ -207,6 +226,12 @@ begin
   grdFiles.FileList.ReadDirectory;
   grdFiles.FileList.Sort(soFileName);
   grdFiles.Invalidate;
+end;
+
+procedure TMainForm.AddMessage(const AMsg: TfpgString);
+begin
+  grdMessages.RowCount := grdMessages.RowCount + 1;
+  grdMessages.Cells[0,grdMessages.RowCount-1] := AMsg;
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
@@ -489,7 +514,7 @@ begin
   begin
     Name := 'mnuRun';
     SetPosition(476, 161, 172, 20);
-    AddMenuItem('Make', 'Ctrl+F9', nil);
+    AddMenuItem('Make', 'Ctrl+F9', @miRunMake);
     AddMenuItem('Build All', 'Ctrl+Shift+F9', nil);
     AddMenuItem('Make 1', 'Ctrl+Alt+1', nil);
     AddMenuItem('Make 2', 'Ctrl+Alt+2', nil);
@@ -597,7 +622,7 @@ begin
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
-    RowCount := 3;
+    RowCount := 0;
     RowSelect := True;
     ShowHeader := False;
     TabOrder := 1;
