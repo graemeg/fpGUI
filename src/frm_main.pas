@@ -64,6 +64,7 @@ type
     procedure   SetupProjectTree;
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
+    procedure   OpenEditorPage(const AFilename: TfpgString);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -99,50 +100,11 @@ end;
 procedure TMainForm.btnOpenFileClicked(Sender: TObject);
 var
   s: TfpgString;
-  f: TfpgString;
-  n: TfpgTreeNode;
-  i: integer;
-  found: Boolean;
-  ts: TfpgTabSheet;
 begin
   s := SelectFileDialog(sfdOpen, Format(cFileFilterTemplate, ['Source Files', cSourceFiles, cSourceFiles]));
   if s <> '' then
   begin
-    f := fpgExtractFileName(s);
-    found := False;
-    for i := 0 to pcEditor.PageCount-1 do
-    begin
-      if pcEditor.Pages[i].Text = f then
-        found := True;
-      if found then
-        break;
-    end;
-    if found then
-    begin
-      // reuse existing tab
-      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.BeginUpdate;
-      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.LoadFromFile(s);
-      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
-      pcEditor.ActivePageIndex := i;
-      ts := pcEditor.ActivePage;
-    end
-    else
-    begin
-      // we need a new tabsheet
-      ts := pcEditor.AppendTabSheet(f);
-      CreateMemo(ts, 1, 1, 200, 20).Align := alClient;
-      TfpgMemo(ts.Components[0]).Lines.BeginUpdate;
-      TfpgMemo(ts.Components[0]).Lines.LoadFromFile(s);
-      TfpgMemo(ts.Components[0]).Lines.EndUpdate;
-    end;
-    UpdateStatus(s);
-    n := tvProject.RootNode.FindSubNode('Units', True);
-    if Assigned(n) then
-    begin
-      n := n.AppendText(f);
-      n.Data := ts;
-      tvProject.Selection := n;
-    end;
+    OpenEditorPage(s);
   end;
 end;
 
@@ -232,6 +194,54 @@ procedure TMainForm.AddMessage(const AMsg: TfpgString);
 begin
   grdMessages.RowCount := grdMessages.RowCount + 1;
   grdMessages.Cells[0,grdMessages.RowCount-1] := AMsg;
+end;
+
+procedure TMainForm.OpenEditorPage(const AFilename: TfpgString);
+var
+  s: TfpgString;
+  f: TfpgString;
+  n: TfpgTreeNode;
+  i: integer;
+  found: Boolean;
+  ts: TfpgTabSheet;
+begin
+  s := AFilename;
+    f := fpgExtractFileName(s);
+    found := False;
+    for i := 0 to pcEditor.PageCount-1 do
+    begin
+      if pcEditor.Pages[i].Text = f then
+        found := True;
+      if found then
+        break;
+    end;
+    if found then
+    begin
+      // reuse existing tab
+      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.BeginUpdate;
+      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.LoadFromFile(s);
+      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
+      pcEditor.ActivePageIndex := i;
+      ts := pcEditor.ActivePage;
+    end
+    else
+    begin
+      // we need a new tabsheet
+      ts := pcEditor.AppendTabSheet(f);
+      CreateMemo(ts, 1, 1, 200, 20).Align := alClient;
+      TfpgMemo(ts.Components[0]).Lines.BeginUpdate;
+      TfpgMemo(ts.Components[0]).Lines.LoadFromFile(s);
+      TfpgMemo(ts.Components[0]).Lines.EndUpdate;
+    end;
+    UpdateStatus(s);
+    n := tvProject.RootNode.FindSubNode('Units', True);
+    if Assigned(n) then
+    begin
+      n := n.AppendText(f);
+      n.Data := ts;
+      tvProject.Selection := n;
+    end;
+
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
