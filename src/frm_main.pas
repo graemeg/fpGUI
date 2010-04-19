@@ -57,6 +57,7 @@ type
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
+    procedure   miViewDebug(Sender: TObject);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
     procedure   SetupFilesGrid;
@@ -73,6 +74,7 @@ uses
   fpg_dialogs
   ,fpg_utils
   ,frm_configureide
+  ,frm_debug
   ;
 
 
@@ -150,6 +152,13 @@ end;
 procedure TMainForm.miConfigureIDE(Sender: TObject);
 begin
   DisplayConfigureIDE;
+end;
+
+procedure TMainForm.miViewDebug(Sender: TObject);
+begin
+  if not Assigned(DebugForm) then
+    fpgApplication.CreateForm(TDebugForm, DebugForm);
+  DebugForm.Show;
 end;
 
 procedure TMainForm.UpdateStatus(const AText: TfpgString);
@@ -436,6 +445,7 @@ begin
     Name := 'mnuView';
     SetPosition(476, 119, 172, 20);
     AddMenuItem('Todo List...', '', nil);
+    AddMenuItem('Debug Windows', '', @miViewDebug);
   end;
 
   mnuProject := TfpgPopupMenu.Create(self);
