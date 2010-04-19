@@ -374,8 +374,7 @@ begin
     THackBaseEdit(View).MaxLength := Ma;
 end;
 
-procedure TtiBaseEditMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiBaseEditMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
@@ -450,8 +449,7 @@ begin
   end;
 end;
 
-procedure TtiSpinEditMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiSpinEditMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
@@ -462,8 +460,8 @@ begin
       View.OnExit := @DoOnChange;
     if ObjectUpdateMoment in [ouNone] then
     begin
-      THackbaseEdit(View).OnChange := nil;
-      THackbaseEdit(View).OnExit := nil;
+      View.OnChange := nil;
+      View.OnExit := nil;
     end;
   end;
 end;
@@ -510,8 +508,8 @@ begin
       View.OnExit := @DoOnChange;
     if ObjectUpdateMoment in [ouNone] then
     begin
-      THackbaseEdit(View).OnChange := nil;
-      THackbaseEdit(View).OnExit := nil;
+      View.OnChange := nil;
+      View.OnExit := nil;
     end;
   end;
 end;
@@ -567,8 +565,8 @@ begin
       View.OnExit := @DoOnChange;
     if ObjectUpdateMoment in [ouNone] then
     begin
-      THackbaseEdit(View).OnChange := nil;
-      THackbaseEdit(View).OnExit := nil;
+      View.OnChange := nil;
+      View.OnExit := nil;
     end;  
   end;
 end;
@@ -597,8 +595,8 @@ begin
       View.OnExit := @DoOnChange;
     if ObjectUpdateMoment in [ouNone] then
     begin
-      THackbaseEdit(View).OnChange := nil;
-      THackbaseEdit(View).OnExit := nil;
+      View.OnChange := nil;
+      View.OnExit := nil;
     end;
   end;
 end;
@@ -761,8 +759,7 @@ end;
 
 { TtiCheckBoxMediatorView }
 
-procedure TtiCheckBoxMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiCheckBoxMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
@@ -773,8 +770,8 @@ begin
       View.OnExit := @DoOnChange;
     if ObjectUpdateMoment in [ouNone] then
     begin
-      THackbaseEdit(View).OnChange := nil;
-      THackbaseEdit(View).OnExit := nil;
+      View.OnChange := nil;
+      View.OnExit := nil;
     end;
   end;
 end;
@@ -835,8 +832,7 @@ begin
   end;
 end;
 
-procedure TtiCalendarComboMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiCalendarComboMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
@@ -847,8 +843,8 @@ begin
       View.OnExit := @DoOnChange;
     if ObjectUpdateMoment in [ouNone] then
     begin
-      THackbaseEdit(View).OnChange := nil;
-      THackbaseEdit(View).OnExit := nil;
+      View.OnChange := nil;
+      View.OnExit := nil;
     end;
   end;
 end;
@@ -902,8 +898,7 @@ begin
   end;
 end;
 
-procedure TtiSpinEditFloatMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiSpinEditFloatMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
@@ -914,8 +909,8 @@ begin
       View.OnExit := @DoOnChange;
     if ObjectUpdateMoment in [ouNone] then
     begin
-      THackbaseEdit(View).OnChange := nil;
-      THackbaseEdit(View).OnExit := nil;
+      View.OnChange := nil;
+      View.OnExit := nil;
     end;
   end;
 end;
