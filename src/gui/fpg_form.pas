@@ -320,7 +320,7 @@ begin
   
   if ModalResult <> mrNone then
   begin
-    lCloseAction := caFree; // Dummy variable - we do nothing with it
+    lCloseAction := caHide; // Dummy variable - we do nothing with it
     DoOnClose(lCloseAction); // Simply so the OnClose event fires.
   end;
 end;
