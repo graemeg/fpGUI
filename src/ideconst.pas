@@ -18,6 +18,7 @@ const
   cEnvironment    = 'Environment';
   cEditor         = 'Editor';
   cShortcuts      = 'Shortcuts';
+  cINIMakeOption  = 'MakeOption';
 
 
   // Predefined Macros

@@ -116,7 +116,7 @@ begin
   FIniFile.WriteInteger(cProjectOptions, 'DefaultMake', DefaultMake);
 
   // various make options
-  SaveList(MakeOptions, 'MakeOptionsCount', 'MakeOption');
+  SaveList(MakeOptions, 'MakeOptionsCount', cINIMakeOption);
 
   // macros definitions
   SaveList(MacroNames, 'MacroCount', 'Macro');
