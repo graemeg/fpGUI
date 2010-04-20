@@ -60,6 +60,7 @@ type
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
     procedure   miTest(Sender: TObject);
+    procedure   miProjectOptions(Sender: TObject);
     procedure   miProjectOpen(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
@@ -84,6 +85,7 @@ uses
   ,fpg_dialogs
   ,fpg_utils
   ,frm_configureide
+  ,frm_projectoptions
   ,frm_debug
   ,ideconst
   ,Project
@@ -232,6 +234,11 @@ begin
   writeln('');
   writeln('        ------------------------ ');
 
+end;
+
+procedure TMainForm.miProjectOptions(Sender: TObject);
+begin
+  DisplayProjectOptions;
 end;
 
 procedure TMainForm.miProjectOpen(Sender: TObject);
@@ -624,7 +631,7 @@ begin
   begin
     Name := 'mnuProject';
     SetPosition(476, 140, 172, 20);
-    AddMenuItem('Options...', '', nil);
+    AddMenuItem('Options...', '', @miProjectOptions);
     AddMenuItem('-', '', nil);
     AddMenuItem('New (empty)...', '', nil);
     AddMenuItem('New from Template...', '', nil);

@@ -12,6 +12,7 @@
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
       <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -35,7 +36,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="9">
       <Unit0>
         <Filename Value="fpgide.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -76,6 +77,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="UnitList"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="frm_projectoptions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_projectoptions"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
