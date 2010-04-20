@@ -6,8 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
-  fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_combobox,
-  fpg_edit;
+  fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_customgrid, fpg_basegrid,
+  fpg_combobox, fpg_edit;
 
 type
 
@@ -56,8 +56,26 @@ type
     TabSheet7: TfpgTabSheet;
     grdDebugSrcDirs: TfpgStringGrid;
     {@VFD_HEAD_END: ProjectOptionsForm}
+    FCellEdit: TfpgEdit;
+    FFocusRect: TfpgRect;
+    FLastGrid: TfpgStringGrid; // reference only
+    procedure CellEditKeypressed(Sender: TObject; var KeyCode: word;
+        var ShiftState: TShiftState; var Consumed: boolean);
+    procedure grdCompilerDirsDrawCell(Sender: TObject; const ARow,
+        ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
+        var ADefaultDrawing: boolean);
+    procedure grdCompilerDirsKeyPressed(Sender: TObject; var KeyCode: word;
+        var ShiftState: TShiftState; var Consumed: boolean);
+    procedure grdCompilerMakeOptionsKeyPressed(Sender: TObject; var KeyCode: word;
+        var ShiftState: TShiftState; var Consumed: boolean);
+    procedure grdCompilerMakeOptionsDrawCell(Sender: TObject; const ARow,
+        ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
+        var ADefaultDrawing: boolean);
+    procedure grdCompilerMakeOptionsClicked(Sender: TObject);
+    procedure grdCompilerDirsClicked(Sender: TObject);
     procedure LoadSettings;
     procedure SaveSettings;
+    procedure SetupCellEdit(AGrid: TfpgStringGrid);
   public
     procedure AfterCreate; override;
   end;
@@ -94,6 +112,102 @@ end;
 
 {@VFD_NEWFORM_IMPL}
 
+procedure TProjectOptionsForm.CellEditKeypressed(Sender: TObject;
+  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyReturn then
+  begin
+    FLastGrid.Cells[FLastGrid.FocusCol, FLastGrid.FocusRow] := FCellEdit.Text;
+    FCellEdit.Visible := False;
+    FLastGrid.SetFocus;
+  end;
+end;
+
+procedure TProjectOptionsForm.grdCompilerDirsDrawCell(Sender: TObject;
+  const ARow, ACol: Integer; const ARect: TfpgRect;
+  const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+begin
+  if ACol = 5 then
+  begin
+    grdCompilerDirs.Canvas.Color := clMedGray;
+    grdCompilerDirs.Canvas.DrawLine(ARect.Right-1, ARect.Top, ARect.Right-1, ARect.Bottom);
+  end
+  else if ACol = 6 then
+  begin
+    grdCompilerDirs.Canvas.Color := clMedGray;
+    grdCompilerDirs.Canvas.DrawLine(ARect.Left, ARect.Top, ARect.Left, ARect.Bottom);
+  end;
+
+  if (gdSelected in AFlags) and (ACol = 10) then
+  begin
+    FFocusRect := ARect;
+  end;
+end;
+
+procedure TProjectOptionsForm.grdCompilerDirsKeyPressed(Sender: TObject;
+  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if TfpgStringGrid(Sender).FocusCol < 10 then
+    Exit;
+  if (KeyCode = keyF2) or (KeyCode = keyReturn) then
+  begin
+    // we need to edit the cell contents
+    SetupCellEdit(TfpgStringGrid(Sender));
+  end;
+end;
+
+procedure TProjectOptionsForm.grdCompilerMakeOptionsKeyPressed(Sender: TObject;
+  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if TfpgStringGrid(Sender).FocusCol < 6 then
+    Exit;
+  if (KeyCode = keyF2) or (KeyCode = keyReturn) then
+  begin
+    // we need to edit the cell contents
+    SetupCellEdit(TfpgStringGrid(Sender));
+  end;
+end;
+
+procedure TProjectOptionsForm.grdCompilerMakeOptionsDrawCell(Sender: TObject;
+  const ARow, ACol: Integer; const ARect: TfpgRect;
+  const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+begin
+  if (gdSelected in AFlags) and (ACol = 6) then
+  begin
+    FFocusRect := ARect;
+  end;
+end;
+
+procedure TProjectOptionsForm.grdCompilerMakeOptionsClicked(Sender: TObject);
+var
+  r, c: integer;
+begin
+  r := grdCompilerMakeOptions.FocusRow;
+  c := grdCompilerMakeOptions.FocusCol;
+  if c < 6 then   // checkbox area
+  begin
+    if TfpgStringGrid(Sender).Cells[c, r] = '' then
+      TfpgStringGrid(Sender).Cells[c, r] := 'x'
+    else
+      TfpgStringGrid(Sender).Cells[c, r] := '';
+  end;
+end;
+
+procedure TProjectOptionsForm.grdCompilerDirsClicked(Sender: TObject);
+var
+  r, c: integer;
+begin
+  r := TfpgStringGrid(Sender).FocusRow;
+  c := TfpgStringGrid(Sender).FocusCol;
+  if c < 10 then   // checkbox area
+  begin
+    if TfpgStringGrid(Sender).Cells[c, r] = '' then
+      TfpgStringGrid(Sender).Cells[c, r] := 'x'
+    else
+      TfpgStringGrid(Sender).Cells[c, r] := '';
+  end;
+end;
+
 procedure TProjectOptionsForm.LoadSettings;
 var
   i: integer;
@@ -120,12 +234,35 @@ begin
   grdCompilerMakeOptions.Cells[1, 1] := 'x';
 
   grdCompilerMakeOptions.Cells[2, 2] := 'x';
-
 end;
 
 procedure TProjectOptionsForm.SaveSettings;
 begin
   //
+end;
+
+procedure TProjectOptionsForm.SetupCellEdit(AGrid: TfpgStringGrid);
+var
+  r: TfpgRect;
+  pt: TPoint;
+begin
+  if Assigned(FCellEdit) then
+    FCellEdit.Free;
+
+  FLastGrid := AGrid;
+  FCellEdit := TfpgEdit.Create(FLastGrid.Parent);
+  pt.X := FLastGrid.Left + FFocusRect.Left;
+  pt.Y := FLastGrid.Top + FFocusRect.Top;
+  with FCellEdit do
+  begin
+    Name := 'FCellEdit';
+    SetPosition(pt.X, pt.Y, FFocusRect.Width, FFocusRect.Height);
+    BorderStyle := ebsSingle;
+    FontDesc := '#Grid';
+    Text := AGrid.Cells[AGrid.FocusCol, AGrid.FocusRow];
+    OnKeyPress := @CellEditKeypressed;
+    SetFocus;
+  end;
 end;
 
 procedure TProjectOptionsForm.AfterCreate;
@@ -417,6 +554,9 @@ begin
     RowCount := 0;
     RowSelect := False;
     TabOrder := 1;
+    OnClick := @grdCompilerMakeOptionsClicked;
+    OnDrawCell := @grdCompilerMakeOptionsDrawCell;
+    OnKeyPress :=@grdCompilerMakeOptionsKeyPressed;
   end;
 
   grdCompilerDirs := TfpgStringGrid.Create(TabSheet2);
@@ -439,9 +579,12 @@ begin
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
-    RowCount := 0;
+    RowCount := 4;
     RowSelect := False;
     TabOrder := 1;
+    OnClick := @grdCompilerDirsClicked;
+    OnDrawCell := @grdCompilerDirsDrawCell;
+    OnKeyPress :=@grdCompilerDirsKeyPressed;
   end;
 
   Label11 := TfpgLabel.Create(TabSheet2);
