@@ -44,11 +44,15 @@ type
     FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
     FPanelBorder: TPanelBorder;
+    FParentBackgroundColor: Boolean;
     procedure   SetPanelStyle(const AValue: TPanelStyle);
     procedure   SetPanelBorder(const AValue: TPanelBorder);
+    procedure   SetParentBackgroundColor(const AValue: Boolean);
   protected
+    procedure   HandlePaint; override;
     property    Style: TPanelStyle read FPanelStyle write SetPanelStyle default bsRaised;
     property    BorderStyle: TPanelBorder read FPanelBorder write SetPanelBorder default bsSingle;
+    property    ParentBackgroundColor: Boolean read FParentBackgroundColor write SetParentBackgroundColor default False;
   public
     constructor Create(AOwner: TComponent); override;
     function    GetClientRect: TfpgRect; override;
@@ -64,6 +68,7 @@ type
     property    BackgroundColor;
     property    BorderStyle;
     property    Hint;
+    property    ParentBackgroundColor;
     property    ParentShowHint;
     property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
     property    ShowHint;
@@ -115,6 +120,7 @@ type
     property    Layout: TLayout read GetLayout write SetLayout default tlCenter;
     property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
     property    Margin: integer read GetMargin write SetMargin default 2;
+    property    ParentBackgroundColor;
     property    ParentShowHint;
     property    ShowHint;
     property    Style;
@@ -246,6 +252,22 @@ begin
   end;
 end;
 
+procedure TfpgAbstractPanel.SetParentBackgroundColor(const AValue: Boolean);
+begin
+  if FParentBackgroundColor = AValue then exit;
+  FParentBackgroundColor := AValue;
+  RePaint;
+end;
+
+procedure TfpgAbstractPanel.HandlePaint;
+begin
+  inherited HandlePaint;
+  if FParentBackgroundColor then
+    Canvas.Clear(Parent.BackgroundColor)
+  else
+    Canvas.Clear(BackgroundColor);
+end;
+
 constructor TfpgAbstractPanel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -255,7 +277,7 @@ begin
   FWidth           := 80;
   FHeight          := 80;
   FFocusable       := True;  // otherwise children can't get focus
-  FBackgroundColor := Parent.BackgroundColor;
+  FParentBackgroundColor := False;
   FIsContainer     := True;
 end;
 
@@ -273,8 +295,6 @@ end;
 procedure TfpgBevel.HandlePaint;
 begin
   inherited HandlePaint;
-
-  Canvas.Clear(BackgroundColor);
 
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
@@ -439,8 +459,6 @@ var
 begin
   inherited HandlePaint;
 
-  Canvas.Clear(BackgroundColor);
-
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
   //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
@@ -510,7 +528,6 @@ begin
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
-  FBackgroundColor  := Parent.BackgroundColor;
   FAlignment        := taCenter;
   FLayout           := tlCenter;
   FWrapText         := False;
