@@ -505,6 +505,7 @@ begin
   wc.NameBase  := 'Bevel';
   wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('ParentBackgroundColor', TPropertyBoolean, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
   wc.AddProperty('Shape', TPropertyEnum, 'Box, Frame, TopLine, Spacer etc..');
@@ -522,6 +523,7 @@ begin
   wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
   wc.AddProperty('LineSpace', TPropertyInteger, 'Line spacing between wrapped caption');
   wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
+  wc.AddProperty('ParentBackgroundColor', TPropertyBoolean, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
