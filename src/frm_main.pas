@@ -550,6 +550,7 @@ begin
     Hint := '';
     TabOrder := 5;
     TabPosition := tpRight;
+    Options := [to_PMenuClose];
     OnClosingTabSheet :=@TabSheetClosing;
   end;
 
