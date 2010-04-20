@@ -560,7 +560,6 @@ var
   clipr: TfpgRect;   // clip rectangle
   drawstate: TfpgGridDrawState;
 begin
-  drawstate := [];
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -605,6 +604,7 @@ begin
       r.Left := FMargin;
       for col := FFirstCol to ColumnCount-1 do
       begin
+        drawstate := [];
         r.Width := ColumnWidth[col];
         Canvas.SetClipRect(clipr);
 
