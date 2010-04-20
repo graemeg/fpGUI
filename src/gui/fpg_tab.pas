@@ -45,6 +45,9 @@ type
   
   TfpgTabStyle    = (tsTabs, tsButtons, tsFlatButtons);
   TfpgTabPosition = (tpTop, tpBottom, tpLeft, tpRight, tpNone);
+  TfpgTabOption   = (to_PMenuClose, to_PMenuShowAvailTabs);
+
+  TfpgTabOptions = set of TfpgTabOption;
 
 
   TfpgTabSheet = class(TfpgWidget)
@@ -95,6 +98,7 @@ type
     FStyle: TfpgTabStyle;
     FTabPosition: TfpgTabPosition;
     FPopupMenu: TfpgPopupMenu;
+    FTabOptions: TfpgTabOptions;
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
@@ -144,6 +148,7 @@ type
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
     property    FixedTabHeight: integer read FFixedTabHeight write SetFixedTabHeight default 21;
     property    Hint;
+    property    Options: TfpgTabOptions read FTabOptions write FTabOptions;
     property    ParentShowHint;
     property    ShowHint;
     property    SortPages: boolean read FSortPages write SetSortPages default False;
@@ -1040,12 +1045,15 @@ procedure TfpgPageControl.HandleRMouseUp(x, y: integer; shiftstate: TShiftState)
 begin
   inherited HandleRMouseUp(x, y, shiftstate);
 //  ShowDefaultPopupMenu(x, y, ShiftState);
-  if not Assigned(FPopupMenu) then
+  if to_PMenuClose in FTabOptions then
   begin
-    FPopupMenu := TfpgPopupMenu.Create(self);
-    FPopupMenu.AddMenuItem('Close Tab', '', @pmCloseTab);
+    if not Assigned(FPopupMenu) then
+    begin
+      FPopupMenu := TfpgPopupMenu.Create(self);
+      FPopupMenu.AddMenuItem('Close Tab', '', @pmCloseTab);
+    end;
+    FPopupMenu.ShowAt(self, x, y);
   end;
-  FPopupMenu.ShowAt(self, x, y);
 end;
 
 procedure TfpgPageControl.HandleKeyPress(var keycode: word;
@@ -1088,6 +1096,7 @@ begin
   FWidth  := 150;
   FHeight := 100;
   FIsContainer := True;
+  FTabOptions  := [];
 
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
