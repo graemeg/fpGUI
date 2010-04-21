@@ -40,12 +40,14 @@ type
     FFilter: TfpgString;
     FOnButtonClick: TNotifyEvent;
     FInitialDir: TfpgString;
+    FReadOnly: Boolean;
     function GetExtraHint: TfpgString;
     procedure SetExtraHint(const AValue: TfpgString);
     procedure SetFilter(const AValue: TfpgString);
     procedure btnClick(Sender: TObject);
     procedure SetFileName(const AValue: TfpgString);
     function GetFileName: TfpgString;
+    procedure SetReadOnly(const AValue: Boolean);
   protected
     procedure HandlePaint; override;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
@@ -56,6 +58,7 @@ type
     property FileName: TfpgString read GetFileName write SetFileName;
     property InitialDir: TfpgString read FInitialDir write FInitialDir;
     property Filter: TfpgString read FFilter write SetFilter;
+    property ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property TabOrder;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   end;
@@ -67,11 +70,13 @@ type
     FButton: TfpgButton;
     FOnButtonClick: TNotifyEvent;
     FRootDirectory: TfpgString;
+    FReadOnly: Boolean;
     function GetDirectory: TfpgString;
     procedure btnClick(Sender: TObject);
     function GetExtraHint: TfpgString;
     procedure SetDirectory(const AValue: TfpgString);
     procedure SetExtraHint(const AValue: TfpgString);
+    procedure SetReadOnly(const AValue: Boolean);
   protected
     procedure HandlePaint; override;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
@@ -81,6 +86,7 @@ type
     property Directory: TfpgString read GetDirectory write SetDirectory;
     property ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
     property RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
+    property ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property TabOrder;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   end;
@@ -91,7 +97,9 @@ type
     FEdit: TfpgEdit;
     FButton: TfpgButton;
     FOnButtonClick: TNotifyEvent;
+    FReadOnly: Boolean;
     procedure btnClick(Sender: TObject);
+    procedure SetReadOnly(const AValue: Boolean);
   protected
     function GetFontDesc: string; override;
     procedure SetFontDesc(const AValue: string); override;
@@ -101,6 +109,7 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property FontDesc;
+    property ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property TabOrder;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   end;
@@ -123,6 +132,7 @@ begin
   FWidth          := 140;
   FHeight         := 24;
   FFilter         := '';
+  FReadOnly       := False;
 
   FEdit := TfpgEdit.Create(self);
   with FEdit do
@@ -205,6 +215,15 @@ begin
   Result := FEdit.Text;
 end;
 
+procedure TfpgFileNameEdit.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly = AValue then
+    Exit;
+  FReadOnly := AValue;
+  FEdit.ReadOnly := FReadOnly;
+  FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
+end;
+
 procedure TfpgFileNameEdit.HandlePaint;
 var
   img: TfpgImage;
@@ -258,6 +277,7 @@ begin
   inherited Create(AOwner);
   FWidth          := 140;
   FHeight         := 24;
+  FReadOnly       := False;
 
   FEdit := TfpgEdit.Create(self);
   with FEdit do
@@ -322,6 +342,15 @@ begin
   FEdit.ExtraHint := AValue;
 end;
 
+procedure TfpgDirectoryEdit.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly = AValue then
+    Exit;
+  FReadOnly := AValue;
+  FEdit.ReadOnly := FReadOnly;
+  FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
+end;
+
 procedure TfpgDirectoryEdit.HandlePaint;
 var
   img: TfpgImage;
@@ -379,6 +408,15 @@ begin
     FontDesc := f;
   if Assigned(OnButtonClick) then
 	  OnButtonClick(self);
+end;
+
+procedure TfpgFontEdit.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly = AValue then
+    Exit;
+  FReadOnly := AValue;
+  FEdit.ReadOnly := FReadOnly;
+  FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
 end;
 
 function TfpgFontEdit.GetFontDesc: string;
@@ -440,6 +478,7 @@ begin
   Text            := '';
   FWidth          := 140;
   FHeight         := 24;
+  FReadOnly       := False;
 
   FEdit := TfpgEdit.Create(self);
   with FEdit do
