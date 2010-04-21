@@ -93,7 +93,7 @@ type
     FOnChange: TTabSheetChange;
     FRightButton: TfpgButton;         // bottom/right
     FLeftButton: TfpgButton;          // left/top
-    FFirstTabButton: TfpgTabSheet;
+    FFirstTabButton: TfpgTabSheet;    // when tabs don't fit in screen this is the first button on screen when tabs are scrolled
     FSortPages: boolean;
     FStyle: TfpgTabStyle;
     FTabPosition: TfpgTabPosition;
@@ -685,6 +685,63 @@ begin
   if not Enabled then
     Include(lTxtFlags, txtDisabled);
 
+
+  if TabPosition in [tpTop, tpBottom] then
+  begin
+    if MaxButtonWidthSum > (Width-(FMargin*2)) then
+    begin
+      if FFirstTabButton = nil then
+        FFirstTabButton := h
+      else
+        h := FFirstTabButton;
+      if TabPosition = tpTop then
+      begin
+        FLeftButton.SetPosition(Width - (FRightButton.Width * 2), FMargin, FRightButton.Height, FRightButton.Height);
+        FRightButton.SetPosition(Width - FRightButton.Width, FMargin, FRightButton.Height, FRightButton.Height);
+      end
+      else
+      begin
+        FLeftButton.SetPosition(Width - (FRightButton.Width * 2), Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+        FRightButton.SetPosition(Width - FRightButton.Width, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+      end;
+      FLeftButton.Visible   := True;
+      FRightButton.Visible  := True;
+    end
+    else
+    begin
+      FLeftButton.Visible   := False;
+      FRightButton.Visible  := False;
+    end;
+  end;
+
+  if TabPosition in [tpLeft, tpRight] then
+  begin
+    if MaxButtonHeightSum > (Height-(FMargin*2)) then
+    begin
+      if FFirstTabButton = nil then
+        FFirstTabButton := h
+      else
+        h := FFirstTabButton;
+      if TabPosition = tpLeft then
+      begin
+        FLeftButton.SetPosition(MaxButtonWidth - (FRightButton.Width * 2), Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+        FRightButton.SetPosition(MaxButtonWidth - FRightButton.Width, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+      end
+      else
+      begin
+        FLeftButton.SetPosition(Width - MaxButtonWidth, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+        FRightButton.SetPosition(Width - MaxButtonWidth + FRightButton.Width, Height - ButtonHeight - FMargin, FRightButton.Height, FRightButton.Height);
+      end;
+      FLeftButton.Visible   := True;
+      FRightButton.Visible  := True;
+    end
+    else
+    begin
+      FLeftButton.Visible   := False;
+      FRightButton.Visible  := False;
+    end;
+  end;
+
   case TabPosition of
     tpNone:
       begin
@@ -710,22 +767,6 @@ begin
     tpBottom:
       begin
         lTxtFlags += TextFlagsDflt;
-        if MaxButtonWidthSum > (Width-(FMargin*2)) then
-        begin
-          if FFirstTabButton = nil then
-            FFirstTabButton := h
-          else
-            h := FFirstTabButton;
-          FLeftButton.SetPosition(Width - (FRightButton.Width * 2), Height - ButtonHeight-FMargin, FRightButton.Height, FRightButton.Height);
-          FRightButton.SetPosition(Width - FrightButton.Width, Height - ButtonHeight-FMargin, FRightButton.Height, FRightButton.Height);
-          FLeftButton.Visible   := True;
-          FRightButton.Visible  := True;
-        end
-        else
-        begin
-          FLeftButton.Visible   := False;
-          FRightButton.Visible  := False;
-        end;
         lp := 0;
         r2.SetRect(2, Height - ButtonHeight-3, 50, 21);
         while h <> nil do
@@ -770,23 +811,6 @@ begin
     tpTop:
       begin
         lTxtFlags += TextFlagsDflt;
-        if MaxButtonWidthSum > (Width-(FMargin*2)) then
-        begin
-          if FFirstTabButton = nil then
-            FFirstTabButton := h
-          else
-            h := FFirstTabButton;
-          FLeftButton.SetPosition(Width - (FRightButton.Width * 2), FMargin, FRightButton.Height, FRightButton.Height);
-          FRightButton.SetPosition(Width - FrightButton.Width, FMargin, FRightButton.Height, FRightButton.Height);
-          FLeftButton.Visible   := True;
-          FRightButton.Visible  := True;
-        end
-        else
-        begin
-          FLeftButton.Visible   := False;
-          FRightButton.Visible  := False;
-        end;
-
         lp := 0;
         r2.SetRect(2, 2, 50, 21);
         while h <> nil do
@@ -977,7 +1001,7 @@ begin
 
     tpBottom:
       begin
-        p1 := Height - FMargin - Buttonheight;
+        p1 := Height - FMargin - ButtonHeight;
         p2 := Height - FMargin;
       end;
 
