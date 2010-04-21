@@ -14,14 +14,8 @@ procedure MainProc;
 var
   frm: TMainForm;
 begin
-  FPG_DEFAULT_FONT_DESC := 'DejaVu Sans-9';
-
+//  FPG_DEFAULT_FONT_DESC := 'DejaVu Sans-9';
   fpgApplication.Initialize;
-
-//  fpgSetNamedFont('Grid', 'DejaVu Sans-8');
-//  fpgSetNamedFont('GridHeader', 'DejaVu Sans-8:bold');
-
-
   frm := TMainForm.Create(nil);
   try
     frm.Show;

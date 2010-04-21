@@ -780,6 +780,25 @@ begin
   {@VFD_BODY_END: MainForm}
   {%endregion}
 
+{
+  pcEditor.AppendTabSheet('Five');
+  pcEditor.AppendTabSheet('Six');
+  pcEditor.AppendTabSheet('Seven');
+  pcEditor.AppendTabSheet('Eight');
+  pcEditor.AppendTabSheet('Nine');
+  pcEditor.AppendTabSheet('Ten');
+  pcEditor.AppendTabSheet('11');
+  pcEditor.AppendTabSheet('12');
+  pcEditor.AppendTabSheet('13');
+  pcEditor.AppendTabSheet('14');
+  pcEditor.AppendTabSheet('15');
+  pcEditor.AppendTabSheet('16');
+  pcEditor.AppendTabSheet('17');
+  pcEditor.AppendTabSheet('18');
+  pcEditor.AppendTabSheet('19');
+  pcEditor.AppendTabSheet('20');
+}
+
   mainmenu.AddMenuItem('&File', nil).SubMenu := mnuFile;
   mainmenu.AddMenuItem('&Edit', nil).SubMenu := mnuEdit;
   mainmenu.AddMenuItem('&Search', nil).SubMenu := mnuSearch;
