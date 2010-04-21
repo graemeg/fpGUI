@@ -1390,19 +1390,25 @@ end;
 procedure TfpgBaseTextEdit.HandlePaint;
 var
   r: TfpgRect;
+  flags: TFTextFlags;
 begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
+  r.Left := -FDrawOffset + GetMarginAdjustment;
 
   if Enabled and (FVisibleText = '') and (not Focused) then
   begin
     Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
+    flags := [txtLeft, txtVCenter];
+    Canvas.DrawText(r, FExtraHint, flags);    // fpgStyle.DrawString is called internally
   end
   else
   begin
     Canvas.SetTextColor(FTextColor);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
+    flags := [txtLeft, txtVCenter];
+    if not Enabled then
+      flags += [txtDisabled];
+    Canvas.DrawText(r, FVisibleText, flags);  // fpgStyle.DrawString is called internally
   end;
 
   if Focused then
