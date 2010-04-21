@@ -121,6 +121,8 @@ type
 
 
   TfpgStringGrid = class(TfpgCustomStringGrid)
+  public
+    property    Font;
   published
     property    BackgroundColor;
 //    property    ColResizing;
