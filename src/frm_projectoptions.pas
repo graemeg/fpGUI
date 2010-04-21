@@ -12,6 +12,7 @@ uses
 type
 
   TProjectOptionsForm = class(TfpgForm)
+    procedure CellEditExit(Sender: TObject);
   private
     {@VFD_HEAD_BEGIN: ProjectOptionsForm}
     btnCancel: TfpgButton;
@@ -59,24 +60,20 @@ type
     FCellEdit: TfpgEdit;
     FFocusRect: TfpgRect;
     FLastGrid: TfpgStringGrid; // reference only
-    procedure CellEditKeypressed(Sender: TObject; var KeyCode: word;
-        var ShiftState: TShiftState; var Consumed: boolean);
-    procedure grdCompilerDirsDrawCell(Sender: TObject; const ARow,
-        ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
-        var ADefaultDrawing: boolean);
-    procedure grdCompilerDirsKeyPressed(Sender: TObject; var KeyCode: word;
-        var ShiftState: TShiftState; var Consumed: boolean);
-    procedure grdCompilerMakeOptionsKeyPressed(Sender: TObject; var KeyCode: word;
-        var ShiftState: TShiftState; var Consumed: boolean);
-    procedure grdCompilerMakeOptionsDrawCell(Sender: TObject; const ARow,
-        ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState;
-        var ADefaultDrawing: boolean);
+    FCheckFont: TfpgFont;
+    procedure CellEditKeypressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure grdCompilerDirsDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+    procedure grdCompilerDirsKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure grdCompilerMakeOptionsKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure grdCompilerMakeOptionsDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure grdCompilerMakeOptionsClicked(Sender: TObject);
     procedure grdCompilerDirsClicked(Sender: TObject);
     procedure LoadSettings;
     procedure SaveSettings;
     procedure SetupCellEdit(AGrid: TfpgStringGrid);
   public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     procedure AfterCreate; override;
   end;
 
@@ -91,6 +88,37 @@ uses
   Project
   ,ideconst
   ;
+
+const
+  cMultiplicationX = #$E2#$9C#$95;
+  cNormCheck = #$E2#$9C#$93;
+  cHeavyCheck = #$E2#$9C#$94;
+  cHeavyX = #$E2#$9C#$96;
+  cMedCircle = #$E2#$9A#$AB;
+  cX = #$78;
+  cCheck = cHeavyCheck;
+{
+  U+2715 MULTIPLICATION X
+    UTF-8: 0xE2 0x9C 0x95
+    UTF-16: 0x2715
+
+  U+2713 CHECK MARK
+    UTF-8: 0xE2 0x9C 0x93
+    UTF-16: 0x2713
+
+  U+2714 HEAVY CHECK MARK
+    UTF-8: 0xE2 0x9C 0x94
+    UTF-16: 0x2714
+
+  U+2716 HEAVY MULTIPLICATION X
+    UTF-8: 0xE2 0x9C 0x96
+    UTF-16: 0x2716
+
+  U+26AB MEDIUM BLACK CIRCLE
+    UTF-8: 0xE2 0x9A 0xAB
+    UTF-16: 0x26AB
+}
+
 
 procedure DisplayProjectOptions;
 var
@@ -111,6 +139,11 @@ begin
 end;
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TProjectOptionsForm.CellEditExit(Sender: TObject);
+begin
+  FCellEdit.Visible := False;
+end;
 
 procedure TProjectOptionsForm.CellEditKeypressed(Sender: TObject;
   var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
@@ -142,17 +175,28 @@ begin
   begin
     FFocusRect := ARect;
   end;
+
+  if ACol < 10 then
+    grdCompilerDirs.Canvas.SetFont(FCheckFont)
+  else
+    grdCompilerDirs.Canvas.Setfont(grdCompilerDirs.Font);
 end;
 
 procedure TProjectOptionsForm.grdCompilerDirsKeyPressed(Sender: TObject;
   var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 begin
   if TfpgStringGrid(Sender).FocusCol < 10 then
-    Exit;
-  if (KeyCode = keyF2) or (KeyCode = keyReturn) then
   begin
-    // we need to edit the cell contents
-    SetupCellEdit(TfpgStringGrid(Sender));
+    if (KeyCode = keySpace) then
+      grdCompilerDirsClicked(Sender);
+  end
+  else if TfpgStringGrid(Sender).FocusCol = 10 then
+  begin
+    if (KeyCode = keyF2) or (KeyCode = keyReturn) then
+    begin
+      // we need to edit the cell contents
+      SetupCellEdit(TfpgStringGrid(Sender));
+    end;
   end;
 end;
 
@@ -160,11 +204,17 @@ procedure TProjectOptionsForm.grdCompilerMakeOptionsKeyPressed(Sender: TObject;
   var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 begin
   if TfpgStringGrid(Sender).FocusCol < 6 then
-    Exit;
-  if (KeyCode = keyF2) or (KeyCode = keyReturn) then
   begin
-    // we need to edit the cell contents
-    SetupCellEdit(TfpgStringGrid(Sender));
+    if (KeyCode = keySpace) then
+      grdCompilerMakeOptionsClicked(Sender);
+  end
+  else if TfpgStringGrid(Sender).FocusCol = 6 then
+  begin
+    if (KeyCode = keyF2) or (KeyCode = keyReturn) then
+    begin
+      // we need to edit the cell contents
+      SetupCellEdit(TfpgStringGrid(Sender));
+    end;
   end;
 end;
 
@@ -176,18 +226,23 @@ begin
   begin
     FFocusRect := ARect;
   end;
+
+  if ACol < 6 then
+    grdCompilerMakeOptions.Canvas.SetFont(FCheckFont)
+  else
+    grdCompilerMakeOptions.Canvas.Setfont(grdCompilerMakeOptions.Font);
 end;
 
 procedure TProjectOptionsForm.grdCompilerMakeOptionsClicked(Sender: TObject);
 var
   r, c: integer;
 begin
-  r := grdCompilerMakeOptions.FocusRow;
-  c := grdCompilerMakeOptions.FocusCol;
+  r := TfpgStringGrid(Sender).FocusRow;
+  c := TfpgStringGrid(Sender).FocusCol;
   if c < 6 then   // checkbox area
   begin
     if TfpgStringGrid(Sender).Cells[c, r] = '' then
-      TfpgStringGrid(Sender).Cells[c, r] := 'x'
+      TfpgStringGrid(Sender).Cells[c, r] := cCheck
     else
       TfpgStringGrid(Sender).Cells[c, r] := '';
   end;
@@ -202,7 +257,7 @@ begin
   if c < 10 then   // checkbox area
   begin
     if TfpgStringGrid(Sender).Cells[c, r] = '' then
-      TfpgStringGrid(Sender).Cells[c, r] := 'x'
+      TfpgStringGrid(Sender).Cells[c, r] := cCheck
     else
       TfpgStringGrid(Sender).Cells[c, r] := '';
   end;
@@ -223,17 +278,22 @@ begin
     grdCompilerMakeOptions.Cells[6, i] := GProject.MakeOptions[i];
   end;
 
-  grdCompilerMakeOptions.Cells[0, 0] := 'x';
-  grdCompilerMakeOptions.Cells[1, 0] := 'x';
-  grdCompilerMakeOptions.Cells[2, 0] := 'x';
-  grdCompilerMakeOptions.Cells[3, 0] := 'x';
-  grdCompilerMakeOptions.Cells[4, 0] := 'x';
-  grdCompilerMakeOptions.Cells[5, 0] := 'x';
+  for i := 0 to GProject.UnitDirs.Count-1 do
+  begin
+    grdCompilerDirs.Cells[10, i] := GProject.UnitDirs[i];
+  end;
 
-  grdCompilerMakeOptions.Cells[0, 1] := 'x';
-  grdCompilerMakeOptions.Cells[1, 1] := 'x';
+  grdCompilerMakeOptions.Cells[0, 0] := cCheck;
+  grdCompilerMakeOptions.Cells[1, 0] := cCheck;
+  grdCompilerMakeOptions.Cells[2, 0] := cCheck;
+  grdCompilerMakeOptions.Cells[3, 0] := cCheck;
+  grdCompilerMakeOptions.Cells[4, 0] := cCheck;
+  grdCompilerMakeOptions.Cells[5, 0] := cCheck;
 
-  grdCompilerMakeOptions.Cells[2, 2] := 'x';
+  grdCompilerMakeOptions.Cells[0, 1] := cCheck;
+  grdCompilerMakeOptions.Cells[1, 1] := cCheck;
+
+  grdCompilerMakeOptions.Cells[2, 2] := cCheck;
 end;
 
 procedure TProjectOptionsForm.SaveSettings;
@@ -261,8 +321,21 @@ begin
     FontDesc := '#Grid';
     Text := AGrid.Cells[AGrid.FocusCol, AGrid.FocusRow];
     OnKeyPress := @CellEditKeypressed;
+    OnExit  := @CellEditExit;
     SetFocus;
   end;
+end;
+
+constructor TProjectOptionsForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FCheckFont := fpgGetFont('DejaVu Sans-9');
+end;
+
+destructor TProjectOptionsForm.Destroy;
+begin
+  FCheckFont.Free;
+  inherited Destroy;
 end;
 
 procedure TProjectOptionsForm.AfterCreate;
