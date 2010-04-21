@@ -7,12 +7,11 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
   fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_customgrid, fpg_basegrid,
-  fpg_combobox, fpg_edit;
+  fpg_combobox, fpg_edit, fpg_memo;
 
 type
 
   TProjectOptionsForm = class(TfpgForm)
-    procedure CellEditExit(Sender: TObject);
   private
     {@VFD_HEAD_BEGIN: ProjectOptionsForm}
     btnCancel: TfpgButton;
@@ -56,11 +55,14 @@ type
     TabSheet6: TfpgTabSheet;
     TabSheet7: TfpgTabSheet;
     grdDebugSrcDirs: TfpgStringGrid;
+    btnShowCmdLine: TfpgButton;
     {@VFD_HEAD_END: ProjectOptionsForm}
     FCellEdit: TfpgEdit;
     FFocusRect: TfpgRect;
     FLastGrid: TfpgStringGrid; // reference only
     FCheckFont: TfpgFont;
+    procedure btnShowCmdLineClicked(Sender: TObject);
+    procedure CellEditExit(Sender: TObject);
     procedure CellEditKeypressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure grdCompilerDirsDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure grdCompilerDirsKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
@@ -85,7 +87,8 @@ procedure DisplayProjectOptions;
 implementation
 
 uses
-  Project
+  fpg_iniutils
+  ,Project
   ,ideconst
   ;
 
@@ -139,6 +142,62 @@ begin
 end;
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TProjectOptionsForm.btnShowCmdLineClicked(Sender: TObject);
+var
+  c: TfpgString;
+  i: integer;
+  b: integer;
+
+  procedure ShowString(const AString: TfpgString; const AHeading: TfpgString);
+  var
+    lForm: TfpgForm;
+    lMemo: TfpgMemo;
+  begin
+    lForm := TfpgForm.Create(nil);
+    lMemo := TfpgMemo.Create(lForm);
+    try
+      lForm.WindowTitle := AHeading;
+      lForm.Width       := 450;
+      lForm.Height      := 250;
+      lForm.WindowPosition := wpOneThirdDown;
+      lForm.Name        := 'FormShowStrings';
+      lMemo.Lines.Text  := AString;
+      lMemo.FontDesc    := 'Courier New-10';
+      lMemo.SetPosition(0, 0, lForm.Width, lForm.Height);
+      lMemo.Align       := alClient;
+      lForm.ShowModal;
+    finally
+      lForm.free;
+    end;
+  end;
+
+begin
+  // build compilation string
+  c := gINI.ReadString(cEnvironment, 'Compiler', '') + LineEnding;
+  b := cbDefaultMakeCol.FocusItem;
+  // include dirs
+  for i := 0 to GProject.UnitDirs.Count-1 do
+    if GProject.UnitDirsGrid[b, i] and GProject.UnitDirsGrid[7, i] then
+      c := c + ' -Fi' + GProject.UnitDirs[i] + LineEnding;
+  // unit dirs
+  for i := 0 to GProject.UnitDirs.Count-1 do
+    if GProject.UnitDirsGrid[b, i] and GProject.UnitDirsGrid[6, i] then
+      c := c + ' -Fu' + GProject.UnitDirs[i] + LineEnding;
+  // unit output dir
+  if GProject.UnitOutputDir <> '' then
+    c := c + ' -FU' + GProject.UnitOutputDir + LineEnding;
+  // make option - compiler flags
+  for i := 0 to GProject.MakeOptions.Count-1 do
+    if GProject.MakeOptionsGrid[b, i] then
+      c := c + ' ' + GProject.MakeOptions[i];
+  // target output file
+  c := c + ' -o' + GProject.TargetFile;
+  // unit to start compilation
+  c := c + ' ' + GProject.MainUnit;
+
+  ShowString(c, 'Compile command');
+end;
 
 procedure TProjectOptionsForm.CellEditExit(Sender: TObject);
 begin
@@ -811,6 +870,19 @@ begin
     RowSelect := False;
     ShowHeader := False;
     TabOrder := 1;
+  end;
+
+  btnShowCmdLine := TfpgButton.Create(tsCompiler);
+  with btnShowCmdLine do
+  begin
+    Name := 'btnShowCmdLine';
+    SetPosition(160, 172, 132, 24);
+    Text := 'Show command line';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 16;
+    OnClick :=@btnShowCmdLineClicked;
   end;
 
   {@VFD_BODY_END: ProjectOptionsForm}
