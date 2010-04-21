@@ -265,7 +265,7 @@ end;
 
 procedure TProjectOptionsForm.LoadSettings;
 var
-  i: integer;
+  i, j: integer;
 begin
   edtMainFile.FileName := GProject.MainUnit;
   edtTargetFile.FileName := GProject.TargetFile;
@@ -276,13 +276,25 @@ begin
   for i := 0 to GProject.MakeOptions.Count-1 do
   begin
     grdCompilerMakeOptions.Cells[6, i] := GProject.MakeOptions[i];
+    for j := 0 to 5 do // we know there is only 6 boolean columns
+    begin
+      if GProject.MakeOptionsGrid[j, i] then
+        grdCompilerMakeOptions.Cells[j, i] := cCheck;
+    end;
   end;
 
+  grdCompilerDirs.RowCount := GProject.UnitDirs.Count;
   for i := 0 to GProject.UnitDirs.Count-1 do
   begin
     grdCompilerDirs.Cells[10, i] := GProject.UnitDirs[i];
+    for j := 0 to 9 do // we know there is only 10 boolean columns
+    begin
+      if GProject.UnitDirsGrid[j, i] then
+        grdCompilerDirs.Cells[j, i] := cCheck;
+    end;
   end;
 
+{
   grdCompilerMakeOptions.Cells[0, 0] := cCheck;
   grdCompilerMakeOptions.Cells[1, 0] := cCheck;
   grdCompilerMakeOptions.Cells[2, 0] := cCheck;
@@ -629,7 +641,7 @@ begin
     TabOrder := 1;
     OnClick := @grdCompilerMakeOptionsClicked;
     OnDrawCell := @grdCompilerMakeOptionsDrawCell;
-    OnKeyPress :=@grdCompilerMakeOptionsKeyPressed;
+    OnKeyPress := @grdCompilerMakeOptionsKeyPressed;
   end;
 
   grdCompilerDirs := TfpgStringGrid.Create(TabSheet2);
@@ -652,12 +664,12 @@ begin
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
     Hint := '';
-    RowCount := 4;
+    RowCount := 0;
     RowSelect := False;
     TabOrder := 1;
     OnClick := @grdCompilerDirsClicked;
     OnDrawCell := @grdCompilerDirsDrawCell;
-    OnKeyPress :=@grdCompilerDirsKeyPressed;
+    OnKeyPress := @grdCompilerDirsKeyPressed;
   end;
 
   Label11 := TfpgLabel.Create(TabSheet2);
