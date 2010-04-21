@@ -371,6 +371,7 @@ function  fpgRectToRect(const ARect: TfpgRect): TRect;
 procedure PrintRect(const Rect: TRect);
 procedure PrintRect(const Rect: TfpgRect);
 procedure PrintCoord(const x, y: TfpgCoord);
+procedure PrintCoord(const pt: TPoint);
 function  PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 procedure PrintCallTraceDbgLn(const AMessage: string);
 procedure DumpStack;
@@ -703,7 +704,12 @@ begin
   dec(iCallTrace);
   inherited Destroy;
 end;
-  
+
+procedure PrintCoord(const pt: TPoint);
+begin
+  PrintCoord(pt.X, pt.Y);
+end;
+
 function PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 begin
   Result := TPrintCallTrace.Create(AClassName, AMethodName);
