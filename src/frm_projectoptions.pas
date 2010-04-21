@@ -293,19 +293,6 @@ begin
         grdCompilerDirs.Cells[j, i] := cCheck;
     end;
   end;
-
-{
-  grdCompilerMakeOptions.Cells[0, 0] := cCheck;
-  grdCompilerMakeOptions.Cells[1, 0] := cCheck;
-  grdCompilerMakeOptions.Cells[2, 0] := cCheck;
-  grdCompilerMakeOptions.Cells[3, 0] := cCheck;
-  grdCompilerMakeOptions.Cells[4, 0] := cCheck;
-  grdCompilerMakeOptions.Cells[5, 0] := cCheck;
-
-  grdCompilerMakeOptions.Cells[0, 1] := cCheck;
-  grdCompilerMakeOptions.Cells[1, 1] := cCheck;
-
-  grdCompilerMakeOptions.Cells[2, 2] := cCheck;
 end;
 
 procedure TProjectOptionsForm.SaveSettings;
