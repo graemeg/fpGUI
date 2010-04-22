@@ -31,6 +31,7 @@ type
     destructor  Destroy; override;
     function    Count: integer;
     function    FindByName(const AUnitName: TfpgString): TUnit;
+    function    FileExists(const AFilename: TfpgString): Boolean;
     procedure   Add(NewUnit: TUnit);
     procedure   Clear;
     procedure   Delete(AIndex: integer);
@@ -96,6 +97,19 @@ begin
       exit;
   end;
   Result := nil;
+end;
+
+function TUnitList.FileExists(const AFilename: TfpgString): Boolean;
+var
+  i: integer;
+begin
+  Result := False;
+  for i := 0 to Count-1 do
+  begin
+    Result := Items[i].FileName = AFilename;
+    if Result then
+      Exit;
+  end;
 end;
 
 procedure TUnitList.Add(NewUnit: TUnit);
