@@ -128,14 +128,14 @@ procedure TUnitList.Clear;
 var
   i: integer;
 begin
-  for i := 0 to Count-1 do
-    Items[i].Free;
+  for i := Count-1 downto 0 do
+    TUnit(FList[i]).Free;
   FList.Clear;
 end;
 
 procedure TUnitList.Delete(AIndex: integer);
 begin
-  Items[AIndex].Free;
+  TUnit(FList[AIndex]).Free;
   FList.Delete(AIndex);
 end;
 
