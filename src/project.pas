@@ -196,6 +196,7 @@ begin
   FIniFile.WriteString(cProjectOptions, 'MainUnit', MainUnit);
   FIniFile.WriteString(cProjectOptions, 'TargetFile', TargetFile);
   FIniFile.WriteInteger(cProjectOptions, 'DefaultMake', DefaultMake);
+  FIniFile.WriteString(cProjectOptions, 'UnitOutputDir', UnitOutputDir);
 
   // various make options
   SaveList(MakeOptions, 'MakeOptionsCount', cINIMakeOption);
@@ -206,7 +207,13 @@ begin
   // unit search directories
   SaveList(UnitDirs, 'UnitDirsCount', 'UnitDir');
 
-  FIniFile.WriteString(cProjectOptions, 'UnitOutputDir', UnitOutputDir);
+  // Unit file list
+  FIniFile.WriteInteger(cUnits, 'UnitCount', UnitList.Count);
+  for j := 0 to UnitList.Count-1 do
+  begin
+    FIniFile.WriteString(cUnits, 'Unit' + IntToStr(j+1),
+        Format('%s,%s', [UnitList[j].FileName, BoolToStr(UnitList[j].Opened, '1', '0')]));
+  end;
 
   Result := True;
 end;
@@ -218,17 +225,18 @@ var
   j: integer;
   l: integer;
   sl: TStringList;
+  u: TUnit;
 
   // CName = xxxCount & IName is the Item name
-  procedure LoadList(AList: TStringList; const CName, IName: TfpgString);
+  procedure LoadList(ASection: TfpgString; AList: TStringList; const CName, IName: TfpgString);
   var
     c: integer;
     i: integer;
   begin
-    c := FIniFile.ReadInteger(cProjectOptions, CName, 0);
+    c := FIniFile.ReadInteger(ASection, CName, 0);
     for i := 0 to c-1 do
     begin
-      s := FIniFile.ReadString(cProjectOptions, IName + IntToStr(i+1), '');
+      s := FIniFile.ReadString(ASection, IName + IntToStr(i+1), '');
       if s <> '' then
         AList.Add(s);
     end;
@@ -247,12 +255,13 @@ begin
   MainUnit := FIniFile.ReadString(cProjectOptions, 'MainUnit', '');
   TargetFile := FIniFile.ReadString(cProjectOptions, 'TargetFile', '');
   DefaultMake := FIniFile.ReadInteger(cProjectOptions, 'DefaultMake', 0);
+  UnitOutputDir := FIniFile.ReadString(cProjectOptions, 'UnitOutputDir', 'units/i386-linux/');
 
   // Load make options
-  LoadList(MakeOptions, 'MakeOptionsCount', 'MakeOption');
+  LoadList(cProjectOptions, MakeOptions, 'MakeOptionsCount', 'MakeOption');
   sl := TStringList.Create;
   try
-    LoadList(sl, 'MakeOptionsCount', 'MakeOptionEnabled');
+    LoadList(cProjectOptions, sl, 'MakeOptionsCount', 'MakeOptionEnabled');
     SetLength(FMakeOptionsGrid, 6, MakeOptions.Count);    // 6 columns by X rows
     for j := 0 to sl.Count-1 do
     begin
@@ -268,13 +277,13 @@ begin
   end;
 
   // Load Macro definitions
-  LoadList(MacroNames, 'MacroCount', 'Macro');
+  LoadList(cProjectOptions, MacroNames, 'MacroCount', 'Macro');
 
   // Load Unit search dirs
-  LoadList(UnitDirs, 'UnitDirsCount', 'UnitDir');
+  LoadList(cProjectOptions, UnitDirs, 'UnitDirsCount', 'UnitDir');
   sl := TStringList.Create;
   try
-    LoadList(sl, 'UnitDirsCount', 'UnitDirEnabled');
+    LoadList(cProjectOptions, sl, 'UnitDirsCount', 'UnitDirEnabled');
     SetLength(FUnitDirsGrid, 10, UnitDirs.Count);    // 10 columns by X rows
     for j := 0 to sl.Count-1 do
     begin
@@ -289,7 +298,20 @@ begin
     sl.Free;
   end;
 
-  UnitOutputDir := FIniFile.ReadString(cProjectOptions, 'UnitOutputDir', 'units/i386-linux/');
+  // Load Unit file list
+  sl := TStringList.Create;
+  try
+    LoadList(cUnits, sl, 'UnitCount', 'Unit');
+    for j := 0 to sl.Count-1 do
+    begin
+      u := TUnit.Create;
+      u.FileName := tiToken(sl[j], ',', 1);
+      u.Opened := Boolean(StrToInt(tiToken(sl[j], ',', 2)));
+      UnitList.Add(u);
+    end;
+  finally
+    sl.Free;
+  end;
 
   Result := True;
 end;
