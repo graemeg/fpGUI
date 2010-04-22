@@ -213,7 +213,18 @@ begin
 end;
 
 procedure TMainForm.miProjectSaveAs(Sender: TObject);
+var
+  s: TfpgString;
+  b: TfpgString;
 begin
+  s := SelectFileDialog(sfdSave, Format(cFileFilterTemplate, ['Project Files', cProjectFiles, cProjectFiles]));
+  if s <> '' then
+  begin
+    b := fpgExtractFileExt(s);
+    if fpgExtractFileExt(s) = '' then
+      s := s + cProjectExt;
+    GProject.Save(s);
+  end;
 
 end;
 
