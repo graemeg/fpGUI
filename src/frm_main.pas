@@ -144,21 +144,32 @@ var
   p: TProcess;
   c: TfpgString;
   i: integer;
+  b: integer;
 begin
   p := TProcess.Create(nil);
   p.ShowWindow := swoShowNormal;
   p.CurrentDirectory := GProject.ProjectDir;
+
   // build compilation string
-  c := gINI.ReadString(cEnvironment, 'Compiler', '') + ' ';
+  c := gINI.ReadString(cEnvironment, 'Compiler', '');
+  b := GProject.DefaultMake;
+  // include dirs
+  for i := 0 to GProject.UnitDirs.Count-1 do
+    if GProject.UnitDirsGrid[b, i] and GProject.UnitDirsGrid[7, i] then
+      c := c + ' -Fi' + GProject.UnitDirs[i];
   // unit dirs
   for i := 0 to GProject.UnitDirs.Count-1 do
-    c := c + ' -Fu' + GProject.UnitDirs[i];
+    if GProject.UnitDirsGrid[b, i] and GProject.UnitDirsGrid[6, i] then
+      c := c + ' -Fu' + GProject.UnitDirs[i];
   // unit output dir
-  c := c + ' -FU' + GProject.UnitOutputDir;
+  if GProject.UnitOutputDir <> '' then
+    c := c + ' -FU' + GProject.UnitOutputDir;
+  // make option - compiler flags
+  for i := 0 to GProject.MakeOptions.Count-1 do
+    if GProject.MakeOptionsGrid[b, i] then
+      c := c + ' ' + GProject.MakeOptions[i];
   // target output file
   c := c + ' -o' + GProject.TargetFile;
-  // make option - compiler flags
-  c := c + ' ' + GProject.MakeOptions[GProject.DefaultMake];
   // unit to start compilation
   c := c + ' ' + GProject.MainUnit;
 
