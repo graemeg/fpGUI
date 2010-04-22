@@ -61,6 +61,7 @@ type
     procedure   miViewDebug(Sender: TObject);
     procedure   miProjectOptions(Sender: TObject);
     procedure   miProjectOpen(Sender: TObject);
+    procedure   miProjectSave(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   UpdateStatus(const AText: TfpgString);
@@ -204,6 +205,11 @@ begin
     OpenEditorPage(GProject.ProjectDir + GProject.MainUnit);
     AddMessage('Project loaded');
   end;
+end;
+
+procedure TMainForm.miProjectSave(Sender: TObject);
+begin
+  GProject.Save;
 end;
 
 procedure TMainForm.miProjectSaveAs(Sender: TObject);
@@ -583,7 +589,7 @@ begin
     AddMenuItem('New from Template...', '', nil);
     AddMenuItem('Open...', '', @miProjectOpen);
     AddMenuItem('Open Recent', '', nil);
-    AddMenuItem('Save...', '', nil);
+    AddMenuItem('Save', '', @miProjectSave);
     AddMenuItem('Save As...', '', @miProjectSaveAs);
     AddMenuItem('-', '', nil);
     AddMenuItem('View Source', '', nil);
