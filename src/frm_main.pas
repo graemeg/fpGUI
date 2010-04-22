@@ -261,7 +261,11 @@ end;
 procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
 var
   n: TfpgTreeNode;
+  u: TUnit;
 begin
+  u := GProject.UnitList.FindByName(ATabSheet.Text);
+  if Assigned(u) then
+    u.Opened := False;
   n := tvProject.RootNode.FindSubNode(ATabSheet, True);
   if Assigned(n) then
   begin
