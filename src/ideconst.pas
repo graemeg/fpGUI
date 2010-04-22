@@ -13,6 +13,7 @@ const
   // Project Options
   cProjectOptions  = 'ProjectOptions';
   cOpenedUnits     = 'OpenedUnits';
+  cUnits           = 'Units';
 
   // INI Environment
   cEnvironment    = 'Environment';
