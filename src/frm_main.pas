@@ -325,44 +325,49 @@ var
   i: integer;
   found: Boolean;
   ts: TfpgTabSheet;
+  m: TfpgMemo;
 begin
   s := AFilename;
-    f := fpgExtractFileName(s);
-    found := False;
-    for i := 0 to pcEditor.PageCount-1 do
-    begin
-      if pcEditor.Pages[i].Text = f then
-        found := True;
-      if found then
-        break;
-    end;
+  f := fpgExtractFileName(s);
+  found := False;
+  for i := 0 to pcEditor.PageCount-1 do
+  begin
+    if pcEditor.Pages[i].Text = f then
+      found := True;
     if found then
-    begin
-      // reuse existing tab
-      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.BeginUpdate;
-      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.LoadFromFile(s);
-      TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
-      pcEditor.ActivePageIndex := i;
-      ts := pcEditor.ActivePage;
-    end
-    else
-    begin
-      // we need a new tabsheet
-      ts := pcEditor.AppendTabSheet(f);
-      CreateMemo(ts, 1, 1, 200, 20).Align := alClient;
-      TfpgMemo(ts.Components[0]).Lines.BeginUpdate;
-      TfpgMemo(ts.Components[0]).Lines.LoadFromFile(s);
-      TfpgMemo(ts.Components[0]).Lines.EndUpdate;
-    end;
-    UpdateStatus(s);
-    n := tvProject.RootNode.FindSubNode('Units', True);
-    if Assigned(n) then
-    begin
-      n := n.AppendText(f);
-      n.Data := ts;
-      tvProject.Selection := n;
-    end;
-
+      break;
+  end;
+  if found then
+  begin
+    // reuse existing tab
+    TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.BeginUpdate;
+    TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.LoadFromFile(s);
+    TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
+    pcEditor.ActivePageIndex := i;
+    ts := pcEditor.ActivePage;
+  end
+  else
+  begin
+    // we need a new tabsheet
+    ts := pcEditor.AppendTabSheet(f);
+    m := CreateMemo(ts, 1, 1, 200, 20);
+    m.Align := alClient;
+    m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
+    TfpgMemo(ts.Components[0]).Lines.BeginUpdate;
+    TfpgMemo(ts.Components[0]).Lines.LoadFromFile(s);
+    TfpgMemo(ts.Components[0]).Lines.EndUpdate;
+    ts.Realign;
+    pcEditor.ActivePage := ts;
+  end;
+  ts.Hint := s;
+  UpdateStatus(s);
+  n := tvProject.RootNode.FindSubNode('Units', True);
+  if Assigned(n) then
+  begin
+    n := n.AppendText(f);
+    n.Data := ts;
+    tvProject.Selection := n;
+  end;
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
