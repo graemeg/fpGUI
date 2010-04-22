@@ -47,12 +47,12 @@ uses
 
 function TUnitList.GetItems(AIndex: integer): TUnit;
 begin
-
+  Result := TUnit(FList[AIndex]);
 end;
 
 procedure TUnitList.SetItems(AIndex: integer; const AValue: TUnit);
 begin
-
+  FList[AIndex] := AValue;
 end;
 
 constructor TUnitList.Create;
