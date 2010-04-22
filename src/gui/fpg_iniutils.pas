@@ -53,7 +53,8 @@ implementation
 
 uses
   fpg_main,
-  fpg_constants;
+  fpg_constants,
+  fpg_utils;
 
 var
   uINI: TfpgINIFile;
@@ -89,7 +90,7 @@ begin
 
   if lFileName = '' then
     lFileName := ApplicationName + '.ini'
-  else if ExtractFileExt(lFileName) = '' then
+  else if fpgExtractFileExt(lFileName) = '' then
     lFileName := lFileName + '.ini';
 
   lFileName := lDir + lFileName;
