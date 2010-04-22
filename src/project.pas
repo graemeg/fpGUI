@@ -28,7 +28,7 @@ type
   public
     constructor Create;
     destructor  Destroy; override;
-    function    Save: Boolean;
+    function    Save(const AFile: TfpgString = ''): Boolean;
     function    Load(AProjectFile: TfpgString): Boolean;
     property    ProjectDir: TfpgString read FProjectDir write FProjectDir;
     property    ProjectName: TfpgString read FProjectName write FProjectName;
@@ -159,7 +159,9 @@ begin
   inherited Destroy;
 end;
 
-function TProject.Save: Boolean;
+function TProject.Save(const AFile: TfpgString = ''): Boolean;
+var
+  j: integer;
 
   procedure SaveList(AList: TStringList; const CName, IName: TfpgString);
   var
@@ -176,7 +178,18 @@ begin
     raise Exception.Create('Project name has not been specified yet');
 
   if not Assigned(FIniFile) then
-    FIniFile := TfpgINIFile.CreateExt(ProjectDir + ProjectName + cProjectExt);
+  begin
+    if AFile = '' then
+      FIniFile := TfpgINIFile.CreateExt(ProjectDir + ProjectName + cProjectExt)
+    else
+      FIniFile := TfpgINIFile.CreateExt(AFile);
+  end
+  else
+  begin
+    if AFile <> '' then
+      FIniFile.Free;
+    FIniFile := TfpgINIFile.CreateExt(AFile);
+  end;
 
   FIniFile.WriteString(cProjectOptions, 'ProjectDir', ProjectDir);
   FIniFile.WriteString(cProjectOptions, 'ProjectName', ProjectName);
