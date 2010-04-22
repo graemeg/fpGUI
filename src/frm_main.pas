@@ -63,6 +63,7 @@ type
     procedure   miProjectOpen(Sender: TObject);
     procedure   miProjectSave(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
+    procedure   miProjectAddUnitToProject(Sender: TObject);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
@@ -89,6 +90,7 @@ uses
   ,frm_debug
   ,ideconst
   ,Project
+  ,UnitList
   ;
 
 
@@ -225,7 +227,24 @@ begin
       s := s + cProjectExt;
     GProject.Save(s);
   end;
+end;
 
+procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
+var
+  u: TUnit;
+  s: TfpgString;
+  i: integer;
+begin
+  s := pcEditor.ActivePage.Hint;
+  writeln('adding unit: ', s);
+  if s = '' then
+    Exit;
+  if GProject.UnitList.FileExists(s) then
+    Exit;
+  u := TUnit.Create;
+  u.FileName := s;
+  u.Opened := True;
+  GProject.UnitList.Add(u);
 end;
 
 procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
@@ -604,7 +623,7 @@ begin
     AddMenuItem('Save As...', '', @miProjectSaveAs);
     AddMenuItem('-', '', nil);
     AddMenuItem('View Source', '', nil);
-    AddMenuItem('Add editor file to Project', '', nil);
+    AddMenuItem('Add editor file to Project', '', @miProjectAddUnitToProject);
   end;
 
   mnuRun := TfpgPopupMenu.Create(self);
