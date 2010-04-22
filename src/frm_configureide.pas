@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_editbtn,
-  fpg_label, fpg_tab, fpg_edit, fpg_grid;
+  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox;
 
 type
 
@@ -44,6 +44,16 @@ type
     tsFileFilters: TfpgTabSheet;
     grdSyntaxDefs: TfpgStringGrid;
     grdFileFilters: TfpgStringGrid;
+    tsExtTools: TfpgTabSheet;
+    Label10: TfpgLabel;
+    edtExtToolMenu: TfpgEdit;
+    Label12: TfpgLabel;
+    edtExtToolFile: TfpgFileNameEdit;
+    Label13: TfpgLabel;
+    edtExtToolParams: TfpgEdit;
+    btnExtToolAdd: TfpgButton;
+    btnExtToolDel: TfpgButton;
+    lbExtTools: TfpgListBox;
     {@VFD_HEAD_END: ConfigureIDEForm}
     procedure LoadSettings;
     procedure SaveSettings;
@@ -471,6 +481,124 @@ begin
     RowCount := 5;
     RowSelect := False;
     TabOrder := 1;
+  end;
+
+  tsExtTools := TfpgTabSheet.Create(pcSettings);
+  with tsExtTools do
+  begin
+    Name := 'tsExtTools';
+    SetPosition(125, 3, 442, 424);
+    Text := 'External Tools';
+  end;
+
+  Label10 := TfpgLabel.Create(tsExtTools);
+  with Label10 do
+  begin
+    Name := 'Label10';
+    SetPosition(8, 234, 212, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Menu Caption';
+  end;
+
+  edtExtToolMenu := TfpgEdit.Create(tsExtTools);
+  with edtExtToolMenu do
+  begin
+    Name := 'edtExtToolMenu';
+    SetPosition(8, 252, 428, 24);
+    Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    Hint := '';
+    TabOrder := 3;
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+
+  Label12 := TfpgLabel.Create(tsExtTools);
+  with Label12 do
+  begin
+    Name := 'Label12';
+    SetPosition(8, 282, 428, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Program';
+  end;
+
+  edtExtToolFile := TfpgFileNameEdit.Create(tsExtTools);
+  with edtExtToolFile do
+  begin
+    Name := 'edtExtToolFile';
+    SetPosition(8, 300, 428, 24);
+    Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    FileName := '';
+    InitialDir := '';
+    Filter := '';
+    TabOrder := 5;
+  end;
+
+  Label13 := TfpgLabel.Create(tsExtTools);
+  with Label13 do
+  begin
+    Name := 'Label13';
+    SetPosition(8, 330, 420, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Parameters';
+  end;
+
+  edtExtToolParams := TfpgEdit.Create(tsExtTools);
+  with edtExtToolParams do
+  begin
+    Name := 'edtExtToolParams';
+    SetPosition(8, 348, 428, 24);
+    Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    Hint := '';
+    TabOrder := 7;
+    Text := '';
+    FontDesc := '#Edit1';
+  end;
+
+  btnExtToolAdd := TfpgButton.Create(tsExtTools);
+  with btnExtToolAdd do
+  begin
+    Name := 'btnExtToolAdd';
+    SetPosition(8, 8, 24, 24);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := -1;
+    ImageName := 'stdimg.add';
+    ImageSpacing := 0;
+    TabOrder := 8;
+  end;
+
+  btnExtToolDel := TfpgButton.Create(tsExtTools);
+  with btnExtToolDel do
+  begin
+    Name := 'btnExtToolDel';
+    SetPosition(34, 8, 24, 24);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := -1;
+    ImageName := 'stdimg.remove';
+    ImageSpacing := 0;
+    TabOrder := 9;
+  end;
+
+  lbExtTools := TfpgListBox.Create(tsExtTools);
+  with lbExtTools do
+  begin
+    Name := 'lbExtTools';
+    SetPosition(8, 33, 428, 192);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#List';
+    Hint := '';
+    HotTrack := False;
+    PopupFrame := False;
+    TabOrder := 10;
   end;
 
   {@VFD_BODY_END: ConfigureIDEForm}
