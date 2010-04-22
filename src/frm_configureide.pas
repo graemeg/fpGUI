@@ -36,7 +36,7 @@ type
     Label8: TfpgLabel;
     Label9: TfpgLabel;
     Label11: TfpgLabel;
-    FontEdit1: TfpgFontEdit;
+    edtEditorFont: TfpgFontEdit;
     edtExeExt: TfpgEdit;
     edtTarget: TfpgEdit;
     grdShortcuts: TfpgStringGrid;
@@ -95,6 +95,7 @@ begin
   edtDebugger.Filename := gINI.ReadString(cEnvironment, 'Debugger', 'gdb');
   edtExeExt.Text := gINI.ReadString(cEnvironment, 'ExeExt', '');
   edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', 'i386-linux');
+  edtEditorFont.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
 end;
 
 procedure TConfigureIDEForm.SaveSettings;
@@ -108,6 +109,9 @@ begin
   gINI.WriteString(cEnvironment, 'Debugger', edtDebugger.Filename);
   gINI.WriteString(cEnvironment, 'ExeExt', edtExeExt.Text);
   gINI.WriteString(cEnvironment, 'Target', edtTarget.Text);
+  gINI.WriteString(cEditor, 'Font', edtEditorFont.FontDesc);
+
+
 end;
 
 procedure TConfigureIDEForm.AfterCreate;
@@ -370,10 +374,10 @@ begin
     Text := 'Font';
   end;
 
-  FontEdit1 := TfpgFontEdit.Create(tsEditor);
-  with FontEdit1 do
+  edtEditorFont := TfpgFontEdit.Create(tsEditor);
+  with edtEditorFont do
   begin
-    Name := 'FontEdit1';
+    Name := 'edtEditorFont';
     SetPosition(8, 22, 424, 24);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Edit1';
