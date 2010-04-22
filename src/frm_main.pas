@@ -59,7 +59,6 @@ type
     procedure   miRunMake(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
-    procedure   miTest(Sender: TObject);
     procedure   miProjectOptions(Sender: TObject);
     procedure   miProjectOpen(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
@@ -181,59 +180,6 @@ begin
   if not Assigned(DebugForm) then
     fpgApplication.CreateForm(TDebugForm, DebugForm);
   DebugForm.Show;
-end;
-
-procedure TMainForm.miTest(Sender: TObject);
-var
-  i: integer;
-begin
-  FreeProject;
-
-  GProject.ProjectDir := '/media/flash16gig/programming/fpgide/src/';
-  GProject.ProjectName := 'fpgide';
-  GProject.MainUnit := 'fpgide.lpr';
-  GProject.TargetFile := 'fpgide';
-  GProject.DefaultMake := 0;
-  GProject.MakeOptions.Add('-l -Mobjfpc -Sch');
-  GProject.MakeOptions.Add('-gl -O-');
-  GProject.MakeOptions.Add('-B');
-  GProject.MakeOptions.Add('-O2 -XX -Xs -CX');
-  GProject.MacroNames.Add('TargetCPU=x86_64');
-  GProject.MacroNames.Add('TargetOS=linux');
-  GProject.MacroNames.Add('TargetCPU=i386');
-  GProject.MacroNames.Add('TargetOS=win32');
-  GProject.MacroNames.Add('FPGUI_DIR=/home/graemeg/programming/fpgui/');
-  GProject.MacroNames.Add('tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/');
-  GProject.UnitDirs.Add('.');
-  GProject.UnitDirs.Add('/home/graemeg/programming/fpgui/lib/i386-linux/');
-  GProject.UnitOutputDir := 'units/i386-linux/';
-
-  if GProject.Save then
-    ShowMessage('Project saved');
-
-  FreeProject;
-  GProject.Load('/media/flash16gig/programming/fpgide/src/fpgide.project');
-
-  writeln('-------------- Project -----------------');
-  writeln('ProjectDir:        ', GProject.ProjectDir);
-  writeln('ProjectName:       ', GProject.ProjectName);
-  writeln('Mainunit:          ', GProject.MainUnit);
-  writeln('TargetFile:        ', GProject.TargetFile);
-  writeln('DefaultMake:       ', GProject.DefaultMake);
-  writeln('MakeOptions count: ', GProject.MakeOptions.Count);
-  for i := 0 to GProject.MakeOptions.Count-1 do
-    writeln(' #', i, '        ', GProject.MakeOptions[i]);
-  writeln('MacroNames count: ', GProject.MacroNames.Count);
-  for i := 0 to GProject.MacroNames.Count-1 do
-    writeln(' #', i, '        ', GProject.MacroNames[i]);
-  writeln('UnitDirs count: ', GProject.UnitDirs.Count);
-  for i := 0 to GProject.UnitDirs.Count-1 do
-    writeln(' #', i, '        ', GProject.UnitDirs[i]);
-  writeln('UnitOutputDir:     ', GProject.UnitOutputDir);
-
-  writeln('');
-  writeln('        ------------------------ ');
-
 end;
 
 procedure TMainForm.miProjectOptions(Sender: TObject);
@@ -483,7 +429,6 @@ begin
     ImageMargin := 0;
     ImageName := 'stdimg.saveall';
     TabOrder := 4;
-    OnClick := @miTest;
   end;
 
   pnlStatusBar := TfpgBevel.Create(self);
