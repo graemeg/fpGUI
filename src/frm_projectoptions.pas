@@ -309,10 +309,10 @@ procedure TProjectOptionsForm.LoadSettings;
 var
   i, j: integer;
 begin
-  edtMainFile.FileName := GProject.MainUnit;
-  edtTargetFile.FileName := GProject.TargetFile;
-  edtMakeDir.Directory := GProject.ProjectDir;
-  cbDefaultMakeCol.FocusItem := GProject.DefaultMake;
+  edtMainFile.FileName            := GProject.MainUnit;
+  edtTargetFile.FileName          := GProject.TargetFile;
+  edtMakeDir.Directory            := GProject.ProjectDir;
+  cbDefaultMakeCol.FocusItem      := GProject.DefaultMake;
   grdCompilerMakeOptions.RowCount := GProject.MakeOptions.Count;
 
   for i := 0 to GProject.MakeOptions.Count-1 do
@@ -338,8 +338,35 @@ begin
 end;
 
 procedure TProjectOptionsForm.SaveSettings;
+var
+  i, j: integer;
 begin
-  //
+  GProject.MainUnit          := edtMainFile.FileName;
+  GProject.TargetFile        := edtTargetFile.FileName;
+  GProject.ProjectDir        := edtMakeDir.Directory;
+  GProject.DefaultMake       := cbDefaultMakeCol.FocusItem;
+
+  GProject.ClearAndInitMakeOptions(grdCompilerMakeOptions.RowCount);
+  for i := 0 to grdCompilerMakeOptions.RowCount-1 do
+  begin
+    GProject.MakeOptions.Add(grdCompilerMakeOptions.Cells[6, i]);
+    for j := 0 to 5 do // we know there is only 6 boolean columns
+    begin
+      if grdCompilerMakeOptions.Cells[j, i] = cCheck then
+        GProject.MakeOptionsGrid[j, i] := True;
+    end;
+  end;
+
+  GProject.ClearAndInitUnitDirsGrid(grdCompilerDirs.RowCount);
+  for i := 0 to grdCompilerDirs.RowCount-1 do
+  begin
+    GProject.UnitDirs.Add(grdCompilerDirs.Cells[10, i]);
+    for j := 0 to 9 do // we know there is only 10 boolean columns
+    begin
+      if grdCompilerDirs.Cells[j, i] = cCheck then
+        GProject.UnitDirsGrid[j, i] := True;
+    end;
+  end;
 end;
 
 procedure TProjectOptionsForm.SetupCellEdit(AGrid: TfpgStringGrid);

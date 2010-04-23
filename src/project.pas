@@ -31,6 +31,8 @@ type
     function    Save(const AFile: TfpgString = ''): Boolean;
     function    Load(AProjectFile: TfpgString): Boolean;
     function    GenerateCmdLine(const AShowOnly: Boolean = False; const ABuildMode: integer = -1): TfpgString;
+    procedure   ClearAndInitMakeOptions(const ASize: integer);
+    procedure   ClearAndInitUnitDirsGrid(const ASize: integer);
     property    ProjectDir: TfpgString read FProjectDir write FProjectDir;
     property    ProjectName: TfpgString read FProjectName write FProjectName;
     property    MainUnit: TfpgString read FMainUnit write FMainUnit;
@@ -354,6 +356,20 @@ begin
   c := c + ' ' + MainUnit;
 
   Result := c;
+end;
+
+procedure TProject.ClearAndInitMakeOptions(const ASize: integer);
+begin
+  FMakeOptions.Clear;
+  SetLength(FMakeOptionsGrid, 0, 0);    // free items
+  SetLength(FMakeOptionsGrid, 6, ASize);    // 6 columns by X rows
+end;
+
+procedure TProject.ClearAndInitUnitDirsGrid(const ASize: integer);
+begin
+  FUnitDirs.Clear;
+  SetLength(FUnitDirsGrid, 0, 0); // free items
+  SetLength(FUnitDirsGrid, 10, ASize);   // 10 columns by X rows
 end;
 
 
