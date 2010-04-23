@@ -352,9 +352,12 @@ begin
   GProject.ProjectDir        := edtMakeDir.Directory;
   GProject.DefaultMake       := cbDefaultMakeCol.FocusItem;
 
+  CleanupCompilerMakeOptionsGrid;
   GProject.ClearAndInitMakeOptions(grdCompilerMakeOptions.RowCount);
   for i := 0 to grdCompilerMakeOptions.RowCount-1 do
   begin
+    if grdCompilerMakeOptions.Cells[6, i] = '' then
+      Continue;
     GProject.MakeOptions.Add(grdCompilerMakeOptions.Cells[6, i]);
     for j := 0 to 5 do // we know there is only 6 boolean columns
     begin
@@ -363,6 +366,7 @@ begin
     end;
   end;
 
+  CleanupCompilerDirs;
   GProject.ClearAndInitUnitDirsGrid(grdCompilerDirs.RowCount);
   for i := 0 to grdCompilerDirs.RowCount-1 do
   begin
