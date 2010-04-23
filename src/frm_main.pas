@@ -143,8 +143,6 @@ procedure TMainForm.miRunMake(Sender: TObject);
 var
   p: TProcess;
   c: TfpgString;
-  i: integer;
-  b: integer;
 begin
   p := TProcess.Create(nil);
   p.ShowWindow := swoShowNormal;
@@ -152,26 +150,7 @@ begin
 
   // build compilation string
   c := gINI.ReadString(cEnvironment, 'Compiler', '');
-  b := GProject.DefaultMake;
-  // include dirs
-  for i := 0 to GProject.UnitDirs.Count-1 do
-    if GProject.UnitDirsGrid[b, i] and GProject.UnitDirsGrid[7, i] then
-      c := c + ' -Fi' + GProject.UnitDirs[i];
-  // unit dirs
-  for i := 0 to GProject.UnitDirs.Count-1 do
-    if GProject.UnitDirsGrid[b, i] and GProject.UnitDirsGrid[6, i] then
-      c := c + ' -Fu' + GProject.UnitDirs[i];
-  // unit output dir
-  if GProject.UnitOutputDir <> '' then
-    c := c + ' -FU' + GProject.UnitOutputDir;
-  // make option - compiler flags
-  for i := 0 to GProject.MakeOptions.Count-1 do
-    if GProject.MakeOptionsGrid[b, i] then
-      c := c + ' ' + GProject.MakeOptions[i];
-  // target output file
-  c := c + ' -o' + GProject.TargetFile;
-  // unit to start compilation
-  c := c + ' ' + GProject.MainUnit;
+  c := c + GProject.GenerateCmdLine;
 
   writeln('');
   writeln('Compile command:');

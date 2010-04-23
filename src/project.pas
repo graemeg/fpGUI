@@ -30,6 +30,7 @@ type
     destructor  Destroy; override;
     function    Save(const AFile: TfpgString = ''): Boolean;
     function    Load(AProjectFile: TfpgString): Boolean;
+    function    GenerateCmdLine(const AShowOnly: Boolean = False; const ABuildMode: integer = -1): TfpgString;
     property    ProjectDir: TfpgString read FProjectDir write FProjectDir;
     property    ProjectName: TfpgString read FProjectName write FProjectName;
     property    MainUnit: TfpgString read FMainUnit write FMainUnit;
@@ -314,6 +315,45 @@ begin
   end;
 
   Result := True;
+end;
+
+function TProject.GenerateCmdLine(const AShowOnly: Boolean; const ABuildMode: integer): TfpgString;
+var
+  c: TfpgString;
+  b: integer;
+  eol: TfpgString;
+  i: integer;
+begin
+  if AShowOnly then
+    eol := LineEnding
+  else
+    eol := '';
+  if ABuildMode = -1 then
+    b := DefaultMake
+  else
+    b := ABuildMode;
+
+  // include dirs
+  for i := 0 to UnitDirs.Count-1 do
+    if UnitDirsGrid[b, i] and UnitDirsGrid[7, i] then
+      c := c + ' -Fi' + UnitDirs[i] + eol;
+  // unit dirs
+  for i := 0 to UnitDirs.Count-1 do
+    if UnitDirsGrid[b, i] and UnitDirsGrid[6, i] then
+      c := c + ' -Fu' + UnitDirs[i] + eol;
+  // unit output dir
+  if UnitOutputDir <> '' then
+    c := c + ' -FU' + UnitOutputDir + eol;
+  // make option - compiler flags
+  for i := 0 to MakeOptions.Count-1 do
+    if MakeOptionsGrid[b, i] then
+      c := c + ' ' + MakeOptions[i];
+  // target output file
+  c := c + ' -o' + TargetFile;
+  // unit to start compilation
+  c := c + ' ' + MainUnit;
+
+  Result := c;
 end;
 
 
