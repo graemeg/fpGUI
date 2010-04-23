@@ -279,6 +279,8 @@ procedure TProjectOptionsForm.grdCompilerMakeOptionsClicked(Sender: TObject);
 var
   r, c: integer;
 begin
+  if TfpgStringGrid(Sender).RowCount = 0 then
+    TfpgStringGrid(Sender).RowCount := 1;
   r := TfpgStringGrid(Sender).FocusRow;
   c := TfpgStringGrid(Sender).FocusCol;
   if c < 6 then   // checkbox area
@@ -294,6 +296,8 @@ procedure TProjectOptionsForm.grdCompilerDirsClicked(Sender: TObject);
 var
   r, c: integer;
 begin
+  if TfpgStringGrid(Sender).RowCount = 0 then
+    TfpgStringGrid(Sender).RowCount := 1;
   r := TfpgStringGrid(Sender).FocusRow;
   c := TfpgStringGrid(Sender).FocusCol;
   if c < 10 then   // checkbox area
