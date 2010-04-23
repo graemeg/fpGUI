@@ -20,6 +20,9 @@ const
   cEditor         = 'Editor';
   cShortcuts      = 'Shortcuts';
   cINIMakeOption  = 'MakeOption';
+  cINIMakeOptionGrid = 'MakeOptionEnabled';
+  cINIUnitDir     = 'UnitDir';
+  cINIUnitDirGrid = 'UnitDirEnabled';
 
 
   // Predefined Macros

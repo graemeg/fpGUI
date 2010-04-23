@@ -164,7 +164,9 @@ end;
 
 function TProject.Save(const AFile: TfpgString = ''): Boolean;
 var
-  j: integer;
+  c, j: integer;
+  s: TfpgString;
+  lDelim: TfpgString;
 
   procedure SaveList(AList: TStringList; const CName, IName: TfpgString);
   var
@@ -201,14 +203,51 @@ begin
   FIniFile.WriteInteger(cProjectOptions, 'DefaultMake', DefaultMake);
   FIniFile.WriteString(cProjectOptions, 'UnitOutputDir', UnitOutputDir);
 
-  // various make options
+  // Process the Make (compiler param) options
+  { first delete old items in ini file }
+  c := FIniFile.ReadInteger(cProjectOptions, 'MakeOptionsCount', 0);
+  for j := 1 to c do
+    FIniFile.DeleteKey(cProjectOptions, cINIMakeOption + IntToStr(j));
+  { no lets save new info }
   SaveList(MakeOptions, 'MakeOptionsCount', cINIMakeOption);
+  for j := 0 to MakeOptions.Count-1 do
+  begin
+    s := '';
+    lDelim := '';
+    for c := 0 to 5 do
+    begin
+      if MakeOptionsGrid[c, j] then  // True = 1, False = 0
+        s := s + lDelim + '1'
+      else
+        s := s + lDelim + '0';
+      lDelim := ',';
+    end;
+    FIniFile.WriteString(cProjectOptions, cINIMakeOptionGrid + IntToStr(j+1), s);
+  end;
 
   // macros definitions
   SaveList(MacroNames, 'MacroCount', 'Macro');
 
   // unit search directories
-  SaveList(UnitDirs, 'UnitDirsCount', 'UnitDir');
+  { first delete old items in ini file }
+  c := FIniFile.ReadInteger(cProjectOptions, 'UnitDirsCount', 0);
+  for j := 1 to c do
+    FIniFile.DeleteKey(cProjectOptions, cINIUnitDir + IntToStr(j));
+  SaveList(UnitDirs, 'UnitDirsCount', cINIUnitDir);
+  for j := 0 to UnitDirs.Count-1 do
+  begin
+    s := '';
+    lDelim := '';
+    for c := 0 to 9 do
+    begin
+      if UnitDirsGrid[c, j] then  // True = 1, False = 0
+        s := s + lDelim + '1'
+      else
+        s := s + lDelim + '0';
+      lDelim := ',';
+    end;
+    FIniFile.WriteString(cProjectOptions, cINIUnitDirGrid + IntToStr(j+1), s);
+  end;
 
   // Unit file list
   FIniFile.WriteInteger(cUnits, 'UnitCount', UnitList.Count);
@@ -264,7 +303,7 @@ begin
   LoadList(cProjectOptions, MakeOptions, 'MakeOptionsCount', 'MakeOption');
   sl := TStringList.Create;
   try
-    LoadList(cProjectOptions, sl, 'MakeOptionsCount', 'MakeOptionEnabled');
+    LoadList(cProjectOptions, sl, 'MakeOptionsCount', cINIMakeOptionGrid);
     SetLength(FMakeOptionsGrid, 6, MakeOptions.Count);    // 6 columns by X rows
     for j := 0 to sl.Count-1 do
     begin
