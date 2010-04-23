@@ -59,6 +59,7 @@ type
     procedure   miRunMake(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
+    procedure   miProjectNew(Sender: TObject);
     procedure   miProjectOptions(Sender: TObject);
     procedure   miProjectOpen(Sender: TObject);
     procedure   miProjectSave(Sender: TObject);
@@ -173,6 +174,16 @@ begin
   if not Assigned(DebugForm) then
     fpgApplication.CreateForm(TDebugForm, DebugForm);
   DebugForm.Show;
+end;
+
+procedure TMainForm.miProjectNew(Sender: TObject);
+begin
+  CloseAllTabs;
+  FreeProject;
+  GProject.ProjectName := 'empty.project';
+  GProject.MainUnit := 'empty.pas';
+  OpenEditorPage(GProject.MainUnit);
+  miProjectSaveAs(nil);
 end;
 
 procedure TMainForm.miProjectOptions(Sender: TObject);
@@ -614,7 +625,7 @@ begin
     SetPosition(476, 140, 172, 20);
     AddMenuItem('Options...', '', @miProjectOptions);
     AddMenuItem('-', '', nil);
-    AddMenuItem('New (empty)...', '', nil);
+    AddMenuItem('New (empty)...', '', @miProjectNew);
     AddMenuItem('New from Template...', '', nil);
     AddMenuItem('Open...', '', @miProjectOpen);
     AddMenuItem('Open Recent', '', nil);
