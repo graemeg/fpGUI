@@ -73,6 +73,8 @@ type
     procedure LoadSettings;
     procedure SaveSettings;
     procedure SetupCellEdit(AGrid: TfpgStringGrid);
+    procedure CleanupCompilerMakeOptionsGrid;
+    procedure CleanupCompilerDirs;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -395,6 +397,30 @@ begin
     OnKeyPress := @CellEditKeypressed;
     OnExit  := @CellEditExit;
     SetFocus;
+  end;
+end;
+
+// Remove all rows that have empty grid options (text)
+procedure TProjectOptionsForm.CleanupCompilerMakeOptionsGrid;
+var
+  i: integer;
+begin
+  for i := grdCompilerMakeOptions.RowCount-1 downto 0 do
+  begin
+    if Trim(grdCompilerMakeOptions.Cells[6, i]) = '' then
+      grdCompilerMakeOptions.DeleteRow(i);
+  end;
+end;
+
+// Remove all rows that have empty grid options (text)
+procedure TProjectOptionsForm.CleanupCompilerDirs;
+var
+  i: integer;
+begin
+  for i := grdCompilerDirs.RowCount-1 downto 0 do
+  begin
+    if Trim(grdCompilerDirs.Cells[10, i]) = '' then
+      grdCompilerDirs.DeleteRow(i);
   end;
 end;
 
