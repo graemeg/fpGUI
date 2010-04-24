@@ -374,7 +374,7 @@ begin
   Splitter2.Align := alLeft;
   pcEditor.Align := alClient;
 
-  pnlClientArea.Realign;
+  Realign;
 
   SetupProjectTree;
   SetupFilesGrid;
