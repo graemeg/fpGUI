@@ -243,8 +243,9 @@ begin
     end;
     sub := Copy(r, pstart, (pend-pstart)+1);
     m := FindByName(sub);
-    if Assigned(m) then
-      r := StringReplace(r, sub, m.Value, [rfReplaceAll, rfIgnoreCase]);
+    if not Assigned(m) then
+      raise Exception.CreateFmt('The macro <%s> is not defined.', [sub]);
+    r := StringReplace(r, sub, m.Value, [rfReplaceAll, rfIgnoreCase]);
     pstart := Pos('${', r);
   end;
   Result := r;
