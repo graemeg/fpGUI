@@ -428,6 +428,7 @@ begin
     Name := 'btnQuit';
     SetPosition(4, 2, 24, 24);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
@@ -442,6 +443,7 @@ begin
     Name := 'btnOpen';
     SetPosition(28, 2, 24, 24);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
@@ -456,6 +458,7 @@ begin
     Name := 'btnSave';
     SetPosition(56, 2, 24, 24);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
@@ -469,6 +472,7 @@ begin
     Name := 'btnSaveAll';
     SetPosition(80, 2, 24, 24);
     Text := '';
+    Embedded := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
