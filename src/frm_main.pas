@@ -220,12 +220,10 @@ end;
 procedure TMainForm.miProjectSaveAs(Sender: TObject);
 var
   s: TfpgString;
-  b: TfpgString;
 begin
   s := SelectFileDialog(sfdSave, Format(cFileFilterTemplate, ['Project Files', cProjectFiles, cProjectFiles]));
   if s <> '' then
   begin
-    b := fpgExtractFileExt(s);
     if fpgExtractFileExt(s) = '' then
       s := s + cProjectExt;
     GProject.Save(s);
@@ -236,7 +234,6 @@ procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
 var
   u: TUnit;
   s: TfpgString;
-  i: integer;
 begin
   s := pcEditor.ActivePage.Hint;
   writeln('adding unit: ', s);
