@@ -419,6 +419,8 @@ type
     constructor Create(AFontID, AFontDesc: string);
   end;
 
+  TWidgetFriend = class(TfpgWidget);  // so we can get access to the Protected section
+
 constructor TNamedFontItem.Create(AFontID, AFontDesc: string);
 begin
   FontID   := AFontID;
@@ -1231,13 +1233,17 @@ end;
 procedure TfpgApplication.HintTimerFired(Sender: TObject);
 var
   w: TfpgWidget;
+  lHint: TfpgString;
 begin
   w := nil;
-//  writeln('HintTimerFired...');
   w := TfpgWidget(FHintWidget);
   try
     if Assigned(w) then
-      ActivateHint(w.WindowToScreen(w, FHintPos), w.Hint);
+    begin
+//writeln('fpgApplication.HintTimerFired w = ', w.ClassName, ' - ', w.Name);
+      TWidgetFriend(w).DoShowHint(lHint);
+      ActivateHint(w.WindowToScreen(w, FHintPos), lHint);
+    end;
   except
     // silence it!
     { TODO : FHintWidget probably went out of scope just as timer fired. Try
