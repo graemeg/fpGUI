@@ -49,6 +49,7 @@ type
     grdFiles: TfpgFileGrid;
     grdMessages: TfpgStringGrid;
     memScribble: TfpgMemo;
+    btnTest: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure   FormShow(Sender: TObject);
     procedure   btnQuitClicked(Sender: TObject);
@@ -72,6 +73,7 @@ type
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   CloseAllTabs;
     procedure   OpenEditorPage(const AFilename: TfpgString);
+    procedure   miTest(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -90,6 +92,7 @@ uses
   ,frm_projectoptions
   ,frm_debug
   ,ideconst
+  ,idemacros
   ,Project
   ,UnitList
   ;
@@ -357,6 +360,17 @@ begin
     n.Data := ts;
     tvProject.Selection := n;
   end;
+end;
+
+procedure TMainForm.miTest(Sender: TObject);
+var
+  s: TfpgString;
+  r: TfpgString;
+begin
+  s := cMacro_Compiler + ' -FU' +cMacro_Target+' -Fu' + cMacro_FPGuiLibDir;
+  writeln('source string = ', s);
+  r := GMacroList.ExpandMacro(s);
+  writeln('expanded string = ', r);
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
@@ -687,7 +701,7 @@ begin
   with tsMessages do
   begin
     Name := 'tsMessages';
-    SetPosition(3, 24, 258, 57);
+    SetPosition(73, 3, 188, 78);
     Text := 'Messages';
   end;
 
@@ -746,7 +760,7 @@ begin
   with grdMessages do
   begin
     Name := 'grdMessages';
-    SetPosition(0, 4, 258, 52);
+    SetPosition(0, 4, 188, 73);
     Anchors := [anLeft,anRight,anTop,anBottom];
     AddColumn('New', 800, taLeftJustify);
     FontDesc := '#Grid';
@@ -769,6 +783,19 @@ begin
     Lines.Add('or type whatever you want...');
     FontDesc := '#Edit2';
     TabOrder := 1;
+  end;
+
+  btnTest := TfpgButton.Create(Bevel1);
+  with btnTest do
+  begin
+    Name := 'btnTest';
+    SetPosition(168, 2, 80, 24);
+    Text := 'test';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 5;
+    OnClick := @miTest;
   end;
 
   {@VFD_BODY_END: MainForm}
