@@ -26,6 +26,8 @@ type
     FItems: TList;
     function    GetItems(AIndex: integer): TIDEMacro;
     procedure   SetItems(AIndex: integer; const AValue: TIDEMacro);
+    procedure   AddDefaults;
+    procedure   LoadSavedValues;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -85,10 +87,64 @@ begin
   FItems[AIndex] := AValue;
 end;
 
+procedure TIDEMacroList.AddDefaults;
+var
+  o: TIDEMacro;
+begin
+  o := TIDEMacro.Create(cMacro_FPCSrcDir, '', 'FPC source directory');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_FPGuiDir, '', 'fpGUI root directory');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_FPGuiLibDir, cMacro_FPGuiDir+'lib/'+cMacro_Target+'/', 'fpGUI compiled library directory');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_SyntaxDefDir, cMacro_FPGuiDir+'examples/apps/fpgide/syntaxdefs/', 'Editor syntax highlighter definitions');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_TemplateDir, cMacro_FPGuiDir+'examples/apps/fpgide/templates/', 'Project template directory');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_Compiler, '', 'FPC Compiler to use');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_Debugger, 'gdb', 'Location of GDB debugger');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_ExeExt, {$IFDEF MSWINDOWS} '.exe' {$ENDIF} {$IFDEF UNIX} '' {$ENDIF}, 'Default executable extension');
+  Add(o);
+  o := TIDEMacro.Create(cMacro_Target, CPUTarget+'-'+OSTarget, 'Default target');
+  Add(o);
+end;
+
+procedure TIDEMacroList.LoadSavedValues;
+var
+  s: TfpgString;
+begin
+  // we don't unnecessarily override the defaults setup in AddDefaults()
+  SetValue(cMacro_FPCSrcDir, gINI.ReadString(cEnvironment, 'FPCSrcDir', ''));
+  SetValue(cMacro_FPGuiDir, gINI.ReadString(cEnvironment, 'FPGuiDir', ''));
+  s := gINI.ReadString(cEnvironment, 'FPGuiLibDir', '');
+  if s <> '' then
+    SetValue(cMacro_FPGuiLibDir, s);
+  s := gINI.ReadString(cEnvironment, 'SyntaxDefDir', '');
+  if s <> '' then
+    SetValue(cMacro_SyntaxDefDir, s);
+  s := gINI.ReadString(cEnvironment, 'TemplateDir', '');
+  if s <> '' then
+    SetValue(cMacro_TemplateDir, s);
+  SetValue(cMacro_Compiler, gINI.ReadString(cEnvironment, 'Compiler', ''));
+  s := gINI.ReadString(cEnvironment, 'Debugger', '');
+  if s <> '' then
+    SetValue(cMacro_Debugger, s);
+  s := gINI.ReadString(cEnvironment, 'ExeExt', '');
+  if s <> '' then
+    SetValue(cMacro_ExeExt, s);
+  s := gINI.ReadString(cEnvironment, 'Target', '');
+  if s <> '' then
+    SetValue(cMacro_Target, s);
+end;
+
 constructor TIDEMacroList.Create;
 begin
   inherited Create;
   FItems := TList.Create;
+  AddDefaults;
+  LoadSavedValues;
 end;
 
 destructor TIDEMacroList.Destroy;
