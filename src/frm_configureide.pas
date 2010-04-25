@@ -96,15 +96,15 @@ end;
 
 procedure TConfigureIDEForm.LoadSettings;
 begin
-  edtFPCDir.Directory := gINI.ReadString(cEnvironment, 'fpcDir', '');
-  edtFPGuiDir.Directory := gINI.ReadString(cEnvironment, 'fpGuiDir', '');
-  edtFPGuiLibDir.Directory := gINI.ReadString(cEnvironment, 'fpGuiLibDir', '${FPGUIDIR}lib/');
-  edtSyntaxDefDir.Directory := gINI.ReadString(cEnvironment, 'SyntaxDefDir', '${FPGUIDIR}apps/ide/syntaxdefs/');
-  edtTempateDir.Directory := gINI.ReadString(cEnvironment, 'TemplateDir', '${FPGUIDIR}apps/ide/templates/');
+  edtFPCSrcDir.Directory := gINI.ReadString(cEnvironment, 'FPCSrcDir', '');
+  edtFPGuiDir.Directory := gINI.ReadString(cEnvironment, 'FPGuiDir', '');
+  edtFPGuiLibDir.Directory := gINI.ReadString(cEnvironment, 'FPGuiLibDir', GMacroList.FindByName(cMacro_FPGuiLibDir).Value);
+  edtSyntaxDefDir.Directory := gINI.ReadString(cEnvironment, 'SyntaxDefDir', GMacroList.FindByName(cMacro_SyntaxDefDir).Value);
+  edtTempateDir.Directory := gINI.ReadString(cEnvironment, 'TemplateDir', GMacroList.FindByName(cMacro_TemplateDir).Value);
   edtCompiler.Filename := gINI.ReadString(cEnvironment, 'Compiler', '');
   edtDebugger.Filename := gINI.ReadString(cEnvironment, 'Debugger', 'gdb');
   edtExeExt.Text := gINI.ReadString(cEnvironment, 'ExeExt', '');
-  edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', 'i386-linux');
+  edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', GMacroList.FindByName(cMacro_Target).Value);
   edtEditorFont.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
 end;
 
