@@ -19,7 +19,7 @@ type
     tsEditor: TfpgTabSheet;
     tsShortcuts: TfpgTabSheet;
     Label1: TfpgLabel;
-    edtFPCDir: TfpgDirectoryEdit;
+    edtFPCSrcDir: TfpgDirectoryEdit;
     edtFPGuiDir: TfpgDirectoryEdit;
     edtFPGuiLibDir: TfpgDirectoryEdit;
     edtSyntaxDefDir: TfpgDirectoryEdit;
@@ -109,9 +109,9 @@ end;
 
 procedure TConfigureIDEForm.SaveSettings;
 begin
-  gINI.WriteString(cEnvironment, 'fpcDir', edtFPCDir.Directory);
-  gINI.WriteString(cEnvironment, 'fpGuiDir', edtFPGuiDir.Directory);
-  gINI.WriteString(cEnvironment, 'fpGuiLibDir', edtFPGuiLibDir.Directory);
+  gINI.WriteString(cEnvironment, 'FPCSrcDir', edtFPCSrcDir.Directory);
+  gINI.WriteString(cEnvironment, 'FPGuiDir', edtFPGuiDir.Directory);
+  gINI.WriteString(cEnvironment, 'FPGuiLibDir', edtFPGuiLibDir.Directory);
   gINI.WriteString(cEnvironment, 'SyntaxDefDir', edtSyntaxDefDir.Directory);
   gINI.WriteString(cEnvironment, 'TemplateDir', edtTempateDir.Directory);
   gINI.WriteString(cEnvironment, 'Compiler', edtCompiler.Filename);
@@ -120,6 +120,8 @@ begin
   gINI.WriteString(cEnvironment, 'Target', edtTarget.Text);
   gINI.WriteString(cEditor, 'Font', edtEditorFont.FontDesc);
 
+  SaveToMacroList(GMacroList);
+end;
 
 end;
 
@@ -207,10 +209,10 @@ begin
     Text := '${FPCDIR}';
   end;
 
-  edtFPCDir := TfpgDirectoryEdit.Create(tsEnvironment);
-  with edtFPCDir do
+  edtFPCSrcDir := TfpgDirectoryEdit.Create(tsEnvironment);
+  with edtFPCSrcDir do
   begin
-    Name := 'edtFPCDir';
+    Name := 'edtFPCSrcDir';
     SetPosition(8, 22, 424, 24);
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
