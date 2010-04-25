@@ -329,7 +329,8 @@ begin
     if MakeOptionsGrid[b, i] then
       c := c + ' ' + MakeOptions[i];
   // target output file
-  c := c + ' -o' + TargetFile;
+  if TargetFile <> '' then
+    c := c + ' -o' + TargetFile;
   // unit to start compilation
   c := c + ' ' + MainUnit;
 
