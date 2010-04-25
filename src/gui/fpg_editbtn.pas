@@ -33,85 +33,89 @@ uses
   ;
 
 type
-  TfpgFileNameEdit = class(TfpgAbstractPanel)
+  TfpgBaseEditButton = class(TfpgAbstractPanel)
   private
-    FEdit: TfpgEdit;
-    FButton: TfpgButton;
-    FFilter: TfpgString;
     FOnButtonClick: TNotifyEvent;
-    FInitialDir: TfpgString;
     FReadOnly: Boolean;
+    procedure SetReadOnly(const AValue: Boolean);
     function GetExtraHint: TfpgString;
     procedure SetExtraHint(const AValue: TfpgString);
-    procedure SetFilter(const AValue: TfpgString);
-    procedure btnClick(Sender: TObject);
-    procedure SetFileName(const AValue: TfpgString);
-    function GetFileName: TfpgString;
-    procedure SetReadOnly(const AValue: Boolean);
   protected
-    procedure HandlePaint; override;
+    FEdit: TfpgEdit;
+    FButton: TfpgButton;
+    function  GetOnShowHint: THintEvent; override;
+    procedure SetOnShowHint(const AValue: THintEvent); override;
+    procedure SetHint(const AValue: TfpgString); override;
+    function  GetHint: TfpgString; override;
+    procedure InternalButtonClick(Sender: TObject); virtual;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
+    property  ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
+    property  ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
+    property  OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   public
     constructor Create(AOwner: TComponent); override;
-  published
-    property ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
-    property FileName: TfpgString read GetFileName write SetFileName;
-    property InitialDir: TfpgString read FInitialDir write FInitialDir;
-    property Filter: TfpgString read FFilter write SetFilter;
-    property ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
-    property TabOrder;
-    property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
   end;
 
 
-  TfpgDirectoryEdit = class(TfpgAbstractPanel)
+  TfpgFileNameEdit = class(TfpgBaseEditButton)
   private
-    FEdit: TfpgEdit;
-    FButton: TfpgButton;
-    FOnButtonClick: TNotifyEvent;
-    FRootDirectory: TfpgString;
-    FReadOnly: Boolean;
-    function GetDirectory: TfpgString;
-    procedure btnClick(Sender: TObject);
-    function GetExtraHint: TfpgString;
-    procedure SetDirectory(const AValue: TfpgString);
-    procedure SetExtraHint(const AValue: TfpgString);
-    procedure SetReadOnly(const AValue: Boolean);
+    FFilter: TfpgString;
+    FInitialDir: TfpgString;
+    procedure SetFilter(const AValue: TfpgString);
+    procedure SetFileName(const AValue: TfpgString);
+    function GetFileName: TfpgString;
   protected
     procedure HandlePaint; override;
-    procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
+    procedure InternalButtonClick(Sender: TObject); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property ExtraHint;
+    property FileName: TfpgString read GetFileName write SetFileName;
+    property InitialDir: TfpgString read FInitialDir write FInitialDir;
+    property Filter: TfpgString read FFilter write SetFilter;
+    property ReadOnly;
+    property TabOrder;
+    property OnButtonClick;
+    property OnShowHint;
+  end;
+
+
+  TfpgDirectoryEdit = class(TfpgBaseEditButton)
+  private
+    FRootDirectory: TfpgString;
+    function GetDirectory: TfpgString;
+    procedure SetDirectory(const AValue: TfpgString);
+  protected
+    procedure HandlePaint; override;
+    procedure InternalButtonClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
     property Directory: TfpgString read GetDirectory write SetDirectory;
-    property ExtraHint: TfpgString read GetExtraHint write SetExtraHint;
+    property ExtraHint;
     property RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
-    property ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
+    property ReadOnly;
     property TabOrder;
-    property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
+    property OnButtonClick;
+    property OnShowHint;
   end;
 
 
-  TfpgFontEdit = class(TfpgPanel)
-  private
-    FEdit: TfpgEdit;
-    FButton: TfpgButton;
-    FOnButtonClick: TNotifyEvent;
-    FReadOnly: Boolean;
-    procedure btnClick(Sender: TObject);
-    procedure SetReadOnly(const AValue: Boolean);
+  TfpgFontEdit = class(TfpgBaseEditButton)
   protected
-    function GetFontDesc: string; override;
-    procedure SetFontDesc(const AValue: string); override;
+    function GetFontDesc: TfpgString; virtual;
+    procedure SetFontDesc(const AValue: TfpgString); virtual;
     procedure HandlePaint; override;
-    procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
+    procedure InternalButtonClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property FontDesc;
-    property ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
+    property FontDesc: TfpgString read GetFontDesc write SetFontDesc;
+    property ReadOnly;
     property TabOrder;
-    property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
+    property OnButtonClick;
+    property OnShowHint;
   end;
 
 
@@ -124,14 +128,76 @@ uses
   ;
 
 
-{ TfpgFileNameEdit }
+{ TfpgBaseEditButton }
 
-constructor TfpgFileNameEdit.Create(AOwner: TComponent);
+procedure TfpgBaseEditButton.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly = AValue then
+    Exit;
+  FReadOnly := AValue;
+  FEdit.ReadOnly := FReadOnly;
+  FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
+end;
+
+function TfpgBaseEditButton.GetExtraHint: TfpgString;
+begin
+  Result := FEdit.ExtraHint;
+end;
+
+procedure TfpgBaseEditButton.SetExtraHint(const AValue: TfpgString);
+begin
+  FEdit.ExtraHint := AValue;
+end;
+
+function TfpgBaseEditButton.GetOnShowHint: THintEvent;
+begin
+  // rewire the FEdit event to the parent (composite) component
+  Result := FEdit.OnShowHint;
+end;
+
+procedure TfpgBaseEditButton.SetOnShowHint(const AValue: THintEvent);
+begin
+  // rewire the FEdit event to the parent (composite) component
+  FEdit.OnShowHint := AValue;
+end;
+
+procedure TfpgBaseEditButton.SetHint(const AValue: TfpgString);
+begin
+  FEdit.Hint := AValue;
+end;
+
+function TfpgBaseEditButton.GetHint: TfpgString;
+begin
+  Result := FEdit.Hint;
+end;
+
+procedure TfpgBaseEditButton.InternalButtonClick(Sender: TObject);
+begin
+  // do nothing
+  if Assigned(OnButtonClick) then
+    OnButtonClick(self);
+end;
+
+procedure TfpgBaseEditButton.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  if csDesigning in ComponentState then
+  begin
+    FEdit.Visible := False;
+    FButton.Visible := False;
+  end
+  else
+  begin
+    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
+    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+  end;
+end;
+
+constructor TfpgBaseEditButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWidth          := 140;
   FHeight         := 24;
-  FFilter         := '';
   FReadOnly       := False;
 
   FEdit := TfpgEdit.Create(self);
@@ -150,59 +216,27 @@ begin
     Text := '';
     FontDesc := '#Label1';
     ImageMargin := -1;
-    ImageName := 'stdimg.folderfile';
+    ImageName := 'stdimg.elipses';
     ImageSpacing := 0;
     TabOrder := 1;
-    OnClick := @btnClick;
+    OnClick := @InternalButtonClick;
   end;
+end;
+
+
+
+{ TfpgFileNameEdit }
+
+constructor TfpgFileNameEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FFilter         := '';
+  FButton.ImageName := 'stdimg.folderfile';
 end;
 
 procedure TfpgFileNameEdit.SetFilter(const AValue: TfpgString);
 begin
   FFilter := AValue;
-end;
-
-function TfpgFileNameEdit.GetExtraHint: TfpgString;
-begin
-  Result := FEdit.ExtraHint;
-end;
-
-procedure TfpgFileNameEdit.SetExtraHint(const AValue: TfpgString);
-begin
-  FEdit.ExtraHint := AValue;
-end;
-
-procedure TfpgFileNameEdit.btnClick(Sender: TObject);
-var
-  dlg: TfpgFileDialog;
-begin
-  dlg := TfpgFileDialog.Create(nil);
-  try
-    if FileName = '' then
-    begin
-      if FInitialDir <> '' then
-        dlg.InitialDir := FInitialDir;
-    end
-    else
-    begin
-      // Use path of existing filename
-      dlg.InitialDir := fpgExtractFilePath(FileName);
-      if dlg.InitialDir = '' then    // FileName had no path
-        dlg.InitialDir := FInitialDir;
-    end;
-    if FFilter = '' then
-      dlg.Filter := rsAllFiles + ' (' + AllFilesMask + ')' + '|' + AllFilesMask
-    else
-      dlg.Filter :=  FFilter + '|' + rsAllFiles + ' (' + AllFilesMask + ')' + '|' + AllFilesMask;
-    if dlg.RunOpenFile then
-    begin
-      FEdit.Text := dlg.FileName;
-    end;
-  finally
-    dlg.Free;
-  end;
-  if Assigned(OnButtonClick) then
-    OnButtonClick(self);
 end;
 
 procedure TfpgFileNameEdit.SetFileName(const AValue: TfpgString);
@@ -213,15 +247,6 @@ end;
 function TfpgFileNameEdit.GetFileName: TfpgString;
 begin
   Result := FEdit.Text;
-end;
-
-procedure TfpgFileNameEdit.SetReadOnly(const AValue: Boolean);
-begin
-  if FReadOnly = AValue then
-    Exit;
-  FReadOnly := AValue;
-  FEdit.ReadOnly := FReadOnly;
-  FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
 end;
 
 procedure TfpgFileNameEdit.HandlePaint;
@@ -254,19 +279,36 @@ begin
   end;
 end;
 
-procedure TfpgFileNameEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+procedure TfpgFileNameEdit.InternalButtonClick(Sender: TObject);
+var
+  dlg: TfpgFileDialog;
 begin
-  inherited HandleResize(AWidth, AHeight);
-  if csDesigning in ComponentState then
-  begin
-    FEdit.Visible := False;
-    FButton.Visible := False;
-  end
-  else
-  begin
-    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
-    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+  dlg := TfpgFileDialog.Create(nil);
+  try
+    if FileName = '' then
+    begin
+      if FInitialDir <> '' then
+        dlg.InitialDir := FInitialDir;
+    end
+    else
+    begin
+      // Use path of existing filename
+      dlg.InitialDir := fpgExtractFilePath(FileName);
+      if dlg.InitialDir = '' then    // FileName had no path
+        dlg.InitialDir := FInitialDir;
+    end;
+    if FFilter = '' then
+      dlg.Filter := rsAllFiles + ' (' + AllFilesMask + ')' + '|' + AllFilesMask
+    else
+      dlg.Filter :=  FFilter + '|' + rsAllFiles + ' (' + AllFilesMask + ')' + '|' + AllFilesMask;
+    if dlg.RunOpenFile then
+    begin
+      FEdit.Text := dlg.FileName;
+    end;
+  finally
+    dlg.Free;
   end;
+  inherited InternalButtonClick(Sender);
 end;
 
 
@@ -275,31 +317,7 @@ end;
 constructor TfpgDirectoryEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth          := 140;
-  FHeight         := 24;
-  FReadOnly       := False;
-
-  FEdit := TfpgEdit.Create(self);
-  with FEdit do
-  begin
-    Name := 'FEdit';
-    Text := '';
-    FontDesc := '#Edit1';
-    TabOrder := 0;
-  end;
-
-  FButton := TfpgButton.Create(self);
-  with FButton do
-  begin
-    Name := 'FButton';
-    Text := '';
-    FontDesc := '#Label1';
-    ImageMargin := -1;
-    ImageName := 'stdimg.folder';
-    ImageSpacing := 0;
-    TabOrder := 1;
-    OnClick := @btnClick;
-  end;
+  FButton.ImageName := 'stdimg.folder';
 end;
 
 function TfpgDirectoryEdit.GetDirectory: TfpgString;
@@ -307,48 +325,9 @@ begin
   Result := FEdit.Text;
 end;
 
-procedure TfpgDirectoryEdit.btnClick(Sender: TObject);
-var
-  dlg: TfpgSelectDirDialog;
-begin
-  dlg := TfpgSelectDirDialog.Create(nil);
-  try
-    if FRootDirectory <> '' then
-      dlg.RootDirectory := FRootDirectory;
-    dlg.SelectedDir := Directory;
-    if dlg.ShowModal = mrOK then
-    begin
-      FEdit.Text:= dlg.SelectedDir;
-    end;
-  finally
-    dlg.Free;
-  end;
-  if Assigned(OnButtonClick) then
-	  OnButtonClick(self);
-end;
-
-function TfpgDirectoryEdit.GetExtraHint: TfpgString;
-begin
-  Result := FEdit.ExtraHint;
-end;
-
 procedure TfpgDirectoryEdit.SetDirectory(const AValue: TfpgString);
 begin
   FEdit.Text := AValue;
-end;
-
-procedure TfpgDirectoryEdit.SetExtraHint(const AValue: TfpgString);
-begin
-  FEdit.ExtraHint := AValue;
-end;
-
-procedure TfpgDirectoryEdit.SetReadOnly(const AValue: Boolean);
-begin
-  if FReadOnly = AValue then
-    Exit;
-  FReadOnly := AValue;
-  FEdit.ReadOnly := FReadOnly;
-  FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
 end;
 
 procedure TfpgDirectoryEdit.HandlePaint;
@@ -381,57 +360,35 @@ begin
   end;
 end;
 
-procedure TfpgDirectoryEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+procedure TfpgDirectoryEdit.InternalButtonClick(Sender: TObject);
+var
+  dlg: TfpgSelectDirDialog;
 begin
-  inherited HandleResize(AWidth, AHeight);
-  if csDesigning in ComponentState then
-  begin
-    FEdit.Visible := False;
-    FButton.Visible := False;
-  end
-  else
-  begin
-    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
-    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+  dlg := TfpgSelectDirDialog.Create(nil);
+  try
+    if FRootDirectory <> '' then
+      dlg.RootDirectory := FRootDirectory;
+    dlg.SelectedDir := Directory;
+    if dlg.ShowModal = mrOK then
+    begin
+      FEdit.Text:= dlg.SelectedDir;
+    end;
+  finally
+    dlg.Free;
   end;
+  inherited InternalButtonClick(Sender);
 end;
 
 
 { TfpgFontEdit }
 
-procedure TfpgFontEdit.btnClick(Sender: TObject);
-var
-  f: TfpgString;
+function TfpgFontEdit.GetFontDesc: TfpgString;
 begin
-  f := FontDesc;
-  if SelectFontDialog(f) then
-    FontDesc := f;
-  if Assigned(OnButtonClick) then
-	  OnButtonClick(self);
+  Result := FEdit.Text;
 end;
 
-procedure TfpgFontEdit.SetReadOnly(const AValue: Boolean);
+procedure TfpgFontEdit.SetFontDesc(const AValue: TfpgString);
 begin
-  if FReadOnly = AValue then
-    Exit;
-  FReadOnly := AValue;
-  FEdit.ReadOnly := FReadOnly;
-  FButton.Enabled := not FReadOnly;   // Buttons don't have ReadOnly property.
-end;
-
-function TfpgFontEdit.GetFontDesc: string;
-begin
-  Result := inherited GetFontDesc;
-  if Result <> FEdit.Text then  // user must have entered fontdesc directly
-  begin
-    Result := FEdit.Text;
-    SetFontDesc(Result); // update internal fontdesc to sync with FEdit value
-  end;
-end;
-
-procedure TfpgFontEdit.SetFontDesc(const AValue: string);
-begin
-  inherited SetFontDesc(AValue);
   FEdit.Text := AValue;
 end;
 
@@ -457,50 +414,20 @@ begin
   end;
 end;
 
-procedure TfpgFontEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+procedure TfpgFontEdit.InternalButtonClick(Sender: TObject);
+var
+  f: TfpgString;
 begin
-  inherited HandleResize(AWidth, AHeight);
-  if csDesigning in ComponentState then
-  begin
-    FEdit.Visible := False;
-    FButton.Visible := False;
-  end
-  else
-  begin
-    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
-    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
-  end;
+  f := FontDesc;
+  if SelectFontDialog(f) then
+    FontDesc := f;
+  inherited InternalButtonClick(Sender);
 end;
 
 constructor TfpgFontEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Text            := '';
-  FWidth          := 140;
-  FHeight         := 24;
-  FReadOnly       := False;
-
-  FEdit := TfpgEdit.Create(self);
-  with FEdit do
-  begin
-    Name := 'FEdit';
-    Text := '#Edit1';
-    FontDesc := '#Edit1';
-    TabOrder := 0;
-  end;
-
-  FButton := TfpgButton.Create(self);
-  with FButton do
-  begin
-    Name := 'FButton';
-    Text := '';
-    FontDesc := '#Label1';
-    ImageMargin := -1;
-    ImageName := 'stdimg.font';
-    ImageSpacing := 0;
-    TabOrder := 1;
-    OnClick := @btnClick;
-  end;
+  FButton.ImageName := 'stdimg.font';
 end;
 
 
