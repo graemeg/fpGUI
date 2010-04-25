@@ -92,9 +92,11 @@ implementation
 
 uses
   fpg_iniutils
+  ,fpg_dialogs
   ,Project
   ,ideconst
   ,ideutils
+  ,idemacros
   ;
 
 type
@@ -132,7 +134,15 @@ begin
   b := cbDefaultMakeCol.FocusItem;
 
   c := c + GProject.GenerateCmdLine(True, b);
-
+  try
+    c := GMacroList.ExpandMacro(c);
+  except
+    on E: Exception do
+    begin
+      TfpgMessageDialog.Critical('', E.Message);
+      Exit;
+    end;
+  end;
   ShowString(c, 'Compile command');
 end;
 
