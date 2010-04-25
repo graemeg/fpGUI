@@ -236,7 +236,7 @@ begin
   MainUnit := FIniFile.ReadString(cProjectOptions, 'MainUnit', '');
   TargetFile := FIniFile.ReadString(cProjectOptions, 'TargetFile', '');
   DefaultMake := FIniFile.ReadInteger(cProjectOptions, 'DefaultMake', 0);
-  UnitOutputDir := FIniFile.ReadString(cProjectOptions, 'UnitOutputDir', 'units/i386-linux/');
+  UnitOutputDir := FIniFile.ReadString(cProjectOptions, 'UnitOutputDir', 'units/'+cMacro_Target+'/');
 
   // Load make options
   LoadList(cProjectOptions, MakeOptions, 'MakeOptionsCount', 'MakeOption');
