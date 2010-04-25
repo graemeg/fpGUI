@@ -41,7 +41,22 @@ type
   end;
 
 
+// lazy-man singleton of IDE Macros
+function GMacroList: TIDEMacroList;
+
+
 implementation
+
+var
+  uIDEMacroList: TIDEMacroList;
+
+
+function GMacroList: TIDEMacroList;
+begin
+  if not Assigned(uIDEMacroList) then
+    uIDEMacroList := TIDEMacroList.Create;
+  Result := uIDEMacroList;
+end;
 
 
 { TIDEMacro }
@@ -196,6 +211,13 @@ begin
   if lMacro <> nil then
     lMacro.Value := NewValue;
 end;
+
+
+initialization
+  uIDEMacroList := nil;
+
+finalization
+  uIDEMacroList.Free;
 
 end.
 
