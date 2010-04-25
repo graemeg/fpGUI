@@ -54,8 +54,11 @@ type
     btnExtToolDel: TfpgButton;
     lbExtTools: TfpgListBox;
     {@VFD_HEAD_END: ConfigureIDEForm}
+    // so we can get correct hints, but still undo with the Cancel button
+    FInternalMacroList: TIDEMacroList;
     procedure LoadSettings;
     procedure SaveSettings;
+    procedure SaveToMacroList(AList: TIDEMacroList);
   public
     procedure AfterCreate; override;
   end;
@@ -123,6 +126,17 @@ begin
   SaveToMacroList(GMacroList);
 end;
 
+procedure TConfigureIDEForm.SaveToMacroList(AList: TIDEMacroList);
+begin
+  AList.SetValue(cMacro_FPCSrcDir, edtFPCSrcDir.Directory);
+  AList.SetValue(cMacro_FPGuiDir, edtFPGuiDir.Directory);
+  AList.SetValue(cMacro_FPGuiLibDir, edtFPGuiLibDir.Directory);
+  AList.SetValue(cMacro_SyntaxDefDir, edtSyntaxDefDir.Directory);
+  AList.SetValue(cMacro_TemplateDir, edtTempateDir.Directory);
+  AList.SetValue(cMacro_Compiler, edtCompiler.FileName);
+  AList.SetValue(cMacro_Debugger, edtDebugger.FileName);
+  AList.SetValue(cMacro_ExeExt, edtExeExt.Text);
+  AList.SetValue(cMacro_Target, edtTarget.Text);
 end;
 
 procedure TConfigureIDEForm.AfterCreate;
