@@ -39,6 +39,7 @@ type
     procedure   Clear;
     procedure   Delete(AIndex: integer);
     procedure   SetValue(const MacroName, NewValue: TfpgString);
+    procedure   ResetToDefaults;
     property    Items[AIndex: integer]: TIDEMacro read GetItems write SetItems; default;
   end;
 
@@ -296,6 +297,13 @@ begin
   lMacro := FindByName(MacroName);
   if lMacro <> nil then
     lMacro.Value := NewValue;
+end;
+
+procedure TIDEMacroList.ResetToDefaults;
+begin
+  Clear;
+  AddDefaults;
+  LoadSavedValues;
 end;
 
 
