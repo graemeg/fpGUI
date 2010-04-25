@@ -95,35 +95,9 @@ uses
   ,ideutils
   ;
 
-const
-  cMultiplicationX = #$E2#$9C#$95;
-  cNormCheck = #$E2#$9C#$93;
-  cHeavyCheck = #$E2#$9C#$94;
-  cHeavyX = #$E2#$9C#$96;
-  cMedCircle = #$E2#$9A#$AB;
-  cX = #$78;
-  cCheck = cHeavyCheck;
-{
-  U+2715 MULTIPLICATION X
-    UTF-8: 0xE2 0x9C 0x95
-    UTF-16: 0x2715
-
-  U+2713 CHECK MARK
-    UTF-8: 0xE2 0x9C 0x93
-    UTF-16: 0x2713
-
-  U+2714 HEAVY CHECK MARK
-    UTF-8: 0xE2 0x9C 0x94
-    UTF-16: 0x2714
-
-  U+2716 HEAVY MULTIPLICATION X
-    UTF-8: 0xE2 0x9C 0x96
-    UTF-16: 0x2716
-
-  U+26AB MEDIUM BLACK CIRCLE
-    UTF-8: 0xE2 0x9A 0xAB
-    UTF-16: 0x26AB
-}
+type
+  // Used to get access to the Protected properties
+  TDirectoryEditFriend = class(TfpgDirectoryEdit);
 
 
 procedure DisplayProjectOptions;
