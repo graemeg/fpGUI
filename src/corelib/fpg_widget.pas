@@ -1030,9 +1030,8 @@ begin
     if Components[n] is TfpgWidget then
     begin
       w := TfpgWidget(Components[n]);
+      if w.Enabled and w.Visible and w.Focusable then
       begin
-
-      if w.Visible and w.Enabled and w.Focusable then
         case direction of
           fsdFirst:
             if w.TabOrder < lasttaborder then
