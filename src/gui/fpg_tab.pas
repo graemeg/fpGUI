@@ -156,6 +156,7 @@ type
     property    TabOrder;
     property    TabPosition: TfpgTabPosition read FTabPosition write SetTabPosition default tpTop;
     property    TextColor;
+    property    OnShowHint;
   end;
 
 

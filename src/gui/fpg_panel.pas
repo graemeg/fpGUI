@@ -79,6 +79,7 @@ type
     property    OnMouseMove;
     property    OnMouseUp;
     property    OnPaint;
+    property    OnShowHint;
   end;
   
 
@@ -129,6 +130,7 @@ type
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnShowHint;
   end;
   
 
@@ -167,6 +169,7 @@ type
     property    TextColor;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnShowHint;
   end;
 
 

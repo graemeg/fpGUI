@@ -64,8 +64,6 @@ type
   TAllowNew = (anNo, anYes, anAsk);
 
 
-  { TfpgBaseEditCombo }
-
   TfpgBaseEditCombo = class(TfpgBaseComboBox)
   private
     FAutoCompletion: Boolean;
@@ -77,8 +75,7 @@ type
     procedure   SetAllowNew(const AValue: TAllowNew);
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
-    procedure   InternalListBoxKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState;
-                var consumed: Boolean);
+    procedure   InternalListBoxKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
   protected
     FDropDown: TfpgPopupWindow;
     FDrawOffset: integer;
@@ -132,6 +129,7 @@ type
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
+    property    OnShowHint;
   end;
 
 

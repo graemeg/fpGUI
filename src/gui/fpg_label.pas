@@ -88,6 +88,7 @@ type
     property    OnMouseExit;
     property    OnMouseMove;
     property    OnMouseUp;
+    property    OnShowHint;
   end;
 
 

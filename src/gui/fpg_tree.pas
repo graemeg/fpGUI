@@ -243,6 +243,7 @@ type
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
     property    OnDoubleClick;
+    property    OnShowHint;
   end;
   
 

@@ -185,6 +185,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
+    property    OnShowHint;
   end;
 
 
@@ -232,6 +233,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
+    property    OnShowHint;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -269,6 +271,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnMouseMove;
+    property    OnShowHint;
   end;
 
 
@@ -309,6 +312,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnMouseMove;
+    property    OnShowHint;
   end;
 
 
@@ -344,6 +348,7 @@ type
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
+    property    OnShowHint;
   end;
 
 

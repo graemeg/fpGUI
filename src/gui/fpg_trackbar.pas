@@ -78,6 +78,7 @@ type
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    TabOrder;
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
+    property    OnShowHint;
   end;
   
   
@@ -129,6 +130,7 @@ type
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnShowHint;
   end;
   
 

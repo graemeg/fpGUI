@@ -156,6 +156,7 @@ type
     property    OnDropDown;
     property    OnEnter;
     property    OnExit;
+    property    OnShowHint;
   end;
   
 

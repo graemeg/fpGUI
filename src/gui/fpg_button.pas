@@ -33,7 +33,6 @@ type
 
   TImageLayout = (ilImageLeft, ilImageTop, ilImageRight, ilImageBottom);
 
-  { TfpgBaseButton }
 
   TfpgBaseButton = class(TfpgWidget, ICommandHolder)
   private
@@ -149,12 +148,13 @@ type
     property    Text;
     property    TextColor;
     property    TabOrder;
+    property    OnClick;
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
     property    OnMouseMove;
     property    OnMouseUp;
-    property    OnClick;
+    property    OnShowHint;
   end;
 
 

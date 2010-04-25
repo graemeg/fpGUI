@@ -78,6 +78,7 @@ type
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnShowHint;
   end;
 
 

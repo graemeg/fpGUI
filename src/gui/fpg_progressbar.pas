@@ -70,6 +70,7 @@ type
     property    ShowHint;
     property    Step;
     property    TextColor;
+    property    OnShowHint;
   end;
 
 

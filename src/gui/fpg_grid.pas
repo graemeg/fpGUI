@@ -67,6 +67,7 @@ type
     property    TabOrder;
     property    OnRowChange;
     property    OnDoubleClick;
+    property    OnShowHint;
   end;
 
 
@@ -154,6 +155,7 @@ type
     property    OnFocusChange;
     property    OnKeyPress;
     property    OnRowChange;
+    property    OnShowHint;
   end;
 
 function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;

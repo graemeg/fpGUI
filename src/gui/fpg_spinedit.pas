@@ -120,7 +120,7 @@ type
     procedure SetValue(const AValue: extended);
     procedure SetDecimals(const AValue: integer);
     procedure SetFixedDecimals(const AValue: Boolean);
-    procedure SetHint(const AValue: string); override;
+    procedure SetHint(const AValue: TfpgString); override;
     procedure ButtonUpClick(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
     procedure ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -160,6 +160,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
+    property    OnShowHint;
   end;
 
 
@@ -190,7 +191,7 @@ type
     procedure SetIncrement(const AValue: integer);
     procedure SetLargeIncrement(const AValue: integer);
     procedure SetValue(const AValue: integer);
-    procedure SetHint(const AValue: string); override;
+    procedure SetHint(const AValue: TfpgString); override;
     procedure ButtonUpClick(Sender: TObject);
     procedure ButtonDownClick(Sender: TObject);
     procedure ButtonUpMouseDown(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -228,6 +229,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
+    property    OnShowHint;
   end;
 
 
@@ -620,7 +622,7 @@ begin
   end;
 end;
 
-procedure TfpgSpinEditFloat.SetHint(const AValue: string);
+procedure TfpgSpinEditFloat.SetHint(const AValue: TfpgString);
 begin
   inherited SetHint(AValue);
   // let child component use the same hint
@@ -1034,7 +1036,7 @@ begin
   end;
 end;
 
-procedure TfpgSpinEdit.SetHint(const AValue: string);
+procedure TfpgSpinEdit.SetHint(const AValue: TfpgString);
 begin
   inherited SetHint(AValue);
   // let child component use the same hint

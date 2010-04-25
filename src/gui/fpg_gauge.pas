@@ -97,6 +97,7 @@ type
     property    ShowHint;
     property    ShowText: Boolean read FShowText write SetShowText default True;
     property    Visible;
+    property    OnShowHint;
   end;
 
 

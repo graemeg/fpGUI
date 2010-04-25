@@ -70,6 +70,7 @@ type
     property    ImageFileName;
     property    IsTransparent;
     property    FrameCount;
+    property    OnShowHint;
   end;
 
 

@@ -263,6 +263,7 @@ type
     property    OnPaintColumn: TfpgLVPaintColumnEvent read FOnPaintColumn write FOnPaintColumn;
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;
     property    OnSelectionChanged: TfpgLVItemSelectEvent read FOnSelectionChanged write FOnSelectionChanged;
+    property    OnShowHint;
   end;
   
   

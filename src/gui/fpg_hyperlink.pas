@@ -60,6 +60,7 @@ type
     property    ShowHint;
     property    URL: TfpgString read FUrl write SetURL;
     property    OnClick;
+    property    OnShowHint;
 end;
 
 

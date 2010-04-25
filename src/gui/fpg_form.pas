@@ -124,6 +124,7 @@ type
     property    OnPaint;
     property    OnResize;
     property    OnShow;
+    property    OnShowHint;
   end;
 
 

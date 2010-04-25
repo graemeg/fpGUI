@@ -120,6 +120,7 @@ type
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
+    property    OnShowHint;
   end;
 
 
