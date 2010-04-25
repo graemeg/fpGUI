@@ -32,7 +32,7 @@ type
     function    Count: integer;
     function    FindByName(const MacroName: TfpgString): TIDEMacro;
     function    StrHasMacros(const s: TfpgString): boolean;
-    function    SubstituteStr(var s: TfpgString): boolean;
+    function    ExpandMacro(const s: TfpgString): TfpgString;
     procedure   Add(NewMacro: TIDEMacro);
     procedure   Clear;
     procedure   Delete(AIndex: integer);
@@ -46,6 +46,10 @@ function GMacroList: TIDEMacroList;
 
 
 implementation
+
+uses
+  ideconst
+  ,fpg_iniutils;
 
 var
   uIDEMacroList: TIDEMacroList;
@@ -158,9 +162,35 @@ begin
   end;
 end;
 
-function TIDEMacroList.SubstituteStr(var s: TfpgString): boolean;
+function TIDEMacroList.ExpandMacro(const s: TfpgString): TfpgString;
+var
+  sub: TfpgString;
+  pstart: integer;
+  pend: integer;
+  len: integer;
+  m: TIDEMacro;
+  r: TfpgString;
 begin
-
+  r := s;
+  pstart := Pos('${', r);
+  while (pstart > 0) do
+  begin
+    len := Length(r);
+    pend := pstart + 2;
+    while pend < len do
+    begin
+      if r[pend] = '}' then
+        break
+      else
+        inc(pend);
+    end;
+    sub := Copy(r, pstart, (pend-pstart)+1);
+    m := FindByName(sub);
+    if Assigned(m) then
+      r := StringReplace(r, sub, m.Value, [rfReplaceAll, rfIgnoreCase]);
+    pstart := Pos('${', r);
+  end;
+  Result := r;
 end;
 
 procedure TIDEMacroList.Add(NewMacro: TIDEMacro);
