@@ -6,10 +6,9 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_editbtn,
-  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox;
+  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, idemacros;
 
 type
-
   TConfigureIDEForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: ConfigureIDEForm}
