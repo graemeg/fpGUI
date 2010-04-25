@@ -56,11 +56,14 @@ type
     {@VFD_HEAD_END: ConfigureIDEForm}
     // so we can get correct hints, but still undo with the Cancel button
     FInternalMacroList: TIDEMacroList;
+    procedure BeforeShowHint(Sender: TObject; var AHint: TfpgString);
     procedure LoadSettings;
     procedure SaveSettings;
     procedure SaveToMacroList(AList: TIDEMacroList);
   public
-    procedure AfterCreate; override;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -73,8 +76,14 @@ implementation
 uses
   fpg_dialogs
   ,fpg_iniutils
+  ,fpg_widget
   ,ideconst
   ;
+
+type
+  // Used to get access to the Protected properties
+  TDirectoryEditFriend = class(TfpgDirectoryEdit);
+
 
 procedure DisplayConfigureIDE;
 var
@@ -95,6 +104,52 @@ begin
 end;
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TConfigureIDEForm.BeforeShowHint(Sender: TObject; var AHint: TfpgString);
+var
+  s: TfpgString;
+  c: TfpgWidget;
+begin
+  if Sender is TfpgWidget then
+    c := TfpgWidget(Sender)
+  else
+    Exit;    // should never occur, but lets just be safe
+
+  if (c.Name = 'FEdit') and ((c.Parent is TfpgDirectoryEdit) or (c.Parent is TfpgFileNameEdit)) then
+  begin
+    if c.Parent <> nil then
+      c := c.Parent
+    else
+      Exit; // lets just be safe again
+  end;
+
+  if c.Name = 'edtFPCSrcDir' then
+    s := edtFPCSrcDir.Directory
+  else if c.Name = 'edtFPGuiDir' then
+    s := edtFPGuiDir.Directory
+  else if c.Name = 'edtFPGuiLibDir' then
+    s := edtFPGuiLibDir.Directory
+  else if c.Name = 'edtSyntaxDefDir' then
+    s := edtSyntaxDefDir.Directory
+  else if c.Name = 'edtTempateDir' then
+    s := edtTempateDir.Directory
+  else if c.Name = 'edtCompiler' then
+    s := edtCompiler.Filename
+  else if c.Name = 'edtDebugger' then
+    s := edtDebugger.Filename
+  else if c.Name = 'edtTarget' then
+    s := edtTarget.Text
+  else if c.Name = 'edtExeExt' then
+    s := edtExeExt.Text;
+
+  AHint := s;
+
+  if FInternalMacroList.StrHasMacros(s) then
+  begin
+    SaveToMacroList(FInternalMacroList);
+    AHint := FInternalMacroList.ExpandMacro(s);
+  end;
+end;
 
 procedure TConfigureIDEForm.LoadSettings;
 begin
@@ -139,6 +194,18 @@ begin
   AList.SetValue(cMacro_Target, edtTarget.Text);
 end;
 
+constructor TConfigureIDEForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FInternalMacroList := TIDEMacroList.Create;
+end;
+
+destructor TConfigureIDEForm.Destroy;
+begin
+  FInternalMacroList.Free;
+  inherited Destroy;
+end;
+
 procedure TConfigureIDEForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -147,6 +214,7 @@ begin
   SetPosition(332, 190, 578, 480);
   WindowTitle := 'Configure IDE';
   Hint := '';
+  ShowHint := True;
   WindowPosition := wpOneThirdDown;
 
   btnCancel := TfpgButton.Create(self);
@@ -220,7 +288,7 @@ begin
     SetPosition(8, 4, 340, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := '${FPCDIR}';
+    Text := 'FPC Source Directory ${FPCDIR}';
   end;
 
   edtFPCSrcDir := TfpgDirectoryEdit.Create(tsEnvironment);
@@ -233,6 +301,8 @@ begin
     Directory := '';
     RootDirectory := '';
     TabOrder := 3;
+    Hint := '*';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtFPGuiDir := TfpgDirectoryEdit.Create(tsEnvironment);
@@ -245,6 +315,8 @@ begin
     Directory := '';
     RootDirectory := '';
     TabOrder := 6;
+    Hint := '*';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtFPGuiLibDir := TfpgDirectoryEdit.Create(tsEnvironment);
@@ -257,6 +329,8 @@ begin
     Directory := '${FPGUIDIR}lib/';
     RootDirectory := '';
     TabOrder := 7;
+    Hint := '*';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtSyntaxDefDir := TfpgDirectoryEdit.Create(tsEnvironment);
@@ -269,6 +343,8 @@ begin
     Directory := '${FPGUIDIR}apps/ide/syntaxdefs/';
     RootDirectory := '';
     TabOrder := 8;
+    Hint := '*';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtTempateDir := TfpgDirectoryEdit.Create(tsEnvironment);
@@ -281,6 +357,8 @@ begin
     Directory := '{FPGUIDIR}apps/ide/templates/';
     RootDirectory := '';
     TabOrder := 9;
+    Hint := '*';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtCompiler := TfpgFileNameEdit.Create(tsEnvironment);
@@ -294,6 +372,8 @@ begin
     InitialDir := '';
     Filter := '';
     TabOrder := 10;
+    Hint := '*';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtDebugger := TfpgFileNameEdit.Create(tsEnvironment);
@@ -307,6 +387,8 @@ begin
     InitialDir := '';
     Filter := '';
     TabOrder := 11;
+    Hint := '*';
+    OnShowHint := @BeforeShowHint;
   end;
 
   Label2 := TfpgLabel.Create(tsEnvironment);
@@ -316,7 +398,7 @@ begin
     SetPosition(8, 56, 340, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := '${FPGUIDIR}';
+    Text := 'fpGUI Root Directory ${FPGUIDIR}';
   end;
 
   Label3 := TfpgLabel.Create(tsEnvironment);
@@ -415,10 +497,11 @@ begin
     Name := 'edtExeExt';
     SetPosition(8, 362, 144, 24);
     ExtraHint := '';
-    Hint := '';
+    Hint := '*';
     TabOrder := 21;
     Text := '';
     FontDesc := '#Edit1';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtTarget := TfpgEdit.Create(tsEnvironment);
@@ -427,10 +510,11 @@ begin
     Name := 'edtTarget';
     SetPosition(164, 362, 192, 24);
     ExtraHint := '';
-    Hint := '';
+    Hint := '*';
     TabOrder := 22;
     Text := 'i386-linux';
     FontDesc := '#Edit1';
+    OnShowHint := @BeforeShowHint;
   end;
 
   grdShortcuts := TfpgStringGrid.Create(tsShortcuts);
