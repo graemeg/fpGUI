@@ -5,10 +5,6 @@ MainUnit=fpgide.lpr
 TargetFile=fpgide
 DefaultMake=0
 MakeOptionsCount=4
-MakeOption1=-l -Mobjfpc -Sch
-MakeOption2=-gl -O-
-MakeOption3=-B
-MakeOption4=-O2 -XX -Xs -CX
 MakeOptionEnabled1=1,1,1,1,1,1
 MakeOptionEnabled2=1,1,1,1,1,0
 MakeOptionEnabled3=0,1,0,0,0,1
@@ -20,21 +16,26 @@ Macro3=TargetCPU=i386
 Macro4=TargetOS=win32
 Macro5=FPGUI_DIR=/home/graemeg/programming/fpgui/
 Macro6=tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/
-UnitDirsCount=8
-UnitDir1=/home/graemeg/programming/fpgui/src/
-UnitDir2=/home/graemeg/programming/fpgui/src/corelib/
-UnitDir3=/home/graemeg/programming/fpgui/src/corelib/x11/
-UnitDir4=/home/graemeg/programming/fpgui/src/corelib/gdi/
-UnitDir5=/home/graemeg/programming/fpgui/src/gui/
-UnitDir6=/home/graemeg/programming/fpgui/src/gui/db/
-UnitDir7=/home/graemeg/programming/fpgui/lib/i386-linux/
-UnitDir8=/home/graemeg/programming/fpgui/lib/i386-win32/
+UnitDirsCount=6
 UnitDirEnabled1=1,1,1,1,0,0,0,1,0,0
 UnitDirEnabled2=1,1,1,1,0,0,1,1,0,0
 UnitDirEnabled3=1,1,1,0,0,0,1,1,0,0
 UnitDirEnabled4=0,0,0,1,0,0,1,1,0,0
 UnitDirEnabled5=1,1,1,1,0,0,1,0,0,0
-UnitDirEnabled6=1,1,1,1,0,0,1,0,0,0
+UnitDirEnabled6=0,0,0,0,1,1,1,0,0,0
 UnitDirEnabled7=0,0,0,0,1,0,1,0,0,0
 UnitDirEnabled8=0,0,0,0,0,1,1,0,0,0
-UnitOutputDir=units/i386-linux/
+UnitOutputDir=units/${TARGET}/
+MakeOption1=-l -Mobjfpc -Sch
+MakeOption2=-gl -O-
+MakeOption3=-B
+MakeOption4=-O2 -XX -Xs -CX
+UnitDir1=${FPGUIDIR}src/
+UnitDir2=${FPGUIDIR}src/corelib/
+UnitDir3=${FPGUIDIR}src/corelib/x11/
+UnitDir4=${FPGUIDIR}src/corelib/gdi/
+UnitDir5=${FPGUIDIR}gui/
+UnitDir6=${FPGUIDLIBDIR}
+
+[Units]
+UnitCount=0
