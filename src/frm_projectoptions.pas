@@ -6,8 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
-  fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_customgrid, fpg_basegrid,
-  fpg_combobox, fpg_edit, fpg_memo;
+  fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_basegrid,
+  fpg_combobox, fpg_edit;
 
 type
 
@@ -56,6 +56,8 @@ type
     TabSheet7: TfpgTabSheet;
     grdDebugSrcDirs: TfpgStringGrid;
     btnShowCmdLine: TfpgButton;
+    edtUnitOutputDir: TfpgDirectoryEdit;
+    Label9: TfpgLabel;
     {@VFD_HEAD_END: ProjectOptionsForm}
     FCellEdit: TfpgEdit;
     FFocusRect: TfpgRect;
@@ -268,6 +270,7 @@ begin
   edtMainFile.FileName            := GProject.MainUnit;
   edtTargetFile.FileName          := GProject.TargetFile;
   edtMakeDir.Directory            := GProject.ProjectDir;
+  edtUnitOutputDir.Directory      := GProject.UnitOutputDir;
   cbDefaultMakeCol.FocusItem      := GProject.DefaultMake;
   grdCompilerMakeOptions.RowCount := GProject.MakeOptions.Count;
 
@@ -301,6 +304,7 @@ begin
   GProject.TargetFile        := edtTargetFile.FileName;
   GProject.ProjectDir        := edtMakeDir.Directory;
   GProject.DefaultMake       := cbDefaultMakeCol.FocusItem;
+  GProject.UnitOutputDir     := edtUnitOutputDir.Directory;
 
   CleanupCompilerMakeOptionsGrid;
   GProject.ClearAndInitMakeOptions(grdCompilerMakeOptions.RowCount);
@@ -331,7 +335,6 @@ end;
 
 procedure TProjectOptionsForm.SetupCellEdit(AGrid: TfpgStringGrid);
 var
-  r: TfpgRect;
   pt: TPoint;
 begin
   if Assigned(FCellEdit) then
@@ -877,6 +880,27 @@ begin
     ImageName := '';
     TabOrder := 16;
     OnClick :=@btnShowCmdLineClicked;
+  end;
+
+  edtUnitOutputDir := TfpgDirectoryEdit.Create(tsCompiler);
+  with edtUnitOutputDir do
+  begin
+    Name := 'edtUnitOutputDir';
+    SetPosition(300, 172, 288, 24);
+    ExtraHint := '';
+    Directory := '';
+    RootDirectory := '';
+    TabOrder := 17;
+  end;
+
+  Label9 := TfpgLabel.Create(tsCompiler);
+  with Label9 do
+  begin
+    Name := 'Label9';
+    SetPosition(300, 154, 280, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Unit output directory (-FU)';
   end;
 
   {@VFD_BODY_END: ProjectOptionsForm}
