@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, fpg_base, fpg_main, frm_main, frm_configureide, ideconst, idemacros, frm_debug,
-  project, unitlist, frm_projectoptions;
+  project, unitlist, frm_projectoptions, ideutils;
 
 
 procedure MainProc;

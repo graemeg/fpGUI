@@ -92,6 +92,7 @@ uses
   fpg_iniutils
   ,Project
   ,ideconst
+  ,ideutils
   ;
 
 const
@@ -148,32 +149,7 @@ end;
 procedure TProjectOptionsForm.btnShowCmdLineClicked(Sender: TObject);
 var
   c: TfpgString;
-  i: integer;
   b: integer;
-
-  procedure ShowString(const AString: TfpgString; const AHeading: TfpgString);
-  var
-    lForm: TfpgForm;
-    lMemo: TfpgMemo;
-  begin
-    lForm := TfpgForm.Create(nil);
-    lMemo := TfpgMemo.Create(lForm);
-    try
-      lForm.WindowTitle := AHeading;
-      lForm.Width       := 450;
-      lForm.Height      := 250;
-      lForm.WindowPosition := wpOneThirdDown;
-      lForm.Name        := 'FormShowStrings';
-      lMemo.Lines.Text  := AString;
-      lMemo.FontDesc    := 'Courier New-10';
-      lMemo.SetPosition(0, 0, lForm.Width, lForm.Height);
-      lMemo.Align       := alClient;
-      lForm.ShowModal;
-    finally
-      lForm.free;
-    end;
-  end;
-
 begin
   // build compilation string
   c := gINI.ReadString(cEnvironment, 'Compiler', '') + LineEnding;

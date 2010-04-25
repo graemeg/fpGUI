@@ -36,7 +36,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="9">
+    <Units Count="10">
       <Unit0>
         <Filename Value="fpgide.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -82,6 +82,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_projectoptions"/>
       </Unit8>
+      <Unit9>
+        <Filename Value="ideutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ideutils"/>
+      </Unit9>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
