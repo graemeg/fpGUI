@@ -32,6 +32,8 @@ uses
 type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
 
+  THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
+
 
   TfpgWidget = class(TfpgWindow)
   private
@@ -49,6 +51,7 @@ type
     FOnKeyPress: TKeyPressEvent;
     FOnResize: TNotifyEvent;
     FOnScreen: boolean;
+    FOnShowHint: THintEvent;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
@@ -76,12 +79,14 @@ type
     FAnchors: TAnchors;
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
-    FHint: string;
+    FHint: TfpgString;
     FShowHint: boolean;
     FParentShowHint: boolean;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
+    function    GetOnShowHint: THintEvent; virtual;
+    procedure   SetOnShowHint(const AValue: THintEvent); virtual;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
     procedure   SetTextColor(const AValue: TfpgColor); virtual;
     function    GetParent: TfpgWidget; reintroduce;
@@ -90,10 +95,12 @@ type
     procedure   SetVisible(const AValue: boolean); virtual;
     procedure   SetShowHint(const AValue: boolean); virtual;
     procedure   SetParentShowHint(const AValue: boolean); virtual;
-    procedure   SetHint(const AValue: string); virtual;
+    function    GetHint: TfpgString; virtual;
+    procedure   SetHint(const AValue: TfpgString); virtual;
     procedure   DoUpdateWindowPosition; override;
     procedure   DoAlign(AAlign: TAlign);
     procedure   DoResize;
+    procedure   DoShowHint(var AHint: TfpgString);
     procedure   HandlePaint; virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
@@ -129,6 +136,7 @@ type
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnResize: TNotifyEvent read FOnResize write FOnResize;
+    property    OnShowHint: THintEvent read GetOnShowHint write SetOnShowHint;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -155,7 +163,7 @@ type
     property    Focused: boolean read FFocused write FFocused default False;
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
-    property    Hint: string read FHint write SetHint;
+    property    Hint: TfpgString read GetHint write SetHint;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
@@ -208,7 +216,7 @@ begin
   for i := 0 to ComponentCount - 1 do
   begin
     if Components[i] is TfpgWidget then
-      TfpgWidget(Components[i]).Enabled := self.Enabled;
+      TfpgWidget(Components[i]).Enabled := FEnabled;
   end;
   RePaint;
 end;
@@ -225,6 +233,11 @@ begin
   FActiveWidget := AValue;
   if FActiveWidget <> nil then
     FActiveWidget.HandleSetFocus;
+end;
+
+function TfpgWidget.GetHint: TfpgString;
+begin
+  Result := FHint;
 end;
 
 function TfpgWidget.IsShowHintStored: boolean;
@@ -279,7 +292,7 @@ begin
     FShowHint := False;
 end;
 
-procedure TfpgWidget.SetHint(const AValue: string);
+procedure TfpgWidget.SetHint(const AValue: TfpgString);
 begin
   FHint := AValue;
 end;
@@ -698,6 +711,16 @@ begin
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
 end;
 
+function TfpgWidget.GetOnShowHint: THintEvent;
+begin
+  Result := FOnShowHint;
+end;
+
+procedure TfpgWidget.SetOnShowHint(const AValue: THintEvent);
+begin
+  FOnShowHint := AValue;
+end;
+
 procedure TfpgWidget.HandleShow;
 var
   n: integer;
@@ -1007,6 +1030,7 @@ begin
     if Components[n] is TfpgWidget then
     begin
       w := TfpgWidget(Components[n]);
+      begin
 
       if w.Visible and w.Enabled and w.Focusable then
         case direction of
@@ -1028,6 +1052,7 @@ begin
             if startwg = w then
               FoundIt := True
             else if w.TabOrder < lasttaborder then
+            begin
               if (startwg = nil) or
                 (w.TabOrder > startwg.TabOrder) or
                 (FoundIt and (w.TabOrder = startwg.TabOrder)) then
@@ -1035,7 +1060,7 @@ begin
                 Result       := w;
                 lasttaborder := w.TabOrder;
               end;
-
+            end;
           fsdPrev:
             if startwg = w then
               FoundIt := True
@@ -1048,7 +1073,8 @@ begin
                 lasttaborder := w.TabOrder;
               end;
 
-        end;
+        end; { case }
+      end; { if w.Enabled... }
     end;
 end;
 
@@ -1251,6 +1277,15 @@ procedure TfpgWidget.DoResize;
 begin
   if Assigned(FOnResize) then
     FOnResize(Self);
+end;
+
+procedure TfpgWidget.DoShowHint(var AHint: TfpgString);
+begin
+  AHint := Hint;
+  if Assigned(FOnShowHint) then
+  begin
+    FOnShowHint(self, AHint);
+  end;
 end;
 
 procedure TfpgWidget.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
