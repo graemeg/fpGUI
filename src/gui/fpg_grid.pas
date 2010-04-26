@@ -140,6 +140,7 @@ type
     property    Hint;
     property    Options;
     property    ParentShowHint;
+    property    PopupMenu;
     property    RowCount;
     property    RowSelect;
     property    ScrollBarStyle;

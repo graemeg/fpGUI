@@ -30,7 +30,8 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  fpg_scrollbar;
+  fpg_scrollbar,
+  fpg_menu;
   
 type
 
@@ -77,6 +78,7 @@ type
     FHScrollBar: TfpgScrollBar;
     FUpdateCount: integer;
     FOptions: TfpgGridOptions;
+    FPopupMenu: TfpgPopupMenu;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -122,6 +124,7 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   FollowFocus; virtual;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
@@ -133,6 +136,7 @@ type
     property    FocusRow: Integer read FFocusRow write SetFocusRow default -1;
     property    RowSelect: boolean read FRowSelect write SetRowSelect;
     property    ColumnCount: Integer read GetColumnCount;
+    property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
     property    RowCount: Integer read GetRowCount;
     property    ShowHeader: boolean read FShowHeader write SetShowHeader default True;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
@@ -1036,6 +1040,26 @@ begin
     MouseCursor := mcSizeEW;
 
   CheckFocusChange;
+end;
+
+procedure TfpgBaseGrid.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  hh: integer;
+begin
+  inherited HandleRMouseUp(x, y, shiftstate);
+  if Assigned(PopupMenu) then
+  begin
+    // popup should not appear if you clicked in header - maybe this behaviour should be user-selectable?
+    if ShowHeader then
+      hh := FHeaderHeight+1
+    else
+      hh := 0;
+
+    if ShowHeader and (y > FMargin+hh) then  // not in Header row
+    begin
+      PopupMenu.ShowAt(self, x, y);
+    end;
+  end;
 end;
 
 procedure TfpgBaseGrid.FollowFocus;
