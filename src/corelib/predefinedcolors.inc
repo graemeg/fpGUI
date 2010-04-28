@@ -63,6 +63,10 @@
   clMenuText            = TfpgColor(cl_BaseNamedColor + 25); // $80000019;
   clMenuDisabled        = TfpgColor(cl_BaseNamedColor + 26); // $8000001A;
   clHintWindow          = TfpgColor(cl_BaseNamedColor + 27); // $8000001B;
+  clGridSelection       = TfpgColor(cl_BaseNamedColor + 28);
+  clGridSelectionText   = TfpgColor(cl_BaseNamedColor + 29);
+  clGridInactiveSel     = TfpgColor(cl_BaseNamedColor + 30);
+  clGridInactiveSelText = TfpgColor(cl_BaseNamedColor + 31);
 
 
 

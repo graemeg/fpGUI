@@ -1695,6 +1695,10 @@ begin
   fpgSetNamedColor(clMenuText, $000000);
   fpgSetNamedColor(clMenuDisabled, $909090);
   fpgSetNamedColor(clHintWindow, $FFFFBF);
+  fpgSetNamedColor(clGridSelection, $08246A);           // same as clSelection
+  fpgSetNamedColor(clGridSelectionText, $FFFFFF);       // same as clSelectionText
+  fpgSetNamedColor(clGridInactiveSel, $D0D0FF);         // same as clInactiveSel
+  fpgSetNamedColor(clGridInactiveSelText, $000000);     // same as clInactiveSelText
 
 
   // Global Font Objects
