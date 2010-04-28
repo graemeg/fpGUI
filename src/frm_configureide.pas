@@ -123,24 +123,13 @@ begin
       Exit; // lets just be safe again
   end;
 
-  if c.Name = 'edtFPCSrcDir' then
-    s := edtFPCSrcDir.Directory
-  else if c.Name = 'edtFPGuiDir' then
-    s := edtFPGuiDir.Directory
-  else if c.Name = 'edtFPGuiLibDir' then
-    s := edtFPGuiLibDir.Directory
-  else if c.Name = 'edtSyntaxDefDir' then
-    s := edtSyntaxDefDir.Directory
-  else if c.Name = 'edtTempateDir' then
-    s := edtTempateDir.Directory
-  else if c.Name = 'edtCompiler' then
-    s := edtCompiler.Filename
-  else if c.Name = 'edtDebugger' then
-    s := edtDebugger.Filename
-  else if c.Name = 'edtTarget' then
-    s := edtTarget.Text
-  else if c.Name = 'edtExeExt' then
-    s := edtExeExt.Text;
+  // controls that may contain macros
+  if c is TfpgDirectoryEdit then
+    s := TfpgDirectoryEdit(c).Directory
+  else if c is TfpgFileNameEdit then
+    s := TfpgFileNameEdit(c).FileName
+  else if c is TfpgEdit then
+    s := TfpgEdit(c).Text;
 
   AHint := s;
 
