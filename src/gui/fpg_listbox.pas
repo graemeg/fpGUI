@@ -995,6 +995,10 @@ begin
           FItems.Add(TColorItem.Create('clUnset', clUnset));
           FItems.Add(TColorItem.Create('clMenuText', clMenuText));
           FItems.Add(TColorItem.Create('clMenuDisabled', clMenuDisabled));
+          FItems.Add(TColorItem.Create('clGridSelection', clGridSelection));
+          FItems.Add(TColorItem.Create('clGridSelectionText', clGridSelectionText));
+          FItems.Add(TColorItem.Create('clGridInactiveSel', clGridInactiveSel));
+          FItems.Add(TColorItem.Create('clGridInactiveSelText', clGridInactiveSelText));
         end;
     cpWebColors:
         begin
