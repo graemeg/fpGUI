@@ -17,7 +17,6 @@
       actual character code.
 }
 
-{ TODO : This dialog needs to be incorporated with TfpgEdit popup menu. }
 
 {%mainunit fpg_dialogs.pas}
 

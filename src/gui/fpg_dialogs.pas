@@ -23,7 +23,6 @@ unit fpg_dialogs;
   TODO:
     * Try and refactor the code to remove all IFDEF's
     * Implement MessageDlg with icons and buttons [Work-In-Progress]
-    * Select Directory dialog (treeview style)
 }
 
 {.$Define DEBUG}
