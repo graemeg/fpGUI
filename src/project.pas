@@ -131,8 +131,10 @@ begin
   else
   begin
     if AFile <> '' then
+    begin
       FIniFile.Free;
-    FIniFile := TfpgINIFile.CreateExt(AFile);
+      FIniFile := TfpgINIFile.CreateExt(AFile);
+    end;
   end;
 
   FIniFile.WriteString(cProjectOptions, 'ProjectDir', ProjectDir);
@@ -356,7 +358,7 @@ initialization
   uProject := nil;
 
 finalization
-  uProject.Free;
+  FreeProject;
 
 end.
 
