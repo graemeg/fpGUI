@@ -43,7 +43,7 @@ type
   TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean) of object;
 
   // widget options
-  TfpgGridOption = (go_HideFocusRect);
+  TfpgGridOption = (go_HideFocusRect, go_AlternativeColor);
   TfpgGridOptions = set of TfpgGridOption;
 
   // Column 2 is special just for testing purposes. Descendant classes will
@@ -79,6 +79,7 @@ type
     FUpdateCount: integer;
     FOptions: TfpgGridOptions;
     FPopupMenu: TfpgPopupMenu;
+    FAlternativeBGColor: TfpgColor;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -98,12 +99,14 @@ type
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
     procedure   SetFirstRow(const AValue: Integer);
+    procedure   SetAlternativeBGColor(const AValue: TfpgColor);
   protected
     property    UpdateCount: integer read FUpdateCount;
     procedure   UpdateScrollBars; virtual;
     function    GetHeaderText(ACol: Integer): string; virtual;
     function    GetColumnWidth(ACol: Integer): integer; virtual;
     procedure   SetColumnWidth(ACol: Integer; const AValue: integer); virtual;
+    function    GetBackgroundColor(ARow: integer; ACol: integer): TfpgColor; virtual;
     function    GetColumnBackgroundColor(ACol: Integer): TfpgColor; virtual;
     procedure   SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor); virtual;
     function    GetColumnTextColor(ACol: Integer): TfpgColor; virtual;
@@ -126,6 +129,7 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   FollowFocus; virtual;
+    property    AlternateBGColor: TfpgColor read FAlternativeBGColor write SetAlternativeBGColor default clHilite1;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
     property    Font: TfpgFont read FFont;
@@ -262,6 +266,24 @@ begin
     UpdateScrollBars;
     Repaint;
   end;
+end;
+
+function TfpgBaseGrid.GetBackgroundColor(ARow: integer; ACol: integer): TfpgColor;
+begin
+  if (ARow >= 0) and (ACol >= 0) and (ARow < RowCount) and (ACol < ColumnCount) then
+  begin
+    if go_AlternativeColor in Options then
+    begin
+      if (ARow mod 2) <> 0 then
+        Result := AlternateBGColor
+      else
+        Result := ColumnBackgroundColor[ACol];
+    end
+    else
+      Result := ColumnBackgroundColor[ACol];
+  end
+  else
+    Result := BackgroundColor;
 end;
 
 function TfpgBaseGrid.GetColumnBackgroundColor(ACol: Integer): TfpgColor;
@@ -481,6 +503,12 @@ begin
   RePaint;
 end;
 
+procedure TfpgBaseGrid.SetAlternativeBGColor(const AValue: TfpgColor);
+begin
+  if FAlternativeBGColor = AValue then exit;
+  FAlternativeBGColor := AValue;
+end;
+
 procedure TfpgBaseGrid.UpdateScrollBars;
 var
   HWidth: integer;
@@ -627,7 +655,7 @@ begin
         end
         else
         begin
-          Canvas.SetColor(ColumnBackgroundColor[col]);
+          Canvas.SetColor(GetBackgroundColor(row, col));
           Canvas.SetTextColor(ColumnTextColor[col]);
         end;
         Canvas.AddClipRect(r);
@@ -1141,6 +1169,7 @@ begin
   FDefaultRowHeight := FFont.Height + 2;
   FHeaderHeight     := FHeaderFont.Height + 2;
   FBackgroundColor  := clBoxColor;
+  FAlternativeBGColor := clHilite1;
   FColResizing      := False;
 
   MinHeight   := HeaderHeight + DefaultRowHeight + FMargin;

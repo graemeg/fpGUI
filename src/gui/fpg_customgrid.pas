@@ -259,7 +259,7 @@ begin
   if (ACol >= 0) and (ACol < ColumnCount) then
     Result := TfpgGridColumn(FColumns[ACol]).FBackgroundColor
   else
-    result := BackgroundColor;
+    Result := BackgroundColor;
 end;
 
 procedure TfpgCustomGrid.SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor);

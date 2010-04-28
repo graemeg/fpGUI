@@ -125,6 +125,7 @@ type
   public
     property    Font;
   published
+    property    AlternateBGColor;
     property    BackgroundColor;
 //    property    ColResizing;
     property    ColumnCount;
