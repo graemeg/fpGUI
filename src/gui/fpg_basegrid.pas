@@ -616,13 +616,13 @@ begin
         begin
           if FFocused then
           begin
-            Canvas.SetColor(clSelection);
-            Canvas.SetTextColor(clSelectionText);
+            Canvas.SetColor(clGridSelection);
+            Canvas.SetTextColor(clGridSelectionText);
           end
           else
           begin
-            Canvas.SetColor(clInactiveSel);
-            Canvas.SetTextColor(clInactiveSelText);
+            Canvas.SetColor(clGridInactiveSel);
+            Canvas.SetTextColor(clGridInactiveSelText);
           end;
         end
         else
