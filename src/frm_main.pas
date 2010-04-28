@@ -141,8 +141,9 @@ end;
 procedure TMainForm.miAboutIDE(Sender: TObject);
 begin
   TfpgMessageDialog.Information('About fpGUI IDE',
-      'Created by Graeme Geldenhuys' + LineEnding
-       + 'Compiled with FPC ' + FPCVersion);
+      'fpGUI IDE version ' + FPGUI_VERSION + LineEnding + LineEnding
+      + 'Created by Graeme Geldenhuys' + LineEnding
+      + 'Compiled with FPC ' + FPCVersion);
 end;
 
 procedure TMainForm.miRunMake(Sender: TObject);
