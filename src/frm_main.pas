@@ -158,6 +158,7 @@ begin
   // build compilation string
   c := gINI.ReadString(cEnvironment, 'Compiler', '');
   c := c + GProject.GenerateCmdLine;
+  c := GMacroList.ExpandMacro(c);
 
   writeln('');
   writeln('Compile command:');
