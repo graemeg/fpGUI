@@ -614,10 +614,10 @@ begin
   begin
     Name := 'mnuFile';
     SetPosition(476, 56, 172, 20);
-    AddMenuItem('New...', '', nil);
-    AddMenuItem('Open...', '', nil);
-    AddMenuItem('Open Recent', '', nil);
-    AddMenuItem('Save...', '', nil);
+    AddMenuItem('New...', '', nil).Enabled := False;
+    AddMenuItem('Open...', '', nil).Enabled := False;
+    AddMenuItem('Open Recent', '', nil).Enabled := False;
+    AddMenuItem('Save...', '', nil).Enabled := False;
     AddMenuItem('Save As...', '', @miFileSaveAs);
     AddMenuItem('-', '', nil);
     AddMenuItem('Quit', '', @btnQuitClicked);
@@ -628,9 +628,9 @@ begin
   begin
     Name := 'mnuEdit';
     SetPosition(476, 24, 172, 20);
-    AddMenuItem('Cut', '', nil);
-    AddMenuItem('Copy', '', nil);
-    AddMenuItem('Paste', '', nil);
+    AddMenuItem('Cut', '', nil).Enabled := False;
+    AddMenuItem('Copy', '', nil).Enabled := False;
+    AddMenuItem('Paste', '', nil).Enabled := False;
   end;
 
   mnuSearch := TfpgPopupMenu.Create(self);
@@ -638,9 +638,9 @@ begin
   begin
     Name := 'mnuSearch';
     SetPosition(476, 98, 172, 20);
-    AddMenuItem('Find...', '', nil);
-    AddMenuItem('Find in Files...', '', nil);
-    AddMenuItem('Procedure List...', '', nil);
+    AddMenuItem('Find...', '', nil).Enabled := False;
+    AddMenuItem('Find in Files...', '', nil).Enabled := False;
+    AddMenuItem('Procedure List...', '', nil).Enabled := False;
   end;
 
   mnuView := TfpgPopupMenu.Create(self);
@@ -648,8 +648,8 @@ begin
   begin
     Name := 'mnuView';
     SetPosition(476, 119, 172, 20);
-    AddMenuItem('Todo List...', '', nil);
-    AddMenuItem('Debug Windows', '', @miViewDebug);
+    AddMenuItem('Todo List...', '', nil).Enabled := False;
+    AddMenuItem('Debug Windows', '', @miViewDebug).Enabled := False;
   end;
 
   mnuProject := TfpgPopupMenu.Create(self);
