@@ -2,7 +2,7 @@
 ProjectDir=/media/flash16gig/programming/fpgide/src/
 ProjectName=fpgide
 MainUnit=fpgide.lpr
-TargetFile=fpgide
+TargetFile=fpgide${EXEEXT}
 DefaultMake=0
 MakeOptionsCount=4
 MakeOptionEnabled1=1,1,1,1,1,1
@@ -34,7 +34,7 @@ UnitDir1=${FPGUIDIR}src/
 UnitDir2=${FPGUIDIR}src/corelib/
 UnitDir3=${FPGUIDIR}src/corelib/x11/
 UnitDir4=${FPGUIDIR}src/corelib/gdi/
-UnitDir5=${FPGUIDIR}gui/
+UnitDir5=${FPGUIDIR}src/gui/
 UnitDir6=${FPGUILIBDIR}
 
 [Units]
