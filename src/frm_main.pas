@@ -240,7 +240,7 @@ begin
     if fpgExtractFileExt(s) = '' then
       s := s + cProjectExt;
     try
-      GProject.Save;
+      GProject.Save(s);
     except
       on E: Exception do
       begin
