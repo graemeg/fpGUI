@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
   fpg_tab, fpg_editbtn, fpg_checkbox, fpg_grid, fpg_basegrid,
-  fpg_combobox, fpg_edit;
+  fpg_combobox, fpg_edit, idemacros;
 
 type
 
@@ -63,6 +63,8 @@ type
     FFocusRect: TfpgRect;
     FLastGrid: TfpgStringGrid; // reference only
     FCheckFont: TfpgFont;
+    // so we can get correct hints, but still undo with the Cancel button
+    FInternalMacroList: TIDEMacroList;
     procedure btnShowCmdLineClicked(Sender: TObject);
     procedure CellEditExit(Sender: TObject);
     procedure CellEditKeypressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
@@ -72,15 +74,18 @@ type
     procedure grdCompilerMakeOptionsDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure grdCompilerMakeOptionsClicked(Sender: TObject);
     procedure grdCompilerDirsClicked(Sender: TObject);
+    procedure BeforeShowHint(Sender: TObject; var AHint: TfpgString);
     procedure LoadSettings;
     procedure SaveSettings;
     procedure SetupCellEdit(AGrid: TfpgStringGrid);
     procedure CleanupCompilerMakeOptionsGrid;
     procedure CleanupCompilerDirs;
+    procedure SaveToMacroList(AList: TIDEMacroList);
+
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-    procedure AfterCreate; override;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -93,10 +98,10 @@ implementation
 uses
   fpg_iniutils
   ,fpg_dialogs
+  ,fpg_widget
   ,Project
   ,ideconst
   ,ideutils
-  ,idemacros
   ;
 
 type
@@ -273,6 +278,43 @@ begin
   end;
 end;
 
+procedure TProjectOptionsForm.BeforeShowHint(Sender: TObject; var AHint: TfpgString);
+var
+  s: TfpgString;
+  c: TfpgWidget;
+begin
+  if Sender is TfpgWidget then
+    c := TfpgWidget(Sender)
+  else
+    Exit;    // should never occur, but lets just be safe
+
+  if (c.Name = 'FEdit') and ((c.Parent is TfpgDirectoryEdit) or (c.Parent is TfpgFileNameEdit)) then
+  begin
+    if c.Parent <> nil then
+      c := c.Parent
+    else
+      Exit; // lets just be safe again
+  end;
+
+  // controls that may contain macros
+  if c is TfpgDirectoryEdit then
+    s := TfpgDirectoryEdit(c).Directory
+  else if c is TfpgFileNameEdit then
+    s := TfpgFileNameEdit(c).FileName
+  else if c is TfpgEdit then
+    s := TfpgEdit(c).Text
+  else if c is TfpgStringGrid then
+    s := TfpgStringGrid(c).Cells[TfpgStringGrid(c).FocusCol, TfpgStringGrid(c).FocusRow];
+
+  AHint := s;
+
+  if FInternalMacroList.StrHasMacros(s) then
+  begin
+    SaveToMacroList(FInternalMacroList);
+    AHint := FInternalMacroList.ExpandMacro(s);
+  end;
+end;
+
 procedure TProjectOptionsForm.LoadSettings;
 var
   i, j: integer;
@@ -391,14 +433,21 @@ begin
   end;
 end;
 
+procedure TProjectOptionsForm.SaveToMacroList(AList: TIDEMacroList);
+begin
+//  AList.SetValue(cMacro_FPCSrcDir, edtFPCSrcDir.Directory);
+end;
+
 constructor TProjectOptionsForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FInternalMacroList := TIDEMacroList.Create;
   FCheckFont := fpgGetFont('DejaVu Sans-9');
 end;
 
 destructor TProjectOptionsForm.Destroy;
 begin
+  FInternalMacroList.Free;
   FCheckFont.Free;
   inherited Destroy;
 end;
@@ -504,6 +553,8 @@ begin
     InitialDir := '';
     Filter := '';
     TabOrder := 2;
+    Hint := ' ';
+    OnShowHint := @BeforeShowHint;
   end;
 
   Label2 := TfpgLabel.Create(tsCompiler);
@@ -526,6 +577,8 @@ begin
     InitialDir := '';
     Filter := '';
     TabOrder := 4;
+    Hint := ' ';
+    OnShowHint := @BeforeShowHint;
   end;
 
   edtMakeCommand := TfpgFileNameEdit.Create(tsCompiler);
@@ -538,6 +591,8 @@ begin
     InitialDir := '';
     Filter := '';
     TabOrder := 5;
+    Hint := ' ';
+    OnShowHint := @BeforeShowHint;
   end;
 
   Label3 := TfpgLabel.Create(tsCompiler);
@@ -559,6 +614,8 @@ begin
     Directory := '';
     RootDirectory := '';
     TabOrder := 7;
+    Hint := ' ';
+    OnShowHint := @BeforeShowHint;
   end;
 
   Label4 := TfpgLabel.Create(tsCompiler);
@@ -688,13 +745,14 @@ begin
     AddColumn('Command line options', 430, taLeftJustify);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
-    Hint := '';
+    Hint := ' ';
     RowCount := 0;
     RowSelect := False;
     TabOrder := 1;
     OnClick := @grdCompilerMakeOptionsClicked;
     OnDrawCell := @grdCompilerMakeOptionsDrawCell;
     OnKeyPress := @grdCompilerMakeOptionsKeyPressed;
+    OnShowHint := @BeforeShowHint;
   end;
 
   grdCompilerDirs := TfpgStringGrid.Create(TabSheet2);
@@ -716,13 +774,15 @@ begin
     AddColumn('Directories', 350, taLeftJustify);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
-    Hint := '';
+    Hint := ' ';
+    ParentShowHint := False;
     RowCount := 0;
     RowSelect := False;
     TabOrder := 1;
     OnClick := @grdCompilerDirsClicked;
     OnDrawCell := @grdCompilerDirsDrawCell;
     OnKeyPress := @grdCompilerDirsKeyPressed;
+    OnShowHint := @BeforeShowHint;
   end;
 
   Label11 := TfpgLabel.Create(TabSheet2);
@@ -901,6 +961,8 @@ begin
     Directory := '';
     RootDirectory := '';
     TabOrder := 17;
+    Hint := ' ';
+    OnShowHint := @BeforeShowHint;
   end;
 
   Label9 := TfpgLabel.Create(tsCompiler);
