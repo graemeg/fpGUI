@@ -35,7 +35,7 @@ UnitDir2=${FPGUIDIR}src/corelib/
 UnitDir3=${FPGUIDIR}src/corelib/x11/
 UnitDir4=${FPGUIDIR}src/corelib/gdi/
 UnitDir5=${FPGUIDIR}gui/
-UnitDir6=${FPGUIDLIBDIR}
+UnitDir6=${FPGUILIBDIR}
 
 [Units]
 UnitCount=0
