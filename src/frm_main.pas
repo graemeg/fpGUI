@@ -217,7 +217,15 @@ end;
 
 procedure TMainForm.miProjectSave(Sender: TObject);
 begin
-  GProject.Save;
+  try
+    GProject.Save;
+  except
+    on E: Exception do
+    begin
+      TfpgMessageDialog.Critical('', E.Message);
+    end;
+  end;
+  AddMessage('Project saved.');
 end;
 
 procedure TMainForm.miProjectSaveAs(Sender: TObject);
@@ -229,7 +237,15 @@ begin
   begin
     if fpgExtractFileExt(s) = '' then
       s := s + cProjectExt;
-    GProject.Save(s);
+    try
+      GProject.Save;
+    except
+      on E: Exception do
+      begin
+        TfpgMessageDialog.Critical('', E.Message);
+      end;
+    end;
+    AddMessage(Format('Project saved as <%s>.', [s]));
   end;
 end;
 
