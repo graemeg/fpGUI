@@ -269,8 +269,8 @@ type
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
     property    Display: PXDisplay read FDisplay;
-    property    RootWindow: TfpgWinHandle read FRootWindow;
-    property    EventFilter: TX11EventFilter read FEventFilter write FEventFilter;
+    property    RootWindow: TfpgWinHandle read FRootWindow; platform;
+    property    EventFilter: TX11EventFilter read FEventFilter write FEventFilter; platform;
   end;
 
 
@@ -1316,7 +1316,7 @@ function TfpgX11Application.GetScreenWidth: TfpgCoord;
 var
   wa: TXWindowAttributes;
 begin
-  XGetWindowAttributes(FDisplay, RootWindow, @wa);
+  XGetWindowAttributes(FDisplay, FRootWindow, @wa);
   Result := wa.Width;
 end;
 
@@ -1324,7 +1324,7 @@ function TfpgX11Application.GetScreenHeight: TfpgCoord;
 var
   wa: TXWindowAttributes;
 begin
-  XGetWindowAttributes(FDisplay, RootWindow, @wa);
+  XGetWindowAttributes(FDisplay, FRootWindow, @wa);
   Result := wa.Height;
 end;
 
