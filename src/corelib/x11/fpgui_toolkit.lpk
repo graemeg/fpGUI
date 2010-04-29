@@ -32,7 +32,7 @@
     <License Value="LGPL 2 with static linking exception.
 "/>
     <Version Minor="7"/>
-    <Files Count="79">
+    <Files Count="80">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -349,6 +349,10 @@
         <Filename Value="../../gui/fpg_editbtn.pas"/>
         <UnitName Value="fpg_editbtn"/>
       </Item79>
+      <Item80>
+        <Filename Value="../../gui/colordialog.inc"/>
+        <Type Value="Include"/>
+      </Item80>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">

@@ -47,7 +47,10 @@ uses
   fpg_combobox,
   fpg_panel,
   fpg_memo,
-  fpg_tree;
+  fpg_tree,
+  fpg_ColorWheel,
+  fpg_spinedit,
+  fpg_tab;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
@@ -205,6 +208,7 @@ type
 {$I promptuserdialog.inc}
 {$I selectdirdialog.inc}
 {$I charmapdialog.inc}
+{$I colordialog.inc}
 
 
 
@@ -517,14 +521,14 @@ begin
 
   btnCancel := CreateButton(self, Width-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsCancel, @btnCancelClick);
   btnCancel.Name      := 'btnCancel';
-  btnCancel.ImageName := 'stdimg.Cancel';   // Do NOT localize
+  btnCancel.ImageName := 'stdimg.cancel';   // Do NOT localize
   btnCancel.ShowImage := True;
   btnCancel.Anchors   := [anRight, anBottom];
   btnCancel.TabOrder  := 2;
 
   btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsOK, @btnOKClick);
   btnOK.Name      := 'btnOK';
-  btnOK.ImageName := 'stdimg.OK';   // Do NOT localize
+  btnOK.ImageName := 'stdimg.ok';   // Do NOT localize
   btnOK.ShowImage := True;
   btnOK.Anchors   := [anRight, anBottom];
   btnOK.TabOrder  := 1;
@@ -1426,6 +1430,7 @@ end;
 {$I promptuserdialog.inc}
 {$I selectdirdialog.inc}
 {$I charmapdialog.inc}
+{$I colordialog.inc}
 
 
 end.
