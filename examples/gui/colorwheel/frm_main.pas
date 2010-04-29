@@ -67,14 +67,14 @@ end;
 
 procedure TMainForm.RGBChanged(Sender: TObject);
 var
-  rgb: TRGBTriple;
+  rgb: TFPColor;
   c: TfpgColor;
 begin
   FViaRGB := True;  // revent recursive updates
   rgb.Red := StrToInt(edR.Text);
   rgb.Green := StrToInt(edG.Text);
   rgb.Blue := StrToInt(edB.Text);
-  c := RGBTripleTofpgColor(rgb);
+  c := FPColorTofpgColor(rgb);
   ColorWheel1.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB := False;
 end;
@@ -122,11 +122,11 @@ end;
 
 procedure TMainForm.UpdateRGBComponents;
 var
-  rgb: TRGBTriple;
+  rgb: TFPColor;
   c: TfpgColor;
 begin
   c := ValueBar1.SelectedColor;
-  rgb := fpgColorToRGBTriple(c);
+  rgb := fpgColorToFPColor(c);
   edR.Text := IntToStr(rgb.Red);
   edG.Text := IntToStr(rgb.Green);
   edB.Text := IntToStr(rgb.Blue);
