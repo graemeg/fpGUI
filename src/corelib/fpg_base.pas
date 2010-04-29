@@ -40,6 +40,14 @@ type
     Green: word;
     Blue: word;
     Alpha: word;
+  end deprecated;
+
+  // Same declaration as in FPImage unit, but we don't use FPImage yet, so declare it here
+  TFPColor = record
+    Red: word;
+    Green: word;
+    Blue: word;
+    Alpha: word;
   end;
 
   TWindowType = (wtChild, wtWindow, wtModalForm, wtPopup);
@@ -600,8 +608,10 @@ function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 function  CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKeyType;
 
 { Color }
-function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
-function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple; deprecated;
+function  fpgColorToFPColor(const AColor: TfpgColor): TFPColor;
+function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor; deprecated;
+function  FPColorTofpgColor(const AColor: TFPColor): TfpgColor;
 function  fpgGetRed(const AColor: TfpgColor): word;
 function  fpgGetGreen(const AColor: TfpgColor): word;
 function  fpgGetBlue(const AColor: TfpgColor): word;
@@ -806,7 +816,7 @@ begin
   end  { if/else }
 end;
 
-function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
+function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple; deprecated;
 begin
   with Result do
   begin
@@ -817,7 +827,23 @@ begin
   end
 end;
 
-function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+function fpgColorToFPColor(const AColor: TfpgColor): TFPColor;
+begin
+  with Result do
+  begin
+    Red   := fpgGetRed(AColor);
+    Green := fpgGetGreen(AColor);
+    Blue  := fpgGetBlue(AColor);
+//    Alpha := fpgGetAlpha(AColor);
+  end
+end;
+
+function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor; deprecated;
+begin
+  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16);// or (AColor.Alpha shl 32);
+end;
+
+function FPColorTofpgColor(const AColor: TFPColor): TfpgColor;
 begin
   Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16);// or (AColor.Alpha shl 32);
 end;
@@ -860,16 +886,16 @@ end;
 
 function fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
 var
-  c1, c2: TRGBTriple;
-  avg: TRGBTriple;
+  c1, c2: TFPColor;
+  avg: TFPColor;
 begin
-  c1 := fpgColorToRGBTriple(AColor1);
-  c2 := fpgColorToRGBTriple(AColor2);
+  c1 := fpgColorToFPColor(AColor1);
+  c2 := fpgColorToFPColor(AColor2);
   avg.Red   := c1.Red + (c2.Red - c1.Red) div 2;
   avg.Green := c1.Green + (c2.Green - c1.Green) div 2;
   avg.Blue  := c1.Blue + (c2.Blue - c1.Blue) div 2;
   avg.Alpha := c1.Alpha + (c2.Alpha - c1.Alpha) div 2;
-  Result := RGBTripleTofpgColor(avg);
+  Result := FPColorTofpgColor(avg);
 end;
 
 function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
@@ -1455,15 +1481,15 @@ end;
 procedure TfpgCanvasBase.GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor;
   ADirection: TGradientDirection);
 var
-  RGBStart: TRGBTriple;
-  RGBStop: TRGBTriple;
+  RGBStart: TFPColor;
+  RGBStop: TFPColor;
   RDiff, GDiff, BDiff: Integer;
   count: Integer;
   i: Integer;
-  newcolor: TRGBTriple;
+  newcolor: TFPColor;
 begin
-  RGBStart := fpgColorToRGBTriple(fpgColorToRGB(AStart));
-  RGBStop  := fpgColorToRGBTriple(fpgColorToRGB(AStop));
+  RGBStart := fpgColorToFPColor(fpgColorToRGB(AStart));
+  RGBStop  := fpgColorToFPColor(fpgColorToRGB(AStop));
 
   if ADirection = gdVertical then
     count := ARect.Bottom - ARect.Top
@@ -1480,7 +1506,7 @@ begin
     newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
     newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
-    SetColor(RGBTripleTofpgColor(newcolor));
+    SetColor(FPColorTofpgColor(newcolor));
 
     // We have to overshoot by 1 pixel as DrawLine paints 1 pixel short (by design)
     if ADirection = gdHorizontal then
@@ -1689,7 +1715,7 @@ var
   contributions: array[0..10] of TfpgInterpolationContribution;
   dif, w, gamma, a: double;
   c: TfpgColor;
-  rgb: TRGBTriple;
+  rgb: TFPColor;
 begin
   for x := 0 to Width - 1 do
   begin
@@ -1733,7 +1759,7 @@ begin
         with contributions[r] do
         begin
           c   := image.colors[place, y];
-          rgb := fpgColorToRGBTriple(c);
+          rgb := fpgColorToFPColor(c);
           a     := weight; // * rgb.Alpha / $FFFF;
           re    := re + a * rgb.Red;
           gr    := gr + a * rgb.Green;
@@ -1747,7 +1773,7 @@ begin
         blue  := ColorRound(bl);
 //        alpha := ColorRound(gamma * $FFFF);
       end;
-      tempimage.colors[x, y] := RGBTripleTofpgColor(rgb);
+      tempimage.colors[x, y] := FPColorTofpgColor(rgb);
     end;
   end;
 end;
@@ -1760,7 +1786,7 @@ var
   contributions: array[0..10] of TfpgInterpolationContribution;
   dif, w, gamma, a: double;
   c: TfpgColor;
-  rgb: TRGBTriple;
+  rgb: TFPColor;
 begin
   for y := 0 to Height - 1 do
   begin
@@ -1804,7 +1830,7 @@ begin
         with contributions[r] do
         begin
           c := tempimage.colors[x, place];
-          rgb := fpgColorToRGBTriple(c);
+          rgb := fpgColorToFPColor(c);
           a     := weight;// * rgb.alpha / $FFFF;
           re    := re + a * rgb.red;
           gr    := gr + a * rgb.green;
@@ -1818,7 +1844,7 @@ begin
         blue  := ColorRound(bl);
 //        alpha := ColorRound(gamma * $FFFF);
       end;
-      Canvas.Pixels[x + dx, y + dy] := RGBTripleTofpgColor(rgb);
+      Canvas.Pixels[x + dx, y + dy] := FPColorTofpgColor(rgb);
     end;
   end;
 end;

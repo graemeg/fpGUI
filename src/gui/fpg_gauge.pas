@@ -115,22 +115,22 @@ uses
   to be moved in CanvasBase? }
 procedure FillArcGradient(canvas: TfpgCanvas; X,Y,W,H: TfpgCoord; a1,a2: double; Astart,Astop: TfpgColor);
 var
-  RGBStart: TRGBTriple;
-  RGBStop: TRGBTriple;
+  RGBStart: TFPColor;
+  RGBStop: TFPColor;
   RDiff, GDiff, BDiff: Integer;
   count: Integer;
   i: Integer;
-  newcolor: TRGBTriple;
+  newcolor: TFPColor;
 begin
-  if Astart = Astop then 
+  if Astart = Astop then
   begin { No gradient, just solid color}
     canvas.SetColor(Astart);
     canvas.FillArc(X, Y, W, H, a1, a2);
     Exit; //==>
   end;
 
-  RGBStart := fpgColorToRGBTriple(fpgColorToRGB(AStart));
-  RGBStop  := fpgColorToRGBTriple(fpgColorToRGB(AStop));
+  RGBStart := fpgColorToFPColor(fpgColorToRGB(AStart));
+  RGBStop  := fpgColorToFPColor(fpgColorToRGB(AStop));
 
   count := min(H,W);
   count := count div 2;
@@ -156,7 +156,7 @@ begin
     newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
     newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
-    canvas.SetColor(RGBTripleTofpgColor(newcolor));
+    canvas.SetColor(FPColorTofpgColor(newcolor));
     canvas.DrawArc(X, Y, W, H, a1, a2);
   end;
 end;

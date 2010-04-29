@@ -45,9 +45,9 @@ var
   r, g, b: longint;
   hi, lo: longint;
   d:   longint;
-  rgb: TRGBTriple;
+  rgb: TFPColor;
 begin
-  rgb   := fpgColorToRGBTriple(C);
+  rgb   := fpgColorToFPColor(C);
   r     := rgb.Red;
   g     := rgb.Green;
   b     := rgb.Blue;
@@ -78,7 +78,7 @@ end;
 function HSVToRGB(const H: longint; const S, V: double): TfpgColor;
 var
   r, g, b: longint;
-  rgb:     TRGBTriple;
+  rgb: TFPColor;
 begin
   if (h < 0) or (h > 1535) or (S < 0) or (S > 1) or (V < 0) or (V > 1) then
   begin
@@ -130,7 +130,7 @@ begin
   rgb.Red := r;
   rgb.Green := g;
   rgb.Blue := b;
-  Result := RGBTripleTofpgColor(rgb);
+  Result := FPColorTofpgColor(rgb);
 end;
 
 

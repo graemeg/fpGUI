@@ -101,25 +101,25 @@ end;
 
 procedure TfpgColorSelectDialog.RGBChanged(Sender: TObject);
 var
-  rgb: TRGBTriple;
+  rgb: TFPColor;
   c: TfpgColor;
 begin
   FViaRGB     := True;  // prevent recursive updates
   rgb.Red     := edR.Value;
   rgb.Green   := edG.Value;
   rgb.Blue    := edB.Value;
-  c := RGBTripleTofpgColor(rgb);
+  c := FPColorTofpgColor(rgb);
   ColorWheel.SetSelectedColor(c);  // This will trigger ColorWheel and ValueBar OnChange event
   FViaRGB     := False;
 end;
 
 procedure TfpgColorSelectDialog.UpdateRGBComponents;
 var
-  rgb: TRGBTriple;
+  rgb: TFPColor;
   c: TfpgColor;
 begin
   c := ValueBar.SelectedColor;
-  rgb := fpgColorToRGBTriple(c);
+  rgb := fpgColorToFPColor(c);
   edR.Value := rgb.Red;
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
