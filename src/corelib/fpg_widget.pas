@@ -181,7 +181,6 @@ implementation
 
 uses
   fpg_constants,
-  fpg_hint,
   fpg_menu;
 
 

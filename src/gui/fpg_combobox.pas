@@ -407,8 +407,6 @@ end;
 { TComboboxDropdownWindow }
 
 procedure TComboboxDropdownWindow.SetFirstItem;
-var
-  i: integer;
 begin
   // If FocusItem is less than DropDownCount FirsItem = 0
   if ListBox.FocusItem+1 <= FCallerWidget.DropDownCount then

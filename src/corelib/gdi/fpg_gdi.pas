@@ -1169,7 +1169,6 @@ begin
       Exit;  // handling waiting timeout
   end;
 
-  {$Note Incorporate Felipe's code from previous fpGUI in here. It handles WinCE and Windows just fine. }
   {$IFDEF WinCE}
   // No GetVersion
   Windows.GetMessageW(@Msg, 0, 0, 0);   //NT

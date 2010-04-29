@@ -67,7 +67,6 @@ uses
   GetText
   ,fpg_pofiles
   ,fpg_utils
-  ,fpg_main
   ;
   
 

@@ -93,9 +93,6 @@ var
 
 implementation
 
-uses
-  fpg_constants;
-
 
 type
   TfpgHintShadow = class(TfpgForm)
