@@ -13,7 +13,7 @@
 
     Description:
       This unit implements color selectors using a ColorWheel and
-      a ValueBar. Color results are in HSV format.
+      a ValueBar. Color results are in HSV or TfpgColor format.
 }
 
 unit fpg_ColorWheel;
