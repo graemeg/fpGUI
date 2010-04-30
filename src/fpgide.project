@@ -1,6 +1,6 @@
 [ProjectOptions]
 ProjectDir=/media/flash16gig/programming/fpgide/src/
-ProjectName=fpgide
+ProjectName=fpgide.project
 MainUnit=fpgide.lpr
 TargetFile=fpgide${EXEEXT}
 DefaultMake=0
@@ -16,14 +16,14 @@ Macro3=TargetCPU=i386
 Macro4=TargetOS=win32
 Macro5=FPGUI_DIR=/home/graemeg/programming/fpgui/
 Macro6=tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/
-UnitDirsCount=6
+UnitDirsCount=7
 UnitDirEnabled1=1,1,1,1,0,0,0,1,0,0
 UnitDirEnabled2=1,1,1,1,0,0,1,1,0,0
 UnitDirEnabled3=1,1,1,0,0,0,1,1,0,0
 UnitDirEnabled4=0,0,0,1,0,0,1,1,0,0
 UnitDirEnabled5=1,1,1,1,0,0,1,0,0,0
-UnitDirEnabled6=0,0,0,0,1,1,1,0,0,0
-UnitDirEnabled7=0,0,0,0,1,0,1,0,0,0
+UnitDirEnabled6=1,1,1,1,0,0,1,0,0,0
+UnitDirEnabled7=0,0,0,0,1,1,1,0,0,0
 UnitDirEnabled8=0,0,0,0,0,1,1,0,0,0
 UnitOutputDir=units/${TARGET}/
 MakeOption1=-l -Mobjfpc -Sch
@@ -35,7 +35,18 @@ UnitDir2=${FPGUIDIR}src/corelib/
 UnitDir3=${FPGUIDIR}src/corelib/x11/
 UnitDir4=${FPGUIDIR}src/corelib/gdi/
 UnitDir5=${FPGUIDIR}src/gui/
-UnitDir6=${FPGUILIBDIR}
+UnitDir6=${FPGUIDIR}src/gui/db/
+UnitDir7=${FPGUILIBDIR}
 
 [Units]
-UnitCount=0
+UnitCount=10
+Unit1=fpgide.lpr,1
+Unit2=frm_configureide.pas,1
+Unit3=frm_debug.pas,0
+Unit4=frm_main.pas,0
+Unit5=frm_projectoptions.pas,1
+Unit6=ideconst.pas,0
+Unit7=idemacros.pas,0
+Unit8=ideutils.pas,0
+Unit9=project.pas,0
+Unit10=unitlist.pas,0
