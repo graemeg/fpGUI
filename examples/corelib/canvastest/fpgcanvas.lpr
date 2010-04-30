@@ -47,7 +47,13 @@ var
 begin
   // Testing Rectangles
   Canvas.SetColor(clBlack);
-  r.SetRect(0, 0, 1, 1);
+  r.SetRect(0, 0, 1, 1);     // 1x1  (this is really a dot)
+  Canvas.DrawRectangle(r);
+  Canvas.SetColor(clRed);
+  r.SetRect(0, 1, 1, 5);    // 1x5  (this is really a vertical line)
+  Canvas.DrawRectangle(r);
+  Canvas.SetColor(clMagenta);
+  r.SetRect(1, 0, 5, 1);    // 5x1  (this is really a horizontal line)
   Canvas.DrawRectangle(r);
 
   Canvas.SetColor(clBlack);
