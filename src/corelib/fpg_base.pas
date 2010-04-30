@@ -2620,6 +2620,7 @@ begin
   inherited Create(AOwner);
   FHelpType     := htKeyword;
   FHelpContext  := 0;
+  FTagPointer   := nil;
 end;
 
 end.
