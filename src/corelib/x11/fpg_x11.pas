@@ -2125,7 +2125,10 @@ procedure TfpgX11Canvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
 //  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
   // Same behavior as Windows. See documentation for reason.
-  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
+  if (w = 1) and (h = 1) then // a dot
+    DoDrawLine(x, y, x+w, y+w)
+  else
+    XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
 end;
 
 procedure TfpgX11Canvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
