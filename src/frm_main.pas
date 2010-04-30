@@ -69,10 +69,11 @@ type
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
+    procedure   PopuplateProjectTree;
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   CloseAllTabs;
-    procedure   OpenEditorPage(const AFilename: TfpgString);
+    function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
     procedure   miTest(Sender: TObject);
     function    GetUnitsNode: TfpgTreeNode;
     procedure   UpdateWindowTitle;
@@ -204,18 +205,28 @@ end;
 procedure TMainForm.miProjectOpen(Sender: TObject);
 var
   s: TfpgString;
-  n: TfpgTreeNode;
+  i: integer;
+  ts: TfpgTabSheet;
 begin
   s := SelectFileDialog(sfdOpen, Format(cFileFilterTemplate, ['Project Files', cProjectFiles, cProjectFiles]));
   if s <> '' then
   begin
+    // remove all project info
     CloseAllTabs;
+    SetupProjectTree;
     FreeProject;
-    n := tvProject.RootNode.FindSubNode('Units', True);
-    if n <> nil then
-      n.Clear;
+    // now load new project info
     GProject.Load(s);
-    OpenEditorPage(GProject.ProjectDir + GProject.MainUnit);
+    for i := 0 to GProject.UnitList.Count-1 do
+    begin
+      if GProject.UnitList[i].Opened then
+      begin
+        ts := OpenEditorPage(GProject.UnitList[i].FileName);
+        ts.TagPointer := GProject.UnitList[i];
+      end;
+    end;
+    PopuplateProjectTree;
+    UpdateWindowTitle;
     AddMessage('Project loaded');
   end;
 end;
@@ -259,6 +270,8 @@ procedure TMainForm.miProjectAddUnitToProject(Sender: TObject);
 var
   u: TUnit;
   s: TfpgString;
+  r: TfpgTreeNode;
+  n: TfpgTreeNode;
 begin
   s := pcEditor.ActivePage.Hint;
 //  writeln('adding unit: ', s);
@@ -270,23 +283,42 @@ begin
   u.FileName := s;
   u.Opened := True;
   GProject.UnitList.Add(u);
+  // add reference to tabsheet
+  pcEditor.ActivePage.TagPointer := u;
+  s := ExtractRelativepath(GProject.ProjectDir, u.FileName);
+  r := GetUnitsNode;
+  n := r.AppendText(s);
+  // add reference to treenode
+  n.Data := u;
+  tvProject.Invalidate;
+end;
+
+procedure TMainForm.tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+var
+  r: TfpgTreeNode;
+  n: TfpgTreeNode;
+  ts: TfpgTabSheet;
+  u: TUnit;
+begin
+  r := GetUnitsNode;
+  n := tvProject.Selection;
+  if n.Data <> nil then
+    u := TUnit(n.Data);
+  if u <> nil then
+  begin
+    ts := OpenEditorPage(u.FileName);
+    u.Opened := True;
+    ts.TagPointer := u; // add reference to tabsheet
+  end;
 end;
 
 procedure TMainForm.TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
 var
-  n: TfpgTreeNode;
   u: TUnit;
 begin
-  u := GProject.UnitList.FindByName(ATabSheet.Text);
+  u := TUnit(ATabSheet.TagPointer);
   if Assigned(u) then
     u.Opened := False;
-  n := tvProject.RootNode.FindSubNode(ATabSheet, True);
-  if Assigned(n) then
-  begin
-    tvProject.RootNode.Remove(n);
-    n.Free;
-    tvProject.Invalidate;
-  end;
 end;
 
 procedure TMainForm.UpdateStatus(const AText: TfpgString);
@@ -296,11 +328,33 @@ end;
 
 procedure TMainForm.SetupProjectTree;
 begin
+  tvProject.RootNode.Clear;
   tvProject.RootNode.AppendText('Units');
   tvProject.RootNode.AppendText('Images');
   tvProject.RootNode.AppendText('Help Files');
   tvProject.RootNode.AppendText('Text');
   tvProject.RootNode.AppendText('Other');
+end;
+
+procedure TMainForm.PopuplateProjectTree;
+var
+  r: TfpgTreeNode;
+  n: TfpgTreeNode;
+  i: integer;
+  s: TfpgString;
+begin
+  r := GetUnitsNode;
+  tvProject.Selection := r;
+  if Assigned(r) then // just to be safe, but 'Units' should always exist
+  begin
+    for i := 0 to GProject.UnitList.Count-1 do
+    begin
+      s := ExtractRelativepath(GProject.ProjectDir, GProject.UnitList[i].FileName);
+      n := r.AppendText(s);
+      n.Data := GProject.UnitList[i];
+    end;
+  end;
+  r.Expand;
 end;
 
 procedure TMainForm.SetupFilesGrid;
@@ -331,11 +385,10 @@ begin
   end;
 end;
 
-procedure TMainForm.OpenEditorPage(const AFilename: TfpgString);
+function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
 var
   s: TfpgString;
   f: TfpgString;
-  n: TfpgTreeNode;
   i: integer;
   found: Boolean;
   ts: TfpgTabSheet;
@@ -374,14 +427,8 @@ begin
     pcEditor.ActivePage := ts;
   end;
   ts.Hint := s;
+  Result := ts;
   UpdateStatus(s);
-  n := tvProject.RootNode.FindSubNode('Units', True);
-  if Assigned(n) then
-  begin
-    n := n.AppendText(f);
-    n.Data := ts;
-    tvProject.Selection := n;
-  end;
 end;
 
 procedure TMainForm.miTest(Sender: TObject);
@@ -591,7 +638,7 @@ begin
     TabOrder := 5;
     TabPosition := tpRight;
     Options := [to_PMenuClose];
-    OnClosingTabSheet :=@TabSheetClosing;
+    OnClosingTabSheet := @TabSheetClosing;
   end;
 
   tsEditor1 := TfpgTabSheet.Create(pcEditor);
