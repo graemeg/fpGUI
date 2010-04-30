@@ -44,6 +44,7 @@ var
   fnt: TfpgFont;
   y: integer;
   c: TfpgColor;
+  lImage: TfpgImage;
 begin
   // Testing Rectangles
   Canvas.SetColor(clBlack);
@@ -142,15 +143,26 @@ begin
 
   // Testing Bitmap painting
   Canvas.DrawString(5, 180, 'Single BMP file:');
-  Canvas.DrawString(300, 210, '(mask enabled for all images)');
+  Canvas.DrawString(310, 210, '(mask enabled for all images)');
   Canvas.DrawImage(150, 180, bmp);
   Canvas.DrawString(5, 210, 'Parts of BMP file:');
   Canvas.DrawImagePart(150, 210, bmp, 0, 0, 32, 21);
   Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
   Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
+  // create image from an image
+  r.SetRect(32, 0, 32, 21); // second button in image
+  lImage := bmp.ImageFromRect(r);
+  try
+    lImage.CreateMaskFromSample(0, 0);
+    lImage.UpdateImage;
+    Canvas.DrawImage(270, 215, lImage);
+  finally
+    lImage.Free;
+  end;
 
+
+  // Testing Bitmap strechdraw
   Canvas.StretchDraw(150, 240, 300, 50, bmp);
-
   Canvas.DrawImage(150, 300, dst);
   Canvas.StretchDraw(180, 300, 70, 70, dst);
   Canvas.StretchDraw(265, 300, 230, 25, bmp);
