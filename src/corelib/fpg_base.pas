@@ -200,6 +200,7 @@ type
     procedure   AllocateImage(acolordepth, awidth, aheight: integer);
     procedure   AllocateMask;
     procedure   CreateMaskFromSample(x, y: TfpgCoord);
+    { Must always be called AFTER you populated the ImageData array. Then only does it allocate OS resources. }
     procedure   UpdateImage;
     property    ImageData: pointer read FImageData;
     property    ImageDataSize: integer read FImageDataSize;

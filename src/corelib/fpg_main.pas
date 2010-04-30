@@ -2093,11 +2093,8 @@ var
   ix, iy: TfpgCoord;
 begin
   SortRect(ARect);
-
   Result := TfpgImage.Create;
   Result.AllocateImage(ColorDepth, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top);
-  Result.UpdateImage;
-
   iy := -1;
   for y := ARect.Top to ARect.Bottom-1 do
   begin
@@ -2109,6 +2106,7 @@ begin
       Result.Colors[ix, iy] := Colors[x, y];
     end;
   end;
+  Result.UpdateImage;
 end;
 
 function TfpgImage.ImageFromRect(var ARect: TfpgRect): TfpgImage;
@@ -2117,11 +2115,8 @@ var
   ix, iy: TfpgCoord;
 begin
   SortRect(ARect);
-
   Result := TfpgImage.Create;
   Result.AllocateImage(ColorDepth, ARect.Width, ARect.Height);
-  Result.UpdateImage;
-  
   iy := -1;
   for y := ARect.Top to ARect.Bottom do
   begin
@@ -2133,6 +2128,7 @@ begin
       Result.Colors[ix, iy] := Colors[x, y];
     end;
   end;
+  Result.UpdateImage;
 end;
 
 initialization
