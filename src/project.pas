@@ -118,7 +118,7 @@ var
 
 begin
   Result := False;
-  if ProjectName = '' then
+  if (AFile = '') and (ProjectName = '') then
     raise Exception.Create('Project name has not been specified yet');
 
   if not Assigned(FIniFile) then
@@ -136,6 +136,9 @@ begin
       FIniFile := TfpgINIFile.CreateExt(AFile);
     end;
   end;
+
+  if AFile <> '' then
+    ProjectName := fpgExtractFileName(AFile);
 
   FIniFile.WriteString(cProjectOptions, 'ProjectDir', ProjectDir);
   FIniFile.WriteString(cProjectOptions, 'ProjectName', ProjectName);
