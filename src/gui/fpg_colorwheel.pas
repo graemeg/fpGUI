@@ -213,7 +213,6 @@ begin
       FImage.Free;
     FImage := TfpgImage.Create;
     FImage.AllocateImage(32, DrawWidth, DrawHeight);
-    FImage.UpdateImage;
     for X := 0 to DrawWidth - 1 do
     begin
       for Y := 0 to DrawHeight - 1 do
@@ -232,6 +231,7 @@ begin
           // point is outside wheel. Also incase color is alias, lookup the RGB values.
           FImage.Colors[x, y] := fpgColorToRGB(BackgroundColor);
       end;
+      FImage.UpdateImage;
     end;
     FRecalcWheel := False;
   end
