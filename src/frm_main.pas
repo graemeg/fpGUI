@@ -74,6 +74,7 @@ type
     procedure   CloseAllTabs;
     procedure   OpenEditorPage(const AFilename: TfpgString);
     procedure   miTest(Sender: TObject);
+    function    GetUnitsNode: TfpgTreeNode;
     procedure   UpdateWindowTitle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -260,7 +261,7 @@ var
   s: TfpgString;
 begin
   s := pcEditor.ActivePage.Hint;
-  writeln('adding unit: ', s);
+//  writeln('adding unit: ', s);
   if s = '' then
     Exit;
   if GProject.UnitList.FileExists(s) then
@@ -392,6 +393,11 @@ begin
   writeln('source string = ', s);
   r := GMacroList.ExpandMacro(s);
   writeln('expanded string = ', r);
+end;
+
+function TMainForm.GetUnitsNode: TfpgTreeNode;
+begin
+  Result := tvProject.RootNode.FindSubNode('Units', True);
 end;
 
 procedure TMainForm.UpdateWindowTitle;
