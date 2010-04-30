@@ -197,8 +197,9 @@ begin
   FIniFile.WriteInteger(cUnits, 'UnitCount', UnitList.Count);
   for j := 0 to UnitList.Count-1 do
   begin
+    s := UnitList[j].FileName;
     FIniFile.WriteString(cUnits, 'Unit' + IntToStr(j+1),
-        Format('%s,%s', [UnitList[j].FileName, BoolToStr(UnitList[j].Opened, '1', '0')]));
+        Format('%s,%s', [ExtractRelativepath(ProjectDir, s), BoolToStr(UnitList[j].Opened, '1', '0')]));
   end;
 
   Result := True;
@@ -291,7 +292,8 @@ begin
     for j := 0 to sl.Count-1 do
     begin
       u := TUnit.Create;
-      u.FileName := tiToken(sl[j], ',', 1);
+      s := tiToken(sl[j], ',', 1);
+      u.FileName := ExpandFileName(s);
       u.Opened := Boolean(StrToInt(tiToken(sl[j], ',', 2)));
       UnitList.Add(u);
     end;
