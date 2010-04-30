@@ -1136,7 +1136,7 @@ begin
       end;
     end;  { for }
   end;  { if/else }
-
+  CheckFocusChange;
   UpdateScrollBars;
 end;
 
