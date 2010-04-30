@@ -74,6 +74,7 @@ type
     procedure   CloseAllTabs;
     procedure   OpenEditorPage(const AFilename: TfpgString);
     procedure   miTest(Sender: TObject);
+    procedure   UpdateWindowTitle;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -99,6 +100,7 @@ uses
 
 
 const
+  cTitle = 'fpGUI IDE - %s';
   cFileFilterTemplate  = '%s (%s)|%s';
   cSourceFiles = '*.pas;*.pp;*.lpr';
   cProjectFiles = '*.project';
@@ -247,6 +249,7 @@ begin
         TfpgMessageDialog.Critical('', E.Message);
       end;
     end;
+    UpdateWindowTitle;
     AddMessage(Format('Project saved as <%s>.', [s]));
   end;
 end;
@@ -389,6 +392,11 @@ begin
   writeln('source string = ', s);
   r := GMacroList.ExpandMacro(s);
   writeln('expanded string = ', r);
+end;
+
+procedure TMainForm.UpdateWindowTitle;
+begin
+  WindowTitle := Format(cTitle, [GProject.ProjectName]);
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
