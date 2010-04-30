@@ -66,6 +66,7 @@ type
     procedure   miProjectSave(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
     procedure   miProjectAddUnitToProject(Sender: TObject);
+    procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
@@ -825,6 +826,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 1;
+    OnDoubleClick := @tvProjectDoubleClick;
   end;
 
   grdFiles := TfpgFileGrid.Create(tsFiles);
