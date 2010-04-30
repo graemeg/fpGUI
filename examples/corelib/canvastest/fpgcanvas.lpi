@@ -5,12 +5,13 @@
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
         <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
-      <Title Value="fpcanvas"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -45,6 +46,9 @@
       <SmartLinkUnit Value="True"/>
     </CodeGeneration>
     <Linking>
+      <Debugging>
+        <UseLineInfoUnit Value="False"/>
+      </Debugging>
       <LinkSmart Value="True"/>
     </Linking>
     <Other>

@@ -15,20 +15,18 @@ uses
 
 type
 
-  { TMainForm }
-
   TMainForm = class(TfpgForm)
   private
+    {@VFD_HEAD_BEGIN: MainForm}
+    {@VFD_HEAD_END: MainForm}
     bmp: TfpgImage;
     dst: TfpgImage;
-    procedure FormPaint(Sender: TObject);
-    procedure CustomPaintJob;
-  protected
-    procedure HandlePaint; override;
+    procedure   FormPaint(Sender: TObject);
+    procedure   CustomPaintJob;
   public
-    procedure AfterCreate; override;
-    procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
   end;
 
 { TMainForm }
@@ -186,46 +184,45 @@ begin
   // Gradient testing
   r.SetRect(265, 340, 185, 35);
   Canvas.GradientFill(r, clBlue, clMagenta, gdHorizontal);
-
 end;
 
-procedure TMainForm.HandlePaint;
+constructor TMainForm.Create(AOwner: TComponent);
 begin
-  inherited HandlePaint;
-//  CustomPaintJob;
-end;
-
-procedure TMainForm.AfterCreate;
-begin
-  inherited AfterCreate;
-  SetPosition(100, 100, 500, 400);
-  WindowTitle := 'fpGFX Canvas Test';
+  inherited Create(AOwner);
 
   bmp := LoadImage_BMP('button.bmp');
   if not Assigned(bmp) then
     raise Exception.Create('Failed to load button.bmp');
   bmp.CreateMaskFromSample(0,0);
   bmp.UpdateImage;
-  
-//  dst := TfpgImage.Create;
-//  dst.AllocateImage(bmp.ColorDepth, 200, 50);
+
   dst := LoadImage_BMP('gears2.bmp');
   dst.CreateMaskFromSample(0,0);
   dst.UpdateImage;
 end;
 
-procedure TMainForm.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  OnPaint := @FormPaint;
-end;
-
-procedure TMainForm.BeforeDestruction;
+destructor TMainForm.Destroy;
 begin
   dst.Free;
   bmp.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
+
+procedure TMainForm.AfterCreate;
+begin
+  {%region 'Auto-generated GUI code' -fold}
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(357, 214, 500, 400);
+  WindowTitle := 'fpGUI Canvas Test';
+  Hint := '';
+  WindowPosition := wpOneThirdDown;
+  OnPaint := @FormPaint;
+
+  {@VFD_BODY_END: MainForm}
+  {%endregion}
+end;
+
 
 procedure MainProc;
 var
