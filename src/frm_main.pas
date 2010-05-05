@@ -58,6 +58,11 @@ type
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
     procedure   miRunMake(Sender: TObject);
+    procedure   miRunBuild(Sender: TObject);
+    procedure   miRunMake1(Sender: TObject);
+    procedure   miRunMake2(Sender: TObject);
+    procedure   miRunMake3(Sender: TObject);
+    procedure   miRunMake4(Sender: TObject);
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
     procedure   miProjectNew(Sender: TObject);
@@ -68,6 +73,7 @@ type
     procedure   miProjectAddUnitToProject(Sender: TObject);
     procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
+    procedure   BuildTerminated(Sender: TObject);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
@@ -99,6 +105,7 @@ uses
   ,idemacros
   ,Project
   ,UnitList
+  ,BuilderThread
   ;
 
 
@@ -153,27 +160,61 @@ end;
 
 procedure TMainForm.miRunMake(Sender: TObject);
 var
-  p: TProcess;
-  c: TfpgString;
+  thd: TBuilderThread;
 begin
-  p := TProcess.Create(nil);
-  p.ShowWindow := swoShowNormal;
-  p.CurrentDirectory := GProject.ProjectDir;
+  thd := TBuilderThread.Create(True);
+  thd.OnTerminate := @BuildTerminated;
+  thd.Resume;
+end;
 
-  // build compilation string
-  c := gINI.ReadString(cEnvironment, 'Compiler', '');
-  c := c + GProject.GenerateCmdLine;
-  c := GMacroList.ExpandMacro(c);
+procedure TMainForm.miRunBuild(Sender: TObject);
+var
+  thd: TBuilderThread;
+begin
+  thd := TBuilderThread.Create(True);
+  thd.BuildMode := 1;
+  thd.OnTerminate := @BuildTerminated;
+  thd.Resume;
+end;
 
-  writeln('');
-  writeln('Compile command:');
-  writeln('  ' + c);
-  AddMessage('Compile command: ' + c);
+procedure TMainForm.miRunMake1(Sender: TObject);
+var
+  thd: TBuilderThread;
+begin
+  thd := TBuilderThread.Create(True);
+  thd.BuildMode := 2;
+  thd.OnTerminate := @BuildTerminated;
+  thd.Resume;
+end;
 
-  p.CommandLine := c;
-  p.Execute;
-  AddMessage('Compilation complete');
-  p.Free;
+procedure TMainForm.miRunMake2(Sender: TObject);
+var
+  thd: TBuilderThread;
+begin
+  thd := TBuilderThread.Create(True);
+  thd.BuildMode := 3;
+  thd.OnTerminate := @BuildTerminated;
+  thd.Resume;
+end;
+
+procedure TMainForm.miRunMake3(Sender: TObject);
+var
+  thd: TBuilderThread;
+begin
+  thd := TBuilderThread.Create(True);
+  thd.BuildMode := 4;
+  thd.OnTerminate := @BuildTerminated;
+  thd.Resume;
+end;
+
+procedure TMainForm.miRunMake4(Sender: TObject);
+var
+  thd: TBuilderThread;
+begin
+  thd := TBuilderThread.Create(True);
+  thd.BuildMode := 5;
+  thd.OnTerminate := @BuildTerminated;
+  thd.Resume;
 end;
 
 procedure TMainForm.miConfigureIDE(Sender: TObject);
@@ -321,6 +362,11 @@ begin
   u := TUnit(ATabSheet.TagPointer);
   if Assigned(u) then
     u.Opened := False;
+end;
+
+procedure TMainForm.BuildTerminated(Sender: TObject);
+begin
+  AddMessage('Compilation complete');
 end;
 
 procedure TMainForm.UpdateStatus(const AText: TfpgString);
@@ -743,11 +789,11 @@ begin
     Name := 'mnuRun';
     SetPosition(476, 161, 172, 20);
     AddMenuItem('Make', 'Ctrl+F9', @miRunMake);
-    AddMenuItem('Build All', 'Ctrl+Shift+F9', nil);
-    AddMenuItem('Make 1', 'Ctrl+Alt+1', nil);
-    AddMenuItem('Make 2', 'Ctrl+Alt+2', nil);
-    AddMenuItem('Make 3', 'Ctrl+Alt+3', nil);
-    AddMenuItem('Make 4', 'Ctrl+Alt+4', nil);
+    AddMenuItem('Build All', 'Ctrl+Shift+F9', @miRunBuild);
+    AddMenuItem('Make 1', 'Ctrl+Alt+1', @miRunMake1);
+    AddMenuItem('Make 2', 'Ctrl+Alt+2', @miRunMake2);
+    AddMenuItem('Make 3', 'Ctrl+Alt+3', @miRunMake3);
+    AddMenuItem('Make 4', 'Ctrl+Alt+4', @miRunMake4);
     AddMenuItem('-', '', nil);
     AddMenuItem('Run', 'F9', nil);
     AddMenuItem('Run Parameters...', '', nil);
