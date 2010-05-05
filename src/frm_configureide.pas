@@ -277,7 +277,7 @@ begin
     SetPosition(8, 4, 340, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'FPC Source Directory ${FPCDIR}';
+    Text := 'FPC Source Directory ${FPCSRCDIR}';
   end;
 
   edtFPCSrcDir := TfpgDirectoryEdit.Create(tsEnvironment);
