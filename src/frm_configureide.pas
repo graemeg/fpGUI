@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_editbtn,
-  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, idemacros;
+  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, idemacros, fpg_combobox;
 
 type
   TConfigureIDEForm = class(TfpgForm)
@@ -53,6 +53,8 @@ type
     btnExtToolAdd: TfpgButton;
     btnExtToolDel: TfpgButton;
     lbExtTools: TfpgListBox;
+    cbTabPosition: TfpgComboBox;
+    Label14: TfpgLabel;
     {@VFD_HEAD_END: ConfigureIDEForm}
     // so we can get correct hints, but still undo with the Cancel button
     FInternalMacroList: TIDEMacroList;
@@ -152,6 +154,7 @@ begin
   edtExeExt.Text := gINI.ReadString(cEnvironment, 'ExeExt', '');
   edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', GMacroList.FindByName(cMacro_Target).Value);
   edtEditorFont.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
+  cbTabPosition.FocusItem := gINI.ReadInteger(cEditor, 'TabPosition', 0);
 end;
 
 procedure TConfigureIDEForm.SaveSettings;
@@ -166,6 +169,7 @@ begin
   gINI.WriteString(cEnvironment, 'ExeExt', edtExeExt.Text);
   gINI.WriteString(cEnvironment, 'Target', edtTarget.Text);
   gINI.WriteString(cEditor, 'Font', edtEditorFont.FontDesc);
+  gINI.WriteInteger(cEditor, 'TabPosition', cbTabPosition.FocusItem);
 
   SaveToMacroList(GMacroList);
 end;
@@ -687,6 +691,30 @@ begin
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 10;
+  end;
+
+  cbTabPosition := TfpgComboBox.Create(tsEditor);
+  with cbTabPosition do
+  begin
+    Name := 'cbTabPosition';
+    SetPosition(8, 68, 144, 22);
+    FontDesc := '#List';
+    Hint := '';
+    Items.Add('top');
+    Items.Add('bottom');
+    Items.Add('left');
+    Items.Add('right');
+    TabOrder := 3;
+  end;
+
+  Label14 := TfpgLabel.Create(tsEditor);
+  with Label14 do
+  begin
+    Name := 'Label14';
+    SetPosition(8, 50, 404, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Tab position';
   end;
 
   {@VFD_BODY_END: ConfigureIDEForm}
