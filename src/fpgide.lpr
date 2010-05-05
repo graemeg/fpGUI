@@ -3,11 +3,11 @@ program fpgide;
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  {$IFDEF UNIX}
   cthreads,
-  {$ENDIF}{$ENDIF}
+  {$ENDIF}
   Classes, fpg_base, fpg_main, frm_main, frm_configureide, ideconst, idemacros, frm_debug,
-  project, unitlist, frm_projectoptions, ideutils;
+  project, unitlist, frm_projectoptions, ideutils, builderthread;
 
 
 procedure MainProc;
