@@ -179,6 +179,7 @@ end;
 procedure TMainForm.miConfigureIDE(Sender: TObject);
 begin
   DisplayConfigureIDE;
+  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
 end;
 
 procedure TMainForm.miViewDebug(Sender: TObject);
@@ -471,6 +472,9 @@ begin
 
   SetupProjectTree;
   SetupFilesGrid;
+
+  // apply editor settings
+  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
