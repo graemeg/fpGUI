@@ -196,10 +196,20 @@ end;
 procedure TProjectOptionsForm.grdCompilerDirsKeyPressed(Sender: TObject;
   var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 begin
+  if (KeyCode = keyInsert) and (ssCtrl in ShiftState) then
+  begin
+    TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
+    Consumed := True;
+    Exit;
+  end;
+
   if TfpgStringGrid(Sender).FocusCol < 10 then
   begin
     if (KeyCode = keySpace) then
+    begin
       grdCompilerDirsClicked(Sender);
+      Consumed := True;
+    end;
   end
   else if TfpgStringGrid(Sender).FocusCol = 10 then
   begin
@@ -207,6 +217,7 @@ begin
     begin
       // we need to edit the cell contents
       SetupCellEdit(TfpgStringGrid(Sender));
+      Consumed := True;
     end;
   end;
 end;
@@ -214,10 +225,20 @@ end;
 procedure TProjectOptionsForm.grdCompilerMakeOptionsKeyPressed(Sender: TObject;
   var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
 begin
+  if (KeyCode = keyInsert) and (ssCtrl in ShiftState) then
+  begin
+    TfpgStringGrid(Sender).RowCount := TfpgStringGrid(Sender).RowCount + 1;
+    Consumed := True;
+    Exit;
+  end;
+
   if TfpgStringGrid(Sender).FocusCol < 6 then
   begin
     if (KeyCode = keySpace) then
+    begin
       grdCompilerMakeOptionsClicked(Sender);
+      Consumed := True;
+    end;
   end
   else if TfpgStringGrid(Sender).FocusCol = 6 then
   begin
@@ -225,6 +246,7 @@ begin
     begin
       // we need to edit the cell contents
       SetupCellEdit(TfpgStringGrid(Sender));
+      Consumed := True;
     end;
   end;
 end;
