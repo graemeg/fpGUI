@@ -107,19 +107,19 @@ begin
   Result.Top   := y;
   Result.Text  := AText;
   Result.LineSpace := ALineSpace;
-  if w = 0 then
-  begin
-    Result.Width := Result.Font.TextWidth(Result.Text);
-    Result.FAutoSize := True;
-  end
-  else
-    Result.Width := w;
   if h < Result.Font.Height then
     Result.Height:= Result.Font.Height
   else
     Result.Height:= h;
   Result.Alignment:= HAlign;
   Result.Layout:= VAlign;
+  if w = 0 then
+  begin
+    Result.Width := Result.Font.TextWidth(Result.Text);
+    Result.AutoSize := True;
+  end
+  else
+    Result.Width := w;
 end;
 
 { TfpgCustomLabel }
