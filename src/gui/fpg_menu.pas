@@ -77,7 +77,7 @@ type
     procedure   Click;
     function    Selectable: boolean;
     function    GetAccelChar: string;
-    procedure   DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord);
+    procedure   DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord; const AImgWidth: integer);
     function    GetCommand: ICommand;
     procedure   SetCommand(ACommand: ICommand);
     property    Checked: boolean read FChecked write SetChecked;
@@ -160,6 +160,7 @@ type
     procedure   PrepareToShow;
     function    VisibleCount: integer;
     function    VisibleItem(ind: integer): TfpgMenuItem;
+    procedure   HandleShow; override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -186,10 +187,14 @@ function CreateMenuBar(AOwner: TfpgWidget): TfpgMenuBar; overload;
 
 
 implementation
-
+  
 var
   uFocusedPopupMenu: TfpgPopupMenu;
 
+const
+  cImgWidth: integer = 16;
+
+  
 function CreateMenuBar(AOwner: TfpgWidget; x, y, w, h: TfpgCoord): TfpgMenuBar;
 begin
   if AOwner = nil then
@@ -258,6 +263,7 @@ begin
   FSeparator := False;
   FVisible := True;
   FEnabled := True;
+  FChecked := False;
   FSubMenu := nil;
   FOnClick := nil;
 end;
@@ -286,11 +292,12 @@ begin
     Result := '';
 end;
 
-procedure TfpgMenuItem.DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord);
+procedure TfpgMenuItem.DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord; const AImgWidth: integer);
 var
   s: string;
   p: integer;
   achar: string;
+  img: TfpgImage;
 begin
   if not Enabled then
     ACanvas.SetFont(fpgStyle.MenuDisabledFont)
@@ -300,19 +307,23 @@ begin
   achar := '&';
   s := Text;
 
+  if Checked then
+  begin
+    img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
+    ACanvas.DrawImage(x-AImgWidth-2, y, img);   // 2 = margin.
+  end;
+  
   repeat
     p := UTF8Pos(achar, s);
     if p > 0 then
     begin
       // first part of text before the & sign
-//      ACanvas.DrawString(x, y, UTF8Copy(s, 1, p-1));
       fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, 1, p-1), Enabled);
 
       inc(x, fpgStyle.MenuFont.TextWidth(UTF8Copy(s, 1, p-1)));
       if UTF8Copy(s, p+1, 1) = achar then
       begin
         // Do we need to paint a actual & sign (create via && in item text)
-//        ACanvas.DrawString(x, y, achar);
         fpgStyle.DrawString(ACanvas, x, y, achar, Enabled);
         inc(x, fpgStyle.MenuFont.TextWidth(achar));
       end
@@ -321,7 +332,6 @@ begin
         // Draw the HotKey text
         if Enabled then
           ACanvas.SetFont(fpgStyle.MenuAccelFont);
-//        ACanvas.DrawString(x, y, UTF8Copy(s, p+1, 1));
         fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, p+1, 1), Enabled);
         inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, p+1, 1)));
         if Enabled then
@@ -333,7 +343,6 @@ begin
 
   // Draw the remaining text after the & sign
   if UTF8Length(s) > 0 then
-//    ACanvas.DrawString(x, y, s);
     fpgStyle.DrawString(ACanvas, x, y, s, Enabled);
 end;
 
@@ -389,6 +398,12 @@ begin
     Result := nil
   else
     Result := TfpgMenuItem(FItems.Items[ind]);
+end;
+
+procedure TfpgMenuBar.HandleShow;
+begin
+  PrepareToShow;
+  inherited HandleShow;
 end;
 
 procedure TfpgMenuBar.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -497,7 +512,6 @@ var
   n: integer;
   r: TfpgRect;
 begin
-  PrepareToShow;
   Canvas.BeginDraw;
   inherited HandlePaint;
   r.SetRect(0, 0, Width, Height);
@@ -590,7 +604,7 @@ begin
       Canvas.FillRectangle(r);
       // a possible future theme option
 //      Canvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
-      mi.DrawText(Canvas, r.left+4, r.top+1);
+      mi.DrawText(Canvas, r.left+4, r.top+1, cImgWidth);
       Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
     end;  { if col=n }
@@ -829,7 +843,6 @@ procedure TfpgPopupMenu.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   newf: integer;
   mi: TfpgMenuItem;
-  r: TfpgRect;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
@@ -1025,25 +1038,20 @@ begin
   else
   begin
     x := rect.Left + FSymbolWidth + FTextMargin;
-
-    mi.DrawText(Canvas, x, rect.top);
+    mi.DrawText(Canvas, x+cImgWidth, rect.top, cImgWidth);
 
     if mi.HotKeyDef <> '' then
     begin
       s := mi.HotKeyDef;
       fpgStyle.DrawString(Canvas, rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
-//      Canvas.DrawString(rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s);
     end;
 
     if mi.SubMenu <> nil then
     begin
-      canvas.SetColor(Canvas.TextColor);
+      Canvas.SetColor(Canvas.TextColor);
       x := (rect.height div 2) - 3;
       img := fpgImages.GetImage('sys.sb.right');
       Canvas.DrawImage(rect.right-x-2, rect.Top + ((rect.Height-img.Height) div 2), img);
-//      canvas.FillTriangle(rect.right-x-2, rect.top+2,
-//                          rect.right-2, rect.top+2+x,
-//                          rect.right-x-2, rect.top+2+2*x);
     end;
   end;
 end;
@@ -1205,8 +1213,8 @@ begin
     hkw := hkw + 10; // spacing between text and hotkey text
 
   FHeight := FMargin*2 + h;
-  FWidth  := (FMargin+FTextMargin)*2 + FSymbolWidth + tw + hkw;
-
+  FWidth  := (FMargin+FTextMargin)*2 + FSymbolWidth + tw + hkw + cImgWidth;
+  
   uFocusedPopupMenu := self;
 end;
 
