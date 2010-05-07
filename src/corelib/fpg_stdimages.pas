@@ -150,6 +150,11 @@ begin
       sizeof(stdimg_menu_preferences_16), 0,0);
 
   fpgImages.AddMaskedBMP(
+            'stdimg.check',
+            @stdimg_menu_check_16,
+      sizeof(stdimg_menu_check_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
             'stdimg.document',
             @stdimg_document,
       sizeof(stdimg_document), 0,0);
