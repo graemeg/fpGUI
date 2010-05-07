@@ -2142,7 +2142,7 @@ initialization
   InitializeDebugOutput;
   fpgInitMsgQueue;
 
-finalization;
+finalization
   uClipboard.Free;
   uApplication.Free;
   FinalizeDebugOutput;
