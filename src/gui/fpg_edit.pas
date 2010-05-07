@@ -1760,12 +1760,6 @@ begin
     r := GetClientRect;
     Canvas.SetClipRect(r);
 
-    if Enabled then
-      Canvas.SetColor(FBackgroundColor)
-    else
-      Canvas.SetColor(clWindowBackground);
-    Canvas.FillRectangle(r);
-
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);
     x := r.Width - Font.TextWidth(Text) - FSideMargin;
