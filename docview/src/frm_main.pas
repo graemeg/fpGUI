@@ -67,6 +67,7 @@ type
     btnPrev: TfpgButton;
     btnNext: TfpgButton;
     btnHelp: TfpgButton;
+    btnQuit: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     miOpenRecentMenu: TfpgPopupMenu;
 //    Files: TList; // current open help files.
@@ -1762,6 +1763,7 @@ begin
   Name := 'MainForm';
   SetPosition(602, 274, 654, 386);
   WindowTitle := 'fpGUI Documentation Viewer';
+  Hint := '';
   ShowHint := True;
   WindowPosition := wpUser;
   OnCloseQuery  := @MainFormCloseQuery;
@@ -1772,6 +1774,7 @@ begin
     Name := 'bvlStatusBar';
     SetPosition(0, 366, 653, 20);
     Anchors := [anLeft,anRight,anBottom];
+    Hint := '';
     Style := bsLowered;
   end;
 
@@ -1781,6 +1784,7 @@ begin
     Name := 'ProgressBar';
     SetPosition(501, 2, 150, 16);
     Anchors := [anRight,anBottom];
+    Hint := '';
   end;
 
   lblStatus := TfpgLabel.Create(bvlStatusBar);
@@ -1800,6 +1804,7 @@ begin
     Name := 'bvlBody';
     SetPosition(0, 55, 653, 310);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    Hint := '';
     Shape := bsSpacer;
   end;
 
@@ -1809,6 +1814,7 @@ begin
     Name := 'PageControl1';
     SetPosition(0, 16, 260, 276);
     ActivePageIndex := 0;
+    Hint := '';
     TabOrder := 0;
     Align := alLeft;
     OnChange  := @PageControl1Change;
@@ -1829,6 +1835,7 @@ begin
     SetPosition(4, 32, 242, 212);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
+    Hint := '';
     ScrollWheelDelta := 60;
     ShowImages := True;
     TabOrder := 0;
@@ -1879,6 +1886,7 @@ begin
     SetPosition(4, 32, 242, 212);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
+    Hint := '';
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 1;
@@ -1892,6 +1900,8 @@ begin
     Name := 'IndexSearchEdit';
     SetPosition(4, 4, 152, 24);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    Hint := '';
     TabOrder := 2;
     Text := '';
     FontDesc := '#Edit1';
@@ -1923,6 +1933,8 @@ begin
     Name := 'edSearchText';
     SetPosition(4, 20, 210, 26);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    Hint := '';
     TabOrder := 1;
     Text := '';
     FontDesc := '#Edit1';
@@ -1946,6 +1958,7 @@ begin
     SetPosition(12, 68, 192, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 3;
     Text := 'This section';
     Enabled := False;
@@ -1958,6 +1971,7 @@ begin
     SetPosition(12, 88, 192, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 4;
     Text := 'Marked sections';
     Enabled := False;
@@ -1971,6 +1985,7 @@ begin
     Checked := True;
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 5;
     Text := 'All sections';
     Enabled := False;
@@ -1983,6 +1998,7 @@ begin
     SetPosition(12, 128, 192, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 6;
     Text := 'Index';
     Enabled := False;
@@ -1995,6 +2011,7 @@ begin
     SetPosition(12, 148, 192, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 7;
     Text := 'Marked libraries';
     Enabled := False;
@@ -2007,6 +2024,7 @@ begin
     SetPosition(12, 168, 192, 20);
     FontDesc := '#Label1';
     GroupIndex := 0;
+    Hint := '';
     TabOrder := 8;
     Text := 'All libraries';
     Enabled := False;
@@ -2019,6 +2037,7 @@ begin
     SetPosition(4, 220, 242, 76);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
+    Hint := '';
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 9;
@@ -2065,6 +2084,7 @@ begin
     SetPosition(4, 32, 242, 252);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
+    Hint := '';
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 0;
@@ -2137,6 +2157,7 @@ begin
     SetPosition(4, 8, 242, 236);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
+    Hint := '';
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 0;
@@ -2229,6 +2250,7 @@ begin
     Name := 'ToolBar';
     SetPosition(0, 25, 654, 28);
     Anchors := [anLeft,anRight,anTop];
+    Hint := '';
     Style := bsLowered;
     Shape := bsBottomLine;
   end;
@@ -2237,13 +2259,14 @@ begin
   with btnOpen do
   begin
     Name := 'btnOpen';
-    SetPosition(2, 1, 24, 24);
+    SetPosition(30, 1, 24, 24);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
     Hint := 'Open a new help file.';
-    ImageMargin := 0;
+    ImageMargin := -1;
     ImageName := 'stdimg.open';
+    ImageSpacing := 0;
     TabOrder := 0;
     OnClick := @miFileOpenClicked;
   end;
@@ -2252,7 +2275,7 @@ begin
   with btnPanel do
   begin
     Name := 'btnPanel';
-    SetPosition(36, 1, 32, 24);
+    SetPosition(64, 1, 32, 24);
     Text := 'pnl';
     AllowAllUp := True;
     Embedded := True;
@@ -2268,13 +2291,14 @@ begin
   with btnBack do
   begin
     Name := 'btnBack';
-    SetPosition(74, 1, 32, 24);
+    SetPosition(102, 1, 32, 24);
     Text := '<';
     Embedded := True;
     FontDesc := '#Label1';
     Hint := 'Previous history item.';
-    ImageMargin := 0;
+    ImageMargin := -1;
     ImageName := 'dv.arrowleft';
+    ImageSpacing := 0;
     TabOrder := 2;
     OnClick := @btnBackHistClick;
   end;
@@ -2283,13 +2307,14 @@ begin
   with btnFwd do
   begin
     Name := 'btnFwd';
-    SetPosition(108, 1, 32, 24);
+    SetPosition(136, 1, 32, 24);
     Text := '>';
     Embedded := True;
     FontDesc := '#Label1';
     Hint := 'Next history item.';
-    ImageMargin := 0;
+    ImageMargin := -1;
     ImageName := 'dv.arrowright';
+    ImageSpacing := 0;
     TabOrder := 3;
     OnClick := @btnFwdHistClick;
   end;
@@ -2298,13 +2323,14 @@ begin
   with btnPrev do
   begin
     Name := 'btnPrev';
-    SetPosition(146, 1, 32, 24);
+    SetPosition(174, 1, 32, 24);
     Text := 'prev';
     Embedded := True;
     FontDesc := '#Label1';
     Hint := 'Previous Topic.';
-    ImageMargin := 0;
+    ImageMargin := -1;
     ImageName := 'dv.arrowup';
+    ImageSpacing := 0;
     TabOrder := 4;
     OnClick := @btnPrevClick;
   end;
@@ -2313,13 +2339,14 @@ begin
   with btnNext do
   begin
     Name := 'btnNext';
-    SetPosition(180, 1, 32, 24);
+    SetPosition(208, 1, 32, 24);
     Text := 'next';
     Embedded := True;
     FontDesc := '#Label1';
     Hint := 'Next Topic.';
-    ImageMargin := 0;
+    ImageMargin := -1;
     ImageName := 'dv.arrowdown';
+    ImageSpacing := 0;
     TabOrder := 5;
     OnClick :=@btnNextClick;
   end;
@@ -2328,7 +2355,7 @@ begin
   with btnHelp do
   begin
     Name := 'btnHelp';
-    SetPosition(218, 1, 24, 24);
+    SetPosition(246, 1, 24, 24);
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
@@ -2338,6 +2365,22 @@ begin
     ImageSpacing := 0;
     TabOrder := 6;
     OnClick := @miHelpProdInfoClicked;
+  end;
+
+  btnQuit := TfpgButton.Create(ToolBar);
+  with btnQuit do
+  begin
+    Name := 'btnQuit';
+    SetPosition(4, 1, 24, 24);
+    Text := '';
+    Embedded := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := -1;
+    ImageName := 'stdimg.quit';
+    ImageSpacing := 0;
+    TabOrder := 8;
+    OnClick := @miFileQuitClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
