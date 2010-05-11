@@ -66,6 +66,7 @@ type
     procedure   miConfigureIDE(Sender: TObject);
     procedure   miViewDebug(Sender: TObject);
     procedure   miProjectNew(Sender: TObject);
+    procedure   miProjectNewFromTemplate(Sender: TObject);
     procedure   miProjectOptions(Sender: TObject);
     procedure   miProjectOpen(Sender: TObject);
     procedure   miProjectSave(Sender: TObject);
@@ -98,6 +99,7 @@ uses
   ,fpg_iniutils
   ,fpg_dialogs
   ,fpg_utils
+  ,fpg_constants
   ,frm_configureide
   ,frm_projectoptions
   ,frm_debug
@@ -238,6 +240,28 @@ begin
   GProject.MainUnit := 'empty.pas';
   OpenEditorPage(GProject.MainUnit);
   miProjectSaveAs(nil);
+end;
+
+procedure TMainForm.miProjectNewFromTemplate(Sender: TObject);
+var
+  dlg: TfpgFileDialog;
+  lFilename: TfpgString;
+begin
+  CloseAllTabs;
+  FreeProject;
+  dlg := TfpgFileDialog.Create(nil);
+  try
+    dlg.InitialDir := GMacroList.ExpandMacro(cMacro_TemplateDir);
+    dlg.Filter := Format(cFileFilterTemplate, ['Project Files', cProjectFiles, cProjectFiles])
+                  + '|' + rsAllFiles+' ('+AllFilesMask+')'+'|'+AllFilesMask;
+    if dlg.RunOpenFile then
+    begin
+      lFilename := dlg.FileName;
+      GProject.Load(lFilename);
+    end;
+  finally
+    dlg.Free;
+  end;
 end;
 
 procedure TMainForm.miProjectOptions(Sender: TObject);
@@ -773,7 +797,7 @@ begin
     AddMenuItem('Options...', '', @miProjectOptions);
     AddMenuItem('-', '', nil);
     AddMenuItem('New (empty)...', '', @miProjectNew);
-    AddMenuItem('New from Template...', '', nil);
+    AddMenuItem('New from Template...', '', @miProjectNewFromTemplate);
     AddMenuItem('Open...', '', @miProjectOpen);
     AddMenuItem('Open Recent', '', nil);
     AddMenuItem('Save', '', @miProjectSave);
