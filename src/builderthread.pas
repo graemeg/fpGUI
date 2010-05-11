@@ -25,6 +25,7 @@ uses
   ,process
   ,fpg_base
   ,fpg_iniutils
+  ,fpg_utils
   ,ideconst
   ,idemacros
   ;
@@ -42,7 +43,16 @@ procedure TBuilderThread.Execute;
 var
   p: TProcess;
   c: TfpgString;
+  unitdir: TfpgString;
 begin
+  unitdir := GProject.ProjectDir + GProject.UnitOutputDir;
+  unitdir := GMacroList.ExpandMacro(unitdir);
+  if not fpgDirectoryExists(unitdir) then
+  begin
+    writeln('DEBUG:  TBuilderThread.Execute - Creating dir: ' + unitdir);
+    fpgForceDirectories(unitDir);
+
+  end;
   p := TProcess.Create(nil);
   p.ShowWindow := swoShowNormal;
   p.CurrentDirectory := GProject.ProjectDir;
