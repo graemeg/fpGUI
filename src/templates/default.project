@@ -1,0 +1,39 @@
+[ProjectOptions]
+ProjectDir=/media/flash16gig/programming/fpgide/src/
+ProjectName=default.project
+MainUnit=default.pas
+TargetFile=default${EXEEXT}
+DefaultMake=0
+UnitOutputDir=units/${TARGET}/
+MakeOptionsCount=4
+MakeOptionEnabled1=1,1,1,1,1,1
+MakeOptionEnabled2=1,1,1,1,1,0
+MakeOptionEnabled3=0,1,0,0,0,1
+MakeOptionEnabled4=0,0,0,0,0,1
+MacroCount=6
+Macro1=TargetCPU=x86_64
+Macro2=TargetOS=linux
+Macro3=TargetCPU=i386
+Macro4=TargetOS=win32
+Macro5=FPGUI_DIR=/home/graemeg/programming/fpgui/
+Macro6=tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/
+UnitDirsCount=6
+UnitDirEnabled1=1,1,1,1,0,0,0,1,0,0
+UnitDirEnabled2=1,1,1,1,0,0,1,1,0,0
+UnitDirEnabled3=1,1,1,0,0,0,1,1,0,0
+UnitDirEnabled4=0,0,0,1,0,0,1,1,0,0
+UnitDirEnabled5=1,1,1,1,0,0,1,0,0,0
+UnitDirEnabled6=1,1,1,1,0,0,1,0,0,0
+MakeOption1=-l -Mobjfpc -Sch
+MakeOption2=-gl -O-
+MakeOption3=-B
+MakeOption4=-O2 -XX -Xs -CX
+UnitDir1=${FPGUIDIR}src/
+UnitDir2=${FPGUIDIR}src/corelib/
+UnitDir3=${FPGUIDIR}src/corelib/x11/
+UnitDir4=${FPGUIDIR}src/corelib/gdi/
+UnitDir5=${FPGUIDIR}src/gui/
+UnitDir6=${FPGUIDIR}src/gui/db/
+
+[Units]
+UnitCount=0
