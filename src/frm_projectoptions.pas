@@ -58,6 +58,10 @@ type
     btnShowCmdLine: TfpgButton;
     edtUnitOutputDir: TfpgDirectoryEdit;
     Label9: TfpgLabel;
+    Label10: TfpgLabel;
+    grdMacroGroup: TfpgStringGrid;
+    Label12: TfpgLabel;
+    grdUserMacros: TfpgStringGrid;
     {@VFD_HEAD_END: ProjectOptionsForm}
     FCellEdit: TfpgEdit;
     FFocusRect: TfpgRect;
@@ -74,6 +78,9 @@ type
     procedure grdCompilerMakeOptionsDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure grdCompilerMakeOptionsClicked(Sender: TObject);
     procedure grdCompilerDirsClicked(Sender: TObject);
+    procedure grdUserMacrosClicked(Sender: TObject);
+    procedure grdUserMacrosDrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+    procedure grdMacroGroupCanSelectCell(Sender: TObject; const ARow, ACol: Integer; var ACanSelect: boolean);
     procedure BeforeShowHint(Sender: TObject; var AHint: TfpgString);
     procedure LoadSettings;
     procedure SaveSettings;
@@ -298,6 +305,44 @@ begin
     else
       TfpgStringGrid(Sender).Cells[c, r] := '';
   end;
+end;
+
+procedure TProjectOptionsForm.grdUserMacrosClicked(Sender: TObject);
+var
+  r, c: integer;
+begin
+  if TfpgStringGrid(Sender).RowCount = 0 then
+    TfpgStringGrid(Sender).RowCount := 1;
+  r := TfpgStringGrid(Sender).FocusRow;
+  c := TfpgStringGrid(Sender).FocusCol;
+  if c < 6 then   // checkbox area
+  begin
+    if TfpgStringGrid(Sender).Cells[c, r] = '' then
+      TfpgStringGrid(Sender).Cells[c, r] := cCheck
+    else
+      TfpgStringGrid(Sender).Cells[c, r] := '';
+  end;
+end;
+
+procedure TProjectOptionsForm.grdUserMacrosDrawCell(Sender: TObject;
+  const ARow, ACol: Integer; const ARect: TfpgRect;
+  const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+begin
+  if (gdSelected in AFlags) and (ACol = 6) then
+  begin
+    FFocusRect := ARect;
+  end;
+
+  if ACol < 6 then
+    grdUserMacros.Canvas.SetFont(FCheckFont)
+  else
+    grdUserMacros.Canvas.Setfont(grdUserMacros.Font);
+end;
+
+procedure TProjectOptionsForm.grdMacroGroupCanSelectCell(Sender: TObject;
+  const ARow, ACol: Integer; var ACanSelect: boolean);
+begin
+  ACanSelect := ACol > 0;
 end;
 
 procedure TProjectOptionsForm.BeforeShowHint(Sender: TObject; var AHint: TfpgString);
@@ -543,7 +588,7 @@ begin
   with tsMacros do
   begin
     Name := 'tsMacros';
-    SetPosition(3, 24, 456, 217);
+    SetPosition(3, 24, 594, 497);
     Text := 'Macros';
   end;
 
@@ -574,7 +619,7 @@ begin
     FileName := '${PROJECTNAME}.pas';
     InitialDir := '';
     Filter := '';
-    TabOrder := 2;
+    TabOrder := 0;
     Hint := ' ';
     OnShowHint := @BeforeShowHint;
   end;
@@ -598,7 +643,7 @@ begin
     FileName := '${PROJECTNAME}${EXEEXT}';
     InitialDir := '';
     Filter := '';
-    TabOrder := 4;
+    TabOrder := 1;
     Hint := ' ';
     OnShowHint := @BeforeShowHint;
   end;
@@ -612,7 +657,7 @@ begin
     FileName := '${COMPILER}';
     InitialDir := '';
     Filter := '';
-    TabOrder := 5;
+    TabOrder := 2;
     Hint := ' ';
     OnShowHint := @BeforeShowHint;
   end;
@@ -635,7 +680,7 @@ begin
     ExtraHint := '';
     Directory := '';
     RootDirectory := '';
-    TabOrder := 7;
+    TabOrder := 3;
     Hint := ' ';
     OnShowHint := @BeforeShowHint;
   end;
@@ -670,7 +715,7 @@ begin
     FileName := '';
     InitialDir := '';
     Filter := '';
-    TabOrder := 10;
+    TabOrder := 4;
     Enabled := False;
   end;
 
@@ -681,7 +726,7 @@ begin
     SetPosition(300, 128, 280, 20);
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 11;
+    TabOrder := 5;
     Text := 'Copy messages to file';
   end;
 
@@ -708,7 +753,7 @@ begin
     Items.Add('2 (Make 2)');
     Items.Add('3 (Make 3)');
     Items.Add('4 (Make 4)');
-    TabOrder := 13;
+    TabOrder := 6;
     FocusItem := 0;
   end;
 
@@ -733,7 +778,7 @@ begin
     Anchors := [anLeft,anRight,anTop,anBottom];
     ActivePageIndex := 0;
     Hint := '';
-    TabOrder := 15;
+    TabOrder := 9;
   end;
 
   TabSheet1 := TfpgTabSheet.Create(pcCompiler);
@@ -800,6 +845,7 @@ begin
     ParentShowHint := False;
     RowCount := 0;
     RowSelect := False;
+    ShowHint := True;
     TabOrder := 1;
     OnClick := @grdCompilerDirsClicked;
     OnDrawCell := @grdCompilerDirsDrawCell;
@@ -970,7 +1016,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 16;
+    TabOrder := 7;
     OnClick :=@btnShowCmdLineClicked;
   end;
 
@@ -982,7 +1028,7 @@ begin
     ExtraHint := '';
     Directory := '';
     RootDirectory := '';
-    TabOrder := 17;
+    TabOrder := 8;
     Hint := ' ';
     OnShowHint := @BeforeShowHint;
   end;
@@ -995,6 +1041,79 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Unit output directory (-FU)';
+  end;
+
+  Label10 := TfpgLabel.Create(tsMacros);
+  with Label10 do
+  begin
+    Name := 'Label10';
+    SetPosition(4, 10, 580, 16);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Active Group';
+  end;
+
+  grdMacroGroup := TfpgStringGrid.Create(tsMacros);
+  with grdMacroGroup do
+  begin
+    Name := 'grdMacroGroup';
+    SetPosition(4, 28, 584, 104);
+    Anchors := [anLeft,anRight,anTop];
+    AddColumn('#', 20, taCenter);
+    AddColumn('', 20, taCenter);
+    AddColumn('Name', 520, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    Hint := '';
+    RowCount := 6;
+    RowSelect := False;
+    ShowHeader := False;
+    TabOrder := 0;
+    Columns[0].BackgroundColor := clLightGray;
+    Cells[0,0] := '1';
+    Cells[0,1] := '2';
+    Cells[0,2] := '3';
+    Cells[0,3] := '4';
+    Cells[0,4] := '5';
+    Cells[0,5] := '6';
+    FocusCol := 2;
+    OnCanSelectCell := @grdMacroGroupCanSelectCell;
+  end;
+
+  Label12 := TfpgLabel.Create(tsMacros);
+  with Label12 do
+  begin
+    Name := 'Label12';
+    SetPosition(4, 144, 572, 16);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'User defined macros';
+  end;
+
+  grdUserMacros := TfpgStringGrid.Create(tsMacros);
+  with grdUserMacros do
+  begin
+    Name := 'grdUserMacros';
+    SetPosition(4, 162, 584, 328);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    AddColumn('1', 20, taCenter);
+    AddColumn('2', 20, taCenter);
+    AddColumn('3', 20, taCenter);
+    AddColumn('4', 20, taCenter);
+    AddColumn('5', 20, taCenter);
+    AddColumn('6', 20, taCenter);
+    AddColumn('Name', 150, taLeftJustify);
+    AddColumn('Value', 290, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    Hint := '';
+    RowCount := 0;
+    RowSelect := False;
+    TabOrder := 1;
+    OnClick := @grdUserMacrosClicked;
+    OnDrawCell := @grdUserMacrosDrawCell;
   end;
 
   {@VFD_BODY_END: ProjectOptionsForm}
