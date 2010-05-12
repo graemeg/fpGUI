@@ -217,7 +217,7 @@ begin
 
       //Writeln(linecnt,' lines loaded.');
       move(img.ImageData^, img.MaskData^, img.ImageDataSize);
-      img.Invert;
+      img.Invert(True);
     end;
 
     4:

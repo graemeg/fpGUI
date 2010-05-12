@@ -195,7 +195,7 @@ type
   public
     constructor Create;
     destructor  Destroy; override;
-    procedure   Invert;
+    procedure   Invert(IncludeMask: Boolean = False);
     procedure   FreeImage;
     procedure   AllocateImage(acolordepth, awidth, aheight: integer);
     procedure   AllocateMask;
@@ -1950,7 +1950,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgImageBase.Invert;
+procedure TfpgImageBase.Invert(IncludeMask: Boolean);
 var
   p: ^byte;
   n: integer;
@@ -1965,13 +1965,16 @@ begin
     Inc(p);
   end;
 
-  if FMaskData <> nil then
+  if IncludeMask then
   begin
-    p := FMaskData;
-    for n := 1 to FMaskDataSize do
+    if FMaskData <> nil then
     begin
-      p^ := p^ xor $FF;
-      Inc(p);
+      p := FMaskData;
+      for n := 1 to FMaskDataSize do
+      begin
+        p^ := p^ xor $FF;
+        Inc(p);
+      end;
     end;
   end;
 end;
