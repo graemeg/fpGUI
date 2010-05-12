@@ -123,8 +123,8 @@ type
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
     procedure   HandleClose; override;
-    procedure   DrawItem(mi: TfpgMenuItem; rect: TfpgRect); virtual;
-    procedure   DrawRow(line: integer; focus: boolean); virtual;
+    procedure   DrawItem(mi: TfpgMenuItem; rect: TfpgRect; const AItemFocused: boolean); virtual;
+    procedure   DrawRow(line: integer; const AItemFocused: boolean); virtual;
     function    ItemHeight(mi: TfpgMenuItem): integer; virtual;
     procedure   PrepareToShow;
   public
@@ -1022,7 +1022,7 @@ begin
     Result := TfpgMenuItem(FItems.Items[ind]);
 end;
 
-procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect);
+procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect; const AItemFocused: boolean);
 var
   s: string;
   x: integer;
@@ -1056,7 +1056,7 @@ begin
   end;
 end;
 
-procedure TfpgPopupMenu.DrawRow(line: integer; focus: boolean);
+procedure TfpgPopupMenu.DrawRow(line: integer; const AItemFocused: boolean);
 var
   n: integer;
   r: TfpgRect;
@@ -1073,7 +1073,7 @@ begin
 
     if line = n then
     begin
-      if focus and (not mi.Separator) then
+      if AItemFocused and (not mi.Separator) then
       begin
         if MenuFocused then
         begin
@@ -1103,7 +1103,7 @@ begin
         end;
       end;
       Canvas.FillRectangle(r);
-      DrawItem(mi, r);
+      DrawItem(mi, r, AItemFocused);
       Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
     end;
