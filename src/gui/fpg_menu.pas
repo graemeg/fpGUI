@@ -297,7 +297,6 @@ var
   s: string;
   p: integer;
   achar: string;
-  img: TfpgImage;
 begin
   if not Enabled then
     ACanvas.SetFont(fpgStyle.MenuDisabledFont)
@@ -307,12 +306,6 @@ begin
   achar := '&';
   s := Text;
 
-  if Checked then
-  begin
-    img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
-    ACanvas.DrawImage(x-AImgWidth-2, y, img);   // 2 = margin.
-  end;
-  
   repeat
     p := UTF8Pos(achar, s);
     if p > 0 then
@@ -1037,20 +1030,34 @@ begin
   end
   else
   begin
+    // process Check mark if needed
+    if mi.Checked then
+    begin
+      img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
+      if AItemFocused then
+        img.Invert;
+      Canvas.DrawImage(rect.Left, rect.Top, img);
+      if AItemFocused then
+        img.Invert;  // restore image to original state
+    end;
+
+    // process menu item Text
     x := rect.Left + FSymbolWidth + FTextMargin;
     mi.DrawText(Canvas, x+cImgWidth, rect.top, cImgWidth);
 
+    // process menu item Hot Key text
     if mi.HotKeyDef <> '' then
     begin
       s := mi.HotKeyDef;
       fpgStyle.DrawString(Canvas, rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
     end;
 
+    // process menu item submenu arrow image
     if mi.SubMenu <> nil then
     begin
       Canvas.SetColor(Canvas.TextColor);
       x := (rect.height div 2) - 3;
-      img := fpgImages.GetImage('sys.sb.right');
+      img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
       Canvas.DrawImage(rect.right-x-2, rect.Top + ((rect.Height-img.Height) div 2), img);
     end;
   end;
