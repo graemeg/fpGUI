@@ -37,10 +37,22 @@ type
   end;
 
 
+  TShowSplashCommand = class(TInterfacedObject, ICommand)
+  public
+    procedure   Execute;
+  end;
+
+
+  TShowBorderlessForm = class(TInterfacedObject, ICommand)
+  public
+    procedure   Execute;
+  end;
+
+
 implementation
 
 uses
-  fpg_main, SysUtils;
+  SysUtils, fpg_main, frm_main, frm_splashscreen;
 
 { TNullInterfacedObject }
 
@@ -72,17 +84,29 @@ end;
 
 procedure TAddCommand.Execute;
 begin
-  Writeln('>> TAddComand.Execute');
   FMemo.Lines.Add('Hello ' + IntToStr(Random(500)));
-  FMemo.Invalidate;
 end;
 
 { TExitCommand }
 
 procedure TExitCommand.Execute;
 begin
-  Writeln('>> TExitComand.Execute');
   fpgApplication.Terminated := True;
+end;
+
+{ TShowSplashCommand }
+
+procedure TShowSplashCommand.Execute;
+begin
+  frmSplash := TSplashForm.Create(nil);
+  frmSplash.Show;
+end;
+
+{ TShowBorderlessForm }
+
+procedure TShowBorderlessForm.Execute;
+begin
+  TBorderLessForm.Execute;
 end;
 
 end.

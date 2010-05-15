@@ -5,33 +5,24 @@ unit frm_splashscreen;
 interface
 
 uses
-  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
-  fpg_widget, fpg_form, fpg_label, fpg_button,
-  fpg_listbox, fpg_memo, fpg_combobox, fpg_grid,
-  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar,
-  fpg_progressbar, fpg_radiobutton, fpg_tab, fpg_menu,
-  fpg_panel, fpg_popupcalendar, fpg_gauge;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel,
+  fpg_label;
 
 type
-
-  { TSplashForm }
-
   TSplashForm = class(TfpgForm)
-    procedure SplashFormShow(Sender: TObject);
-    procedure TimerFired(Sender: TObject);
   private
-    tmr: TfpgTimer;
-  protected
-    procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
-    procedure AdjustWindowStyle; override;
-  public
     {@VFD_HEAD_BEGIN: SplashForm}
     pnlName1: TfpgBevel;
     lblName2: TfpgLabel;
     lblName1: TfpgLabel;
     {@VFD_HEAD_END: SplashForm}
+    tmr: TfpgTimer;
+    procedure   SplashFormShow(Sender: TObject);
+    procedure   TimerFired(Sender: TObject);
+    procedure   SplashFormClick(Sender: TObject);
+  public
     constructor Create(AOwner: TComponent); override;
-    procedure AfterCreate; override;
+    procedure   AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
@@ -42,6 +33,11 @@ var
 implementation
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TSplashForm.SplashFormClick(Sender: TObject);
+begin
+  TimerFired(nil);
+end;
 
 procedure TSplashForm.SplashFormShow(Sender: TObject);
 begin
@@ -56,18 +52,6 @@ begin
   Hide;
 end;
 
-procedure TSplashForm.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
-begin
-  inherited HandleLMouseUp(x, y, shiftstate);
-  TimerFired(nil);
-end;
-
-procedure TSplashForm.AdjustWindowStyle;
-begin
-  inherited AdjustWindowStyle;
-
-end;
-
 constructor TSplashForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -78,6 +62,7 @@ begin
   tmr.OnTimer := @TimerFired;
   
   OnShow := @SplashFormShow;
+  OnClick := @SplashFormClick;
 end;
 
 procedure TSplashForm.AfterCreate;
