@@ -714,7 +714,9 @@ begin
   if pform <> nil then
     pform.ModalResult := ModalResult;
 
-  if Assigned(OnClick) then
+  if Assigned(FCommand) then    // ICommand takes preference to OnClick
+    FCommand.Execute
+  else if Assigned(OnClick) then
     OnClick(self);
 end;
 

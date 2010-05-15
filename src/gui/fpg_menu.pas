@@ -270,7 +270,9 @@ end;
 
 procedure TfpgMenuItem.Click;
 begin
-  if Assigned(FOnClick) then
+  if Assigned(FCommand) then    // ICommand takes preference over OnClick
+    FCommand.Execute
+  else if Assigned(FOnClick) then
     FOnClick(self);
 end;
 
