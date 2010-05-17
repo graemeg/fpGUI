@@ -1398,6 +1398,7 @@ begin
   end;
 
   AdjustWindowStyle;
+
   wh := XCreateWindow(xapplication.Display, pwh,
     FLeft, FTop, FWidth, FHeight, 0,
     CopyFromParent,
