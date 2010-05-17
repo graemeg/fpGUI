@@ -24,6 +24,7 @@ type
     mnuFile: TfpgPopupMenu;
     btnShowBorderless: TfpgButton;
     btnShowSplash: TfpgButton;
+    Label1: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
   public
     procedure   AfterCreate; override;
@@ -58,9 +59,7 @@ uses
 constructor TBorderLessForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-//  WindowType := wtPopup;  // removes borders and title bar
-  Include(FWindowAttributes, waBorderLess)
-//  WindowAttributes := WindowAttributes + [waStayOnTop]; // well, it lets the window stay on top. :)
+  Include(FWindowAttributes, waBorderLess);  // borderless and steals focus like a normal form
 end;
 
 procedure TBorderLessForm.AfterCreate;
@@ -139,7 +138,7 @@ begin
   with btnAdd do
   begin
     Name := 'btnAdd';
-    SetPosition(260, 36, 148, 24);
+    SetPosition(260, 28, 148, 24);
     Text := 'Add Text to Memo';
     FontDesc := '#Label1';
     Hint := '';
@@ -151,7 +150,7 @@ begin
   with memName1 do
   begin
     Name := 'memName1';
-    SetPosition(8, 36, 236, 228);
+    SetPosition(8, 28, 236, 236);
     Hint := '';
     Lines.Add('');
     FontDesc := '#Edit1';
@@ -190,7 +189,7 @@ begin
   with btnShowBorderless do
   begin
     Name := 'btnShowBorderless';
-    SetPosition(260, 68, 148, 24);
+    SetPosition(260, 56, 148, 24);
     Text := 'Show Borderless Form';
     FontDesc := '#Label1';
     Hint := '';
@@ -202,12 +201,23 @@ begin
   with btnShowSplash do
   begin
     Name := 'btnShowSplash';
-    SetPosition(260, 100, 148, 24);
+    SetPosition(260, 84, 148, 24);
     Text := 'Show Splash Screen';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 7;
+  end;
+
+  Label1 := TfpgLabel.Create(self);
+  with Label1 do
+  begin
+    Name := 'Label1';
+    SetPosition(252, 120, 156, 116);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Note the difference between a borderless form and a splash screen (wtPopup) form. wtPopup doesn''t steal focus (eg: hint window)';
+    WrapText := True;
   end;
 
   {@VFD_BODY_END: MainForm}

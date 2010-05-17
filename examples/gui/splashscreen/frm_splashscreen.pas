@@ -55,7 +55,7 @@ end;
 constructor TSplashForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowType := wtPopup;  // removes borders and title bar
+  WindowType := wtPopup;  // borderless but doesn't steal focus
   WindowAttributes := WindowAttributes + [waStayOnTop]; // well, it lets the window stay on top. :)
 
   tmr := TfpgTimer.Create(3000);
