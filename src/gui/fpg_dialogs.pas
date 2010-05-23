@@ -209,6 +209,7 @@ type
 {$I selectdirdialog.inc}
 {$I charmapdialog.inc}
 {$I colordialog.inc}
+{$I inputquerydialog.inc}
 
 
 
@@ -220,6 +221,7 @@ function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: T
 function SelectDirDialog(const AStartDir: TfpgString = ''): TfpgString;
 function fpgShowCharMap: TfpgString;
 function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
+function fpgInputQuery(const ACaption, APrompt: TfpgString; var Value: TfpgString): Boolean;
 
 
 implementation
@@ -1433,6 +1435,7 @@ end;
 {$I selectdirdialog.inc}
 {$I charmapdialog.inc}
 {$I colordialog.inc}
+{$I inputquerydialog.inc}
 
 
 end.

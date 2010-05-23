@@ -32,7 +32,7 @@
     <License Value="LGPL 2 with static linking exception.
 "/>
     <Version Minor="7"/>
-    <Files Count="81">
+    <Files Count="82">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -357,6 +357,10 @@
         <Filename Value="../fpg_imgfmt_jpg.pas"/>
         <UnitName Value="fpg_imgfmt_jpg"/>
       </Item81>
+      <Item82>
+        <Filename Value="../../gui/inputquerydialog.inc"/>
+        <Type Value="Include"/>
+      </Item82>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">

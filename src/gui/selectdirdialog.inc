@@ -2,9 +2,6 @@
 
 {$IFDEF read_interface}
 
-
-  { TfpgSelectDirDialog }
-
   TfpgSelectDirDialog = class(TfpgBaseDialog)
   private
     tv: TfpgTreeView;
