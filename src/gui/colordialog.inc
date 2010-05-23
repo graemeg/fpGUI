@@ -55,8 +55,6 @@ type
   end;
 
 
-function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
-
 {$ENDIF read_interface}
 
 

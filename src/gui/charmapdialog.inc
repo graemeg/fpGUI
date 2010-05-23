@@ -47,7 +47,6 @@
     property    NewText: TfpgString read GetNewText;
   end;
 
-function fpgShowCharMap: TfpgString;
 
 {$ENDIF read_interface}
 

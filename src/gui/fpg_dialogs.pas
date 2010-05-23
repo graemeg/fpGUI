@@ -218,6 +218,8 @@ procedure ShowMessage(AMessage: string; ACentreText: Boolean = False); overload;
 function SelectFontDialog(var FontDesc: string): boolean;
 function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''): TfpgString;
 function SelectDirDialog(const AStartDir: TfpgString = ''): TfpgString;
+function fpgShowCharMap: TfpgString;
+function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
 
 
 implementation
