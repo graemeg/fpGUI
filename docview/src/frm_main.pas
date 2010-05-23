@@ -99,6 +99,7 @@ type
     procedure   MainFormDestroy(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
+    procedure   miFileOpenSpecialClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
     procedure   miConfigureClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
@@ -358,6 +359,17 @@ end;
 procedure TMainForm.miFileOpenClicked(Sender: TObject);
 begin
   FileOpen;
+end;
+
+procedure TMainForm.miFileOpenSpecialClicked(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  if fpgInputQuery('Open Special...', 'Enter environment variable to open', s) then
+  begin
+    if s <> '' then
+      OpenFile(s, '', True);
+  end;
 end;
 
 procedure TMainForm.miFileCloseClicked(Sender: TObject);
@@ -2197,6 +2209,7 @@ begin
     Name := 'miFile';
     SetPosition(292, 96, 132, 20);
     AddMenuItem('Open...', '', @miFileOpenClicked);
+    AddMenuItem('Open Special...', '', @miFileOpenSpecialClicked);
     AddMenuItem('Save current Topic to IPF...', '', @miFileSaveTopicAsIPF);
     AddMenuItem('Close', '', @miFileCloseClicked);
     AddMenuitem('-', '', nil);
