@@ -25,7 +25,6 @@ unit fpg_grid;
       returning a TStrings with all related text inserted.
     * File Grid: Introduce support for images based on file types. User must
       be able to override the default images with their own.
-    * Remove the usage of libc unit. libc is linux/x86 specific.
 }
 
 interface

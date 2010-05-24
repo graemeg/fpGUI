@@ -22,7 +22,6 @@ unit fpg_customgrid;
 {
   TODO:
     * Column text alignment needs to be implemented. Currently always Centre.
-    * AlternateColor for rows need to be implemented.
 }
 
 {.$Define DEBUG}
