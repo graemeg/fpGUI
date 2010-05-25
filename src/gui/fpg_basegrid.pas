@@ -153,7 +153,7 @@ type
     property    ColumnTextColor[ACol: Integer]: TfpgColor read GetColumnTextColor write SetColumnTextColor;
     property    VisibleRows: Integer read VisibleLines;
     property    TopRow: Integer read FFirstRow write SetFirstRow;
-    property    Options: TfpgGridOptions read FOptions write FOptions default [go_SmoothScroll];
+    property    Options: TfpgGridOptions read FOptions write FOptions default [];
     property    OnDrawCell: TfpgDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property    OnFocusChange: TfpgFocusChangeNotify read FOnFocusChange write FOnFocusChange;
     property    OnRowChange: TfpgRowChangeNotify read FOnRowChange write FOnRowChange;
@@ -1230,7 +1230,7 @@ begin
   FRowSelect  := False;
   FScrollBarStyle := ssAutoBoth;
   FUpdateCount    := 0;
-  FOptions    := [go_SmoothScroll];
+  FOptions    := [];
 
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');
