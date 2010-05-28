@@ -115,8 +115,8 @@ type
     procedure   UpdateGutterCoords;
     procedure   KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
     procedure   InitMemoObjects;
-    procedure SetRightEdge(const AValue: Boolean);
-    procedure SetRightEdgeCol(const AValue: Integer);
+    procedure   SetRightEdge(const AValue: Boolean);
+    procedure   SetRightEdgeCol(const AValue: Integer);
   protected
     { -- internal events -- }
     procedure   HandlePaint; override;
