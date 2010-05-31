@@ -462,6 +462,7 @@ procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: Integer; ARect: TfpgRect;
 var
   Flags: TFTextFlags;
   txt: string;
+  r: TfpgRect;
 begin
   if Cells[ACol, ARow] <> '' then
   begin
@@ -489,7 +490,14 @@ begin
     end;  { case }
 
     with ARect,Columns[ACol] do
-      Canvas.DrawText(Left+HMargin, Top, Right-Left-(HMargin*2), Bottom-Top, txt, Flags);
+    begin
+      r := ARect;
+      // make adjustment for margins
+      r.Left := r.Left + HMargin;
+      r.Width := r.Width - (HMargin*2);
+      // finally paint the text
+      Canvas.DrawText(r, txt, Flags);
+    end;
   end;
 end;
 
