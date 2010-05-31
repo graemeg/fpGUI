@@ -79,6 +79,7 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure   HandlePaint; override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   PositionChange(d: integer);
   public
     Orientation: TOrientation;
@@ -146,6 +147,12 @@ begin
   DrawSlider(FRecalc);
   Canvas.EndDraw;   // Do not remove - Scrollbars do painting outside HandlePaint as well!
   FRecalc := False;
+end;
+
+procedure TfpgScrollBar.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  FRecalc := True;
 end;
 
 procedure TfpgScrollBar.RepaintSlider;
