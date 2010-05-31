@@ -119,6 +119,8 @@ type
     procedure   SetRightEdgeCol(const AValue: Integer);
   protected
     { -- internal events -- }
+    procedure   HandleShow; override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   HandlePaint; override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
@@ -376,6 +378,8 @@ end;
 procedure TfpgBaseTextEdit.SetGutterVisible(const AValue: Boolean);
 begin
   FGutterPan.Visible := AValue;
+  if FGutterPan.Visible then
+    UpdateGutterCoords;
   Invalidate;
 end;
 
@@ -440,18 +444,20 @@ end;
 procedure TfpgBaseTextEdit.UpdateScrollBars;
 begin
   FVScrollBar.Min := 0;
-  FVScrollBar.PageSize := FVisLines - 2;
-  FVScrollBar.Max := FLines.Count +1 - FVisLines;  // +1 is so the last line is completely visible
+  FVScrollBar.PageSize := FVisLines - 4;
+  FVScrollBar.Max := FLines.Count - FVisLines + 1;  // +1 is so the last line is completely visible
   FVScrollBar.Position := VPos;
+  FVScrollBar.SliderSize := FVisLines / FLines.Count;
   FVScrollBar.Visible := FLines.Count > FVisLines;
 
   FHScrollBar.Min := 0;
-  FHScrollBar.PageSize := FVisCols div 4; //FMaxScrollH div 4;
-  FHScrollBar.Max := FMaxScrollH;// div 2;
+  FHScrollBar.PageSize := FVisCols div 2; //FMaxScrollH div 4;
+  FHScrollBar.Max := FMaxScrollH - FVisCols + 1;// div 2;
   FHScrollBar.Position := HPos;
+  FHScrollBar.SliderSize := FVisCols / FMaxScrollH;
   FHScrollBar.Visible := FMaxScrollH > FVisCols;
 
-  UpdateScrollBarCoords;
+//  UpdateScrollBarCoords;
 end;
 
 procedure TfpgBaseTextEdit.VScrollBarMove(Sender: TObject; position: integer);
@@ -917,10 +923,31 @@ begin
   end;
 end;
 
+procedure TfpgBaseTextEdit.HandleShow;
+begin
+  inherited HandleShow;
+  HandleResize(Width, Height);
+end;
+
+procedure TfpgBaseTextEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  writeln('DEBUG:  TfpgBaseTextEdit.HandleResize ');
+  inherited HandleResize(AWidth, AHeight);
+  if HasHandle then
+  begin
+    UpdateCharBounds;
+    writeln('DEBUG:  TfpgBaseTextEdit.HandleResize - update sb coords');
+    UpdateScrollBarCoords;
+    writeln('DEBUG:  TfpgBaseTextEdit.HandleResize - update sb');
+    UpdateScrollBars;
+    UpdateGutterCoords;
+  end;
+end;
+
 procedure TfpgBaseTextEdit.HandlePaint;
 begin
+  writeln('DEBUG:  TfpgBaseTextEdit.HandlePaint ');
 //  inherited HandlePaint;
-  UpdateCharBounds;
   // normal house keeping
   Canvas.ClearClipRect;
   Canvas.Clear(clBoxColor);
@@ -929,8 +956,6 @@ begin
   Canvas.SetClipRect(GetClientRect);
 
   // do the actual drawing
-  UpdateScrollBarCoords;
-  UpdateGutterCoords;
   DrawVisible;
   DrawCaret(CaretPos.X, CaretPos.Y);
   Canvas.ClearClipRect;
@@ -1353,7 +1378,7 @@ begin
   CaretPos.y    := 0;
   FTopLine      := 0;
   FTabWidth     := 8;
-  FMaxScrollH   := 0;
+  FMaxScrollH   := 1;
   VPos          := 0;
   HPos          := 0;
   FTracking     := True;
@@ -1534,6 +1559,7 @@ begin
     Exit; //==>
   Clear;
   FLines.LoadFromFile(AFileName);
+  HandleResize(Width, Height);
   Invalidate;
 end;
 
