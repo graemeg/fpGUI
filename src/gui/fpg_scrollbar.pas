@@ -98,6 +98,9 @@ type
 
 implementation
 
+const
+  cMinSliderLength = 20;
+
 { TfpgScrollBar }
 
 constructor TfpgScrollBar.Create(AOwner: TComponent);
@@ -113,7 +116,7 @@ begin
   SliderSize    := 0.5;
   FOnScroll     := nil;
   FSliderPos    := 0;
-  FSliderLength := 10;
+  FSliderLength := cMinSliderLength;
   FScrollStep   := 1;
   FPageSize     := 5;
   FLargeChange  := 0;
@@ -346,8 +349,8 @@ begin
 
     FSliderLength := Trunc(area * SliderSize);
     //FSliderLength := Trunc((width/area) * (fmax /area  ));
-    if FSliderLength < 20 then
-      FSliderLength := 20;
+    if FSliderLength < cMinSliderLength then
+      FSliderLength := cMinSliderLength;
     if FSliderLength > area then
       FSliderLength := area;
     area := area - FSliderLength;
