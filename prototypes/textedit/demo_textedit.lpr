@@ -7,7 +7,7 @@ uses
   typinfo,
   Sysutils,
   fpg_base, fpg_main, fpg_form, fpg_button, fpg_label,
-  fpg_memo, fpg_dialogs, fpg_utils, fpg_radiobutton,
+  fpg_memo, fpg_dialogs, fpg_utils, fpg_stringutils, fpg_radiobutton,
   fpg_textedit, fpg_checkbox, fpg_panel;
   
 type
@@ -40,6 +40,7 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   btnLoadClicked(Sender: TObject);
     procedure   ChangeFontClicked(Sender: TObject);
+    procedure   TextEditDrawLine(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -47,6 +48,86 @@ type
 
 
 { TMainForm }
+
+const
+  cReservedWords: array[1..44] of string =
+    ('begin', 'end', 'program', 'procedure', 'var',
+     'uses', 'type', 'const', 'if', 'then',
+     'for', 'do', 'unit', 'interface', 'implementation',
+     'initialization', 'finalization', 'with', 'case', 'private',
+     'protected', 'public', 'published', 'override', 'virtual',
+     'class', 'record', 'function', 'property', 'to',
+     'else', 'finally', 'while', 'except', 'try',
+     'constructor', 'destructor', 'read', 'write', 'out',
+     'default', 'not', 'and', 'in');
+
+procedure TMainForm.TextEditDrawLine(Sender: TObject; ALineText: TfpgString;
+  ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+  var AllowSelfDraw: Boolean);
+var
+  oldfont, newfont: TfpgFont;
+  s: TfpgString;  // copy of ALineText we work with
+  i, j, c: integer;  // i = position of reserved word; c = last character pos
+  iLength: integer; // length of reserved word
+  w: integer;     // reserved word loop variable
+  r: TfpgRect;    // string rectangle to draw in
+  edt: TfpgTextEdit;
+
+  procedure TestFurther(var AIndex: integer);
+  begin
+    if AIndex = 0 then
+    begin
+      AIndex := UTF8Pos(cReservedWords[w], s);
+      if (AIndex > 0) then
+      begin
+//        writeln('>> ', s);
+//        writeln(AIndex+iLength-1, ' ---- ', Length(s));
+        if (AIndex+iLength-1 <> Length(s)) and not (s[AIndex+iLength] in [';', '.', '(', #10, #13]) then
+          AIndex := 0;
+      end;
+    end;
+  end;
+
+begin
+  edt := TfpgTextEdit(Sender);
+  AllowSelfDraw := False;
+  ACanvas.TextColor := clBlack;
+  ACanvas.DrawText(ATextRect, ALineText); // draw plain text first
+  oldfont := TfpgFont(ACanvas.Font);
+  newfont := fpgGetFont(edt.FontDesc + ':bold'); // 'Bitstream Vera Sans Mono-10'
+  ACanvas.Font := newfont;
+//  PrintRect(ATextRect);
+
+  for w := Low(cReservedWords) to High(cReservedWords) do
+  begin
+    s := ALineText;
+    i := UTF8Pos(cReservedWords[w]+' ', s);
+    iLength := UTF8Length(cReservedWords[w]);
+    TestFurther(i);
+    j := 0;
+    while i > 0 do
+    begin
+//      writeln('DEBUG:  TMainForm.TextEditDrawLine - s = <' + s + '>');
+//      writeln('DEBUG:  TMainForm.TextEditDrawLine - found keyword: ' + cReservedWords[w]);
+      j := j + i;
+      s := UTF8Copy(ALineText, j, iLength+1);
+      UTF8Delete(s, 1, i + iLength);
+      r.SetRect(ATextRect.Left + edt.FontWidth * (j - 1), ATextRect.Top,
+        edt.FontWidth * (j + iLength), ATextRect.Height);
+//      PrintRect(r);
+//      ACanvas.Color := clWhite;
+//      ACanvas.FillRectangle(r); // clear area of previous text
+      ACanvas.DrawText(r, cReservedWords[w]);   // draw bold text
+      i := UTF8Pos(cReservedWords[w]+' ', s);
+      TestFurther(i);
+      j := j + iLength;
+    end;  { while }
+  end;  { for w }
+
+  ACanvas.Font := oldfont;
+  newfont.Free;
+//  writeln('------');
+end;
 
 procedure TMainForm.ShowGutterChanged(Sender: TObject);
 begin
@@ -194,15 +275,21 @@ begin
     Name := 'TextEdit';
     SetPosition(300, 172, 280, 235);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    Lines.Add('Memo Test0');
-    Lines.Add('Memo Test1');
-    Lines.Add('Memo Test2');
-    Lines.Add('Memo Test3');
-    Lines.Add('Memo Test4');
+    Lines.Add('program Test1;');
+    Lines.Add('{$mode objfpc}{$H+}');
+    Lines.Add('uses');
+    Lines.Add('  classes;');
+    Lines.Add('var');
+    Lines.Add('  i: integer;');
+    Lines.Add('begin');
+    Lines.Add('  writeln(i);');
+    Lines.Add('end.');
+    Lines.Add('');
     //    FontDesc := '#Edit1';
     FontDesc := 'Bitstream Vera Sans Mono-10';
     //    Lines.Insert(1,'0 Beforje 1 after');
     ParentShowHint := True;
+    OnDrawLine := @TextEditDrawLine;
   end;
 
   btnLoad := TfpgButton.Create(self);

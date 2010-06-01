@@ -62,12 +62,18 @@ type
   end;
 
 
+  TfpgDrawLineEvent = procedure(Sender: TObject; ALineText: TfpgString;
+      ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+      var AllowSelfDraw: Boolean) of object;
+
+
   TfpgBaseTextEdit = class(TfpgWidget)
   private
     FFont: TfpgFont;
     FFullRedraw: Boolean;
     FLines: TStrings;
     CaretPos: TPoint;
+    FOnDrawLine: TfpgDrawLineEvent;
     FScrollBarStyle: TfpgScrollStyle;
     MousePos: TPoint;
     FChrW: Integer;
@@ -142,6 +148,7 @@ type
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
+    property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -153,6 +160,8 @@ type
     procedure   DeleteSelection;
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
+    property    FontHeight: Integer read FChrH;
+    property    FontWidth: Integer read FChrW;
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
     property    ScrollPos_V: Integer read GetVScrollPos write SetVScrollPos;
     property    TopLine: Integer read FTopLine;
@@ -172,6 +181,7 @@ type
     property    ScrollBarStyle;
     property    TabWidth;
     property    Tracking;
+    property    OnDrawLine;
   end;
 
 
@@ -1295,11 +1305,12 @@ begin
   { start drawing formatted text }
   R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
   AllowDraw := True;
-//  if Assigned(FOnDrawLine) then FOnDrawLine(Self, S, I, LGliph, R, AllowDraw);
+  { end-user can hook in here to do syntax highlighting and other custom drawing }
+  if Assigned(FOnDrawLine) then
+    FOnDrawLine(self, S, I, Canvas, R, AllowDraw);
   { Draw simple text line... }
   if AllowDraw then
     Canvas.DrawText(R, S);
-//    DrawText(LGliph.Canvas.Handle, PChar(S), Length(S), R, DT_DRAWLINE);
 
   { todo: Do other formatting here. }
   { todo: Do selection painting here. }
