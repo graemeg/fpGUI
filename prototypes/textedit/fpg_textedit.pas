@@ -457,7 +457,8 @@ begin
   FVScrollBar.PageSize := FVisLines - 4;
   FVScrollBar.Max := FLines.Count - FVisLines + 1;  // +1 is so the last line is completely visible
   FVScrollBar.Position := VPos;
-  FVScrollBar.SliderSize := FVisLines / FLines.Count;
+  if FLines.Count > 0 then
+    FVScrollBar.SliderSize := FVisLines / FLines.Count;
   FVScrollBar.Visible := FLines.Count > FVisLines;
 
   FHScrollBar.Min := 0;
