@@ -228,6 +228,7 @@ type
     function    Add(const s: String): Integer; override;
     procedure   Delete(Index: Integer); override;
     procedure   Clear; override;
+    procedure   Exchange(Index1, Index2: Integer); override;
   end;
 
 
@@ -288,6 +289,17 @@ begin
   ListBox.FocusItem := -1;
   ListBox.UpdateScrollBar;
   ListBox.Invalidate;
+end;
+
+procedure TfpgListBoxStrings.Exchange(Index1, Index2: Integer);
+begin
+  inherited Exchange(Index1, Index2);
+  if UpdateCount > 0 then
+    Exit;
+  if Assigned(ListBox) and (ListBox.HasHandle) then
+  begin
+    ListBox.Invalidate;
+  end;
 end;
 
 
