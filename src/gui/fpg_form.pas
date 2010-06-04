@@ -107,11 +107,19 @@ type
   published
     property    BackgroundColor;
     property    FullScreen;
+    property    Height;
     property    Hint;
+    property    Left;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
     property    ModalResult;
-    property    Sizeable;
     property    ShowHint;
+    property    Sizeable;
     property    TextColor;
+    property    Top;
+    property    Width;
     property    WindowPosition;
     property    WindowTitle;
     property    OnActivate;
