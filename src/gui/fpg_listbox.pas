@@ -229,6 +229,7 @@ type
     procedure   Delete(Index: Integer); override;
     procedure   Clear; override;
     procedure   Exchange(Index1, Index2: Integer); override;
+    procedure   Assign(Source: TPersistent); override;
   end;
 
 
@@ -298,6 +299,18 @@ begin
     Exit;
   if Assigned(ListBox) and (ListBox.HasHandle) then
   begin
+    ListBox.Invalidate;
+  end;
+end;
+
+procedure TfpgListBoxStrings.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if UpdateCount > 0 then
+    Exit;
+  if Assigned(ListBox) and (ListBox.HasHandle) then
+  begin
+    ListBox.UpdateScrollBar;
     ListBox.Invalidate;
   end;
 end;
