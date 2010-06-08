@@ -14,7 +14,7 @@ fpdoc --package=CoreLib \
   --input='-Fi../src/corelib ../src/corelib/fpg_stdimages.pas' --descr=xml/corelib/fpg_stdimages.xml \
   --input='-Fi../src/corelib ../src/corelib/fpg_stringutils.pas' --descr=xml/corelib/fpg_stringutils.xml \
   --input='-Fi../src/corelib ../src/corelib/fpg_widget.pas' --descr=xml/corelib/fpg_widget.xml \
-  --input='-Fi../src/corelib ../src/corelib/fpg_utils.pas' --descr=xml/corelib/fpg_utils.xml \
+  --input='-Fi../src/corelib -Fi../src/corelib/x11 ../src/corelib/fpg_utils.pas' --descr=xml/corelib/fpg_utils.xml \
   --input='-Fi../src/corelib ../src/corelib/fpg_popupwindow.pas' --descr=xml/corelib/fpg_popupwindow.xml \
   --input='-Fi../src/corelib ../src/corelib/fpg_wuline.pas' --descr=xml/corelib/fpg_wuline.xml \
   --input='-Fi../src/corelib ../src/corelib/fpg_imagelist.pas' --descr=xml/corelib/fpg_imagelist.xml \
