@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
   <package name="CoreLib">
-
     <module name="fpg_widget">
       <short/>
       <descr/>
@@ -9,6 +8,32 @@
       <element name="TfpgWidget.SetPosition">
         <short>Sets the position and size of the component.</short>
         <descr>Sets the position and size of the component. It also fires the Resize message. If you are setting up a component like a button on a form, you don't really want the resize event to fire for the button, before the form is displayed (visible). In that case, rather use the components Top, Left, Width and Height properties.</descr>
+      </element>
+      <element name="TfpgWidget.FormDesigner">
+        <short>If assigned, then this widget is being editing in the Form Designer</short>
+      </element>
+      <element name="TfpgWidget.Parent">
+        <short>An alias for Owner.</short>
+        <descr>Unlike Delphi or Lazarus, fpGUI treats Owner and Parent as the same thing. Owner or Parent manages the life of children, and the parent/child hierarchy defines the visual aspect as well.</descr>
+      </element>
+      <element name="TfpgWidget.IsContainer">
+        <short>Can this component managed child components.</short>
+        <descr>This is mainly used in fpGUI UI Designer, to know if you can drop on widget inside another widget.</descr>
+      </element>
+      <element name="TfpgWidget.Focusable">
+        <short>This determines if the widget is allowed to received keyboard focus.</short>
+      </element>
+      <element name="TfpgWidget.Anchors">
+        <short>Allows the component to resize or reposition based on its Parent.</short>
+        <descr>
+          <p>By default Anchors are set to Top Left.</p>
+          <p>
+            <b>NOTE</b>
+          </p>
+          <p>Anchoring only takes affect <i>after</i> the component is visible on the screen (when the component has a window handle assigned). So if you create a Button in the constructor and set its Anchor property to Bottom/Right, and then set the size of the Form, the Button will <i>not</i> be repositioned.
+</p>
+          <p>This is by design. fpGUI allows you to setup a window layout without triggering unnecesary events as you set property values for each widget. Only when csLoading is not in ComponentState, then anchoring events will be triggered. This allows the developer or the fpGUI UI Designer to setup a window layout undisturbed.</p>
+        </descr>
       </element>
     </module>
   </package>
