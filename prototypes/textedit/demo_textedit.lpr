@@ -289,7 +289,7 @@ begin
     FontDesc := 'Bitstream Vera Sans Mono-10';
     //    Lines.Insert(1,'0 Beforje 1 after');
     ParentShowHint := True;
-    OnDrawLine := @TextEditDrawLine;
+//    OnDrawLine := @TextEditDrawLine;
   end;
 
   btnLoad := TfpgButton.Create(self);

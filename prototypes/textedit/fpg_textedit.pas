@@ -887,10 +887,103 @@ begin
 
     keyHome:
         begin
+          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            CaretPos.X := 0;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            if ssShift in ShiftState then
+            begin
+              if not FSelected then
+              begin
+                FSelStartNo := CaretPos.Y;
+                FSelStartOffs := CaretPos.X;
+                FSelected := True;
+              end;
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+              FSelEndNo := 0;
+              FSelEndOffs := 0;
+            end
+            else
+            begin
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+            end;
+            Exit;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              FSelStartNo := CaretPos.Y;
+              FSelStartOffs := CaretPos.X;
+              FSelected := True;
+            end;
+            CaretPos.X := 0;
+            FSelEndNo := CaretPos.Y;
+            FSelEndOffs := 0;
+            if FSelEndNo = FSelStartNo then
+              FSelected := (FSelStartOffs <> FSelEndOffs);
+          end;
         end;
 
     keyEnd:
         begin
+          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            if CaretPos.Y <= pred(FLines.Count) then
+              CaretPos.X := Length(FLines[CaretPos.Y])
+            else
+              CaretPos.X := 0;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            if ssShift in ShiftState then
+            begin
+              if not FSelected then
+              begin
+                FSelStartNo := CaretPos.Y;
+                FSelStartOffs := CaretPos.X;
+                FSelected := True;
+              end;
+              CaretPos.Y := pred(FLines.Count);
+              CaretPos.X := Length(FLines[CaretPos.Y]);
+              FSelEndNo := pred(FLines.Count);
+              FSelEndOffs := Length(FLines[CaretPos.Y]);
+            end else
+            begin
+              CaretPos.Y := pred(FLines.Count);
+              CaretPos.X := Length(FLines[CaretPos.Y]);
+            end;
+            Exit;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              FSelStartNo := CaretPos.Y;
+              if CaretPos.Y <= pred(FLines.Count) then
+                if CaretPos.X > Length(FLines[CaretPos.Y]) then
+                  CaretPos.X := Length(FLines[CaretPos.Y]);
+              FSelStartOffs := CaretPos.X;
+              FSelected := True;
+            end;
+            if CaretPos.Y <= pred(FLines.Count) then
+              CaretPos.X := Length(FLines[CaretPos.Y])
+            else
+              CaretPos.X := 0;
+            FSelEndNo := CaretPos.Y;
+            FSelEndOffs := CaretPos.X;
+            if FSelEndNo = FSelStartNo then
+              FSelected := (FSelStartOffs <> FSelEndOffs);
+          end;
         end;
 
     keyPrior, keyNext:
