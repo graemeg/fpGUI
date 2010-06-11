@@ -188,7 +188,7 @@ type
 implementation
 
 uses
-  fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils;
+  fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils, math;
 
 
 function GetNextWord(SLine: TfpgString; var PosX: Integer): Boolean;
@@ -617,6 +617,8 @@ end;
 { This procedure is used to set caret position on keyboard navigation and
   to set selection if Shift key is pressed. }
 procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
+var
+  SaveXCaret: Integer;
 
   procedure CtrlKeyLeftKey;
   var
@@ -674,7 +676,6 @@ procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const
   end;
 
 begin
-  writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav >>');
   case AKeyCode of
     keyLeft:
         begin
@@ -986,11 +987,55 @@ begin
           end;
         end;
 
-    keyPrior, keyNext:
+    keyPageUp, keyPageDown:
         begin
+          if not FSelected then
+          begin
+            FSelStartNo := CaretPos.Y;
+            FSelStartOffs := CaretPos.X;
+          end;
+          SaveXCaret := CaretPos.Y - FTopLine;
+          if AKeyCode = keyPageUp then
+          begin
+            if VPos = 0 then
+            begin
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+            end
+            else
+            begin
+              // scroll text
+              if FVScrollBar.Visible then
+                FVScrollBar.PageUp;
+              // restore caret at same line offset as before
+              CaretPos.Y := FTopLine + SaveXCaret;
+            end;
+          end
+          else
+          begin
+            if VPos > (FLines.Count - FVisLines) then
+            begin
+              CaretPos.Y := FLines.Count-1;
+              CaretPos.X := Length(FLines[CaretPos.Y]);
+            end
+            else
+            begin
+              // scroll text
+              if FVScrollBar.Visible then
+                FVScrollBar.PageDown;
+              // restore caret at same line offset as before
+              CaretPos.Y := FTopLine + SaveXCaret;
+            end;
+          end;
+          if ssShift in ShiftState then
+          begin
+            FSelEndNo := CaretPos.Y;
+            FSelEndOffs := CaretPos.X;
+            if not FSelected then
+              FSelected := True;
+          end;
         end;
   end;
-  writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav <<');
 end;
 
 procedure TfpgBaseTextEdit.InitMemoObjects;
