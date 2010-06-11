@@ -818,8 +818,8 @@ begin
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y - 1;
-            {$Note This does not work. The view must scroll and caret pos stay the same. }
-            VScrollBarMove(self, FVScrollBar.Position-1);
+            if FVScrollBar.Visible then
+              FVScrollBar.LineUp;    // VScrollBarMove(self, FVScrollBar.Position-1);
             FSelStartNo := CaretPos.Y;
             Exit;
           end
@@ -861,8 +861,8 @@ begin
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y + 1;
-            {$Note This does not work. The view must scroll and caret pos stay the same. }
-            VScrollBarMove(self, FVScrollBar.Position+1);
+            if FVScrollBar.Visible then
+              FVScrollBar.LineDown;    // VScrollBarMove(self, FVScrollBar.Position+1);
             FSelStartNo := CaretPos.Y;
             Exit;
           end
