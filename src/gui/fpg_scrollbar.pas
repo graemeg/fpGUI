@@ -87,6 +87,10 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   RepaintSlider;
+    procedure   LineUp;
+    procedure   LineDown;
+    procedure   PageUp;
+    procedure   PageDown;
     property    PageSize: integer read FPageSize write FPageSize default 5;
     property    Position: integer read FPosition write SetSBPosition default 10;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
@@ -161,6 +165,26 @@ begin
     Exit; //==>
   FRecalc := True;
   Invalidate;//  DrawSlider(True);
+end;
+
+procedure TfpgScrollBar.LineUp;
+begin
+  Step(-1);
+end;
+
+procedure TfpgScrollBar.LineDown;
+begin
+  Step(1);
+end;
+
+procedure TfpgScrollBar.PageUp;
+begin
+  StepPage(-1);
+end;
+
+procedure TfpgScrollBar.PageDown;
+begin
+  StepPage(1);
 end;
 
 procedure TfpgScrollBar.SetMax(const AValue: integer);
