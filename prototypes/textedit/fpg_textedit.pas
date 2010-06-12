@@ -1214,8 +1214,6 @@ var
   X: Integer;
   CaretScroll: Boolean;
 begin
-  writeln('>> TfpgBaseTextEdit.HandleKeyPress: keycode:', keycode);
-  writeln('  CaretPos X:', CaretPos.X, '  Y:', CaretPos.Y);
 //  inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   { Add lines as we go, so we can cursor past EOF. }
@@ -1223,6 +1221,7 @@ begin
   if CaretPos.Y > pred(FLines.Count) then
   begin
     FLines.Add('');
+    FVScrollBar.Max := FVScrollBar.Max + 1;
     Exit; //==>
   end;
 //  if (keycode = keyEscape) or (ssCtrl in ShiftState) then
