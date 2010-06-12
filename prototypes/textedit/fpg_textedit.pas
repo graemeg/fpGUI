@@ -836,7 +836,7 @@ begin
             begin
               FSelStartNo := CaretPos.Y + 1;
               FSelStartOffs := CaretPos.X;
-              FSelEndNo := CaretPos.X;
+              FSelEndNo := CaretPos.Y;
               FSelEndOffs := CaretPos.X;
               FSelected := True;
             end
@@ -1424,7 +1424,7 @@ var
 begin
   if FLines.Count = 0 then
     Exit; //==>
-  if (I < 0) or (I > Pred(FLines.Count)) then
+  if (I < 0) or (I > FLines.Count-1) then
     Exit; //==>
   S := FLines[I];
   if Pos(#9, S) > 0 then
@@ -1451,10 +1451,53 @@ begin
     FOnDrawLine(self, S, I, Canvas, R, AllowDraw);
   { Draw simple text line... }
   if AllowDraw then
+  begin
     Canvas.DrawText(R, S);
+    if FSelected then
+    begin
+      if (I > StartNo) and (I < EndNo) then     // whole line is selected
+      begin
+        R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
+        Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+      end
+      else
+      begin
+        Ei := EndOffs;
+        Si := StartOffs;
+        if (I = StartNo) and (I = EndNo) then  // start/end selection on same line
+        begin
+          SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
+          if Ei > UTF8Length(S) then
+            SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si)
+          else
+            SS := UTF8Copy(S, Si + 1, Ei - Si);
+          R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+          Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+        end
+        else
+        begin
+          if (I = StartNo) and (I < EndNo) then
+          begin
+            SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
+            R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+            Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+          end
+          else
+          begin
+            if (I > StartNo) and (I = EndNo) then
+            begin
+              if Ei > UTF8Length(S) then
+                Ei := UTF8Length(S);
+              SS := UTF8Copy(S, 1, Ei);
+              R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
+              Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+            end;
+          end;
+        end;
+      end;
+    end; { if FSelected... }
+  end;  { if AllowDraw... }
 
-  { todo: Do other formatting here. }
-  { todo: Do selection painting here. }
   if UTF8Length(S) > FMaxScrollH then
   begin
     FMaxScrollH := UTF8Length(S);
