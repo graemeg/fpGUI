@@ -807,6 +807,9 @@ begin
           if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y - 1;
+            // scroll text
+            if FVScrollBar.Visible and (CaretPos.Y < FTopLine) then
+              FVScrollBar.LineUp;
             if FSelected then
             begin
               FSelected := False;
@@ -850,7 +853,10 @@ begin
           if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y + 1;
-            if FSelected then
+            // scroll text
+            if FVScrollBar.Visible and (CaretPos.Y > FTopLine+FVisLines-2) then
+              FVScrollBar.LineDown;
+              if FSelected then
             begin
               FSelected := False;
               Exit;
@@ -1307,13 +1313,12 @@ begin
   else if CaretPos.X < HPos then
     ScrollPos_H := CaretPos.X;
 
-  if CaretPos.Y < FTopLine then
+  if CaretPos.Y < (FTopLine+1) then
     ScrollPos_V := CaretPos.Y
-  else if CaretPos.Y > FTopLine + FVisLines - 2 then
+  else if CaretPos.Y > (FTopLine + FVisLines - 2) then
     ScrollPos_V := CaretPos.Y - FVisLines + 2;
 
   Invalidate;
-  writeln('<< TfpgBaseTextEdit.HandleKeyPress');
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar;
