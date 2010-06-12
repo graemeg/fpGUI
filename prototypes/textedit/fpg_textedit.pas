@@ -1510,8 +1510,8 @@ begin
 
   if not FSelected then
   begin
-    FSelStartNo := CaretPos.x;
-    FSelStartOffs := CaretPos.y;
+    FSelStartNo := CaretPos.Y;
+    FSelStartOffs := CaretPos.X;
   end;
 end;
 
