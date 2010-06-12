@@ -460,6 +460,8 @@ begin
   if FLines.Count > 0 then
     FVScrollBar.SliderSize := FVisLines / FLines.Count;
   FVScrollBar.Visible := FLines.Count > FVisLines;
+  if FVScrollBar.Visible then
+    FVScrollBar.RepaintSlider;
 
   FHScrollBar.Min := 0;
   FHScrollBar.PageSize := FVisCols div 2; //FMaxScrollH div 4;
@@ -467,8 +469,11 @@ begin
   FHScrollBar.Position := HPos;
   FHScrollBar.SliderSize := FVisCols / FMaxScrollH;
   FHScrollBar.Visible := FMaxScrollH > FVisCols;
+  if FHScrollBar.Visible then
+    FHScrollBar.RepaintSlider;
 
-//  UpdateScrollBarCoords;
+  UpdateScrollBarCoords;
+  UpdateCharBounds;
 end;
 
 procedure TfpgBaseTextEdit.VScrollBarMove(Sender: TObject; position: integer);
@@ -522,7 +527,7 @@ var
 begin
   OldPos := VPos;
   VPos := p;
-  UpdateScrollBars;
+
   {$IFDEF gDEBUG}
   writeln('OldPos:', OldPos, '  NewPos:', VPos, ' SB.Max:', FVScrollBar.Max);
   {$ENDIF}
@@ -556,7 +561,7 @@ var
 begin
   OldPos := HPos;
   HPos := p;
-  UpdateScrollBars;
+
   {$IFDEF gDEBUG}
   writeln('OldPos:', OldPos, '  NewPos:', HPos, ' SB.Max:', FHScrollBar.Max);
   {$ENDIF}
@@ -587,11 +592,6 @@ begin
   r := GetClientRect;
   VHeight := r.Height;
   HWidth  := r.Width;
-
-  //if FVScrollBar.Visible then
-    //Dec(HWidth, FVScrollBar.Width);
-  //if FHScrollBar.Visible then
-    //Dec(VHeight, FHScrollBar.Height);
 
   FHScrollBar.Top     := Height - FHScrollBar.Height - r.Top;
   FHScrollBar.Left    := r.Top;
