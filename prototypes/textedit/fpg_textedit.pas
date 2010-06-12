@@ -426,6 +426,7 @@ begin
     FVisCols := GetClientRect.Width div FChrW;
 end;
 
+{ Re-order StartXXX and EndXXX if user is selecting backwards }
 procedure TfpgBaseTextEdit.GetSelBounds(var AStartNo, AEndNo, AStartOffs,
   AEndOffs: Integer);
 begin
@@ -437,12 +438,14 @@ begin
     begin
       AStartOffs := FSelStartOffs;
       AEndOffs := FSelEndOffs;
-    end else
+    end
+    else
     begin
       AStartOffs := FSelEndOffs;
       AEndOffs := FSelStartOffs;
     end;
-  end else
+  end
+  else
   begin
     AStartNo := FSelEndNo;
     AEndNo := FSelStartNo;
@@ -684,12 +687,12 @@ begin
           begin
             if CaretPos.Y > 0 then
             begin
-              if CaretPos.Y <= pred(FLines.Count) then
+              if CaretPos.Y <= (FLines.Count-1) then
               begin
                 if (ssCtrl in ShiftState) and (CaretPos.Y > 0) then
                 begin
                   CaretPos.Y := CaretPos.Y - 1;
-                  CaretPos.X := Length(FLines[CaretPos.Y]);
+                  CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
                   if FSelected then
                   begin
                     FSelEndNo := CaretPos.Y;
@@ -699,7 +702,7 @@ begin
                 end;
               end;
               CaretPos.Y := CaretPos.Y - 1;
-              CaretPos.X := Length(FLines[CaretPos.Y]);
+              CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
             end
             else
             begin
@@ -710,9 +713,9 @@ begin
           begin
             if not FSelected then
             begin
-              if CaretPos.Y <= pred(FLines.Count) then
-                if CaretPos.X > Length(FLines[CaretPos.Y]) then
-                  CaretPos.Y := Length(FLines[CaretPos.Y]) - 1;
+              if CaretPos.Y <= (FLines.Count-1) then
+                if CaretPos.X > UTF8Length(FLines[CaretPos.Y]) then
+                  CaretPos.Y := UTF8Length(FLines[CaretPos.Y]) - 1;
               FSelected := True;
               FSelStartNo := CaretPos.Y;
               FSelStartOffs := CaretPos.X + 1;
@@ -729,11 +732,11 @@ begin
                 CtrlKeyLeftKey
               else
                 FSelEndOffs := CaretPos.X;
-              if FSelEndNo <= pred(FLines.Count) then
+              if FSelEndNo <= (FLines.Count-1) then
               begin
-                if FSelEndOffs > Length(FLines[FSelEndNo]) then
+                if FSelEndOffs > UTF8Length(FLines[FSelEndNo]) then
                 begin
-                  FSelEndOffs := Length(FLines[FSelEndNo]) - 1;
+                  FSelEndOffs := UTF8Length(FLines[FSelEndNo]) - 1;
                   CaretPos.X := FSelEndOffs;
                 end;
               end
