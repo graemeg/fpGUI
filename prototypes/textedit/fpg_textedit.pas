@@ -1086,14 +1086,10 @@ end;
 
 procedure TfpgBaseTextEdit.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
-  writeln('DEBUG:  TfpgBaseTextEdit.HandleResize ');
   inherited HandleResize(AWidth, AHeight);
   if HasHandle then
   begin
     UpdateCharBounds;
-    writeln('DEBUG:  TfpgBaseTextEdit.HandleResize - update sb coords');
-    UpdateScrollBarCoords;
-    writeln('DEBUG:  TfpgBaseTextEdit.HandleResize - update sb');
     UpdateScrollBars;
     UpdateGutterCoords;
   end;
@@ -1101,7 +1097,6 @@ end;
 
 procedure TfpgBaseTextEdit.HandlePaint;
 begin
-  writeln('DEBUG:  TfpgBaseTextEdit.HandlePaint ');
 //  inherited HandlePaint;
   // normal house keeping
   Canvas.ClearClipRect;
