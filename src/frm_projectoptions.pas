@@ -66,7 +66,6 @@ type
     FCellEdit: TfpgEdit;
     FFocusRect: TfpgRect;
     FLastGrid: TfpgStringGrid; // reference only
-    FCheckFont: TfpgFont;
     // so we can get correct hints, but still undo with the Cancel button
     FInternalMacroList: TIDEMacroList;
     procedure btnShowCmdLineClicked(Sender: TObject);
@@ -177,6 +176,8 @@ end;
 procedure TProjectOptionsForm.grdCompilerDirsDrawCell(Sender: TObject;
   const ARow, ACol: Integer; const ARect: TfpgRect;
   const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+var
+  img: TfpgImage;
 begin
   if ACol = 5 then
   begin
@@ -195,7 +196,18 @@ begin
   end;
 
   if ACol < 10 then
-    grdCompilerDirs.Canvas.SetFont(FCheckFont)
+  begin
+    if grdCompilerDirs.Cells[ACol, ARow] = cCheck then
+    begin
+      img := fpgImages.GetImage('stdimg.check');
+      if (gdSelected in AFlags) and (gdFocused in AFlags) then
+        img.Invert;
+      grdCompilerDirs.Canvas.DrawImage(ARect.Left, ARect.Top, img);
+      if (gdSelected in AFlags) and (gdFocused in AFlags) then
+        img.Invert;  // restore image to original state
+      ADefaultDrawing := False;
+    end;
+  end
   else
     grdCompilerDirs.Canvas.Setfont(grdCompilerDirs.Font);
 end;
@@ -261,6 +273,8 @@ end;
 procedure TProjectOptionsForm.grdCompilerMakeOptionsDrawCell(Sender: TObject;
   const ARow, ACol: Integer; const ARect: TfpgRect;
   const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+var
+  img: TfpgImage;
 begin
   if (gdSelected in AFlags) and (ACol = 6) then
   begin
@@ -268,7 +282,18 @@ begin
   end;
 
   if ACol < 6 then
-    grdCompilerMakeOptions.Canvas.SetFont(FCheckFont)
+  begin
+    if grdCompilerMakeOptions.Cells[ACol, ARow] = cCheck then
+    begin
+      img := fpgImages.GetImage('stdimg.check');
+      if (gdSelected in AFlags) and (gdFocused in AFlags) then
+        img.Invert;
+      grdCompilerMakeOptions.Canvas.DrawImage(ARect.Left, ARect.Top, img);
+      if (gdSelected in AFlags) and (gdFocused in AFlags) then
+        img.Invert;  // restore image to original state
+      ADefaultDrawing := False;
+    end;
+  end
   else
     grdCompilerMakeOptions.Canvas.Setfont(grdCompilerMakeOptions.Font);
 end;
@@ -327,6 +352,8 @@ end;
 procedure TProjectOptionsForm.grdUserMacrosDrawCell(Sender: TObject;
   const ARow, ACol: Integer; const ARect: TfpgRect;
   const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+var
+  img: TfpgImage;
 begin
   if (gdSelected in AFlags) and (ACol = 6) then
   begin
@@ -334,7 +361,18 @@ begin
   end;
 
   if ACol < 6 then
-    grdUserMacros.Canvas.SetFont(FCheckFont)
+  begin
+    if grdUserMacros.Cells[ACol, ARow] = cCheck then
+    begin
+      img := fpgImages.GetImage('stdimg.check');
+      if (gdSelected in AFlags) and (gdFocused in AFlags) then
+        img.Invert;
+      grdUserMacros.Canvas.DrawImage(ARect.Left, ARect.Top, img);
+      if (gdSelected in AFlags) and (gdFocused in AFlags) then
+        img.Invert;  // restore image to original state
+      ADefaultDrawing := False;
+    end;
+  end
   else
     grdUserMacros.Canvas.Setfont(grdUserMacros.Font);
 end;
@@ -371,7 +409,11 @@ begin
   else if c is TfpgEdit then
     s := TfpgEdit(c).Text
   else if c is TfpgStringGrid then
+  begin
     s := TfpgStringGrid(c).Cells[TfpgStringGrid(c).FocusCol, TfpgStringGrid(c).FocusRow];
+    if s = cCheck then
+      s := '';
+  end;
 
   AHint := s;
 
@@ -509,13 +551,11 @@ constructor TProjectOptionsForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FInternalMacroList := TIDEMacroList.Create;
-  FCheckFont := fpgGetFont('DejaVu Sans-9');
 end;
 
 destructor TProjectOptionsForm.Destroy;
 begin
   FInternalMacroList.Free;
-  FCheckFont.Free;
   inherited Destroy;
 end;
 
