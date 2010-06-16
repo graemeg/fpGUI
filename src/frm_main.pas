@@ -54,6 +54,7 @@ type
     procedure   FormShow(Sender: TObject);
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenFileClicked(Sender: TObject);
+    procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
@@ -137,6 +138,15 @@ begin
   begin
     OpenEditorPage(s);
   end;
+end;
+
+procedure TMainForm.miFileSave(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  s := pcEditor.ActivePage.Hint;
+  if s <> '' then
+    TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
 end;
 
 procedure TMainForm.miFileSaveAs(Sender: TObject);
@@ -725,6 +735,7 @@ begin
     ImageMargin := 0;
     ImageName := 'stdimg.save';
     TabOrder := 3;
+    OnClick := @miFileSave;
   end;
 
   btnSaveAll := TfpgButton.Create(Bevel1);
@@ -739,6 +750,7 @@ begin
     ImageMargin := 0;
     ImageName := 'stdimg.saveall';
     TabOrder := 4;
+    Enabled := False;
   end;
 
   pnlStatusBar := TfpgBevel.Create(self);
@@ -847,7 +859,7 @@ begin
     AddMenuItem('New...', '', nil).Enabled := False;
     AddMenuItem('Open...', '', nil).Enabled := False;
     AddMenuItem('Open Recent', '', nil).Enabled := False;
-    AddMenuItem('Save...', '', nil).Enabled := False;
+    AddMenuItem('Save', '', @miFileSave);
     AddMenuItem('Save As...', '', @miFileSaveAs);
     AddMenuItem('-', '', nil);
     AddMenuItem('Quit', '', @btnQuitClicked);
