@@ -103,6 +103,7 @@ uses
   ,frm_configureide
   ,frm_projectoptions
   ,frm_debug
+  ,fpg_textedit
   ,ideconst
   ,idemacros
   ,Project
@@ -142,9 +143,7 @@ var
 begin
   s := SelectFileDialog(sfdSave);
   if s <> '' then
-  begin
-    TfpgMemo(pcEditor.ActivePage.Components[0]).Lines.SaveToFile(s);
-  end;
+    TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
 end;
 
 procedure TMainForm.miAboutFPGuiClicked(Sender: TObject);
@@ -464,7 +463,8 @@ var
   i: integer;
   found: Boolean;
   ts: TfpgTabSheet;
-  m: TfpgMemo;
+  m: TfpgTextEdit;
+  ext: TfpgString;
 begin
   s := AFilename;
   f := fpgExtractFileName(s);
@@ -479,9 +479,9 @@ begin
   if found then
   begin
     // reuse existing tab
-    TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.BeginUpdate;
-    TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.LoadFromFile(s);
-    TfpgMemo(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).Lines.BeginUpdate;
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).LoadFromFile(s);
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
     pcEditor.ActivePageIndex := i;
     ts := pcEditor.ActivePage;
   end
@@ -489,12 +489,22 @@ begin
   begin
     // we need a new tabsheet
     ts := pcEditor.AppendTabSheet(f);
-    m := CreateMemo(ts, 1, 1, 200, 20);
+    m := TfpgTextEdit.Create(ts);
+    m.SetPosition(1, 1, 200, 20);
     m.Align := alClient;
     m.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
-    TfpgMemo(ts.Components[0]).Lines.BeginUpdate;
-    TfpgMemo(ts.Components[0]).Lines.LoadFromFile(s);
-    TfpgMemo(ts.Components[0]).Lines.EndUpdate;
+    m.GutterVisible := True;
+    m.GutterShowLineNumbers := True;
+    m.RightEdge := True;
+    TfpgTextEdit(ts.Components[0]).Lines.BeginUpdate;
+    TfpgTextEdit(ts.Components[0]).Lines.LoadFromFile(s);
+    TfpgTextEdit(ts.Components[0]).Lines.EndUpdate;
+    if gINI.ReadBool(cEditor, 'SyntaxHighlighting', True) then
+    begin
+      ext := fpgExtractFileExt(AFilename);
+      if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') then
+        TfpgTextEdit(ts.Components[0]).OnDrawLine := @TextEditDrawLine;
+    end;
     ts.Realign;
     pcEditor.ActivePage := ts;
   end;
