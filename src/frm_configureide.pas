@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_button, fpg_editbtn,
-  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, idemacros, fpg_combobox;
+  fpg_label, fpg_tab, fpg_edit, fpg_grid, fpg_listbox, idemacros, fpg_combobox,
+  fpg_checkbox;
 
 type
   TConfigureIDEForm = class(TfpgForm)
@@ -55,6 +56,7 @@ type
     lbExtTools: TfpgListBox;
     cbTabPosition: TfpgComboBox;
     Label14: TfpgLabel;
+    cbSyntaxHighlighting: TfpgCheckBox;
     {@VFD_HEAD_END: ConfigureIDEForm}
     // so we can get correct hints, but still undo with the Cancel button
     FInternalMacroList: TIDEMacroList;
@@ -155,6 +157,7 @@ begin
   edtTarget.Text := gINI.ReadString(cEnvironment, 'Target', GMacroList.FindByName(cMacro_Target).Value);
   edtEditorFont.FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
   cbTabPosition.FocusItem := gINI.ReadInteger(cEditor, 'TabPosition', 0);
+  cbSyntaxHighlighting.Checked := gINI.ReadBool(cEditor, 'SyntaxHighlighting', True);
 end;
 
 procedure TConfigureIDEForm.SaveSettings;
@@ -170,6 +173,7 @@ begin
   gINI.WriteString(cEnvironment, 'Target', edtTarget.Text);
   gINI.WriteString(cEditor, 'Font', edtEditorFont.FontDesc);
   gINI.WriteInteger(cEditor, 'TabPosition', cbTabPosition.FocusItem);
+  gINI.WriteBool(cEditor, 'SyntaxHighlighting', cbSyntaxHighlighting.Checked);
 
   SaveToMacroList(GMacroList);
 end;
@@ -468,7 +472,7 @@ begin
   with Label11 do
   begin
     Name := 'Label11';
-    SetPosition(8, 4, 80, 16);
+    SetPosition(8, 4, 224, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Font';
@@ -715,6 +719,18 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Tab position';
+  end;
+
+  cbSyntaxHighlighting := TfpgCheckBox.Create(tsEditor);
+  with cbSyntaxHighlighting do
+  begin
+    Name := 'cbSyntaxHighlighting';
+    SetPosition(4, 100, 404, 20);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 5;
+    Text := 'Syntax Highlighting';
   end;
 
   {@VFD_BODY_END: ConfigureIDEForm}
