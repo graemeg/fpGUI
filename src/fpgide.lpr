@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}
   Classes, fpg_base, fpg_main, frm_main, frm_configureide, ideconst, idemacros, frm_debug,
-  project, unitlist, frm_projectoptions, ideutils, builderthread;
+  project, unitlist, frm_projectoptions, ideutils, builderthread, ideimages,
+  stringhelpers, frm_procedurelist;
 
 
 procedure MainProc;
@@ -16,6 +17,7 @@ var
 begin
 //  FPG_DEFAULT_FONT_DESC := 'DejaVu Sans-9';
   fpgApplication.Initialize;
+  RegisterIDEImages;
   frm := TMainForm.Create(nil);
   try
     frm.Show;
