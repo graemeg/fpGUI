@@ -114,7 +114,7 @@ uses
 const
   cTitle = 'fpGUI IDE - %s';
   cFileFilterTemplate  = '%s (%s)|%s';
-  cSourceFiles = '*.pas;*.pp;*.lpr';
+  cSourceFiles = '*.pas;*.pp;*.lpr;*.dpr;*.inc';
   cProjectFiles = '*.project';
 
 
