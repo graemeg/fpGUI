@@ -123,12 +123,48 @@ Example:
   fpc @extrafpc.cfg docedit.lpr
 
 
+ MacOSX instructions and known issues
+ ====================================
+
+NOTE:
+  MacOSX is still an unsupported platform, but some users have reported
+  that it works, so I decided to add some of their notes here for any other
+  Mac users that want to try fpGUI.
+
+To run fpGUI based application under MacOSX, you use the X11 backend. X11
+is included with all recent MacOSX versions (in older OSX versions it was
+a separate install - but included on the install DVD).
+
+An example workflow to work with any fpgui app is:
+a) launch X11 (Applications -> Utilities)
+b) start the X11 console xterm (Cmd+N or from the X11 menu)
+c) type the path to your fpgui application ( example: cd
+./Documents/fpgui/examples/apps   if you put fpgui in your Documents
+folder)
+d) type ./appname to start the application "appname"
+
+ * Apparently starting fpGUI apps from an icon on the desktop requires that you
+   double click the icon twice. This issue seems to be common with other X11
+   apps under OSX as well. eg: Gimp, any GTK2 app etc.. Alternatively, start it
+   from a X11 console, then it runs first time.
+
+ * This issue is more about FPC then fpGUI specific, but it's handy to know. In
+   many standard Xcode + X11 installation, the linker could not find the X11
+   libraries. So changing the fpc.cfg by adding
+      -Fl/usr/X11/lib
+   in the search library path solved the problem. Mac usually doesn't let you
+   choose the path during installation, so probably other Snow Leopard users
+   will have to double check the correct X11 library path.
+
+ * Compiling from the command line, the compiler cannot create the 
+   sub-directory "units" used by most demos inluded with fpGUI. So remember to
+   create such a directory if the compiler fails. When using Lazarus IDE to
+   compile fpGUI projects, the IDE normally creates the missing unit output 
+   path for you.
 
 
-Regards,
-  - Graeme -
 
-                ===========================================
+                =================[  END  ]===================
 
 
 
