@@ -85,6 +85,7 @@ type
     FDayColor: TfpgColor;
     FHolidayColor: TfpgColor;
     FSelectedColor: TfpgColor;
+    FSingleClickSelect: boolean;
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
@@ -105,10 +106,12 @@ type
     procedure   btnMonthUpClicked(Sender: TObject);
     procedure   btnMonthDownClicked(Sender: TObject);
     procedure   btnTodayClicked(Sender: TObject);
+    procedure   grdName1Clicked(Sender: TObject);
     procedure   grdName1DoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   grdName1KeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   grdName1DrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
     procedure   TearDown;
+    procedure   SetSingleClickSelect(const AValue: boolean);
   protected
     FntNorm, FntBold: TfpgFont;
     FOrigFocusWin: TfpgWidget;
@@ -122,6 +125,7 @@ type
     destructor  Destroy; override;
     procedure   AfterCreate;
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
+    property    SingleClickSelect: boolean read FSingleClickSelect write SetSingleClickSelect default False;
     property    Day: Word index 1 read GetDateElement write SetDateElement;
     property    Month: Word index 2 read GetDateElement write SetDateElement;
     property    Year: Word index 3 read GetDateElement write SetDateElement;
@@ -150,6 +154,7 @@ type
     FHolidayColor: TfpgColor;
     FSelectedColor: TfpgColor;
     FCloseOnSelect: boolean;
+    FSingleClickSelect: boolean;
     procedure   SetDateFormat(const AValue: string);
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
@@ -160,6 +165,7 @@ type
     procedure   SetHolidayColor(const AValue: TfpgColor);
     procedure   SetSelectedColor(const AValue: TfpgColor);
     procedure   SetCloseOnSelect(const AValue: boolean);
+    procedure   SetSingleClickSelect(const AValue: boolean);
   protected
     function    GetText: string; override;
     procedure   SetText(const AValue: string); override;
@@ -182,6 +188,7 @@ type
     property    MinDate: TDateTime read FMinDate write SetMinDate;
     property    ParentShowHint;
     property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
+    property    SingleClickSelect: boolean read FSingleClickSelect write SetSingleClickSelect default False;
     property    ShowHint;
     property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
     property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay default 0;
@@ -197,11 +204,9 @@ type
 
   TfpgCalendarCheckCombo = class(TfpgCalendarCombo)
   private
-//    FCheckBox: TfpgCheckbox;
     FChecked: boolean;
     FCheckBoxRect: TfpgRect;
     FCheckboxChanged: TfpgOnCheckboxChangedEvent;
-    procedure   InternalCheckBoxChanged(Sender: TObject);
     procedure   SetChecked(const AValue: Boolean);
     procedure   DoCheckboxChanged;
   protected
@@ -322,6 +327,12 @@ begin
     if CloseOnSelect then
       Close;
   end;
+end;
+
+procedure TfpgPopupCalendar.SetSingleClickSelect(const AValue: boolean);
+begin
+  if FSingleClickSelect = AValue then exit;
+  FSingleClickSelect := AValue;
 end;
 
 function TfpgPopupCalendar.GetDateElement(Index: integer): Word;
@@ -557,6 +568,12 @@ begin
   end;
 end;
 
+procedure TfpgPopupCalendar.grdName1Clicked(Sender: TObject);
+begin
+  if FSingleClickSelect then
+    TearDown;
+end;
+
 procedure TfpgPopupCalendar.HandlePaint;
 begin
   Canvas.BeginDraw;
@@ -675,6 +692,7 @@ begin
   FSelectedColor := clWhite;
   FMonthOffset := 0;
   FCloseOnSelect := True;
+  FSingleClickSelect := False;
   UpdateCalendar;
 end;
 
@@ -823,6 +841,7 @@ begin
     RowSelect := False;
     TabOrder := 8;
     ScrollBarStyle := ssNone;
+    OnClick  := @grdName1Clicked;
     OnDoubleClick := @grdName1DoubleClick;
     OnKeyPress := @grdName1KeyPress;
     OnDrawCell := @grdName1DrawCell;
@@ -943,6 +962,12 @@ begin
   FCloseOnSelect := AValue;
 end;
 
+procedure TfpgCalendarCombo.SetSingleClickSelect(const AValue: boolean);
+begin
+  if FSingleClickSelect = AValue then exit;
+  FSingleClickSelect := AValue;
+end;
+
 function TfpgCalendarCombo.HasText: boolean;
 begin
   Result := FDate >= FMinDate;
@@ -956,6 +981,7 @@ begin
   FWeeklyHoliday := -1;
   FDate := Now;
   FCloseOnSelect := True;
+  FSingleClickSelect := False;
   DateFormat := ShortDateFormat;
 end;
 
@@ -1002,6 +1028,7 @@ begin
     ddw.DontCloseWidget := self;
     { Set to false CloseOnSelect to leave opened popup calendar menu }
     ddw.CloseOnSelect := CloseOnSelect;
+    ddw.SingleClickSelect := SingleClickSelect;
     ddw.CallerWidget  := self;
 
     if Assigned(OnDropDown) then
@@ -1033,17 +1060,11 @@ end;
 
 { TfpgCalendarCheckCombo }
 
-procedure TfpgCalendarCheckCombo.InternalCheckBoxChanged(Sender: TObject);
-begin
-  RePaint;
-end;
-
 procedure TfpgCalendarCheckCombo.SetChecked(const AValue: Boolean);
 begin
   if AValue = FChecked then
     Exit; //==>
   FChecked := Avalue;
-  InternalCheckBoxChanged(nil);
 end;
 
 procedure TfpgCalendarCheckCombo.DoCheckboxChanged;
@@ -1086,7 +1107,6 @@ procedure TfpgCalendarCheckCombo.InternalOnValueSet(Sender: TObject;
 begin
   inherited InternalOnValueSet(Sender, ADate);
   Checked := True;
-//  InternalCheckBoxChanged(nil);
 end;
 
 procedure TfpgCalendarCheckCombo.HandleKeyPress(var keycode: word;
@@ -1153,22 +1173,6 @@ begin
   FCheckBoxRect.SetRect(2, 0, 17, 17);
   FCheckboxRect.Top := (FHeight - FCheckBoxRect.Height) div 2;
   OffsetRect(FCheckboxRect, 2, 3);  // frame border must be taken into consideration
-
-{
-  FCheckBox := TfpgCheckBox.Create(self);
-  with FCheckbox do
-  begin
-    Name := '_IntCheckBox';
-    SetPosition(2, 2, 18, 17);
-    Checked := True;
-    FontDesc := '#Label1';
-    Text := '';
-//    BackgroundColor := self.BackgroundColor;
-    BackgroundColor := clMagenta;
-    Focusable := False;
-    OnChange := @InternalCheckBoxChanged;
-  end;
-}
 end;
 
 
