@@ -315,6 +315,10 @@ begin
   if s = '' then
     Exit; //==>
   lD := StrToInt(s);
+  if (grdName1.FocusRow = 0) and (lD > 7) then
+    Exit; // clicked in previous month
+  if (grdName1.FocusRow >= 4) and (lD < 15) then
+    Exit; // clicked in next month
   d := EncodeDate(Year, Month, lD);
   if (d >= FMinDate) and (d <= FMaxDate) then
   begin
