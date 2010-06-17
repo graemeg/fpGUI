@@ -2737,7 +2737,7 @@ and what fpGUI uses. The same grid layout as used in TfpgStringGrid or any
 Spreadsheet program etc.
 </p>
 <pre>.
-   0   1
+   0   1   2
 0  +---+---+---
    | x |   |
 1  +---+---+---

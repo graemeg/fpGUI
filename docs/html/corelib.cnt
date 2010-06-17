@@ -23,6 +23,7 @@
   FPGM_MOVE fpg_base/fpgm_move.html
   FPGM_POPUPCLOSE fpg_base/fpgm_popupclose.html
   FPGM_HINTTIMER fpg_base/fpgm_hinttimer.html
+  FPGM_FREEME fpg_base/fpgm_freeme.html
   FPGM_USER fpg_base/fpgm_user.html
   FPGM_KILLME fpg_base/fpgm_killme.html
   keyNul fpg_base/keynul.html
@@ -237,17 +238,7 @@
   keyNewSheqelSign fpg_base/keynewsheqelsign.html
   keyDongSign fpg_base/keydongsign.html
   keyEuroSign fpg_base/keyeurosign.html
-  mrNone fpg_base/mrnone.html
-  mrOk fpg_base/mrok.html
-  mrCancel fpg_base/mrcancel.html
-  mrYes fpg_base/mryes.html
-  mrNo fpg_base/mrno.html
-  mrAbort fpg_base/mrabort.html
-  mrRetry fpg_base/mrretry.html
-  mrIgnore fpg_base/mrignore.html
-  mrAll fpg_base/mrall.html
-  mrNoToAll fpg_base/mrnotoall.html
-  mrYesToAll fpg_base/mryestoall.html
+  FPG_HELPVIEWER fpg_base/fpg_helpviewer.html
   UserNamedColorStart fpg_base/usernamedcolorstart.html
   clAqua fpg_base/claqua.html
   clBlack fpg_base/clblack.html
@@ -301,6 +292,10 @@
   clMenuText fpg_base/clmenutext.html
   clMenuDisabled fpg_base/clmenudisabled.html
   clHintWindow fpg_base/clhintwindow.html
+  clGridSelection fpg_base/clgridselection.html
+  clGridSelectionText fpg_base/clgridselectiontext.html
+  clGridInactiveSel fpg_base/clgridinactivesel.html
+  clGridInactiveSelText fpg_base/clgridinactiveseltext.html
   clAliceBlue fpg_base/claliceblue.html
   clAntiqueWhite fpg_base/clantiquewhite.html
   clAquamarine fpg_base/claquamarine.html
@@ -430,15 +425,16 @@
   TfpgColor fpg_base/tfpgcolor.html
   TfpgString fpg_base/tfpgstring.html
   TfpgChar fpg_base/tfpgchar.html
-  TfpgModalResult fpg_base/tfpgmodalresult.html
   PPoint fpg_base/ppoint.html
   TRGBTriple fpg_base/trgbtriple.html
+  TFPColor fpg_base/tfpcolor.html
   TWindowType fpg_base/twindowtype.html
   TWindowAttribute fpg_base/twindowattribute.html
   TWindowAttributes fpg_base/twindowattributes.html
   TMouseCursor fpg_base/tmousecursor.html
   TGradientDirection fpg_base/tgradientdirection.html
   TClipboardKeyType fpg_base/tclipboardkeytype.html
+  TfpgModalResult fpg_base/tfpgmodalresult.html
   TfpgMsgParmMouse fpg_base/tfpgmsgparmmouse.html
   TfpgMsgParmKeyboard fpg_base/tfpgmsgparmkeyboard.html
   TfpgMsgParmUser fpg_base/tfpgmsgparmuser.html
@@ -496,6 +492,7 @@
   TfpgFontBase fpg_base/tfpgfontbase.html
    FFontDesc fpg_base/tfpgfontbase.ffontdesc.html
    FFontRes fpg_base/tfpgfontbase.ffontres.html
+   GetIsFixedWidth fpg_base/tfpgfontbase.getisfixedwidth.html
    TextWidth fpg_base/tfpgfontbase.textwidth.html
    Ascent fpg_base/tfpgfontbase.ascent.html
    Descent fpg_base/tfpgfontbase.descent.html
@@ -503,6 +500,7 @@
    FontDesc fpg_base/tfpgfontbase.fontdesc.html
    FontRes fpg_base/tfpgfontbase.fontres.html
    Handle fpg_base/tfpgfontbase.handle.html
+   IsFixedWidth fpg_base/tfpgfontbase.isfixedwidth.html
   TfpgCustomInterpolation fpg_base/tfpgcustominterpolation.html
    Initialize fpg_base/tfpgcustominterpolation.initialize.html
    Execute fpg_base/tfpgcustominterpolation.execute.html
@@ -590,7 +588,13 @@
    LineStyle fpg_base/tfpgcanvasbase.linestyle.html
    LineWidth fpg_base/tfpgcanvasbase.linewidth.html
   TfpgComponent fpg_base/tfpgcomponent.html
+   SetHelpContext fpg_base/tfpgcomponent.sethelpcontext.html
+   SetHelpKeyword fpg_base/tfpgcomponent.sethelpkeyword.html
+   Create fpg_base/tfpgcomponent.create.html
    TagPointer fpg_base/tfpgcomponent.tagpointer.html
+   HelpContext fpg_base/tfpgcomponent.helpcontext.html
+   HelpKeyword fpg_base/tfpgcomponent.helpkeyword.html
+   HelpType fpg_base/tfpgcomponent.helptype.html
   TfpgWindowBase fpg_base/tfpgwindowbase.html
    FMouseCursor fpg_base/tfpgwindowbase.fmousecursor.html
    FWindowType fpg_base/tfpgwindowbase.fwindowtype.html
@@ -610,6 +614,7 @@
    FCanvas fpg_base/tfpgwindowbase.fcanvas.html
    FSizeIsDirty fpg_base/tfpgwindowbase.fsizeisdirty.html
    FPosIsDirty fpg_base/tfpgwindowbase.fposisdirty.html
+   FMouseCursorIsDirty fpg_base/tfpgwindowbase.fmousecursorisdirty.html
    HandleIsValid fpg_base/tfpgwindowbase.handleisvalid.html
    DoUpdateWindowPosition fpg_base/tfpgwindowbase.doupdatewindowposition.html
    DoAllocateWindowHandle fpg_base/tfpgwindowbase.doallocatewindowhandle.html
@@ -617,6 +622,7 @@
    DoRemoveWindowLookup fpg_base/tfpgwindowbase.doremovewindowlookup.html
    DoSetWindowVisible fpg_base/tfpgwindowbase.dosetwindowvisible.html
    DoMoveWindow fpg_base/tfpgwindowbase.domovewindow.html
+   DoResizeWindow fpg_base/tfpgwindowbase.doresizewindow.html
    DoWindowToScreen fpg_base/tfpgwindowbase.dowindowtoscreen.html
    DoSetWindowTitle fpg_base/tfpgwindowbase.dosetwindowtitle.html
    DoSetMouseCursor fpg_base/tfpgwindowbase.dosetmousecursor.html
@@ -640,6 +646,7 @@
    Bottom fpg_base/tfpgwindowbase.bottom.html
    UpdateWindowPosition fpg_base/tfpgwindowbase.updatewindowposition.html
    MoveWindow fpg_base/tfpgwindowbase.movewindow.html
+   ResizeWindow fpg_base/tfpgwindowbase.resizewindow.html
    WindowToScreen fpg_base/tfpgwindowbase.windowtoscreen.html
    HasParent fpg_base/tfpgwindowbase.hasparent.html
    ActivateWindow fpg_base/tfpgwindowbase.activatewindow.html
@@ -665,6 +672,7 @@
    FIsInitialized fpg_base/tfpgapplicationbase.fisinitialized.html
    FModalFormStack fpg_base/tfpgapplicationbase.fmodalformstack.html
    DoGetFontFaceList fpg_base/tfpgapplicationbase.dogetfontfacelist.html
+   GetHelpViewer fpg_base/tfpgapplicationbase.gethelpviewer.html
    Create fpg_base/tfpgapplicationbase.create.html
    Destroy fpg_base/tfpgapplicationbase.destroy.html
    GetFontFaceList fpg_base/tfpgapplicationbase.getfontfacelist.html
@@ -681,8 +689,14 @@
    Terminate fpg_base/tfpgapplicationbase.terminate.html
    Lock fpg_base/tfpgapplicationbase.lock.html
    Unlock fpg_base/tfpgapplicationbase.unlock.html
+   InvokeHelp fpg_base/tfpgapplicationbase.invokehelp.html
+   ContextHelp fpg_base/tfpgapplicationbase.contexthelp.html
+   KeywordHelp fpg_base/tfpgapplicationbase.keywordhelp.html
    FormCount fpg_base/tfpgapplicationbase.formcount.html
    Forms fpg_base/tfpgapplicationbase.forms.html
+   HelpContext fpg_base/tfpgapplicationbase.helpcontext.html
+   HelpFile fpg_base/tfpgapplicationbase.helpfile.html
+   HelpKey fpg_base/tfpgapplicationbase.helpkey.html
    IsInitialized fpg_base/tfpgapplicationbase.isinitialized.html
    TopModalForm fpg_base/tfpgapplicationbase.topmodalform.html
    MainForm fpg_base/tfpgapplicationbase.mainform.html
@@ -730,7 +744,9 @@
   KeycodeToText fpg_base/keycodetotext.html
   CheckClipboardKey fpg_base/checkclipboardkey.html
   fpgColorToRGBTriple fpg_base/fpgcolortorgbtriple.html
+  fpgColorToFPColor fpg_base/fpgcolortofpcolor.html
   RGBTripleTofpgColor fpg_base/rgbtripletofpgcolor.html
+  FPColorTofpgColor fpg_base/fpcolortofpgcolor.html
   fpgGetRed fpg_base/fpggetred.html
   fpgGetGreen fpg_base/fpggetgreen.html
   fpgGetBlue fpg_base/fpggetblue.html
@@ -777,21 +793,21 @@
   TXWindowStateFlag fpg_x11/txwindowstateflag.html
   TXWindowStateFlags fpg_x11/txwindowstateflags.html
   TX11EventFilter fpg_x11/tx11eventfilter.html
-  TfpgFontResourceImpl fpg_x11/tfpgfontresourceimpl.html
-   Handle fpg_x11/tfpgfontresourceimpl.handle.html
-   Create fpg_x11/tfpgfontresourceimpl.create.html
-   Destroy fpg_x11/tfpgfontresourceimpl.destroy.html
-   HandleIsValid fpg_x11/tfpgfontresourceimpl.handleisvalid.html
+  TfpgX11FontResource fpg_x11/tfpgx11fontresource.html
+   Handle fpg_x11/tfpgx11fontresource.handle.html
+   Create fpg_x11/tfpgx11fontresource.create.html
+   Destroy fpg_x11/tfpgx11fontresource.destroy.html
+   HandleIsValid fpg_x11/tfpgx11fontresource.handleisvalid.html
    GetAscent fpg_base/tfpgfontresourcebase.getascent.html
    GetDescent fpg_base/tfpgfontresourcebase.getdescent.html
    GetHeight fpg_base/tfpgfontresourcebase.getheight.html
    GetTextWidth fpg_base/tfpgfontresourcebase.gettextwidth.html
-  TfpgImageImpl fpg_x11/tfpgimageimpl.html
+  TfpgX11Image fpg_x11/tfpgx11image.html
    DoFreeImage fpg_base/tfpgimagebase.dofreeimage.html
    DoInitImage fpg_base/tfpgimagebase.doinitimage.html
    DoInitImageMask fpg_base/tfpgimagebase.doinitimagemask.html
    Create fpg_base/tfpgimagebase.create.html
-  TfpgCanvasImpl fpg_x11/tfpgcanvasimpl.html
+  TfpgX11Canvas fpg_x11/tfpgx11canvas.html
    DoSetFontRes fpg_base/tfpgcanvasbase.dosetfontres.html
    DoSetTextColor fpg_base/tfpgcanvasbase.dosettextcolor.html
    DoSetColor fpg_base/tfpgcanvasbase.dosetcolor.html
@@ -815,95 +831,52 @@
    SetPixel fpg_base/tfpgcanvasbase.setpixel.html
    DoDrawArc fpg_base/tfpgcanvasbase.dodrawarc.html
    DoFillArc fpg_base/tfpgcanvasbase.dofillarc.html
-   DoDrawPolygon fpg_x11/tfpgcanvasimpl.dodrawpolygon.html
-   DCHandle fpg_x11/tfpgcanvasimpl.dchandle.html
+   DoDrawPolygon fpg_x11/tfpgx11canvas.dodrawpolygon.html
+   DCHandle fpg_x11/tfpgx11canvas.dchandle.html
    Create fpg_base/tfpgcanvasbase.create.html
    Destroy fpg_base/tfpgcanvasbase.destroy.html
-  TfpgWindowImpl fpg_x11/tfpgwindowimpl.html
-   FWinFlags fpg_x11/tfpgwindowimpl.fwinflags.html
-   FWinHandle fpg_x11/tfpgwindowimpl.fwinhandle.html
-   FBackupWinHandle fpg_x11/tfpgwindowimpl.fbackupwinhandle.html
-   FModalForWin fpg_x11/tfpgwindowimpl.fmodalforwin.html
+  TfpgX11Window fpg_x11/tfpgx11window.html
+   FWinFlags fpg_x11/tfpgx11window.fwinflags.html
+   FWinHandle fpg_x11/tfpgx11window.fwinhandle.html
+   FBackupWinHandle fpg_x11/tfpgx11window.fbackupwinhandle.html
+   FModalForWin fpg_x11/tfpgx11window.fmodalforwin.html
    DoAllocateWindowHandle fpg_base/tfpgwindowbase.doallocatewindowhandle.html
    DoReleaseWindowHandle fpg_base/tfpgwindowbase.doreleasewindowhandle.html
-   DoRemoveWindowLookup fpg_x11/tfpgwindowimpl.doremovewindowlookup.html
+   DoRemoveWindowLookup fpg_x11/tfpgx11window.doremovewindowlookup.html
    DoSetWindowVisible fpg_base/tfpgwindowbase.dosetwindowvisible.html
    HandleIsValid fpg_base/tfpgwindowbase.handleisvalid.html
    DoSetWindowTitle fpg_base/tfpgwindowbase.dosetwindowtitle.html
    DoMoveWindow fpg_base/tfpgwindowbase.domovewindow.html
+   DoResizeWindow fpg_x11/tfpgx11window.doresizewindow.html
    DoWindowToScreen fpg_base/tfpgwindowbase.dowindowtoscreen.html
    DoUpdateWindowPosition fpg_base/tfpgwindowbase.doupdatewindowposition.html
    DoSetMouseCursor fpg_base/tfpgwindowbase.dosetmousecursor.html
-   WinHandle fpg_x11/tfpgwindowimpl.winhandle.html
+   WinHandle fpg_x11/tfpgx11window.winhandle.html
    Create fpg_base/tfpgwindowbase.create.html
-   ActivateWindow fpg_x11/tfpgwindowimpl.activatewindow.html
+   ActivateWindow fpg_x11/tfpgx11window.activatewindow.html
    CaptureMouse fpg_base/tfpgwindowbase.capturemouse.html
    ReleaseMouse fpg_base/tfpgwindowbase.releasemouse.html
-   SetFullscreen fpg_x11/tfpgwindowimpl.setfullscreen.html
-  TfpgApplicationImpl fpg_x11/tfpgapplicationimpl.html
-   FDisplay fpg_x11/tfpgapplicationimpl.fdisplay.html
-   DisplayDepth fpg_x11/tfpgapplicationimpl.displaydepth.html
-   DefaultBackground fpg_x11/tfpgapplicationimpl.defaultbackground.html
-   DefaultForeground fpg_x11/tfpgapplicationimpl.defaultforeground.html
-   DefaultScreen fpg_x11/tfpgapplicationimpl.defaultscreen.html
-   DefaultVisual fpg_x11/tfpgapplicationimpl.defaultvisual.html
-   DefaultColorMap fpg_x11/tfpgapplicationimpl.defaultcolormap.html
-   FRootWindow fpg_x11/tfpgapplicationimpl.frootwindow.html
-   xia_clipboard fpg_x11/tfpgapplicationimpl.xia_clipboard.html
-   xia_motif_wm_hints fpg_x11/tfpgapplicationimpl.xia_motif_wm_hints.html
-   xia_wm_protocols fpg_x11/tfpgapplicationimpl.xia_wm_protocols.html
-   xia_wm_delete_window fpg_x11/tfpgapplicationimpl.xia_wm_delete_window.html
-   netlayer fpg_x11/tfpgapplicationimpl.netlayer.html
-   xia_targets fpg_x11/tfpgapplicationimpl.xia_targets.html
-   InputMethod fpg_x11/tfpgapplicationimpl.inputmethod.html
-   InputContext fpg_x11/tfpgapplicationimpl.inputcontext.html
-   FLastKeySym fpg_x11/tfpgapplicationimpl.flastkeysym.html
-   DoGetFontFaceList fpg_base/tfpgapplicationbase.dogetfontfacelist.html
-   Create fpg_base/tfpgapplicationbase.create.html
-   Destroy fpg_x11/tfpgapplicationimpl.destroy.html
-   DoMessagesPending fpg_x11/tfpgapplicationimpl.domessagespending.html
-   DoWaitWindowMessage fpg_x11/tfpgapplicationimpl.dowaitwindowmessage.html
-   DoFlush fpg_x11/tfpgapplicationimpl.doflush.html
-   GetScreenWidth fpg_x11/tfpgapplicationimpl.getscreenwidth.html
-   GetScreenHeight fpg_x11/tfpgapplicationimpl.getscreenheight.html
-   Screen_dpi_x fpg_x11/tfpgapplicationimpl.screen_dpi_x.html
-   Screen_dpi_y fpg_x11/tfpgapplicationimpl.screen_dpi_y.html
-   Screen_dpi fpg_x11/tfpgapplicationimpl.screen_dpi.html
-   Display fpg_x11/tfpgapplicationimpl.display.html
-   RootWindow fpg_x11/tfpgapplicationimpl.rootwindow.html
-   EventFilter fpg_x11/tfpgapplicationimpl.eventfilter.html
-  TfpgClipboardImpl fpg_x11/tfpgclipboardimpl.html
-   FClipboardText fpg_x11/tfpgclipboardimpl.fclipboardtext.html
-   DoGetText fpg_x11/tfpgclipboardimpl.dogettext.html
-   DoSetText fpg_x11/tfpgclipboardimpl.dosettext.html
-   InitClipboard fpg_x11/tfpgclipboardimpl.initclipboard.html
-  TfpgFileListImpl fpg_x11/tfpgfilelistimpl.html
-   EncodeModeString fpg_x11/tfpgfilelistimpl.encodemodestring.html
-   Create fpg_x11/tfpgfilelistimpl.create.html
-   InitializeEntry fpg_x11/tfpgfilelistimpl.initializeentry.html
-   PopulateSpecialDirs fpg_x11/tfpgfilelistimpl.populatespecialdirs.html
-  fpgColorToX fpg_x11/fpgcolortox.html
+   SetFullscreen fpg_x11/tfpgx11window.setfullscreen.html
  fpg_gdi fpg_gdi/index.html
   WM_MOUSEWHEEL fpg_gdi/wm_mousewheel.html
   VER_PLATFORM_WIN32_CE fpg_gdi/ver_platform_win32_ce.html
   CLEARTYPE_QUALITY fpg_gdi/cleartype_quality.html
-  TfpgFontResourceImpl fpg_gdi/tfpgfontresourceimpl.html
-   OpenFontByDesc fpg_gdi/tfpgfontresourceimpl.openfontbydesc.html
-   Handle fpg_gdi/tfpgfontresourceimpl.handle.html
-   Create fpg_gdi/tfpgfontresourceimpl.create.html
-   Destroy fpg_gdi/tfpgfontresourceimpl.destroy.html
-   HandleIsValid fpg_gdi/tfpgfontresourceimpl.handleisvalid.html
+  TfpgGDIFontResource fpg_gdi/tfpggdifontresource.html
+   OpenFontByDesc fpg_gdi/tfpggdifontresource.openfontbydesc.html
+   Handle fpg_gdi/tfpggdifontresource.handle.html
+   Create fpg_gdi/tfpggdifontresource.create.html
+   Destroy fpg_gdi/tfpggdifontresource.destroy.html
+   HandleIsValid fpg_gdi/tfpggdifontresource.handleisvalid.html
    GetAscent fpg_base/tfpgfontresourcebase.getascent.html
    GetDescent fpg_base/tfpgfontresourcebase.getdescent.html
    GetHeight fpg_base/tfpgfontresourcebase.getheight.html
    GetTextWidth fpg_base/tfpgfontresourcebase.gettextwidth.html
-  TfpgFontImpl fpg_gdi/tfpgfontimpl.html
-  TfpgImageImpl fpg_gdi/tfpgimageimpl.html
+  TfpgGDIImage fpg_gdi/tfpggdiimage.html
    DoFreeImage fpg_base/tfpgimagebase.dofreeimage.html
    DoInitImage fpg_base/tfpgimagebase.doinitimage.html
    DoInitImageMask fpg_base/tfpgimagebase.doinitimagemask.html
    Create fpg_base/tfpgimagebase.create.html
-  TfpgCanvasImpl fpg_gdi/tfpgcanvasimpl.html
+  TfpgGDICanvas fpg_gdi/tfpggdicanvas.html
    DoSetFontRes fpg_base/tfpgcanvasbase.dosetfontres.html
    DoSetTextColor fpg_base/tfpgcanvasbase.dosettextcolor.html
    DoSetColor fpg_base/tfpgcanvasbase.dosetcolor.html
@@ -927,19 +900,19 @@
    SetPixel fpg_base/tfpgcanvasbase.setpixel.html
    DoDrawArc fpg_base/tfpgcanvasbase.dodrawarc.html
    DoFillArc fpg_base/tfpgcanvasbase.dofillarc.html
-   DoDrawPolygon fpg_gdi/tfpgcanvasimpl.dodrawpolygon.html
-   DCHandle fpg_gdi/tfpgcanvasimpl.dchandle.html
+   DoDrawPolygon fpg_gdi/tfpggdicanvas.dodrawpolygon.html
+   DCHandle fpg_gdi/tfpggdicanvas.dchandle.html
    Create fpg_base/tfpgcanvasbase.create.html
    Destroy fpg_base/tfpgcanvasbase.destroy.html
-  TfpgWindowImpl fpg_gdi/tfpgwindowimpl.html
-   FWinHandle fpg_gdi/tfpgwindowimpl.fwinhandle.html
-   FModalForWin fpg_gdi/tfpgwindowimpl.fmodalforwin.html
-   FWinStyle fpg_gdi/tfpgwindowimpl.fwinstyle.html
-   FWinStyleEx fpg_gdi/tfpgwindowimpl.fwinstyleex.html
-   FParentWinHandle fpg_gdi/tfpgwindowimpl.fparentwinhandle.html
+  TfpgGDIWindow fpg_gdi/tfpggdiwindow.html
+   FWinHandle fpg_gdi/tfpggdiwindow.fwinhandle.html
+   FModalForWin fpg_gdi/tfpggdiwindow.fmodalforwin.html
+   FWinStyle fpg_gdi/tfpggdiwindow.fwinstyle.html
+   FWinStyleEx fpg_gdi/tfpggdiwindow.fwinstyleex.html
+   FParentWinHandle fpg_gdi/tfpggdiwindow.fparentwinhandle.html
    DoAllocateWindowHandle fpg_base/tfpgwindowbase.doallocatewindowhandle.html
    DoReleaseWindowHandle fpg_base/tfpgwindowbase.doreleasewindowhandle.html
-   DoRemoveWindowLookup fpg_gdi/tfpgwindowimpl.doremovewindowlookup.html
+   DoRemoveWindowLookup fpg_gdi/tfpggdiwindow.doremovewindowlookup.html
    DoSetWindowVisible fpg_base/tfpgwindowbase.dosetwindowvisible.html
    HandleIsValid fpg_base/tfpgwindowbase.handleisvalid.html
    DoUpdateWindowPosition fpg_base/tfpgwindowbase.doupdatewindowposition.html
@@ -947,53 +920,53 @@
    DoWindowToScreen fpg_base/tfpgwindowbase.dowindowtoscreen.html
    DoSetWindowTitle fpg_base/tfpgwindowbase.dosetwindowtitle.html
    DoSetMouseCursor fpg_base/tfpgwindowbase.dosetmousecursor.html
-   WinHandle fpg_gdi/tfpgwindowimpl.winhandle.html
+   WinHandle fpg_gdi/tfpggdiwindow.winhandle.html
    Create fpg_base/tfpgwindowbase.create.html
-   ActivateWindow fpg_gdi/tfpgwindowimpl.activatewindow.html
+   ActivateWindow fpg_gdi/tfpggdiwindow.activatewindow.html
    CaptureMouse fpg_base/tfpgwindowbase.capturemouse.html
    ReleaseMouse fpg_base/tfpgwindowbase.releasemouse.html
-   SetFullscreen fpg_gdi/tfpgwindowimpl.setfullscreen.html
-  TfpgApplicationImpl fpg_gdi/tfpgapplicationimpl.html
-   FDisplay fpg_gdi/tfpgapplicationimpl.fdisplay.html
-   WindowClass fpg_gdi/tfpgapplicationimpl.windowclass.html
-   WidgetClass fpg_gdi/tfpgapplicationimpl.widgetclass.html
-   hcr_default fpg_gdi/tfpgapplicationimpl.hcr_default.html
-   hcr_dir_ew fpg_gdi/tfpgapplicationimpl.hcr_dir_ew.html
-   hcr_dir_ns fpg_gdi/tfpgapplicationimpl.hcr_dir_ns.html
-   hcr_edit fpg_gdi/tfpgapplicationimpl.hcr_edit.html
-   hcr_dir_nwse fpg_gdi/tfpgapplicationimpl.hcr_dir_nwse.html
-   hcr_dir_nesw fpg_gdi/tfpgapplicationimpl.hcr_dir_nesw.html
-   hcr_move fpg_gdi/tfpgapplicationimpl.hcr_move.html
-   hcr_crosshair fpg_gdi/tfpgapplicationimpl.hcr_crosshair.html
-   hcr_wait fpg_gdi/tfpgapplicationimpl.hcr_wait.html
-   hcr_hand fpg_gdi/tfpgapplicationimpl.hcr_hand.html
-   FFocusedWindow fpg_gdi/tfpgapplicationimpl.ffocusedwindow.html
-   FHiddenWindow fpg_gdi/tfpgapplicationimpl.fhiddenwindow.html
-   HiddenWndClass fpg_gdi/tfpgapplicationimpl.hiddenwndclass.html
-   ActivationHook fpg_gdi/tfpgapplicationimpl.activationhook.html
-   GetHiddenWindow fpg_gdi/tfpgapplicationimpl.gethiddenwindow.html
+   SetFullscreen fpg_gdi/tfpggdiwindow.setfullscreen.html
+  TfpgGDIApplication fpg_gdi/tfpggdiapplication.html
+   FDisplay fpg_gdi/tfpggdiapplication.fdisplay.html
+   WindowClass fpg_gdi/tfpggdiapplication.windowclass.html
+   WidgetClass fpg_gdi/tfpggdiapplication.widgetclass.html
+   hcr_default fpg_gdi/tfpggdiapplication.hcr_default.html
+   hcr_dir_ew fpg_gdi/tfpggdiapplication.hcr_dir_ew.html
+   hcr_dir_ns fpg_gdi/tfpggdiapplication.hcr_dir_ns.html
+   hcr_edit fpg_gdi/tfpggdiapplication.hcr_edit.html
+   hcr_dir_nwse fpg_gdi/tfpggdiapplication.hcr_dir_nwse.html
+   hcr_dir_nesw fpg_gdi/tfpggdiapplication.hcr_dir_nesw.html
+   hcr_move fpg_gdi/tfpggdiapplication.hcr_move.html
+   hcr_crosshair fpg_gdi/tfpggdiapplication.hcr_crosshair.html
+   hcr_wait fpg_gdi/tfpggdiapplication.hcr_wait.html
+   hcr_hand fpg_gdi/tfpggdiapplication.hcr_hand.html
+   FFocusedWindow fpg_gdi/tfpggdiapplication.ffocusedwindow.html
+   FHiddenWindow fpg_gdi/tfpggdiapplication.fhiddenwindow.html
+   HiddenWndClass fpg_gdi/tfpggdiapplication.hiddenwndclass.html
+   ActivationHook fpg_gdi/tfpggdiapplication.activationhook.html
+   GetHiddenWindow fpg_gdi/tfpggdiapplication.gethiddenwindow.html
    DoGetFontFaceList fpg_base/tfpgapplicationbase.dogetfontfacelist.html
    Create fpg_base/tfpgapplicationbase.create.html
-   Destroy fpg_gdi/tfpgapplicationimpl.destroy.html
-   DoMessagesPending fpg_gdi/tfpgapplicationimpl.domessagespending.html
-   DoWaitWindowMessage fpg_gdi/tfpgapplicationimpl.dowaitwindowmessage.html
-   DoFlush fpg_gdi/tfpgapplicationimpl.doflush.html
-   GetScreenWidth fpg_gdi/tfpgapplicationimpl.getscreenwidth.html
-   GetScreenHeight fpg_gdi/tfpgapplicationimpl.getscreenheight.html
-   Screen_dpi_x fpg_gdi/tfpgapplicationimpl.screen_dpi_x.html
-   Screen_dpi_y fpg_gdi/tfpgapplicationimpl.screen_dpi_y.html
-   Screen_dpi fpg_gdi/tfpgapplicationimpl.screen_dpi.html
-   Display fpg_gdi/tfpgapplicationimpl.display.html
-  TfpgClipboardImpl fpg_gdi/tfpgclipboardimpl.html
-   FClipboardText fpg_gdi/tfpgclipboardimpl.fclipboardtext.html
-   DoGetText fpg_gdi/tfpgclipboardimpl.dogettext.html
-   DoSetText fpg_gdi/tfpgclipboardimpl.dosettext.html
-   InitClipboard fpg_gdi/tfpgclipboardimpl.initclipboard.html
-  TfpgFileListImpl fpg_gdi/tfpgfilelistimpl.html
-   EncodeAttributesString fpg_gdi/tfpgfilelistimpl.encodeattributesstring.html
-   Create fpg_gdi/tfpgfilelistimpl.create.html
-   InitializeEntry fpg_gdi/tfpgfilelistimpl.initializeentry.html
-   PopulateSpecialDirs fpg_gdi/tfpgfilelistimpl.populatespecialdirs.html
+   Destroy fpg_gdi/tfpggdiapplication.destroy.html
+   DoMessagesPending fpg_gdi/tfpggdiapplication.domessagespending.html
+   DoWaitWindowMessage fpg_gdi/tfpggdiapplication.dowaitwindowmessage.html
+   DoFlush fpg_gdi/tfpggdiapplication.doflush.html
+   GetScreenWidth fpg_gdi/tfpggdiapplication.getscreenwidth.html
+   GetScreenHeight fpg_gdi/tfpggdiapplication.getscreenheight.html
+   Screen_dpi_x fpg_gdi/tfpggdiapplication.screen_dpi_x.html
+   Screen_dpi_y fpg_gdi/tfpggdiapplication.screen_dpi_y.html
+   Screen_dpi fpg_gdi/tfpggdiapplication.screen_dpi.html
+   Display fpg_gdi/tfpggdiapplication.display.html
+  TfpgGDIClipboard fpg_gdi/tfpggdiclipboard.html
+   FClipboardText fpg_gdi/tfpggdiclipboard.fclipboardtext.html
+   DoGetText fpg_gdi/tfpggdiclipboard.dogettext.html
+   DoSetText fpg_gdi/tfpggdiclipboard.dosettext.html
+   InitClipboard fpg_gdi/tfpggdiclipboard.initclipboard.html
+  TfpgGDIFileList fpg_gdi/tfpggdifilelist.html
+   EncodeAttributesString fpg_gdi/tfpggdifilelist.encodeattributesstring.html
+   Create fpg_gdi/tfpggdifilelist.create.html
+   InitializeEntry fpg_gdi/tfpggdifilelist.initializeentry.html
+   PopulateSpecialDirs fpg_gdi/tfpggdifilelist.populatespecialdirs.html
   UnicodeEnabledOS fpg_gdi/unicodeenabledos.html
   WinVersion fpg_gdi/winversion.html
   FontSmoothingType fpg_gdi/fontsmoothingtype.html
@@ -1001,8 +974,9 @@
   AllAnchors fpg_main/allanchors.html
   TextFlagsDflt fpg_main/textflagsdflt.html
   cMessageQueueSize fpg_main/cmessagequeuesize.html
-  fpGUIVersion fpg_main/fpguiversion.html
+  FPGUI_VERSION fpg_main/fpgui_version.html
   fpGUIName fpg_main/fpguiname.html
+  fpGUIWebsite fpg_main/fpguiwebsite.html
   txtWordDelims fpg_main/txtworddelims.html
   TOrientation fpg_main/torientation.html
   TAlign fpg_main/talign.html
@@ -1065,6 +1039,7 @@
    DrawText fpg_main/tfpgcanvas.drawtext.html
   TfpgStyle fpg_main/tfpgstyle.html
    DefaultFont fpg_main/tfpgstyle.defaultfont.html
+   FixedFont fpg_main/tfpgstyle.fixedfont.html
    MenuFont fpg_main/tfpgstyle.menufont.html
    MenuAccelFont fpg_main/tfpgstyle.menuaccelfont.html
    MenuDisabledFont fpg_main/tfpgstyle.menudisabledfont.html
@@ -1094,6 +1069,7 @@
    Destroy fpg_main/tfpgapplication.destroy.html
    GetFont fpg_main/tfpgapplication.getfont.html
    ActivateHint fpg_main/tfpgapplication.activatehint.html
+   RecreateHintWindow fpg_main/tfpgapplication.recreatehintwindow.html
    Flush fpg_main/tfpgapplication.flush.html
    HandleException fpg_main/tfpgapplication.handleexception.html
    HideHint fpg_main/tfpgapplication.hidehint.html
@@ -1161,6 +1137,7 @@
   PrintCallTraceDbgLn fpg_main/printcalltracedbgln.html
   DumpStack fpg_main/dumpstack.html
   DebugLn fpg_main/debugln.html
+  operator =(TRect, TRect): Boolean fpg_main/op-equal-trect-trect-boolean.html
   fpgStyle fpg_main/fpgstyle.html
   fpgCaret fpg_main/fpgcaret.html
   fpgImages fpg_main/fpgimages.html
@@ -1242,8 +1219,11 @@
   Delete8 fpg_stringutils/delete8.html
   Insert8 fpg_stringutils/insert8.html
   fpgCharAt fpg_stringutils/fpgcharat.html
+  fpgAppendPathDelim fpg_stringutils/fpgappendpathdelim.html
+  fpgRemovePathDelim fpg_stringutils/fpgremovepathdelim.html
  fpg_widget fpg_widget/index.html
   TFocusSearchDirection fpg_widget/tfocussearchdirection.html
+  THintEvent fpg_widget/thintevent.html
   TfpgWidget fpg_widget/tfpgwidget.html
    MsgPaint fpg_widget/tfpgwidget.msgpaint.html
    MsgResize fpg_widget/tfpgwidget.msgresize.html
@@ -1273,6 +1253,8 @@
    FBackgroundColor fpg_widget/tfpgwidget.fbackgroundcolor.html
    FTextColor fpg_widget/tfpgwidget.ftextcolor.html
    FIsContainer fpg_widget/tfpgwidget.fiscontainer.html
+   GetOnShowHint fpg_widget/tfpgwidget.getonshowhint.html
+   SetOnShowHint fpg_widget/tfpgwidget.setonshowhint.html
    SetBackgroundColor fpg_widget/tfpgwidget.setbackgroundcolor.html
    SetTextColor fpg_widget/tfpgwidget.settextcolor.html
    GetParent fpg_widget/tfpgwidget.getparent.html
@@ -1281,9 +1263,12 @@
    SetVisible fpg_widget/tfpgwidget.setvisible.html
    SetShowHint fpg_widget/tfpgwidget.setshowhint.html
    SetParentShowHint fpg_widget/tfpgwidget.setparentshowhint.html
+   GetHint fpg_widget/tfpgwidget.gethint.html
+   SetHint fpg_widget/tfpgwidget.sethint.html
    DoUpdateWindowPosition fpg_widget/tfpgwidget.doupdatewindowposition.html
    DoAlign fpg_widget/tfpgwidget.doalign.html
    DoResize fpg_widget/tfpgwidget.doresize.html
+   DoShowHint fpg_widget/tfpgwidget.doshowhint.html
    HandlePaint fpg_widget/tfpgwidget.handlepaint.html
    HandleKeyChar fpg_widget/tfpgwidget.handlekeychar.html
    HandleKeyPress fpg_widget/tfpgwidget.handlekeypress.html
@@ -1318,10 +1303,14 @@
    OnMouseUp fpg_widget/tfpgwidget.onmouseup.html
    OnPaint fpg_widget/tfpgwidget.onpaint.html
    OnResize fpg_widget/tfpgwidget.onresize.html
+   OnShowHint fpg_widget/tfpgwidget.onshowhint.html
    Create fpg_widget/tfpgwidget.create.html
    Destroy fpg_widget/tfpgwidget.destroy.html
+   AfterConstruction fpg_widget/tfpgwidget.afterconstruction.html
    GetClientRect fpg_widget/tfpgwidget.getclientrect.html
    GetBoundsRect fpg_widget/tfpgwidget.getboundsrect.html
+   InDesigner fpg_widget/tfpgwidget.indesigner.html
+   InvokeHelp fpg_widget/tfpgwidget.invokehelp.html
    Realign fpg_widget/tfpgwidget.realign.html
    SetFocus fpg_widget/tfpgwidget.setfocus.html
    KillFocus fpg_widget/tfpgwidget.killfocus.html
@@ -1363,20 +1352,27 @@
   fpgFileExists fpg_utils/fpgfileexists.html
   fpgDirectoryExists fpg_utils/fpgdirectoryexists.html
   fpgExtractFileDir fpg_utils/fpgextractfiledir.html
+  fpgExtractFilePath fpg_utils/fpgextractfilepath.html
+  fpgExtractFileName fpg_utils/fpgextractfilename.html
+  fpgExtractFileExt fpg_utils/fpgextractfileext.html
+  fpgForceDirectories fpg_utils/fpgforcedirectories.html
  fpg_popupwindow fpg_popupwindow/index.html
   TfpgPopupWindow fpg_popupwindow/tfpgpopupwindow.html
    MsgClose fpg_popupwindow/tfpgpopupwindow.msgclose.html
-   AdjustWindowStyle fpg_popupwindow/tfpgpopupwindow.adjustwindowstyle.html
    HandleClose fpg_popupwindow/tfpgpopupwindow.handleclose.html
+   HandleShow fpg_popupwindow/tfpgpopupwindow.handleshow.html
    ProcessPopupFrame fpg_popupwindow/tfpgpopupwindow.processpopupframe.html
    DoPaintPopupFrame fpg_popupwindow/tfpgpopupwindow.dopaintpopupframe.html
    DoOnClose fpg_popupwindow/tfpgpopupwindow.doonclose.html
+   DoOnShow fpg_popupwindow/tfpgpopupwindow.doonshow.html
    Create fpg_popupwindow/tfpgpopupwindow.create.html
+   AdjustWindowStyle fpg_popupwindow/tfpgpopupwindow.adjustwindowstyle.html
    ShowAt fpg_popupwindow/tfpgpopupwindow.showat.html
    Close fpg_popupwindow/tfpgpopupwindow.close.html
    DontCloseWidget fpg_popupwindow/tfpgpopupwindow.dontclosewidget.html
    PopupFrame fpg_popupwindow/tfpgpopupwindow.popupframe.html
    OnClose fpg_popupwindow/tfpgpopupwindow.onclose.html
+   OnShow fpg_popupwindow/tfpgpopupwindow.onshow.html
   ClosePopups fpg_popupwindow/closepopups.html
   PopupListFirst fpg_popupwindow/popuplistfirst.html
   PopupListFind fpg_popupwindow/popuplistfind.html
@@ -1401,6 +1397,7 @@
    RemoveIndex fpg_imagelist/tfpgimagelist.removeindex.html
    GetMaxItem fpg_imagelist/tfpgimagelist.getmaxitem.html
    Item fpg_imagelist/tfpgimagelist.item.html
+   Count fpg_imagelist/tfpgimagelist.count.html
  fpg_constants fpg_constants/index.html
   rserrnotassigned fpg_constants/index-1.html#rserrnotassigned
   rsnewitemdetected fpg_constants/index-1.html#rsnewitemdetected
@@ -1419,6 +1416,7 @@
   rscancel fpg_constants/index-1.html#rscancel
   rscannotcreatedir fpg_constants/index-1.html#rscannotcreatedir
   rschange fpg_constants/index-1.html#rschange
+  rscharactermap fpg_constants/index-1.html#rscharactermap
   rsclose fpg_constants/index-1.html#rsclose
   rscollection fpg_constants/index-1.html#rscollection
   rsconfirm fpg_constants/index-1.html#rsconfirm
@@ -1459,6 +1457,7 @@
   rsignore fpg_constants/index-1.html#rsignore
   rsinformation fpg_constants/index-1.html#rsinformation
   rsinsert fpg_constants/index-1.html#rsinsert
+  rsinsertfromcharactermap fpg_constants/index-1.html#rsinsertfromcharactermap
   rsitalic fpg_constants/index-1.html#rsitalic
   rserritemofwrongtype fpg_constants/index-1.html#rserritemofwrongtype
   rsshortjan fpg_constants/index-1.html#rsshortjan
@@ -1500,6 +1499,7 @@
   rssaveafile fpg_constants/index-1.html#rssaveafile
   rssearch fpg_constants/index-1.html#rssearch
   rsselect fpg_constants/index-1.html#rsselect
+  rsselectadirectory fpg_constants/index-1.html#rsselectadirectory
   rsselectafont fpg_constants/index-1.html#rsselectafont
   rsshortsep fpg_constants/index-1.html#rsshortsep
   rslongsep fpg_constants/index-1.html#rslongsep
@@ -1509,6 +1509,7 @@
   rsstyle fpg_constants/index-1.html#rsstyle
   rsshortsun fpg_constants/index-1.html#rsshortsun
   rslongsun fpg_constants/index-1.html#rslongsun
+  rstexttoinsert fpg_constants/index-1.html#rstexttoinsert
   rsshortthu fpg_constants/index-1.html#rsshortthu
   rslongthu fpg_constants/index-1.html#rslongthu
   rstoday fpg_constants/index-1.html#rstoday
@@ -1562,6 +1563,7 @@
    Count fpg_translations/ttranslationlist.count.html
    Items fpg_translations/ttranslationlist.items.html
   TranslateResourceStrings fpg_translations/translateresourcestrings.html
+  fpgMatchLocale fpg_translations/fpgmatchlocale.html
  fpg_stringhashlist fpg_stringhashlist/index.html
   PStringHashItem fpg_stringhashlist/pstringhashitem.html
   TStringHashItem fpg_stringhashlist/tstringhashitem.html
@@ -1629,6 +1631,7 @@
 #CoreLib.fpg_base.TfpgFontBase TObject
 2VFFontDesc
 2VFFontRes
+2MGetIsFixedWidth
 3MTextWidth
 3MAscent
 3MDescent
@@ -1636,6 +1639,7 @@
 3PFontDesc r
 3PFontRes r
 3PHandle r
+3PIsFixedWidth r
 #CoreLib.fpg_base.TfpgCustomInterpolation TObject
 1VFCanvas
 1VFImage
@@ -1736,7 +1740,16 @@
 3PLineWidth r
 #CoreLib.fpg_base.TfpgComponent TComponent
 1VFTagPointer
+1VFHelpContext
+1VFHelpKeyword
+1VFHelpType
+2MSetHelpContext
+2MSetHelpKeyword
+3MCreate
 3PTagPointer rw
+4PHelpContext rw
+4PHelpKeyword rw
+4PHelpType rw
 #CoreLib.fpg_base.TfpgWindowBase #CoreLib.fpg_base.TfpgComponent
 1VFParent
 1MSetMouseCursor
@@ -1760,6 +1773,7 @@
 2VFCanvas
 2VFSizeIsDirty
 2VFPosIsDirty
+2VFMouseCursorIsDirty
 2MHandleIsValid
 2MDoUpdateWindowPosition
 2MDoAllocateWindowHandle
@@ -1767,6 +1781,7 @@
 2MDoRemoveWindowLookup
 2MDoSetWindowVisible
 2MDoMoveWindow
+2MDoResizeWindow
 2MDoWindowToScreen
 2MDoSetWindowTitle
 2MDoSetMouseCursor
@@ -1790,6 +1805,7 @@
 3MBottom
 3MUpdateWindowPosition
 3MMoveWindow
+3MResizeWindow
 3MWindowToScreen
 3MHasParent
 3MActivateWindow
@@ -1810,17 +1826,21 @@
 3PCanvas r
 3PParent rw
 3PMouseCursor rw
-#CoreLib.fpg_base.TfpgApplicationBase TComponent
+#CoreLib.fpg_base.TfpgApplicationBase #CoreLib.fpg_base.TfpgComponent
 1VFMainForm
 1VFTerminated
 1VFCritSect
+1VFHelpKey
+1VFHelpFile
 1MGetForm
 1MGetFormCount
 1MGetTopModalForm
+1MGetHelpFile
 2VFOnIdle
 2VFIsInitialized
 2VFModalFormStack
 2MDoGetFontFaceList
+2MGetHelpViewer
 3MCreate
 3MDestroy
 3MGetFontFaceList
@@ -1837,8 +1857,14 @@
 3MTerminate
 3MLock
 3MUnlock
+3MInvokeHelp
+3MContextHelp
+3MKeywordHelp
 3PFormCount r
 3PForms r
+3PHelpContext
+3PHelpFile rw
+3PHelpKey rw
 3PIsInitialized r
 3PTopModalForm r
 3PMainForm rw
@@ -1903,7 +1929,7 @@
 3PHasFileMode r
 3PShowHidden rw
 3PSpecialDirs r
-#CoreLib.fpg_x11.TfpgFontResourceImpl #CoreLib.fpg_base.TfpgFontResourceBase
+#CoreLib.fpg_x11.TfpgX11FontResource #CoreLib.fpg_base.TfpgFontResourceBase
 1VFFontData
 1MDoGetTextWidthClassic
 1MDoGetTextWidthWorkaround
@@ -1915,7 +1941,7 @@
 3MGetDescent
 3MGetHeight
 3MGetTextWidth
-#CoreLib.fpg_x11.TfpgImageImpl #CoreLib.fpg_base.TfpgImageBase
+#CoreLib.fpg_x11.TfpgX11Image #CoreLib.fpg_base.TfpgImageBase
 1VFXimg
 1VFXimgmask
 1MXImage
@@ -1924,7 +1950,7 @@
 2MDoInitImage
 2MDoInitImageMask
 3MCreate
-#CoreLib.fpg_x11.TfpgCanvasImpl #CoreLib.fpg_base.TfpgCanvasBase
+#CoreLib.fpg_x11.TfpgX11Canvas #CoreLib.fpg_base.TfpgCanvasBase
 1VFDrawing
 1VFDrawWindow
 1VFBufferPixmap
@@ -1968,7 +1994,7 @@
 2PDCHandle r
 3MCreate
 3MDestroy
-#CoreLib.fpg_x11.TfpgWindowImpl #CoreLib.fpg_base.TfpgWindowBase
+#CoreLib.fpg_x11.TfpgX11Window #CoreLib.fpg_base.TfpgWindowBase
 2VFWinFlags
 2VFWinHandle
 2VFBackupWinHandle
@@ -1980,6 +2006,7 @@
 2MHandleIsValid
 2MDoSetWindowTitle
 2MDoMoveWindow
+2MDoResizeWindow
 2MDoWindowToScreen
 2MDoUpdateWindowPosition
 2MDoSetMouseCursor
@@ -1989,56 +2016,7 @@
 3MCaptureMouse
 3MReleaseMouse
 3MSetFullscreen
-#CoreLib.fpg_x11.TfpgApplicationImpl #CoreLib.fpg_base.TfpgApplicationBase
-1VFComposeBuffer
-1VFComposeStatus
-1VFEventFilter
-1MConvertShiftState
-1MKeySymToKeycode
-1MStartComposing
-2VFDisplay
-2VDisplayDepth
-2VDefaultBackground
-2VDefaultForeground
-2VDefaultScreen
-2VDefaultVisual
-2VDefaultColorMap
-2VFRootWindow
-2Vxia_clipboard
-2Vxia_motif_wm_hints
-2Vxia_wm_protocols
-2Vxia_wm_delete_window
-2Vnetlayer
-2Vxia_targets
-2VInputMethod
-2VInputContext
-2VFLastKeySym
-2MDoGetFontFaceList
-3MCreate
-3MDestroy
-3MDoMessagesPending
-3MDoWaitWindowMessage
-3MDoFlush
-3MGetScreenWidth
-3MGetScreenHeight
-3MScreen_dpi_x
-3MScreen_dpi_y
-3MScreen_dpi
-3PDisplay r
-3PRootWindow r
-3PEventFilter rw
-#CoreLib.fpg_x11.TfpgClipboardImpl #CoreLib.fpg_base.TfpgClipboardBase
-1VFWaitingForSelection
-2VFClipboardText
-2MDoGetText
-2MDoSetText
-2MInitClipboard
-#CoreLib.fpg_x11.TfpgFileListImpl #CoreLib.fpg_base.TfpgFileListBase
-0MEncodeModeString
-0MCreate
-0MInitializeEntry
-0MPopulateSpecialDirs
-#CoreLib.fpg_gdi.TfpgFontResourceImpl #CoreLib.fpg_base.TfpgFontResourceBase
+#CoreLib.fpg_gdi.TfpgGDIFontResource #CoreLib.fpg_base.TfpgFontResourceBase
 1VFFontData
 1VFMetrics
 2MOpenFontByDesc
@@ -2050,8 +2028,7 @@
 3MGetDescent
 3MGetHeight
 3MGetTextWidth
-#CoreLib.fpg_gdi.TfpgFontImpl #CoreLib.fpg_base.TfpgFontBase
-#CoreLib.fpg_gdi.TfpgImageImpl #CoreLib.fpg_base.TfpgImageBase
+#CoreLib.fpg_gdi.TfpgGDIImage #CoreLib.fpg_base.TfpgImageBase
 1VFBMPHandle
 1VFMaskHandle
 1VFIsTwoColor
@@ -2061,7 +2038,7 @@
 2MDoInitImage
 2MDoInitImageMask
 3MCreate
-#CoreLib.fpg_gdi.TfpgCanvasImpl #CoreLib.fpg_base.TfpgCanvasBase
+#CoreLib.fpg_gdi.TfpgGDICanvas #CoreLib.fpg_base.TfpgCanvasBase
 1VFDrawing
 1VFBufferBitmap
 1VFDrawWindow
@@ -2107,7 +2084,7 @@
 2PDCHandle r
 3MCreate
 3MDestroy
-#CoreLib.fpg_gdi.TfpgWindowImpl #CoreLib.fpg_base.TfpgWindowBase
+#CoreLib.fpg_gdi.TfpgGDIWindow #CoreLib.fpg_base.TfpgWindowBase
 1VFMouseInWindow
 1VFNonFullscreenRect
 1VFNonFullscreenStyle
@@ -2136,7 +2113,7 @@
 3MCaptureMouse
 3MReleaseMouse
 3MSetFullscreen
-#CoreLib.fpg_gdi.TfpgApplicationImpl #CoreLib.fpg_base.TfpgApplicationBase
+#CoreLib.fpg_gdi.TfpgGDIApplication #CoreLib.fpg_base.TfpgApplicationBase
 2VFDisplay
 2VWindowClass
 2VWidgetClass
@@ -2167,17 +2144,17 @@
 3MScreen_dpi_y
 3MScreen_dpi
 3PDisplay r
-#CoreLib.fpg_gdi.TfpgClipboardImpl #CoreLib.fpg_base.TfpgClipboardBase
+#CoreLib.fpg_gdi.TfpgGDIClipboard #CoreLib.fpg_base.TfpgClipboardBase
 2VFClipboardText
 2MDoGetText
 2MDoSetText
 2MInitClipboard
-#CoreLib.fpg_gdi.TfpgFileListImpl #CoreLib.fpg_base.TfpgFileListBase
+#CoreLib.fpg_gdi.TfpgGDIFileList #CoreLib.fpg_base.TfpgFileListBase
 0MEncodeAttributesString
 0MCreate
 0MInitializeEntry
 0MPopulateSpecialDirs
-#CoreLib.fpg_main.TfpgFontResource #CoreLib.fpg_x11.TfpgFontResourceImpl
+#CoreLib.fpg_main.TfpgFontResource TfpgFontResourceImpl
 2VFFontDesc
 2VFRefCount
 3MCreate
@@ -2187,7 +2164,7 @@
 #CoreLib.fpg_main.TfpgFont #CoreLib.fpg_base.TfpgFontBase
 3MCreate
 3MDestroy
-#CoreLib.fpg_main.TfpgWindow #CoreLib.fpg_x11.TfpgWindowImpl
+#CoreLib.fpg_main.TfpgWindow TfpgWindowImpl
 2MSetParent
 2MGetParent
 2MGetCanvas
@@ -2196,7 +2173,7 @@
 3PParent rw
 3PCanvas r
 3PWinHandle
-#CoreLib.fpg_main.TfpgImage #CoreLib.fpg_x11.TfpgImageImpl
+#CoreLib.fpg_main.TfpgImage TfpgImageImpl
 3MImageFromRect
 #CoreLib.fpg_main.TfpgImages .TObject
 1VFImages
@@ -2208,7 +2185,7 @@
 3MAddBMP
 3MAddMaskedBMP
 3MListImages
-#CoreLib.fpg_main.TfpgCanvas #CoreLib.fpg_x11.TfpgCanvasImpl
+#CoreLib.fpg_main.TfpgCanvas TfpgCanvasImpl
 1MAddLineBreaks
 3MCreate
 3MDestroy
@@ -2219,6 +2196,7 @@
 3MDrawText
 #CoreLib.fpg_main.TfpgStyle .TObject
 3VDefaultFont
+3VFixedFont
 3VMenuFont
 3VMenuAccelFont
 3VMenuDisabledFont
@@ -2233,7 +2211,7 @@
 0VDest
 0VListener
 0VMsgCode
-#CoreLib.fpg_main.TfpgApplication #CoreLib.fpg_x11.TfpgApplicationImpl
+#CoreLib.fpg_main.TfpgApplication TfpgApplicationImpl
 1VFHintPause
 1VFShowHint
 1VFOnException
@@ -2244,7 +2222,7 @@
 1VFHintPos
 1MSetHintPause
 1MSetupLocalizationStrings
-1MInternalMsgClose
+1MInternalMsgFreeMe
 1MInternalMsgHintTimer
 1MCreateHintWindow
 1MHintTimerFired
@@ -2263,6 +2241,7 @@
 3MDestroy
 3MGetFont
 3MActivateHint
+3MRecreateHintWindow
 3MFlush
 3MHandleException
 3MHideHint
@@ -2313,8 +2292,8 @@
 3MInvertCaret
 3PWidth r
 3PHeight r
-#CoreLib.fpg_main.TfpgClipboard #CoreLib.fpg_x11.TfpgClipboardImpl
-#CoreLib.fpg_main.TfpgFileList #CoreLib.fpg_x11.TfpgFileListImpl
+#CoreLib.fpg_main.TfpgClipboard TfpgClipboardImpl
+#CoreLib.fpg_main.TfpgFileList TfpgFileListImpl
 #CoreLib.fpg_cmdlineparams.TGfxCommandLineParams TObject
 1VFsParams
 1VFslParams
@@ -2395,8 +2374,10 @@
 1VFOnKeyPress
 1VFOnResize
 1VFOnScreen
+1VFOnShowHint
 1MSetActiveWidget
 1MIsShowHintStored
+1MSetFormDesigner
 2MMsgPaint
 2MMsgResize
 2MMsgMove
@@ -2425,6 +2406,8 @@
 2VFBackgroundColor
 2VFTextColor
 2VFIsContainer
+2MGetOnShowHint
+2MSetOnShowHint
 2MSetBackgroundColor
 2MSetTextColor
 2MGetParent
@@ -2433,9 +2416,12 @@
 2MSetVisible
 2MSetShowHint
 2MSetParentShowHint
+2MGetHint
+2MSetHint
 2MDoUpdateWindowPosition
 2MDoAlign
 2MDoResize
+2MDoShowHint
 2MHandlePaint
 2MHandleKeyChar
 2MHandleKeyPress
@@ -2470,10 +2456,14 @@
 2POnMouseUp rw
 2POnPaint rw
 2POnResize rw
+2POnShowHint rw
 3MCreate
 3MDestroy
+3MAfterConstruction
 3MGetClientRect
 3MGetBoundsRect
+3MInDesigner
+3MInvokeHelp
 3MRealign
 3MSetFocus
 3MKillFocus
@@ -2499,20 +2489,24 @@
 #CoreLib.fpg_popupwindow.TfpgPopupWindow #CoreLib.fpg_widget.TfpgWidget
 1VFDontCloseWidget
 1VFOnClose
+1VFOnShow
 1VFPopupFrame
 1MSetPopupFrame
 2MMsgClose
-2MAdjustWindowStyle
 2MHandleClose
+2MHandleShow
 2MProcessPopupFrame
 2MDoPaintPopupFrame
 2MDoOnClose
+2MDoOnShow
 3MCreate
+3MAdjustWindowStyle
 3MShowAt
 3MClose
 3PDontCloseWidget rw
 3PPopupFrame rw
 3POnClose rw
+3POnShow rw
 #CoreLib.fpg_imagelist.EItemExists Exception
 #CoreLib.fpg_imagelist.TfpgImageItem TObject
 1VFImage
@@ -2532,6 +2526,7 @@
 1MGetFListIndex
 1MGetItem
 1MSetItem
+1MGetCount
 3MCreate
 3MDestroy
 3MAddItemFromFile
@@ -2539,6 +2534,7 @@
 3MRemoveIndex
 3MGetMaxItem
 3PItem rw
+3PCount r
 #CoreLib.fpg_pofiles.TPOFileItem TObject
 3VIdentifier
 3VOriginal
