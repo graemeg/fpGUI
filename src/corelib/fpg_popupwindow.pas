@@ -45,6 +45,7 @@ type
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
     procedure   HandleClose; virtual;
     procedure   HandleShow; override;
+    procedure   HandlePaint; override;
     procedure   ProcessPopupFrame; virtual;
     procedure   DoPaintPopupFrame; virtual;
     procedure   DoOnClose; virtual;
@@ -241,6 +242,13 @@ begin
   DoOnShow;
 end;
 
+procedure TfpgPopupWindow.HandlePaint;
+begin
+  inherited HandlePaint;
+  if PopupFrame then
+    DoPaintPopupFrame;
+end;
+
 procedure TfpgPopupWindow.ProcessPopupFrame;
 var
   i: integer;
@@ -263,10 +271,7 @@ begin
     end;
     HandleResize(Width+2, Height+2);
     UpdateWindowPosition;
-
-    Canvas.BeginDraw;
-    DoPaintPopupFrame;
-    Canvas.EndDraw;
+    Repaint;
   end;
 end;
 
