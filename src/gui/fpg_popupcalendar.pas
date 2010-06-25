@@ -237,6 +237,7 @@ type
 implementation
 
 uses
+  dateutils,
   fpg_scrollbar,
   fpg_constants;
 
@@ -418,14 +419,20 @@ procedure TfpgPopupCalendar.SetDateElement(Index: integer; const AValue: Word);
 var
   lD, lM, lY: Word;
   lDate: TDateTime;
+  d: Word;
 begin
   if AValue > 0 then
   begin
     DecodeDate(FDate, lY, lM, lD);
     case Index of
-      1: lD := AValue;
-      2: lM := AValue;
-      3: lY := AValue;
+      1:  lD := AValue;
+      2:  begin
+            lM := AValue;
+            d := DaysInAMonth(lY, lM);
+            if lD > d then // If original day value is larger than days in new month
+              lD := d;
+          end;
+      3:  lY := AValue;
     end;
     try
       lDate := EncodeDate(lY, lM, lD);
