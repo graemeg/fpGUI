@@ -51,13 +51,15 @@ uses
   fpg_combobox,
   fpg_basegrid,
   fpg_grid,
-  fpg_dialogs{,
-  fpg_checkbox};
+  fpg_dialogs,
+  fpg_menu;
 
 type
 
   TfpgOnDateSetEvent = procedure(Sender: TObject; const ADate: TDateTime) of object;
   TfpgOnCheckboxChangedEvent = procedure(Sender: TObject; const AIsChecked: Boolean) of object;
+
+{@VFD_NEWFORM_DECL}
 
 
   TfpgPopupCalendar = class(TfpgPopupWindow)
@@ -86,6 +88,7 @@ type
     FHolidayColor: TfpgColor;
     FSelectedColor: TfpgColor;
     FSingleClickSelect: boolean;
+    FMonthsPopupMenu: TfpgPopupMenu;
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
@@ -110,8 +113,11 @@ type
     procedure   grdName1DoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   grdName1KeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   grdName1DrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+    procedure   edtMonthClicked(Sender: TObject);
+    procedure   miMonthClicked(Sender: TObject);
     procedure   TearDown;
     procedure   SetSingleClickSelect(const AValue: boolean);
+    procedure   ClosePopupMenusWindows;
   protected
     FntNorm, FntBold: TfpgFont;
     FOrigFocusWin: TfpgWidget;
@@ -119,6 +125,7 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
+    procedure   ShowDefaultPopupMenu; virtual;
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   public
     constructor Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget); reintroduce;
@@ -226,7 +233,6 @@ type
   end;
 
 
-{@VFD_NEWFORM_DECL}
 
 implementation
 
@@ -260,6 +266,7 @@ end;
 procedure TfpgPopupCalendar.grdName1DoubleClick(Sender: TObject;
   AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 begin
+  ClosePopupMenusWindows;
   TearDown;
 end;
 
@@ -305,6 +312,19 @@ begin
   end;
 end;
 
+procedure TfpgPopupCalendar.edtMonthClicked(Sender: TObject);
+begin
+  ShowDefaultPopupMenu;
+end;
+
+procedure TfpgPopupCalendar.miMonthClicked(Sender: TObject);
+var
+  itm: TfpgMenuItem;
+begin
+  itm := Sender as TfpgMenuItem;
+  SetDateElement(2 {month index}, itm.Tag);
+end;
+
 procedure TfpgPopupCalendar.TearDown;
 var
   lD: Word;
@@ -337,6 +357,15 @@ procedure TfpgPopupCalendar.SetSingleClickSelect(const AValue: boolean);
 begin
   if FSingleClickSelect = AValue then exit;
   FSingleClickSelect := AValue;
+end;
+
+procedure TfpgPopupCalendar.ClosePopupMenusWindows;
+begin
+  if Assigned(FMonthsPopupMenu) then
+  begin
+    FMonthsPopupMenu.Close;
+    FreeAndNil(FMonthsPopupMenu);
+  end;
 end;
 
 function TfpgPopupCalendar.GetDateElement(Index: integer): Word;
@@ -531,6 +560,7 @@ procedure TfpgPopupCalendar.btnYearUpClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate, 12);
   if d <= FMaxDate then
     DateValue := d;
@@ -540,6 +570,7 @@ procedure TfpgPopupCalendar.btnYearDownClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate, -12);
   if d >= FMinDate then
     DateValue := d;
@@ -549,6 +580,7 @@ procedure TfpgPopupCalendar.btnMonthUpClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate);
   if d <= FMaxDate then
     DateValue := d;
@@ -558,6 +590,7 @@ procedure TfpgPopupCalendar.btnMonthDownClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate, -1);
   if d >= FMinDate then
     DateValue := d;
@@ -565,6 +598,7 @@ end;
 
 procedure TfpgPopupCalendar.btnTodayClicked(Sender: TObject);
 begin
+  ClosePopupMenusWindows;
   if Now >= FMinDate then
   begin
     DateValue := Now;
@@ -574,6 +608,7 @@ end;
 
 procedure TfpgPopupCalendar.grdName1Clicked(Sender: TObject);
 begin
+  ClosePopupMenusWindows;
   if FSingleClickSelect then
     TearDown;
 end;
@@ -680,6 +715,44 @@ begin
     FocusRootWidget.SetFocus;
 end;
 
+procedure TfpgPopupCalendar.ShowDefaultPopupMenu;
+var
+  itm: TfpgMenuItem;
+begin
+  if not Assigned(FMonthsPopupMenu) then
+  begin
+    FMonthsPopupMenu := TfpgPopupMenu.Create(nil);
+    FMonthsPopupMenu.DontCloseWidget := self;  // now we can control when the popup window closes
+    itm := FMonthsPopupMenu.AddMenuItem(rslongjan, '', @miMonthClicked);
+    itm.Tag := 1;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongfeb, '', @miMonthClicked);
+    itm.Tag := 2;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongmar, '', @miMonthClicked);
+    itm.Tag := 3;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongapr, '', @miMonthClicked);
+    itm.Tag := 4;
+    itm := FMonthsPopupMenu.AddMenuItem(rsLongMay, '', @miMonthClicked);
+    itm.Tag := 5;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongjun, '', @miMonthClicked);
+    itm.Tag := 6;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongjul, '', @miMonthClicked);
+    itm.Tag := 7;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongaug, '', @miMonthClicked);
+    itm.Tag := 8;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongsep, '', @miMonthClicked);
+    itm.Tag := 9;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongoct, '', @miMonthClicked);
+    itm.Tag := 10;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongnov, '', @miMonthClicked);
+    itm.Tag := 11;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongdec, '', @miMonthClicked);
+    itm.Tag := 12;
+  end;
+
+//  SetDefaultPopupMenuItemsState;
+  FMonthsPopupMenu.ShowAt(self, edtMonth.Left, edtMonth.Bottom);
+end;
+
 constructor TfpgPopupCalendar.Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget);
 begin
   inherited Create(AOwner);
@@ -702,6 +775,8 @@ end;
 
 destructor TfpgPopupCalendar.Destroy;
 begin
+  if Assigned(FMonthsPopupMenu) then
+    FMonthsPopupMenu.Free;
   FntBold.Free;
   FntNorm.Free;
   inherited Destroy;
@@ -778,6 +853,7 @@ begin
     FontDesc := '#Edit1';
     IgnoreMouseCursor := True;
     Focusable := False;
+    OnClick  := @edtMonthClicked;
   end;
 
   btnMonthUp := TfpgButton.Create(self);
