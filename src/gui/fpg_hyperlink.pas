@@ -50,6 +50,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   GoHyperLink;
   published
+    property    Alignment;
     property    Autosize;
     property    FontDesc;
     property    Hint;
