@@ -448,14 +448,14 @@ begin
   if FDate = AValue then
     Exit; //==>
 
-  if (trunc(FDate) >= trunc(FMinDate)) then
+  if (trunc(AValue) >= trunc(FMinDate)) then
     {$IFDEF DEBUG}
     writeln('Passed min test')
     {$ENDIF}
   else
     exit;
 
-  if (FDate <= FMaxDate) then
+  if (trunc(AValue) <= trunc(FMaxDate)) then
     {$IFDEF DEBUG}
     writeln('Passed max test')
     {$ENDIF}
@@ -796,9 +796,6 @@ begin
   Name := 'fpgPopupCalendar';
   SetPosition(370, 182, 233, 142);
   Hint := '';
-  //  WindowTitle := 'fpgPopupCalendar';
-  //  Sizeable := False;
-  //  WindowPosition := wpUser;
 
   edtYear := TfpgEdit.Create(self);
   with edtYear do
@@ -936,17 +933,7 @@ begin
 
   {@VFD_BODY_END: fpgPopupCalendar}
   {%endregion}
-{
-  // Setup localization
-  // UI Designer doesn't support resource strings yet!
-  grdName1.ColumnTitle[0] := rsShortSun;
-  grdName1.ColumnTitle[1] := rsShortMon;
-  grdName1.ColumnTitle[2] := rsShortTue;
-  grdName1.ColumnTitle[3] := rsShortWed;
-  grdName1.ColumnTitle[4] := rsShortThu;
-  grdName1.ColumnTitle[5] := rsShortFri;
-  grdName1.ColumnTitle[6] := rsShortSat;
-}
+
   btnToday.Text := rsToday;
 end;
 
