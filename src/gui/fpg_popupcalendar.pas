@@ -1163,12 +1163,10 @@ end;
 procedure TfpgCalendarCheckCombo.DoDrawText(const ARect: TfpgRect);
 var
   lRect: TfpgRect;
-  flags: TFTextFlags;
 begin
   lRect := ARect;
   lRect.Left := lRect.Left+FCheckBoxRect.Width + 1;
   lRect.Width := lRect.Width - (FCheckBoxRect.Width + 1) - FMargin;
-  flags := [txtRight, txtVCenter];
   if HasText then
   begin
     if not FChecked then
