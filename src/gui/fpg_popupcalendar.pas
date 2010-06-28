@@ -1233,6 +1233,7 @@ begin
   begin
     Checked := not FChecked;
     DoCheckboxChanged;
+    Repaint;
   end
   else
     inherited HandleLMouseUp(x, y, shiftstate);
