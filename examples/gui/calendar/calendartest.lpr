@@ -1,7 +1,3 @@
-{
-   This is still under development!!!!!!!!!!!!!!!!!
-}
-
 program calendartest;
 
 {$mode objfpc}{$H+}
@@ -38,6 +34,7 @@ type
     bvlName1: TfpgBevel;
     CalendarCombo1: TfpgCalendarCheckCombo;
     Label1: TfpgLabel;
+    cbSingleClickClose: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure   btnDateFormatClicked(Sender: TObject);
     procedure   btnTodayClicked(Sender: TObject);
@@ -46,6 +43,7 @@ type
     procedure   cbWHolidayChange(Sender: TObject);
     procedure   cbName1Change(Sender: TObject);
     procedure   cbCloseOnSelectChanged(Sender: TObject);
+    procedure   cbSingleClickCloseChanged(Sender: TObject);
     procedure   btnClearClicked(Sender: TObject);
     procedure   DrawCalendar(month, year: integer);
   public
@@ -60,6 +58,11 @@ type
 procedure TMainForm.cbCloseOnSelectChanged(Sender: TObject);
 begin
   cal.CloseOnSelect := TfpgCheckBox(Sender).Checked;
+end;
+
+procedure TMainForm.cbSingleClickCloseChanged(Sender: TObject);
+begin
+  cal.SingleClickSelect := TfpgCheckBox(Sender).Checked;
 end;
 
 procedure TMainForm.btnClearClicked(Sender: TObject);
@@ -183,7 +186,7 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(362, 186, 372, 309);
+  SetPosition(362, 186, 372, 340);
   WindowTitle := 'fpGUI Calendar Test';
   Hint := '';
   WindowPosition := wpUser;
@@ -253,7 +256,7 @@ begin
   with cal do
   begin
     Name := 'cal';
-    SetPosition(132, 224, 120, 23);
+    SetPosition(132, 268, 120, 23);
     DateFormat := 'dd mmm yyyy';
     FontDesc := '#List';
     Hint := '';
@@ -267,7 +270,7 @@ begin
   with btnDateFormat do
   begin
     Name := 'btnDateFormat';
-    SetPosition(232, 116, 75, 23);
+    SetPosition(232, 160, 75, 23);
     Text := 'Set Format';
     FontDesc := '#Label1';
     Hint := '';
@@ -280,7 +283,8 @@ begin
   with edtDateFormat do
   begin
     Name := 'edtDateFormat';
-    SetPosition(132, 116, 92, 24);
+    SetPosition(132, 160, 92, 24);
+    ExtraHint := '';
     Hint := '';
     TabOrder := 7;
     Text := 'yy-mm-d';
@@ -301,7 +305,7 @@ begin
   with lblName5 do
   begin
     Name := 'lblName5';
-    SetPosition(8, 228, 104, 15);
+    SetPosition(8, 272, 104, 15);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Calendar Combo:';
@@ -311,7 +315,7 @@ begin
   with btnToday do
   begin
     Name := 'btnToday';
-    SetPosition(256, 224, 59, 23);
+    SetPosition(256, 268, 59, 23);
     Text := 'Today';
     FontDesc := '#Label1';
     Hint := '';
@@ -324,7 +328,8 @@ begin
   with edtMinDate do
   begin
     Name := 'edtMinDate';
-    SetPosition(132, 144, 92, 24);
+    SetPosition(132, 188, 92, 24);
+    ExtraHint := '';
     Hint := '';
     TabOrder := 13;
     Text := '2005-01-01';
@@ -335,7 +340,8 @@ begin
   with edtMaxDate do
   begin
     Name := 'edtMaxDate';
-    SetPosition(132, 172, 92, 24);
+    SetPosition(132, 216, 92, 24);
+    ExtraHint := '';
     Hint := '';
     TabOrder := 14;
     Text := '2009-01-01';
@@ -346,7 +352,7 @@ begin
   with btnMinDate do
   begin
     Name := 'btnMinDate';
-    SetPosition(232, 144, 75, 23);
+    SetPosition(232, 188, 75, 23);
     Text := 'Min Date';
     FontDesc := '#Label1';
     Hint := '';
@@ -359,7 +365,7 @@ begin
   with btnMaxDate do
   begin
     Name := 'btnMaxDate';
-    SetPosition(232, 172, 75, 23);
+    SetPosition(232, 216, 75, 23);
     Text := 'Max Date';
     FontDesc := '#Label1';
     Hint := '';
@@ -395,7 +401,7 @@ begin
   with bvlName1 do
   begin
     Name := 'bvlName1';
-    SetPosition(8, 204, 350, 2);
+    SetPosition(8, 248, 350, 2);
     Anchors := [anLeft,anRight,anTop];
     Hint := '';
     Style := bsLowered;
@@ -405,7 +411,7 @@ begin
   with CalendarCombo1 do
   begin
     Name := 'CalendarCombo1';
-    SetPosition(132, 264, 120, 22);
+    SetPosition(132, 308, 120, 22);
     Checked := True;
     DateFormat := 'yyyy-mm-dd';
     FontDesc := '#List';
@@ -417,10 +423,22 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(8, 268, 116, 16);
+    SetPosition(8, 312, 116, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Optional date:';
+  end;
+
+  cbSingleClickClose := TfpgCheckBox.Create(self);
+  with cbSingleClickClose do
+  begin
+    Name := 'cbSingleClickClose';
+    SetPosition(128, 112, 236, 20);
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 20;
+    Text := 'Single click selection';
+    OnChange := @cbSingleClickCloseChanged;
   end;
 
   {@VFD_BODY_END: MainForm}
