@@ -1236,7 +1236,7 @@ begin
   for n := 0 to alist.Count - 1 do
   begin
     w := TfpgWidget(alist[n]);
-    case aalign of
+    case AAlign of
       alTop:
         begin
           w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.Height);
