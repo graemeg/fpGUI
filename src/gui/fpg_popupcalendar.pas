@@ -643,7 +643,7 @@ begin
   begin
     FYearPopupWindow := TYearSelectForm.CreateCustom(nil, YearOf(MinDate), YearOf(MaxDate));
     FYearPopupWindow.OnClose  := @YearPopupWindowClose;
-    FYearPopupWindow.DontCloseWidget := self;  // now we can control when the popup window closes
+//    FYearPopupWindow.DontCloseWidget := self;  // now we can control when the popup window closes
     FYearPopupWindow.Year := Year;
   end;
   FYearPopupWindow.ShowAt(self, edtYear.Left, edtYear.Bottom);
@@ -1071,7 +1071,7 @@ begin
   if not Assigned(FMonthsPopupMenu) then
   begin
     FMonthsPopupMenu := TfpgPopupMenu.Create(nil);
-    FMonthsPopupMenu.DontCloseWidget := self;  // now we can control when the popup window closes
+//    FMonthsPopupMenu.DontCloseWidget := self;  // now we can control when the popup window closes
     itm := FMonthsPopupMenu.AddMenuItem(rslongjan, '', @miMonthClicked);
     itm.Tag := 1;
     itm := FMonthsPopupMenu.AddMenuItem(rslongfeb, '', @miMonthClicked);
