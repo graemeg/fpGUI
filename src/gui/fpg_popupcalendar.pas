@@ -282,6 +282,10 @@ uses
   fpg_scrollbar,
   fpg_constants;
 
+type
+  // friend class to get access to Protected methods
+  TPopupMenuFriend = class(TfpgPopupMenu);
+
 
 {@VFD_NEWFORM_IMPL}
 
@@ -643,9 +647,9 @@ begin
   begin
     FYearPopupWindow := TYearSelectForm.CreateCustom(nil, YearOf(MinDate), YearOf(MaxDate));
     FYearPopupWindow.OnClose  := @YearPopupWindowClose;
-//    FYearPopupWindow.DontCloseWidget := self;  // now we can control when the popup window closes
     FYearPopupWindow.Year := Year;
   end;
+
   FYearPopupWindow.ShowAt(self, edtYear.Left, edtYear.Bottom);
 end;
 
@@ -1067,11 +1071,11 @@ end;
 procedure TfpgPopupCalendar.ShowDefaultPopupMenu;
 var
   itm: TfpgMenuItem;
+  pt: TPoint;
 begin
   if not Assigned(FMonthsPopupMenu) then
   begin
     FMonthsPopupMenu := TfpgPopupMenu.Create(nil);
-//    FMonthsPopupMenu.DontCloseWidget := self;  // now we can control when the popup window closes
     itm := FMonthsPopupMenu.AddMenuItem(rslongjan, '', @miMonthClicked);
     itm.Tag := 1;
     itm := FMonthsPopupMenu.AddMenuItem(rslongfeb, '', @miMonthClicked);
@@ -1098,8 +1102,15 @@ begin
     itm.Tag := 12;
   end;
 
+  // translate Edit coordinates
+  pt := WindowToScreen(self, Point(edtMonth.Left, edtMonth.Bottom));
+  TPopupMenuFriend(FMonthsPopupMenu).PrepareToShow;  // forces height calculation
+  // If dropdown will not fit below Edit, then we place it above
+  if (pt.y + FMonthsPopupMenu.Height) > fpgApplication.ScreenHeight then
+    pt.y := pt.y - edtMonth.Height - FMonthsPopupMenu.Height;
+
 //  SetDefaultPopupMenuItemsState;
-  FMonthsPopupMenu.ShowAt(self, edtMonth.Left, edtMonth.Bottom);
+  FMonthsPopupMenu.ShowAt(nil, pt.x, pt.y);
 end;
 
 constructor TfpgPopupCalendar.Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget);
