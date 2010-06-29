@@ -1222,7 +1222,7 @@ begin
     hkw := hkw + 10; // spacing between text and hotkey text
 
   FHeight := FMargin*2 + h;
-  FWidth  := (FMargin+FTextMargin)*2 + FSymbolWidth + tw + hkw + cImgWidth;
+  FWidth  := ((FMargin+FTextMargin)*2) + FSymbolWidth + tw + hkw + (cImgWidth*2);
   
   uFocusedPopupMenu := self;
 end;
