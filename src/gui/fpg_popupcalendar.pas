@@ -359,7 +359,6 @@ begin
   FOriginalYear := 0;
   FMinYear := MinYear;
   FMaxYear := MaxYear;
-  WriteLn(FMinYear, ' ', FMaxYear);
 end;
 
 procedure TYearSelectForm.AfterConstruction;
