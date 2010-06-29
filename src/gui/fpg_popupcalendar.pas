@@ -1484,6 +1484,7 @@ begin
   if AValue = FChecked then
     Exit; //==>
   FChecked := Avalue;
+  Repaint;
 end;
 
 procedure TfpgCalendarCheckCombo.DoCheckboxChanged;
