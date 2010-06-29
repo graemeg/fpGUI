@@ -1774,7 +1774,7 @@ procedure TfpgGDICanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
-  {Stupid GDI can't tell the difference between 0 and 360°!!}
+  {Stupid GDI can't tell the difference between 0 and 360 degrees!!}
   if a2 = 0 then
     Exit; //==>
   {Stupid GDI must be told in which direction to draw}
@@ -1794,7 +1794,7 @@ procedure TfpgGDICanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
-  {Stupid GDI can't tell the difference between 0 and 360°!!}
+  {Stupid GDI can't tell the difference between 0 and 360 degrees!!}
   if a2 = 0 then
     Exit; //==>
   {Stupid GDI must be told in which direction to draw}
