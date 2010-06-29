@@ -1371,27 +1371,26 @@ begin
   mid         := 0;
   wcname      := 'FPGWIN';
 
-  if aparent <> nil then
+  if AParent <> nil then
     FParentWinHandle := TfpgGDIWindow(AParent).WinHandle
   else
     FParentWinHandle := 0;
 
-  if FWindowType = wtChild then
+  if WindowType = wtChild then
   begin
     FWinStyle   := WS_CHILD;
     FWinStyleEx := 0;
     mid         := 1;
     wcname      := 'FPGWIDGET';
   end
-  else if FWindowType in [wtPopup] then
+  else if WindowType in [wtPopup] then
   begin
     // This prevents the popup window from stealing the focus. eg: ComboBox dropdown
     FParentWinHandle := GetDesktopWindow;
     FWinStyle   := WS_CHILD;
     FWinStyleEx := WS_EX_TOPMOST or WS_EX_TOOLWINDOW;
-  end;
-
-  if FWindowType = wtModalForm then
+  end
+  else if WindowType = wtModalForm then
   begin
     // set parent window to special hidden window. It helps to hide window taskbar button.
     FParentWinHandle := wapplication.GetHiddenWindow;
@@ -1401,10 +1400,10 @@ begin
     FWinStyleEx := 0;
   end;
 
-  AdjustWindowStyle;
-
   if ((WindowType = wtWindow) or (WindowType = wtModalForm)) and (waBorderLess in FWindowAttributes) then
-    FWinStyle := WS_POPUP;  // this is different to wtPopop (toolwindow, hint window) because it can steal focus like a normal form
+    FWinStyle := FWinStyle and WS_POPUP;  // this is different to wtPopop (toolwindow, hint window) because it can steal focus like a normal form
+
+  AdjustWindowStyle;
 
   if waAutoPos in FWindowAttributes then
   begin
@@ -1412,7 +1411,7 @@ begin
     FTop  := TfpgCoord(CW_USEDEFAULT);
   end;
 
-  if (FWindowType <> wtChild) and not (waSizeable in FWindowAttributes) then
+  if (WindowType <> wtChild) and not (waSizeable in FWindowAttributes) then
     FWinStyle := FWinStyle and not (WS_SIZEBOX or WS_MAXIMIZEBOX);
 
   FWinStyle := FWinStyle or WS_CLIPCHILDREN or WS_CLIPSIBLINGS;
