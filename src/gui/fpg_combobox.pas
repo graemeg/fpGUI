@@ -83,7 +83,7 @@ type
     FBtnPressed: Boolean;
     procedure   SetMargin(const AValue: integer);
     procedure   CalculateInternalButtonRect; virtual;
-    procedure   InternalOnClose(Sender: TObject);
+    procedure   InternalOnClose(Sender: TObject); virtual;
     procedure   InternalItemsChanged(Sender: TObject); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnChange; virtual;
