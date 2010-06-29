@@ -342,11 +342,6 @@ procedure TfpgPopupWindow.Close;
 begin
   HandleClose;
   PopupListRemove(self);
-  { TODO : Move this out to the GDI specific unit. }
-  {$IFDEF MSWINDOWS}
-  if uFirstPopup <> nil then
-    uFirstPopup^.Widget.CaptureMouse;
-  {$ENDIF}
 end;
 
 
