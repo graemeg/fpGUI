@@ -41,7 +41,6 @@ type
 
   TfpgAbstractPanel = class(TfpgWidget)
   private
-    FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
     FPanelBorder: TPanelBorder;
     FParentBackgroundColor: Boolean;
@@ -61,6 +60,7 @@ type
 
   TfpgBevel = class(TfpgAbstractPanel)
   private
+    FPanelShape: TPanelShape;
     procedure   SetPanelShape(const AValue: TPanelShape);
   protected
     procedure   HandlePaint; override;
@@ -298,7 +298,6 @@ end;
 constructor TfpgAbstractPanel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FPanelShape      := bsBox;
   FPanelStyle      := bsRaised;
   FPanelBorder     := bsSingle;
   FWidth           := 80;
@@ -551,7 +550,6 @@ begin
   inherited Create(AOwner);
   FText             := 'Panel';
   FFont             := fpgGetFont('#Label1');
-  FPanelShape       := bsBox;
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
@@ -790,7 +788,6 @@ begin
   inherited Create(AOwner);
   FText             := 'Group box';
   FFont             := fpgGetFont('#Label1');
-  FPanelShape       := bsBox;
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
