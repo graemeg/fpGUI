@@ -32,7 +32,7 @@ uses
 type
 
   TPanelShape = (bsBox, bsFrame, bsTopLine, bsBottomLine, bsLeftLine,
-    bsRightLine, bsSpacer);
+    bsRightLine, bsSpacer, bsVerDivider);
 
   TPanelStyle = (bsLowered, bsRaised);
 
@@ -426,39 +426,21 @@ end;
 
 procedure TfpgBevel.DrawVerDivider;
 begin
-  if Shape in [bsBox] then
-    if FPanelBorder = bsSingle then
-      Canvas.DrawLine(0, 0, Width - 1, 0)
-    else
-      Canvas.DrawLine(0, 1, Width - 1, 1);
-  if Shape in [bsFrame, bsTopLine] then
-      Canvas.DrawLine(0, 0, Width - 1, 0);
-  if Shape in [bsBox] then
-    if FPanelBorder = bsSingle then
-      Canvas.DrawLine(0, 1, 0, Height - 1)
-    else
-      Canvas.DrawLine(1, 1, 1, Height - 1);
-  if Shape in [bsFrame, bsLeftLine] then
-    Canvas.DrawLine(0, 1, 0, Height - 1);
-  if Shape in [bsFrame, bsRightLine] then
-    Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
-  if Shape in [bsFrame, bsBottomLine] then
-    Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
+  if Style = bsRaised then
+    Canvas.SetColor(clHilite2)
+  else
+    Canvas.SetColor(clShadow1);
+
+  Canvas.DrawLine(0, 0, 3, 0);
+  Canvas.DrawLine(0, 0, 0, Height - 1);
 
   if Style = bsRaised then
-    Canvas.SetColor(clShadow2)
+    Canvas.SetColor(clShadow1)
   else
     Canvas.SetColor(clHilite2);
 
-  if Shape in [bsFrame, bsTopLine] then
-    Canvas.DrawLine(1, 1, Width - 2, 1);
-  if Shape in [bsFrame, bsLeftLine] then
-    Canvas.DrawLine(1, 2, 1, Height - 2);
-  if Shape in [bsBox, bsFrame, bsRightLine] then
-    Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
-  if Shape in [bsBox, bsFrame, bsBottomLine] then
-    Canvas.DrawLine(0, Height - 1, Width, Height - 1);
-
+  Canvas.DrawLine(0, Height - 1, 2, Height - 1);
+  Canvas.DrawLine(2, Height - 1, 2, 0);
 end;
 
 procedure TfpgBevel.HandlePaint;
@@ -483,6 +465,7 @@ begin
     bsLeftLine:     DrawLeftLine;
     bsRightLine:    DrawRightLine;
     bsSpacer:       DrawSpacer;
+    bsVerDivider:   DrawVerDivider;
   end;
 end;
 
