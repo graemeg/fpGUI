@@ -62,6 +62,14 @@ type
   private
     FPanelShape: TPanelShape;
     procedure   SetPanelShape(const AValue: TPanelShape);
+    procedure   DrawBox;        //  bsBox
+    procedure   DrawFrame;      //  bsFrame
+    procedure   DrawTopLine;    //  bsTopLine
+    procedure   DrawBottomLine; //  bsBottomLine
+    procedure   DrawLeftLine;   //  bsLeftLine
+    procedure   DrawRightLine;  //  bsRightLine
+    procedure   DrawSpacer;     //  bsSpacer
+    procedure   DrawVerDivider; //  bsVerDivider
   protected
     procedure   HandlePaint; override;
   published
@@ -318,23 +326,106 @@ begin
   end;
 end;
 
-procedure TfpgBevel.HandlePaint;
+procedure TfpgBevel.DrawBox;
 begin
-  inherited HandlePaint;
-
-  //  Canvas.SetLineStyle(2, lsSolid);
-  //  Canvas.SetColor(clWindowBackground);
-  //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
   if FPanelBorder = bsSingle then
-    Canvas.SetLineStyle(1, lsSolid)
+    Canvas.DrawLine(0, 0, Width - 1, 0)
   else
-    Canvas.SetLineStyle(2, lsSolid);
+    Canvas.DrawLine(0, 1, Width - 1, 1);
+
+  if FPanelBorder = bsSingle then
+    Canvas.DrawLine(0, 1, 0, Height - 1)
+  else
+    Canvas.DrawLine(1, 1, 1, Height - 1);
 
   if Style = bsRaised then
-    Canvas.SetColor(clHilite2)
+    Canvas.SetColor(clShadow2)
   else
-    Canvas.SetColor(clShadow2);
+    Canvas.SetColor(clHilite2);
 
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+end;
+
+procedure TfpgBevel.DrawFrame;
+begin
+  Canvas.DrawLine(0, 0, Width - 1, 0);
+  Canvas.DrawLine(0, 1, 0, Height - 1);
+  Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
+  Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(1, 1, Width - 2, 1);
+  Canvas.DrawLine(1, 2, 1, Height - 2);
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+end;
+
+procedure TfpgBevel.DrawTopLine;
+begin
+  Canvas.DrawLine(0, 0, Width, 0);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(0, 1, Width, 1);
+end;
+
+procedure TfpgBevel.DrawBottomLine;
+begin
+  Canvas.DrawLine(0, Height - 2, Width, Height - 2);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+end;
+
+procedure TfpgBevel.DrawLeftLine;
+begin
+  Canvas.DrawLine(0, 1, 0, Height - 1);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(1, 1, 1, Height - 1);
+end;
+
+procedure TfpgBevel.DrawRightLine;
+begin
+  Canvas.DrawLine(Width - 2, 0, Width - 2, Height - 1);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+end;
+
+procedure TfpgBevel.DrawSpacer;
+begin
+  // To make it more visible in the UI Designer
+  if csDesigning in ComponentState then
+  begin
+    Canvas.SetColor(clInactiveWgFrame);
+    Canvas.SetLineStyle(1, lsDash);
+    Canvas.DrawRectangle(0, 0, Width, Height);
+  end;
+end;
+
+procedure TfpgBevel.DrawVerDivider;
+begin
   if Shape in [bsBox] then
     if FPanelBorder = bsSingle then
       Canvas.DrawLine(0, 0, Width - 1, 0)
@@ -367,18 +458,31 @@ begin
     Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   if Shape in [bsBox, bsFrame, bsBottomLine] then
     Canvas.DrawLine(0, Height - 1, Width, Height - 1);
-    
-  // To make it more visible in the UI Designer
-  if csDesigning in ComponentState then
-  begin
-    if Shape in [bsSpacer] then
-    begin
-      Canvas.SetColor(clInactiveWgFrame);
-      Canvas.SetLineStyle(1, lsDash);
-      Canvas.DrawRectangle(0, 0, Width, Height);
-//      Canvas.SetTextColor(clText1);
-//      Canvas.DrawString(2, 2, Name + ': ' + Classname);
-    end;
+
+end;
+
+procedure TfpgBevel.HandlePaint;
+begin
+  inherited HandlePaint;
+
+  if FPanelBorder = bsSingle then
+    Canvas.SetLineStyle(1, lsSolid)
+  else
+    Canvas.SetLineStyle(2, lsSolid);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clHilite2)
+  else
+    Canvas.SetColor(clShadow2);
+
+  case Shape of
+    bsBox:          DrawBox;
+    bsFrame:        DrawFrame;
+    bsTopLine:      DrawTopLine;
+    bsBottomLine:   DrawBottomLine;
+    bsLeftLine:     DrawLeftLine;
+    bsRightLine:    DrawRightLine;
+    bsSpacer:       DrawSpacer;
   end;
 end;
 
