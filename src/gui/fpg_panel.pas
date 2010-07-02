@@ -436,22 +436,30 @@ begin
 end;
 
 procedure TfpgBevel.DrawVerDivider;
+
+  procedure PaintLine(px, py: integer);
+  begin
+    if Style = bsRaised then
+      Canvas.SetColor(clHilite2)
+    else
+      Canvas.SetColor(clShadow1);
+
+    Canvas.DrawLine(px, py, px+2, py);
+    Canvas.DrawLine(px, py, px, Height);
+
+    if Style = bsRaised then
+      Canvas.SetColor(clShadow1)
+    else
+      Canvas.SetColor(clHilite2);
+
+    Canvas.DrawLine(px+1, Height - 1, px+3, Height - 1);
+    Canvas.DrawLine(px+2, py, px+2, Height);
+  end;
+
 begin
-  if Style = bsRaised then
-    Canvas.SetColor(clHilite2)
-  else
-    Canvas.SetColor(clShadow1);
-
-  Canvas.DrawLine(0, 0, 3, 0);
-  Canvas.DrawLine(0, 0, 0, Height - 1);
-
-  if Style = bsRaised then
-    Canvas.SetColor(clShadow1)
-  else
-    Canvas.SetColor(clHilite2);
-
-  Canvas.DrawLine(0, Height - 1, 2, Height - 1);
-  Canvas.DrawLine(2, Height - 1, 2, 0);
+  PaintLine(0, 0);
+  if FPanelBorder = bsDouble then
+    PaintLine(3, 0);
 end;
 
 procedure TfpgBevel.HandlePaint;
