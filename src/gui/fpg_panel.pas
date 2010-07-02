@@ -461,7 +461,7 @@ begin
   if Style = bsRaised then
     Canvas.SetColor(clHilite2)
   else
-    Canvas.SetColor(clShadow2);
+    Canvas.SetColor(clShadow1);
 
   case Shape of
     bsBox:          DrawBox;
