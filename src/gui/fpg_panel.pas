@@ -329,6 +329,11 @@ end;
 procedure TfpgBevel.DrawBox;
 begin
   if FPanelBorder = bsSingle then
+    Canvas.SetLineStyle(1, lsSolid)
+  else
+    Canvas.SetLineStyle(2, lsSolid);
+
+  if FPanelBorder = bsSingle then
     Canvas.DrawLine(0, 0, Width - 1, 0)
   else
     Canvas.DrawLine(0, 1, Width - 1, 1);
@@ -349,6 +354,8 @@ end;
 
 procedure TfpgBevel.DrawFrame;
 begin
+  Canvas.SetLineStyle(1, lsSolid);
+
   Canvas.DrawLine(0, 0, Width - 1, 0);
   Canvas.DrawLine(0, 1, 0, Height - 1);
   Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
@@ -367,6 +374,7 @@ end;
 
 procedure TfpgBevel.DrawTopLine;
 begin
+  Canvas.SetLineStyle(1, lsSolid);
   Canvas.DrawLine(0, 0, Width, 0);
 
   if Style = bsRaised then
@@ -379,6 +387,7 @@ end;
 
 procedure TfpgBevel.DrawBottomLine;
 begin
+  Canvas.SetLineStyle(1, lsSolid);
   Canvas.DrawLine(0, Height - 2, Width, Height - 2);
 
   if Style = bsRaised then
@@ -391,6 +400,7 @@ end;
 
 procedure TfpgBevel.DrawLeftLine;
 begin
+  Canvas.SetLineStyle(1, lsSolid);
   Canvas.DrawLine(0, 1, 0, Height - 1);
 
   if Style = bsRaised then
@@ -403,6 +413,7 @@ end;
 
 procedure TfpgBevel.DrawRightLine;
 begin
+  Canvas.SetLineStyle(1, lsSolid);
   Canvas.DrawLine(Width - 2, 0, Width - 2, Height - 1);
 
   if Style = bsRaised then
@@ -446,11 +457,6 @@ end;
 procedure TfpgBevel.HandlePaint;
 begin
   inherited HandlePaint;
-
-  if FPanelBorder = bsSingle then
-    Canvas.SetLineStyle(1, lsSolid)
-  else
-    Canvas.SetLineStyle(2, lsSolid);
 
   if Style = bsRaised then
     Canvas.SetColor(clHilite2)
