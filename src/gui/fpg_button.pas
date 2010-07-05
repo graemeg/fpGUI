@@ -508,7 +508,7 @@ var
   pofs: integer;
   lBtnFlags: TFButtonFlags;
   clr: TfpgColor;
-
+  img: TfpgImage;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -567,9 +567,17 @@ begin
 
   CalculatePositions (ix, iy, tx, ty);
 
-  if FShowImage and assigned (FImage) then
-    Canvas.DrawImage(ix + pofs, iy + pofs, FImage);
-
+  if FShowImage and Assigned(FImage) then
+  begin
+    if Enabled then
+      Canvas.DrawImage(ix + pofs, iy + pofs, FImage)
+    else
+    begin
+      img := FImage.CreateDisabledImage;
+      Canvas.DrawImage(ix + pofs, iy + pofs, img);
+      img.Free;
+    end;
+  end;
   fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
 end;
 
