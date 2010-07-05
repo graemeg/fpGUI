@@ -189,6 +189,7 @@ type
     FImageDataSize: integer;
     FMaskData: pointer;
     FMaskDataSize: integer;
+    FMaskPoint: TPoint;
     procedure   DoFreeImage; virtual; abstract;
     procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
     procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
@@ -210,6 +211,7 @@ type
     property    Height: integer read FHeight;
     property    ColorDepth: integer read FColorDepth;
     property    Masked: boolean read FMasked;
+    property    MaskPoint: TPoint read FMaskPoint;
     property    Colors[x, y: TfpgCoord]: TfpgColor read GetColor write SetColor;
   end;
 
@@ -1942,6 +1944,7 @@ begin
   FMaskData      := nil;
   FMaskDataSize  := 0;
   FMasked        := False;
+  FMaskPoint     := Point(0, 0);
 end;
 
 destructor TfpgImageBase.Destroy;
@@ -2050,6 +2053,7 @@ begin
     Exit; //==>
 
   AllocateMask;
+  FMaskPoint := Point(x, y);
 
   p := FImageData;
   if x < 0 then
