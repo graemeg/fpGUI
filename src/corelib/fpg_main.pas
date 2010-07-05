@@ -143,6 +143,7 @@ type
 
   TfpgImage = class(TfpgImageImpl)
   public
+    function    CreateDisabledImage: TfpgImage;
     function    ImageFromSource: TfpgImage;
     function    ImageFromRect(var ARect: TRect): TfpgImage; overload;
     function    ImageFromRect(var ARect: TfpgRect): TfpgImage; overload;
@@ -400,7 +401,8 @@ uses
   fpg_hint,
   fpg_extgraphics,
   fpg_utils,
-  fpg_cmdlineparams;
+  fpg_cmdlineparams,
+  fpg_imgutils;
 
 var
   fpgTimers: TList;
@@ -2087,6 +2089,12 @@ end;
 
 
 { TfpgImage }
+
+function TfpgImage.CreateDisabledImage: TfpgImage;
+begin
+  Result := ImageFromSource;
+  fpgApplyGreyFilter(Result);
+end;
 
 function TfpgImage.ImageFromSource: TfpgImage;
 var
