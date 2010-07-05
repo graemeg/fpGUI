@@ -1,4 +1,4 @@
-{ This file was automatically created by Lazarus. Do not edit!
+{ This file was automatically created by Lazarus. do not edit!
   This source is only used to compile and install the package.
  }
 
@@ -18,7 +18,7 @@ uses
   fpg_radiobutton, fpg_scrollbar, fpg_style, fpg_tab, fpg_trackbar, fpg_tree, 
   fpgui_db, fpg_gdi, fpg_impl, fpg_splitter, fpg_hint, fpg_spinedit, 
   fpg_extgraphics, fpg_ColorMapping, fpg_ColorWheel, fpg_interface, 
-  fpg_editbtn, fpg_imgfmt_jpg;
+  fpg_editbtn, fpg_imgfmt_jpg, fpg_imgutils;
 
 implementation
 

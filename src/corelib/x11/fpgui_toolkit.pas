@@ -17,7 +17,7 @@ uses
   fpg_mru, fpg_panel, fpg_popupcalendar, fpg_progressbar, fpg_radiobutton, 
   fpg_scrollbar, fpg_style, fpg_tab, fpg_trackbar, fpg_tree, fpgui_db, fpg_splitter, 
   fpg_hint, fpg_spinedit, fpg_extgraphics, fpg_ColorMapping, fpg_ColorWheel, 
-  fpg_interface, fpg_editbtn, fpg_imgfmt_jpg;
+  fpg_interface, fpg_editbtn, fpg_imgfmt_jpg, fpg_imgutils;
 
 implementation
 
