@@ -143,6 +143,7 @@ type
 
   TfpgImage = class(TfpgImageImpl)
   public
+    function    ImageFromSource: TfpgImage;
     function    ImageFromRect(var ARect: TRect): TfpgImage; overload;
     function    ImageFromRect(var ARect: TfpgRect): TfpgImage; overload;
   end;
@@ -2086,6 +2087,24 @@ end;
 
 
 { TfpgImage }
+
+function TfpgImage.ImageFromSource: TfpgImage;
+var
+  x, y: TfpgCoord;
+begin
+  Result := TfpgImage.Create;
+  Result.AllocateImage(ColorDepth, Width, Height);
+  for x := 0 to Width-1 do
+  begin
+    for y := 0 to Height-1 do
+    begin
+      Result.Colors[x, y] := Colors[x, y];
+    end;
+  end;
+  if Masked then
+    Result.CreateMaskFromSample(MaskPoint.X, MaskPoint.Y);
+  Result.UpdateImage;
+end;
 
 function TfpgImage.ImageFromRect(var ARect: TRect): TfpgImage;
 var
