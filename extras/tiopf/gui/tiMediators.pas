@@ -581,7 +581,7 @@ end;
 
 procedure TtiMemoMediatorView.DoGuiToObject;
 begin
-  Subject.PropValue[FieldName] := View.Lines.Text;
+  Subject.PropValue[FieldName] := Trim(View.Lines.Text);
 end;
 
 procedure TtiMemoMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
