@@ -905,8 +905,8 @@ function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
 begin
   Result := (APoint.x >= ARect.Left) and
             (APoint.y >= ARect.Top) and
-            (APoint.x < ARect.Right) and
-            (APoint.y < ARect.Bottom);
+            (APoint.x <= ARect.Right) and
+            (APoint.y <= ARect.Bottom);
 end;
 
 procedure SortRect(var ARect: TRect);
