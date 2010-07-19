@@ -56,12 +56,13 @@ type
     property    Font;
     property    HeaderFont;
   published
-    property    FontDesc;
-    property    HeaderFontDesc;
-    property    RowCount;
     property    ColumnCount;
     property    Columns;
     property    FocusRow;
+    property    FontDesc;
+    property    HeaderFontDesc;
+    property    Options;
+    property    RowCount;
     property    ScrollBarStyle;
     property    TabOrder;
     property    OnRowChange;
