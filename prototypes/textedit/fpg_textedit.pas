@@ -1453,12 +1453,16 @@ begin
   if AllowDraw then
   begin
     Canvas.DrawText(R, S);
+  end;
     if FSelected then
     begin
+      Canvas.TextColor := clWhite;
+      Canvas.Color :=  fpgColorToRGB(clSelection);
       if (ALineIndex > StartNo) and (ALineIndex < EndNo) then     // whole line is selected
       begin
         R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
-        Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+        Canvas.FillRectangle(R);
+        Canvas.DrawText(R, S);
       end
       else
       begin
@@ -1472,7 +1476,8 @@ begin
           else
             SS := UTF8Copy(S, Si + 1, Ei - Si);
           R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
-          Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+          Canvas.FillRectangle(R);
+          Canvas.DrawText(R, SS);
         end
         else
         begin
@@ -1480,7 +1485,8 @@ begin
           begin
             SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
             R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
-            Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+            Canvas.FillRectangle(R);
+            Canvas.DrawText(R, SS);
           end
           else
           begin
@@ -1490,13 +1496,14 @@ begin
                 Ei := UTF8Length(S);
               SS := UTF8Copy(S, 1, Ei);
               R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
-              Canvas.XORFillRectangle(fpgColorToRGB(clSelection) xor $FFFFFF, R);
+              Canvas.FillRectangle(R);
+              Canvas.DrawText(R, SS);
             end;
           end;
         end;
       end;
     end; { if FSelected... }
-  end;  { if AllowDraw... }
+//  end;  { if AllowDraw... }
 
   if UTF8Length(S) > FMaxScrollH then
   begin
