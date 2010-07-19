@@ -1334,8 +1334,8 @@ begin
       SLine := FLines[CaretPos.Y];
 
       { cursor was somewhere in whitespace, so we need to fill up the spaces }
-      if UTF8Length(SLine) < CaretPos.y + 1 then
-        for Fill := Length(SLine) to CaretPos.y + 1 do
+      if UTF8Length(SLine) < CaretPos.X + 1 then
+        for Fill := Length(SLine) to CaretPos.X + 1 do
           SLine := SLine + ' ';
 
       UTF8Insert(AText, SLine, CaretPos.X + 1);
