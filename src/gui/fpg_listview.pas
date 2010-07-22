@@ -24,6 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
+  contnrs,
   fpg_base,
   fpg_main,
   fpg_widget,
@@ -80,7 +81,7 @@ type
   TfpgLVColumns = class(TPersistent)
   private
     FListView: TfpgListView;
-    FColumns: TList;
+    FColumns: TObjectList;
     function    GetColumn(AIndex: Integer): TfpgLVColumn;
     procedure   SetColumn(AIndex: Integer; const AValue: TfpgLVColumn);
   public
@@ -1564,6 +1565,7 @@ begin
   FItems.DeleteViewer(Self);
   FSelected.Free;
   FOldSelected.Free;
+  FColumns.Free;
   inherited Destroy;
 end;
 
@@ -1630,7 +1632,7 @@ end;
 constructor TfpgLVColumns.Create(AListView: TfpgListView);
 begin
   FListView := AListView;
-  FColumns := TList.Create;
+  FColumns := TObjectList.Create;
 end;
 
 destructor TfpgLVColumns.Destroy;
