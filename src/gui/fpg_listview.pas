@@ -122,7 +122,7 @@ type
     FColumns: TfpgLVColumns;
     FCurrentIndexOf: Integer;
     FViewers: TList;
-    FItems: TList;
+    FItems: TObjectList;
     function    GetCapacity: Integer;
     function    GetItem(AIndex: Integer): TfpgLVItem;
     procedure   SetCapacity(const AValue: Integer);
@@ -390,7 +390,7 @@ end;
 
 constructor TfpgLVItems.Create(AViewer: IfpgLVItemViewer);
 begin
-  FItems := TList.Create;
+  FItems := TObjectList.Create;
   FViewers := TList.Create;
   AddViewer(AViewer);
 end;
@@ -436,11 +436,11 @@ begin
   // search significantly when we are using indexof in a for loop
   if (FCurrentIndexOf > 100) and (FCurrentIndexOf < Count-2) then
   begin
-    if FItems.Items[FCurrentIndexOf] = Pointer(AItem) then
+    if FItems.Items[FCurrentIndexOf] = AItem then
       Result := FCurrentIndexOf
-    else if FItems.Items[FCurrentIndexOf+1] = Pointer(AItem) then
+    else if FItems.Items[FCurrentIndexOf+1] = AItem then
       Result := FCurrentIndexOf+1
-    else if FItems.Items[FCurrentIndexOf-1] = Pointer(AItem) then
+    else if FItems.Items[FCurrentIndexOf-1] = AItem then
       Result := FCurrentIndexOf-1
   end;
   if Result = -1 then
