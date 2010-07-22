@@ -247,6 +247,7 @@ type
     procedure   MakeItemVisible(AIndex: Integer; PartialOK: Boolean = False);
     function    ItemAdd: TfpgLVItem; deprecated;
     function    AddItem: TfpgLVItem;
+    function    NewItem: TfpgLVItem;
   published
     property    Columns: TfpgLVColumns read FColumns;
     property    HScrollBar: TfpgScrollBar read FHScrollBar;
@@ -1621,6 +1622,11 @@ function TfpgListView.AddItem: TfpgLVItem;
 begin
   Result := TfpgLVItem.Create(FItems);
   FItems.Add(Result);
+end;
+
+function TfpgListView.NewItem: TfpgLVItem;
+begin
+  Result := TfpgLVItem.Create(FItems);
 end;
 
 { TfpgLVColumns }
