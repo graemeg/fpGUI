@@ -2,6 +2,40 @@
   Release notes for fpGUI
   =======================
 
+v0.7 (2010-08-02)
+  - Quite a few more minor bug fixes since v0.7-rc2.
+  - Some memory leaks in TfpgListView
+  - Added an example Debug Server in examples/apps/debugserver
+    - This can be used with FPC's dbugintf unit so you can send
+      debug messages. Handy for debugging CGI apps on your server.
+  - A new unit fpg_imgutils was added. It contains some handy 
+    utility functions for images.
+  - Implemented disabled images support for all controls that can
+    display images.
+  - Added a new TfpgMemo Mediator for use with tiOPF based
+     applications.
+  - Improved quick date selection in TfpgComboCalendar. Users can
+    now click the Year or Month to quickly select a different value
+    without the need for scrolling through every month.
+  - Many more improvements to the "prototype" text editor component
+    located in prototypes/textedit/. Soon this will become a 
+    standard component in fpGUI.
+  - Minor improvements to DocView's toolbar.
+  - DocView now has a 'File | Open Special' option, which can open
+    environment variables pointing to a location where INF files are.
+  - Grids now have a smooth scrolling option for horizontal scrolling.
+  - A new Input Query dialog was added.
+  - Some demos where improved. eg: SplashScreen demo.
+  - JPEG image format support was added. Soon all image formats
+    supported by FPImage will be included. Unfortunately it did not
+    make it into this release.
+  - Added a fpGUI project template for when you use fpGUI with MSEide.
+  - A new Color Selection dialog was added to fpGUI.
+  - fpGUI's UI Designer has a few more components on the component palette.
+    eg: TfpgFilenameEdit, TfpgDirectoryEdit, TfpgFontEdit, etc...
+  - Some more minor changes to allow compiling fpGUI under MacOSX with X11.
+  
+
 v0.7.rc2  (2010-04-08)
   - Localization of Character Map dialog.
   - Insert from Character Map added to TfpgEdit default popup menu.
