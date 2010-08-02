@@ -39,9 +39,9 @@ type
     btnAddOne: TfpgButton;
     btnFiveOnly: TfpgButton;
     btnDelRow: TfpgButton;
+    chkSmoothScroll: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
-    procedure StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton;
-      AShift: TShiftState; const AMousePos: TPoint);
+    procedure   StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnAddFiveClicked(Sender: TObject);
     procedure   btnAddOneClicked(Sender: TObject);
     procedure   btnFiveOnlyClicked(Sender: TObject);
@@ -51,6 +51,7 @@ type
     procedure   chkShowHeaderChange(Sender: TObject);
     procedure   chkShowGridChange(Sender: TObject);
     procedure   chkHideFocusChange(Sender: TObject);
+    procedure   chkSmoothScrollChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Integer;
         const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
@@ -117,8 +118,17 @@ begin
   if chkHideFocus.Checked then
     stringgrid.Options := stringgrid.Options + [go_HideFocusRect]
   else
-    stringgrid.Options := [];
+    stringgrid.Options := stringgrid.Options - [go_HideFocusRect];
   stringgrid.Invalidate;
+end;
+
+procedure TMainForm.chkSmoothScrollChange(Sender: TObject);
+begin
+  if chkSmoothScroll.Checked then
+    stringgrid.Options := stringgrid.Options + [go_SmoothScroll]
+  else
+    stringgrid.Options := stringgrid.Options - [go_SmoothScroll];
+  stringgrid.Update;
 end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
@@ -156,6 +166,7 @@ begin
   Name := 'MainForm';
   SetPosition(351, 214, 515, 350);
   WindowTitle := 'Grid control test';
+  Hint := '';
   WindowPosition := wpScreenCenter;
 
   btnQuit := TfpgButton.Create(self);
@@ -168,6 +179,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.Quit';
+    TabOrder := 1;
     OnClick := @btnQuitClick;
   end;
 
@@ -182,7 +194,9 @@ begin
     AddColumn('Numbers', 150, taRightJustify);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
+    Hint := '';
     RowCount := 17;
+    RowSelect := False;
     TabOrder := 1;
     AddColumn('Column 0', 65);
     // Alignment test
@@ -213,6 +227,7 @@ begin
     Anchors := [anRight,anTop];
     Checked := True;
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 2;
     Text := 'Show Header';
     OnChange := @chkShowHeaderChange;
@@ -226,6 +241,7 @@ begin
     Anchors := [anRight,anTop];
     Checked := True;
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 3;
     Text := 'Show Grid';
     OnChange := @chkShowGridChange;
@@ -238,6 +254,7 @@ begin
     SetPosition(394, 60, 116, 24);
     Anchors := [anRight,anTop];
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 4;
     Text := 'Row Select';
     OnChange := @chkRowSelectChange;
@@ -250,6 +267,7 @@ begin
     SetPosition(394, 84, 116, 24);
     Anchors := [anRight,anTop];
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 5;
     Text := 'Disabled';
     OnChange := @chkDisabledChange;
@@ -262,6 +280,7 @@ begin
     SetPosition(394, 108, 120, 20);
     Anchors := [anRight,anTop];
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 6;
     Text := 'Hide Focus';
     OnChange := @chkHideFocusChange;
@@ -271,8 +290,12 @@ begin
   with edtTopRow do
   begin
     Name := 'edtTopRow';
-    SetPosition(12, 280, 56, 22);
+    SetPosition(12, 280, 56, 24);
     Anchors := [anLeft,anBottom];
+    Hint := '';
+    TabOrder := 8;
+    FontDesc := '#Edit1';
+    Value := 0;
   end;
 
   btnTopRow := TfpgButton.Create(self);
@@ -336,12 +359,26 @@ begin
   begin
     Name := 'btnDelRow';
     SetPosition(168, 308, 80, 23);
+    Anchors := [anLeft,anBottom];
     Text := 'Delete Row';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 12;
     OnClick := @btnDelRowClicked;
+  end;
+
+  chkSmoothScroll := TfpgCheckBox.Create(self);
+  with chkSmoothScroll do
+  begin
+    Name := 'chkSmoothScroll';
+    SetPosition(394, 128, 120, 20);
+    Anchors := [anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 14;
+    Text := 'Smooth Scroll';
+    OnChange := @chkSmoothScrollChange;
   end;
 
   {@VFD_BODY_END: MainForm}
