@@ -61,15 +61,17 @@ type
     miDebug: TfpgPopupMenu;
     ToolBar: TfpgBevel;
     btnOpen: TfpgButton;
-    btnPanel: TfpgButton;
     btnBack: TfpgButton;
     btnFwd: TfpgButton;
     btnPrev: TfpgButton;
     btnNext: TfpgButton;
     btnHelp: TfpgButton;
     btnQuit: TfpgButton;
+    Bevel1: TfpgBevel;
+    Bevel2: TfpgBevel;
     {@VFD_HEAD_END: MainForm}
     miOpenRecentMenu: TfpgPopupMenu;
+    miDebugHexInfo: TfpgMenuItem;
 //    Files: TList; // current open help files.
     Debug: boolean;
     FFileOpenRecent: TfpgMenuItem;
@@ -440,6 +442,7 @@ end;
 procedure TMainForm.miDebugHex(Sender: TObject);
 begin
   Debug := not Debug;
+  miDebugHexInfo.Checked := Debug;
   DisplayTopic(nil);
 end;
 
@@ -2244,6 +2247,8 @@ begin
     AddMenuItem('Help using help', '', nil);
     AddMenuItem('Command line parameters', '', @miHelpCmdLineParams);
     AddMenuItem('-', '', nil);
+    AddMenuItem('Show help file header info', '', @miDebugHeader);
+    AddMenuItem('-', '', nil);
     AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
   end;
@@ -2253,8 +2258,7 @@ begin
   begin
     Name := 'miDebug';
     SetPosition(292, 192, 132, 20);
-    AddMenuItem('Debug: Header', '', @miDebugHeader);
-    AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
+    miDebugHexInfo := AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
   end;
 
   ToolBar := TfpgBevel.Create(self);
@@ -2274,7 +2278,7 @@ begin
     Name := 'btnOpen';
     SetPosition(30, 1, 24, 24);
     Text := '';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Open a new help file.';
     ImageMargin := -1;
@@ -2282,37 +2286,23 @@ begin
     ImageSpacing := 0;
     TabOrder := 0;
     OnClick := @miFileOpenClicked;
-  end;
-
-  btnPanel := TfpgButton.Create(ToolBar);
-  with btnPanel do
-  begin
-    Name := 'btnPanel';
-    SetPosition(64, 1, 32, 24);
-    Text := 'pnl';
-    AllowAllUp := True;
-    Embedded := True;
-    FontDesc := '#Label1';
-    GroupIndex := 1;
-    Hint := 'Display or hide tabs';
-    ImageName := '';
-    TabOrder := 1;
-    Enabled := False;
+    Focusable := False;
   end;
 
   btnBack := TfpgButton.Create(ToolBar);
   with btnBack do
   begin
     Name := 'btnBack';
-    SetPosition(102, 1, 32, 24);
+    SetPosition(70, 1, 32, 24);
     Text := '<';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Previous history item.';
     ImageMargin := -1;
     ImageName := 'dv.arrowleft';
     ImageSpacing := 0;
     TabOrder := 2;
+    Focusable := False;
     OnClick := @btnBackHistClick;
   end;
 
@@ -2320,15 +2310,16 @@ begin
   with btnFwd do
   begin
     Name := 'btnFwd';
-    SetPosition(136, 1, 32, 24);
+    SetPosition(104, 1, 32, 24);
     Text := '>';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Next history item.';
     ImageMargin := -1;
     ImageName := 'dv.arrowright';
     ImageSpacing := 0;
     TabOrder := 3;
+    Focusable := False;
     OnClick := @btnFwdHistClick;
   end;
 
@@ -2336,15 +2327,16 @@ begin
   with btnPrev do
   begin
     Name := 'btnPrev';
-    SetPosition(174, 1, 32, 24);
+    SetPosition(138, 1, 32, 24);
     Text := 'prev';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Previous Topic.';
     ImageMargin := -1;
     ImageName := 'dv.arrowup';
     ImageSpacing := 0;
     TabOrder := 4;
+    Focusable := False;
     OnClick := @btnPrevClick;
   end;
 
@@ -2352,15 +2344,16 @@ begin
   with btnNext do
   begin
     Name := 'btnNext';
-    SetPosition(208, 1, 32, 24);
+    SetPosition(172, 1, 32, 24);
     Text := 'next';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Next Topic.';
     ImageMargin := -1;
     ImageName := 'dv.arrowdown';
     ImageSpacing := 0;
     TabOrder := 5;
+    Focusable := False;
     OnClick :=@btnNextClick;
   end;
 
@@ -2368,15 +2361,16 @@ begin
   with btnHelp do
   begin
     Name := 'btnHelp';
-    SetPosition(246, 1, 24, 24);
+    SetPosition(218, 1, 24, 24);
     Text := '';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Display Product Information.';
     ImageMargin := -1;
     ImageName := 'stdimg.help';
     ImageSpacing := 0;
     TabOrder := 6;
+    Focusable := False;
     OnClick := @miHelpProdInfoClicked;
   end;
 
@@ -2386,7 +2380,7 @@ begin
     Name := 'btnQuit';
     SetPosition(4, 1, 24, 24);
     Text := '';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := -1;
@@ -2394,6 +2388,27 @@ begin
     ImageSpacing := 0;
     TabOrder := 8;
     OnClick := @miFileQuitClicked;
+    Focusable := False;
+  end;
+
+  Bevel1 := TfpgBevel.Create(ToolBar);
+  with Bevel1 do
+  begin
+    Name := 'Bevel1';
+    SetPosition(61, 0, 6, 24);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsLeftLine;
+  end;
+
+  Bevel2 := TfpgBevel.Create(ToolBar);
+  with Bevel2 do
+  begin
+    Name := 'Bevel2';
+    SetPosition(210, 0, 6, 24);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsLeftLine;
   end;
 
   {@VFD_BODY_END: MainForm}
