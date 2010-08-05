@@ -1078,8 +1078,8 @@ begin
     exit;
   end;
 
-  Result := FLayout.FindPoint( XToFind + FXScroll,
-                               YToFind + FYScroll,
+  Result := FLayout.FindPoint( XToFind + FXScroll,     // horizontal scrolls into positive
+                               YToFind + (-FYScroll),  // vertical scrolls into negative
                                LineIndex,
                                Offset,
                                Link );
