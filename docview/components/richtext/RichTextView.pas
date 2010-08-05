@@ -2002,12 +2002,12 @@ end;
 
 Procedure TRichTextView.UpPage;
 begin
-  SetVerticalPosition( FVScrollbar.Position - FVScrollbar.PageSize );
+  SetVerticalPosition( FVScrollbar.Position + FVScrollbar.PageSize );
 end;
 
 Procedure TRichTextView.DownPage;
 begin
-  SetVerticalPosition( FVScrollbar.Position + FVScrollbar.PageSize );
+  SetVerticalPosition( FVScrollbar.Position - FVScrollbar.PageSize );
 end;
 
 Procedure TRichTextView.SmallScrollUp;
