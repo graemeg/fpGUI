@@ -1181,7 +1181,7 @@ begin
 
   // Calculate used and available width
   AvailableWidth := GetTextAreaWidth;
-  MaxDisplayWidth := FLayout.Width;
+  MaxDisplayWidth := FLayout.Width + 200;  { TODO : We need to fix FLayout.Width first before we remove + 200 }
 
   // Horizontal scroll setup
   if MaxDisplayWidth > AvailableWidth then
@@ -1190,7 +1190,8 @@ begin
 //  FHScrollbar.SliderSize := AvailableWidth div 2;
   FHScrollbar.Min := 0;
   if FNeedHScroll then
-    FHScrollbar.Max := MaxDisplayWidth
+    { TODO : As soon as we fix FLayout.Width, then we can enable the extra code below }
+    FHScrollbar.Max := (MaxDisplayWidth) // - AvailableWidth)  + FScrollbarWidth
   else
   begin
     FHScrollBar.Position := 0;
@@ -1212,9 +1213,11 @@ begin
   end;
 
   FHScrollBar.ScrollStep :=  25; // pixels
-  FHScrollBar.PageSize := AvailableWidth div 2;
+  FHScrollBar.PageSize := AvailableWidth - FHScrollbar.ScrollStep; // slightly less than width
+  FHScrollBar.SliderSize := AvailableWidth / MaxDisplayWidth;
   FVScrollBar.ScrollStep := 25; // not used (line up/down calculated explicitly)
-  FVScrollBar.PageSize := AvailableHeight div 2;
+  FVScrollBar.PageSize := AvailableHeight - FVScrollBar.ScrollStep;
+  FVScrollBar.SliderSize := AvailableHeight / FLayout.Height;
 
   // Physical horizontal scroll setup
   FHScrollbar.Visible := FNeedHScroll;
