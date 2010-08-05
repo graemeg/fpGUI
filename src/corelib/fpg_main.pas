@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      The main unit trying everything together in corelib.
+      The main unit that ties everything together from CoreLib.
 }
 
 unit fpg_main;
