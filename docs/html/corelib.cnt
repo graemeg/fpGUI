@@ -464,6 +464,7 @@
    FImageDataSize fpg_base/tfpgimagebase.fimagedatasize.html
    FMaskData fpg_base/tfpgimagebase.fmaskdata.html
    FMaskDataSize fpg_base/tfpgimagebase.fmaskdatasize.html
+   FMaskPoint fpg_base/tfpgimagebase.fmaskpoint.html
    DoFreeImage fpg_base/tfpgimagebase.dofreeimage.html
    DoInitImage fpg_base/tfpgimagebase.doinitimage.html
    DoInitImageMask fpg_base/tfpgimagebase.doinitimagemask.html
@@ -483,6 +484,7 @@
    Height fpg_base/tfpgimagebase.height.html
    ColorDepth fpg_base/tfpgimagebase.colordepth.html
    Masked fpg_base/tfpgimagebase.masked.html
+   MaskPoint fpg_base/tfpgimagebase.maskpoint.html
    Colors fpg_base/tfpgimagebase.colors.html
   TfpgFontResourceBase fpg_base/tfpgfontresourcebase.html
    GetAscent fpg_base/tfpgfontresourcebase.getascent.html
@@ -622,7 +624,6 @@
    DoRemoveWindowLookup fpg_base/tfpgwindowbase.doremovewindowlookup.html
    DoSetWindowVisible fpg_base/tfpgwindowbase.dosetwindowvisible.html
    DoMoveWindow fpg_base/tfpgwindowbase.domovewindow.html
-   DoResizeWindow fpg_base/tfpgwindowbase.doresizewindow.html
    DoWindowToScreen fpg_base/tfpgwindowbase.dowindowtoscreen.html
    DoSetWindowTitle fpg_base/tfpgwindowbase.dosetwindowtitle.html
    DoSetMouseCursor fpg_base/tfpgwindowbase.dosetmousecursor.html
@@ -646,7 +647,6 @@
    Bottom fpg_base/tfpgwindowbase.bottom.html
    UpdateWindowPosition fpg_base/tfpgwindowbase.updatewindowposition.html
    MoveWindow fpg_base/tfpgwindowbase.movewindow.html
-   ResizeWindow fpg_base/tfpgwindowbase.resizewindow.html
    WindowToScreen fpg_base/tfpgwindowbase.windowtoscreen.html
    HasParent fpg_base/tfpgwindowbase.hasparent.html
    ActivateWindow fpg_base/tfpgwindowbase.activatewindow.html
@@ -847,7 +847,6 @@
    HandleIsValid fpg_base/tfpgwindowbase.handleisvalid.html
    DoSetWindowTitle fpg_base/tfpgwindowbase.dosetwindowtitle.html
    DoMoveWindow fpg_base/tfpgwindowbase.domovewindow.html
-   DoResizeWindow fpg_x11/tfpgx11window.doresizewindow.html
    DoWindowToScreen fpg_base/tfpgwindowbase.dowindowtoscreen.html
    DoUpdateWindowPosition fpg_base/tfpgwindowbase.doupdatewindowposition.html
    DoSetMouseCursor fpg_base/tfpgwindowbase.dosetmousecursor.html
@@ -857,6 +856,49 @@
    CaptureMouse fpg_base/tfpgwindowbase.capturemouse.html
    ReleaseMouse fpg_base/tfpgwindowbase.releasemouse.html
    SetFullscreen fpg_x11/tfpgx11window.setfullscreen.html
+  TfpgX11Application fpg_x11/tfpgx11application.html
+   FDisplay fpg_x11/tfpgx11application.fdisplay.html
+   DisplayDepth fpg_x11/tfpgx11application.displaydepth.html
+   DefaultBackground fpg_x11/tfpgx11application.defaultbackground.html
+   DefaultForeground fpg_x11/tfpgx11application.defaultforeground.html
+   DefaultScreen fpg_x11/tfpgx11application.defaultscreen.html
+   DefaultVisual fpg_x11/tfpgx11application.defaultvisual.html
+   DefaultColorMap fpg_x11/tfpgx11application.defaultcolormap.html
+   FRootWindow fpg_x11/tfpgx11application.frootwindow.html
+   xia_clipboard fpg_x11/tfpgx11application.xia_clipboard.html
+   xia_motif_wm_hints fpg_x11/tfpgx11application.xia_motif_wm_hints.html
+   xia_wm_protocols fpg_x11/tfpgx11application.xia_wm_protocols.html
+   xia_wm_delete_window fpg_x11/tfpgx11application.xia_wm_delete_window.html
+   netlayer fpg_x11/tfpgx11application.netlayer.html
+   xia_targets fpg_x11/tfpgx11application.xia_targets.html
+   InputMethod fpg_x11/tfpgx11application.inputmethod.html
+   InputContext fpg_x11/tfpgx11application.inputcontext.html
+   FLastKeySym fpg_x11/tfpgx11application.flastkeysym.html
+   DoGetFontFaceList fpg_base/tfpgapplicationbase.dogetfontfacelist.html
+   Create fpg_base/tfpgapplicationbase.create.html
+   Destroy fpg_x11/tfpgx11application.destroy.html
+   DoMessagesPending fpg_x11/tfpgx11application.domessagespending.html
+   DoWaitWindowMessage fpg_x11/tfpgx11application.dowaitwindowmessage.html
+   DoFlush fpg_x11/tfpgx11application.doflush.html
+   GetScreenWidth fpg_x11/tfpgx11application.getscreenwidth.html
+   GetScreenHeight fpg_x11/tfpgx11application.getscreenheight.html
+   Screen_dpi_x fpg_x11/tfpgx11application.screen_dpi_x.html
+   Screen_dpi_y fpg_x11/tfpgx11application.screen_dpi_y.html
+   Screen_dpi fpg_x11/tfpgx11application.screen_dpi.html
+   Display fpg_x11/tfpgx11application.display.html
+   RootWindow fpg_x11/tfpgx11application.rootwindow.html
+   EventFilter fpg_x11/tfpgx11application.eventfilter.html
+  TfpgX11Clipboard fpg_x11/tfpgx11clipboard.html
+   FClipboardText fpg_x11/tfpgx11clipboard.fclipboardtext.html
+   DoGetText fpg_x11/tfpgx11clipboard.dogettext.html
+   DoSetText fpg_x11/tfpgx11clipboard.dosettext.html
+   InitClipboard fpg_x11/tfpgx11clipboard.initclipboard.html
+  TfpgX11FileList fpg_x11/tfpgx11filelist.html
+   InitializeEntry fpg_x11/tfpgx11filelist.initializeentry.html
+   PopulateSpecialDirs fpg_x11/tfpgx11filelist.populatespecialdirs.html
+   Create fpg_x11/tfpgx11filelist.create.html
+   EncodeModeString fpg_x11/tfpgx11filelist.encodemodestring.html
+  fpgColorToX fpg_x11/fpgcolortox.html
  fpg_gdi fpg_gdi/index.html
   WM_MOUSEWHEEL fpg_gdi/wm_mousewheel.html
   VER_PLATFORM_WIN32_CE fpg_gdi/ver_platform_win32_ce.html
@@ -1019,6 +1061,8 @@
    Canvas fpg_main/tfpgwindow.canvas.html
    WinHandle fpg_main/tfpgwindow.winhandle.html
   TfpgImage fpg_main/tfpgimage.html
+   CreateDisabledImage fpg_main/tfpgimage.createdisabledimage.html
+   ImageFromSource fpg_main/tfpgimage.imagefromsource.html
    ImageFromRect fpg_main/tfpgimage.imagefromrect.html
   TfpgImages fpg_main/tfpgimages.html
    Create fpg_main/tfpgimages.create.html
@@ -1361,6 +1405,7 @@
    MsgClose fpg_popupwindow/tfpgpopupwindow.msgclose.html
    HandleClose fpg_popupwindow/tfpgpopupwindow.handleclose.html
    HandleShow fpg_popupwindow/tfpgpopupwindow.handleshow.html
+   HandlePaint fpg_popupwindow/tfpgpopupwindow.handlepaint.html
    ProcessPopupFrame fpg_popupwindow/tfpgpopupwindow.processpopupframe.html
    DoPaintPopupFrame fpg_popupwindow/tfpgpopupwindow.dopaintpopupframe.html
    DoOnClose fpg_popupwindow/tfpgpopupwindow.doonclose.html
@@ -1603,6 +1648,7 @@
 2VFImageDataSize
 2VFMaskData
 2VFMaskDataSize
+2VFMaskPoint
 2MDoFreeImage
 2MDoInitImage
 2MDoInitImageMask
@@ -1622,6 +1668,7 @@
 3PHeight r
 3PColorDepth r
 3PMasked r
+3PMaskPoint r
 3PColors rw
 #CoreLib.fpg_base.TfpgFontResourceBase TObject
 3MGetAscent
@@ -1781,7 +1828,6 @@
 2MDoRemoveWindowLookup
 2MDoSetWindowVisible
 2MDoMoveWindow
-2MDoResizeWindow
 2MDoWindowToScreen
 2MDoSetWindowTitle
 2MDoSetMouseCursor
@@ -1805,7 +1851,6 @@
 3MBottom
 3MUpdateWindowPosition
 3MMoveWindow
-3MResizeWindow
 3MWindowToScreen
 3MHasParent
 3MActivateWindow
@@ -2006,7 +2051,6 @@
 2MHandleIsValid
 2MDoSetWindowTitle
 2MDoMoveWindow
-2MDoResizeWindow
 2MDoWindowToScreen
 2MDoUpdateWindowPosition
 2MDoSetMouseCursor
@@ -2016,6 +2060,55 @@
 3MCaptureMouse
 3MReleaseMouse
 3MSetFullscreen
+#CoreLib.fpg_x11.TfpgX11Application #CoreLib.fpg_base.TfpgApplicationBase
+1VFComposeBuffer
+1VFComposeStatus
+1VFEventFilter
+1MConvertShiftState
+1MKeySymToKeycode
+1MStartComposing
+2VFDisplay
+2VDisplayDepth
+2VDefaultBackground
+2VDefaultForeground
+2VDefaultScreen
+2VDefaultVisual
+2VDefaultColorMap
+2VFRootWindow
+2Vxia_clipboard
+2Vxia_motif_wm_hints
+2Vxia_wm_protocols
+2Vxia_wm_delete_window
+2Vnetlayer
+2Vxia_targets
+2VInputMethod
+2VInputContext
+2VFLastKeySym
+2MDoGetFontFaceList
+3MCreate
+3MDestroy
+3MDoMessagesPending
+3MDoWaitWindowMessage
+3MDoFlush
+3MGetScreenWidth
+3MGetScreenHeight
+3MScreen_dpi_x
+3MScreen_dpi_y
+3MScreen_dpi
+3PDisplay r
+3PRootWindow r
+3PEventFilter rw
+#CoreLib.fpg_x11.TfpgX11Clipboard #CoreLib.fpg_base.TfpgClipboardBase
+1VFWaitingForSelection
+2VFClipboardText
+2MDoGetText
+2MDoSetText
+2MInitClipboard
+#CoreLib.fpg_x11.TfpgX11FileList #CoreLib.fpg_base.TfpgFileListBase
+2MInitializeEntry
+2MPopulateSpecialDirs
+3MCreate
+3MEncodeModeString
 #CoreLib.fpg_gdi.TfpgGDIFontResource #CoreLib.fpg_base.TfpgFontResourceBase
 1VFFontData
 1VFMetrics
@@ -2174,6 +2267,8 @@
 3PCanvas r
 3PWinHandle
 #CoreLib.fpg_main.TfpgImage TfpgImageImpl
+3MCreateDisabledImage
+3MImageFromSource
 3MImageFromRect
 #CoreLib.fpg_main.TfpgImages .TObject
 1VFImages
@@ -2495,6 +2590,7 @@
 2MMsgClose
 2MHandleClose
 2MHandleShow
+2MHandlePaint
 2MProcessPopupFrame
 2MDoPaintPopupFrame
 2MDoOnClose

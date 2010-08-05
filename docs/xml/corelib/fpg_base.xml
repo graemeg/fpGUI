@@ -46,7 +46,7 @@ etc.).
       <!-- record type Visibility: default -->
       <element name="TRGBTriple">
         <short>A record structure holding the RGBA values of a color.</short>
-        <descr/>
+        <descr>This is now marked as "deprecated". Please use TFPColor instead.</descr>
         <seealso/>
       </element>
       <!-- variable Visibility: default -->
@@ -194,6 +194,22 @@ it is shown for the first time.</short>
         <short>Defines that the gradient must be painted horizontally.</short>
       </element>
       <!-- enumeration type Visibility: default -->
+      <element name="TFileEntryType">
+        <short>Represents the type of entry found on the filesystem.</short>
+        <descr/>
+        <seealso>
+          <link id="TFileEntry"/>
+        </seealso>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFileEntryType.etFile">
+        <short>Denotes a File type</short>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFileEntryType.etDir">
+        <short>Denotes a Directory type</short>
+      </element>
+      <!-- enumeration type Visibility: default -->
       <element name="TClipboardKeyType">
         <short>Represents the clipboard function being triggered by some keyboard key combination.</short>
         <descr/>
@@ -201,19 +217,19 @@ it is shown for the first time.</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckNone">
-        <short/>
+        <short>No clipboard action detected</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckCopy">
-        <short/>
+        <short>Copy to clipboard action detected</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckPaste">
-        <short/>
+        <short>Paste to clipboard action detected</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckCut">
-        <short/>
+        <short>Cut to clipboard action detected</short>
       </element>
       <!-- constant Visibility: default -->
       <element name="MOUSE_LEFT">
@@ -3157,7 +3173,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.Invert">
-        <short/>
+        <short>Inverts the Image</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3171,7 +3187,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.AllocateImage">
-        <short/>
+        <short>Allocates OS resources for the Image</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3190,14 +3206,14 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.AllocateMask">
-        <short/>
+        <short>Allocates OS resources for the Image Mask</short>
         <descr/>
         <errors/>
         <seealso/>
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.CreateMaskFromSample">
-        <short/>
+        <short>Creates a mask based on the sample point presented by X and Y parameters</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3212,7 +3228,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.UpdateImage">
-        <short/>
+        <short>Updates the internal image resources and OS resources from image data</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3243,19 +3259,19 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.Width">
-        <short/>
+        <short>Width of the image</short>
         <descr/>
         <seealso/>
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.Height">
-        <short/>
+        <short>Height of the image</short>
         <descr/>
         <seealso/>
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.ColorDepth">
-        <short/>
+        <short>Color depth of the image. Currently 24/32-bit is all that is supported.</short>
         <descr/>
         <seealso/>
       </element>
@@ -3267,7 +3283,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.Colors">
-        <short/>
+        <short>Array property to access a specific color of the image based on X and Y co-ordinates</short>
         <descr/>
         <seealso/>
       </element>
@@ -5498,7 +5514,34 @@ Right. And the Top is always smaller than the Bottom.
         <short>Clips the line based on AClipRect boundaries.</short>
         <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
       </element>
+      <element name="TFileEntry">
+        <short>A simple data object representing a file</short>
+        <descr>
+          <printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
+      </element>
+      <element name="TFileEntry.Name">
+        <short>Name of a file</short>
+      </element>
+      <element name="TFileEntry.Extension">
+        <short>The extension of a file</short>
+      </element>
+      <element name="TFileEntry.Size">
+        <short>Size of a file in bytes</short>
+      </element>
+      <element name="TFileEntry.IsLink">
+        <short>Is this item a symbolic link (on unix-type OSes)</short>
+      </element>
+      <element name="TFileEntry.LinkTarget">
+        <short>If it is a symbolic link, LinkTarget is what it points too</short>
+      </element>
+      <element name="TFileEntry.ModTime">
+        <short>Last modified timestamp</short>
+      </element>
+      <element name="TFPColor">
+        <short>A record structure holding the RGBA values of a color.</short>
+        <descr>This is the same declaration as the one found in FPImage (include with Free Pascal Compiler). In future when FPImage is integrated with fpGUI, I will remove this declaration.</descr>
+      </element>
     </module>
     <!-- gfxbase -->
   </package>
-</fpdoc-descriptions>
+</fpdoc-descriptions>

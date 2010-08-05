@@ -1,19 +1,22 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
   <package name="CoreLib">
-
     <module name="fpg_main">
-      <short/>
-      <descr/>
-
+      <short>The main unit that ties everything together from CoreLib</short>
+      <descr>
+        <p>
+          <printshort id="fpg_main"/>. This unit contain the higher level classes that the end-user will use to build applications.
+</p>
+        <p>This unit also contains the global objects instances used to start an application, or helper functions used through a a fpGUI based application. eg: <link id="fpgApplication"/>, <link id="fpgClipboard"/>.</p>
+      </descr>
       <!-- procedure Visibility: default -->
       <element name="fpgPostMessage">
         <short>Posts a message to the event queue</short>
         <descr>fpgPostMessage posts a message to the event queue, but doesn't wait for it to compelete. It returns immediately.</descr>
         <errors/>
         <seealso>
-	  <link id="fpgSendMessage"/>
-	</seealso>
+          <link id="fpgSendMessage"/>
+        </seealso>
       </element>
       <!-- procedure Visibility: default -->
       <element name="fpgSendMessage">
@@ -21,10 +24,28 @@
         <descr>fpgSendMessage sends a message to the event queue and waits for it to complete before it returns.</descr>
         <errors/>
         <seealso>
-	  <link id="fpgPostMessage"/>
-	</seealso>
+          <link id="fpgPostMessage"/>
+        </seealso>
       </element>
-
+      <element name="fpgColorToRGB">
+        <short>Convert a color to RGB values of that color</short>
+        <descr>
+          <printshort id="fpgColorToRGB"/>. Not all <link id="fpg_base.TfpgColor">TfpgColor</link> values are in RGB format. For example you are "named" colors too. eg: clWindowBackground</descr>
+      </element>
+      <element name="fpgGetNamedColor">
+        <short>Returns a "named" TfpgColor based on a RGB color</short>
+      </element>
+      <element name="fpgSetNamedColor">
+        <short>Define a new "named" color</short>
+      </element>
+      <element name="fpgGetNamedFontList">
+        <short>Return a TStringList of "named" fonts</short>
+      </element>
+      <element name="fpgSetNamedFont">
+        <short>Defined a new "named" font</short>
+        <descr>
+          <printshort id="fpgSetNamedFont"/>. Because fpGUI is a cross-platform toolkit, the same fonts might not be available on all systems. For this reason fpGUI supports "named" or "alias names" for fonts. You can specify a font description, and then give that font description a name. Then any component that has a FontDesc property you can pass the full font description, or the "named" font name. An example of a named font is '#Edit1' which is the default font used for <link id="fpg_edit.TfpgEdit">TfpgEdit</link>.</descr>
+      </element>
     </module>
     <!-- fpg_main -->
   </package>
