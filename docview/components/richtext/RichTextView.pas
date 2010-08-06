@@ -687,7 +687,7 @@ ProfileEvent('DEBUG:  TRichTextView.HandlePaint   4');
   if not Debug then
     Draw( 0, FLayout.FNumLines )
   else
-    Canvas.DrawText(8, 8, GetTextAreaWidth, 1000, FText, [txtLeft, txtTop, txtWrap]);
+    Canvas.DrawText(8, 8, GetTextAreaWidth, GetTextAreaHeight{1000}, FText, [txtLeft, txtTop, txtWrap]);
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
   Canvas.ClearClipRect;
 
@@ -1111,7 +1111,7 @@ ProfileEvent('DEBUG:  TRichTextView.Draw >>>');
     EndLine := StartLine;
     StartLine := Temp;
   end;
-  // calculate selection ptrs
+  // calculate selection pointers
   if SelectionSet then
   begin
     SelectionStartP := FText + FSelectionStart;
