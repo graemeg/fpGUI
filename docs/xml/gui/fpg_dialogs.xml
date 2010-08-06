@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <fpdoc-descriptions>
-<package name="GUI">
+<package name="fpGUI">
 
 <module name="fpg_dialogs">
 <short>Various dialogs used by fpGUI based applications.</short>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="CoreLib">
+  <package name="fpGUI">
     <module name="fpg_main">
       <short>The main unit that ties everything together from CoreLib</short>
       <descr>
@@ -45,6 +45,13 @@
         <short>Defined a new "named" font</short>
         <descr>
           <printshort id="fpgSetNamedFont"/>. Because fpGUI is a cross-platform toolkit, the same fonts might not be available on all systems. For this reason fpGUI supports "named" or "alias names" for fonts. You can specify a font description, and then give that font description a name. Then any component that has a FontDesc property you can pass the full font description, or the "named" font name. An example of a named font is '#Edit1' which is the default font used for <link id="fpg_edit.TfpgEdit">TfpgEdit</link>.</descr>
+      </element>
+      <element name="TfpgCanvas.DrawText">
+        <short>Output Text onto the Canvas</short>
+        <descr>
+          <printshort id="TfpgCanvas.DrawText"/>.</descr>
+      </element>
+      <element name="TfpgCanvas.StretchDraw" link="fpg_base.TfpgCanvasBase.StretchDraw">
       </element>
     </module>
     <!-- fpg_main -->

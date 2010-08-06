@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="GUI">
+  <package name="fpGUI">
     <module name="fpg_colormapping">
       <short>This unit contains some color conversion/mapping functions.</short>
       <descr/>

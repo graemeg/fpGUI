@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="CoreLib">
+  <package name="fpGUI">
     <module name="fpg_widget">
       <short/>
       <descr/>

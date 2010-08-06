@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <fpdoc-descriptions>
-<package name="CoreLib">
+<package name="fpGUI">
 
 <module name="fpg_wuline">
-<short></short>
-<descr>
+<short>Xioalin Wu's anti-aliased line drawing algorithm implementation</short>
+<descr><printshort id="fpg_wuline"/>. For more details see the following Wikipedia page:
+http://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm
 </descr>
 
 </module>

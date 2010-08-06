@@ -1,22 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <fpdoc-descriptions>
-<package name="CoreLib">
-
-<module name="fpg_extinterpolation">
-<short>Extra interpolation filter declarations.</short>
-<descr>
-<p>
-Some more interpolation filters for 
-<link id="fpg_base.TfpgCanvasBase.StretchDraw">TfpgCanvas.StretchDraw</link>:<br/>
+  <package name="fpGUI">
+    <module name="fpg_extinterpolation">
+      <short>Extra interpolation filter declarations.</short>
+      <descr>
+        <p>Some more interpolation filters for <link id="fpg_base.TfpgCanvasBase.StretchDraw">TfpgCanvasBase.StretchDraw</link>:<br/>
 Bessel, Gaussian and Sinc are infinite impulse response (IIR),
 the others are finite impulse response (FIR). The implementation
 of Bessel and Sinc are windowed with Blackman filter.</p>
-<p>
-This unit was ported from fcl-image which is part of FPC. A few
+        <p>This unit was ported from fcl-image which is part of FPC. A few
 more filters have also been added.</p>
-</descr>
-
-</module>
-
-</package>
+      </descr>
+    </module>
+  </package>
 </fpdoc-descriptions>
