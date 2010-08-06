@@ -203,8 +203,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
         begin
           // we haven't yet started drawing:
           // so work out alignment
-          X := Start.X{ * FontWidthPrecisionFactor}
-               + Layout.GetStartX( Style, Line );
+          X := Start.X + Layout.GetStartX( Style, Line );
           StartedDrawing := true;
         end;
 
@@ -262,7 +261,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
           inc( X, FontManager.CharWidth( ' ' )  );
 
         Layout.PerformStyleTag( Element.Tag, Style, X );
-        NewMarginX := ( Start.X + Style.LeftMargin ){ * FontWidthPrecisionFactor};
+        NewMarginX := ( Start.X + Style.LeftMargin );
         if NewMarginX > X then
         begin
           //skip across...
@@ -305,7 +304,7 @@ ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
   LineIndex := 0;
 
   // debug only to show Margins.
-  //FontManager.Canvas.Color:= clBlue;
+  //FontManager.Canvas.Color:= clRed;
   //FontManager.Canvas.DrawLine(0, y, 300, y);
 
   repeat
