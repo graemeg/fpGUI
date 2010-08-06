@@ -267,9 +267,21 @@ var
   i: integer;
   lTopic: TTopic;
   lFound: Boolean;
+  lURL: TfpgString;
 begin
   // TODO: process other types of links (external, application etc...) too!
-
+  if pos('url', Link) > 0 then
+  begin
+    // we have a external URL of some kind
+    // format is always:  'url "<uri>"'
+//    ShowMessage('Found an external Link' + LineEnding + Link);
+    lURL := StringReplace(Link, 'url "', '', []);
+    lURL := UTF8Copy(lURL, 0, UTF8Length(lURL)-1);
+    fpgOpenURL(lURL);
+  end
+  else
+  begin
+    // we have a internal INF file link
     LinkIndex := StrToInt( Link );
     lLink := THelpLink(CurrentTopic.Links[LinkIndex]);
     lTopic := FindTopicForLink(lLink);
@@ -287,25 +299,18 @@ begin
       if lTopic <> nil then
       begin
         lFound := True;
-        writeln('Found Topic! ', lTopic.Title);
+//        writeln('Found Topic! ', lTopic.Title);
         break;
-
       end;
       if lFound then
         break;
     end;
     if lTopic <> nil then
     begin
-      writeln('Displaying topic <', lTopic.Title, '>');
+//      writeln('Displaying topic <', lTopic.Title, '>');
       DisplayTopic(lTopic);
     end;
-    //lLink := SourceWindow.Topic.Links[ LinkIndex ];
-    //
-    //PostMsg( Self.Handle,
-    //         WM_FOLLOWLINK,
-    //         longint( Link ),
-    //         longint( SourceWindow ) );
-
+  end;
 end;
 
 procedure TMainForm.IndexSearchEditKeyPress(Sender: TObject; var KeyCode: word;
