@@ -924,11 +924,15 @@ var
   lDefaultFontSpec: TFontSpec;
 begin
 ProfileEvent('DEBUG:  TCanvasFontManager.SetFont >>>>');
-  if (FCurrentFontSpec.FaceName = FontSpec.FaceName) and
-     (FCurrentFontSpec.PointSize = FontSpec.PointSize) and
-     (FCurrentFontSpec.Attributes = FontSpec.Attributes) then
-    // same font
-    exit;
+  // we don't need this any more, because we check FCurrentFont <> Font further down
+  // We also make sure we always set Canvas.Font - this fixes large display of Grids or Sample Code in Courier New font
+  //if (FCurrentFontSpec.FaceName = FontSpec.FaceName) and
+  //   (FCurrentFontSpec.PointSize = FontSpec.PointSize) and
+  //   (FCurrentFontSpec.Attributes = FontSpec.Attributes) then
+  //   //same font
+  //begin
+  //  exit;
+  //end;
 
   Font := GetFont( FontSpec );
 
@@ -937,7 +941,7 @@ ProfileEvent('DEBUG:  TCanvasFontManager.SetFont >>>>');
     // ack! Pfffbt! Couldn't find the font.
 
     // Try to get the default font
-//    writeln('---------- here goes nothing -------------');
+    //writeln('---------- here goes nothing -------------');
     Font := GetFont( FDefaultFontSpec );
     if Font = nil then
     begin
@@ -948,7 +952,7 @@ ProfileEvent('DEBUG:  TCanvasFontManager.SetFont >>>>');
       FPGuiFontToFontSpec( fpgApplication.DefaultFont, lDefaultFontSpec );
       Font := GetFont( lDefaultFontSpec );
       if Font = nil then
-        // Jimminy! We can't even get the default system font
+        // WTF! We can't even get the default system font
         raise Exception.Create( 'Could not access default font '
                                 + 'in place of '
                                 + FontSpec.FaceName
@@ -960,7 +964,8 @@ ProfileEvent('DEBUG:  TCanvasFontManager.SetFont >>>>');
 
   SelectFont( Font, 1 );
   FCurrentFontSpec := FontSpec;
-  FCurrentFont.Free;
+  if FCurrentFont <> Font then
+    FCurrentFont.Free;
   FCurrentFont := Font;
 ProfileEvent('DEBUG:  TCanvasFontManager.SetFont <<<<');
 end;
