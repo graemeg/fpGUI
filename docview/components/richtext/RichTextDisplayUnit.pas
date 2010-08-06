@@ -178,7 +178,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
 
   TextBlockStart := P;
 
-  Y := Start.Y + Line.MaxDescender; // co-ordinates are from top/left, so do we need descender? [Graeme]
+  Y := Start.Y; // + Line.MaxDescender; // co-ordinates are from top/left, so do we need descender? [Graeme]
 
   while P < EndP do
   begin
