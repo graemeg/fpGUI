@@ -523,7 +523,7 @@ begin
   end;
 
   if Fontinfo = '' then
-    // nothing found se use default font of fpGUI
+    // nothing found so use default font of fpGUI
     FontInfo := fpgApplication.DefaultFont.FontDesc;
 end;
 
@@ -834,19 +834,16 @@ var
   s: string;
 begin
   // Select the logical font
-  if Font.FontType = ftOutline then
-  begin
-    s := Font.FaceName + '-' + IntToStr(Font.PointSize);
-    if faBold in Font.Attributes then
-      s := s + ':bold';
-    if faItalic in Font.Attributes then
-      s := s + ':italic';
-    if faUnderScore in Font.Attributes then
-      s := s + ':underline';
+  s := Font.FaceName + '-' + IntToStr(Font.PointSize);
+  if faBold in Font.Attributes then
+    s := s + ':bold';
+  if faItalic in Font.Attributes then
+    s := s + ':italic';
+  if faUnderScore in Font.Attributes then
+    s := s + ':underline';
 
-    f := fpgGetFont(s);
-    FCanvas.Font := f;
-  end;
+  f := fpgGetFont(s);
+  FCanvas.Font := f;
 end;
 
 // Get a font to match the given spec, creating or re-using an
