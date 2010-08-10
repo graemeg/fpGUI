@@ -12,8 +12,20 @@ Italian, Portuguese (Brazil) and Russian.</p>
 one of the language DEFINES in the interface section of the fpg_constants unit.
 </p>
 </descr>
-
-</module>
-
-</package>
+      <element name="fpgAddColon">
+        <short>A utility function to add a colon at the correct location in a string</short>
+        <descr>
+          <printshort id="fpgAddColon"/>. This is so that when fpGUI supports LTR and RTL languages, the colon will be added at the correct place.</descr>
+      </element>
+      <element name="DEFAULT_HINT_PAUSE">
+        <short>Default pause in milliseconds before a hint is displayed</short>
+      </element>
+      <element name="DOUBLECLICK_MS">
+        <short>Time maximum time in milliseconds between left-clicks for a double click to be triggered</short>
+      </element>
+      <element name="DOUBLECLICK_DISTANCE">
+        <short>Maximum distance a mouse pointer can move between two left-clicks and still trigger a double click event</short>
+      </element>
+    </module>
+  </package>
 </fpdoc-descriptions>
