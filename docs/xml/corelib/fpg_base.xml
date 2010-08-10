@@ -33,7 +33,7 @@ underlying type in the future. Example to floating points.
           <p>TfpgColor is always in RRGGBB (Red, Green, Blue) format, no matter the
 operating system.
 </p>
-          <p>The <var>gfxbase</var> unit also contains definitions of many useful color 
+          <p>The <var>fpg_base</var> unit also contains definitions of many useful color 
 constants. It defines the standard predefined Delphi colors (like clRed, 
 clMagenta etc.), the 140 websafe colors using the defacto standard names as 
 used by Netscape and Internet Explorer web browsers. As well as some internal 
@@ -760,6 +760,7 @@ it is shown for the first time.</short>
         <seealso/>
       </element>
       <!-- constant Visibility: default -->
+
       <element name="keyF23">
         <short/>
         <descr/>
@@ -1089,6 +1090,7 @@ it is shown for the first time.</short>
         <descr/>
         <seealso/>
       </element>
+
       <!-- constant Visibility: default -->
       <element name="keyPD">
         <short/>
@@ -5542,6 +5544,6 @@ Right. And the Top is always smaller than the Bottom.
         <descr>This is the same declaration as the one found in FPImage (include with Free Pascal Compiler). In future when FPImage is integrated with fpGUI, I will remove this declaration.</descr>
       </element>
     </module>
-    <!-- gfxbase -->
+    <!-- fpg_base -->
   </package>
-</fpdoc-descriptions>
+</fpdoc-descriptions>
