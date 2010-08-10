@@ -1226,7 +1226,7 @@ begin
     if Components[n] is TfpgWidget then
     begin
       w := TfpgWidget(Components[n]);
-      if w.Align = AAlign then
+      if (w.Align = AAlign) and (w.Visible) then
         alist.Add(w);
     end;
 
