@@ -12,19 +12,27 @@ Steps:
 
 3.  $ cp images/inf-book-28x48.png ~/.icons/inf-help.png
 
-4.  $ cp install/docview.desktop ~/.local/share/applications/
+4.  $ cd ~/.icons; ln -s inf-help.png application-inf.png
 
-5.  $ cp docview-mime.xml ~/.local/share/mime/packages
+5.  $ cp install/docview.desktop ~/.local/share/applications/
 
-6.  $ update-mime-database ~/.local/share/mime/
+6.  $ cp docview-mime.xml ~/.local/share/mime/packages
+
+7.  $ update-mime-database ~/.local/share/mime/
+
+
+  You are done!
+
+******  The rest is not needed anymore  ********
+
 
 Gnome now knows the mime type for *.inf files. Now to setup the new default
 icon Nautilus will show for *.inf files, you need to do these two steps.
 
 
-7.  $ mkdir ~/.icons/gnome/48x48/mimetypes
+8.  $ mkdir ~/.icons/gnome/48x48/mimetypes
 
-8.  $ ln -s ~/.icons/inf-help.png ~/.icons/gnome/48x48/mimetypes/gnome-mime-application-inf.png
+9.  $ ln -s ~/.icons/inf-help.png ~/.icons/gnome/48x48/mimetypes/gnome-mime-application-inf.png
 
 Now you are all done!
 
