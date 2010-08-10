@@ -29,8 +29,7 @@
       </element>
       <element name="fpgColorToRGB">
         <short>Convert a color to RGB values of that color</short>
-        <descr>
-          <printshort id="fpgColorToRGB"/>. Not all <link id="fpg_base.TfpgColor">TfpgColor</link> values are in RGB format. For example you are "named" colors too. eg: clWindowBackground</descr>
+        <descr><printshort id="fpgColorToRGB"/>. Not all <link id="#fpgui.fpg_base.TfpgColor">TfpgColor</link> values are in RGB format. For example you are "named" colors too. eg: clWindowBackground</descr>
       </element>
       <element name="fpgGetNamedColor">
         <short>Returns a "named" TfpgColor based on a RGB color</short>
@@ -46,12 +45,30 @@
         <descr>
           <printshort id="fpgSetNamedFont"/>. Because fpGUI is a cross-platform toolkit, the same fonts might not be available on all systems. For this reason fpGUI supports "named" or "alias names" for fonts. You can specify a font description, and then give that font description a name. Then any component that has a FontDesc property you can pass the full font description, or the "named" font name. An example of a named font is '#Edit1' which is the default font used for <link id="fpg_edit.TfpgEdit">TfpgEdit</link>.</descr>
       </element>
+      <element name="TfpgCanvas">
+        <short>This is the drawing Canvas of each widget</short>
+        <descr><printshort id="TfpgCanvas"/>.</descr>
+      </element>
       <element name="TfpgCanvas.DrawText">
         <short>Output Text onto the Canvas</short>
         <descr>
           <printshort id="TfpgCanvas.DrawText"/>.</descr>
       </element>
-      <element name="TfpgCanvas.StretchDraw" link="fpg_base.TfpgCanvasBase.StretchDraw">
+      <element name="TfpgCanvas.StretchDraw" link="#fpgui.fpg_base.TfpgCanvasBase.StretchDraw">
+      </element>
+      <element name="PrintRect">
+        <short>Prints rectangle information to console</short>
+        <descr><printshort id="PrintRect"/>. This is a helper function for debugging purposes.</descr>
+        <seealso>
+          <link id="#fpgui.fpg_base.TfpgRect">TfpgRect</link>
+        </seealso>
+      </element>
+      <element name="TfpgStyle">
+        <short>This supplies very basic theming support for now</short>
+        <descr><p><printshort id="TfpgStyle"/>. At a later date the theming support in
+fpGUI will be totally reworked to supply built-in and image based theming.</p><p>See the
+document named <var>theming_spec.txt</var> in the "docs" folder for details of what is
+planned.</p></descr>
       </element>
     </module>
     <!-- fpg_main -->
