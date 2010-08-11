@@ -10,15 +10,9 @@ Legend
 
 Todo list
 =========
-[o] - Fixes suggish scrolling. I think it's a recursive position event on the
-      vertical scrollbar causing the problem.
-      (*** It's much better already ***)
-[ ] - Text wrapping in RichTextView is not 100% correct
 [ ] - Access Violation when the application terminates.
 [ ] - Ever growing list of fonts used while loading new topics.
 [o] - Settings / Customization dialog is needed.
-[ ] - Open Recent Files doesn't always get populated, or gets cleared for some
-      reason.
 [ ] - Change mouse cursor when over hyperlinks in RichTextView
 [o] - Implement a ipfdump program. Already started work on this and is called
       docdump in the src directory.
@@ -34,10 +28,13 @@ Todo list
 [ ] - Sometimes searching for a word doesn't find help even though it exists.
       eg: 'descriptor' doesn't find the help in fppoll topic, even though the
       work is clearly in the topic contents.
-[ ] - Implement History tab and tracking - including Back & Next buttons.
 [ ] - Options or Configuration dialog to set various things.
-[ ] - Hyperlinks on scrolled content doesn't work.
 [ ] - Implement popup window for "notes" hyperlinks.
+[ ] - RichTextView component issue. Incompatible with original OS/2 VIEW. When
+      resetting a font style (eg: italics to normal), it should not affect a
+      previously set font color, unless a new font color is explicitly set.
+[ ] - External links are not supported yet.
+[ ] - Implement Image support in INF or HLP files.
 
 [x] - Display topic by ID via command line parameters
 [x] - 'Could not load topic slots' message when trying to view some topics.
@@ -46,6 +43,13 @@ Todo list
       with the Open Watcom WIPFC - limit is now set to 65000 entries)
 [x] - Clicking in index list should set the text in the index search edit box.
 [x] - MRU menu item doesn't seem to remember all opened documents.
+[x] - Text wrapping in RichTextView is not 100% correct
+[x] - Hyperlinks on scrolled content doesn't work.
+[x] - Implement History tab and tracking - including Back & Next buttons.
+[x] - Open Recent Files doesn't always get populated, or gets cleared for some
+      reason.
+[x] - Fixes suggish scrolling. I think it's a recursive position event on the
+      vertical scrollbar causing the problem.
 
 
 fpdoc IPF todo list
