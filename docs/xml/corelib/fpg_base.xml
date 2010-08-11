@@ -35,7 +35,7 @@ operating system.
 </p>
           <p>The <var>fpg_base</var> unit also contains definitions of many useful color 
 constants. It defines the standard predefined Delphi colors (like clRed, 
-clMagenta etc.), the 140 websafe colors using the defacto standard names as 
+clMagenta etc.), the 140 web safe colors using the defacto standard names as 
 used by Netscape and Internet Explorer web browsers. As well as some internal 
 color constants used by many GUI components (like clText, clWindowBackground 
 etc.).
@@ -760,7 +760,6 @@ it is shown for the first time.</short>
         <seealso/>
       </element>
       <!-- constant Visibility: default -->
-
       <element name="keyF23">
         <short/>
         <descr/>
@@ -1090,7 +1089,6 @@ it is shown for the first time.</short>
         <descr/>
         <seealso/>
       </element>
-
       <!-- constant Visibility: default -->
       <element name="keyPD">
         <short/>
@@ -5546,4 +5544,4 @@ Right. And the Top is always smaller than the Bottom.
     </module>
     <!-- fpg_base -->
   </package>
-</fpdoc-descriptions>
+</fpdoc-descriptions>

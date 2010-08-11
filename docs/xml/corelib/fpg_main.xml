@@ -28,8 +28,9 @@
         </seealso>
       </element>
       <element name="fpgColorToRGB">
-        <short>Convert a color to RGB values of that color</short>
-        <descr><printshort id="fpgColorToRGB"/>. Not all <link id="#fpgui.fpg_base.TfpgColor">TfpgColor</link> values are in RGB format. For example you are "named" colors too. eg: clWindowBackground</descr>
+        <short>Convert a color to the RGB values of that color</short>
+        <descr><printshort id="fpgColorToRGB"/>. Not all <link id="#fpgui.fpg_base.TfpgColor">TfpgColor</link> values are in RGB format. For example, you get "named" colors too (eg: clWindowBackground), which
+        is simply an index value, but later translated to a real RGB value via the theming system.</descr>
       </element>
       <element name="fpgGetNamedColor">
         <short>Returns a "named" TfpgColor based on a RGB color</short>
