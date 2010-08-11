@@ -72,6 +72,7 @@ type
     procedure   AddImage(AImage: TfpgImage; AIndex: integer = -1);
     procedure   RemoveIndex(AIndex: integer);
     function    GetMaxItem: integer;
+    procedure   Clear;
     property    Item[AIndex: integer]: TfpgImageItem read GetItem write SetItem;
     property    Count: integer read GetCount;
   end;
@@ -206,6 +207,11 @@ begin
   for i := 0 to FList.Count - 1 do
     if TfpgImageItem(FList[i]).Index > result then
       result := TfpgImageItem(FList[i]).Index;
+end;
+
+procedure TfpgImageList.Clear;
+begin
+  FList.Clear;
 end;
 
 { TfpgImageItem }
