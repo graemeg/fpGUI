@@ -46,6 +46,7 @@ procedure DeallocateMemory( Var P: pointer );
 
 // Alias method which is the same as Move() but with less confusing name
 procedure MemCopy(const src; var dest; size: SizeInt);
+procedure FillMem( Dest: pointer; Size: longint; Data: Byte );
 // Allows for debug output and quite disable of output
 procedure ProfileEvent(const AString: string);
 // Return AFilename's size in bytes
@@ -210,6 +211,11 @@ end;
 procedure MemCopy(const src; var dest; size: SizeInt);
 begin
   Move(src, dest, size);
+end;
+
+procedure FillMem( Dest: pointer; Size: longint; Data: Byte );
+begin
+  FillChar( Dest^, Size, Data );
 end;
 
 procedure ProfileEvent(const AString: string);

@@ -1701,6 +1701,10 @@ begin
                   nil {Highlights} );
 
   { TODO -oGraeme : We do not support images yet }
+//  THelpFile(CurrentTopic.HelpFile).GetImages(ImageOf)
+//   THelpFile( Topic.HelpFile ).GetImages( ImageOffsets,
+//                                           Images );
+
   ImageIndices.Free;
 
   //writeln(lText);

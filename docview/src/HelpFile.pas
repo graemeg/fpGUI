@@ -16,9 +16,8 @@ uses
   ,fpg_imagelist
   ,IPFFileFormatUnit
   ,HelpTopic
-//  ,HelpBitmap
+  ,HelpBitmap
   ,SearchTable
-  ,nvNullObjects    // Fake various classes like TImageList
   ;
 
 type
@@ -190,7 +189,8 @@ uses
 //  DebugUnit,
 //  ACLFileIOUtility,
 //  ACLLanguageUnit;
-  nvUtilities
+  fpg_main
+  ,nvUtilities
   ,ACLStringUtility
   ;
 
@@ -1079,8 +1079,9 @@ begin
                                          + ': '
                                          + e.Message );}
       begin
-        Bitmap := THelpBitmap.Create;
-        Bitmap.LoadFromResourceName( 'MissingBitmap' );  // TODO: Add image resource to DocView
+//        Bitmap := THelpBitmap.Create;
+        Bitmap := THelpBitmap(fpgImages.GetImage('stdimg.dlg.critical'));
+//        Bitmap.LoadFromResourceName( 'MissingBitmap' );  // TODO: Add image resource to DocView
       end;
     end;
 
