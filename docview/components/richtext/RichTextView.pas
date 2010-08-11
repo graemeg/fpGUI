@@ -257,7 +257,7 @@ Type
     Procedure SetSelectionStart( SelectionStart: longint );
     Procedure SetSelectionEnd( SelectionEnd: longint );
 
-    Procedure SetImages( Images: TfpgImageList );
+    Procedure SetImages( AImages: TfpgImageList );
     Procedure Notification( AComponent: TComponent;
                             Operation: TOperation ); override;
   Public
@@ -1693,9 +1693,9 @@ end;
 //  Refresh;
 //end;
 
-Procedure TRichTextView.SetImages( Images: TfpgImageList );
+Procedure TRichTextView.SetImages( AImages: TfpgImageList );
 begin
-  if Images = FImages then
+  if AImages = FImages then
     exit; // no change
 
   { TODO -oGraeme : TfpgImageList is not a TComponent descendant. Maybe it should be? }
@@ -1703,7 +1703,7 @@ begin
   //  // Tell the old imagelist not to inform us any more
   //  FImages.Notification( Self, opRemove );
 
-  FImages := Images;
+  FImages := AImages;
   //if FImages <> nil then
   //  // request notification when other is freed
   //  FImages.FreeNotification( Self );
