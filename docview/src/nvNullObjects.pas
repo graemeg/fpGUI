@@ -5,12 +5,12 @@ unit nvNullObjects;
 interface
 
 uses
-  contnrs, Classes, SysUtils;
+  contnrs, Classes, SysUtils, fpg_main;
 
 type
   EHelpBitmapException = class(Exception);
 
-  THelpBitmap = class(TObject)
+  THelpBitmap = class(TfpgImage)
   public
     constructor CreateFromHelpFile( FileHandle: TFileStream; Offset: longint );
     procedure LoadFromResourceName(const AName: string);
