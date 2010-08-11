@@ -282,7 +282,7 @@ end;
 destructor TfpgImageItem.Destroy;
 begin
   if FImage <> nil then
-     FImage.Destroy;
+     FImage.Free;
   inherited Destroy;
 end;
 
