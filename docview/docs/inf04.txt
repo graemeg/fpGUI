@@ -528,6 +528,8 @@
            // 0 means there is a single byte of data to follow (e.g. when the byte > 80)
         ( optionally ) byte[ N+1 ] data
       int16 Number of zeroes to follow
+
+
   **** Image data ****
 
       Beginning at file offset imgstart, this data is a series of compressed
@@ -539,7 +541,7 @@
                              // BEFORE compression: not correct in this context
            int16 xHotspot;   // only for icons/pointers, not relevant here?
            int16 yHotspot;
-           int16 offBits;    // offset to the actual bitmap data bits
+           int32 offBits;    // offset to the actual bitmap data bits
            BITMAPINFOHEADER bmp; // further bitmap data:
              int32 cbFix;    // length of bitmapinfo header structure (12)
                              // (including this field)
