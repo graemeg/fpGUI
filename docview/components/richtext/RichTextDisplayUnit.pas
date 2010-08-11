@@ -224,11 +224,11 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
             Bitmap := Layout.Images.Item[BitmapIndex].Image;
 
             BitmapRect.Left := X div FontWidthPrecisionFactor;
-            BitmapRect.Bottom := Start.Y;
+            BitmapRect.Top := Start.Y;
             BitmapRect.Right := Trunc(BitmapRect.Left
                                 + Bitmap.Width
                                   * Layout.HorizontalImageScale);
-            BitmapRect.Top := Trunc(BitmapRect.Bottom
+            BitmapRect.Bottom := Trunc(BitmapRect.Top
                               + Bitmap.Height
                                 * Layout.VerticalImageScale);
 
