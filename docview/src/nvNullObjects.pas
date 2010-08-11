@@ -10,16 +10,6 @@ uses
 type
   EHelpBitmapException = class(Exception);
 
-  // forward declaration
-  THelpBitmap = class;
-
-
-  TImageList = class(TObjectList)
-  public
-    procedure Add(ABitmap: THelpBitmap; AParam2: TObject);
-  end;
-
-
   THelpBitmap = class(TObject)
   public
     constructor CreateFromHelpFile( FileHandle: TFileStream; Offset: longint );
@@ -32,15 +22,7 @@ implementation
 
 
 
-{ TImageList }
-
-procedure TImageList.Add(ABitmap: THelpBitmap; AParam2: TObject);
-begin
-  //
-end;
-
 { THelpBitmap }
-
 
 constructor THelpBitmap.CreateFromHelpFile(FileHandle: TFileStream; Offset: longint);
 begin

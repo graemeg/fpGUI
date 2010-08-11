@@ -13,6 +13,7 @@ Interface
 uses
   Classes
   ,SysUtils
+  ,fpg_imagelist
   ,IPFFileFormatUnit
   ,HelpTopic
 //  ,HelpBitmap
@@ -140,8 +141,7 @@ type
 
     property ReferencedFiles: TStringList read _ReferencedFiles;
 
-    procedure GetImages( ImageOffsets: TList;
-                         Images: TImageList );
+    procedure GetImages( ImageOffsets: TList; Images: TfpgImageList );
 
     function GetImage( ImageOffset: longint ): THelpBitmap;
 
@@ -1057,8 +1057,7 @@ begin
   end;
 end;
 
-procedure THelpFile.GetImages( ImageOffsets: TList;
-                               Images: TImageList );
+procedure THelpFile.GetImages( ImageOffsets: TList; Images: TfpgImageList );
 var
   ListIndex: longint;
   ImageOffset: longint;
@@ -1081,13 +1080,11 @@ begin
                                          + e.Message );}
       begin
         Bitmap := THelpBitmap.Create;
-        Bitmap.LoadFromResourceName( 'MissingBitmap' );
+        Bitmap.LoadFromResourceName( 'MissingBitmap' );  // TODO: Add image resource to DocView
       end;
     end;
 
-    Images.Add( Bitmap, nil );
-    Bitmap.Destroy;
-
+    Images.AddImage(Bitmap);
   end;
 end;
 
