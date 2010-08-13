@@ -51,17 +51,24 @@
 
   -- Marcus Groeber (marcusg@ph-cip.uni-koeln.de - Fidonet 2:243/8605.1)
 
+
   *** introduction to version 3 ***
 
   Just a bit of an update and flesh out ;-)
 
   -- Peter Childs (pjchilds@apanix.apana.org.au)
 
+
   *** Version 4 ****
 
   Further additions as found while writing NewView
 
   -- Aaron Lawrence
+
+  Some more info and corrections while writing fpGUI's DocView
+
+  -- Graeme Geldenhuys
+
 
   **** Types ****
 
@@ -74,6 +81,7 @@
      int8       8 bit unsigned integer
      int16      16 bit unsigned integer
      int32      32 bit unsigned integer
+
 
   **** The File Header ****
 
@@ -98,8 +106,8 @@
             int32 tocstrlen;    // number of bytes in file occupied by the
                                 // table-of-contents entries
             int32 tocstart;     // 32 bit file offset of the start of tocarray
-            int16 nres;         // number of panels with ressource numbers
-            int32 resstart;     // 32 bit file offset of ressource number table
+            int16 nres;         // number of panels with resource numbers
+            int32 resstart;     // 32 bit file offset of resource number table
             int16 nname;        // number of panels with textual name
             int32 namestart;    // 32 bit file offset to panel name table
             int16 nindex;       // number of index entries
@@ -121,6 +129,7 @@
             int8  unknown5[12]; // unknown purpose
             char8 title[48];    // ASCII title of database
           }
+
 
   **** The table of contents entries ****
 
@@ -223,6 +232,7 @@
       skip over bytestoskip bytes (after w2) and find the tocslots and title
       as in the non-extended case.
 
+
   **** The table of contents array ****
 
       Beginning at file offset tocstart, this structure can overlay the
@@ -232,6 +242,7 @@
                                                // tocentries (above)
           }
 
+
   **** The Slots array ****
 
       Beginning at file offset slotsstart (provided by the file header) find
@@ -239,6 +250,7 @@
              int32 slots[nslots];       // file offset of the article
                                         // corresponding  to this slot
           }
+
 
   **** The Dictionary ****
 
@@ -250,6 +262,7 @@
           {
              char8*     strings[ndict];
           }
+
 
   **** The Article entries ****
 
@@ -263,6 +276,7 @@
              int8       text[ntext];    // encoded text of the article
           }
 
+
   **** The Local dictionary ****
 
       Beginning at file position localdictpos (for each article) there is an
@@ -270,6 +284,7 @@
           {
              int16      localwords[nlocaldict];
           }
+
 
   **** The Text ****
 
@@ -290,6 +305,7 @@
       false, the words are abutted and spaces are supplied using 0xfe or the
       dictionary.  Examples are entered and left with 0xff escape sequences.
       The variable "spacing" is initially (start of every article slot) TRUE.
+
 
   **** 0xff escape sequences ****
 
@@ -456,14 +472,16 @@
       The font used in the text is the normal IBM extended character set,
       including line graphics and some of the characters below 32.
 
-  **** The ressource number array ****
+
+  **** The resource number array ****
 
       Beginning at file offset resstart, this structure can overlay the
       file:
           {
-              int16  res[nres];         // ressource number of panels
+              int16  res[nres];         // resource number of panels
               int16  toc[nres];         // toc entry number of panel
           }
+
 
   **** The text name array ****
 
@@ -473,6 +491,7 @@
               int16  name[nres];        // index to panel name in dictionary
               int16  toc[nres];         // toc entry number of panel
           }
+
 
   **** The index table ****
 
@@ -492,10 +511,12 @@
               int32 synonyms;           // 32 bit file offset to start of synonyms referencing this word
           }
 
+
   **** The extended data block ****
 
       Not yet decoded.  This block has a size of 64 bytes and contains various
       pointers to font names, names of externel databases etc.
+
 
   **** The full text search table ****
 
@@ -567,9 +588,10 @@
               int8  dataType;   // 0 = uncompressed
                                    2 = compressed
               data...
-              Compression is LZW (Lempel Ziv XX?)
+              Compression is LZW (Lempel Ziv Welch)
 
         }
+
 
   **** NLS table ****
 
@@ -577,7 +599,10 @@
       language and codepage the document was prepared in. It seems to contain
       some bitfields as well that might be used for character classification.
 
-Appendix 1: Some useful translations from IBM Extended ASCII to normal ASCII
+
+Appendix 1:
+-----------
+Some useful translations from IBM Extended ASCII to normal ASCII
 
       One other transformation I had to make was of the character box
       characters of the IBM extended ASCII set.  These characters appear in strings
@@ -610,7 +635,9 @@ Appendix 1: Some useful translations from IBM Extended ASCII to normal ASCII
                                 can't tell which from my translation
 
 
-Appendix 2:  Style codes for escCode 0x04 and 0x0D
+Appendix 2:
+-----------
+Style codes for escCode 0x04 and 0x0D
 
       escCode 0x04 implements font changes associated with the :hp# IPF source tag.
 
@@ -631,6 +658,7 @@ Appendix 2:  Style codes for escCode 0x04 and 0x0D
 
 
 History:
+--------
 October 22, 1992: version for initial posting (inf01.doc)
 July 12, 1993: second version (refer to introduction for changes) (inf02.doc)
 July 18, 1993: added appendices to the second version (inf02a.doc)
