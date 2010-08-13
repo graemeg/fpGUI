@@ -7,7 +7,8 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
   fpg_tree, fpg_splitter, fpg_menu, fpg_button, fpg_listbox,
-  fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar,
+  fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar, fpg_imagelist,
+  fpg_imgfmt_bmp,
   HelpFile, RichTextView, HelpTopic;
 
 type
@@ -76,6 +77,7 @@ type
     Debug: boolean;
     FFileOpenRecent: TfpgMenuItem;
     FHistorySelection: Boolean;
+    FImages: TfpgImageList;
 
     LoadingFilenameList: TStringList;
     LoadingFileIndex: integer;
@@ -201,6 +203,7 @@ const
   cVersion    = 'Version ' + FPGUI_VERSION;
 
 {$I arrows.inc}
+{$I missing.inc}
 
 {@VFD_NEWFORM_IMPL}
 
@@ -347,6 +350,8 @@ begin
   LoadSettings;
   CreateMRUMenuItems;
   ProcessCommandLineParams;
+
+  RichView.Images := FImages;
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
@@ -1700,10 +1705,11 @@ begin
                   ImageIndices,
                   nil {Highlights} );
 
+  if ImageIndices.Count > 0 then
+  begin
   { TODO -oGraeme : We do not support images yet }
-//  THelpFile(CurrentTopic.HelpFile).GetImages(ImageOf)
-//   THelpFile( Topic.HelpFile ).GetImages( ImageOffsets,
-//                                           Images );
+//   THelpFile(CurrentTopic.HelpFile).GetImages(ImageIndices, FImages);
+  end;
 
   ImageIndices.Free;
 
@@ -1741,6 +1747,8 @@ begin
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
+var
+  img: TfpgImage;
 begin
   inherited Create(AOwner);
   fpgApplication.OnException  := @MainFormException;
@@ -1754,6 +1762,16 @@ begin
   FHistorySelection := False;
   { TODO -oGraeme : Make Debug a menu option }
   Debug := False;
+
+  FImages := TfpgImageList.Create;
+  // store up to three images per Topic - while we don't support INF images
+  img := CreateImage_BMP(@dv_missing, sizeof(dv_missing));
+  FImages.AddImage(img);
+  img := CreateImage_BMP(@dv_missing, sizeof(dv_missing));
+  FImages.AddImage(img);
+  img := CreateImage_BMP(@dv_missing, sizeof(dv_missing));
+  FImages.AddImage(img);
+
 
   // load toolbar images
   fpgImages.AddMaskedBMP(
@@ -1771,10 +1789,13 @@ begin
   fpgImages.AddMaskedBMP(
     'dv.arrowdown', @usr_arrow_down,
     sizeof(usr_arrow_down), 0, 0);
+
 end;
 
 destructor TMainForm.Destroy;
 begin
+  RichView.Images := nil;
+  FImages.Free;
   CurrentTopic := nil;  // it was a reference only
   FFileOpenRecent := nil;   // it was a reference only
   miOpenRecentMenu.Free;
