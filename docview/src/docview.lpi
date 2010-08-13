@@ -32,7 +32,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="29">
+    <Units Count="30">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -175,6 +175,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpBitmap"/>
       </Unit28>
+      <Unit29>
+        <Filename Value="missing.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit29>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

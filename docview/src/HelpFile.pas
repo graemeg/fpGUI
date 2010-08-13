@@ -1,12 +1,8 @@
-Unit HelpFile;
+unit HelpFile;
 
 {$mode objfpc}{$H+}
 
-// NewView - a new OS/2 Help Viewer
-// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
-// This software is released under the Gnu Public License - see readme.txt
-
-Interface
+interface
 
 // Encapsulates the basic reading of a help file's structure.
 
@@ -653,7 +649,7 @@ type
 
 procedure THelpFile.ReadIndex;
 var
-  IndexIndex: longint; // I can't resist :-)
+  IndexIndex: longint;
   pEntryHeader: pTIndexEntryHeader;
   EntryText: string;
   IndexTitleLen: longint;
@@ -1097,12 +1093,12 @@ begin
                                               + ImageOffset );
   except
     on e: EHelpBitmapException do
-{        raise EHelpFileException.Create( 'Error loading help bitmap at'
-                                       + IntToStr( ImageOffset )
-                                       + ': '
-                                       + e.Message );}
     begin
       result := nil;
+        raise EHelpFileException.Create( 'Error loading help bitmap at'
+                                       + IntToStr( ImageOffset )
+                                       + ': '
+                                       + e.Message );
     end;
   end;
 end;

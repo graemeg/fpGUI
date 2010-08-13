@@ -2,10 +2,6 @@ Unit HelpTopic;
 
 {$mode objfpc}{$H+}
 
-// NewView - a new OS/2 Help Viewer
-// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
-// This software is released under the Gnu Public License - see readme.txt
-
 Interface
 
 // This is it - the monster which decodes IPF data.
@@ -1065,6 +1061,7 @@ begin
                                     BitmapOffset,
                                     BitmapFlags,
                                     ImageOffsets );
+
       if State.Spacing
          AND (OutputString[Length(OutputString)] <> RTF_NewLine) // no space after a line break
       then
