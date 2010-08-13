@@ -36,8 +36,21 @@ is centred in the available horizontal space of the button.</descr>
         <short>The registered name of a image to display on the button</short>
         <descr>
           <printshort id="TfpgBaseButton.ImageName"/>. This is the name used when
-a image resource was registered with the global <link id="#fpgui.fpg_main.fpgImages">fpgImages</link> instance.</descr>
+a image resource was registered with the global <link id="fpg_main.fpgImages">fpgImages</link> instance.</descr>
       </element>
+
+      <element name="TfpgButton">
+        <short>Concrete button class used in user interfaces</short>
+        <descr><printshort id="TfpgButton"/>. This class is a descendant of <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link> and
+simply publishes various properties for runtime type information.</descr>
+        <seealso>
+          <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link>
+        </seealso>
+      </element>
+      <element name="TfpgButton.ImageName" link="TfpgBaseButton.ImageName"/>
+      <element name="TfpgButton.ImageSpacing" link="TfpgBaseButton.ImageSpacing"/>
+      <element name="TfpgButton.ImageLayout" link="TfpgBaseButton.ImageLayout"/>
+
     </module>
   </package>
 </fpdoc-descriptions>
