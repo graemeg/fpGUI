@@ -63,10 +63,10 @@ type
     _UncompressedBlockSize: longint;
     function GetPaletteSize: longint;
     procedure BitmapError(Msg: string);
-    procedure DecompressLZW(var Buffer: Pointer; var Count: PtrInt);
+    procedure DecompressLZW(var Buffer: Pointer; const Count: integer; var NewBuffer: PByte; var NewCount: integer);
     procedure ReadBitmapData( Blocks: TList; TotalSize: longint );
   public
-    constructor CreateFromHelpFile(AFileHandle: TFileStream; Offset: longint);
+    constructor CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longint);
     destructor Destroy; override;
   end;
 
@@ -96,9 +96,10 @@ type
   end;
 
   TBitmapBlock = class(TObject)
-    _Data: PBYTE;
+  public
     _Size: uint16;
     _CompressionType: uint8;
+    _Data: PBYTE;
     destructor Destroy; override;
   end;
 
@@ -108,7 +109,7 @@ begin
   inherited Destroy;
 end;
 
-constructor THelpBitmap.CreateFromHelpFile(AFileHandle: TFileStream; Offset: longint);
+constructor THelpBitmap.CreateFromHelpFile(var AFileHandle: TFileStream; Offset: longint);
 var
   WordsPerLine: longint;
   LineSize: longint;
@@ -123,6 +124,7 @@ var
   BitmapArrayHeader: INFBITMAPARRAYHEADER;
   bytes: integer;
 begin
+  inherited Create;
   FileHandle := AFileHandle;
 
   FileHandle.Seek(Offset, soBeginning);
@@ -173,14 +175,18 @@ begin
   _Header.OffBits := sizeof( _Header ) + GetPaletteSize;           // TODO: Graeme, double check this!
 
   // Load palette
-  _pPalette := GetMem( GetPaletteSize );
-  bytes := FileHandle.Read(_pPalette, GetPaletteSize);
-  if bytes <> GetPaletteSize then
-    raise EHelpBitmapException.Create( 'Failed to read Palette.' );
+  if _Header.cBitCount <= 8 then
+  begin
+    _pPalette := GetMem( GetPaletteSize );
+    bytes := FileHandle.Read(_pPalette, GetPaletteSize);
+    if bytes <> GetPaletteSize then
+      raise EHelpBitmapException.Create( 'Failed to read Palette.' );
+  end;
 
   // Read data header
+  FillChar( DataHeader, sizeof( DataHeader ), 0 );
   bytes := FileHandle.Read(DataHeader, SizeOf(DataHeader));
-  if bytes <> GetPaletteSize then
+  if bytes <> SizeOf(DataHeader) then
     raise EHelpBitmapException.Create( 'Failed to read DataHeader.' );
   _UncompressedBlockSize := DataHeader.usUncompressedBlockSize;
 
@@ -209,10 +215,9 @@ begin
     FileHandle.Read(Block._Data, Block._Size);
 
     inc( BytesRead, Block._Size  );
-
     Blocks.Add( Block );
-
   end;
+
   ReadBitmapData( Blocks, sizeof( _Header ) + GetPaletteSize + _BitsSize );
 
   for BlockIndex := 0 to Blocks.Count - 1 do
@@ -243,7 +248,7 @@ begin
   inherited Destroy;
 end;
 
-procedure THelpBitmap.DecompressLZW(var Buffer: Pointer; var Count: PtrInt);
+procedure THelpBitmap.DecompressLZW(var Buffer: Pointer; const Count: Integer; var NewBuffer: PByte; var NewCount: integer);
 type
   TLZWString = packed record
     Count: integer;
@@ -254,8 +259,8 @@ const
   ClearCode = 256; // clear table, start with 9bit codes
   EoiCode = 257; // end of input
 var
-  NewBuffer: PByte;
-  NewCount: PtrInt;
+//  NewBuffer: PByte;
+//  NewCount: PtrInt;
   NewCapacity: PtrInt;
   SrcPos: PtrInt;
   SrcPosBit: integer;
@@ -456,9 +461,9 @@ begin
   end;
 
   ReAllocMem(NewBuffer,NewCount);
-  FreeMem(Buffer);
-  Buffer:=NewBuffer;
-  Count:=NewCount;
+//  FreeMem(Buffer);
+//  Buffer:=NewBuffer;
+//  Count:=NewCount;
 end;
 
 
@@ -510,11 +515,12 @@ begin
         if not Assigned( LZWDecompressBlock )then
           raise EHelpBitmapException.Create( 'Cannot decode bitmap - DLL not found' );
 
-        LZWDecompressBlock( Block._Data,
-                            BitmapOutputPointer,
-                            Block._Size,
-                            BytesWrittenFromBlock,
-                            lastOutByte );
+//        DecompressLZW(Block._Data, Block._Size);
+        //LZWDecompressBlock( Block._Data,
+        //                    BitmapOutputPointer,
+        //                    Block._Size,
+        //                    BytesWrittenFromBlock,
+        //                    lastOutByte );
 
         inc( BytesWritten, BytesWrittenFromBlock );
 
