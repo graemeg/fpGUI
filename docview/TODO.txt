@@ -1,0 +1,65 @@
+
+  DocView todo list.
+
+Legend
+======
+[ ] - not started yet
+[o] - started but not complete
+[x] - completed task.
+
+
+Todo list
+=========
+[ ] - Access Violation when the application terminates.
+[ ] - Ever growing list of fonts used while loading new topics.
+[o] - Settings / Customization dialog is needed.
+[ ] - Change mouse cursor when over hyperlinks in RichTextView
+[o] - Implement a ipfdump program. Already started work on this and is called
+      docdump in the src directory.
+[ ] - Implement a IPF Compiler in Object Pascal
+[ ] - Text is not selectable in RichTextView. I imagine people want to
+      copy & paste examples. Although "Save current Topic" already exists.
+[ ] - Communication between application and docview. Both directions. Possible
+      solutions is Pipes or IPC unit.
+[ ] - Create help file for DocView listing all supported features etc..
+[ ] - Searching for two words as-is does not seem to work.
+      eg: 'file descriptor' exists is fppoll help, but trying to search for
+      those two words doesn't find anything.
+[ ] - Sometimes searching for a word doesn't find help even though it exists.
+      eg: 'descriptor' doesn't find the help in fppoll topic, even though the
+      work is clearly in the topic contents.
+[ ] - Options or Configuration dialog to set various things.
+[ ] - Implement popup window for "notes" hyperlinks.
+[ ] - RichTextView component issue. Incompatible with original OS/2 VIEW. When
+      resetting a font style (eg: italics to normal), it should not affect a
+      previously set font color, unless a new font color is explicitly set.
+[ ] - External links are not supported yet.
+[ ] - Implement Image support in INF or HLP files.
+
+[x] - Display topic by ID via command line parameters
+[x] - 'Could not load topic slots' message when trying to view some topics.
+[x] - Extend compiler or INF file format for larged Word Index list. Currently
+      LCL documentation needs to be split in two, to compile. (this was an issue
+      with the Open Watcom WIPFC - limit is now set to 65000 entries)
+[x] - Clicking in index list should set the text in the index search edit box.
+[x] - MRU menu item doesn't seem to remember all opened documents.
+[x] - Text wrapping in RichTextView is not 100% correct
+[x] - Hyperlinks on scrolled content doesn't work.
+[x] - Implement History tab and tracking - including Back & Next buttons.
+[x] - Open Recent Files doesn't always get populated, or gets cleared for some
+      reason.
+[x] - Fixes suggish scrolling. I think it's a recursive position event on the
+      vertical scrollbar causing the problem.
+
+
+fpdoc IPF todo list
+===================
+[ ] - Class declaration in overview page is missing. Like HTML output.
+[ ] - Class inheritance tree must be shown in overview page. Like HTML output.
+[ ] - 
+[ ] - 
+[ ] - 
+
+
+
+

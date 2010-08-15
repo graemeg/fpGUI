@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -32,7 +32,7 @@ uses
 type
 
   TPanelShape = (bsBox, bsFrame, bsTopLine, bsBottomLine, bsLeftLine,
-    bsRightLine, bsSpacer);
+    bsRightLine, bsSpacer, bsVerDivider);
 
   TPanelStyle = (bsLowered, bsRaised);
 
@@ -41,14 +41,17 @@ type
 
   TfpgAbstractPanel = class(TfpgWidget)
   private
-    FPanelShape: TPanelShape;
     FPanelStyle: TPanelStyle;
     FPanelBorder: TPanelBorder;
+    FParentBackgroundColor: Boolean;
     procedure   SetPanelStyle(const AValue: TPanelStyle);
     procedure   SetPanelBorder(const AValue: TPanelBorder);
+    procedure   SetParentBackgroundColor(const AValue: Boolean);
   protected
+    procedure   HandlePaint; override;
     property    Style: TPanelStyle read FPanelStyle write SetPanelStyle default bsRaised;
     property    BorderStyle: TPanelBorder read FPanelBorder write SetPanelBorder default bsSingle;
+    property    ParentBackgroundColor: Boolean read FParentBackgroundColor write SetParentBackgroundColor default False;
   public
     constructor Create(AOwner: TComponent); override;
     function    GetClientRect: TfpgRect; override;
@@ -57,22 +60,42 @@ type
 
   TfpgBevel = class(TfpgAbstractPanel)
   private
+    FPanelShape: TPanelShape;
     procedure   SetPanelShape(const AValue: TPanelShape);
+    procedure   DrawBox;        //  bsBox
+    procedure   DrawFrame;      //  bsFrame
+    procedure   DrawTopLine;    //  bsTopLine
+    procedure   DrawBottomLine; //  bsBottomLine
+    procedure   DrawLeftLine;   //  bsLeftLine
+    procedure   DrawRightLine;  //  bsRightLine
+    procedure   DrawSpacer;     //  bsSpacer
+    procedure   DrawVerDivider; //  bsVerDivider
   protected
     procedure   HandlePaint; override;
   published
     property    BackgroundColor;
     property    BorderStyle;
-    property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
-    property    Style;
+    property    Height;
+    property    Hint;
+    property    Left;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
+    property    ParentBackgroundColor;
     property    ParentShowHint;
+    property    Shape: TPanelShape read FPanelShape write SetPanelShape default bsBox;
     property    ShowHint;
+    property    Style;
+    property    Top;
+    property    Width;
     property    OnClick;
     property    OnDoubleClick;
     property    OnMouseDown;
     property    OnMouseMove;
     property    OnMouseUp;
     property    OnPaint;
+    property    OnShowHint;
   end;
   
 
@@ -90,8 +113,6 @@ type
     procedure   SetLayout(const AValue: TLayout);
     function    GetText: string;
     procedure   SetText(const AValue: string);
-    function    GetFontDesc: string;
-    procedure   SetFontDesc(const AValue: string);
     function    GetLineSpace: integer;
     procedure   SetLineSpace(const AValue: integer);
     function    GetMargin: integer;
@@ -100,6 +121,8 @@ type
     procedure   SetWrapText(const AValue: boolean);
   protected
     FFont: TfpgFont;
+    function    GetFontDesc: string; virtual;
+    procedure   SetFontDesc(const AValue: string); virtual;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -110,17 +133,28 @@ type
     property    BackgroundColor;
     property    BorderStyle;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Height;
+    property    Hint;
     property    Layout: TLayout read GetLayout write SetLayout default tlCenter;
+    property    Left;
+    property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
+    property    Margin: integer read GetMargin write SetMargin default 2;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
+    property    ParentBackgroundColor;
+    property    ParentShowHint;
+    property    ShowHint;
     property    Style;
     property    Text: string read GetText write SetText;
     property    TextColor;
-    property    LineSpace: integer read GetLineSpace write SetLineSpace default 2;
-    property    Margin: integer read GetMargin write SetMargin default 2;
+    property    Top;
+    property    Width;
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
-    property    ParentShowHint;
-    property    ShowHint;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnShowHint;
   end;
   
 
@@ -139,24 +173,35 @@ type
     procedure   SetMargin(const AValue: integer);
   protected
     FFont: TfpgFont;
-    function    GetClientRect: TfpgRect; override;
     procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    function    GetClientRect: TfpgRect; override;
     property    Font: TfpgFont read FFont;
   published
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property    BackgroundColor;
     property    BorderStyle;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Height;
+    property    Hint;
+    property    Left;
     property    Margin: integer read GetMargin write SetMargin default 2;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
     property    ParentShowHint;
     property    ShowHint;
     property    Style;
     property    Text: string read GetText write SetText;
     property    TextColor;
+    property    Top;
+    property    Width;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnShowHint;
   end;
 
 
@@ -242,16 +287,31 @@ begin
   end;
 end;
 
+procedure TfpgAbstractPanel.SetParentBackgroundColor(const AValue: Boolean);
+begin
+  if FParentBackgroundColor = AValue then exit;
+  FParentBackgroundColor := AValue;
+  RePaint;
+end;
+
+procedure TfpgAbstractPanel.HandlePaint;
+begin
+  inherited HandlePaint;
+  if FParentBackgroundColor then
+    Canvas.Clear(Parent.BackgroundColor)
+  else
+    Canvas.Clear(BackgroundColor);
+end;
+
 constructor TfpgAbstractPanel.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FPanelShape      := bsBox;
   FPanelStyle      := bsRaised;
   FPanelBorder     := bsSingle;
   FWidth           := 80;
   FHeight          := 80;
   FFocusable       := True;  // otherwise children can't get focus
-  FBackgroundColor := Parent.BackgroundColor;
+  FParentBackgroundColor := False;
   FIsContainer     := True;
 end;
 
@@ -266,69 +326,160 @@ begin
   end;
 end;
 
-procedure TfpgBevel.HandlePaint;
+procedure TfpgBevel.DrawBox;
 begin
-  inherited HandlePaint;
-
-  Canvas.Clear(BackgroundColor);
-
-  //  Canvas.SetLineStyle(2, lsSolid);
-  //  Canvas.SetColor(clWindowBackground);
-  //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
   if FPanelBorder = bsSingle then
     Canvas.SetLineStyle(1, lsSolid)
   else
     Canvas.SetLineStyle(2, lsSolid);
 
-  if Style = bsRaised then
-    Canvas.SetColor(clHilite2)
+  if FPanelBorder = bsSingle then
+    Canvas.DrawLine(0, 0, Width - 1, 0)
   else
-    Canvas.SetColor(clShadow2);
+    Canvas.DrawLine(0, 1, Width - 1, 1);
 
-  if Shape in [bsBox] then
-    if FPanelBorder = bsSingle then
-      Canvas.DrawLine(0, 0, Width - 1, 0)
-    else
-      Canvas.DrawLine(0, 1, Width - 1, 1);
-  if Shape in [bsFrame, bsTopLine] then
-      Canvas.DrawLine(0, 0, Width - 1, 0);
-  if Shape in [bsBox] then
-    if FPanelBorder = bsSingle then
-      Canvas.DrawLine(0, 1, 0, Height - 1)
-    else
-      Canvas.DrawLine(1, 1, 1, Height - 1);
-  if Shape in [bsFrame, bsLeftLine] then
-    Canvas.DrawLine(0, 1, 0, Height - 1);
-  if Shape in [bsFrame, bsRightLine] then
-    Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
-  if Shape in [bsFrame, bsBottomLine] then
-    Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
+  if FPanelBorder = bsSingle then
+    Canvas.DrawLine(0, 1, 0, Height - 1)
+  else
+    Canvas.DrawLine(1, 1, 1, Height - 1);
 
   if Style = bsRaised then
     Canvas.SetColor(clShadow2)
   else
     Canvas.SetColor(clHilite2);
 
-  if Shape in [bsFrame, bsTopLine] then
-    Canvas.DrawLine(1, 1, Width - 2, 1);
-  if Shape in [bsFrame, bsLeftLine] then
-    Canvas.DrawLine(1, 2, 1, Height - 2);
-  if Shape in [bsBox, bsFrame, bsRightLine] then
-    Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
-  if Shape in [bsBox, bsFrame, bsBottomLine] then
-    Canvas.DrawLine(0, Height - 1, Width, Height - 1);
-    
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+end;
+
+procedure TfpgBevel.DrawFrame;
+begin
+  Canvas.SetLineStyle(1, lsSolid);
+
+  Canvas.DrawLine(0, 0, Width - 1, 0);
+  Canvas.DrawLine(0, 1, 0, Height - 1);
+  Canvas.DrawLine(Width - 2, 1, Width - 2, Height - 1);
+  Canvas.DrawLine(1, Height - 2, Width - 1, Height - 2);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(1, 1, Width - 2, 1);
+  Canvas.DrawLine(1, 2, 1, Height - 2);
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+end;
+
+procedure TfpgBevel.DrawTopLine;
+begin
+  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.DrawLine(0, 0, Width, 0);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(0, 1, Width, 1);
+end;
+
+procedure TfpgBevel.DrawBottomLine;
+begin
+  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.DrawLine(0, Height - 2, Width, Height - 2);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(0, Height - 1, Width, Height - 1);
+end;
+
+procedure TfpgBevel.DrawLeftLine;
+begin
+  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.DrawLine(0, 1, 0, Height - 1);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(1, 1, 1, Height - 1);
+end;
+
+procedure TfpgBevel.DrawRightLine;
+begin
+  Canvas.SetLineStyle(1, lsSolid);
+  Canvas.DrawLine(Width - 2, 0, Width - 2, Height - 1);
+
+  if Style = bsRaised then
+    Canvas.SetColor(clShadow2)
+  else
+    Canvas.SetColor(clHilite2);
+
+  Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
+end;
+
+procedure TfpgBevel.DrawSpacer;
+begin
   // To make it more visible in the UI Designer
   if csDesigning in ComponentState then
   begin
-    if Shape in [bsSpacer] then
-    begin
-      Canvas.SetColor(clInactiveWgFrame);
-      Canvas.SetLineStyle(1, lsDash);
-      Canvas.DrawRectangle(0, 0, Width, Height);
-//      Canvas.SetTextColor(clText1);
-//      Canvas.DrawString(2, 2, Name + ': ' + Classname);
-    end;
+    Canvas.SetColor(clInactiveWgFrame);
+    Canvas.SetLineStyle(1, lsDash);
+    Canvas.DrawRectangle(0, 0, Width, Height);
+  end;
+end;
+
+procedure TfpgBevel.DrawVerDivider;
+
+  procedure PaintLine(px, py: integer);
+  begin
+    if Style = bsRaised then
+      Canvas.SetColor(clHilite2)
+    else
+      Canvas.SetColor(clShadow1);
+
+    Canvas.DrawLine(px, py, px+2, py);
+    Canvas.DrawLine(px, py, px, Height);
+
+    if Style = bsRaised then
+      Canvas.SetColor(clShadow1)
+    else
+      Canvas.SetColor(clHilite2);
+
+    Canvas.DrawLine(px+1, Height - 1, px+3, Height - 1);
+    Canvas.DrawLine(px+2, py, px+2, Height);
+  end;
+
+begin
+  PaintLine(0, 0);
+  if FPanelBorder = bsDouble then
+    PaintLine(3, 0);
+end;
+
+procedure TfpgBevel.HandlePaint;
+begin
+  inherited HandlePaint;
+
+  if Style = bsRaised then
+    Canvas.SetColor(clHilite2)
+  else
+    Canvas.SetColor(clShadow1);
+
+  case Shape of
+    bsBox:          DrawBox;
+    bsFrame:        DrawFrame;
+    bsTopLine:      DrawTopLine;
+    bsBottomLine:   DrawBottomLine;
+    bsLeftLine:     DrawLeftLine;
+    bsRightLine:    DrawRightLine;
+    bsSpacer:       DrawSpacer;
+    bsVerDivider:   DrawVerDivider;
   end;
 end;
 
@@ -435,8 +586,6 @@ var
 begin
   inherited HandlePaint;
 
-  Canvas.Clear(BackgroundColor);
-
   //  Canvas.SetLineStyle(2, lsSolid);
   //  Canvas.SetColor(clWindowBackground);
   //  Canvas.DrawRectangle(1, 1, Width - 1, Height - 1);
@@ -502,12 +651,9 @@ begin
   inherited Create(AOwner);
   FText             := 'Panel';
   FFont             := fpgGetFont('#Label1');
-  FPanelShape       := bsBox;
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
-  FFocusable        := True;  // otherwise children can't get focus
-  FBackgroundColor  := Parent.BackgroundColor;
   FAlignment        := taCenter;
   FLayout           := tlCenter;
   FWrapText         := False;
@@ -743,7 +889,6 @@ begin
   inherited Create(AOwner);
   FText             := 'Group box';
   FFont             := fpgGetFont('#Label1');
-  FPanelShape       := bsBox;
   FPanelStyle       := bsRaised;
   FWidth            := 80;
   FHeight           := 80;
@@ -751,6 +896,12 @@ begin
   FBackgroundColor  := Parent.BackgroundColor;
   FAlignment        := taLeftJustify;
   FMargin           := 2;
+end;
+
+destructor TfpgGroupBox.Destroy;
+begin
+  FFont.Free;
+  inherited Destroy;
 end;
 
 end.

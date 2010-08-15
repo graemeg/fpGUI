@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -98,8 +98,8 @@ begin
   wgd   := TWidgetDesigner(wgdesigner);
   gridc := maindsgn.GridResolution;
 
-  dx := dx - dx mod gridc;
-  dy := dy - dy mod gridc;
+  dx := dx - (dx mod gridc);
+  dy := dy - (dy mod gridc);
 
   case direction of
     1: wgd.Widget.MoveAndResizeBy(dx, dy, -dx, -dy);
@@ -134,7 +134,6 @@ begin
     7: MouseCursor := mcSizeNESW;   // bottom left
     8: MouseCursor := mcSizeEW;     // left
   end;
-  Visible := True;
 end;
 
 procedure TwgResizer.Show;

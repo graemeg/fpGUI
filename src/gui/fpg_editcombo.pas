@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -64,8 +64,6 @@ type
   TAllowNew = (anNo, anYes, anAsk);
 
 
-  { TfpgBaseEditCombo }
-
   TfpgBaseEditCombo = class(TfpgBaseComboBox)
   private
     FAutoCompletion: Boolean;
@@ -77,8 +75,7 @@ type
     procedure   SetAllowNew(const AValue: TAllowNew);
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
-    procedure   InternalListBoxKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState;
-                var consumed: Boolean);
+    procedure   InternalListBoxKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
   protected
     FDropDown: TfpgPopupWindow;
     FDrawOffset: integer;
@@ -120,6 +117,7 @@ type
     property    FocusItem;
     property    FontDesc;
     property    Height;
+    property    Hint;
     property    Items;
     property    Margin;
     property    Text;
@@ -131,6 +129,7 @@ type
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
+    property    OnShowHint;
   end;
 
 

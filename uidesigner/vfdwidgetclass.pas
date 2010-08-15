@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -47,6 +47,7 @@ type
     procedure   CreateLayout; virtual;
     procedure   LoadValue(wg: TfpgWidget); virtual;
     procedure   StoreValue(wg: TfpgWidget); virtual;
+    procedure   SetFocus; virtual;
   end;
 
 
@@ -96,7 +97,7 @@ uses
 
 type
   // used to get to SetDesigning() in Form Designer
-  TComponentFriendClass = class(TComponent);
+  TWidgetFriendClass = class(TfpgWidget);
 
 
 { TVFDWidgetClass }
@@ -122,7 +123,7 @@ end;
 function TVFDWidgetClass.CreateWidget(AOwner: TComponent): TfpgWidget;
 begin
   Result := WidgetClass.Create(AOwner);
-  TComponentFriendClass(Result).SetDesigning(True);
+  TWidgetFriendClass(Result).SetDesigning(True);
 end;
 
 function TVFDWidgetClass.CreatePopupMenu(AWidget: TfpgWidget): TfpgPopupMenu;
@@ -237,6 +238,11 @@ begin
   // the property must be published !
   // PPropInfo := GetPropInfo(object, 'propname');
   // if PPropInfo^.PropType^.name =
+end;
+
+procedure TVFDPropertyEditor.SetFocus;
+begin
+  // do nothing
 end;
 
 end.

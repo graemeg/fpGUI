@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -43,15 +43,16 @@ type
     procedure   SetPopupFrame(const AValue: boolean);
   protected
     procedure   MsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
-    procedure   AdjustWindowStyle; override;
     procedure   HandleClose; virtual;
     procedure   HandleShow; override;
+    procedure   HandlePaint; override;
     procedure   ProcessPopupFrame; virtual;
     procedure   DoPaintPopupFrame; virtual;
     procedure   DoOnClose; virtual;
     procedure   DoOnShow; virtual;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure   AdjustWindowStyle; override;
     procedure   ShowAt(AWidget: TfpgWidget; x, y: TfpgCoord); overload;
     procedure   ShowAt(x, y: TfpgCoord); overload;
     procedure   Close; virtual;
@@ -241,6 +242,13 @@ begin
   DoOnShow;
 end;
 
+procedure TfpgPopupWindow.HandlePaint;
+begin
+  inherited HandlePaint;
+  if PopupFrame then
+    DoPaintPopupFrame;
+end;
+
 procedure TfpgPopupWindow.ProcessPopupFrame;
 var
   i: integer;
@@ -263,10 +271,7 @@ begin
     end;
     HandleResize(Width+2, Height+2);
     UpdateWindowPosition;
-
-    Canvas.BeginDraw;
-    DoPaintPopupFrame;
-    Canvas.EndDraw;
+    Repaint;
   end;
 end;
 
@@ -337,11 +342,6 @@ procedure TfpgPopupWindow.Close;
 begin
   HandleClose;
   PopupListRemove(self);
-  { TODO : Move this out to the GDI specific unit. }
-  {$IFDEF MSWINDOWS}
-  if uFirstPopup <> nil then
-    uFirstPopup^.Widget.CaptureMouse;
-  {$ENDIF}
 end;
 
 

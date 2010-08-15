@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -54,6 +54,9 @@ function fpgFileExists(const FileName: TfpgString): Boolean;
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
+function fpgExtractFileName(const FileName: TfpgString): TfpgString;
+function fpgExtractFileExt(const FileName: TfpgString): TfpgString;
+function fpgForceDirectories(const ADirectory: TfpgString): Boolean;
 
 
 implementation
@@ -132,6 +135,21 @@ begin
   Result := ExtractFilePath(fpgToOSEncoding(Filename));
 end;
 
+function fpgExtractFileName(const FileName: TfpgString): TfpgString;
+begin
+  Result := ExtractFileName(fpgToOSEncoding(Filename));
+end;
+
+function fpgExtractFileExt(const FileName: TfpgString): TfpgString;
+begin
+  Result := ExtractFileExt(fpgToOSEncoding(Filename));
+end;
+
+function fpgForceDirectories(const ADirectory: TfpgString): Boolean;
+begin
+  Result := ForceDirectories(fpgToOSEncoding(ADirectory));
+end;
+
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 begin
   if (Path <> '') and (Path[length(Path)] <> PathDelim) then
@@ -180,12 +198,8 @@ end;
 
 function fpgAllFilesMask: TfpgString;
 begin
-  {$Note In FPC 2.2.2 onwards we can use AllFilesMask which is part of RTL }
-  {$IFDEF WINDOWS}
-  Result := '*.*';
-  {$ELSE}
-  Result := '*';
-  {$ENDIF}
+  { Since FPC 2.2.2 we have the AllFilesMask variable, which is part of the RTL }
+  Result := AllFilesMask;
 end;
 
 function fpgConvertLineEndings(const s: TfpgString): TfpgString;

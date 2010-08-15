@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <Name Value="fpgui_richtext"/>
+    <AddToProjectUsesSection Value="False"/>
+    <Author Value="Graeme Geldenhuys"/>
+    <CompilerOptions>
+      <Version Value="8"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="../../src/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Parsing>
+        <Style Value="1"/>
+        <SyntaxOptions>
+          <CStyleOperator Value="False"/>
+          <AllowLabel Value="False"/>
+          <CPPInline Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
+      <CodeGeneration>
+        <TargetCPU Value="i386"/>
+        <TargetOS Value="Linux"/>
+        <Optimizations>
+          <OptimizationLevel Value="0"/>
+        </Optimizations>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="RichTextView component"/>
+    <License Value="LGPL2 with static linking exception."/>
+    <Version Minor="1"/>
+    <Files Count="7">
+      <Item1>
+        <Filename Value="RichTextDocumentUnit.pas"/>
+        <UnitName Value="RichTextDocumentUnit"/>
+      </Item1>
+      <Item2>
+        <Filename Value="ACLStringUtility.pas"/>
+        <UnitName Value="ACLStringUtility"/>
+      </Item2>
+      <Item3>
+        <Filename Value="CanvasFontManager.pas"/>
+        <UnitName Value="CanvasFontManager"/>
+      </Item3>
+      <Item4>
+        <Filename Value="RichTextStyleUnit.pas"/>
+        <UnitName Value="RichTextStyleUnit"/>
+      </Item4>
+      <Item5>
+        <Filename Value="RichTextLayoutUnit.pas"/>
+        <UnitName Value="RichTextLayoutUnit"/>
+      </Item5>
+      <Item6>
+        <Filename Value="RichTextDisplayUnit.pas"/>
+        <UnitName Value="RichTextDisplayUnit"/>
+      </Item6>
+      <Item7>
+        <Filename Value="RichTextView.pas"/>
+        <UnitName Value="RichTextView"/>
+      </Item7>
+    </Files>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="fpgui_toolkit"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)/"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <fpdoc-descriptions>
-<package name="GUI">
+<package name="fpGUI">
 
 <module name="fpg_dialogs">
 <short>Various dialogs used by fpGUI based applications.</short>
@@ -85,20 +85,15 @@ When the dialog is opened the file specified is pre selected.
 <!-- property Visibility: public -->
 <element name="TfpgFileDialog.Filter">
 <short>File mask filters available in the dialog.</short>
-<descr>
-<p>
-The filter consists out of two parts separated by a | sign. If more than
+<descr><p>The filter consists out of two parts separated by a | sign. If more than
 one filter needs to be specified each filter is also separated by a | sign.
 The format for a single filter is: &lt;description&gt;|&lt;filemask&gt;
 The format for multiple filters are: &lt;description&gt;|&lt;filemask&gt;|&lt;description&gt;|&lt;filemask&gt;|&lt;description&gt;|&lt;filemask&gt;
 </p>
-<p>
- Example:<br/>
- <ul>
-   <li><p>'All Files (*)|*'</p></li>
-   <li><p>'All Files (*)|*|Object Pascal (*.pas)|*.pas'</p></li>
- </ul>
-</p>
+<p>Example:</p>
+<code>'All Files (*)|*'
+'All Files (*)|*|Object Pascal (*.pas)|*.pas'
+</code>
 <p>           
 A filemask can also contain more than one mask separated by a ; sign.<br/>
 eg: 'Object Pascal|*.pas;*.lpi;*.pp'

@@ -15,7 +15,6 @@ type
   protected
     procedure   HandlePaint; override;
   public
-    constructor Create(aowner: TComponent); override;
     procedure   AfterCreate; override;
   end;
 
@@ -25,6 +24,13 @@ procedure TMainForm.AfterCreate;
 begin
   SetPosition(100,100,700,500);
   WindowTitle := 'fpGUI Standard Image Listing';
+  WindowPosition := wpOneThirdDown;
+  MinWidth := 200;
+  MinHeight := 100;
+
+  btnClose := CreateButton(self, Width-90, Height-35, 75, 'Quit', @btnCloseClick);
+  btnClose.ImageName := 'stdimg.quit';
+  btnClose.Anchors := [anRight, anBottom];
 end;
 
 procedure TMainForm.btnCloseClick(Sender: TObject);
@@ -66,16 +72,6 @@ begin
 
   Canvas.EndDraw;
   sl.Free;
-end;
-
-constructor TMainForm.Create(aowner: TComponent);
-begin
-  inherited Create(aowner);
-  // Place button in bottom right corner.
-  btnClose := CreateButton(self, Width-90, Height-35, 75, 'Quit', @btnCloseClick);
-  btnClose.ImageName := 'stdimg.quit';
-//  btnClose.Focusable := False;
-  btnClose.Anchors := [anRight, anBottom];
 end;
 
 procedure MainProc;

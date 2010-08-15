@@ -7,10 +7,10 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgfx,
-  gfxbase,
-  gui_form,
-  gfx_imgfmt_bmp, fpgui_toolkit;
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_imgfmt_bmp;
   
 type
 

@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -13,6 +13,10 @@
 
     Description:
       This defines the CoreLib backend interface to the Windows GDI API.
+
+      Win32 API Reference - http://msdn.microsoft.com/en-us/library/ff468919(VS.85).aspx
+      Windows CE 3.0 API Reference - http://msdn.microsoft.com/en-us/library/ms925466.aspx
+      FPC WinCE information - http://wiki.freepascal.org/WinCE_port
 }
 
 unit fpg_gdi;
@@ -44,12 +48,11 @@ var
   FontSmoothingType: Cardinal;
 
 type
-
   // forward declaration
-  TfpgWindowImpl = class;
+  TfpgGDIWindow = class;
 
 
-  TfpgFontResourceImpl = class(TfpgFontResourceBase)
+  TfpgGDIFontResource = class(TfpgFontResourceBase)
   private
     FFontData: HFONT;
     FMetrics: Windows.TEXTMETRIC;
@@ -67,11 +70,7 @@ type
   end;
 
 
-  TfpgFontImpl = class(TfpgFontBase)
-  end;
-
-
-  TfpgImageImpl = class(TfpgImageBase)
+  TfpgGDIImage = class(TfpgImageBase)
   private
     FBMPHandle: HBITMAP;
     FMaskHandle: HBITMAP;
@@ -87,18 +86,16 @@ type
   end;
 
 
-  { TfpgCanvasImpl }
-
-  TfpgCanvasImpl = class(TfpgCanvasBase)
+  TfpgGDICanvas = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
     FBufferBitmap: HBitmap;
-    FDrawWindow: TfpgWindowImpl;
+    FDrawWindow: TfpgGDIWindow;
     Fgc: TfpgDCHandle;
     FBufgc: TfpgDCHandle;
     FWinGC: TfpgDCHandle;
     FBackgroundColor: TfpgColor;
-    FCurFontRes: TfpgFontResourceImpl;
+    FCurFontRes: TfpgGDIFontResource;
     FClipRect: TfpgRect;
     FClipRectSet: Boolean;
     FWindowsColor: longword;
@@ -141,18 +138,18 @@ type
   end;
 
 
-  TfpgWindowImpl = class(TfpgWindowBase)
+  TfpgGDIWindow = class(TfpgWindowBase)
   private
     FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
     FNonFullscreenStyle: longword;
     FFullscreenIsSet: boolean;
     FSkipResizeMessage: boolean;
-    function    DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wParam, lParam: Cardinal): Boolean;
+    function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
   protected
     FWinHandle: TfpgWinHandle;
-    FModalForWin: TfpgWindowImpl;
+    FModalForWin: TfpgGDIWindow;
     FWinStyle: longword;
     FWinStyleEx: longword;
     FParentWinHandle: TfpgWinHandle;
@@ -177,7 +174,7 @@ type
   end;
 
 
-  TfpgApplicationImpl = class(TfpgApplicationBase)
+  TfpgGDIApplication = class(TfpgApplicationBase)
   protected
     FDisplay: HDC;
     WindowClass: TWndClass;
@@ -220,7 +217,7 @@ type
   end;
 
 
-  TfpgClipboardImpl = class(TfpgClipboardBase)
+  TfpgGDIClipboard = class(TfpgClipboardBase)
   protected
     FClipboardText: TfpgString;
     function    DoGetText: TfpgString; override;
@@ -229,7 +226,7 @@ type
   end;
 
 
-  TfpgFileListImpl = class(TfpgFileListBase)
+  TfpgGDIFileList = class(TfpgFileListBase)
     function    EncodeAttributesString(attrs: longword): TFileModeString;
     constructor Create; override;
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
@@ -256,6 +253,37 @@ var
 
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
+
+{$IFDEF wince}
+// A few tweaks to get fpGUI working on the Symbol MC1000 WinCE 4.2
+// *** Need to fix the hack in procedure TfpgWindowImpl.DoAllocateWindowHandle
+
+const
+  CS_OWNDC = 0;
+  WS_OVERLAPPEDWINDOW = WS_VISIBLE;
+  WS_POPUPWINDOW = 0;
+  WS_EX_APPWINDOW = 0;
+
+// From Lazarus wince\winext.pas:
+function GET_X_LPARAM(lp : Windows.LParam) : longint;
+  begin
+    result:=smallint(LOWORD(lp));
+  end;
+function GET_Y_LPARAM(lp : Windows.LParam) : longint;
+  begin
+    result:=smallint(HIWORD(lp));
+  end;
+
+// *** copied from Lazarus
+function MulDiv(nNumber, nNumerator, nDenominator: Integer): Integer;
+begin
+  if nDenominator = 0 then
+    Result := -1
+  else
+//  Result := MathRound( int64(nNumber) * int64(nNumerator) / nDenominator);
+    Result := Round( int64(nNumber) * int64(nNumerator) / nDenominator);
+end;
+{$ENDIF}
 
 function fpgColorToWin(col: TfpgColor): longword;
 var
@@ -387,15 +415,23 @@ end;
 // returns true when the operating system is windows 2000 or newer
 function IsWin2kOrLater: Boolean;
 begin
+  {$IFDEF WinCE}
+  Result := false;
+  {$ELSE}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion >= 5);
+  {$ENDIF}
 end;
 
 // returns true when the operating system is windows XP or newer
 function IsWinXPOrLater: Boolean;
 begin
+  {$IFDEF WinCE}
+  Result := false;
+  {$ELSE}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and
      (((Win32MajorVersion = 5) and (Win32MinorVersion >= 1)) or
       ((Win32MajorVersion >= 6) and (Win32MinorVersion >= 0)));
+  {$ENDIF}
 end;
 
 function WinkeystateToShiftstate(keystate: cardinal): TShiftState;
@@ -411,6 +447,32 @@ begin
     Include(result, ssCtrl);
   end;
 end;
+
+{$IFDEF wince}
+procedure WinCESetDibBits(BMP: HBITMAP; awidth, aheight: Integer; aimgdata: Pointer; var bi: TBitmapInfo);
+var
+  hdcSrc, hdcDest: HDC;
+  hbmSrc: HBITMAP;
+  bm: BITMAP;
+begin
+  hdcDest:= CreateCompatibleDC(0);
+  SelectObject(hdcDest, BMP);
+  if bi.bmiHeader.biBitCount = 1 then
+  begin
+    SetDIBitsToDevice(hdcDest, 0, 0, awidth, aheight, 0, 0, 0, aheight, aimgdata, bi, DIB_RGB_COLORS);
+  end
+  else
+  begin
+    hdcSrc:= CreateCompatibleDC(0);
+    hbmSrc:= CreateBitmap(awidth, aheight, 1, bi.bmiHeader.biBitCount, aimgdata);
+    SelectObject(hdcSrc, hbmSrc);
+    BitBlt(hdcDest, 0, 0, awidth, aheight, hdcSrc, 0, 0, SRCCOPY);
+    DeleteDC(hdcSrc);
+    DeleteObject(hbmSrc);
+  end;
+  DeleteDC(hdcDest);
+end;
+{$ENDIF}
 
 procedure GetWindowBorderDimensions(const w: TfpgWindowBase; var dx, dy: integer);
 var
@@ -455,10 +517,10 @@ begin
   begin
     // write('Hooked HCBT_ACTIVATE at '+IntToStr(wParam)+': ');
     if (wapplication.TopModalForm <> nil) and
-       (wParam <> TfpgWindowImpl(wapplication.TopModalForm).FWinHandle) then
+       (wParam <> TfpgGDIWindow(wapplication.TopModalForm).FWinHandle) then
     begin
       // writeln('stopped');
-      SetActiveWindow(TfpgWindowImpl(wapplication.TopModalForm).FWinHandle);
+      SetActiveWindow(TfpgGDIWindow(wapplication.TopModalForm).FWinHandle);
       Result := 1;
     end else
     begin
@@ -471,10 +533,10 @@ end;
 
 function fpgWindowProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 var
-  w: TfpgWindowImpl;
-  pw: TfpgWindowImpl;
+  w: TfpgGDIWindow;
+  pw: TfpgGDIWindow;
   kwg: TfpgWidget;
-  mw: TfpgWindowImpl;
+  mw: TfpgGDIWindow;
   kcode: integer;
   i: integer;
   sstate: integer;
@@ -487,6 +549,7 @@ var
   mcode: integer;
   wmsg: TMsg;
   PaintStruct: TPaintStruct;
+  TmpW: widestring;
 
   //------------
   procedure SetMinMaxInfo(var MinMaxInfo: TMINMAXINFO);
@@ -525,7 +588,7 @@ var
 begin
   if uMsg = WM_CREATE then
   begin
-    w := TfpgWindowImpl(PCreateStruct(lParam)^.lpCreateParams);
+    w := TfpgGDIWindow(PCreateStruct(lParam)^.lpCreateParams);
     w.FWinHandle := hwnd; // this is very important, because number of messages sent
     // before the createwindow returns the window handle
     Windows.SetWindowLong(hwnd, GWL_USERDATA, longword(w));
@@ -563,10 +626,10 @@ begin
     Exit; //==>
   end;
 
-  w      := TfpgWindowImpl(Windows.GetWindowLong(hwnd, GWL_USERDATA));
+  w      := TfpgGDIWindow(Windows.GetWindowLong(hwnd, GWL_USERDATA));
   Result := 0;
 
-  if not (w is TfpgWindowImpl) then
+  if not (w is TfpgGDIWindow) then
   begin
     {$IFDEF DEBUG} writeln('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -621,7 +684,8 @@ begin
             fpgSendMessage(nil, w, FPGM_KEYRELEASE, msgp)
           else if uMsg = WM_CHAR then
           begin
-            msgp.keyboard.keychar := UTF8Encode(WideChar(wParam));
+            tmpW := WideChar(wParam);
+            msgp.keyboard.keychar := UTF8Encode(tmpW);
             fpgSendMessage(nil, w, FPGM_KEYCHAR, msgp);
           end;
           
@@ -692,7 +756,7 @@ begin
               mw    := GetMyWidgetFromHandle(h);
               pw    := mw;
               while (pw <> nil) and (pw.Parent <> nil) do
-                pw := TfpgWindowImpl(pw.Parent);
+                pw := TfpgGDIWindow(pw.Parent);
 
               if ((pw = nil) or (PopupListFind(pw.WinHandle) = nil)) and
                  (not PopupDontCloseWidget(TfpgWidget(mw))) and
@@ -706,7 +770,7 @@ begin
           if (wapplication.TopModalForm <> nil) then
           begin
             mw := nil;
-            mw := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+            mw := TfpgGDIWindow(WidgetParentForm(TfpgWidget(w)));
             if (mw <> nil) and (wapplication.TopModalForm <> mw) then
               blockmsg := True;
           end;
@@ -852,9 +916,9 @@ begin
           mw   := nil;
           h    := WindowFromPoint(pt);
           if h > 0 then  // get window mouse is hovering over
-            mw := TfpgWindowImpl(Windows.GetWindowLong(h, GWL_USERDATA));
+            mw := TfpgGDIWindow(Windows.GetWindowLong(h, GWL_USERDATA));
 
-          if (mw is TfpgWindowImpl) then
+          if (mw is TfpgGDIWindow) then
           begin
             msgp.mouse.x := pt.x;
             msgp.mouse.y := pt.y;
@@ -960,11 +1024,16 @@ begin
   end;
 end;
 
-{ TfpgApplicationImpl }
+{ TfpgGDIApplication }
 
 // helper function for DoGetFontFaceList
+{$IFDEF wince}
+function MyFontEnumerator(var LogFont: ENUMLOGFONT; var TextMetric: NEWTEXTMETRIC;
+    FontType: Integer; data: LPARAM): Integer; CDecl;
+{$ELSE}
 function MyFontEnumerator(var LogFont: ENUMLOGFONTEX; var TextMetric: NEWTEXTMETRICEX;
     FontType: Integer; data: LPARAM): Integer; stdcall;
+{$ENDIF}
 var
   sl: TStringList;
   s: string;
@@ -976,18 +1045,22 @@ begin
   Result := 1;
 end;
 
-function TfpgApplicationImpl.DoGetFontFaceList: TStringList;
+function TfpgGDIApplication.DoGetFontFaceList: TStringList;
 var
   LFont: TLogFont;
 begin
   Result := TStringList.Create;
   FillChar(LFont, sizeof(LFont), 0);
   LFont.lfCharset := DEFAULT_CHARSET;
+  {$IFDEF wince}
+  EnumFontFamiliesW(Display, @LFont, @MyFontEnumerator, LongInt(result));
+  {$ELSE}
   EnumFontFamiliesEx(Display, @LFont, @MyFontEnumerator, LongInt(result), 0);
+  {$ENDIF}
   Result.Sort;
 end;
 
-function TfpgApplicationImpl.GetHiddenWindow: HWND;
+function TfpgGDIApplication.GetHiddenWindow: HWND;
 begin
   if (FHiddenWindow = 0) then
   begin
@@ -1004,12 +1077,12 @@ begin
     Windows.RegisterClass(@HiddenWndClass);
 
     FHiddenWindow := CreateWindow('FPGHIDDEN', '',
-      DWORD(WS_POPUP), 0, 0, 0, 0, TfpgWindowImpl(MainForm).FWinHandle, 0, MainInstance, nil);
+      DWORD(WS_POPUP), 0, 0, 0, 0, TfpgGDIWindow(MainForm).FWinHandle, 0, MainInstance, nil);
   end;
   Result := FHiddenWindow;
 end;
 
-constructor TfpgApplicationImpl.Create(const AParams: string);
+constructor TfpgGDIApplication.Create(const AParams: string);
 begin
   inherited Create(AParams);
   FIsInitialized  := False;
@@ -1062,20 +1135,20 @@ begin
   wapplication   := TfpgApplication(self);
 end;
 
-destructor TfpgApplicationImpl.Destroy;
+destructor TfpgGDIApplication.Destroy;
 begin
   UnhookWindowsHookEx(ActivationHook);
   inherited Destroy;
 end;
 
-function TfpgApplicationImpl.DoMessagesPending: boolean;
+function TfpgGDIApplication.DoMessagesPending: boolean;
 var
   Msg: TMsg;
 begin
   Result := Windows.PeekMessageW(@Msg, 0, 0, 0, PM_NOREMOVE);
 end;
 
-procedure TfpgApplicationImpl.DoWaitWindowMessage(atimeoutms: integer);
+procedure TfpgGDIApplication.DoWaitWindowMessage(atimeoutms: integer);
 var
   Msg: TMsg;
   timerid: longword;
@@ -1084,7 +1157,7 @@ var
 begin
   timerid  := 0;
   if Assigned(wapplication.MainForm) then
-    ltimerWnd := TfpgWindowImpl(wapplication.MainForm).WinHandle
+    ltimerWnd := TfpgGDIWindow(wapplication.MainForm).WinHandle
   else
     ltimerWnd := 0;
 
@@ -1096,11 +1169,15 @@ begin
       Exit;  // handling waiting timeout
   end;
 
-  {$Note Incorporate Felipe's code from previous fpGUI in here. It handles WinCE and Windows just fine. }
+  {$IFDEF WinCE}
+  // No GetVersion
+  Windows.GetMessageW(@Msg, 0, 0, 0);   //NT
+  {$ELSE}
   if (GetVersion() < $80000000) then
     Windows.GetMessageW(@Msg, 0, 0, 0)   //NT
   else
     Windows.GetMessage(@Msg, 0, 0, 0);   //Win98
+  {$ENDIF}
 
   Windows.DispatchMessage(@msg);
 
@@ -1108,12 +1185,14 @@ begin
     Windows.KillTimer(ltimerWnd, 1);  // same IDEvent as used in SetTimer
 end;
 
-procedure TfpgApplicationImpl.DoFlush;
+procedure TfpgGDIApplication.DoFlush;
 begin
+  {$IFNDEF wince}
   GdiFlush;
+  {$ENDIF}
 end;
 
-function TfpgApplicationImpl.GetScreenWidth: TfpgCoord;
+function TfpgGDIApplication.GetScreenWidth: TfpgCoord;
 var
   r: TRECT;
 begin
@@ -1122,7 +1201,7 @@ begin
   // Result := Windows.GetSystemMetrics(SM_CXSCREEN);
 end;
 
-function TfpgApplicationImpl.GetScreenHeight: TfpgCoord;
+function TfpgGDIApplication.GetScreenHeight: TfpgCoord;
 var
   r: TRECT;
 begin
@@ -1131,35 +1210,35 @@ begin
   // Result := Windows.GetSystemMetrics(SM_CYSCREEN);
 end;
 
-function TfpgApplicationImpl.Screen_dpi_x: integer;
+function TfpgGDIApplication.Screen_dpi_x: integer;
 begin
   Result := GetDeviceCaps(wapplication.display, LOGPIXELSX)
 end;
 
-function TfpgApplicationImpl.Screen_dpi_y: integer;
+function TfpgGDIApplication.Screen_dpi_y: integer;
 begin
   Result := GetDeviceCaps(wapplication.display, LOGPIXELSY)
 end;
 
-function TfpgApplicationImpl.Screen_dpi: integer;
+function TfpgGDIApplication.Screen_dpi: integer;
 begin
   Result := Screen_dpi_y;
 end;
 
-{ TfpgWindowImpl }
+{ TfpgGDIWindow }
 var
   // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
   
-function TfpgWindowImpl.DoMouseEnterLeaveCheck(AWindow: TfpgWindowImpl; uMsg, wParam, lParam: Cardinal): Boolean;
+function TfpgGDIWindow.DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
 var
   pt, spt: Windows.POINT;
   msgp: TfpgMessageParams;
   CursorInDifferentWindow: boolean;
   CurrentWindowHndl: TfpgWinHandle;
   MouseCaptureWHndl: TfpgWinHandle;
-  LastWindow: TfpgWindowImpl;
-  CurrentWindow: TfpgWindowImpl;
+  LastWindow: TfpgGDIWindow;
+  CurrentWindow: TfpgGDIWindow;
 begin
   // vvzh: this method currently cannot receive mouse events when mouse pointer
   // is outside of the application window. We could try to play with
@@ -1209,7 +1288,7 @@ begin
   uLastWindowHndl := CurrentWindowHndl;
 end;
 
-procedure TfpgWindowImpl.WindowSetFullscreen(aFullScreen, aUpdate: boolean);
+procedure TfpgGDIWindow.WindowSetFullscreen(aFullScreen, aUpdate: boolean);
 begin
   if aFullScreen = FFullscreenIsSet then
     Exit; //==>
@@ -1219,7 +1298,7 @@ begin
     FNonFullscreenStyle := FWinStyle;
     FNonFullscreenRect.SetRect(Left, Top, Width, Height);
     // vvzh: the following lines are the workaround for bug. When calling
-    // WindowSetFullscreen from TfpgWindowImpl.DoAllocateWindowHandle,
+    // WindowSetFullscreen from TfpgGDIWindow.DoAllocateWindowHandle,
     // Left and Top are equal to -2147483648. As the result, if
     // we set FullScreen := True at the form creation time and then
     // call SetFullScreen(False) the form disappears, because it is moved
@@ -1268,10 +1347,15 @@ begin
   FFullscreenIsSet := aFullScreen;
 end;
 
-procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
+procedure TfpgGDIWindow.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
+{$IFDEF wince}
+  wcname: widestring;
+  wname: widestring;
+{$ELSE}
   wcname: string;
   wname: string;
+{$ENDIF}
   mid: dword;
   rwidth: integer;
   rheight: integer;
@@ -1287,27 +1371,26 @@ begin
   mid         := 0;
   wcname      := 'FPGWIN';
 
-  if aparent <> nil then
-    FParentWinHandle := TfpgWindowImpl(AParent).WinHandle
+  if AParent <> nil then
+    FParentWinHandle := TfpgGDIWindow(AParent).WinHandle
   else
     FParentWinHandle := 0;
 
-  if FWindowType = wtChild then
+  if WindowType = wtChild then
   begin
     FWinStyle   := WS_CHILD;
     FWinStyleEx := 0;
     mid         := 1;
     wcname      := 'FPGWIDGET';
   end
-  else if FWindowType in [wtPopup] then
+  else if WindowType in [wtPopup] then
   begin
     // This prevents the popup window from stealing the focus. eg: ComboBox dropdown
     FParentWinHandle := GetDesktopWindow;
     FWinStyle   := WS_CHILD;
     FWinStyleEx := WS_EX_TOPMOST or WS_EX_TOOLWINDOW;
-  end;
-
-  if FWindowType = wtModalForm then
+  end
+  else if WindowType = wtModalForm then
   begin
     // set parent window to special hidden window. It helps to hide window taskbar button.
     FParentWinHandle := wapplication.GetHiddenWindow;
@@ -1317,6 +1400,9 @@ begin
     FWinStyleEx := 0;
   end;
 
+  if ((WindowType = wtWindow) or (WindowType = wtModalForm)) and (waBorderLess in FWindowAttributes) then
+    FWinStyle := FWinStyle and WS_POPUP;  // this is different to wtPopop (toolwindow, hint window) because it can steal focus like a normal form
+
   AdjustWindowStyle;
 
   if waAutoPos in FWindowAttributes then
@@ -1325,7 +1411,7 @@ begin
     FTop  := TfpgCoord(CW_USEDEFAULT);
   end;
 
-  if (FWindowType <> wtChild) and not (waSizeable in FWindowAttributes) then
+  if (WindowType <> wtChild) and not (waSizeable in FWindowAttributes) then
     FWinStyle := FWinStyle and not (WS_SIZEBOX or WS_MAXIMIZEBOX);
 
   FWinStyle := FWinStyle or WS_CLIPCHILDREN or WS_CLIPSIBLINGS;
@@ -1345,11 +1431,35 @@ begin
     r.Top    := FTop;
     r.Right  := FLeft + FWidth;
     r.Bottom := FTop + FHeight;
+    {$IFDEF wince}
+    AdjustWindowRectEx(@r, FWinStyle, False, FWinStyleEx);
+    {$ELSE}
     AdjustWindowRectEx(r, FWinStyle, False, FWinStyleEx);
+    {$ENDIF}
     rwidth   := r.Right - r.Left;
     rheight  := r.Bottom - r.Top;
   end;
 
+  {$IFDEF wince}
+  // required for some WinCE devices
+  FWinStyleEx := FWinStyleEx or WS_VISIBLE; // or WS_BORDER;
+  FWinStyle := FWinStyleEx;
+
+  FWinHandle := Windows.CreateWindowExW(
+    FWinStyleEx,     // extended window style
+    PWideChar(wcname),   // registered class name
+    PWideChar(wname),    // window name
+    FWinStyle,       // window style
+    FLeft,           // horizontal position of window
+    FTop,            // vertical position of window
+    rwidth,          // window width
+    rheight,         // window height
+    FParentWinHandle, // handle to parent or owner window
+    mid,             // menu handle or child identifier
+    MainInstance,    // handle to application instance
+    Self             // window-creation data
+    );
+  {$ELSE}
   FWinHandle := Windows.CreateWindowEx(
     FWinStyleEx,     // extended window style
     PChar(wcname),   // registered class name
@@ -1364,6 +1474,7 @@ begin
     MainInstance,    // handle to application instance
     Self             // window-creation data
     );
+  {$ENDIF}
 
   if waScreenCenterPos in FWindowAttributes then
   begin
@@ -1387,7 +1498,7 @@ begin
   FSkipResizeMessage := False;
 end;
 
-procedure TfpgWindowImpl.DoReleaseWindowHandle;
+procedure TfpgGDIWindow.DoReleaseWindowHandle;
 begin
   if FWinHandle <= 0 then
     Exit;
@@ -1395,12 +1506,12 @@ begin
   FWinHandle := 0;
 end;
 
-procedure TfpgWindowImpl.DoRemoveWindowLookup;
+procedure TfpgGDIWindow.DoRemoveWindowLookup;
 begin
   // Nothing to do here
 end;
 
-procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);
+procedure TfpgGDIWindow.DoSetWindowVisible(const AValue: Boolean);
 var
   r: TRect;
 begin
@@ -1429,7 +1540,7 @@ begin
     Windows.ShowWindow(FWinHandle, SW_HIDE);
 end;
 
-procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
+procedure TfpgGDIWindow.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
   if HandleIsValid then
     Windows.SetWindowPos(
@@ -1438,18 +1549,18 @@ begin
       SWP_NOZORDER or SWP_NOSIZE);// or SWP_NOREDRAW);
 end;
 
-function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+function TfpgGDIWindow.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 begin
-  if not TfpgWindowImpl(ASource).HandleIsValid then
+  if not TfpgGDIWindow(ASource).HandleIsValid then
     Exit; //==>
 
   Result.X := AScreenPos.X;
   Result.Y := AScreenPos.Y;
-  ClientToScreen(TfpgWindowImpl(ASource).WinHandle, Result);
+  ClientToScreen(TfpgGDIWindow(ASource).WinHandle, Result);
 end;
 
 {
-procedure TfpgWindowImpl.MoveToScreenCenter;
+procedure TfpgGDIWindow.MoveToScreenCenter;
 var
   r : TRECT;
 begin
@@ -1460,15 +1571,19 @@ begin
 end;
 }
 
-procedure TfpgWindowImpl.DoSetWindowTitle(const atitle: string);
+procedure TfpgGDIWindow.DoSetWindowTitle(const atitle: string);
 begin
+  {$ifdef wince}
+  Windows.SetWindowText(WinHandle, PWideChar(Utf8Decode(ATitle)));
+  {$else}
   if UnicodeEnabledOS then
     Windows.SetWindowTextW(WinHandle, PWideChar(Utf8Decode(ATitle)))
   else
     Windows.SetWindowText(WinHandle, PChar(Utf8ToAnsi(ATitle)));
+  {$endif}
 end;
 
-procedure TfpgWindowImpl.DoSetMouseCursor;
+procedure TfpgGDIWindow.DoSetMouseCursor;
 var
   hc: HCURSOR;
 begin
@@ -1496,24 +1611,24 @@ begin
   SetCursor(hc);
 end;
 
-constructor TfpgWindowImpl.Create(AOwner: TComponent);
+constructor TfpgGDIWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
   FFullscreenIsSet := false;
 end;
 
-procedure TfpgWindowImpl.ActivateWindow;
+procedure TfpgGDIWindow.ActivateWindow;
 begin
   SetForegroundWindow(FWinHandle);
 end;
 
-procedure TfpgWindowImpl.CaptureMouse;
+procedure TfpgGDIWindow.CaptureMouse;
 begin
   Windows.SetCapture(FWinHandle);
 end;
 
-procedure TfpgWindowImpl.ReleaseMouse;
+procedure TfpgGDIWindow.ReleaseMouse;
 begin
   Windows.ReleaseCapture;
 //  if PopupListFirst <> nil then
@@ -1521,18 +1636,18 @@ begin
 //  if GfxFirstPopup <> nil then SetCapture(GfxFirstPopup^.wg.WinHandle);
 end;
 
-procedure TfpgWindowImpl.SetFullscreen(AValue: Boolean);
+procedure TfpgGDIWindow.SetFullscreen(AValue: Boolean);
 begin
   inherited SetFullscreen(AValue);
   WindowSetFullscreen(AValue, True);
 end;
 
-function TfpgWindowImpl.HandleIsValid: boolean;
+function TfpgGDIWindow.HandleIsValid: boolean;
 begin
   Result := FWinHandle > 0;
 end;
 
-procedure TfpgWindowImpl.DoUpdateWindowPosition;
+procedure TfpgGDIWindow.DoUpdateWindowPosition;
 var
   bx, by: integer;
 begin
@@ -1546,9 +1661,9 @@ begin
   FSkipResizeMessage := False;
 end;
 
-{ TfpgCanvasImpl }
+{ TfpgGDICanvas }
 
-constructor TfpgCanvasImpl.Create;
+constructor TfpgGDICanvas.Create;
 begin
   inherited;
   FDrawing      := False;
@@ -1556,7 +1671,7 @@ begin
   FBufferBitmap := 0;
 end;
 
-destructor TfpgCanvasImpl.Destroy;
+destructor TfpgGDICanvas.Destroy;
 begin
   if FDrawing then
     DoEndDraw;
@@ -1564,7 +1679,7 @@ begin
   inherited;
 end;
 
-procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
+procedure TfpgGDICanvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
   ARect: TfpgRect;
   bmsize: Windows.TSIZE;
@@ -1572,8 +1687,10 @@ begin
   if FDrawing and buffered and (FBufferBitmap > 0) then
   begin
     // check if the dimensions are ok
+    {$IFNDEF wince}
     GetBitmapDimensionEx(FBufferBitmap, bmsize);
-    FDrawWindow := TfpgWindowImpl(awin);
+    {$ENDIF}
+    FDrawWindow := TfpgGDIWindow(awin);
     DoGetWinRect(ARect);
     if (bmsize.cx <> (ARect.Right-ARect.Left+1)) or
        (bmsize.cy <> (ARect.Bottom-ARect.Top+1)) then
@@ -1582,7 +1699,7 @@ begin
 
   if not FDrawing then
   begin
-    FDrawWindow := TfpgWindowImpl(awin);
+    FDrawWindow := TfpgGDIWindow(awin);
     FWinGC      := Windows.GetDC(FDrawWindow.FWinHandle);
 
     if buffered then
@@ -1621,7 +1738,7 @@ begin
   FDrawing := True;
 end;
 
-procedure TfpgCanvasImpl.DoEndDraw;
+procedure TfpgGDICanvas.DoEndDraw;
 begin
   if FDrawing then
   begin
@@ -1638,71 +1755,75 @@ begin
   end;
 end;
 
-function TfpgCanvasImpl.GetPixel(X, Y: integer): TfpgColor;
+function TfpgGDICanvas.GetPixel(X, Y: integer): TfpgColor;
 var
   c: longword;
 begin
   c := Windows.GetPixel(Fgc, X, Y);
   if c = CLR_INVALID then
-    Writeln('fpGFX/GDI: TfpgCanvasImpl.GetPixel returned an invalid color');
+    Writeln('fpGFX/GDI: TfpgGDICanvas.GetPixel returned an invalid color');
   Result := WinColorTofpgColor(c);
 end;
 
-procedure TfpgCanvasImpl.SetPixel(X, Y: integer; const AValue: TfpgColor);
+procedure TfpgGDICanvas.SetPixel(X, Y: integer; const AValue: TfpgColor);
 begin
   Windows.SetPixel(Fgc, X, Y, fpgColorToWin(AValue));
 end;
 
-procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgGDICanvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
-  {Stupid GDI can't tell the difference between 0 and 360°!!}
+  {Stupid GDI can't tell the difference between 0 and 360 degrees!!}
   if a2 = 0 then
     Exit; //==>
   {Stupid GDI must be told in which direction to draw}
+  {$IFNDEF wince}
   if a2 < 0 then
     Windows.SetArcDirection(FGc, AD_CLOCKWISE)
   else
     Windows.SetArcDirection(FGc, AD_COUNTERCLOCKWISE);
+  {$ENDIF}
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Arc(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
   {$ENDIF}
 end;
 
-procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgGDICanvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 var
   SX, SY, EX, EY: Longint;
 begin
-  {Stupid GDI can't tell the difference between 0 and 360°!!}
+  {Stupid GDI can't tell the difference between 0 and 360 degrees!!}
   if a2 = 0 then
     Exit; //==>
   {Stupid GDI must be told in which direction to draw}
+  {$IFNDEF wince}
   if a2 < 0 then
     Windows.SetArcDirection(FGc, AD_CLOCKWISE)
   else
     Windows.SetArcDirection(FGc, AD_COUNTERCLOCKWISE);
+  {$ENDIF}
   Angles2Coords(x, y, w, h, a1*16, a2*16, SX, SY, EX, EY);
   {$IFNDEF wince}
   Windows.Pie(Fgc, x, y, x+w, y+h, SX, SY, EX, EY);
   {$ENDIF}
 end;
 
-procedure TfpgCanvasImpl.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
+procedure TfpgGDICanvas.DoDrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
 //var
 //  pts: array of TPoint;
 begin
   Windows.Polygon(Fgc, Points, NumPts);
 end;
 
-procedure TfpgCanvasImpl.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
+procedure TfpgGDICanvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 begin
   if FBufferBitmap > 0 then
     BitBlt(FWinGC, x, y, w, h, Fgc, x, y, SRCCOPY);
 end;
 
-procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TfpgRect);
+procedure TfpgGDICanvas.DoAddClipRect(const ARect: TfpgRect);
 var
   rg: HRGN;
 begin
@@ -1714,22 +1835,32 @@ begin
   DeleteObject(rg);
 end;
 
-procedure TfpgCanvasImpl.DoClearClipRect;
+procedure TfpgGDICanvas.DoClearClipRect;
 begin
   SelectClipRgn(Fgc, 0);
   FClipRectSet := False;
 end;
 
-procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgGDICanvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
   Windows.MoveToEx(Fgc, x1, y1, nil);
   Windows.LineTo(Fgc, x2, y2);
 end;
 
-procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgGDICanvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 var
   wr: Windows.TRect;
   r: TfpgRect;
+
+{$IFDEF WinCE}
+// *** copied from Lazarus
+function FrameRect(DC: HDC; const ARect: TRect; hBr: HBRUSH) : integer;
+begin
+//roozbeh....works for now!
+  Result := Integer(DrawFocusRect(DC,Arect));
+end;
+{$ENDIF}
+
 begin
   if FLineStyle = lsSolid then
   begin
@@ -1737,7 +1868,11 @@ begin
     wr.Top    := y;
     wr.Right  := x + w;
     wr.Bottom := y + h;
-    Windows.FrameRect(Fgc, wr, FBrush)  // this handles 1x1 rectangles
+    {$IFDEF WinCE}
+    FrameRect(Fgc, wr, FBrush);
+    {$ELSE}
+    Windows.FrameRect(Fgc, wr, FBrush); // this handles 1x1 rectangles
+    {$ENDIF}
   end
   else
   begin
@@ -1749,7 +1884,7 @@ begin
   end;
 end;
 
-procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
+procedure TfpgGDICanvas.DoDrawString(x, y: TfpgCoord; const txt: string);
 var
   WideText: widestring;
 begin
@@ -1764,7 +1899,7 @@ begin
   {$endif}
 end;
 
-procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgGDICanvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 var
   wr: Windows.TRect;
 begin
@@ -1775,7 +1910,7 @@ begin
   Windows.FillRect(Fgc, wr, FBrush);
 end;
 
-procedure TfpgCanvasImpl.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+procedure TfpgGDICanvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 var
   pts: array[1..3] of Windows.TPoint;
 begin
@@ -1788,12 +1923,12 @@ begin
   Windows.Polygon(Fgc, pts, 3);
 end;
 
-function TfpgCanvasImpl.DoGetClipRect: TfpgRect;
+function TfpgGDICanvas.DoGetClipRect: TfpgRect;
 begin
   Result := FClipRect;
 end;
 
-procedure TfpgCanvasImpl.DoGetWinRect(out r: TfpgRect);
+procedure TfpgGDICanvas.DoGetWinRect(out r: TfpgRect);
 var
   wr: TRect;
 begin
@@ -1804,7 +1939,7 @@ begin
   r.Height  := wr.Bottom - wr.Top + 1;
 end;
 
-procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TfpgRect);
+procedure TfpgGDICanvas.DoSetClipRect(const ARect: TfpgRect);
 begin
   FClipRectSet := True;
   FClipRect    := ARect;
@@ -1813,7 +1948,7 @@ begin
   SelectClipRgn(Fgc, FClipRegion);
 end;
 
-procedure TfpgCanvasImpl.DoSetColor(cl: TfpgColor);
+procedure TfpgGDICanvas.DoSetColor(cl: TfpgColor);
 begin
   DeleteObject(FBrush);
   FWindowsColor := fpgColorToWin(cl);
@@ -1822,7 +1957,7 @@ begin
   SelectObject(Fgc, FBrush);
 end;
 
-procedure TfpgCanvasImpl.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
+procedure TfpgGDICanvas.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
 const
   cDot: array[1..2] of DWORD = (1, 1);
   cDash: array[1..4] of DWORD = (4, 2, 4, 2);
@@ -1838,11 +1973,15 @@ begin
   case AStyle of
     lsDot:
       begin
+        {$IFNDEF wince}
         FPen := ExtCreatePen(PS_GEOMETRIC or PS_ENDCAP_FLAT or PS_USERSTYLE, FLineWidth, logBrush, Length(cDot), @cDot);
+        {$ENDIF}
       end;
     lsDash:
       begin
+        {$IFNDEF wince}
         FPen := ExtCreatePen(PS_GEOMETRIC or PS_ENDCAP_FLAT or PS_USERSTYLE, FLineWidth, logBrush, Length(cDash), @cDash);
+        {$ENDIF}
       end;
     lsSolid:
       begin
@@ -1856,12 +1995,12 @@ begin
   SelectObject(Fgc, FPen);
 end;
 
-procedure TfpgCanvasImpl.DoSetTextColor(cl: TfpgColor);
+procedure TfpgGDICanvas.DoSetTextColor(cl: TfpgColor);
 begin
   Windows.SetTextColor(Fgc, fpgColorToWin(cl));
 end;
 
-procedure TfpgCanvasImpl.TryFreeBackBuffer;
+procedure TfpgGDICanvas.TryFreeBackBuffer;
 begin
   if FBufferBitmap > 0 then
     DeleteObject(FBufferBitmap);
@@ -1872,15 +2011,15 @@ begin
   FBufgc := 0;
 end;
 
-procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);
+procedure TfpgGDICanvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   if fntres = nil then
     Exit; //==>
-  FCurFontRes := TfpgFontResourceImpl(fntres);
+  FCurFontRes := TfpgGDIFontResource(fntres);
   Windows.SelectObject(Fgc, FCurFontRes.Handle);
 end;
 
-procedure TfpgCanvasImpl.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+procedure TfpgGDICanvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
 const
   DSTCOPY     = $00AA0029;
   ROP_DSPDxax = $00E20746;
@@ -1892,22 +2031,22 @@ begin
     Exit; //==>
 
   tmpdc := CreateCompatibleDC(wapplication.display);
-  SelectObject(tmpdc, TfpgImageImpl(img).BMPHandle);
+  SelectObject(tmpdc, TfpgGDIImage(img).BMPHandle);
 
-  if TfpgImageImpl(img).FIsTwoColor then
+  if TfpgGDIImage(img).FIsTwoColor then
     rop := PATCOPY
   else
     rop := SRCCOPY;
 
-  if TfpgImageImpl(img).MaskHandle > 0 then
-    MaskBlt(Fgc, x, y, w, h, tmpdc, xi, yi, TfpgImageImpl(img).MaskHandle, xi, yi, MakeRop4(rop, DSTCOPY))
+  if TfpgGDIImage(img).MaskHandle > 0 then
+    MaskBlt(Fgc, x, y, w, h, tmpdc, xi, yi, TfpgGDIImage(img).MaskHandle, xi, yi, MakeRop4(rop, DSTCOPY))
   else
     BitBlt(Fgc, x, y, w, h, tmpdc, xi, yi, rop);
 
   DeleteDC(tmpdc);
 end;
 
-procedure TfpgCanvasImpl.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
+procedure TfpgGDICanvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 var
   hb: HBRUSH;
   nullpen: HPEN;
@@ -1926,9 +2065,9 @@ begin
   SelectObject(Fgc, FPen);
 end;
 
-{ TfpgFontResourceImpl }
+{ TfpgGDIFontResource }
 
-constructor TfpgFontResourceImpl.Create(const afontdesc: string);
+constructor TfpgGDIFontResource.Create(const afontdesc: string);
 begin
   FFontData := OpenFontByDesc(afontdesc);
 
@@ -1939,14 +2078,14 @@ begin
   end;
 end;
 
-destructor TfpgFontResourceImpl.Destroy;
+destructor TfpgGDIFontResource.Destroy;
 begin
   if HandleIsValid then
     Windows.DeleteObject(FFontData);
   inherited;
 end;
 
-function TfpgFontResourceImpl.OpenFontByDesc(const desc: string): HFONT;
+function TfpgGDIFontResource.OpenFontByDesc(const desc: string): HFONT;
 var
   lf: Windows.LOGFONT;
   facename: string;
@@ -2035,30 +2174,34 @@ begin
         lf.lfQuality := DEFAULT_QUALITY;
   end;
 
+  {$IFDEF wince}
+  Result := CreateFontIndirectW(@lf);
+  {$ELSE}
   Result := CreateFontIndirectA(@lf);
+  {$ENDIF}
 end;
 
-function TfpgFontResourceImpl.HandleIsValid: boolean;
+function TfpgGDIFontResource.HandleIsValid: boolean;
 begin
   Result := FFontData <> 0;
 end;
 
-function TfpgFontResourceImpl.GetAscent: integer;
+function TfpgGDIFontResource.GetAscent: integer;
 begin
   Result := FMetrics.tmAscent;
 end;
 
-function TfpgFontResourceImpl.GetDescent: integer;
+function TfpgGDIFontResource.GetDescent: integer;
 begin
   Result := FMetrics.tmDescent;
 end;
 
-function TfpgFontResourceImpl.GetHeight: integer;
+function TfpgGDIFontResource.GetHeight: integer;
 begin
   Result := FMetrics.tmHeight;
 end;
 
-function TfpgFontResourceImpl.GetTextWidth(const txt: string): integer;
+function TfpgGDIFontResource.GetTextWidth(const txt: string): integer;
 var
   ts: Windows.SIZE;
   WideText: widestring;
@@ -2080,16 +2223,16 @@ begin
   Result := ts.cx;
 end;
 
-{ TfpgImageImpl }
+{ TfpgGDIImage }
 
-constructor TfpgImageImpl.Create;
+constructor TfpgGDIImage.Create;
 begin
   FBMPHandle  := 0;
   FMaskHandle := 0;
   FIsTwoColor := False;
 end;
 
-procedure TfpgImageImpl.DoFreeImage;
+procedure TfpgGDIImage.DoFreeImage;
 begin
   if FBMPHandle > 0 then
     DeleteObject(FBMPHandle);
@@ -2099,7 +2242,7 @@ begin
   FMaskHandle := 0;
 end;
 
-procedure TfpgImageImpl.DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
+procedure TfpgGDIImage.DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
 var
   bi: TBitmapInfo;
 begin
@@ -2128,7 +2271,11 @@ begin
     biClrImportant  := 0;
   end;
 
+  {$IFNDEF wince}
   SetDIBits(wapplication.display, FBMPHandle, 0, aheight, aimgdata, bi, DIB_RGB_COLORS);
+  {$else}
+  WinCESetDibBits(FBMPHandle, awidth, aheight, aimgdata, bi);
+  {$ENDIF}
 
   FIsTwoColor := (acolordepth = 1);
 end;
@@ -2139,7 +2286,7 @@ type
     bmColors: array[1..2] of longword;
   end;
 
-procedure TfpgImageImpl.DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
+procedure TfpgGDIImage.DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
 var
   bi: TMyMonoBitmap;
   pbi: PBitmapInfo;
@@ -2167,12 +2314,16 @@ begin
   bi.bmColors[2] := $FFFFFF;
 
   pbi := @bi;
+  {$IFNDEF wince}
   SetDIBits(wapplication.display, FMaskHandle, 0, aheight, aimgdata, pbi^, DIB_RGB_COLORS);
+  {$ELSE}
+  WinCESetDibBits(FMaskHandle, awidth, aheight, aimgdata, pbi^);
+  {$ENDIF}
 end;
 
-{ TfpgClipboardImpl }
+{ TfpgGDIClipboard }
 
-function TfpgClipboardImpl.DoGetText: TfpgString;
+function TfpgGDIClipboard.DoGetText: TfpgString;
 var
   h: THANDLE;
   p: PChar;
@@ -2198,7 +2349,7 @@ begin
   Result := FClipboardText;
 end;
 
-procedure TfpgClipboardImpl.DoSetText(const AValue: TfpgString);
+procedure TfpgGDIClipboard.DoSetText(const AValue: TfpgString);
 begin
   FClipboardText := AValue;
   if OpenClipboard(FClipboardWndHandle) then
@@ -2209,7 +2360,7 @@ begin
   end;
 end;
 
-procedure TfpgClipboardImpl.InitClipboard;
+procedure TfpgGDIClipboard.InitClipboard;
 begin
   {$WARNING This does not work! 'FPGUI' window class was not registered,
   so CreateWindowEx always returns 0}
@@ -2229,9 +2380,9 @@ begin
       );
 end;
 
-{ TfpgFileListImpl }
+{ TfpgGDIFileList }
 
-function TfpgFileListImpl.EncodeAttributesString(attrs: longword
+function TfpgGDIFileList.EncodeAttributesString(attrs: longword
   ): TFileModeString;
 begin
   Result := '';
@@ -2243,13 +2394,13 @@ begin
   if (attrs and FILE_ATTRIBUTE_COMPRESSED) <> 0 then Result := Result + 'c';
 end;
 
-constructor TfpgFileListImpl.Create;
+constructor TfpgGDIFileList.Create;
 begin
   inherited Create;
   FHasFileMode := false;
 end;
 
-function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
+function TfpgGDIFileList.InitializeEntry(sr: TSearchRec): TFileEntry;
 begin
   Result := inherited InitializeEntry(sr);
   if Assigned(Result) then
@@ -2260,7 +2411,7 @@ begin
   end;
 end;
 
-procedure TfpgFileListImpl.PopulateSpecialDirs(const aDirectory: TfpgString);
+procedure TfpgGDIFileList.PopulateSpecialDirs(const aDirectory: TfpgString);
 const
   MAX_DRIVES = 25;
 var
@@ -2276,10 +2427,12 @@ begin
     while n <= MAX_DRIVES do
     begin
       drvs := chr(n+ord('A'))+':\';
+      {$IFNDEF wince}
       if Windows.GetDriveType(PChar(drvs)) <> 1 then
       begin
         FSpecialDirs.Add(drvs);
       end;
+      {$ENDIF}
       inc(n);
     end;
   end;

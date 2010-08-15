@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -63,6 +63,7 @@ uses
   fpg_tab,
   fpg_popupcalendar,
   fpg_gauge,
+  fpg_editbtn,
   vfdpropeditgrid,
   vfdmain;
 
@@ -94,7 +95,7 @@ function TVFDPageControlWidgetClass.CreatePopupMenu(AWidget: TfpgWidget): TfpgPo
 begin
   FWidget := TfpgPageControl(AWidget);
   Result := TfpgPopupMenu.Create(nil);
-  { TODO : These are disabled for now, because a TabSheet component is used
+  { TODO : These are disabled for now, because a TabSheet component are used
            instead of a menu item - for adding tabs. }
   Result.AddMenuItem('Add Tab', '', @AddTabSClicked).Enabled := False;
   Result.AddMenuItem('Delete Tab', '', @DeleteTabClicked).Enabled := False;
@@ -162,6 +163,12 @@ begin
     'vfd.listbox', @stdimg_vfd_listbox,
     sizeof(stdimg_vfd_listbox),
     0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.colorlistbox', @stdimg_vfd_colorlistbox,
+    sizeof(stdimg_vfd_colorlistbox),
+    0, 0);
+
 
   fpgImages.AddMaskedBMP(
     'vfd.combobox', @stdimg_vfd_combobox,
@@ -273,6 +280,20 @@ begin
     sizeof(stdimg_vfd_combodatecheckedit),
     0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'vfd.editfilename', @stdimg_vfd_editfilename,
+    sizeof(stdimg_vfd_editfilename),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.editdirectory', @stdimg_vfd_editdirectory,
+    sizeof(stdimg_vfd_editdirectory),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.editfont', @stdimg_vfd_editfont,
+    sizeof(stdimg_vfd_editfont),
+    0, 0);
 end;
 
 procedure AddWidgetPosProps(wgc: TVFDWidgetClass);
@@ -293,6 +314,7 @@ begin
   wc.NameBase := 'frm';
   wc.AddProperty('WindowTitle', TPropertyString, '');
 //  wc.AddProperty('WindowPosition', TPropertyEnum, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   FVFDFormWidget := wc;
 
@@ -301,7 +323,7 @@ begin
   wc.NameBase := 'Label';
   wc.AddProperty('Alignment', TPropertyEnum, 'Horizontal text alignment');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the label text');
-  wc.AddProperty('Hint', TPropertyString, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Layout', TPropertyEnum, 'Vertical text layout');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
@@ -314,9 +336,15 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgEdit);
   wc.NameBase := 'Edit';
 //  wc.AddProperty('Color', TPropertyColor, 'Text color');
+  wc.AddProperty('AutoSelect', TPropertyBoolean, 'On receiving focus, auto select text');
+  wc.AddProperty('AutoSize', TPropertyBoolean, 'Change Height based on FontDesc being set');
+  wc.AddProperty('BorderStyle', TPropertyEnum, '');
+  wc.AddProperty('ExtraHint', TPropertyString, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('Text', TPropertyString, 'Initial text');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('IgnoreMouseCursor', TPropertyBoolean, 'If True, then mouse pointer doesn''t change');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.WidgetIconName := 'vfd.edit';
@@ -325,6 +353,7 @@ begin
   // Memo
   wc          := TVFDWidgetClass.Create(TfpgMemo);
   wc.NameBase := 'Memo';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Lines', TPropertyStringList, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -342,12 +371,12 @@ begin
   wc.AddProperty('Flat', TPropertyBoolean, 'Only draw button borders when mouse hovers over button');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
-  wc.AddProperty('Hint', TPropertyString, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ImageLayout', TPropertyEnum, 'Which side of the button contains the image');
   wc.AddProperty('ImageMargin', TPropertyInteger, 'Space between image and border, -1 centers image/text');
   wc.AddProperty('ImageName', TPropertyString, '');
   wc.AddProperty('ImageSpacing', TPropertyInteger, 'Space between image and text, -1 centers text');
-  wc.AddProperty('ModalResult', TPropertyInteger, '');
+  wc.AddProperty('ModalResult', TPropertyEnum, 'Modal Result returned and overrides the OnClick event handler');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowImage', TPropertyBoolean, 'Boolean value');
@@ -360,6 +389,7 @@ begin
   wc.NameBase := 'CheckBox';
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
@@ -373,6 +403,7 @@ begin
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('GroupIndex', TPropertyInteger, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
@@ -384,6 +415,7 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
   wc.NameBase := 'ComboBox';
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
@@ -396,6 +428,7 @@ begin
   wc.NameBase := 'CalendarCombo';
   wc.AddProperty('DateFormat', TPropertyString, 'Standard RTL date formatting applies');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
@@ -409,6 +442,7 @@ begin
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('DateFormat', TPropertyString, 'Standard RTL date formatting applies');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
@@ -419,7 +453,10 @@ begin
   // ListBox
   wc          := TVFDWidgetClass.Create(TfpgListBox);
   wc.NameBase := 'ListBox';
+  wc.AddProperty('AutoHeight', TPropertyBoolean, '');
+  wc.Addproperty('DragToReorder', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('HotTrack', TPropertyBoolean, '');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -429,12 +466,30 @@ begin
   wc.WidgetIconName := 'vfd.listbox';
   RegisterVFDWidget(wc);
 
+  // Color ListBox
+  wc          := TVFDWidgetClass.Create(TfpgColorListBox);
+  wc.NameBase := 'ColorListBox';
+  wc.AddProperty('AutoHeight', TPropertyBoolean, '');
+  wc.AddProperty('ColorPalette', TPropertyEnum, '');
+  wc.Addproperty('DragToReorder', TPropertyBoolean, '');
+  wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('HotTrack', TPropertyBoolean, '');
+  wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('PopupFrame', TPropertyBoolean, '');
+  wc.AddProperty('ShowColorNames', TPropertyBoolean, '');
+  wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.colorlistbox';
+  RegisterVFDWidget(wc);
+
   // StringGrid
   wc := TVFDWidgetClass.Create(TfpgStringGrid);
   wc.NameBase := 'Grid';
   wc.AddProperty('Columns', TPropertyDBColumns, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('HeaderFontDesc', TPropertyFontDesc, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('RowCount', TPropertyInteger, '');
   wc.AddProperty('RowSelect', TPropertyBoolean, '');
@@ -449,6 +504,8 @@ begin
   wc           := TVFDWidgetClass.Create(TfpgBevel);
   wc.NameBase  := 'Bevel';
   wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
+  wc.AddProperty('ParentBackgroundColor', TPropertyBoolean, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
   wc.AddProperty('Shape', TPropertyEnum, 'Box, Frame, TopLine, Spacer etc..');
@@ -462,9 +519,11 @@ begin
   wc.NameBase  := 'Panel';
   wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
   wc.AddProperty('LineSpace', TPropertyInteger, 'Line spacing between wrapped caption');
   wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
+  wc.AddProperty('ParentBackgroundColor', TPropertyBoolean, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
@@ -480,6 +539,7 @@ begin
   wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
   wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Margin', TPropertyInteger, 'Margin of text');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Style', TPropertyEnum, 'Raised or Lower look');
@@ -492,6 +552,7 @@ begin
   // ProgressBar
   wc          := TVFDWidgetClass.Create(TfpgProgressBar);
   wc.NameBase := 'ProgressBar';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
@@ -504,6 +565,7 @@ begin
   // TrackBar
   wc          := TVFDWidgetClass.Create(TfpgTrackBar);
   wc.NameBase := 'TrackBar';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Max', TPropertyInteger, '');
   wc.AddProperty('Min', TPropertyInteger, '');
   wc.AddProperty('Orientation', TPropertyEnum, '');
@@ -518,6 +580,7 @@ begin
   // ListView
   wc := TVFDWidgetClass.Create(TfpgListView);
   wc.NameBase := 'ListView';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('MultiSelect', TPropertyBoolean, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHeaders', TPropertyBoolean, '');
@@ -531,6 +594,7 @@ begin
   wc.NameBase := 'TreeView';
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('FontDesc',TPropertyFontDesc, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ScrollWheelDelta', TPropertyInteger, 'Scroll amount with mouse wheel');
   wc.AddProperty('ShowColumns',TPropertyBoolean, 'Boolean value');
@@ -546,6 +610,7 @@ begin
   wc.NameBase := 'PageControl';
   wc.AddProperty('ActivePageIndex', TPropertyInteger, '');
   wc.AddProperty('FixedTabWidth', TPropertyInteger, '');
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('SortPages', TPropertyBoolean, 'Boolean value');
@@ -568,6 +633,7 @@ begin
   // Gauge
   wc          := TVFDWidgetClass.Create(TfpgGauge);
   wc.NameBase := 'Gauge';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Kind', TPropertyEnum, '');
   wc.AddProperty('MinValue', TPropertyInteger, '');
   wc.AddProperty('MaxValue', TPropertyInteger, '');
@@ -582,9 +648,11 @@ begin
   // Integer Edit
   wc          := TVFDWidgetClass.Create(TfpgEditInteger);
   wc.NameBase := 'EditInteger';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ReadOnly', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
 //  wc.AddProperty('CustomThousandSeparator', TPropertyString, 'Thousand separator character');
@@ -595,9 +663,11 @@ begin
   // Float Edit
   wc          := TVFDWidgetClass.Create(TfpgEditFloat);
   wc.NameBase := 'EditFloat';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ReadOnly', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Value', TPropertyFloat, 'Initial value');
   wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
@@ -611,9 +681,11 @@ begin
   // Currency Edit
   wc          := TVFDWidgetClass.Create(TfpgEditCurrency);
   wc.NameBase := 'EditCurrency';
+  wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  wc.AddProperty('ReadOnly', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('Value', TPropertyFloat, 'Initial value');
   wc.AddProperty('ShowThousand', TPropertyBoolean, 'Show thousand separator');
@@ -621,6 +693,72 @@ begin
 //  wc.AddProperty('CustomDecimalSeparator', TPropertyString, 'Decimal separator character');
 //  wc.AddProperty('CustomThousandSeparator', TPropertyString, 'Thousand separator character');
   wc.WidgetIconName := 'vfd.editcurrency';
+  RegisterVFDWidget(wc);
+
+  { TODO : UI Designer still has problems with components that have child components. }
+  // Spin Edit
+  //wc          := TVFDWidgetClass.Create(TfpgSpinEdit);
+  //wc.NameBase := 'SpinEdit';
+  //wc.AddProperty('ButtonWidth', TPropertyInteger, 'Spin button width');
+  //wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  //wc.Addproperty('Hint', TPropertyString, '');
+  //wc.AddProperty('Increment', TPropertyInteger, 'Increment value on short press');
+  //wc.AddProperty('LargeIncrement', TPropertyInteger, 'Large increment value on long press');
+  //wc.AddProperty('MaxValue', TPropertyInteger, 'Maximum value');
+  //wc.AddProperty('MinValue', TPropertyInteger, 'Minimum value');
+  //wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  //wc.AddProperty('Value', TPropertyInteger, 'Initial value');
+  //wc.WidgetIconName := 'vfd.editinteger';
+  //RegisterVFDWidget(wc);
+
+  // Spin Edit Float
+  //wc          := TVFDWidgetClass.Create(TfpgSpinEditFloat);
+  //wc.NameBase := 'SpinEditFloat';
+  //wc.AddProperty('ButtonWidth', TPropertyInteger, 'Spin button width');
+  //wc.Addproperty('Decimals', TPropertyInteger, '');
+  //wc.Addproperty('FixedDecimals', TPropertyBoolean, '');
+  //wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
+  //wc.Addproperty('Hint', TPropertyString, '');
+  //wc.AddProperty('Increment', TPropertyFloat, 'Increment value on short press');
+  //wc.AddProperty('LargeIncrement', TPropertyFloat, 'Large increment value on long press');
+  //wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  //wc.AddProperty('MaxValue', TPropertyFloat, 'Maximum value');
+  //wc.AddProperty('MinValue', TPropertyFloat, 'Minimum value');
+  //wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  //wc.AddProperty('Value', TPropertyFloat, 'Initial value');
+  //wc.WidgetIconName := 'vfd.editfloat';
+  //RegisterVFDWidget(wc);
+
+  // Filename Edit
+  wc          := TVFDWidgetClass.Create(TfpgFileNameEdit);
+  wc.NameBase := 'FilenameEdit';
+  wc.AddProperty('ExtraHint', TPropertyString, '');
+  wc.AddProperty('FileName', TPropertyString, 'Preset filename in edit component');
+  wc.AddProperty('InitialDir', TPropertyString, 'Initial starting directory of the dialog');
+  wc.AddProperty('Filter', TPropertyString, 'Filename filters used in the dialog');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.editfilename';
+  RegisterVFDWidget(wc);
+
+  // Directory Edit
+  wc          := TVFDWidgetClass.Create(TfpgDirectoryEdit);
+  wc.NameBase := 'DirectoryEdit';
+  wc.AddProperty('ExtraHint', TPropertyString, '');
+  wc.AddProperty('Directory', TPropertyString, 'Preset directory name in edit component');
+  wc.AddProperty('RootDirectory', TPropertyString, 'Initial starting directory of the dialog');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.editdirectory';
+  RegisterVFDWidget(wc);
+
+  // Font Edit
+  wc          := TVFDWidgetClass.Create(TfpgFontEdit);
+  wc.NameBase := 'DirectoryEdit';
+  wc.AddProperty('FontDesc', TPropertyString, 'Specify a preset font description');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.WidgetIconName := 'vfd.editfont';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...

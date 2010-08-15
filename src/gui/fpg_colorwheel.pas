@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -13,7 +13,7 @@
 
     Description:
       This unit implements color selectors using a ColorWheel and
-      a ValueBar. Color results are in HSV format.
+      a ValueBar. Color results are in HSV or TfpgColor format.
 }
 
 unit fpg_ColorWheel;
@@ -213,7 +213,6 @@ begin
       FImage.Free;
     FImage := TfpgImage.Create;
     FImage.AllocateImage(32, DrawWidth, DrawHeight);
-    FImage.UpdateImage;
     for X := 0 to DrawWidth - 1 do
     begin
       for Y := 0 to DrawHeight - 1 do
@@ -232,6 +231,7 @@ begin
           // point is outside wheel. Also incase color is alias, lookup the RGB values.
           FImage.Colors[x, y] := fpgColorToRGB(BackgroundColor);
       end;
+      FImage.UpdateImage;
     end;
     FRecalcWheel := False;
   end

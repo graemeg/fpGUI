@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="GUI">
+  <package name="fpGUI">
     <module name="fpg_hyperlink">
       <short>A label component that can launch a web browser</short>
       <descr>This component acts like a link found in a web page. You can assign a

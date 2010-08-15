@@ -72,7 +72,7 @@ begin
     Text := 'Close';
     FontDesc := '#Label1';
     ImageName := 'stdimg.close';
-    ModalResult := 1;
+    ModalResult := mrOK;
     OnClick:= @OnCloseClick;
   end;
 

@@ -214,9 +214,10 @@ type
 
 
   { Base class to handle TfpgCalendarCombo controls }
-  TtiCalendarComboMediatorView = class(TtiBaseEditMediatorView)
+  TtiCalendarComboMediatorView = class(TtiControlMediatorView)
   protected
     procedure   SetupGUIandObject; override;
+    procedure   SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment); override;
   public
     constructor Create; override;
     function    View: TfpgCalendarCombo; reintroduce;
@@ -373,15 +374,21 @@ begin
     THackBaseEdit(View).MaxLength := Ma;
 end;
 
-procedure TtiBaseEditMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiBaseEditMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnchange,ouCustom] then
       THackBaseEdit(View).OnChange := @DoOnChange
     else
       THackBaseEdit(View).OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      THackbaseEdit(View).OnChange := nil;
+      THackbaseEdit(View).OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiBaseEditMediatorView.Create;
@@ -442,15 +449,21 @@ begin
   end;
 end;
 
-procedure TtiSpinEditMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiSpinEditMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiSpinEditMediatorView.Create;
@@ -488,10 +501,17 @@ procedure TtiTrackBarMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectU
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoTrackBarChanged   // TfpgTrackBar has a different event signature
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiTrackBarMediatorView.Create;
@@ -538,10 +558,17 @@ procedure TtiComboBoxMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectU
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;  
+  end;
 end;
 
 
@@ -554,17 +581,24 @@ end;
 
 procedure TtiMemoMediatorView.DoGuiToObject;
 begin
-  Subject.PropValue[FieldName] := View.Lines.Text;
+  Subject.PropValue[FieldName] := Trim(View.Lines.Text);
 end;
 
 procedure TtiMemoMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiMemoMediatorView.Create;
@@ -585,8 +619,12 @@ begin
 end;
 
 procedure TtiMemoMediatorView.SetupGUIandObject;
+var
+  Mi, Ma: integer;
 begin
   inherited SetupGUIandObject;
+  if Subject.GetFieldBounds(FieldName,Mi,Ma) and (Ma>0) then
+    View.MaxLength := Ma;
   View.Lines.Text := '';
 end;
 
@@ -721,15 +759,21 @@ end;
 
 { TtiCheckBoxMediatorView }
 
-procedure TtiCheckBoxMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiCheckBoxMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiCheckBoxMediatorView.Create;
@@ -788,6 +832,23 @@ begin
   end;
 end;
 
+procedure TtiCalendarComboMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
+begin
+  inherited SetObjectUpdateMoment(AValue);
+  if View <> nil then
+  begin
+    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+      View.OnChange := @DoOnChange
+    else
+      View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;
+  end;
+end;
+
 constructor TtiCalendarComboMediatorView.Create;
 begin
   inherited Create;
@@ -837,15 +898,21 @@ begin
   end;
 end;
 
-procedure TtiSpinEditFloatMediatorView.SetObjectUpdateMoment(
-  const AValue: TtiObjectUpdateMoment);
+procedure TtiSpinEditFloatMediatorView.SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment);
 begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
+  begin
     if ObjectUpdateMoment in [ouOnChange,ouCustom] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;
+  end;
 end;
 
 constructor TtiSpinEditFloatMediatorView.Create;

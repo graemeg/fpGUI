@@ -28,6 +28,8 @@ type
     lblName1: TfpgLabel;
     lblName2: TfpgLabel;
     lblName3: TfpgLabel;
+    loadinglogo: TfpgImgAnim;
+    Label1: TfpgLabel;
     {@VFD_HEAD_END: MainForm}
     procedure AfterCreate; override;
   end;
@@ -86,7 +88,9 @@ begin
     SetPosition(212, 216, 80, 24);
     Text := 'Quit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
+    TabOrder := 0;
     OnClick := @btnQuitClicked;
   end;
 
@@ -97,6 +101,7 @@ begin
     SetPosition(140, 12, 80, 24);
     Text := 'Start';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 1;
     OnClick := @btnStartClicked;
@@ -139,6 +144,7 @@ begin
     Name := 'lblName1';
     SetPosition(140, 52, 152, 16);
     FontDesc := '#Label2';
+    Hint := '';
     Text := 'Step through frames';
   end;
 
@@ -146,8 +152,9 @@ begin
   with lblName2 do
   begin
     Name := 'lblName2';
-    SetPosition(56, 136, 192, 16);
+    SetPosition(56, 136, 108, 16);
     FontDesc := '#Label2';
+    Hint := '';
     Text := 'Wanda the fish';
   end;
 
@@ -157,7 +164,30 @@ begin
     Name := 'lblName3';
     SetPosition(140, 68, 152, 16);
     FontDesc := '#Label1';
+    Hint := '';
     Text := '(stop the animation first)';
+  end;
+
+  loadinglogo := TfpgImgAnim.Create(self);
+  with loadinglogo do
+  begin
+    Name := 'loadinglogo';
+    SetPosition(236, 156, 16, 16);
+    IsTransparent := True;
+    ImageFileName := 'loading.bmp';
+    FrameCount := 8;
+    Interval := 200;
+    Enabled := True;
+  end;
+
+  Label1 := TfpgLabel.Create(self);
+  with Label1 do
+  begin
+    Name := 'Label1';
+    SetPosition(204, 136, 112, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Loading...';
   end;
 
   {@VFD_BODY_END: MainForm}

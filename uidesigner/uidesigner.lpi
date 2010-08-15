@@ -10,7 +10,6 @@
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
-      <Title Value="uiDesigner"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -23,7 +22,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <LaunchingApplication Use="True" PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">
@@ -114,14 +113,23 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
+    <SearchPaths>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <AllowLabel Value="False"/>
         <CPPInline Value="False"/>
+        <UseAnsiStrings Value="True"/>
       </SyntaxOptions>
     </Parsing>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
     <Other>
-      <CustomOptions Value="-FUunits
+      <CustomOptions Value="
 "/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -22,7 +22,6 @@ unit fpg_customgrid;
 {
   TODO:
     * Column text alignment needs to be implemented. Currently always Centre.
-    * AlternateColor for rows need to be implemented.
 }
 
 {.$Define DEBUG}
@@ -259,7 +258,7 @@ begin
   if (ACol >= 0) and (ACol < ColumnCount) then
     Result := TfpgGridColumn(FColumns[ACol]).FBackgroundColor
   else
-    result := BackgroundColor;
+    Result := BackgroundColor;
 end;
 
 procedure TfpgCustomGrid.SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor);

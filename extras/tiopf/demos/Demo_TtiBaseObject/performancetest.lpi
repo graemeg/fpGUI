@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
-    <Version Value="6"/>
+    <Version Value="7"/>
     <General>
+      <Flags>
+        <LRSInOutputDirectory Value="False"/>
+      </Flags>
       <MainUnit Value="0"/>
-      <IconPath Value="./"/>
       <TargetFileExt Value=""/>
       <ActiveEditorIndexAtStart Value="0"/>
     </General>
@@ -32,7 +33,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="performancetest"/>
         <CursorPos X="1" Y="13"/>
-        <TopLine Value="43"/>
+        <TopLine Value="13"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
@@ -42,12 +43,12 @@
         <UnitName Value="frm_main"/>
         <CursorPos X="37" Y="85"/>
         <TopLine Value="65"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="2"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="../../../../../../../../opt/fpc_2.2.0/src/packages/fcl-base/src/inc/custapp.pp"/>
+        <Filename Value="/opt/fpc_2.2.0/src/packages/fcl-base/src/inc/custapp.pp"/>
         <UnitName Value="CustApp"/>
         <CursorPos X="3" Y="26"/>
         <TopLine Value="11"/>
@@ -72,25 +73,21 @@
         <UnitName Value="tiBaseObject"/>
         <CursorPos X="1" Y="128"/>
         <TopLine Value="94"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="../../../../../../../../opt/fpc_2.2.0/src/rtl/inc/objpash.inc"/>
+        <Filename Value="/opt/fpc_2.2.0/src/rtl/inc/objpash.inc"/>
         <CursorPos X="29" Y="220"/>
         <TopLine Value="212"/>
-        <EditorIndex Value="1"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="../../../../../../../../opt/fpc_2.2.0/src/rtl/inc/objpas.inc"/>
+        <Filename Value="/opt/fpc_2.2.0/src/rtl/inc/objpas.inc"/>
         <CursorPos X="9" Y="709"/>
         <TopLine Value="705"/>
-        <EditorIndex Value="2"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="FMain.pas"/>

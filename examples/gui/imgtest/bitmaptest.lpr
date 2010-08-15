@@ -19,8 +19,7 @@ type
   TMainForm = class(TfpgForm)
   private
     img: TfpgImage;
-  protected
-    procedure   HandlePaint; override;
+    procedure   FormPaint(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -29,22 +28,21 @@ type
 
 { TMainForm }
 
-procedure TMainForm.HandlePaint;
+procedure TMainForm.FormPaint(Sender: TObject);
 var
   i, j: integer;
 begin
-  Canvas.BeginDraw; // activate double buffering in time.
-//  inherited HandlePaint;
-  img.Free;
-  img := TfpgImage.Create;
-  img.AllocateImage(32, 256, 256);
-  img.UpdateImage;
-  // populate the bitmap with pretty colors :-)
-  for j := 0 to 255 do
-    for i := 0 to 255 do
-      PLongWord(img.ImageData)[j * 256 + i] := (i shl 16) or (j shl 8);
+  if not Assigned(img) then // we only need to create the image once
+  begin
+    img := TfpgImage.Create;
+    img.AllocateImage(32, 256, 256);
+    // populate the bitmap with pretty colors :-)
+    for j := 0 to 255 do
+      for i := 0 to 255 do
+        PLongWord(img.ImageData)[j * 256 + i] := (i shl 16) or (j shl 8);
+    img.UpdateImage; // now only do we allocate OS resources
+  end;
   Canvas.DrawImage(0, 0, img);
-  Canvas.EndDraw;
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -52,6 +50,9 @@ begin
   inherited Create(AOwner);
   SetPosition(100, 100, 256, 256);
   WindowTitle := 'fpGUI Bitmap Test';
+  WindowPosition := wpOneThirdDown;
+  Sizeable := False;
+  OnPaint := @FormPaint;
 end;
 
 destructor TMainForm.Destroy;

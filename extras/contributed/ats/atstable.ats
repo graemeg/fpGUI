@@ -1,0 +1,218 @@
+rsLanguage:
+  EN="English"
+  RU="Русский"
+  AF="Afrikaans"
+rsOK:
+  EN="OK"
+  RU="OK"
+  AF="Goed"
+rsCancel:
+  EN="Cancel"
+  RU="Отмена"
+  AF="Kanseleer"
+rsHelp:
+  EN="Help"
+  RU="Справка"
+  AF="Help"
+rsOpen:
+  EN="Open"
+  RU="Открыть"
+  AF="Maak oop"
+rsSave:
+  EN="Save"
+  RU="Сохранить"
+  AF="Stoor"
+rsCreate:
+  EN="Create"
+  RU="Создать"
+rsChange:
+  EN="Change"
+  RU="Изменить"
+rsFind:
+  EN="Find"
+  RU="Найти"
+rsSearch:
+  EN="Search"
+  RU="Поиск"
+rsReplace:
+  EN="Replace"
+  RU="Заменить"
+rsConfirm:
+  EN="Confirm"
+  RU="Подтвердить"
+rsAll:
+  EN="All"
+  RU="Все"
+rsSelect:
+  EN="Select"
+  RU="Выбрать"
+rsYes:
+  EN="Yes"
+  RU="Да"
+rsNo:
+  EN="No"
+  RU="Нет"
+  AF="Nee"
+rsAbort:
+  EN="Abort"
+  RU="Прервать"
+rsRetry:
+  EN="Retry"
+  RU="Повторить"
+rsIgnore:
+  EN="Ignore"
+  RU="Пропустить"
+rsClose:
+  EN="Close"
+  RU="Закрыть"
+rsInsert:
+  EN="Insert"
+  RU="Вставка"
+rsEdit:
+  EN="Edit"
+  RU="Редактировать"
+rsDelete:
+  EN="Delete"
+  RU="Удалить"
+rsExit:
+  EN="Exit"
+  RU="Выход"
+rsYesToAll:
+  EN="Yes to All"
+  RU="Да для всех"
+rsNoToAll:
+  EN="No to All"
+  RU="Нет для всех"
+rsCut:
+  EN="Cut"
+  RU="Вырезать"
+rsCopy:
+  EN="Copy"
+  RU="Копировать"
+rsPaste:
+  EN="Paste"
+  RU="Вставить"
+rsError:
+  EN="Error"
+rsCriticalError:
+  EN="Critical Error"
+rsInformation:
+  EN="Information"
+rsConfirmation:
+  EN="Confirmation"
+rsWarning:
+  EN="Warning"
+rsMessage:
+  EN="Message"
+rsAbout:
+  EN="About %s"
+rsAllFiles:
+  EN="All Files"
+rsCreateDirectory:
+  EN="Create directory"
+rsEnterNewDirectory:
+  EN="Enter new directory name"
+rsCannotCreateDir:
+  EN="Cannot create directory"
+rsSelectAFont:
+  EN="Select a font"
+rsName:
+  EN="Name"
+rsCollection:
+  EN="Collection"
+rsSize:
+  EN="Size"
+rsStyle:
+  EN="Style"
+rsItalic:
+  EN="Italic"
+rsBold:
+  EN="Bold"
+rsUnderScore:
+  EN="UnderScore"
+rsTypeface:
+  EN="Typeface"
+rsAntiAliasing:
+  EN="Anti aliasing"
+rsExampleText:
+  EN="Example Text"
+rsCollectionAllFonts:
+  EN="All Fonts"
+rsCollectionRecentlyUsed:
+  EN="Recently Used"
+rsCollectionFavourites:
+  EN="Favourites"
+rsCollectionFixedWidth:
+  EN="Fixed Width"
+rsCollectionSans:
+  EN="Sans"
+rsCollectionSerif:
+  EN="Serif"
+rsCollectionFontAliases:
+  EN="Font Aliases"
+rsOpenAFile:
+  EN="Open a file"
+rsFileName:
+  EN="Filename"
+rsFileType:
+  EN="Type of file"
+rsDrive:
+  EN="Drive"
+rsFiles:
+  EN="Files"
+rsDirectories:
+  EN="Directories"
+rsShowHidden:
+  EN="Show hidden files"
+rsFileSelection:
+  EN="File Selection"
+rsFileModifiedTime:
+  EN="Mod. Time"
+rsFileAttributes:
+  EN="Attributes"
+rsFileRights:
+  EN="Rights"
+rsFileOwner:
+  EN="Owner"
+rsFileGroup:
+  EN="Group"
+rsSaveAFile:
+  EN="Save file as"
+rsErrListMustBeEmpty:
+  EN="List must be empty"
+rsErrCouldNotOpenDir:
+  EN="Could not open the directory <%s>"
+rsErrItemOfWrongType:
+  EN="Item is not of <%s> type!"
+rsErrFailedToCreateDir:
+  EN="Failed to create the directory <%s>"
+rsErrNotAssigned:
+  EN="<%s> not assigned"
+rsShortMon:
+  EN="Mon"
+rsShortTue:
+  EN="Tue"
+rsShortWed:
+  EN="Wed"
+rsShortThu:
+  EN="Thu"
+rsShortFri:
+  EN="Fri"
+rsShortSat:
+  EN="Sat"
+rsShortSun:
+  EN="Sun"
+rsLongMon:
+  EN="Monday"
+rsLongTue:
+  EN="Tuesday"
+rsLongWed:
+  EN="Wednesday"
+rsLongThu:
+  EN="Thursday"
+rsLongFri:
+  EN="Friday"
+rsLongSat:
+  EN="Saturday"
+rsLongSun:
+  EN="Sunday"

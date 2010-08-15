@@ -23,6 +23,8 @@ begin
   Helper := '';
   if fpsystem('which xdg-open') = 0 then
     Helper := 'xdg-open'
+  else if FileExists('/usr/bin/sensible-browser') then
+    Helper := '/usr/bin/sensible-browser'
   else if FileExists('/etc/alternatives/x-www-browser') then
     Helper := '/etc/alternatives/x-www-browser'
   else if fpsystem('which firefox') = 0 then

@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -62,12 +62,18 @@ type
   end;
 
 
+  TfpgDrawLineEvent = procedure(Sender: TObject; ALineText: TfpgString;
+      ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
+      var AllowSelfDraw: Boolean) of object;
+
+
   TfpgBaseTextEdit = class(TfpgWidget)
   private
     FFont: TfpgFont;
     FFullRedraw: Boolean;
     FLines: TStrings;
     CaretPos: TPoint;
+    FOnDrawLine: TfpgDrawLineEvent;
     FScrollBarStyle: TfpgScrollStyle;
     MousePos: TPoint;
     FChrW: Integer;
@@ -89,6 +95,8 @@ type
     FSelDrag: Boolean;
     FSelected, FSelMouseDwn: Boolean;
     FGutterPan: TfpgGutter;
+    FRightEdge: Boolean;
+    FRightEdgeCol: Integer;
     function    GetFontDesc: string;
     function    GetGutterShowLineNumbers: Boolean;
     function    GetGutterVisible: Boolean;
@@ -113,8 +121,12 @@ type
     procedure   UpdateGutterCoords;
     procedure   KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
     procedure   InitMemoObjects;
+    procedure   SetRightEdge(const AValue: Boolean);
+    procedure   SetRightEdgeCol(const AValue: Integer);
   protected
     { -- internal events -- }
+    procedure   HandleShow; override;
+    procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   HandlePaint; override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
@@ -124,8 +136,8 @@ type
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     { -- local widget functions -- }
     procedure   DrawVisible; virtual;
-    procedure   DrawLine(const I, Y: Integer); virtual;
-    procedure   FormatLine(const I, X, Y: Integer);
+    procedure   DrawLine(const ALineIndex, Y: Integer); virtual;
+    procedure   FormatLine(const ALineIndex, X, Y: Integer);
     procedure   DrawCaret(const X, Y: Integer); virtual;
     { -- to be published --}
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -136,6 +148,7 @@ type
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
+    property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -147,10 +160,14 @@ type
     procedure   DeleteSelection;
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
+    property    FontHeight: Integer read FChrH;
+    property    FontWidth: Integer read FChrW;
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
     property    ScrollPos_V: Integer read GetVScrollPos write SetVScrollPos;
     property    TopLine: Integer read FTopLine;
     property    VisibleLines: Integer read FVisLines;
+    property    RightEdge: Boolean read FRightEdge write SetRightEdge default False;
+    property    RightEdgeCol: Integer read FRightEdgeCol write SetRightEdgeCol default 80;
   end;
 
 
@@ -164,13 +181,14 @@ type
     property    ScrollBarStyle;
     property    TabWidth;
     property    Tracking;
+    property    OnDrawLine;
   end;
 
 
 implementation
 
 uses
-  fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils;
+  fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils, math;
 
 
 function GetNextWord(SLine: TfpgString; var PosX: Integer): Boolean;
@@ -370,6 +388,8 @@ end;
 procedure TfpgBaseTextEdit.SetGutterVisible(const AValue: Boolean);
 begin
   FGutterPan.Visible := AValue;
+  if FGutterPan.Visible then
+    UpdateGutterCoords;
   Invalidate;
 end;
 
@@ -406,6 +426,7 @@ begin
     FVisCols := GetClientRect.Width div FChrW;
 end;
 
+{ Re-order StartXXX and EndXXX if user is selecting backwards }
 procedure TfpgBaseTextEdit.GetSelBounds(var AStartNo, AEndNo, AStartOffs,
   AEndOffs: Integer);
 begin
@@ -417,12 +438,14 @@ begin
     begin
       AStartOffs := FSelStartOffs;
       AEndOffs := FSelEndOffs;
-    end else
+    end
+    else
     begin
       AStartOffs := FSelEndOffs;
       AEndOffs := FSelStartOffs;
     end;
-  end else
+  end
+  else
   begin
     AStartNo := FSelEndNo;
     AEndNo := FSelStartNo;
@@ -434,18 +457,26 @@ end;
 procedure TfpgBaseTextEdit.UpdateScrollBars;
 begin
   FVScrollBar.Min := 0;
-  FVScrollBar.PageSize := FVisLines - 2;
-  FVScrollBar.Max := FLines.Count +1 - FVisLines;  // +1 is so the last line is completely visible
+  FVScrollBar.PageSize := FVisLines - 4;
+  FVScrollBar.Max := FLines.Count - FVisLines + 1;  // +1 is so the last line is completely visible
   FVScrollBar.Position := VPos;
+  if FLines.Count > 0 then
+    FVScrollBar.SliderSize := FVisLines / FLines.Count;
   FVScrollBar.Visible := FLines.Count > FVisLines;
+  if FVScrollBar.Visible then
+    FVScrollBar.RepaintSlider;
 
   FHScrollBar.Min := 0;
-  FHScrollBar.PageSize := FVisCols div 4; //FMaxScrollH div 4;
-  FHScrollBar.Max := FMaxScrollH;// div 2;
+  FHScrollBar.PageSize := FVisCols div 2; //FMaxScrollH div 4;
+  FHScrollBar.Max := FMaxScrollH - FVisCols + 1;// div 2;
   FHScrollBar.Position := HPos;
+  FHScrollBar.SliderSize := FVisCols / FMaxScrollH;
   FHScrollBar.Visible := FMaxScrollH > FVisCols;
+  if FHScrollBar.Visible then
+    FHScrollBar.RepaintSlider;
 
   UpdateScrollBarCoords;
+  UpdateCharBounds;
 end;
 
 procedure TfpgBaseTextEdit.VScrollBarMove(Sender: TObject; position: integer);
@@ -499,7 +530,7 @@ var
 begin
   OldPos := VPos;
   VPos := p;
-  UpdateScrollBars;
+
   {$IFDEF gDEBUG}
   writeln('OldPos:', OldPos, '  NewPos:', VPos, ' SB.Max:', FVScrollBar.Max);
   {$ENDIF}
@@ -533,7 +564,7 @@ var
 begin
   OldPos := HPos;
   HPos := p;
-  UpdateScrollBars;
+
   {$IFDEF gDEBUG}
   writeln('OldPos:', OldPos, '  NewPos:', HPos, ' SB.Max:', FHScrollBar.Max);
   {$ENDIF}
@@ -565,11 +596,6 @@ begin
   VHeight := r.Height;
   HWidth  := r.Width;
 
-  //if FVScrollBar.Visible then
-    //Dec(HWidth, FVScrollBar.Width);
-  //if FHScrollBar.Visible then
-    //Dec(VHeight, FHScrollBar.Height);
-
   FHScrollBar.Top     := Height - FHScrollBar.Height - r.Top;
   FHScrollBar.Left    := r.Top;
   FHScrollBar.Width   := HWidth;
@@ -594,6 +620,8 @@ end;
 { This procedure is used to set caret position on keyboard navigation and
   to set selection if Shift key is pressed. }
 procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const AKeyCode: Word);
+var
+  SaveXCaret: Integer;
 
   procedure CtrlKeyLeftKey;
   var
@@ -651,7 +679,6 @@ procedure TfpgBaseTextEdit.KeyboardCaretNav(const ShiftState: TShiftState; const
   end;
 
 begin
-  writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav >>');
   case AKeyCode of
     keyLeft:
         begin
@@ -660,12 +687,12 @@ begin
           begin
             if CaretPos.Y > 0 then
             begin
-              if CaretPos.Y <= pred(FLines.Count) then
+              if CaretPos.Y <= (FLines.Count-1) then
               begin
                 if (ssCtrl in ShiftState) and (CaretPos.Y > 0) then
                 begin
                   CaretPos.Y := CaretPos.Y - 1;
-                  CaretPos.X := Length(FLines[CaretPos.Y]);
+                  CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
                   if FSelected then
                   begin
                     FSelEndNo := CaretPos.Y;
@@ -675,7 +702,7 @@ begin
                 end;
               end;
               CaretPos.Y := CaretPos.Y - 1;
-              CaretPos.X := Length(FLines[CaretPos.Y]);
+              CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
             end
             else
             begin
@@ -686,9 +713,9 @@ begin
           begin
             if not FSelected then
             begin
-              if CaretPos.Y <= pred(FLines.Count) then
-                if CaretPos.X > Length(FLines[CaretPos.Y]) then
-                  CaretPos.Y := Length(FLines[CaretPos.Y]) - 1;
+              if CaretPos.Y <= (FLines.Count-1) then
+                if CaretPos.X > UTF8Length(FLines[CaretPos.Y]) then
+                  CaretPos.Y := UTF8Length(FLines[CaretPos.Y]) - 1;
               FSelected := True;
               FSelStartNo := CaretPos.Y;
               FSelStartOffs := CaretPos.X + 1;
@@ -705,11 +732,11 @@ begin
                 CtrlKeyLeftKey
               else
                 FSelEndOffs := CaretPos.X;
-              if FSelEndNo <= pred(FLines.Count) then
+              if FSelEndNo <= (FLines.Count-1) then
               begin
-                if FSelEndOffs > Length(FLines[FSelEndNo]) then
+                if FSelEndOffs > UTF8Length(FLines[FSelEndNo]) then
                 begin
-                  FSelEndOffs := Length(FLines[FSelEndNo]) - 1;
+                  FSelEndOffs := UTF8Length(FLines[FSelEndNo]) - 1;
                   CaretPos.X := FSelEndOffs;
                 end;
               end
@@ -783,6 +810,9 @@ begin
           if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y - 1;
+            // scroll text
+            if FVScrollBar.Visible and (CaretPos.Y < FTopLine) then
+              FVScrollBar.LineUp;
             if FSelected then
             begin
               FSelected := False;
@@ -794,8 +824,8 @@ begin
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y - 1;
-            {$Note This does not work. The view must scroll and caret pos stay the same. }
-            VScrollBarMove(self, FVScrollBar.Position-1);
+            if FVScrollBar.Visible then
+              FVScrollBar.LineUp;    // VScrollBarMove(self, FVScrollBar.Position-1);
             FSelStartNo := CaretPos.Y;
             Exit;
           end
@@ -806,7 +836,7 @@ begin
             begin
               FSelStartNo := CaretPos.Y + 1;
               FSelStartOffs := CaretPos.X;
-              FSelEndNo := CaretPos.X;
+              FSelEndNo := CaretPos.Y;
               FSelEndOffs := CaretPos.X;
               FSelected := True;
             end
@@ -826,7 +856,10 @@ begin
           if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y + 1;
-            if FSelected then
+            // scroll text
+            if FVScrollBar.Visible and (CaretPos.Y > FTopLine+FVisLines-2) then
+              FVScrollBar.LineDown;
+              if FSelected then
             begin
               FSelected := False;
               Exit;
@@ -837,8 +870,8 @@ begin
           else if (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
           begin
             CaretPos.Y := CaretPos.Y + 1;
-            {$Note This does not work. The view must scroll and caret pos stay the same. }
-            VScrollBarMove(self, FVScrollBar.Position+1);
+            if FVScrollBar.Visible then
+              FVScrollBar.LineDown;    // VScrollBarMove(self, FVScrollBar.Position+1);
             FSelStartNo := CaretPos.Y;
             Exit;
           end
@@ -864,17 +897,154 @@ begin
 
     keyHome:
         begin
+          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            CaretPos.X := 0;
+            if FSelected then
+            begin
+              FSelected := False;
+              Exit;
+            end;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            if ssShift in ShiftState then
+            begin
+              if not FSelected then
+              begin
+                FSelStartNo := CaretPos.Y;
+                FSelStartOffs := CaretPos.X;
+                FSelected := True;
+              end;
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+              FSelEndNo := 0;
+              FSelEndOffs := 0;
+            end
+            else
+            begin
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+            end;
+            Exit;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              FSelStartNo := CaretPos.Y;
+              FSelStartOffs := CaretPos.X;
+              FSelected := True;
+            end;
+            CaretPos.X := 0;
+            FSelEndNo := CaretPos.Y;
+            FSelEndOffs := 0;
+            if FSelEndNo = FSelStartNo then
+              FSelected := (FSelStartOffs <> FSelEndOffs);
+          end;
         end;
 
     keyEnd:
         begin
+          if not (ssCtrl in ShiftState) and not (ssShift in ShiftState) then
+          begin
+            if CaretPos.Y <= pred(FLines.Count) then
+              CaretPos.X := Length(FLines[CaretPos.Y])
+            else
+              CaretPos.X := 0;
+          end;
+          if ssCtrl in ShiftState then
+          begin
+            if ssShift in ShiftState then
+            begin
+              if not FSelected then
+              begin
+                FSelStartNo := CaretPos.Y;
+                FSelStartOffs := CaretPos.X;
+                FSelected := True;
+              end;
+              CaretPos.Y := pred(FLines.Count);
+              CaretPos.X := Length(FLines[CaretPos.Y]);
+              FSelEndNo := pred(FLines.Count);
+              FSelEndOffs := Length(FLines[CaretPos.Y]);
+            end else
+            begin
+              CaretPos.Y := pred(FLines.Count);
+              CaretPos.X := Length(FLines[CaretPos.Y]);
+            end;
+            Exit;
+          end;
+          if ssShift in ShiftState then
+          begin
+            if not FSelected then
+            begin
+              FSelStartNo := CaretPos.Y;
+              if CaretPos.Y <= pred(FLines.Count) then
+                if CaretPos.X > Length(FLines[CaretPos.Y]) then
+                  CaretPos.X := Length(FLines[CaretPos.Y]);
+              FSelStartOffs := CaretPos.X;
+              FSelected := True;
+            end;
+            if CaretPos.Y <= pred(FLines.Count) then
+              CaretPos.X := Length(FLines[CaretPos.Y])
+            else
+              CaretPos.X := 0;
+            FSelEndNo := CaretPos.Y;
+            FSelEndOffs := CaretPos.X;
+            if FSelEndNo = FSelStartNo then
+              FSelected := (FSelStartOffs <> FSelEndOffs);
+          end;
         end;
 
-    keyPrior, keyNext:
+    keyPageUp, keyPageDown:
         begin
+          if not FSelected then
+          begin
+            FSelStartNo := CaretPos.Y;
+            FSelStartOffs := CaretPos.X;
+          end;
+          SaveXCaret := CaretPos.Y - FTopLine;
+          if AKeyCode = keyPageUp then
+          begin
+            if VPos = 0 then
+            begin
+              CaretPos.Y := 0;
+              CaretPos.X := 0;
+            end
+            else
+            begin
+              // scroll text
+              if FVScrollBar.Visible then
+                FVScrollBar.PageUp;
+              // restore caret at same line offset as before
+              CaretPos.Y := FTopLine + SaveXCaret;
+            end;
+          end
+          else
+          begin
+            if VPos > (FLines.Count - FVisLines) then
+            begin
+              CaretPos.Y := FLines.Count-1;
+              CaretPos.X := Length(FLines[CaretPos.Y]);
+            end
+            else
+            begin
+              // scroll text
+              if FVScrollBar.Visible then
+                FVScrollBar.PageDown;
+              // restore caret at same line offset as before
+              CaretPos.Y := FTopLine + SaveXCaret;
+            end;
+          end;
+          if ssShift in ShiftState then
+          begin
+            FSelEndNo := CaretPos.Y;
+            FSelEndOffs := CaretPos.X;
+            if not FSelected then
+              FSelected := True;
+          end;
         end;
   end;
-  writeln('DEBUG:  TfpgBaseTextEdit.KeyboardCaretNav <<');
 end;
 
 procedure TfpgBaseTextEdit.InitMemoObjects;
@@ -887,10 +1057,50 @@ begin
   end;
 end;
 
+procedure TfpgBaseTextEdit.SetRightEdge(const AValue: Boolean);
+begin
+  if FRightEdge <> AValue then
+  begin
+    FRightEdge := AValue;
+    Invalidate;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.SetRightEdgeCol(const AValue: Integer);
+var
+  v: Integer;
+begin
+  v := AValue;
+  if v < 20 then v := 20;
+  if v > 160 then v := 160;
+  if FRightEdgeCol <> v then
+  begin
+    FRightEdgeCol := v;
+    if FRightEdge then
+      Invalidate;
+  end;
+end;
+
+procedure TfpgBaseTextEdit.HandleShow;
+begin
+  inherited HandleShow;
+  HandleResize(Width, Height);
+end;
+
+procedure TfpgBaseTextEdit.HandleResize(AWidth, AHeight: TfpgCoord);
+begin
+  inherited HandleResize(AWidth, AHeight);
+  if HasHandle then
+  begin
+    UpdateCharBounds;
+    UpdateScrollBars;
+    UpdateGutterCoords;
+  end;
+end;
+
 procedure TfpgBaseTextEdit.HandlePaint;
 begin
 //  inherited HandlePaint;
-  UpdateCharBounds;
   // normal house keeping
   Canvas.ClearClipRect;
   Canvas.Clear(clBoxColor);
@@ -899,8 +1109,6 @@ begin
   Canvas.SetClipRect(GetClientRect);
 
   // do the actual drawing
-  UpdateScrollBarCoords;
-  UpdateGutterCoords;
   DrawVisible;
   DrawCaret(CaretPos.X, CaretPos.Y);
   Canvas.ClearClipRect;
@@ -1009,8 +1217,6 @@ var
   X: Integer;
   CaretScroll: Boolean;
 begin
-  writeln('>> TfpgBaseTextEdit.HandleKeyPress: keycode:', keycode);
-  writeln('  CaretPos X:', CaretPos.X, '  Y:', CaretPos.Y);
 //  inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   { Add lines as we go, so we can cursor past EOF. }
@@ -1018,6 +1224,7 @@ begin
   if CaretPos.Y > pred(FLines.Count) then
   begin
     FLines.Add('');
+    FVScrollBar.Max := FVScrollBar.Max + 1;
     Exit; //==>
   end;
 //  if (keycode = keyEscape) or (ssCtrl in ShiftState) then
@@ -1103,13 +1310,12 @@ begin
   else if CaretPos.X < HPos then
     ScrollPos_H := CaretPos.X;
 
-  if CaretPos.Y < FTopLine then
+  if CaretPos.Y < (FTopLine+1) then
     ScrollPos_V := CaretPos.Y
-  else if CaretPos.Y > FTopLine + FVisLines - 2 then
+  else if CaretPos.Y > (FTopLine + FVisLines - 2) then
     ScrollPos_V := CaretPos.Y - FVisLines + 2;
 
   Invalidate;
-  writeln('<< TfpgBaseTextEdit.HandleKeyPress');
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar;
@@ -1128,8 +1334,8 @@ begin
       SLine := FLines[CaretPos.Y];
 
       { cursor was somewhere in whitespace, so we need to fill up the spaces }
-      if UTF8Length(SLine) < CaretPos.y + 1 then
-        for Fill := Length(SLine) to CaretPos.y + 1 do
+      if UTF8Length(SLine) < CaretPos.X + 1 then
+        for Fill := Length(SLine) to CaretPos.X + 1 do
           SLine := SLine + ' ';
 
       UTF8Insert(AText, SLine, CaretPos.X + 1);
@@ -1155,6 +1361,26 @@ begin
   Y := 0;
   cntVis := 1;
   GetSelBounds(StartNo, EndNo, StartOffs, EndOffs);
+
+  // Draw right edge line first, so text can draw over it.
+  if FRightEdge then
+  begin
+    if not FGutterPan.Visible then
+    begin
+      with Canvas do
+      begin
+        Canvas.Color := clShadow1; // FEnvironment.RightEdgeColor;
+        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW), GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW), GetClientRect.Height);
+      end;
+    end else
+      with Canvas do
+      begin
+        Canvas.Color := clShadow1; // FEnvironment.RightEdgeColor;
+        Canvas.DrawLine((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, GetClientRect.Top, (FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, GetClientRect.Height);
+      end;
+  end;
+
+  // Draw lines of text
   for I := FTopLine to FTopLine + FVisLines do
   begin
     DrawLine(I, Y);
@@ -1163,30 +1389,9 @@ begin
     if cntVis > FVisLines then
       Break;  //==>
   end;
-  { todo: implement this }
-{
-  if FRightEdge then
-  begin
-    if not FGutterOpt.Visible then
-    begin
-      with Canvas do
-      begin
-        Pen.Color := FEnvironment.RightEdgeColor;
-        MoveTo((FRightEdgeCol * FChrW) - (HPos * FChrW), 0);
-        LineTo((FRightEdgeCol * FChrW) - (HPos * FChrW), ClientHeight);
-      end;
-    end else
-      with Canvas do
-      begin
-        Pen.Color := FEnvironment.RightEdgeColor;
-        MoveTo((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, 0);
-        LineTo((FRightEdgeCol * FChrW) - (HPos * FChrW) + FGutterPan.Width, ClientHeight);
-      end;
-  end;
-}
 end;
 
-procedure TfpgBaseTextEdit.DrawLine(const I, Y: Integer);
+procedure TfpgBaseTextEdit.DrawLine(const ALineIndex, Y: Integer);
 var
   X: Integer;
   GSz: Integer;
@@ -1203,14 +1408,14 @@ begin
   else
     GSz := GetClientRect.Left + 1; // gutter size if no gutter panel
 
-  if I < FLines.Count then
+  if ALineIndex < FLines.Count then
   begin
     X := -(HPos * FChrW) + GSz;
-    FormatLine(I, X, Y);
+    FormatLine(ALineIndex, X, Y);
   end;
 end;
 
-procedure TfpgBaseTextEdit.FormatLine(const I, X, Y: Integer);
+procedure TfpgBaseTextEdit.FormatLine(const ALineIndex, X, Y: Integer);
 var
   S, CorrectS, SS: TfpgString;
   TI, Si, Ei, T: Integer;
@@ -1219,9 +1424,9 @@ var
 begin
   if FLines.Count = 0 then
     Exit; //==>
-  if (I < 0) or (I > Pred(FLines.Count)) then
+  if (ALineIndex < 0) or (ALineIndex > FLines.Count-1) then
     Exit; //==>
-  S := FLines[I];
+  S := FLines[ALineIndex];
   if Pos(#9, S) > 0 then
   begin
     CorrectS := '';
@@ -1241,14 +1446,65 @@ begin
   { start drawing formatted text }
   R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
   AllowDraw := True;
-//  if Assigned(FOnDrawLine) then FOnDrawLine(Self, S, I, LGliph, R, AllowDraw);
+  { end-user can hook in here to do syntax highlighting and other custom drawing }
+  if Assigned(FOnDrawLine) then
+    FOnDrawLine(self, S, ALineIndex, Canvas, R, AllowDraw);
   { Draw simple text line... }
   if AllowDraw then
+  begin
     Canvas.DrawText(R, S);
-//    DrawText(LGliph.Canvas.Handle, PChar(S), Length(S), R, DT_DRAWLINE);
+  end;
+    if FSelected then
+    begin
+      Canvas.TextColor := clWhite;
+      Canvas.Color :=  fpgColorToRGB(clSelection);
+      if (ALineIndex > StartNo) and (ALineIndex < EndNo) then     // whole line is selected
+      begin
+        R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
+        Canvas.FillRectangle(R);
+        Canvas.DrawText(R, S);
+      end
+      else
+      begin
+        Ei := EndOffs;
+        Si := StartOffs;
+        if (ALineIndex = StartNo) and (ALineIndex = EndNo) then  // start/end selection on same line
+        begin
+          SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
+          if Ei > UTF8Length(S) then
+            SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si)
+          else
+            SS := UTF8Copy(S, Si + 1, Ei - Si);
+          R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+          Canvas.FillRectangle(R);
+          Canvas.DrawText(R, SS);
+        end
+        else
+        begin
+          if (ALineIndex = StartNo) and (ALineIndex < EndNo) then
+          begin
+            SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
+            R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+            Canvas.FillRectangle(R);
+            Canvas.DrawText(R, SS);
+          end
+          else
+          begin
+            if (ALineIndex > StartNo) and (ALineIndex = EndNo) then
+            begin
+              if Ei > UTF8Length(S) then
+                Ei := UTF8Length(S);
+              SS := UTF8Copy(S, 1, Ei);
+              R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
+              Canvas.FillRectangle(R);
+              Canvas.DrawText(R, SS);
+            end;
+          end;
+        end;
+      end;
+    end; { if FSelected... }
+//  end;  { if AllowDraw... }
 
-  { todo: Do other formatting here. }
-  { todo: Do selection painting here. }
   if UTF8Length(S) > FMaxScrollH then
   begin
     FMaxScrollH := UTF8Length(S);
@@ -1307,29 +1563,31 @@ begin
 
   if not FSelected then
   begin
-    FSelStartNo := CaretPos.x;
-    FSelStartOffs := CaretPos.y;
+    FSelStartNo := CaretPos.Y;
+    FSelStartOffs := CaretPos.X;
   end;
 end;
 
 constructor TfpgBaseTextEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Focusable   := True;
-  FFont       := fpgGetFont('#Edit1');
-  Width       := 320;
-  Height      := 240;
-  FLines      := TStringList.Create;
-  CaretPos.x  := 0;
-  CaretPos.y  := 0;
-  FTopLine    := 0;
-  FTabWidth   := 8;
-  FMaxScrollH := 0;
-  VPos        := 0;
-  HPos        := 0;
-  FTracking   := True;
-  FFullRedraw := False;
-  FSelected   := False;
+  Focusable     := True;
+  FFont         := fpgGetFont('#Edit1');
+  Width         := 320;
+  Height        := 240;
+  FLines        := TStringList.Create;
+  CaretPos.x    := 0;
+  CaretPos.y    := 0;
+  FTopLine      := 0;
+  FTabWidth     := 8;
+  FMaxScrollH   := 1;
+  VPos          := 0;
+  HPos          := 0;
+  FTracking     := True;
+  FFullRedraw   := False;
+  FSelected     := False;
+  FRightEdge    := False;
+  FRightEdgeCol := 80;
 
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
@@ -1503,6 +1761,7 @@ begin
     Exit; //==>
   Clear;
   FLines.LoadFromFile(AFileName);
+  HandleResize(Width, Height);
   Invalidate;
 end;
 

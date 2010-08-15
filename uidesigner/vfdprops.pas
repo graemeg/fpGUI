@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -115,6 +115,7 @@ type
     procedure StoreStrValue(wg: TfpgWidget);
     procedure LoadFloatValue(wg: TfpgWidget);
     procedure StoreFloatValue(wg: TfpgWidget);
+    procedure SetFocus; override;
   end;
 
 
@@ -124,6 +125,7 @@ type
     procedure CreateLayout; override;
     procedure LoadValue(wg: TfpgWidget); override;
     procedure StoreValue(wg: TfpgWidget); override;
+    procedure SetFocus; override;
   end;
   
   
@@ -173,7 +175,7 @@ begin
   frm := TItemEditorForm.Create(nil);
   try
     frm.edItems.Lines.Assign(sl);
-    if frm.ShowModal = 1 then
+    if frm.ShowModal = mrOK then
       sl.Assign(frm.edItems.Lines);
   finally
     frm.Free;
@@ -396,6 +398,11 @@ begin
   except
     // error
   end;
+end;
+
+procedure TGeneralPropertyEditor.SetFocus;
+begin
+  Edit.SetFocus;
 end;
 
 procedure TGeneralPropertyEditor.StoreValue(wg: TfpgWidget);
@@ -690,6 +697,11 @@ end;
 procedure TChoicePropertyEditor.StoreValue(wg: TfpgWidget);
 begin
   SetEnumProp(wg, prop.Name, chl.Text);
+end;
+
+procedure TChoicePropertyEditor.SetFocus;
+begin
+  chl.SetFocus;
 end;
 
 { TBooleanPropertyEditor }

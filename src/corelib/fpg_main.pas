@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -12,7 +12,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Description:
-      The main unit trying everything together in corelib.
+      The main unit that ties everything together from CoreLib.
 }
 
 unit fpg_main;
@@ -21,7 +21,6 @@ unit fpg_main;
 
 {.$Define DEBUG}
 
-{ TODO : Remove IFDEF in Interface uses clause }
 { TODO : Implement font size adjustments for each platform. eg: linux=10pt & windows=8pt }
 
 interface
@@ -29,16 +28,8 @@ interface
 uses
   Classes,
   SysUtils,
-  fpg_base
-  // This is the only place we have such IFDEF!!! Is this ok, or must we
-  // implement it like we have done for the previous version of fpGFX?
-  {$IFDEF MSWINDOWS}
-  ,fpg_gdi
-  {$ENDIF}
-  {$IFDEF UNIX}
-  ,fpg_x11
-  {$ENDIF}
-  ;
+  fpg_base,
+  fpg_interface;
 
 type
   TOrientation = (orVertical, orHorizontal);
@@ -68,8 +59,9 @@ const
   cMessageQueueSize = 1024;
 
   // version and name constants
-  fpGUIVersion = '0.6.2';
+  {$I VERSION_FILE.inc}  // this includes the auto generated:  fpGUI_Version = xxx
   fpGUIName    = 'fpGUI Toolkit';
+  fpGUIWebsite = 'http://opensoft.homeip.net/fpgui/';
 
 const
   txtWordDelims: set of char = [' ', #9, #13, #10];
@@ -151,6 +143,8 @@ type
 
   TfpgImage = class(TfpgImageImpl)
   public
+    function    CreateDisabledImage: TfpgImage;
+    function    ImageFromSource: TfpgImage;
     function    ImageFromRect(var ARect: TRect): TfpgImage; overload;
     function    ImageFromRect(var ARect: TfpgRect): TfpgImage; overload;
   end;
@@ -232,7 +226,7 @@ type
     FHintPos: TPoint;
     procedure   SetHintPause(const AValue: Integer);
     procedure   SetupLocalizationStrings;
-    procedure   InternalMsgClose(var msg: TfpgMessageRec); message FPGM_CLOSE;
+    procedure   InternalMsgFreeMe(var msg: TfpgMessageRec); message FPGM_FREEME;
     procedure   InternalMsgHintTimer(var msg: TfpgMessageRec); message FPGM_HINTTIMER;
     procedure   CreateHintWindow;
     procedure   HintTimerFired(Sender: TObject);
@@ -253,6 +247,7 @@ type
     destructor  Destroy; override;
     function    GetFont(const afontdesc: string): TfpgFont;
     procedure   ActivateHint(APos: TPoint; AHint: TfpgString);
+    procedure   RecreateHintWindow;
     procedure   Flush;
     procedure   HandleException(Sender: TObject);
     procedure   HideHint;
@@ -321,9 +316,11 @@ type
   
   TfpgClipboard = class(TfpgClipboardImpl)
   end;
+
   
   TfpgFileList = class(TfpgFileListImpl)
   end;
+
 
 var
   fpgStyle:  TfpgStyle;   { TODO -ograemeg : move this into fpgApplication }
@@ -376,6 +373,7 @@ function  fpgRectToRect(const ARect: TfpgRect): TRect;
 procedure PrintRect(const Rect: TRect);
 procedure PrintRect(const Rect: TfpgRect);
 procedure PrintCoord(const x, y: TfpgCoord);
+procedure PrintCoord(const pt: TPoint);
 function  PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 procedure PrintCallTraceDbgLn(const AMessage: string);
 procedure DumpStack;
@@ -403,7 +401,8 @@ uses
   fpg_hint,
   fpg_extgraphics,
   fpg_utils,
-  fpg_cmdlineparams;
+  fpg_cmdlineparams,
+  fpg_imgutils;
 
 var
   fpgTimers: TList;
@@ -422,6 +421,8 @@ type
     FontDesc: string;
     constructor Create(AFontID, AFontDesc: string);
   end;
+
+  TWidgetFriend = class(TfpgWidget);  // so we can get access to the Protected section
 
 constructor TNamedFontItem.Create(AFontID, AFontDesc: string);
 begin
@@ -692,7 +693,7 @@ begin
   spacing := '';
   inc(iCallTrace);
   for i := 0 to iCallTrace do
-    spacing := spacing + '  ';
+    spacing += '  ';
   FClassName := AClassName;
   FMethodName := AMethodName;
   {$IFDEF DEBUG}
@@ -708,7 +709,12 @@ begin
   dec(iCallTrace);
   inherited Destroy;
 end;
-  
+
+procedure PrintCoord(const pt: TPoint);
+begin
+  PrintCoord(pt.X, pt.Y);
+end;
+
 function PrintCallTrace(const AClassName, AMethodName: string): IInterface;
 begin
   Result := TPrintCallTrace.Create(AClassName, AMethodName);
@@ -721,14 +727,14 @@ var
 begin
   s := '';
   for i := 0 to iCallTrace+1 do
-    s := s + '  ';
+    s += '  ';
   writeln(s + AMessage);
 end;
 
 procedure DumpStack;
-Var
-  Message : String;
-  i : longint;
+var
+  lMessage: String;
+  i: longint;
 begin
   writeln(' Stack trace:');
 //  Dump_Stack(StdOut, get_frame);
@@ -736,15 +742,15 @@ begin
   Writeln(stdout,'An unhandled exception occurred at $',HexStr(Ptrint(ExceptAddr),sizeof(PtrInt)*2),' :');
   if ExceptObject is exception then
    begin
-     Message:=Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
-     Writeln(stdout,Message);
+     lMessage := Exception(ExceptObject).ClassName+' : '+Exception(ExceptObject).Message;
+     Writeln(stdout,lMessage);
    end
   else
    Writeln(stdout,'Exception object ',ExceptObject.ClassName,' is not of class Exception.');
   Writeln(stdout,BackTraceStrFunc(ExceptAddr));
   if (ExceptFrameCount>0) then
     begin
-      for i:=0 to ExceptFrameCount-1 do
+      for i := 0 to ExceptFrameCount-1 do
         Writeln(stdout,BackTraceStrFunc(ExceptFrames[i]));
     end;
   Writeln(stdout,'');
@@ -788,21 +794,21 @@ end;
 procedure TfpgTimer.SetEnabled(const AValue: boolean);
 begin
   if (not FEnabled) and AValue then
-    FNextAlarm := now + interval * ONE_MILISEC;
+    FNextAlarm := now + (interval * ONE_MILISEC);
   FEnabled := AValue;
 end;
 
 procedure TfpgTimer.SetInterval(const AValue: integer);
 begin
   FInterval := AValue;
-  FNextAlarm := now + FInterval * ONE_MILISEC;
+  FNextAlarm := now + (FInterval * ONE_MILISEC);
 end;
 
 constructor TfpgTimer.Create(ainterval: integer);
 begin
   FInterval := ainterval;
-  OnTimer  := nil;
-  FEnabled := False;
+  OnTimer   := nil;
+  FEnabled  := False;
   fpgTimers.Add(self);
 end;
 
@@ -826,7 +832,7 @@ begin
     // set the next alarm point
     if interval > 0 then
       while FNextAlarm <= ctime do
-        FNextAlarm := FNextAlarm + (interval * ONE_MILISEC);
+        FNextAlarm += (interval * ONE_MILISEC);
 
     if Assigned(FOnTimer) then
       FOnTimer(self);
@@ -971,8 +977,12 @@ begin
   begin
     HideHint;
     FHintWindow.Free;
+    FHintWindow := nil;
   end;
-    
+  FHintTimer.Enabled := False;
+  FHintTimer.OnTimer := nil;
+  FHintTimer.Free;
+
   DestroyComponents;  // while message queue is still active
 
   for i := 0 to (fpgNamedFonts.Count - 1) do
@@ -1066,9 +1076,28 @@ begin
   h := wnd.Font.Height + (wnd.Border * 2) + (wnd.Margin * 2);
   { prevents hint from going off the right screen edge }
   if (APos.X + w) > ScreenWidth then
+  begin
     APos.X:= ScreenWidth - w;
+    // just a few more sanity checks
+    if APos.X < 0 then
+      APos.X := 0;
+    if w > ScreenWidth then
+      w := ScreenWidth;
+  end;
   wnd.SetPosition(APos.X, APos.Y, w, h);
+  wnd.UpdateWindowPosition;
   wnd.Show;
+end;
+
+procedure TfpgApplication.RecreateHintWindow;
+begin
+  if Assigned(FHintWindow) then
+  begin
+    HideHint;
+    FHintWindow.Free;
+    FHintWindow := nil;
+  end;
+  CreateHintWindow;
 end;
 
 procedure TfpgApplication.Initialize;
@@ -1140,6 +1169,20 @@ begin
   SetLength(FalseBoolStrs,1);
   TrueBoolStrs[0]   := rsTrue;
   FalseBoolStrs[0]  := rsFalse;
+
+  // Dialog box button captions
+  cMsgDlgBtnText[mbOK]        := rsOK;
+  cMsgDlgBtnText[mbCancel]    := rsCancel;
+  cMsgDlgBtnText[mbYes]       := rsYes;
+  cMsgDlgBtnText[mbNo]        := rsNo;
+  cMsgDlgBtnText[mbAbort]     := rsAbort;
+  cMsgDlgBtnText[mbRetry]     := rsRetry;
+  cMsgDlgBtnText[mbIgnore]    := rsIgnore;
+  cMsgDlgBtnText[mbAll]       := rsAll;
+  cMsgDlgBtnText[mbNoToAll]   := rsNoToAll;
+  cMsgDlgBtnText[mbYesToAll]  := rsYesToAll;
+  cMsgDlgBtnText[mbHelp]      := rsHelp;
+  cMsgDlgBtnText[mbClose]     := rsClose;
 end;
 
 procedure TfpgApplication.SetHintPause(const AValue: Integer);
@@ -1148,7 +1191,7 @@ begin
   FHintTimer.Interval := FHintPause;
 end;
 
-procedure TfpgApplication.InternalMsgClose(var msg: TfpgMessageRec);
+procedure TfpgApplication.InternalMsgFreeMe(var msg: TfpgMessageRec);
 begin
   if Assigned(msg.Sender) then
   begin
@@ -1193,13 +1236,17 @@ end;
 procedure TfpgApplication.HintTimerFired(Sender: TObject);
 var
   w: TfpgWidget;
+  lHint: TfpgString;
 begin
   w := nil;
-//  writeln('HintTimerFired...');
   w := TfpgWidget(FHintWidget);
   try
     if Assigned(w) then
-      ActivateHint(w.WindowToScreen(w, FHintPos), w.Hint);
+    begin
+//writeln('fpgApplication.HintTimerFired w = ', w.ClassName, ' - ', w.Name);
+      TWidgetFriend(w).DoShowHint(lHint);
+      ActivateHint(w.WindowToScreen(w, FHintPos), lHint);
+    end;
   except
     // silence it!
     { TODO : FHintWidget probably went out of scope just as timer fired. Try
@@ -1235,8 +1282,9 @@ begin
   fpgStyle      := TfpgStyle.Create;
   fpgCaret      := TfpgCaret.Create;
   fpgImages     := TfpgImages.Create;
+
   fpgCreateStandardImages;
-  
+
   // This will process Application and fpGUI Toolkit translation (*.po) files
   TranslateResourceStrings(ApplicationName, ExtractFilePath(ParamStr(0)), '');
   SetupLocalizationStrings;
@@ -1422,7 +1470,7 @@ begin
       Result := TrimRight(Result) + sLineBreak;
     end else
       Inc(lw, tw);
-    Result := Result + sub;
+    Result += sub;
   end;
 end;
 
@@ -1623,25 +1671,25 @@ begin
 
   {$Note Refactor this so under Windows it can detect the system colors instead.
     Also under Linux (KDE and Gnome) we should be able to detect the system colors.}
-  fpgSetNamedColor(clWindowBackground, $D4D0C8);
+  fpgSetNamedColor(clWindowBackground, $D5D2CD);
   fpgSetNamedColor(clBoxColor, $FFFFFF);
-  fpgSetNamedColor(clShadow1, $808080);
-  fpgSetNamedColor(clShadow2, $404040);
-  fpgSetNamedColor(clHilite1, $E0E0E0);
-  fpgSetNamedColor(clHilite2, $FFFFFF);
+  fpgSetNamedColor(clShadow1, $848284);       // medium
+  fpgSetNamedColor(clShadow2, $424142);       // dark
+  fpgSetNamedColor(clHilite1, $E0E0E0);       // light
+  fpgSetNamedColor(clHilite2, $FFFFFF);       // white
   fpgSetNamedColor(clText1, $000000);
   fpgSetNamedColor(clText2, $000040);
   fpgSetNamedColor(clText3, $800000);
   fpgSetNamedColor(clText4, $404000);
-  fpgSetNamedColor(clSelection, $0A246A);
+  fpgSetNamedColor(clSelection, $08246A);
   fpgSetNamedColor(clSelectionText, $FFFFFF);
   fpgSetNamedColor(clInactiveSel, $D0D0FF);
   fpgSetNamedColor(clInactiveSelText, $000000);
   fpgSetNamedColor(clScrollBar, $E8E4DB);
-  fpgSetNamedColor(clButtonFace, $D4D0C8);
+  fpgSetNamedColor(clButtonFace, $D5D2CD);
   fpgSetNamedColor(clListBox, $FFFFFF);
   fpgSetNamedColor(clGridLines, $A0A0A0);
-  fpgSetNamedColor(clGridHeader, $D4D0C8);
+  fpgSetNamedColor(clGridHeader, $D5D2CD);
   fpgSetNamedColor(clWidgetFrame, $000000);
   fpgSetNamedColor(clInactiveWgFrame, $A0A0A0);
   fpgSetNamedColor(clTextCursor, $000000);
@@ -1650,6 +1698,10 @@ begin
   fpgSetNamedColor(clMenuText, $000000);
   fpgSetNamedColor(clMenuDisabled, $909090);
   fpgSetNamedColor(clHintWindow, $FFFFBF);
+  fpgSetNamedColor(clGridSelection, $08246A);           // same as clSelection
+  fpgSetNamedColor(clGridSelectionText, $FFFFFF);       // same as clSelectionText
+  fpgSetNamedColor(clGridInactiveSel, $D0D0FF);         // same as clInactiveSel
+  fpgSetNamedColor(clGridInactiveSelText, $000000);     // same as clInactiveSelText
 
 
   // Global Font Objects
@@ -1839,7 +1891,7 @@ begin
     Exit; //==>
   if not AEnabled then
   begin
-    ACanvas.SetTextColor(clHilite1);
+    ACanvas.SetTextColor(clHilite2);
     ACanvas.DrawString(x+1, y+1, AText);
     ACanvas.SetTextColor(clShadow1);
   end;
@@ -2038,17 +2090,38 @@ end;
 
 { TfpgImage }
 
+function TfpgImage.CreateDisabledImage: TfpgImage;
+begin
+  Result := ImageFromSource;
+  fpgApplyGreyFilter(Result);
+end;
+
+function TfpgImage.ImageFromSource: TfpgImage;
+var
+  x, y: TfpgCoord;
+begin
+  Result := TfpgImage.Create;
+  Result.AllocateImage(ColorDepth, Width, Height);
+  for x := 0 to Width-1 do
+  begin
+    for y := 0 to Height-1 do
+    begin
+      Result.Colors[x, y] := Colors[x, y];
+    end;
+  end;
+  if Masked then
+    Result.CreateMaskFromSample(MaskPoint.X, MaskPoint.Y);
+  Result.UpdateImage;
+end;
+
 function TfpgImage.ImageFromRect(var ARect: TRect): TfpgImage;
 var
   x, y: TfpgCoord;
   ix, iy: TfpgCoord;
 begin
   SortRect(ARect);
-
   Result := TfpgImage.Create;
   Result.AllocateImage(ColorDepth, ARect.Right-ARect.Left, ARect.Bottom-ARect.Top);
-  Result.UpdateImage;
-
   iy := -1;
   for y := ARect.Top to ARect.Bottom-1 do
   begin
@@ -2060,6 +2133,7 @@ begin
       Result.Colors[ix, iy] := Colors[x, y];
     end;
   end;
+  Result.UpdateImage;
 end;
 
 function TfpgImage.ImageFromRect(var ARect: TfpgRect): TfpgImage;
@@ -2068,11 +2142,8 @@ var
   ix, iy: TfpgCoord;
 begin
   SortRect(ARect);
-
   Result := TfpgImage.Create;
   Result.AllocateImage(ColorDepth, ARect.Width, ARect.Height);
-  Result.UpdateImage;
-  
   iy := -1;
   for y := ARect.Top to ARect.Bottom do
   begin
@@ -2084,6 +2155,7 @@ begin
       Result.Colors[ix, iy] := Colors[x, y];
     end;
   end;
+  Result.UpdateImage;
 end;
 
 initialization
@@ -2097,7 +2169,7 @@ initialization
   InitializeDebugOutput;
   fpgInitMsgQueue;
 
-finalization;
+finalization
   uClipboard.Free;
   uApplication.Free;
   FinalizeDebugOutput;

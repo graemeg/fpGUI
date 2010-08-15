@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -65,6 +65,7 @@ type
     property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Hint;
     property    BoxLayout: TBoxLayout read GetBoxLayout write SetBoxLayout default tbLeftBox;
     property    GroupIndex: integer read FGroupIndex write FGroupIndex;
     property    ParentShowHint;
@@ -73,6 +74,7 @@ type
     property    Text: string read FText write SetText;
     property    TextColor;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property    OnShowHint;
   end;
   
   

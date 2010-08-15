@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -50,14 +50,18 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   GoHyperLink;
   published
+    property    Alignment;
     property    Autosize;
     property    FontDesc;
+    property    Hint;
     property    HotTrackColor: TfpgColor read fHotTrackColor write SetHotTrackColor;
     property    HotTrackFont: TfpgString read fHTFont write SetHotTrackFont;
     property    Text;
     property    TextColor;
+    property    ShowHint;
     property    URL: TfpgString read FUrl write SetURL;
     property    OnClick;
+    property    OnShowHint;
 end;
 
 

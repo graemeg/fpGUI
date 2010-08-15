@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -137,6 +137,7 @@ type
     property    DragToReorder;
     property    FocusItem;
     property    FontDesc;
+    property    Hint;
     property    HotTrack;
     property    Items;
     property    ParentShowHint;
@@ -144,6 +145,8 @@ type
     property    ShowHint;
     property    TabOrder;
     property    TextColor;
+    property    OnDoubleClick;
+    property    OnShowHint;
   end;
   
   
@@ -196,10 +199,13 @@ type
     property    DragToReorder;
     property    FocusItem;
     property    FontDesc;
+    property    Hint;
     property    HotTrack;
     property    Items;
+    property    ParentShowHint;
     property    PopupFrame;
     property    ShowColorNames;
+    property    ShowHint;
     property    TabOrder;
     property    TextColor;
   end;
@@ -216,13 +222,14 @@ type
   TfpgListBoxStrings = class(TStringList)
   protected
     ListBox: TfpgTextListBox;
-    procedure   SetUpdateState(Updating: Boolean); override;
   public
     constructor Create(AListBox: TfpgTextListBox);
     destructor  Destroy; override;
     function    Add(const s: String): Integer; override;
     procedure   Delete(Index: Integer); override;
     procedure   Clear; override;
+    procedure   Exchange(Index1, Index2: Integer); override;
+    procedure   Assign(Source: TPersistent); override;
   end;
 
 
@@ -239,12 +246,6 @@ end;
 
 { TfpgListBoxStrings }
 
-procedure TfpgListBoxStrings.SetUpdateState(Updating: Boolean);
-begin
-  inherited SetUpdateState(Updating);
-  // do nothing extra for now
-end;
-
 constructor TfpgListBoxStrings.Create(AListBox: TfpgTextListBox);
 begin
   inherited Create;
@@ -260,6 +261,8 @@ end;
 function TfpgListBoxStrings.Add(const s: String): Integer;
 begin
   Result := inherited Add(s);
+  if UpdateCount > 0 then
+      Exit;
   if Assigned(ListBox) and (ListBox.HasHandle) then
   begin
     ListBox.UpdateScrollBar;
@@ -270,6 +273,8 @@ end;
 procedure TfpgListBoxStrings.Delete(Index: Integer);
 begin
   inherited Delete(Index);
+  if UpdateCount > 0 then
+      Exit;
   if Assigned(ListBox) and (ListBox.HasHandle) then
   begin
     ListBox.UpdateScrollBar;
@@ -280,9 +285,34 @@ end;
 procedure TfpgListBoxStrings.Clear;
 begin
   inherited Clear;
+  if UpdateCount > 0 then
+      Exit;
   ListBox.FocusItem := -1;
   ListBox.UpdateScrollBar;
   ListBox.Invalidate;
+end;
+
+procedure TfpgListBoxStrings.Exchange(Index1, Index2: Integer);
+begin
+  inherited Exchange(Index1, Index2);
+  if UpdateCount > 0 then
+    Exit;
+  if Assigned(ListBox) and (ListBox.HasHandle) then
+  begin
+    ListBox.Invalidate;
+  end;
+end;
+
+procedure TfpgListBoxStrings.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if UpdateCount > 0 then
+    Exit;
+  if Assigned(ListBox) and (ListBox.HasHandle) then
+  begin
+    ListBox.UpdateScrollBar;
+    ListBox.Invalidate;
+  end;
 end;
 
 
@@ -622,7 +652,7 @@ var
   r: TfpgRect;
 begin
   //if FUpdateCount > 0 then
-    //Exit; //==>
+  //  Exit; //==>
 
   inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -990,6 +1020,10 @@ begin
           FItems.Add(TColorItem.Create('clUnset', clUnset));
           FItems.Add(TColorItem.Create('clMenuText', clMenuText));
           FItems.Add(TColorItem.Create('clMenuDisabled', clMenuDisabled));
+          FItems.Add(TColorItem.Create('clGridSelection', clGridSelection));
+          FItems.Add(TColorItem.Create('clGridSelectionText', clGridSelectionText));
+          FItems.Add(TColorItem.Create('clGridInactiveSel', clGridInactiveSel));
+          FItems.Add(TColorItem.Create('clGridInactiveSelText', clGridInactiveSelText));
         end;
     cpWebColors:
         begin

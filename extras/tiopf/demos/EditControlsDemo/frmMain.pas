@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, fpg_form, fpg_button, fpg_label, fpg_edit, fpg_trackbar,
-  fpg_combobox, fpg_memo, Model, tiFormMediator, Model_View;
+  fpg_combobox, fpg_memo, Model, tiModelMediator, Model_View;
 
 type
   TMainForm = class(TfpgForm)
@@ -25,7 +25,7 @@ type
     { The object we will be working with. }
     FPerson: TPerson;
     { Form Mediator }
-    FMediator: TFormMediator;
+    FMediator: TtiModelMediator;
 
     procedure   btnCloseClick(Sender: TObject);
     procedure   btnShowModelClick(Sender: TObject);
@@ -183,7 +183,7 @@ begin
 }
   if not Assigned(FMediator) then
   begin
-    FMediator := TFormMediator.Create(self);
+    FMediator := TtiModelMediator.Create(self);
     FMediator.Name := 'DemoFormMediator';
     FMediator.AddProperty('Name', edtName);
     FMediator.AddProperty('Age', AgeTrackBar);

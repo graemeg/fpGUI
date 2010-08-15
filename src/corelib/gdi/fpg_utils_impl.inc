@@ -1,7 +1,6 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Registry,
   Shellapi;
   
 // GDI specific implementations of encoding functions
@@ -19,7 +18,9 @@ end;
 procedure fpgOpenURL(const aURL: TfpgString);
 begin
   try
-    ShellExecute(0, 'open', PChar(aURL), nil, nil, 0) ;
+    {$IFNDEF wince}
+    ShellExecute(0, 'open', PChar(aURL), nil, nil, 1 {SW_SHOWNORMAL});
+    {$ENDIF}
   except
     // do nothing
   end;

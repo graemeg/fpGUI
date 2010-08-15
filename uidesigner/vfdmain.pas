@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -24,6 +24,8 @@ interface
 uses
   Classes,
   SysUtils,
+  fpg_base,
+  fpg_main,
   fpg_widget,
   fpg_dialogs,
   vfdprops,
@@ -33,7 +35,7 @@ uses
   newformdesigner;
 
 const
-  program_version = '0.7 beta';
+  program_version = FPGUI_VERSION;
 
 type
 
@@ -84,11 +86,11 @@ implementation
 uses
   vfdformparser,
   fpg_iniutils,
-  fpg_utils,
-  fpg_main;
+  fpg_utils;
 
-Var
+var
   DefaultPasExt : String = '.pas';
+  OneClickMove: Boolean;
 
 { TMainDesigner }
 
@@ -277,12 +279,13 @@ var
   nfrm: TNewFormForm;
 begin
   nfrm := TNewFormForm.Create(nil);
-  if nfrm.ShowModal = 1 then
+  if nfrm.ShowModal = mrOK then
     if nfrm.edName.Text <> '' then
     begin
       fd           := TFormDesigner.Create;
       fd.Form.Name := nfrm.edName.Text;
       fd.Form.WindowTitle := nfrm.edName.Text;
+      fd.OneClickMove := OneClickMove;
       FDesigners.Add(fd);
       fd.Show;
     end;
@@ -373,6 +376,7 @@ var
 begin
   fp := TVFDFormParser.Create(FormName, FormHead, FormBody);
   fd := fp.ParseForm;
+  fd.OneClickMove := OneClickMove;
   fp.Free;
 
   FDesigners.Add(fd);
@@ -409,7 +413,7 @@ var
 begin
   frm := TfrmVFDSetup.Create(nil);
   try
-    if frm.ShowModal = 1 then
+    if frm.ShowModal = mrOK then
     begin
       LoadDefaults;
       frmMain.mru.MaxItems      := gINI.ReadInteger('Options', 'MRUFileCount', 4);
@@ -440,6 +444,7 @@ begin
   end;
   DefaultPasExt   := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
   UndoOnPropExit  := gINI.ReadBool('Options', 'UndoOnExit', DefUndoOnPropExit);
+  OneClickMove    := gINI.ReadBool('Options', 'OneClickMove', True);
   fpgApplication.HintPause := 1000;
 end;
 

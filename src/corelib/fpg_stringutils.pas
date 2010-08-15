@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -46,6 +46,8 @@ procedure Delete8(var S: string; Index, Size: integer);
 procedure Insert8(const Source: string; var S: string; Index: integer);
 
 function  fpgCharAt(const s: TfpgString; Index: integer): TfpgChar;
+function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+function  fpgRemovePathDelim(const Path: TfpgString): TfpgString;
 
 
 implementation
@@ -317,6 +319,21 @@ begin
   Result := UTF8Copy(s, Index, 1);
 end;
 
+function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
+begin
+  if (Path <> '') and (Path[Length(Path)] <> PathDelim) then
+    Result := Path + PathDelim
+  else
+    Result := Path;
+end;
+
+function fpgRemovePathDelim(const Path: TfpgString): TfpgString;
+begin
+  if (Path <> '') and (Path[Length(Path)] = PathDelim) then
+    Result := LeftStr(Path, Length(Path)-1)
+  else
+    Result := Path;
+end;
 
 end.
 

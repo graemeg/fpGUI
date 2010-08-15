@@ -10,12 +10,9 @@ unit frm_threedee;
 interface
 
 uses
-  SysUtils, Classes, gfxbase, fpgfx, gui_edit, 
-  gfx_widget, gui_form, gui_label, gui_button,
-  gui_listbox, gui_memo, gui_combobox, gui_grid, 
-  gui_dialogs, gui_checkbox, gui_tree, gui_trackbar, 
-  gui_progressbar, gui_radiobutton, gui_tab, gui_menu,
-  gui_bevel;
+  SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
+  fpg_widget, fpg_form, fpg_label, fpg_button, fpg_dialogs,
+  fpg_checkbox, fpg_trackbar, fpg_progressbar, fpg_menu;
 
 type
 
@@ -69,8 +66,8 @@ type
 implementation
 
 uses
-  gfx_UTF8utils,
-  gfx_imgfmt_bmp;
+  fpg_stringutils,
+  fpg_imgfmt_bmp;
   
 const
   clM2DarkBlue = $187EC0;
@@ -122,18 +119,18 @@ Const
 procedure FillRectGradient(Canvas: TfpgCanvas; X, Y, W, H: TfpgCoord;
     Strip: Integer; Astart, Astop: TfpgColor);
 var
-  RGBStart: TRGBTriple;
-  RGBStop: TRGBTriple;
+  RGBStart: TFPColor;
+  RGBStop: TFPColor;
   RDiff, GDiff, BDiff: Integer;
   count: Integer;
   i: Integer;
-  newcolor: TRGBTriple;
+  newcolor: TFPColor;
   Hx, Hy: TfpgCoord; // Coordinates for Horizontal Lines
   Vx, Vy: TfpgCoord; // Coordinates for Vertical Lines
   avgcolor: TfpgColor;
 begin
-  RGBStart := fpgColorToRGBTriple(fpgColorToRGB(AStart));
-  RGBStop  := fpgColorToRGBTriple(fpgColorToRGB(AStop));
+  RGBStart := fpgColorToFPColor(fpgColorToRGB(AStart));
+  RGBStop  := fpgColorToFPColor(fpgColorToRGB(AStop));
 
   count := Strip;
   Hx := X;
@@ -154,7 +151,7 @@ begin
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
    
     Canvas.SetLineStyle(1, lsSolid);
-    Canvas.SetColor(RGBTripleTofpgColor(newcolor));
+    Canvas.SetColor(FPColorTofpgColor(newcolor));
     Canvas.DrawLine(Hx, Hy, W+2, Hy); // Horizontal Line
     Canvas.DrawLine(Vx, Vy, Vx, H+2); // Vertical Line
     // next Horizontal Line: one pixel lower, one pixel shorter on the left

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -30,7 +30,8 @@ uses
   fpg_base,
   fpg_main,
   fpg_widget,
-  fpg_scrollbar;
+  fpg_scrollbar,
+  fpg_menu;
   
 type
 
@@ -42,7 +43,7 @@ type
   TfpgDrawCellEvent = procedure(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean) of object;
 
   // widget options
-  TfpgGridOption = (go_HideFocusRect);
+  TfpgGridOption = (go_HideFocusRect, go_AlternativeColor, go_SmoothScroll);
   TfpgGridOptions = set of TfpgGridOption;
 
   // Column 2 is special just for testing purposes. Descendant classes will
@@ -65,6 +66,7 @@ type
     FPrevRow: Integer;
     FFirstRow: Integer;
     FFirstCol: Integer;
+    FXOffset: integer;  // used for go_SmoothScroll
     FMargin: integer;
     FFont: TfpgFont;
     FHeaderFont: TfpgFont;
@@ -77,6 +79,8 @@ type
     FHScrollBar: TfpgScrollBar;
     FUpdateCount: integer;
     FOptions: TfpgGridOptions;
+    FPopupMenu: TfpgPopupMenu;
+    FAlternativeBGColor: TfpgColor;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
@@ -96,12 +100,14 @@ type
     function    VisibleWidth: integer;
     function    VisibleHeight: integer;
     procedure   SetFirstRow(const AValue: Integer);
+    procedure   SetAlternativeBGColor(const AValue: TfpgColor);
   protected
     property    UpdateCount: integer read FUpdateCount;
     procedure   UpdateScrollBars; virtual;
     function    GetHeaderText(ACol: Integer): string; virtual;
     function    GetColumnWidth(ACol: Integer): integer; virtual;
     procedure   SetColumnWidth(ACol: Integer; const AValue: integer); virtual;
+    function    GetBackgroundColor(ARow: integer; ACol: integer): TfpgColor; virtual;
     function    GetColumnBackgroundColor(ACol: Integer): TfpgColor; virtual;
     procedure   SetColumnBackgroundColor(ACol: Integer; const AValue: TfpgColor); virtual;
     function    GetColumnTextColor(ACol: Integer): TfpgColor; virtual;
@@ -122,7 +128,9 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   FollowFocus; virtual;
+    property    AlternateBGColor: TfpgColor read FAlternativeBGColor write SetAlternativeBGColor default clHilite1;
     property    DefaultColWidth: integer read FDefaultColWidth write SetDefaultColWidth default 64;
     property    DefaultRowHeight: integer read FDefaultRowHeight write SetDefaultRowHeight;
     property    Font: TfpgFont read FFont;
@@ -133,6 +141,7 @@ type
     property    FocusRow: Integer read FFocusRow write SetFocusRow default -1;
     property    RowSelect: boolean read FRowSelect write SetRowSelect;
     property    ColumnCount: Integer read GetColumnCount;
+    property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
     property    RowCount: Integer read GetRowCount;
     property    ShowHeader: boolean read FShowHeader write SetShowHeader default True;
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
@@ -166,12 +175,25 @@ implementation
 
 procedure TfpgBaseGrid.HScrollBarMove(Sender: TObject; position: integer);
 begin
-  if FFirstCol <> position then
+  if go_SmoothScroll in FOptions then
   begin
-    if Position < 0 then
-      Position := 0;
-    FFirstCol := position;
-    RePaint;
+    if FXOffset <> position then
+    begin
+      if Position < 0 then
+        Position := 0;
+      FXOffset := position;
+      Repaint;
+    end;
+  end
+  else
+  begin
+    if FFirstCol <> position then
+    begin
+      if Position < 0 then
+        Position := 0;
+      FFirstCol := position;
+      RePaint;
+    end;
   end;
 end;
 
@@ -258,6 +280,24 @@ begin
     UpdateScrollBars;
     Repaint;
   end;
+end;
+
+function TfpgBaseGrid.GetBackgroundColor(ARow: integer; ACol: integer): TfpgColor;
+begin
+  if (ARow >= 0) and (ACol >= 0) and (ARow < RowCount) and (ACol < ColumnCount) then
+  begin
+    if go_AlternativeColor in Options then
+    begin
+      if (ARow mod 2) <> 0 then
+        Result := AlternateBGColor
+      else
+        Result := ColumnBackgroundColor[ACol];
+    end
+    else
+      Result := ColumnBackgroundColor[ACol];
+  end
+  else
+    Result := BackgroundColor;
 end;
 
 function TfpgBaseGrid.GetColumnBackgroundColor(ACol: Integer): TfpgColor;
@@ -351,8 +391,11 @@ begin
   Canvas.SetTextColor(clText1);
   s := GetHeaderText(ACol);
   x := (ARect.Left + (ARect.Width div 2)) - (FHeaderFont.TextWidth(s) div 2);
-  if x < 1 then
-    x := 1;
+  if not (go_SmoothScroll in FOptions) then
+  begin
+    if x < 1 then
+      x := 1;
+  end;
   fpgStyle.DrawString(Canvas, x, ARect.Top+1, s, Enabled);
 end;
 
@@ -477,6 +520,12 @@ begin
   RePaint;
 end;
 
+procedure TfpgBaseGrid.SetAlternativeBGColor(const AValue: TfpgColor);
+begin
+  if FAlternativeBGColor = AValue then exit;
+  FAlternativeBGColor := AValue;
+end;
+
 procedure TfpgBaseGrid.UpdateScrollBars;
 var
   HWidth: integer;
@@ -484,6 +533,7 @@ var
   vw: integer;
   cw: integer;
   i: integer;
+  x: integer;
 begin
   VHeight := Height - 4;
   HWidth  := Width - 4;
@@ -500,6 +550,7 @@ begin
   begin
     FHScrollBar.Visible := False;
     FFirstCol := 0;
+    FXOffset := 0;
   end;
   
   // This needs improving while resizing
@@ -529,8 +580,16 @@ begin
     Dec(VHeight, FHScrollBar.Height);
     FHScrollBar.Min         := 0;
     FHScrollBar.SliderSize  := 0.2;
-    FHScrollBar.Max         := ColumnCount-1;
-    FHScrollBar.Position    := FFirstCol;
+    if go_SmoothScroll in FOptions then
+    begin
+      FHScrollBar.Max := cw - vw;
+      FHScrollBar.Position := FXOffset;
+    end
+    else
+    begin
+      FHScrollBar.Max := ColumnCount-1;
+      FHScrollBar.Position := FFirstCol;
+    end;
     FHScrollBar.RepaintSlider;
   end;
 
@@ -559,8 +618,9 @@ var
   row: Integer;
   clipr: TfpgRect;   // clip rectangle
   drawstate: TfpgGridDrawState;
+  cLeft: integer;
+  c: integer;
 begin
-  drawstate := [];
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -576,12 +636,25 @@ begin
   clipr.SetRect(FMargin, FMargin, VisibleWidth, VisibleHeight);
   r := clipr;
 
+  cLeft := FMargin; // column starting point
+  if go_SmoothScroll in FOptions then
+  begin
+    if FHScrollBar.Visible then
+      Dec(cLeft, FHScrollBar.Position);
+    c := 0;
+  end
+  else
+  begin
+    c := FFirstCol;
+  end;
+
   if (ColumnCount > 0) and ShowHeader then
   begin
     // Drawing horizontal headers
+    r.Left := cLeft;
     r.Height := FHeaderHeight;
     Canvas.SetFont(FHeaderFont);
-    for col := FFirstCol to ColumnCount-1 do
+    for col := c to ColumnCount-1 do
     begin
       r.Width := ColumnWidth[col];
       Canvas.SetClipRect(clipr);
@@ -602,9 +675,10 @@ begin
 
     for row := FFirstRow to RowCount-1 do
     begin
-      r.Left := FMargin;
-      for col := FFirstCol to ColumnCount-1 do
+      r.Left := cLeft;
+      for col := c to ColumnCount-1 do
       begin
+        drawstate := [];
         r.Width := ColumnWidth[col];
         Canvas.SetClipRect(clipr);
 
@@ -612,18 +686,18 @@ begin
         begin
           if FFocused then
           begin
-            Canvas.SetColor(clSelection);
-            Canvas.SetTextColor(clSelectionText);
+            Canvas.SetColor(clGridSelection);
+            Canvas.SetTextColor(clGridSelectionText);
           end
           else
           begin
-            Canvas.SetColor(clInactiveSel);
-            Canvas.SetTextColor(clInactiveSelText);
+            Canvas.SetColor(clGridInactiveSel);
+            Canvas.SetTextColor(clGridInactiveSelText);
           end;
         end
         else
         begin
-          Canvas.SetColor(ColumnBackgroundColor[col]);
+          Canvas.SetColor(GetBackgroundColor(row, col));
           Canvas.SetTextColor(ColumnTextColor[col]);
         end;
         Canvas.AddClipRect(r);
@@ -898,6 +972,8 @@ var
   cw: integer;
   n: integer;
   colresize: boolean;
+  cLeft: integer;
+  c: integer;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
   
@@ -922,15 +998,27 @@ begin
     colresize := False;
     hh := FHeaderHeight;
 
+    cLeft := FMargin; // column starting point
+    if go_SmoothScroll in FOptions then
+    begin
+      if FHScrollBar.Visible then
+        Dec(cLeft, FHScrollBar.Position);
+      c := 0;
+    end
+    else
+    begin
+      c := FFirstCol;
+    end;
+
     if (y <= FMargin + hh) then // we are over the Header row
     begin
       cw := 0;
-      for n := FFirstCol to ColumnCount-1 do
+      for n := c to ColumnCount-1 do
       begin
         inc(cw, ColumnWidth[n]);
         // Resizing is enabled 4 pixel either way of the cell border
-        if ((x >= (FMargin+cw - 4)) and (x <= (FMargin+cw+4))) or
-           (cw > (FMargin + VisibleWidth)) and (x >= FMargin + VisibleWidth-4)   then
+        if ((x >= (cLeft+cw-4)) and (x <= (cLeft+cw+4))) {or
+           (cw > (cLeft + VisibleWidth)) and (x >= (cLeft + VisibleWidth-4))} then
         begin
           colresize := True;
           Break;
@@ -969,6 +1057,8 @@ var
   nw: integer;
   prow: Integer;
   pcol: Integer;
+  c: integer;
+  cLeft: integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
 
@@ -987,27 +1077,40 @@ begin
   if ShowHeader and (y <= FMargin+hh) then  // inside Header row
   begin
     {$IFDEF DEBUG} Writeln('header click...'); {$ENDIF}
+
+    cLeft := FMargin; // column starting point
+    if go_SmoothScroll in FOptions then
+    begin
+      if FHScrollBar.Visible then
+        Dec(cLeft, FHScrollBar.Position);
+      c := 0;
+    end
+    else
+    begin
+      c := FFirstCol;
+    end;
+
     cw := 0;
-    for n := FFirstCol to ColumnCount-1 do
+    for n := c to ColumnCount-1 do
     begin
       inc(cw, ColumnWidth[n]);
-      if (x >= (FMargin+cw - 4)) and (x <= (FMargin+cw + 4)) then
+      if (x >= (cLeft+cw-4)) and (x <= (cLeft+cw+4)) then
       begin
         {$IFDEF DEBUG} Writeln('column resize...'); {$ENDIF}
         FColResizing  := True;
         FResizedCol   := n;
         FDragPos      := x;
         Break;
-      end
-      else if (cw > FMargin+VisibleWidth) and (x >= FMargin+VisibleWidth-4) then
-      begin
-        FColResizing  := True;
-        FResizedCol   := n;
-        FDragPos      := x;
-        nw := ColumnWidth[FResizedCol] - (cw+FMargin-x);
-        if nw > 0 then
-          SetColumnWidth(FResizedCol, nw );
-        Break;
+      //end
+      //else if (cw > cLeft+VisibleWidth) and (x >= cLeft+VisibleWidth-4) then
+      //begin
+      //  FColResizing  := True;
+      //  FResizedCol   := n;
+      //  FDragPos      := x;
+      //  nw := ColumnWidth[FResizedCol] - (cw+cLeft-x);
+      //  if nw > 0 then
+      //    SetColumnWidth(FResizedCol, nw );
+      //  Break;
       end;  { if/else }
 
       if cw > VisibleWidth then
@@ -1036,6 +1139,26 @@ begin
     MouseCursor := mcSizeEW;
 
   CheckFocusChange;
+end;
+
+procedure TfpgBaseGrid.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  hh: integer;
+begin
+  inherited HandleRMouseUp(x, y, shiftstate);
+  if Assigned(PopupMenu) then
+  begin
+    // popup should not appear if you clicked in header - maybe this behaviour should be user-selectable?
+    if ShowHeader then
+      hh := FHeaderHeight+1
+    else
+      hh := 0;
+
+    if ShowHeader and (y > FMargin+hh) then  // not in Header row
+    begin
+      PopupMenu.ShowAt(self, x, y);
+    end;
+  end;
 end;
 
 procedure TfpgBaseGrid.FollowFocus;
@@ -1084,7 +1207,7 @@ begin
       end;
     end;  { for }
   end;  { if/else }
-
+  CheckFocusChange;
   UpdateScrollBars;
 end;
 
@@ -1117,6 +1240,7 @@ begin
   FDefaultRowHeight := FFont.Height + 2;
   FHeaderHeight     := FHeaderFont.Height + 2;
   FBackgroundColor  := clBoxColor;
+  FAlternativeBGColor := clHilite1;
   FColResizing      := False;
 
   MinHeight   := HeaderHeight + DefaultRowHeight + FMargin;
@@ -1182,6 +1306,8 @@ var
   hh: integer;
   cw: integer;
   n: Integer;
+  cLeft: integer;
+  c: integer;
 begin
   if ShowHeader then
     hh := FHeaderHeight+1
@@ -1192,11 +1318,23 @@ begin
   if ARow > RowCount-1 then
     ARow := RowCount-1;
 
+  cLeft := FMargin; // column starting point
+  if go_SmoothScroll in FOptions then
+  begin
+    if FHScrollBar.Visible then
+      Dec(cLeft, FHScrollBar.Position);
+    c := 0;
+  end
+  else
+  begin
+    c := FFirstCol;
+  end;
+
   cw := 0;
-  for n := FFirstCol to ColumnCount-1 do
+  for n := c to ColumnCount-1 do
   begin
     inc(cw, ColumnWidth[n]);
-    if FMargin+cw >= x then
+    if cLeft+cw >= x then
     begin
       ACol := n;
       Break;

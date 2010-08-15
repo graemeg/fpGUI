@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -33,7 +33,6 @@ type
 
   TImageLayout = (ilImageLeft, ilImageTop, ilImageRight, ilImageBottom);
 
-  { TfpgBaseButton }
 
   TfpgBaseButton = class(TfpgWidget, ICommandHolder)
   private
@@ -137,24 +136,33 @@ type
     property    Flat;
     property    FontDesc;
     property    GroupIndex;
+    property    Height;
     property    Hint;
     property    ImageLayout;
     property    ImageMargin;
     property    ImageName;
     property    ImageSpacing;
+    property    Left;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
     property    ModalResult;
     property    ParentShowHint;
     property    ShowHint;
     property    ShowImage;
+    property    TabOrder;
     property    Text;
     property    TextColor;
-    property    TabOrder;
+    property    Top;
+    property    Width;
+    property    OnClick;
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
     property    OnMouseMove;
     property    OnMouseUp;
-    property    OnClick;
+    property    OnShowHint;
   end;
 
 
@@ -500,7 +508,7 @@ var
   pofs: integer;
   lBtnFlags: TFButtonFlags;
   clr: TfpgColor;
-
+  img: TfpgImage;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -559,9 +567,17 @@ begin
 
   CalculatePositions (ix, iy, tx, ty);
 
-  if FShowImage and assigned (FImage) then
-    Canvas.DrawImage(ix + pofs, iy + pofs, FImage);
-
+  if FShowImage and Assigned(FImage) then
+  begin
+    if Enabled then
+      Canvas.DrawImage(ix + pofs, iy + pofs, FImage)
+    else
+    begin
+      img := FImage.CreateDisabledImage;
+      Canvas.DrawImage(ix + pofs, iy + pofs, img);
+      img.Free;
+    end;
+  end;
   fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
 end;
 
@@ -714,7 +730,9 @@ begin
   if pform <> nil then
     pform.ModalResult := ModalResult;
 
-  if Assigned(OnClick) then
+  if Assigned(FCommand) then    // ICommand takes preference to OnClick
+    FCommand.Execute
+  else if Assigned(OnClick) then
     OnClick(self);
 end;
 

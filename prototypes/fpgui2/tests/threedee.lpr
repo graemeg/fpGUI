@@ -11,7 +11,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpgfx, frm_threedee, fpgui_toolkit;
+  Classes, fpg_main, frm_threedee;
 
 
 procedure MainProc;

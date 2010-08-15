@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_widget, fpg_form, fpg_button,
   fpg_grid, fpg_checkbox, fpg_panel, fpg_listview, fpg_listbox, fpg_combobox,
-  Model, tiFormMediator, tiMediators;
+  Model, tiModelMediator, tiMediators;
 
 type
 
@@ -15,9 +15,8 @@ type
   private
     { The object we will be working with. }
     FPersonList: TPersonList;
-    FMediator: TFormMediator;
-    medCombo: TMediatorComboBoxView;
-
+    FMediator: TtiModelMediator;
+    medCombo: TtiComboBoxMediatorView;
     procedure btnViaCodeChangeClick(Sender: TObject);
     procedure btnQuitClicked(Sender: TObject);
     procedure btnViaCodeAddClick(Sender: TObject);
@@ -89,17 +88,17 @@ end;
 
 procedure TMainForm.btnShowDeletedClick(Sender: TObject);
 var
-  med: TMediatorView;
+  med: TtiMediatorView;
 begin
   med := FMediator.FindByComponent(grdName1).Mediator;
-  tiShowString(TStringGridMediator(med).SelectedObject.AsDebugString);
+  tiShowString(TtiStringGridMediatorView(med).SelectedObject.AsDebugString);
 end;
 
 procedure TMainForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    FMediator := TFormMediator.Create(self);
+    FMediator := TtiModelMediator.Create(self);
     FMediator.Name := 'DemoFormMediator';
     FMediator.AddComposite('Name(150,"Name",<);Age(50,"Age",>);GenderGUI(80,"Gender",|)', grdName1);
 //    FMediator.AddComposite('Name(150,"Name",<);Age(75,"Age",>);GenderGUI(50,"Gender",|)', lvName1);
@@ -271,7 +270,7 @@ end;
 
 
 initialization
-  gMediatorManager.RegisterMediator(TStringGridMediator, TtiObjectList);
+  gMediatorManager.RegisterMediator(TtiStringGridMediatorView, TtiObjectList);
 //  gMediatorManager.RegisterMediator(TListBoxMediator, TPersonList);
 //  gMediatorManager.RegisterMediator(TListViewMediator, TtiObjectList);
 

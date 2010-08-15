@@ -11,16 +11,16 @@ interface
 uses
   Classes,
   SysUtils,
-  gfxbase,
-  fpgfx,
-  gui_form,
-  gui_button,
-  gui_edit,
-  gui_label,
-  gui_menu,
-  gui_memo,
-  gui_tree,
-  gui_bevel,
+  fpg_base,
+  fpg_main,
+  fpg_form,
+  fpg_button,
+  fpg_edit,
+  fpg_label,
+  fpg_menu,
+  fpg_memo,
+  fpg_tree,
+  fpg_panel,
   dom, XMLWrite, XMLRead, contnrs, model;
 
 type
@@ -63,7 +63,7 @@ type
 implementation
 
 uses
-  gui_dialogs, frm_options;
+  fpg_dialogs, frm_options;
   
   
 const
@@ -150,7 +150,7 @@ begin
   ShowMessage(cAppName
       + #10
       + #10 + 'Written by Graeme Geldenhuys - 2007'
-      + #10 + 'Using the ' + fpGUIName + ' v' + fpGUIVersion
+      + #10 + 'Using the ' + fpGUIName + ' v' + fpGUI_Version
       ,'About');
 end;
 
@@ -275,7 +275,6 @@ begin
     Text := 'Quit';
     FontDesc := '#Label1';
     ImageName := 'stdimg.Quit';
-    ModalResult := 0;
     ShowImage := True;
     OnClick   := @btnQuitClicked;
   end;

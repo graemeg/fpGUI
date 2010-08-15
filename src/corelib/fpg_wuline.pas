@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -44,7 +44,7 @@ type
 // Blend a pixel with the current colour
 procedure AlphaBlendPixel(ACanvas: TfpgCanvas; X, Y: integer; R, G, B: word; ARatio: Double);
 var
-  LBack, LNew: TRGBTriple;
+  LBack, LNew: TFPColor;
   LMinusRatio: Double;
 begin
   if (X < 0) or (X > TCanvasHack(ACanvas).FWindow.Width - 1) or (Y < 0) or
@@ -52,11 +52,11 @@ begin
     Exit; // clipping
 
   LMinusRatio := 1 - ARatio;
-  LBack       := fpgColorToRGBTriple(ACanvas.Pixels[X, Y]);
+  LBack       := fpgColorToFPColor(ACanvas.Pixels[X, Y]);
   LNew.Blue   := round(B*ARatio + LBack.Blue*LMinusRatio);
   LNew.Green  := round(G*ARatio + LBack.Green*LMinusRatio);
   LNew.Red    := round(R*ARatio + LBack.Red*LMinusRatio);
-  ACanvas.Pixels[X, Y] := RGBTripleTofpgColor(LNew);
+  ACanvas.Pixels[X, Y] := FPColorTofpgColor(LNew);
 end;
 
 // Draw a anti-aliased line

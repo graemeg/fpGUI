@@ -19,12 +19,13 @@ Contributors
 Felipe Monteiro de Carvalho
 Andrew Haines
 Giuliano Colla
-Jean-Marc Levecque - various & French translation
-Antonio Sanguigni - various & Italian translation
-Vladimir Zhirov - various & Russian translation
-Alexsander Rosa - Portuguese translation
-Horacio Jamilis - Spanish translation
+Jean-Marc Levecque
+Antonio Sanguigni
+Vladimir Zhirov
+Alexsander Rosa
+Horacio Jamilis
 Michael van Canneyt
+JP Anghel
 
            ______________.o0O0o.______________
            

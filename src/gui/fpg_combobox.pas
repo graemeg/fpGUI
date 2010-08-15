@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -83,7 +83,7 @@ type
     FBtnPressed: Boolean;
     procedure   SetMargin(const AValue: integer);
     procedure   CalculateInternalButtonRect; virtual;
-    procedure   InternalOnClose(Sender: TObject);
+    procedure   InternalOnClose(Sender: TObject); virtual;
     procedure   InternalItemsChanged(Sender: TObject); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnChange; virtual;
@@ -141,6 +141,7 @@ type
     property    FocusItem;
     property    FontDesc;
     property    Height;
+    property    Hint;
     property    Items;
     property    Margin;
     property    Options;
@@ -155,6 +156,7 @@ type
     property    OnDropDown;
     property    OnEnter;
     property    OnExit;
+    property    OnShowHint;
   end;
   
 
@@ -405,8 +407,6 @@ end;
 { TComboboxDropdownWindow }
 
 procedure TComboboxDropdownWindow.SetFirstItem;
-var
-  i: integer;
 begin
   // If FocusItem is less than DropDownCount FirsItem = 0
   if ListBox.FocusItem+1 <= FCallerWidget.DropDownCount then

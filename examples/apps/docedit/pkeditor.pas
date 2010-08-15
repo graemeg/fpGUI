@@ -27,8 +27,8 @@ unit PkEditor;
 interface
 
 uses
-  SysUtils, Classes, DOM, gui_bevel, gui_label, gui_tree, gui_menu,
-  gfx_imagelist, FPDEUtil, doceditmsg, doceditopts;
+  SysUtils, Classes, DOM, fpg_panel, fpg_label, fpg_tree, fpg_menu,
+  fpg_imagelist, FPDEUtil, doceditmsg, doceditopts;
 
 Type
   { TPackageEditor }

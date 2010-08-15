@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -203,8 +203,12 @@ type
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DoChange; virtual;
     procedure   DoExpand(ANode: TfpgTreeNode); virtual;
+    // only visual (visible) nodes
     function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    // any next node, even if node is collapsed
+    function    NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    function    PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
     // the nodes between the given node and the direct next node
     function    SpaceToVisibleNext(aNode: TfpgTreeNode): integer;
     function    StepToRoot(aNode: TfpgTreeNode): integer;
@@ -214,6 +218,8 @@ type
     procedure   SetColumnWidth(AIndex, AWidth: word);
     // the width of a column - aIndex of the rootnode = 0
     function    GetColumnWidth(AIndex: word): word;
+    procedure   GotoNextNodeUp;
+    procedure   GotoNextNodeDown;
     property    Font: TfpgFont read FFont;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
@@ -228,6 +234,7 @@ type
     property    ParentShowHint;
     property    ScrollWheelDelta: integer read FScrollWheelDelta write FScrollWheelDelta default 15;
     property    ShowColumns: boolean read FShowColumns write SetShowColumns default False;
+    property    Hint;
     property    ShowHint;
     property    ShowImages: boolean read FShowImages write SetShowImages default False;
     property    TabOrder;
@@ -235,6 +242,8 @@ type
     property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle default lsDot;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
+    property    OnDoubleClick;
+    property    OnShowHint;
   end;
   
 
@@ -775,13 +784,16 @@ end;
 procedure TfpgTreeview.SetSelection(const AValue: TfpgTreeNode);
 var
   n: TfpgTreeNode;
+  dy: integer;    // y delta - absolute top node
+  nh: integer;    // node height
+  vh: integer;    // visible height
 begin
-  if aValue <> FSelection then
+  if AValue <> FSelection then
   begin
-    FSelection := aValue;
-    if aValue <> nil then
+    FSelection := AValue;
+    if AValue <> nil then
     begin
-      n := aValue.parent;
+      n := AValue.Parent;
       while n <> nil do
       begin
         n.Expand;
@@ -789,17 +801,28 @@ begin
         n := n.parent;
       end;
     end;
-    
-    if GetAbsoluteNodeTop(Selection) + GetNodeHeight - FVScrollbar.Position > VisibleHeight then
+
+    dy := GetAbsoluteNodeTop(FSelection);
+    nh := GetNodeHeight;
+    vh := VisibleHeight;
+    if dy + nh - FVScrollbar.Position > vh then
     begin
-      FVScrollbar.Position := GetAbsoluteNodeTop(Selection) + GetNodeHeight - VisibleHeight;
+      if FVScrollBar.Max = 0 then    // the first time and no expansion happened before.
+        FVScrollBar.Max := dy + Height;
+      FVScrollbar.Position := dy + nh - vh;
       FYOffset := FVScrollbar.Position;
       UpdateScrollBars;
+      if FHScrollbar.Visible then    // HScrollbar appeared so we need to adjust position again
+      begin
+        FVScrollbar.Position := FVScrollbar.Position + FHScrollbar.Height;
+        FYOffset := FVScrollbar.Position;
+        UpdateScrollBars;
+      end;
     end;
     
-    if GetAbsoluteNodeTop(Selection) - FVScrollbar.Position < 0 then
+    if dy - FVScrollbar.Position < 0 then
     begin
-      FVScrollbar.Position := GetAbsoluteNodeTop(Selection);
+      FVScrollbar.Position := dy;
       FYOffset := FVScrollbar.Position;
       UpdateScrollbars;
     end;
@@ -853,14 +876,14 @@ end;
 
 function TfpgTreeview.VisibleWidth: integer;
 begin
-  Result := Width - 2;
+  Result := Width - 2; // border width = 2 pixels
   if FVScrollbar.Visible then
      dec(Result, FVScrollbar.Width);
 end;
 
 function TfpgTreeview.VisibleHeight: integer;
 begin
-  Result := Height - 2;
+  Result := Height - 2; // border width = 2 pixels
   if FShowColumns then
     dec(Result, FColumnHeight);
   if FHScrollbar.Visible then
@@ -1051,6 +1074,20 @@ begin
     result := DefaultColumnWidth;
 end;
 
+procedure TfpgTreeView.GotoNextNodeUp;
+begin
+  if Selection = RootNode.FirstSubNode then
+    Exit;
+  Selection := PrevNode(Selection);
+end;
+
+procedure TfpgTreeView.GotoNextNodeDown;
+begin
+  if Selection = RootNode.LastSubNode then
+    Exit;
+  Selection := NextNode(Selection);
+end;
+
 procedure TfpgTreeview.PreCalcColumnLeft;
 var
   Aleft: TfpgCoord;
@@ -1086,9 +1123,9 @@ begin
   {$IFDEF DEBUG}
   writeln(Classname, '.UpdateScrollbars');
   {$ENDIF}
-  FVScrollbar.Visible := VisibleHeight < GetNodeHeightSum * GetNodeHeight;
+  FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
   FVScrollbar.Min := 0;
-  FVScrollbar.Max := (GetNodeHeightSum - 1) * GetNodeHeight;
+  FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
   FHScrollbar.Min := 0;
   FHScrollbar.Max := MaxNodeWidth - VisibleWidth + FVScrollbar.Width;
   FHScrollbar.Visible := MaxNodeWidth > Width - 2;
@@ -1097,13 +1134,18 @@ begin
     FVScrollbar.Position := 0;
     FVScrollBar.RepaintSlider;
     FYOffset := 0;
-  end;
+  end
+  else
+    FVScrollBar.RepaintSlider;
+
   if not FHScrollbar.Visible then
   begin
     FHScrollbar.Position := 0;
     FHScrollBar.RepaintSlider;
     FXOffset := 0;
-  end;
+  end
+  else
+    FHScrollBar.RepaintSlider;
 end;
 
 procedure TfpgTreeview.ResetScrollbar;
@@ -1586,7 +1628,7 @@ begin
     keyRight:
       begin
         Consumed := True;
-        Selection.Collapsed := false;
+        Selection.Expand;
         DoExpand(Selection);
         ResetScrollbar;
         RePaint;
@@ -1655,21 +1697,27 @@ end;
 
 procedure TfpgTreeview.HandleMouseScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
+var
+  i: integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
   if delta > 0 then
   begin
     inc(FYOffset, FScrollWheelDelta);
-    if FYOffset > VisibleHeight then
-      FYOffset := VisibleHeight;
+    i := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
+    if FYOffset > i then
+      FYOffset := i;
+    i := FVScrollbar.Position + FScrollWheelDelta;
+    FVScrollbar.Position := i;
   end
   else
   begin
     dec(FYOffset, FScrollWheelDelta);
     if FYOffset < 0 then
       FYOffset := 0;
+    i := FVScrollbar.Position - FScrollWheelDelta;
+    FVScrollbar.Position := i;
   end;
-    
   UpdateScrollbars;
   RePaint;
 end;
@@ -1747,6 +1795,58 @@ begin
   end;
 end;
 
+function TfpgTreeView.NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
+  //----------------
+  procedure _FindNextNode;
+  begin
+    if ANode.Next <> nil then
+    begin
+      result := ANode.Next;
+    end
+    else
+    begin
+      while ANode.Next = nil do
+      begin
+        ANode := ANode.Parent;
+        if ANode = nil then
+          exit;  //==>
+      end;
+      result := ANode.Next;
+    end;
+  end;
+
+begin
+  result := nil;
+  if ANode.Count > 0 then
+    result := ANode.FirstSubNode
+  else
+    _FindNextNode;
+end;
+
+function TfpgTreeView.PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
+var
+  n: TfpgTreeNode;
+begin
+  n := ANode;
+  if ANode.Prev <> nil then
+  begin
+    result  := ANode.Prev;
+    ANode   := ANode.Prev;
+    while {(not ANode.Collapsed) and} (ANode.Count > 0) do
+    begin
+      result  := ANode.LastSubNode;
+      ANode   := ANode.LastSubNode;
+    end;
+  end
+  else
+  begin
+    if ANode.Parent <> nil then
+      result := ANode.Parent
+    else
+      result := n;
+  end;
+end;
+
 function TfpgTreeview.SpaceToVisibleNext(aNode: TfpgTreeNode): integer;
 var
   h: TfpgTreeNode;
@@ -1805,7 +1905,7 @@ begin
   FHScrollbar.OnScroll    := @HScrollbarScroll;
   FHScrollbar.Visible     := False;
   FHScrollbar.Position    := 0;
-  FHScrollbar.SliderSize  := 0.2;
+  FHScrollbar.SliderSize  := 0.5;
   
   FVScrollbar := TfpgScrollbar.Create(self);
   FVScrollbar.Orientation := orVertical;

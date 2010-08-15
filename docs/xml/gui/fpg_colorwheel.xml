@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="GUI">
+  <package name="fpGUI">
     <module name="fpg_colorwheel">
-      <short>The unit contains a ColorWheel and ValueBar component.</short>
-      <descr>
+      <short>The unit contains a ColorWheel and ValueBar component</short>
+      <descr><p><printshort id="fpg_colorwheel"/>.</p>
         <p>
           <b>Using the components:</b>
         </p>
@@ -13,7 +13,7 @@
           <li>Put a color wheel on your form.</li>
           <li>Put a value bar on your form beside the wheel.</li>
           <li>Set the ColorWheel's ValueBar property to the ValueBar component
-   you just put on the form.</li>
+you just put on the form.</li>
         </ol>
         <p>The two components are now linked together. When a selection is
 made in the color wheel the value bar will update to show the range
@@ -26,11 +26,11 @@ only be displayed at runtime.</p>
           <b>Reading and setting the color:</b>
         </p>
         <p>To set the color being displayed, use the SetSelectedColor method
-           of the color wheel.</p>
+of the color wheel.</p>
         <p>To read the color selected, read the SelectedColor property
-           of the ValueBar.</p>
+of the ValueBar.</p>
         <p>If you want to know when the user picks a color, you
-           can use the OnChange event in the ValueBar.</p>
+can use the OnChange event in the ValueBar.</p>
       </descr>
       <element name="TfpgColorWheel">
         <short>A colorwheel component.</short>

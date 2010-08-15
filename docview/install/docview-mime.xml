@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/inf">
+    <comment>Compiled INF Help File</comment>
+    <acronym>INF</acronym>
+    <expanded-acronym>Information Help File</expanded-acronym>
+    <magic priority="50">
+      <match type="string" offset="0" value="HSP"/>
+    </magic>
+    <glob pattern="*.inf"/>
+    <alias type="application/x-inf"/>
+  </mime-type>
+</mime-info>

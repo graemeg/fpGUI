@@ -5,20 +5,22 @@
     <AddToProjectUsesSection Value="False"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <SearchPaths>
+        <IncludeFiles Value="../../"/>
         <OtherUnitFiles Value="../;../../gui/;../../gui/db/"/>
         <UnitOutputDirectory Value="../../../lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
-          <CStyleOperator Value="False"/>
           <AllowLabel Value="False"/>
           <CPPInline Value="False"/>
         </SyntaxOptions>
       </Parsing>
       <CodeGeneration>
-        <SmartLinkUnit Value="True"/>
+        <Optimizations>
+          <OptimizationLevel Value="0"/>
+        </Optimizations>
       </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
@@ -26,10 +28,10 @@
     </CompilerOptions>
     <Description Value="fpGUI Toolkit
 "/>
-    <License Value="Modified LGPL
+    <License Value="LGPL 2 with static linking exception.
 "/>
-    <Version Minor="6" Release="3"/>
-    <Files Count="77">
+    <Version Minor="7"/>
+    <Files Count="84">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -338,6 +340,34 @@
         <Filename Value="../../gui/fpg_colorwheel.pas"/>
         <UnitName Value="fpg_ColorWheel"/>
       </Item77>
+      <Item78>
+        <Filename Value="fpg_interface.pas"/>
+        <UnitName Value="fpg_interface"/>
+      </Item78>
+      <Item79>
+        <Filename Value="../../gui/fpg_editbtn.pas"/>
+        <UnitName Value="fpg_editbtn"/>
+      </Item79>
+      <Item80>
+        <Filename Value="../../gui/colordialog.inc"/>
+        <Type Value="Include"/>
+      </Item80>
+      <Item81>
+        <Filename Value="../fpg_imgfmt_jpg.pas"/>
+        <UnitName Value="fpg_imgfmt_jpg"/>
+      </Item81>
+      <Item82>
+        <Filename Value="../../gui/inputquerydialog.inc"/>
+        <Type Value="Include"/>
+      </Item82>
+      <Item83>
+        <Filename Value="../fpg_imgutils.pas"/>
+        <UnitName Value="fpg_imgutils"/>
+      </Item83>
+      <Item84>
+        <Filename Value="../../VERSION_FILE.inc"/>
+        <Type Value="Include"/>
+      </Item84>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">

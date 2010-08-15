@@ -1,30 +1,29 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="GUI">
+  <package name="fpGUI">
     <module name="fpg_colormapping">
       <short>This unit contains some color conversion/mapping functions.</short>
       <descr/>
       <element name="RGBToHSV">
         <short>Map RGB colorspace to HSV colorspace.</short>
-        <descr>This function converts a RGB (Red, Green, Blue) colorspace value to HSV (Hue, Saturation, Value) colorspace. The parameters have specific value ranges. Please see the parameter documentation for more details.</descr>
+        <descr><p>This function converts a RGB (Red, Green, Blue) colorspace value to 
+HSV (Hue, Saturation, Value) colorspace. The parameters have specific value ranges as
+listed below.</p>
+<dl>
+<dt>Hue</dt>
+<dd>The Hue range is from 0 - 1535. In that range, the primary colors are mapped to the following values. Red = 0. Green = 512 and Blue = 1024.</dd>
+<dt>Saturation</dt>
+<dd>The Saturation value range is from 0.0 - 1.0. Grey (no color) = 0. Maximum color = 1.0.</dd>
+<dt>Value</dt>
+<dd>The Value value range is from 0.0 to 1.0. Black being 0 and maximum brightness being 1.0.</dd>
+</dl>
+        </descr>
       </element>
       <element name="HSVToRGB">
         <short>Map HSV colorspace to RGB colorspace.</short>
-      </element>
-      <element name="RGBToHSV.Hue">
-        <short>Returned Hue value</short>
-        <descr>The Hue range is from 0 - 1535. In that range, the primary colors are mapped to the following values. Red = 0. Green = 512 and Blue = 1024.</descr>
-      </element>
-      <element name="RGBToHSV.Saturation">
-        <short>Returned Saturation value.</short>
-        <descr>The Saturation value range is from 0.0 - 1.0. Grey (no color) = 0. Maximum color = 1.0.</descr>
-      </element>
-      <element name="RGBToHSV.Value">
-        <short>Returned Value value.</short>
-        <descr>The Value value range is from 0.0 to 1.0. Black being 0 and maximum brightness being 1.0.</descr>
-      </element>
-      <element name="HSVToRGB.H">
-        <short>Hue value</short>
+        <seealso>
+          <link id="RGBToHSV"/>
+        </seealso>
       </element>
     </module>
   </package>

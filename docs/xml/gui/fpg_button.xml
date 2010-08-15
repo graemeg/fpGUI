@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="fpGUI">
+    <module name="fpg_button">
+      <short>This unit defines the push button classes.</short>
+      <element name="TImageLayout">
+        <short>Enum type defining the position of images inside a Button</short>
+      </element>
+      <element name="TImageLayout.ilImageLeft">
+        <short>Image to the left of the button text.</short>
+      </element>
+      <element name="TImageLayout.ilImageTop">
+        <short>Image above the button text.</short>
+      </element>
+      <element name="TImageLayout.ilImageRight">
+        <short>Image to the right of the button text.</short>
+      </element>
+      <element name="TImageLayout.ilImageBottom">
+        <short>Image below the button text.</short>
+      </element>
+      <element name="TfpgBaseButton">
+        <short>Base class the represents a push button control</short>
+      </element>
+      <element name="TfpgBaseButton.ImageLayout">
+        <short>Defines where on the button the image will be displayed</short>
+      </element>
+      <element name="TfpgBaseButton.ImageSpacing">
+        <short>The spacing between the Image and the Text</short>
+        <descr>The <var>ImageSpacing</var> value is in pixels. The value range
+is from -1 to any positive value. -1 has a special meaning and is also the
+default value. When ImageSpacing equals -1, then the spacing between the button
+image and the button text is automatically calculated so that the button text
+is centred in the available horizontal space of the button.</descr>
+      </element>
+      <element name="TfpgBaseButton.ImageName">
+        <short>The registered name of a image to display on the button</short>
+        <descr>
+          <printshort id="TfpgBaseButton.ImageName"/>. This is the name used when
+a image resource was registered with the global <link id="fpg_main.fpgImages">fpgImages</link> instance.</descr>
+      </element>
+
+      <element name="TfpgButton">
+        <short>Concrete button class used in user interfaces</short>
+        <descr><printshort id="TfpgButton"/>. This class is a descendant of <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link> and
+simply publishes various properties for runtime type information.</descr>
+        <seealso>
+          <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link>
+        </seealso>
+      </element>
+      <element name="TfpgButton.ImageName" link="TfpgBaseButton.ImageName"/>
+      <element name="TfpgButton.ImageSpacing" link="TfpgBaseButton.ImageSpacing"/>
+      <element name="TfpgButton.ImageLayout" link="TfpgBaseButton.ImageLayout"/>
+
+    </module>
+  </package>
+</fpdoc-descriptions>

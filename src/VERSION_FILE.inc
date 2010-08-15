@@ -1,0 +1,1 @@
+FPGUI_VERSION = '0.7';

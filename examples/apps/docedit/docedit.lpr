@@ -7,9 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  fpgfx,
-  frm_main, frm_options, model, FPDEUtil, PkEditor, doceditmsg, doceditopts,
-  fpgui_toolkit;
+  fpg_main,
+  frm_main, frm_options, model, FPDEUtil, doceditmsg, doceditopts;
 
 
 procedure MainProc;

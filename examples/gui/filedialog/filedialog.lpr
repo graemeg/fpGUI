@@ -55,7 +55,10 @@ type
 
 function TMyDBLoginDlg.GetDatabase: TfpgString;
 begin
-  Result := aStringList.ValueFromIndex[cbDatabases.FocusItem];
+  if cbDatabases.FocusItem = -1 then
+    Result := '<nothing selected>'
+  else
+    Result := aStringList.ValueFromIndex[cbDatabases.FocusItem];
 end;
 
 procedure TMyDBLoginDlg.PopulateComboDb;
@@ -83,13 +86,13 @@ begin
   dlg := TMyDBLoginDlg.Create(nil);
   try
     dlg.WindowTitle := 'Sample Login';
-    if dlg.ShowModal = 1 then
+    if dlg.ShowModal = mrOK then
     begin
       TfpgMessageDialog.Information('User Results',
           'User=' + dlg.UserID + #13 +
           'Pass=' + dlg.Password +  #13 +
           'Database=' + dlg.Database, [mbOK]);
-      fpgApplication.ProcessMessages;
+//      fpgApplication.ProcessMessages;
     end;
   finally
     dlg.Free;

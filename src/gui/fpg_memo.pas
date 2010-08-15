@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -110,6 +110,7 @@ type
   published
     property    BackgroundColor default clBoxColor;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    Hint;
     property    Lines: TStringList read FLines;
     property    ParentShowHint;
     property    ShowHint;
@@ -119,6 +120,7 @@ type
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
+    property    OnShowHint;
   end;
 
 
@@ -402,8 +404,9 @@ begin
     SetLineText(selsl, ls);
   end;
 
-  for n := selsl to selel do
-    FLines.Delete(n);
+  //delete moves lines up, so delete same line number over and over.
+  for n := (selsl+1) to selel do
+    FLines.Delete(selsl+1);
 
   FCursorPos  := selsp;
   FCursorLine := selsl;
@@ -863,6 +866,10 @@ begin
     if yp > Height then
       Break;
   end;  { for }
+
+  // Special case because it never entered the for loop above
+  if (LineCount = 0) and Focused then
+    fpgCaret.SetCaret(Canvas, FSideMargin, 3, fpgCaret.Width, FFont.Height);
 
   if not Focused then
     fpgCaret.UnSetCaret(Canvas);

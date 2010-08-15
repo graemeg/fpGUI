@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -32,11 +32,18 @@ type
   TfpgColor       = type longword;    // Always in RRGGBB (Alpha, Red, Green, Blue) format!!
   TfpgString      = type string;
   TfpgChar        = type string[4];
-  TfpgModalResult = Low(integer)..High(integer);
 
   PPoint = ^TPoint;
 
   TRGBTriple = record
+    Red: word;
+    Green: word;
+    Blue: word;
+    Alpha: word;
+  end deprecated;
+
+  // Same declaration as in FPImage unit, but we don't use FPImage yet, so declare it here
+  TFPColor = record
     Red: word;
     Green: word;
     Blue: word;
@@ -58,6 +65,10 @@ type
                         gdHorizontal);  // Fill Horizontal
 
   TClipboardKeyType = (ckNone, ckCopy, ckPaste, ckCut);
+
+  // If you have to convert this to an Integer, mrNone = 0 etc.
+  TfpgModalResult = (mrNone, mrOK, mrCancel, mrYes, mrNo, mrAbort, mrRetry,
+      mrIgnore, mrAll, mrNoToAll, mrYesToAll);
 
 const
   MOUSE_LEFT       = 1;
@@ -83,24 +94,12 @@ const
   FPGM_MOVE        = 16;
   FPGM_POPUPCLOSE  = 17;
   FPGM_HINTTIMER   = 18;
+  FPGM_FREEME      = 19;
   FPGM_USER        = 50000;
-  FPGM_KILLME      = High(Integer);
+  FPGM_KILLME      = MaxInt;
 
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
-
-  { TfpgModalResult values }
-  mrNone     = 0;
-  mrOk       = mrNone + 1;
-  mrCancel   = mrOk + 1;
-  mrYes      = mrCancel + 1;
-  mrNo       = mrYes + 1;
-  mrAbort    = mrNo + 1;
-  mrRetry    = mrAbort + 1;
-  mrIgnore   = mrRetry + 1;
-  mrAll      = mrIgnore + 1;
-  mrNoToAll  = mrAll + 1;
-  mrYesToAll = mrNoToAll + 1;
 
   { Default fpGUI help viewer }
   FPG_HELPVIEWER = 'docview';
@@ -190,17 +189,19 @@ type
     FImageDataSize: integer;
     FMaskData: pointer;
     FMaskDataSize: integer;
+    FMaskPoint: TPoint;
     procedure   DoFreeImage; virtual; abstract;
     procedure   DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
     procedure   DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer); virtual; abstract;
   public
     constructor Create;
     destructor  Destroy; override;
-    procedure   Invert;
+    procedure   Invert(IncludeMask: Boolean = False);
     procedure   FreeImage;
     procedure   AllocateImage(acolordepth, awidth, aheight: integer);
     procedure   AllocateMask;
     procedure   CreateMaskFromSample(x, y: TfpgCoord);
+    { Must always be called AFTER you populated the ImageData array. Then only does it allocate OS resources. }
     procedure   UpdateImage;
     property    ImageData: pointer read FImageData;
     property    ImageDataSize: integer read FImageDataSize;
@@ -210,6 +211,7 @@ type
     property    Height: integer read FHeight;
     property    ColorDepth: integer read FColorDepth;
     property    Masked: boolean read FMasked;
+    property    MaskPoint: TPoint read FMaskPoint;
     property    Colors[x, y: TfpgCoord]: TfpgColor read GetColor write SetColor;
   end;
 
@@ -227,6 +229,7 @@ type
   protected
     FFontDesc: string;
     FFontRes: TfpgFontResourceBase;
+    function    GetIsFixedWidth: boolean; virtual;
   public
     function    TextWidth(const txt: string): integer;
     function    Ascent: integer;
@@ -235,6 +238,7 @@ type
     property    FontDesc: string read FFontDesc;
     property    FontRes: TfpgFontResourceBase read FFontRes;
     property    Handle: TfpgFontResourceBase read FFontRes;
+    property    IsFixedWidth: boolean read GetIsFixedWidth;
   end;
 
 
@@ -370,8 +374,19 @@ type
   TfpgComponent = class(TComponent)
   private
     FTagPointer: Pointer;
+    FHelpContext: THelpContext;
+    FHelpKeyword: TfpgString;
+    FHelpType: THelpType;
+  protected
+    procedure   SetHelpContext(const AValue: THelpContext); virtual;
+    procedure   SetHelpKeyword(const AValue: TfpgString); virtual;
   public
+    constructor Create(AOwner: TComponent); override;
     property    TagPointer: Pointer read FTagPointer write FTagPointer;
+  published
+    property    HelpContext: THelpContext read FHelpContext write SetHelpContext default 0;
+    property    HelpKeyword: TfpgString read FHelpKeyword write SetHelpKeyword;
+    property    HelpType: THelpType read FHelpType write FHelpType default htKeyword;
   end;
 
 
@@ -400,6 +415,7 @@ type
     FCanvas: TfpgCanvasBase;
     FSizeIsDirty: Boolean;
     FPosIsDirty: Boolean;
+    FMouseCursorIsDirty: Boolean;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
@@ -458,16 +474,11 @@ type
   end;
 
 
-  { TfpgApplicationBase }
-
-  TfpgApplicationBase = class(TComponent)
+  TfpgApplicationBase = class(TfpgComponent)
   private
     FMainForm: TfpgWindowBase;
     FTerminated: boolean;
     FCritSect: TCriticalSection;
-    FHelpType: THelpType;
-    FHelpContext: THelpContext;
-    FHelpWord: TfpgString;
     FHelpKey: word;
     FHelpFile: TfpgString;
     function    GetForm(Index: Integer): TfpgWindowBase;
@@ -498,15 +509,13 @@ type
     procedure   Lock;
     procedure   Unlock;
     procedure   InvokeHelp;
-    function    ContextHelp(const HelpContext: THelpContext): Boolean;
-    function    KeywordHelp(const HelpKeyword: string): Boolean;
+    function    ContextHelp(const AHelpContext: THelpContext): Boolean;
+    function    KeywordHelp(const AHelpKeyword: string): Boolean;
     property    FormCount: integer read GetFormCount;
     property    Forms[Index: Integer]: TfpgWindowBase read GetForm;
-    property    HelpContext: THelpContext read FHelpContext write FHelpContext;
+    property    HelpContext;
     property    HelpFile: TfpgString read GetHelpFile write FHelpFile;
     property    HelpKey: word read FHelpKey write FHelpKey default keyF1;
-    property    HelpType: THelpType read FHelpType write FHelpType default htContext;
-    property    HelpWord: TfpgString read FHelpWord write FHelpWord;
     property    IsInitialized: boolean read FIsInitialized;
     property    TopModalForm: TfpgWindowBase read GetTopModalForm;
     property    MainForm: TfpgWindowBase read FMainForm write FMainForm;
@@ -602,8 +611,10 @@ function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
 function  CheckClipboardKey(AKey: Word;  AShiftstate: TShiftState): TClipboardKeyType;
 
 { Color }
-function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
-function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+function  fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple; deprecated;
+function  fpgColorToFPColor(const AColor: TfpgColor): TFPColor;
+function  RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor; deprecated;
+function  FPColorTofpgColor(const AColor: TFPColor): TfpgColor;
 function  fpgGetRed(const AColor: TfpgColor): word;
 function  fpgGetGreen(const AColor: TfpgColor): word;
 function  fpgGetBlue(const AColor: TfpgColor): word;
@@ -808,7 +819,7 @@ begin
   end  { if/else }
 end;
 
-function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple;
+function fpgColorToRGBTriple(const AColor: TfpgColor): TRGBTriple; deprecated;
 begin
   with Result do
   begin
@@ -819,7 +830,23 @@ begin
   end
 end;
 
-function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor;
+function fpgColorToFPColor(const AColor: TfpgColor): TFPColor;
+begin
+  with Result do
+  begin
+    Red   := fpgGetRed(AColor);
+    Green := fpgGetGreen(AColor);
+    Blue  := fpgGetBlue(AColor);
+//    Alpha := fpgGetAlpha(AColor);
+  end
+end;
+
+function RGBTripleTofpgColor(const AColor: TRGBTriple): TfpgColor; deprecated;
+begin
+  Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16);// or (AColor.Alpha shl 32);
+end;
+
+function FPColorTofpgColor(const AColor: TFPColor): TfpgColor;
 begin
   Result := AColor.Blue or (AColor.Green shl 8) or (AColor.Red shl 16);// or (AColor.Alpha shl 32);
 end;
@@ -862,24 +889,24 @@ end;
 
 function fpgGetAvgColor(const AColor1, AColor2: TfpgColor): TfpgColor;
 var
-  c1, c2: TRGBTriple;
-  avg: TRGBTriple;
+  c1, c2: TFPColor;
+  avg: TFPColor;
 begin
-  c1 := fpgColorToRGBTriple(AColor1);
-  c2 := fpgColorToRGBTriple(AColor2);
+  c1 := fpgColorToFPColor(AColor1);
+  c2 := fpgColorToFPColor(AColor2);
   avg.Red   := c1.Red + (c2.Red - c1.Red) div 2;
   avg.Green := c1.Green + (c2.Green - c1.Green) div 2;
   avg.Blue  := c1.Blue + (c2.Blue - c1.Blue) div 2;
   avg.Alpha := c1.Alpha + (c2.Alpha - c1.Alpha) div 2;
-  Result := RGBTripleTofpgColor(avg);
+  Result := FPColorTofpgColor(avg);
 end;
 
 function PtInRect(const ARect: TfpgRect; const APoint: TPoint): Boolean;
 begin
   Result := (APoint.x >= ARect.Left) and
             (APoint.y >= ARect.Top) and
-            (APoint.x < ARect.Right) and
-            (APoint.y < ARect.Bottom);
+            (APoint.x <= ARect.Right) and
+            (APoint.y <= ARect.Bottom);
 end;
 
 procedure SortRect(var ARect: TRect);
@@ -1021,6 +1048,8 @@ end;
 procedure TfpgWindowBase.AllocateWindowHandle;
 begin
   DoAllocateWindowHandle(FParent);
+  if FMouseCursorIsDirty then
+    DoSetMouseCursor;
 end;
 
 procedure TfpgWindowBase.ReleaseWindowHandle;
@@ -1116,6 +1145,7 @@ constructor TfpgWindowBase.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FMouseCursor := mcDefault;
+  FMouseCursorIsDirty := False;
   FPosIsDirty := True;
   FSizeIsDirty := True;
   FMaxWidth := 0;
@@ -1454,15 +1484,15 @@ end;
 procedure TfpgCanvasBase.GradientFill(ARect: TfpgRect; AStart, AStop: TfpgColor;
   ADirection: TGradientDirection);
 var
-  RGBStart: TRGBTriple;
-  RGBStop: TRGBTriple;
+  RGBStart: TFPColor;
+  RGBStop: TFPColor;
   RDiff, GDiff, BDiff: Integer;
   count: Integer;
   i: Integer;
-  newcolor: TRGBTriple;
+  newcolor: TFPColor;
 begin
-  RGBStart := fpgColorToRGBTriple(fpgColorToRGB(AStart));
-  RGBStop  := fpgColorToRGBTriple(fpgColorToRGB(AStop));
+  RGBStart := fpgColorToFPColor(fpgColorToRGB(AStart));
+  RGBStop  := fpgColorToFPColor(fpgColorToRGB(AStop));
 
   if ADirection = gdVertical then
     count := ARect.Bottom - ARect.Top
@@ -1479,7 +1509,7 @@ begin
     newcolor.Red    := RGBStart.Red + (i * RDiff) div count;
     newcolor.Green  := RGBStart.Green + (i * GDiff) div count;
     newcolor.Blue   := RGBStart.Blue + (i * BDiff) div count;
-    SetColor(RGBTripleTofpgColor(newcolor));
+    SetColor(FPColorTofpgColor(newcolor));
 
     // We have to overshoot by 1 pixel as DrawLine paints 1 pixel short (by design)
     if ADirection = gdHorizontal then
@@ -1558,6 +1588,8 @@ end;
 
 procedure TfpgCanvasBase.SetFont(AFont: TfpgFontBase);
 begin
+  if AFont = nil then
+    exit;
   FFont := AFont;
   DoSetFontRes(AFont.FFontRes);
 end;
@@ -1615,6 +1647,17 @@ begin
 end;
 
 { TfpgFontBase }
+
+function TfpgFontBase.GetIsFixedWidth: boolean;
+begin
+  // very crude but handy as a fallback option
+  if (Pos('mono', Lowercase(FFontDesc)) > 0) or
+     (Pos('courier', Lowercase(FFontDesc)) > 0) or
+     (Pos('fixed', Lowercase(FFontDesc)) > 0) then
+    Result := True
+  else
+    Result := False;
+end;
 
 function TfpgFontBase.TextWidth(const txt: string): integer;
 begin
@@ -1675,7 +1718,7 @@ var
   contributions: array[0..10] of TfpgInterpolationContribution;
   dif, w, gamma, a: double;
   c: TfpgColor;
-  rgb: TRGBTriple;
+  rgb: TFPColor;
 begin
   for x := 0 to Width - 1 do
   begin
@@ -1719,7 +1762,7 @@ begin
         with contributions[r] do
         begin
           c   := image.colors[place, y];
-          rgb := fpgColorToRGBTriple(c);
+          rgb := fpgColorToFPColor(c);
           a     := weight; // * rgb.Alpha / $FFFF;
           re    := re + a * rgb.Red;
           gr    := gr + a * rgb.Green;
@@ -1733,7 +1776,7 @@ begin
         blue  := ColorRound(bl);
 //        alpha := ColorRound(gamma * $FFFF);
       end;
-      tempimage.colors[x, y] := RGBTripleTofpgColor(rgb);
+      tempimage.colors[x, y] := FPColorTofpgColor(rgb);
     end;
   end;
 end;
@@ -1746,7 +1789,7 @@ var
   contributions: array[0..10] of TfpgInterpolationContribution;
   dif, w, gamma, a: double;
   c: TfpgColor;
-  rgb: TRGBTriple;
+  rgb: TFPColor;
 begin
   for y := 0 to Height - 1 do
   begin
@@ -1790,7 +1833,7 @@ begin
         with contributions[r] do
         begin
           c := tempimage.colors[x, place];
-          rgb := fpgColorToRGBTriple(c);
+          rgb := fpgColorToFPColor(c);
           a     := weight;// * rgb.alpha / $FFFF;
           re    := re + a * rgb.red;
           gr    := gr + a * rgb.green;
@@ -1804,7 +1847,7 @@ begin
         blue  := ColorRound(bl);
 //        alpha := ColorRound(gamma * $FFFF);
       end;
-      Canvas.Pixels[x + dx, y + dy] := RGBTripleTofpgColor(rgb);
+      Canvas.Pixels[x + dx, y + dy] := FPColorTofpgColor(rgb);
     end;
   end;
 end;
@@ -1886,7 +1929,7 @@ var
 begin
   p := FImageData;
   Inc(p, (FWidth * y) + x);
-  p^ := longword(AValue);
+  p^ := AValue;
 //  write(IntToHex(AValue, 6) + ' ');
 end;
 
@@ -1901,6 +1944,7 @@ begin
   FMaskData      := nil;
   FMaskDataSize  := 0;
   FMasked        := False;
+  FMaskPoint     := Point(0, 0);
 end;
 
 destructor TfpgImageBase.Destroy;
@@ -1909,7 +1953,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgImageBase.Invert;
+procedure TfpgImageBase.Invert(IncludeMask: Boolean);
 var
   p: ^byte;
   n: integer;
@@ -1924,13 +1968,16 @@ begin
     Inc(p);
   end;
 
-  if FMaskData <> nil then
+  if IncludeMask then
   begin
-    p := FMaskData;
-    for n := 1 to FMaskDataSize do
+    if FMaskData <> nil then
     begin
-      p^ := p^ xor $FF;
-      Inc(p);
+      p := FMaskData;
+      for n := 1 to FMaskDataSize do
+      begin
+        p^ := p^ xor $FF;
+        Inc(p);
+      end;
     end;
   end;
 end;
@@ -2006,6 +2053,7 @@ begin
     Exit; //==>
 
   AllocateMask;
+  FMaskPoint := Point(x, y);
 
   p := FImageData;
   if x < 0 then
@@ -2196,21 +2244,27 @@ end;
 
 procedure TfpgApplicationBase.InvokeHelp;
 begin
+  { TODO -oGraeme -cHelp System : We should probably try ActiveForm and ActiveWidget help first. }
   if HelpType = htKeyword then
-    KeywordHelp(HelpWord)
+    KeywordHelp(HelpKeyword)
   else
     ContextHelp(HelpContext);
 end;
 
-function TfpgApplicationBase.ContextHelp(const HelpContext: THelpContext): Boolean;
+function TfpgApplicationBase.ContextHelp(const AHelpContext: THelpContext): Boolean;
 var
   p: TProcess;
 begin
-  { TODO -oGraeme : Support HelpContext in docview }
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
-      p.CommandLine := GetHelpViewer + ' ' + HelpFile
+    begin
+      if AHelpContext = 0 then
+        p.CommandLine := GetHelpViewer + ' ' + HelpFile
+      else
+        p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -n ' + IntToStr(AHelpContext);
+//writeln('DEBUG:  TfpgApplicationBase.ContextHelp > ', p.CommandLine);
+    end
     else
       p.CommandLine := GetHelpViewer;
     p.Execute;
@@ -2219,15 +2273,17 @@ begin
   end;
 end;
 
-function TfpgApplicationBase.KeywordHelp(const HelpKeyword: string): Boolean;
+function TfpgApplicationBase.KeywordHelp(const AHelpKeyword: string): Boolean;
 var
   p: TProcess;
 begin
-  { TODO -oGraeme : Support HelpKeyword in docview }
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
-      p.CommandLine := GetHelpViewer + ' ' + HelpFile
+    begin
+      p.CommandLine := GetHelpViewer + ' ' + HelpFile + ' -s ' + AHelpKeyword;
+//writeln('DEBUG:  TfpgApplicationBase.ContextHelp > ', p.CommandLine);
+    end
     else
       p.CommandLine := GetHelpViewer;
     p.Execute;
@@ -2544,6 +2600,34 @@ begin
   end;
   FEntries.Free;
   FEntries := newl;
+end;
+
+{ TfpgComponent }
+
+procedure TfpgComponent.SetHelpContext(const AValue: THelpContext);
+begin
+  if not (csLoading in ComponentState) then
+    FHelpType := htContext;
+  if FHelpContext = AValue then
+    Exit; //==>
+  FHelpContext := AValue;
+end;
+
+procedure TfpgComponent.SetHelpKeyword(const AValue: TfpgString);
+begin
+  if not (csLoading in ComponentState) then
+    FHelpType := htKeyword;
+  if FHelpKeyword = AValue then
+    Exit; //==>
+  FHelpKeyword := AValue;
+end;
+
+constructor TfpgComponent.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FHelpType     := htKeyword;
+  FHelpContext  := 0;
+  FTagPointer   := nil;
 end;
 
 end.

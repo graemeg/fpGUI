@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -58,6 +58,7 @@ type
   private
     FCommand: ICommand;
     FEnabled: boolean;
+    FHint: TfpgString;
     FHotKeyDef: TfpgHotKeyDef;
     FOnClick: TNotifyEvent;
     FSeparator: boolean;
@@ -76,11 +77,12 @@ type
     procedure   Click;
     function    Selectable: boolean;
     function    GetAccelChar: string;
-    procedure   DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord);
+    procedure   DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord; const AImgWidth: integer);
     function    GetCommand: ICommand;
     procedure   SetCommand(ACommand: ICommand);
     property    Checked: boolean read FChecked write SetChecked;
     property    Text: TfpgString read FText write SetText;
+    property    Hint: TfpgString read FHint write FHint;
     property    HotKeyDef: TfpgHotKeyDef read FHotKeyDef write SetHotKeyDef;
     property    Separator: boolean read FSeparator write SetSeparator;
     property    Visible: boolean read FVisible write SetVisible;
@@ -121,8 +123,8 @@ type
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
     procedure   HandleClose; override;
-    procedure   DrawItem(mi: TfpgMenuItem; rect: TfpgRect); virtual;
-    procedure   DrawRow(line: integer; focus: boolean); virtual;
+    procedure   DrawItem(mi: TfpgMenuItem; rect: TfpgRect; const AItemFocused: boolean); virtual;
+    procedure   DrawRow(line: integer; const AItemFocused: boolean); virtual;
     function    ItemHeight(mi: TfpgMenuItem): integer; virtual;
     procedure   PrepareToShow;
   public
@@ -185,10 +187,14 @@ function CreateMenuBar(AOwner: TfpgWidget): TfpgMenuBar; overload;
 
 
 implementation
-
+  
 var
   uFocusedPopupMenu: TfpgPopupMenu;
 
+const
+  cImgWidth: integer = 16;
+
+  
 function CreateMenuBar(AOwner: TfpgWidget; x, y, w, h: TfpgCoord): TfpgMenuBar;
 begin
   if AOwner = nil then
@@ -257,13 +263,16 @@ begin
   FSeparator := False;
   FVisible := True;
   FEnabled := True;
+  FChecked := False;
   FSubMenu := nil;
   FOnClick := nil;
 end;
 
 procedure TfpgMenuItem.Click;
 begin
-  if Assigned(FOnClick) then
+  if Assigned(FCommand) then    // ICommand takes preference over OnClick
+    FCommand.Execute
+  else if Assigned(FOnClick) then
     FOnClick(self);
 end;
 
@@ -285,13 +294,12 @@ begin
     Result := '';
 end;
 
-procedure TfpgMenuItem.DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord);
+procedure TfpgMenuItem.DrawText(ACanvas: TfpgCanvas; x, y: TfpgCoord; const AImgWidth: integer);
 var
   s: string;
   p: integer;
   achar: string;
 begin
-//  writeln('DrawText  x:', x, '  y:', y);
   if not Enabled then
     ACanvas.SetFont(fpgStyle.MenuDisabledFont)
   else
@@ -305,12 +313,13 @@ begin
     if p > 0 then
     begin
       // first part of text before the & sign
-      ACanvas.DrawString(x, y, UTF8Copy(s, 1, p-1));
+      fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, 1, p-1), Enabled);
+
       inc(x, fpgStyle.MenuFont.TextWidth(UTF8Copy(s, 1, p-1)));
       if UTF8Copy(s, p+1, 1) = achar then
       begin
         // Do we need to paint a actual & sign (create via && in item text)
-        ACanvas.DrawString(x, y, achar);
+        fpgStyle.DrawString(ACanvas, x, y, achar, Enabled);
         inc(x, fpgStyle.MenuFont.TextWidth(achar));
       end
       else
@@ -318,7 +327,7 @@ begin
         // Draw the HotKey text
         if Enabled then
           ACanvas.SetFont(fpgStyle.MenuAccelFont);
-        ACanvas.DrawString(x, y, UTF8Copy(s, p+1, 1));
+        fpgStyle.DrawString(ACanvas, x, y, UTF8Copy(s, p+1, 1), Enabled);
         inc(x, ACanvas.Font.TextWidth(UTF8Copy(s, p+1, 1)));
         if Enabled then
           ACanvas.SetFont(fpgStyle.MenuFont);
@@ -329,7 +338,7 @@ begin
 
   // Draw the remaining text after the & sign
   if UTF8Length(s) > 0 then
-    ACanvas.DrawString(x, y, s);
+    fpgStyle.DrawString(ACanvas, x, y, s, Enabled);
 end;
 
 function TfpgMenuItem.GetCommand: ICommand;
@@ -507,7 +516,7 @@ begin
   Canvas.SetColor(clShadow1);
   Canvas.DrawLine(r.Left, r.Bottom-1, r.Right+1, r.Bottom-1);   // bottom
   // outer bottom line
-  Canvas.SetColor(clHilite1);
+  Canvas.SetColor(clWhite);
   Canvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
 
   for n := 0 to VisibleCount-1 do
@@ -590,7 +599,7 @@ begin
       Canvas.FillRectangle(r);
       // a possible future theme option
 //      Canvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
-      mi.DrawText(Canvas, r.left+4, r.top+1);
+      mi.DrawText(Canvas, r.left+4, r.top+1, cImgWidth);
       Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
     end;  { if col=n }
@@ -739,7 +748,7 @@ begin
   begin
     CloseSubMenus;
     // showing the submenu
-    mi.SubMenu.ShowAt(self, Width, GetItemPosY(FFocusItem));
+    mi.SubMenu.ShowAt(self, Width-5, GetItemPosY(FFocusItem)); // 5 is the menu overlap in pixels
     mi.SubMenu.OpenerPopup := self;
     mi.SubMenu.OpenerMenuBar := OpenerMenuBar;
     uFocusedPopupMenu := mi.SubMenu;
@@ -829,7 +838,6 @@ procedure TfpgPopupMenu.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
   newf: integer;
   mi: TfpgMenuItem;
-  r: TfpgRect;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
@@ -972,7 +980,7 @@ begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.Clear(BackgroundColor);
-  Canvas.SetColor(clWidgetFrame);
+  Canvas.SetColor(clWindowBackground);
   Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
   Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
 
@@ -1009,7 +1017,7 @@ begin
     Result := TfpgMenuItem(FItems.Items[ind]);
 end;
 
-procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect);
+procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect; const AItemFocused: boolean);
 var
   s: string;
   x: integer;
@@ -1017,35 +1025,47 @@ var
 begin
   if mi.Separator then
   begin
-    Canvas.SetColor(clMenuText);
-    Canvas.DrawLine(rect.Left, rect.Top+2, rect.Right+1, rect.Top+2);
+    Canvas.SetColor(clShadow1);
+    Canvas.DrawLine(rect.Left+1, rect.Top+2, rect.Right, rect.Top+2);
+    Canvas.SetColor(clHilite2);
+    Canvas.DrawLine(rect.Left+1, rect.Top+3, rect.Right, rect.Top+3);
   end
   else
   begin
+    // process Check mark if needed
+    if mi.Checked then
+    begin
+      img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
+      if AItemFocused then
+        img.Invert;
+      Canvas.DrawImage(rect.Left, rect.Top, img);
+      if AItemFocused then
+        img.Invert;  // restore image to original state
+    end;
+
+    // process menu item Text
     x := rect.Left + FSymbolWidth + FTextMargin;
+    mi.DrawText(Canvas, x+cImgWidth, rect.top, cImgWidth);
 
-    mi.DrawText(Canvas, x, rect.top);
-
+    // process menu item Hot Key text
     if mi.HotKeyDef <> '' then
     begin
       s := mi.HotKeyDef;
-      Canvas.DrawString(rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s);
+      fpgStyle.DrawString(Canvas, rect.Right-FMenuFont.TextWidth(s)-FTextMargin, rect.Top, s, mi.Enabled);
     end;
 
+    // process menu item submenu arrow image
     if mi.SubMenu <> nil then
     begin
-      canvas.SetColor(Canvas.TextColor);
+      Canvas.SetColor(Canvas.TextColor);
       x := (rect.height div 2) - 3;
-      img := fpgImages.GetImage('sys.sb.right');
+      img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
       Canvas.DrawImage(rect.right-x-2, rect.Top + ((rect.Height-img.Height) div 2), img);
-//      canvas.FillTriangle(rect.right-x-2, rect.top+2,
-//                          rect.right-2, rect.top+2+x,
-//                          rect.right-x-2, rect.top+2+2*x);
     end;
   end;
 end;
 
-procedure TfpgPopupMenu.DrawRow(line: integer; focus: boolean);
+procedure TfpgPopupMenu.DrawRow(line: integer; const AItemFocused: boolean);
 var
   n: integer;
   r: TfpgRect;
@@ -1062,7 +1082,7 @@ begin
 
     if line = n then
     begin
-      if focus and (not mi.Separator) then
+      if AItemFocused and (not mi.Separator) then
       begin
         if MenuFocused then
         begin
@@ -1092,7 +1112,7 @@ begin
         end;
       end;
       Canvas.FillRectangle(r);
-      DrawItem(mi, r);
+      DrawItem(mi, r, AItemFocused);
       Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
     end;
@@ -1202,8 +1222,8 @@ begin
     hkw := hkw + 10; // spacing between text and hotkey text
 
   FHeight := FMargin*2 + h;
-  FWidth  := (FMargin+FTextMargin)*2 + FSymbolWidth + tw + hkw;
-
+  FWidth  := ((FMargin+FTextMargin)*2) + FSymbolWidth + tw + hkw + (cImgWidth*2);
+  
   uFocusedPopupMenu := self;
 end;
 

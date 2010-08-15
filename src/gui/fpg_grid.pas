@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -25,7 +25,6 @@ unit fpg_grid;
       returning a TStrings with all related text inserted.
     * File Grid: Introduce support for images based on file types. User must
       be able to override the default images with their own.
-    * Remove the usage of libc unit. libc is linux/x86 specific.
 }
 
 interface
@@ -57,16 +56,18 @@ type
     property    Font;
     property    HeaderFont;
   published
-    property    FontDesc;
-    property    HeaderFontDesc;
-    property    RowCount;
     property    ColumnCount;
     property    Columns;
     property    FocusRow;
+    property    FontDesc;
+    property    HeaderFontDesc;
+    property    Options;
+    property    RowCount;
     property    ScrollBarStyle;
     property    TabOrder;
     property    OnRowChange;
     property    OnDoubleClick;
+    property    OnShowHint;
   end;
 
 
@@ -121,7 +122,10 @@ type
 
 
   TfpgStringGrid = class(TfpgCustomStringGrid)
+  public
+    property    Font;
   published
+    property    AlternateBGColor;
     property    BackgroundColor;
 //    property    ColResizing;
     property    ColumnCount;
@@ -134,8 +138,10 @@ type
     property    FontDesc;
     property    HeaderFontDesc;
     property    HeaderHeight;
+    property    Hint;
     property    Options;
     property    ParentShowHint;
+    property    PopupMenu;
     property    RowCount;
     property    RowSelect;
     property    ScrollBarStyle;
@@ -151,6 +157,7 @@ type
     property    OnFocusChange;
     property    OnKeyPress;
     property    OnRowChange;
+    property    OnShowHint;
   end;
 
 function CreateStringGrid(AOwner: TComponent; x, y, w, h: TfpgCoord; AColumnCount: integer = 0): TfpgStringGrid;
@@ -456,6 +463,7 @@ procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: Integer; ARect: TfpgRect;
 var
   Flags: TFTextFlags;
   txt: string;
+  r: TfpgRect;
 begin
   if Cells[ACol, ARow] <> '' then
   begin
@@ -483,7 +491,14 @@ begin
     end;  { case }
 
     with ARect,Columns[ACol] do
-      Canvas.DrawText(Left+HMargin, Top, Right-Left-(HMargin*2), Bottom-Top, txt, Flags);
+    begin
+      r := ARect;
+      // make adjustment for margins
+      r.Left := r.Left + HMargin;
+      r.Width := r.Width - (HMargin*2);
+      // finally paint the text
+      Canvas.DrawText(r, txt, Flags);
+    end;
   end;
 end;
 

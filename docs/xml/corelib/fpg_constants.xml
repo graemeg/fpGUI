@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <fpdoc-descriptions>
-<package name="CoreLib">
+<package name="fpGUI">
 
 <module name="fpg_constants">
-<short></short>
-<descr>
+<short>All constants used in fpGUI are defined here</short>
+<descr><p><printshort id="fpg_constants"/>. All the text constants defined here,
+are also the ones that get translated to multiple languages. Currently fpGUI
+and translations for: Afrikaans, German, English (default), Spanish, French,
+Italian, Portuguese (Brazil) and Russian.</p>
+<p>To change the default (compiled in) language used by fpGUI, simply enabled
+one of the language DEFINES in the interface section of the fpg_constants unit.
+</p>
 </descr>
-
-</module>
-
-</package>
+      <element name="fpgAddColon">
+        <short>A utility function to add a colon at the correct location in a string</short>
+        <descr>
+          <printshort id="fpgAddColon"/>. This is so that when fpGUI supports LTR and RTL languages, the colon will be added at the correct place.</descr>
+      </element>
+      <element name="DEFAULT_HINT_PAUSE">
+        <short>Default pause in milliseconds before a hint is displayed</short>
+      </element>
+      <element name="DOUBLECLICK_MS">
+        <short>Time maximum time in milliseconds between left-clicks for a double click to be triggered</short>
+      </element>
+      <element name="DOUBLECLICK_DISTANCE">
+        <short>Maximum distance a mouse pointer can move between two left-clicks and still trigger a double click event</short>
+      </element>
+    </module>
+  </package>
 </fpdoc-descriptions>

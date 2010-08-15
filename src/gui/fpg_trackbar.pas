@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -69,13 +69,16 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    BackgroundColor;
+    property    Hint;
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 10;
     property    Position: integer read FPosition write SetTBPosition default 0;
+    property    ShowHint;
     property    SliderSize: integer read FSliderSize write SetSliderSize default 11;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
     property    TabOrder;
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
+    property    OnShowHint;
   end;
   
   
@@ -118,6 +121,7 @@ type
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
     property    ParentShowHint;
+    property    Hint;
     property    ShowHint;
     property    ShowPosition: boolean read FShowPosition write SetShowPosition default False;
     property    Orientation: TOrientation read FOrientation write FOrientation default orHorizontal;
@@ -126,6 +130,7 @@ type
     property    OnChange: TTrackBarChange read FOnChange write FOnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnShowHint;
   end;
   
 

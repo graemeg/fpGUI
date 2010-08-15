@@ -8,26 +8,30 @@
       <Version Value="8"/>
       <PathDelim Value="\"/>
       <SearchPaths>
+        <IncludeFiles Value="..\..\"/>
         <OtherUnitFiles Value="..\;..\..\gui\;..\..\gui\db\"/>
         <UnitOutputDirectory Value="..\..\..\lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
         <SyntaxOptions>
-          <CStyleOperator Value="False"/>
           <AllowLabel Value="False"/>
           <CPPInline Value="False"/>
+          <UseAnsiStrings Value="True"/>
         </SyntaxOptions>
       </Parsing>
+      <CodeGeneration>
+        <Optimizations>
+          <OptimizationLevel Value="0"/>
+        </Optimizations>
+      </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="fpGUI Toolkit
-"/>
-    <License Value="Modified LGPL
-"/>
-    <Version Minor="6" Release="3"/>
-    <Files Count="73">
+    <Description Value="fpGUI Toolkit"/>
+    <License Value="LGPL 2 with static linking exception."/>
+    <Version Minor="7"/>
+    <Files Count="80">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -320,6 +324,34 @@
         <Filename Value="..\..\gui\fpg_colorwheel.pas"/>
         <UnitName Value="fpg_ColorWheel"/>
       </Item73>
+      <Item74>
+        <Filename Value="fpg_interface.pas"/>
+        <UnitName Value="fpg_interface"/>
+      </Item74>
+      <Item75>
+        <Filename Value="..\..\gui\fpg_editbtn.pas"/>
+        <UnitName Value="fpg_editbtn"/>
+      </Item75>
+      <Item76>
+        <Filename Value="..\..\gui\colordialog.inc"/>
+        <Type Value="Include"/>
+      </Item76>
+      <Item77>
+        <Filename Value="..\fpg_imgfmt_jpg.pas"/>
+        <UnitName Value="fpg_imgfmt_jpg"/>
+      </Item77>
+      <Item78>
+        <Filename Value="..\..\gui\inputquerydialog.inc"/>
+        <Type Value="Include"/>
+      </Item78>
+      <Item79>
+        <Filename Value="..\fpg_imgutils.pas"/>
+        <UnitName Value="fpg_imgutils"/>
+      </Item79>
+      <Item80>
+        <Filename Value="..\..\VERSION_FILE.inc"/>
+        <Type Value="Include"/>
+      </Item80>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>
     <RequiredPkgs Count="1">
@@ -333,7 +365,6 @@
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
-      <DestinationDirectory Value="$(TestDir)\publishedpackage\"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>

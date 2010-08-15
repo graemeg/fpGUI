@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -26,6 +26,7 @@ interface
 uses
   Classes
   ,SysUtils
+  ,fpg_base
   ;
 
 
@@ -57,6 +58,7 @@ type
 
 
 procedure TranslateResourceStrings(const BaseAppName, BaseDirectory, CustomLang: string);
+function  fpgMatchLocale(const ALanguageID: TfpgString): boolean;
 
 
 implementation
@@ -157,14 +159,26 @@ begin
 end;
 
 // Strip the '.' onwards part. eg: en_ZA.UTF-8  ->  en_ZA
-procedure FixLanguageIDs;
+procedure FixLanguageIDs(var ALanguageID: TfpgString);
 var
   lpos: integer;
 begin
-  lpos := Pos('.', SystemLanguageID1);
+  lpos := Pos('.', ALanguageID);
   if lpos > 0 then
-    SystemLanguageID1 := Copy(SystemLanguageID1, 0, lpos-1);
+    ALanguageID := Copy(ALanguageID, 0, lpos-1);
 end;
+
+function fpgMatchLocale(const ALanguageID: TfpgString): boolean;
+var
+  s: TfpgString;
+begin
+  s := ALanguageID;
+  FixLanguageIDs(s);
+  Result := s = SystemLanguageID1;
+  if not Result then
+    Result := s = SystemLanguageID2;
+end;
+
 
 { TTranslationList }
 
@@ -213,7 +227,7 @@ end;
 initialization
   TranslationList := nil;
   GetLanguageIDs(SystemLanguageID1, SystemLanguageID2);
-  FixLanguageIDs;
+  FixLanguageIDs(SystemLanguageID1);
 
 finalization
   TranslationList.Free;

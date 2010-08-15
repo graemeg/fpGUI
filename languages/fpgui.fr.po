@@ -80,6 +80,10 @@ msgstr "Impossible de créer le répertoire"
 msgid "Change"
 msgstr "Modifier"
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr "Table de caractères"
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Fermer"
@@ -239,6 +243,10 @@ msgstr "Information"
 #: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Insérer"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -400,6 +408,10 @@ msgstr "Chercher"
 msgid "Select"
 msgstr "Selectionner"
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Sélectionner un répertoire"
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Choisir la police"
@@ -435,6 +447,10 @@ msgstr "Dim"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Dimanche"
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr "Texte à insérer"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"

@@ -8,7 +8,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
   fpg_widget, fpg_form, fpg_label, fpg_button, fpg_combobox,
   fpg_dialogs, fpg_menu,
-  model, tiFormMediator;
+  model, tiModelMediator;
 
 type
   TAddressEditForm = class(TfpgForm)
@@ -32,7 +32,7 @@ type
     btnCancel: TfpgButton;
     {@VFD_HEAD_END: AddressEditForm}
     FData: TAddress;
-    FMediator: TFormMediator;
+    FMediator: TtiModelMediator;
     procedure SetData(const AValue: TAddress);
     procedure SetupMediators;
   public
@@ -76,7 +76,7 @@ procedure TAddressEditForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    FMediator := TFormMediator.Create(self);
+    FMediator := TtiModelMediator.Create(self);
     FMediator.AddProperty('AddressType', cbType).ValueList := gContactManager.AddressTypeList;
     FMediator.AddProperty('Nr', edNo);
     FMediator.AddProperty('Street', edStreet);

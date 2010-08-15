@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -183,13 +183,11 @@ begin
     pixelcnt := 0;
     while (p) < (pdata) do
     begin
-      pcol^ := Plongword(p)^;
-      //Writeln('color: ',HexStr(pcol^,8));
+      pcol^ := (LongWord(p[3]) shl 24) + (LongWord(p[2]) shl 16) + (LongWord(p[1]) shl 8) + LongWord(p[0]);
       Inc(pcol);
-      Inc(Plongword(p));
+      inc(p, 4);
       Inc(pixelcnt);
     end;
-    //writeln(pixelcnt,' colors loaded.');
   end;
 
   pdest := img.ImageData;
@@ -219,7 +217,7 @@ begin
 
       //Writeln(linecnt,' lines loaded.');
       move(img.ImageData^, img.MaskData^, img.ImageDataSize);
-      img.Invert;
+      img.Invert(True);
     end;
 
     4:

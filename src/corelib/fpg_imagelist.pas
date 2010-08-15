@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -72,6 +72,7 @@ type
     procedure   AddImage(AImage: TfpgImage; AIndex: integer = -1);
     procedure   RemoveIndex(AIndex: integer);
     function    GetMaxItem: integer;
+    procedure   Clear;
     property    Item[AIndex: integer]: TfpgImageItem read GetItem write SetItem;
     property    Count: integer read GetCount;
   end;
@@ -208,6 +209,11 @@ begin
       result := TfpgImageItem(FList[i]).Index;
 end;
 
+procedure TfpgImageList.Clear;
+begin
+  FList.Clear;
+end;
+
 { TfpgImageItem }
 
 procedure TfpgImageItem.SetImageList(AImageList: TfpgImageList);
@@ -276,7 +282,7 @@ end;
 destructor TfpgImageItem.Destroy;
 begin
   if FImage <> nil then
-     FImage.Destroy;
+     FImage.Free;
   inherited Destroy;
 end;
 

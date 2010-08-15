@@ -8,7 +8,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_edit,
   fpg_widget, fpg_form, fpg_label, fpg_button,
   fpg_listview, fpg_memo,
-  model, tiFormMediator;
+  model, tiModelMediator;
 
 type
 
@@ -35,8 +35,8 @@ type
     btnDebug: TfpgButton;
     {@VFD_HEAD_END: ContactEditForm}
     FData: TContact;
-    FMediator: TFormMediator;
-    FAdrsMediator: TFormMediator;
+    FMediator: TtiModelMediator;
+    FAdrsMediator: TtiModelMediator;
     procedure SetData(const AValue: TContact);
     procedure SetupMediators;
     procedure btnDebugClicked(Sender: TObject);
@@ -77,7 +77,7 @@ procedure TContactEditForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    FMediator := TFormMediator.Create(self);
+    FMediator := TtiModelMediator.Create(self);
     FMediator.AddProperty('FirstName', edFName);
     FMediator.AddProperty('LastName', edLName);
     FMediator.AddProperty('EMail', edEmail);
@@ -89,7 +89,7 @@ begin
 
   if not Assigned(FAdrsMediator) then
   begin
-    FAdrsMediator := TFormMediator.Create(self);
+    FAdrsMediator := TtiModelMediator.Create(self);
     FAdrsMediator.AddComposite({'AddressType.Name;}'AddressType4GUI(50,"Type");Nr;Street;Telephone1', lvAddresses);
   end;
   FAdrsMediator.Subject := FData.AddressList;
@@ -105,7 +105,7 @@ procedure TContactEditForm.btnEditClicked(Sender: TObject);
 var
   obj: TAddress;
 begin
-  obj := TAddress(TListViewMediator(FAdrsMediator.FindByComponent(lvAddresses).Mediator).SelectedObject);
+  obj := TAddress(TtiListViewMediatorView(FAdrsMediator.FindByComponent(lvAddresses).Mediator).SelectedObject);
   tiShowString(obj.AsDebugString);
 
   if not Assigned(obj) then

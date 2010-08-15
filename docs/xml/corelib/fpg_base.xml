@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="CoreLib">
+  <package name="fpGUI">
     <!--
   ====================================================================
     gfxbase
@@ -17,7 +17,6 @@ of fpGUI. It also defines many types and constants used throughout the toolkit.
 defined in this unit.
 </p>
       </descr>
-
       <!-- alias type Visibility: default -->
       <element name="TfpgCoord">
         <short>A custom type used to represent X and Y coordinates.</short>
@@ -34,9 +33,9 @@ underlying type in the future. Example to floating points.
           <p>TfpgColor is always in RRGGBB (Red, Green, Blue) format, no matter the
 operating system.
 </p>
-          <p>The <var>gfxbase</var> unit also contains definitions of many useful color 
+          <p>The <var>fpg_base</var> unit also contains definitions of many useful color 
 constants. It defines the standard predefined Delphi colors (like clRed, 
-clMagenta etc.), the 140 websafe colors using the defacto standard names as 
+clMagenta etc.), the 140 web safe colors using the defacto standard names as 
 used by Netscape and Internet Explorer web browsers. As well as some internal 
 color constants used by many GUI components (like clText, clWindowBackground 
 etc.).
@@ -47,7 +46,7 @@ etc.).
       <!-- record type Visibility: default -->
       <element name="TRGBTriple">
         <short>A record structure holding the RGBA values of a color.</short>
-        <descr/>
+        <descr>This is now marked as "deprecated". Please use TFPColor instead.</descr>
         <seealso/>
       </element>
       <!-- variable Visibility: default -->
@@ -88,17 +87,17 @@ means no titlebar or window borders are going to be created.</short>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtWindow">
         <short>This would specify a standard window with titlebar and window borders.</short>
+        <descr>This would specify a standard window with titlebar and window borders. It grabs input focus, and appears in the taskbar.</descr>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtModalForm">
-        <short>This windows is the same as <link id="TWindowType.wtWindow">wtWindow</link>, 
-but grabs the input focus until it has closed.</short>
+        <short>This windows type is similar to <link id="TWindowType.wtWindow">wtWindow</link>, but grabs focus.</short>
+        <descr>This windows is the same as <link id="TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtPopup">
-        <short>This window will normally not have a titlebar or window borders and will 
-appear above other windows. It is used for example in the dropdown window of a 
-ComboBox or a tooltip window.</short>
+        <short>This window will normally not have a titlebar or window borders.</short>
+        <descr>This window will normally not have a titlebar or window borders and will appear above other windows. It is used for example in the dropdown window of a ComboBox or a tooltip window or popup menus. This type of window does not steal focus.</descr>
       </element>
       <!-- enumeration type Visibility: default -->
       <element name="TWindowAttribute">
@@ -195,6 +194,22 @@ it is shown for the first time.</short>
         <short>Defines that the gradient must be painted horizontally.</short>
       </element>
       <!-- enumeration type Visibility: default -->
+      <element name="TFileEntryType">
+        <short>Represents the type of entry found on the filesystem.</short>
+        <descr/>
+        <seealso>
+          <link id="TFileEntry"/>
+        </seealso>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFileEntryType.etFile">
+        <short>Denotes a File type</short>
+      </element>
+      <!-- enumeration value Visibility: default -->
+      <element name="TFileEntryType.etDir">
+        <short>Denotes a Directory type</short>
+      </element>
+      <!-- enumeration type Visibility: default -->
       <element name="TClipboardKeyType">
         <short>Represents the clipboard function being triggered by some keyboard key combination.</short>
         <descr/>
@@ -202,19 +217,19 @@ it is shown for the first time.</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckNone">
-        <short/>
+        <short>No clipboard action detected</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckCopy">
-        <short/>
+        <short>Copy to clipboard action detected</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckPaste">
-        <short/>
+        <short>Paste to clipboard action detected</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TClipboardKeyType.ckCut">
-        <short/>
+        <short>Cut to clipboard action detected</short>
       </element>
       <!-- constant Visibility: default -->
       <element name="MOUSE_LEFT">
@@ -2678,11 +2693,71 @@ it is shown for the first time.</short>
       </element>
       <!-- object Visibility: default -->
       <element name="TfpgRect">
-        <short>A rectangle structure used throughout fpGUI.</short>
-        <descr>Note that this structure is not a class, so static allocations are 
+        <short>A graphical (pixel based) rectangle structure used throughout fpGUI.</short>
+        <descr>
+          <p>Note that this structure is not a class, so static allocations are 
 allowed. This makes it much easier to use in Widgets and in fpGUI internal
-messages.
-</descr>
+messages.</p>
+          <p>Think of the pixel screen/grid like the grid of a spreadsheet (or as a magnified look of the top corner of your screen).
+</p>
+          <pre>.
+     0   1
+   +---+---+---
+0  | x |   |
+   +---+---+---
+1  |   |   |
+   +---+---+---
+2  |   |   |
+   +---+---+---
+   |   |   |
+</pre>
+          <p>x is at (0,0). A pixel is always 1x1, you don't get smaller (we are not using sub-pixels like on LCD screens, because they don't apply to all screens).  
+</p>
+          <p>So with that example, Width = 1 pixel and Height = 1 pixel. In the case of 
+Classes.Bounds() the Right and Bottom values are (1,1) which looking at the 
+above image will be wrong, the pixel only covers one block, so in a screen/pixel 
+environment, Right, Bottom is also (0,0), the same as Top/Left. This is what
+TfpgRect.Right and TfpgRect.Bottom will report.
+</p>
+          <pre>.
+     0   1
+   +---+---+---
+0  | x | x |
+   +---+---+---
+1  | x | x |
+   +---+---+---
+2  |   |   |
+   +---+---+---
+   |   |   |
+</pre>
+          <p>In this example we have a rectangle. Top/Left = (0,0) and Bottom/Right = (1,1). 
+This means Width = 2 pixels and Height = 2 pixels. Clearly visible in the image 
+above.
+</p>
+          <p>But if we call Classes.Bounds(0,0,2,2) it reports Bottom/Right as (2,2) which 
+is wrong (again looking at the image above as reference). This is my point. 
+Bounds() cannot be used in this case in a graphical environment.
+</p>
+          <p>The reason I don't use a grid layout as shown below, is 
+because if the mouse is over the rectangle containing x, the OS (graphics system) reports its 
+position as (0,0). You don't have to have the mouse pointer over the intersecting 
+lines at (0,0) as indicated in the image below. The whole square containing 
+the x is referenced as (0,0), hence the grid layout as show in the images above,
+and what fpGUI uses. The same grid layout as used in TfpgStringGrid or any 
+Spreadsheet program etc.
+</p>
+          <pre>.
+   0   1   2
+0  +---+---+---
+   | x |   |
+1  +---+---+---
+   |   |   |
+2  +---+---+---
+   |   |   |
+3  +---+---+---
+   |   |   |
+</pre>
+        </descr>
         <errors/>
         <seealso/>
       </element>
@@ -3098,7 +3173,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.Invert">
-        <short/>
+        <short>Inverts the Image</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3112,7 +3187,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.AllocateImage">
-        <short/>
+        <short>Allocates OS resources for the Image</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3131,14 +3206,14 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.AllocateMask">
-        <short/>
+        <short>Allocates OS resources for the Image Mask</short>
         <descr/>
         <errors/>
         <seealso/>
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.CreateMaskFromSample">
-        <short/>
+        <short>Creates a mask based on the sample point presented by X and Y parameters</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3153,7 +3228,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- procedure Visibility: public -->
       <element name="TfpgImageBase.UpdateImage">
-        <short/>
+        <short>Updates the internal image resources and OS resources from image data</short>
         <descr/>
         <errors/>
         <seealso/>
@@ -3184,19 +3259,19 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.Width">
-        <short/>
+        <short>Width of the image</short>
         <descr/>
         <seealso/>
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.Height">
-        <short/>
+        <short>Height of the image</short>
         <descr/>
         <seealso/>
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.ColorDepth">
-        <short/>
+        <short>Color depth of the image. Currently 24/32-bit is all that is supported.</short>
         <descr/>
         <seealso/>
       </element>
@@ -3208,7 +3283,7 @@ titlebars or borders inside a main parent window.
       </element>
       <!-- property Visibility: public -->
       <element name="TfpgImageBase.Colors">
-        <short/>
+        <short>Array property to access a specific color of the image based on X and Y co-ordinates</short>
         <descr/>
         <seealso/>
       </element>
@@ -5439,7 +5514,34 @@ Right. And the Top is always smaller than the Bottom.
         <short>Clips the line based on AClipRect boundaries.</short>
         <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
       </element>
+      <element name="TFileEntry">
+        <short>A simple data object representing a file</short>
+        <descr>
+          <printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
+      </element>
+      <element name="TFileEntry.Name">
+        <short>Name of a file</short>
+      </element>
+      <element name="TFileEntry.Extension">
+        <short>The extension of a file</short>
+      </element>
+      <element name="TFileEntry.Size">
+        <short>Size of a file in bytes</short>
+      </element>
+      <element name="TFileEntry.IsLink">
+        <short>Is this item a symbolic link (on unix-type OSes)</short>
+      </element>
+      <element name="TFileEntry.LinkTarget">
+        <short>If it is a symbolic link, LinkTarget is what it points too</short>
+      </element>
+      <element name="TFileEntry.ModTime">
+        <short>Last modified timestamp</short>
+      </element>
+      <element name="TFPColor">
+        <short>A record structure holding the RGBA values of a color.</short>
+        <descr>This is the same declaration as the one found in FPImage (include with Free Pascal Compiler). In future when FPImage is integrated with fpGUI, I will remove this declaration.</descr>
+      </element>
     </module>
-    <!-- gfxbase -->
+    <!-- fpg_base -->
   </package>
-</fpdoc-descriptions>
+</fpdoc-descriptions>

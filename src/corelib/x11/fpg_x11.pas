@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -52,6 +52,7 @@ type
   PInt = ^integer;
 
 
+  {$HINTS OFF}
   TXIC = record
     dummy: Pointer;
   end;
@@ -62,6 +63,7 @@ type
     dummy: Pointer;
   end;
   PXIM = ^TXIM;
+  {$HINTS ON}
 
 
   TXdbeSwapInfo = record
@@ -109,7 +111,6 @@ const
   PROP_MWM_HINTS_ELEMENTS             = 5;
 
 type
-
   TXWindowStateFlag = (xwsfMapped);
   TXWindowStateFlags = set of TXWindowStateFlag;
   
@@ -117,10 +118,10 @@ type
   TX11EventFilter = function(const AEvent: TXEvent): Boolean of object;
 
   // forward declaration
-  TfpgWindowImpl = class;
+  TfpgX11Window = class;
   
 
-  TfpgFontResourceImpl = class(TfpgFontResourceBase)
+  TfpgX11FontResource = class(TfpgFontResourceBase)
   private
     FFontData: PXftFont;
     function    DoGetTextWidthClassic(const txt: string): integer;
@@ -138,7 +139,7 @@ type
   end;
 
 
-  TfpgImageImpl = class(TfpgImageBase)
+  TfpgX11Image = class(TfpgImageBase)
   private
     FXimg: TXImage;
     FXimgmask: TXImage;
@@ -153,14 +154,14 @@ type
   end;
 
 
-  TfpgCanvasImpl = class(TfpgCanvasBase)
+  TfpgX11Canvas = class(TfpgCanvasBase)
   private
     FDrawing: boolean;
-    FDrawWindow: TfpgWindowImpl;
+    FDrawWindow: TfpgX11Window;
     FBufferPixmap: TfpgDCHandle;
     FDrawHandle: TfpgDCHandle;
     Fgc: TfpgGContext;
-    FCurFontRes: TfpgFontResourceImpl;
+    FCurFontRes: TfpgX11FontResource;
     FClipRect: TfpgRect;
     FClipRectSet: boolean;
     FXftDraw: PXftDraw;
@@ -203,12 +204,12 @@ type
   end;
 
 
-  TfpgWindowImpl = class(TfpgWindowBase)
+  TfpgX11Window = class(TfpgWindowBase)
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
     FBackupWinHandle: TfpgWinHandle;  // Used by DestroyNotify & UnmapNotify events
-    FModalForWin: TfpgWindowImpl;
+    FModalForWin: TfpgX11Window;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     procedure   DoReleaseWindowHandle; override;
     procedure   DoRemoveWindowLookup; override;
@@ -229,9 +230,9 @@ type
   end;
 
 
-  TfpgApplicationImpl = class(TfpgApplicationBase)
+  TfpgX11Application = class(TfpgApplicationBase)
   private
-    FComposeBuffer: String[32];
+    FComposeBuffer: TfpgString;
     FComposeStatus: TStatus;
     FEventFilter: TX11EventFilter;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
@@ -268,12 +269,12 @@ type
     function    Screen_dpi_y: integer; override;
     function    Screen_dpi: integer; override;
     property    Display: PXDisplay read FDisplay;
-    property    RootWindow: TfpgWinHandle read FRootWindow;
-    property    EventFilter: TX11EventFilter read FEventFilter write FEventFilter;
+    property    RootWindow: TfpgWinHandle read FRootWindow; platform;
+    property    EventFilter: TX11EventFilter read FEventFilter write FEventFilter; platform;
   end;
 
 
-  TfpgClipboardImpl = class(TfpgClipboardBase)
+  TfpgX11Clipboard = class(TfpgClipboardBase)
   private
     FWaitingForSelection: Boolean;
   protected
@@ -284,11 +285,13 @@ type
   end;
   
   
-  TfpgFileListImpl = class(TfpgFileListBase)
-    function    EncodeModeString(FileMode: longword): TFileModeString;
-    constructor Create; override;
+  TfpgX11FileList = class(TfpgFileListBase)
+  protected
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
+  public
+    constructor Create; override;
+    function    EncodeModeString(FileMode: longword): TFileModeString;
   end;
 
 
@@ -299,7 +302,9 @@ implementation
 
 uses
   baseunix,
-  users,  { for *nix user and group name support }
+  {$IFNDEF DARWIN}
+  users,  { For unix user and group name support. Mac+X11 doesn't like this }
+  {$ENDIF}
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
@@ -383,7 +388,7 @@ type
 
   // single direction linked list
   WindowLookupRec = record
-    w: TfpgWindowImpl;
+    w: TfpgX11Window;
     Next: PWindowLookupRec;
   end;
 
@@ -391,7 +396,7 @@ var
   FirstWindowLookupRec: PWindowLookupRec;
   LastWindowLookupRec: PWindowLookupRec;
 
-procedure AddWindowLookup(w: TfpgWindowImpl);
+procedure AddWindowLookup(w: TfpgX11Window);
 var
   p: PWindowLookupRec;
 begin
@@ -408,7 +413,7 @@ begin
   LastWindowLookupRec := p;
 end;
 
-procedure RemoveWindowLookup(w: TfpgWindowImpl);
+procedure RemoveWindowLookup(w: TfpgX11Window);
 var
   prevp: PWindowLookupRec;
   p: PWindowLookupRec;
@@ -437,7 +442,7 @@ begin
     end;
 end;
 
-function FindWindowByHandle(wh: TfpgWinHandle): TfpgWindowImpl;
+function FindWindowByHandle(wh: TfpgWinHandle): TfpgX11Window;
 var
   p: PWindowLookupRec;
 begin
@@ -457,7 +462,7 @@ begin
   Result := nil;
 end;
 
-function FindWindowByBackupHandle(wh: TfpgWinHandle): TfpgWindowImpl;
+function FindWindowByBackupHandle(wh: TfpgWinHandle): TfpgX11Window;
 var
   p: PWindowLookupRec;
 begin
@@ -534,7 +539,7 @@ begin
   e._type       := SelectionNotify;
   e.requestor   := ev.xselectionrequest.requestor;
   e.selection   := ev.xselectionrequest.selection;
-  e.selection   := xapplication.xia_clipboard;
+//  e.selection   := xapplication.xia_clipboard;
   e.target      := ev.xselectionrequest.target;
   e.time        := ev.xselectionrequest.time;
   e._property   := ev.xselectionrequest._property;
@@ -543,7 +548,7 @@ begin
   begin
     a := XA_STRING;
     XChangeProperty(xapplication.Display, e.requestor, e._property,
-		      XA_ATOM, sizeof(TAtom)*8, 0, PByte(@a), sizeof(TAtom));
+		      XA_ATOM, 32, PropModeReplace, PByte(@a), Sizeof(TAtom)); // I think last parameter is right?
   end
   else
   begin
@@ -566,9 +571,9 @@ begin
 end;
 
 
-{ TfpgApplicationImpl }
+{ TfpgX11Application }
 
-function TfpgApplicationImpl.ConvertShiftState(AState: Cardinal): TShiftState;
+function TfpgX11Application.ConvertShiftState(AState: Cardinal): TShiftState;
 begin
   Result := [];
   if (AState and Button1Mask) <> 0 then
@@ -595,7 +600,7 @@ begin
     Include(Result, ssAltGr);
 end;
 
-function TfpgApplicationImpl.KeySymToKeycode(KeySym: TKeySym): Word;
+function TfpgX11Application.KeySymToKeycode(KeySym: TKeySym): Word;
 const
   Table_20aX: array[$20a0..$20ac] of Word = (keyEcuSign, keyColonSign,
     keyCruzeiroSign, keyFFrancSign, keyLiraSign, keyMillSign, keyNairaSign,
@@ -664,17 +669,23 @@ begin
 {$ENDIF}
 end;
 
-function TfpgApplicationImpl.StartComposing(const Event: TXEvent): TKeySym;
+function TfpgX11Application.StartComposing(const Event: TXEvent): TKeySym;
 var
   l: integer;
 begin
+  SetLength(FComposeBuffer, 20); // buffer set to some default size
   // Xutf8LookupString returns the size of FComposeBuffer in bytes.
   l := Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
-        SizeOf(FComposeBuffer) - 1, @Result, @FComposeStatus);
+        Length(FComposeBuffer), @Result, @FComposeStatus);
   SetLength(FComposeBuffer, l);
+  // if overflow occured, then previous SetLength() would have fixed the buffer
+  // size, so run Xutf8LookupString again to read correct value.
+  if FComposeStatus = XBufferOverflow then
+    Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
+        Length(FComposeBuffer), @Result, @FComposeStatus);
 end;
 
-function TfpgApplicationImpl.DoGetFontFaceList: TStringList;
+function TfpgX11Application.DoGetFontFaceList: TStringList;
 var
   pfs: PFcFontSet;
   ppat: PPFcPattern;
@@ -682,7 +693,8 @@ var
   s: string;
   pc: PChar;
 begin
-  pfs := XftListFonts(Display, DefaultScreen, [FC_SCALABLE, FcTypeBool, 1, 0, FC_FAMILY, 0]);
+  // this now even returns non-scaleable fonts which is what we sometimes want.
+  pfs := XftListFonts(Display, DefaultScreen, [0, FC_FAMILY, 0]);
 
   if pfs = nil then
     Exit; //==>
@@ -706,7 +718,7 @@ begin
   Result.Sort;
 end;
 
-constructor TfpgApplicationImpl.Create(const AParams: string);
+constructor TfpgX11Application.Create(const AParams: string);
 begin
   inherited Create(AParams);
   FIsInitialized    := False;
@@ -741,15 +753,14 @@ begin
   if InputMethod = nil then
     Exit;
 
-  InputContext := XCreateIC(InputMethod, [XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0]);
+  InputContext := XCreateIC(InputMethod, [XNInputStyle, XIMPreeditNothing or XIMStatusNothing, nil]);
   if InputContext = nil then
     Exit;
-
   FIsInitialized := True;
   xapplication := TfpgApplication(self);
 end;
 
-destructor TfpgApplicationImpl.Destroy;
+destructor TfpgX11Application.Destroy;
 begin
   netlayer.Free;
   XCloseDisplay(FDisplay);
@@ -757,7 +768,7 @@ begin
   inherited Destroy;
 end;
 
-function TfpgApplicationImpl.DoMessagesPending: boolean;
+function TfpgX11Application.DoMessagesPending: boolean;
 begin
   Result := (XPending(display) > 0);
 end;
@@ -823,15 +834,15 @@ begin
   end;
 end;
 
-procedure TfpgApplicationImpl.DoWaitWindowMessage(atimeoutms: integer);
+procedure TfpgX11Application.DoWaitWindowMessage(atimeoutms: integer);
 var
   ev: TXEvent;
   NewEvent: TXevent;
   i: integer;
   r: integer;
   blockmsg: boolean;
-  w: TfpgWindowImpl;
-  ew: TfpgWindowImpl;
+  w: TfpgX11Window;
+  ew: TfpgX11Window;
   kwg: TfpgWidget;
   wh: TfpgWinHandle;
   wa: TXWindowAttributes;
@@ -848,9 +859,9 @@ var
   procedure PrintKeyEvent(const event: TXEvent);
   var
     keysym: TKeySym;
-    compose_status: TXComposeStatus;
-    length: integer;
-    s: string[10];
+    icstatus: TStatus;
+    l: integer;
+    s: string;
   begin
     case event._type of
       X.KeyPress:
@@ -866,10 +877,12 @@ var
           writeln('not a key event ');
         end;
     end;
-    length := Xutf8LookupString(InputContext, @event.xkey, @s[1], 9, @keysym, @compose_status);
-    SetLength(s, length);
-    if((length > 0) and (length <=9)) then
-      writeln('result of xlookupstring [' + s + ']');
+    SetLength(s, 20);
+    l := Xutf8LookupString(InputContext, @event.xkey, @s[1], Length(s), @keysym, @icstatus);
+    SetLength(s, l);
+    if icstatus = XBufferOverflow then
+      Xutf8LookupString(InputContext, @event.xkey, @s[1], Length(s), @keysym, @icstatus);
+    writeln('result of xlookupstring [' + s + ']');
     writeln(Format('*** keysym [%s] ', [XKeysymToString(keysym)]));
   end;
 
@@ -1042,7 +1055,7 @@ begin
             begin
               ew := w;
               while (w <> nil) and (w.Parent <> nil) do
-                w := TfpgWindowImpl(w.Parent);
+                w := TfpgX11Window(w.Parent);
 
               if (w <> nil) and (PopupListFind(w.WinHandle) = nil) and
                  (not PopupDontCloseWidget(TfpgWidget(ew))) then
@@ -1055,7 +1068,7 @@ begin
           w := FindWindowByHandle(ev.xbutton.window); // restore w
           if xapplication.TopModalForm <> nil then
           begin
-            ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+            ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
             if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
@@ -1133,7 +1146,7 @@ begin
             ReportLostWindow(ev);
           if xapplication.TopModalForm <> nil then
           begin
-            ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+            ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
             if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
               blockmsg := true;
           end;
@@ -1168,7 +1181,7 @@ begin
               if xapplication.TopModalForm <> nil then
               begin
                 // This is ugly!!!!!!!!!!!!!!!
-                ew := TfpgWindowImpl(WidgetParentForm(TfpgWidget(w)));
+                ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
                 if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                   blockmsg := true;
               end;
@@ -1271,7 +1284,7 @@ begin
           if not Assigned(w) then
             ReportLostWindow(ev)
           else
-            RemoveWindowLookup(TfpgWindowImpl(w));
+            RemoveWindowLookup(TfpgX11Window(w));
         end;
 
     X.GraphicsExpose,
@@ -1294,28 +1307,28 @@ begin
   end;
 end;
 
-procedure TfpgApplicationImpl.DoFlush;
+procedure TfpgX11Application.DoFlush;
 begin
   XFlush(FDisplay);
 end;
 
-function TfpgApplicationImpl.GetScreenWidth: TfpgCoord;
+function TfpgX11Application.GetScreenWidth: TfpgCoord;
 var
   wa: TXWindowAttributes;
 begin
-  XGetWindowAttributes(FDisplay, RootWindow, @wa);
+  XGetWindowAttributes(FDisplay, FRootWindow, @wa);
   Result := wa.Width;
 end;
 
-function TfpgApplicationImpl.GetScreenHeight: TfpgCoord;
+function TfpgX11Application.GetScreenHeight: TfpgCoord;
 var
   wa: TXWindowAttributes;
 begin
-  XGetWindowAttributes(FDisplay, RootWindow, @wa);
+  XGetWindowAttributes(FDisplay, FRootWindow, @wa);
   Result := wa.Height;
 end;
 
-function TfpgApplicationImpl.Screen_dpi_x: integer;
+function TfpgX11Application.Screen_dpi_x: integer;
 var
   mm: integer;
 begin
@@ -1328,7 +1341,7 @@ begin
     Result := 96; // seems to be a well known default. :-(
 end;
 
-function TfpgApplicationImpl.Screen_dpi_y: integer;
+function TfpgX11Application.Screen_dpi_y: integer;
 var
   mm: integer;
 begin
@@ -1341,7 +1354,7 @@ begin
     Result := Screen_dpi_x; // same as width
 end;
 
-function TfpgApplicationImpl.Screen_dpi: integer;
+function TfpgX11Application.Screen_dpi: integer;
 begin
   Result := Screen_dpi_y;
   {$IFDEF DEBUG}
@@ -1351,9 +1364,9 @@ begin
   {$ENDIF}
 end;
 
-{ TfpgWindowImpl }
+{ TfpgX11Window }
 
-procedure TfpgWindowImpl.DoAllocateWindowHandle(AParent: TfpgWindowBase);
+procedure TfpgX11Window.DoAllocateWindowHandle(AParent: TfpgWindowBase);
 var
   pwh: TfpgWinHandle;
   wh: TfpgWinHandle;
@@ -1372,7 +1385,7 @@ begin
     Exit; //==>
 
   if AParent <> nil then
-    pwh := TfpgWindowImpl(AParent).WinHandle
+    pwh := TfpgX11Window(AParent).WinHandle
   else
     pwh := xapplication.RootWindow;
 
@@ -1385,6 +1398,7 @@ begin
   end;
 
   AdjustWindowStyle;
+
   wh := XCreateWindow(xapplication.Display, pwh,
     FLeft, FTop, FWidth, FHeight, 0,
     CopyFromParent,
@@ -1461,9 +1475,9 @@ begin
     begin
       lmwh := 0;
       if fpgApplication.PrevModalForm <> nil then
-        lmwh := TfpgWindowImpl(fpgApplication.PrevModalForm).WinHandle
+        lmwh := TfpgX11Window(fpgApplication.PrevModalForm).WinHandle
       else if fpgApplication.MainForm <> nil then
-        lmwh := TfpgWindowImpl(fpgApplication.MainForm).WinHandle;
+        lmwh := TfpgX11Window(fpgApplication.MainForm).WinHandle;
       if lmwh <> 0 then
       begin
         XSetTransientForHint(xapplication.display, FWinHandle, lmwh);
@@ -1483,7 +1497,7 @@ begin
     prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', longbool(0));
     if prop = X.None then
     begin
-      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
+//      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
       // Set Override Redirect here!
       mwmhints.flags := 0;
     end
@@ -1514,7 +1528,7 @@ begin
   AddWindowLookup(self);
 end;
 
-procedure TfpgWindowImpl.DoReleaseWindowHandle;
+procedure TfpgX11Window.DoReleaseWindowHandle;
 //var
 //  lCallTrace: IInterface;
 begin
@@ -1533,13 +1547,13 @@ begin
   FWinHandle := 0;
 end;
 
-procedure TfpgWindowImpl.DoRemoveWindowLookup;
+procedure TfpgX11Window.DoRemoveWindowLookup;
 begin
 //  PrintCallTraceDbgLn('RemoveWindowLookup ' + Name + ' [' + Classname + ']');
   RemoveWindowLookup(self);
 end;
 
-procedure TfpgWindowImpl.DoSetWindowVisible(const AValue: Boolean);
+procedure TfpgX11Window.DoSetWindowVisible(const AValue: Boolean);
 begin
   if AValue then
   begin
@@ -1562,34 +1576,34 @@ begin
   end;
 end;
 
-function TfpgWindowImpl.HandleIsValid: boolean;
+function TfpgX11Window.HandleIsValid: boolean;
 begin
   Result := (FWinHandle > 0);
 end;
 
-procedure TfpgWindowImpl.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
+procedure TfpgX11Window.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
 begin
   if HandleIsValid then
     XMoveWindow(xapplication.display, FWinHandle, x, y);
 end;
 
-function TfpgWindowImpl.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
+function TfpgX11Window.DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
 var
   dx: integer;
   dy: integer;
   cw: TfpgWinHandle;
 begin
-  if not TfpgWindowImpl(ASource).HandleIsValid then
+  if not TfpgX11Window(ASource).HandleIsValid then
     Exit; //==>
     
-  XTranslateCoordinates(xapplication.display, TfpgWindowImpl(ASource).WinHandle,
+  XTranslateCoordinates(xapplication.display, TfpgX11Window(ASource).WinHandle,
       XDefaultRootWindow(xapplication.display), AScreenPos.X, AScreenPos.Y, @dx, @dy, @cw);
 
   Result.X := dx;
   Result.Y := dy;
 end;
 
-procedure TfpgWindowImpl.DoUpdateWindowPosition;
+procedure TfpgX11Window.DoUpdateWindowPosition;
 var
   w: longword;
   h: longword;
@@ -1607,14 +1621,17 @@ begin
     XMoveResizeWindow(xapplication.display, FWinHandle, FLeft, FTop, w, h);
 end;
 
-procedure TfpgWindowImpl.DoSetMouseCursor;
+procedure TfpgX11Window.DoSetMouseCursor;
 var
   xc: TCursor;
   shape: integer;
 begin
   if not HasHandle then
+  begin
+    FMouseCursorIsDirty := True;
     Exit; //==>
-    
+  end;
+
   case FMouseCursor of
     mcSizeEW:     shape := XC_sb_h_double_arrow;
     mcSizeNS:     shape := XC_sb_v_double_arrow;
@@ -1634,9 +1651,11 @@ begin
   xc := XCreateFontCursor(xapplication.Display, shape);
   XDefineCursor(xapplication.Display, FWinHandle, xc);
   XFreeCursor(xapplication.Display, xc);
+
+  FMouseCursorIsDirty := False;
 end;
 
-procedure TfpgWindowImpl.DoSetWindowTitle(const ATitle: string);
+procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);
 var
   tp: TXTextProperty;
 begin
@@ -1656,19 +1675,19 @@ begin
   XSetWMIconName(xapplication.Display, FWinHandle, @tp);
 end;
 
-constructor TfpgWindowImpl.Create(AOwner: TComponent);
+constructor TfpgX11Window.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
   FBackupWinHandle := 0;
 end;
 
-procedure TfpgWindowImpl.ActivateWindow;
+procedure TfpgX11Window.ActivateWindow;
 begin
   XSetInputFocus(xapplication.Display, FWinHandle, RevertToParent, CurrentTime);
 end;
 
-procedure TfpgWindowImpl.CaptureMouse;
+procedure TfpgX11Window.CaptureMouse;
 begin
   XGrabPointer(xapplication.Display, FWinHandle,
       TBool(False),
@@ -1682,20 +1701,20 @@ begin
       );
 end;
 
-procedure TfpgWindowImpl.ReleaseMouse;
+procedure TfpgX11Window.ReleaseMouse;
 begin
   XUngrabPointer(xapplication.display, CurrentTime);
 end;
 
-procedure TfpgWindowImpl.SetFullscreen(AValue: Boolean);
+procedure TfpgX11Window.SetFullscreen(AValue: Boolean);
 begin
   inherited SetFullscreen(AValue);
   fpgApplication.netlayer.WindowSetFullscreen(FWinHandle, AValue);
 end;
 
-{ TfpgFontResourceImpl }
+{ TfpgX11FontResource }
 
-function TfpgFontResourceImpl.DoGetTextWidthClassic(const txt: string): integer;
+function TfpgX11FontResource.DoGetTextWidthClassic(const txt: string): integer;
 var
   extents: TXGlyphInfo;
 begin
@@ -1703,7 +1722,7 @@ begin
   Result := extents.xOff;
 end;
 
-function TfpgFontResourceImpl.DoGetTextWidthWorkaround(const txt: string): integer;
+function TfpgX11FontResource.DoGetTextWidthWorkaround(const txt: string): integer;
 var
   extents: TXGlyphInfo;
   ch: string;
@@ -1719,40 +1738,40 @@ begin
   end;
 end;
 
-constructor TfpgFontResourceImpl.Create(const afontdesc: string);
+constructor TfpgX11FontResource.Create(const afontdesc: string);
 begin
   FFontData := XftFontOpenName(xapplication.display, xapplication.DefaultScreen, PChar(afontdesc));
 end;
 
-destructor TfpgFontResourceImpl.Destroy;
+destructor TfpgX11FontResource.Destroy;
 begin
   if HandleIsValid then
     XftFontClose(xapplication.Display, FFontData);
   inherited;
 end;
 
-function TfpgFontResourceImpl.HandleIsValid: boolean;
+function TfpgX11FontResource.HandleIsValid: boolean;
 begin
   Result := (FFontData <> nil);
 end;
 
-function TfpgFontResourceImpl.GetAscent: integer;
+function TfpgX11FontResource.GetAscent: integer;
 begin
   Result := FFontData^.ascent;
 end;
 
-function TfpgFontResourceImpl.GetDescent: integer;
+function TfpgX11FontResource.GetDescent: integer;
 begin
   Result := FFontData^.descent;
 end;
 
-function TfpgFontResourceImpl.GetHeight: integer;
+function TfpgX11FontResource.GetHeight: integer;
 begin
   // Do NOT use FFontData^.height as it isn't as accurate
   Result := GetAscent + GetDescent;
 end;
 
-function TfpgFontResourceImpl.GetTextWidth(const txt: string): integer;
+function TfpgX11FontResource.GetTextWidth(const txt: string): integer;
 begin
   if length(txt) < 1 then
   begin
@@ -1767,9 +1786,9 @@ begin
     Result := DoGetTextWidthWorkaround(txt);
 end;
 
-{ TfpgCanvasImpl }
+{ TfpgX11Canvas }
 
-constructor TfpgCanvasImpl.Create;
+constructor TfpgX11Canvas.Create;
 begin
   inherited;
   FDrawing    := False;
@@ -1782,7 +1801,7 @@ begin
   FClipRegion   := nil;
 end;
 
-destructor TfpgCanvasImpl.Destroy;
+destructor TfpgX11Canvas.Destroy;
 begin
   if FDrawing then
     DoEndDraw;
@@ -1791,7 +1810,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgCanvasImpl.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
+procedure TfpgX11Canvas.DoBeginDraw(awin: TfpgWindowBase; buffered: boolean);
 var
   x: integer;
   y: integer;
@@ -1804,15 +1823,15 @@ var
   pmh: longword;
   GcValues: TXGcValues;
 begin
-  if Assigned(TfpgWindowImpl(awin)) then
+  if Assigned(TfpgX11Window(awin)) then
   begin
     // This occurs every now and again with TfpgMemo and InvertCaret painting!
     // Investigate this.
-    if not TfpgWindowImpl(awin).HasHandle then
+    if not TfpgX11Window(awin).HasHandle then
       raise Exception.Create('Window doesn''t have a Handle');
   end;
   
-  XGetGeometry(xapplication.display, TfpgWindowImpl(awin).FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);
+  XGetGeometry(xapplication.display, TfpgX11Window(awin).FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);
 
   if FDrawing and buffered and (FBufferPixmap > 0) then
     if FBufferPixmap > 0 then
@@ -1825,7 +1844,7 @@ begin
 
   if not FDrawing then
   begin
-    FDrawWindow := TfpgWindowImpl(awin);
+    FDrawWindow := TfpgX11Window(awin);
 
     if buffered then
     begin
@@ -1881,13 +1900,12 @@ begin
       XDefaultColormap(xapplication.display, xapplication.DefaultScreen));
 
     FClipRegion := XCreateRegion;
-    
   end;
 
   FDrawing := True;
 end;
 
-procedure TfpgCanvasImpl.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
+procedure TfpgX11Canvas.DoPutBufferToScreen(x, y, w, h: TfpgCoord);
 var
   cgc: TfpgGContext;
   GcValues: TXGcValues;
@@ -1900,7 +1918,7 @@ begin
   end;
 end;
 
-procedure TfpgCanvasImpl.DoEndDraw;
+procedure TfpgX11Canvas.DoEndDraw;
 begin
   if FDrawing then
   begin
@@ -1916,7 +1934,7 @@ begin
   end;
 end;
 
-function TfpgCanvasImpl.GetPixel(X, Y: integer): TfpgColor;
+function TfpgX11Canvas.GetPixel(X, Y: integer): TfpgColor;
 var
   Image: PXImage;
   Pixel: Cardinal;
@@ -1941,7 +1959,7 @@ begin
   end;
 end;
 
-procedure TfpgCanvasImpl.SetPixel(X, Y: integer; const AValue: TfpgColor);
+procedure TfpgX11Canvas.SetPixel(X, Y: integer; const AValue: TfpgColor);
 var
   oldColor: TfpgColor;
 begin
@@ -1951,19 +1969,19 @@ begin
   SetColor(oldColor);
 end;
 
-procedure TfpgCanvasImpl.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgX11Canvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
   XDrawArc(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgCanvasImpl.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
 begin
   XFillArc(xapplication.display, FDrawHandle, Fgc, x, y, w, h,
       Trunc(64 * a1), Trunc(64 * a2));
 end;
 
-procedure TfpgCanvasImpl.DoDrawPolygon(Points: fpg_base.PPoint; NumPts: Integer; Winding: boolean);
+procedure TfpgX11Canvas.DoDrawPolygon(Points: fpg_base.PPoint; NumPts: Integer; Winding: boolean);
 var
   PointArray: PXPoint;
   i: integer;
@@ -1980,7 +1998,7 @@ begin
     FreeMem(PointArray);
 end;
 
-procedure TfpgCanvasImpl.BufferFreeTimer(Sender: TObject);
+procedure TfpgX11Canvas.BufferFreeTimer(Sender: TObject);
 begin
   {$IFDEF DEBUG}
   WriteLn('fpGFX/X11: Freeing Buffer w=', FPixWidth, ' h=', FPixHeight);
@@ -1989,31 +2007,31 @@ begin
   FreeAndNil(FBufferFreeTimer);
 end;
 
-procedure TfpgCanvasImpl.TryFreePixmap;
+procedure TfpgX11Canvas.TryFreePixmap;
 begin
   if FBufferPixmap > 0 then
     XFreePixmap(xapplication.Display, FBufferPixmap);
   FBufferPixmap := 0;
 end;
 
-procedure TfpgCanvasImpl.DoSetFontRes(fntres: TfpgFontResourceBase);
+procedure TfpgX11Canvas.DoSetFontRes(fntres: TfpgFontResourceBase);
 begin
   if fntres = nil then
     Exit; //==>
-  FCurFontRes := TfpgFontResourceImpl(fntres);
+  FCurFontRes := TfpgX11FontResource(fntres);
 end;
 
-procedure TfpgCanvasImpl.DoSetTextColor(cl: TfpgColor);
+procedure TfpgX11Canvas.DoSetTextColor(cl: TfpgColor);
 begin
   SetXftColor(cl, FColorTextXft);
 end;
 
-procedure TfpgCanvasImpl.DoSetColor(cl: TfpgColor);
+procedure TfpgX11Canvas.DoSetColor(cl: TfpgColor);
 begin
   XSetForeGround(xapplication.display, Fgc, fpgColorToX(cl));
 end;
 
-procedure TfpgCanvasImpl.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
+procedure TfpgX11Canvas.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
 const
   cDot: array[0..1] of Char = #1#1;
   cDash: array[0..1] of Char = #4#2;
@@ -2060,7 +2078,7 @@ begin
   end;  { case }
 end;
 
-procedure TfpgCanvasImpl.DoDrawString(x, y: TfpgCoord; const txt: string);
+procedure TfpgX11Canvas.DoDrawString(x, y: TfpgCoord; const txt: string);
 begin
   if Length(txt) < 1 then
     Exit; //==>
@@ -2069,7 +2087,7 @@ begin
     y + FCurFontRes.GetAscent, PChar(txt), Length(txt));
 end;
 
-procedure TfpgCanvasImpl.DoGetWinRect(out r: TfpgRect);
+procedure TfpgX11Canvas.DoGetWinRect(out r: TfpgRect);
 var
   rw: TfpgWinHandle;
   x: integer;
@@ -2083,12 +2101,12 @@ begin
       @(r.width), @(r.height), @bw, @d);
 end;
 
-procedure TfpgCanvasImpl.DoFillRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
 begin
   XFillRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w, h);
 end;
 
-procedure TfpgCanvasImpl.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
+procedure TfpgX11Canvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
 begin
   XSetForeGround(xapplication.display, Fgc, fpgColorToX(fpgColorToRGB(col)));
   XSetFunction(xapplication.display, Fgc, GXxor);
@@ -2097,7 +2115,7 @@ begin
   XSetFunction(xapplication.display, Fgc, GXcopy);
 end;
 
-procedure TfpgCanvasImpl.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+procedure TfpgX11Canvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
 var
   pts: array[1..3] of TXPoint;
 begin
@@ -2108,20 +2126,23 @@ begin
   XFillPolygon(xapplication.display, FDrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
 end;
 
-procedure TfpgCanvasImpl.DoDrawRectangle(x, y, w, h: TfpgCoord);
+procedure TfpgX11Canvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
 begin
 //  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
   // Same behavior as Windows. See documentation for reason.
-  XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
+  if (w = 1) and (h = 1) then // a dot
+    DoDrawLine(x, y, x+w, y+w)
+  else
+    XDrawRectangle(xapplication.display, FDrawHandle, Fgc, x, y, w-1, h-1);
 end;
 
-procedure TfpgCanvasImpl.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
+procedure TfpgX11Canvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
 begin
   // Same behavior as Windows. See documentation for reason.
   XDrawLine(xapplication.display, FDrawHandle, Fgc, x1, y1, x2, y2);
 end;
 
-procedure TfpgCanvasImpl.DoSetClipRect(const ARect: TfpgRect);
+procedure TfpgX11Canvas.DoSetClipRect(const ARect: TfpgRect);
 var
   r: TXRectangle;
   rg: TRegion;
@@ -2142,12 +2163,12 @@ begin
   XDestroyRegion(rg);
 end;
 
-function TfpgCanvasImpl.DoGetClipRect: TfpgRect;
+function TfpgX11Canvas.DoGetClipRect: TfpgRect;
 begin
   Result := FClipRect;
 end;
 
-procedure TfpgCanvasImpl.DoAddClipRect(const ARect: TfpgRect);
+procedure TfpgX11Canvas.DoAddClipRect(const ARect: TfpgRect);
 var
   r: TXRectangle;
   rg: TRegion;
@@ -2169,7 +2190,7 @@ begin
   XDestroyRegion(rg);
 end;
 
-procedure TfpgCanvasImpl.DoClearClipRect;
+procedure TfpgX11Canvas.DoClearClipRect;
 var
   r: TfpgRect;
 begin
@@ -2178,7 +2199,7 @@ begin
   FClipRectSet := False;
 end;
 
-procedure TfpgCanvasImpl.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+procedure TfpgX11Canvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
 var
   msk: TPixmap;
   gc2: Tgc;
@@ -2201,7 +2222,7 @@ begin
     XFillRectangle(xapplication.display, msk, gc2, 0, 0, w, h);
 
     XSetForeground(xapplication.display, gc2, 1);
-    XPutImage(xapplication.display, msk, gc2, TfpgImageImpl(img).XImageMask, xi, yi, 0, 0, w, h);
+    XPutImage(xapplication.display, msk, gc2, TfpgX11Image(img).XImageMask, xi, yi, 0, 0, w, h);
 
     drawgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
     XSetClipMask(xapplication.display, drawgc, msk);
@@ -2216,19 +2237,19 @@ begin
     XPutImage(xapplication.display, FDrawHandle, Fgc, TfpgImage(img).XImage, xi, yi, x, y, w, h);
 end;
 
-{ TfpgImageImpl }
+{ TfpgX11Image }
 
-constructor TfpgImageImpl.Create;
+constructor TfpgX11Image.Create;
 begin
   inherited Create;
 end;
 
-procedure TfpgImageImpl.DoFreeImage;
+procedure TfpgX11Image.DoFreeImage;
 begin
   // does nothing on X11
 end;
 
-procedure TfpgImageImpl.DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
+procedure TfpgX11Image.DoInitImage(acolordepth, awidth, aheight: integer; aimgdata: Pointer);
 begin
   FMasked := False;
 
@@ -2275,7 +2296,7 @@ begin
   XInitImage(@FXimg);
 end;
 
-procedure TfpgImageImpl.DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
+procedure TfpgX11Image.DoInitImageMask(awidth, aheight: integer; aimgdata: Pointer);
 begin
   FMasked := True;
 
@@ -2305,19 +2326,19 @@ begin
   XInitImage(@FXimgMask);
 end;
 
-function TfpgImageImpl.XImage: PXImage;
+function TfpgX11Image.XImage: PXImage;
 begin
   Result := @FXimg;
 end;
 
-function TfpgImageImpl.XImageMask: PXImage;
+function TfpgX11Image.XImageMask: PXImage;
 begin
   Result := @FXimgMask;
 end;
 
-{ TfpgClipboardImpl }
+{ TfpgX11Clipboard }
 
-function TfpgClipboardImpl.DoGetText: TfpgString;
+function TfpgX11Clipboard.DoGetText: TfpgString;
 begin
   XConvertSelection(xapplication.Display, xapplication.xia_clipboard,
       XA_STRING, xapplication.xia_clipboard, FClipboardWndHandle, 0);
@@ -2333,23 +2354,23 @@ begin
   Result := FClipboardText;
 end;
 
-procedure TfpgClipboardImpl.DoSetText(const AValue: TfpgString);
+procedure TfpgX11Clipboard.DoSetText(const AValue: TfpgString);
 begin
   FClipboardText := AValue;
   XSetSelectionOwner(xapplication.Display, xapplication.xia_clipboard,
       FClipboardWndHandle, 0);
 end;
 
-procedure TfpgClipboardImpl.InitClipboard;
+procedure TfpgX11Clipboard.InitClipboard;
 begin
   FWaitingForSelection := False;
   FClipboardWndHandle := XCreateSimpleWindow(xapplication.Display,
       xapplication.RootWindow, 10, 10, 10, 10, 0, 0, 0);
 end;
 
-{ TfpgFileListImpl }
+{ TfpgX11FileList }
 
-function TfpgFileListImpl.EncodeModeString(FileMode: longword): TFileModeString;
+function TfpgX11FileList.EncodeModeString(FileMode: longword): TFileModeString;
 const
   modestring: string[9] = 'xwrxwrxwr';  // must be in reverse order
 var
@@ -2372,13 +2393,13 @@ begin
   end;
 end;
 
-constructor TfpgFileListImpl.Create;
+constructor TfpgX11FileList.Create;
 begin
   inherited Create;
   FHasFileMode := true;
 end;
 
-function TfpgFileListImpl.InitializeEntry(sr: TSearchRec): TFileEntry;
+function TfpgX11FileList.InitializeEntry(sr: TSearchRec): TFileEntry;
 var
   info: Tstat;
   fullname: TfpgString;
@@ -2392,14 +2413,29 @@ begin
     Result.IsExecutable := ((sr.Mode and $40) <> 0);
     Result.mode         := EncodeModeString(sr.Mode);
     Fpstat(PChar(fullname), info);
-    {Result.GroupID     := info.st_gid;
-    Result.OwnerID      := info.st_uid;}
-    Result.Owner        := GetUserName(TUID(info.st_uid));
-    Result.Group        := GetGroupName(TGID(info.st_uid));
+    // Especially if files are transfered on removable media the host system
+    // might not have those user or group ids. So name lookups will fail. This
+    // simply returns the ID's in such cases.
+    {$IFNDEF DARWIN}
+    try
+      Result.Owner := GetUserName(TUID(info.st_uid));
+    except
+      Result.Owner := IntToStr(info.st_uid);
+    end;
+    try
+      Result.Group := GetGroupName(TGID(info.st_gid));
+    except
+      Result.Group := IntToStr(info.st_gid);
+    end;
+    {$ELSE}
+      // Darwin (Mac-OS) can't seem to use users.pp unit from FPC. A bug in FPC?
+      Result.Owner := IntToStr(info.st_uid);
+      Result.Group := IntToStr(info.st_gid);
+    {$ENDIF}
   end;
 end;
 
-procedure TfpgFileListImpl.PopulateSpecialDirs(const aDirectory: TfpgString);
+procedure TfpgX11FileList.PopulateSpecialDirs(const aDirectory: TfpgString);
 var
   ds: string;
 begin

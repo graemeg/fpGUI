@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -58,7 +58,7 @@ type
     procedure   AddNewFormImpl(formname, formbody: string);
     function    FindFormBlock(blockid, formname: string): TVFDFileBlock;
     procedure   SetFormData(formname, headblock, bodyblock: string);
-    procedure   NewFileSkeleton(unitname: string);
+    procedure   NewFileSkeleton(AUnitname: string);
   end;
   
 
@@ -323,10 +323,10 @@ begin
   Result := rs;
 end;
 
-procedure TVFDFile.NewFileSkeleton(unitname: string);
+procedure TVFDFile.NewFileSkeleton(AUnitname: string);
 begin
   FFileData :=
-    'unit ' + unitname + ';'+ LineEnding + LineEnding +
+    'unit ' + AUnitname + ';'+ LineEnding + LineEnding +
     '{$mode objfpc}{$H+}' + LineEnding + LineEnding +
     'interface' + LineEnding + LineEnding +
     'uses' + LineEnding +

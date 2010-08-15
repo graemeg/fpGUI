@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2007 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -53,7 +53,8 @@ implementation
 
 uses
   fpg_main,
-  fpg_constants;
+  fpg_constants,
+  fpg_utils;
 
 var
   uINI: TfpgINIFile;
@@ -89,7 +90,7 @@ begin
 
   if lFileName = '' then
     lFileName := ApplicationName + '.ini'
-  else if ExtractFileExt(lFileName) = '' then
+  else if fpgExtractFileExt(lFileName) = '' then
     lFileName := lFileName + '.ini';
 
   lFileName := lDir + lFileName;

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -224,7 +224,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.close';
-    ModalResult := 1;
+    ModalResult := mrOK;
     TabOrder := 2;
   end;
 
@@ -403,7 +403,7 @@ begin
   begin
     Name := 'setmenu';
     SetPosition(464, 29, 120, 20);
-    AddMenuItem('General options ...', '', @(maindsgn.OnOptionsClick));
+    AddMenuItem('General options...', '', @(maindsgn.OnOptionsClick));
   end;
 
   miOpenRecentMenu := TfpgPopupMenu.Create(self);
@@ -418,8 +418,8 @@ begin
   begin
     Name := 'helpmenu';
     SetPosition(328, 52, 120, 20);
-    AddMenuItem('Product Information', '', @miHelpAboutClick);
-    AddMenuItem('About fpGUI', '', @miHelpAboutGUI);
+    AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutGUI);
+    AddMenuItem('Product Information...', '', @miHelpAboutClick);
   end;
 
   previewmenu := TfpgPopupMenu.Create(self);
@@ -839,6 +839,8 @@ begin
     NameDrag := False
   else
     inherited;
+  if (Editor <> nil) and (Editor.Visible) then
+    Editor.SetFocus;
 end;
 
 procedure TwgPropertyList.HandleMouseScroll(x, y: integer;
@@ -908,8 +910,7 @@ end;
 
 procedure TfrmMain.miHelpAboutGUI(Sender: TObject);
 begin
-  ShowMessage('This product was created using ' + fpGUIName + ' v' +
-      fpGUIVersion, 'About fpGUI');
+  TfpgMessageDialog.AboutFPGui;
 end;
 
 procedure TfrmMain.miMRUClick(Sender: TObject; const FileName: string);

@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <SessionStorage Value="InIDEConfig"/>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <UseAppBundle Value="False"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <Units Count="15">
+      <Unit0>
+        <Filename Value="docdump.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="docdump"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="../IPFEscapeCodes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IPFEscapeCodes"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../IPFFileFormatUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IPFFileFormatUnit"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="readheader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readheader"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="filestreamhelper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="filestreamhelper"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="readextfiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readextfiles"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../docs/inf04.txt"/>
+        <IsPartOfProject Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="readstrings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readstrings"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="iterator_impl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="iterator_impl"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="iterator_intf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="iterator_intf"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="readnlsdata.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readnlsdata"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="readfonts.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readfonts"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="readcontrols.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readcontrols"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="readtoc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="readtoc"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="u_Tools.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="u_Tools"/>
+      </Unit14>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)/"/>
+      <OtherUnitFiles Value="../"/>
+      <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+</CONFIG>

@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -61,6 +61,7 @@ type
   TfpgProgressBar = class(TfpgCustomProgressBar)
   published
     property    BackgroundColor default $c4c4c4;
+    property    Hint;
     property    ShowCaption;
     property    Max;
     property    Min;
@@ -69,6 +70,7 @@ type
     property    ShowHint;
     property    Step;
     property    TextColor;
+    property    OnShowHint;
   end;
 
 

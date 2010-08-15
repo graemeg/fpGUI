@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -24,6 +24,7 @@ interface
 uses
   Classes,
   SysUtils,
+  contnrs,
   fpg_base,
   fpg_main,
   fpg_widget,
@@ -80,7 +81,7 @@ type
   TfpgLVColumns = class(TPersistent)
   private
     FListView: TfpgListView;
-    FColumns: TList;
+    FColumns: TObjectList;
     function    GetColumn(AIndex: Integer): TfpgLVColumn;
     procedure   SetColumn(AIndex: Integer; const AValue: TfpgLVColumn);
   public
@@ -121,7 +122,7 @@ type
     FColumns: TfpgLVColumns;
     FCurrentIndexOf: Integer;
     FViewers: TList;
-    FItems: TList;
+    FItems: TObjectList;
     function    GetCapacity: Integer;
     function    GetItem(AIndex: Integer): TfpgLVItem;
     procedure   SetCapacity(const AValue: Integer);
@@ -244,13 +245,16 @@ type
     procedure   BeginUpdate;
     procedure   EndUpdate;
     procedure   MakeItemVisible(AIndex: Integer; PartialOK: Boolean = False);
-    function    ItemAdd: TfpgLVItem;
+    function    ItemAdd: TfpgLVItem; deprecated;
+    function    AddItem: TfpgLVItem;
+    function    NewItem: TfpgLVItem;
   published
     property    Columns: TfpgLVColumns read FColumns;
     property    HScrollBar: TfpgScrollBar read FHScrollBar;
     property    ItemHeight: Integer read GetItemHeight;
     property    ItemIndex: Integer read FItemIndex write SetItemIndex;
     property    Items: TfpgLVItems read FItems write SetItems;
+    property    Hint;
     property    MultiSelect: Boolean read FMultiSelect write SetMultiSelect;
     property    ParentShowHint;
     property    SelectionFollowsFocus: Boolean read FSelectionFollowsFocus write FSelectionFollowsFocus;
@@ -262,6 +266,7 @@ type
     property    OnPaintColumn: TfpgLVPaintColumnEvent read FOnPaintColumn write FOnPaintColumn;
     property    OnPaintItem: TfpgLVPaintItemEvent read FOnPaintItem write FOnPaintItem;
     property    OnSelectionChanged: TfpgLVItemSelectEvent read FOnSelectionChanged write FOnSelectionChanged;
+    property    OnShowHint;
   end;
   
   
@@ -387,7 +392,7 @@ end;
 
 constructor TfpgLVItems.Create(AViewer: IfpgLVItemViewer);
 begin
-  FItems := TList.Create;
+  FItems := TObjectList.Create;
   FViewers := TList.Create;
   AddViewer(AViewer);
 end;
@@ -433,11 +438,11 @@ begin
   // search significantly when we are using indexof in a for loop
   if (FCurrentIndexOf > 100) and (FCurrentIndexOf < Count-2) then
   begin
-    if FItems.Items[FCurrentIndexOf] = Pointer(AItem) then
+    if FItems.Items[FCurrentIndexOf] = AItem then
       Result := FCurrentIndexOf
-    else if FItems.Items[FCurrentIndexOf+1] = Pointer(AItem) then
+    else if FItems.Items[FCurrentIndexOf+1] = AItem then
       Result := FCurrentIndexOf+1
-    else if FItems.Items[FCurrentIndexOf-1] = Pointer(AItem) then
+    else if FItems.Items[FCurrentIndexOf-1] = AItem then
       Result := FCurrentIndexOf-1
   end;
   if Result = -1 then
@@ -800,13 +805,7 @@ begin
     FOnColumnClick(Self, Column, Button);
 
   Column.FDown := True;
-  
-  if FUpdateCount = 0 then
-  begin
-    Canvas.BeginDraw(False);
-       PaintHeaders;
-    Canvas.EndDraw;//(2,2, width-4, Height-4);
-  end;
+  Repaint;
 end;
 
 procedure TfpgListView.HandleHeaderMouseMove(x, y: Integer; btnstate: word;
@@ -1568,6 +1567,7 @@ begin
   FItems.DeleteViewer(Self);
   FSelected.Free;
   FOldSelected.Free;
+  FColumns.Free;
   inherited Destroy;
 end;
 
@@ -1615,8 +1615,18 @@ end;
 
 function TfpgListView.ItemAdd: TfpgLVItem;
 begin
+  Result := AddItem;
+end;
+
+function TfpgListView.AddItem: TfpgLVItem;
+begin
   Result := TfpgLVItem.Create(FItems);
   FItems.Add(Result);
+end;
+
+function TfpgListView.NewItem: TfpgLVItem;
+begin
+  Result := TfpgLVItem.Create(FItems);
 end;
 
 { TfpgLVColumns }
@@ -1634,7 +1644,7 @@ end;
 constructor TfpgLVColumns.Create(AListView: TfpgListView);
 begin
   FListView := AListView;
-  FColumns := TList.Create;
+  FColumns := TObjectList.Create;
 end;
 
 destructor TfpgLVColumns.Destroy;

@@ -15,20 +15,18 @@ uses
 
 type
 
-  { TMainForm }
-
   TMainForm = class(TfpgForm)
   private
+    {@VFD_HEAD_BEGIN: MainForm}
+    {@VFD_HEAD_END: MainForm}
     bmp: TfpgImage;
     dst: TfpgImage;
-    procedure FormPaint(Sender: TObject);
-    procedure CustomPaintJob;
-  protected
-    procedure HandlePaint; override;
+    procedure   FormPaint(Sender: TObject);
+    procedure   CustomPaintJob;
   public
-    procedure AfterCreate; override;
-    procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure   AfterCreate; override;
   end;
 
 { TMainForm }
@@ -46,10 +44,17 @@ var
   fnt: TfpgFont;
   y: integer;
   c: TfpgColor;
+  lImage: TfpgImage;
 begin
   // Testing Rectangles
   Canvas.SetColor(clBlack);
-  r.SetRect(0, 0, 1, 1);
+  r.SetRect(0, 0, 1, 1);     // 1x1  (this is really a dot)
+  Canvas.DrawRectangle(r);
+  Canvas.SetColor(clRed);
+  r.SetRect(0, 1, 1, 5);    // 1x5  (this is really a vertical line)
+  Canvas.DrawRectangle(r);
+  Canvas.SetColor(clMagenta);
+  r.SetRect(1, 0, 5, 1);    // 5x1  (this is really a horizontal line)
   Canvas.DrawRectangle(r);
 
   Canvas.SetColor(clBlack);
@@ -138,15 +143,26 @@ begin
 
   // Testing Bitmap painting
   Canvas.DrawString(5, 180, 'Single BMP file:');
-  Canvas.DrawString(300, 210, '(mask enabled for all images)');
+  Canvas.DrawString(310, 210, '(mask enabled for all images)');
   Canvas.DrawImage(150, 180, bmp);
   Canvas.DrawString(5, 210, 'Parts of BMP file:');
   Canvas.DrawImagePart(150, 210, bmp, 0, 0, 32, 21);
   Canvas.DrawImagePart(190, 210, bmp, 32, 0, 32, 21);
   Canvas.DrawImagePart(230, 210, bmp, 64, 0, 32, 21);
+  // create image from an image
+  r.SetRect(32, 0, 32, 21); // second button in image
+  lImage := bmp.ImageFromRect(r);
+  try
+    lImage.CreateMaskFromSample(0, 0);
+    lImage.UpdateImage;
+    Canvas.DrawImage(270, 215, lImage);
+  finally
+    lImage.Free;
+  end;
 
+
+  // Testing Bitmap strechdraw
   Canvas.StretchDraw(150, 240, 300, 50, bmp);
-
   Canvas.DrawImage(150, 300, dst);
   Canvas.StretchDraw(180, 300, 70, 70, dst);
   Canvas.StretchDraw(265, 300, 230, 25, bmp);
@@ -186,46 +202,45 @@ begin
   // Gradient testing
   r.SetRect(265, 340, 185, 35);
   Canvas.GradientFill(r, clBlue, clMagenta, gdHorizontal);
-
 end;
 
-procedure TMainForm.HandlePaint;
+constructor TMainForm.Create(AOwner: TComponent);
 begin
-  inherited HandlePaint;
-//  CustomPaintJob;
-end;
-
-procedure TMainForm.AfterCreate;
-begin
-  inherited AfterCreate;
-  SetPosition(100, 100, 500, 400);
-  WindowTitle := 'fpGFX Canvas Test';
+  inherited Create(AOwner);
 
   bmp := LoadImage_BMP('button.bmp');
   if not Assigned(bmp) then
     raise Exception.Create('Failed to load button.bmp');
   bmp.CreateMaskFromSample(0,0);
   bmp.UpdateImage;
-  
-//  dst := TfpgImage.Create;
-//  dst.AllocateImage(bmp.ColorDepth, 200, 50);
+
   dst := LoadImage_BMP('gears2.bmp');
   dst.CreateMaskFromSample(0,0);
   dst.UpdateImage;
 end;
 
-procedure TMainForm.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  OnPaint := @FormPaint;
-end;
-
-procedure TMainForm.BeforeDestruction;
+destructor TMainForm.Destroy;
 begin
   dst.Free;
   bmp.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
+
+procedure TMainForm.AfterCreate;
+begin
+  {%region 'Auto-generated GUI code' -fold}
+  {@VFD_BODY_BEGIN: MainForm}
+  Name := 'MainForm';
+  SetPosition(357, 214, 500, 400);
+  WindowTitle := 'fpGUI Canvas Test';
+  Hint := '';
+  WindowPosition := wpOneThirdDown;
+  OnPaint := @FormPaint;
+
+  {@VFD_BODY_END: MainForm}
+  {%endregion}
+end;
+
 
 procedure MainProc;
 var

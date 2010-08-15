@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -73,8 +73,8 @@ begin
   btnClear := CreateButton(self, 8, 200, 80, 'Clear', @btnClearClicked);
   btnClear.Anchors := [anLeft, anBottom];
 
-  btnOK         := CreateButton(self, btnClear.Right + 4, 200, 80, 'OK', @OnButtonClick);
-  btnOK.Anchors := [anLeft, anBottom];
+  btnOK         := CreateButton(self, Width-168, 200, 80, 'OK', @OnButtonClick);
+  btnOK.Anchors := [anRight, anBottom];
 
   btnCancel     := CreateButton(self, Width-84, 200, 80, 'Cancel', @OnButtonClick);
   btnCancel.Anchors := [anRight, anBottom];

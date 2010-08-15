@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -23,7 +23,6 @@ unit fpg_dialogs;
   TODO:
     * Try and refactor the code to remove all IFDEF's
     * Implement MessageDlg with icons and buttons [Work-In-Progress]
-    * Select Directory dialog (treeview style)
 }
 
 {.$Define DEBUG}
@@ -48,7 +47,10 @@ uses
   fpg_combobox,
   fpg_panel,
   fpg_memo,
-  fpg_tree;
+  fpg_tree,
+  fpg_ColorWheel,
+  fpg_spinedit,
+  fpg_tab;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
@@ -159,10 +161,12 @@ type
     FOpenMode: boolean;
     FFilterList: TStringList;
     FFilter: string;
+    FInitialDir: string;
     procedure   SetFilter(const Value: string);
     function    GetFontDesc: string;
     function    GetShowHidden: boolean;
     procedure   SetFontDesc(const AValue: string);
+    procedure   SetInitialDir(const AValue: string);
     procedure   SetShowHidden(const Value: boolean);
     procedure   ListChanged(Sender: TObject; ARow: Integer);
     procedure   GridDblClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
@@ -188,6 +192,7 @@ type
     function    RunSaveFile: boolean;
     property    Filter: string read FFilter write SetFilter;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
+    property    InitialDir: string read FInitialDir write SetInitialDir;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
   
@@ -203,6 +208,8 @@ type
 {$I promptuserdialog.inc}
 {$I selectdirdialog.inc}
 {$I charmapdialog.inc}
+{$I colordialog.inc}
+{$I inputquerydialog.inc}
 
 
 
@@ -212,6 +219,9 @@ procedure ShowMessage(AMessage: string; ACentreText: Boolean = False); overload;
 function SelectFontDialog(var FontDesc: string): boolean;
 function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''): TfpgString;
 function SelectDirDialog(const AStartDir: TfpgString = ''): TfpgString;
+function fpgShowCharMap: TfpgString;
+function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
+function fpgInputQuery(const ACaption, APrompt: TfpgString; var Value: TfpgString): Boolean;
 
 
 implementation
@@ -339,7 +349,7 @@ begin
   Result := False;
   frm := TfpgFontSelectDialog.Create(nil);
   frm.SetFontDesc(FontDesc);
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
   begin
     FontDesc := frm.GetFontDesc;
     Result := True;
@@ -381,6 +391,7 @@ var
 begin
   dlg := TfpgSelectDirDialog.Create(nil);
   try
+    dlg.SelectedDir := AStartDir;
     if dlg.ShowModal = mrOK then
       Result := dlg.SelectedDir
     else
@@ -514,14 +525,14 @@ begin
 
   btnCancel := CreateButton(self, Width-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsCancel, @btnCancelClick);
   btnCancel.Name      := 'btnCancel';
-  btnCancel.ImageName := 'stdimg.Cancel';   // Do NOT localize
+  btnCancel.ImageName := 'stdimg.cancel';   // Do NOT localize
   btnCancel.ShowImage := True;
   btnCancel.Anchors   := [anRight, anBottom];
   btnCancel.TabOrder  := 2;
 
   btnOK := CreateButton(self, btnCancel.Left-FDefaultButtonWidth-FSpacing, 370, FDefaultButtonWidth, rsOK, @btnOKClick);
   btnOK.Name      := 'btnOK';
-  btnOK.ImageName := 'stdimg.OK';   // Do NOT localize
+  btnOK.ImageName := 'stdimg.ok';   // Do NOT localize
   btnOK.ShowImage := True;
   btnOK.Anchors   := [anRight, anBottom];
   btnOK.TabOrder  := 1;
@@ -986,6 +997,15 @@ begin
     grid.FontDesc := AValue;
 end;
 
+procedure TfpgFileDialog.SetInitialDir(const AValue: string);
+begin
+  if FInitialDir <> AValue then
+  begin
+    FInitialDir := AValue;
+    SetCurrentDirectory(FInitialDir);
+  end;
+end;
+
 procedure TfpgFileDialog.SetShowHidden(const Value: boolean);
 begin
   btnShowHidden.Down := Value;
@@ -1215,7 +1235,7 @@ var
 begin
   dlg := TfpgNewDirDialog.Create(nil);
   try
-    if dlg.ShowModal = 1 then
+    if dlg.ShowModal = mrOK then
     begin
       if dlg.Directory <> '' then
       begin
@@ -1372,7 +1392,7 @@ begin
   btnOK.ImageName := 'stdimg.open';   // Do NOT localize
   btnOK.Text      := rsOpen;
 
-  if ShowModal = 1 then
+  if ShowModal = mrOK then
     Result := True
   else
     Result := False;
@@ -1396,7 +1416,7 @@ begin
   btnOK.ImageName := 'stdimg.save';   // Do NOT localize
   btnOK.Text      := rsSave;
 
-  if ShowModal = 1 then
+  if ShowModal = mrOK then
     Result := True
   else
     Result := False;
@@ -1414,6 +1434,8 @@ end;
 {$I promptuserdialog.inc}
 {$I selectdirdialog.inc}
 {$I charmapdialog.inc}
+{$I colordialog.inc}
+{$I inputquerydialog.inc}
 
 
 end.

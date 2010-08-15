@@ -12,7 +12,8 @@ uses
   fpg_form,
   fpg_button,
   fpg_panel,
-  fpg_label;
+  fpg_label,
+  fpg_checkbox;
   
 type
   TMainForm = class(TfpgForm)
@@ -25,6 +26,8 @@ type
     lblStyle: TfpgLabel;
     lblShape: TfpgLabel;
     lblNext: TfpgLabel;
+    chkDouble: TfpgCheckBox;
+    procedure   chkDoubleChanged(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   btnStylesClick(Sender: TObject);
     procedure   btnShapesClick(Sender: TObject);
@@ -33,6 +36,14 @@ type
   end;
 
 { TMainForm }
+
+procedure TMainForm.chkDoubleChanged(Sender: TObject);
+begin
+  if chkDouble.Checked then
+    Bevel.BorderStyle := bsDouble
+  else
+    Bevel.BorderStyle := bsSingle;
+end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
@@ -88,6 +99,8 @@ begin
   lblNext   := CreateLabel(self, 200, 80, 'Next value is...');
   btnShapes := CreateButton(self, 200, 100, 90, 'bsFrame', @btnShapesClick);
   btnStyles := CreateButton(self, 200, 130, 90, 'bsLowered', @btnStylesClick);
+  chkDouble := CreateCheckBox(self, 200, 160, 'Double Line');
+  chkDouble.OnChange  := @chkDoubleChanged;
 
   lblShape  := CreateLabel(self, 6, 190, 'Shape is bsBox');
   lblStyle  := CreateLabel(self, 6, 210, 'Style is bsRaised');

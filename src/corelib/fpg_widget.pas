@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -32,6 +32,8 @@ uses
 type
   TFocusSearchDirection = (fsdFirst, fsdLast, fsdNext, fsdPrev);
 
+  THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
+
 
   TfpgWidget = class(TfpgWindow)
   private
@@ -49,8 +51,10 @@ type
     FOnKeyPress: TKeyPressEvent;
     FOnResize: TNotifyEvent;
     FOnScreen: boolean;
+    FOnShowHint: THintEvent;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
+    procedure   SetFormDesigner(const AValue: TObject);
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -75,12 +79,14 @@ type
     FAnchors: TAnchors;
     FActiveWidget: TfpgWidget;
     FAlign: TAlign;
-    FHint: string;
+    FHint: TfpgString;
     FShowHint: boolean;
     FParentShowHint: boolean;
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
+    function    GetOnShowHint: THintEvent; virtual;
+    procedure   SetOnShowHint(const AValue: THintEvent); virtual;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
     procedure   SetTextColor(const AValue: TfpgColor); virtual;
     function    GetParent: TfpgWidget; reintroduce;
@@ -89,9 +95,12 @@ type
     procedure   SetVisible(const AValue: boolean); virtual;
     procedure   SetShowHint(const AValue: boolean); virtual;
     procedure   SetParentShowHint(const AValue: boolean); virtual;
+    function    GetHint: TfpgString; virtual;
+    procedure   SetHint(const AValue: TfpgString); virtual;
     procedure   DoUpdateWindowPosition; override;
     procedure   DoAlign(AAlign: TAlign);
     procedure   DoResize;
+    procedure   DoShowHint(var AHint: TfpgString);
     procedure   HandlePaint; virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
@@ -127,19 +136,22 @@ type
     property    OnMouseUp: TMouseButtonEvent read FOnMouseUp write FOnMouseUp;
     property    OnPaint: TPaintEvent read FOnPaint write FOnPaint;
     property    OnResize: TNotifyEvent read FOnResize write FOnResize;
+    property    OnShowHint: THintEvent read GetOnShowHint write SetOnShowHint;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   AfterConstruction; override;
     function    GetClientRect: TfpgRect; virtual;
     function    GetBoundsRect: TfpgRect; virtual;
     function    InDesigner: boolean;
+    procedure   InvokeHelp; virtual;
     procedure   Realign;
     procedure   SetFocus;
     procedure   KillFocus;
     procedure   MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
     procedure   SetPosition(aleft, atop, awidth, aheight: TfpgCoord); virtual;
     procedure   Invalidate; // double check this works as developers expect????
-    property    FormDesigner: TObject read FFormDesigner write FFormDesigner;
+    property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
@@ -151,7 +163,7 @@ type
     property    Focused: boolean read FFocused write FFocused default False;
     property    Anchors: TAnchors read FAnchors write FAnchors;
     property    Align: TAlign read FAlign write FAlign;
-    property    Hint: string read FHint write FHint;
+    property    Hint: TfpgString read GetHint write SetHint;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
@@ -169,7 +181,7 @@ implementation
 
 uses
   fpg_constants,
-  fpg_hint;
+  fpg_menu;
 
 
 var
@@ -203,7 +215,7 @@ begin
   for i := 0 to ComponentCount - 1 do
   begin
     if Components[i] is TfpgWidget then
-      TfpgWidget(Components[i]).Enabled := self.Enabled;
+      TfpgWidget(Components[i]).Enabled := FEnabled;
   end;
   RePaint;
 end;
@@ -212,7 +224,7 @@ procedure TfpgWidget.SetActiveWidget(const AValue: TfpgWidget);
 begin
   if FActiveWidget = AValue then
     Exit; //==>
-  if FFormDesigner <> nil then
+  if InDesigner then
     Exit; //==>
   
   if FActiveWidget <> nil then
@@ -222,9 +234,26 @@ begin
     FActiveWidget.HandleSetFocus;
 end;
 
+function TfpgWidget.GetHint: TfpgString;
+begin
+  Result := FHint;
+end;
+
 function TfpgWidget.IsShowHintStored: boolean;
 begin
   Result := not ParentShowHint;
+end;
+
+procedure TfpgWidget.SetFormDesigner(const AValue: TObject);
+var
+  i: integer;
+begin
+  FFormDesigner := AValue;
+  for i := 0 to ComponentCount-1 do
+  begin
+    if (Components[i] is TfpgWidget) and (TfpgWidget(Components[i]).Parent = self) then
+      TfpgWidget(Components[i]).FormDesigner := AValue;
+  end;
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -234,9 +263,13 @@ begin
   FVisible := AValue;
   if FOnScreen then
     if FVisible then
-      HandleShow
+    begin
+//      writeln('DEBUG:  TfpgWidget.SetVisible - handleshow');
+      HandleShow;
+    end
     else
     begin
+//      writeln('DEBUG:  TfpgWidget.SetVisible - handlehide');
       HandleHide;
       FOnScreen := True;
     end;
@@ -256,6 +289,11 @@ begin
     FParentShowHint := AValue;
   if FParentShowHint then
     FShowHint := False;
+end;
+
+procedure TfpgWidget.SetHint(const AValue: TfpgString);
+begin
+  FHint := AValue;
 end;
 
 procedure TfpgWidget.DoUpdateWindowPosition;
@@ -318,6 +356,28 @@ begin
   Result := (FFormDesigner <> nil)
 end;
 
+procedure TfpgWidget.InvokeHelp;
+begin
+  case HelpType of
+    htKeyword:
+      if HelpKeyword <> '' then
+      begin
+        fpgApplication.KeywordHelp(HelpKeyword);
+        Exit; //==>
+      end;
+    htContext:
+      if HelpContext <> 0 then
+      begin
+        fpgApplication.ContextHelp(HelpContext);
+        Exit; //==>
+      end;
+  end;
+  if Parent <> nil then
+    Parent.InvokeHelp
+  else
+    fpgApplication.InvokeHelp;
+end;
+
 procedure TfpgWidget.Realign;
 begin
   HandleAlignments(0, 0);
@@ -358,6 +418,8 @@ begin
   FBackgroundColor := clWindowBackground;
   FTextColor  := clText1;
 
+  inherited Create(AOwner);
+
   if (AOwner <> nil) and (AOwner is TfpgWidget) then
   begin
     Parent := TfpgWidget(AOwner);
@@ -371,26 +433,28 @@ begin
     FWindowType := wtChild;
     FShowHint   := Parent.ShowHint;
   end;
-
-  inherited Create(AOwner);
-
-  // This is for components that are created at runtime, after it's
-  // parent has already been shown.
-  if (Parent <> nil) and (Parent.HasHandle) then
-  begin
-    InternalHandleShow;
-  end;
-
-  Loaded;  // remove csLoading from ComponentState
 end;
 
 destructor TfpgWidget.Destroy;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgWidget.Destroy [', Classname, ']');
+  writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
   HandleHide;
-  inherited;
+  inherited Destroy;
+end;
+
+procedure TfpgWidget.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  // This is for components that are created at runtime, after it's
+  // parent has already been shown.
+  if (Parent <> nil) and (Parent.HasHandle) then
+  begin
+    HandleShow;
+  end;
+
+  Loaded;  // remove csLoading from ComponentState
 end;
 
 procedure TfpgWidget.MsgKeyChar(var msg: TfpgMessageRec);
@@ -424,7 +488,7 @@ var
   consumed: boolean;
   wg: TfpgWidget;
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -454,7 +518,7 @@ var
   consumed: boolean;
   wg: TfpgWidget;
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -481,7 +545,7 @@ procedure TfpgWidget.MsgMouseDown(var msg: TfpgMessageRec);
 var
   mb: TMouseButton;
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     // dispatching message to designer
     FFormDesigner.Dispatch(msg);
@@ -521,7 +585,7 @@ var
   IsDblClick: boolean;
 begin
 //  writeln('TfpgWidget.MsgMouseUp');
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -578,7 +642,7 @@ end;
 
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
 begin
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -611,7 +675,7 @@ begin
   {$IFDEF DEBUG}
   writeln('MsgMouseEnter');
   {$ENDIF}
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -628,7 +692,7 @@ begin
   {$IFDEF DEBUG}
   writeln('MsgMouseExit');
   {$ENDIF}
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
@@ -646,33 +710,43 @@ begin
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
 end;
 
+function TfpgWidget.GetOnShowHint: THintEvent;
+begin
+  Result := FOnShowHint;
+end;
+
+procedure TfpgWidget.SetOnShowHint(const AValue: THintEvent);
+begin
+  FOnShowHint := AValue;
+end;
+
 procedure TfpgWidget.HandleShow;
 var
   n: integer;
   c: TComponent;
 begin
-//  writeln('Widget.HandleShow - ', ClassName, '  x:', Left, ' y:', Top, ' w:', Width, ' h:', Height);
   FOnScreen := True;
-//  FVisible := True;
-
   AllocateWindowHandle;
   DoSetWindowVisible(FVisible);
 
   for n := 0 to ComponentCount - 1 do
   begin
     c := Components[n];
-    if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) and
-      (TfpgWidget(c).FOnScreen = False) then
-      TfpgWidget(c).HandleShow;
+    if (c is TfpgWidget) and (TfpgWidget(c).Parent = self) then
+    begin
+      if not (c is TfpgPopupMenu) then  // these should not be created yet
+      begin
+        TfpgWidget(c).HandleShow;
+      end;
+    end;
   end;
 end;
 
 procedure TfpgWidget.InternalHandleShow;
 begin
   FOnScreen := True;
-  FVisible := False;
   AllocateWindowHandle;
-  DoSetWindowVisible(False);
+  DoSetWindowVisible(FVisible);
 end;
 
 procedure TfpgWidget.HandleHide;
@@ -955,8 +1029,8 @@ begin
     if Components[n] is TfpgWidget then
     begin
       w := TfpgWidget(Components[n]);
-
-      if w.Visible and w.Enabled and w.Focusable then
+      if w.Enabled and w.Visible and w.Focusable then
+      begin
         case direction of
           fsdFirst:
             if w.TabOrder < lasttaborder then
@@ -976,6 +1050,7 @@ begin
             if startwg = w then
               FoundIt := True
             else if w.TabOrder < lasttaborder then
+            begin
               if (startwg = nil) or
                 (w.TabOrder > startwg.TabOrder) or
                 (FoundIt and (w.TabOrder = startwg.TabOrder)) then
@@ -983,7 +1058,7 @@ begin
                 Result       := w;
                 lasttaborder := w.TabOrder;
               end;
-
+            end;
           fsdPrev:
             if startwg = w then
               FoundIt := True
@@ -996,7 +1071,8 @@ begin
                 lasttaborder := w.TabOrder;
               end;
 
-        end;
+        end; { case }
+      end; { if w.Enabled... }
     end;
 end;
 
@@ -1019,7 +1095,7 @@ begin
   dh      := msg.Params.rect.Height - FHeight;
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
   HandleAlignments(dw, dh);
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
   end;
@@ -1029,7 +1105,7 @@ end;
 procedure TfpgWidget.MsgMove(var msg: TfpgMessageRec);
 begin
   HandleMove(msg.Params.rect.Left, msg.Params.rect.Top);
-  if FFormDesigner <> nil then
+  if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
   end;
@@ -1150,7 +1226,7 @@ begin
     if Components[n] is TfpgWidget then
     begin
       w := TfpgWidget(Components[n]);
-      if w.Align = AAlign then
+      if (w.Align = AAlign) and (w.Visible) then
         alist.Add(w);
     end;
 
@@ -1160,7 +1236,7 @@ begin
   for n := 0 to alist.Count - 1 do
   begin
     w := TfpgWidget(alist[n]);
-    case aalign of
+    case AAlign of
       alTop:
         begin
           w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.Height);
@@ -1199,6 +1275,15 @@ procedure TfpgWidget.DoResize;
 begin
   if Assigned(FOnResize) then
     FOnResize(Self);
+end;
+
+procedure TfpgWidget.DoShowHint(var AHint: TfpgString);
+begin
+  AHint := Hint;
+  if Assigned(FOnShowHint) then
+  begin
+    FOnShowHint(self, AHint);
+  end;
 end;
 
 procedure TfpgWidget.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);

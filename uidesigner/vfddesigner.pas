@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -82,9 +82,11 @@ type
 
 
   TFormDesigner = class(TObject)
+  private
+    FOneClickMove: boolean;
   protected
     FWidgets: TList;
-    FForm: TDesignedForm;
+    FForm: TfpgForm;
     FFormOther: string;
     FDragging: boolean;
     FDragPosX,
@@ -101,7 +103,6 @@ type
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   DesignerKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
   public
-    OneClickMove: boolean; // the widgets can be selected and dragged within one click
     constructor Create;
     destructor  Destroy; override;
     procedure   ClearForm;
@@ -130,7 +131,9 @@ type
     function    GetFormSourceDecl: string;
     function    GetFormSourceImpl: string;
     function    GetWidgetSourceImpl(wd: TWidgetDesigner; ident: string): string;
-    property    Form: TDesignedForm read FForm;
+    // The widgets can be selected and dragged within one click
+    property    OneClickMove: boolean read FOneClickMove write FOneClickMove;
+    property    Form: TfpgForm read FForm;
     property    FormOther: string read FFormOther write FFormOther;
   end;
 
@@ -158,6 +161,7 @@ begin
     Widget.MouseCursor := mcDefault;
 
   for n := 1 to 8 do
+  begin
     if FSelected then
       resizer[n] := TwgResizer.Create(self, n)
     else
@@ -166,6 +170,7 @@ begin
         resizer[n].Free;
       resizer[n] := nil;
     end;
+  end;
 
   UpdateResizerPositions;
 
@@ -178,6 +183,7 @@ constructor TWidgetDesigner.Create(AFormDesigner: TFormDesigner; wg: TfpgWidget;
 var
   n: integer;
 begin
+  inherited Create;
   FFormDesigner := AFormDesigner;
   FWidget       := wg;
   FVFDClass     := wgc;
@@ -450,7 +456,7 @@ begin
   FWidgets := TList.Create;
   FWasDrag := False;
 
-  OneClickMove := True;
+  FOneClickMove := True;
 
   FForm               := TDesignedForm.Create(nil);
   FForm.FormDesigner  := self;
@@ -502,9 +508,8 @@ begin
 //  writeln('TFormDesigner.AddWidget');
   cd     := TWidgetDesigner.Create(self, wg, wgc);
   FWidgets.Add(cd);
-  //cd.Selected := true;
-  if wg is TDesignedForm then
-    TDesignedForm(wg).FormDesigner := self;
+  if wg is TfpgForm then
+    wg.FormDesigner := self;
   Result := cd;
 end;
 
@@ -671,7 +676,7 @@ begin
   if fi <= frm.list.ItemCount then
     frm.list.FocusItem := fi;
 
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
   begin
     for n := 0 to FWidgets.Count - 1 do
       TWidgetDesigner(FWidgets.Items[n]).Widget.Visible := False;
@@ -742,7 +747,7 @@ begin
   if fi <= frm.list.ItemCount then
     frm.list.FocusItem := fi;
 
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
   begin
     taborder := 1;
     for n := 0 to frm.List.Items.Count - 1 do
@@ -1046,7 +1051,7 @@ begin
   end;
 
   posval := -9999;
-  if frm.ShowModal = 1 then
+  if frm.ShowModal = mrOK then
     posval := StrToIntDef(frm.edPos.Text, -9999);
   frm.Free;
 
@@ -1149,7 +1154,6 @@ begin
   Result := newname;
 end;
 
-
 procedure TFormDesigner.MsgActivate(var msg: TfpgMessageRec);
 begin
   msg.Stop := True;
@@ -1219,7 +1223,15 @@ begin
 }
   s := s + '  WindowTitle := ' + QuotedStr(FForm.WindowTitle) + ';' + LineEnding;
 
-  // ShowHint property - This is ugly, Form's properties or not handled well!!
+  // Hint property - This is ugly, Form's properties are not handled well!!
+  PropInfo := GetPropInfo(FForm.ClassType, 'Hint');
+  t := GetStrProp(FForm, 'Hint');
+  if IsStoredProp(FForm, PropInfo) then
+  begin
+    s := s + '  Hint := ' + QuotedStr(t) + ';' + LineEnding;
+  end;
+
+  // ShowHint property - This is ugly, Form's properties are not handled well!!
   PropInfo := GetPropInfo(FForm.ClassType, 'ShowHint');
   i := GetOrdProp(FForm, 'ShowHint');
   if IsStoredProp(FForm, PropInfo) then
@@ -1410,7 +1422,7 @@ begin
   //frmie.Top := ay;
 
   frmie.edItems.Lines.Assign(sl);
-  if frmie.ShowModal = 1 then
+  if frmie.ShowModal = mrOK then
   begin
 //    Writeln('OK');
     sl.Assign(frmie.edItems.Lines);
@@ -1456,7 +1468,7 @@ begin
     cfrm         := TInsertCustomForm.Create(nil);
     cfrm.edName.Text := GenerateNewName(wgc.NameBase);
     cfrm.edClass.Text := 'Tfpg';
-    if cfrm.ShowModal = 1 then
+    if cfrm.ShowModal = mrOK then
     begin
       newname      := cfrm.edName.Text;
       newClassName := cfrm.edClass.Text;
@@ -1476,8 +1488,8 @@ begin
     if wgc.WidgetClass = TOtherWidget then
       TOtherWidget(wg).wgClassName := newclassname;
     wgd          := AddWidget(wg, wgc);
-    wg.Visible   := True;
     wg.SetPosition(x, y, wg.Width, wg.Height);
+    wg.Visible   := True;
     DeSelectAll;
     wgd.Selected := True;
     UpdatePropWin;

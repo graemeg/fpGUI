@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2009 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -69,14 +69,24 @@ type
     property    BoxLayout;
     property    Checked;
     property    FontDesc;
+    property    Height;
+    property    Hint;
+    property    Left;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
     property    ParentShowHint;
     property    ShowHint;
     property    TabOrder;
     property    Text;
     property    TextColor;
+    property    Top;
+    property    Width;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
+    property    OnShowHint;
   end;
 
 

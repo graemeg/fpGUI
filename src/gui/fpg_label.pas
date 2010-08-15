@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -72,13 +72,21 @@ type
     property    AutoSize;
     property    BackgroundColor;
     property    FontDesc;
+    property    Height;
     property    Hint;
     property    Layout;
+    property    Left;
     property    LineSpace;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
+    property    Parent;
     property    ParentShowHint;
     property    ShowHint;
     property    Text;
     property    TextColor;
+    property    Top;
     property    Width;
     property    WrapText;
     property    OnClick;
@@ -88,6 +96,7 @@ type
     property    OnMouseExit;
     property    OnMouseMove;
     property    OnMouseUp;
+    property    OnShowHint;
   end;
 
 
@@ -106,19 +115,19 @@ begin
   Result.Top   := y;
   Result.Text  := AText;
   Result.LineSpace := ALineSpace;
-  if w = 0 then
-  begin
-    Result.Width := Result.Font.TextWidth(Result.Text);
-    Result.FAutoSize := True;
-  end
-  else
-    Result.Width := w;
   if h < Result.Font.Height then
     Result.Height:= Result.Font.Height
   else
     Result.Height:= h;
   Result.Alignment:= HAlign;
   Result.Layout:= VAlign;
+  if w = 0 then
+  begin
+    Result.Width := Result.Font.TextWidth(Result.Text);
+    Result.AutoSize := True;
+  end
+  else
+    Result.Width := w;
 end;
 
 { TfpgCustomLabel }
@@ -183,7 +192,7 @@ end;
 procedure TfpgCustomLabel.ResizeLabel;
 begin
   if FAutoSize and not FWrapText then
-    Width:= FFont.TextWidth(FText);
+    Width := FFont.TextWidth(FText);
   UpdateWindowPosition;
   RePaint;
 end;

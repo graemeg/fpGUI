@@ -9,7 +9,7 @@ uses
   fpg_widget, fpg_form, fpg_button, fpg_grid,
   fpg_dialogs, fpg_menu,
   fpg_panel,
-  model, tiFormMediator;
+  model, tiModelMediator;
 
 type
 
@@ -24,7 +24,7 @@ type
     btnCancel: TfpgButton;
     {@VFD_HEAD_END: CountryListForm}
     FData: TCountryList;
-    FMediator: TFormMediator;
+    FMediator: TtiModelMediator;
     procedure SetData(const AValue: TCountryList);
     procedure SetupMediators;
     procedure btnEditClicked(Sender: TObject);
@@ -62,7 +62,7 @@ procedure TCountryListForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    FMediator := TFormMediator.Create(self);
+    FMediator := TtiModelMediator.Create(self);
     FMediator.AddComposite('ISO(60);Name(110)', grdName1);
   end;
   FMediator.Subject := FData;

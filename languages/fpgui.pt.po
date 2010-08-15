@@ -80,6 +80,10 @@ msgstr "Não foi possível criar diretório"
 msgid "Change"
 msgstr "Editar"
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Fechar"
@@ -239,6 +243,10 @@ msgstr "Informação"
 #: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Inserir"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -400,6 +408,10 @@ msgstr "Pesquisar"
 msgid "Select"
 msgstr "Selecionar"
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Selecione um diretório"
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Selecione a fonte"
@@ -434,6 +446,10 @@ msgstr ""
 
 #: fpg_constants:rslongsun
 msgid "Sunday"
+msgstr ""
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
 msgstr ""
 
 #: fpg_constants:rsshortthu

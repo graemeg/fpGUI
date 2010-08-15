@@ -12,7 +12,7 @@
       <TargetFileExt Value=""/>
     </General>
     <VersionInfo>
-      <ProjectVersion Value=""/>
+      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="0.0.0.0" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
@@ -46,6 +46,7 @@
       </SyntaxOptions>
     </Parsing>
     <Other>
+      <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

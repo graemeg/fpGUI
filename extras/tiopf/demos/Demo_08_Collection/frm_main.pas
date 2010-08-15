@@ -10,7 +10,7 @@ uses
   fpg_listbox, fpg_memo, fpg_combobox, fpg_grid,
   fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar,
   fpg_progressbar, fpg_radiobutton, fpg_tab, fpg_menu,
-  fpg_panel, Client_BOM, tiFormMediator;
+  fpg_panel, Client_BOM, tiModelMediator;
 
 type
 
@@ -31,7 +31,7 @@ type
     grdCollection: TfpgStringGrid;
     {@VFD_HEAD_END: MainForm}
     FClients: TClients;
-    FMediator: TFormMediator;
+    FMediator: TtiModelMediator;
     procedure   MainFormShow(Sender: TObject);
     procedure   CreateTable;
     procedure   DropTable;
@@ -112,7 +112,7 @@ procedure TMainForm.CreateMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    FMediator := TFormMediator.Create(self);
+    FMediator := TtiModelMediator.Create(self);
     FMediator.AddComposite('ClientName(200,"Client name");ClientID(80,"Client ID")', grdCollection);
   end;
   FMediator.Subject := FClients;
@@ -327,6 +327,6 @@ begin
 end;
 
 initialization
-  gMediatorManager.RegisterMediator(TStringGridMediator, TClients);
+  gMediatorManager.RegisterMediator(TtiStringGridMediatorView, TClients);
 
 end.

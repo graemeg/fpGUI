@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -55,6 +55,8 @@ type
     FMaxLength: integer;
     FSelecting: Boolean;
     FReadOnly: Boolean;
+    FIgnoreMouseCursor: Boolean;
+    FAutoSize: Boolean;
     procedure   Adjust(UsePxCursorPos: boolean = false); virtual;
     procedure   AdjustTextOffset(UsePxCursorPos: boolean); virtual;
     procedure   AdjustDrawingInfo; virtual;
@@ -75,6 +77,7 @@ type
     procedure   DefaultPopupCopy(Sender: TObject);
     procedure   DefaultPopupPaste(Sender: TObject);
     procedure   DefaultPopupClearAll(Sender: TObject);
+    procedure   DefaultPopupInsertFromCharmap(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
     procedure   SetReadOnly(const AValue: Boolean);
   protected
@@ -111,9 +114,11 @@ type
     procedure   HandleHide; override;
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
+    property    AutoSize: Boolean read FAutoSize write FAutoSize default True;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
+    property    IgnoreMouseCursor: Boolean read FIgnoreMouseCursor write FIgnoreMouseCursor default False;
     property    MaxLength: Integer read FMaxLength write FMaxLength;
     property    PasswordMode: Boolean read FPasswordMode write SetPasswordMode default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
@@ -155,15 +160,19 @@ type
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
     property    AutoSelect;
+    property    AutoSize;
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
     property    ExtraHint;
     property    FontDesc;
     property    HeightMargin;
     property    HideSelection;
+    property    Hint;
+    property    IgnoreMouseCursor;
     property    MaxLength;
     property    ParentShowHint;
     property    PasswordMode;
+    property    ReadOnly;
     property    ShowHint;
     property    SideMargin;
     property    TabOrder;
@@ -176,6 +185,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
+    property    OnShowHint;
   end;
 
 
@@ -223,6 +233,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnPaint;
+    property    OnShowHint;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -244,8 +255,10 @@ type
     property    Text;
   published
     property    CustomThousandSeparator;
+    property    Hint;
     property    NegativeColor;
     property    ParentShowHint;
+    property    ReadOnly;
     property    ShowHint;
     property    ShowThousand default True;
     property    TabOrder;
@@ -258,6 +271,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnMouseMove;
+    property    OnShowHint;
   end;
 
 
@@ -278,17 +292,19 @@ type
     property    OldColor;
     property    Text;
   published
-    property    Decimals: integer read FDecimals write SetDecimals default -1;
     property    CustomDecimalSeparator;
+    property    CustomThousandSeparator;
+    property    Decimals: integer read FDecimals write SetDecimals default -1;
     property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals default False;
+    property    Hint;
     property    NegativeColor;
+    property    ParentShowHint;
+    property    ReadOnly;
+    property    ShowHint;
     property    ShowThousand default True;
     property    TabOrder;
     property    TextColor;
-    property    CustomThousandSeparator;
     property    Value: extended read GetValue write SetValue;
-    property    ParentShowHint;
-    property    ShowHint;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
@@ -296,6 +312,7 @@ type
     property    OnMouseEnter;
     property    OnMouseExit;
     property    OnMouseMove;
+    property    OnShowHint;
   end;
 
 
@@ -314,21 +331,24 @@ type
     property    OldColor;
     property    Text;
   published
-    property    Decimals: integer read FDecimals write SetDecimals default 2;
-    property    NegativeColor;
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
-    property    ShowThousand default True;
-    property    Value: Currency read GetValue write SetValue;
+    property    Decimals: integer read FDecimals write SetDecimals default 2;
+    property    Hint;
+    property    NegativeColor;
     property    ParentShowHint;
+    property    ReadOnly;
     property    ShowHint;
+    property    ShowThousand default True;
     property    TabOrder;
+    property    Value: Currency read GetValue write SetValue;
     property    OnChange;
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
     property    OnMouseEnter;
     property    OnMouseExit;
+    property    OnShowHint;
   end;
 
 
@@ -348,7 +368,8 @@ implementation
 
 uses
   fpg_stringutils,
-  fpg_constants;
+  fpg_constants,
+  fpg_dialogs;
 
 const
   // internal popupmenu item names
@@ -356,6 +377,7 @@ const
   ipmCopy       = 'miDefaultCopy';
   ipmPaste      = 'miDefaultPaste';
   ipmClearAll   = 'miDefaultClearAll';
+  ipmCharmap    = 'miDefaultCharmap';
 
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
@@ -679,7 +701,7 @@ begin
   end;
   Canvas.SetClipRect(r);
 
-  if Enabled then
+  if Enabled and not ReadOnly then
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
@@ -703,7 +725,7 @@ begin
   prevval   := Text;
   s         := AText;
 
-  if not consumed then
+  if (not consumed) and (not ReadOnly) then
   begin
     // Handle only printable characters
     // UTF-8 characters beyond ANSI range are supposed to be printable
@@ -753,14 +775,18 @@ begin
     ckPaste:
         begin
           DoPaste(fpgClipboard.Text);
-          hasChanged := True;
+          if not ReadOnly then
+            hasChanged := True;
         end;
     ckCut:
         begin
           DoCopy;
           DeleteSelection;
-          Adjust;
-          hasChanged := True;
+          if not ReadOnly then
+          begin
+            Adjust;
+            hasChanged := True;
+          end;
         end;
   else
     Consumed := False;
@@ -787,18 +813,20 @@ begin
         end;
 
       keyRight:
-        if FCursorPos < UTF8Length(FText) then
         begin
           consumed := True;
-          Inc(FCursorPos);
+          if FCursorPos < UTF8Length(FText) then
+          begin
+            Inc(FCursorPos);
 
-          if (ssCtrl in shiftstate) then
-            // word search...
-            //                    while (FCursorPos < Length(FText)) and ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
-            //                      do Inc(FCursorPos);
-            //                    while (FCursorPos < Length(FText)) and not ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
-            //                      do Inc(FCursorPos);
-          ;
+            if (ssCtrl in shiftstate) then
+              // word search...
+              //                    while (FCursorPos < Length(FText)) and ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
+              //                      do Inc(FCursorPos);
+              //                    while (FCursorPos < Length(FText)) and not ptkIsAlphaNum(copy(FText,FCursorPos+1,1))
+              //                      do Inc(FCursorPos);
+            ;
+          end;
         end;
 
       keyHome:
@@ -829,32 +857,32 @@ begin
 
   if not Consumed then
   begin
-    consumed := True;
-
-    case keycode of
-      keyBackSpace:
-          begin
-            if FSelOffset <> 0 then
-              DeleteSelection
-            else if FCursorPos > 0 then
+   if not ReadOnly then
+   begin
+      case keycode of
+        keyBackSpace:
             begin
-              UTF8Delete(FText, FCursorPos, 1);
-              Dec(FCursorPos);
+              if FSelOffset <> 0 then
+                DeleteSelection
+              else if FCursorPos > 0 then
+              begin
+                UTF8Delete(FText, FCursorPos, 1);
+                Dec(FCursorPos);
+                hasChanged := True;
+              end;// backspace
+              Consumed := True;
+            end;
+
+        keyDelete:
+            begin
+              if FSelOffset <> 0 then
+                DeleteSelection
+              else if FCursorPos < UTF8Length(FText) then
+                UTF8Delete(FText, FCursorPos + 1, 1);
               hasChanged := True;
-            end;// backspace
-          end;
-
-
-      keyDelete:
-          begin
-            if FSelOffset <> 0 then
-              DeleteSelection
-            else if FCursorPos < UTF8Length(FText) then
-              UTF8Delete(FText, FCursorPos + 1, 1);
-            hasChanged := True;
-          end;
-      else
-        Consumed := False;
+              Consumed := True;
+            end;
+      end;  { case }
     end;
 
     if Consumed then
@@ -947,7 +975,7 @@ begin
   inherited HandleMouseEnter;
   if (csDesigning in ComponentState) then
     Exit;
-  if Enabled then
+  if Enabled and (not FIgnoreMouseCursor) then
     MouseCursor := mcIBeam;
 end;
 
@@ -990,30 +1018,31 @@ end;
 constructor TfpgBaseEdit.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FFont             := fpgGetFont('#Edit1');  // owned object !
-  Focusable         := True;
-  FHeight           := FFont.Height + 8;     // (BorderStyle + HeightMargin) * 2
-  FWidth            := 120;
-  FTextColor        := Parent.TextColor;
-  FBackgroundColor  := clBoxColor;
-  FAutoSelect       := True;
-  FSelecting        := False;
-  FHideSelection    := True;
-  FReadOnly         := False;
-  FSideMargin       := 3;
-  FHeightMargin     := 2;
-  FMaxLength        := 0; // no limit
-  FText             := '';
-  FCursorPos        := UTF8Length(FText);
-  FSelStart         := FCursorPos;
-  FSelOffset        := 0;
-  FTextOffset       := 0;
-  FPasswordMode     := False;
-  FBorderStyle      := ebsDefault;
-  FPopupMenu        := nil;
-  FDefaultPopupMenu := nil;
-  FOnChange         := nil;
-
+  FFont               := fpgGetFont('#Edit1');  // owned object !
+  Focusable           := True;
+  FHeight             := FFont.Height + 8;     // (BorderStyle + HeightMargin) * 2
+  FWidth              := 120;
+  FTextColor          := Parent.TextColor;
+  FBackgroundColor    := clBoxColor;
+  FAutoSelect         := True;
+  FAutoSize           := True;
+  FSelecting          := False;
+  FHideSelection      := True;
+  FReadOnly           := False;
+  FSideMargin         := 3;
+  FHeightMargin       := 2;
+  FMaxLength          := 0; // no limit
+  FText               := '';
+  FCursorPos          := UTF8Length(FText);
+  FSelStart           := FCursorPos;
+  FSelOffset          := 0;
+  FTextOffset         := 0;
+  FPasswordMode       := False;
+  FBorderStyle        := ebsDefault;
+  FIgnoreMouseCursor  := False;
+  FPopupMenu          := nil;
+  FDefaultPopupMenu   := nil;
+  FOnChange           := nil;
 end;
 
 destructor TfpgBaseEdit.Destroy;
@@ -1057,16 +1086,19 @@ procedure TfpgBaseEdit.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
-  case BorderStyle of
-    ebsNone:
-      if Height < FFont.Height + (FHeightMargin * 2) then
-        Height:= FFont.Height + (FHeightMargin * 2);
-    ebsDefault:
-      if Height < FFont.Height + 4 + (FHeightMargin * 2) then
-        Height:= FFont.Height + 4 + (FHeightMargin * 2);
-    ebsSingle:
-      if Height < FFont.Height + 2 + (FHeightMargin * 2) then
-        Height:= FFont.Height + 2 + (FHeightMargin * 2);
+  if AutoSize then
+  begin
+    case BorderStyle of
+      ebsNone:
+        if Height < FFont.Height + (FHeightMargin * 2) then
+          Height:= FFont.Height + (FHeightMargin * 2);
+      ebsDefault:
+        if Height < FFont.Height + 4 + (FHeightMargin * 2) then
+          Height:= FFont.Height + 4 + (FHeightMargin * 2);
+      ebsSingle:
+        if Height < FFont.Height + 2 + (FHeightMargin * 2) then
+          Height:= FFont.Height + 2 + (FHeightMargin * 2);
+    end;
   end;
   Adjust;
   RePaint;
@@ -1130,22 +1162,41 @@ end;
 
 procedure TfpgBaseEdit.DefaultPopupCut(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit;
   CutToClipboard;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupCopy(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit;
   CopyToClipboard;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupPaste(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit;
   PasteFromClipboard
 end;
 
 procedure TfpgBaseEdit.DefaultPopupClearAll(Sender: TObject);
 begin
+  if ReadOnly then
+    Exit;
   Clear;
+end;
+
+procedure TfpgBaseEdit.DefaultPopupInsertFromCharmap(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  if ReadOnly then
+    Exit;
+  s := fpgShowCharMap;
+  if s <> '' then
+    DoPaste(s);
 end;
 
 procedure TfpgBaseEdit.SetDefaultPopupMenuItemsState;
@@ -1160,13 +1211,15 @@ begin
       itm := TfpgMenuItem(FDefaultPopupMenu.Components[i]);
       // enabled/disable menu items
       if itm.Name = ipmCut then
-        itm.Enabled := FSelOffset <> 0
+        itm.Enabled := (not ReadOnly) and (FSelOffset <> 0)
       else if itm.Name = ipmCopy then
         itm.Enabled := FSelOffset <> 0
       else if itm.Name = ipmPaste then
-        itm.Enabled := fpgClipboard.Text <> ''
+        itm.Enabled := (not ReadOnly) and (fpgClipboard.Text <> '')
       else if itm.Name = ipmClearAll then
-        itm.Enabled := Text <> '';
+        itm.Enabled := (not ReadOnly) and (Text <> '')
+      else if itm.Name = ipmCharmap then
+        itm.Enabled := (not ReadOnly);
     end;
   end;
 end;
@@ -1175,6 +1228,7 @@ procedure TfpgBaseEdit.SetReadOnly(const AValue: Boolean);
 begin
   if FReadOnly = AValue then exit;
   FReadOnly := AValue;
+  RePaint;
 end;
 
 function TfpgBaseEdit.GetMarginAdjustment: integer;
@@ -1204,6 +1258,10 @@ begin
     itm.Name := ipmPaste;
     itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
     itm.Name := ipmClearAll;
+    itm := FDefaultPopupMenu.AddMenuItem('-', '', nil);
+    itm.Name := 'N1';
+    itm := FDefaultPopupMenu.AddMenuItem(rsInsertFromCharacterMap, '', @DefaultPopupInsertFromCharmap);
+    itm.Name := ipmCharmap;
   end;
 
   SetDefaultPopupMenuItemsState;
@@ -1214,6 +1272,8 @@ procedure TfpgBaseEdit.DeleteSelection;
 var
   prevval: TfpgString;
 begin
+  if ReadOnly then
+    Exit;
   prevval := FText;
   if FSelOffset <> 0 then
   begin
@@ -1246,6 +1306,8 @@ var
   s: string;
   prevval: TfpgString;
 begin
+  if ReadOnly then
+    Exit;
   prevval := FText;
   DeleteSelection;
   s := AText;
@@ -1333,19 +1395,25 @@ end;
 procedure TfpgBaseTextEdit.HandlePaint;
 var
   r: TfpgRect;
+  flags: TFTextFlags;
 begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders
+  r.Left := -FDrawOffset + GetMarginAdjustment;
 
-  if (FVisibleText = '') and not Focused then
+  if Enabled and (FVisibleText = '') and (not Focused) then
   begin
     Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FExtraHint, Enabled);
+    flags := [txtLeft, txtVCenter];
+    Canvas.DrawText(r, FExtraHint, flags);    // fpgStyle.DrawString is called internally
   end
   else
   begin
     Canvas.SetTextColor(FTextColor);
-    fpgStyle.DrawString(Canvas, -FDrawOffset + GetMarginAdjustment, r.Top + FHeightMargin, FVisibleText, Enabled);
+    flags := [txtLeft, txtVCenter];
+    if not Enabled then
+      flags += [txtDisabled];
+    Canvas.DrawText(r, FVisibleText, flags);  // fpgStyle.DrawString is called internally
   end;
 
   if Focused then
@@ -1691,12 +1759,6 @@ begin
   begin
     r := GetClientRect;
     Canvas.SetClipRect(r);
-
-    if Enabled then
-      Canvas.SetColor(FBackgroundColor)
-    else
-      Canvas.SetColor(clWindowBackground);
-    Canvas.FillRectangle(r);
 
     Canvas.SetFont(Font);
     Canvas.SetTextColor(TextColor);

@@ -1,7 +1,7 @@
 {
-    fpGUI  -  Free Pascal GUI Library
+    fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -102,6 +102,11 @@ begin
             @stdimg_checkboxes,
       sizeof(stdimg_checkboxes));
 
+  fpgImages.AddMaskedBMP(
+            'stdimg.ellipse',
+            @stdimg_ellipse,
+      sizeof(stdimg_ellipse), 0,0);
+
 
   // General purpose images:
   fpgImages.AddMaskedBMP(
@@ -143,6 +148,11 @@ begin
             'stdimg.configure',
             @stdimg_menu_preferences_16,
       sizeof(stdimg_menu_preferences_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
+            'stdimg.check',
+            @stdimg_menu_check_16,
+      sizeof(stdimg_menu_check_16), 0,0);
 
   fpgImages.AddMaskedBMP(
             'stdimg.document',
@@ -208,6 +218,11 @@ begin
             'stdimg.folderup',
             @stdimg_folder_up_16,
       sizeof(stdimg_folder_up_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
+            'stdimg.folderfile',
+            @stdimg_folder_open_file_16,
+      sizeof(stdimg_folder_open_file_16), 0,0);
 
   fpgImages.AddMaskedBMP(
             'stdimg.open',

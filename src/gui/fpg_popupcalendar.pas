@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -51,13 +51,51 @@ uses
   fpg_combobox,
   fpg_basegrid,
   fpg_grid,
-  fpg_dialogs{,
-  fpg_checkbox};
+  fpg_dialogs,
+  fpg_menu,
+  fpg_hyperlink,
+  fpg_panel;
 
 type
 
   TfpgOnDateSetEvent = procedure(Sender: TObject; const ADate: TDateTime) of object;
   TfpgOnCheckboxChangedEvent = procedure(Sender: TObject; const AIsChecked: Boolean) of object;
+
+  TYearSelectForm = class(TfpgPopupWindow)
+  private
+    {@VFD_HEAD_BEGIN: YearSelectForm}
+    btnMinus10: TfpgButton;
+    btnPlus10: TfpgButton;
+    Bevel1: TfpgBevel;
+    Label1: TfpgHyperlink;
+    Label2: TfpgHyperlink;
+    Label3: TfpgHyperlink;
+    Label4: TfpgHyperlink;
+    Label5: TfpgHyperlink;
+    Label6: TfpgHyperlink;
+    Label7: TfpgHyperlink;
+    Label8: TfpgHyperlink;
+    Label9: TfpgHyperlink;
+    Label10: TfpgHyperlink;
+    {@VFD_HEAD_END: YearSelectForm}
+    FYear: Word;
+    FOriginalYear: Word;
+    FMinYear: Word;
+    FMaxYear: Word;
+    procedure   YearClicked(Sender: TObject);
+    procedure   SetYear(const AValue: Word);
+    procedure   Minus10Clicked(Sender: TObject);
+    procedure   Plus10Clicked(Sender: TObject);
+  protected
+    procedure   HandlePaint; override;
+  public
+    constructor CreateCustom(AOwner: TComponent; const MinYear, MaxYear: Word);
+    procedure   AfterConstruction; override;
+    procedure   AfterCreate;
+    property    Year: Word read FYear write SetYear;
+    property    MinYear: Word read FMinYear;
+    property    MaxYear: Word read FMaxYear;
+  end;
 
 
   TfpgPopupCalendar = class(TfpgPopupWindow)
@@ -85,6 +123,10 @@ type
     FDayColor: TfpgColor;
     FHolidayColor: TfpgColor;
     FSelectedColor: TfpgColor;
+    FSingleClickSelect: boolean;
+    FMonthsPopupMenu: TfpgPopupMenu;
+    FYearPopupWindow: TYearSelectForm;
+    procedure   YearPopupWindowClose(Sender: TObject);
     function    GetDateElement(Index: integer): Word;
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
@@ -105,10 +147,16 @@ type
     procedure   btnMonthUpClicked(Sender: TObject);
     procedure   btnMonthDownClicked(Sender: TObject);
     procedure   btnTodayClicked(Sender: TObject);
+    procedure   grdName1Clicked(Sender: TObject);
     procedure   grdName1DoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   grdName1KeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   grdName1DrawCell(Sender: TObject; const ARow, ACol: Integer; const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
+    procedure   edtMonthClicked(Sender: TObject);
+    procedure   edtYearClicked(Sender: TObject);
+    procedure   miMonthClicked(Sender: TObject);
     procedure   TearDown;
+    procedure   SetSingleClickSelect(const AValue: boolean);
+    procedure   ClosePopupMenusWindows;
   protected
     FntNorm, FntBold: TfpgFont;
     FOrigFocusWin: TfpgWidget;
@@ -116,12 +164,14 @@ type
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleShow; override;
     procedure   HandleHide; override;
+    procedure   ShowDefaultPopupMenu; virtual;
     property    CallerWidget: TfpgWidget read FCallerWidget write FCallerWidget;
   public
     constructor Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget); reintroduce;
     destructor  Destroy; override;
     procedure   AfterCreate;
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
+    property    SingleClickSelect: boolean read FSingleClickSelect write SetSingleClickSelect default False;
     property    Day: Word index 1 read GetDateElement write SetDateElement;
     property    Month: Word index 2 read GetDateElement write SetDateElement;
     property    Year: Word index 3 read GetDateElement write SetDateElement;
@@ -150,6 +200,7 @@ type
     FHolidayColor: TfpgColor;
     FSelectedColor: TfpgColor;
     FCloseOnSelect: boolean;
+    FSingleClickSelect: boolean;
     procedure   SetDateFormat(const AValue: string);
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
@@ -159,10 +210,11 @@ type
     procedure   SetDayColor(const AValue: TfpgColor);
     procedure   SetHolidayColor(const AValue: TfpgColor);
     procedure   SetSelectedColor(const AValue: TfpgColor);
-    procedure   SetText(const AValue: string); override;
-    function    GetText: string; override;
     procedure   SetCloseOnSelect(const AValue: boolean);
+    procedure   SetSingleClickSelect(const AValue: boolean);
   protected
+    function    GetText: string; override;
+    procedure   SetText(const AValue: string); override;
     procedure   InternalOnValueSet(Sender: TObject; const ADate: TDateTime); virtual;
     function    HasText: boolean; override;
     procedure   DoDropDown; override;
@@ -170,36 +222,37 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property    BackgroundColor;
-    property    DateFormat: string read FDateFormat write SetDateFormat;
-    property    DateValue: TDateTime read FDate write SetDateValue;
-    property    FontDesc;
-    property    MinDate: TDateTime read FMinDate write SetMinDate;
-    property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
-    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay default 0;
-    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
-    property    DayColor: TfpgColor read FDayColor write SetDayColor;
-    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
-    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
-    property    ParentShowHint;
-    property    ShowHint;
     { Clicking on calendar Today button will close the popup calendar by default }
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
+    property    DateFormat: string read FDateFormat write SetDateFormat;
+    property    DateValue: TDateTime read FDate write SetDateValue;
+    property    DayColor: TfpgColor read FDayColor write SetDayColor;
+    property    FontDesc;
+    property    Hint;
+    property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;
+    property    MaxDate: TDateTime read FMaxDate write SetMaxDate;
+    property    MinDate: TDateTime read FMinDate write SetMinDate;
+    property    ParentShowHint;
+    property    SelectedColor: TfpgColor read FSelectedColor write SetSelectedColor;
+    property    SingleClickSelect: boolean read FSingleClickSelect write SetSingleClickSelect default False;
+    property    ShowHint;
+    property    WeeklyHoliday: integer read FWeeklyHoliday write SetWeeklyHoliday default -1;
+    property    WeekStartDay: integer read FWeekStartDay write SetWeekStartDay default 0;
     property    TabOrder;
     property    OnChange;
     property    OnCloseUp;
     property    OnDropDown;
     property    OnEnter;
     property    OnExit;
+    property    OnShowHint;
   end;
 
 
   TfpgCalendarCheckCombo = class(TfpgCalendarCombo)
   private
-//    FCheckBox: TfpgCheckbox;
     FChecked: boolean;
     FCheckBoxRect: TfpgRect;
     FCheckboxChanged: TfpgOnCheckboxChangedEvent;
-    procedure   InternalCheckBoxChanged(Sender: TObject);
     procedure   SetChecked(const AValue: Boolean);
     procedure   DoCheckboxChanged;
   protected
@@ -221,14 +274,296 @@ type
 
 {@VFD_NEWFORM_DECL}
 
+
 implementation
 
 uses
+  dateutils,
   fpg_scrollbar,
   fpg_constants;
 
+type
+  // friend class to get access to Protected methods
+  TPopupMenuFriend = class(TfpgPopupMenu);
+
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TYearSelectForm.YearClicked(Sender: TObject);
+begin
+  FYear := StrToInt(TfpgHyperlink(Sender).Text);
+  Close;
+end;
+
+procedure TYearSelectForm.SetYear(const AValue: Word);
+
+  function IsInRange(const AYear: word): boolean;
+  begin
+    // always one year less on either side (min and max) so we don't go over
+    // any possible month limits.
+    Result := (AYear > MinYear) and (AYear < MaxYear);
+  end;
+
+begin
+  if FYear = AValue then exit;
+  FYear := AValue;
+  if FOriginalYear = 0 then
+    FOriginalYear := FYear;
+  Label1.Text := IntToStr(FYear-4);
+  Label1.Enabled := IsInRange(FYear-4);
+  Label2.Text := IntToStr(FYear-3);
+  Label2.Enabled := IsInRange(FYear-3);
+  Label3.Text := IntToStr(FYear-2);
+  Label3.Enabled := IsInRange(FYear-2);
+  Label4.Text := IntToStr(FYear-1);
+  Label4.Enabled := IsInRange(FYear-1);
+  Label5.Text := IntToStr(FYear);
+  if FYear = FOriginalYear then
+    Label5.FontDesc := '#Label2'
+  else
+    Label5.FontDesc := '#Label1';
+  Label5.Enabled := IsInRange(FYear);
+  Label6.Text := IntToStr(FYear+1);
+  Label6.Enabled := IsInRange(FYear+1);
+  Label7.Text := IntToStr(FYear+2);
+  Label7.Enabled := IsInRange(FYear+2);
+  Label8.Text := IntToStr(FYear+3);
+  Label8.Enabled := IsInRange(FYear+3);
+  Label9.Text := IntToStr(FYear+4);
+  Label9.Enabled := IsInRange(FYear+4);
+  Label10.Text := IntToStr(FYear+5);
+  Label10.Enabled := IsInRange(FYear+5);
+end;
+
+procedure TYearSelectForm.Minus10Clicked(Sender: TObject);
+begin
+  SetYear(FYear-10);
+end;
+
+procedure TYearSelectForm.Plus10Clicked(Sender: TObject);
+begin
+  SetYear(FYear+10);
+end;
+
+procedure TYearSelectForm.HandlePaint;
+begin
+//  inherited HandlePaint;
+  Canvas.BeginDraw;
+  Canvas.Clear(BackgroundColor);
+  Canvas.SetColor(clWindowBackground);
+  Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
+  Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
+  Canvas.EndDraw;
+end;
+
+constructor TYearSelectForm.CreateCustom(AOwner: TComponent; const MinYear, MaxYear: Word);
+begin
+  Create(AOwner);
+  FYear := 0;
+  FOriginalYear := 0;
+  FMinYear := MinYear;
+  FMaxYear := MaxYear;
+end;
+
+procedure TYearSelectForm.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  AfterCreate;
+end;
+
+procedure TYearSelectForm.AfterCreate;
+begin
+  {%region 'Auto-generated GUI code' -fold}
+  {@VFD_BODY_BEGIN: YearSelectForm}
+  Name := 'YearSelectForm';
+  SetPosition(439, 401, 130, 122);
+//  WindowTitle := 'YearSelectForm';
+//  Hint := '';
+//  Sizeable := False;
+
+  btnMinus10 := TfpgButton.Create(self);
+  with btnMinus10 do
+  begin
+    Name := 'btnMinus10';
+    SetPosition(4, 4, 24, 24);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := -1;
+    ImageName := 'sys.sb.left';
+    ImageSpacing := 0;
+    TabOrder := 1;
+    OnClick := @Minus10Clicked;
+  end;
+
+  btnPlus10 := TfpgButton.Create(self);
+  with btnPlus10 do
+  begin
+    Name := 'btnPlus10';
+    SetPosition(104, 4, 24, 24);
+    Text := '';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := -1;
+    ImageName := 'sys.sb.right';
+    ImageSpacing := 0;
+    TabOrder := 2;
+    OnClick := @Plus10Clicked;
+  end;
+
+  Bevel1 := TfpgBevel.Create(self);
+  with Bevel1 do
+  begin
+    Name := 'Bevel1';
+    SetPosition(64, 32, 2, 85);
+    Hint := '';
+    Style := bsLowered;
+  end;
+
+  Label1 := TfpgHyperlink.Create(self);
+  with Label1 do
+  begin
+    Name := 'Label1';
+    SetPosition(8, 32, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label2 := TfpgHyperlink.Create(self);
+  with Label2 do
+  begin
+    Name := 'Label2';
+    SetPosition(8, 48, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label3 := TfpgHyperlink.Create(self);
+  with Label3 do
+  begin
+    Name := 'Label3';
+    SetPosition(8, 64, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label4 := TfpgHyperlink.Create(self);
+  with Label4 do
+  begin
+    Name := 'Label4';
+    SetPosition(8, 80, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label5 := TfpgHyperlink.Create(self);
+  with Label5 do
+  begin
+    Name := 'Label5';
+    SetPosition(8, 96, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label6 := TfpgHyperlink.Create(self);
+  with Label6 do
+  begin
+    Name := 'Label6';
+    SetPosition(76, 32, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label7 := TfpgHyperlink.Create(self);
+  with Label7 do
+  begin
+    Name := 'Label7';
+    SetPosition(76, 48, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label8 := TfpgHyperlink.Create(self);
+  with Label8 do
+  begin
+    Name := 'Label8';
+    SetPosition(76, 64, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label9 := TfpgHyperlink.Create(self);
+  with Label9 do
+  begin
+    Name := 'Label9';
+    SetPosition(76, 80, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  Label10 := TfpgHyperlink.Create(self);
+  with Label10 do
+  begin
+    Name := 'Label10';
+    SetPosition(76, 96, 44, 16);
+    Alignment := taCenter;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Label';
+    TextColor := clText1;
+    HotTrackFont := '#Label1';
+    OnClick := @YearClicked;
+  end;
+
+  {@VFD_BODY_END: YearSelectForm}
+  {%endregion}
+end;
+
 
 procedure TfpgPopupCalendar.PopulateDays;
 var
@@ -253,6 +588,7 @@ end;
 procedure TfpgPopupCalendar.grdName1DoubleClick(Sender: TObject;
   AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
 begin
+  ClosePopupMenusWindows;
   TearDown;
 end;
 
@@ -298,6 +634,33 @@ begin
   end;
 end;
 
+procedure TfpgPopupCalendar.edtMonthClicked(Sender: TObject);
+begin
+  ClosePopupMenusWindows;
+  ShowDefaultPopupMenu;
+end;
+
+procedure TfpgPopupCalendar.edtYearClicked(Sender: TObject);
+begin
+  ClosePopupMenusWindows;
+  if not Assigned(FYearPopupWindow) then
+  begin
+    FYearPopupWindow := TYearSelectForm.CreateCustom(nil, YearOf(MinDate), YearOf(MaxDate));
+    FYearPopupWindow.OnClose  := @YearPopupWindowClose;
+    FYearPopupWindow.Year := Year;
+  end;
+
+  FYearPopupWindow.ShowAt(self, edtYear.Left, edtYear.Bottom);
+end;
+
+procedure TfpgPopupCalendar.miMonthClicked(Sender: TObject);
+var
+  itm: TfpgMenuItem;
+begin
+  itm := Sender as TfpgMenuItem;
+  SetDateElement(2 {month index}, itm.Tag);
+end;
+
 procedure TfpgPopupCalendar.TearDown;
 var
   lD: Word;
@@ -308,6 +671,10 @@ begin
   if s = '' then
     Exit; //==>
   lD := StrToInt(s);
+  if (grdName1.FocusRow = 0) and (lD > 7) then
+    Exit; // clicked in previous month
+  if (grdName1.FocusRow >= 4) and (lD < 15) then
+    Exit; // clicked in next month
   d := EncodeDate(Year, Month, lD);
   if (d >= FMinDate) and (d <= FMaxDate) then
   begin
@@ -320,6 +687,32 @@ begin
     if CloseOnSelect then
       Close;
   end;
+end;
+
+procedure TfpgPopupCalendar.SetSingleClickSelect(const AValue: boolean);
+begin
+  if FSingleClickSelect = AValue then exit;
+  FSingleClickSelect := AValue;
+end;
+
+procedure TfpgPopupCalendar.ClosePopupMenusWindows;
+begin
+  if Assigned(FMonthsPopupMenu) then
+  begin
+    FMonthsPopupMenu.Close;
+    FreeAndNil(FMonthsPopupMenu);
+  end;
+
+  if Assigned(FYearPopupWindow) then
+  begin
+    FYearPopupWindow.Close;
+    FreeAndNil(FYearPopupWindow);
+  end;
+end;
+
+procedure TfpgPopupCalendar.YearPopupWindowClose(Sender: TObject);
+begin
+  Year := FYearPopupWindow.Year;
 end;
 
 function TfpgPopupCalendar.GetDateElement(Index: integer): Word;
@@ -372,14 +765,20 @@ procedure TfpgPopupCalendar.SetDateElement(Index: integer; const AValue: Word);
 var
   lD, lM, lY: Word;
   lDate: TDateTime;
+  d: Word;
 begin
   if AValue > 0 then
   begin
     DecodeDate(FDate, lY, lM, lD);
     case Index of
-      1: lD := AValue;
-      2: lM := AValue;
-      3: lY := AValue;
+      1:  lD := AValue;
+      2:  begin
+            lM := AValue;
+            d := DaysInAMonth(lY, lM);
+            if lD > d then // If original day value is larger than days in new month
+              lD := d;
+          end;
+      3:  lY := AValue;
     end;
     try
       lDate := EncodeDate(lY, lM, lD);
@@ -395,14 +794,14 @@ begin
   if FDate = AValue then
     Exit; //==>
 
-  if (trunc(FDate) >= trunc(FMinDate)) then
+  if (trunc(AValue) >= trunc(FMinDate)) then
     {$IFDEF DEBUG}
     writeln('Passed min test')
     {$ENDIF}
   else
     exit;
 
-  if (FDate <= FMaxDate) then
+  if (trunc(AValue) <= trunc(FMaxDate)) then
     {$IFDEF DEBUG}
     writeln('Passed max test')
     {$ENDIF}
@@ -514,6 +913,7 @@ procedure TfpgPopupCalendar.btnYearUpClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate, 12);
   if d <= FMaxDate then
     DateValue := d;
@@ -523,6 +923,7 @@ procedure TfpgPopupCalendar.btnYearDownClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate, -12);
   if d >= FMinDate then
     DateValue := d;
@@ -532,6 +933,7 @@ procedure TfpgPopupCalendar.btnMonthUpClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate);
   if d <= FMaxDate then
     DateValue := d;
@@ -541,6 +943,7 @@ procedure TfpgPopupCalendar.btnMonthDownClicked(Sender: TObject);
 var
   d: TDateTime;
 begin
+  ClosePopupMenusWindows;
   d := IncMonth(FDate, -1);
   if d >= FMinDate then
     DateValue := d;
@@ -548,11 +951,19 @@ end;
 
 procedure TfpgPopupCalendar.btnTodayClicked(Sender: TObject);
 begin
+  ClosePopupMenusWindows;
   if Now >= FMinDate then
   begin
     DateValue := Now;
     TearDown;
   end;
+end;
+
+procedure TfpgPopupCalendar.grdName1Clicked(Sender: TObject);
+begin
+  ClosePopupMenusWindows;
+  if FSingleClickSelect then
+    TearDown;
 end;
 
 procedure TfpgPopupCalendar.HandlePaint;
@@ -657,6 +1068,51 @@ begin
     FocusRootWidget.SetFocus;
 end;
 
+procedure TfpgPopupCalendar.ShowDefaultPopupMenu;
+var
+  itm: TfpgMenuItem;
+  pt: TPoint;
+begin
+  if not Assigned(FMonthsPopupMenu) then
+  begin
+    FMonthsPopupMenu := TfpgPopupMenu.Create(nil);
+    itm := FMonthsPopupMenu.AddMenuItem(rslongjan, '', @miMonthClicked);
+    itm.Tag := 1;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongfeb, '', @miMonthClicked);
+    itm.Tag := 2;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongmar, '', @miMonthClicked);
+    itm.Tag := 3;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongapr, '', @miMonthClicked);
+    itm.Tag := 4;
+    itm := FMonthsPopupMenu.AddMenuItem(rsLongMay, '', @miMonthClicked);
+    itm.Tag := 5;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongjun, '', @miMonthClicked);
+    itm.Tag := 6;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongjul, '', @miMonthClicked);
+    itm.Tag := 7;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongaug, '', @miMonthClicked);
+    itm.Tag := 8;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongsep, '', @miMonthClicked);
+    itm.Tag := 9;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongoct, '', @miMonthClicked);
+    itm.Tag := 10;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongnov, '', @miMonthClicked);
+    itm.Tag := 11;
+    itm := FMonthsPopupMenu.AddMenuItem(rslongdec, '', @miMonthClicked);
+    itm.Tag := 12;
+  end;
+
+  // translate Edit coordinates
+  pt := WindowToScreen(self, Point(edtMonth.Left, edtMonth.Bottom));
+  TPopupMenuFriend(FMonthsPopupMenu).PrepareToShow;  // forces height calculation
+  // If dropdown will not fit below Edit, then we place it above
+  if (pt.y + FMonthsPopupMenu.Height) > fpgApplication.ScreenHeight then
+    pt.y := pt.y - edtMonth.Height - FMonthsPopupMenu.Height;
+
+//  SetDefaultPopupMenuItemsState;
+  FMonthsPopupMenu.ShowAt(nil, pt.x, pt.y);
+end;
+
 constructor TfpgPopupCalendar.Create(AOwner: TComponent; AOrigFocusWin: TfpgWidget);
 begin
   inherited Create(AOwner);
@@ -673,11 +1129,16 @@ begin
   FSelectedColor := clWhite;
   FMonthOffset := 0;
   FCloseOnSelect := True;
+  FSingleClickSelect := False;
   UpdateCalendar;
 end;
 
 destructor TfpgPopupCalendar.Destroy;
 begin
+  if Assigned(FMonthsPopupMenu) then
+    FMonthsPopupMenu.Free;
+  if Assigned(FYearPopupWindow) then
+    FYearPopupWindow.Free;
   FntBold.Free;
   FntNorm.Free;
   inherited Destroy;
@@ -685,22 +1146,26 @@ end;
 
 procedure TfpgPopupCalendar.AfterCreate;
 begin
+  {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: fpgPopupCalendar}
   Name := 'fpgPopupCalendar';
-  SetPosition(285, 249, 233, 142);
-//  WindowTitle := 'fpgPopupCalendar';
-//  Sizeable := False;
-//  WindowPosition := wpUser;
+  SetPosition(370, 182, 233, 142);
+  Hint := '';
 
   edtYear := TfpgEdit.Create(self);
   with edtYear do
   begin
     Name := 'edtYear';
     SetPosition(0, 0, 37, 22);
+    AutoSize := False;
+    BorderStyle := ebsSingle;
+    Hint := '';
+    TabOrder := 1;
     Text := '';
     FontDesc := '#Edit1';
+    IgnoreMouseCursor := True;
     Focusable := False;
-    BorderStyle := ebsSingle;
+    OnClick := @edtYearClicked;
   end;
 
   btnYearUp := TfpgButton.Create(self);
@@ -711,8 +1176,10 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
+    TabOrder := 2;
     Focusable := False;
     OnClick := @btnYearUpClicked;
   end;
@@ -725,8 +1192,10 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
+    TabOrder := 3;
     Focusable := False;
     OnClick := @btnYearDownClicked;
   end;
@@ -736,10 +1205,15 @@ begin
   begin
     Name := 'edtMonth';
     SetPosition(50, 0, 100, 22);
+    AutoSize := False;
+    BorderStyle := ebsSingle;
+    Hint := '';
+    TabOrder := 4;
     Text := '';
     FontDesc := '#Edit1';
+    IgnoreMouseCursor := True;
     Focusable := False;
-    BorderStyle := ebsSingle;
+    OnClick  := @edtMonthClicked;
   end;
 
   btnMonthUp := TfpgButton.Create(self);
@@ -750,8 +1224,10 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.up';
+    TabOrder := 5;
     Focusable := False;
     OnClick := @btnMonthUpClicked;
   end;
@@ -764,12 +1240,14 @@ begin
     Text := '';
     Embedded := True;
     FontDesc := '#Label1';
+    Hint := '';
     ImageMargin := 0;
     ImageName := 'sys.sb.down';
+    TabOrder := 6;
     Focusable := False;
     OnClick := @btnMonthDownClicked;
   end;
-  
+
   btnToday := TfpgButton.Create(self);
   with btnToday do
   begin
@@ -777,6 +1255,9 @@ begin
     SetPosition(164, 0, 70, 22);
     Text := 'Today';
     FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 7;
     Focusable := True;
     OnClick := @btnTodayClicked;
   end;
@@ -795,25 +1276,20 @@ begin
     AddColumn('Sat', 33, taCenter);
     FontDesc := '#Grid';
     HeaderFontDesc := '#GridHeader';
+    Hint := '';
     RowCount := 6;
+    RowSelect := False;
+    TabOrder := 8;
     ScrollBarStyle := ssNone;
+    OnClick  := @grdName1Clicked;
     OnDoubleClick := @grdName1DoubleClick;
     OnKeyPress := @grdName1KeyPress;
     OnDrawCell := @grdName1DrawCell;
   end;
 
   {@VFD_BODY_END: fpgPopupCalendar}
-{
-  // Setup localization
-  // UI Designer doesn't support resource strings yet!
-  grdName1.ColumnTitle[0] := rsShortSun;
-  grdName1.ColumnTitle[1] := rsShortMon;
-  grdName1.ColumnTitle[2] := rsShortTue;
-  grdName1.ColumnTitle[3] := rsShortWed;
-  grdName1.ColumnTitle[4] := rsShortThu;
-  grdName1.ColumnTitle[5] := rsShortFri;
-  grdName1.ColumnTitle[6] := rsShortSat;
-}
+  {%endregion}
+
   btnToday.Text := rsToday;
 end;
 
@@ -916,6 +1392,12 @@ begin
   FCloseOnSelect := AValue;
 end;
 
+procedure TfpgCalendarCombo.SetSingleClickSelect(const AValue: boolean);
+begin
+  if FSingleClickSelect = AValue then exit;
+  FSingleClickSelect := AValue;
+end;
+
 function TfpgCalendarCombo.HasText: boolean;
 begin
   Result := FDate >= FMinDate;
@@ -929,6 +1411,7 @@ begin
   FWeeklyHoliday := -1;
   FDate := Now;
   FCloseOnSelect := True;
+  FSingleClickSelect := False;
   DateFormat := ShortDateFormat;
 end;
 
@@ -975,6 +1458,7 @@ begin
     ddw.DontCloseWidget := self;
     { Set to false CloseOnSelect to leave opened popup calendar menu }
     ddw.CloseOnSelect := CloseOnSelect;
+    ddw.SingleClickSelect := SingleClickSelect;
     ddw.CallerWidget  := self;
 
     if Assigned(OnDropDown) then
@@ -1006,17 +1490,12 @@ end;
 
 { TfpgCalendarCheckCombo }
 
-procedure TfpgCalendarCheckCombo.InternalCheckBoxChanged(Sender: TObject);
-begin
-  RePaint;
-end;
-
 procedure TfpgCalendarCheckCombo.SetChecked(const AValue: Boolean);
 begin
   if AValue = FChecked then
     Exit; //==>
   FChecked := Avalue;
-  InternalCheckBoxChanged(nil);
+  Repaint;
 end;
 
 procedure TfpgCalendarCheckCombo.DoCheckboxChanged;
@@ -1028,13 +1507,10 @@ end;
 procedure TfpgCalendarCheckCombo.DoDrawText(const ARect: TfpgRect);
 var
   lRect: TfpgRect;
-  flags: TFTextFlags;
-  lColor: TfpgColor;
 begin
   lRect := ARect;
   lRect.Left := lRect.Left+FCheckBoxRect.Width + 1;
   lRect.Width := lRect.Width - (FCheckBoxRect.Width + 1) - FMargin;
-  flags := [txtRight, txtVCenter];
   if HasText then
   begin
     if not FChecked then
@@ -1060,7 +1536,6 @@ procedure TfpgCalendarCheckCombo.InternalOnValueSet(Sender: TObject;
 begin
   inherited InternalOnValueSet(Sender, ADate);
   Checked := True;
-//  InternalCheckBoxChanged(nil);
 end;
 
 procedure TfpgCalendarCheckCombo.HandleKeyPress(var keycode: word;
@@ -1115,6 +1590,7 @@ begin
   begin
     Checked := not FChecked;
     DoCheckboxChanged;
+    Repaint;
   end
   else
     inherited HandleLMouseUp(x, y, shiftstate);
@@ -1127,22 +1603,6 @@ begin
   FCheckBoxRect.SetRect(2, 0, 17, 17);
   FCheckboxRect.Top := (FHeight - FCheckBoxRect.Height) div 2;
   OffsetRect(FCheckboxRect, 2, 3);  // frame border must be taken into consideration
-
-{
-  FCheckBox := TfpgCheckBox.Create(self);
-  with FCheckbox do
-  begin
-    Name := '_IntCheckBox';
-    SetPosition(2, 2, 18, 17);
-    Checked := True;
-    FontDesc := '#Label1';
-    Text := '';
-//    BackgroundColor := self.BackgroundColor;
-    BackgroundColor := clMagenta;
-    Focusable := False;
-    OnChange := @InternalCheckBoxChanged;
-  end;
-}
 end;
 
 

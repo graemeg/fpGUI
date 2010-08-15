@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -34,6 +34,9 @@ type
   
   TFormCloseEvent = procedure(Sender: TObject; var CloseAction: TCloseAction) of object;
   TFormCloseQueryEvent = procedure(Sender: TObject; var CanClose: boolean) of object;
+  TfpgHelpEvent = function(AHelpType: THelpType; AHelpContext: THelpContext;
+       const AHelpKeyword: String; const AHelpFile: String;
+       var AHandled: Boolean): Boolean of object;
 
 
   TfpgBaseForm = class(TfpgWidget)
@@ -47,14 +50,13 @@ type
     FOnDestroy: TNotifyEvent;
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
+    FOnHelp: TfpgHelpEvent;
   protected
     FModalResult: TfpgModalResult;
     FParentForm: TfpgBaseForm;
     FWindowPosition: TWindowPosition;
     FWindowTitle: string;
     FSizeable: boolean;
-    procedure   AdjustWindowStyle; override;
-    procedure   SetWindowParameters; override;
     procedure   SetWindowTitle(const ATitle: string); override;
     procedure   MsgActivate(var msg: TfpgMessageRec); message FPGM_ACTIVATE;
     procedure   MsgDeActivate(var msg: TfpgMessageRec); message FPGM_DEACTIVATE;
@@ -67,6 +69,7 @@ type
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
+    function    DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext; const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean; virtual;
     // properties
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
@@ -80,6 +83,7 @@ type
     property    OnCreate: TNotifyEvent read FOnCreate write FOnCreate;
     property    OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
     property    OnDestroy: TNotifyEvent read FOnDestroy write FOnDestroy;
+    property    OnHelp: TfpgHelpEvent read FOnHelp write FOnHelp;
     property    OnHide: TNotifyEvent read FOnHide write FOnHide;
     property    OnShow: TNotifyEvent read FOnShow write FOnShow;
   public
@@ -88,9 +92,12 @@ type
     procedure   AfterConstruction; override;
     procedure   BeforeDestruction; override;
     procedure   AfterCreate; virtual;
+    procedure   AdjustWindowStyle; override;
+    procedure   SetWindowParameters; override;
+    procedure   InvokeHelp; override;
     procedure   Show;
     procedure   Hide;
-    function    ShowModal: integer;
+    function    ShowModal: TfpgModalResult;
     procedure   Close;
     function    CloseQuery: boolean; virtual;
   end;
@@ -100,22 +107,41 @@ type
   published
     property    BackgroundColor;
     property    FullScreen;
+    property    Height;
+    property    Hint;
+    property    Left;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
     property    ModalResult;
-    property    Sizeable;
     property    ShowHint;
+    property    Sizeable;
     property    TextColor;
+    property    Top;
+    property    Width;
     property    WindowPosition;
     property    WindowTitle;
     property    OnActivate;
+    property    OnClick;
     property    OnClose;
     property    OnCloseQuery;
     property    OnCreate;
     property    OnDeactivate;
     property    OnDestroy;
+    property    OnDoubleClick;
+    property    OnEnter;
+    property    OnExit;
     property    OnHide;
+    property    OnMouseDown;
+    property    OnMouseEnter;
+    property    OnMouseExit;
+    property    OnMouseMove;
+    property    OnMouseUp;
     property    OnPaint;
     property    OnResize;
     property    OnShow;
+    property    OnShowHint;
   end;
 
 
@@ -262,13 +288,25 @@ begin
   // for the user
 end;
 
+procedure TfpgBaseForm.InvokeHelp;
+var
+  lEventHandled: Boolean;
+  lSucceeded: Boolean;
+begin
+  lEventHandled := False;
+  lSucceeded := False;
+  lSucceeded := DoOnHelp(HelpType, HelpContext, HelpKeyword, fpgApplication.HelpFile, lEventHandled);
+  if (not lSucceeded) or (not lEventHandled) then
+    inherited InvokeHelp;
+end;
+
 procedure TfpgBaseForm.Show;
 begin
   FVisible := True;
   HandleShow;
 end;
 
-function TfpgBaseForm.ShowModal: integer;
+function TfpgBaseForm.ShowModal: TfpgModalResult;
 var
   lCloseAction: TCloseAction;
 begin
@@ -288,7 +326,6 @@ begin
     except
       on E: Exception do
       begin
-        ModalResult := -1;
         Visible := False;
         fpgApplication.HandleException(self);
       end;
@@ -301,7 +338,7 @@ begin
   
   if ModalResult <> mrNone then
   begin
-    lCloseAction := caFree; // Dummy variable - we do nothing with it
+    lCloseAction := caHide; // Dummy variable - we do nothing with it
     DoOnClose(lCloseAction); // Simply so the OnClose event fires.
   end;
 end;
@@ -369,8 +406,8 @@ end;
 
 procedure TfpgBaseForm.AfterConstruction;
 begin
-  inherited AfterConstruction;
   AfterCreate;
+  inherited AfterConstruction;
   if Assigned(FOnCreate) then
     FOnCreate(self);
 end;
@@ -388,12 +425,16 @@ begin
     OnClose(self, CloseAction);
 end;
 
+function TfpgBaseForm.DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext;
+  const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean;
+begin
+  if Assigned(FOnHelp) then
+    Result := FOnHelp(AHelpType, AHelpContext, AHelpKeyword, AHelpFile, AHandled);
+end;
+
 procedure TfpgBaseForm.Hide;
 begin
   Visible := False;
-//  HandleHide;
-  if ModalResult = mrNone then
-    ModalResult := -1;
 end;
 
 procedure TfpgBaseForm.Close;
@@ -426,7 +467,7 @@ begin
             fpgApplication.Terminate
           else
             // We can't free ourselves, somebody else needs to do it
-            fpgPostMessage(Self, fpgApplication, FPGM_CLOSE);
+            fpgPostMessage(Self, fpgApplication, FPGM_FREEME);
         end;
     end;  { case CloseAction }
   end;  { if CloseQuery }

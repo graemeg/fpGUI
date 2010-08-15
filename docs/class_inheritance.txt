@@ -1,78 +1,84 @@
 
+                      fpGUI Toolkit
+                 CLASS INHERITANCE LAYOUT
+
+
 The derivation and inheritance of classes are different than one
-might be used to.  It will be explained by the following
-example.
+might be used to. It will be explained by the following example.
 
 Due to the graphics painting library being different on certain
 platforms we had to do some trickery to the inheritance so the
 same classname could be used in descendant classes for widgets
-etc in fpGUI.
+in fpGUI. We also did not want to introduce IFDEF's in our code,
+if we did not absolutely needed too.
 
-Here is the inheritance for the X11 backend for TFCanvas:
+Here is the inheritance for the X11 backend for TfpgCanvas:
 
-                                  TObject
-                                     |
-                               TFCustomCanvas
-                                     |
-     TDefCanvas      --->        TX11Canvas
-         |
-      TFCanvas
-
-
-
-Here is the inheritance for the GDI backend for TFCanvas:
-
-                                  TObject
-                                     |
-                               TFCustomCanvas
-                                     |
-     TDefCanvas      --->        TGDICanvas
-         |
-      TFCanvas
+                                      TObject
+                                         |
+                                   TfpgCanvasBase
+                                         |
+     TfpgCanvasImpl      --->       TfpgX11Canvas
+           |
+       TfpgCanvas
 
 
-TDefCanvas acts like a alias for the actual backend used. Every 
-painting library has a gfxinterface.pas unit that defines this
+Here is the inheritance for the GDI backend for TfpgCanvas:
+
+                                      TObject
+                                         |
+                                   TfpgCanvasBase
+                                         |
+     TfpgCanvasImpl      --->       TfpgGDICanvas
+           |
+       TfpgCanvas
+
+
+TfpgCanvasImpl acts like an alias for the actual backend used. Every
+painting library has a fpg_interface.pas unit that defines this
 alias.
 
-  X11:    gfx/x11/gfxinterface.pas
-  GDI:    gfx/gdi/gfxinterface.pas
+  X11:    corelib/x11/fpg_interface.pas
+  GDI:    corelib/gdi/fpg_interface.pas
 
 
-TFCanvas is common to all painting backends.
+TfpgCanvas is common to all painting backends.
 
-  TFCanvas:    gfx/fpgfx.pas
+  TfpgCanvas:    corelib/fpg_main.pas
 
 
-TFCustomCanvas is also common to all painting backends and acts
+TfpgCanvasBase is also common to all painting backends and acts
 like a abstract class defining the class interface that needs
 to be implemented.
 
-  TFCustomCanvas:    gfx/gfxbase.pas
+  TfpgCanvasBase:    corelib/fpg_base.pas
 
 
 Each backend needs to implement the class interface defined by
-TFCustomCanvas. Obviously they are specific to each backend
-so lives in that backends directory.
+TfpgCanvasBase. Obviously they are specific to each backend
+so the unit implementing that interface, lives in that backend
+specific directory.
 
-  TX11Canvas:    gfx/x11/gfx_x11.pas
-  TGDICanvas:    gfx/gdi/gfx_gdi.pas
+  TfpgX11Canvas:    corelib/x11/fpg_x11.pas
+  TfpgGDICanvas:    corelib/gdi/fpg_gdi.pas
 
 
-Each backend has it's own fpgfxpackage.lpk Lazarus Package. Due
-to the fpgfxpackage including the common units and the backend
-specific units, it completes the class hierachy and ties
-all the units together.
+Each backend has its own fpgui_toolkit.lpk Lazarus Package. Due
+to the fpgui_toolkit including the common units and the backend
+specific units, it completes the class hierachy and ties all the
+units together into one framework.
 
 Other classes that follow this same process (inheritance) are
-listed below.  Their actual definitions are in the 
-gfxinterface.pas unit in each backend directory.
+listed below. Their actual definitions are in the fpg_interface.pas
+unit inside each backend directory.
 
-  TDefFont
-  TDefScreen
-  TDefApplication
-  TDefWindow
-  TDefBitmap
+  TfpgFontResourceImpl
+  TfpgImageImpl
+  TfpgCanvasImpl
+  TfpgWindowImpl
+  TfpgApplicationImpl
+  TfpgClipboardImpl
+  TfpgFileListImpl
 
         ---------------oO0Oo-----------------
 

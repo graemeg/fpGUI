@@ -80,6 +80,10 @@ msgstr "Non riesco a creare la cartella"
 msgid "Change"
 msgstr "Cambia"
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Chiudi"
@@ -239,6 +243,10 @@ msgstr "Informazione"
 #: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Inserisci"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -400,6 +408,10 @@ msgstr "Cerca"
 msgid "Select"
 msgstr "Seleziona"
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Selezionare una directory"
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Seleziona un font"
@@ -435,6 +447,10 @@ msgstr "Dom"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Domenica"
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"

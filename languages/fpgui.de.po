@@ -79,6 +79,10 @@ msgstr "Kann Verzeichnis nicht anlegen"
 msgid "Change"
 msgstr "Ändern"
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Schließen"
@@ -238,6 +242,10 @@ msgstr "Information"
 #: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Einfügen"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -399,6 +407,10 @@ msgstr "Suchen"
 msgid "Select"
 msgstr "Ausgewählte"
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Wählen Sie ein Verzeichnis"
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Schriftart auswählen"
@@ -434,6 +446,10 @@ msgstr "Son"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Sonntag"
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"

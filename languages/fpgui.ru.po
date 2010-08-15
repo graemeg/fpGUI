@@ -80,6 +80,10 @@ msgstr "Невозможно создать директорию"
 msgid "Change"
 msgstr "Изменить"
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr "Закрыть"
@@ -239,6 +243,10 @@ msgstr "Информация"
 #: fpg_constants:rsinsert
 msgid "Insert"
 msgstr "Вставка"
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
+msgstr ""
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -400,6 +408,10 @@ msgstr "Поиск"
 msgid "Select"
 msgstr "Выбрать"
 
+#: fpg_constants:rsselectadirectory
+msgid "Select a Directory"
+msgstr "Выберите директорию"
+
 #: fpg_constants:rsselectafont
 msgid "Select a font"
 msgstr "Выбор шрифта"
@@ -435,6 +447,10 @@ msgstr "Вс"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Воскресенье"
+
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
 
 #: fpg_constants:rsshortthu
 msgid "Thu"

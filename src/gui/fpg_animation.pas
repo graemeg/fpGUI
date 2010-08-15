@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2008 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -70,6 +70,7 @@ type
     property    ImageFileName;
     property    IsTransparent;
     property    FrameCount;
+    property    OnShowHint;
   end;
 
 
@@ -130,7 +131,8 @@ end;
 procedure TfpgBaseImgAnim.SetEnabled(const AValue: boolean);
 begin
   inherited SetEnabled(AValue);
-  FTimer.Enabled := FEnabled;
+  if not (csDesigning in ComponentState) then
+    FTimer.Enabled := FEnabled;
 end;
 
 procedure TfpgBaseImgAnim.SetImageFilename(const AValue: TfpgString);

@@ -10,7 +10,7 @@ uses
   fpg_base, fpg_main, fpg_widget, fpg_form, fpg_button,
   fpg_grid, fpg_dialogs, fpg_menu,
   { tiOPF }
-  tiFormMediator;
+  tiModelMediator;
 
 type
   { The main application window }
@@ -26,7 +26,7 @@ type
     miEdit: TfpgPopupMenu;
     miSystem: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
-    FMediator: TFormMediator;
+    FMediator: TtiModelMediator;
     procedure FormShow(Sender: TObject);
     procedure GridDoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure SetupMediators;
@@ -68,7 +68,7 @@ procedure TMainForm.SetupMediators;
 begin
   if not Assigned(FMediator) then
   begin
-    FMediator := TFormMediator.Create(self);
+    FMediator := TtiModelMediator.Create(self);
     FMediator.AddComposite('FirstName;LastName(130);EMail(180);Mobile(130);Comments(200)', grdContacts);
   end;
   FMediator.Subject := gContactManager.ContactList;
@@ -95,7 +95,7 @@ begin
     tiAppError('You need to select a Contact first');
     Exit;
   end;
-  c := TContact(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
+  c := TContact(TtiStringGridMediatorView(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
 
   if not Assigned(c) then
     Exit; //==>
@@ -115,7 +115,7 @@ begin
     tiAppError('You need to select a Contact first');
     Exit;
   end;
-  c := TContact(TStringGridMediator(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
+  c := TContact(TtiStringGridMediatorView(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
 
   if tiAppConfirmation('Are you sure you want to delete <%s>', [c.FirstName + ' ' + c.LastName]) then
   begin
@@ -266,11 +266,11 @@ end;
 initialization
   RegisterFallBackMediators;
 
-  gMediatorManager.RegisterMediator(TStringGridMediator, TContactList);
-  gMediatorManager.RegisterMediator(TListViewMediator, TAddressList);
-  gMediatorManager.RegisterMediator(TStringGridMediator, TCityList);
-  gMediatorManager.RegisterMediator(TStringGridMediator, TCountryList);
-  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TCity, 'Country');
-  gMediatorManager.RegisterMediator(TMediatorDynamicComboBoxView, TAddressType, 'AddressType');
+  gMediatorManager.RegisterMediator(TtiStringGridMediatorView, TContactList);
+  gMediatorManager.RegisterMediator(TtiListViewMediatorView, TAddressList);
+  gMediatorManager.RegisterMediator(TtiStringGridMediatorView, TCityList);
+  gMediatorManager.RegisterMediator(TtiStringGridMediatorView, TCountryList);
+  gMediatorManager.RegisterMediator(TtiDynamicComboBoxMediatorView, TCity, 'Country');
+  gMediatorManager.RegisterMediator(TtiDynamicComboBoxMediatorView, TAddressType, 'AddressType');
 
 end.
