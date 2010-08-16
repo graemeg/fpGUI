@@ -71,7 +71,7 @@ scope string1 string
   
 scope symbol1 symbol
   RETURN
-# No endtokens, scope terminates imediately
+# No endtokens, scope terminates immediately
 
 
 scope main
@@ -91,6 +91,9 @@ scope main
   ';' symbol1
   ',' symbol1
   '=' symbol1
+  '<>' symbol1
+  '<' symbol1
+  '>' symbol1
   
   
 
