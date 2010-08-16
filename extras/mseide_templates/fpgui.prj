@@ -11,6 +11,7 @@ order8=0
 order9=0
 order10=0
 order11=0
+order12=0
 [projectoptions]
 projectdir=/opt/msegui_svn/apps/ide/templates
 projectfilename=/opt/msegui_svn/apps/ide/templates/fpgui.prj
@@ -68,7 +69,7 @@ replacedialog=13
  y=302
  cx=421
  cy=163
-options=93
+options=95
  [projectoptionsfo.twidgetgrid3]
  propcolwidthref=801
  sortdescent0=0
@@ -95,7 +96,7 @@ options=93
  sortcol=-1
  col=4
  row=0
- rowheight=17
+ rowheight=19
  [projectoptionsfo.newfile]
  firsttab=0
  index=0
@@ -108,9 +109,11 @@ options=93
  width1=460
  sortdescent1=0
  values2=0
+ values2_ci=-1
  width2=30
  sortdescent2=0
  values3=0
+ values3_ci=-1
  width3=50
  sortdescent3=0
  values4=0
@@ -125,8 +128,8 @@ options=93
  [projectoptionsfo.macrosplitter]
  x=0
  y=178
- xprop=0
- yprop=0.34296724470134
+ xprop=1
+ yprop=0.35145631067961
  [projectoptionsfo.macrogrid]
  propcolwidthref=595
  sortdescent0=0
@@ -141,7 +144,7 @@ options=93
  sortdescent7=0
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=1
+ index=2
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=772
  width0=47
@@ -155,11 +158,11 @@ options=93
  index=0
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=6
+ index=7
  [projectoptionsfo]
  stackedunder=
- x=283
- y=107
+ x=96
+ y=46
  cx=821
  cy=572
 settings=8
@@ -211,17 +214,11 @@ exceptclassnames=1
  EconvertError
 exceptignore=1
  0
-modulenames=3
- ACTIONSMO
- MAINFO
+modulenames=1
  SOURCEPAGE
-moduletypes=3
- TACTIONSMO
- TMAINFO
+moduletypes=1
  TSOURCEPAGE
-modulefiles=3
- /opt/msegui_svn/apps/ide/actionsmodule.mfm
- /opt/msegui_svn/apps/ide/main.mfm
+modulefiles=1
  /opt/msegui_svn/apps/ide/sourcepage.mfm
 mainfile=${PROJECTNAME}.pas
 targetfile=${PROJECTNAME}${EXEEXT}
@@ -250,6 +247,10 @@ beforeload=
 afterload=
 beforerun=
 defaultmake=1
+befcommand=0
+befcommandon=0
+aftcommand=0
+aftcommandon=0
 makeoptions=5
  -l -Mobjfpc -Sh
  -gl -O-
@@ -262,24 +263,27 @@ makeoptionson=5
  34
  32
  63
-macroon=5
+macroon=6
  1
  3
  6
  4
  63
-macronames=5
+ 63
+macronames=6
  TargetCPU
  TargetOS
  TargetCPU
  TargetOS
  FPGUI_DIR
-macrovalues=5
+ HelpPath
+macrovalues=6
  x86_64
  linux
  i386
  win32
  /home/graemeg/programming/fpgui
+ /opt/FPC_Docs/inf/
 macrogroup=0
 groupcomments=6
  Linux 64-bit
@@ -289,9 +293,9 @@ groupcomments=6
  
  
 sourcedirs=4
- ${MSEDIR}lib/addon/*/
- ${MSELIBDIR}kernel/$TARGET/
- ${MSELIBDIR}*/
+ ${FPGUI_DIR}/src/corelib/gdi/X/
+ ${FPGUI_DIR}/src/corelib/x11/
+ ${FPGUI_DIR}/src/*/
  ./
 defines=0
 defineson=0
@@ -303,7 +307,7 @@ unitdirs=6
  ${FPGUI_DIR}/src/gui/
  ${FPGUI_DIR}/src/corelib/
 unitdirson=6
- 65599
+ 65537
  131102
  196618
  196614
@@ -314,16 +318,18 @@ incpref=-Fi
 libpref=-Fl
 objpref=-Fo
 targpref=-o
-sourcefilemasks=4
+sourcefilemasks=5
  "*.pas" "*.dpr" "*.pp" "*.inc" "*.lpr"
  "*.c" "*.cc" "*.h"
  "*.mfm"
  "*.ipf"
-syntaxdeffiles=4
- ${SYNTAXDEFDIR}pascal.sdef
+ "*.sql"
+syntaxdeffiles=5
+ ${SYNTAXDEFDIR}pascal_dark.sdef
  ${SYNTAXDEFDIR}cpp.sdef
  ${SYNTAXDEFDIR}objecttext.sdef
  ${SYNTAXDEFDIR}ipf2.sdef
+ ${SYNTAXDEFDIR}sql.sdef
 filemasknames=5
  Source
  Forms
@@ -336,12 +342,24 @@ filemasks=5
  *.txt
  *.ipf
  *
-toolsave=0
-toolhide=0
-toolparse=0
-toolmenus=0
-toolfiles=0
-toolparams=0
+toolsave=2
+ -1
+ 0
+toolhide=2
+ 0
+ 0
+toolparse=2
+ 0
+ 0
+toolmenus=2
+ fpGUI &UI Designer
+ fpGUI &DocView
+toolfiles=2
+ ${FPGUI_DIR}/uidesigner/units/${TargetCPU}-${TargetOS}/uidesigner${EXEEXT}
+ ${FPGUI_DIR}/docview/src/units/${TargetCPU}-${TargetOS}/docview${EXEEXT}
+toolparams=2
+ ${CURSOURCEFILE}
+ ${HelpPath} -k ${cursword}
 fontalias=0
 fontancestors=0
 fontnames=0
@@ -422,13 +440,16 @@ scrollheight=0
 tabstops=4
 spacetabs=0
 tabindent=0
-editfontname=Raize
-editfontheight=13
+editfontname=mseide_source
+editfontheight=15
 editfontwidth=0
-editfontextraspace=2
+editfontextraspace=0
+editfontcolor=-1879048183
+editbkcolor=-1879048186
+statementcolor=14745599
 editfontantialiased=1
 editmarkbrackets=1
-backupfilecount=2
+backupfilecount=0
 encoding=0
 scriptbeforecopy=
 scriptaftercopy=
@@ -508,7 +529,11 @@ units=
  modulefilenames=0
  modulenames=0
  moduleclassnames=0
- a=0,4133,0,Units
+ a=0,4133,0,Pascal Units
+ )
+cmodules=
+ (
+ a=0,4132,0,C Modules
  )
 files=
  (
@@ -518,7 +543,7 @@ files=
 storedir=/opt/msegui_svn/apps/ide/compstore/
 filename=
 [layout]
-windowlayout=413
+windowlayout=467
  [mainfo.openfile]
  filenames=0
  filehistory=10
@@ -540,11 +565,11 @@ windowlayout=413
  [mainfo]
  stackedunder=
  x=4
- y=24
+ y=46
  cx=322
  cy=74
  wsize=0
- active=0
+ active=1
  visible=1
  [targetconsolefo]
  splitdir=0
@@ -555,10 +580,12 @@ windowlayout=413
  ny=0
  ncx=0
  ncy=0
- x=405
- y=452
- cx=904
- cy=347
+ x=616
+ y=358
+ cx=368
+ cy=306
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -575,7 +602,9 @@ windowlayout=413
  x=0
  y=0
  cx=470
- cy=340
+ cy=338
+ rcx=0
+ rcy=0
  [memoryfo]
  splitdir=0
  useroptions=16507
@@ -589,7 +618,9 @@ windowlayout=413
  x=0
  y=0
  cx=470
- cy=340
+ cy=338
+ rcx=0
+ rcy=0
  [memoryfo.add]
  value=0
  [memoryfo.memon]
@@ -601,7 +632,7 @@ windowlayout=413
  [disassfo]
  splitdir=0
  useroptions=16491
- stackedunder=componentstorefo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -612,13 +643,15 @@ windowlayout=413
  y=502
  cx=564
  cy=210
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
  [findinfilefo]
  splitdir=0
  useroptions=16491
- stackedunder=mainfo.panel1
+ stackedunder=componentstorefo
  parent=
  mdistate=0
  nx=0
@@ -629,6 +662,8 @@ windowlayout=413
  y=115
  cx=786
  cy=207
+ rcx=0
+ rcy=0
  [projecttreefo]
  splitdir=0
  useroptions=16491
@@ -643,9 +678,21 @@ windowlayout=413
  y=39
  cx=698
  cy=413
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
+ [projecttreefo.grid]
+ propcolwidthref=547
+ width0=141
+ sortdescent0=0
+ width1=541
+ sortdescent1=0
+ sortcol=-1
+ col=-1073741823
+ row=-1073741823
+ rowheight=19
  [stackfo]
  splitdir=0
  useroptions=16489
@@ -659,7 +706,9 @@ windowlayout=413
  x=0
  y=0
  cx=470
- cy=340
+ cy=338
+ rcx=0
+ rcy=0
  [watchpointsfo]
  splitdir=0
  useroptions=16489
@@ -673,6 +722,8 @@ windowlayout=413
  y=26
  cx=483
  cy=210
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -682,6 +733,7 @@ windowlayout=413
  sortdescent0=0
  values1=1
   0
+ values1_ci=-1
  width1=33
  sortdescent1=0
  values2=1
@@ -692,6 +744,7 @@ windowlayout=413
  sortdescent4=0
  values5=1
   0
+ values5_ci=-1
  width5=38
  sortdescent5=0
  values6=1
@@ -712,6 +765,8 @@ windowlayout=413
  y=404
  cx=477
  cy=128
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -720,7 +775,7 @@ windowlayout=413
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
- stackedunder=mainfo.panel2
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -731,6 +786,8 @@ windowlayout=413
  y=179
  cx=447
  cy=484
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -753,19 +810,24 @@ windowlayout=413
  x=0
  y=0
  cx=470
- cy=340
+ cy=338
+ rcx=0
+ rcy=0
  [watchfo.grid]
  propcolwidthref=275
  values0=0
+ values0_ci=-1
  width0=13
  sortdescent0=0
  values1=0
  width1=152
  sortdescent1=0
  values3=0
+ values3_ci=-1
  width3=12
  sortdescent3=0
  values4=0
+ values4_ci=-1
  width4=13
  sortdescent4=0
  [watchfo.watchon]
@@ -786,10 +848,12 @@ windowlayout=413
  y=359
  cx=925
  cy=226
+ rcx=0
+ rcy=0
  [componentstorefo]
  splitdir=0
  useroptions=24675
- stackedunder=projecttreefo
+ stackedunder=mainfo.panel1
  parent=
  mdistate=0
  nx=0
@@ -800,6 +864,8 @@ windowlayout=413
  y=100
  cx=445
  cy=354
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -807,10 +873,11 @@ windowlayout=413
  propcolwidthref=435
  width0=111
  sortdescent0=0
- width1=157
  sortdescent1=0
  width2=160
  sortdescent2=0
+ width3=185
+ sortdescent3=0
  [componentstorefo.storefiledialog]
  filenames=1
   /home/mse/test/msegui/apps/ide/compstore/
@@ -839,6 +906,8 @@ windowlayout=413
  y=3
  cx=440
  cy=107
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -857,7 +926,9 @@ windowlayout=413
  x=0
  y=0
  cx=322
- cy=36
+ cy=32
+ rcx=0
+ rcy=0
  [sourcefo]
  splitdir=0
  useroptions=16489
@@ -872,6 +943,8 @@ windowlayout=413
  y=0
  cx=925
  cy=585
+ rcx=0
+ rcy=0
  [actionsmo.watchesonact]
  checked=1
  [actionsmo.bluedotsonact]
@@ -890,7 +963,9 @@ windowlayout=413
  x=0
  y=0
  cx=470
- cy=340
+ cy=338
+ rcx=0
+ rcy=0
  [mainfo.panel1]
  splitdir=2
  useroptions=33586667
@@ -905,6 +980,8 @@ windowlayout=413
  y=201
  cx=935
  cy=585
+ rcx=0
+ rcy=0
  wsize=0
  active=1
  visible=1
@@ -918,7 +995,7 @@ windowlayout=413
   memoryfo
   cpui386fo
  activetab=4
- stackedunder=formdesignerfo
+ stackedunder=mainfo.panel1
  parent=
  mdistate=0
  nx=0
@@ -929,6 +1006,8 @@ windowlayout=413
  y=256
  cx=480
  cy=359
+ rcx=0
+ rcy=0
  wsize=0
  active=0
  visible=0
@@ -948,13 +1027,9 @@ editpos=0
 sourcefiles=0
 relpaths=0
 ismoduletexts=0
-modules=3
+modules=1
  /opt/msegui_svn/apps/ide/sourcepage.mfm
- /opt/msegui_svn/apps/ide/main.mfm
- /opt/msegui_svn/apps/ide/actionsmodule.mfm
-visiblemodules=3
- 0
- 0
+visiblemodules=1
  0
 [sourcefo.tabwidget]
 tabsize=134
