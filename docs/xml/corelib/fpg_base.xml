@@ -1,15 +1,21 @@
 <?xml version="1.0"?>
 <fpdoc-descriptions>
-  <package name="fpGUI">
-    <!--
-  ====================================================================
-    gfxbase
-  ====================================================================
--->
+
+<package name="fpGUI">
+<descr><p>fpGUI Toolkit is intended for Open Source and Commercial applications.
+fpGUI uses the LGPL2 license with the static linking exception - the same as
+the Free Pascal Compiler's RTL.</p>
+<p>fpGUI is an Object Pascal toolkit for cross-platform application development.
+It provides single-source portability across Linux, MS Windows, *BSD and 
+embedded systems running Embedded Linux and Windows CE.</p>
+<p>
+For more information, see the fpGUI Toolkit website at: <url href="http://opensoft.homeip.net/fpgui/" />
+</p>
+</descr>
+
     <module name="fpg_base">
       <short>The base unit and starting point of fpGUI</short>
-      <descr>
-        <p>This unit contains all the abstract classes for the CoreLib code
+      <descr><p>This unit contains all the abstract classes for the CoreLib code
 of fpGUI. It also defines many types and constants used throughout the toolkit.
 </p>
         <p>When implementing support for a completely new windowing system 
@@ -46,7 +52,7 @@ etc.).
       <!-- record type Visibility: default -->
       <element name="TRGBTriple">
         <short>A record structure holding the RGBA values of a color.</short>
-        <descr>This is now marked as "deprecated". Please use TFPColor instead.</descr>
+        <descr>This is now marked as "deprecated". Please use <link id="fpg_base.TFPColor">TFPColor</link> instead.</descr>
         <seealso/>
       </element>
       <!-- variable Visibility: default -->
@@ -91,8 +97,8 @@ means no titlebar or window borders are going to be created.</short>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtModalForm">
-        <short>This windows type is similar to <link id="TWindowType.wtWindow">wtWindow</link>, but grabs focus.</short>
-        <descr>This windows is the same as <link id="TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
+        <short>This windows type is similar to <link id="fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs focus.</short>
+        <descr>This windows is the same as <link id="fpg_base.TWindowType.wtWindow">wtWindow</link>, but grabs the input focus until it has closed. This window normally doesn't appear in the taskbar.</descr>
       </element>
       <!-- enumeration value Visibility: default -->
       <element name="TWindowType.wtPopup">
@@ -5331,11 +5337,10 @@ returns the correct enum type detected.
       <!-- function Visibility: default -->
       <element name="fpgColorToRGBTriple">
         <short>Converts the TfpgColor to TRGBTriple type</short>
-        <descr>This function converts the given TfpgColor into a TRGBTriple type.
-</descr>
+        <descr>This function converts the given TfpgColor into a TRGBTriple type.</descr>
         <errors/>
         <seealso>
-          <link id="TRGBTriple"/>
+          <link id="fpg_base.TRGBTriple">TRGBTriple</link>
         </seealso>
       </element>
       <!-- function result Visibility: default -->
@@ -5353,7 +5358,7 @@ returns the correct enum type detected.
 </descr>
         <errors/>
         <seealso>
-          <link id="TRGBTriple"/>
+          <link id="fpg_base.TRGBTriple">TRGBTriple</link>
         </seealso>
       </element>
       <!-- function result Visibility: default -->
@@ -5497,18 +5502,14 @@ Right. And the Top is always smaller than the Bottom.
       </element>
       <element name="TfpgCanvasBase.DrawLineClipped">
         <short>Draws a line inside a clip rectangle</short>
-        <descr>
-          <p>
-            <printshort id="TfpgCanvasBase.DrawLineClipped"/>. This procedure clips a line to the AClipRect boundaries and
+        <descr><p><printshort id="TfpgCanvasBase.DrawLineClipped"/>. This procedure clips a line to the AClipRect boundaries and
  then calls the DrawLine procedure with the clipped coordinates.  If the line
  lies completely outside of the clip boundary, then the Line routine is not
  called.  This procedure uses the well known Cohen-Sutherland line clipping
- algorithm to clip each coordinate.
-</p>
-          <p>Use this if you did not what to change the Canvas.ClipRegion for some reason.
+ algorithm to clip each coordinate.</p>
+<p>Use this if you did not what to change the Canvas.ClipRegion for some reason.
  For a detailed explanation see:  http://www.nondot.org/~sabre/graphpro/line6.html
-</p>
-        </descr>
+</p></descr>
       </element>
       <element name="TfpgCanvasBase.ClipLine">
         <short>Clips the line based on AClipRect boundaries.</short>
@@ -5516,8 +5517,7 @@ Right. And the Top is always smaller than the Bottom.
       </element>
       <element name="TFileEntry">
         <short>A simple data object representing a file</short>
-        <descr>
-          <printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
+        <descr><printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
       </element>
       <element name="TFileEntry.Name">
         <short>Name of a file</short>
