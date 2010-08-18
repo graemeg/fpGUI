@@ -209,12 +209,6 @@ type
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DoChange; virtual;
     procedure   DoExpand(ANode: TfpgTreeNode); virtual;
-    // only visual (visible) nodes
-    function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
-    function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
-    // any next node, even if node is collapsed
-    function    NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
-    function    PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
     // the nodes between the given node and the direct next node
     function    SpaceToVisibleNext(aNode: TfpgTreeNode): integer;
     function    StepToRoot(aNode: TfpgTreeNode): integer;
@@ -228,6 +222,12 @@ type
     procedure   GotoNextNodeDown;
     procedure   FullCollapse;
     procedure   FullExpand;
+    // any next node, even if node is collapsed
+    function    NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    function    PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    // only visual (visible) nodes
+    function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     property    Font: TfpgFont read FFont;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
