@@ -10,11 +10,11 @@
 HSV (Hue, Saturation, Value) colorspace. The parameters have specific value ranges as
 listed below.</p>
 <dl>
-<dt>Hue</dt>
+<dt><i>Hue</i></dt>
 <dd>The Hue range is from 0 - 1535. In that range, the primary colors are mapped to the following values. Red = 0. Green = 512 and Blue = 1024.</dd>
-<dt>Saturation</dt>
+<dt><i>Saturation</i></dt>
 <dd>The Saturation value range is from 0.0 - 1.0. Grey (no color) = 0. Maximum color = 1.0.</dd>
-<dt>Value</dt>
+<dt><i>Value</i></dt>
 <dd>The Value value range is from 0.0 to 1.0. Black being 0 and maximum brightness being 1.0.</dd>
 </dl>
         </descr>
@@ -22,7 +22,7 @@ listed below.</p>
       <element name="HSVToRGB">
         <short>Map HSV colorspace to RGB colorspace.</short>
         <seealso>
-          <link id="RGBToHSV"/>
+          <link id="fpg_colormapping.RGBToHSV">RGBToHSV</link>
         </seealso>
       </element>
     </module>
