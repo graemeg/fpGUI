@@ -1,9 +1,9 @@
 #!/bin/sh
 # fpc/bin must be in your PATH
 
-app=fpdoc
+#app=fpdoc
 #app=/opt/fpc_2.5.1/x86_64-linux/bin/fpdoc
-#app=/media/flash16gig/programming/fpdoc_ipf/fpdoc
+app=/media/flash16gig/programming/fpdoc_ipf/fpdoc.elf64
 
 $app \
   --package=fpgui \
@@ -29,6 +29,7 @@ $app \
   --input='-Fi../src/corelib ../src/corelib/fpg_pofiles.pas' --descr=xml/corelib/fpg_pofiles.xml \
   --input='-Fi../src/corelib ../src/corelib/fpg_translations.pas' --descr=xml/corelib/fpg_translations.xml \
   --input='-Fi../src/corelib ../src/corelib/fpg_stringhashlist.pas' --descr=xml/corelib/fpg_stringhashlist.xml \
+  --input='-Fi../src/corelib ../src/corelib/fpg_command_intf.pas' --descr=xml/corelib/fpg_command_intf.xml \
   --input='-Fi../src/gui ../src/gui/fpg_dialogs.pas' --descr=xml/gui/fpg_dialogs.xml \
   --input='-Fi../src/gui ../src/gui/fpg_hyperlink.pas' --descr=xml/gui/fpg_hyperlink.xml \
   --input='-Fi../src/gui ../src/gui/fpg_colormapping.pas' --descr=xml/gui/fpg_colormapping.xml \
