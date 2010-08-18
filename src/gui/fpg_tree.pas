@@ -104,7 +104,7 @@ type
     function    FindSubNode(AData: TObject; ARecursive: Boolean): TfpgTreeNode; overload;
     function    GetMaxDepth: integer;
     function    GetMaxVisibleDepth: integer;
-    procedure   Append(var aValue: TfpgTreeNode);
+    procedure   Append(var ANode: TfpgTreeNode);
     procedure   Clear;  // remove all nodes recursively
     procedure   Collapse;
     procedure   Expand;
@@ -418,20 +418,21 @@ begin
   end;
 end;
 
-procedure TfpgTreeNode.Append(var aValue: TfpgTreeNode);
+procedure TfpgTreeNode.Append(var ANode: TfpgTreeNode);
 begin
-  aValue.Parent := self;
-  aValue.Next   := nil;
+  DoTreeCheck(ANode);
+  ANode.Parent := self;
+  ANode.Next   := nil;
 
   if FFirstSubNode = nil then
-    FFirstSubNode := aValue;
+    FFirstSubNode := ANode;
 
-  aValue.prev := FLastSubNode;
+  ANode.Prev := FLastSubNode;
 
   if FLastSubNode <> nil then
-    FLastSubNode.Next := aValue;
+    FLastSubNode.Next := ANode;
 
-  FLastSubNode := aValue;
+  FLastSubNode := ANode;
 end;
 
 function TfpgTreeNode.FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode;
