@@ -150,6 +150,7 @@ type
     FMenuOptions: TfpgMenuOptions;
     FPrevFocusItem: integer;
     FFocusItem: integer;
+    FClicked: Boolean;
     procedure   SetFocusItem(const AValue: integer);
     procedure   DoSelect;
     procedure   CloseSubmenus;
@@ -420,10 +421,9 @@ begin
   end
   else
   begin
-    if not Focused then
-      Exit;
+    if not FClicked then
+      exit;
   end;
-
 
   newf := CalcMouseCol(x);
   if not VisibleItem(newf).Selectable then
@@ -452,15 +452,17 @@ begin
   
   if ComponentCount = 0 then
     Exit; // We have no menu items in MainMenu.
+    
+  FClicked := not FClicked;
 
-  if not Focused then
-    ActivateMenu;
-  //else
-  //begin
-    //CloseSubmenus;
-    //DeActivateMenu;
-    //Exit; //==>
-  //end;
+  if FClicked then
+    ActivateMenu
+  else
+  begin
+    CloseSubmenus;
+    DeActivateMenu;
+    exit; //==>
+  end;
 
   newf := CalcMouseCol(x);
 
@@ -532,6 +534,7 @@ begin
   FFocusItem        := -1;
   FPrevFocusItem    := -1;
   FFocusable        := False;
+  FClicked          := False;
   FBackgroundColor  := Parent.BackgroundColor;
   FTextColor        := Parent.TextColor;
   // calculate the best height based on font
