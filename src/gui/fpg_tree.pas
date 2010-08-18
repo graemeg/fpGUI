@@ -48,6 +48,8 @@ uses
   
 type
 
+  TfpgNodeAttachMode = (naAdd, naAddFirst, naAddChild, naAddChildFirst, naInsert);
+
   PfpgTreeColumnWidth = ^TfpgTreeColumnWidth;
   TfpgTreeColumnWidth = record
     next: PfpgTreeColumnWidth;
@@ -107,6 +109,7 @@ type
     procedure   Collapse;
     procedure   Expand;
     procedure   Remove(var aNode: TfpgTreeNode);
+    procedure   MoveTo(Destination: TfpgTreeNode; Mode: TfpgNodeAttachMode);
     procedure   UnregisterSubNode(aNode: TfpgTreeNode);
     // parent color settings
     function    ParentInactSelColor: TfpgColor;
@@ -669,6 +672,53 @@ begin
   aNode.prev := nil;
   aNode.next := nil;
   aNode.parent := nil;
+end;
+
+procedure TfpgTreeNode.MoveTo(Destination: TfpgTreeNode; Mode: TfpgNodeAttachMode);
+begin
+  if Destination = nil then
+    Exit;
+  DoTreeCheck(Destination);
+
+  Parent.Remove(self);
+  case Mode of
+    naAdd:
+        begin
+          Destination.Parent.Append(self);
+        end;
+    naAddFirst:
+        begin
+          Next := Destination.Parent.FirstSubNode;
+          Next.Prev := self;
+          Destination.Parent.FFirstSubNode := self;
+          Parent := Destination.Parent;
+        end;
+    naAddChild:
+        begin
+          Destination.Append(self);
+        end;
+    naAddChildFirst:
+        begin
+          Next := Destination.FirstSubNode;
+          if Assigned(Destination.FirstSubNode) then
+            Destination.FirstSubNode.Prev := self;
+          Destination.FFirstSubNode := self;
+          Parent := Destination;
+          if Destination.LastSubNode = nil then
+            Destination.FLastSubNode := self;
+        end;
+    naInsert:
+        begin
+          Prev := Destination.Prev;
+          Next := Destination;
+          Parent := Destination.Parent;
+          Destination.Prev := self;
+          if Prev = nil then
+            Parent.FFirstSubNode := self
+          else
+            Prev.Next := self;
+        end;
+  end;  { case }
 end;
 
 procedure TfpgTreeNode.Clear;
