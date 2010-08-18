@@ -55,6 +55,7 @@ type
   end;
   
   // forward declaration
+  TfpgTreeView = class;
   TfpgTreeNode = class;
   
   TfpgTreeNodeFindMethod = procedure(ANode: TfpgTreeNode; var AFound: boolean) of object;
@@ -77,6 +78,7 @@ type
     FText: TfpgString;
     FTextColor: TfpgColor;
     FHasChildren: Boolean;
+    FTree: TfpgTreeView;
     procedure   SetCollapsed(const AValue: boolean);
     procedure   SetInactSelColor(const AValue: TfpgColor);
     procedure   SetInactSelTextColor(const AValue: TfpgColor);
@@ -87,6 +89,7 @@ type
     procedure   SetTextColor(const AValue: TfpgColor);
     procedure   DoRePaint;
     procedure   SetHasChildren(const AValue: Boolean);
+    procedure   DoTreeCheck(ANode: TfpgTreeNode);
   public
     constructor Create;
     destructor  Destroy; override;
@@ -346,6 +349,12 @@ begin
   end;
 end;
 
+procedure TfpgTreeNode.DoTreeCheck(ANode: TfpgTreeNode);
+begin
+  if ANode.FTree <> FTree then
+    raise Exception.Create('Nodes must be of the same tree');
+end;
+
 constructor TfpgTreeNode.Create;
 begin
   FData           := nil;
@@ -536,6 +545,7 @@ begin
   writeln('TfpgTreeNode.AppendText');
   {$ENDIF}
   h := TfpgTreeNode.Create;
+  h.FTree := FTree;
   h.Text := AText;
   Append(h);
   result := h;
@@ -758,7 +768,10 @@ end;
 function TfpgTreeview.GetRootNode: TfpgTreeNode;
 begin
   if FRootNode = nil then
+  begin
     FRootNode := TfpgTreeNode.Create;
+    FRootNode.FTree := self;
+  end;
   FRootNode.TextColor     := clText1;
   FRootnode.SelTextColor  := clSelectionText;
   FRootnode.SelColor      := clSelection;
@@ -1807,7 +1820,7 @@ function TfpgTreeView.NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
     begin
       while ANode.Next = nil do
       begin
-        ANode := ANode.Parent;
+        ANode := ANode.Parent;  // back out one level depth
         if ANode = nil then
           exit;  //==>
       end;
