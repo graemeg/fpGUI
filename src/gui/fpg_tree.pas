@@ -223,6 +223,8 @@ type
     function    GetColumnWidth(AIndex: word): word;
     procedure   GotoNextNodeUp;
     procedure   GotoNextNodeDown;
+    procedure   FullCollapse;
+    procedure   FullExpand;
     property    Font: TfpgFont read FFont;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
@@ -1099,6 +1101,34 @@ begin
   if Selection = RootNode.LastSubNode then
     Exit;
   Selection := NextNode(Selection);
+end;
+
+procedure TfpgTreeView.FullCollapse;
+var
+  n: TfpgTreeNode;
+begin
+  n := NextNode(RootNode);
+  repeat
+    if n <> nil then
+    begin
+      n.Collapse;
+    end;
+    n := NextNode(n);
+  until n = nil;
+end;
+
+procedure TfpgTreeView.FullExpand;
+var
+  n: TfpgTreeNode;
+begin
+  n := NextNode(RootNode);
+  repeat
+    if n <> nil then
+    begin
+      n.Expand;
+    end;
+    n := NextNode(n);
+  until n = nil;
 end;
 
 procedure TfpgTreeview.PreCalcColumnLeft;
