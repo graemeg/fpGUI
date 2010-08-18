@@ -768,7 +768,10 @@ begin
         op.Close;
       op := op.OpenerPopup;
     end;
+    // notify menubar that we clicked a menu item
+    OpenerMenuBar.FClicked := False;
     VisibleItem(FFocusItem).Click;
+    FFocusItem := -1;
   end;  { if/else }
 
 //  if OpenerMenuBar <> nil then
