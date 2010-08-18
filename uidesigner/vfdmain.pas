@@ -392,13 +392,13 @@ end;
 procedure TMainDesigner.OnEditWidgetOrder(Sender: TObject);
 begin
   if SelectedForm <> nil then
-    SelectedForm.EditWidgetOrder;
+    SelectedForm.EditWidgetOrTabOrder(emWidgetOrder);
 end;
 
 procedure TMainDesigner.OnEditTabOrder(Sender: TObject);
 begin
   if SelectedForm <> nil then
-    SelectedForm.EditTabOrder;
+    SelectedForm.EditWidgetOrTabOrder(emTabOrder);
 end;
 
 procedure TMainDesigner.OnExit(Sender: TObject);

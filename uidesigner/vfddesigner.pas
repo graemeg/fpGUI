@@ -43,6 +43,8 @@ uses
 
 type
 
+  TfpgEditMode = (emWidgetOrder, emTabOrder);
+
   TOtherWidget = class(TfpgWidget)
   protected
     FFont: TfpgFont;
@@ -116,8 +118,7 @@ type
     procedure   SelectNextWidget(fw: boolean);
     procedure   MoveResizeWidgets(dx, dy, dw, dh: integer);
     procedure   DeleteWidgets;
-    procedure   EditWidgetOrder;
-    procedure   EditTabOrder;
+    procedure   EditWidgetOrTabOrder(AMode: TfpgEditMode);
     procedure   InsertWidget(pwg: TfpgWidget; x, y: integer; wgc: TVFDWidgetClass);
     procedure   UpdatePropWin;
     procedure   OnPropTextChange(Sender: TObject);
@@ -142,8 +143,12 @@ implementation
 
 uses
   vfdmain,
-  TypInfo;
+  TypInfo,
+  fpg_tree;
 
+const
+  cEditOrder: array[TfpgEditMode] of string = ('Widget Order', 'Tab Order');
+  
 
 { TWidgetDesigner }
 
@@ -636,134 +641,80 @@ begin
 end;
 
 
-procedure TFormDesigner.EditWidgetOrder;
+procedure TFormDesigner.EditWidgetOrTabOrder(AMode: TfpgEditMode);
 var
   frm: TWidgetOrderForm;
   n, fi: integer;
   cd: TWidgetDesigner;
   identlevel: integer;
+  lFocused: TfpgTreeNode;
+  lNode: TfpgTreeNode;
+  s: string;
 
-  procedure AddChildWidgets(pwg: TfpgWidget; slist: TStrings);
+  procedure AddChildWidgets(AParent: TfpgWidget; ATreeNode: TfpgTreeNode);
   var
     f: integer;
     fcd: TWidgetDesigner;
+    lNode: TfpgTreeNode;
   begin
-    for f := 0 to FWidgets.Count - 1 do
+    for f := 0 to FWidgets.Count-1 do
     begin
       fcd := TWidgetDesigner(FWidgets.Items[f]);
-
-      if fcd.Widget.Parent = pwg then
+      if fcd.Widget.Parent = AParent then
       begin
-        frm.list.Items.AddObject(StringOfChar(' ', identlevel) + fcd.Widget.Name + ' : ' + fcd.Widget.ClassName, fcd);
-        Inc(identlevel);
-        AddChildWidgets(fcd.Widget, slist);
-        Dec(identlevel);
+        if AMode = emTabOrder then
+          s := ' (' + IntToStr(fcd.Widget.TabOrder) + ')'
+        else
+          s := '';
+        lNode := ATreeNode.AppendText(fcd.Widget.Name + ': ' + fcd.Widget.ClassName + s);
+        lNode.Data := fcd;
+        if fcd.Selected then
+          lFocused := lNode;
+        AddChildWidgets(fcd.Widget, lNode);
       end;
-
-      if fcd.Selected then
-        fi := f + 1;
     end;
   end;
-
+  
 begin
   frm := TWidgetOrderForm.Create(nil);
-  fi  := 1;
+  frm.WindowTitle := cEditOrder[AMode];
+  frm.lblTitle.Text := Format(frm.lblTitle.Text, [cEditOrder[AMode]]);
+  fi  := 0;
 
   identlevel := 0;
+  frm.Treeview1.RootNode.Clear;
+  lFocused := nil;
 
-  AddChildWidgets(FForm, frm.list.Items);
+  AddChildWidgets(FForm, frm.Treeview1.RootNode);
+  frm.Treeview1.FullExpand;
 
-  if fi <= frm.list.ItemCount then
-    frm.list.FocusItem := fi;
-
+  if lFocused <> nil then
+  	frm.Treeview1.Selection := lFocused
+  else
+    frm.Treeview1.Selection := frm.Treeview1.Rootnode.FirstSubNode;
+  frm.Treeview1.SetFocus;
+    
   if frm.ShowModal = mrOK then
   begin
-    for n := 0 to FWidgets.Count - 1 do
-      TWidgetDesigner(FWidgets.Items[n]).Widget.Visible := False;
-
-    for n := 0 to FWidgets.Count - 1 do
-      FWidgets.Items[n] := frm.List.Items.Objects[n];
-
-    for n := 0 to FWidgets.Count - 1 do
+    n := 0;
+    lNode := frm.Treeview1.NextNode(frm.Treeview1.RootNode);
+    while lNode <> nil do
     begin
-      cd := TWidgetDesigner(FWidgets.Items[n]);
-      cd.Widget.Visible := True;
-    end;
-
-    for n := 0 to FWidgets.Count - 1 do
-    begin
-      cd := TWidgetDesigner(FWidgets.Items[n]);
-      if cd.Selected then
+      if AMode = emWidgetOrder then
       begin
-        // re-creating the resizers
-        cd.Selected := False;
-        cd.Selected := True;
-      end;
-    end;
-
-  end;
-  frm.Free;
-end;
-
-procedure TFormDesigner.EditTabOrder;
-const
-  cDivider = ' : ';
-var
-  frm: TWidgetOrderForm;
-  n, fi: integer;
-  identlevel: integer;
-  taborder: integer;
-
-  procedure AddChildWidgets(pwg: TfpgWidget; slist: TStrings);
-  var
-    f: integer;
-    fcd: TWidgetDesigner;
-  begin
-    for f := 0 to FWidgets.Count - 1 do
-    begin
-      fcd := TWidgetDesigner(FWidgets.Items[f]);
-
-      if fcd.Widget.Parent = pwg then
+        FWidgets.Items[n] := lNode.Data;
+      end
+      else if AMode = emTabOrder then
       begin
-        frm.list.Items.AddObject(StringOfChar(' ', identlevel) + fcd.Widget.Name + cDivider + fcd.Widget.ClassName, fcd);
-        Inc(identlevel, 2);
-        AddChildWidgets(fcd.Widget, slist);
-        Dec(identlevel, 2);
+        if IsPublishedProp(TWidgetDesigner(lNode.Data).Widget, 'TabOrder') then
+        begin
+          TWidgetDesigner(lNode.Data).Widget.TabOrder := n;
+        end;        
       end;
-
-      if fcd.Selected then
-        fi := f + 1;
+      lNode := frm.Treeview1.NextNode(lNode);
+      n := n + 1;
     end;
-  end;
-
-begin
-  frm := TWidgetOrderForm.Create(nil);
-  frm.WindowTitle := 'Tab Order';
-  fi  := 1;
-  identlevel := 0;
-
-  AddChildWidgets(FForm, frm.list.Items);
-
-  if fi <= frm.list.ItemCount then
-    frm.list.FocusItem := fi;
-
-  if frm.ShowModal = mrOK then
-  begin
-    taborder := 1;
-    for n := 0 to frm.List.Items.Count - 1 do
-    begin
-        try
-          if IsPublishedProp(TWidgetDesigner(frm.List.Items.Objects[n]).Widget, 'TabOrder') then
-          begin
-//            SetPropValue(TWidgetDesigner(frm.List.Items.Objects[n]).Widget, 'TabOrder', taborder);
-            TWidgetDesigner(frm.List.Items.Objects[n]).Widget.TabOrder := taborder;
-            inc(taborder);
-          end;
-        except
-          // do nothing. TabOrder was not published
-        end;
-    end;
-  end;  { if }
+  end; { if }
   frm.Free;
 end;
 
@@ -799,7 +750,7 @@ begin
         'F4: edit items' + LineEnding}, 'Small help');
 
     keyF2:
-      EditWidgetOrder;
+      EditWidgetOrTabOrder(emTabOrder);
 
     //keyF4:
       //if frmProperties.btnEdit.Visible then

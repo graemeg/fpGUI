@@ -30,11 +30,11 @@ uses
   fpg_label,
   fpg_edit,
   fpg_button,
-  fpg_listbox,
   fpg_combobox,
   fpg_trackbar,
   fpg_checkbox,
-  fpg_panel;
+  fpg_panel,
+  fpg_tree;
 
 type
 
@@ -83,17 +83,17 @@ type
     procedure AfterCreate; override;
     procedure OnButtonClick(Sender: TObject);
   end;
-  
+
 
   TWidgetOrderForm = class(TVFDDialog)
   public
     {@VFD_HEAD_BEGIN: WidgetOrderForm}
-    l1: TfpgLabel;
-    list: TfpgListBox;
+    lblTitle: TfpgLabel;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
     btnUp: TfpgButton;
     btnDown: TfpgButton;
+    TreeView1: TfpgTreeView;
     {@VFD_HEAD_END: WidgetOrderForm}
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -254,67 +254,54 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: WidgetOrderForm}
   Name := 'WidgetOrderForm';
-  SetPosition(534, 173, 312, 258);
+  SetPosition(534, 173, 426, 398);
   WindowTitle := 'Widget order';
   Hint := '';
   WindowPosition := wpScreenCenter;
 
-  l1 := TfpgLabel.Create(self);
-  with l1 do
+  lblTitle := TfpgLabel.Create(self);
+  with lblTitle do
   begin
-    Name := 'l1';
-    SetPosition(4, 4, 108, 16);
+    Name := 'lblTitle';
+    SetPosition(4, 4, 248, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Form widget order:';
-  end;
-
-  list := TfpgListBox.Create(self);
-  with list do
-  begin
-    Name := 'list';
-    SetPosition(4, 24, 220, 228);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#List';
-    Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
-    TabOrder := 1;
+    Text := 'Form %s:';
   end;
 
   btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
     Name := 'btnOK';
-    SetPosition(232, 24, 75, 24);
+    SetPosition(346, 24, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'OK';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.ok';
+    ModalResult := mrOK;
     TabOrder := 2;
-    OnClick := @OnButtonClick;
   end;
 
   btnCancel := TfpgButton.Create(self);
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(232, 52, 75, 24);
+    SetPosition(346, 52, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'Cancel';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.cancel';
+    ModalResult := mrCancel;
     TabOrder := 3;
-    OnClick := @OnButtonClick;
   end;
 
   btnUp := TfpgButton.Create(self);
   with btnUp do
   begin
     Name := 'btnUp';
-    SetPosition(232, 108, 75, 24);
+    SetPosition(346, 108, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'Up';
     FontDesc := '#Label1';
@@ -328,7 +315,7 @@ begin
   with btnDown do
   begin
     Name := 'btnDown';
-    SetPosition(232, 136, 75, 24);
+    SetPosition(346, 136, 75, 24);
     Anchors := [anRight,anTop];
     Text := 'Down';
     FontDesc := '#Label1';
@@ -338,82 +325,45 @@ begin
     OnClick := @OnButtonClick;
   end;
 
+  TreeView1 := TfpgTreeView.Create(self);
+  with TreeView1 do
+  begin
+    Name := 'TreeView1';
+    SetPosition(4, 24, 336, 368);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 7;
+  end;
+
   {@VFD_BODY_END: WidgetOrderForm}
 end;
 
 procedure TWidgetOrderForm.OnButtonClick(Sender: TObject);
 var
-  i: integer;
-  n: integer;
-  myilev: integer;
-
-  function IdentLevel(astr: string): integer;
-  var
-    s: string;
-    f: integer;
-  begin
-    Result := 0;
-    s      := astr;
-    f      := 1;
-    while (f <= length(s)) and (s[f] = ' ') do
-    begin
-      Inc(Result);
-      Inc(f);
-    end;
-  end;
-
+  lNode: TfpgTreeNode;
 begin
-  if Sender = btnOK then
-    ModalResult := mrOK
-  else if Sender = btnCancel then
-    ModalResult := mrCancel
-  else
+  lNode := Treeview1.Selection;
+  if lNode = nil then
+    exit;
+  
+  if Sender = btnUp then
   begin
-    // up / down
-    i := list.FocusItem;
-    if i < 0 then
-      Exit;
-
-    myilev := IdentLevel(list.Items[i]);
-
-    if Sender = btnUP then
-    begin
-      if (i > 0) and (IdentLevel(list.Items[i - 1]) = myilev) then
-      begin
-        list.Items.Move(i, i - 1);
-
-        n := i;
-        while (n < list.Items.Count) and (IdentLevel(list.Items[n]) > myilev) do
-        begin
-          list.Items.Move(n, n - 1);
-          Inc(n);
-        end;
-
-        list.FocusItem := i - 1;
-      end;
-    end
-    else if Sender = btnDOWN then
-      if (i < list.Items.Count-1) then
-      begin
-        n := i;
-        while (n < list.Items.Count) and (IdentLevel(list.Items[n]) > myilev) do
-          Inc(n);
-
-        if (i = n) and (i < list.Items.Count-1) and (IdentLevel(list.Items[i]) > myilev) then
-          Exit;
-
-        if (n > list.Items.Count-1) then
-          Exit; //==>
-
-        while (n >= i) do
-        begin
-          list.Items.Move(n, n + 1);
-          Dec(n);
-        end;
-
-        list.FocusItem := i + 1;
-      end;
+    if lNode.Prev = nil then
+      exit; // nothing to do
+    lNode.MoveTo(lNode.Prev, naInsert);
+  end
+  else
+  begin   // btnDown
+    if (lNode.Next = nil) then
+      exit;  // nothing to do
+    if (lNode.Next.Next = nil) then // the last node doesn't have a next
+      lNode.MoveTo(lNode.Next, naAdd)
+    else
+      lNode.MoveTo(lNode.Next.Next, naInsert);  
   end;
+  
+  Treeview1.Invalidate;
 end;
 
 { TVFDDialogBase }
@@ -575,6 +525,7 @@ begin
   begin
     Name := 'edtDefaultExt';
     SetPosition(28, 216, 68, 24);
+    ExtraHint := '';
     Hint := '';
     TabOrder := 5;
     Text := '';
