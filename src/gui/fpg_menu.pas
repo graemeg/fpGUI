@@ -151,10 +151,12 @@ type
     FPrevFocusItem: integer;
     FFocusItem: integer;
     FClicked: Boolean;
+    FLastItemClicked: integer;
     procedure   SetFocusItem(const AValue: integer);
     procedure   DoSelect;
     procedure   CloseSubmenus;
     function    ItemWidth(mi: TfpgMenuItem): integer;
+    procedure   InternalReset;
   protected
     FItems: TList;  // stores visible items only
     property    FocusItem: integer read FFocusItem write SetFocusItem;
@@ -408,6 +410,8 @@ var
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
 
+  newf := CalcMouseCol(x);
+
   // process menu options
   if mnuo_nofollowingmouse in FMenuOptions then
   begin
@@ -416,16 +420,19 @@ begin
   end
   else if mnuo_autoopen in FMenuOptions then
   begin
-    if not Focused then
-      ActivateMenu;
+//    if not Focused then
+    FLastItemClicked := newf;
+    FClicked := True;
+    ActivateMenu;
   end
   else
   begin
     if not FClicked then
-      exit;
+      exit
+    else
+      FLastItemClicked := newf;
   end;
 
-  newf := CalcMouseCol(x);
   if not VisibleItem(newf).Selectable then
     Exit; //==>
 
@@ -453,18 +460,27 @@ begin
   if ComponentCount = 0 then
     Exit; // We have no menu items in MainMenu.
     
-  FClicked := not FClicked;
+  newf := CalcMouseCol(x);
+  if (FLastItemClicked <> -1) and (FLastItemClicked <> newf) then
+  begin
+    // do nothing
+    //FClicked := not FClicked
+  end
+  else
+    FClicked := not FClicked;
 
   if FClicked then
-    ActivateMenu
+  begin
+    ActivateMenu;
+    FLastItemClicked := newf;
+  end
   else
   begin
     CloseSubmenus;
     DeActivateMenu;
+    FLastItemClicked := -1;
     exit; //==>
   end;
-
-  newf := CalcMouseCol(x);
 
   if not VisibleItem(newf).Selectable then
     Exit; //==>
@@ -533,6 +549,7 @@ begin
   FBeforeShow       := nil;
   FFocusItem        := -1;
   FPrevFocusItem    := -1;
+  FLastItemClicked  := -1;
   FFocusable        := False;
   FClicked          := False;
   FBackgroundColor  := Parent.BackgroundColor;
@@ -555,6 +572,12 @@ end;
 function TfpgMenuBar.ItemWidth(mi: TfpgMenuItem): integer;
 begin
   Result := fpgStyle.MenuFont.TextWidth(mi.Text) + (2*6);
+end;
+
+procedure TfpgMenuBar.InternalReset;
+begin
+  FClicked := False;
+  FLastItemClicked := -1;
 end;
 
 procedure TfpgMenuBar.DrawColumn(col: integer; focus: boolean);
@@ -739,6 +762,7 @@ begin
   Result:= TfpgMenuItem(Components[AMenuPos]);
 end;
 
+
 { TfpgPopupMenu }
 
 procedure TfpgPopupMenu.DoSelect;
@@ -769,7 +793,7 @@ begin
       op := op.OpenerPopup;
     end;
     // notify menubar that we clicked a menu item
-    OpenerMenuBar.FClicked := False;
+    OpenerMenuBar.InternalReset;
     VisibleItem(FFocusItem).Click;
     FFocusItem := -1;
   end;  { if/else }
