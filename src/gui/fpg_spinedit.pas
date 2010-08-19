@@ -707,12 +707,22 @@ begin
     begin
       FValue      := FValue + FIncrement;
       FEdit.Value := FValue;
+    end
+    else if not IsMaxLimitReached then
+    begin
+      FValue      := FMaxValue;
+      FEdit.Value := FValue;
     end;
 
   if KeyCode = KeyDown then
     if FEdit.Value - Increment >= FMinValue then
     begin
       FValue      := FValue - FIncrement;
+      FEdit.Value := FValue;
+    end
+    else if not IsMinLimitReached then
+    begin
+      FValue      := FMinValue;
       FEdit.Value := FValue;
     end;
 
@@ -1121,12 +1131,22 @@ begin
     begin
       Inc(FValue, FIncrement);
       FEdit.Value := FValue;
+    end
+    else if not IsMaxLimitReached then
+    begin
+      FValue      := FMaxValue;
+      FEdit.Value := FValue;
     end;
 
   if KeyCode = KeyDown then
     if FEdit.Value - Increment >= FMinValue then
     begin
       Dec(FValue, FIncrement);
+      FEdit.Value := FValue;
+    end
+    else if not IsMinLimitReached then
+    begin
+      FValue      := FMinValue;
       FEdit.Value := FValue;
     end;
 
