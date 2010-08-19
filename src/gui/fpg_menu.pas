@@ -796,7 +796,8 @@ begin
       op := op.OpenerPopup;
     end;
     // notify menubar that we clicked a menu item
-    OpenerMenuBar.InternalReset;
+    if Assigned(OpenerMenuBar) then
+      OpenerMenuBar.InternalReset;
     VisibleItem(FFocusItem).Click;
     FFocusItem := -1;
   end;  { if/else }
