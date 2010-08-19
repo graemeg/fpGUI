@@ -2122,7 +2122,7 @@ begin
   with tsNotes do
   begin
     Name := 'tsNotes';
-    SetPosition(3, 24, 254, 289);
+    SetPosition(3, 24, 254, 249);
     Text := 'Notes';
   end;
 
@@ -2130,7 +2130,7 @@ begin
   with ListBox1 do
   begin
     Name := 'ListBox1';
-    SetPosition(4, 32, 242, 252);
+    SetPosition(4, 32, 242, 212);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
@@ -2150,6 +2150,7 @@ begin
     ImageMargin := 0;
     ImageName := 'stdimg.add';
     TabOrder := 1;
+    Enabled := false;
   end;
 
   btnNotesEdit := TfpgButton.Create(tsNotes);
@@ -2163,6 +2164,7 @@ begin
     ImageMargin := 0;
     ImageName := 'stdimg.edit';
     TabOrder := 2;
+    Enabled := False;
   end;
 
   btnNotesDel := TfpgButton.Create(tsNotes);
@@ -2176,6 +2178,7 @@ begin
     ImageMargin := 0;
     ImageName := 'stdimg.remove';
     TabOrder := 3;
+    Enabled := False;
   end;
 
   btnNotesGoto := TfpgButton.Create(tsNotes);
