@@ -467,7 +467,10 @@ begin
     //FClicked := not FClicked
   end
   else
-    FClicked := not FClicked;
+  begin
+    if VisibleItem(newf).Selectable then
+      FClicked := not FClicked;
+  end;
 
   if FClicked then
   begin
