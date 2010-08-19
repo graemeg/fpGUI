@@ -16,14 +16,13 @@ uses
   fpg_button,
   fpg_imagelist,
   fpg_label,
-  fpg_panel,
   fpg_dialogs,
-  fpg_combobox;
+  fpg_combobox,
+  fpg_utils;
 
 type
 
   TMainForm = class(TfpgForm)
-    procedure TestButtonClicked(Sender: TObject);
   private
     {@VFD_HEAD_BEGIN: MainForm}
     tree: TfpgTreeView;
@@ -35,14 +34,17 @@ type
     Label3: TfpgLabel;
     Label4: TfpgLabel;
     Label5: TfpgLabel;
-    Bevel1: TfpgBevel;
     lblSource: TfpgLabel;
     lblDestination: TfpgLabel;
     btnSource: TfpgButton;
     btnDest: TfpgButton;
     btnMoveTo: TfpgButton;
     cbMoveToTypes: TfpgComboBox;
-    Button1: TfpgButton;
+    Label6: TfpgLabel;
+    Label7: TfpgLabel;
+    Label8: TfpgLabel;
+    btnCollapseAll: TfpgButton;
+    btnExpandAll: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     FImagelist: TfpgImageList;
     FSrcNode: TfpgTreeNode;
@@ -55,6 +57,8 @@ type
     procedure   btnSourceClicked(Sender: TObject);
     procedure   btnDestinationClicked(Sender: TObject);
     procedure   btnMoveToClicked(Sender: TObject);
+    procedure   btnCollapseAllClicked(Sender: TObject);
+    procedure   btnExpandAllClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -166,12 +170,19 @@ begin
 end;
 
 procedure TMainForm.btnMoveToClicked(Sender: TObject);
+const
+  cEmpty = '--';
 var
   i: integer;
 begin
   if FSrcNode = FDestNode then
   begin
-    ShowMessage('Source and Destination may not be the same');
+    TfpgMessageDialog.Warning('', 'Source and Destination may not be the same');
+    exit;
+  end;
+  if (FSrcNode = nil) or (FDestnode = nil) then
+  begin
+    TfpgMessageDialog.Warning('', 'Both Source and Destintation needs to be set first');
     exit;
   end;
   i := cbMoveToTypes.FocusItem;
@@ -181,20 +192,10 @@ begin
   // reset values
   FSrcNode := nil;
   FDestnode := nil;
-  lblSource.Text := '--';
-  lblDestination.Text := '--';
+  lblSource.Text := cEmpty;
+  lblDestination.Text := cEmpty;
 
   TreeNodeChanged(nil);
-end;
-
-procedure TMainForm.TestButtonClicked(Sender: TObject);
-var
-  n: TfpgTreeNode;
-begin
-  n := Tree.Selection;
-  n.Parent.Remove(n);
-  n.Free;
-  Tree.Invalidate;
 end;
 
 procedure TMainForm.cbShowImagesChange(Sender: TObject);
@@ -207,10 +208,14 @@ begin
   inherited Create(AOwner);
   // create a image list
   FImagelist := TfpgImageList.Create;
-  FImagelist.AddItemFromFile(SetDirSeparators('../../../images/folder_16.bmp'), 0);
-  FImagelist.AddItemFromFile(SetDirSeparators('../../../images/menu_preferences_16.bmp'), 1);
-  FImagelist.Item[1].Image.CreateMaskFromSample(0, 0);
-  FImagelist.Item[1].Image.UpdateImage;
+  if fpgFileExists('../../../images/folder_16.bmp') then
+    FImagelist.AddItemFromFile(SetDirSeparators('../../../images/folder_16.bmp'), 0);
+  if fpgFileExists('../../../images/menu_preferences_16.bmp') then
+  begin
+    FImagelist.AddItemFromFile(SetDirSeparators('../../../images/menu_preferences_16.bmp'), 1);
+    FImagelist.Item[1].Image.CreateMaskFromSample(0, 0);
+    FImagelist.Item[1].Image.UpdateImage;
+  end;
 end;
 
 destructor TMainForm.Destroy;
@@ -225,7 +230,7 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(294, 174, 709, 250);
+  SetPosition(399, 184, 709, 333);
   WindowTitle := 'Treeview Test';
   Hint := '';
   WindowPosition := wpScreenCenter;
@@ -234,13 +239,13 @@ begin
   with tree do
   begin
     Name := 'tree';
-    SetPosition(8, 8, 284, 184);
+    SetPosition(8, 8, 284, 267);
     Anchors := [anLeft,anTop,anBottom];
     FontDesc := '#Label1';
     Hint := '';
     ScrollWheelDelta := 30;
     ShowImages := True;
-    TabOrder := 1;
+    TabOrder := 0;
     ImageList := FImagelist;
     OnChange  := @TreeNodeChanged;
   end;
@@ -249,7 +254,7 @@ begin
   with cbShowImages do
   begin
     Name := 'cbShowImages';
-    SetPosition(8, 200, 109, 20);
+    SetPosition(8, 283, 109, 20);
     Anchors := [anLeft,anBottom];
     Checked := True;
     FontDesc := '#Label1';
@@ -263,7 +268,7 @@ begin
   with cbIndentNode do
   begin
     Name := 'cbIndentNode';
-    SetPosition(120, 200, 179, 20);
+    SetPosition(120, 283, 179, 20);
     Anchors := [anLeft,anBottom];
     Checked := True;
     FontDesc := '#Label1';
@@ -277,7 +282,7 @@ begin
   with btnClear do
   begin
     Name := 'btnClear';
-    SetPosition(8, 222, 144, 23);
+    SetPosition(8, 305, 144, 23);
     Anchors := [anLeft,anBottom];
     Text := 'Clear Selected Node';
     FontDesc := '#Label1';
@@ -291,7 +296,7 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(312, 12, 292, 16);
+    SetPosition(316, 24, 292, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Label';
@@ -301,7 +306,7 @@ begin
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(312, 32, 288, 16);
+    SetPosition(316, 40, 288, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Label';
@@ -311,7 +316,7 @@ begin
   with Label3 do
   begin
     Name := 'Label3';
-    SetPosition(312, 52, 272, 16);
+    SetPosition(316, 56, 272, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Label';
@@ -321,7 +326,7 @@ begin
   with Label4 do
   begin
     Name := 'Label4';
-    SetPosition(312, 72, 300, 16);
+    SetPosition(316, 72, 300, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Label';
@@ -331,54 +336,42 @@ begin
   with Label5 do
   begin
     Name := 'Label5';
-    SetPosition(312, 92, 320, 16);
+    SetPosition(316, 88, 320, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Label';
-  end;
-
-  Bevel1 := TfpgBevel.Create(self);
-  with Bevel1 do
-  begin
-    Name := 'Bevel1';
-    SetPosition(312, 116, 388, 12);
-    Anchors := [anLeft,anRight,anTop];
-    BorderStyle := bsDouble;
-    Hint := '';
-    Style := bsLowered;
-    Shape := bsTopLine;
   end;
 
   lblSource := TfpgLabel.Create(self);
   with lblSource do
   begin
     Name := 'lblSource';
-    SetPosition(312, 160, 140, 16);
+    SetPosition(316, 172, 140, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Label';
+    Text := '--';
   end;
 
   lblDestination := TfpgLabel.Create(self);
   with lblDestination do
   begin
     Name := 'lblDestination';
-    SetPosition(464, 160, 128, 16);
+    SetPosition(468, 172, 128, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Label';
+    Text := '--';
   end;
 
   btnSource := TfpgButton.Create(self);
   with btnSource do
   begin
     Name := 'btnSource';
-    SetPosition(312, 132, 80, 24);
+    SetPosition(316, 144, 80, 24);
     Text := 'Source';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 13;
+    TabOrder := 11;
     OnClick := @btnSourceClicked;
   end;
 
@@ -386,12 +379,12 @@ begin
   with btnDest do
   begin
     Name := 'btnDest';
-    SetPosition(464, 132, 80, 24);
+    SetPosition(468, 144, 80, 24);
     Text := 'Destination';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 14;
+    TabOrder := 12;
     OnClick := @btnDestinationClicked;
   end;
 
@@ -399,12 +392,12 @@ begin
   with btnMoveTo do
   begin
     Name := 'btnMoveTo';
-    SetPosition(608, 132, 80, 24);
+    SetPosition(612, 144, 80, 24);
     Text := 'MoveTo';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 15;
+    TabOrder := 13;
     OnClick := @btnMoveToClicked;
   end;
 
@@ -412,7 +405,7 @@ begin
   with cbMoveToTypes do
   begin
     Name := 'cbMoveToTypes';
-    SetPosition(608, 164, 96, 22);
+    SetPosition(612, 172, 96, 22);
     FontDesc := '#List';
     Hint := '';
     Items.Add('naAdd');
@@ -420,26 +413,79 @@ begin
     Items.Add('naAddChild');
     Items.Add('naAddChildFirst');
     Items.Add('naInsert');
-    TabOrder := 16;
+    TabOrder := 14;
     FocusItem := 0;
   end;
 
-  Button1 := TfpgButton.Create(self);
-  with Button1 do
+  Label6 := TfpgLabel.Create(self);
+  with Label6 do
   begin
-    Name := 'Button1';
-    SetPosition(472, 208, 80, 24);
-    Text := 'Button';
+    Name := 'Label6';
+    SetPosition(300, 4, 348, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Selected Node Information';
+  end;
+
+  Label7 := TfpgLabel.Create(self);
+  with Label7 do
+  begin
+    Name := 'Label7';
+    SetPosition(300, 120, 348, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Reorder Nodes (testing MovoTo() function)';
+  end;
+
+  Label8 := TfpgLabel.Create(self);
+  with Label8 do
+  begin
+    Name := 'Label8';
+    SetPosition(300, 200, 308, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Test various Tree functions';
+  end;
+
+  btnCollapseAll := TfpgButton.Create(self);
+  with btnCollapseAll do
+  begin
+    Name := 'btnCollapseAll';
+    SetPosition(316, 224, 92, 24);
+    Text := 'Collapse All';
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 17;
-    OnClick  := @TestButtonClicked;
+    TabOrder := 19;
+    OnClick := @btnCollapseAllClicked;
+  end;
+
+  btnExpandAll := TfpgButton.Create(self);
+  with btnExpandAll do
+  begin
+    Name := 'btnExpandAll';
+    SetPosition(416, 224, 92, 24);
+    Text := 'Expand All';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 20;
+    OnClick := @btnExpandAllClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
 
   PopulateTree;
+end;
+
+procedure TMainForm.btnCollapseAllClicked(Sender: TObject);
+begin
+  tree.FullCollapse;
+end;
+
+procedure TMainForm.btnExpandAllClicked(Sender: TObject);
+begin
+  tree.FullExpand;
 end;
 
 
