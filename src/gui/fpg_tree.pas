@@ -1166,6 +1166,7 @@ begin
     end;
     n := NextNode(n);
   until n = nil;
+  Repaint;
 end;
 
 procedure TfpgTreeView.FullExpand;
@@ -1180,6 +1181,7 @@ begin
     end;
     n := NextNode(n);
   until n = nil;
+  Repaint;
 end;
 
 procedure TfpgTreeview.PreCalcColumnLeft;
