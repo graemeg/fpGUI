@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+
+<module name="fpg_tree">
+<short>This unit defines a tree view control</short>
+<descr><p><printshort id="fpg_tree"/>. A tree view displays items in an indented
+outline. The control provides buttons that allow nodes to be expanded and collapsed.
+You can include icons with items' text labels and display different icons to 
+indicate whether a node is expanded or collapsed.</p>
+</descr>
+
+
+<element name="TfpgTreeView">
+<short>Represents a window that displays a hierachy list of items</short>
+<descr><p><printshort id="TfpgTreeView"/>. Examples of such hierachies can be
+the headings in a document, the entries in a index, or the files and directories
+on a disk.</p>
+<p>Use TfpgTreeView to add an expanding and contracting outline to a form. Each node
+in a tree view control consists of a label and a number of optional bitmapped images.
+Each node can have a list of subnodes associated with it. By clicking on a node,
+the user can expand or collapse the associated list of subnodes.</p>
+<remark>There is basic column support, but this is still very experimental.</remark></descr>
+</element>
+
+<element name="TfpgTreeView.FullCollapse">
+<short>Collapses all the nodes within a tree view control</short>
+<descr><printshort id="TfpgTreeView.FullCollapse"/>. Call FullCollapse to hide
+all the nodes in the tree view except those at the first level. All node buttons
+will change from '-' to '+'.</descr>
+<seealso>
+  <link id="TfpgTreeView.FullExpand"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeView.FullExpand">
+<short>Expands all nodes within the tree view control</short>
+<descr><printshort id="TfpgTreeView.FullExpand"/>. Call FullExpand to display
+all the nodes in the tree view. All node buttons will change from '+' to '-'.</descr>
+<seealso>
+  <link id="TfpgTreeView.FullCollapse"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeView.GotoNextNodeUp">
+<short>Moves the selection to the previous node up the tree</short>
+</element>
+
+<element name="TfpgTreeView.GotoNextNodeDown">
+<short>Moves the selection to the next node down the tree</short>
+</element>
+
+<element name="TfpgTreeView.NextNode">
+<short>Return the next node after ANode</short>
+<descr><printshort id="TfpgTreeView.NextNode"/>. This function will step into child
+nodes as well, to return the correct node. It works on the actual nodes in the tree,
+and not just the visible nodes in the tree.</descr>
+<seealso>
+  <link id="TfpgTreeView.PrevNode"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeView.PrevNode">
+<short>Return the previous node starting from ANode</short>
+<descr><printshort id="TfpgTreeView.PrevNode"/>. This function will step into child
+nodes as well, to insure it returns the correct node. It works on the actual nodes
+in the tree, and not just on the visible nodes.</descr>
+<seealso>
+  <link id="TfpgTreeView.NextNode"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeview.NextVisualNode">
+<short>Return the next visible node starting from ANode</short>
+<descr><printshort id="TfpgTreeview.NextVisualNode"/>. This works exactly the same
+as <var>NextNode</var> function, but this time it only acts on nodes that are visible.</descr>
+<seealso>
+  <link id="TfpgTreeview.NextNode"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeview.PrevVisualNode">
+<short>Return the previous visible node starting from ANode</short>
+<descr><printshort id="TfpgTreeview.PrevVisualNode"/>. This works exactly the same
+as <var>PrevNode</var> function, but this time it only acts on nodes that are visible.</descr>
+<seealso>
+  <link id="TfpgTreeview.PrevNode"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeview.Font">
+<short>This gives you read access to the internal Font resource</short>
+<descr><printshort id="TfpgTreeview.Font"/>. If you want to change the font used
+in the tree view, use the <link id="TfpgTreeview.FondDesc">FondDesc</link> property instead.</descr>
+<seealso>
+  <link id="TfpgTreeview.FontDesc"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeview.RootNode">
+<short>Returns the first node of the tree where all other nodes branch from</short>
+<descr><printshort id="TfpgTreeview.RootNode"/>. This node is not a visible node, and
+is the internal node all other nodes in the tree branches from.</descr>
+</element>
+
+<element name="TfpgTreeview.Selection">
+<short>Specifies the selected node in the tree vie</short>
+<descr><p><printshort id="TfpgTreeview.Selection"/>. Read <var>Selection</var> to access
+the selected node of the tree view. If there is no selected node, the value returned
+is nil.</p>
+<p>Set <var>Selection</var> to set the node in the tree view. If the new node is
+a child of a collapsed node, the tree view will automatically
+expand the nodes and scroll the new selected node into view. As the parent nodes are
+expanded, so the tree view will trigger the OnExpand event as well.</p></descr>
+</element>
+
+<element name="TfpgTreeview.ImageList">
+<short>Refers to the image list associated with the tree view</short>
+<descr><printshort id="TfpgTreeview.ImageList"/>. Use the <var>ImageList</var> to
+provide a customised list of bitmaps that can be displayed with the node's text. Use
+the node's <link id="TfpgTreeNode.ImageIndex">ImageIndex</link> property to specify the
+bitmap that must be painted next to the node's text.</descr>
+<seealso>
+  <link id="TfpgTreeNode.ImageIndex"/>
+</seealso>
+</element>
+
+<element name="TfpgTreeview.PopupMenu">
+<short>Identifies the pop-up menu associated with the tree view</short>
+<descr><printshort id="TfpgTreeview.PopupMenu"/>. Assign a value to <var>PopupMenu</var>
+to make a popup-menu appear when the user selects the control and clicks the right mouse
+button.</descr>
+</element>
+
+<element name="TfpgTreeview.DefaultColumnWidth">
+<short>Is the default with of columns displayed in the tree view</short>
+<descr><p><printshort id="TfpgTreeview.DefaultColumnWidth"/>.</p>
+<remark>There is basic column support, but this is still very experimental.</remark></descr>
+</element>
+
+<element name="TfpgTreeview.FontDesc">
+<short>Specifies the font used for the tree view</short>
+<descr><printshort id="TfpgTreeview.FontDesc"/>. You can specify the font name and size
+in the format <var>fontname-size:attributes</var>, or you can use any of the font
+aliases that has been setup. A font alias is a short name for some specific font, font size
+and attribute all in one. A font alias is in the format <var>#aliasname</var>.</descr>
+</element>
+
+
+<element name="TfpgTreeview.HandleLMouseUp" link="fpg_widget.TfpgWidget.HandleLMouseUp"/>
+<element name="TfpgTreeview.HandleLMouseDown" link="fpg_widget.TfpgWidget.HandleLMouseDown"/>
+<element name="TfpgTreeview.HandleRMouseUp" link="fpg_widget.TfpgWidget.HandleRMouseUp"/>
+<element name="TfpgTreeview.HandleDoubleClick" link="fpg_widget.TfpgWidget.HandleDoubleClick"/>
+<element name="TfpgTreeview.HandleKeyPress" link="fpg_widget.TfpgWidget.HandleKeyPress"/>
+<element name="TfpgTreeview.HandleMouseScroll" link="fpg_widget.TfpgWidget.HandleMouseScroll"/>
+
+
+</module>
+
+</package>
+</fpdoc-descriptions>
+
