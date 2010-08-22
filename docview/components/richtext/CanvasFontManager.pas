@@ -567,10 +567,16 @@ begin
   FCanvas.Font := fpgApplication.DefaultFont;
 
   // delete each logical font and our record of it
-  for i := 0 to FLogicalFonts.Count - 1 do
+  for i := FLogicalFonts.Count-1 downto 0 do
   begin
-    lFont := TLogicalFont(FLogicalFonts[ i ]);
-    lFont.Free;
+    // TODO: This must be fixed. If we don't use try..except we sometimes get AV's on lFont.Free
+    // TODO: TLogicalFont must be totally removed from DocView.
+    try
+      lFont := TLogicalFont(FLogicalFonts[i]);
+      lFont.Free;
+    except
+      // do nothing
+    end;
   end;
   FLogicalFonts.Clear;
   FLogicalFonts.Free;
