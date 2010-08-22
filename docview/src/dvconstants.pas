@@ -4,6 +4,9 @@ unit dvConstants;
 
 interface
 
+uses
+  Classes;
+
 const
   { DO NOT LOCALIZE }
   HelpPathEnvironmentVar = 'HELP';
@@ -24,7 +27,7 @@ resourcestring
   rsDVNoFile = 'No file';
   rsDVOpenHelpFile = 'Open Help File';
   rsDVHelpFiles = 'Help Files';
-  rsDVNoMatchesFound = '(No matches found for ''%s'')';
+  rsDVNoMatchesFound = '(No matches found for <%s>)';
   rsDVSearchSyntaxError = 'Error in search syntax: ';
   rsDVSearchFoundMsg = 'Found %d matches for ';
   rsDVCouldNotOpen = 'Could not open <%s>';
