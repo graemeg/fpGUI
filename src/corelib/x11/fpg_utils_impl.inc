@@ -1,7 +1,7 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Unix;
+  Unix, BaseUnix;
 
 // X11 specific filesystem implementations of encoding functions
 
@@ -40,3 +40,11 @@ begin
     fpSystem(Helper + ' ' + aURL + '&');
 end;
 
+function fpgFileSize(const AFilename: TfpgString): integer;
+var
+  st: baseunix.stat;
+begin
+  if not fpstat(pointer(AFilename),st) >= 0 then
+    exit(-1);
+  Result := st.st_size;
+end;

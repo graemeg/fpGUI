@@ -31,6 +31,7 @@ uses
 function fpgToOSEncoding(aString: TfpgString): string;
 function fpgFromOSEncoding(aString: string): TfpgString;
 procedure fpgOpenURL(const aURL: TfpgString);
+function fpgFileSize(const AFilename: TfpgString): integer;
 
 
 // *** Common functions for all platforms ***
