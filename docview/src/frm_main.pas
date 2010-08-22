@@ -1147,6 +1147,9 @@ var
 begin
   LogEvent(LogStartup, 'OpenFiles' );
 
+  if CurrentOpenFiles.Count = 0 then
+   exit; // nothing to do
+
   //if not OKToCloseFile then
   //  exit;
 
