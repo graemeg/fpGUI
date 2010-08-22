@@ -436,8 +436,8 @@ begin
     with sl do
     begin
       Add('<b><u>Filename:</u></b> <red>' + f.Filename + '<black>');
-      Add('');
       Add('<b>Title:</b> ' + f.Title);
+      Add('<b>File size:</b> ' + IntToStr(fpgFileSize(f.Filename)) + 'bytes');
       Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
       Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
       Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
