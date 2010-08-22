@@ -408,6 +408,7 @@ begin
     End;
   End;
 
+  fl.Free;
   // pick some for defaults
   GetDefaultFonts;
 end;
