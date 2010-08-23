@@ -1147,9 +1147,6 @@ var
 begin
   LogEvent(LogStartup, 'OpenFiles' );
 
-  if CurrentOpenFiles.Count = 0 then
-   exit; // nothing to do
-
   //if not OKToCloseFile then
   //  exit;
 
@@ -1174,6 +1171,9 @@ begin
   CloseFile;
 
   AssignList(tmpHelpFiles, CurrentOpenFiles );
+
+  if CurrentOpenFiles.Count = 0 then
+   exit; // no help files found - nothing further to do
 
   ProgressBar.Position := 50;
   SetStatus( rsDVDisplaying );
