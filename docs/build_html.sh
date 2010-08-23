@@ -33,7 +33,9 @@ $app \
   --input='-Fi../src/gui ../src/gui/fpg_hyperlink.pas' --descr=xml/gui/fpg_hyperlink.xml \
   --input='-Fi../src/gui ../src/gui/fpg_colormapping.pas' --descr=xml/gui/fpg_colormapping.xml \
   --input='-Fi../src/gui ../src/gui/fpg_colorwheel.pas' --descr=xml/gui/fpg_colorwheel.xml \
-  --input='-Fi../src/gui ../src/gui/fpg_button.pas' --descr=xml/gui/fpg_button.xml
+  --input='-Fi../src/gui ../src/gui/fpg_button.pas' --descr=xml/gui/fpg_button.xml \
+  --input='-Fi../src/gui ../src/gui/fpg_tree.pas' --descr=xml/gui/fpg_tree.xml
+
 #  --input='-Fi../src/gui ../src/gui/fpg_.pas' --descr=xml/gui/fpg_.xml \
 #  --input='-Fi../src/gui ../src/gui/fpg_.pas' --descr=xml/gui/fpg_.xml \
 #  --input='-Fi../src/gui ../src/gui/fpg_.pas' --descr=xml/gui/fpg_.xml \

@@ -9,6 +9,7 @@ $app \
   --package=fpgui \
   --format=ipf \
   --output=fpgui.ipf  \
+  --duplinkeddoc \
   --input='-Fi../src/corelib ../src/corelib/fpg_base.pas' --descr=xml/corelib/fpg_base.xml \
   --input='-Fi../src/corelib ../src/corelib/x11/fpg_x11.pas' --descr=xml/corelib/x11/fpg_x11.xml \
   --input='-Fi../src/corelib ../src/corelib/gdi/fpg_gdi.pas' --descr=xml/corelib/gdi/fpg_gdi.xml \
@@ -31,7 +32,9 @@ $app \
   --input='-Fi../src/gui ../src/gui/fpg_hyperlink.pas' --descr=xml/gui/fpg_hyperlink.xml \
   --input='-Fi../src/gui ../src/gui/fpg_colormapping.pas' --descr=xml/gui/fpg_colormapping.xml \
   --input='-Fi../src/gui ../src/gui/fpg_colorwheel.pas' --descr=xml/gui/fpg_colorwheel.xml \
-  --input='-Fi../src/gui ../src/gui/fpg_button.pas' --descr=xml/gui/fpg_button.xml
+  --input='-Fi../src/gui ../src/gui/fpg_button.pas' --descr=xml/gui/fpg_button.xml \
+  --input='-Fi../src/gui ../src/gui/fpg_tree.pas' --descr=xml/gui/fpg_tree.xml
+
 #  --input='-Fi../src/gui ../src/gui/fpg_.pas' --descr=xml/gui/fpg_.xml \
 #  --input='-Fi../src/gui ../src/gui/fpg_.pas' --descr=xml/gui/fpg_.xml \
 #  --input='-Fi../src/gui ../src/gui/fpg_.pas' --descr=xml/gui/fpg_.xml \
