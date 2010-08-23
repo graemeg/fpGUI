@@ -34,7 +34,7 @@ var
 begin
   // Don't assign the widestring to TSearchRec.name because it is of type
   // string, which will generate a conversion to the system encoding
-  Str := UTF8Decode(Filename);
+  Str := UTF8Decode(AFilename);
   FindHandle:=Windows.FindFirstFileW(PWideChar(Str), FindData);
   if FindHandle=Windows.Invalid_Handle_value then
   begin

@@ -192,7 +192,7 @@ begin
             break;
         until fpgFindNext(FileInfo) <> 0;
     finally
-      FindClose(FileInfo);
+      SysUtils.FindClose(FileInfo);
     end;
   end;
 end;
