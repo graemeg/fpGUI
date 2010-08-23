@@ -2415,7 +2415,7 @@ var
 begin
   e := TFileEntry.Create;
   e.Name        := sr.Name;
-  e.Extension   := ExtractFileExt(e.Name);
+  e.Extension   := fpgExtractFileExt(e.Name);
   e.Size        := sr.Size;
   // e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
   e.ModTime     := FileDateToDateTime(sr.Time);

@@ -1034,7 +1034,7 @@ begin
 
     if dlg.RunOpenFile then
     begin
-      Settings.LastOpenDirectory := ExtractFilePath(dlg.Filename);
+      Settings.LastOpenDirectory := fpgExtractFilePath(dlg.Filename);
       OpenFile(dlg.Filename, '', true);
     end;
     { TODO -oGraeme : Add support for multiple files. }

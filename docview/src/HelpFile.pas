@@ -186,6 +186,7 @@ uses
 //  ACLFileIOUtility,
 //  ACLLanguageUnit;
   fpg_main
+  ,fpg_utils
   ,nvUtilities
   ,ACLStringUtility
   ;
@@ -1219,7 +1220,7 @@ var
   fstream: TFileStream;
   Ext: string;
 begin
-  Ext := ExtractFileExt( Filename );
+  Ext := fpgExtractFileExt( Filename );
   Result := '';
 
   if    SameText( Ext, '.inf' )
