@@ -698,6 +698,8 @@ var
   end;
 
 begin
+  if Desc = '' then
+    exit;
   cp := 1;
   c  := Desc[1];
 
