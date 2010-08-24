@@ -58,6 +58,7 @@ type
     miFile: TfpgPopupMenu;
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
+    miView: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     miDebug: TfpgPopupMenu;
     ToolBar: TfpgBevel;
@@ -108,6 +109,8 @@ type
     procedure   miFileOpenSpecialClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
     procedure   miConfigureClicked(Sender: TObject);
+    procedure   miViewExpandAllClicked(Sender: TObject);
+    procedure   miViewCollapseAllClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpCmdLineParams(Sender: TObject);
@@ -424,6 +427,16 @@ end;
 procedure TMainForm.miConfigureClicked(Sender: TObject);
 begin
   ShowConfigForm;
+end;
+
+procedure TMainForm.miViewExpandAllClicked(Sender: TObject);
+begin
+  tvContents.FullExpand;
+end;
+
+procedure TMainForm.miViewCollapseAllClicked(Sender: TObject);
+begin
+  tvContents.FullCollapse;
 end;
 
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
@@ -2310,6 +2323,15 @@ begin
     AddMenuItem('Show', '', nil);
   end;
 
+  miView := TfpgPopupMenu.Create(self);
+  with miView do
+  begin
+    Name := 'miView';
+    SetPosition(292, 216, 132, 20);
+    AddMenuItem('Expand All', '', @miViewExpandAllClicked);
+    AddMenuItem('Collapse All', '', @miViewCollapseAllClicked);
+  end;
+
   miHelp := TfpgPopupMenu.Create(self);
   with miHelp do
   begin
@@ -2505,6 +2527,8 @@ begin
   MainMenu.AddMenuItem('&Help', nil).SubMenu := miHelp;
   MainMenu.AddMenuItem('&Debug', nil).SubMenu := miDebug;
   FFileOpenRecent.SubMenu := miOpenRecentMenu;
+
+  tvContents.PopupMenu := miView;
 
   // correct default visible tabsheet
   PageControl1.ActivePageIndex := 0;
