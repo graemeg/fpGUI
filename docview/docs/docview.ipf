@@ -364,32 +364,38 @@ double quotes around it, for example "os/2 warp".
 :p.
 :hp2.Matching features:ehp2.
 :p.
-DocView allows you finer control of searching.
-:p.
-+ (plus sign) indicates a word that :hp2.must:ehp2. be matched
-.br
-- (minus sign) indicates a word that must :hp2.not:ehp2. be matched
+DocView allows you finer control of searching. You can add either of the two symbols
+directly infront of a word (no spaces between symbol and word), to narrow down
+a search even more.
+:dl compant tsize=15.
+:dt.+ (plus sign)
+:dd.indicates a word that :hp2.must:ehp2. be matched
+:dt.- (minus sign)
+:dd.indicates a word that must :hp2.not:ehp2. be matched
+:edl.
 :p.
 To make searching even more useful, DocView implements a special search algorithm
 which does partial word matches. That is, if you search for "win", DocView will
 also find "window", "following", "showing" etc. However, the better the match is the higher
 the rank will be. The search rank is displayed in square brackets behind each
-search result. Searches are also :hp2.not:ehp2. case-sensitive.
-:p.:hp2.How DocView ranks results:ehp2.
-:p.DocView ranks matching topics by various means&colon.
-:p.&endash. a closer match to a full word
-:p.&endash. number of matching words in a topic
-:p.&endash. matches within the title
-:p.&endash. matches within an index entry
+search result. Searches are :hp2.not:ehp2. case-sensitive.
+:p.
+:hp2.How DocView ranks results:ehp2.
+:p.DocView ranks matching topics by various means:
+:ul.
+:li.a closer match to a full word
+:li.number of matching words in a topic
+:li.matches within the title
+:li.matches within an index entry
+:eul.
 
 .* ************************************************************
 .* Notes
 .* ************************************************************
-:h2 res=7 id='notes'.
-Notes
-:p.:hp2.Adding and Using Notes:ehp2.
+:h2 res=7 id='notes'.Notes
+:hp2.Adding and Using Notes:ehp2.
 :p.
-:p.DocView allows you to add notes &lpar.annotations&rpar. to your help
+DocView allows you to add notes &lpar.annotations&rpar. to your help
 files&per.
 :p.To add a note&comma. simply click where you want to make a note and click the
 &odq.Note&cdq. button
