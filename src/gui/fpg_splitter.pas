@@ -61,6 +61,7 @@ type
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
+    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     procedure   StopSizing; dynamic;
     Procedure   DrawGrabBar(ARect: TfpgRect); virtual;
@@ -302,6 +303,25 @@ begin
   if FControl = nil then
     MouseCursor := mcDefault;
   Repaint;
+end;
+
+procedure TfpgSplitter.HandleDoubleClick(x, y: integer; button: word;
+  shiftstate: TShiftState);
+begin
+  inherited HandleDoubleClick(x, y, button, shiftstate);
+  if FAutoSnap then
+  begin
+    if FNewSize = 0 then
+    begin
+      FNewSize := FMinSize+1;
+      DoCanResize(FNewSize);
+    end
+    else
+    begin
+      FNewSize := 0;
+      DoCanResize(FNewSize);
+    end;
+  end;
 end;
 
 procedure TfpgSplitter.HandlePaint;
