@@ -202,7 +202,17 @@
         <OptimizationLevel Value="0"/>
       </Optimizations>
     </CodeGeneration>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
     <Other>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
       <CustomOptions Value="-O-"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

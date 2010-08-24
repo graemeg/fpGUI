@@ -109,6 +109,7 @@ type
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpCmdLineParams(Sender: TObject);
+    procedure   miHelpUsingDocView(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
     procedure   miFileSaveTopicAsIPF(Sender: TObject);
@@ -418,6 +419,12 @@ procedure TMainForm.miHelpCmdLineParams(Sender: TObject);
 begin
   CloseFile(False);
   ShowCmdLineParamHelp;
+end;
+
+procedure TMainForm.miHelpUsingDocView(Sender: TObject);
+begin
+  CloseFile(False);
+  OpenFile(OWN_HELP_MARKER, '', True);
 end;
 
 procedure TMainForm.miDebugHeader(Sender: TObject);
@@ -2284,8 +2291,7 @@ begin
   begin
     Name := 'miHelp';
     SetPosition(292, 168, 132, 20);
-    AddMenuItem('Contents...', '', nil);
-    AddMenuItem('Help using help', '', nil);
+    AddMenuItem('Help using DocView', 'F1', @miHelpUsingDocView);
     AddMenuItem('Command line parameters', '', @miHelpCmdLineParams);
     AddMenuItem('-', '', nil);
     AddMenuItem('Show help file header info', '', @miDebugHeader);
