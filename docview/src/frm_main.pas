@@ -1084,7 +1084,8 @@ begin
     else
     begin
       LogEvent(LogStartup, '    File not found' );
-      FullFilePath := FileName; // we'll complain later.
+      TfpgMessageDialog.Critical('Error', 'Failed to find the help file: ' + Filename);
+      Abort;
     end;
     LoadingFilenameList[ FileIndex ] := FullFilePath;
   end;
