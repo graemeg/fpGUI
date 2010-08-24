@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_tab, fpg_button,
-  fpg_label, fpg_edit, fpg_panel, fpg_combobox, fpg_listbox, fpg_checkbox;
+  fpg_label, fpg_edit, fpg_panel, fpg_combobox, fpg_listbox, fpg_checkbox,
+  fpg_editbtn;
 
 type
 
@@ -19,11 +20,7 @@ type
     tsGeneral: TfpgTabSheet;
     tsFontsColor: TfpgTabSheet;
     Label1: TfpgLabel;
-    edtNormalFont: TfpgEdit;
-    btnNormalFont: TfpgButton;
     Label2: TfpgLabel;
-    edtFixedFont: TfpgEdit;
-    btnFixedFont: TfpgButton;
     btnHelp: TfpgButton;
     pnlSearchHighlight: TfpgPanel;
     cbIndexStyle: TfpgComboBox;
@@ -37,9 +34,9 @@ type
     chkOpenTOC: TfpgCheckBox;
     btnColorHighlight: TfpgButton;
     btnResetColors: TfpgButton;
+    edtFixedFont: TfpgFontEdit;
+    edtNormalFont: TfpgFontEdit;
     {@VFD_HEAD_END: ConfigurationForm}
-    procedure btnNormalFontClicked(Sender: TObject);
-    procedure btnFixedFontClicked(Sender: TObject);
     procedure ConfigurationFormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
@@ -78,24 +75,6 @@ begin
 end;
 
 {@VFD_NEWFORM_IMPL}
-
-procedure TConfigurationForm.btnNormalFontClicked(Sender: TObject);
-var
-  f: TfpgString;
-begin
-  f := edtNormalFont.Text;
-  if SelectFontDialog(f) then
-    edtNormalFont.Text := f;
-end;
-
-procedure TConfigurationForm.btnFixedFontClicked(Sender: TObject);
-var
-  f: TfpgString;
-begin
-  f := edtFixedFont.Text;
-  if SelectFontDialog(f) then
-    edtFixedFont.Text := f;
-end;
 
 procedure TConfigurationForm.ConfigurationFormShow(Sender: TObject);
 begin
@@ -164,14 +143,14 @@ End;
 procedure TConfigurationForm.SettingsToGui;
 begin
   // General
-  cbIndexStyle.FocusItem := Ord(Settings.IndexStyle);
+  cbIndexStyle.FocusItem  := Ord(Settings.IndexStyle);
   lbSearchDirs.Items.Assign(Settings.SearchDirectories);
   chkEscapeIPFSymbols.Checked := Settings.IPFTopicSaveAsEscaped;
-  chkStartupHelp.Checked := Settings.StartupHelp;
-  chkOpenTOC.Checked := Settings.OpenWithExpandedContents;
+  chkStartupHelp.Checked  := Settings.StartupHelp;
+  chkOpenTOC.Checked      := Settings.OpenWithExpandedContents;
   // Fonts & Color
-  edtNormalFont.Text := Settings.NormalFont.FontDesc;
-  edtFixedFont.Text := Settings.FixedFont.FontDesc;
+  edtNormalFont.FontDesc  := Settings.NormalFont.FontDesc;
+  edtFixedFont.FontDesc   := Settings.FixedFont.FontDesc;
   UpdateColorPanels;
 end;
 
@@ -185,9 +164,9 @@ begin
   Settings.OpenWithExpandedContents := chkOpenTOC.Checked;
   // Fonts & Color
   Settings.NormalFont.Free;
-  Settings.NormalFont := fpgGetFont(edtNormalFont.Text);
+  Settings.NormalFont := fpgGetFont(edtNormalFont.FontDesc);
   Settings.FixedFont.Free;
-  Settings.FixedFont := fpgGetFont(edtFixedFont.Text);
+  Settings.FixedFont := fpgGetFont(edtFixedFont.FontDesc);
   Settings.Colors[SearchHighlightTextColorIndex] := pnlSearchHighlight.BackgroundColor;
 end;
 
@@ -233,7 +212,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 1;
+    TabOrder := 19;
     OnClick := @btnSaveClick;
   end;
 
@@ -246,7 +225,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 2;
+    TabOrder := 20;
     OnClick := @btnCancelClick;
   end;
 
@@ -270,74 +249,20 @@ begin
   with Label1 do
   begin
     Name := 'Label1';
-    SetPosition(12, 20, 108, 16);
+    SetPosition(12, 20, 108, 19);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Normal Font';
-  end;
-
-  edtNormalFont := TfpgEdit.Create(tsFontsColor);
-  with edtNormalFont do
-  begin
-    Name := 'edtNormalFont';
-    SetPosition(124, 16, 248, 24);
-    Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
-    Hint := '';
-    TabOrder := 1;
-    Text := '';
-    FontDesc := '#Edit1';
-  end;
-
-  btnNormalFont := TfpgButton.Create(tsFontsColor);
-  with btnNormalFont do
-  begin
-    Name := 'btnNormalFont';
-    SetPosition(384, 16, 80, 24);
-    Anchors := [anRight,anTop];
-    Text := 'Select...';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 2;
-    OnClick := @btnNormalFontClicked;
   end;
 
   Label2 := TfpgLabel.Create(tsFontsColor);
   with Label2 do
   begin
     Name := 'Label2';
-    SetPosition(12, 52, 104, 16);
+    SetPosition(12, 52, 104, 19);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Fixed Font';
-  end;
-
-  edtFixedFont := TfpgEdit.Create(tsFontsColor);
-  with edtFixedFont do
-  begin
-    Name := 'edtFixedFont';
-    SetPosition(124, 48, 248, 24);
-    Anchors := [anLeft,anRight,anTop];
-    ExtraHint := '';
-    Hint := '';
-    TabOrder := 4;
-    Text := '';
-    FontDesc := '#Edit1';
-  end;
-
-  btnFixedFont := TfpgButton.Create(tsFontsColor);
-  with btnFixedFont do
-  begin
-    Name := 'btnFixedFont';
-    SetPosition(384, 48, 80, 24);
-    Anchors := [anRight,anTop];
-    Text := 'Select...';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 5;
-    OnClick :=@btnFixedFontClicked;
   end;
 
   btnHelp := TfpgButton.Create(self);
@@ -350,7 +275,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 6;
+    TabOrder := 21;
     HelpType := htContext;
     OnClick := @btnHelpClick;
   end;
@@ -370,20 +295,20 @@ begin
   with cbIndexStyle do
   begin
     Name := 'cbIndexStyle';
-    SetPosition(12, 32, 160, 22);
+    SetPosition(12, 32, 160, 25);
     FontDesc := '#List';
     Hint := '';
     Items.Add('Alphabetical');
     Items.Add('FileOnly');
     Items.Add('Full');
-    TabOrder := 0;
+    TabOrder := 2;
   end;
 
   lblIndexStyle := TfpgLabel.Create(tsGeneral);
   with lblIndexStyle do
   begin
     Name := 'lblIndexStyle';
-    SetPosition(12, 12, 212, 16);
+    SetPosition(12, 11, 296, 19);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Index style';
@@ -393,7 +318,7 @@ begin
   with lblSearchDirs do
   begin
     Name := 'lblSearchDirs';
-    SetPosition(12, 64, 216, 16);
+    SetPosition(12, 63, 308, 19);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Search directories';
@@ -408,7 +333,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 4;
+    TabOrder := 5;
     OnClick :=@btnSearchDirAddClicked;
   end;
 
@@ -421,7 +346,7 @@ begin
     Hint := '';
     HotTrack := False;
     PopupFrame := False;
-    TabOrder := 5;
+    TabOrder := 6;
     Items.Duplicates := dupIgnore;
   end;
 
@@ -434,7 +359,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 5;
+    TabOrder := 7;
   end;
 
   chkEscapeIPFSymbols := TfpgCheckBox.Create(tsGeneral);
@@ -445,7 +370,7 @@ begin
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 6;
+    TabOrder := 8;
     Text := 'Escape symbols when saving topics as IPF text';
   end;
 
@@ -458,7 +383,7 @@ begin
     Checked := True;
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 8;
+    TabOrder := 9;
     Text := 'Show DocView help at startup if no files opened';
   end;
 
@@ -470,7 +395,7 @@ begin
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 9;
+    TabOrder := 10;
     Text := 'Open files with contents expanded';
   end;
 
@@ -483,7 +408,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 8;
+    TabOrder := 17;
     OnClick := @btnSearchHighlightClicked;
   end;
 
@@ -496,8 +421,28 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 9;
+    TabOrder := 18;
     OnClick := @ResetColorsButtonOnClick;
+  end;
+
+  edtFixedFont := TfpgFontEdit.Create(tsFontsColor);
+  with edtFixedFont do
+  begin
+    Name := 'edtFixedFont';
+    SetPosition(124, 48, 340, 27);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '';
+    TabOrder := 15;
+  end;
+
+  edtNormalFont := TfpgFontEdit.Create(tsFontsColor);
+  with edtNormalFont do
+  begin
+    Name := 'edtNormalFont';
+    SetPosition(124, 16, 340, 27);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '';
+    TabOrder := 14;
   end;
 
   {@VFD_BODY_END: ConfigurationForm}
