@@ -92,6 +92,7 @@ type
     DisplayedIndex: TStringList; // duplicate of index listbox, for fast case insensitive searching
     CurrentTopic: TTopic; // so we can get easy access to current topic viewed
     CurrentHistoryIndex: integer;
+    OpenAdditionalFile: boolean;
 
     procedure   btnBackHistClick(Sender: TObject);
     procedure   btnFwdHistClick(Sender: TObject);
@@ -103,6 +104,7 @@ type
     procedure   MainFormDestroy(Sender: TObject);
     procedure   miFileQuitClicked(Sender: TObject);
     procedure   miFileOpenClicked(Sender: TObject);
+    procedure   miFileOpenAdditionalFileClicked(Sender: TObject);
     procedure   miFileOpenSpecialClicked(Sender: TObject);
     procedure   miFileCloseClicked(Sender: TObject);
     procedure   miConfigureClicked(Sender: TObject);
@@ -375,14 +377,23 @@ end;
 
 procedure TMainForm.miFileOpenClicked(Sender: TObject);
 begin
+  OpenAdditionalFile := False;
   FileOpen;
+end;
+
+procedure TMainForm.miFileOpenAdditionalFileClicked(Sender: TObject);
+begin
+  OpenAdditionalFile := True;
+  FileOpen;
+  OpenAdditionalFile := False;
 end;
 
 procedure TMainForm.miFileOpenSpecialClicked(Sender: TObject);
 var
   s: TfpgString;
 begin
-  if fpgInputQuery('Open Special...', 'Enter environment variable to open', s) then
+  OpenAdditionalFile := False;
+  if fpgInputQuery('Open Special...', 'Enter Environment Variable or Directory Path to open', s) then
   begin
     if s <> '' then
       OpenFile(s, '', True);
@@ -1176,7 +1187,8 @@ begin
 
   // Now that we have successfully loaded the new help file(s)
   // close the existing one.
-  CloseFile;
+  if not OpenAdditionalFile then
+    CloseFile;
 
   AssignList(tmpHelpFiles, CurrentOpenFiles );
 
@@ -1771,6 +1783,7 @@ begin
   DisplayedIndex := TStringList.Create;
   CurrentHistoryIndex := -1;
   FHistorySelection := False;
+  OpenAdditionalFile := False;
   { TODO -oGraeme : Make Debug a menu option }
   Debug := False;
 
@@ -2260,6 +2273,7 @@ begin
     Name := 'miFile';
     SetPosition(292, 96, 132, 20);
     AddMenuItem('Open...', '', @miFileOpenClicked);
+    AddMenuItem('Open additional file...', '', @miFileOpenAdditionalFileClicked);
     AddMenuItem('Open Special...', '', @miFileOpenSpecialClicked);
     AddMenuItem('Save current Topic to IPF...', '', @miFileSaveTopicAsIPF);
     AddMenuItem('Close', '', @miFileCloseClicked);
