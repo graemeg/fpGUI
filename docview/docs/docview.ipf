@@ -45,7 +45,7 @@ as native executable for Linux, FreeBSD and Windows. DocView is also available i
 :i1 id=30004.source code
 :i1 id=30007.features planned
 :hp2.Support and Licensing:ehp2.
-:p.DocView is Copyright 2009&endash.2010 by Graeme Geldenhuys. It is also licensed
+:p.DocView is Copyright 2009-2010 by Graeme Geldenhuys. It is also licensed
 under the GNU Public License v2, which means you have the right to obtain the
 source code.
 :p.
@@ -296,62 +296,85 @@ order, you can use the
  buttons on the toolbar. This is one way to treat the help file as a normal book, reading
 through each page.
 :p.
-You can also review the whole table of contents by using &odq.Expand All&cdq. in the
-&odq.View&cdq. menu&per. This expands all the branches of the contents table so you can
-quickly look through it&per. However&comma. it&apos.s usually easier to use
+You can also review the whole table of contents by using "Expand All" in the
+tree view's popup menu. This expands all the branches of the contents table so you can
+quickly look through it. However, it's usually easier to use
 :link reftype=hd refid='search'.Search:elink. or :link reftype=hd
-refid='Index'.Index:elink. for this purpose&per.
+refid='Index'.Index:elink. for this purpose.
 
 .* ************************************************************
 .* Index
 .* ************************************************************
 :h2 res=5 id='index'.Index
-:p.:hp2.About the Index:ehp2.
+:hp2.About the Index:ehp2.
 :p.
-:p.The Index tab contains an alphabetical listing of topics or keywords in the
-help file&per. You can quickly search through it just by typing the first few
-characters of the word you want to look up&per. DocView jumps to the first match
-in the index automatically&per. To view the highlighted topic&comma. press
-enter&per.
+The Index tab contains an alphabetical listing of topics or keywords in the
+help file. You can quickly search through it just by typing the first few
+characters of the word you want to look up. DocView jumps to the first match
+in the index automatically. To view the highlighted topic, press
+enter.
 :note text='Note:'.
-:p.Help files may or may not include an &odq.official&cdq. index&per. The index is
-manually created by the author&comma. so &lpar.for original View&rpar. it&apos.s
-usefulness is strictly dependent on how much work the author put into it&per.
-There may not even be one&per.
-:p.However&comma. a useful index can be provided simply by listing the titles of
-each topic alphabetically&comma. and this is what DocView does&per. It then
-merges the original index &lpar.if any&rpar. with the list of topic titles&per.
-:p.If for some reason you don&apos.t like this&comma. you can turn it off in
-Tools &endash. Options &endash. Index tab&per.
+Help files may or may not include an "official" index. The index is
+manually created by the author, so (for the original OS/2 View program) it's
+usefulness is strictly dependent on how much work the author put into it.
+There may not even be Index information in the help file.
+:p.
+However, a useful index can be provided simply by listing the titles of
+each topic alphabetically, and this is what DocView does. It then
+merges the original index (if any) with the list of topic titles.
+:p.
+If for some reason you don't like this, you can change this behaviour in
+"Settings - Options - General" tab. There are three options to choose from.
+:dl tsize=16.
+:dt.Alphabetical
+:dd.All topics from the table of content are sorted and displayed as an Index.
+:dt.File Only
+:dd.Only the "official" index created by the author of the help file is used. Some
+help files don't include an official index, so then the Index listbox will be empty.
+:dt.Full
+:dd.Both the topics and the official index are combined to display a larger and
+more useful Index to the user. This is the default option.
+:edl.
 
 .* ************************************************************
 .* Search
 .* ************************************************************
-:h2 res=6 id='search'.
-Search
-:p.:hp2.Searching:ehp2.
+:h2 res=6 id='search'.Search
+:hp2.Searching:ehp2.
 :p.
-:p.Searching is a quick way to find information&comma. when you don&apos.t know
-where to start&per. Simply go to the Search tab&comma. type some related words
-and click the Search button&per.
-You&apos.ll see a listing of all topics containing that word&comma. or words
-like it&comma. with the best matches at the top&per. The best match will be
-displayed automatically&per.
-:p.Words that matches your search are highlighted in the topic&per.
-:p.:hp2.Global search:ehp2.
-:p.You can also search all help files on your system using the :link reftype=hd
-refid='GlobalSearch'.global search:elink. in Tools &endash. Search all Help
-Files&per.
-:p.:hp2.Phrase search:ehp2.
-:p.If you want to search for a phrase made up of more than one word&comma. put
-double quotes around it&comma. for example &odq.os&slash.2 warp&cdq.&per.
-:p.:hp2.Matching features:ehp2.
-:p.DocView allows you finer control of searching&per.
-:p.&plus. indicates a word that :hp2.must:ehp2. be matched
-:p.&endash. indicates a word that must :hp2.not:ehp2. be matched
-:p.DocView always does partial word matches&per. That is&comma. if you search
-for &odq.win&cdq. DocView will also find &odq.window&cdq. and &odq.showing&cdq.&per. However&comma. the
-better the match is the higher the rank will be&per.
+Searching is a quick way to find information, when you don't know
+where to start. Simply go to the Search tab, type some related words
+and press Enter, or click the Go button.
+You'll see a listing of all topics containing that word, or words
+like it, with the best matches at the top. The best match will be
+displayed automatically.
+:p.
+Words that matches your search are highlighted in the topic.
+.*  TODO
+.*  :p.
+.*  :hp2.Global search:ehp2.
+.*  :p.You can also search all help files on your system using the :link reftype=hd
+.*  refid='GlobalSearch'.global search:elink. in "Settings - Search all Help
+.*  Files".
+:p.
+:hp2.Phrase search:ehp2.
+:p.
+If you want to search for a phrase made up of more than one word, put
+double quotes around it, for example "os/2 warp".
+:p.
+:hp2.Matching features:ehp2.
+:p.
+DocView allows you finer control of searching.
+:p.
++ (plus sign) indicates a word that :hp2.must:ehp2. be matched
+.br
+- (minus sign) indicates a word that must :hp2.not:ehp2. be matched
+:p.
+To make searching even more useful, DocView implements a special search algorithm
+which does partial word matches. That is, if you search for "win", DocView will
+also find "window", "following", "showing" etc. However, the better the match is the higher
+the rank will be. The search rank is displayed in square brackets behind each
+search result. Searches are also :hp2.not:ehp2. case-sensitive.
 :p.:hp2.How DocView ranks results:ehp2.
 :p.DocView ranks matching topics by various means&colon.
 :p.&endash. a closer match to a full word
