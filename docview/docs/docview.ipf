@@ -1,12 +1,8 @@
 :userdoc.
 :docprof toc=123456.
-:title.NewView Help
+:title.fpGUI DocView Help
 .* ************************************************************
-.* Subject: Help for NewView
-.* Version:
-.* Copyright: Copyright 2004 Aaron Lawrence
-.* Copyright: Copyright 2006-2007 Ronald Brill
-.* Author: Aaron Lawrence
+.* Subject: Help for DocView
 .* ************************************************************
 .*
 .*
@@ -15,109 +11,134 @@
 .* ************************************************************
 :h1 res=30000 id='Introduction'.Introduction
 :i1 id=30001.support
-:p.:artwork runin name='images\NewView.bmp'.
-:hp2.Welcome to NewView&xclm.:ehp2.
+.*  :artwork runin name='images\DocView.bmp'.
+:hp2.Welcome to DocView!:ehp2.
 :p.
-:p.NewView is a program for reading OS&slash.2 &lpar.or eComStation&rpar. Help
-Files&per.
+DocView is a program for reading fpGUI or OS/2 (aka eComStation) Help
+Files. Both the INF and OS/2 HLP file formats can be read.
 :p.:link reftype=hd refid='Support'.Support and Licensing:elink.
-:p.:link reftype=hd refid='Using'.Using NewView:elink.
-:p.:hp1.To stop this file appearing when you start NewView without specifying a
-help file&comma. see Tools &endash. Options &endash. General tab&per.:ehp1.
-:p.:hp2.History:ehp2.
-:p.NewView replaces the original IBM program supplied with OS&slash.2&per.
-:p.It improves upon many aspects of View&comma. with a modern&comma. easy to use
-interface&comma. more options&comma. and new features that View simply
-didn&apos.t have&per.
+:p.:link reftype=hd refid='Using'.Using DocView:elink.
+:p.:hp1.To stop this file appearing when you start DocView without specifying a
+help file, see "Tools - Options - General" tab.:ehp1.
 :p.
+:hp2.History:ehp2.
+:p.
+DocView was originally based on the OS/2 NewView program. It was ported from
+the Sibyl development environment, to the fpGUI Toolkit and the Free Pascal Compiler. Since then the code
+and features of DocView has diverged.
+:p.
+It improves upon many aspects of the origin IBM View program, with a modern,
+easy to use interface, more options, and new features that View simply
+didn't have. And don't forget, DocVIew is also cross platform - currently available
+as native executable for Linux, FreeBSD and Windows. DocView is also available in
+32-bit or 64-bit.
+
+
 .* ************************************************************
 .* Support and Licensing
 .* ************************************************************
-:h2 res=1 id='Support'.
-Support and Licensing
+:h2 res=1 id='Support'.Support and Licensing
 :i1 id=30002.license
 :i2 refid=30001.Support and Licensing
 :i2 refid=30001.Introduction
 :i1 id=30003.bugs
 :i1 id=30004.source code
-:p.:hp2.Support and Licensing:ehp2.
+:i1 id=30007.features planned
+:hp2.Support and Licensing:ehp2.
+:p.DocView is Copyright 2009&endash.2010 by Graeme Geldenhuys. It is also licensed
+under the GNU Public License v2, which means you have the right to obtain the
+source code.
 :p.
-:p.NewView is Copyright 1999&endash.2006 Aaron Lawrence&per. It is also licensed
-under the GNU Public License&comma. which means you have the right to obtain the
-source code&per.
-:p.Since 2006 Ronald Brill maintains the product&per.
-.br
-NewView is a Netlabs project&per.
-:p.See the Readme&per.txt for more technical details&per.
-:p.See the Changes&per.txt file for a history of changes to NewView&per.
-:p.If you find NewView helpful&comma. please email me and&slash.or make a
-donation to support further development&per. It&apos.s nice to hear from
-you&xclm.
+DocView is part of the fpGUI Toolkit project and is the default help viewer for
+any fpGUI based applications. Source code for DocView is available in the fpGUI
+git repository on SourceForge.net, inside the :hp1.docview:ehp1. directory.
+:p.
+If you find DocView helpful, please email me and/or make a
+donation to support further development. It's nice to hear from
+you!
 :ul.
-:li.Suggestions&comma. compliments or bug reports http&colon.&slash.&slash.svn&per.netlabs&per.org&slash.newview
-:li.Translate NewView to your language&per.
-:li.A donation to Netlabs http&colon.&slash.&slash.www&per.mensys&per.nl
+:li.Project is hosted on SourceForge.net at http://sourceforge.net/projects/fpgui/
+:li.Suggestions, compliments or bug reports can be left on the fpGUI support newsgroups.
+The news server is accessible via NNTP at news://opensoft.homeip.net/
+.br
+There is also a web interface to the NNTP news server for those behind company
+firewalls. http://opensoft.homeip.net/webnews/
+:li.Translate DocView to your language.
+:li.A donation to fpGUI development. You can contact me via email at: graemeg@gmail.com
 :eul.
 :p.:hp2.Reporting Bugs:ehp2.
-:p.If you need to report a crash or other problem&comma. then be as specific as
-possible about what files were being used&comma. what you were doing&comma.
-etc&per. If one is available&comma. PLEASE include the newview&per.log&per. The
-log file will be EITHER
-.br
- &endash. in the same directory as NewView itself
-.br
- &endash. in the folder set by LOGFILES environment variable &lpar.typically eCS
-1&per.1&plus.&rpar.
-.br
-If it is specific to a particular help file&comma. then send them to me&comma.
-unless they&apos.re large &lpar.bigger than 1MB&rpar.&per.
-:p.Most of the following information is in the newview&per.log file&comma. but
-it would be helpful if you could include it for verification&colon.
+:p.If you need to report a crash or other problem, then be as specific as
+possible about what files were being used, what you were doing,
+etc. If at all possible, compile DocView with debug information and supply a
+backtrace. This will greatly help me fix problems.
+:p.
+If it is specific to a particular help file, then send them to me via email.
+:p.
+It would be helpful if you could include the following information with your
+bug report:
 :ul.
-:li.NewView version &lpar.Help &endash. Product Information&rpar.
-:li.The filenames of the help files&per.
-:li.A screenshot may be useful&comma. if the problem is an incorrect or corrupt
-display&per.
+:li.DocView version (Help - Product Information)
+:li.The file names of the help files you have problems with.
+:li.A screenshot may be useful, if the problem is an incorrect or corrupt
+display.
 :eul.
-:p.:hp2.Why doesn&apos.t my help file work properly?:ehp2.
+:p.:hp2.Why doesn't my help file work properly?:ehp2.
 :p.Some of the less used features of the original View program are not
-implemented&per. This is either because I have not got around to it&comma. or
-because they are simply not worth the time&per. Examples include
-metafiles&comma. index synonyms&comma. the entire application control API&comma.
-and so on&per.
-:p.Unfortunately&comma. it seems that at least one developer has used every one
-of these features&comma. so you may find an occasional file that doesn&apos.t
-load or doesn&apos.t work properly&per.
-.*
-.*
+implemented. This is either because I have not got around to it, or
+because they are simply not worth the time. Examples include
+metafiles, index synonyms, application control API (like toolbar button customisation),
+MDI style window management and so on.
+:p.Unfortunately, IBM seems to have used every one of these features in there INF
+documents, so you may find an occasional file that doesn't
+load or doesn't work properly.
+:p.:hp2.Features still planned?:ehp2.
+:ul.
+:li.Image support. The Ric Text View component can already handle images, I am only struggling
+to decode the images inside INF help files. This should hopefully be fixed soon.
+:li.Bookmark support
+:li.Annotations of help files
+:li.Printing support
+:li.Cross-file linking. Clicking a hyperlink that automatically opens another
+INF help file and goes to the correct topic. DocView already supports loading
+multiple files, so this is almost complete.
+:li.Some optimization of the Rich Text View component. Better startup time, improved
+text wrapping and font substitution support.
+:eul.
+
+
 .* ************************************************************
-.* Using NewView
+.* Using DocView
 .* ************************************************************
-:h1 res=2 id='Using'.
-Using NewView
-:p.:hp2.Using NewView:ehp2.
-:p.Once you have :link reftype=hd refid='OpeningFiles'.opened a
-file:elink.&comma. you can read it in various ways&per.
-:p.You can read the :link reftype=hd refid='contents'.table of
-contents:elink.&comma. use the :link reftype=hd refid='Index'.alphabetical
-index:elink.&comma. or :link reftype=hd refid='search'.search:elink.&per.
-:p.To simply read the help file like a paper book&comma. use the &odq.Previous&cdq.
-:artwork runin name='images\previous.bmp'.
- and &odq.Next&cdq.
-:artwork runin name='images\next.bmp'.
- buttons to work your way through all the topics&per.
-:p.You can also use the help file like web pages&comma. using &odq.Back&cdq.
-:artwork runin name='images\back.bmp'.
- and &odq.Forward&cdq.
-:artwork runin name='images\forward.bmp'.
- buttons to go back to wherever you were before&comma. or to retread your
-steps&per.
-:p.Colours and some of the behaviour of NewView can be adjusted from the Tools
-&endash. Options menu&per.
-:p.You can also :link reftype=hd refid='notes'.annotate:elink. or :link
-reftype=hd refid='bookmarks'.bookmark:elink. topics&per.
-.*
-.*
+:h1 res=2 id='Using'.Using DocView
+:hp2.Using DocView:ehp2.
+:p.
+Once you have :link reftype=hd refid='OpeningFiles'.opened a
+file:elink., you can read it in various ways.
+:p.
+You can read the :link reftype=hd refid='contents'.table of
+contents:elink., use the :link reftype=hd refid='Index'.alphabetical
+index:elink., or :link reftype=hd refid='search'.search:elink..
+:p.
+To simply read the help file like a paper book, use the "Previous"
+.*  :artwork runin name='images\previous.bmp'.
+ and "Next"
+.*  :artwork runin name='images\next.bmp'.
+ buttons to work your way through all the topics. They are the Up and Down arrow
+ buttons on the toolbar.
+:p.You can also use the help file like web pages, using "Back"
+.*  :artwork runin name='images\back.bmp'.
+ and "Forward"
+.*  :artwork runin name='images\forward.bmp'.
+ buttons to go back to wherever you were before, or to retrace your
+steps. They are the Left and Right arrow buttons on the toolbar.
+:p.
+Colours and some of the behaviour of DocView can be adjusted from the "Tools
+- Options" menu.
+.* TODO
+.* :p.You can also :link reftype=hd refid='notes'.annotate:elink. or :link
+.*reftype=hd refid='bookmarks'.bookmark:elink. topics.
+
+
 .* ************************************************************
 .* Opening Help File
 .* ************************************************************
@@ -126,52 +147,65 @@ Opening Files
 :i1 id=30005.open
 :p.:hp2.Opening Help Files:ehp2.
 :p.
-:p.To open a help file&comma. you can use any of the following&colon.
-:p.&endash. Double&endash.click a :link reftype=hd refid='HelpIcons'.help
-icon:elink. that is already set up
-:p.&endash. Type &odq.view :hp1.filename:ehp1.&cdq. from the :link reftype=hd
-refid='CommandLine'.command line:elink.
-:p.&endash. Click the Open button
-:artwork runin name='images\open.bmp'.
- from within NewView
-:p.&endash. Reload a recently viewed file from the &odq.File&cdq. menu
-:p.&endash. Drag and drop a Help file from the desktop
-:p.Once the file is loaded&comma. you should see the :link reftype=hd
-refid='contents'.table of contents:elink. and the first topic&per.
-:note text='Note:'.This assumes you installed NewView as a replacement
-for original View&per. If you didn&apos.t then existing help icons and the
-command line may behave differently&per.
-:p.:hp2.Loading Multiple Files Together:ehp2.
-:p.NewView can load multiple files at once&comma. presenting them as if they
-were one book&comma. and read environment variables for filenames&per.
-:p.For example&comma. with the OS&slash.2 Developer&apos.s Toolkit
-documentation&colon.
-.br
-  NewView cpref
-.br
-loads the &odq.Control Program Guide and Reference&cdq.&per. CPREF is an environment
-variable set in config&per.sys&comma. consisting of &odq.CP1&plus.CP2&plus.CP3&cdq.
-which tells NewView &lpar.or View&rpar. to load the help files CP1&comma. CP2
-and CP3&per. The files are searched for in the path specified by two :link
+To open a help file, you can use any of the following:
+:ul.
+:li.Double-click a :link reftype=hd refid='HelpIcons'.help icon:elink. that is
+already set up. The DocView executable needs to be associated with INF files in
+your desktop environment.
+:li.Type "docview :hp1.filename:ehp1." from the :link reftype=hd
+refid='CommandLine'.command line:elink..
+:li.Click the Open button
+.*  :artwork runin name='images\open.bmp'.
+ from within DocView, or the "File - Open" menu item.
+:li.Click the "File - Open Special" to load help files based on an Environmnt Variable
+that was previous set.
+:li.Reload a recently viewed file from the "File - Open Recent" menu.
+:eul.
+:p.
+Once the file is loaded, you should see the :link reftype=hd
+refid='contents'.table of contents:elink. and the first help topic.
+:p.
+:hp2.Loading Multiple Files Together:ehp2.
+:p.
+DocView can load multiple files at once, presenting them as if they
+were one book, and read environment variables for filenames.
+:p.
+For example, on my system I can do the following:
+:xmp.
+  docview FPCHELP
+:exmp.
+which loads the whole Free Pascal help library on my system. FPCHELP is an environment
+variable set in ~/.profile (Linux) or config.sys (Windows) consisting of "rtl+fcl+ref"
+which tells DocView to load the help files rtl.inf, fcl.inf and ref.inf. The
+files are searched for in the path specified by two :link
 reftype=hd refid='L_EnvironmentVariables'.environment
-variables:elink.&per.&asterisk.
-:p.The files are all loaded and effectively appended to each other&per.
-:p.Being able to load multiple files like this can be helpful for various
-reasons&per. For example&comma. 4OS&slash.2 &lpar.a CMD&per.EXE
-replacement&rpar. uses it to add it&apos.s own help on top of the original CMD
-help&per. You can do it yourself with any files you like&per.
-:p.You can load multiple files in the Open File dialog by using Ctrl or Shift to
-select multiple files&per.
-:p.When you click a link to a different help file&comma. NewView loads the other
-file without closing your current files&per.
-:p.At any time&comma. you can find out what files are open by using File
-&endash. Information&per.
-:p.:hp2.Loading Additional Files:ehp2.
-:p.You can tick the &odq.Keep current files open&cdq. checkbox in the Open File
-dialog&comma. and NewView will open the files you have selected without closing
+variables:elink..
+:p.
+The files are all loaded and effectively appended to each other.
+:p.
+Being able to load multiple files like this can be helpful for various
+reasons. For example, I use this method to integrate DocView with the various IDE's
+(Integrated Development Environments) I use. I can then easily search for help on
+language keywords, source code classes or units etc.
+:p.
+.* TODO
+Soon you will be able to load multiple files in the Open File dialog by using Ctrl or Shift to
+select multiple files.
+.* TODO
+.* :p.
+.* When you click a link to a different help file&comma. DocView loads the other
+.* file without closing your current files&per.
+:p.
+At any time, you can find out what files are open by using the "Help - Show help
+file header info" menu option.
+:p.
+:hp2.Loading Additional Files:ehp2.
+:p.
+You can tick the &odq.Keep current files open&cdq. checkbox in the Open File
+dialog&comma. and DocView will open the files you have selected without closing
 the currently opened files&per.
 :p.:hp2.Drag and Drop:ehp2.
-:p.You can drag and drop &per.INF or &per.HLP files onto NewView and they will
+:p.You can drag and drop &per.INF or &per.HLP files onto DocView and they will
 be opened&per. If you hold down the Shift key&comma. they will be opened without
 closing the current files&per.
 :p.You can drop files onto any of the main content areas&comma. such as the
@@ -209,7 +243,7 @@ file in different ways&per.
 :p.:link reftype=hd refid='search'.Search:elink.
 :p.:link reftype=hd refid='notes'.Notes:elink.
 :p.You can turn this panel off to get more space&comma. with the button
-:artwork runin name='images\navigator.bmp'. or by selecting View
+.*  :artwork runin name='images\navigator.bmp'. or by selecting View
 &endash. Show Left Panel from the menu&comma. or pressing Alt&plus.P&per. Do the
 same to turn it on again&per.
 :p.You can stop the navigation panel from appearing when a help file is opened
@@ -235,9 +269,9 @@ move through the contents by using the arrow keys&per.
 :p.To move through :hp2.all:ehp2. topics in the contents tree&comma. in
 order&comma. you can use Ctrl &plus. Up and Ctrl &plus. Down&comma. or the
 &odq.Previous&cdq.
-:artwork runin name='images\previous.bmp'.
+.*  :artwork runin name='images\previous.bmp'.
  and &odq.Next&cdq.
-:artwork runin name='images\next.bmp'.
+.*  :artwork runin name='images\next.bmp'.
  buttons&per. This is one way to treat the file as a normal book&comma. reading
 through each page&per.
 :p.You can also review the whole table of contents by using &odq.Expand All&cdq. in the
@@ -254,7 +288,7 @@ Index
 :p.
 :p.The Index tab contains an alphabetical listing of topics or keywords in the
 help file&per. You can quickly search through it just by typing the first few
-characters of the word you want to look up&per. NewView jumps to the first match
+characters of the word you want to look up&per. DocView jumps to the first match
 in the index automatically&per. To view the highlighted topic&comma. press
 enter&per.
 :note text='Note:'.
@@ -263,7 +297,7 @@ manually created by the author&comma. so &lpar.for original View&rpar. it&apos.s
 usefulness is strictly dependent on how much work the author put into it&per.
 There may not even be one&per.
 :p.However&comma. a useful index can be provided simply by listing the titles of
-each topic alphabetically&comma. and this is what NewView does&per. It then
+each topic alphabetically&comma. and this is what DocView does&per. It then
 merges the original index &lpar.if any&rpar. with the list of topic titles&per.
 :p.If for some reason you don&apos.t like this&comma. you can turn it off in
 Tools &endash. Options &endash. Index tab&per.
@@ -289,14 +323,14 @@ Files&per.
 :p.If you want to search for a phrase made up of more than one word&comma. put
 double quotes around it&comma. for example &odq.os&slash.2 warp&cdq.&per.
 :p.:hp2.Matching features:ehp2.
-:p.NewView allows you finer control of searching&per.
+:p.DocView allows you finer control of searching&per.
 :p.&plus. indicates a word that :hp2.must:ehp2. be matched
 :p.&endash. indicates a word that must :hp2.not:ehp2. be matched
-:p.NewView always does partial word matches&per. That is&comma. if you search
-for &odq.win&cdq. NewView will also find &odq.window&cdq. and &odq.showing&cdq.&per. However&comma. the
+:p.DocView always does partial word matches&per. That is&comma. if you search
+for &odq.win&cdq. DocView will also find &odq.window&cdq. and &odq.showing&cdq.&per. However&comma. the
 better the match is the higher the rank will be&per.
-:p.:hp2.How NewView ranks results:ehp2.
-:p.NewView ranks matching topics by various means&colon.
+:p.:hp2.How DocView ranks results:ehp2.
+:p.DocView ranks matching topics by various means&colon.
 :p.&endash. a closer match to a full word
 :p.&endash. number of matching words in a topic
 :p.&endash. matches within the title
@@ -308,11 +342,11 @@ better the match is the higher the rank will be&per.
 Notes
 :p.:hp2.Adding and Using Notes:ehp2.
 :p.
-:p.NewView allows you to add notes &lpar.annotations&rpar. to your help
+:p.DocView allows you to add notes &lpar.annotations&rpar. to your help
 files&per.
 :p.To add a note&comma. simply click where you want to make a note and click the
 &odq.Note&cdq. button
-:artwork runin name='images\note.bmp'.
+.*  :artwork runin name='images\note.bmp'.
 &comma. then type your text and click OK&per. The text will be inserted into the
 help topic with a different color &lpar.default is green&semi. you can change
 this in Tools &endash. Options &endash. Colors&rpar.&per.
@@ -337,7 +371,7 @@ Global Search
 :p.:hp2.Global search:ehp2.
 :p.You can search all help files on your system&comma. by clicking the Search
 All button
-:artwork runin name='images\search.bmp'.
+.*  :artwork runin name='images\search.bmp'.
 &comma. using Tools &endash. Search all Help Files in the menu&comma. or
 pressing Ctrl&plus.S&per.
 :p.This search works similarly to :link reftype=hd refid='search'.searching
@@ -345,7 +379,7 @@ within a file:elink.&comma. but it also tells you what help file the results
 were found in&per.
 :p.These searches may take some time&comma. depending on what you search
 for&per. You can stop the search at any time&per.
-:p.:hp2.Where NewView searches:ehp2.
+:p.:hp2.Where DocView searches:ehp2.
 :p.The default is to search for help files in the help paths&comma. which are
 specified by the BOOKSHELF and HELP :link reftype=hd
 refid='L_EnvironmentVariables'.environment variables:elink.&per.
@@ -400,9 +434,9 @@ subdirectories&per.
 Bookmarks
 :p.:hp2.Bookmarks:ehp2.
 :p.
-:p.NewView allows you to bookmark particular topics within the current help
+:p.DocView allows you to bookmark particular topics within the current help
 file&per. Simply click the bookmark button
-:artwork runin name='images\bookmark.bmp'.
+.*  :artwork runin name='images\bookmark.bmp'.
  to add the current topic as a bookmark&per.
 :p.To jump to a bookmark&comma. go to the &odq.Bookmarks&cdq. menu&comma. and click on
 the bookmark you want to open&per.
@@ -411,7 +445,7 @@ the &odq.Bookmarks&cdq. menu&per. This window can remain open while you read&com
 that you can quickly look through your bookmarks&per.
 :p.
 :note text='Note:'.
-:p.NewView bookmarks remember all the topic windows that are open&comma. if
+:p.DocView bookmarks remember all the topic windows that are open&comma. if
 there is more than one&per.
 :p.Bookmarks are saved in a file with the extension &per.bmk&comma. in the same
 directory as the help file they are for&per.
@@ -424,9 +458,9 @@ directory as the help file they are for&per.
 Internet Links
 :p.:hp2.Internet Links:ehp2.
 :p.When you click a web URL like
-http&colon.&slash.&slash.www&per.google&per.com&comma. NewView launches your
+http&colon.&slash.&slash.www&per.google&per.com&comma. DocView launches your
 default web browser&per.
-:p.This web browser is specified by operating system settings&comma. not NewView
+:p.This web browser is specified by operating system settings&comma. not DocView
 itself&per. To configure it&comma. you can open a URL object on the
 desktop&comma. edit the browser path in the :hp2.Browser:ehp2. tab&comma. then
 click Set Default&per. Alternatively&comma. download the utility ConfigApps from
@@ -443,7 +477,7 @@ these links&per.
 :p.The original View had no understanding of URL or email links&comma. so the
 only way to implement them was a link to&comma. for example&comma.
 &odq.netscape&per.exe&cdq. with the correct parameters&per.
-:p.NewView translates program links to &odq.netscape&cdq.&comma. &odq.explore&cdq. or &odq.mozilla&cdq.
+:p.DocView translates program links to &odq.netscape&cdq.&comma. &odq.explore&cdq. or &odq.mozilla&cdq.
 into links to the default browser&per.
 :p.It also auto&endash.detects URLs in the forms&colon.
 :p. http&colon.&slash.&slash.x  https&colon.&slash.&slash.x
@@ -455,7 +489,7 @@ prefix&colon.
 :p. ftp&per.a&per.b &endash. ftp
 :p. a&atsign.b&per.c &endash. email
 :p.where a&comma. b and c are any alphanumeric string&per.
-:p.You don&apos.t need to do anything for NewView to recognise these&per.
+:p.You don&apos.t need to do anything for DocView to recognise these&per.
 .*
 .*
 .* ************************************************************
@@ -464,17 +498,17 @@ prefix&colon.
 :h1 res=9 id='CommandLine'.
 Command Line Parameters
 :p.:hp2.Command Line Parameters:ehp2.
-:p.When you run NewView from the command line you can supply various
+:p.When you run DocView from the command line you can supply various
 parameters&per. None of them are required&per.
 :p.
-:p.:hp2.NewView &lbracket.options&rbracket. &lbracket.&lt.filename&gt.
+:p.:hp2.DocView &lbracket.options&rbracket. &lbracket.&lt.filename&gt.
 &lbracket.&lt.search text&gt.&rbracket.&rbracket.:ehp2.
-:p.If NewView is installed as a replacement for view&comma. then the command
-starts with view instead of newview&per.
+:p.If DocView is installed as a replacement for view&comma. then the command
+starts with view instead of DocView&per.
 :p.:link reftype=hd refid='CommandLineExamples'.Examples:elink.
 .*
 :p.:hp2.&lt.filename&gt.:ehp2.
-:p.The file for NewView to load&per. You can load multiple files at once by
+:p.The file for DocView to load&per. You can load multiple files at once by
 using filename1&plus.filename2 etc&per.
 .br
 If a path isn&apos.t specified&comma. then the files are searched for in the
@@ -502,16 +536,16 @@ refid='search'.serach navigation panel:elink.&per.
 :lm margin=4.
 To search for copy in the whole cmdref document you can call
 :xmp.
-  newview &slash.s cmdref copy
+  DocView &slash.s cmdref copy
 :exmp.
-NewView is clever enought to handle multiple words (like the :link reftype=hd
+DocView is clever enought to handle multiple words (like the :link reftype=hd
 refid='search'.serach navigation panel:elink.)&per. This is a OR search&per.
 :xmp.
-  newview &slash.s cmdref net access
+  DocView &slash.s cmdref net access
 :exmp.
 To perform a AND search enclose the search phrase in double quotes&per.
 :xmp.
-  newview &slash.s cmdref &odq.net access&cdq.
+  DocView &slash.s cmdref &odq.net access&cdq.
 :exmp.
 :lm margin=1.
 .*
@@ -523,12 +557,12 @@ given text&comma. on all the help files in your system&per.
 :lm margin=4.
 To search for copy in all help files use
 :xmp.
-  newview &slash.g copy
+  DocView &slash.g copy
 :exmp.
 Provide the file name as first parameter if you like to open a help file
 before the search starts.
 :xmp.
-  newview &slash.g cmdref copy
+  DocView &slash.g cmdref copy
 :exmp.
 :lm margin=1.
 .*
@@ -568,7 +602,7 @@ developers&comma. but can be used for any purpose&per.
 :p.Loads the specified language&per. Overrides the default chosen based on the
 LANG environment variable&per. For example&comma.
 :xmp.
-  newview cmdref &slash.lang&colon.en
+  DocView cmdref &slash.lang&colon.en
 :exmp.
 loads English&per. See readme&per.txt for more information&per.
 :p.:hp2.&slash.pos&colon.&lt.left&gt.&comma.&lt.bottom&gt.&comma.&lt.width&gt.&comma.&lt.height&gt.:ehp2.
@@ -576,11 +610,11 @@ loads English&per. See readme&per.txt for more information&per.
 must be given&per. Put a :hp2.P:ehp2. after a number to specify a
 percentage&per. For example&colon.
 :xmp.
-  newview &slash.pos&colon.10P&comma.10P&comma.80P&comma.80P
+  DocView &slash.pos&colon.10P&comma.10P&comma.80P&comma.80P
 :exmp.
 :p.makes the window centered and 80&percent. of the screen size&per.
 :p.:hp2.&slash.title&colon.&lt.window title&gt.:ehp2.
-:p.Sets the title of the NewView window to the specified text&comma. overriding
+:p.Sets the title of the DocView window to the specified text&comma. overriding
 whatever appears in the help file&per. The text &odq.Help &endash.  &cdq. will always be
 inserted in front of the specified text&comma. unless the specified text is
 &odq.help&cdq.&comma. in which case the title will simply become &odq.Help&cdq.&per. This is to
@@ -588,7 +622,7 @@ make sure that help windows are always obvious as such in the window list&per.
 :p.If you need to specify multiple words&comma. surround the entire option with
 quotes&comma. for example&colon.
 :xmp.
-  newview cmdref &odq.&slash.title&colon.Command Line Help&cdq.
+  DocView cmdref &odq.&slash.title&colon.Command Line Help&cdq.
 :exmp.
 .* ************************************************************
 .* Command Line Examples
@@ -597,8 +631,8 @@ quotes&comma. for example&colon.
 Command Line Examples
 :p.:hp2.Command Line Examples:ehp2.
 .*
-:p.The following examples assume that newview is installed as a complete
-replacement and therefore view is actually newview&per.
+:p.The following examples assume that DocView is installed as a complete
+replacement and therefore view is actually DocView&per.
 :p.:hp2.view cmdref:ehp2.
 :lm margin=4.
 :p.Open the file cmdref&per.inf &lpar.OS&slash.2 Command Reference&rpar. from
@@ -701,7 +735,7 @@ The additional shortcuts are&colon.
 :p.
 :p.:hp2.Ctrl&plus.M:ehp2. Add note at cursor position
 :p.
-:p.:hp2.F1:ehp2. Help for NewView
+:p.:hp2.F1:ehp2. Help for DocView
 .*
 .*
 .* ************************************************************
@@ -713,7 +747,7 @@ Environment Variables
 :p.
 :p.Both the :hp2.BOOKSHELF:ehp2. and :hp2.HELP:ehp2. environment variables
 define paths &lpar.lists of directories&rpar. for searching for help files&per.
-NewView uses both paths without distinction&per.
+DocView uses both paths without distinction&per.
 :p.These paths are searched when you&colon.
 :p.o specify a help file without a path on the command line
 :p.o use the File &endash. Open Special&per.&per.&per. menu item
@@ -723,9 +757,9 @@ NewView uses both paths without distinction&per.
 paths&comma. if you also want old view to be able to find the files&per.
 :p.:hp2.Other environment variables:ehp2.
 :p.The :hp2.LANG:ehp2. environment variable is examined to decide the default
-language that NewView will be displayed in&per. &lpar.Overridden by the
+language that DocView will be displayed in&per. &lpar.Overridden by the
 &slash.lang :link reftype=hd refid='AdvancedParameters'.command line
-parameter:elink.&per.&rpar. See the newview readme&per.txt for more information
+parameter:elink.&per.&rpar. See the DocView readme&per.txt for more information
 about languages&per.
 :p.The directory defined in :hp2.LOGFILES:ehp2. is used for logging crashes or
 other information&per.
@@ -776,13 +810,13 @@ IPF format&per. Free&per.
 :p.o HyperMake
 &lpar.http&colon.&slash.&slash.www&per.hypermake&per.com&rpar.&per.
 Similar&comma. but can also produce Windows Help and HTML&per.
-:p.o Sibyl &lpar.which NewView was created with&rpar. comes with an IPF
+:p.o Sibyl &lpar.which DocView was created with&rpar. comes with an IPF
 preprocessor&per.
 :p.o IPFEditor from PCS
 &lpar.http&colon.&slash.&slash.www&per.pcs&endash.soft&per.com&slash.productipfe212&per.htm
 .br
 &rpar.&per. Probably the most complete&comma. but significant cost&per.
-Note&colon. NewView doesn&apos.t support everything IPFE can do&xclm.
+Note&colon. DocView doesn&apos.t support everything IPFE can do&xclm.
 .br
 In the past there were many other options&per. Those listed should still be
 available and have some support&per.
@@ -798,7 +832,7 @@ resource ID&comma. either directly using the HM&us.DISPLAY&us.HELP
 message&comma. or indirectly via help tables added to their resources&comma.
 which PM automatically handles&per. The resource ID is stored in a table inside
 the help file&per.
-:p.For document authors&comma. NewView offers the ability to see and find
+:p.For document authors&comma. DocView offers the ability to see and find
 resource IDs&per.
 :p.:hp2.Finding by Resource ID:ehp2.
 :p.Use Tools &endash. Find Resource ID to search for a specified resource ID in
@@ -817,6 +851,6 @@ Topic Names
 help topics from within their application&comma. using the HM&us.DISPLAY&us.HELP
 message with parameter 2 being HM&us.PANELNAME&per.
 :p.These are not so often used&per.
-:p.NewView can find a particular topic name&comma. using Tools &endash. Find
+:p.DocView can find a particular topic name&comma. using Tools &endash. Find
 Topic Name&per.
 :euserdoc.
