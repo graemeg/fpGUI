@@ -1,12 +1,8 @@
-Unit SettingsUnit;
+unit SettingsUnit;
 
 {$mode objfpc}{$H+}
 
-// NewView - a new OS/2 Help Viewer
-// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
-// This software is released under the Gnu Public License - see readme.txt
-
-Interface
+interface
 
 // Defines settings (options) in a record and contains functions
 // for loading and saving them to ini file.
@@ -80,12 +76,13 @@ Type
   TToolbarStyle = ( tsNone, tsImages, tsText, tsImagesAndText );
   TGlobalSearchLocation = ( gsHelpPaths, gsFixedDrives, gsSelectedHelpPaths, gsCustom );
 
+
   TMRUItem = class(TObject)
   public
     Title: string;
     Filenames: TStringList;
     constructor Create;
-    destructor Destroy; override;
+    destructor  Destroy; override;
   end;
 
 
@@ -95,8 +92,7 @@ Type
     LastSaveDirectory: string;
     StartupHelp: boolean;
     LeftPanelWidth: longint;
-    ShowLeftPanel_Help: boolean;
-    ShowLeftPanel_Standalone: boolean;
+    ShowLeftPanel: boolean;
     FileDialogSplit: Double;
     Colors: array[ 0..NumColorSettings - 1 ] of TfpgColor;
     NormalFont: TfpgFont;
@@ -115,6 +111,7 @@ Type
     SearchDirectories: TStringList;
     IPFTopicSaveAsEscaped: boolean;
   end;
+
 
 // global procs
 procedure LoadSettings;
@@ -187,8 +184,7 @@ begin
       LeftPanelWidth := ReadInteger( GeneralSection, 'LeftPanelWidth', 225 );
       FileDialogSplit := ReadInteger( GeneralSection, 'FileDialogSplit', 500 ) / 1000;
 
-      ShowLeftPanel_Help := ReadBool( GeneralSection, 'ShowLeftPanel_Help', true );
-      ShowLeftPanel_Standalone := ReadBool( GeneralSection, 'ShowLeftPanel_Standalone', true );
+      ShowLeftPanel := ReadBool( GeneralSection, 'ShowLeftPanel', true );
 
       // Colours
       for ColorIndex := 0 to High( Colors ) do
@@ -330,8 +326,7 @@ begin
       // Write split points, as units of 0.1%
       WriteInteger( GeneralSection, 'FileDialogSplit', Round( FileDialogSplit * 1000 ) );
 
-      WriteBool( GeneralSection, 'ShowLeftPanel_Help', ShowLeftPanel_Help );
-      WriteBool( GeneralSection, 'ShowLeftPanel_Standalone', ShowLeftPanel_Standalone );
+      WriteBool( GeneralSection, 'ShowLeftPanel', ShowLeftPanel);
 
       // Colours
       for ColorIndex := 0 to High( Colors ) do
@@ -490,8 +485,7 @@ Begin
   aStrings.Add('LastSaveDirectory: ' + Settings.LastSaveDirectory);
   aStrings.Add('StartupHelp:       ' + boolToStr(Settings.StartupHelp));
   // LeftPanelWidth: longint;
-  aStrings.Add('ShowLeftPanel_Help: ' + boolToStr(Settings.ShowLeftPanel_Help));
-  aStrings.Add('ShowLeftPanel_Standalone: ' + boolToStr(Settings.ShowLeftPanel_Standalone));
+  aStrings.Add('ShowLeftPanel: ' + boolToStr(Settings.ShowLeftPanel));
   // FileDialogSplit: real;
   // Colors: array[ 0..NumColorSettings - 1 ] of TColor;
   // NormalFont: TFont;
