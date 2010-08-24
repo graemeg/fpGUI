@@ -19,7 +19,7 @@ Files. Both the INF and OS/2 HLP file formats can be read.
 :p.:link reftype=hd refid='Support'.Support and Licensing:elink.
 :p.:link reftype=hd refid='Using'.Using DocView:elink.
 :p.:hp1.To stop this file appearing when you start DocView without specifying a
-help file, see "Tools - Options - General" tab.:ehp1.
+help file, see "Settings - Options - General" tab.:ehp1.
 :p.
 :hp2.History:ehp2.
 :p.
@@ -157,6 +157,8 @@ refid='CommandLine'.command line:elink..
 :li.Click the Open button
 .*  :artwork runin name='images\open.bmp'.
  from within DocView, or the "File - Open" menu item.
+:li.Click the "File - Open additional file" menu item to open more files, without
+closing the already opened files.
 :li.Click the "File - Open Special" to load help files based on an Environmnt Variable
 that was previous set.
 :li.Reload a recently viewed file from the "File - Open Recent" menu.
@@ -188,9 +190,8 @@ reasons. For example, I use this method to integrate DocView with the various ID
 (Integrated Development Environments) I use. I can then easily search for help on
 language keywords, source code classes or units etc.
 :p.
-.* TODO
-Soon you will be able to load multiple files in the Open File dialog by using Ctrl or Shift to
-select multiple files.
+You can also open additional help files by selecting the "File - Open additional file"
+menu option.
 .* TODO
 .* :p.
 .* When you click a link to a different help file&comma. DocView loads the other
@@ -201,89 +202,110 @@ file header info" menu option.
 :p.
 :hp2.Loading Additional Files:ehp2.
 :p.
-You can tick the &odq.Keep current files open&cdq. checkbox in the Open File
-dialog&comma. and DocView will open the files you have selected without closing
-the currently opened files&per.
-:p.:hp2.Drag and Drop:ehp2.
-:p.You can drag and drop &per.INF or &per.HLP files onto DocView and they will
-be opened&per. If you hold down the Shift key&comma. they will be opened without
-closing the current files&per.
-:p.You can drop files onto any of the main content areas&comma. such as the
-Contents or Index windows&comma. or an existing topic window&per.
-:note text='Note:'.Some links that go across files&comma. will only work if the correct set of
-files is loaded&per.
+You can select the "File - Open additional file" menu option, and DocView will
+open the file you have selected without closing the currently opened files.
+.*  TODO
+.*  :p.:hp2.Drag and Drop:ehp2.
+.*  :p.You can drag and drop &per.INF or &per.HLP files onto DocView and they will
+.*  be opened&per. If you hold down the Shift key&comma. they will be opened without
+.*  closing the current files&per.
+.*  :p.You can drop files onto any of the main content areas&comma. such as the
+.*  Contents or Index windows&comma. or an existing topic window&per.
+.*  :note text='Note:'.Some links that go across files&comma. will only work if the correct set of
+.*  files is loaded&per.
+
+
 .* ************************************************************
 .* Help Icons
 .* ************************************************************
-:h2 res=17 id='HelpIcons'.
-Help Icons
-:p.:hp2.Help Icons:ehp2.
-:p.Help Icons on the desktop are usually &odq.program objects&cdq. with the program name
-set to &odq.view&per.exe&cdq. and the parameters set to the name of the help files&per.
-:p.Some programs create these icons automatically at install time&per.
-:p.You can create these icons yourself by using the desktop program
-template&per. See desktop help for more information&per.
-:p.If you create icons by dragging help files to the desktop&comma. then you
-cannot give them a meaningful title&comma. because that would change the name of
-the file&comma. which might prevent programs from finding the help file&per.
-Therefore program objects are currently the recommended means of creating help
-icons&per.
-.*
-.*
+:h2 res=17 id='HelpIcons'.Help Icons
+:hp2.Help Icons:ehp2.
+:p.
+Help Icons on the desktop are usually "program shortcuts" or "filesystem objects".
+Details on how to create a program shortcut for DocView, or how to associate INF
+files to be opened with DocView, is beyond the scope of this document. Please see the
+help of your operating system for more information.
+:p.
+Saying that, with the fpGUI source code, in the "docview/install" directory, there is some
+information on how to setup a Gnome desktop with DocView. Unfortunately those
+instructions don't seem to work on all Linux or FreeBSD systems, so you again need
+to refer to your desktop system's help for guidance.
+.*  :p.Some programs create these icons automatically at install time&per.
+.*  :p.You can create these icons yourself by using the desktop program
+.*  template&per. See desktop help for more information&per.
+.*  :p.If you create icons by dragging help files to the desktop&comma. then you
+.*  cannot give them a meaningful title&comma. because that would change the name of
+.*  the file&comma. which might prevent programs from finding the help file&per.
+.*  Therefore program objects are currently the recommended means of creating help
+.*  icons&per.
+
+
 .* ************************************************************
 .* Navigation Panel Tabs
 .* ************************************************************
-:h1 res=200 id='NavigationPanel'.
-Navigation Panel Tabs
-:p.:hp2.Navigation Panel Tabs:ehp2.
-:p.The left hand panel contains several tabs for moving through the current help
-file in different ways&per.
-:p.:link reftype=hd refid='contents'.Contents:elink.
-:p.:link reftype=hd refid='Index'.Index:elink.
-:p.:link reftype=hd refid='search'.Search:elink.
-:p.:link reftype=hd refid='notes'.Notes:elink.
-:p.You can turn this panel off to get more space&comma. with the button
+:h1 res=200 id='NavigationPanel'.Navigation Panel Tabs
+:hp2.Navigation Panel Tabs:ehp2.
+:p.
+The left hand panel contains several tabs for moving through the current help
+file in different ways.
+:ul.
+:li.:link reftype=hd refid='contents'.Contents:elink.
+:li.:link reftype=hd refid='index'.Index:elink.
+:li.:link reftype=hd refid='search'.Search:elink.
+:li.:link reftype=hd refid='notes'.Notes:elink.
+:li.:link reftype=hd refid='history'.History:elink.
+:eul.
+:p.You can hide this panel to get more space, by draging the splitter bar
 .*  :artwork runin name='images\navigator.bmp'. or by selecting View
-&endash. Show Left Panel from the menu&comma. or pressing Alt&plus.P&per. Do the
-same to turn it on again&per.
-:p.You can stop the navigation panel from appearing when a help file is opened
-in Tools &endash. Options &endash. General tab&per.
-:note text='Note:'.Many programs choose to show the table of contents
-when they open their help file&semi. in this case&comma. the panel is
-automatically shown&comma. overriding your setting&per.
+to the left, or simply double-clicking on the splitter bar. To show the Left Panel
+again, drag the splitter bar to the right.
+:p.
+The last location of the splitter bar (width of the Left Panel) is remembered
+between DocView sessions. So when you open DocView, the Left Panel is the same
+width as the last time you used DocView.
+.*  TODO
+.*  :p.You can stop the navigation panel from appearing when a help file is opened
+.*  in Tools &endash. Options &endash. General tab&per.
+
+
 .* ************************************************************
 .* Contents View
 .* ************************************************************
-:h2 res=4 id='contents'.
-Contents View
+:h2 res=4 id='contents'.Contents View
 :i1 id=30006.Table of Contents
-:p.:hp2.Table of Contents:ehp2.
+:hp2.Table of Contents:ehp2.
 :p.
-:p.Most help files have a table of contents that shows you the topics in the
-file&comma. in a hierarchy or &odq.tree&cdq.&per. This is usually the first view you see
-when you open a file&per.
-:p.You can expand or collapse branches on the tree by clicking the &plus. or
-&endash. buttons&comma. or using the space bar&per.
-:p.To view a topic from the contents&comma. just click on it&per. You can also
-move through the contents by using the arrow keys&per.
-:p.To move through :hp2.all:ehp2. topics in the contents tree&comma. in
-order&comma. you can use Ctrl &plus. Up and Ctrl &plus. Down&comma. or the
-&odq.Previous&cdq.
+Most help files have a table of contents that shows you the topics in the
+file, in a hierarchy or "tree". This is usually the first view you see
+when you open a file.
+:p.
+You can expand or collapse branches on the tree by clicking the [+] or
+[-] buttons, or using the left and right arrow keys on the keyboard.
+:p.
+To view a topic from the contents, just click on it. You can also
+move through the contents by using the arrow keys.
+:p.
+To move through :hp2.all:ehp2. topics in the contents tree, in
+order, you can use the
+.*  TODO
+.*  Ctrl &plus. Up and Ctrl &plus. Down&comma. or the
+"Previous"
 .*  :artwork runin name='images\previous.bmp'.
- and &odq.Next&cdq.
+ and "Next"
 .*  :artwork runin name='images\next.bmp'.
- buttons&per. This is one way to treat the file as a normal book&comma. reading
-through each page&per.
-:p.You can also review the whole table of contents by using &odq.Expand All&cdq. in the
+ buttons on the toolbar. This is one way to treat the help file as a normal book, reading
+through each page.
+:p.
+You can also review the whole table of contents by using &odq.Expand All&cdq. in the
 &odq.View&cdq. menu&per. This expands all the branches of the contents table so you can
 quickly look through it&per. However&comma. it&apos.s usually easier to use
 :link reftype=hd refid='search'.Search:elink. or :link reftype=hd
 refid='Index'.Index:elink. for this purpose&per.
+
 .* ************************************************************
 .* Index
 .* ************************************************************
-:h2 res=5 id='Index'.
-Index
+:h2 res=5 id='index'.Index
 :p.:hp2.About the Index:ehp2.
 :p.
 :p.The Index tab contains an alphabetical listing of topics or keywords in the
@@ -301,6 +323,7 @@ each topic alphabetically&comma. and this is what DocView does&per. It then
 merges the original index &lpar.if any&rpar. with the list of topic titles&per.
 :p.If for some reason you don&apos.t like this&comma. you can turn it off in
 Tools &endash. Options &endash. Index tab&per.
+
 .* ************************************************************
 .* Search
 .* ************************************************************
@@ -335,6 +358,7 @@ better the match is the higher the rank will be&per.
 :p.&endash. number of matching words in a topic
 :p.&endash. matches within the title
 :p.&endash. matches within an index entry
+
 .* ************************************************************
 .* Notes
 .* ************************************************************
@@ -361,6 +385,14 @@ directory as the help file they are for&per.
 :note text='Note:'.If a help file is changed &lpar.for example a program is
 upgraded&rpar. then notes will no longer appear in the correct place&semi.
 however&comma. you can still read them from the Notes tab&per.
+
+.* ************************************************************
+.* History
+.* ************************************************************
+:h2 res=21 id='history'.History
+:p.:hp2.About the History:ehp2.
+:p.
+
 .*
 .*
 .* ************************************************************
