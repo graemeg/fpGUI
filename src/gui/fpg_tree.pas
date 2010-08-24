@@ -862,10 +862,14 @@ begin
       n := AValue.Parent;
       while n <> nil do
       begin
-        n.Expand;
-        DoExpand(n);
+        if n.Collapsed then
+        begin
+          n.Expand;
+          DoExpand(n);
+        end;
         n := n.parent;
       end;
+      UpdateScrollbars;
     end;
 
     dy := GetAbsoluteNodeTop(FSelection);
@@ -875,7 +879,7 @@ begin
     begin
       if FVScrollBar.Max = 0 then    // the first time and no expansion happened before.
         FVScrollBar.Max := dy + Height;
-      FVScrollbar.Position := dy + nh - vh;
+      FVScrollbar.Position := dy + nh - (vh div 2);
       FYOffset := FVScrollbar.Position;
       UpdateScrollBars;
       if FHScrollbar.Visible then    // HScrollbar appeared so we need to adjust position again
