@@ -14,6 +14,7 @@ const
   HELP_FILE_DELIMITER = '+';
   HELP_FILE_EXTENSION = ExtensionSeparator + 'hlp';
   INF_FILE_EXTENSION = ExtensionSeparator + 'inf';
+  cDocViewHelpFile = 'docview.inf';
 
 
 resourcestring
