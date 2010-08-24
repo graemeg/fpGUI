@@ -36,6 +36,7 @@ type
 
   NaturalNumber = 1..High(Integer);
 
+  TfpgSnapEvent = procedure(Sender: TObject; const AClosed: boolean) of object;
 
   TfpgSplitter = class(TfpgWidget)
   private
@@ -49,12 +50,14 @@ type
     FOldSize: Integer;
     FSplit: Integer;
     FMouseOver: Boolean;
+    FOnSnap: TfpgSnapEvent;
     procedure   CalcSplitSize(X, Y: Integer; out NewSize, Split: Integer);
     function    FindControl: TfpgWidget;
     procedure   SetColorGrabBar(const AValue: TfpgColor);
     procedure   UpdateControlSize;
     procedure   UpdateSize(const X, Y: Integer);
   protected
+    procedure   DoOnSnap(const AClosed: Boolean);
     function    DoCanResize(var NewSize: Integer): Boolean; virtual;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -69,7 +72,9 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
+    property    AutoSnap: boolean read FAutoSnap write FAutoSnap default True;
     property    ColorGrabBar: TfpgColor read FColorGrabBar write SetColorGrabBar default clColorGrabBar;
+    property    OnSnap: TfpgSnapEvent read FOnSnap write FOnSnap;
   end;
 
 function CreateSplitter(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
@@ -196,12 +201,21 @@ begin
   CalcSplitSize(X, Y, FNewSize, FSplit);
 end;
 
+procedure TfpgSplitter.DoOnSnap(const AClosed: Boolean);
+begin
+  if Assigned(FOnSnap) then
+    FOnSnap(self, AClosed);
+end;
+
 function TfpgSplitter.DoCanResize(var NewSize: Integer): Boolean;
 begin
   // Result := CanResize(NewSize); // omit onCanResize call
   Result := True;
   if Result and (NewSize <= FMinSize) and FAutoSnap then
+  begin
     NewSize := 0;
+    DoOnSnap(NewSize = 0);
+  end;
 end;
 
 procedure TfpgSplitter.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
