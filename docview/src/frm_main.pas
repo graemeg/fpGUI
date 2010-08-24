@@ -1377,13 +1377,7 @@ begin
   if Settings.OpenWithExpandedContents then
   begin
     LogEvent(LogStartup, '  Expand all contents' );
-    tvContents.RootNode.Expand;
-    node := tvContents.RootNode.Next;
-    while node <> nil do
-    begin
-      node.Expand;
-      node := tvContents.RootNode.Next;
-    end;
+    tvContents.FullExpand;
   end
   else
   begin
@@ -2321,7 +2315,7 @@ begin
   begin
     Name := 'miHelp';
     SetPosition(292, 168, 132, 20);
-    AddMenuItem('Help using DocView', 'F1', @miHelpUsingDocView);
+    AddMenuItem('Help using DocView', '', @miHelpUsingDocView);
     AddMenuItem('Command line parameters', '', @miHelpCmdLineParams);
     AddMenuItem('-', '', nil);
     AddMenuItem('Show help file header info', '', @miDebugHeader);

@@ -34,6 +34,7 @@ type
     btnSearchDirDelete: TfpgButton;
     chkEscapeIPFSymbols: TfpgCheckBox;
     chkStartupHelp: TfpgCheckBox;
+    chkOpenTOC: TfpgCheckBox;
     {@VFD_HEAD_END: ConfigurationForm}
     procedure btnNormalFontClicked(Sender: TObject);
     procedure btnFixedFontClicked(Sender: TObject);
@@ -145,6 +146,7 @@ begin
   lbSearchDirs.Items.Assign(Settings.SearchDirectories);
   chkEscapeIPFSymbols.Checked := Settings.IPFTopicSaveAsEscaped;
   chkStartupHelp.Checked := Settings.StartupHelp;
+  chkOpenTOC.Checked := Settings.OpenWithExpandedContents;
   // Fonts & Color
   edtNormalFont.Text := Settings.NormalFont.FontDesc;
   edtFixedFont.Text := Settings.FixedFont.FontDesc;
@@ -157,6 +159,7 @@ begin
   Settings.SearchDirectories.Assign(lbSearchDirs.Items);
   Settings.IPFTopicSaveAsEscaped := chkEscapeIPFSymbols.Checked;
   Settings.StartupHelp := chkStartupHelp.Checked;
+  Settings.OpenWithExpandedContents := chkOpenTOC.Checked;
   // Fonts & Color
   Settings.NormalFont.Free;
   Settings.NormalFont := fpgGetFont(edtNormalFont.Text);
@@ -175,7 +178,7 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: ConfigurationForm}
   Name := 'ConfigurationForm';
-  SetPosition(310, 157, 515, 439);
+  SetPosition(402, 189, 515, 439);
   WindowTitle := 'Configuration';
   Hint := '';
   WindowPosition := wpOneThirdDown;
@@ -421,13 +424,25 @@ begin
   with chkStartupHelp do
   begin
     Name := 'chkStartupHelp';
-    SetPosition(12, 264, 480, 20);
+    SetPosition(12, 268, 480, 20);
     Anchors := [anLeft,anRight,anTop];
     Checked := True;
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 8;
     Text := 'Show DocView help at startup if no files opened';
+  end;
+
+  chkOpenTOC := TfpgCheckBox.Create(tsGeneral);
+  with chkOpenTOC do
+  begin
+    Name := 'chkOpenTOC';
+    SetPosition(12, 292, 476, 20);
+    Anchors := [anLeft,anRight,anTop];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 9;
+    Text := 'Open files with contents expanded';
   end;
 
   {@VFD_BODY_END: ConfigurationForm}
