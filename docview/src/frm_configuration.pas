@@ -33,6 +33,7 @@ type
     lbSearchDirs: TfpgListBox;
     btnSearchDirDelete: TfpgButton;
     chkEscapeIPFSymbols: TfpgCheckBox;
+    chkStartupHelp: TfpgCheckBox;
     {@VFD_HEAD_END: ConfigurationForm}
     procedure btnNormalFontClicked(Sender: TObject);
     procedure btnFixedFontClicked(Sender: TObject);
@@ -143,6 +144,7 @@ begin
   cbIndexStyle.FocusItem := Ord(Settings.IndexStyle);
   lbSearchDirs.Items.Assign(Settings.SearchDirectories);
   chkEscapeIPFSymbols.Checked := Settings.IPFTopicSaveAsEscaped;
+  chkStartupHelp.Checked := Settings.StartupHelp;
   // Fonts & Color
   edtNormalFont.Text := Settings.NormalFont.FontDesc;
   edtFixedFont.Text := Settings.FixedFont.FontDesc;
@@ -154,6 +156,7 @@ begin
   Settings.IndexStyle := TIndexStyle(cbIndexStyle.FocusItem);
   Settings.SearchDirectories.Assign(lbSearchDirs.Items);
   Settings.IPFTopicSaveAsEscaped := chkEscapeIPFSymbols.Checked;
+  Settings.StartupHelp := chkStartupHelp.Checked;
   // Fonts & Color
   Settings.NormalFont.Free;
   Settings.NormalFont := fpgGetFont(edtNormalFont.Text);
@@ -174,6 +177,7 @@ begin
   Name := 'ConfigurationForm';
   SetPosition(310, 157, 515, 439);
   WindowTitle := 'Configuration';
+  Hint := '';
   WindowPosition := wpOneThirdDown;
 
   PageControl1 := TfpgPageControl.Create(self);
@@ -183,6 +187,7 @@ begin
     SetPosition(4, 4, 506, 388);
     Anchors := [anLeft,anRight,anTop,anBottom];
     ActivePageIndex := 0;
+    Hint := '';
     TabOrder := 0;
     OnChange := @PageControl1Change;
   end;
@@ -245,6 +250,8 @@ begin
     Name := 'edtNormalFont';
     SetPosition(124, 16, 248, 24);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    Hint := '';
     TabOrder := 1;
     Text := '';
     FontDesc := '#Edit1';
@@ -280,6 +287,8 @@ begin
     Name := 'edtFixedFont';
     SetPosition(124, 48, 248, 24);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    Hint := '';
     TabOrder := 4;
     Text := '';
     FontDesc := '#Edit1';
@@ -320,6 +329,7 @@ begin
     Name := 'Panel1';
     SetPosition(128, 116, 204, 28);
     FontDesc := '#Label1';
+    Hint := '';
     Style := bsLowered;
     Text := 'Panel';
   end;
@@ -330,6 +340,7 @@ begin
     Name := 'cbIndexStyle';
     SetPosition(12, 32, 160, 22);
     FontDesc := '#List';
+    Hint := '';
     Items.Add('Alphabetical');
     Items.Add('FileOnly');
     Items.Add('Full');
@@ -375,6 +386,7 @@ begin
     Name := 'lbSearchDirs';
     SetPosition(12, 84, 388, 148);
     FontDesc := '#List';
+    Hint := '';
     HotTrack := False;
     PopupFrame := False;
     TabOrder := 5;
@@ -400,8 +412,22 @@ begin
     SetPosition(12, 244, 480, 20);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 6;
     Text := 'Escape symbols when saving topics as IPF text';
+  end;
+
+  chkStartupHelp := TfpgCheckBox.Create(tsGeneral);
+  with chkStartupHelp do
+  begin
+    Name := 'chkStartupHelp';
+    SetPosition(12, 264, 480, 20);
+    Anchors := [anLeft,anRight,anTop];
+    Checked := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 8;
+    Text := 'Show DocView help at startup if no files opened';
   end;
 
   {@VFD_BODY_END: ConfigurationForm}

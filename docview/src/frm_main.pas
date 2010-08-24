@@ -337,6 +337,8 @@ begin
 end;
 
 procedure TMainForm.MainFormShow(Sender: TObject);
+var
+  lFilename: TfpgString;
 begin
   bvlBody.Realign;
 
@@ -355,6 +357,20 @@ begin
   ProcessCommandLineParams;
 
   RichView.Images := FImages;
+
+  if ParamCount = 0 then
+  begin
+    // user hasn't requested any particular file
+    // at startup, so if the option is still set,
+    // load the DocView help file
+    if Settings.StartupHelp then
+    begin
+      lFilename := GetOwnHelpFileName;
+      if FileExists(lFilename) then
+        OpenFile(lFilename, '', true);
+    end;
+  end;
+
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
