@@ -25,7 +25,7 @@ type
     edtFixedFont: TfpgEdit;
     btnFixedFont: TfpgButton;
     btnHelp: TfpgButton;
-    Panel1: TfpgPanel;
+    pnlSearchHighlight: TfpgPanel;
     cbIndexStyle: TfpgComboBox;
     lblIndexStyle: TfpgLabel;
     lblSearchDirs: TfpgLabel;
@@ -35,6 +35,8 @@ type
     chkEscapeIPFSymbols: TfpgCheckBox;
     chkStartupHelp: TfpgCheckBox;
     chkOpenTOC: TfpgCheckBox;
+    btnColorHighlight: TfpgButton;
+    btnResetColors: TfpgButton;
     {@VFD_HEAD_END: ConfigurationForm}
     procedure btnNormalFontClicked(Sender: TObject);
     procedure btnFixedFontClicked(Sender: TObject);
@@ -44,8 +46,11 @@ type
     procedure btnCancelClick(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
     procedure btnSearchDirAddClicked(Sender: TObject);
+    procedure btnSearchHighlightClicked(Sender: TObject);
+    procedure ResetColorsButtonOnClick(Sender: TObject);
     procedure SettingsToGui;
     procedure GuiToSettings;
+    procedure UpdateColorPanels;
   public
     constructor Create(AOwner: TComponent); override;
     procedure AfterCreate; override;
@@ -139,6 +144,23 @@ begin
     lbSearchDirs.Items.Add(s);
 end;
 
+procedure TConfigurationForm.btnSearchHighlightClicked(Sender: TObject);
+begin
+  pnlSearchHighlight.BackgroundColor := fpgSelectColorDialog(pnlSearchHighlight.BackgroundColor);
+end;
+
+procedure TConfigurationForm.ResetColorsButtonOnClick(Sender: TObject);
+var
+  i: longint;
+Begin
+  // restore default colors
+  for i := 0 to NumColorSettings - 1 do
+  begin
+    Settings.Colors[i] := DefaultColors[i];
+  end;
+  UpdateColorPanels;
+End;
+
 procedure TConfigurationForm.SettingsToGui;
 begin
   // General
@@ -150,6 +172,7 @@ begin
   // Fonts & Color
   edtNormalFont.Text := Settings.NormalFont.FontDesc;
   edtFixedFont.Text := Settings.FixedFont.FontDesc;
+  UpdateColorPanels;
 end;
 
 procedure TConfigurationForm.GuiToSettings;
@@ -165,6 +188,12 @@ begin
   Settings.NormalFont := fpgGetFont(edtNormalFont.Text);
   Settings.FixedFont.Free;
   Settings.FixedFont := fpgGetFont(edtFixedFont.Text);
+  Settings.Colors[SearchHighlightTextColorIndex] := pnlSearchHighlight.BackgroundColor;
+end;
+
+procedure TConfigurationForm.UpdateColorPanels;
+begin
+  pnlSearchHighlight.BackgroundColor := Settings.Colors[SearchHighlightTextColorIndex];
 end;
 
 constructor TConfigurationForm.Create(AOwner: TComponent);
@@ -326,15 +355,15 @@ begin
     OnClick := @btnHelpClick;
   end;
 
-  Panel1 := TfpgPanel.Create(tsFontsColor);
-  with Panel1 do
+  pnlSearchHighlight := TfpgPanel.Create(tsFontsColor);
+  with pnlSearchHighlight do
   begin
-    Name := 'Panel1';
-    SetPosition(128, 116, 204, 28);
+    Name := 'pnlSearchHighlight';
+    SetPosition(12, 104, 360, 24);
     FontDesc := '#Label1';
     Hint := '';
     Style := bsLowered;
-    Text := 'Panel';
+    Text := 'Search Highlight Color';
   end;
 
   cbIndexStyle := TfpgComboBox.Create(tsGeneral);
@@ -445,8 +474,37 @@ begin
     Text := 'Open files with contents expanded';
   end;
 
+  btnColorHighlight := TfpgButton.Create(tsFontsColor);
+  with btnColorHighlight do
+  begin
+    Name := 'btnColorHighlight';
+    SetPosition(384, 104, 80, 24);
+    Text := 'Color';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 8;
+    OnClick := @btnSearchHighlightClicked;
+  end;
+
+  btnResetColors := TfpgButton.Create(tsFontsColor);
+  with btnResetColors do
+  begin
+    Name := 'btnResetColors';
+    SetPosition(12, 328, 100, 24);
+    Text := 'Reset Colors';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 9;
+    OnClick := @ResetColorsButtonOnClick;
+  end;
+
   {@VFD_BODY_END: ConfigurationForm}
   {%endregion}
+
+  // always reset pagecotrol
+  PageControl1.ActivePageIndex := 0;
 end;
 
 
