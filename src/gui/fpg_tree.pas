@@ -1152,10 +1152,15 @@ begin
 end;
 
 procedure TfpgTreeView.GotoNextNodeDown;
+var
+  lNode: TfpgTreeNode;
 begin
-  if Selection = RootNode.LastSubNode then
+  if (Selection = RootNode.LastSubNode) and (RootNode.LastSubNode.CountRecursive = 0) then
     Exit;
-  Selection := NextNode(Selection);
+
+  lNode := NextNode(Selection);
+  if lNode <> nil then
+    Selection := lNode;
 end;
 
 procedure TfpgTreeView.FullCollapse;
