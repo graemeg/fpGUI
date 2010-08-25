@@ -103,6 +103,8 @@ INF help file and goes to the correct topic. DocView already supports loading
 multiple files, so this is almost complete.
 :li.Some optimization of the Rich Text View component. Better startup time, improved
 text wrapping and font substitution support.
+:li.Global searching of all help files on your help folder specified by the
+environment variables BOOKSHELF or HELP.
 :eul.
 
 
@@ -360,14 +362,14 @@ Words that matches your search are highlighted in the topic.
 :hp2.Phrase search:ehp2.
 :p.
 If you want to search for a phrase made up of more than one word, put
-double quotes around it, for example "os/2 warp".
+double quotes around it, for example "OS/2 warp".
 :p.
 :hp2.Matching features:ehp2.
 :p.
 DocView allows you finer control of searching. You can add either of the two symbols
 directly infront of a word (no spaces between symbol and word), to narrow down
 a search even more.
-:dl compant tsize=15.
+:dl compact tsize=20.
 :dt.+ (plus sign)
 :dd.indicates a word that :hp2.must:ehp2. be matched
 :dt.- (minus sign)
@@ -382,7 +384,7 @@ search result. Searches are :hp2.not:ehp2. case-sensitive.
 :p.
 :hp2.How DocView ranks results:ehp2.
 :p.DocView ranks matching topics by various means:
-:ul.
+:ul compact.
 :li.a closer match to a full word
 :li.number of matching words in a topic
 :li.matches within the title
@@ -394,26 +396,35 @@ search result. Searches are :hp2.not:ehp2. case-sensitive.
 .* ************************************************************
 :h2 res=7 id='notes'.Notes
 :hp2.Adding and Using Notes:ehp2.
+:note.:hp8.*** This feature is not implemented yet. ***:ehp8.
 :p.
-DocView allows you to add notes &lpar.annotations&rpar. to your help
-files&per.
-:p.To add a note&comma. simply click where you want to make a note and click the
-&odq.Note&cdq. button
+DocView allows you to add notes (annotations) to your help
+files.
+:p.
+To add a note, simply click where you want to make a note and click the
+"Note" toolbar button
 .*  :artwork runin name='images\note.bmp'.
-&comma. then type your text and click OK&per. The text will be inserted into the
-help topic with a different color &lpar.default is green&semi. you can change
-this in Tools &endash. Options &endash. Colors&rpar.&per.
-:p.To edit or delete a note&comma. click on the colored note text&semi. you can
-then edit the note text&comma. or click on delete to get rid of it&per.
-:p.You can also review all the notes that you&apos.ve made in the current help
-file&lpar.s&rpar. by going to the Notes tab&semi. this allows you to add&comma.
-edit and delete&comma. and also jump to the topics containing your notes&per.
+, then type your text and click OK. The text will be inserted into the
+help topic with a different color (default is green; you can change
+this in "Settings - Options - Fonts &amp. Colors".
 :p.
-:p.Notes are saved in a file with the extension &per.nte&comma. in the same
-directory as the help file they are for&per.
-:note text='Note:'.If a help file is changed &lpar.for example a program is
-upgraded&rpar. then notes will no longer appear in the correct place&semi.
-however&comma. you can still read them from the Notes tab&per.
+To edit or delete a note, click on the colored note text; you can
+then edit the note text, or click on delete to get rid of it.
+:p.
+You can also review all the notes that you've made in the current help
+file(s) by going to the Notes tab; this allows you to add,
+edit and delete, and also jump to the topics containing your notes.
+:p.
+Notes are saved in a file with the extension "&per.notes", in the DocView config
+directory. This is in the user's home profile directory where there is read/write
+access. Under Linux it is normally "~/.config/docview/" and under Windows it is
+normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
+I will probably add a setting in DocView, so the user can configure a 
+preferred storage location for notes (eg: some users prefer it like OS/2's View program did,
+by storing notes in the same directory as the help file).
+:note.If a help file is changed (for example a program is
+upgraded) then notes will no longer appear in the correct place;
+however, you can still read them from the Notes tab.
 
 .* ************************************************************
 .* History
@@ -421,432 +432,447 @@ however&comma. you can still read them from the Notes tab&per.
 :h2 res=21 id='history'.History
 :p.:hp2.About the History:ehp2.
 :p.
+DocView keeps track of every topic you visit. This allows you to view a help file
+like a web browser does with web pages. You can use the "Back" and "Forward"
+buttons on the toolbar to move back and forward in your history list.
+:p.
+In the History tab, is a list of all previously visited topics. To jump to any
+of them, simply highlight the topic and press enter. Or simply double-click a
+topic.
+:p.
+The history is not saved when you exit DocView. The history is also cleared if
+you open a new or additional help file.
 
 .*
 .*
 .* ************************************************************
 .* Global Search
 .* ************************************************************
-:h1 res=18 id='GlobalSearch'.
-Global Search
-:p.:hp2.Global search:ehp2.
-:p.You can search all help files on your system&comma. by clicking the Search
-All button
-.*  :artwork runin name='images\search.bmp'.
-&comma. using Tools &endash. Search all Help Files in the menu&comma. or
-pressing Ctrl&plus.S&per.
-:p.This search works similarly to :link reftype=hd refid='search'.searching
-within a file:elink.&comma. but it also tells you what help file the results
-were found in&per.
-:p.These searches may take some time&comma. depending on what you search
-for&per. You can stop the search at any time&per.
-:p.:hp2.Where DocView searches:ehp2.
-:p.The default is to search for help files in the help paths&comma. which are
-specified by the BOOKSHELF and HELP :link reftype=hd
-refid='L_EnvironmentVariables'.environment variables:elink.&per.
-:p.You can choose other places to search by choosing from the drop&endash.down
-list&comma. or customise the list by clicking the Select button&per.
-:p.:hp2.Search in&colon. Standard Help Paths:ehp2.
-:p.This is the default and will search BOOKSHELF and HELP as specified
-above&per.
-:p.Clicking the select button will allow you to choose which of the directories
-in the help paths will be used&per. Click each item in the list to select or
-de&endash.select it&per. After you choose this&comma. the location will show as
-&odq.Selected Help Paths&cdq.
-:p.:hp2.Search in&colon. All Hard Drives:ehp2.
-:p.This option will search all hard &lpar.non&endash.removable&rpar. drives on
-your system&per. You can click &odq.Select&per.&per.&per.&cdq. to customise the
-location&per.
-:p.Searching drives can find more help files&comma. but might be much slower
-than just the help paths&per.
-:p.:hp2.Search in&colon. Selected Help Paths:ehp2.
-:p.If you have already selected particular help paths to search&per.&comma. you can
-click &odq.Select&per.&per.&per.&cdq. to customise again&per.
-:p.:hp2.Search in&colon. Directory List:ehp2.
-:p.In the &odq.Select Directories&cdq. dialog&comma. clicking the &odq.Add&per.&per.&per.&cdq.
-button will allow you to add one or more directories to the search list&per.
-:p.Select the drive and directory using the controls that appear&comma. then
-click &odq.&lt. Add Directory&cdq. to add the chosen directory&per. You can do this as
-many times as you like&per. Choose &odq.With sub&endash.directories&cdq. if you want
-sub&endash.directories of the selected directory to be searched as well&per. In
-this case&comma. &per.&per.&per. will show on the end of the directory&per.
-:p.After you add a custom directory like this&comma. the location for searching
-will show as &odq.Directory List&cdq.&per.
-:note text='Note:'.If you add a custom directory to standard or selected help
-paths&comma. then the list will become a custom list&comma. and you can no
-longer re&endash.select help paths&per. To get back to the original help
-paths&comma. choose &odq.Standard Help Paths&cdq. then click &odq.Select&per.&per.&per.&cdq.
-again&per.
-:p.:hp2.Search in&colon. Typing a location:ehp2.
-:p.You can type a drive or directory into the &odq.Search in&colon.&cdq. entry
-field&per. Add &odq.&per.&per.&per.&cdq. on the end of the directory if you want to
-search subdirectories as well&per.
-:p.Example&colon.
-:p. Search in&colon. &lbracket. E&colon.&bsl.mydocs&bsl.&per.&per.&per.
- &rbracket.
-:p.This will search help files in E&colon.&bsl.mydocs&bsl. and any
-subdirectories&per.
-.*
-.*
+.*  TODO
+.*  :h1 res=18 hide id='GlobalSearch'.Global Search
+.*  :hp2.Global search:ehp2.
+.*  :note.:hp8.*** This feature is not implemented yet. ***:ehp8.
+.*  :p.You can search all help files on your system, by clicking the Search
+.*  All toolbar button
+.*  .*  :artwork runin name='images\search.bmp'.
+.*  , or by using "Tools - Search all Help Files" in the menu, or
+.*  pressing Ctrl+S.
+.*  :p.
+.*  This search works similarly to :link reftype=hd refid='search'.searching
+.*  within a file:elink., but it also tells you what help file the results
+.*  were found in.
+.*  :p.
+.*  These searches may take some time, depending on what you search
+.*  for. You can stop the search at any time.
+.*  :p.
+.*  :hp2.Where DocView searches:ehp2.
+.*  :p.
+.*  The default is to search for help files in the help paths, which are
+.*  specified by the BOOKSHELF and HELP :link reftype=hd
+.*  refid='L_EnvironmentVariables'.environment variables:elink..
+.*  :p.
+.*  You can choose other places to search by choosing from the drop-down
+.*  list, or customise the list by clicking the Select button.
+.*  :ul.
+.*  :li.:hp2.Search in: Standard Help Paths:ehp2.
+.*  :p.
+.*  This is the default and will search BOOKSHELF and HELP as specified
+.*  above.
+.*  :p.
+.*  Clicking the select button will allow you to choose which of the directories
+.*  in the help paths will be used. Click each item in the list to select or
+.*  deselect it. After you choose this, the location will show as
+.*  "Selected Help Paths".
+.*  :li.:hp2.Search in: All Hard Drives:ehp2.
+.*  :p.
+.*  This option will search all hard drives on
+.*  your system. You can click "Select..." to customise the
+.*  location.
+.*  :p.
+.*  Searching drives can find more help files, but might be much slower
+.*  than just the help paths.
+.*  :li.:hp2.Search in: Selected Help Paths:ehp2.
+.*  :p.
+.*  If you have already selected particular help paths to search, you can
+.*  click "Select..." to customise again.
+.*  :li.:hp2.Search in: Directory List:ehp2.
+.*  :p.
+.*  In the "Select Directories" dialog, clicking the "Add..."
+.*  button will allow you to add one or more directories to the search list.
+.*  :p.
+.*  Select the drive and directory using the controls that appear, then
+.*  click "< Add Directory" to add the chosen directory. You can do this as
+.*  many times as you like. Choose "With sub-directories" if you want
+.*  sub-directories of the selected directory to be searched as well. In
+.*  this case, ... will show on the end of the directory.
+.*  :p.
+.*  After you add a custom directory like this, the location for searching
+.*  will show as "Directory List".
+.*  :note.If you add a custom directory to standard or selected help
+.*  paths, then the list will become a custom list, and you can no
+.*  longer re-select help paths. To get back to the original help
+.*  paths, choose "Standard Help Paths" then click "Select..."
+.*  again.
+.*  :li.:hp2.Search in: Typing a location:ehp2.
+.*  :p.
+.*  You can type a drive or directory into the "Search in:" entry
+.*  field. Add "..." on the end of the directory if you want to
+.*  search subdirectories as well.
+.*  :p.
+.*  Example:
+.*  :p.
+.*  Search in: [ E:\mydocs\... ]
+.*  :p.
+.*  This will search help files in E:\mydocs\ and any
+.*  subdirectories.
+.*  :eul.
+
+
 .* ************************************************************
 .* Bookmarks
 .* ************************************************************
-:h1 res=8 id='bookmarks'.
-Bookmarks
-:p.:hp2.Bookmarks:ehp2.
+:h1 res=8 id='bookmarks'.Bookmarks
+:hp2.Bookmarks:ehp2.
+:note.:hp8.*** This feature is not implemented yet. ***:ehp8.
 :p.
-:p.DocView allows you to bookmark particular topics within the current help
-file&per. Simply click the bookmark button
+DocView allows you to bookmark particular topics within the current help
+file. Simply click the bookmark toolbar button
 .*  :artwork runin name='images\bookmark.bmp'.
- to add the current topic as a bookmark&per.
-:p.To jump to a bookmark&comma. go to the &odq.Bookmarks&cdq. menu&comma. and click on
-the bookmark you want to open&per.
-:p.You can view or delete all your bookmarks by clicking on &odq.Edit&per.&per.&cdq. in
-the &odq.Bookmarks&cdq. menu&per. This window can remain open while you read&comma. so
-that you can quickly look through your bookmarks&per.
+to add the current topic as a bookmark.
 :p.
+To jump to a bookmark, go to the "Bookmarks" menu, and click on
+the bookmark you want to open.
+:p.
+You can view or delete all your bookmarks by clicking on "Edit..." in
+the "Bookmarks" menu. This window can remain open while you read, so
+that you can quickly look through your bookmarks.
 :note text='Note:'.
-:p.DocView bookmarks remember all the topic windows that are open&comma. if
-there is more than one&per.
-:p.Bookmarks are saved in a file with the extension &per.bmk&comma. in the same
-directory as the help file they are for&per.
-.*
-.*
+DocView bookmarks remember all the topic windows that are open, if
+there is more than one.
+:p.
+Bookmarks are saved in a file with the extension ".bookmarks", in the DocView config
+directory. This is in the user's home profile directory where there is read/write
+access. Under Linux it is normally "~/.config/docview/" and under Windows it is
+normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
+I will probably add a setting in DocView, so the user can configure a 
+preferred storage location for bookmarks (eg: some users prefer it like OS/2's View program did,
+by storing notes in the same directory as the help file).
+
+
 .* ************************************************************
 .* Internet Links
 .* ************************************************************
-:h1 res=100 id='InternetLinks'.
-Internet Links
-:p.:hp2.Internet Links:ehp2.
-:p.When you click a web URL like
-http&colon.&slash.&slash.www&per.google&per.com&comma. DocView launches your
-default web browser&per.
-:p.This web browser is specified by operating system settings&comma. not DocView
-itself&per. To configure it&comma. you can open a URL object on the
-desktop&comma. edit the browser path in the :hp2.Browser:ehp2. tab&comma. then
-click Set Default&per. Alternatively&comma. download the utility ConfigApps from
-Hobbes
+:h1 res=100 id='InternetLinks'.Internet Links
+:hp2.Internet Links:ehp2.
 :p.
- http&colon.&slash.&slash.hobbes&per.nmsu&per.edu&slash.cgi&endash.bin&slash.h&endash.search?key&eq.configapps
-.br
-:p.Browsers may also have the ability to make themselves the default&comma.
-either at install time or in preferences&per.
-:p.Email&comma. Newsgroups and FTP links are also passed to the web browser&per.
-At this time&comma. it isn&apos.t possible to choose a different program for
-these links&per.
-:p.:hp2.Note to help file authors:ehp2.
-:p.The original View had no understanding of URL or email links&comma. so the
-only way to implement them was a link to&comma. for example&comma.
-&odq.netscape&per.exe&cdq. with the correct parameters&per.
-:p.DocView translates program links to &odq.netscape&cdq.&comma. &odq.explore&cdq. or &odq.mozilla&cdq.
-into links to the default browser&per.
-:p.It also auto&endash.detects URLs in the forms&colon.
-:p. http&colon.&slash.&slash.x  https&colon.&slash.&slash.x
- ftp&colon.&slash.&slash.x
-:p. mailto&colon.x  news&colon.x
-:p.Things that look like URLs are also detected&comma. even without the protocol
-prefix&colon.
-:p. www&per.a&per.b &endash. browser
-:p. ftp&per.a&per.b &endash. ftp
-:p. a&atsign.b&per.c &endash. email
-:p.where a&comma. b and c are any alphanumeric string&per.
-:p.You don&apos.t need to do anything for DocView to recognise these&per.
-.*
-.*
+When you click a web URL like
+http://opensoft.homeip.net/fpgui/, DocView launches your
+default web browser.
+:p.
+This web browser is specified by operating system settings, not DocView
+itself. Please see your operating system or desktop environment help for further
+details on how to configure it.
+:p.
+For more technical details about what browser is used, have a look at the fpgOpenURL()
+function in fpGUI Toolkit source code.
+:p.
+Email, Newsgroups and FTP links are also passed to operating system or desktop
+environment, the same as web addresses.
+:p.
+:hp2.Note to help file authors:ehp2.
+:p.The original OS/2 View program had no understanding of URL or email links, so the
+only way to implement them was a link to, for example,
+"netscape.exe" with the correct parameters.
+:p.
+DocView translates program links to "netscape", "explorer" or "mozilla"
+into links to the default browser.
+:p.
+It also auto-detects URLs in the forms:
+:lm margin=5.
+:p.http&colon.//xxx
+:p.https&colon.//xxx
+:p.ftp&colon.//xxx
+:p.mailto&colon.xxx
+:p.news&colon.xxx
+:lm margin=1.
+:p.
+Things that look like URLs are also detected, even without the protocol
+prefix:
+:lm margin=5.
+:p.www&per.aaa&per.bbb - browser
+:p.ftp&per.aaa&per.bbb - ftp
+:p.aaa&atsign.bbb&per.ccc - email
+:lm margin=1.
+:p.
+where aaa, bbb and ccc are any alphanumeric string.
+:p.
+You don't need to do anything for DocView to recognise these.
+
+
 .* ************************************************************
 .* Command Line
 .* ************************************************************
-:h1 res=9 id='CommandLine'.
-Command Line Parameters
-:p.:hp2.Command Line Parameters:ehp2.
-:p.When you run DocView from the command line you can supply various
-parameters&per. None of them are required&per.
+:h1 res=9 id='CommandLine'.Command Line Parameters
+:hp2.Command Line Parameters:ehp2.
 :p.
-:p.:hp2.DocView &lbracket.options&rbracket. &lbracket.&lt.filename&gt.
-&lbracket.&lt.search text&gt.&rbracket.&rbracket.:ehp2.
-:p.If DocView is installed as a replacement for view&comma. then the command
-starts with view instead of DocView&per.
-:p.:link reftype=hd refid='CommandLineExamples'.Examples:elink.
-.*
-:p.:hp2.&lt.filename&gt.:ehp2.
-:p.The file for DocView to load&per. You can load multiple files at once by
-using filename1&plus.filename2 etc&per.
-.br
-If a path isn&apos.t specified&comma. then the files are searched for in the
-:link reftype=hd refid='L_EnvironmentVariables'.BOOKSHELF and HELP
-paths:elink.&per.
-.br
-If you path and&slash.or filename contains special characters (like blank) then
-you have to enclose the filename in double qoutes&per.
-.*
-:p.:hp2.&lt.search text&gt.:ehp2.
-:p.Search topic titles and index entries for this text&per. This is
-:hp2.not:ehp2. the same as a normal search&comma. for compatibility with
-original View&per. To do a proper search use the &slash.s option &lpar.see
-below&rpar.&per. For more details&comma. see :link reftype=hd
-refid='CommandLineTopicSearch'.Command Line Topic Search:elink.&per.
-:p.:hp2.Options:ehp2.
-:p.:hp2.&slash.s:ehp2.
-:p.After opening the file&comma. performs a :link reftype=hd
-refid='search'.search:elink. for the given text (do a real full text search intead of
-the default topic titles search)&per. The result is the same as performing the search from
-the :link reftype=hd
-refid='search'.serach navigation panel:elink.&per.
-:p.Example&colon.
-.br
-:lm margin=4.
-To search for copy in the whole cmdref document you can call
+When you run DocView from the command line you can supply various
+parameters. None of them are required. For a quick summary, select
+"Help - Command line parameters".
 :xmp.
-  DocView &slash.s cmdref copy
+  docview [<filename>] [[option] [option parameter]]
 :exmp.
-DocView is clever enought to handle multiple words (like the :link reftype=hd
-refid='search'.serach navigation panel:elink.)&per. This is a OR search&per.
+
+:link reftype=hd refid='CommandLineExamples'.Examples:elink.
+:p.
+:hp2.<filename>:ehp2.
+:p.
+The file for DocView to load. You can load multiple files at once by
+using filename1+filename2 format.
+:p.
+If a path isn't specified, then the files are searched for in the
+:link reftype=hd refid='L_EnvironmentVariables'.BOOKSHELF and HELP:elink.
+environment variable locations.
+:p.
+If a path and/or filename contains special characters (like blank) then
+you have to enclose the filename in double qoutes.
+
+:p.
+:hp2.[option]:ehp2.
+:p.The following options are available:
+:parml tsize=6.
+:pt.-h
+:pd.Show the command line summary when docview starts up.
+:pt.-k <searchtext>
+:pd.After opening the file, it performs a :link reftype=hd
+refid='search'.search:elink. for a keyword <searchtext>. This does a full text
+search look at topic titles, index entries and topic content. The result is the
+same as performing a search from the :link reftype=hd refid='search'.search panel:elink..
+:p.
+Example:
+.br
+:lm margin=8.
+To search for TfpgApplication in the whole fpGUI Toolkit class document you can call
 :xmp.
-  DocView &slash.s cmdref net access
+  docview fpgui.inf -k TfpgApplication
 :exmp.
-To perform a AND search enclose the search phrase in double quotes&per.
+DocView is clever enough to handle multiple words (like the :link reftype=hd
+refid='search'.search panel:elink.). This is a OR search.
 :xmp.
-  DocView &slash.s cmdref &odq.net access&cdq.
+  docview fpgui.inf -k net access
+:exmp.
+To perform an AND search enclose the search phrase in double quotes.
+:xmp.
+  docview fpgui.inf -k "net access"
 :exmp.
 :lm margin=1.
-.*
-:p.:hp2.&slash.g:ehp2.
-:p.Performs a :link reftype=hd refid='GlobalSearch'.global search:elink. for the
-given text&comma. on all the help files in your system&per.
-:p.Example&colon.
-.br
-:lm margin=4.
-To search for copy in all help files use
-:xmp.
-  DocView &slash.g copy
-:exmp.
-Provide the file name as first parameter if you like to open a help file
-before the search starts.
-:xmp.
-  DocView &slash.g cmdref copy
-:exmp.
-:lm margin=1.
-.*
-:p.:hp2.&slash.?:ehp2. or :hp2.&slash.h:ehp2. or :hp2.&slash.help:ehp2.
-:p.Show command line help
-:p.See also&colon. :link reftype=hd refid='AdvancedParameters'.Advanced
-Parameters:elink.
-.* ************************************************************
-.* Command Line Topic Search
-.* ************************************************************
-:h2 res=13 id='CommandLineTopicSearch'.
-Command Line Topic Search
-:p.:hp2.Command line topic search:ehp2.
-:p. view &lt.filename&gt. &lt.topic&gt.
-:p.The topic search parameter specified on the command line&comma. copies the
-behaviour of old view&per.
-:p.Text within topics is not searched&comma. only titles and index entries&per.
-This makes it less useful to humans&comma. but is used by some programs to
-reference help topics in a predictable way&per.
-:p.You can use multiple words here&per.
-:p.The search performed is&colon.
-:p.&endash. topic title starts with search text
-:p.&endash. index entry starts with search text
-:p.&endash. topic title contains search text
-:p.&endash. index entry contains search text&per.
-:p.Developers should make sure that the expected document will be found if using
-this technique to identify topics when starting New or Old view&per.
+:pt.-n <id>
+:pd.Open a topic with the numeric ID equal to <id>.
+:pt.-s <id>
+:pd.Open a topic with string ID equal to <id>.
+:pt.-debuglog <filename>
+:pd.Log debug information to a file.
+:eparml.
+
+.*  :p.See also&colon. :link reftype=hd refid='AdvancedParameters'.Advanced
+.*  Parameters:elink.
+
 .* ************************************************************
 .* Advanded Parameters
 .* ************************************************************
-:h2 res=14 id='AdvancedParameters'.
-Advanced Parameters
-:p.:hp2.Advanced Parameters:ehp2.
-:p.The following command line parameters are intended mainly for software
-developers&comma. but can be used for any purpose&per.
-:p.:hp2.&slash.lang&colon.&lt.language spec&gt.:ehp2.
-:p.Loads the specified language&per. Overrides the default chosen based on the
-LANG environment variable&per. For example&comma.
-:xmp.
-  DocView cmdref &slash.lang&colon.en
-:exmp.
-loads English&per. See readme&per.txt for more information&per.
-:p.:hp2.&slash.pos&colon.&lt.left&gt.&comma.&lt.bottom&gt.&comma.&lt.width&gt.&comma.&lt.height&gt.:ehp2.
-:p.Set the main program window to the given position and size&per. All values
-must be given&per. Put a :hp2.P:ehp2. after a number to specify a
-percentage&per. For example&colon.
-:xmp.
-  DocView &slash.pos&colon.10P&comma.10P&comma.80P&comma.80P
-:exmp.
-:p.makes the window centered and 80&percent. of the screen size&per.
-:p.:hp2.&slash.title&colon.&lt.window title&gt.:ehp2.
-:p.Sets the title of the DocView window to the specified text&comma. overriding
-whatever appears in the help file&per. The text &odq.Help &endash.  &cdq. will always be
-inserted in front of the specified text&comma. unless the specified text is
-&odq.help&cdq.&comma. in which case the title will simply become &odq.Help&cdq.&per. This is to
-make sure that help windows are always obvious as such in the window list&per.
-:p.If you need to specify multiple words&comma. surround the entire option with
-quotes&comma. for example&colon.
-:xmp.
-  DocView cmdref &odq.&slash.title&colon.Command Line Help&cdq.
-:exmp.
+.*  :h2 res=14 id='AdvancedParameters'.
+.*  Advanced Parameters
+.*  :p.:hp2.Advanced Parameters:ehp2.
+.*  :p.The following command line parameters are intended mainly for software
+.*  developers&comma. but can be used for any purpose&per.
+.*  :p.:hp2.&slash.lang&colon.&lt.language spec&gt.:ehp2.
+.*  :p.Loads the specified language&per. Overrides the default chosen based on the
+.*  LANG environment variable&per. For example&comma.
+.*  :xmp.
+.*    DocView cmdref &slash.lang&colon.en
+.*  :exmp.
+.*  loads English&per. See readme&per.txt for more information&per.
+.*  :p.:hp2.&slash.pos&colon.&lt.left&gt.&comma.&lt.bottom&gt.&comma.&lt.width&gt.&comma.&lt.height&gt.:ehp2.
+.*  :p.Set the main program window to the given position and size&per. All values
+.*  must be given&per. Put a :hp2.P:ehp2. after a number to specify a
+.*  percentage&per. For example&colon.
+.*  :xmp.
+.*    DocView &slash.pos&colon.10P&comma.10P&comma.80P&comma.80P
+.*  :exmp.
+.*  :p.makes the window centered and 80&percent. of the screen size&per.
+.*  :p.:hp2.&slash.title&colon.&lt.window title&gt.:ehp2.
+.*  :p.Sets the title of the DocView window to the specified text&comma. overriding
+.*  whatever appears in the help file&per. The text &odq.Help &endash.  &cdq. will always be
+.*  inserted in front of the specified text&comma. unless the specified text is
+.*  &odq.help&cdq.&comma. in which case the title will simply become &odq.Help&cdq.&per. This is to
+.*  make sure that help windows are always obvious as such in the window list&per.
+.*  :p.If you need to specify multiple words&comma. surround the entire option with
+.*  quotes&comma. for example&colon.
+.*  :xmp.
+.*    DocView cmdref &odq.&slash.title&colon.Command Line Help&cdq.
+.*  :exmp.
+
 .* ************************************************************
 .* Command Line Examples
 .* ************************************************************
-:h2 res=15 id='CommandLineExamples'.
-Command Line Examples
-:p.:hp2.Command Line Examples:ehp2.
-.*
-:p.The following examples assume that DocView is installed as a complete
-replacement and therefore view is actually DocView&per.
-:p.:hp2.view cmdref:ehp2.
+:h2 res=15 id='CommandLineExamples'.Command Line Examples
+:hp2.Command Line Examples:ehp2.
+:p.
+The following examples assume that DocView is installed and is accessible from
+the command line.
+:p.
+:hp2.docview fpgui:ehp2.
 :lm margin=4.
-:p.Open the file cmdref&per.inf &lpar.OS&slash.2 Command Reference&rpar. from
-the help path&per.
+:p.
+Open the file fpgui.inf (fpGUI Toolkit's class documentation) from
+the help path.
 :lm margin=1.
-.*
-:p.:hp2.view cmdref&plus.os2ug:ehp2.
+:p.
+:hp2.docview fpgui+rtl:ehp2.
 :lm margin=4.
-:p.Open two files&comma. cmdref&per.inf and os2ug&per.inf &lpar.OS&slash.2 User
-Guide&rpar.&comma. in the same window&per.
+:p.
+Open two files, fpgui.inf and rtl.inf (Free Pascal's Runtime Library documentation),
+in the same window. The table of contents from rtl.inf is added to the end of the
+contents from fpgui.inf. The indexes are combined alphabetically.
+:lm margin=1.
+:p.
+:hp2.docview c:\programming\books\rtl.inf:ehp2.
+:lm margin=4.
+:p.
+Open the file rtl.inf in the c:\programming\books\ directory.
+:lm margin=1.
+:p.
+:hp2.docview "c:\programming books\rtl.inf":ehp2.
+:lm margin=4.
+:p.
+Surround <path>\<file> with double quotes if they contain special characters
+(like spaces).
+:lm margin=1.
+:p.
+:hp2.docview fpgui -k themes:ehp2.
+:lm margin=4.
+:p.Open the file fpgui.inf and search for the word "themes". The best
+match is shown. The search tab will also be active, showing any other search
+results.
+:lm margin=1.
+:p.
+Linux example:
 .br
-The table of contents from os2ug&per.inf is added to the end of the contents
-from cmdref&per.inf&per. The indexes are combined alphabetically&per.
-:lm margin=1.
-.*
-:p.:hp2.view c&colon.&bsl.os2&bsl.book&bsl.os2ug&per.inf:ehp2.
-:lm margin=4.
-:p.Open the file os2ug&per.inf in the c&colon.&bsl.os2&bsl.book directory&per.
-:lm margin=1.
-.*
-:p.:hp2.view &odq.c&colon.&bsl.os2 book&bsl.os2ug&per.inf&cdq.:ehp2.
-:lm margin=4.
-:p.Surround path&bsl.file with double quotes if they contain special characters (like blank)&per.
-:lm margin=1.
-.*
-:p.:hp2.view cmdref dir:ehp2.
-:lm margin=4.
-:p.Open the file cmdref &lpar.OS&slash.2 command reference&rpar. and look in
-titles and index for the word &odq.dir&cdq.&per. Will show the help page for the DIR
-command&per.
-:lm margin=1.
-.*
-:p.:hp2.view &slash.s os2ug desktop:ehp2.
-:lm margin=4.
-:p.Open the file os2ug&per.inf and search for the word &odq.desktop&cdq.&per. The best
-match is shown&per.
-:lm margin=1.
-.*
-:p.:hp2.view &slash.g permissions:ehp2.
-:lm margin=4.
-:p.Performs a search of all help files for the word &odq.permissions&cdq.&per.
-:lm margin=1.
-.*
-:p.:hp2.set myhelp&eq.cmdref&plus.os2ug&plus.rexx:ehp2.
+:hp2.export MYHELP=rtl+fcl+fpgui:ehp2.
 .br
-:hp2.view myhelp:ehp2.
+:hp2.docview MYHELP:ehp2.
+:p.
+Windows example:
+.br
+:hp2.set MYHELP=rtl+fcl+fpgui:ehp2.
+.br
+:hp2.docview MYHELP:ehp2.
 :lm margin=4.
 :p.The first line sets an environment variable MYHELP to contain the names of
-three help files&per. The second line opens the three files&per.
+three help files. The second line opens the three files.
+:note.Under Linux, environment variable names are also case sensitive (like
+file names), so the environment variable "MYHELP" is not equal to "myhelp".
 :lm margin=1.
-.*
-.*
+
+
 .* ************************************************************
 .* Keyboard Shortcuts
 .* ************************************************************
-:h1 res=10 id='KeyboardShortcuts'.
-Keyboard Shortcuts
-:p.:hp2.Keyboard Shortcuts:ehp2.
-:p.Most keyboard shortcuts are visible in the menu&comma. but a few are not&per.
-The additional shortcuts are&colon.
-:p.:hp2.Alt&plus.F4:ehp2. Exit
-:p.:hp2.Ctrl&plus.C:ehp2. Copy selected text to clipboard
-:p.:hp2.F7:ehp2. Back
-:p.:hp2.F8:ehp2. Forward
-:p.:hp2.Ctrl&plus.Left:ehp2. Back
-:p.:hp2.F11:ehp2. Previous in contents
-:p.:hp2.F12:ehp2. Next in contents
-:p.
-:p.:hp2.Shortcuts visible in the menu:ehp2.
-:p.:hp2.Ctrl&plus.O:ehp2. Open files
-:p.:hp2.Ctrl&plus.E:ehp2. Open files from help paths
-:p.:hp2.Ctrl&plus.N:ehp2. Open a new window
-:p.:hp2.Ctrl&plus.P:ehp2. Print topic
-:p.:hp2.F3:ehp2. Exit
-:p.
-:p.
-:p.:hp2.Ctrl&plus.A:ehp2. Select all text in topic
-:p.:hp2.Ctrl&plus.Ins:ehp2. Copy selected text to clipboard
-:p.
-:p.:hp2.Ctrl&plus.F:ehp2. Find within current topic
-:p.:hp2.Ctrl&plus.G:ehp2. Repeat last find
-:p.
-:p.:hp2.Ctrl&plus.S:ehp2. Open global search tool
-:p.
-:p.:hp2.Alt&plus.C:ehp2. Change to the contents tab
-:p.:hp2.Alt&plus.I:ehp2. Change to the index tab
-:p.:hp2.Alt&plus.S:ehp2. Change to the search tab
-:p.:hp2.Alt&plus.N:ehp2. Change to the notes tab
-:p.:hp2.Alt&plus.P:ehp2. Toggle the left panel &lpar.tabs&rpar. on and off
-:p.:hp2.F5:ehp2. Expand all contents
-:p.:hp2.F6:ehp2. Collapse all contents
-:p.
-:p.:hp2.Esc:ehp2. Back
-:p.:hp2.Ctrl&plus.Right:ehp2. Forward
-:p.:hp2.Ctrl&plus.Up:ehp2. Previous topic in contents
-:p.:hp2.Ctrl&plus.Down:ehp2. Next topic in contents
-:p.
-:p.:hp2.Ctrl&plus.D:ehp2. Edit bookmarks
-:p.:hp2.Ctrl&plus.B:ehp2. Bookmark current topic
-:p.
-:p.:hp2.Ctrl&plus.M:ehp2. Add note at cursor position
-:p.
-:p.:hp2.F1:ehp2. Help for DocView
-.*
-.*
+.* TODO
+.*  :h1 res=10 id='KeyboardShortcuts'.
+.*  Keyboard Shortcuts
+.*  :p.:hp2.Keyboard Shortcuts:ehp2.
+.*  :p.Most keyboard shortcuts are visible in the menu&comma. but a few are not&per.
+.*  The additional shortcuts are&colon.
+.*  :p.:hp2.Alt&plus.F4:ehp2. Exit
+.*  :p.:hp2.Ctrl&plus.C:ehp2. Copy selected text to clipboard
+.*  :p.:hp2.F7:ehp2. Back
+.*  :p.:hp2.F8:ehp2. Forward
+.*  :p.:hp2.Ctrl&plus.Left:ehp2. Back
+.*  :p.:hp2.F11:ehp2. Previous in contents
+.*  :p.:hp2.F12:ehp2. Next in contents
+.*  :p.
+.*  :p.:hp2.Shortcuts visible in the menu:ehp2.
+.*  :p.:hp2.Ctrl&plus.O:ehp2. Open files
+.*  :p.:hp2.Ctrl&plus.E:ehp2. Open files from help paths
+.*  :p.:hp2.Ctrl&plus.N:ehp2. Open a new window
+.*  :p.:hp2.Ctrl&plus.P:ehp2. Print topic
+.*  :p.:hp2.F3:ehp2. Exit
+.*  :p.
+.*  :p.
+.*  :p.:hp2.Ctrl&plus.A:ehp2. Select all text in topic
+.*  :p.:hp2.Ctrl&plus.Ins:ehp2. Copy selected text to clipboard
+.*  :p.
+.*  :p.:hp2.Ctrl&plus.F:ehp2. Find within current topic
+.*  :p.:hp2.Ctrl&plus.G:ehp2. Repeat last find
+.*  :p.
+.*  :p.:hp2.Ctrl&plus.S:ehp2. Open global search tool
+.*  :p.
+.*  :p.:hp2.Alt&plus.C:ehp2. Change to the contents tab
+.*  :p.:hp2.Alt&plus.I:ehp2. Change to the index tab
+.*  :p.:hp2.Alt&plus.S:ehp2. Change to the search tab
+.*  :p.:hp2.Alt&plus.N:ehp2. Change to the notes tab
+.*  :p.:hp2.Alt&plus.P:ehp2. Toggle the left panel &lpar.tabs&rpar. on and off
+.*  :p.:hp2.F5:ehp2. Expand all contents
+.*  :p.:hp2.F6:ehp2. Collapse all contents
+.*  :p.
+.*  :p.:hp2.Esc:ehp2. Back
+.*  :p.:hp2.Ctrl&plus.Right:ehp2. Forward
+.*  :p.:hp2.Ctrl&plus.Up:ehp2. Previous topic in contents
+.*  :p.:hp2.Ctrl&plus.Down:ehp2. Next topic in contents
+.*  :p.
+.*  :p.:hp2.Ctrl&plus.D:ehp2. Edit bookmarks
+.*  :p.:hp2.Ctrl&plus.B:ehp2. Bookmark current topic
+.*  :p.
+.*  :p.:hp2.Ctrl&plus.M:ehp2. Add note at cursor position
+.*  :p.
+.*  :p.:hp2.F1:ehp2. Help for DocView
+
+
 .* ************************************************************
 .* Environment Variables
 .* ************************************************************
-:h1 res=11 id='L_EnvironmentVariables'.
-Environment Variables
-:p.:hp2.Environment Variables:ehp2.
+:h1 res=11 id='L_EnvironmentVariables'.Environment Variables
+:hp2.Environment Variables:ehp2.
 :p.
-:p.Both the :hp2.BOOKSHELF:ehp2. and :hp2.HELP:ehp2. environment variables
-define paths &lpar.lists of directories&rpar. for searching for help files&per.
-DocView uses both paths without distinction&per.
-:p.These paths are searched when you&colon.
-:p.o specify a help file without a path on the command line
-:p.o use the File &endash. Open Special&per.&per.&per. menu item
-:p.o do a :link reftype=hd refid='GlobalSearch'.global search:elink.
+Both the :hp2.BOOKSHELF:ehp2. and :hp2.HELP:ehp2. environment variables
+define paths (lists of directories) for searching for help files.
+DocView uses both paths without distinction.
+:p.
+These paths are searched when you:
+:ul.
+:li.specify a help file without a path on the command line
+:li.use the "File - Open Special..." menu item
+.* TODO
+.* :li.do a :link reftype=hd refid='GlobalSearch'.global search:elink.
+:eul.
 :p.You can permanently add directories of help files to the :hp2.HELP:ehp2. or
-:hp2.BOOKSHELF:ehp2. paths by modifying the CONFIG&per.SYS file&per. Add to both
-paths&comma. if you also want old view to be able to find the files&per.
-:p.:hp2.Other environment variables:ehp2.
-:p.The :hp2.LANG:ehp2. environment variable is examined to decide the default
-language that DocView will be displayed in&per. &lpar.Overridden by the
-&slash.lang :link reftype=hd refid='AdvancedParameters'.command line
-parameter:elink.&per.&rpar. See the DocView readme&per.txt for more information
-about languages&per.
-:p.The directory defined in :hp2.LOGFILES:ehp2. is used for logging crashes or
-other information&per.
-:p.The subdirectory &odq.lang&cdq. under the directory defined by :hp2.OSDIR:ehp2. is
-searched for language files at startup&per.
-:p.The path :hp2.ULSPATH:ehp2. is also searched for language files&per.
-.*
-.*
+:hp2.BOOKSHELF:ehp2. paths by modifying the CONFIG&per.SYS (Windows) or
+~/.profile (Linux &amp. FreeBSD) file.
+:p.
+:hp2.Other environment variables:ehp2.
+:p.
+The :hp2.LANG:ehp2. environment variable is examined under Linux or FreeBSD to
+decide the default language that DocView will be displayed in. Windows doesn't
+user a environment variable, instead use the Region applet in the Windows Control Panel.
+
+
 .* ************************************************************
 .* For Authors and Developers
 .* ************************************************************
-:h1 res=20 id='ForAuthors'.
-For Authors and Developers
-:p.:hp2.For Authors and Developers:ehp2.
+:h1 res=20 id='ForAuthors'.For Authors and Developers
+:hp2.For Authors and Developers:ehp2.
 :p.
-:p.This section contains some notes for document authors and software
-developers&per.
-:p.Also see the section about URL recognition in the :link reftype=hd
-refid='InternetLinks'.Internet Links :elink.topic&per.
+This section contains some notes for document authors and software
+developers.
+:p.
+Also see the section about URL recognition in the :link reftype=hd
+refid='InternetLinks'.Internet Links :elink.topic.
+
 .* ************************************************************
 .* Writing Help Files
 .* ************************************************************
-:h2 res=12 id='WritingHelpFiles'.
-Writing Help Files
-:p.:hp2.Writing OS&slash.2 Help Files :ehp2.
-:p.
+:h2 res=12 id='WritingHelpFiles'.Writing Help Files
+:hp2.Writing OS&slash.2 Help Files:ehp2.
 :p.OS&slash.2 Help Files are produced using the IPF Compiler&per. IPF stands for
 Information Presentation Facility&per.
 :p.The IPF Compiler takes a text file written in a language that tells it about
