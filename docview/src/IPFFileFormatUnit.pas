@@ -10,9 +10,9 @@ uses
   SysUtils;
 
 type
-  uint32  = longword;
-  uint16  = word;
-  uint8   = byte;
+  uint32  = longword;       // 4 bytes
+  uint16  = word;           // 2 bytes
+  uint8   = byte;           // 1 byte
   pUInt16 = ^uint16;
   pUInt32 = ^uint32;
   pUInt8  = ^uint8;

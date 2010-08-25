@@ -492,6 +492,7 @@ begin
       Add('<b><u>Filename:</u></b> <blue>' + f.Filename + '<black>');
       Add('<b>Title:</b> ' + f.Title);
       Add('<b>File size:</b> ' + IntToStr(fpgFileSize(f.Filename)) + ' bytes');
+      Add('<b>INF/HLP file version</b> ' + f.FormatVersion);
       Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
       Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
       Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
