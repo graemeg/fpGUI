@@ -79,7 +79,7 @@ begin
     SetPosition(0, 0, 496, 260);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Hint := '';
-    FontDesc := '#Edit1';
+    FontDesc := '#Edit2';
     TabOrder := 2;
   end;
 
