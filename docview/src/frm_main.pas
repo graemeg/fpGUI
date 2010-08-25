@@ -119,6 +119,7 @@ type
     procedure   miDebugHex(Sender: TObject);
     procedure   miToolsFindByResourceID(Sender: TObject);
     procedure   miToolsFindTopifByName(Sender: TObject);
+    procedure   miTopicPropertiesClicked(Sender: TObject);
     procedure   miFileSaveTopicAsIPF(Sender: TObject);
     procedure   OnMRUMenuItemClick(Sender: TObject);
     procedure   btnShowIndex(Sender: TObject);
@@ -545,6 +546,50 @@ Begin
     if not DisplayTopicByGlobalName( TopicNameString ) then
       TfpgMessageDialog.Critical( 'Find Topic By Name', 'Topic name not found' );
 end;
+
+procedure TMainForm.miTopicPropertiesClicked(Sender: TObject);
+const
+  TopicInfoTitle = 'Topic Information';
+  TopicInfoTopicTitle = 'Title: ';
+  TopicInfoIndex = 'Index: ';
+  TopicInfoFile = 'File:  ';
+  TopicInfoResourceIDs = 'Resource IDs:';
+  TopicInfoNoResourceIDs = '  (None)';
+var
+  Topic: TTopic;
+  HelpFile: THelpFile;
+  ResourceIDs: TList;
+  i: longint;
+  sl: TStringList;
+begin
+  if CurrentTopic = nil then
+    Exit;
+  Topic := CurrentTopic;
+  HelpFile := Topic.HelpFile as THelpFile;
+
+  ResourceIDs := TList.Create;
+  HelpFile.FindResourceIDsForTopic(Topic, ResourceIDs);
+  sl := TStringList.Create;
+  try
+    with sl do
+    begin
+      Clear;
+      Add( TopicInfoTitle );
+      Add( TopicInfoTopicTitle + Topic.Title );
+      Add( TopicInfoIndex + IntToStr( Topic.Index ) );
+      Add( TopicInfoFile + HelpFile.Filename );
+      Add( TopicInfoResourceIDs );
+      for i := 0 to ResourceIDs.Count - 1 do
+        Add( '  ' + IntToStr( longint( ResourceIDs[ i ] ) ) );
+      if ResourceIDs.Count = 0 then
+        Add( TopicInfoNoResourceIDs );
+    end;
+    ResourceIDs.Destroy;
+    ShowText(TopicInfoTitle, sl.Text);
+  finally
+    sl.Free;
+  end;
+End;
 
 procedure TMainForm.miFileSaveTopicAsIPF(Sender: TObject);
 var
@@ -2378,6 +2423,8 @@ begin
     SetPosition(292, 216, 132, 20);
     AddMenuItem('Expand All', '', @miViewExpandAllClicked);
     AddMenuItem('Collapse All', '', @miViewCollapseAllClicked);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Topic Properties', '', @miTopicPropertiesClicked);
   end;
 
   miTools := TfpgPopupMenu.Create(self);
