@@ -21,7 +21,6 @@ type
     tsFontsColor: TfpgTabSheet;
     Label1: TfpgLabel;
     Label2: TfpgLabel;
-    btnHelp: TfpgButton;
     pnlSearchHighlight: TfpgPanel;
     cbIndexStyle: TfpgComboBox;
     lblIndexStyle: TfpgLabel;
@@ -37,6 +36,7 @@ type
     edtFixedFont: TfpgFontEdit;
     edtNormalFont: TfpgFontEdit;
     {@VFD_HEAD_END: ConfigurationForm}
+    btnHelp: TfpgButton;
     procedure ConfigurationFormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject; NewActiveSheet: TfpgTabSheet);
@@ -94,11 +94,11 @@ procedure TConfigurationForm.PageControl1Change(Sender: TObject;
 begin
   if NewActiveSheet = tsGeneral then
   begin
-    btnHelp.HelpContext := hcConfigGeneralTab;
+//    btnHelp.HelpContext := hcConfigGeneralTab;
   end
   else if NewActiveSheet = tsFontsColor then
   begin
-    btnHelp.HelpContext := hcConfigFontsColorTab;
+//    btnHelp.HelpContext := hcConfigFontsColorTab;
   end;
 end;
 
@@ -252,6 +252,7 @@ begin
     SetPosition(12, 20, 108, 19);
     FontDesc := '#Label1';
     Hint := '';
+    Layout := tlCenter;
     Text := 'Normal Font';
   end;
 
@@ -262,22 +263,8 @@ begin
     SetPosition(12, 52, 104, 19);
     FontDesc := '#Label1';
     Hint := '';
+    Layout := tlCenter;
     Text := 'Fixed Font';
-  end;
-
-  btnHelp := TfpgButton.Create(self);
-  with btnHelp do
-  begin
-    Name := 'btnHelp';
-    SetPosition(468, 356, 28, 24);
-    Anchors := [anRight,anBottom];
-    Text := '?';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 21;
-    HelpType := htContext;
-    OnClick := @btnHelpClick;
   end;
 
   pnlSearchHighlight := TfpgPanel.Create(tsFontsColor);
@@ -308,7 +295,7 @@ begin
   with lblIndexStyle do
   begin
     Name := 'lblIndexStyle';
-    SetPosition(12, 11, 296, 19);
+    SetPosition(12, 13, 296, 17);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Index style';
@@ -318,7 +305,7 @@ begin
   with lblSearchDirs do
   begin
     Name := 'lblSearchDirs';
-    SetPosition(12, 63, 308, 19);
+    SetPosition(12, 65, 308, 17);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Search directories';
@@ -346,7 +333,7 @@ begin
     Hint := '';
     HotTrack := False;
     PopupFrame := False;
-    TabOrder := 6;
+    TabOrder := 7;
     Items.Duplicates := dupIgnore;
   end;
 
@@ -359,7 +346,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 7;
+    TabOrder := 6;
   end;
 
   chkEscapeIPFSymbols := TfpgCheckBox.Create(tsGeneral);
@@ -429,7 +416,7 @@ begin
   with edtFixedFont do
   begin
     Name := 'edtFixedFont';
-    SetPosition(124, 48, 340, 27);
+    SetPosition(124, 48, 340, 24);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '';
     TabOrder := 15;
@@ -439,7 +426,7 @@ begin
   with edtNormalFont do
   begin
     Name := 'edtNormalFont';
-    SetPosition(124, 16, 340, 27);
+    SetPosition(124, 16, 340, 24);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '';
     TabOrder := 14;
@@ -450,6 +437,21 @@ begin
 
   // always reset pagecotrol
   PageControl1.ActivePageIndex := 0;
+
+  //btnHelp := TfpgButton.Create(self);
+  //with btnHelp do
+  //begin
+  //  Name := 'btnHelp';
+  //  SetPosition(468, 356, 28, 24);
+  //  Anchors := [anRight,anBottom];
+  //  Text := '?';
+  //  FontDesc := '#Label1';
+  //  Hint := '';
+  //  ImageName := '';
+  //  TabOrder := 21;
+  //  HelpType := htContext;
+  //  OnClick := @btnHelpClick;
+  //end;
 end;
 
 
