@@ -881,7 +881,8 @@ begin
     // the "no results" place holder
     exit;
   Topic := lbSearchResults.Items.Objects[lbSearchResults.FocusItem] as TTopic;
-  DisplayTopic( Topic );
+  if Topic <> nil then
+    DisplayTopic(Topic);
 end;
 
 procedure TMainForm.NavigateToHistoryIndex(AIndex: integer);
@@ -1802,8 +1803,16 @@ begin
   //writeln('-----------------------------');
   RichView.AddText(PChar(lText));
 
+  if CurrentTopic.ShowInContents then
+  begin
   tvContents.Selection := tvContents.RootNode.FindSubNode(CurrentTopic, True);
   tvContents.Invalidate;
+  end
+  else
+  begin
+    tvContents.Selection := nil;
+    tvContents.Invalidate;
+  end;
   SaveNavigatePoint;
   UpdateLocationPanel;
 end;
