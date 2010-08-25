@@ -2367,8 +2367,8 @@ begin
   begin
     Name := 'miBookmarks';
     SetPosition(292, 144, 132, 20);
-    AddMenuItem('Add..', '', nil);
-    AddMenuItem('Show', '', nil);
+    AddMenuItem('Add..', '', nil).Enabled := False;
+    AddMenuItem('Show', '', nil).Enabled := False;
   end;
 
   miView := TfpgPopupMenu.Create(self);
@@ -2423,7 +2423,7 @@ begin
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := 'Open a new help file.';
+    Hint := 'Open a new help file';
     ImageMargin := -1;
     ImageName := 'stdimg.open';
     ImageSpacing := 0;
@@ -2440,7 +2440,7 @@ begin
     Text := '<';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := 'Previous history item.';
+    Hint := 'Previous history item';
     ImageMargin := -1;
     ImageName := 'dv.arrowleft';
     ImageSpacing := 0;
@@ -2457,7 +2457,7 @@ begin
     Text := '>';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := 'Next history item.';
+    Hint := 'Next history item';
     ImageMargin := -1;
     ImageName := 'dv.arrowright';
     ImageSpacing := 0;
@@ -2474,7 +2474,7 @@ begin
     Text := 'prev';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := 'Previous Topic.';
+    Hint := 'Previous Topic';
     ImageMargin := -1;
     ImageName := 'dv.arrowup';
     ImageSpacing := 0;
@@ -2491,13 +2491,13 @@ begin
     Text := 'next';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := 'Next Topic.';
+    Hint := 'Next Topic';
     ImageMargin := -1;
     ImageName := 'dv.arrowdown';
     ImageSpacing := 0;
     TabOrder := 5;
     Focusable := False;
-    OnClick :=@btnNextClick;
+    OnClick := @btnNextClick;
   end;
 
   btnHelp := TfpgButton.Create(ToolBar);
@@ -2508,7 +2508,7 @@ begin
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := 'Display Product Information.';
+    Hint := 'Display Product Information';
     ImageMargin := -1;
     ImageName := 'stdimg.help';
     ImageSpacing := 0;
