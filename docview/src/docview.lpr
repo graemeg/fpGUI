@@ -12,7 +12,7 @@ uses
   fpg_cmdlineparams, IPFFileFormatUnit, HelpWindowDimensions,
   NewViewConstantsUnit, SettingsUnit, RichTextStyleUnit, CanvasFontManager,
   ACLStringUtility, RichTextDocumentUnit, RichTextView, RichTextLayoutUnit,
-  RichTextDisplayUnit, dvconstants, dvHelpers, frm_configuration, HelpBitmap;
+  RichTextDisplayUnit, dvconstants, dvHelpers, frm_configuration, HelpBitmap, frm_text;
 
 
 procedure MainProc;
