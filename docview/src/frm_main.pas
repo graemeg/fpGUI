@@ -117,6 +117,8 @@ type
     procedure   miHelpUsingDocView(Sender: TObject);
     procedure   miDebugHeader(Sender: TObject);
     procedure   miDebugHex(Sender: TObject);
+    procedure   miToolsFindByResourceID(Sender: TObject);
+    procedure   miToolsFindTopifByName(Sender: TObject);
     procedure   miFileSaveTopicAsIPF(Sender: TObject);
     procedure   OnMRUMenuItemClick(Sender: TObject);
     procedure   btnShowIndex(Sender: TObject);
@@ -172,6 +174,9 @@ type
     function    FindTopicForLink( Link: THelpLink ): TTopic;
     function    FindTopicByResourceID( ID: word ): TTopic;
     function    FindTopicByName(const AName: string): TTopic;
+    function    DisplayTopicByResourceID( ID: word ): boolean;
+    function    DisplayTopicByName(const TopicName: string): boolean;
+    function    DisplayTopicByGlobalName(const TopicName: string): boolean;
     procedure   ViewSourceMIOnClick(Sender: TObject);
     procedure   AddCurrentToMRUFiles;
     procedure   CreateMRUMenuItems;
@@ -507,6 +512,38 @@ begin
   Debug := not Debug;
   miDebugHexInfo.Checked := Debug;
   DisplayTopic(nil);
+end;
+
+procedure TMainForm.miToolsFindByResourceID(Sender: TObject);
+var
+  ResourceIDString: string;
+  ResourceID: word;
+begin
+  if not fpgInputQuery('Find Resource ID', 'Enter the resource ID to find', ResourceIDString) then
+    exit;
+  try
+    ResourceID := StrToInt(ResourceIDString);
+  except
+    TfpgMessageDialog.Critical('Find Resource ID', 'Invalid resource ID entered');
+    exit;
+  end;
+
+  if not DisplayTopicByResourceID( ResourceID ) then
+    TfpgMessageDialog.Critical('Find Resource ID', 'Resource ID not found');
+end;
+
+procedure TMainForm.miToolsFindTopifByName(Sender: TObject);
+var
+  TopicNameString: string;
+Begin
+  if not fpgInputQuery( 'Find Topic By Name',
+                       'Enter the topic name to search for',
+                       TopicNameString ) then
+    exit;
+
+  if not DisplayTopicByName( TopicNameString ) then
+    if not DisplayTopicByGlobalName( TopicNameString ) then
+      TfpgMessageDialog.Critical( 'Find Topic By Name', 'Topic name not found' );
 end;
 
 procedure TMainForm.miFileSaveTopicAsIPF(Sender: TObject);
@@ -2340,6 +2377,9 @@ begin
     Name := 'miTools';
     SetPosition(428, 96, 120, 20);
     AddMenuItem('Show file info', '', @miDebugHeader);
+    AddMenuItem('Find topic by resource ID', '', @miToolsFindByResourceID);
+    AddMenuItem('Find topic by resource name', '', @miToolsFindTopifByName);
+    miDebugHexInfo := AddMenuItem('Toggle hex INF values in contents', '', @miDebugHex);
     AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
   end;
 
@@ -2716,6 +2756,46 @@ begin
   // not found.
   Result := nil;
 end;
+
+function TMainForm.DisplayTopicByResourceID(ID: word): boolean;
+var
+  Topic: TTopic;
+begin
+  Topic := FindTopicByResourceID( ID );
+  if Topic = nil then
+  begin
+    Result := false;
+    exit;
+  end;
+  result := true;
+  DisplayTopic(Topic);
+end;
+
+function TMainForm.DisplayTopicByName(const TopicName: string): boolean;
+var
+  Topic: TTopic;
+begin
+  Topic := FindTopicByName(TopicName);
+  if Topic = nil then
+  begin
+    Result := false;
+    exit;
+  end;
+  result := true;
+  DisplayTopic(Topic);
+end;
+
+function TMainForm.DisplayTopicByGlobalName(const TopicName: string): boolean;
+begin
+  Result := False;
+  // TODO: implement me
+end;
+
+procedure TMainForm.ViewSourceMIOnClick(Sender: TObject);
+begin
+  ShowText('RichView Source Text', RichView.Text);
+End;
+
 
 // Add the current list of open files as
 // a Most Recently Used entry
