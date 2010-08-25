@@ -60,7 +60,6 @@ type
     miBookmarks: TfpgPopupMenu;
     miView: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
-    miDebug: TfpgPopupMenu;
     ToolBar: TfpgBevel;
     btnOpen: TfpgButton;
     btnBack: TfpgButton;
@@ -485,9 +484,9 @@ begin
     sl.Clear;
     with sl do
     begin
-      Add('<b><u>Filename:</u></b> <red>' + f.Filename + '<black>');
+      Add('<b><u>Filename:</u></b> <blue>' + f.Filename + '<black>');
       Add('<b>Title:</b> ' + f.Title);
-      Add('<b>File size:</b> ' + IntToStr(fpgFileSize(f.Filename)) + 'bytes');
+      Add('<b>File size:</b> ' + IntToStr(fpgFileSize(f.Filename)) + ' bytes');
       Add('<b>Dictionary count:</b> ' + IntToStr(f.DictionaryCount));
       Add('<b>Topic count:</b> ' + IntToStr(f.TopicCount));
       Add('<b>Index count:</b> ' + IntToStr(f.Index.Count));
@@ -2340,6 +2339,7 @@ begin
   begin
     Name := 'miTools';
     SetPosition(428, 96, 120, 20);
+    AddMenuItem('Show file info', '', @miDebugHeader);
     AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
   end;
 
@@ -2351,18 +2351,8 @@ begin
     AddMenuItem('Help using DocView', '', @miHelpUsingDocView);
     AddMenuItem('Command line parameters', '', @miHelpCmdLineParams);
     AddMenuItem('-', '', nil);
-    AddMenuItem('Show help file header info', '', @miDebugHeader);
-    AddMenuItem('-', '', nil);
     AddMenuItem('About fpGUI Toolkit...', '', @miHelpAboutFPGui);
     AddMenuItem('Product Information...', '', @miHelpProdInfoClicked);
-  end;
-
-  miDebug := TfpgPopupMenu.Create(self);
-  with miDebug do
-  begin
-    Name := 'miDebug';
-    SetPosition(292, 192, 132, 20);
-    miDebugHexInfo := AddMenuItem('Toggle Hex INF Values in Contents', '', @miDebugHex);
   end;
 
   ToolBar := TfpgBevel.Create(self);
@@ -2537,7 +2527,6 @@ begin
   MainMenu.AddMenuItem('&Bookmarks', nil).SubMenu := miBookmarks;
   MainMenu.AddMenuItem('&Tools', nil).SubMenu := miTools;
   MainMenu.AddMenuItem('&Help', nil).SubMenu := miHelp;
-  MainMenu.AddMenuItem('&Debug', nil).SubMenu := miDebug;
   FFileOpenRecent.SubMenu := miOpenRecentMenu;
 
   tvContents.PopupMenu := miView;
