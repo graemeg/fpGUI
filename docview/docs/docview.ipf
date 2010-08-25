@@ -872,72 +872,127 @@ refid='InternetLinks'.Internet Links :elink.topic.
 .* Writing Help Files
 .* ************************************************************
 :h2 res=12 id='WritingHelpFiles'.Writing Help Files
-:hp2.Writing OS&slash.2 Help Files:ehp2.
-:p.OS&slash.2 Help Files are produced using the IPF Compiler&per. IPF stands for
-Information Presentation Facility&per.
-:p.The IPF Compiler takes a text file written in a language that tells it about
-things like headings&comma. links&comma. text and images&comma. and produces
-either a &per.INF or &per.HLP file&per.
-:p.The official way to obtain the IPF compiler &lpar.ipfc&per.exe&rpar. is from
-the OS&slash.2 Developers Toolkit&per. This is included free with eComStation
-&lpar.http&colon.&slash.&slash.www&per.ecomstation&per.com&rpar.&per.
-:p.Since the language for IPFC is tedious &lpar.for example all punctuation must
-be typed as special keywords&comma. like &amp.comma&per.&rpar. many people use
-other tools besides the IPF compiler itself&per.
-:p.I use Vyperhelp
-&lpar.http&colon.&slash.&slash.www&per.vyperhelp&per.com&rpar. since it is
-simple and graphical&per. It can also export to Windows Help&comma. HTML and
-others&comma. though it only runs on OS&slash.2&per. Not free&per.
-:p.Some other popular options are&colon.
-:p.o HyperText&slash.2 IPF Preprocessor
-&lpar.http&colon.&slash.&slash.www&per.clanganke&per.de&slash.os2&slash.sw&slash.htext&slash.
-.br
-&rpar. &endash. preprocesses a simpler starting language into the very difficult
-IPF format&per. Free&per.
-:p.o HyperMake
-&lpar.http&colon.&slash.&slash.www&per.hypermake&per.com&rpar.&per.
-Similar&comma. but can also produce Windows Help and HTML&per.
-:p.o Sibyl &lpar.which DocView was created with&rpar. comes with an IPF
-preprocessor&per.
-:p.o IPFEditor from PCS
-&lpar.http&colon.&slash.&slash.www&per.pcs&endash.soft&per.com&slash.productipfe212&per.htm
-.br
-&rpar.&per. Probably the most complete&comma. but significant cost&per.
-Note&colon. DocView doesn&apos.t support everything IPFE can do&xclm.
-.br
-In the past there were many other options&per. Those listed should still be
-available and have some support&per.
+:hp2.Writing fpGUI Toolkit and OS/2 Help Files:ehp2.
+:p.
+fpGUI Toolkit Help Files are produced using the IPF Compiler. IPF stands for
+Information Presentation Facility and was original designed by IBM.
+:p.
+The IPF Compiler takes a text file written in a markup language that tells
+it about things like headings, links, text and images, and produces
+either a .INF or .HLP file.
+:p.
+The official way to obtain the IPF compiler (ipfc.exe). is from
+the OS/2 Developers Toolkit. This is included free with eComStation
+(http://www.ecomstation.com). fpGUI doesn't support the OS/2 platform, so we
+can't really use the origin IPF Compiler. Luckily for us, open source software
+comes to the rescue! A developer from the OpenWatcom (http://www.openwatcom.org) project
+implemented a clean room implementation of the IPF Compiler, by simply using the
+origin IPF Compiler documentation as a guide. This new compiler is called WIPC, and
+is 100% compatible with the original IBM version.
+:p.
+For your convenience I included the OpenWatcom IPF Compiler as part of fpGUI Toolkit.
+You can find pre-built Windows and Linux binaries in the <fpgui>/tools/wipfc/ directory.
+:p.
+One huge benefit of the WIPFC compiler over the original IBM version, is that it
+is much easier to author help files. With the original IBM version the source help text
+was very tedious to write. Every symbol or punctuation like a comma, semi-colon, hyphen etc. and to be
+written as special "escaped" keyword. This requirement (and labour intensive work) was
+luckily removed from the WIPFC version.
+:p.
+fpGUI also includes the IPF Language Reference document (IPFREF_v4.INF) as part
+of fpGUI Toolkit. You can find this INF document in the
+<fpgui>/docview/docs/ directory. The IPF language is not hard to learn. There are
+45 tags in total, but you don't need all of them to start authoring your own help
+files. All markup tags (with the exception of 5 tags) start with a colon and end
+with a fullstop. The tags are mnemonic, making it easy to assocciate them with
+their function.
+:p.
+There are still some GUI IPF editors out there, but most of them are only for
+OS/2 (and maybe for Windows). The IPF Language is actually really easy to learn
+and understand, so you don't really need a special editor. I used my programming IDE
+as my editor, and simply supplied it with a syntax highlighter for the IPF language.
+No extra tools needed. Just so you know, that is what I used to author this help
+document. :-)
+:p.
+Here is an example of a small IPF document to get you started. I'll also show you
+how to compile it into a binary INF file - viewable with DocView of course. ;-)
+:p.
+Lets create a text file and call it "sample.ipf". Then type in the following using
+your favourite text editor.
+:xmp.
+ &colon.userdoc.
+ &colon.title. Sample INF file...
+ &colon.h1.Header One
+ &colon.p.This is a sample file with one header in the table of content.
+ &colon.p.This is paragraph two of this single header.
+ &colon.euserdoc.
+:exmp.
+:p.
+Save the document and close your editor. Now we have the source of our first help
+file. Now all that remains is to compile it into a binary INF file.
+:p.
+To use the WIPC compiler, we need to setup an environment variable so the compiler
+can find some of it's support files.
+:p.
+We do this as follows under Linux.
+:xmp.
+ export WIPFC=~/apps/wipfc/
+:exmp.
+ ...or as follows under Windows.
+:xmp.
+ set WIPFC=C:\apps\wipfc\
+:exmp.
+
+I normally setup my computer so that those settings are permantantly set when my
+computer boots up. I also make sure the "wipfc" executable is setup in the system
+search path so I can run it form anywhere on my system. Now we are ready to compile
+our help file!
+
+:xmp.
+  wipfc -i sample.ipf
+:exmp.
+
+If you typed the document correctly, you should now have
+a :hp2.sample.inf:ehp2. file in the current directory. Now you simply
+run DocView and open your first INF help file. Well done!
+
 .* ************************************************************
 .* Topic Resource IDs
 .* ************************************************************
-:h2 res=16 id='TopicResourceIDs'.
-Topic Resource IDs
-:p.:hp2.Topic Resource IDs:ehp2.
-:p.Resource IDs are used by authors of online help for applications&comma. to
-identify help topics&per. Applications call the Help Manager specifying a
-resource ID&comma. either directly using the HM&us.DISPLAY&us.HELP
-message&comma. or indirectly via help tables added to their resources&comma.
-which PM automatically handles&per. The resource ID is stored in a table inside
-the help file&per.
-:p.For document authors&comma. DocView offers the ability to see and find
-resource IDs&per.
-:p.:hp2.Finding by Resource ID:ehp2.
-:p.Use Tools &endash. Find Resource ID to search for a specified resource ID in
-all opened files&per.
-:p.:hp2.Displaying Resource IDs:ehp2.
-:p.Use topic properties &lpar.right mouse click &endash. Properties&rpar. to see
-which resource IDs are associated with a topic&per.
+:h2 res=16 id='TopicResourceIDs'.Topic Resource IDs
+:hp2.Topic Resource IDs:ehp2.
+:p.
+Resource IDs are used by authors of online help for applications, to
+identify help topics. When you create fpGUI base applications, the fpGUI
+framework will call DocView with the resource ID as parameter, to display the
+correct topic for that part of your application. The resource ID is stored in
+a table inside the help file. For a developer to use these, they needs to set
+the component's HelpType to htContext.
+:p.
+For document authors, DocView offers the ability to see and find
+resource IDs.
+:p.
+:hp2.Finding by Resource ID:ehp2.
+:p.
+Use "Tools - Find topic by resource ID" to search for a specified resource ID in
+all opened files.
+:p.
+:hp2.Displaying Resource IDs:ehp2.
+:p.
+Use topic properties (right mouse click in the Contents tree view - "Topic Properties")
+to see which resource IDs are associated with a topic.
+
 .* ************************************************************
 .* TopicNames
 .* ************************************************************
-:h2 res=19 id='TopicNames'.
-Topic Names
-:p.:hp2.Topic Names:ehp2.
+:h2 res=19 id='TopicNames'.Topic Names
+:hp2.Topic Names:ehp2.
 :p.
-:p.Like resource IDs&comma. topic names can be used by developers to link to
-help topics from within their application&comma. using the HM&us.DISPLAY&us.HELP
-message with parameter 2 being HM&us.PANELNAME&per.
-:p.These are not so often used&per.
-:p.DocView can find a particular topic name&comma. using Tools &endash. Find
-Topic Name&per.
+Like resource IDs, topic names can be used by developers to link to
+help topics from within their application. The developers needs to set the component's
+HelpType to htKeyword.
+:p.
+DocView can find a particular topic name, using "Tools - Find
+topic by resource name".
+
 :euserdoc.
