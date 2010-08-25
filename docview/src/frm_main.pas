@@ -71,6 +71,7 @@ type
     btnQuit: TfpgButton;
     Bevel1: TfpgBevel;
     Bevel2: TfpgBevel;
+    miTools: TfpgPopupMenu;
     {@VFD_HEAD_END: MainForm}
     miOpenRecentMenu: TfpgPopupMenu;
     miDebugHexInfo: TfpgMenuItem;
@@ -172,6 +173,7 @@ type
     function    FindTopicForLink( Link: THelpLink ): TTopic;
     function    FindTopicByResourceID( ID: word ): TTopic;
     function    FindTopicByName(const AName: string): TTopic;
+    procedure   ViewSourceMIOnClick(Sender: TObject);
     procedure   AddCurrentToMRUFiles;
     procedure   CreateMRUMenuItems;
   public
@@ -201,6 +203,7 @@ uses
   ,SettingsUnit
   ,dvHelpers
   ,frm_configuration
+  ,frm_text
   ;
 
 const
@@ -2332,6 +2335,14 @@ begin
     AddMenuItem('Collapse All', '', @miViewCollapseAllClicked);
   end;
 
+  miTools := TfpgPopupMenu.Create(self);
+  with miTools do
+  begin
+    Name := 'miTools';
+    SetPosition(428, 96, 120, 20);
+    AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
+  end;
+
   miHelp := TfpgPopupMenu.Create(self);
   with miHelp do
   begin
@@ -2524,6 +2535,7 @@ begin
   MainMenu.AddMenuItem('&File', nil).SubMenu := miFile;
   MainMenu.AddMenuItem('&Settings', nil).SubMenu := miSettings;
   MainMenu.AddMenuItem('&Bookmarks', nil).SubMenu := miBookmarks;
+  MainMenu.AddMenuItem('&Tools', nil).SubMenu := miTools;
   MainMenu.AddMenuItem('&Help', nil).SubMenu := miHelp;
   MainMenu.AddMenuItem('&Debug', nil).SubMenu := miDebug;
   FFileOpenRecent.SubMenu := miOpenRecentMenu;
