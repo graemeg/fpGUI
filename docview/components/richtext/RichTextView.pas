@@ -516,16 +516,12 @@ begin
 
     FSelectionEnd := -1;
     FSelectionStart := -1;
-
-    // clear display of selection
-    { TODO -oGraeme : Draw must not be called here }
-//    Draw( StartLine, EndLine );
-
     Canvas.SetClipRect(OldClip);
  end;
 
   FSelectionEnd := -1;
   FSelectionStart := -1;
+  Repaint;
 end;
 
 Function TRichTextView.GetTextEnd: longint;
@@ -539,7 +535,9 @@ begin
   FDefaultMenu.OnShow := @DefaultMenuPopup;
 
   FSelectAllMI := FDefaultMenu.AddMenuItem('Select &All', '', @SelectAllMIClick);
+  FSelectAllMI.Enabled := False;  // TODO: implement me
   FCopyMI := FDefaultMenu.AddMenuItem('&Copy', '', @CopyMIClick);
+  FCopyMI.Enabled := False;  // TODO: implement me
   FDefaultMenu.AddMenuItem('-', '', nil);
   FRefreshMI := FDefaultMenu.AddMenuItem('&Refresh', '', @RefreshMIClick);
   FDefaultMenu.AddMenuItem('-', '', nil);
@@ -2405,8 +2403,9 @@ end;
 Procedure TRichTextView.SelectAll;
 begin
   ClearSelection;
-  SelectionStart := FLayout.GetCharIndex( FText );
-  SelectionEnd := FLayout.GetTextEnd;
+  FSelectionStart := FLayout.GetCharIndex( FText );
+  FSelectionEnd := FLayout.GetTextEnd;
+  Repaint;
 end;
 
 (*
