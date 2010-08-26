@@ -2441,6 +2441,7 @@ begin
     AddMenuItem('Find topic by resource name', '', @miToolsFindTopifByName);
     miDebugHexInfo := AddMenuItem('Toggle hex INF values in contents', '', @miDebugHex);
     AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
+    AddMenuItem('Current topic properties', '', @miTopicPropertiesClicked);
   end;
 
   miHelp := TfpgPopupMenu.Create(self);
