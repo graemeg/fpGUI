@@ -209,6 +209,7 @@ uses
   ,dvHelpers
   ,frm_configuration
   ,frm_text
+  ,NewViewConstantsUnit
   ;
 
 const
@@ -287,11 +288,11 @@ var
   lURL: TfpgString;
 begin
   // TODO: process other types of links (external, application etc...) too!
-  if pos('external', Link) > 0 then
+  if pos(PARAM_LINK_EXTERNAL, Link) > 0 then
   begin
     TfpgMessageDialog.Warning('', 'External links are not supported in DocView yet. Please try again with a later build.')
   end
-  else if pos('url', Link) > 0 then
+  else if pos(PARAM_LINK_URL, Link) > 0 then
   begin
     // we have a external URL of some kind
     // format is always:  'url "<uri>"'
