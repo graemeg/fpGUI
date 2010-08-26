@@ -954,6 +954,8 @@ begin
   s := '';
   sep := '';
   n := tvContents.Selection;
+  if n = nil then
+    Exit;
   while n.Parent <> nil do
   begin
     s := n.Parent.Text + sep + s;
