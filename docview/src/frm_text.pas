@@ -64,6 +64,7 @@ begin
   SetPosition(405, 197, 496, 297);
   WindowTitle := 'Text Form';
   Hint := '';
+  WindowPosition := wpScreenCenter;
 
   btnClose := TfpgButton.Create(self);
   with btnClose do
