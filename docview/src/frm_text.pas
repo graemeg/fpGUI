@@ -17,7 +17,9 @@ type
     {@VFD_HEAD_BEGIN: TextForm}
     btnClose: TfpgButton;
     Memo1: TfpgMemo;
+    btnCopy: TfpgButton;
     {@VFD_HEAD_END: TextForm}
+    procedure btnCopyClicked(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -49,6 +51,11 @@ end;
 
 {@VFD_NEWFORM_IMPL}
 
+procedure TTextForm.btnCopyClicked(Sender: TObject);
+begin
+  fpgClipboard.Text := Memo1.Lines.Text;
+end;
+
 procedure TTextForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -68,8 +75,8 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 1;
     ModalResult := mrOK;
+    TabOrder := 1;
   end;
 
   Memo1 := TfpgMemo.Create(self);
@@ -81,6 +88,19 @@ begin
     Hint := '';
     FontDesc := '#Edit2';
     TabOrder := 2;
+  end;
+
+  btnCopy := TfpgButton.Create(self);
+  with btnCopy do
+  begin
+    Name := 'btnCopy';
+    SetPosition(4, 268, 128, 24);
+    Text := 'Copy to Clipboard';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 3;
+    OnClick := @btnCopyClicked;
   end;
 
   {@VFD_BODY_END: TextForm}
