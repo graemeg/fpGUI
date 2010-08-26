@@ -1231,8 +1231,10 @@ begin
   FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
   FVScrollbar.Min := 0;
   FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
+  FVScrollbar.PageSize := (VisibleHeight div 4) * 3;  // three quarters of the height
   FHScrollbar.Min := 0;
   FHScrollbar.Max := MaxNodeWidth - VisibleWidth + FVScrollbar.Width;
+  FHScrollbar.PageSize := (VisibleWidth div 4) * 3;  // three quarters of the height
   FHScrollbar.Visible := MaxNodeWidth > Width - 2;
   if not FVScrollbar.Visible then
   begin
