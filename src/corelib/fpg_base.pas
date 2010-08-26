@@ -531,7 +531,7 @@ type
     procedure   DoSetText(const AValue: TfpgString); virtual; abstract;
     procedure   InitClipboard; virtual; abstract;
   public
-    constructor Create;
+    constructor Create; virtual;
     property    Text: TfpgString read DoGetText write DoSetText;
   end;
 
@@ -2296,6 +2296,7 @@ end;
 
 constructor TfpgClipboardBase.Create;
 begin
+  inherited Create;
   InitClipboard;
 end;
 

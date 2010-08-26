@@ -2350,35 +2350,46 @@ begin
 end;
 
 procedure TfpgGDIClipboard.DoSetText(const AValue: TfpgString);
+var
+  mem: THandle;
+  po2: PWideChar;
+  str: PWideChar;
 begin
   FClipboardText := AValue;
-  if OpenClipboard(FClipboardWndHandle) then
+  if OpenClipboard(0) then
   begin
-    EmptyClipboard;
-    SetClipboardData(CF_TEXT, 0);
+    str := PWideChar(Utf8Decode(AValue));
+    if EmptyClipboard then
+    begin
+      // Allocate a global memory object for the text.
+      mem:= globalalloc(GMEM_MOVEABLE or GMEM_DDESHARE, (length(AValue)+1)*2);
+      if mem <> 0 then
+      begin
+        po2:= globallock(mem);
+        if po2 <> nil then
+        begin
+          move(str^, po2^, (length(AValue)+1)*2);
+          globalunlock(mem);
+          if SetClipboardData(CF_UNICODETEXT,longword(mem)) <> 0 then
+          begin
+            //writeln('Successfully copied to clipboard');
+          end;
+        end
+        else
+        begin
+          globalfree(mem);
+        end;
+      end;
+    end;
     CloseClipboard;
   end;
 end;
 
 procedure TfpgGDIClipboard.InitClipboard;
 begin
-  {$WARNING This does not work! 'FPGUI' window class was not registered,
-  so CreateWindowEx always returns 0}
-  FClipboardWndHandle := Windows.CreateWindowEx(
-      0,            // extended window style
-      'FPGUI',      // registered class name
-      nil,          // window name
-      0,            // window style
-      0,            // horizontal position of window
-      0,            // vertical position of window
-      10,           // window width
-      10,           // window height
-      0,            // handle to parent or owner window
-      0,            // menu handle or child identifier
-      MainInstance, // handle to application instance
-      nil           // window-creation data
-      );
+  // nothing to do here
 end;
+
 
 { TfpgGDIFileList }
 
