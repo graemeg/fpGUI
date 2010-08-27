@@ -14,6 +14,9 @@ uses
   ACLStringUtility, RichTextDocumentUnit, RichTextView, RichTextLayoutUnit,
   RichTextDisplayUnit, dvconstants, dvHelpers, frm_configuration, HelpBitmap, frm_text;
 
+{$IFDEF WINDOWS}
+  {$R docview.rc}
+{$ENDIF}
 
 procedure MainProc;
 var
