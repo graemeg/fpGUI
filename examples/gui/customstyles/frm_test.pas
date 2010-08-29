@@ -27,6 +27,11 @@ type
     btnName4: TfpgButton;
     edtName1: TfpgEdit;
     btnClose: TfpgButton;
+    MainMenu: TfpgMenuBar;
+    pmFile: TfpgPopupMenu;
+    pmEdit: TfpgPopupMenu;
+    pmHelp: TfpgPopupMenu;
+    pmSubMenu1: TfpgPopupMenu;
     {@VFD_HEAD_END: TestForm}
     procedure CloseClicked(Sender: TObject);
   public
@@ -45,18 +50,21 @@ begin
 end;
 
 procedure TTestForm.AfterCreate;
+var
+  miSubMenu: TfpgMenuItem;
 begin
   {@VFD_BODY_BEGIN: TestForm}
   Name := 'TestForm';
-  SetPosition(335, 206, 300, 250);
+  SetPosition(335, 206, 442, 250);
   WindowTitle := 'Testing Custom Styles';
+  Hint := '';
   WindowPosition := wpScreenCenter;
 
   btnName1 := TfpgButton.Create(self);
   with btnName1 do
   begin
     Name := 'btnName1';
-    SetPosition(24, 48, 80, 24);
+    SetPosition(24, 56, 80, 24);
     Text := 'Button1';
     FontDesc := '#Label1';
     Hint := '';
@@ -68,7 +76,7 @@ begin
   with lblName1 do
   begin
     Name := 'lblName1';
-    SetPosition(20, 24, 116, 16);
+    SetPosition(20, 32, 116, 16);
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Standard Button';
@@ -78,7 +86,7 @@ begin
   with lblName2 do
   begin
     Name := 'lblName2';
-    SetPosition(164, 24, 124, 16);
+    SetPosition(164, 32, 124, 16);
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Embedded Button';
@@ -88,7 +96,7 @@ begin
   with btnName2 do
   begin
     Name := 'btnName2';
-    SetPosition(176, 48, 80, 24);
+    SetPosition(176, 56, 80, 24);
     Text := 'Button2';
     Embedded := True;
     FontDesc := '#Label1';
@@ -101,7 +109,7 @@ begin
   with lblName3 do
   begin
     Name := 'lblName3';
-    SetPosition(20, 92, 100, 16);
+    SetPosition(20, 100, 100, 16);
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Default Button';
@@ -111,7 +119,7 @@ begin
   with btnName3 do
   begin
     Name := 'btnName3';
-    SetPosition(24, 116, 80, 24);
+    SetPosition(24, 124, 80, 24);
     Text := 'Button3';
     FontDesc := '#Label1';
     Hint := '';
@@ -124,7 +132,7 @@ begin
   with lblName4 do
   begin
     Name := 'lblName4';
-    SetPosition(164, 92, 116, 16);
+    SetPosition(164, 100, 116, 16);
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Flat Button';
@@ -134,7 +142,7 @@ begin
   with btnName4 do
   begin
     Name := 'btnName4';
-    SetPosition(176, 116, 80, 24);
+    SetPosition(176, 124, 80, 24);
     Text := 'Button4';
     Flat := True;
     FontDesc := '#Label1';
@@ -147,7 +155,9 @@ begin
   with edtName1 do
   begin
     Name := 'edtName1';
-    SetPosition(24, 168, 120, 22);
+    SetPosition(24, 168, 164, 27);
+    ExtraHint := '';
+    Hint := '';
     TabOrder := 5;
     Text := '';
     FontDesc := '#Edit1';
@@ -157,7 +167,8 @@ begin
   with btnClose do
   begin
     Name := 'btnClose';
-    SetPosition(212, 216, 80, 24);
+    SetPosition(354, 216, 80, 24);
+    Anchors := [anRight,anBottom];
     Text := 'Close';
     FontDesc := '#Label1';
     Hint := '';
@@ -166,7 +177,67 @@ begin
     OnClick := @CloseClicked;
   end;
 
+  MainMenu := TfpgMenuBar.Create(self);
+  with MainMenu do
+  begin
+    Name := 'MainMenu';
+    SetPosition(8, 4, 120, 24);
+    Align := alTop;
+  end;
+
+  pmFile := TfpgPopupMenu.Create(self);
+  with pmFile do
+  begin
+    Name := 'pmFile';
+    SetPosition(300, 64, 120, 24);
+    AddMenuItem('&Open', 'Ctrl+O', nil);
+    AddMenuItem('&Save', 'Ctrl+S', nil);
+    AddMenuItem('S&ave As', 'Ctrl+A', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Save && Reload', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('&Quit', 'Ctrl+Q', nil);
+  end;
+
+  pmEdit := TfpgPopupMenu.Create(self);
+  with pmEdit do
+  begin
+    Name := 'pmEdit';
+    SetPosition(300, 92, 120, 24);
+    AddMenuItem('Cut', '', nil);
+    AddMenuItem('Copy', '', nil);
+    AddMenuItem('Paste', '', nil);
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Some selected item', '', nil).Checked := True;
+    miSubMenu := AddMenuItem('My sub-menu', '', nil);
+  end;
+
+  pmHelp := TfpgPopupMenu.Create(self);
+  with pmHelp do
+  begin
+    Name := 'pmHelp';
+    SetPosition(300, 120, 120, 24);
+    AddMenuItem('About...', '', nil);
+  end;
+
+  pmSubMenu1 := TfpgPopupMenu.Create(self);
+  with pmSubMenu1 do
+  begin
+    Name := 'pmSubMenu1';
+    SetPosition(300, 148, 120, 24);
+    AddMenuItem('Item 1', '', nil);
+    AddMenuItem('Item 2', '', nil);
+    AddMenuItem('Item 3', '', nil).Enabled := False;
+  end;
+
   {@VFD_BODY_END: TestForm}
+
+  // hook up menus to mainmenu bar
+  MainMenu.AddMenuItem('File', nil).SubMenu := pmFile;
+  MainMenu.AddMenuItem('Edit', nil).SubMenu := pmEdit;
+  MainMenu.AddMenuItem('Help', nil).SubMenu := pmHelp;
+
+  miSubMenu.SubMenu := pmSubMenu1;
 end;
 
 
