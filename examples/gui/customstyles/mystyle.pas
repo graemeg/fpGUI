@@ -120,7 +120,7 @@ end;
 procedure TMyStyle.DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags);
 begin
   inherited DrawMenuRow(ACanvas, r, AFlags);
-  if mifSelected in AFlags then
+  if (mifSelected in AFlags) and not (mifSeparator in AFlags) then
     ACanvas.GradientFill(r, TfpgColor($fec475), TfpgColor($fb9d24), gdVertical);
 end;
 
