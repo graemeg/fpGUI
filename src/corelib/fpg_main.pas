@@ -43,6 +43,8 @@ type
 
   TFButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
     btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
+
+  TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator, mifEnabled, mifChecked, mifSubMenu);
     
   TFTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter, txtBottom, txtWrap, txtDisabled,
     txtAutoSize);
@@ -187,10 +189,9 @@ type
 
 
   { This is very basic for now, just to remind us of theming support. Later we
-    will rework this to use a Style Manager like the previous fpGUI. Styles must
-    also move out of fpGFX. Also support Bitmap based styles for easier theme
-    implementations. }
-  TfpgStyle = class
+    will rework this to use a Style Manager like the previous fpGUI.
+    Also support Bitmap based styles for easier theme implementations. }
+  TfpgStyle = class(TObject)
   public
     DefaultFont: TfpgFont;
     FixedFont: TfpgFont;
@@ -204,6 +205,10 @@ type
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
+    procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
+    procedure   DrawMenuItem(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags; AText: TfpgString); virtual;
+    procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
+    procedure   DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
   end;
   
 
@@ -1915,6 +1920,50 @@ begin
   // restore previous settings
   ACanvas.SetColor(oldColor);
   ACanvas.SetLineStyle(oldLineWidth, oldLineStyle);
+end;
+
+procedure TfpgStyle.DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags);
+begin
+  ACanvas.FillRectangle(r);
+end;
+
+procedure TfpgStyle.DrawMenuItem(ACanvas: TfpgCanvas; r: TfpgRect;
+  AFlags: TfpgMenuItemFlags; AText: TfpgString);
+begin
+  //
+end;
+
+procedure TfpgStyle.DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect);
+begin
+  ACanvas.SetColor(clShadow1);
+  ACanvas.DrawLine(r.Left+1, r.Top+2, r.Right, r.Top+2);
+  ACanvas.SetColor(clHilite2);
+  ACanvas.DrawLine(r.Left+1, r.Top+3, r.Right, r.Top+3);
+end;
+
+procedure TfpgStyle.DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags);
+var
+  img: TfpgImage;
+  lx: TfpgCoord;
+  ly: TfpgCoord;
+begin
+  if mifChecked in AFlags then
+  begin
+    img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
+    if mifSelected in AFlags then
+      img.Invert;  // invert modifies the original image, so we must restore it later
+    ACanvas.DrawImage(x, y, img);
+    if mifSelected in AFlags then
+      img.Invert;  // restore image to original state
+  end;
+  if mifSubMenu in AFlags then
+  begin
+    img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
+    lx := (r.height div 2) - 3;
+    lx := r.right-lx-2;
+    ly := y + ((r.Height-img.Height) div 2);
+    ACanvas.DrawImage(lx, ly, img);
+  end;
 end;
 
 

@@ -123,7 +123,7 @@ type
     procedure   HandlePaint; override;
     procedure   HandleShow; override;
     procedure   HandleClose; override;
-    procedure   DrawItem(mi: TfpgMenuItem; rect: TfpgRect; const AItemFocused: boolean); virtual;
+    procedure   DrawItem(mi: TfpgMenuItem; rect: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
     procedure   DrawRow(line: integer; const AItemFocused: boolean); virtual;
     function    ItemHeight(mi: TfpgMenuItem): integer; virtual;
     procedure   PrepareToShow;
@@ -1051,35 +1051,32 @@ begin
     Result := TfpgMenuItem(FItems.Items[ind]);
 end;
 
-procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect; const AItemFocused: boolean);
+procedure TfpgPopupMenu.DrawItem(mi: TfpgMenuItem; rect: TfpgRect; AFlags: TfpgMenuItemFlags);
 var
   s: string;
   x: integer;
   img: TfpgImage;
+  lFlags: TfpgMenuItemFlags;
 begin
+  lFlags := AFlags;
   if mi.Separator then
   begin
-    Canvas.SetColor(clShadow1);
-    Canvas.DrawLine(rect.Left+1, rect.Top+2, rect.Right, rect.Top+2);
-    Canvas.SetColor(clHilite2);
-    Canvas.DrawLine(rect.Left+1, rect.Top+3, rect.Right, rect.Top+3);
+    fpgStyle.DrawMenuItemSeparator(Canvas, rect);
   end
   else
   begin
     // process Check mark if needed
     if mi.Checked then
     begin
-      img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
-      if AItemFocused then
-        img.Invert;
-      Canvas.DrawImage(rect.Left, rect.Top, img);
-      if AItemFocused then
-        img.Invert;  // restore image to original state
+      lFlags := lFlags + [mifChecked];
+      fpgStyle.DrawMenuItemImage(Canvas, rect.Left, rect.Top, rect, lFlags);
+      lFlags := lFlags - [mifChecked];
     end;
 
     // process menu item Text
     x := rect.Left + FSymbolWidth + FTextMargin;
     mi.DrawText(Canvas, x+cImgWidth, rect.top, cImgWidth);
+    Canvas.SetColor(Canvas.TextColor);  // reset text default color
 
     // process menu item Hot Key text
     if mi.HotKeyDef <> '' then
@@ -1091,10 +1088,9 @@ begin
     // process menu item submenu arrow image
     if mi.SubMenu <> nil then
     begin
-      Canvas.SetColor(Canvas.TextColor);
-      x := (rect.height div 2) - 3;
-      img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
-      Canvas.DrawImage(rect.right-x-2, rect.Top + ((rect.Height-img.Height) div 2), img);
+      lFlags := lFlags + [mifSubMenu];
+      fpgStyle.DrawMenuItemImage(Canvas, rect.Left, rect.Top, rect, lFlags);
+      lFlags := lFlags - [mifSubMenu];
     end;
   end;
 end;
@@ -1104,25 +1100,33 @@ var
   n: integer;
   r: TfpgRect;
   mi: TfpgMenuItem;
+  lFlags: TfpgMenuItemFlags;
 begin
-  Canvas.BeginDraw;
   r.SetRect(FMargin, FMargin, FWidth-(2*FMargin), FHeight-(2*FMargin));
 
   for n := 0 to VisibleCount-1 do
   begin
     mi := VisibleItem(n);
-
+    lFlags := [];
     r.height := ItemHeight(mi);
 
     if line = n then
     begin
+      if AItemFocused then
+        lFlags := [mifSelected];     // refering to menu item in active popup menu
+      if mi.Separator then
+        lFlags := lFlags + [mifSeparator];
       if AItemFocused and (not mi.Separator) then
       begin
-        if MenuFocused then
+        if MenuFocused then          // refering to popup menu window
         begin
+          lFlags := lFlags + [mifHasFocus];
           Canvas.SetColor(clSelection);
           if mi.Selectable then
-            Canvas.SetTextColor(clSelectionText)
+          begin
+            lFlags := lFlags + [mifEnabled];
+            Canvas.SetTextColor(clSelectionText);
+          end
           else
             Canvas.SetTextColor(clMenuDisabled);
         end
@@ -1136,6 +1140,7 @@ begin
       begin
         if mi.Enabled then
         begin
+          lFlags := lFlags + [mifEnabled];
           Canvas.SetColor(BackgroundColor);
           Canvas.SetTextColor(clMenuText);
         end
@@ -1145,9 +1150,9 @@ begin
           Canvas.SetTextColor(clMenuDisabled);
         end;
       end;
-      Canvas.FillRectangle(r);
-      DrawItem(mi, r, AItemFocused);
-      Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
+      fpgStyle.DrawMenuRow(Canvas, r, lFlags);
+      DrawItem(mi, r, lFlags);
+
       Exit; //==>
     end;
     inc(r.Top, ItemHeight(mi) );
