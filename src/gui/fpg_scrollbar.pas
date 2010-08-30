@@ -138,13 +138,13 @@ begin
   Canvas.BeginDraw; // Do not remove - Scrollbars do painting outside HandlePaint as well!
   if Orientation = orVertical then
   begin
-    DrawButton(0, 0, Width, Width, 'sys.sb.up', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), FPosition <> FMin);
-    DrawButton(0, Height-Width, Width, Width, 'sys.sb.down', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), FPosition <> FMax);
+    DrawButton(0, 0, Width, Width, 'sys.sb.up', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
+    DrawButton(0, Height-Width, Width, Width, 'sys.sb.down', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), (FPosition <> FMax) and (Parent.Enabled));
   end
   else
   begin
-    DrawButton(0, 0, Height, Height, 'sys.sb.left', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), FPosition <> FMin);
-    DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), FPosition <> FMax);
+    DrawButton(0, 0, Height, Height, 'sys.sb.left', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
+    DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), (FPosition <> FMax) and (Parent.Enabled));
   end;
 
   DrawSlider(FRecalc);
