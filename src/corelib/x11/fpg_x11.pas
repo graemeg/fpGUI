@@ -1476,6 +1476,8 @@ begin
       lmwh := 0;
       if fpgApplication.PrevModalForm <> nil then
         lmwh := TfpgX11Window(fpgApplication.PrevModalForm).WinHandle
+      else if FocusRootWidget <> nil then
+        lmwh := TfpgX11Window(FocusRootWidget).WinHandle
       else if fpgApplication.MainForm <> nil then
         lmwh := TfpgX11Window(fpgApplication.MainForm).WinHandle;
       if lmwh <> 0 then

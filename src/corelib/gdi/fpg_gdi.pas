@@ -1392,8 +1392,12 @@ begin
   end
   else if WindowType = wtModalForm then
   begin
-    // set parent window to special hidden window. It helps to hide window taskbar button.
-    FParentWinHandle := wapplication.GetHiddenWindow;
+    if FocusRootWidget <> nil then
+      FParentWinHandle := FocusRootWidget.WinHandle
+    else
+      // set parent window to special hidden window. It helps to hide window taskbar button.
+      FParentWinHandle := wapplication.GetHiddenWindow;
+
     // for modal windows, this is necessary
     FWinStyle   := WS_OVERLAPPEDWINDOW or WS_POPUPWINDOW;
     FWinStyle   := FWinStyle and not (WS_MINIMIZEBOX);
