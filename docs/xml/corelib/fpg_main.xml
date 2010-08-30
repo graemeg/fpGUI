@@ -72,6 +72,13 @@ fpGUI will be totally reworked to supply built-in and image based theming.</p><p
 document named <var>theming_spec.txt</var> in the "docs" folder for details of what is
 planned.</p></descr>
       </element>
+
+<element name="fpgRect">
+<seealso>
+<link id="fpg_base.TfpgRect">TfpgRect</link>
+</seealso>
+</element>
+
     </module>
     <!-- fpg_main -->
   </package>
