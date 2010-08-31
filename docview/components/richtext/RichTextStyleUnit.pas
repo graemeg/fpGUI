@@ -271,7 +271,7 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
       if     ( Tag.TagType = ttSetLeftMargin )
          and ( MarginParam1 = 'here' ) then
       begin
-        Style.LeftMargin := X {div FontWidthPrecisionFactor};
+        Style.LeftMargin := X;
       end
       else
       begin
@@ -296,8 +296,7 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
                 NewMargin := MarginSize * FontManager.MaximumCharWidth;
               msSpecifiedChar:
                 NewMargin := MarginSize
-                             * FontManager.CharWidth( Chr( Settings.MarginChar ) )
-                             div FontWidthPrecisionFactor;
+                             * FontManager.CharWidth( Chr( Settings.MarginChar ) );
             end;
           end;
         except
@@ -305,11 +304,9 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
         end;
 
         if Tag.TagType = ttSetLeftMargin then
-          Style.LeftMargin := Settings.Margins.Left
-                              + NewMargin
+          Style.LeftMargin := Settings.Margins.Left + NewMargin
         else
-          Style.RightMargin := Settings.Margins.Right
-                               + NewMargin;
+          Style.RightMargin := Settings.Margins.Right + NewMargin;
       end;
       tmpFontParts.Free;
     end;  { teSet[left|right]margin }
