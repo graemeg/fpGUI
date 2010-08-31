@@ -96,6 +96,7 @@ begin
   begin
     Name := 'btnCopy';
     SetPosition(4, 268, 128, 24);
+    Anchors := [anLeft,anBottom];
     Text := 'Copy to Clipboard';
     FontDesc := '#Label1';
     Hint := '';
