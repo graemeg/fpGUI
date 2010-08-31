@@ -882,8 +882,7 @@ begin
       CheckForAutoURL( AText, State );
       Margin := integer( ( pData + 2 )^ );
       GetMarginTag( Margin, State.FontState, OutputString, false );
-      OutputString := OutputString
-                      + RTF_NewLine;
+      OutputString := OutputString  + RTF_NewLine;
     end;
 
     ecSetLeftMarginFit:
@@ -1047,7 +1046,7 @@ begin
     begin
       State.FontState := fsNormal;
       State.InCharGraphics := false;
-      OutputString := '</tt><wrap yes>' + RTF_NewLine;
+      OutputString := '</tt><wrap yes>';// + RTF_NewLine;
       State.Spacing := true;
     end;
 
