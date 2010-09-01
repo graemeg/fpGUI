@@ -35,7 +35,6 @@ Implementation
 
 uses
   SysUtils
-//  ACLString, ACLUtility,
   ,RichTextDocumentUnit
   ,fpg_base
   ,fpg_main

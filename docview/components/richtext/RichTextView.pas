@@ -14,7 +14,6 @@ Uses
   fpg_imagelist,
   RichTextStyleUnit,
   RichTextLayoutUnit,
-//  RichTextDocumentUnit,
   CanvasFontManager;
 
 {
@@ -404,7 +403,6 @@ uses
   SysUtils
   ,ACLStringUtility
   ,nvUtilities
-//  ControlScrolling, ControlsUtility,
   ,RichTextDocumentUnit
   ,RichTextDisplayUnit
   ;
