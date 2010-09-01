@@ -2745,7 +2745,7 @@ const
 var
   s: string;
 begin
-  s := '<font "Arial" 12><b>' + cLongName + '</b></font>' + le
+  s := '<font "' + DefaultTopicFontName + '" 12><b>' + cLongName + '</b></font>' + le
        + cVersion + le + le
        + 'Supported command line parameters:' + le + le
        + '<tt>'

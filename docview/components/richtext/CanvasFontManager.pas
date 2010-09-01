@@ -15,10 +15,14 @@ Const
   // This defines the fraction of a pixel that
   // font character widths will be given in
   FontWidthPrecisionFactor = 1; // 256 seems to be specific to OS/2 API
-  DefaultTopicFont = 'Sans';
+  DefaultTopicFontName = 'Arial';
   DefaultTopicFontSize = '10';
-  DefaultTopicFixedFont = 'Courier New';
+  DefaultTopicFixedFontName = 'Courier New';
   DefaultTopicFixedFontSize = '10';
+
+
+  DefaultTopicFont = DefaultTopicFontName + '-' + DefaultTopicFontSize;
+  DefaultTopicFixedFont = DefaultTopicFixedFontName + '-' + DefaultTopicFixedFontSize;
 
 
 Type
@@ -146,6 +150,7 @@ uses
   ,ACLStringUtility
   ,nvUtilities
   ,fpg_stringutils
+  ,SettingsUnit
   ;
 
 
@@ -345,13 +350,13 @@ end;
 procedure GetDefaultFonts;
 begin
   // courier new is common and reasonably nice
-  DefaultOutlineFixedFace := FindFaceName( 'Courier New' );
+  DefaultOutlineFixedFace := FindFaceName( DefaultTopicFixedFontName );
   if DefaultOutlineFixedFace = nil then
   begin
     DefaultOutlineFixedFace := GetFirstOutlineFace( true ); // first fixed outline face
   end;
 
-  DefaultOutlineProportionalFace := FindFaceName( DefaultTopicFont );
+  DefaultOutlineProportionalFace := FindFaceName( DefaultTopicFontName );
   if DefaultOutlineProportionalFace = nil then
   begin
     DefaultOutlineProportionalFace := GetFirstOutlineFace( false ); // first prop outline face
@@ -455,17 +460,17 @@ end;
 function SubstituteBitmapFontToOutline( const FaceName: string ): string;
 begin
   if StringsSame( FaceName, 'Helv' ) then
-    result := DefaultTopicFont
+    result := DefaultTopicFontName
   else if StringsSame( FaceName, 'Helvetica' ) then
-    result := DefaultTopicFont
+    result := DefaultTopicFontName
   else if StringsSame( FaceName, 'Tms Rmn' ) then
     result := 'Times New Roman'
   else if StringsSame( FaceName, 'System Proportional' ) then
-    result := DefaultTopicFont
+    result := DefaultTopicFontName
   else if StringsSame( FaceName, 'System Monospaced' ) then
-    result := DefaultTopicFixedFont
+    result := DefaultTopicFixedFontName
   else if StringsSame( FaceName, 'System VIO' ) then
-    result := DefaultTopicFixedFont
+    result := DefaultTopicFixedFontName
   else
     result := FaceName; // no substitution
 end;
