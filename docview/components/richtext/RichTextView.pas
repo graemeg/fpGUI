@@ -139,6 +139,7 @@ Type
     procedure HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
     procedure HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
 
     //procedure ScanEvent( Var KeyCode: TKeyCode;
     //                     RepeatCount: Byte ); override;
@@ -762,7 +763,7 @@ procedure TRichTextView.HandleLMouseDown(x, y: integer; shiftstate: TShiftState)
 var
   Line: longint;
   Offset: longint;
-  Link: string;
+  Link: TfpgString;
   Position: TTextPosition;
   Shift: boolean;
 begin
@@ -779,6 +780,41 @@ begin
     if Assigned( FOnClickLink ) then
       FOnClickLink( Self, FClickedLink );
   FClickedLink := ''; // reset link
+end;
+
+procedure TRichTextView.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
+var
+  Line: longint;
+  Offset: longint;
+  Link: TfpgString;
+  Position: TTextPosition;
+begin
+  inherited HandleMouseMove(x, y, btnstate, shiftstate);
+  Position := FindPoint(X, Y, Line, Offset, Link);
+
+//  if not MouseCapture then     // TODO: Introduce a IsMouseCaptured in TfpgWindow
+  begin
+    if Link <> FLastLinkOver then
+    begin
+      if Link <> '' then
+      begin
+        if Assigned(FOnOverLink) then
+          FOnOverLink(Self, Link)
+      end
+      else
+      begin
+        if Assigned(FOnNotOverLink) then
+          FOnNotOverLink(Self, FLastLinkOver);
+      end;
+      FLastLinkOver := Link;
+    end;
+
+    if Link <> '' then
+      MouseCursor := mcHand
+    else
+      MouseCursor := mcDefault;   // TODO: later this should be IBeam when RichView supports editing
+    exit;
+  end;
 end;
 
 Destructor TRichTextView.Destroy;
@@ -1061,13 +1097,9 @@ begin
 
   TextHeight := GetTextAreaHeight;
 
-//  YToFind := Height - YToFind;
-
-  //if FBorderStyle = bsSingle then
-  //begin
-  //  dec( YToFind, 2 );
-  //  dec( XToFind, 2 );
-  //end;
+  // Should we take into account Border Styles?
+  XToFind := XToFind - FRichTextSettings.Margins.Left;
+  YToFind := YToFind - FRichTextSettings.Margins.Top;
 
   if YToFind < 3 then
   begin
