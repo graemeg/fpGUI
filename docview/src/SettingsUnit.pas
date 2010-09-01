@@ -36,20 +36,6 @@ Const
   //clLightCyan = $c0ffff;
   //clLightGreen = $e0ffe0;
 
-  VGADefaultColors: array[ 0 .. NumColorSettings - 1 ] of TfpgColor
-   = ( clBoxColor,
-       clText1,
-       clText1,
-       clBoxColor,
-       clText1,
-       clBoxColor,
-       clText1,
-       clBoxColor,
-       clText1,
-       clBoxColor,
-       clGreen,
-       clYellow );
-
   DefaultColors: array[ 0 .. NumColorSettings - 1 ] of TfpgColor
    = ( clLightCyan,
        clBlack,
@@ -113,7 +99,7 @@ Type
 // global procs
 procedure LoadSettings;
 procedure SaveSettings;
-procedure writeSettingsDetailsTo(aStrings : TStrings);
+procedure WriteSettingsDetailsTo(aStrings : TStrings);
 procedure AddToMRUList( const Title: string; Filenames: TStrings );
 
 var
@@ -186,10 +172,7 @@ begin
       // Colours
       for ColorIndex := 0 to High( Colors ) do
       begin
-        //if GetScreenColorDepth > 8 then
-           DefaultColor := DefaultColors[ ColorIndex ];
-        //else
-        //   DefaultColor := VGADefaultColors[ ColorIndex ];
+        DefaultColor := DefaultColors[ ColorIndex ];
         Colors[ ColorIndex ] := ReadInteger( ColoursSection,
                                              'Color' + IntToStr( ColorIndex ),
                                              DefaultColor );
@@ -465,7 +448,7 @@ begin
   end;
 end;
 
-procedure writeSettingsDetailsTo(aStrings : TStrings);
+procedure WriteSettingsDetailsTo(aStrings : TStrings);
 Begin
   aStrings.Add('');
   aStrings.Add('---- Settings ----');

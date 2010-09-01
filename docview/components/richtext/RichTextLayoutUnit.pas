@@ -10,7 +10,8 @@ Interface
 Uses
   Classes,
   CanvasFontManager,
-  RichTextDocumentUnit, RichTextStyleUnit,
+  RichTextDocumentUnit,
+  RichTextStyleUnit,
   fpg_imagelist;
 
 Type
