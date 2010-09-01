@@ -95,6 +95,7 @@ type
     CurrentHistoryIndex: integer;
     OpenAdditionalFile: boolean;
 
+    procedure   UpdateRichViewFromSettings;
     procedure   btnBackHistClick(Sender: TObject);
     procedure   btnFwdHistClick(Sender: TObject);
     procedure   btnPrevClick(Sender: TObject);
@@ -238,6 +239,13 @@ begin
   end
 end;
 
+procedure TMainForm.UpdateRichViewFromSettings;
+begin
+  RichView.RichTextSettings.NormalFont := fpgGetFont(Settings.NormalFontDesc);
+  RichView.RichTextSettings.FixedFont := fpgGetFont(Settings.FixedFontDesc);
+  RichView.ScrollDistance := Settings.ScrollDistance;
+end;
+
 procedure TMainForm.btnBackHistClick(Sender: TObject);
 begin
   if CurrentHistoryIndex > 0 then
@@ -364,6 +372,7 @@ begin
   ProcessCommandLineParams;
 
   RichView.Images := FImages;
+  UpdateRichViewFromSettings;
 
   if ParamCount = 0 then
   begin
@@ -377,7 +386,6 @@ begin
         OpenFile(lFilename, '', true);
     end;
   end;
-
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
@@ -431,8 +439,7 @@ end;
 procedure TMainForm.miConfigureClicked(Sender: TObject);
 begin
   ShowConfigForm;
-  RichView.RichTextSettings.NormalFont := fpgGetFont(Settings.NormalFontDesc);
-  RichView.RichTextSettings.FixedFont := fpgGetFont(Settings.FixedFontDesc);
+  UpdateRichViewFromSettings;
 end;
 
 procedure TMainForm.miViewExpandAllClicked(Sender: TObject);

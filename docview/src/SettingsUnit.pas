@@ -76,6 +76,7 @@ Type
     StartupHelp: boolean;
     LeftPanelWidth: longint;
     ShowLeftPanel: boolean;
+    ScrollDistance: integer;
     FileDialogSplit: Double;
     Colors: array[ 0..NumColorSettings - 1 ] of TfpgColor;
     NormalFontDesc: TfpgString;
@@ -168,6 +169,8 @@ begin
       FileDialogSplit := ReadInteger( GeneralSection, 'FileDialogSplit', 500 ) / 1000;
 
       ShowLeftPanel := ReadBool( GeneralSection, 'ShowLeftPanel', true );
+
+      ScrollDistance := ReadInteger(GeneralSection, 'ScrollDistance', 75);
 
       // Colours
       for ColorIndex := 0 to High( Colors ) do
@@ -302,6 +305,7 @@ begin
       WriteInteger( GeneralSection, 'FileDialogSplit', Round( FileDialogSplit * 1000 ) );
 
       WriteBool( GeneralSection, 'ShowLeftPanel', ShowLeftPanel);
+      WriteInteger(GeneralSection, 'ScrollDistance', ScrollDistance);
 
       // Colours
       for ColorIndex := 0 to High( Colors ) do
@@ -461,6 +465,7 @@ Begin
   aStrings.Add('StartupHelp:       ' + boolToStr(Settings.StartupHelp));
   // LeftPanelWidth: longint;
   aStrings.Add('ShowLeftPanel: ' + boolToStr(Settings.ShowLeftPanel));
+  aStrings.Add('ScrollDistance: ' + IntToStr(Settings.ScrollDistance));
   // FileDialogSplit: real;
   // Colors: array[ 0..NumColorSettings - 1 ] of TColor;
   aStrings.Add('NormalFont: ' +  Settings.NormalFontDesc);

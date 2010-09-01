@@ -38,6 +38,9 @@ type
     rbIndexOrig: TfpgRadioButton;
     rbIndexAlpha: TfpgRadioButton;
     rbIndexBoth: TfpgRadioButton;
+    lblScrollDistance: TfpgLabel;
+    edtScrollDistance: TfpgEditInteger;
+    lblPixels: TfpgLabel;
     {@VFD_HEAD_END: ConfigurationForm}
     btnHelp: TfpgButton;
     procedure ConfigurationFormShow(Sender: TObject);
@@ -146,6 +149,7 @@ End;
 procedure TConfigurationForm.SettingsToGui;
 begin
   // General
+  edtScrollDistance.Value := Settings.ScrollDistance;
   lbSearchDirs.Items.Assign(Settings.SearchDirectories);
   chkEscapeIPFSymbols.Checked := Settings.IPFTopicSaveAsEscaped;
   chkStartupHelp.Checked  := Settings.StartupHelp;
@@ -163,6 +167,11 @@ end;
 procedure TConfigurationForm.GuiToSettings;
 begin
   // General
+  if edtScrollDistance.Value < 1 then
+    edtScrollDistance.Value := 75; // default
+  if edtScrollDistance.Value > 400 then
+    edtScrollDistance.Value := 400;
+  Settings.ScrollDistance := edtScrollDistance.Value;
   Settings.SearchDirectories.Assign(lbSearchDirs.Items);
   Settings.IPFTopicSaveAsEscaped := chkEscapeIPFSymbols.Checked;
   Settings.StartupHelp := chkStartupHelp.Checked;

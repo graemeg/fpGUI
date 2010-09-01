@@ -49,9 +49,10 @@ Type
   TLinkEvent = procedure( Sender: TRichTextView; Link: string ) of object;
 
 
-  TRichTextView = Class( TfpgWidget )
+  TRichTextView = class(TfpgWidget)
   private
     FPopupMenu: TfpgPopupMenu;
+    FScrollDistance: integer;
     procedure   FVScrollbarScroll(Sender: TObject; position: integer);
     procedure   FHScrollbarScroll(Sender: TObject; position: integer);
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
@@ -63,6 +64,7 @@ Type
     Procedure   SmoothScrollMIClick( Sender: TObject );
     Procedure   DebugMIClick( Sender: TObject );
     Procedure   DefaultMenuPopup( Sender: TObject );
+    procedure   SetScrollDistance(const AValue: integer);
   protected
     FFontManager: TCanvasFontManager;
     FRichTextSettings: TRichTextSettings;
@@ -79,12 +81,12 @@ Type
     FOnClickLink: TLinkEvent;
 
     FDefaultMenu: TfpgPopupMenu;
-      FSelectAllMI: TfpgMenuItem;
-      FCopyMI: TfpgMenuItem;
-      FRefreshMI: TfpgMenuItem;
-      FWordWrapMI: TfpgMenuItem;
-      FSmoothScrollMI: TfpgMenuItem;
-      FDebugMI: TfpgMenuItem;
+    FSelectAllMI: TfpgMenuItem;
+    FCopyMI: TfpgMenuItem;
+    FRefreshMI: TfpgMenuItem;
+    FWordWrapMI: TfpgMenuItem;
+    FSmoothScrollMI: TfpgMenuItem;
+    FDebugMI: TfpgMenuItem;
 
     // Internal layout data
     FNeedVScroll, FNeedHScroll: boolean;
@@ -366,6 +368,7 @@ Type
     property RichTextSettings: TRichTextSettings read FRichTextSettings;
     property ScrollBarWidth: longint read FScrollBarWidth write SetScrollBarWidth default 15;
     property SmoothScroll: boolean read FSmoothScroll write FSmoothScroll;
+    property ScrollDistance: integer read FScrollDistance write SetScrollDistance default 75;
     property UseDefaultMenu: boolean read FUseDefaultMenu write FUseDefaultMenu default True;
     property Debug: boolean read FDebug write SetDebug default False;
     property Images: TfpgImageList read FImages write SetImages;
@@ -579,6 +582,17 @@ begin
   FWordWrapMI.Checked := FRichTextSettings.DefaultWrap;
   FSmoothScrollMI.Checked := SmoothScroll;
   FDebugMI.Checked := Debug;
+end;
+
+procedure TRichTextView.SetScrollDistance(const AValue: integer);
+begin
+  if FScrollDistance = AValue then
+    exit;
+  FScrollDistance := AValue;
+  if Assigned(FVScrollBar) then
+    FVScrollBar.ScrollStep := FScrollDistance;
+  if Assigned(FHScrollBar) then
+    FHScrollBar.ScrollStep := FScrollDistance;
 end;
 
 constructor TRichTextView.Create(AOwner: TComponent);
@@ -1205,12 +1219,12 @@ begin
     FVScrollBar.Max := 0;
   end;
 
-  FHScrollBar.ScrollStep :=  25; // pixels
-  FHScrollBar.PageSize := AvailableWidth - FHScrollbar.ScrollStep; // slightly less than width
-  FHScrollBar.SliderSize := AvailableWidth / MaxDisplayWidth;
-  FVScrollBar.ScrollStep := 25; // not used (line up/down calculated explicitly)
-  FVScrollBar.PageSize := AvailableHeight - FVScrollBar.ScrollStep;
-  FVScrollBar.SliderSize := AvailableHeight / FLayout.Height;
+  FHScrollBar.ScrollStep  := FScrollDistance; // pixels
+  FHScrollBar.PageSize    := AvailableWidth - FHScrollbar.ScrollStep; // slightly less than width
+  FHScrollBar.SliderSize  := AvailableWidth / MaxDisplayWidth;
+  FVScrollBar.ScrollStep  := FScrollDistance; // pixels
+  FVScrollBar.PageSize    := AvailableHeight - FVScrollBar.ScrollStep;
+  FVScrollBar.SliderSize  := AvailableHeight / FLayout.Height;
 
   // Physical horizontal scroll setup
   FHScrollbar.Visible := FNeedHScroll;
@@ -1422,7 +1436,7 @@ begin
     Result := 0;
 end;
 
-Function TRichTextView.GetLineUpPosition: longint;
+function TRichTextView.GetLineUpPosition: longint;
 var
   FirstVisibleLine: longint;
   Offset: longint;
@@ -1431,8 +1445,7 @@ begin
   Result := GetLineUpPositionFrom( FirstVisibleLine, Offset );
 end;
 
-Function TRichTextView.GetLineUpPositionFrom( FirstVisibleLine: longint;
-                                              Offset: longint ): longint;
+function TRichTextView.GetLineUpPositionFrom( FirstVisibleLine: longint; Offset: longint ): longint;
 begin
   // we should never have scrolled all lines off the top!!
   assert( FirstVisibleLine <> -1 );
@@ -1449,15 +1462,13 @@ begin
   end;
 
   // scroll so that top line is fully visible...
-  Result := FVScrollBar.Position
-            - Offset;
+  Result := FVScrollBar.Position - Offset;
 
   if Offset < (FLayout.FLines^[ FirstVisibleLine ].Height div 2) then
     // more than half the line was already displayed so
     if FirstVisibleLine > 0 then
       // AND to make next line up visible
       dec( Result, FLayout.FLines^[ FirstVisibleLine - 1 ].Height );
-
 end;
 
 Function Sign( arg: longint ): longint;
@@ -1526,54 +1537,26 @@ end;
 *)
 
 Procedure TRichTextView.DoVerticalScroll( NewY: longint );
-//var
-//  ScrollDistance: longint;
 begin
   FYScroll := 0 - NewY;
-
   if not Visible then
   begin
     FLastYScroll := FYScroll;
     exit;
   end;
-
-//  ScrollDistance := FYScroll - FLastYScroll;
-
-  { TODO -ograeme -cscrolling : Implement vertical scrolling here }
-  //ScrollControlRect( Self,
-  //                   GetTextAreaRect,
-  //                   0,
-  //                   ScrollDistance,
-  //                   Color,
-  //                   FSmoothScroll );
-
   FLastYScroll := FYScroll;
   RePaint;
   SetupCursor;
 end;
 
 Procedure TRichTextView.DoHorizontalScroll( NewX: longint );
-var
-  ScrollDistance: longint;
 begin
   FXScroll := NewX;
-
   if not Visible then
   begin
     FLastXScroll := FXScroll;
     exit;
   end;
-
-//  ScrollDistance := FXScroll - FLastXScroll;
-
-  { TODO -ograemeg -cscrolling : Implement horizontal scrolling }
-  //ScrollControlRect( Self,
-  //                   GetTextAreaRect,
-  //                   - ScrollDistance,
-  //                   0,
-  //                   Color,
-  //                   FSmoothScroll );
-
   FLastXScroll := FXScroll;
   RePaint;
   SetupCursor;
