@@ -149,8 +149,8 @@ begin
   chkStartupHelp.Checked  := Settings.StartupHelp;
   chkOpenTOC.Checked      := Settings.OpenWithExpandedContents;
   // Fonts & Color
-  edtNormalFont.FontDesc  := Settings.NormalFont.FontDesc;
-  edtFixedFont.FontDesc   := Settings.FixedFont.FontDesc;
+  edtNormalFont.FontDesc  := Settings.NormalFontDesc;
+  edtFixedFont.FontDesc   := Settings.FixedFontDesc;
   UpdateColorPanels;
 end;
 
@@ -163,10 +163,8 @@ begin
   Settings.StartupHelp := chkStartupHelp.Checked;
   Settings.OpenWithExpandedContents := chkOpenTOC.Checked;
   // Fonts & Color
-  Settings.NormalFont.Free;
-  Settings.NormalFont := fpgGetFont(edtNormalFont.FontDesc);
-  Settings.FixedFont.Free;
-  Settings.FixedFont := fpgGetFont(edtFixedFont.FontDesc);
+  Settings.NormalFontDesc := edtNormalFont.FontDesc;
+  Settings.FixedFontDesc := edtFixedFont.FontDesc;
   Settings.Colors[SearchHighlightTextColorIndex] := pnlSearchHighlight.BackgroundColor;
 end;
 
