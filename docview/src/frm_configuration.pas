@@ -232,7 +232,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 19;
+    TabOrder := 25;
     OnClick := @btnSaveClick;
   end;
 
@@ -245,7 +245,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 20;
+    TabOrder := 26;
     OnClick := @btnCancelClick;
   end;
 
@@ -335,7 +335,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 5;
+    TabOrder := 3;
     OnClick :=@btnSearchDirAddClicked;
   end;
 
@@ -348,7 +348,7 @@ begin
     Hint := '';
     HotTrack := False;
     PopupFrame := False;
-    TabOrder := 7;
+    TabOrder := 5;
     Items.Duplicates := dupIgnore;
   end;
 
@@ -361,7 +361,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 6;
+    TabOrder := 4;
   end;
 
   chkEscapeIPFSymbols := TfpgCheckBox.Create(tsGeneral);
@@ -372,7 +372,7 @@ begin
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 8;
+    TabOrder := 6;
     Text := 'Escape symbols when saving topics as IPF text';
   end;
 
@@ -385,7 +385,7 @@ begin
     Checked := True;
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 9;
+    TabOrder := 7;
     Text := 'Show DocView help at startup if no files opened';
   end;
 
@@ -397,7 +397,7 @@ begin
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
-    TabOrder := 10;
+    TabOrder := 8;
     Text := 'Open files with contents expanded';
   end;
 
@@ -410,7 +410,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 17;
+    TabOrder := 15;
     OnClick := @btnSearchHighlightClicked;
   end;
 
@@ -423,7 +423,7 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 18;
+    TabOrder := 16;
     OnClick := @ResetColorsButtonOnClick;
   end;
 
@@ -434,7 +434,7 @@ begin
     SetPosition(124, 48, 340, 24);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '';
-    TabOrder := 15;
+    TabOrder := 14;
   end;
 
   edtNormalFont := TfpgFontEdit.Create(tsFontsColor);
@@ -444,7 +444,7 @@ begin
     SetPosition(124, 16, 340, 24);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '';
-    TabOrder := 14;
+    TabOrder := 13;
   end;
 
   rbIndexOrig := TfpgRadioButton.Create(tsIndex);
