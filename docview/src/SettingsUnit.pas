@@ -67,9 +67,6 @@ Const
   ApplicationFontIndex = 0;
   NumFontSettings = 1;
 
-  DefaultTopicFont = DefaultTopicFont + '-' + DefaultTopicFontSize;
-  DefaultTopicFixedFont = DefaultTopicFixedFont + '-10' + DefaultTopicFixedFontSize;
-
 
 Type
   TIndexStyle = ( isAlphabetical, isFileOnly, isFull );
@@ -95,8 +92,8 @@ Type
     ShowLeftPanel: boolean;
     FileDialogSplit: Double;
     Colors: array[ 0..NumColorSettings - 1 ] of TfpgColor;
-    NormalFont: TfpgFont;
-    FixedFont: TfpgFont;
+    NormalFontDesc: TfpgString;
+    FixedFontDesc: TfpgString;
     Fonts: array[ 0..NumFontSettings - 1 ] of TfpgFont;
     FixedFontSubstitution: boolean;
     FixedFontSubstitutes: string;
@@ -226,13 +223,8 @@ begin
       end;
 
       // Fonts
-      NormalFont := fpgGetFont(ReadString(FontsSection, 'NormalFont', DefaultTopicFont));
-      if NormalFont = nil then
-        NormalFont := fpgStyle.DefaultFont;
-
-      FixedFont := fpgGetFont(ReadString(FontsSection, 'FixedFont', DefaultTopicFixedFont));
-      if FixedFont = nil then
-        FixedFont := fpgStyle.FixedFont;
+      NormalFontDesc := ReadString(FontsSection, 'NormalFont', DefaultTopicFont);
+      FixedFontDesc := ReadString(FontsSection, 'FixedFont', DefaultTopicFixedFont);
 
       for i := 0 to NumFontSettings - 1 do
       begin
@@ -243,7 +235,7 @@ begin
       end;
 
       FixedFontSubstitution := ReadBool( FontsSection, 'FixedFontSubstitution', true );
-      FixedFontSubstitutes := ReadString( FontsSection, 'FixedFontSubstitutes', 'Mono-10' );
+      FixedFontSubstitutes := ReadString( FontsSection, 'FixedFontSubstitutes', DefaultTopicFixedFont );
 
       // Index style
       SettingString := ReadString( GeneralSection, 'IndexStyle', 'Full' );
@@ -357,8 +349,8 @@ begin
       end;
 
       // Fonts
-      WriteString( FontsSection, 'NormalFont', NormalFont.FontDesc );
-      WriteString( FontsSection, 'FixedFont', FixedFont.FontDesc );
+      WriteString( FontsSection, 'NormalFont', NormalFontDesc );
+      WriteString( FontsSection, 'FixedFont', FixedFontDesc );
       for FontIndex := 0 to NumFontSettings - 1 do
       begin
         FontName := 'Font' + IntToStr( FontIndex );
@@ -488,8 +480,8 @@ Begin
   aStrings.Add('ShowLeftPanel: ' + boolToStr(Settings.ShowLeftPanel));
   // FileDialogSplit: real;
   // Colors: array[ 0..NumColorSettings - 1 ] of TColor;
-  // NormalFont: TFont;
-  // FixedFont: TFont;
+  aStrings.Add('NormalFont: ' +  Settings.NormalFontDesc);
+  aStrings.Add('FixedFont: ' + Settings.FixedFontDesc);
   // Fonts: array[ 0..NumFontSettings - 1 ] of TFont;
   aStrings.Add('FixedFontSubstitution: ' + boolToStr(Settings.FixedFontSubstitution));
   aStrings.Add('FixedFontSubstitutes: ' + Settings.FixedFontSubstitutes);
@@ -508,14 +500,9 @@ end;
 
 Initialization
   Settings.MRUList := TObjectList.Create;
-
-  //Settings.NormalFont := fpgStyle.DefaultFont;
-  //Settings.FixedFont := fpgStyle.FixedFont;
-  //Settings.SearchDirectories := TStringList.Create;
+  Settings.SearchDirectories := TStringList.Create;
 
 Finalization
-  Settings.NormalFont.Free;
-  Settings.FixedFont.Free;
   Settings.SearchDirectories.Free;
   Settings.MRUList.Free;
 
