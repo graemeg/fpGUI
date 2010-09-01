@@ -210,6 +210,7 @@ uses
   ,frm_configuration
   ,frm_text
   ,NewViewConstantsUnit
+  ,CanvasFontManager
   ;
 
 const
@@ -359,12 +360,6 @@ begin
   PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
   UpdateWindowPosition;
 
-  Settings.NormalFont := fpgStyle.DefaultFont;
-  Settings.FixedFont := fpgStyle.FixedFont;
-  Settings.SearchDirectories := TStringList.Create;
-
-  LogEvent(LogSettings, 'Loading settings');
-  LoadSettings;
   CreateMRUMenuItems;
   ProcessCommandLineParams;
 
@@ -436,6 +431,8 @@ end;
 procedure TMainForm.miConfigureClicked(Sender: TObject);
 begin
   ShowConfigForm;
+  RichView.RichTextSettings.NormalFont := fpgGetFont(Settings.NormalFontDesc);
+  RichView.RichTextSettings.FixedFont := fpgGetFont(Settings.FixedFontDesc);
 end;
 
 procedure TMainForm.miViewExpandAllClicked(Sender: TObject);
@@ -1934,6 +1931,8 @@ begin
     'dv.arrowdown', @usr_arrow_down,
     sizeof(usr_arrow_down), 0, 0);
 
+  // load custom user settings like Fonts, Search Highlight Color etc.
+  LoadSettings;
 end;
 
 destructor TMainForm.Destroy;
