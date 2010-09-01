@@ -107,6 +107,33 @@ text wrapping and font substitution support.
 environment variables BOOKSHELF or HELP.
 :eul.
 
+.* ----------------------------------------------------------------------
+:h2.Disclaimers
+:p.
+Since this program is free, it is supplied with no warranty, either expressed or
+implied. 
+:p.
+I disclaim all warranties for any damages, including, but not limited to, incidental
+or consequential damage caused directly or indirectly by this software. 
+:p.
+All software is supplied AS IS. You may use the program package only at your own
+risk. 
+:p.
+This program must not be used in states that do not allow the above limitation of
+liability.
+
+
+.* ----------------------------------------------------------------------
+:h2.Trademarks
+:p.
+The following trademarks are used in this online help file:
+:ul compact.
+:li.OS/2 is a registered trademark of IBM Corporation.
+:li.eComStation is a registered trademark of Serenity Systems, Inc.
+:li.Windows is a registered trademark of Microsoft Corporation
+:li.Linux is a registered trademark of Linus Torvalds
+:li.FreeBSD is a registered trademark of The FreeBSD Foundation
+:eul.
 
 .* ************************************************************
 .* Using DocView
