@@ -178,6 +178,7 @@ For example, on my system I can do the following:
 :xmp.
   docview FPCHELP
 :exmp.
+:p.
 which loads the whole Free Pascal help library on my system. FPCHELP is an environment
 variable set in ~/.profile (Linux) or config.sys (Windows) consisting of "rtl+fcl+ref"
 which tells DocView to load the help files rtl.inf, fcl.inf and ref.inf. The
@@ -622,7 +623,8 @@ parameters. None of them are required. For a quick summary, select
   docview [<filename>] [[option] [option parameter]]
 :exmp.
 
-:link reftype=hd refid='CommandLineExamples'.Examples:elink.
+:p.
+:link reftype=hd refid='CommandLineExamples'.:hp2.Examples:ehp2.:elink.
 :p.
 :hp2.<filename>:ehp2.
 :p.
@@ -652,19 +654,26 @@ Example:
 .br
 :lm margin=8.
 To search for TfpgApplication in the whole fpGUI Toolkit class document you can call
+
 :xmp.
   docview fpgui.inf -k TfpgApplication
 :exmp.
+
+:p.
 DocView is clever enough to handle multiple words (like the :link reftype=hd
 refid='search'.search panel:elink.). This is a OR search.
+
 :xmp.
   docview fpgui.inf -k net access
 :exmp.
+
+:p.
 To perform an AND search enclose the search phrase in double quotes.
 :xmp.
   docview fpgui.inf -k "net access"
 :exmp.
 :lm margin=1.
+
 :pt.-n <id>
 :pd.Open a topic with the numeric ID equal to <id>.
 :pt.-s <id>
@@ -952,6 +961,7 @@ our help file!
   wipfc -i sample.ipf
 :exmp.
 
+:p.
 If you typed the document correctly, you should now have
 a :hp2.sample.inf:ehp2. file in the current directory. Now you simply
 run DocView and open your first INF help file. Well done!
