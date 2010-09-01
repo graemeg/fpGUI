@@ -7,22 +7,22 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_tab, fpg_button,
   fpg_label, fpg_edit, fpg_panel, fpg_combobox, fpg_listbox, fpg_checkbox,
-  fpg_editbtn;
+  fpg_editbtn, fpg_radiobutton;
 
 type
 
   TConfigurationForm = class(TfpgForm)
   private
     {@VFD_HEAD_BEGIN: ConfigurationForm}
-    PageControl1: TfpgPageControl;
+    pcSettings: TfpgPageControl;
     btnSave: TfpgButton;
     btnCancel: TfpgButton;
     tsGeneral: TfpgTabSheet;
     tsFontsColor: TfpgTabSheet;
+    tsIndex: TfpgTabSheet;
     Label1: TfpgLabel;
     Label2: TfpgLabel;
     pnlSearchHighlight: TfpgPanel;
-    cbIndexStyle: TfpgComboBox;
     lblIndexStyle: TfpgLabel;
     lblSearchDirs: TfpgLabel;
     btnSearchDirAdd: TfpgButton;
@@ -35,6 +35,9 @@ type
     btnResetColors: TfpgButton;
     edtFixedFont: TfpgFontEdit;
     edtNormalFont: TfpgFontEdit;
+    rbIndexOrig: TfpgRadioButton;
+    rbIndexAlpha: TfpgRadioButton;
+    rbIndexBoth: TfpgRadioButton;
     {@VFD_HEAD_END: ConfigurationForm}
     btnHelp: TfpgButton;
     procedure ConfigurationFormShow(Sender: TObject);
@@ -79,7 +82,7 @@ end;
 procedure TConfigurationForm.ConfigurationFormShow(Sender: TObject);
 begin
   SettingsToGui;
-  PageControl1.ActivePage := tsGeneral;
+  pcSettings.ActivePage := tsGeneral;
   // programatically seting a tab does not fire OnChange event, so we do it mantually
   PageControl1Change(self, tsGeneral);
 end;
@@ -143,7 +146,6 @@ End;
 procedure TConfigurationForm.SettingsToGui;
 begin
   // General
-  cbIndexStyle.FocusItem  := Ord(Settings.IndexStyle);
   lbSearchDirs.Items.Assign(Settings.SearchDirectories);
   chkEscapeIPFSymbols.Checked := Settings.IPFTopicSaveAsEscaped;
   chkStartupHelp.Checked  := Settings.StartupHelp;
@@ -152,12 +154,15 @@ begin
   edtNormalFont.FontDesc  := Settings.NormalFontDesc;
   edtFixedFont.FontDesc   := Settings.FixedFontDesc;
   UpdateColorPanels;
+  // Index
+  rbIndexOrig.Checked   := Settings.IndexStyle = isFileOnly;
+  rbIndexAlpha.Checked  := Settings.IndexStyle = isAlphabetical;
+  rbIndexBoth.Checked   := Settings.IndexStyle = isFull;
 end;
 
 procedure TConfigurationForm.GuiToSettings;
 begin
   // General
-  Settings.IndexStyle := TIndexStyle(cbIndexStyle.FocusItem);
   Settings.SearchDirectories.Assign(lbSearchDirs.Items);
   Settings.IPFTopicSaveAsEscaped := chkEscapeIPFSymbols.Checked;
   Settings.StartupHelp := chkStartupHelp.Checked;
@@ -166,6 +171,13 @@ begin
   Settings.NormalFontDesc := edtNormalFont.FontDesc;
   Settings.FixedFontDesc := edtFixedFont.FontDesc;
   Settings.Colors[SearchHighlightTextColorIndex] := pnlSearchHighlight.BackgroundColor;
+  // Index
+  if rbIndexOrig.Checked then
+    Settings.IndexStyle := isFileOnly
+  else if rbIndexAlpha.Checked then
+    Settings.IndexStyle := isAlphabetical
+  else if rbIndexBoth.Checked then
+    Settings.IndexStyle := isFull;
 end;
 
 procedure TConfigurationForm.UpdateColorPanels;
@@ -187,12 +199,13 @@ begin
   SetPosition(402, 189, 515, 439);
   WindowTitle := 'Configuration';
   Hint := '';
+  ShowHint := True;
   WindowPosition := wpOneThirdDown;
 
-  PageControl1 := TfpgPageControl.Create(self);
-  with PageControl1 do
+  pcSettings := TfpgPageControl.Create(self);
+  with pcSettings do
   begin
-    Name := 'PageControl1';
+    Name := 'pcSettings';
     SetPosition(4, 4, 506, 388);
     Anchors := [anLeft,anRight,anTop,anBottom];
     ActivePageIndex := 0;
@@ -227,7 +240,7 @@ begin
     OnClick := @btnCancelClick;
   end;
 
-  tsGeneral := TfpgTabSheet.Create(PageControl1);
+  tsGeneral := TfpgTabSheet.Create(pcSettings);
   with tsGeneral do
   begin
     Name := 'tsGeneral';
@@ -235,12 +248,20 @@ begin
     Text := 'General';
   end;
 
-  tsFontsColor := TfpgTabSheet.Create(PageControl1);
+  tsFontsColor := TfpgTabSheet.Create(pcSettings);
   with tsFontsColor do
   begin
     Name := 'tsFontsColor';
     SetPosition(3, 24, 500, 361);
     Text := 'Fonts & Color';
+  end;
+
+  tsIndex := TfpgTabSheet.Create(pcSettings);
+  with tsIndex do
+  begin
+    Name := 'tsIndex';
+    SetPosition(3, 24, 500, 361);
+    Text := 'Index';
   end;
 
   Label1 := TfpgLabel.Create(tsFontsColor);
@@ -276,25 +297,12 @@ begin
     Text := 'Search Highlight Color';
   end;
 
-  cbIndexStyle := TfpgComboBox.Create(tsGeneral);
-  with cbIndexStyle do
-  begin
-    Name := 'cbIndexStyle';
-    SetPosition(12, 32, 160, 25);
-    FontDesc := '#List';
-    Hint := '';
-    Items.Add('Alphabetical');
-    Items.Add('FileOnly');
-    Items.Add('Full');
-    TabOrder := 2;
-  end;
-
-  lblIndexStyle := TfpgLabel.Create(tsGeneral);
+  lblIndexStyle := TfpgLabel.Create(tsIndex);
   with lblIndexStyle do
   begin
     Name := 'lblIndexStyle';
-    SetPosition(12, 13, 296, 17);
-    FontDesc := '#Label1';
+    SetPosition(12, 12, 224, 17);
+    FontDesc := '#Label2';
     Hint := '';
     Text := 'Index style';
   end;
@@ -430,11 +438,78 @@ begin
     TabOrder := 14;
   end;
 
+  rbIndexOrig := TfpgRadioButton.Create(tsIndex);
+  with rbIndexOrig do
+  begin
+    Name := 'rbIndexOrig';
+    SetPosition(24, 28, 280, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    Hint := '';
+    TabOrder := 21;
+    Text := 'File Only (only entries specified in file)';
+  end;
+
+  rbIndexAlpha := TfpgRadioButton.Create(tsIndex);
+  with rbIndexAlpha do
+  begin
+    Name := 'rbIndexAlpha';
+    SetPosition(24, 48, 280, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    Hint := '';
+    TabOrder := 22;
+    Text := 'Alphabetical listing of topics';
+  end;
+
+  rbIndexBoth := TfpgRadioButton.Create(tsIndex);
+  with rbIndexBoth do
+  begin
+    Name := 'rbIndexBoth';
+    SetPosition(24, 68, 280, 20);
+    FontDesc := '#Label1';
+    GroupIndex := 1;
+    Hint := '';
+    TabOrder := 23;
+    Text := 'Both';
+  end;
+
+  lblScrollDistance := TfpgLabel.Create(tsGeneral);
+  with lblScrollDistance do
+  begin
+    Name := 'lblScrollDistance';
+    SetPosition(12, 12, 280, 17);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Mouse Wheel Scroll Distance';
+  end;
+
+  edtScrollDistance := TfpgEditInteger.Create(tsGeneral);
+  with edtScrollDistance do
+  begin
+    Name := 'edtScrollDistance';
+    SetPosition(12, 32, 72, 24);
+    Hint := '';
+    TabOrder := 2;
+    FontDesc := '#Edit1';
+    Value := 0;
+  end;
+
+  lblPixels := TfpgLabel.Create(tsGeneral);
+  with lblPixels do
+  begin
+    Name := 'lblPixels';
+    SetPosition(88, 36, 80, 17);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := '(pixels)';
+  end;
+
   {@VFD_BODY_END: ConfigurationForm}
   {%endregion}
 
   // always reset pagecotrol
-  PageControl1.ActivePageIndex := 0;
+  pcSettings.ActivePageIndex := 0;
 
   //btnHelp := TfpgButton.Create(self);
   //with btnHelp do
