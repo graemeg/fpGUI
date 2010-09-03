@@ -42,13 +42,16 @@ program fpmake;
 
 uses sysutils, fpmkunit;
 
+const
+  {$I VERSION_FILE.inc}
+
 var
   T: TTarget;
   P: TPackage;
 begin
   with Installer do begin
     P := AddPackage('fpgui');
-    P.Version := '0.7.0';
+    P.Version := FPGUI_VERSION;
     P.Author := 'Graeme Geldenhuys';
     P.Email := 'graemeg@gmail.com';
     P.License := 'Modified LGPL';
