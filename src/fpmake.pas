@@ -48,7 +48,7 @@ var
 begin
   with Installer do begin
     P := AddPackage('fpgui');
-    P.Version := '0.6.3';
+    P.Version := '0.7.0';
     P.Author := 'Graeme Geldenhuys';
     P.Email := 'graemeg@gmail.com';
     P.License := 'Modified LGPL';
@@ -72,9 +72,10 @@ begin
 //    else
 //      Defaults.GlobalUnitDir := Format('c:\fpc\2.2.3\units\%s-%s', [CurrentCPU, CurrentOS]);
 
-    if Defaults.OS in AllUnixOSes
-      then Defaults.Options := Defaults.Options + '-dX11'
-      else Defaults.Options := Defaults.Options + '-dGDI';
+    if Defaults.OS in AllUnixOSes then
+      Defaults.Options.Add('-dX11')
+    else
+      Defaults.Options.Add('-dGDI');
 
     P.SourcePath.Add('corelib');
     P.SourcePath.Add('corelib/x11', AllUnixOSes);
