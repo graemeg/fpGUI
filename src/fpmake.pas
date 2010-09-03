@@ -92,6 +92,7 @@ begin
     P.UnitPath.Add('gui');
     P.UnitPath.Add('gui/db');
 
+    P.IncludePath.Add('.');
     P.IncludePath.Add('corelib');
     P.IncludePath.Add('corelib/x11', AllUnixOSes);
     P.IncludePath.Add('corelib/gdi', AllWindowsOSes);
@@ -129,15 +130,21 @@ begin
 
     { corelib }
     T := P.Targets.AddUnit('fpg_base.pas');
+      T.Dependencies.AddInclude('keys.inc');
+      T.Dependencies.AddInclude('predefinedcolors.inc');
     T := P.Targets.AddUnit('fpg_imagelist.pas');
     T := P.Targets.AddUnit('fpg_popupwindow.pas');
     T := P.Targets.AddUnit('fpg_translations.pas');
     T := P.Targets.AddUnit('fpg_cmdlineparams.pas');
     T := P.Targets.AddUnit('fpg_imgfmt_bmp.pas');
+    T := P.Targets.AddUnit('fpg_imgfmt_jpg.pas');
     T := P.Targets.AddUnit('fpg_stdimages.pas');
     T := P.Targets.AddUnit('fpg_utils.pas');
+    T := P.Targets.AddUnit('fpg_imgutils.pas');
     T := P.Targets.AddUnit('fpg_command_intf.pas');
     T := P.Targets.AddUnit('fpg_main.pas');
+      T.Dependencies.AddInclude('VERSION_FILE.inc');
+      T.Dependencies.AddInclude('fpg_msgqueue.inc');
     T := P.Targets.AddUnit('fpg_stringhashlist.pas');
     T := P.Targets.AddUnit('fpg_widget.pas');
     T := P.Targets.AddUnit('fpg_constants.pas');
@@ -147,6 +154,7 @@ begin
     T := P.Targets.AddUnit('fpg_extinterpolation.pas');
     T := P.Targets.AddUnit('fpg_pofiles.pas');
     T := P.Targets.AddUnit('fpg_stringutils.pas');
+    T := P.Targets.AddUnit('fpg_extgraphics.pas');
 
     { corelib include files }
 //    T := P.Sources.AddSrc('keys.inc');
@@ -186,6 +194,10 @@ begin
     T := P.Targets.AddUnit('fpg_menu.pas');
     T := P.Targets.AddUnit('fpg_progressbar.pas');
     T := P.Targets.AddUnit('fpg_style.pas');
+    T := P.Targets.AddUnit('fpg_spinedit.pas');
+    T := P.Targets.AddUnit('fpg_colorwheel.pas');
+    T := P.Targets.AddUnit('fpg_colormapping.pas');
+    T := P.Targets.AddUnit('fpg_editbtn.pas');
 
     Run;
   end;
