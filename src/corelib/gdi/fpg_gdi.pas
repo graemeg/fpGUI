@@ -32,7 +32,11 @@ uses
   Classes,
   SysUtils,
   fpg_base,
-  fpg_impl;
+  fpg_impl
+  {$IFDEF DEBUG}
+  ,dbugintf
+  {$ENDIF DEBUG}
+  ;
 
 { Constants missing on windows unit }
 const
@@ -631,7 +635,7 @@ begin
 
   if not (w is TfpgGDIWindow) then
   begin
-    {$IFDEF DEBUG} writeln('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
+    {$IFDEF DEBUG} SendDebug('fpGFX/GDI: Unable to detect Window - using DefWindowProc'); {$ENDIF}
     Result := Windows.DefWindowProc(hwnd, uMsg, wParam, lParam);
     Exit; //==>
   end;
@@ -646,8 +650,7 @@ begin
     WM_KEYDOWN,
     WM_SYSKEYDOWN:
         begin
-          {$IFDEF DEBUG} write(w.ClassName + ': '); {$ENDIF}
-          {$IFDEF DEBUG} writeln('wm_char, wm_keyup, wm_keydown'); {$ENDIF}
+          {$IFDEF DEBUG} SendDebug(w.ClassName + ': wm_char, wm_keyup, wm_keydown'); {$ENDIF}
           kwg := FindKeyboardFocus;
           if kwg <> nil then
             w := kwg;
@@ -715,7 +718,7 @@ begin
         begin
           {$IFDEF DEBUG}
           if uMsg <> WM_MOUSEMOVE then
-            writeln('fpGFX/GDI: Found a mouse button event');
+            SendDebug('fpGFX/GDI: Found a mouse button event');
           {$ENDIF}
 //          msgp.mouse.x := smallint(lParam and $FFFF);
 //          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
@@ -725,16 +728,15 @@ begin
           if uMsg = WM_MOUSEMOVE then
           begin
             {$IFDEF DEBUG}
-            Writeln('old x=', OldMousePos.x, ' y=', OldMousePos.y);
-            writeln('new x=', msgp.mouse.x, ' y=', msgp.mouse.y);
-            writeln('---');
+            SendDebugFmt('old x=%d  y=%d', [OldMousePos.x, OldMousePos.y]);
+            SendDebugFmt('new x=%d  y=%d', [msgp.mouse.x, msgp.mouse.y]);
             {$ENDIF}
             // Check for fake MouseMove messages - Windows sucks!
             if (OldMousePos.x = msgp.mouse.x) and
                (OldMousePos.y = msgp.mouse.y) then
             begin
               {$IFDEF DEBUG}
-              writeln('We received fake MouseMove messages');
+              SendDebug('We received fake MouseMove messages');
               {$ENDIF}
               Exit; //==>
             end
@@ -790,7 +792,7 @@ begin
               WM_RBUTTONDOWN:
                   begin
                     {$IFDEF DEBUG}
-                    writeln('fpGUI/GDI:', w.ClassName + ': MouseButtonDown event');
+                    SendDebug('fpGUI/GDI: ' + w.ClassName + ': MouseButtonDown event');
                     {$ENDIF}
                     // This is temporary and we should try and move it to
                     // the UI Designer code instead.
@@ -807,7 +809,7 @@ begin
               WM_RBUTTONUP:
                   begin
                     {$IFDEF DEBUG}
-                    writeln('fpGFX/GDI:', w.ClassName + ': MouseButtonUp event');
+                    SendDebug('fpGFX/GDI: '+ w.ClassName + ': MouseButtonUp event');
                     {$ENDIF}
                     // This is temporary and we should try and move it to
                     // the UI Designer code instead.
@@ -875,8 +877,7 @@ begin
           msgp.rect.Height := smallint((lParam and $FFFF0000) shr 16);
 
           {$IFDEF DEBUG}
-            write(w.ClassName + ': ');
-            writeln('WM_SIZE: width=',msgp.rect.width, ' height=',msgp.rect.height);
+            SendDebugFmt('%s: WM_SIZE  w=%d  h=%d', [w.ClassName, msgp.rect.width, msgp.rect.Height]);
           {$ENDIF}
           // skip minimize...
           if lparam <> 0 then
@@ -886,8 +887,7 @@ begin
     WM_MOVE:
         begin
           {$IFDEF DEBUG}
-          write(w.ClassName + ': ');
-          writeln('WM_MOVE');
+          SendDebug(w.ClassName + ': WM_MOVE');
           {$ENDIF}
           // window decoration correction ...
           if (GetWindowLong(w.WinHandle, GWL_STYLE) and WS_CHILD) = 0 then
@@ -908,8 +908,7 @@ begin
     WM_MOUSEWHEEL:
         begin
           {$IFDEF DEBUG}
-            write(w.ClassName + ': ');
-            writeln('WM_MOUSEWHEEL: wp=',IntToHex(wparam,8), ' lp=',IntToHex(lparam,8));
+            SendDebugFmt('%s: WM_MOUSEWHEEL: wp=%s  lp=%s', [w.ClassName, IntToHex(wparam,8), IntToHex(lparam,8)]);
           {$ENDIF}
           pt.x := GET_X_LPARAM(lParam);
           pt.y := GET_Y_LPARAM(lParam);
@@ -941,7 +940,7 @@ begin
     WM_ACTIVATE:  // We currently use WM_NCACTIVATE instead!
         begin
           {$IFDEF DEBUG}
-            writeln(w.ClassName + ': WM_ACTIVATE');
+            SendDebug(w.ClassName + ': WM_ACTIVATE');
           {$ENDIF}
           if (Lo(wParam) = WA_INACTIVE) then
             fpgSendMessage(nil, w, FPGM_DEACTIVATE)
@@ -958,8 +957,7 @@ begin
     WM_NCACTIVATE:
         begin
           {$IFDEF DEBUG}
-            write(w.ClassName + ': WM_NCACTIVATE ');
-            writeln(wParam);
+            SendDebugFmt('%s: WM_NCACTIVATE wparam=%d', [w.ClassName, wParam]);
           {$ENDIF}
           if (wParam = 0) then
             fpgSendMessage(nil, w, FPGM_DEACTIVATE)
@@ -969,7 +967,7 @@ begin
           if (PopupListFirst <> nil) and (PopupListFirst.Visible) then
           begin
             {$IFDEF DEBUG}
-            writeln(' Blockmsg = True (part 1) : ' + PopupListFirst.ClassName);
+            SendDebug(' Blockmsg = True (part 1) : ' + PopupListFirst.ClassName);
             {$ENDIF}
             // This is ugly but needed for now to get TfpgCombobox to work
             if (PopupListFirst.ClassName <> 'TDropDownWindow') then
@@ -1002,8 +1000,7 @@ begin
     WM_CLOSE:
         begin
           {$IFDEF DEBUG}
-            write(w.ClassName + ': ');
-            writeln('WM_Close');
+            SendDebug(w.ClassName + ': WM_Close');
           {$ENDIF}
           fpgSendMessage(nil, w, FPGM_CLOSE, msgp);
         end;
@@ -1011,8 +1008,7 @@ begin
     WM_PAINT:
         begin
           {$IFDEF DEBUG}
-            write(w.ClassName + ': ');
-            writeln('WM_PAINT');
+            SendDebug(w.ClassName + ': WM_PAINT');
           {$ENDIF}
           Windows.BeginPaint(w.WinHandle, @PaintStruct);
           fpgSendMessage(nil, w, FPGM_PAINT, msgp);

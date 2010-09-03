@@ -95,6 +95,7 @@ type
     CurrentHistoryIndex: integer;
     OpenAdditionalFile: boolean;
 
+    procedure   UpdateRichViewFromSettings;
     procedure   btnBackHistClick(Sender: TObject);
     procedure   btnFwdHistClick(Sender: TObject);
     procedure   btnPrevClick(Sender: TObject);
@@ -210,6 +211,7 @@ uses
   ,frm_configuration
   ,frm_text
   ,NewViewConstantsUnit
+  ,CanvasFontManager
   ;
 
 const
@@ -235,6 +237,13 @@ begin
     Consumed := True;
     DisplayTopic(nil);
   end
+end;
+
+procedure TMainForm.UpdateRichViewFromSettings;
+begin
+  RichView.RichTextSettings.NormalFont := fpgGetFont(Settings.NormalFontDesc);
+  RichView.RichTextSettings.FixedFont := fpgGetFont(Settings.FixedFontDesc);
+  RichView.ScrollDistance := Settings.ScrollDistance;
 end;
 
 procedure TMainForm.btnBackHistClick(Sender: TObject);
@@ -359,16 +368,11 @@ begin
   PageControl1.Width := gINI.ReadInteger('Options', 'SplitterLeft', 260);
   UpdateWindowPosition;
 
-  Settings.NormalFont := fpgStyle.DefaultFont;
-  Settings.FixedFont := fpgStyle.FixedFont;
-  Settings.SearchDirectories := TStringList.Create;
-
-  LogEvent(LogSettings, 'Loading settings');
-  LoadSettings;
   CreateMRUMenuItems;
   ProcessCommandLineParams;
 
   RichView.Images := FImages;
+  UpdateRichViewFromSettings;
 
   if ParamCount = 0 then
   begin
@@ -382,7 +386,6 @@ begin
         OpenFile(lFilename, '', true);
     end;
   end;
-
 end;
 
 procedure TMainForm.MainFormDestroy(Sender: TObject);
@@ -436,6 +439,7 @@ end;
 procedure TMainForm.miConfigureClicked(Sender: TObject);
 begin
   ShowConfigForm;
+  UpdateRichViewFromSettings;
 end;
 
 procedure TMainForm.miViewExpandAllClicked(Sender: TObject);
@@ -1934,6 +1938,8 @@ begin
     'dv.arrowdown', @usr_arrow_down,
     sizeof(usr_arrow_down), 0, 0);
 
+  // load custom user settings like Fonts, Search Highlight Color etc.
+  LoadSettings;
 end;
 
 destructor TMainForm.Destroy;
@@ -2745,7 +2751,7 @@ const
 var
   s: string;
 begin
-  s := '<font "Arial" 12><b>' + cLongName + '</b></font>' + le
+  s := '<font "' + DefaultTopicFontName + '" 12><b>' + cLongName + '</b></font>' + le
        + cVersion + le + le
        + 'Supported command line parameters:' + le + le
        + '<tt>'

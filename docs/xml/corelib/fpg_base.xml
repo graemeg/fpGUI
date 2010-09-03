@@ -5507,7 +5507,7 @@ Right. And the Top is always smaller than the Bottom.
  lies completely outside of the clip boundary, then the Line routine is not
  called.  This procedure uses the well known Cohen-Sutherland line clipping
  algorithm to clip each coordinate.</p>
-<p>Use this if you did not what to change the Canvas.ClipRegion for some reason.
+<p>Use this if you do not want to change the Canvas.ClipRegion for some reason.
  For a detailed explanation see:  http://www.nondot.org/~sabre/graphpro/line6.html
 </p></descr>
       </element>

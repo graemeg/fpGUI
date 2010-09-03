@@ -10,7 +10,8 @@ Interface
 Uses
   Classes,
   CanvasFontManager,
-  RichTextDocumentUnit, RichTextStyleUnit,
+  RichTextDocumentUnit,
+  RichTextStyleUnit,
   fpg_imagelist;
 
 Type
@@ -117,11 +118,7 @@ Implementation
 
 Uses
   SysUtils
-//  PMWin, BseDos, Dos, ClipBrd, Printers,
-//  ACLUtility,
   ,ACLStringUtility
-//  ACLString,
-//  ControlScrolling;
   ,nvUtilities
   ,fpg_main
   ;

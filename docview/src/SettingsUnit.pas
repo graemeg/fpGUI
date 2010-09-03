@@ -36,20 +36,6 @@ Const
   //clLightCyan = $c0ffff;
   //clLightGreen = $e0ffe0;
 
-  VGADefaultColors: array[ 0 .. NumColorSettings - 1 ] of TfpgColor
-   = ( clBoxColor,
-       clText1,
-       clText1,
-       clBoxColor,
-       clText1,
-       clBoxColor,
-       clText1,
-       clBoxColor,
-       clText1,
-       clBoxColor,
-       clGreen,
-       clYellow );
-
   DefaultColors: array[ 0 .. NumColorSettings - 1 ] of TfpgColor
    = ( clLightCyan,
        clBlack,
@@ -66,9 +52,6 @@ Const
 
   ApplicationFontIndex = 0;
   NumFontSettings = 1;
-
-  DefaultTopicFont = DefaultTopicFont + '-' + DefaultTopicFontSize;
-  DefaultTopicFixedFont = DefaultTopicFixedFont + '-10' + DefaultTopicFixedFontSize;
 
 
 Type
@@ -93,10 +76,11 @@ Type
     StartupHelp: boolean;
     LeftPanelWidth: longint;
     ShowLeftPanel: boolean;
+    ScrollDistance: integer;
     FileDialogSplit: Double;
     Colors: array[ 0..NumColorSettings - 1 ] of TfpgColor;
-    NormalFont: TfpgFont;
-    FixedFont: TfpgFont;
+    NormalFontDesc: TfpgString;
+    FixedFontDesc: TfpgString;
     Fonts: array[ 0..NumFontSettings - 1 ] of TfpgFont;
     FixedFontSubstitution: boolean;
     FixedFontSubstitutes: string;
@@ -116,7 +100,7 @@ Type
 // global procs
 procedure LoadSettings;
 procedure SaveSettings;
-procedure writeSettingsDetailsTo(aStrings : TStrings);
+procedure WriteSettingsDetailsTo(aStrings : TStrings);
 procedure AddToMRUList( const Title: string; Filenames: TStrings );
 
 var
@@ -186,13 +170,12 @@ begin
 
       ShowLeftPanel := ReadBool( GeneralSection, 'ShowLeftPanel', true );
 
+      ScrollDistance := ReadInteger(GeneralSection, 'ScrollDistance', 75);
+
       // Colours
       for ColorIndex := 0 to High( Colors ) do
       begin
-        //if GetScreenColorDepth > 8 then
-           DefaultColor := DefaultColors[ ColorIndex ];
-        //else
-        //   DefaultColor := VGADefaultColors[ ColorIndex ];
+        DefaultColor := DefaultColors[ ColorIndex ];
         Colors[ ColorIndex ] := ReadInteger( ColoursSection,
                                              'Color' + IntToStr( ColorIndex ),
                                              DefaultColor );
@@ -226,13 +209,8 @@ begin
       end;
 
       // Fonts
-      NormalFont := fpgGetFont(ReadString(FontsSection, 'NormalFont', DefaultTopicFont));
-      if NormalFont = nil then
-        NormalFont := fpgStyle.DefaultFont;
-
-      FixedFont := fpgGetFont(ReadString(FontsSection, 'FixedFont', DefaultTopicFixedFont));
-      if FixedFont = nil then
-        FixedFont := fpgStyle.FixedFont;
+      NormalFontDesc := ReadString(FontsSection, 'NormalFont', DefaultTopicFont);
+      FixedFontDesc := ReadString(FontsSection, 'FixedFont', DefaultTopicFixedFont);
 
       for i := 0 to NumFontSettings - 1 do
       begin
@@ -243,7 +221,7 @@ begin
       end;
 
       FixedFontSubstitution := ReadBool( FontsSection, 'FixedFontSubstitution', true );
-      FixedFontSubstitutes := ReadString( FontsSection, 'FixedFontSubstitutes', 'Mono-10' );
+      FixedFontSubstitutes := ReadString( FontsSection, 'FixedFontSubstitutes', DefaultTopicFixedFont );
 
       // Index style
       SettingString := ReadString( GeneralSection, 'IndexStyle', 'Full' );
@@ -327,6 +305,7 @@ begin
       WriteInteger( GeneralSection, 'FileDialogSplit', Round( FileDialogSplit * 1000 ) );
 
       WriteBool( GeneralSection, 'ShowLeftPanel', ShowLeftPanel);
+      WriteInteger(GeneralSection, 'ScrollDistance', ScrollDistance);
 
       // Colours
       for ColorIndex := 0 to High( Colors ) do
@@ -357,8 +336,8 @@ begin
       end;
 
       // Fonts
-      WriteString( FontsSection, 'NormalFont', NormalFont.FontDesc );
-      WriteString( FontsSection, 'FixedFont', FixedFont.FontDesc );
+      WriteString( FontsSection, 'NormalFont', NormalFontDesc );
+      WriteString( FontsSection, 'FixedFont', FixedFontDesc );
       for FontIndex := 0 to NumFontSettings - 1 do
       begin
         FontName := 'Font' + IntToStr( FontIndex );
@@ -473,7 +452,7 @@ begin
   end;
 end;
 
-procedure writeSettingsDetailsTo(aStrings : TStrings);
+procedure WriteSettingsDetailsTo(aStrings : TStrings);
 Begin
   aStrings.Add('');
   aStrings.Add('---- Settings ----');
@@ -486,10 +465,11 @@ Begin
   aStrings.Add('StartupHelp:       ' + boolToStr(Settings.StartupHelp));
   // LeftPanelWidth: longint;
   aStrings.Add('ShowLeftPanel: ' + boolToStr(Settings.ShowLeftPanel));
+  aStrings.Add('ScrollDistance: ' + IntToStr(Settings.ScrollDistance));
   // FileDialogSplit: real;
   // Colors: array[ 0..NumColorSettings - 1 ] of TColor;
-  // NormalFont: TFont;
-  // FixedFont: TFont;
+  aStrings.Add('NormalFont: ' +  Settings.NormalFontDesc);
+  aStrings.Add('FixedFont: ' + Settings.FixedFontDesc);
   // Fonts: array[ 0..NumFontSettings - 1 ] of TFont;
   aStrings.Add('FixedFontSubstitution: ' + boolToStr(Settings.FixedFontSubstitution));
   aStrings.Add('FixedFontSubstitutes: ' + Settings.FixedFontSubstitutes);
@@ -508,14 +488,9 @@ end;
 
 Initialization
   Settings.MRUList := TObjectList.Create;
-
-  //Settings.NormalFont := fpgStyle.DefaultFont;
-  //Settings.FixedFont := fpgStyle.FixedFont;
-  //Settings.SearchDirectories := TStringList.Create;
+  Settings.SearchDirectories := TStringList.Create;
 
 Finalization
-  Settings.NormalFont.Free;
-  Settings.FixedFont.Free;
   Settings.SearchDirectories.Free;
   Settings.MRUList.Free;
 

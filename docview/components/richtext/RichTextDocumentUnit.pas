@@ -151,7 +151,6 @@ function CopyPlainTextToBuffer( StartP: PChar;
 Implementation
 
 uses
-//  BseDOS, // for NLS/case mapping
   SysUtils
   ,ACLStringUtility
   ;

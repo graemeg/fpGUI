@@ -153,7 +153,11 @@ implementation
 uses
   fpg_main,
   fpg_popupwindow,
-  fpg_menu;
+  fpg_menu
+  {$IFDEF DEBUG}
+  ,dbugintf
+  {$ENDIF}
+  ;
   
 type
   // to access protected methods
@@ -188,9 +192,14 @@ end;
 
 procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
 begin
-//  writeln('BaseForm - MsgActivate');
+  {$IFDEF DEBUG}
+  SendDebug(Classname + ' ' + Name + '.BaseForm - MsgActivate');
+  {$ENDIF}
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
+    {$IFDEF DEBUG}
+    SendDebug('Inside if block');
+    {$ENDIF}
     FocusRootWidget := self;
     
     if FFormDesigner <> nil then
@@ -386,7 +395,9 @@ var
   i: integer;
   wg: TfpgWidget;
 begin
-//  writeln(Classname, '.Keypress');
+  {$IFDEF DEBUG}
+  SendDebug(Classname + '.Keypress');
+  {$ENDIF}
   // find the TfpgMenuBar
   if not consumed then
   begin

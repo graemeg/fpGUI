@@ -42,13 +42,16 @@ program fpmake;
 
 uses sysutils, fpmkunit;
 
+const
+  {$I VERSION_FILE.inc}
+
 var
   T: TTarget;
   P: TPackage;
 begin
   with Installer do begin
     P := AddPackage('fpgui');
-    P.Version := '0.6.3';
+    P.Version := FPGUI_VERSION;
     P.Author := 'Graeme Geldenhuys';
     P.Email := 'graemeg@gmail.com';
     P.License := 'Modified LGPL';
@@ -62,7 +65,7 @@ begin
       if we set the package name to fpgui as above.  This base install dir
       can be overridden by passing -B to fpmake.  The line below will cause
       the units to be output in ../lib/<cpu-os>/fpgui  }
-    Defaults.UnitInstallDir := Format('../lib/%s-%s/', [CurrentCPU, CurrentOS]);
+//    Defaults.UnitInstallDir := Format('../lib/%s-%s/', [CurrentCPU, CurrentOS]);
 
     { If you installed FPC to a non-standard location, you need to specify
       where fpmake can find the compiler and RTL units. You can pass that
@@ -72,9 +75,10 @@ begin
 //    else
 //      Defaults.GlobalUnitDir := Format('c:\fpc\2.2.3\units\%s-%s', [CurrentCPU, CurrentOS]);
 
-    if Defaults.OS in AllUnixOSes
-      then Defaults.Options := Defaults.Options + '-dX11'
-      else Defaults.Options := Defaults.Options + '-dGDI';
+    if Defaults.OS in AllUnixOSes then
+      Defaults.Options.Add('-dX11')
+    else
+      Defaults.Options.Add('-dGDI');
 
     P.SourcePath.Add('corelib');
     P.SourcePath.Add('corelib/x11', AllUnixOSes);
@@ -88,64 +92,81 @@ begin
     P.UnitPath.Add('gui');
     P.UnitPath.Add('gui/db');
 
+    P.IncludePath.Add('.');
     P.IncludePath.Add('corelib');
     P.IncludePath.Add('corelib/x11', AllUnixOSes);
     P.IncludePath.Add('corelib/gdi', AllWindowsOSes);
     P.IncludePath.Add('gui');
 
     { todo: add unit and include dependency for all }
+{    
     P.Sources.AddSrcFiles('corelib/*.pas');
     P.Sources.AddSrcFiles('gui/*.pas');
-    if Defaults.OS in AllUnixOSes
-      then P.Sources.AddSrcFiles('corelib/x11/*.pas')
-      else P.Sources.AddSrcFiles('corelib/gdi/*.pas');
-
-    { x11 and gdi common }
-//    if Defaults.OS in AllUnixOSes
-//      then
- P.Targets.AddUnit('corelib/x11/fpg_impl.pas', AllWindowsOSes);
-//      else
- P.Targets.AddUnit('corelib/gdi/fpg_impl.pas', AllUnixOSes);
-//    T := P.Targets.AddUnit('fpg_impl.pas');
-
-    { corelib/x11 }
-    T := P.Targets.AddUnit('fpg_keyconv_x11.pas', AllUnixOSes);
-    T := P.Targets.AddUnit('fpg_netlayer_x11.pas', AllUnixOSes);
-    T := P.Targets.AddUnit('fpg_x11.pas', AllUnixOSes);
-{    with T.Dependencies do begin
-      AddUnit('fpg_xft_x11');
-      AddUnit('fpg_netlayer_x11');
-      AddUnit('fpg_base');
-      AddUnit('fpg_impl');
-    end;  }
-    T := P.Targets.AddUnit('fpg_xft_x11.pas', AllUnixOSes);
-
-    { corelib/gdi }
-    T := P.Targets.AddUnit('fpg_gdi.pas', AllWindowsOSes);
+    if Defaults.OS in AllUnixOSes then
+      P.Sources.AddSrcFiles('corelib/x11/*.pas')
+    else
+      P.Sources.AddSrcFiles('corelib/gdi/*.pas');
+}
 
     { corelib }
     T := P.Targets.AddUnit('fpg_base.pas');
+      T.Dependencies.AddInclude('keys.inc');
+      T.Dependencies.AddInclude('predefinedcolors.inc');
     T := P.Targets.AddUnit('fpg_imagelist.pas');
     T := P.Targets.AddUnit('fpg_popupwindow.pas');
     T := P.Targets.AddUnit('fpg_translations.pas');
     T := P.Targets.AddUnit('fpg_cmdlineparams.pas');
     T := P.Targets.AddUnit('fpg_imgfmt_bmp.pas');
+    T := P.Targets.AddUnit('fpg_imgfmt_jpg.pas');
     T := P.Targets.AddUnit('fpg_stdimages.pas');
+      T.Dependencies.AddInclude('stdimages.inc');
     T := P.Targets.AddUnit('fpg_utils.pas');
+      T.Dependencies.AddInclude('fpg_utils_impl.inc', AllUnixOSes);
+      T.Dependencies.AddInclude('fpg_utils_impl.inc', AllWindowsOSes);
+    T := P.Targets.AddUnit('fpg_imgutils.pas');
     T := P.Targets.AddUnit('fpg_command_intf.pas');
     T := P.Targets.AddUnit('fpg_main.pas');
+      T.Dependencies.AddInclude('VERSION_FILE.inc');
+      T.Dependencies.AddInclude('fpg_msgqueue.inc');
     T := P.Targets.AddUnit('fpg_stringhashlist.pas');
     T := P.Targets.AddUnit('fpg_widget.pas');
     T := P.Targets.AddUnit('fpg_constants.pas');
+      T.Dependencies.AddInclude('lang_en.inc');
+      T.Dependencies.AddInclude('lang_af.inc');
+      T.Dependencies.AddInclude('lang_de.inc');
+      T.Dependencies.AddInclude('lang_es.inc');
+      T.Dependencies.AddInclude('lang_fr.inc');
+      T.Dependencies.AddInclude('lang_it.inc');
+      T.Dependencies.AddInclude('lang_pt.inc');
+      T.Dependencies.AddInclude('lang_ru.inc');
       T.ResourceStrings := True;
-    T := P.Targets.AddUnit('fpg_strings.pas');
+//    T := P.Targets.AddUnit('fpg_strings.pas');    // this unit is not used in fpGUI
     T := P.Targets.AddUnit('fpg_wuline.pas');
     T := P.Targets.AddUnit('fpg_extinterpolation.pas');
     T := P.Targets.AddUnit('fpg_pofiles.pas');
     T := P.Targets.AddUnit('fpg_stringutils.pas');
+    T := P.Targets.AddUnit('fpg_extgraphics.pas');
 
-    { corelib include files }
-//    T := P.Sources.AddSrc('keys.inc');
+
+    { corelib/x11 }
+    T := P.Targets.AddUnit('fpg_keyconv_x11.pas', AllUnixOSes);
+    T := P.Targets.AddUnit('fpg_netlayer_x11.pas', AllUnixOSes);
+    T := P.Targets.AddUnit('fpg_xft_x11.pas', AllUnixOSes);
+    T := P.Targets.AddUnit('fpg_impl.pas', AllUnixOSes);
+    T := P.Targets.AddUnit('fpg_x11.pas', AllUnixOSes);
+      T.Dependencies.AddUnit('fpg_xft_x11');
+      T.Dependencies.AddUnit('fpg_netlayer_x11');
+      T.Dependencies.AddUnit('fpg_base');
+      T.Dependencies.AddUnit('fpg_impl');
+    T := P.Targets.AddUnit('fpg_interface.pas', AllUnixOSes);
+
+
+    { corelib/gdi }
+    T := P.Targets.AddUnit('fpg_impl.pas', AllWindowsOSes);
+    T := P.Targets.AddUnit('fpg_gdi.pas', AllWindowsOSes);
+      T.Dependencies.AddInclude('fpg_keys_gdi.inc', AllWindowsOSes);
+    T := P.Targets.AddUnit('fpg_interface.pas', AllWindowsOSes);
+
 
     { gui/db }
     T := P.Targets.AddUnit('fpgui_db.pas');
@@ -169,6 +190,14 @@ begin
     T := P.Targets.AddUnit('fpg_trackbar.pas');
     T := P.Targets.AddUnit('fpg_button.pas');
     T := P.Targets.AddUnit('fpg_dialogs.pas');
+   	  T.Dependencies.AddInclude('charmapdialog.inc');
+   	  T.Dependencies.AddInclude('colordialog.inc');
+   	  T.Dependencies.AddInclude('inputquerydialog.inc');
+   	  T.Dependencies.AddInclude('messagedialog.inc');
+   	  T.Dependencies.AddInclude('newdirdialog.inc');
+   	  T.Dependencies.AddInclude('promptuserdialog.inc');
+   	  T.Dependencies.AddInclude('selectdirdialog.inc');
+   	  T.Dependencies.AddInclude('logo.inc');
     T := P.Targets.AddUnit('fpg_gauge.pas');
     T := P.Targets.AddUnit('fpg_iniutils.pas');
     T := P.Targets.AddUnit('fpg_memo.pas');
@@ -182,6 +211,10 @@ begin
     T := P.Targets.AddUnit('fpg_menu.pas');
     T := P.Targets.AddUnit('fpg_progressbar.pas');
     T := P.Targets.AddUnit('fpg_style.pas');
+    T := P.Targets.AddUnit('fpg_spinedit.pas');
+    T := P.Targets.AddUnit('fpg_colorwheel.pas');
+    T := P.Targets.AddUnit('fpg_colormapping.pas');
+    T := P.Targets.AddUnit('fpg_editbtn.pas');
 
     Run;
   end;
