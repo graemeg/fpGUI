@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes,
+  Classes, SysUtils,
   fpg_base,
   fpg_main,
   fpg_form,
@@ -30,6 +30,7 @@ type
     btnName1: TfpgButton;
     btnName2: TfpgButton;
     btnUserPrompt: TfpgButton;
+    btnUserInput: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     procedure   btnQuitClick(Sender: TObject);
     procedure   btnOpenFileClick(Sender: TObject);
@@ -37,6 +38,7 @@ type
     procedure   btnMessageBoxClick(Sender: TObject);
     procedure   btnMessageDlgClick(Sender: TObject);
     procedure   btnUserPromptClick(Sender: TObject);
+    procedure   btnUserInputClicked(Sender: TObject);
   public
     procedure   AfterCreate; override;
   end;
@@ -99,6 +101,14 @@ begin
   end;
 end;
 
+procedure TMainForm.btnUserInputClicked(Sender: TObject);
+var
+  lAnswer: TfpgString;
+begin
+  if fpgInputQuery('Caption here', 'And the prompt goes here', lAnswer) then
+    ShowMessage(Format('User entered <%s>', [lAnswer]));
+end;
+
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
   Close;
@@ -153,8 +163,9 @@ begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(197, 147, 419, 138);
+  SetPosition(330, 199, 419, 138);
   WindowTitle := 'File dialog test';
+  Hint := '';
   MinWidth := 300;
   MinHeight := 135;
 
@@ -165,6 +176,7 @@ begin
     SetPosition(8, 8, 80, 23);
     Text := 'Open File...';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 1;
     OnClick := @btnOpenFileClick;
@@ -177,6 +189,7 @@ begin
     SetPosition(8, 34, 80, 23);
     Text := 'Save File...';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 2;
     OnClick := @btnSaveFileClick;
@@ -188,6 +201,8 @@ begin
     Name := 'edFilename';
     SetPosition(8, 70, 400, 24);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
+    Hint := '';
     TabOrder := 2;
     Text := '';
     FontDesc := '#Edit1';
@@ -201,6 +216,7 @@ begin
     Anchors := [anRight,anBottom];
     Text := 'Quit';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := 'stdimg.Quit';
     TabOrder := 6;
     OnClick := @btnQuitClick;
@@ -210,9 +226,10 @@ begin
   with btnName1 do
   begin
     Name := 'btnName1';
-    SetPosition(148, 8, 119, 27);
+    SetPosition(148, 8, 116, 27);
     Text := 'Message Box';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 3;
     OnClick := @btnMessageBoxClick;
@@ -225,6 +242,7 @@ begin
     SetPosition(272, 8, 131, 27);
     Text := 'Message Dialog';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 4;
     OnClick := @btnMessageDlgClick;
@@ -237,9 +255,23 @@ begin
     SetPosition(272, 40, 131, 24);
     Text := 'User Prompt';
     FontDesc := '#Label1';
+    Hint := '';
     ImageName := '';
     TabOrder := 5;
     OnClick := @btnUserPromptClick;
+  end;
+
+  btnUserInput := TfpgButton.Create(self);
+  with btnUserInput do
+  begin
+    Name := 'btnUserInput';
+    SetPosition(148, 40, 116, 24);
+    Text := 'User Input';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 8;
+    OnClick :=@btnUserInputClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
