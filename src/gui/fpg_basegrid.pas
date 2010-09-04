@@ -931,10 +931,10 @@ begin
   lCol := FFirstCol;
 
   if delta > 0 then // scroll down
-    inc(FFirstRow, abs(delta))
+    inc(FFirstRow, abs(delta)*3)
   else              // scroll up
     if FFirstRow > 0 then
-      dec(FFirstRow, abs(delta));
+      dec(FFirstRow, abs(delta)*3);
 
   // apply limits
   if FFirstRow > RowCount - VisibleLines then
