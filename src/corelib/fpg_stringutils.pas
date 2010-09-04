@@ -48,6 +48,8 @@ procedure Insert8(const Source: string; var S: string; Index: integer);
 function  fpgCharAt(const s: TfpgString; Index: integer): TfpgChar;
 function  fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function  fpgRemovePathDelim(const Path: TfpgString): TfpgString;
+function  fpgTrimR(const AString, ATrim: TfpgString; ACaseSensitive: boolean = false): TfpgString;
+
 
 
 implementation
@@ -334,6 +336,22 @@ begin
   else
     Result := Path;
 end;
+
+function fpgTrimR(const AString, ATrim: TfpgString; ACaseSensitive: boolean): TfpgString;
+var
+  li: integer;
+begin
+  if ACaseSensitive then
+    li := UTF8Pos(ATrim, AString)
+  else
+    li := UTF8Pos(UpperCase(ATrim), UpperCase(AString));
+
+  if li <> 0 then
+    Result := UTF8Copy(AString, 1, li - 1)
+  else
+    Result := AString;
+end;
+
 
 end.
 
