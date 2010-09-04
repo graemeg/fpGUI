@@ -50,7 +50,9 @@ uses
   fpg_tree,
   fpg_ColorWheel,
   fpg_spinedit,
-  fpg_tab;
+  fpg_tab,
+  fpg_menu,
+  fpg_iniutils;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
@@ -153,6 +155,8 @@ type
     btnUpDir: TfpgButton;
     btnDirNew: TfpgButton;
     btnShowHidden: TfpgButton;
+    btnGoHome: TfpgButton;
+    btnBookmark: TfpgButton;
     pnlFileInfo: TfpgPanel;
     edFilename: TfpgEdit;
     chlFilter: TfpgComboBox;
@@ -162,6 +166,8 @@ type
     FFilterList: TStringList;
     FFilter: string;
     FInitialDir: string;
+    FBookmarkMenu: TfpgPopupMenu;
+    FIni: TfpgIniFile;
     procedure   SetFilter(const Value: string);
     function    GetFontDesc: string;
     function    GetShowHidden: boolean;
@@ -177,9 +183,13 @@ type
     procedure   DirChange(Sender: TObject);
     procedure   UpDirClick(Sender: TObject);
     procedure   btnDirNewClicked(Sender: TObject);
+    procedure   btnGoHomeClicked(Sender: TObject);
+    procedure   btnBookmarkClicked(Sender: TObject);
     procedure   edFilenameChanged(Sender: TObject);
     procedure   UpdateButtonState;
     function    HighlightFile(const AFilename: string): boolean;
+    function    CreatePopupMenu: TfpgPopupMenu;
+    procedure   BookmarkItemClicked(Sender: TObject);
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
@@ -1018,7 +1028,7 @@ begin
   chlDir := TfpgComboBox.Create(self);
   with chlDir do
   begin
-    SetPosition(8, 12, 526, 22);
+    SetPosition(8, 12, 484, 24);
     Anchors := [anLeft, anRight, anTop];
     FontDesc := '#List';
     OnChange := @DirChange;
@@ -1036,42 +1046,73 @@ begin
   btnUpDir := TfpgButton.Create(self);
   with btnUpDir do
   begin
-    SetPosition(540, 11, 26, 24);
+    SetPosition(500, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.folderup';   // Do NOT localize
-    ModalResult := mrNone;
     Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
     OnClick := @UpDirClick;
   end;
 
   btnDirNew := TfpgButton.Create(self);
   with btnDirNew do
   begin
-    SetPosition(572, 11, 26, 24);
+    SetPosition(526, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.foldernew';    // Do NOT localize
-    ModalResult := mrNone;
     Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
     OnClick := @btnDirNewClicked;
   end;
 
   btnShowHidden := TfpgButton.Create(self);
   with btnShowHidden do
   begin
-    SetPosition(604, 11, 26, 24);
+    SetPosition(552, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.hidden';   // Do NOT localize
-    ModalResult := mrNone;
     Focusable := False;
     GroupIndex := 1;
     AllowAllUp := True;
+    ImageSpacing := 0;
+    ImageMargin := -1;
     OnClick := @DirChange;
+  end;
+
+  btnGoHome := TfpgButton.Create(self);
+  with btnGoHome do
+  begin
+    SetPosition(578, 11, 24, 24);
+    Anchors := [anRight, anTop];
+    Text := '';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.folderhome';    // Do NOT localize
+    Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
+    OnClick := @btnGoHomeClicked;
+  end;
+
+  btnBookmark := TfpgButton.Create(self);
+  with btnBookmark do
+  begin
+    SetPosition(604, 11, 24, 24);
+    Anchors := [anRight, anTop];
+    Text := '';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.bookmark';    // Do NOT localize
+    Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
+    OnClick := @btnBookmarkClicked;
   end;
 
   { Create lower Panel details }
@@ -1212,6 +1253,8 @@ end;
 
 destructor TfpgFileDialog.Destroy;
 begin
+  FIni.Free;
+  FBookmarkMenu.Free;
   FFilterList.Free;
   inherited Destroy;
 end;
@@ -1254,8 +1297,23 @@ begin
   end;
 end;
 
+procedure TfpgFileDialog.btnGoHomeClicked(Sender: TObject);
+begin
+  SetCurrentDirectory(GetUserDir);
+end;
+
+procedure TfpgFileDialog.btnBookmarkClicked(Sender: TObject);
+var
+  pm: TfpgPopupMenu;
+begin
+  FBookmarkMenu.Free;
+  FBookmarkMenu := CreatePopupMenu;
+  FBookmarkMenu.ShowAt(self, btnBookmark.Left, btnBookmark.Bottom);
+end;
+
 procedure TfpgFileDialog.edFilenameChanged(Sender: TObject);
 begin
+  writeln('TfpgFileDialog.edFilenameChanged ');
   UpdateButtonState;
 end;
 
@@ -1301,6 +1359,9 @@ begin
     
   grid.Update;
   grid.SetFocus;
+
+  if FOpenMode then // when saving file, we want to keep file name
+    edFilename.Clear;
 end;
 
 function TfpgFileDialog.HighlightFile(const AFilename: string): boolean;
@@ -1317,6 +1378,59 @@ begin
     end;
   end;
   Result := False;
+end;
+
+function TfpgFileDialog.CreatePopupMenu: TfpgPopupMenu;
+var
+  i: integer;
+  s: TfpgString;
+  lst: TStringList;
+  mi: TfpgMenuItem;
+begin
+  Result := TfpgPopupMenu.Create(nil);
+  with Result do
+  begin
+    lst := TStringList.Create;
+    if not Assigned(FIni) then
+      FIni := TfpgINIFile.CreateExt(fpgGetToolkitConfigDir + FPG_BOOKMARKS_FILE);
+    FIni.ReadSection(FPG_BOOKMARK_SECTION, lst);
+    // add previous bookmarks to menu
+    for i := 0 to lst.Count-1 do
+    begin
+      mi := AddMenuItem(lst[i], '', @BookmarkItemClicked);
+    end;
+    // Now add static items
+    if lst.Count > 0 then
+      AddMenuItem('-', '', nil);
+    mi := AddMenuItem('Add current directory', '', @BookmarkItemClicked);
+    mi.Tag := 1;
+    mi := AddMenuItem('Configure...', '', @BookmarkItemClicked);
+    mi.Tag := 2;
+  end;
+end;
+
+procedure TfpgFileDialog.BookmarkItemClicked(Sender: TObject);
+var
+  mi: TfpgMenuItem;
+  s: TfpgString;
+begin
+  if Sender is TfpgMenuItem then
+   mi := TfpgMenuItem(Sender);
+  if mi = nil then
+    Exit;
+  if mi.Tag = 1 then  // Add current directory
+  begin
+    FIni.WriteString(FPG_BOOKMARK_SECTION, grid.FileList.DirectoryName, grid.FileList.DirectoryName);
+  end
+  else if mi.Tag = 2 then  // configure bookmarks
+  begin
+    //
+  end
+  else
+  begin // bookmark has been clicked
+    s := FIni.ReadString(FPG_BOOKMARK_SECTION, mi.Text, '.');
+    SetCurrentDirectory(s);
+  end;
 end;
 
 procedure TfpgFileDialog.ProcessFilterString;
