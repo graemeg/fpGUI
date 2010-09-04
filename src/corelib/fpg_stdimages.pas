@@ -225,6 +225,16 @@ begin
       sizeof(stdimg_folder_open_file_16), 0,0);
 
   fpgImages.AddMaskedBMP(
+            'stdimg.folderhome',
+            @stdimg_folder_home_16,
+      sizeof(stdimg_folder_home_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
+            'stdimg.bookmark',
+            @stdimg_bookmark_16,
+      sizeof(stdimg_bookmark_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
             'stdimg.open',
             @stdimg_folder_open_16,
       sizeof(stdimg_folder_open_16), 0,0);
