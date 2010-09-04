@@ -1303,17 +1303,15 @@ begin
 end;
 
 procedure TfpgFileDialog.btnBookmarkClicked(Sender: TObject);
-var
-  pm: TfpgPopupMenu;
 begin
-  FBookmarkMenu.Free;
+  if Assigned(FBookmarkMenu) then
+    FBookmarkMenu.Free;
   FBookmarkMenu := CreatePopupMenu;
   FBookmarkMenu.ShowAt(self, btnBookmark.Left, btnBookmark.Bottom);
 end;
 
 procedure TfpgFileDialog.edFilenameChanged(Sender: TObject);
 begin
-  writeln('TfpgFileDialog.edFilenameChanged ');
   UpdateButtonState;
 end;
 
@@ -1391,17 +1389,21 @@ begin
   with Result do
   begin
     lst := TStringList.Create;
-    if not Assigned(FIni) then
-      FIni := TfpgINIFile.CreateExt(fpgGetToolkitConfigDir + FPG_BOOKMARKS_FILE);
-    FIni.ReadSection(FPG_BOOKMARK_SECTION, lst);
-    // add previous bookmarks to menu
-    for i := 0 to lst.Count-1 do
-    begin
-      mi := AddMenuItem(lst[i], '', @BookmarkItemClicked);
+    try
+      if not Assigned(FIni) then
+        FIni := TfpgINIFile.CreateExt(fpgGetToolkitConfigDir + FPG_BOOKMARKS_FILE);
+      FIni.ReadSection(FPG_BOOKMARK_SECTION, lst);
+      // add previous bookmarks to menu
+      for i := 0 to lst.Count-1 do
+      begin
+        mi := AddMenuItem(lst[i], '', @BookmarkItemClicked);
+      end;
+      // Now add static items
+      if lst.Count > 0 then
+        AddMenuItem('-', '', nil);
+    finally
+      lst.Free;
     end;
-    // Now add static items
-    if lst.Count > 0 then
-      AddMenuItem('-', '', nil);
     mi := AddMenuItem('Add current directory', '', @BookmarkItemClicked);
     mi.Tag := 1;
     mi := AddMenuItem('Configure...', '', @BookmarkItemClicked);
