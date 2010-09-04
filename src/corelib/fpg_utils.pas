@@ -41,6 +41,7 @@ function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
 function fpgAllFilesMask: TfpgString;
 function fpgConvertLineEndings(const s: TfpgString): TfpgString;
+function fpgGetToolkitConfigDir: TfpgString;
 { This is so that when we support LTR and RTL languages, the colon will be
   added at the correct place. }
 function fpgAddColon(const AText: TfpgString): TfpgString;
@@ -247,6 +248,11 @@ begin
     end
     else
       Inc(i);
+end;
+
+function fpgGetToolkitConfigDir: TfpgString;
+begin
+  Result := fpgTrimR(fpgGetAppConfigDir(False), ApplicationName, True) + FPG_CONFIG_DIR;
 end;
 
 function fpgAddColon(const AText: TfpgString): TfpgString;

@@ -1,7 +1,7 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Unix, BaseUnix;
+  Unix, BaseUnix, fpg_constants, fpg_stringutils;
 
 // X11 specific filesystem implementations of encoding functions
 

@@ -1,7 +1,7 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Shellapi, Windows;
+  Shellapi, Windows, fpg_constants, fpg_stringutils;
   
 // GDI specific implementations of encoding functions
 
