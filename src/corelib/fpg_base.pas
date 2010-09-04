@@ -2137,7 +2137,7 @@ var
 begin
   // Default location is in same directory as current running application
   // This location might change in the future.
-  ext := ExtractFileExt(ParamStr(0));
+  ext := fpgExtractFileExt(ParamStr(0));
   Result := fpgExtractFilePath(ParamStr(0)) + FPG_HELPVIEWER + ext;
 end;
 

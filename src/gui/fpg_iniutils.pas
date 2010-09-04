@@ -52,6 +52,7 @@ function gINI(const AFileName: string = ''): TfpgINIFile;
 implementation
 
 uses
+  fpg_base,
   fpg_main,
   fpg_constants,
   fpg_utils;
@@ -71,12 +72,12 @@ end;
 
 constructor TfpgINIFile.CreateExt(const AFileName: string; AReadOnly: Boolean);
 var
-  lDir: string;
-  lFileName: string;
+  lDir: TfpgString;
+  lFileName: TfpgString;
 begin
   FReadOnly := AReadOnly;
-  lDir      := ExtractFileDir(AFileName);
-  lFileName := ExtractFileName(AFileName);
+  lDir      := fpgExtractFileDir(AFileName);
+  lFileName := fpgExtractFileName(AFileName);
 
   if lDir = '' then
     lDir := GetAppConfigDir(False);
@@ -84,7 +85,7 @@ begin
     lDir := lDir + PathDelim;
 
   { We used a non-Global config dir, so should be able to create the dir }
-  if not ForceDirectories(lDir) then
+  if not fpgForceDirectories(lDir) then
     raise Exception.CreateFmt(rsErrFailedToCreateDir, [lDir]);
 
 
