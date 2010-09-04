@@ -41,6 +41,9 @@ function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
 function fpgAllFilesMask: TfpgString;
 function fpgConvertLineEndings(const s: TfpgString): TfpgString;
+{ This is so that when we support LTR and RTL languages, the colon will be
+  added at the correct place. }
+function fpgAddColon(const AText: TfpgString): TfpgString;
 
 
  // RTL wrapper filesystem functions with platform independant encoding
@@ -232,6 +235,12 @@ begin
     end
     else
       Inc(i);
+end;
+
+function fpgAddColon(const AText: TfpgString): TfpgString;
+begin
+  { TODO : Check language direction and add colon at appropriate end. This is very crude! }
+  Result := AText + ':';
 end;
 
 

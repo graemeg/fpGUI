@@ -101,8 +101,6 @@ const
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
 
-  { Default fpGUI help viewer }
-  FPG_HELPVIEWER = 'docview';
 
 var
   FPG_DEFAULT_FONT_DESC: string = 'Arial-10:antialias=true';
@@ -633,6 +631,7 @@ implementation
 uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
+  fpg_constants,
   typinfo,
   process;
 
