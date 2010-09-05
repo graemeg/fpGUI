@@ -66,6 +66,10 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
+#: fpg_constants:rscharactermap
+msgid "Character Map"
+msgstr ""
+
 #: fpg_constants:rsclose
 msgid "Close"
 msgstr ""
@@ -224,6 +228,10 @@ msgstr ""
 
 #: fpg_constants:rsinsert
 msgid "Insert"
+msgstr ""
+
+#: fpg_constants:rsinsertfromcharactermap
+msgid "Insert from Character Map"
 msgstr ""
 
 #: fpg_constants:rsitalic
@@ -430,6 +438,10 @@ msgstr ""
 msgid "Sunday"
 msgstr ""
 
+#: fpg_constants:rstexttoinsert
+msgid "Text to Insert"
+msgstr ""
+
 #: fpg_constants:rsshortthu
 msgid "Thu"
 msgstr ""
@@ -494,15 +506,27 @@ msgstr ""
 msgid "Yes to All"
 msgstr ""
 
-#: fpg_constants:rstexttoinsert
-msgid "Text to Insert"
+#: fpg_constants:rsaddcurrentdirectory
+msgid "Add current directory"
 msgstr ""
 
-#: fpg_constants:rscharactermap
-msgid "Character Map"
+#: fpg_constants:rsconfigurebookmarks
+msgid "Configure Bookmarks"
 msgstr ""
 
-#: fpg_constants:rsinsertfromcharactermap
-msgid "Insert from Character Map"
+#: fpg_constants:rsmoveup
+msgid "Move Up"
+msgstr ""
+
+#: fpg_constants:rsmovedown
+msgid "Move Down"
+msgstr ""
+
+#: fpg_constants:rschangetitle
+msgid "Change Title"
+msgstr ""
+
+#: fpg_constants:rsdirectory
+msgid "Directory"
 msgstr ""
 

@@ -28,6 +28,10 @@ msgstr "Abortar"
 msgid "About %s"
 msgstr "Acerca de %s"
 
+#: fpg_constants:rsaddcurrentdirectory
+msgid "Add current directory"
+msgstr ""
+
 #: fpg_constants:rsall
 msgid "All"
 msgstr "Todos"
@@ -80,6 +84,10 @@ msgstr "No se puede crear la carpeta"
 msgid "Change"
 msgstr "Cambiar"
 
+#: fpg_constants:rschangetitle
+msgid "Change Title"
+msgstr ""
+
 #: fpg_constants:rscharactermap
 msgid "Character Map"
 msgstr ""
@@ -91,6 +99,10 @@ msgstr "Cerrar"
 #: fpg_constants:rscollection
 msgid "Collection"
 msgstr "Colección"
+
+#: fpg_constants:rsconfigurebookmarks
+msgid "Configure Bookmarks"
+msgstr ""
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -143,6 +155,10 @@ msgstr "Borrar"
 #: fpg_constants:rsdirectories
 msgid "Directories"
 msgstr "Carpetas"
+
+#: fpg_constants:rsdirectory
+msgid "Directory"
+msgstr ""
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -311,6 +327,14 @@ msgstr "Lun"
 #: fpg_constants:rslongmon
 msgid "Monday"
 msgstr "Lunes"
+
+#: fpg_constants:rsmovedown
+msgid "Move Down"
+msgstr ""
+
+#: fpg_constants:rsmoveup
+msgid "Move Up"
+msgstr ""
 
 #: fpg_constants:rsname
 msgid "Name"

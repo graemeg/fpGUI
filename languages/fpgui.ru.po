@@ -28,6 +28,10 @@ msgstr "Прервать"
 msgid "About %s"
 msgstr "Информация о %s"
 
+#: fpg_constants:rsaddcurrentdirectory
+msgid "Add current directory"
+msgstr ""
+
 #: fpg_constants:rsall
 msgid "All"
 msgstr "Все"
@@ -80,6 +84,10 @@ msgstr "Невозможно создать директорию"
 msgid "Change"
 msgstr "Изменить"
 
+#: fpg_constants:rschangetitle
+msgid "Change Title"
+msgstr ""
+
 #: fpg_constants:rscharactermap
 msgid "Character Map"
 msgstr ""
@@ -91,6 +99,10 @@ msgstr "Закрыть"
 #: fpg_constants:rscollection
 msgid "Collection"
 msgstr "Группа"
+
+#: fpg_constants:rsconfigurebookmarks
+msgid "Configure Bookmarks"
+msgstr ""
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -143,6 +155,10 @@ msgstr "Удалить"
 #: fpg_constants:rsdirectories
 msgid "Directories"
 msgstr "Директории"
+
+#: fpg_constants:rsdirectory
+msgid "Directory"
+msgstr ""
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -311,6 +327,14 @@ msgstr "Пн"
 #: fpg_constants:rslongmon
 msgid "Monday"
 msgstr "Понедельник"
+
+#: fpg_constants:rsmovedown
+msgid "Move Down"
+msgstr ""
+
+#: fpg_constants:rsmoveup
+msgid "Move Up"
+msgstr ""
 
 #: fpg_constants:rsname
 msgid "Name"
