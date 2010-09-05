@@ -81,20 +81,22 @@ type
 
   TfpgMessageBox = class(TfpgForm)
   private
+    {@VFD_HEAD_BEGIN: MessageBox}
+    FButton: TfpgButton;
+    {@VFD_HEAD_END: MessageBox}
     FLines: TStringList;
     FFont: TfpgFont;
     FTextY: integer;
     FLineHeight: integer;
     FMaxLineWidth: integer;
-    FButton: TfpgButton;
     FCentreText: Boolean;
-  protected
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   HandlePaint; override;
-    procedure   HandleShow; override;
+    procedure   FormPaint(Sender: TObject);
+    procedure   FormShow(Sender: TObject);
+    procedure   FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   AfterCreate; override;
     procedure   SetMessage(AMessage: string);
     property    CentreText: Boolean read FCentreText write FCentreText default False;
   end;
@@ -413,21 +415,11 @@ end;
 
 { TfpgMessageBox }
 
-procedure TfpgMessageBox.HandleKeyPress(var keycode: word;
-  var shiftstate: TShiftState; var consumed: boolean);
-begin
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
-  if keycode = keyEscape then
-    Close;
-end;
-
-procedure TfpgMessageBox.HandlePaint;
+procedure TfpgMessageBox.FormPaint(Sender: TObject);
 var
   n, y: integer;
   tw: integer;
 begin
-  inherited HandlePaint;
-
   Canvas.SetFont(FFont);
   y := FTextY;
   for n := 0 to FLines.Count-1 do
@@ -441,30 +433,30 @@ begin
   end;
 end;
 
-procedure TfpgMessageBox.HandleShow;
+procedure TfpgMessageBox.FormShow(Sender: TObject);
 begin
-  inherited HandleShow;
-  FButton.SetFocus;
+  FButton.Text := cMsgDlgBtnText[mbOK]
+end;
+
+procedure TfpgMessageBox.FormKeyPressed(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyEscape then
+  begin
+    Consumed := False;
+    Close;
+  end;
 end;
 
 constructor TfpgMessageBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowPosition := wpOneThirdDown;
-  Sizeable := False;
-  
   FLines        := TStringList.Create;
   FFont         := fpgGetFont('#Label1');
   FTextY        := 10;
   FLineHeight   := FFont.Height + 4;
-  MinWidth      := 200;
   FMaxLineWidth := 500;
   FCentreText   := False;
-  
-  FButton := TfpgButton.Create(self);
-  FButton.Text    := cMsgDlgBtnText[mbOK];
-  FButton.Width   := 75;
-  FButton.ModalResult := mrOK;
 end;
 
 destructor TfpgMessageBox.Destroy;
@@ -472,6 +464,38 @@ begin
   FFont.Free;
   FLines.Free;
   inherited Destroy;
+end;
+
+procedure TfpgMessageBox.AfterCreate;
+begin
+  inherited AfterCreate;
+  {@VFD_BODY_BEGIN: MessageBox}
+  Name := 'MessageBox';
+  SetPosition(330, 199, 419, 138);
+  WindowTitle := 'Message';
+  Hint := '';
+  WindowPosition := wpOneThirdDown;
+  MinWidth := 200;
+  Sizeable := False;
+  OnShow  := @FormShow;
+  OnPaint := @FormPaint;
+  OnKeyPress := @FormKeyPressed;
+
+  FButton := TfpgButton.Create(self);
+  with FButton do
+  begin
+    Name := 'FButton';
+    SetPosition(8, 8, 75, 23);
+    Text := 'OK';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    ModalResult := mrOK;
+    TabOrder := 1;
+    OnKeyPress := @FormKeyPressed;
+  end;
+
+  {@VFD_BODY_END: MessageBox}
 end;
 
 procedure TfpgMessageBox.SetMessage(AMessage: string);
