@@ -1064,6 +1064,7 @@ begin
   begin
     SetPosition(8, 44, 622, 200);
     Anchors := [anLeft, anRight, anTop, anBottom];
+    Options := [go_AlternativeColor, go_SmoothScroll];
     OnRowChange := @ListChanged;
     OnDoubleClick := @GridDblClicked;
   end;
