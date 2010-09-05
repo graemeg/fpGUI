@@ -192,6 +192,7 @@ type
     function    HighlightFile(const AFilename: string): boolean;
     function    CreatePopupMenu: TfpgPopupMenu;
     procedure   BookmarkItemClicked(Sender: TObject);
+    procedure   ShowConfigureBookmarks;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
@@ -207,7 +208,6 @@ type
     property    InitialDir: string read FInitialDir write SetInitialDir;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
-  
 
 { This lets us use a single include file for both the Interface and
   Implementation sections. }
@@ -222,6 +222,7 @@ type
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I managebookmarksdialog.inc}
 
 
 
@@ -1428,9 +1429,9 @@ begin
     finally
       lst.Free;
     end;
-    mi := AddMenuItem('Add current directory', '', @BookmarkItemClicked);
+    mi := AddMenuItem(rsAddCurrentDirectory, '', @BookmarkItemClicked);
     mi.Tag := 1;
-    mi := AddMenuItem('Configure...', '', @BookmarkItemClicked);
+    mi := AddMenuItem(rsConfigureBookmarks + '...', '', @BookmarkItemClicked);
     mi.Tag := 2;
   end;
 end;
@@ -1450,12 +1451,24 @@ begin
   end
   else if mi.Tag = 2 then  // configure bookmarks
   begin
-    //
+    ShowConfigureBookmarks;
   end
   else
   begin // bookmark has been clicked
     s := FIni.ReadString(FPG_BOOKMARK_SECTION, mi.Text, '.');
     SetCurrentDirectory(s);
+  end;
+end;
+
+procedure TfpgFileDialog.ShowConfigureBookmarks;
+var
+  frm: TConfigureBookmarksForm;
+begin
+  frm := TConfigureBookmarksForm.Create(FIni);
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
   end;
 end;
 
@@ -1578,6 +1591,7 @@ end;
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I managebookmarksdialog.inc}
 
 
 end.
