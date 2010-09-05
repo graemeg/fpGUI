@@ -30,6 +30,7 @@ type
     btnCancel: TfpgButton;
     {@VFD_HEAD_END: fpgQueryDialog}
     procedure SetupCaptions;
+    procedure edtTextKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   public
     procedure AfterCreate; override;
   end;
@@ -60,6 +61,12 @@ procedure TfpgQueryDialog.SetupCaptions;
 begin
   btnOK.Text := rsOK;
   btnCancel.Text := rsCancel;
+end;
+
+procedure TfpgQueryDialog.edtTextKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyEnter then
+   btnOK.Click;
 end;
 
 procedure TfpgQueryDialog.AfterCreate;
@@ -94,6 +101,7 @@ begin
     TabOrder := 2;
     Text := '';
     FontDesc := '#Edit1';
+    OnKeyPress := @edtTextKeyPressed;
   end;
 
   btnOK := TfpgButton.Create(self);
