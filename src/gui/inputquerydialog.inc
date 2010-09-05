@@ -48,8 +48,10 @@ begin
   try
     dlg.WindowTitle := ACaption;
     dlg.lblText.Text := APrompt;
+    dlg.edtText.Text := Value;
     Result := dlg.ShowModal = mrOK;
-    Value := dlg.edtText.Text;
+    if Result then
+      Value := dlg.edtText.Text;
   finally
     dlg.Free;
   end;
