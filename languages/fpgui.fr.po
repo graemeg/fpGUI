@@ -30,7 +30,7 @@ msgstr "A propos de %s"
 
 #: fpg_constants:rsaddcurrentdirectory
 msgid "Add current directory"
-msgstr ""
+msgstr "Ajouter le répertoire courant"
 
 #: fpg_constants:rsall
 msgid "All"
@@ -86,7 +86,7 @@ msgstr "Modifier"
 
 #: fpg_constants:rschangetitle
 msgid "Change Title"
-msgstr ""
+msgstr "Changer le titre"
 
 #: fpg_constants:rscharactermap
 msgid "Character Map"
@@ -102,7 +102,7 @@ msgstr "Collection"
 
 #: fpg_constants:rsconfigurebookmarks
 msgid "Configure Bookmarks"
-msgstr ""
+msgstr "Configurer les signets"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -158,7 +158,7 @@ msgstr "Répertoires"
 
 #: fpg_constants:rsdirectory
 msgid "Directory"
-msgstr ""
+msgstr "Répertoire"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -262,7 +262,7 @@ msgstr "Insérer"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr ""
+msgstr "Insérer depuis la table de caractères"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -330,11 +330,11 @@ msgstr "Lundi"
 
 #: fpg_constants:rsmovedown
 msgid "Move Down"
-msgstr ""
+msgstr "Déplacer vers le bas"
 
 #: fpg_constants:rsmoveup
 msgid "Move Up"
-msgstr ""
+msgstr "Déplacer vers le haut"
 
 #: fpg_constants:rsname
 msgid "Name"
