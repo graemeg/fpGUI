@@ -1538,25 +1538,26 @@ begin
           Canvas.SetColor(h.ParentInactSelColor);
           Canvas.SetTextColor(h.ParentInActSelTextColor);
         end;
-        Canvas.FillRectangle(w - FXOffset, YPos - FYOffset + col - GetNodeHeight + FFont.Ascent div 2 - 2, GetNodeWidth(h), GetNodeHeight);
+        // draw selection rectangle
+        Canvas.FillRectangle(w - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h), GetNodeHeight);
         if (ImageList <> nil) and ShowImages then
         begin
           AImageItem := ImageList.Item[h.ImageIndex];
           if AImageItem <> nil then
           begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image, 0, 0, 16, 16);
-            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
+            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - (GetNodeHeight div 2), h.text);
           end
           else
           begin
             if FIndentNodeWithNoImage then
-              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - FFont.Ascent div 2, h.text)
+              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - (GetNodeHeight div 2), h.text)
             else
-              Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+              Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
           end;
         end
         else
-          Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
         Canvas.SetTextColor(h.ParentTextColor);
       end
       else
@@ -1566,19 +1567,19 @@ begin
           AImageItem := ImageList.Item[h.ImageIndex];
           if AImageItem <> nil then
           begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image, 0, 0, 16, 16);
-            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
+            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - (GetNodeHeight div 2), h.text);
           end
           else
           begin
             if FIndentNodeWithNoImage then
-              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - FFont.Ascent div 2, h.text)
+              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - (GetNodeHeight div 2), h.text)
             else
-              Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+              Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
           end
         end
         else
-          Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
       end;  { if/else }
 
       Canvas.SetLineStyle(1, FTreeLineStyle);
