@@ -160,6 +160,20 @@ begin
     StringGrid.Canvas.SetTextColor(clTeal);
     StringGrid.Canvas.DrawString(ARect.Height + ARect.Left + 2, ARect.Top, StringGrid.Cells[ACol, ARow]);
   end;
+  // two rows with different background color
+  if (ARow = 7) or (ARow = 8) then
+  begin
+    if ((gdSelected in AFlags) and (gdFocused in AFlags)) or
+       (gdSelected in AFlags) then
+      Exit; // we want select cel to be painted as normal
+    // If we got here, we must do some painting. The background first.
+    StringGrid.Canvas.Color := clOrange;
+    StringGrid.Canvas.FillRectangle(ARect);
+    // NOTE: We want the grid to take care of the drawing of the text, which
+    //  handles text layout and alignment, so we MUST NOT set the
+    //  ADefaultDrawing to False. If we do, we need to handle text painting
+    //  ourselves.
+  end;
 end;
 
 procedure TMainForm.btnTopRowClicked(Sender: TObject);
