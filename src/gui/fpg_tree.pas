@@ -1789,7 +1789,16 @@ begin
             Selection := RootNode.FirstSubNode;
         end;
       end;
-      
+
+    keyPageUp:
+      begin
+        FVScrollbar.PageUp;
+      end;
+
+    keyPageDown:
+      begin
+        FVScrollbar.PageDown;
+      end;
     else
       Consumed := False;
   end;
