@@ -67,11 +67,13 @@ begin
   lst := TStringList.Create;
   FIni.ReadSection(FPG_BOOKMARK_SECTION, lst);
   grdBookmarks.RowCount := lst.Count;
+  grdBookmarks.BeginUpdate;
   for i := 0 to lst.Count-1 do
   begin
     grdBookmarks.Cells[0, i] := lst[i];
     grdBookmarks.Cells[1, i] := FIni.ReadString(FPG_BOOKMARK_SECTION, lst[i], '');
   end;
+  grdBookmarks.EndUpdate;
   lst.Free;
 end;
 
