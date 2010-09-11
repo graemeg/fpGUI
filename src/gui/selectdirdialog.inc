@@ -277,6 +277,7 @@ begin
   begin
     Name := 'tv';
     SetPosition(FSpacing, FSpacing, 288, 322);
+    Anchors     := [anTop, anLeft, anRight, anBottom];
     ImageList   := FImageList;
     ShowImages  := True;
     OnExpand    := @NodeExpanded;
