@@ -1807,23 +1807,25 @@ procedure TfpgTreeview.HandleMouseScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
 var
   i: integer;
+  dy: integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
-  if delta > 0 then
+  dy := (VisibleHeight div 3);  // mouse scrolling is 1/3 of the height
+  if delta > 0 then // scrolling down
   begin
-    inc(FYOffset, FScrollWheelDelta);
+    inc(FYOffset, dy);  //FScrollWheelDelta);
     i := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
     if FYOffset > i then
       FYOffset := i;
-    i := FVScrollbar.Position + FScrollWheelDelta;
+    i := FVScrollbar.Position + dy;
     FVScrollbar.Position := i;
   end
   else
-  begin
-    dec(FYOffset, FScrollWheelDelta);
+  begin  // scrolling up
+    dec(FYOffset, dy); //FScrollWheelDelta);
     if FYOffset < 0 then
       FYOffset := 0;
-    i := FVScrollbar.Position - FScrollWheelDelta;
+    i := FVScrollbar.Position - dy;
     FVScrollbar.Position := i;
   end;
   UpdateScrollbars;
