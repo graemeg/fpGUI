@@ -83,6 +83,7 @@ type
     FAlternativeBGColor: TfpgColor;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
+    function    GetTotalColumnWidth: integer;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetHeaderFontDesc(const AValue: string);
@@ -147,6 +148,7 @@ type
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    HeaderHeight: integer read FHeaderHeight;
+    property    TotalColumnWidth: integer read GetTotalColumnWidth;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
     property    ColumnBackgroundColor[ACol: Integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
@@ -205,6 +207,15 @@ end;
 function TfpgBaseGrid.GetHeaderFontDesc: string;
 begin
   Result := FHeaderFont.FontDesc;
+end;
+
+function TfpgBaseGrid.GetTotalColumnWidth: integer;
+var
+  i: integer;
+begin
+  Result := 0;
+  for i := 0 to ColumnCount-1 do
+    Result := Result + ColumnWidth[i];
 end;
 
 procedure TfpgBaseGrid.SetFontDesc(const AValue: string);
@@ -579,16 +590,17 @@ begin
   begin
     Dec(VHeight, FHScrollBar.Height);
     FHScrollBar.Min         := 0;
-    FHScrollBar.SliderSize  := 0.2;
     if go_SmoothScroll in FOptions then
     begin
       FHScrollBar.Max := cw - vw;
       FHScrollBar.Position := FXOffset;
+      FHScrollBar.SliderSize := TotalColumnWidth / Width;
     end
     else
     begin
       FHScrollBar.Max := ColumnCount-1;
       FHScrollBar.Position := FFirstCol;
+      FHScrollBar.SliderSize  := 1 / ColumnCount;
     end;
     FHScrollBar.RepaintSlider;
   end;
