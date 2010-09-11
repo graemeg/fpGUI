@@ -40,6 +40,7 @@ type
     btnFiveOnly: TfpgButton;
     btnDelRow: TfpgButton;
     chkSmoothScroll: TfpgCheckBox;
+    chkAlterColor: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure   StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnAddFiveClicked(Sender: TObject);
@@ -52,6 +53,7 @@ type
     procedure   chkShowGridChange(Sender: TObject);
     procedure   chkHideFocusChange(Sender: TObject);
     procedure   chkSmoothScrollChange(Sender: TObject);
+    procedure   chkAlterColorChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Integer;
         const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
@@ -129,6 +131,15 @@ begin
   else
     stringgrid.Options := stringgrid.Options - [go_SmoothScroll];
   stringgrid.Update;
+end;
+
+procedure TMainForm.chkAlterColorChange(Sender: TObject);
+begin
+  if chkAlterColor.Checked then
+    stringgrid.Options := stringgrid.Options + [go_AlternativeColor]
+  else
+    stringgrid.Options := stringgrid.Options - [go_AlternativeColor];
+  stringgrid.Invalidate;
 end;
 
 procedure TMainForm.btnQuitClick(Sender: TObject);
@@ -277,7 +288,7 @@ begin
   with chkHideFocus do
   begin
     Name := 'chkHideFocus';
-    SetPosition(394, 108, 120, 20);
+    SetPosition(394, 108, 120, 24);
     Anchors := [anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
@@ -372,13 +383,25 @@ begin
   with chkSmoothScroll do
   begin
     Name := 'chkSmoothScroll';
-    SetPosition(394, 128, 120, 20);
+    SetPosition(394, 132, 120, 24);
     Anchors := [anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 14;
     Text := 'Smooth Scroll';
     OnChange := @chkSmoothScrollChange;
+  end;
+
+  chkAlterColor := TfpgCheckBox.Create(self);
+  with chkAlterColor do
+  begin
+    Name := 'chkAlterColor';
+    SetPosition(394, 156, 120, 24);
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 15;
+    Text := 'Alternate Color';
+    OnChange := @chkAlterColorChange;
   end;
 
   {@VFD_BODY_END: MainForm}
