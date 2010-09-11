@@ -52,7 +52,8 @@ uses
   fpg_spinedit,
   fpg_tab,
   fpg_menu,
-  fpg_iniutils;
+  fpg_iniutils,
+  fpg_imagelist;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,

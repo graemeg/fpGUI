@@ -7,6 +7,7 @@
     tv: TfpgTreeView;
     FRootDir: TfpgString;
     FShowHidden: Boolean;
+    FImagelist: TfpgImageList;
     function    GetAbsolutePath(Node: TfpgTreeNode): TfpgString;
     procedure   InitializeTreeview;
     procedure   SetRootDir(const AValue: TfpgString);
@@ -19,6 +20,7 @@
     {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterCreate; override;
     { return the selected directory or set initial selected dir }
     property    SelectedDir: TfpgString read GetSelectedDir write SetSelectedDir;
@@ -158,6 +160,7 @@ begin
           for i := 0 to SortList.Count - 1 do
           begin
             NewNode := Node.AppendText(SortList[i]);
+            NewNode.ImageIndex := 0;
 //            NewNode := TV.Items.AddChild(Node, SortList[i]);
             // if subdirectories then indicate so.
 { Todo: Fix this by adding HasChildren to Treeview }
@@ -245,9 +248,20 @@ end;
 {$ENDIF}
 
 constructor TfpgSelectDirDialog.Create(AOwner: TComponent);
+var
+  img: TfpgImage;
 begin
   inherited Create(AOwner);
   FShowHidden := False;
+  FImagelist := TfpgImageList.Create;
+  img := fpgImages.GetImage('stdimg.folder').ImageFromSource;
+  FImageList.AddImage(img);
+end;
+
+destructor TfpgSelectDirDialog.Destroy;
+begin
+  FImagelist.Free;
+  inherited Destroy;
 end;
 
 procedure TfpgSelectDirDialog.AfterCreate;
@@ -263,7 +277,9 @@ begin
   begin
     Name := 'tv';
     SetPosition(FSpacing, FSpacing, 288, 322);
-    OnExpand :=@NodeExpanded;
+    ImageList   := FImageList;
+    ShowImages  := True;
+    OnExpand    := @NodeExpanded;
   end;
 
   // reposition buttons
