@@ -1232,6 +1232,7 @@ begin
   FVScrollbar.Min := 0;
   FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
   FVScrollbar.PageSize := (VisibleHeight div 4) * 3;  // three quarters of the height
+  FVScrollbar.ScrollStep := GetNodeHeight;  // up/down buttons move the height of the font
   FHScrollbar.Min := 0;
   FHScrollbar.Max := MaxNodeWidth - VisibleWidth + FVScrollbar.Width;
   FHScrollbar.PageSize := (VisibleWidth div 4) * 3;  // three quarters of the height
