@@ -37,6 +37,7 @@ type
 
   TfpgWidget = class(TfpgWindow)
   private
+    FAcceptDrops: boolean;
     FAlignRect: TfpgRect;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
@@ -85,6 +86,7 @@ type
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
+    procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
@@ -151,6 +153,7 @@ type
     procedure   Invalidate; // double check this works as developers expect????
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
+    property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
     property    Visible: boolean read FVisible write SetVisible default True;
@@ -231,6 +234,13 @@ begin
   FActiveWidget := AValue;
   if FActiveWidget <> nil then
     FActiveWidget.HandleSetFocus;
+end;
+
+procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);
+begin
+  if FAcceptDrops = AValue then
+    exit;
+  FAcceptDrops := AValue;
 end;
 
 function TfpgWidget.GetHint: TfpgString;
@@ -405,7 +415,8 @@ begin
   FShowHint       := False;
   FParentShowHint := True;
   FBackgroundColor := clWindowBackground;
-  FTextColor  := clText1;
+  FTextColor      := clText1;
+  FAcceptDrops    := False;
 
   inherited Create(AOwner);
 
