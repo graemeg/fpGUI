@@ -205,6 +205,8 @@ type
 
 
   TfpgX11Window = class(TfpgWindowBase)
+  private
+    QueueEnabledDrops: boolean;
   protected
     FWinFlags: TXWindowStateFlags;
     FWinHandle: TfpgWinHandle;
@@ -220,6 +222,7 @@ type
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     procedure   DoUpdateWindowPosition; override;
     procedure   DoSetMouseCursor; override;
+    procedure   DoEnableDrops(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -235,9 +238,27 @@ type
     FComposeBuffer: TfpgString;
     FComposeStatus: TStatus;
     FEventFilter: TX11EventFilter;
+    { all XDND atoms }
+    XdndAware: TAtom;
+    XdndTypeList: TAtom;
+    XdndSelection: TAtom;
+    { XDND client messages }
+    XdndEnter: TAtom;
+    XdndPosition: TAtom;
+    XdndStatus: TAtom;
+    XdndLeave: TAtom;
+    XdndDrop: TAtom;
+    XdndFinished: TAtom;
+    { XDND actions }
+    XdndActionCopy: TAtom;
+    XdndActionMove: TAtom;
+    XdndActionLink: TAtom;
+    XdndActionAsk: TAtom;
+    XdndActionPrivate: TAtom;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
+    procedure   XdndInit;
   protected
     FDisplay: PXDisplay;
     DisplayDepth: integer;
@@ -251,8 +272,9 @@ type
     xia_motif_wm_hints: TAtom;
     xia_wm_protocols: TAtom;
     xia_wm_delete_window: TAtom;
-    netlayer: TNETWindowLayer;
+    xia_wm_state: TAtom;
     xia_targets: TAtom;
+    netlayer: TNETWindowLayer;
     InputMethod: PXIM;
     InputContext: PXIC;
     FLastKeySym: TKeySym;   // Used for KeyRelease event
@@ -313,9 +335,18 @@ uses
   cursorfont,
   xatom;            // used for XA_WM_NAME
 
+type
+  TAtomArray = array [0..0] of TAtom;
+  PAtomArray = ^TAtomArray;
+
+  TWindowArray = array [0..0] of TWindow;
+  PWindowArray = ^TWindowArray;
+
 var
   xapplication: TfpgApplication;
 
+const
+  FPG_XDND_VERSION: integer = 4; // our supported XDND version
 
  // some externals
 
@@ -688,6 +719,28 @@ begin
         Length(FComposeBuffer), @Result, @FComposeStatus);
 end;
 
+procedure TfpgX11Application.XdndInit;
+begin
+  XdndAware         := XInternAtom(FDisplay, 'XdndAware',         False);
+  XdndTypeList      := XInternAtom(FDisplay, 'XdndTypeList',      False);
+  XdndSelection     := XInternAtom(FDisplay, 'XdndSelection',     False);
+
+  // client messages
+  XdndEnter         := XInternAtom(FDisplay, 'XdndEnter',         False);
+  XdndPosition      := XInternAtom(FDisplay, 'XdndPosition',      False);
+  XdndStatus        := XInternAtom(FDisplay, 'XdndStatus',        False);
+  XdndLeave         := XInternAtom(FDisplay, 'XdndLeave',         False);
+  XdndDrop          := XInternAtom(FDisplay, 'XdndDrop',          False);
+  XdndFinished      := XInternAtom(FDisplay, 'XdndFinished',      False);
+
+  // actions
+  XdndActionCopy    := XInternAtom(FDisplay, 'XdndActionCopy',    False);
+  XdndActionMove    := XInternAtom(FDisplay, 'XdndActionMove',    False);
+  XdndActionLink    := XInternAtom(FDisplay, 'XdndActionLink',    False);
+  XdndActionAsk     := XInternAtom(FDisplay, 'XdndActionAsk',     False);
+  XdndActionPrivate := XInternAtom(FDisplay, 'XdndActionPrivate', False);
+end;
+
 function TfpgX11Application.DoGetFontFaceList: TStringList;
 var
   pfs: PFcFontSet;
@@ -743,11 +796,15 @@ begin
   DefaultColorMap := XDefaultColorMap(FDisplay, DefaultScreen);
 
   // Initialize atoms
-  xia_clipboard         := XInternAtom(FDisplay, 'CLIPBOARD', longbool(0));
-  xia_targets           := XInternAtom(FDisplay, 'TARGETS', longbool(0));
-  xia_motif_wm_hints    := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', longbool(0));
-  xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', longbool(0));
-  xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', longbool(0));
+  xia_clipboard         := XInternAtom(FDisplay, 'CLIPBOARD', TBool(False));
+  xia_targets           := XInternAtom(FDisplay, 'TARGETS', TBool(False));
+  xia_motif_wm_hints    := XInternAtom(FDisplay, '_MOTIF_WM_HINTS', TBool(False));
+  xia_wm_protocols      := XInternAtom(FDisplay, 'WM_PROTOCOLS', TBool(False));
+  xia_wm_delete_window  := XInternAtom(FDisplay, 'WM_DELETE_WINDOW', TBool(False));
+  xia_wm_state          := XInternAtom(FDisplay, 'WM_STATE', TBool(False));
+
+  { initializa the XDND atoms }
+  XdndInit;
 
   netlayer := TNETWindowLayer.Create(FDisplay);
 
@@ -893,7 +950,7 @@ var
   procedure ReportLostWindow(const event: TXEvent);
   begin
     {$IFDEF DEBUG}
-    writeln('fpGFX/X11: ', GetXEventName(event._type), ' can''t find <',
+    writeln('fpGUI/X11: ', GetXEventName(event._type), ' can''t find <',
         IntToHex(event.xany.window, 9), '>');
     {$ENDIF}
   end;
@@ -1163,7 +1220,7 @@ begin
           end;
         end;
 
-    // message blockings for modal windows
+    { one use is for message blockings for modal windows, or XDND etc. }
     X.ClientMessage:
         begin
           w := FindWindowByBackupHandle(ev.xclient.window);
@@ -1656,6 +1713,20 @@ begin
   FMouseCursorIsDirty := False;
 end;
 
+procedure TfpgX11Window.DoEnableDrops(const AValue: boolean);
+begin
+  // notify XDND protocol that we can handle DND
+  if AValue then
+  begin
+    if HasHandle then
+      XChangeProperty(xapplication.Display, WinHandle, xapplication.XdndAware, XA_ATOM, 32, PropModeReplace, @FPG_XDND_VERSION, 1)
+    else
+      QueueEnabledDrops := True; // we need to do this once we have a winhandle
+  end
+  else
+    XDeleteProperty(xapplication.Display, WinHandle, xapplication.XdndAware);
+end;
+
 procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);
 var
   tp: TXTextProperty;
@@ -1681,6 +1752,7 @@ begin
   inherited Create(AOwner);
   FWinHandle := 0;
   FBackupWinHandle := 0;
+  QueueEnabledDrops := False;
 end;
 
 procedure TfpgX11Window.ActivateWindow;
