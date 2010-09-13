@@ -70,6 +70,9 @@ type
   TfpgModalResult = (mrNone, mrOK, mrCancel, mrYes, mrNo, mrAbort, mrRetry,
       mrIgnore, mrAll, mrNoToAll, mrYesToAll);
 
+  TfpgDragAction = (daCopy, daMove, daLink);
+  TfpgDragActions = set of TfpgDragAction;
+
 const
   MOUSE_LEFT       = 1;
   MOUSE_RIGHT      = 3;
@@ -95,6 +98,8 @@ const
   FPGM_POPUPCLOSE  = 17;
   FPGM_HINTTIMER   = 18;
   FPGM_FREEME      = 19;
+  FPGM_DROPACTIVE  = 20;
+  FPGM_DROPINACTIVE = 21;
   FPGM_USER        = 50000;
   FPGM_KILLME      = MaxInt;
 
@@ -439,6 +444,7 @@ type
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
     procedure   DoSetMouseCursor; virtual; abstract;
+    procedure   DoEnableDrops(const AValue: boolean); virtual; abstract;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
@@ -980,11 +986,15 @@ begin
     GetPropList(Obj.ClassInfo, tkPropsWithDefault, PropInfos);
     { Loop through all the selected properties }
     for Loop := 0 to Count - 1 do
+    begin
       with PropInfos^[Loop]^ do
+      begin
         { If there is supposed to be a default value... }
         if Default <> NoDefault then
           { ...then jolly well set it }
           SetOrdProp(Obj, PropInfos^[Loop], Default)
+      end;
+    end;
   finally
     FreeMem(PropInfos, Count * SizeOf(PPropInfo));
   end;
@@ -2689,6 +2699,7 @@ begin
   inherited Create(AOwner);
   FHelpType     := htKeyword;
   FHelpContext  := 0;
+  FHelpKeyword  := '';
   FTagPointer   := nil;
 end;
 
