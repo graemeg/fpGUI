@@ -789,8 +789,8 @@ begin
   end;
   FDNDTypeList.Clear;
   FActionType     := 0;
-  FSrcWinHandle   := -1;
-  FLastDropTarget := -1;
+  FSrcWinHandle   := 0;
+  FLastDropTarget := 0;
 end;
 
 procedure TfpgX11Application.HandleDNDenter(ATopLevelWindow: TfpgX11Window;
@@ -798,7 +798,7 @@ procedure TfpgX11Application.HandleDNDenter(ATopLevelWindow: TfpgX11Window;
 var
   actualtype: TAtom;
   actualformat: cint;
-  count, remaining, dummy: culong;
+  count, remaining: culong;
   xdndtypes: PAtomArray;
   i: integer;
   s: TfpgString;
