@@ -1588,8 +1588,8 @@ begin
           begin
             HandleDNDposition(w,                            // top level window
                 ev.xclient.data.l[0],                       // Source window
-                (ev.xclient.data.l[2] shr 16) and $FFFF,    // x_root
-                ev.xclient.data.l[2] and $FFFF,             // y_root
+                (ev.xclient.data.l[2] and $FFFF0000) shr 16, // x_root
+                ev.xclient.data.l[2] and $0000FFFF,          // y_root
                 ev.xclient.data.l[4],                       // action
                 ev.xclient.data.l[3]);                      // timestamp
           end
