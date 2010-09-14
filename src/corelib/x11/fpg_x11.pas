@@ -537,9 +537,9 @@ end;
 procedure ProcessSelection(var ev: TXEvent);
 var
   s: string;
-  actual: TAtom;
-  format: integer;
-  count, remaining: longword;
+  actualformat: TAtom;
+  actualtype: cint;
+  count, remaining: culong;
   data: PChar;
 begin
   if ev.xselection._property > 0 then
@@ -548,7 +548,7 @@ begin
         ev.xselection._property, 0, 16000,
         TBool(false), // delete
         0, // type
-        @actual, @format, @count, @remaining,
+        @actualformat, @actualtype, @count, @remaining,
         @data);
     s := data;
 
@@ -838,7 +838,7 @@ var
   rootw: TfpgWinHandle;
   parentw: TfpgWinHandle;
   childs: ^TfpgWinHandle;
-  cnum: longword;
+  cnum: cuint;
 begin
   childs := nil;
   if XQueryTree(xapplication.display, wh, @rootw, @parentw, @childs, @cnum) <> 0 then
