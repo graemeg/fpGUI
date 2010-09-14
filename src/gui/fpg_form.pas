@@ -51,6 +51,8 @@ type
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
     FOnHelp: TfpgHelpEvent;
+    FEnableDrops: boolean;
+    procedure   SetEnableDrops(const AValue: boolean);
   protected
     FModalResult: TfpgModalResult;
     FParentForm: TfpgBaseForm;
@@ -100,6 +102,7 @@ type
     function    ShowModal: TfpgModalResult;
     procedure   Close;
     function    CloseQuery: boolean; virtual;
+    property    EnableDrops: boolean read FEnableDrops write SetEnableDrops;
   end;
   
   
@@ -184,6 +187,13 @@ begin
 end;
 
 { TfpgBaseForm }
+
+procedure TfpgBaseForm.SetEnableDrops(const AValue: boolean);
+begin
+  if FEnableDrops = AValue then exit;
+  FEnableDrops := AValue;
+  DoEnableDrops(AValue);
+end;
 
 procedure TfpgBaseForm.SetWindowTitle(const ATitle: string);
 begin
