@@ -70,8 +70,8 @@ type
   TfpgModalResult = (mrNone, mrOK, mrCancel, mrYes, mrNo, mrAbort, mrRetry,
       mrIgnore, mrAll, mrNoToAll, mrYesToAll);
 
-  TfpgDragAction = (daCopy, daMove, daLink);
-  TfpgDragActions = set of TfpgDragAction;
+  TfpgDropAction = (daCopy, daMove, daLink);
+  TfpgDropActions = set of TfpgDropAction;
 
 const
   MOUSE_LEFT       = 1;
