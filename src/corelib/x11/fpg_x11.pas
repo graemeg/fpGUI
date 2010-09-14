@@ -269,6 +269,7 @@ type
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
+    function    GetDropActionFromAtom(const AAtom: TAtom): TfpgDropAction;
     procedure   XdndInit;
     procedure   ResetDNDVariables;
     procedure   HandleDNDenter(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ev: TXEvent);
@@ -741,6 +742,18 @@ begin
   if FComposeStatus = XBufferOverflow then
     Xutf8LookupString(InputContext, @Event.xkey, @FComposeBuffer[1],
         Length(FComposeBuffer), @Result, @FComposeStatus);
+end;
+
+function TfpgX11Application.GetDropActionFromAtom(const AAtom: TAtom): TfpgDropAction;
+begin
+  if AAtom = XdndActionCopy then
+    Result := daCopy
+  else if AAtom = XdndActionMove then
+    Result := daMove
+  else if AAtom = XdndActionLink then
+    Result := daLink
+  else
+    Result := daCopy; { the save fallback option }
 end;
 
 procedure TfpgX11Application.XdndInit;
