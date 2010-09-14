@@ -44,6 +44,7 @@ type
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
     FOnDragEnter: TfpgDragEnterEvent;
+    FOnDragLeave: TNotifyEvent;
     FOnEnter: TNotifyEvent;
     FOnExit: TNotifyEvent;
     FOnMouseDown: TMouseButtonEvent;
@@ -175,6 +176,7 @@ type
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
     property    OnDragEnter: TfpgDragEnterEvent read FOnDragEnter write FOnDragEnter;
+    property    OnDragLeave: TNotifyEvent read FOnDragLeave write FOnDragLeave;
   end;
 
 

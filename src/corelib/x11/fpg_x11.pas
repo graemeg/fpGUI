@@ -887,10 +887,21 @@ end;
 
 procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window;
     const ASource: TWindow);
+var
+  wg: TfpgWidget;
 begin
   {$IFDEF DNDDEBUG}
   writeln('XdndLeave event received!');
   {$ENDIF}
+  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  begin
+    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    if wg.AcceptDrops then
+    begin
+      if Assigned(wg.OnDragLeave) then
+        wg.OnDragLeave(nil);
+    end;
+  end;
   ResetDNDVariables;
 end;
 
@@ -905,6 +916,7 @@ var
   lTargetWinHandle: TWindow;
   w: TfpgX11Window;
   wg: TfpgWidget;
+  wg2: TfpgWidget;
   msgp: TfpgMessageParams;
   lDragEnterEvent: TfpgDragEnterEvent;
   lDropAction: TfpgDropAction;
@@ -952,8 +964,17 @@ begin
       wg := TfpgWidget(w);
       if FLastDropTarget <> lTargetWinHandle then
       begin
-        fillchar(msgp, sizeof(msgp), 0);
-        fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
+        if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+        begin
+          wg2 := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+          if wg2.AcceptDrops then
+          begin
+            if Assigned(wg2.OnDragLeave) then
+              wg2.OnDragLeave(nil);
+          end;
+          fillchar(msgp, sizeof(msgp), 0);
+          fpgPostMessage(nil, wg2, FPGM_DROPEXIT, msgp);
+        end;
       end;
       FLastDropTarget := lTargetWinHandle;
       if wg.AcceptDrops then
