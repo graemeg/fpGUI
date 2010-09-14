@@ -73,6 +73,8 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
+    procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
+    procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
   protected
     FFormDesigner: TObject;
     FVisible: boolean;
@@ -727,6 +729,16 @@ procedure TfpgWidget.MsgMouseScroll(var msg: TfpgMessageRec);
 begin
   HandleMouseScroll(msg.Params.mouse.x, msg.Params.mouse.y,
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
+end;
+
+procedure TfpgWidget.MsgDropEnter(var msg: TfpgMessageRec);
+begin
+  // do nothing
+end;
+
+procedure TfpgWidget.MsgDropExit(var msg: TfpgMessageRec);
+begin
+  // do nothing
 end;
 
 function TfpgWidget.GetOnShowHint: THintEvent;
