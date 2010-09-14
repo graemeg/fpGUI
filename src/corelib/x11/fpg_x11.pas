@@ -883,20 +883,6 @@ begin
   end;
   if count > 3 then
     XFree(xdndtypes);
-
-  for i := 0 to FDNDTypeList.Count-1 do
-  begin
-    { TODO: Somehow we must be told what is our preferred mime type }
-    { This list must be from most specific to least specific }
-    if TDNDSrcType(FDNDTypeList[i]).Name = 'text/plain' then
-      FDNDDataType := TDNDSrcType(FDNDTypeList[i]).ID
-    else if TDNDSrcType(FDNDTypeList[i]).Name = 'TEXT' then
-      FDNDDataType := TDNDSrcType(FDNDTypeList[i]).ID
-    else if TDNDSrcType(FDNDTypeList[i]).Name = 'STRING' then
-      FDNDDataType := TDNDSrcType(FDNDTypeList[i]).ID;
-    if FDNDDataType <> 0 then
-      break;
-  end;
 end;
 
 procedure TfpgX11Application.HandleDNDleave(ATopLevelWindow: TfpgX11Window;
@@ -915,21 +901,26 @@ var
   dx, dy: cint;
   child: TWindow;
   s: string;
+  i: integer;
   lTargetWinHandle: TWindow;
   w: TfpgX11Window;
-  lAccept: clong = 0;
+  wg: TfpgWidget;
   msgp: TfpgMessageParams;
+  lDragEnterEvent: TfpgDragEnterEvent;
+  lDropAction: TfpgDropAction;
+  lAccept: Boolean;
+  lMimeChoice: TfpgString;
+  lMimeList: TStringList;
 begin
   {$IFDEF DNDDEBUG}
   writeln('XdndPosition event received!');
   {$ENDIF}
+  lAccept := False;
   FSrcWinHandle := ASource;
   FActionType   := AAction;
   FSrcTimeStamp := ATimeStamp;
   lTargetWinHandle := ATopLevelWindow.WinHandle;
-  if ATopLevelWindow is TfpgWidget then      // TODO: We could use Interfaces here eg: IDragDropEnabled
-    if TfpgWidget(ATopLevelWindow).AcceptDrops then
-      lAccept := 1;
+  lMimeChoice := 'text/plain';
 
   {$IFDEF DNDDEBUG}
   s := XGetAtomName(FDisplay, AAction);
@@ -946,25 +937,41 @@ begin
   {$ENDIF}
 
   if child <> 0 then
+    w := FindWindowByHandle(child)
+  else
+    w := ATopLevelWindow;
+
+  if Assigned(w) then
   begin
-    w := FindWindowByHandle(child);
-    if Assigned(w) then
+    lTargetWinHandle := w.WinHandle;
+    {$IFDEF DNDDEBUG}
+    writeln('dragging over window: ', w.Name);
+    {$ENDIF}
+    if w is TfpgWidget then      // TODO: We could use Interfaces here eg: IDragDropEnabled
     begin
-      lTargetWinHandle := w.WinHandle;
-      {$IFDEF DNDDEBUG}
-      writeln('dragging over window: ', w.Name);
-      {$ENDIF}
-      if w is TfpgWidget then      // TODO: We could use Interfaces here eg: IDragDropEnabled
+      wg := TfpgWidget(w);
+      if FLastDropTarget <> lTargetWinHandle then
       begin
-        if FLastDropTarget <> lTargetWinHandle then
+        fillchar(msgp, sizeof(msgp), 0);
+        fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
+      end;
+      FLastDropTarget := lTargetWinHandle;
+      if wg.AcceptDrops then
+      begin
+        if Assigned(wg.OnDragEnter) then
         begin
-          fillchar(msgp, sizeof(msgp), 0);
-          fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
+          lDropAction := GetDropActionFromAtom(AAction);
+          lMimeList := TStringList.Create;
+          for i := 0 to FDNDTypeList.Count-1 do
+            lMimeList.Add(TDNDSrcType(FDNDTypeList[i]).Name);
+          { TODO: We need to populate the Source parameter. }
+          wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
+          lMimeList.Free;
+          FActionType := GetAtomFromDropAction(lDropAction);
         end;
-        FLastDropTarget := lTargetWinHandle;
-        if TfpgWidget(w).AcceptDrops then
+
+        if lAccept then
         begin
-          lAccept := 1;
           fillchar(msgp, sizeof(msgp), 0);
           msgp.mouse.x := dx;
           msgp.mouse.y := dy;
@@ -972,17 +979,17 @@ begin
         end;
       end;
     end;
-  end
-  else
-  begin
-    if FLastDropTarget <> lTargetWinHandle then
-    begin
-      fillchar(msgp, sizeof(msgp), 0);
-      fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
-    end;
-    FLastDropTarget := lTargetWinHandle;
   end;
 
+  for i := 0 to FDNDTypeList.Count-1 do
+  begin
+    { This list must be from most specific to least specific }
+    if TDNDSrcType(FDNDTypeList[i]).Name = lMimeChoice then
+    begin
+      FDNDDataType := TDNDSrcType(FDNDTypeList[i]).ID;
+      break;
+    end;
+  end;
 
   // send message to confirm drop will be accepted in specified rectangle
   FillChar(Msg, SizeOf(Msg), 0);
@@ -992,20 +999,14 @@ begin
   Msg.xclient.message_type  := XdndStatus;
   Msg.xclient.format        := 32;
 
-
-  Msg.xclient.data.l[0] := ATopLevelWindow.WinHandle;  // always top-level window
-  Msg.xclient.data.l[1] := 0;
-  if (FDNDDataType <> None) and (FActionType = XdndActionCopy) and (lAccept = 1) then  // we only accept copy action for now
-    Msg.xclient.data.l[1] := 1; // 0 xor (1 shl 0); // 0-bit set so we accept drop
-  {$IFDEF DNDDEBUG}
-  if FDNDDataType = None then
-    writeln('No suitable data type found, so we refuse drop');
-  if FActionType <> XdndActionCopy then
-    writeln('No suitable action found, so we refuse drop');
-  {$ENDIF}
-  Msg.xclient.data.l[2] := 0; // (Left shl 16) or Top;  // x & y co-ordinates
-  Msg.xclient.data.l[3] := 0; // (Width shl 16) or Height; // w & h co-ordinates
-  Msg.xclient.data.l[4] := FActionType; // this should be the action we accept
+  Msg.xclient.data.l[0]   := ATopLevelWindow.WinHandle;  // always top-level window
+  if lAccept then
+    Msg.xclient.data.l[1] := 1
+  else
+    Msg.xclient.data.l[1] := 0;
+  Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
+  Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
+  Msg.xclient.data.l[4]   := FActionType;
 
   XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
 end;
@@ -1253,7 +1254,6 @@ var
   xfd: integer;
   KeySym: TKeySym;
   Popup: TfpgWidget;
-  status: TStatus;
   needToWait: boolean;
 
   // debug purposes only
