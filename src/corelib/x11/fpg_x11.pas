@@ -19,7 +19,8 @@ unit fpg_x11;
 
 {$mode objfpc}{$H+}
 
-{.$Define DEBUG}
+{.$Define DEBUG}      // general debugging - mostly OS messages though
+{$Define DNDDEBUG}   // drag-n-drop specific debugging
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 
@@ -768,7 +769,7 @@ begin
   if FLastDropTarget <> 0 then
   begin
     fillchar(msgp, sizeof(msgp), 0);
-    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPINACTIVE, msgp);
+    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
   end;
   FDNDTypeList.Clear;
   FActionType     := 0;
@@ -810,7 +811,7 @@ begin
         if FLastDropTarget <> lTargetWinHandle then
         begin
           fillchar(msgp, sizeof(msgp), 0);
-          fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPINACTIVE, msgp);
+          fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
         end;
         FLastDropTarget := lTargetWinHandle;
         if TfpgWidget(w).AcceptDrops then
@@ -819,7 +820,7 @@ begin
           fillchar(msgp, sizeof(msgp), 0);
           msgp.mouse.x := dx;
           msgp.mouse.y := dy;
-          fpgPostMessage(nil, w, FPGM_DROPACTIVE, msgp);
+          fpgPostMessage(nil, w, FPGM_DROPENTER, msgp);
         end;
       end;
     end;
@@ -829,7 +830,7 @@ begin
     if FLastDropTarget <> lTargetWinHandle then
     begin
       fillchar(msgp, sizeof(msgp), 0);
-      fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPINACTIVE, msgp);
+      fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPEXIT, msgp);
     end;
     FLastDropTarget := lTargetWinHandle;
   end;
@@ -1346,7 +1347,6 @@ begin
           // WM_PROTOCOLS message
           if Assigned(w) and (ev.xclient.message_type = xia_wm_protocols) then
           begin
-            //WriteLn(XGetAtomName(FDisplay, TAtom(ev.xclient.data.l[0])));
             if (ev.xclient.data.l[0] = netlayer.NetAtom[naWM_PING]) then
             begin
               // always respond to pings or the wm will kill us
