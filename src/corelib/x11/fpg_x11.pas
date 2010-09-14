@@ -270,6 +270,7 @@ type
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
     function    GetDropActionFromAtom(const AAtom: TAtom): TfpgDropAction;
+    function    GetAtomFromDropAction(const AAction: TfpgDropAction): TAtom;
     procedure   XdndInit;
     procedure   ResetDNDVariables;
     procedure   HandleDNDenter(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ev: TXEvent);
@@ -754,7 +755,18 @@ begin
   else if AAtom = XdndActionLink then
     Result := daLink
   else
-    Result := daCopy; { the save fallback option }
+    Result := daCopy; { the safe fallback option }
+end;
+
+function TfpgX11Application.GetAtomFromDropAction(const AAction: TfpgDropAction): TAtom;
+begin
+  case AAction of
+    daCopy:  Result := XdndActionCopy;
+    daMove:  Result := XdndActionMove;
+    daLink:  Result := XdndActionLink;
+    else
+      Result := XdndActionCopy;  { the safe fallback option }
+  end;
 end;
 
 procedure TfpgX11Application.XdndInit;
