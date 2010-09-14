@@ -276,6 +276,7 @@ type
     procedure   HandleDNDleave(ATopLevelWindow: TfpgX11Window; const ASource: TWindow);
     procedure   HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
     procedure   HandleDNDdrop(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ATimestamp: x.TTime);
+    procedure   HandleDNDSelection(const ev: TXEvent);
   protected
     FDisplay: PXDisplay;
     DisplayDepth: integer;
@@ -1023,6 +1024,51 @@ begin
   ResetDNDVariables;
 end;
 
+procedure TfpgX11Application.HandleDNDSelection(const ev: TXEvent);
+var
+  actualtype: TAtom;
+  actualformat: cint;
+  count, remaining, dummy: culong;
+  s: TfpgString;
+  data: PChar;
+begin
+  {$IFDEF DNDDEBUG}
+  writeln('XdndSelection message received!');
+  {$ENDIF}
+  { do not get data yet, just see how much there is }
+  XGetWindowProperty(FDisplay, ev.xselection.requestor,
+      ev.xselection._property, 0, 0,
+      TBool(false),
+      AnyPropertyType,
+      @actualtype, @actualformat, @count, @remaining,
+      @data);
+
+  { we handle the DND selection here }
+    {$IFDEF DNDDEBUG}
+    s := XGetAtomName(FDisplay, actualtype);
+    writeln(Format('  ActualType: %s (%d)', [s, ActualType]));
+    writeln('  Actualformat = ', ActualFormat);
+    writeln('  count = ', count);
+    writeln('  remaining = ', remaining);
+    writeln('-----------------');
+    {$ENDIF}
+
+  if remaining > 0 then   { we have data - now fetch it! }
+  begin
+    XGetWindowProperty(FDisplay, ev.xselection.requestor,
+        ev.xselection._property, 0, remaining,
+        TBool(false),
+        AnyPropertyType,
+        @actualtype, @actualformat, @count, @dummy,
+        @data);
+    s := data;
+  end;
+
+  {$IFDEF DNDDEBUG}
+  writeln(' s = ', s);
+  {$ENDIF}
+end;
+
 function TfpgX11Application.DoGetFontFaceList: TStringList;
 var
   pfs: PFcFontSet;
@@ -1611,7 +1657,13 @@ begin
 
     X.SelectionNotify:
         begin
-          ProcessSelection(ev);
+          { Handle XDND data }
+          if ev.xselection._property = XdndSelection then
+          begin
+            HandleDNDSelection(ev);
+          end
+          else  { Handle X Selections - clipboard data }
+            ProcessSelection(ev);
         end;
 
     X.SelectionRequest:
