@@ -28,6 +28,7 @@ interface
 uses
   Classes,
   SysUtils,
+  contnrs,
   X,
   Xlib,
   XUtil,
@@ -238,6 +239,8 @@ type
     FComposeBuffer: TfpgString;
     FComposeStatus: TStatus;
     FEventFilter: TX11EventFilter;
+    { XDND type list received from Source window }
+    FDNDTypeList: TObjectList;
     { all XDND atoms }
     XdndAware: TAtom;
     XdndTypeList: TAtom;
@@ -255,10 +258,18 @@ type
     XdndActionLink: TAtom;
     XdndActionAsk: TAtom;
     XdndActionPrivate: TAtom;
+    { XDND variables }
+    FActionType: TAtom;
+    FSrcWinHandle: TfpgWinHandle;
+    FDNDVersion: integer;
+    FDNDDataType: TAtom;
+    FSrcTimeStamp: clong;
+    FLastDropTarget: TfpgWinHandle;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
     procedure   XdndInit;
+    procedure   ResetDNDVariables;
   protected
     FDisplay: PXDisplay;
     DisplayDepth: integer;
@@ -331,11 +342,19 @@ uses
   fpg_widget,
   fpg_popupwindow,
   fpg_stringutils,  // used for GetTextWidth
+  fpg_utils,
   fpg_form,         // for modal event support
   cursorfont,
-  xatom;            // used for XA_WM_NAME
+  xatom,            // used for XA_WM_NAME
+  math;
 
 type
+  TDNDSrcType = class(TObject)
+  public
+    Name: TfpgString;
+    ID: integer;
+  end;
+
   TAtomArray = array [0..0] of TAtom;
   PAtomArray = ^TAtomArray;
 
@@ -741,6 +760,20 @@ begin
   XdndActionPrivate := XInternAtom(FDisplay, 'XdndActionPrivate', False);
 end;
 
+procedure TfpgX11Application.ResetDNDVariables;
+var
+  msgp: TfpgMessageParams;
+begin
+  if FLastDropTarget <> 0 then
+  begin
+    fillchar(msgp, sizeof(msgp), 0);
+    fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPINACTIVE, msgp);
+  end;
+  FDNDTypeList.Clear;
+  FActionType     := 0;
+  FSrcWinHandle   := -1
+end;
+
 function TfpgX11Application.DoGetFontFaceList: TStringList;
 var
   pfs: PFcFontSet;
@@ -804,6 +837,7 @@ begin
   xia_wm_state          := XInternAtom(FDisplay, 'WM_STATE', TBool(False));
 
   { initializa the XDND atoms }
+  FDNDTypeList := TObjectList.Create;
   XdndInit;
 
   netlayer := TNETWindowLayer.Create(FDisplay);
@@ -824,7 +858,7 @@ destructor TfpgX11Application.Destroy;
 begin
   netlayer.Free;
   XCloseDisplay(FDisplay);
-  
+  FDNDTypeList.Free;
   inherited Destroy;
 end;
 
