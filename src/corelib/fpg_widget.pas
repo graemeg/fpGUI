@@ -34,6 +34,8 @@ type
 
   THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
 
+  TfpgDragEnterEvent = procedure(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean) of object;
+
 
   TfpgWidget = class(TfpgWindow)
   private
@@ -41,6 +43,7 @@ type
     FAlignRect: TfpgRect;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
+    FOnDragEnter: TfpgDragEnterEvent;
     FOnEnter: TNotifyEvent;
     FOnExit: TNotifyEvent;
     FOnMouseDown: TMouseButtonEvent;
@@ -169,6 +172,7 @@ type
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
+    property    OnDragEnter: TfpgDragEnterEvent read FOnDragEnter write FOnDragEnter;
   end;
 
 
