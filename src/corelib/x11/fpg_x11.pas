@@ -1511,7 +1511,7 @@ begin
               begin
                 // This is ugly!!!!!!!!!!!!!!!
                 ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
-                if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+                if (ew <> nil) and (TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                   blockmsg := true;
               end;
           
