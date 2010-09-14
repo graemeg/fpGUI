@@ -45,6 +45,7 @@ function fpgGetToolkitConfigDir: TfpgString;
 { This is so that when we support LTR and RTL languages, the colon will be
   added at the correct place. }
 function fpgAddColon(const AText: TfpgString): TfpgString;
+function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
 
 
  // RTL wrapper filesystem functions with platform independant encoding
@@ -259,6 +260,11 @@ function fpgAddColon(const AText: TfpgString): TfpgString;
 begin
   { TODO : Check language direction and add colon at appropriate end. This is very crude! }
   Result := AText + ':';
+end;
+
+function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
+begin
+  Result := (AData and (1 shl AIndex) <> 0);
 end;
 
 
