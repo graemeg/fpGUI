@@ -868,7 +868,7 @@ begin
       FDNDTypeList.Add(itm);
     end;
   end;
-  if xdndtypes <> nil then
+  if count > 3 then
     XFree(xdndtypes);
 
   for i := 0 to FDNDTypeList.Count-1 do
