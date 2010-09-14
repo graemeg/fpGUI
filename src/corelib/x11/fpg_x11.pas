@@ -266,6 +266,7 @@ type
     FDNDDataType: TAtom;
     FSrcTimeStamp: clong;
     FLastDropTarget: TfpgWinHandle;
+    FDropPos: TPoint;
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
@@ -804,6 +805,8 @@ begin
   FActionType     := 0;
   FSrcWinHandle   := 0;
   FLastDropTarget := 0;
+  FDropPos.X := 0;
+  FDropPos.Y := 0;
 end;
 
 procedure TfpgX11Application.HandleDNDenter(ATopLevelWindow: TfpgX11Window;
@@ -909,7 +912,7 @@ procedure TfpgX11Application.HandleDNDposition(ATopLevelWindow: TfpgX11Window; c
     const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
 var
   Msg: TXEvent;
-  dx, dy: cint;
+  dx, dy, dx2, dy2: cint;
   child: TWindow;
   s: string;
   i: integer;
@@ -949,7 +952,13 @@ begin
   {$ENDIF}
 
   if child <> 0 then
-    w := FindWindowByHandle(child)
+  begin
+    w := FindWindowByHandle(child);
+    dx2 := dx;
+    dy2 := dy;
+    XTranslateCoordinates(FDisplay, ATopLevelWindow.WinHandle, w.WinHandle,
+        dx2, dy2, @dx, @dy, @child);
+  end
   else
     w := ATopLevelWindow;
 
@@ -993,6 +1002,8 @@ begin
 
         if lAccept then
         begin
+          FDropPos.X := dx;
+          FDropPos.Y := dy;
           fillchar(msgp, sizeof(msgp), 0);
           msgp.mouse.x := dx;
           msgp.mouse.y := dy;
@@ -1055,7 +1066,6 @@ begin
   Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
 
   XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
-  ResetDNDVariables;
 end;
 
 procedure TfpgX11Application.HandleDNDSelection(const ev: TXEvent);
@@ -1065,6 +1075,7 @@ var
   count, remaining, dummy: culong;
   s: TfpgString;
   data: PChar;
+  wg: TfpgWidget;
 begin
   {$IFDEF DNDDEBUG}
   writeln('XdndSelection message received!');
@@ -1098,9 +1109,16 @@ begin
     s := data;
   end;
 
+  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  begin
+    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    if Assigned(wg.OnDragDrop) then
+      wg.OnDragDrop(nil, nil, FDropPos.X, FDropPos.Y, s);
+  end;
   {$IFDEF DNDDEBUG}
   writeln(' s = ', s);
   {$ENDIF}
+  ResetDNDVariables;
 end;
 
 function TfpgX11Application.DoGetFontFaceList: TStringList;
