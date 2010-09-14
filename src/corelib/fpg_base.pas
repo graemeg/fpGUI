@@ -2266,6 +2266,7 @@ function TfpgApplicationBase.ContextHelp(const AHelpContext: THelpContext): Bool
 var
   p: TProcess;
 begin
+  Result := False;
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
@@ -2278,6 +2279,7 @@ begin
     end
     else
       p.CommandLine := GetHelpViewer;
+    Result := True;
     p.Execute;
   finally
     p.Free;
@@ -2288,6 +2290,7 @@ function TfpgApplicationBase.KeywordHelp(const AHelpKeyword: string): Boolean;
 var
   p: TProcess;
 begin
+  Result := False;
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
@@ -2297,6 +2300,7 @@ begin
     end
     else
       p.CommandLine := GetHelpViewer;
+    Result := True;
     p.Execute;
   finally
     p.Free;
