@@ -1858,6 +1858,13 @@ begin
     fpgApplication.netlayer.WindowSetSupportPING(FWinHandle);
 
     XFree(WMHints);
+
+    { we need to set the XdndAware property }
+    if QueueEnabledDrops then
+    begin
+      writeln('QueueEnableDrop....');
+      DoEnableDrops(True);
+    end;
   end;
 
   hints.flags := 0;
