@@ -270,6 +270,7 @@ type
     function    StartComposing(const Event: TXEvent): TKeySym;
     procedure   XdndInit;
     procedure   ResetDNDVariables;
+    procedure   HandleDNDposition(ATopLevelWindow: TfpgX11Window; ASource: TWindow; x_root: integer; y_root: integer; AAction: TAtom; ATimestamp: x.TTime);
   protected
     FDisplay: PXDisplay;
     DisplayDepth: integer;
@@ -772,6 +773,87 @@ begin
   FDNDTypeList.Clear;
   FActionType     := 0;
   FSrcWinHandle   := -1
+end;
+
+procedure TfpgX11Application.HandleDNDposition(ATopLevelWindow: TfpgX11Window; ASource: TWindow; x_root: integer;
+  y_root: integer; AAction: TAtom; ATimestamp: x.TTime);
+var
+  Msg: TXEvent;
+  dx, dy: cint;
+  child: TWindow;
+  s: string;
+  lTargetWinHandle: TWindow;
+  w: TfpgX11Window;
+  lAccept: clong = 0;
+  msgp: TfpgMessageParams;
+begin
+  FSrcWinHandle := ASource;
+  FActionType   := AAction;
+  FSrcTimeStamp := ATimeStamp;
+  lTargetWinHandle := ATopLevelWindow.WinHandle;
+  if ATopLevelWindow is TfpgWidget then      // TODO: We could use Interfaces here eg: IDragDropEnabled
+    if TfpgWidget(ATopLevelWindow).AcceptDrops then
+      lAccept := 1;
+
+  // query to see if we accept to be drop target
+  XTranslateCoordinates(FDisplay, XDefaultRootWindow(FDisplay), ATopLevelWindow.WinHandle,
+      x_root, y_root, @dx, @dy, @child);
+
+  if child <> 0 then
+  begin
+    w := FindWindowByHandle(child);
+    if Assigned(w) then
+    begin
+      lTargetWinHandle := w.WinHandle;
+      if w is TfpgWidget then      // TODO: We could use Interfaces here eg: IDragDropEnabled
+      begin
+        if FLastDropTarget <> lTargetWinHandle then
+        begin
+          fillchar(msgp, sizeof(msgp), 0);
+          fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPINACTIVE, msgp);
+        end;
+        FLastDropTarget := lTargetWinHandle;
+        if TfpgWidget(w).AcceptDrops then
+        begin
+          lAccept := 1;
+          fillchar(msgp, sizeof(msgp), 0);
+          msgp.mouse.x := dx;
+          msgp.mouse.y := dy;
+          fpgPostMessage(nil, w, FPGM_DROPACTIVE, msgp);
+        end;
+      end;
+    end;
+  end
+  else
+  begin
+    if FLastDropTarget <> lTargetWinHandle then
+    begin
+      fillchar(msgp, sizeof(msgp), 0);
+      fpgPostMessage(nil, FindWindowByHandle(FLastDropTarget), FPGM_DROPINACTIVE, msgp);
+    end;
+    FLastDropTarget := lTargetWinHandle;
+  end;
+
+
+  // send message to confirm drop will be accepted in specified rectangle
+  FillChar(Msg, SizeOf(Msg), 0);
+  Msg.xany._type      := ClientMessage;
+  Msg.xany.display    := FDisplay;
+  Msg.xclient.window  := FSrcWinHandle; // source winhandle msg is going to
+  Msg.xclient.message_type  := XdndStatus;
+  Msg.xclient.format        := 32;
+
+
+  Msg.xclient.data.l[0] := ATopLevelWindow.WinHandle;  // always top-level window
+  Msg.xclient.data.l[1] := 0;
+  if (FDNDDataType <> None) and (FActionType = XdndActionCopy) and (lAccept = 1) then  // we only accept copy action for now
+    Msg.xclient.data.l[1] := 1; // 0 xor (1 shl 0); // 0-bit set so we accept drop
+
+  Msg.xclient.data.l[2] := 0; // (Left shl 16) or Top;  // x & y co-ordinates
+  Msg.xclient.data.l[3] := 0; // (Width shl 16) or Height; // w & h co-ordinates
+  Msg.xclient.data.l[4] := FActionType; // this should be the action we accept
+
+  XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
 end;
 
 function TfpgX11Application.DoGetFontFaceList: TStringList;
