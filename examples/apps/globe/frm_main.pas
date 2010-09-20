@@ -199,6 +199,9 @@ begin
       + 'I:   Zoom in' + LineEnding
       + 'O:   Zoom out' + LineEnding
       + 'Q:   Quit the application' + LineEnding
+      + LineEnding
+      + 'The arrow keys rotate the globe up,down,left and right' + LineEnding
+      + LineEnding
       + 'F1:  Shows this help' + LineEnding
       + 'F11: About fpGUI Toolkit' + LineEnding
       + 'F12: About this program');
