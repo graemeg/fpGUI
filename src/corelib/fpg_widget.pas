@@ -179,7 +179,8 @@ implementation
 
 uses
   fpg_constants,
-  fpg_menu;
+  fpg_menu,
+  fpg_form;  { for OnKeyPress handling }
 
 
 var
@@ -475,6 +476,7 @@ var
   ss: TShiftState;
   consumed: boolean;
   wg: TfpgWidget;
+  wlast: TfpgWidget;
 begin
   if InDesigner then
   begin
@@ -490,12 +492,26 @@ begin
   HandleKeyPress(key, ss, consumed);
   if not consumed then
   begin
+    { work it's way to one before top level form - forms are not focusable remember }
     wg := Parent;
+    wlast := wg;
     while (not consumed) and (wg <> nil) do
     begin
       wg.HandleKeyPress(key, ss, consumed);
+      wlast := wg;
       wg := wg.Parent;
     end;
+  end;
+  { we should now be at the top level form }
+  if (not consumed) and (wlast <> nil) then
+  begin
+    if (wlast is TfpgForm) and Assigned(wlast.OnKeyPress) then
+      wlast.OnKeyPress(self, key, ss, consumed);
+  end;
+  { now finaly, lets give fpgApplication a chance }
+  if (not consumed) and Assigned(fpgApplication.OnKeyPress) then
+  begin
+    fpgApplication.OnKeyPress(self, key, ss, consumed);
   end;
 end;
 

@@ -229,6 +229,7 @@ type
     FHintTimer: TfpgTimer;
     FHintWidget: TfpgWindow;
     FHintPos: TPoint;
+    FOnKeyPress: TKeyPressEvent;
     procedure   SetHintPause(const AValue: Integer);
     procedure   SetupLocalizationStrings;
     procedure   InternalMsgFreeMe(var msg: TfpgMessageRec); message FPGM_FREEME;
@@ -270,6 +271,7 @@ type
     property    ShowHint: boolean read FShowHint write SetShowHint default True;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
     property    OnException: TExceptionEvent read FOnException write FOnException;
+    property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   end;
 
 

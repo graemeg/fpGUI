@@ -133,6 +133,7 @@ type
     property    OnEnter;
     property    OnExit;
     property    OnHide;
+    property    OnKeyPress;
     property    OnMouseDown;
     property    OnMouseEnter;
     property    OnMouseExit;
