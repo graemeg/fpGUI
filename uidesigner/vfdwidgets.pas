@@ -518,6 +518,7 @@ begin
   wc           := TVFDWidgetClass.Create(TfpgPanel);
   wc.NameBase  := 'Panel';
   wc.AddProperty('Alignment', TPropertyEnum, 'Text alignment');
+  wc.AddProperty('BorderStyle', TPropertyEnum, 'Single or Double');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Layout', TPropertyEnum, 'Layout of the caption');
