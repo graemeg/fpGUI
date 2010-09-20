@@ -451,6 +451,8 @@ type
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
     function    HasParent: Boolean; override;
+    function    GetClientRect: TfpgRect; virtual;
+    function    GetBoundsRect: TfpgRect; virtual;
     procedure   ActivateWindow; virtual; abstract;
     procedure   CaptureMouse; virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
@@ -1202,6 +1204,16 @@ end;
 function TfpgWindowBase.HasParent: Boolean;
 begin
   Result := FParent <> nil;
+end;
+
+function TfpgWindowBase.GetClientRect: TfpgRect;
+begin
+  Result.SetRect(0, 0, Width, Height);
+end;
+
+function TfpgWindowBase.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, Width+1, Height+1);
 end;
 
 procedure TfpgWindowBase.SetFullscreen(AValue: Boolean);

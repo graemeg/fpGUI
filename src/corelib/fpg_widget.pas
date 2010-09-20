@@ -141,8 +141,6 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterConstruction; override;
-    function    GetClientRect: TfpgRect; virtual;
-    function    GetBoundsRect: TfpgRect; virtual;
     function    InDesigner: boolean;
     procedure   InvokeHelp; virtual;
     procedure   Realign;
@@ -339,16 +337,6 @@ begin
     FTextColor := AValue;
     Repaint;
   end;
-end;
-
-function TfpgWidget.GetClientRect: TfpgRect;
-begin
-  Result.SetRect(0, 0, Width, Height);
-end;
-
-function TfpgWidget.GetBoundsRect: TfpgRect;
-begin
-  Result.SetRect(Left, Top, Width+1, Height+1);
 end;
 
 function TfpgWidget.InDesigner: boolean;
