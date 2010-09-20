@@ -335,6 +335,8 @@ function XdbeDeallocateBackBufferName(ADisplay: PXDisplay; ABuffer: TfpgWinHandl
 function XOpenIM(para1: PDisplay; para2: PXrmHashBucketRec; para3: Pchar; para4: Pchar): PXIM; cdecl; external;
 function XCreateIC(para1: PXIM; para2: array of const): PXIC; cdecl; external;
 
+const
+  AltGrMask = 1 shl 13;  // missing from X unit
 
 function ConvertTo565Pixel(rgb: longword): word;
 begin
@@ -592,11 +594,12 @@ begin
     Include(Result, ssAlt);
   if (AState and Mod2Mask) <> 0 then
     Include(Result, ssNum);
-  if (AState and Mod4Mask) <> 0 then
+  { NOTE: Mod3Mask is normally unused for some reason }
+  if (AState and Mod4Mask) <> 0 then   { aka "Windows key" }
     Include(Result, ssSuper);
   if (AState and Mod5Mask) <> 0 then
     Include(Result, ssScroll);
-  if (AState and (1 shl 13)) <> 0 then
+  if (AState and AltGrMask) <> 0 then
     Include(Result, ssAltGr);
 end;
 
@@ -627,7 +630,7 @@ begin
     0..Ord('a')-1, Ord('z')+1..$bf, $f7:
       Result := KeySym;
     Ord('a')..Ord('z'), $c0..$f6, $f8..$ff:
-      Result := KeySym - 32;
+      Result := KeySym - 32;  // ignore case: convert lowercase a-z to A-Z keysyms;
     $20a0..$20ac: Result := Table_20aX[KeySym];
     $fe20: Result := keyTab;
     $fe50..$fe60: Result := Table_feXX[KeySym];
