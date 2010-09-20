@@ -94,12 +94,15 @@ type
     procedure   FormPaint(Sender: TObject);
     procedure   FormShow(Sender: TObject);
     procedure   FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    function    GetFontDesc: string;
+    procedure   SetFontDesc(const AValue: string);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterCreate; override;
     procedure   SetMessage(AMessage: string);
     property    CentreText: Boolean read FCentreText write FCentreText default False;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
   end;
   
 
@@ -448,6 +451,18 @@ begin
     Consumed := False;
     Close;
   end;
+end;
+
+function TfpgMessageBox.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+procedure TfpgMessageBox.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  RePaint;
 end;
 
 constructor TfpgMessageBox.Create(AOwner: TComponent);
