@@ -5541,6 +5541,40 @@ Right. And the Top is always smaller than the Bottom.
         <short>A record structure holding the RGBA values of a color.</short>
         <descr>This is the same declaration as the one found in FPImage (include with Free Pascal Compiler). In future when FPImage is integrated with fpGUI, I will remove this declaration.</descr>
       </element>
+
+<element name="TfpgPoint.ManhattanLength">
+<short>Quick calculation of the length between points</short>
+<descr><p>Returns the sum of the absolute values of X and Y,
+traditionally known as the "Manhattan length" of the vector from
+the origin to the point. For example:</p>
+<code>
+var
+  oldPosition: TfpgPoint;
+  newPosition: TfpgPoint;
+begin
+  newPosition := MousePosition - oldPosition;
+  if (newPosition.ManhattanLength > 5) then
+  begin
+    // the mouse has moved more than 5 pixels since the oldPosition
+  end;
+end;
+</code>
+<p>
+Accuracy is traded for speed. This is a useful, and quick to calculate, approximation to the
+true length:</p>
+<code>
+    TrueLength := sqrt(power(X, 2) + power(Y, 2));
+</code>
+<p>
+The tradition of "Manhattan length" arises because such distances
+apply to travelers who can only travel on a rectangular grid, like
+the streets of Manhattan.</p>
+<p>For a further explanation of "Manhattan length" see the WikiPedia article at
+<link>http://en.wikipedia.org/wiki/Taxicab_geometry</link></p>
+</descr>
+</element>
+
+
     </module>
     <!-- fpg_base -->
   </package>
