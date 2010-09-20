@@ -92,8 +92,8 @@ type
     property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    HotTrack: boolean read FHotTrack write FHotTrack;
-    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
+    property    HotTrack: boolean read FHotTrack write FHotTrack default False;
+    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame default False;
     property    DragToReorder: boolean read FDragToReorder write FDragToReorder default False;
   public
     constructor Create(AOwner: TComponent); override;
@@ -181,7 +181,7 @@ type
 //    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     property    Items: TList read FItems;
     property    Color: TfpgColor read GetColor write SetColor;
-    property    ColorPalette: TfpgColorPalette read FColorPalette write SetColorPalette;
+    property    ColorPalette: TfpgColorPalette read FColorPalette write SetColorPalette default cpStandardColors;
     property    ShowColorNames: Boolean read FShowColorNames write SetShowColorNames default True;
   public
     constructor Create(AOwner: TComponent); override;
