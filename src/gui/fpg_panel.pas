@@ -333,21 +333,24 @@ begin
   else
     Canvas.SetLineStyle(2, lsSolid);
 
+  { top }
   if FPanelBorder = bsSingle then
     Canvas.DrawLine(0, 0, Width - 1, 0)
   else
     Canvas.DrawLine(0, 1, Width - 1, 1);
 
+  { left }
   if FPanelBorder = bsSingle then
     Canvas.DrawLine(0, 1, 0, Height - 1)
   else
     Canvas.DrawLine(1, 1, 1, Height - 1);
 
   if Style = bsRaised then
-    Canvas.SetColor(clShadow2)
+    Canvas.SetColor(clShadow1)
   else
     Canvas.SetColor(clHilite2);
 
+  { right, then bottom }
   Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   Canvas.DrawLine(0, Height - 1, Width, Height - 1);
 end;
@@ -597,7 +600,7 @@ begin
   if Style = bsRaised then
     Canvas.SetColor(clHilite2)
   else
-    Canvas.SetColor(clShadow2);
+    Canvas.SetColor(clShadow1);
 
   if FPanelBorder = bsSingle then
   begin
@@ -611,7 +614,7 @@ begin
   end;
 
   if Style = bsRaised then
-    Canvas.SetColor(clShadow2)
+    Canvas.SetColor(clShadow1)
   else
     Canvas.SetColor(clHilite2);
 
