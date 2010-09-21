@@ -25,7 +25,8 @@ uses
   Classes,
   SysUtils,
   fpg_impl,
-  syncobjs; // TCriticalSection usage
+  syncobjs, // TCriticalSection usage
+  URIParser, variants, contnrs;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -626,6 +627,40 @@ type
   end;
 
 
+  TfpgMimeDataStruct = class(TObject)
+  public
+    format: TfpgString;
+    data: Variant;
+    constructor Create(const AFormat: TfpgString; const AData: variant); reintroduce;
+  end;
+
+
+  TfpgMimeDataBase = class(TObject)
+  private
+    { TODO: This is wrong, we must have one Data Storage object }
+    FDataList: TObjectList;
+    FFormats: TStrings;
+    FUrlList: TList;
+    FHTML: TfpgString;
+    function    Geturls: TList;
+    procedure   Seturls(const AValue: TList);
+    function    GetText: TfpgString;
+    procedure   SetText(const AValue: TfpgString);
+    function    GetHTML: TfpgString;
+    procedure   SetHTML(const AValue: TfpgString);
+    function    GetFormatCout: integer;
+  public
+    constructor Create;
+    destructor  Destroy; override;
+    procedure   Clear;
+    function    HasFormat(const AMimeType: TfpgString): boolean;
+    function    Formats: TStrings;
+    procedure   SetData(const AMimeType: TfpgString; const AData: Variant);
+    property    urls: TList read Geturls write Seturls;
+    property    Text: TfpgString read GetText write SetText;
+    property    HTML: TfpgString read GetHTML write SetHTML;
+    property    FormatCount: integer read GetFormatCout;
+  end;
 { ********  Helper functions  ******** }
 { Keyboard }
 function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
@@ -2702,6 +2737,159 @@ begin
   FHelpKeyword  := '';
   FTagPointer   := nil;
 end;
+
+{ TfpgMimeDataStruct }
+
+constructor TfpgMimeDataStruct.Create(const AFormat: TfpgString; const AData: variant);
+begin
+  inherited Create;
+  format := AFormat;
+  data := AData;
+end;
+
+
+{ TfpgMimeDataBase }
+
+function TfpgMimeDataBase.Geturls: TList;
+begin
+  { TODO: We should only return data related to MIME type:  text/uri-list }
+  Result := nil;
+end;
+
+procedure TfpgMimeDataBase.Seturls(const AValue: TList);
+begin
+  if AValue = nil then
+    raise Exception.Create('Source URI list must not be nil');
+
+  if Assigned(FUrlList) then
+    FUrlList.Free;
+
+  { We take ownership of AValue. Can we do this? }
+  FUrlList := AValue;
+  FFormats.Clear;
+  Formats.Add('text/uri-list');
+end;
+
+function TfpgMimeDataBase.GetText: TfpgString;
+var
+  i: integer;
+  s: string;
+begin
+  { TODO: if data was HTML, we must strip all tags - regex will make this easy }
+  for i := 0 to FDataList.Count-1 do
+  begin
+    if TfpgMimeDataStruct(FDataList[i]).format = 'text/plain' then
+    begin
+      s := TfpgMimeDataStruct(FDataList[i]).data;
+      Result := s;
+      break;
+    end;
+  end;
+end;
+
+procedure TfpgMimeDataBase.SetText(const AValue: TfpgString);
+var
+  i: integer;
+  r: TfpgMimeDataStruct;
+begin
+  { remove existing 'text/plain' first }
+  for i := FDataList.Count-1 downto 0 do
+  begin
+    r := TfpgMimeDataStruct(FDataList[i]);
+    if r.format = 'text/plain' then
+    begin
+      FDataList.Remove(FDataList[i]);
+      break;
+    end;
+  end;
+  { now add new structure }
+  r := TfpgMimeDataStruct.Create('text/plain', AValue);
+  FDataList.Add(r);
+end;
+
+function TfpgMimeDataBase.GetHTML: TfpgString;
+begin
+  { TODO: We should only return data related to MIME type:  text/html }
+  Result := FHTML;
+end;
+
+procedure TfpgMimeDataBase.SetHTML(const AValue: TfpgString);
+begin
+  FHTML := AValue;
+  FFormats.Clear;
+  Formats.Add('text/html');
+end;
+
+function TfpgMimeDataBase.GetFormatCout: integer;
+begin
+  Result := FDataList.Count;
+end;
+
+constructor TfpgMimeDataBase.Create;
+begin
+  inherited Create;
+  FDataList := TObjectList.Create;
+  FFormats := TStringList.Create;
+end;
+
+destructor TfpgMimeDataBase.Destroy;
+begin
+  FFormats.Free;
+  FDataList.Free;
+  inherited Destroy;
+end;
+
+procedure TfpgMimeDataBase.Clear;
+begin
+  FFormats.Clear;
+  FUrlList.Clear;
+  FDataList.Clear;
+end;
+
+function TfpgMimeDataBase.HasFormat(const AMimeType: TfpgString): boolean;
+begin
+  Result := FFormats.IndexOf(AMimeType) > -1;
+end;
+
+function TfpgMimeDataBase.Formats: TStrings;
+var
+  i: integer;
+  r: TfpgMimeDataStruct;
+  s: string;
+begin
+  if FDataList.Count = 0 then
+    Result := nil
+  else
+  begin
+    Result := TStringList.Create;
+    for i := 0 to FDataList.Count-1 do
+    begin
+      s := TfpgMimeDataStruct(FDataList[i]).format;
+      Result.Add(s);
+    end;
+  end;
+end;
+
+procedure TfpgMimeDataBase.SetData(const AMimeType: TfpgString; const AData: Variant);
+var
+  i: integer;
+  r: TfpgMimeDataStruct;
+begin
+  { remove existing mime type first }
+  for i := FDataList.Count-1 downto 0 do
+  begin
+    r := TfpgMimeDataStruct(FDataList[i]);
+    if r.format = AMimeType then
+    begin
+      FDataList.Remove(FDataList[i]);
+      break;
+    end;
+  end;
+  { now add new structure }
+  r := TfpgMimeDataStruct.Create(AMimeType, AData);
+  FDataList.Add(r);
+end;
+
 
 end.
 
