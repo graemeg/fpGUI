@@ -107,7 +107,6 @@ var
 
 const
   UserNamedColorStart   = 128;
-
   {$I predefinedcolors.inc}
 
 type
@@ -121,6 +120,22 @@ type
     function  Right: TfpgCoord;
     procedure SetBottom(Value: TfpgCoord);
     procedure SetRight(Value: TfpgCoord);
+  end;
+
+
+  TfpgPoint = object  // not class for static allocations
+    X: integer;
+    Y: integer;
+    procedure SetPoint(AX, AY: integer);
+    function  ManhattanLength: integer;      { See URL for explanation http://en.wikipedia.org/wiki/Taxicab_geometry }
+    function  ManhattanLength(const PointB: TfpgPoint): integer;
+  end;
+
+
+  TfpgSize = object  // not class for static allocations
+    W: integer;
+    H: integer;
+    procedure SetSize(AWidth, AHeight: integer);
   end;
 
 
@@ -628,6 +643,8 @@ procedure SortRect(var ARect: TRect);
 procedure SortRect(var ARect: TfpgRect);
 procedure SortRect(var left, top, right, bottom: integer);
 
+
+
 implementation
 
 uses
@@ -1002,6 +1019,35 @@ procedure TfpgRect.SetRight(Value: TfpgCoord);
 begin
   Width := Value - Left + 1;
 end;
+
+
+{ TfpgPoint }
+
+procedure TfpgPoint.SetPoint(AX, AY: integer);
+begin
+  X := AX;
+  Y := AY;
+end;
+
+function TfpgPoint.ManhattanLength: integer;
+begin
+  Result := Abs(X) + Abs(Y);
+end;
+
+function TfpgPoint.ManhattanLength(const PointB: TfpgPoint): integer;
+begin
+  Result := Abs(PointB.X-X) + Abs(PointB.Y-Y);
+end;
+
+
+{ TfpgSize }
+
+procedure TfpgSize.SetSize(AWidth, AHeight: integer);
+begin
+  W := AWidth;
+  H := AHeight;
+end;
+
 
 { TfpgWindowBase }
 
