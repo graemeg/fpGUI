@@ -366,7 +366,7 @@ procedure fpgCheckTimers;
 function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
 function  fpgGetTickCount: DWord;
 
-// Rectangle routines
+// Rectangle, Point & Size routines
 function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
 function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
@@ -375,6 +375,8 @@ function  CenterPoint(const Rect: TRect): TPoint;
 function  CenterPoint(const Rect: TfpgRect): TPoint;
 function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
 function  fpgRectToRect(const ARect: TfpgRect): TRect;
+function  fpgPoint(const AX, AY: integer): TfpgPoint;
+function  fpgSize(const AWidth, AHeight: integer): TfpgSize;
 
 // Debug rountines
 procedure PrintRect(const Rect: TRect);
@@ -393,6 +395,26 @@ procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 
 // operator overloading of some useful structures
 operator = (a: TRect; b: TRect): boolean;
+operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
+operator + (const APoint1, APoint2: TPoint) p: TPoint;
+operator + (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+operator + (const APoint: TPoint; ASize: TfpgSize) p: TPoint;
+operator + (const APoint: TfpgPoint; ASize: TfpgSize) p: TfpgPoint;
+operator + (const ASize: TfpgSize; APoint: TPoint) s: TfpgSize;
+operator + (const ASize: TfpgSize; APoint: TfpgPoint) s: TfpgSize;
+operator + (const ASize1, ASize2: TfpgSize) s: TfpgSize;
+operator + (const APoint: TPoint; i: Integer) p: TPoint;
+operator + (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+operator + (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+operator - (const APoint1, APoint2: TPoint) p: TPoint;
+operator - (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+operator - (const APoint: TPoint; i: Integer) p: TPoint;
+operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
+operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
+operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+
 
 implementation
 
@@ -588,6 +610,16 @@ begin
   Result.Top    := ARect.Top;
   Result.Right  := ARect.Right;
   Result.Bottom := ARect.Bottom;
+end;
+
+function fpgPoint(const AX, AY: integer): TfpgPoint;
+begin
+  Result.SetPoint(AX, AY);
+end;
+
+function fpgSize(const AWidth, AHeight: integer): TfpgSize;
+begin
+  Result.SetSize(AWidth, AHeight);
 end;
 
 procedure InitializeDebugOutput;
@@ -794,6 +826,121 @@ begin
     Result := True
   else
     Result := False;
+end;
+
+operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
+begin
+  b := (ASize1.w = ASize2.w) and (ASize1.h = ASize2.h);
+end;
+
+operator + (const APoint1, APoint2: TPoint) p: TPoint;
+begin
+  p.x := APoint1.x + APoint2.x;
+  p.y := APoint1.y + APoint2.y;
+end;
+
+operator + (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+begin
+  p.x := APoint1.x + APoint2.x;
+  p.y := APoint1.y + APoint2.y;
+end;
+
+operator + (const APoint: TPoint; ASize: TfpgSize) p: TPoint;
+begin
+  p.x := APoint.x + ASize.w;
+  p.y := APoint.y + ASize.h;
+end;
+
+operator + (const APoint: TfpgPoint; ASize: TfpgSize) p: TfpgPoint;
+begin
+  p.x := APoint.x + ASize.w;
+  p.y := APoint.y + ASize.h;
+end;
+
+operator + (const ASize: TfpgSize; APoint: TPoint) s: TfpgSize;
+begin
+  s.w := ASize.w + APoint.x;
+  s.h := ASize.h + APoint.y;
+end;
+
+operator + (const ASize: TfpgSize; APoint: TfpgPoint) s: TfpgSize;
+begin
+  s.w := ASize.w + APoint.x;
+  s.h := ASize.h + APoint.y;
+end;
+
+operator + (const ASize1, ASize2: TfpgSize) s: TfpgSize;
+begin
+  s.w := ASize1.w + ASize2.w;
+  s.h := ASize1.h + ASize2.h;
+end;
+
+operator + (const APoint: TPoint; i: Integer) p: TPoint;
+begin
+  p.x := APoint.x + i;
+  p.y := APoint.y + i;
+end;
+
+operator + (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+begin
+  p.x := APoint.x + i;
+  p.y := APoint.y + i;
+end;
+
+operator + (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+begin
+  s.w := ASize.w + i;
+  s.h := ASize.h + i;
+end;
+
+operator - (const APoint1, APoint2: TPoint) p: TPoint;
+begin
+  p.x := APoint1.x - APoint2.x;
+  p.y := APoint1.y - APoint2.y;
+end;
+
+operator - (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+begin
+  p.x := APoint1.x - APoint2.x;
+  p.y := APoint1.y - APoint2.y;
+end;
+
+operator - (const APoint: TPoint; i: Integer) p: TPoint;
+begin
+  p.x := APoint.x - i;
+  p.y := APoint.y - i;
+end;
+
+operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+begin
+  p.x := APoint.x - i;
+  p.y := APoint.y - i;
+end;
+
+operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
+begin
+  s.w := ASize.w - APoint.x;
+  s.h := ASize.h - APoint.y;
+end;
+
+operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
+begin
+  s.w := ASize.w - APoint.x;
+  s.h := ASize.h - APoint.y;
+end;
+
+operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+begin
+  s.w := ASize.w - i;
+  s.h := ASize.h - i;
+end;
+
+operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+begin
+  b := (AColor1.Red = AColor2.Red)
+        and (AColor1.Green = AColor2.Green)
+        and (AColor1.Blue = AColor2.Blue)
+        and (AColor1.Alpha = AColor2.Alpha);
 end;
 
 { TfpgTimer }
