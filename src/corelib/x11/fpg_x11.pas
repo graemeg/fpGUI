@@ -606,13 +606,13 @@ begin
   if e.target = xapplication.xia_targets then
   begin
     a := XA_STRING;
-    XChangeProperty(xapplication.Display, e.requestor, e._property,
-		      XA_ATOM, 32, PropModeReplace, PByte(@a), Sizeof(TAtom)); // I think last parameter is right?
+    XChangeProperty(xapplication.Display, e.requestor, e._property, XA_ATOM,
+        32, PropModeReplace, PByte(@a), Sizeof(TAtom)); // I think last parameter is right?
   end
   else
   begin
     XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
-        8, 0, PByte(@fpgClipboard.FClipboardText[1]), Length(fpgClipboard.FClipboardText));
+        8, PropModeReplace, PByte(@fpgClipboard.FClipboardText[1]), Length(fpgClipboard.FClipboardText));
   end;
 
   XSendEvent(xapplication.Display, e.requestor, false, 0, @e );
@@ -1785,7 +1785,7 @@ begin
         end;
 
     else
-      WriteLn('fpGFX/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
+      WriteLn('fpGUI/X11: Unhandled X11 event received: ', GetXEventName(ev._type));
   end;
 end;
 
@@ -1985,7 +1985,7 @@ begin
   if ((FWindowType = wtWindow) or (FWindowType = wtModalForm)) and (waBorderless in FWindowAttributes) and not (waX11SkipWMHints in FWindowAttributes) then
   begin
     prop := X.None;
-    prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', longbool(0));
+    prop := XInternAtom(xapplication.display, '_MOTIF_WM_INFO', TBool(False));
     if prop = X.None then
     begin
 //      writeln('Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.');
@@ -2860,7 +2860,7 @@ procedure TfpgX11Clipboard.DoSetText(const AValue: TfpgString);
 begin
   FClipboardText := AValue;
   XSetSelectionOwner(xapplication.Display, xapplication.xia_clipboard,
-      FClipboardWndHandle, 0);
+      FClipboardWndHandle, CurrentTime);
 end;
 
 procedure TfpgX11Clipboard.InitClipboard;
