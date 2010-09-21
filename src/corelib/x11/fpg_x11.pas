@@ -649,6 +649,71 @@ begin
   XSendEvent(xapplication.Display, e.requestor, false, 0, @e );
 end;
 
+function IsTopLevel(AWin: TWindow): Boolean;
+var
+  actualtype: TAtom = None;
+  actualformat: cint;
+  count, remaining: culong;
+  data: pchar = nil;
+begin
+//  writeln('IsTopLevel ');
+  XGetWindowProperty(xapplication.Display, AWin, xapplication.xia_wm_state, 0, 0,
+      TBool(False), AnyPropertyType, @actualtype, @actualformat, @count,
+      @remaining, @data);
+  if data <> nil then
+    XFree(data);
+  Result := actualtype <> None;
+end;
+
+function FindWindow(ARoot: TWindow; const x, y: cint): TWindow;
+var
+  wattr: TXWindowAttributes;
+  r, p: TWindow;
+  children: PWindowArray = nil;
+  numch: cuint = 0;
+  i: integer;
+begin
+//  writeln('FindWindow ');
+  XGetWindowAttributes(xapplication.Display, ARoot, @wattr);
+  if (wattr.map_state <> IsUnmapped) and
+      ((x >= wattr.x) and (x < (wattr.x + wattr.width))) and
+      ((y >= wattr.y) and (y < (wattr.y + wattr.height))) then
+  begin
+    // mapped and inside, is it a top-level?
+    if (IsTopLevel(ARoot)) then
+    begin
+      Result := ARoot;
+      exit;
+    end;
+//     writeln('Query Tree');
+    if XQueryTree(xapplication.Display, ARoot, @r, @p, @children, @numch) <> 0 then
+    begin
+      if (numch > 0) and (children <> nil) then
+      begin
+        r := None;
+        { upon return from XQueryTree, children are listed in the current
+          stacking order, from bottom-most (first) to top-most (last) }
+        for i := numch-1 downto 0 do
+        begin
+          r := FindWindow(children^[i], x - wattr.x, y - wattr.y);
+          if r <> None then
+            break;
+        end;
+
+        XFree(children);
+        if r <> None then
+        begin
+          Result := r;
+          exit;
+        end;
+        Result := ARoot;   // a fallback Result - we should never get here though
+      end;
+    end;
+  end
+  else
+    Result := None;
+end;
+
 // File utils
 function ExtractTargetSymLinkPath(ALink: string): string;
 begin
@@ -662,6 +727,13 @@ end;
 
 
 { TfpgX11Application }
+
+procedure TfpgX11Application.SetDrag(const AValue: TfpgX11Drag);
+begin
+  if Assigned(FDrag) then
+    FDrag.Free;
+  FDrag := AValue;
+end;
 
 function TfpgX11Application.ConvertShiftState(AState: Cardinal): TShiftState;
 begin
