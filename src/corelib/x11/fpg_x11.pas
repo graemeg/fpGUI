@@ -126,6 +126,7 @@ type
 
   // forward declaration
   TfpgX11Window = class;
+  TfpgX11Drag = class;
   
 
   TfpgX11FontResource = class(TfpgFontResourceBase)
@@ -272,6 +273,8 @@ type
     FSrcTimeStamp: clong;
     FLastDropTarget: TfpgWinHandle;
     FDropPos: TPoint;
+    FDrag: TfpgX11Drag;
+    procedure   SetDrag(const AValue: TfpgX11Drag);
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
     function    StartComposing(const Event: TXEvent): TKeySym;
@@ -284,6 +287,7 @@ type
     procedure   HandleDNDposition(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const x_root: integer; const y_root: integer; const AAction: TAtom; const ATimestamp: x.TTime);
     procedure   HandleDNDdrop(ATopLevelWindow: TfpgX11Window; const ASource: TWindow; const ATimestamp: x.TTime);
     procedure   HandleDNDSelection(const ev: TXEvent);
+    property    Drag: TfpgX11Drag read FDrag write SetDrag;
   protected
     FDisplay: PXDisplay;
     DisplayDepth: integer;
@@ -339,6 +343,33 @@ type
   public
     constructor Create; override;
     function    EncodeModeString(FileMode: longword): TFileModeString;
+  end;
+
+
+  TfpgX11Drag = class(TfpgDragBase)
+  private
+    FLastTarget: TfpgWinHandle;
+    FUseVersion: integer;
+    FTargetIsDNDAware: Boolean;
+    FStatusPending: Boolean;
+    FDropAccepted: Boolean;
+    FProposedAction: TAtom;
+    FAcceptedAction: TAtom;
+    FMimeTypesArray: TAtomArray;
+    xia_plain_text: TAtom;
+    procedure Dragging(ev: TXEvent);
+    function  IsDNDAware(win: TWindow): boolean;
+    procedure SendDNDLeave(ATarget: TWindow);
+    procedure SendDNDEnter(ATarget: TWindow);
+    procedure SendDNDPosition(ATarget: TWindow; x_root: cint; y_root: cint; AAction: TAtom; ATime: X.TTime);
+    procedure SendDNDDrop;
+    procedure HandleDNDStatus(ATarget: TWindow; AAccept: integer; ARect: TfpgRect; AAction: TAtom);
+    procedure HandleSelectionRequest(ev: TXEvent);
+  protected
+    FSource: TfpgX11Window;
+    function GetSource: TfpgX11Window; virtual;
+  public
+    function Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
   end;
 
 
@@ -2951,6 +2982,239 @@ begin
   inherited PopulateSpecialDirs(ds);
 end;
 
+
+{ TfpgX11Drag }
+
+procedure TfpgX11Drag.Dragging(ev: TXEvent);
+var
+  dx, dy: cint;
+  child: TWindow;
+  lTarget: TWindow;
+begin
+  lTarget := FindWindow(ev.xmotion.root, ev.xmotion.x_root, ev.xmotion.y_root);
+  if FLastTarget <> lTarget then
+  begin
+    SendDNDLeave(FLastTarget);
+
+    FLastTarget       := lTarget;
+    FTargetIsDNDAware := IsDNDAware(lTarget);
+    FStatusPending    := False;
+    FDropAccepted     := False;
+    FAcceptedAction   := X.None;
+
+    if FTargetIsDNDAware then
+      SendDNDEnter(FLastTarget);
+  end;
+
+  if FTargetIsDNDAware and not FStatusPending then
+  begin
+    SendDNDPosition(FLastTarget, ev.xmotion.x_root, ev.xmotion.y_root,
+        FProposedAction, ev.xmotion.time);
+    // this is to avoid sending XdndPosition messages over and over
+    // if the target is not responding
+    FStatusPending := True;
+  end;
+end;
+
+function TfpgX11Drag.IsDNDAware(win: TWindow): boolean;
+var
+  actualtype: TAtom;
+  actualformat: cint;
+  count, remaining, dummy: culong;
+  s: TfpgString;
+  data: PChar;
+  lversion: culong;
+begin
+  if (win = None) then
+  begin
+    Result := False;
+    exit;
+  end;
+  XGetWindowProperty(xapplication.Display, win, xapplication.XdndAware, 0, $8000000,
+      TBool(False), XA_ATOM, @actualtype, @actualformat, @count, @remaining, @data);
+
+  if count = 0 then
+  begin
+    if data <> nil then
+      XFree(data);
+    Result := False;
+    exit;
+  end;
+
+  lversion := Integer(data[0]);
+  FUseVersion := min(Integer(FPG_XDND_VERSION), Integer(lversion));
+
+  {$IFDEF DNDDEBUG}
+  writeln(Format('IsDNDAware theirs:%d  ours:%d  using:%d', [lversion, FPG_XDND_VERSION, FUseVersion]));
+  {$ENDIF}
+end;
+
+procedure TfpgX11Drag.SendDNDLeave(ATarget: TWindow);
+var
+  xev: TXEvent;
+begin
+  xev.xany._type        := X.ClientMessage;
+  xev.xany.display      := xapplication.Display;
+  xev.xclient.window    := ATarget;
+  xev.xclient.message_type := xapplication.XdndLeave;
+  xev.xclient.format    := 32;
+
+  xev.xclient.data.l[0] := FSource.WinHandle;
+  xev.xclient.data.l[1] := 0;
+
+  xev.xclient.data.l[2] := 0;
+  xev.xclient.data.l[3] := 0;
+  xev.xclient.data.l[4] := 0;
+
+  XSendEvent(xapplication.Display, ATarget, False, NoEventMask, @xev);
+end;
+
+procedure TfpgX11Drag.SendDNDEnter(ATarget: TWindow);
+var
+  xev: TXEvent;
+  i, n: integer;
+  s: PChar;
+  sl: TStrings;
+begin
+  xev.xany._type       := X.ClientMessage;
+  xev.xany.display     := xapplication.Display;
+  xev.xclient.window   := ATarget;
+  xev.xclient.message_type := xapplication.XdndEnter;
+  xev.xclient.format   := 32;
+
+  xev.xclient.data.l[0] := FSource.WinHandle;
+
+  n := FMimeData.FormatCount;
+
+  if n > 3 then
+    i := 1
+  else
+    i := 0;
+  xev.xclient.data.l[1] := i or (FUseVersion shl 24);
+
+  // set the first 1-3 data types
+  //SetLength(FMimeTypesArray, 0);
+  //SetLength(FMimeTypesArray, n);
+  //sl := FMimeData.Formats;
+  //for i := 0 to n-1 do
+  //begin
+  //  a := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
+  //  FMimeTypesArray[i] := a;
+  //end;
+//    a := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
+
+  xev.xclient.data.l[2] := xia_plain_text; //FMimeTypesArray[0];
+  xev.xclient.data.l[3] := x.None;
+  xev.xclient.data.l[4] := x.None;
+  sl.Free;
+
+//  for (i = 0; i < 3; ++i)
+//    xevent.xclient.data.l[2+i] = (i < n) ? _typelist[i] : None;
+
+  XSendEvent(xapplication.Display, ATarget, False, NoEventMask, @xev);
+end;
+
+procedure TfpgX11Drag.SendDNDPosition(ATarget: TWindow; x_root: cint;
+  y_root: cint; AAction: TAtom; ATime: X.TTime);
+var
+  xev: TXEvent;
+begin
+  xev.xany._type       := X.ClientMessage;
+  xev.xany.display     := xapplication.Display;
+  xev.xclient.window   := ATarget;
+  xev.xclient.message_type := xapplication.XdndPosition;
+  xev.xclient.format   := 32;
+
+  xev.xclient.data.l[0] := FSource.WinHandle;
+  xev.xclient.data.l[1] := 0;
+
+  xev.xclient.data.l[2] := (x_root shl 16) or y_root;    // root coordinates
+  xev.xclient.data.l[3] := ATime;   // timestamp for retrieving data
+  xev.xclient.data.l[4] := AAction; // requested action
+
+  XSendEvent(xapplication.Display, ATarget, False, NoEventMask, @xev);
+end;
+
+procedure TfpgX11Drag.SendDNDDrop;
+var
+  xev: TXEvent;
+begin
+  xev.xany._type      := X.ClientMessage;
+  xev.xany.display    := xapplication.Display;
+  xev.xclient.window  := FLastTarget;
+  xev.xclient.message_type := xapplication.XdndDrop;
+  xev.xclient.format  := 32;
+
+  xev.xclient.data.l[0] := FSource.WinHandle;    // from;
+  xev.xclient.data.l[1] := 0;                // reserved
+  xev.xclient.data.l[2] := CurrentTime;       // timestamp
+  xev.xclient.data.l[3] := 0;
+  xev.xclient.data.l[4] := 0;
+
+  XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
+end;
+
+procedure TfpgX11Drag.HandleDNDStatus(ATarget: TWindow; AAccept: integer;
+  ARect: TfpgRect; AAction: TAtom);
+begin
+  if ATarget = FLastTarget then
+  begin
+    FStatusPending := False;
+    if AAccept = 1 then
+    begin
+      FDropAccepted := True;
+      FAcceptedAction := AAction;
+      { TODO: Change mouse cursor to show drop accepted/valid }
+    end
+    else
+    begin
+      FDropAccepted := False;
+      FAcceptedAction := X.None;
+      { TODO: change mouse cursor to show drop not valid }
+    end;
+  end;
+  { TODO: If we waited to long, we have a timeout }
+end;
+
+procedure TfpgX11Drag.HandleSelectionRequest(ev: TXEvent);
+var
+  e: TXSelectionEvent;
+begin
+  e._type       := SelectionNotify;
+  e.requestor   := ev.xselectionrequest.requestor;
+  e.selection   := ev.xselectionrequest.selection;
+  e.target      := ev.xselectionrequest.target;
+  e.time        := ev.xselectionrequest.time;
+  e._property   := ev.xselectionrequest._property;
+
+  XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
+        8, PropModeReplace, PByte(@FMimeData.Text[1]), Length(FMimeData.Text));
+
+  XSendEvent(xapplication.Display, e.requestor, false, NoEventMask, @e );
+end;
+
+function TfpgX11Drag.GetSource: TfpgX11Window;
+begin
+  Result := FSource;
+end;
+
+function TfpgX11Drag.Execute(const ADropActions: TfpgDropActions;
+  const ADefaultAction: TfpgDropAction): TfpgDropAction;
+var
+  r: cint;
+begin
+  if FDragging then
+    Result := daIgnore
+  else
+  begin
+    FDragging := True;
+    xia_plain_text := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
+    FProposedAction := xapplication.GetAtomFromDropAction(ADefaultAction);
+    xapplication.Drag := self;
+    r := XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, FSource.WinHandle, CurrentTime);
+    writeln('XSetSelectionOwner returned = ', r);
+  end;
+end;
 
 initialization
   xapplication := nil;
