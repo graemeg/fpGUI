@@ -408,7 +408,7 @@ var
   xapplication: TfpgApplication;
 
 const
-  FPG_XDND_VERSION: integer = 4; // our supported XDND version
+  FPG_XDND_VERSION: culong = 4; // our supported XDND version
 
  // some externals
 
