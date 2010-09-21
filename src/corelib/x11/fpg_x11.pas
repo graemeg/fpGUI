@@ -53,6 +53,11 @@ type
   TfpgGContext  = Xlib.TGc;
   PInt = ^integer;
 
+  TAtomArray = array of TAtom;
+  PAtomArray = ^TAtomArray;
+
+  TWindowArray = array of TWindow;
+  PWindowArray = ^TWindowArray;
 
   {$HINTS OFF}
   TXIC = record
@@ -364,12 +369,6 @@ type
     ID: integer;
   end;
 
-  TAtomArray = array [0..0] of TAtom;
-  PAtomArray = ^TAtomArray;
-
-  TWindowArray = array [0..0] of TWindow;
-  PWindowArray = ^TWindowArray;
-
 var
   xapplication: TfpgApplication;
 
@@ -600,7 +599,6 @@ begin
   e._type       := SelectionNotify;
   e.requestor   := ev.xselectionrequest.requestor;
   e.selection   := ev.xselectionrequest.selection;
-//  e.selection   := xapplication.xia_clipboard;
   e.target      := ev.xselectionrequest.target;
   e.time        := ev.xselectionrequest.time;
   e._property   := ev.xselectionrequest._property;
