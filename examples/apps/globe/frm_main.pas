@@ -56,6 +56,8 @@ type
     btnZoomIn: TfpgButton;
     btnZoomOut: TfpgButton;
     btnHelp: TfpgButton;
+    Bevel2: TfpgBevel;
+    Bevel3: TfpgBevel;
     {@VFD_HEAD_END: MainForm}
     miShowGrid: TfpgMenuItem;
     FShowGrid: boolean;
@@ -306,14 +308,15 @@ begin
   Name := 'MainForm';
   SetPosition(357, 219, 363, 430);
   WindowTitle := 'fpGUI Globe';
-  WindowPosition := wpOneThirdDown;
+  Hint := '';
   ShowHint := True;
+  WindowPosition := wpOneThirdDown;
 
   MainMenu := TfpgMenuBar.Create(self);
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 363, 24);
+    SetPosition(0, 0, 363, 21);
     Anchors := [anLeft,anRight,anTop];
   end;
 
@@ -360,7 +363,7 @@ begin
   with StatusPanel do
   begin
     Name := 'StatusPanel';
-    SetPosition(1, 405, 363, 24);
+    SetPosition(0, 405, 363, 24);
     Anchors := [anLeft,anRight,anBottom];
     Alignment := taLeftJustify;
     FontDesc := '#Label1';
@@ -373,7 +376,7 @@ begin
   with Bevel1 do
   begin
     Name := 'Bevel1';
-    SetPosition(0, 24, 363, 28);
+    SetPosition(0, 22, 363, 30);
     Anchors := [anLeft,anRight,anTop];
     Hint := '';
     Style := bsLowered;
@@ -384,8 +387,10 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(4, 1, 24, 24);
+    SetPosition(4, 2, 24, 24);
     Text := '';
+    Down := False;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Quit the application';
     ImageMargin := -1;
@@ -400,9 +405,11 @@ begin
   with btnGrid do
   begin
     Name := 'btnGrid';
-    SetPosition(32, 1, 24, 24);
+    SetPosition(35, 2, 24, 24);
     Text := '';
     AllowAllUp := True;
+    Down := True;
+    Flat := True;
     FontDesc := '#Label1';
     GroupIndex := 1;
     Hint := 'Toggle the grid on or off';
@@ -411,7 +418,6 @@ begin
     ImageSpacing := 0;
     TabOrder := 2;
     Focusable := False;
-    Down := True;
     OnClick := @miShowGridClicked;
   end;
 
@@ -419,8 +425,10 @@ begin
   with btnZoomIn do
   begin
     Name := 'btnZoomIn';
-    SetPosition(60, 1, 24, 24);
+    SetPosition(60, 2, 24, 24);
     Text := '';
+    Down := False;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Zoom in';
     ImageMargin := -1;
@@ -435,8 +443,10 @@ begin
   with btnZoomOut do
   begin
     Name := 'btnZoomOut';
-    SetPosition(84, 1, 24, 24);
+    SetPosition(84, 2, 24, 24);
     Text := '';
+    Down := False;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Zoom out';
     ImageMargin := -1;
@@ -451,8 +461,10 @@ begin
   with btnHelp do
   begin
     Name := 'btnHelp';
-    SetPosition(112, 1, 24, 24);
+    SetPosition(116, 2, 24, 24);
     Text := '';
+    Down := False;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := 'Keyboard shortcut help';
     ImageMargin := -1;
@@ -461,6 +473,26 @@ begin
     TabOrder := 5;
     Focusable := False;
     OnClick := @btnHelpClicked;
+  end;
+
+  Bevel2 := TfpgBevel.Create(Bevel1);
+  with Bevel2 do
+  begin
+    Name := 'Bevel2';
+    SetPosition(30, 2, 3, 24);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsLeftLine;
+  end;
+
+  Bevel3 := TfpgBevel.Create(Bevel1);
+  with Bevel3 do
+  begin
+    Name := 'Bevel3';
+    SetPosition(112, 2, 3, 24);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsLeftLine;
   end;
 
   {@VFD_BODY_END: MainForm}
