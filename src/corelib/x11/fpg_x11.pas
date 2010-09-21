@@ -1153,7 +1153,7 @@ procedure TfpgX11Application.HandleDNDdrop(ATopLevelWindow: TfpgX11Window;
 var
   Msg: TXEvent;
 begin
-  {$IFDEF DEBUG}
+  {$IFDEF DNDDEBUG}
   writeln('XdndDrop event received!');
   {$ENDIF}
   XConvertSelection(FDisplay, XdndSelection, FDNDDataType, XdndSelection, ATopLevelWindow.FWinHandle, ATimestamp);
@@ -1608,6 +1608,16 @@ begin
                 ClosePopups;
               end;
             end;
+          end
+          else
+          begin
+            if Assigned(Drag) then    // button released
+            begin
+              Drag.SendDNDDrop;
+              { TODO: Start timeout in case XdndFinished is not received, so we can free Drag }
+//              writeln('Freeing Drag Object');
+//              FreeAndNil(FDrag);
+            end;
           end;
 
           w := FindWindowByHandle(ev.xbutton.window); // restore w
@@ -1688,20 +1698,27 @@ begin
           until not XCheckTypedWindowEvent(display, ev.xmotion.window, X.MotionNotify, @ev);
           w := FindWindowByHandle(ev.xmotion.window);
           if not Assigned(w) then
-            ReportLostWindow(ev);
-          if xapplication.TopModalForm <> nil then
+            ReportLostWindow(ev)
+          else
           begin
-            ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
-            if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
-              blockmsg := true;
-          end;
-          if not blockmsg then
-          begin
-            msgp.mouse.x          := ev.xmotion.x;
-            msgp.mouse.y          := ev.xmotion.y;
-            msgp.mouse.Buttons    := (ev.xmotion.state and $FF00) shr 8;
-            msgp.mouse.shiftstate := ConvertShiftState(ev.xmotion.state);
-            fpgPostMessage(nil, FindWindowByHandle(ev.xmotion.window), FPGM_MOUSEMOVE, msgp);
+            if Assigned(Drag) then
+            begin
+              Drag.Dragging(ev);
+            end;
+            if xapplication.TopModalForm <> nil then
+            begin
+              ew := TfpgX11Window(WidgetParentForm(TfpgWidget(w)));
+              if (ew <> nil) and (xapplication.TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
+                blockmsg := true;
+            end;
+            if not blockmsg then
+            begin
+              msgp.mouse.x          := ev.xmotion.x;
+              msgp.mouse.y          := ev.xmotion.y;
+              msgp.mouse.Buttons    := (ev.xmotion.state and $FF00) shr 8;
+              msgp.mouse.shiftstate := ConvertShiftState(ev.xmotion.state);
+              fpgPostMessage(nil, w, FPGM_MOUSEMOVE, msgp);
+            end;
           end;
         end;
 
@@ -1755,6 +1772,18 @@ begin
             {$IFDEF DNDDEBUG}
             writeln('XdndStatus event received!');
             {$ENDIF}
+            if Assigned(Drag) then
+            begin
+              Drag.HandleDNDStatus(
+                  ev.xclient.data.l[0],
+                  ev.xclient.data.l[1] and 1,
+                  fpgRect(
+                    (ev.xclient.data.l[2] shr 16) and $FFFF,
+                    ev.xclient.data.l[2] and $FFFF,
+                    (ev.xclient.data.l[3] shr 16) and $FFFF,
+                    ev.xclient.data.l[3] and $FFFF),
+                  ev.xclient.data.l[4]);
+            end;
           end
           { XDND protocol - XdndLeave }
           else if Assigned(w) and (ev.xclient.message_type = XdndLeave) then
@@ -1772,6 +1801,11 @@ begin
             {$IFDEF DNDDEBUG}
             writeln('XdndFinished event received!');
             {$ENDIF}
+            if Assigned(Drag) then
+            begin
+              writeln('Freeing Drag Object');
+              FreeAndNil(FDrag);
+            end;
           end;
         end;
 
@@ -1824,7 +1858,17 @@ begin
 
     X.SelectionRequest:
         begin
-          ProcessSelectionRequest(ev);
+          if ev.xselectionrequest.selection = XdndSelection then
+          begin
+            writeln('found a XdndSelection request');
+            if Assigned(Drag) then
+              Drag.HandleSelectionRequest(ev);
+          end
+          else
+          begin
+            writeln('found a clipboard selection request');
+            ProcessSelectionRequest(ev);
+          end;
         end;
         
     X.SelectionClear:
