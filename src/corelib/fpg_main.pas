@@ -29,7 +29,8 @@ uses
   Classes,
   SysUtils,
   fpg_base,
-  fpg_interface;
+  fpg_interface,
+  fpg_impl;
 
 type
   TOrientation = (orVertical, orHorizontal);
@@ -329,6 +330,25 @@ type
 
   
   TfpgFileList = class(TfpgFileListImpl)
+  end;
+
+
+  TfpgMimeData = class(TfpgMimeDataImpl)
+  end;
+
+
+  TfpgDrag = class(TfpgDragImpl)
+  private
+    FTarget: TfpgWinHandle;
+    procedure   SetMimeData(const AValue: TfpgMimeDataBase);
+  protected
+    function    GetSource: TfpgWindow; reintroduce;
+  public
+    constructor Create(ASource: TfpgWindow);
+    function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
+    property    Source: TfpgWindow read GetSource;
+    property    Target: TfpgWinHandle read FTarget write FTarget;
+    property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
   end;
 
 
@@ -2385,6 +2405,37 @@ begin
   end;
   Result.UpdateImage;
 end;
+
+
+{ TfpgDrag }
+
+procedure TfpgDrag.SetMimeData(const AValue: TfpgMimeDataBase);
+begin
+  if Assigned(FMimeData) then
+    FMimeData.Free;
+  FMimeData := AValue;
+end;
+
+function TfpgDrag.GetSource: TfpgWindow;
+begin
+  Result := TfpgWindow(inherited GetSource);
+end;
+
+constructor TfpgDrag.Create(ASource: TfpgWindow);
+begin
+  inherited Create;
+  FSource := ASource;
+end;
+
+function TfpgDrag.Execute(const ADropActions: TfpgDropActions;
+  const ADefaultAction: TfpgDropAction): TfpgDropAction;
+begin
+  Assert(FMimeData <> nil, ClassName + ': No mimedata was set before starting the drag');
+  Assert(FSource <> nil, ClassName + ': No Source window was specified before starting the drag');
+  inherited Execute(ADropActions, ADefaultAction);
+end;
+
+
 
 initialization
   uApplication    := nil;

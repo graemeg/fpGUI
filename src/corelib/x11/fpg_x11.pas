@@ -346,6 +346,10 @@ type
   end;
 
 
+  TfpgX11MimeData = class(TfpgMimeDataBase)
+  end;
+
+
   TfpgX11Drag = class(TfpgDragBase)
   private
     FLastTarget: TfpgWinHandle;
