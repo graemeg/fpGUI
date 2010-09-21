@@ -1759,7 +1759,12 @@ begin
     if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clHilite2)
     else
-      ACanvas.SetColor(clShadow2);
+    begin
+      if (btfFlat in AFlags) or (btfHover in AFlags) then
+        ACanvas.SetColor(clShadow1)  { light shadow }
+      else
+        ACanvas.SetColor(clShadow2); { dark shadow }
+    end;
   end
   else
     ACanvas.SetColor(clHilite2);
@@ -1781,13 +1786,26 @@ begin
     if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clHilite1)
     else
-      ACanvas.SetColor(clShadow2);
+    begin
+      if (btfFlat in AFlags) or (btfHover in AFlags) then
+        ACanvas.SetColor(clHilite2)  { light shadow }
+      else
+        ACanvas.SetColor(clShadow2); { dark shadow }
+    end;
   end
   else
-    ACanvas.SetColor(clShadow2);
-    
+  begin
+    if btfHover in AFlags then
+      ACanvas.SetColor(clShadow1)  { light shadow }
+    else
+      ACanvas.SetColor(clShadow2); { dark shadow }
+  end;
+
   ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
+
+  if (btfFlat in AFlags) or (btfHover in AFlags) then
+    exit; { "toolbar" style buttons need a nice thing/flat border }
 
   // Right and Bottom (inner)
   if btfIsPressed in AFlags then
