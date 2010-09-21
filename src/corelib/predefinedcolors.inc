@@ -34,7 +34,7 @@
 
 
   // System named color identifiers.  DON'T CHANGE THE ORDER!
-  cl_BaseNamedColor      = TfpgColor($80000000);
+  cl_BaseNamedColor      = $80000000;
 
   clWindowBackground    = TfpgColor(cl_BaseNamedColor + 1);
   clBoxColor            = TfpgColor(cl_BaseNamedColor + 2);
