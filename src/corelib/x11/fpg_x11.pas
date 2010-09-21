@@ -53,10 +53,10 @@ type
   TfpgGContext  = Xlib.TGc;
   PInt = ^integer;
 
-  TAtomArray = array of TAtom;
+  TAtomArray = array[0..0] of TAtom;
   PAtomArray = ^TAtomArray;
 
-  TWindowArray = array of TWindow;
+  TWindowArray = array[0..0] of TWindow;
   PWindowArray = ^TWindowArray;
 
   {$HINTS OFF}
