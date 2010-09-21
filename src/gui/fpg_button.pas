@@ -532,6 +532,12 @@ begin
       Include(lBtnFlags, btfHover)
     else if FFlat then
       Include(lBtnFlags, btfFlat);
+  end
+  else
+  begin
+    { while in the designer we want hover effect all the time }
+    if FFlat then
+      Include(lBtnFlags, btfHover);
   end;
 
   if not FFlat and FDefault then
