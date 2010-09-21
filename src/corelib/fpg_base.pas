@@ -661,6 +661,19 @@ type
     property    HTML: TfpgString read GetHTML write SetHTML;
     property    FormatCount: integer read GetFormatCout;
   end;
+
+  TfpgDragBase = class(TObject)
+  protected
+    FDragging: Boolean;
+    FMimeData: TfpgMimeDataBase;
+  public
+    constructor Create;
+    destructor  Destroy; override;
+    function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; virtual; abstract;
+  end;
+
+
+
 { ********  Helper functions  ******** }
 { Keyboard }
 function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
@@ -2888,6 +2901,21 @@ begin
   { now add new structure }
   r := TfpgMimeDataStruct.Create(AMimeType, AData);
   FDataList.Add(r);
+end;
+
+
+{ TfpgDragBase }
+
+constructor TfpgDragBase.Create;
+begin
+  inherited Create;
+  FDragging := False;
+end;
+
+destructor TfpgDragBase.Destroy;
+begin
+  FMimeData.Free;
+  inherited Destroy;
 end;
 
 
