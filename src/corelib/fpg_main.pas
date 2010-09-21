@@ -230,6 +230,7 @@ type
     FHintWidget: TfpgWindow;
     FHintPos: TPoint;
     FOnKeyPress: TKeyPressEvent;
+    FStartDragDistance: integer;
     procedure   SetHintPause(const AValue: Integer);
     procedure   SetupLocalizationStrings;
     procedure   InternalMsgFreeMe(var msg: TfpgMessageRec); message FPGM_FREEME;
@@ -237,6 +238,7 @@ type
     procedure   CreateHintWindow;
     procedure   HintTimerFired(Sender: TObject);
     procedure   SetShowHint(const AValue: boolean);
+    procedure   SetStartDragDistance(const AValue: integer);
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -269,6 +271,7 @@ type
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
     property    ShowHint: boolean read FShowHint write SetShowHint default True;
+    property    StartDragDistance: integer read FStartDragDistance write SetStartDragDistance default 5;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
     property    OnException: TExceptionEvent read FOnException write FOnException;
     property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
@@ -1106,6 +1109,7 @@ begin
   FHintPause      := DEFAULT_HINT_PAUSE;
   FHintWidget     := nil;   // widget the mouse is over and whos hint text we need.
   FShowHint       := True;
+  FStartDragDistance := 5; // pixels
 
   try
     inherited Create(AParams);
@@ -1414,6 +1418,14 @@ procedure TfpgApplication.SetShowHint(const AValue: boolean);
 begin
 //writeln('>> SetShowHint to :', AValue);
   FShowHint := AValue;
+end;
+
+procedure TfpgApplication.SetStartDragDistance(const AValue: integer);
+begin
+  if AValue < 0 then
+    FStartDragDistance := 0
+  else
+    FStartDragDistance := AValue;
 end;
 
 procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
