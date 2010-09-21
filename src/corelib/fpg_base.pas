@@ -70,7 +70,7 @@ type
   TfpgModalResult = (mrNone, mrOK, mrCancel, mrYes, mrNo, mrAbort, mrRetry,
       mrIgnore, mrAll, mrNoToAll, mrYesToAll);
 
-  TfpgDropAction = (daCopy, daMove, daLink);
+  TfpgDropAction = (daIgnore, daCopy, daMove, daLink, daAsk);
   TfpgDropActions = set of TfpgDropAction;
 
 const
