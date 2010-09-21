@@ -312,7 +312,7 @@ begin
   with MainMenu do
   begin
     Name := 'MainMenu';
-    SetPosition(0, 0, 486, 26);
+    SetPosition(0, 0, 486, 21);
     Anchors := [anLeft,anRight,anTop];
   end;
 
@@ -320,7 +320,7 @@ begin
   with Bevel1 do
   begin
     Name := 'Bevel1';
-    SetPosition(0, 26, 486, 31);
+    SetPosition(0, 21, 486, 30);
     Anchors := [anLeft,anRight,anTop];
     Hint := '';
     Style := bsLowered;
@@ -331,7 +331,7 @@ begin
   with grdMessages do
   begin
     Name := 'grdMessages';
-    SetPosition(4, 63, 478, 246);
+    SetPosition(4, 55, 478, 254);
     Anchors := [anLeft,anRight,anTop,anBottom];
     AddColumn('Type', 50, taLeftJustify);
     AddColumn('Time', 75, taCenter);
@@ -380,7 +380,7 @@ begin
   with btnQuit do
   begin
     Name := 'btnQuit';
-    SetPosition(4, 2, 25, 25);
+    SetPosition(4, 2, 24, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
@@ -407,7 +407,7 @@ begin
   with btnPause do
   begin
     Name := 'btnPause';
-    SetPosition(43, 2, 25, 25);
+    SetPosition(43, 2, 24, 24);
     Text := '';
     AllowAllUp := True;
     Flat := True;
@@ -416,6 +416,7 @@ begin
     Hint := 'pause server';
     ImageMargin := -1;
     ImageName := 'dbs.pause';
+    ImageSpacing := 0;
     TabOrder := 2;
     Focusable := False;
     OnClick :=@btnPauseClicked;
@@ -425,13 +426,14 @@ begin
   with btnStart do
   begin
     Name := 'btnStart';
-    SetPosition(70, 2, 25, 25);
+    SetPosition(67, 2, 24, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'start server';
     ImageMargin := -1;
     ImageName := 'dbs.run';
+    ImageSpacing := 0;
     TabOrder := 2;
     Focusable := False;
     OnClick := @btnStartClicked;
@@ -442,13 +444,14 @@ begin
   with btnClear do
   begin
     Name := 'btnClear';
-    SetPosition(97, 2, 25, 25);
+    SetPosition(91, 2, 24, 24);
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'clear listview';
     ImageMargin := -1;
     ImageName := 'dbs.clean';
+    ImageSpacing := 0;
     TabOrder := 2;
     Focusable := False;
     OnClick :=@btnClearClicked;
