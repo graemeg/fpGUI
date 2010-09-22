@@ -2272,6 +2272,8 @@ begin
   end;
 
   case FMouseCursor of
+    mcDefault:    shape := XC_left_ptr;
+    mcArrow:      shape := XC_arrow;
     mcSizeEW:     shape := XC_sb_h_double_arrow;
     mcSizeNS:     shape := XC_sb_v_double_arrow;
     mcIBeam:      shape := XC_xterm;
