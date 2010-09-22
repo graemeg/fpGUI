@@ -359,8 +359,9 @@ type
     FDropAccepted: Boolean;
     FProposedAction: TAtom;
     FAcceptedAction: TAtom;
-    FMimeTypesArray: TAtomArray;
+    FMimeTypesArray: array of TAtom;
     xia_plain_text: TAtom;
+    procedure   InitializeMimeTypesToAtoms;
     procedure Dragging(ev: TXEvent);
     function  IsDNDAware(win: TWindow): boolean;
     procedure SendDNDLeave(ATarget: TWindow);
@@ -3110,6 +3111,31 @@ end;
 
 { TfpgX11Drag }
 
+procedure TfpgX11Drag.InitializeMimeTypesToAtoms;
+var
+  sl: TStringList;
+  i: integer;
+  a: TAtom;
+  s: PChar;
+begin
+  { free old array }
+  SetLength(FMimeTypesArray, 0);
+  { set size of new array }
+  SetLength(FMimeTypesArray, FMimedata.FormatCount);
+
+  sl := FMimeData.Formats as TStringList;
+  try
+    for i := 0 to FMimeData.FormatCount-1 do
+    begin
+      s := PChar(sl[i]);
+      a := XInternAtom(xapplication.Display, s, TBool(False));
+      FMimeTypesArray[i] := a;
+    end;
+  finally
+    sl.Free;
+  end;
+end;
+
 procedure TfpgX11Drag.Dragging(ev: TXEvent);
 var
   dx, dy: cint;
@@ -3222,25 +3248,15 @@ begin
     i := 0;
   xev.xclient.data.l[1] := i or (FUseVersion shl 24);
 
-  // set the first 1-3 data types
-  //SetLength(FMimeTypesArray, 0);
-  //SetLength(FMimeTypesArray, n);
-  //sl := FMimeData.Formats;
-  //for i := 0 to n-1 do
-  //begin
-  //  a := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
-  //  FMimeTypesArray[i] := a;
-  //end;
-//    a := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
-
-  xev.xclient.data.l[2] := xia_plain_text; //FMimeTypesArray[0];
-  xev.xclient.data.l[3] := x.None;
-  xev.xclient.data.l[4] := x.None;
-
-//  sl.Free;
-
-//  for (i = 0; i < 3; ++i)
-//    xevent.xclient.data.l[2+i] = (i < n) ? _typelist[i] : None;
+  InitializeMimeTypesToAtoms;
+  { TODO: currently we limit ourselves to 3 mime types max. Fix this later }
+  for i := 0 to 2 do
+  begin
+    if i < n then
+      xev.xclient.data.l[2+i] := FMimeTypesArray[i]
+    else
+      xev.xclient.data.l[2+i] := x.None;
+  end;
 
   XSendEvent(xapplication.Display, ATarget, False, NoEventMask, @xev);
 end;
