@@ -3168,6 +3168,7 @@ begin
 
   lversion := Integer(data[0]);
   FUseVersion := min(Integer(FPG_XDND_VERSION), Integer(lversion));
+  Result := True;
 
   {$IFDEF DNDDEBUG}
   writeln(Format('IsDNDAware theirs:%d  ours:%d  using:%d', [lversion, FPG_XDND_VERSION, FUseVersion]));
@@ -3231,7 +3232,8 @@ begin
   xev.xclient.data.l[2] := xia_plain_text; //FMimeTypesArray[0];
   xev.xclient.data.l[3] := x.None;
   xev.xclient.data.l[4] := x.None;
-  sl.Free;
+
+//  sl.Free;
 
 //  for (i = 0; i < 3; ++i)
 //    xevent.xclient.data.l[2+i] = (i < n) ? _typelist[i] : None;
