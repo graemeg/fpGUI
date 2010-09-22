@@ -3328,6 +3328,7 @@ end;
 procedure TfpgX11Drag.HandleSelectionRequest(ev: TXEvent);
 var
   e: TXSelectionEvent;
+  s: string;
 begin
   e._type       := SelectionNotify;
   e.requestor   := ev.xselectionrequest.requestor;
@@ -3336,8 +3337,24 @@ begin
   e.time        := ev.xselectionrequest.time;
   e._property   := ev.xselectionrequest._property;
 
-  XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
-        8, PropModeReplace, PByte(@FMimeData.Text[1]), Length(FMimeData.Text));
+  s := XGetAtomName(xapplication.Display, e.target);
+  if FMimeData.HasFormat(s) then
+  begin
+    if s = 'text/plain' then
+      XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
+        8, PropModeReplace, PByte(@FMimeData.Text[1]), Length(FMimeData.Text))
+    else if s = 'text/html' then
+    begin
+      XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
+        8, PropModeReplace, PByte(@FMimeData.HTML[1]), Length(FMimeData.HTML))
+
+    end
+    else
+      { TODO: for now we immediately fall back to text/plain type }
+      XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
+        8, PropModeReplace, PByte(@FMimeData.Text[1]), Length(FMimeData.Text))
+
+  end;
 
   XSendEvent(xapplication.Display, e.requestor, false, NoEventMask, @e );
 end;
