@@ -362,19 +362,20 @@ type
     FMimeTypesArray: array of TAtom;
     xia_plain_text: TAtom;
     procedure   InitializeMimeTypesToAtoms;
-    procedure Dragging(ev: TXEvent);
-    function  IsDNDAware(win: TWindow): boolean;
-    procedure SendDNDLeave(ATarget: TWindow);
-    procedure SendDNDEnter(ATarget: TWindow);
-    procedure SendDNDPosition(ATarget: TWindow; x_root: cint; y_root: cint; AAction: TAtom; ATime: X.TTime);
-    procedure SendDNDDrop;
-    procedure HandleDNDStatus(ATarget: TWindow; AAccept: integer; ARect: TfpgRect; AAction: TAtom);
-    procedure HandleSelectionRequest(ev: TXEvent);
+    procedure   Dragging(ev: TXEvent);
+    function    IsDNDAware(win: TWindow): boolean;
+    procedure   SendDNDLeave(ATarget: TWindow);
+    procedure   SendDNDEnter(ATarget: TWindow);
+    procedure   SendDNDPosition(ATarget: TWindow; x_root: cint; y_root: cint; AAction: TAtom; ATime: X.TTime);
+    procedure   SendDNDDrop;
+    procedure   HandleDNDStatus(ATarget: TWindow; AAccept: integer; ARect: TfpgRect; AAction: TAtom);
+    procedure   HandleSelectionRequest(ev: TXEvent);
   protected
     FSource: TfpgX11Window;
-    function GetSource: TfpgX11Window; virtual;
+    function    GetSource: TfpgX11Window; virtual;
   public
-    function Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
+    destructor  Destroy; override;
+    function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
   end;
 
 
