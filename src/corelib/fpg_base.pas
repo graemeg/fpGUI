@@ -639,9 +639,7 @@ type
   private
     { TODO: This is wrong, we must have one Data Storage object }
     FDataList: TObjectList;
-    FFormats: TStrings;
     FUrlList: TList;
-    FHTML: TfpgString;
     function    Geturls: TList;
     procedure   Seturls(const AValue: TList);
     function    GetText: TfpgString;
@@ -2779,8 +2777,8 @@ begin
 
   { We take ownership of AValue. Can we do this? }
   FUrlList := AValue;
-  FFormats.Clear;
-  Formats.Add('text/uri-list');
+//  FFormats.Clear;
+//  Formats.Add('text/uri-list');
 end;
 
 function TfpgMimeDataBase.GetText: TfpgString;
@@ -2788,7 +2786,7 @@ var
   i: integer;
   s: string;
 begin
-  { TODO: if data was HTML, we must strip all tags - regex will make this easy }
+  { TODO: if no text/plain, but we have HTML, we must strip all tags and return that }
   for i := 0 to FDataList.Count-1 do
   begin
     if TfpgMimeDataStruct(FDataList[i]).format = 'text/plain' then
@@ -2821,16 +2819,40 @@ begin
 end;
 
 function TfpgMimeDataBase.GetHTML: TfpgString;
+var
+  i: integer;
+  s: string;
 begin
-  { TODO: We should only return data related to MIME type:  text/html }
-  Result := FHTML;
+  { TODO: if data was HTML, we must strip all tags - regex will make this easy }
+  for i := 0 to FDataList.Count-1 do
+  begin
+    if TfpgMimeDataStruct(FDataList[i]).format = 'text/html' then
+    begin
+      s := TfpgMimeDataStruct(FDataList[i]).data;
+      Result := s;
+      break;
+    end;
+  end;
 end;
 
 procedure TfpgMimeDataBase.SetHTML(const AValue: TfpgString);
+var
+  i: integer;
+  r: TfpgMimeDataStruct;
 begin
-  FHTML := AValue;
-  FFormats.Clear;
-  Formats.Add('text/html');
+  { remove existing 'text/html' first }
+  for i := FDataList.Count-1 downto 0 do
+  begin
+    r := TfpgMimeDataStruct(FDataList[i]);
+    if r.format = 'text/html' then
+    begin
+      FDataList.Remove(FDataList[i]);
+      break;
+    end;
+  end;
+  { now add new structure }
+  r := TfpgMimeDataStruct.Create('text/html', AValue);
+  FDataList.Add(r);
 end;
 
 function TfpgMimeDataBase.GetFormatCout: integer;
@@ -2842,26 +2864,31 @@ constructor TfpgMimeDataBase.Create;
 begin
   inherited Create;
   FDataList := TObjectList.Create;
-  FFormats := TStringList.Create;
 end;
 
 destructor TfpgMimeDataBase.Destroy;
 begin
-  FFormats.Free;
   FDataList.Free;
   inherited Destroy;
 end;
 
 procedure TfpgMimeDataBase.Clear;
 begin
-  FFormats.Clear;
   FUrlList.Clear;
   FDataList.Clear;
 end;
 
 function TfpgMimeDataBase.HasFormat(const AMimeType: TfpgString): boolean;
+var
+  i: integer;
 begin
-  Result := FFormats.IndexOf(AMimeType) > -1;
+  Result := False;
+  for i := 0 to FDataList.Count-1 do
+  begin
+    Result := TfpgMimeDataStruct(FDataList[i]).format = AMimeType;
+    if Result then
+      break;
+  end;
 end;
 
 function TfpgMimeDataBase.Formats: TStrings;
