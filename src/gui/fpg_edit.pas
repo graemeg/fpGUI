@@ -1178,7 +1178,7 @@ procedure TfpgBaseEdit.DefaultPopupPaste(Sender: TObject);
 begin
   if ReadOnly then
     Exit;
-  PasteFromClipboard
+  PasteFromClipboard;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupClearAll(Sender: TObject);
