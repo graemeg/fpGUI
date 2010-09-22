@@ -3283,6 +3283,7 @@ begin
   xev.xclient.data.l[4] := 0;
 
   XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
+  FSource.MouseCursor := mcDefault;
 end;
 
 procedure TfpgX11Drag.HandleDNDStatus(ATarget: TWindow; AAccept: integer;
@@ -3295,14 +3296,12 @@ begin
     begin
       FDropAccepted := True;
       FAcceptedAction := AAction;
-      { TODO: Change mouse cursor to show drop accepted/valid }
       FSource.MouseCursor := mcDrag;
     end
     else
     begin
       FDropAccepted := False;
       FAcceptedAction := X.None;
-      { TODO: change mouse cursor to show drop not valid }
       FSource.MouseCursor := mcNoDrop;
     end;
   end;
@@ -3329,6 +3328,12 @@ end;
 function TfpgX11Drag.GetSource: TfpgX11Window;
 begin
   Result := FSource;
+end;
+
+destructor TfpgX11Drag.Destroy;
+begin
+  FSource.MouseCursor := mcDefault;
+  inherited Destroy;
 end;
 
 function TfpgX11Drag.Execute(const ADropActions: TfpgDropActions;
