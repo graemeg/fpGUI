@@ -3115,10 +3115,14 @@ begin
   lTarget := FindWindow(ev.xmotion.root, ev.xmotion.x_root, ev.xmotion.y_root);
   if FLastTarget <> lTarget then
   begin
-    SendDNDLeave(FLastTarget);
+    if FLastTarget <> 0 then { meaning we had a target before }
+      SendDNDLeave(FLastTarget);
 
     FLastTarget       := lTarget;
     FTargetIsDNDAware := IsDNDAware(lTarget);
+    {$IFDEF DNDDEBUG}
+    writeln('IsDNDAware = ', BoolToStr(FTargetIsDNDAware, True));
+    {$ENDIF}
     FStatusPending    := False;
     FDropAccepted     := False;
     FAcceptedAction   := X.None;
