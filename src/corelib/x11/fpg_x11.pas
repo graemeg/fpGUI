@@ -1703,7 +1703,8 @@ begin
           begin
             if Assigned(Drag) then
             begin
-              Drag.Dragging(ev);
+              if ((ev.xmotion.state and $FF00) shr 8) = MOUSE_LEFT then
+                Drag.Dragging(ev);
             end;
             if xapplication.TopModalForm <> nil then
             begin
