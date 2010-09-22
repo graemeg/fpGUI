@@ -660,7 +660,6 @@ var
   count, remaining: culong;
   data: pchar = nil;
 begin
-//  writeln('IsTopLevel ');
   XGetWindowProperty(xapplication.Display, AWin, xapplication.xia_wm_state, 0, 0,
       TBool(False), AnyPropertyType, @actualtype, @actualformat, @count,
       @remaining, @data);
@@ -669,15 +668,16 @@ begin
   Result := actualtype <> None;
 end;
 
+{ find toplevel window that contains mouse co-ordinates x, y (co-ordinates are
+  from root window) }
 function FindWindow(ARoot: TWindow; const x, y: cint): TWindow;
 var
   wattr: TXWindowAttributes;
   r, p: TWindow;
   children: PWindowArray = nil;
-  numch: cuint = 0;
+  numchildren: cuint = 0;
   i: integer;
 begin
-//  writeln('FindWindow ');
   XGetWindowAttributes(xapplication.Display, ARoot, @wattr);
   if (wattr.map_state <> IsUnmapped) and
       ((x >= wattr.x) and (x < (wattr.x + wattr.width))) and
@@ -689,15 +689,14 @@ begin
       Result := ARoot;
       exit;
     end;
-//     writeln('Query Tree');
-    if XQueryTree(xapplication.Display, ARoot, @r, @p, @children, @numch) <> 0 then
+    if XQueryTree(xapplication.Display, ARoot, @r, @p, @children, @numchildren) <> 0 then
     begin
-      if (numch > 0) and (children <> nil) then
+      if (numchildren > 0) then
       begin
         r := None;
         { upon return from XQueryTree, children are listed in the current
           stacking order, from bottom-most (first) to top-most (last) }
-        for i := numch-1 downto 0 do
+        for i := numchildren-1 downto 0 do
         begin
           r := FindWindow(children^[i], x - wattr.x, y - wattr.y);
           if r <> None then
@@ -1156,6 +1155,7 @@ begin
   {$IFDEF DNDDEBUG}
   writeln('XdndDrop event received!');
   {$ENDIF}
+  { TODO: Must XConvertSelection always be called? }
   XConvertSelection(FDisplay, XdndSelection, FDNDDataType, XdndSelection, ATopLevelWindow.FWinHandle, ATimestamp);
 
   { send message to confirm drop will be accepted in specified rectangle }
