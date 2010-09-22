@@ -3332,7 +3332,7 @@ end;
 function TfpgX11Drag.Execute(const ADropActions: TfpgDropActions;
   const ADefaultAction: TfpgDropAction): TfpgDropAction;
 var
-  r: cint;
+  win: TWindow;
 begin
   if FDragging then
     Result := daIgnore
@@ -3342,8 +3342,10 @@ begin
     xia_plain_text := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
     FProposedAction := xapplication.GetAtomFromDropAction(ADefaultAction);
     xapplication.Drag := self;
-    r := XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, FSource.WinHandle, CurrentTime);
-    writeln('XSetSelectionOwner returned = ', r);
+    XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, FSource.WinHandle, CurrentTime);
+    win := XGetSelectionOwner(xapplication.Display, xapplication.XdndSelection);
+    if win <> FSource.WinHandle then
+      raise Exception.Create('Application failed to aquire selection owner status');
   end;
 end;
 
