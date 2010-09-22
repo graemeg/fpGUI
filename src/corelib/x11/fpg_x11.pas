@@ -2283,6 +2283,8 @@ begin
     mcCross:      shape := XC_crosshair;
     mcHourGlass:  shape := XC_watch;
     mcHand:       shape := XC_hand2;
+    mcDrag:       shape := XC_target;
+    mcNoDrop:     shape := XC_pirate;
   else
     shape := XC_left_ptr; //XC_arrow;
   end;
@@ -3292,12 +3294,14 @@ begin
       FDropAccepted := True;
       FAcceptedAction := AAction;
       { TODO: Change mouse cursor to show drop accepted/valid }
+      FSource.MouseCursor := mcDrag;
     end
     else
     begin
       FDropAccepted := False;
       FAcceptedAction := X.None;
       { TODO: change mouse cursor to show drop not valid }
+      FSource.MouseCursor := mcNoDrop;
     end;
   end;
   { TODO: If we waited to long, we have a timeout }
