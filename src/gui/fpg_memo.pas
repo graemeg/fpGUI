@@ -418,9 +418,9 @@ procedure TfpgMemo.ResetSelectionVariables;
 begin
   FSelecting      := False;
   FSelStartPos    := FCursorPos;
-  FSelEndPos      := 0;
-  FSelStartLine   := -1;
-  FSelEndLine     := -1;
+  FSelEndPos      := FCursorPos;
+  FSelStartLine   := FCursorLine;
+  FSelEndLine     := FCursorLine;
   FMouseDragging  := False;
 end;
 
