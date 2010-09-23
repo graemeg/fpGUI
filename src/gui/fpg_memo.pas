@@ -352,22 +352,15 @@ procedure TfpgMemo.SetDefaultPopupMenuItemsState;
 var
   i: integer;
   itm: TfpgMenuItem;
+  b: boolean;
 
   function SomethingSelected: boolean;
-  var
-    selsl: integer;
-    selsp: integer;
-    selel: integer;
-    selep: integer;
   begin
-    Result := FSelecting;
-    //Result := (FSelStartPos <> FCursorPos)
-    //      and (FSelEndPos <> 0)
-    //      and (FSelStartLine <> -1)
-    //      and (FSelEndLine <> -1);
+    Result := SelectionText <> '';
   end;
 
 begin
+  b := SomethingSelected;
   for i := 0 to FDefaultPopupMenu.ComponentCount-1 do
   begin
     if FDefaultPopupMenu.Components[i] is TfpgMenuItem then
@@ -375,9 +368,9 @@ begin
       itm := TfpgMenuItem(FDefaultPopupMenu.Components[i]);
       // enabled/disable menu items
       if itm.Name = ipmCut then
-        itm.Enabled := (not ReadOnly) and SomethingSelected
+        itm.Enabled := (not ReadOnly) and b
       else if itm.Name = ipmCopy then
-        itm.Enabled := SomethingSelected
+        itm.Enabled := b
       else if itm.Name = ipmPaste then
         itm.Enabled := (not ReadOnly) and (fpgClipboard.Text <> '')
       else if itm.Name = ipmClearAll then
