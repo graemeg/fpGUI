@@ -601,7 +601,7 @@ begin
       if lcnt = 0 then
         SetLineText(l, si + si8)
       else
-        FLines.Insert(l-1, si + si8);
+        FLines.Insert(l, si + si8);
 
       si := '';
       si8 := '';
