@@ -35,7 +35,7 @@ type
   THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
 
   TfpgDragEnterEvent = procedure(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean) of object;
-  TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: TfpgString) of object;
+  TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
 
 
   TfpgWidget = class(TfpgWindow)

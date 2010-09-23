@@ -1180,7 +1180,7 @@ var
   actualtype: TAtom;
   actualformat: cint;
   count, remaining, dummy: culong;
-  s: TfpgString;
+  s: variant;
   data: PChar;
   wg: TfpgWidget;
 begin
@@ -3329,6 +3329,7 @@ procedure TfpgX11Drag.HandleSelectionRequest(ev: TXEvent);
 var
   e: TXSelectionEvent;
   s: string;
+  v: variant;
 begin
   e._type       := SelectionNotify;
   e.requestor   := ev.xselectionrequest.requestor;
@@ -3347,12 +3348,15 @@ begin
     begin
       XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
         8, PropModeReplace, PByte(@FMimeData.HTML[1]), Length(FMimeData.HTML))
-
     end
     else
-      { TODO: for now we immediately fall back to text/plain type }
+    begin
+      { transfering as raw bytes of data }
+      v := FMimeData.GetData(s);
+      s := v;
       XChangeProperty(xapplication.Display, e.requestor, e._property, e.target,
-        8, PropModeReplace, PByte(@FMimeData.Text[1]), Length(FMimeData.Text))
+        8, PropModeReplace, PByte(@s[1]), Length(s));
+    end;
 
   end;
 
