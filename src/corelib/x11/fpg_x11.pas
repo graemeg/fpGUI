@@ -20,7 +20,7 @@ unit fpg_x11;
 {$mode objfpc}{$H+}
 
 {.$Define DEBUG}      // general debugging - mostly OS messages though
-{$Define DNDDEBUG}   // drag-n-drop specific debugging
+{.$Define DNDDEBUG}   // drag-n-drop specific debugging
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
 
