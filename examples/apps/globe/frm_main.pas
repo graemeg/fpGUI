@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_widget, fpg_form, fpg_menu,
-  fpg_panel, fpg_button, fpg_stdimages;
+  fpg_panel, fpg_button;
 
 
 {$I globe_data.inc}
