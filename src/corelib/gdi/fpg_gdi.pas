@@ -168,6 +168,7 @@ type
     //procedure MoveToScreenCenter; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
+    procedure   DoEnableDrops(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -235,6 +236,19 @@ type
     constructor Create; override;
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
     procedure   PopulateSpecialDirs(const aDirectory: TfpgString); override;
+  end;
+
+
+  TfpgGDIMimeDataBase = class(TfpgMimeDataBase)
+  end;
+
+
+  TfpgGDIDrag = class(TfpgDragBase)
+  protected
+    FSource: TfpgGDIWindow;
+    function    GetSource: TfpgGDIWindow; virtual;
+  public
+    function Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction; override;
   end;
 
 
@@ -1611,6 +1625,11 @@ begin
   SetCursor(hc);
 end;
 
+procedure TfpgGDIWindow.DoEnableDrops(const AValue: boolean);
+begin
+  // TODO: still needs to be implemented
+end;
+
 constructor TfpgGDIWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -2449,6 +2468,20 @@ begin
   end;
 
   inherited PopulateSpecialDirs(aDirectory);
+end;
+
+{ TfpgGDIDrag }
+
+function TfpgGDIDrag.GetSource: TfpgGDIWindow;
+begin
+  Result := FSource;
+end;
+
+function TfpgGDIDrag.Execute(const ADropActions: TfpgDropActions;
+  const ADefaultAction: TfpgDropAction): TfpgDropAction;
+begin
+  { TODO: this still needs to be implemented }
+  Result := daCopy;
 end;
 
 initialization
