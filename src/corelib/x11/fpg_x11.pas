@@ -361,6 +361,7 @@ type
     FAcceptedAction: TAtom;
     FMimeTypesArray: array of TAtom;
     xia_plain_text: TAtom;
+    procedure   SetTypeListProperty;
     procedure   InitializeMimeTypesToAtoms;
     procedure   Dragging(ev: TXEvent);
     function    IsDNDAware(win: TWindow): boolean;
@@ -3112,6 +3113,13 @@ end;
 
 { TfpgX11Drag }
 
+procedure TfpgX11Drag.SetTypeListProperty;
+begin
+  XChangeProperty(xapplication.Display, FSource.WinHandle,
+      xapplication.XdndTypeList, XA_ATOM, 32,
+      PropModeReplace, @FMimeTypesArray[0], Length(FMimeTypesArray));
+end;
+
 procedure TfpgX11Drag.InitializeMimeTypesToAtoms;
 var
   sl: TStringList;
@@ -3121,8 +3129,8 @@ var
 begin
   { free old array }
   SetLength(FMimeTypesArray, 0);
-  { set size of new array }
-  SetLength(FMimeTypesArray, FMimedata.FormatCount);
+  { set size of new array. Extra element for the terminating x.None value }
+  SetLength(FMimeTypesArray, FMimedata.FormatCount+1);
 
   sl := FMimeData.Formats as TStringList;
   try
@@ -3132,6 +3140,7 @@ begin
       a := XInternAtom(xapplication.Display, s, TBool(False));
       FMimeTypesArray[i] := a;
     end;
+    FMimeTypesArray[i+1] := x.None; // termination value
   finally
     sl.Free;
   end;
@@ -3249,14 +3258,22 @@ begin
     i := 0;
   xev.xclient.data.l[1] := i or (FUseVersion shl 24);
 
-  InitializeMimeTypesToAtoms;
-  { TODO: currently we limit ourselves to 3 mime types max. Fix this later }
-  for i := 0 to 2 do
+  if n <= 3 then
   begin
-    if i < n then
-      xev.xclient.data.l[2+i] := FMimeTypesArray[i]
-    else
-      xev.xclient.data.l[2+i] := x.None;
+    for i := 0 to 2 do
+    begin
+      if i < n then
+        xev.xclient.data.l[2+i] := FMimeTypesArray[i]
+      else
+        xev.xclient.data.l[2+i] := x.None;
+    end;
+  end
+  else
+  begin
+    { available types are in the XdndTypeList property instead }
+    xev.xclient.data.l[2] := x.None;
+    xev.xclient.data.l[3] := x.None;
+    xev.xclient.data.l[4] := x.None;
   end;
 
   XSendEvent(xapplication.Display, ATarget, False, NoEventMask, @xev);
@@ -3390,10 +3407,15 @@ begin
     xia_plain_text := XInternAtom(xapplication.Display, 'text/plain', TBool(False));
     FProposedAction := xapplication.GetAtomFromDropAction(ADefaultAction);
     xapplication.Drag := self;
+
     XSetSelectionOwner(xapplication.Display, xapplication.XdndSelection, FSource.WinHandle, CurrentTime);
     win := XGetSelectionOwner(xapplication.Display, xapplication.XdndSelection);
     if win <> FSource.WinHandle then
-      raise Exception.Create('Application failed to aquire selection owner status');
+      raise Exception.Create('fpGUI/X11: Application failed to aquire selection owner status');
+
+    InitializeMimeTypesToAtoms;
+    if FMimeData.FormatCount > 3 then
+      SetTypeListProperty;
   end;
 end;
 
