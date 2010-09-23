@@ -3371,6 +3371,9 @@ end;
 destructor TfpgX11Drag.Destroy;
 begin
   FSource.MouseCursor := mcDefault;
+  XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndAware);
+  XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndTypeList);
+  SetLength(FMimeTypesArray, 0);
   inherited Destroy;
 end;
 
