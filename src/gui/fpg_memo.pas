@@ -110,7 +110,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   UpdateScrollBars;
-    function    SelectionText: string;
+    function    SelectionText: TfpgString;
     procedure   CopyToClipboard;
     procedure   CutToClipboard;
     procedure   PasteFromClipboard;
@@ -569,58 +569,11 @@ begin
 end;
 
 procedure TfpgMemo.DoCopy;
-var
-  n: integer;
-  selsl: integer;
-  selsp: integer;
-  selel: integer;
-  selep: integer;
-  ls: string;
-  len: integer;
-  st: integer;
-  s: string;
 begin
   if FSelEndLine < 0 then
     Exit;
 
-  if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
-  begin
-    selsl := FSelStartLine;
-    selsp := FSelStartPos;
-    selel := FSelEndLine;
-    selep := FSelEndPos;
-  end
-  else
-  begin
-    selel := FSelStartLine;
-    selep := FSelStartPos;
-    selsl := FSelEndLine;
-    selsp := FSelEndPos;
-  end;
-
-  s := '';
-
-  for n := selsl to selel do
-  begin
-    if n > selsl then
-      s := s + #13#10;
-
-    ls := GetLineText(n);
-
-    if selsl < n then
-      st := 0
-    else
-      st := selsp;
-
-    if selel > n then
-      len := UTF8Length(ls)
-    else
-      len := selep - st;
-
-    s := s + UTF8Copy(ls, st + 1, len);
-  end;
-
-  fpgClipboard.Text := s;
+  fpgClipboard.Text := SelectionText;
 end;
 
 procedure TfpgMemo.DoPaste(const AText: TfpgString);
@@ -1585,23 +1538,55 @@ begin
   end;
 end;
 
-function TfpgMemo.SelectionText: string;
+function TfpgMemo.SelectionText: TfpgString;
+var
+  n: integer;
+  selsl: integer;
+  selsp: integer;
+  selel: integer;
+  selep: integer;
+  ls: string;
+  len: integer;
+  st: integer;
+  s: TfpgString;
 begin
-  {
-  if FSelOffset <> 0 then
+  if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
   begin
-    if FSelOffset < 0 then
-    begin
-      Result := Copy(FText,1+FSelStart + FSelOffset,-FSelOffset);
-    end
-    else
-    begin
-      result := Copy(FText,1+FSelStart,FSelOffset);
-    end;
+    selsl := FSelStartLine;
+    selsp := FSelStartPos;
+    selel := FSelEndLine;
+    selep := FSelEndPos;
   end
   else
-}
-    Result := '';
+  begin
+    selel := FSelStartLine;
+    selep := FSelStartPos;
+    selsl := FSelEndLine;
+    selsp := FSelEndPos;
+  end;
+
+  s := '';
+  for n := selsl to selel do
+  begin
+    if n > selsl then
+      s := s + LineEnding;
+
+    ls := GetLineText(n);
+
+    if selsl < n then
+      st := 0
+    else
+      st := selsp;
+
+    if selel > n then
+      len := UTF8Length(ls)
+    else
+      len := selep - st;
+
+    s := s + UTF8Copy(ls, st + 1, len);
+  end;
+
+  Result := s;
 end;
 
 procedure TfpgMemo.CopyToClipboard;
