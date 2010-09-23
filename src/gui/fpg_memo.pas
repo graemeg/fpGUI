@@ -621,8 +621,6 @@ begin
   si := si + si8;
 
   FCursorPos := UTF8Length(si);
-  FSelStartPos := FCursorPos;
-  FSelEndPos := FCursorPos;
   si := si + lineend;
 
   if lcnt = 0 then
@@ -635,12 +633,9 @@ begin
     FCursorLine := l;
   end;
 
-  FSelStartLine := FCursorLine;
-  FSelEndLine := -1;
-
   AdjustCursor;
+  ResetSelectionVariables;
   Repaint;
-  FSelecting := False;
 end;
 
 procedure TfpgMemo.AdjustCursor;
@@ -1046,14 +1041,6 @@ var
   ls: string;
   ls2: string;
   hasChanged: boolean;
-  
-  procedure StopSelection;
-  begin
-    FSelStartLine := FCursorLine;
-    FSelStartPos  := FCursorPos;
-    FSelEndLine   := -1;
-  end;
-  
 begin
   fpgApplication.HideHint;
   Consumed := True;
@@ -1094,7 +1081,6 @@ begin
         if FCursorPos > 0 then
         begin
           Dec(FCursorPos);
-
           if (ssCtrl in shiftstate) then
             // word search...
             (*
@@ -1104,14 +1090,12 @@ begin
                     while (FCursorPos > 0) and pgfIsAlphaNum(copy(CurrentLine,FCursorPos,1))
                       do Dec(FCursorPos);
             *);
-
         end;// left
 
       keyRight:
         if FCursorPos < UTF8Length(CurrentLine) then
         begin
           Inc(FCursorPos);
-
           if (ssCtrl in shiftstate) then
             // word search...
             (*
@@ -1121,7 +1105,6 @@ begin
                     while (FCursorPos < length(CurrentLine)) and not pgfIsAlphaNum(copy(CurrentLine,FCursorPos+1,1))
                       do Inc(FCursorPos);
               *);
-
         end;// right
 
       keyUp:
@@ -1194,7 +1177,7 @@ begin
         FSelEndLine := FCursorLine;
       end
       else
-        StopSelection;
+        ResetSelectionVariables;
     end;
   end;
 
@@ -1285,8 +1268,8 @@ begin
 
     if Consumed then
     begin
-      StopSelection;
       AdjustCursor;
+      ResetSelectionVariables;
     end;
   end;
 
