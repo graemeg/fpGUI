@@ -653,6 +653,7 @@ type
     procedure   Clear;
     function    HasFormat(const AMimeType: TfpgString): boolean;
     function    Formats: TStrings;
+    function    GetData(const AMimeType: TfpgString): Variant;
     procedure   SetData(const AMimeType: TfpgString; const AData: Variant);
     property    urls: TList read Geturls write Seturls;
     property    Text: TfpgString read GetText write SetText;
@@ -2906,6 +2907,20 @@ begin
     begin
       s := TfpgMimeDataStruct(FDataList[i]).format;
       Result.Add(s);
+    end;
+  end;
+end;
+
+function TfpgMimeDataBase.GetData(const AMimeType: TfpgString): Variant;
+var
+  i: integer;
+begin
+  for i := 0 to FDataList.Count-1 do
+  begin
+    if TfpgMimeDataStruct(FDataList[i]).format = AMimeType then
+    begin
+      Result := TfpgMimeDataStruct(FDataList[i]).data;
+      break;
     end;
   end;
 end;
