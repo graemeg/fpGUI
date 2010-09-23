@@ -1575,6 +1575,7 @@ begin
   DoCopy;
   DeleteSelection;
   AdjustCursor;
+  ResetSelectionVariables;
   RePaint;
 end;
 
