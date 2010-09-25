@@ -179,6 +179,9 @@ type
     property    Text;
     property    TextColor;
     property    OnChange;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;

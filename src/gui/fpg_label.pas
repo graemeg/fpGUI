@@ -90,6 +90,10 @@ type
     property    Width;
     property    WrapText;
     property    OnClick;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnDoubleClick;
     property    OnMouseDown;
     property    OnMouseEnter;
