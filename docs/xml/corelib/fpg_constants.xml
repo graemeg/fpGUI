@@ -20,7 +20,7 @@ has translations for:</p>
 <p>To change the default (compiled in) language used by fpGUI, simply enabled
 one of the language DEFINES in the interface section of the fpg_constants unit.</p>
 <p>For more details on changing the default language of fpGUI Toolkit, see the topic
-"<link id="fpg_constants.ChangingDefaultLanguage">Changing the default language</link>".</p>
+"<link id="#fpgui.AdditionalTopics.ChangingDefaultLanguage">Changing the default language</link>".</p>
 </descr>
       <element name="fpgAddColon">
         <short>A utility function to add a colon at the correct location in a string</short>
@@ -36,27 +36,6 @@ one of the language DEFINES in the interface section of the fpg_constants unit.<
       <element name="DOUBLECLICK_DISTANCE">
         <short>Maximum distance a mouse pointer can move between two left-clicks and still trigger a double click event</short>
       </element>
-      
-<topic name="ChangingDefaultLanguage">
-<short>Changing the default language</short>
-<descr><p>Inside the <var>fpg_constants.pas</var> unit there are a few commented language
-defines. If no language specific Define is set, then fpGUI defaults to the English
-language. So say you want to change the default language to German, simply uncomment
-the <b>de</b> define, and recompile fpGUI.
-</p>
-<p>Here is a list of current supported languages and their commented defines as they
-appear in the <var>fpg_constants</var> unit.</p>
-<code>
-{.$DEFINE de}     // German
-{.$DEFINE ru}     // Russian
-{.$DEFINE fr}     // French
-{.$DEFINE pt}     // Portuguese (Brazil)
-{.$DEFINE af}     // Afrikaans
-{.$DEFINE it}     // Italian
-{.$DEFINE es}     // Spanish
-</code>
-</descr>
-</topic>    
       
     </module>
   </package>

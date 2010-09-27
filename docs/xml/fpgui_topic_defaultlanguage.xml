@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+<topic name="AdditionalTopics">
+<short>Additional Topics</short>
+
+<topic name="ChangingDefaultLanguage">
+<short>Changing the default language</short>
+<descr><p>Inside the <var>fpg_constants.pas</var> unit there are a few commented language
+defines. If no language specific Define is set, then fpGUI defaults to the English
+language. So say you want to change the default language to German, simply uncomment
+the <b>de</b> define, and recompile fpGUI.
+</p>
+<p>Here is a list of current supported languages and their commented defines as they
+appear in the <var>fpg_constants</var> unit.</p>
+<code>
+{.$DEFINE de}     // German
+{.$DEFINE ru}     // Russian
+{.$DEFINE fr}     // French
+{.$DEFINE pt}     // Portuguese (Brazil)
+{.$DEFINE af}     // Afrikaans
+{.$DEFINE it}     // Italian
+{.$DEFINE es}     // Spanish
+</code>
+</descr>
+
+
+</topic>
+</topic>
+</package>
+</fpdoc-descriptions>
