@@ -1332,7 +1332,7 @@ begin
     x := x + FXOffset;
     cancel := False;
     last := RootNode;
-    while not (((i - 1) * GetNodeHeight - 2 <= y) and ((i) * GetNodeHeight + 2 >= y)) do
+    while not ((((i - 1) * GetNodeHeight) <= y) and ((i * GetNodeHeight) >= y)) do
     begin
       node := NextVisualNode(last);
       if node = nil then
