@@ -86,10 +86,15 @@ end;
 
 function fpgGetFirstMessage: PfpgMessageRec;
 begin
-  if UsedFirstMessage <> nil then
-    Result := @(UsedFirstMessage.msg)
-  else
-    Result := nil;
+  fpgApplication.Lock;
+  try
+    if UsedFirstMessage <> nil then
+      Result := @(UsedFirstMessage.msg)
+    else
+      Result := nil;
+  finally
+    fpgApplication.Unlock;
+  end;
 end;
 
 procedure fpgInitMsgQueue;
