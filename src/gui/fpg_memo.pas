@@ -1221,7 +1221,7 @@ begin
       keyDelete:
           begin
             ls := GetLineText(FCursorLine);
-            if FSelEndLine > -1 then
+            if SelectionText <> '' then
               DeleteSelection
             else if FCursorPos < UTF8Length(ls) then
             begin
