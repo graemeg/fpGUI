@@ -331,7 +331,7 @@ begin
   Edit.Anchors  := Anchors;
 //  Edit.OnChange := @UpdateProperty;
   Edit.OnKeyPress := @EditKeyPressed;
-  Edit.OnExit :=@EditExit;
+  Edit.OnExit := @EditExit;
   Edit.Visible := True;
 end;
 

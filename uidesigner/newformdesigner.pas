@@ -798,7 +798,7 @@ end;
 
 function TwgPropertyList.RowHeight: integer;
 begin
-  Result := 22;
+  Result := 23;
 end;
 
 procedure TwgPropertyList.OnUpdateProperty(Sender: TObject);
@@ -969,8 +969,8 @@ begin
 
   editor := prop.CreateEditor(Self);
   x      := 3 + NameWidth;
-  y      := FMargin + (FFocusItem - FFirstItem) * RowHeight;
-  editor.SetPosition(x, y - 1, Width - ScrollBarWidth - x, RowHeight);
+  y      := FMargin + ((FFocusItem - FFirstItem) * RowHeight);
+  editor.SetPosition(x, y, Width - FMargin - ScrollBarWidth - x, RowHeight-1); // last -1 is so cell border lines are still visible
   editor.CreateLayout;
   editor.OnUpdate := @OnUpdateProperty;
   editor.LoadValue(Props.Widget);

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="7"/>
+    <Version Value="9"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
@@ -9,10 +9,9 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <TargetFileExt Value=""/>
     </General>
     <VersionInfo>
-      <ProjectVersion Value=""/>
+      <StringTable ProductVersion=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
@@ -112,7 +111,7 @@
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="8"/>
+    <Version Value="9"/>
     <SearchPaths>
       <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
@@ -120,7 +119,6 @@
       <SyntaxOptions>
         <AllowLabel Value="False"/>
         <CPPInline Value="False"/>
-        <UseAnsiStrings Value="True"/>
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
