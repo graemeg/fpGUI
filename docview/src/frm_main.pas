@@ -1011,7 +1011,10 @@ begin
   lbSearchResults.Items.Clear;
 
   if SearchText = '' then
+  begin
+    ClearAllWordSequences;
     exit;
+  end;
 
   lbSearchResults.Items.Add(rsDVSearchingMsg);
   SetStatus(rsDVSearchingMsg);
