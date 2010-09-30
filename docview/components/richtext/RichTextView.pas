@@ -246,8 +246,7 @@ Type
                                  PreserveSelection: boolean );
 
     procedure MakeRowVisible( Row: longint );
-    procedure MakeRowAndColumnVisible( Row: longint;
-                                       Column: longint );
+    procedure MakeRowAndColumnVisible(Row: longint; Column: longint);
 
     // These two methods set selection start and end,
     // and redraw the screen, but do not set up cursor.
@@ -768,9 +767,23 @@ var
   Shift: boolean;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
+  Offset := 0;
   Position := FindPoint( X, Y, Line, Offset, Link );
   FClickedLink := Link;
 //  writeln('Pos=', Ord(Position), '  link=', Link);
+
+  if Position in [tpAboveTextArea, tpBelowTextArea] then
+    // not on the control (this probably won't happen)
+    exit;
+
+  // if shift is pressed then keep the same selection start.
+  Shift := ssShift in ShiftState;
+  RemoveCursor;
+
+  if not Shift then
+    ClearSelection;
+
+  SetCursorPosition(Offset, Line, Shift);
 end;
 
 procedure TRichTextView.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
@@ -792,29 +805,25 @@ begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
   Position := FindPoint(X, Y, Line, Offset, Link);
 
-//  if not MouseCapture then     // TODO: Introduce a IsMouseCaptured in TfpgWindow
+  if Link <> FLastLinkOver then
   begin
-    if Link <> FLastLinkOver then
-    begin
-      if Link <> '' then
-      begin
-        if Assigned(FOnOverLink) then
-          FOnOverLink(Self, Link)
-      end
-      else
-      begin
-        if Assigned(FOnNotOverLink) then
-          FOnNotOverLink(Self, FLastLinkOver);
-      end;
-      FLastLinkOver := Link;
-    end;
-
     if Link <> '' then
-      MouseCursor := mcHand
+    begin
+      if Assigned(FOnOverLink) then
+        FOnOverLink(Self, Link)
+    end
     else
-      MouseCursor := mcDefault;   // TODO: later this should be IBeam when RichView supports editing
-    exit;
+    begin
+      if Assigned(FOnNotOverLink) then
+        FOnNotOverLink(Self, FLastLinkOver);
+    end;
+    FLastLinkOver := Link;
   end;
+
+  if Link <> '' then
+    MouseCursor := mcHand
+  else
+    MouseCursor := mcDefault;   // TODO: later this should be IBeam when RichView supports editing
 end;
 
 Destructor TRichTextView.Destroy;
@@ -2790,21 +2799,19 @@ begin
   end;
 end;
 
-procedure TRichTextView.MakeRowAndColumnVisible( Row: longint;
-                                                 Column: longint );
+procedure TRichTextView.MakeRowAndColumnVisible(Row: longint; Column: longint);
 var
   X: Longint;
 begin
   MakeRowVisible( Row );
   FLayout.GetXFromOffset( Column, Row, X );
 
-  if X > FXScroll + GetTextAreaWidth then
+  if X > (FXScroll + GetTextAreaWidth) then
     // off the right
     SetHorizontalPosition( X - GetTextAreaWidth + 5 )
   else if X < FXScroll then
     // off to left
     SetHorizontalPosition( X );
-
 end;
 
 function TRichTextView.LinkFromIndex( const CharIndexToFind: longint): string;
