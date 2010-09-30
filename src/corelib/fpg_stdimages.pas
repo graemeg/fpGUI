@@ -260,6 +260,11 @@ begin
       sizeof(stdimg_help_16), 0,0);
 
   fpgImages.AddMaskedBMP(
+            'stdimg.about',
+            @stdimg_about_16,
+      sizeof(stdimg_about_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
             'stdimg.hidden',
             @stdimg_hidden,
       sizeof(stdimg_hidden), 0,0);
