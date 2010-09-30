@@ -23,6 +23,7 @@ type
     Label1: TfpgLabel;
     Label2: TfpgLabel;
     pnlSearchHighlight: TfpgPanel;
+    pnlNotesColor: TfpgPanel;
     lblIndexStyle: TfpgLabel;
     lblSearchDirs: TfpgLabel;
     btnSearchDirAdd: TfpgButton;
@@ -32,6 +33,7 @@ type
     chkStartupHelp: TfpgCheckBox;
     chkOpenTOC: TfpgCheckBox;
     btnColorHighlight: TfpgButton;
+    btnColorNotes: TfpgButton;
     btnResetColors: TfpgButton;
     edtFixedFont: TfpgFontEdit;
     edtNormalFont: TfpgFontEdit;
@@ -50,6 +52,7 @@ type
     procedure btnSaveClick(Sender: TObject);
     procedure btnSearchDirAddClicked(Sender: TObject);
     procedure btnSearchHighlightClicked(Sender: TObject);
+    procedure btnNotesColorClicked(Sender: TObject);
     procedure ResetColorsButtonOnClick(Sender: TObject);
     procedure SettingsToGui;
     procedure GuiToSettings;
@@ -134,6 +137,11 @@ begin
   pnlSearchHighlight.BackgroundColor := fpgSelectColorDialog(pnlSearchHighlight.BackgroundColor);
 end;
 
+procedure TConfigurationForm.btnNotesColorClicked(Sender: TObject);
+begin
+  pnlNotesColor.BackgroundColor := fpgSelectColorDialog(pnlNotesColor.BackgroundColor);
+end;
+
 procedure TConfigurationForm.ResetColorsButtonOnClick(Sender: TObject);
 var
   i: longint;
@@ -180,6 +188,7 @@ begin
   Settings.NormalFontDesc := edtNormalFont.FontDesc;
   Settings.FixedFontDesc := edtFixedFont.FontDesc;
   Settings.Colors[SearchHighlightTextColorIndex] := pnlSearchHighlight.BackgroundColor;
+  Settings.Colors[NotesTextColorIndex] := pnlNotesColor.BackgroundColor;
   // Index
   if rbIndexOrig.Checked then
     Settings.IndexStyle := isFileOnly
@@ -192,6 +201,7 @@ end;
 procedure TConfigurationForm.UpdateColorPanels;
 begin
   pnlSearchHighlight.BackgroundColor := Settings.Colors[SearchHighlightTextColorIndex];
+  pnlNotesColor.BackgroundColor := Settings.Colors[NotesTextColorIndex];
 end;
 
 constructor TConfigurationForm.Create(AOwner: TComponent);
@@ -229,6 +239,7 @@ begin
     Name := 'btnSave';
     SetPosition(344, 408, 80, 24);
     Text := 'Save';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -242,6 +253,7 @@ begin
     Name := 'btnCancel';
     SetPosition(428, 408, 80, 24);
     Text := 'Cancel';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -306,6 +318,17 @@ begin
     Text := 'Search Highlight Color';
   end;
 
+  pnlNotesColor := TfpgPanel.Create(tsFontsColor);
+  with pnlNotesColor do
+  begin
+    Name := 'pnlNotesColor';
+    SetPosition(12, 134, 360, 24);
+    FontDesc := '#Label1';
+    Hint := '';
+    Style := bsLowered;
+    Text := 'Notes/Annotations Color';
+  end;
+
   lblIndexStyle := TfpgLabel.Create(tsIndex);
   with lblIndexStyle do
   begin
@@ -332,6 +355,7 @@ begin
     Name := 'btnSearchDirAdd';
     SetPosition(408, 84, 80, 24);
     Text := 'Add...';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -346,8 +370,6 @@ begin
     SetPosition(12, 84, 388, 148);
     FontDesc := '#List';
     Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
     TabOrder := 5;
     Items.Duplicates := dupIgnore;
   end;
@@ -358,6 +380,7 @@ begin
     Name := 'btnSearchDirDelete';
     SetPosition(408, 116, 80, 24);
     Text := 'Remove...';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -407,11 +430,26 @@ begin
     Name := 'btnColorHighlight';
     SetPosition(384, 104, 80, 24);
     Text := 'Color';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 15;
     OnClick := @btnSearchHighlightClicked;
+  end;
+
+  btnColorNotes := TfpgButton.Create(tsFontsColor);
+  with btnColorNotes do
+  begin
+    Name := 'btnColorNotes';
+    SetPosition(384, 134, 80, 24);
+    Text := 'Color';
+    Down := False;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 15;
+    OnClick := @btnNotesColorClicked;
   end;
 
   btnResetColors := TfpgButton.Create(tsFontsColor);
@@ -420,6 +458,7 @@ begin
     Name := 'btnResetColors';
     SetPosition(12, 328, 100, 24);
     Text := 'Reset Colors';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
