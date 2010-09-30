@@ -45,7 +45,7 @@ type
     Label3: TfpgLabel;
     btnSearch: TfpgButton;
     tsNotes: TfpgTabSheet;
-    ListBox1: TfpgListBox;
+    NotesListBox: TfpgListBox;
     btnNotesAdd: TfpgButton;
     btnNotesEdit: TfpgButton;
     btnNotesDel: TfpgButton;
@@ -71,6 +71,8 @@ type
     Bevel1: TfpgBevel;
     Bevel2: TfpgBevel;
     miTools: TfpgPopupMenu;
+    Bevel3: TfpgBevel;
+    btnTBNoteAdd: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     miOpenRecentMenu: TfpgPopupMenu;
     miDebugHexInfo: TfpgMenuItem;
@@ -94,7 +96,17 @@ type
     CurrentTopic: TTopic; // so we can get easy access to current topic viewed
     CurrentHistoryIndex: integer;
     OpenAdditionalFile: boolean;
+    Notes: TList; // Notes in current files.
 
+    procedure   btnTBNoteAddClick(Sender: TObject);
+    procedure   RichViewOverLink(Sender: TRichTextView; Link: string);
+    procedure   RichViewNotOverLink(Sender: TRichTextView; Link: string);
+    procedure   NotesListBoxChange(Sender: TObject);
+    procedure   NotesListBoxKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    procedure   NotesListBoxDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+    procedure   btnNotesAddClick(Sender: TObject);
+    procedure   btnNotesDelClick(Sender: TObject);
+    procedure   btnNotesEditClick(Sender: TObject);
     procedure   UpdateRichViewFromSettings;
     procedure   btnBackHistClick(Sender: TObject);
     procedure   btnFwdHistClick(Sender: TObject);
@@ -138,6 +150,7 @@ type
     procedure   lbHistoryDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbHistoryKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   btnSearchClicked(Sender: TObject);
+    procedure   btnNotesGotoClicked(Sender: TObject);
     procedure   IndexSearchEditOnChange(Sender: TObject);
     procedure   DisplaySelectedSearchResultTopic;
     procedure   NavigateToHistoryIndex(AIndex: integer);
@@ -155,14 +168,31 @@ type
     function    OpenFile(const AFileName: string; const AWindowTitle: string; const DisplayFirstTopic: boolean): boolean;
     procedure   CloseFile(const ADestroying: boolean = False);
     procedure   OnHelpFileLoadProgress(n, outof: integer; AMessage: string);
-    procedure   LoadNotes(AHelpFile: THelpFile);
     procedure   LoadContents(AFiles: TList; var FirstNode: TfpgTreeNode);
     procedure   LoadIndex;
     // Used in loading contents
     procedure   AddChildNodes(AHelpFile: THelpFile; AParentNode: TfpgTreeNode; ALevel: longint; var ATopicIndex: longint );
-    procedure   ClearNotes;
     procedure   ClearIndexComponents;
-    procedure   SaveNotes(AHelpFile: THelpFile);
+
+    // Note manipulations --------------------------------
+    // make sure that note insert positions are not in
+    // the middle of tags due to help file or newview updates.
+    procedure   CorrectNotesPositions(Topic: TTopic; AText: pchar);
+    procedure   InsertNotesIntoTopicText(ATopic: TTopic; var AText: TfpgString);
+    function    FindOriginalNoteCharIndex(NoteCharIndex: longword; Topic: TTopic): longword;
+    function    FindActualNoteCharIndex(NoteCharIndex: longword; MaxNoteIndex: longword; Topic: TTopic): longword;
+    procedure   RefreshNoteInsertInfo( NoteIndex: longword );
+    procedure   ClearNotes;
+    procedure   SaveNotesForFile(AHelpFile: THelpFile);
+    procedure   LoadNotesForFile(AHelpFile: THelpFile);
+    procedure   AddNote;
+    procedure   EditNote(ANoteIndex: longint);
+    procedure   DeleteNote(ANoteIndex: longint);
+    procedure   SaveNotes;
+    procedure   GotoCurrentNote;
+    procedure   UpdateNotesDisplay;
+    procedure   EnableNotesControls;
+
     procedure   DisplayTopic(ATopic: TTopic = nil);
     procedure   ResetProgress;
     procedure   SetStatus(const AText: TfpgString);
@@ -210,8 +240,11 @@ uses
   ,dvHelpers
   ,frm_configuration
   ,frm_text
+  ,frm_note
   ,NewViewConstantsUnit
   ,CanvasFontManager
+  ,HelpNote
+  ,RichTextDocumentUnit
   ;
 
 const
@@ -221,6 +254,7 @@ const
 
 {$I arrows.inc}
 {$I missing.inc}
+{$I images.inc}
 
 {@VFD_NEWFORM_IMPL}
 
@@ -237,6 +271,67 @@ begin
     Consumed := True;
     DisplayTopic(nil);
   end
+end;
+
+procedure TMainForm.btnTBNoteAddClick(Sender: TObject);
+begin
+  AddNote;
+end;
+
+procedure TMainForm.RichViewOverLink(Sender: TRichTextView; Link: string);
+begin
+  if StrLeft(Link, 4 ) = PARAM_LINK_NOTE then
+    SetStatus('Click to edit note');
+end;
+
+procedure TMainForm.RichViewNotOverLink(Sender: TRichTextView; Link: string);
+begin
+  UpdateLocationPanel;
+end;
+
+procedure TMainForm.NotesListBoxChange(Sender: TObject);
+begin
+  EnableNotesControls;
+end;
+
+procedure TMainForm.NotesListBoxKeyPress(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if (KeyCode = keyReturn) or (KeyCode = keyPEnter) then
+  begin
+    Consumed := True;
+    GotoCurrentNote;
+  end
+  else if (KeyCode = keyDelete) then
+  begin
+    Consumed := True;
+    DeleteNote(NotesListBox.FocusItem);
+  end;
+end;
+
+procedure TMainForm.NotesListBoxDoubleClick(Sender: TObject; AButton: TMouseButton;
+  AShift: TShiftState; const AMousePos: TPoint);
+begin
+  GotoCurrentNote;
+end;
+
+procedure TMainForm.btnNotesAddClick(Sender: TObject);
+begin
+  AddNote;
+end;
+
+procedure TMainForm.btnNotesDelClick(Sender: TObject);
+begin
+  if NotesListBox.FocusItem = -1 then
+    exit;
+  DeleteNote(NotesListBox.FocusItem);
+end;
+
+procedure TMainForm.btnNotesEditClick(Sender: TObject);
+begin
+  if NotesListBox.FocusItem = -1 then
+    exit;
+  EditNote(NotesListBox.FocusItem);
 end;
 
 procedure TMainForm.UpdateRichViewFromSettings;
@@ -295,9 +390,19 @@ var
   lTopic: TTopic;
   lFound: Boolean;
   lURL: TfpgString;
+  lNoteIndex: integer;
 begin
-  // TODO: process other types of links (external, application etc...) too!
-  if pos(PARAM_LINK_EXTERNAL, Link) > 0 then
+  if pos(PARAM_LINK_NOTE, Link) > 0 then
+  begin
+    lNoteIndex := StrToInt(StrRightFrom(Link, 5));
+    NotesListBox.FocusItem := lNoteIndex;
+    EditNote(lNoteIndex);
+  end
+  else if pos(PARAM_LINK_PROGRAM, Link) > 0 then
+  begin
+    TfpgMessageDialog.Warning('', 'Program links are not supported in DocView yet. Please try again with a later build.')
+  end
+  else if pos(PARAM_LINK_EXTERNAL, Link) > 0 then
   begin
     TfpgMessageDialog.Warning('', 'External links are not supported in DocView yet. Please try again with a later build.')
   end
@@ -305,7 +410,6 @@ begin
   begin
     // we have a external URL of some kind
     // format is always:  'url "<uri>"'
-//    ShowMessage('Found an external Link' + LineEnding + Link);
     lURL := StringReplace(Link, 'url "', '', []);
     lURL := UTF8Copy(lURL, 0, UTF8Length(lURL)-1);
     fpgOpenURL(lURL);
@@ -314,15 +418,19 @@ begin
   begin
     // we have a internal INF file link
     LinkIndex := StrToInt( Link );
-    lLink := THelpLink(CurrentTopic.Links[LinkIndex]);
-    lTopic := FindTopicForLink(lLink);
+    lLink     := THelpLink(CurrentTopic.Links[LinkIndex]);
+    lTopic    := FindTopicForLink(lLink);
+
     if lTopic <> nil then
       DisplayTopic(lTopic);
-    exit;
+    { TODO: we need to implement the remained of link support }
+    //-----------------------
+    exit; //==>
 
     lHelp := THelpFile(lLink.HelpFile);
     lTopic := nil;
     lFound := False;
+
     for i := 0 to CurrentOpenFiles.Count-1 do
     begin
       lHelp := THelpFile(CurrentOpenFiles[i]);
@@ -330,17 +438,14 @@ begin
       if lTopic <> nil then
       begin
         lFound := True;
-//        writeln('Found Topic! ', lTopic.Title);
         break;
       end;
       if lFound then
         break;
     end;
+
     if lTopic <> nil then
-    begin
-//      writeln('Displaying topic <', lTopic.Title, '>');
       DisplayTopic(lTopic);
-    end;
   end;
 end;
 
@@ -889,6 +994,11 @@ begin
   DoSearch;
 end;
 
+procedure TMainForm.btnNotesGotoClicked(Sender: TObject);
+begin
+  GotoCurrentNote;
+end;
+
 procedure TMainForm.IndexSearchEditOnChange(Sender: TObject);
 var
   tmpMatchIndex: longint;
@@ -971,7 +1081,8 @@ end;
 
 procedure TMainForm.EnableControls;
 begin
-  //
+  { TODO: lots more need to be added here }
+  EnableNotesControls;
 end;
 
 procedure TMainForm.ClearAllWordSequences;
@@ -1139,8 +1250,7 @@ begin
   //  LoadBookmarks( HelpFile );
   //end;
 
-  { TODO -ograeme : update notes display }
-  //UpdateNotesDisplay;
+  UpdateNotesDisplay;
 
   { TODO -ograeme : bookmarks }
   //BuildBookmarksMenu;
@@ -1403,7 +1513,7 @@ begin
   for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
   begin
     lHelpFile := THelpFile(CurrentOpenFiles[FileIndex]);
-    SaveNotes( lHelpFile );
+    SaveNotesForFile( lHelpFile );
   end;
 
   ClearIndexComponents;
@@ -1425,10 +1535,99 @@ begin
   //
 end;
 
-procedure TMainForm.LoadNotes(AHelpFile: THelpFile);
-begin
-//  NotesFileName:= ChangeFileExt( HelpFile.FileName, '.nte' );
+procedure TMainForm.LoadNotesForFile(AHelpFile: THelpFile);
+var
+  NotesFileName: TfpgString;
+  TopicIndex: longint;
+  InsertPoint: longint;
+  Note: THelpNote;
 
+  NotesFile: TStringList;
+
+  Paragraph: TfpgString;
+  NotEOF: boolean;
+  NoteText: TfpgString;
+  i: integer;
+  s: TfpgString;
+  lReadTopicIndex: boolean;
+  lReadInsertPoint: boolean;
+begin
+  ProfileEvent( 'Load notes for ' + AHelpFile.Filename );
+
+  if AHelpFile.NotesLoaded then
+    exit;
+
+  AHelpFile.NotesLoaded := true;
+  NotesFileName := fpgChangeFileExt(AHelpFile.FileName, NOTES_FILE_EXTENSION);
+
+  if not fpgFileExists(NotesFileName) then
+    exit; // no notes
+
+  NotesFile := TStringList.Create;
+  if NotesFile = nil then
+  begin
+    TfpgMessageDialog.Critical('Error', 'Error opening file: ' + NotesFileName);
+    exit;
+  end;
+  NotesFile.LoadFromFile(NotesFileName);
+
+  NoteText := '';
+  NotEOF := true;
+  i := 0;
+  repeat
+    { reset variables }
+    TopicIndex := -1;
+    InsertPoint := -1;
+    NoteText := '';
+
+    { Read the topic index }
+    s := NotesFile[i];
+    try
+      TopicIndex := StrToInt(s);
+    except
+      TopicIndex := -1;
+    end;
+    inc(i);
+
+    { Read the insert point }
+    s := NotesFile[i];
+    try
+      InsertPoint := StrToInt(s);
+    except
+      InsertPoint := -1;
+    end;
+    inc(i);
+
+    { Read note text until end marker is found }
+    repeat
+      s := NotesFile[i];
+      inc(i);
+      if s = '#ENDNOTE#' then
+      begin
+        // found end of note
+        if (TopicIndex >= 0) and (InsertPoint >= 0) then
+        begin
+          Note := THelpNote.Create;
+          Note.Topic := AHelpFile.Topics[TopicIndex];
+          Note.InsertPoint := InsertPoint;
+          Note.Text := NoteText;
+          Notes.Add(Note);
+        end;
+        break;
+      end
+      else
+      begin
+        if NoteText <> '' then
+          NoteText := NoteText + LineEnding + s
+        else
+          NoteText := s;
+      end;
+    until s = '#ENDNOTE#';
+
+  until i >= NotesFile.Count;
+
+  NotesFile.Free;
+  UpdateNotesDisplay;
 end;
 
 procedure TMainForm.LoadContents(AFiles: TList; var FirstNode: TfpgTreeNode);
@@ -1742,9 +1941,323 @@ begin
   IndexLoaded := False;
 end;
 
-procedure TMainForm.SaveNotes(AHelpFile: THelpFile);
+procedure TMainForm.CorrectNotesPositions(Topic: TTopic; AText: pchar);
+var
+  NoteIndex: longint;
+  Note: THelpNote;
+  p: pchar;
+  NextP: pchar;
+  Element: TTextElement;
+  TextIndex: longint;
 begin
-  { TODO -oGraeme : Implement me }
+  NoteIndex := 0;
+  for NoteIndex := 0 to Notes.Count-1 do
+  begin
+    Note := THelpNote(Notes[NoteIndex]);
+    if Note.Topic = Topic then
+    begin
+      // this note belongs to the specified topic.
+      p := AText;
+
+      while true do
+      begin
+        Element := ExtractNextTextElement( p, NextP );
+        if Element.ElementType = teTextEnd then
+          break;
+        TextIndex := PCharDiff( p, AText );
+        if TextIndex >= Note.InsertPoint then
+        begin
+          // found a safe point to insert
+          if TextIndex <> Note.InsertPoint then
+          begin
+            // correct it.
+            Note.InsertPoint := TextIndex;
+          end;
+          break;
+        end;
+
+        p := NextP;
+      end;
+    end;
+  end;
+end;
+
+procedure TMainForm.InsertNotesIntoTopicText(ATopic: TTopic; var AText: TfpgString);
+var
+  NoteIndex: longint;
+  Note: THelpNote;
+  ActualInsertPoint: longword;
+begin
+  CorrectNotesPositions( ATopic, PChar(AText) );
+
+  for NoteIndex := 0 to Notes.Count - 1 do
+  begin
+    Note := THelpNote(Notes[NoteIndex]);
+    if Note.Topic = ATopic then
+    begin
+      // Adjust insert point for any notes we have already inserted.
+      ActualInsertPoint := FindActualNoteCharIndex( Note.InsertPoint,
+                                                    NoteIndex,
+                                                    ATopic );
+      RefreshNoteInsertInfo( NoteIndex );
+      // DON'T USE UTF8Insert() HERE - THE OFFSET IS IN BYTES, NOT CHARACTERS!
+      Insert(Note.InsertText, AText, ActualInsertPoint);
+    end;
+  end;
+end;
+
+function TMainForm.FindOriginalNoteCharIndex(NoteCharIndex: longword; Topic: TTopic): longword;
+var
+  NoteIndex: longint;
+  Note: THelpNote;
+begin
+  Result := NoteCharIndex;
+  for NoteIndex := 0 to Notes.Count-1 do
+  begin
+    Note := THelpNote(Notes[NoteIndex]);
+    if Note.Topic = Topic then
+      if Note.InsertPoint < NoteCharIndex then
+        dec(Result, UTF8Length(Note.InsertText));
+  end;
+end;
+
+function TMainForm.FindActualNoteCharIndex(NoteCharIndex: longword;
+    MaxNoteIndex: longword; Topic: TTopic): longword;
+var
+  NoteIndex: longint;
+  Note: THelpNote;
+begin
+  NoteIndex := 0;
+  Result := NoteCharIndex;
+  for NoteIndex := 0 to MaxNoteIndex-1 do
+  begin
+    Note := THelpNote(Notes[NoteIndex]);
+    if Note.Topic = Topic then
+      if Note.InsertPoint < NoteCharIndex then
+        inc(Result, UTF8Length(Note.InsertText));
+  end;
+end;
+
+procedure TMainForm.RefreshNoteInsertInfo(NoteIndex: longword);
+var
+  Note: THelpNote;
+begin
+  Note :=  THelpNote(Notes[ NoteIndex ]);
+  if Note.Topic = nil then
+    exit;
+  with Note do
+  begin
+    InsertText := '<color #'
+                   + IntToHex( Settings.Colors[ NotesTextColorIndex ], 6 )
+                   + '><link note' + IntToStr( NoteIndex ) + '>';
+    InsertText := InsertText + Text;
+    InsertText := InsertText + '</color></link>';
+  end;
+end;
+
+procedure TMainForm.SaveNotesForFile(AHelpFile: THelpFile);
+var
+  NotesFileName: TfpgString;
+  FileNoteCount: integer;
+  NoteIndex: integer;
+  Note: THelpNote;
+  NotesFile: TStringList;
+  TopicIndex: integer;
+  s: TfpgString;
+begin
+  ProfileEvent('Save notes for ' + AHelpFile.Filename);
+  if not AHelpFile.NotesLoaded then
+    // we never loaded the notes/displayed a topic from this file
+    // so don't do anything.
+    exit;
+
+  ProfileEvent('Really saving');
+  NotesFileName := fpgChangeFileExt(AHelpFile.FileName, NOTES_FILE_EXTENSION);
+
+  FileNoteCount := 0;
+  for  NoteIndex := 0 to Notes.Count-1 do
+  begin
+    Note := THelpNote(Notes[NoteIndex]);
+    if Note.Topic.HelpFile = AHelpFile then
+      inc(FileNoteCount);
+  end;
+
+  if FileNoteCount = 0 then
+  begin
+    // no notes. delete notes file if it already exists.
+    if fpgFileExists( NotesFileName ) then
+      fpgDeleteFile( NotesFileName );
+    exit;
+  end;
+
+  NotesFile := TStringList.Create;
+
+  for NoteIndex := 0 to Notes.Count-1 do
+  begin
+    Note := THelpNote(Notes[ NoteIndex ]);
+
+    if Note.Topic.HelpFile <> AHelpFile then
+      continue;
+
+    TopicIndex := AHelpFile.IndexOfTopic(Note.Topic);
+
+    NotesFile.Add(IntToStr(TopicIndex));
+    NotesFile.Add(IntToStr(Note.InsertPoint));
+    NotesFile.Add(Note.Text);
+    NotesFile.Add('#ENDNOTE#');
+  end;
+
+  NotesFile.SaveToFile(NotesFileName);
+  NotesFile.Free;
+end;
+
+procedure TMainForm.AddNote;
+var
+  Note: THelpNote;
+  NoteForm: TNoteForm;
+begin
+  { check that the note position isn't within a note already }
+  if RichView.LinkFromIndex(RichView.CursorIndex) <> '' then
+  begin
+    TfpgMessageDialog.Critical('Error', 'You can''t add a note within a link or another note' );
+    exit;
+  end;
+
+  NoteForm := TNoteForm.Create(nil);
+  NoteForm.Text := '';
+  NoteForm.CanDelete := False;
+  if NoteForm.ShowModal <> mrOK then
+  begin
+    NoteForm.Free;
+    exit;
+  end;
+
+  // store note data
+  Note := THelpNote.Create;
+  Note.Text := NoteForm.Text;
+  NoteForm.Free;
+
+  // compensate for existing notes
+  if RichView.CursorIndex <> -1 then
+    Note.InsertPoint := FindOriginalNoteCharIndex(RichView.CursorIndex, CurrentTopic)
+  else
+    Note.InsertPoint := 0;
+  Note.Topic := CurrentTopic;
+  Notes.Add(Note);
+
+  // redisplay topic
+  DisplayTopic(CurrentTopic);
+  //DisplayTopicInWindow( Window,
+  //                      false, // don't follow links!
+  //                      true ); // keep position
+
+  //RichView.SelectionStart := FindActualNoteCharIndex(Note.InsertPoint,
+  //                                                      Notes.Count - 1,
+  //                                                      CurrentTopic);
+  UpdateNotesDisplay;
+
+  SaveNotes;
+end;
+
+procedure TMainForm.EditNote(ANoteIndex: longint);
+var
+  Note: THelpNote;
+  NoteForm: TNoteForm;
+begin
+  Note := THelpNote(Notes[ANoteIndex]);
+  if Note = nil then
+    exit;
+  NoteForm := TNoteForm.Create(nil);
+  try
+    NoteForm.Text := Note.Text;
+    NoteForm.CanDelete := True;
+
+    if NoteForm.ShowModal = mrCancel then
+      exit;
+
+    if NoteForm.ModalResult = mrAbort then
+    begin
+      DeleteNote(ANoteIndex);
+      exit;
+    end;
+
+    Note.Text := NoteForm.Text;
+    SaveNotes;
+    DisplayTopic(CurrentTopic);
+    UpdateNotesDisplay;
+  finally
+    NoteForm.Free;
+  end;
+end;
+
+procedure TMainForm.DeleteNote(ANoteIndex: longint);
+var
+  Note: THelpNote;
+begin
+  if TfpgMessageDialog.Question(rsconfirmation, 'Are you sure you want to delete the seleted Note?') <> mbYes then
+    Exit;
+  { if we got here, we must delete the note }
+  Note := THelpNote(Notes[ANoteIndex]);
+  Notes.Delete(ANoteIndex);
+  Note.Free;
+
+  DisplayTopic(CurrentTopic);
+  UpdateNotesDisplay;
+
+  SaveNotes;
+end;
+
+procedure TMainForm.SaveNotes;
+var
+  FileIndex: integer;
+  HelpFile: THelpFile;
+begin
+  ProfileEvent( 'Save notes' );
+  for FileIndex := 0 to CurrentOpenFiles.Count-1 do
+  begin
+    HelpFile := THelpFile(CurrentOpenFiles[FileIndex]);
+    SaveNotesForFile(HelpFile);
+  end;
+end;
+
+procedure TMainForm.GotoCurrentNote;
+var
+  Note: THelpNote;
+begin
+  if NotesListBox.FocusItem = -1 then
+    exit;
+  Note := NotesListBox.Items.Objects[NotesListBox.FocusItem] as THelpNote;
+  DisplayTopic(Note.Topic);
+end;
+
+procedure TMainForm.UpdateNotesDisplay;
+var
+  NoteIndex: longint;
+  Note: THelpNote;
+  NoteTitle: string;
+begin
+  NotesListBox.Items.Clear;
+  for NoteIndex := 0 to Notes.Count-1 do
+  begin
+    Note := THelpNote(Notes[NoteIndex]);
+    if Note.Topic <> nil then
+      NoteTitle := Note.Topic.Title
+    else
+      NoteTitle := StrLeft(Note.Text, 100);
+    NotesListBox.Items.AddObject(NoteTitle, Note);
+  end;
+  EnableNotesControls;
+end;
+
+procedure TMainForm.EnableNotesControls;
+var
+  NoteSelected: boolean;
+begin
+  NoteSelected := NotesListBox.FocusItem <> -1;
+  btnNotesEdit.Enabled := NoteSelected;
+  btnNotesGoto.Enabled := NoteSelected;
+  btnNotesDel.Enabled := NoteSelected;
+  btnNotesAdd.Enabled := CurrentOpenFiles.Count > 0;
 end;
 
 procedure TMainForm.DisplayTopic(ATopic: TTopic);
@@ -1857,6 +2370,11 @@ begin
 
   //writeln(lText);
   //writeln('-----------------------------');
+  { Load and insert annotations / notes }
+  if not HelpFile.NotesLoaded then
+    LoadNotesForFile(HelpFile);
+  InsertNotesIntoTopicText(Topic, lText);
+
   RichView.AddText(PChar(lText));
 
   if CurrentTopic.ShowInContents then
@@ -1903,11 +2421,12 @@ begin
   inherited Create(AOwner);
   fpgApplication.OnException  := @MainFormException;
   OnShow  := @MainFormShow;
-  OnDestroy :=@MainFormDestroy;
+  OnDestroy := @MainFormDestroy;
 //  Files := TList.Create;
   AllFilesWordSequences := TList.Create;
   CurrentOpenFiles := TList.Create;
   DisplayedIndex := TStringList.Create;
+  Notes := TList.Create;
   CurrentHistoryIndex := -1;
   FHistorySelection := False;
   OpenAdditionalFile := False;
@@ -1941,6 +2460,11 @@ begin
     'dv.arrowdown', @usr_arrow_down,
     sizeof(usr_arrow_down), 0, 0);
 
+  fpgImages.AddMaskedBMP(
+    'dv.notegreen', @usr_notegreen,
+    sizeof(usr_notegreen), 0, 0);
+
+
   // load custom user settings like Fonts, Search Highlight Color etc.
   LoadSettings;
 end;
@@ -1953,6 +2477,7 @@ begin
   FFileOpenRecent := nil;   // it was a reference only
   miOpenRecentMenu.Free;
 //  DestroyListAndObjects(Files);
+  DestroyListAndObjects(Notes);
   DestroyListAndObjects(AllFilesWordSequences);
   DestroyListAndObjects(CurrentOpenFiles);
   inherited Destroy;
@@ -2052,6 +2577,7 @@ begin
     SetPosition(166, 4, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Go to';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -2074,6 +2600,7 @@ begin
     SetPosition(166, 4, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Go to';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -2089,11 +2616,9 @@ begin
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
     TabOrder := 1;
     OnDoubleClick  := @lbIndexDoubleClick;
-    OnKeyPress:=@lbIndexKeyPress;
+    OnKeyPress := @lbIndexKeyPress;
   end;
 
   IndexSearchEdit := TfpgEdit.Create(tsIndex);
@@ -2240,8 +2765,6 @@ begin
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
     TabOrder := 9;
     OnDoubleClick := @lbSearchResultsDoubleClick;
     OnKeyPress := @lbSearchResultsKeyPress;
@@ -2264,6 +2787,7 @@ begin
     SetPosition(220, 20, 28, 26);
     Anchors := [anRight,anTop];
     Text := 'Go';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -2279,17 +2803,18 @@ begin
     Text := 'Notes';
   end;
 
-  ListBox1 := TfpgListBox.Create(tsNotes);
-  with ListBox1 do
+  NotesListBox := TfpgListBox.Create(tsNotes);
+  with NotesListBox do
   begin
-    Name := 'ListBox1';
+    Name := 'NotesListBox';
     SetPosition(4, 32, 242, 212);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
     TabOrder := 0;
+    OnDoubleClick  := @NotesListBoxDoubleClick;
+    OnKeyPress  := @NotesListBoxKeyPress;
+    OnChange  := @NotesListBoxChange;
   end;
 
   btnNotesAdd := TfpgButton.Create(tsNotes);
@@ -2298,12 +2823,14 @@ begin
     Name := 'btnNotesAdd';
     SetPosition(4, 4, 24, 24);
     Text := '';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.add';
     TabOrder := 1;
     Enabled := false;
+    OnClick  := @btnNotesAddClick;
   end;
 
   btnNotesEdit := TfpgButton.Create(tsNotes);
@@ -2312,12 +2839,14 @@ begin
     Name := 'btnNotesEdit';
     SetPosition(32, 4, 24, 24);
     Text := '';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.edit';
     TabOrder := 2;
     Enabled := False;
+    OnClick := @btnNotesEditClick;
   end;
 
   btnNotesDel := TfpgButton.Create(tsNotes);
@@ -2326,12 +2855,14 @@ begin
     Name := 'btnNotesDel';
     SetPosition(60, 4, 24, 24);
     Text := '';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.remove';
     TabOrder := 3;
     Enabled := False;
+    OnClick := @btnNotesDelClick;
   end;
 
   btnNotesGoto := TfpgButton.Create(tsNotes);
@@ -2341,10 +2872,12 @@ begin
     SetPosition(166, 4, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Go to';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 4;
+    OnClick := @btnNotesGotoClicked;
   end;
 
   tsHistory := TfpgTabSheet.Create(PageControl1);
@@ -2363,8 +2896,6 @@ begin
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#List';
     Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
     TabOrder := 0;
     OnDoubleClick := @lbHistoryDoubleClick;
     OnKeyPress := @lbHistoryKeyPress;
@@ -2385,7 +2916,9 @@ begin
     SetPosition(368, 192, 244, 92);
     TabOrder := 2;
     Align := alClient;
-    OnClickLink:=@RichViewClickLink;
+    OnOverLink  := @RichViewOverLink;
+    OnNotOverLink  := @RichViewNotOverLink;
+    OnClickLink := @RichViewClickLink;
   end;
 
   MainMenu := TfpgMenuBar.Create(self);
@@ -2482,6 +3015,7 @@ begin
     Name := 'btnOpen';
     SetPosition(30, 1, 24, 24);
     Text := '';
+    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Open a new help file';
@@ -2499,6 +3033,7 @@ begin
     Name := 'btnBack';
     SetPosition(70, 1, 32, 24);
     Text := '<';
+    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Previous history item';
@@ -2516,6 +3051,7 @@ begin
     Name := 'btnFwd';
     SetPosition(104, 1, 32, 24);
     Text := '>';
+    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Next history item';
@@ -2533,6 +3069,7 @@ begin
     Name := 'btnPrev';
     SetPosition(138, 1, 32, 24);
     Text := 'prev';
+    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Previous Topic';
@@ -2550,6 +3087,7 @@ begin
     Name := 'btnNext';
     SetPosition(172, 1, 32, 24);
     Text := 'next';
+    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Next Topic';
@@ -2565,13 +3103,14 @@ begin
   with btnHelp do
   begin
     Name := 'btnHelp';
-    SetPosition(218, 1, 24, 24);
+    SetPosition(256, 1, 24, 24);
     Text := '';
+    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Display Product Information';
     ImageMargin := -1;
-    ImageName := 'stdimg.help';
+    ImageName := 'stdimg.about';
     ImageSpacing := 0;
     TabOrder := 6;
     Focusable := False;
@@ -2584,6 +3123,7 @@ begin
     Name := 'btnQuit';
     SetPosition(4, 1, 24, 24);
     Text := '';
+    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := '';
@@ -2613,6 +3153,34 @@ begin
     Hint := '';
     Style := bsLowered;
     Shape := bsLeftLine;
+  end;
+
+  Bevel3 := TfpgBevel.Create(ToolBar);
+  with Bevel3 do
+  begin
+    Name := 'Bevel3';
+    SetPosition(248, 0, 6, 24);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsLeftLine;
+  end;
+
+  btnTBNoteAdd := TfpgButton.Create(ToolBar);
+  with btnTBNoteAdd do
+  begin
+    Name := 'btnTBNoteAdd';
+    SetPosition(218, 1, 24, 24);
+    Text := '';
+    Down := False;
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageMargin := -1;
+    ImageName := 'dv.notegreen';
+    ImageSpacing := 0;
+    TabOrder := 12;
+    Focusable := False;
+    OnClick := @btnTBNoteAddClick;
   end;
 
   {@VFD_BODY_END: MainForm}

@@ -28,7 +28,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="33">
+    <Units Count="35">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -188,6 +188,16 @@
         <Filename Value="../docs/docview.ipf"/>
         <IsPartOfProject Value="True"/>
       </Unit32>
+      <Unit33>
+        <Filename Value="frm_note.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_note"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="HelpNote.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpNote"/>
+      </Unit34>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

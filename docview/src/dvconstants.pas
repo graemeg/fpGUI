@@ -1,3 +1,20 @@
+{
+    fpGUI  -  Free Pascal GUI Toolkit
+
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Constants used by DocView.
+}
+
 unit dvConstants;
 
 {$mode objfpc}{$H+}
@@ -5,7 +22,9 @@ unit dvConstants;
 interface
 
 uses
-  Classes;
+  Classes
+  ,fpg_base
+  ;
 
 const
   { DO NOT LOCALIZE }
@@ -14,6 +33,7 @@ const
   HELP_FILE_DELIMITER = '+';
   HELP_FILE_EXTENSION = ExtensionSeparator + 'hlp';
   INF_FILE_EXTENSION = ExtensionSeparator + 'inf';
+  NOTES_FILE_EXTENSION = ExtensionSeparator + 'notes';
   cDocViewHelpFile = 'docview.inf';
 
 
@@ -36,6 +56,7 @@ resourcestring
 const
   hcConfigGeneralTab               = 510;
   hcConfigFontsColorTab            = 520;
+
 
 implementation
 
