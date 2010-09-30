@@ -82,21 +82,24 @@ bug report:
 :li.A screenshot may be useful, if the problem is an incorrect or corrupt
 display.
 :eul.
+
 :p.:hp2.Why doesn't my help file work properly?:ehp2.
-:p.Some of the less used features of the original View program are not
+:p.
+Some of the less used features of the original View program are not
 implemented. This is either because I have not got around to it, or
 because they are simply not worth the time. Examples include
 metafiles, index synonyms, application control API (like toolbar button customisation),
 MDI style window management and so on.
-:p.Unfortunately, IBM seems to have used every one of these features in there INF
+:p.
+Unfortunately, IBM seems to have used every one of these features in there INF
 documents, so you may find an occasional file that doesn't
 load or doesn't work properly.
+
 :p.:hp2.Features still planned?:ehp2.
 :ul.
 :li.Image support. The Ric Text View component can already handle images, I am only struggling
 to decode the images inside INF help files. This should hopefully be fixed soon.
 :li.Bookmark support
-:li.Annotations of help files
 :li.Printing support
 :li.Cross-file linking. Clicking a hyperlink that automatically opens another
 INF help file and goes to the correct topic. DocView already supports loading
@@ -424,12 +427,11 @@ search result. Searches are :hp2.not:ehp2. case-sensitive.
 .* ************************************************************
 :h2 res=7 id='notes'.Notes
 :hp2.Adding and Using Notes:ehp2.
-:note.:hp8.*** This feature is not implemented yet. ***:ehp8.
 :p.
 DocView allows you to add notes (annotations) to your help
 files.
 :p.
-To add a note, simply click where you want to make a note and click the
+To add a note, simply left click where you want to make a note and click the
 "Note" toolbar button
 .*  :artwork runin name='images\note.bmp'.
 , then type your text and click OK. The text will be inserted into the
@@ -443,13 +445,21 @@ You can also review all the notes that you've made in the current help
 file(s) by going to the Notes tab; this allows you to add,
 edit and delete, and also jump to the topics containing your notes.
 :p.
-Notes are saved in a file with the extension "&per.notes", in the DocView config
-directory. This is in the user's home profile directory where there is read/write
-access. Under Linux it is normally "~/.config/docview/" and under Windows it is
-normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
-I will probably add a setting in DocView, so the user can configure a 
-preferred storage location for notes (eg: some users prefer it like OS/2's View program did,
-by storing notes in the same directory as the help file).
+Notes are saved in a file with the extension "&per.notes", in same directory
+as the help file. This makes it ideal to keep your private notes with the help
+files in question. For example: storing help files on a removable usb drive. If
+you made any annotations, your annotations will be avaiable, no matter what
+machine you use to read your help. In future this behaviour will become user
+selectable, so you can select your preferred storage location.
+
+.* the DocView config
+.* directory. This is in the user's home profile directory where there is read/write
+.* access. Under Linux it is normally "~/.config/docview/" and under Windows it is
+.* normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
+.* I will probably add a setting in DocView, so the user can configure a
+.* preferred storage location for notes (eg: some users prefer it like OS/2's View program did,
+.* by storing notes in the same directory as the help file).
+
 :note.If a help file is changed (for example a program is
 upgraded) then notes will no longer appear in the correct place;
 however, you can still read them from the Notes tab.
