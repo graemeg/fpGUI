@@ -601,12 +601,12 @@ var
 begin
   case Style.Alignment of
     taLeft:
-      Result := Style.LeftMargin * FontWidthPrecisionFactor;
+      Result := Style.LeftMargin;
 
     taRight:
-      Result :=   Style.LeftMargin * FontWidthPrecisionFactor
+      Result :=   Style.LeftMargin
                 + FLayoutWidth
-                - Style.RightMargin * FontWidthPrecisionFactor
+                - Style.RightMargin
                 - Line.Width;
 
     taCenter:
@@ -617,10 +617,9 @@ begin
         // |<-----line width------>               |
         // space = layoutw-rm-linew
         SpaceOnLine :=   FLayoutWidth
-                       - Style.RightMargin * FontWidthPrecisionFactor
+                       - Style.RightMargin
                        - Line.Width; // Note: line width includes left margin
-        Result :=   Style.LeftMargin * FontWidthPrecisionFactor
-                  + SpaceOnLine div 2;
+        Result :=   Style.LeftMargin + (SpaceOnLine div 2);
       end;
   end;
 end;
@@ -671,8 +670,7 @@ begin
           // so work out alignment
           X := GetStartX( Style, Line );
 
-          if X div FontWidthPrecisionFactor
-             > XToFind then
+          if X > XToFind then
           begin
             // found before the start of the line
             // don't set link
@@ -687,8 +685,7 @@ begin
         // Now find out how wide the thing is
         inc( X, GetElementWidth( Element ) );
 
-        if X div FontWidthPrecisionFactor
-           > XToFind then
+        if X > XToFind then
         begin
           // found
           Offset := PCharDiff( P, Line.Text );
@@ -715,7 +712,7 @@ begin
             PerformStyleTag( Element.Tag,
                              Style,
                              X );
-            NewMarginX := Style.LeftMargin * FontWidthPrecisionFactor;
+            NewMarginX := Style.LeftMargin;
             if NewMarginX > X then
             begin
               //skip across...
@@ -771,7 +768,7 @@ begin
 
         if GetCharIndex( P ) - GetCharIndex( Line.Text ) >= Offset then
         begin
-          X := X div FontWidthPrecisionFactor;
+          X := X;
           // found
           exit;
         end;
@@ -793,7 +790,7 @@ begin
                          Style,
                          X );
 
-        NewMarginX := Style.LeftMargin * FontWidthPrecisionFactor;
+        NewMarginX := Style.LeftMargin;
         if NewMarginX > X then
         begin
           //skip across...
@@ -808,7 +805,7 @@ begin
   if not StartedDrawing then
     X := GetStartX( Style, Line );
 
-  X := X div FontWidthPrecisionFactor;
+  X := X;
 end;
 
 function TRichTextLayout.GetLineFromPosition( YToFind: longint;
@@ -930,9 +927,7 @@ begin
       if IsValidBitmapIndex( BitmapIndex ) then
       begin
         Bitmap := FImages.Item[BitmapIndex].Image;
-        Result := Trunc(Bitmap.Width
-                  * FontWidthPrecisionFactor
-                  * FHorizontalImageScale);
+        Result := Trunc(Bitmap.Width * FHorizontalImageScale);
       end;
     end;
 
