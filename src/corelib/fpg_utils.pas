@@ -57,6 +57,7 @@ function fpgGetCurrentDir: TfpgString;
 function fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
 function fpgExpandFileName(const FileName: TfpgString): TfpgString;
 function fpgFileExists(const FileName: TfpgString): Boolean;
+function fpgDeleteFile(const FileName: TfpgString): Boolean;
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
@@ -127,6 +128,11 @@ end;
 function fpgFileExists(const FileName: TfpgString): Boolean;
 begin
   Result := FileExists(fpgToOSEncoding(FileName));
+end;
+
+function fpgDeleteFile(const FileName: TfpgString): Boolean;
+begin
+  Result := DeleteFile(fpgToOSEncoding(FileName));
 end;
 
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
