@@ -640,13 +640,12 @@ Var
   NewMarginX: longint;
   StartedDrawing: boolean;
 begin
-  Line := TLayoutLine(FLines[ LineIndex ]);
-  P := Line.Text;
-  EndP := Line.Text + Line.Length;
-
+  Line  := TLayoutLine(FLines[ LineIndex ]);
+  P     := Line.Text;
+  EndP  := Line.Text + Line.Length;
   Style := Line.Style;
-  FFontManager.SetFont( Style.Font );
 
+  FFontManager.SetFont( Style.Font );
   StartedDrawing := false;
 
   Link := '';
@@ -830,7 +829,7 @@ begin
   begin
     LineHeight := TLayoutLine(FLines[ LineIndex ]).Height;
     if     ( YToFind >= Y )
-       and ( YToFind < Y + LineHeight ) then
+       and ( YToFind < (Y + LineHeight)) then
       begin
         // YToFind is within the line
         Result := tpWithinText;
@@ -838,7 +837,7 @@ begin
         exit;
       end;
 
-    inc( Y, TLayoutLine(FLines[ LineIndex ]).Height );
+    inc( Y, LineHeight );
     inc( LineIndex );
   end;
 
