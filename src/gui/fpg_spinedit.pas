@@ -327,10 +327,7 @@ end;
 
 procedure TfpgAbstractSpinEdit.HandlePaint;
 begin
-    Canvas.Clear(BackgroundColor);
-    if FButtonUp.HasHandle then
-      fpgPostMessage(self, FButtonUp, FPGM_PAINT);
-//    FButtonDown.Invalidate;
+  Canvas.Clear(BackgroundColor);
 end;
 
 procedure TfpgAbstractSpinEdit.HandleResize(AWidth, AHeight: TfpgCoord);

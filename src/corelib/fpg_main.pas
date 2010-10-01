@@ -2215,6 +2215,7 @@ procedure TfpgCaret.UnSetCaret(ACanvas: TfpgCanvas);
 begin
   if (FCanvas = ACanvas) or (ACanvas = nil) then
   begin
+    FTimer.Enabled := False;
     FEnabled := False;
     FCanvas  := nil;
   end;
