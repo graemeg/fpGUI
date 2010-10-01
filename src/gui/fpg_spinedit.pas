@@ -1113,9 +1113,13 @@ begin
     begin
       FValue      := 0;
       FEdit.Value := FValue;
+      DoOnChange;
     end
     else if (StrToInt(FEdit.Text) <= FMaxValue) and (StrToInt(FEdit.Text) >= FMinValue) then
-      FValue      := FEdit.Value
+    begin
+      FValue      := FEdit.Value;
+      DoOnChange;
+    end
     else
       FEdit.Value := FValue;
 
@@ -1124,11 +1128,13 @@ begin
     begin
       Inc(FValue, FIncrement);
       FEdit.Value := FValue;
+      DoOnChange;
     end
     else if not IsMaxLimitReached then
     begin
       FValue      := FMaxValue;
       FEdit.Value := FValue;
+      DoOnChange;
     end;
 
   if KeyCode = KeyDown then
@@ -1136,23 +1142,27 @@ begin
     begin
       Dec(FValue, FIncrement);
       FEdit.Value := FValue;
+      DoOnChange;
     end
     else if not IsMinLimitReached then
     begin
       FValue      := FMinValue;
       FEdit.Value := FValue;
+      DoOnChange;
     end;
 
   if KeyCode = KeyPageUp then
   begin
     FValue      := FMaxValue;
     FEdit.Value := FValue;
+    DoOnChange;
   end;
 
   if KeyCode = KeyPageDown then
   begin
     FValue      := FMinValue;
     FEdit.Value := FValue;
+    DoOnChange;
   end;
 
   EnableButtons;
