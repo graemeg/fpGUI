@@ -382,7 +382,7 @@ var
 begin
   r := AButton.GetClientRect;
 
-  InflateRect(r, -1, -1); // button borders
+  InflateRect(r, -2, -2); // button borders
   if AButton.Down then
     OffsetRect(r, 1, 1);
 
