@@ -179,7 +179,7 @@ var
 begin
   fname := EditedFileName;
 
-  if ((Sender as TComponent).Name = 'btnSave')
+  if ((Sender as TComponent).Tag = 10)
     and (EditedFileName <> '') then
       fname := EditedFileName
   else

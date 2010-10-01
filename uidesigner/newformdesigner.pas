@@ -190,6 +190,7 @@ begin
   Name := 'frmAbout';
   SetPosition(378, 267, 276, 180);
   WindowTitle := 'Product Information...';
+  Hint := '';
   Sizeable := False;
   WindowPosition := wpScreenCenter;
 
@@ -221,6 +222,7 @@ begin
     SetPosition(194, 148, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Close';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := 'stdimg.close';
@@ -285,12 +287,14 @@ var
   x, y: integer;
   wgc: TVFDWidgetClass;
   btn: TwgPaletteButton;
+  mi: TfpgMenuItem;
 begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: frmMain}
   Name := 'frmMain';
-  SetPosition(84, 123, 754, 92);
+  SetPosition(338, 140, 754, 92);
   WindowTitle := 'frmMain';
+  Hint := '';
   ShowHint := True;
   WindowPosition := wpUser;
   MinHeight := 82;
@@ -310,10 +314,12 @@ begin
     Name := 'btnNewForm';
     SetPosition(4, 28, 25, 24);
     Text := '';
+    Down := False;
     FontDesc := '#Label1';
-    Hint := 'Create a new form';
+    Hint := 'Add New Form to Unit';
     ImageMargin := -1;
     ImageName := 'vfd.newform';
+    ImageSpacing := 0;
     TabOrder := 1;
     Focusable := False;
     OnClick   := @(maindsgn.OnNewForm);
@@ -325,10 +331,12 @@ begin
     Name := 'btnOpen';
     SetPosition(30, 28, 25, 24);
     Text := '';
+    Down := False;
     FontDesc := '#Label1';
     Hint := 'Open a file';
     ImageMargin := -1;
     ImageName := 'stdimg.open';
+    ImageSpacing := 0;
     TabOrder := 2;
     Focusable := False;
     OnClick   := @(maindsgn.OnLoadFile);
@@ -340,12 +348,15 @@ begin
     Name := 'btnSave';
     SetPosition(56, 28, 25, 24);
     Text := '';
+    Down := False;
     FontDesc := '#Label1';
     Hint := 'Save the current form design';
     ImageMargin := -1;
     ImageName := 'stdimg.save';
+    ImageSpacing := 0;
     TabOrder := 3;
     Focusable := False;
+    Tag := 10;
     OnClick   := @(maindsgn.OnSaveFile);
   end;
 
@@ -367,6 +378,7 @@ begin
     SetPosition(4, 67, 144, 22);
     Anchors := [anLeft,anBottom];
     FontDesc := '#List';
+    Hint := '';
     Items.Add('-');
     TabOrder := 5;
     FocusItem := 0;
@@ -377,12 +389,15 @@ begin
   begin
     Name := 'filemenu';
     SetPosition(464, 64, 120, 20);
-    AddMenuItem('New', '', @(maindsgn.OnNewFile));
-    AddMenuItem('Open', '', @(maindsgn.OnLoadFile));
+    AddMenuItem('Create New File...', '', @(maindsgn.OnNewFile));
+    AddMenuItem('Open...', '', @(maindsgn.OnLoadFile));
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
-    AddMenuItem('Save As...', '', @(maindsgn.OnSaveFile));
     AddMenuItem('-', '', nil);
-    AddMenuItem('New Form...', '', @(maindsgn.OnNewForm));
+    mi := AddMenuItem('Save', '', @(maindsgn.OnSaveFile));
+    mi.Tag := 10;
+    AddMenuItem('Save As New Template Unit...', '', @(maindsgn.OnSaveFile));
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Add New Form to Unit...', '', @(maindsgn.OnNewForm));
     AddMenuItem('-', '', nil);
     AddMenuItem('Exit', '', @(maindsgn.OnExit));
   end;
