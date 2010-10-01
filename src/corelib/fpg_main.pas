@@ -379,6 +379,7 @@ procedure fpgDeleteFirstMessage;
 function  fpgColorToRGB(col: TfpgColor): TfpgColor;
 function  fpgGetNamedColor(col: TfpgColor): TfpgColor;
 procedure fpgSetNamedColor(colorid, rgbvalue: longword);
+function  fpgIsNamedColor(col: TfpgColor): boolean;
 function  fpgGetNamedFontDesc(afontid: string): string;
 procedure fpgSetNamedFont(afontid, afontdesc: string);
 function  fpgGetNamedFontList: TStringlist;
@@ -1057,6 +1058,11 @@ begin
     Exit;
   i := colorid and $FF;
   fpgNamedColors[i] := rgbvalue;
+end;
+
+function fpgIsNamedColor(col: TfpgColor): boolean;
+begin
+  Result := (col and cl_BaseNamedColor) <> 0;
 end;
 
 function fpgGetNamedFontDesc(afontid: string): string;
