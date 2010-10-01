@@ -908,7 +908,8 @@ begin
   begin
     btn := wgPalette.Components[n] as TwgPaletteButton;
     btn.SetPosition(x, y, 30, 28);
-
+    btn.ImageMargin   := -1;
+    btn.ImageSpacing  := 0;
     Inc(x, 32);
     if (x+30) >= wgpalette.Width then
     begin
