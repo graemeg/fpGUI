@@ -135,6 +135,7 @@ type
     property    AutoHeight;
     property    BackgroundColor default clListBox;
     property    DragToReorder;
+    property    Enabled;
     property    FocusItem;
     property    FontDesc;
     property    Hint;
@@ -197,6 +198,7 @@ type
     property    Color;
     property    ColorPalette;
     property    DragToReorder;
+    property    Enabled;
     property    FocusItem;
     property    FontDesc;
     property    Hint;

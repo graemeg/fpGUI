@@ -137,6 +137,7 @@ type
   published
     property    BackgroundColor default clBoxColor;
     property    DropDownCount;
+    property    Enabled;
     property    ExtraHint;
     property    FocusItem;
     property    FontDesc;

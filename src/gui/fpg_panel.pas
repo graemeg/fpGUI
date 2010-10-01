@@ -75,6 +75,7 @@ type
   published
     property    BackgroundColor;
     property    BorderStyle;
+    property    Enabled;
     property    Height;
     property    Hint;
     property    Left;
@@ -132,6 +133,7 @@ type
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
     property    BackgroundColor;
     property    BorderStyle;
+    property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Height;
     property    Hint;
@@ -183,6 +185,7 @@ type
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property    BackgroundColor;
     property    BorderStyle;
+    property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Height;
     property    Hint;

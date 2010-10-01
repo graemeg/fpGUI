@@ -236,6 +236,7 @@ type
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth default 15;
+    property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    IndentNodeWithNoImage: boolean read FIndentNodeWithNoImage write SetIndentNodeWithNoImage default True;
     property    NoImageIndent: integer read FNoImageIndent write FNoImageIndent default 16;

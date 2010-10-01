@@ -163,6 +163,7 @@ type
     property    AutoSize;
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
+    property    Enabled;
     property    ExtraHint;
     property    FontDesc;
     property    HeightMargin;
@@ -258,6 +259,7 @@ type
     property    Text;
   published
     property    CustomThousandSeparator;
+    property    Enabled;
     property    Hint;
     property    NegativeColor;
     property    ParentShowHint;
@@ -298,6 +300,7 @@ type
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
     property    Decimals: integer read FDecimals write SetDecimals default -1;
+    property    Enabled;
     property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals default False;
     property    Hint;
     property    NegativeColor;
@@ -337,6 +340,7 @@ type
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
     property    Decimals: integer read FDecimals write SetDecimals default 2;
+    property    Enabled;
     property    Hint;
     property    NegativeColor;
     property    ParentShowHint;
@@ -344,6 +348,7 @@ type
     property    ShowHint;
     property    ShowThousand default True;
     property    TabOrder;
+    property    TextColor;
     property    Value: Currency read GetValue write SetValue;
     property    OnChange;
     property    OnEnter;

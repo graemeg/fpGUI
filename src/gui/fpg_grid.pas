@@ -133,6 +133,7 @@ type
     property    ColumnWidth;
     property    DefaultColWidth;
     property    DefaultRowHeight;
+    property    Enabled;
     property    FocusCol;
     property    FocusRow;
     property    FontDesc;

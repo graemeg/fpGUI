@@ -227,6 +227,7 @@ type
     property    DateFormat: string read FDateFormat write SetDateFormat;
     property    DateValue: TDateTime read FDate write SetDateValue;
     property    DayColor: TfpgColor read FDayColor write SetDayColor;
+    property    Enabled;
     property    FontDesc;
     property    Hint;
     property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;

@@ -70,14 +70,15 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property ExtraHint;
-    property FileName: TfpgString read GetFileName write SetFileName;
-    property InitialDir: TfpgString read FInitialDir write FInitialDir;
-    property Filter: TfpgString read FFilter write SetFilter;
-    property ReadOnly;
-    property TabOrder;
-    property OnButtonClick;
-    property OnShowHint;
+    property    Enabled;
+    property    ExtraHint;
+    property    FileName: TfpgString read GetFileName write SetFileName;
+    property    InitialDir: TfpgString read FInitialDir write FInitialDir;
+    property    Filter: TfpgString read FFilter write SetFilter;
+    property    ReadOnly;
+    property    TabOrder;
+    property    OnButtonClick;
+    property    OnShowHint;
   end;
 
 
@@ -92,13 +93,14 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property Directory: TfpgString read GetDirectory write SetDirectory;
-    property ExtraHint;
-    property RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
-    property ReadOnly;
-    property TabOrder;
-    property OnButtonClick;
-    property OnShowHint;
+    property    Directory: TfpgString read GetDirectory write SetDirectory;
+    property    Enabled;
+    property    ExtraHint;
+    property    RootDirectory: TfpgString read FRootDirectory write FRootDirectory;
+    property    ReadOnly;
+    property    TabOrder;
+    property    OnButtonClick;
+    property    OnShowHint;
   end;
 
 
@@ -111,11 +113,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property FontDesc: TfpgString read GetFontDesc write SetFontDesc;
-    property ReadOnly;
-    property TabOrder;
-    property OnButtonClick;
-    property OnShowHint;
+    property    Enabled;
+    property    ExtraHint;
+    property    FontDesc: TfpgString read GetFontDesc write SetFontDesc;
+    property    ReadOnly;
+    property    TabOrder;
+    property    OnButtonClick;
+    property    OnShowHint;
   end;
 
 

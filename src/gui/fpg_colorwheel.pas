@@ -63,6 +63,7 @@ type
     procedure   SetSelectedColor(const NewColor: TfpgColor);
   published
     property    BackgroundColor;
+    property    Enabled;
     property    ValueBar: TfpgValueBar Read FValueBar Write SetValueBar;
     property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth default 5;
     property    CursorSize: longint Read FCursorSize Write SetCursorSize default 5;
@@ -99,6 +100,7 @@ type
     procedure   SetHS(Hue: longint; Sat: double);
   published
     property    BackgroundColor;
+    property    Enabled;
     property    Value: double Read FValue Write SetValue;
     property    SelectedColor: TfpgColor Read GetSelectedColor;
     property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth;

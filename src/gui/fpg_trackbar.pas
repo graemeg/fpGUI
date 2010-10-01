@@ -116,6 +116,7 @@ type
     destructor  Destroy; override;
   published
     property    BackgroundColor;
+    property    Enabled;
     property    Position: integer read FPosition write SetTBPosition default 0;
     property    ScrollStep: integer read FScrollStep write FScrollStep default 1;
     property    Min: integer read FMin write SetMin default 0;

@@ -68,6 +68,7 @@ type
     property    BackgroundColor;
     property    BoxLayout;
     property    Checked;
+    property    Enabled;
     property    FontDesc;
     property    Height;
     property    Hint;

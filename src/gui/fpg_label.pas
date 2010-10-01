@@ -71,6 +71,7 @@ type
     property    Alignment;
     property    AutoSize;
     property    BackgroundColor;
+    property    Enabled;
     property    FontDesc;
     property    Height;
     property    Hint;

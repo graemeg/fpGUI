@@ -133,6 +133,7 @@ type
     property    Default;
     property    Down;
     property    Embedded;
+    property    Enabled;
     property    Flat;
     property    FontDesc;
     property    GroupIndex;

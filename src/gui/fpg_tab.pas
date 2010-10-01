@@ -71,6 +71,8 @@ type
     property    PageControl: TfpgPageControl read FPageControl write SetPageControl;
     property    TabVisible: boolean read FTabVisible write FTabVisible;
   published
+    property    BackgroundColor;
+    property    Enabled;
     property    Text: string read GetText write SetText;
     property    OnPaint;
   end;
@@ -145,6 +147,7 @@ type
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
     property    BackgroundColor;
+    property    Enabled;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;
     property    FixedTabHeight: integer read FFixedTabHeight write SetFixedTabHeight default 21;
     property    Hint;

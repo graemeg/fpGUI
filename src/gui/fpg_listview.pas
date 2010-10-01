@@ -250,6 +250,7 @@ type
     function    NewItem: TfpgLVItem;
   published
     property    Columns: TfpgLVColumns read FColumns;
+    property    Enabled;
     property    HScrollBar: TfpgScrollBar read FHScrollBar;
     property    ItemHeight: Integer read GetItemHeight;
     property    ItemIndex: Integer read FItemIndex write SetItemIndex;
