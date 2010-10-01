@@ -1651,6 +1651,7 @@ procedure TfpgBaseNumericEdit.SetNegativeColor(const AValue: TfpgColor);
 begin
   if FNegativeColor=AValue then exit;
   FNegativeColor:=AValue;
+  FormatEdit;
 end;
 
 procedure TfpgBaseNumericEdit.SetThousandSeparator(const AValue: TfpgChar);
