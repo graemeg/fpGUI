@@ -132,7 +132,9 @@ end;
 
 function fpgDeleteFile(const FileName: TfpgString): Boolean;
 begin
-  Result := DeleteFile(fpgToOSEncoding(FileName));
+  { Don't remove 'SysUtils.' prefix, it is required under Windows, other
+    FPC tries to use Windows.DeleteFile API - which is wrong }
+  Result := SysUtils.DeleteFile(fpgToOSEncoding(FileName));
 end;
 
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
