@@ -916,6 +916,7 @@ begin
     Items.Add('48');
     Items.Add('64');
     Items.Add('72');
+    FocusItem := 4;  // 10 point font
     OnChange  := @OnParamChange;
   end;
 

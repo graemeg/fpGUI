@@ -1079,9 +1079,9 @@ begin
       Exit; //==>
     end;
 
-  {.$IFDEF DEBUG}
+  {$IFDEF DEBUG}
   Writeln('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
-  {.$ENDIF}
+  {$ENDIF}
   Result := FPG_DEFAULT_FONT_DESC;
 end;
 
