@@ -64,6 +64,7 @@ uses
   fpg_popupcalendar,
   fpg_gauge,
   fpg_editbtn,
+  fpg_ColorWheel,
   vfdpropeditgrid,
   vfdmain;
 
@@ -293,6 +294,16 @@ begin
   fpgImages.AddMaskedBMP(
     'vfd.editfont', @stdimg_vfd_editfont,
     sizeof(stdimg_vfd_editfont),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.colorwheel', @stdimg_vfd_colorwheel,
+    sizeof(stdimg_vfd_colorwheel),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.valuebar', @stdimg_vfd_valuebar,
+    sizeof(stdimg_vfd_valuebar),
     0, 0);
 end;
 
@@ -761,6 +772,24 @@ begin
   wc.AddProperty('FontDesc', TPropertyString, 'Specify a preset font description');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.editfont';
+  RegisterVFDWidget(wc);
+
+  // Color wheel
+  wc          := TVFDWidgetClass.Create(TfpgColorWheel);
+  wc.NameBase := 'ColorWheel';
+  wc.AddProperty('MarginWidth', TPropertyInteger, 'The margin that will not be painted on four sides of widget');
+  wc.AddProperty('CursorSize', TPropertyInteger, 'Size of cross-hair in color wheel');
+  wc.AddProperty('WhiteAreaPercent', TPropertyInteger, 'The percentage of the centre of the wheel which is white');
+  wc.WidgetIconName := 'vfd.colorwheel';
+  RegisterVFDWidget(wc);
+
+  // Value Bar - works in accordance with color wheel
+  wc          := TVFDWidgetClass.Create(TfpgValueBar);
+  wc.NameBase := 'ValueBar';
+  wc.AddProperty('MarginWidth', TPropertyInteger, 'The margin that will not be painted on four sides of widget');
+  wc.AddProperty('CursorHeight', TPropertyInteger, 'Size of selection cursor');
+  wc.AddProperty('Value', TPropertyFloat, '');
+  wc.WidgetIconName := 'vfd.valuebar';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...

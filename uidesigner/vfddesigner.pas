@@ -1496,7 +1496,7 @@ constructor TOtherWidget.Create(AOwner: TComponent);
 begin
   inherited;
   wgClassName := 'TfpgWidget';
-  FBackgroundColor := $C0E0C0;
+  FBackgroundColor := clUIDesignerGreen;
   FFont   := fpgStyle.DefaultFont;
   FWidth  := 120;
   FHeight := 32;

@@ -29,6 +29,7 @@
   clMoneyGreen    = TfpgColor($C0DCC0);
   clSkyBlue       = TfpgColor($A6CAF0);
   clMedGray       = TfpgColor($A0A0A4);
+  clUIDesignerGreen = TfpgColor($C0E0C0);
 
 
 
