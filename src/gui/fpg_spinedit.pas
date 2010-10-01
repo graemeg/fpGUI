@@ -386,11 +386,7 @@ begin
   if AButton.Down then
     OffsetRect(r, 1, 1);
 
-  // TfpgRect to TRect
-  Result.Left := r.Left;
-  Result.Top := r.Top;
-  Result.Right := r.Right;
-  Result.Bottom := r.Bottom;
+  Result := fpgRectToRect(r);
 end;
 
 procedure TfpgAbstractSpinEdit.ButtonUpPaint(Sender: TObject);
