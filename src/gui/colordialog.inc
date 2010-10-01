@@ -28,7 +28,7 @@ type
     pcColorSelect: TfpgPageControl;
     tsColorWheel: TfpgTabSheet;
     tsColorNames: TfpgTabSheet;
-    ComboBox1: TfpgComboBox;
+    cbColorPalette: TfpgComboBox;
     ColorListBox1: TfpgColorListBox;
     Label1: TfpgLabel;
     Label2: TfpgLabel;
@@ -48,6 +48,8 @@ type
     procedure   ColorChanged(Sender: TObject);
     procedure   RGBChanged(Sender: TObject);
     procedure   UpdateRGBComponents;
+    procedure   PopulatePaletteColorCombo;
+    procedure   cbColorPaletteChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -71,7 +73,7 @@ begin
   try
     frm.ColorWheel.SetSelectedColor(APresetColor);
     if frm.ShowModal = mrOK then
-      Result := frm.ValueBar.SelectedColor;
+      Result := frm.SelectedColor;
   finally
     frm.Free;
   end;
@@ -81,12 +83,15 @@ end;
 
 function TfpgColorSelectDialog.GetSelectedColor: TfpgColor;
 begin
-  //
+  if pcColorSelect.ActivePageIndex = 0 then
+    Result := ValueBar.SelectedColor
+  else
+    Result := ColorListBox1.Color;
 end;
 
 procedure TfpgColorSelectDialog.SetSelectedColor(const AValue: TfpgColor);
 begin
-  //
+  ColorWheel.SetSelectedColor(AValue);
 end;
 
 procedure TfpgColorSelectDialog.ColorChanged(Sender: TObject);
@@ -121,6 +126,27 @@ begin
   edR.Value := rgb.Red;
   edG.Value := rgb.Green;
   edB.Value := rgb.Blue;
+end;
+
+procedure TfpgColorSelectDialog.PopulatePaletteColorCombo;
+begin
+  cbColorPalette.Items.Clear;
+  cbColorPalette.Items.Add('cpStandardColors');
+  cbColorPalette.Items.Add('cpSystemColors');
+  cbColorPalette.Items.Add('cpWebColors');
+  cbColorPalette.FocusItem := 0;
+  cbColorPalette.OnChange := @cbColorPaletteChange;
+end;
+
+procedure TfpgColorSelectDialog.cbColorPaletteChange(Sender: TObject);
+begin
+  if cbColorPalette.Text = 'cpStandardColors' then
+    ColorListBox1.ColorPalette := cpStandardColors
+  else if cbColorPalette.Text = 'cpSystemColors' then
+    ColorListBox1.ColorPalette := cpSystemColors
+  else
+    ColorListBox1.ColorPalette := cpWebColors;
+  ColorListBox1.SetFocus;
 end;
 
 constructor TfpgColorSelectDialog.Create(AOwner: TComponent);
@@ -167,10 +193,10 @@ begin
     Text := 'Predefined';
   end;
 
-  ComboBox1 := TfpgComboBox.Create(tsColorNames);
-  with ComboBox1 do
+  cbColorPalette := TfpgComboBox.Create(tsColorNames);
+  with cbColorPalette do
   begin
-    Name := 'ComboBox1';
+    Name := 'cbColorPalette';
     SetPosition(8, 24, 299, 22);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#List';
@@ -184,6 +210,7 @@ begin
     Name := 'ColorListBox1';
     SetPosition(8, 72, 299, 224);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    Color := TfpgColor($00FFFF);
     FontDesc := '#List';
     Hint := '';
     TabOrder := 2;
@@ -221,6 +248,7 @@ begin
   begin
     Name := 'ValueBar';
     SetPosition(240, 8, 64, 204);
+    Value := 1;
     OnChange := @ColorChanged;
   end;
 
@@ -306,6 +334,8 @@ begin
   btnCancel.Top   := Height - btnCancel.Height - FSpacing;
   btnOK.Left      := btnCancel.Left - FDefaultButtonWidth - 6;
   btnOK.Top       := btnCancel.Top;
+  
+  PopulatePaletteColorCombo;
 end;
 
 
