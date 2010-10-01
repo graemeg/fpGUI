@@ -968,6 +968,15 @@ begin
           Result := 0;
         end;
 
+    WM_TIMECHANGE:
+        begin
+          {$IFDEF DEBUG}
+          SendDebug(w.ClassName + ': WM_TIMECHANGE');
+          {$ENDIF}
+          writeln('fpGUI/GDI: ' + w.ClassName + ': WM_TIMECHANGE');
+          fpgResetAllTimers;
+        end;
+
     WM_NCACTIVATE:
         begin
           {$IFDEF DEBUG}
