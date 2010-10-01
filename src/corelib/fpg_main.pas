@@ -1047,7 +1047,10 @@ end;
 
 function fpgGetNamedColor(col: TfpgColor): TfpgColor;
 begin
-  Result := fpgNamedColors[col and $FF];
+  if fpgIsNamedColor(col) then
+    Result := col  // nothing to do, it is already a named color
+  else
+    Result := fpgNamedColors[col and $FF];
 end;
 
 procedure fpgSetNamedColor(colorid, rgbvalue: longword);
