@@ -488,8 +488,8 @@ type
     property    Height: TfpgCoord read FHeight write SetHeight;
     property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
     property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
-    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth;
-    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight;
+    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
+    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
     property    Canvas: TfpgCanvasBase read GetCanvas;
     property    Parent: TfpgWindowBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
