@@ -43,11 +43,11 @@ type
     pnlColorPreview: TfpgBevel;
     {@VFD_HEAD_END: ColorSelectDialog}
     FViaRGB: Boolean;  // to prevent recursive changes
-    function GetSelectedColor: TfpgColor;
-    procedure SetSelectedColor(const AValue: TfpgColor);
-    procedure ColorChanged(Sender: TObject);
-    procedure RGBChanged(Sender: TObject);
-    procedure UpdateRGBComponents;
+    function    GetSelectedColor: TfpgColor;
+    procedure   SetSelectedColor(const AValue: TfpgColor);
+    procedure   ColorChanged(Sender: TObject);
+    procedure   RGBChanged(Sender: TObject);
+    procedure   UpdateRGBComponents;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
