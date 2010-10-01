@@ -103,8 +103,8 @@ type
     property    Enabled;
     property    Value: double Read FValue Write SetValue;
     property    SelectedColor: TfpgColor Read GetSelectedColor;
-    property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth;
-    property    CursorHeight: longint Read FCursorHeight Write SetCursorHeight;
+    property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth default 5;
+    property    CursorHeight: longint Read FCursorHeight Write SetCursorHeight default 10;
     property    OnChange: TNotifyEvent Read FOnChange Write FOnChange;
   end;
 
@@ -506,7 +506,7 @@ begin
   inherited Create(AOwner);
   FMarginWidth := 5;
   FValue  := 1.0;
-  Width   := 100;
+  Width   := 80;
   Height  := 100;
   Name    := 'ValueBar';
   FCursorHeight := 10;
