@@ -156,6 +156,7 @@ type
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnPaint;
     property    OnShowHint;
   end;
   
@@ -204,6 +205,7 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnPaint;
     property    OnShowHint;
   end;
 
