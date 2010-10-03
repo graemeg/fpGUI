@@ -187,7 +187,7 @@ begin
 
   l1           := CreateLabel(self, 8, 8, 'Form name:');
   edName       := CreateEdit(self, 8, 28, 180, 0);
-  edName.Text  := 'frm';
+  edName.Text  := '';
   edName.OnKeyPress := @OnedNameKeyPressed;
   btnOK        := CreateButton(self, 196, 8, 80, rsOK, @OnButtonClick);
   btnCancel    := CreateButton(self, 196, 36, 80, rsCancel, @OnButtonClick);

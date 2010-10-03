@@ -277,20 +277,44 @@ procedure TMainDesigner.OnNewForm(Sender: TObject);
 var
   fd: TFormDesigner;
   nfrm: TNewFormForm;
+
+  function DoesNameAlreadyExist(const AName: string): boolean;
+  var
+    i: integer;
+  begin
+    Result := False;
+    for i := 0 to FDesigners.Count-1 do
+    begin
+      if TFormDesigner(FDesigners[i]).Form.Name = AName then
+      begin
+        Result := True;
+        break;
+      end;
+    end;
+  end;
 begin
   nfrm := TNewFormForm.Create(nil);
-  if nfrm.ShowModal = mrOK then
-    if nfrm.edName.Text <> '' then
+  try
+    if nfrm.ShowModal = mrOK then
     begin
-      fd           := TFormDesigner.Create;
-      fd.Form.Name := nfrm.edName.Text;
-      fd.Form.WindowTitle := nfrm.edName.Text;
+      if DoesNameAlreadyExist(nfrm.edName.Text) then
+      begin
+        TfpgMessageDialog.Critical('Name Conflict','The form name already exists in the current unit, please try again');
+        exit;
+      end;
+      fd := TFormDesigner.Create;
+      if nfrm.edName.Text <> '' then
+        fd.Form.Name := nfrm.edName.Text;
+      fd.Form.WindowTitle := fd.Form.Name;
       fd.OneClickMove := OneClickMove;
       FDesigners.Add(fd);
       SelectedForm := fd;
       fd.Show;
     end;
-  nfrm.Free;
+
+  finally
+    nfrm.Free;
+  end;
 end;
 
 procedure TMainDesigner.CreateWindows;
