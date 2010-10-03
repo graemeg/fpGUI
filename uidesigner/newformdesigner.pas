@@ -717,6 +717,7 @@ end;
 procedure TPropertyList.Clear;
 begin
   FList.Clear;
+  Widget := nil;
 end;
 
 constructor TPropertyList.Create;

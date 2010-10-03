@@ -819,13 +819,13 @@ begin
   begin
     frmProperties.lstProps.ReleaseEditor;
     PropList.Clear;
+    PropList.Widget := wg;
     for n := 0 to wgc.PropertyCount-1 do
     begin
       PropList.AddItem(wgc.GetProperty(n));
       if UpperCase(wgc.GetProperty(n).Name) = UpperCase(lastPropName) then
         i := n;
     end;
-    PropList.Widget := wg;
     frmProperties.lstProps.Update;
     if i > -1 then
       frmProperties.lstProps.FocusItem := i;

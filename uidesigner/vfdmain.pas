@@ -287,6 +287,7 @@ begin
       fd.Form.WindowTitle := nfrm.edName.Text;
       fd.OneClickMove := OneClickMove;
       FDesigners.Add(fd);
+      SelectedForm := fd;
       fd.Show;
     end;
   nfrm.Free;
