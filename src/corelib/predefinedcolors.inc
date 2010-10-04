@@ -68,6 +68,7 @@
   clGridSelectionText   = TfpgColor(cl_BaseNamedColor + 29);
   clGridInactiveSel     = TfpgColor(cl_BaseNamedColor + 30);
   clGridInactiveSelText = TfpgColor(cl_BaseNamedColor + 31);
+  clSplitterGrabBar     = TfpgColor(cl_BaseNamedColor + 32);
 
 
 
