@@ -28,12 +28,8 @@ uses
   fpg_main,
   fpg_widget;
   
-const
-  clColorGrabBar = $839EFE; // Pale navy blue
-  cSplitterWidth = 8;
 
 type
-
   NaturalNumber = 1..High(Integer);
 
   TfpgSnapEvent = procedure(Sender: TObject; const AClosed: boolean) of object;
@@ -73,7 +69,7 @@ type
     destructor  Destroy; override;
   published
     property    AutoSnap: boolean read FAutoSnap write FAutoSnap default True;
-    property    ColorGrabBar: TfpgColor read FColorGrabBar write SetColorGrabBar default clColorGrabBar;
+    property    ColorGrabBar: TfpgColor read FColorGrabBar write SetColorGrabBar default clSplitterGrabBar;
     property    OnSnap: TfpgSnapEvent read FOnSnap write FOnSnap;
   end;
 
@@ -81,6 +77,10 @@ function CreateSplitter(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCo
          AnAlign: TAlign): TfpgSplitter;
 
 implementation
+
+const
+  cSplitterWidth = 8;
+
 
 function CreateSplitter(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
          AnAlign: TAlign): TfpgSplitter;
@@ -253,7 +253,9 @@ begin
       Inc(FMaxSize, FControl.Height);
     end;
     UpdateSize(X, Y);
+
     CaptureMouse;
+
     {AllocateLineDC;
     with ValidParentForm(Self) do
       if ActiveControl <> nil then
@@ -493,7 +495,7 @@ begin
   // FResizeStyle := rsPattern;
   FOldSize := -1;
   FMouseOver := False;
-  FColorGrabBar := clColorGrabBar;
+  FColorGrabBar := clSplitterGrabBar;
 end;
 
 destructor TfpgSplitter.Destroy;

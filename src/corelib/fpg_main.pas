@@ -1906,6 +1906,7 @@ begin
   fpgSetNamedColor(clGridSelectionText, $FFFFFF);       // same as clSelectionText
   fpgSetNamedColor(clGridInactiveSel, $D0D0FF);         // same as clInactiveSel
   fpgSetNamedColor(clGridInactiveSelText, $000000);     // same as clInactiveSelText
+  fpgSetNamedColor(clSplitterGrabBar, $839EFE);         // pale blue
 
 
   // Global Font Objects
