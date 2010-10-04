@@ -339,7 +339,15 @@ var
 begin
   Canvas.SetColor(clWindowBackground);
   Canvas.FillRectangle(GetClientRect);
-  
+
+  { just to make it's borders more visible in the designer }
+  if csDesigning in ComponentState then
+  begin
+    Canvas.SetColor(clInactiveWgFrame);
+    Canvas.SetLineStyle(1, lsDash);
+    Canvas.DrawRectangle(0, 0, Width, Height);
+  end;
+
   case Align of
     alRight,
     alLeft:
