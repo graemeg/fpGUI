@@ -8,6 +8,9 @@
 <element name="TfpgWidget.SetPosition">
 <short>Sets the position and size of the component</short>
 <descr><printshort id="TfpgWidget.SetPosition"/>. It also fires the Resize message. If you are setting up a component like a button on a form, you don't really want the resize event to fire for the button, before the form is displayed (visible). In that case, rather use the components Top, Left, Width and Height properties.</descr>
+<seealso>
+<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+</seealso>
 </element>
 
 <element name="TfpgWidget.FormDesigner">

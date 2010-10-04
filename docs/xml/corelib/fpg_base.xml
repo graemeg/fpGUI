@@ -604,6 +604,91 @@ or widget has a window handle. Widgets are essentially embedded windows without
 titlebars or borders inside a main parent window.
 </descr>
       </element>
+
+<element name="TfpgWindowBase.UpdateWindowPosition">
+<short>Forces fpGUI to act on window position and size properties</short>
+<descr><p>fpGUI implements what is called "delayed resource allocation". It delays
+some action until everything is ready to go. This delayed action applies to setting
+Widget or Form size and position. Why? Imagine you have a complex form
+with lots of anchors, alignments and OnResize event handlers. Now
+somewhere in there you change the size or position of a component.</p>
+
+<code>
+MyWidget.Left := ...
+MyWidget.Top := ...
+MyWidget.Width := ...
+MyWidget.Height := ...
+</code>
+
+<p>If fpGUI acted immediately, as every property is set, it means it
+would have to recalculate all those widget boundaries, and fire all
+OnResize event handlers of the whole form four times. Once for each
+property - as you set them. Not very efficient! To reduce such
+redundant calculations, fpGUI allows you to set all the properties,
+then act on it once you call <var>UpdateWindowPosition</var>. In most cases fpGUI
+can even reduce the API calls needed, because it could pass for
+example Width and Height via one API call. In the case of X11, it can actually do all
+four values in a single API call. Thus improving efficiency and reduces resize calculatios and screen
+redraws.</p>
+</descr>
+</element>
+
+<element name="TfpgWindowBase.Left">
+<short>Specifies the horizontal coordinate of the left edge of a component relative to its parent</short>
+<descr><p><printshort id="TfpgWindowBase.Left"/>. Use the Left property to determine where the left side
+of the control begins or to reposition the left side of the control.
+</p>
+<remark>fpGUI delays acting on the Top, Left, Width and Height properies of a control until the
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+help.</remark></descr>
+<seealso>
+<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+</seealso>
+</element>
+
+<element name="TfpgWindowBase.Top">
+<short>Specifies the vertical (X) coordinate of the top edge of a component relative to its parent</short>
+<descr><p><printshort id="TfpgWindowBase.Top"/>. Use the Top property to determine where the top side
+of the control begins or to reposition the top side of the control.
+</p>
+<remark>fpGUI delays acting on the Top, Left, Width and Height properies of a control until the
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+help.</remark></descr>
+<seealso>
+<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+</seealso>
+</element>
+
+<element name="TfpgWindowBase.Width">
+<short>Specifies the horizontal size of the control or form in pixels</short>
+<descr><p><printshort id="TfpgWindowBase.Width"/>. Use the Width property
+to read or change the width of the control. For TfpgTabSheet controls of for
+controls that have their Align property set to alTop, alBottom or alClient, changing
+this property at runtime has no effect.
+</p>
+<remark>fpGUI delays acting on the Top, Left, Width and Height properies of a control until the
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+help.</remark></descr>
+<seealso>
+<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+</seealso>
+</element>
+
+<element name="TfpgWindowBase.Height">
+<short>Specifies the vertical size of the control or form in pixels</short>
+<descr><p><printshort id="TfpgWindowBase.Height"/>. Use the Height property
+to read or change the height of the control. For TfpgTabSheet controls of for
+controls that have their Align property set to alLeft, alRight or alClient, changing
+this property at runtime has no effect.
+</p>
+<remark>fpGUI delays acting on the Top, Left, Width and Height properies of a control until the
+<var>UpdateWindowPosition</var> method is called. For more information on why this is so, see <link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">UpdateWindowPosition</link>
+help.</remark></descr>
+<seealso>
+<link id="fpg_base.TfpgWindowBase.UpdateWindowPosition">TfpgWindowBase.UpdateWindowPosition</link>
+</seealso>
+</element>
+
       <!-- object Visibility: default -->
       <element name="TfpgCanvasBase">
         <short>Abstract class used to represent a Canvas for painting</short>
@@ -868,4 +953,4 @@ the streets of Manhattan.</p>
     </module>
     <!-- fpg_base -->
   </package>
-</fpdoc-descriptions>
+</fpdoc-descriptions>
