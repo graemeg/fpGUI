@@ -62,9 +62,11 @@ type
     FOnShowHint: THintEvent;
     FDragStartPos: TfpgPoint;
     FDragActive: boolean;
+    alist: TList;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
+    procedure SetAlign(const AValue: TAlign);
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -111,7 +113,7 @@ type
     function    GetHint: TfpgString; virtual;
     procedure   SetHint(const AValue: TfpgString); virtual;
     procedure   DoUpdateWindowPosition; override;
-    procedure   DoAlign(AAlign: TAlign);
+    procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
     procedure   HandlePaint; virtual;
@@ -175,7 +177,7 @@ type
     property    Focusable: boolean read FFocusable write FFocusable default False;
     property    Focused: boolean read FFocused write FFocused default False;
     property    Anchors: TAnchors read FAnchors write FAnchors default [anLeft, anTop];
-    property    Align: TAlign read FAlign write FAlign;
+    property    Align: TAlign read FAlign write SetAlign default alNone;
     property    Hint: TfpgString read GetHint write SetHint;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
@@ -216,6 +218,33 @@ begin
     Result := FocusRootWidget;
     while (Result <> nil) and (Result.ActiveWidget <> nil) do
       Result := Result.ActiveWidget;
+  end;
+end;
+
+function CompareInts(i1, i2: integer): integer;
+begin
+  if i1 < i2 then
+    Result := -1
+  else if i1 > i2 then
+    Result := 1
+  else
+    Result := 0;
+end;
+
+function AlignCompare(p1, p2: Pointer): integer;
+var
+  w1: TfpgWidget;
+  w2: TfpgWidget;
+begin
+  w1 := TfpgWidget(p1);
+  w2 := TfpgWidget(p2);
+  case w1.Align of
+    alTop:    Result := CompareInts(w1.Top, w2.Top);
+    alBottom: Result := CompareInts(w2.Top, w1.Top);
+    alLeft:   Result := CompareInts(w1.Left, w2.Left);
+    alRight:  Result := CompareInts(w2.Left, w1.Left);
+    else
+      Result         := 0;
   end;
 end;
 
@@ -278,6 +307,14 @@ begin
     if (Components[i] is TfpgWidget) and (TfpgWidget(Components[i]).Parent = self) then
       TfpgWidget(Components[i]).FormDesigner := AValue;
   end;
+end;
+
+procedure TfpgWidget.SetAlign(const AValue: TAlign);
+begin
+  if FAlign = AValue then
+    Exit;
+  FAlign := AValue;
+  Realign;
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -1172,17 +1209,32 @@ var
   dy: integer;
   dw: integer;
   dh: integer;
+  w: TfpgWidget;
 begin
   if (csLoading in ComponentState) then
     Exit;  //==>
 //  writeln('HandleAlignments - ', Classname);
   FAlignRect := GetClientRect;
 
-  DoAlign(alTop);
-  DoAlign(alBottom);
-  DoAlign(alLeft);
-  DoAlign(alRight);
-  DoAlign(alClient);
+  alist := TList.Create;
+  try
+    for n := 0 to ComponentCount - 1 do
+      if Components[n] is TfpgWidget then
+      begin
+        w := TfpgWidget(Components[n]);
+        if (w.Align <> alNone) and (w.Visible) then
+          alist.Add(w);
+      end;
+
+    DoAlignment;
+    //DoAlign(alTop);
+    //DoAlign(alBottom);
+    //DoAlign(alLeft);
+    //DoAlign(alRight);
+    //DoAlign(alClient);
+  finally
+    alist.Free;
+  end;
 
   // handle anchors finally for alNone
   for n := 0 to ComponentCount - 1 do
@@ -1246,55 +1298,16 @@ begin
     MoveAndResize(FLeft + dx, FTop + dy, FWidth + dw, FHeight + dh);
 end;
 
-function CompareInts(i1, i2: integer): integer;
-begin
-  if i1 < i2 then
-    Result := -1
-  else if i1 > i2 then
-    Result := 1
-  else
-    Result := 0;
-end;
-
-function AlignCompare(p1, p2: Pointer): integer;
+procedure TfpgWidget.DoAlignment;
 var
-  w1: TfpgWidget;
-  w2: TfpgWidget;
-begin
-  w1 := TfpgWidget(p1);
-  w2 := TfpgWidget(p2);
-  case w1.Align of
-    alTop:    Result := CompareInts(w1.Top, w2.Top);
-    alBottom: Result := CompareInts(w2.Top, w1.Top);
-    alLeft:   Result := CompareInts(w1.Left, w2.Left);
-    alRight:  Result := CompareInts(w2.Left, w1.Left);
-    else
-      Result         := 0;
-  end;
-end;
-
-procedure TfpgWidget.DoAlign(AAlign: TAlign);
-var
-  alist: TList;
   w: TfpgWidget;
   n: integer;
 begin
-  alist := TList.Create;
-  for n := 0 to ComponentCount - 1 do
-    if Components[n] is TfpgWidget then
-    begin
-      w := TfpgWidget(Components[n]);
-      if (w.Align = AAlign) and (w.Visible) then
-        alist.Add(w);
-    end;
-
-  alist.Sort(@AlignCompare);
-
   // and process this list in order
   for n := 0 to alist.Count - 1 do
   begin
     w := TfpgWidget(alist[n]);
-    case AAlign of
+    case w.Align of
       alTop:
         begin
           w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.Height);
@@ -1325,8 +1338,6 @@ begin
         w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, FAlignRect.Height);
     end; { case }
   end;
-
-  alist.Free;
 end;
 
 procedure TfpgWidget.DoResize;
