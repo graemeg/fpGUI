@@ -65,6 +65,7 @@ uses
   fpg_gauge,
   fpg_editbtn,
   fpg_ColorWheel,
+  fpg_splitter,
   vfdpropeditgrid,
   vfdmain;
 
@@ -304,6 +305,11 @@ begin
   fpgImages.AddMaskedBMP(
     'vfd.valuebar', @stdimg_vfd_valuebar,
     sizeof(stdimg_vfd_valuebar),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
+    'vfd.splitter', @stdimg_vfd_splitter,
+    sizeof(stdimg_vfd_splitter),
     0, 0);
 end;
 
@@ -879,6 +885,15 @@ begin
   wc.AddProperty('MarginWidth', TPropertyInteger, 'The margin that will not be painted on four sides of widget');
   wc.AddProperty('Value', TPropertyFloat, '');
   wc.WidgetIconName := 'vfd.valuebar';
+  RegisterVFDWidget(wc);
+
+  // Splitter - works in accordance with color wheel
+  wc          := TVFDWidgetClass.Create(TfpgSplitter);
+  wc.NameBase := 'Splitter';
+  wc.AddProperty('Align', TPropertyEnum, '');
+  wc.AddProperty('ColorGrabBar', TPropertyColor, '');
+  wc.AddProperty('AutoSnap', TPropertyBoolean, '');
+  wc.WidgetIconName := 'vfd.splitter';
   RegisterVFDWidget(wc);
 
   // Other - do not delete!!! this should be the last...
