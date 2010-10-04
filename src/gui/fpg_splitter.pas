@@ -133,12 +133,11 @@ var
   r: TfpgRect;
 begin
   Result := nil;
-  p := Point(Left, Top);
   case Align of
-    alLeft: Dec(p.X);
-    alRight: Inc(p.X, Width);
-    alTop: Dec(p.Y);
-    alBottom: Inc(p.Y, Height);
+    alLeft:   p := Point(Left-2, Top + (Height div 2));
+    alRight:  p := Point(Right+2, Top + (Height div 2));
+    alTop:    p := Point(Left + (Width div 2), Top-2);
+    alBottom: p := Point(Left + (Width div 2), Bottom+2);
   else
     Exit;
   end;
@@ -180,16 +179,10 @@ begin
   begin
     case Align of
       alLeft, alRight:
-//          FControl.Width  := FNewSize; // (1)
-         FControl.SetPosition(FControl.Left, FControl.Top, FNewSize, FControl.Height); // (2)
+         FControl.SetPosition(FControl.Left, FControl.Top, FNewSize, FControl.Height);
       alTop, alBottom:
-//          FControl.Height := FNewSize; // (1)
-         FControl.SetPosition(FControl.Left, FControl.Top, FControl.Width, FNewSize);  // (2)
+         FControl.SetPosition(FControl.Left, FControl.Top, FControl.Width, FNewSize);
     end;
-//    FControl.UpdateWindowPosition; // (1)
-    // vvzh:
-    // Lines marked with (1) work wrong under Linux (e.g. folding/unfolding Memo1)
-    // Lines marked with (2) work OK under both platforms. Why?
     Parent.Realign;
     // if Assigned(FOnMoved) then FOnMoved(Self);
     FOldSize := FNewSize;
