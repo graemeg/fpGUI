@@ -174,7 +174,7 @@ type
     { Is the widget allowed to receive keyboard focus. }
     property    Focusable: boolean read FFocusable write FFocusable default False;
     property    Focused: boolean read FFocused write FFocused default False;
-    property    Anchors: TAnchors read FAnchors write FAnchors;
+    property    Anchors: TAnchors read FAnchors write FAnchors default [anLeft, anTop];
     property    Align: TAlign read FAlign write FAlign;
     property    Hint: TfpgString read GetHint write SetHint;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
@@ -1189,8 +1189,7 @@ begin
     if (Components[n] is TfpgWidget) then
     begin
       wg := TfpgWidget(Components[n]);
-      if (wg.FAlign = alNone) and
-          ((anBottom in wg.Anchors) or (anRight in wg.Anchors)) then
+      if (wg.FAlign = alNone) and ([anLeft, anTop] <> wg.Anchors) then
       begin
         // we must alter the window
         dx := 0;
@@ -1198,15 +1197,21 @@ begin
         dw := 0;
         dh := 0;
 
-        if (anLeft in wg.Anchors) and (anRight in wg.Anchors) then
-          dw := dwidth
-        else if anRight in wg.Anchors then
-          dx := dwidth;
+        if (anRight in wg.Anchors) then
+          if (anLeft in wg.Anchors) then
+            dw := dwidth
+          else
+            dx := dwidth
+        else if not (anLeft in wg.Anchors) then
+          dx := (dwidth div 2);
 
-        if (anTop in wg.Anchors) and (anBottom in wg.Anchors) then
-          dh := dheight
-        else if anBottom in wg.Anchors then
-          dy := dheight;
+        if (anBottom in wg.Anchors) then
+          if (anTop in wg.Anchors) then
+            dh := dheight
+          else
+            dy := dheight
+        else if not (anTop in wg.Anchors) then
+          dy := (dheight div 2);
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
       end;
