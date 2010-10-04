@@ -68,6 +68,7 @@ type
   
   TfpgLabel = class(TfpgCustomLabel)
   published
+    property    Align;
     property    Alignment;
     property    AutoSize;
     property    BackgroundColor;

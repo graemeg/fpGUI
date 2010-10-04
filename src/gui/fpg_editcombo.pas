@@ -117,6 +117,7 @@ type
 
   TfpgEditCombo = class(TfpgBaseEditCombo)
   published
+    property    Align;
     property    AllowNew;
     property    AutoCompletion;
     property    BackgroundColor;

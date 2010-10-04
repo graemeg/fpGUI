@@ -127,6 +127,7 @@ type
     together. }
   TfpgButton = class(TfpgBaseButton)
   published
+    property    Align;
     property    AllowAllUp;
     property    AllowDown;
     property    BackgroundColor default clButtonFace;

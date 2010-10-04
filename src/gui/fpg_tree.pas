@@ -235,6 +235,7 @@ type
     property    ImageList: TfpgImageList read FImageList write FImageList;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
+    property    Align;
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth default 15;
     property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;

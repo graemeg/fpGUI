@@ -159,6 +159,7 @@ type
   public
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
+    property    Align;
     property    AutoSelect;
     property    AutoSize;
     property    BackgroundColor default clBoxColor;
@@ -258,6 +259,7 @@ type
     property    OldColor;
     property    Text;
   published
+    property    Align;
     property    CustomThousandSeparator;
     property    Enabled;
     property    Hint;
@@ -297,6 +299,7 @@ type
     property    OldColor;
     property    Text;
   published
+    property    Align;
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
     property    Decimals: integer read FDecimals write SetDecimals default -1;
@@ -337,6 +340,7 @@ type
     property    OldColor;
     property    Text;
   published
+    property    Align;
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
     property    Decimals: integer read FDecimals write SetDecimals default 2;

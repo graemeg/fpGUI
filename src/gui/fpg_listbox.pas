@@ -132,6 +132,7 @@ type
   // The standard strings listbox we will actually use in a GUI.
   TfpgListBox = class(TfpgTextListBox)
   published
+    property    Align;
     property    AutoHeight;
     property    BackgroundColor default clListBox;
     property    DragToReorder;
@@ -193,6 +194,7 @@ type
   
   TfpgColorListBox = class(TfpgBaseColorListBox)
   published
+    property    Align;
     property    AutoHeight;
     property    BackgroundColor default clListBox;
     property    Color;

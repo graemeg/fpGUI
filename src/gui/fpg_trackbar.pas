@@ -68,6 +68,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    Align;
     property    BackgroundColor;
     property    Hint;
     property    Min: integer read FMin write SetMin default 0;
@@ -115,6 +116,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
+    property    Align;
     property    BackgroundColor;
     property    Enabled;
     property    Position: integer read FPosition write SetTBPosition default 0;

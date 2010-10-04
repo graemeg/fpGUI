@@ -97,6 +97,8 @@ type
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
     property    OnScroll: TScrollNotifyEvent read FOnScroll write FOnScroll;
+  published
+    property    Align;
   end;
 
 

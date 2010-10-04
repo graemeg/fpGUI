@@ -146,6 +146,7 @@ type
     property    OnClosingTabSheet: TTabSheetClosing read FOnClosingTabSheet write FOnClosingTabSheet;
   published
     property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
+    property    Align;
     property    BackgroundColor;
     property    Enabled;
     property    FixedTabWidth: integer read FFixedTabWidth write SetFixedTabWidth default 0;

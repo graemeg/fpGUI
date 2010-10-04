@@ -135,6 +135,7 @@ type
 
   TfpgComboBox = class(TfpgBaseStaticCombo)
   published
+    property    Align;
     property    BackgroundColor default clBoxColor;
     property    DropDownCount;
     property    Enabled;

@@ -65,6 +65,7 @@ type
 
   TfpgCheckBox = class(TfpgBaseCheckBox)
   published
+    property    Align;
     property    BackgroundColor;
     property    BoxLayout;
     property    Checked;

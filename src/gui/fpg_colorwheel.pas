@@ -62,6 +62,7 @@ type
     property    Saturation: double Read FSaturation;
     procedure   SetSelectedColor(const NewColor: TfpgColor);
   published
+    property    Align;
     property    BackgroundColor;
     property    Enabled;
     property    ValueBar: TfpgValueBar Read FValueBar Write SetValueBar;
@@ -99,6 +100,7 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   SetHS(Hue: longint; Sat: double);
   published
+    property    Align;
     property    BackgroundColor;
     property    Enabled;
     property    Value: double Read FValue Write SetValue;

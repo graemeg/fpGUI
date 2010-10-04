@@ -61,6 +61,7 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
+    property    Align;
     property    AutoSize: boolean read FAutoSize write SetAutoSize default False;
     property    BackgroundColor;
     property    Checked: boolean read FChecked write SetChecked default False;

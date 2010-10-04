@@ -249,6 +249,7 @@ type
     function    AddItem: TfpgLVItem;
     function    NewItem: TfpgLVItem;
   published
+    property    Align;
     property    Columns: TfpgLVColumns read FColumns;
     property    Enabled;
     property    HScrollBar: TfpgScrollBar read FHScrollBar;

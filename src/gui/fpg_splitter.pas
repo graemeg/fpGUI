@@ -68,6 +68,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
+    property    Align;
     property    AutoSnap: boolean read FAutoSnap write FAutoSnap default True;
     property    ColorGrabBar: TfpgColor read FColorGrabBar write SetColorGrabBar default clSplitterGrabBar;
     property    OnSnap: TfpgSnapEvent read FOnSnap write FOnSnap;

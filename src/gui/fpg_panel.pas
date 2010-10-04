@@ -73,6 +73,7 @@ type
   protected
     procedure   HandlePaint; override;
   published
+    property    Align;
     property    BackgroundColor;
     property    BorderStyle;
     property    Enabled;
@@ -130,6 +131,7 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
+    property    Align;
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
     property    BackgroundColor;
     property    BorderStyle;
@@ -183,6 +185,7 @@ type
     function    GetClientRect: TfpgRect; override;
     property    Font: TfpgFont read FFont;
   published
+    property    Align;
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property    BackgroundColor;
     property    BorderStyle;

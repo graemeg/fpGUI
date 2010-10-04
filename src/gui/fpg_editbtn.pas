@@ -70,6 +70,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    Align;
     property    Enabled;
     property    ExtraHint;
     property    FileName: TfpgString read GetFileName write SetFileName;
@@ -93,6 +94,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    Align;
     property    Directory: TfpgString read GetDirectory write SetDirectory;
     property    Enabled;
     property    ExtraHint;
@@ -113,6 +115,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    Align;
     property    Enabled;
     property    ExtraHint;
     property    FontDesc: TfpgString read GetFontDesc write SetFontDesc;

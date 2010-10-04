@@ -124,6 +124,7 @@ type
     property    UseTabs: boolean read FUseTabs write FUseTabs default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
+    property    Align;
     property    BackgroundColor default clBoxColor;
     property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
