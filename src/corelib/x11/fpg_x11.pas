@@ -1906,11 +1906,14 @@ begin
           { X11 is too efficient, so new windows don't need a OnResize when mapped,
             but because Windows GDI does so, we want the same events under X11.
             Lets fake one. }
-          msgp.rect.Left   := w.Left;
-          msgp.rect.Top    := w.Top;
-          msgp.rect.Width  := w.Width;
-          msgp.rect.Height := w.Height;
-          fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
+          if w <> nil then
+          begin
+            msgp.rect.Left   := w.Left;
+            msgp.rect.Top    := w.Top;
+            msgp.rect.Width  := w.Width;
+            msgp.rect.Height := w.Height;
+            fpgPostMessage(nil, w, FPGM_RESIZE, msgp);
+          end;
         end;
 
     X.UnmapNotify:
