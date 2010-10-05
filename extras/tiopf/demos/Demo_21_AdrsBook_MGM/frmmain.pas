@@ -95,7 +95,7 @@ begin
     tiAppError('You need to select a Contact first');
     Exit;
   end;
-  c := TContact(TtiStringGridMediatorView(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
+  c := TContact(TtiStringGridMediatorView(FMediator.ComponentMediator(grdContacts)).SelectedObject);
 
   if not Assigned(c) then
     Exit; //==>
@@ -115,7 +115,7 @@ begin
     tiAppError('You need to select a Contact first');
     Exit;
   end;
-  c := TContact(TtiStringGridMediatorView(FMediator.FindByComponent(grdContacts).Mediator).SelectedObject);
+  c := TContact(TtiStringGridMediatorView(FMediator.ComponentMediator(grdContacts)).SelectedObject);
 
   if tiAppConfirmation('Are you sure you want to delete <%s>', [c.FirstName + ' ' + c.LastName]) then
   begin
