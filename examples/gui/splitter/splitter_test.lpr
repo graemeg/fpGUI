@@ -84,20 +84,8 @@ begin
   with spl2 do
   begin
     Name := 'spl2';
-    SetPosition(165, 90, 257, 8);
+    SetPosition(164, 90, 257, 8);
     Align := alTop;
-  end;
-
-  mmDest := TfpgMemo.Create(self);
-  with mmDest do
-  begin
-    Name := 'mmDest';
-    SetPosition(165, 94, 256, 116);
-    Lines.Add('Memo2 Line #1');
-    Lines.Add('Memo2 Line #2');
-    FontDesc := '#Edit1';
-    TabOrder := 1;
-    Align := alClient;
   end;
 
   pnlName1 := TfpgPanel.Create(self);
@@ -143,9 +131,18 @@ begin
     SetPosition(0, 211, 554, 8);
     Align := alBottom;
   end;
-  
-  // vvzh: the form appears unaligned under Linux, so we have to add the following line:
-  Self.Realign;
+
+  mmDest := TfpgMemo.Create(self);
+  with mmDest do
+  begin
+    Name := 'mmDest';
+    SetPosition(165, 94, 100, 100);
+    Lines.Add('Memo2 Line #1');
+    Lines.Add('Memo2 Line #2');
+    FontDesc := '#Edit1';
+    TabOrder := 1;
+    Align := alClient;
+  end;
 
   {@VFD_BODY_END: frmSplitterTest}
 end;
