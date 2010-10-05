@@ -57,6 +57,7 @@ type
     procedure   SetupGUIandObject; override;
     procedure   ClearList; override;
     procedure   RebuildList; override;
+    procedure   SetActive(const AValue: Boolean); override;
   public
     constructor CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; AIsObserving: Boolean = True); reintroduce; overload;
     destructor  Destroy; override;
@@ -249,9 +250,9 @@ end;
 
 procedure TtiListViewMediatorView.SetActive(const AValue: Boolean);
 begin
+  inherited SetActive(AValue);
   if not AValue then
     ClearList;
-  inherited SetActive(AValue);
 end;
 
 constructor TtiListViewMediatorView.CreateCustom(AModel: TtiObjectList; AView: TfpgListView; AOnBeforeSetupField: TtiOnBeforeSetupField; ADisplayNames: string; AIsObserving: Boolean);
@@ -519,6 +520,13 @@ begin
   finally
     View.EndUpdate;
   end;
+end;
+
+procedure TtiStringGridMediatorView.SetActive(const AValue: Boolean);
+begin
+  inherited SetActive(AValue);
+  if not AValue then
+    ClearList;
 end;
 
 constructor TtiStringGridMediatorView.CreateCustom(AModel: TtiObjectList; AGrid: TfpgStringGrid; ADisplayNames: string; AIsObserving: Boolean);
