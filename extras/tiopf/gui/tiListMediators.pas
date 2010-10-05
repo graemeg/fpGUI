@@ -504,7 +504,7 @@ procedure TtiStringGridMediatorView.ClearList;
 begin
   MediatorList.Clear;
   if View <> nil then
-    View.RowCount := 1; {$Note Double check if this is desired. Shouldn't it be 0 instead. }
+    View.RowCount := 0;  { Don't call View.Clear because then the Header is gone too }
 end;
 
 procedure TtiStringGridMediatorView.RebuildList;
