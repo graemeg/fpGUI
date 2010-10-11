@@ -293,6 +293,7 @@ type
     destructor  Destroy; override;
     procedure   CheckAlarm(ctime: TDateTime);
     procedure   Reset; virtual;
+    procedure   Pause(ASeconds: integer);
     property    Enabled: boolean read FEnabled write SetEnabled;
     property    NextAlarm: TDateTime read FNextAlarm;
     { Interval is in milliseconds. }
@@ -446,6 +447,7 @@ implementation
 uses
   strutils,
   math,
+  dateutils,
   fpg_imgfmt_bmp,
   fpg_stdimages,
   fpg_translations,
@@ -1030,6 +1032,14 @@ procedure TfpgTimer.Reset;
 begin
   Enabled := False;
   Enabled := True;
+end;
+
+procedure TfpgTimer.Pause(ASeconds: integer);
+begin
+  if Enabled then
+  begin
+    FNextAlarm := incSecond(Now, ASeconds);
+  end;
 end;
 
 function fpgApplication: TfpgApplication;
