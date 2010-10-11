@@ -107,14 +107,15 @@ begin
     +'  {$IFDEF UNIX}{$IFDEF UseCThreads}'+le
     +'  cthreads,'+le
     +'  {$ENDIF}{$ENDIF}'+le
-    +'  Classes, fpg_main, fpg_form;'+le
+    +'  Classes, fpg_base, fpg_main, fpg_form;'+le
     +le
     +'type'+le
     +le
     +'  TMainForm = class(TfpgForm)'+le
-    +'  public'+le
+    +'  private'+le
     +'    {@VFD_HEAD_BEGIN: MainForm}'+le
     +'    {@VFD_HEAD_END: MainForm}'+le
+    +'  public'+le
     +'    procedure AfterCreate; override;'+le
     +'  end;'+le
     +le
