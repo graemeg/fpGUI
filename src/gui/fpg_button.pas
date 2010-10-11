@@ -13,6 +13,9 @@
 
     Description:
       Defines a push button control.
+
+    TODO:
+      * multi-line button text. It must take into account image position as well.
 }
 
 unit fpg_button;
@@ -62,6 +65,7 @@ type
     procedure   SetAllowAllUp(const Value: boolean);
     procedure   DoPush;
     procedure   DoRelease(x, y: integer);
+    procedure   SetAllowMultiLineText(const AValue: boolean);
   protected
     FImageMargin: integer;
     FImageSpacing: integer;
@@ -72,6 +76,7 @@ type
     FFont: TfpgFont;
     FDefault: boolean;
     FState: integer;  // 0 - normal  // 1 - hover
+    FAllowMultiLineText: boolean;
     procedure   SetShowImage(AValue: Boolean);
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -85,6 +90,7 @@ type
     property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp default False;
     { Buttons behave like toggle buttons. This is an alias for GroupIndex > 0 }
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
+    property    AllowMultiLineText: boolean read FAllowMultiLineText write SetAllowMultiLineText default False;
     property    Default: boolean read FDefault write SetDefault default False;
     property    Down: Boolean read FDown write SetDown;
     { The button will not show focus. It might also have a different down state (look).
@@ -130,6 +136,7 @@ type
     property    Align;
     property    AllowAllUp;
     property    AllowDown;
+    property    AllowMultiLineText;
     property    BackgroundColor default clButtonFace;
     property    Default;
     property    Down;
@@ -308,6 +315,7 @@ begin
   FDefault      := False;
   FAllowAllUp   := False;
   FState        := 0;
+  FAllowMultiLineText := False;
 end;
 
 destructor TfpgBaseButton.Destroy;
@@ -515,6 +523,7 @@ var
   lBtnFlags: TFButtonFlags;
   clr: TfpgColor;
   img: TfpgImage;
+  lTextFlags: TFTextFlags;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -589,8 +598,33 @@ begin
       Canvas.DrawImage(ix + pofs, iy + pofs, img);
       img.Free;
     end;
+
   end;
-  fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
+
+  { EXPERIMENTAL: multi-line button text
+      Only in this condition do we support multi-line text }
+  if AllowMultiLineText and (FImageLayout = ilImageLeft) then
+  begin
+    r.SetRect(0, 0, Width, Height);
+    InflateRect(r, -3, -3);   { same as focus rectangle }
+    if FShowImage and Assigned(FImage) then
+    begin
+      ix := FImageMargin + FImage.Width;
+      if FImageSpacing > 0 then
+        ix += FImageSpacing;
+      OffsetRect(r, ix, 0);
+      r.Width -= ix;
+    end;
+    if FDown then
+     OffsetRect(r, pofs, pofs);
+
+    lTextFlags := [txtHCenter, txtVCenter{, txtWrap}];
+    if not Enabled then
+      lTextFlags += [txtDisabled];
+    Canvas.DrawText(r, Text, lTextFlags);
+  end
+  else
+    fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
 end;
 
 procedure TfpgBaseButton.DoPush;
@@ -648,6 +682,13 @@ begin
 
   FClickOnPush := False;
   FClicked     := False;
+end;
+
+procedure TfpgBaseButton.SetAllowMultiLineText(const AValue: boolean);
+begin
+  if FAllowMultiLineText = AValue then exit;
+  FAllowMultiLineText := AValue;
+  Repaint;
 end;
 
 procedure TfpgBaseButton.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
