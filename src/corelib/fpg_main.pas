@@ -289,10 +289,10 @@ type
     procedure   SetInterval(const AValue: integer);
   public
     { AInterval is in milliseconds. }
-    constructor Create(ainterval: integer);
+    constructor Create(ainterval: integer); virtual;
     destructor  Destroy; override;
     procedure   CheckAlarm(ctime: TDateTime);
-    procedure   Reset;
+    procedure   Reset; virtual;
     property    Enabled: boolean read FEnabled write SetEnabled;
     property    NextAlarm: TDateTime read FNextAlarm;
     { Interval is in milliseconds. }
