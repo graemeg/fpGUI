@@ -217,7 +217,7 @@ function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord
          AStyle: TPanelStyle): TfpgBevel;
 
 function CreatePanel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
-         AStyle: TPanelStyle; AALignment: TAlignment= taCenter; ALayout: TLayout= tlCenter;
+         AStyle: TPanelStyle = bsRaised; AALignment: TAlignment= taCenter; ALayout: TLayout= tlCenter;
          AMargin: integer= 2; ALineSpace: integer= 2): TfpgPanel;
 
 function CreateGroupBox(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
