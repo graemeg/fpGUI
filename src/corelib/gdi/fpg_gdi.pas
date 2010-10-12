@@ -53,6 +53,7 @@ var
 type
   // forward declaration
   TfpgGDIWindow = class;
+  TGDIDragManager = class;
 
 
   TfpgGDIFontResource = class(TfpgFontResourceBase)
@@ -143,6 +144,9 @@ type
 
   TfpgGDIWindow = class(TfpgWindowBase)
   private
+    FDragManager: TGDIDragManager;
+    function    GetDragManager: TGDIDragManager;
+  private
     FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
     FNonFullscreenStyle: longword;
@@ -150,6 +154,7 @@ type
     FSkipResizeMessage: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
+    property    DragManager: TGDIDragManager read GetDragManager;
   protected
     FWinHandle: TfpgWinHandle;
     FModalForWin: TfpgGDIWindow;
@@ -171,6 +176,7 @@ type
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   ActivateWindow; override;
     procedure   CaptureMouse; override;
     procedure   ReleaseMouse; override;
@@ -251,6 +257,26 @@ type
   end;
 
 
+  { TGDIDragManager }
+
+  TGDIDragManager = class(TInterfacedObject, IDropTarget)
+  private
+    FDropTarget: TObject;  { actually a TfpgWidget }
+    FRegistered: boolean;
+    { IDropTarget }
+    function DragEnter(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
+    function DragOver(grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
+    function DragLeave: HResult;StdCall;
+    function Drop(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD):HResult;StdCall;
+  public
+    constructor Create(ADropTarget: TObject); reintroduce;
+    destructor  Destroy; override;
+    procedure   RegisterDragDrop;
+    procedure   RevokeDragDrop;
+    property    DropTarget: TObject read FDropTarget; { actually a TfpgWidget }
+  end;
+
+
 implementation
 
 uses
@@ -266,7 +292,7 @@ var
   wapplication: TfpgApplication;
   MouseFocusedWH: HWND;
   OldMousePos: TPoint;  // used to detect fake MouseMove events
-
+  NeedToUnitialize: Boolean;
 
 // some required keyboard functions
 {$INCLUDE fpg_keys_gdi.inc}
@@ -1249,7 +1275,14 @@ end;
 var
   // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
-  
+
+function TfpgGDIWindow.GetDragManager: TGDIDragManager;
+begin
+  if not Assigned(FDragManager) then
+     FDragManager := TGDIDragManager.Create(self);
+  Result := FDragManager;
+end;
+
 function TfpgGDIWindow.DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
 var
   pt, spt: Windows.POINT;
@@ -1645,6 +1678,14 @@ begin
   inherited Create(AOwner);
   FWinHandle := 0;
   FFullscreenIsSet := false;
+end;
+
+destructor TfpgGDIWindow.Destroy;
+begin
+  if (self as TfpgWidget).AcceptDrops and Assigned(FDragManager) then
+    FDragManager.RevokeDragDrop;
+  FDragManager := nil;     { frees drag manager instance }
+  inherited Destroy;
 end;
 
 procedure TfpgGDIWindow.ActivateWindow;
@@ -2494,9 +2535,59 @@ begin
   Result := daCopy;
 end;
 
+{ TGDIDragManager }
+
+function TGDIDragManager.DragEnter(const dataObj: IDataObject;
+  grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult; StdCall;
+begin
+
+end;
+
+function TGDIDragManager.DragOver(grfKeyState: DWORD; pt: TPoint;
+  var dwEffect: DWORD): HResult; StdCall;
+begin
+
+end;
+
+function TGDIDragManager.DragLeave: HResult; StdCall;
+begin
+
+end;
+
+function TGDIDragManager.Drop(const dataObj: IDataObject; grfKeyState: DWORD;
+  pt: TPoint; var dwEffect: DWORD): HResult; StdCall;
+begin
+
+end;
+
+constructor TGDIDragManager.Create(ADropTarget: TObject);
+begin
+  inherited Create;
+  FDropTarget := ADropTarget;
+  FRegistered := False;
+end;
+
+destructor TGDIDragManager.Destroy;
+begin
+  if FRegistered then
+    RevokeDragDrop;
+  inherited Destroy;
+end;
+
+procedure TGDIDragManager.RegisterDragDrop;
+begin
+  Activex.RegisterDragDrop(TfpgWidget(FDropTarget).WinHandle, self as IDropTarget)
+end;
+
+procedure TGDIDragManager.RevokeDragDrop;
+begin
+  ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
+end;
+
 initialization
   wapplication   := nil;
   MouseFocusedWH := 0;
+  NeedToUnitialize := Succeeded(OleInitialize(nil));
 
 {$IFDEF WinCE}
   UnicodeEnabledOS := True;
@@ -2513,6 +2604,10 @@ initialization
     else
       FontSmoothingType := ANTIALIASED_QUALITY;
 {$ENDIF}
+
+finalization
+  if NeedToUnitialize then
+    OleUninitialize;
 
 end.
 
