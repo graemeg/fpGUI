@@ -66,7 +66,7 @@ type
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
-    procedure SetAlign(const AValue: TAlign);
+    procedure   SetAlign(const AValue: TAlign);
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
