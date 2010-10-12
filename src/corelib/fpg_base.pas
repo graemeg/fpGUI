@@ -446,6 +446,7 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
     procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
+    procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;

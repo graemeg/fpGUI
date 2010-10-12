@@ -231,6 +231,7 @@ type
     procedure   DoUpdateWindowPosition; override;
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
+    procedure   DoAcceptDrops(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -2394,6 +2395,11 @@ begin
   end
   else
     XDeleteProperty(xapplication.Display, WinHandle, xapplication.XdndAware);
+end;
+
+procedure TfpgX11Window.DoAcceptDrops(const AValue: boolean);
+begin
+  { TODO : Remove EnableDrops, then recurse from here to parent top level from, and set XDNDAware property for form. }
 end;
 
 procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);

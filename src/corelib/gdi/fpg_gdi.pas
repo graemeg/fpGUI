@@ -28,9 +28,10 @@ unit fpg_gdi;
 interface
 
 uses
-  Windows,
   Classes,
   SysUtils,
+  Windows,
+  ActiveX,
   fpg_base,
   fpg_impl
   {$IFDEF DEBUG}
@@ -152,6 +153,7 @@ type
     FNonFullscreenStyle: longword;
     FFullscreenIsSet: boolean;
     FSkipResizeMessage: boolean;
+    QueueAcceptDrops: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
     property    DragManager: TGDIDragManager read GetDragManager;
@@ -173,6 +175,7 @@ type
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
+    procedure   DoAcceptDrops(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -1587,6 +1590,11 @@ begin
   // the forms require some adjustments before the Window appears
   SetWindowParameters;
   FSkipResizeMessage := False;
+
+  if QueueAcceptDrops then
+  begin
+    DoAcceptDrops(True);
+  end;
 end;
 
 procedure TfpgGDIWindow.DoReleaseWindowHandle;
@@ -1704,7 +1712,24 @@ end;
 
 procedure TfpgGDIWindow.DoDNDEnabled(const AValue: boolean);
 begin
-  // TODO: still needs to be implemented
+  { GDI has nothing to do here }
+end;
+
+procedure TfpgGDIWindow.DoAcceptDrops(const AValue: boolean);
+begin
+  if AValue then
+  begin
+    if HasHandle then
+      DragManager.RegisterDragDrop
+    else
+      QueueAcceptDrops := True; // we need to do this once we have a winhandle
+  end
+  else
+  begin
+    if HasHandle then
+      DragManager.RevokeDragDrop;
+    QueueAcceptDrops := False;
+  end;
 end;
 
 constructor TfpgGDIWindow.Create(AOwner: TComponent);

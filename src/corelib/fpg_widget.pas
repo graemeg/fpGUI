@@ -286,6 +286,7 @@ begin
   if FAcceptDrops = AValue then
     exit;
   FAcceptDrops := AValue;
+  DoAcceptDrops(AValue);
 end;
 
 function TfpgWidget.GetHint: TfpgString;
