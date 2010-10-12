@@ -481,7 +481,7 @@ begin
       if View.Width > (lColumnTotalWidth + lGridNonContentWidth) then
       begin
         lLastColumnWidth := View.Width - (lColumnTotalWidth + lGridNonContentWidth);
-        if lLastColumnWidth > 10 then
+        if lLastColumnWidth > FieldsInfo[i].FieldWidth then { only go bigger, not smaller }
           View.ColumnWidth[i] := lLastColumnWidth;
       end;
     end
