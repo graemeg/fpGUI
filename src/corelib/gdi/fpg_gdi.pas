@@ -477,19 +477,53 @@ begin
   {$ENDIF}
 end;
 
+{  **********   Some helper conversion functions   ************* }
+
 function WinkeystateToShiftstate(keystate: cardinal): TShiftState;
 begin
- result:= [];
-  if GetKeyState(vk_menu) < 0 then begin
+  Result := [];
+  if GetKeyState(vk_menu) < 0 then
     Include(result, ssAlt);
-  end;
-  if GetKeyState(vk_shift) < 0 then begin
+  if GetKeyState(vk_shift) < 0 then
     Include(result, ssShift);
-  end;
-  if GetKeyState(vk_control) < 0 then begin
+  if GetKeyState(vk_control) < 0 then
     Include(result, ssCtrl);
-  end;
 end;
+
+function TranslateToFPGDropActions(const pdwEffects: DWORD): TfpgDropActions;
+begin
+  Result := [daIgnore];
+  if (pdwEffects and DROPEFFECT_LINK) <> 0 then
+    Result := Result + [daLink];
+  if (pdwEffects and DROPEFFECT_COPY) <> 0  then
+    Result := Result + [daCopy];
+  if (pdwEffects and DROPEFFECT_MOVE) <> 0  then
+    Result := Result + [daMove];
+end;
+
+function TranslateToFPGDropAction(const pdwEffects: DWORD): TfpgDropAction;
+begin
+  if (pdwEffects and DROPEFFECT_LINK) <> 0 then
+    Result := daLink
+  else if (pdwEffects and DROPEFFECT_COPY) <> 0 then
+    Result := daCopy
+  else if (pdwEffects and DROPEFFECT_MOVE) <> 0 then
+    Result := daMove
+  else
+    Result := daIgnore;
+end;
+
+function TranslateToWinDragEffects(const AActions: TfpgDropActions): DWORD;
+begin
+  Result := DROPEFFECT_NONE;
+  if daLink in AActions then
+    Result := Result or DROPEFFECT_LINK;
+  if daCopy in AActions then
+    Result := Result or DROPEFFECT_COPY;
+  if daMove in AActions then
+    Result := Result or DROPEFFECT_MOVE;
+end;
+
 
 {$IFDEF wince}
 procedure WinCESetDibBits(BMP: HBITMAP; awidth, aheight: Integer; aimgdata: Pointer; var bi: TBitmapInfo);
