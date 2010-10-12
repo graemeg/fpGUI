@@ -148,8 +148,15 @@ type
     property    PopupFrame;
     property    ShowHint;
     property    TabOrder;
+    property    Text;
     property    TextColor;
+    property    OnChange;
     property    OnDoubleClick;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnScroll;
+    property    OnSelect;
     property    OnShowHint;
   end;
   
