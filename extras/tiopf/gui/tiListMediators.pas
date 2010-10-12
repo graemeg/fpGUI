@@ -99,7 +99,7 @@ type
 
 
   { Composite mediator for TfpgListBox }
-  TtiListBoxMediatorView = class(TtiCustomListMediatorView)
+  TtiListBoxListMediatorView = class(TtiCustomListMediatorView)
   private
     function    DoCreateItemMediator(AData: TtiObject; ARowIdx: integer): TtiListItemMediator; override;
     procedure   DoDeleteItemMediator(AIndex: Integer; AMediator: TtiListItemMediator); override;
@@ -146,7 +146,7 @@ procedure RegisterFallBackListMediators;
 begin
   gMediatorManager.RegisterMediator(TtiListViewMediatorView, TtiObjectList);
   gMediatorManager.RegisterMediator(TtiStringGridMediatorView, TtiObjectList);
-  gMediatorManager.RegisterMediator(TtiListBoxMediatorView, TtiObjectList);
+  gMediatorManager.RegisterMediator(TtiListBoxListMediatorView, TtiObjectList);
 end;
 
 { TtiListViewMediatorView }
@@ -608,9 +608,9 @@ begin
 end;
 
 
-{ TtiListBoxMediatorView }
+{ TtiListBoxListMediatorView }
 
-function TtiListBoxMediatorView.DoCreateItemMediator(AData: TtiObject; ARowIdx: integer): TtiListItemMediator;
+function TtiListBoxListMediatorView.DoCreateItemMediator(AData: TtiObject; ARowIdx: integer): TtiListItemMediator;
 var
   i: integer;
   lFieldName: string;
@@ -633,18 +633,18 @@ begin
   end;
 end;
 
-procedure TtiListBoxMediatorView.DoDeleteItemMediator(AIndex: Integer; AMediator: TtiListItemMediator);
+procedure TtiListBoxListMediatorView.DoDeleteItemMediator(AIndex: Integer; AMediator: TtiListItemMediator);
 begin
   View.Items.Delete(AIndex);
   inherited DoDeleteItemMediator(AIndex, AMediator);
 end;
 
-function TtiListBoxMediatorView.GetSelectedObject: TtiObject;
+function TtiListBoxListMediatorView.GetSelectedObject: TtiObject;
 begin
   Result := GetObjectFromRow(View.FocusItem);
 end;
 
-procedure TtiListBoxMediatorView.SetSelectedObject(const AValue: TtiObject);
+procedure TtiListBoxListMediatorView.SetSelectedObject(const AValue: TtiObject);
 var
   i: integer;
   o: TObject;
@@ -661,19 +661,19 @@ begin
 //  inherited SetSelectedObject(AValue);
 end;
 
-procedure TtiListBoxMediatorView.CreateColumns;
+procedure TtiListBoxListMediatorView.CreateColumns;
 begin
   // do nothing - we don't support columns
 end;
 
-procedure TtiListBoxMediatorView.ClearList;
+procedure TtiListBoxListMediatorView.ClearList;
 begin
   MediatorList.Clear;
   if View <> nil then
     View.Items.Clear;
 end;
 
-procedure TtiListBoxMediatorView.RebuildList;
+procedure TtiListBoxListMediatorView.RebuildList;
 begin
   { This rebuilds the whole list. Not very efficient. }
   View.BeginUpdate;
@@ -687,13 +687,13 @@ begin
   end;
 end;
 
-procedure TtiListBoxMediatorView.SetupGUIandObject;
+procedure TtiListBoxListMediatorView.SetupGUIandObject;
 begin
-  View.Items.Clear;
   inherited SetupGUIandObject;
+  View.Items.Clear;
 end;
 
-constructor TtiListBoxMediatorView.CreateCustom(AModel: TtiObjectList;
+constructor TtiListBoxListMediatorView.CreateCustom(AModel: TtiObjectList;
   AListBox: TfpgListBox; ADisplayNames: string; AIsObserving: Boolean);
 begin
   inherited Create;
@@ -704,18 +704,18 @@ begin
   IsObserving := AIsObserving;
 end;
 
-destructor TtiListBoxMediatorView.Destroy;
+destructor TtiListBoxListMediatorView.Destroy;
 begin
   IsObserving := False;
   inherited Destroy;
 end;
 
-class function TtiListBoxMediatorView.ComponentClass: TClass;
+class function TtiListBoxListMediatorView.ComponentClass: TClass;
 begin
   Result := TfpgListView;
 end;
 
-function TtiListBoxMediatorView.GetObjectFromRow(ARow: Integer): TtiObject;
+function TtiListBoxListMediatorView.GetObjectFromRow(ARow: Integer): TtiObject;
 var
   O: TObject;
 begin
@@ -737,7 +737,7 @@ begin
   end;
 end;
 
-function TtiListBoxMediatorView.View: TfpgListBox;
+function TtiListBoxListMediatorView.View: TfpgListBox;
 begin
   Result := TfpgListBox(inherited View);
 end;
