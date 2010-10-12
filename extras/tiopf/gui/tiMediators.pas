@@ -25,6 +25,7 @@ uses
   ,fpg_memo
   ,fpg_popupcalendar
   ,fpg_spinedit
+  ,fpg_listbox
   ;
 
 type
@@ -225,6 +226,47 @@ type
   end;
 
 
+  { Base class to handle TfpgListBox controls }
+  TtiListBoxMediatorView = class(TtiControlMediatorView)
+  protected
+    procedure   DoObjectToGui; override;
+    procedure   SetObjectUpdateMoment(const AValue: TtiObjectUpdateMoment); override;
+  public
+    constructor Create; override;
+    function    View: TfpgListBox; reintroduce;
+    class function ComponentClass: TClass; override;
+  end;
+
+
+  { Sets ItemIndex based on integer property }
+  TtiItemListBoxMediatorView = class(TtiListBoxMediatorView)
+  protected
+    procedure   DoGUIToObject; override;
+    procedure   DoObjectToGUI; override;
+  public
+    constructor Create; override;
+  end;
+
+
+  { TfpgListBox observing a list and setting a Object property }
+  TtiDynamicListBoxMediatorView = class(TtiListBoxMediatorView)
+  private
+    FDisplayFieldName: string;
+    FExternalOnChange: TNotifyEvent;
+    function    GetDisplayFieldName: string;
+    procedure   InternalListRefresh;
+  protected
+    procedure   SetListObject(const AValue: TtiObjectList); override;
+    procedure   SetOnChangeActive(AValue: Boolean); virtual;
+    procedure   SetupGUIandObject; override;
+    procedure   DoGuiToObject; override;
+    procedure   DoObjectToGui; override;
+  public
+    procedure   RefreshList; virtual;
+    property    DisplayFieldName: string read GetDisplayFieldName write FDisplayFieldName;
+  end;
+
+
 // Registering generic mediators which can handle most cases by default.
 procedure RegisterFallBackMediators;
 
@@ -266,6 +308,9 @@ begin
   gMediatorManager.RegisterMediator(TtiCalendarComboMediatorView, TtiObject, [tkFloat]);
   gMediatorManager.RegisterMediator(TtiSpinEditMediatorView, TtiObject, [tkInteger]);
   gMediatorManager.RegisterMediator(TtiSpinEditFloatMediatorView, TtiObject, [tkFloat]);
+  gMediatorManager.RegisterMediator(TtiListBoxMediatorView, TtiObject, [tkSString,tkAString]);
+  gMediatorManager.RegisterMediator(TtiItemListBoxMediatorView, TtiObject, [tkInteger, tkEnumeration]);
+  gMediatorManager.RegisterMediator(TtiDynamicListBoxMediatorView, TtiObject, [tkClass]);
 end;
 
 { TtiControlMediatorView }
@@ -985,6 +1030,192 @@ begin
   Result := TfpgEditCurrency;
 end;
 
+
+{ TtiDynamicListBoxMediatorView }
+
+function TtiDynamicListBoxMediatorView.GetDisplayFieldName: string;
+begin
+  Result := FDisplayFieldName;
+  if (Result = '') then
+    Result := 'Caption'; // Do not localize.
+end;
+
+procedure TtiDynamicListBoxMediatorView.InternalListRefresh;
+var
+  lItems: TStrings;
+  i: Integer;
+begin
+  lItems := View.Items;
+  lItems.Clear;
+  View.Text := '';
+
+  if (ValueList = nil) or
+     (ValueList.Count < 1) or
+     (SameText(FieldName, EmptyStr)) then
+    Exit; //==>
+
+  try
+    for i := 0 to ValueList.Count - 1 do
+      lItems.AddObject(GetStrProp(ValueList.Items[i], DisplayFieldName), ValueList.Items[i]);
+  except
+    on E: Exception do
+      RaiseMediatorError(cErrorAddingItemToCombobox,[E.message, FieldName]);
+  end;
+  ObjectToGui;
+end;
+
+procedure TtiDynamicListBoxMediatorView.SetListObject(const AValue: TtiObjectList);
+begin
+  inherited SetListObject(AValue);
+  InternalListRefresh;
+  if Assigned(ValueList) then
+    View.Enabled := ValueList.Count > 0;
+end;
+
+procedure TtiDynamicListBoxMediatorView.SetOnChangeActive(AValue: Boolean);
+begin
+  if AValue then
+  begin
+    if not UseInternalOnChange then
+      View.OnChange := FExternalOnChange
+    else
+      View.OnChange := @DoOnChange;
+  end
+  else
+  begin
+    if not UseInternalOnChange then
+      FExternalOnChange := View.OnChange;
+    View.OnChange := nil;
+  end;
+end;
+
+procedure TtiDynamicListBoxMediatorView.SetupGUIandObject;
+begin
+  inherited SetupGUIandObject;
+
+  if UseInternalOnChange then
+    View.OnChange := @DoOnChange; // default OnChange event handler
+
+  {$Note As far as I can see, ValueList is always going to be nil here! - Graeme }
+  if ValueList <> nil then
+    View.Enabled := (ValueList.Count > 0);
+end;
+
+procedure TtiDynamicListBoxMediatorView.DoGuiToObject;
+var
+  lValue: TtiObject;
+  lPropType: TTypeKind;
+begin
+  if not DataAndPropertyValid then
+    Exit; //==>
+  if View.FocusItem < 0 then
+    Exit; //==>
+
+  lValue := TtiObject(ValueList.Items[View.FocusItem]);
+
+  lPropType := typinfo.PropType(Subject, FieldName);
+  if lPropType = tkClass then
+    typinfo.SetObjectProp(Subject, FieldName, lValue)
+  else
+    RaiseMediatorError(cErrorPropertyNotClass);
+end;
+
+procedure TtiDynamicListBoxMediatorView.DoObjectToGui;
+var
+  i: Integer;
+  lValue: TtiObject;
+  lPropType: TTypeKind;
+begin
+  SetOnChangeActive(false);
+
+  //  Set the index only (We're assuming the item is present in the list)
+  View.FocusItem := -1;
+  if Subject = nil then
+    Exit; //==>
+
+  if not Assigned(ValueList) then
+    RaiseMediatorError(cErrorListHasNotBeenAssigned);
+
+  lValue := nil;
+  lPropType := typinfo.PropType(Subject, FieldName);
+  if lPropType = tkClass then
+    lValue := TtiObject(typinfo.GetObjectProp(Subject, FieldName))
+  else
+    RaiseMediatorError(cErrorPropertyNotClass);
+
+  for i := 0 to ValueList.Count - 1 do
+    if ValueList.Items[i] = lValue then
+    begin
+      View.FocusItem := i;
+      Break; //==>
+    end;
+
+  SetOnChangeActive(true);
+end;
+
+procedure TtiDynamicListBoxMediatorView.RefreshList;
+begin
+  InternalListRefresh;
+end;
+
+{ TtiItemListBoxMediatorView }
+
+procedure TtiItemListBoxMediatorView.DoGUIToObject;
+begin
+  SetOrdProp(Subject, FieldName, View.FocusItem);
+end;
+
+procedure TtiItemListBoxMediatorView.DoObjectToGUI;
+begin
+  View.FocusItem := GetOrdProp(Subject, FieldName);
+end;
+
+constructor TtiItemListBoxMediatorView.Create;
+begin
+  inherited Create;
+  GuiFieldName := 'FocusItem';
+end;
+
+{ TtiListBoxMediatorView }
+
+procedure TtiListBoxMediatorView.DoObjectToGui;
+begin
+  View.FocusItem := View.Items.IndexOf(Subject.PropValue[FieldName]);
+end;
+
+procedure TtiListBoxMediatorView.SetObjectUpdateMoment(
+  const AValue: TtiObjectUpdateMoment);
+begin
+  inherited SetObjectUpdateMoment(AValue);
+  if View <> nil then
+  begin
+    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+      View.OnChange := @DoOnChange
+    else
+      View.OnExit := @DoOnChange;
+    if ObjectUpdateMoment in [ouNone] then
+    begin
+      View.OnChange := nil;
+      View.OnExit := nil;
+    end;
+  end;
+end;
+
+constructor TtiListBoxMediatorView.Create;
+begin
+  inherited Create;
+  GuiFieldName := 'Text';
+end;
+
+function TtiListBoxMediatorView.View: TfpgListBox;
+begin
+  Result := TfpgListBox(inherited View);
+end;
+
+class function TtiListBoxMediatorView.ComponentClass: TClass;
+begin
+  Result := TfpgListBox;
+end;
 
 end.
 
