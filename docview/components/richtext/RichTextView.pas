@@ -41,6 +41,9 @@ Type
 
   TScrollingDirection = ( sdUp, sdDown );
 
+var
+  testvar: integer = 0;
+
 Type
 
   TRichTextView = class;
@@ -408,6 +411,8 @@ uses
   ,nvUtilities
   ,RichTextDocumentUnit
   ,RichTextDisplayUnit
+  ,fpg_stringutils
+  ,SettingsUnit   // TODO: We shouldn't have this dependency!!
   ;
 
 Procedure TRichTextView.SetSelectionStart( SelectionStart: longint );
@@ -503,7 +508,6 @@ var
   StartLine: longint;
   EndLine: longint;
 begin
-
   if SelectionSet then
   begin
     OldClip := Canvas.GetClipRect;
@@ -768,9 +772,10 @@ var
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   Offset := 0;
+  testvar := 1;
   Position := FindPoint( X, Y, Line, Offset, Link );
   FClickedLink := Link;
-//  writeln('Pos=', Ord(Position), '  link=', Link);
+  writeln('  link=', Link, '  line=', Line, ' offset=', offset);
 
   if Position in [tpAboveTextArea, tpBelowTextArea] then
     // not on the control (this probably won't happen)
@@ -1100,6 +1105,9 @@ function TRichTextView.FindPoint( XToFind: longint;
 var
   TextHeight: longint;
 begin
+  if testvar = 1 then
+    testvar := 0;
+
   LineIndex := 0;
   Offset := 0;
   Link := '';
@@ -1642,31 +1650,8 @@ end;
 
 // ADelay = True means that we hold off on redoing the Layout and Painting.
 Procedure TRichTextView.AddText( Text: PChar; ADelay: boolean );
-var
-  s: string;
 begin
-  s := Text;
-  // Warning: Hack Alert! replace some strange Bell character found in some INF files
-//  s := SubstituteChar(s, Chr($07), Chr($20) );
-  s := StringReplace(s, Chr($07), #$E2#$80#$A2, [rfReplaceAll, rfIgnoreCase]);    // u+2022  small bullet
-
-//// Hack Alert #2: replace strange table chars with something we can actually see
-//  s := SubstituteChar(s, Chr(218), Char('+') );   // top-left corner
-//  s := SubstituteChar(s, Chr(196), Char('-') );   // horz row deviders
-//  s := SubstituteChar(s, Chr(194), Char('-') );   // centre top T connection
-//  s := SubstituteChar(s, Chr(191), Char('+') );   // top-right corner
-//  s := SubstituteChar(s, Chr(192), Char('+') );   // bot-left corner
-//  s := SubstituteChar(s, Chr(193), Char('-') );   // centre bottom inverted T
-//  s := SubstituteChar(s, Chr(197), Char('+') );
-//  s := SubstituteChar(s, Chr(179), Char('|') );  //
-//  s := SubstituteChar(s, Chr(195), Char('|') );
-//  s := SubstituteChar(s, Chr(180), Char('|') );
-//  s := SubstituteChar(s, Chr(217), Char('+') );   // bot-right corner
-
-
-
-
-  AddAndResize( FText, PChar(s) );
+  AddAndResize( FText, Text);
   if not ADelay then
   begin
     Layout;
@@ -2110,6 +2095,9 @@ begin
   FCursorOffset := Offset;
   FCursorRow := Row;
   Index := FLayout.GetCharIndex( FLayout.FLines^[ Row ].Text ) + Offset;
+
+  writeln('  SetCursorPosition: offset=', FCursorOffset, ' row=', FCursorRow, ' index=', Index);
+  exit;
   if PreserveSelection then
   begin
     SetSelectionEndInternal( Index )
@@ -2790,6 +2778,11 @@ begin
   end
   else
   begin
+    writeln('need to scroll down, desired row below bottom line');
+    writeln('BottomLine = ', BottomLine, '  Row = ', Row);
+    writeln('new pos = ', FLayout.GetLinePosition( Row )
+                           + FLayout.FLines^[ Row ].Height
+                           - GetTextAreaHeight);
     // need to scroll down, desired row below bottom line
     if     ( BottomLine <> -1 )
        and ( Row >= BottomLine ) then

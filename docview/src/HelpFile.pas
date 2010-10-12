@@ -18,6 +18,9 @@ uses
 
 type
 
+  TFontEncoding = (encUTF8, encCP437, encCP850, encIBMGraph);
+
+
   TIndexEntry = class(TObject)
   private
     name: String;
@@ -45,8 +48,6 @@ type
     procedure   Add(anIndexEntry: TIndexEntry);
   end;
 
-
-  { THelpFile }
 
   THelpFile = class(TObject)
   private
@@ -172,7 +173,7 @@ type
     procedure SetupFontSubstitutes( Substitutions: string );
   public
     NotesLoaded: boolean; // used externally
-
+    Encoding: TFontEncoding;
   end;
 
 // Returns helpfile that the given topic is within
@@ -397,9 +398,9 @@ begin
   LogEvent(LogParse, 'Helpfile Load: ' + aFileName);
 
   _FileName := aFileName;
+  Encoding := encUTF8;
 
   InitMembers;
-
   Open;
 
   // we always need these basics:
@@ -414,7 +415,6 @@ begin
     Close;
     raise;
   end;
-
   // the rest is loaded on demand
 end;
 
@@ -1060,6 +1060,10 @@ begin
   begin
     pFontSpec := p + i * sizeof( THelpFontSpec );
     _FontTable.Add( pFontSpec );
+    if pFontSpec^.CodePage = 850 then
+      Encoding := encCP850
+    else if pFontSpec^.CodePage = 437 then
+      Encoding := encCP437;
   end;
 end;
 

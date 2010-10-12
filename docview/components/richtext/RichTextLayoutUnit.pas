@@ -437,7 +437,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
               if not FFontManager.IsFixed then
               begin
                 // end of italic; add a space
-                inc( WordX, FFontManager.CharWidth( ' ' ) );
+//                inc( WordX, FFontManager.CharWidth( ' ' ) );
               end;
             end;
 
@@ -706,7 +706,7 @@ begin
                and ( faItalic in Style.Font.Attributes )
                and ( not FFontManager.IsFixed ) then
               // end of italic; add a space
-              inc( X, FFontManager.CharWidth( ' ' )  );
+//              inc( X, FFontManager.CharWidth( ' ' )  );
 
             PerformStyleTag( Element.Tag,
                              Style,
@@ -783,7 +783,7 @@ begin
            and ( faItalic in Style.Font.Attributes )
            and ( not FFontManager.IsFixed ) then
           // end of italic; add a space
-          inc( X, FFontManager.CharWidth( ' ' )  );
+//          inc( X, FFontManager.CharWidth( ' ' )  );
 
         PerformStyleTag( Element.Tag,
                          Style,

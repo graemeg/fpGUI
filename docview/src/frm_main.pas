@@ -8,7 +8,7 @@ uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_tab,
   fpg_tree, fpg_splitter, fpg_menu, fpg_button, fpg_listbox,
   fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar, fpg_imagelist,
-  fpg_imgfmt_bmp,
+  fpg_imgfmt_bmp, fpg_combobox,
   HelpFile, RichTextView, HelpTopic;
 
 type
@@ -71,6 +71,7 @@ type
     btnQuit: TfpgButton;
     Bevel1: TfpgBevel;
     Bevel2: TfpgBevel;
+    cbEncoding: TfpgComboBox;
     Bevel3: TfpgBevel;
     btnTBNoteAdd: TfpgButton;
     {@VFD_HEAD_END: MainForm}
@@ -151,7 +152,9 @@ type
     procedure   lbHistoryDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   lbHistoryKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   btnSearchClicked(Sender: TObject);
+    procedure   cbEncodingChanged(Sender: TObject);
     procedure   btnNotesGotoClicked(Sender: TObject);
+    procedure   UpdateEncodingComboBox;
     procedure   IndexSearchEditOnChange(Sender: TObject);
     procedure   DisplaySelectedSearchResultTopic;
     procedure   NavigateToHistoryIndex(AIndex: integer);
@@ -1003,9 +1006,20 @@ begin
   DoSearch;
 end;
 
+procedure TMainForm.cbEncodingChanged(Sender: TObject);
+begin
+  Settings.Encoding := TFontEncoding(cbEncoding.FocusItem);
+  DisplayTopic(CurrentTopic);
+end;
+
 procedure TMainForm.btnNotesGotoClicked(Sender: TObject);
 begin
   GotoCurrentNote;
+end;
+
+procedure TMainForm.UpdateEncodingComboBox;
+begin
+  cbEncoding.FocusItem := Ord(Settings.Encoding);
 end;
 
 procedure TMainForm.IndexSearchEditOnChange(Sender: TObject);
@@ -1364,9 +1378,8 @@ begin
       HelpFile := THelpFile.Create( FileName );
       if Settings.FixedFontSubstitution then
          HelpFile.SetupFontSubstitutes( Settings.FixedFontSubstitutes );
-
+      Settings.Encoding := HelpFile.Encoding;
       aHelpFiles.Add( HelpFile );
-
     except
       on E: Exception do
       begin
@@ -1398,6 +1411,7 @@ begin
 
   LoadingFilenameList.Free;
   Result := true;
+  UpdateEncodingComboBox;
 end;
 
 { Open the file or list of files in FileNames
@@ -2377,8 +2391,16 @@ begin
 
   ImageIndices.Free;
 
-  //writeln(lText);
-  //writeln('-----------------------------');
+  // apply encoding conversion
+  case Settings.Encoding of
+    encUTF8:      lText := IPFToUTF8(lText);
+    encCP437:     lText := CP437ToUTF8(lText);
+    encCP850:     lText := CP850ToUTF8(lText);
+    encIBMGraph:  lText := IBMGraphToUTF8(lText);
+  else
+    lText := IPFToUTF8(lText);
+  end;
+
   { Load and insert annotations / notes }
   if not HelpFile.NotesLoaded then
     LoadNotesForFile(HelpFile);
@@ -3151,6 +3173,23 @@ begin
     Hint := '';
     Shape := bsLeftLine;
     Style := bsLowered;
+  end;
+
+  cbEncoding := TfpgComboBox.Create(ToolBar);
+  with cbEncoding do
+  begin
+    Name := 'cbEncoding';
+    SetPosition(524, 2, 124, 22);
+    Anchors := [anRight,anTop];
+    FontDesc := '#List';
+    Hint := '';
+    Items.Add('UTF-8');
+    Items.Add('CP437');
+    Items.Add('CP850');
+    Items.Add('IBM Graph (cp437)');
+    TabOrder := 10;
+    FocusItem := 0;
+    OnChange  := @cbEncodingChanged;
   end;
 
   Bevel3 := TfpgBevel.Create(ToolBar);

@@ -13,6 +13,7 @@ Uses
   ,fpg_base
   ,fpg_main
   ,CanvasFontManager
+  ,HelpFile
   ;
 
 Const
@@ -94,6 +95,7 @@ Type
     GlobalSearchLocation: TGlobalSearchLocation;
     SearchDirectories: TStringList;
     IPFTopicSaveAsEscaped: boolean;
+    Encoding: TFontEncoding;
   end;
 
 
@@ -276,6 +278,7 @@ begin
       else
         GlobalSearchLocation := gsCustom;
 
+      Encoding := encUTF8;
     end;
   end;
   LogEvent(LogSettings, ' Done' );
