@@ -424,7 +424,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnchange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnchange,ouCustom,ouDefault] then
       THackBaseEdit(View).OnChange := @DoOnChange
     else
       THackBaseEdit(View).OnExit := @DoOnChange;
@@ -499,7 +499,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
@@ -547,7 +547,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoTrackBarChanged   // TfpgTrackBar has a different event signature
     else
       View.OnExit := @DoOnChange;
@@ -604,7 +604,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
@@ -634,7 +634,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
@@ -809,7 +809,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
@@ -882,7 +882,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
@@ -948,7 +948,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
@@ -1189,7 +1189,7 @@ begin
   inherited SetObjectUpdateMoment(AValue);
   if View <> nil then
   begin
-    if ObjectUpdateMoment in [ouOnChange,ouCustom] then
+    if ObjectUpdateMoment in [ouOnChange,ouCustom,ouDefault] then
       View.OnChange := @DoOnChange
     else
       View.OnExit := @DoOnChange;
