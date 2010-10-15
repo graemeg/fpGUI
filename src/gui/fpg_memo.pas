@@ -93,6 +93,7 @@ type
     procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   SetReadOnly(const AValue: Boolean);
     procedure   ResetSelectionVariables;
+    procedure   SetCursorPos(const AValue: integer);
   protected
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -119,6 +120,7 @@ type
     procedure   Clear;
     procedure   BeginUpdate;
     procedure   EndUpdate;
+    property    CursorPos: integer read FCursorPos write SetCursorPos;
     property    CursorLine: integer read FCursorLine write SetCursorLine;
     property    Font: TfpgFont read FFont;
     property    LineHeight: integer read FLineHeight;
@@ -420,6 +422,29 @@ begin
   FSelStartLine   := FCursorLine;
   FSelEndLine     := FCursorLine;
   FMouseDragging  := False;
+end;
+
+procedure TfpgMemo.SetCursorPos(const AValue: integer);
+var
+  x: integer;
+begin
+  if FCursorPos = AValue then
+    exit;
+
+  if AValue = 0 then
+    FCursorPos := AValue
+  else
+  begin
+    x := UTF8Length(FLines[CursorLine]);
+    if AValue > x then  { can't set Cursorpos greater than number of characters on that line }
+      FCursorPos := x
+    else
+      FCursorPos := AValue;
+  end;
+  FSelStartPos  := FCursorPos;
+  FSelEndPos    := FCursorPos;
+  AdjustCursor;
+  Repaint;
 end;
 
 constructor TfpgMemo.Create(AOwner: TComponent);
