@@ -502,16 +502,14 @@ var
   ctime: TDateTime;
 begin
   ctime := now;
-  i := 0;
-  while i < fpgTimers.Count do
+  i := fpgTimers.Count;
+  while i > 0 do
   begin
+    dec(i);
     if fpgTimers[i] = nil then
       fpgTimers.Delete(i)
     else
-    begin
       TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
-      Inc(i);
-    end;
   end;
 end;
 
