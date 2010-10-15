@@ -1182,6 +1182,8 @@ begin
 
   if (atimeoutms >= 0) and (not DoMessagesPending) then
   begin
+    if Assigned(FOnIdle) then
+      OnIdle(self);
     if atimeoutms > 0 then
       timerid := Windows.SetTimer(ltimerWnd, 1, atimeoutms, nil)
     else

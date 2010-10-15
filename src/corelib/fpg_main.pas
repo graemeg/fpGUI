@@ -1603,7 +1603,7 @@ end;
 
 procedure TfpgApplication.RunMessageLoop;
 begin
-  WaitWindowMessage(1000);
+  WaitWindowMessage(2000);
 end;
 
 { TfpgFont }
