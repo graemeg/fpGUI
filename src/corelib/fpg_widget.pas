@@ -137,7 +137,7 @@ type
     procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
     procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
-    procedure   RePaint;
+    procedure   RePaint; virtual;
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;

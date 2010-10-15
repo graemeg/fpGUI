@@ -62,6 +62,7 @@ type
     FPopupMenu: TfpgPopupMenu;
     FDefaultPopupMenu: TfpgPopupMenu;
     FReadOnly: Boolean;
+    FUpdateCount: integer;
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
     procedure   RecalcLongestLine;
@@ -106,6 +107,7 @@ type
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
     procedure   HandleHide; override;
+    procedure   RePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -115,6 +117,8 @@ type
     procedure   CutToClipboard;
     procedure   PasteFromClipboard;
     procedure   Clear;
+    procedure   BeginUpdate;
+    procedure   EndUpdate;
     property    CursorLine: integer read FCursorLine write SetCursorLine;
     property    Font: TfpgFont read FFont;
     property    LineHeight: integer read FLineHeight;
@@ -168,7 +172,6 @@ type
   TfpgMemoStrings = class(TStringList)
   protected
     Memo: TfpgMemo;
-    procedure   RefreshMemo;
   public
     constructor Create(AMemo: TfpgMemo); reintroduce;
     destructor  Destroy; override;
@@ -179,15 +182,6 @@ type
   end;
 
 { TfpgMemoStrings }
-
-procedure TfpgMemoStrings.RefreshMemo;
-begin
-  if Assigned(Memo) and (Memo.HasHandle) then
-  begin
-    Memo.Invalidate;
-    Memo.UpdateScrollBars;
-  end;
-end;
 
 constructor TfpgMemoStrings.Create(AMemo: TfpgMemo);
 begin
@@ -203,28 +197,30 @@ end;
 
 function TfpgMemoStrings.Add(const s: String): Integer;
 begin
+  Memo.BeginUpdate;
   Result := inherited Add(s);
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 procedure TfpgMemoStrings.Delete(Index: Integer);
 begin
-//  writeln('Delete''s Index = ', Index);
+  Memo.BeginUpdate;
   inherited Delete(Index);
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 procedure TfpgMemoStrings.Insert(Index: Integer; const S: string);
 begin
-//  writeln('Insert''s Index = ', Index);
+  Memo.BeginUpdate;
   inherited Insert(Index, S);
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 procedure TfpgMemoStrings.Clear;
 begin
+  Memo.BeginUpdate;
   inherited Clear;
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 
@@ -447,6 +443,7 @@ begin
   FPopupMenu  := nil;
   FDefaultPopupMenu := nil;
   FReadOnly   := False;
+  FUpdateCount := 0;
 
   FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 0;
@@ -852,6 +849,12 @@ procedure TfpgMemo.HandleHide;
 begin
   fpgCaret.UnSetCaret(Canvas);
   inherited;
+end;
+
+procedure TfpgMemo.RePaint;
+begin
+  if FUpdateCount <= 0 then
+    inherited RePaint;
 end;
 
 procedure TfpgMemo.VScrollBarMove(Sender: TObject; position: integer);
@@ -1600,6 +1603,21 @@ begin
   FDrawOffset   := 0;
 
   Repaint;
+end;
+
+procedure TfpgMemo.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TfpgMemo.EndUpdate;
+begin
+  Dec(FUpdateCount);
+  if FUpdateCount <= 0 then
+  begin
+    Invalidate;
+    UpdateScrollBars;
+  end;
 end;
 
 function TfpgMemo.GetText: TfpgString;
