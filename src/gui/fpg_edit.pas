@@ -229,16 +229,7 @@ type
     property    HideSelection;
 //    property    MaxLength;  { probably MaxValue and MinValue }
     property    TabOrder;
-    property    TextColor;
     property    ShowThousand: boolean read FShowThousand write FShowThousand default False;
-    property    OnChange;
-    property    OnEnter;
-    property    OnExit;
-    property    OnKeyPress;
-    property    OnMouseEnter;
-    property    OnMouseExit;
-    property    OnPaint;
-    property    OnShowHint;
   public
     constructor Create(AOwner: TComponent); override;
   published
