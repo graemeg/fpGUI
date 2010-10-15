@@ -246,13 +246,18 @@ var
   MaxLine: integer;
   yp: integer;
 begin
-  if (aValue < 0) or (aValue = FCursorLine) then
+  if (aValue < 0) or (aValue = FCursorLine) or (AValue > FLines.Count-1) then
     Exit; // wrong value
+
   if aValue < FFirstLine then
   begin
     FFirstLine  := aValue; // moves the selected line to the top of the displayed rectangle
     FCursorLine := aValue;
     FCursorPos  := 0;
+    FSelStartPos  := FCursorPos;
+    FSelStartLine := FCursorLine;
+    FSelEndLine   := -1;
+    AdjustCursor;
     RePaint;
     Exit;
   end;
@@ -272,15 +277,21 @@ begin
     FFirstLine  := aValue;
     FCursorLine := aValue;
     FCursorPos  := 0;
+    FSelStartPos  := FCursorPos;
+    FSelStartLine := FCursorLine;
+    FSelEndLine   := -1;
+    AdjustCursor;
     RePaint;
-    Exit;
   end
   else
   begin
     FCursorLine := aValue;
     FCursorPos  := 0;
+    FSelStartPos  := FCursorPos;
+    FSelStartLine := FCursorLine;
+    FSelEndLine   := -1;
+    AdjustCursor;
     RePaint;
-    Exit;
   end;
 end;
 
