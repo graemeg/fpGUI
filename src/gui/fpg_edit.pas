@@ -1803,8 +1803,8 @@ begin
   FAlignment := taRightJustify;
   FDecimalSeparator := DecimalSeparator;
   FThousandSeparator := ThousandSeparator;
-  NegativeColor := clRed;
-  OldColor := TextColor;
+  FNegativeColor := clRed;
+  FOldColor := TextColor;
 end;
 
 { TfpgEditInteger }
