@@ -225,7 +225,7 @@ type
      Still to implement !!}
     property    CustomDecimalSeparator: TfpgChar read FDecimalseparator write SetDecimalSeparator;
     property    CustomThousandSeparator: TfpgChar read FThousandSeparator write SetThousandSeparator;
-    property    NegativeColor: TfpgColor read FNegativeColor write SetNegativeColor;
+    property    NegativeColor: TfpgColor read FNegativeColor write SetNegativeColor default clRed;
     property    HideSelection;
 //    property    MaxLength;  { probably MaxValue and MinValue }
     property    TabOrder;
