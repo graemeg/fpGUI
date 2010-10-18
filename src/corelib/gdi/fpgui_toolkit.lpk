@@ -5,7 +5,7 @@
     <Name Value="fpgui_toolkit"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <IncludeFiles Value="..\..\"/>
@@ -16,7 +16,6 @@
         <SyntaxOptions>
           <AllowLabel Value="False"/>
           <CPPInline Value="False"/>
-          <UseAnsiStrings Value="True"/>
         </SyntaxOptions>
       </Parsing>
       <CodeGeneration>
@@ -31,7 +30,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Minor="7"/>
-    <Files Count="80">
+    <Files Count="81">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -352,6 +351,10 @@
         <Filename Value="..\..\VERSION_FILE.inc"/>
         <Type Value="Include"/>
       </Item80>
+      <Item81>
+        <Filename Value="fpg_oledragdrop.pas"/>
+        <UnitName Value="fpg_OLEDragDrop"/>
+      </Item81>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>
     <RequiredPkgs Count="1">

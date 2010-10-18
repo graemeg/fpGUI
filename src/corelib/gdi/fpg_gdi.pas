@@ -37,6 +37,7 @@ uses
   {$IFDEF DEBUG}
   ,dbugintf
   {$ENDIF DEBUG}
+  ,fpg_OLEDragDrop
   ;
 
 { Constants missing on windows unit }
@@ -145,8 +146,8 @@ type
 
   TfpgGDIWindow = class(TfpgWindowBase)
   private
-    FDragManager: TGDIDragManager;
-    function    GetDragManager: TGDIDragManager;
+    FDropManager: TfpgOLEDropTarget;
+    function    GetDropManager: TfpgOLEDropTarget;
   private
     FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
@@ -156,7 +157,7 @@ type
     QueueAcceptDrops: boolean;
     function    DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
     procedure   WindowSetFullscreen(aFullScreen, aUpdate: boolean);
-    property    DragManager: TGDIDragManager read GetDragManager;
+    property    DropManager: TfpgOLEDropTarget read GetDropManager;
   protected
     FWinHandle: TfpgWinHandle;
     FModalForWin: TfpgGDIWindow;
@@ -260,17 +261,15 @@ type
   end;
 
 
-  { TGDIDragManager }
-
   TGDIDragManager = class(TInterfacedObject, IDropTarget)
   private
     FDropTarget: TObject;  { actually a TfpgWidget }
     FRegistered: boolean;
     { IDropTarget }
-    function DragEnter(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
-    function DragOver(grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
-    function DragLeave: HResult;StdCall;
-    function Drop(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD):HResult;StdCall;
+    function    DragEnter(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
+    function    DragOver(grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
+    function    DragLeave: HResult;StdCall;
+    function    Drop(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD):HResult;StdCall;
   public
     constructor Create(ADropTarget: TObject); reintroduce;
     destructor  Destroy; override;
@@ -1313,11 +1312,11 @@ var
   // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
 
-function TfpgGDIWindow.GetDragManager: TGDIDragManager;
+function TfpgGDIWindow.GetDropManager: TfpgOLEDropTarget;
 begin
-  if not Assigned(FDragManager) then
-     FDragManager := TGDIDragManager.Create(self);
-  Result := FDragManager;
+  if not Assigned(FDropManager) then
+    FDropManager := TfpgOLEDropTarget.Create(self);
+  Result := FDropManager;
 end;
 
 function TfpgGDIWindow.DoMouseEnterLeaveCheck(AWindow: TfpgGDIWindow; uMsg, wParam, lParam: Cardinal): Boolean;
@@ -1720,14 +1719,14 @@ begin
   if AValue then
   begin
     if HasHandle then
-      DragManager.RegisterDragDrop
+        DropManager.RegisterDragDrop
     else
       QueueAcceptDrops := True; // we need to do this once we have a winhandle
   end
   else
   begin
     if HasHandle then
-      DragManager.RevokeDragDrop;
+      DropManager.RevokeDragDrop;
     QueueAcceptDrops := False;
   end;
 end;
@@ -1736,14 +1735,14 @@ constructor TfpgGDIWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FWinHandle := 0;
+  FDropManager := nil;
   FFullscreenIsSet := false;
 end;
 
 destructor TfpgGDIWindow.Destroy;
 begin
-  if (self as TfpgWidget).AcceptDrops and Assigned(FDragManager) then
-    FDragManager.RevokeDragDrop;
-  FDragManager := nil;     { frees drag manager instance }
+  if (self as TfpgWidget).AcceptDrops and Assigned(FDropManager) then
+    FDropManager.Free;
   inherited Destroy;
 end;
 
