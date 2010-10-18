@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
   fpg_base, fpg_main, fpg_form, fpg_button, fpg_grid, fpg_panel,
-  fpg_label, fpg_edit, fpg_stdimages;
+  fpg_label, fpg_edit, fpg_stdimages, fpg_checkbox;
 
 type
   TMainForm = class(TfpgForm)
@@ -23,7 +23,9 @@ type
     Label1: TfpgLabel;
     Label2: TfpgLabel;
     Label3: TfpgLabel;
+    chkAcceptDrops: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
+    procedure CheckAcceptDropsChanged(Sender: TObject);
     procedure Edit1DragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
     procedure Edit1DragEnter(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
     procedure Bevel1DragEnter(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean);
@@ -41,6 +43,11 @@ type
 
 
 {@VFD_NEWFORM_IMPL}
+
+procedure TMainForm.CheckAcceptDropsChanged(Sender: TObject);
+begin
+  Edit1.AcceptDrops := chkAcceptDrops.Checked;
+end;
 
 procedure TMainForm.Edit1DragDrop(Sender, Source: TObject; X, Y: integer;
   AData: variant);
@@ -113,6 +120,7 @@ var
   d: TfpgDrag;
   v: variant;
 begin
+  writeln('in >');
   m := TfpgMimeData.Create;
   { via convenience properties }
   m.Text := 'My name is Earl';
@@ -131,6 +139,7 @@ begin
   d.MimeData := m;
   { TfpgDrag instance will be freed later when DND action is completed }
   d.Execute([daCopy]);
+  writeln('< out');
 end;
 
 procedure TMainForm.ShowMimeList(AMimeList: TStringList);
@@ -163,13 +172,13 @@ begin
     SetPosition(260, 40, 244, 140);
     Anchors := [anLeft,anRight,anTop];
     Alignment := taLeftJustify;
+    BorderStyle := bsDouble;
     FontDesc := '#Label1';
     Hint := '';
     Layout := tlTop;
     Style := bsLowered;
     Text := '';
     WrapText := True;
-    BorderStyle := bsDouble;
     AcceptDrops := True;
     OnDragEnter := @Bevel1DragEnter;
     OnDragLeave := @Bevel1DragLeave;
@@ -182,6 +191,7 @@ begin
     Name := 'Grid1';
     SetPosition(8, 224, 496, 167);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    BackgroundColor := TfpgColor($80000002);
     AddColumn('#', 20, taLeftJustify);
     AddColumn('MIME Type', 190, taLeftJustify);
     AddColumn('Data', 250, taLeftJustify);
@@ -200,11 +210,11 @@ begin
     SetPosition(424, 400, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Quit';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 3;
-    Down := False;
     OnClick :=@Button1Clicked;
   end;
 
@@ -215,11 +225,11 @@ begin
     SetPosition(340, 400, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Clear';
+    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
     TabOrder := 4;
-    Down := False;
   end;
 
   MyDragSourceLabel := TfpgLabel.Create(self);
@@ -232,7 +242,6 @@ begin
     Hint := '';
     Layout := tlCenter;
     Text := 'Drag Me!';
-    BackgroundColor := clSteelBlue;
     OnDragStartDetected := @LabelDragStartDetected;
   end;
 
@@ -242,10 +251,10 @@ begin
     Name := 'Edit1';
     SetPosition(8, 156, 240, 24);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 7;
     Text := '';
-    FontDesc := '#Edit1';
     AcceptDrops := True;
     OnDragEnter := @Edit1DragEnter;
     OnDragDrop  := @Edit1DragDrop;
@@ -279,6 +288,19 @@ begin
     FontDesc := '#Label2';
     Hint := '';
     Text := 'Available drop formats';
+  end;
+
+  chkAcceptDrops := TfpgCheckBox.Create(self);
+  with chkAcceptDrops do
+  begin
+    Name := 'chkAcceptDrops';
+    SetPosition(4, 112, 168, 20);
+    Checked := True;
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 10;
+    Text := 'Enable AcceptDrops';
+    OnChange :=@CheckAcceptDropsChanged;
   end;
 
   {@VFD_BODY_END: MainForm}
