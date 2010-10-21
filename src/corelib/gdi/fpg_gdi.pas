@@ -147,7 +147,11 @@ type
   TfpgGDIWindow = class(TfpgWindowBase)
   private
     FDropManager: TfpgOLEDropTarget;
+    FDropPos: TPoint;
     function    GetDropManager: TfpgOLEDropTarget;
+    procedure   HandleDNDLeave(Sender: TObject);
+    procedure   HandleDNDEnter(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD);
+    procedure   HandleDNDPosition(Sender: TObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
   private
     FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
@@ -1326,10 +1330,96 @@ var
   // this are required for Windows MouseEnter & MouseExit detection.
   uLastWindowHndl: TfpgWinHandle;
 
+procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
+var
+  wg: TfpgWidget;
+begin
+  wg := self as TfpgWidget;
+  if wg.AcceptDrops then  { if we get here, this should always be true anyway }
+  begin
+    if Assigned(wg.OnDragLeave) then
+      wg.OnDragLeave(nil);
+  end;
+end;
+
+procedure TfpgGDIWindow.HandleDNDEnter(Sender: TObject; DataObj: IDataObject;
+    KeyState: Longint; PT: TPoint; var Effect: DWORD);
+var
+  wg: TfpgWidget;
+  lMimeList: TStringList;
+  lMimeChoice: TfpgString;
+  lAccept: Boolean;
+  lDropAction: TfpgDropAction;
+  EnumIntf: IEnumFORMATETC;
+  msgp: TfpgMessageParams;
+begin
+  wg := self as TfpgWidget;
+  if wg.AcceptDrops then
+  begin
+    lAccept := False;
+
+    { enumerate the available formats }
+//    DataObj.EnumFormatEtc(DATADIR_GET, EnumIntf);
+//    EnumIntf.Next();
+    lMimeList := EnumDataToStringList(DataObj);
+
+    lMimeChoice := 'text/plain';
+//    lMimeList := TStringList.Create;
+//    lMimeList.Add(lMimeChoice);
+//    lMimeList.Add('text/html');
+    lDropAction := TranslateToFPGDropAction(Effect);
+    if Assigned(wg.OnDragEnter) then
+      wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
+
+    if not lAccept then
+      Effect := DROPEFFECT_NONE
+    else
+      Effect := TranslateToWinDragEffect(lDropAction);
+
+    { Notify widget of drag status, so it can update its look }
+    if lAccept then
+    begin
+      FDropPos.x := PT.x;
+      FDropPos.y := PT.y;
+      fillchar(msgp, sizeof(msgp), 0);
+      msgp.mouse.x := PT.x;
+      msgp.mouse.y := PT.y;
+      fpgPostMessage(nil, wg, FPGM_DROPENTER, msgp);
+    end;
+
+  end;
+end;
+
+procedure TfpgGDIWindow.HandleDNDPosition(Sender: TObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
+var
+  msgp: TfpgMessageParams;
+  wg: TfpgWidget;
+begin
+  wg := self as TfpgWidget;
+  { Notify widget of drag status, so it can update its look. We do the pos
+    check because OLE framework calls DragOver repeatedly even if the mouse
+    doesn't move, but simply because the mouse is over the widget. We don't
+    want that, for performance reasons. }
+  if FDropPos <> PT then
+  begin
+    FDropPos.x := PT.x;
+    FDropPos.y := PT.y;
+    fillchar(msgp, sizeof(msgp), 0);
+    msgp.mouse.x := PT.x;
+    msgp.mouse.y := PT.y;
+    fpgPostMessage(nil, wg, FPGM_DROPENTER, msgp);
+  end;
+end;
+
 function TfpgGDIWindow.GetDropManager: TfpgOLEDropTarget;
 begin
   if not Assigned(FDropManager) then
+  begin
     FDropManager := TfpgOLEDropTarget.Create(self);
+    FDropManager.OnDragLeave := @HandleDNDLeave;
+    FDropManager.OnDragEnter := @HandleDNDEnter;
+    FDropManager.OnDragOver  := @HandleDNDPosition;
+  end;
   Result := FDropManager;
 end;
 
@@ -1750,6 +1840,8 @@ begin
   inherited Create(AOwner);
   FWinHandle := 0;
   FDropManager := nil;
+  FDropPos.x := 0;
+  FDropPos.y := 0;
   FFullscreenIsSet := false;
 end;
 
