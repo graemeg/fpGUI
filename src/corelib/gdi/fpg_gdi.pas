@@ -526,6 +526,20 @@ begin
     Result := Result or DROPEFFECT_MOVE;
 end;
 
+function TranslateToWinDragEffect(const AAction: TfpgDropAction): DWORD;
+begin
+  if AAction = daIgnore then
+    Result := DROPEFFECT_NONE
+  else if daLink = AAction then
+    Result := DROPEFFECT_LINK
+  else if daCopy = AAction then
+    Result := DROPEFFECT_COPY
+  else if daMove = AAction then
+    Result := DROPEFFECT_MOVE
+  else
+    Result := DROPEFFECT_NONE; { fallback, but should never be reached }
+end;
+
 
 {$IFDEF wince}
 procedure WinCESetDibBits(BMP: HBITMAP; awidth, aheight: Integer; aimgdata: Pointer; var bi: TBitmapInfo);
