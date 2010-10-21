@@ -422,6 +422,7 @@ procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 // operator overloading of some useful structures
 operator = (a: TRect; b: TRect): boolean;
 operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
+operator = (const APoint1, APoint2: TPoint) b: Boolean;
 operator + (const APoint1, APoint2: TPoint) p: TPoint;
 operator + (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
 operator + (const APoint: TPoint; ASize: TfpgSize) p: TPoint;
@@ -864,6 +865,11 @@ end;
 operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
 begin
   b := (ASize1.w = ASize2.w) and (ASize1.h = ASize2.h);
+end;
+
+operator = (const APoint1, APoint2: TPoint) b: Boolean;
+begin
+  b := (APoint1.X = APoint2.X) and (APoint1.Y = APoint2.Y);
 end;
 
 operator + (const APoint1, APoint2: TPoint) p: TPoint;
