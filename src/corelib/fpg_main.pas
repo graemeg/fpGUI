@@ -1895,7 +1895,7 @@ begin
   fpgSetNamedColor(clText4, $404000);
   fpgSetNamedColor(clSelection, $08246A);
   fpgSetNamedColor(clSelectionText, $FFFFFF);
-  fpgSetNamedColor(clInactiveSel, $D0D0FF);
+  fpgSetNamedColor(clInactiveSel, $99A6BF);  // win 2000 buttonface = $D4D0C8
   fpgSetNamedColor(clInactiveSelText, $000000);
   fpgSetNamedColor(clScrollBar, $E8E4DB);
   fpgSetNamedColor(clButtonFace, $D5D2CD);
@@ -1906,13 +1906,13 @@ begin
   fpgSetNamedColor(clInactiveWgFrame, $A0A0A0);
   fpgSetNamedColor(clTextCursor, $000000);
   fpgSetNamedColor(clChoiceListBox, $E8E8E8);
-  fpgSetNamedColor(clUnset, $D0D0FF);
+  fpgSetNamedColor(clUnset, $99A6BF);                   // dull (gray) blue
   fpgSetNamedColor(clMenuText, $000000);
   fpgSetNamedColor(clMenuDisabled, $909090);
   fpgSetNamedColor(clHintWindow, $FFFFBF);
   fpgSetNamedColor(clGridSelection, $08246A);           // same as clSelection
   fpgSetNamedColor(clGridSelectionText, $FFFFFF);       // same as clSelectionText
-  fpgSetNamedColor(clGridInactiveSel, $D0D0FF);         // same as clInactiveSel
+  fpgSetNamedColor(clGridInactiveSel, $99A6BF);         // same as clInactiveSel
   fpgSetNamedColor(clGridInactiveSelText, $000000);     // same as clInactiveSelText
   fpgSetNamedColor(clSplitterGrabBar, $839EFE);         // pale blue
 
