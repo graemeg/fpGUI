@@ -77,6 +77,7 @@ type
   protected
     procedure   DoDragEnter(DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD); virtual;
     procedure   DoDragOver(KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect); virtual;
+    procedure   DoDragLeave;
     procedure   DoDragDrop(DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect); virtual;
     { IInterface }
     function    QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
@@ -773,6 +774,12 @@ begin
   if Assigned(FOnDragOver) then begin
     FOnDragOver(Self, KeyState, PT, Effect);
   end;
+end;
+
+procedure TfpgOLEDropTarget.DoDragLeave;
+begin
+  if Assigned(FOnDragLeave) then
+    FOnDragLeave(self);
 end;
 
 procedure TfpgOLEDropTarget.DoDragDrop(DataObj: IDataObject; KeyState: LongInt;
