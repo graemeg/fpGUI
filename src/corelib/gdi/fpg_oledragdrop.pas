@@ -61,7 +61,7 @@ type
 
 
   TfpgOLEDragDropEffect = (deNone, deCopy, deMove, deLink);
-  TfpgOLEDragEnterEvent = procedure(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect) of object;
+  TfpgOLEDragEnterEvent = procedure(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD) of object;
   TfpgOLEDragOverEvent = procedure(Sender: TObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect) of object;
   TfpgOLEDragDropEvent = procedure(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect) of object;
 
@@ -75,7 +75,7 @@ type
     FOnDragLeave: TNotifyEvent;
     FOnDragDrop: TfpgOLEDragDropEvent;
   protected
-    procedure   DoDragEnter(DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect); virtual;
+    procedure   DoDragEnter(DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD); virtual;
     procedure   DoDragOver(KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect); virtual;
     procedure   DoDragDrop(DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect); virtual;
     { IInterface }
@@ -87,7 +87,7 @@ type
     function    DragOver(grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult; stdcall;
     function    DragLeave: HResult; stdcall;
     function    Drop(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult; stdcall;
-
+  public
     property    OnDragEnter: TfpgOLEDragEnterEvent read FOnDragEnter write FOnDragEnter;
     property    OnDragOver: TfpgOLEDragOverEvent read FOnDragOver write FOnDragOver;
     property    OnDragLeave: TNotifyEvent read FOnDragLeave write FOnDragLeave;
@@ -176,7 +176,7 @@ type
     function    DoDragAcceptFiles(DataObj: IDataObject): Boolean;
     function    DoDragAcceptPosition(PT: TPoint): Boolean;
     procedure   DoDropFiles(DataObj: IDataObject; PT: TPoint);
-    procedure   DoDragEnter(DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect); override;
+    procedure   DoDragEnter(DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD); override;
     procedure   DoDragOver(KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect); override;
     procedure   DoDragDrop(DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect); override;
   public
@@ -684,14 +684,14 @@ begin
 end;
 
 procedure TfpgOLEDropTarget.DoDragEnter(DataObj: IDataObject;
-  KeyState: Integer; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
+  KeyState: LongInt; PT: TPoint; var Effect: DWORD);
 begin
   if Assigned(FOnDragEnter) then begin
     FOnDragEnter(Self, DataObj, KeyState, PT, Effect);
   end;
 end;
 
-procedure TfpgOLEDropTarget.DoDragOver(KeyState: Integer; PT: TPoint;
+procedure TfpgOLEDropTarget.DoDragOver(KeyState: LongInt; PT: TPoint;
   var Effect: TfpgOLEDragDropEffect);
 begin
   if Assigned(FOnDragOver) then begin
@@ -699,7 +699,7 @@ begin
   end;
 end;
 
-procedure TfpgOLEDropTarget.DoDragDrop(DataObj: IDataObject; KeyState: Integer;
+procedure TfpgOLEDropTarget.DoDragDrop(DataObj: IDataObject; KeyState: LongInt;
   PT: TPoint; Effect: TfpgOLEDragDropEffect);
 begin
   if Assigned(FOnDragDrop) then begin
@@ -783,28 +783,25 @@ begin
 end;
 
 procedure TDragFilesTarget.DoDragEnter(DataObj: IDataObject;
-  KeyState: Integer; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
+  KeyState: LongInt; PT: TPoint; var Effect: DWORD);
 begin
   FDragAcceptFiles := DoDragAcceptFiles(DataObj);
-  if FDragAcceptFiles and DoDragAcceptPosition(PT) then begin
-    inherited;
-  end else begin
-    Effect := deNone;
-  end;
+  if FDragAcceptFiles and DoDragAcceptPosition(PT) then
+    inherited DoDragEnter(DataObj, KeyState, PT, Effect)
+  else
+    Effect := DROPEFFECT_NONE;
 end;
 
-procedure TDragFilesTarget.DoDragOver(KeyState: Integer; PT: TPoint;
-  var Effect: TfpgOLEDragDropEffect);
+procedure TDragFilesTarget.DoDragOver(KeyState: LongInt; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
 begin
-  if FDragAcceptFiles and DoDragAcceptPosition(PT) then begin
-    inherited;
-  end else begin
+  if FDragAcceptFiles and DoDragAcceptPosition(PT) then
+    inherited DoDragOver(KeyState, PT, Effect)
+  else
     Effect := deNone;
-  end;
 end;
 
 procedure TDragFilesTarget.DoDragDrop(DataObj: IDataObject;
-  KeyState: Integer; PT: TPoint; Effect: TfpgOLEDragDropEffect);
+  KeyState: LongInt; PT: TPoint; Effect: TfpgOLEDragDropEffect);
 begin
   DoDropFiles(DataObj, PT);
   inherited;
