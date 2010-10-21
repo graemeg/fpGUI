@@ -13,13 +13,6 @@ type
 
   TMainForm = class(TfpgForm)
   private
-    procedure chkColorNameChange(Sender: TObject);
-    procedure ckdReorderChanged(Sender: TObject);
-    procedure cbName1Change(Sender: TObject);
-    procedure btnName1Clicked(Sender: TObject);
-    procedure SetBGColor(Sender: TObject);
-    procedure PopulatePaletteColorCombo;
-  public
     {@VFD_HEAD_BEGIN: MainForm}
     cbName1: TfpgComboBox;
     lblName4: TfpgLabel;
@@ -32,6 +25,13 @@ type
     chkColorName: TfpgCheckBox;
     chkReorder: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
+    procedure chkColorNameChange(Sender: TObject);
+    procedure ckdReorderChanged(Sender: TObject);
+    procedure cbName1Change(Sender: TObject);
+    procedure btnName1Clicked(Sender: TObject);
+    procedure SetBGColor(Sender: TObject);
+    procedure PopulatePaletteColorCombo;
+  public
     procedure AfterCreate; override;
   end;
   
