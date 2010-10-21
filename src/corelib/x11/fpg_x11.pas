@@ -1107,6 +1107,7 @@ begin
           FActionType := GetAtomFromDropAction(lDropAction);
         end;
 
+        { Notify widget of drag status, so it can update its look }
         if lAccept then
         begin
           FDropPos.X := dx;

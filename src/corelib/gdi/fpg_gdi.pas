@@ -40,7 +40,6 @@ uses
 
 { Constants missing on windows unit }
 const
-  WM_MOUSEWHEEL         = $020a;    // we could remove this since FPC 2.0.4
   VER_PLATFORM_WIN32_CE = 3;
   CLEARTYPE_QUALITY     = 5;
 
