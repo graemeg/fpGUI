@@ -185,6 +185,8 @@ type
     property    OnDropFiles: TDropFilesEvent read FOnDropFiles write FOnDropFiles;
   end;
 
+function WindowsMimeLookup(const CFFormat: string): string;
+function EnumDataToStringList(DataObj: IDataObject): TStringList;
 
 implementation
 
@@ -195,6 +197,79 @@ var
   CF_FILENAMEMAP: Cardinal;
   CF_FILEDESCRIPTOR: Cardinal;
   CF_FILECONTENTS: Cardinal;
+
+
+function WindowsMimeLookup(const CFFormat: string): string;
+begin
+  { replace know clipboard formats with mime types }
+  if CFFormat = 'CF_TEXT' then
+    Result := 'text/plain'
+  else if CFFormat = 'CF_UNICODETEXT' then
+    Result := 'text/plain'
+  else if CFFormat = 'CF_OEMTEXT' then
+    Result := 'text/plain'
+  else if CFFormat = 'CF_HDROP' then
+    Result := 'text/uri-list'
+  else if CFFormat = 'CF_RICHTEXT' then
+    Result := 'text/html'
+  else
+    Result := CFFormat;
+end;
+
+function WindowsClipboardFormatToString(const CFFormat: integer): string;
+begin
+  { replace know clipboard formats with mime types }
+  case CFFormat of
+    CF_DIF          : result := 'CF_DIF';
+    CF_DIB          : result := 'CF_DIB';
+    CF_TEXT         : result := 'CF_TEXT';
+    CF_SYLK         : result := 'CF_SYLK';
+    CF_TIFF         : result := 'CF_TIFF';
+    CF_RIFF         : result := 'CF_RIFF';
+    CF_WAVE         : result := 'CF_WAVE';
+    CF_HDROP        : result := 'CF_HDROP';
+    CF_BITMAP       : result := 'CF_BITMAP';
+    CF_LOCALE       : result := 'CF_LOCALE';
+    CF_OEMTEXT      : result := 'CF_OEMTEXT';
+    CF_PALETTE      : result := 'CF_PALETTE';
+    CF_PENDATA      : result := 'CF_PENDATA';
+    CF_UNICODETEXT  : result := 'CF_UNICODETEXT';
+    CF_ENHMETAFILE  : result := 'CF_ENHMETAFILE';
+    CF_METAFILEPICT : result := 'CF_METAFILEPICT';
+    else
+      Result := Format('unknown (%d)', [CFFormat]);
+  end;
+end;
+
+function EnumDataToStringList(DataObj: IDataObject): TStringList;
+var
+	FE: FORMATETC;
+	EnumFormats: IEnumFORMATETC;
+	num: integer;
+  lname: string;
+  FormatName: array[0..MAX_PATH] of Char;
+  i: integer;
+begin
+  if DataObj.EnumFormatEtc(DATADIR_GET, EnumFormats) <> S_OK then
+    raise Exception.Create('EnumDataToStringList: Failed to get EnumFormatEtc interface');
+
+  Result := TStringList.Create;
+  EnumFormats.Reset;
+  while EnumFormats.Next(1, FE, @num) = S_OK do
+  begin
+    lName := '';
+    i := GetClipboardFormatName(FE.cfFormat,FormatName,MAX_PATH);
+    if i <> 0 then
+    begin
+      lName := FormatName;
+    end
+    else
+    begin
+      lName := WindowsClipboardFormatToString(FE.cfFormat);
+    end;
+    Result.Add(lName);
+  end;
+end;
 
 procedure DeepCopyFormatEtc(P1, P2: PFormatEtc);
 begin
