@@ -655,24 +655,25 @@ end;
 
 function TfpgOLEDropTarget.DragEnter(const dataObj: IDataObject;
   grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;
-var
-  Effect: TfpgOLEDragDropEffect;
+//var
+//  Effect: TfpgOLEDragDropEffect;
 begin
-  dwEffect := DROPEFFECT_NONE;
-  Effect := deNone;
-  DoDragEnter(dataObj, grfKeyState, pt, Effect);
-  case Effect of
-    deNone: dwEffect := DROPEFFECT_NONE;
-    deCopy: dwEffect := DROPEFFECT_COPY;
-    deMove: dwEffect := DROPEFFECT_MOVE;
-    deLink: dwEffect := DROPEFFECT_LINK;
-  end;
+  //dwEffect := DROPEFFECT_NONE;
+  //Effect := deNone;
+  DoDragEnter(dataObj, grfKeyState, pt, dwEffect);
+  //case Effect of
+  //  deNone: dwEffect := DROPEFFECT_NONE;
+  //  deCopy: dwEffect := DROPEFFECT_COPY;
+  //  deMove: dwEffect := DROPEFFECT_MOVE;
+  //  deLink: dwEffect := DROPEFFECT_LINK;
+  //end;
   Result := S_OK;
 end;
 
 function TfpgOLEDropTarget.DragLeave: HResult;
 begin
   Result := S_OK;
+  DoDragLeave;
 end;
 
 function TfpgOLEDropTarget.DragOver(grfKeyState: DWORD; pt: TPoint;
