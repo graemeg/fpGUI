@@ -189,6 +189,7 @@ type
 
 function WindowsMimeLookup(const CFFormat: string): string;
 function EnumDataToStringList(DataObj: IDataObject): TStringList;
+function GetFormatEtc(const CFFormat: DWORD): FORMATETC;
 
 implementation
 
@@ -271,6 +272,15 @@ begin
     end;
     Result.Add(lName);
   end;
+end;
+
+function GetFormatEtc(const CFFormat: DWORD): FORMATETC;
+begin
+  Result.CfFormat := CFFormat;
+  Result.Ptd := nil;
+  Result.dwAspect := DVASPECT_CONTENT;
+  Result.lindex := -1;
+  Result.tymed := TYMED_HGLOBAL;
 end;
 
 procedure DeepCopyFormatEtc(P1, P2: PFormatEtc);
