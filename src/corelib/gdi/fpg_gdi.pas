@@ -24,6 +24,7 @@ unit fpg_gdi;
 {$mode objfpc}{$H+}
 
 {.$Define Debug}
+{.$Define DND_DEBUG}
 
 interface
 
@@ -154,6 +155,7 @@ type
     procedure   HandleDNDLeave(Sender: TObject);
     procedure   HandleDNDEnter(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD);
     procedure   HandleDNDPosition(Sender: TObject; KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect);
+    procedure   HandleDNDDrop(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);
   private
     FMouseInWindow: boolean;
     FNonFullscreenRect: TfpgRect;
@@ -1418,6 +1420,42 @@ begin
   end;
 end;
 
+procedure TfpgGDIWindow.HandleDNDDrop(Sender: TObject; DataObj: IDataObject;
+    KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect);
+var
+  FE: FORMATETC;
+  stgmed: STGMEDIUM;
+  data: pchar;
+  wg: TfpgWidget;
+  CF: DWORD;
+begin
+  if not FUserAcceptDrag then
+    exit;
+
+  {$IFDEF DND_DEBUG}
+  Writeln('TfpgGDIWindow.HandleDNDDrop');
+  {$ENDIF}
+
+  wg := self as TfpgWidget;
+  { construct a FORMATETC object }
+  CF := WindowsClipboardLoopup(FUserMimeSelection);
+  FE := GetFormatEtc(CF);
+
+  if DataObj.QueryGetData(FE) = S_OK then
+  begin
+    if DataObj.GetData(FE, stgmed) = S_OK then
+    begin
+      { Yippie! the data is there, so go get it! }
+      data := GlobalLock(stgmed.HGLOBAL);
+      if Assigned(wg.OnDragDrop) then
+        wg.OnDragDrop(self, nil, pt.x, pt.y, data);
+      GlobalUnlock(stgmed.HGLOBAL);
+      { release the data using the COM API }
+      ReleaseStgMedium(stgmed);
+    end;
+  end;
+end;
+
 function TfpgGDIWindow.GetDropManager: TfpgOLEDropTarget;
 begin
   if not Assigned(FDropManager) then
@@ -1426,6 +1464,7 @@ begin
     FDropManager.OnDragLeave := @HandleDNDLeave;
     FDropManager.OnDragEnter := @HandleDNDEnter;
     FDropManager.OnDragOver  := @HandleDNDPosition;
+    FDropManager.OnDragDrop  := @HandleDNDDrop;
   end;
   Result := FDropManager;
 end;
