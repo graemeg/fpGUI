@@ -148,6 +148,8 @@ type
   private
     FDropManager: TfpgOLEDropTarget;
     FDropPos: TPoint;
+    FUserMimeSelection: TfpgString;
+    FUserAcceptDrag: Boolean;
     function    GetDropManager: TfpgOLEDropTarget;
     procedure   HandleDNDLeave(Sender: TObject);
     procedure   HandleDNDEnter(Sender: TObject; DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD);
@@ -1334,6 +1336,7 @@ procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
 var
   wg: TfpgWidget;
 begin
+  FUserMimeSelection := '';
   wg := self as TfpgWidget;
   if wg.AcceptDrops then  { if we get here, this should always be true anyway }
   begin
@@ -1374,7 +1377,11 @@ begin
     if not lAccept then
       Effect := DROPEFFECT_NONE
     else
+    begin
       Effect := TranslateToWinDragEffect(lDropAction);
+      FUserMimeSelection := lMimeChoice;
+      FUserAcceptDrag := True;
+    end;
 
     { Notify widget of drag status, so it can update its look }
     if lAccept then
@@ -1843,6 +1850,8 @@ begin
   FDropPos.x := 0;
   FDropPos.y := 0;
   FFullscreenIsSet := false;
+  FUserMimeSelection := '';
+  FUserAcceptDrag := False;
 end;
 
 destructor TfpgGDIWindow.Destroy;
@@ -2724,7 +2733,7 @@ begin
 
 end;
 
-constructor TGDIDragManager.Create(ADropTarget: TObject);
+constructor TGDIDragManager.Create(ADropTarget: TfpgWindowBase);
 begin
   inherited Create;
   FDropTarget := ADropTarget;
