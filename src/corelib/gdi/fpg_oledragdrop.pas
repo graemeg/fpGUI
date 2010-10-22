@@ -261,6 +261,7 @@ var
 	EnumFormats: IEnumFORMATETC;
 	num: integer;
   lname: string;
+  lMimeName: string;
   FormatName: array[0..MAX_PATH] of Char;
   i: integer;
 begin
@@ -282,6 +283,10 @@ begin
       lName := WindowsClipboardFormatToString(FE.cfFormat);
     end;
     Result.Add(lName);
+    { Lets add the mime type too if we can find one }
+    lMimeName := WindowsMimeLookup(lName);
+    if lName <> lMimeName then
+      Result.Add(lMimeName);
   end;
 end;
 
