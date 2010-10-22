@@ -74,11 +74,7 @@ type
     FOnDragOver: TfpgOLEDragOverEvent;
     FOnDragLeave: TNotifyEvent;
     FOnDragDrop: TfpgOLEDragDropEvent;
-  protected
-    procedure   DoDragEnter(DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD); virtual;
-    procedure   DoDragOver(KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect); virtual;
-    procedure   DoDragLeave;
-    procedure   DoDragDrop(DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect); virtual;
+  private
     { IInterface }
     function    QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
     function    _AddRef: Integer; stdcall;
@@ -88,6 +84,11 @@ type
     function    DragOver(grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult; stdcall;
     function    DragLeave: HResult; stdcall;
     function    Drop(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult; stdcall;
+  protected
+    procedure   DoDragEnter(DataObj: IDataObject; KeyState: Longint; PT: TPoint; var Effect: DWORD); virtual;
+    procedure   DoDragOver(KeyState: Longint; PT: TPoint; var Effect: TfpgOLEDragDropEffect); virtual;
+    procedure   DoDragLeave;
+    procedure   DoDragDrop(DataObj: IDataObject; KeyState: Longint; PT: TPoint; Effect: TfpgOLEDragDropEffect); virtual;
   public
     property    OnDragEnter: TfpgOLEDragEnterEvent read FOnDragEnter write FOnDragEnter;
     property    OnDragOver: TfpgOLEDragOverEvent read FOnDragOver write FOnDragOver;
