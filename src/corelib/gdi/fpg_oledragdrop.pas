@@ -187,7 +187,9 @@ type
     property    OnDropFiles: TDropFilesEvent read FOnDropFiles write FOnDropFiles;
   end;
 
+
 function WindowsMimeLookup(const CFFormat: string): string;
+function WindowsClipboardLoopup(const AMime: string): DWORD;
 function EnumDataToStringList(DataObj: IDataObject): TStringList;
 function GetFormatEtc(const CFFormat: DWORD): FORMATETC;
 
@@ -217,6 +219,15 @@ begin
     Result := 'text/html'
   else
     Result := CFFormat;
+end;
+
+function WindowsClipboardLoopup(const AMime: string): DWORD;
+begin
+  { TODO: We need to implement this correctly }
+  if AMime = 'text/plain' then
+    Result := CF_TEXT
+  else
+    Result := CF_TEXT;  // fallback result
 end;
 
 function WindowsClipboardFormatToString(const CFFormat: integer): string;
