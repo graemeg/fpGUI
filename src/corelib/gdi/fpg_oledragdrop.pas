@@ -13,6 +13,8 @@
 
     Description:
       This unit implements the OLE Drag-n-Drop functionality of Windows.
+      This unit is implemented based on the articles posted on
+        http://www.catch22.net/tuts/dragdrop/
 }
 unit fpg_OLEDragDrop;
 
