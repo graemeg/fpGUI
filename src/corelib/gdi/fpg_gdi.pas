@@ -267,7 +267,7 @@ type
 
   TGDIDragManager = class(TInterfacedObject, IDropTarget)
   private
-    FDropTarget: TObject;  { actually a TfpgWidget }
+    FDropTarget: TfpgWindowBase;  { actually a TfpgWidget }
     FRegistered: boolean;
     { IDropTarget }
     function    DragEnter(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
@@ -275,11 +275,11 @@ type
     function    DragLeave: HResult;StdCall;
     function    Drop(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD):HResult;StdCall;
   public
-    constructor Create(ADropTarget: TObject); reintroduce;
+    constructor Create(ADropTarget: TfpgWindowBase); reintroduce;
     destructor  Destroy; override;
     procedure   RegisterDragDrop;
     procedure   RevokeDragDrop;
-    property    DropTarget: TObject read FDropTarget; { actually a TfpgWidget }
+    property    DropTarget: TfpgWindowBase read FDropTarget; { actually a TfpgWidget }
   end;
 
 
