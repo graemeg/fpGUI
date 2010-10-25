@@ -664,7 +664,7 @@ begin
       FDown := False;
       RePaint;
       fpgApplication.ProcessMessages;
-      if PtInRect(r, Point(x, y)) then
+      if PtInRect(r, Point(x, y)) and FOnClickPending then
         Click;
     end;
   end
@@ -675,7 +675,7 @@ begin
       FDown := False;
       RePaint;
       fpgApplication.ProcessMessages;
-      if PtInRect(r, Point(x, y)) then
+      if PtInRect(r, Point(x, y)) and FOnClickPending then
         Click;
     end;
   end;
@@ -785,8 +785,11 @@ begin
 
   if Assigned(FCommand) then    // ICommand takes preference to OnClick
     FCommand.Execute
-  else if Assigned(OnClick) then
-    OnClick(self);
+  else
+  begin
+    if Assigned(OnClick) then
+      OnClick(self);
+  end;
 end;
 
 function TfpgBaseButton.GetCommand: ICommand;

@@ -99,6 +99,7 @@ type
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
+    FOnClickPending: Boolean;
     procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
@@ -470,6 +471,7 @@ begin
   FTextColor      := clText1;
   FAcceptDrops    := False;
   FDragActive     := False;
+  FOnClickPending := False;
 
   inherited Create(AOwner);
 
@@ -670,6 +672,7 @@ begin
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin
+        FOnClickPending := True;
         mb := mbLeft;
         if uLastClickWidget = self then
           IsDblClick := ((fpgGetTickCount - uLastClickTime) <= DOUBLECLICK_MS)
@@ -683,7 +686,7 @@ begin
         uLastClickTime := fpgGetTickCount;
         if IsDblClick then
         begin
-
+          FOnClickPending := False; { When Double Click occurs we don't want single click }
           HandleDoubleClick(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
           if Assigned(FOnDoubleClick) then
             FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
@@ -1032,7 +1035,7 @@ end;
 
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  if Assigned(FOnClick) then
+  if FOnClickPending and Assigned(FOnClick) then
     FOnClick(self);
 end;
 
