@@ -1189,6 +1189,13 @@ begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDselection');
   {$ENDIF}
+  if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
+  begin
+    wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
+    if not wg.AcceptDrops then
+      Exit;
+  end;
+
   { do not get data yet, just see how much there is }
   XGetWindowProperty(FDisplay, ev.xselection.requestor,
       ev.xselection._property, 0, 0,
@@ -1221,8 +1228,11 @@ begin
   if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
   begin
     wg := FindWindowByHandle(FLastDropTarget) as TfpgWidget;
-    if Assigned(wg.OnDragDrop) then
-      wg.OnDragDrop(nil, nil, FDropPos.X, FDropPos.Y, s);
+    if wg.AcceptDrops then
+    begin
+      if Assigned(wg.OnDragDrop) then
+        wg.OnDragDrop(nil, nil, FDropPos.X, FDropPos.Y, s);
+    end;
   end;
   {$IFDEF DNDDEBUG}
   writeln(' s = ', s);
@@ -1730,7 +1740,7 @@ begin
     { one use is for message blockings for modal windows, or XDND etc. }
     X.ClientMessage:
         begin
-          w := FindWindowByBackupHandle(ev.xclient.window);
+          w := FindWindowByHandle(ev.xclient.window);
           if not Assigned(w) then
             ReportLostWindow(ev);
 
