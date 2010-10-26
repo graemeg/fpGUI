@@ -928,7 +928,7 @@ var
   itm: TDNDSrcType;
 begin
   {$IFDEF DNDDEBUG}
-  writeln('XdndEnter event received!');
+  writeln('TfpgX11Application.HandleDNDenter');
   {$ENDIF}
   ResetDNDVariables;
   FSrcWinHandle := ASource;
@@ -1001,7 +1001,7 @@ var
   wg: TfpgWidget;
 begin
   {$IFDEF DNDDEBUG}
-  writeln('XdndLeave event received!');
+  writeln('TfpgX11Application.HandleDNDleave');
   {$ENDIF}
   if FLastDropTarget <> 0 then { 0 would be first time in, so there is no last window }
   begin
@@ -1035,7 +1035,7 @@ var
   lMimeList: TStringList;
 begin
   {$IFDEF DNDDEBUG}
-  writeln('XdndPosition event received!');
+  writeln('TfpgX11Application.HandleDNDposition  (toplevel window = ', ATopLevelWindow.Name, ')');
   {$ENDIF}
   lAccept := False;
   FSrcWinHandle := ASource;
@@ -1157,7 +1157,7 @@ var
   Msg: TXEvent;
 begin
   {$IFDEF DNDDEBUG}
-  writeln('XdndDrop event received!');
+  writeln('TfpgX11Application.HandleDNDdrop');
   {$ENDIF}
   { TODO: Must XConvertSelection always be called? }
   XConvertSelection(FDisplay, XdndSelection, FDNDDataType, XdndSelection, ATopLevelWindow.FWinHandle, ATimestamp);
@@ -1187,7 +1187,7 @@ var
   wg: TfpgWidget;
 begin
   {$IFDEF DNDDEBUG}
-  writeln('XdndSelection message received!');
+  writeln('TfpgX11Application.HandleDNDselection');
   {$ENDIF}
   { do not get data yet, just see how much there is }
   XGetWindowProperty(FDisplay, ev.xselection.requestor,
@@ -1759,11 +1759,17 @@ begin
           { XDND protocol - XdndEnter }
           else if Assigned(w) and (ev.xclient.message_type = XdndEnter) then
           begin
+            {$IFDEF DNDDEBUG}
+            writeln('ClientMessage.XdndEnter event received');
+            {$ENDIF}
             HandleDNDenter(w, ev.xclient.data.l[0], ev);
           end
           { XDND protocol - XdndPosition }
           else if Assigned(w) and (ev.xclient.message_type = XdndPosition) then
           begin
+            {$IFDEF DNDDEBUG}
+            writeln('ClientMessage.XdndPosition event received');
+            {$ENDIF}
             HandleDNDposition(w,                            // top level window
                 ev.xclient.data.l[0],                       // Source window
                 (ev.xclient.data.l[2] and $FFFF0000) shr 16, // x_root
@@ -1775,7 +1781,7 @@ begin
           else if Assigned(w) and (ev.xclient.message_type = XdndStatus) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('XdndStatus event received!');
+            writeln('ClientMessage.XdndStatus event received');
             {$ENDIF}
             if Assigned(Drag) then
             begin
@@ -1793,22 +1799,32 @@ begin
           { XDND protocol - XdndLeave }
           else if Assigned(w) and (ev.xclient.message_type = XdndLeave) then
           begin
+            {$IFDEF DNDDEBUG}
+            writeln('ClientMessage.XdndLeave event received');
+            {$ENDIF}
             HandleDNDleave(w, ev.xclient.data.l[0]);
           end
           { XDND protocol - XdndDrop }
           else if Assigned(w) and (ev.xclient.message_type = XdndDrop) then
           begin
+            {$IFDEF DNDDEBUG}
+            writeln('ClientMessage.XdndDrop event received');
+            writeln('    ClassName = ', w.ClassName);
+            writeln('    Name = ', w.Name);
+            {$ENDIF}
             HandleDNDdrop(w, ev.xclient.data.l[0], ev.xclient.data.l[2]);
           end
           { XDND protocol - XdndFinished }
           else if Assigned(w) and (ev.xclient.message_type = XdndFinished) then
           begin
             {$IFDEF DNDDEBUG}
-            writeln('XdndFinished event received!');
+            writeln('ClientMessage.XdndFinished event received');
             {$ENDIF}
             if Assigned(Drag) then
             begin
+              {$IFDEF DNDDEBUG}
               writeln('Freeing Drag Object');
+              {$ENDIF}
               FreeAndNil(FDrag);
             end;
           end;
@@ -1855,6 +1871,9 @@ begin
           { Handle XDND data }
           if ev.xselection._property = XdndSelection then
           begin
+            {$IFDEF DNDDEBUG}
+            writeln('XdndSelection message received');
+            {$ENDIF}
             HandleDNDSelection(ev);
           end
           else  { Handle X Selections - clipboard data }
@@ -1865,13 +1884,17 @@ begin
         begin
           if ev.xselectionrequest.selection = XdndSelection then
           begin
+            {$IFDEF DNDDEBUG}
             writeln('found a XdndSelection request');
+            {$ENDIF}
             if Assigned(Drag) then
               Drag.HandleSelectionRequest(ev);
           end
           else
           begin
+            {$IFDEF DEBUG}
             writeln('found a clipboard selection request');
+            {$ENDIF}
             ProcessSelectionRequest(ev);
           end;
         end;
