@@ -141,6 +141,7 @@ type
     property    FontDesc;
     property    HeaderFontDesc;
     property    HeaderHeight;
+    property    HeaderStyle;
     property    Hint;
     property    Options;
     property    ParentShowHint;

@@ -180,6 +180,8 @@ type
     procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord);
     procedure   DrawControlFrame(r: TfpgRect);
+    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True);
+    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True);
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection);
     procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection);
     procedure   DrawFocusRect(r: TfpgRect);
@@ -203,6 +205,7 @@ type
     destructor  Destroy; override;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
+    procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
@@ -1731,6 +1734,16 @@ begin
   DrawControlFrame(r.Left, r.Top, r.Width, r.Height);
 end;
 
+procedure TfpgCanvas.DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean);
+begin
+  fpgStyle.DrawBevel(self, x, y, w, h, ARaised);
+end;
+
+procedure TfpgCanvas.DrawBevel(r: TfpgRect; ARaised: Boolean);
+begin
+  DrawBevel(r.Left, r.Top, r.Width, r.Height, ARaised);
+end;
+
 procedure TfpgCanvas.DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection);
 begin
   fpgStyle.DrawDirectionArrow(self, x, y, w, h, direction);
@@ -2054,6 +2067,36 @@ begin
   ACanvas.SetColor(clHilite1);
   ACanvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right (inner)
   ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left+1, r.Bottom-1);   // bottom (inner)
+end;
+
+procedure TfpgStyle.DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean);
+var
+  r: TfpgRect;
+begin
+  r.SetRect(x, y, w, h);
+  ACanvas.SetColor(clWindowBackground);
+  ACanvas.SetLineStyle(1, lsSolid);
+  ACanvas.FillRectangle(x, y, w, h);
+  
+  if ARaised then
+    ACanvas.SetColor(clHilite2)
+  else
+    ACanvas.SetColor(clShadow1);
+
+  { top }
+  ACanvas.DrawLine(r.Right-1, r.Top, r.Left, r.Top);
+
+  { left }
+  ACanvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom);
+
+  if ARaised then
+    ACanvas.SetColor(clShadow1)
+  else
+    ACanvas.SetColor(clHilite2);
+
+  { right, then bottom }
+  ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);
+  ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);
 end;
 
 procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection);
