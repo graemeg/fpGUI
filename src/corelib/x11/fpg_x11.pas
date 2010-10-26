@@ -1021,6 +1021,13 @@ var
   Msg: TXEvent;
   dx, dy, dx2, dy2: cint;
   child: TWindow;
+  prevchild: TWindow;
+
+  ret_root: TfpgWinHandle;
+  ret_child: TfpgWinHandle;
+  root_x, root_y: integer;
+  child_x, child_y: integer;
+
   s: string;
   i: integer;
   lTargetWinHandle: TWindow;
@@ -1050,24 +1057,29 @@ begin
   writeln('  x_root: ', x_root, '  y_root: ', y_root);
   {$ENDIF}
 
-  // query to see if we accept to be drop target
+  // Find window under cursor, and position of cursor inside that window
   XTranslateCoordinates(FDisplay, XDefaultRootWindow(FDisplay), ATopLevelWindow.WinHandle,
-      x_root, y_root, @dx, @dy, @child);
-
-  {$IFDEF DNDDEBUG}
-  writeln(Format('x:%d  y:%d  child:%d', [dx, dy, child]));
-  {$ENDIF}
-
-  if child <> 0 then
+      x_root, y_root, @dx, @dy, @ret_child);
+  child := ret_child;
+  prevchild := ATopLevelWindow.WinHandle;
+  while ret_child <> 0 do   // If we have chidren, iterate until we reach the top most child
   begin
-    w := FindWindowByHandle(child);
+    child :=  ret_child;
     dx2 := dx;
     dy2 := dy;
-    XTranslateCoordinates(FDisplay, ATopLevelWindow.WinHandle, w.WinHandle,
-        dx2, dy2, @dx, @dy, @child);
-  end
+    XTranslateCoordinates(FDisplay, prevchild, child,
+        dx2, dy2, @dx, @dy, @ret_child);
+    prevchild := child;
+  end;
+
+  if child <> 0 then
+    w := FindWindowByHandle(child)
   else
     w := ATopLevelWindow;
+
+  {$IFDEF DNDDEBUG}
+  writeln(Format('x:%d  y:%d  child:%d (%x)', [dx, dy, w.WinHandle, w.WinHandle]));
+  {$ENDIF}
 
   if Assigned(w) then
   begin
