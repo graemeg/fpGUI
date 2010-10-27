@@ -1177,9 +1177,10 @@ begin
   writeln('TfpgX11Application.HandleDNDdrop');
   {$ENDIF}
   { TODO: Must XConvertSelection always be called? }
-  XConvertSelection(FDisplay, XdndSelection, FDNDDataType, XdndSelection, ATopLevelWindow.FWinHandle, ATimestamp);
+  if FDNDDataType <> None then
+    XConvertSelection(FDisplay, XdndSelection, FDNDDataType, XdndSelection, ATopLevelWindow.FWinHandle, ATimestamp);
 
-  { send message to confirm drop will be accepted in specified rectangle }
+  { send message to signal drop is finished }
   FillChar(Msg, SizeOf(Msg), 0);
   Msg.xany._type            := ClientMessage;
   Msg.xany.display          := FDisplay;
@@ -1188,7 +1189,10 @@ begin
   Msg.xclient.format        := 32;
 
   Msg.xclient.data.l[0] := ATopLevelWindow.FWinHandle;  // winhandle of target window
-  Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
+  if FDNDDataType = None then
+    Msg.xclient.data.l[1] := 0 // drop NOT accepted
+  else
+    Msg.xclient.data.l[1] := 1; // drop accepted - target can remove the data
   Msg.xclient.data.l[2] := FActionType; // this should be the action we accepted
 
   XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
