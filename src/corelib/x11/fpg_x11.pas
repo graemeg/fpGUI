@@ -1158,12 +1158,17 @@ begin
 
   Msg.xclient.data.l[0]   := ATopLevelWindow.WinHandle;  // always top-level window
   if lAccept then
-    Msg.xclient.data.l[1] := 1
+  begin
+    Msg.xclient.data.l[1] := 1;
+    Msg.xclient.data.l[4]   := FActionType;
+  end
   else
+  begin
     Msg.xclient.data.l[1] := 0;
+    Msg.xclient.data.l[4]   := None;
+  end;
   Msg.xclient.data.l[2]   := 0;       // x & y co-ordinates
   Msg.xclient.data.l[3]   := 0;       // w & h co-ordinates
-  Msg.xclient.data.l[4]   := FActionType;
 
   XSendEvent(FDisplay, FSrcWinHandle, False, NoEventMask, @Msg);
 end;
