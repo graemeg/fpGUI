@@ -1101,6 +1101,7 @@ begin
               wg2.OnDragLeave(nil);
           end;
           fillchar(msgp, sizeof(msgp), 0);
+          { Notify the widget so it can reset its looks if needed }
           fpgPostMessage(nil, wg2, FPGM_DROPEXIT, msgp);
         end;
       end;
@@ -1113,6 +1114,9 @@ begin
           lMimeList := TStringList.Create;
           for i := 0 to FDNDTypeList.Count-1 do
             lMimeList.Add(TDNDSrcType(FDNDTypeList[i]).Name);
+          { Use the first mime-type as the default option presented. The mime-list
+            should always be from most specific to least specific. }
+          lMimeChoice := lMimeList[0];
           { TODO: We need to populate the Source parameter. }
           wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
           lMimeList.Free;
@@ -1133,6 +1137,7 @@ begin
     end;
   end;
 
+  FDNDDataType := None;
   for i := 0 to FDNDTypeList.Count-1 do
   begin
     { This list must be from most specific to least specific }
