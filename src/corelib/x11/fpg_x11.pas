@@ -1656,7 +1656,10 @@ begin
               Drag.SendDNDDrop;
               { TODO: Start timeout in case XdndFinished is not received, so we can free Drag }
 //              writeln('Freeing Drag Object');
-//              FreeAndNil(FDrag);
+              if not Drag.FDropAccepted then
+              begin
+                FreeAndNil(FDrag);
+              end;
             end;
           end;
 
@@ -3376,19 +3379,24 @@ procedure TfpgX11Drag.SendDNDDrop;
 var
   xev: TXEvent;
 begin
-  xev.xany._type      := X.ClientMessage;
-  xev.xany.display    := xapplication.Display;
-  xev.xclient.window  := FLastTarget;
-  xev.xclient.message_type := xapplication.XdndDrop;
-  xev.xclient.format  := 32;
+  if FDropAccepted then
+  begin
+    xev.xany._type      := X.ClientMessage;
+    xev.xany.display    := xapplication.Display;
+    xev.xclient.window  := FLastTarget;
+    xev.xclient.message_type := xapplication.XdndDrop;
+    xev.xclient.format  := 32;
 
-  xev.xclient.data.l[0] := FSource.WinHandle;    // from;
-  xev.xclient.data.l[1] := 0;                // reserved
-  xev.xclient.data.l[2] := CurrentTime;       // timestamp
-  xev.xclient.data.l[3] := 0;
-  xev.xclient.data.l[4] := 0;
+    xev.xclient.data.l[0] := FSource.WinHandle;    // from;
+    xev.xclient.data.l[1] := 0;                // reserved
+    xev.xclient.data.l[2] := CurrentTime;       // timestamp
+    xev.xclient.data.l[3] := 0;
+    xev.xclient.data.l[4] := 0;
 
-  XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
+    XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
+  end
+  else
+    SendDNDLeave(FLastTarget);
   FSource.MouseCursor := mcDefault;
 end;
 
