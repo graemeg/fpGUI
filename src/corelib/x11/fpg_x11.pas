@@ -3415,7 +3415,7 @@ begin
     else
     begin
       FDropAccepted := False;
-      FAcceptedAction := X.None;
+      FAcceptedAction := X.None; { AAction should equal None, but lets just make sure }
       FSource.MouseCursor := mcNoDrop;
     end;
   end;
@@ -3467,6 +3467,9 @@ end;
 
 destructor TfpgX11Drag.Destroy;
 begin
+  {$IFDEF DNDDEBUG}
+  writeln('TfpgX11Drag.Destroy ');
+  {$ENDIF}
   FSource.MouseCursor := mcDefault;
   XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndAware);
   XDeleteProperty(xapplication.Display, FSource.WinHandle, xapplication.XdndTypeList);
