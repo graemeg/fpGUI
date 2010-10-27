@@ -2458,8 +2458,13 @@ end;
 function TfpgDrag.Execute(const ADropActions: TfpgDropActions;
   const ADefaultAction: TfpgDropAction): TfpgDropAction;
 begin
-  Assert(FMimeData <> nil, ClassName + ': No mimedata was set before starting the drag');
-  Assert(FSource <> nil, ClassName + ': No Source window was specified before starting the drag');
+  {$NOTE These exception messages need to become resource strings }
+  if not Assigned(FMimeData) then
+    raise Exception.Create(ClassName + ': No mimedata was set before starting the drag');
+  if not Assigned(FSource) then
+    raise Exception.Create(ClassName + ': No Source window was specified before starting the drag');
+  if ADropActions = [] then
+    raise Exception.Create(ClassName + ': No Drop Action was specified');
   inherited Execute(ADropActions, ADefaultAction);
 end;
 
