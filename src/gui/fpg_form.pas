@@ -51,8 +51,8 @@ type
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
     FOnHelp: TfpgHelpEvent;
-    FEnableDrops: boolean;
-    procedure   SetEnableDrops(const AValue: boolean);
+    FDNDEnabled: boolean;
+    procedure   SetDNDEnabled(const AValue: boolean);
   protected
     FModalResult: TfpgModalResult;
     FParentForm: TfpgBaseForm;
@@ -73,6 +73,7 @@ type
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
     function    DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext; const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean; virtual;
     // properties
+    property    DNDEnabled: boolean read FDNDEnabled write SetDNDEnabled default False;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
@@ -102,13 +103,13 @@ type
     function    ShowModal: TfpgModalResult;
     procedure   Close;
     function    CloseQuery: boolean; virtual;
-    property    EnableDrops: boolean read FEnableDrops write SetEnableDrops;
   end;
   
   
   TfpgForm = class(TfpgBaseForm)
   published
     property    BackgroundColor;
+    property    DNDEnabled;
     property    FullScreen;
     property    Height;
     property    Hint;
@@ -188,11 +189,11 @@ end;
 
 { TfpgBaseForm }
 
-procedure TfpgBaseForm.SetEnableDrops(const AValue: boolean);
+procedure TfpgBaseForm.SetDNDEnabled(const AValue: boolean);
 begin
-  if FEnableDrops = AValue then exit;
-  FEnableDrops := AValue;
-  DoEnableDrops(AValue);
+  if FDNDEnabled = AValue then exit;
+  FDNDEnabled := AValue;
+  DoDNDEnabled(AValue);
 end;
 
 procedure TfpgBaseForm.SetWindowTitle(const ATitle: string);
@@ -295,6 +296,7 @@ begin
   FModalResult     := mrNone;
   FFullScreen      := False;
   FIsContainer     := True;
+  FDNDEnabled      := False;
 end;
 
 destructor TfpgBaseForm.Destroy;

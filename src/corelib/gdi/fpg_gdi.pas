@@ -167,7 +167,7 @@ type
     //procedure MoveToScreenCenter; override;
     procedure   DoSetWindowTitle(const ATitle: string); override;
     procedure   DoSetMouseCursor; override;
-    procedure   DoEnableDrops(const AValue: boolean); override;
+    procedure   DoDNDEnabled(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -1635,7 +1635,7 @@ begin
   SetCursor(hc);
 end;
 
-procedure TfpgGDIWindow.DoEnableDrops(const AValue: boolean);
+procedure TfpgGDIWindow.DoDNDEnabled(const AValue: boolean);
 begin
   // TODO: still needs to be implemented
 end;

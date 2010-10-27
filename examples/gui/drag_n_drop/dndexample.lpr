@@ -154,7 +154,7 @@ begin
   SetPosition(316, 186, 512, 429);
   WindowTitle := 'Drop Site Demo';
   Hint := '';
-  EnableDrops := True;
+  DNDEnabled := True;
 
   Bevel1 := TfpgPanel.Create(self);
   with Bevel1 do

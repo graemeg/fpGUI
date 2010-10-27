@@ -230,7 +230,7 @@ type
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; override;
     procedure   DoUpdateWindowPosition; override;
     procedure   DoSetMouseCursor; override;
-    procedure   DoEnableDrops(const AValue: boolean); override;
+    procedure   DoDNDEnabled(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -2130,7 +2130,7 @@ begin
     if QueueEnabledDrops then
     begin
       writeln('QueueEnableDrop....');
-      DoEnableDrops(True);
+      DoDNDEnabled(True);
     end;
   end;
 
@@ -2364,7 +2364,7 @@ begin
   FMouseCursorIsDirty := False;
 end;
 
-procedure TfpgX11Window.DoEnableDrops(const AValue: boolean);
+procedure TfpgX11Window.DoDNDEnabled(const AValue: boolean);
 begin
   // notify XDND protocol that we can handle DND
   if AValue then
