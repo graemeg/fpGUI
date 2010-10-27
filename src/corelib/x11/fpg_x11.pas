@@ -1009,7 +1009,7 @@ begin
     if wg.AcceptDrops then
     begin
       if Assigned(wg.OnDragLeave) then
-        wg.OnDragLeave(nil);
+        wg.OnDragLeave(wg);
     end;
   end;
   ResetDNDVariables;
@@ -1098,7 +1098,7 @@ begin
           if wg2.AcceptDrops then
           begin
             if Assigned(wg2.OnDragLeave) then
-              wg2.OnDragLeave(nil);
+              wg2.OnDragLeave(wg2);
           end;
           fillchar(msgp, sizeof(msgp), 0);
           { Notify the widget so it can reset its looks if needed }
