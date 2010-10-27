@@ -346,7 +346,7 @@ type
     function    GetSource: TfpgWindow; reintroduce;
   public
     constructor Create(ASource: TfpgWindow);
-    function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
+    function    Execute(const ADropActions: TfpgDropActions = [daCopy]; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
     property    Source: TfpgWindow read GetSource;
     property    Target: TfpgWinHandle read FTarget write FTarget;
     property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
