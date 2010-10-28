@@ -1,5 +1,4 @@
 [ProjectOptions]
-ProjectDir=/media/flash16gig/programming/fpgide/src/
 ProjectName=fpgide.project
 MainUnit=fpgide.lpr
 TargetFile=fpgide${EXEEXT}
@@ -39,14 +38,15 @@ UnitDir6=${FPGUIDIR}src/gui/db/
 UnitDir7=${FPGUILIBDIR}
 
 [Units]
-UnitCount=10
-Unit1=fpgide.lpr,1
+UnitCount=11
+Unit1=fpgide.lpr,0
 Unit2=frm_configureide.pas,0
 Unit3=frm_debug.pas,0
-Unit4=frm_main.pas,1
-Unit5=frm_projectoptions.pas,0
-Unit6=ideconst.pas,1
-Unit7=idemacros.pas,0
-Unit8=ideutils.pas,1
-Unit9=project.pas,1
-Unit10=unitlist.pas,0
+Unit4=frm_main.pas,-1
+Unit5=frm_procedurelist.pas,-1
+Unit6=frm_projectoptions.pas,0
+Unit7=ideconst.pas,-1
+Unit8=idemacros.pas,0
+Unit9=ideutils.pas,-1
+Unit10=project.pas,-1
+Unit11=unitlist.pas,-1
