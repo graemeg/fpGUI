@@ -1114,9 +1114,15 @@ begin
           lMimeList := TStringList.Create;
           for i := 0 to FDNDTypeList.Count-1 do
             lMimeList.Add(TDNDSrcType(FDNDTypeList[i]).Name);
+
           { Use the first mime-type as the default option presented. The mime-list
             should always be from most specific to least specific. }
-          lMimeChoice := lMimeList[0];
+          if lMimeList.Count > 0 then
+            lMimeChoice := lMimeList[0]
+          else
+            {$NOTE We need to replace this message with a resouce string }
+            raise Exception.Create('fpGUI/X11: no mime types available for DND operation');
+
           { TODO: We need to populate the Source parameter. }
           wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
           lMimeList.Free;
