@@ -6,9 +6,18 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_panel, fpg_label,
-  fpg_edit, fpg_combobox, fpg_grid;
+  fpg_edit, fpg_combobox, fpg_grid, pparser, pastree;
 
 type
+
+  TSimpleEngine = class(TPasTreeContainer)
+  public
+    function CreateElement(AClass: TPTreeElement; const AName: String;
+      AParent: TPasElement; AVisibility: TPasMemberVisibility;
+      const ASourceFilename: String; ASourceLinenumber: Integer): TPasElement; override;
+    function FindElement(const AName: String): TPasElement; override;
+  end;
+
 
   TProcedureListForm = class(TfpgForm)
   private
@@ -21,15 +30,71 @@ type
     lblObjects: TfpgLabel;
     grdProcedures: TfpgStringGrid;
     {@VFD_HEAD_END: ProcedureListForm}
+    FFilename: TfpgString;
+    procedure   FormShow(Sender: TObject);
   public
-    procedure AfterCreate; override;
+    constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; override;
   end;
 
 {@VFD_NEWFORM_DECL}
 
+function DisplayProcedureList(const AFilename: TfpgString): boolean;
+
+
 implementation
 
+uses
+  ideconst;
+
+
+function DisplayProcedureList(const AFilename: TfpgString): boolean;
+var
+  frm: TProcedureListForm;
+begin
+  try
+    frm := TProcedureListForm.Create(nil);
+    frm.FFilename := AFilename;
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
+end;
+
 {@VFD_NEWFORM_IMPL}
+
+procedure TProcedureListForm.FormShow(Sender: TObject);
+var
+  M: TPasModule;
+  E: TPasTreeContainer;
+  I: Integer;
+  Decls: TList;
+  p: TPasElement;
+begin
+  E := TSimpleEngine.Create;
+  try
+    M := ParseSource(E, FFilename, OSTarget, CPUTarget);
+
+    { Cool, we successfully parsed the unit.
+      Now output some info about it. }
+    Decls := M.InterfaceSection.Declarations;
+    for I := 0 to Decls.Count - 1 do
+    begin
+      p := TObject(Decls[I]) as TPasElement;
+      Writeln('Interface item ', I, ': ' + p.Name + ' [line ' + IntToStr(p.SourceLinenumber) + ']');
+
+    end;
+    FreeAndNil(M);
+  finally
+    FreeAndNil(E)
+  end;
+end;
+
+constructor TProcedureListForm.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  OnShow  := @FormShow;
+end;
 
 procedure TProcedureListForm.AfterCreate;
 begin
@@ -128,5 +193,23 @@ begin
   {%endregion}
 end;
 
+
+{ TSimpleEngine }
+
+function TSimpleEngine.CreateElement(AClass: TPTreeElement;
+  const AName: String; AParent: TPasElement; AVisibility: TPasMemberVisibility;
+  const ASourceFilename: String; ASourceLinenumber: Integer): TPasElement;
+begin
+  Result := AClass.Create(AName, AParent);
+  Result.Visibility := AVisibility;
+  Result.SourceFilename := ASourceFilename;
+  Result.SourceLinenumber := ASourceLinenumber;
+end;
+
+function TSimpleEngine.FindElement(const AName: String): TPasElement;
+begin
+  { dummy implementation, see TFPDocEngine.FindElement for a real example }
+  Result := nil;
+end;
 
 end.
