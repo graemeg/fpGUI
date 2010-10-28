@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
-  fpg_tree;
+  fpg_tree, fpg_textedit, fpg_mru;
 
 type
 
@@ -16,21 +16,33 @@ type
     {@VFD_HEAD_BEGIN: MainForm}
     pnlMenu: TfpgBevel;
     mainmenu: TfpgMenuBar;
-    Bevel1: TfpgBevel;
+    Toolbar: TfpgBevel;
     btnQuit: TfpgButton;
     btnOpen: TfpgButton;
     btnSave: TfpgButton;
     btnSaveAll: TfpgButton;
+    btnTest: TfpgButton;
     pnlStatusBar: TfpgBevel;
+    lblStatus: TfpgLabel;
     pnlClientArea: TfpgBevel;
     pnlWindow: TfpgPageControl;
+    tsMessages: TfpgTabSheet;
+    grdMessages: TfpgStringGrid;
+    tsScribble: TfpgTabSheet;
+    memScribble: TfpgMemo;
+    tsTerminal: TfpgTabSheet;
     Splitter1: TfpgSplitter;
     pnlTool: TfpgPageControl;
+    tsProject: TfpgTabSheet;
+    tvProject: TfpgTreeView;
+    tsFiles: TfpgTabSheet;
+    grdFiles: TfpgFileGrid;
     Splitter2: TfpgSplitter;
+    grdOpenFiles: TfpgStringGrid;
+    Splitter3: TfpgSplitter;
     pcEditor: TfpgPageControl;
-    tsEditor1: TfpgTabSheet;
-    Memo1: TfpgMemo;
-    lblStatus: TfpgLabel;
+    tseditor: TfpgTabSheet;
+    TextEditor: TfpgTextEdit;
     mnuFile: TfpgPopupMenu;
     mnuEdit: TfpgPopupMenu;
     mnuSearch: TfpgPopupMenu;
@@ -40,22 +52,16 @@ type
     mnuTools: TfpgPopupMenu;
     mnuSettings: TfpgPopupMenu;
     mnuHelp: TfpgPopupMenu;
-    tsMessages: TfpgTabSheet;
-    tsScribble: TfpgTabSheet;
-    tsTerminal: TfpgTabSheet;
-    tsProject: TfpgTabSheet;
-    tsFiles: TfpgTabSheet;
-    tvProject: TfpgTreeView;
-    grdFiles: TfpgFileGrid;
-    grdMessages: TfpgStringGrid;
-    memScribble: TfpgMemo;
-    btnTest: TfpgButton;
     {@VFD_HEAD_END: MainForm}
+    pmOpenRecentMenu: TfpgPopupMenu;
+    miRecentProjects: TfpgMenuItem;
+    FRecentFiles: TfpgMRU;
     procedure   FormShow(Sender: TObject);
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenFileClicked(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
+    procedure   miSearchProcedureList(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
     procedure   miRunMake(Sender: TObject);
@@ -70,6 +76,7 @@ type
     procedure   miProjectNewFromTemplate(Sender: TObject);
     procedure   miProjectOptions(Sender: TObject);
     procedure   miProjectOpen(Sender: TObject);
+    procedure   miRecentProjectsClick(Sender: TObject; const FileName: String);
     procedure   miProjectSave(Sender: TObject);
     procedure   miProjectSaveAs(Sender: TObject);
     procedure   miProjectAddUnitToProject(Sender: TObject);
@@ -82,6 +89,7 @@ type
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
     procedure   CloseAllTabs;
+    procedure   LoadProject(const AFilename: TfpgString);
     function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
     procedure   miTest(Sender: TObject);
     function    GetUnitsNode: TfpgTreeNode;
@@ -106,12 +114,14 @@ uses
   ,frm_configureide
   ,frm_projectoptions
   ,frm_debug
-  ,fpg_textedit
+  ,frm_procedurelist
+  ,fpg_basegrid
   ,ideconst
   ,idemacros
   ,Project
   ,UnitList
   ,BuilderThread
+  ,dbugintf
   ;
 
 
@@ -156,6 +166,15 @@ begin
   s := SelectFileDialog(sfdSave);
   if s <> '' then
     TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+end;
+
+procedure TMainForm.miSearchProcedureList(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  s := pcEditor.ActivePage.Hint;
+  if s <> '' then
+    DisplayProcedureList(s);
 end;
 
 procedure TMainForm.miAboutFPGuiClicked(Sender: TObject);
@@ -239,7 +258,7 @@ end;
 procedure TMainForm.miViewDebug(Sender: TObject);
 begin
   if not Assigned(DebugForm) then
-    fpgApplication.CreateForm(TDebugForm, DebugForm);
+    fpgApplication.CreateForm(TDebugForm, TfpgWindowBase(DebugForm));
   DebugForm.Show;
 end;
 
@@ -283,30 +302,17 @@ end;
 procedure TMainForm.miProjectOpen(Sender: TObject);
 var
   s: TfpgString;
-  i: integer;
-  ts: TfpgTabSheet;
 begin
   s := SelectFileDialog(sfdOpen, Format(cFileFilterTemplate, ['Project Files', cProjectFiles, cProjectFiles]));
   if s <> '' then
   begin
-    // remove all project info
-    CloseAllTabs;
-    SetupProjectTree;
-    FreeProject;
-    // now load new project info
-    GProject.Load(s);
-    for i := 0 to GProject.UnitList.Count-1 do
-    begin
-      if GProject.UnitList[i].Opened then
-      begin
-        ts := OpenEditorPage(GProject.UnitList[i].FileName);
-        ts.TagPointer := GProject.UnitList[i];
-      end;
-    end;
-    PopuplateProjectTree;
-    UpdateWindowTitle;
-    AddMessage('Project loaded');
+    LoadProject(s);
   end;
+end;
+
+procedure TMainForm.miRecentProjectsClick(Sender: TObject; const FileName: String);
+begin
+  LoadProject(Filename);
 end;
 
 procedure TMainForm.miProjectSave(Sender: TObject);
@@ -432,12 +438,14 @@ begin
   begin
     for i := 0 to GProject.UnitList.Count-1 do
     begin
+      {$Note ExtractRelativePath still needs a fpGUI wrapper }
       s := ExtractRelativepath(GProject.ProjectDir, GProject.UnitList[i].FileName);
       n := r.AppendText(s);
       n.Data := GProject.UnitList[i];
     end;
   end;
   r.Expand;
+  tvProject.Invalidate;
 end;
 
 procedure TMainForm.SetupFilesGrid;
@@ -466,6 +474,31 @@ begin
     pcEditor.RemoveTabSheet(ts);
     ts.Free;
   end;
+end;
+
+procedure TMainForm.LoadProject(const AFilename: TfpgString);
+var
+  i: integer;
+  ts: TfpgTabSheet;
+begin
+  // remove all project info
+  CloseAllTabs;
+  SetupProjectTree;
+  FreeProject;
+  // now load new project info
+  GProject.Load(AFilename);
+  FRecentFiles.AddItem(AFilename);
+  for i := 0 to GProject.UnitList.Count-1 do
+  begin
+    if GProject.UnitList[i].Opened then
+    begin
+      ts := OpenEditorPage(GProject.UnitList[i].FileName);
+      ts.TagPointer := GProject.UnitList[i];
+    end;
+  end;
+  PopuplateProjectTree;
+  UpdateWindowTitle;
+  AddMessage('Project loaded');
 end;
 
 function TMainForm.OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -587,6 +620,7 @@ var
   end;
 
 begin
+//  writeln('syntax highlight line: ', ALineIndex);
   edt := TfpgTextEdit(Sender);
   AllowSelfDraw := False;
   ACanvas.TextColor := clBlack;
@@ -629,6 +663,7 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
+{
   // outer containers
   pnlMenu.Align := alTop;
   pnlStatusBar.Align := alBottom;
@@ -639,29 +674,34 @@ begin
   Splitter1.Align := alBottom;
   pnlTool.Align := alLeft;
   Splitter2.Align := alLeft;
-  pcEditor.Align := alClient;
 
-  Realign;
+  grdOpenFiles.Align := alRight;
+  Splitter3.Align := alRight;
+  TextEditor.Align := alClient;
+}
+//  Realign;
 
   SetupProjectTree;
   SetupFilesGrid;
 
   // apply editor settings
-  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
+//  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   OnShow  := @FormShow;
+  SendDebug('TMainForm.Create');
 end;
 
 procedure TMainForm.AfterCreate;
 begin
+  SendMethodEnter('TMainForm.AfterCreate');
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(310, 206, 650, 358);
+  SetPosition(310, 206, 638, 428);
   WindowTitle := 'fpGUI IDE - %s';
   Hint := '';
   WindowPosition := wpOneThirdDown;
@@ -670,7 +710,8 @@ begin
   with pnlMenu do
   begin
     Name := 'pnlMenu';
-    SetPosition(0, 0, 648, 54);
+    SetPosition(0, 0, 638, 54);
+    Align := alTop;
     Hint := '';
     Shape := bsSpacer;
   end;
@@ -679,96 +720,129 @@ begin
   with mainmenu do
   begin
     Name := 'mainmenu';
-    SetPosition(0, 0, 648, 24);
+    SetPosition(0, 0, 638, 24);
     Anchors := [anLeft,anRight,anTop];
+    Align := alTop;
   end;
 
-  Bevel1 := TfpgBevel.Create(pnlMenu);
-  with Bevel1 do
+  Toolbar := TfpgBevel.Create(pnlMenu);
+  with Toolbar do
   begin
-    Name := 'Bevel1';
-    SetPosition(0, 24, 648, 28);
+    Name := 'Toolbar';
+    SetPosition(2, 2, 634, 50);
     Anchors := [anLeft,anRight,anTop];
+    Align := alClient;
     Hint := '';
     Shape := bsSpacer;
   end;
 
-  btnQuit := TfpgButton.Create(Bevel1);
+  btnQuit := TfpgButton.Create(Toolbar);
   with btnQuit do
   begin
     Name := 'btnQuit';
     SetPosition(4, 2, 24, 24);
     Text := '';
+    Down := False;
     Embedded := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.quit';
-    TabOrder := 1;
+    TabOrder := 3;
     OnClick  := @btnQuitClicked;
   end;
 
-  btnOpen := TfpgButton.Create(Bevel1);
+  btnOpen := TfpgButton.Create(Toolbar);
   with btnOpen do
   begin
     Name := 'btnOpen';
     SetPosition(28, 2, 24, 24);
     Text := '';
+    Down := False;
     Embedded := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.open';
-    TabOrder := 2;
+    TabOrder := 4;
     OnClick := @btnOpenFileClicked;
   end;
 
-  btnSave := TfpgButton.Create(Bevel1);
+  btnSave := TfpgButton.Create(Toolbar);
   with btnSave do
   begin
     Name := 'btnSave';
     SetPosition(56, 2, 24, 24);
     Text := '';
+    Down := False;
     Embedded := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.save';
-    TabOrder := 3;
+    TabOrder := 5;
     OnClick := @miFileSave;
   end;
 
-  btnSaveAll := TfpgButton.Create(Bevel1);
+  btnSaveAll := TfpgButton.Create(Toolbar);
   with btnSaveAll do
   begin
     Name := 'btnSaveAll';
     SetPosition(80, 2, 24, 24);
     Text := '';
+    Down := False;
     Embedded := True;
+    Enabled := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.saveall';
-    TabOrder := 4;
-    Enabled := False;
+    TabOrder := 6;
+  end;
+
+  btnTest := TfpgButton.Create(Toolbar);
+  with btnTest do
+  begin
+    Name := 'btnTest';
+    SetPosition(168, 2, 80, 24);
+    Text := 'test';
+    Down := False;
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 7;
+    OnClick := @miTest;
   end;
 
   pnlStatusBar := TfpgBevel.Create(self);
   with pnlStatusBar do
   begin
     Name := 'pnlStatusBar';
-    SetPosition(0, 338, 648, 20);
+    SetPosition(0, 408, 636, 20);
     Anchors := [anLeft,anRight,anBottom];
     Hint := '';
     Style := bsLowered;
+  end;
+
+  lblStatus := TfpgLabel.Create(pnlStatusBar);
+  with lblStatus do
+  begin
+    Name := 'lblStatus';
+    SetPosition(2, 2, 632, 16);
+    Anchors := [anLeft,anRight,anTop];
+    Align := alBottom;
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := '';
   end;
 
   pnlClientArea := TfpgBevel.Create(self);
   with pnlClientArea do
   begin
     Name := 'pnlClientArea';
-    SetPosition(0, 57, 648, 248);
+    SetPosition(0, 54, 638, 374);
     Anchors := [anLeft,anRight,anTop,anBottom];
+    Align := alClient;
     Hint := '';
     Shape := bsSpacer;
   end;
@@ -777,78 +851,183 @@ begin
   with pnlWindow do
   begin
     Name := 'pnlWindow';
-    SetPosition(192, 156, 264, 84);
+    SetPosition(2, 288, 634, 84);
     ActivePageIndex := 0;
+    Align := alBottom;
     Hint := '';
-    TabOrder := 1;
+    TabOrder := 11;
     TabPosition := tpLeft;
+  end;
+
+  tsMessages := TfpgTabSheet.Create(pnlWindow);
+  with tsMessages do
+  begin
+    Name := 'tsMessages';
+    SetPosition(73, 3, 558, 78);
+    Text := 'Messages';
+  end;
+
+  grdMessages := TfpgStringGrid.Create(tsMessages);
+  with grdMessages do
+  begin
+    Name := 'grdMessages';
+    SetPosition(0, 4, 558, 73);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    BackgroundColor := TfpgColor($80000002);
+    AddColumn('New', 800, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    Hint := '';
+    RowCount := 0;
+    RowSelect := True;
+    ShowHeader := False;
+    TabOrder := 13;
+  end;
+
+  tsScribble := TfpgTabSheet.Create(pnlWindow);
+  with tsScribble do
+  begin
+    Name := 'tsScribble';
+    SetPosition(73, 3, 188, 78);
+    Text := 'Scribble';
+  end;
+
+  memScribble := TfpgMemo.Create(tsScribble);
+  with memScribble do
+  begin
+    Name := 'memScribble';
+    SetPosition(0, 4, 187, 73);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#Edit2';
+    Hint := '';
+    Lines.Add('Make notes, use it as a clipboard');
+    Lines.Add('or type whatever you want...');
+    TabOrder := 15;
+  end;
+
+  tsTerminal := TfpgTabSheet.Create(pnlWindow);
+  with tsTerminal do
+  begin
+    Name := 'tsTerminal';
+    SetPosition(73, 3, 188, 78);
+    Text := 'Terminal';
   end;
 
   Splitter1 := TfpgSplitter.Create(pnlClientArea);
   with Splitter1 do
   begin
     Name := 'Splitter1';
-    SetPosition(152, 140, 352, 8);
+    SetPosition(2, 281, 634, 7);
+    Align := alBottom;
   end;
 
   pnlTool := TfpgPageControl.Create(pnlClientArea);
   with pnlTool do
   begin
     Name := 'pnlTool';
-    SetPosition(12, 4, 140, 136);
+    SetPosition(2, 2, 140, 279);
     ActivePageIndex := 0;
+    Align := alLeft;
     Hint := '';
-    TabOrder := 3;
+    TabOrder := 18;
+  end;
+
+  tsProject := TfpgTabSheet.Create(pnlTool);
+  with tsProject do
+  begin
+    Name := 'tsProject';
+    SetPosition(3, 24, 134, 252);
+    Text := 'Project';
+  end;
+
+  tvProject := TfpgTreeView.Create(tsProject);
+  with tvProject do
+  begin
+    Name := 'tvProject';
+    SetPosition(1, 1, 132, 250);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 20;
+    OnDoubleClick := @tvProjectDoubleClick;
+  end;
+
+  tsFiles := TfpgTabSheet.Create(pnlTool);
+  with tsFiles do
+  begin
+    Name := 'tsFiles';
+    SetPosition(3, 24, 134, 193);
+    Text := 'Files';
+  end;
+
+  grdFiles := TfpgFileGrid.Create(tsFiles);
+  with grdFiles do
+  begin
+    Name := 'grdFiles';
+    SetPosition(1, 1, 131, 190);
+    Anchors := [anLeft,anRight,anTop,anBottom];
+    Options := Options + [go_SmoothScroll];
   end;
 
   Splitter2 := TfpgSplitter.Create(pnlClientArea);
   with Splitter2 do
   begin
     Name := 'Splitter2';
-    SetPosition(160, 8, 8, 116);
+    SetPosition(142, 2, 8, 279);
+    Align := alLeft;
+  end;
+
+  grdOpenFiles := TfpgStringGrid.Create(pnlClientArea);
+  with grdOpenFiles do
+  begin
+    Name := 'grdOpenFiles';
+    SetPosition(516, 2, 120, 279);
+    Align := alRight;
+    BackgroundColor := TfpgColor($80000002);
+    AddColumn('File', 100, taLeftJustify);
+    FontDesc := '#Grid';
+    HeaderFontDesc := '#GridHeader';
+    Hint := '';
+    RowCount := 0;
+    RowSelect := True;
+    ShowHeader := False;
+    TabOrder := 24;
+  end;
+
+  Splitter3 := TfpgSplitter.Create(pnlClientArea);
+  with Splitter3 do
+  begin
+    Name := 'Splitter3';
+    SetPosition(508, 2, 8, 279);
+    Align := alRight;
   end;
 
   pcEditor := TfpgPageControl.Create(pnlClientArea);
   with pcEditor do
   begin
     Name := 'pcEditor';
-    SetPosition(208, 8, 324, 120);
+    SetPosition(150, 2, 358, 279);
     ActivePageIndex := 0;
-    Hint := '';
-    TabOrder := 5;
-    TabPosition := tpRight;
-    Options := [to_PMenuClose];
-    OnClosingTabSheet := @TabSheetClosing;
-  end;
-
-  tsEditor1 := TfpgTabSheet.Create(pcEditor);
-  with tsEditor1 do
-  begin
-    Name := 'tsEditor1';
-    SetPosition(3, 3, 267, 114);
-    Text := 'Editor1';
-  end;
-
-  Memo1 := TfpgMemo.Create(tsEditor1);
-  with Memo1 do
-  begin
-    Name := 'Memo1';
-    SetPosition(64, 16, 120, 52);
-    Hint := '';
-    FontDesc := '#Edit2';
-    TabOrder := 1;
     Align := alClient;
+    Hint := '';
+    TabOrder := 18;
+    TabPosition := tpRight;
   end;
 
-  lblStatus := TfpgLabel.Create(pnlStatusBar);
-  with lblStatus do
+  tseditor := TfpgTabSheet.Create(pcEditor);
+  with tseditor do
   begin
-    Name := 'lblStatus';
-    SetPosition(4, 2, 636, 16);
-    Anchors := [anLeft,anRight,anTop];
-    FontDesc := '#Label1';
-    Hint := '';
-    Text := '';
+    Name := 'tseditor';
+    SetPosition(3, 3, 282, 273);
+    Text := 'Tabsheet1';
+  end;
+
+  TextEditor := TfpgTextEdit.Create(tseditor);
+  with TextEditor do
+  begin
+    Name := 'TextEditor';
+    SetPosition(0, 0, 130, 200);
+    Align := alClient;
   end;
 
   mnuFile := TfpgPopupMenu.Create(self);
@@ -882,7 +1061,7 @@ begin
     SetPosition(476, 98, 172, 20);
     AddMenuItem('Find...', '', nil).Enabled := False;
     AddMenuItem('Find in Files...', '', nil).Enabled := False;
-    AddMenuItem('Procedure List...', '', nil).Enabled := False;
+    AddMenuItem('Procedure List...', '', @miSearchProcedureList);
   end;
 
   mnuView := TfpgPopupMenu.Create(self);
@@ -891,7 +1070,7 @@ begin
     Name := 'mnuView';
     SetPosition(476, 119, 172, 20);
     AddMenuItem('Todo List...', '', nil).Enabled := False;
-    AddMenuItem('Debug Windows', '', @miViewDebug).Enabled := False;
+    AddMenuItem('Debug Windows', '', @miViewDebug);
   end;
 
   mnuProject := TfpgPopupMenu.Create(self);
@@ -904,7 +1083,7 @@ begin
     AddMenuItem('New (empty)...', '', @miProjectNew);
     AddMenuItem('New from Template...', '', @miProjectNewFromTemplate);
     AddMenuItem('Open...', '', @miProjectOpen);
-    AddMenuItem('Open Recent', '', nil);
+    miRecentProjects := AddMenuItem('Open Recent', '', nil);
     AddMenuItem('Save', '', @miProjectSave);
     AddMenuItem('Save As...', '', @miProjectSaveAs);
     AddMenuItem('-', '', nil);
@@ -956,108 +1135,6 @@ begin
     AddMenuItem('About fpGUI IDE...', '', @miAboutIDE);
   end;
 
-  tsMessages := TfpgTabSheet.Create(pnlWindow);
-  with tsMessages do
-  begin
-    Name := 'tsMessages';
-    SetPosition(73, 3, 188, 78);
-    Text := 'Messages';
-  end;
-
-  tsScribble := TfpgTabSheet.Create(pnlWindow);
-  with tsScribble do
-  begin
-    Name := 'tsScribble';
-    SetPosition(3, 24, 258, 57);
-    Text := 'Scribble';
-  end;
-
-  tsTerminal := TfpgTabSheet.Create(pnlWindow);
-  with tsTerminal do
-  begin
-    Name := 'tsTerminal';
-    SetPosition(3, 24, 258, 57);
-    Text := 'Terminal';
-  end;
-
-  tsProject := TfpgTabSheet.Create(pnlTool);
-  with tsProject do
-  begin
-    Name := 'tsProject';
-    SetPosition(3, 24, 134, 109);
-    Text := 'Project';
-  end;
-
-  tsFiles := TfpgTabSheet.Create(pnlTool);
-  with tsFiles do
-  begin
-    Name := 'tsFiles';
-    SetPosition(3, 24, 134, 109);
-    Text := 'Files';
-  end;
-
-  tvProject := TfpgTreeView.Create(tsProject);
-  with tvProject do
-  begin
-    Name := 'tvProject';
-    SetPosition(1, 1, 132, 107);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    FontDesc := '#Label1';
-    Hint := '';
-    TabOrder := 1;
-    OnDoubleClick := @tvProjectDoubleClick;
-  end;
-
-  grdFiles := TfpgFileGrid.Create(tsFiles);
-  with grdFiles do
-  begin
-    Name := 'grdFiles';
-    SetPosition(1, 1, 131, 106);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-  end;
-
-  grdMessages := TfpgStringGrid.Create(tsMessages);
-  with grdMessages do
-  begin
-    Name := 'grdMessages';
-    SetPosition(0, 4, 188, 73);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    AddColumn('New', 800, taLeftJustify);
-    FontDesc := '#Grid';
-    HeaderFontDesc := '#GridHeader';
-    Hint := '';
-    RowCount := 0;
-    RowSelect := True;
-    ShowHeader := False;
-    TabOrder := 1;
-  end;
-
-  memScribble := TfpgMemo.Create(tsScribble);
-  with memScribble do
-  begin
-    Name := 'memScribble';
-    SetPosition(0, 4, 257, 52);
-    Anchors := [anLeft,anRight,anTop,anBottom];
-    Hint := '';
-    Lines.Add('Make notes, use it as a clipboard');
-    Lines.Add('or type whatever you want...');
-    FontDesc := '#Edit2';
-    TabOrder := 1;
-  end;
-
-  btnTest := TfpgButton.Create(Bevel1);
-  with btnTest do
-  begin
-    Name := 'btnTest';
-    SetPosition(168, 2, 80, 24);
-    Text := 'test';
-    FontDesc := '#Label1';
-    Hint := '';
-    ImageName := '';
-    TabOrder := 5;
-    OnClick := @miTest;
-  end;
-
   {@VFD_BODY_END: MainForm}
   {%endregion}
 
@@ -1089,6 +1166,25 @@ begin
   mainmenu.AddMenuItem('&Tools', nil).SubMenu := mnuTools;
   mainmenu.AddMenuItem('&Settings', nil).SubMenu := mnuSettings;
   mainmenu.AddMenuItem('&Help', nil).SubMenu := mnuHelp;
+
+  pmOpenRecentMenu := TfpgPopupMenu.Create(self);
+  with pmOpenRecentMenu do
+  begin
+    Name := 'pmOpenRecentMenu';
+    SetPosition(336, 68, 128, 20);
+  end;
+
+  miRecentProjects.SubMenu := pmOpenRecentMenu;
+
+  FRecentFiles := TfpgMRU.Create(self);
+  FRecentFiles.ParentMenuItem := pmOpenRecentMenu;
+  FRecentFiles.OnClick         :=@miRecentProjectsClick;
+  FRecentFiles.MaxItems        := gINI.ReadInteger('Options', 'MRUProjectCount', 10);
+  FRecentFiles.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
+  FRecentFiles.LoadMRU;
+
+
+  SendMethodExit('TMainForm.AfterCreate');
 end;
 
 
