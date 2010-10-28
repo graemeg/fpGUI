@@ -140,7 +140,6 @@ begin
   if AFile <> '' then
     ProjectName := fpgExtractFileName(AFile);
 
-  FIniFile.WriteString(cProjectOptions, 'ProjectDir', ProjectDir);
   FIniFile.WriteString(cProjectOptions, 'ProjectName', ProjectName);
   FIniFile.WriteString(cProjectOptions, 'MainUnit', MainUnit);
   FIniFile.WriteString(cProjectOptions, 'TargetFile', TargetFile);
@@ -199,7 +198,7 @@ begin
   begin
     s := UnitList[j].FileName;
     FIniFile.WriteString(cUnits, 'Unit' + IntToStr(j+1),
-        Format('%s,%s', [ExtractRelativepath(ProjectDir, s), BoolToStr(UnitList[j].Opened, '1', '0')]));
+        Format('%s,%s', [ExtractRelativepath(ProjectDir, s), BoolToStr(UnitList[j].Opened, False)]));
   end;
 
   Result := True;
@@ -237,7 +236,7 @@ begin
   if not Assigned(FIniFile) then
     FIniFile := TfpgINIFile.CreateExt(AProjectFile);
 
-  ProjectDir := FIniFile.ReadString(cProjectOptions, 'ProjectDir', fpgExtractFilePath(AProjectFile));
+  ProjectDir := fpgExtractFilePath(AProjectFile);
   ProjectName := FIniFile.ReadString(cProjectOptions, 'ProjectName', ChangeFileExt(fpgExtractFileName(AProjectFile), ''));
   MainUnit := FIniFile.ReadString(cProjectOptions, 'MainUnit', '');
   TargetFile := FIniFile.ReadString(cProjectOptions, 'TargetFile', '');
