@@ -45,7 +45,7 @@ type
     FImageName: string;
     FClicked: Boolean;
     FShowImage: Boolean;
-    FClickOnPush: Boolean;
+    FClickOnPush: Boolean;    { Used for group buttons where click happens on "down" state. Normal buttons, the click happens on "release" state }
     FGroupIndex: integer;
     FAllowAllUp: boolean;
     FModalResult: TfpgModalResult;
@@ -695,6 +695,7 @@ procedure TfpgBaseButton.HandleKeyPress(var keycode: word; var shiftstate: TShif
 begin
   if (keycode = keyReturn) or (keycode = keySpace) or (keycode = keyPEnter) then
   begin
+    FOnClickPending := True;
     DoPush;
     Consumed := True;
   end
@@ -706,8 +707,9 @@ procedure TfpgBaseButton.HandleKeyRelease(var keycode: word; var shiftstate: TSh
 begin
   if (keycode = keyReturn) or (keycode = keySpace) or (keycode = keyPEnter) then
   begin
-    DoRelease(1, 1); // fake co-ordinates to it executes the Click
+    DoRelease(1, 1); // fake co-ordinates so it executes the Click
     Consumed := True;
+    FOnClickPending := False;
   end
   else
     inherited;
