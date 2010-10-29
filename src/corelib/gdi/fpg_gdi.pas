@@ -2845,7 +2845,9 @@ begin
       lIsTranslated := False;
       {$Note OLE DND: We are only handling strings at the moment, this needs to be extended to other types too }
       itm := FMimeData[i];
+      {$IFDEF DND_DEBUG}
       writeln('  Processing mime-type: ', itm.Format);
+      {$ENDIF}
 
       { description of data we are sending }
       New(F);

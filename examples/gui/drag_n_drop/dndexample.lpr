@@ -130,26 +130,23 @@ var
   d: TfpgDrag;
   v: variant;
 begin
-  writeln('in >');
   m := TfpgMimeData.Create;
+
   { via convenience properties }
   m.Text := 'My name is Earl';
   m.HTML := 'My name is <b>Earl</b>';
-  { via generic SetData function }
-  //m.SetData('text/special', 'type number three');
-  //v := 'type number four';
-  //m.SetData('text/four', v);
-  //m.SetData('text/five', 'type number five');
+  { Could also have used the generic SetData function }
+//  m.SetData('text/plain', 'My name is Earl');
+//  m.SetData('text/html', 'My name is <b>Earl</b>');
 
   { tell TfpgDrag who is the Source of the drag }
-//  d := TfpgDrag.Create(MyDragSourceLabel);
   d := TfpgDrag.Create(Sender as TfpgWindow);
 
   { TfpgDrag now takes ownership of TfpgMimeData }
   d.MimeData := m;
+
   { TfpgDrag instance will be freed later when DND action is completed }
   d.Execute([daCopy]);
-  writeln('< out');
 end;
 
 procedure TMainForm.ShowMimeList(AMimeList: TStringList);
