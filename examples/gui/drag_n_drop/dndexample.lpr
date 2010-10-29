@@ -24,6 +24,7 @@ type
     Label2: TfpgLabel;
     Label3: TfpgLabel;
     chkAcceptDrops: TfpgCheckBox;
+    chkAccept: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure CheckAcceptDropsChanged(Sender: TObject);
     procedure Edit1DragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
@@ -32,6 +33,7 @@ type
     procedure Bevel1DragLeave(Sender: TObject);
     procedure PanelDragDrop(Sender, Source: TObject; X, Y: integer; AData: variant);
     procedure Button1Clicked(Sender: TObject);
+    procedure btnClearClicked(Sender: TObject);
     procedure LabelDragStartDetected(Sender: TObject);
     procedure ShowMimeList(AMimeList: TStringList);
   public
@@ -62,7 +64,10 @@ var
   s: string;
 begin
   s := 'text/plain';
-  Accept := AMimeList.IndexOf(s) > -1;
+  if chkAccept.Checked then
+    Accept := False
+  else
+    Accept := AMimeList.IndexOf(s) > -1;
   if Accept then
   begin
     if AMimeChoice <> s then
@@ -114,6 +119,11 @@ begin
   Close;
 end;
 
+procedure TMainForm.btnClearClicked(Sender: TObject);
+begin
+  Grid1.RowCount := 0;
+end;
+
 procedure TMainForm.LabelDragStartDetected(Sender: TObject);
 var
   m: TfpgMimeData;
@@ -126,10 +136,10 @@ begin
   m.Text := 'My name is Earl';
   m.HTML := 'My name is <b>Earl</b>';
   { via generic SetData function }
-  m.SetData('text/special', 'type number three');
-  v := 'type number four';
-  m.SetData('text/four', v);
-  m.SetData('text/five', 'type number five');
+  //m.SetData('text/special', 'type number three');
+  //v := 'type number four';
+  //m.SetData('text/four', v);
+  //m.SetData('text/five', 'type number five');
 
   { tell TfpgDrag who is the Source of the drag }
 //  d := TfpgDrag.Create(MyDragSourceLabel);
@@ -230,6 +240,7 @@ begin
     Hint := '';
     ImageName := '';
     TabOrder := 4;
+    OnClick := @btnClearClicked;
   end;
 
   MyDragSourceLabel := TfpgLabel.Create(self);
@@ -238,6 +249,7 @@ begin
     Name := 'MyDragSourceLabel';
     SetPosition(28, 20, 84, 40);
     Alignment := taCenter;
+    BackgroundColor := TfpgColor($67D47A);
     FontDesc := '#Label1';
     Hint := '';
     Layout := tlCenter;
@@ -294,13 +306,24 @@ begin
   with chkAcceptDrops do
   begin
     Name := 'chkAcceptDrops';
-    SetPosition(4, 112, 168, 20);
+    SetPosition(4, 96, 168, 20);
     Checked := True;
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 10;
     Text := 'Enable AcceptDrops';
     OnChange :=@CheckAcceptDropsChanged;
+  end;
+
+  chkAccept := TfpgCheckBox.Create(self);
+  with chkAccept do
+  begin
+    Name := 'chkAccept';
+    SetPosition(4, 116, 244, 20);
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 11;
+    Text := 'Set Accept to False in OnDragEnter';
   end;
 
   {@VFD_BODY_END: MainForm}
