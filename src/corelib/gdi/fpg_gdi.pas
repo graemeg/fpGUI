@@ -1257,6 +1257,8 @@ end;
 
 destructor TfpgGDIApplication.Destroy;
 begin
+  if Assigned(FDrag) then
+    FDrag.Free;
   UnhookWindowsHookEx(ActivationHook);
   inherited Destroy;
 end;
@@ -1389,17 +1391,19 @@ begin
 
     { enumerate the available formats and return them as a StringList }
     lMimeList := EnumDataToStringList(DataObj);
+    try
+      if lMimeList.Count > 0 then
+        lMimeChoice := lMimeList[0]
+      else
+        {$NOTE We need to replace this message with a resouce string }
+        raise Exception.Create('fpGUI/GDI: no mime types available for DND operation');
 
-    if lMimeList.Count > 0 then
-      lMimeChoice := lMimeList[0]
-    else
-      {$NOTE We need to replace this message with a resouce string }
-      raise Exception.Create('fpGUI/GDI: no mime types available for DND operation');
-
-    lDropAction := TranslateToFPGDropAction(Effect);
-    if Assigned(wg.OnDragEnter) then
-      wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
-
+      lDropAction := TranslateToFPGDropAction(Effect);
+      if Assigned(wg.OnDragEnter) then
+        wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
+    finally
+      lMimeList.Free;
+    end;
     if not lAccept then
       Effect := DROPEFFECT_NONE
     else
@@ -1915,6 +1919,8 @@ begin
     OnStartDragDetected is complete. So we need to set FDragActive to False
     here. }
   FDragActive := False;
+  if Assigned(wapplication.FDrag) then
+    FreeAndNil(wapplication.FDrag);
 end;
 
 constructor TfpgGDIWindow.Create(AOwner: TComponent);
@@ -1931,7 +1937,7 @@ end;
 
 destructor TfpgGDIWindow.Destroy;
 begin
-  if (self as TfpgWidget).AcceptDrops and Assigned(FDropManager) then
+  if Assigned(FDropManager) then
     FDropManager.Free;
   inherited Destroy;
 end;
