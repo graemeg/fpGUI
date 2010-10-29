@@ -68,6 +68,7 @@ type
   
   TfpgLabel = class(TfpgCustomLabel)
   published
+    property    AcceptDrops;
     property    Align;
     property    Alignment;
     property    AutoSize;

@@ -73,6 +73,7 @@ type
   protected
     procedure   HandlePaint; override;
   published
+    property    AcceptDrops;
     property    Align;
     property    BackgroundColor;
     property    BorderStyle;
@@ -93,6 +94,10 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
     property    OnMouseDown;
     property    OnMouseMove;
     property    OnMouseUp;
@@ -131,6 +136,7 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
+    property    AcceptDrops;
     property    Align;
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
     property    BackgroundColor;
@@ -158,6 +164,10 @@ type
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
     property    OnPaint;
     property    OnShowHint;
   end;
@@ -185,6 +195,7 @@ type
     function    GetClientRect: TfpgRect; override;
     property    Font: TfpgFont read FFont;
   published
+    property    AcceptDrops;
     property    Align;
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property    BackgroundColor;
@@ -208,6 +219,10 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
     property    OnPaint;
     property    OnShowHint;
   end;

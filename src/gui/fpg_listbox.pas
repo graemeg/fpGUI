@@ -134,6 +134,7 @@ type
   // The standard strings listbox we will actually use in a GUI.
   TfpgListBox = class(TfpgTextListBox)
   published
+    property    AcceptDrops;
     property    Align;
     property    AutoHeight;
     property    BackgroundColor default clListBox;
@@ -152,6 +153,10 @@ type
     property    TextColor;
     property    OnChange;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
@@ -203,6 +208,7 @@ type
   
   TfpgColorListBox = class(TfpgBaseColorListBox)
   published
+    property    AcceptDrops;
     property    Align;
     property    AutoHeight;
     property    BackgroundColor default clListBox;
@@ -221,6 +227,10 @@ type
     property    ShowHint;
     property    TabOrder;
     property    TextColor;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
   end;
 
 

@@ -159,6 +159,7 @@ type
   public
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
+    property    AcceptDrops;
     property    Align;
     property    AutoSelect;
     property    AutoSize;
@@ -184,6 +185,7 @@ type
     property    OnDragEnter;
     property    OnDragLeave;
     property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;

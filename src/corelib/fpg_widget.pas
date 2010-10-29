@@ -165,7 +165,7 @@ type
     procedure   Invalidate; // double check this works as developers expect????
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
-    property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops;
+    property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
     property    Visible: boolean read FVisible write SetVisible default True;
