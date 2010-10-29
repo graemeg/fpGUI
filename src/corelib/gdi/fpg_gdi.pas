@@ -265,7 +265,10 @@ type
   end;
 
 
+  { Used mainly for sending drags - being the source of the drag }
   TfpgGDIDrag = class(TfpgDragBase)
+  private
+    function    StringToHandle(const AString: TfpgString): HGLOBAL;
   protected
     FSource: TfpgGDIWindow;
     function    GetSource: TfpgGDIWindow; virtual;
@@ -2746,6 +2749,22 @@ begin
 end;
 
 { TfpgGDIDrag }
+
+function TfpgGDIDrag.StringToHandle(const AString: TfpgString): HGLOBAL;
+var
+  dest: HGLOBAL;
+  l: integer;
+  p: PChar;
+begin
+  p := PChar(AString);
+  l := Length(AString)+1;
+  { allocate and lock a global memory buffer. Make it fixed
+    data so we don't have to use GlobalLock }
+  dest := GlobalAlloc(GMEM_FIXED, l);
+  { Copy the string into the buffer }
+  Move(p^, PChar(dest)^, l);
+  Result := dest;
+end;
 
 function TfpgGDIDrag.GetSource: TfpgGDIWindow;
 begin
