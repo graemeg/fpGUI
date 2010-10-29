@@ -628,9 +628,9 @@ type
   end;
 
 
-  TfpgMimeDataStruct = class(TObject)
+  TfpgMimeDataItem = class(TObject)
   public
-    format: TfpgString;
+    format: TfpgString;   { mime string type }
     data: Variant;
     constructor Create(const AFormat: TfpgString; const AData: variant); reintroduce;
   end;
@@ -641,13 +641,14 @@ type
     { TODO: This is wrong, we must have one Data Storage object }
     FDataList: TObjectList;
     FUrlList: TList;
+    function    GetItem(AIndex: Integer): TfpgMimeDataItem;
     function    Geturls: TList;
     procedure   Seturls(const AValue: TList);
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
     function    GetHTML: TfpgString;
     procedure   SetHTML(const AValue: TfpgString);
-    function    GetFormatCout: integer;
+    function    GetCount: integer;
   public
     constructor Create;
     destructor  Destroy; override;
@@ -656,10 +657,11 @@ type
     function    Formats: TStrings;
     function    GetData(const AMimeType: TfpgString): Variant;
     procedure   SetData(const AMimeType: TfpgString; const AData: Variant);
+    property    Items[AIndex: Integer]: TfpgMimeDataItem read GetItem; default;
     property    urls: TList read Geturls write Seturls;
     property    Text: TfpgString read GetText write SetText;
     property    HTML: TfpgString read GetHTML write SetHTML;
-    property    FormatCount: integer read GetFormatCout;
+    property    Count: integer read GetCount;
   end;
 
   TfpgDragBase = class(TObject)
@@ -2751,9 +2753,9 @@ begin
   FTagPointer   := nil;
 end;
 
-{ TfpgMimeDataStruct }
+{ TfpgMimeDataItem }
 
-constructor TfpgMimeDataStruct.Create(const AFormat: TfpgString; const AData: variant);
+constructor TfpgMimeDataItem.Create(const AFormat: TfpgString; const AData: variant);
 begin
   inherited Create;
   format := AFormat;
@@ -2767,6 +2769,11 @@ function TfpgMimeDataBase.Geturls: TList;
 begin
   { TODO: We should only return data related to MIME type:  text/uri-list }
   Result := nil;
+end;
+
+function TfpgMimeDataBase.GetItem(AIndex: Integer): TfpgMimeDataItem;
+begin
+  Result := TfpgMimeDataItem(FDataList[AIndex]);
 end;
 
 procedure TfpgMimeDataBase.Seturls(const AValue: TList);
@@ -2789,11 +2796,11 @@ var
   s: string;
 begin
   { TODO: if no text/plain, but we have HTML, we must strip all tags and return that }
-  for i := 0 to FDataList.Count-1 do
+  for i := 0 to Count-1 do
   begin
-    if TfpgMimeDataStruct(FDataList[i]).format = 'text/plain' then
+    if Items[i].format = 'text/plain' then
     begin
-      s := TfpgMimeDataStruct(FDataList[i]).data;
+      s := Items[i].data;
       Result := s;
       break;
     end;
@@ -2803,20 +2810,20 @@ end;
 procedure TfpgMimeDataBase.SetText(const AValue: TfpgString);
 var
   i: integer;
-  r: TfpgMimeDataStruct;
+  r: TfpgMimeDataItem;
 begin
   { remove existing 'text/plain' first }
-  for i := FDataList.Count-1 downto 0 do
+  for i := Count-1 downto 0 do
   begin
-    r := TfpgMimeDataStruct(FDataList[i]);
+    r := Items[i];
     if r.format = 'text/plain' then
     begin
-      FDataList.Remove(FDataList[i]);
+      FDataList.Remove(r);
       break;
     end;
   end;
   { now add new structure }
-  r := TfpgMimeDataStruct.Create('text/plain', AValue);
+  r := TfpgMimeDataItem.Create('text/plain', AValue);
   FDataList.Add(r);
 end;
 
@@ -2826,11 +2833,11 @@ var
   s: string;
 begin
   { TODO: if data was HTML, we must strip all tags - regex will make this easy }
-  for i := 0 to FDataList.Count-1 do
+  for i := 0 to Count-1 do
   begin
-    if TfpgMimeDataStruct(FDataList[i]).format = 'text/html' then
+    if Items[i].format = 'text/html' then
     begin
-      s := TfpgMimeDataStruct(FDataList[i]).data;
+      s := Items[i].data;
       Result := s;
       break;
     end;
@@ -2840,24 +2847,24 @@ end;
 procedure TfpgMimeDataBase.SetHTML(const AValue: TfpgString);
 var
   i: integer;
-  r: TfpgMimeDataStruct;
+  r: TfpgMimeDataItem;
 begin
   { remove existing 'text/html' first }
-  for i := FDataList.Count-1 downto 0 do
+  for i := Count-1 downto 0 do
   begin
-    r := TfpgMimeDataStruct(FDataList[i]);
+    r := Items[i];
     if r.format = 'text/html' then
     begin
-      FDataList.Remove(FDataList[i]);
+      FDataList.Remove(r);
       break;
     end;
   end;
   { now add new structure }
-  r := TfpgMimeDataStruct.Create('text/html', AValue);
+  r := TfpgMimeDataItem.Create('text/html', AValue);
   FDataList.Add(r);
 end;
 
-function TfpgMimeDataBase.GetFormatCout: integer;
+function TfpgMimeDataBase.GetCount: integer;
 begin
   Result := FDataList.Count;
 end;
@@ -2885,9 +2892,9 @@ var
   i: integer;
 begin
   Result := False;
-  for i := 0 to FDataList.Count-1 do
+  for i := 0 to Count-1 do
   begin
-    Result := TfpgMimeDataStruct(FDataList[i]).format = AMimeType;
+    Result := Items[i].format = AMimeType;
     if Result then
       break;
   end;
@@ -2896,17 +2903,17 @@ end;
 function TfpgMimeDataBase.Formats: TStrings;
 var
   i: integer;
-  r: TfpgMimeDataStruct;
+  r: TfpgMimeDataItem;
   s: string;
 begin
-  if FDataList.Count = 0 then
+  if Count = 0 then
     Result := nil
   else
   begin
     Result := TStringList.Create;
-    for i := 0 to FDataList.Count-1 do
+    for i := 0 to Count-1 do
     begin
-      s := TfpgMimeDataStruct(FDataList[i]).format;
+      s := Items[i].format;
       Result.Add(s);
     end;
   end;
@@ -2916,11 +2923,11 @@ function TfpgMimeDataBase.GetData(const AMimeType: TfpgString): Variant;
 var
   i: integer;
 begin
-  for i := 0 to FDataList.Count-1 do
+  for i := 0 to Count-1 do
   begin
-    if TfpgMimeDataStruct(FDataList[i]).format = AMimeType then
+    if Items[i].format = AMimeType then
     begin
-      Result := TfpgMimeDataStruct(FDataList[i]).data;
+      Result := Items[i].data;
       break;
     end;
   end;
@@ -2929,20 +2936,20 @@ end;
 procedure TfpgMimeDataBase.SetData(const AMimeType: TfpgString; const AData: Variant);
 var
   i: integer;
-  r: TfpgMimeDataStruct;
+  r: TfpgMimeDataItem;
 begin
   { remove existing mime type first }
-  for i := FDataList.Count-1 downto 0 do
+  for i := Count-1 downto 0 do
   begin
-    r := TfpgMimeDataStruct(FDataList[i]);
+    r := Items[i];
     if r.format = AMimeType then
     begin
-      FDataList.Remove(FDataList[i]);
+      FDataList.Remove(r);
       break;
     end;
   end;
   { now add new structure }
-  r := TfpgMimeDataStruct.Create(AMimeType, AData);
+  r := TfpgMimeDataItem.Create(AMimeType, AData);
   FDataList.Add(r);
 end;
 
