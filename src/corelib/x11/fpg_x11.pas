@@ -2148,7 +2148,6 @@ begin
     { we need to set the XdndAware property }
     if QueueEnabledDrops then
     begin
-      writeln('QueueEnableDrop....');
       DoDNDEnabled(True);
     end;
   end;
