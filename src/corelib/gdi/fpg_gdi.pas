@@ -273,7 +273,7 @@ type
     FSource: TfpgGDIWindow;
     function    GetSource: TfpgGDIWindow; virtual;
   public
-    function Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction; override;
+    function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction; override;
   end;
 
 
@@ -2771,11 +2771,108 @@ begin
   Result := FSource;
 end;
 
-function TfpgGDIDrag.Execute(const ADropActions: TfpgDropActions;
-  const ADefaultAction: TfpgDropAction): TfpgDropAction;
+function TfpgGDIDrag.Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction): TfpgDropAction;
+var
+  dwEffect: DWORD;
+  dwResult: HRESULT;
+  i: Integer;
+  F: PFormatEtc;
+  S: string;
+  M: PStgMedium;
+  itm: TfpgMimeDataItem;
+  lEffects: DWORD;
+  FDataObject: TfpgOLEDataObject;
+  FDropSource: TfpgOLEDropSource;
+  lIsTranslated: boolean;
 begin
   { TODO: this still needs to be implemented }
-  Result := daCopy;
+  if FDragging then
+  begin
+    {$IFDEF DND_DEBUG}
+    writeln('TfpgGDIDrag.Execute (already dragging)');
+    {$ENDIF}
+    Result := daIgnore;
+  end
+  else
+  begin
+    {$IFDEF DND_DEBUG}
+    writeln('TfpgGDIDrag.Execute (new drag)');
+    {$ENDIF}
+    FDragging := True;
+    wapplication.Drag := self;
+    lEffects := TranslateToWinDragEffects(ADropActions);
+    FDataObject := TfpgOLEDataObject.Create;
+
+    for i := 0 to FMimeData.Count-1 do
+    begin
+      F := nil;
+      M := nil;
+      lIsTranslated := False;
+      {$Note OLE DND: We are only handling strings at the moment, this needs to be extended to other types too }
+      itm := FMimeData[i];
+      writeln('  Processing mime-type: ', itm.Format);
+
+      { description of data we are sending }
+      New(F);
+      F^.cfFormat := WindowsClipboardLookup(itm.format, lIsTranslated);
+      F^.ptd := nil;
+      F^.dwAspect := DVASPECT_CONTENT;
+      F^.lindex := -1;
+      F^.tymed := TYMED_HGLOBAL;
+      FDataObject.FormatEtcList.Add(F);
+
+      { storage for data we are sending }
+      s := itm.data;
+      New(M);
+      M^.tymed := TYMED_HGLOBAL;
+      M^.hGlobal := StringToHandle(s);
+      FDataObject.StgMediumList.Add(M);
+
+      { Original mime type was translated to a known Windows CF_ formats, add
+        mimetype string as-is as well }
+      if lIsTranslated then
+      begin
+        New(F);
+        F^.cfFormat := RegisterClipboardFormat(PChar(itm.format));
+        F^.ptd := nil;
+        F^.dwAspect := DVASPECT_CONTENT;
+        F^.lindex := -1;
+        F^.tymed := TYMED_HGLOBAL;
+        FDataObject.FormatEtcList.Add(F);
+
+        { storage for data we are sending }
+        s := itm.data;
+        New(M);
+        M^.tymed := TYMED_HGLOBAL;
+        M^.hGlobal := StringToHandle(s);
+        FDataObject.StgMediumList.Add(M);
+      end;
+    end;
+
+    { Now let OLE take over from here }
+    FDropSource := TfpgOLEDropSource.Create;
+    dwResult := ActiveX.DoDragDrop( FDataObject as IDataObject,
+                                    FDropSource as IDropSource,
+                                    lEffects,
+                                    @dwEffect);
+    Result := TranslateToFPGDropAction(dwEffect);
+
+    if dwResult = DRAGDROP_S_DROP then
+    begin
+      { which action did the user select, and act accordingly }
+      if dwEffect = DROPEFFECT_COPY then
+      begin
+        // nothing to do here
+      end;
+      if dwEffect = DROPEFFECT_MOVE then
+      begin
+        // Sowehow we need to remove the data from source
+      end;
+    end;
+
+//    (FDropSource as IUnknown)._Release;
+//    (FDataObject as IUnknown)._Release;
+  end;
 end;
 
 { TGDIDragManager }
