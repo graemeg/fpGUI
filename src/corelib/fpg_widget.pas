@@ -47,7 +47,6 @@ type
     FOnDragDrop: TfpgDragDropEvent;
     FOnDragEnter: TfpgDragEnterEvent;
     FOnDragLeave: TNotifyEvent;
-    FOnDragStartDetected: TNotifyEvent;
     FOnEnter: TNotifyEvent;
     FOnExit: TNotifyEvent;
     FOnMouseDown: TMouseButtonEvent;
@@ -61,7 +60,6 @@ type
     FOnScreen: boolean;
     FOnShowHint: THintEvent;
     FDragStartPos: TfpgPoint;
-    FDragActive: boolean;
     alist: TList;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
@@ -142,7 +140,6 @@ type
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
-    property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
     property    OnEnter: TNotifyEvent read FOnEnter write FOnEnter;
     property    OnExit: TNotifyEvent read FOnExit write FOnExit;
     property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
@@ -471,7 +468,6 @@ begin
   FBackgroundColor := clWindowBackground;
   FTextColor      := clText1;
   FAcceptDrops    := False;
-  FDragActive     := False;
   FOnClickPending := False;
 
   inherited Create(AOwner);
@@ -728,8 +724,8 @@ begin
     if not FDragActive and (FDragStartPos.ManhattanLength(fpgPoint(msg.Params.mouse.x, msg.Params.mouse.y)) > fpgApplication.StartDragDistance) then
     begin
       FDragActive := True;
-      if Assigned(OnDragStartDetected) then
-        OnDragStartDetected(self);
+      // In Windows dragging is a blocking function, so FDragActive is false after this call
+      DoDragStartDetected;
     end;
   end;
 

@@ -435,6 +435,8 @@ type
     FSizeIsDirty: Boolean;
     FPosIsDirty: Boolean;
     FMouseCursorIsDirty: Boolean;
+    FOnDragStartDetected: TNotifyEvent;
+    FDragActive: boolean;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
@@ -447,6 +449,7 @@ type
     procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
     procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
+    procedure   DoDragStartDetected; virtual;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
@@ -459,6 +462,7 @@ type
     procedure   SetWidth(const AValue: TfpgCoord);
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
+    property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
@@ -1137,6 +1141,12 @@ begin
     Result := MinHeight;
 end;
 
+procedure TfpgWindowBase.DoDragStartDetected;
+begin
+  if Assigned(FOnDragStartDetected) then
+    FOnDragStartDetected(self);
+end;
+
 procedure TfpgWindowBase.SetParent(const AValue: TfpgWindowBase);
 begin
   FParent := AValue;
@@ -1257,6 +1267,7 @@ begin
   FSizeIsDirty := True;
   FMaxWidth := 0;
   FMaxHeight := 0;
+  FDragActive := False;
 end;
 
 procedure TfpgWindowBase.AfterConstruction;

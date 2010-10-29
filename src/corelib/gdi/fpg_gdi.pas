@@ -186,6 +186,7 @@ type
     procedure   DoSetMouseCursor; override;
     procedure   DoDNDEnabled(const AValue: boolean); override;
     procedure   DoAcceptDrops(const AValue: boolean); override;
+    procedure   DoDragStartDetected; override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -1904,6 +1905,15 @@ begin
       DropManager.RevokeDragDrop;
     QueueAcceptDrops := False;
   end;
+end;
+
+procedure TfpgGDIWindow.DoDragStartDetected;
+begin
+  inherited DoDragStartDetected;
+  { In windows OLE dragging is a blocking function, so it never returns until
+    OnStartDragDetected is complete. So we need to set FDragActive to False
+    here. }
+  FDragActive := False;
 end;
 
 constructor TfpgGDIWindow.Create(AOwner: TComponent);
