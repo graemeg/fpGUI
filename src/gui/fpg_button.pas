@@ -92,7 +92,7 @@ type
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
     property    AllowMultiLineText: boolean read FAllowMultiLineText write SetAllowMultiLineText default False;
     property    Default: boolean read FDefault write SetDefault default False;
-    property    Down: Boolean read FDown write SetDown;
+    property    Down: Boolean read FDown write SetDown default False;
     { The button will not show focus. It might also have a different down state (look).
       This is similar to Focusable = False, but the appearance of the down state might differ. }
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
