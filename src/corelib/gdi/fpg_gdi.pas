@@ -1378,15 +1378,15 @@ begin
   begin
     lAccept := False;
 
-    { enumerate the available formats }
-//    DataObj.EnumFormatEtc(DATADIR_GET, EnumIntf);
-//    EnumIntf.Next();
+    { enumerate the available formats and return them as a StringList }
     lMimeList := EnumDataToStringList(DataObj);
 
-    lMimeChoice := 'text/plain';
-//    lMimeList := TStringList.Create;
-//    lMimeList.Add(lMimeChoice);
-//    lMimeList.Add('text/html');
+    if lMimeList.Count > 0 then
+      lMimeChoice := lMimeList[0]
+    else
+      {$NOTE We need to replace this message with a resouce string }
+      raise Exception.Create('fpGUI/GDI: no mime types available for DND operation');
+
     lDropAction := TranslateToFPGDropAction(Effect);
     if Assigned(wg.OnDragEnter) then
       wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
