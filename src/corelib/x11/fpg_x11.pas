@@ -3217,11 +3217,11 @@ begin
   { free old array }
   SetLength(FMimeTypesArray, 0);
   { set size of new array. Extra element for the terminating x.None value }
-  SetLength(FMimeTypesArray, FMimedata.FormatCount+1);
+  SetLength(FMimeTypesArray, FMimedata.Count+1);
 
   sl := FMimeData.Formats as TStringList;
   try
-    for i := 0 to FMimeData.FormatCount-1 do
+    for i := 0 to FMimeData.Count-1 do
     begin
       s := PChar(sl[i]);
       a := XInternAtom(xapplication.Display, s, TBool(False));
@@ -3337,7 +3337,7 @@ begin
 
   xev.xclient.data.l[0] := FSource.WinHandle;
 
-  n := FMimeData.FormatCount;
+  n := FMimeData.Count;
 
   if n > 3 then
     i := 1
@@ -3489,8 +3489,7 @@ begin
   inherited Destroy;
 end;
 
-function TfpgX11Drag.Execute(const ADropActions: TfpgDropActions;
-  const ADefaultAction: TfpgDropAction): TfpgDropAction;
+function TfpgX11Drag.Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction): TfpgDropAction;
 var
   win: TWindow;
 begin
@@ -3509,7 +3508,7 @@ begin
       raise Exception.Create('fpGUI/X11: Application failed to aquire selection owner status');
 
     InitializeMimeTypesToAtoms;
-    if FMimeData.FormatCount > 3 then
+    if FMimeData.Count > 3 then
       SetTypeListProperty;
   end;
 end;
