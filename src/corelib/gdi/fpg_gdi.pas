@@ -57,6 +57,7 @@ type
   // forward declaration
   TfpgGDIWindow = class;
   TGDIDragManager = class;
+  TfpgGDIDrag = class;
 
 
   TfpgGDIFontResource = class(TfpgFontResourceBase)
@@ -197,6 +198,10 @@ type
 
 
   TfpgGDIApplication = class(TfpgApplicationBase)
+  private
+    FDrag: TfpgGDIDrag;
+    procedure   SetDrag(const AValue: TfpgGDIDrag);
+    property    Drag: TfpgGDIDrag read FDrag write SetDrag;
   protected
     FDisplay: HDC;
     WindowClass: TWndClass;
@@ -1160,6 +1165,13 @@ begin
   EnumFontFamiliesEx(Display, @LFont, @MyFontEnumerator, LongInt(result), 0);
   {$ENDIF}
   Result.Sort;
+end;
+
+procedure TfpgGDIApplication.SetDrag(const AValue: TfpgGDIDrag);
+begin
+  if Assigned(FDrag) then
+    FDrag.Free;
+  FDrag := AValue;
 end;
 
 function TfpgGDIApplication.GetHiddenWindow: HWND;
