@@ -274,6 +274,7 @@ type
     FSource: TfpgGDIWindow;
     function    GetSource: TfpgGDIWindow; virtual;
   public
+    destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction=daCopy): TfpgDropAction; override;
   end;
 
@@ -2789,6 +2790,14 @@ end;
 function TfpgGDIDrag.GetSource: TfpgGDIWindow;
 begin
   Result := FSource;
+end;
+
+destructor TfpgGDIDrag.Destroy;
+begin
+  {$IFDEF DND_DEBUG}
+  writeln('TfpgGDIDrag.Destroy ');
+  {$ENDIF}
+  inherited Destroy;
 end;
 
 function TfpgGDIDrag.Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction): TfpgDropAction;
