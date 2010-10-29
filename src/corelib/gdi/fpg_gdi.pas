@@ -1443,6 +1443,7 @@ var
   data: pchar;
   wg: TfpgWidget;
   CF: DWORD;
+  lIsTranslated: Boolean;
 begin
   if not FUserAcceptDrag then
     exit;
@@ -1453,7 +1454,7 @@ begin
 
   wg := self as TfpgWidget;
   { construct a FORMATETC object }
-  CF := WindowsClipboardLoopup(FUserMimeSelection);
+  CF := WindowsClipboardLookup(FUserMimeSelection, lIsTranslated);
   FE := GetFormatEtc(CF);
 
   if DataObj.QueryGetData(FE) = S_OK then

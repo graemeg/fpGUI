@@ -191,7 +191,7 @@ type
 
 
 function WindowsMimeLookup(const CFFormat: string): string;
-function WindowsClipboardLoopup(const AMime: string): DWORD;
+function WindowsClipboardLookup(const AMime: string; var IsTranslated: Boolean): DWORD;
 function EnumDataToStringList(DataObj: IDataObject): TStringList;
 function GetFormatEtc(const CFFormat: DWORD): FORMATETC;
 
@@ -223,13 +223,26 @@ begin
     Result := CFFormat;
 end;
 
-function WindowsClipboardLoopup(const AMime: string): DWORD;
+function WindowsClipboardLookup(const AMime: string; var IsTranslated: Boolean): DWORD;
 begin
-  { TODO: We need to implement this correctly }
-  if AMime = 'text/plain' then
-    Result := CF_TEXT
-  else
+  { TODO: We need to improve this implementation }
+  if AMime = 'text/html' then
+  begin
+    { We don't want duplicate CF_TEXT in DataObject, so register some of our
+      known convenience types (from TfpgMimeData) as-is }
+    IsTranslated := False;
+    Result := RegisterClipboardFormat('text/html');
+  end
+  else if Pos('text/', AMime) = 1 then
+  begin
+    IsTranslated := True;
     Result := CF_TEXT;  // fallback result
+  end
+  else
+  begin
+    IsTranslated := False;
+    Result := RegisterClipboardFormat(PChar(AMime));
+  end;
 end;
 
 function WindowsClipboardFormatToString(const CFFormat: integer): string;
