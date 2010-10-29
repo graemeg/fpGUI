@@ -298,10 +298,6 @@ begin
       lName := WindowsClipboardFormatToString(FE.cfFormat);
     end;
     Result.Add(lName);
-    { Lets add the mime type too if we can find one }
-    lMimeName := WindowsMimeLookup(lName);
-    if lName <> lMimeName then
-      Result.Add(lMimeName);
   end;
 end;
 
