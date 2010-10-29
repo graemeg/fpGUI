@@ -277,6 +277,7 @@ type
   end;
 
 
+  { Used mainly for receiving drags - being the target of the drag }
   TGDIDragManager = class(TInterfacedObject, IDropTarget)
   private
     FDropTarget: TfpgWindowBase;  { actually a TfpgWidget }
@@ -823,7 +824,7 @@ begin
         begin
           {$IFDEF DEBUG}
           if uMsg <> WM_MOUSEMOVE then
-            SendDebug('fpGFX/GDI: Found a mouse button event');
+            writeln('fpGFX/GDI: Found a mouse button event');
           {$ENDIF}
 //          msgp.mouse.x := smallint(lParam and $FFFF);
 //          msgp.mouse.y := smallint((lParam and $FFFF0000) shr 16);
@@ -1353,6 +1354,9 @@ procedure TfpgGDIWindow.HandleDNDLeave(Sender: TObject);
 var
   wg: TfpgWidget;
 begin
+  {$IFDEF DND_DEBUG}
+  writeln('TfpgGDIWindow.HandleDNDLeave ');
+  {$ENDIF}
   FUserMimeSelection := '';
   wg := self as TfpgWidget;
   if wg.AcceptDrops then  { if we get here, this should always be true anyway }
@@ -1373,6 +1377,9 @@ var
   EnumIntf: IEnumFORMATETC;
   msgp: TfpgMessageParams;
 begin
+  {$IFDEF DND_DEBUG}
+  writeln('TfpgGDIWindow.HandleDNDEnter ');
+  {$ENDIF}
   wg := self as TfpgWidget;
   if wg.AcceptDrops then
   begin
@@ -1410,7 +1417,6 @@ begin
       msgp.mouse.y := PT.y;
       fpgPostMessage(nil, wg, FPGM_DROPENTER, msgp);
     end;
-
   end;
 end;
 
@@ -1426,6 +1432,9 @@ begin
     want that, for performance reasons. }
   if FDropPos <> PT then
   begin
+    {$IFDEF DND_DEBUG}
+    writeln('TfpgGDIWindow.HandleDNDPosition ');
+    {$ENDIF}
     FDropPos.x := PT.x;
     FDropPos.y := PT.y;
     fillchar(msgp, sizeof(msgp), 0);

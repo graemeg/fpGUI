@@ -362,8 +362,10 @@ var
 begin
   DataObject := TfpgOLEDataObject.Create;
 
+  { append filenames as one long string delimited by #0. ie: something like a PChar }
   S := '';
-  for I := 0 to FFileNames.Count - 1 do begin
+  for I := 0 to FFileNames.Count - 1 do
+  begin
     SetLength(S, Length(S)+Length(FFileNames[I])+1);
     Move(FFileNames[I][1], S[Length(S)-Length(FFileNames[I])], Length(FFileNames[I]));
     S[Length(S)] := #0;
@@ -371,6 +373,7 @@ begin
   SetLength(S, Length(S)+1);
   S[Length(S)] := #0;
 
+  { description of data we are sending }
   New(F);
   F^.cfFormat := CF_HDROP;
   F^.ptd := nil;
@@ -379,6 +382,7 @@ begin
   F^.tymed := TYMED_HGLOBAL;
   DataObject.FormatEtcList.Add(F);
 
+  { storage for data we are sending }
   New(M);
   M^.tymed := TYMED_HGLOBAL;
   M^.hGlobal := Cardinal(GlobalAlloc(GMEM_FIXED, SizeOf(TDropFiles)+Length(S)));
@@ -389,9 +393,12 @@ begin
   Move(S[1], PChar(M^.hGlobal+SizeOf(TDropFiles))^, Length(S));
   DataObject.StgMediumList.Add(M);
 
-  if (FAliasFileNames.Count > 0) and (FAliasFileNames.Count = FFileNames.Count) then begin
+  if (FAliasFileNames.Count > 0) and (FAliasFileNames.Count = FFileNames.Count) then
+  begin
+    { append filename aliases as one long string delimited by #0. ie: something like a PChar }
     S := '';
-    for I := 0 to FAliasFileNames.Count - 1 do begin
+    for I := 0 to FAliasFileNames.Count - 1 do
+    begin
       SetLength(S, Length(S)+Length(FAliasFileNames[I])+1);
       Move(FAliasFileNames[I][1], S[Length(S)-Length(FAliasFileNames[I])], Length(FAliasFileNames[I]));
       S[Length(S)] := #0;
@@ -399,6 +406,7 @@ begin
     SetLength(S, Length(S)+1);
     S[Length(S)] := #0;
 
+    { description of data we are sending }
     New(F);
     F^.cfFormat := CF_FILENAMEMAP;
     F^.ptd := nil;
@@ -407,6 +415,7 @@ begin
     F^.tymed := TYMED_HGLOBAL;
     DataObject.FormatEtcList.Add(F);
 
+    { storage for data we are sending }
     New(M);
     M^.tymed := TYMED_HGLOBAL;
     M^.hGlobal := Cardinal(GlobalAlloc(GMEM_FIXED, Length(S)));
@@ -417,8 +426,11 @@ begin
   DropSource := TfpgOLEDropSource.Create;
   dwResult := ActiveX.DoDragDrop(DataObject as IDataObject, DropSource as IDropSource, DROPEFFECT_COPY, @dwEffect);
 
-  if dwResult = DRAGDROP_S_DROP then begin
-    if dwEffect = DROPEFFECT_COPY then begin
+  if dwResult = DRAGDROP_S_DROP then
+  begin
+    if dwEffect = DROPEFFECT_COPY then
+    begin
+      // nothing to do. If this whas xxx_MOVE, we would remove data from source
     end;
   end;
 end;
@@ -450,8 +462,7 @@ begin
   Result := DRAGDROP_S_USEDEFAULTCURSORS;
 end;
 
-function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL;
-  grfKeyState: Integer): HResult;
+function TfpgOLEDropSource.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: Integer): HResult;
 begin
   if FEscapePressed then
     Result := DRAGDROP_S_CANCEL
@@ -459,6 +470,9 @@ begin
     Result := DRAGDROP_S_DROP
   else
     Result := S_OK;
+  {$IFDEF DND_DEBUG}
+  writeln('TfpgOLEDropSource.QueryContinueDrag  Result = ', Result);
+  {$ENDIF}
 end;
 
 { TfpgOLEDataObject }
@@ -503,7 +517,8 @@ end;
 function TfpgOLEDataObject.EnumFormatEtc(dwDirection: DWORD;
   out enumFormatEtc: IEnumFormatEtc): HResult;
 begin
-  if dwDirection = DATADIR_GET then begin
+  if dwDirection = DATADIR_GET then
+  begin
     enumFormatEtc := TfpgOLEEnumFormatEtc.Create(FFormatEtcList) as IEnumFormatEtc;
     Result := S_OK;
   end
@@ -528,10 +543,12 @@ begin
   Idx := LookupFormatEtc(formatetcIn);
   if Idx = -1 then
     Result := DV_E_FORMATETC
-  else begin
+  else
+  begin
     medium.tymed := FFormatEtcList[Idx]^.tymed;
     medium.PUnkForRelease := nil;
-    if medium.tymed = TYMED_HGLOBAL then begin
+    if medium.tymed = TYMED_HGLOBAL then
+    begin
       medium.hGlobal := DupGlobalMem(FStgMediumList[Idx]^.hGlobal);
       Result := S_OK;
     end
@@ -747,10 +764,14 @@ function TfpgOLEDropTarget.Drop(const dataObj: IDataObject;
 var
   Effect: TfpgOLEDragDropEffect;
 begin
-  if dwEffect and DROPEFFECT_COPY > 0 then Effect := deCopy
-  else if dwEffect and DROPEFFECT_MOVE  > 0 then Effect := deMove
-  else if dwEffect and DROPEFFECT_LINK > 0 then Effect := deLink
-  else Effect := deNone;
+  if dwEffect and DROPEFFECT_COPY > 0 then
+    Effect := deCopy
+  else if dwEffect and DROPEFFECT_MOVE  > 0 then
+    Effect := deMove
+  else if dwEffect and DROPEFFECT_LINK > 0 then
+    Effect := deLink
+  else
+    Effect := deNone;
   DoDragDrop(dataObj, grfKeyState, pt, Effect);
   Result := S_OK;
 end;
