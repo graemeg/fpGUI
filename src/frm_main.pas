@@ -57,6 +57,7 @@ type
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     procedure   FormShow(Sender: TObject);
+    procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure   btnQuitClicked(Sender: TObject);
     procedure   btnOpenFileClicked(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
@@ -663,35 +664,33 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
-{
-  // outer containers
-  pnlMenu.Align := alTop;
-  pnlStatusBar.Align := alBottom;
-  pnlClientArea.Align := alClient;
-
-  // inner containers
-  pnlWindow.Align := alBottom;
-  Splitter1.Align := alBottom;
-  pnlTool.Align := alLeft;
-  Splitter2.Align := alLeft;
-
-  grdOpenFiles.Align := alRight;
-  Splitter3.Align := alRight;
-  TextEditor.Align := alClient;
-}
-//  Realign;
+  Left := gINI.ReadInteger(Name + 'State', 'Left', Left);
+  Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
+  Width := gINI.ReadInteger(Name + 'State', 'Width', Width);
+  Height := gINI.ReadInteger(Name + 'State', 'Height', Height);
+  UpdateWindowPosition;
 
   SetupProjectTree;
   SetupFilesGrid;
 
   // apply editor settings
-//  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
+  pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
+end;
+
+procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  CloseAction := caFree;
+  gINI.WriteInteger(Name + 'State', 'Left', Left);
+  gINI.WriteInteger(Name + 'State', 'Top', Top);
+  gINI.WriteInteger(Name + 'State', 'Width', Width);
+  gINI.WriteInteger(Name + 'State', 'Height', Height);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   OnShow  := @FormShow;
+  OnClose := @FormClose;
   SendDebug('TMainForm.Create');
 end;
 
