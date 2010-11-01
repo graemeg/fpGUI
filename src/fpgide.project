@@ -3,11 +3,11 @@ ProjectName=fpgide.project
 MainUnit=fpgide.lpr
 TargetFile=fpgide${EXEEXT}
 DefaultMake=0
-MakeOptionsCount=4
+MakeOptionsCount=5
 MakeOptionEnabled1=1,1,1,1,1,1
 MakeOptionEnabled2=1,1,1,1,1,0
-MakeOptionEnabled3=0,1,0,0,0,1
-MakeOptionEnabled4=0,0,0,0,0,1
+MakeOptionEnabled3=1,1,0,0,0,1
+MakeOptionEnabled4=0,0,0,0,1,1
 MacroCount=6
 Macro1=TargetCPU=x86_64
 Macro2=TargetOS=linux
@@ -25,10 +25,12 @@ UnitDirEnabled6=1,1,1,1,0,0,1,0,0,0
 UnitDirEnabled7=0,0,0,0,1,1,1,0,0,0
 UnitDirEnabled8=0,0,0,0,0,1,1,0,0,0
 UnitOutputDir=units/${TARGET}/
+MakeOptionEnabled5=1,0,0,0,0,0
 MakeOption1=-l -Mobjfpc -Sch
 MakeOption2=-gl -O-
 MakeOption3=-B
 MakeOption4=-O2 -XX -Xs -CX
+MakeOption5=-veiw
 UnitDir1=${FPGUIDIR}src/
 UnitDir2=${FPGUIDIR}src/corelib/
 UnitDir3=${FPGUIDIR}src/corelib/x11/
