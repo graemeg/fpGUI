@@ -137,6 +137,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    function    TabSheetAtPos(const x, y: integer): TfpgTabSheet;
     function    AppendTabSheet(ATitle: string): TfpgTabSheet;
     procedure   RemoveTabSheet(ATabSheet: TfpgTabSheet);
     property    PageCount: Integer read GetPageCount;
@@ -982,90 +983,17 @@ end;
 
 procedure TfpgPageControl.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 var
-  h: TfpgTabSheet;
-  lp: integer;  // left position
-  bw: integer;  // button width
-  bh: integer;  // button height
-  p1, p2: integer;    // tab boundaries for mouse click to take affect
+  ts: TfpgTabSheet;
 begin
 //  debugln('>> TfpgPageControl.HandleLMouseUp');
-  h := TfpgTabSheet(FPages.First);
-  if h = nil then
-    Exit; //==>
-
-  lp := FMargin;
-  if MaxButtonWidthSum > (Width-(FMargin*2)) then
-    h := FFirstTabButton;
-
-  case TabPosition of
-    tpTop:
-      begin
-        p1 := FMargin;
-        p2 := ButtonHeight;
-      end;
-
-    tpBottom:
-      begin
-        p1 := Height - FMargin - ButtonHeight;
-        p2 := Height - FMargin;
-      end;
-
-    tpRight:
-      begin
-        p1 := Width - MaxButtonWidth;
-        p2 := Width;
-      end;
-
-    tpLeft:
-      begin
-        p1 := FMargin;
-        p2 := FMargin + MaxButtonWidth;
-      end;
-  end;
-
-  if TabPosition in [tpTop, tpBottom] then
-  begin
-    if (y > p1) and (y < p2) then
-    begin
-       while h <> nil do
-       begin
-          bw := ButtonWidth(h.Text);  // initialize button width
-          if (x > lp) and (x < lp + bw) then
-          begin
-            if h <> ActivePage then
-              ActivePage := h;
-            exit;
-          end;  { if }
-          lp := lp + bw;
-          if h <> TfpgTabSheet(FPages.Last) then
-            h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
-          else
-            h := nil;
-       end;  { while }
-    end;  { if }
-  end;
-
-  if TabPosition in [tpLeft, tpRight] then
-  begin
-    if (x > p1) and (x < p2) then
-    begin
-      while h <> nil do
-      begin
-        bh := ButtonHeight;  // initialize button height
-        if (y > lp) and (y < lp + bh) then
-        begin
-          if h <> ActivePage then
-            ActivePage := h;
-          exit;
-        end;  { if }
-        lp := lp + bh;
-        if h <> TfpgTabSheet(FPages.Last) then
-          h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
-        else
-          h := nil;
-      end;  { while }
-    end;  { if }
-  end;
+  ts := TfpgTabSheet(FPages.First);
+  if ts = nil then
+    exit; //==>  { This means there are no tabs }
+  
+  ts := TabSheetAtPos(x, y);
+  
+  if Assigned(ts) then
+    ActivePage := ts;
 
   inherited HandleLMouseUp(x, y, shiftstate);
 end;
@@ -1162,6 +1090,92 @@ begin
   ActiveWidget := nil;
   FFirstTabButton := nil;
   inherited Destroy;
+end;
+
+function TfpgPageControl.TabSheetAtPos(const x, y: integer): TfpgTabSheet;
+var
+  h: TfpgTabSheet;
+  lp: integer;  // left position
+  bw: integer;  // button width
+  bh: integer;  // button height
+  p1, p2: integer;    // tab boundaries for mouse click to take affect
+begin
+  Result := nil;
+  h := TfpgTabSheet(FPages.First);
+
+  lp := FMargin;
+  if MaxButtonWidthSum > (Width-(FMargin*2)) then
+    h := FFirstTabButton;
+
+  case TabPosition of
+    tpTop:
+      begin
+        p1 := FMargin;
+        p2 := ButtonHeight;
+      end;
+
+    tpBottom:
+      begin
+        p1 := Height - FMargin - ButtonHeight;
+        p2 := Height - FMargin;
+      end;
+
+    tpRight:
+      begin
+        p1 := Width - MaxButtonWidth;
+        p2 := Width;
+      end;
+
+    tpLeft:
+      begin
+        p1 := FMargin;
+        p2 := FMargin + MaxButtonWidth;
+      end;
+  end;
+
+  if TabPosition in [tpTop, tpBottom] then
+  begin
+    if (y > p1) and (y < p2) then
+    begin
+       while h <> nil do
+       begin
+          bw := ButtonWidth(h.Text);  // initialize button width
+          if (x > lp) and (x < lp + bw) then
+          begin
+            if h <> ActivePage then
+              Result := h;
+            exit;
+          end;  { if }
+          lp := lp + bw;
+          if h <> TfpgTabSheet(FPages.Last) then
+            h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
+          else
+            h := nil;
+       end;  { while }
+    end;  { if }
+  end;
+
+  if TabPosition in [tpLeft, tpRight] then
+  begin
+    if (x > p1) and (x < p2) then
+    begin
+      while h <> nil do
+      begin
+        bh := ButtonHeight;  // initialize button height
+        if (y > lp) and (y < lp + bh) then
+        begin
+          if h <> ActivePage then
+            Result := h;
+          exit;
+        end;  { if }
+        lp := lp + bh;
+        if h <> TfpgTabSheet(FPages.Last) then
+          h := TfpgTabSheet(FPages[FPages.IndexOf(h)+1])
+        else
+          h := nil;
+      end;  { while }
+    end;  { if }
+  end;
 end;
 
 function TfpgPageControl.AppendTabSheet(ATitle: string): TfpgTabSheet;
