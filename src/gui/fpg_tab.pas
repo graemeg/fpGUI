@@ -101,6 +101,7 @@ type
     FTabPosition: TfpgTabPosition;
     FPopupMenu: TfpgPopupMenu;
     FTabOptions: TfpgTabOptions;
+    FLastRClickPos: TfpgPoint;
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
@@ -641,9 +642,11 @@ procedure TfpgPageControl.pmCloseTab(Sender: TObject);
 var
   ts: TfpgTabSheet;
 begin
-  ts := ActivePage;
+  ts := TabSheetAtPos(FLastRClickPos.x, FLastRClickPos.y);
+  if not Assigned(ts) then
+    ts := ActivePage;
   if ts = nil then
-    Exit;
+    exit;
   RemovePage(ts);
   DoTabSheetClosing(ts);
   ts.Free;
@@ -999,15 +1002,32 @@ begin
 end;
 
 procedure TfpgPageControl.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  ts: TfpgTabSheet;
+  s: TfpgString;
 begin
   inherited HandleRMouseUp(x, y, shiftstate);
-//  ShowDefaultPopupMenu(x, y, ShiftState);
+
+  { store the position for later usage }
+  FLastRClickPos := fpgPoint(x,y);
+
   if to_PMenuClose in FTabOptions then
   begin
+    ts := TabSheetAtPos(x, y);
+    {$NOTE TODO: This text needs to become a resource string }
+    if Assigned(ts) then
+      s := Format('Close "%s" Tab', [ts.Text])
+    else
+      s := 'Close Tab';
+      
     if not Assigned(FPopupMenu) then
     begin
       FPopupMenu := TfpgPopupMenu.Create(self);
-      FPopupMenu.AddMenuItem('Close Tab', '', @pmCloseTab);
+      FPopupMenu.AddMenuItem(s, '', @pmCloseTab);
+    end
+    else
+    begin
+      FPopupMenu.MenuItem(0).Text := s;    { This is dangerous but works for now }
     end;
     FPopupMenu.ShowAt(self, x, y);
   end;
