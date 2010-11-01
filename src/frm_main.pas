@@ -1039,6 +1039,8 @@ begin
     Hint := '';
     TabOrder := 18;
     TabPosition := tpRight;
+    Options := Options + [to_PMenuClose];
+    OnClosingTabSheet := @TabSheetClosing;
   end;
 
   tseditor := TfpgTabSheet.Create(pcEditor);
@@ -1061,7 +1063,7 @@ begin
   with mnuFile do
   begin
     Name := 'mnuFile';
-    SetPosition(476, 56, 172, 20);
+    SetPosition(476, 61, 172, 20);
     AddMenuItem('New...', '', nil).Enabled := False;
     AddMenuItem('Open...', '', nil).Enabled := False;
     AddMenuItem('Open Recent', '', nil).Enabled := False;
@@ -1075,7 +1077,7 @@ begin
   with mnuEdit do
   begin
     Name := 'mnuEdit';
-    SetPosition(476, 24, 172, 20);
+    SetPosition(476, 80, 172, 20);
     AddMenuItem('Cut', '', nil).Enabled := False;
     AddMenuItem('Copy', '', nil).Enabled := False;
     AddMenuItem('Paste', '', nil).Enabled := False;
