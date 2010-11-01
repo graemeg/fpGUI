@@ -84,11 +84,13 @@ type
     procedure   tvProjectDoubleClick(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   TabSheetClosing(Sender: TObject; ATabSheet: TfpgTabSheet);
     procedure   BuildTerminated(Sender: TObject);
+    procedure   BuildOutput(Sender: TObject; const ALine: string);
     procedure   UpdateStatus(const AText: TfpgString);
     procedure   SetupProjectTree;
     procedure   PopuplateProjectTree;
     procedure   SetupFilesGrid;
     procedure   AddMessage(const AMsg: TfpgString);
+    procedure   ClearMessagesWindow;
     procedure   CloseAllTabs;
     procedure   LoadProject(const AFilename: TfpgString);
     function    OpenEditorPage(const AFilename: TfpgString): TfpgTabSheet;
@@ -195,8 +197,10 @@ procedure TMainForm.miRunMake(Sender: TObject);
 var
   thd: TBuilderThread;
 begin
+  ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
   thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
 end;
 
@@ -204,9 +208,11 @@ procedure TMainForm.miRunBuild(Sender: TObject);
 var
   thd: TBuilderThread;
 begin
+  ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
   thd.BuildMode := 1;
   thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
 end;
 
@@ -214,9 +220,11 @@ procedure TMainForm.miRunMake1(Sender: TObject);
 var
   thd: TBuilderThread;
 begin
+  ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
   thd.BuildMode := 2;
   thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
 end;
 
@@ -224,9 +232,11 @@ procedure TMainForm.miRunMake2(Sender: TObject);
 var
   thd: TBuilderThread;
 begin
+  ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
   thd.BuildMode := 3;
   thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
 end;
 
@@ -234,9 +244,11 @@ procedure TMainForm.miRunMake3(Sender: TObject);
 var
   thd: TBuilderThread;
 begin
+  ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
   thd.BuildMode := 4;
   thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
 end;
 
@@ -244,9 +256,11 @@ procedure TMainForm.miRunMake4(Sender: TObject);
 var
   thd: TBuilderThread;
 begin
+  ClearMessagesWindow;
   thd := TBuilderThread.Create(True);
   thd.BuildMode := 5;
   thd.OnTerminate := @BuildTerminated;
+  thd.OnAvailableOutput := @BuildOutput;
   thd.Resume;
 end;
 
@@ -411,6 +425,11 @@ begin
   AddMessage('Compilation complete');
 end;
 
+procedure TMainForm.BuildOutput(Sender: TObject; const ALine: string);
+begin
+  AddMessage(ALine);
+end;
+
 procedure TMainForm.UpdateStatus(const AText: TfpgString);
 begin
   lblStatus.Text := AText;
@@ -460,8 +479,17 @@ end;
 
 procedure TMainForm.AddMessage(const AMsg: TfpgString);
 begin
+  grdMessages.BeginUpdate;
   grdMessages.RowCount := grdMessages.RowCount + 1;
   grdMessages.Cells[0,grdMessages.RowCount-1] := AMsg;
+  grdMessages.FocusRow := grdMessages.RowCount;
+  grdMessages.EndUpdate;
+//  fpgApplication.ProcessMessages;
+end;
+
+procedure TMainForm.ClearMessagesWindow;
+begin
+  grdMessages.RowCount := 0;
 end;
 
 procedure TMainForm.CloseAllTabs;
