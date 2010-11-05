@@ -29,7 +29,8 @@ uses
   Classes,
   SysUtils,
   fpg_base,
-  fpg_interface;
+  fpg_interface,
+  fpg_impl;
 
 type
   TOrientation = (orVertical, orHorizontal);
@@ -43,6 +44,8 @@ type
 
   TFButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
     btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
+
+  TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator, mifEnabled, mifChecked, mifSubMenu);
     
   TFTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter, txtBottom, txtWrap, txtDisabled,
     txtAutoSize);
@@ -177,6 +180,8 @@ type
     procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord);
     procedure   DrawControlFrame(r: TfpgRect);
+    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True);
+    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True);
     procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection);
     procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection);
     procedure   DrawFocusRect(r: TfpgRect);
@@ -187,10 +192,9 @@ type
 
 
   { This is very basic for now, just to remind us of theming support. Later we
-    will rework this to use a Style Manager like the previous fpGUI. Styles must
-    also move out of fpGFX. Also support Bitmap based styles for easier theme
-    implementations. }
-  TfpgStyle = class
+    will rework this to use a Style Manager like the previous fpGUI.
+    Also support Bitmap based styles for easier theme implementations. }
+  TfpgStyle = class(TObject)
   public
     DefaultFont: TfpgFont;
     FixedFont: TfpgFont;
@@ -201,9 +205,14 @@ type
     destructor  Destroy; override;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
+    procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
+    procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
+    procedure   DrawMenuItem(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags; AText: TfpgString); virtual;
+    procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
+    procedure   DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
   end;
   
 
@@ -224,6 +233,8 @@ type
     FHintTimer: TfpgTimer;
     FHintWidget: TfpgWindow;
     FHintPos: TPoint;
+    FOnKeyPress: TKeyPressEvent;
+    FStartDragDistance: integer;
     procedure   SetHintPause(const AValue: Integer);
     procedure   SetupLocalizationStrings;
     procedure   InternalMsgFreeMe(var msg: TfpgMessageRec); message FPGM_FREEME;
@@ -231,6 +242,7 @@ type
     procedure   CreateHintWindow;
     procedure   HintTimerFired(Sender: TObject);
     procedure   SetShowHint(const AValue: boolean);
+    procedure   SetStartDragDistance(const AValue: integer);
   protected
     FDisplayParams: string;
     FScreenWidth: integer;
@@ -263,8 +275,10 @@ type
     property    ScreenWidth: integer read FScreenWidth;
     property    ScreenHeight: integer read FScreenHeight;
     property    ShowHint: boolean read FShowHint write SetShowHint default True;
+    property    StartDragDistance: integer read FStartDragDistance write SetStartDragDistance default 5;
     property    StopOnException: Boolean read FStopOnException write FStopOnException;
     property    OnException: TExceptionEvent read FOnException write FOnException;
+    property    OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
   end;
 
 
@@ -278,10 +292,11 @@ type
     procedure   SetInterval(const AValue: integer);
   public
     { AInterval is in milliseconds. }
-    constructor Create(ainterval: integer);
+    constructor Create(ainterval: integer); virtual;
     destructor  Destroy; override;
     procedure   CheckAlarm(ctime: TDateTime);
-    procedure   Reset;
+    procedure   Reset; virtual;
+    procedure   Pause(ASeconds: integer);
     property    Enabled: boolean read FEnabled write SetEnabled;
     property    NextAlarm: TDateTime read FNextAlarm;
     { Interval is in milliseconds. }
@@ -322,6 +337,25 @@ type
   end;
 
 
+  TfpgMimeData = class(TfpgMimeDataImpl)
+  end;
+
+
+  TfpgDrag = class(TfpgDragImpl)
+  private
+    FTarget: TfpgWinHandle;
+    procedure   SetMimeData(const AValue: TfpgMimeDataBase);
+  protected
+    function    GetSource: TfpgWindow; reintroduce;
+  public
+    constructor Create(ASource: TfpgWindow);
+    function    Execute(const ADropActions: TfpgDropActions = [daCopy]; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
+    property    Source: TfpgWindow read GetSource;
+    property    Target: TfpgWinHandle read FTarget write FTarget;
+    property    MimeData: TfpgMimeDataBase read FMimeData write SetMimeData;
+  end;
+
+
 var
   fpgStyle:  TfpgStyle;   { TODO -ograemeg : move this into fpgApplication }
   fpgCaret:  TfpgCaret;   { TODO -ograemeg : move this into fpgApplication }
@@ -349,6 +383,7 @@ procedure fpgDeleteFirstMessage;
 function  fpgColorToRGB(col: TfpgColor): TfpgColor;
 function  fpgGetNamedColor(col: TfpgColor): TfpgColor;
 procedure fpgSetNamedColor(colorid, rgbvalue: longword);
+function  fpgIsNamedColor(col: TfpgColor): boolean;
 function  fpgGetNamedFontDesc(afontid: string): string;
 procedure fpgSetNamedFont(afontid, afontdesc: string);
 function  fpgGetNamedFontList: TStringlist;
@@ -356,10 +391,11 @@ function  fpgGetNamedFontList: TStringlist;
 // Timers rountines
 procedure fpgInitTimers;
 procedure fpgCheckTimers;
+procedure fpgResetAllTimers;
 function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
 function  fpgGetTickCount: DWord;
 
-// Rectangle routines
+// Rectangle, Point & Size routines
 function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 function  InflateRect(var Rect: TfpgRect; dx: Integer; dy: Integer): Boolean;
 function  OffsetRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
@@ -368,6 +404,8 @@ function  CenterPoint(const Rect: TRect): TPoint;
 function  CenterPoint(const Rect: TfpgRect): TPoint;
 function  fpgRect(ALeft, ATop, AWidth, AHeight: integer): TfpgRect;
 function  fpgRectToRect(const ARect: TfpgRect): TRect;
+function  fpgPoint(const AX, AY: integer): TfpgPoint;
+function  fpgSize(const AWidth, AHeight: integer): TfpgSize;
 
 // Debug rountines
 procedure PrintRect(const Rect: TRect);
@@ -386,12 +424,34 @@ procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 
 // operator overloading of some useful structures
 operator = (a: TRect; b: TRect): boolean;
+operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
+operator = (const APoint1, APoint2: TPoint) b: Boolean;
+operator + (const APoint1, APoint2: TPoint) p: TPoint;
+operator + (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+operator + (const APoint: TPoint; ASize: TfpgSize) p: TPoint;
+operator + (const APoint: TfpgPoint; ASize: TfpgSize) p: TfpgPoint;
+operator + (const ASize: TfpgSize; APoint: TPoint) s: TfpgSize;
+operator + (const ASize: TfpgSize; APoint: TfpgPoint) s: TfpgSize;
+operator + (const ASize1, ASize2: TfpgSize) s: TfpgSize;
+operator + (const APoint: TPoint; i: Integer) p: TPoint;
+operator + (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+operator + (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+operator - (const APoint1, APoint2: TPoint) p: TPoint;
+operator - (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+operator - (const APoint: TPoint; i: Integer) p: TPoint;
+operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
+operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
+operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+
 
 implementation
 
 uses
   strutils,
   math,
+  dateutils,
   fpg_imgfmt_bmp,
   fpg_stdimages,
   fpg_translations,
@@ -446,17 +506,23 @@ var
   ctime: TDateTime;
 begin
   ctime := now;
-  i := 0;
-  while i < fpgTimers.Count do
+  i := fpgTimers.Count;
+  while i > 0 do
   begin
+    dec(i);
     if fpgTimers[i] = nil then
       fpgTimers.Delete(i)
     else
-    begin
       TfpgTimer(fpgTimers[i]).CheckAlarm(ctime);
-      Inc(i);
-    end;
   end;
+end;
+
+procedure fpgResetAllTimers;
+var
+  i: integer;
+begin
+  for i := 0 to fpgTimers.Count-1 do
+    TfpgTimer(fpgTimers[i]).Reset;
 end;
 
 function fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
@@ -581,6 +647,16 @@ begin
   Result.Top    := ARect.Top;
   Result.Right  := ARect.Right;
   Result.Bottom := ARect.Bottom;
+end;
+
+function fpgPoint(const AX, AY: integer): TfpgPoint;
+begin
+  Result.SetPoint(AX, AY);
+end;
+
+function fpgSize(const AWidth, AHeight: integer): TfpgSize;
+begin
+  Result.SetSize(AWidth, AHeight);
 end;
 
 procedure InitializeDebugOutput;
@@ -789,6 +865,126 @@ begin
     Result := False;
 end;
 
+operator = (const ASize1, ASize2: TfpgSize) b: Boolean;
+begin
+  b := (ASize1.w = ASize2.w) and (ASize1.h = ASize2.h);
+end;
+
+operator = (const APoint1, APoint2: TPoint) b: Boolean;
+begin
+  b := (APoint1.X = APoint2.X) and (APoint1.Y = APoint2.Y);
+end;
+
+operator + (const APoint1, APoint2: TPoint) p: TPoint;
+begin
+  p.x := APoint1.x + APoint2.x;
+  p.y := APoint1.y + APoint2.y;
+end;
+
+operator + (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+begin
+  p.x := APoint1.x + APoint2.x;
+  p.y := APoint1.y + APoint2.y;
+end;
+
+operator + (const APoint: TPoint; ASize: TfpgSize) p: TPoint;
+begin
+  p.x := APoint.x + ASize.w;
+  p.y := APoint.y + ASize.h;
+end;
+
+operator + (const APoint: TfpgPoint; ASize: TfpgSize) p: TfpgPoint;
+begin
+  p.x := APoint.x + ASize.w;
+  p.y := APoint.y + ASize.h;
+end;
+
+operator + (const ASize: TfpgSize; APoint: TPoint) s: TfpgSize;
+begin
+  s.w := ASize.w + APoint.x;
+  s.h := ASize.h + APoint.y;
+end;
+
+operator + (const ASize: TfpgSize; APoint: TfpgPoint) s: TfpgSize;
+begin
+  s.w := ASize.w + APoint.x;
+  s.h := ASize.h + APoint.y;
+end;
+
+operator + (const ASize1, ASize2: TfpgSize) s: TfpgSize;
+begin
+  s.w := ASize1.w + ASize2.w;
+  s.h := ASize1.h + ASize2.h;
+end;
+
+operator + (const APoint: TPoint; i: Integer) p: TPoint;
+begin
+  p.x := APoint.x + i;
+  p.y := APoint.y + i;
+end;
+
+operator + (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+begin
+  p.x := APoint.x + i;
+  p.y := APoint.y + i;
+end;
+
+operator + (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+begin
+  s.w := ASize.w + i;
+  s.h := ASize.h + i;
+end;
+
+operator - (const APoint1, APoint2: TPoint) p: TPoint;
+begin
+  p.x := APoint1.x - APoint2.x;
+  p.y := APoint1.y - APoint2.y;
+end;
+
+operator - (const APoint1, APoint2: TfpgPoint) p: TfpgPoint;
+begin
+  p.x := APoint1.x - APoint2.x;
+  p.y := APoint1.y - APoint2.y;
+end;
+
+operator - (const APoint: TPoint; i: Integer) p: TPoint;
+begin
+  p.x := APoint.x - i;
+  p.y := APoint.y - i;
+end;
+
+operator - (const APoint: TfpgPoint; i: Integer) p: TfpgPoint;
+begin
+  p.x := APoint.x - i;
+  p.y := APoint.y - i;
+end;
+
+operator - (const ASize: TfpgSize; const APoint: TPoint) s: TfpgSize;
+begin
+  s.w := ASize.w - APoint.x;
+  s.h := ASize.h - APoint.y;
+end;
+
+operator - (const ASize: TfpgSize; const APoint: TfpgPoint) s: TfpgSize;
+begin
+  s.w := ASize.w - APoint.x;
+  s.h := ASize.h - APoint.y;
+end;
+
+operator - (const ASize: TfpgSize; i: Integer) s: TfpgSize;
+begin
+  s.w := ASize.w - i;
+  s.h := ASize.h - i;
+end;
+
+operator = (const AColor1, AColor2: TFPColor) b: Boolean;
+begin
+  b := (AColor1.Red = AColor2.Red)
+        and (AColor1.Green = AColor2.Green)
+        and (AColor1.Blue = AColor2.Blue)
+        and (AColor1.Alpha = AColor2.Alpha);
+end;
+
 { TfpgTimer }
 
 procedure TfpgTimer.SetEnabled(const AValue: boolean);
@@ -845,6 +1041,14 @@ begin
   Enabled := True;
 end;
 
+procedure TfpgTimer.Pause(ASeconds: integer);
+begin
+  if Enabled then
+  begin
+    FNextAlarm := incSecond(Now, ASeconds);
+  end;
+end;
+
 function fpgApplication: TfpgApplication;
 begin
   if not Assigned(uApplication) then
@@ -869,7 +1073,10 @@ end;
 
 function fpgGetNamedColor(col: TfpgColor): TfpgColor;
 begin
-  Result := fpgNamedColors[col and $FF];
+  if fpgIsNamedColor(col) then
+    Result := col  // nothing to do, it is already a named color
+  else
+    Result := fpgNamedColors[col and $FF];
 end;
 
 procedure fpgSetNamedColor(colorid, rgbvalue: longword);
@@ -880,6 +1087,11 @@ begin
     Exit;
   i := colorid and $FF;
   fpgNamedColors[i] := rgbvalue;
+end;
+
+function fpgIsNamedColor(col: TfpgColor): boolean;
+begin
+  Result := (col and cl_BaseNamedColor) <> 0;
 end;
 
 function fpgGetNamedFontDesc(afontid: string): string;
@@ -893,9 +1105,9 @@ begin
       Exit; //==>
     end;
 
-  {.$IFDEF DEBUG}
+  {$IFDEF DEBUG}
   Writeln('GetNamedFontDesc error: "' + afontid + '" is missing. Default is used.');
-  {.$ENDIF}
+  {$ENDIF}
   Result := FPG_DEFAULT_FONT_DESC;
 end;
 
@@ -952,6 +1164,7 @@ begin
   FHintPause      := DEFAULT_HINT_PAUSE;
   FHintWidget     := nil;   // widget the mouse is over and whos hint text we need.
   FShowHint       := True;
+  FStartDragDistance := 5; // pixels
 
   try
     inherited Create(AParams);
@@ -1262,6 +1475,14 @@ begin
   FShowHint := AValue;
 end;
 
+procedure TfpgApplication.SetStartDragDistance(const AValue: integer);
+begin
+  if AValue < 0 then
+    FStartDragDistance := 0
+  else
+    FStartDragDistance := AValue;
+end;
+
 procedure TfpgApplication.FreeFontRes(afontres: TfpgFontResource);
 var
   n: integer;
@@ -1302,11 +1523,11 @@ end;
 procedure TfpgApplication.ProcessMessages;
 begin
   Flush;
-  while DoMessagesPending do
-  begin
-    WaitWindowMessage(0);
-    Flush;
-  end;
+//  while DoMessagesPending do      // this blocked timers and other non-OS code
+//  begin
+    WaitWindowMessage(250);
+//    Flush;
+//  end;
 end;
 
 procedure TfpgApplication.SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);
@@ -1389,7 +1610,7 @@ end;
 
 procedure TfpgApplication.RunMessageLoop;
 begin
-  WaitWindowMessage(1000);
+  WaitWindowMessage(2000);
 end;
 
 { TfpgFont }
@@ -1511,6 +1732,16 @@ end;
 procedure TfpgCanvas.DrawControlFrame(r: TfpgRect);
 begin
   DrawControlFrame(r.Left, r.Top, r.Width, r.Height);
+end;
+
+procedure TfpgCanvas.DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean);
+begin
+  fpgStyle.DrawBevel(self, x, y, w, h, ARaised);
+end;
+
+procedure TfpgCanvas.DrawBevel(r: TfpgRect; ARaised: Boolean);
+begin
+  DrawBevel(r.Left, r.Top, r.Width, r.Height, ARaised);
 end;
 
 procedure TfpgCanvas.DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection);
@@ -1683,7 +1914,7 @@ begin
   fpgSetNamedColor(clText4, $404000);
   fpgSetNamedColor(clSelection, $08246A);
   fpgSetNamedColor(clSelectionText, $FFFFFF);
-  fpgSetNamedColor(clInactiveSel, $D0D0FF);
+  fpgSetNamedColor(clInactiveSel, $99A6BF);  // win 2000 buttonface = $D4D0C8
   fpgSetNamedColor(clInactiveSelText, $000000);
   fpgSetNamedColor(clScrollBar, $E8E4DB);
   fpgSetNamedColor(clButtonFace, $D5D2CD);
@@ -1694,14 +1925,15 @@ begin
   fpgSetNamedColor(clInactiveWgFrame, $A0A0A0);
   fpgSetNamedColor(clTextCursor, $000000);
   fpgSetNamedColor(clChoiceListBox, $E8E8E8);
-  fpgSetNamedColor(clUnset, $D0D0FF);
+  fpgSetNamedColor(clUnset, $99A6BF);                   // dull (gray) blue
   fpgSetNamedColor(clMenuText, $000000);
   fpgSetNamedColor(clMenuDisabled, $909090);
   fpgSetNamedColor(clHintWindow, $FFFFBF);
   fpgSetNamedColor(clGridSelection, $08246A);           // same as clSelection
   fpgSetNamedColor(clGridSelectionText, $FFFFFF);       // same as clSelectionText
-  fpgSetNamedColor(clGridInactiveSel, $D0D0FF);         // same as clInactiveSel
+  fpgSetNamedColor(clGridInactiveSel, $99A6BF);         // same as clInactiveSel
   fpgSetNamedColor(clGridInactiveSelText, $000000);     // same as clInactiveSelText
+  fpgSetNamedColor(clSplitterGrabBar, $839EFE);         // pale blue
 
 
   // Global Font Objects
@@ -1752,7 +1984,12 @@ begin
     if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clHilite2)
     else
-      ACanvas.SetColor(clShadow2);
+    begin
+      if (btfFlat in AFlags) or (btfHover in AFlags) then
+        ACanvas.SetColor(clShadow1)  { light shadow }
+      else
+        ACanvas.SetColor(clShadow2); { dark shadow }
+    end;
   end
   else
     ACanvas.SetColor(clHilite2);
@@ -1774,13 +2011,26 @@ begin
     if (btfIsEmbedded in AFlags) then
       ACanvas.SetColor(clHilite1)
     else
-      ACanvas.SetColor(clShadow2);
+    begin
+      if (btfFlat in AFlags) or (btfHover in AFlags) then
+        ACanvas.SetColor(clHilite2)  { light shadow }
+      else
+        ACanvas.SetColor(clShadow2); { dark shadow }
+    end;
   end
   else
-    ACanvas.SetColor(clShadow2);
-    
+  begin
+    if btfHover in AFlags then
+      ACanvas.SetColor(clShadow1)  { light shadow }
+    else
+      ACanvas.SetColor(clShadow2); { dark shadow }
+  end;
+
   ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);   // right
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
+
+  if (btfFlat in AFlags) or (btfHover in AFlags) then
+    exit; { "toolbar" style buttons need a nice thing/flat border }
 
   // Right and Bottom (inner)
   if btfIsPressed in AFlags then
@@ -1817,6 +2067,36 @@ begin
   ACanvas.SetColor(clHilite1);
   ACanvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right (inner)
   ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left+1, r.Bottom-1);   // bottom (inner)
+end;
+
+procedure TfpgStyle.DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean);
+var
+  r: TfpgRect;
+begin
+  r.SetRect(x, y, w, h);
+  ACanvas.SetColor(clWindowBackground);
+  ACanvas.SetLineStyle(1, lsSolid);
+  ACanvas.FillRectangle(x, y, w, h);
+  
+  if ARaised then
+    ACanvas.SetColor(clHilite2)
+  else
+    ACanvas.SetColor(clShadow1);
+
+  { top }
+  ACanvas.DrawLine(r.Right-1, r.Top, r.Left, r.Top);
+
+  { left }
+  ACanvas.DrawLine(r.Left, r.Top, r.Left, r.Bottom);
+
+  if ARaised then
+    ACanvas.SetColor(clShadow1)
+  else
+    ACanvas.SetColor(clHilite2);
+
+  { right, then bottom }
+  ACanvas.DrawLine(r.Right, r.Top, r.Right, r.Bottom);
+  ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);
 end;
 
 procedure TfpgStyle.DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection);
@@ -1917,6 +2197,50 @@ begin
   ACanvas.SetLineStyle(oldLineWidth, oldLineStyle);
 end;
 
+procedure TfpgStyle.DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags);
+begin
+  ACanvas.FillRectangle(r);
+end;
+
+procedure TfpgStyle.DrawMenuItem(ACanvas: TfpgCanvas; r: TfpgRect;
+  AFlags: TfpgMenuItemFlags; AText: TfpgString);
+begin
+  //
+end;
+
+procedure TfpgStyle.DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect);
+begin
+  ACanvas.SetColor(clShadow1);
+  ACanvas.DrawLine(r.Left+1, r.Top+2, r.Right, r.Top+2);
+  ACanvas.SetColor(clHilite2);
+  ACanvas.DrawLine(r.Left+1, r.Top+3, r.Right, r.Top+3);
+end;
+
+procedure TfpgStyle.DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags);
+var
+  img: TfpgImage;
+  lx: TfpgCoord;
+  ly: TfpgCoord;
+begin
+  if mifChecked in AFlags then
+  begin
+    img := fpgImages.GetImage('stdimg.check');    // Do NOT localize
+    if mifSelected in AFlags then
+      img.Invert;  // invert modifies the original image, so we must restore it later
+    ACanvas.DrawImage(x, y, img);
+    if mifSelected in AFlags then
+      img.Invert;  // restore image to original state
+  end;
+  if mifSubMenu in AFlags then
+  begin
+    img := fpgImages.GetImage('sys.sb.right');    // Do NOT localize
+    lx := (r.height div 2) - 3;
+    lx := r.right-lx-2;
+    ly := y + ((r.Height-img.Height) div 2);
+    ACanvas.DrawImage(lx, ly, img);
+  end;
+end;
+
 
 { TfpgCaret }
 
@@ -1967,6 +2291,7 @@ procedure TfpgCaret.UnSetCaret(ACanvas: TfpgCanvas);
 begin
   if (FCanvas = ACanvas) or (ACanvas = nil) then
   begin
+    FTimer.Enabled := False;
     FEnabled := False;
     FCanvas  := nil;
   end;
@@ -2157,6 +2482,42 @@ begin
   end;
   Result.UpdateImage;
 end;
+
+
+{ TfpgDrag }
+
+procedure TfpgDrag.SetMimeData(const AValue: TfpgMimeDataBase);
+begin
+  if Assigned(FMimeData) then
+    FMimeData.Free;
+  FMimeData := AValue;
+end;
+
+function TfpgDrag.GetSource: TfpgWindow;
+begin
+  Result := TfpgWindow(inherited GetSource);
+end;
+
+constructor TfpgDrag.Create(ASource: TfpgWindow);
+begin
+  inherited Create;
+  FSource := ASource;
+end;
+
+function TfpgDrag.Execute(const ADropActions: TfpgDropActions;
+  const ADefaultAction: TfpgDropAction): TfpgDropAction;
+begin
+  {$NOTE These exception messages need to become resource strings }
+  if not Assigned(FMimeData) then
+    raise Exception.Create(ClassName + ': No mimedata was set before starting the drag');
+  if not Assigned(FSource) then
+    raise Exception.Create(ClassName + ': No Source window was specified before starting the drag');
+  if ADropActions = [] then
+    raise Exception.Create(ClassName + ': No Drop Action was specified');
+  inherited Execute(ADropActions, ADefaultAction);
+end;
+
+
 
 initialization
   uApplication    := nil;

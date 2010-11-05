@@ -48,6 +48,8 @@ uses
   
 type
 
+  TfpgNodeAttachMode = (naAdd, naAddFirst, naAddChild, naAddChildFirst, naInsert);
+
   PfpgTreeColumnWidth = ^TfpgTreeColumnWidth;
   TfpgTreeColumnWidth = record
     next: PfpgTreeColumnWidth;
@@ -55,6 +57,7 @@ type
   end;
   
   // forward declaration
+  TfpgTreeView = class;
   TfpgTreeNode = class;
   
   TfpgTreeNodeFindMethod = procedure(ANode: TfpgTreeNode; var AFound: boolean) of object;
@@ -77,6 +80,7 @@ type
     FText: TfpgString;
     FTextColor: TfpgColor;
     FHasChildren: Boolean;
+    FTree: TfpgTreeView;
     procedure   SetCollapsed(const AValue: boolean);
     procedure   SetInactSelColor(const AValue: TfpgColor);
     procedure   SetInactSelTextColor(const AValue: TfpgColor);
@@ -87,6 +91,7 @@ type
     procedure   SetTextColor(const AValue: TfpgColor);
     procedure   DoRePaint;
     procedure   SetHasChildren(const AValue: Boolean);
+    procedure   DoTreeCheck(ANode: TfpgTreeNode);
   public
     constructor Create;
     destructor  Destroy; override;
@@ -99,11 +104,12 @@ type
     function    FindSubNode(AData: TObject; ARecursive: Boolean): TfpgTreeNode; overload;
     function    GetMaxDepth: integer;
     function    GetMaxVisibleDepth: integer;
-    procedure   Append(var aValue: TfpgTreeNode);
+    procedure   Append(var ANode: TfpgTreeNode);
     procedure   Clear;  // remove all nodes recursively
     procedure   Collapse;
     procedure   Expand;
     procedure   Remove(var aNode: TfpgTreeNode);
+    procedure   MoveTo(Destination: TfpgTreeNode; Mode: TfpgNodeAttachMode);
     procedure   UnregisterSubNode(aNode: TfpgTreeNode);
     // parent color settings
     function    ParentInactSelColor: TfpgColor;
@@ -203,12 +209,6 @@ type
     procedure   DrawHeader(ACol: integer; ARect: TfpgRect; AFlags: integer); virtual;
     procedure   DoChange; virtual;
     procedure   DoExpand(ANode: TfpgTreeNode); virtual;
-    // only visual (visible) nodes
-    function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
-    function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
-    // any next node, even if node is collapsed
-    function    NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
-    function    PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
     // the nodes between the given node and the direct next node
     function    SpaceToVisibleNext(aNode: TfpgTreeNode): integer;
     function    StepToRoot(aNode: TfpgTreeNode): integer;
@@ -220,6 +220,14 @@ type
     function    GetColumnWidth(AIndex: word): word;
     procedure   GotoNextNodeUp;
     procedure   GotoNextNodeDown;
+    procedure   FullCollapse;
+    procedure   FullExpand;
+    // any next node, even if node is collapsed
+    function    NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    function    PrevNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    // only visual (visible) nodes
+    function    NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
+    function    PrevVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
     property    Font: TfpgFont read FFont;
     // Invisible node that starts the tree
     property    RootNode: TfpgTreeNode read GetRootNode;
@@ -227,7 +235,9 @@ type
     property    ImageList: TfpgImageList read FImageList write FImageList;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
+    property    Align;
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth default 15;
+    property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    IndentNodeWithNoImage: boolean read FIndentNodeWithNoImage write SetIndentNodeWithNoImage default True;
     property    NoImageIndent: integer read FNoImageIndent write FNoImageIndent default 16;
@@ -346,6 +356,12 @@ begin
   end;
 end;
 
+procedure TfpgTreeNode.DoTreeCheck(ANode: TfpgTreeNode);
+begin
+  if ANode.FTree <> FTree then
+    raise Exception.Create('Nodes must be of the same tree');
+end;
+
 constructor TfpgTreeNode.Create;
 begin
   FData           := nil;
@@ -404,20 +420,21 @@ begin
   end;
 end;
 
-procedure TfpgTreeNode.Append(var aValue: TfpgTreeNode);
+procedure TfpgTreeNode.Append(var ANode: TfpgTreeNode);
 begin
-  aValue.Parent := self;
-  aValue.Next   := nil;
+  DoTreeCheck(ANode);
+  ANode.Parent := self;
+  ANode.Next   := nil;
 
   if FFirstSubNode = nil then
-    FFirstSubNode := aValue;
+    FFirstSubNode := ANode;
 
-  aValue.prev := FLastSubNode;
+  ANode.Prev := FLastSubNode;
 
   if FLastSubNode <> nil then
-    FLastSubNode.Next := aValue;
+    FLastSubNode.Next := ANode;
 
-  FLastSubNode := aValue;
+  FLastSubNode := ANode;
 end;
 
 function TfpgTreeNode.FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode;
@@ -536,6 +553,7 @@ begin
   writeln('TfpgTreeNode.AppendText');
   {$ENDIF}
   h := TfpgTreeNode.Create;
+  h.FTree := FTree;
   h.Text := AText;
   Append(h);
   result := h;
@@ -659,6 +677,53 @@ begin
   aNode.parent := nil;
 end;
 
+procedure TfpgTreeNode.MoveTo(Destination: TfpgTreeNode; Mode: TfpgNodeAttachMode);
+begin
+  if Destination = nil then
+    Exit;
+  DoTreeCheck(Destination);
+
+  Parent.Remove(self);
+  case Mode of
+    naAdd:
+        begin
+          Destination.Parent.Append(self);
+        end;
+    naAddFirst:
+        begin
+          Next := Destination.Parent.FirstSubNode;
+          Next.Prev := self;
+          Destination.Parent.FFirstSubNode := self;
+          Parent := Destination.Parent;
+        end;
+    naAddChild:
+        begin
+          Destination.Append(self);
+        end;
+    naAddChildFirst:
+        begin
+          Next := Destination.FirstSubNode;
+          if Assigned(Destination.FirstSubNode) then
+            Destination.FirstSubNode.Prev := self;
+          Destination.FFirstSubNode := self;
+          Parent := Destination;
+          if Destination.LastSubNode = nil then
+            Destination.FLastSubNode := self;
+        end;
+    naInsert:
+        begin
+          Prev := Destination.Prev;
+          Next := Destination;
+          Parent := Destination.Parent;
+          Destination.Prev := self;
+          if Prev = nil then
+            Parent.FFirstSubNode := self
+          else
+            Prev.Next := self;
+        end;
+  end;  { case }
+end;
+
 procedure TfpgTreeNode.Clear;
 var
   n: TfpgTreeNode;
@@ -758,7 +823,10 @@ end;
 function TfpgTreeview.GetRootNode: TfpgTreeNode;
 begin
   if FRootNode = nil then
+  begin
     FRootNode := TfpgTreeNode.Create;
+    FRootNode.FTree := self;
+  end;
   FRootNode.TextColor     := clText1;
   FRootnode.SelTextColor  := clSelectionText;
   FRootnode.SelColor      := clSelection;
@@ -796,10 +864,14 @@ begin
       n := AValue.Parent;
       while n <> nil do
       begin
-        n.Expand;
-        DoExpand(n);
+        if n.Collapsed then
+        begin
+          n.Expand;
+          DoExpand(n);
+        end;
         n := n.parent;
       end;
+      UpdateScrollbars;
     end;
 
     dy := GetAbsoluteNodeTop(FSelection);
@@ -809,7 +881,7 @@ begin
     begin
       if FVScrollBar.Max = 0 then    // the first time and no expansion happened before.
         FVScrollBar.Max := dy + Height;
-      FVScrollbar.Position := dy + nh - vh;
+      FVScrollbar.Position := dy + nh - (vh div 2);
       FYOffset := FVScrollbar.Position;
       UpdateScrollBars;
       if FHScrollbar.Visible then    // HScrollbar appeared so we need to adjust position again
@@ -1082,10 +1154,45 @@ begin
 end;
 
 procedure TfpgTreeView.GotoNextNodeDown;
+var
+  lNode: TfpgTreeNode;
 begin
-  if Selection = RootNode.LastSubNode then
+  if (Selection = RootNode.LastSubNode) and (RootNode.LastSubNode.CountRecursive = 0) then
     Exit;
-  Selection := NextNode(Selection);
+
+  lNode := NextNode(Selection);
+  if lNode <> nil then
+    Selection := lNode;
+end;
+
+procedure TfpgTreeView.FullCollapse;
+var
+  n: TfpgTreeNode;
+begin
+  n := NextNode(RootNode);
+  repeat
+    if n <> nil then
+    begin
+      n.Collapse;
+    end;
+    n := NextNode(n);
+  until n = nil;
+  Repaint;
+end;
+
+procedure TfpgTreeView.FullExpand;
+var
+  n: TfpgTreeNode;
+begin
+  n := NextNode(RootNode);
+  repeat
+    if n <> nil then
+    begin
+      n.Expand;
+    end;
+    n := NextNode(n);
+  until n = nil;
+  Repaint;
 end;
 
 procedure TfpgTreeview.PreCalcColumnLeft;
@@ -1126,8 +1233,11 @@ begin
   FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
   FVScrollbar.Min := 0;
   FVScrollbar.Max := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
+  FVScrollbar.PageSize := (VisibleHeight div 4) * 3;  // three quarters of the height
+  FVScrollbar.ScrollStep := GetNodeHeight;  // up/down buttons move the height of the font
   FHScrollbar.Min := 0;
   FHScrollbar.Max := MaxNodeWidth - VisibleWidth + FVScrollbar.Width;
+  FHScrollbar.PageSize := (VisibleWidth div 4) * 3;  // three quarters of the height
   FHScrollbar.Visible := MaxNodeWidth > Width - 2;
   if not FVScrollbar.Visible then
   begin
@@ -1224,7 +1334,7 @@ begin
     x := x + FXOffset;
     cancel := False;
     last := RootNode;
-    while not (((i - 1) * GetNodeHeight - 2 <= y) and ((i) * GetNodeHeight + 2 >= y)) do
+    while not ((((i - 1) * GetNodeHeight) <= y) and ((i * GetNodeHeight) >= y)) do
     begin
       node := NextVisualNode(last);
       if node = nil then
@@ -1430,25 +1540,26 @@ begin
           Canvas.SetColor(h.ParentInactSelColor);
           Canvas.SetTextColor(h.ParentInActSelTextColor);
         end;
-        Canvas.FillRectangle(w - FXOffset, YPos - FYOffset + col - GetNodeHeight + FFont.Ascent div 2 - 2, GetNodeWidth(h), GetNodeHeight);
+        // draw selection rectangle
+        Canvas.FillRectangle(w - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h), GetNodeHeight);
         if (ImageList <> nil) and ShowImages then
         begin
           AImageItem := ImageList.Item[h.ImageIndex];
           if AImageItem <> nil then
           begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image, 0, 0, 16, 16);
-            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
+            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - (GetNodeHeight div 2), h.text);
           end
           else
           begin
             if FIndentNodeWithNoImage then
-              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - FFont.Ascent div 2, h.text)
+              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - (GetNodeHeight div 2), h.text)
             else
-              Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+              Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
           end;
         end
         else
-          Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
         Canvas.SetTextColor(h.ParentTextColor);
       end
       else
@@ -1458,19 +1569,19 @@ begin
           AImageItem := ImageList.Item[h.ImageIndex];
           if AImageItem <> nil then
           begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 4, AImageItem.Image, 0, 0, 16, 16);
-            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - FFont.Ascent div 2, h.text);
+            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
+            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - (GetNodeHeight div 2), h.text);
           end
           else
           begin
             if FIndentNodeWithNoImage then
-              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - FFont.Ascent div 2, h.text)
+              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - (GetNodeHeight div 2), h.text)
             else
-              Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+              Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
           end
         end
         else
-          Canvas.DrawString(w - FXOffset + 1, ACenterPos - FFont.Ascent div 2, h.text);
+          Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
       end;  { if/else }
 
       Canvas.SetLineStyle(1, FTreeLineStyle);
@@ -1680,7 +1791,16 @@ begin
             Selection := RootNode.FirstSubNode;
         end;
       end;
-      
+
+    keyPageUp:
+      begin
+        FVScrollbar.PageUp;
+      end;
+
+    keyPageDown:
+      begin
+        FVScrollbar.PageDown;
+      end;
     else
       Consumed := False;
   end;
@@ -1699,23 +1819,25 @@ procedure TfpgTreeview.HandleMouseScroll(x, y: integer;
   shiftstate: TShiftState; delta: smallint);
 var
   i: integer;
+  dy: integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
-  if delta > 0 then
+  dy := (VisibleHeight div 3);  // mouse scrolling is 1/3 of the height
+  if delta > 0 then // scrolling down
   begin
-    inc(FYOffset, FScrollWheelDelta);
+    inc(FYOffset, dy);  //FScrollWheelDelta);
     i := (GetNodeHeightSum * GetNodeHeight) - VisibleHeight + FHScrollbar.Height;
     if FYOffset > i then
       FYOffset := i;
-    i := FVScrollbar.Position + FScrollWheelDelta;
+    i := FVScrollbar.Position + dy;
     FVScrollbar.Position := i;
   end
   else
-  begin
-    dec(FYOffset, FScrollWheelDelta);
+  begin  // scrolling up
+    dec(FYOffset, dy); //FScrollWheelDelta);
     if FYOffset < 0 then
       FYOffset := 0;
-    i := FVScrollbar.Position - FScrollWheelDelta;
+    i := FVScrollbar.Position - dy;
     FVScrollbar.Position := i;
   end;
   UpdateScrollbars;
@@ -1807,7 +1929,7 @@ function TfpgTreeView.NextNode(ANode: TfpgTreeNode): TfpgTreeNode;
     begin
       while ANode.Next = nil do
       begin
-        ANode := ANode.Parent;
+        ANode := ANode.Parent;  // back out one level depth
         if ANode = nil then
           exit;  //==>
       end;

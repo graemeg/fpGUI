@@ -29,12 +29,13 @@
   clMoneyGreen    = TfpgColor($C0DCC0);
   clSkyBlue       = TfpgColor($A6CAF0);
   clMedGray       = TfpgColor($A0A0A4);
+  clUIDesignerGreen = TfpgColor($C0E0C0);
 
 
 
 
   // System named color identifiers.  DON'T CHANGE THE ORDER!
-  cl_BaseNamedColor      = TfpgColor($80000000);
+  cl_BaseNamedColor      = $80000000;
 
   clWindowBackground    = TfpgColor(cl_BaseNamedColor + 1);
   clBoxColor            = TfpgColor(cl_BaseNamedColor + 2);
@@ -67,6 +68,7 @@
   clGridSelectionText   = TfpgColor(cl_BaseNamedColor + 29);
   clGridInactiveSel     = TfpgColor(cl_BaseNamedColor + 30);
   clGridInactiveSelText = TfpgColor(cl_BaseNamedColor + 31);
+  clSplitterGrabBar     = TfpgColor(cl_BaseNamedColor + 32);
 
 
 

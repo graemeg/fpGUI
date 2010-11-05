@@ -47,9 +47,10 @@ simply publishes various properties for runtime type information.</descr>
           <link id="fpg_button.TfpgBaseButton">TfpgBaseButton</link>
         </seealso>
       </element>
-      <element name="TfpgButton.ImageName" link="TfpgBaseButton.ImageName"/>
-      <element name="TfpgButton.ImageSpacing" link="TfpgBaseButton.ImageSpacing"/>
-      <element name="TfpgButton.ImageLayout" link="TfpgBaseButton.ImageLayout"/>
+
+<element name="TfpgButton.ImageName" link="TfpgBaseButton.ImageName"/>
+<element name="TfpgButton.ImageSpacing" link="TfpgBaseButton.ImageSpacing"/>
+<element name="TfpgButton.ImageLayout" link="TfpgBaseButton.ImageLayout"/>
 
     </module>
   </package>

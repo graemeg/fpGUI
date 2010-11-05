@@ -226,17 +226,8 @@ begin
 end;
 
 function GetFileSize(const AFilename: string): integer;
-var
-  f: File;
 begin
-  Result := 0;
-  {$i-}
-  FileMode := 0; // read-only
-  Assign(f, fpgToOSEncoding(AFileName));
-  Reset(f);
-  {$i+}
-  Result := FileSize(f);
-  CloseFile(f);
+  Result := fpgFileSize(AFilename);
 end;
 
 function IsDigit(const AChar: TfpgChar): boolean;
@@ -261,7 +252,7 @@ begin
   if Limit1 < Limit2 then
     Result:= ( Value >= Limit1 ) and ( Value <= Limit2 )
   else
-    Result:= ( Value >= Limit2 ) and ( Value <= Limit1 )
+    Result:= ( Value >= Limit2 ) and ( Value <= Limit1 );
 end;
 
 operator = (ARect: TRect; BRect: TRect): boolean;

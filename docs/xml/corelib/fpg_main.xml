@@ -15,7 +15,7 @@
         <descr>fpgPostMessage posts a message to the event queue, but doesn't wait for it to compelete. It returns immediately.</descr>
         <errors/>
         <seealso>
-          <link id="fpgSendMessage"/>
+          <link id="fpg_main.fpgSendMessage"/>
         </seealso>
       </element>
       <!-- procedure Visibility: default -->
@@ -24,7 +24,7 @@
         <descr>fpgSendMessage sends a message to the event queue and waits for it to complete before it returns.</descr>
         <errors/>
         <seealso>
-          <link id="fpgPostMessage"/>
+          <link id="fpg_main.fpgPostMessage"/>
         </seealso>
       </element>
       <element name="fpgColorToRGB">
@@ -62,7 +62,7 @@ is simply an index value, but later translated to a real RGB value via the themi
         <short>Prints rectangle information to console</short>
         <descr><printshort id="PrintRect"/>. This is a helper function for debugging purposes.</descr>
         <seealso>
-          <link id="#fpgui.fpg_base.TfpgRect">TfpgRect</link>
+          <link id="fpg_base.TfpgRect">TfpgRect</link>
         </seealso>
       </element>
       <element name="TfpgStyle">
@@ -72,6 +72,13 @@ fpGUI will be totally reworked to supply built-in and image based theming.</p><p
 document named <var>theming_spec.txt</var> in the "docs" folder for details of what is
 planned.</p></descr>
       </element>
+
+<element name="fpgRect">
+<seealso>
+<link id="fpg_base.TfpgRect">TfpgRect</link>
+</seealso>
+</element>
+
     </module>
     <!-- fpg_main -->
   </package>

@@ -61,8 +61,7 @@ type
     function GetMargin_Top: longint;
     Procedure SetMargin_Top( NewValue: longint );
     Procedure SetupComponent;
-    Procedure AssignFont( Var Font: TfpgFont;
-                          NewFont: TfpgFont );
+    Procedure AssignFont(var AFont: TfpgFont; NewFont: TfpgFont);
 
     // Hide properties...
     property Name;
@@ -131,6 +130,7 @@ uses
   SysUtils,
   ACLStringUtility
   ,nvUtilities
+  ,SettingsUnit
 //  , ACLProfile
   ;
 
@@ -271,7 +271,7 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
       if     ( Tag.TagType = ttSetLeftMargin )
          and ( MarginParam1 = 'here' ) then
       begin
-        Style.LeftMargin := X {div FontWidthPrecisionFactor};
+        Style.LeftMargin := X;
       end
       else
       begin
@@ -296,8 +296,7 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
                 NewMargin := MarginSize * FontManager.MaximumCharWidth;
               msSpecifiedChar:
                 NewMargin := MarginSize
-                             * FontManager.CharWidth( Chr( Settings.MarginChar ) )
-                             div FontWidthPrecisionFactor;
+                             * FontManager.CharWidth( Chr( Settings.MarginChar ) );
             end;
           end;
         except
@@ -305,11 +304,9 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
         end;
 
         if Tag.TagType = ttSetLeftMargin then
-          Style.LeftMargin := Settings.Margins.Left
-                              + NewMargin
+          Style.LeftMargin := Settings.Margins.Left + NewMargin
         else
-          Style.RightMargin := Settings.Margins.Right
-                               + NewMargin;
+          Style.RightMargin := Settings.Margins.Right + NewMargin;
       end;
       tmpFontParts.Free;
     end;  { teSet[left|right]margin }
@@ -323,11 +320,11 @@ end;
 function GetDefaultStyle( const Settings: TRichTextSettings ): TTextDrawStyle;
 begin
   FillChar(Result, SizeOf(TTextDrawStyle), 0);
-  FPGuiFontToFontSpec( Settings.FNormalFont, Result.Font );
-  Result.Alignment := Settings.FDefaultAlignment;
-  Result.Wrap := Settings.FDefaultWrap;
-  Result.Color := Settings.FDefaultColor;
-  Result.BackgroundColor := Settings.FDefaultBackgroundColor;
+  FPGuiFontToFontSpec( Settings.NormalFont, Result.Font );
+  Result.Alignment := Settings.DefaultAlignment;
+  Result.Wrap := Settings.DefaultWrap;
+  Result.Color := Settings.DefaultColor;
+  Result.BackgroundColor := Settings.DefaultBackgroundColor;
   Result.LeftMargin := Settings.Margins.Left;
   Result.RightMargin := Settings.Margins.Right;
 end;
@@ -337,11 +334,11 @@ Procedure TRichTextSettings.SetupComponent;
 begin
   Name := 'RichTextSettings';
 
-  FNormalFont := fpgGetFont('Arial-10');
-  FFixedFont := fpgGetFont('Courier New-10');
-  FHeading1Font := fpgGetFont('Arial-20');
-  FHeading2Font := fpgGetFont('Arial-14');
-  FHeading3Font := fpgGetFont('Arial-10:bold');
+  FNormalFont   := fpgGetFont(Settings.NormalFontDesc);  // fpgGetFont(DefaultTopicFont);
+  FFixedFont    := fpgGetFont(Settings.FixedFontDesc); // fpgGetFont(DefaultTopicFixedFont);
+  FHeading1Font := fpgGetFont(DefaultTopicFontName + '-20');
+  FHeading2Font := fpgGetFont(DefaultTopicFontName + '-14');
+  FHeading3Font := fpgGetFont(DefaultTopicFontName + '-10:bold');
 
   FDefaultColor := clBlack;
   FDefaultBackgroundColor := clWhite;
@@ -353,12 +350,12 @@ begin
   FMarginSizeStyle := msMaximumCharWidth;
   FMarginChar := Ord( ' ' );
 
-  FMargins.Left := 0;
-  FMargins.Right := 0;
-  FMargins.Top := 0;
+  FMargins.Left   := 0;
+  FMargins.Right  := 0;
+  FMargins.Top    := 0;
   FMargins.Bottom := 0;
 
-  FUpdateCount := 0;
+  FUpdateCount    := 0;
   FChangesPending := false;
 end;
 
@@ -505,18 +502,16 @@ begin
   Result := FontA.FontDesc = FontB.FontDesc;
 end;
 
-Procedure TRichTextSettings.AssignFont( Var Font: TfpgFont;
-                                        NewFont: TfpgFont );
+Procedure TRichTextSettings.AssignFont(var AFont: TfpgFont; NewFont: TfpgFont );
 begin
   If NewFont = Nil Then
     NewFont := fpgApplication.DefaultFont;
 
-  if FontSame( NewFont, Font ) then
+  if FontSame( NewFont, AFont ) then
     exit; // no change
 
-  Font.Free;
-  Font := NewFont;
-//  Font.Free;
+  AFont.Free;
+  AFont := NewFont;
 
   Change;
 End;

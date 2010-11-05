@@ -13,6 +13,9 @@
 
     Description:
       Defines a push button control.
+
+    TODO:
+      * multi-line button text. It must take into account image position as well.
 }
 
 unit fpg_button;
@@ -42,7 +45,7 @@ type
     FImageName: string;
     FClicked: Boolean;
     FShowImage: Boolean;
-    FClickOnPush: Boolean;
+    FClickOnPush: Boolean;    { Used for group buttons where click happens on "down" state. Normal buttons, the click happens on "release" state }
     FGroupIndex: integer;
     FAllowAllUp: boolean;
     FModalResult: TfpgModalResult;
@@ -62,6 +65,7 @@ type
     procedure   SetAllowAllUp(const Value: boolean);
     procedure   DoPush;
     procedure   DoRelease(x, y: integer);
+    procedure   SetAllowMultiLineText(const AValue: boolean);
   protected
     FImageMargin: integer;
     FImageSpacing: integer;
@@ -72,6 +76,7 @@ type
     FFont: TfpgFont;
     FDefault: boolean;
     FState: integer;  // 0 - normal  // 1 - hover
+    FAllowMultiLineText: boolean;
     procedure   SetShowImage(AValue: Boolean);
     procedure   HandlePaint; override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -85,8 +90,9 @@ type
     property    AllowAllUp: boolean read FAllowAllUp write SetAllowAllUp default False;
     { Buttons behave like toggle buttons. This is an alias for GroupIndex > 0 }
     property    AllowDown: Boolean read GetAllowDown write SetAllowDown;
+    property    AllowMultiLineText: boolean read FAllowMultiLineText write SetAllowMultiLineText default False;
     property    Default: boolean read FDefault write SetDefault default False;
-    property    Down: Boolean read FDown write SetDown;
+    property    Down: Boolean read FDown write SetDown default False;
     { The button will not show focus. It might also have a different down state (look).
       This is similar to Focusable = False, but the appearance of the down state might differ. }
     property    Embedded: Boolean read FEmbedded write SetEmbedded default False;
@@ -127,12 +133,15 @@ type
     together. }
   TfpgButton = class(TfpgBaseButton)
   published
+    property    Align;
     property    AllowAllUp;
     property    AllowDown;
+    property    AllowMultiLineText;
     property    BackgroundColor default clButtonFace;
     property    Default;
     property    Down;
     property    Embedded;
+    property    Enabled;
     property    Flat;
     property    FontDesc;
     property    GroupIndex;
@@ -157,6 +166,10 @@ type
     property    Top;
     property    Width;
     property    OnClick;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnMouseDown;
     property    OnMouseExit;
     property    OnMouseEnter;
@@ -302,6 +315,7 @@ begin
   FDefault      := False;
   FAllowAllUp   := False;
   FState        := 0;
+  FAllowMultiLineText := False;
 end;
 
 destructor TfpgBaseButton.Destroy;
@@ -509,6 +523,7 @@ var
   lBtnFlags: TFButtonFlags;
   clr: TfpgColor;
   img: TfpgImage;
+  lTextFlags: TFTextFlags;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;
@@ -532,6 +547,12 @@ begin
       Include(lBtnFlags, btfHover)
     else if FFlat then
       Include(lBtnFlags, btfFlat);
+  end
+  else
+  begin
+    { while in the designer we want hover effect all the time }
+    if FFlat then
+      Include(lBtnFlags, btfHover);
   end;
 
   if not FFlat and FDefault then
@@ -577,8 +598,33 @@ begin
       Canvas.DrawImage(ix + pofs, iy + pofs, img);
       img.Free;
     end;
+
   end;
-  fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
+
+  { EXPERIMENTAL: multi-line button text
+      Only in this condition do we support multi-line text }
+  if AllowMultiLineText and (FImageLayout = ilImageLeft) then
+  begin
+    r.SetRect(0, 0, Width, Height);
+    InflateRect(r, -3, -3);   { same as focus rectangle }
+    if FShowImage and Assigned(FImage) then
+    begin
+      ix := FImageMargin + FImage.Width;
+      if FImageSpacing > 0 then
+        ix += FImageSpacing;
+      OffsetRect(r, ix, 0);
+      r.Width -= ix;
+    end;
+    if FDown then
+     OffsetRect(r, pofs, pofs);
+
+    lTextFlags := [txtHCenter, txtVCenter{, txtWrap}];
+    if not Enabled then
+      lTextFlags += [txtDisabled];
+    Canvas.DrawText(r, Text, lTextFlags);
+  end
+  else
+    fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
 end;
 
 procedure TfpgBaseButton.DoPush;
@@ -618,7 +664,7 @@ begin
       FDown := False;
       RePaint;
       fpgApplication.ProcessMessages;
-      if PtInRect(r, Point(x, y)) then
+      if PtInRect(r, Point(x, y)) and FOnClickPending then
         Click;
     end;
   end
@@ -629,7 +675,7 @@ begin
       FDown := False;
       RePaint;
       fpgApplication.ProcessMessages;
-      if PtInRect(r, Point(x, y)) then
+      if PtInRect(r, Point(x, y)) and FOnClickPending then
         Click;
     end;
   end;
@@ -638,10 +684,18 @@ begin
   FClicked     := False;
 end;
 
+procedure TfpgBaseButton.SetAllowMultiLineText(const AValue: boolean);
+begin
+  if FAllowMultiLineText = AValue then exit;
+  FAllowMultiLineText := AValue;
+  Repaint;
+end;
+
 procedure TfpgBaseButton.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 begin
   if (keycode = keyReturn) or (keycode = keySpace) or (keycode = keyPEnter) then
   begin
+    FOnClickPending := True;
     DoPush;
     Consumed := True;
   end
@@ -653,8 +707,9 @@ procedure TfpgBaseButton.HandleKeyRelease(var keycode: word; var shiftstate: TSh
 begin
   if (keycode = keyReturn) or (keycode = keySpace) or (keycode = keyPEnter) then
   begin
-    DoRelease(1, 1); // fake co-ordinates to it executes the Click
+    DoRelease(1, 1); // fake co-ordinates so it executes the Click
     Consumed := True;
+    FOnClickPending := False;
   end
   else
     inherited;
@@ -732,8 +787,11 @@ begin
 
   if Assigned(FCommand) then    // ICommand takes preference to OnClick
     FCommand.Execute
-  else if Assigned(OnClick) then
-    OnClick(self);
+  else
+  begin
+    if Assigned(OnClick) then
+      OnClick(self);
+  end;
 end;
 
 function TfpgBaseButton.GetCommand: ICommand;

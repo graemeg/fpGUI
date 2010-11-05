@@ -14,11 +14,11 @@ msgstr ""
 
 #: fpg_constants:rserrnotassigned
 msgid "<%s> not assigned"
-msgstr ""
+msgstr "<%s> não interligado"
 
 #: fpg_constants:rsnewitemdetected
 msgid "A new item has been detected."
-msgstr ""
+msgstr "Novo item detectado"
 
 #: fpg_constants:rsabort
 msgid "Abort"
@@ -26,7 +26,11 @@ msgstr "Abortar"
 
 #: fpg_constants:rsabout
 msgid "About %s"
-msgstr ""
+msgstr "Sobre %s"
+
+#: fpg_constants:rsaddcurrentdirectory
+msgid "Add current directory"
+msgstr "Adicionar diretório atual"
 
 #: fpg_constants:rsall
 msgid "All"
@@ -38,7 +42,7 @@ msgstr "Todos os arquivos"
 
 #: fpg_constants:rscollectionallfonts
 msgid "All Fonts"
-msgstr ""
+msgstr "Todas Fontes"
 
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
@@ -46,23 +50,23 @@ msgstr ""
 
 #: fpg_constants:rsshortapr
 msgid "Apr"
-msgstr ""
+msgstr "Abr"
 
 #: fpg_constants:rslongapr
 msgid "April"
-msgstr ""
+msgstr "Abril"
 
 #: fpg_constants:rsfileattributes
 msgid "Attributes"
-msgstr ""
+msgstr "Atributos"
 
 #: fpg_constants:rsshortaug
 msgid "Aug"
-msgstr ""
+msgstr "Ago"
 
 #: fpg_constants:rslongaug
 msgid "August"
-msgstr ""
+msgstr "Agosto"
 
 #: fpg_constants:rsbold
 msgid "Bold"
@@ -80,9 +84,13 @@ msgstr "Não foi possível criar diretório"
 msgid "Change"
 msgstr "Editar"
 
+#: fpg_constants:rschangetitle
+msgid "Change Title"
+msgstr "Mudar Título"
+
 #: fpg_constants:rscharactermap
 msgid "Character Map"
-msgstr ""
+msgstr "Mapa de Caracteres"
 
 #: fpg_constants:rsclose
 msgid "Close"
@@ -91,6 +99,10 @@ msgstr "Fechar"
 #: fpg_constants:rscollection
 msgid "Collection"
 msgstr "Coleção"
+
+#: fpg_constants:rsconfigurebookmarks
+msgid "Configure Bookmarks"
+msgstr ""
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -102,11 +114,11 @@ msgstr "Confirmação"
 
 #: fpg_constants:rscopy
 msgid "Copy"
-msgstr ""
+msgstr "Copiar"
 
 #: fpg_constants:rserrcouldnotopendir
 msgid "Could not open the directory <%s>"
-msgstr ""
+msgstr "Não pode abrir o diretório <%s>"
 
 #: fpg_constants:rscreate
 msgid "Create"
@@ -122,19 +134,19 @@ msgstr "Erro Crítico"
 
 #: fpg_constants:rscut
 msgid "Cut"
-msgstr ""
+msgstr "Cortar"
 
 #: fpg_constants:rsdatabase
 msgid "Database"
-msgstr ""
+msgstr "Banco de Dados"
 
 #: fpg_constants:rsshortdec
 msgid "Dec"
-msgstr ""
+msgstr "Dez"
 
 #: fpg_constants:rslongdec
 msgid "December"
-msgstr ""
+msgstr "Dezembro"
 
 #: fpg_constants:rsdelete
 msgid "Delete"
@@ -144,9 +156,13 @@ msgstr "Deletar"
 msgid "Directories"
 msgstr "Diretórios"
 
+#: fpg_constants:rsdirectory
+msgid "Directory"
+msgstr "Diretório"
+
 #: fpg_constants:rsdrive
 msgid "Drive"
-msgstr ""
+msgstr "Dispositivo"
 
 #: fpg_constants:rsedit
 msgid "Edit"
@@ -174,7 +190,7 @@ msgstr "Sair"
 
 #: fpg_constants:rserrfailedtocreatedir
 msgid "Failed to create the directory <%s>"
-msgstr ""
+msgstr "Falhou ao criar o diretório <%s>"
 
 #: fpg_constants:rsfalse
 msgid "False"
@@ -182,19 +198,19 @@ msgstr "Falso"
 
 #: fpg_constants:rscollectionfavourites
 msgid "Favourites"
-msgstr ""
+msgstr "Favoritos"
 
 #: fpg_constants:rsshortfeb
 msgid "Feb"
-msgstr ""
+msgstr "Fev"
 
 #: fpg_constants:rslongfeb
 msgid "February"
-msgstr ""
+msgstr "Fevereiro"
 
 #: fpg_constants:rsfileselection
 msgid "File Selection"
-msgstr ""
+msgstr "Seleção de Arquivo"
 
 #: fpg_constants:rsfilename
 msgid "Filename"
@@ -210,7 +226,7 @@ msgstr "Encontrar"
 
 #: fpg_constants:rscollectionfixedwidth
 msgid "Fixed Width"
-msgstr ""
+msgstr "Largura Fixa"
 
 #: fpg_constants:rscollectionfontaliases
 msgid "Font Aliases"
@@ -218,15 +234,15 @@ msgstr ""
 
 #: fpg_constants:rsshortfri
 msgid "Fri"
-msgstr ""
+msgstr "Sex"
 
 #: fpg_constants:rslongfri
 msgid "Friday"
-msgstr ""
+msgstr "Sexta-feira"
 
 #: fpg_constants:rsfilegroup
 msgid "Group"
-msgstr ""
+msgstr "Grupo"
 
 #: fpg_constants:rshelp
 msgid "Help"
@@ -246,7 +262,7 @@ msgstr "Inserir"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr ""
+msgstr "Inserir do Mapa de Caracteres"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -254,31 +270,31 @@ msgstr "Itálico"
 
 #: fpg_constants:rserritemofwrongtype
 msgid "Item is not of <%s> type!"
-msgstr ""
+msgstr "Item não é do tipo <%s>"
 
 #: fpg_constants:rsshortjan
 msgid "Jan"
-msgstr ""
+msgstr "Jan"
 
 #: fpg_constants:rslongjan
 msgid "January"
-msgstr ""
+msgstr "janeiro"
 
 #: fpg_constants:rsshortjul
 msgid "Jul"
-msgstr ""
+msgstr "Jul"
 
 #: fpg_constants:rslongjul
 msgid "July"
-msgstr ""
+msgstr "Julho"
 
 #: fpg_constants:rsshortjun
 msgid "Jun"
-msgstr ""
+msgstr "Jun"
 
 #: fpg_constants:rslongjun
 msgid "June"
-msgstr ""
+msgstr "Junho"
 
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
@@ -286,15 +302,15 @@ msgstr "Lista deve estar vazio"
 
 #: fpg_constants:rsshortmar
 msgid "Mar"
-msgstr ""
+msgstr "Mar"
 
 #: fpg_constants:rslongmar
 msgid "March"
-msgstr ""
+msgstr "Março"
 
 #: fpg_constants:rsshortmay
 msgid "May"
-msgstr ""
+msgstr "Mai"
 
 #: fpg_constants:rsmessage
 msgid "Message"
@@ -302,15 +318,23 @@ msgstr "Mensagem"
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
-msgstr ""
+msgstr "Tempo Mod."
 
 #: fpg_constants:rsshortmon
 msgid "Mon"
-msgstr ""
+msgstr "Seg"
 
 #: fpg_constants:rslongmon
 msgid "Monday"
-msgstr ""
+msgstr "Segunda-feira"
+
+#: fpg_constants:rsmovedown
+msgid "Move Down"
+msgstr "Mover Abaixo"
+
+#: fpg_constants:rsmoveup
+msgid "Move Up"
+msgstr "Mover Acima"
 
 #: fpg_constants:rsname
 msgid "Name"
@@ -326,11 +350,11 @@ msgstr "Não para todos"
 
 #: fpg_constants:rsshortnov
 msgid "Nov"
-msgstr ""
+msgstr "Nov"
 
 #: fpg_constants:rslongnov
 msgid "November"
-msgstr ""
+msgstr "Novembro"
 
 #: fpg_constants:rsok
 msgid "OK"
@@ -338,11 +362,11 @@ msgstr "OK"
 
 #: fpg_constants:rsshortoct
 msgid "Oct"
-msgstr ""
+msgstr "Out"
 
 #: fpg_constants:rslongoct
 msgid "October"
-msgstr ""
+msgstr "Outubro"
 
 #: fpg_constants:rsopen
 msgid "Open"
@@ -354,19 +378,19 @@ msgstr "Abrir um arquivo"
 
 #: fpg_constants:rsfileowner
 msgid "Owner"
-msgstr ""
+msgstr "Dono"
 
 #: fpg_constants:rspassword
 msgid "Password"
-msgstr ""
+msgstr "Senha"
 
 #: fpg_constants:rspaste
 msgid "Paste"
-msgstr ""
+msgstr "Colar"
 
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
-msgstr ""
+msgstr "Recentemente Usado"
 
 #: fpg_constants:rsreplace
 msgid "Replace"
@@ -386,11 +410,11 @@ msgstr ""
 
 #: fpg_constants:rsshortsat
 msgid "Sat"
-msgstr ""
+msgstr "Sab"
 
 #: fpg_constants:rslongsat
 msgid "Saturday"
-msgstr ""
+msgstr "Sabado"
 
 #: fpg_constants:rssave
 msgid "Save"
@@ -418,11 +442,11 @@ msgstr "Selecione a fonte"
 
 #: fpg_constants:rsshortsep
 msgid "Sep"
-msgstr ""
+msgstr "Set"
 
 #: fpg_constants:rslongsep
 msgid "September"
-msgstr ""
+msgstr "Setembro"
 
 #: fpg_constants:rscollectionserif
 msgid "Serif"
@@ -450,19 +474,19 @@ msgstr ""
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
-msgstr ""
+msgstr "Texto para Inserir"
 
 #: fpg_constants:rsshortthu
 msgid "Thu"
-msgstr ""
+msgstr "Qui"
 
 #: fpg_constants:rslongthu
 msgid "Thursday"
-msgstr ""
+msgstr "Quinta-feira"
 
 #: fpg_constants:rstoday
 msgid "Today"
-msgstr ""
+msgstr "Hoje"
 
 #: fpg_constants:rstrue
 msgid "True"
@@ -470,11 +494,11 @@ msgstr "Verdadeiro"
 
 #: fpg_constants:rsshorttue
 msgid "Tue"
-msgstr ""
+msgstr "Ter"
 
 #: fpg_constants:rslongtue
 msgid "Tuesday"
-msgstr ""
+msgstr "Terça-feira"
 
 #: fpg_constants:rsfiletype
 msgid "Type of file"
@@ -490,7 +514,7 @@ msgstr "Sublinhado"
 
 #: fpg_constants:rsusername
 msgid "User name"
-msgstr ""
+msgstr "Usuário"
 
 #: fpg_constants:rswarning
 msgid "Warning"
@@ -498,15 +522,15 @@ msgstr "Advertência"
 
 #: fpg_constants:rsshortwed
 msgid "Wed"
-msgstr ""
+msgstr "Qua"
 
 #: fpg_constants:rslongwed
 msgid "Wednesday"
-msgstr ""
+msgstr "Quarta-feira"
 
 #: fpg_constants:rsaddnewitem
 msgid "Would you like to add the new item <%s> to the list?"
-msgstr ""
+msgstr "Você gostaria de adicionar um novo item <%s> para a lista?"
 
 #: fpg_constants:rsyes
 msgid "Yes"

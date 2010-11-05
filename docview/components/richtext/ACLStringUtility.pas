@@ -215,20 +215,6 @@ Procedure ParseConfigLine( const S: string;
 // Removes spaces around the separator in the given string
 Procedure RemoveSeparatorSpaces( var S: string; const Separator:string );
 
-{$ifdef os2}
-// ------------ Ansi String utilities ------------------------
-
-// Right & left trim that works with AnsiStrings.
-Function AnsiTrim( const S: AnsiString ): AnsiString;
-
-Procedure AnsiParseConfigLine( const S: Ansistring;
-                               var keyName: Ansistring;
-                               var keyValue: Ansistring );
-
-Function AnsiExtractNextValue( var CSVString: AnsiString;
-                               const Separator: AnsiString ): AnsiString;
-
-{$endif}
 
 // ------------- Lists of strings, and strings as lists -----------
 
@@ -922,39 +908,6 @@ Begin
   Result := ( UppercaseC >= 'A' ) and ( UppercaseC <= 'Z' );
 end;
 
-{$ifdef os2}
-// Returns true if s is only spaces (or empty)
-Function IsSpaces( const s: string ): boolean;
-Begin
-  Asm
-  MOV ESI,s   // get address of s into ESI
-  MOV CL,[ESI]     // get length of s
-  MOVZX ECX, CL      // widen CL
-  INC ECX
-
-!IsSpacesLoop:
-  INC ESI   // move to next char
-  DEC ECX
-  JE !IsSpacesTrue
-
-  MOV AL,[ESI] // load character
-  CMP AL,32  // is it a space?
-  JE !IsSpacesLoop // yes, go to next
-
-  // no, return false
-  MOV EAX, 0
-  JMP !IsSpacesDone
-
-!IsSpacesTrue:
-  MOV EAX, 1
-
-!IsSpacesDone:
-  LEAVE
-  RETN32 4
-  End;
-
-End;
-{$else}
 // Returns true if s is only spaces (or empty)
 Function IsSpaces( const s: string ): boolean;
 var
@@ -970,7 +923,6 @@ Begin
   end;
   result := true;
 end;
-{$endif}
 
 Function StrLeft0Pad( const n: integer; const width: integer ): string;
 Begin
@@ -1267,83 +1219,6 @@ begin
     // No build number, add a 1
     Result:= StartString + '1';
 end;
-
-{$ifdef OS2}
-
-Function AnsiTrim( const S: AnsiString ): AnsiString;
-Var
-  i: longint;
-Begin
-  i:= 1;
-  while i<length( S) do
-  begin
-    if S[ i ]<>' ' then
-      break;
-    inc( i );
-  end;
-  Result:= S;
-  if i>1 then
-    AnsiDelete( Result, 1, i-1 );
-  i:= length( Result );
-  while i>=1 do
-  begin
-    if S[ i ]<>' ' then
-      break;
-    dec( i );
-  end;
-  AnsiSetLength( Result, i );
-End;
-
-Procedure AnsiParseConfigLine( const S: Ansistring;
-                               var keyName: Ansistring;
-                               var keyValue: Ansistring );
-Var
-  line: AnsiString;
-  EqualsPos: longint;
-Begin
-  KeyName:= '';
-  KeyValue:= '';
-
-  line:= AnsiTrim( S );
-  EqualsPos:= AnsiPos( '=', line );
-
-  if ( EqualsPos>0 ) then
-  begin
-    KeyName:= AnsiCopy( line, 1, EqualsPos-1 );
-    KeyName:= AnsiTrim( KeyName );
-
-    KeyValue:= AnsiCopy( line, EqualsPos+1, length( line )-EqualsPos );
-    KeyValue:= AnsiTrim( KeyValue );
-  end;
-end;
-
-Function AnsiExtractNextValue( var CSVString: AnsiString;
-                               const Separator: AnsiString ): AnsiString;
-Var
-  SeparatorPos: integer;
-Begin
-  SeparatorPos:= AnsiPos( Separator, CSVString );
-  if SeparatorPos>0 then
-  begin
-    Result:= AnsiCopy( CSVString, 1, SeparatorPos-1 );
-    AnsiDelete( CSVString, 1, SeparatorPos + length( Separator ) - 1 );
-  end
-  else
-  begin
-    Result:= CSVString;
-    CSVString:= '';
-  end;
-  Result:= AnsiTrim( Result );
-  // Remove qyotes if present
-  if ( Result[1] = chr(34) )
-     and ( Result[ length(Result) ] = chr(34) ) then
-  begin
-    AnsiDelete( Result, 1, 1 );
-    AnsiDelete( Result, length( Result ), 1 );
-    Result:= AnsiTrim( Result );
-  end;
-end;
-{$Endif}
 
 Procedure ReverseList( TheList:TStrings );
 Var

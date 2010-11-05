@@ -25,10 +25,10 @@ type
   TfpgColorSelectDialog = class(TfpgBaseDialog)
   private
     {@VFD_HEAD_BEGIN: ColorSelectDialog}
-    PageControl1: TfpgPageControl;
-    TabSheet1: TfpgTabSheet;
-    TabSheet2: TfpgTabSheet;
-    ComboBox1: TfpgComboBox;
+    pcColorSelect: TfpgPageControl;
+    tsColorWheel: TfpgTabSheet;
+    tsColorNames: TfpgTabSheet;
+    cbColorPalette: TfpgComboBox;
     ColorListBox1: TfpgColorListBox;
     Label1: TfpgLabel;
     Label2: TfpgLabel;
@@ -43,11 +43,13 @@ type
     pnlColorPreview: TfpgBevel;
     {@VFD_HEAD_END: ColorSelectDialog}
     FViaRGB: Boolean;  // to prevent recursive changes
-    function GetSelectedColor: TfpgColor;
-    procedure SetSelectedColor(const AValue: TfpgColor);
-    procedure ColorChanged(Sender: TObject);
-    procedure RGBChanged(Sender: TObject);
-    procedure UpdateRGBComponents;
+    function    GetSelectedColor: TfpgColor;
+    procedure   SetSelectedColor(const AValue: TfpgColor);
+    procedure   ColorChanged(Sender: TObject);
+    procedure   RGBChanged(Sender: TObject);
+    procedure   UpdateRGBComponents;
+    procedure   PopulatePaletteColorCombo;
+    procedure   cbColorPaletteChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -71,7 +73,7 @@ begin
   try
     frm.ColorWheel.SetSelectedColor(APresetColor);
     if frm.ShowModal = mrOK then
-      Result := frm.ValueBar.SelectedColor;
+      Result := frm.SelectedColor;
   finally
     frm.Free;
   end;
@@ -81,12 +83,15 @@ end;
 
 function TfpgColorSelectDialog.GetSelectedColor: TfpgColor;
 begin
-  //
+  if pcColorSelect.ActivePageIndex = 0 then
+    Result := ValueBar.SelectedColor
+  else
+    Result := ColorListBox1.Color;
 end;
 
 procedure TfpgColorSelectDialog.SetSelectedColor(const AValue: TfpgColor);
 begin
-  //
+  ColorWheel.SetSelectedColor(AValue);
 end;
 
 procedure TfpgColorSelectDialog.ColorChanged(Sender: TObject);
@@ -123,6 +128,27 @@ begin
   edB.Value := rgb.Blue;
 end;
 
+procedure TfpgColorSelectDialog.PopulatePaletteColorCombo;
+begin
+  cbColorPalette.Items.Clear;
+  cbColorPalette.Items.Add('cpStandardColors');
+  cbColorPalette.Items.Add('cpSystemColors');
+  cbColorPalette.Items.Add('cpWebColors');
+  cbColorPalette.FocusItem := 0;
+  cbColorPalette.OnChange := @cbColorPaletteChange;
+end;
+
+procedure TfpgColorSelectDialog.cbColorPaletteChange(Sender: TObject);
+begin
+  if cbColorPalette.Text = 'cpStandardColors' then
+    ColorListBox1.ColorPalette := cpStandardColors
+  else if cbColorPalette.Text = 'cpSystemColors' then
+    ColorListBox1.ColorPalette := cpSystemColors
+  else
+    ColorListBox1.ColorPalette := cpWebColors;
+  ColorListBox1.SetFocus;
+end;
+
 constructor TfpgColorSelectDialog.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -135,15 +161,15 @@ begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: ColorSelectDialog}
   Name := 'ColorSelectDialog';
-  SetPosition(316, 186, 328, 375);
+  SetPosition(340, 164, 328, 375);
   WindowTitle := 'Color Select Dialog';
   Hint := '';
   WindowPosition := wpOneThirdDown;
 
-  PageControl1 := TfpgPageControl.Create(self);
-  with PageControl1 do
+  pcColorSelect := TfpgPageControl.Create(self);
+  with pcColorSelect do
   begin
-    Name := 'PageControl1';
+    Name := 'pcColorSelect';
     SetPosition(4, 4, 320, 332);
     Anchors := [anLeft,anRight,anTop,anBottom];
     ActivePageIndex := 0;
@@ -151,26 +177,26 @@ begin
     TabOrder := 1;
   end;
 
-  TabSheet1 := TfpgTabSheet.Create(PageControl1);
-  with TabSheet1 do
+  tsColorWheel := TfpgTabSheet.Create(pcColorSelect);
+  with tsColorWheel do
   begin
-    Name := 'TabSheet1';
+    Name := 'tsColorWheel';
     SetPosition(3, 24, 314, 305);
     Text := 'Color Wheel';
   end;
 
-  TabSheet2 := TfpgTabSheet.Create(PageControl1);
-  with TabSheet2 do
+  tsColorNames := TfpgTabSheet.Create(pcColorSelect);
+  with tsColorNames do
   begin
-    Name := 'TabSheet2';
+    Name := 'tsColorNames';
     SetPosition(3, 24, 314, 305);
     Text := 'Predefined';
   end;
 
-  ComboBox1 := TfpgComboBox.Create(TabSheet2);
-  with ComboBox1 do
+  cbColorPalette := TfpgComboBox.Create(tsColorNames);
+  with cbColorPalette do
   begin
-    Name := 'ComboBox1';
+    Name := 'cbColorPalette';
     SetPosition(8, 24, 299, 22);
     Anchors := [anLeft,anRight,anTop];
     FontDesc := '#List';
@@ -178,21 +204,19 @@ begin
     TabOrder := 1;
   end;
 
-  ColorListBox1 := TfpgColorListBox.Create(TabSheet2);
+  ColorListBox1 := TfpgColorListBox.Create(tsColorNames);
   with ColorListBox1 do
   begin
     Name := 'ColorListBox1';
     SetPosition(8, 72, 299, 224);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    ColorPalette := cpStandardColors;
+    Color := TfpgColor($00FFFF);
     FontDesc := '#List';
     Hint := '';
-    HotTrack := False;
-    PopupFrame := False;
     TabOrder := 2;
   end;
 
-  Label1 := TfpgLabel.Create(TabSheet2);
+  Label1 := TfpgLabel.Create(tsColorNames);
   with Label1 do
   begin
     Name := 'Label1';
@@ -202,7 +226,7 @@ begin
     Text := 'Select a color palette';
   end;
 
-  Label2 := TfpgLabel.Create(TabSheet2);
+  Label2 := TfpgLabel.Create(tsColorNames);
   with Label2 do
   begin
     Name := 'Label2';
@@ -212,22 +236,23 @@ begin
     Text := 'Available colors:';
   end;
 
-  ColorWheel := TfpgColorWheel.Create(TabSheet1);
+  ColorWheel := TfpgColorWheel.Create(tsColorWheel);
   with ColorWheel do
   begin
     Name := 'ColorWheel';
     SetPosition(8, 8, 204, 204);
   end;
 
-  ValueBar := TfpgValueBar.Create(TabSheet1);
+  ValueBar := TfpgValueBar.Create(tsColorWheel);
   with ValueBar do
   begin
     Name := 'ValueBar';
     SetPosition(240, 8, 64, 204);
+    Value := 1;
     OnChange := @ColorChanged;
   end;
 
-  edR := TfpgSpinEdit.Create(TabSheet1);
+  edR := TfpgSpinEdit.Create(tsColorWheel);
   with edR do
   begin
     Name := 'edR';
@@ -237,7 +262,7 @@ begin
     OnChange := @RGBChanged;
   end;
 
-  edG := TfpgSpinEdit.Create(TabSheet1);
+  edG := TfpgSpinEdit.Create(tsColorWheel);
   with edG do
   begin
     Name := 'edG';
@@ -247,7 +272,7 @@ begin
     OnChange := @RGBChanged;
   end;
 
-  edB := TfpgSpinEdit.Create(TabSheet1);
+  edB := TfpgSpinEdit.Create(tsColorWheel);
   with edB do
   begin
     Name := 'edB';
@@ -257,7 +282,7 @@ begin
     OnChange := @RGBChanged;
   end;
 
-  Label3 := TfpgLabel.Create(TabSheet1);
+  Label3 := TfpgLabel.Create(tsColorWheel);
   with Label3 do
   begin
     Name := 'Label3';
@@ -268,7 +293,7 @@ begin
     Text := 'Red';
   end;
 
-  Label4 := TfpgLabel.Create(TabSheet1);
+  Label4 := TfpgLabel.Create(tsColorWheel);
   with Label4 do
   begin
     Name := 'Label4';
@@ -279,7 +304,7 @@ begin
     Text := 'Green';
   end;
 
-  Label5 := TfpgLabel.Create(TabSheet1);
+  Label5 := TfpgLabel.Create(tsColorWheel);
   with Label5 do
   begin
     Name := 'Label5';
@@ -290,7 +315,7 @@ begin
     Text := 'Blue';
   end;
 
-  pnlColorPreview := TfpgBevel.Create(TabSheet1);
+  pnlColorPreview := TfpgBevel.Create(tsColorWheel);
   with pnlColorPreview do
   begin
     Name := 'pnlColorPreview';
@@ -309,6 +334,8 @@ begin
   btnCancel.Top   := Height - btnCancel.Height - FSpacing;
   btnOK.Left      := btnCancel.Left - FDefaultButtonWidth - 6;
   btnOK.Top       := btnCancel.Top;
+  
+  PopulatePaletteColorCombo;
 end;
 
 

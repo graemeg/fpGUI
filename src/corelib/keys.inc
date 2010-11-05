@@ -5,7 +5,7 @@
   GII info at <http://www.ggi-project.org/packages/libgii.html>
 }
 
-{%mainunit gfxbase.pas}
+{%mainunit fpg_base.pas}
 
 const
 

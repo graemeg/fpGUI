@@ -28,14 +28,11 @@ uses
   fpg_main,
   fpg_widget;
   
-const
-  clColorGrabBar = $839EFE; // Pale navy blue
-  cSplitterWidth = 8;
 
 type
-
   NaturalNumber = 1..High(Integer);
 
+  TfpgSnapEvent = procedure(Sender: TObject; const AClosed: boolean) of object;
 
   TfpgSplitter = class(TfpgWidget)
   private
@@ -49,18 +46,21 @@ type
     FOldSize: Integer;
     FSplit: Integer;
     FMouseOver: Boolean;
+    FOnSnap: TfpgSnapEvent;
     procedure   CalcSplitSize(X, Y: Integer; out NewSize, Split: Integer);
     function    FindControl: TfpgWidget;
     procedure   SetColorGrabBar(const AValue: TfpgColor);
     procedure   UpdateControlSize;
     procedure   UpdateSize(const X, Y: Integer);
   protected
+    procedure   DoOnSnap(const AClosed: Boolean);
     function    DoCanResize(var NewSize: Integer): Boolean; virtual;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
+    procedure   HandleDoubleClick(x, y: integer; button: word; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     procedure   StopSizing; dynamic;
     Procedure   DrawGrabBar(ARect: TfpgRect); virtual;
@@ -68,13 +68,20 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
   published
-    property    ColorGrabBar: TfpgColor read FColorGrabBar write SetColorGrabBar default clColorGrabBar;
+    property    Align;
+    property    AutoSnap: boolean read FAutoSnap write FAutoSnap default True;
+    property    ColorGrabBar: TfpgColor read FColorGrabBar write SetColorGrabBar default clSplitterGrabBar;
+    property    OnSnap: TfpgSnapEvent read FOnSnap write FOnSnap;
   end;
 
 function CreateSplitter(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
          AnAlign: TAlign): TfpgSplitter;
 
 implementation
+
+const
+  cSplitterWidth = 8;
+
 
 function CreateSplitter(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord;
          AnAlign: TAlign): TfpgSplitter;
@@ -127,12 +134,11 @@ var
   r: TfpgRect;
 begin
   Result := nil;
-  p := Point(Left, Top);
   case Align of
-    alLeft: Dec(p.X);
-    alRight: Inc(p.X, Width);
-    alTop: Dec(p.Y);
-    alBottom: Inc(p.Y, Height);
+    alLeft:   p := Point(Left-2, Top + (Height div 2));
+    alRight:  p := Point(Right+2, Top + (Height div 2));
+    alTop:    p := Point(Left + (Width div 2), Top-2);
+    alBottom: p := Point(Left + (Width div 2), Bottom+2);
   else
     Exit;
   end;
@@ -174,16 +180,10 @@ begin
   begin
     case Align of
       alLeft, alRight:
-//          FControl.Width  := FNewSize; // (1)
-         FControl.SetPosition(FControl.Left, FControl.Top, FNewSize, FControl.Height); // (2)
+         FControl.SetPosition(FControl.Left, FControl.Top, FNewSize, FControl.Height);
       alTop, alBottom:
-//          FControl.Height := FNewSize; // (1)
-         FControl.SetPosition(FControl.Left, FControl.Top, FControl.Width, FNewSize);  // (2)
+         FControl.SetPosition(FControl.Left, FControl.Top, FControl.Width, FNewSize);
     end;
-//    FControl.UpdateWindowPosition; // (1)
-    // vvzh:
-    // Lines marked with (1) work wrong under Linux (e.g. folding/unfolding Memo1)
-    // Lines marked with (2) work OK under both platforms. Why?
     Parent.Realign;
     // if Assigned(FOnMoved) then FOnMoved(Self);
     FOldSize := FNewSize;
@@ -195,12 +195,21 @@ begin
   CalcSplitSize(X, Y, FNewSize, FSplit);
 end;
 
+procedure TfpgSplitter.DoOnSnap(const AClosed: Boolean);
+begin
+  if Assigned(FOnSnap) then
+    FOnSnap(self, AClosed);
+end;
+
 function TfpgSplitter.DoCanResize(var NewSize: Integer): Boolean;
 begin
   // Result := CanResize(NewSize); // omit onCanResize call
   Result := True;
   if Result and (NewSize <= FMinSize) and FAutoSnap then
+  begin
     NewSize := 0;
+    DoOnSnap(NewSize = 0);
+  end;
 end;
 
 procedure TfpgSplitter.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -238,7 +247,9 @@ begin
       Inc(FMaxSize, FControl.Height);
     end;
     UpdateSize(X, Y);
+
     CaptureMouse;
+
     {AllocateLineDC;
     with ValidParentForm(Self) do
       if ActiveControl <> nil then
@@ -304,13 +315,40 @@ begin
   Repaint;
 end;
 
+procedure TfpgSplitter.HandleDoubleClick(x, y: integer; button: word;
+  shiftstate: TShiftState);
+begin
+  inherited HandleDoubleClick(x, y, button, shiftstate);
+  if FAutoSnap then
+  begin
+    if FNewSize = 0 then
+    begin
+      FNewSize := FMinSize+1;
+      DoCanResize(FNewSize);
+    end
+    else
+    begin
+      FNewSize := 0;
+      DoCanResize(FNewSize);
+    end;
+  end;
+end;
+
 procedure TfpgSplitter.HandlePaint;
 var
   lRect: TfpgRect;
 begin
   Canvas.SetColor(clWindowBackground);
   Canvas.FillRectangle(GetClientRect);
-  
+
+  { just to make it's borders more visible in the designer }
+  if csDesigning in ComponentState then
+  begin
+    Canvas.SetColor(clInactiveWgFrame);
+    Canvas.SetLineStyle(1, lsDash);
+    Canvas.DrawRectangle(0, 0, Width, Height);
+  end;
+
   case Align of
     alRight,
     alLeft:
@@ -459,7 +497,7 @@ begin
   // FResizeStyle := rsPattern;
   FOldSize := -1;
   FMouseOver := False;
-  FColorGrabBar := clColorGrabBar;
+  FColorGrabBar := clSplitterGrabBar;
 end;
 
 destructor TfpgSplitter.Destroy;

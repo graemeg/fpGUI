@@ -26,7 +26,7 @@ implementation
 procedure T${%FORMNAME%}.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
-  {@VFD_BODY_BEGIN: MainForm}
+  {@VFD_BODY_BEGIN: ${%FORMNAME%}}
   Name := '${%FORMNAME%}';
   SetPosition(374, 228, 490, 258);
   WindowTitle := 'NewForm';

@@ -58,6 +58,7 @@ uses
   fpg_main,
   fpg_widget,
   fpg_popupwindow,
+  fpg_menu,
   fpg_combobox;
 
 type
@@ -72,10 +73,14 @@ type
     FSelectedItem: integer;
     FMaxLength: integer;
     FNewItem: boolean;
+    FDefaultPopupMenu: TfpgPopupMenu;
     procedure   SetAllowNew(const AValue: TAllowNew);
     procedure   InternalBtnClick(Sender: TObject);
     procedure   InternalListBoxSelect(Sender: TObject);
     procedure   InternalListBoxKeyPress(Sender: TObject; var keycode: word; var shiftstate: TShiftState; var consumed: Boolean);
+    procedure   DefaultPopupInsertFromCharmap(Sender: TObject);
+    procedure   DoPaste(const AText: TfpgString);
+    procedure   SetDefaultPopupMenuItemsState;
   protected
     FDropDown: TfpgPopupWindow;
     FDrawOffset: integer;
@@ -86,11 +91,14 @@ type
     function    GetText: string; virtual;
     function    HasText: boolean; virtual;
     procedure   SetText(const AValue: string); virtual;
+    procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: Boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandlePaint; override;
     property    AutoCompletion: Boolean read FAutocompletion write FAutoCompletion default False;
     property    AllowNew: TAllowNew read FAllowNew write SetAllowNew default anNo;
@@ -109,6 +117,7 @@ type
 
   TfpgEditCombo = class(TfpgBaseEditCombo)
   published
+    property    Align;
     property    AllowNew;
     property    AutoCompletion;
     property    BackgroundColor;
@@ -144,6 +153,14 @@ uses
   fpg_constants,
   fpg_listbox,
   fpg_dialogs;
+
+const
+  // internal popupmenu item names
+  //ipmCut        = 'miDefaultCut';
+  //ipmCopy       = 'miDefaultCopy';
+  //ipmPaste      = 'miDefaultPaste';
+  //ipmClearAll   = 'miDefaultClearAll';
+  ipmCharmap    = 'miDefaultCharmap';
 
 var
   OriginalFocusRoot: TfpgWidget;
@@ -372,6 +389,74 @@ begin
   Repaint;
 end;
 
+procedure TfpgBaseEditCombo.DefaultPopupInsertFromCharmap(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  if FAllowNew= anNo then
+    Exit;
+  s := fpgShowCharMap;
+  if s <> '' then
+    //SetText(s);
+    DoPaste(s);
+end;
+
+procedure TfpgBaseEditCombo.DoPaste(const AText: TfpgString);
+var
+  s: string;
+  prevval: TfpgString;
+  i: integer;
+begin
+  prevval := FText;
+  s := AText;
+    if (FMaxLength <= 0) or (UTF8Length(FText) < FMaxLength) then
+    begin
+      UTF8Insert(s, FText, FCursorPos + UTF8Length(s));
+      Inc(FCursorPos);
+      FSelStart := FCursorPos;
+      if Assigned(FDropDown) then
+        FDropDown.Close;
+      FSelectedItem := -1;
+      for i := 0 to FItems.Count-1 do
+        if SameText(UTF8Copy(FItems.Strings[i], 1, UTF8Length(FText)), FText) then
+        begin
+          FSelectedItem:= i;
+          DoDropDown;
+          Break;
+        end;
+      if FSelectedItem = -1 then
+        FNewItem:= True;
+    end;
+  Repaint;
+  if prevval <> Text then
+    DoOnChange;
+end;
+
+procedure TfpgBaseEditCombo.SetDefaultPopupMenuItemsState;
+var
+  i: integer;
+  itm: TfpgMenuItem;
+begin
+  //for i := 0 to FDefaultPopupMenu.ComponentCount-1 do
+  //begin
+  //  if FDefaultPopupMenu.Components[i] is TfpgMenuItem then
+  //  begin
+  //    itm := TfpgMenuItem(FDefaultPopupMenu.Components[i]);
+  //    // enabled/disable menu items
+  //    if itm.Name = ipmCut then
+  //      itm.Enabled := (not ReadOnly) and (FSelOffset <> 0)
+  //    else if itm.Name = ipmCopy then
+  //      itm.Enabled := FSelOffset <> 0
+  //    else if itm.Name = ipmPaste then
+  //      itm.Enabled := (not ReadOnly) and (fpgClipboard.Text <> '')
+  //    else if itm.Name = ipmClearAll then
+  //      itm.Enabled := (not ReadOnly) and (Text <> '')
+  //    else if itm.Name = ipmCharmap then
+  //      itm.Enabled := (not ReadOnly);
+  //  end;
+  //end;
+end;
+
 procedure TfpgBaseEditCombo.SetText(const AValue: string);
 var
   i: integer;
@@ -396,6 +481,32 @@ begin
     // if we get here, we didn't find a match
     FocusItem := -1;
   end;
+end;
+
+procedure TfpgBaseEditCombo.ShowDefaultPopupMenu(const x, y: integer;
+  const shiftstate: TShiftState);
+var
+  itm: TfpgMenuItem;
+begin
+  if not Assigned(FDefaultPopupMenu) then
+  begin
+    FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
+    //itm := FDefaultPopupMenu.AddMenuItem(rsCut, '', @DefaultPopupCut);
+    //itm.Name := ipmCut;
+    //itm := FDefaultPopupMenu.AddMenuItem(rsCopy, '', @DefaultPopupCopy);
+    //itm.Name := ipmCopy;
+    //itm := FDefaultPopupMenu.AddMenuItem(rsPaste, '', @DefaultPopupPaste);
+    //itm.Name := ipmPaste;
+    //itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
+    //itm.Name := ipmClearAll;
+    //itm := FDefaultPopupMenu.AddMenuItem('-', '', nil);
+    //itm.Name := 'N1';
+    itm := FDefaultPopupMenu.AddMenuItem(rsInsertFromCharacterMap, '', @DefaultPopupInsertFromCharmap);
+    itm.Name := ipmCharmap;
+  end;
+
+  SetDefaultPopupMenuItemsState;
+  FDefaultPopupMenu.ShowAt(self, x, y);
 end;
 
 procedure TfpgBaseEditCombo.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -595,6 +706,25 @@ begin
   PaintInternalButton;
 end;
 
+procedure TfpgBaseEditCombo.HandleRMouseDown(x, y: integer;
+  shiftstate: TShiftState);
+begin
+  // keyMenu was pressed
+  if shiftstate = [ssExtra1] then
+    HandleRMouseUp(x, y, [])
+  else
+    inherited HandleRMouseDown(x, y, shiftstate);
+end;
+
+procedure TfpgBaseEditCombo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
+begin
+  inherited HandleRMouseUp(x, y, shiftstate);
+  //if Assigned(PopupMenu) then
+  //  PopupMenu.ShowAt(self, x, y)
+  //else
+    ShowDefaultPopupMenu(x, y, ShiftState);
+end;
+
 procedure TfpgBaseEditCombo.HandlePaint;
 var
   r: TfpgRect;
@@ -770,7 +900,8 @@ end;
 
 destructor TfpgBaseEditCombo.Destroy;
 begin
-  FDropDown.Free;
+  if not Assigned(FDropDown) then
+    FDropDown.Free;
   inherited Destroy;
 end;
 

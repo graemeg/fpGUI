@@ -221,12 +221,14 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property    Align;
     property    BackgroundColor;
     { Clicking on calendar Today button will close the popup calendar by default }
     property    CloseOnSelect: boolean read FCloseOnSelect write SetCloseOnSelect default True;
     property    DateFormat: string read FDateFormat write SetDateFormat;
     property    DateValue: TDateTime read FDate write SetDateValue;
     property    DayColor: TfpgColor read FDayColor write SetDayColor;
+    property    Enabled;
     property    FontDesc;
     property    Hint;
     property    HolidayColor: TfpgColor read FHolidayColor write SetHolidayColor;

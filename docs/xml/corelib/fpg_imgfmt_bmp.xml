@@ -4,8 +4,7 @@
 
 <module name="fpg_imgfmt_bmp">
 <short>BMP image reader implementation</short>
-<descr>This unit implements a BMP (Bitmap) image reader.
-</descr>
+<descr><p>This unit implements a BMP (Bitmap) image reader.</p></descr>
 
 <!-- procedure Visibility: default -->
 <element name="ReadImage_BMP">
@@ -15,9 +14,8 @@
 <!-- function Visibility: default -->
 <element name="LoadImage_BMP">
 <short>Load's the image from the file specified.</short>
-<descr>This functions loads the BMP image from the file specified and returns
-a TfpgImage object representing the BMP file.
-</descr>
+<descr><p>This functions loads the BMP image from the file specified and returns
+a <link id="fpg_main.TfpgImage">TfpgImage</link> object representing the BMP file.</p></descr>
 </element>
 
 <!-- function result Visibility: default -->
@@ -32,8 +30,8 @@ a TfpgImage object representing the BMP file.
 
 <!-- function Visibility: default -->
 <element name="CreateImage_BMP">
-<short>Creates a TfpgImage representing a BMP file from data in memory.</short>
-<descr>Creates a TfpgImage representing a BMP file from data in memory.
+<short>Creates a <link id="fpg_main.TfpgImage">TfpgImage</link> representing a BMP file from data in memory.</short>
+<descr><printshort id="CreateImage_BMP"/>.
 </descr>
 </element>
 

@@ -13,13 +13,6 @@ type
 
   TMainForm = class(TfpgForm)
   private
-    procedure chkColorNameChange(Sender: TObject);
-    procedure ckdReorderChanged(Sender: TObject);
-    procedure cbName1Change(Sender: TObject);
-    procedure btnName1Clicked(Sender: TObject);
-    procedure SetBGColor(Sender: TObject);
-    procedure PopulatePaletteColorCombo;
-  public
     {@VFD_HEAD_BEGIN: MainForm}
     cbName1: TfpgComboBox;
     lblName4: TfpgLabel;
@@ -32,6 +25,13 @@ type
     chkColorName: TfpgCheckBox;
     chkReorder: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
+    procedure chkColorNameChange(Sender: TObject);
+    procedure ckdReorderChanged(Sender: TObject);
+    procedure cbName1Change(Sender: TObject);
+    procedure btnName1Clicked(Sender: TObject);
+    procedure SetBGColor(Sender: TObject);
+    procedure PopulatePaletteColorCombo;
+  public
     procedure AfterCreate; override;
   end;
   
@@ -93,6 +93,7 @@ begin
   Name := 'MainForm';
   SetPosition(286, 264, 413, 250);
   WindowTitle := 'Color ListBox Test';
+  Hint := '';
   WindowPosition := wpScreenCenter;
 
   cbName1 := TfpgComboBox.Create(self);
@@ -101,6 +102,7 @@ begin
     Name := 'cbName1';
     SetPosition(12, 36, 172, 22);
     FontDesc := '#List';
+    Hint := '';
     TabOrder := 0;
   end;
 
@@ -131,7 +133,11 @@ begin
   with lbColorPick do
   begin
     Name := 'lbColorPick';
-    SetPosition(216, 20, 184, 148);
+    SetPosition(216, 20, 184, 212);
+    Anchors := [anLeft,anTop,anBottom];
+    FontDesc := '#List';
+    Hint := '';
+    TabOrder := 4;
   end;
 
   btnName2 := TfpgButton.Create(self);
@@ -196,6 +202,7 @@ begin
     SetPosition(12, 140, 180, 20);
     Checked := True;
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 8;
     Text := 'Show Color Names';
     OnChange := @chkColorNameChange;
@@ -207,6 +214,7 @@ begin
     Name := 'chkReorder';
     SetPosition(12, 160, 180, 20);
     FontDesc := '#Label1';
+    Hint := '';
     TabOrder := 9;
     Text := 'Drag to reorder';
     OnChange := @ckdReorderChanged;

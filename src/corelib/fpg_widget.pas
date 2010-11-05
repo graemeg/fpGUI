@@ -34,12 +34,19 @@ type
 
   THintEvent = procedure(Sender: TObject; var AHint: TfpgString) of object;
 
+  TfpgDragEnterEvent = procedure(Sender, Source: TObject; AMimeList: TStringList; var AMimeChoice: TfpgString; var ADropAction: TfpgDropAction; var Accept: Boolean) of object;
+  TfpgDragDropEvent = procedure(Sender, Source: TObject; X, Y: integer; AData: variant) of object;
+
 
   TfpgWidget = class(TfpgWindow)
   private
+    FAcceptDrops: boolean;
     FAlignRect: TfpgRect;
     FOnClick: TNotifyEvent;
     FOnDoubleClick: TMouseButtonEvent;
+    FOnDragDrop: TfpgDragDropEvent;
+    FOnDragEnter: TfpgDragEnterEvent;
+    FOnDragLeave: TNotifyEvent;
     FOnEnter: TNotifyEvent;
     FOnExit: TNotifyEvent;
     FOnMouseDown: TMouseButtonEvent;
@@ -52,9 +59,12 @@ type
     FOnResize: TNotifyEvent;
     FOnScreen: boolean;
     FOnShowHint: THintEvent;
+    FDragStartPos: TfpgPoint;
+    alist: TList;
     procedure   SetActiveWidget(const AValue: TfpgWidget);
     function    IsShowHintStored: boolean;
     procedure   SetFormDesigner(const AValue: TObject);
+    procedure   SetAlign(const AValue: TAlign);
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   MsgResize(var msg: TfpgMessageRec); message FPGM_RESIZE;
@@ -69,6 +79,8 @@ type
     procedure   MsgMouseEnter(var msg: TfpgMessageRec); message FPGM_MOUSEENTER;
     procedure   MsgMouseExit(var msg: TfpgMessageRec); message FPGM_MOUSEEXIT;
     procedure   MsgMouseScroll(var msg: TfpgMessageRec); message FPGM_SCROLL;
+    procedure   MsgDropEnter(var msg: TfpgMessageRec); message FPGM_DROPENTER;
+    procedure   MsgDropExit(var msg: TfpgMessageRec); message FPGM_DROPEXIT;
   protected
     FFormDesigner: TObject;
     FVisible: boolean;
@@ -85,6 +97,8 @@ type
     FBackgroundColor: TfpgColor;
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
+    FOnClickPending: Boolean;
+    procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
     procedure   SetBackgroundColor(const AValue: TfpgColor); virtual;
@@ -98,7 +112,7 @@ type
     function    GetHint: TfpgString; virtual;
     procedure   SetHint(const AValue: TfpgString); virtual;
     procedure   DoUpdateWindowPosition; override;
-    procedure   DoAlign(AAlign: TAlign);
+    procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
     procedure   HandlePaint; virtual;
@@ -122,7 +136,7 @@ type
     procedure   InternalHandleShow; virtual;
     procedure   HandleHide; virtual;
     procedure   MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
-    procedure   RePaint;
+    procedure   RePaint; virtual;
     { property events }
     property    OnClick: TNotifyEvent read FOnClick write FOnClick;
     property    OnDoubleClick: TMouseButtonEvent read FOnDoubleClick write FOnDoubleClick;
@@ -141,8 +155,6 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterConstruction; override;
-    function    GetClientRect: TfpgRect; virtual;
-    function    GetBoundsRect: TfpgRect; virtual;
     function    InDesigner: boolean;
     procedure   InvokeHelp; virtual;
     procedure   Realign;
@@ -153,6 +165,7 @@ type
     procedure   Invalidate; // double check this works as developers expect????
     property    FormDesigner: TObject read FFormDesigner write SetFormDesigner;
     property    Parent: TfpgWidget read GetParent write SetParent;
+    property    AcceptDrops: boolean read FAcceptDrops write SetAcceptDrops default False;
     property    ActiveWidget: TfpgWidget read FActiveWidget write SetActiveWidget;
     property    IsContainer: Boolean read FIsContainer;
     property    Visible: boolean read FVisible write SetVisible default True;
@@ -161,13 +174,16 @@ type
     { Is the widget allowed to receive keyboard focus. }
     property    Focusable: boolean read FFocusable write FFocusable default False;
     property    Focused: boolean read FFocused write FFocused default False;
-    property    Anchors: TAnchors read FAnchors write FAnchors;
-    property    Align: TAlign read FAlign write FAlign;
+    property    Anchors: TAnchors read FAnchors write FAnchors default [anLeft, anTop];
+    property    Align: TAlign read FAlign write SetAlign default alNone;
     property    Hint: TfpgString read GetHint write SetHint;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
     property    TextColor: TfpgColor read FTextColor write SetTextColor default clText1;
+    property    OnDragEnter: TfpgDragEnterEvent read FOnDragEnter write FOnDragEnter;
+    property    OnDragLeave: TNotifyEvent read FOnDragLeave write FOnDragLeave;
+    property    OnDragDrop: TfpgDragDropEvent read FOnDragDrop write FOnDragDrop;
   end;
 
 
@@ -181,7 +197,8 @@ implementation
 
 uses
   fpg_constants,
-  fpg_menu;
+  fpg_menu,
+  fpg_form;  { for OnKeyPress handling }
 
 
 var
@@ -199,6 +216,33 @@ begin
     Result := FocusRootWidget;
     while (Result <> nil) and (Result.ActiveWidget <> nil) do
       Result := Result.ActiveWidget;
+  end;
+end;
+
+function CompareInts(i1, i2: integer): integer;
+begin
+  if i1 < i2 then
+    Result := -1
+  else if i1 > i2 then
+    Result := 1
+  else
+    Result := 0;
+end;
+
+function AlignCompare(p1, p2: Pointer): integer;
+var
+  w1: TfpgWidget;
+  w2: TfpgWidget;
+begin
+  w1 := TfpgWidget(p1);
+  w2 := TfpgWidget(p2);
+  case w1.Align of
+    alTop:    Result := CompareInts(w1.Top, w2.Top);
+    alBottom: Result := CompareInts(w2.Top, w1.Top);
+    alLeft:   Result := CompareInts(w1.Left, w2.Left);
+    alRight:  Result := CompareInts(w2.Left, w1.Left);
+    else
+      Result         := 0;
   end;
 end;
 
@@ -234,6 +278,14 @@ begin
     FActiveWidget.HandleSetFocus;
 end;
 
+procedure TfpgWidget.SetAcceptDrops(const AValue: boolean);
+begin
+  if FAcceptDrops = AValue then
+    exit;
+  FAcceptDrops := AValue;
+  DoAcceptDrops(AValue);
+end;
+
 function TfpgWidget.GetHint: TfpgString;
 begin
   Result := FHint;
@@ -254,6 +306,14 @@ begin
     if (Components[i] is TfpgWidget) and (TfpgWidget(Components[i]).Parent = self) then
       TfpgWidget(Components[i]).FormDesigner := AValue;
   end;
+end;
+
+procedure TfpgWidget.SetAlign(const AValue: TAlign);
+begin
+  if FAlign = AValue then
+    Exit;
+  FAlign := AValue;
+  Realign;
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -341,16 +401,6 @@ begin
   end;
 end;
 
-function TfpgWidget.GetClientRect: TfpgRect;
-begin
-  Result.SetRect(0, 0, Width, Height);
-end;
-
-function TfpgWidget.GetBoundsRect: TfpgRect;
-begin
-  Result.SetRect(Left, Top, Width+1, Height+1);
-end;
-
 function TfpgWidget.InDesigner: boolean;
 begin
   Result := (FFormDesigner <> nil)
@@ -416,7 +466,9 @@ begin
   FShowHint       := False;
   FParentShowHint := True;
   FBackgroundColor := clWindowBackground;
-  FTextColor  := clText1;
+  FTextColor      := clText1;
+  FAcceptDrops    := False;
+  FOnClickPending := False;
 
   inherited Create(AOwner);
 
@@ -487,6 +539,7 @@ var
   ss: TShiftState;
   consumed: boolean;
   wg: TfpgWidget;
+  wlast: TfpgWidget;
 begin
   if InDesigner then
   begin
@@ -502,12 +555,26 @@ begin
   HandleKeyPress(key, ss, consumed);
   if not consumed then
   begin
+    { work it's way to one before top level form - forms are not focusable remember }
     wg := Parent;
+    wlast := wg;
     while (not consumed) and (wg <> nil) do
     begin
       wg.HandleKeyPress(key, ss, consumed);
+      wlast := wg;
       wg := wg.Parent;
     end;
+  end;
+  { we should now be at the top level form }
+  if (not consumed) and (wlast <> nil) then
+  begin
+    if (wlast is TfpgForm) and Assigned(wlast.OnKeyPress) then
+      wlast.OnKeyPress(self, key, ss, consumed);
+  end;
+  { now finaly, lets give fpgApplication a chance }
+  if (not consumed) and Assigned(fpgApplication.OnKeyPress) then
+  begin
+    fpgApplication.OnKeyPress(self, key, ss, consumed);
   end;
 end;
 
@@ -559,6 +626,7 @@ begin
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin
+        FDragStartPos.SetPoint(msg.Params.mouse.x, msg.Params.mouse.y);
         mb := mbLeft;
         HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
       end;
@@ -585,6 +653,7 @@ var
   IsDblClick: boolean;
 begin
 //  writeln('TfpgWidget.MsgMouseUp');
+  FDragActive := False;
   if InDesigner then
   begin
     FFormDesigner.Dispatch(msg);
@@ -600,6 +669,7 @@ begin
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin
+        FOnClickPending := True;
         mb := mbLeft;
         if uLastClickWidget = self then
           IsDblClick := ((fpgGetTickCount - uLastClickTime) <= DOUBLECLICK_MS)
@@ -613,7 +683,7 @@ begin
         uLastClickTime := fpgGetTickCount;
         if IsDblClick then
         begin
-
+          FOnClickPending := False; { When Double Click occurs we don't want single click }
           HandleDoubleClick(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
           if Assigned(FOnDoubleClick) then
             FOnDoubleClick(self, mb, msg.Params.mouse.shiftstate,
@@ -647,6 +717,16 @@ begin
     FFormDesigner.Dispatch(msg);
     if msg.Stop then
       Exit;
+  end;
+
+  if (msg.Params.mouse.Buttons and MOUSE_LEFT) = MOUSE_LEFT then
+  begin
+    if not FDragActive and (FDragStartPos.ManhattanLength(fpgPoint(msg.Params.mouse.x, msg.Params.mouse.y)) > fpgApplication.StartDragDistance) then
+    begin
+      FDragActive := True;
+      // In Windows dragging is a blocking function, so FDragActive is false after this call
+      DoDragStartDetected;
+    end;
   end;
 
   HandleMouseMove(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.Buttons, msg.Params.mouse.shiftstate);
@@ -708,6 +788,16 @@ procedure TfpgWidget.MsgMouseScroll(var msg: TfpgMessageRec);
 begin
   HandleMouseScroll(msg.Params.mouse.x, msg.Params.mouse.y,
       msg.Params.mouse.shiftstate, msg.Params.mouse.delta);
+end;
+
+procedure TfpgWidget.MsgDropEnter(var msg: TfpgMessageRec);
+begin
+  // do nothing
+end;
+
+procedure TfpgWidget.MsgDropExit(var msg: TfpgMessageRec);
+begin
+  // do nothing
 end;
 
 function TfpgWidget.GetOnShowHint: THintEvent;
@@ -942,7 +1032,7 @@ end;
 
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
-  if Assigned(FOnClick) then
+  if FOnClickPending and Assigned(FOnClick) then
     FOnClick(self);
 end;
 
@@ -1119,25 +1209,39 @@ var
   dy: integer;
   dw: integer;
   dh: integer;
+  w: TfpgWidget;
 begin
   if (csLoading in ComponentState) then
     Exit;  //==>
 //  writeln('HandleAlignments - ', Classname);
   FAlignRect := GetClientRect;
 
-  DoAlign(alTop);
-  DoAlign(alBottom);
-  DoAlign(alLeft);
-  DoAlign(alRight);
-  DoAlign(alClient);
+  alist := TList.Create;
+  try
+    for n := 0 to ComponentCount - 1 do
+      if Components[n] is TfpgWidget then
+      begin
+        w := TfpgWidget(Components[n]);
+        if (w.Align <> alNone) and (w.Visible) then
+          alist.Add(w);
+      end;
+
+    DoAlignment;
+    //DoAlign(alTop);
+    //DoAlign(alBottom);
+    //DoAlign(alLeft);
+    //DoAlign(alRight);
+    //DoAlign(alClient);
+  finally
+    alist.Free;
+  end;
 
   // handle anchors finally for alNone
   for n := 0 to ComponentCount - 1 do
     if (Components[n] is TfpgWidget) then
     begin
       wg := TfpgWidget(Components[n]);
-      if (wg.FAlign = alNone) and
-          ((anBottom in wg.Anchors) or (anRight in wg.Anchors)) then
+      if (wg.FAlign = alNone) and ([anLeft, anTop] <> wg.Anchors) then
       begin
         // we must alter the window
         dx := 0;
@@ -1145,15 +1249,21 @@ begin
         dw := 0;
         dh := 0;
 
-        if (anLeft in wg.Anchors) and (anRight in wg.Anchors) then
-          dw := dwidth
-        else if anRight in wg.Anchors then
-          dx := dwidth;
+        if (anRight in wg.Anchors) then
+          if (anLeft in wg.Anchors) then
+            dw := dwidth
+          else
+            dx := dwidth
+        else if not (anLeft in wg.Anchors) then
+          dx := (dwidth div 2);
 
-        if (anTop in wg.Anchors) and (anBottom in wg.Anchors) then
-          dh := dheight
-        else if anBottom in wg.Anchors then
-          dy := dheight;
+        if (anBottom in wg.Anchors) then
+          if (anTop in wg.Anchors) then
+            dh := dheight
+          else
+            dy := dheight
+        else if not (anTop in wg.Anchors) then
+          dy := (dheight div 2);
 
         wg.MoveAndResizeBy(dx, dy, dw, dh);
       end;
@@ -1188,55 +1298,16 @@ begin
     MoveAndResize(FLeft + dx, FTop + dy, FWidth + dw, FHeight + dh);
 end;
 
-function CompareInts(i1, i2: integer): integer;
-begin
-  if i1 < i2 then
-    Result := -1
-  else if i1 > i2 then
-    Result := 1
-  else
-    Result := 0;
-end;
-
-function AlignCompare(p1, p2: Pointer): integer;
+procedure TfpgWidget.DoAlignment;
 var
-  w1: TfpgWidget;
-  w2: TfpgWidget;
-begin
-  w1 := TfpgWidget(p1);
-  w2 := TfpgWidget(p2);
-  case w1.Align of
-    alTop:    Result := CompareInts(w1.Top, w2.Top);
-    alBottom: Result := CompareInts(w2.Top, w1.Top);
-    alLeft:   Result := CompareInts(w1.Left, w2.Left);
-    alRight:  Result := CompareInts(w2.Left, w1.Left);
-    else
-      Result         := 0;
-  end;
-end;
-
-procedure TfpgWidget.DoAlign(AAlign: TAlign);
-var
-  alist: TList;
   w: TfpgWidget;
   n: integer;
 begin
-  alist := TList.Create;
-  for n := 0 to ComponentCount - 1 do
-    if Components[n] is TfpgWidget then
-    begin
-      w := TfpgWidget(Components[n]);
-      if (w.Align = AAlign) and (w.Visible) then
-        alist.Add(w);
-    end;
-
-  alist.Sort(@AlignCompare);
-
   // and process this list in order
   for n := 0 to alist.Count - 1 do
   begin
     w := TfpgWidget(alist[n]);
-    case AAlign of
+    case w.Align of
       alTop:
         begin
           w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, w.Height);
@@ -1267,8 +1338,6 @@ begin
         w.MoveAndResize(FAlignRect.Left, FAlignRect.Top, FAlignRect.Width, FAlignRect.Height);
     end; { case }
   end;
-
-  alist.Free;
 end;
 
 procedure TfpgWidget.DoResize;

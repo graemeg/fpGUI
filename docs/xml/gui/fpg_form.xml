@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+  <package name="fpGUI">
+    <module name="fpg_form">
+      <short>This unit contains the class implementation representing a Form/Window on the screen</short>
+      <descr/>
+
+<element name="TWindowPosition.wpUser">
+<descr>OS or Desktop/Window manager decides the position.</descr>
+</element>
+
+<element name="TWindowPosition.wpAuto">
+<descr>Window gets placed in exact x,y coordinates set by developer.</descr>
+</element>
+
+<element name="TWindowPosition.wpScreenCenter">
+<descr>Window gets centered horizontally and vertically in the current desktop window.</descr>
+</element>
+
+<element name="TWindowPosition.wpOneThirdDown">
+<descr>Following the "golden ratio 1.618" rules or ideas as to what is
+pleasing to the eye. The window is positioned one third from
+the top of the screen, using the desktop height to calculate, and centered
+horizontally.
+</descr>
+</element>
+
+    </module>
+  </package>
+</fpdoc-descriptions>

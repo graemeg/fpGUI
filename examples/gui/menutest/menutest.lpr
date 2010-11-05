@@ -28,13 +28,17 @@ type
     btnSave: TfpgButton;
     btnOpen: TfpgButton;
     btnAbout: TfpgButton;
+    pnlClient: TfpgBevel;
     edit1: TfpgEdit;
     Memo1: TfpgMemo;
     FFileSubMenu: TfpgPopupMenu;
     FEditSubMenu: TfpgPopupMenu;
     FEditSelectSubMenu: TfpgPopupMenu;
     FViewSubMenu: TfpgPopupMenu;
+    FDisabledSubMenu: TfpgPopupMenu;
     FHelpSubMenu: TfpgPopupMenu;
+    Bevel1: TfpgBevel;
+    Bevel2: TfpgBevel;
     {@VFD_HEAD_END: MainForm}
     procedure   miExitClicked(Sender: TObject);
     procedure   miMenuItemSelected(Sender: TObject);
@@ -71,6 +75,7 @@ procedure TMainForm.miToolBarChecked(Sender: TObject);
 begin
   TfpgMenuItem(Sender).Checked := not TfpgMenuItem(Sender).Checked;
   ToolBar.Visible := not ToolBar.Visible;
+  Realign;
   Log('Check Menu for Toolbar toggled');
 end;
 
@@ -78,6 +83,7 @@ procedure TMainForm.miStatusBarChecked(Sender: TObject);
 begin
   TfpgMenuItem(Sender).Checked := not TfpgMenuItem(Sender).Checked;
   StatusBar.Visible := not StatusBar.Visible;
+  Realign;
   Log('Check Menu for Statusbar toggled');
 end;
 
@@ -92,21 +98,25 @@ begin
 end;
 
 procedure TMainForm.AfterCreate;
+var
+  mi: TfpgMenuItem;
 begin
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
-  SetPosition(316, 169, 400, 200);
+  SetPosition(402, 189, 400, 200);
   WindowTitle := 'Menu Test';
   Hint := '';
   WindowPosition := wpOneThirdDown;
+  MinWidth := 300;
+  MinHeight := 100;
 
   FMenuBar := TfpgMenuBar.Create(self);
   with FMenuBar do
   begin
     Name := 'FMenuBar';
     SetPosition(0, 0, 400, 24);
-    Anchors := [anLeft,anRight,anTop];
+    Align := alTop;
   end;
 
   StatusBar := TfpgPanel.Create(self);
@@ -114,12 +124,12 @@ begin
   begin
     Name := 'StatusBar';
     SetPosition(0, 176, 400, 24);
-    Anchors := [anLeft,anRight,anBottom];
     Alignment := taLeftJustify;
     FontDesc := '#Label1';
     Hint := '';
     Style := bsLowered;
     Text := 'This is the status bar...';
+    Align := alBottom;
   end;
 
   Toolbar := TfpgBevel.Create(self);
@@ -127,9 +137,10 @@ begin
   begin
     Name := 'Toolbar';
     SetPosition(0, 24, 400, 29);
-    Anchors := [anLeft,anRight,anTop];
     Hint := '';
+    Style := bsLowered;
     Shape := bsBottomLine;
+    Align := alTop;
   end;
 
   btnQuit := TfpgButton.Create(Toolbar);
@@ -138,67 +149,77 @@ begin
     Name := 'btnQuit';
     SetPosition(4, 2, 24, 24);
     Text := '';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := -1;
     ImageName := 'stdimg.quit';
-    ImageSpacing := 0;
     TabOrder := 1;
     OnClick := @miExitClicked;
+    Focusable := False;
   end;
 
   btnSave := TfpgButton.Create(Toolbar);
   with btnSave do
   begin
     Name := 'btnSave';
-    SetPosition(56, 2, 24, 24);
+    SetPosition(64, 2, 24, 24);
     Text := '';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := -1;
     ImageName := 'stdimg.save';
-    ImageSpacing := 0;
     TabOrder := 2;
+    Focusable := False;
   end;
 
   btnOpen := TfpgButton.Create(Toolbar);
   with btnOpen do
   begin
     Name := 'btnOpen';
-    SetPosition(32, 2, 24, 24);
+    SetPosition(40, 2, 24, 24);
     Text := '';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := -1;
     ImageName := 'stdimg.open';
-    ImageSpacing := 0;
     TabOrder := 3;
+    Focusable := False;
   end;
 
   btnAbout := TfpgButton.Create(Toolbar);
   with btnAbout do
   begin
     Name := 'btnAbout';
-    SetPosition(84, 2, 24, 24);
+    SetPosition(100, 2, 24, 24);
     Text := '';
-    Embedded := True;
+    Flat := True;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := -1;
     ImageName := 'stdimg.help';
-    ImageSpacing := 0;
     TabOrder := 4;
     OnClick := @btnAboutClicked;
+    Focusable := False;
   end;
 
-  edit1 := TfpgEdit.Create(self);
+  pnlClient := TfpgBevel.Create(self);
+  with pnlClient do
+  begin
+    Name := 'pnlClient';
+    SetPosition(56, 56, 244, 116);
+    Hint := '';
+    Shape := bsSpacer;
+    Align := alClient;
+  end;
+
+  edit1 := TfpgEdit.Create(pnlClient);
   with edit1 do
   begin
     Name := 'edit1';
-    SetPosition(8, 62, 100, 24);
+    SetPosition(8, 4, 100, 24);
     ExtraHint := '';
     Hint := '';
     TabOrder := 6;
@@ -206,11 +227,11 @@ begin
     FontDesc := '#Edit1';
   end;
 
-  Memo1 := TfpgMemo.Create(self);
+  Memo1 := TfpgMemo.Create(pnlClient);
   with Memo1 do
   begin
     Name := 'Memo1';
-    SetPosition(124, 60, 268, 108);
+    SetPosition(120, 4, 120, 108);
     Anchors := [anLeft,anRight,anTop,anBottom];
     Hint := '';
     Lines.Add('<= Text Edit has a popup menu too.');
@@ -275,6 +296,34 @@ begin
     AddMenuItem('Test Russian text -> Òåñò', '', @miMenuItemSelected);
   end;
 
+  FDisabledSubMenu := TfpgPopupMenu.Create(self);
+  with FDisabledSubMenu do
+  begin
+    Name := 'FDisabledSubMenu';
+    SetPosition(264, 160, 120, 20);
+    AddMenuItem('I''m not enabled', '', nil);
+  end;
+
+  Bevel1 := TfpgBevel.Create(Toolbar);
+  with Bevel1 do
+  begin
+    Name := 'Bevel1';
+    SetPosition(32, 2, 5, 24);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsLeftLine;
+  end;
+
+  Bevel2 := TfpgBevel.Create(Toolbar);
+  with Bevel2 do
+  begin
+    Name := 'Bevel2';
+    SetPosition(92, 2, 5, 24);
+    Hint := '';
+    Style := bsLowered;
+    Shape := bsLeftLine;
+  end;
+
   {@VFD_BODY_END: MainForm}
   {%endregion}
 
@@ -282,8 +331,9 @@ begin
   FMenuBar.AddMenuItem('&File', nil).SubMenu := FFileSubMenu;
   FMenuBar.AddMenuItem('&Edit', nil).SubMenu := FEditSubMenu;
   FMenuBar.AddMenuItem('&View', nil).SubMenu := FViewSubMenu;
-  FMenuBar.AddMenuItem('&Windows', nil);
-  FMenuBar.AddMenuItem('&Disabled', nil).Enabled := False;
+  mi := FMenuBar.AddMenuItem('&Disabled', nil);
+  mi.Enabled := False;
+  mi.SubMenu := FDisabledSubMenu;
   FMenuBar.AddMenuItem('&Help', nil).SubMenu := FHelpSubMenu;
 end;
 

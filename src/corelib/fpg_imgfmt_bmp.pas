@@ -25,8 +25,7 @@ interface
 uses
   Classes,
   SysUtils,
-  fpg_main,
-  fpg_base;
+  fpg_main;
 
 procedure ReadImage_BMP(img: TfpgImage; bmp: Pointer; bmpsize: longword);
 function  LoadImage_BMP(const AFileName: String): TfpgImage;

@@ -72,25 +72,25 @@ procedure fpgCreateStandardImages;
 begin
   // system images. Change these to the composite arrow bmp that includes
   // disabled state
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(  // 7x4 image
             'sys.sb.up',
             @stdimg_arrow_up,
-      sizeof(stdimg_arrow_up));
+      sizeof(stdimg_arrow_up), 0, 0);
 
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(  // 7x4 image
             'sys.sb.down',
             @stdimg_arrow_down,
-      sizeof(stdimg_arrow_down));
+      sizeof(stdimg_arrow_down), 0, 3);
 
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(  // 4x7 image
             'sys.sb.left',
             @stdimg_arrow_left,
-      sizeof(stdimg_arrow_left));
+      sizeof(stdimg_arrow_left), 0, 0);
 
-  fpgImages.AddBMP(
+  fpgImages.AddMaskedBMP(  // 4x7 image
             'sys.sb.right',
             @stdimg_arrow_right,
-      sizeof(stdimg_arrow_right));
+      sizeof(stdimg_arrow_right), 3, 0);
       
   fpgImages.AddMaskedBMP(  // 60x12 in total.  5 images of 12x12 each.
             'sys.radiobuttons',
@@ -225,6 +225,16 @@ begin
       sizeof(stdimg_folder_open_file_16), 0,0);
 
   fpgImages.AddMaskedBMP(
+            'stdimg.folderhome',
+            @stdimg_folder_home_16,
+      sizeof(stdimg_folder_home_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
+            'stdimg.bookmark',
+            @stdimg_bookmark_16,
+      sizeof(stdimg_bookmark_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
             'stdimg.open',
             @stdimg_folder_open_16,
       sizeof(stdimg_folder_open_16), 0,0);
@@ -248,6 +258,11 @@ begin
             'stdimg.help',
             @stdimg_help_16,
       sizeof(stdimg_help_16), 0,0);
+
+  fpgImages.AddMaskedBMP(
+            'stdimg.about',
+            @stdimg_about_16,
+      sizeof(stdimg_about_16), 0,0);
 
   fpgImages.AddMaskedBMP(
             'stdimg.hidden',

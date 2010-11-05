@@ -9,6 +9,9 @@ Unit IPFEscapeCodes;
 
 Interface
 
+uses
+  Classes;
+
 // List of IPF escape codes. Not complete! Many are just used
 // as magic numbers in HelpTopic.pas
 

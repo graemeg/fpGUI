@@ -50,7 +50,10 @@ uses
   fpg_tree,
   fpg_ColorWheel,
   fpg_spinedit,
-  fpg_tab;
+  fpg_tab,
+  fpg_menu,
+  fpg_iniutils,
+  fpg_imagelist;
 
 type
   TfpgMsgDlgType = (mtAbout, mtWarning, mtError, mtInformation, mtConfirmation,
@@ -79,22 +82,27 @@ type
 
   TfpgMessageBox = class(TfpgForm)
   private
+    {@VFD_HEAD_BEGIN: MessageBox}
+    FButton: TfpgButton;
+    {@VFD_HEAD_END: MessageBox}
     FLines: TStringList;
     FFont: TfpgFont;
     FTextY: integer;
     FLineHeight: integer;
     FMaxLineWidth: integer;
-    FButton: TfpgButton;
     FCentreText: Boolean;
-  protected
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    procedure   HandlePaint; override;
-    procedure   HandleShow; override;
+    procedure   FormPaint(Sender: TObject);
+    procedure   FormShow(Sender: TObject);
+    procedure   FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+    function    GetFontDesc: string;
+    procedure   SetFontDesc(const AValue: string);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   AfterCreate; override;
     procedure   SetMessage(AMessage: string);
     property    CentreText: Boolean read FCentreText write FCentreText default False;
+    property    FontDesc: string read GetFontDesc write SetFontDesc;
   end;
   
 
@@ -153,6 +161,8 @@ type
     btnUpDir: TfpgButton;
     btnDirNew: TfpgButton;
     btnShowHidden: TfpgButton;
+    btnGoHome: TfpgButton;
+    btnBookmark: TfpgButton;
     pnlFileInfo: TfpgPanel;
     edFilename: TfpgEdit;
     chlFilter: TfpgComboBox;
@@ -162,6 +172,8 @@ type
     FFilterList: TStringList;
     FFilter: string;
     FInitialDir: string;
+    FBookmarkMenu: TfpgPopupMenu;
+    FIni: TfpgIniFile;
     procedure   SetFilter(const Value: string);
     function    GetFontDesc: string;
     function    GetShowHidden: boolean;
@@ -177,9 +189,14 @@ type
     procedure   DirChange(Sender: TObject);
     procedure   UpDirClick(Sender: TObject);
     procedure   btnDirNewClicked(Sender: TObject);
+    procedure   btnGoHomeClicked(Sender: TObject);
+    procedure   btnBookmarkClicked(Sender: TObject);
     procedure   edFilenameChanged(Sender: TObject);
     procedure   UpdateButtonState;
     function    HighlightFile(const AFilename: string): boolean;
+    function    CreatePopupMenu: TfpgPopupMenu;
+    procedure   BookmarkItemClicked(Sender: TObject);
+    procedure   ShowConfigureBookmarks;
   protected
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   btnOKClick(Sender: TObject); override;
@@ -195,7 +212,6 @@ type
     property    InitialDir: string read FInitialDir write SetInitialDir;
     property    ShowHidden: boolean read GetShowHidden write SetShowHidden;
   end;
-  
 
 { This lets us use a single include file for both the Interface and
   Implementation sections. }
@@ -210,6 +226,7 @@ type
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I managebookmarksdialog.inc}
 
 
 
@@ -403,21 +420,11 @@ end;
 
 { TfpgMessageBox }
 
-procedure TfpgMessageBox.HandleKeyPress(var keycode: word;
-  var shiftstate: TShiftState; var consumed: boolean);
-begin
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
-  if keycode = keyEscape then
-    Close;
-end;
-
-procedure TfpgMessageBox.HandlePaint;
+procedure TfpgMessageBox.FormPaint(Sender: TObject);
 var
   n, y: integer;
   tw: integer;
 begin
-  inherited HandlePaint;
-
   Canvas.SetFont(FFont);
   y := FTextY;
   for n := 0 to FLines.Count-1 do
@@ -431,30 +438,42 @@ begin
   end;
 end;
 
-procedure TfpgMessageBox.HandleShow;
+procedure TfpgMessageBox.FormShow(Sender: TObject);
 begin
-  inherited HandleShow;
-  FButton.SetFocus;
+  FButton.Text := cMsgDlgBtnText[mbOK]
+end;
+
+procedure TfpgMessageBox.FormKeyPressed(Sender: TObject; var KeyCode: word;
+  var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyEscape then
+  begin
+    Consumed := False;
+    Close;
+  end;
+end;
+
+function TfpgMessageBox.GetFontDesc: string;
+begin
+  Result := FFont.FontDesc;
+end;
+
+procedure TfpgMessageBox.SetFontDesc(const AValue: string);
+begin
+  FFont.Free;
+  FFont := fpgGetFont(AValue);
+  RePaint;
 end;
 
 constructor TfpgMessageBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  WindowPosition := wpOneThirdDown;
-  Sizeable := False;
-  
   FLines        := TStringList.Create;
   FFont         := fpgGetFont('#Label1');
   FTextY        := 10;
   FLineHeight   := FFont.Height + 4;
-  MinWidth      := 200;
   FMaxLineWidth := 500;
   FCentreText   := False;
-  
-  FButton := TfpgButton.Create(self);
-  FButton.Text    := cMsgDlgBtnText[mbOK];
-  FButton.Width   := 75;
-  FButton.ModalResult := mrOK;
 end;
 
 destructor TfpgMessageBox.Destroy;
@@ -462,6 +481,38 @@ begin
   FFont.Free;
   FLines.Free;
   inherited Destroy;
+end;
+
+procedure TfpgMessageBox.AfterCreate;
+begin
+  inherited AfterCreate;
+  {@VFD_BODY_BEGIN: MessageBox}
+  Name := 'MessageBox';
+  SetPosition(330, 199, 419, 138);
+  WindowTitle := 'Message';
+  Hint := '';
+  WindowPosition := wpOneThirdDown;
+  MinWidth := 200;
+  Sizeable := False;
+  OnShow  := @FormShow;
+  OnPaint := @FormPaint;
+  OnKeyPress := @FormKeyPressed;
+
+  FButton := TfpgButton.Create(self);
+  with FButton do
+  begin
+    Name := 'FButton';
+    SetPosition(8, 8, 75, 23);
+    Text := 'OK';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    ModalResult := mrOK;
+    TabOrder := 1;
+    OnKeyPress := @FormKeyPressed;
+  end;
+
+  {@VFD_BODY_END: MessageBox}
 end;
 
 procedure TfpgMessageBox.SetMessage(AMessage: string);
@@ -698,6 +749,8 @@ var
   end;
 
 begin
+  if Desc = '' then
+    exit;
   cp := 1;
   c  := Desc[1];
 
@@ -863,6 +916,7 @@ begin
     Items.Add('48');
     Items.Add('64');
     Items.Add('72');
+    FocusItem := 4;  // 10 point font
     OnChange  := @OnParamChange;
   end;
 
@@ -1016,7 +1070,7 @@ begin
   chlDir := TfpgComboBox.Create(self);
   with chlDir do
   begin
-    SetPosition(8, 12, 526, 22);
+    SetPosition(8, 12, 484, 24);
     Anchors := [anLeft, anRight, anTop];
     FontDesc := '#List';
     OnChange := @DirChange;
@@ -1027,6 +1081,7 @@ begin
   begin
     SetPosition(8, 44, 622, 200);
     Anchors := [anLeft, anRight, anTop, anBottom];
+    Options := [go_AlternativeColor, go_SmoothScroll];
     OnRowChange := @ListChanged;
     OnDoubleClick := @GridDblClicked;
   end;
@@ -1034,42 +1089,73 @@ begin
   btnUpDir := TfpgButton.Create(self);
   with btnUpDir do
   begin
-    SetPosition(540, 11, 26, 24);
+    SetPosition(500, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.folderup';   // Do NOT localize
-    ModalResult := mrNone;
     Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
     OnClick := @UpDirClick;
   end;
 
   btnDirNew := TfpgButton.Create(self);
   with btnDirNew do
   begin
-    SetPosition(572, 11, 26, 24);
+    SetPosition(526, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.foldernew';    // Do NOT localize
-    ModalResult := mrNone;
     Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
     OnClick := @btnDirNewClicked;
   end;
 
   btnShowHidden := TfpgButton.Create(self);
   with btnShowHidden do
   begin
-    SetPosition(604, 11, 26, 24);
+    SetPosition(552, 11, 24, 24);
     Anchors := [anRight, anTop];
     Text := '';
     FontDesc := '#Label1';
     ImageName := 'stdimg.hidden';   // Do NOT localize
-    ModalResult := mrNone;
     Focusable := False;
     GroupIndex := 1;
     AllowAllUp := True;
+    ImageSpacing := 0;
+    ImageMargin := -1;
     OnClick := @DirChange;
+  end;
+
+  btnGoHome := TfpgButton.Create(self);
+  with btnGoHome do
+  begin
+    SetPosition(578, 11, 24, 24);
+    Anchors := [anRight, anTop];
+    Text := '';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.folderhome';    // Do NOT localize
+    Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
+    OnClick := @btnGoHomeClicked;
+  end;
+
+  btnBookmark := TfpgButton.Create(self);
+  with btnBookmark do
+  begin
+    SetPosition(604, 11, 24, 24);
+    Anchors := [anRight, anTop];
+    Text := '';
+    FontDesc := '#Label1';
+    ImageName := 'stdimg.bookmark';    // Do NOT localize
+    Focusable := False;
+    ImageSpacing := 0;
+    ImageMargin := -1;
+    OnClick := @btnBookmarkClicked;
   end;
 
   { Create lower Panel details }
@@ -1210,6 +1296,8 @@ end;
 
 destructor TfpgFileDialog.Destroy;
 begin
+  FIni.Free;
+  FBookmarkMenu.Free;
   FFilterList.Free;
   inherited Destroy;
 end;
@@ -1250,6 +1338,19 @@ begin
   finally
     dlg.Free;
   end;
+end;
+
+procedure TfpgFileDialog.btnGoHomeClicked(Sender: TObject);
+begin
+  SetCurrentDirectory(GetUserDir);
+end;
+
+procedure TfpgFileDialog.btnBookmarkClicked(Sender: TObject);
+begin
+  if Assigned(FBookmarkMenu) then
+    FBookmarkMenu.Free;
+  FBookmarkMenu := CreatePopupMenu;
+  FBookmarkMenu.ShowAt(self, btnBookmark.Left, btnBookmark.Bottom);
 end;
 
 procedure TfpgFileDialog.edFilenameChanged(Sender: TObject);
@@ -1299,6 +1400,9 @@ begin
     
   grid.Update;
   grid.SetFocus;
+
+  if FOpenMode then // when saving file, we want to keep file name
+    edFilename.Clear;
 end;
 
 function TfpgFileDialog.HighlightFile(const AFilename: string): boolean;
@@ -1315,6 +1419,75 @@ begin
     end;
   end;
   Result := False;
+end;
+
+function TfpgFileDialog.CreatePopupMenu: TfpgPopupMenu;
+var
+  i: integer;
+  s: TfpgString;
+  lst: TStringList;
+  mi: TfpgMenuItem;
+begin
+  Result := TfpgPopupMenu.Create(nil);
+  with Result do
+  begin
+    lst := TStringList.Create;
+    try
+      if not Assigned(FIni) then
+        FIni := TfpgINIFile.CreateExt(fpgGetToolkitConfigDir + FPG_BOOKMARKS_FILE);
+      FIni.ReadSection(FPG_BOOKMARK_SECTION, lst);
+      // add previous bookmarks to menu
+      for i := 0 to lst.Count-1 do
+      begin
+        mi := AddMenuItem(lst[i], '', @BookmarkItemClicked);
+      end;
+      // Now add static items
+      if lst.Count > 0 then
+        AddMenuItem('-', '', nil);
+    finally
+      lst.Free;
+    end;
+    mi := AddMenuItem(rsAddCurrentDirectory, '', @BookmarkItemClicked);
+    mi.Tag := 1;
+    mi := AddMenuItem(rsConfigureBookmarks + '...', '', @BookmarkItemClicked);
+    mi.Tag := 2;
+  end;
+end;
+
+procedure TfpgFileDialog.BookmarkItemClicked(Sender: TObject);
+var
+  mi: TfpgMenuItem;
+  s: TfpgString;
+begin
+  if Sender is TfpgMenuItem then
+   mi := TfpgMenuItem(Sender);
+  if mi = nil then
+    Exit;
+  if mi.Tag = 1 then  // Add current directory
+  begin
+    FIni.WriteString(FPG_BOOKMARK_SECTION, grid.FileList.DirectoryName, grid.FileList.DirectoryName);
+  end
+  else if mi.Tag = 2 then  // configure bookmarks
+  begin
+    ShowConfigureBookmarks;
+  end
+  else
+  begin // bookmark has been clicked
+    s := FIni.ReadString(FPG_BOOKMARK_SECTION, mi.Text, '.');
+    SetCurrentDirectory(s);
+  end;
+end;
+
+procedure TfpgFileDialog.ShowConfigureBookmarks;
+var
+  frm: TConfigureBookmarksForm;
+begin
+  frm := TConfigureBookmarksForm.Create(FIni);
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TfpgFileDialog.ProcessFilterString;
@@ -1369,7 +1542,7 @@ begin
   if (i >= 0) and (i < FFilterList.Count) then
     Result := FFilterList[i]
   else
-    Result := '*';
+    Result := AllFilesMask;
 end;
 
 function TfpgFileDialog.RunOpenFile: boolean;
@@ -1378,12 +1551,12 @@ var
   fname: string;
 begin
   FOpenMode := True;
-  sdir := ExtractFileDir(FileName);
+  sdir := fpgExtractFileDir(FileName);
   if sdir = '' then
     sdir := '.';
 
   SetCurrentDirectory(sdir);
-  fname := ExtractFileName(FileName);
+  fname := fpgExtractFileName(FileName);
 
   if not HighlightFile(fname) then
     edFilename.Text := fname;
@@ -1436,6 +1609,7 @@ end;
 {$I charmapdialog.inc}
 {$I colordialog.inc}
 {$I inputquerydialog.inc}
+{$I managebookmarksdialog.inc}
 
 
 end.

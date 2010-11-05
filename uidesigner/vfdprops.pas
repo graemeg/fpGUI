@@ -92,6 +92,16 @@ type
     function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
     procedure OnExternalEdit(wg: TfpgWidget); override;
   end;
+  
+  
+  TPropertyColor = class(TVFDWidgetProperty)
+  public
+    function  ParseSourceLine(wg: TfpgWidget; const line: string): boolean; override;
+    function  GetPropertySource(wg: TfpgWidget; const ident: string): string; override;
+    function  GetValueText(wg: TfpgWidget): string; override;
+    function  CreateEditor(AOwner: TComponent): TVFDPropertyEditor; override;
+    procedure OnExternalEdit(wg: TfpgWidget); override;
+  end;
 
 
   TGPEType = (gptInteger, gptString, gptFloat);
@@ -331,7 +341,7 @@ begin
   Edit.Anchors  := Anchors;
 //  Edit.OnChange := @UpdateProperty;
   Edit.OnKeyPress := @EditKeyPressed;
-  Edit.OnExit :=@EditExit;
+  Edit.OnExit := @EditExit;
   Edit.Visible := True;
 end;
 
@@ -657,7 +667,7 @@ begin
     try
       SetEnumProp(wg, Name, sval);
     except
-      Writeln('invalid enum value: "' + sval + '" for ' + Name);
+//      Writeln('invalid enum value: "' + sval + '" for ' + Name);
       Result := False;
     end;
 end;
@@ -767,7 +777,7 @@ end;
 
 function TPropertyFloat.GetPropertySource(wg: TfpgWidget; const ident: string): string;
 begin
-  Result := ident + Name + ' := ' + FloatToStr(GetFloatProp(wg, Name)) + ';' + LineEnding
+  Result := ident + Name + ' := ' + FloatToStr(GetFloatProp(wg, Name)) + ';' + LineEnding;
 end;
 
 function TPropertyFloat.GetValueText(wg: TfpgWidget): string;
@@ -780,6 +790,87 @@ begin
   Result := TGeneralPropertyEditor.Create(AOwner, self);
   with TGeneralPropertyEditor(Result) do
     etype := gptFloat;
+end;
+
+{ TPropertyColor }
+
+function TPropertyColor.ParseSourceLine(wg: TfpgWidget; const line: string): boolean;
+var
+  s: string;
+  ival: integer;
+begin
+  s      := line;
+  Result := False;
+  if UpperCase(GetIdentifier(s)) <> UpperCase(Name) then
+    Exit;
+
+  Result := CheckSymbol(s, ':=');
+  if Result then
+  begin
+    ival := GetColorValue(s);
+    Result := CheckSymbol(s, ';');
+  end;
+
+  if Result then
+    try
+      SetOrdProp(wg, Name, ival);
+    except
+//      Writeln('invalid ordinal value: "', ival, '" for ', Name);
+      Result := False;
+    end;
+end;
+
+function TPropertyColor.GetPropertySource(wg: TfpgWidget; const ident: string): string;
+var
+  PropInfo: PPropInfo;
+  i: integer;
+  c: TfpgColor;
+  nc: TfpgColor;
+begin
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  i := GetOrdProp(wg, Name);
+  if PropInfo^.Default <> i then
+  begin
+    if fpgIsNamedColor(TfpgColor(i)) then
+      Result := ident + Name + ' := TfpgColor($' + IntToHex(i, 8) + ');' + LineEnding
+    else
+    begin
+      c := fpgColorToRGB(TfpgColor(i));
+      Result := ident + Name + ' := TfpgColor($' + IntToHex(c, 6) + ');' + LineEnding;
+    end;
+  end
+  else
+    Result := '';
+end;
+
+function TPropertyColor.GetValueText(wg: TfpgWidget): string;
+var
+  PropInfo: PPropInfo;
+  i: integer;
+  c: TfpgColor;
+begin
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  i := GetOrdProp(wg, Name);
+  c := fpgColorToRGB(TfpgColor(i));
+  Result := '$' + IntToHex(c, 6);
+end;
+
+function TPropertyColor.CreateEditor(AOwner: TComponent): TVFDPropertyEditor;
+begin
+  Result := TExternalPropertyEditor.Create(AOwner, self);
+end;
+
+procedure TPropertyColor.OnExternalEdit(wg: TfpgWidget);
+var
+  PropInfo: PPropInfo;
+  i: integer;
+  c: TfpgColor;
+begin
+  PropInfo := GetPropInfo(wg.ClassType, Name);
+  i := GetOrdProp(wg, Name);
+  c := fpgColorToRGB(TfpgColor(i));
+  c := fpgSelectColorDialog(c);
+  SetOrdProp(wg, Name, c);
 end;
 
 end.

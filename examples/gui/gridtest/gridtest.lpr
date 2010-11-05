@@ -40,6 +40,7 @@ type
     btnFiveOnly: TfpgButton;
     btnDelRow: TfpgButton;
     chkSmoothScroll: TfpgCheckBox;
+    chkAlterColor: TfpgCheckBox;
     {@VFD_HEAD_END: MainForm}
     procedure   StringGridDoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnAddFiveClicked(Sender: TObject);
@@ -52,6 +53,7 @@ type
     procedure   chkShowGridChange(Sender: TObject);
     procedure   chkHideFocusChange(Sender: TObject);
     procedure   chkSmoothScrollChange(Sender: TObject);
+    procedure   chkAlterColorChange(Sender: TObject);
     procedure   btnQuitClick(Sender: TObject);
     procedure   stringgridDrawCell(Sender: TObject; const ARow, ACol: Integer;
         const ARect: TfpgRect; const AFlags: TfpgGridDrawState; var ADefaultDrawing: boolean);
@@ -131,6 +133,15 @@ begin
   stringgrid.Update;
 end;
 
+procedure TMainForm.chkAlterColorChange(Sender: TObject);
+begin
+  if chkAlterColor.Checked then
+    stringgrid.Options := stringgrid.Options + [go_AlternativeColor]
+  else
+    stringgrid.Options := stringgrid.Options - [go_AlternativeColor];
+  stringgrid.Invalidate;
+end;
+
 procedure TMainForm.btnQuitClick(Sender: TObject);
 begin
   Close;
@@ -148,6 +159,20 @@ begin
         ARect.Height, ARect.Height, adRight);
     StringGrid.Canvas.SetTextColor(clTeal);
     StringGrid.Canvas.DrawString(ARect.Height + ARect.Left + 2, ARect.Top, StringGrid.Cells[ACol, ARow]);
+  end;
+  // two rows with different background color
+  if (ARow = 7) or (ARow = 8) then
+  begin
+    if ((gdSelected in AFlags) and (gdFocused in AFlags)) or
+       (gdSelected in AFlags) then
+      Exit; // we want select cel to be painted as normal
+    // If we got here, we must do some painting. The background first.
+    StringGrid.Canvas.Color := clOrange;
+    StringGrid.Canvas.FillRectangle(ARect);
+    // NOTE: We want the grid to take care of the drawing of the text, which
+    //  handles text layout and alignment, so we MUST NOT set the
+    //  ADefaultDrawing to False. If we do, we need to handle text painting
+    //  ourselves.
   end;
 end;
 
@@ -277,7 +302,7 @@ begin
   with chkHideFocus do
   begin
     Name := 'chkHideFocus';
-    SetPosition(394, 108, 120, 20);
+    SetPosition(394, 108, 120, 24);
     Anchors := [anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
@@ -372,13 +397,25 @@ begin
   with chkSmoothScroll do
   begin
     Name := 'chkSmoothScroll';
-    SetPosition(394, 128, 120, 20);
+    SetPosition(394, 132, 120, 24);
     Anchors := [anRight,anTop];
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 14;
     Text := 'Smooth Scroll';
     OnChange := @chkSmoothScrollChange;
+  end;
+
+  chkAlterColor := TfpgCheckBox.Create(self);
+  with chkAlterColor do
+  begin
+    Name := 'chkAlterColor';
+    SetPosition(394, 156, 120, 24);
+    FontDesc := '#Label1';
+    Hint := '';
+    TabOrder := 15;
+    Text := 'Alternate Color';
+    OnChange := @chkAlterColorChange;
   end;
 
   {@VFD_BODY_END: MainForm}

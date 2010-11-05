@@ -159,10 +159,13 @@ type
   public
     property    PopupMenu;  // UI Designer doesn't fully support it yet
   published
+    property    AcceptDrops;
+    property    Align;
     property    AutoSelect;
     property    AutoSize;
     property    BackgroundColor default clBoxColor;
     property    BorderStyle;
+    property    Enabled;
     property    ExtraHint;
     property    FontDesc;
     property    HeightMargin;
@@ -179,6 +182,10 @@ type
     property    Text;
     property    TextColor;
     property    OnChange;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnEnter;
     property    OnExit;
     property    OnKeyPress;
@@ -220,20 +227,11 @@ type
      Still to implement !!}
     property    CustomDecimalSeparator: TfpgChar read FDecimalseparator write SetDecimalSeparator;
     property    CustomThousandSeparator: TfpgChar read FThousandSeparator write SetThousandSeparator;
-    property    NegativeColor: TfpgColor read FNegativeColor write SetNegativeColor;
+    property    NegativeColor: TfpgColor read FNegativeColor write SetNegativeColor default clRed;
     property    HideSelection;
 //    property    MaxLength;  { probably MaxValue and MinValue }
     property    TabOrder;
-    property    TextColor;
     property    ShowThousand: boolean read FShowThousand write FShowThousand default False;
-    property    OnChange;
-    property    OnEnter;
-    property    OnExit;
-    property    OnKeyPress;
-    property    OnMouseEnter;
-    property    OnMouseExit;
-    property    OnPaint;
-    property    OnShowHint;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -254,7 +252,9 @@ type
     property    OldColor;
     property    Text;
   published
+    property    Align;
     property    CustomThousandSeparator;
+    property    Enabled;
     property    Hint;
     property    NegativeColor;
     property    ParentShowHint;
@@ -292,9 +292,11 @@ type
     property    OldColor;
     property    Text;
   published
+    property    Align;
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
     property    Decimals: integer read FDecimals write SetDecimals default -1;
+    property    Enabled;
     property    FixedDecimals: boolean read FFixedDecimals write SetFixedDecimals default False;
     property    Hint;
     property    NegativeColor;
@@ -331,9 +333,11 @@ type
     property    OldColor;
     property    Text;
   published
+    property    Align;
     property    CustomDecimalSeparator;
     property    CustomThousandSeparator;
     property    Decimals: integer read FDecimals write SetDecimals default 2;
+    property    Enabled;
     property    Hint;
     property    NegativeColor;
     property    ParentShowHint;
@@ -341,6 +345,7 @@ type
     property    ShowHint;
     property    ShowThousand default True;
     property    TabOrder;
+    property    TextColor;
     property    Value: Currency read GetValue write SetValue;
     property    OnChange;
     property    OnEnter;
@@ -1178,7 +1183,7 @@ procedure TfpgBaseEdit.DefaultPopupPaste(Sender: TObject);
 begin
   if ReadOnly then
     Exit;
-  PasteFromClipboard
+  PasteFromClipboard;
 end;
 
 procedure TfpgBaseEdit.DefaultPopupClearAll(Sender: TObject);
@@ -1643,6 +1648,7 @@ procedure TfpgBaseNumericEdit.SetNegativeColor(const AValue: TfpgColor);
 begin
   if FNegativeColor=AValue then exit;
   FNegativeColor:=AValue;
+  FormatEdit;
 end;
 
 procedure TfpgBaseNumericEdit.SetThousandSeparator(const AValue: TfpgChar);
@@ -1799,8 +1805,8 @@ begin
   FAlignment := taRightJustify;
   FDecimalSeparator := DecimalSeparator;
   FThousandSeparator := ThousandSeparator;
-  NegativeColor := clRed;
-  OldColor := TextColor;
+  FNegativeColor := clRed;
+  FOldColor := TextColor;
 end;
 
 { TfpgEditInteger }

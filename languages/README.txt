@@ -19,16 +19,16 @@ All language files can easily be updated with the
 script.
 
 All text and messages used in the toolkit should be placed into the  
-<fpGUIdir/src/corelib/lang_english.inc include file. This unit uses a
+<fpGUIdir/src/corelib/lang_en.inc (English) include file. This unit uses a
 resourcestring section, so that the compiler will create the
-<fpGUIdir>/lib/gfx_constants.rst file.
+<fpGUIdir>/lib/fpg_constants.rst file.
 Since this is a fpc-only format it must be converted with the rstconv program:
 
 cd <fpGUIdir>/languages
-rstconv -i ../lib/gfx_constants.rst -o fpgui.po
+rstconv -i ../lib/fpg_constants.rst -o fpgui.po
 
 Hint: 
-This is done by <fpGUIdir>/tools/localize.sh or <fpGUIdir>\tools\localize.bat.
+This is automatically done by <fpGUIdir>/tools/localize.sh or <fpGUIdir>\tools\localize.bat.
 
 This will create the file fpgui.po, which should be translated in all
 required languages to a fpgui.xx.po file. For the xx see the gettext unit

@@ -65,6 +65,7 @@ type
   public
     property    Position;
   published
+    property    Align;
     property    Enabled;
     property    Interval;
     property    ImageFileName;

@@ -51,6 +51,8 @@ type
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
     FOnHelp: TfpgHelpEvent;
+    FDNDEnabled: boolean;
+    procedure   SetDNDEnabled(const AValue: boolean);
   protected
     FModalResult: TfpgModalResult;
     FParentForm: TfpgBaseForm;
@@ -71,6 +73,7 @@ type
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
     function    DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext; const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean; virtual;
     // properties
+    property    DNDEnabled: boolean read FDNDEnabled write SetDNDEnabled default False;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
@@ -106,6 +109,7 @@ type
   TfpgForm = class(TfpgBaseForm)
   published
     property    BackgroundColor;
+    property    DNDEnabled;
     property    FullScreen;
     property    Height;
     property    Hint;
@@ -133,6 +137,7 @@ type
     property    OnEnter;
     property    OnExit;
     property    OnHide;
+    property    OnKeyPress;
     property    OnMouseDown;
     property    OnMouseEnter;
     property    OnMouseExit;
@@ -153,7 +158,11 @@ implementation
 uses
   fpg_main,
   fpg_popupwindow,
-  fpg_menu;
+  fpg_menu
+  {$IFDEF DEBUG}
+  ,dbugintf
+  {$ENDIF}
+  ;
   
 type
   // to access protected methods
@@ -180,6 +189,13 @@ end;
 
 { TfpgBaseForm }
 
+procedure TfpgBaseForm.SetDNDEnabled(const AValue: boolean);
+begin
+  if FDNDEnabled = AValue then exit;
+  FDNDEnabled := AValue;
+  DoDNDEnabled(AValue);
+end;
+
 procedure TfpgBaseForm.SetWindowTitle(const ATitle: string);
 begin
   FWindowTitle := ATitle;
@@ -188,9 +204,14 @@ end;
 
 procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
 begin
-//  writeln('BaseForm - MsgActivate');
+  {$IFDEF DEBUG}
+  SendDebug(Classname + ' ' + Name + '.BaseForm - MsgActivate');
+  {$ENDIF}
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
+    {$IFDEF DEBUG}
+    SendDebug('Inside if block');
+    {$ENDIF}
     FocusRootWidget := self;
     
     if FFormDesigner <> nil then
@@ -275,6 +296,7 @@ begin
   FModalResult     := mrNone;
   FFullScreen      := False;
   FIsContainer     := True;
+  FDNDEnabled      := False;
 end;
 
 destructor TfpgBaseForm.Destroy;
@@ -386,7 +408,9 @@ var
   i: integer;
   wg: TfpgWidget;
 begin
-//  writeln(Classname, '.Keypress');
+  {$IFDEF DEBUG}
+  SendDebug(Classname + '.Keypress');
+  {$ENDIF}
   // find the TfpgMenuBar
   if not consumed then
   begin

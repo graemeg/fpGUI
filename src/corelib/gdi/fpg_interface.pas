@@ -33,6 +33,8 @@ type
   TfpgApplicationImpl   = TfpgGDIApplication;
   TfpgClipboardImpl     = TfpgGDIClipboard;
   TfpgFileListImpl      = TfpgGDIFileList;
+  TfpgMimeDataImpl      = TfpgGDIMimeDataBase;
+  TfpgDragImpl          = TfpgGDIDrag;
 
 implementation
 

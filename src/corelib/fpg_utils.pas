@@ -31,6 +31,7 @@ uses
 function fpgToOSEncoding(aString: TfpgString): string;
 function fpgFromOSEncoding(aString: string): TfpgString;
 procedure fpgOpenURL(const aURL: TfpgString);
+function fpgFileSize(const AFilename: TfpgString): integer;
 
 
 // *** Common functions for all platforms ***
@@ -40,6 +41,11 @@ function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
 function fpgHasSubDirs(const Dir: TfpgString; AShowHidden: Boolean): Boolean;
 function fpgAllFilesMask: TfpgString;
 function fpgConvertLineEndings(const s: TfpgString): TfpgString;
+function fpgGetToolkitConfigDir: TfpgString;
+{ This is so that when we support LTR and RTL languages, the colon will be
+  added at the correct place. }
+function fpgAddColon(const AText: TfpgString): TfpgString;
+function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
 
 
  // RTL wrapper filesystem functions with platform independant encoding
@@ -51,12 +57,16 @@ function fpgGetCurrentDir: TfpgString;
 function fpgSetCurrentDir(const NewDir: TfpgString): Boolean;
 function fpgExpandFileName(const FileName: TfpgString): TfpgString;
 function fpgFileExists(const FileName: TfpgString): Boolean;
+function fpgDeleteFile(const FileName: TfpgString): Boolean;
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
 function fpgExtractFileDir(const FileName: TfpgString): TfpgString;
 function fpgExtractFilePath(const FileName: TfpgString): TfpgString;
 function fpgExtractFileName(const FileName: TfpgString): TfpgString;
 function fpgExtractFileExt(const FileName: TfpgString): TfpgString;
 function fpgForceDirectories(const ADirectory: TfpgString): Boolean;
+function fpgChangeFileExt(const FileName, Extension: TfpgString): TfpgString;
+function fpgGetAppConfigDir(const Global: Boolean): TfpgString;
+function fpgGetAppConfigFile(const Global: Boolean; const SubDir: Boolean): TfpgString;
 
 
 implementation
@@ -120,6 +130,13 @@ begin
   Result := FileExists(fpgToOSEncoding(FileName));
 end;
 
+function fpgDeleteFile(const FileName: TfpgString): Boolean;
+begin
+  { Don't remove 'SysUtils.' prefix, it is required under Windows, other
+    FPC tries to use Windows.DeleteFile API - which is wrong }
+  Result := SysUtils.DeleteFile(fpgToOSEncoding(FileName));
+end;
+
 function fpgDirectoryExists(const ADirectory: TfpgString): Boolean;
 begin
   Result := DirectoryExists(fpgToOSEncoding(ADirectory));
@@ -148,6 +165,21 @@ end;
 function fpgForceDirectories(const ADirectory: TfpgString): Boolean;
 begin
   Result := ForceDirectories(fpgToOSEncoding(ADirectory));
+end;
+
+function fpgChangeFileExt(const FileName, Extension: TfpgString): TfpgString;
+begin
+  Result := ChangeFileExt(fpgToOSEncoding(Filename), Extension);
+end;
+
+function fpgGetAppConfigDir(const Global: Boolean): TfpgString;
+begin
+  Result := fpgFromOSEncoding(GetAppConfigDir(Global));
+end;
+
+function fpgGetAppConfigFile(const Global: Boolean; const SubDir: Boolean): TfpgString;
+begin
+  Result := fpgFromOSEncoding(GetAppConfigFile(Global, SubDir));
 end;
 
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
@@ -191,7 +223,7 @@ begin
             break;
         until fpgFindNext(FileInfo) <> 0;
     finally
-      FindClose(FileInfo);
+      SysUtils.FindClose(FileInfo);
     end;
   end;
 end;
@@ -225,6 +257,22 @@ begin
     end
     else
       Inc(i);
+end;
+
+function fpgGetToolkitConfigDir: TfpgString;
+begin
+  Result := fpgTrimR(fpgGetAppConfigDir(False), ApplicationName, True) + FPG_CONFIG_DIR;
+end;
+
+function fpgAddColon(const AText: TfpgString): TfpgString;
+begin
+  { TODO : Check language direction and add colon at appropriate end. This is very crude! }
+  Result := AText + ':';
+end;
+
+function fpgIsBitSet(const AData: integer; const AIndex: integer): boolean;
+begin
+  Result := (AData and (1 shl AIndex) <> 0);
 end;
 
 

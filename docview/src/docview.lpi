@@ -1,20 +1,16 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="8"/>
+    <Version Value="9"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
       </Flags>
       <SessionStorage Value="InIDEConfig"/>
       <MainUnit Value="0"/>
-      <TargetFileExt Value=""/>
       <Title Value="docview"/>
       <UseAppBundle Value="False"/>
     </General>
-    <VersionInfo>
-      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="0.0.0.0" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion="0.0.0.0"/>
-    </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
       <IgnoreBinaries Value="False"/>
@@ -32,7 +28,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="30">
+    <Units Count="35">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -179,6 +175,29 @@
         <Filename Value="missing.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit29>
+      <Unit30>
+        <Filename Value="frm_text.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_text"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="docview.rc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="../docs/docview.ipf"/>
+        <IsPartOfProject Value="True"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="frm_note.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_note"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="HelpNote.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpNote"/>
+      </Unit34>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -202,7 +221,17 @@
         <OptimizationLevel Value="0"/>
       </Optimizations>
     </CodeGeneration>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
     <Other>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
       <CustomOptions Value="-O-"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

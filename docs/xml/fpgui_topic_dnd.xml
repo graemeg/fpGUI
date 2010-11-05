@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+<topic name="AdditionalTopics">
+<short>Additional Topics</short>
+<topic name='DND'>
+
+<short>Drag and Drop</short>
+
+<descr><p>Drag and drop provides a simple visual mechanism which users can use
+to transfer information between and within applications. [In the literature this
+is referred to as a "direct manipulation model".] Drag and drop is similar in
+function to the clipboard's cut and paste mechanism.
+</p>
+<p>This topic describes the basic drag and drop mechanism and outlines the
+approach used to enable it in custom widgets.
+</p>
+<p><b>Drag and Drop Classes</b></p>
+<p>These classes deal with drag and drop and the necessary mime type encoding and
+decoding.</p>
+<dl>
+<dt>TfpgDrag</dt><dd>The Object that initializes the drag and drop action, and
+that manages the lifespan of the TfpgMimeData instance.</dd>
+<dt>TfpgMimeData</dt><dd>This class manages data and a mime type describing that
+data.</dd>
+</dl>
+</descr>
+
+</topic>
+</topic>
+</package>
+</fpdoc-descriptions>

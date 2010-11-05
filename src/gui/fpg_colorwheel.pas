@@ -62,7 +62,9 @@ type
     property    Saturation: double Read FSaturation;
     procedure   SetSelectedColor(const NewColor: TfpgColor);
   published
+    property    Align;
     property    BackgroundColor;
+    property    Enabled;
     property    ValueBar: TfpgValueBar Read FValueBar Write SetValueBar;
     property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth default 5;
     property    CursorSize: longint Read FCursorSize Write SetCursorSize default 5;
@@ -98,11 +100,13 @@ type
     constructor Create(AOwner: TComponent); override;
     procedure   SetHS(Hue: longint; Sat: double);
   published
+    property    Align;
     property    BackgroundColor;
+    property    Enabled;
     property    Value: double Read FValue Write SetValue;
     property    SelectedColor: TfpgColor Read GetSelectedColor;
-    property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth;
-    property    CursorHeight: longint Read FCursorHeight Write SetCursorHeight;
+    property    MarginWidth: longint Read FMarginWidth Write SetMarginWidth default 5;
+    property    CursorHeight: longint Read FCursorHeight Write SetCursorHeight default 10;
     property    OnChange: TNotifyEvent Read FOnChange Write FOnChange;
   end;
 
@@ -197,12 +201,16 @@ begin
     // but draw an outline
     Canvas.SetLineStyle(1, lsDash);
     Canvas.DrawRectangle(GetClientRect);
+    Canvas.SetLineStyle(1, lsSolid);
+    Canvas.Color := clUIDesignerGreen;
+    Canvas.FillArc(FMarginWidth, FMarginWidth, DrawWidth, DrawHeight, 0, 360);
     Canvas.Color := clHilite1;
-    Canvas.DrawArc(Width div 2, Height div 2, DrawWidth div 2 + 1,
-        DrawHeight div 2 + 1, 45, 180);
+    Canvas.DrawArc(FMarginWidth, FMarginWidth, DrawWidth, DrawHeight, 45, 180);
     Canvas.Color := clShadow1;
-    Canvas.DrawArc(Width div 2, Height div 2, DrawWidth div 2 + 1,
-        DrawHeight div 2 + 1, 225, 180);
+    Canvas.DrawArc(FMarginWidth, FMarginWidth, DrawWidth, DrawHeight, 225, 180);
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(5, 5, Name + ': ' + ClassName);
+    DrawCursor;
     Exit;  //==>
   end;
 
@@ -427,13 +435,19 @@ begin
   begin
     // when designing just draw
     // a rectangle to indicate
+    Canvas.Color := clBlack;
     Canvas.SetLineStyle(1, lsDash);
     Canvas.DrawRectangle(GetClientRect);
     if (Width < MarginWidth * 2) or (Height < MarginWidth * 2) then
       Exit;  //==>
     r := GetClientRect;
-    InflateRect(r, FMarginWidth, FMarginWidth);
+    InflateRect(r, -FMarginWidth, -FMarginWidth);
+    Canvas.Color := clShadow1;
+    Canvas.SetLineStyle(1, lsSolid);
     Canvas.DrawRectangle(r);
+    Canvas.TextColor := clShadow1;
+    Canvas.DrawText(5, 5, Width, Height, Name + ': ' + ClassName, TextFlagsDflt + [txtWrap]);
+    DrawCursor;
     exit;
   end;
 
@@ -494,7 +508,7 @@ begin
   inherited Create(AOwner);
   FMarginWidth := 5;
   FValue  := 1.0;
-  Width   := 100;
+  Width   := 80;
   Height  := 100;
   Name    := 'ValueBar';
   FCursorHeight := 10;

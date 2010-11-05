@@ -30,7 +30,7 @@ unit fpg_constants;
 interface
 
 uses
-  SysUtils, fpg_base;
+  SysUtils;
 
 resourcestring
 
@@ -92,21 +92,20 @@ const
   ONE_MILISEC = 1/MSecsPerDay;
 
   DEFAULT_HINT_PAUSE = 500;   // in milliseconds
+
+  { Default fpGUI help viewer }
+  FPG_HELPVIEWER = 'docview';
+
+  FPG_CONFIG_DIR = 'fpgui_toolkit' + PathDelim;
+  FPG_BOOKMARKS_FILE = 'bookmarks.ini';
+  FPG_BOOKMARK_SECTION = 'bookmarks';
   
 
-{ This is so that when we support LTR and RTL languages, the colon will be
-  added at the correct place. }
-function fpgAddColon(const AText: TfpgString): TfpgString;
 
 
 implementation
 
 
-function fpgAddColon(const AText: TfpgString): TfpgString;
-begin
-  { TODO : Check language direction and add colon at appropriate end. }
-  result := AText + ':';
-end;
 
 end.
 

@@ -60,7 +60,9 @@ type
   
   TfpgProgressBar = class(TfpgCustomProgressBar)
   published
+    property    Align;
     property    BackgroundColor default $c4c4c4;
+    property    Enabled;
     property    Hint;
     property    ShowCaption;
     property    Max;

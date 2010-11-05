@@ -37,6 +37,8 @@ type
 
   TfpgGridDrawState = set of (gdSelected, gdFocused, gdFixed);
 
+  TfpgGridHeaderStyle = (ghsButton, ghsThin, ghsFlat);
+
   TfpgFocusChangeNotify = procedure(Sender: TObject; ARow, ACol: Integer) of object;
   TfpgRowChangeNotify = procedure(Sender: TObject; ARow: Integer) of object;
   TfpgCanSelectCellEvent = procedure(Sender: TObject; const ARow, ACol: Integer; var ACanSelect: boolean) of object;
@@ -52,6 +54,7 @@ type
   private
     FColResizing: boolean;
     FDragPos: integer;      // used for column resizing
+    FHeaderStyle: TfpgGridHeaderStyle;
     FOnDrawCell: TfpgDrawCellEvent;
     FResizedCol: integer;   // used for column resizing
     FDefaultColWidth: integer;
@@ -83,9 +86,11 @@ type
     FAlternativeBGColor: TfpgColor;
     function    GetFontDesc: string;
     function    GetHeaderFontDesc: string;
+    function    GetTotalColumnWidth: integer;
     procedure   HScrollBarMove(Sender: TObject; position: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetHeaderFontDesc(const AValue: string);
+    procedure   SetHeaderStyle(const AValue: TfpgGridHeaderStyle);
     procedure   SetRowSelect(const AValue: boolean);
     procedure   SetScrollBarStyle(const AValue: TfpgScrollStyle);
     procedure   VScrollBarMove(Sender: TObject; position: integer);
@@ -139,6 +144,7 @@ type
     property    HeaderFontDesc: string read GetHeaderFontDesc write SetHeaderFontDesc;
     property    FocusCol: Integer read FFocusCol write SetFocusCol default -1;
     property    FocusRow: Integer read FFocusRow write SetFocusRow default -1;
+    property    HeaderStyle: TfpgGridHeaderStyle read FHeaderStyle write SetHeaderStyle default ghsButton;
     property    RowSelect: boolean read FRowSelect write SetRowSelect;
     property    ColumnCount: Integer read GetColumnCount;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
@@ -147,6 +153,7 @@ type
     property    ShowGrid: boolean read FShowGrid write SetShowGrid default True;
     property    ScrollBarStyle: TfpgScrollStyle read FScrollBarStyle write SetScrollBarStyle default ssAutoBoth;
     property    HeaderHeight: integer read FHeaderHeight;
+    property    TotalColumnWidth: integer read GetTotalColumnWidth;
 //    property    ColResizing: boolean read FColResizing write FColResizing;
     property    ColumnWidth[ACol: Integer]: integer read GetColumnWidth write SetColumnWidth;
     property    ColumnBackgroundColor[ACol: Integer]: TfpgColor read GetColumnBackgroundColor write SetColumnBackgroundColor;
@@ -207,6 +214,15 @@ begin
   Result := FHeaderFont.FontDesc;
 end;
 
+function TfpgBaseGrid.GetTotalColumnWidth: integer;
+var
+  i: integer;
+begin
+  Result := 0;
+  for i := 0 to ColumnCount-1 do
+    Result := Result + ColumnWidth[i];
+end;
+
 procedure TfpgBaseGrid.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
@@ -223,6 +239,14 @@ begin
   if FHeaderHeight < FHeaderFont.Height + 2 then
     FHeaderHeight := FHeaderFont.Height + 2;
   RePaint;
+end;
+
+procedure TfpgBaseGrid.SetHeaderStyle(const AValue: TfpgGridHeaderStyle);
+begin
+  if FHeaderStyle = AValue then
+    exit;
+  FHeaderStyle := AValue;
+  Repaint;
 end;
 
 procedure TfpgBaseGrid.SetRowSelect(const AValue: boolean);
@@ -370,10 +394,27 @@ var
   r: TfpgRect;
   x: integer;
 begin
-  // Here we can implement a head style check
-  Canvas.DrawButtonFace(ARect, [btfIsEmbedded]);
   r := ARect;
-  InflateRect(r, -2, -2);
+  // Here we can implement a head style check
+  case FHeaderStyle of
+    ghsButton:
+        begin
+          Canvas.DrawButtonFace(ARect, [btfIsEmbedded]);
+          InflateRect(r, -2, -2);
+        end;
+    ghsThin:
+        begin
+          Canvas.DrawBevel(ARect);
+        end;
+    ghsFlat:
+        begin
+          Canvas.Color:= clGridHeader;
+          Canvas.FillRectangle(r);
+          Canvas.Color:= clShadow2;
+          Canvas.DrawLine(r.Left, r.Bottom, r.Right, r.Bottom);  { bottom line }
+          Canvas.DrawLine(r.Right, r.Bottom, r.Right, r.Top-1);  { right line }
+        end;
+  end;
   Canvas.AddClipRect(r);  // text may not overshoot header border
 (*
   // drawing grid lines
@@ -579,16 +620,17 @@ begin
   begin
     Dec(VHeight, FHScrollBar.Height);
     FHScrollBar.Min         := 0;
-    FHScrollBar.SliderSize  := 0.2;
     if go_SmoothScroll in FOptions then
     begin
       FHScrollBar.Max := cw - vw;
       FHScrollBar.Position := FXOffset;
+      FHScrollBar.SliderSize := TotalColumnWidth / Width;
     end
     else
     begin
       FHScrollBar.Max := ColumnCount-1;
       FHScrollBar.Position := FFirstCol;
+      FHScrollBar.SliderSize  := 1 / ColumnCount;
     end;
     FHScrollBar.RepaintSlider;
   end;
@@ -931,10 +973,10 @@ begin
   lCol := FFirstCol;
 
   if delta > 0 then // scroll down
-    inc(FFirstRow, abs(delta))
+    inc(FFirstRow, abs(delta)*3)
   else              // scroll up
     if FFirstRow > 0 then
-      dec(FFirstRow, abs(delta));
+      dec(FFirstRow, abs(delta)*3);
 
   // apply limits
   if FFirstRow > RowCount - VisibleLines then
@@ -1231,6 +1273,7 @@ begin
   FScrollBarStyle := ssAutoBoth;
   FUpdateCount    := 0;
   FOptions    := [];
+  FHeaderStyle := ghsButton;
 
   FFont       := fpgGetFont('#Grid');
   FHeaderFont := fpgGetFont('#GridHeader');

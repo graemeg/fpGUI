@@ -68,9 +68,12 @@ type
   
   TfpgLabel = class(TfpgCustomLabel)
   published
+    property    AcceptDrops;
+    property    Align;
     property    Alignment;
     property    AutoSize;
     property    BackgroundColor;
+    property    Enabled;
     property    FontDesc;
     property    Height;
     property    Hint;
@@ -90,6 +93,10 @@ type
     property    Width;
     property    WrapText;
     property    OnClick;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
     property    OnDoubleClick;
     property    OnMouseDown;
     property    OnMouseEnter;

@@ -33,6 +33,8 @@ type
   TfpgApplicationImpl   = TfpgX11Application;
   TfpgClipboardImpl     = TfpgX11Clipboard;
   TfpgFileListImpl      = TfpgX11FileList;
+  TfpgMimeDataImpl      = TfpgX11MimeData;
+  TfpgDragImpl          = TfpgX11Drag;
 
 implementation
 

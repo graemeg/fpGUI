@@ -60,12 +60,15 @@ type
     FWrapping: boolean;
     FLongestLineWidth: TfpgCoord;
     FPopupMenu: TfpgPopupMenu;
+    FDefaultPopupMenu: TfpgPopupMenu;
+    FReadOnly: Boolean;
+    FUpdateCount: integer;
     function    GetFontDesc: string;
     procedure   SetFontDesc(const AValue: string);
     procedure   RecalcLongestLine;
     procedure   DeleteSelection;
     procedure   DoCopy;
-    procedure   DoPaste;
+    procedure   DoPaste(const AText: TfpgString);
     procedure   AdjustCursor;
     function    LineCount: integer;
     function    GetLineText(linenum: integer): string;
@@ -81,10 +84,21 @@ type
     function    GetText: TfpgString;
     procedure   SetCursorLine(aValue: integer);
     procedure   UpdateScrollBarCoords;
+    procedure   DefaultPopupCut(Sender: TObject);
+    procedure   DefaultPopupCopy(Sender: TObject);
+    procedure   DefaultPopupPaste(Sender: TObject);
+    procedure   DefaultPopupClearAll(Sender: TObject);
+    procedure   DefaultPopupInsertFromCharmap(Sender: TObject);
+    procedure   SetDefaultPopupMenuItemsState;
+    procedure   ShowDefaultPopupMenu(const x, y: integer; const shiftstate: TShiftState); virtual;
+    procedure   SetReadOnly(const AValue: Boolean);
+    procedure   ResetSelectionVariables;
+    procedure   SetCursorPos(const AValue: integer);
   protected
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
+    procedure   HandleRMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState); override;
     procedure   HandleResize(dwidth, dheight: integer); override;
@@ -94,11 +108,19 @@ type
     procedure   HandleMouseEnter; override;
     procedure   HandleMouseExit; override;
     procedure   HandleHide; override;
+    procedure   RePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   UpdateScrollBars;
-    function    SelectionText: string;
+    function    SelectionText: TfpgString;
+    procedure   CopyToClipboard;
+    procedure   CutToClipboard;
+    procedure   PasteFromClipboard;
+    procedure   Clear;
+    procedure   BeginUpdate;
+    procedure   EndUpdate;
+    property    CursorPos: integer read FCursorPos write SetCursorPos;
     property    CursorLine: integer read FCursorLine write SetCursorLine;
     property    Font: TfpgFont read FFont;
     property    LineHeight: integer read FLineHeight;
@@ -108,11 +130,14 @@ type
     property    UseTabs: boolean read FUseTabs write FUseTabs default False;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
+    property    Align;
     property    BackgroundColor default clBoxColor;
+    property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Hint;
     property    Lines: TStringList read FLines;
     property    ParentShowHint;
+    property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property    ShowHint;
     property    TabOrder;
     property    TextColor;
@@ -130,14 +155,25 @@ function CreateMemo(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgMemo;
 implementation
 
 uses
-  fpg_stringutils;
+  fpg_stringutils
+  ,fpg_constants
+  ,fpg_dialogs
+  ;
+
+const
+  // internal popupmenu item names
+  ipmCut        = 'miDefaultCut';
+  ipmCopy       = 'miDefaultCopy';
+  ipmPaste      = 'miDefaultPaste';
+  ipmClearAll   = 'miDefaultClearAll';
+  ipmCharmap    = 'miDefaultCharmap';
+
 
 type
   // custom stringlist that will notify the memo of item changes
   TfpgMemoStrings = class(TStringList)
   protected
     Memo: TfpgMemo;
-    procedure   RefreshMemo;
   public
     constructor Create(AMemo: TfpgMemo); reintroduce;
     destructor  Destroy; override;
@@ -148,15 +184,6 @@ type
   end;
 
 { TfpgMemoStrings }
-
-procedure TfpgMemoStrings.RefreshMemo;
-begin
-  if Assigned(Memo) and (Memo.HasHandle) then
-  begin
-    Memo.Invalidate;
-    Memo.UpdateScrollBars;
-  end;
-end;
 
 constructor TfpgMemoStrings.Create(AMemo: TfpgMemo);
 begin
@@ -172,28 +199,30 @@ end;
 
 function TfpgMemoStrings.Add(const s: String): Integer;
 begin
+  Memo.BeginUpdate;
   Result := inherited Add(s);
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 procedure TfpgMemoStrings.Delete(Index: Integer);
 begin
-//  writeln('Delete''s Index = ', Index);
+  Memo.BeginUpdate;
   inherited Delete(Index);
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 procedure TfpgMemoStrings.Insert(Index: Integer; const S: string);
 begin
-//  writeln('Insert''s Index = ', Index);
+  Memo.BeginUpdate;
   inherited Insert(Index, S);
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 procedure TfpgMemoStrings.Clear;
 begin
+  Memo.BeginUpdate;
   inherited Clear;
-  RefreshMemo;
+  Memo.EndUpdate;
 end;
 
 
@@ -217,13 +246,18 @@ var
   MaxLine: integer;
   yp: integer;
 begin
-  if (aValue < 0) or (aValue = FCursorLine) then
+  if (aValue < 0) or (aValue = FCursorLine) or (AValue > FLines.Count-1) then
     Exit; // wrong value
+
   if aValue < FFirstLine then
   begin
     FFirstLine  := aValue; // moves the selected line to the top of the displayed rectangle
     FCursorLine := aValue;
     FCursorPos  := 0;
+    FSelStartPos  := FCursorPos;
+    FSelStartLine := FCursorLine;
+    FSelEndLine   := -1;
+    AdjustCursor;
     RePaint;
     Exit;
   end;
@@ -243,15 +277,21 @@ begin
     FFirstLine  := aValue;
     FCursorLine := aValue;
     FCursorPos  := 0;
+    FSelStartPos  := FCursorPos;
+    FSelStartLine := FCursorLine;
+    FSelEndLine   := -1;
+    AdjustCursor;
     RePaint;
-    Exit;
   end
   else
   begin
     FCursorLine := aValue;
     FCursorPos  := 0;
+    FSelStartPos  := FCursorPos;
+    FSelStartLine := FCursorLine;
+    FSelEndLine   := -1;
+    AdjustCursor;
     RePaint;
-    Exit;
   end;
 end;
 
@@ -280,6 +320,144 @@ begin
   FHScrollBar.UpdateWindowPosition;
 end;
 
+procedure TfpgMemo.DefaultPopupCut(Sender: TObject);
+begin
+  if ReadOnly then
+    Exit;
+  CutToClipboard;
+end;
+
+procedure TfpgMemo.DefaultPopupCopy(Sender: TObject);
+begin
+  if ReadOnly then
+    Exit;
+  CopyToClipboard;
+end;
+
+procedure TfpgMemo.DefaultPopupPaste(Sender: TObject);
+begin
+  if ReadOnly then
+    Exit;
+  PasteFromClipboard;
+end;
+
+procedure TfpgMemo.DefaultPopupClearAll(Sender: TObject);
+begin
+  if ReadOnly then
+    Exit;
+  Clear;
+end;
+
+procedure TfpgMemo.DefaultPopupInsertFromCharmap(Sender: TObject);
+var
+  s: TfpgString;
+begin
+  if ReadOnly then
+    Exit;
+  s := fpgShowCharMap;
+  if s <> '' then
+    DoPaste(s);
+end;
+
+procedure TfpgMemo.SetDefaultPopupMenuItemsState;
+var
+  i: integer;
+  itm: TfpgMenuItem;
+  b: boolean;
+
+  function SomethingSelected: boolean;
+  begin
+    Result := SelectionText <> '';
+  end;
+
+begin
+  b := SomethingSelected;
+  for i := 0 to FDefaultPopupMenu.ComponentCount-1 do
+  begin
+    if FDefaultPopupMenu.Components[i] is TfpgMenuItem then
+    begin
+      itm := TfpgMenuItem(FDefaultPopupMenu.Components[i]);
+      // enabled/disable menu items
+      if itm.Name = ipmCut then
+        itm.Enabled := (not ReadOnly) and b
+      else if itm.Name = ipmCopy then
+        itm.Enabled := b
+      else if itm.Name = ipmPaste then
+        itm.Enabled := (not ReadOnly) and (fpgClipboard.Text <> '')
+      else if itm.Name = ipmClearAll then
+        itm.Enabled := (not ReadOnly) and (Text <> '')
+      else if itm.Name = ipmCharmap then
+        itm.Enabled := (not ReadOnly);
+    end;
+  end;
+end;
+
+procedure TfpgMemo.ShowDefaultPopupMenu(const x, y: integer;
+  const shiftstate: TShiftState);
+var
+  itm: TfpgMenuItem;
+begin
+  if not Assigned(FDefaultPopupMenu) then
+  begin
+    FDefaultPopupMenu := TfpgPopupMenu.Create(nil);
+    itm := FDefaultPopupMenu.AddMenuItem(rsCut, '', @DefaultPopupCut);
+    itm.Name := ipmCut;
+    itm := FDefaultPopupMenu.AddMenuItem(rsCopy, '', @DefaultPopupCopy);
+    itm.Name := ipmCopy;
+    itm := FDefaultPopupMenu.AddMenuItem(rsPaste, '', @DefaultPopupPaste);
+    itm.Name := ipmPaste;
+    itm := FDefaultPopupMenu.AddMenuItem(rsDelete, '', @DefaultPopupClearAll);
+    itm.Name := ipmClearAll;
+    itm := FDefaultPopupMenu.AddMenuItem('-', '', nil);
+    itm.Name := 'N1';
+    itm := FDefaultPopupMenu.AddMenuItem(rsInsertFromCharacterMap, '', @DefaultPopupInsertFromCharmap);
+    itm.Name := ipmCharmap;
+  end;
+
+  SetDefaultPopupMenuItemsState;
+  FDefaultPopupMenu.ShowAt(self, x, y);
+end;
+
+procedure TfpgMemo.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly = AValue then exit;
+  FReadOnly := AValue;
+  RePaint;
+end;
+
+procedure TfpgMemo.ResetSelectionVariables;
+begin
+  FSelecting      := False;
+  FSelStartPos    := FCursorPos;
+  FSelEndPos      := FCursorPos;
+  FSelStartLine   := FCursorLine;
+  FSelEndLine     := FCursorLine;
+  FMouseDragging  := False;
+end;
+
+procedure TfpgMemo.SetCursorPos(const AValue: integer);
+var
+  x: integer;
+begin
+  if FCursorPos = AValue then
+    exit;
+
+  if AValue = 0 then
+    FCursorPos := AValue
+  else
+  begin
+    x := UTF8Length(FLines[CursorLine]);
+    if AValue > x then  { can't set Cursorpos greater than number of characters on that line }
+      FCursorPos := x
+    else
+      FCursorPos := AValue;
+  end;
+  FSelStartPos  := FCursorPos;
+  FSelEndPos    := FCursorPos;
+  AdjustCursor;
+  Repaint;
+end;
+
 constructor TfpgMemo.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -288,7 +466,6 @@ begin
   FHeight     := FFont.Height * 3 + 4;
   FWidth      := 120;
   FLineHeight := FFont.Height + 2;
-  FSelecting  := False;
   FSideMargin := 3;
   FMaxLength  := 0;
   FWrapping   := False;
@@ -299,19 +476,18 @@ begin
   FTabWidth   := 4;
   FMinWidth   := 20;
   FMinHeight  := 30;
+  FPopupMenu  := nil;
+  FDefaultPopupMenu := nil;
+  FReadOnly   := False;
+  FUpdateCount := 0;
 
   FLines      := TfpgMemoStrings.Create(self);
   FFirstLine  := 0;
   FCursorLine := 0;
 
-  FCursorPos    := 0;
-  FSelStartPos  := FCursorPos;
-  FSelEndPos    := 0;
-  FSelStartLine := -1;
-  FSelEndLine   := -1;
+  ResetSelectionVariables;
 
   FDrawOffset    := 0;
-  FMouseDragging := False;
 
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
@@ -327,6 +503,8 @@ end;
 
 destructor TfpgMemo.Destroy;
 begin
+  if Assigned(FDefaultPopupMenu) then
+    FDefaultPopupMenu.Free;
   TfpgMemoStrings(FLines).Free;
   FFont.Free;
   inherited Destroy;
@@ -362,6 +540,8 @@ var
   len: integer;
   st: integer;
 begin
+  if ReadOnly then
+    Exit;
   if FSelEndLine < 0 then
     Exit;
 
@@ -410,84 +590,42 @@ begin
 
   FCursorPos  := selsp;
   FCursorLine := selsl;
+  FSelStartPos := FCursorPos;
+  FSelEndPos := FCursorPos;
+  FSelStartLine := selsl;
   FSelEndLine := -1;
 end;
 
 procedure TfpgMemo.DoCopy;
-var
-  n: integer;
-  selsl: integer;
-  selsp: integer;
-  selel: integer;
-  selep: integer;
-  ls: string;
-  len: integer;
-  st: integer;
-  s: string;
 begin
   if FSelEndLine < 0 then
     Exit;
 
-  if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
-  begin
-    selsl := FSelStartLine;
-    selsp := FSelStartPos;
-    selel := FSelEndLine;
-    selep := FSelEndPos;
-  end
-  else
-  begin
-    selel := FSelStartLine;
-    selep := FSelStartPos;
-    selsl := FSelEndLine;
-    selsp := FSelEndPos;
-  end;
-
-  s := '';
-
-  for n := selsl to selel do
-  begin
-    if n > selsl then
-      s := s + #13#10;
-
-    ls := GetLineText(n);
-
-    if selsl < n then
-      st := 0
-    else
-      st := selsp;
-
-    if selel > n then
-      len := UTF8Length(ls)
-    else
-      len := selep - st;
-
-    s := s + UTF8Copy(ls, st + 1, len);
-  end;
-
-  //SetClipboardText(s);
+  fpgClipboard.Text := SelectionText;
 end;
 
-procedure TfpgMemo.DoPaste;
-{
+procedure TfpgMemo.DoPaste(const AText: TfpgString);
 var
-  s: string;
-  si: string;
-  si8: string;
-  lineend: string;
+  s: TfpgString;
+  si: TfpgString;       { beginning of line to cursor }
+  si8: TfpgString;
+  lineend: TfpgString;  { from cursor to end of line }
   n: integer;
   l: integer;
   lcnt: integer;
-}
 begin
-  Exit;
-  (*
+  if ReadOnly then
+    Exit;
   DeleteSelection;
-  s := GetClipboardText;
+  s := AText;
 
   si := UTF8Copy(CurrentLine,1,FCursorPos);
   lineend := UTF8Copy(CurrentLine,FCursorPos+1, UTF8Length(CurrentLine));
-  l := FCursorLine;
+  if FCursorLine = -1 then  { first time in, FLines has no data yet }
+    l := 0
+  else
+    l := FCursorLine;
+
   n := 1;
   lcnt := 0;
   si8 := '';
@@ -495,8 +633,10 @@ begin
   begin
     if (s[n] = #13) or (s[n] = #10) then
     begin
-      if lcnt = 0 then SetLineText(l, si + si8)
-                  else FLines.Insert(l-1, si + si8);
+      if lcnt = 0 then
+        SetLineText(l, si + si8)
+      else
+        FLines.Insert(l, si + si8);
 
       si := '';
       si8 := '';
@@ -524,13 +664,13 @@ begin
   end
   else
   begin
-    FLines.Insert(l-1, si);
+    FLines.Insert(l, si);
     FCursorLine := l;
   end;
 
   AdjustCursor;
+  ResetSelectionVariables;
   Repaint;
-*)
 end;
 
 procedure TfpgMemo.AdjustCursor;
@@ -747,6 +887,12 @@ begin
   inherited;
 end;
 
+procedure TfpgMemo.RePaint;
+begin
+  if FUpdateCount <= 0 then
+    inherited RePaint;
+end;
+
 procedure TfpgMemo.VScrollBarMove(Sender: TObject; position: integer);
 begin
   if FFirstLine <> position then
@@ -783,7 +929,7 @@ begin
   InflateRect(r, -2, -2);
   Canvas.SetClipRect(r);
 
-  if Enabled then
+  if Enabled and not ReadOnly then
     Canvas.SetColor(FBackgroundColor)
   else
     Canvas.SetColor(clWindowBackground);
@@ -895,31 +1041,35 @@ begin
   prevval  := Text;
   s        := AText;
 
-  // Printable characters only
-  // Note: This is now UTF-8 compliant!
-  if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
+  if (not consumed) and (not ReadOnly) then
   begin
-    if (FMaxLength <= 0) or (UTF8Length(FLines.Text) < FMaxLength) then
+    // Printable characters only
+    // Note: This is now UTF-8 compliant!
+    if (Ord(AText[1]) > 31) and (Ord(AText[1]) < 127) or (Length(AText) > 1) then
     begin
-      if FCursorLine < 0 then
-        FCursorLine := 0;
-      DeleteSelection;
-      ls := GetLineText(FCursorLine);
-      UTF8Insert(s, ls, FCursorPos + 1);
-      SetLineText(FCursorLine, ls);
-      Inc(FCursorPos);
-      FSelStartPos  := FCursorPos;
-      FSelStartLine := FCursorLine;
-      FSelEndLine   := -1;
-      AdjustCursor;
+      if (FMaxLength <= 0) or (UTF8Length(FLines.Text) < FMaxLength) then
+      begin
+        if FCursorLine < 0 then
+          FCursorLine := 0;
+        DeleteSelection;
+        ls := GetLineText(FCursorLine);
+        UTF8Insert(s, ls, FCursorPos + 1);
+        SetLineText(FCursorLine, ls);
+        Inc(FCursorPos);
+        FSelStartPos  := FCursorPos;
+        FSelStartLine := FCursorLine;
+        FSelEndLine   := -1;
+        AdjustCursor;
+      end;
+
+      consumed := True;
     end;
 
-    consumed := True;
+    if prevval <> Text then
+      if Assigned(FOnChange) then
+        FOnChange(self);
   end;
 
-  if prevval <> Text then
-    if Assigned(FOnChange) then
-      FOnChange(self);
 
   if consumed then
     RePaint;
@@ -932,15 +1082,8 @@ var
   ls: string;
   ls2: string;
   hasChanged: boolean;
-  
-  procedure StopSelection;
-  begin
-    FSelStartLine := FCursorLine;
-    FSelStartPos  := FCursorPos;
-    FSelEndLine   := -1;
-  end;
-  
 begin
+  fpgApplication.HideHint;
   Consumed := True;
   hasChanged := False;
   case CheckClipBoardKey(keycode, shiftstate) of
@@ -950,14 +1093,19 @@ begin
         end;
     ckPaste:
         begin
-          DoPaste;
-          hasChanged := True;
+          DoPaste(fpgClipboard.Text);
+          if not ReadOnly then
+            hasChanged := True;
         end;
     ckCut:
         begin
           DoCopy;
           DeleteSelection;
-          hasChanged := True;
+          if not ReadOnly then
+          begin
+            AdjustCursor;
+            hasChanged := True;
+          end;
         end;
   else
     Consumed := False;
@@ -974,7 +1122,6 @@ begin
         if FCursorPos > 0 then
         begin
           Dec(FCursorPos);
-
           if (ssCtrl in shiftstate) then
             // word search...
             (*
@@ -984,14 +1131,12 @@ begin
                     while (FCursorPos > 0) and pgfIsAlphaNum(copy(CurrentLine,FCursorPos,1))
                       do Dec(FCursorPos);
             *);
-
         end;// left
 
       keyRight:
         if FCursorPos < UTF8Length(CurrentLine) then
         begin
           Inc(FCursorPos);
-
           if (ssCtrl in shiftstate) then
             // word search...
             (*
@@ -1001,7 +1146,6 @@ begin
                     while (FCursorPos < length(CurrentLine)) and not pgfIsAlphaNum(copy(CurrentLine,FCursorPos+1,1))
                       do Inc(FCursorPos);
               *);
-
         end;// right
 
       keyUp:
@@ -1074,11 +1218,11 @@ begin
         FSelEndLine := FCursorLine;
       end
       else
-        StopSelection;
+        ResetSelectionVariables;
     end;
   end;
 
-  if not Consumed then
+  if (not Consumed) and (not ReadOnly) then
   begin
     consumed := True;
 
@@ -1118,7 +1262,7 @@ begin
       keyDelete:
           begin
             ls := GetLineText(FCursorLine);
-            if FSelEndLine > -1 then
+            if SelectionText <> '' then
               DeleteSelection
             else if FCursorPos < UTF8Length(ls) then
             begin
@@ -1165,8 +1309,8 @@ begin
 
     if Consumed then
     begin
-      StopSelection;
       AdjustCursor;
+      ResetSelectionVariables;
     end;
   end;
 
@@ -1190,6 +1334,7 @@ var
   ls: string;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
+  ResetSelectionVariables;
 
   // searching the appropriate character position
   lnum := FFirstLine + (y - FSideMargin) div LineHeight;
@@ -1219,9 +1364,11 @@ begin
   begin
     FSelEndLine := lnum;
     FSelEndpos  := cp;
+    FSelecting := True;
   end
   else
   begin
+    FSelecting := False;
     FSelStartLine := lnum;
     FSelStartPos  := cp;
     FSelEndLine   := -1;
@@ -1229,11 +1376,22 @@ begin
   Repaint;
 end;
 
+procedure TfpgMemo.HandleRMouseDown(x, y: integer; shiftstate: TShiftState);
+begin
+  // keyMenu was pressed
+  if shiftstate = [ssExtra1] then
+    HandleRMouseUp(x, y, [])
+  else
+    inherited HandleRMouseDown(x, y, shiftstate);
+end;
+
 procedure TfpgMemo.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleRMouseUp(x, y, shiftstate);
   if Assigned(PopupMenu) then
-    PopupMenu.ShowAt(self, x, y);
+    PopupMenu.ShowAt(self, x, y)
+  else
+    ShowDefaultPopupMenu(x, y, ShiftState);
 end;
 
 procedure TfpgMemo.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);
@@ -1276,6 +1434,7 @@ begin
     FSelEndLine := lnum;
     FSelEndPos  := cp;
     FCursorPos  := cp;
+    FSelecting := True;
     Repaint;
   end;
 
@@ -1396,23 +1555,105 @@ begin
   end;
 end;
 
-function TfpgMemo.SelectionText: string;
+function TfpgMemo.SelectionText: TfpgString;
+var
+  n: integer;
+  selsl: integer;
+  selsp: integer;
+  selel: integer;
+  selep: integer;
+  ls: string;
+  len: integer;
+  st: integer;
+  s: TfpgString;
 begin
-  {
-  if FSelOffset <> 0 then
+  if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
   begin
-    if FSelOffset < 0 then
-    begin
-      Result := Copy(FText,1+FSelStart + FSelOffset,-FSelOffset);
-    end
-    else
-    begin
-      result := Copy(FText,1+FSelStart,FSelOffset);
-    end;
+    selsl := FSelStartLine;
+    selsp := FSelStartPos;
+    selel := FSelEndLine;
+    selep := FSelEndPos;
   end
   else
-}
-    Result := '';
+  begin
+    selel := FSelStartLine;
+    selep := FSelStartPos;
+    selsl := FSelEndLine;
+    selsp := FSelEndPos;
+  end;
+
+  s := '';
+  for n := selsl to selel do
+  begin
+    if n > selsl then
+      s := s + LineEnding;
+
+    ls := GetLineText(n);
+
+    if selsl < n then
+      st := 0
+    else
+      st := selsp;
+
+    if selel > n then
+      len := UTF8Length(ls)
+    else
+      len := selep - st;
+
+    s := s + UTF8Copy(ls, st + 1, len);
+  end;
+
+  Result := s;
+end;
+
+procedure TfpgMemo.CopyToClipboard;
+begin
+  DoCopy;
+end;
+
+procedure TfpgMemo.CutToClipboard;
+begin
+  DoCopy;
+  DeleteSelection;
+  AdjustCursor;
+  ResetSelectionVariables;
+  RePaint;
+end;
+
+procedure TfpgMemo.PasteFromClipboard;
+begin
+  DoPaste(fpgClipboard.Text);
+end;
+
+procedure TfpgMemo.Clear;
+begin
+  FLines.Clear;
+  { not sure if all of these are required }
+  FFirstLine    := 0;
+  FCursorLine   := 0;
+  FCursorPos    := 0;
+  FSelStartPos  := FCursorPos;
+  FSelEndPos    := 0;
+  FSelStartLine := -1;
+  FSelEndLine   := -1;
+  FDrawOffset   := 0;
+
+  Repaint;
+end;
+
+procedure TfpgMemo.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TfpgMemo.EndUpdate;
+begin
+  Dec(FUpdateCount);
+  if FUpdateCount <= 0 then
+  begin
+    Invalidate;
+    UpdateScrollBars;
+  end;
 end;
 
 function TfpgMemo.GetText: TfpgString;

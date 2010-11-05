@@ -92,8 +92,8 @@ type
     property    AutoHeight: boolean read FAutoHeight write SetAutoHeight default False;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
-    property    HotTrack: boolean read FHotTrack write FHotTrack;
-    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame;
+    property    HotTrack: boolean read FHotTrack write FHotTrack default False;
+    property    PopupFrame: boolean read FPopupFrame write SetPopupFrame default False;
     property    DragToReorder: boolean read FDragToReorder write FDragToReorder default False;
   public
     constructor Create(AOwner: TComponent); override;
@@ -117,6 +117,8 @@ type
   TfpgTextListBox = class(TfpgBaseListBox)
   protected
     FItems: TStringList;
+    function    GetText: string; virtual;
+    procedure   SetText(const AValue: string); virtual;
     procedure   DrawItem(num: integer; rect: TfpgRect; flags: integer); override;
     procedure   Exchange(Index1, Index2: Integer); override;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
@@ -125,16 +127,19 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     function    ItemCount: integer; override;
-    function    Text: string;
+    property    Text: string read GetText write SetText stored False;
   end;
   
 
   // The standard strings listbox we will actually use in a GUI.
   TfpgListBox = class(TfpgTextListBox)
   published
+    property    AcceptDrops;
+    property    Align;
     property    AutoHeight;
     property    BackgroundColor default clListBox;
     property    DragToReorder;
+    property    Enabled;
     property    FocusItem;
     property    FontDesc;
     property    Hint;
@@ -144,8 +149,19 @@ type
     property    PopupFrame;
     property    ShowHint;
     property    TabOrder;
+    property    Text;
     property    TextColor;
+    property    OnChange;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
+    property    OnEnter;
+    property    OnExit;
+    property    OnKeyPress;
+    property    OnScroll;
+    property    OnSelect;
     property    OnShowHint;
   end;
   
@@ -181,7 +197,7 @@ type
 //    procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); override;
     property    Items: TList read FItems;
     property    Color: TfpgColor read GetColor write SetColor;
-    property    ColorPalette: TfpgColorPalette read FColorPalette write SetColorPalette;
+    property    ColorPalette: TfpgColorPalette read FColorPalette write SetColorPalette default cpStandardColors;
     property    ShowColorNames: Boolean read FShowColorNames write SetShowColorNames default True;
   public
     constructor Create(AOwner: TComponent); override;
@@ -192,11 +208,14 @@ type
   
   TfpgColorListBox = class(TfpgBaseColorListBox)
   published
+    property    AcceptDrops;
+    property    Align;
     property    AutoHeight;
     property    BackgroundColor default clListBox;
     property    Color;
     property    ColorPalette;
     property    DragToReorder;
+    property    Enabled;
     property    FocusItem;
     property    FontDesc;
     property    Hint;
@@ -208,6 +227,10 @@ type
     property    ShowHint;
     property    TabOrder;
     property    TextColor;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragDrop;
+    property    OnDragStartDetected;
   end;
 
 
@@ -855,6 +878,35 @@ end;
 
 { TfpgTextListBox }
 
+function TfpgTextListBox.GetText: string;
+begin
+  if (ItemCount > 0) and (FocusItem <> -1) then
+    result := FItems[FocusItem]
+  else
+    result := '';
+end;
+
+procedure TfpgTextListBox.SetText(const AValue: string);
+var
+  i: integer;
+begin
+  if AValue = '' then
+    SetFocusItem(-1)  // nothing selected
+  else
+  begin
+    for i := 0 to FItems.Count-1 do
+    begin
+      if SameText(Items.Strings[i], AValue) then
+      begin
+        SetFocusItem(i);
+        Exit; //==>
+      end;
+    end;
+    // if we get here, we didn't find a match
+    SetFocusItem(-1);
+  end;
+end;
+
 procedure TfpgTextListBox.DrawItem(num: integer; rect: TfpgRect; flags: integer);
 begin
   //if num < 0 then
@@ -903,14 +955,6 @@ end;
 function TfpgTextListBox.ItemCount: integer;
 begin
   result := FItems.Count;
-end;
-
-function TfpgTextListBox.Text: string;
-begin
-  if (ItemCount > 0) and (FocusItem <> -1) then
-    result := FItems[FocusItem]
-  else
-    result := '';
 end;
 
 { TColorItem }

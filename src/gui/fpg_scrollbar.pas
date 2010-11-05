@@ -43,7 +43,6 @@ type
   
   TfpgScrollBarPart = (sbpNone, sbpUpBack, sbpPageUpBack, sbpSlider, sbpDownForward, sbpPageDownForward);
 
-  { TfpgScrollBar }
 
   TfpgScrollBar = class(TfpgWidget)
   private
@@ -72,7 +71,7 @@ type
     FMousePosition: TPoint;
     FOnScroll: TScrollNotifyEvent;
     procedure   ScrollTimer(Sender: TObject);
-    procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False); virtual;
+    procedure   DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False; const ButtonEnabled: Boolean= True); virtual;
     procedure   DrawSlider(recalc: boolean); virtual;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
@@ -98,6 +97,8 @@ type
     property    Min: integer read FMin write SetMin default 0;
     property    Max: integer read FMax write SetMax default 100;
     property    OnScroll: TScrollNotifyEvent read FOnScroll write FOnScroll;
+  published
+    property    Align;
   end;
 
 
@@ -139,13 +140,13 @@ begin
   Canvas.BeginDraw; // Do not remove - Scrollbars do painting outside HandlePaint as well!
   if Orientation = orVertical then
   begin
-    DrawButton(0, 0, Width, Width, 'sys.sb.up', FScrollbarDownPart = sbpUpBack);
-    DrawButton(0, Height-Width, Width, Width, 'sys.sb.down', FScrollbarDownPart = sbpDownForward);
+    DrawButton(0, 0, Width, Width, 'sys.sb.up', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
+    DrawButton(0, Height-Width, Width, Width, 'sys.sb.down', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), (FPosition <> FMax) and (Parent.Enabled));
   end
   else
   begin
-    DrawButton(0, 0, Height, Height, 'sys.sb.left', FScrollbarDownPart = sbpUpBack);
-    DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', FScrollbarDownPart = sbpDownForward);
+    DrawButton(0, 0, Height, Height, 'sys.sb.left', (FScrollbarDownPart = sbpUpBack) and (FPosition <> FMin), (FPosition <> FMin) and (Parent.Enabled));
+    DrawButton(Width-Height, 0, Height, Height, 'sys.sb.right', (FScrollbarDownPart = sbpDownForward) and (FPosition <> FMax), (FPosition <> FMax) and (Parent.Enabled));
   end;
 
   DrawSlider(FRecalc);
@@ -323,9 +324,9 @@ begin
 end;
 
 // only called from inside HandlePaint so no need for BeginDraw..EndDraw calls
-procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False);
+procedure TfpgScrollBar.DrawButton(x, y, w, h: TfpgCoord; const imgname: string; Pressed: Boolean = False; const ButtonEnabled: Boolean= True);
 var
-  img: TfpgImage;
+  img, imgdisabled: TfpgImage;
   dx: integer;
   dy: integer;
 begin
@@ -344,7 +345,16 @@ begin
   Canvas.SetColor(clText1);
   img := fpgImages.GetImage(imgname);
   if img <> nil then
-    Canvas.DrawImage(x + w div 2 - (img.Width div 2) + dx, y + h div 2 - (img.Height div 2) + dy, img);
+  begin
+    if ButtonEnabled then
+      Canvas.DrawImage(x + w div 2 - (img.Width div 2) + dx, y + h div 2 - (img.Height div 2) + dy, img)
+    else
+    begin
+      imgdisabled := img.CreateDisabledImage;
+      Canvas.DrawImage(x + w div 2 - (img.Width div 2) + dx, y + h div 2 - (img.Height div 2) + dy, imgdisabled);
+      imgdisabled.Free;
+    end;
+  end;
 end;
 
 // only called from inside HandlePaint so no need for BeginDraw..EndDraw calls
@@ -516,14 +526,13 @@ begin
   if FScrollbarDownPart = sbpSlider then
   begin
     FSliderDragStart := FSliderPos;
-    Invalidate; //DrawSlider(False);
+    Invalidate;
   end
   else if not (FScrollbarDownPart in [sbpNone, sbpSlider]) then
   begin
     FScrollTimer.Interval := 300;
     FScrollTimer.Enabled := True;
-
-    Invalidate; //HandlePaint;
+    Invalidate;
   end;
 end;
 
@@ -540,7 +549,7 @@ begin
   FScrollbarDownPart := sbpNone;
   
   if WasPressed then
-    Invalidate; //HandlePaint;
+    Invalidate;
 end;
 
 procedure TfpgScrollBar.HandleMouseMove(x, y: integer; btnstate: word; shiftstate: TShiftState);

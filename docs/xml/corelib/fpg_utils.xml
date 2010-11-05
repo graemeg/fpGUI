@@ -4,16 +4,14 @@
 
 <module name="fpg_utils">
 <short>Utility functions.</short>
-<descr>Utility functions used throughout fpGUI. Some have common
-implementations and some have platform specific implementations.
-</descr>
+<descr><p>Utility functions used throughout fpGUI. Some have common
+implementations and some have platform specific implementations.</p></descr>
 
 <!-- function Visibility: default -->
 <element name="fpgToOSEncoding">
 <short>Converts string from fpGUI to OS specific filesystem encoding</short>
 <descr>This function is specific to filesystem strings like Paths, Filenames
- and Directories.
-</descr>
+ and Directories.</descr>
 </element>
 
 <!-- function Visibility: default -->

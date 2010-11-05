@@ -1,15 +1,24 @@
-Unit NewViewConstantsUnit;
+{
+    fpGUI  -  Free Pascal GUI Toolkit
+
+    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Common used constants for DocView
+}
+unit NewViewConstantsUnit;
 
 {$mode objfpc}{$H+}
 
-// NewView - a new OS/2 Help Viewer
-// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
-// Copyright 2006-2009 Ronald Brill (rbri at rbri dot de)
-// This software is released under the Gnu Public License - see readme.txt
-
-// Common used constants for NewView
-
-Interface
+interface
 
 const
   PARAM_LINK_NOTE = 'note';
@@ -23,6 +32,6 @@ const
   PRGM_FIREFOX = 'firefox';
 
 
-Implementation
+implementation
 
-End.
+end.

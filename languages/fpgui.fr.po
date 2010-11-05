@@ -28,6 +28,10 @@ msgstr "Arrêter"
 msgid "About %s"
 msgstr "A propos de %s"
 
+#: fpg_constants:rsaddcurrentdirectory
+msgid "Add current directory"
+msgstr "Ajouter le répertoire courant"
+
 #: fpg_constants:rsall
 msgid "All"
 msgstr "Tous"
@@ -80,6 +84,10 @@ msgstr "Impossible de créer le répertoire"
 msgid "Change"
 msgstr "Modifier"
 
+#: fpg_constants:rschangetitle
+msgid "Change Title"
+msgstr "Changer le titre"
+
 #: fpg_constants:rscharactermap
 msgid "Character Map"
 msgstr "Table de caractères"
@@ -91,6 +99,10 @@ msgstr "Fermer"
 #: fpg_constants:rscollection
 msgid "Collection"
 msgstr "Collection"
+
+#: fpg_constants:rsconfigurebookmarks
+msgid "Configure Bookmarks"
+msgstr "Configurer les signets"
 
 #: fpg_constants:rsconfirm
 msgid "Confirm"
@@ -143,6 +155,10 @@ msgstr "Supprimer"
 #: fpg_constants:rsdirectories
 msgid "Directories"
 msgstr "Répertoires"
+
+#: fpg_constants:rsdirectory
+msgid "Directory"
+msgstr "Répertoire"
 
 #: fpg_constants:rsdrive
 msgid "Drive"
@@ -246,7 +262,7 @@ msgstr "Insérer"
 
 #: fpg_constants:rsinsertfromcharactermap
 msgid "Insert from Character Map"
-msgstr ""
+msgstr "Insérer depuis la table de caractères"
 
 #: fpg_constants:rsitalic
 msgid "Italic"
@@ -311,6 +327,14 @@ msgstr "Lun"
 #: fpg_constants:rslongmon
 msgid "Monday"
 msgstr "Lundi"
+
+#: fpg_constants:rsmovedown
+msgid "Move Down"
+msgstr "Déplacer vers le bas"
+
+#: fpg_constants:rsmoveup
+msgid "Move Up"
+msgstr "Déplacer vers le haut"
 
 #: fpg_constants:rsname
 msgid "Name"

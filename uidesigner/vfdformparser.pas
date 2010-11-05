@@ -25,6 +25,7 @@ interface
 uses
   Classes,
   SysUtils,
+  fpg_base,
   fpg_main,
   fpg_widget,
   fpg_form,
@@ -59,6 +60,7 @@ function  CheckSymbol(var s: string; const sym: string): boolean;
 function  GetIntValue(var s: string): integer;
 function  GetBoolValue(var s: string): boolean;
 function  GetFloatValue(var s: string): extended;
+function  GetColorValue(var s: string): integer;
 
 
 implementation
@@ -238,6 +240,28 @@ begin
 //    CheckSymbol(s, ')');
 //  if ids = 'u8' then
 //    Result := u8(Result);
+end;
+
+function GetColorValue(var s: string): integer;
+var
+  n: integer;
+  ns: string;
+begin
+  SkipSpaces(s);
+  GetIdentifier(s);    // extract 'TfpgColor' identifier
+  CheckSymbol(s, '(');
+  SkipSpaces(s);
+  ns := '';
+  n  := 1;
+  while (n <= length(s)) and (s[n] in ['$','0'..'9','a'..'f','A'..'F']) do
+  begin
+    ns := ns + s[n];
+    Inc(n);
+  end;
+  Result := StrToIntDef(ns, clWindowBackground);
+  Delete(s, 1, length(ns));
+  SkipSpaces(s);
+  CheckSymbol(s, ')');
 end;
 
 function GetIdentifier(var s: string): string;

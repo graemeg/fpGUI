@@ -327,10 +327,7 @@ end;
 
 procedure TfpgAbstractSpinEdit.HandlePaint;
 begin
-    Canvas.Clear(BackgroundColor);
-    if FButtonUp.HasHandle then
-      fpgPostMessage(self, FButtonUp, FPGM_PAINT);
-//    FButtonDown.Invalidate;
+  Canvas.Clear(BackgroundColor);
 end;
 
 procedure TfpgAbstractSpinEdit.HandleResize(AWidth, AHeight: TfpgCoord);
@@ -385,15 +382,11 @@ var
 begin
   r := AButton.GetClientRect;
 
-  InflateRect(r, -1, -1); // button borders
+  InflateRect(r, -2, -2); // button borders
   if AButton.Down then
     OffsetRect(r, 1, 1);
 
-  // TfpgRect to TRect
-  Result.Left := r.Left;
-  Result.Top := r.Top;
-  Result.Right := r.Right;
-  Result.Bottom := r.Bottom;
+  Result := fpgRectToRect(r);
 end;
 
 procedure TfpgAbstractSpinEdit.ButtonUpPaint(Sender: TObject);
@@ -707,12 +700,22 @@ begin
     begin
       FValue      := FValue + FIncrement;
       FEdit.Value := FValue;
+    end
+    else if not IsMaxLimitReached then
+    begin
+      FValue      := FMaxValue;
+      FEdit.Value := FValue;
     end;
 
   if KeyCode = KeyDown then
     if FEdit.Value - Increment >= FMinValue then
     begin
       FValue      := FValue - FIncrement;
+      FEdit.Value := FValue;
+    end
+    else if not IsMinLimitReached then
+    begin
+      FValue      := FMinValue;
       FEdit.Value := FValue;
     end;
 
@@ -1110,9 +1113,13 @@ begin
     begin
       FValue      := 0;
       FEdit.Value := FValue;
+      DoOnChange;
     end
     else if (StrToInt(FEdit.Text) <= FMaxValue) and (StrToInt(FEdit.Text) >= FMinValue) then
-      FValue      := FEdit.Value
+    begin
+      FValue      := FEdit.Value;
+      DoOnChange;
+    end
     else
       FEdit.Value := FValue;
 
@@ -1121,6 +1128,13 @@ begin
     begin
       Inc(FValue, FIncrement);
       FEdit.Value := FValue;
+      DoOnChange;
+    end
+    else if not IsMaxLimitReached then
+    begin
+      FValue      := FMaxValue;
+      FEdit.Value := FValue;
+      DoOnChange;
     end;
 
   if KeyCode = KeyDown then
@@ -1128,18 +1142,27 @@ begin
     begin
       Dec(FValue, FIncrement);
       FEdit.Value := FValue;
+      DoOnChange;
+    end
+    else if not IsMinLimitReached then
+    begin
+      FValue      := FMinValue;
+      FEdit.Value := FValue;
+      DoOnChange;
     end;
 
   if KeyCode = KeyPageUp then
   begin
     FValue      := FMaxValue;
     FEdit.Value := FValue;
+    DoOnChange;
   end;
 
   if KeyCode = KeyPageDown then
   begin
     FValue      := FMinValue;
     FEdit.Value := FValue;
+    DoOnChange;
   end;
 
   EnableButtons;

@@ -4,9 +4,8 @@
 
 <module name="fpg_wuline">
 <short>Xioalin Wu's anti-aliased line drawing algorithm implementation</short>
-<descr><printshort id="fpg_wuline"/>. For more details see the following Wikipedia page:
-http://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm
-</descr>
+<descr><p><printshort id="fpg_wuline"/>. For more details see the following Wikipedia page:
+<url href="http://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm" /></p></descr>
 
 </module>
 

@@ -25,7 +25,8 @@ uses
   Classes,
   SysUtils,
   fpg_impl,
-  syncobjs; // TCriticalSection usage
+  syncobjs, // TCriticalSection usage
+  URIParser, variants, contnrs;
 
 type
   TfpgCoord       = integer;     // we might use floating point coordinates in the future...
@@ -59,7 +60,7 @@ type
 
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
       mcSizeNWSE, mcSizeNESW, mcSizeSWNE, mcSizeSENW, mcMove, mcHourGlass,
-      mcHand);
+      mcHand, mcDrag, mcNoDrop);
 
   TGradientDirection = (gdVertical,     // Fill vertical
                         gdHorizontal);  // Fill Horizontal
@@ -69,6 +70,9 @@ type
   // If you have to convert this to an Integer, mrNone = 0 etc.
   TfpgModalResult = (mrNone, mrOK, mrCancel, mrYes, mrNo, mrAbort, mrRetry,
       mrIgnore, mrAll, mrNoToAll, mrYesToAll);
+
+  TfpgDropAction = (daIgnore, daCopy, daMove, daLink, daAsk);
+  TfpgDropActions = set of TfpgDropAction;
 
 const
   MOUSE_LEFT       = 1;
@@ -95,21 +99,20 @@ const
   FPGM_POPUPCLOSE  = 17;
   FPGM_HINTTIMER   = 18;
   FPGM_FREEME      = 19;
+  FPGM_DROPENTER   = 20;
+  FPGM_DROPEXIT    = 21;
   FPGM_USER        = 50000;
   FPGM_KILLME      = MaxInt;
 
   // The special keys, based on the well-known keyboard scan codes
   {$I keys.inc}
 
-  { Default fpGUI help viewer }
-  FPG_HELPVIEWER = 'docview';
 
 var
   FPG_DEFAULT_FONT_DESC: string = 'Arial-10:antialias=true';
 
 const
   UserNamedColorStart   = 128;
-
   {$I predefinedcolors.inc}
 
 type
@@ -123,6 +126,22 @@ type
     function  Right: TfpgCoord;
     procedure SetBottom(Value: TfpgCoord);
     procedure SetRight(Value: TfpgCoord);
+  end;
+
+
+  TfpgPoint = object  // not class for static allocations
+    X: integer;
+    Y: integer;
+    procedure SetPoint(AX, AY: integer);
+    function  ManhattanLength: integer;      { See URL for explanation http://en.wikipedia.org/wiki/Taxicab_geometry }
+    function  ManhattanLength(const PointB: TfpgPoint): integer;
+  end;
+
+
+  TfpgSize = object  // not class for static allocations
+    W: integer;
+    H: integer;
+    procedure SetSize(AWidth, AHeight: integer);
   end;
 
 
@@ -416,6 +435,8 @@ type
     FSizeIsDirty: Boolean;
     FPosIsDirty: Boolean;
     FMouseCursorIsDirty: Boolean;
+    FOnDragStartDetected: TNotifyEvent;
+    FDragActive: boolean;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
@@ -426,6 +447,9 @@ type
     function    DoWindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint; virtual; abstract;
     procedure   DoSetWindowTitle(const ATitle: string); virtual; abstract;
     procedure   DoSetMouseCursor; virtual; abstract;
+    procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
+    procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
+    procedure   DoDragStartDetected; virtual;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
     function    GetCanvas: TfpgCanvasBase; virtual;
@@ -438,6 +462,7 @@ type
     procedure   SetWidth(const AValue: TfpgCoord);
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
+    property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
@@ -453,6 +478,8 @@ type
     procedure   MoveWindow(const x: TfpgCoord; const y: TfpgCoord);
     function    WindowToScreen(ASource: TfpgWindowBase; const AScreenPos: TPoint): TPoint;
     function    HasParent: Boolean; override;
+    function    GetClientRect: TfpgRect; virtual;
+    function    GetBoundsRect: TfpgRect; virtual;
     procedure   ActivateWindow; virtual; abstract;
     procedure   CaptureMouse; virtual; abstract;
     procedure   ReleaseMouse; virtual; abstract;
@@ -466,8 +493,8 @@ type
     property    Height: TfpgCoord read FHeight write SetHeight;
     property    MinWidth: TfpgCoord read FMinWidth write FMinWidth;
     property    MinHeight: TfpgCoord read FMinHeight write FMinHeight;
-    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth;
-    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight;
+    property    MaxWidth: TfpgCoord read FMaxWidth write FMaxWidth default 0;
+    property    MaxHeight: TfpgCoord read FMaxHeight write FMaxHeight default 0;
     property    Canvas: TfpgCanvasBase read GetCanvas;
     property    Parent: TfpgWindowBase read GetParent write SetParent;
     property    MouseCursor: TMouseCursor read FMouseCursor write SetMouseCursor;
@@ -531,7 +558,7 @@ type
     procedure   DoSetText(const AValue: TfpgString); virtual; abstract;
     procedure   InitClipboard; virtual; abstract;
   public
-    constructor Create;
+    constructor Create; virtual;
     property    Text: TfpgString read DoGetText write DoSetText;
   end;
 
@@ -605,6 +632,54 @@ type
   end;
 
 
+  TfpgMimeDataItem = class(TObject)
+  public
+    format: TfpgString;   { mime string type }
+    data: Variant;
+    constructor Create(const AFormat: TfpgString; const AData: variant); reintroduce;
+  end;
+
+
+  TfpgMimeDataBase = class(TObject)
+  private
+    { TODO: This is wrong, we must have one Data Storage object }
+    FDataList: TObjectList;
+    FUrlList: TList;
+    function    GetItem(AIndex: Integer): TfpgMimeDataItem;
+    function    Geturls: TList;
+    procedure   Seturls(const AValue: TList);
+    function    GetText: TfpgString;
+    procedure   SetText(const AValue: TfpgString);
+    function    GetHTML: TfpgString;
+    procedure   SetHTML(const AValue: TfpgString);
+    function    GetCount: integer;
+  public
+    constructor Create;
+    destructor  Destroy; override;
+    procedure   Clear;
+    function    HasFormat(const AMimeType: TfpgString): boolean;
+    function    Formats: TStrings;
+    function    GetData(const AMimeType: TfpgString): Variant;
+    procedure   SetData(const AMimeType: TfpgString; const AData: Variant);
+    property    Items[AIndex: Integer]: TfpgMimeDataItem read GetItem; default;
+    property    urls: TList read Geturls write Seturls;
+    property    Text: TfpgString read GetText write SetText;
+    property    HTML: TfpgString read GetHTML write SetHTML;
+    property    Count: integer read GetCount;
+  end;
+
+  TfpgDragBase = class(TObject)
+  protected
+    FDragging: Boolean;
+    FMimeData: TfpgMimeDataBase;
+  public
+    constructor Create;
+    destructor  Destroy; override;
+    function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; virtual; abstract;
+  end;
+
+
+
 { ********  Helper functions  ******** }
 { Keyboard }
 function  KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
@@ -628,11 +703,14 @@ procedure SortRect(var ARect: TRect);
 procedure SortRect(var ARect: TfpgRect);
 procedure SortRect(var left, top, right, bottom: integer);
 
+
+
 implementation
 
 uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
+  fpg_constants,
   typinfo,
   process;
 
@@ -962,11 +1040,15 @@ begin
     GetPropList(Obj.ClassInfo, tkPropsWithDefault, PropInfos);
     { Loop through all the selected properties }
     for Loop := 0 to Count - 1 do
+    begin
       with PropInfos^[Loop]^ do
+      begin
         { If there is supposed to be a default value... }
         if Default <> NoDefault then
           { ...then jolly well set it }
           SetOrdProp(Obj, PropInfos^[Loop], Default)
+      end;
+    end;
   finally
     FreeMem(PropInfos, Count * SizeOf(PPropInfo));
   end;
@@ -1002,6 +1084,35 @@ begin
   Width := Value - Left + 1;
 end;
 
+
+{ TfpgPoint }
+
+procedure TfpgPoint.SetPoint(AX, AY: integer);
+begin
+  X := AX;
+  Y := AY;
+end;
+
+function TfpgPoint.ManhattanLength: integer;
+begin
+  Result := Abs(X) + Abs(Y);
+end;
+
+function TfpgPoint.ManhattanLength(const PointB: TfpgPoint): integer;
+begin
+  Result := Abs(PointB.X-X) + Abs(PointB.Y-Y);
+end;
+
+
+{ TfpgSize }
+
+procedure TfpgSize.SetSize(AWidth, AHeight: integer);
+begin
+  W := AWidth;
+  H := AHeight;
+end;
+
+
 { TfpgWindowBase }
 
 procedure TfpgWindowBase.SetMouseCursor(const AValue: TMouseCursor);
@@ -1028,6 +1139,12 @@ begin
     Result := MaxHeight;
   if Result < MinHeight then
     Result := MinHeight;
+end;
+
+procedure TfpgWindowBase.DoDragStartDetected;
+begin
+  if Assigned(FOnDragStartDetected) then
+    FOnDragStartDetected(self);
 end;
 
 procedure TfpgWindowBase.SetParent(const AValue: TfpgWindowBase);
@@ -1150,6 +1267,7 @@ begin
   FSizeIsDirty := True;
   FMaxWidth := 0;
   FMaxHeight := 0;
+  FDragActive := False;
 end;
 
 procedure TfpgWindowBase.AfterConstruction;
@@ -1203,6 +1321,16 @@ end;
 function TfpgWindowBase.HasParent: Boolean;
 begin
   Result := FParent <> nil;
+end;
+
+function TfpgWindowBase.GetClientRect: TfpgRect;
+begin
+  Result.SetRect(0, 0, Width, Height);
+end;
+
+function TfpgWindowBase.GetBoundsRect: TfpgRect;
+begin
+  Result.SetRect(Left, Top, Width+1, Height+1);
 end;
 
 procedure TfpgWindowBase.SetFullscreen(AValue: Boolean);
@@ -2138,7 +2266,7 @@ var
 begin
   // Default location is in same directory as current running application
   // This location might change in the future.
-  ext := ExtractFileExt(ParamStr(0));
+  ext := fpgExtractFileExt(ParamStr(0));
   Result := fpgExtractFilePath(ParamStr(0)) + FPG_HELPVIEWER + ext;
 end;
 
@@ -2255,6 +2383,7 @@ function TfpgApplicationBase.ContextHelp(const AHelpContext: THelpContext): Bool
 var
   p: TProcess;
 begin
+  Result := False;
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
@@ -2267,6 +2396,7 @@ begin
     end
     else
       p.CommandLine := GetHelpViewer;
+    Result := True;
     p.Execute;
   finally
     p.Free;
@@ -2277,6 +2407,7 @@ function TfpgApplicationBase.KeywordHelp(const AHelpKeyword: string): Boolean;
 var
   p: TProcess;
 begin
+  Result := False;
   p := TProcess.Create(nil);
   try
     if fpgFileExists(HelpFile) then
@@ -2286,6 +2417,7 @@ begin
     end
     else
       p.CommandLine := GetHelpViewer;
+    Result := True;
     p.Execute;
   finally
     p.Free;
@@ -2296,6 +2428,7 @@ end;
 
 constructor TfpgClipboardBase.Create;
 begin
+  inherited Create;
   InitClipboard;
 end;
 
@@ -2415,7 +2548,7 @@ var
 begin
   e := TFileEntry.Create;
   e.Name        := sr.Name;
-  e.Extension   := ExtractFileExt(e.Name);
+  e.Extension   := fpgExtractFileExt(e.Name);
   e.Size        := sr.Size;
   // e.Attributes  := sr.Attr; // this is incorrect and needs to improve!
   e.ModTime     := FileDateToDateTime(sr.Time);
@@ -2627,8 +2760,225 @@ begin
   inherited Create(AOwner);
   FHelpType     := htKeyword;
   FHelpContext  := 0;
+  FHelpKeyword  := '';
   FTagPointer   := nil;
 end;
+
+{ TfpgMimeDataItem }
+
+constructor TfpgMimeDataItem.Create(const AFormat: TfpgString; const AData: variant);
+begin
+  inherited Create;
+  format := AFormat;
+  data := AData;
+end;
+
+
+{ TfpgMimeDataBase }
+
+function TfpgMimeDataBase.Geturls: TList;
+begin
+  { TODO: We should only return data related to MIME type:  text/uri-list }
+  Result := nil;
+end;
+
+function TfpgMimeDataBase.GetItem(AIndex: Integer): TfpgMimeDataItem;
+begin
+  Result := TfpgMimeDataItem(FDataList[AIndex]);
+end;
+
+procedure TfpgMimeDataBase.Seturls(const AValue: TList);
+begin
+  if AValue = nil then
+    raise Exception.Create('Source URI list must not be nil');
+
+  if Assigned(FUrlList) then
+    FUrlList.Free;
+
+  { We take ownership of AValue. Can we do this? }
+  FUrlList := AValue;
+//  FFormats.Clear;
+//  Formats.Add('text/uri-list');
+end;
+
+function TfpgMimeDataBase.GetText: TfpgString;
+var
+  i: integer;
+  s: string;
+begin
+  { TODO: if no text/plain, but we have HTML, we must strip all tags and return that }
+  for i := 0 to Count-1 do
+  begin
+    if Items[i].format = 'text/plain' then
+    begin
+      s := Items[i].data;
+      Result := s;
+      break;
+    end;
+  end;
+end;
+
+procedure TfpgMimeDataBase.SetText(const AValue: TfpgString);
+var
+  i: integer;
+  r: TfpgMimeDataItem;
+begin
+  { remove existing 'text/plain' first }
+  for i := Count-1 downto 0 do
+  begin
+    r := Items[i];
+    if r.format = 'text/plain' then
+    begin
+      FDataList.Remove(r);
+      break;
+    end;
+  end;
+  { now add new structure }
+  r := TfpgMimeDataItem.Create('text/plain', AValue);
+  FDataList.Add(r);
+end;
+
+function TfpgMimeDataBase.GetHTML: TfpgString;
+var
+  i: integer;
+  s: string;
+begin
+  { TODO: if data was HTML, we must strip all tags - regex will make this easy }
+  for i := 0 to Count-1 do
+  begin
+    if Items[i].format = 'text/html' then
+    begin
+      s := Items[i].data;
+      Result := s;
+      break;
+    end;
+  end;
+end;
+
+procedure TfpgMimeDataBase.SetHTML(const AValue: TfpgString);
+var
+  i: integer;
+  r: TfpgMimeDataItem;
+begin
+  { remove existing 'text/html' first }
+  for i := Count-1 downto 0 do
+  begin
+    r := Items[i];
+    if r.format = 'text/html' then
+    begin
+      FDataList.Remove(r);
+      break;
+    end;
+  end;
+  { now add new structure }
+  r := TfpgMimeDataItem.Create('text/html', AValue);
+  FDataList.Add(r);
+end;
+
+function TfpgMimeDataBase.GetCount: integer;
+begin
+  Result := FDataList.Count;
+end;
+
+constructor TfpgMimeDataBase.Create;
+begin
+  inherited Create;
+  FDataList := TObjectList.Create;
+end;
+
+destructor TfpgMimeDataBase.Destroy;
+begin
+  FDataList.Free;
+  inherited Destroy;
+end;
+
+procedure TfpgMimeDataBase.Clear;
+begin
+  FUrlList.Clear;
+  FDataList.Clear;
+end;
+
+function TfpgMimeDataBase.HasFormat(const AMimeType: TfpgString): boolean;
+var
+  i: integer;
+begin
+  Result := False;
+  for i := 0 to Count-1 do
+  begin
+    Result := Items[i].format = AMimeType;
+    if Result then
+      break;
+  end;
+end;
+
+function TfpgMimeDataBase.Formats: TStrings;
+var
+  i: integer;
+  r: TfpgMimeDataItem;
+  s: string;
+begin
+  if Count = 0 then
+    Result := nil
+  else
+  begin
+    Result := TStringList.Create;
+    for i := 0 to Count-1 do
+    begin
+      s := Items[i].format;
+      Result.Add(s);
+    end;
+  end;
+end;
+
+function TfpgMimeDataBase.GetData(const AMimeType: TfpgString): Variant;
+var
+  i: integer;
+begin
+  for i := 0 to Count-1 do
+  begin
+    if Items[i].format = AMimeType then
+    begin
+      Result := Items[i].data;
+      break;
+    end;
+  end;
+end;
+
+procedure TfpgMimeDataBase.SetData(const AMimeType: TfpgString; const AData: Variant);
+var
+  i: integer;
+  r: TfpgMimeDataItem;
+begin
+  { remove existing mime type first }
+  for i := Count-1 downto 0 do
+  begin
+    r := Items[i];
+    if r.format = AMimeType then
+    begin
+      FDataList.Remove(r);
+      break;
+    end;
+  end;
+  { now add new structure }
+  r := TfpgMimeDataItem.Create(AMimeType, AData);
+  FDataList.Add(r);
+end;
+
+
+{ TfpgDragBase }
+
+constructor TfpgDragBase.Create;
+begin
+  inherited Create;
+  FDragging := False;
+end;
+
+destructor TfpgDragBase.Destroy;
+begin
+  FMimeData.Free;
+  inherited Destroy;
+end;
+
 
 end.
 

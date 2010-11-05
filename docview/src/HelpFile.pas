@@ -46,8 +46,11 @@ type
   end;
 
 
+  { THelpFile }
+
   THelpFile = class(TObject)
   private
+    function GetFormatVersion: string;
     function GetStringResourceIDCount: integer;
     function GetNumericResourceIDCount: integer;
   protected
@@ -133,6 +136,7 @@ type
     property NumericResourceIDCount: integer read GetNumericResourceIDCount;
     property Index: TIndex read GetIndex;
     property Filename: string read _FileName;
+    property FormatVersion: string read GetFormatVersion;
 
     property ReferencedFiles: TStringList read _ReferencedFiles;
 
@@ -186,6 +190,7 @@ uses
 //  ACLFileIOUtility,
 //  ACLLanguageUnit;
   fpg_main
+  ,fpg_utils
   ,nvUtilities
   ,ACLStringUtility
   ;
@@ -343,6 +348,11 @@ const
 Function TopicFile( Topic: TTopic ): THelpFile;
 Begin
   Result := Topic.HelpFile as THelpFile;
+end;
+
+function THelpFile.GetFormatVersion: string;
+begin
+  Result := Format('%d.%d', [_pHeader^.version_hi, _pHeader^.version_lo]);
 end;
 
 function THelpFile.GetStringResourceIDCount: integer;
@@ -1219,7 +1229,7 @@ var
   fstream: TFileStream;
   Ext: string;
 begin
-  Ext := ExtractFileExt( Filename );
+  Ext := fpgExtractFileExt( Filename );
   Result := '';
 
   if    SameText( Ext, '.inf' )

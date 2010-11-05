@@ -1,7 +1,7 @@
 {%mainunit fpg_utils.pas}
 
 uses
-  Shellapi;
+  Shellapi, Windows, fpg_constants, fpg_stringutils;
   
 // GDI specific implementations of encoding functions
 
@@ -24,5 +24,24 @@ begin
   except
     // do nothing
   end;
+end;
+
+function fpgFileSize(const AFilename: TfpgString): integer;
+var
+  FindData: TWIN32FindDataW;
+  FindHandle: THandle;
+  Str: widestring;
+begin
+  // Don't assign the widestring to TSearchRec.name because it is of type
+  // string, which will generate a conversion to the system encoding
+  Str := UTF8Decode(AFilename);
+  FindHandle:=Windows.FindFirstFileW(PWideChar(Str), FindData);
+  if FindHandle=Windows.Invalid_Handle_value then
+  begin
+    Result:=-1;
+    exit;
+  end;
+  Result := (int64(FindData.nFileSizeHigh) shl 32)+FindData.nFileSizeLow;
+  Windows.FindClose(FindHandle);
 end;
 

@@ -6,11 +6,21 @@
 <short>All constants used in fpGUI are defined here</short>
 <descr><p><printshort id="fpg_constants"/>. All the text constants defined here,
 are also the ones that get translated to multiple languages. Currently fpGUI
-and translations for: Afrikaans, German, English (default), Spanish, French,
-Italian, Portuguese (Brazil) and Russian.</p>
+has translations for:</p>
+<ul>
+<li>Afrikaans</li>
+<li>German</li>
+<li>English (default language - but is user selectable)</li>
+<li>Spanish</li>
+<li>French</li>
+<li>Italian</li>
+<li>Portuguese (Brazilian)</li>
+<li>Russian</li>
+</ul>
 <p>To change the default (compiled in) language used by fpGUI, simply enabled
-one of the language DEFINES in the interface section of the fpg_constants unit.
-</p>
+one of the language DEFINES in the interface section of the fpg_constants unit.</p>
+<p>For more details on changing the default language of fpGUI Toolkit, see the topic
+"<link id="#fpgui.AdditionalTopics.ChangingDefaultLanguage">Changing the default language</link>".</p>
 </descr>
       <element name="fpgAddColon">
         <short>A utility function to add a colon at the correct location in a string</short>
@@ -26,6 +36,7 @@ one of the language DEFINES in the interface section of the fpg_constants unit.
       <element name="DOUBLECLICK_DISTANCE">
         <short>Maximum distance a mouse pointer can move between two left-clicks and still trigger a double click event</short>
       </element>
+      
     </module>
   </package>
 </fpdoc-descriptions>

@@ -129,7 +129,7 @@ not specified the caption of the message box will be 'Message'.
 <element name="SelectFontDialog">
 <short>A convenience function to show the font selection dialog.</short>
 <seealso>
-  <link id="TfpgFontSelectDialog"/>
+  <link id="fpg_dialogs.TfpgFontSelectDialog">TfpgFontSelectDialog</link>
 </seealso>
 </element>
 

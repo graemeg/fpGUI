@@ -56,6 +56,7 @@ type
     property    Font;
     property    HeaderFont;
   published
+    property    Align;
     property    ColumnCount;
     property    Columns;
     property    FocusRow;
@@ -125,6 +126,7 @@ type
   public
     property    Font;
   published
+    property    Align;
     property    AlternateBGColor;
     property    BackgroundColor;
 //    property    ColResizing;
@@ -133,11 +135,13 @@ type
     property    ColumnWidth;
     property    DefaultColWidth;
     property    DefaultRowHeight;
+    property    Enabled;
     property    FocusCol;
     property    FocusRow;
     property    FontDesc;
     property    HeaderFontDesc;
     property    HeaderHeight;
+    property    HeaderStyle;
     property    Hint;
     property    Options;
     property    ParentShowHint;

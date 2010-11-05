@@ -28,6 +28,10 @@ msgstr ""
 msgid "About %s"
 msgstr ""
 
+#: fpg_constants:rsaddcurrentdirectory
+msgid "Add current directory"
+msgstr ""
+
 #: fpg_constants:rsall
 msgid "All"
 msgstr ""
@@ -80,6 +84,10 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
+#: fpg_constants:rschangetitle
+msgid "Change Title"
+msgstr ""
+
 #: fpg_constants:rscharactermap
 msgid "Character Map"
 msgstr ""
@@ -90,6 +98,10 @@ msgstr ""
 
 #: fpg_constants:rscollection
 msgid "Collection"
+msgstr ""
+
+#: fpg_constants:rsconfigurebookmarks
+msgid "Configure Bookmarks"
 msgstr ""
 
 #: fpg_constants:rsconfirm
@@ -142,6 +154,10 @@ msgstr ""
 
 #: fpg_constants:rsdirectories
 msgid "Directories"
+msgstr ""
+
+#: fpg_constants:rsdirectory
+msgid "Directory"
 msgstr ""
 
 #: fpg_constants:rsdrive
@@ -310,6 +326,14 @@ msgstr ""
 
 #: fpg_constants:rslongmon
 msgid "Monday"
+msgstr ""
+
+#: fpg_constants:rsmovedown
+msgid "Move Down"
+msgstr ""
+
+#: fpg_constants:rsmoveup
+msgid "Move Up"
 msgstr ""
 
 #: fpg_constants:rsname

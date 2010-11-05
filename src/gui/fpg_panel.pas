@@ -73,8 +73,11 @@ type
   protected
     procedure   HandlePaint; override;
   published
+    property    AcceptDrops;
+    property    Align;
     property    BackgroundColor;
     property    BorderStyle;
+    property    Enabled;
     property    Height;
     property    Hint;
     property    Left;
@@ -91,6 +94,10 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
     property    OnMouseDown;
     property    OnMouseMove;
     property    OnMouseUp;
@@ -129,9 +136,12 @@ type
     destructor  Destroy; override;
     property    Font: TfpgFont read FFont;
   published
+    property    AcceptDrops;
+    property    Align;
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taCenter;
     property    BackgroundColor;
     property    BorderStyle;
+    property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Height;
     property    Hint;
@@ -154,6 +164,11 @@ type
     property    WrapText: boolean read GetWrapText write SetWrapText default False;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
+    property    OnPaint;
     property    OnShowHint;
   end;
   
@@ -180,9 +195,12 @@ type
     function    GetClientRect: TfpgRect; override;
     property    Font: TfpgFont read FFont;
   published
+    property    AcceptDrops;
+    property    Align;
     property    Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property    BackgroundColor;
     property    BorderStyle;
+    property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Height;
     property    Hint;
@@ -201,6 +219,11 @@ type
     property    Width;
     property    OnClick;
     property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
+    property    OnPaint;
     property    OnShowHint;
   end;
 
@@ -209,7 +232,7 @@ function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord
          AStyle: TPanelStyle): TfpgBevel;
 
 function CreatePanel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
-         AStyle: TPanelStyle; AALignment: TAlignment= taCenter; ALayout: TLayout= tlCenter;
+         AStyle: TPanelStyle = bsRaised; AALignment: TAlignment= taCenter; ALayout: TLayout= tlCenter;
          AMargin: integer= 2; ALineSpace: integer= 2): TfpgPanel;
 
 function CreateGroupBox(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AText: string;
@@ -333,21 +356,24 @@ begin
   else
     Canvas.SetLineStyle(2, lsSolid);
 
+  { top }
   if FPanelBorder = bsSingle then
     Canvas.DrawLine(0, 0, Width - 1, 0)
   else
     Canvas.DrawLine(0, 1, Width - 1, 1);
 
+  { left }
   if FPanelBorder = bsSingle then
     Canvas.DrawLine(0, 1, 0, Height - 1)
   else
     Canvas.DrawLine(1, 1, 1, Height - 1);
 
   if Style = bsRaised then
-    Canvas.SetColor(clShadow2)
+    Canvas.SetColor(clShadow1)
   else
     Canvas.SetColor(clHilite2);
 
+  { right, then bottom }
   Canvas.DrawLine(Width - 1, 0, Width - 1, Height - 1);
   Canvas.DrawLine(0, Height - 1, Width, Height - 1);
 end;
@@ -597,7 +623,7 @@ begin
   if Style = bsRaised then
     Canvas.SetColor(clHilite2)
   else
-    Canvas.SetColor(clShadow2);
+    Canvas.SetColor(clShadow1);
 
   if FPanelBorder = bsSingle then
   begin
@@ -611,7 +637,7 @@ begin
   end;
 
   if Style = bsRaised then
-    Canvas.SetColor(clShadow2)
+    Canvas.SetColor(clShadow1)
   else
     Canvas.SetColor(clHilite2);
 

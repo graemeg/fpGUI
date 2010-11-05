@@ -10,7 +10,8 @@ Interface
 Uses
   Classes,
   CanvasFontManager,
-  RichTextDocumentUnit, RichTextStyleUnit,
+  RichTextDocumentUnit,
+  RichTextStyleUnit,
   fpg_imagelist;
 
 Type
@@ -117,11 +118,7 @@ Implementation
 
 Uses
   SysUtils
-//  PMWin, BseDos, Dos, ClipBrd, Printers,
-//  ACLUtility,
   ,ACLStringUtility
-//  ACLString,
-//  ControlScrolling;
   ,nvUtilities
   ,fpg_main
   ;
@@ -604,12 +601,12 @@ var
 begin
   case Style.Alignment of
     taLeft:
-      Result := Style.LeftMargin * FontWidthPrecisionFactor;
+      Result := Style.LeftMargin;
 
     taRight:
-      Result :=   Style.LeftMargin * FontWidthPrecisionFactor
+      Result :=   Style.LeftMargin
                 + FLayoutWidth
-                - Style.RightMargin * FontWidthPrecisionFactor
+                - Style.RightMargin
                 - Line.Width;
 
     taCenter:
@@ -620,10 +617,9 @@ begin
         // |<-----line width------>               |
         // space = layoutw-rm-linew
         SpaceOnLine :=   FLayoutWidth
-                       - Style.RightMargin * FontWidthPrecisionFactor
+                       - Style.RightMargin
                        - Line.Width; // Note: line width includes left margin
-        Result :=   Style.LeftMargin * FontWidthPrecisionFactor
-                  + SpaceOnLine div 2;
+        Result :=   Style.LeftMargin + (SpaceOnLine div 2);
       end;
   end;
 end;
@@ -644,13 +640,12 @@ Var
   NewMarginX: longint;
   StartedDrawing: boolean;
 begin
-  Line := TLayoutLine(FLines[ LineIndex ]);
-  P := Line.Text;
-  EndP := Line.Text + Line.Length;
-
+  Line  := TLayoutLine(FLines[ LineIndex ]);
+  P     := Line.Text;
+  EndP  := Line.Text + Line.Length;
   Style := Line.Style;
-  FFontManager.SetFont( Style.Font );
 
+  FFontManager.SetFont( Style.Font );
   StartedDrawing := false;
 
   Link := '';
@@ -674,8 +669,7 @@ begin
           // so work out alignment
           X := GetStartX( Style, Line );
 
-          if X div FontWidthPrecisionFactor
-             > XToFind then
+          if X > XToFind then
           begin
             // found before the start of the line
             // don't set link
@@ -690,8 +684,7 @@ begin
         // Now find out how wide the thing is
         inc( X, GetElementWidth( Element ) );
 
-        if X div FontWidthPrecisionFactor
-           > XToFind then
+        if X > XToFind then
         begin
           // found
           Offset := PCharDiff( P, Line.Text );
@@ -718,7 +711,7 @@ begin
             PerformStyleTag( Element.Tag,
                              Style,
                              X );
-            NewMarginX := Style.LeftMargin * FontWidthPrecisionFactor;
+            NewMarginX := Style.LeftMargin;
             if NewMarginX > X then
             begin
               //skip across...
@@ -774,7 +767,7 @@ begin
 
         if GetCharIndex( P ) - GetCharIndex( Line.Text ) >= Offset then
         begin
-          X := X div FontWidthPrecisionFactor;
+          X := X;
           // found
           exit;
         end;
@@ -796,7 +789,7 @@ begin
                          Style,
                          X );
 
-        NewMarginX := Style.LeftMargin * FontWidthPrecisionFactor;
+        NewMarginX := Style.LeftMargin;
         if NewMarginX > X then
         begin
           //skip across...
@@ -811,7 +804,7 @@ begin
   if not StartedDrawing then
     X := GetStartX( Style, Line );
 
-  X := X div FontWidthPrecisionFactor;
+  X := X;
 end;
 
 function TRichTextLayout.GetLineFromPosition( YToFind: longint;
@@ -836,7 +829,7 @@ begin
   begin
     LineHeight := TLayoutLine(FLines[ LineIndex ]).Height;
     if     ( YToFind >= Y )
-       and ( YToFind < Y + LineHeight ) then
+       and ( YToFind < (Y + LineHeight)) then
       begin
         // YToFind is within the line
         Result := tpWithinText;
@@ -844,7 +837,7 @@ begin
         exit;
       end;
 
-    inc( Y, TLayoutLine(FLines[ LineIndex ]).Height );
+    inc( Y, LineHeight );
     inc( LineIndex );
   end;
 
@@ -933,9 +926,7 @@ begin
       if IsValidBitmapIndex( BitmapIndex ) then
       begin
         Bitmap := FImages.Item[BitmapIndex].Image;
-        Result := Trunc(Bitmap.Width
-                  * FontWidthPrecisionFactor
-                  * FHorizontalImageScale);
+        Result := Trunc(Bitmap.Width * FHorizontalImageScale);
       end;
     end;
 
