@@ -114,6 +114,7 @@ uses
   ,fpg_utils
   ,fpg_stringutils
   ,fpg_constants
+  ,fpg_widget
   ,frm_configureide
   ,frm_projectoptions
   ,frm_debug
@@ -125,6 +126,7 @@ uses
   ,UnitList
   ,BuilderThread
   ,dbugintf
+  ,ideutils
   ;
 
 
@@ -174,10 +176,14 @@ end;
 procedure TMainForm.miSearchProcedureList(Sender: TObject);
 var
   s: TfpgString;
+  edt: TfpgTextEdit;
 begin
   s := pcEditor.ActivePage.Hint;
   if s <> '' then
-    DisplayProcedureList(s);
+  begin
+    edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+    DisplayProcedureList(s, edt);
+  end;
 end;
 
 procedure TMainForm.miAboutFPGuiClicked(Sender: TObject);
@@ -592,10 +598,12 @@ var
   s: TfpgString;
   r: TfpgString;
 begin
+  TempHourGlassCursor(TfpgWidget(self));
   s := cMacro_Compiler + ' -FU' +cMacro_Target+' -Fu' + cMacro_FPGuiLibDir;
   writeln('source string = ', s);
   r := GMacroList.ExpandMacro(s);
   writeln('expanded string = ', r);
+  sleep(5000);
 end;
 
 function TMainForm.GetUnitsNode: TfpgTreeNode;
