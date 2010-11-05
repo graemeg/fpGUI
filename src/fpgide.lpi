@@ -36,7 +36,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="15">
       <Unit0>
         <Filename Value="fpgide.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -107,10 +107,18 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="frm_procedurelist"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="mpaslex.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="mPasLex"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="9"/>
+    <Target>
+      <Filename Value="fpgide.elf32"/>
+    </Target>
     <SearchPaths>
       <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>

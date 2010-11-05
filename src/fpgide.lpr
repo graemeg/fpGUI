@@ -8,7 +8,7 @@ uses
   {$ENDIF}
   Classes, fpg_base, fpg_main, frm_main, frm_configureide, ideconst, idemacros,
   frm_debug, project, unitlist, frm_projectoptions, ideutils, builderthread,
-  ideimages, stringhelpers, frm_procedurelist;
+  ideimages, stringhelpers, frm_procedurelist, mPasLex;
 
 
 procedure MainProc;
