@@ -2287,10 +2287,6 @@ begin
     if not HandleIsValid then
       AllocateWindowHandle;
     XMapWindow(xapplication.Display, FWinHandle);
-
-    if (Parent = nil) and (WindowType <> wtPopup) then
-      XMoveWindow(fpgApplication.Display, FWinHandle, FLeft, FHeight);
-
     Include(FWinFlags, xwsfMapped);
     // Fullscreen can only be set visible (mapped) windows.
     if waFullScreen in FWindowAttributes then
