@@ -1038,7 +1038,7 @@ begin
   FHeightMargin       := 2;
   FMaxLength          := 0; // no limit
   FText               := '';
-  FCursorPos          := UTF8Length(FText);
+  FCursorPos          := 0;
   FSelStart           := FCursorPos;
   FSelOffset          := 0;
   FTextOffset         := 0;
@@ -1129,7 +1129,7 @@ begin
     s := AValue;
 
   FText       := s;
-  FCursorPos  := UTF8Length(FText);
+  FCursorPos  := 0;
   FSelStart   := FCursorPos;
   FSelOffset  := 0;
   FTextOffset := 0;
