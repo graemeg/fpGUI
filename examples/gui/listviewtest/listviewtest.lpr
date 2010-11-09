@@ -4,7 +4,7 @@ program listviewtest;
 
 uses
   Classes, sysutils,
-  fpg_base, fpg_main, fpg_listview, fpg_form, fpg_button, fpg_edit, fpg_checkbox;
+  fpg_base, fpg_main, fpg_listview, fpg_form, fpg_button, fpg_edit, fpg_checkbox, fpg_splitter, fpg_panel;
   
 type
 
@@ -13,6 +13,7 @@ type
     FEdit: TfpgEdit;
     FAddButton: TfpgButton;
     FListView: TfpgListView;
+    FSplitter: TfpgSplitter;
     FTmpListView: TfpgListView;
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
@@ -77,31 +78,46 @@ end;
 constructor TMainForm.Create(AOwner: TComponent);
 var
   LVColumn: TfpgLVColumn;
+  TopPanel,
+  BottomPanel: TfpgPanel;
 begin
   inherited Create(AOwner);
 
   WindowTitle := 'ListView Test';
-  SetPosition(200, 200, 610, 455);
+  SetPosition(200, 200, 640, 480);
 
-  FListView := TfpgListView.Create(Self);
+
+  BottomPanel := TfpgPanel.Create(Self);
+  BottomPanel.Align  := alBottom;
+  BottomPanel.Height := 40;
+  BottomPanel.Parent := Self;
+  BottomPanel.Text   := '';
+
+  TopPanel         := TfpgPanel.Create(Self);
+  TopPanel.Align   := alClient;
+  TopPanel.Parent  := Self;
+  TopPanel.Text    := '';
+
+
+  FListView := TfpgListView.Create(TopPanel);
   with FListView do begin
-    Parent := Self;
-    Top := 10;
-    Left := 10;
+    Parent := TopPanel;
+    Align := alLeft;
     Width := 320;
-    Height := 400;
     OnPaintItem := @PaintItem;
     OnSelectionChanged := @ItemSelectionChanged;
     MultiSelect := True;
   end;
 
-  FTmpListView := TfpgListView.Create(Self);
+  FSplitter := TfpgSplitter.Create(TopPanel);
+  with FSplitter do begin
+    Parent := TopPanel;
+    Align:=alLeft;
+  end;
+  FTmpListView := TfpgListView.Create(TopPanel);
   with FTmpListView do begin
-    Parent := Self;
-    Top := 10;
-    Left := 335;
-    Width := 270;
-    Height := 400;
+    Parent := TopPanel;
+    Align := alClient;
     //OnPaintItem := @PaintItem;
     Items := FListView.Items;
   end;
@@ -112,7 +128,7 @@ begin
   LVColumn.Width := 150;
   LVColumn.Height := 50;
   LVColumn.Resizable := True;
-  LVColumn.Alignment := taRightJustify;
+  LVColumn.Alignment := taLeftJustify;
   FListView.Columns.Add(LVColumn);
   FTmpListView.Columns.Add(LVColumn);
   
@@ -137,44 +153,45 @@ begin
   LVColumn.ColumnIndex := 2;
 
 
-  FEdit := TfpgEdit.Create(Self);
+  FEdit := TfpgEdit.Create(BottomPanel);
   with FEdit do begin
-    Parent := Self;
-    Top := 420;
+    Parent := BottomPanel;
+    Top := 10;
     Left := 10;
     Width := 100;
   end;
 
-  FAddButton := TfpgButton.Create(Self);
+  FAddButton := TfpgButton.Create(BottomPanel);
   with FAddButton do begin
-    Parent := Self;
-    Top := 420;
+    Parent := BottomPanel;
+    Top := 10;
     Left := 120;
     Width := 80;
     Text := 'Add';
     OnClick := @AddBttn;
   end;
 
-  FQuitButton := TfpgButton.Create(Self);
+  FQuitButton := TfpgButton.Create(BottomPanel);
   with FQuitButton do begin
-    Parent := Self;
+    Parent := BottomPanel;
     ImageName := 'stdimg.Quit';
     ShowImage := True;
-    Top := 420;
-    Left := 210;
+    Top := 10;
+    Left := -10;
     Width := 80;
     Text := 'Quit';
+    Anchors := [anRight, anBottom];
     OnClick := @CloseBttn;
   end;
   
-  FCheck := TfpgCheckBox.Create(Self);
+  FCheck := TfpgCheckBox.Create(BottomPanel);
   with FCheck do begin
-    Parent := Self;
-    Top := 420;
-    Left := 290;
+    Parent := BottomPanel;
+    Top := 10;
+    Left := 205;
     Width := 110;
     Checked := True;
-    Text := 'ShowHeaders';
+    Text := 'Show Headers';
     OnChange := @ShowHeadersChange;
   end;
 
