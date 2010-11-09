@@ -171,13 +171,16 @@ type
   end;
   
 
+  { TfpgListView }
+
   TfpgListView = class(TfpgWidget, IfpgLVItemViewer)
+  private
+    procedure SetShiftIsPressed(const AValue: Boolean);
   private
     FItemIndex: Integer;
     FMultiSelect: Boolean;
     FOnPaintColumn: TfpgLVPaintColumnEvent;
     FOnSelectionChanged: TfpgLVItemSelectEvent;
-    FShiftCount: Integer;
     FSelectionFollowsFocus: Boolean;
     FSelectionShiftStart: Integer;
     FOnColumnClick: TfpgLVColumnClickEvent;
@@ -193,6 +196,7 @@ type
     FResizingColumn: TfpgLVColumn;
     FMouseDownPoint: TPoint;
     FScrollBarNeedsUpdate: Boolean;
+    FShiftIsPressed: Boolean;
     function    GetItemHeight: Integer;
     procedure   SetItemIndex(const AValue: Integer);
     procedure   SetItems(const AValue: TfpgLVItems);
@@ -209,8 +213,6 @@ type
     //
     function    GetVisibleColumnsWidth: Integer;
     function    GetItemAreaHeight: Integer;
-    procedure   StartShiftSelection;
-    procedure   EndShiftSelection;
     procedure   SelectionSetRangeEnabled(AStart, AEnd: Integer; AValue: Boolean);
     procedure   SelectionToggleRange(AStart, AEnd: Integer; const ShiftState: TShiftState; IgnoreStartIndex: Boolean);
     procedure   SelectionClear;
@@ -223,6 +225,7 @@ type
     procedure   DoRepaint;
     procedure   DoColumnClick(Column: TfpgLVColumn; Button: Integer);
     procedure   HandleHeaderMouseMove(x, y: Integer; btnstate: word; Shiftstate: TShiftState);
+    property    ShiftIsPressed: Boolean read FShiftIsPressed write SetShiftIsPressed;
   protected
     procedure   MsgPaint(var msg: TfpgMessageRec); message FPGM_PAINT;
     procedure   HandleMouseScroll(x, y: integer; shiftstate: TShiftState; delta: smallint); override;
@@ -559,6 +562,37 @@ begin
   FOnColumnClick:=AValue;
 end;
 
+
+procedure TfpgListView.SetShiftIsPressed(const AValue: Boolean);
+var
+  i: Integer;
+begin
+  if AValue = FShiftIsPressed then
+    Exit;
+  FShiftIsPressed:=AValue;
+  if AValue then
+  begin
+    if FItems.Count = 0 then
+      Exit;
+    FSelectionShiftStart := FItemIndex;
+    // ensure start index is at least 0
+    if FSelectionShiftStart = -1 then
+      Inc(FSelectionShiftStart);
+    FOldSelected.Clear;
+    FOldSelected.Capacity := FSelected.Capacity;
+    for i := 0 to FSelected.Count-1 do
+    begin
+      FOldSelected.Add(FSelected.Items[i]);
+    end;
+
+  end
+  else
+  begin
+    FSelectionShiftStart := -1;
+    FOldSelected.Clear;
+  end;
+end;
+
 function TfpgListView.GetItemHeight: Integer;
 begin
   Result := Canvas.Font.Height + 4;
@@ -622,40 +656,11 @@ begin
     Dec(Result,FHScrollBar.Height);
 end;
 
-procedure TfpgListView.StartShiftSelection;
-var
-  I: Integer;
-begin
-  Inc(FShiftCount);
-  if FItems.Count = 0 then
-    Exit;
-  if FShiftCount> 1 then
-    Exit;
-  FSelectionShiftStart := FItemIndex;
-  if FSelectionShiftStart = -1 then
-    Inc(FSelectionShiftStart);
-  FOldSelected.Clear;
-  FOldSelected.Capacity := FSelected.Capacity;
-  for I := 0 to FSelected.Count-1 do
-  begin
-    FOldSelected.Add(FSelected.Items[I]);
-  end;
-end;
-
-procedure TfpgListView.EndShiftSelection;
-begin
-  Dec(FShiftCount);
-  if FShiftCount > 0 then
-    Exit;
-  FSelectionShiftStart := -1;
-  FOldSelected.Clear;
-end;
 
 procedure TfpgListView.SelectionSetRangeEnabled(AStart, AEnd: Integer; AValue: Boolean);
 var
   TmpI: LongInt;
   I: LongInt;
-  ShouldShow: Boolean;
 begin
   if AStart > AEnd then
   begin
@@ -673,12 +678,8 @@ begin
     Exit;
   for I := AStart to AEnd do
   begin
-    ShouldShow := AValue;
-    if FOldSelected.IndexOf(FItems.Item[I]) > -1 then
-      ShouldShow := not AValue;
-
     if I <> FSelectionShiftStart then
-      ItemSetSelected(FItems.Item[I], ShouldShow);
+      ItemSetSelected(FItems.Item[I], AValue);
   end;
 end;
 
@@ -909,7 +910,7 @@ var
   HeaderX: Integer;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
-  
+  ShiftIsPressed := ssShift in shiftstate;
   cRect := GetClientRect;
   
   FMouseDownPoint := Point(X,Y);
@@ -998,7 +999,7 @@ var
   Column: TfpgLVColumn;
 begin
   inherited HandleRMouseDown(x, y, shiftstate);
-
+  ShiftIsPressed := ssShift in shiftstate;
   cRect := GetClientRect;
 
   if not PtInRect(cRect, Point(X,Y)) then
@@ -1109,13 +1110,9 @@ var
 begin
   consumed := True;
   OldIndex := FItemIndex;
+  ShiftIsPressed := ssShift in shiftstate;
   //WriteLn('Got key: ',IntToHex(keycode, 4));
   case keycode of
-    keyShift, keyShiftR:
-    begin
-      if FMultiSelect then
-        StartShiftSelection;
-    end;
     keyUp:
     begin
       if ItemIndex > 0 then
@@ -1190,18 +1187,15 @@ end;
 
 procedure TfpgListView.HandleKeyRelease(var keycode: word;
   var shiftstate: TShiftState; var consumed: boolean);
+var
+  CacheShiftPressed: Boolean;
 begin
-  consumed := True;
-  case keycode of
-    keyShift, keyShiftR:
-    begin
-      EndShiftSelection;
-    end;
-  else
-    consumed := False;
-    inherited HandleKeyRelease(keycode, shiftstate, consumed);
-  end;
-  
+  CacheShiftPressed := ShiftIsPressed;
+
+  ShiftIsPressed := ssShift in shiftstate;
+
+  consumed := CacheShiftPressed <> ShiftIsPressed;
+
 end;
 
 procedure TfpgListView.HandlePaint;
@@ -1384,7 +1378,10 @@ begin
     
     if lvppFocused in PaintPart then
     begin
-      Canvas.Color := clBlack;
+      if lisSelected in ItemState then
+        Canvas.Color := not clSelection
+      else
+        Canvas.Color := clSelection;
       Canvas.SetLineStyle(1, lsDot);
       Canvas.DrawRectangle(ItemRect);
     end;
