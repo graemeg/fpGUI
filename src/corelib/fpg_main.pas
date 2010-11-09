@@ -2237,7 +2237,11 @@ begin
     lx := (r.height div 2) - 3;
     lx := r.right-lx-2;
     ly := y + ((r.Height-img.Height) div 2);
+    if mifSelected in AFlags then
+      img.Invert;  // invert modifies the original image, so we must restore it later
     ACanvas.DrawImage(lx, ly, img);
+    if mifSelected in AFlags then
+      img.Invert;  // restore image to original state
   end;
 end;
 
