@@ -38,6 +38,7 @@ end;
 procedure TMainForm.AddBttn(Sender: TObject);
 var
   Item: TfpgLVItem;
+  I: Integer;
 begin
   FListView.BeginUpdate;
   FTmpListView.BeginUpdate;
@@ -72,7 +73,7 @@ end;
 procedure TMainForm.ItemSelectionChanged(ListView: TfpgListView;
   Item: TfpgLVItem; ItemIndex: Integer; Selected: Boolean);
 begin
-  WriteLn('Item changed: ', ItemIndex, ' ', Item.Caption, ' ',Selected);
+  //WriteLn('Item changed: ', ItemIndex, ' ', Item.Caption, ' ',Selected);
 end;
 
 constructor TMainForm.Create(AOwner: TComponent);
