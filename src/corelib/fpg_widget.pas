@@ -98,6 +98,7 @@ type
     FTextColor: TfpgColor;
     FIsContainer: Boolean;
     FOnClickPending: Boolean;
+    FIgnoreDblClicks: Boolean;
     procedure   SetAcceptDrops(const AValue: boolean); virtual;
     function    GetOnShowHint: THintEvent; virtual;
     procedure   SetOnShowHint(const AValue: THintEvent); virtual;
@@ -177,6 +178,7 @@ type
     property    Anchors: TAnchors read FAnchors write FAnchors default [anLeft, anTop];
     property    Align: TAlign read FAlign write SetAlign default alNone;
     property    Hint: TfpgString read GetHint write SetHint;
+    property    IgnoreDblClicks: Boolean read FIgnoreDblClicks write FIgnoreDblClicks;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
@@ -671,7 +673,7 @@ begin
       begin
         FOnClickPending := True;
         mb := mbLeft;
-        if uLastClickWidget = self then
+        if (uLastClickWidget = self) and (not FIgnoreDblClicks) then
           IsDblClick := ((fpgGetTickCount - uLastClickTime) <= DOUBLECLICK_MS)
             and (Abs(uLastClickPoint.x - msg.Params.mouse.x) <= DOUBLECLICK_DISTANCE)
             and (Abs(uLastClickPoint.y - msg.Params.mouse.y) <= DOUBLECLICK_DISTANCE)

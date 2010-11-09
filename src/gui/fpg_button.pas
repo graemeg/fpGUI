@@ -316,6 +316,7 @@ begin
   FAllowAllUp   := False;
   FState        := 0;
   FAllowMultiLineText := False;
+  FIgnoreDblClicks := True;
 end;
 
 destructor TfpgBaseButton.Destroy;
