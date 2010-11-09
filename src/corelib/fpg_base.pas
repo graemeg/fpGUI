@@ -526,7 +526,7 @@ type
     procedure   PopModalForm;
     function    PrevModalForm: TfpgWindowBase;
     function    RemoveWindowFromModalStack(AForm: TfpgWindowBase): Integer;
-    procedure   CreateForm(AFormClass: TComponentClass; out AForm: TfpgWindowBase);
+    procedure   CreateForm(InstanceClass: TComponentClass; out Reference);
     function    GetScreenWidth: TfpgCoord; virtual; abstract;
     function    GetScreenHeight: TfpgCoord; virtual; abstract;
     function    Screen_dpi_x: integer; virtual; abstract;
@@ -711,6 +711,7 @@ uses
   fpg_main,  // needed for fpgApplication & fpgNamedColor
   fpg_utils, // needed for fpgFileList
   fpg_constants,
+  fpg_form,  // needed for fpgApplication.CreateForms()
   typinfo,
   process;
 
@@ -2336,16 +2337,34 @@ begin
   Result := FModalFormStack.Remove(AForm);
 end;
 
-procedure TfpgApplicationBase.CreateForm(AFormClass: TComponentClass;
-  out AForm: TfpgWindowBase);
+procedure TfpgApplicationBase.CreateForm(InstanceClass: TComponentClass; out Reference);
+var
+  Instance: TComponent;
+  ok: boolean;
+  AForm: TfpgForm;
 begin
+  // Allocate the instance, without calling the constructor
+  Instance := TComponent(InstanceClass.NewInstance);
+  // set the Reference before the constructor is called, so that
+  // events and constructors can refer to it
+  TComponent(Reference) := Instance;
+
+  ok:=false;
   try
-    AForm := TfpgWindowBase(AFormClass.Create(self));
+    Instance.Create(Self);
+    ok:=true;
+  finally
+    if not ok then
+    begin
+      TComponent(Reference) := nil;
+    end;
+  end;
+
+  if (Instance is TfpgForm) then
+  begin
+    AForm := TfpgForm(Instance);
     if FMainForm = nil then
       FMainForm := AForm;
-  except
-    AForm := nil;
-    raise;
   end;
 end;
 

@@ -23,6 +23,8 @@ unit fpg_x11;
 {.$Define DNDDEBUG}   // drag-n-drop specific debugging
 
 { TODO : Compiz effects: Menu popup with correct window hint. Same for Combo dropdown window. }
+{ TODO : Under Compiz restoring a window position moves the window down/right the width and height
+         of the window borders. This as something to do with win_gravity = StaticGravity setting. }
 
 interface
 
