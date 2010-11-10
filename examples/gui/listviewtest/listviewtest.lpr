@@ -4,7 +4,7 @@ program listviewtest;
 
 uses
   Classes, sysutils,
-  fpg_base, fpg_main, fpg_listview, fpg_form, fpg_button, fpg_edit, fpg_checkbox, fpg_splitter, fpg_panel;
+  fpg_base, fpg_main, fpg_listview, fpg_form, fpg_button, fpg_edit, fpg_checkbox, fpg_splitter, fpg_panel, fpg_imagelist;
   
 type
 
@@ -29,6 +29,7 @@ type
   end;
 
 { TMainForm }
+
 
 procedure TMainForm.CloseBttn(Sender: TObject);
 begin
@@ -81,12 +82,39 @@ var
   LVColumn: TfpgLVColumn;
   TopPanel,
   BottomPanel: TfpgPanel;
+  IL: TStringList;
+  i: Integer;
+  FImageList: TfpgImageList;
+  FSelectedImageList: TfpgImageList;
+  TmpImage: TfpgImage;
 begin
   inherited Create(AOwner);
 
   WindowTitle := 'ListView Test';
   SetPosition(200, 200, 640, 480);
 
+  IL := TStringList.Create;
+
+  fpgImages.ListImages(IL);
+
+  FImageList := TfpgImageList.Create;
+  FSelectedImageList := TfpgImageList.Create;
+
+  for i := 0 to IL.Count-1 do
+    FImageList.AddImage(fpgImages.GetImage(IL.Strings[i]));
+
+  IL.Free;
+
+  // invert the items for the 'selected' images
+  FImageList.Item[i].Image.ImageFromSource;
+
+  for i := 0 to FImageList.Count-1 do
+  begin
+    TmpImage := FImageList.Item[i].Image.ImageFromSource;
+    TmpImage.Invert;
+    FSelectedImageList.AddImage(TmpImage);
+
+  end;
 
   BottomPanel := TfpgPanel.Create(Self);
   BottomPanel.Align  := alBottom;
@@ -108,6 +136,8 @@ begin
     OnPaintItem := @PaintItem;
     OnSelectionChanged := @ItemSelectionChanged;
     MultiSelect := True;
+    Images := FImageList;
+    ImagesSelected := FSelectedImageList;
   end;
 
   FSplitter := TfpgSplitter.Create(TopPanel);
