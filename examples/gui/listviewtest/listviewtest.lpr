@@ -137,6 +137,7 @@ begin
     OnSelectionChanged := @ItemSelectionChanged;
     MultiSelect := True;
     Images := FImageList;
+    SubItemImages := FImageList;
     ImagesSelected := FSelectedImageList;
   end;
 

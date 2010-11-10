@@ -180,6 +180,30 @@ type
     property    SubItems: TStrings read GetSubItems;
     property    Selected[ListView: TfpgListView]: Boolean read GetSelected write SetSelected;
   end;
+
+  { TfpgListViewSubitems }
+
+  TfpgListViewSubItems = class(TStrings)
+  private
+    FList: TList;
+    FOnChange: TNotifyEvent;
+    function GetImageIndex(ASubIndex: Integer): Integer;
+    procedure SetImageIndex(ASubIndex: Integer; const AValue: Integer);
+    procedure DoChange;
+  protected
+    function    GetObject(Index: Integer): TObject; override;
+    function    Get(Index: Integer): string; override;
+    function    GetCount: Integer; override;
+    procedure   Put(Index: Integer; const S: string); override;
+    procedure   PutObject(Index: Integer; AObject: TObject); override;
+    procedure   Insert(Index: Integer; const S: string); override;
+  public
+    constructor Create;
+    procedure   Delete(Index: Integer); override;
+    property    ImageIndex[ASubIndex: Integer]: Integer read GetImageIndex write SetImageIndex;
+    property    OnChange: TNotifyEvent read FOnChange write FOnChange;
+
+  end;
   
 
   { TfpgListView }
@@ -312,6 +336,13 @@ uses
 type
   // used to access protected methods
   TfpgScrollbarFriend = class(TfpgScrollbar)
+  end;
+
+  PfpgLVSubitemRec = ^TfpgLVSubitemRec;
+  TfpgLVSubitemRec = record
+    AText: String;
+    AObject: TObject;
+    AImageIndex: Integer;
   end;
 
 
@@ -549,8 +580,8 @@ function TfpgLVItem.GetSubItems: TStrings;
 begin
   if FSubItems = nil then
   begin
-    FSubItems := TStringList.Create;
-    TStringList(FSubItems).OnChange := @SubItemsChanged;
+    FSubItems := TfpgListViewSubitems.Create;
+    TfpgListViewSubitems(FSubItems).OnChange := @SubItemsChanged;
   end;
   Result := FSubItems;
 end;
@@ -630,15 +661,24 @@ var
   State: TfpgLVItemStates;
   Item: TfpgLVItem;
   ImgList: TfpgImageList;
+  ImgIndex: Integer;
   ImagesArray: Array[TfpgLVItemStates] of TfpgImageList;
 begin
   Result := nil;
   Item := Items.Item[AItemIndex];
 
+  ImgIndex:=-1;;
   if AColumnIndex = 0 then
-    ImagesArray := FImages
+  begin
+    ImagesArray := FImages;
+    ImgIndex := Item.ImageIndex;
+  end
   else
+  begin
     ImagesArray := FSubItemImages;
+    if (Item.SubItemCount > 0) and (AColumnIndex <= Item.SubItemCount) then
+      ImgIndex := TfpgListViewSubItems(Item.SubItems).ImageIndex[AColumnIndex-1];
+  end;
 
   // later we will make the state preference order configurable
   while (not (PreferredState in AState)) and (PreferredState <> lisNoState) do
@@ -651,14 +691,18 @@ begin
       continue;
     ImgList := ImagesArray[State];
 
-    if (Item.ImageIndex <> -1) and (Item.ImageIndex < ImgList.Count) then
+    if (ImgIndex <> -1) and (ImgIndex < ImgList.Count) then
     begin
-      Result := ImgList.Item[Item.ImageIndex].Image;
+      Result := ImgList.Item[ImgIndex].Image;
     end
     else
     begin
-      if AItemIndex < ImgList.Count then
-        Result := ImgList.Item[AItemIndex].Image;
+      if AColumnIndex = 0 then
+        ImgIndex := AItemIndex
+      else
+        ImgIndex := AColumnIndex-1;
+      if ImgIndex < ImgList.Count then
+        Result := ImgList.Item[ImgIndex].Image;
     end;
     break;
   end;
@@ -1937,6 +1981,82 @@ end;
 destructor TfpgLVColumn.Destroy;
 begin
   inherited Destroy;
+end;
+
+{ TfpgListViewSubitems }
+
+function TfpgListViewSubitems.GetImageIndex(ASubIndex: Integer): Integer;
+begin
+  Result := PfpgLVSubitemRec(FList.Items[ASubIndex])^.AImageIndex;
+end;
+
+procedure TfpgListViewSubitems.SetImageIndex(ASubIndex: Integer;
+  const AValue: Integer);
+begin
+  PfpgLVSubitemRec(FList.Items[ASubIndex])^.AImageIndex:=AValue;
+  DoChange;
+end;
+
+procedure TfpgListViewSubitems.DoChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+end;
+
+function TfpgListViewSubitems.GetObject(Index: Integer): TObject;
+begin
+  Result:=PfpgLVSubitemRec(FList.Items[Index])^.AObject;
+end;
+
+function TfpgListViewSubitems.Get(Index: Integer): string;
+begin
+  Result:=PfpgLVSubitemRec(FList.Items[Index])^.AText;
+end;
+
+function TfpgListViewSubitems.GetCount: Integer;
+begin
+  Result:=FList.Count;
+end;
+
+procedure TfpgListViewSubitems.Put(Index: Integer; const S: string);
+begin
+  PfpgLVSubitemRec(FList.Items[Index])^.AText:=S;
+end;
+
+procedure TfpgListViewSubitems.PutObject(Index: Integer; AObject: TObject);
+var
+  SubItem: PfpgLVSubitemRec;
+begin
+  SubItem := PfpgLVSubitemRec(FList.Items[Index]);
+  SubItem^.AObject := AObject;
+  DoChange;
+end;
+
+procedure TfpgListViewSubitems.Insert(Index: Integer; const S: string);
+var
+  SubItem: PfpgLVSubitemRec;
+begin
+  SubItem:= New(PfpgLVSubitemRec);
+  SubItem^.AText:=S;
+  SubItem^.AImageIndex:=-1;
+  SubItem^.AObject := nil;
+  FList.Insert(Index, SubItem);
+  DoChange;
+end;
+
+constructor TfpgListViewSubitems.Create;
+begin
+  FList:= TList.Create;
+end;
+
+procedure TfpgListViewSubitems.Delete(Index: Integer);
+var
+  SubItem: PfpgLVSubitemRec;
+begin
+  SubItem := PfpgLVSubitemRec(FList.Items[Index]);
+  SubItem^.AText := '';
+  Dispose(SubItem);
+  FList.Delete(Index);
 end;
 
 end.
