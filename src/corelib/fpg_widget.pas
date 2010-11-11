@@ -1417,6 +1417,7 @@ begin
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.SetPosition - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
+  if (FLeft <> ALeft) or (FTop <> ATop) or (FWidth <> AWidth) or (FHeight <> AHeight) then
     MoveAndResize(aleft, atop, awidth, aheight);
 end;
 
