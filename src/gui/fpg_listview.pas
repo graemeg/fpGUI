@@ -1404,14 +1404,6 @@ begin
   fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
   
   ClipRect.SetRect(2, 2, Width-4, Height-4);
-
-  if ShowHeaders then
-  begin
-    PaintHeaders;
-    Inc(ClipRect.Top, HeaderHeight);
-    Dec(ClipRect.Height, HeaderHeight);
-  end;
-  
   Canvas.SetClipRect(ClipRect);
 
   // This paints the small square remaining below the vscrollbar
@@ -1432,6 +1424,8 @@ begin
     
   Canvas.SetClipRect(ClipRect);
   PaintItems;
+  if ShowHeaders then
+    PaintHeaders;
 end;
 
 procedure TfpgListView.HandleResize(awidth, aheight: TfpgCoord);
