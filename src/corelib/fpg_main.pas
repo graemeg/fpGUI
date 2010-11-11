@@ -64,7 +64,7 @@ const
   // version and name constants
   {$I VERSION_FILE.inc}  // this includes the auto generated:  fpGUI_Version = xxx
   fpGUIName    = 'fpGUI Toolkit';
-  fpGUIWebsite = 'http://opensoft.homeip.net/fpgui/';
+  fpGUIWebsite = 'http://opensoft.homeip.net:8080/fpgui/';
 
 const
   txtWordDelims: set of char = [' ', #9, #13, #10];
