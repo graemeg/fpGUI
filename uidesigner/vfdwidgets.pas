@@ -430,6 +430,7 @@ begin
   wc.NameBase := 'CheckBox';
   wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
+  wc.AddProperty('BoxLayout', TPropertyEnum, 'Is checkbox on left or right');
   wc.AddProperty('Checked', TPropertyBoolean, 'Boolean value');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
