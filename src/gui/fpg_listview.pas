@@ -185,7 +185,7 @@ type
 
   TfpgListViewSubItems = class(TStrings)
   private
-    FList: TList;
+    FList: TFPList;
     FOnChange: TNotifyEvent;
     function GetImageIndex(ASubIndex: Integer): Integer;
     procedure SetImageIndex(ASubIndex: Integer; const AValue: Integer);
@@ -196,10 +196,12 @@ type
     function    GetCount: Integer; override;
     procedure   Put(Index: Integer; const S: string); override;
     procedure   PutObject(Index: Integer; AObject: TObject); override;
-    procedure   Insert(Index: Integer; const S: string); override;
   public
     constructor Create;
+    destructor  Destroy; override;
     procedure   Delete(Index: Integer); override;
+    procedure   Clear; override;
+    procedure   Insert(Index: Integer; const S: string); override;
     property    ImageIndex[ASubIndex: Integer]: Integer read GetImageIndex write SetImageIndex;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
 
@@ -1567,9 +1569,10 @@ begin
     if lvppFocused in PaintPart then
     begin
       if lisSelected in ItemState then
-        Canvas.Color := not clSelection
+        Canvas.Color := TfpgColor(not clSelection)
       else
         Canvas.Color := clSelection;
+
       Canvas.SetLineStyle(1, lsDot);
       Canvas.DrawRectangle(ItemRect);
     end;
@@ -2040,7 +2043,14 @@ end;
 
 constructor TfpgListViewSubitems.Create;
 begin
-  FList:= TList.Create;
+  FList:= TFPList.Create;
+end;
+
+destructor TfpgListViewSubItems.Destroy;
+begin
+  Clear;
+  FList.Free;
+  inherited Destroy;
 end;
 
 procedure TfpgListViewSubitems.Delete(Index: Integer);
@@ -2051,6 +2061,14 @@ begin
   SubItem^.AText := '';
   Dispose(SubItem);
   FList.Delete(Index);
+end;
+
+procedure TfpgListViewSubItems.Clear;
+var
+  i: LongInt;
+begin
+  for i := FList.Count downto 0 do
+    Delete(i);
 end;
 
 end.
