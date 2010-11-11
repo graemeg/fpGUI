@@ -20,6 +20,8 @@ unit fpg_form;
 
 {$mode objfpc}{$H+}
 
+{.$Define CStackDebug}
+
 interface
 
 uses
@@ -159,15 +161,13 @@ uses
   fpg_main,
   fpg_popupwindow,
   fpg_menu
-  {$IFDEF DEBUG}
-  ,dbugintf
-  {$ENDIF}
   ;
   
 type
   // to access protected methods
   TfpgMenuBarFriend = class(TfpgMenuBar)
   end;
+
 
 
 function WidgetParentForm(wg: TfpgWidget): TfpgForm;
@@ -323,7 +323,14 @@ begin
 end;
 
 procedure TfpgBaseForm.Show;
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgBaseForm.Show - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
   FVisible := True;
   HandleShow;
 end;
@@ -391,13 +398,29 @@ begin
 end;
 
 procedure TfpgBaseForm.HandleMove(x, y: TfpgCoord);
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgBaseForm.HandleMove - ' + ClassName + ' ('+Name+')');
+  DebugLn(Format('x:%d  y:%d', [x, y]));
+  {$ENDIF}
   ClosePopups;
   inherited HandleMove(x, y);
 end;
 
 procedure TfpgBaseForm.HandleResize(awidth, aheight: TfpgCoord);
+{$IFDEF CStackDebug}
+var
+  i: iinterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  DebugMethodEnter('TfpgBaseForm.HandleResize - ' + ClassName + ' ('+Name+')');
+  DebugLn(Format('w:%d  h:%d', [awidth, aheight]));
+  {$ENDIF}
   ClosePopups;
   inherited HandleResize(awidth, aheight);
 end;
@@ -407,9 +430,12 @@ procedure TfpgBaseForm.HandleKeyPress(var keycode: word;
 var
   i: integer;
   wg: TfpgWidget;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
-  {$IFDEF DEBUG}
-  SendDebug(Classname + '.Keypress');
+  {$IFDEF Debug}
+  itf := DebugMethodEnter('TfpgBaseForm.HandleKeyPress - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   // find the TfpgMenuBar
   if not consumed then

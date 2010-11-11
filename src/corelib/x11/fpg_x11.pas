@@ -2114,7 +2114,7 @@ begin
   mask := 0;
   if (FWindowType in [wtPopup]) or (waX11SkipWMHints in FWindowAttributes) then
   begin
-    attr.Override_Redirect := TBool(True);
+    attr.Override_Redirect := 1;
     mask := CWOverrideRedirect;
   end;
 

@@ -20,6 +20,7 @@ unit fpg_widget;
 {$mode objfpc}{$H+}
 
 {.$Define DEBUG}
+{.$Define CStackDebug}
 
 interface
 
@@ -207,7 +208,7 @@ var
   uLastClickWidget: TfpgWidget;
   uLastClickPoint: TPoint;
   uLastClickTime: DWord;
-  
+
 
 function FindKeyboardFocus: TfpgWidget;
 begin
@@ -362,14 +363,22 @@ procedure TfpgWidget.DoUpdateWindowPosition;
 var
   dw: integer;
   dh: integer;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.DoUpdateWindowPosition - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
 //  writeln('DoUpdateWindowPosition - ', Classname);
   dw      := FWidth - FPrevWidth;
   dh      := FHeight - FPrevHeight;
 
   if IsContainer and FSizeIsDirty then
   begin
-//    writeln('DoUpdateWindowPosition ', Classname, ' - w:', dw, ' h:', dh);
+    {$IFDEF CStackDebug}
+    DebugLn(Format('w: %d  h: %d', [dw, dh]));
+    {$ENDIF}
     HandleAlignments(dw, dh);
   end;
 
@@ -753,9 +762,13 @@ begin
 end;
 
 procedure TfpgWidget.MsgMouseEnter(var msg: TfpgMessageRec);
+{$IFDEF Debug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
-  {$IFDEF DEBUG}
-  writeln('MsgMouseEnter');
+  {$IFDEF Debug}
+  itf := DebugMethodEnter('TfpgWidget.MsgMouseEnter - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   if InDesigner then
   begin
@@ -770,9 +783,13 @@ begin
 end;
 
 procedure TfpgWidget.MsgMouseExit(var msg: TfpgMessageRec);
+{$IFDEF Debug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
-  {$IFDEF DEBUG}
-  writeln('MsgMouseExit');
+  {$IFDEF Debug}
+  itf := DebugMethodEnter('TfpgWidget.MsgMouseExit - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   if InDesigner then
   begin
@@ -1074,9 +1091,12 @@ procedure TfpgWidget.HandleMouseEnter;
 var
   msgp: TfpgMessageParams;
   b: boolean;
+{$IFDEF Debug}
+  itf: IInterface;
+{$ENDIF}
 begin
-  {$IFDEF DEBUG}
-  writeln('TfpgWidget.HandleMouseEnter: ' + ClassName);
+  {$IFDEF Debug}
+  itf := DebugMethodEnter('TfpgWidget.HandleMouseEnter - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   fillchar(msgp, sizeof(msgp), 0);
 
@@ -1182,7 +1202,13 @@ procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
 var
   dw: integer;
   dh: integer;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.MsgResize - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
   dw      := msg.Params.rect.Width - FWidth;
   dh      := msg.Params.rect.Height - FHeight;
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
@@ -1195,7 +1221,14 @@ begin
 end;
 
 procedure TfpgWidget.MsgMove(var msg: TfpgMessageRec);
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.MsgMove - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
   HandleMove(msg.Params.rect.Left, msg.Params.rect.Top);
   if InDesigner then
   begin
@@ -1212,21 +1245,32 @@ var
   dw: integer;
   dh: integer;
   w: TfpgWidget;
+{$IFDEF CStackDebug}
+  itf: IInterface;
+{$ENDIF}
 begin
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.HandleAlignments - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
   if (csLoading in ComponentState) then
     Exit;  //==>
-//  writeln('HandleAlignments - ', Classname);
-  FAlignRect := GetClientRect;
 
+  {$IFDEF CStackDebug}
+  DebugLn(Format('dwidth=%d  dheight=%d  Classname=''%s''', [dwidth, dheight, ClassName]));
+  {$ENDIF}
+
+  FAlignRect := GetClientRect;
   alist := TList.Create;
   try
     for n := 0 to ComponentCount - 1 do
+    begin
       if Components[n] is TfpgWidget then
       begin
         w := TfpgWidget(Components[n]);
         if (w.Align <> alNone) and (w.Visible) then
           alist.Add(w);
       end;
+    end;
 
     DoAlignment;
     //DoAlign(alTop);
@@ -1273,8 +1317,15 @@ begin
 end;
 
 procedure TfpgWidget.MoveAndResize(ALeft, ATop, AWidth, AHeight: TfpgCoord);
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
-//  writeln('MoveAndResize: ', Classname, ' t:', ATop, ' l:', ALeft, ' w:', AWidth, ' h:', aHeight);
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.MoveAndResize');
+  DebugLn(Format('Class:%s  t:%d  l:%d  w:%d  h:%d', [Classname, ATop, ALeft, AWidth, aHeight]));
+  {$ENDIF}
   if HasHandle then
   begin
     if (ALeft <> FLeft) or (ATop <> FTop) then
@@ -1358,8 +1409,15 @@ begin
 end;
 
 procedure TfpgWidget.SetPosition(aleft, atop, awidth, aheight: TfpgCoord);
+{$IFDEF CStackDebug}
+var
+  itf: IInterface;
+{$ENDIF}
 begin
-  MoveAndResize(aleft, atop, awidth, aheight);
+  {$IFDEF CStackDebug}
+  itf := DebugMethodEnter('TfpgWidget.SetPosition - ' + ClassName + ' ('+Name+')');
+  {$ENDIF}
+    MoveAndResize(aleft, atop, awidth, aheight);
 end;
 
 procedure TfpgWidget.Invalidate;
