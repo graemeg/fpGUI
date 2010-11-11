@@ -2127,6 +2127,9 @@ begin
     xapplication.DefaultVisual,
     mask, @attr);
 
+  if wh = 0 then
+    raise Exception.Create('fpGUI/X11: Failed to create window ' + ClassName);
+
   FWinHandle := wh;
   FBackupWinHandle := wh;
   
@@ -2154,6 +2157,7 @@ begin
     end;
   end;
 
+  FillChar(hints, sizeof(hints), 0);
   hints.flags := 0;
 
   if not (waAutoPos in FWindowAttributes) then
