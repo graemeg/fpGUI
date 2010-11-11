@@ -883,6 +883,14 @@ Right. And the Top is always smaller than the Bottom.
         <descr>This does not do any drawing, in only clips the line coordinates. This method is used internally by <link id="TfpgCanvasBase.DrawLineClipped"/>.</descr>
       </element>
 
+<element name="TfpgCanvasBase.GradientFill">
+<short>Paints a rectangle with a gradient</short>
+<descr><printshort id="TfpgCanvasBase.GradientFill"/>. If the gradient direction is
+set to gdHorizontal, then it pains from left to right. If the gradient direction is
+set to gdVertical, then it paints from top to bottom.</descr>
+</element>
+
+
       <element name="TFileEntry">
         <short>A simple data object representing a file</short>
         <descr><printshort id="TFileEntry"/>. Some properties are OS dependant.</descr>
@@ -953,4 +961,4 @@ the streets of Manhattan.</p>
     </module>
     <!-- fpg_base -->
   </package>
-</fpdoc-descriptions>
+</fpdoc-descriptions>
