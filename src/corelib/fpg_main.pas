@@ -421,6 +421,9 @@ procedure DebugLn(const s1: TfpgString);
 procedure DebugLn(const s1, s2: TfpgString);
 procedure DebugLn(const s1, s2, s3: TfpgString);
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
+procedure DebugLn(const s1, s2, s3, s4, s5: TfpgString);
+function DebugMethodEnter(const s1: TfpgString): IInterface;
+procedure DebugSeparator;
 
 // operator overloading of some useful structures
 operator = (a: TRect; b: TRect): boolean;
@@ -473,8 +476,19 @@ var
   uMsgQueueList: TList;
   uDebugText: ^Text;
   uDebugTextAllocated: Boolean;
+  uDebugIndent: integer;
 
 type
+
+  TDebugMethodHelper = class(TInterfacedObject)
+  private
+    FMethod: string;
+  public
+    constructor Create(const AMethodName: string);
+    destructor Destroy; override;
+  end;
+
+
   TNamedFontItem = class
   public
     FontID: string;
@@ -482,7 +496,28 @@ type
     constructor Create(AFontID, AFontDesc: string);
   end;
 
-  TWidgetFriend = class(TfpgWidget);  // so we can get access to the Protected section
+
+  TWidgetFriend = class(TfpgWidget);
+
+
+{ TDebugMethodHelper }
+
+constructor TDebugMethodHelper.Create(const AMethodName: string);
+begin
+  inherited Create;
+  FMethod := AMethodName;
+  DebugLn('>> ' + FMethod);
+  uDebugIndent := uDebugIndent + 2;
+end;
+
+destructor TDebugMethodHelper.Destroy;
+begin
+  uDebugIndent := uDebugIndent - 2;
+  DebugLn('<< ' + FMethod);
+  inherited Destroy;
+end;
+
+  // so we can get access to the Protected section
 
 constructor TNamedFontItem.Create(AFontID, AFontDesc: string);
 begin
@@ -682,6 +717,7 @@ var
   end;
 
 begin
+  uDebugIndent := 0;
   uDebugText := nil;
   DebugFileName := GetDebugFileName;
   if (DebugFileName <> '') and
@@ -833,10 +869,13 @@ begin
 end;
 
 procedure DebugLn(const s1: TfpgString);
+var
+  s: string;
 begin
   if not Assigned(uDebugText) then
     Exit; //==>
-  writeln(uDebugText^, fpgConvertLineEndings(s1));
+  s := DupeString(' ', uDebugIndent);
+  writeln(uDebugText^, s + fpgConvertLineEndings(s1));
 end;
 
 procedure DebugLn(const s1, s2: TfpgString);
@@ -852,6 +891,21 @@ end;
 procedure DebugLn(const s1, s2, s3, s4: TfpgString);
 begin
   DebugLn(s1 + ' ' + s2 + ' ' + s3 + ' ' + s4);
+end;
+
+procedure DebugLn(const s1, s2, s3, s4, s5: TfpgString);
+begin
+  DebugLn(s1 + ' ' + s2 + ' ' + s3 + ' ' + s4 + ' ' + s5);
+end;
+
+function DebugMethodEnter(const s1: TfpgString): IInterface;
+begin
+  Result := TDebugMethodHelper.Create(s1);
+end;
+
+procedure DebugSeparator;
+begin
+  DebugLn('>--------------------------<');
 end;
 
 operator = (a: TRect; b: TRect): boolean;
