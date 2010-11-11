@@ -2067,7 +2067,7 @@ procedure TfpgListViewSubItems.Clear;
 var
   i: LongInt;
 begin
-  for i := FList.Count downto 0 do
+  for i := FList.Count-1 downto 0 do
     Delete(i);
 end;
 
