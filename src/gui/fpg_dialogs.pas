@@ -192,6 +192,7 @@ type
     procedure   btnGoHomeClicked(Sender: TObject);
     procedure   btnBookmarkClicked(Sender: TObject);
     procedure   edFilenameChanged(Sender: TObject);
+    procedure   edFilenameKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   UpdateButtonState;
     function    HighlightFile(const AFilename: string): boolean;
     function    CreatePopupMenu: TfpgPopupMenu;
@@ -1180,6 +1181,7 @@ begin
     Text := '';
     FontDesc := '#Edit1';
     OnChange := @edFilenameChanged;
+    OnKeyPress := @edFilenameKeyPressed;
   end;
   
   { Filter section }
@@ -1356,6 +1358,16 @@ end;
 procedure TfpgFileDialog.edFilenameChanged(Sender: TObject);
 begin
   UpdateButtonState;
+end;
+
+procedure TfpgFileDialog.edFilenameKeyPressed(Sender: TObject;
+  var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyReturn then
+  begin
+    Consumed := True;
+    btnOK.Click;
+  end;
 end;
 
 procedure TfpgFileDialog.UpdateButtonState;
