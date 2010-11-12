@@ -465,8 +465,11 @@ begin
   wc          := TVFDWidgetClass.Create(TfpgComboBox);
   wc.NameBase := 'ComboBox';
   wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
+  wc.AddProperty('AutoSize', TPropertyBoolean, 'Change Height based on FontDesc being set');
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
+  wc.AddProperty('ExtraHint', TPropertyString, 'Extra hint that appears inside component while no item is selected');
+  wc.AddProperty('FocusItem', TPropertyInteger, 'Currently selected item');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');
