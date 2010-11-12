@@ -76,12 +76,14 @@ type
     procedure   SetFontDesc(const AValue: string);
     procedure   SetExtraHint(const AValue: string);
   protected
+    FAutoSize: Boolean;
     FMargin: integer;
     FInternalBtnRect: TfpgRect;
     FFocusItem: integer;
     FItems: TStringList;
     FBtnPressed: Boolean;
-    procedure   SetMargin(const AValue: integer);
+    procedure   SetMargin(const AValue: integer); virtual;
+    procedure   SetAutoSize(const AValue: Boolean); virtual;
     procedure   CalculateInternalButtonRect; virtual;
     procedure   InternalOnClose(Sender: TObject); virtual;
     procedure   InternalItemsChanged(Sender: TObject); virtual;
@@ -92,6 +94,7 @@ type
     procedure   DoOnCloseUp; virtual;
     procedure   PaintInternalButton; virtual;
     function    GetDropDownPos(AParent, AComboBox, ADropDown: TfpgWidget): TfpgRect; virtual;
+    property    AutoSize: Boolean read FAutoSize write SetAutoSize default False;
     property    DropDownCount: integer read FDropDownCount write SetDropDownCount default 8;
     property    ExtraHint: string read FExtraHint write SetExtraHint;
     property    FocusItem: integer read FFocusItem write SetFocusItem;
@@ -137,6 +140,7 @@ type
   published
     property    AcceptDrops;
     property    Align;
+    property    AutoSize;
     property    BackgroundColor default clBoxColor;
     property    DropDownCount;
     property    Enabled;
@@ -233,8 +237,10 @@ procedure TfpgBaseComboBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
-  if Height < FFont.Height + (FMargin * 2) then
+  if FAutoSize then
+  begin
     Height := FFont.Height + (FMargin * 2);
+  end;
   RePaint;
 end;
 
@@ -252,6 +258,22 @@ begin
     Exit; //=>
   FMargin := AValue;
   Height := FFont.Height + (FMargin * 2);
+end;
+
+procedure TfpgBaseComboBox.SetAutoSize(const AValue: Boolean);
+var
+  r: TRect;
+begin
+  if FAutoSize = AValue then
+    exit;
+  FAutoSize := AValue;
+  if FAutoSize then
+  begin
+    r := fpgStyle.GetControlFrameBorders;
+    FHeight := FFont.Height + (Margin*2) + (r.Top+r.Bottom);
+    CalculateInternalButtonRect;
+    UpdateWindowPosition;
+  end;
 end;
 
 procedure TfpgBaseComboBox.CalculateInternalButtonRect;
@@ -392,12 +414,15 @@ end;
 constructor TfpgBaseComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FDropDownCount := 8;
-  FMargin := 3;
-  FFocusItem := -1; // nothing is selected
-  FItems  := TStringList.Create;
+  FWidth          := 120;
+  FHeight         := 24;
+  FAutoSize       := False;
+  FDropDownCount  := 8;
+  FMargin         := 3;
+  FFocusItem      := -1; // nothing is selected
+  FItems := TStringList.Create;
   FItems.OnChange := @InternalItemsChanged;
-  FFont   := fpgGetFont('#List');
+  FFont := fpgGetFont('#List');
   FOptions := [];
   FBtnPressed := False;
   FOnChange := nil;
@@ -697,8 +722,6 @@ begin
   inherited Create(AOwner);
   FBackgroundColor  := clBoxColor;
   FTextColor        := Parent.TextColor;
-  FWidth            := 120;
-  FHeight           := Font.Height + (2*FMargin);
   FFocusable        := True;
 
   CalculateInternalButtonRect;
