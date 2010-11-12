@@ -213,6 +213,9 @@ type
     procedure   DrawMenuItem(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags; AText: TfpgString); virtual;
     procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     procedure   DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
+    function    GetButtonBorders: TRect; virtual;
+    function    GetControlFrameBorders: TRect; virtual;
+    function    GetSeparatorSize: integer; virtual;
   end;
   
 
@@ -2297,6 +2300,21 @@ begin
     if mifSelected in AFlags then
       img.Invert;  // restore image to original state
   end;
+end;
+
+function TfpgStyle.GetButtonBorders: TRect;
+begin
+  Result := Rect(5, 5, 5, 5);
+end;
+
+function TfpgStyle.GetControlFrameBorders: TRect;
+begin
+  Result := Rect(2, 2, 2, 2);
+end;
+
+function TfpgStyle.GetSeparatorSize: integer;
+begin
+  Result := 2;
 end;
 
 
