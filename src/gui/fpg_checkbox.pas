@@ -38,6 +38,7 @@ type
     FFont: TfpgFont;
     FBoxLayout: TBoxLayout;
     FBoxSize: integer;
+    FImgTextSpacing: integer;
     FIsPressed: boolean;
     function    GetBoxLayout: TBoxLayout;
     function    GetFontDesc: string;
@@ -139,6 +140,7 @@ procedure TfpgBaseCheckBox.SetFontDesc(const AValue: string);
 begin
   FFont.Free;
   FFont := fpgGetFont(AValue);
+  { TODO: Implement AutoSize property, then adjust width here if True }
   RePaint;
 end;
 
@@ -159,33 +161,21 @@ end;
 procedure TfpgBaseCheckBox.HandlePaint;
 var
   r: TfpgRect;
-  ty: integer;
-  tx: integer;
   ix: integer;
   img: TfpgImage;
-  cliprect: TfpgRect;
+  LFlags: TFTextFlags;
 begin
   inherited HandlePaint;
-  
+  Canvas.ClearClipRect;
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(0, 0, Width, Height);
   Canvas.SetFont(Font);
-  cliprect.SetRect(1, 1, Width-2, Height-2);
-
-  if FFocused then
-  begin
-    Canvas.SetColor(clText1);
-    Canvas.SetLineStyle(1, lsDot);
-    Canvas.DrawRectangle(cliprect);
-    InflateRect(cliprect, 1, 1);
-  end;
-  Canvas.SetClipRect(cliprect);
   Canvas.SetLineStyle(1, lsSolid);
 
   if FBoxLayout = tbLeftBox then
-    r.SetRect(2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize)
+    r.SetRect(2, ((Height - FBoxSize) div 2), FBoxSize, FBoxSize)
   else
-    r.SetRect(Width - FBoxSize - 2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize);
+    r.SetRect(Width - FBoxSize - 2, ((Height - FBoxSize) div 2), FBoxSize, FBoxSize);
   if r.top < 0 then
     r.top := 0;
 
@@ -199,27 +189,47 @@ begin
   else
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
-  // calc the text offset and checkbox offset
-  if FBoxLayout = tbLeftBox then
-  begin
-    tx := r.right + 8;
-    inc(r.left, 2);
-  end
-  else
-    tx := 3;  // leave space for focus rectangle
-  inc(r.top, 1);
   // paint the check (in this case a X)
   img := fpgImages.GetImage('sys.checkboxes');    // Do NOT localize
-  Canvas.DrawImagePart(r.Left, r.Top, img, ix*13, 0, 13, 13);
+  Canvas.DrawImagePart(r.Left, r.Top, img, ix*FBoxSize, 0, FBoxSize, FBoxSize);
 
-  ty := (Height div 2) - (Font.Height div 2);
-  if ty < 0 then
-    ty := 0;
+  r := GetClientRect;
+  { max focus rectangle and text boundry }
+  InflateRect(r, -1, -1);
+  { exclude the checkbox image and spacing from rectangle }
+  if FBoxLayout = tbLeftBox then
+  begin
+    r.Left  := r.Left + FBoxSize + FImgTextSpacing;
+    r.Width := r.Width - FBoxSize - FImgTextSpacing;
+  end
+  else
+    r.Width := r.Width - FBoxSize - FImgTextSpacing;
+
   Canvas.SetTextColor(FTextColor);
-  Canvas.ClearClipRect;
-  cliprect.SetRect(tx, ty, Width-FBoxSize-8, cliprect.Height);
-  Canvas.SetClipRect(cliprect);
-  fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
+  Canvas.SetClipRect(r);
+
+  if Enabled then
+    LFlags := [txtLeft, txtVCenter]
+  else
+    LFlags := [txtLeft, txtVCenter, txtDisabled];
+  Canvas.DrawText(r, FText, LFlags);   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
+
+  if FFocused then
+  begin
+    Canvas.ClearClipRect;
+    { adjust focusrect-to-text margin }
+    if FBoxLayout = tbLeftBox then
+    begin
+      r.Left := r.Left - 2;
+      r.Width := r.Width + 2;
+    end
+    else
+    begin
+      r.Width := r.Width + 2;
+    end;
+    { undo the 2px focusrect-to-text margin, so we simply use the clip rect }
+    fpgStyle.DrawFocusRect(Canvas, r);
+  end;
 end;
 
 procedure TfpgBaseCheckBox.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
@@ -263,7 +273,8 @@ begin
   FTextColor  := Parent.TextColor;
   FBackgroundColor := Parent.BackgroundColor;
   FFocusable  := True;
-  FBoxSize    := 14;
+  FBoxSize    := 13;
+  FImgTextSpacing := 6;
   FChecked    := False;
   FIsPressed  := False;
   FOnChange   := nil;
