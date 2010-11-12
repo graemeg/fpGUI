@@ -80,6 +80,7 @@ type
     procedure   DefaultPopupInsertFromCharmap(Sender: TObject);
     procedure   SetDefaultPopupMenuItemsState;
     procedure   SetReadOnly(const AValue: Boolean);
+    procedure   SetAutoSize(const AValue: Boolean);
   protected
     FFont: TfpgFont;
     FSideMargin: integer;
@@ -114,7 +115,7 @@ type
     procedure   HandleHide; override;
     function    GetDrawText: String;
     property    AutoSelect: Boolean read FAutoSelect write SetAutoSelect default True;
-    property    AutoSize: Boolean read FAutoSize write FAutoSize default True;
+    property    AutoSize: Boolean read FAutoSize write SetAutoSize default False;
     property    BorderStyle: TfpgEditBorderStyle read FBorderStyle write SetBorderStyle default ebsDefault;
     property    FontDesc: String read GetFontDesc write SetFontDesc;
     property    HideSelection: Boolean read FHideSelection write SetHideSelection default True;
@@ -1025,12 +1026,12 @@ begin
   inherited Create(AOwner);
   FFont               := fpgGetFont('#Edit1');  // owned object !
   Focusable           := True;
-  FHeight             := FFont.Height + 8;     // (BorderStyle + HeightMargin) * 2
+  FHeight             := 24;
   FWidth              := 120;
   FTextColor          := Parent.TextColor;
   FBackgroundColor    := clBoxColor;
   FAutoSelect         := True;
-  FAutoSize           := True;
+  FAutoSize           := False;
   FSelecting          := False;
   FHideSelection      := True;
   FReadOnly           := False;
@@ -1234,6 +1235,21 @@ begin
   if FReadOnly = AValue then exit;
   FReadOnly := AValue;
   RePaint;
+end;
+
+procedure TfpgBaseEdit.SetAutoSize(const AValue: Boolean);
+var
+  r: TRect;
+begin
+  if FAutoSize = AValue then
+    exit;
+  FAutoSize := AValue;
+  if FAutoSize then
+  begin
+    r := fpgStyle.GetControlFrameBorders;
+    FHeight := FFont.Height + (FHeightMargin*2) + (r.Top+r.Bottom);
+    UpdateWindowPosition;
+  end;
 end;
 
 function TfpgBaseEdit.GetMarginAdjustment: integer;
