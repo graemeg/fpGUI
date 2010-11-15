@@ -205,12 +205,12 @@ end;
 procedure TfpgBaseForm.MsgActivate(var msg: TfpgMessageRec);
 begin
   {$IFDEF DEBUG}
-  SendDebug(Classname + ' ' + Name + '.BaseForm - MsgActivate');
+  DebugLn(Classname + ' ' + Name + '.BaseForm - MsgActivate');
   {$ENDIF}
   if (fpgApplication.TopModalForm = nil) or (fpgApplication.TopModalForm = self) then
   begin
     {$IFDEF DEBUG}
-    SendDebug('Inside if block');
+    DebugLn('Inside if block');
     {$ENDIF}
     FocusRootWidget := self;
     
@@ -434,7 +434,7 @@ var
   itf: IInterface;
 {$ENDIF}
 begin
-  {$IFDEF Debug}
+  {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgBaseForm.HandleKeyPress - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
   // find the TfpgMenuBar
