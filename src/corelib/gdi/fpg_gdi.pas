@@ -23,8 +23,9 @@ unit fpg_gdi;
 
 {$mode objfpc}{$H+}
 
-{.$Define Debug}
+{.$Define DEBUG}
 {.$Define DND_DEBUG}
+{.$Define DEBUGKEYS}
 
 interface
 
@@ -758,7 +759,7 @@ begin
     WM_KEYDOWN,
     WM_SYSKEYDOWN:
         begin
-          {$IFDEF DEBUG} SendDebug(w.ClassName + ': wm_char, wm_keyup, wm_keydown'); {$ENDIF}
+          {$IFDEF DEBUGKEYS} SendDebug(w.ClassName + ': wm_char, wm_keyup, wm_keydown'); {$ENDIF}
           kwg := FindKeyboardFocus;
           if kwg <> nil then
             w := kwg;

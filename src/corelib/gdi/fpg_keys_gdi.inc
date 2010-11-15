@@ -280,14 +280,14 @@ const
 begin
   if TranslTable[VirtKey]  = -1 then
   begin
-{$IFDEF Debug}
+{$IFDEF DebugKeys}
     WriteLn('No mapping for virtual keycode $', IntToHex(VirtKey, 2));
 {$ENDIF}
     Result := keyNIL
   end else
   begin
     Result := TranslTable[VirtKey];
-{$IFDEF Debug}
+{$IFDEF DebugKeys}
     WriteLn('Key $', IntToHex(VirtKey, 2), ' mapped to $', IntToHex(Result, 4));
 {$ENDIF}
   end;
