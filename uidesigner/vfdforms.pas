@@ -40,7 +40,7 @@ type
 
   TVFDDialog = class(TfpgForm)
   protected
-    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState;  var consumed: boolean); override;
+    procedure HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
   end;
 
 
@@ -59,8 +59,7 @@ type
 
   TNewFormForm = class(TVFDDialog)
   private
-    procedure OnedNameKeyPressed(Sender: TObject; var KeyCode: word;
-      var ShiftState: TShiftState; var Consumed: boolean);
+    procedure OnedNameKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   public
     l1: TfpgLabel;
     edName: TfpgEdit;
@@ -73,8 +72,7 @@ type
 
   TEditPositionForm = class(TVFDDialog)
   private
-    procedure edPosKeyPressed(Sender: TObject; var KeyCode: word;
-      var ShiftState: TShiftState; var Consumed: boolean);
+    procedure edPosKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   public
     lbPos: TfpgLabel;
     edPos: TfpgEdit;
@@ -88,13 +86,15 @@ type
   TWidgetOrderForm = class(TVFDDialog)
   public
     {@VFD_HEAD_BEGIN: WidgetOrderForm}
+
+
     lblTitle: TfpgLabel;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
     btnUp: TfpgButton;
     btnDown: TfpgButton;
     TreeView1: TfpgTreeView;
-    {@VFD_HEAD_END: WidgetOrderForm}
+            {@VFD_HEAD_END: WidgetOrderForm}
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterCreate; override;
@@ -104,6 +104,8 @@ type
 
   TfrmVFDSetup = class(TfpgForm)
   private
+    FINIVersion: integer;
+    procedure   FormShow(Sender: TObject);
     procedure   LoadSettings;
     procedure   SaveSettings;
     procedure   btnOKClick(Sender: TObject);
@@ -125,7 +127,10 @@ type
     Bevel1: TfpgBevel;
     Bevel2: TfpgBevel;
     Bevel3: TfpgBevel;
+    Label1: TfpgLabel;
+    chkCodeRegions: TfpgCheckBox;
     {@VFD_HEAD_END: frmVFDSetup}
+    constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
     procedure   BeforeDestruction; override;
   end;
@@ -139,6 +144,9 @@ uses
   fpg_iniutils,
   fpg_constants,
   vfdprops; // used to get Object Inspector defaults
+
+const
+  cDesignerINIVersion = 1;
 
 
 { TInsertCustomForm }
@@ -253,6 +261,11 @@ procedure TWidgetOrderForm.AfterCreate;
 begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: WidgetOrderForm}
+
+
+
+
+
   Name := 'WidgetOrderForm';
   SetPosition(534, 173, 426, 398);
   WindowTitle := 'Widget order';
@@ -336,7 +349,7 @@ begin
     TabOrder := 7;
   end;
 
-  {@VFD_BODY_END: WidgetOrderForm}
+            {@VFD_BODY_END: WidgetOrderForm}
 end;
 
 procedure TWidgetOrderForm.OnButtonClick(Sender: TObject);
@@ -378,24 +391,38 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TfrmVFDSetup.FormShow(Sender: TObject);
+begin
+  { If it's an older version, don't load the size because the dialog dimensions
+    probably changed in a newer version }
+  if FINIVersion >= cDesignerINIVersion then
+    gINI.ReadFormState(self)
+  else
+    gINI.ReadFormState(self, -1, -1, True);
+end;
+
 procedure TfrmVFDSetup.LoadSettings;
 begin
+  FINIVersion             := gINI.ReadInteger('Designer', 'Version', 0);
   chlGrid.FocusItem       := gINI.ReadInteger('Options', 'GridResolution', 2);
   tbMRUFileCount.Position := gINI.ReadInteger('Options', 'MRUFileCount', 4);
   chkFullPath.Checked     := gINI.ReadBool('Options', 'ShowFullPath', True);
   edtDefaultExt.Text      := gINI.ReadString('Options', 'DefaultFileExt', '.pas');
   chkUndoOnExit.Checked   := gINI.ReadBool('Options', 'UndoOnExit', UndoOnPropExit);
   chkOneClick.Checked     := gINI.ReadBool('Options', 'OneClickMove', True);
+  chkCodeRegions.Checked  := gINI.ReadBool('Options', 'UseCodeRegions', True);
 end;
 
 procedure TfrmVFDSetup.SaveSettings;
 begin
+  gINI.WriteInteger('Designer', 'Version', cDesignerINIVersion);
   gINI.WriteInteger('Options', 'GridResolution', chlGrid.FocusItem);
   gINI.WriteInteger('Options', 'MRUFileCount', tbMRUFileCount.Position);
   gINI.WriteBool('Options', 'ShowFullPath', chkFullPath.Checked);
   gINI.WriteString('Options', 'DefaultFileExt', edtDefaultExt.Text);
   gINI.WriteBool('Options', 'UndoOnExit', chkUndoOnExit.Checked);
   gINI.WriteBool('Options', 'OneClickMove', chkOneClick.Checked);
+  gINI.WriteBool('Options', 'UseCodeRegions', chkCodeRegions.Checked);
 end;
 
 procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
@@ -404,21 +431,29 @@ begin
   ModalResult := mrOK;
 end;
 
+constructor TfrmVFDSetup.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  OnShow := @FormShow;
+end;
+
 procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
   Name := 'frmVFDSetup';
-  SetPosition(392, 386, 398, 283);
+  SetPosition(392, 386, 398, 306);
   WindowTitle := 'General settings';
   Hint := '';
+  ShowHint := True;
   WindowPosition := wpScreenCenter;
-  gINI.ReadFormState(self); // after form created but before creating widgets
+  MinHeight := 305;
+  MinWidth := 335;
 
   lb1 := TfpgLabel.Create(self);
   with lb1 do
   begin
     Name := 'lb1';
-    SetPosition(28, 32, 112, 16);
+    SetPosition(24, 32, 112, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Grid resolution:';
@@ -428,21 +463,22 @@ begin
   with chlGrid do
   begin
     Name := 'chlGrid';
-    SetPosition(144, 28, 88, 22);
+    SetPosition(144, 28, 88, 24);
+    ExtraHint := '';
+    FocusItem := -1;
     FontDesc := '#List';
     Hint := '';
     Items.Add('1');
     Items.Add('4');
     Items.Add('8');
     TabOrder := 1;
-    FocusItem := 0;
   end;
 
   btnOK := TfpgButton.Create(self);
   with btnOK do
   begin
     Name := 'btnOK';
-    SetPosition(238, 253, 75, 24);
+    SetPosition(238, 276, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
@@ -456,7 +492,7 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(317, 253, 75, 24);
+    SetPosition(317, 276, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
@@ -470,7 +506,7 @@ begin
   with lblRecentFiles do
   begin
     Name := 'lblRecentFiles';
-    SetPosition(28, 132, 124, 16);
+    SetPosition(24, 132, 124, 16);
     FontDesc := '#Label1';
     Hint := '';
     Text := 'Recent files count:';
@@ -524,22 +560,22 @@ begin
   with edtDefaultExt do
   begin
     Name := 'edtDefaultExt';
-    SetPosition(28, 216, 68, 24);
+    SetPosition(164, 216, 68, 24);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 5;
     Text := '';
-    FontDesc := '#Edit1';
   end;
 
   lblName3 := TfpgLabel.Create(self);
   with lblName3 do
   begin
     Name := 'lblName3';
-    SetPosition(12, 192, 152, 16);
+    SetPosition(12, 192, 60, 16);
     FontDesc := '#Label2';
     Hint := '';
-    Text := 'Default file extension';
+    Text := 'Various';
   end;
 
   chkUndoOnExit := TfpgCheckBox.Create(self);
@@ -570,9 +606,10 @@ begin
   begin
     Name := 'Bevel1';
     SetPosition(108, 4, 280, 14);
+    Anchors := [anLeft,anRight,anTop];
     Hint := '';
-    Style := bsLowered;
     Shape := bsBottomLine;
+    Style := bsLowered;
   end;
 
   Bevel2 := TfpgBevel.Create(self);
@@ -580,19 +617,42 @@ begin
   begin
     Name := 'Bevel2';
     SetPosition(192, 104, 196, 14);
+    Anchors := [anLeft,anRight,anTop];
     Hint := '';
-    Style := bsLowered;
     Shape := bsBottomLine;
+    Style := bsLowered;
   end;
 
   Bevel3 := TfpgBevel.Create(self);
   with Bevel3 do
   begin
     Name := 'Bevel3';
-    SetPosition(156, 188, 232, 14);
+    SetPosition(72, 188, 316, 14);
+    Anchors := [anLeft,anRight,anTop];
     Hint := '';
-    Style := bsLowered;
     Shape := bsBottomLine;
+    Style := bsLowered;
+  end;
+
+  Label1 := TfpgLabel.Create(self);
+  with Label1 do
+  begin
+    Name := 'Label1';
+    SetPosition(24, 220, 132, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Default file extension:';
+  end;
+
+  chkCodeRegions := TfpgCheckBox.Create(self);
+  with chkCodeRegions do
+  begin
+    Name := 'chkCodeRegions';
+    SetPosition(24, 244, 360, 20);
+    FontDesc := '#Label1';
+    Hint := 'Applies to new form/dialogs only';
+    TabOrder := 18;
+    Text := 'Use code-folding regions in auto-generated code';
   end;
 
   {@VFD_BODY_END: frmVFDSetup}

@@ -64,6 +64,9 @@ type
 
 implementation
 
+uses
+  fpg_iniutils;
+
 const
   cBlockPrefix = '{@VFD_';
 
@@ -100,15 +103,30 @@ end;
 procedure TVFDFile.AddNewFormImpl(formname, formbody: string);
 var
   s: string;
+  lUseRegions: boolean;
+  lRegionTop, lRegionBottom: string;
 begin
+  { Does the developer code regions or not - a Lazarus IDE feature }
+  lUseRegions := gINI.ReadBool('Options', 'UseCodeRegions', True);
+  if lUseRegions then
+  begin
+    lRegionTop    := '  {%region ''Auto-generated GUI code'' -fold}' + LineEnding;
+    lRegionBottom := '  {%endregion}' + LineEnding;
+  end
+  else
+  begin
+    lRegionTop    := '';
+    lRegionBottom := '';
+  end;
+
   s := LineEnding + LineEnding +
     'procedure T' + formname + '.AfterCreate;' + LineEnding +
     'begin' + LineEnding +
-    '  {%region ''Auto-generated GUI code'' -fold}' + LineEnding +
+    lRegionTop +
     '  {@VFD_BODY_BEGIN: ' + formname + '}' + LineEnding +
     formbody +
     '  {@VFD_BODY_END: ' + formname + '}' + LineEnding +
-    '  {%endregion}' + LineEnding +
+    lRegionBottom +
     'end;' + LineEnding;
   NewFormsImpl := NewFormsImpl + s;
 end;
