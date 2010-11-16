@@ -42,7 +42,7 @@ type
     function    ReadDateTime(const ASection, AName: string; ADefault: TDateTime): TDateTime; override;
     function    ReadFloat(const ASection, AName: string; ADefault: double): double; override;
     function    ReadTime(const ASection, AName: string; ADefault: TDateTime): TDateTime; override;
-    procedure   ReadFormState(AForm: TfpgForm; AHeight: integer = -1; AWidth: integer = -1);
+    procedure   ReadFormState(AForm: TfpgForm; AHeight: integer = -1; AWidth: integer = -1; const ASkipDimensions: Boolean = False);
     procedure   WriteFormState(AForm: TfpgForm);
   end;
 
@@ -158,7 +158,7 @@ begin
 end;
 
 // Do NOT localize
-procedure TfpgINIFile.ReadFormState(AForm: TfpgForm; AHeight: integer; AWidth: integer);
+procedure TfpgINIFile.ReadFormState(AForm: TfpgForm; AHeight: integer; AWidth: integer; const ASkipDimensions: Boolean = False);
 var
   LINISection: string;
   LTop: integer;
@@ -184,7 +184,7 @@ begin
   else
     AForm.WindowPosition := wpScreenCenter;
   // Only set the form size if a bsSizable window
-  if AForm.Sizeable then
+  if AForm.Sizeable and (not ASkipDimensions) then
   begin
     if AHeight = -1 then
       LHeight := AForm.Height
@@ -197,6 +197,8 @@ begin
     AForm.Height := readInteger(LINISection, 'Height', LHeight);
     AForm.Width := readInteger(LINISection, 'Width', LWidth);
   end;
+  AForm.UpdateWindowPosition;
+
   //  AForm.WindowState := TWindowState(ReadInteger(LINISection, 'WindowState', ord(wsNormal)));
 
   // If the form is off screen (positioned outside all monitor screens) then
