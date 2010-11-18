@@ -62,7 +62,7 @@ type
   TfpgCustomGrid = class(TfpgBaseGrid)
   protected
     FRowCount: Integer;
-    FColumns: TList;
+    FColumns: TFPList;
     procedure   HandleSetFocus; override;
     procedure   SetTextColor(const AValue: TfpgColor); override;
     function    GetColumns(AIndex: integer): TfpgGridColumn; virtual;
@@ -304,20 +304,20 @@ end;
 
 constructor TfpgCustomGrid.Create(AOwner: TComponent);
 begin
-  FColumns := TList.Create;
+  FColumns := TFPList.Create;
   inherited Create(AOwner);
   ColumnCount := 0;
   RowCount    := 0;
 end;
 
 destructor TfpgCustomGrid.Destroy;
+var
+  i: integer;
 begin
-  while FColumns.Count > 0 do
+  for i := FColumns.Count-1 downto 0 do
   begin
-    TfpgGridColumn(FColumns.Items[0]).Free;
-    FColumns.Delete(0);
+    TfpgGridColumn(FColumns.Items[i]).Free;
   end;
-
   FColumns.Free;
   inherited Destroy;
 end;
