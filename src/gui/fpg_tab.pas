@@ -217,7 +217,7 @@ begin
     Exit; //==>
   FText := AValue;
   if PageControl <> nil then
-    PageControl.RePaintTitles;
+    PageControl.Invalidate;
 end;
 
 procedure TfpgTabSheet.HandlePaint;
@@ -513,7 +513,7 @@ begin
   if FStyle = AValue then
     Exit; //==>
   FStyle := AValue;
-  RePaintTitles;
+  Invalidate;
 end;
 
 procedure TfpgPageControl.SetTabPosition(const AValue: TfpgTabPosition);
@@ -688,7 +688,6 @@ begin
   if h = nil then
     Exit; //==>
   
-  Canvas.BeginDraw;
   Canvas.SetTextColor(TextColor);
   lTxtFlags := [];
   if not Enabled then
@@ -953,7 +952,6 @@ begin
       end;
   end; { case }
 
-  Canvas.EndDraw;
 end;
 
 procedure TfpgPageControl.HandlePaint;
