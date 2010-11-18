@@ -316,7 +316,8 @@ begin
   if FAlign = AValue then
     Exit;
   FAlign := AValue;
-  Realign;
+  if Parent <> nil then
+    Parent.Realign;
 end;
 
 procedure TfpgWidget.SetVisible(const AValue: boolean);
@@ -1282,7 +1283,7 @@ begin
     alist.Free;
   end;
 
-  // handle anchors finally for alNone
+  // Finally handle anchors (where Align = alNone)
   for n := 0 to ComponentCount - 1 do
     if (Components[n] is TfpgWidget) then
     begin
@@ -1326,7 +1327,7 @@ begin
   itf := DebugMethodEnter('TfpgWidget.MoveAndResize');
   DebugLn(Format('Class:%s  t:%d  l:%d  w:%d  h:%d', [Classname, ATop, ALeft, AWidth, aHeight]));
   {$ENDIF}
-  if HasHandle then
+  if not (csLoading in ComponentState) {HasHandle} then
   begin
     if (ALeft <> FLeft) or (ATop <> FTop) then
       HandleMove(ALeft, ATop);
