@@ -84,21 +84,24 @@ type
 
 
   TWidgetOrderForm = class(TVFDDialog)
+  private
+    function    GetTitle: string;
+    procedure   SetTitle(const AValue: string);
   public
     {@VFD_HEAD_BEGIN: WidgetOrderForm}
-
-
     lblTitle: TfpgLabel;
     btnOK: TfpgButton;
     btnCancel: TfpgButton;
     btnUp: TfpgButton;
     btnDown: TfpgButton;
     TreeView1: TfpgTreeView;
-            {@VFD_HEAD_END: WidgetOrderForm}
+    {@VFD_HEAD_END: WidgetOrderForm}
+  public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   AfterCreate; override;
     procedure   OnButtonClick(Sender: TObject);
+    property    Title: string read GetTitle write SetTitle;
   end;
 
 
@@ -244,6 +247,16 @@ end;
 
 { TWidgetOrderForm }
 
+function TWidgetOrderForm.GetTitle: string;
+begin
+  Result := lblTitle.Text;
+end;
+
+procedure TWidgetOrderForm.SetTitle(const AValue: string);
+begin
+  lblTitle.Text := Format(lblTitle.Text, [AValue]);
+end;
+
 constructor TWidgetOrderForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -261,11 +274,6 @@ procedure TWidgetOrderForm.AfterCreate;
 begin
   inherited AfterCreate;
   {@VFD_BODY_BEGIN: WidgetOrderForm}
-
-
-
-
-
   Name := 'WidgetOrderForm';
   SetPosition(534, 173, 426, 398);
   WindowTitle := 'Widget order';

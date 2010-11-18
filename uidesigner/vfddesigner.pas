@@ -678,7 +678,7 @@ var
 begin
   frm := TWidgetOrderForm.Create(nil);
   frm.WindowTitle := cEditOrder[AMode];
-  frm.lblTitle.Text := Format(frm.lblTitle.Text, [cEditOrder[AMode]]);
+  frm.Title := cEditOrder[AMode];
   fi  := 0;
 
   identlevel := 0;
