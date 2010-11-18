@@ -102,6 +102,7 @@ type
     FPopupMenu: TfpgPopupMenu;
     FTabOptions: TfpgTabOptions;
     FLastRClickPos: TfpgPoint;
+    FUpdateCount: Integer;
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
@@ -135,9 +136,12 @@ type
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleRMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
+    procedure   RePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    procedure   BeginUpdate;
+    procedure   EndUpdate;
     function    TabSheetAtPos(const x, y: integer): TfpgTabSheet;
     function    AppendTabSheet(ATitle: string): TfpgTabSheet;
     procedure   RemoveTabSheet(ATabSheet: TfpgTabSheet);
@@ -493,8 +497,7 @@ begin
   end;
 end;
 
-function TfpgPageControl.FindNextPage(ACurrent: TfpgTabSheet; AForward: boolean
-  ): TfpgTabSheet;
+function TfpgPageControl.FindNextPage(ACurrent: TfpgTabSheet; AForward: boolean): TfpgTabSheet;
 begin
   // To be completed
   result := nil;
@@ -1063,6 +1066,13 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
+procedure TfpgPageControl.RePaint;
+begin
+  if FUpdateCount > 0 then
+    Exit;
+  inherited RePaint;
+end;
+
 constructor TfpgPageControl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -1108,6 +1118,18 @@ begin
   ActiveWidget := nil;
   FFirstTabButton := nil;
   inherited Destroy;
+end;
+
+procedure TfpgPageControl.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TfpgPageControl.EndUpdate;
+begin
+  Dec(FUpdateCount);
+  if FUpdateCount <= 0 then
+    RePaint;
 end;
 
 function TfpgPageControl.TabSheetAtPos(const x, y: integer): TfpgTabSheet;
