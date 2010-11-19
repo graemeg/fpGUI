@@ -41,6 +41,7 @@ type
     FBoxLayout: TBoxLayout;
     FBoxSize: integer;
     FIsPressed: boolean;
+    FImgTextSpacing: integer;
     function    GetBoxLayout: TBoxLayout;
     function    GetFontDesc: string;
     procedure   SetBoxLayout(const AValue: TBoxLayout);
@@ -49,13 +50,13 @@ type
     procedure   SetFontDesc(const AValue: string);
     procedure   SetText(const AValue: string);
     procedure   DoAdjustWidth;
+    function    FindNeighbour(direction: TFocusSearchDirection): TfpgRadioButton;
   protected
     procedure   HandlePaint; override;
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleLMouseUp(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandleKeyRelease(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
-    function    FindNeighbour(direction: TFocusSearchDirection): TfpgRadioButton;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -184,33 +185,21 @@ end;
 procedure TfpgRadioButton.HandlePaint;
 var
   r: TfpgRect;
-  ty: integer;
-  tx: integer;
   img: TfpgImage;
   ix: integer;
-  cliprect: TfpgRect;
+  LFlags: TFTextFlags;
 begin
   inherited HandlePaint;
-
+  Canvas.ClearClipRect;
   Canvas.SetColor(FBackgroundColor);
   Canvas.FillRectangle(0, 0, Width, Height);
   Canvas.SetFont(Font);
-  cliprect.SetRect(1, 1, Width-2, Height-2);
-
-  if FFocused then
-  begin
-    Canvas.SetColor(clText1);
-    Canvas.SetLineStyle(1, lsDot);
-    Canvas.DrawRectangle(cliprect);
-    InflateRect(cliprect, 1, 1);
-  end;
-  Canvas.SetClipRect(cliprect);
   Canvas.SetLineStyle(1, lsSolid);
 
   if FBoxLayout = tbLeftBox then
-    r.SetRect(2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize)
+    r.SetRect(2, ((Height - FBoxSize) div 2), FBoxSize, FBoxSize)
   else
-    r.SetRect(Width - FBoxSize - 2, (Height div 2) - (FBoxSize div 2), FBoxSize, FBoxSize);
+    r.SetRect(Width - FBoxSize - 2, ((Height - FBoxSize) div 2), FBoxSize, FBoxSize);
   if r.top < 0 then
     r.top := 0;
 
@@ -224,27 +213,47 @@ begin
   else
     ix := (2 + (Ord(FChecked) * 2)) - Ord(FChecked);
 
-  // calc the text offset and radiobutton offset
-  if FBoxLayout = tbLeftBox then
-  begin
-    tx := r.right + 8;
-    inc(r.left, 2);
-  end
-  else
-    tx := 3;  // leave space for focus rectangle
-  inc(r.top, 1);
   // paint the radio button
   img := fpgImages.GetImage('sys.radiobuttons');    // Do NOT localize
-  Canvas.DrawImagePart(r.Left, r.Top, img, ix*12, 0, 12, 12);
+  Canvas.DrawImagePart(r.Left, r.Top, img, ix*FBoxSize, 0, FBoxSize, FBoxSize);
 
-  ty := (Height div 2) - (Font.Height div 2);
-  if ty < 0 then
-    ty := 0;
+  r := GetClientRect;
+  { max focus rectangle and text boundry }
+  InflateRect(r, -1, -1);
+  { exclude the radiobutton image and spacing from rectangle }
+  if FBoxLayout = tbLeftBox then
+  begin
+    r.Left  := r.Left + FBoxSize+1 + FImgTextSpacing;   { +1 or -1 is so checkbox and radiobutton text align }
+    r.Width := r.Width - FBoxSize-1 - FImgTextSpacing;
+  end
+  else
+    r.Width := r.Width - FBoxSize-1 - FImgTextSpacing;
+
   Canvas.SetTextColor(FTextColor);
-  Canvas.ClearClipRect;
-  cliprect.SetRect(tx, ty, Width-FBoxSize-8, cliprect.Height);
-  Canvas.SetClipRect(cliprect);
-  fpgStyle.DrawString(Canvas, tx, ty, FText, Enabled);
+  Canvas.SetClipRect(r);
+
+  if Enabled then
+    LFlags := [txtLeft, txtVCenter]
+  else
+    LFlags := [txtLeft, txtVCenter, txtDisabled];
+  Canvas.DrawText(r, FText, LFlags);   { internally this still calls fpgStyle.DrawString(), so theming will be applied }
+
+  if FFocused then
+  begin
+    Canvas.ClearClipRect;
+    { adjust focusrect-to-text margin }
+    if FBoxLayout = tbLeftBox then
+    begin
+      r.Left := r.Left - 2;
+      r.Width := r.Width + 2;
+    end
+    else
+    begin
+      r.Width := r.Width + 2;
+    end;
+    { undo the 2px focusrect-to-text margin, so we simply use the clip rect }
+    fpgStyle.DrawFocusRect(Canvas, r);
+  end;
 end;
 
 procedure TfpgRadioButton.HandleLMouseDown(x, y: integer;
@@ -401,6 +410,7 @@ begin
   FAutoSize   := False;
   FOnChange   := nil;
   FBoxLayout  := tbLeftBox;
+  FImgTextSpacing := 6;
 end;
 
 destructor TfpgRadioButton.Destroy;
