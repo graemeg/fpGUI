@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <Name Value="impression"/>
+    <AddToProjectUsesSection Value="False"/>
+    <Author Value="&quot;Jean-Marc Levecque&quot; <jmarc.levecque@dbmail.com>"/>
+    <CompilerOptions>
+      <Version Value="9"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+        <LCLWidgetType Value="fpgui"/>
+      </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <CStyleOperator Value="False"/>
+          <AllowLabel Value="False"/>
+          <CPPInline Value="False"/>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
+      <Linking>
+        <Debugging>
+          <UseLineInfoUnit Value="False"/>
+        </Debugging>
+      </Linking>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="PDF reporting engine"/>
+    <Version Minor="1"/>
+    <Files Count="4">
+      <Item1>
+        <Filename Value="u_commande.pas"/>
+        <UnitName Value="U_Commande"/>
+      </Item1>
+      <Item2>
+        <Filename Value="u_imprime.pas"/>
+        <UnitName Value="U_Imprime"/>
+      </Item2>
+      <Item3>
+        <Filename Value="u_pdf.pas"/>
+        <UnitName Value="U_Pdf"/>
+      </Item3>
+      <Item4>
+        <Filename Value="u_visu.pas"/>
+        <UnitName Value="U_Visu"/>
+      </Item4>
+    </Files>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="fpgui_toolkit"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
