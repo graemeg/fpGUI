@@ -1,5 +1,5 @@
 {
-    << Impressions >>  U_Pdf.pas
+    << Impressions >>  U_Visu.pas
 
     Copyright (C) 2010 - JM.Levecque - <jmarc.levecque@jmlesite.fr>
 

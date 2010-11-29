@@ -49,6 +49,7 @@ type
     protected
       procedure EcritInteger(const AFlux: TStream);
       procedure IncrementeInteger;
+      property Value: Integer read FValue write FValue;
     public
       constructor CreateInteger(const AValue: Integer);
       destructor Destroy; override;
@@ -264,6 +265,8 @@ var
   CurrentColor: string;
   CurrentWidth: string;
 
+// utility functions
+
 procedure EcritChaine(const Valeur: string; AFlux: TStream);
 begin
 AFlux.Write(PChar(Valeur)^,Length(Valeur));
@@ -337,6 +340,8 @@ Couleur:= Couleur mod 65535;
 Green:= Couleur div 255;
 Blue:= Couleur mod 255;
 end;
+
+// object methods
 
 constructor TPdfObjet.Create;
 begin
@@ -949,6 +954,7 @@ var
   Pages: TPdfXRef;
   XRefObjets: TPdfReference;
   Nom: TPdfName;
+  Dictionaire: TPdfDictionary;
   Table: TPdfArray;
   Count: TPdfInteger;
 begin
@@ -964,9 +970,16 @@ then
   begin
   XRefObjets:= TPdfReference.CreateReference(Parent);
   Pages.FObjet.AddElement('Parent',XRefObjets);
+  // increment count in parent pages dictionary
+  Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[Parent]).FObjet);
+  TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
+  // add kid reference in parent pages dictionary
+  XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+  TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Kids')]).FValue).AddItem(XRefObjets);
   end
-else  // add pages reference to catalog dictionary
+else
   begin
+  // add pages reference to catalog dictionary
   XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
   TPdfDictionary(TPdfXRef(FXRefObjets[ElementParNom('Catalog')]).FObjet).AddElement('Pages',XRefObjets)
   end;
@@ -1178,7 +1191,7 @@ end;
 
 constructor TPdfDocument.CreateDocument;
 var
-  Cpt,CptSect,CptPage,CptFont,NumFont,Parent,PageNum,NumPage: Integer;
+  Cpt,CptSect,CptPage,CptFont,NumFont,TreeRoot,Parent,PageNum,NumPage: Integer;
   Trouve: Boolean;
   Dictionaire: TPdfDictionary;
   FontName: string;
@@ -1192,11 +1205,15 @@ CreatePreferences;
 Parent:= 0;
 if Sections.Count> 1
 then
-  Parent:= CreatePages(Parent);
+  TreeRoot:= CreatePages(Parent);
 NumPage:= 0; // numéro de page identique à celui de l'appel à ImprimePage
 for CptSect:= 0 to Pred(Sections.Count) do
   begin
-  Parent:= CreatePages(Parent);
+  if Sections.Count> 1
+  then
+    Parent:= CreatePages(TreeRoot)
+  else
+    Parent:= CreatePages(Parent);
   for CptPage:= 0 to Pred(T_Section(Sections[CptSect]).Pages.Count) do
     begin
     CreatePage(Parent);
@@ -1205,31 +1222,20 @@ for CptSect:= 0 to Pred(Sections.Count) do
     CreateStream(NumPage,PageNum);
     end;
   end;
+if Sections.Count> 1
+then
+  begin
+  // update count in root parent pages dictionary
+  Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[TreeRoot]).FObjet);
+  TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).Value:= T_Section(Sections[CptSect]).TotPages;
+  end;
 NumFont:= 0;
 for Cpt:= 0 to Pred(Fontes.Count) do
   begin
   Trouve:= False;
   FontName:= ExtractBaseFontName(T_Fonte(Fontes[Cpt]).GetFonte.FontDesc);
-  //for CptFont:= 1 to Pred(FXRefObjets.Count) do
-  //  begin
-  //  Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[CptFont]).FObjet);
-  //  if Dictionaire.FElement.Count> 0
-  //  then
-  //    if TPdfName(TPdfDicElement(Dictionaire.FElement[0]).FValue).FValue= 'Font'
-  //    then
-  //      if TPdfName(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('BaseFont')]).FValue).FValue= FontName
-  //      then
-  //        begin
-  //        Trouve:= True;
-  //        Break;
-  //        end;
-  //  end;
-  //if not Trouve
-  //then
-  //  begin
-    CreateFont(FontName,NumFont);
-    Inc(NumFont);
-    //end;
+  CreateFont(FontName,NumFont);
+  Inc(NumFont);
   end;
 TPdfInteger(TPdfDicElement(Trailer.FElement[Trailer.ElementParCle('Size')]).FValue).FValue:= FXRefObjets.Count;
 if PdfPage.Count> 0

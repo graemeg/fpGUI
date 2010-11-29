@@ -1,5 +1,5 @@
 {
-    << Impressions >>  U_Pdf.pas
+    << Impressions >>  U_Imprime.pas
 
     Copyright (C) 2010 - JM.Levecque - <jmarc.levecque@jmlesite.fr>
 
@@ -49,10 +49,10 @@ type
       FNmSection: Integer;
       FNmPage: Integer;
       FNmPageSect: Integer;
-      FPosRef: TPoint;              // position absolue d'écriture
-      FEnTeteHeight: Integer;       // position verticale de fin de texte en zone entete
-      FPageHeight: Integer;         // position verticale de fin de texte en zone page
-      FPiedHeight: Integer;         // position verticale de début de texte en zone pied
+      FPosRef: TPoint;              // absolute writting position
+      FEnTeteHeight: Integer;       // end of text vertical position in the header
+      FPageHeight: Integer;         // end of text vertical position in the page
+      FPiedHeight: Integer;         // beginning of text vertical position in the footer
       FGroupe: Boolean;
       FDefaultFile: string;
       function Dim2Pixels(Value: Single): Integer;
@@ -80,160 +80,169 @@ type
       destructor Destroy; override;
       procedure Debut(IniOriente: TOrient= oPortrait; IniTypePapier: TTypePapier= A4;
                 IniMesure: TMesure= msMM; IniVersion: Char= 'F'; IniVisu: Boolean= True);
-                // début d'impression avec initialisations
-                // IniOriente = orientation du papier >> oPortrait ou oLandscape
+                // starts preview and printing process with initializations
+                // IniOriente = paper orientation >> oPortrait or oLandscape
                 // IniTypePapier = (A4, Letter,Legal,Executive,Comm10,Monarch,DL,C5,B5)
-                // IniMesure = millimètres (msMM) ou inches (msInches)
-                // IniVersion = version française 'F' ou version anglaise 'E', ou autre, à venir
-                // IniVisu = True (visualisation) ou False (impression directe
+                // IniMesure = millimeters (msMM) or inches (msInches)
+                // IniVersion = version française 'F' or version English 'E', or other, to come
+                // IniVisu = True (visualisation) or False (direct printing or PDF generation)
       procedure Fin;
       procedure ImprimeDocument;
       procedure Visualisation;
       procedure Section(MgGauche,MgDroite,MgHaute,MgBasse: Single; Retrait: Single= 0);
-                // nouvelle section avec initialisation des marges
+                // new section with initialization of margins
       procedure Page;
-                // nouvelle page dans la section courante
+                // new page in the current section
       function Fond(FdColor: TfpgColor): Integer;
-               // retourne le numéro alloué à la couleur créée
-               // FdColor = couleur de fond
+               // returns the number allocated to the color
+               // FdColor = background color
       function Fonte(FtNom: string; FtColor: TfpgColor): Integer;
-               // retourne le numéro alloué à la fonte créée
-               // FtNom = FontDesc définissant la fonte
-               // FtColor = couleur d'écriture
+               // returns the number allocated to the font
+               // FtNom = FontDesc of the font
+               // FtColor = font color
       function StyleTrait(StEpais: Integer; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
-               // retourne le numéro alloué au style de trait
-               // StEpais = épaisseur de trait en pixels
-               // StColor = couleur de trait
-               // StStyle = style de trait
+               // returns the number allocated to the line style
+               // StEpais = thickness of the line in pixels
+               // StColor = line color
+               // StStyle = line style
       function Bordure(BdFlags: TFBordFlags; BdStyle: Integer): Integer;
-               // retourne le numéro alloué à la bordure
-               // BdFlags = position de la bordure (bdTop,bdBottom,bdLeft,bdRight)
-               // BdStyle = caractéristiques du trait: épaisseur, couleur, style
+               // returns the number allocated to the border
+               // BdFlags = position of the border (bdTop,bdBottom,bdLeft,bdRight)
+               // BdStyle = border line style: thickness, color, style
       function Colonne(ClnPos,ClnWidth: Single; ClnMargin: Single= 0; ClnColor: TfpgColor= clWhite): Integer;
-               // retourne le numero alloué à la colonne créée
-               // ClnPos = position gauche en valeur numérique dans l'unité de mesure
-               // ClnWidth = largeur en valeur numérique dans l'unité de mesure
-               // ClnMargin = marges gauche et droite
-               // ClnColor = couleur de fond de la colonne
+               // returns the number allocated to the column
+               // ClnPos = left position in numeric value in the measurement unit (msMM or msInch)
+               // ClnWidth = width in numeric value in the measurement unit (msMM or msInch)
+               // ClnMargin = left and right margins in numeric value in the measurement unit (msMM or msInch)
+               // ClnColor = column background color
       procedure EcritEnTete(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lnCourante,lnFin) ou valeur numérique dans l'unité de mesure
-                // Texte = texte à écrire
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Texte = texte to be written
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lnCourante,lnFin) ou valeur numérique dans l'unité de mesure
-                // Texte = texte à écrire
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Texte = texte to be written
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure EcritPied(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lnCourante,lnFin) ou valeur numérique dans l'unité de mesure
-                // Texte = texte à écrire
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Texte = texte to be written
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure NumSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lgCourante,lgFin) ou valeur numérique dans l'unité de mesure
-                // TexteSection = texte à écrire devant le numéro de section
-                // TexteTotal = texte à écrire devant le nombre de sections
-                // Total= True > affiche le nombre total de sections
-                // Alpha= True > affiche le nombre total de sections en lettres en ordre alphabétique
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // TexteSection = text to be written before the section number
+                // TexteTotal = text to be written before the number of sections
+                // Total= True => displays the number of sections
+                // Alpha= True => displays the number of sections using letters in alphabetic order
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure NumSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lgCourante,lgFin) ou valeur numérique dans l'unité de mesure
-                // TexteSection = texte à écrire devant le numéro de section
-                // TexteTotal = texte à écrire devant le nombre de sections
-                // Total= True > affiche le nombre total de sections
-                // Alpha= True > affiche le nombre total de sections en lettres en ordre alphabétique
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // TexteSection = text to be written before the section number
+                // TexteTotal = text to be written before the number of sections
+                // Total= True => displays the number of sections
+                // Alpha= True => displays the number of sections using letters in alphabetic order
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure NumPageEnTete(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
                 Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
                 CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lnCourante,lnFin) ou valeur numérique dans l'unité de mesure
-                // TextePage = texte à écrire devant le numéro de page
-                // TexteTotal = texte à écrire devant le nombre de pages
-                // Total= True > affiche le nombre total de pages
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // TextePage = text to be written before the page number in the document
+                // TexteTotal = text to be written before the number of pages of the document
+                // Total= True > displays the number of pages of the document
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure NumPagePied(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
                 Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
                 CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lnCourante,lnFin) ou valeur numérique dans l'unité de mesure
-                // TextePage = texte à écrire devant le numéro de page
-                // TexteTotal = texte à écrire devant le nombre de pages
-                // Total= True > affiche le nombre total de pages
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // TextePage = text to be written before the page number in the document
+                // TexteTotal = text to be written before the number of pages of the document
+                // Total= True > displays the number of pages of the document
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure NumPageSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lnCourante,lnFin) ou valeur numérique dans l'unité de mesure
-                // TextePage = texte à écrire devant le numéro de page dans la section
-                // TexteTotal = texte à écrire devant le nombre de pages de la section
-                // Total= True > affiche le nombre total de pages de la section
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplce la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // TextePage = text to ba written before the page number in the section
+                // TexteTotal = text to be written before the number of pages of the section
+                // Total= True > displays the number of pages of the section
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       procedure NumPageSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
-                // Horiz = cadrage (cnLeft,cnCenter,cnRight)
-                //         ou valeur numérique dans l'unité de mesure
-                // Verti = ligne (lnCourante,lnFin) ou valeur numérique dans l'unité de mesure
-                // TextePage = texte à écrire devant le numéro de page dans la section
-                // TexteTotal = texte à écrire devant le nombre de pages de la section
-                // Total= True > affiche le nombre total de pages de la section
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // FonteNum = fonte applicable au texte
-                // InterNum = interlignes applicables au texte
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
-                // BordNum = bordure applicable, si> -1
+                // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // Verti = line position in column (lnCourante,lnFin)
+                //         or numeric value in the measurement unit (msMM or msInch)
+                // TextePage = text to ba written before the page number in the section
+                // TexteTotal = text to be written before the number of pages of the section
+                // Total= True > displays the number of pages of the section
+                // ColNum = column reference, default between left and right margins
+                // FonteNum = font reference
+                // InterNum = space between lines reference
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
+                // BordNum = border reference, if> -1
       //procedure TraitEnTete(Horiz,Verti: Single; ColNum: Integer= 0; StyleNum: Integer= 0; FinH: Integer= -1;
                 //FinV: Integer= -1);
       //procedure TraitPage(Horiz,Verti: Single; ColNum: Integer= 0; StyleNum: Integer= 0; FinH: Integer= -1;
@@ -241,48 +250,50 @@ type
       //procedure TraitPied(Horiz,Verti: Single; ColNum: Integer= 0; StyleNum: Integer= 0; FinH: Integer= -1;
                 //FinV: Integer= -1);
       procedure EspaceEnTete(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
-                // Verti = hauteur de l'espace vide : valeur numérique dans l'unité de mesure
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
+                // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
+                // ColNum = column reference, default between left and right margins
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
       procedure EspacePage(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
-                // Verti = hauteur de l'espace vide : valeur numérique dans l'unité de mesure
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
+                // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
+                // ColNum = column reference, default between left and right margins
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
       procedure EspacePied(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
-                // Verti = hauteur de l'espace vide : valeur numérique dans l'unité de mesure
-                // ColNum = colonne, par défaut: entre les marges gauche et droite
-                // CoulFdNum = couleur de fond, si > -1, remplace la couleur de colonne éventuelle
+                // Verti = height of the empty space : numeric value in the measurement unit (msMM or msInch)
+                // ColNum = column reference, default between left and right margins
+                // CoulFdNum = background color reference, if > -1, replaces the column background color if any
       function Interligne(ItlSup,ItlInt,ItlInf: Single): Integer;
-               // IntSup = interligne supérieure dans l'unité de mesure
-               // IntInf = interligne inférieure dans l'unité de mesure
+               // IntSup = space between lines, top : numeric value in the measurement unit (msMM or msInch)
+               // IntInt = space between lines, internal if wrapping : numeric value in the measurement unit (msMM or msInch)
+               // IntInf = space between lines, botom : numeric value in the measurement unit (msMM or msInch)
       procedure Groupe(SautPage: Boolean= False);
-                // SautPage = True >> force nouvelle page avant le groupe
-                //          = False >> sur la page active si le groupe peut y être entièrement inclus
+                // SautPage = True >> forces new page before the group
+                //          = False >> does not create a new page if the whole group can stand on the same page as the preceding text
       procedure FinGroupe(SautPage: Boolean= False);
-                // SautPage = True >> force nouvelle page après le groupe
-                //          = False >> continue sur la page active après le groupe
+                // SautPage = True >> forces new page after the group
+                //          = False >> lets continue on the same page after the group
       procedure ColorColChange(ColNum: Integer; ColColor: TfpgColor);
-                // Change la couleur d'une colonne
-                // ColNum = numéro de la colonne
-                // ColColor = nouvelle couleur de fond de la colonne
+                // Changes the background color of a column
+                // ColNum = column reference
+                // ColColor = new background color for the column
       procedure CadreMarges(AStyle: Integer);
-                // Trace un cadre aux marges de la page
-                // AStyle = style de trait
+                // draw a frame at the page margins
+                // AStyle = line style of the frame
       procedure CadreEnTete(AStyle: Integer);
-                // trace un cadre aux dimensions de l'entête
-                // AStyle = style de trait
+                // draw a frame at the limits of the header
+                // AStyle = line style of the frame
       procedure CadrePage(AStyle: Integer);
-                // trace un care aux dimensions de la page
-                // AStyle = style de trait
+                // draw a frame at the page limits : left and right margins, header bottom and footer top
+                // AStyle = line style of the frame
       procedure CadrePied(AStyle: Integer);
-                // trace un cadre aux dimensions du pied de page
-                // AStyle = style de trait
+                // draw a frame at the limits of the footer
+                // AStyle = line style of the frame
       procedure TraitPage(XDebut,YDebut,XFin,YFin: Single; AStyle: Integer);
-                // XDebut = abscisse du point initial dans l'unité de mesure
-                // YDebut = ordonnée du point initial dans l'unité de mesure
-                // XFin = abscisse du point final dans l'unité de mesure
-                // YFin = ordonnée du point final dans l'unité de mesure
-                // AStyle = style de trait
+                // draw a line at absolute position
+                // XDebut = horizontal position of starting point in numeric value in the measurement unit (msMM or msInch)
+                // YDebut = vertical position of starting point in numeric value in the measurement unit (msMM or msInch)
+                // XFin = horizontal position of ending point in numeric value in the measurement unit (msMM or msInch)
+                // YFin = vertical position of ending point in numeric value in the measurement unit (msMM or msInch)
+                // AStyle = line style of the frame
       property Langue: Char read FVersion write FVersion;
       property Visualiser: Boolean read FVisualisation write FVisualisation;
       property NumeroSection: Integer read FNmSection write FNmSection;
@@ -293,6 +304,8 @@ type
       property DefaultFile: string read FDefaultFile write FDefaultFile;
       property CouleurCourante: Integer read FColorCourante write FColorCourante;
     end;
+
+  // classes for interface with PDF generation
 
   TPdfElement = class
     end;
@@ -410,41 +423,47 @@ end;
 
 function T_Imprime.AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFont): string;
 var
-  i, n, ls: integer;
+  i,n,ls: integer;
   sub: string;
-  lw, tw: integer;
+  lw,tw: integer;
 begin
-  Result := '';
-  ls := Length(Txt);
-  lw := 0;
-  i  := 1;
-  while i <= ls do
+Result:= '';
+ls:= Length(Txt);
+lw:= 0;
+i:= 1;
+while i<= ls do
   begin
-    if (Txt[i] in txtWordDelims) then       // read the delimeter only
+  if (Txt[i] in txtWordDelims)
+  then       // read the delimeter only
     begin
-      sub := Txt[i];
-      Inc(i);
-    end else                              // read the whole word
+    sub:= Txt[i];
+    Inc(i);
+    end
+  else                                // read the whole word
     begin
-      n := PosSetEx(txtWordDelims, Txt, i);
-      if n > 0 then
+    n:= PosSetEx(txtWordDelims,Txt,i);
+    if n> 0
+    then
       begin
-        sub := Copy(Txt, i, n-i);
-        i := n;
-      end else
+      sub:= Copy(Txt,i,n-i);
+      i:= n;
+      end
+    else
       begin
-        sub := Copy(Txt, i, MaxInt);
-        i := ls+1;
+      sub:= Copy(Txt,i,MaxInt);
+      i:= ls+1;
       end;
     end;
-    tw := AFnt.TextWidth(sub);            // wrap if needed
-    if (lw + tw > aMaxLineWidth) and (lw > 0) then
+  tw:= AFnt.TextWidth(sub);            // wrap if needed
+  if (lw+tw> aMaxLineWidth) and (lw> 0)
+  then
     begin
-      lw := tw;
-      Result := TrimRight(Result) + sLineBreak;
-    end else
-      Inc(lw, tw);
-    Result := Result + sub;
+    lw:= tw;
+    Result:= TrimRight(Result)+sLineBreak;
+    end
+  else
+    Inc(lw,tw);
+  Result:= Result+sub;
   end;
 end;
 

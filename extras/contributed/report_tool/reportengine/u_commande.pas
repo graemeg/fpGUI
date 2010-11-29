@@ -1,5 +1,5 @@
 {
-    << Impressions >>  U_Pdf.pas
+    << Impressions >>  U_Commande.pas
 
     Copyright (C) 2010 - JM.Levecque - <jmarc.levecque@jmlesite.fr>
 
@@ -41,6 +41,8 @@ type
     W: Integer;
     Imprimable: TDimensions;
     end;
+
+  // document classes
 
   T_Section = class
     private
@@ -120,6 +122,8 @@ type
       property Commandes: TList read FCommandes;
       property GetHeight: Integer read FHeight;
     end;
+
+  // command classes
 
   T_Commande = class
     end;
@@ -331,6 +335,10 @@ var
 
 implementation
 
+// utility functions
+
+// extracts the font size from the fontdesc
+
 function ExtractFontSize(const AValue: string): string;
 begin
 if Pos(':',AValue)> 0
@@ -339,6 +347,8 @@ then
 else
   Result:= Copy(AValue,Succ(Pos('-',AValue)),Length(AValue)-Pos('-',AValue));
 end;
+
+// document classes methods
 
 function T_Section.FirstPage: Integer;
 begin
@@ -530,6 +540,8 @@ then
 ACommande:= T_Numero.Create(APosX,APosY,AColonne,ATexteNum,ATexteTot,AFonte,AFond,ABord,AInterL,ACurFont,AFlags,ATotal,AAlpha,ATypeNum);
 Commandes.Add(ACommande);
 end;
+
+// command classes methods
 
 procedure T_EcritTexte.SetPosY(const AValue: Integer);
 begin
