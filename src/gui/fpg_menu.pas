@@ -151,6 +151,7 @@ type
     FPrevFocusItem: integer;
     FFocusItem: integer;
     FClicked: Boolean;
+    FMouseIsOver: boolean;  { So we know when PopupMenu's close, if we should redraw bar }
     FLastItemClicked: integer;
     procedure   SetFocusItem(const AValue: integer);
     procedure   DoSelect;
@@ -168,6 +169,8 @@ type
     procedure   HandleLMouseDown(x, y: integer; shiftstate: TShiftState); override;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   HandlePaint; override;
+    procedure   HandleMouseEnter; override;
+    procedure   HandleMouseExit; override;
     function    CalcMouseCol(x: integer): integer;
     function    GetItemPosX(index: integer): integer;
     function    MenuFocused: boolean;
@@ -536,6 +539,18 @@ begin
   Canvas.EndDraw;
 end;
 
+procedure TfpgMenuBar.HandleMouseEnter;
+begin
+  inherited HandleMouseEnter;
+  FMouseIsOver := True;
+end;
+
+procedure TfpgMenuBar.HandleMouseExit;
+begin
+  inherited HandleMouseExit;
+  FMouseIsOver := False;
+end;
+
 constructor TfpgMenuBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -544,17 +559,14 @@ begin
   FFocusItem        := -1;
   FPrevFocusItem    := -1;
   FLastItemClicked  := -1;
-  FFocusable        := False;
+  FFocusable        := True;
   FClicked          := False;
   FBackgroundColor  := Parent.BackgroundColor;
   FTextColor        := Parent.TextColor;
   // calculate the best height based on font
   FHeight := fpgStyle.MenuFont.Height + 6; // 3px margin top and bottom
-
-  FLightColor := TfpgColor($f0ece3);  // color at top of menu bar
-  FDarkColor  := TfpgColor($beb8a4);  // color at bottom of menu bar
-  
   FMenuOptions := [];
+  FMouseIsOver := False;
 end;
 
 destructor TfpgMenuBar.Destroy;
@@ -724,6 +736,8 @@ end;
 procedure TfpgMenuBar.DeActivateMenu;
 begin
   Parent.ActiveWidget := nil;
+  if not FMouseIsOver then
+    InternalReset;
 end;
 
 procedure TfpgMenuBar.ActivateMenu;
@@ -1324,7 +1338,6 @@ begin
     if (OpenerPopup = nil) or not OpenerPopup.HasHandle then
     begin
       OpenerMenuBar.DeActivateMenu;
-      //OpenerMenuBar.Repaint;
     end;
     //else
     //OpenerMenuBar.RePaint;
