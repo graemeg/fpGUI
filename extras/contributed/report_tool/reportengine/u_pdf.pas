@@ -229,11 +229,13 @@ type
       procedure EcritObjet(const AObjet: Integer; const AFlux: TStream);
       procedure CreateRefTable;
       procedure CreateTrailer;
-      procedure CreateCatalog;
+      function CreateCatalog: Integer;
       procedure CreateInfo;
       procedure CreatePreferences;
       function CreatePages(Parent: Integer): Integer;
-      procedure CreatePage(Parent: Integer);
+      function CreatePage(Parent,Haut,Larg: Integer): Integer;
+      function CreateOutlines(Parent: Integer): Integer;
+      function CreateOutline(Parent,SectNo,PageNo: Integer; SectTitre: string): Integer;
       procedure CreateFont(NomFonte: string; NumFonte: Integer);
       function CreateContents: Integer;
       procedure CreateStream(NumeroPage,PageNum: Integer);
@@ -254,6 +256,7 @@ const
 var
   Document: TPdfDocument;
   OldDecSeparator: Char;
+  Outline: Boolean;
 
 implementation
 
@@ -264,6 +267,7 @@ var
   Trailer: TPdfDictionary;
   CurrentColor: string;
   CurrentWidth: string;
+  Catalogue: Integer;
 
 // utility functions
 
@@ -881,7 +885,7 @@ XRefObjets:= TPdfInteger.CreateInteger(FXRefObjets.Count);
 Trailer.AddElement('Size',XRefObjets);
 end;
 
-procedure TPdfDocument.CreateCatalog;
+function TPdfDocument.CreateCatalog: Integer;
 var
   Catalog: TPdfXRef;
   XRefObjets: TPdfReference;
@@ -896,6 +900,7 @@ Trailer.AddElement('Root',XRefObjets);
 // add type element to catalog dictionary
 Nom:= TPdfName.CreateName('Catalog');
 Catalog.FObjet.AddElement('Type',Nom);
+Result:= Pred(FXRefObjets.Count);
 end;
 
 procedure TPdfDocument.CreateInfo;
@@ -992,7 +997,7 @@ Pages.FObjet.AddElement('Count',Count);
 Result:= Pred(FXRefObjets.Count);
 end;
 
-procedure TPdfDocument.CreatePage(Parent: Integer);
+function TPdfDocument.CreatePage(Parent,Haut,Larg: Integer): Integer;
 var
   Page: TPdfXRef;
   XRefObjets: TPdfReference;
@@ -1025,9 +1030,9 @@ Coord:= TPdfInteger.CreateInteger(0);
 TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('MediaBox')]).FValue).AddItem(Coord);
 Coord:= TPdfInteger.CreateInteger(0);
 TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('MediaBox')]).FValue).AddItem(Coord);
-Coord:= TPdfInteger.CreateInteger(Imprime.LargeurPapier);
+Coord:= TPdfInteger.CreateInteger(Larg);
 TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('MediaBox')]).FValue).AddItem(Coord);
-Coord:= TPdfInteger.CreateInteger(Imprime.HauteurPapier);
+Coord:= TPdfInteger.CreateInteger(Haut);
 TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('MediaBox')]).FValue).AddItem(Coord);
 // add resources element to page dictionary
 Dictionaire:= TPdfDictionary.CreateDictionary;
@@ -1045,6 +1050,64 @@ TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet
 // add text element in procset array to page dictionary
 Nom:= TPdfName.CreateName('Text');
 TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet')]).FValue).AddItem(Nom);
+Result:= Pred(FXRefObjets.Count);
+end;
+
+function TPdfDocument.CreateOutlines(Parent: Integer): Integer;
+var
+  Outlines: TPdfXRef;
+  XRefObjets: TPdfReference;
+  Nom: TPdfName;
+  Count: TPdfInteger;
+begin
+// add xref entry
+Outlines:= TPdfXRef.CreateXRef;
+FXRefObjets.Add(Outlines);
+// add type element to outlines dictionary
+Nom:= TPdfName.CreateName('Outlines');
+Outlines.FObjet.AddElement('Type',Nom);
+// add count element to outlines dictionary
+Count:= TPdfInteger.CreateInteger(0);
+Outlines.FObjet.AddElement('Count',Count);
+Result:= Pred(FXRefObjets.Count);
+end;
+
+function TPdfDocument.CreateOutline(Parent,SectNo,PageNo: Integer; SectTitre: string): Integer;
+var
+  Outline: TPdfXRef;
+  XRefObjets: TPdfReference;
+  Titre: TPdfString;
+  Count: TPdfInteger;
+  Table: TPdfArray;
+begin
+// add xref entry
+Outline:= TPdfXRef.CreateXRef;
+FXRefObjets.Add(Outline);
+// add title element to outline dictionary
+if PageNo> -1
+then
+  if SectTitre<> ''
+  then
+    Titre:= TPdfString.CreateString(SectTitre+' Page '+IntToStr(PageNo))
+  else
+    Titre:= TPdfString.CreateString('Section '+IntToStr(SectNo)+' Page '+IntToStr(PageNo))
+else
+  if SectTitre<> ''
+  then
+    Titre:= TPdfString.CreateString(SectTitre)
+  else
+    Titre:= TPdfString.CreateString('Section '+IntToStr(SectNo));
+Outline.FObjet.AddElement('Title',Titre);
+// add parent reference to outline dictionary
+XRefObjets:= TPdfReference.CreateReference(Parent);
+Outline.FObjet.AddElement('Parent',XRefObjets);
+// add count element to outline dictionary
+Count:= TPdfInteger.CreateInteger(0);
+Outline.FObjet.AddElement('Count',Count);
+// add dest element to outline dictionary
+Table:= TPdfArray.CreateArray;
+Outline.FObjet.AddElement('Dest',Table);
+Result:= Pred(FXRefObjets.Count);
 end;
 
 procedure TPdfDocument.CreateFont(NomFonte: string; NumFonte: Integer);
@@ -1191,35 +1254,127 @@ end;
 
 constructor TPdfDocument.CreateDocument;
 var
-  Cpt,CptSect,CptPage,CptFont,NumFont,TreeRoot,Parent,PageNum,NumPage: Integer;
-  Trouve: Boolean;
+  Cpt,CptSect,CptPage,CptFont,NumFont,TreeRoot,ParentPage,PageNum,NumPage: Integer;
+  OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage: Integer;
   Dictionaire: TPdfDictionary;
+  XRefObjets,PrevOutline,PrevSect: TPdfReference;
+  Nom: TPdfName;
+  Trouve: Boolean;
   FontName: string;
 begin
 inherited Create;
 CreateRefTable;
 CreateTrailer;
-CreateCatalog;
+Catalogue:= CreateCatalog;
 CreateInfo;
 CreatePreferences;
-Parent:= 0;
+ParentPage:= 0;
+ParentOutline:= 0;
 if Sections.Count> 1
 then
-  TreeRoot:= CreatePages(Parent);
+  begin
+  if Outline
+  then
+    begin
+    OutlineRoot:= CreateOutlines(ParentOutline);
+    // add outline reference to catalog dictionary
+    XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+    TPdfDictionary(TPdfXRef(FXRefObjets[Catalogue]).FObjet).AddElement('Outlines',XRefObjets);
+    // add useoutline element to catalog dictionary
+    Nom:= TPdfName.CreateName('UseOutlines');
+    TPdfDictionary(TPdfXRef(FXRefObjets[Catalogue]).FObjet).AddElement('PageMode',Nom);
+    end;
+  TreeRoot:= CreatePages(ParentPage);
+  end;
 NumPage:= 0; // numéro de page identique à celui de l'appel à ImprimePage
 for CptSect:= 0 to Pred(Sections.Count) do
   begin
   if Sections.Count> 1
   then
-    Parent:= CreatePages(TreeRoot)
+    begin
+    if Outline
+    then
+      begin
+      ParentOutline:= CreateOutline(OutlineRoot,Succ(CptSect),-1,T_Section(Sections[CptSect]).Titre);
+      Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet);
+      TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
+      if CptSect= 0
+      then
+        begin
+        XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+        TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet).AddElement('First',XRefObjets);
+        NextSect:= ParentOutline;
+        PrevSect:= XRefObjets;
+        end
+      else
+        begin
+        XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+        TPdfDictionary(TPdfXRef(FXRefObjets[NextSect]).FObjet).AddElement('Next',XRefObjets);
+        TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('Prev',PrevSect);
+        NextSect:= ParentOutline;
+        PrevSect:= XRefObjets;
+        end;
+      if CptSect= Pred(Sections.Count)
+      then
+        begin
+        XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+        TPdfDictionary(TPdfXRef(FXRefObjets[OutlineRoot]).FObjet).AddElement('Last',XRefObjets);
+        end;
+      end;
+    ParentPage:= CreatePages(TreeRoot);
+    end
   else
-    Parent:= CreatePages(Parent);
+    ParentPage:= CreatePages(ParentPage);
   for CptPage:= 0 to Pred(T_Section(Sections[CptSect]).Pages.Count) do
     begin
-    CreatePage(Parent);
+    with T_Section(Sections[CptSect]) do
+      NewPage:= CreatePage(ParentPage,Paper.H,Paper.W);
     Inc(NumPage);
     PageNum:= CreateContents; // pagenum = numéro d'objet dans le fichier PDF
     CreateStream(NumPage,PageNum);
+    if (Sections.Count> 1) and Outline
+    then
+      begin
+      PageOutline:= CreateOutline(ParentOutline,Succ(CptSect),Succ(Cptpage),T_Section(Sections[CptSect]).Titre);
+      Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet);
+      TPdfInteger(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Count')]).FValue).IncrementeInteger;
+      // add page reference to outline destination
+      Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[PageOutline]).FObjet);
+      XRefObjets:= TPdfReference.CreateReference(NewPage);
+      TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Dest')]).FValue).AddItem(XRefObjets);
+      // add display control name to outline destination
+      Nom:= TPdfName.CreateName('Fit');
+      TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Dest')]).FValue).AddItem(Nom);
+      if CptPage= 0
+      then
+        begin
+        XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+        TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('First',XRefObjets);
+        NextOutline:= PageOutline;
+        PrevOutline:= XRefObjets;
+        // add page reference to parent outline destination
+        Dictionaire:= TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet);
+        XRefObjets:= TPdfReference.CreateReference(NewPage);
+        TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Dest')]).FValue).AddItem(XRefObjets);
+        // add display control name to outline destination
+        Nom:= TPdfName.CreateName('Fit');
+        TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('Dest')]).FValue).AddItem(Nom);
+        end
+      else
+        begin
+        XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+        TPdfDictionary(TPdfXRef(FXRefObjets[NextOutline]).FObjet).AddElement('Next',XRefObjets);
+        TPdfDictionary(TPdfXRef(FXRefObjets[PageOutline]).FObjet).AddElement('Prev',PrevOutline);
+        NextOutline:= PageOutline;
+        PrevOutline:= XRefObjets;
+        end;
+      if CptPage= Pred(T_Section(Sections[CptSect]).Pages.Count)
+      then
+        begin
+        XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
+        TPdfDictionary(TPdfXRef(FXRefObjets[ParentOutline]).FObjet).AddElement('Last',XRefObjets);
+        end;
+      end;
     end;
   end;
 if Sections.Count> 1

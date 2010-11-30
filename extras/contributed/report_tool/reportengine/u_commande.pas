@@ -48,6 +48,7 @@ type
     private
       FNumSect: Integer;
       FNbPages: Integer;
+      FPaper: TPapier;
       FMarges: TDimensions;
       FBasEnTete: Integer;
       FHautPied: Integer;
@@ -55,10 +56,12 @@ type
       FEnTete: TList;
       FPied: TList;
       FCadres: TList;
-      function FirstPage: Integer;
-      function TotalPages: Integer;
+      FColonnes: TList;
+      FTitre: string;
+      function GetFirstPage: Integer;
+      function GetTotalPages: Integer;
     public
-      constructor Create(AMarges: TDimensions; ANum: Integer); virtual;
+      constructor Create(APaper: TPapier; AMarges: TDimensions; ANum: Integer); virtual;
       destructor Destroy; override;
       procedure LoadPage(APageNum: Integer);
       procedure LoadCmdEnTete;
@@ -71,15 +74,21 @@ type
       procedure LoadEspacePied(APosY,AColonne,AHeight,AFond: Integer);
       procedure LoadCadre(AStyle: Integer; AZone: TZone);
       procedure LoadTrait(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+      procedure LoadTraitHorizEnTete(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+      procedure LoadTraitHorizPage(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+      procedure LoadTraitHorizPied(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
       function GetCmdPage(NumPage: Integer): TList;
-      property GetCmdEnTete: TList read FEntete;
-      property GetCmdPied: TList read FPied;
-      property GetNbPages: Integer read FNbPages;
-      property GetFirstPage: Integer read FirstPage;
+      property CmdEnTete: TList read FEntete;
+      property CmdPied: TList read FPied;
+      property NbPages: Integer read FNbPages;
+      property FirstPage: Integer read GetFirstPage;
       property Pages: TList read FPages;
-      property TotPages: Integer read TotalPages;
-      property GetMarges: TDimensions read FMarges;
-      property GetCmdCadres: TList read FCadres;
+      property TotPages: Integer read GetTotalPages;
+      property Paper: TPapier read FPaper;
+      property Marges: TDimensions read FMarges;
+      property CmdCadres: TList read FCadres;
+      property Colonnes: TList read FColonnes;
+      property Titre: string read FTitre write FTitre;
     end;
 
   T_Page = class
@@ -104,8 +113,8 @@ type
       constructor Create; virtual;
       destructor Destroy; override;
       property Commandes: TList read FCommandes write FCommandes;
-      property GetLineHeight: Integer read FLineHeight;
-      property GetGroupeHeight: Integer read FGroupeHeight;
+      property LineHeight: Integer read FLineHeight;
+      property GroupeHeight: Integer read FGroupeHeight;
     end;
 
   T_Ligne = class
@@ -120,7 +129,7 @@ type
       procedure LoadNumero(APosX,APosY,AColonne,ATexteNum,ATexteTot,AFonte,AHeight,AFond,ABord,AInterL: Integer;
                 ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
       property Commandes: TList read FCommandes;
-      property GetHeight: Integer read FHeight;
+      property LineHeight: Integer read FHeight;
     end;
 
   // command classes
@@ -226,9 +235,9 @@ type
       function GetTextPos: Integer;
       function GetTextWidth: Integer;
       procedure SetColColor(AColor: TfpgColor);
-      property GetColPos: Integer read FPos;
-      property GetColWidth: Integer read FWidth;
-      property GetColMargin: Integer read FMargin;
+      property ColPos: Integer read FPos write FPos;
+      property ColWidth: Integer read FWidth write FWidth;
+      property ColMargin: Integer read FMargin write FMargin;
       property GetColor: TfpgColor read FColor;
     end;
 
@@ -314,7 +323,7 @@ type
 
 var
   Sections: TList;
-  Colonnes: TList;
+//  Colonnes: TList;
   Textes: TStringList;
   Fontes: TList;
   Interlignes: TList;
@@ -348,14 +357,14 @@ else
   Result:= Copy(AValue,Succ(Pos('-',AValue)),Length(AValue)-Pos('-',AValue));
 end;
 
-// document classes methods
+// document class methods
 
-function T_Section.FirstPage: Integer;
+function T_Section.GetFirstPage: Integer;
 begin
 Result:= T_Page(Pages[0]).PagesTot;
 end;
 
-function T_Section.TotalPages: Integer;
+function T_Section.GetTotalPages: Integer;
 begin
 if Pages.Count> 0
 then
@@ -364,10 +373,11 @@ else
   Result:= 0;
 end;
 
-constructor T_Section.Create(AMarges: TDimensions; ANum: Integer);
+constructor T_Section.Create(APaper: TPapier; AMarges: TDimensions; ANum: Integer);
 begin
 FNumSect:= ANum;
 FNbPages:= 0;
+FPaper:= APaper;
 FMarges:= AMarges;
 FBasEnTete:= FMarges.T;
 FHautPied:= FMarges.B;
@@ -375,6 +385,7 @@ FPages:= TList.Create;
 FEnTete:= TList.Create;
 FPied:= TList.Create;
 FCadres:= TList.Create;
+FColonnes:= TList.Create;
 end;
 
 destructor T_Section.Destroy;
@@ -383,6 +394,7 @@ FPages.Free;
 FEnTete.Free;
 FPied.Free;
 FCadres.Free;
+FColonnes.Free;
 inherited Destroy;
 end;
 
@@ -478,6 +490,24 @@ ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
 T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
 end;
 
+procedure T_Section.LoadTraitHorizEnTete(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+begin
+ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
+FEnTete.Add(ACommande);
+end;
+
+procedure T_Section.LoadTraitHorizPage(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+begin
+ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
+T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
+end;
+
+procedure T_Section.LoadTraitHorizPied(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+begin
+ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
+FPied.Add(ACommande);
+end;
+
 function T_Section.GetCmdPage(NumPage: Integer): TList;
 begin
 Result:= T_Page(Pages[Pred(NumPage)]).Commandes;
@@ -541,7 +571,7 @@ ACommande:= T_Numero.Create(APosX,APosY,AColonne,ATexteNum,ATexteTot,AFonte,AFon
 Commandes.Add(ACommande);
 end;
 
-// command classes methods
+// command class methods
 
 procedure T_EcritTexte.SetPosY(const AValue: Integer);
 begin

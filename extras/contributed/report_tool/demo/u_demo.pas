@@ -20,6 +20,7 @@ type
       Bt_PdfSimpleText: TfpgButton;
       Bt_PdfMultiPages: TfpgButton;
       Bt_PdfMultiSections: TfpgButton;
+      Bt_PdfOutlines: TfpgButton;
       Bt_PdfCadres: TfpgButton;
       Bt_PdfColor: TfpgButton;
       Bt_PdfLines: TfpgButton;
@@ -30,6 +31,7 @@ type
       Bt_VisuSimpleText: TfpgButton;
       Bt_VisuMultiPages: TfpgButton;
       Bt_VisuMultiSections: TfpgButton;
+      Bt_VisuOutlines: TfpgButton;
       Bt_VisuCadres: TfpgButton;
       Bt_VisuColor: TfpgButton;
       Bt_VisuLines: TfpgButton;
@@ -40,6 +42,7 @@ type
       Bt_PrintSimpleText: TfpgButton;
       Bt_PrintMultiPages: TfpgButton;
       Bt_PrintMultiSections: TfpgButton;
+      Bt_PrintOutlines: TfpgButton;
       Bt_PrintCadres: TfpgButton;
       Bt_PrintColor: TfpgButton;
       Bt_PrintLines: TfpgButton;
@@ -50,6 +53,7 @@ type
       procedure Bt_PdfSimpleTextClick(Sender: TObject);
       procedure Bt_PdfMultiPagesClick(Sender: TObject);
       procedure Bt_PdfMultiSectionsClick(Sender: TObject);
+      procedure Bt_PdfOutlinesClick(Sender: TObject);
       procedure Bt_PdfCadresClick(Sender: TObject);
       procedure Bt_PdfColorClick(Sender: TObject);
       procedure Bt_PdfLinesClick(Sender: TObject);
@@ -59,6 +63,7 @@ type
       procedure Bt_VisuSimpleTextClick(Sender: TObject);
       procedure Bt_VisuMultiPagesClick(Sender: TObject);
       procedure Bt_VisuMultiSectionsClick(Sender: TObject);
+      procedure Bt_VisuOutlinesClick(Sender: TObject);
       procedure Bt_VisuCadresClick(Sender: TObject);
       procedure Bt_VisuColorClick(Sender: TObject);
       procedure Bt_VisuLinesClick(Sender: TObject);
@@ -68,6 +73,7 @@ type
       procedure Bt_PrintSimpleTextClick(Sender: TObject);
       procedure Bt_PrintMultiPagesClick(Sender: TObject);
       procedure Bt_PrintMultiSectionsClick(Sender: TObject);
+      procedure Bt_PrintOutlinesClick(Sender: TObject);
       procedure Bt_PrintCadresClick(Sender: TObject);
       procedure Bt_PrintColorClick(Sender: TObject);
       procedure Bt_PrintLinesClick(Sender: TObject);
@@ -78,6 +84,7 @@ type
       procedure ImprimeSimpleText(Preview: Boolean);
       procedure ImprimeMultiPages(Preview: Boolean);
       procedure ImprimeMultiSections(Preview: Boolean);
+      procedure ImprimeOutlines(Preview: Boolean);
       procedure ImprimeCadres(Preview: Boolean);
       procedure ImprimeColor(Preview: Boolean);
       procedure ImprimeLines(Preview: Boolean);
@@ -279,6 +286,58 @@ with Imprime do
   Fd_SauvePdf.FontDesc:= 'bitstream vera sans-9';
   Fd_SauvePdf.Filter:= 'Fichiers pdf |*.pdf';
   Fd_SauvePdf.FileName:= 'MultiSections.pdf';
+  try
+    if Fd_SauvePdf.RunSaveFile
+    then
+      begin
+      FichierPdf:= Fd_SauvePdf.FileName;
+      if Lowercase(Copy(FichierPdf,Length(FichierPdf)-3,4))<> '.pdf'
+      then
+         FichierPdf:= FichierPdf+'.pdf';
+      Document:= TPdfDocument.CreateDocument;
+      with Document do
+        begin
+        FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
+        EcritDocument(FluxFichier);
+        FluxFichier.Free;
+        Free;
+        end;
+  {$ifdef linux}
+      fpgOpenURL(FichierPdf);
+  {$endif}
+  {$ifdef win32}
+      ShellExecute(0,PChar('OPEN'),PChar(FichierPdf),PChar(''),PChar(''),1);
+  {$endif}
+      end;
+  finally
+    Fd_SauvePdf.Free;
+    end;
+  Free;
+  end;
+end;
+
+procedure TF_Demo.Bt_PdfOutlinesClick(Sender: TObject);
+var
+  Fd_SauvePdf: TfpgFileDialog;
+  FichierPdf: string;
+  FluxFichier: TFileStream;
+begin
+Imprime:= T_Imprime.Create;
+with Imprime do
+  begin
+//  Langue:= Version;
+  ImprimeOutlines(False);
+  if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
+  then
+    begin
+    ShowMessage('There is no file to print');
+    Exit;
+    end;
+  Fd_SauvePdf:= TfpgFileDialog.Create(nil);
+  Fd_SauvePdf.InitialDir:= ExtractFilePath(Paramstr(0));
+  Fd_SauvePdf.FontDesc:= 'bitstream vera sans-9';
+  Fd_SauvePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SauvePdf.FileName:= 'Outlines.pdf';
   try
     if Fd_SauvePdf.RunSaveFile
     then
@@ -617,6 +676,18 @@ with Imprime do
   end;
 end;
 
+procedure TF_Demo.Bt_VisuOutlinesClick(Sender: TObject);
+begin
+Imprime:= T_Imprime.Create;
+with Imprime do
+  begin
+  //Langue:= Version;
+  DefaultFile:= 'Outlines.pdf';
+  ImprimeOutlines(True);
+  Free;
+  end;
+end;
+
 procedure TF_Demo.Bt_VisuCadresClick(Sender: TObject);
 begin
 Imprime:= T_Imprime.Create;
@@ -693,6 +764,11 @@ begin
 end;
 
 procedure TF_Demo.Bt_PrintMultiSectionsClick(Sender: TObject);
+begin
+
+end;
+
+procedure TF_Demo.Bt_PrintOutlinesClick(Sender: TObject);
 begin
 
 end;
@@ -798,6 +874,7 @@ end;
 procedure TF_Demo.ImprimeMultiSections(Preview: Boolean);
 var
   FtTitreS1,FtTitreS2,FtTitreS3,FtTexte,FtNum,FtNumS: Integer;
+  ColDefSect2: Integer;
   Cpt: Integer;
 begin
 with Imprime do
@@ -826,7 +903,74 @@ with Imprime do
     Page;
 
   // create a new section and define the margins
-  Section(10,10,10,10);
+  Section(10,10,10,10,0,oLandscape);
+  // create a default column for section2 which is landscape oriented
+  ColDefSect2:= Colonne(20,257);
+  // write title on each page of the section
+  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefSect2,FtTitreS2);
+  // write section number and total of sections on each page
+  NumSectionEnTete(cnRight,lnFin,'Section','of',True,False,ColDefSect2,FtNum);
+  // write page number for the section and total pages of the section on each page
+  NumPageSectionEnTete(cnCenter,lnFin,'Section page','of',True,True,ColDefSect2,FtNumS);
+  // write page number and total of pages on each page
+  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefSect2,FtNum);
+  // create some new empty pages in the section
+  for Cpt:= 1 to 2 do
+    Page;
+
+  // create a new section and define the margins
+  Section(20,20,20,20);
+  // write title on each page of the section
+  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS3);
+  // write section number and total of sections on each page
+  NumSectionEnTete(cnRight,lnFin,'Section','of',True,True,ColDefaut,FtNum);
+  // write page number for the section and total pages of the section on each page
+  NumPageSectionEnTete(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  // write page number and total of pages on each page
+  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  // create some new empty pages in the section
+  for Cpt:= 1 to 4 do
+    Page;
+
+  // preparation is finished, so create PDF objects
+  Fin;
+  end;
+end;
+
+procedure TF_Demo.ImprimeOutlines(Preview: Boolean);
+var
+  FtTitreS1,FtTitreS2,FtTitreS3,FtTexte,FtNum,FtNumS: Integer;
+  ColDefSect2: Integer;
+  Cpt: Integer;
+begin
+with Imprime do
+  begin
+  // define orientation, page format, measurement unit, language, preview (true) or print (false)
+  Debut(oPortrait,A4,msMM,Langue,Preview);
+  // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
+  FtTitreS1:= Fonte('helvetica-15:bold',clBlack);
+  FtTitreS2:= Fonte('helvetica-14:italic',clBlack);
+  FtTitreS3:= Fonte('helvetica-12:bold:italic',clBlack);
+  FtTexte:= Fonte('helvetica-8',clBlack);
+  FtNum:= Fonte('helvetica-7:italic',clBlack);
+  FtNumS:= Fonte('helvetica-7:italic',clGray);
+  // create a new section and define the margins
+  Section(20,10,10,10);
+  // write title on each page of the section
+  EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS1);
+  // write section number and total of sections on each page
+  NumSectionEnTete(cnRight,lnFin,'Section','of',True,False,ColDefaut,FtNum);
+  // write page number for the section and total pages of the section on each page
+  NumPageSectionPied(cnCenter,lnFin,'Section page','of',True,False,ColDefaut,FtNumS);
+  // write page number and total of pages on each page
+  NumPagePied(cnCenter,lnFin,'Page','of',True,ColDefaut,FtNum);
+  // create some new empty pages in the section
+  for Cpt:= 1 to 3 do
+    Page;
+
+  // create a new section and define the margins
+  Section(10,10,10,10,0,oLandscape);
+  TitreSection:= 'Landscape oriented';
   // write title on each page of the section
   EcritEnTete(cnCenter,lnFin,'MULTI SECTION DOCUMENT',ColDefaut,FtTitreS2);
   // write section number and total of sections on each page
@@ -854,6 +998,7 @@ with Imprime do
     Page;
 
   // preparation is finished, so create PDF objects
+  Outline:= True;
   Fin;
   end;
 end;
@@ -998,6 +1143,7 @@ with Imprime do
   EcritPage(cnLeft,lnFin,'',Col3,FtTexte);
   EspacePage(5);
   EcritPage(cnLeft,lnFin,'A thick border',Col3,FtTexte,IlTexte,-1,BdRect);
+  TraitHorizPage(2,2,Col2,TsEpais);
   TraitPage(30,100,150,150,tsFinNoir);
   TraitPage(50,70,180,100,tsFinBleu);
   TraitPage(40,140,160,80,tsFinRouge);
@@ -1139,7 +1285,7 @@ begin
 inherited Create(AOwner);
 Name := 'F_Demo';
 WindowTitle:= 'PDF demo';
-SetPosition(0, 0, 650, 450);
+SetPosition(0, 0, 650, 500);
 WindowPosition:= wpScreenCenter;
 Sizeable:= False;
 fpgSetNamedColor(clWindowBackground,clPaleGreen);
@@ -1154,21 +1300,23 @@ Bt_PdfEmptyPage:= CreateButton(Self,50,30,150,'Empty page',@Bt_PdfEmptyPageClick
 Bt_PdfSimpleText:= CreateButton(Self,50,70,150,'Simple text',@Bt_PdfSimpleTextClick,'stdimg.Adobe_pdf');
 Bt_PdfMultiPages:= CreateButton(Self,50,110,150,'Multiple pages',@Bt_PdfMultiPagesClick,'stdimg.Adobe_pdf');
 Bt_PdfMultiSections:= CreateButton(Self,50,150,150,'Multiple sections',@Bt_PdfMultiSectionsClick,'stdimg.Adobe_pdf');
-Bt_PdfCadres:= CreateButton(Self,50,190,150,'Draw frames',@Bt_PdfCadresClick,'stdimg.Adobe_pdf');
-Bt_PdfColor:= CreateButton(Self,50,230,150,'Show colors',@Bt_PdfColorClick,'stdimg.Adobe_pdf');
-Bt_PdfLines:= CreateButton(Self,50,270,150,'Draw lines',@Bt_PdfLinesClick,'stdimg.Adobe_pdf');
-Bt_PdfGrid:= CreateButton(Self,50,310,150,'Show grid',@Bt_PdfGridClick,'stdimg.Adobe_pdf');
-Bt_PdfGraph:= CreateButton(Self,50,350,150,'Show graph',@Bt_PdfGraphClick,'stdimg.Adobe_pdf');
+Bt_PdfOutlines:= CreateButton(Self,50,190,150,'Outlines',@Bt_PdfOutlinesClick,'stdimg.Adobe_pdf');
+Bt_PdfCadres:= CreateButton(Self,50,230,150,'Draw frames',@Bt_PdfCadresClick,'stdimg.Adobe_pdf');
+Bt_PdfColor:= CreateButton(Self,50,270,150,'Show colors',@Bt_PdfColorClick,'stdimg.Adobe_pdf');
+Bt_PdfLines:= CreateButton(Self,50,310,150,'Draw lines',@Bt_PdfLinesClick,'stdimg.Adobe_pdf');
+Bt_PdfGrid:= CreateButton(Self,50,350,150,'Show grid',@Bt_PdfGridClick,'stdimg.Adobe_pdf');
+Bt_PdfGraph:= CreateButton(Self,50,390,150,'Show graph',@Bt_PdfGraphClick,'stdimg.Adobe_pdf');
 L_Pdf:= CreateLabel(Self,250,5,'Preview',150,20,taCenter);
 Bt_VisuEmptyPage:= CreateButton(Self,250,30,150,'Empty page',@Bt_VisuEmptyPageClick,'stdimg.Preview');
 Bt_VisuSimpleText:= CreateButton(Self,250,70,150,'Simple text',@Bt_VisuSimpleTextClick,'stdimg.Preview');
 Bt_VisuMultiPages:= CreateButton(Self,250,110,150,'Multiple pages',@Bt_VisuMultiPagesClick,'stdimg.Preview');
 Bt_VisuMultiSections:= CreateButton(Self,250,150,150,'Multiple sections',@Bt_VisuMultiSectionsClick,'stdimg.Preview');
-Bt_VisuCadres:= CreateButton(Self,250,190,150,'Draw frames',@Bt_VisuCadresClick,'stdimg.Preview');
-Bt_VisuColor:= CreateButton(Self,250,230,150,'Show colors',@Bt_VisuColorClick,'stdimg.Preview');
-Bt_VisuLines:= CreateButton(Self,250,270,150,'Draw lines',@Bt_VisuLinesClick,'stdimg.Preview');
-Bt_VisuGrid:= CreateButton(Self,250,310,150,'Show grid',@Bt_VisuGridClick,'stdimg.Preview');
-Bt_VisuGraph:= CreateButton(Self,250,350,150,'Show graph',@Bt_VisuGraphClick,'stdimg.Preview');
+Bt_VisuOutlines:= CreateButton(Self,250,190,150,'Outlines',@Bt_VisuOutlinesClick,'stdimg.Preview');
+Bt_VisuCadres:= CreateButton(Self,250,230,150,'Draw frames',@Bt_VisuCadresClick,'stdimg.Preview');
+Bt_VisuColor:= CreateButton(Self,250,270,150,'Show colors',@Bt_VisuColorClick,'stdimg.Preview');
+Bt_VisuLines:= CreateButton(Self,250,310,150,'Draw lines',@Bt_VisuLinesClick,'stdimg.Preview');
+Bt_VisuGrid:= CreateButton(Self,250,350,150,'Show grid',@Bt_VisuGridClick,'stdimg.Preview');
+Bt_VisuGraph:= CreateButton(Self,250,390,150,'Show graph',@Bt_VisuGraphClick,'stdimg.Preview');
 L_Print:= CreateLabel(Self,450,5,'Print to printer',150,20,taCenter);
 Bt_PrintEmptyPage:= CreateButton(Self,450,30,150,'Empty page',@Bt_PrintEmptyPageClick,'stdimg.Imprimer');
 Bt_PrintEmptyPage.Enabled:= False;
@@ -1178,17 +1326,19 @@ Bt_PrintMultiPages:= CreateButton(Self,450,110,150,'Multiple pages',@Bt_PrintMul
 Bt_PrintMultiPages.Enabled:= False;
 Bt_PrintMultiSections:= CreateButton(Self,450,150,150,'Multiple sections',@Bt_PrintMultiSectionsClick,'stdimg.Imprimer');
 Bt_PrintMultiSections.Enabled:= False;
-Bt_PrintCadres:= CreateButton(Self,450,190,150,'Draw frames',@Bt_PrintCadresClick,'stdimg.Imprimer');
+Bt_PrintOutlines:= CreateButton(Self,450,190,150,'Outlines',@Bt_PrintOutlinesClick,'stdimg.Imprimer');
+Bt_PrintOutlines.Enabled:= False;
+Bt_PrintCadres:= CreateButton(Self,450,230,150,'Draw frames',@Bt_PrintCadresClick,'stdimg.Imprimer');
 Bt_PrintCadres.Enabled:= False;
-Bt_PrintColor:= CreateButton(Self,450,230,150,'Show colors',@Bt_PrintColorClick,'stdimg.Imprimer');
+Bt_PrintColor:= CreateButton(Self,450,270,150,'Show colors',@Bt_PrintColorClick,'stdimg.Imprimer');
 Bt_PrintColor.Enabled:= False;
-Bt_PrintLines:= CreateButton(Self,450,270,150,'Draw lines',@Bt_PrintLinesClick,'stdimg.Imprimer');
+Bt_PrintLines:= CreateButton(Self,450,310,150,'Draw lines',@Bt_PrintLinesClick,'stdimg.Imprimer');
 Bt_PrintLines.Enabled:= False;
-Bt_PrintGrid:= CreateButton(Self,450,310,150,'Show grid',@Bt_PrintGridClick,'stdimg.Imprimer');
+Bt_PrintGrid:= CreateButton(Self,450,350,150,'Show grid',@Bt_PrintGridClick,'stdimg.Imprimer');
 Bt_PrintGrid.Enabled:= False;
-Bt_PrintGraph:= CreateButton(Self,450,350,150,'Show graph',@Bt_PrintGraphClick,'stdimg.Imprimer');
+Bt_PrintGraph:= CreateButton(Self,450,390,150,'Show graph',@Bt_PrintGraphClick,'stdimg.Imprimer');
 Bt_PrintGraph.Enabled:= False;
-Bt_Fermer:= CreateButton(Self,450,400,150,'Fermer',@Bt_FermerClick,'stdimg.Fermer');
+Bt_Fermer:= CreateButton(Self,450,450,150,'Fermer',@Bt_FermerClick,'stdimg.Fermer');
 Bt_Fermer.BackgroundColor:= clTomato;
 Randomize;
 for Cpt:= 0 to 18 do
