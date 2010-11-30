@@ -527,16 +527,9 @@ var
   r: TfpgRect;
 begin
   Canvas.BeginDraw;
-  inherited HandlePaint;
+
   r.SetRect(0, 0, Width, Height);
-  Canvas.Clear(FBackgroundColor);
-//  Canvas.DrawButtonFace(r, []);
-  // inner bottom line
-  Canvas.SetColor(clShadow1);
-  Canvas.DrawLine(r.Left, r.Bottom-1, r.Right+1, r.Bottom-1);   // bottom
-  // outer bottom line
-  Canvas.SetColor(clWhite);
-  Canvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
+  fpgStyle.DrawMenuBar(Canvas, r, FBackgroundColor);
 
   for n := 0 to VisibleCount-1 do
     DrawColumn(n, n = FocusItem);
@@ -616,8 +609,6 @@ begin
           Canvas.SetTextColor(clMenuDisabled);
         end;
       end;  { if/else }
-      // a possible future theme option
-//      Canvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
       mi.DrawText(Canvas, r.left+4, r.top+1, cImgWidth);
       Exit; //==>
     end;  { if col=n }
