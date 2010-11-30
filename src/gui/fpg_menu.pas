@@ -133,7 +133,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
     procedure   Close; override;
-    function    AddMenuItem(const AMenuName: TfpgString; const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
+    function    AddMenuItem(const AMenuName: TfpgString; const hotkeydef: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
     function    MenuItemByName(const AMenuName: TfpgString): TfpgMenuItem;
     function    MenuItem(const AMenuPos: integer): TfpgMenuItem;  // added to allow for localization
     property    BeforeShow: TNotifyEvent read FBeforeShow write FBeforeShow;
@@ -1350,14 +1350,14 @@ begin
 end;
 
 function TfpgPopupMenu.AddMenuItem(const AMenuName: TfpgString;
-    const hotkeydef: string; HandlerProc: TNotifyEvent): TfpgMenuItem;
+    const hotkeydef: string; OnClickProc: TNotifyEvent): TfpgMenuItem;
 begin
   result := TfpgMenuItem.Create(self);
   if AMenuName <> '-' then
   begin
     result.Text := AMenuName;
     result.hotkeydef := hotkeydef;
-    result.OnClick := HandlerProc;
+    result.OnClick := OnClickProc;
   end
   else
   begin
