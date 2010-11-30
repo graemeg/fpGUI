@@ -46,9 +46,10 @@ type
   TMyStyle = class(TfpgStyle)
   public
     constructor Create; override;
-    procedure DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); override;
-    procedure DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); override;
+    procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); override;
+    procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); override;
     procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); override;
+    procedure   DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor); override;
   end;
 
 
@@ -122,6 +123,24 @@ begin
   inherited DrawMenuRow(ACanvas, r, AFlags);
   if (mifSelected in AFlags) and not (mifSeparator in AFlags) then
     ACanvas.GradientFill(r, TfpgColor($fec475), TfpgColor($fb9d24), gdVertical);
+end;
+
+procedure TMyStyle.DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor);
+var
+  FLightColor: TfpgColor;
+  FDarkColor: TfpgColor;
+begin
+  // a possible future theme option
+  FLightColor := TfpgColor($f0ece3);  // color at top of menu bar
+  FDarkColor  := TfpgColor($beb8a4);  // color at bottom of menu bar
+  ACanvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
+
+  // inner bottom line
+  ACanvas.SetColor(clShadow1);
+  ACanvas.DrawLine(r.Left, r.Bottom-1, r.Right+1, r.Bottom-1);   // bottom
+  // outer bottom line
+  ACanvas.SetColor(clWhite);
+  ACanvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
 end;
 
 end.
