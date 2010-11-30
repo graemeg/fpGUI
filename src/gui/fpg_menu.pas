@@ -362,6 +362,7 @@ begin
     Exit;
   FPrevFocusItem := FFocusItem;
   FFocusItem := AValue;
+  Repaint;
 end;
 
 procedure TfpgMenuBar.PrepareToShow;
@@ -482,18 +483,15 @@ begin
     CloseSubmenus;
     DeActivateMenu;
     FLastItemClicked := -1;
+    FocusItem := -1;
     exit; //==>
   end;
 
+  if newf <> FFocusItem then
+    FocusItem := newf;
+
   if not VisibleItem(newf).Selectable then
     Exit; //==>
-
-  if newf <> FFocusItem then
-  begin
-//    DrawColumn(FFocusItem, False);
-    FocusItem := newf;
-//    DrawColumn(FFocusItem, True);
-  end;
 
   DoSelect;
 end;
@@ -581,6 +579,8 @@ procedure TfpgMenuBar.InternalReset;
 begin
   FClicked := False;
   FLastItemClicked := -1;
+  FFocusItem := -1;
+  Repaint;
 end;
 
 procedure TfpgMenuBar.DrawColumn(col: integer; focus: boolean);
@@ -589,28 +589,19 @@ var
   r: TfpgRect;
   mi: TfpgMenuItem;
 begin
-  Canvas.BeginDraw;
-  r.SetRect(2, 1, 1, fpgStyle.MenuFont.Height+1);
+  r.SetRect(2, 1, 1, Height-4);
 
-  for n := 0 to VisibleCount-1 do
+  for n := 0 to VisibleCount-1 do  { so we can calculate menu item position }
   begin
     mi := VisibleItem(n);
     r.width := ItemWidth(mi);
     if col = n then
     begin
-      if focus and Focused then
+      if focus then
       begin
-        if MenuFocused then
-        begin
-          Canvas.SetColor(clSelection);
-          Canvas.SetTextColor(clSelectionText);
-        end
-        else
-        begin
-//          Canvas.SetColor(clInactiveSel);
-          Canvas.SetColor(clShadow1);
-          Canvas.SetTextColor(clInactiveSelText);
-        end;
+        fpgStyle.DrawBevel(Canvas, r.left, r.top, r.width, r.height, False);
+        Canvas.SetColor(BackgroundColor);
+        Canvas.SetTextColor(clMenuText);
       end
       else
       begin
@@ -625,14 +616,12 @@ begin
           Canvas.SetTextColor(clMenuDisabled);
         end;
       end;  { if/else }
-      Canvas.FillRectangle(r);
       // a possible future theme option
 //      Canvas.GradientFill(r, FLightColor, FDarkColor, gdVertical);
       mi.DrawText(Canvas, r.left+4, r.top+1, cImgWidth);
-      Canvas.EndDraw(r.Left, r.Top, r.Width, r.Height);
       Exit; //==>
     end;  { if col=n }
-    inc(r.Left, ItemWidth(mi));
+    inc(r.Left, r.width);
   end;  { for }
 end;
 
@@ -985,6 +974,8 @@ begin
             op.Close;
             op := op.OpenerPopup;
           end;
+          if OpenerMenubar <> nil then
+            OpenerMenubar.InternalReset;
         end;
   else
     consumed := false;
