@@ -209,6 +209,7 @@ type
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
+    procedure   DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor); virtual;
     procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
     procedure   DrawMenuItem(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags; AText: TfpgString); virtual;
     procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
@@ -2252,6 +2253,18 @@ begin
   // restore previous settings
   ACanvas.SetColor(oldColor);
   ACanvas.SetLineStyle(oldLineWidth, oldLineStyle);
+end;
+
+procedure TfpgStyle.DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor);
+begin
+  ACanvas.Clear(ABackgroundColor);
+
+  // inner bottom line
+  ACanvas.SetColor(clShadow1);
+  ACanvas.DrawLine(r.Left, r.Bottom-1, r.Right+1, r.Bottom-1);   // bottom
+  // outer bottom line
+  ACanvas.SetColor(clWhite);
+  ACanvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
 end;
 
 procedure TfpgStyle.DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags);
