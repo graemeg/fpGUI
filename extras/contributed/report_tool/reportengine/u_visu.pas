@@ -21,7 +21,7 @@ unit U_Visu;
 interface
 
 uses
-  Classes, SysUtils, Process,
+  Classes, SysUtils,
   {$ifdef win32}
   shellapi,
   {$endif}
@@ -89,7 +89,7 @@ var
 implementation
 
 uses
-  U_Imprime, U_Commande, U_Pdf;
+  U_Imprime, U_Commande, U_Pdf, U_ReportImages;
 
 procedure TF_Visu.FormShow(Sender: TObject);
 begin
@@ -493,38 +493,39 @@ WindowPosition:= wpUser;
 SetPosition(0, 0, FpgApplication.ScreenWidth-2, FpgApplication.ScreenHeight-66);
 Sizeable:= False;
 BackgroundColor:= clMediumAquamarine;
+CreateReportImages;
 Bv_Commande:= CreateBevel(Self,0,0,Width,50,bsBox,bsRaised);
 Bv_Commande.BackgroundColor:= clBisque;
 Bt_Fermer:= CreateButton(Bv_Commande,10,10,26,'',@Bt_FermerClick);
 Bt_Fermer.BackgroundColor:= clOrangeRed;
-Bt_Fermer.ImageName:= 'stdimg.Fermer';
+Bt_Fermer.ImageName:= 'repimg.Fermer';
 Bt_Imprimer:= CreateButton(Bv_Commande,50,10,26,'',@Bt_ImprimerClick);
 Bt_Imprimer.BackgroundColor:= clGreen;
-Bt_Imprimer.ImageName:= 'stdimg.Imprimer';
+Bt_Imprimer.ImageName:= 'repimg.Imprimer';
 Bt_Imprimer.Enabled:= False;
 Bt_Imprimante:= CreateButton(Bv_Commande,90,10,26,'',@Bt_ImprimanteClick);
 Bt_Imprimante.BackgroundColor:= clSilver;
-Bt_Imprimante.ImageName:= 'stdimg.Imprimante';
+Bt_Imprimante.ImageName:= 'repimg.Imprimante';
 Bt_Imprimante.Enabled:= False;
 Bt_Arreter:= CreateButton(Bv_Commande,130,10,26,'',@Bt_ArreterClick);
 Bt_Arreter.BackgroundColor:= clRed;
-Bt_Arreter.ImageName:= 'stdimg.Stop';
+Bt_Arreter.ImageName:= 'repimg.Stop';
 Bt_Pdf:= CreateButton(Bv_Commande,170,10,26,'',@Bt_PdfClick);
 Bt_Pdf.BackgroundColor:= clWhite;
 Bt_Pdf.ImageMargin:= 0;
-Bt_Pdf.ImageName:= 'stdimg.Adobe_pdf';
+Bt_Pdf.ImageName:= 'repimg.Adobe_pdf';
 Bv_Pages:= CreateBevel(Bv_Commande,220,5,300,40,bsBox,bsLowered);
 Bv_Pages.BackgroundColor:= clLinen;
 Bt_PremPage:= CreateButton(Bv_Pages,54,6,26,'',@Bt_PremPageClick);
-Bt_PremPage.ImageName:= 'stdimg.Debut';
+Bt_PremPage.ImageName:= 'repimg.Debut';
 Bt_PrecPage:= CreateButton(Bv_Pages,80,6,26,'',@Bt_PrecPageClick);
-Bt_PrecPage.ImageName:= 'stdimg.Precedent';
+Bt_PrecPage.ImageName:= 'repimg.Precedent';
 E_NumPage:= CreateEditInteger(Bv_Pages,110,8,60,0);
 E_NumPage.OnKeyPress:= @E_NumPageKeypress;
 Bt_Suivpage:= CreateButton(Bv_Pages,174,6,26,'',@Bt_SuivPageClick);
-Bt_SuivPage.ImageName:= 'stdimg.Suivant';
+Bt_SuivPage.ImageName:= 'repimg.Suivant';
 Bt_DernPage:= CreateButton(Bv_Pages,200,6,26,'',@Bt_DernPageClick);
-Bt_DernPage.ImageName:= 'stdimg.Fin';
+Bt_DernPage.ImageName:= 'repimg.Fin';
 L_Pages:= CreateLabel(Bv_Pages,5,E_NumPage.Top,'Page',0,E_NumPage.Height,taLeftJustify,tlcenter);
 L_Depage:= CreateLabel(Bv_Pages,235,E_NumPage.Top,'de',0,E_NumPage.Height,taLeftJustify,tlcenter);
 L_NbrPages:= CreateLabel(Bv_Pages,265,E_NumPage.Top,' ',30,E_NumPage.Height,taCenter,tlcenter);
@@ -533,11 +534,11 @@ Bv_Sections.BackgroundColor:= clLinen;
 //Bt_PremSect:= CreateButton(Bv_Sections,64,6,26,'',@Bt_PremSectClick);
 //Bt_PremSect.ImageName:= 'stdimg.Debut';
 Bt_PrecSect:= CreateButton(Bv_Sections,90,6,26,'',@Bt_PrecSectClick);
-Bt_PrecSect.ImageName:= 'stdimg.Precedent';
+Bt_PrecSect.ImageName:= 'repimg.Precedent';
 E_NumSect:= CreateEditInteger(Bv_Sections,120,8,60,0);
 E_NumSect.OnKeyPress:= @E_NumSectKeyPress;
 Bt_SuivSect:= CreateButton(Bv_Sections,184,6,26,'',@Bt_SuivSectClick);
-Bt_SuivSect.ImageName:= 'stdimg.Suivant';
+Bt_SuivSect.ImageName:= 'repimg.Suivant';
 //Bt_DernSect:= CreateButton(Bv_Sections,210,6,26,'',@Bt_DernSectClick);
 //Bt_DernSect.ImageName:= 'stdimg.Fin';
 L_Sections:= CreateLabel(Bv_Sections,5,E_NumSect.Top,'Section',0,E_NumSect.Height,taLeftJustify,tlcenter);

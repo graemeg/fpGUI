@@ -29,7 +29,7 @@
     </CompilerOptions>
     <Description Value="PDF reporting engine"/>
     <Version Minor="1"/>
-    <Files Count="4">
+    <Files Count="5">
       <Item1>
         <Filename Value="u_commande.pas"/>
         <UnitName Value="U_Commande"/>
@@ -46,6 +46,10 @@
         <Filename Value="u_visu.pas"/>
         <UnitName Value="U_Visu"/>
       </Item4>
+      <Item5>
+        <Filename Value="u_reportimages.pas"/>
+        <UnitName Value="U_ReportImages"/>
+      </Item5>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
