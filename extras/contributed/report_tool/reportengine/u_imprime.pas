@@ -886,10 +886,11 @@ end;
 procedure T_Imprime.EcritLigne(PosX,PosY,Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
           TxtFlags: TFTextFlags; Zone: TZone);
 var
-  PosH,PosV,HTxt,HautTxt,IntlInt,IntLSup,IntLInf,Half,CoulTrait,EpaisTrait: Integer;
+  PosH,PosV,HTxt,HautTxt,IntlInt,IntLSup,IntLInf,Half,CoulTrait,EpaisTrait,Cpt: Integer;
   FinDeLigne,UseCurFont: Boolean;
   Fnt: TfpgFont;
   StylTrait: TfpgLineStyle;
+  Wraplst: TStringList;
 begin
 with T_Section(Sections[Pred(NumeroSection)]) do
   begin
@@ -1002,7 +1003,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                   else
                     begin
                     LoadCmdGroupeToPage;
-                    AGroupe.Commandes.Clear;
+//                    AGroupe.Commandes.Clear;
                     Page;
                     FPosRef.Y:= FMargeCourante.T+FEnTeteHeight;
                     if ALigne.Commandes.Count> 0
@@ -1235,25 +1236,60 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 PdfPage.Add(PdfLine);
                 end;
               end;
-          PdfTexte:= TPdfTexte.Create;
-          with PdfTexte do
+          if Fnt.TextWidth(Textes[Texte])< GetTextWidth
+          then
             begin
-            PageId:= NumeroPage;
-            FFont:= FonteNum;
-            FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
-            FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
-            TextPosX:= GetTextPos;
-            if (txtRight in TxtFlags)
-            then
-              TextPosX:= ColPos+ColWidth-ColMargin-Fnt.TextWidth(Textes[Texte]);
-            if (txtHCenter in TxtFlags)
-            then
-              TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Textes[Texte])) div 2;
-            TextPosY:= Paper.H-PosY-Fnt.Ascent;
-            TextLarg:= ColWidth;
-            Ecriture:= Textes[Texte];
+            PdfTexte:= TPdfTexte.Create;
+            with PdfTexte do
+              begin
+              PageId:= NumeroPage;
+              FFont:= FonteNum;
+              FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
+              FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
+              TextPosX:= GetTextPos;
+              if (txtRight in TxtFlags)
+              then
+                TextPosX:= ColPos+ColWidth-ColMargin-Fnt.TextWidth(Textes[Texte]);
+              if (txtHCenter in TxtFlags)
+              then
+                TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Textes[Texte])) div 2;
+              TextPosY:= Paper.H-PosY-Fnt.Ascent;
+              TextLarg:= ColWidth;
+              Ecriture:= Textes[Texte];
+              end;
+            PdfPage.Add(PdfTexte);
+            end
+          else
+            begin
+            Wraplst:= TStringList.Create;
+            Wraplst.Text:= Textes[Texte];
+            for Cpt:= 0 to Pred(Wraplst.Count) do
+              Wraplst[Cpt]:= AddLineBreaks(Wraplst[Cpt],GetTextWidth,Fnt);
+            Wraplst.Text:= Wraplst.Text;
+            for Cpt:= 0 to Pred(Wraplst.Count) do
+              begin
+                PdfTexte:= TPdfTexte.Create;
+                with PdfTexte do
+                  begin
+                  PageId:= NumeroPage;
+                  FFont:= FonteNum;
+                  FSize:= T_Fonte(Fontes[FonteNum]).GetSize;
+                  FColor:= T_Fonte(Fontes[FonteNum]).GetColor;
+                  TextPosX:= GetTextPos;
+                  if (txtRight in TxtFlags)
+                  then
+                    TextPosX:= ColPos+ColWidth-ColMargin-Fnt.TextWidth(Wraplst[Cpt]);
+                  if (txtHCenter in TxtFlags)
+                  then
+                    TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Wraplst[Cpt])) div 2;
+                  TextPosY:= Paper.H-PosY-Fnt.Ascent-(Fnt.Height+IntlInt)*Cpt;
+                  TextLarg:= ColWidth;
+                  Ecriture:= Wraplst[Cpt];
+                  end;
+                PdfPage.Add(PdfTexte);
+              end;
+            WrapLst.Free;
             end;
-          PdfPage.Add(PdfTexte);
           end
       else
         begin
@@ -1706,6 +1742,9 @@ with T_Section(Sections[Pred(NumeroSection)]) do
           LoadEspacePied(PosV,Colonne,EspHeight,FondNum);
           end;
         end;
+      if FGroupe
+      then
+        LoadEspaceGroupe(EspHeight);
       FinLigne(Zone);
       end;
     ppVisualise:
@@ -1910,6 +1949,7 @@ begin
 with T_Section(Sections[Pred(NumeroSection)]) do
   case FPreparation of
     ppPrepare:
+      begin
       case Zone of
         zEnTete:
           begin
@@ -1940,6 +1980,10 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             LoadTraitHorizPied(ColPos,PosV,Colonne,ColPos+ColWidth,PosV,StTrait);
           end;
         end;
+      if FGroupe
+      then
+        LoadTraitHorizGroupe(T_TraitStyle(TraitStyles[StTrait]).GetEpais);
+      end;
     ppVisualise:
       with FCanevas do
         begin

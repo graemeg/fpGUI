@@ -72,11 +72,13 @@ type
       procedure LoadEspaceEnTete(APosY,AColonne,AHeight,AFond: Integer);
       procedure LoadEspacePage(APosY,AColonne,AHeight,AFond: Integer);
       procedure LoadEspacePied(APosY,AColonne,AHeight,AFond: Integer);
+      procedure LoadEspaceGroupe(AHeight: Integer);
       procedure LoadCadre(AStyle: Integer; AZone: TZone);
       procedure LoadTrait(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
       procedure LoadTraitHorizEnTete(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
       procedure LoadTraitHorizPage(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
       procedure LoadTraitHorizPied(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+      procedure LoadTraitHorizGroupe(AHeight: Integer);
       function GetCmdPage(NumPage: Integer): TList;
       property CmdEnTete: TList read FEntete;
       property CmdPied: TList read FPied;
@@ -478,6 +480,11 @@ ACommande:= T_Espace.Create(APosY,AColonne,AHeight,AFond);
 FPied.Add(ACommande);
 end;
 
+procedure T_Section.LoadEspaceGroupe(AHeight: Integer);
+begin
+AGroupe.FGroupeHeight:= AGroupe.FGroupeHeight+AHeight;
+end;
+
 procedure T_Section.LoadCadre(AStyle: Integer; AZone: TZone);
 begin
 ACommande:= T_Cadre.Create(AStyle,AZone);
@@ -506,6 +513,11 @@ procedure T_Section.LoadTraitHorizPied(APosXDeb,APosYDeb,AColonne,APosXFin,APosY
 begin
 ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
 FPied.Add(ACommande);
+end;
+
+procedure T_Section.LoadTraitHorizGroupe(AHeight: Integer);
+begin
+AGroupe.FGroupeHeight:= AGroupe.FGroupeHeight+AHeight;
 end;
 
 function T_Section.GetCmdPage(NumPage: Integer): TList;
