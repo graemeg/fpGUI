@@ -542,7 +542,7 @@ var
 begin
   if ReadOnly then
     Exit;
-  if FSelEndLine < 0 then
+  if (FSelEndLine < 0) or (FSelStartLine<0) then
     Exit;
 
   if (FSelStartLine shl 16) + FSelStartPos <= (FSelEndLine shl 16) + FSelEndPos then
