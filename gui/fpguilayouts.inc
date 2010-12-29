@@ -972,12 +972,12 @@ var
   ColInfos, RowInfos: PWidgetArrayInfoArray;
   i: Integer;
 begin
-  MinSize.cx := (FColCount - 1) * FColSpacing;
-  MinSize.cy := (FRowCount - 1) * FRowSpacing;
-  DefSize.cx := (FColCount - 1) * FColSpacing;
-  DefSize.cy := (FRowCount - 1) * FRowSpacing;
-  MaxSize.cx := (FColCount - 1) * FColSpacing;
-  MaxSize.cy := (FRowCount - 1) * FRowSpacing;
+  FMinSize.cx := (FColCount - 1) * FColSpacing;
+  FMinSize.cy := (FRowCount - 1) * FRowSpacing;
+  FDefSize.cx := (FColCount - 1) * FColSpacing;
+  FDefSize.cy := (FRowCount - 1) * FRowSpacing;
+  FMaxSize.cx := (FColCount - 1) * FColSpacing;
+  FMaxSize.cy := (FRowCount - 1) * FRowSpacing;
 
   InitSizeInfos(ColInfos, RowInfos);
 

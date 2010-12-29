@@ -20,7 +20,6 @@ type
     procedure CompOptFormOnActivate(Sender: TObject);
     procedure SmartLinkClick(Sender: TObject);
   published
-    procedure btnCloseClick(Sender: TObject);
     Box1: TFBoxLayout;
     Box2: TFBoxLayout;
     Box3: TFBoxLayout;
@@ -58,6 +57,7 @@ type
         rbLevel3: TFRadioButton;
         rbKeepVarReg: TFCheckbox;
         rbUncOpt: TFCheckbox;
+    procedure btnCloseClick(Sender: TObject);
   end;
 
 var

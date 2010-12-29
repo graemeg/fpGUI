@@ -323,7 +323,7 @@ begin
   XGetGeometry(GFApplication.Handle, Handle, @DummyWnd, @DummyInt, @DummyInt,
     @FWidth, @FHeight, @DummyInt, @DummyInt);
 
-  GCValues.graphics_exposures := False;
+  GCValues.graphics_exposures := TBool(False);
   FGC := XCreateGC(GFApplication.Handle, Handle, GCGraphicsExposures, @GCValues);
   if not Assigned(GC) then
     raise EX11Error.Create(SGCCreationFailed);
@@ -816,21 +816,21 @@ begin
   FVisual := Attr.Visual;
 
   case Attr.Depth of
-    1: PixelFormat.FormatType := ftMono;
-    4: PixelFormat.FormatType := ftPal4;
-    8: PixelFormat.FormatType := ftPal8;
-    16: PixelFormat.FormatType := ftRGB16;
-    24: PixelFormat.FormatType := ftRGB24;
-    32: PixelFormat.FormatType := ftRGB32;
+    1: FPixelFormat.FormatType := ftMono;
+    4: FPixelFormat.FormatType := ftPal4;
+    8: FPixelFormat.FormatType := ftPal8;
+    16: FPixelFormat.FormatType := ftRGB16;
+    24: FPixelFormat.FormatType := ftRGB24;
+    32: FPixelFormat.FormatType := ftRGB32;
     else
       raise EX11Error.CreateFmt(SWindowUnsupportedPixelFormat, [Attr.Depth]);
   end;
-  
+
   if Attr.Depth >= 16 then
   begin
-    PixelFormat.RedMask   := Visual^.red_mask;
-    PixelFormat.GreenMask := Visual^.green_mask;
-    PixelFormat.BlueMask  := Visual^.blue_mask;
+    FPixelFormat.RedMask   := Visual^.red_mask;
+    FPixelFormat.GreenMask := Visual^.green_mask;
+    FPixelFormat.BlueMask  := Visual^.blue_mask;
   end;
 end;
 
@@ -1243,7 +1243,7 @@ constructor TX11Window.Create(AParent: TFCustomWindow; AWindowOptions: TFWindowO
 const
   WindowHints: TXWMHints = (
     flags: InputHint or StateHint or WindowGroupHint;
-    input: True;
+    input: TBool(True);
     initial_state: NormalState;
     icon_pixmap: 0;
     icon_window: 0;
@@ -1297,18 +1297,18 @@ begin
   { setup attributes and masks }
   if (woBorderless in WindowOptions) or (woToolWindow in WindowOptions) then
   begin
-    Attr.Override_Redirect := True;    // this removes window borders
+    Attr.Override_Redirect := TBool(True);    // this removes window borders
     mask := CWOverrideRedirect;// or CWColormap;
   end
   else if (woPopup in WindowOptions) then
   begin
-    Attr.Override_Redirect := True;    // this removes window borders
-    Attr.save_under := True;
+    Attr.Override_Redirect := TBool(True);    // this removes window borders
+    Attr.save_under := TBool(True);
     mask := CWOverrideRedirect or CWSaveUnder;
   end
   else
   begin
-    Attr.Override_Redirect := False;
+    Attr.Override_Redirect := TBool(False);
     mask := CWColormap;
   end;
 

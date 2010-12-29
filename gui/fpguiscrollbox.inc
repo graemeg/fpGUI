@@ -239,10 +239,10 @@ begin
         Point(Parent.Width - VertScrollBar.MinSize.cx - Right, Top),
 	      Size(VertScrollBar.MinSize.cx, Parent.Height - HorzScrollBarHeight - Top - Bottom));
 
-      ClientRect.Left   := Left;
-      ClientRect.Top    := Top;
-      ClientRect.Right  := Parent.Width - Right - VertScrollBarWidth;
-      ClientRect.Bottom := Parent.Height - Bottom - HorzScrollBarHeight;
+      FClientRect.Left   := Left;
+      FClientRect.Top    := Top;
+      FClientRect.Right  := Parent.Width - Right - VertScrollBarWidth;
+      FClientRect.Bottom := Parent.Height - Bottom - HorzScrollBarHeight;
       if Assigned(OnClientRectChange) then
         OnClientRectChange(Self);
 

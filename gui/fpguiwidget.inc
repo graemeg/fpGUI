@@ -139,8 +139,8 @@
 
   TMouseLeaveCheckEventObj = class(TMouseEventObj)
   public
-    function SendToChild(AChild: TFWidget): Boolean; override;
     NewCursor: TFCursor;
+    function SendToChild(AChild: TFWidget): Boolean; override;
   end;
 
 

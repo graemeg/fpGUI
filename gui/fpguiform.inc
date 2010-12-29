@@ -150,7 +150,7 @@ end;
 
 procedure TFCustomForm.ShowModal;
 begin
-  Include(WindowOptions, woModal);
+  Include(FWindowOptions, woModal);
   Show;
 end;
 
@@ -314,8 +314,8 @@ end;}
 
 procedure TFCustomForm.Resized;
 begin
-  ClientRect.Right := Wnd.ClientWidth;
-  ClientRect.Bottom := Wnd.ClientHeight;
+  FClientRect.Right := Wnd.ClientWidth;
+  FClientRect.Bottom := Wnd.ClientHeight;
   if Assigned(Child) then
     Child.SetBounds(Point(BorderWidth, BorderWidth),
       TSize(ClientRect.BottomRight) - 2 * BorderWidth);
