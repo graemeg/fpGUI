@@ -220,6 +220,8 @@ begin
   Hint := '';
   ShowHint := True;
   WindowPosition := wpOneThirdDown;
+  MinWidth := 513;
+  MinHeight := 398;
 
   pcSettings := TfpgPageControl.Create(self);
   with pcSettings do
@@ -238,6 +240,7 @@ begin
   begin
     Name := 'btnSave';
     SetPosition(344, 408, 80, 24);
+    Anchors := [anRight, anBottom];
     Text := 'Save';
     Down := False;
     FontDesc := '#Label1';
@@ -252,6 +255,7 @@ begin
   begin
     Name := 'btnCancel';
     SetPosition(428, 408, 80, 24);
+    Anchors := [anRight, anBottom];
     Text := 'Cancel';
     Down := False;
     FontDesc := '#Label1';
