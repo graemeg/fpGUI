@@ -2494,6 +2494,8 @@ begin
   Hint := '';
   ShowHint := True;
   WindowPosition := wpUser;
+  MinWidth := 430;
+  MinHeight := 300;
   OnCloseQuery  := @MainFormCloseQuery;
 
   bvlStatusBar := TfpgBevel.Create(self);
