@@ -1203,6 +1203,7 @@ procedure TfpgWidget.MsgResize(var msg: TfpgMessageRec);
 var
   dw: integer;
   dh: integer;
+  _w, _h: integer;
 {$IFDEF CStackDebug}
   itf: IInterface;
 {$ENDIF}
@@ -1210,9 +1211,15 @@ begin
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.MsgResize - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
-  dw      := msg.Params.rect.Width - FWidth;
-  dh      := msg.Params.rect.Height - FHeight;
+  _w := FWidth;
+  _h := FHeight;
+  { Width and Height might not be what came through in the msg because of
+    size constraints, so we calculate the delta diffs after HandleResize }
   HandleResize(msg.Params.rect.Width, msg.Params.rect.Height);
+  //dw      := msg.Params.rect.Width - FWidth;
+  //dh      := msg.Params.rect.Height - FHeight;
+  dw := FWidth - _w;
+  dh := FHeight - _h;
   HandleAlignments(dw, dh);
   if InDesigner then
   begin
