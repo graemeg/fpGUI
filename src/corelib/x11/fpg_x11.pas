@@ -1743,6 +1743,17 @@ begin
           end;
         end;
 
+    X.GraphicsExpose:
+        begin
+          repeat
+            //
+          until not XCheckTypedWindowEvent(display, ev.xexpose.window, X.GraphicsExpose, @ev);
+          if ev.xgraphicsexpose.count = 0 then
+          begin
+            fpgPostMessage(nil, FindWindowByHandle(ev.xgraphicsexpose.drawable), FPGM_PAINT);
+          end;
+        end;
+
     X.MotionNotify:
         begin
           repeat
@@ -2008,7 +2019,6 @@ begin
             RemoveWindowLookup(TfpgX11Window(w));
         end;
 
-    X.GraphicsExpose,
     X.NoExpose:
         begin
           // writeln('got a GraphicsExpose or NoExpose event');
