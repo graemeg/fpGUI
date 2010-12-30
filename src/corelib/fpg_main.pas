@@ -59,7 +59,7 @@ const
   TextFlagsDflt = [txtLeft, txtTop];
   
   // Used for the internal message queue
-  cMessageQueueSize = 1024;
+  cMessageQueueSize = 2048;
 
   // version and name constants
   {$I VERSION_FILE.inc}  // this includes the auto generated:  fpGUI_Version = xxx
