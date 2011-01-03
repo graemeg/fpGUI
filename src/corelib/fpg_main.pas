@@ -205,6 +205,7 @@ type
     destructor  Destroy; override;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
+    procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
@@ -2125,6 +2126,11 @@ begin
   ACanvas.SetColor(clHilite1);
   ACanvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right (inner)
   ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left+1, r.Bottom-1);   // bottom (inner)
+end;
+
+procedure TfpgStyle.DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect);
+begin
+  DrawControlFrame(ACanvas, r.Left, r.Top, r.Width, r.Height);
 end;
 
 procedure TfpgStyle.DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean);
