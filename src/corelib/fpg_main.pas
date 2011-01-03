@@ -1692,7 +1692,7 @@ end;
 
 constructor TfpgFontResource.Create(const afontdesc: string);
 begin
-  inherited;
+  inherited Create(afontdesc);
   FFontDesc := afontdesc;
   FRefCount := 0;
 end;
@@ -1907,6 +1907,8 @@ begin
   FLeft   := 0;
   FWidth  := 16;
   FHeight := 16;
+  FPrevWidth  := FWidth;
+  FPrevHeight := FHeight;
 
   FMinWidth  := 2;
   FMinHeight := 2;
