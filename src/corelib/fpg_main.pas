@@ -1234,7 +1234,6 @@ begin
       FScreenHeight := GetScreenHeight;
     end;
 
-    FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
   except
     on E: Exception do
       Sysutils.ShowException(ExceptObject, ExceptAddr);
@@ -1557,6 +1556,7 @@ end;
 
 procedure TfpgApplication.InternalInit;
 begin
+  FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
   fpgInitTimers;
   fpgNamedFonts := TList.Create;
   fpgStyle      := TfpgStyle.Create;
