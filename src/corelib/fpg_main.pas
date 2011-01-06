@@ -1582,11 +1582,11 @@ end;
 procedure TfpgApplication.ProcessMessages;
 begin
   Flush;
-//  while DoMessagesPending do      // this blocked timers and other non-OS code
-//  begin
+  while DoMessagesPending do
+  begin
     WaitWindowMessage(250);
-//    Flush;
-//  end;
+    Flush;
+  end;
 end;
 
 procedure TfpgApplication.SetMessageHook(AWidget: TObject; const AMsgCode: integer; AListener: TObject);

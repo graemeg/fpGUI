@@ -1366,6 +1366,7 @@ end;
 function TfpgX11Application.DoMessagesPending: boolean;
 begin
   Result := (XPending(display) > 0);
+  fpgCheckTimers;
 end;
 
 function GetParentWindow(wh: TfpgWinHandle; var pw, rw: TfpgWinHandle): boolean;
