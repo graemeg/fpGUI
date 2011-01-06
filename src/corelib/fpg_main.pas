@@ -395,7 +395,7 @@ function  fpgGetNamedFontList: TStringlist;
 
 // Timers rountines
 procedure fpgInitTimers;
-procedure fpgCheckTimers;
+function  fpgCheckTimers: Boolean;
 procedure fpgResetAllTimers;
 function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
 function  fpgGetTickCount: DWord;
@@ -541,13 +541,14 @@ begin
     fpgTimers := TList.Create;
 end;
 
-procedure fpgCheckTimers;
+function fpgCheckTimers: Boolean;
 var
   i: integer;
   ctime: TDateTime;
 begin
   ctime := now;
   i := fpgTimers.Count;
+  Result := i > 0;
   while i > 0 do
   begin
     dec(i);
