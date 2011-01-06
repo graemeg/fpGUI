@@ -399,6 +399,7 @@ procedure fpgCheckTimers;
 procedure fpgResetAllTimers;
 function  fpgClosestTimer(ctime: TDateTime; amaxtime: integer): integer;
 function  fpgGetTickCount: DWord;
+procedure fpgPause(MilliSeconds: Cardinal);
 
 // Rectangle, Point & Size routines
 function  InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
@@ -600,6 +601,18 @@ function fpgGetTickCount: DWord;
 begin
   Result := DWord(Trunc(Now * MSecsPerDay));
 end;
+
+{ blocking function for the caller, but still processes framework messages }
+procedure fpgPause(MilliSeconds: Cardinal);
+var
+  lStart: TDateTime;
+begin
+   lStart := Now * MSecsPerDay;
+   repeat
+     fpgApplication.ProcessMessages;
+   until ((Now*MSecsPerDay)-lStart) > MilliSeconds;
+end;
+
 
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
 begin
