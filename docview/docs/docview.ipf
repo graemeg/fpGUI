@@ -27,8 +27,8 @@ DocView was originally based on the OS/2 NewView program. It was ported from
 the Sibyl development environment, to the fpGUI Toolkit and the Free Pascal Compiler. Since then the code
 and features of DocView has diverged.
 :p.
-It improves upon many aspects of the origin IBM View program, with a modern,
-easy to use interface, more options, and new features that View simply
+It improves upon many aspects of the origin IBM VIEW program, with a modern,
+easy to use interface, more options, and new features that VIEW simply
 didn't have. And don't forget, DocVIew is also cross platform - currently available
 as native executable for Linux, FreeBSD and Windows. DocView is also available in
 32-bit or 64-bit.
@@ -45,7 +45,7 @@ as native executable for Linux, FreeBSD and Windows. DocView is also available i
 :i1 id=30004.source code
 :i1 id=30007.features planned
 :hp2.Support and Licensing:ehp2.
-:p.DocView is Copyright 2009-2010 by Graeme Geldenhuys. It is also licensed
+:p.DocView is Copyright 2009-2011 by Graeme Geldenhuys. It is also licensed
 under the GNU Public License v2, which means you have the right to obtain the
 source code.
 :p.
@@ -85,15 +85,15 @@ display.
 
 :p.:hp2.Why doesn't my help file work properly?:ehp2.
 :p.
-Some of the less used features of the original View program are not
+Some of the less used features of the original IBM VIEW program are not
 implemented. This is either because I have not got around to it, or
 because they are simply not worth the time. Examples include
 metafiles, index synonyms, application control API (like toolbar button customisation),
 MDI style window management and so on.
 :p.
-Unfortunately, IBM seems to have used every one of these features in there INF
+Unfortunately, IBM seems to have used every one of those features in their INF
 documents, so you may find an occasional file that doesn't
-load or doesn't work properly.
+display or navigate properly.
 
 :p.:hp2.Features still planned?:ehp2.
 :ul.
@@ -604,7 +604,7 @@ by storing notes in the same directory as the help file).
 :hp2.Internet Links:ehp2.
 :p.
 When you click a web URL like
-http://opensoft.homeip.net/fpgui/, DocView launches your
+http://fpgui.sourceforge.net , DocView launches your
 default web browser.
 :p.
 This web browser is specified by operating system settings, not DocView
