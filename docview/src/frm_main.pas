@@ -98,6 +98,7 @@ type
     OpenAdditionalFile: boolean;
     Notes: TList; // Notes in current files.
 
+    procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnTBNoteAddClick(Sender: TObject);
     procedure   RichViewOverLink(Sender: TRichTextView; Link: string);
     procedure   RichViewNotOverLink(Sender: TRichTextView; Link: string);
@@ -272,6 +273,13 @@ begin
     Consumed := True;
     DisplayTopic(nil);
   end
+end;
+
+procedure TMainForm.Splitter1DoubleClicked(Sender: TObject;
+  AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
+begin
+  PageControl1.Visible := not PageControl1.Visible;
+  bvlBody.Realign;
 end;
 
 procedure TMainForm.btnTBNoteAddClick(Sender: TObject);
@@ -2547,6 +2555,7 @@ begin
     Hint := '';
     TabOrder := 0;
     Align := alLeft;
+    MinWidth := 120;
     OnChange  := @PageControl1Change;
   end;
 
@@ -2910,6 +2919,7 @@ begin
     Name := 'Splitter1';
     SetPosition(265, 120, 8, 168);
     Align := alLeft;
+    OnDoubleClick :=@Splitter1DoubleClicked;
   end;
 
   RichView := TRichTextView.Create(bvlBody);
