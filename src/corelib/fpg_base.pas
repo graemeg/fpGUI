@@ -1211,9 +1211,7 @@ procedure TfpgWindowBase.HandleMove(x, y: TfpgCoord);
 begin
   if FTop <> y then
   begin
-    // if we don't have a handle we are still setting up, so actual value and
-    // previous value must be the same.
-    if HasHandle then
+    if not (csLoading in ComponentState) then
       FPrevTop := FTop
     else
       FPrevTop := y;
@@ -1223,9 +1221,7 @@ begin
 
   if FLeft <> x then
   begin
-    // if we don't have a handle we are still setting up, so actual value and
-    // previous value must be the same.
-    if HasHandle then
+    if not (csLoading in ComponentState) then
       FPrevLeft := FHeight
     else
       FPrevLeft := x;
@@ -1238,9 +1234,7 @@ procedure TfpgWindowBase.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
   if FWidth <> AWidth then
   begin
-    // if we don't have a handle we are still setting up, so actual value and
-    // previous value must be the same.
-    if HasHandle then
+    if not (csLoading in ComponentState) then
       FPrevWidth := FWidth
     else
       FPrevWidth := AWidth;
@@ -1250,9 +1244,7 @@ begin
 
   if FHeight <> AHeight then
   begin
-    // if we don't have a handle we are still setting up, so actual value and
-    // previous value must be the same.
-    if HasHandle then
+    if not (csLoading in ComponentState) then
       FPrevHeight := FHeight
     else
       FPrevHeight := AHeight;
@@ -1305,8 +1297,7 @@ end;
 
 procedure TfpgWindowBase.UpdateWindowPosition;
 begin
-  if HasHandle then
-    DoUpdateWindowPosition;
+  DoUpdateWindowPosition;
 end;
 
 procedure TfpgWindowBase.MoveWindow(const x: TfpgCoord; const y: TfpgCoord);

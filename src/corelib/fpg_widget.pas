@@ -371,14 +371,14 @@ begin
   {$IFDEF CStackDebug}
   itf := DebugMethodEnter('TfpgWidget.DoUpdateWindowPosition - ' + ClassName + ' ('+Name+')');
   {$ENDIF}
-//  writeln('DoUpdateWindowPosition - ', Classname);
+//  writeln('TfpgWidget.DoUpdateWindowPosition - ' + Classname + ' ('+Name+')');
   dw      := FWidth - FPrevWidth;
   dh      := FHeight - FPrevHeight;
 
   if IsContainer and FSizeIsDirty then
   begin
     {$IFDEF CStackDebug}
-    DebugLn(Format('w: %d  h: %d', [dw, dh]));
+    DebugLn(Format('  Alignment deltas  w: %d  h: %d', [dw, dh]));
     {$ENDIF}
     HandleAlignments(dw, dh);
   end;
@@ -1334,7 +1334,7 @@ begin
   itf := DebugMethodEnter('TfpgWidget.MoveAndResize');
   DebugLn(Format('Class:%s  t:%d  l:%d  w:%d  h:%d', [Classname, ATop, ALeft, AWidth, aHeight]));
   {$ENDIF}
-  if not (csLoading in ComponentState) {HasHandle} then
+  if not (csLoading in ComponentState) then
   begin
     if (ALeft <> FLeft) or (ATop <> FTop) then
       HandleMove(ALeft, ATop);

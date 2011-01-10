@@ -2348,17 +2348,19 @@ var
   w: longword;
   h: longword;
 begin
-  if FWidth > 1 then
-    w := FWidth
-  else
-    w := 1;
-  if FHeight > 1 then
-    h := FHeight
-  else
-    h := 1;
+  if HasHandle then
+  begin
+    if FWidth > 1 then
+      w := FWidth
+    else
+      w := 1;
+    if FHeight > 1 then
+      h := FHeight
+    else
+      h := 1;
 
-  if FWinHandle > 0 then
     XMoveResizeWindow(xapplication.display, FWinHandle, FLeft, FTop, w, h);
+  end;
 end;
 
 procedure TfpgX11Window.DoSetMouseCursor;

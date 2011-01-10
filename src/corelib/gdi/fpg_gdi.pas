@@ -1976,14 +1976,17 @@ procedure TfpgGDIWindow.DoUpdateWindowPosition;
 var
   bx, by: integer;
 begin
-  FSkipResizeMessage := True;
-  GetWindowBorderDimensions(Self, bx, by);
-  Windows.SetWindowPos(
-    WinHandle, HWND_TOP,
-    FLeft, FTop, FWidth + bx, FHeight + by,
-    SWP_NOZORDER);// or SWP_NOREDRAW);
-  Windows.InvalidateRect(WinHandle, nil, True);
-  FSkipResizeMessage := False;
+  if HasHandle then
+  begin
+    FSkipResizeMessage := True;
+    GetWindowBorderDimensions(Self, bx, by);
+    Windows.SetWindowPos(
+      WinHandle, HWND_TOP,
+      FLeft, FTop, FWidth + bx, FHeight + by,
+      SWP_NOZORDER);// or SWP_NOREDRAW);
+    Windows.InvalidateRect(WinHandle, nil, True);
+    FSkipResizeMessage := False;
+  end;
 end;
 
 { TfpgGDICanvas }
