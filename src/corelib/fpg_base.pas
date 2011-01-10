@@ -517,6 +517,7 @@ type
     FIsInitialized: Boolean;
     FModalFormStack: TList;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
+    procedure   DoWaitWindowMessage(atimeoutms: integer); virtual; abstract;
     function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
   public

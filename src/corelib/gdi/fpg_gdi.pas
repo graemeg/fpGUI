@@ -231,11 +231,11 @@ type
     ActivationHook: HHOOK;
     function    GetHiddenWindow: HWND;
     function    DoGetFontFaceList: TStringList; override;
+    procedure   DoWaitWindowMessage(atimeoutms: integer); override;
     function    MessagesPending: boolean; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
-    procedure   DoWaitWindowMessage(atimeoutms: integer);
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
     function    GetScreenHeight: TfpgCoord; override;
