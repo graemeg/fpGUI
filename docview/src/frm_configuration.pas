@@ -461,6 +461,7 @@ begin
   begin
     Name := 'btnResetColors';
     SetPosition(12, 328, 100, 24);
+    Anchors := [anLeft,anBottom];
     Text := 'Reset Colors';
     Down := False;
     FontDesc := '#Label1';
