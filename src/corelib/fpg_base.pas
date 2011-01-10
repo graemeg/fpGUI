@@ -517,6 +517,7 @@ type
     FIsInitialized: Boolean;
     FModalFormStack: TList;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
+    function    MessagesPending: boolean; virtual; abstract;
     function    GetHelpViewer: TfpgString; virtual;
   public
     constructor Create(const AParams: string); virtual; reintroduce;

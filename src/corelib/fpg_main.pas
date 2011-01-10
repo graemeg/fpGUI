@@ -1596,7 +1596,7 @@ end;
 procedure TfpgApplication.ProcessMessages;
 begin
   Flush;
-  while DoMessagesPending do
+  while MessagesPending do
   begin
     WaitWindowMessage(250);
     Flush;

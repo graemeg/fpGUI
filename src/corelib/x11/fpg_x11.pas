@@ -311,10 +311,10 @@ type
     InputContext: PXIC;
     FLastKeySym: TKeySym;   // Used for KeyRelease event
     function    DoGetFontFaceList: TStringList; override;
+    function    MessagesPending: boolean; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
-    function    DoMessagesPending: boolean;
     procedure   DoWaitWindowMessage(atimeoutms: integer);
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
@@ -1363,7 +1363,7 @@ begin
   inherited Destroy;
 end;
 
-function TfpgX11Application.DoMessagesPending: boolean;
+function TfpgX11Application.MessagesPending: boolean;
 begin
   Result := (XPending(display) > 0);
   fpgCheckTimers;

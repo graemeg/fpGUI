@@ -231,10 +231,10 @@ type
     ActivationHook: HHOOK;
     function    GetHiddenWindow: HWND;
     function    DoGetFontFaceList: TStringList; override;
+    function    MessagesPending: boolean; override;
   public
     constructor Create(const AParams: string); override;
     destructor  Destroy; override;
-    function    DoMessagesPending: boolean;
     procedure   DoWaitWindowMessage(atimeoutms: integer);
     procedure   DoFlush;
     function    GetScreenWidth: TfpgCoord; override;
@@ -1264,7 +1264,7 @@ begin
   inherited Destroy;
 end;
 
-function TfpgGDIApplication.DoMessagesPending: boolean;
+function TfpgGDIApplication.MessagesPending: boolean;
 var
   Msg: TMsg;
 begin
@@ -1284,7 +1284,7 @@ begin
   else
     ltimerWnd := 0;
 
-  if (atimeoutms >= 0) and (not DoMessagesPending) then
+  if (atimeoutms >= 0) and (not MessagesPending) then
   begin
     if Assigned(FOnIdle) then
       OnIdle(self);
