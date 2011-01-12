@@ -17,8 +17,8 @@ type
     btnHelp: TfpgButton;
     btnCancel: TfpgButton;
     btnDelete: TfpgButton;
-    FCanDelete: boolean;
     {@VFD_HEAD_END: NoteForm}
+    FCanDelete: Boolean;
     procedure   FormShow(Sender: TObject);
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
