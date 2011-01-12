@@ -171,8 +171,7 @@ begin
       resizer[n] := TwgResizer.Create(self, n)
     else
     begin
-      if resizer[n] <> nil then
-        resizer[n].Free;
+      resizer[n].Free;
       resizer[n] := nil;
     end;
   end;
@@ -204,8 +203,7 @@ var
   n: integer;
 begin
   for n := 1 to 8 do
-    if resizer[n] <> nil then
-      resizer[n].Free;
+    resizer[n].Free;
   other.Free;
   inherited Destroy;
 end;
