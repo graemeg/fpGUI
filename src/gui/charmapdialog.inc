@@ -276,7 +276,7 @@ begin
   begin
     Name := 'pnlChar';
     SetPosition(292, 304, 60, 48);
-    Anchors := [anLeft,anRight,anTop,anBottom];
+    Anchors := [anRight,anBottom];
     FontDesc := 'Arial-16:antialias=true';
     Hint := '';
     Style := bsLowered;
