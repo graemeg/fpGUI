@@ -1078,8 +1078,8 @@ begin
   inherited Create(AOwner);
   FFont   := fpgStyle.DefaultFont;
   FPages  := TList.Create;
-  FWidth  := 150;
-  FHeight := 100;
+  Width   := 150;
+  Height  := 100;
   FIsContainer := True;
   FTabOptions  := [];
   FActivePageIndex := 0;
