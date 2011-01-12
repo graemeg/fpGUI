@@ -86,8 +86,8 @@ begin
     Name := 'Memo1';
     SetPosition(0, 0, 496, 260);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    Hint := '';
     FontDesc := '#Edit2';
+    Hint := '';
     TabOrder := 2;
   end;
 

@@ -229,7 +229,6 @@ begin
     Name := 'pcSettings';
     SetPosition(4, 4, 506, 388);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    ActivePageIndex := 0;
     Hint := '';
     TabOrder := 0;
     OnChange := @PageControl1Change;
@@ -240,9 +239,8 @@ begin
   begin
     Name := 'btnSave';
     SetPosition(344, 408, 80, 24);
-    Anchors := [anRight, anBottom];
+    Anchors := [anRight,anBottom];
     Text := 'Save';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -255,9 +253,8 @@ begin
   begin
     Name := 'btnCancel';
     SetPosition(428, 408, 80, 24);
-    Anchors := [anRight, anBottom];
+    Anchors := [anRight,anBottom];
     Text := 'Cancel';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -359,7 +356,6 @@ begin
     Name := 'btnSearchDirAdd';
     SetPosition(408, 84, 80, 24);
     Text := 'Add...';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -384,7 +380,6 @@ begin
     Name := 'btnSearchDirDelete';
     SetPosition(408, 116, 80, 24);
     Text := 'Remove...';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -434,7 +429,6 @@ begin
     Name := 'btnColorHighlight';
     SetPosition(384, 104, 80, 24);
     Text := 'Color';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -448,7 +442,6 @@ begin
     Name := 'btnColorNotes';
     SetPosition(384, 134, 80, 24);
     Text := 'Color';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -463,7 +456,6 @@ begin
     SetPosition(12, 328, 100, 24);
     Anchors := [anLeft,anBottom];
     Text := 'Reset Colors';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -477,6 +469,7 @@ begin
     Name := 'edtFixedFont';
     SetPosition(124, 48, 340, 24);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
     FontDesc := '';
     TabOrder := 14;
   end;
@@ -487,6 +480,7 @@ begin
     Name := 'edtNormalFont';
     SetPosition(124, 16, 340, 24);
     Anchors := [anLeft,anRight,anTop];
+    ExtraHint := '';
     FontDesc := '';
     TabOrder := 13;
   end;
@@ -542,9 +536,9 @@ begin
   begin
     Name := 'edtScrollDistance';
     SetPosition(12, 32, 72, 24);
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 2;
-    FontDesc := '#Edit1';
     Value := 0;
   end;
 

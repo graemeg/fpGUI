@@ -59,6 +59,7 @@ type
     miSettings: TfpgPopupMenu;
     miBookmarks: TfpgPopupMenu;
     miView: TfpgPopupMenu;
+    miTools: TfpgPopupMenu;
     miHelp: TfpgPopupMenu;
     ToolBar: TfpgBevel;
     btnOpen: TfpgButton;
@@ -70,7 +71,6 @@ type
     btnQuit: TfpgButton;
     Bevel1: TfpgBevel;
     Bevel2: TfpgBevel;
-    miTools: TfpgPopupMenu;
     Bevel3: TfpgBevel;
     btnTBNoteAdd: TfpgButton;
     {@VFD_HEAD_END: MainForm}
@@ -2550,11 +2550,10 @@ begin
   with PageControl1 do
   begin
     Name := 'PageControl1';
-    SetPosition(0, 16, 260, 276);
-    ActivePageIndex := 0;
+    SetPosition(2, 2, 260, 306);
+    Align := alLeft;
     Hint := '';
     TabOrder := 0;
-    Align := alLeft;
     MinWidth := 120;
     OnChange  := @PageControl1Change;
   end;
@@ -2563,7 +2562,7 @@ begin
   with tsContents do
   begin
     Name := 'tsContents';
-    SetPosition(3, 24, 254, 249);
+    SetPosition(3, 24, 254, 279);
     Text := 'Contents';
   end;
 
@@ -2571,7 +2570,7 @@ begin
   with tvContents do
   begin
     Name := 'tvContents';
-    SetPosition(4, 32, 242, 212);
+    SetPosition(4, 32, 242, 242);
     Anchors := [anLeft,anRight,anTop,anBottom];
     FontDesc := '#Label1';
     Hint := '';
@@ -2589,7 +2588,6 @@ begin
     SetPosition(166, 4, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Go to';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -2612,7 +2610,6 @@ begin
     SetPosition(166, 4, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Go to';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -2640,10 +2637,10 @@ begin
     SetPosition(4, 4, 152, 24);
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 2;
     Text := '';
-    FontDesc := '#Edit1';
     OnChange := @IndexSearchEditOnChange;
     OnKeyPress :=@IndexSearchEditKeyPress;
   end;
@@ -2673,10 +2670,10 @@ begin
     SetPosition(4, 20, 210, 26);
     Anchors := [anLeft,anRight,anTop];
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 1;
     Text := '';
-    FontDesc := '#Edit1';
     OnKeyPress :=@edSearchTextKeyPress;
   end;
 
@@ -2695,12 +2692,12 @@ begin
   begin
     Name := 'RadioButton1';
     SetPosition(12, 68, 192, 20);
+    Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
     TabOrder := 3;
     Text := 'This section';
-    Enabled := False;
   end;
 
   RadioButton2 := TfpgRadioButton.Create(tsSearch);
@@ -2708,12 +2705,12 @@ begin
   begin
     Name := 'RadioButton2';
     SetPosition(12, 88, 192, 20);
+    Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
     TabOrder := 4;
     Text := 'Marked sections';
-    Enabled := False;
   end;
 
   RadioButton3 := TfpgRadioButton.Create(tsSearch);
@@ -2722,12 +2719,12 @@ begin
     Name := 'RadioButton3';
     SetPosition(12, 108, 192, 20);
     Checked := True;
+    Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
     TabOrder := 5;
     Text := 'All sections';
-    Enabled := False;
   end;
 
   RadioButton4 := TfpgRadioButton.Create(tsSearch);
@@ -2735,12 +2732,12 @@ begin
   begin
     Name := 'RadioButton4';
     SetPosition(12, 128, 192, 20);
+    Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
     TabOrder := 6;
     Text := 'Index';
-    Enabled := False;
   end;
 
   RadioButton5 := TfpgRadioButton.Create(tsSearch);
@@ -2748,12 +2745,12 @@ begin
   begin
     Name := 'RadioButton5';
     SetPosition(12, 148, 192, 20);
+    Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
     TabOrder := 7;
     Text := 'Marked libraries';
-    Enabled := False;
   end;
 
   RadioButton6 := TfpgRadioButton.Create(tsSearch);
@@ -2761,12 +2758,12 @@ begin
   begin
     Name := 'RadioButton6';
     SetPosition(12, 168, 192, 20);
+    Enabled := False;
     FontDesc := '#Label1';
     GroupIndex := 0;
     Hint := '';
     TabOrder := 8;
     Text := 'All libraries';
-    Enabled := False;
   end;
 
   lbSearchResults := TfpgListBox.Create(tsSearch);
@@ -2799,7 +2796,6 @@ begin
     SetPosition(220, 20, 28, 26);
     Anchors := [anRight,anTop];
     Text := 'Go';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -2835,13 +2831,12 @@ begin
     Name := 'btnNotesAdd';
     SetPosition(4, 4, 24, 24);
     Text := '';
-    Down := False;
+    Enabled := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.add';
     TabOrder := 1;
-    Enabled := false;
     OnClick  := @btnNotesAddClick;
   end;
 
@@ -2851,13 +2846,12 @@ begin
     Name := 'btnNotesEdit';
     SetPosition(32, 4, 24, 24);
     Text := '';
-    Down := False;
+    Enabled := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.edit';
     TabOrder := 2;
-    Enabled := False;
     OnClick := @btnNotesEditClick;
   end;
 
@@ -2867,13 +2861,12 @@ begin
     Name := 'btnNotesDel';
     SetPosition(60, 4, 24, 24);
     Text := '';
-    Down := False;
+    Enabled := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageMargin := 0;
     ImageName := 'stdimg.remove';
     TabOrder := 3;
-    Enabled := False;
     OnClick := @btnNotesDelClick;
   end;
 
@@ -2884,7 +2877,6 @@ begin
     SetPosition(166, 4, 80, 24);
     Anchors := [anRight,anTop];
     Text := 'Go to';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -3018,8 +3010,8 @@ begin
     SetPosition(0, 25, 654, 28);
     Anchors := [anLeft,anRight,anTop];
     Hint := '';
-    Style := bsLowered;
     Shape := bsBottomLine;
+    Style := bsLowered;
   end;
 
   btnOpen := TfpgButton.Create(ToolBar);
@@ -3028,7 +3020,6 @@ begin
     Name := 'btnOpen';
     SetPosition(30, 1, 24, 24);
     Text := '';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Open a new help file';
@@ -3046,7 +3037,6 @@ begin
     Name := 'btnBack';
     SetPosition(70, 1, 32, 24);
     Text := '<';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Previous history item';
@@ -3064,7 +3054,6 @@ begin
     Name := 'btnFwd';
     SetPosition(104, 1, 32, 24);
     Text := '>';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Next history item';
@@ -3082,7 +3071,6 @@ begin
     Name := 'btnPrev';
     SetPosition(138, 1, 32, 24);
     Text := 'prev';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Previous Topic';
@@ -3100,7 +3088,6 @@ begin
     Name := 'btnNext';
     SetPosition(172, 1, 32, 24);
     Text := 'next';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Next Topic';
@@ -3118,7 +3105,6 @@ begin
     Name := 'btnHelp';
     SetPosition(256, 1, 24, 24);
     Text := '';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := 'Display Product Information';
@@ -3136,7 +3122,6 @@ begin
     Name := 'btnQuit';
     SetPosition(4, 1, 24, 24);
     Text := '';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := '';
@@ -3154,8 +3139,8 @@ begin
     Name := 'Bevel1';
     SetPosition(61, 0, 6, 24);
     Hint := '';
-    Style := bsLowered;
     Shape := bsLeftLine;
+    Style := bsLowered;
   end;
 
   Bevel2 := TfpgBevel.Create(ToolBar);
@@ -3164,8 +3149,8 @@ begin
     Name := 'Bevel2';
     SetPosition(210, 0, 6, 24);
     Hint := '';
-    Style := bsLowered;
     Shape := bsLeftLine;
+    Style := bsLowered;
   end;
 
   Bevel3 := TfpgBevel.Create(ToolBar);
@@ -3174,8 +3159,8 @@ begin
     Name := 'Bevel3';
     SetPosition(248, 0, 6, 24);
     Hint := '';
-    Style := bsLowered;
     Shape := bsLeftLine;
+    Style := bsLowered;
   end;
 
   btnTBNoteAdd := TfpgButton.Create(ToolBar);
@@ -3184,7 +3169,6 @@ begin
     Name := 'btnTBNoteAdd';
     SetPosition(218, 1, 24, 24);
     Text := '';
-    Down := False;
     Flat := True;
     FontDesc := '#Label1';
     Hint := '';

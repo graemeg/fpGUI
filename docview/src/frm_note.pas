@@ -72,8 +72,8 @@ begin
     Name := 'Memo1';
     SetPosition(4, 4, 412, 149);
     Anchors := [anLeft,anRight,anTop,anBottom];
-    Hint := '';
     FontDesc := '#Edit1';
+    Hint := '';
     TabOrder := 1;
   end;
 
@@ -84,7 +84,6 @@ begin
     SetPosition(252, 161, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -99,7 +98,6 @@ begin
     SetPosition(4, 161, 80, 24);
     Anchors := [anLeft,anBottom];
     Text := 'Help';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -113,7 +111,6 @@ begin
     SetPosition(336, 161, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
@@ -127,7 +124,6 @@ begin
     Name := 'btnDelete';
     SetPosition(92, 161, 80, 24);
     Text := 'Delete';
-    Down := False;
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
