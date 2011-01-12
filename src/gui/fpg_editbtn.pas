@@ -188,29 +188,35 @@ end;
 procedure TfpgBaseEditButton.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
-  if csDesigning in ComponentState then
+  { resizing can now occur before the component is shown, so we need extra
+    checks here, like are we still busy creating everything. }
+  if not (csLoading in ComponentState) then
   begin
-    FEdit.Visible := False;
-    FButton.Visible := False;
-  end
-  else
-  begin
-    FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
-    FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+    if csDesigning in ComponentState then
+    begin
+      FEdit.Visible := False;
+      FButton.Visible := False;
+    end
+    else
+    begin
+        FEdit.SetPosition(0, 0, AWidth - AHeight, AHeight);
+        FButton.SetPosition(AWidth - AHeight, 0, AHeight, AHeight);
+    end;
   end;
 end;
 
 constructor TfpgBaseEditButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FWidth          := 140;
-  FHeight         := 24;
+  Width           := 140;
+  Height          := 24;
   FReadOnly       := False;
 
   FEdit := TfpgEdit.Create(self);
   with FEdit do
   begin
     Name := 'FEdit';
+    SetPosition(0, 0, self.Width - self.Height, self.Height);
     Text := '';
     FontDesc := '#Edit1';
     TabOrder := 0;
@@ -220,6 +226,7 @@ begin
   with FButton do
   begin
     Name := 'FButton';
+    SetPosition(self.Width - self.Height, 0, self.Height, self.Height);
     Text := '';
     FontDesc := '#Label1';
     ImageMargin := -1;

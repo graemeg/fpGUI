@@ -293,8 +293,8 @@ begin
   inherited Create(AOwner);
   FText         := 'Button';
   FFont         := fpgGetFont('#Label1');
-  FHeight       := FFont.Height + 8;
-  FWidth        := 80;
+  Height        := FFont.Height + 8;
+  Width         := 80;
   FFocusable    := True;
   FTextColor    := Parent.TextColor;
   FBackgroundColor := clButtonFace;

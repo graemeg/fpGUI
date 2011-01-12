@@ -331,8 +331,8 @@ begin
   inherited Create(AOwner);
   FPanelStyle      := bsRaised;
   FPanelBorder     := bsSingle;
-  FWidth           := 80;
-  FHeight          := 80;
+  Width            := 80;
+  Height           := 80;
   FFocusable       := True;  // otherwise children can't get focus
   FParentBackgroundColor := False;
   FIsContainer     := True;
