@@ -151,7 +151,7 @@ type
     property    OnChange: TTabSheetChange read FOnChange write FOnChange;
     property    OnClosingTabSheet: TTabSheetClosing read FOnClosingTabSheet write FOnClosingTabSheet;
   published
-    property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex;
+    property    ActivePageIndex: integer read GetActivePageIndex write SetActivePageIndex default 0;
     property    Align;
     property    BackgroundColor;
     property    Enabled;
@@ -1082,6 +1082,7 @@ begin
   FHeight := 100;
   FIsContainer := True;
   FTabOptions  := [];
+  FActivePageIndex := 0;
 
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
