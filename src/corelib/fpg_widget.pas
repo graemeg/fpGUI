@@ -1340,7 +1340,6 @@ begin
       HandleMove(ALeft, ATop);
     if (AWidth <> FWidth) or (AHeight <> FHeight) then
       HandleResize(AWidth, AHeight);
-    UpdateWindowPosition;
   end
   else
   begin
@@ -1350,6 +1349,7 @@ begin
     Width  := AWidth;
     Height := AHeight;
   end;
+  UpdateWindowPosition;
 end;
 
 procedure TfpgWidget.MoveAndResizeBy(const dx, dy, dw, dh: TfpgCoord);
