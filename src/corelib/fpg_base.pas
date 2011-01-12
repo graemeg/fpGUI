@@ -1222,7 +1222,7 @@ begin
   if FLeft <> x then
   begin
     if not (csLoading in ComponentState) then
-      FPrevLeft := FHeight
+      FPrevLeft := FLeft
     else
       FPrevLeft := x;
     FLeft := x;
