@@ -333,7 +333,8 @@ end;
 procedure TfpgAbstractSpinEdit.HandleResize(AWidth, AHeight: TfpgCoord);
 begin
   inherited HandleResize(AWidth, AHeight);
-  ResizeChildren;
+  if not (csLoading in ComponentState) then
+    ResizeChildren;
 end;
 
 function TfpgAbstractSpinEdit.GetButtonsBackgroundColor: TfpgColor;
