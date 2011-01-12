@@ -123,6 +123,7 @@ begin
   begin
     Name := 'btnDelete';
     SetPosition(92, 161, 80, 24);
+    Anchors := [anLeft,anBottom];
     Text := 'Delete';
     FontDesc := '#Label1';
     Hint := '';
