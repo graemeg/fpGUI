@@ -436,47 +436,6 @@ begin
     if lok then
       wg.Name := sval;
   end
-  {
-  else if ident = 'TEXT' then
-  begin
-    lok := CheckSymbol(s, ':=');
-    if lok then
-    begin
-      sval := GetStringValue(s);
-      lok := CheckSymbol(s, ';');
-    end;
-    if lok then
-    begin
-      if wg is TwgLabel then TwgLabel(wg).Text := sval
-      else if wg is TwgEdit then TwgEdit(wg).Text := sval
-      else if wg is TwgButton then TwgButton(wg).Text := sval
-      else if wg is TwgCheckBox then TwgCheckBox(wg).Text := sval
-      else
-          lok := false;
-    end;
-    if lok then SetWidgetText(wg, sval);
-  end
-  else if (ident = 'LINES') or (ident = 'ITEMS') then
-  begin
-    lok := CheckSymbol(s, '.');
-    lok := lok and (UpperCase(GetIdentifier(s)) = 'ADD');
-    lok := lok and CheckSymbol(s, '(');
-    if lok then
-    begin
-      sval := GetStringValue(s);
-      lok := lok and CheckSymbol(s, ')');
-      lok := lok and CheckSymbol(s, ';');
-    end;
-    if lok then
-    begin
-      if wg is TwgMemo then TwgMemo(wg).Lines.Add(sval)
-      else if wg is TwgChoiceList then TwgChoiceList(wg).Items.Add(sval)
-      else if wg is TwgTextListBox then TwgTextListBox(wg).Items.Add(sval)
-      else
-          lok := false;
-    end;
-  end
-}
   else if ident = 'ANCHORS' then
   begin
     lok := CheckSymbol(s, ':=');
@@ -533,40 +492,10 @@ begin
       wg.Height := GetIntValue(s);
     lok := lok and CheckSymbol(s, ')');
     lok := lok and CheckSymbol(s, ';');
+    wg.UpdateWindowPosition;
     //if lok then Writeln('sd ok.');
     //writeln('WT: ',sval);
-  end
-  {
-  else if (wg is TwgDBGrid) and (ident = 'ADDCOLUMN8') then
-  begin
-    c := TDBColumn.Create;
-    lok := CheckSymbol(s, '(');
-
-    if lok then c.Title := u8(GetStringValue(s));
-    lok := lok and CheckSymbol(s, ',');
-    if lok then c.FieldName8 := GetStringValue(s);
-    lok := lok and CheckSymbol(s, ',');
-    if lok then c.Width := GetIntValue(s);
-    lok := lok and CheckSymbol(s, ',');
-    if lok then
-    begin
-      sval := UpperCase(GetIdentifier(s));
-      if sval = 'ALRIGHT' then c.Alignment := alRight
-      else if sval = 'ALCENTER' then c.Alignment := alCenter
-      else c.Alignment := alLeft;
-    end;
-
-    lok := lok and CheckSymbol(s, ')');
-    lok := lok and CheckSymbol(s, ';');
-
-    if lok then
-    begin
-      TwgDBGrid(wg).AddColumn(c.Title, c.FieldName8, c.Width, c.Alignment)
-    end;
-
-    c.Free;
   end;
-};
 
   if not lok then
     if wgc <> nil then
