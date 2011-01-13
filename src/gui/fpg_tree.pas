@@ -236,6 +236,7 @@ type
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
     property    Align;
+    property    BackgroundColor default clListBox;
     property    DefaultColumnWidth: word read FDefaultColumnWidth write SetDefaultColumnWidth default 15;
     property    Enabled;
     property    FontDesc: string read GetFontDesc write SetFontDesc;
@@ -248,6 +249,7 @@ type
     property    ShowHint;
     property    ShowImages: boolean read FShowImages write SetShowImages default False;
     property    TabOrder;
+    property    TextColor;
     property    TreeLineColor: TfpgColor read FTreeLineColor write SetTreeLineColor default clShadow1;
     property    TreeLineStyle: TfpgLineStyle read FTreeLineStyle write SetTreeLineStyle default lsDot;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
