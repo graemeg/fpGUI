@@ -1297,9 +1297,8 @@ begin
   writeln(Classname, '.HandleResize');
   {$ENDIF}
   inherited HandleResize(awidth, aheight);
-  if (csLoading in ComponentState) then
-    exit;
-  ResetScrollbar;
+  if not (csLoading in ComponentState) then
+    ResetScrollbar;
   RePaint;
 end;
 
@@ -1440,9 +1439,8 @@ end;
 
 procedure TfpgTreeview.HandleShow;
 begin
-  if (csLoading in ComponentState) then
-    Exit;
-  ResetScrollbar;
+  if not (csLoading in ComponentState) then
+    ResetScrollbar;
   inherited HandleShow;
 end;
 
@@ -1465,22 +1463,36 @@ begin
   writeln('TfpgTreeview.HandlePaint');
   {$ENDIF}
 //  inherited HandlePaint;
-  if not HasHandle then
-    Exit; //==>
-  i1 := 0;
-  PreCalcColumnLeft;
-  UpdateScrollbars;
-  AVisibleHeight := VisibleHeight;
 
-  Canvas.BeginDraw;  // start double buffering
   Canvas.ClearClipRect;
   Canvas.Clear(FBackgroundColor);
+
+  // Limit painting in the UI Designer
+  if csDesigning in ComponentState then
+  begin
+    Canvas.SetColor(clInactiveWgFrame);
+    r.SetRect(0, 0, Width, Height);
+    Canvas.DrawRectangle(r);
+    Canvas.SetTextColor(clInactiveWgFrame);
+    Canvas.DrawString(2, 2, Name + ': ' + Classname);
+    Exit;
+  end;
+
   if FFocused then
     Canvas.SetColor(clWidgetFrame)
   else
     Canvas.SetColor(clInactiveWgFrame);
   r.SetRect(0, 0, Width, Height);
   Canvas.DrawRectangle(r); // border
+
+  i1 := 0;
+  PreCalcColumnLeft;
+  UpdateScrollbars;
+  AVisibleHeight := VisibleHeight;
+
+
+//  if not HasHandle then
+//    Exit; //==>
 
   { TODO : Columns need to be redesigned completely }
   if ShowColumns then
@@ -1720,7 +1732,6 @@ begin
       break;  //==>
     end;
   end; { while h <> nil }
-  Canvas.EndDraw;
 end;
 
 procedure TfpgTreeview.DrawHeader(ACol: integer; ARect: TfpgRect;
@@ -2021,8 +2032,8 @@ begin
   FDefaultColumnWidth := 15;
   FFirstColumn  := nil;
   FFont := fpgGetFont('#Label1');
-  FWidth := 150;
-  FHeight := 100;
+  Width := 150;
+  Height := 100;
 
   FHScrollbar := TfpgScrollbar.Create(self);
   FHScrollbar.Orientation := orHorizontal;
