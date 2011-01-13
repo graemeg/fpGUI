@@ -696,6 +696,7 @@ begin
   wc := TVFDWidgetClass.Create(TfpgTreeView);
   wc.NameBase := 'TreeView';
   wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
+  wc.AddProperty('BackgroundColor', TPropertyColor, '');
   wc.AddProperty('DefaultColumnWidth',TPropertyInteger, '');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('FontDesc',TPropertyFontDesc, '');
