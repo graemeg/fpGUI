@@ -66,7 +66,9 @@ type
     procedure   SetName(const NewName: TComponentName); override;
   public
     constructor Create(AOwner: TComponent); override;
+    constructor CreateWithTitle(AOwner: TComponent; const AText: TfpgString = ''); virtual;
     destructor  Destroy; override;
+    procedure   AfterConstruction; override;
     property    PageIndex: Integer read GetPageIndex write SetPageIndex;
     property    PageControl: TfpgPageControl read FPageControl write SetPageControl;
     property    TabVisible: boolean read FTabVisible write FTabVisible;
@@ -106,10 +108,12 @@ type
     function    GetActivePageIndex: integer;
     function    GetPage(AIndex: integer): TfpgTabSheet;
     function    GetPageCount: Integer;
-    procedure   InsertPage(const APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
+    procedure   InsertPage(var APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
     procedure   RemovePage(const APage: TfpgTabSheet);
     procedure   SetActivePageIndex(const AValue: integer);
     procedure   SetActivePage(const AValue: TfpgTabSheet);
+    procedure   PositionTabSheets;
+    procedure   PositionTabSheet(var APage: TfpgTabSheet);
     function    MaxButtonWidthSum: integer;
     function    MaxButtonHeightSum: integer;
     function    MaxButtonWidth: integer;
@@ -252,11 +256,12 @@ begin
   FBackgroundColor := Parent.BackgroundColor;
   FTextColor := Parent.TextColor;
   FIsContainer := True;
-  if (AOwner <> nil) and (AOwner is TfpgPageControl) then
-  begin
-    FPageControl:=TfpgPageControl(AOwner);  
-    FPageControl.InsertPage(self, True);
-  end;
+end;
+
+constructor TfpgTabSheet.CreateWithTitle(AOwner: TComponent; const AText: TfpgString);
+begin
+  Create(AOwner);
+  FText := AText;
 end;
 
 destructor TfpgTabSheet.Destroy;
@@ -264,6 +269,16 @@ begin
   if FPageControl <> nil then
     FPageControl.RemovePage(self);
   inherited Destroy;
+end;
+
+procedure TfpgTabSheet.AfterConstruction;
+begin
+  if (Owner <> nil) and (Owner is TfpgPageControl) then
+  begin
+    FPageControl:=TfpgPageControl(Owner);
+    FPageControl.InsertPage(self, True);
+  end;
+  inherited AfterConstruction;
 end;
 
 procedure TfpgTabSheet.SetPageControl(APageControl: TfpgPageControl);
@@ -293,11 +308,12 @@ begin
   Result := FPages.Count;
 end;
 
-procedure TfpgPageControl.InsertPage(const APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
+procedure TfpgPageControl.InsertPage(var APage: TfpgTabSheet; SuppressOnChangeEvent: boolean = False);
 begin
   if FPages.IndexOf(APage) <> -1 then
     Exit; //==>   The page has already been added.
   FPages.Add(APage);
+  PositionTabSheets;
   { TODO: This behaviour could maybe be controlled by a Options property }
   if FPages.Count=1 then
   begin
@@ -363,6 +379,91 @@ begin
     FActivePageIndex := FPages.IndexOf(AValue);
   RePaint;
   DoPageChange(FActivePage);
+end;
+
+procedure TfpgPageControl.PositionTabSheets;
+var
+  i: integer;
+  t: TfpgTabSheet;
+begin
+  for i := 0 to FPages.Count-1 do
+  begin
+    t := TfpgTabSheet(FPages[i]);
+    PositionTabSheet(t);
+    t.Anchors := [anLeft, anTop, anRight, anBottom];
+  end;
+end;
+
+procedure TfpgPageControl.PositionTabSheet(var APage: TfpgTabSheet);
+var
+  r: TRect;
+  w: integer;
+  wd: integer;  { width delta }
+  h: integer;
+  hd: integer;  { height delta }
+  msg: TfpgMessageParams;
+begin
+  // PageControl has bevelled edges in some themes
+  r := fpgStyle.GetControlFrameBorders;
+
+  { Calculate and set Width and Height }
+  if TabPosition in [tpTop, tpBottom] then
+  begin
+    w := Width - (FMargin*2) - r.Left - r.Right;
+    wd := APage.Width - w;
+    APage.Width   := w;
+    h := Height - ButtonHeight - (FMargin*2) - r.Top - r.Bottom;
+    hd := APage.Height - h;
+    APage.Height  := h;
+  end
+  else if TabPosition in [tpLeft, tpRight] then
+  begin
+    w := Width - MaxButtonWidth - (FMargin*2) - r.Left - r.Right;
+    wd := APage.Width - w;
+    APage.Width   := w;
+    h := Height - (FMargin*2) - r.Top - r.Bottom;
+    hd := APage.Height - h;
+    APage.Height  := h;
+  end
+  else
+  begin   // tpNone
+    w := Width - (FMargin*2) - r.Left - r.Right;
+    wd := APage.Width - w;
+    APage.Width   := w;
+    h := Height - (FMargin*2) - r.Top - r.Bottom;
+    hd := APage.Height - h;
+    APage.Height  := h;
+  end;
+
+  { Calculate and set Top and Left }
+  if TabPosition = tpTop then
+  begin
+    APage.Left    := FMargin + r.Left;
+    APage.Top     := ButtonHeight + FMargin + r.Top;
+  end
+  else if TabPosition = tpBottom then
+  begin
+    APage.Left    := FMargin + r.Left;
+    APage.Top     := FMargin + r.Top;
+  end
+  else if TabPosition = tpLeft then
+  begin
+    APage.Left    := MaxButtonWidth + FMargin + r.Left;
+    APage.Top     := FMargin + r.Top;
+  end
+  else if TabPosition = tpRight then
+  begin
+    APage.Left    := FMargin + r.Left;
+    APage.Top     := FMargin + r.Top;
+  end;
+
+  if TabPosition in [tpNone] then
+  begin
+    APage.Left    := FMargin + r.Left;
+    APage.Top     := FMargin + r.Top;
+  end;
+
+  APage.UpdateWindowPosition; { Internal state is now resolved }
 end;
 
 function TfpgPageControl.MaxButtonWidthSum: integer;
