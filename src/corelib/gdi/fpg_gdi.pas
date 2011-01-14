@@ -1466,6 +1466,7 @@ var
   stgmed: STGMEDIUM;
   data: pchar;
   wg: TfpgWidget;
+  swg: TfpgWidget; { source widget }
   CF: DWORD;
   lIsTranslated: Boolean;
 begin
@@ -1488,7 +1489,14 @@ begin
       { Yippie! the data is there, so go get it! }
       data := GlobalLock(stgmed.HGLOBAL);
       if Assigned(wg.OnDragDrop) then
-        wg.OnDragDrop(self, nil, pt.x, pt.y, data);
+      begin
+        if Assigned(uDragSource) then
+          swg := uDragSource as TfpgWidget
+        else
+          swg := nil;
+        wg.OnDragDrop(wg, swg, pt.x, pt.y, data);
+        uDragSource := nil;
+      end;
       GlobalUnlock(stgmed.HGLOBAL);
       { release the data using the COM API }
       ReleaseStgMedium(stgmed);
