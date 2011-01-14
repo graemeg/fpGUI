@@ -412,6 +412,7 @@ type
 
 var
   xapplication: TfpgApplication;
+  uDragSource: TfpgWidget;  { points to the Source widget of the DND when drop is inside the same app }
 
 const
   FPG_XDND_VERSION: culong = 4; // our supported XDND version
@@ -1037,6 +1038,7 @@ var
   w: TfpgX11Window;
   wg: TfpgWidget;
   wg2: TfpgWidget;
+  swg: TfpgWidget;
   msgp: TfpgMessageParams;
   lDragEnterEvent: TfpgDragEnterEvent;
   lDropAction: TfpgDropAction;
@@ -1127,7 +1129,11 @@ begin
             raise Exception.Create('fpGUI/X11: no mime types available for DND operation');
 
           { TODO: We need to populate the Source parameter. }
-          wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
+          if Assigned(Drag) then
+            swg := TfpgDrag(Drag).Source as TfpgWidget
+          else
+            swg := nil;
+          wg.OnDragEnter(wg, swg, lMimeList, lMimeChoice, lDropAction, lAccept);
           lMimeList.Free;
           FActionType := GetAtomFromDropAction(lDropAction);
         end;
@@ -3424,9 +3430,14 @@ begin
     xev.xclient.data.l[4] := 0;
 
     XSendEvent(xapplication.Display, FLastTarget, False, NoEventMask, @xev);
+
+    uDragSource := FSource as TfpgWidget;
   end
   else
+  begin
     SendDNDLeave(FLastTarget);
+    uDragSource := nil;
+  end;
   FSource.MouseCursor := mcDefault;
 end;
 
