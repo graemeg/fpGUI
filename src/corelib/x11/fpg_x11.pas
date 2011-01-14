@@ -1226,6 +1226,7 @@ var
   s: variant;
   data: PChar;
   wg: TfpgWidget;
+  swg: TfpgWidget; { source widget that started drag - if drag and drop occur in the same application }
 begin
   {$IFDEF DNDDEBUG}
   writeln('TfpgX11Application.HandleDNDselection');
@@ -1272,7 +1273,14 @@ begin
     if wg.AcceptDrops then
     begin
       if Assigned(wg.OnDragDrop) then
-        wg.OnDragDrop(nil, nil, FDropPos.X, FDropPos.Y, s);
+      begin
+        if Assigned(uDragSource) then
+          swg := uDragSource as TfpgWidget
+        else
+          swg := nil;
+        wg.OnDragDrop(wg, swg, FDropPos.X, FDropPos.Y, s);
+        uDragSource := nil; { reset variable for the next DND action }
+      end;
     end;
   end;
   {$IFDEF DNDDEBUG}
