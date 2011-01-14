@@ -312,6 +312,7 @@ uses
 
 var
   wapplication: TfpgApplication;
+  uDragSource: TfpgWidget;  { points to the Source widget of the DND when drop is inside the same app }
   MouseFocusedWH: HWND;
   OldMousePos: TPoint;  // used to detect fake MouseMove events
   NeedToUnitialize: Boolean;
@@ -1375,6 +1376,7 @@ procedure TfpgGDIWindow.HandleDNDEnter(Sender: TObject; DataObj: IDataObject;
     KeyState: Longint; PT: TPoint; var Effect: DWORD);
 var
   wg: TfpgWidget;
+  swg: TfpgWidget;
   lMimeList: TStringList;
   lMimeChoice: TfpgString;
   lAccept: Boolean;
@@ -1401,7 +1403,13 @@ begin
 
       lDropAction := TranslateToFPGDropAction(Effect);
       if Assigned(wg.OnDragEnter) then
-        wg.OnDragEnter(self, nil, lMimeList, lMimeChoice, lDropAction, lAccept);
+      begin
+        if Assigned(uDragSource) then
+          swg := uDragSource as TfpgWidget
+        else
+          swg := nil;
+        wg.OnDragEnter(self, swg, lMimeList, lMimeChoice, lDropAction, lAccept);
+      end;
     finally
       lMimeList.Free;
     end;
@@ -2890,6 +2898,7 @@ begin
       end;
     end;
 
+    uDragSource := TfpgDrag(self).Source as TfpgWidget;
     { Now let OLE take over from here }
     FDropSource := TfpgOLEDropSource.Create;
     dwResult := ActiveX.DoDragDrop( FDataObject as IDataObject,
