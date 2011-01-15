@@ -2,9 +2,9 @@ Unit CanvasFontManager;
 
 {$mode objfpc}{$H+}
 
-Interface
+interface
 
-Uses
+uses
   Classes
   ,fpg_base
   ,fpg_main
@@ -15,13 +15,13 @@ Const
   // This defines the fraction of a pixel that
   // font character widths will be given in
   DefaultTopicFontName = 'Arial';
-  DefaultTopicFontSize = 10;
+  DefaultTopicFontSize: integer = 10;
   DefaultTopicFixedFontName = 'Courier New';
-  DefaultTopicFixedFontSize = 10;
+  DefaultTopicFixedFontSize: integer = 10;
 
-
-  DefaultTopicFont = DefaultTopicFontName + '-' + DefaultTopicFontSize;
-  DefaultTopicFixedFont = DefaultTopicFixedFontName + '-' + DefaultTopicFixedFontSize;
+var
+  DefaultTopicFont: string;
+  DefaultTopicFixedFont: string;
 
 type
   {Standard Font Attributes}
@@ -319,6 +319,10 @@ begin
   Point.x := Point.X + Canvas.Font.TextWidth(t);
 end;
 
+
+initialization
+  DefaultTopicFont := DefaultTopicFontName + '-' + IntToStr(DefaultTopicFontSize);
+  DefaultTopicFixedFont := DefaultTopicFixedFontName + '-' + IntToStr(DefaultTopicFixedFontSize);
 
 end.
 

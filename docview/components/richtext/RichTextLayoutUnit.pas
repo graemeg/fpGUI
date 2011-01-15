@@ -131,8 +131,8 @@ end;
 // Create a layout of the specified rich text.
 constructor TRichTextLayout.Create(Text: PChar; Images: TfpgImageList;
     RichTextSettings: TRichTextSettings; FontManager: TCanvasFontManager;
-    Width: longint);
-Begin
+    AWidth: longint);
+begin
 ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
   inherited Create;
   FRichTextSettings := RichTextSettings;
@@ -157,7 +157,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Create   2');
 ProfileEvent('DEBUG:  TRichTextLayout.Create   3');
   Layout;
 ProfileEvent('DEBUG:  TRichTextLayout.Create <<<<');
-End;
+end;
 
 Destructor TRichTextLayout.Destroy;
 Begin
