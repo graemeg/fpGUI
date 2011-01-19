@@ -149,14 +149,13 @@ type
     procedure   InsertItem(AItem: TfpgLVItem; AIndex: Integer);
     procedure   BeginUpdate;
     procedure   EndUpdate;
+    procedure   Sort(Compare: TListSortCompare);
     property    Capacity: Integer read GetCapacity write SetCapacity;
     property    Columns: TfpgLVColumns read FColumns;
     property    Item[AIndex: Integer]: TfpgLVItem read GetItem write SetItem;
   end;
   
   
-  { TfpgLVItem }
-
   TfpgLVItem = class(TObject)
   private
     FCaption: String;
@@ -181,7 +180,6 @@ type
     property    Selected[ListView: TfpgListView]: Boolean read GetSelected write SetSelected;
   end;
 
-  { TfpgListViewSubitems }
 
   TfpgListViewSubItems = class(TStrings)
   private
@@ -204,7 +202,6 @@ type
     procedure   Insert(Index: Integer; const S: string); override;
     property    ImageIndex[ASubIndex: Integer]: Integer read GetImageIndex write SetImageIndex;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
-
   end;
   
 
@@ -552,6 +549,13 @@ begin
     FUpdateCount := 0;
   if FUpdateCount = 0 then
     DoEndUpdate;
+end;
+
+procedure TfpgLVItems.Sort(Compare: TListSortCompare);
+begin
+  BeginUpdate;
+  FItems.Sort(Compare);
+  EndUpdate;
 end;
 
 { TfpgLVItem }
