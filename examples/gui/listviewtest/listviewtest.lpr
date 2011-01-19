@@ -4,7 +4,8 @@ program listviewtest;
 
 uses
   Classes, sysutils,
-  fpg_base, fpg_main, fpg_listview, fpg_form, fpg_button, fpg_edit, fpg_checkbox, fpg_splitter, fpg_panel, fpg_imagelist;
+  fpg_base, fpg_main, fpg_listview, fpg_form, fpg_button, fpg_edit,
+  fpg_checkbox, fpg_splitter, fpg_panel, fpg_imagelist, fpg_stringutils;
   
 type
 
@@ -17,8 +18,10 @@ type
     FTmpListView: TfpgListView;
     FQuitButton: TfpgButton;
     FCheck: TfpgCheckBox;
+    procedure LVColumnClicked(Listview: TfpgListView; Column: TfpgLVColumn; Button: Integer);
     procedure CloseBttn(Sender: TObject);
     procedure AddBttn(Sender: TObject);
+    procedure SortButton(Sender: TObject);
     procedure ShowHeadersChange(Sender: TObject);
     procedure PaintItem(ListView: TfpgListView; ACanvas: TfpgCanvas; Item: TfpgLVItem;
                                    ItemIndex: Integer; Area:TfpgRect; var PaintPart: TfpgLVItemPaintPart);
@@ -28,8 +31,18 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
+
+
 { TMainForm }
 
+procedure TMainForm.LVColumnClicked(Listview: TfpgListView; Column: TfpgLVColumn;
+  Button: Integer);
+begin
+  if Column.ColumnIndex = 0 then
+  begin
+    SortButton(nil);
+  end;
+end;
 
 procedure TMainForm.CloseBttn(Sender: TObject);
 begin
@@ -46,7 +59,7 @@ begin
   //FListView.Items.Capacity := FListView.Items.Capacity + 2000000;
   //for I := 0 to 1999999 do begin
     Item := FListView.ItemAdd;
-    Item.Caption := FEdit.Text + IntToStr(FListView.Items.Count);
+    Item.Caption := FEdit.Text + IntToStr(Random(1000));
     Item.SubItems.Add('c0');
     Item.SubItems.Add('c1');
     Item.SubItems.Add('c2');
@@ -55,6 +68,25 @@ begin
   //end;
   FListView.EndUpdate;
   FTmpListView.EndUpdate;
+end;
+
+function CompareProc(Item1, Item2: Pointer): Integer;
+var
+  a, b: TfpgLVItem;
+begin
+  a := TfpgLVItem(Item1);
+  b := TfpgLVItem(Item2);
+  if UTF8Length(a.Caption) < UTF8Length(b.Caption) then
+    Result := -1
+  else if UTF8Length(a.Caption) > UTF8Length(b.Caption) then
+    Result := 1
+  else
+    Result := CompareText(a.Caption, b.Caption);
+end;
+
+procedure TMainForm.SortButton(Sender: TObject);
+begin
+  FListView.Items.Sort(@CompareProc);
 end;
 
 procedure TMainForm.ShowHeadersChange(Sender: TObject);
@@ -89,6 +121,7 @@ var
   TmpImage: TfpgImage;
 begin
   inherited Create(AOwner);
+  Randomize;
 
   WindowTitle := 'ListView Test';
   SetPosition(200, 200, 640, 480);
@@ -106,14 +139,11 @@ begin
   IL.Free;
 
   // invert the items for the 'selected' images
-  FImageList.Item[i].Image.ImageFromSource;
-
   for i := 0 to FImageList.Count-1 do
   begin
     TmpImage := FImageList.Item[i].Image.ImageFromSource;
     TmpImage.Invert;
     FSelectedImageList.AddImage(TmpImage);
-
   end;
 
   BottomPanel := TfpgPanel.Create(Self);
@@ -139,6 +169,7 @@ begin
     Images := FImageList;
     SubItemImages := FImageList;
     ImagesSelected := FSelectedImageList;
+    OnColumnClick  := @LVColumnClicked;
   end;
 
   FSplitter := TfpgSplitter.Create(TopPanel);
@@ -161,6 +192,7 @@ begin
   LVColumn.Height := 50;
   LVColumn.Resizable := True;
   LVColumn.Alignment := taLeftJustify;
+  LVColumn.ColumnIndex := 0;
   FListView.Columns.Add(LVColumn);
   FTmpListView.Columns.Add(LVColumn);
   
@@ -169,6 +201,7 @@ begin
   LVColumn.Width := 100;
   LVColumn.Height := 50;
   LVColumn.Alignment := taCenter;
+  LVColumn.ColumnIndex := 1;
   //LVColumn.Visible := False;
   FListView.Columns.Add(LVColumn);
   //FTmpListView.Columns.Add(LVColumn);
@@ -180,9 +213,9 @@ begin
   //LVColumn.Visible := False;
   LVColumn.Resizable := True;
   LVColumn.Alignment := taRightJustify;
+  LVColumn.ColumnIndex := 2;
   FListView.Columns.Add(LVColumn);
   FTmpListView.Columns.Add(LVColumn);
-  LVColumn.ColumnIndex := 2;
 
 
   FEdit := TfpgEdit.Create(BottomPanel);
