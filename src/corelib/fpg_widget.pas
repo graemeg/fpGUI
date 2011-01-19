@@ -179,7 +179,7 @@ type
     property    Anchors: TAnchors read FAnchors write FAnchors default [anLeft, anTop];
     property    Align: TAlign read FAlign write SetAlign default alNone;
     property    Hint: TfpgString read GetHint write SetHint;
-    property    IgnoreDblClicks: Boolean read FIgnoreDblClicks write FIgnoreDblClicks;
+    property    IgnoreDblClicks: Boolean read FIgnoreDblClicks write FIgnoreDblClicks default False;
     property    ShowHint: boolean read FShowHint write SetShowHint stored IsShowHintStored;
     property    ParentShowHint: boolean read FParentShowHint write SetParentShowHint default True;
     property    BackgroundColor: TfpgColor read FBackgroundColor write SetBackgroundColor default clWindowBackground;
@@ -482,6 +482,7 @@ begin
   FTextColor      := clText1;
   FAcceptDrops    := False;
   FOnClickPending := False;
+  FIgnoreDblClicks := False;
 
   inherited Create(AOwner);
 
