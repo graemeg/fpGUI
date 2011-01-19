@@ -1051,9 +1051,15 @@ begin
 end;
 
 procedure TfpgWidget.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
+var
+  r: TfpgRect;
 begin
-  if FOnClickPending and Assigned(FOnClick) then
+  r.SetRect(0, 0, Width, Height);
+  if PtInRect(r, Point(x, y)) and FOnClickPending then
+  begin
+    if Assigned(FOnClick) then
     FOnClick(self);
+  end;
 end;
 
 procedure TfpgWidget.HandleRMouseUp(x, y: integer; shiftstate: TShiftState);
