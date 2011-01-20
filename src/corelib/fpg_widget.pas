@@ -208,6 +208,7 @@ var
   uLastClickWidget: TfpgWidget;
   uLastClickPoint: TPoint;
   uLastClickTime: DWord;
+  uMouseDownSourceWidget: TfpgWidget; { widget Left MButton was pressed on }
 
 
 function FindKeyboardFocus: TfpgWidget;
@@ -638,6 +639,7 @@ begin
   case msg.Params.mouse.Buttons of
     MOUSE_LEFT:
       begin
+        uMouseDownSourceWidget := self;
         FDragStartPos.SetPoint(msg.Params.mouse.x, msg.Params.mouse.y);
         mb := mbLeft;
         HandleLMouseDown(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
@@ -704,6 +706,8 @@ begin
 
         // The mouse up must still be handled even if we had a double click event.
         HandleLMouseUp(msg.Params.mouse.x, msg.Params.mouse.y, msg.Params.mouse.shiftstate);
+
+        uMouseDownSourceWidget := nil;
       end;
 
     MOUSE_RIGHT:
@@ -731,7 +735,7 @@ begin
       Exit;
   end;
 
-  if (msg.Params.mouse.Buttons and MOUSE_LEFT) = MOUSE_LEFT then
+  if ((msg.Params.mouse.Buttons and MOUSE_LEFT) = MOUSE_LEFT) and (self = uMouseDownSourceWidget) then
   begin
     if not FDragActive and (FDragStartPos.ManhattanLength(fpgPoint(msg.Params.mouse.x, msg.Params.mouse.y)) > fpgApplication.StartDragDistance) then
     begin
@@ -1055,7 +1059,7 @@ var
   r: TfpgRect;
 begin
   r.SetRect(0, 0, Width, Height);
-  if PtInRect(r, Point(x, y)) and FOnClickPending then
+  if PtInRect(r, Point(x, y)) and FOnClickPending and (self = uMouseDownSourceWidget) then
   begin
     if Assigned(FOnClick) then
     FOnClick(self);
