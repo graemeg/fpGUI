@@ -160,6 +160,18 @@ type
       destructor Destroy; override;
     end;
 
+  T_Points = array of TPoint;
+
+  TPdfSurface = class(TPdfObjet)
+    private
+      FPoints: array of TPoint;
+    protected
+      procedure EcritSurface(const AFlux: TStream);
+    public
+      constructor CreateSurface(const APoints: T_Points);
+      destructor Destroy; override;
+    end;
+
   TPdfLineStyle = class(TPdfObjet)
     private
       FDash: TfpgLineStyle;
@@ -512,6 +524,9 @@ for Cpt:= 0 to Pred(FStream.Count) do
   if TPdfObjet(FStream[Cpt]) is TPdfLineStyle
   then
     TPdfLineStyle(FStream[Cpt]).EcritLineStyle(AFlux);
+  if TPdfObjet(FStream[Cpt]) is TPdfSurface
+  then
+    TPdfSurface(FStream[Cpt]).EcritSurface(AFlux);
   end;
 end;
 
@@ -638,6 +653,28 @@ begin
 inherited;
 end;
 
+procedure TPdfSurface.EcritSurface(const AFlux: TStream);
+var
+  Cpt: Integer;
+begin
+EcritChaine(IntToStr(FPoints[0].X)+' '+IntToStr(FPoints[0].Y)+' m'+CRLF,AFlux);
+for Cpt:= 1 to Pred(Length(FPoints)) do
+  EcritChaine(IntToStr(FPoints[Cpt].X)+' '+IntToStr(FPoints[Cpt].Y)+' l'+CRLF,AFlux);
+EcritChaine('h'+CRLF,AFlux);
+EcritChaine('f'+CRLF,AFlux);
+end;
+
+constructor TPdfSurface.CreateSurface(const APoints: T_Points);
+begin
+inherited Create;
+FPoints:= APoints;
+end;
+
+destructor TPdfSurface.Destroy;
+begin
+inherited;
+end;
+
 procedure TPdfLineStyle.EcritLineStyle(const AFlux: TStream);
 begin
 EcritChaine('[',AFlux);
@@ -688,13 +725,18 @@ else
 end;
 
 constructor TPdfColor.CreateColor(const AStroke: Boolean; Couleur: Longint);
+var
+  OldSeparator: Char;
 begin
 inherited Create;
+OldSeparator:= DecimalSeparator;
+DecimalSeparator:= '.';
 FBlue:= FormatFloat('0.##',Couleur mod 256/256);
 Couleur:= Couleur div 256;
 FGreen:= FormatFloat('0.##',Couleur mod 256/256);
 FRed:= FormatFloat('0.##',Couleur div 256/256);
 FStroke:= AStroke;
+DecimalSeparator:= OldSeparator;
 end;
 
 destructor TPdfColor.Destroy;
@@ -1184,6 +1226,7 @@ var
   Fnt: TPdfFonte;
   Rct: TPdfRectangle;
   Lin: TPdfLigne;
+  Srf: TPdfSurface;
   Sty: TpdfLineStyle;
 begin
 for Cpt:= 0 to Pred(PdfPage.Count) do
@@ -1248,6 +1291,17 @@ for Cpt:= 0 to Pred(PdfPage.Count) do
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Sty);
         Lin:= TPdfLigne.CreateLigne(LineEpais,LineStartX,LineStartY,LineEndX,LineEndY);
         TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Lin);
+        end;
+  if TPdfElement(PdfPage[Cpt]) is TPdfSurf
+  then
+    if TPdfSurf(PdfPage[Cpt]).PageId= NumeroPage
+    then
+      with TPdfSurf(PdfPage[Cpt]) do
+        begin
+        Clr:= TPdfColor.CreateColor(True,SurfColor);
+        TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Clr);
+        Srf:= TPdfSurface.CreateSurface(Points);
+        TPdfStream(TPdfXRef(FXRefObjets[PageNum]).FStream).AddItem(Srf);
         end;
   end;
 end;
@@ -1330,7 +1384,7 @@ for CptSect:= 0 to Pred(Sections.Count) do
     with T_Section(Sections[CptSect]) do
       NewPage:= CreatePage(ParentPage,Paper.H,Paper.W);
     Inc(NumPage);
-    PageNum:= CreateContents; // pagenum = numéro d'objet dans le fichier PDF
+    PageNum:= CreateContents; // pagenum = object number in the pdf file
     CreateStream(NumPage,PageNum);
     if (Sections.Count> 1) and Outline
     then

@@ -22,7 +22,7 @@ interface
 
 uses
   Classes, SysUtils,
-  fpg_base, fpg_main;
+  fpg_base, fpg_main, U_Pdf;
 
 type
   TZone = (zEnTete,zPied,zPage,zMarges);
@@ -79,6 +79,7 @@ type
       procedure LoadTraitHorizPage(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
       procedure LoadTraitHorizPied(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
       procedure LoadTraitHorizGroupe(AHeight: Integer);
+      procedure LoadSurf(APos: array of TPoint; AColor: TfpgColor);
       function GetCmdPage(NumPage: Integer): TList;
       property CmdEnTete: TList read FEntete;
       property CmdPied: TList read FPied;
@@ -323,6 +324,16 @@ type
       property GetZone: TZone read FZone;
     end;
 
+  T_Surface = class(T_Commande)
+    private
+      FPoints: T_Points;
+      FColor: TfpgColor;
+    public
+      constructor Create(APoints: array of TPoint; AColor: TfpgColor);
+      property GetPoints: T_Points read FPoints;
+      property GetColor: TfpgColor read FColor;
+    end;
+
 var
   Sections: TList;
 //  Colonnes: TList;
@@ -520,6 +531,12 @@ begin
 AGroupe.FGroupeHeight:= AGroupe.FGroupeHeight+AHeight;
 end;
 
+procedure T_Section.LoadSurf(APos: array of TPoint; AColor: TfpgColor);
+begin
+Acommande:= T_Surface.Create(APos,AColor);
+T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
+end;
+
 function T_Section.GetCmdPage(NumPage: Integer): TList;
 begin
 Result:= T_Page(Pages[Pred(NumPage)]).Commandes;
@@ -698,6 +715,17 @@ FPosY:= APosY;
 FColonne:= AColonne;
 FHeight:= AHeight;
 FFond:= AFond;
+end;
+
+constructor T_Surface.Create(APoints: array of TPoint; AColor: TfpgColor);
+var
+  Cpt: Integer;
+begin
+inherited Create;
+SetLength(FPoints,Length(APoints));
+for Cpt:= 0 to Pred(Length(FPoints)) do
+  FPoints[Cpt]:= APoints[Cpt];
+FColor:= AColor;
 end;
 
 procedure T_Espace.SetPosY(const AValue: Integer);

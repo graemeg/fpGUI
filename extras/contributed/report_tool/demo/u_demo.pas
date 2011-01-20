@@ -26,6 +26,7 @@ type
       Bt_PdfLines: TfpgButton;
       Bt_PdfGrid: TfpgButton;
       Bt_PdfGraph: TfpgButton;
+      Bt_PdfSurf: TfpgButton;
       L_Visu: TfpgLabel;
       Bt_VisuEmptyPage: TfpgButton;
       Bt_VisuSimpleText: TfpgButton;
@@ -37,6 +38,7 @@ type
       Bt_VisuLines: TfpgButton;
       Bt_VisuGrid: TfpgButton;
       Bt_VisuGraph: TfpgButton;
+      Bt_VisuSurf: TfpgButton;
       L_Print: TfpgLabel;
       Bt_PrintEmptyPage: TfpgButton;
       Bt_PrintSimpleText: TfpgButton;
@@ -48,6 +50,7 @@ type
       Bt_PrintLines: TfpgButton;
       Bt_PrintGrid: TfpgButton;
       Bt_PrintGraph: TfpgButton;
+      Bt_PrintSurf: TfpgButton;
       Bt_Fermer: TfpgButton;
       procedure Bt_PdfEmptyPageClick(Sender: TObject);
       procedure Bt_PdfSimpleTextClick(Sender: TObject);
@@ -59,6 +62,7 @@ type
       procedure Bt_PdfLinesClick(Sender: TObject);
       procedure Bt_PdfGridClick(Sender: TObject);
       procedure Bt_PdfGraphClick(Sender: TObject);
+      procedure Bt_PdfSurfClick(Sender: TObject);
       procedure Bt_VisuEmptyPageClick(Sender: TObject);
       procedure Bt_VisuSimpleTextClick(Sender: TObject);
       procedure Bt_VisuMultiPagesClick(Sender: TObject);
@@ -69,6 +73,7 @@ type
       procedure Bt_VisuLinesClick(Sender: TObject);
       procedure Bt_VisuGridClick(Sender: TObject);
       procedure Bt_VisuGraphClick(Sender: TObject);
+      procedure Bt_VisuSurfClick(Sender: TObject);
       procedure Bt_PrintEmptyPageClick(Sender: TObject);
       procedure Bt_PrintSimpleTextClick(Sender: TObject);
       procedure Bt_PrintMultiPagesClick(Sender: TObject);
@@ -79,6 +84,7 @@ type
       procedure Bt_PrintLinesClick(Sender: TObject);
       procedure Bt_PrintGridClick(Sender: TObject);
       procedure Bt_PrintGraphClick(Sender: TObject);
+      procedure Bt_PrintSurfClick(Sender: TObject);
       procedure Bt_FermerClick(Sender: TObject);
       procedure ImprimeEmptyPage(Preview: Boolean);
       procedure ImprimeSimpleText(Preview: Boolean);
@@ -90,6 +96,7 @@ type
       procedure ImprimeLines(Preview: Boolean);
       procedure ImprimeGrid(Preview: Boolean);
       procedure ImprimeGraph(Preview: Boolean);
+      procedure ImprimeSurf(Preview: Boolean);
     public
       constructor Create(AOwner: TComponent); override;
     end;
@@ -628,6 +635,58 @@ with Imprime do
   end;
 end;
 
+procedure TF_Demo.Bt_PdfSurfClick(Sender: TObject);
+var
+  Fd_SauvePdf: TfpgFileDialog;
+  FichierPdf: string;
+  FluxFichier: TFileStream;
+begin
+Imprime:= T_Imprime.Create;
+with Imprime do
+  begin
+//  Langue:= Version;
+  ImprimeSurf(False);
+  if T_Section(Sections[Pred(Sections.Count)]).TotPages= 0
+  then
+    begin
+    ShowMessage('There is no file to print');
+    Exit;
+    end;
+  Fd_SauvePdf:= TfpgFileDialog.Create(nil);
+  Fd_SauvePdf.InitialDir:= ExtractFilePath(Paramstr(0));
+  Fd_SauvePdf.FontDesc:= 'bitstream vera sans-9';
+  Fd_SauvePdf.Filter:= 'Fichiers pdf |*.pdf';
+  Fd_SauvePdf.FileName:= 'Surface.pdf';
+  try
+    if Fd_SauvePdf.RunSaveFile
+    then
+      begin
+      FichierPdf:= Fd_SauvePdf.FileName;
+      if Lowercase(Copy(FichierPdf,Length(FichierPdf)-3,4))<> '.pdf'
+      then
+         FichierPdf:= FichierPdf+'.pdf';
+      Document:= TPdfDocument.CreateDocument;
+      with Document do
+        begin
+        FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
+        EcritDocument(FluxFichier);
+        FluxFichier.Free;
+        Free;
+        end;
+  {$ifdef linux}
+      fpgOpenURL(FichierPdf);
+  {$endif}
+  {$ifdef win32}
+      ShellExecute(0,PChar('OPEN'),PChar(FichierPdf),PChar(''),PChar(''),1);
+  {$endif}
+      end;
+  finally
+    Fd_SauvePdf.Free;
+    end;
+  Free;
+  end;
+end;
+
 procedure TF_Demo.Bt_VisuEmptyPageClick(Sender: TObject);
 begin
 Imprime:= T_Imprime.Create;
@@ -748,6 +807,18 @@ with Imprime do
   end;
 end;
 
+procedure TF_Demo.Bt_VisuSurfClick(Sender: TObject);
+begin
+Imprime:= T_Imprime.Create;
+with Imprime do
+  begin
+  //Langue:= Version;
+  DefaultFile:= 'Surface.pdf';
+  ImprimeSurf(True);
+  Free;
+  end;
+end;
+
 procedure TF_Demo.Bt_PrintEmptyPageClick(Sender: TObject);
 begin
 
@@ -794,6 +865,11 @@ begin
 end;
 
 procedure TF_Demo.Bt_PrintGraphClick(Sender: TObject);
+begin
+
+end;
+
+procedure TF_Demo.Bt_PrintSurfClick(Sender: TObject);
 begin
 
 end;
@@ -1278,6 +1354,34 @@ with Imprime do
   end;
 end;
 
+procedure TF_Demo.ImprimeSurf(Preview: Boolean);
+var
+  FtTitre,FtTexte: Integer;
+  IlTitre,IlTexte: Integer;
+  begin
+  with Imprime do
+    begin
+    // define orientation, page format, measurement unit, language, preview (true) or print (false)
+    Debut(oPortrait,A4,msMM,Langue,Preview);
+    // create a new section and define the margins with an additional one due to frames drawing
+    Section(10,10,10,10);
+    // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
+    FtTitre:= Fonte('helvetica-15:bold',clBlack);
+    FtTexte:= Fonte('helvetica-7',clBlack);
+    // create line spacings to be used
+    IlTitre:= Interligne(3,0,3);
+    IlTexte:= Interligne(1,0,0);
+    EcritEnTete(cnCenter,lnFin,'SHOWING SURFACE',ColDefaut,FtTitre,IlTitre);
+    // write page number and total of pages on each page
+    NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
+    // paint some surfaces
+    SurfPage([40,40,100],[50,110,80],clGreen);
+    SurfPage([30,50,150,80,120,130],[120,180,180,160,140,120],clFuchsia);
+    // preparation is finished, so create PDF objects
+    Fin;
+    end;
+  end;
+
 constructor TF_Demo.Create(AOwner: TComponent);
 var
   Cpt: Integer;
@@ -1285,7 +1389,7 @@ begin
 inherited Create(AOwner);
 Name := 'F_Demo';
 WindowTitle:= 'PDF demo';
-SetPosition(0, 0, 650, 500);
+SetPosition(0, 0, 650, 550);
 WindowPosition:= wpScreenCenter;
 Sizeable:= False;
 CreateReportImages;
@@ -1307,6 +1411,7 @@ Bt_PdfColor:= CreateButton(Self,50,270,150,'Show colors',@Bt_PdfColorClick,'repi
 Bt_PdfLines:= CreateButton(Self,50,310,150,'Draw lines',@Bt_PdfLinesClick,'repimg.Adobe_pdf');
 Bt_PdfGrid:= CreateButton(Self,50,350,150,'Show grid',@Bt_PdfGridClick,'repimg.Adobe_pdf');
 Bt_PdfGraph:= CreateButton(Self,50,390,150,'Show graph',@Bt_PdfGraphClick,'repimg.Adobe_pdf');
+Bt_PdfSurf:= CreateButton(Self,50,430,150,'Show surface',@Bt_PdfSurfClick,'repimg.Adobe_pdf');
 L_Pdf:= CreateLabel(Self,250,5,'Preview',150,20,taCenter);
 Bt_VisuEmptyPage:= CreateButton(Self,250,30,150,'Empty page',@Bt_VisuEmptyPageClick,'repimg.Preview');
 Bt_VisuSimpleText:= CreateButton(Self,250,70,150,'Simple text',@Bt_VisuSimpleTextClick,'repimg.Preview');
@@ -1318,6 +1423,7 @@ Bt_VisuColor:= CreateButton(Self,250,270,150,'Show colors',@Bt_VisuColorClick,'r
 Bt_VisuLines:= CreateButton(Self,250,310,150,'Draw lines',@Bt_VisuLinesClick,'repimg.Preview');
 Bt_VisuGrid:= CreateButton(Self,250,350,150,'Show grid',@Bt_VisuGridClick,'repimg.Preview');
 Bt_VisuGraph:= CreateButton(Self,250,390,150,'Show graph',@Bt_VisuGraphClick,'repimg.Preview');
+Bt_VisuSurf:= CreateButton(Self,250,430,150,'Show surface',@Bt_VisuSurfClick,'repimg.Preview');
 L_Print:= CreateLabel(Self,450,5,'Print to printer',150,20,taCenter);
 Bt_PrintEmptyPage:= CreateButton(Self,450,30,150,'Empty page',@Bt_PrintEmptyPageClick,'repimg.Imprimer');
 Bt_PrintEmptyPage.Enabled:= False;
@@ -1339,7 +1445,9 @@ Bt_PrintGrid:= CreateButton(Self,450,350,150,'Show grid',@Bt_PrintGridClick,'rep
 Bt_PrintGrid.Enabled:= False;
 Bt_PrintGraph:= CreateButton(Self,450,390,150,'Show graph',@Bt_PrintGraphClick,'repimg.Imprimer');
 Bt_PrintGraph.Enabled:= False;
-Bt_Fermer:= CreateButton(Self,450,450,150,'Fermer',@Bt_FermerClick,'repimg.Fermer');
+Bt_PrintSurf:= CreateButton(Self,450,430,150,'Show surface',@Bt_PrintSurfClick,'repimg.Imprimer');
+Bt_PrintSurf.Enabled:= False;
+Bt_Fermer:= CreateButton(Self,450,500,150,'Fermer',@Bt_FermerClick,'repimg.Fermer');
 Bt_Fermer.BackgroundColor:= clTomato;
 Randomize;
 for Cpt:= 0 to 18 do

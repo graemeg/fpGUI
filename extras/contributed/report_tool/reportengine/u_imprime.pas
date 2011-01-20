@@ -77,6 +77,7 @@ type
       procedure TraceCadre(StTrait: Integer; Zone: TZone);
       procedure TraceTrait(XDebut,YDebut,XFin,YFin,StTrait: Integer);
       procedure TraceTraitHoriz(XDebut,YDebut,Colonne,XFin,StTrait: Integer; Zone: TZone);
+      procedure PaintSurface(Points: T_Points; Couleur: TfpgColor);
       function GetTitreSection: string;
       procedure SetTitreSection(ATitre: string);
     public
@@ -293,23 +294,24 @@ type
                 // ColColor = new background color for the column
       procedure CadreMarges(AStyle: Integer);
                 // draw a frame at the page margins
-                // AStyle = line style of the frame
+                // AStyle = reference of the line style of the frame
       procedure CadreEnTete(AStyle: Integer);
                 // draw a frame at the limits of the header
-                // AStyle = line style of the frame
+                // AStyle = reference of the line style of the frame
       procedure CadrePage(AStyle: Integer);
                 // draw a frame at the page limits : left and right margins, header bottom and footer top
-                // AStyle = line style of the frame
+                // AStyle = reference of the line style of the frame
       procedure CadrePied(AStyle: Integer);
                 // draw a frame at the limits of the footer
-                // AStyle = line style of the frame
+                // AStyle = reference of the line style of the frame
       procedure TraitPage(XDebut,YDebut,XFin,YFin: Single; AStyle: Integer);
                 // draw a line at absolute position
                 // XDebut = horizontal position of starting point in numeric value in the measurement unit (msMM or msInch)
                 // YDebut = vertical position of starting point in numeric value in the measurement unit (msMM or msInch)
                 // XFin = horizontal position of ending point in numeric value in the measurement unit (msMM or msInch)
                 // YFin = vertical position of ending point in numeric value in the measurement unit (msMM or msInch)
-                // AStyle = reference of the line style of the frame
+                // AStyle = reference of the line style of the line
+      procedure SurfPage(XLimits,YLimits: array of Single; AColor: TfpgColor);
       property Langue: Char read FVersion write FVersion;
       property Visualiser: Boolean read FVisualisation write FVisualisation;
       property NumeroSection: Integer read FNmSection write FNmSection;
@@ -396,6 +398,18 @@ type
       property LineStyle: TfpgLineStyle read FStyle write FStyle;
     end;
 
+  TPdfSurf = class(TPdfElement)
+    private
+      FPage: Integer;
+      FPoints: T_Points;
+      FColor: Integer;
+    protected
+    public
+      property PageId: Integer read FPage write FPage;
+      property Points: T_Points read FPoints;
+      property SurfColor: Integer read FColor write FColor;
+    end;
+
 var
   Imprime: T_Imprime;
 
@@ -408,6 +422,7 @@ var
   PdfTexte: TPdfTexte;
   PdfRect: TPdfRect;
   PdfLine: TPdfLine;
+  PdfSurf: TPdfSurf;
 
 const
   FontDefaut= 0;
@@ -788,6 +803,10 @@ with T_Section(Sections[Pred(NumeroSection)]) do
       then
         with Cmd as T_Trait do
           TraceTrait(GetPosX,GetPosY,GetEndX,GetEndY,GetStyle);
+      if Cmd is T_Surface
+      then
+        with Cmd as T_Surface do
+          PaintSurface(GetPoints,GetColor);
       end;
   if CmdPied.Count> 0
   then
@@ -2013,6 +2032,47 @@ with T_Section(Sections[Pred(NumeroSection)]) do
     end;
 end;
 
+procedure T_Imprime.PaintSurface(Points: T_Points; Couleur: TfpgColor);
+var
+  OldColor: TfpgColor;
+  Cpt: Integer;
+begin
+with T_Section(Sections[Pred(NumeroSection)]) do
+  case FPreparation of
+    ppPrepare:
+      LoadSurf(Points,Couleur);
+    ppVisualise:
+      begin
+      OldColor:= FCanevas.Color;
+      FCanevas.SetColor(Couleur);
+      FCanevas.DrawPolygon(Points);
+      FCanevas.SetColor(OldColor);
+      end;
+    ppFichierPdf:
+      begin
+      PdfSurf:= TPdfSurf.Create;
+      SetLength(PdfSurf.FPoints,Length(Points));
+      for Cpt:= 0 to Pred(Length(Points)) do
+        begin
+        PdfSurf.FPoints[Cpt].X:= Points[Cpt].X;
+        PdfSurf.FPoints[Cpt].Y:= Paper.H-Points[Cpt].Y;
+        end;
+      with PdfSurf do
+        begin
+        PageId:= NumeroPage;
+        //SetLength(FPoints,Length(Points));
+        //for Cpt:= 0 to Pred(Length(Points)) do   // weird behaviour: points gets length= 0 inside the with clause !
+        //  begin
+        //  FPoints[Cpt].X:= Points[Cpt].X;
+        //  FPoints[Cpt].Y:= Paper.H-Points[Cpt].Y;
+        //  end;
+        FColor:= Couleur;
+        end;
+      PdfPage.Add(PdfSurf);
+      end;
+    end;
+end;
+
 function T_Imprime.GetTitreSection: string;
 begin
 Result:= T_Section(Sections[Pred(Sections.Count)]).Titre;
@@ -2037,8 +2097,6 @@ Bords:= TList.Create;
 Textes:= TStringList.Create;
 ALigne:= T_Ligne.Create;
 PdfPage:= TList.Create;
-OldDecSeparator:= DecimalSeparator;
-DecimalSeparator:= '.';
 Outline:= False;
 end;
 
@@ -2046,7 +2104,6 @@ destructor T_Imprime.Destroy;
 var
   Cpt: Integer;
 begin
-DecimalSeparator:= OldDecSeparator;
 if Sections.Count> 0
 then
   begin
@@ -2723,6 +2780,29 @@ YDeb:= Dim2Pixels(YDebut);
 XEnd:= Dim2Pixels(XFin);
 YEnd:= Dim2Pixels(YFin);
 TraceTrait(XDeb,YDeb,XEnd,YEnd,AStyle);
+end;
+
+procedure T_Imprime.SurfPage(XLimits,YLimits: array of Single; AColor: TfpgColor);
+var
+  Taille,Cpt: Integer;
+  Ends: array of TPoint;
+begin
+if Length(XLimits)< Length(YLimits)
+then
+  Taille:= Length(XLimits)
+else
+  if Length(XLimits)> Length(YLimits)
+  then
+    Taille:= Length(YLimits)
+  else
+    Taille:= Length(XLimits);
+SetLength(Ends,Taille);
+for Cpt:= 0 to Pred(Taille) do
+  begin
+  Ends[Cpt].X:= Dim2Pixels(XLimits[Cpt]);
+  Ends[Cpt].Y:= Dim2Pixels(YLimits[Cpt]);
+  end;
+PaintSurface(Ends,AColor);
 end;
 
 end.
