@@ -198,8 +198,11 @@ end;
 
 procedure TfpgCustomLabel.ResizeLabel;
 begin
-  if FAutoSize and not FWrapText then
+  if FAutoSize and (not FWrapText) then
+  begin
     Width := FFont.TextWidth(FText);
+    Height:= FFont.Height;
+  end;
   UpdateWindowPosition;
   RePaint;
 end;
