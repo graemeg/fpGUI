@@ -54,13 +54,18 @@ type
     property    Alignment;
     property    Autosize;
     property    FontDesc;
+    property    Height;
     property    Hint;
     property    HotTrackColor: TfpgColor read fHotTrackColor write SetHotTrackColor;
     property    HotTrackFont: TfpgString read fHTFont write SetHotTrackFont;
+    property    Left;
     property    Text;
     property    TextColor;
     property    ShowHint;
     property    URL: TfpgString read FUrl write SetURL;
+    property    Top;
+    property    Width;
+    property    WrapText;
     property    OnClick;
     property    OnShowHint;
 end;
