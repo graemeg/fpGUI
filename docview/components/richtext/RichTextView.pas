@@ -41,8 +41,6 @@ Type
 
   TScrollingDirection = ( sdUp, sdDown );
 
-var
-  testvar: integer = 0;
 
 Type
 
@@ -772,10 +770,9 @@ var
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
   Offset := 0;
-  testvar := 1;
   Position := FindPoint( X, Y, Line, Offset, Link );
   FClickedLink := Link;
-  writeln('  link=', Link, '  line=', Line, ' offset=', offset);
+  //writeln('  link=', Link, '  line=', Line, ' offset=', offset);
 
   if Position in [tpAboveTextArea, tpBelowTextArea] then
     // not on the control (this probably won't happen)
@@ -1105,9 +1102,6 @@ function TRichTextView.FindPoint( XToFind: longint;
 var
   TextHeight: longint;
 begin
-  if testvar = 1 then
-    testvar := 0;
-
   LineIndex := 0;
   Offset := 0;
   Link := '';
@@ -2096,8 +2090,8 @@ begin
   FCursorRow := Row;
   Index := FLayout.GetCharIndex( FLayout.FLines^[ Row ].Text ) + Offset;
 
-  writeln('  SetCursorPosition: offset=', FCursorOffset, ' row=', FCursorRow, ' index=', Index);
-  exit;
+  //writeln('  SetCursorPosition: offset=', FCursorOffset, ' row=', FCursorRow, ' index=', Index);
+  exit;    { TODO:  Complete this selection of text code - currently gives AV's }
   if PreserveSelection then
   begin
     SetSelectionEndInternal( Index )
@@ -2778,11 +2772,11 @@ begin
   end
   else
   begin
-    writeln('need to scroll down, desired row below bottom line');
-    writeln('BottomLine = ', BottomLine, '  Row = ', Row);
-    writeln('new pos = ', FLayout.GetLinePosition( Row )
-                           + FLayout.FLines^[ Row ].Height
-                           - GetTextAreaHeight);
+    //writeln('need to scroll down, desired row below bottom line');
+    //writeln('BottomLine = ', BottomLine, '  Row = ', Row);
+    //writeln('new pos = ', FLayout.GetLinePosition( Row )
+    //                       + FLayout.FLines^[ Row ].Height
+    //                       - GetTextAreaHeight);
     // need to scroll down, desired row below bottom line
     if     ( BottomLine <> -1 )
        and ( Row >= BottomLine ) then
