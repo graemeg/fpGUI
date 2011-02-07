@@ -28,6 +28,9 @@ unit fpg_combobox;
 { TODO: Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
       the items list. }
 
+{ TODO: Introduce SideMargin and TopMargin like TfpgEdit, instead of just
+      the single Margin property. }
+
 {
 This is an example of what we can aim for:
 You need a mono font to see the correct layout.
@@ -257,7 +260,9 @@ begin
   if (FMargin = AValue) or (AValue <= 0) then
     Exit; //=>
   FMargin := AValue;
-  Height := FFont.Height + (FMargin * 2);
+  if FAutoSize then
+    Height := FFont.Height + (FMargin * 2);
+  Repaint;
 end;
 
 procedure TfpgBaseComboBox.SetAutoSize(const AValue: Boolean);
