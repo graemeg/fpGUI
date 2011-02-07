@@ -470,10 +470,10 @@ begin
   wc.AddProperty('BackgroundColor', TPropertyColor, '');
   wc.AddProperty('Enabled', TPropertyBoolean, '');
   wc.AddProperty('ExtraHint', TPropertyString, 'Extra hint that appears inside component while no item is selected');
-  wc.AddProperty('FocusItem', TPropertyInteger, 'Currently selected item');
   wc.AddProperty('FontDesc', TPropertyFontDesc, 'The font used for displaying the text');
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');
+  wc.AddProperty('FocusItem', TPropertyInteger, 'Currently selected item');  // must be after 'Items' property for UI Designer!
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
