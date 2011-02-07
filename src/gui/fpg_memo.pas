@@ -1680,24 +1680,26 @@ begin
   FLines.Clear;
   s := '';
   n := 1;
-  while n <= UTF8Length(AValue) do
-  begin
-    c := UTF8Copy(AValue, n, 1);
-    if (c[1] = #13) or (c[1] = #10) then
-    begin
-      FLines.Add(s);
-      s := '';
-      c := UTF8Copy(AValue, n + 1, 1);
-      if c[1] = #10 then
-        Inc(n);
-    end
-    else
-      s := s + c;
-    Inc(n);
-  end;
 
-  if s <> '' then
-    FLines.Add(s);
+  FLines.Text := AValue;
+  //while n <= UTF8Length(AValue) do
+  //begin
+  //  c := UTF8Copy(AValue, n, 1);
+  //  if (c[1] = #13) or (c[1] = #10) then
+  //  begin
+  //    FLines.Add(s);
+  //    s := '';
+  //    c := UTF8Copy(AValue, n + 1, 1);
+  //    if c[1] = #10 then
+  //      Inc(n);
+  //  end
+  //  else
+  //    s := s + c;
+  //  Inc(n);
+  //end;
+  //
+  //if s <> '' then
+  //  FLines.Add(s);
 
   FDrawOffset   := 0;
   FCursorPos    := 0;
