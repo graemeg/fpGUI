@@ -28,7 +28,7 @@ unit fpg_combobox;
 { TODO: Implement .BeginUpdate and .EndUpdate methods so we know when to refresh
       the items list. }
 
-{ TODO: Introduce SideMargin and TopMargin like TfpgEdit, instead of just
+{ TODO: Introduce SideMargin and HeightMargin like TfpgEdit, instead of just
       the single Margin property. }
 
 {
@@ -104,7 +104,7 @@ type
     property    FontDesc: string read GetFontDesc write SetFontDesc;
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    Options: TfpgComboOptions read FOptions write FOptions;
-    property    Margin: integer read FMargin write SetMargin default 3;
+    property    Margin: integer read FMargin write SetMargin default 1;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnCloseUp: TNotifyEvent read FOnCloseUp write FOnCloseUp;
     property    OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
@@ -423,7 +423,7 @@ begin
   FHeight         := 24;
   FAutoSize       := False;
   FDropDownCount  := 8;
-  FMargin         := 3;
+  FMargin         := 1;
   FFocusItem      := -1; // nothing is selected
   FItems := TStringList.Create;
   FItems.OnChange := @InternalItemsChanged;
@@ -721,6 +721,8 @@ begin
     else
       Canvas.SetColor(clWindowBackground);
     Canvas.SetTextColor(FTextColor);
+    r.Left := r.Left + Margin;
+    r.Width := r.Width - Margin;
   end;
   Canvas.FillRectangle(r);
 
