@@ -1574,6 +1574,7 @@ var
   s: TfpgString;
   lReadTopicIndex: boolean;
   lReadInsertPoint: boolean;
+  lNoteTextStarted: boolean;
 begin
   ProfileEvent( 'Load notes for ' + AHelpFile.Filename );
 
@@ -1599,6 +1600,7 @@ begin
   i := 0;
   repeat
     { reset variables }
+    lNoteTextStarted := False;
     TopicIndex := -1;
     InsertPoint := -1;
     NoteText := '';
@@ -1640,10 +1642,11 @@ begin
       end
       else
       begin
-        if NoteText <> '' then
+        if lNoteTextStarted then
           NoteText := NoteText + LineEnding + s
         else
           NoteText := s;
+        lNoteTextStarted := True;
       end;
     until s = '#ENDNOTE#';
 
