@@ -1969,8 +1969,8 @@ begin
   fpgSetNamedFont('Edit1', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('Edit2', 'Courier New-10');
   fpgSetNamedFont('List', FPG_DEFAULT_FONT_DESC);
-  fpgSetNamedFont('Grid', 'Arial-9');
-  fpgSetNamedFont('GridHeader', 'Arial-9:bold');
+  fpgSetNamedFont('Grid', FPG_DEFAULT_SANS + '-9');
+  fpgSetNamedFont('GridHeader', FPG_DEFAULT_SANS + '-9:bold');
   fpgSetNamedFont('Menu', FPG_DEFAULT_FONT_DESC);
   fpgSetNamedFont('MenuAccel', FPG_DEFAULT_FONT_DESC + ':underline');
   fpgSetNamedFont('MenuDisabled', FPG_DEFAULT_FONT_DESC);
