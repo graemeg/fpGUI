@@ -584,14 +584,19 @@ begin
 end;
 
 procedure TfpgBaseStaticCombo.DoDrawText(const ARect: TfpgRect);
+var
+  flags: TFTextFlags;
 begin
   // Draw select item's text
+  flags := [txtLeft, txtVCenter];
+  if not Enabled then
+    flags += [txtDisabled];
   if HasText then
-    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, Text, Enabled)
+    Canvas.DrawText(ARect, Text, flags)
   else
   begin
     Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, FMargin+1, FMargin, ExtraHint, Enabled);
+    Canvas.DrawText(ARect, ExtraHint, flags);
   end;
 end;
 
