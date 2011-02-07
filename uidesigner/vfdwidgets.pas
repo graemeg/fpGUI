@@ -474,6 +474,7 @@ begin
   wc.AddProperty('Hint', TPropertyString, 'Tooltip hint');
   wc.AddProperty('Items', TPropertyStringList, '');
   wc.AddProperty('FocusItem', TPropertyInteger, 'Currently selected item');  // must be after 'Items' property for UI Designer!
+  wc.AddProperty('Margin', TPropertyInteger, '');
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
