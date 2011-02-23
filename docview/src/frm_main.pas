@@ -3149,7 +3149,7 @@ begin
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := '';
+    Hint := 'Quit the application';
     ImageMargin := -1;
     ImageName := 'stdimg.quit';
     ImageSpacing := 0;
@@ -3213,7 +3213,7 @@ begin
     Text := '';
     Flat := True;
     FontDesc := '#Label1';
-    Hint := '';
+    Hint := 'Add an annotation';
     ImageMargin := -1;
     ImageName := 'dv.notegreen';
     ImageSpacing := 0;
