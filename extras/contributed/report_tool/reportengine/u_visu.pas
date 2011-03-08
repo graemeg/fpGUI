@@ -155,7 +155,7 @@ try
     with Document do
       begin
       FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-      EcritDocument(FluxFichier);
+      WriteDocument(FluxFichier);
       FluxFichier.Free;
       Free;
       end;
