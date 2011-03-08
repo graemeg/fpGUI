@@ -3,13 +3,14 @@
   <Package Version="3">
     <PathDelim Value="\"/>
     <Name Value="fpgui_toolkit"/>
+    <AddToProjectUsesSection Value="False"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
       <Version Value="9"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="..\..\"/>
-        <OtherUnitFiles Value="..\;..\..\gui\;..\..\gui\db\"/>
+        <IncludeFiles Value="..\.."/>
+        <OtherUnitFiles Value="..;..\..\gui;..\..\gui\db"/>
         <UnitOutputDirectory Value="..\..\..\lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -356,7 +357,7 @@
         <UnitName Value="fpg_OLEDragDrop"/>
       </Item81>
     </Files>
-    <LazDoc Paths="..\..\..\docs\xml\corelib\;..\..\..\docs\xml\corelib\x11\;..\..\..\docs\xml\corelib\gdi\;..\..\..\docs\xml\gui\"/>
+    <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\gui"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="FCL"/>
@@ -364,7 +365,7 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
