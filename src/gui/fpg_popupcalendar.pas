@@ -1509,10 +1509,15 @@ end;
 procedure TfpgCalendarCheckCombo.DoDrawText(const ARect: TfpgRect);
 var
   lRect: TfpgRect;
+var
+  flags: TFTextFlags;
 begin
   lRect := ARect;
   lRect.Left := lRect.Left+FCheckBoxRect.Width + 1;
-  lRect.Width := lRect.Width - (FCheckBoxRect.Width + 1) - FMargin;
+  lRect.Width := lRect.Width - (FCheckBoxRect.Width + 1);
+  flags := [txtLeft, txtVCenter];
+  if not Enabled then
+    flags += [txtDisabled];
   if HasText then
   begin
     if not FChecked then
@@ -1524,12 +1529,12 @@ begin
       else
         Canvas.SetTextColor(TextColor);
     end;
-    fpgStyle.DrawString(Canvas, lRect.Left {FMargin+1}, {lRect.Top }FMargin, Text, Enabled);
+    Canvas.DrawText(lRect, Text, flags)
   end
   else
   begin
     Canvas.SetTextColor(clShadow1);
-    fpgStyle.DrawString(Canvas, lRect.Left {FMargin+1}, {lRect.Top} FMargin, ExtraHint, Enabled);
+    Canvas.DrawText(lRect, ExtraHint, flags);
   end;
 end;
 
