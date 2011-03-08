@@ -722,7 +722,7 @@ begin
       Canvas.SetColor(clWindowBackground);
     Canvas.SetTextColor(FTextColor);
     r.Left := r.Left + Margin;
-    r.Width := r.Width - Margin;
+    r.Width := r.Width - (Margin*2);
   end;
   Canvas.FillRectangle(r);
 
