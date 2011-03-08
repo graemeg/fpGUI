@@ -34,6 +34,7 @@ type
 
   T_Imprime = class(TObject)
     private
+      OldSeparator: Char;
       FVersion: Char;
       FPapier: TPapier;
       FTypePapier: TTypePapier;
@@ -49,13 +50,13 @@ type
       FNmSection: Integer;
       FNmPage: Integer;
       FNmPageSect: Integer;
-      FPosRef: TPoint;              // absolute writting position
-      FEnTeteHeight: Integer;       // end of text vertical position in the header
-      FPageHeight: Integer;         // end of text vertical position in the page
-      FPiedHeight: Integer;         // beginning of text vertical position in the footer
+      FPosRef: TRefPos;              // absolute writting position
+      FEnTeteHeight: Single;       // end of text vertical position in the header
+      FPageHeight: Single;         // end of text vertical position in the page
+      FPiedHeight: Single;         // beginning of text vertical position in the footer
       FGroupe: Boolean;
       FDefaultFile: string;
-      function Dim2Pixels(Value: Single): Integer;
+      function Dim2Pixels(Value: Single): Single;
       function AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFont): string;
       function TxtHeight(AWid: Integer; const ATxt: TfpgString; AFnt: TfpgFont; ALSpace: Integer= 2): Integer;
       function ConvertitEnAlpha(Valeur: Integer): string;
@@ -65,18 +66,18 @@ type
       procedure PrepareFormat;
       procedure CreateVisu;
       procedure ImprimePage(PageNumero: Integer);
-      procedure DecaleLignesPied(Decalage: Integer);
-      procedure DecaleLigne(Decalage: Integer);
-      procedure DecaleGroupe(Decalage: Integer);
-      procedure EcritLigne(PosX,PosY,Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
+      procedure DecaleLignesPied(Decalage: Single);
+      procedure DecaleLigne(Decalage: Single);
+      procedure DecaleGroupe(Decalage: Single);
+      procedure EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
                 TxtFlags: TFTextFlags; Zone: TZone);
-      procedure EcritNum(PosX,PosY,Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
+      procedure EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
                 TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum);
-      procedure InsereEspace(PosY,Colonne,EspHeight,FondNum: Integer; Zone: TZone);
+      procedure InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Single; FondNum: Integer; Zone: TZone);
       procedure FinLigne(Zone: TZone);
       procedure TraceCadre(StTrait: Integer; Zone: TZone);
-      procedure TraceTrait(XDebut,YDebut,XFin,YFin,StTrait: Integer);
-      procedure TraceTraitHoriz(XDebut,YDebut,Colonne,XFin,StTrait: Integer; Zone: TZone);
+      procedure TraceTrait(XDebut,YDebut,XFin,YFin: Single; StTrait: Integer);
+      procedure TraceTraitHoriz(XDebut,YDebut: Single; Colonne: Integer; XFin: Single; StTrait: Integer; Zone: TZone);
       procedure PaintSurface(Points: T_Points; Couleur: TfpgColor);
       function GetTitreSection: string;
       procedure SetTitreSection(ATitre: string);
@@ -108,7 +109,7 @@ type
                // returns the number allocated to the font
                // FtNom = FontDesc of the font
                // FtColor = font color
-      function StyleTrait(StEpais: Integer; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
+      function StyleTrait(StEpais: Single; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
                // returns the number allocated to the line style
                // StEpais = thickness of the line in pixels
                // StColor = line color
@@ -334,18 +335,18 @@ type
       FPage: Integer;
       FFont: Integer;
       FSize: string;
-      FPosX: Integer;
-      FPosY: Integer;
-      FLarg: Integer;
+      FPosX: Single;
+      FPosY: Single;
+      FLarg: Single;
       FText: string;
       FColor: TfpgColor;
     public
       property PageId: Integer read FPage write FPage;
       property FontName: Integer read FFont write FFont;
       property FontSize: string read FSize write FSize;
-      property TextPosX: Integer read FPosX write FPosX;
-      property TextPosY: Integer read FPosY write FPosY;
-      property TextLarg: Integer read FLarg write FLarg;
+      property TextPosX: Single read FPosX write FPosX;
+      property TextPosY: Single read FPosY write FPosY;
+      property TextLarg: Single read FLarg write FLarg;
       property Ecriture: string read FText write FText;
       property Couleur: TfpgColor read FColor write FColor;
     end;
@@ -353,11 +354,11 @@ type
   TPdfRect = class(TPdfElement)
     private
       FPage: Integer;
-      FEpais: Integer;
-      FGauche: Integer;
-      FBas: Integer;
-      FHaut: Integer;
-      FLarg: Integer;
+      FEpais: Single;
+      FGauche: Single;
+      FBas: Single;
+      FHaut: Single;
+      FLarg: Single;
       FColor: Integer;
       FFill: Boolean;
       FStroke: Boolean;
@@ -365,11 +366,11 @@ type
     protected
     public
       property PageId: Integer read FPage write FPage;
-      property RectEpais: Integer read FEpais write FEpais;
-      property RectGauche: Integer read FGauche write FGauche;
-      property RectBas: Integer read FBas write FBas;
-      property RectHaut: Integer read FHaut write FBas;
-      property RectLarg: Integer read FLarg write FLarg;
+      property RectEpais: Single read FEpais write FEpais;
+      property RectGauche: Single read FGauche write FGauche;
+      property RectBas: Single read FBas write FBas;
+      property RectHaut: Single read FHaut write FHaut;
+      property RectLarg: Single read FLarg write FLarg;
       property RectCouleur: Integer read FColor write FColor;
       property RectEmplit: Boolean read FFill write FFill;
       property RectTrace: Boolean read FStroke write FStroke;
@@ -379,21 +380,21 @@ type
   TPdfLine = class(TPdfElement)
     private
       FPage: Integer;
-      FEpais: Integer;
-      FStartX: Integer;
-      FStartY: Integer;
-      FEndX: Integer;
-      FEndY: Integer;
+      FEpais: Single;
+      FStartX: Single;
+      FStartY: Single;
+      FEndX: Single;
+      FEndY: Single;
       FColor: Integer;
       FStyle: TfpgLineStyle;
     protected
     public
       property PageId: Integer read FPage write FPage;
-      property LineEpais: Integer read FEpais write FEpais;
-      property LineStartX: Integer read FSTartX write FStartX;
-      property LineStartY: Integer read FStartY write FStartY;
-      property LineEndX: Integer read FEndX write FEndX;
-      property LineEndY: Integer read FEndY write FEndY;
+      property LineEpais: Single read FEpais write FEpais;
+      property LineStartX: Single read FSTartX write FStartX;
+      property LineStartY: Single read FStartY write FStartY;
+      property LineEndX: Single read FEndX write FEndX;
+      property LineEndY: Single read FEndY write FEndY;
       property LineColor: Integer read FColor write FColor;
       property LineStyle: TfpgLineStyle read FStyle write FStyle;
     end;
@@ -444,13 +445,13 @@ const
   PPI= 72;
   Cent= 100;
 
-function T_Imprime.Dim2Pixels(Value: Single): Integer;
+function T_Imprime.Dim2Pixels(Value: Single): Single;
 begin
 if FMesure= msMM
 then
-  Result:= Round(Value*PPI/InchToMM)
+  Result:= Value*PPI/InchToMM
 else
-  Result:= Trunc(Value*PPI);
+  Result:= Value*PPI;
 end;
 
 function T_Imprime.AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFont): string;
@@ -552,7 +553,8 @@ end;
 
 procedure T_Imprime.PrepareFormat;
 var
-  TempH,TempW,TempT,TempL,TempR,TempB: Integer;
+  TempH,TempW: Integer;
+  TempT,TempL,TempR,TempB: Single;
 begin
 with FPapier do
   begin
@@ -844,7 +846,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   end;
 end;
 
-procedure T_Imprime.DecaleLignesPied(Decalage: Integer);
+procedure T_Imprime.DecaleLignesPied(Decalage: Single);
 var
   Cpt: Integer;
   Cmd: T_Commande;
@@ -870,7 +872,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
       end;
 end;
 
-procedure T_Imprime.DecaleLigne(Decalage: Integer);
+procedure T_Imprime.DecaleLigne(Decalage: Single);
 var
   Cpt: Integer;
   Cmd: T_Commande;
@@ -886,7 +888,7 @@ with ALigne do
     end;
 end;
 
-procedure T_Imprime.DecaleGroupe(Decalage: Integer);
+procedure T_Imprime.DecaleGroupe(Decalage: Single);
 var
   Cpt: Integer;
   Cmd: T_Commande;
@@ -902,10 +904,11 @@ with AGroupe do
     end;
 end;
 
-procedure T_Imprime.EcritLigne(PosX,PosY,Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
+procedure T_Imprime.EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
           TxtFlags: TFTextFlags; Zone: TZone);
 var
-  PosH,PosV,HTxt,HautTxt,IntlInt,IntLSup,IntLInf,Half,CoulTrait,EpaisTrait,Cpt: Integer;
+  PosH,PosV,IntlInt,IntLSup,IntLInf,EpaisTrait: Single;
+  HTxt,HautTxt,Half,CoulTrait,Cpt: Integer;
   FinDeLigne,UseCurFont: Boolean;
   Fnt: TfpgFont;
   StylTrait: TfpgLineStyle;
@@ -936,12 +939,12 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   IntLInf:= T_Interligne(Interlignes[FInterLCourante]).GetInf;
   if Colonne> -1
   then
-    HautTxt:= TxtHeight(T_Colonne(Colonnes[Colonne]).GetTextWidth,Textes[Texte],Fnt,IntlInt)+IntLSup+IntLInf
+    HautTxt:= TxtHeight(Round(T_Colonne(Colonnes[Colonne]).GetTextWidth),Textes[Texte],Fnt,Round(IntlInt))+Round(IntLSup+IntLInf)
   else
-    HautTxt:= TxtHeight(Paper.W,Textes[Texte],Fnt,IntlInt)+IntLSup+IntLInf;
+    HautTxt:= TxtHeight(Paper.W,Textes[Texte],Fnt,Round(IntlInt))+Round(IntLSup+IntLInf);
   if (Colonne> -1) and (BordNum> -1)
   then
-    Half:= T_TraitStyle(TraitStyles[T_Bord(Bords[BordNum]).GetStyle]).GetEpais div 2
+    Half:= Round(T_TraitStyle(TraitStyles[T_Bord(Bords[BordNum]).GetStyle]).GetEpais) div 2
   else
     Half:= 0;
   case FPreparation of
@@ -1082,7 +1085,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
               PosH:= PosH+T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte])-T_Colonne(Colonnes[ColDefaut]).ColMargin;
             if (txtHCenter in TxtFlags)
             then
-              PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte])) div 2;
+              PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte]))/2;
             end
         else
           if PosX> 0
@@ -1103,7 +1106,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
               PosH:= PosH+T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte])-T_Colonne(Colonnes[ColDefaut]).ColMargin;
             if (txtHCenter in TxtFlags)
             then
-              PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte])) div 2;
+              PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte]))/2;
             end;
       FPosRef.X:= PosH+Fnt.TextWidth(Textes[Texte]+' ');
       ALigne.LoadTexte(PosH,PosV,Colonne,Texte,FonteNum,HTxt,FondNum,BordNum,InterL,UseCurFont,TxtFlags);
@@ -1128,30 +1131,30 @@ with T_Section(Sections[Pred(NumeroSection)]) do
               SetColor(T_Fond(Fonds[FondNum]).GetColor)
             else
               SetColor(GetColor);
-            FillRectangle(ColPos,PosY-IntLSup,ColWidth,HautTxt);
+            FillRectangle(Round(ColPos),Round(PosY-IntLSup),Round(ColWidth),HautTxt);
             if BordNum> -1
             then
               with T_Bord(Bords[BordNum]) do
                 begin
-                SetLineStyle(T_TraitStyle(TraitStyles[GetStyle]).GetEpais,T_TraitStyle(TraitStyles[GetStyle]).GetStyle);
+                SetLineStyle(Round(T_TraitStyle(TraitStyles[GetStyle]).GetEpais),T_TraitStyle(TraitStyles[GetStyle]).GetStyle);
                 SetColor(T_TraitStyle(TraitStyles[GetStyle]).GetColor);
                 if bcGauche in GetFlags
                 then
-                  DrawLine(ColPos+Half,PosY-IntLSup,ColPos+Half,PosY-IntLSup+HautTxt);
+                  DrawLine(Round(ColPos)+Half,Round(PosY-IntLSup),Round(ColPos)+Half,Round(PosY-IntLSup)+HautTxt);
                 if bcDroite in GetFlags
                 then
-                  DrawLine(ColPos+ColWidth-Succ(Half),PosY-IntLSup,ColPos+ColWidth-Succ(Half),PosY-IntLSup+HautTxt);
+                  DrawLine(Round(ColPos+ColWidth)-Succ(Half),Round(PosY-IntLSup),Round(ColPos+ColWidth)-Succ(Half),Round(PosY-IntLSup)+HautTxt);
                 if bcHaut in GetFlags
                 then
-                  DrawLine(ColPos,PosY-IntLSup+Half,ColPos+ColWidth,PosY-IntLSup+Half);
+                  DrawLine(Round(ColPos),Round(PosY-IntLSup)+Half,Round(ColPos+ColWidth),Round(PosY-IntLSup)+Half);
                 if bcBas in GetFlags
                 then
-                  DrawLine(ColPos,PosY-IntLSup+HautTxt-Half,ColPos+ColWidth,PosY-IntLSup+HautTxt-Half);
+                  DrawLine(Round(ColPos),Round(PosY-IntLSup)+HautTxt-Half,Round(ColPos+ColWidth),Round(PosY-IntLSup)+HautTxt-Half);
                 end;
-            DrawText(GetTextPos,PosY,GetTextWidth,0,Textes[Texte],TxtFlags,IntlInt);
+            DrawText(Round(GetTextPos),Round(PosY),Round(GetTextWidth),0,Textes[Texte],TxtFlags,Round(IntlInt));
             end
         else
-          DrawText(PosX,PosY-Fnt.Ascent,Textes[Texte],TxtFlags);
+          DrawText(Round(PosX),Round(PosY)-Fnt.Ascent,Textes[Texte],TxtFlags);
         end;
     ppFichierPDF:
       if Colonne> -1
@@ -1271,7 +1274,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 TextPosX:= ColPos+ColWidth-ColMargin-Fnt.TextWidth(Textes[Texte]);
               if (txtHCenter in TxtFlags)
               then
-                TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Textes[Texte])) div 2;
+                TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Textes[Texte]))/2;
               TextPosY:= Paper.H-PosY-Fnt.Ascent;
               TextLarg:= ColWidth;
               Ecriture:= Textes[Texte];
@@ -1283,7 +1286,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             Wraplst:= TStringList.Create;
             Wraplst.Text:= Textes[Texte];
             for Cpt:= 0 to Pred(Wraplst.Count) do
-              Wraplst[Cpt]:= AddLineBreaks(Wraplst[Cpt],GetTextWidth,Fnt);
+              Wraplst[Cpt]:= AddLineBreaks(Wraplst[Cpt],Round(GetTextWidth),Fnt);
             Wraplst.Text:= Wraplst.Text;
             for Cpt:= 0 to Pred(Wraplst.Count) do
               begin
@@ -1300,7 +1303,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                     TextPosX:= ColPos+ColWidth-ColMargin-Fnt.TextWidth(Wraplst[Cpt]);
                   if (txtHCenter in TxtFlags)
                   then
-                    TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Wraplst[Cpt])) div 2;
+                    TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Wraplst[Cpt]))/2;
                   TextPosY:= Paper.H-PosY-Fnt.Ascent-(Fnt.Height+IntlInt)*Cpt;
                   TextLarg:= ColWidth;
                   Ecriture:= Wraplst[Cpt];
@@ -1330,7 +1333,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   end;
 end;
 
-procedure T_Imprime.EcritNum(PosX,PosY,Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
+procedure T_Imprime.EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
           TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum);
 
   function BuildChaine: string;
@@ -1376,7 +1379,8 @@ procedure T_Imprime.EcritNum(PosX,PosY,Colonne,TexteNum,TexteTot,FonteNum,FondNu
   end;
 
 var
-  PosH,PosV,HTxt,HautTxt,IntlInt,IntLSup,IntLInf,Half,CoulTrait,EpaisTrait: Integer;
+  PosH,PosV,IntlInt,IntLSup,IntLInf,EpaisTrait: Single;
+  HTxt,HautTxt,Half,CoulTrait: Integer;
   FinDeLigne,UseCurFont: Boolean;
   Fnt: TfpgFont;
   StylTrait: TfpgLineStyle;
@@ -1407,12 +1411,12 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   IntLInf:= T_Interligne(Interlignes[FInterLCourante]).GetInf;
   if Colonne> -1
   then
-    HautTxt:= TxtHeight(T_Colonne(Colonnes[Colonne]).GetTextWidth,Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0',Fnt,IntlInt)+IntLSup+IntLInf
+    HautTxt:= TxtHeight(Round(T_Colonne(Colonnes[Colonne]).GetTextWidth),Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0',Fnt,Round(IntlInt))+Round(IntLSup+IntLInf)
   else
-    HautTxt:= TxtHeight(Paper.W,Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0',Fnt,IntlInt)+IntLSup+IntLInf;
+    HautTxt:= TxtHeight(Paper.W,Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0',Fnt,Round(IntlInt))+Round(IntLSup+IntLInf);
   if (Colonne> -1) and (BordNum> -1)
   then
-    Half:= T_TraitStyle(TraitStyles[T_Bord(Bords[BordNum]).GetStyle]).GetEpais div 2;
+    Half:= Round(T_TraitStyle(TraitStyles[T_Bord(Bords[BordNum]).GetStyle]).GetEpais) div 2;
   case FPreparation of
     ppPrepare:
       begin
@@ -1491,9 +1495,9 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             then
               if Total
               then
-                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 ')) div 2
+                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 '))/2
               else
-                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 ')) div 2;
+                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '))/2;
             end
         else
           if PosX> 0
@@ -1518,9 +1522,9 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             then
               if Total
               then
-                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 ')) div 2
+                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 '))/2
               else
-                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 ')) div 2;
+                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '))/2;
             end;
       FPosRef.X:= PosH+Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 ');
       ALigne.LoadNumero(PosH,PosV,Colonne,TexteNum,TexteTot,FonteNum,HTxt,FondNum,BordNum,InterL,UseCurFont,TxtFlags,Total,Alpha,SPNum);
@@ -1546,30 +1550,30 @@ with T_Section(Sections[Pred(NumeroSection)]) do
               SetColor(T_Fond(Fonds[FondNum]).GetColor)
             else
               SetColor(GetColor);
-            FillRectangle(ColPos,PosY-IntLSup,ColWidth,HautTxt);
+            FillRectangle(Round(ColPos),Round(PosY-IntLSup),Round(ColWidth),HautTxt);
             if BordNum> -1
             then
               with T_Bord(Bords[BordNum]) do
                 begin
-                SetLineStyle(T_TraitStyle(TraitStyles[GetStyle]).GetEpais,T_TraitStyle(TraitStyles[GetStyle]).GetStyle);
+                SetLineStyle(Round(T_TraitStyle(TraitStyles[GetStyle]).GetEpais),T_TraitStyle(TraitStyles[GetStyle]).GetStyle);
                 SetColor(T_TraitStyle(TraitStyles[GetStyle]).GetColor);
                 if bcGauche in GetFlags
                 then
-                  DrawLine(ColPos+Half,PosY-IntLSup,ColPos+Half,PosY-IntLSup+HautTxt);
+                  DrawLine(Round(ColPos)+Half,Round(PosY-IntLSup),Round(ColPos)+Half,Round(PosY-IntLSup)+HautTxt);
                 if bcDroite in GetFlags
                 then
-                  DrawLine(ColPos+ColWidth-Half,PosY-IntLSup,ColPos+ColWidth-Half,PosY-IntLSup+HautTxt);
+                  DrawLine(Round(ColPos+ColWidth)-Half,Round(PosY-IntLSup),Round(ColPos+ColWidth)-Half,Round(PosY-IntLSup)+HautTxt);
                 if bcHaut in GetFlags
                 then
-                  DrawLine(ColPos,PosY-IntLSup+Half,ColPos+ColWidth,PosY-IntLSup+Half);
+                  DrawLine(Round(ColPos),Round(PosY-IntLSup)+Half,Round(ColPos+ColWidth),Round(PosY-IntLSup)+Half);
                 if bcBas in GetFlags
                 then
-                  DrawLine(ColPos,PosY-IntLSup+HautTxt-Succ(Half),ColPos+ColWidth,PosY-IntLSup+HautTxt-Succ(Half));
+                  DrawLine(Round(ColPos),Round(PosY-IntLSup)+HautTxt-Succ(Half),Round(ColPos+ColWidth),Round(PosY-IntLSup)+HautTxt-Succ(Half));
                 end;
-            DrawText(GetTextPos,PosY,GetTextWidth,0,Chaine,TxtFlags,IntlInt);
+            DrawText(Round(GetTextPos),Round(PosY),Round(GetTextWidth),0,Chaine,TxtFlags,Round(IntlInt));
             end
         else
-          DrawText(PosX,PosY,Chaine,TxtFlags);
+          DrawText(Round(PosX),Round(PosY),Chaine,TxtFlags);
         end;
     ppFichierPDF:
       begin
@@ -1688,7 +1692,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
                 TextPosX:= ColPos+ColWidth-ColMargin-Fnt.TextWidth(Chaine);
               if (txtHCenter in TxtFlags)
               then
-                TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Chaine)) div 2;
+                TextPosX:= GetTextPos+(ColWidth-Fnt.TextWidth(Chaine))/2;
               TextPosY:= Paper.H-PosY-Fnt.Ascent;
               TextLarg:= ColWidth;
               Ecriture:= Chaine;
@@ -1716,9 +1720,9 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   end;
 end;
 
-procedure T_Imprime.InsereEspace(PosY,Colonne,EspHeight,FondNum: Integer; Zone: TZone);
+procedure T_Imprime.InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Single; FondNum: Integer; Zone: TZone);
 var
-  PosV: Integer;
+  PosV: Single;
 begin
 with T_Section(Sections[Pred(NumeroSection)]) do
   begin
@@ -1774,7 +1778,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
           SetColor(T_Fond(Fonds[FondNum]).GetColor)
         else
           SetColor(GetColor);
-        FillRectangle(ColPos,PosV,ColWidth,EspHeight);
+        FillRectangle(Round(ColPos),Round(PosV),Round(ColWidth),Round(EspHeight));
         end;
     ppFichierPDF:
       begin
@@ -1828,7 +1832,7 @@ end;
 
 procedure T_Imprime.TraceCadre(StTrait: Integer; Zone: TZone);
 var
-  Half: Integer;
+  Half,MargeL,MargeR,MargeT,MargeB,EnTeteH,PiedH: Integer;
 begin
 with T_Section(Sections[Pred(NumeroSection)]) do
   case FPreparation of
@@ -1839,41 +1843,49 @@ with T_Section(Sections[Pred(NumeroSection)]) do
         begin
         with T_TraitStyle(TraitStyles[StTrait]) do
           begin
-          SetLineStyle(GetEpais,GetStyle);
-          Half:= GetEpais div 2;
+          SetLineStyle(Round(GetEpais),GetStyle);
+          Half:= Round(GetEpais) div 2;
           SetColor(GetColor);
           end;
         with FMargeCourante do
+          begin
+          MargeL:= Round(L);
+          MargeR:= Round(R);
+          MargeT:= Round(T);
+          MargeB:= Round(B);
+          EnTeteH:= Round(FEnTeteHeight);
+          PiedH:= Round(FPiedHeight);
           case Zone of
             zEnTete:
               begin
-              DrawLine(L+Half,T,L+Half,T+FEnTeteHeight);                // gauche
-              DrawLine(R-Half,T,R-Half,T+FEnTeteHeight);                // droite
-              DrawLine(L,T+Half,R,T+Half);                              // haute
-              DrawLine(L,T+FEnTeteHeight-Half,R,T+FEnTeteHeight-Half);  // basse
+              DrawLine(MargeL+Half,MargeT,MargeL+Half,MargeT+EnTeteH);          // gauche
+              DrawLine(MargeR-Half,MargeT,MargeR-Half,MargeT+EnTeteH);          // droite
+              DrawLine(MargeL,MargeT+Half,MargeR,MargeT+Half);                  // haute
+              DrawLine(MargeL,MargeT+EnTeteH-Half,MargeR,MargeT+EnTeteH-Half);  // basse
               end;
             zPage:
               begin
-              DrawLine(L+Half,T+FEnTeteHeight,L+Half,B-FPiedHeight);    // gauche
-              DrawLine(R-Half,T+FEnTeteHeight,R-Half,B-FPiedHeight);    // droite
-              DrawLine(L,T+FEnTeteHeight+Half,R,T+FEnTeteHeight+Half);  // haute
-              DrawLine(L,B-FPiedHeight-Half,R,B-FPiedHeight-Half);      // basse
+              DrawLine(MargeL+Half,MargeT+EnTeteH,MargeL+Half,MargeB-PiedH);    // gauche
+              DrawLine(MargeR-Half,MargeT+EnTeteH,MargeR-Half,MargeB-PiedH);    // droite
+              DrawLine(MargeL,MargeT+EnTeteH+Half,MargeR,MargeT+EnTeteH+Half);  // haute
+              DrawLine(MargeL,MargeB-PiedH-Half,MargeR,MargeB-PiedH-Half);      // basse
               end;
             zPied:
               begin
-              DrawLine(L+Half,B-FPiedHeight,L+Half,B);                  // gauche
-              DrawLine(R-Half,B-FPiedHeight,R-Half,B);                  // droite
-              DrawLine(L,B-FPiedHeight+Half,R,B-FPiedHeight+Half);      // haute
-              DrawLine(L,B-Half,R,B-Half);                              // basse
+              DrawLine(MargeL+Half,MargeB-PiedH,MargeL+Half,MargeB);            // gauche
+              DrawLine(MargeR-Half,MargeB-PiedH,MargeR-Half,MargeB);            // droite
+              DrawLine(MargeL,MargeB-PiedH+Half,MargeR,MargeB-PiedH+Half);      // haute
+              DrawLine(MargeL,MargeB-Half,MargeR,MargeB-Half);                  // basse
               end;
             zMarges:
               begin
-              DrawLine(L+Half,T,L+Half,B-Succ(Half));                   // gauche
-              DrawLine(R-Half,T,R-Half,B-Succ(Half));                   // droite
-              DrawLine(L,T+Half,R,T+Half);                              // haute
-              DrawLine(L,B-Half,R,B-Half);                              // basse
+              DrawLine(MargeL+Half,MargeT,MargeL+Half,MargeB-Succ(Half));       // gauche
+              DrawLine(MargeR-Half,MargeT,MargeR-Half,MargeB-Succ(Half));       // droite
+              DrawLine(MargeL,MargeT+Half,MargeR,MargeT+Half);                  // haute
+              DrawLine(MargeL,MargeB-Half,MargeR,MargeB-Half);                  // basse
               end;
             end;
+          end;
         end;
     ppFichierPDF:
       begin
@@ -1926,7 +1938,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
     end;
 end;
 
-procedure T_Imprime.TraceTrait(XDebut,YDebut,XFin,YFin,StTrait: Integer);
+procedure T_Imprime.TraceTrait(XDebut,YDebut,XFin,YFin: Single; StTrait: Integer);
 begin
 with T_Section(Sections[Pred(NumeroSection)]) do
   case FPreparation of
@@ -1937,10 +1949,10 @@ with T_Section(Sections[Pred(NumeroSection)]) do
         begin
         with T_TraitStyle(TraitStyles[StTrait]) do
           begin
-          SetLineStyle(GetEpais,GetStyle);
+          SetLineStyle(Round(GetEpais),GetStyle);
           SetColor(GetColor);
           end;
-        DrawLine(XDebut,YDebut,XFin,YFin);
+        DrawLine(Round(XDebut),Round(YDebut),Round(XFin),Round(YFin));
         end;
     ppFichierPdf:
       begin
@@ -1961,9 +1973,9 @@ with T_Section(Sections[Pred(NumeroSection)]) do
     end;
 end;
 
-procedure T_Imprime.TraceTraitHoriz(XDebut,YDebut,Colonne,XFin,StTrait: Integer; Zone: TZone);
+procedure T_Imprime.TraceTraitHoriz(XDebut,YDebut: Single; Colonne: Integer; XFin: Single; StTrait: Integer; Zone: TZone);
 var
-  PosV: Integer;
+  PosV: Single;
 begin
 with T_Section(Sections[Pred(NumeroSection)]) do
   case FPreparation of
@@ -2008,10 +2020,10 @@ with T_Section(Sections[Pred(NumeroSection)]) do
         begin
         with T_TraitStyle(TraitStyles[StTrait]) do
           begin
-          SetLineStyle(GetEpais,GetStyle);
+          SetLineStyle(Round(GetEpais),GetStyle);
           SetColor(GetColor);
           end;
-        DrawLine(XDebut,YDebut,XFin,YDebut);
+        DrawLine(Round(XDebut),Round(YDebut),Round(XFin),Round(YDebut));
         end;
     ppFichierPdf:
       begin
@@ -2036,6 +2048,7 @@ procedure T_Imprime.PaintSurface(Points: T_Points; Couleur: TfpgColor);
 var
   OldColor: TfpgColor;
   Cpt: Integer;
+  Pts: array of TPoint;
 begin
 with T_Section(Sections[Pred(NumeroSection)]) do
   case FPreparation of
@@ -2045,7 +2058,13 @@ with T_Section(Sections[Pred(NumeroSection)]) do
       begin
       OldColor:= FCanevas.Color;
       FCanevas.SetColor(Couleur);
-      FCanevas.DrawPolygon(Points);
+      SetLength(Pts,Length(Points));
+      for Cpt:= 0 to Pred(Length(Pts)) do
+        begin
+        Pts[Cpt].X:= Round(Points[Cpt].X);
+        Pts[Cpt].Y:= Round(Points[Cpt].Y);
+        end;
+      FCanevas.DrawPolygon(Pts);
       FCanevas.SetColor(OldColor);
       end;
     ppFichierPdf:
@@ -2088,6 +2107,8 @@ end;
 constructor T_Imprime.Create;
 begin
 inherited Create;
+OldSeparator:= DecimalSeparator;
+DecimalSeparator:= '.';
 Sections:= TList.Create;
 Fontes:= TList.Create;
 Interlignes:= TList.Create;
@@ -2141,6 +2162,7 @@ then
 Bords.Free;
 Textes.Free;
 ALigne.Free;
+DecimalSeparator:= OldSeparator;
 inherited;
 end;
 
@@ -2214,7 +2236,7 @@ end;
 procedure T_Imprime.Section(MgGauche,MgDroite,MgHaute,MgBasse: Single; Retrait: Single;
           IniOriente: TOrient= oPortrait);
 var
-  CMargin: Integer;
+  CMargin: Single;
 begin
 case FPreparation of
   ppPrepare:
@@ -2282,7 +2304,7 @@ AFonte:= T_Fonte.Create(FtNom,FtColor);
 Result:= Fontes.Add(AFonte);
 end;
 
-function T_Imprime.StyleTrait(StEpais: Integer; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
+function T_Imprime.StyleTrait(StEpais: Single; StColor: Tfpgcolor; StStyle: TfpgLineStyle): Integer;
 begin
 ATraitStyle:= T_TraitStyle.Create(StEpais,StColor,StStyle);
 Result:= TraitStyles.Add(ATraitStyle);
@@ -2296,7 +2318,7 @@ end;
 
 function T_Imprime.Colonne(ClnPos,ClnWidth: Single; ClnMargin: Single= 0; ClnColor: TfpgColor= clWhite): Integer;
 var
-  CPos,CWidth,CMargin: Integer;
+  CPos,CWidth,CMargin: Single;
 begin
 CPos:= Dim2Pixels(ClnPos);
 with T_Section(Sections[Pred(NumeroSection)]) do
@@ -2317,134 +2339,125 @@ end;
 procedure T_Imprime.EcritEnTete(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTexte: Integer;
+  RefTexte: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTexte:= Textes.IndexOf(Texte);
 if RefTexte= -1
 then
   RefTexte:= Textes.Add(Texte);
-EcritLigne(X,Y,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZEnTete);
+EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZEnTete);
 end;
 
 procedure T_Imprime.EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTexte: Integer;
+  RefTexte: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  Include(Flags,txtWrap);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTexte:= Textes.IndexOf(Texte);
 if RefTexte= -1
 then
   RefTexte:= Textes.Add(Texte);
-EcritLigne(X,Y,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPage);
+EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPage);
 end;
 
 procedure T_Imprime.EcritPied(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTexte: Integer;
+  RefTexte: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTexte:= Textes.IndexOf(Texte);
 if RefTexte= -1
 then
   RefTexte:= Textes.Add(Texte);
-EcritLigne(X,Y,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPied);
+EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPied);
 end;
 
 procedure T_Imprime.NumSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTextePage,RefTexteTot: Integer;
+  RefTextePage,RefTexteTot: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTextePage:= Textes.IndexOf(TexteSect);
 if RefTextePage= -1
 then
@@ -2453,37 +2466,35 @@ RefTexteTot:= Textes.IndexOf(TexteTot);
 if RefTexteTot= -1
 then
   RefTexteTot:= Textes.Add(TexteTot);
-EcritNum(X,Y,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZEnTete,SectNum);
+EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZEnTete,SectNum);
 end;
 
 procedure T_Imprime.NumSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0;CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTextePage,RefTexteTot: Integer;
+  RefTextePage,RefTexteTot: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTextePage:= Textes.IndexOf(TexteSect);
 if RefTextePage= -1
 then
@@ -2492,37 +2503,35 @@ RefTexteTot:= Textes.IndexOf(TexteTot);
 if RefTexteTot= -1
 then
   RefTexteTot:= Textes.Add(TexteTot);
-EcritNum(X,Y,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZPied,SectNum);
+EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZPied,SectNum);
 end;
 
 procedure T_Imprime.NumPageEnTete(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
           Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
           CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTextePage,RefTexteTot: Integer;
+  RefTextePage,RefTexteTot: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTextePage:= Textes.IndexOf(TextePage);
 if RefTextePage= -1
 then
@@ -2531,37 +2540,35 @@ RefTexteTot:= Textes.IndexOf(TexteTotal);
 if RefTexteTot= -1
 then
   RefTexteTot:= Textes.Add(TexteTotal);
-EcritNum(X,Y,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,False,ZEnTete,PageNum);
+EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,False,ZEnTete,PageNum);
 end;
 
 procedure T_Imprime.NumPagePied(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
           Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
           CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTextePage,RefTexteTot: Integer;
+  RefTextePage,RefTexteTot: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTextePage:= Textes.IndexOf(TextePage);
 if RefTextePage= -1
 then
@@ -2570,37 +2577,35 @@ RefTexteTot:= Textes.IndexOf(TexteTotal);
 if RefTexteTot= -1
 then
   RefTexteTot:= Textes.Add(TexteTotal);
-EcritNum(X,Y,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,False,ZPied,PageNum);
+EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,False,ZPied,PageNum);
 end;
 
 procedure T_Imprime.NumPageSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTextePage,RefTexteTot: Integer;
+  RefTextePage,RefTexteTot: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTextePage:= Textes.IndexOf(TexteSect);
 if RefTextePage= -1
 then
@@ -2609,37 +2614,35 @@ RefTexteTot:= Textes.IndexOf(TexteTot);
 if RefTexteTot= -1
 then
   RefTexteTot:= Textes.Add(TexteTot);
-EcritNum(X,Y,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZEnTete,PSectNum);
+EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZEnTete,PSectNum);
 end;
 
 procedure T_Imprime.NumPageSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
           Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
-  X,Y,RefTextePage,RefTexteTot: Integer;
+  RefTextePage,RefTexteTot: Integer;
   Flags: TFTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
 then
   begin
-  X:= Round(Horiz);
-  case X of
-    cnLeft:
-      Include(Flags,txtLeft);
-    cnCenter:
-      Include(Flags,txtHCenter);
-    cnRight:
-      Include(Flags,txtRight);
-    end;
+  if Horiz= cnLeft
+  then
+    Include(Flags,txtLeft);
+  if Horiz= cnCenter
+  then
+    Include(Flags,txtHCenter);
+  if Horiz= cnRight
+  then
+    Include(Flags,txtRight);
   end
 else
-  X:= Dim2Pixels(Horiz);
-if Verti< 0
+  Horiz:= Dim2Pixels(Horiz);
+if Verti> 0
 then
-  Y:= Round(Verti)
-else
-  Y:= Dim2Pixels(Verti);
+  Verti:= Dim2Pixels(Verti);
 RefTextePage:= Textes.IndexOf(TexteSect);
 if RefTextePage= -1
 then
@@ -2648,58 +2651,37 @@ RefTexteTot:= Textes.IndexOf(TexteTot);
 if RefTexteTot= -1
 then
   RefTexteTot:= Textes.Add(TexteTot);
-EcritNum(X,Y,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZPied,PSectNum);
+EcritNum(Horiz,Verti,ColNum,RefTextePage,RefTexteTot,FonteNum,CoulFdNum,BordNum,InterNum,Flags,Total,Alpha,ZPied,PSectNum);
 end;
 
 procedure T_Imprime.TraitHorizEnTete(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
-var
-  XDeb,YDeb: Integer;
 begin
-XDeb:= Dim2Pixels(EspAvant);
-YDeb:= Dim2Pixels(EspApres);
-TraceTraitHoriz(XDeb,YDeb,ColNum,-1,StyleNum,zEntete);
+TraceTraitHoriz(Dim2Pixels(EspAvant),Dim2Pixels(EspApres),ColNum,-1,StyleNum,zEntete);
 end;
 
 procedure T_Imprime.TraitHorizPage(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
-var
-  XDeb,YDeb: Integer;
 begin
-XDeb:= Dim2Pixels(EspAvant);
-YDeb:= Dim2Pixels(EspApres);
-TraceTraitHoriz(XDeb,YDeb,ColNum,-1,StyleNum,zPage);
+TraceTraitHoriz(Dim2Pixels(EspAvant),Dim2Pixels(EspApres),ColNum,-1,StyleNum,zPage);
 end;
 
 procedure T_Imprime.TraitHorizPied(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
-var
-  XDeb,YDeb: Integer;
 begin
-XDeb:= Dim2Pixels(EspAvant);
-YDeb:= Dim2Pixels(EspApres);
-TraceTraitHoriz(XDeb,YDeb,ColNum,-1,StyleNum,zPied);
+TraceTraitHoriz(Dim2Pixels(EspAvant),Dim2Pixels(EspApres),ColNum,-1,StyleNum,zPied);
 end;
 
 procedure T_Imprime.EspaceEnTete(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
-var
-  H: Integer;
 begin
-H:= Dim2Pixels(Verti);
-InsereEspace(-1,ColNum,H,CoulFdNum,zEntete);
+InsereEspace(-1,ColNum,Dim2Pixels(Verti),CoulFdNum,zEntete);
 end;
 
 procedure T_Imprime.EspacePage(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
-var
-  H: Integer;
 begin
-H:= Dim2Pixels(Verti);
-InsereEspace(-1,ColNum,H,CoulFdNum,zPage);
+InsereEspace(-1,ColNum,Dim2Pixels(Verti),CoulFdNum,zPage);
 end;
 
 procedure T_Imprime.EspacePied(Verti: Single; ColNum: Integer=0; CoulFdNum: Integer= -1);
-var
-  H: Integer;
 begin
-H:= Dim2Pixels(Verti);
-InsereEspace(-1,ColNum,H,CoulFdNum,zPied);
+InsereEspace(-1,ColNum,Dim2Pixels(Verti),CoulFdNum,zPied);
 end;
 
 function T_Imprime.Interligne(ItlSup,ItlInt,ItlInf: Single): Integer;
@@ -2708,17 +2690,17 @@ var
 begin
 if ItlSup> 0
 then
-  Sup:= Dim2Pixels(ItlSup)
+  Sup:= Round(Dim2Pixels(ItlSup))
 else
   Sup:= 0;
 if ItlInt> 0
 then
-  Int:= Dim2Pixels(ItlInt)
+  Int:= Round(Dim2Pixels(ItlInt))
 else
   Int:= 0;
 if ItlInf> 0
 then
-  Inf:= Dim2Pixels(ItlInf)
+  Inf:= Round(Dim2Pixels(ItlInf))
 else
   Inf:= 0;
 AInterligne:= T_Interligne.Create(Sup,Int,Inf);
@@ -2772,20 +2754,14 @@ TraceCadre(AStyle,zPied);
 end;
 
 procedure T_Imprime.TraitPage(XDebut,YDebut,XFin,YFin: Single; AStyle: Integer);
-var
-  XDeb,YDeb,XEnd,YEnd: Integer;
 begin
-XDeb:= Dim2Pixels(XDebut);
-YDeb:= Dim2Pixels(YDebut);
-XEnd:= Dim2Pixels(XFin);
-YEnd:= Dim2Pixels(YFin);
-TraceTrait(XDeb,YDeb,XEnd,YEnd,AStyle);
+TraceTrait(Dim2Pixels(XDebut),Dim2Pixels(YDebut),Dim2Pixels(XFin),Dim2Pixels(YFin),AStyle);
 end;
 
 procedure T_Imprime.SurfPage(XLimits,YLimits: array of Single; AColor: TfpgColor);
 var
   Taille,Cpt: Integer;
-  Ends: array of TPoint;
+  Ends: array of TRefPos;
 begin
 if Length(XLimits)< Length(YLimits)
 then

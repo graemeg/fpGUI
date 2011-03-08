@@ -30,10 +30,10 @@ type
   TFBordFlags= set of (bcGauche,bcDroite,bcHaut,bcBas);
 
   TDimensions= record
-    T: Integer;
-    L: Integer;
-    R: Integer;
-    B: Integer;
+    T: Single;
+    L: Single;
+    R: Single;
+    B: Single;
     end;
 
   TPapier= record
@@ -50,8 +50,8 @@ type
       FNbPages: Integer;
       FPaper: TPapier;
       FMarges: TDimensions;
-      FBasEnTete: Integer;
-      FHautPied: Integer;
+      FBasEnTete: Single;
+      FHautPied: Single;
       FPages: TList;
       FEnTete: TList;
       FPied: TList;
@@ -69,17 +69,17 @@ type
       procedure LoadCmdPied;
       procedure LoadCmdGroupe;
       procedure LoadCmdGroupeToPage;
-      procedure LoadEspaceEnTete(APosY,AColonne,AHeight,AFond: Integer);
-      procedure LoadEspacePage(APosY,AColonne,AHeight,AFond: Integer);
-      procedure LoadEspacePied(APosY,AColonne,AHeight,AFond: Integer);
-      procedure LoadEspaceGroupe(AHeight: Integer);
+      procedure LoadEspaceEnTete(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
+      procedure LoadEspacePage(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
+      procedure LoadEspacePied(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
+      procedure LoadEspaceGroupe(AHeight: Single);
       procedure LoadCadre(AStyle: Integer; AZone: TZone);
-      procedure LoadTrait(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
-      procedure LoadTraitHorizEnTete(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
-      procedure LoadTraitHorizPage(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
-      procedure LoadTraitHorizPied(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
-      procedure LoadTraitHorizGroupe(AHeight: Integer);
-      procedure LoadSurf(APos: array of TPoint; AColor: TfpgColor);
+      procedure LoadTrait(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
+      procedure LoadTraitHorizEnTete(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
+      procedure LoadTraitHorizPage(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
+      procedure LoadTraitHorizPied(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
+      procedure LoadTraitHorizGroupe(AHeight: Single);
+      procedure LoadSurf(APos: T_Points; AColor: TfpgColor);
       function GetCmdPage(NumPage: Integer): TList;
       property CmdEnTete: TList read FEntete;
       property CmdPied: TList read FPied;
@@ -109,15 +109,15 @@ type
 
   T_Groupe = class
     private
-      FLineHeight: Integer;
-      FGroupeHeight: Integer;
+      FLineHeight: Single;
+      FGroupeHeight: Single;
       FCommandes: TList;
     public
       constructor Create; virtual;
       destructor Destroy; override;
       property Commandes: TList read FCommandes write FCommandes;
-      property LineHeight: Integer read FLineHeight;
-      property GroupeHeight: Integer read FGroupeHeight;
+      property LineHeight: Single read FLineHeight;
+      property GroupeHeight: Single read FGroupeHeight;
     end;
 
   T_Ligne = class
@@ -127,9 +127,9 @@ type
     public
       constructor Create; virtual;
       destructor Destroy; override;
-      procedure LoadTexte(APosX,APosY,AColonne,ATexte,AFonte,AHeight,AFond,ABord,AInterL: Integer;
+      procedure LoadTexte(APosX,APosY: Single; AColonne,ATexte,AFonte,AHeight,AFond,ABord,AInterL: Integer;
                 ACurFont: Boolean; AFlags: TFTextFlags);
-      procedure LoadNumero(APosX,APosY,AColonne,ATexteNum,ATexteTot,AFonte,AHeight,AFond,ABord,AInterL: Integer;
+      procedure LoadNumero(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AHeight,AFond,ABord,AInterL: Integer;
                 ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
       property Commandes: TList read FCommandes;
       property LineHeight: Integer read FHeight;
@@ -148,8 +148,8 @@ type
 
   T_EcritTexte = class(T_Commande)
     private
-      FPosX: Integer;
-      FPosY: Integer;
+      FPosX: Single;
+      FPosY: Single;
       FColonne: Integer;
       FTexte: Integer;
       FFonte: Integer;
@@ -159,10 +159,10 @@ type
       FCurFont: Boolean;
       FFlags: TFTextFlags;
     public
-      constructor Create(APosX,APosY,AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TFTextFlags); virtual;
-      procedure SetPosY(const AValue: Integer);
-      property GetPosX: Integer read FPosX;
-      property GetPosY: Integer read FPosY;
+      constructor Create(APosX,APosY: Single; AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TFTextFlags); virtual;
+      procedure SetPosY(const AValue: Single);
+      property GetPosX: Single read FPosX;
+      property GetPosY: Single read FPosY;
       property GetColonne: Integer read FColonne;
       property GetTexte: Integer read FTexte;
       property GetFonte: Integer read FFonte;
@@ -175,8 +175,8 @@ type
 
   T_Numero = class(T_Commande)
     private
-      FPosX: Integer;
-      FPosY: Integer;
+      FPosX: Single;
+      FPosY: Single;
       FColonne: Integer;
       FTexteNum: Integer;
       FTexteTot: Integer;
@@ -190,11 +190,11 @@ type
       FAlpha: Boolean;
       FTypeNum: TSectPageNum;
     public
-      constructor Create(APosX,APosY,AColonne,ATexteNum,ATexteTot,AFonte,AFond,ABord,AInterL: Integer;
+      constructor Create(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AFond,ABord,AInterL: Integer;
                   ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum); virtual;
-      procedure SetPosY(const AValue: Integer);
-      property GetPosX: Integer read FPosX;
-      property GetPosY: Integer read FPosY;
+      procedure SetPosY(const AValue: Single);
+      property GetPosX: Single read FPosX;
+      property GetPosY: Single read FPosY;
       property GetColonne: Integer read FColonne;
       property GetTexteNum: Integer read FTexteNum;
       property GetTexteTot: Integer read FTexteTot;
@@ -211,36 +211,36 @@ type
 
   T_Trait = class(T_Commande)
     private
-      FPosX: Integer;
-      FPosY: Integer;
+      FPosX: Single;
+      FPosY: Single;
       FColonne: Integer;
       FStyle: Integer;
-      FEndX: Integer;
-      FEndY: Integer;
+      FEndX: Single;
+      FEndY: Single;
     public
-      constructor Create(APosX,APosY,AColonne,AStyle,AEndX,AEndY: Integer); virtual;
-      property GetPosX: Integer read FPosX;
-      property GetPosY: Integer read FPosY;
+      constructor Create(APosX,APosY: Single; AColonne,AStyle: Integer; AEndX,AEndY: Single); virtual;
+      property GetPosX: Single read FPosX;
+      property GetPosY: Single read FPosY;
       property GetColonne: Integer read FColonne;
       property GetStyle: Integer read FStyle;
-      property GetEndX: Integer read FEndX;
-      property GetEndY: Integer read FEndY;
+      property GetEndX: Single read FEndX;
+      property GetEndY: Single read FEndY;
     end;
 
   T_Colonne = class(T_Commande)
     private
-      FPos: Integer;
-      FWidth: Integer;
-      FMargin: Integer;
+      FPos: Single;
+      FWidth: Single;
+      FMargin: Single;
       FColor: TfpgColor;
     public
-      constructor Create(APos,AWidth,AMargin: Integer; AColor: TfpgColor); virtual;
-      function GetTextPos: Integer;
-      function GetTextWidth: Integer;
+      constructor Create(APos,AWidth,AMargin: Single; AColor: TfpgColor); virtual;
+      function GetTextPos: Single;
+      function GetTextWidth: Single;
       procedure SetColColor(AColor: TfpgColor);
-      property ColPos: Integer read FPos write FPos;
-      property ColWidth: Integer read FWidth write FWidth;
-      property ColMargin: Integer read FMargin write FMargin;
+      property ColPos: Single read FPos write FPos;
+      property ColWidth: Single read FWidth write FWidth;
+      property ColMargin: Single read FMargin write FMargin;
       property GetColor: TfpgColor read FColor;
     end;
 
@@ -259,28 +259,28 @@ type
 
   T_Interligne = class(T_Commande)
     private
-      FSup: Integer;
-      FInt: Integer;
-      FInf: Integer;
+      FSup: Single;
+      FInt: Single;
+      FInf: Single;
     public
-      constructor Create(ASup,AInt,AInf: Integer); virtual;
-      property GetSup: Integer read FSup;
-      property GetInt: Integer read FInt;
-      property GetInf: Integer read FInf;
+      constructor Create(ASup,AInt,AInf: Single); virtual;
+      property GetSup: Single read FSup;
+      property GetInt: Single read FInt;
+      property GetInf: Single read FInf;
     end;
 
   T_Espace = class(T_Commande)
     private
-      FPosY: Integer;
+      FPosY: Single;
       FColonne: Integer;
-      FHeight: Integer;
+      FHeight: Single;
       FFond: Integer;
     public
-      constructor Create(APosY,AColonne,AHeight,AFond: Integer); virtual;
-      procedure SetPosY(const AValue: Integer);
-      property GetPosY: Integer read FPosY;
+      constructor Create(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer); virtual;
+      procedure SetPosY(const AValue: Single);
+      property GetPosY: Single read FPosY;
       property GetColonne: Integer read FColonne;
-      property GetHeight: Integer read FHeight;
+      property GetHeight: Single read FHeight;
       property GetFond: Integer read FFond;
     end;
 
@@ -294,12 +294,12 @@ type
 
   T_TraitStyle = class(T_Commande)
     private
-      FEpais: Integer;
+      FEpais: Single;
       FColor: TfpgColor;
       FStyle: TfpgLineStyle;
     public
-      constructor Create(AEpais: Integer; AColor: Tfpgcolor; AStyle: TfpgLineStyle); virtual;
-      property GetEpais: Integer read FEpais;
+      constructor Create(AEpais: Single; AColor: Tfpgcolor; AStyle: TfpgLineStyle); virtual;
+      property GetEpais: Single read FEpais;
       property GetColor: TfpgColor read FColor;
       property GetStyle: TfpgLineStyle read FStyle;
     end;
@@ -329,7 +329,7 @@ type
       FPoints: T_Points;
       FColor: TfpgColor;
     public
-      constructor Create(APoints: array of TPoint; AColor: TfpgColor);
+      constructor Create(APoints: array of TRefPos; AColor: TfpgColor);
       property GetPoints: T_Points read FPoints;
       property GetColor: TfpgColor read FColor;
     end;
@@ -473,25 +473,25 @@ AGroupe.FGroupeHeight:= 0;
 AGroupe.Commandes.Clear;
 end;
 
-procedure T_Section.LoadEspaceEnTete(APosY,AColonne,AHeight,AFond: Integer);
+procedure T_Section.LoadEspaceEnTete(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
 begin
 ACommande:= T_Espace.Create(APosY,AColonne,AHeight,AFond);
 FEnTete.Add(ACommande);
 end;
 
-procedure T_Section.LoadEspacePage(APosY,AColonne,AHeight,AFond: Integer);
+procedure T_Section.LoadEspacePage(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
 begin
 ACommande:= T_Espace.Create(APosY,AColonne,AHeight,AFond);
 T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
 end;
 
-procedure T_Section.LoadEspacePied(APosY,AColonne,AHeight,AFond: Integer);
+procedure T_Section.LoadEspacePied(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
 begin
 ACommande:= T_Espace.Create(APosY,AColonne,AHeight,AFond);
 FPied.Add(ACommande);
 end;
 
-procedure T_Section.LoadEspaceGroupe(AHeight: Integer);
+procedure T_Section.LoadEspaceGroupe(AHeight: Single);
 begin
 AGroupe.FGroupeHeight:= AGroupe.FGroupeHeight+AHeight;
 end;
@@ -502,36 +502,37 @@ ACommande:= T_Cadre.Create(AStyle,AZone);
 FCadres.Add(ACommande);
 end;
 
-procedure T_Section.LoadTrait(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+procedure T_Section.LoadTrait(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
 begin
 ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
 T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
 end;
 
-procedure T_Section.LoadTraitHorizEnTete(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+procedure T_Section.LoadTraitHorizEnTete(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single;
+          AStyle: Integer);
 begin
 ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
 FEnTete.Add(ACommande);
 end;
 
-procedure T_Section.LoadTraitHorizPage(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+procedure T_Section.LoadTraitHorizPage(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
 begin
 ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
 T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
 end;
 
-procedure T_Section.LoadTraitHorizPied(APosXDeb,APosYDeb,AColonne,APosXFin,APosYFin,AStyle: Integer);
+procedure T_Section.LoadTraitHorizPied(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
 begin
 ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
 FPied.Add(ACommande);
 end;
 
-procedure T_Section.LoadTraitHorizGroupe(AHeight: Integer);
+procedure T_Section.LoadTraitHorizGroupe(AHeight: Single);
 begin
 AGroupe.FGroupeHeight:= AGroupe.FGroupeHeight+AHeight;
 end;
 
-procedure T_Section.LoadSurf(APos: array of TPoint; AColor: TfpgColor);
+procedure T_Section.LoadSurf(APos: T_Points; AColor: TfpgColor);
 begin
 Acommande:= T_Surface.Create(APos,AColor);
 T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
@@ -580,7 +581,7 @@ FCommandes.Free;
 inherited Destroy;
 end;
 
-procedure T_Ligne.LoadTexte(APosX,APosY,AColonne,ATexte,AFonte,AHeight,AFond,ABord,AInterL: Integer;
+procedure T_Ligne.LoadTexte(APosX,APosY: Single; AColonne,ATexte,AFonte,AHeight,AFond,ABord,AInterL: Integer;
           ACurFont: Boolean; AFlags: TFTextFlags);
 begin
 if FHeight< AHeight
@@ -590,7 +591,7 @@ ACommande:= T_EcritTexte.Create(APosX,APosY,AColonne,ATexte,AFonte,AFond,ABord,A
 Commandes.Add(ACommande);
 end;
 
-procedure T_Ligne.LoadNumero(APosX,APosY,AColonne,ATexteNum,ATexteTot,AFonte,AHeight,AFond,ABord,AInterL: Integer;
+procedure T_Ligne.LoadNumero(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AHeight,AFond,ABord,AInterL: Integer;
           ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
 begin
 if FHeight< AHeight
@@ -602,14 +603,14 @@ end;
 
 // command class methods
 
-procedure T_EcritTexte.SetPosY(const AValue: Integer);
+procedure T_EcritTexte.SetPosY(const AValue: Single);
 begin
 if FPosY<> AValue
 then
   FPosY:= AValue;
 end;
 
-constructor T_EcritTexte.Create(APosX,APosY,AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TFTextFlags);
+constructor T_EcritTexte.Create(APosX,APosY: Single; AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TFTextFlags);
 begin
 inherited Create;
 FPosX:= APosX;
@@ -624,14 +625,14 @@ FCurFont:= ACurFont;
 FFlags:= AFlags;
 end;
 
-procedure T_Numero.SetPosY(const AValue: Integer);
+procedure T_Numero.SetPosY(const AValue: Single);
 begin
 if FPosY<> AValue
 then
   FPosY:= AValue;
 end;
 
-constructor T_Numero.Create(APosX,APosY,AColonne,ATexteNum,ATexteTot,AFonte,AFond,ABord,AInterL: Integer;
+constructor T_Numero.Create(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AFond,ABord,AInterL: Integer;
             ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
 begin
 inherited Create;
@@ -651,7 +652,7 @@ FAlpha:= AAlpha;
 FTypeNum:= ATypeNum;
 end;
 
-constructor T_Trait.Create(APosX,APosY,AColonne,AStyle,AEndX,AEndY: Integer);
+constructor T_Trait.Create(APosX,APosY: Single; AColonne,AStyle: Integer; AEndX,AEndY: Single);
 begin
 FPosX:= APosX;
 FPosY:= APosY;
@@ -661,7 +662,7 @@ FEndX:= AEndX;
 FEndY:= AEndY;
 end;
 
-constructor T_Colonne.Create(APos,AWidth,AMargin: Integer; AColor: TfpgColor);
+constructor T_Colonne.Create(APos,AWidth,AMargin: Single; AColor: TfpgColor);
 begin
 inherited Create;
 FPos:= APos;
@@ -670,12 +671,12 @@ FMargin:= AMargin;
 FColor:= AColor;
 end;
 
-function T_Colonne.GetTextPos: Integer;
+function T_Colonne.GetTextPos: Single;
 begin
 Result:= FPos+FMargin;
 end;
 
-function T_Colonne.GetTextWidth: Integer;
+function T_Colonne.GetTextWidth: Single;
 begin
 Result:= FWidth-(FMargin*2);
 end;
@@ -700,7 +701,7 @@ begin
 Result:= TfpgFont(FFonte).Height;
 end;
 
-constructor T_Interligne.Create(ASup,AInt,AInf: Integer);
+constructor T_Interligne.Create(ASup,AInt,AInf: Single);
 begin
 inherited Create;
 FSup:= ASup;
@@ -708,7 +709,7 @@ FInt:= AInt;
 FInf:= AInf;
 end;
 
-constructor T_Espace.Create(APosY,AColonne,AHeight,AFond: Integer);
+constructor T_Espace.Create(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
 begin
 inherited Create;
 FPosY:= APosY;
@@ -717,7 +718,7 @@ FHeight:= AHeight;
 FFond:= AFond;
 end;
 
-constructor T_Surface.Create(APoints: array of TPoint; AColor: TfpgColor);
+constructor T_Surface.Create(APoints: array of TRefPos; AColor: TfpgColor);
 var
   Cpt: Integer;
 begin
@@ -728,7 +729,7 @@ for Cpt:= 0 to Pred(Length(FPoints)) do
 FColor:= AColor;
 end;
 
-procedure T_Espace.SetPosY(const AValue: Integer);
+procedure T_Espace.SetPosY(const AValue: Single);
 begin
 if FPosY<> AValue
 then
@@ -740,7 +741,7 @@ begin
 FColor:= AColor;
 end;
 
-constructor T_TraitStyle.Create(AEpais: Integer; AColor: Tfpgcolor; AStyle: TfpgLineStyle);
+constructor T_TraitStyle.Create(AEpais: Single; AColor: Tfpgcolor; AStyle: TfpgLineStyle);
 begin
 inherited Create;
 FEpais:= AEpais;

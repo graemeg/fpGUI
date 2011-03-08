@@ -149,7 +149,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -201,7 +201,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -253,7 +253,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -305,7 +305,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -357,7 +357,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -409,7 +409,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -461,7 +461,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -513,7 +513,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -565,7 +565,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -617,7 +617,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -669,7 +669,7 @@ with Imprime do
       with Document do
         begin
         FluxFichier:= TFileStream.Create(FichierPdf,fmCreate);
-        EcritDocument(FluxFichier);
+        WriteDocument(FluxFichier);
         FluxFichier.Free;
         Free;
         end;
@@ -1082,7 +1082,7 @@ end;
 procedure TF_Demo.ImprimeCadres(Preview: Boolean);
 var
   FtTitre,FtTexte: Integer;
-  TsFin,TsEpais: Integer;
+  TsFin,TsNorm,TsEpais: Integer;
   IlTitre,IlTexte: Integer;
 begin
 with Imprime do
@@ -1095,7 +1095,8 @@ with Imprime do
   FtTitre:= Fonte('helvetica-15:bold',clBlack);
   FtTexte:= Fonte('helvetica-8',clBlack);
   // create the style of lines to be used
-  TsFin:= StyleTrait(1,clBlack,lsSolid);
+  TsFin:= StyleTrait(0.2,clBlack,lsSolid);
+  TsNorm:= StyleTrait(1,clBlack,lsSolid);
   TsEpais:= StyleTrait(2,clBlack,lsSolid);
   // create line spacings to be used
   IlTitre:= Interligne(3,0,3);
@@ -1109,7 +1110,7 @@ with Imprime do
   // draw thick frame rectangle at header
   CadreEnTete(TsEpais);
   // draw thick frame rectangle at footer
-  CadrePied(TsEpais);
+  CadrePied(TsNorm);
   // preparation is finished, so create PDF objects
   Fin;
   end;
@@ -1194,8 +1195,8 @@ with Imprime do
   FtTitre:= Fonte('helvetica-15:bold',clBlack);
   FtTexte:= Fonte('helvetica-8',clBlack);
   // create the style of lines to be used
-  TsFinNoir:= StyleTrait(1,clBlack,lsSolid);
-  TsFinBleu:= StyleTrait(1,clBlue,lsDash);
+  TsFinNoir:= StyleTrait(0.2,clBlack,lsSolid);
+  TsFinBleu:= StyleTrait(0.1,clBlue,lsDash);
   TsEpais:= StyleTrait(2,clBlack,lsSolid);
   TsFinRouge:= StyleTrait(1,clRed,lsDashDot);
   // create line spacings to be used

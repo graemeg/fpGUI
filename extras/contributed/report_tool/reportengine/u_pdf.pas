@@ -37,7 +37,7 @@ type
     private
       FValue: Boolean;
     protected
-      procedure EcritBoolean(const AFlux: TStream);
+      procedure WriteBoolean(const AFlux: TStream);
     public
       constructor CreateBoolean(const AValue: Boolean);
       destructor Destroy; override;
@@ -47,7 +47,7 @@ type
     private
       FValue: Integer;
     protected
-      procedure EcritInteger(const AFlux: TStream);
+      procedure WriteInteger(const AFlux: TStream);
       procedure IncrementeInteger;
       property Value: Integer read FValue write FValue;
     public
@@ -59,7 +59,7 @@ type
     private
       FValue: Integer;
     protected
-      procedure EcritReference(const AFlux: TStream);
+      procedure WriteReference(const AFlux: TStream);
     public
       constructor CreateReference(const AValue: Integer);
       destructor Destroy; override;
@@ -69,7 +69,7 @@ type
     private
       FValue: string;
     protected
-      procedure EcritName(const AFlux: TStream);
+      procedure WriteName(const AFlux: TStream);
     public
       constructor CreateName(const AValue: string);
       destructor Destroy; override;
@@ -79,7 +79,7 @@ type
     private
       FValue: string;
     protected
-      procedure EcritString(const AFlux: TStream);
+      procedure WriteString(const AFlux: TStream);
     public
       constructor CreateString(const AValue: string);
       destructor Destroy; override;
@@ -89,7 +89,7 @@ type
     private
       FArray: TList;
     protected
-      procedure EcritArray(const AFlux: TStream);
+      procedure WriteArray(const AFlux: TStream);
       procedure AddItem(const AValue: TPdfObjet);
     public
       constructor CreateArray;
@@ -100,7 +100,7 @@ type
     private
       FStream: TList;
     protected
-      procedure EcritStream(const AFlux: TStream);
+      procedure WriteStream(const AFlux: TStream);
       procedure AddItem(const AValue: TPdfObjet);
     public
       constructor CreateStream;
@@ -112,7 +112,7 @@ type
       FTxtFont: Integer;
       FTxtSize: string;
     protected
-      procedure EcritFonte(const AFlux: TStream);
+      procedure WriteFonte(const AFlux: TStream);
     public
       constructor CreateFonte(const AFont: Integer; const ASize: string);
       destructor Destroy; override;
@@ -120,53 +120,58 @@ type
 
   TPdfText = class(TPdfObjet)
     private
-      FTxtPosX: Integer;
-      FTxtPosY: Integer;
+      FTxtPosX: Single;
+      FTxtPosY: Single;
       FTxtText: TPdfString;
     protected
-      procedure EcritText(const AFlux: TStream);
+      procedure WriteText(const AFlux: TStream);
     public
-      constructor CreateText(const APosX,APosY: Integer; const AText: string);
+      constructor CreateText(const APosX,APosY: Single; const AText: string);
       destructor Destroy; override;
     end;
 
   TPdfLigne = class(TPdfObjet)
     private
-      FEpais: Integer;
-      FStaX: Integer;
-      FStaY: Integer;
-      FEndX: Integer;
-      FEndY: Integer;
+      FEpais: Single;
+      FStaX: Single;
+      FStaY: Single;
+      FEndX: Single;
+      FEndY: Single;
     protected
-      procedure EcritLigne(const AFlux: TStream);
+      procedure WriteLigne(const AFlux: TStream);
     public
-      constructor CreateLigne(const AEpais,AStaX,AStaY,AEndX,AEndY: Integer);
+      constructor CreateLigne(const AEpais,AStaX,AStaY,AEndX,AEndY: Single);
       destructor Destroy; override;
     end;
 
   TPdfRectangle = class(TPdfObjet)
     private
-      FEpais: Integer;
-      FRecX: Integer;
-      FRecY: Integer;
-      FRecW: Integer;
-      FRecH: Integer;
+      FEpais: Single;
+      FRecX: Single;
+      FRecY: Single;
+      FRecW: Single;
+      FRecH: Single;
       FFill: Boolean;
       FStroke: Boolean;
     protected
-      procedure EcritRectangle(const AFlux: TStream);
+      procedure WriteRectangle(const AFlux: TStream);
     public
-      constructor CreateRectangle(const AEpais,APosX,APosY,AWidth,AHeight: Integer; const AFill,AStroke: Boolean);
+      constructor CreateRectangle(const AEpais,APosX,APosY,AWidth,AHeight: Single; const AFill,AStroke: Boolean);
       destructor Destroy; override;
     end;
 
-  T_Points = array of TPoint;
+  TRefPos= record
+    X: Single;
+    Y: Single;
+    end;
+
+  T_Points = array of TRefPos;
 
   TPdfSurface = class(TPdfObjet)
     private
-      FPoints: array of TPoint;
+      FPoints: T_Points;
     protected
-      procedure EcritSurface(const AFlux: TStream);
+      procedure WriteSurface(const AFlux: TStream);
     public
       constructor CreateSurface(const APoints: T_Points);
       destructor Destroy; override;
@@ -177,7 +182,7 @@ type
       FDash: TfpgLineStyle;
       FPhase: Integer;
     protected
-      procedure EcritLineStyle(const AFlux: TStream);
+      procedure WriteLineStyle(const AFlux: TStream);
     public
       constructor CreateLineStyle(ADash: TfpgLineStyle; APhase: Integer);
       destructor Destroy; override;
@@ -190,7 +195,7 @@ type
       FBlue: string;
       FStroke: Boolean;
     protected
-      procedure EcritColor(const AFlux: TStream);
+      procedure WriteColor(const AFlux: TStream);
     public
       constructor CreateColor(const AStroke: Boolean; Couleur: LongInt);
       destructor Destroy; override;
@@ -201,7 +206,7 @@ type
       FKey: TPdfName;
       FValue: TPdfObjet;
     protected
-      procedure EcritDicElement(const AFlux: TStream);
+      procedure WriteDicElement(const AFlux: TStream);
     public
       constructor CreateDicElement(const AKey: string; const AValue: TPdfObjet);
       destructor Destroy; override;
@@ -213,7 +218,7 @@ type
     protected
       procedure AddElement(const AKey: string; const AValue: TPdfObjet);
       function ElementParCle(const AValue: string): Integer;
-      procedure EcritDictionary(AFlux: TStream);
+      procedure WriteDictionary(AFlux: TStream);
     public
       constructor CreateDictionary;
       destructor Destroy; override;
@@ -225,7 +230,7 @@ type
       FObjet: TPdfDictionary;
       FStream: TPdfStream;
     protected
-      procedure EcritXRef(const AFlux: TStream);
+      procedure WriteXRef(const AFlux: TStream);
     public
       constructor CreateXRef;
       destructor Destroy; override;
@@ -237,8 +242,8 @@ type
       FXRefObjets: TList; // list of TPdfXRef
     protected
       function ElementParNom(const AValue: string): Integer;
-      procedure EcritXRefTable(const AFlux: TStream);
-      procedure EcritObjet(const AObjet: Integer; const AFlux: TStream);
+      procedure WriteXRefTable(const AFlux: TStream);
+      procedure WriteObjet(const AObjet: Integer; const AFlux: TStream);
       procedure CreateRefTable;
       procedure CreateTrailer;
       function CreateCatalog: Integer;
@@ -254,7 +259,7 @@ type
     public
       constructor CreateDocument;
       destructor Destroy; override;
-      procedure EcritDocument(const AFlux: TStream);
+      procedure WriteDocument(const AFlux: TStream);
     end;
 
 const
@@ -283,7 +288,7 @@ var
 
 // utility functions
 
-procedure EcritChaine(const Valeur: string; AFlux: TStream);
+procedure WriteChaine(const Valeur: string; AFlux: TStream);
 begin
 AFlux.Write(PChar(Valeur)^,Length(Valeur));
 end;
@@ -361,7 +366,7 @@ end;
 
 constructor TPdfObjet.Create;
 begin
-  // implementation dans les descendants
+  // to be implemented by descendents
 end;
 
 destructor TPdfObjet.Destroy;
@@ -369,13 +374,13 @@ begin
 inherited;
 end;
 
-procedure TPdfBoolean.EcritBoolean(const AFlux: TStream);
+procedure TPdfBoolean.WriteBoolean(const AFlux: TStream);
 begin
 if FValue
 then
-  EcritChaine('true',AFlux)
+  WriteChaine('true',AFlux)
 else
-  EcritChaine('false',AFlux);
+  WriteChaine('false',AFlux);
 end;
 
 constructor TPdfBoolean.CreateBoolean(const AValue: Boolean);
@@ -389,9 +394,9 @@ begin
 inherited;
 end;
 
-procedure TPdfInteger.EcritInteger(const AFlux: TStream);
+procedure TPdfInteger.WriteInteger(const AFlux: TStream);
 begin
-EcritChaine(IntToStr(FValue), AFlux);
+WriteChaine(IntToStr(FValue), AFlux);
 end;
 
 procedure TPdfInteger.IncrementeInteger;
@@ -410,9 +415,9 @@ begin
 inherited;
 end;
 
-procedure TPdfReference.EcritReference(const AFlux: TStream);
+procedure TPdfReference.WriteReference(const AFlux: TStream);
 begin
-EcritChaine(IntToStr(FValue)+' 0 R',AFlux);
+WriteChaine(IntToStr(FValue)+' 0 R',AFlux);
 end;
 
 constructor TPdfReference.CreateReference(const AValue: Integer);
@@ -426,11 +431,11 @@ begin
 inherited;
 end;
 
-procedure TPdfName.EcritName(const AFlux: TStream);
+procedure TPdfName.WriteName(const AFlux: TStream);
 begin
 if FValue<> ''
 then
-  EcritChaine('/'+FValue,AFlux);
+  WriteChaine('/'+FValue,AFlux);
 end;
 
 constructor TPdfName.CreateName(const AValue: string);
@@ -444,9 +449,9 @@ begin
 inherited;
 end;
 
-procedure TPdfString.EcritString(const AFlux: TStream);
+procedure TPdfString.WriteString(const AFlux: TStream);
 begin
-EcritChaine('('+Utf8ToAnsi(FValue)+')',AFlux);
+WriteChaine('('+Utf8ToAnsi(FValue)+')',AFlux);
 end;
 
 constructor TPdfString.CreateString(const AValue: string);
@@ -460,27 +465,27 @@ begin
 inherited;
 end;
 
-procedure TPdfArray.EcritArray(const AFlux: TStream);
+procedure TPdfArray.WriteArray(const AFlux: TStream);
 var
   Cpt: Integer;
 begin
-EcritChaine('[',AFlux);
+WriteChaine('[',AFlux);
 for Cpt:= 0 to Pred(FArray.Count) do
   begin
   if Cpt> 0
   then
-    EcritChaine(' ',AFlux);
+    WriteChaine(' ',AFlux);
   if TPdfObjet(FArray[Cpt]) is TPdfInteger
   then
-    TPdfInteger(FArray[Cpt]).EcritInteger(AFlux);
+    TPdfInteger(FArray[Cpt]).WriteInteger(AFlux);
   if TPdfObjet(FArray[Cpt]) is TPdfReference
   then
-    TPdfReference(FArray[Cpt]).EcritReference(AFlux);
+    TPdfReference(FArray[Cpt]).WriteReference(AFlux);
   if TPdfObjet(FArray[Cpt]) is TPdfName
   then
-    TPdfName(FArray[Cpt]).EcritName(AFlux);
+    TPdfName(FArray[Cpt]).WriteName(AFlux);
   end;
-EcritChaine(']',AFlux);
+WriteChaine(']',AFlux);
 end;
 
 procedure TPdfArray.AddItem(const AValue: TPdfObjet);
@@ -500,7 +505,7 @@ FArray.Free;
 inherited;
 end;
 
-procedure TPdfStream.EcritStream(const AFlux: TStream);
+procedure TPdfStream.WriteStream(const AFlux: TStream);
 var
   Cpt: Integer;
 begin
@@ -508,25 +513,25 @@ for Cpt:= 0 to Pred(FStream.Count) do
   begin
   if TPdfObjet(FStream[Cpt]) is TPdfFonte
   then
-    TPdfFonte(FStream[Cpt]).EcritFonte(AFlux);
+    TPdfFonte(FStream[Cpt]).WriteFonte(AFlux);
   if TPdfColor(FStream[Cpt]) is TPdfColor
   then
-    TPdfColor(FStream[Cpt]).EcritColor(AFlux);
+    TPdfColor(FStream[Cpt]).WriteColor(AFlux);
   if TPdfObjet(FStream[Cpt]) is TPdfText
   then
-    TPdfText(FStream[Cpt]).EcritText(AFlux);
+    TPdfText(FStream[Cpt]).WriteText(AFlux);
   if TPdfObjet(FStream[Cpt]) is TPdfRectangle
   then
-    TPdfRectangle(FStream[Cpt]).EcritRectangle(AFlux);
+    TPdfRectangle(FStream[Cpt]).WriteRectangle(AFlux);
   if TPdfObjet(FStream[Cpt]) is TPdfLigne
   then
-    TPdfLigne(FStream[Cpt]).EcritLigne(AFlux);
+    TPdfLigne(FStream[Cpt]).WriteLigne(AFlux);
   if TPdfObjet(FStream[Cpt]) is TPdfLineStyle
   then
-    TPdfLineStyle(FStream[Cpt]).EcritLineStyle(AFlux);
+    TPdfLineStyle(FStream[Cpt]).WriteLineStyle(AFlux);
   if TPdfObjet(FStream[Cpt]) is TPdfSurface
   then
-    TPdfSurface(FStream[Cpt]).EcritSurface(AFlux);
+    TPdfSurface(FStream[Cpt]).WriteSurface(AFlux);
   end;
 end;
 
@@ -547,9 +552,9 @@ FStream.Free;
 inherited;
 end;
 
-procedure TPdfFonte.EcritFonte(const AFlux: TStream);
+procedure TPdfFonte.WriteFonte(const AFlux: TStream);
 begin
-EcritChaine('/F'+IntToStr(FTxtFont)+' '+FTxtSize+' Tf'+CRLF,AFlux);
+WriteChaine('/F'+IntToStr(FTxtFont)+' '+FTxtSize+' Tf'+CRLF,AFlux);
 end;
 
 constructor TPdfFonte.CreateFonte(const AFont: Integer; const ASize: string);
@@ -564,16 +569,16 @@ begin
 inherited;
 end;
 
-procedure TPdfText.EcritText(const AFlux: TStream);
+procedure TPdfText.WriteText(const AFlux: TStream);
 begin
-EcritChaine('BT'+CRLF,AFlux);
-EcritChaine(IntToStr(FTxtPosX)+' '+IntToStr(FTxtPosY)+' Td'+CRLF,AFlux);
-TPdfString(FTxtText).EcritString(AFlux);
-EcritChaine(' Tj'+CRLF,AFlux);
-EcritChaine('ET'+CRLF,AFlux);
+WriteChaine('BT'+CRLF,AFlux);
+WriteChaine(FormatFloat('0.##',FTxtPosX)+' '+FormatFloat('0.##',FTxtPosY)+' Td'+CRLF,AFlux);
+TPdfString(FTxtText).WriteString(AFlux);
+WriteChaine(' Tj'+CRLF,AFlux);
+WriteChaine('ET'+CRLF,AFlux);
 end;
 
-constructor TPdfText.CreateText(const APosX,APosY: Integer; const AText: string);
+constructor TPdfText.CreateText(const APosX,APosY: Single; const AText: string);
 begin
 inherited Create;
 FTxtPosX:= APosX;
@@ -587,21 +592,21 @@ FTxtText.Free;
 inherited;
 end;
 
-procedure TPdfLigne.EcritLigne(const AFlux: TStream);
+procedure TPdfLigne.WriteLigne(const AFlux: TStream);
 begin
-if (IntToStr(FEpais)+' w')<> CurrentWidth
+if (FormatFloat('0.##',FEpais)+' w')<> CurrentWidth
 then
   begin
-  EcritChaine('1 J'+CRLF,AFlux);
-  EcritChaine(IntToStr(FEpais)+' w'+CRLF,AFlux);
-  CurrentWidth:= IntToStr(FEpais)+' w';
+  WriteChaine('1 J'+CRLF,AFlux);
+  WriteChaine(FormatFloat('0.##',FEpais)+' w'+CRLF,AFlux);
+  CurrentWidth:= FormatFloat('0.##',FEpais)+' w';
   end;
-EcritChaine(IntToStr(FStaX)+' '+IntToStr(FStaY)+' m'+CRLF,AFlux);
-EcritChaine(IntToStr(FEndX)+' '+IntToStr(FEndY)+' l'+CRLF,AFlux);
-EcritChaine('S'+CRLF,AFlux);
+WriteChaine(FormatFloat('0.##',FStaX)+' '+FormatFloat('0.##',FStaY)+' m'+CRLF,AFlux);
+WriteChaine(FormatFloat('0.##',FEndX)+' '+FormatFloat('0.##',FEndY)+' l'+CRLF,AFlux);
+WriteChaine('S'+CRLF,AFlux);
 end;
 
-constructor TPdfLigne.CreateLigne(const AEpais,AStaX,AStaY,AEndX,AEndY: Integer);
+constructor TPdfLigne.CreateLigne(const AEpais,AStaX,AStaY,AEndX,AEndY: Single);
 begin
 inherited Create;
 FEpais:= AEpais;
@@ -616,27 +621,27 @@ begin
 inherited;
 end;
 
-procedure TPdfRectangle.EcritRectangle(const AFlux: TStream);
+procedure TPdfRectangle.WriteRectangle(const AFlux: TStream);
 begin
 if FStroke
 then
-  if (IntToStr(FEpais)+' w')<> CurrentWidth
+  if (FormatFloat('0.##',FEpais)+' w')<> CurrentWidth
   then
     begin
-    EcritChaine('1 J'+CRLF,AFlux);
-    EcritChaine(IntToStr(FEpais)+' w'+CRLF,AFlux);
-    CurrentWidth:= IntToStr(FEpais)+' w';
+    WriteChaine('1 J'+CRLF,AFlux);
+    WriteChaine(FormatFloat('0.##',FEpais)+' w'+CRLF,AFlux);
+    CurrentWidth:= FormatFloat('0.##',FEpais)+' w';
     end;
-EcritChaine(IntToStr(FRecX)+' '+IntToStr(FRecY)+' '+IntToStr(FRecW)+' '+IntToStr(FRecH)+' re'+CRLF,AFlux);
+WriteChaine(FormatFloat('0.##',FRecX)+' '+FormatFloat('0.##',FRecY)+' '+FormatFloat('0.##',FRecW)+' '+FormatFloat('0.##',FRecH)+' re'+CRLF,AFlux);
 if FStroke
 then
-  EcritChaine('S'+CRLF,AFlux);
+  WriteChaine('S'+CRLF,AFlux);
 if FFill
 then
-  EcritChaine('f'+CRLF,AFlux);
+  WriteChaine('f'+CRLF,AFlux);
 end;
 
-constructor TPdfRectangle.CreateRectangle(const AEpais,APosX,APosY,AWidth,AHeight: Integer; const AFill,AStroke: Boolean);
+constructor TPdfRectangle.CreateRectangle(const AEpais,APosX,APosY,AWidth,AHeight: Single; const AFill,AStroke: Boolean);
 begin
 inherited Create;
 FEpais:= AEpais;
@@ -653,15 +658,15 @@ begin
 inherited;
 end;
 
-procedure TPdfSurface.EcritSurface(const AFlux: TStream);
+procedure TPdfSurface.WriteSurface(const AFlux: TStream);
 var
   Cpt: Integer;
 begin
-EcritChaine(IntToStr(FPoints[0].X)+' '+IntToStr(FPoints[0].Y)+' m'+CRLF,AFlux);
+WriteChaine(FormatFloat('0.##',FPoints[0].X)+' '+FormatFloat('0.##',FPoints[0].Y)+' m'+CRLF,AFlux);
 for Cpt:= 1 to Pred(Length(FPoints)) do
-  EcritChaine(IntToStr(FPoints[Cpt].X)+' '+IntToStr(FPoints[Cpt].Y)+' l'+CRLF,AFlux);
-EcritChaine('h'+CRLF,AFlux);
-EcritChaine('f'+CRLF,AFlux);
+  WriteChaine(FormatFloat('0.##',FPoints[Cpt].X)+' '+FormatFloat('0.##',FPoints[Cpt].Y)+' l'+CRLF,AFlux);
+WriteChaine('h'+CRLF,AFlux);
+WriteChaine('f'+CRLF,AFlux);
 end;
 
 constructor TPdfSurface.CreateSurface(const APoints: T_Points);
@@ -675,20 +680,20 @@ begin
 inherited;
 end;
 
-procedure TPdfLineStyle.EcritLineStyle(const AFlux: TStream);
+procedure TPdfLineStyle.WriteLineStyle(const AFlux: TStream);
 begin
-EcritChaine('[',AFlux);
+WriteChaine('[',AFlux);
 case FDash of
   lsDash:
-    EcritChaine('5 5',AFlux);
+    WriteChaine('5 5',AFlux);
   lsDot:
-    EcritChaine('2 2',AFlux);
+    WriteChaine('2 2',AFlux);
   lsDashDot:
-    EcritChaine('5 2 2 2',AFlux);
+    WriteChaine('5 2 2 2',AFlux);
   lsDashDotDot:
-    EcritChaine('5 2 2 2 2 2',AFlux);
+    WriteChaine('5 2 2 2 2 2',AFlux);
   end;
-EcritChaine('] '+IntToStr(FPhase)+' d'+CRLF,AFlux);
+WriteChaine('] '+IntToStr(FPhase)+' d'+CRLF,AFlux);
 end;
 
 constructor TPdfLineStyle.CreateLineStyle(ADash: TfpgLineStyle; APhase: Integer);
@@ -703,7 +708,7 @@ begin
 inherited;
 end;
 
-procedure TPdfColor.EcritColor(const AFlux: TStream);
+procedure TPdfColor.WriteColor(const AFlux: TStream);
 begin
 if FStroke
 then
@@ -711,7 +716,7 @@ then
   if (FRed+' '+FGreen+' '+FBlue+' rg')<> CurrentColor
   then
     begin
-    EcritChaine(FRed+' '+FGreen+' '+FBlue+' rg'+CRLF,AFlux);
+    WriteChaine(FRed+' '+FGreen+' '+FBlue+' rg'+CRLF,AFlux);
     CurrentColor:= FRed+' '+FGreen+' '+FBlue+' rg';
     end;
   end
@@ -719,24 +724,19 @@ else
   if (FRed+' '+FGreen+' '+FBlue+' RG')<> CurrentColor
   then
     begin
-    EcritChaine(FRed+' '+FGreen+' '+FBlue+' RG'+CRLF,AFlux);
+    WriteChaine(FRed+' '+FGreen+' '+FBlue+' RG'+CRLF,AFlux);
     CurrentColor:= FRed+' '+FGreen+' '+FBlue+' RG';
     end;
 end;
 
 constructor TPdfColor.CreateColor(const AStroke: Boolean; Couleur: Longint);
-var
-  OldSeparator: Char;
 begin
 inherited Create;
-OldSeparator:= DecimalSeparator;
-DecimalSeparator:= '.';
 FBlue:= FormatFloat('0.##',Couleur mod 256/256);
 Couleur:= Couleur div 256;
 FGreen:= FormatFloat('0.##',Couleur mod 256/256);
 FRed:= FormatFloat('0.##',Couleur div 256/256);
 FStroke:= AStroke;
-DecimalSeparator:= OldSeparator;
 end;
 
 destructor TPdfColor.Destroy;
@@ -744,32 +744,32 @@ begin
 inherited
 end;
 
-procedure TPdfDicElement.EcritDicElement(const AFlux: TStream);
+procedure TPdfDicElement.WriteDicElement(const AFlux: TStream);
 begin
-FKey.EcritName(AFlux);
-EcritChaine(' ',AFlux);
+FKey.WriteName(AFlux);
+WriteChaine(' ',AFlux);
 if FValue is TPdfBoolean
 then
-  TPdfBoolean(FValue).EcritBoolean(AFlux);
+  TPdfBoolean(FValue).WriteBoolean(AFlux);
 if FValue is TPdfInteger
 then
-  TPdfInteger(FValue).EcritInteger(AFlux);
+  TPdfInteger(FValue).WriteInteger(AFlux);
 if FValue is TPdfReference
 then
-  TPdfReference(FValue).EcritReference(AFlux);
+  TPdfReference(FValue).WriteReference(AFlux);
 if FValue is TPdfName
 then
-  TPdfName(FValue).EcritName(AFlux);
+  TPdfName(FValue).WriteName(AFlux);
 if FValue is TPdfString
 then
-  TPdfString(FValue).EcritString(AFlux);
+  TPdfString(FValue).WriteString(AFlux);
 if FValue is TPdfArray
 then
-  TPdfArray(FValue).EcritArray(AFlux);
+  TPdfArray(FValue).WriteArray(AFlux);
 if FValue is TPdfDictionary
 then
-  TPdfDictionary(FValue).EcritDictionary(AFlux);
-EcritChaine(CRLF,AFlux);
+  TPdfDictionary(FValue).WriteDictionary(AFlux);
+WriteChaine(CRLF,AFlux);
 end;
 
 constructor TPdfDicElement.CreateDicElement(const AKey: string; const AValue: TPdfObjet);
@@ -806,14 +806,14 @@ for Cpt:= 0 to Pred(FElement.Count) do
     end;
 end;
 
-procedure TPdfDictionary.EcritDictionary(AFlux: TStream);
+procedure TPdfDictionary.WriteDictionary(AFlux: TStream);
 var
   Cpt: Integer;
 begin
-EcritChaine('<<'+CRLF,AFlux);
+WriteChaine('<<'+CRLF,AFlux);
 for Cpt:= 0 to Pred(FElement.Count) do
-  TPdfDicElement(FElement[Cpt]).EcritDicElement(AFlux);
-EcritChaine('>>',AFlux);
+  TPdfDicElement(FElement[Cpt]).WriteDicElement(AFlux);
+WriteChaine('>>',AFlux);
 end;
 
 constructor TPdfDictionary.CreateDictionary;
@@ -834,9 +834,9 @@ FElement.Free;
 inherited;
 end;
 
-procedure TPdfXRef.EcritXRef(const AFlux: TStream);
+procedure TPdfXRef.WriteXRef(const AFlux: TStream);
 begin
-EcritChaine(IntToChaine(FOffset,10)+' '+IntToChaine(0,5)+' n'+CRLF,AFlux);
+WriteChaine(IntToChaine(FOffset,10)+' '+IntToChaine(0,5)+' n'+CRLF,AFlux);
 end;
 
 constructor TPdfXRef.CreateXRef;
@@ -864,47 +864,47 @@ for Cpt:= 1 to Pred(FXRefObjets.Count) do
     Result:= Cpt;
 end;
 
-procedure TPdfDocument.EcritXRefTable(const AFlux: TStream);
+procedure TPdfDocument.WriteXRefTable(const AFlux: TStream);
 var
   Cpt: Integer;
 begin
 if FXRefObjets.Count> 1
 then
   for Cpt:= 1 to Pred(FXRefObjets.Count) do
-    TPdfXRef(FXRefObjets[Cpt]).EcritXRef(AFlux);
+    TPdfXRef(FXRefObjets[Cpt]).WriteXRef(AFlux);
 end;
 
-procedure TPdfDocument.EcritObjet(const AObjet: Integer; const AFlux: TStream);
+procedure TPdfDocument.WriteObjet(const AObjet: Integer; const AFlux: TStream);
 var
   Dictionaire: TPdfDictionary;
   Long: TPdfInteger;
   Fin: Integer;
   Flux: TMemoryStream;
 begin
-EcritChaine(IntToStr(AObjet)+' 0 obj'+CRLF,AFlux);
+WriteChaine(IntToStr(AObjet)+' 0 obj'+CRLF,AFlux);
 if TPdfXRef(FXRefObjets[AObjet]).FStream= nil
 then
-  TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).EcritDictionary(AFlux)
+  TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).WriteDictionary(AFlux)
 else
   begin
    Flux:= TMemoryStream.Create;
   Flux.Position:= 0;
   CurrentColor:= '';
   CurrentWidth:= '';
-  TPdfXRef(FXRefObjets[AObjet]).FStream.EcritStream(Flux);
+  TPdfXRef(FXRefObjets[AObjet]).FStream.WriteStream(Flux);
 // write stream length element in contents dictionary
   Long:= TPdfInteger.CreateInteger(Flux.Size);
   TPdfDictionary(TPdfXRef(FXRefObjets[AObjet]).FObjet).AddElement('Length',Long);
   Flux.Free;
-  TPdfXRef(FXRefObjets[AObjet]).FObjet.EcritDictionary(AFlux);
+  TPdfXRef(FXRefObjets[AObjet]).FObjet.WriteDictionary(AFlux);
 // write stream in contents dictionary
   CurrentColor:= '';
   CurrentWidth:= '';
-  EcritChaine(CRLF+'stream'+CRLF,AFlux);
-  TPdfXRef(FXRefObjets[AObjet]).FStream.EcritStream(AFlux);
-  EcritChaine('endstream',AFlux);
+  WriteChaine(CRLF+'stream'+CRLF,AFlux);
+  TPdfXRef(FXRefObjets[AObjet]).FStream.WriteStream(AFlux);
+  WriteChaine('endstream',AFlux);
   end;
-EcritChaine(CRLF+'endobj'+CRLF,AFlux);
+WriteChaine(CRLF+'endobj'+CRLF,AFlux);
 end;
 
 procedure TPdfDocument.CreateRefTable;
@@ -1465,31 +1465,31 @@ FXRefObjets.Free;
 inherited;
 end;
 
-procedure TPdfDocument.EcritDocument(const AFlux: TStream);
+procedure TPdfDocument.WriteDocument(const AFlux: TStream);
 var
   Cpt,XRefPos: Integer;
 begin
 AFlux.Position:= 0;
-EcritChaine(PDF_VERSION+CRLF,AFlux);
+WriteChaine(PDF_VERSION+CRLF,AFlux);
 // write numbered indirect objects
 for Cpt:= 1 to Pred(FXRefObjets.Count) do
   begin
   XRefPos:= AFlux.Position;
-  EcritObjet(Cpt,AFlux);
+  WriteObjet(Cpt,AFlux);
   TPdfXRef(FXRefObjets[Cpt]).Offset:= XRefPos;
   end;
 XRefPos:= AFlux.Position;
 // write xref table
-EcritChaine('xref'+CRLF+'0 '+IntToStr(FXRefObjets.Count)+CRLF,AFlux);
+WriteChaine('xref'+CRLF+'0 '+IntToStr(FXRefObjets.Count)+CRLF,AFlux);
 with TPdfXRef(FXRefObjets[0]) do
-  EcritChaine(IntToChaine(Offset,10)+' '+IntToChaine(PDF_MAX_GEN_NUM,5)+' f'+CRLF,AFlux);
-EcritXRefTable(AFlux);
+  WriteChaine(IntToChaine(Offset,10)+' '+IntToChaine(PDF_MAX_GEN_NUM,5)+' f'+CRLF,AFlux);
+WriteXRefTable(AFlux);
 // write trailer
-EcritChaine('trailer'+CRLF,AFlux);
-Trailer.EcritDictionary(AFlux);
+WriteChaine('trailer'+CRLF,AFlux);
+Trailer.WriteDictionary(AFlux);
 // write offset of last xref table
-EcritChaine(CRLF+'startxref'+CRLF+IntToStr(XRefPos)+CRLF,AFlux);
-EcritChaine(PDF_FILE_END,AFlux);
+WriteChaine(CRLF+'startxref'+CRLF+IntToStr(XRefPos)+CRLF,AFlux);
+WriteChaine(PDF_FILE_END,AFlux);
 end;
 
 end.
