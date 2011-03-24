@@ -1506,7 +1506,7 @@ var
   
 begin
   xfd := XConnectionNumber(display);
-  XFlush(display);
+  DoFlush;
 (*
   repeat
 
