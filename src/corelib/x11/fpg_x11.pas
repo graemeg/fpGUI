@@ -2232,8 +2232,13 @@ begin
       lmwh := 0;
       if fpgApplication.PrevModalForm <> nil then
         lmwh := TfpgX11Window(fpgApplication.PrevModalForm).WinHandle
-      else if FocusRootWidget <> nil then
-        lmwh := TfpgX11Window(FocusRootWidget).WinHandle
+{ 2011-03-24: Graeme Geldenhuys
+  I commented code this code because it caused more problems that it solved
+  when multiple modal dialogs or prompts are shown in succession.
+  This code was originally introduced in commit 2ffdd747. I'm looking for an
+  alternative solution to the original problem. }
+//      else if FocusRootWidget <> nil then
+//        lmwh := TfpgX11Window(FocusRootWidget).WinHandle
       else if fpgApplication.MainForm <> nil then
         lmwh := TfpgX11Window(fpgApplication.MainForm).WinHandle;
       if lmwh <> 0 then
