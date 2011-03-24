@@ -559,7 +559,7 @@ begin
     p := p^.Next;
   end;
   {$IFDEF DEBUG}
-  writeln('GFX/X11: FindWindowByHandle failed to find <', IntToHex(wh, 9), '>');
+  writeln('fpGUI/X11: FindWindowByHandle failed to find <', IntToHex(wh, 9), '>');
   {$ENDIF}
   Result := nil;
 end;
@@ -579,7 +579,7 @@ begin
     p := p^.Next;
   end;
   {$IFDEF DEBUG}
-  writeln('GFX/X11: FindWindowByBackupHandle failed to find <', IntToHex(wh, 9), '>');
+  writeln('fpGUI/X11: FindWindowByBackupHandle failed to find <', IntToHex(wh, 9), '>');
   {$ENDIF}
   Result := nil;
 end;
