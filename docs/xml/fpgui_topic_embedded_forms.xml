@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<fpdoc-descriptions>
+<package name="fpGUI">
+<topic name="AdditionalTopics">
+<short>Additional Topics</short>
+<topic name='EmbeddedForms'>
+
+<short>Embedded Forms as reusable Frames</short>
+
+<descr><p>fpGUI allows you to embed a Form inside another Form. This is similar
+to the Delphi-like TFrame idea. This is very handy if you want to reuse a UI design
+in multiple places in your application.
+</p>
+<p>At first you will be tempted to design a "frame" using a TfpgForm descendant,
+because that is what the UI Designer will create for you by default. Please refrain
+from using TfpgForm descendants as "frames" because there are quite a few pitfalls.
+Instead, use TfpgBevel as the base class for a UI Frame design. This eliminates
+all the possible problems you might get. You can still use the UI Designer because,
+the UI Designer simply ignores the base class of any UI design - it only care about
+what is inside the designer comment markers.
+</p>
+<p><b>What are the problems when you descend from TfpgForm</b></p>
+<ul>
+<li>Drag-n-Drop under X11 will stop working for those forms. The XDND protocol needs
+to speak to the top-level form. When you use a TfpgForm as an embedded form or frame,
+it will find the wrong TfpgForm, and DND will simply not work.</li>
+<li>You could display an embedded form as modal, meaning it will block all other
+input to the application, making the outer parent form look like it is frozen.</li>
+<li>A TfpgForm has a WindowPosition property which is by default set to wpAuto. This
+means, fpGUI leaves it up to the OS or Window Manager to decide where that form mast
+first appear. This also means that your Top/Left position you specify for the embedded
+form will most likely be ignored - giving undesired results.</li>
+</ul>
+
+<p>
+Simply using TfpgBevel (or soon to appear TfpgFrame) as your base class for embedded forms/frames
+will resolve all these issues for you. For an example of this, take a look at the demo
+project in [fpgui]/examples/embedded_form/ directory.
+</p>
+</descr>
+
+</topic>
+</topic>
+</package>
+</fpdoc-descriptions>
