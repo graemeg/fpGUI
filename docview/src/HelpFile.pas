@@ -106,11 +106,11 @@ type
     procedure ReadFontTableData;
     procedure ParseFontTable;
 
-    function GetTopic( Index: longint ): TTopic;
+    function GetTopic( AIndex: longint ): TTopic;
     function GetTopicCount: longint;
 
     function GetDictionaryCount: longint;
-    function GetDictionaryWord( Index: longint ): string;
+    function GetDictionaryWord( AIndex: longint ): string;
 
     function GetHighlightWords: UInt32ArrayPointer;
 
@@ -146,7 +146,7 @@ type
     function GetImage( ImageOffset: longint ): THelpBitmap;
 
     property DictionaryCount: longint read GetDictionaryCount;
-    property DictionaryWords[ Index: longint ]: string read GetDictionaryWord;
+    property DictionaryWords[ AIndex: longint ]: string read GetDictionaryWord;
 
     function IndexOfTopic( Topic: TTopic ): longint;
 
@@ -1117,13 +1117,13 @@ begin
   end;
 end;
 
-function THelpFile.GetTopic( Index: longint ): TTopic;
+function THelpFile.GetTopic( AIndex: longint ): TTopic;
 begin
-  if    ( Index < 0 )
-     or ( Index > _Topics.Count - 1 ) then
+  if    ( AIndex < 0 )
+     or ( AIndex > _Topics.Count - 1 ) then
     Result := nil
   else
-    Result := TTopic(_Topics[ Index ]);
+    Result := TTopic(_Topics[ AIndex ]);
 end;
 
 function THelpFile.GetTopicCount: longint;
@@ -1141,9 +1141,9 @@ begin
   Result := _Dictionary.Count;
 end;
 
-function THelpFile.GetDictionaryWord( Index: longint ): string;
+function THelpFile.GetDictionaryWord( AIndex: longint ): string;
 begin
-  Result := _Dictionary[ Index ];
+  Result := _Dictionary[ AIndex ];
 end;
 
 
