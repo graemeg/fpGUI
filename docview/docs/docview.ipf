@@ -899,7 +899,8 @@ These paths are searched when you:
 :p.
 The :hp2.LANG:ehp2. environment variable is examined under Linux or FreeBSD to
 decide the default language that DocView will be displayed in. Windows doesn't
-user a environment variable, instead use the Region applet in the Windows Control Panel.
+use an environment variable - instead you need to use the Region applet in
+the Windows Control Panel.
 
 
 .* ************************************************************
