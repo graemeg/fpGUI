@@ -57,6 +57,7 @@ type
       FGroupe: Boolean;
       FDefaultFile: string;
       function Dim2Pixels(Value: Single): Single;
+      function Pixels2Dim(Value: Single): Single;
       function AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFont): string;
       function TxtHeight(AWid: Integer; const ATxt: TfpgString; AFnt: TfpgFont; ALSpace: Integer= 2): Integer;
       function ConvertitEnAlpha(Valeur: Integer): string;
@@ -69,11 +70,11 @@ type
       procedure DecaleLignesPied(Decalage: Single);
       procedure DecaleLigne(Decalage: Single);
       procedure DecaleGroupe(Decalage: Single);
-      procedure EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
-                TxtFlags: TFTextFlags; Zone: TZone);
-      procedure EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
-                TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum);
-      procedure InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Single; FondNum: Integer; Zone: TZone);
+      function EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
+                TxtFlags: TFTextFlags; Zone: TZone): Single;
+      function EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
+                TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum): Single;
+      function InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Single; FondNum: Integer; Zone: TZone): Single;
       procedure FinLigne(Zone: TZone);
       procedure TraceCadre(StTrait: Integer; Zone: TZone);
       procedure TraceTrait(XDebut,YDebut,XFin,YFin: Single; StTrait: Integer);
@@ -135,9 +136,9 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
-      procedure EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
-                InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
+                // BordNum = border reference, if > -1
+      function EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+                InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1): Single;
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
                 //         or numeric value in the measurement unit (msMM or msInch)
                 // Verti = line position in column (lnCourante,lnFin)
@@ -147,7 +148,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure EcritPied(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
                 // Horiz = horizontal position in column (cnLeft,cnCenter,cnRight)
@@ -159,7 +160,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure NumSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
@@ -175,7 +176,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure NumSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
@@ -191,7 +192,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure NumPageEnTete(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
                 Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
                 CoulFdNum: Integer= -1; BordNum: Integer= -1);
@@ -206,7 +207,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure NumPagePied(Horiz,Verti: Single; TextePage: string= ''; TexteTotal: string= '';
                 Total: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0; InterNum: Integer= 0;
                 CoulFdNum: Integer= -1; BordNum: Integer= -1);
@@ -221,7 +222,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure NumPageSectionEnTete(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
@@ -236,7 +237,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure NumPageSectionPied(Horiz,Verti: Single; TexteSect: string= ''; TexteTot: string= '';
                 Total: Boolean= False; Alpha: Boolean= False; ColNum: Integer= 0; FonteNum: Integer= 0;
                 InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
@@ -251,7 +252,7 @@ type
                 // FonteNum = font reference
                 // InterNum = space between lines reference
                 // CoulFdNum = background color reference, if > -1, replaces the column background color if any
-                // BordNum = border reference, if> -1
+                // BordNum = border reference, if > -1
       procedure TraitHorizEnTete(EspAvant,EspApres: Single; ColNum: Integer= 0; StyleNum: Integer= 0);
                 // EspAvant = empty space before the horizontal line : numeric value in the measurement unit (msMM or msInch)
                 // EspApres =  empty space after the horizontal line : numeric value in the measurement unit (msMM or msInch)
@@ -434,6 +435,7 @@ const
   cnLeft= -2;
   cnCenter= -3;
   cnRight= -4;
+  PPI= 72;
 
 implementation
 
@@ -442,7 +444,6 @@ uses
 
 const
   InchToMM= 25.4;
-  PPI= 72;
   Cent= 100;
 
 function T_Imprime.Dim2Pixels(Value: Single): Single;
@@ -452,6 +453,15 @@ then
   Result:= Value*PPI/InchToMM
 else
   Result:= Value*PPI;
+end;
+
+function T_Imprime.Pixels2Dim(Value: Single): Single;
+begin
+if FMesure= msMM
+then
+  Result:= Value*InchToMM/PPI
+else
+  Result:= Value/PPI;
 end;
 
 function T_Imprime.AddLineBreaks(const Txt: TfpgString; AMaxLineWidth: integer; AFnt: TfpgFont): string;
@@ -904,8 +914,8 @@ with AGroupe do
     end;
 end;
 
-procedure T_Imprime.EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
-          TxtFlags: TFTextFlags; Zone: TZone);
+function T_Imprime.EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
+          TxtFlags: TFTextFlags; Zone: TZone): Single;
 var
   PosH,PosV,IntlInt,IntLSup,IntLInf,EpaisTrait: Single;
   HTxt,HautTxt,Half,CoulTrait,Cpt: Integer;
@@ -1103,13 +1113,14 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             PosH:= T_Colonne(Colonnes[Colonne]).GetTextPos;
             if (txtRight in TxtFlags)
             then
-              PosH:= PosH+T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte])-T_Colonne(Colonnes[ColDefaut]).ColMargin;
+              PosH:= PosH+T_Colonne(Colonnes[Colonne]).ColWidth-Fnt.TextWidth(Textes[Texte])-T_Colonne(Colonnes[Colonne]).ColMargin;
             if (txtHCenter in TxtFlags)
             then
-              PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[Texte]))/2;
+              PosH:= PosH+(T_Colonne(Colonnes[Colonne]).ColWidth-Fnt.TextWidth(Textes[Texte]))/2;
             end;
       FPosRef.X:= PosH+Fnt.TextWidth(Textes[Texte]+' ');
       ALigne.LoadTexte(PosH,PosV,Colonne,Texte,FonteNum,HTxt,FondNum,BordNum,InterL,UseCurFont,TxtFlags);
+      Result:= Pixels2Dim(FPosRef.Y);
       if FinDeLigne
       then
         begin
@@ -1333,8 +1344,8 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   end;
 end;
 
-procedure T_Imprime.EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
-          TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum);
+function T_Imprime.EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
+          TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum): Single;
 
   function BuildChaine: string;
   var
@@ -1510,24 +1521,25 @@ with T_Section(Sections[Pred(NumeroSection)]) do
               PosH:= PosX
           else
             begin
-            PosH:= T_Colonne(Colonnes[Colonne]).GetTextPos-T_Colonne(Colonnes[ColDefaut]).ColMargin;
+            PosH:= T_Colonne(Colonnes[Colonne]).GetTextPos-T_Colonne(Colonnes[Colonne]).ColMargin;
             if (txtRight in TxtFlags)
             then
               if Total
               then
-                PosH:= PosH+T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 ')-T_Colonne(Colonnes[ColDefaut]).ColMargin
+                PosH:= PosH+T_Colonne(Colonnes[Colonne]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 ')-T_Colonne(Colonnes[Colonne]).ColMargin
               else
-                PosH:= PosH+T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 ')-T_Colonne(Colonnes[ColDefaut]).ColMargin;
+                PosH:= PosH+T_Colonne(Colonnes[Colonne]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 ')-T_Colonne(Colonnes[Colonne]).ColMargin;
             if (txtHCenter in TxtFlags)
             then
               if Total
               then
-                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 '))/2
+                PosH:= PosH+(T_Colonne(Colonnes[Colonne]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 '))/2
               else
-                PosH:= PosH+(T_Colonne(Colonnes[ColDefaut]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '))/2;
+                PosH:= PosH+(T_Colonne(Colonnes[Colonne]).ColWidth-Fnt.TextWidth(Textes[TexteNum]+' 0 '))/2;
             end;
       FPosRef.X:= PosH+Fnt.TextWidth(Textes[TexteNum]+' 0 '+Textes[TexteTot]+' 0 ');
       ALigne.LoadNumero(PosH,PosV,Colonne,TexteNum,TexteTot,FonteNum,HTxt,FondNum,BordNum,InterL,UseCurFont,TxtFlags,Total,Alpha,SPNum);
+      Result:= Pixels2Dim(FPosRef.Y);
       if FinDeLigne
       then
         begin
@@ -1720,7 +1732,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
   end;
 end;
 
-procedure T_Imprime.InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Single; FondNum: Integer; Zone: TZone);
+function T_Imprime.InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Single; FondNum: Integer; Zone: TZone): Single;
 var
   PosV: Single;
 begin
@@ -1768,6 +1780,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
       if FGroupe
       then
         LoadEspaceGroupe(EspHeight);
+      Result:= Pixels2Dim(FPosRef.Y);
       FinLigne(Zone);
       end;
     ppVisualise:
@@ -1867,8 +1880,8 @@ with T_Section(Sections[Pred(NumeroSection)]) do
               begin
               DrawLine(MargeL+Half,MargeT+EnTeteH,MargeL+Half,MargeB-PiedH);    // gauche
               DrawLine(MargeR-Half,MargeT+EnTeteH,MargeR-Half,MargeB-PiedH);    // droite
-              DrawLine(MargeL,MargeT+EnTeteH+Half,MargeR,MargeT+EnTeteH+Half);  // haute
-              DrawLine(MargeL,MargeB-PiedH-Half,MargeR,MargeB-PiedH-Half);      // basse
+              DrawLine(MargeL,MargeT+EnTeteH-Half,MargeR,MargeT+EnTeteH-Half);  // haute
+              DrawLine(MargeL,MargeB-PiedH+Half,MargeR,MargeB-PiedH+Half);      // basse
               end;
             zPied:
               begin
@@ -1911,8 +1924,8 @@ with T_Section(Sections[Pred(NumeroSection)]) do
             zPage:
               begin
               FGauche:= L;
-              FBas:= Paper.H-B-FPiedHeight;
-              FHaut:= Paper.H-T-FEnTeteHeight-B-FPiedHeight;
+              FBas:= Paper.H-B+FPiedHeight;
+              FHaut:= B-T-FEnTeteHeight-FPiedHeight;
               FLarg:= R-L;
               end;
             zPied:
@@ -2316,6 +2329,12 @@ ABord:= T_Bord.Create(BdFlags,BdStyle);
 Result:= Bords.Add(ABord);
 end;
 
+//function T_Imprime.Bordure(BdFlags: TFBordFlags; StFlags: array of Integer): Integer;
+//begin
+//ABord:= T_Bord.Create(BdFlags,BdStyle);
+//Result:= Bords.Add(ABord);
+//end;
+
 function T_Imprime.Colonne(ClnPos,ClnWidth: Single; ClnMargin: Single= 0; ClnColor: TfpgColor= clWhite): Integer;
 var
   CPos,CWidth,CMargin: Single;
@@ -2368,8 +2387,8 @@ then
 EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZEnTete);
 end;
 
-procedure T_Imprime.EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
-          InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
+function T_Imprime.EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;
+          InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1): Single;
 var
   RefTexte: Integer;
   Flags: TFTextFlags;
@@ -2397,7 +2416,7 @@ RefTexte:= Textes.IndexOf(Texte);
 if RefTexte= -1
 then
   RefTexte:= Textes.Add(Texte);
-EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPage);
+Result:= EcritLigne(Horiz,Verti,ColNum,RefTexte,FonteNum,CoulFdNum,BordNum,InterNum,Flags,ZPage);
 end;
 
 procedure T_Imprime.EcritPied(Horiz,Verti: Single; Texte: string; ColNum: Integer= 0; FonteNum: Integer= 0;

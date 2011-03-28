@@ -1106,11 +1106,12 @@ with Imprime do
   // write page number and total of pages on each page
   NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
   // draw thin frame rectangle at margins
-  CadreMarges(TsFin);
+//  CadreMarges(TsFin);
   // draw thick frame rectangle at header
   CadreEnTete(TsEpais);
   // draw thick frame rectangle at footer
   CadrePied(TsNorm);
+  CadrePage(TsEpais);
   // preparation is finished, so create PDF objects
   Fin;
   end;
@@ -1232,12 +1233,25 @@ end;
 
 procedure TF_Demo.ImprimeGrid(Preview: Boolean);
 var
-  FtTitre,FtTexte,FtSTitre: Integer;
-  TsFinNoir: Integer;
+  FtTitre,FtTexte,FtTexteBlue,FtTexteRed,FtSTitre: Integer;
+  TsFinNoir,TsEpaisBleu: Integer;
   IlTitre,IlTexte: Integer;
+  FdBeige: Integer;
   Col: array[1..5] of Integer;
-  BdColn,BdFinCol: Integer;
+  BdColn,BdColnG,BdColnD: Integer;
   CptLig,CptCol: Integer;
+  PosHoriz,PredPosHoriz: Single;
+const
+  Col1Pos= 20;
+  Col1Wid= 40;
+  Col2Pos= 60;
+  Col2Wid= 35;
+  Col3Pos= 95;
+  Col3Wid= 35;
+  Col4Pos= 130;
+  Col4Wid= 35;
+  Col5Pos= 165;
+  Col5Wid= 35;
 begin
 with Imprime do
   begin
@@ -1248,21 +1262,27 @@ with Imprime do
   // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
   FtTitre:= Fonte('helvetica-15:bold',clBlack);
   FtTexte:= Fonte('helvetica-7',clBlack);
+  FtTexteBlue:= Fonte('helvetica-7',clBlue);
+  FtTexteRed:= Fonte('helvetica-7',clRed);
   FtSTitre:= Fonte('helvetica-9:bold:italic',clBlue);
   // create the style of lines to be used
-  TsFinNoir:= StyleTrait(1,clBlack,lsSolid);
+  TsFinNoir:= StyleTrait(0.5,clBlack,lsSolid);
+  TsEpaisBleu:= StyleTrait(1.5,clBlue,lsSolid);
   // create line spacings to be used
   IlTitre:= Interligne(3,0,3);
   IlTexte:= Interligne(1,0,0);
+  // define column background color
+  FdBeige:= Fond(clBeige);
   // define column borders
-  BdColn:= Bordure([bcGauche,bcDroite,bcHaut],TsFinNoir);
-  BdFinCol:= Bordure([bcGauche,bcDroite,bcHaut,bcBas],TsFinNoir);
+  BdColn:= Bordure([bcGauche,bcDroite],TsFinNoir);
+  BdColnG:= Bordure([bcGauche],TsEpaisBleu);
+  BdColnD:= Bordure([bcDroite],TsEpaisBleu);
   // create columns to be used
-  Col[1]:= Colonne(20,40,2);
-  Col[2]:= Colonne(60,35,2);
-  Col[3]:= Colonne(95,35,2);
-  Col[4]:= Colonne(130,35,2);
-  Col[5]:= Colonne(165,35,2);
+  Col[1]:= Colonne(Col1Pos,Col1Wid,2);
+  Col[2]:= Colonne(Col2Pos,Col2Wid,2);
+  Col[3]:= Colonne(Col3Pos,Col3Wid,2);
+  Col[4]:= Colonne(Col4Pos,Col4Wid,2);
+  Col[5]:= Colonne(Col5Pos,Col5Wid,2);
   // write title on each page
   EcritEnTete(cnCenter,lnFin,'SHOWING GRIDS',ColDefaut,FtTitre,IlTitre);
   // write page number and total of pages on each page
@@ -1278,22 +1298,56 @@ with Imprime do
         EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte);
   EspacePage(5);
   // write a grid with borders
-  EcritPage(cnCenter,lnFin,'Grid with borders',ColDefaut,FtSTitre,IlTitre);
+  PosHoriz:= EcritPage(cnCenter,lnFin,'Grid with borders and colors',ColDefaut,FtSTitre,IlTitre);
+  TraitPage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsEpaisBleu);
   for CptLig:= 1 to 10 do
     for CptCol:= 1 to 5 do
-      if CptCol= 5
+      if CptCol= 1
       then
-        if CptLig= 10
+        if CptLig mod 2= 0
         then
-          EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdFinCol)
+          EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,FdBeige,BdColnG)
         else
-          EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColn)
+          EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteBlue,IlTexte,-1,BdColnG)
       else
-        if CptLig= 10
+        if CptCol= 5
         then
-          EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdFinCol)
+          if CptLig= 10
+          then
+            begin
+            PredPosHoriz:= PosHoriz;
+            PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteRed,IlTexte,FdBeige,BdColnD);
+            TraitPage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
+            TraitPage(Col1Pos,PosHoriz,Col5Pos+Col5Wid,PosHoriz,TsEpaisBleu);
+            TraitPage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsFinNoir);
+            end
+          else
+            begin
+            if CptLig= 1
+            then
+              PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColnD)
+            else
+              if CptLig mod 2= 0
+              then
+                begin
+                PredPosHoriz:= PosHoriz;
+                PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteRed,IlTexte,FdBeige,BdColnD);
+                TraitPage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
+                TraitPage(Col5Pos,PredPosHoriz,Col5Pos,PosHoriz,TsFinNoir);
+                end
+              else
+                begin
+                PredPosHoriz:= PosHoriz;
+                PosHoriz:= EcritPage(cnLeft,lnFin,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColnD);
+                TraitPage(Col1Pos,PredPosHoriz,Col5Pos+Col5Wid,PredPosHoriz,TsFinNoir);
+                end;
+            end
         else
-          EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,-1,BdColn);
+          if CptLig mod 2= 0
+          then
+            EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexte,IlTexte,FdBeige,BdColn)
+          else
+            EcritPage(cnLeft,lnCourante,'line '+IntToStr(CptLig)+' ; column '+IntToStr(CptCol),Col[CptCol],FtTexteBlue,IlTexte,-1,BdColn);
   // preparation is finished, so create PDF objects
   Fin;
   end;
