@@ -275,8 +275,14 @@ begin
   if InDesigner then
     Exit; //==>
   
-  if FActiveWidget <> nil then
-    FActiveWidget.HandleKillFocus;
+  try
+    if FActiveWidget <> nil then
+      FActiveWidget.HandleKillFocus;
+  except
+    { This is just a failsafe, in case FActiveWidget was not correctly set
+      in the destructor of TfpgWidget }
+    FActiveWidget := nil;
+  end;
   FActiveWidget := AValue;
   if FActiveWidget <> nil then
     FActiveWidget.HandleSetFocus;
@@ -507,6 +513,9 @@ begin
   writeln('TfpgWidget.Destroy [', Classname, '.', Name, ']');
   {$ENDIF}
   HandleHide;
+  if Owner <> nil then
+    if (Owner is TfpgWidget) and (TfpgWidget(Owner).ActiveWidget = self) then
+      TfpgWidget(Owner).ActiveWidget := nil;
   inherited Destroy;
 end;
 
