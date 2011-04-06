@@ -732,7 +732,7 @@ begin
   end;
 
   SearchTableOffset := _pHeader^.SearchStart and $7fffffff;
-  SearchTableRecordLengthIs16Bit := _pHeader^.SearchStart and $80000000 > 0;
+  SearchTableRecordLengthIs16Bit := (_pHeader^.SearchStart and $80000000) > 0;
   ReadFileBlock( _pSearchData,
                  SearchTableOffset,
                  _pHeader^.SearchLen );
