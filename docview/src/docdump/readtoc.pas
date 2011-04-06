@@ -73,7 +73,7 @@ begin
   GetMem(pData, hdr.toclen);
   AIn.Read(pData^, hdr.toclen);
   pEntry := pData;
-  for count := 1 to hdr.ntoc do
+  for count := 0 to hdr.ntoc-1 do
   begin
 //    AIn.Read(toc, SizeOf(TTOCEntryStart));
 //    FillChar(olay, SizeOf(TTOCOverlay), 0);

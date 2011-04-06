@@ -32,7 +32,7 @@ begin
     for i := 0 to eHdr.NumFontEntry-1 do
     begin
       AIn.Read(fnt, SizeOf(THelpFontSpec));
-      AOut.WriteLn(Format('  Font Entry #%d', [i+1]));
+      AOut.WriteLn(Format('  Font Entry #%d', [i]));
       AOut.WriteLn(Format('    FontSpec.FaceName: %s', [fnt.FaceName]));
       AOut.WriteLn(Format('    FontSpec.Height:   %4.4x (%0:d)', [fnt.Height]));
       AOut.WriteLn(Format('    FontSpec.Width:    %4.4x (%0:d)', [fnt.Width]));
