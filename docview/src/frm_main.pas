@@ -135,6 +135,7 @@ type
     procedure   miToolsFindByResourceID(Sender: TObject);
     procedure   miToolsFindTopifByName(Sender: TObject);
     procedure   miTopicPropertiesClicked(Sender: TObject);
+    procedure   miDumpDictionaryClicked(Sender: TObject);
     procedure   miFileSaveTopicAsIPF(Sender: TObject);
     procedure   OnMRUMenuItemClick(Sender: TObject);
     procedure   btnShowIndex(Sender: TObject);
@@ -713,6 +714,26 @@ begin
     sl.Free;
   end;
 End;
+
+procedure TMainForm.miDumpDictionaryClicked(Sender: TObject);
+var
+  i: integer;
+  j: integer;
+  f: THelpFile;
+  sl: TStringList;
+begin
+  for i := 0 to CurrentOpenFiles.Count-1 do
+  begin
+    f := THelpFile(CurrentOpenFiles[i]);
+    sl := TStringList.Create;
+    for j := 0 to f.DictionaryCount-1 do
+    begin
+      sl.Add('"' + f.DictionaryWords[j] + '"');
+    end;
+    sl.SaveToFile(GetTempDir + fpgExtractFileName(f.Filename) + '.dictionary');
+  end;
+  sl.Free;
+end;
 
 procedure TMainForm.miFileSaveTopicAsIPF(Sender: TObject);
 var
@@ -3014,6 +3035,7 @@ begin
     miDebugHexInfo := AddMenuItem('Toggle hex INF values in contents', '', @miDebugHex);
     AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
     AddMenuItem('Current topic properties', '', @miTopicPropertiesClicked);
+    AddMenuItem('Dump dictionary to file in temp directory', '', @miDumpDictionaryClicked);
   end;
 
   miHelp := TfpgPopupMenu.Create(self);
