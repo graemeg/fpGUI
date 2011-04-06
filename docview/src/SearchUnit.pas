@@ -85,7 +85,7 @@ begin
   WordSequences.Clear;
 end;
 
-// given a search word which is known to matche Reference word,
+// given a Search word which is known to match the Reference word,
 // return the relevance
 function MatchedWordRelevance( const SearchWord: string;
                                const ReferenceWord: string ): longint;
@@ -361,8 +361,8 @@ begin
   AllocUInt32Array( TopicsExcluded, // Exclusions are treated as boolean only
                     TopicCount );
 
-  FillUInt32Array( TopicRelevances, TopicCount, 0);
-  FillUInt32Array( TopicsExcluded, TopicCount, 0);
+  ClearUInt32Array( TopicRelevances, TopicCount );
+  ClearUInt32Array( TopicsExcluded, TopicCount );
 
   for TermIndex := 0 to Query.TermCount - 1 do
   begin
@@ -425,8 +425,7 @@ begin
       // this search term part, search topic texts
 
       LogEvent(LogSearch, '  Dictionary search done' );
-      ClearUInt32Array( TopicsMatchingTermPart,
-                        TopicCount );
+      ClearUInt32Array( TopicsMatchingTermPart, TopicCount );
 
       for DictIndex := 0 to HelpFile.DictionaryCount - 1 do
       begin
@@ -435,8 +434,7 @@ begin
         begin
           // Search for occurrences of this word
           // within the text of topics
-          HelpFile.SearchTable.Search( DictIndex,
-                                       TopicsMatchingDictWord );
+          HelpFile.SearchTable.Search(DictIndex, TopicsMatchingDictWord);
 
           // debug
           s := HelpFile.DictionaryWords[ DictIndex ];
