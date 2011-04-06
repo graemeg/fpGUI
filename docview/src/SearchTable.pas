@@ -1,19 +1,31 @@
+{
+    fpGUI  -  Free Pascal GUI Toolkit
+
+    Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
+    distribution, for details of the copyright.
+
+    See the file COPYING.modifiedLGPL, included in this distribution,
+    for details about redistributing fpGUI.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+    Description:
+      Code to read and use the IPF search tables. Note: The RLE
+      decompression was arrived at by trial and error. It seems
+      to be correct but it's difficult to test.
+}
+
 Unit SearchTable;
 
 {$mode objfpc}{$H+}
 
-// NewView - a new OS/2 Help Viewer
-// Copyright 2003 Aaron Lawrence (aaronl at consultant dot com)
-// This software is released under the Gnu Public License - see readme.txt
-
-Interface
+interface
 
 uses
   Classes, IPFFileFormatUnit;
-
-// Code to read and use IPF search tables
-// NB The RLE decompression was arrived at by trial and error
-// it seems to be correct but it's difficult to test.
 
 type
   TSearchTable = class(TObject)
@@ -47,7 +59,9 @@ type
 
   end;
 
-Implementation
+
+implementation
+
 
 constructor TSearchTable.Create( Data: pointer;
                                  RecordLengthIs16Bit: boolean;
