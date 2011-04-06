@@ -229,7 +229,6 @@ var
   pDataEnd: pointer;
   Flags: uint8;
 begin
-  FillUInt32Array( Results, _TopicCount, 0 );
   pWordRecord:= _Entries[ DictIndex ];
 
   // Check search table format
@@ -250,13 +249,14 @@ begin
   pDataEnd:= pWordRecord + RecordLen;
   case CompressionCode of
     0: // word not used anywhere.
-      ;
+      ClearUInt32Array( Results, _TopicCount );
 
     1: // used in all panels
       FillUInt32Array( Results, _TopicCount, 1 );
 
     2: // RLE
     begin
+      ClearUInt32Array( Results, _TopicCount );
       DoRLESearch( pData,
                    pDataEnd,
                    Results );
@@ -264,6 +264,7 @@ begin
 
     3: // list of topics containing word
     begin
+      ClearUInt32Array( Results, _TopicCount );
       while pData < pDataEnd do
       begin
         TopicIndex:= pUInt16( pData )^;
@@ -285,10 +286,13 @@ begin
     end;
 
     5, // compressed by truncating bit stream at last byte containing a set bit.
-    6: // same as above but starting at non-zero byte
+    6: // same as above but starting at non-zero byte (first word contains start topic)
     begin
+      ClearUInt32Array( Results, _TopicCount );
       if CompressionCode = 5 then
+      begin
         TopicIndex:= 0
+      end
       else
       begin
         TopicIndex:= pUInt16( pData )^ * 8;
@@ -304,6 +308,13 @@ begin
         inc( TopicIndex, 8 );
         inc( pData );
       end;
+    end;
+
+    else  { unmatched case items }
+    begin
+//      writeln('Unknown search method: Found no topic text match');
+      // unknown method
+      ClearUInt32Array( Results, _TopicCount );
     end;
   end;
 end;
