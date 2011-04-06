@@ -79,7 +79,7 @@ Type
     icmdOffset: uint32;   // file offset to icmd index items
     icmdSize: uint32;     // size of icmd index table
     searchstart: uint32;  // 31 bit file offset of full text search table
-                          // Note: top bit indicates 32 bit search record!
+                          // Note: top bit indicates 16 or 8 bit search record!
     searchlen: uint32;    // size of full text search table
     nslots: uint16;       // number of "slots"
     slotsstart: uint32;   // file offset of the slots array

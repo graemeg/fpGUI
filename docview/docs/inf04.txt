@@ -114,7 +114,9 @@
             int32 indexstart;   // 32 bit file offset to index table
             int32 indexlen;     // size of index table
             int8  unknown3[10]; // unknown purpose
-            int32 searchstart;  // 32 bit file offset of full text search table
+            int32 searchstart;  // 31 bit file offset of full text search table
+                                //  1 bit if True means search record is 16bits
+                                //    else search record is 8bits in size.
             int32 searchlen;    // size of full text search table
             int16 nslots;       // number of "slots"
             int32 slotsstart;   // file offset of the slots array
