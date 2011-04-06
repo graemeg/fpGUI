@@ -58,9 +58,9 @@ var
   pEntry: pTTOCEntryStart;
   pExtendedInfo: pExtendedTOCEntry;
   p: PByte;
-  i: integer;
   titleLen: integer;
   title: string;
+  lOffset: uint32;
 begin
   AOut.WriteLn('');
   AOut.WriteLn('Table of Contents');
@@ -78,14 +78,14 @@ begin
 //    AIn.Read(toc, SizeOf(TTOCEntryStart));
 //    FillChar(olay, SizeOf(TTOCOverlay), 0);
     p := PByte(pEntry) + sizeof(TTOCEntryStart);
-    i := Longint(p^);
 
     olay.extended  :=  (pEntry^.flags and TOCEntryExtended ) = TOCEntryExtended;
     olay.nestlevel := (pEntry^.flags and TOCEntryLevelMask);
     olay.hidden := (pEntry^.flags and TOCEntryHidden) = TOCEntryHidden;
     olay.haschildren := (pEntry^.flags and TOCEntryHasChildren) = TOCEntryHasChildren;
 
-    AOut.WriteLn(Format('  TOC Entry #%d at offset %8.8x (%d bytes)', [count, p^, i]));
+    lOffset := hdr.tocstart + (pEntry-pData);
+    AOut.WriteLn(Format('  TOC Entry #%d at offset %8.8x (%d bytes)', [count, lOffset, lOffset]));
     AOut.WriteLn(Format('    tocentry.length:      %2.2x (%0:d bytes)', [pEntry^.length]));
     AOut.WriteLn(Format('    tocentry.nestlevel:   %d', [olay.nestlevel]));
     AOut.WriteLn(Format('    tocentry.unknown:     %s', [iif(olay.unknown, 'set', 'clear')]));
