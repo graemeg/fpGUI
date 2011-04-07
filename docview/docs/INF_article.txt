@@ -1,0 +1,593 @@
+
+            Information on reading the INF file format
+            ==========================================
+
+Author: unknown
+Date:   unknown
+
+
+This article is intended to provide the reader with enough information
+to  read  and search the HLP/INF file format.  Support is not provided
+for constructing your own INF files.
+
+The  INF  and  HLP  file  format  are  exactly the same except for the
+switching of two bytes in the header. Therefore all the information in
+this article applies to both HLP and INF files. The difference between
+the  two  will  be explained later. I will, however, use the term "INF
+format" to distinguish between OS/2 HLP files and Windows HLP files.
+
+This  article  will be divided into three main parts. First there will
+be an overview of the file format. Second there will be information on
+accessing  parts of this format, including code samples. Third will be
+information on searching the INF format.
+
+Note  that  to  understand a lot of the concepts in displaying panels,
+an  understanding  of  the  IPF Guide and Reference is necessary. This
+will give an understanding of the ways in which panels can be modified
+in terms of sizes, styles, etc.
+
+
+Overview
+========
+
+        [This is where I will put Stan's document]
+
+Accessing Information in the INF/HLP file
+-----------------------------------------
+The  next part of this article is organized as if you are writing your
+own  INF/HLP viewer.  It  will  provide  explanations on how to do the
+following things:
+
+1. Read  in  header  information.  This  will allow you to display the
+   title and access the rest of the information in the panel.
+
+2. Read in and index the vocabulary.
+
+3. Read  in  the Cell Offset Table. This will be used later to display
+   panels.
+
+4. Read  in  the table of contents. Explanations will be given for two
+   methods  of  accessing  the  table  of  contents. The first is from
+   memory.  This  method is useful if you are reading the entire table
+   of  contents  at  once  to  display it, or if your application will
+   provide primary access to panels through the table of contents. The
+   second  method  of  accessing table of contents entries is directly
+   from the file. This method is useful for linking and for displaying
+   a  panel  initially  when  a file is opened. In OS/2, VIEW uses the
+   first  method  whereas  displaying help for an application uses the
+   second method.
+
+5. Display  the  titles  of all panels in the file. Titles will not be
+   stored  because  access  to  the  table  of contents is provided by
+   index,  not  by  title.  There is a lot of extra information in the
+   table  of  contents  entries  that will not be used until a cell is
+   actually displayed.
+
+6. Display  a  panel.  This  will  be  the  most involved explanation.
+   Displaying   a   panel   actually  requires  retrieving  a  lot  of
+   information  from  the  table  of  contents  and  then  reading and
+   formatting the data within the panel.
+
+Note  that this makes some basic assumptions that you are going to use
+the file in a similar manner as OS/2s VIEW program and Help Manager.
+
+
+Headers
+=======
+The  first step in accessing information in the file is to read in the
+header.  Figures  1  and  2  show  the  structures used to acccess the
+regular  and  extended  headers.  The  extended header is not in every
+file.  It  can  be  detected  by  checking  the ExtHeaderOffset in the
+DOCHEADER structure. If the ExtHeaderOffset is greater than 0, then it
+is the file offset of the extended header. The following code fragment
+opens the file and reads the DOCHEADER and the EXTHEADER if necessary.
+
+DOCHEADER DocHeader;
+EXTHEADER ExtHeader;
+FILE*     fpointer;
+CHAR*     FileName;
+
+fpointer = fopen(FileName,"rb");
+fread(&DocHeader,sizeof(DOCHEADER),1,fpointer);
+if (DocHeader.ExtHeaderOffset > 0) {
+   fseek(fpointer, DocHeader.ExtHeaderOffset, SEEK_SET);
+   fread(&ExtHeader,sizeof(EXTHEADER),1,fpointer);
+}
+
+The DOCHEADER contains all of the information needed to access data
+within the file.  At this point, though, there are only a couple
+fields we are concerned about.  The first is the FileCTRLWord.  This
+field indicates the type of file.  If it is 0x01505348 it is an INF file;
+If it is 0x10505348, it is a HLP file.  The other field of use right now
+is the Title;  this is simply a null-terminated string containing
+the title of the document.  One interesting note is that although
+the title for a HLP file is normally specified in an application,
+there still is a title in the HLP file if the writer specified
+a :title. tag.
+
+
+Vocabulary
+==========
+Once the DOCHEADER is obtained, the next step is to read the vocabulary.
+All references to the vocabulary in the INF/HLP file are made via an
+index value.  This index, however, is not in the file so it must be
+built.  The following code fragment reads in the vocabulary and builds
+an index to it.
+
+PULONG pulVocabIndex;
+PCHAR pchVocab;
+ULONG ulVocabPointer;
+INT i;
+
+pchVocab = malloc(DocHeader.CLVTSize);
+pulVocabIndex = malloc(DocHeader.CLVTNumWords*(sizeof(ULONG));
+
+fseek(fpointer, DocHeader.CLVTOffset,SEEK_SET);
+fread(pchVocab, DocHeader.CLVTSize, 1, fpointer);
+
+ulVocabPointer = 0;
+for (i=0;i< DocHeader.CLVTNumWords ;i++ ) {
+   pulVocabIndex[i] = ulVocabPointer;
+   ulVocabPointer += pchVocab[ulVocabPointer];
+} /* endfor */
+
+Remember that when referencing the vocabulary, the first byte contains the
+length of the word, including the first byte.  Here is the result of the
+above code sample with a vocabulary of {you, can, develop}.
+
+Example:
+--------
+pchVocab -> 4can8develop4you
+            │   │       │
+            │   └───┐  ┌┘
+            └─────┐ │  │
+pulVocabIndex -> {0,4,12}
+
+Given any index into the vocabulary, you can then reference the
+appropriate word.
+
+
+Cell Offset Table
+=================
+The Cell Offset Table will be read next.  It will be used later to
+get the file offsets of the cells within each panel.  The information
+needed to obtain the Cell Offset Table is contained in the DOCHEADER.
+The pertinent fields are NumCell and COTOffset.  The following code
+fragment retrieves the Cell Offset Table from the file.
+
+PULONG pulCOT;
+
+pulCOT = malloc(DocHeader.NumCell*sizeof(ULONG));
+fseek(fpointer, DocHeader.COTOffset, SEEK_SET);
+fread(pulCOT, DocHeader.NumCell*sizeof(ULONG), 1, fpointer);
+
+
+Table Of Contents
+=================
+The next step is to read the table of contents into memory.
+The DOCHEADER contains all the values necessary to read the table of
+contents.  TOCOffset contains the file offset of the table of contents
+and TOCSize contains the size.  The table of contents is read in a
+similar manner to the vocabulary; that is, it is read into memory
+and then indexed.  The following code fragments reads the table
+of contents into memory.
+
+PULONG pulTOCIndex;
+PBYTE pbTOC;
+ULONG ulTOCPointer;
+INT i;
+
+pbTOC = malloc(DocHeader.TOCSize);
+pulTOCIndex = malloc(DocHeader.NumTOCEntry*(sizeof(ULONG));
+
+fseek(fpointer, DocHeader.TOCOffset,SEEK_SET);
+fread(pbTOC, DocHeader.TOCSize, 1, fpointer);
+
+ulTOCPointer = pbTOC;
+for (i=0;i< DocHeader.NumTOCEntry ;i++ ) {
+   pulTOCIndex[i] = ulTOCPointer;
+   ulTOCPointer += (BYTE) *pvTOC;
+} /* endfor */
+
+Each entry in the TOC index is an address of a TOC entry.  Once the TOC
+is in memory, individual TOC items can be referenced.  Note that this
+is not the only way to reference the TOC.  There is also a TOC Ofset
+Table which provides file offsets to individual TOC items.  This is used
+when you need to reference a panel individually by its TOC index.
+This is true when linking and when opening a HLP or INF file without
+display the table of contents first.  The following code fragment
+retrieves the TOC Offset Table.
+
+PULONG pulTOCOffsetTable;
+
+pulTOCOffsetTable = malloc(DocHeader.NumTOCEntry*sizeof(ULONG));
+
+fseek(fpointer, DocHeader.OfsTiTICOfsTable,SEEK_SET);
+fread(pulTOCOffsetTable, DocHeader.NumTOCEntry*sizeof(ULONG), 1, fpointer);
+
+Once you have access to a table of contents entry, you must then read
+in the data contained there.  This is not very straightforward due
+to the fact that TOC entries can very greatly in length.  At this point,
+though, the important thing to read from the TOC entries are the titles.
+You will probably not want to use the header information until you need
+to display a panel.  The following code fragment just reads the title
+given that the table of contents is in memory and the entry we want
+to access is i.  It also checks the the extended header (if it exists)
+to determine whether or not the entry is a parent.  This will allow
+you to display some sort of indicator that the entry can be expanded
+to display its children, similar to the way the help manager does.
+
+TOCIN TocIn;
+USHORT NumBytes;
+BOOL fParent = FALSE;
+PSZ pszTitle;
+USHORT TOCControlWord;
+
+memcpy(&TOCIn, pulTOCIndex[i], sizeof(TOCIN));
+NumBytes = sizeof(TOCIN);
+ExtHeader = TocIn.HeadLevel&HIGH_ORDER_MASK;
+if (ExtHeader) {
+   memcpy(&TOCControlWord, pulTOCIndex[i]+sizeof(TOCIN), sizeof(USHORT));
+   NumBytes += sizeof(USHORT);
+   if (TOCControlWord&PANEL_EXTENDEDPARENT) {
+      fParent = TRUE;
+   }
+   if (TOCControlWord&PANEL_EXTENDED_X_Y) {
+      NumBytes+=(sizeof(BYTE)+2*sizeof(USHORT));
+   }
+   if (TOCControlWord&PANEL_EXTENDED_CX_CY) {
+      NumBytes+=(sizeof(BYTE)+2*sizeof(USHORT));
+   }
+   if (TOCControlWord&PANEL_EXTENDED_STYLE) {
+      NumBytes += sizeof(USHORT);
+   }
+   if (TOCControlWord&PANEL_EXTENDED_GROUP) {
+      NumBytes += sizeof(USHORT);
+   }
+   if (TOCControlWord&PANEL_EXTENDED_CTRLSINDEX)
+      NumBytes += sizeof(USHORT);
+}
+NumBytes += TOCIn.NumCells*sizeof(BYTE);
+pszTitle = malloc(TOCIn.LengthEntry-NumBytes+1);
+memcpy(pszTitle, pulTOCIndex[i]+NumBytes, TOCIn.LengthEntry-NumBytes);
+pszTitle[TOCIn.LengthEntry-NumBytes] = '\0';
+
+If the table of contents entry is on disk, the following code fragment
+retrieves the title and status as a parent using the TOC Offset Table.
+
+TOCIN TocIn;
+USHORT NumBytes;
+BOOL fParent = FALSE;
+PSZ pszTitle;
+
+fseek(fpointer, pulTOCOffsetTable[i], SEEK_SET);
+fread(&TOCIn, sizeof(TOCIN), 1, fpointer(TOCIN));
+NumBytes = sizeof(TOCIN);
+ExtHeader = TocIn.HeadLevel&HIGH_ORDER_MASK;
+if (ExtHeader) {
+   fread(&TOCControlWord, sizeof(USHORT), 1, fpointer);
+   NumBytes += sizeof(USHORT);
+   if (TOCControlWord&PANEL_EXTENDEDPARENT) {
+      fParent = TRUE;
+   }
+   if (TOCControlWord&PANEL_EXTENDED_X_Y) {
+      fseek(fpointer, sizeof(BYTE)+2*sizeof(USHORT), SEEK_CUR);
+      NumBytes+=(sizeof(BYTE)+2*sizeof(USHORT));
+   }
+   if (TOCControlWord&PANEL_EXTENDED_CX_CY) {
+      fseek(fpointer, sizeof(BYTE)+2*sizeof(USHORT), SEEK_CUR);
+      NumBytes+=(sizeof(BYTE)+2*sizeof(USHORT));
+   }
+   if (TOCControlWord&PANEL_EXTENDED_STYLE) {
+      fseek(fpointer, sizeof(USHORT), SEEK_CUR);
+      NumBytes += sizeof(USHORT);
+   }
+   if (TOCControlWord&PANEL_EXTENDED_GROUP) {
+      fseek(fpointer, sizeof(USHORT), SEEK_CUR);
+      NumBytes += sizeof(USHORT);
+   }
+   if (TOCControlWord&PANEL_EXTENDED_CTRLSINDEX) {
+      fseek(fpointer, sizeof(USHORT), SEEK_CUR);
+      NumBytes += sizeof(USHORT);
+   }
+}
+NumBytes += TOCIn.NumCells*sizeof(BYTE);
+fseek(fpointer, TOCIn.NumCells*sizeof(BYTE), SEEK_CUR);
+pszTitle = malloc(TOCIn.LengthEntry-NumBytes+1);
+fread(pszTitle, TOCIn.LengthEntry-NumBytes, SEEK_SET);
+pszTitle[TOCIn.LengthEntry-NumBytes] = '\0';
+
+IMPORTANT: The title is not null terminated.  We had to explicitly
+           add a null to the end of the title.
+
+The TOCIN structure and TOCControlWord provide a lot more information
+than we are using in the above fragment.  One important piece of
+information is the headlevel.  This is available in the HeadLevel
+field of the TOCIN structure.  To actually get at the headlevel,
+you must OR the HeadLevel field with LOW_ORDER_MASK.  The result is
+a byte indicating the head level (1-6).  Most of the other information
+in the table of contents is not really usable until a panel is displayed.
+When we are displaying a panel, we will reaccess the table of contents
+entry to get the pertinent information.
+
+
+Displaying a Panel
+==================
+The next step is displaying a panel.  All that is necessary to display
+a panel is an index to a table of contents entry.  We will use this
+index to get all the information about the panel.  Table of contents
+indexes are obtained from various places including the index table,
+the panel number table, the panel name table, and the search table.
+In our viewer, we obtain the table of contents index determine which
+table of contents entry the use selected.  Remember that we did not save
+the title entries of the table of contents.  The reason we did not is
+because all we need is an index to the table of contents entry.  The
+title is not necessary for access.
+
+The first step is to get the TOCIN structure from memory or from the
+file.  This is performed in the same manner as the above code
+fragments.  Once we have the TOCIN structure, we can detect the presence
+of an extended table of contents header (hereafter referred to as the
+control word).  To detect the presence of a control word, we OR the
+HeadLevel value with the HIGH_ORDER_MASK.  If the resulting value
+is not zero, there is a control word present.  The control word
+is defined as a USHORT. By ORing the TOCControlWord with various
+constants defined in the header file, we can determine information
+about the panel including location, size, group, etc.  The following
+constants are used to find that information.
+
+PANEL_EXTENDED_VIEWPORT
+PANEL_EXTENDED_NOSEARCH - Entry should not be searched
+PANEL_EXTENDED_NOPRINT - Entry should not be printed
+PANEL_EXTENDED_AUTO
+PANEL_EXTENDED_CHILD - Entry is a child
+PANEL_EXTENDED_CLEAR
+PANEL_EXTENDED_DEPENDENT
+PANEL_EXTENDED_PARENT - Entry is a parent
+PANEL_EXTENDED_TUTORIAL
+
+PANEL_EXTENDED_X_Y - lower left location of panel
+Read in additional byte,word,word
+PANEL_EXTENDED_CX_CY - size of panel
+Read in additional byte,word,word
+PANEL_EXTENDED_STYLE - style of window
+Read in additional word
+PANEL_EXTENDED_GROUP - group number
+Read in additional word
+PANEL_EXTENDED_CTRLSINDEX - control group index
+Read in additonal word
+
+To obtain a better understanding of things like groups and control
+group indexes, please consult the Information Presentation Facility
+Guide and Reference.
+
+The last five constants indicate that additional information needs
+to be read after the control word.  You will note that in the
+above code fragments for reading the title, we had to process these
+values and skip bytes where appropriate.  Later, in the code
+fragments to retrieve control word information, we will show you how
+to get these extra values.
+
+The other bit of information available in the HeadLevel field is,
+suprisingly, the head level!  We can obtain the headlevel by ORing
+the value in HeadLevel with LOW_ORDER_MASK.
+
+The following code fragment reads in the extended header informatiom
+from memory and sets some variables based on the above constants.
+It also obtains the head level.  Note that for your particular
+application, you might not need all of this information.
+
+/* INSERT CODE FRAGMENT THAT USES MEMCPY TO GET TOC AND PANEL INFO */
+
+If you are reading the table of contents from the file instead of
+memory, use the following code fragment.
+
+TOCIN TocIn;
+USHORT NumBytes;
+BOOL fParent = FALSE;
+PSZ pszTitle;
+
+fseek(fpointer, pulTOCOffsetTable[i], SEEK_SET);
+fread(&TOCIn, sizeof(TOCIN), 1, fpointer(TOCIN));
+HeadLevel = TOCIn.HeadLevel&LOW_ORDER_MASK;
+ExtHeader = TocIn.HeadLevel&HIGH_ORDER_MASK;
+if (ExtHeader) {
+   fread(&TOCControlWord, sizeof(USHORT), 1, fpointer);
+   if (TOCControlWord&PANEL_EXTENDED_X_Y) {
+      fread(&bxyUnits, sizeof(BYTE), 1, fpointer);
+      fread(&usx, sizeof(USHORT), 1, fpointer);
+      fread(&usy, sizeof(USHORT), 1, fpointer);
+   }
+   if (TOCControlWord&PANEL_EXTENDED_CX_CY) {
+      fread(&bcxcyUnits, sizeof(BYTE), 1, fpointer);
+      fread(&uscx, sizeof(USHORT), 1, fpointer);
+      fread(&uscy, sizeof(USHORT), 1, fpointer);
+   }
+   if (TOCControlWord&PANEL_EXTENDED_STYLE)
+      fread(&usStyle, sizeof(USHORT), 1, fpointer);
+   if (TOCControlWord&PANEL_EXTENDED_GROUP)
+      fread(&usGroupNumber, sizeof(USHORT), 1, fpointer);
+   if (TOCControlWord&PANEL_EXTENDED_CTRLSINDEX)
+      fread(&usControlGroupIndex, sizeof(USHORT), 1, fpointer);
+}
+
+The information from the table of contents header is generally only
+used to decide how the window that the help is in will be displayed.
+
+You can use it to position your window and to decide whether it has
+a border, minimize or mazimize buttons, etc.
+Once you have all of the display information from the table of contents,
+you can begin actually getting the information that is in the panel.
+Don't forget to display the title of the panel.  We obtained it
+again in the above code fragments.
+
+A panel consists of one or more cells that contain formatting information
+and the text of the panel.  In most cases, panels have more than one
+cell, so you cannot make the assumption that panels have once cell.
+The number of cells in a panel can be found from the NumCells field
+in the TOCIN structure.
+
+After reading all the extended header information and the title in the
+above samples, you will notice that we saved a value called
+pusBeginCell.  This is a pointer to the place in the table of contents
+where the list of cells begins.  These cell values actually index into
+the Cell Offset Table.  Using the Cell Offset Table we can get the file
+offsets of the individual cells and display the information in them.
+
+The offsets in the COT are only used to retrieve the actual cell.
+In and of themselves, they provide no additional information.  For this
+reason, they will only be used as a part of a code fragment to retrieve
+the actual cell.
+
+In retrieving the cell, the first step is to retrieve the cell header.
+The cell offset points to this header.  Once we have the header, we
+can get the information to display the cell.
+
+The following code fragment loops through all cells in table of contents
+entry i, and reads in the cell headers.  The dots indicate
+where you would actually process the information in the cell, which we
+will do later.
+
+INT j;
+USHORT usCOTIndex;
+CELL Cell;
+
+for (j=0; j<=TOCIn.NumCells; j++)
+/* If the table of contents is in memory, use */
+   memcpy(&usCOTIndex, pusBeginCell, sizeof(USHORT));
+/* If the table of contents is on disk, use */
+   fseek(fpointer, pusBeginCell, SEEK_SET);
+   fread(&usCOTIndex, sizeof(USHORT),1,fpointer);
+/* What follows is the same for both cases */
+   fseek(fpointer, COT[usCOTIndex], SEEK_SET);
+   fread(&Cell, sizeof(CELL),1,fpointer);
+   .
+   .
+   .
+}
+
+The cell information allows us to actually display the text itself.
+
+In the cell header, we have information about the CVT and the CDI.
+These two arrays give us the actual formatting information.  The CDI
+contains formatting information and words.  The words are represented
+as indexes into the CVT.  The CVT elements are indexes into the
+vocabulary (CLVT).  To use the CVT and CDI, we will read them into
+memory and process the CVT byte by byte.  The following code fragment
+reads the CVT and the CDI into memory.  Note that after reading
+the cell header from the file, we are pointing at the beginning of the
+CDI.
+
+PBYTE CDI;
+PUSHORT CVT;
+
+      CDI = malloc(Cell.CDISize);
+      rc=fread(CDI,Cell.CDISize,1,fpointer);
+      rc=fseek(fpointer,Cell.CVTOffset, SEEK_SET);
+      CVT = malloc(Cell.CVTSize*2);
+      rc=fread(CVT, Cell.CVTSize*2,1,fpointer);
+
+Even though the CVT is right after the CDI in the header, we cannot
+assume that after reading the CDI we are pointing at the CVT.  We
+must fseek to the CVTOffset.
+
+Now we want to read the CDI byte by byte and process each item.
+The CDI values are either FA thru FF or they are a number which
+indexes into the CVT which then indexes into the vocabulary.
+Whenever the CDI value is an FF, we need to read additional info.
+This additional info is formatting information, font changes, links,
+etc.  The FF escape code values are documented in appendix A.
+The following code fragment does some very basic formatting of a cell.
+Figure 5 provides the values for each of the BYTE_* values.
+
+INT m;
+INT l;
+CHAR String[255];
+BOOL Together = FALSE;
+
+for (m=0;m<Cell.CDISize;m++ ) {
+   switch (CDI[m]) {
+      /* The value indicates a new paragraph */
+      case BYTE_PARA :
+         printf("\n     ");
+         break;
+      /* The value indicates that the text following should be centered. */
+      /* Center all text until a BYTE_NEWLINE is encountered */
+      case BYTE_CENTRE :
+         printf("Center\n");
+         break;
+      /* Autoblanks are used to indicate when there should be no spaces */
+      /* between words.  When you encounter an autoblank, all words */
+      /* following should be printed without spaces until another autoblank */
+      /* is encountered. */
+      case BYTE_AUTOBLANK :
+         if (Together)
+            Together = FALSE;
+         else
+            Together = TRUE;
+         break;
+      /* The value indicates to print a new line */
+      case BYTE_NEWLINE :
+         printf("\n");
+         break;
+      /* The value indicates a space */
+      case BYTE_BLANK :
+         printf(" ");
+         break;
+      /* The value is an escape code.  We should do some processing within */
+      /* This statement to handle the various cases documented in */
+      /* Appendix A */
+      case BYTE_ESC :
+         break;
+      /* Not sure */
+      case WILD_CHAR :
+         break;
+      /* Not sure */
+      case ESC_CHAR :
+         break;
+      /* It is a word.  Index into the CVT to get the vocabulary offset */
+      /* And print the word */
+      default:
+         l = pulVocabIndex[CVT[CDI[m]]]+1;
+         for (k=0;k<(pchVocab[pulVocabIndex[CVT[CDI[m]]]]-1) ;k++,l++ )
+            String[k] = pchVocab[l];
+         /* Don't forget to null terminate the word. */
+         String[k] = '\0';
+         if (Together)
+            printf("%s",String);
+         else
+            printf("%s ",String);
+
+        break;
+   } /* endswitch */
+} /* endfor */
+
+So that is the basics.  You should now be able to display a cell.
+
+Accessing other information within the INF file
+-----------------------------------------------
+Index table (index) - synonym table
+Index command table (icmd)
+Panel table (context sensitive help)
+Panel name table (link)
+
+Database names
+Fonts
+Country / Grammar
+Bitmaps (should be interesting due to different compression)
+Strings
+Control
+Super Search Table (aka FTS or Full Text Search)
+Child pages
+
+
+Searching
+=========
+If you just want to search an INF file, you will still have to read in
+the  vocabulary  and  the table of contents. You search the vocabulary
+for  a  word,  and  then get the index of that word. This index can be
+used  to  index  into  the  Super  Search  Table  which  allows you to
+determine which panels contain that word. What a pain!
+
+                    ---------o0O0o---------
+
