@@ -792,8 +792,10 @@ procedure TRichTextView.HandleLMouseUp(x, y: integer; shiftstate: TShiftState);
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
   if FClickedLink <> '' then
+  begin
     if Assigned( FOnClickLink ) then
       FOnClickLink( Self, FClickedLink );
+  end;
   FClickedLink := ''; // reset link
 end;
 

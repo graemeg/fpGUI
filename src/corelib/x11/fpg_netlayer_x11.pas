@@ -317,8 +317,10 @@ var
   I: Integer;
   ANetAtom: TNetAtomEnum;
 begin
-  if WindowGetPropertyAtom(FRootWindow, FNetAtoms[naSUPPORTED], AtomCount, Atoms) = False then Exit;
-  //WriteLn('RootWindow Atom Count = ',AtomCount);
+//  if WindowGetPropertyAtom(FRootWindow, FNetAtoms[naSUPPORTED], AtomCount, Atoms) = False then
+//    Exit;
+
+  WriteLn('RootWindow Atom Count = ',AtomCount);
   FillChar(FAtomSupported, SizeOf(Boolean) * Length(FAtomSupported), 0);;
   for I := 0 to AtomCount-1 do begin
     for ANetAtom := Low(TNetAtomEnum) to High(TNetAtomEnum) do begin
@@ -1111,7 +1113,7 @@ begin
   FDisplay := ADisplay;
   FRootWindow := XDefaultRootWindow(FDisplay);
   InitNetAtoms;
-  UpdateSupportedAtoms;
+//  UpdateSupportedAtoms;
 end;
 
 destructor TNETWindowLayer.Destroy;

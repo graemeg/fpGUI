@@ -93,8 +93,8 @@ Type
                                   Var LineIndex: longint;
                                   Var Remainder: longint ): TTextPosition;
     // Layout functions
-    Procedure   AddLineStart( Const Line: TLayoutLine );
-    Procedure   CheckFontHeights( Var Line: TLayoutLine );
+    Procedure   AddLineStart(var Line: TLayoutLine);
+    Procedure   CheckFontHeights(var Line: TLayoutLine);
     Procedure   Layout;
     function    IsValidBitmapIndex( Index: longint ): boolean;
     // property handlers
@@ -167,7 +167,7 @@ Begin
   Inherited Destroy;
 End;
 
-Procedure TRichTextLayout.AddLineStart( Const Line: TLayoutLine );
+Procedure TRichTextLayout.AddLineStart(var Line: TLayoutLine);
 var
   NewAllocation: longint;
 begin
@@ -199,7 +199,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.PerformStyleTag <<<');
 end;
 
 // Check the current font specifications and see if the
-// give line needs updating for max height/descender
+// given line needs updating for max height/descender
 Procedure TRichTextLayout.CheckFontHeights( Var Line: TLayoutLine );
 var
   FontHeight: longint;

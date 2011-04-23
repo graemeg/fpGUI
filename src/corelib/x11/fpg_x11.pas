@@ -402,6 +402,7 @@ uses
   fpg_form,         // for modal event support
   cursorfont,
   xatom,            // used for XA_WM_NAME
+  keysym,
   math;
 
 type
@@ -808,9 +809,9 @@ begin
     $20a0..$20ac: Result := Table_20aX[KeySym];
     $fe20: Result := keyTab;
     $fe50..$fe60: Result := Table_feXX[KeySym];
-    $ff08: Result := keyBackspace;
-    $ff09: Result := keyTab;
-    $ff0a: Result := keyLinefeed;
+    XK_BackSpace:   Result := keyBackspace;
+    XK_Tab:         Result := keyTab;
+    XK_Linefeed:    Result := keyLinefeed;
     $ff0b: Result := keyClear;
     $ff0d: Result := keyReturn;
     $ff13: Result := keyPause;
