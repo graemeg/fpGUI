@@ -126,6 +126,24 @@ type
   end;
 
 
+  TfpgEditButton =  class(TfpgBaseEditButton)
+  protected
+    function    GetText: TfpgString;
+    procedure   SetText(const AValue: TfpgString);
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property    Align;
+    property    Enabled;
+    property    ExtraHint;
+    property    ReadOnly;
+    property    TabOrder;
+    property    Text: TfpgString read GetText write SetText;
+    property    OnButtonClick;
+    property    OnShowHint;
+  end;
+
+
 implementation
 
 uses
@@ -133,6 +151,24 @@ uses
   ,fpg_dialogs
   ,fpg_utils
   ;
+
+{ TfpgEditButton }
+
+function TfpgEditButton.GetText: TfpgString;
+begin
+  Result := FEdit.Text;
+end;
+
+procedure TfpgEditButton.SetText(const AValue: TfpgString);
+begin
+  FEdit.Text := AValue;
+end;
+
+constructor TfpgEditButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FButton.ImageName := 'stdimg.ellipse';
+end;
 
 
 { TfpgBaseEditButton }
