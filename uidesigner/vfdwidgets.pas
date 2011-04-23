@@ -298,6 +298,11 @@ begin
     0, 0);
 
   fpgImages.AddMaskedBMP(
+    'vfd.editbutton', @stdimg_vfd_editbutton,
+    sizeof(stdimg_vfd_editbutton),
+    0, 0);
+
+  fpgImages.AddMaskedBMP(
     'vfd.colorwheel', @stdimg_vfd_colorwheel,
     sizeof(stdimg_vfd_colorwheel),
     0, 0);
@@ -897,6 +902,17 @@ begin
   wc.AddProperty('FontDesc', TPropertyString, 'Specify a preset font description');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.WidgetIconName := 'vfd.editfont';
+  RegisterVFDWidget(wc);
+
+  // Edit Button
+  wc          := TVFDWidgetClass.Create(TfpgEditButton);
+  wc.NameBase := 'EditButton';
+  wc.AddProperty('Align', TPropertyEnum, 'Component alignment');
+  wc.AddProperty('Enabled', TPropertyBoolean, '');
+  wc.AddProperty('ExtraHint', TPropertyString, '');
+  wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
+  wc.AddProperty('Text', TPropertyString, 'Specify the initial text value');
+  wc.WidgetIconName := 'vfd.editbutton';
   RegisterVFDWidget(wc);
 
   // Color wheel
