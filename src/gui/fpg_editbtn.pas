@@ -130,6 +130,7 @@ type
   protected
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
+    procedure   HandlePaint; override;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -162,6 +163,36 @@ end;
 procedure TfpgEditButton.SetText(const AValue: TfpgString);
 begin
   FEdit.Text := AValue;
+end;
+
+procedure TfpgEditButton.HandlePaint;
+var
+  img: TfpgImage;
+begin
+  inherited HandlePaint;
+  // only so that it looks pretty in the UI Designer
+  if csDesigning in ComponentState then
+  begin
+    FEdit.Visible := False;
+    FButton.Visible := False;
+    Canvas.Clear(clBoxColor);
+    fpgStyle.DrawControlFrame(Canvas, 0, 0, Width - Height, Height);
+    fpgStyle.DrawButtonFace(Canvas, Width - Height, 0, Height, Height, [btfIsEmbedded]);
+    Canvas.SetFont(fpgApplication.DefaultFont);
+    if Text <> '' then
+    begin
+      Canvas.TextColor := clText3;
+      Canvas.DrawText(4, 0, Width - Height, Height, Text, [txtLeft, txtVCenter]);
+    end
+    else
+    begin
+      Canvas.TextColor := clShadow1;
+      Canvas.DrawText(0, 0, Width - Height, Height, ClassName, [txtHCenter, txtVCenter]);
+    end;
+    img := fpgImages.GetImage('stdimg.ellipse'); // don't free the img instance - we only got a reference
+    if img <> nil then
+      Canvas.DrawImage(Width-Height+((Height-img.Width) div 2), (Height-img.Height) div 2, img);
+  end;
 end;
 
 constructor TfpgEditButton.Create(AOwner: TComponent);
