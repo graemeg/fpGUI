@@ -563,16 +563,16 @@ begin
   begin
     clr := fpgColorToRGB(clButtonFace);
     fpgSetNamedColor(clButtonface, FBackgroundColor);
-    Canvas.DrawButtonFace(r, lBtnFlags);
+    fpgStyle.DrawButtonFace(Canvas, r, lBtnFlags);
     fpgSetNamedColor(clButtonface, clr);
   end
   else
-    Canvas.DrawButtonFace(r, lBtnFlags);
+    fpgStyle.DrawButtonFace(Canvas, r, lBtnFlags);
 
   if FFocused and (not FEmbedded) then
   begin
     InflateRect(r, -3, -3);
-    Canvas.DrawFocusRect(r);
+    fpgStyle.DrawFocusRect(Canvas, r);
   end;
 
   Canvas.SetTextColor(FTextColor);
@@ -586,7 +586,7 @@ begin
   else
     offset := Point(0, 0);
 
-  CalculatePositions (ix, iy, tx, ty);
+  CalculatePositions(ix, iy, tx, ty);
 
   if FShowImage and Assigned(FImage) then
   begin
@@ -621,7 +621,7 @@ begin
     lTextFlags := [txtHCenter, txtVCenter{, txtWrap}];
     if not Enabled then
       lTextFlags += [txtDisabled];
-    Canvas.DrawText(r, Text, lTextFlags);
+    Canvas.DrawText(r, Text, lTextFlags);  { DrawText does use fpgStyle }
   end
   else
     fpgStyle.DrawString(Canvas, tx+offset.x, ty+offset.y, Text, Enabled);
