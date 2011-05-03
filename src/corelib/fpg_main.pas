@@ -176,18 +176,18 @@ type
     destructor  Destroy; override;
 
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
-    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
-    procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
-    procedure   DrawControlFrame(x, y, w, h: TfpgCoord);
-    procedure   DrawControlFrame(r: TfpgRect);
-    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True);
-    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True);
-    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection);
-    procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection);
+    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); overload;
+    procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags); overload;
+    procedure   DrawControlFrame(x, y, w, h: TfpgCoord); overload;
+    procedure   DrawControlFrame(r: TfpgRect); overload;
+    procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload;
+    procedure   DrawBevel(r: TfpgRect; ARaised: Boolean = True); overload;
+    procedure   DrawDirectionArrow(x, y, w, h: TfpgCoord; direction: TArrowDirection); overload;
+    procedure   DrawDirectionArrow(r: TfpgRect; direction: TArrowDirection); overload;
     procedure   DrawFocusRect(r: TfpgRect);
-    function    DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
-    function    DrawText(x, y: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
-    function    DrawText(r: TfpgRect; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer;
+    function    DrawText(x, y, w, h: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
+    function    DrawText(x, y: TfpgCoord; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
+    function    DrawText(r: TfpgRect; const AText: TfpgString; AFlags: TFTextFlags = TextFlagsDflt; ALineSpace: integer = 2): integer; overload;
   end;
 
 
@@ -204,9 +204,9 @@ type
     constructor Create; virtual;
     destructor  Destroy; override;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual; overload;
-    procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual;
-    procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     procedure   DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TFButtonFlags); overload;
+    procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual; overload;
+    procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
     procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
