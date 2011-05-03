@@ -615,7 +615,7 @@ var
   vista: TThemeButton;
 begin
   btnClose := TfpgButton.Create(self);
-  btnClose.Width      := 75;
+  btnClose.Width      := 80;
   btnClose.Left       := Width - btnClose.Width - 6;
   btnClose.Top        := Height - btnClose.Height - 6;
   btnClose.Text       := 'Quit';
@@ -626,7 +626,8 @@ begin
   xpluna := TThemeButton.Create(self);
   xpluna.Left         := 80;
   xpluna.Top          := 45;
-  xpluna.Width        := 75;
+  xpluna.Width        := 85;
+  xpluna.Height       := 28;
   xpluna.Text         := 'XP Luna (-)';
   xpluna.Masked := True;
   xpluna.OnClick := @ButtonClicked;
@@ -634,7 +635,8 @@ begin
   xpsilver := TThemeButton.Create(self);
   xpsilver.Left       := 230;
   xpsilver.Top        := 45;
-  xpsilver.Width      := 75;
+  xpsilver.Width      := 85;
+  xpsilver.Height     := 28;
   xpsilver.Text       := 'XP Silver (+)';
   bmp := LoadImage_BMP(SetDirSeparators('../../../images/themes/silver/button.bmp'));
   xpsilver.ThemeImage := bmp;
@@ -652,8 +654,10 @@ begin
   vista.ThemeImage := bmp;
 
   styledbutton := TStyledButton.Create(self);
-  styledbutton.SetPosition(btnClose.Left-20, btnClose.Top-80, 75, 24);
+  styledbutton.SetPosition(btnClose.Left, btnClose.Top-80, 80, 24);
 //      styledbutton.Default := True;
+  styledbutton.ImageName := 'stdimg.quit';
+  styledbutton.ShowImage := True;
   styledbutton.Text := 'Styled';
 end;
 
