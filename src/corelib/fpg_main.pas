@@ -217,6 +217,7 @@ type
     procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     procedure   DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
     function    GetButtonBorders: TRect; virtual;
+    function    GetButtonShift: TPoint; virtual;
     function    GetControlFrameBorders: TRect; virtual;
     function    GetSeparatorSize: integer; virtual;
   end;
@@ -2347,6 +2348,11 @@ end;
 function TfpgStyle.GetButtonBorders: TRect;
 begin
   Result := Rect(5, 5, 5, 5);
+end;
+
+function TfpgStyle.GetButtonShift: TPoint;
+begin
+  Result := Point(1, 1);
 end;
 
 function TfpgStyle.GetControlFrameBorders: TRect;
