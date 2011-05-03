@@ -294,7 +294,18 @@ begin
           begin
             r.SetRect(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height);
             InflateRect(r, -3, -3);
-            Canvas.DrawFocusRect(r);
+
+            oldColor      := Canvas.Color;
+            oldLineWidth  := Canvas.LineWidth;
+            oldLineStyle  := Canvas.LineStyle;
+
+            Canvas.SetColor(clText1);
+            Canvas.SetLineStyle(1, lsDot);
+            Canvas.DrawRectangle(r);
+
+            // restore previous settings
+            Canvas.SetColor(oldColor);
+            Canvas.SetLineStyle(oldLineWidth, oldLineStyle);
           end;
         end;  { peFocusRectangle }
         
