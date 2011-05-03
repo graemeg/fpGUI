@@ -2638,7 +2638,7 @@ begin
     raise Exception.Create(ClassName + ': No Source window was specified before starting the drag');
   if ADropActions = [] then
     raise Exception.Create(ClassName + ': No Drop Action was specified');
-  inherited Execute(ADropActions, ADefaultAction);
+  Result := inherited Execute(ADropActions, ADefaultAction);
 end;
 
 
