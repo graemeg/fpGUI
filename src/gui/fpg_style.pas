@@ -205,6 +205,9 @@ type
 
 implementation
 
+uses
+  fpg_button
+  ;
 
 { TfpgCommonStyle }
 
@@ -212,6 +215,8 @@ procedure TfpgCommonStyle.DrawControl(element: TfpgControlElement;
     const option: TfpgStyleOption; canvas: TfpgCanvas; widget: TfpgWidget);
 var
   r: TfpgRect;
+  dx, dy: integer;
+  offset: integer;
 begin
   //  Do common things here
   case element of
@@ -272,7 +277,28 @@ begin
             Canvas.SetColor(clShadow1);
           Canvas.DrawLine(r.Right-1, r.Top+1, r.Right-1, r.Bottom-1);   // right
           Canvas.DrawLine(r.Right-1, r.Bottom-1, r.Left, r.Bottom-1);   // bottom
-        end  { cePushButtonBevel }
+        end;  { cePushButtonBevel }
+
+    cePushButtonLabel:
+        begin
+          {$IFDEF DEBUG}
+          writeln('TfpgCommonStyle.DrawControl: cePushButtonLabel');
+          {$ENDIF}
+          r.SetRect(option.Rect.Left, option.Rect.Top, option.Rect.Width, option.Rect.Height);
+//          InflateRect(r, -3, -3); { same size as used in the focus rectangle }
+
+          Canvas.SetTextColor(TfpgButton(widget).TextColor);
+          Canvas.SetFont(TfpgButton(widget).Font);
+          Canvas.SetClipRect(r);
+
+//          if stLowered in TfpgButtonStyleOption(option).State then
+//            offset := 1
+//          else
+//            offset := 0;
+
+          Canvas.DrawText(r, TfpgButton(widget).Text);
+//          Canvas.DrawString(tx+offset, ty+offset, Text, Enabled);
+        end;  { cePushButtonLabel }
   end;
 end;
 
@@ -280,6 +306,9 @@ procedure TfpgCommonStyle.DrawPrimitive(element: TfpgPrimitiveElement;
     const option: TfpgStyleOption; canvas: TfpgCanvas; widget: TfpgWidget);
 var
   r: TfpgRect;
+  oldColor: TfpgColor;
+  oldLineWidth: integer;
+  oldLineStyle: TfpgLineStyle;
 begin
   // Do common things here. It's going to be a huge case statement. This design
   // allows us to add new controls or elements without having to instantly
