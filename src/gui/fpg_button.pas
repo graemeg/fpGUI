@@ -518,7 +518,6 @@ end;
 
 procedure TfpgBaseButton.HandlePaint;
 var
-  AText: string;
   tx, ty, ix, iy: integer;
   r: TfpgRect;
   pofs: integer;
@@ -581,7 +580,6 @@ begin
 
   Canvas.SetClipRect(r);
   Canvas.SetFont(Font);
-  AText := FText;
 
   if FDown then
     pofs := 1
