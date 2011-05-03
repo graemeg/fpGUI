@@ -520,7 +520,7 @@ procedure TfpgBaseButton.HandlePaint;
 var
   tx, ty, ix, iy: integer;
   r: TfpgRect;
-  pofs: integer;
+  offset: TPoint;
   lBtnFlags: TFButtonFlags;
   clr: TfpgColor;
   img: TfpgImage;
@@ -582,20 +582,20 @@ begin
   Canvas.SetFont(Font);
 
   if FDown then
-    pofs := 1
+    offset := fpgStyle.GetButtonShift
   else
-    pofs := 0;
+    offset := Point(0, 0);
 
   CalculatePositions (ix, iy, tx, ty);
 
   if FShowImage and Assigned(FImage) then
   begin
     if Enabled then
-      Canvas.DrawImage(ix + pofs, iy + pofs, FImage)
+      Canvas.DrawImage(ix+offset.x, iy+offset.y, FImage)
     else
     begin
       img := FImage.CreateDisabledImage;
-      Canvas.DrawImage(ix + pofs, iy + pofs, img);
+      Canvas.DrawImage(ix+offset.x, iy+offset.y, img);
       img.Free;
     end;
 
@@ -616,7 +616,7 @@ begin
       r.Width -= ix;
     end;
     if FDown then
-     OffsetRect(r, pofs, pofs);
+     OffsetRect(r, offset.x, offset.y);
 
     lTextFlags := [txtHCenter, txtVCenter{, txtWrap}];
     if not Enabled then
@@ -624,7 +624,7 @@ begin
     Canvas.DrawText(r, Text, lTextFlags);
   end
   else
-    fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
+    fpgStyle.DrawString(Canvas, tx+offset.x, ty+offset.y, Text, Enabled);
 end;
 
 procedure TfpgBaseButton.DoPush;
