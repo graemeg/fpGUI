@@ -6,11 +6,7 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_widget,
-  fpg_edit, fpg_form, fpg_label, fpg_button,
-  fpg_listbox, fpg_memo, fpg_combobox, fpg_basegrid, fpg_grid, 
-  fpg_dialogs, fpg_checkbox, fpg_tree, fpg_trackbar, 
-  fpg_progressbar, fpg_radiobutton, fpg_tab, fpg_menu,
-  fpg_panel, fpg_popupcalendar, fpg_gauge;
+  fpg_form, fpg_edit, fpg_label, fpg_button, fpg_menu;
 
 type
 
