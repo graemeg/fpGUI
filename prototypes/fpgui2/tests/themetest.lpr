@@ -23,7 +23,7 @@ uses
 type
   { Note:
     I am only creating new classes to test my drawing routines in HandlePaint.
-    The final themeing will be done inside the TfpgXXXX classes. }
+    The final themeing will be done inside the standard gui TfpgXXXX classes. }
 
   { Concept theme button }
   TThemeButton = class(TfpgButton)
@@ -84,8 +84,7 @@ type
   end;
   
   
-  { TStyledButton }
-
+  { A button using the TfpgCommonStyle descendants }
   TStyledButton = class(TfpgButton)
   private
     FStyle: TfpgBaseStyle;
@@ -128,11 +127,19 @@ type
 procedure TStyledButton.HandlePaint;
 var
   buttonoptions: TfpgButtonStyleOption;
+  tx, ty, ix, iy: integer;
+  offset: integer;
+  img: TfpgImage;
+  r: TfpgRect;
+  lTextFlags: TFTextFlags;
 begin
+  writeln('TStyledButton.HandlePaint');
   Canvas.BeginDraw;
   
   Canvas.Clear(clButtonFace);
   Canvas.ClearClipRect;
+
+  lTextFlags := [];
 
   // Setup all button options that we need
   buttonoptions := TfpgButtonStyleOption.Create;
@@ -161,6 +168,58 @@ begin
   // Now let the Style do ALL the drawing. Nothing must be done here!
   FStyle.DrawControl(cePushButtonBevel, buttonoptions, Canvas, self);
   FStyle.DrawPrimitive(peFocusRectangle, buttonoptions, Canvas, self);
+
+  if FDown then
+    offset := 1
+  else
+    offset := 0;
+  CalculatePositions(ix, iy, tx, ty);
+
+  if ShowImage and Assigned(FImage) then
+  begin
+    if Enabled then
+      Canvas.DrawImage(ix+offset, iy+offset, FImage)
+    else
+    begin
+      img := FImage.CreateDisabledImage;
+      Canvas.DrawImage(ix+offset, iy+offset, img);
+      img.Free;
+    end;
+  end;
+
+  { EXPERIMENTAL: multi-line button text
+      Only in this condition do we support multi-line text }
+  if AllowMultiLineText and (ImageLayout = ilImageLeft) then
+  begin
+    r := buttonoptions.Rect;
+    InflateRect(r, -3, -3);   { same as focus rectangle }
+    if ShowImage and Assigned(FImage) then
+    begin
+      ix := ImageMargin + FImage.Width;
+      if ImageSpacing > 0 then
+        ix += ImageSpacing;
+      OffsetRect(r, ix, 0);
+      r.Width -= ix;
+    end;
+
+    if FDown then
+     OffsetRect(r, offset, offset);
+
+    lTextFlags := [txtHCenter, txtVCenter{, txtWrap}];
+    if not Enabled then
+      lTextFlags += [txtDisabled];
+
+//    Canvas.DrawText(r, Text, lTextFlags);
+    buttonoptions.Rect := r;
+  end
+  else
+  begin
+    buttonoptions.Rect.Left := tx+offset;
+    buttonoptions.Rect.Top := ty+offset;
+//    fpgStyle.DrawString(Canvas, tx+pofs, ty+pofs, Text, Enabled);
+  end;
+
+  FStyle.DrawControl(cePushButtonLabel, buttonoptions, Canvas, self);
 
   buttonoptions.Free;
   Canvas.EndDraw;
