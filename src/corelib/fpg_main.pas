@@ -1282,7 +1282,8 @@ begin
   fpgNamedFonts.Free;
 
   fpgImages.Free;
-  fpgStyle.Free;
+  fpgStyleManager.FreeStyleInstance;
+  fpgStyle := nil;
   fpgCaret.Free;
   
   for i := fpgTimers.Count-1 downto 0 do
@@ -1580,7 +1581,12 @@ begin
   FDefaultFont := GetFont(FPG_DEFAULT_FONT_DESC);
   fpgInitTimers;
   fpgNamedFonts := TList.Create;
-  fpgStyle      := TfpgStyle.Create;
+
+  { If the end-user passed in a style, try and create an instance of it }
+  if gCommandLineParams.IsParam('style') then
+    fpgStyleManager.SetStyle(gCommandLineParams.GetParam('style'));
+  fpgStyle := fpgStyleManager.Style;
+
   fpgCaret      := TfpgCaret.Create;
   fpgImages     := TfpgImages.Create;
 
