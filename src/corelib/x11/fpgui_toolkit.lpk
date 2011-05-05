@@ -7,8 +7,8 @@
     <CompilerOptions>
       <Version Value="9"/>
       <SearchPaths>
-        <IncludeFiles Value="../../"/>
-        <OtherUnitFiles Value="../;../../gui/;../../gui/db/"/>
+        <IncludeFiles Value="../.."/>
+        <OtherUnitFiles Value="..;../../gui;../../gui/db"/>
         <UnitOutputDirectory Value="../../../lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -31,7 +31,7 @@
     <License Value="LGPL 2 with static linking exception.
 "/>
     <Version Minor="7" Build="1"/>
-    <Files Count="84">
+    <Files Count="90">
       <Item1>
         <Filename Value="../stdimages.inc"/>
         <Type Value="Include"/>
@@ -368,6 +368,30 @@
         <Filename Value="../../VERSION_FILE.inc"/>
         <Type Value="Include"/>
       </Item84>
+      <Item85>
+        <Filename Value="../../gui/fpg_stylemanager.pas"/>
+        <UnitName Value="fpg_stylemanager"/>
+      </Item85>
+      <Item86>
+        <Filename Value="../../gui/fpg_style_win2k.pas"/>
+        <UnitName Value="fpg_style_win2k"/>
+      </Item86>
+      <Item87>
+        <Filename Value="../../gui/fpg_style_motif.pas"/>
+        <UnitName Value="fpg_style_motif"/>
+      </Item87>
+      <Item88>
+        <Filename Value="../../gui/fpg_style_clearlooks.pas"/>
+        <UnitName Value="fpg_style_clearlooks"/>
+      </Item88>
+      <Item89>
+        <Filename Value="../../gui/fpg_style_bluecurve.pas"/>
+        <UnitName Value="fpg_style_bluecurve"/>
+      </Item89>
+      <Item90>
+        <Filename Value="../../gui/fpg_style_bitmap.pas"/>
+        <UnitName Value="fpg_style_bitmap"/>
+      </Item90>
     </Files>
     <LazDoc Paths="../../../docs/xml/corelib/;../../../docs/xml/corelib/x11/;../../../docs/xml/corelib/gdi/;../../../docs/xml/gui/"/>
     <RequiredPkgs Count="1">

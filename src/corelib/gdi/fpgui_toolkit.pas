@@ -18,8 +18,10 @@ uses
   fpg_radiobutton, fpg_scrollbar, fpg_style, fpg_tab, fpg_trackbar, fpg_tree, 
   fpgui_db, fpg_gdi, fpg_impl, fpg_splitter, fpg_hint, fpg_spinedit, 
   fpg_extgraphics, fpg_ColorMapping, fpg_ColorWheel, fpg_interface, 
-  fpg_editbtn, fpg_imgfmt_jpg, fpg_imgutils, fpg_OLEDragDrop;
+  fpg_editbtn, fpg_imgfmt_jpg, fpg_imgutils, fpg_OLEDragDrop,
+  fpg_stylemanager, fpg_style_win2k, fpg_style_motif, fpg_style_clearlooks,
+  fpg_style_bluecurve, fpg_style_bitmap;
 
 implementation
 
-end.
+end.

@@ -31,7 +31,7 @@
     <Description Value="fpGUI Toolkit"/>
     <License Value="LGPL 2 with static linking exception."/>
     <Version Minor="7" Build="1"/>
-    <Files Count="81">
+    <Files Count="87">
       <Item1>
         <Filename Value="..\stdimages.inc"/>
         <Type Value="Include"/>
@@ -356,6 +356,30 @@
         <Filename Value="fpg_oledragdrop.pas"/>
         <UnitName Value="fpg_OLEDragDrop"/>
       </Item81>
+      <Item82>
+        <Filename Value="..\..\gui\fpg_stylemanager.pas"/>
+        <UnitName Value="fpg_stylemanager"/>
+      </Item82>
+      <Item83>
+        <Filename Value="..\..\gui\fpg_style_win2k.pas"/>
+        <UnitName Value="fpg_style_win2k"/>
+      </Item83>
+      <Item84>
+        <Filename Value="..\..\gui\fpg_style_motif.pas"/>
+        <UnitName Value="fpg_style_motif"/>
+      </Item84>
+      <Item85>
+        <Filename Value="..\..\gui\fpg_style_clearlooks.pas"/>
+        <UnitName Value="fpg_style_clearlooks"/>
+      </Item85>
+      <Item86>
+        <Filename Value="..\..\gui\fpg_style_bluecurve.pas"/>
+        <UnitName Value="fpg_style_bluecurve"/>
+      </Item86>
+      <Item87>
+        <Filename Value="..\..\gui\fpg_style_bitmap.pas"/>
+        <UnitName Value="fpg_style_bitmap"/>
+      </Item87>
     </Files>
     <LazDoc Paths="..\..\..\docs\xml\corelib;..\..\..\docs\xml\corelib\x11;..\..\..\docs\xml\corelib\gdi;..\..\..\docs\xml\gui"/>
     <RequiredPkgs Count="1">
@@ -372,4 +396,4 @@
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>
-</CONFIG>
+</CONFIG>
