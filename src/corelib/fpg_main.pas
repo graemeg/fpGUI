@@ -203,22 +203,25 @@ type
     MenuDisabledFont: TfpgFont;
     constructor Create; virtual;
     destructor  Destroy; override;
-    procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual; overload;
-    procedure   DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TFButtonFlags); overload;
+    { General }
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord); virtual; overload;
     procedure   DrawControlFrame(ACanvas: TfpgCanvas; r: TfpgRect); overload;
+    function    GetControlFrameBorders: TRect; virtual;
     procedure   DrawBevel(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; ARaised: Boolean = True); virtual;
     procedure   DrawDirectionArrow(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; direction: TArrowDirection); virtual;
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
+    { Buttons }
+    procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual; overload;
+    procedure   DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TFButtonFlags); overload;
+    function    GetButtonBorders: TRect; virtual;
+    function    GetButtonShift: TPoint; virtual;
+    { Menus }
     procedure   DrawMenuBar(ACanvas: TfpgCanvas; r: TfpgRect; ABackgroundColor: TfpgColor); virtual;
     procedure   DrawMenuRow(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
     procedure   DrawMenuItem(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgMenuItemFlags; AText: TfpgString); virtual;
     procedure   DrawMenuItemSeparator(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     procedure   DrawMenuItemImage(ACanvas: TfpgCanvas; x, y: TfpgCoord; r: TfpgRect; AFlags: TfpgMenuItemFlags); virtual;
-    function    GetButtonBorders: TRect; virtual;
-    function    GetButtonShift: TPoint; virtual;
-    function    GetControlFrameBorders: TRect; virtual;
     function    GetSeparatorSize: integer; virtual;
     { Editbox }
     procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
@@ -1245,16 +1248,14 @@ begin
 
   try
     inherited Create(AParams);
-
     if IsInitialized then
     begin
       FScreenWidth  := GetScreenWidth;
       FScreenHeight := GetScreenHeight;
     end;
-
   except
     on E: Exception do
-      Sysutils.ShowException(ExceptObject, ExceptAddr);
+      SysUtils.ShowException(ExceptObject, ExceptAddr);
   end;
 end;
 
