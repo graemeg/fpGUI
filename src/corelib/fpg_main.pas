@@ -478,7 +478,9 @@ uses
   fpg_extgraphics,
   fpg_utils,
   fpg_cmdlineparams,
-  fpg_imgutils;
+  fpg_imgutils,
+  fpg_stylemanager,
+  fpg_style_win2k;   // TODO: This needs to be removed!
 
 var
   fpgTimers: TList;
