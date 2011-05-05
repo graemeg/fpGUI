@@ -55,6 +55,10 @@ type
 
 implementation
 
+uses
+  fpg_stylemanager
+  ;
+
 { TMyStyle }
 
 constructor TMyStyle.Create;
@@ -142,6 +146,10 @@ begin
   ACanvas.SetColor(clWhite);
   ACanvas.DrawLine(r.Left, r.Bottom, r.Right+1, r.Bottom);   // bottom
 end;
+
+
+initialization
+  fpgStyleManager.RegisterClass('Demo Style', TMyStyle);
 
 end.
 

@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_widget,
-  fpg_form, fpg_edit, fpg_label, fpg_button, fpg_menu;
+  fpg_form, fpg_edit, fpg_label, fpg_button, fpg_menu,
+  fpg_memo;
 
 type
 
@@ -28,6 +29,8 @@ type
     pmEdit: TfpgPopupMenu;
     pmHelp: TfpgPopupMenu;
     pmSubMenu1: TfpgPopupMenu;
+    memStyles: TfpgMemo;
+    Label1: TfpgLabel;
     {@VFD_HEAD_END: TestForm}
     procedure CloseClicked(Sender: TObject);
   public
@@ -37,6 +40,9 @@ type
 {@VFD_NEWFORM_DECL}
 
 implementation
+
+uses
+  fpg_stylemanager;
 
 {@VFD_NEWFORM_IMPL}
 
@@ -48,10 +54,11 @@ end;
 procedure TTestForm.AfterCreate;
 var
   miSubMenu: TfpgMenuItem;
+  lst: TStrings;
 begin
   {@VFD_BODY_BEGIN: TestForm}
   Name := 'TestForm';
-  SetPosition(335, 206, 442, 250);
+  SetPosition(335, 206, 484, 250);
   WindowTitle := 'Testing Custom Styles';
   Hint := '';
   WindowPosition := wpScreenCenter;
@@ -153,17 +160,17 @@ begin
     Name := 'edtName1';
     SetPosition(24, 168, 164, 27);
     ExtraHint := '';
+    FontDesc := '#Edit1';
     Hint := '';
     TabOrder := 5;
     Text := '';
-    FontDesc := '#Edit1';
   end;
 
   btnClose := TfpgButton.Create(self);
   with btnClose do
   begin
     Name := 'btnClose';
-    SetPosition(354, 216, 80, 24);
+    SetPosition(396, 216, 80, 24);
     Anchors := [anRight,anBottom];
     Text := 'Close';
     FontDesc := '#Label1';
@@ -185,7 +192,7 @@ begin
   with pmFile do
   begin
     Name := 'pmFile';
-    SetPosition(300, 64, 120, 24);
+    SetPosition(204, 148, 120, 24);
     AddMenuItem('&Open', 'Ctrl+O', nil);
     AddMenuItem('&Save', 'Ctrl+S', nil);
     AddMenuItem('S&ave As', 'Ctrl+A', nil);
@@ -199,7 +206,7 @@ begin
   with pmEdit do
   begin
     Name := 'pmEdit';
-    SetPosition(300, 92, 120, 24);
+    SetPosition(204, 172, 120, 24);
     AddMenuItem('Cut', '', nil);
     AddMenuItem('Copy', '', nil);
     AddMenuItem('Paste', '', nil);
@@ -212,7 +219,7 @@ begin
   with pmHelp do
   begin
     Name := 'pmHelp';
-    SetPosition(300, 120, 120, 24);
+    SetPosition(204, 196, 120, 24);
     AddMenuItem('About...', '', nil);
   end;
 
@@ -220,10 +227,30 @@ begin
   with pmSubMenu1 do
   begin
     Name := 'pmSubMenu1';
-    SetPosition(300, 148, 120, 24);
+    SetPosition(204, 220, 120, 24);
     AddMenuItem('Item 1', '', nil);
     AddMenuItem('Item 2', '', nil);
     AddMenuItem('Item 3', '', nil).Enabled := False;
+  end;
+
+  memStyles := TfpgMemo.Create(self);
+  with memStyles do
+  begin
+    Name := 'memStyles';
+    SetPosition(304, 48, 168, 146);
+    FontDesc := '#Edit1';
+    Hint := '';
+    TabOrder := 16;
+  end;
+
+  Label1 := TfpgLabel.Create(self);
+  with Label1 do
+  begin
+    Name := 'Label1';
+    SetPosition(304, 32, 172, 16);
+    FontDesc := '#Label2';
+    Hint := '';
+    Text := 'Registered Styles:';
   end;
 
   {@VFD_BODY_END: TestForm}
@@ -234,6 +261,9 @@ begin
   MainMenu.AddMenuItem('Help', nil).SubMenu := pmHelp;
 
   miSubMenu.SubMenu := pmSubMenu1;
+
+  lst := memStyles.Lines;
+  fpgStyleManager.AssignStyleTypes(lst);
 end;
 
 
