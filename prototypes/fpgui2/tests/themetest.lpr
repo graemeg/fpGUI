@@ -17,7 +17,7 @@ uses
   fpg_imgfmt_bmp,
   fpg_extinterpolation,
   fpg_trackbar,
-  fpg_style,
+  fpg_styler,
   fpg_dialogs;
 
 type

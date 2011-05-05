@@ -14,10 +14,16 @@
     Description:
       This is where all style related types should be defined. The base
       Style class should also be defined here.
-      This is still work in progress!
+
+
+   *********************************************************
+                           WARNING
+    
+                 THIS IS AN EXPERIMENTAL UNIT
+   *********************************************************
 }
 
-unit fpg_style;
+unit fpg_styler;
 
 {$mode objfpc}{$H+}
 

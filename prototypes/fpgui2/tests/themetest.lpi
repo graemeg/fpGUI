@@ -33,12 +33,17 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
         <Filename Value="themetest.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="themetest"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="fpg_styler.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fpg_styler"/>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
