@@ -711,12 +711,7 @@ begin
   end;
   Canvas.SetClipRect(r);
 
-  if Enabled and not ReadOnly then
-    Canvas.SetColor(FBackgroundColor)
-  else
-    Canvas.SetColor(clWindowBackground);
-  Canvas.FillRectangle(r);
-
+  fpgStyle.DrawEditBox(Canvas, r, Enabled, ReadOnly, FBackgroundColor);
   Canvas.SetFont(FFont);
 end;
 
