@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -220,6 +220,8 @@ type
     function    GetButtonShift: TPoint; virtual;
     function    GetControlFrameBorders: TRect; virtual;
     function    GetSeparatorSize: integer; virtual;
+    { Editbox }
+    procedure   DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor); virtual;
   end;
   
 
@@ -2363,6 +2365,15 @@ end;
 function TfpgStyle.GetSeparatorSize: integer;
 begin
   Result := 2;
+end;
+
+procedure TfpgStyle.DrawEditBox(ACanvas: TfpgCanvas; const r: TfpgRect; const IsEnabled: Boolean; const IsReadOnly: Boolean; const ABackgroundColor: TfpgColor);
+begin
+  if IsEnabled and not IsReadOnly then
+    ACanvas.SetColor(ABackgroundColor)
+  else
+    ACanvas.SetColor(clWindowBackground);
+  ACanvas.FillRectangle(r);
 end;
 
 
