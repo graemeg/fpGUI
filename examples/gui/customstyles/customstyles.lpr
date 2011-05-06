@@ -48,13 +48,15 @@ var
   frm: TTestForm;
 begin
   fpgApplication.Initialize;
+
+  { Set our new style as the default (before we create any forms), unless
+    a the end-user specified a different style via the command line. }
+  if not gCommandLineParams.IsParam('style') then
+    if fpgStyleManager.SetStyle('Demo Style') then
+      fpgStyle := fpgStyleManager.Style;
+
   frm := TTestForm.Create(nil);
   try
-    { Lets set a new default style if no style was specified in the command line }
-    if not gCommandLineParams.IsParam('style') then
-      if fpgStyleManager.SetStyle('Demo Style') then
-        fpgStyle := fpgStyleManager.Style;
-
     frm.Show;
     fpgApplication.Run;
   finally

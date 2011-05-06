@@ -2,9 +2,10 @@
   A very quick and basic style implementation. It took all of 10 minutes.
   To apply this style, follow these instructions:
 
-    * free the old fpgStyle
-    * instantiate the new style class
-    * and assign this new instance to fpgStyle variable
+    1) (optional) Check if a style was specified via a command line parameter
+    2) If (1) was false, set the new default which will instantiate the new
+       style class and automatically free the old one.
+    3) Assign our new style instance to the fpgStyle variable
 
 
   Example:
@@ -14,14 +15,15 @@
       frm: TMainForm;
     begin
       fpgApplication.Initialize;
+
+      { Set our new style as the default (before we create any forms), unless
+        a the end-user specified a different style via the command line. }
+      if not gCommandLineParams.IsParam('style') then
+        if fpgStyleManager.SetStyle('Demo Style') then
+          fpgStyle := fpgStyleManager.Style;
+
       frm := TMainForm.Create(nil);
       try
-        // Free the old and set the new style
-        if Assigned(fpgStyle) then
-          fpgStyle.Free;
-        fpgStyle := TMyStyle.Create;
-
-        // now continue with the application
         frm.Show;
         fpgApplication.Run;
       finally
@@ -40,8 +42,6 @@ uses
   Classes, SysUtils, fpg_main, fpg_base;
 
 type
-
-  { TMyStyle }
 
   TMyStyle = class(TfpgStyle)
   public
