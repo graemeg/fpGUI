@@ -40,8 +40,8 @@
   clWindowBackground    = TfpgColor(cl_BaseNamedColor + 1);
   clBoxColor            = TfpgColor(cl_BaseNamedColor + 2);
   clButtonFace          = TfpgColor(cl_BaseNamedColor + 3);
-  clShadow1             = TfpgColor(cl_BaseNamedColor + 4); // nice for disabled text
-  clShadow2             = TfpgColor(cl_BaseNamedColor + 5); // $80000005;
+  clShadow1             = TfpgColor(cl_BaseNamedColor + 4); // nice for disabled text  { light shadow }
+  clShadow2             = TfpgColor(cl_BaseNamedColor + 5); // $80000005;              { dark shadow }
   clHilite1             = TfpgColor(cl_BaseNamedColor + 6); // $80000006;
   clHilite2             = TfpgColor(cl_BaseNamedColor + 7); // $80000007;
   clText1               = TfpgColor(cl_BaseNamedColor + 8); // $80000008;    // normal text

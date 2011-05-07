@@ -2059,6 +2059,7 @@ begin
     Exit; //==>
   end;
 
+  { Clear the rectangle with a color }
   ACanvas.SetColor(clButtonFace);
   ACanvas.SetLineStyle(1, lsSolid);
   ACanvas.FillRectangle(x, y, w, h);
@@ -2085,14 +2086,6 @@ begin
   ACanvas.DrawLine(r.Left, r.Bottom, r.Left, r.Top);  // left
   ACanvas.DrawLine(r.Left, r.Top, r.Right, r.Top);    // top
 
-  // Left and Top (inner)
-  //if btnIsPressed in AFlags then
-  //begin
-    //ACanvas.SetColor(clShadow1);
-    //ACanvas.DrawLine(x + 1, y + h - 3, x + 1, y + 1);  // left
-    //ACanvas.DrawLine(x + 1, y + 1, x + w - 2, y + 1);  // top
-  //end;
-
   // Right and Bottom (outer)
   if (btfIsPressed in AFlags) then
   begin
@@ -2118,7 +2111,7 @@ begin
   ACanvas.DrawLine(r.Right, r.Bottom, r.Left-1, r.Bottom);   // bottom
 
   if (btfFlat in AFlags) or (btfHover in AFlags) then
-    exit; { "toolbar" style buttons need a nice thing/flat border }
+    exit; { "toolbar" style buttons need a nice thin/flat border }
 
   // Right and Bottom (inner)
   if btfIsPressed in AFlags then
