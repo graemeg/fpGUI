@@ -187,7 +187,7 @@ var
   r: TfpgRect;
   img: TfpgImage;
   ix: integer;
-  LFlags: TFTextFlags;
+  LFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
   Canvas.ClearClipRect;

@@ -128,9 +128,9 @@ type
       constructor Create; virtual;
       destructor Destroy; override;
       procedure LoadTexte(APosX,APosY: Single; AColonne,ATexte,AFonte,AHeight,AFond,ABord,AInterL: Integer;
-                ACurFont: Boolean; AFlags: TFTextFlags);
+                ACurFont: Boolean; AFlags: TfpgTextFlags);
       procedure LoadNumero(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AHeight,AFond,ABord,AInterL: Integer;
-                ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
+                ACurFont: Boolean; AFlags: TfpgTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
       property Commandes: TList read FCommandes;
       property LineHeight: Integer read FHeight;
     end;
@@ -157,9 +157,9 @@ type
       FBord: Integer;
       FInterL: Integer;
       FCurFont: Boolean;
-      FFlags: TFTextFlags;
+      FFlags: TfpgTextFlags;
     public
-      constructor Create(APosX,APosY: Single; AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TFTextFlags); virtual;
+      constructor Create(APosX,APosY: Single; AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TfpgTextFlags); virtual;
       procedure SetPosY(const AValue: Single);
       property GetPosX: Single read FPosX;
       property GetPosY: Single read FPosY;
@@ -170,7 +170,7 @@ type
       property GetBord: Integer read FBord;
       property GetInterL: Integer read FInterL;
       property GetCurFont: Boolean read FCurFont;
-      property GetFlags: TFTextFlags read FFlags;
+      property GetFlags: TfpgTextFlags read FFlags;
     end;
 
   T_Numero = class(T_Commande)
@@ -185,13 +185,13 @@ type
       FBord: Integer;
       FInterL: Integer;
       FCurFont: Boolean;
-      FFlags: TFTextFlags;
+      FFlags: TfpgTextFlags;
       FTotal: Boolean;
       FAlpha: Boolean;
       FTypeNum: TSectPageNum;
     public
       constructor Create(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AFond,ABord,AInterL: Integer;
-                  ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum); virtual;
+                  ACurFont: Boolean; AFlags: TfpgTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum); virtual;
       procedure SetPosY(const AValue: Single);
       property GetPosX: Single read FPosX;
       property GetPosY: Single read FPosY;
@@ -203,7 +203,7 @@ type
       property GetBord: Integer read FBord;
       property GetInterL: Integer read FInterL;
       property GetCurFont: Boolean read FCurFont;
-      property GetFlags: TFTextFlags read FFlags;
+      property GetFlags: TfpgTextFlags read FFlags;
       property GetTotal: Boolean read FTotal;
       property GetAlpha: Boolean read FAlpha;
       property GetTypeNum: TSectPageNum read FTypeNum;
@@ -582,7 +582,7 @@ inherited Destroy;
 end;
 
 procedure T_Ligne.LoadTexte(APosX,APosY: Single; AColonne,ATexte,AFonte,AHeight,AFond,ABord,AInterL: Integer;
-          ACurFont: Boolean; AFlags: TFTextFlags);
+          ACurFont: Boolean; AFlags: TfpgTextFlags);
 begin
 if FHeight< AHeight
 then
@@ -592,7 +592,7 @@ Commandes.Add(ACommande);
 end;
 
 procedure T_Ligne.LoadNumero(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AHeight,AFond,ABord,AInterL: Integer;
-          ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
+          ACurFont: Boolean; AFlags: TfpgTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
 begin
 if FHeight< AHeight
 then
@@ -610,7 +610,7 @@ then
   FPosY:= AValue;
 end;
 
-constructor T_EcritTexte.Create(APosX,APosY: Single; AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TFTextFlags);
+constructor T_EcritTexte.Create(APosX,APosY: Single; AColonne,ATexte,AFonte,AFond,ABord,AInterL: Integer; ACurFont: Boolean; AFlags: TfpgTextFlags);
 begin
 inherited Create;
 FPosX:= APosX;
@@ -633,7 +633,7 @@ then
 end;
 
 constructor T_Numero.Create(APosX,APosY: Single; AColonne,ATexteNum,ATexteTot,AFonte,AFond,ABord,AInterL: Integer;
-            ACurFont: Boolean; AFlags: TFTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
+            ACurFont: Boolean; AFlags: TfpgTextFlags; ATotal,AAlpha: Boolean; ATypeNum: TSectPageNum);
 begin
 inherited Create;
 FPosX:= APosX;

@@ -608,7 +608,7 @@ begin
 end;
 procedure TfpgPanel.HandlePaint;
 var
-  lTxtFlags: TFTextFlags;
+  lTxtFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
 
@@ -762,7 +762,7 @@ procedure TfpgGroupBox.HandlePaint;
 var
   r: TfpgRect;
   w: integer;
-  lTxtFlags: TFTextFlags;
+  lTxtFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
 

@@ -774,7 +774,7 @@ var
   toffset: integer;
   TextLeft, TextTop: Integer;
   dx: integer;
-  lTxtFlags: TFTextFlags;
+  lTxtFlags: TfpgTextFlags;
   ActivePageVisible: Boolean;
 begin
   if not HasHandle then

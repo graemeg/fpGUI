@@ -1415,7 +1415,7 @@ end;
 procedure TfpgBaseTextEdit.HandlePaint;
 var
   r: TfpgRect;
-  flags: TFTextFlags;
+  flags: TfpgTextFlags;
 begin
   inherited HandlePaint;
   r := Canvas.GetClipRect;    // contains adjusted size based on borders

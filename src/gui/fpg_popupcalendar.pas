@@ -1510,7 +1510,7 @@ procedure TfpgCalendarCheckCombo.DoDrawText(const ARect: TfpgRect);
 var
   lRect: TfpgRect;
 var
-  flags: TFTextFlags;
+  flags: TfpgTextFlags;
 begin
   lRect := ARect;
   lRect.Left := lRect.Left+FCheckBoxRect.Width + 1;

@@ -71,9 +71,9 @@ type
       procedure DecaleLigne(Decalage: Single);
       procedure DecaleGroupe(Decalage: Single);
       function EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
-                TxtFlags: TFTextFlags; Zone: TZone): Single;
+                TxtFlags: TfpgTextFlags; Zone: TZone): Single;
       function EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
-                TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum): Single;
+                TxtFlags: TfpgTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum): Single;
       function InsereEspace(PosY: Single; Colonne: Integer; EspHeight: Single; FondNum: Integer; Zone: TZone): Single;
       procedure FinLigne(Zone: TZone);
       procedure TraceCadre(StTrait: Integer; Zone: TZone);
@@ -915,7 +915,7 @@ with AGroupe do
 end;
 
 function T_Imprime.EcritLigne(PosX,PosY: Single; Colonne,Texte,FonteNum,FondNum,BordNum,InterL: Integer;
-          TxtFlags: TFTextFlags; Zone: TZone): Single;
+          TxtFlags: TfpgTextFlags; Zone: TZone): Single;
 var
   PosH,PosV,IntlInt,IntLSup,IntLInf,EpaisTrait: Single;
   HTxt,HautTxt,Half,CoulTrait,Cpt: Integer;
@@ -1345,7 +1345,7 @@ with T_Section(Sections[Pred(NumeroSection)]) do
 end;
 
 function T_Imprime.EcritNum(PosX,PosY: Single; Colonne,TexteNum,TexteTot,FonteNum,FondNum,BordNum,InterL: Integer;
-          TxtFlags: TFTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum): Single;
+          TxtFlags: TfpgTextFlags; Total,Alpha: Boolean; Zone: TZone; SPNum: TSectPageNum): Single;
 
   function BuildChaine: string;
   var
@@ -2359,7 +2359,7 @@ procedure T_Imprime.EcritEnTete(Horiz,Verti: Single; Texte: string; ColNum: Inte
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTexte: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2391,7 +2391,7 @@ function T_Imprime.EcritPage(Horiz,Verti: Single; Texte: string; ColNum: Integer
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1): Single;
 var
   RefTexte: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2423,7 +2423,7 @@ procedure T_Imprime.EcritPied(Horiz,Verti: Single; Texte: string; ColNum: Intege
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTexte: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2456,7 +2456,7 @@ procedure T_Imprime.NumSectionEnTete(Horiz,Verti: Single; TexteSect: string= '';
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTextePage,RefTexteTot: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2493,7 +2493,7 @@ procedure T_Imprime.NumSectionPied(Horiz,Verti: Single; TexteSect: string= ''; T
           InterNum: Integer= 0;CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTextePage,RefTexteTot: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2530,7 +2530,7 @@ procedure T_Imprime.NumPageEnTete(Horiz,Verti: Single; TextePage: string= ''; Te
           CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTextePage,RefTexteTot: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2567,7 +2567,7 @@ procedure T_Imprime.NumPagePied(Horiz,Verti: Single; TextePage: string= ''; Text
           CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTextePage,RefTexteTot: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2604,7 +2604,7 @@ procedure T_Imprime.NumPageSectionEnTete(Horiz,Verti: Single; TexteSect: string=
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTextePage,RefTexteTot: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0
@@ -2641,7 +2641,7 @@ procedure T_Imprime.NumPageSectionPied(Horiz,Verti: Single; TexteSect: string= '
           InterNum: Integer= 0; CoulFdNum: Integer= -1; BordNum: Integer= -1);
 var
   RefTextePage,RefTexteTot: Integer;
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
 begin
 Flags:= [];
 if Horiz< 0

@@ -131,7 +131,7 @@ var
   offset: integer;
   img: TfpgImage;
   r: TfpgRect;
-  lTextFlags: TFTextFlags;
+  lTextFlags: TfpgTextFlags;
 begin
   writeln('TStyledButton.HandlePaint');
   Canvas.BeginDraw;

@@ -465,7 +465,7 @@ end;
 procedure TfpgCustomStringGrid.DrawCell(ARow, ACol: Integer; ARect: TfpgRect;
     AFlags: TfpgGridDrawState);
 var
-  Flags: TFTextFlags;
+  Flags: TfpgTextFlags;
   txt: string;
   r: TfpgRect;
 begin

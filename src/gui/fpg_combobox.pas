@@ -585,7 +585,7 @@ end;
 
 procedure TfpgBaseStaticCombo.DoDrawText(const ARect: TfpgRect);
 var
-  flags: TFTextFlags;
+  flags: TfpgTextFlags;
 begin
   // Draw select item's text
   flags := [txtLeft, txtVCenter];

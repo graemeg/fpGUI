@@ -524,7 +524,7 @@ var
   lBtnFlags: TfpgButtonFlags;
   clr: TfpgColor;
   img: TfpgImage;
-  lTextFlags: TFTextFlags;
+  lTextFlags: TfpgTextFlags;
 begin
 //  inherited HandlePaint;
   Canvas.ClearClipRect;

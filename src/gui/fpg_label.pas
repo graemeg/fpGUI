@@ -233,7 +233,7 @@ end;
 procedure TfpgCustomLabel.HandlePaint;
 var
   r: TfpgRect;
-  lTxtFlags: TFTextFlags;
+  lTxtFlags: TfpgTextFlags;
 begin
   inherited HandlePaint;
   Canvas.ClearClipRect;
