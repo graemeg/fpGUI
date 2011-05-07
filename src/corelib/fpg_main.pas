@@ -45,7 +45,8 @@ type
   TfpgButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
     btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
 
-  TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator, mifEnabled, mifChecked, mifSubMenu);
+  TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator,
+    mifEnabled, mifChecked, mifSubMenu);
     
   TfpgTextFlags = set of (txtLeft, txtHCenter, txtRight, txtTop, txtVCenter,
     txtBottom, txtWrap, txtDisabled, txtAutoSize);
@@ -480,7 +481,8 @@ uses
   fpg_cmdlineparams,
   fpg_imgutils,
   fpg_stylemanager,
-  fpg_style_win2k;   // TODO: This needs to be removed!
+  fpg_style_win2k,   // TODO: This needs to be removed!
+  fpg_style_motif;   // TODO: This needs to be removed!
 
 var
   fpgTimers: TList;
