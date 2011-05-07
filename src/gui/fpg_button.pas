@@ -520,6 +520,7 @@ procedure TfpgBaseButton.HandlePaint;
 var
   tx, ty, ix, iy: integer;
   r: TfpgRect;
+  border: TRect;
   offset: TPoint;
   lBtnFlags: TfpgButtonFlags;
   clr: TfpgColor;
@@ -530,6 +531,7 @@ begin
   Canvas.ClearClipRect;
 
   r.SetRect(0, 0, Width, Height);
+  border := fpgStyle.GetButtonBorders;
 
   lBtnFlags := [];
   if FDown then
@@ -571,7 +573,7 @@ begin
 
   if FFocused and (not FEmbedded) then
   begin
-    InflateRect(r, -3, -3);
+    InflateRect(r, -border.Left, -border.Top);
     fpgStyle.DrawFocusRect(Canvas, r);
   end;
 
@@ -606,7 +608,7 @@ begin
   if AllowMultiLineText and (FImageLayout = ilImageLeft) then
   begin
     r.SetRect(0, 0, Width, Height);
-    InflateRect(r, -3, -3);   { same as focus rectangle }
+    InflateRect(r, -border.Left, -border.Top);   { same as focus rectangle }
     if FShowImage and Assigned(FImage) then
     begin
       ix := FImageMargin + FImage.Width;
@@ -618,7 +620,7 @@ begin
     if FDown then
      OffsetRect(r, offset.x, offset.y);
 
-    lTextFlags := [txtHCenter, txtVCenter{, txtWrap}];
+    lTextFlags := [txtHCenter, txtVCenter];
     if not Enabled then
       lTextFlags += [txtDisabled];
     Canvas.DrawText(r, Text, lTextFlags);  { DrawText does use fpgStyle }
