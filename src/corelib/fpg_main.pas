@@ -2350,7 +2350,7 @@ end;
 
 function TfpgStyle.GetButtonBorders: TRect;
 begin
-  Result := Rect(5, 5, 5, 5);
+  Result := Rect(3, 3, 3, 3);
 end;
 
 function TfpgStyle.GetButtonShift: TPoint;
