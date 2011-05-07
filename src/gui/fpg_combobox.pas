@@ -356,7 +356,7 @@ end;
 procedure TfpgBaseComboBox.PaintInternalButton;
 var
   ar: TfpgRect;
-  btnflags: TFButtonFlags;
+  btnflags: TfpgButtonFlags;
 begin
   Canvas.BeginDraw;
   btnflags := [];

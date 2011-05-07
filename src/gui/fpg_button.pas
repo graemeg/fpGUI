@@ -521,7 +521,7 @@ var
   tx, ty, ix, iy: integer;
   r: TfpgRect;
   offset: TPoint;
-  lBtnFlags: TFButtonFlags;
+  lBtnFlags: TfpgButtonFlags;
   clr: TfpgColor;
   img: TfpgImage;
   lTextFlags: TFTextFlags;

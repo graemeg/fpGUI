@@ -42,7 +42,7 @@ type
   TAnchor  = (anLeft, anRight, anTop, anBottom);
   TAnchors = set of TAnchor;
 
-  TFButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
+  TfpgButtonFlags = set of (btfIsEmbedded, btfIsDefault, btfIsPressed,
     btfIsSelected, btfHasFocus, btfHasParentColor, btfFlat, btfHover);
 
   TfpgMenuItemFlags = set of (mifSelected, mifHasFocus, mifSeparator, mifEnabled, mifChecked, mifSubMenu);
@@ -176,8 +176,8 @@ type
     destructor  Destroy; override;
 
     // As soon as TfpgStyle has moved out of CoreLib, these must go!
-    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); overload;
-    procedure   DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags); overload;
+    procedure   DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); overload;
+    procedure   DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags); overload;
     procedure   DrawControlFrame(x, y, w, h: TfpgCoord); overload;
     procedure   DrawControlFrame(r: TfpgRect); overload;
     procedure   DrawBevel(x, y, w, h: TfpgCoord; ARaised: Boolean = True); overload;
@@ -212,8 +212,8 @@ type
     procedure   DrawString(ACanvas: TfpgCanvas; x, y: TfpgCoord; AText: string; AEnabled: boolean = True); virtual;
     procedure   DrawFocusRect(ACanvas: TfpgCanvas; r: TfpgRect); virtual;
     { Buttons }
-    procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags); virtual; overload;
-    procedure   DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TFButtonFlags); overload;
+    procedure   DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags); virtual; overload;
+    procedure   DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgButtonFlags); overload;
     function    GetButtonBorders: TRect; virtual;
     function    GetButtonShift: TPoint; virtual;
     { Menus }
@@ -1800,12 +1800,12 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgCanvas.DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
+procedure TfpgCanvas.DrawButtonFace(x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags);
 begin
   fpgStyle.DrawButtonFace(self, x, y, w, h, AFlags);
 end;
 
-procedure TfpgCanvas.DrawButtonFace(r: TfpgRect; AFlags: TFButtonFlags);
+procedure TfpgCanvas.DrawButtonFace(r: TfpgRect; AFlags: TfpgButtonFlags);
 begin
   DrawButtonFace(r.Left, r.Top, r.Width, r.Height, AFlags);
 end;
@@ -2042,7 +2042,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TFButtonFlags);
+procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; x, y, w, h: TfpgCoord; AFlags: TfpgButtonFlags);
 var
   r: TfpgRect;
 begin
@@ -2135,8 +2135,7 @@ begin
   ACanvas.DrawLine(r.Right-1, r.Bottom-1, r.Left, r.Bottom-1);   // bottom
 end;
 
-procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect;
-  AFlags: TFButtonFlags);
+procedure TfpgStyle.DrawButtonFace(ACanvas: TfpgCanvas; r: TfpgRect; AFlags: TfpgButtonFlags);
 begin
   DrawButtonFace(ACanvas, r.Left, r.Top, r.Width, r.Height, AFlags);
 end;

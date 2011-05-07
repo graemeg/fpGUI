@@ -1446,7 +1446,7 @@ var
   cLeft,
   cTop: Integer;
   Column: TfpgLVColumn;
-  Flags: TFButtonFlags;
+  Flags: TfpgButtonFlags;
   ClipRect: TfpgRect;
   cRect: TfpgRect;
   PaintPart: TfpgLVItemPaintPart;
