@@ -34,11 +34,11 @@ type
 
   TfpgHyperlink = class(TfpgCustomLabel)
   private
-    fHotTrackColor: TfpgColor;
-    fOldColor: TfpgColor;
-    fOldFont: TfpgString;
-    fHTFont: TfpgString;
-    fUrl: TfpgString;
+    FHotTrackColor: TfpgColor;
+    FOldColor: TfpgColor;
+    FOldFont: TfpgString;
+    FHTFont: TfpgString;
+    FUrl: TfpgString;
     procedure   SetHotTrackColor(const AValue: TfpgColor);
     procedure   SetHotTrackFont(const AValue: TfpgString);
     procedure   SetURL(const Value: TfpgString);
@@ -57,7 +57,7 @@ type
     property    Height;
     property    Hint;
     property    HotTrackColor: TfpgColor read FHotTrackColor write SetHotTrackColor default clBlue;
-    property    HotTrackFont: TfpgString read fHTFont write SetHotTrackFont;
+    property    HotTrackFont: TfpgString read FHTFont write SetHotTrackFont;
     property    Left;
     property    Text;
     property    TextColor default clBlue;
@@ -84,32 +84,32 @@ constructor TfpgHyperlink.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Width           := 120;
-  fHotTrackColor  := clBlue;
+  FHotTrackColor  := clBlue;
   TextColor       := clBlue;
-  fUrl            := 'http://opensoft.homeip.net/fpgui/';
-  Text            := 'fpGUI website';
-  fHTFont         := 'Arial-8:antialias=true:underline:bold';
+  FUrl            := 'http://opensoft.homeip.net/fpgui/';
+  FText           := 'fpGUI website';
+  FHTFont         := 'Arial-8:antialias=true:underline:bold';
   FontDesc        := 'Arial-8:antialias=true:underline';
 end;
 
 procedure TfpgHyperlink.SetURL(const Value: TfpgString);
 begin
-  if fUrl <> Value then
-    fUrl := Value;
+  if FUrl <> Value then
+    FUrl := Value;
 end;
 
 procedure TfpgHyperlink.SetHotTrackFont(const AValue: TfpgString);
 begin
-  if fHTFont = AValue then
+  if FHTFont = AValue then
     Exit;
-  fHTFont := AValue;
+  FHTFont := AValue;
 end;
 
 procedure TfpgHyperlink.SetHotTrackColor(const AValue: TfpgColor);
 begin
-  if fHotTrackColor = AValue then
+  if FHotTrackColor = AValue then
     Exit;
-  fHotTrackColor := AValue;
+  FHotTrackColor := AValue;
 end;
 
 procedure TfpgHyperlink.GoHyperLink;
@@ -121,19 +121,19 @@ end;
 procedure TfpgHyperlink.HandleMouseEnter;
 begin
   inherited HandleMouseEnter;
-  fOldColor   := TextColor;
-  TextColor   := fHotTrackColor;
-  fOldFont    := FontDesc;
-  FontDesc    := fHTFont;
+  FOldColor   := TextColor;
+  TextColor   := FHotTrackColor;
+  FOldFont    := FontDesc;
+  FontDesc    := FHTFont;
   MouseCursor := mcHand;
 end;
 
 procedure TfpgHyperlink.HandleMouseExit;
 begin
   inherited HandleMouseExit;
-  TextColor   := fOldColor;
+  TextColor   := FOldColor;
   MouseCursor := mcDefault;
-  FontDesc    := fOldFont;
+  FontDesc    := FOldFont;
 end;
 
 procedure TfpgHyperlink.HandleLMouseDown(x, y: integer; shiftstate: TShiftState);
