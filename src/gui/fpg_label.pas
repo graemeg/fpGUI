@@ -212,8 +212,8 @@ begin
   inherited Create(AOwner);
   FText             := 'Label';
   FFont             := fpgGetFont('#Label1');
-  FHeight           := FFont.Height;
-  FWidth            := 80;
+  Height            := FFont.Height;
+  Width             := 80;
   FTextColor        := Parent.TextColor;
   FBackgroundColor  := Parent.BackgroundColor;
   FAutoSize         := False;
