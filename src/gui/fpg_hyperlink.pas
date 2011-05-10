@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -56,11 +56,11 @@ type
     property    FontDesc;
     property    Height;
     property    Hint;
-    property    HotTrackColor: TfpgColor read fHotTrackColor write SetHotTrackColor;
+    property    HotTrackColor: TfpgColor read FHotTrackColor write SetHotTrackColor default clBlue;
     property    HotTrackFont: TfpgString read fHTFont write SetHotTrackFont;
     property    Left;
     property    Text;
-    property    TextColor;
+    property    TextColor default clBlue;
     property    ShowHint;
     property    URL: TfpgString read FUrl write SetURL;
     property    Top;
@@ -83,13 +83,13 @@ uses
 constructor TfpgHyperlink.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  Width           := 120;
   fHotTrackColor  := clBlue;
   TextColor       := clBlue;
   fUrl            := 'http://opensoft.homeip.net/fpgui/';
   Text            := 'fpGUI website';
   fHTFont         := 'Arial-8:antialias=true:underline:bold';
   FontDesc        := 'Arial-8:antialias=true:underline';
-  AutoSize        := True;
 end;
 
 procedure TfpgHyperlink.SetURL(const Value: TfpgString);
