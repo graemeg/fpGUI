@@ -245,8 +245,8 @@ begin
   begin
     Name := 'lblName4';
     SetPosition(12, 116, 246, 14);
-    Text := 'http://opensoft.homeip.net/fpgui/';
-    URL := 'http://opensoft.homeip.net/fpgui/';
+    Text := 'http://fpgui.sourceforge.net';
+    URL := 'http://fpgui.sourceforge.net';
     FontDesc := 'Arial-9:underline';
     TextColor := clRoyalBlue;
     HotTrackColor := clBlue;
