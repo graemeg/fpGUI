@@ -777,6 +777,9 @@ procedure TfpgBaseButton.Click;
 var
   pform: TfpgForm;
 begin
+  if not Enabled then
+    Exit; //==>
+
   if (not AllowDown) then
   begin
     FDown    := False;
