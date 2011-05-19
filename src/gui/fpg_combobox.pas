@@ -73,11 +73,13 @@ type
     FOnDropDown: TNotifyEvent;
     FOptions: TfpgComboOptions;
     FExtraHint: string;
+    FReadOnly: Boolean;
     function    GetFontDesc: string;
     procedure   SetDropDownCount(const AValue: integer);
     procedure   SetFocusItem(const AValue: integer);
     procedure   SetFontDesc(const AValue: string);
     procedure   SetExtraHint(const AValue: string);
+    procedure   SetReadOnly(const AValue: Boolean);
   protected
     FAutoSize: Boolean;
     FMargin: integer;
@@ -105,6 +107,7 @@ type
     property    Items: TStringList read FItems;    {$Note Make this read/write }
     property    Options: TfpgComboOptions read FOptions write FOptions;
     property    Margin: integer read FMargin write SetMargin default 1;
+    property    ReadOnly: Boolean read FReadOnly write SetReadOnly default False;
     property    OnChange: TNotifyEvent read FOnChange write FOnChange;
     property    OnCloseUp: TNotifyEvent read FOnCloseUp write FOnCloseUp;
     property    OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
@@ -156,6 +159,7 @@ type
     property    Margin;
     property    Options;
     property    ParentShowHint;
+    property    ReadOnly;
     property    ShowHint;
     property    TabOrder;
     property    Text;
@@ -221,6 +225,8 @@ end;
   FocusItem = 0 it means the first item is selected etc. }
 procedure TfpgBaseComboBox.SetFocusItem(const AValue: integer);
 begin
+  if ReadOnly then
+    Exit;
   if FFocusItem = AValue then
     Exit; //==>
   FFocusItem := AValue;
@@ -252,6 +258,13 @@ begin
   if FExtraHint = AValue then
     Exit; //==>
   FExtraHint := AValue;
+  Repaint;
+end;
+
+procedure TfpgBaseComboBox.SetReadOnly(const AValue: Boolean);
+begin
+  if FReadOnly = AValue then exit;
+  FReadOnly := AValue;
   Repaint;
 end;
 
@@ -306,6 +319,8 @@ begin
   inherited HandleKeyPress(keycode, shiftstate, consumed);
   if not consumed then
   begin
+    if ReadOnly then
+      Exit;
     old := FocusItem;
     case keycode of
       keyDown:
@@ -425,6 +440,7 @@ begin
   FDropDownCount  := 8;
   FMargin         := 1;
   FFocusItem      := -1; // nothing is selected
+  FReadOnly       := False;
   FItems := TStringList.Create;
   FItems.OnChange := @InternalItemsChanged;
   FFont := fpgGetFont('#List');
@@ -609,6 +625,9 @@ procedure TfpgBaseStaticCombo.SetText(const AValue: string);
 var
   i: integer;
 begin
+  if ReadOnly then
+    Exit;
+
   if AValue = '' then
     SetFocusItem(-1)  // nothing selected
   else
@@ -695,7 +714,12 @@ begin
   Canvas.SetClipRect(r);
 
   if Enabled then
-    Canvas.SetColor(FBackgroundColor)
+  begin
+    if ReadOnly then
+      Canvas.SetColor(clWindowBackground)
+    else
+      Canvas.SetColor(FBackgroundColor);
+  end
   else
     Canvas.SetColor(clWindowBackground);
 
