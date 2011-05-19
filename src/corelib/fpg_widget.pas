@@ -465,11 +465,7 @@ end;
 
 constructor TfpgWidget.Create(AOwner: TComponent);
 begin
-  {$if defined(VER2_0) or defined(VER2_2_0)}
-  Include(ComponentState, csLoading);
-  {$else}
   Loading;
-  {$endif}
 
   FIsContainer    := False;
   FOnScreen       := False;
