@@ -1665,7 +1665,7 @@ begin
   for n := 0 to LineCount-1 do
   begin
     if n > 0 then
-      s := s + #13#10;
+      s := s + LineEnding;
     s := s + GetLineText(n);
   end;
   Result := s;
