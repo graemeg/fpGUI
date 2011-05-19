@@ -672,7 +672,7 @@ var
   mb: TMouseButton;
   IsDblClick: boolean;
 begin
-//  writeln('TfpgWidget.MsgMouseUp');
+  //writeln('>> TfpgWidget.MsgMouseUp - ', Classname, '.', Name);
   FDragActive := False;
   if InDesigner then
   begin
@@ -730,6 +730,7 @@ begin
   if Assigned(FOnMouseUp) then // and not IsDblClick then
     FOnMouseUp(self, mb, msg.Params.mouse.shiftstate,
         Point(msg.Params.mouse.x, msg.Params.mouse.y));
+  //writeln('<< TfpgWidget.MsgMouseUp - ', Classname, '.', Name);
 end;
 
 procedure TfpgWidget.MsgMouseMove(var msg: TfpgMessageRec);
