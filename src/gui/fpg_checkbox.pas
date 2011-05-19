@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -116,6 +116,8 @@ begin
     Exit; //==>
   FChecked := AValue;
   RePaint;
+  if not (csDesigning in ComponentState) then
+    DoOnChange;
 end;
 
 function TfpgBaseCheckBox.GetBoxLayout: TBoxLayout;
@@ -244,7 +246,6 @@ begin
   inherited HandleLMouseUp(x, y, shiftstate);
   FIsPressed := False;
   Checked := not FChecked;
-  DoOnChange;
 end;
 
 procedure TfpgBaseCheckBox.HandleKeyRelease(var keycode: word;
@@ -254,7 +255,6 @@ begin
   begin
     consumed := True;
     Checked := not FChecked;
-    DoOnChange;
   end;
 
   if consumed then
