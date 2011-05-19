@@ -33,6 +33,7 @@ uses
   ;
 
 type
+
   TfpgBaseEditButton = class(TfpgAbstractPanel)
   private
     FOnButtonClick: TNotifyEvent;
@@ -56,14 +57,17 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
+  TFilenameSetEvent = procedure(Sender: TObject; const AOldValue, ANewValue: TfpgString) of object;
 
   TfpgFileNameEdit = class(TfpgBaseEditButton)
   private
+    FOnFilenameSet: TFilenameSetEvent;
     FFilter: TfpgString;
     FInitialDir: TfpgString;
     procedure SetFilter(const AValue: TfpgString);
     procedure SetFileName(const AValue: TfpgString);
     function GetFileName: TfpgString;
+    procedure DoFilenameSet(const AOld, ANew: TfpgString);
   protected
     procedure HandlePaint; override;
     procedure InternalButtonClick(Sender: TObject); override;
@@ -80,6 +84,7 @@ type
     property    TabOrder;
     property    OnButtonClick;
     property    OnShowHint;
+    property    OnFilenameSet: TFilenameSetEvent read FOnFilenameSet write FOnFilenameSet;
   end;
 
 
@@ -330,6 +335,12 @@ begin
   Result := FEdit.Text;
 end;
 
+procedure TfpgFileNameEdit.DoFilenameSet(const AOld, ANew: TfpgString);
+begin
+  if Assigned(FOnFilenameSet) then
+    FOnFilenameSet(self, AOld, ANew);
+end;
+
 procedure TfpgFileNameEdit.HandlePaint;
 var
   img: TfpgImage;
@@ -363,7 +374,9 @@ end;
 procedure TfpgFileNameEdit.InternalButtonClick(Sender: TObject);
 var
   dlg: TfpgFileDialog;
+  old: TfpgString;
 begin
+  old := FEdit.Text;
   dlg := TfpgFileDialog.Create(nil);
   try
     if FileName = '' then
@@ -390,6 +403,8 @@ begin
     dlg.Free;
   end;
   inherited InternalButtonClick(Sender);
+  if old <> FEdit.Text then
+    DoFilenameSet(old, FEdit.Text);
 end;
 
 
