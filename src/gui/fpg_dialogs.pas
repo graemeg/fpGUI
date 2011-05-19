@@ -959,8 +959,8 @@ begin
   begin
     SetPosition(461, 124, 110, 20);
     Text := rsAntiAliasing;
-    OnChange := @OnParamChange;
     Checked := True;
+    OnChange := @OnParamChange;
   end;
 
   lblLabel4 := TfpgLabel.Create(self);
