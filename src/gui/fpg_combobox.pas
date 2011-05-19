@@ -713,19 +713,16 @@ begin
     Canvas.SetColor(clSelection);
     Canvas.SetTextColor(clSelectionText);
     InflateRect(r, -1, -1);
+    Canvas.FillRectangle(r);
   end
   else
   begin
-    if Enabled then
-      Canvas.SetColor(FBackgroundColor)
-    else
-      Canvas.SetColor(clWindowBackground);
     Canvas.SetTextColor(FTextColor);
-    r.Left := r.Left + Margin;
-    r.Width := r.Width - (Margin*2);
   end;
-  Canvas.FillRectangle(r);
 
+  { adjust rectangle size smaller for text }
+  r.Left := r.Left + Margin;
+  r.Width := r.Width - (Margin*2);
   DoDrawText(r);
 end;
 
