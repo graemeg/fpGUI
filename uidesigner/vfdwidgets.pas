@@ -501,6 +501,7 @@ begin
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('SelectedColor', TPropertyColor, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.Addproperty('SingleClickSelect', TPropertyBoolean, 'Close calendar on date select');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
   wc.WidgetIconName := 'vfd.combodateedit';
@@ -521,6 +522,7 @@ begin
   wc.AddProperty('ParentShowHint', TPropertyBoolean, '');
   wc.AddProperty('SelectedColor', TPropertyColor, '');
   wc.AddProperty('ShowHint', TPropertyBoolean, '');
+  wc.Addproperty('SingleClickSelect', TPropertyBoolean, 'Close calendar on date select');
   wc.AddProperty('TabOrder', TPropertyInteger, 'The tab order');
   wc.AddProperty('WeekStartDay', TPropertyInteger, '0 = Sun, 1 = Mon, etc.');
   wc.WidgetIconName := 'vfd.combodatecheckedit';
