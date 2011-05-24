@@ -1589,11 +1589,11 @@ var
   fname: string;
 begin
   FOpenMode := False;
-  sdir := ExtractFileDir(FileName);
+  sdir := fpgExtractFileDir(FileName);
   if sdir = '' then
     sdir := '.';
   SetCurrentDirectory(sdir);
-  fname := ExtractFileName(FileName);
+  fname := fpgExtractFileName(FileName);
   if not HighlightFile(fname) then
     edFilename.Text := fname;
 
