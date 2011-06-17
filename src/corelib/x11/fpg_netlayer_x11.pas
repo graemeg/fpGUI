@@ -1076,7 +1076,7 @@ var
   Number: PLongWord;
 begin
   Result := FAtomSupported[naNUMBER_OF_DESKTOPS]
-  and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naNUMBER_OF_DESKTOPS], Count, Number);
+              and WindowGetPropertyCardinal(FRootWindow, FNetAtoms[naNUMBER_OF_DESKTOPS], Count, Number);
   if not Result then Exit;
 
   Desktops := PLongInt(Number)^;
