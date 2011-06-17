@@ -188,6 +188,7 @@ type
     procedure   DoDNDEnabled(const AValue: boolean); override;
     procedure   DoAcceptDrops(const AValue: boolean); override;
     procedure   DoDragStartDetected; override;
+    function    GetWindowState: TfpgWindowState; override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
   public
     constructor Create(AOwner: TComponent); override;
@@ -1938,6 +1939,38 @@ begin
   FDragActive := False;
   if Assigned(wapplication.FDrag) then
     FreeAndNil(wapplication.FDrag);
+end;
+
+function TfpgGDIWindow.GetWindowState: TfpgWindowState;
+const
+  flagsoffs = 0 * sizeof(integer);
+var
+  placement: TWindowPlacement;
+begin
+  Result := inherited GetWindowState;
+  case GetWindowLong(FWinHandle, flagsoffs) of
+    1:
+      begin
+        Result := wsMaximized; { TODO: this could later become wsFullScreen or something }
+      end;
+
+    2:
+      begin
+        { Do Nothing. This is actually just vertical fullscreen }
+      end;
+
+    else
+    begin
+      placement.length:= sizeof(placement);
+      if GetWindowPlacement(FWinHandle, placement) then
+      begin
+        case placement.ShowCmd of
+          SW_SHOWMAXIMIZED: result:= wsMaximized;
+          SW_SHOWMINIMIZED: result:= wsMinimized;
+        end;
+      end;
+    end; { case..else }
+  end; { case }
 end;
 
 constructor TfpgGDIWindow.Create(AOwner: TComponent);
