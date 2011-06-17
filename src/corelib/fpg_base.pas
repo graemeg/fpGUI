@@ -58,6 +58,8 @@ type
       waOneThirdDownPos);
   TWindowAttributes = set of TWindowAttribute;
 
+  TfpgWindowState = (wsNormal, wsMinimized, wsMaximized);
+
   TMouseCursor = (mcDefault, mcArrow, mcCross, mcIBeam, mcSizeEW, mcSizeNS,
       mcSizeNWSE, mcSizeNESW, mcSizeSWNE, mcSizeSENW, mcMove, mcHourGlass,
       mcHand, mcDrag, mcNoDrop);
@@ -444,6 +446,7 @@ type
     FMouseCursorIsDirty: Boolean;
     FOnDragStartDetected: TNotifyEvent;
     FDragActive: boolean;
+    FWindowState: TfpgWindowState;
     function    HandleIsValid: boolean; virtual; abstract;
     procedure   DoUpdateWindowPosition; virtual; abstract;
     procedure   DoAllocateWindowHandle(AParent: TfpgWindowBase); virtual; abstract;
@@ -456,6 +459,8 @@ type
     procedure   DoSetMouseCursor; virtual; abstract;
     procedure   DoDNDEnabled(const AValue: boolean); virtual; abstract;
     procedure   DoAcceptDrops(const AValue: boolean); virtual; abstract;
+    function    GetWindowState: TfpgWindowState; virtual;
+    procedure   SetWindowState(const AValue: TfpgWindowState); virtual;
     procedure   DoDragStartDetected; virtual;
     procedure   SetParent(const AValue: TfpgWindowBase); virtual;
     function    GetParent: TfpgWindowBase; virtual;
@@ -470,6 +475,7 @@ type
     procedure   HandleMove(x, y: TfpgCoord); virtual;
     procedure   HandleResize(AWidth, AHeight: TfpgCoord); virtual;
     property    OnDragStartDetected: TNotifyEvent read FOnDragStartDetected write FOnDragStartDetected;
+    property    WindowState: TfpgWindowState read GetWindowState {write SetWindowState} default wsNormal;
   public
     // The standard constructor.
     constructor Create(AOwner: TComponent); override;
@@ -1151,6 +1157,16 @@ begin
     Result := MinHeight;
 end;
 
+function TfpgWindowBase.GetWindowState: TfpgWindowState;
+begin
+  Result := FWindowState;
+end;
+
+procedure TfpgWindowBase.SetWindowState(const AValue: TfpgWindowState);
+begin
+  // do nothing
+end;
+
 procedure TfpgWindowBase.DoDragStartDetected;
 begin
   if Assigned(FOnDragStartDetected) then
@@ -1270,6 +1286,7 @@ begin
   FMaxWidth := 0;
   FMaxHeight := 0;
   FDragActive := False;
+  FWindowState := wsNormal;
 end;
 
 procedure TfpgWindowBase.AfterConstruction;

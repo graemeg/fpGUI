@@ -235,6 +235,7 @@ type
     procedure   DoDNDEnabled(const AValue: boolean); override;
     procedure   DoAcceptDrops(const AValue: boolean); override;
     property    WinHandle: TfpgWinHandle read FWinHandle;
+    function    GetWindowState: TfpgWindowState; override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure   ActivateWindow; override;
@@ -2437,6 +2438,66 @@ end;
 procedure TfpgX11Window.DoAcceptDrops(const AValue: boolean);
 begin
   { TODO : Remove EnableDrops, then recurse from here to parent top level from, and set XDNDAware property for form. }
+end;
+
+function TfpgX11Window.GetWindowState: TfpgWindowState;
+type
+  TWMStateType = (wms_none, wms_normal, wms_withdrawn, wms_iconic);
+  wmstate = record
+    state: longword;
+    icon: PtrUInt;
+  end;
+  pwmstate = ^wmstate;
+var
+  actualtype: TAtom = None;
+  actualformat: cint;
+  count, remaining: culong;
+  data: pwmstate = nil;
+  lWindowStates: TNetWindowStates;
+  maxh, maxv: boolean;
+begin
+  Result := inherited GetWindowState;
+
+  if XGetWindowProperty(xapplication.Display, FWinHandle, xapplication.xia_wm_state, 0, 1,
+      TBool(False), xapplication.xia_wm_state, @actualtype, @actualformat, @count,
+      @remaining, @data) = Success then
+  begin
+    if (actualformat = 32) and (count = 1) then
+    begin
+      case data^.State of
+        Ord(wms_none):
+            begin
+              // do nothing
+            end;
+        Ord(wms_normal):
+            begin
+              Result := wsNormal;
+              maxh := false;
+              maxv := false;
+              xapplication.netlayer.WindowGetState(FWinHandle, lWindowStates);
+              if nwsFullScreen in lWindowStates then
+                Result := wsMaximized; // not really true, but ok for now
+              if nwsMaxVert in lWindowStates then
+                maxv := True;
+              if nwsMaxHorz in lWindowStates then
+                maxh := True;
+              if (Result = wsNormal) and maxv and maxh then
+                Result := wsMaximized;
+            end;
+        Ord(wms_withdrawn):
+            begin
+              // do nothing
+            end;
+        Ord(wms_iconic):
+            begin
+              Result := wsMinimized;
+            end;
+      end; { case }
+    end; { if }
+  end;  { if }
+
+  if data <> nil then
+    XFree(data);
 end;
 
 procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);
