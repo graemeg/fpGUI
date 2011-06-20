@@ -624,7 +624,7 @@ begin
     begin
       FHScrollBar.Max := cw - vw;
       FHScrollBar.Position := FXOffset;
-      FHScrollBar.SliderSize := TotalColumnWidth / Width;
+      FHScrollBar.SliderSize := Width / TotalColumnWidth;
     end
     else
     begin
@@ -1028,7 +1028,7 @@ begin
       FColResizing := False
     else
     begin
-      cw := ColumnWidth[FResizedCol]+x-FDragPos;
+      cw := (ColumnWidth[FResizedCol]+x)-FDragPos;
       if cw < 1 then
         cw := 1;
       SetColumnWidth(FResizedCol, cw);
