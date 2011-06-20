@@ -82,8 +82,6 @@ type
   end;
 
 
-  { TfpgCustomStringGrid }
-
   TfpgCustomStringGrid = class(TfpgCustomGrid)
   private
     function    GetCell(ACol, ARow: Integer): string;
@@ -409,7 +407,8 @@ begin
   if ACol > ColumnCount-1 then
     Exit; //==>
   BeginUpdate;
-  TfpgStringColumn(FColumns.Items[ACol]).Width := AValue;
+  inherited SetColumnWidth(ACol, AValue);
+//  TfpgStringColumn(FColumns.Items[ACol]).Width := AValue;
   EndUpdate;
 end;
 

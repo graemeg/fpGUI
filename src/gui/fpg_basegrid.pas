@@ -1059,15 +1059,13 @@ begin
       begin
         inc(cw, ColumnWidth[n]);
         // Resizing is enabled 4 pixel either way of the cell border
-        if ((x >= (cLeft+cw-4)) and (x <= (cLeft+cw+4))) {or
-           (cw > (cLeft + VisibleWidth)) and (x >= (cLeft + VisibleWidth-4))} then
+        if ((x >= (cLeft+cw-4)) and (x <= (cLeft+cw+4))) then
         begin
           colresize := True;
           Break;
         end;
-
-        if cw > VisibleWidth then
-          Break;
+        { TODO: We could optimize this slightly by breaking as soon as x is
+          greater than current column edge we are over. }
       end;  { if }
     end;  { if/else }
 
@@ -1142,21 +1140,10 @@ begin
         FColResizing  := True;
         FResizedCol   := n;
         FDragPos      := x;
-        Break;
-      //end
-      //else if (cw > cLeft+VisibleWidth) and (x >= cLeft+VisibleWidth-4) then
-      //begin
-      //  FColResizing  := True;
-      //  FResizedCol   := n;
-      //  FDragPos      := x;
-      //  nw := ColumnWidth[FResizedCol] - (cw+cLeft-x);
-      //  if nw > 0 then
-      //    SetColumnWidth(FResizedCol, nw );
-      //  Break;
+        Exit;
       end;  { if/else }
-
-      if cw > VisibleWidth then
-        Break;
+      { TODO: We could optimize this slightly by breaking as soon as x is
+        greater than current column edge we are over. }
     end;  { for }
   end
   else
@@ -1320,7 +1307,7 @@ procedure TfpgBaseGrid.Update;
 begin
   if csUpdating in ComponentState then
     Exit;
-  FollowFocus;
+  UpdateScrollBars;
   RePaint;
 end;
 
