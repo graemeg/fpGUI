@@ -358,8 +358,7 @@ begin
   Result := TfpgStringColumn(FColumns.Items[ACol]).Width;
 end;
 
-procedure TfpgCustomStringGrid.SetCell(ACol, ARow: Integer;
-  const AValue: string);
+procedure TfpgCustomStringGrid.SetCell(ACol, ARow: Integer; const AValue: string);
 begin
   if ACol > ColumnCount-1 then
     Exit; //==>
@@ -368,19 +367,24 @@ begin
   if TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow] <> AValue then
   begin
     BeginUpdate;
-    TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow] := AValue;
-    EndUpdate;
+    try
+      TfpgStringColumn(FColumns.Items[ACol]).Cells[ARow] := AValue;
+    finally
+      EndUpdate;
+    end;
   end;
 end;
 
-procedure TfpgCustomStringGrid.SetColumnAlignment(ACol: Integer;
-  const AValue: TAlignment);
+procedure TfpgCustomStringGrid.SetColumnAlignment(ACol: Integer; const AValue: TAlignment);
 begin
   if ACol > ColumnCount-1 then
     Exit; //==>
   BeginUpdate;
-  TfpgStringColumn(FColumns.Items[ACol]).Alignment := AValue;
-  EndUpdate;
+  try
+    TfpgStringColumn(FColumns.Items[ACol]).Alignment := AValue;
+  finally
+    EndUpdate;
+  end;
 end;
 
 procedure TfpgCustomStringGrid.SetColumnTitle(ACol: Integer; const AValue: string);
@@ -388,12 +392,14 @@ begin
   if ACol > ColumnCount-1 then
     Exit; //==>
   BeginUpdate;
-  TfpgStringColumn(FColumns.Items[ACol]).Title := AValue;
-  EndUpdate;
+  try
+    TfpgStringColumn(FColumns.Items[ACol]).Title := AValue;
+  finally
+    EndUpdate;
+  end;
 end;
 
-procedure TfpgCustomStringGrid.SetObjects(ACol, ARow: Integer;
-  const AValue: TObject);
+procedure TfpgCustomStringGrid.SetObjects(ACol, ARow: Integer; const AValue: TObject);
 begin
   if ACol > ColumnCount-1 then
     Exit; //==>
@@ -407,9 +413,11 @@ begin
   if ACol > ColumnCount-1 then
     Exit; //==>
   BeginUpdate;
-  inherited SetColumnWidth(ACol, AValue);
-//  TfpgStringColumn(FColumns.Items[ACol]).Width := AValue;
-  EndUpdate;
+  try
+    inherited SetColumnWidth(ACol, AValue);
+  finally
+    EndUpdate;
+  end;
 end;
 
 function TfpgCustomStringGrid.GetColumns(AIndex: Integer): TfpgStringColumn;
