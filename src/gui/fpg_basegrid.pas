@@ -462,7 +462,7 @@ begin
     FFocusCol := ColumnCount-1;
 
   FollowFocus;
-  CheckFocusChange;
+  Update;
 end;
 
 procedure TfpgBaseGrid.SetFocusRow(const AValue: Integer);
@@ -477,9 +477,8 @@ begin
   if FFocusRow > RowCount-1 then
     FFocusRow := RowCount-1;
 
-//  FollowFocus;
+  FollowFocus;
   Update;
-  CheckFocusChange;
 end;
 
 procedure TfpgBaseGrid.CheckFocusChange;
