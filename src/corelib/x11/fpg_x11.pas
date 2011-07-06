@@ -763,8 +763,11 @@ begin
     Include(Result, ssCtrl);
   if (AState and Mod1Mask) <> 0 then
     Include(Result, ssAlt);
-  if (AState and Mod2Mask) <> 0 then
-    Include(Result, ssNum);
+  { Numlock is often permanently enabled after booting, so this always gives
+    use the incorrect ShiftState. So we simply stop checking ssNum as part
+    of the ShiftState. }
+//  if (AState and Mod2Mask) <> 0 then
+//    Include(Result, ssNum);
   { NOTE: Mod3Mask is normally unused for some reason }
   if (AState and Mod4Mask) <> 0 then   { aka "Windows key" }
     Include(Result, ssSuper);
