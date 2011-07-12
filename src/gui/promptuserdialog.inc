@@ -138,6 +138,7 @@ begin
   lblDatabases := CreateLabel(self, 8, 101, rsDatabase);
   cbDatabases := CreateComboBox(self, 8, 119, 184, aStringList);
   cbDatabases.Anchors := [anLeft, anTop, anRight];
+  cbDatabases.Height := edUserID.Height;
 
   // reposition buttons
   btnCancel.Left  := Width-FDefaultButtonWidth-FSpacing;
