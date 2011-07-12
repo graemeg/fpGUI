@@ -51,8 +51,8 @@ etc.).
       </element>
       <!-- record type Visibility: default -->
       <element name="TRGBTriple">
-        <short>A record structure holding the RGBA values of a color.</short>
-        <descr>This is now marked as "deprecated". Please use <link id="fpg_base.TFPColor">TFPColor</link> instead.</descr>
+        <short>A record structure holding the RGBA values of a color</short>
+        <descr><printshort id="TRGBTriple"/>. This is now marked as "deprecated". Please use <link id="fpg_base.TFPColor">TFPColor</link> instead.</descr>
         <seealso/>
       </element>
       <!-- variable Visibility: default -->
@@ -87,32 +87,50 @@ means no titlebar or window borders are going to be created.</short>
         <short>This window will normally not have a titlebar or window borders.</short>
         <descr>This window will normally not have a titlebar or window borders and will appear above other windows. It is used for example in the dropdown window of a ComboBox or a tooltip window or popup menus. This type of window does not steal focus.</descr>
       </element>
-      <!-- enumeration type Visibility: default -->
-      <element name="TWindowAttribute">
-        <short>An enum types defining extra attributes of a window.</short>
-        <descr/>
-        <seealso/>
-      </element>
-      <!-- enumeration value Visibility: default -->
-      <element name="TWindowAttribute.waSizeable">
-        <short>If this attribute is set, the window will be resizeable by the user.</short>
-      </element>
-      <!-- enumeration value Visibility: default -->
-      <element name="TWindowAttribute.waAutoPos">
-        <short>If this attribute is set, the underlying window manager will decide where
-the window will be placed on the screen it it becomes visible for the first time.</short>
-      </element>
-      <!-- enumeration value Visibility: default -->
-      <element name="TWindowAttribute.waScreenCenterPos">
-        <short>If this attribute is set, the window will be centred on the screen when
-it is shown for the first time.</short>
-      </element>
-      <!-- set type Visibility: default -->
-      <element name="TWindowAttributes">
-        <short>A set of TWindowAttribute types.</short>
-        <descr/>
-        <seealso/>
-      </element>
+
+<element name="TWindowAttribute">
+<short>An enum types defining extra attributes of a window.</short>
+</element>
+
+<element name="TWindowAttribute.waSizeable">
+<short>If this attribute is set, the window will be resizeable by the user.</short>
+</element>
+
+<element name="TWindowAttribute.waAutoPos">
+<short>If this attribute is set, the underlying window manager will decide where
+the window will be placed on the screen, when it becomes visible for the first time.</short>
+</element>
+
+<element name="TWindowAttribute.waBorderless">
+<short>The window will have no border painted. This is used in windows like Tooltips, Splash screens etc.</short>
+</element>
+
+<element name="TWindowAttribute.waFullScreen">
+<short>When set, this will tell the window manager to create the window in a full screen state.</short>
+</element>
+
+<element name="TWindowAttribute.waOneThirdDownPos">
+<short>When set, the fpGUI framework will calculate the remaining desktop space (minus the window height), and
+then position the window one third of the way down (from the top of the screen). This is usually a more
+desired position than the screen center.</short>
+</element>
+
+<element name="TWindowAttribute.waScreenCenterPos">
+<short>If this attribute is set, the window will be centered on the screen when it is shown for
+the first time.</short>
+</element>
+
+<element name="TWindowAttribute.waStayOnTop">
+<short>If set, the window will always be above all other windows. This is used for example is Splash Screen windows.</short>
+</element>
+
+<element name="TWindowAttributes">
+<short>A set of TWindowAttribute types.</short>
+<seealso>
+<link id="fpg_base.TWindowAttribute">TWindowAttribute</link>
+</seealso>
+</element>
+      
       <!-- enumeration type Visibility: default -->
       <element name="TMouseCursor">
         <short>Enum types of the available mouse cursor shapes.</short>
@@ -920,10 +938,18 @@ set to gdVertical, then it paints from top to bottom.</descr>
         <short>Last modified timestamp</short>
       </element>
 
-      <element name="TFPColor">
-        <short>A record structure holding the RGBA values of a color.</short>
-        <descr>This is the same declaration as the one found in FPImage (include with Free Pascal Compiler). In future when FPImage is integrated with fpGUI, I will remove this declaration.</descr>
-      </element>
+<element name="TFPColor">
+<short>A record structure holding the RGBA values of a color.</short>
+<descr>This is the same declaration as the one found in FPImage (included with the
+Free Pascal Compiler). In future when FPImage is integrated with fpGUI, this declaration
+will be removed.</descr>
+</element>
+
+<element name="TfpgPoint">
+<short>An extension of the FPC TPoint structure</short>
+<descr><p><printshort id="TfpgPoint"/>. This structure is used inside the fpGUI framework, and includes some extra methods like
+calculating lengths between to points etc.</p></descr>
+</element>
 
 <element name="TfpgPoint.ManhattanLength">
 <short>Quick calculation of the length between points</short>
