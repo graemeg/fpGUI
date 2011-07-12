@@ -1010,9 +1010,9 @@ begin
   Canvas.BeginDraw;
 //  inherited HandlePaint;
   Canvas.Clear(BackgroundColor);
-  Canvas.SetColor(clWindowBackground);
-  Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
-  Canvas.DrawButtonFace(1, 1, Width-1, Height-1, []);  // 3d rectangle inside black border
+//  Canvas.SetColor(clBlack);
+//  Canvas.DrawRectangle(0, 0, Width, Height);  // black rectangle border
+  Canvas.DrawButtonFace(0, 0, Width, Height, []);  // 3d rectangle inside black border
 
   for n := 0 to VisibleCount-1 do
     DrawRow(n, n = FFocusItem);
