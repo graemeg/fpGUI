@@ -452,6 +452,7 @@ begin
   {@VFD_BODY_END: frmMain}
   {%endregion}
 
+  { Build component palette }
   x := 0;
   y := 0;
   for n := 0 to VFDWidgetCount-1 do

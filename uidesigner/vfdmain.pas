@@ -179,9 +179,8 @@ var
 begin
   fname := EditedFileName;
 
-  if ((Sender as TComponent).Tag = 10)
-    and (EditedFileName <> '') then
-      fname := EditedFileName
+  if ((Sender as TComponent).Tag = 10) and (EditedFileName <> '') then
+    fname := EditedFileName
   else
   begin
     afiledialog          := TfpgFileDialog.Create(nil);
@@ -196,7 +195,7 @@ begin
       EditedFileName := fname;
     end
     else
-      fname          := '';
+      fname := '';
     aFileDialog.Free;
   end;
 
@@ -212,7 +211,7 @@ begin
   end
   else
   begin
-    uname := ExtractFileName(fname);
+    uname := fpgExtractFileName(fname);
     i     := pos('.pas', LowerCase(uname));
     if i > 0 then
       uname := copy(uname, 1, i - 1);
@@ -221,7 +220,10 @@ begin
 
   for n := 0 to DesignerCount-1 do
   begin
+    fd := nil;
     fd := Designer(n);
+    if fd = nil then
+      raise Exception.Create('Failed to find Designer Form');
     FFile.SetFormData(fd.Form.Name, fd.GetFormSourceDecl, fd.GetFormSourceImpl);
   end;
 
