@@ -11,6 +11,8 @@
     edPassword: TfpgEdit;
     function    GetUserID: TfpgString;
     function    GetUserPassword: TfpgString;
+  protected
+    procedure   btnOKClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
     // Gof defines this Authenticate method a Hook operation in Template methods pattern.
@@ -52,6 +54,12 @@ end;
 function TfpgPromptUserDialog.GetUserPassword: TfpgString;
 begin
   Result := edPassword.Text;
+end;
+
+procedure TfpgPromptUserDialog.btnOKClick(Sender: TObject);
+begin
+  if Authenticate then
+    inherited btnOKClick(Sender);
 end;
 
 constructor TfpgPromptUserDialog.Create(AOwner: TComponent);
