@@ -546,7 +546,7 @@ end;
 procedure TfpgBaseDialog.btnCancelClick(Sender: TObject);
 begin
   ModalResult := mrCancel;
-  Close;
+  Close;  // this shouldn't really be needed if we displayed form with ShowModal
 end;
 
 procedure TfpgBaseDialog.HandleKeyPress(var keycode: word;
