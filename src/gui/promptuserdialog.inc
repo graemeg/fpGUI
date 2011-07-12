@@ -30,10 +30,12 @@
   protected
     aStringList: TStringList;
     cbDatabases: TfpgComboBox;
+    function    GetSelectedDatabase: TfpgString; virtual;
     procedure   PopulateComboDb; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
+    property    Database: TfpgString read GetSelectedDatabase;
   end;
 
 
@@ -116,6 +118,11 @@ begin
 end;
 
 { TfpgPromptUserDbDialog }
+
+function TfpgPromptUserDbDialog.GetSelectedDatabase: TfpgString;
+begin
+  Result := cbDatabases.Text;
+end;
 
 constructor TfpgPromptUserDbDialog.Create(AOwner: TComponent);
 begin
