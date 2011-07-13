@@ -303,7 +303,7 @@ procedure TYearSelectForm.SetYear(const AValue: Word);
   begin
     // always one year less on either side (min and max) so we don't go over
     // any possible month limits.
-    Result := (AYear > MinYear) and (AYear < MaxYear);
+    Result := (AYear >= MinYear) and (AYear <= MaxYear);
   end;
 
 begin
@@ -791,27 +791,26 @@ begin
   end;
 end;
 
+{ If AValue is out of range (min or max), then set it to the limit value }
 procedure TfpgPopupCalendar.SetDateValue(const AValue: TDateTime);
+var
+  lDate: TDateTime;
 begin
   if FDate = AValue then
     Exit; //==>
+  lDate := AValue;
 
   if (trunc(AValue) >= trunc(FMinDate)) then
-    {$IFDEF DEBUG}
-    writeln('Passed min test')
-    {$ENDIF}
+    // do nothing - test passed
   else
-    exit;
-
-  if (trunc(AValue) <= trunc(FMaxDate)) then
-    {$IFDEF DEBUG}
-    writeln('Passed max test')
-    {$ENDIF}
-  else
-    exit;
+    lDate := FMinDate;
     
-  {$IFDEF DEBUG} writeln('SetDateValue: ', FormatDateTime('yyyy-mm-dd', AValue)); {$ENDIF}
-  FDate := AValue;
+  if (trunc(AValue) <= trunc(FMaxDate)) then
+    // do nothing - test passed
+  else
+    lDate := FMaxDate;
+    
+  FDate := lDate;
   UpdateCalendar;
 end;
 
