@@ -131,7 +131,7 @@ type
     procedure   PopulateDays;
     procedure   CalculateMonthOffset;
     function    CalculateCellDay(const ACol, ARow: Integer): Integer;
-    procedure   SetDateElement(Index: integer; const AValue: Word);
+    procedure   SetDateElement(AIndex: integer; const AValue: Word);
     procedure   SetDateValue(const AValue: TDateTime);
     procedure   SetMaxDate(const AValue: TDateTime);
     procedure   SetMinDate(const AValue: TDateTime);
@@ -763,7 +763,7 @@ begin
       FThisMonthDays[ACol,ARow] := True;
 end;
 
-procedure TfpgPopupCalendar.SetDateElement(Index: integer; const AValue: Word);
+procedure TfpgPopupCalendar.SetDateElement(AIndex: integer; const AValue: Word);
 var
   lD, lM, lY: Word;
   lDate: TDateTime;
@@ -772,7 +772,7 @@ begin
   if AValue > 0 then
   begin
     DecodeDate(FDate, lY, lM, lD);
-    case Index of
+    case AIndex of
       1:  lD := AValue;
       2:  begin
             lM := AValue;
