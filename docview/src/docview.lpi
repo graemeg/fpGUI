@@ -31,7 +31,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="35">
+    <Units Count="36">
       <Unit0>
         <Filename Value="docview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -201,6 +201,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="HelpNote"/>
       </Unit34>
+      <Unit35>
+        <Filename Value="HelpBookmark.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HelpBookmark"/>
+      </Unit35>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -216,7 +221,6 @@
         <IncludeAssertionCode Value="True"/>
         <AllowLabel Value="False"/>
         <CPPInline Value="False"/>
-        <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
@@ -224,13 +228,6 @@
         <OptimizationLevel Value="0"/>
       </Optimizations>
     </CodeGeneration>
-    <Linking>
-      <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
-      </Options>
-    </Linking>
     <Other>
       <CompilerMessages>
         <UseMsgFile Value="True"/>

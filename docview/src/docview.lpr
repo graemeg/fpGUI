@@ -11,7 +11,7 @@ uses
   IPFFileFormatUnit, HelpWindowDimensions, NewViewConstantsUnit, SettingsUnit,
   RichTextStyleUnit, CanvasFontManager, ACLStringUtility, RichTextDocumentUnit,
   RichTextView, RichTextLayoutUnit, RichTextDisplayUnit, dvconstants, dvHelpers,
-  frm_configuration, HelpBitmap, frm_text, frm_note, HelpNote;
+  frm_configuration, HelpBitmap, frm_text, frm_note, HelpNote, HelpBookmark;
 
 {$IFDEF WINDOWS}
   {$R docview.rc}
