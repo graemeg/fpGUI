@@ -98,6 +98,7 @@ type
     CurrentHistoryIndex: integer;
     OpenAdditionalFile: boolean;
     Notes: TList; // Notes in current files.
+    Bookmarks: TList;
 
     procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnTBNoteAddClick(Sender: TObject);
@@ -217,6 +218,13 @@ type
     procedure   ViewSourceMIOnClick(Sender: TObject);
     procedure   AddCurrentToMRUFiles;
     procedure   CreateMRUMenuItems;
+    procedure   LoadBookmarks(AHelpFile: THelpFile);
+    procedure   SaveBookmarks;
+    procedure   SaveBookmarksForFile(AHelpFile: THelpFile);
+    procedure   AddBookmark;
+    procedure   OnBookmarksChanged(Sender: TObject);
+    procedure   BuildBookmarksMenu;
+    procedure   UpdateBookmarksDisplay;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -250,6 +258,7 @@ uses
   ,CanvasFontManager
   ,HelpNote
   ,RichTextDocumentUnit
+  ,HelpBookmark
   ;
 
 const
@@ -2482,6 +2491,7 @@ begin
   CurrentOpenFiles := TList.Create;
   DisplayedIndex := TStringList.Create;
   Notes := TList.Create;
+  Bookmarks := TList.Create;
   CurrentHistoryIndex := -1;
   FHistorySelection := False;
   OpenAdditionalFile := False;
@@ -2532,6 +2542,7 @@ begin
   FFileOpenRecent := nil;   // it was a reference only
   miOpenRecentMenu.Free;
 //  DestroyListAndObjects(Files);
+  DestroyListAndObjects(Bookmarks);
   DestroyListAndObjects(Notes);
   DestroyListAndObjects(AllFilesWordSequences);
   DestroyListAndObjects(CurrentOpenFiles);
@@ -3589,6 +3600,165 @@ begin
     MenuItem.Tag := i;
   end;
 end;
+
+procedure TMainForm.LoadBookmarks(AHelpFile: THelpFile);
+var
+  Bookmark: TBookmark;
+  BookmarksFile: TextFile;
+  BookmarksFileName: string;
+  s: string;
+begin
+  ProfileEvent( 'Load bookmarks for ' + AHelpFile.Filename );
+
+  BookmarksFileName := fpgChangeFileExt( AHelpFile.FileName, '.bmark' );
+
+  if not fpgFileExists( BookmarksFileName ) then
+    Exit;
+
+  FileMode := fmInput;
+  AssignFile( BookmarksFile, BookmarksFileName );
+  try
+    Reset( BookmarksFile );
+    try
+      while not Eof( BookmarksFile ) do
+      begin
+        ReadLn( BookmarksFile, s );
+        if Trim( Uppercase( s ) ) = '[BOOKMARK]' then
+        begin
+          Bookmark := TBookmark.Load( BookmarksFile, AHelpFile );
+          Bookmarks.Add( Bookmark );
+        end;
+      end;
+    finally
+      System.Close( BookmarksFile );
+    end;
+  except
+    on e: exception do
+      TfpgMessageDialog.Critical('Load Bookmarks', 'Could not load bookmarks: ' + E.Message);
+  end;
+end;
+
+procedure TMainForm.SaveBookmarks;
+var
+  FileIndex: integer;
+  HelpFile: THelpFile;
+begin
+  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
+  begin
+    HelpFile := THelpFile(CurrentOpenFiles[FileIndex]);
+    SaveBookmarksForFile(HelpFile);
+  end;
+end;
+
+procedure TMainForm.SaveBookmarksForFile(AHelpFile: THelpFile);
+var
+  i: integer;
+  Bookmark: TBookmark;
+  BookmarksFile: TextFile;
+  BookmarksFileName: TfpgString;
+  BookmarkCount: integer;
+begin
+  ProfileEvent( 'Save bookmarks for ' + AHelpFile.Filename );
+
+  BookmarksFileName:= ChangeFileExt(AHelpFile.FileName, '.bmark');
+
+  BookmarkCount := 0;
+  for i := 0 to Bookmarks.Count - 1 do
+  begin
+    Bookmark := TBookmark(Bookmarks[i]);
+    if Bookmark.ContentsTopic.HelpFile = AHelpFile then
+      inc( BookmarkCount );
+  end;
+
+  if BookmarkCount = 0 then
+  begin
+    if fpgFileExists( BookmarksFileName ) then
+      fpgDeleteFile( BookmarksFileName );
+    Exit;
+  end;
+
+  AssignFile( BookmarksFile, BookmarksFileName );
+  try
+    Rewrite( BookmarksFile );
+    try
+      for i := 0 to Bookmarks.Count - 1 do
+      begin
+        Bookmark := TBookmark(Bookmarks[i]);
+        if Bookmark.ContentsTopic.HelpFile = AHelpFile then
+        begin
+          WriteLn( BookmarksFile, '[BOOKMARK]' );
+          Bookmark.Save( BookmarksFile );
+        end;
+      end;
+    finally
+      System.Close( BookmarksFile );
+    end;
+  except
+    on E: Exception do
+      TfpgMessageDialog.Critical('Save Bookmarks', 'Could not save bookmarks: ' + E.Message);
+  end;
+end;
+
+procedure TMainForm.AddBookmark;
+var
+  Bookmark: TBookmark;
+begin
+  Bookmark := TBookmark.Create;
+
+  if tvContents.Selection <> nil then
+  begin
+    Bookmark.ContentsTopic := TTopic(tvContents.Selection.Data);
+    Bookmark.Name := Bookmark.ContentsTopic.Title;
+  end
+  else
+  begin
+    Bookmark.ContentsTopic := nil;
+    Bookmark.Name := '(Untitled)';
+  end;
+
+  Bookmarks.Add( Bookmark );
+  OnBookmarksChanged( self );
+end;
+
+procedure TMainForm.OnBookmarksChanged(Sender: TObject);
+begin
+  BuildBookmarksMenu;
+//  UpdateBookmarksForm;
+  SaveBookmarks;
+end;
+
+procedure TMainForm.BuildBookmarksMenu;
+begin
+
+end;
+
+procedure TMainForm.UpdateBookmarksDisplay;
+var
+  i: integer;
+  Bookmark: TBookmark;
+Begin
+  BookmarksListBox.Items.BeginUpdate;
+  BookmarksListBox.Clear;
+
+  if not Assigned( BookmarkList ) then
+    exit;
+
+  for i := 0 to BookmarkList.Count - 1 do
+  begin
+    Bookmark := BookmarkList[ i ];
+    BookmarksListBox.Items.AddObject( Bookmark.Name,
+                                      Bookmark );
+  end;
+
+  if BookmarksListBox.Items.Count > 0 then
+    BookmarksListBox.ItemIndex := 0;
+
+  BookmarksListBox.Items.EndUpdate;
+  UpdateControls;
+end;
+
+end;
+
 
 
 end.
