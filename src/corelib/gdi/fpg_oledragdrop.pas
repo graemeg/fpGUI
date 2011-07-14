@@ -78,9 +78,9 @@ type
     FOnDragDrop: TfpgOLEDragDropEvent;
   private
     { IInterface }
-    function    QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
-    function    _AddRef: Integer; stdcall;
-    function    _Release: Integer; stdcall;
+    function    QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} iid: TGuid; out obj): LongInt; stdcall;
+    function    _AddRef: longint; stdcall;
+    function    _Release: longint; stdcall;
     { IDropTarget }
     function    DragEnter(const dataObj: IDataObject; grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult;StdCall;
     function    DragOver(grfKeyState: DWORD; pt: TPoint; var dwEffect: DWORD): HResult; stdcall;
@@ -776,17 +776,17 @@ begin
   Result := S_OK;
 end;
 
-function TfpgOLEDropTarget._AddRef: Integer;
+function TfpgOLEDropTarget._AddRef: longint;
 begin
   Result := 1;
 end;
 
-function TfpgOLEDropTarget._Release: Integer;
+function TfpgOLEDropTarget._Release: longint;
 begin
   Result := 1;
 end;
 
-function TfpgOLEDropTarget.QueryInterface(const IID: TGUID; out Obj): HResult;
+function TfpgOLEDropTarget.QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} iid: TGuid; out obj): longint; stdcall;
 begin
   if GetInterface(IID, Obj) then
     Result := 0
