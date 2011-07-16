@@ -21,7 +21,7 @@
 unit fpg_textedit;
 
 {$mode objfpc}{$H+}
-{$Define gDEBUG}
+{.$Define gDEBUG}
 
 interface
 
@@ -97,6 +97,17 @@ type
     FGutterPan: TfpgGutter;
     FRightEdge: Boolean;
     FRightEdgeCol: Integer;
+    FLineChanged: Integer;    // force only one line to repaint if greater than -1
+
+    FLastScrollEventTime: TTime; // in milliseconds
+    FLastScrollEventTimeBefore: TTime; // in milliseconds
+    fmousewheelfrequmin: double;
+    fmousewheelfrequmax: double;
+    fmousewheeldeltamin: double;
+    fmousewheeldeltamax: double;
+    fmousewheelaccelerationmax: double;
+    
+    fwheelsensitivity: double;
     function    GetFontDesc: string;
     function    GetGutterShowLineNumbers: Boolean;
     function    GetGutterVisible: Boolean;
@@ -123,6 +134,9 @@ type
     procedure   InitMemoObjects;
     procedure   SetRightEdge(const AValue: Boolean);
     procedure   SetRightEdgeCol(const AValue: Integer);
+    function    calcmousewheeldelta(var info: TfpgMsgParmMouse; const fmin,fmax,deltamin,deltamax: double): double;
+    function    mousewheelacceleration(const avalue: double): double;
+    function    mousewheelacceleration(const avalue: integer): integer;  
   protected
     { -- internal events -- }
     procedure   HandleShow; override;
@@ -1101,9 +1115,16 @@ end;
 
 procedure TfpgBaseTextEdit.HandlePaint;
 begin
-//  inherited HandlePaint;
-  // normal house keeping
   Canvas.ClearClipRect;
+  if FLineChanged > -1 then
+  begin
+    { TODO: We would like Vertical and Underline cursor painting at some point }
+    DrawLine(FLineChanged, CaretPos.Y * FChrH);
+    FLineChanged := -1;
+    Exit;
+  end;
+
+  // normal house keeping
   Canvas.Clear(clBoxColor);
   fpgStyle.DrawControlFrame(Canvas, 0, 0, Width, Height);
   Canvas.Font := FFont;
@@ -1168,12 +1189,11 @@ begin
   end;
   if FSelDrag then
   begin
-writeln('  SelDrag is True!!!!');
+//    writeln('  SelDrag is True!!!!');
 //    Exit; //==>
   end;
   if not (ssShift in ShiftState) then
   begin
-writeln(' shiftstate not detected');
     if FSelected then
     begin
       { Erase old selection, if any... }
@@ -1195,17 +1215,79 @@ writeln(' shiftstate not detected');
   Invalidate;
 end;
 
+function TfpgBaseTextEdit.calcmousewheeldelta(var info: TfpgMsgParmMouse;
+               const fmin,fmax,deltamin,deltamax: double): double;
+var
+  frequ: double;
+begin
+  if (FLastScrollEventTime <> 0) and (FLastScrollEventTime <> info.timestamp) then
+  begin
+    frequ := 0.00003 /(info.timestamp-FLastScrollEventTime); // Hz
+    {$IFDEF gDEBUG}
+    writeln('frequ = ', Format('%3.9f', [frequ]));
+    {$ENDIF}
+    if frequ > fmax then
+    begin
+      frequ := fmax;
+    end;
+    if frequ < fmin then
+    begin
+      frequ := fmin;
+    end;
+    result := (frequ*(deltamax-deltamin)+(deltamin*fmax-deltamax*fmin)) / (fmax-fmin);
+  end
+  else
+  begin
+    result := deltamin;
+  end;
+{
+  if d > 0 then  // down
+  begin
+    d := - d;
+  end;
+}
+  {$IFDEF gDEBUG}
+  writeln('result = ', Format('%3.6f', [result]));
+  {$ENDIF}
+end;
+
+function TfpgBaseTextEdit.mousewheelacceleration(const avalue: double): double;
+var
+  info: TfpgMsgParmMouse;
+  d: double;
+begin
+  info.timestamp := FLastScrollEventTime + FLastScrollEventTime -
+                     FLastScrollEventTimeBefore;
+  d := calcmousewheeldelta(info,fmousewheelfrequmin,fmousewheelfrequmax,1,
+                      fmousewheelaccelerationmax);
+  result := avalue * d;
+end;
+
+function TfpgBaseTextEdit.mousewheelacceleration(const avalue: integer): integer;
+begin
+  result:= round(mousewheelacceleration(avalue*1.0));
+end;
+
 procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
     delta: smallint);
 var
   msg: TfpgMessageParams;
+  ldelta: integer;
 begin
   inherited HandleMouseScroll(x, y, shiftstate, delta);
   fillchar(msg, sizeof(msg), 0);  // zero out the record - initialize it
   msg.mouse.x := x;
   msg.mouse.y := y;
   msg.mouse.shiftstate := shiftstate;
-  msg.mouse.delta := delta;
+  
+  FLastScrollEventTimeBefore := FLastScrollEventTime;
+  FLastScrollEventTime := Now;
+
+  { calculate a modified delta based on mouse scroll sensitivity setting }
+  ldelta := round(mousewheelacceleration(delta*fwheelsensitivity));
+  
+  msg.mouse.delta := ldelta;
+
   fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
 end;
 
@@ -1218,6 +1300,9 @@ var
   X: Integer;
   CaretScroll: Boolean;
 begin
+  {$IFDEF gDEBUG}
+  writeln('>> TfpgBaseTextEdit.HandleKeyPress');
+  {$ENDIF}
 //  inherited HandleKeyPress(keycode, shiftstate, consumed);
 
   { Add lines as we go, so we can cursor past EOF. }
@@ -1317,6 +1402,9 @@ begin
     ScrollPos_V := CaretPos.Y - FVisLines + 2;
 
   Invalidate;
+  {$IFDEF gDEBUG}
+  writeln('<< TfpgBaseTextEdit.HandleKeyPress');
+  {$ENDIF}
 end;
 
 procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar;
@@ -1325,7 +1413,9 @@ var
   SLine: TfpgString;
   Fill: Integer;
 begin
+  {$IFDEF gDEBUG}
   writeln('>> TfpgBaseTextEdit.HandleKeyChar');
+  {$ENDIF}
   if not consumed then
   begin
     // Handle only printable characters
@@ -1352,7 +1442,9 @@ begin
     RePaint
   else
     inherited HandleKeyChar(AText, shiftstate, consumed);
+  {$IFDEF gDEBUG}
   writeln('<< TfpgBaseTextEdit.HandleKeyChar');
+  {$ENDIF}
 end;
 
 procedure TfpgBaseTextEdit.DrawVisible;
@@ -1589,6 +1681,17 @@ begin
   FSelected     := False;
   FRightEdge    := False;
   FRightEdgeCol := 80;
+  FLineChanged := -1;
+  
+  fmousewheelfrequmin := 1;
+  fmousewheelfrequmax := 100;
+  fmousewheeldeltamin := 0.05;
+  fmousewheeldeltamax := 30;
+  fmousewheelaccelerationmax := 30;
+  fwheelsensitivity := 1.5;
+  
+  FLastScrollEventTime := 0;
+  FLastScrollEventTimeBefore := 0;
 
   FVScrollBar          := TfpgScrollBar.Create(self);
   FVScrollBar.Orientation := orVertical;
