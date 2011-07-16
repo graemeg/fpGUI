@@ -1,0 +1,29 @@
+[ProjectOptions]
+ProjectDir=/media/flash16gig/programming/fpgide/src/
+ProjectName=fpgide
+MainUnit=empty.lpr
+TargetFile=empty
+DefaultMake=0
+UnitOutputDir=units/i386-linux/
+MakeOptionsCount=4
+MakeOption1=-l -Mobjfpc -Sch
+MakeOption2=-gl -O-
+MakeOption3=-B
+MakeOption4=-O2 -XX -Xs -CX
+MakeOptionEnabled1=1,1,1,1,1,1
+MakeOptionEnabled2=1,1,1,1,1,0
+MakeOptionEnabled3=0,1,0,0,0,1
+MakeOptionEnabled4=0,0,0,0,0,1
+MacroCount=6
+Macro1=TargetCPU=x86_64
+Macro2=TargetOS=linux
+Macro3=TargetCPU=i386
+Macro4=TargetOS=win32
+Macro5=FPGUI_DIR=/home/graemeg/programming/fpgui/
+Macro6=tiOPF_fpGUI_Dir=/home/graemeg/programming/3rdParty/tiOPF2/src/
+UnitDirsCount=1
+UnitDir1=./
+UnitDirEnabled1=1,1,1,1,1,1,1,0,0,0
+
+[Units]
+UnitCount=0
