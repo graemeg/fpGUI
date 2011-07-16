@@ -160,6 +160,7 @@ type
     Buttons: word;
     shiftstate: TShiftState;
     delta: Integer;
+    timestamp: TDateTime;  // for future use
   end;
 
 
