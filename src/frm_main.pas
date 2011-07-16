@@ -891,7 +891,7 @@ begin
     Align := alBottom;
     Hint := '';
     TabOrder := 11;
-    TabPosition := tpLeft;
+    TabPosition := tpRight;
   end;
 
   tsMessages := TfpgTabSheet.Create(pnlWindow);

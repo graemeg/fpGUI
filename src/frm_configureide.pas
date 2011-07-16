@@ -251,7 +251,7 @@ begin
     ActivePageIndex := 0;
     Hint := '';
     TabOrder := 3;
-    TabPosition := tpLeft;
+    TabPosition := tpRight;
   end;
 
   tsEnvironment := TfpgTabSheet.Create(pcSettings);
