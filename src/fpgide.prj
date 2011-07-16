@@ -16,7 +16,7 @@ order13=0
 [projectoptions]
 projectdir=/media/flash16gig/programming/fpgide/src
 projectfilename=/media/flash16gig/programming/fpgide/src/fpgide.prj
-findinfiledialog=38
+findinfiledialog=40
  [findinfileadialogfo.subdirs]
  value=1
  [findinfileadialogfo.inopenfiles]
@@ -33,8 +33,9 @@ findinfiledialog=38
   "*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.dir]
  filenames=1
-  /media/flash16gig/programming/Kylix_addons/
- filehistory=3
+  /media/flash16gig/programming/msegui_svn/lib/common/
+ filehistory=4
+  /media/flash16gig/programming/msegui_svn/lib/common/
   /media/flash16gig/programming/Kylix_addons/
   /media/flash16gig/programming/fpgide/src/
   /home/graemeg/programming/lazarus/ide/
@@ -42,8 +43,9 @@ findinfiledialog=38
  filefilter="*.pas" "*.pp" "*.inc"
  filecolwidth=174
  [findinfileadialogfo.findtext]
- value=CLK_TCK
- history=5
+ value=mousewheelacceleration
+ history=6
+  mousewheelacceleration
   CLK_TCK
   TBuilderThread
   Output.Read
@@ -62,8 +64,8 @@ finddialog=8
  stackedunder=
  x=319
  y=205
- cx=331
- cy=116
+ cx=363
+ cy=118
 options=99
  [projectoptionsfo.twidgetgrid3]
  propcolwidthref=732
@@ -72,9 +74,9 @@ options=99
  sortdescent2=0
  width3=128
  sortdescent3=0
- width4=262
+ width4=352
  sortdescent4=0
- width5=292
+ width5=202
  sortdescent5=0
  [projectoptionsfo.twidgetgrid4]
  propcolwidthref=543
@@ -91,7 +93,7 @@ options=99
  sortcol=-1
  col=-1073741823
  row=-1073741823
- rowheight=17
+ rowheight=19
  [projectoptionsfo.newfile]
  firsttab=0
  index=2
@@ -115,7 +117,7 @@ options=99
  x=0
  y=182
  xprop=1
- yprop=0.35645472061657
+ yprop=0.35922330097087
  [projectoptionsfo.macrogrid]
  propcolwidthref=526
  sortdescent0=0
@@ -157,7 +159,7 @@ options=99
  index=0
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=2
+ index=0
  [projectoptionsfo]
  stackedunder=
  x=151
@@ -280,6 +282,7 @@ exceptclassnames=1
  EconvertError
 exceptignore=1
  0
+settingsfile=/media/flash16gig/programming/fpgide/src/fpgide_settings.prj
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -365,7 +368,7 @@ macrovalues=6
  i386
  win32
  /home/graemeg/programming/fpgui
- /opt/FPC_Docs/inf/
+ /home/graemeg/programming/FPC_Docs/inf/
 macrogroup=1
 groupcomments=6
  Linux 64-bit
@@ -391,7 +394,7 @@ unitdirs=6
 unitdirson=6
  65537
  131102
- 196618
+ 196616
  196614
  65566
  65566
@@ -503,13 +506,20 @@ newfoforms=2
  
  
 [breakpoints]
-on=0
-path=0
-line=0
-address=0
-addbkpt=0
-ignore=0
-condition=0
+on=1
+ -1
+path=1
+ /media/flash16gig/programming/fpgide/src/fpg_textedit.pas
+line=1
+ 1257
+address=1
+ 135547161
+addbkpt=1
+ 0
+ignore=1
+ 2
+condition=1
+ 
 panels=0
 units=
  (
@@ -626,34 +636,34 @@ files=
 storedir=/home/graemeg/programming/msegui_svn/apps/ide/compstore/
 filename=
 [layout]
-windowlayout=467
+windowlayout=474
  [mainfo.openfile]
  filenames=0
  filehistory=10
+  /media/flash16gig/programming/msegui_svn/lib/common/kernel/msescrollbar.pas
+  /media/flash16gig/programming/msegui_svn/lib/common/kernel/i386-linux/mseguiintf.pas
+  /media/flash16gig/programming/fpgide/src/synregexpr.pas
+  /home/graemeg/programming/msegui_svn/README.TXT
   /media/flash16gig/programming/fpgide/src/fpg_textedit.pas
   /media/flash16gig/programming/Kylix_addons/Sort_Code/GenericUtils.pas
   /media/flash16gig/programming/Kylix_addons/Sort_Code/ProcedureList.pas
   /media/flash16gig/programming/fpgide/src/mPasLex.pas
   /media/flash16gig/programming/fpgide/src/frm_procedurelist.pas
   /home/graemeg/programming/fpc-2.5.1/src/packages/gdbm/examples/testgdbm.pp
-  /home/graemeg/programming/fpc-2.5.1/src/packages/gdbm/README.txt
-  /home/graemeg/programming/fpc-2.5.1/src/packages/gdbint/src/gdbint.pp
-  /home/graemeg/programming/fpc-2.5.1/src/packages/gdbint/Package.fpc
-  /home/graemeg/.config/fpgide/fpgide.ini
  filefilterindex=4
  filefilter=*
- filecolwidth=174
+ filecolwidth=219
  [mainfo.basedock]
  splitdir=1
  useroptions=15488
  [mainfo]
  stackedunder=
- x=63
- y=71
+ x=66
+ y=49
  cx=693
  cy=87
  wsize=0
- active=0
+ active=1
  visible=1
  [targetconsolefo]
  splitdir=0
@@ -672,7 +682,7 @@ windowlayout=467
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
  useroptions=16489
@@ -740,7 +750,7 @@ windowlayout=467
  [findinfilefo]
  splitdir=0
  useroptions=16491
- stackedunder=messagefo
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -756,7 +766,7 @@ windowlayout=467
  [projecttreefo]
  splitdir=0
  useroptions=16491
- stackedunder=mainfo
+ stackedunder=breakpointsfo
  parent=
  mdistate=3
  nx=0
@@ -770,7 +780,7 @@ windowlayout=467
  rcx=0
  rcy=0
  wsize=0
- active=1
+ active=0
  visible=1
  [projecttreefo.grid]
  propcolwidthref=35
@@ -779,9 +789,9 @@ windowlayout=467
  width1=29
  sortdescent1=0
  sortcol=-1
- col=1
- row=20
- rowheight=17
+ col=0
+ row=9
+ rowheight=19
  [stackfo]
  splitdir=0
  useroptions=16489
@@ -841,7 +851,7 @@ windowlayout=467
  [breakpointsfo]
  splitdir=0
  useroptions=16491
- stackedunder=watchpointsfo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -850,15 +860,15 @@ windowlayout=467
  ncy=0
  x=107
  y=404
- cx=477
+ cx=660
  cy=128
  rcx=0
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [breakpointsfo.bkptson]
- value=0
+ value=1
  [objectinspectorfo]
  splitdir=0
  useroptions=16491
@@ -955,17 +965,17 @@ windowlayout=467
  [messagefo]
  splitdir=0
  useroptions=49259
- stackedunder=sourcefo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=82
- y=770
+ x=5
+ y=24
  cx=1046
- cy=140
+ cy=193
  rcx=1046
  rcy=754
  wsize=0
@@ -974,7 +984,7 @@ windowlayout=467
  [componentstorefo]
  splitdir=0
  useroptions=24675
- stackedunder=findinfilefo
+ stackedunder=messagefo
  parent=
  mdistate=0
  nx=0
@@ -1015,6 +1025,13 @@ windowlayout=467
  filefilterindex=0
  filefilter=
  filecolwidth=0
+ [componentstorefo.compfiledialog]
+ filenames=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ filecolwidth=0
  [componentpalettefo]
  splitdir=0
  useroptions=24683
@@ -1048,8 +1065,8 @@ windowlayout=467
  ncy=0
  x=0
  y=0
- cx=711
- cy=46
+ cx=693
+ cy=45
  rcx=0
  rcy=0
  [sourcefo]
@@ -1078,7 +1095,7 @@ windowlayout=467
  irqoff=0
  splitdir=0
  useroptions=16491
- stackedunder=targetconsolefo
+ stackedunder=threadsfo
  parent=
  mdistate=0
  nx=0
@@ -1097,62 +1114,64 @@ windowlayout=467
 [edit]
 hintwidth=414
 hintheight=19
-finddtext=SetVScrollPos
+finddtext=fwheelsensitivity
 findhistory=10
- SetVScrollPos
- SetVPos
- TKeyPressEvent
- InitializeForm
- LoadProcs
- TfpgDrawCellEvent
- image
- loadimag
- SParseStatistics
- FillListBox
+ fwheelsensitivity
+ deltamin
+ fmousewheelfrequmin
+ flastmousewheeltimestampbefore
+ lasteventtime
+ buttonpress
+ FPGM_SCROLL
+ cbDefaultMakeCol
+ tpLeft
+ left
 findoptions=1
-editpos=34
- 42,561
+editpos=38
  0,0
+ 39,779
  0,0
- 31,184
- 0,0
- 0,0
- 0,0
- 0,0
- 0,0
- 0,0
- 0,0
- 0,0
+ 0,1
  0,-1073741823
- 86,1737
- 0,88
- 0,0
  0,-1073741823
- 6,165
- 24,1473
  0,-1073741823
- 8,107
- 36,124
- 32,61
- 2,52
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 27,230
+ 0,-1073741823
+ 26,1684
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 22,166
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 57,823
+ 0,-1073741823
+ 0,-1073741823
  0,-1073741823
  0,0
- 0,-1073741823
- 37,77
- 29,44
- 5,29
- 0,0
- 0,0
- 0,0
- 0,0
+ 14,843
+ 57,1200
+ 6,16460
+ 51,611
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
-bookmarks3=4
+bookmarks3=2
  84,4
- 184,1
- 585,2
- 1050,5
+ 1052,5
 bookmarks4=0
 bookmarks5=0
 bookmarks6=0
@@ -1162,7 +1181,9 @@ bookmarks9=0
 bookmarks10=0
 bookmarks11=0
 bookmarks12=0
-bookmarks13=0
+bookmarks13=2
+ 1224,2
+ 1683,3
 bookmarks14=0
 bookmarks15=0
 bookmarks16=0
@@ -1183,9 +1204,14 @@ bookmarks30=0
 bookmarks31=0
 bookmarks32=0
 bookmarks33=0
-sourcefiles=34
+bookmarks34=0
+bookmarks35=1
+ 1197,1
+bookmarks36=0
+bookmarks37=0
+sourcefiles=38
+ /media/flash16gig/programming/fpgide/src/synregexpr.pas
  /media/flash16gig/programming/fpgide/src/frm_projectoptions.pas
- /media/flash16gig/programming/fpgide/src/fpgide.lpr
  /media/flash16gig/programming/fpgide/src/ideutils.pas
  /media/flash16gig/programming/fpgide/src/frm_main.pas
  /media/flash16gig/programming/fpgide/src/unitlist.pas
@@ -1218,9 +1244,13 @@ sourcefiles=34
  /media/flash16gig/programming/fpgide/src/debugger.pas
  /media/flash16gig/programming/fpgide/src/mPasLex.pas
  /media/flash16gig/programming/fpgide/src/msetypes.pas
-relpaths=34
+ /media/flash16gig/programming/msegui_svn/lib/common/kernel/i386-linux/mseguiintf.pas
+ /media/flash16gig/programming/msegui_svn/lib/common/kernel/msescrollbar.pas
+ /media/flash16gig/programming/msegui_svn/lib/common/kernel/msegui.pas
+ /home/graemeg/programming/fpgui/src/gui/fpg_scrollbar.pas
+relpaths=38
+ synregexpr.pas
  frm_projectoptions.pas
- fpgide.lpr
  ideutils.pas
  frm_main.pas
  unitlist.pas
@@ -1253,7 +1283,15 @@ relpaths=34
  debugger.pas
  mPasLex.pas
  msetypes.pas
-ismoduletexts=34
+ ../../msegui_svn/lib/common/kernel/i386-linux/mseguiintf.pas
+ ../../msegui_svn/lib/common/kernel/msescrollbar.pas
+ ../../msegui_svn/lib/common/kernel/msegui.pas
+ ../../../../../home/graemeg/programming/fpgui/src/gui/fpg_scrollbar.pas
+ismoduletexts=38
+ 0
+ 0
+ 0
+ 0
  0
  0
  0
@@ -1291,12 +1329,11 @@ ismoduletexts=34
 modules=0
 visiblemodules=0
 [sourcefo.tabwidget]
-order=34
+order=38
  21
- 0
- 1
  2
  3
+ 0
  4
  5
  6
@@ -1305,8 +1342,14 @@ order=34
  9
  10
  11
+ 1
  12
  13
+ 37
+ 20
+ 35
+ 36
+ 34
  14
  15
  16
@@ -1318,7 +1361,6 @@ order=34
  29
  18
  19
- 20
  30
  22
  23
@@ -1328,7 +1370,7 @@ order=34
  27
 tabsize=169
 firsttab=0
-index=0
+index=14
 [components]
 [selecteditpage]
 colwidth=156
