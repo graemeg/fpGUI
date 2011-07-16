@@ -1,0 +1,14 @@
+
+Description
+------------
+This project is a sample program representing a "lightweight IDE".
+At the moment I am simply using this project as playground for developing
+and testing components, and for trying out other programming ideas.
+
+If it ends up being a useful project and a workable IDE, that is just
+a bonus. Due to my daytime work being all proprietary and closed source,
+I can't showcase those. My hope is that this project will be a good substitute
+for that, and show a bit of what fpGUI is capable of (in a larger real-world
+project).
+
+
