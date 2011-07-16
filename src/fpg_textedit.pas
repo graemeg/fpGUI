@@ -257,7 +257,7 @@ var
   r: TfpgRect;
   I, MaxI, W, H, ZeroL: Integer;
   s: TfpgString;
-  ltxtflags: TFTextFlags;
+  ltxtflags: TfpgTextFlags;
 begin
   if not FShowNum then
     Exit; //==>
