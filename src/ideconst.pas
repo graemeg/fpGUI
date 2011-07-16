@@ -35,6 +35,7 @@ const
   cMacro_Debugger       = '${DEBUGGER}';
   cMacro_ExeExt         = '${EXEEXT}';
   cMacro_Target         = '${TARGET}';
+  cMacro_ProjectDir     = '${PROJDIR}';
 
 
   OSTarget: String    = {$I %FPCTARGETOS%};
