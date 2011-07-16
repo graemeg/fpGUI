@@ -22,7 +22,6 @@ fpGUI IDE
     [ ] Assembly window
     [ ] CPU window
 [ ] Syntax highlighting with descent speed.
-[ ] Procedure List dialog
 [ ] Basic Search dialog
 [ ] Find in Files dialog
 [ ] Regex support in all search dialogs
@@ -46,6 +45,7 @@ Completed
 [x] Project management.
 [x] Project based marco support with hard-coded system macros
 [x] pipe compiler messages out to the Messages window.
+[x] Procedure List dialog
 
 
 
