@@ -777,7 +777,7 @@ begin
     SetPosition(4, 154, 144, 16);
     FontDesc := '#Label1';
     Hint := '';
-    Text := 'Default make column';
+    Text := 'Default make column on Run';
   end;
 
   cbDefaultMakeCol := TfpgComboBox.Create(tsCompiler);
