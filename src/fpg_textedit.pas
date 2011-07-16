@@ -157,6 +157,7 @@ type
     procedure   GetRowColAtPos(const X, Y: Integer; out Row, Col: Integer);
     procedure   Clear;
     procedure   ScrollTo(X, Y: Integer);
+    procedure   GotoLine(ALine: integer);
     procedure   DeleteSelection;
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
@@ -1717,6 +1718,13 @@ procedure TfpgBaseTextEdit.ScrollTo(X, Y: Integer);
 begin
   SetVPos(Y div FChrH);
   SetHPos(X div FChrW);
+end;
+
+procedure TfpgBaseTextEdit.GotoLine(ALine: integer);
+begin
+  CaretPos.X := 0;
+  CaretPos.Y := ALine;
+  ScrollPos_V := ALine-5;  // scrolling a few lines short so cursor is not on top line
 end;
 
 procedure TfpgBaseTextEdit.DeleteSelection;
