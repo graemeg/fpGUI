@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
-  fpg_tree, fpg_textedit, fpg_mru;
+  fpg_tree, fpg_textedit, fpg_mru, synregexpr;
 
 type
 
@@ -56,6 +56,7 @@ type
     pmOpenRecentMenu: TfpgPopupMenu;
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
+    FRegex: TRegExpr;
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure   btnQuitClicked(Sender: TObject);
@@ -100,6 +101,7 @@ type
     procedure   TextEditDrawLine(Sender: TObject; ALineText: TfpgString; ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect; var AllowSelfDraw: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
     procedure   AfterCreate; override;
   end;
 
@@ -136,6 +138,13 @@ const
   cSourceFiles = '*.pas;*.pp;*.lpr;*.dpr;*.inc';
   cProjectFiles = '*.project';
 
+  { nicely working so far }
+  cKeywords = '\s*(begin|end|read|write|try|finally|except|uses|interface'
+    + '|implementation|procedure|function|constructor|destructor|property'
+    + '|private|public|published|type|class|unit|program|if|then|for|downto|to'
+    + '|do|else|while|and|inherited|const|var|initialization|finalization)[^0-9a-zA-Z:=;\)\( ]*';
+
+  cComments1 = '\s*\/\/.*$';
 
 {@VFD_NEWFORM_IMPL}
 
@@ -600,9 +609,9 @@ var
 begin
   TempHourGlassCursor(TfpgWidget(self));
   s := cMacro_Compiler + ' -FU' +cMacro_Target+' -Fu' + cMacro_FPGuiLibDir;
-  writeln('source string = ', s);
+//  writeln('source string = ', s);
   r := GMacroList.ExpandMacro(s);
-  writeln('expanded string = ', r);
+//  writeln('expanded string = ', r);
   sleep(5000);
 end;
 
@@ -640,6 +649,7 @@ var
   w: integer;     // reserved word loop variable
   r: TfpgRect;    // string rectangle to draw in
   edt: TfpgTextEdit;
+  lMatchPos, lOffset: integer; // user for regex
 
   procedure TestFurther(var AIndex: integer);
   begin
@@ -648,8 +658,6 @@ var
       AIndex := UTF8Pos(cReservedWords[w], s);
       if (AIndex > 0) then
       begin
-//        writeln('>> ', s);
-//        writeln(AIndex+iLength-1, ' ---- ', Length(s));
         if (AIndex+iLength-1 <> Length(s)) and not (s[AIndex+iLength] in [';', '.', '(', #10, #13]) then
           AIndex := 0;
       end;
@@ -660,38 +668,69 @@ begin
 //  writeln('syntax highlight line: ', ALineIndex);
   edt := TfpgTextEdit(Sender);
   AllowSelfDraw := False;
-  ACanvas.TextColor := clBlack;
-  ACanvas.DrawText(ATextRect, ALineText); // draw plain text first
-  oldfont := TfpgFont(ACanvas.Font);
-  newfont := fpgGetFont(edt.FontDesc + ':bold'); // 'Bitstream Vera Sans Mono-10'
-  ACanvas.Font := newfont;
-//  PrintRect(ATextRect);
 
-  for w := Low(cReservedWords) to High(cReservedWords) do
+  oldfont := TfpgFont(ACanvas.Font);
+  ACanvas.Color := clWhite;
+
+  { draw the plain text first }
+  ACanvas.TextColor := clBlack;
+  ACanvas.DrawText(ATextRect, ALineText);
+
+  lMatchPos := 0;
+  lOffset := 0;
+
+  { syntax highlighting for: keywords }
+  newfont := fpgGetFont(edt.FontDesc + ':bold');
+  ACanvas.Font := newfont;
+  FRegex.Expression := cKeywords;
+  if FRegex.Exec(ALineText) then
   begin
-    s := ALineText;
-    i := UTF8Pos(cReservedWords[w]+' ', s);
-    iLength := UTF8Length(cReservedWords[w]);
-    TestFurther(i);
-    j := 0;
-    while i > 0 do
+    for i := 1 to FRegex.SubExprMatchCount do
     begin
-//      writeln('DEBUG:  TMainForm.TextEditDrawLine - s = <' + s + '>');
-//      writeln('DEBUG:  TMainForm.TextEditDrawLine - found keyword: ' + cReservedWords[w]);
-      j := j + i;
-      s := UTF8Copy(ALineText, j, iLength+1);
-      UTF8Delete(s, 1, i + iLength);
-      r.SetRect(ATextRect.Left + edt.FontWidth * (j - 1), ATextRect.Top,
-        edt.FontWidth * (j + iLength), ATextRect.Height);
-//      PrintRect(r);
-//      ACanvas.Color := clWhite;
-//      ACanvas.FillRectangle(r); // clear area of previous text
-      ACanvas.DrawText(r, cReservedWords[w]);   // draw bold text
-      i := UTF8Pos(cReservedWords[w]+' ', s);
-      TestFurther(i);
-      j := j + iLength;
-    end;  { while }
-  end;  { for w }
+      lMatchPos := FRegex.MatchPos[i];
+      lOffset := FRegex.MatchLen[i];
+      s := FRegex.Match[i];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    end;
+  end;
+
+  { syntax highlighting for: comments }
+  ACanvas.Font := oldfont;
+  ACanvas.TextColor := clDarkCyan;
+  FRegex.Expression := cComments1;
+  if FRegex.Exec(ALineText) then
+  begin
+    if FRegex.SubExprMatchCount = 0 then
+    begin
+      i := 0;
+      lMatchPos := FRegex.MatchPos[i];
+      lOffset := FRegex.MatchLen[i];
+      s := FRegex.Match[i];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    end
+    else
+    begin
+      for i := 1 to FRegex.SubExprMatchCount do
+      begin
+        lMatchPos := FRegex.MatchPos[i];
+        lOffset := FRegex.MatchLen[i];
+        s := FRegex.Match[i];
+        j := Length(s);
+        r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+            (edt.FontWidth * j), ATextRect.Height);
+        ACanvas.FillRectangle(r);
+        ACanvas.DrawText(r, s);
+      end;
+    end;
+  end;
 
   ACanvas.Font := oldfont;
   newfont.Free;
@@ -699,6 +738,8 @@ begin
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
+var
+  lErrPos: integer;
 begin
   Left := gINI.ReadInteger(Name + 'State', 'Left', Left);
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
@@ -711,6 +752,8 @@ begin
 
   // apply editor settings
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
+  FRegex := TRegExpr.Create;
+  FRegex.Expression := cKeywords;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -728,6 +771,12 @@ begin
   OnShow  := @FormShow;
   OnClose := @FormClose;
   SendDebug('TMainForm.Create');
+end;
+
+destructor TMainForm.Destroy;
+begin
+  FRegex.Free;
+  inherited Destroy;
 end;
 
 procedure TMainForm.AfterCreate;
