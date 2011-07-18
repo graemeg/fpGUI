@@ -1,4 +1,7 @@
 
+                   The fpGUI IDE Project
+                   =====================
+
 Description
 ------------
 This project is a sample program representing a "lightweight IDE".
@@ -7,8 +10,14 @@ and testing components, and for trying out other programming ideas.
 
 If it ends up being a useful project and a workable IDE, that is just
 a bonus. Due to my daytime work being all proprietary and closed source,
-I can't showcase those. My hope is that this project will be a good substitute
-for that, and show a bit of what fpGUI is capable of (in a larger real-world
-project).
+I can't showcase any of those real-world projects. My hope is that one day
+this project will be a good showcase project in itself.
 
+
+Status
+-------
+THIS IS WORK IN PROGRESS! This project is NOT ready for usage yet.
+
+
+                        ----oO0Oo----
 
