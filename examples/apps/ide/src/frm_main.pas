@@ -756,6 +756,9 @@ begin
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
   FRegex := TRegExpr.Create;
   FRegex.Expression := cKeywords;
+
+  TextEditor.Clear;
+  TextEditor.SetFocus;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -1120,6 +1123,9 @@ begin
     Name := 'TextEditor';
     SetPosition(0, 0, 130, 200);
     Align := alClient;
+    GutterVisible := True;
+    GutterShowLineNumbers := True;
+    FontDesc := '#Edit2';
   end;
 
   mnuFile := TfpgPopupMenu.Create(self);
