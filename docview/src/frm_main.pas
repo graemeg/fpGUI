@@ -135,6 +135,7 @@ type
     procedure   miDebugHex(Sender: TObject);
     procedure   miToolsFindByResourceID(Sender: TObject);
     procedure   miToolsFindTopifByName(Sender: TObject);
+    procedure   miToolsShowEnvVariablesClicked(Sender: TObject);
     procedure   miTopicPropertiesClicked(Sender: TObject);
     procedure   miDumpDictionaryClicked(Sender: TObject);
     procedure   miFileSaveTopicAsIPF(Sender: TObject);
@@ -678,6 +679,17 @@ Begin
   if not DisplayTopicByName( TopicNameString ) then
     if not DisplayTopicByGlobalName( TopicNameString ) then
       TfpgMessageDialog.Critical( 'Find Topic By Name', 'Topic name not found' );
+end;
+
+procedure TMainForm.miToolsShowEnvVariablesClicked(Sender: TObject);
+  function LGetEnvVarValue(const AVariable: string): string;
+  begin
+    Result := Format('%s = ''%s''', [AVariable, GetEnvironmentVariable(AVariable)]);
+  end;
+begin
+  RichView.Clear;
+  RichView.AddParagraph(PChar(LGetEnvVarValue(BookshelfEnvironmentVar)));
+  RichView.AddParagraph(PChar(LGetEnvVarValue(HelpPathEnvironmentVar)));
 end;
 
 procedure TMainForm.miTopicPropertiesClicked(Sender: TObject);
@@ -3047,6 +3059,7 @@ begin
     AddMenuItem('View source of RichView component', '', @ViewSourceMIOnClick);
     AddMenuItem('Current topic properties', '', @miTopicPropertiesClicked);
     AddMenuItem('Dump dictionary to file in temp directory', '', @miDumpDictionaryClicked);
+    AddMenuItem('Show DocView used environment variables', '', @miToolsShowEnvVariablesClicked);
   end;
 
   miHelp := TfpgPopupMenu.Create(self);
@@ -3737,6 +3750,7 @@ var
   i: integer;
   Bookmark: TBookmark;
 Begin
+(*
   BookmarksListBox.Items.BeginUpdate;
   BookmarksListBox.Clear;
 
@@ -3755,8 +3769,7 @@ Begin
 
   BookmarksListBox.Items.EndUpdate;
   UpdateControls;
-end;
-
+*)
 end;
 
 
