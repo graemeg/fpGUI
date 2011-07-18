@@ -1061,7 +1061,7 @@ begin
     begin
       if ANode.ImageIndex > -1 then
       begin
-        AImage := ImageList.Item[ANode.ImageIndex];
+        AImage := ImageList.Items[ANode.ImageIndex];
         if AImage <> nil then
           result := result + AImage.Image.Width + 2;
       end
@@ -1558,7 +1558,7 @@ begin
         Canvas.FillRectangle(w - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h), GetNodeHeight);
         if (ImageList <> nil) and ShowImages then
         begin
-          AImageItem := ImageList.Item[h.ImageIndex];
+          AImageItem := ImageList.Items[h.ImageIndex];
           if AImageItem <> nil then
           begin
             Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
@@ -1580,7 +1580,7 @@ begin
       begin
         if (ImageList <> nil) and ShowImages then
         begin
-          AImageItem := ImageList.Item[h.ImageIndex];
+          AImageItem := ImageList.Items[h.ImageIndex];
           if AImageItem <> nil then
           begin
             Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);

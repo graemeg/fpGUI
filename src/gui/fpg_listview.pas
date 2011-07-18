@@ -699,7 +699,7 @@ begin
 
     if (ImgIndex <> -1) and (ImgIndex < ImgList.Count) then
     begin
-      Result := ImgList.Item[ImgIndex].Image;
+      Result := ImgList.Items[ImgIndex].Image;
     end
     else
     begin
@@ -708,7 +708,7 @@ begin
       else
         ImgIndex := AColumnIndex-1;
       if ImgIndex < ImgList.Count then
-        Result := ImgList.Item[ImgIndex].Image;
+        Result := ImgList.Items[ImgIndex].Image;
     end;
     break;
   end;

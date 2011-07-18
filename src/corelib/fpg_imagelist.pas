@@ -73,7 +73,7 @@ type
     procedure   RemoveIndex(AIndex: integer);
     function    GetMaxItem: integer;
     procedure   Clear;
-    property    Item[AIndex: integer]: TfpgImageItem read GetItem write SetItem;
+    property    Items[AIndex: integer]: TfpgImageItem read GetItem write SetItem;
     property    Count: integer read GetCount;
   end;
 
@@ -163,7 +163,7 @@ begin
   AImageItem := TfpgImageItem.Create;
   AImageItem.LoadFromFile(AFileName);
   if AIndex > -1 then
-    Item[AIndex] := AImageItem
+    Items[AIndex] := AImageItem
   else
   begin
     FList.Add(AImageItem);
@@ -178,7 +178,7 @@ begin
   AImageItem := TfpgImageItem.Create;
   AImageItem.Image := AImage;
   if AIndex > -1 then
-    Item[AIndex] := AImageItem
+    Items[AIndex] := AImageItem
   else
   begin
     FList.Add(AImageItem);
@@ -227,7 +227,7 @@ begin
     if FImageList <> nil then
       FImageList.RemoveIndex(Index);
     FImageList := AImageList;
-    FImageList.Item[Index] := self;
+    FImageList.Items[Index] := self;
   end;
 end;
 
