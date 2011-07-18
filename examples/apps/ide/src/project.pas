@@ -293,7 +293,7 @@ begin
       u := TUnit.Create;
       s := tiToken(sl[j], ',', 1);
       u.FileName := fpgExpandFileName(ProjectDir + s);
-      u.Opened := Boolean(StrToInt(tiToken(sl[j], ',', 2)));
+      u.Opened := Boolean(StrToInt(tiToken(sl[j], ',', 2)));  // 1 = True, 0 = False
       UnitList.Add(u);
     end;
   finally

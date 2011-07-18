@@ -743,6 +743,7 @@ procedure TMainForm.FormShow(Sender: TObject);
 var
   lErrPos: integer;
 begin
+  {$IFDEF DEBUGSVR}SendMethodEnter('TMainForm.FormShow');{$ENDIF}
   Left := gINI.ReadInteger(Name + 'State', 'Left', Left);
   Top := gINI.ReadInteger(Name + 'State', 'Top', Top);
   Width := gINI.ReadInteger(Name + 'State', 'Width', Width);
@@ -759,6 +760,7 @@ begin
 
   TextEditor.Clear;
   TextEditor.SetFocus;
+  {$IFDEF DEBUGSVR}SendMethodExit('TMainForm.FormShow');{$ENDIF}
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
