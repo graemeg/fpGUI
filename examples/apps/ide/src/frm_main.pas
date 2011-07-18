@@ -127,7 +127,9 @@ uses
   ,Project
   ,UnitList
   ,BuilderThread
+  {$IFDEF DEBUGSVR}
   ,dbugintf
+  {$ENDIF}
   ,ideutils
   ;
 
@@ -770,7 +772,9 @@ begin
   inherited Create(AOwner);
   OnShow  := @FormShow;
   OnClose := @FormClose;
+  {$IFDEF DEBUGSVR}
   SendDebug('TMainForm.Create');
+  {$ENDIF}
 end;
 
 destructor TMainForm.Destroy;
@@ -781,7 +785,9 @@ end;
 
 procedure TMainForm.AfterCreate;
 begin
+  {$IFDEF DEBUGSVR}
   SendMethodEnter('TMainForm.AfterCreate');
+  {$ENDIF}
   {%region 'Auto-generated GUI code' -fold}
   {@VFD_BODY_BEGIN: MainForm}
   Name := 'MainForm';
@@ -1269,8 +1275,9 @@ begin
   FRecentFiles.ShowFullPath    := gINI.ReadBool('Options', 'ShowFullPath', True);
   FRecentFiles.LoadMRU;
 
-
+  {$IFDEF DEBUGSVR}
   SendMethodExit('TMainForm.AfterCreate');
+  {$ENDIF}
 end;
 
 
