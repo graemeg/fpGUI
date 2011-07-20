@@ -12,8 +12,8 @@ Legend
 fpGUI IDE
 =========
 [ ] Double click on lines in Messages window jumps to code line.
-[ ] add a Console Output window to the IDE.
-[ ] integrate GDB/MI into the IDE.
+[ ] Add a Console Output window to the IDE.
+[ ] Integrate GDB/MI into the IDE.
     [ ] porting of basic unit to fpGUI
     [ ] integration of Compiler Settings Dialog
     [ ] Watches window implementation
@@ -35,9 +35,13 @@ fpGUI IDE
 [ ] Global Macro support. These macros exist in the IDE across projects.
 [ ] Unit Testing framework integration (with DUnit2 project)
 [ ] Code Templates support
-[ ] File Browser tabsheet implementation. File navigation and opening of files.
+[o] File Browser tabsheet implementation. File navigation and opening of files.
 [ ] GoTo Line Number dialog
 [ ] Converting all UI to MiG Layout Manager based dialogs.
+[ ] TextEdit: enable line drawing functionality. eg: some key combination with
+    the cursor (arrow) keys allows line drawing. Double and single line
+    characters must be supported. Connecting line characters must be
+    calculated automatically.
 
 
 Completed
