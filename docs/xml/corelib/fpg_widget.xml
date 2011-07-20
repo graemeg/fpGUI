@@ -2,7 +2,7 @@
 <fpdoc-descriptions>
 <package name="fpGUI">
 <module name="fpg_widget">
-<short/>
+<short>The base class for all other GUI widgets</short>
 <descr/>
 
 <element name="TfpgWidget.SetPosition">
@@ -24,7 +24,7 @@
 
 <element name="TfpgWidget.IsContainer">
 <short>Can this component managed child components</short>
-<descr>This is mainly used in fpGUI UI Designer, to know if you can drop on widget inside another widget.</descr>
+<descr>This is mainly used in fpGUI UI Designer, to know if you can drop a widget inside another widget.</descr>
 </element>
 
 <element name="TfpgWidget.Focusable">
