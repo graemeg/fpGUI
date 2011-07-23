@@ -299,7 +299,7 @@ end;
 function GetDefaultStyle( const Settings: TRichTextSettings ): TTextDrawStyle;
 begin
   FillChar(Result, SizeOf(TTextDrawStyle), 0);
-  Result.FontNameSize := DefaultTopicFont + '-10';
+  Result.FontNameSize := DefaultTopicFont;
   Result.FontAttributes := [];
   Result.Alignment := Settings.FDefaultAlignment;
   Result.Wrap := Settings.FDefaultWrap;
