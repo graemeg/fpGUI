@@ -45,14 +45,13 @@ Type
   end;
 
 
-  TTextPosition =
-  (
-    tpAboveTextArea,
-    tpAboveText,
-    tpWithinText,
-    tpBelowText,
-    tpBelowTextArea
-  );
+  TTextPosition = (
+        tpAboveTextArea,
+        tpAboveText,
+        tpWithinText,
+        tpBelowText,
+        tpBelowTextArea
+      );
 
 
   // forward declaration
@@ -84,8 +83,7 @@ Type
                                const X: longint );
     function GetElementWidth( Element: TTextElement ): longint;
     // Queries
-    Function GetStartX( Style: TTextDrawStyle;
-                        Line: TLayoutLine ): longint;
+    Function GetStartX( Style: TTextDrawStyle; Line: TLayoutLine ): longint;
     Procedure GetXFromOffset( const Offset: longint;
                               const LineIndex: longint;
                               Var X: longint );
@@ -112,7 +110,7 @@ Type
     // property handlers
     Function    GetCharIndex( P: PChar ): longint;
     Function    GetTextEnd: longint;
-  Public
+  public
     constructor Create(Text: PChar; Images: TfpgImageList; RichTextSettings: TRichTextSettings; FontManager: TCanvasFontManager; AWidth: longint);
     destructor  Destroy; Override;
     function    LinkFromIndex( const CharIndexToFind: longint): string;
@@ -122,11 +120,16 @@ Type
     property    Height: longint read FHeight;
     property    HorizontalImageScale: double read FHorizontalImageScale;
     property    VerticalImageScale: double read FVerticalImageScale;
-  End;
+  end;
 
 
-Implementation
+implementation
 
+uses
+  SysUtils,
+  ACLStringUtility,
+  nvUtilities,
+  fpg_main;
 
 
 { TLayoutLineList }
@@ -168,12 +171,6 @@ end;
 
 
 { TRichTextLayout }
-Uses
-  SysUtils
-  ,ACLStringUtility
-  ,nvUtilities
-  ,fpg_main
-  ;
 
 Function TRichTextLayout.GetTextEnd: longint;
 begin
@@ -891,9 +888,7 @@ var
   Remainder: longint;
 begin
   Link := '';
-  Result := GetLineFromPosition( YToFind,
-                                 LineIndex,
-                                 Remainder );
+  Result := GetLineFromPosition(YToFind, LineIndex, Remainder);
   case Result of
     tpAboveText:
     begin

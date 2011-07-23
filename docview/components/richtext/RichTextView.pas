@@ -1322,9 +1322,7 @@ begin
   Line := FLayout.FLines[CursorRow];
   LineHeight := Line.Height;
 
-  Y := DrawHeight
-       - ( FLayout.GetLinePosition( CursorRow )
-           - FVScrollbar.Position );
+  Y := DrawHeight - (FLayout.GetLinePosition(CursorRow) - FVScrollbar.Position);
   // Now Y is the top of the line
   if Y < 0 then
     // off bottom
