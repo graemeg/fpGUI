@@ -12,10 +12,13 @@ Uses
   CanvasFontManager,
   RichTextDocumentUnit,
   RichTextStyleUnit,
-  fpg_imagelist;
+  fpg_imagelist,
+  contnrs;
 
 Type
-  TLayoutLine = record
+
+  TLayoutLine = class(TObject)
+  public
     Text: PChar;
     Length: longint;
     Height: longint;
@@ -28,7 +31,18 @@ Type
   end;
 
 
-  TLinesArray = array[ 0..0 ] of TLayoutLine;
+  TLayoutLineList = class(TObjectList)
+  protected
+    function GetItem(Index: Integer): TLayoutLine; reintroduce;
+    procedure SetItem(Index: Integer; const AValue: TLayoutLine); reintroduce;
+  public
+    function Add(AObject: TLayoutLine): Integer; reintroduce;
+    function Remove(AObject: TLayoutLine): Integer; reintroduce;
+    function IndexOf(AObject: TLayoutLine): Integer; reintroduce;
+    function First: TLayoutLine; reintroduce;
+    Function Last: TLayoutLine; reintroduce;
+    property Items[Index: Integer]: TLayoutLine read GetItem write SetItem; default;
+  end;
 
 
   TTextPosition =
@@ -53,7 +67,6 @@ Type
     FFontManager: TCanvasFontManager;
     FText: PChar;
     FImages: TfpgImageList;
-    FAllocatedNumLines: Longint;
     FLayoutWidth: longint; // The target width for the layout. Used for centreing/right align
     FWidth: longint;       // The actual width of the text. May be wider due to unaligned
                            // parts or bitmaps or width so small individual characters don't fit.
@@ -62,8 +75,7 @@ Type
     FHorizontalImageScale: double;
     FVerticalImageScale: double;
   public
-    // Internal layout data
-    FLines: ^TLinesArray;
+    FLines: TLayoutLineList;
     FNumLines: longint;
     FRichTextSettings: TRichTextSettings;
     // Drawing functions
@@ -116,6 +128,46 @@ Type
 Implementation
 
 
+
+{ TLayoutLineList }
+
+function TLayoutLineList.GetItem(Index: Integer): TLayoutLine;
+begin
+  inherited GetItem(Index);
+end;
+
+procedure TLayoutLineList.SetItem(Index: Integer; const AValue: TLayoutLine);
+begin
+  inherited SetItem(Index, AValue);
+end;
+
+function TLayoutLineList.Add(AObject: TLayoutLine): Integer;
+begin
+  Result := inherited Add(AObject);
+end;
+
+function TLayoutLineList.Remove(AObject: TLayoutLine): Integer;
+begin
+  Result := inherited Remove(AObject);
+end;
+
+function TLayoutLineList.IndexOf(AObject: TLayoutLine): Integer;
+begin
+  Result := inherited IndexOf(AObject);
+end;
+
+function TLayoutLineList.First: TLayoutLine;
+begin
+  Result := TLayoutLine(inherited First);
+end;
+
+function TLayoutLineList.Last: TLayoutLine;
+begin
+  Result := TLayoutLine(inherited Last);
+end;
+
+
+{ TRichTextLayout }
 Uses
   SysUtils
   ,ACLStringUtility
@@ -138,9 +190,8 @@ ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
   FRichTextSettings := RichTextSettings;
   FImages := Images;
   FText := Text;
-  FAllocatedNumLines := 10;
 ProfileEvent('DEBUG:  TRichTextLayout.Create   1 of 4');
-  GetMem( FLines, FAllocatedNumLines * sizeof( TLayoutLine ) );
+  FLines := TLayoutLineList.Create;
   FNumLines := 0;
   FLinks := TStringList.Create;
   FLinks.Duplicates := dupIgnore;
@@ -161,41 +212,30 @@ end;
 
 Destructor TRichTextLayout.Destroy;
 Begin
-  FreeMem( Flines, FAllocatedNumLines * sizeof( TLayoutLine ) );
-  FLines := nil;
+  ProfileEvent('TRichTextLayout.Destroy  ******* ');
+  FreeAndNil(FLines);
   FLinks.Free;
-  Inherited Destroy;
+  inherited Destroy;
 End;
 
 Procedure TRichTextLayout.AddLineStart(var Line: TLayoutLine);
-var
-  NewAllocation: longint;
 begin
-  if FNumLines >= FAllocatedNumLines then
-  begin
-    // reallocate the array twice the size
-    NewAllocation := FAllocatedNumLines * 2;
-    FLines := ReAllocMem( FLines,
-//                          FAllocatedNumLines * sizeof( TLayoutLine ),
-                          NewAllocation * sizeof( TLayoutLine ) );
-    FAllocatedNumLines := NewAllocation;
-  end;
-  FLines^[ FNumLines ] := Line;
+  FLines.Add(Line);
   inc( FNumLines );
-  ProfileEvent('          DEBUG:  TRichTextLayout.AddLineStart: FNumLines =' + intToStr(FNumLines));
+  ProfileEvent('TRichTextLayout.AddLineStart: FNumLines =' + intToStr(FNumLines));
 end;
 
 Procedure TRichTextLayout.PerformStyleTag( Const Tag: TTag;
                                            Var Style: TTextDrawStyle;
                                            const X: longint );
 begin
-ProfileEvent('DEBUG:  TRichTextLayout.PerformStyleTag >>>');
+ProfileEvent('TRichTextLayout.PerformStyleTag >>>');
   ApplyStyleTag( Tag,
                  Style,
                  FFontManager,
                  FRichTextSettings,
                  X );
-ProfileEvent('DEBUG:  TRichTextLayout.PerformStyleTag <<<');
+ProfileEvent('TRichTextLayout.PerformStyleTag <<<');
 end;
 
 // Check the current font specifications and see if the
@@ -230,7 +270,7 @@ end;
 
 // Main procedure: reads through the whole text currently stored
 // and breaks up into lines - each represented as a TLayoutLine in
-// the array FLines[ 0.. FNumLines ]
+// the LayoutLineList class
 Procedure TRichTextLayout.Layout;
 Var
   CurrentLine: TLayoutLine;
@@ -266,8 +306,10 @@ Var
     CurrentLine.Width := EndX;
     if CurrentLine.Width > FWidth then
       FWidth := CurrentLine.Width;
-    assert( CurrentLine.Height > 0 ); // we must have set the line height!
+    Assert( CurrentLine.Height > 0 ); // we must have set the line height!
     AddLineStart( CurrentLine );
+
+    CurrentLine := TLayoutLine.Create;
     CurrentLine.Text := NextLine;
     CurrentLine.Style := Style;
     CurrentLine.Height := 0;
@@ -276,6 +318,7 @@ Var
     CurrentLine.Width := 0;
     CurrentLine.LinkIndex := CurrentLinkIndex;
     CurrentLine.Wrapped := false;
+
     assert( CurrentLinkIndex >= -1 );
     assert( CurrentLinkIndex < FLinks.Count );
     WordStartX := Style.LeftMargin;
@@ -294,6 +337,8 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   ApplyStyle( Style, FFontManager );
   CurrentLinkIndex := -1;
   P := FText; // P is the current search position
+
+  CurrentLine := TLayoutLine.Create;
   CurrentLine.Text := P;
   CurrentLine.Style := Style;
   CurrentLine.Height := 0;
@@ -302,6 +347,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   CurrentLine.Width := 0;
   CurrentLine.LinkIndex := -1;
   CurrentLine.Wrapped := false;
+
   WordStartX := Style.LeftMargin;
   WordX := 0;
   WrapX := FLayoutWidth - FRichTextSettings.Margins.Right;
@@ -631,7 +677,7 @@ Var
   StartedDrawing: boolean;
   fstyle: string;
 begin
-  Line  := TLayoutLine(FLines[ LineIndex ]);
+  Line  := FLines[LineIndex];
   P     := Line.Text;
   EndP  := Line.Text + Line.Length;
   Style := Line.Style;
@@ -731,7 +777,7 @@ Var
   NewMarginX: longint;
   fStyle: string;
 begin
-  Line := TLayoutLine(FLines[ LineIndex ]);
+  Line := FLines[LineIndex];
   P := Line.Text;
   EndP := Line.Text + Line.Length;
 
@@ -811,12 +857,13 @@ begin
   if YToFind < Y then
   begin
     Result := tpAboveText;
-    exit;
+    Exit;   //==>
   end;
 
+  // TODO: Replace FNumLines with FLines.Count-1
   while LineIndex < FNumLines do
   begin
-    LineHeight := TLayoutLine(FLines[ LineIndex ]).Height;
+    LineHeight := FLines[LineIndex].Height;
     if     ( YToFind >= Y )
        and ( YToFind < (Y + LineHeight)) then
       begin
@@ -831,7 +878,7 @@ begin
   end;
 
   LineIndex := FNumLines - 1;
-  Remainder := TLayoutLine(FLines[ LineIndex ]).Height;
+  Remainder := FLines[LineIndex].Height;
 
   Result := tpBelowText;
 end;
@@ -856,7 +903,7 @@ begin
 
     tpBelowText:
     begin
-      Offset := TLayoutLine(FLines[ LineIndex ]).Length;
+      Offset := FLines[LineIndex].Length;
       exit;
     end;
   end;
@@ -875,17 +922,16 @@ var
 begin
   Result := 0;
   if Index <= 0 then
-    exit;
+    Exit;   //==>
 
   while Result < FNumLines do
   begin
-    LineCharIndex := GetCharIndex( TLayoutLine(FLines[ Result ]).Text );
-    LineLength := TLayoutLine(FLines[ Result ]).Length;
-    if LineCharIndex + LineLength
-       > Index then
+    LineCharIndex := GetCharIndex(FLines[Result].Text );
+    LineLength := FLines[Result].Length;
+    if (LineCharIndex + LineLength) > Index then
     begin
       // found
-      exit;
+      Exit; //==>
     end;
     inc( Result );
   end;
@@ -895,7 +941,7 @@ end;
 function TRichTextLayout.GetOffsetFromCharIndex( Index: longint;
                                                  Line: longint ): longint;
 begin
-  Result := Index - GetCharIndex( TLayoutLine( FLines[ Line ] ).Text );
+  Result := Index - GetCharIndex(FLines[Line].Text);
 end;
 
 function TRichTextLayout.GetElementWidth( Element: TTextElement ): longint;
@@ -939,8 +985,7 @@ begin
   dec( line );
   while line >= 0 do
   begin
-    inc( Result,
-         TLayoutLine(Flines[ Line ]).Height );
+    inc( Result, Flines[Line].Height );
     dec( line );
   end;
 end;
@@ -957,12 +1002,12 @@ begin
   if FNumLines = 0 then
   begin
     Result := '';
-    exit;
+    Exit;   //==>
   end;
 
   LineIndex := GetLineFromCharIndex( CharIndexToFind );
 
-  Line := TLayoutLine(FLines[ LineIndex ]);
+  Line := FLines[LineIndex];
   P := Line.Text;
   EndP := Line.Text + Line.Length;
 

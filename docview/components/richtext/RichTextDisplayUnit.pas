@@ -306,7 +306,7 @@ ProfileEvent('DEBUG:  DrawRichTextLayout >>>');
   //FontManager.Canvas.DrawLine(0, y, 300, y);
 
   repeat
-    Line := Layout.FLines^[ LineIndex ];
+    Line := Layout.FLines[LineIndex];
     BottomOfLine := Y;
 
     if // the line is in the range to be drawn

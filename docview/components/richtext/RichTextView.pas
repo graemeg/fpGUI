@@ -1121,7 +1121,7 @@ begin
     // below the bottom
     Result := tpBelowTextArea;
     LineIndex := FLayout.FNumLines;
-    Offset := FLayout.FLines^[ FLayout.FNumLines - 1 ].Length - 1;
+    Offset := FLayout.FLines[FLayout.FNumLines-1].Length - 1;
     exit;
   end;
 
@@ -1319,7 +1319,7 @@ begin
   DrawHeight := TextRect.Top - TextRect.Bottom;
   DrawWidth := TextRect.Right - TextRect.Left;
 
-  Line := FLayout.FLines^[ CursorRow ];
+  Line := FLayout.FLines[CursorRow];
   LineHeight := Line.Height;
 
   Y := DrawHeight
@@ -1347,7 +1347,7 @@ begin
 
   TextHeight := FFontManager.CharHeight;
   Descender := FFontManager.CharDescender;
-  MaxDescender := FLayout.FLines^[ CursorRow ].MaxDescender;
+  MaxDescender := FLayout.FLines[CursorRow].MaxDescender;
   CursorHeight := TextHeight;
 
   dec( Y, LineHeight - 1 );
@@ -1397,7 +1397,7 @@ begin
   if LastLine = -1 then
     exit;
 
-  LineHeight := FLayout.FLines^[ LastLine ].Height;
+  LineHeight := FLayout.FLines[LastLine].Height;
 
   if LastLine = FLayout.FNumLines - 1 then
   begin
@@ -1418,7 +1418,7 @@ begin
     // more than half line already displayed so
     if LastLine < FLayout.FNumLines - 1 then
       // AND to make next line fully visible
-      inc( Result, FLayout.FLines^[ LastLine + 1 ].Height );
+      inc( Result, FLayout.FLines[LastLine+1].Height );
 end;
 
 Function TRichTextView.GetSmallDownScrollPosition: longint;
@@ -1436,7 +1436,7 @@ begin
   // Now limit the scrolling to max text height for the bottom line
   Diff := Result - FVScrollBar.Position;
 
-  LineTextHeight := FLayout.FLines^[ LastLine ].MaxTextHeight;
+  LineTextHeight := FLayout.FLines[LastLine].MaxTextHeight;
   if Diff > LineTextHeight then
     Diff := LineTextHeight;
   Result := FVScrollBar.Position + Diff;
@@ -1456,7 +1456,7 @@ begin
   // Now limit the scrolling to max text height for the bottom line
   Diff := FVScrollBar.Position - Result;
 
-  LineTextHeight := FLayout.FLines^[ FirstVisibleLine ].MaxTextHeight;
+  LineTextHeight := FLayout.FLines[FirstVisibleLine].MaxTextHeight;
   if Diff > LineTextHeight then
     Diff := LineTextHeight;
   Result := FVScrollBar.Position - Diff;
@@ -1504,11 +1504,11 @@ begin
   // scroll so that top line is fully visible...
   Result := FVScrollBar.Position - Offset;
 
-  if Offset < (FLayout.FLines^[ FirstVisibleLine ].Height div 2) then
+  if Offset < (FLayout.FLines[FirstVisibleLine].Height div 2) then
     // more than half the line was already displayed so
     if FirstVisibleLine > 0 then
       // AND to make next line up visible
-      dec( Result, FLayout.FLines^[ FirstVisibleLine - 1 ].Height );
+      dec( Result, FLayout.FLines[FirstVisibleLine-1].Height );
 end;
 
 Function Sign( arg: longint ): longint;
@@ -2033,7 +2033,7 @@ begin
     Result := -1;
     exit;
   end;
-  Result := FLayout.GetCharIndex( FLayout.FLines^[ FCursorRow ].Text ) + FCursorOffset;
+  Result := FLayout.GetCharIndex( FLayout.FLines[FCursorRow].Text ) + FCursorOffset;
 end;
 
 procedure TRichTextView.RefreshCursorPosition;
@@ -2059,20 +2059,15 @@ begin
   end;
 
   Row := FLayout.GetLineFromCharIndex( Index );
-  SetCursorPosition( Index - FLayout.GetCharIndex( FLayout.FLines^[ Row ].Text ),
-                     Row,
-                     true );
+  SetCursorPosition( Index - FLayout.GetCharIndex( FLayout.FLines[Row].Text ), Row, true );
 end;
 
-procedure TRichTextView.SetCursorIndex( Index: longint;
-                                        PreserveSelection: boolean );
+procedure TRichTextView.SetCursorIndex( Index: longint; PreserveSelection: boolean );
 var
   Row: longint;
 begin
   Row := FLayout.GetLineFromCharIndex( Index );
-  SetCursorPosition( Index - FLayout.GetCharIndex( FLayout.FLines^[ Row ].Text ),
-                     Row,
-                     PreserveSelection );
+  SetCursorPosition( Index - FLayout.GetCharIndex( FLayout.FLines[Row].Text ), Row, PreserveSelection );
   SetupCursor;
 end;
 
@@ -2085,7 +2080,7 @@ begin
   RemoveCursor;
   FCursorOffset := Offset;
   FCursorRow := Row;
-  Index := FLayout.GetCharIndex( FLayout.FLines^[ Row ].Text ) + Offset;
+  Index := FLayout.GetCharIndex( FLayout.FLines[Row].Text ) + Offset;
 
   //writeln('  SetCursorPosition: offset=', FCursorOffset, ' row=', FCursorRow, ' index=', Index);
   exit;    { TODO:  Complete this selection of text code - currently gives AV's }
@@ -2123,7 +2118,7 @@ begin
 //    exit;
 
 //  SetCursorIndex( GetCharIndex( P ), PreserveSelection );
-  Line := FLayout.FLines^[ CursorRow ];
+  Line := FLayout.FLines[CursorRow];
   NewOffset := PCharDiff( P, Line.Text );
   if NewOffset < Line.Length then
   begin
@@ -2163,7 +2158,7 @@ begin
 
 //  if Element.ElementType = teTextEnd then
 //    exit;
-  Line := FLayout.FLines^[ CursorRow ];
+  Line := FLayout.FLines[CursorRow];
   NewOffset := PCharDiff( P, Line.Text );
   if NewOffset >= 0 then
   begin
@@ -2173,7 +2168,7 @@ begin
   begin
     if FCursorRow <= 0 then
       exit;
-    Line := FLayout.FLines^[ CursorRow - 1 ];
+    Line := FLayout.FLines[CursorRow-1];
     if Line.Wrapped then
       SetCursorPosition( Line.Length - 1, FCursorRow - 1, PreserveSelection )
     else
@@ -2211,7 +2206,7 @@ Procedure TRichTextView.CursorToLineStart( PreserveSelection: boolean );
 Var
   Line: TLayoutLine;
 begin
-  Line := FLayout.FLines^[ FCursorRow ];
+  Line := FLayout.FLines[FCursorRow];
   SetCursorPosition( 0, FCursorRow, PreserveSelection );
   SetupCursor;
 end;
@@ -2220,7 +2215,7 @@ Procedure TRichTextView.CursorToLineEnd( PreserveSelection: boolean );
 Var
   Line: TLayoutLine;
 begin
-  Line := FLayout.FLines^[ FCursorRow ];
+  Line := FLayout.FLines[FCursorRow];
   SetCursorPosition( Line.Length, FCursorRow, PreserveSelection );
   SetupCursor;
 end;
@@ -2281,7 +2276,7 @@ begin
     if NewRow >= FLayout.FNumLines - 1 then
       break;
 
-    Distance := Distance + FLayout.FLines^[ NewRow ].Height;
+    Distance := Distance + FLayout.FLines[NewRow].Height;
     inc( NewRow );
   end;
 
@@ -2306,7 +2301,7 @@ begin
     if NewRow <= 0 then
       break;
     dec( NewRow );
-    Distance := Distance + FLayout.FLines^[ NewRow ].Height;
+    Distance := Distance + FLayout.FLines[NewRow].Height;
   end;
 
   FLayout.GetXFromOffset( FCursorOffset, FCursorRow, X );
@@ -2676,7 +2671,7 @@ begin
   GetFirstVisibleLine( LineIndex,
                        Y );
   if LineIndex >= 0 then
-    Result := FLayout.GetCharIndex( FLayout.FLines^[ LineIndex ].Text )
+    Result := FLayout.GetCharIndex( FLayout.FLines[LineIndex].Text )
   else
     Result := 0;
 end;
@@ -2750,7 +2745,7 @@ begin
     exit;
 
   if     ( Row = BottomLine )
-     and ( Offset >= FLayout.FLines^[ BottomLine ].Height - 1 ) then
+     and ( Offset >= FLayout.FLines[BottomLine].Height - 1 ) then
     // bottom row already entirely visible
     exit;
 
@@ -2778,7 +2773,7 @@ begin
     if     ( BottomLine <> -1 )
        and ( Row >= BottomLine ) then
       SetVerticalPosition( FLayout.GetLinePosition( Row )
-                           + FLayout.FLines^[ Row ].Height
+                           + FLayout.FLines[Row].Height
                            - GetTextAreaHeight );
   end;
 end;
