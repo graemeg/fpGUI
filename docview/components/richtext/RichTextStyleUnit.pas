@@ -63,10 +63,6 @@ type
     Procedure SetMargin_Top( NewValue: longint );
     Procedure SetupComponent;
     Procedure AssignFont(var AFont: TfpgFont; NewFont: TfpgFont);
-
-    // Hide properties...
-    property Name;
-
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -96,7 +92,7 @@ type
     property Margin_Top: longint read GetMargin_Top write SetMargin_Top;
   end;
 
-//  pRichTextSettings = ^TRichTextSettings;
+
   Procedure ApplyStyle( var Style: TTextDrawStyle;
                         FontManager: TCanvasFontManager );
 
@@ -108,18 +104,16 @@ type
 
   function GetDefaultStyle( const Settings: TRichTextSettings ): TTextDrawStyle;
 
-//Exports
-//  TRichTextSettings,'User','';
+
 
 Implementation
 
 uses
   SysUtils,
-  ACLStringUtility
-  ,nvUtilities
-  ,SettingsUnit
-//  , ACLProfile
-  ;
+  ACLStringUtility,
+  nvUtilities,
+  SettingsUnit;
+
 
 Procedure ApplyStyle(var Style: TTextDrawStyle; FontManager: TCanvasFontManager);
 var
@@ -354,60 +348,6 @@ begin
   FHeading3Font.Free;
   Inherited Destroy;
 end;
-
-// Font read/write from SCU. I have NO IDEA why I have to do this manually. But
-// this way works and everything else I tried doesn't
-//Procedure TRichTextSettings.ReadSCUResource( Const ResName: TResourceName;
-//                                             Var Data;
-//                                             DataLen: LongInt );
-//Begin
-//  If ResName = 'Heading1Font' Then
-//  Begin
-//    If DataLen <> 0 Then
-//      FHeading1Font := ReadSCUFont( Data, DataLen );
-//  End
-//  Else If ResName = 'Heading2Font' Then
-//  Begin
-//    If DataLen <> 0 Then
-//      FHeading2Font := ReadSCUFont( Data, DataLen );
-//  End
-//  Else If ResName = 'Heading3Font' Then
-//  Begin
-//    If DataLen <> 0 Then
-//      FHeading3Font := ReadSCUFont( Data, DataLen );
-//  End
-//  Else If ResName = 'FixedFont' Then
-//  Begin
-//    If DataLen <> 0 Then
-//      FFixedFont := ReadSCUFont( Data, DataLen );
-//  End
-//  Else if ResName = 'NormalFont' then
-//  Begin
-//    If DataLen <> 0 Then
-//      FNormalFont := ReadSCUFont( Data, DataLen );
-//  End
-//  Else
-//    Inherited ReadSCUResource( ResName, Data, DataLen );
-//End;
-
-//Function TRichTextSettings.WriteSCUResource( Stream: TResourceStream ): boolean;
-//begin
-//  Result := Inherited WriteSCUResource( Stream );
-//  If Not Result Then
-//    Exit;
-//
-//  If FHeading1Font <> Nil then
-//    Result := FHeading1Font.WriteSCUResourceName( Stream, 'Heading1Font' );
-//  If FHeading2Font <> Nil then
-//    Result := FHeading2Font.WriteSCUResourceName( Stream, 'Heading2Font' );
-//  If FHeading3Font <> Nil then
-//    Result := FHeading3Font.WriteSCUResourceName( Stream, 'Heading3Font' );
-//  If FFixedFont <> Nil then
-//    Result := FFixedFont.WriteSCUResourceName( Stream, 'FixedFont' );
-//  If FNormalFont <> Nil then
-//    Result := FNormalFont.WriteSCUResourceName( Stream, 'NormalFont' );
-//
-//end;
 
 Procedure TRichTextSettings.Change;
 begin
