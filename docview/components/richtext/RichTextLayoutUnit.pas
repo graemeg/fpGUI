@@ -414,53 +414,53 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
       begin
         case CurrentElement.Tag.TagType of
           ttBeginLink:
-          begin
-            CurrentLinkIndex := FLinks.Add( CurrentElement.Tag.Arguments );
-            P := NextP;
-            continue;
-          end;
-
-          ttEndLink:
-          begin
-            CurrentLinkIndex := -1;
-            P := NextP;
-            continue;
-          end;
-
-          ttSetLeftMargin: // SPECIAL CASE... could affect display immediately
-          begin
-            PerformStyleTag( CurrentElement.Tag, Style, WordstartX + WordX );
-            if Style.LeftMargin < WordStartX then
             begin
-              // we're already past the margin being set
-              if pos( 'breakifpast', CurrentElement.Tag.Arguments ) > 0 then
-              begin
-                // this argument means, do a line break
-                // if the margin is already past
-                // Seems unusual for most purposes, but needed for IPF rendering.
-                DoLine( P, NextP, WordStartX + WordX );
-
-                // remember start of line
-                WordStart := NextP;
-                WordX := 0;
-
-                P := NextP;
-
-                continue;
-              end;
-
-              // so ignore it for now.
+              CurrentLinkIndex := FLinks.Add( CurrentElement.Tag.Arguments );
               P := NextP;
               continue;
             end;
 
-            // skip across to the new margin
-            CurrentCharWidth := Style.LeftMargin - WordStartX - WordX;
-            // BUT! Don't treat it as a space, because you would not
-            // expect wrapping to take place in a margin change...
-            // at least not for IPF  :)
+          ttEndLink:
+            begin
+              CurrentLinkIndex := -1;
+              P := NextP;
+              continue;
+            end;
 
-          end;  { teSetLeftMargin }
+          ttSetLeftMargin: // SPECIAL CASE... could affect display immediately
+            begin
+              PerformStyleTag( CurrentElement.Tag, Style, WordstartX + WordX );
+              if Style.LeftMargin < WordStartX then
+              begin
+                // we're already past the margin being set
+                if pos( 'breakifpast', CurrentElement.Tag.Arguments ) > 0 then
+                begin
+                  // this argument means, do a line break
+                  // if the margin is already past
+                  // Seems unusual for most purposes, but needed for IPF rendering.
+                  DoLine( P, NextP, WordStartX + WordX );
+
+                  // remember start of line
+                  WordStart := NextP;
+                  WordX := 0;
+
+                  P := NextP;
+
+                  continue;
+                end;
+
+                // so ignore it for now.
+                P := NextP;
+                continue;
+              end;
+
+              // skip across to the new margin
+              CurrentCharWidth := Style.LeftMargin - WordStartX - WordX;
+              // BUT! Don't treat it as a space, because you would not
+              // expect wrapping to take place in a margin change...
+              // at least not for IPF  :)
+
+            end;  { teSetLeftMargin }
 
           else
           begin
@@ -478,9 +478,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
               end;
             end;
 
-            PerformStyleTag( CurrentElement.Tag,
-                             Style,
-                             WordX );
+            PerformStyleTag( CurrentElement.Tag, Style, WordX );
 
             DisplayedCharsSinceFontChange := false;
             P := NextP;
