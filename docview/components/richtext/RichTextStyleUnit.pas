@@ -81,7 +81,7 @@ type
     property DefaultAlignment: TTextAlignment read FDefaultAlignment write SetDefaultAlignment;
     property DefaultWrap: boolean read FDefaultWrap write SetDefaultWrap default True;
     property AtLeastOneWordBeforeWrap: boolean read FAtLeastOneWordBeforeWrap write SetAtLeastOneWordBeforeWrap;
-    property MarginSizeStyle: TMarginSizeStyle read FMarginSizeStyle write SeTMarginSizeStyle;
+    property MarginSizeStyle: TMarginSizeStyle read FMarginSizeStyle write SetMarginSizeStyle;
     property MarginChar: longint read FMarginChar write SetMarginChar;
     // margins are exposed as individual properties here
     // since the Sibyl IDE cannot cope with editing a record property
@@ -290,12 +290,11 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
               MarginParam2 := tmpFontParts[1]
             else
               MarginParam2 := '';
+
             if MarginParam2 = 'pixels' then
               NewMargin := MarginSize
-
             else if MarginParam2 = 'deffont' then
               NewMargin := MarginSize * ASettings.NormalFont.TextWidth('w')  // .Width
-
             else
             begin
               case ASettings.MarginSizeStyle of
@@ -359,7 +358,8 @@ begin
   FDefaultWrap := true;
   FAtLeastOneWordBeforeWrap := false;
 
-  FMarginSizeStyle := msMaximumCharWidth;
+  { TODO: Add this property to DocView's Preferences dialog }
+  FMarginSizeStyle := msAverageCharWidth;
   FMarginChar := Ord( ' ' );
 
   FMargins.Left   := 0;
