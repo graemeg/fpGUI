@@ -102,7 +102,7 @@ type
                            const Settings: TRichTextSettings;
                            const X: longint );
 
-  function GetDefaultStyle( const Settings: TRichTextSettings ): TTextDrawStyle;
+  function GetDefaultStyle( const ASettings: TRichTextSettings ): TTextDrawStyle;
 
 
 
@@ -290,17 +290,18 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
 ProfileEvent('DEBUG:  ApplyStyleTag <<<');
 end;
 
-function GetDefaultStyle( const Settings: TRichTextSettings ): TTextDrawStyle;
+function GetDefaultStyle( const ASettings: TRichTextSettings ): TTextDrawStyle;
 begin
   FillChar(Result, SizeOf(TTextDrawStyle), 0);
-  Result.FontNameSize := DefaultTopicFont;
+  { Note: this references the user Settings and not the parameter ASettings }
+  Result.FontNameSize := Settings.NormalFontDesc;
   Result.FontAttributes := [];
-  Result.Alignment := Settings.FDefaultAlignment;
-  Result.Wrap := Settings.FDefaultWrap;
-  Result.Color := Settings.FDefaultColor;
-  Result.BackgroundColor := Settings.FDefaultBackgroundColor;
-  Result.LeftMargin := Settings.Margins.Left;
-  Result.RightMargin := Settings.Margins.Right;
+  Result.Alignment := ASettings.FDefaultAlignment;
+  Result.Wrap := ASettings.FDefaultWrap;
+  Result.Color := ASettings.FDefaultColor;
+  Result.BackgroundColor := ASettings.FDefaultBackgroundColor;
+  Result.LeftMargin := ASettings.Margins.Left;
+  Result.RightMargin := ASettings.Margins.Right;
 end;
 
 
@@ -308,8 +309,8 @@ Procedure TRichTextSettings.SetupComponent;
 begin
   Name := 'RichTextSettings';
 
-  FNormalFont   := fpgGetFont(Settings.NormalFontDesc);  // fpgGetFont(DefaultTopicFont);
-  FFixedFont    := fpgGetFont(Settings.FixedFontDesc); // fpgGetFont(DefaultTopicFixedFont);
+  FNormalFont   := fpgGetFont(Settings.NormalFontDesc);
+  FFixedFont    := fpgGetFont(Settings.FixedFontDesc);
   FHeading1Font := fpgGetFont(DefaultTopicFontName + '-20');
   FHeading2Font := fpgGetFont(DefaultTopicFontName + '-14');
   FHeading3Font := fpgGetFont(DefaultTopicFontName + '-10:bold');
