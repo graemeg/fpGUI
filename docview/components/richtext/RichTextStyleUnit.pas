@@ -99,7 +99,7 @@ type
   Procedure ApplyStyleTag( const Tag: TTag;
                            Var Style: TTextDrawStyle;
                            FontManager: TCanvasFontManager;
-                           const Settings: TRichTextSettings;
+                           const ASettings: TRichTextSettings;
                            const X: longint );
 
   function GetDefaultStyle( const ASettings: TRichTextSettings ): TTextDrawStyle;
@@ -131,7 +131,7 @@ end;
 Procedure ApplyStyleTag( Const Tag: TTag;
                          var Style: TTextDrawStyle;
                          FontManager: TCanvasFontManager;
-                         const Settings: TRichTextSettings;
+                         const ASettings: TRichTextSettings;
                          const X: longint );
 var
   MarginParam1: string;
@@ -152,137 +152,174 @@ ProfileEvent('DEBUG:  ApplyStyleTag >>>');
   case Tag.TagType of
     ttBold:
       Include( Style.FontAttributes, faBold );
+
     ttBoldOff:
       Exclude( Style.FontAttributes, faBold );
+
     ttItalic:
       Include( Style.FontAttributes, faItalic );
+
     ttItalicOff:
       Exclude( Style.FontAttributes, faItalic );
+
     ttUnderline:
       Include( Style.FontAttributes, faUnderscore );
+
     ttUnderlineOff:
       Exclude( Style.FontAttributes, faUnderscore );
 
     ttFixedWidthOn:
-      Settings.FixedFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
+      begin
+        Style.FontNameSize := Copy(ASettings.FixedFont.FontDesc, 1, Pos(':', ASettings.FixedFont.FontDesc)-1);
+        Style.FontAttributes := GetFPGuiFontAttributes(ASettings.FixedFont);
+      end;
+
     ttFixedWidthOff:
-      Settings.NormalFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
+      begin
+        Style.FontNameSize := Copy(ASettings.NormalFont.FontDesc, 1, Pos(':', ASettings.NormalFont.FontDesc)-1);
+        Style.FontAttributes := GetFPGuiFontAttributes(ASettings.NormalFont);
+      end;
 
     ttHeading1:
-      Settings.Heading1Font := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
+      begin
+        Style.FontNameSize := Copy(ASettings.Heading1Font.FontDesc, 1, Pos(':', ASettings.Heading1Font.FontDesc)-1);
+        Style.FontAttributes := GetFPGuiFontAttributes(ASettings.Heading1Font);
+      end;
+
     ttHeading2:
-      Settings.Heading2Font := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
+      begin
+        Style.FontNameSize := Copy(ASettings.Heading2Font.FontDesc, 1, Pos(':', ASettings.Heading2Font.FontDesc)-1);
+        Style.FontAttributes := GetFPGuiFontAttributes(ASettings.Heading2Font);
+      end;
+
     ttHeading3:
-      Settings.Heading3Font := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
+      begin
+        Style.FontNameSize := Copy(ASettings.Heading3Font.FontDesc, 1, Pos(':', ASettings.Heading3Font.FontDesc)-1);
+        Style.FontAttributes := GetFPGuiFontAttributes(ASettings.Heading3Font);
+      end;
+
     ttHeadingOff:
-      Settings.NormalFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
+      begin
+        Style.FontNameSize := Copy(ASettings.NormalFont.FontDesc, 1, Pos(':', ASettings.NormalFont.FontDesc)-1);
+        Style.FontAttributes := GetFPGuiFontAttributes(ASettings.NormalFont);
+      end;
 
     ttFont:
-    begin
-      tmpFontParts := TStringList.Create;
-      StrExtractStringsQuoted(tmpFontParts, Tag.Arguments);
-      FontFaceName := tmpFontParts[0];
-      FontSizeString := tmpFontParts[1];
-      tmpFontParts.Destroy;
-
-      NewStyle := Style;
-      NewStyle.FontNameSize := FontFaceName;
-
-      if Pos( 'x', FontSizeString ) > 0 then
       begin
         tmpFontParts := TStringList.Create;
-        StrExtractStrings(tmpFontParts, FontSizeString, ['x'], #0);
-        XSizeStr := tmpFontParts[0];
-        YSizeStr := tmpFontParts[1];
-        tmpFontParts.Destroy;
-        NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + YSizeStr;
-      end
-      else
-        NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + FontSizeString;
+        StrExtractStringsQuoted(tmpFontParts, Tag.Arguments);
+        FontFaceName := tmpFontParts[0];
+        FontSizeString := tmpFontParts[1];
+        tmpFontParts.Free;
 
-      if ( NewStyle.FontNameSize <> '' ) then
-        Style := NewStyle;
-    end;
+        NewStyle := Style;
+        NewStyle.FontNameSize := FontFaceName;
+
+        if Pos( 'x', FontSizeString ) > 0 then
+        begin
+          tmpFontParts := TStringList.Create;
+          StrExtractStrings(tmpFontParts, FontSizeString, ['x'], #0);
+          XSizeStr := tmpFontParts[0];
+          YSizeStr := tmpFontParts[1];
+          tmpFontParts.Destroy;
+          NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + YSizeStr;
+        end
+        else
+          NewStyle.FontNameSize := NewStyle.FontNameSize + '-' + FontSizeString;
+
+        if ( NewStyle.FontNameSize <> '' ) then
+          Style := NewStyle;
+      end;
 
     ttFontOff:
-      // restore default
-      Settings.NormalFont := GetFPGuiFont(Style.FontNameSize, Style.FontAttributes);
+      begin
+        { TODO: Restore to previous font, not NormalFont, because previous font could have
+           been something different to NormalFont }
+        Style.FontNameSize := Copy(ASettings.NormalFont.FontDesc, 1, Pos(':', ASettings.NormalFont.FontDesc)-1);
+        Style.FontAttributes := GetFPGuiFontAttributes(ASettings.NormalFont);
+      end;
 
     ttColor:
       GetTagColor( Tag.Arguments, Style.Color );
+
     ttColorOff:
-      Style.Color := Settings.FDefaultColor;
+      Style.Color := ASettings.FDefaultColor;
+
     ttBackgroundColor:
       GetTagColor( Tag.Arguments, Style.BackgroundColor );
+
     ttBackgroundColorOff:
-      Style.BackgroundColor := Settings.FDefaultBackgroundColor;
+      Style.BackgroundColor := ASettings.FDefaultBackgroundColor;
 
     ttRed:
       Style.Color := clRed;
+
     ttBlue:
       Style.Color := clBlue;
+
     ttGreen:
       Style.Color := clGreen;
+
     ttBlack:
       Style.Color := clBlack;
 
     ttAlign:
-      Style.Alignment := GetTagTextAlignment( Tag.Arguments,
-                                              Settings.FDefaultAlignment );
+      Style.Alignment := GetTagTextAlignment( Tag.Arguments, ASettings.FDefaultAlignment );
 
     ttWrap:
       Style.Wrap := GetTagTextWrap( Tag.Arguments );
 
     ttSetLeftMargin,
     ttSetRightMargin:
-    begin
-      tmpFontParts := TStringList.Create;
-      StrExtractStrings(tmpFontParts, Tag.Arguments, [' '], #0);
-      MarginParam1 := tmpFontParts[0];
-
-      ParsePoint := 1;
-      if     ( Tag.TagType = ttSetLeftMargin )
-         and ( MarginParam1 = 'here' ) then
       begin
-        Style.LeftMargin := X;
-      end
-      else
-      begin
-        try
-          MarginSize := StrToInt( MarginParam1 );
-          if tmpFontParts.Count > 1 then   // do we have a second parameter
-            MarginParam2 := tmpFontParts[1]
-          else
-            MarginParam2 := '';
-          if MarginParam2 = 'pixels' then
-            NewMargin := MarginSize
+        tmpFontParts := TStringList.Create;
+        StrExtractStrings(tmpFontParts, Tag.Arguments, [' '], #0);
+        MarginParam1 := tmpFontParts[0];
 
-          else if MarginParam2 = 'deffont' then
-            NewMargin := MarginSize * Settings.NormalFont.TextWidth('w')  // .Width
-
-          else
-          begin
-            case Settings.MarginSizeStyle of
-              msAverageCharWidth:
-                NewMargin := MarginSize * FontManager.AverageCharWidth;
-              msMaximumCharWidth:
-                NewMargin := MarginSize * FontManager.MaximumCharWidth;
-              msSpecifiedChar:
-                NewMargin := MarginSize
-                             * FontManager.CharWidth( Chr( Settings.MarginChar ) );
-            end;
-          end;
-        except
-          NewMargin := 0;
-        end;
-
-        if Tag.TagType = ttSetLeftMargin then
-          Style.LeftMargin := Settings.Margins.Left + NewMargin
+        ParsePoint := 1;
+        if     ( Tag.TagType = ttSetLeftMargin )
+           and ( MarginParam1 = 'here' ) then
+        begin
+          Style.LeftMargin := X;
+        end
         else
-          Style.RightMargin := Settings.Margins.Right + NewMargin;
-      end;
-      tmpFontParts.Free;
-    end;  { teSet[left|right]margin }
+        begin
+          try
+            MarginSize := StrToInt( MarginParam1 );
+            if tmpFontParts.Count > 1 then   // do we have a second parameter
+              MarginParam2 := tmpFontParts[1]
+            else
+              MarginParam2 := '';
+            if MarginParam2 = 'pixels' then
+              NewMargin := MarginSize
+
+            else if MarginParam2 = 'deffont' then
+              NewMargin := MarginSize * ASettings.NormalFont.TextWidth('w')  // .Width
+
+            else
+            begin
+              case ASettings.MarginSizeStyle of
+                msAverageCharWidth:
+                  NewMargin := MarginSize * FontManager.AverageCharWidth;
+
+                msMaximumCharWidth:
+                  NewMargin := MarginSize * FontManager.MaximumCharWidth;
+
+                msSpecifiedChar:
+                  NewMargin := MarginSize * FontManager.CharWidth(Chr(ASettings.MarginChar));
+              end;
+            end;
+          except
+            NewMargin := 0;
+          end;
+
+          if Tag.TagType = ttSetLeftMargin then
+            Style.LeftMargin := ASettings.Margins.Left + NewMargin
+          else
+            Style.RightMargin := ASettings.Margins.Right + NewMargin;
+        end;
+        tmpFontParts.Free;
+      end;  { teSet[left|right]margin }
 
   end;  { case Tag.TagType }
 
