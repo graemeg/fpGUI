@@ -232,7 +232,7 @@ begin
   inherited Create;
   FCanvas := ACanvas;
   FWidget := AWidget;
-  FDefaultFont := fpgGetFont(Format('%s-%d', [DefaultTopicFont, DefaultTopicFontSize]));
+  FDefaultFont := fpgGetFont(DefaultTopicFont);
   FCanvas.Font := FDefaultFont;
 end;
 
