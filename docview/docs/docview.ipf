@@ -966,30 +966,39 @@ how to compile it into a binary INF file - viewable with DocView of course. ;-)
 :p.
 Lets create a text file and call it "sample.ipf". Then type in the following using
 your favourite text editor.
+
 :xmp.
- &colon.userdoc.
- &colon.title. Sample INF file...
- &colon.h1.Header One
- &colon.p.This is a sample file with one header in the table of content.
- &colon.p.This is paragraph two of this single header.
- &colon.euserdoc.
+  &colon.userdoc.
+  &colon.title. Sample INF file...
+  &colon.h1.Header One
+  &colon.p.This is a sample file with one header in the table of content.
+  &colon.p.This is paragraph two of this single header.
+  &colon.euserdoc.
 :exmp.
+
 :p.
 Save the document and close your editor. Now we have the source of our first help
 file. Now all that remains is to compile it into a binary INF file.
+
 :p.
 To use the WIPC compiler, we need to setup an environment variable so the compiler
 can find some of it's support files.
+
 :p.
 We do this as follows under Linux.
+
 :xmp.
- export WIPFC=~/apps/wipfc/
-:exmp.
- ...or as follows under Windows.
-:xmp.
- set WIPFC=C:\apps\wipfc\
+  export WIPFC=~/apps/wipfc/
 :exmp.
 
+:p.
+ ...or as follows under Windows.
+
+:xmp.
+  set WIPFC=C:\apps\wipfc\
+:exmp.
+
+:p.
 I normally setup my computer so that those settings are permantantly set when my
 computer boots up. I also make sure the "wipfc" executable is setup in the system
 search path so I can run it form anywhere on my system. Now we are ready to compile
