@@ -1136,7 +1136,7 @@ end;
 function fpgApplication: TfpgApplication;
 begin
   if not Assigned(uApplication) then
-    uApplication := TfpgApplication.Create(ParamStr(1));
+    uApplication := TfpgApplication.Create;
   result := uApplication;
 end;
 

@@ -400,6 +400,7 @@ uses
   fpg_stringutils,  // used for GetTextWidth
   fpg_utils,
   fpg_form,         // for modal event support
+  fpg_cmdlineparams,
   cursorfont,
   xatom,            // used for XA_WM_NAME
   keysym,
@@ -1328,10 +1329,19 @@ begin
 end;
 
 constructor TfpgX11Application.Create(const AParams: string);
+var
+  s: string;
 begin
   inherited Create(AParams);
   FIsInitialized    := False;
-  FDisplay          := XOpenDisplay(PChar(aparams));
+
+  if gCommandLineParams.IsParam('display') then
+  begin
+    s := gCommandLineParams.GetParam('display');
+    FDisplay := XOpenDisplay(PChar(s));
+  end
+  else
+    FDisplay := XOpenDisplay('');
 
   if FDisplay = nil then
     raise Exception.Create('fpGUI-X11: Could not open the display. Is your X11 server running?');
