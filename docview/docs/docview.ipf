@@ -1,36 +1,34 @@
 :userdoc.
 :docprof toc=123456.
 :title.fpGUI DocView Help
-.* ************************************************************
-.* Subject: Help for DocView
-.* ************************************************************
-.*
-.*
+
+.nameit symbol=dv text='DocView'
+
 .* ************************************************************
 .* Introduction
 .* ************************************************************
 :h1 res=30000 id='Introduction'.Introduction
 :i1 id=30001.support
 .*  :artwork runin name='images\DocView.bmp'.
-:hp2.Welcome to DocView!:ehp2.
+:hp2.Welcome to &dv.!:ehp2.
 :p.
-DocView is a program for reading fpGUI or OS/2 (aka eComStation) Help
+&dv. is a program for reading fpGUI or OS/2 (aka eComStation) Help
 Files. Both the INF and OS/2 HLP file formats can be read.
 :p.:link reftype=hd refid='Support'.Support and Licensing:elink.
-:p.:link reftype=hd refid='Using'.Using DocView:elink.
-:p.:hp1.To stop this file appearing when you start DocView without specifying a
+:p.:link reftype=hd refid='Using'.Using &dv.:elink.
+:p.:hp1.To stop this file appearing when you start &dv. without specifying a
 help file, see "Settings - Options - General" tab.:ehp1.
 :p.
 :hp2.History:ehp2.
 :p.
-DocView was originally based on the OS/2 NewView program. It was ported from
+&dv. was originally based on the OS/2 NewView program. It was ported from
 the Sibyl development environment, to the fpGUI Toolkit and the Free Pascal Compiler. Since then the code
-and features of DocView has diverged.
+and features of &dv. has diverged.
 :p.
 It improves upon many aspects of the origin IBM VIEW program, with a modern,
 easy to use interface, more options, and new features that VIEW simply
-didn't have. And don't forget, DocVIew is also cross platform - currently available
-as native executable for Linux, FreeBSD and Windows. DocView is also available in
+didn't have. And don't forget, &dv. is also cross platform - currently available
+as native executable for Linux, FreeBSD and Windows. &dv. is also available in
 32-bit or 64-bit.
 
 
@@ -45,15 +43,15 @@ as native executable for Linux, FreeBSD and Windows. DocView is also available i
 :i1 id=30004.source code
 :i1 id=30007.features planned
 :hp2.Support and Licensing:ehp2.
-:p.DocView is Copyright 2009-2011 by Graeme Geldenhuys. It is also licensed
+:p.&dv. is Copyright 2009-2011 by Graeme Geldenhuys. It is also licensed
 under the GNU Public License v2, which means you have the right to obtain the
 source code.
 :p.
-DocView is part of the fpGUI Toolkit project and is the default help viewer for
-any fpGUI based applications. Source code for DocView is available in the fpGUI
+&dv. is part of the fpGUI Toolkit project and is the default help viewer for
+any fpGUI based applications. Source code for &dv. is available in the fpGUI
 git repository on SourceForge.net, inside the :hp1.docview:ehp1. directory.
 :p.
-If you find DocView helpful, please email me and/or make a
+If you find &dv. helpful, please email me and/or make a
 donation to support further development. It's nice to hear from
 you!
 :ul.
@@ -63,13 +61,13 @@ The news server is accessible via NNTP at news://opensoft.homeip.net/
 .br
 There is also a web interface to the NNTP news server for those behind company
 firewalls. http://opensoft.homeip.net/webnews/
-:li.Translate DocView to your language.
+:li.Translate &dv. to your language.
 :li.A donation to fpGUI development. You can contact me via email at: graemeg@gmail.com
 :eul.
 :p.:hp2.Reporting Bugs:ehp2.
 :p.If you need to report a crash or other problem, then be as specific as
 possible about what files were being used, what you were doing,
-etc. If at all possible, compile DocView with debug information and supply a
+etc. If at all possible, compile &dv. with debug information and supply a
 backtrace. This will greatly help me fix problems.
 :p.
 If it is specific to a particular help file, then send them to me via email.
@@ -77,7 +75,7 @@ If it is specific to a particular help file, then send them to me via email.
 It would be helpful if you could include the following information with your
 bug report:
 :ul.
-:li.DocView version (Help - Product Information)
+:li.&dv. version (Help - Product Information)
 :li.The file names of the help files you have problems with.
 :li.A screenshot may be useful, if the problem is an incorrect or corrupt
 display.
@@ -102,7 +100,7 @@ to decode the images inside INF help files. This should hopefully be fixed soon.
 :li.Bookmark support
 :li.Printing support
 :li.Cross-file linking. Clicking a hyperlink that automatically opens another
-INF help file and goes to the correct topic. DocView already supports loading
+INF help file and goes to the correct topic. &dv. already supports loading
 multiple files, so this is almost complete.
 :li.Some optimization of the Rich Text View component. Better startup time, improved
 text wrapping and font substitution support.
@@ -141,8 +139,8 @@ The following trademarks are used in this online help file:
 .* ************************************************************
 .* Using DocView
 .* ************************************************************
-:h1 res=2 id='Using'.Using DocView
-:hp2.Using DocView:ehp2.
+:h1 res=2 id='Using'.Using &dv.
+:hp2.Using &dv.:ehp2.
 :p.
 Once you have :link reftype=hd refid='OpeningFiles'.opened a
 file:elink., you can read it in various ways.
@@ -164,7 +162,7 @@ To simply read the help file like a paper book, use the "Previous"
  buttons to go back to wherever you were before, or to retrace your
 steps. They are the Left and Right arrow buttons on the toolbar.
 :p.
-Colours and some of the behaviour of DocView can be adjusted from the "Tools
+Colours and some of the behaviour of &dv. can be adjusted from the "Tools
 - Options" menu.
 .* TODO
 .* :p.You can also :link reftype=hd refid='notes'.annotate:elink. or :link
@@ -182,13 +180,13 @@ Opening Files
 To open a help file, you can use any of the following:
 :ul.
 :li.Double-click a :link reftype=hd refid='HelpIcons'.help icon:elink. that is
-already set up. The DocView executable needs to be associated with INF files in
+already set up. The &dv. executable needs to be associated with INF files in
 your desktop environment.
 :li.Type "docview :hp1.filename:ehp1." from the :link reftype=hd
 refid='CommandLine'.command line:elink..
 :li.Click the Open button
 .*  :artwork runin name='images\open.bmp'.
- from within DocView, or the "File - Open" menu item.
+ from within &dv., or the "File - Open" menu item.
 :li.Click the "File - Open additional file" menu item to open more files, without
 closing the already opened files.
 :li.Click the "File - Open Special" to load help files based on an Environmnt Variable
@@ -201,7 +199,7 @@ refid='contents'.table of contents:elink. and the first help topic.
 :p.
 :hp2.Loading Multiple Files Together:ehp2.
 :p.
-DocView can load multiple files at once, presenting them as if they
+&dv. can load multiple files at once, presenting them as if they
 were one book, and read environment variables for filenames.
 :p.
 For example, on my system I can do the following:
@@ -211,7 +209,7 @@ For example, on my system I can do the following:
 :p.
 which loads the whole Free Pascal help library on my system. FPCHELP is an environment
 variable set in ~/.profile (Linux) or config.sys (Windows) consisting of "rtl+fcl+ref"
-which tells DocView to load the help files rtl.inf, fcl.inf and ref.inf. The
+which tells &dv. to load the help files rtl.inf, fcl.inf and ref.inf. The
 files are searched for in the path specified by two :link
 reftype=hd refid='L_EnvironmentVariables'.environment
 variables:elink..
@@ -219,7 +217,7 @@ variables:elink..
 The files are all loaded and effectively appended to each other.
 :p.
 Being able to load multiple files like this can be helpful for various
-reasons. For example, I use this method to integrate DocView with the various IDE's
+reasons. For example, I use this method to integrate &dv. with the various IDE's
 (Integrated Development Environments) I use. I can then easily search for help on
 language keywords, source code classes or units etc.
 :p.
@@ -227,7 +225,7 @@ You can also open additional help files by selecting the "File - Open additional
 menu option.
 .* TODO
 .* :p.
-.* When you click a link to a different help file&comma. DocView loads the other
+.* When you click a link to a different help file&comma. &dv. loads the other
 .* file without closing your current files&per.
 :p.
 At any time, you can find out what files are open by using the "Help - Show help
@@ -235,11 +233,11 @@ file header info" menu option.
 :p.
 :hp2.Loading Additional Files:ehp2.
 :p.
-You can select the "File - Open additional file" menu option, and DocView will
+You can select the "File - Open additional file" menu option, and &dv. will
 open the file you have selected without closing the currently opened files.
 .*  TODO
 .*  :p.:hp2.Drag and Drop:ehp2.
-.*  :p.You can drag and drop &per.INF or &per.HLP files onto DocView and they will
+.*  :p.You can drag and drop &per.INF or &per.HLP files onto &dv. and they will
 .*  be opened&per. If you hold down the Shift key&comma. they will be opened without
 .*  closing the current files&per.
 .*  :p.You can drop files onto any of the main content areas&comma. such as the
@@ -255,12 +253,12 @@ open the file you have selected without closing the currently opened files.
 :hp2.Help Icons:ehp2.
 :p.
 Help Icons on the desktop are usually "program shortcuts" or "filesystem objects".
-Details on how to create a program shortcut for DocView, or how to associate INF
-files to be opened with DocView, is beyond the scope of this document. Please see the
+Details on how to create a program shortcut for &dv., or how to associate INF
+files to be opened with &dv., is beyond the scope of this document. Please see the
 help of your operating system for more information.
 :p.
 Saying that, with the fpGUI source code, in the "docview/install" directory, there is some
-information on how to setup a Gnome desktop with DocView. Unfortunately those
+information on how to setup a Gnome desktop with &dv.. Unfortunately those
 instructions don't seem to work on all Linux or FreeBSD systems, so you again need
 to refer to your desktop system's help for guidance.
 .*  :p.Some programs create these icons automatically at install time&per.
@@ -294,8 +292,8 @@ to the left, or simply double-clicking on the splitter bar. To show the Left Pan
 again, drag the splitter bar to the right.
 :p.
 The last location of the splitter bar (width of the Left Panel) is remembered
-between DocView sessions. So when you open DocView, the Left Panel is the same
-width as the last time you used DocView.
+between &dv. sessions. So when you open &dv., the Left Panel is the same
+width as the last time you used &dv..
 .*  TODO
 .*  :p.You can stop the navigation panel from appearing when a help file is opened
 .*  in Tools &endash. Options &endash. General tab&per.
@@ -343,7 +341,7 @@ refid='Index'.Index:elink. for this purpose.
 :p.
 The Index tab contains an alphabetical listing of topics or keywords in the
 help file. You can quickly search through it just by typing the first few
-characters of the word you want to look up. DocView jumps to the first match
+characters of the word you want to look up. &dv. jumps to the first match
 in the index automatically. To view the highlighted topic, press
 enter.
 :note text='Note:'.
@@ -353,7 +351,7 @@ usefulness is strictly dependent on how much work the author put into it.
 There may not even be Index information in the help file.
 :p.
 However, a useful index can be provided simply by listing the titles of
-each topic alphabetically, and this is what DocView does. It then
+each topic alphabetically, and this is what &dv. does. It then
 merges the original index (if any) with the list of topic titles.
 :p.
 If for some reason you don't like this, you can change this behaviour in
@@ -397,7 +395,7 @@ double quotes around it, for example "OS/2 warp".
 :p.
 :hp2.Matching features:ehp2.
 :p.
-DocView allows you finer control of searching. You can add either of the two symbols
+&dv. allows you finer control of searching. You can add either of the two symbols
 directly infront of a word (no spaces between symbol and word), to narrow down
 a search even more.
 :dl compact tsize=20.
@@ -407,14 +405,14 @@ a search even more.
 :dd.indicates a word that must :hp2.not:ehp2. be matched
 :edl.
 :p.
-To make searching even more useful, DocView implements a special search algorithm
-which does partial word matches. That is, if you search for "win", DocView will
+To make searching even more useful, &dv. implements a special search algorithm
+which does partial word matches. That is, if you search for "win", &dv. will
 also find "window", "following", "showing" etc. However, the better the match is the higher
 the rank will be. The search rank is displayed in square brackets behind each
 search result. Searches are :hp2.not:ehp2. case-sensitive.
 :p.
-:hp2.How DocView ranks results:ehp2.
-:p.DocView ranks matching topics by various means:
+:hp2.How &dv. ranks results:ehp2.
+:p.&dv. ranks matching topics by various means:
 :ul compact.
 :li.a closer match to a full word
 :li.number of matching words in a topic
@@ -428,7 +426,7 @@ search result. Searches are :hp2.not:ehp2. case-sensitive.
 :h2 res=7 id='notes'.Notes
 :hp2.Adding and Using Notes:ehp2.
 :p.
-DocView allows you to add notes (annotations) to your help
+&dv. allows you to add notes (annotations) to your help
 files.
 :p.
 To add a note, simply left click where you want to make a note and click the
@@ -456,7 +454,7 @@ selectable, so you can select your preferred storage location.
 .* directory. This is in the user's home profile directory where there is read/write
 .* access. Under Linux it is normally "~/.config/docview/" and under Windows it is
 .* normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
-.* I will probably add a setting in DocView, so the user can configure a
+.* I will probably add a setting in &dv., so the user can configure a
 .* preferred storage location for notes (eg: some users prefer it like OS/2's View program did,
 .* by storing notes in the same directory as the help file).
 
@@ -470,7 +468,7 @@ however, you can still read them from the Notes tab.
 :h2 res=21 id='history'.History
 :p.:hp2.About the History:ehp2.
 :p.
-DocView keeps track of every topic you visit. This allows you to view a help file
+&dv. keeps track of every topic you visit. This allows you to view a help file
 like a web browser does with web pages. You can use the "Back" and "Forward"
 buttons on the toolbar to move back and forward in your history list.
 :p.
@@ -478,7 +476,7 @@ In the History tab, is a list of all previously visited topics. To jump to any
 of them, simply highlight the topic and press enter. Or simply double-click a
 topic.
 :p.
-The history is not saved when you exit DocView. The history is also cleared if
+The history is not saved when you exit &dv.. The history is also cleared if
 you open a new or additional help file.
 
 .*
@@ -503,7 +501,7 @@ you open a new or additional help file.
 .*  These searches may take some time, depending on what you search
 .*  for. You can stop the search at any time.
 .*  :p.
-.*  :hp2.Where DocView searches:ehp2.
+.*  :hp2.Where &dv. searches:ehp2.
 .*  :p.
 .*  The default is to search for help files in the help paths, which are
 .*  specified by the BOOKSHELF and HELP :link reftype=hd
@@ -573,7 +571,7 @@ you open a new or additional help file.
 :hp2.Bookmarks:ehp2.
 :note.:hp8.*** This feature is not implemented yet. ***:ehp8.
 :p.
-DocView allows you to bookmark particular topics within the current help
+&dv. allows you to bookmark particular topics within the current help
 file. Simply click the bookmark toolbar button
 .*  :artwork runin name='images\bookmark.bmp'.
 to add the current topic as a bookmark.
@@ -585,14 +583,14 @@ You can view or delete all your bookmarks by clicking on "Edit..." in
 the "Bookmarks" menu. This window can remain open while you read, so
 that you can quickly look through your bookmarks.
 :note text='Note:'.
-DocView bookmarks remember all the topic windows that are open, if
+&dv. bookmarks remember all the topic windows that are open, if
 there is more than one.
 :p.
-Bookmarks are saved in a file with the extension ".bookmarks", in the DocView config
+Bookmarks are saved in a file with the extension ".bookmarks", in the &dv. config
 directory. This is in the user's home profile directory where there is read/write
 access. Under Linux it is normally "~/.config/docview/" and under Windows it is
 normally "C:\Documents and Settings\<user>\Local Settings\Application Data\docview".
-I will probably add a setting in DocView, so the user can configure a 
+I will probably add a setting in &dv., so the user can configure a
 preferred storage location for bookmarks (eg: some users prefer it like OS/2's View program did,
 by storing notes in the same directory as the help file).
 
@@ -604,10 +602,10 @@ by storing notes in the same directory as the help file).
 :hp2.Internet Links:ehp2.
 :p.
 When you click a web URL like
-http://fpgui.sourceforge.net , DocView launches your
+http://fpgui.sourceforge.net , &dv. launches your
 default web browser.
 :p.
-This web browser is specified by operating system settings, not DocView
+This web browser is specified by operating system settings, not &dv.
 itself. Please see your operating system or desktop environment help for further
 details on how to configure it.
 :p.
@@ -622,7 +620,7 @@ environment, the same as web addresses.
 only way to implement them was a link to, for example,
 "netscape.exe" with the correct parameters.
 :p.
-DocView translates program links to "netscape", "explorer" or "mozilla"
+&dv. translates program links to "netscape", "explorer" or "mozilla"
 into links to the default browser.
 :p.
 It also auto-detects URLs in the forms:
@@ -644,7 +642,7 @@ prefix:
 :p.
 where aaa, bbb and ccc are any alphanumeric string.
 :p.
-You don't need to do anything for DocView to recognise these.
+You don't need to do anything for &dv. to recognise these.
 
 
 .* ************************************************************
@@ -653,7 +651,7 @@ You don't need to do anything for DocView to recognise these.
 :h1 res=9 id='CommandLine'.Command Line Parameters
 :hp2.Command Line Parameters:ehp2.
 :p.
-When you run DocView from the command line you can supply various
+When you run &dv. from the command line you can supply various
 parameters. None of them are required. For a quick summary, select
 "Help - Command line parameters".
 :xmp.
@@ -665,7 +663,7 @@ parameters. None of them are required. For a quick summary, select
 :p.
 :hp2.<filename>:ehp2.
 :p.
-The file for DocView to load. You can load multiple files at once by
+The file for &dv. to load. You can load multiple files at once by
 using filename1+filename2 format.
 :p.
 If a path isn't specified, then the files are searched for in the
@@ -680,7 +678,7 @@ you have to enclose the filename in double qoutes.
 :p.The following options are available:
 :parml tsize=6.
 :pt.-h
-:pd.Show the command line summary when docview starts up.
+:pd.Show the command line summary when &dv. starts up.
 :pt.-k <searchtext>
 :pd.After opening the file, it performs a :link reftype=hd
 refid='search'.search:elink. for a keyword <searchtext>. This does a full text
@@ -697,7 +695,7 @@ To search for TfpgApplication in the whole fpGUI Toolkit class document you can 
 :exmp.
 
 :p.
-DocView is clever enough to handle multiple words (like the :link reftype=hd
+&dv. is clever enough to handle multiple words (like the :link reftype=hd
 refid='search'.search panel:elink.). This is a OR search.
 
 :xmp.
@@ -746,7 +744,7 @@ To perform an AND search enclose the search phrase in double quotes.
 .*  :exmp.
 .*  :p.makes the window centered and 80&percent. of the screen size&per.
 .*  :p.:hp2.&slash.title&colon.&lt.window title&gt.:ehp2.
-.*  :p.Sets the title of the DocView window to the specified text&comma. overriding
+.*  :p.Sets the title of the &dv. window to the specified text&comma. overriding
 .*  whatever appears in the help file&per. The text &odq.Help &endash.  &cdq. will always be
 .*  inserted in front of the specified text&comma. unless the specified text is
 .*  &odq.help&cdq.&comma. in which case the title will simply become &odq.Help&cdq.&per. This is to
@@ -763,7 +761,7 @@ To perform an AND search enclose the search phrase in double quotes.
 :h2 res=15 id='CommandLineExamples'.Command Line Examples
 :hp2.Command Line Examples:ehp2.
 :p.
-The following examples assume that DocView is installed and is accessible from
+The following examples assume that &dv. is installed and is accessible from
 the command line.
 :p.
 :hp2.docview fpgui:ehp2.
@@ -871,7 +869,7 @@ file names), so the environment variable "MYHELP" is not equal to "myhelp".
 .*  :p.
 .*  :p.:hp2.Ctrl&plus.M:ehp2. Add note at cursor position
 .*  :p.
-.*  :p.:hp2.F1:ehp2. Help for DocView
+.*  :p.:hp2.F1:ehp2. Help for &dv.
 
 
 .* ************************************************************
@@ -882,7 +880,7 @@ file names), so the environment variable "MYHELP" is not equal to "myhelp".
 :p.
 Both the :hp2.BOOKSHELF:ehp2. and :hp2.HELP:ehp2. environment variables
 define paths (lists of directories) for searching for help files.
-DocView uses both paths without distinction.
+&dv. uses both paths without distinction.
 :p.
 These paths are searched when you:
 :ul.
@@ -898,7 +896,7 @@ These paths are searched when you:
 :hp2.Other environment variables:ehp2.
 :p.
 The :hp2.LANG:ehp2. environment variable is examined under Linux or FreeBSD to
-decide the default language that DocView will be displayed in. Windows doesn't
+decide the default language that &dv. will be displayed in. Windows doesn't
 use an environment variable - instead you need to use the Region applet in
 the Windows Control Panel.
 
@@ -967,7 +965,8 @@ document. :-)
 
 :p.
 Here is an example of a small IPF document to get you started. I'll also show you
-how to compile it into a binary INF file - viewable with DocView of course. ;-)
+how to compile it into a binary INF file - viewable with &dv. of course. ;-)
+
 :p.
 Lets create a text file and call it "sample.ipf". Then type in the following using
 your favourite text editor.
@@ -1016,7 +1015,7 @@ our help file!
 :p.
 If you typed the document correctly, you should now have
 a :hp2.sample.inf:ehp2. file in the current directory. Now you simply
-run DocView and open your first INF help file. Well done!
+run &dv. and open your first INF help file. Well done!
 
 .* ************************************************************
 .* Topic Resource IDs
@@ -1026,12 +1025,12 @@ run DocView and open your first INF help file. Well done!
 :p.
 Resource IDs are used by authors of online help for applications, to
 identify help topics. When you create fpGUI base applications, the fpGUI
-framework will call DocView with the resource ID as parameter, to display the
+framework will call &dv. with the resource ID as parameter, to display the
 correct topic for that part of your application. The resource ID is stored in
 a table inside the help file. For a developer to use these, they needs to set
 the component's HelpType to htContext.
 :p.
-For document authors, DocView offers the ability to see and find
+For document authors, &dv. offers the ability to see and find
 resource IDs.
 :p.
 :hp2.Finding by Resource ID:ehp2.
@@ -1054,7 +1053,7 @@ Like resource IDs, topic names can be used by developers to link to
 help topics from within their application. The developers needs to set the component's
 HelpType to htKeyword.
 :p.
-DocView can find a particular topic name, using "Tools - Find
+&dv. can find a particular topic name, using "Tools - Find
 topic by resource name".
 
 :euserdoc.
