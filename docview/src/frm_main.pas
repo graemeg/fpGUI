@@ -3338,6 +3338,7 @@ procedure TMainForm.ProcessCommandLineParams;
 var
   showtopic: boolean;
   t: TTopic;
+  n: integer;
 begin
   if ParamCount > 0 then
   begin
@@ -3368,8 +3369,17 @@ begin
   else if gCommandLineParams.IsParam('n') then
   begin
     { Display topic with numeric topic id }
-    t := FindTopicByResourceID(StrToInt(gCommandLineParams.GetParam('n')));
-    DisplayTopic(t);
+    try
+      n := StrToInt(gCommandLineParams.GetParam('n'));
+      t := FindTopicByResourceID(n);
+      DisplayTopic(t);
+    except
+      on EConvertError do
+        begin
+          TfpgMessageDialog.Critical('Invalid Parameter Value',
+            '<' + gCommandLineParams.GetParam('n') + '> is not an number.');
+        end;
+    end;
   end
   else if gCommandLineParams.IsParam('s') then
   begin
