@@ -3350,16 +3350,16 @@ begin
       // do nothing
     else
     begin
-//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - Open file...');
       showtopic := not gCommandLineParams.IsParam('k');
-      OpenFile(ParamStr(1), '', showtopic);
+      { is the first parameter a known docview help, or some addition parameter }
+      if Pos(ctiCommandLineParamPrefix, ParamStr(1)) = 0 then
+        OpenFile(ParamStr(1), '', showtopic);
     end;
   end;
 
   // now process all other parameters
   if gCommandLineParams.IsParam('k') then
   begin
-//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - Keyword Search string');
     { Search for a string }
     edSearchText.Text := gCommandLineParams.GetParam('k');
     PageControl1.ActivePage := tsSearch;
@@ -3368,19 +3368,13 @@ begin
   else if gCommandLineParams.IsParam('n') then
   begin
     { Display topic with numeric topic id }
-//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - Display numeric topic id');
     t := FindTopicByResourceID(StrToInt(gCommandLineParams.GetParam('n')));
-//if not Assigned(t) then
-//  writeln(Format('Failed to find topic <%s>', [gCommandLineParams.GetParam('n')]));
     DisplayTopic(t);
   end
   else if gCommandLineParams.IsParam('s') then
   begin
-//writeln('DEBUG:  TMainForm.ProcessCommandLineParams - display string topic id');
     { Display topic with string topic id }
     t := FindTopicByName(gCommandLineParams.GetParam('s'));
-//if not Assigned(t) then
-//  writeln(Format('Failed to find topic <%s>', [gCommandLineParams.GetParam('k')]));
     DisplayTopic(t);
   end;
 end;
