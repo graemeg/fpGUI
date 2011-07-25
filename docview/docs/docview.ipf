@@ -936,15 +936,18 @@ comes to the rescue! A developer from the OpenWatcom (http://www.openwatcom.org)
 implemented a clean room implementation of the IPF Compiler, by simply using the
 origin IPF Compiler documentation as a guide. This new compiler is called WIPC, and
 is 100% compatible with the original IBM version.
+
 :p.
 For your convenience I included the OpenWatcom IPF Compiler as part of fpGUI Toolkit.
 You can find pre-built Windows and Linux binaries in the <fpgui>/tools/wipfc/ directory.
+
 :p.
-One huge benefit of the WIPFC compiler over the original IBM version, is that it
-is much easier to author help files. With the original IBM version the source help text
-was very tedious to write. Every symbol or punctuation like a comma, semi-colon, hyphen etc. and to be
-written as special "escaped" keyword. This requirement (and labour intensive work) was
+One huge benefit of the WIPFC compiler over the original IBM IPFC version, is that it
+is much easier to author help files. With the original IBM version the help text source
+was very tedious to write. Every symbol or punctuation like a comma, semi-colon, hyphen etc. had to be
+written as special "escaped" symbol. This requirement, which was very labour intensive, was
 luckily removed from the WIPFC version.
+
 :p.
 fpGUI also includes the IPF Language Reference document (IPFREF_v4.INF) as part
 of fpGUI Toolkit. You can find this INF document in the
@@ -953,13 +956,15 @@ of fpGUI Toolkit. You can find this INF document in the
 files. All markup tags (with the exception of 5 tags) start with a colon and end
 with a fullstop. The tags are mnemonic, making it easy to assocciate them with
 their function.
+
 :p.
 There are still some GUI IPF editors out there, but most of them are only for
 OS/2 (and maybe for Windows). The IPF Language is actually really easy to learn
 and understand, so you don't really need a special editor. I used my programming IDE
 as my editor, and simply supplied it with a syntax highlighter for the IPF language.
-No extra tools needed. Just so you know, that is what I used to author this help
+No extra tools are needed. Just so you know, that is what I used to author this help
 document. :-)
+
 :p.
 Here is an example of a small IPF document to get you started. I'll also show you
 how to compile it into a binary INF file - viewable with DocView of course. ;-)
