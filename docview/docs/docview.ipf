@@ -25,11 +25,11 @@ help file, see "Settings - Options - General" tab.:ehp1.
 the Sibyl development environment, to the fpGUI Toolkit and the Free Pascal Compiler. Since then the code
 and features of &dv. has diverged.
 :p.
-It improves upon many aspects of the origin IBM VIEW program, with a modern,
+&dv. improves upon many aspects of the origin IBM VIEW program, with a more modern and
 easy to use interface, more options, and new features that VIEW simply
 didn't have. And don't forget, &dv. is also cross platform - currently available
-as native executable for Linux, FreeBSD and Windows. &dv. is also available in
-32-bit or 64-bit.
+as native executables for Linux, FreeBSD and Windows. &dv. is also available in
+32-bit and 64-bit.
 
 
 .* ************************************************************
