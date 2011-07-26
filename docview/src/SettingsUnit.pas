@@ -84,7 +84,7 @@ type
     FixedFontDesc: TfpgString;
     Fonts: array[ 0..NumFontSettings - 1 ] of TfpgFont;
     FixedFontSubstitution: boolean;
-    FixedFontSubstitutes: string;
+    FixedFontSubstitutes: string;  // semi-colon seperated list of INF fonts eg: 'Courier 10x12;Mono 8x10'
     IndexStyle: TIndexStyle;
     SmoothScrolling: boolean;
     UseOriginalDialogs: boolean;
@@ -223,7 +223,7 @@ begin
       end;
 
       FixedFontSubstitution := ReadBool( FontsSection, 'FixedFontSubstitution', true );
-      FixedFontSubstitutes := ReadString( FontsSection, 'FixedFontSubstitutes', DefaultTopicFixedFont );
+      FixedFontSubstitutes := ReadString( FontsSection, 'FixedFontSubstitutes', 'Courier 18x12' );
 
       // Index style
       SettingString := ReadString( GeneralSection, 'IndexStyle', 'Full' );
