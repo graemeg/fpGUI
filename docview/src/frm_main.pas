@@ -1997,7 +1997,8 @@ end;
 
 procedure TMainForm.ClearNotes;
 begin
-  { TODO -oGraeme : Implement me }
+  DestroyListObjects( Notes );
+  Notes.Clear;
 end;
 
 procedure TMainForm.ClearIndexComponents;
