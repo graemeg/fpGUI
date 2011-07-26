@@ -11,7 +11,7 @@ uses
   Classes, SysUtils, fpg_base;
 
 const
- { TODO -oGraeme : Should this change to LineEnding (platfrom dependant) }
+ { TODO -oGraeme : Should this change to LineEnding (platfrom dependent) }
   EndLine= chr(13)+chr(10);
   TwoEndLines= chr(13)+chr(10)+chr(13)+chr(10);
   Quote = '''';
