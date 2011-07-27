@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-  <mime-type type="application/inf">
+  <mime-type type="application/x-docview-extension-inf">
     <comment>Compiled INF Help File</comment>
     <acronym>INF</acronym>
     <expanded-acronym>Information Help File</expanded-acronym>
@@ -9,5 +9,6 @@
     </magic>
     <glob pattern="*.inf"/>
     <alias type="application/x-inf"/>
+    <generic-icon name="application-x-docview-extension-inf" />
   </mime-type>
 </mime-info>

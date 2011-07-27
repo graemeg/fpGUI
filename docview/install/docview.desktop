@@ -1,15 +1,12 @@
 [Desktop Entry]
 Version=1.0
-Encoding=UTF-8
-Name=fpGUI DocView
-GenericName=INF Help Viewer
-Comment=A INF Documentation Viewer
-Exec=docview %f
-Terminal=false
 Type=Application
-Icon=docview.png
-Categories=Utility;Application;
-StartupWMClass=docview
-MimeType=application/x-inf;
-
+Terminal=false
+Exec=docview %f
+Name=fpGUI DocView
+GenericName=INF help viewer
+Icon=docview
+MimeType=application/x-docview-extension-inf
+Categories=Development;Utility;Application;
+Comment=A fast cross-platform INF help file viewer
 
