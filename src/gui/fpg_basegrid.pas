@@ -828,7 +828,9 @@ var
   w: integer;
   r: integer;
 begin
-  consumed := True;
+  if consumed then
+    exit;
+
   case keycode of
     keyRight:
         begin
@@ -851,6 +853,7 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
 
     keyLeft:
@@ -863,6 +866,7 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
 
     keyUp:
@@ -873,6 +877,7 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
 
     keyDown:
@@ -883,6 +888,7 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
 
     keyPageUp:
@@ -897,6 +903,7 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
 
     keyPageDown:
@@ -911,6 +918,7 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
         
     keyHome:
@@ -930,6 +938,7 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
         
     keyEnd:
@@ -949,11 +958,9 @@ begin
             FollowFocus;
             RePaint;
           end;
+          consumed := True;
         end;
-
-  else
-    consumed := False;
-  end;
+  end;  { case }
   
   if consumed then
     CheckFocusChange;
