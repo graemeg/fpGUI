@@ -827,6 +827,7 @@ procedure TfpgBaseGrid.HandleKeyPress(var keycode: word;
 var
   w: integer;
   r: integer;
+  c: integer;
 begin
   if consumed then
     exit;
@@ -932,11 +933,17 @@ begin
               RePaint;
             end;
           end
-          else if (FFocusCol <> 0) and CanSelectCell(FFocusRow, 0) then
+          else if (FFocusCol <> 0) then
           begin
-            FFocusCol := 0;
-            FollowFocus;
-            RePaint;
+            { find first selectable column }
+            for c := 0 to FFocusCol-1 do
+              if CanSelectCell(FFocusRow, c) then
+              begin
+                FFocusCol := c;
+                FollowFocus;
+                RePaint;
+                break;
+              end;
           end;
           consumed := True;
         end;
@@ -952,11 +959,16 @@ begin
               RePaint;
             end;
           end
-          else if (FFocusCol <> (ColumnCount-1)) and CanSelectCell(FFocusRow, ColumnCount-1) then
+          else if (FFocusCol <> (ColumnCount-1)) then
           begin
-            FFocusCol := ColumnCount-1;
-            FollowFocus;
-            RePaint;
+            for c := ColumnCount-1 downto FFocusCol+1 do
+              if CanSelectCell(FFocusRow, c) then
+              begin
+                FFocusCol := c;
+                FollowFocus;
+                RePaint;
+                break;
+              end;
           end;
           consumed := True;
         end;
