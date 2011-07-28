@@ -9,7 +9,7 @@ uses
   fpg_tree, fpg_splitter, fpg_menu, fpg_button, fpg_listbox,
   fpg_label, fpg_edit, fpg_radiobutton, fpg_progressbar, fpg_imagelist,
   fpg_imgfmt_bmp, fpg_combobox,
-  HelpFile, RichTextView, HelpTopic;
+  HelpFile, RichTextView, HelpTopic, HelpBookmark;
 
 type
   // Used by Index ListBox. We can generate a custom Index if the help file
@@ -67,6 +67,7 @@ type
     btnFwd: TfpgButton;
     btnPrev: TfpgButton;
     btnNext: TfpgButton;
+    btnBookmark: TfpgButton;
     btnHelp: TfpgButton;
     btnQuit: TfpgButton;
     Bevel1: TfpgBevel;
@@ -99,6 +100,7 @@ type
     OpenAdditionalFile: boolean;
     Notes: TList; // Notes in current files.
     Bookmarks: TList;
+    BookmarksMenuItems: TList;
 
     procedure   Splitter1DoubleClicked(Sender: TObject; AButton: TMouseButton; AShift: TShiftState; const AMousePos: TPoint);
     procedure   btnTBNoteAddClick(Sender: TObject);
@@ -115,6 +117,7 @@ type
     procedure   btnFwdHistClick(Sender: TObject);
     procedure   btnPrevClick(Sender: TObject);
     procedure   btnNextClick(Sender: TObject);
+    procedure   btnBookmarkClick(Sender: TObject);
     procedure   RichViewClickLink(Sender: TRichTextView; Link: string);
     procedure   IndexSearchEditKeyPress(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
     procedure   MainFormShow(Sender: TObject);
@@ -127,6 +130,7 @@ type
     procedure   miConfigureClicked(Sender: TObject);
     procedure   miViewExpandAllClicked(Sender: TObject);
     procedure   miViewCollapseAllClicked(Sender: TObject);
+    procedure   miBookmarksMenuItemClicked(Sender: TObject);
     procedure   miHelpProdInfoClicked(Sender: TObject);
     procedure   miHelpAboutFPGui(Sender: TObject);
     procedure   miHelpCmdLineParams(Sender: TObject);
@@ -223,9 +227,11 @@ type
     procedure   SaveBookmarks;
     procedure   SaveBookmarksForFile(AHelpFile: THelpFile);
     procedure   AddBookmark;
+    procedure   ClearBookmarks;
     procedure   OnBookmarksChanged(Sender: TObject);
     procedure   BuildBookmarksMenu;
     procedure   UpdateBookmarksDisplay;
+    procedure   NavigateToBookmark(Bookmark: TBookmark);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -259,7 +265,6 @@ uses
   ,CanvasFontManager
   ,HelpNote
   ,RichTextDocumentUnit
-  ,HelpBookmark
   ;
 
 const
@@ -402,6 +407,11 @@ begin
     tvContents.SetFocus;
     DisplaySelectedContentsTopic;
   end;
+end;
+
+procedure TMainForm.btnBookmarkClick(Sender: TObject);
+begin
+  AddBookmark;
 end;
 
 procedure TMainForm.RichViewClickLink(Sender: TRichTextView; Link: string);
@@ -578,6 +588,18 @@ end;
 procedure TMainForm.miViewCollapseAllClicked(Sender: TObject);
 begin
   tvContents.FullCollapse;
+end;
+
+procedure TMainForm.miBookmarksMenuItemClicked(Sender: TObject);
+var
+  t: PtrInt;
+  MenuItem: TfpgMenuItem;
+  Bookmark: TBookmark;
+begin
+  MenuItem:= Sender as TfpgMenuItem;
+  t:= MenuItem.Tag;
+  Bookmark := TBookmark(Bookmarks[t]);
+  NavigateToBookmark( Bookmark );
 end;
 
 procedure TMainForm.miHelpProdInfoClicked(Sender: TObject);
@@ -1307,19 +1329,19 @@ begin
   SetStatus( rsDVDisplaying );
 
   // Add our open files in the global filelist
-  { TODO -ograeme : implement global filelist support }
-  //for FileIndex := 0 to NewFiles.Count - 1 do
-  //begin
-  //  HelpFile := NewFiles[ FileIndex ];
-  //  GlobalFilelist.AddFile( HelpFile.Filename, Frame.Handle );
-  //  // LoadNotes( HelpFile );
-  //  LoadBookmarks( HelpFile );
-  //end;
+  for FileIndex := 0 to NewFiles.Count-1 do
+  begin
+    HelpFile := THelpFile(NewFiles[FileIndex]);
+    { TODO -ograeme : implement global filelist support }
+//    GlobalFilelist.AddFile( HelpFile.Filename, Frame.Handle );
+    // LoadNotes( HelpFile );
+    LoadBookmarks( HelpFile );
+  end;
 
   UpdateNotesDisplay;
 
   { TODO -ograeme : bookmarks }
-  //BuildBookmarksMenu;
+  BuildBookmarksMenu;
   //UpdateBookmarksForm;
 
   ProgressBar.Position := 55;
@@ -1573,14 +1595,12 @@ begin
     tvContents.Invalidate;
   end;
 
+
   // First save notes. It's important we do this first
   // since we scan all notes each time to find the ones
   // belonging to this file.
-  for FileIndex := 0 to CurrentOpenFiles.Count - 1 do
-  begin
-    lHelpFile := THelpFile(CurrentOpenFiles[FileIndex]);
-    SaveNotesForFile( lHelpFile );
-  end;
+  SaveBookmarks;
+  SaveNotes;
 
   ClearIndexComponents;
   ClearAllWordSequences;
@@ -1593,6 +1613,7 @@ begin
   end;
 
   CurrentOpenFiles.Clear;
+  ClearBookmarks;
   ClearNotes;
 end;
 
@@ -2506,6 +2527,7 @@ begin
   DisplayedIndex := TStringList.Create;
   Notes := TList.Create;
   Bookmarks := TList.Create;
+  BookmarksMenuItems := TList.Create;
   CurrentHistoryIndex := -1;
   FHistorySelection := False;
   OpenAdditionalFile := False;
@@ -2556,7 +2578,9 @@ begin
   FFileOpenRecent := nil;   // it was a reference only
   miOpenRecentMenu.Free;
 //  DestroyListAndObjects(Files);
-  DestroyListAndObjects(Bookmarks);
+  ClearBookmarks;
+  Bookmarks.Free;
+  DestroyListAndObjects(BookmarksMenuItems);
   DestroyListAndObjects(Notes);
   DestroyListAndObjects(AllFilesWordSequences);
   DestroyListAndObjects(CurrentOpenFiles);
@@ -3087,108 +3111,6 @@ begin
     Style := bsLowered;
   end;
 
-  btnOpen := TfpgButton.Create(ToolBar);
-  with btnOpen do
-  begin
-    Name := 'btnOpen';
-    SetPosition(30, 1, 24, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Open a new help file';
-    ImageMargin := -1;
-    ImageName := 'stdimg.open';
-    ImageSpacing := 0;
-    TabOrder := 0;
-    OnClick := @miFileOpenClicked;
-    Focusable := False;
-  end;
-
-  btnBack := TfpgButton.Create(ToolBar);
-  with btnBack do
-  begin
-    Name := 'btnBack';
-    SetPosition(70, 1, 32, 24);
-    Text := '<';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Previous history item';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowleft';
-    ImageSpacing := 0;
-    TabOrder := 2;
-    Focusable := False;
-    OnClick := @btnBackHistClick;
-  end;
-
-  btnFwd := TfpgButton.Create(ToolBar);
-  with btnFwd do
-  begin
-    Name := 'btnFwd';
-    SetPosition(104, 1, 32, 24);
-    Text := '>';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Next history item';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowright';
-    ImageSpacing := 0;
-    TabOrder := 3;
-    Focusable := False;
-    OnClick := @btnFwdHistClick;
-  end;
-
-  btnPrev := TfpgButton.Create(ToolBar);
-  with btnPrev do
-  begin
-    Name := 'btnPrev';
-    SetPosition(138, 1, 32, 24);
-    Text := 'prev';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Previous Topic';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowup';
-    ImageSpacing := 0;
-    TabOrder := 4;
-    Focusable := False;
-    OnClick := @btnPrevClick;
-  end;
-
-  btnNext := TfpgButton.Create(ToolBar);
-  with btnNext do
-  begin
-    Name := 'btnNext';
-    SetPosition(172, 1, 32, 24);
-    Text := 'next';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Next Topic';
-    ImageMargin := -1;
-    ImageName := 'dv.arrowdown';
-    ImageSpacing := 0;
-    TabOrder := 5;
-    Focusable := False;
-    OnClick := @btnNextClick;
-  end;
-
-  btnHelp := TfpgButton.Create(ToolBar);
-  with btnHelp do
-  begin
-    Name := 'btnHelp';
-    SetPosition(256, 1, 24, 24);
-    Text := '';
-    Flat := True;
-    FontDesc := '#Label1';
-    Hint := 'Display Product Information';
-    ImageMargin := -1;
-    ImageName := 'stdimg.about';
-    ImageSpacing := 0;
-    TabOrder := 6;
-    Focusable := False;
-    OnClick := @miHelpProdInfoClicked;
-  end;
-
   btnQuit := TfpgButton.Create(ToolBar);
   with btnQuit do
   begin
@@ -3206,6 +3128,23 @@ begin
     Focusable := False;
   end;
 
+  btnOpen := TfpgButton.Create(ToolBar);
+  with btnOpen do
+  begin
+    Name := 'btnOpen';
+    SetPosition(30, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Open a new help file';
+    ImageMargin := -1;
+    ImageName := 'stdimg.open';
+    ImageSpacing := 0;
+    TabOrder := 0;
+    OnClick := @miFileOpenClicked;
+    Focusable := False;
+  end;
+
   Bevel1 := TfpgBevel.Create(ToolBar);
   with Bevel1 do
   begin
@@ -3216,38 +3155,79 @@ begin
     Style := bsLowered;
   end;
 
+  btnBack := TfpgButton.Create(ToolBar);
+  with btnBack do
+  begin
+    Name := 'btnBack';
+    SetPosition(70, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Previous history item';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowleft';
+    ImageSpacing := 0;
+    TabOrder := 2;
+    Focusable := False;
+    OnClick := @btnBackHistClick;
+  end;
+
+  btnFwd := TfpgButton.Create(ToolBar);
+  with btnFwd do
+  begin
+    Name := 'btnFwd';
+    SetPosition(104, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Next history item';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowright';
+    ImageSpacing := 0;
+    TabOrder := 3;
+    Focusable := False;
+    OnClick := @btnFwdHistClick;
+  end;
+
+  btnPrev := TfpgButton.Create(ToolBar);
+  with btnPrev do
+  begin
+    Name := 'btnPrev';
+    SetPosition(138, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Previous Topic';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowup';
+    ImageSpacing := 0;
+    TabOrder := 4;
+    Focusable := False;
+    OnClick := @btnPrevClick;
+  end;
+
+  btnNext := TfpgButton.Create(ToolBar);
+  with btnNext do
+  begin
+    Name := 'btnNext';
+    SetPosition(172, 1, 32, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Next Topic';
+    ImageMargin := -1;
+    ImageName := 'dv.arrowdown';
+    ImageSpacing := 0;
+    TabOrder := 5;
+    Focusable := False;
+    OnClick := @btnNextClick;
+  end;
+
   Bevel2 := TfpgBevel.Create(ToolBar);
   with Bevel2 do
   begin
     Name := 'Bevel2';
     SetPosition(210, 0, 6, 24);
-    Hint := '';
-    Shape := bsLeftLine;
-    Style := bsLowered;
-  end;
-
-  cbEncoding := TfpgComboBox.Create(ToolBar);
-  with cbEncoding do
-  begin
-    Name := 'cbEncoding';
-    SetPosition(524, 2, 124, 22);
-    Anchors := [anRight,anTop];
-    FontDesc := '#List';
-    Hint := '';
-    Items.Add('UTF-8');
-    Items.Add('CP437');
-    Items.Add('CP850');
-    Items.Add('IBM Graph (cp437)');
-    TabOrder := 10;
-    FocusItem := 0;
-    OnChange  := @cbEncodingChanged;
-  end;
-
-  Bevel3 := TfpgBevel.Create(ToolBar);
-  with Bevel3 do
-  begin
-    Name := 'Bevel3';
-    SetPosition(248, 0, 6, 24);
     Hint := '';
     Shape := bsLeftLine;
     Style := bsLowered;
@@ -3268,6 +3248,67 @@ begin
     TabOrder := 12;
     Focusable := False;
     OnClick := @btnTBNoteAddClick;
+  end;
+
+  btnBookmark := TfpgButton.Create(ToolBar);
+  with btnBookmark do
+  begin
+    Name := 'btnBookmark';
+    SetPosition(244, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Add a bookmark';
+    ImageMargin := -1;
+    ImageName := 'stdimg.bookmark';
+    ImageSpacing := 0;
+    TabOrder := 5;
+    Focusable := False;
+    OnClick := @btnBookmarkClick;
+  end;
+
+  Bevel3 := TfpgBevel.Create(ToolBar);
+  with Bevel3 do
+  begin
+    Name := 'Bevel3';
+    SetPosition(275, 0, 6, 24);
+    Hint := '';
+    Shape := bsLeftLine;
+    Style := bsLowered;
+  end;
+
+  btnHelp := TfpgButton.Create(ToolBar);
+  with btnHelp do
+  begin
+    Name := 'btnHelp';
+    SetPosition(283, 1, 24, 24);
+    Text := '';
+    Flat := True;
+    FontDesc := '#Label1';
+    Hint := 'Display Product Information';
+    ImageMargin := -1;
+    ImageName := 'stdimg.about';
+    ImageSpacing := 0;
+    TabOrder := 6;
+    Focusable := False;
+    OnClick := @miHelpProdInfoClicked;
+  end;
+
+  cbEncoding := TfpgComboBox.Create(ToolBar);
+  with cbEncoding do
+  begin
+    Name := 'cbEncoding';
+    SetPosition(524, 2, 124, 22);
+    Anchors := [anRight,anTop];
+    FontDesc := '#List';
+    Hint := '';
+    Items.Add('UTF-8');
+    Items.Add('CP437');
+    Items.Add('CP850');
+    Items.Add('IBM Graph (cp437)');
+    TabOrder := 10;
+    FocusItem := 0;
+    OnChange  := @cbEncodingChanged;
   end;
 
   {@VFD_BODY_END: MainForm}
@@ -3629,7 +3670,7 @@ var
 begin
   ProfileEvent( 'Load bookmarks for ' + AHelpFile.Filename );
 
-  BookmarksFileName := fpgChangeFileExt( AHelpFile.FileName, '.bmark' );
+  BookmarksFileName := fpgChangeFileExt(AHelpFile.FileName, BOOKMARK_FILE_EXTENSION);
 
   if not fpgFileExists( BookmarksFileName ) then
     Exit;
@@ -3642,7 +3683,7 @@ begin
       while not Eof( BookmarksFile ) do
       begin
         ReadLn( BookmarksFile, s );
-        if Trim( Uppercase( s ) ) = '[BOOKMARK]' then
+        if Trim( Uppercase( s ) ) = BOOKMARK_SECTION then
         begin
           Bookmark := TBookmark.Load( BookmarksFile, AHelpFile );
           Bookmarks.Add( Bookmark );
@@ -3679,7 +3720,7 @@ var
 begin
   ProfileEvent( 'Save bookmarks for ' + AHelpFile.Filename );
 
-  BookmarksFileName:= ChangeFileExt(AHelpFile.FileName, '.bmark');
+  BookmarksFileName:= fpgChangeFileExt(AHelpFile.FileName, BOOKMARK_FILE_EXTENSION);
 
   BookmarkCount := 0;
   for i := 0 to Bookmarks.Count - 1 do
@@ -3705,7 +3746,7 @@ begin
         Bookmark := TBookmark(Bookmarks[i]);
         if Bookmark.ContentsTopic.HelpFile = AHelpFile then
         begin
-          WriteLn( BookmarksFile, '[BOOKMARK]' );
+          WriteLn( BookmarksFile, BOOKMARK_SECTION );
           Bookmark.Save( BookmarksFile );
         end;
       end;
@@ -3731,12 +3772,24 @@ begin
   end
   else
   begin
+    { Not all topics appear in the Contents treeview, so we handle that here }
     Bookmark.ContentsTopic := nil;
-    Bookmark.Name := '(Untitled)';
+    Bookmark.Name := rsDVUntitled;
   end;
 
   Bookmarks.Add( Bookmark );
   OnBookmarksChanged( self );
+end;
+
+procedure TMainForm.ClearBookmarks;
+begin
+  ClearListAndObjects( Bookmarks );
+  BuildBookmarksMenu;
+//  if Assigned( BookmarksForm ) then
+//  begin
+//    UpdateBookmarksForm; // clear bookmarks for next show
+//    BookmarksForm.Hide;
+//  end;
 end;
 
 procedure TMainForm.OnBookmarksChanged(Sender: TObject);
@@ -3747,8 +3800,27 @@ begin
 end;
 
 procedure TMainForm.BuildBookmarksMenu;
+var
+  i: integer;
+  Bookmark: TBookmark;
+  MenuItem: TfpgMenuItem;
 begin
+  DestroyListObjects( BookmarksMenuItems );
+  BookmarksMenuItems.Clear;
 
+  if Bookmarks.Count > 0 then
+  begin
+    MenuItem := miBookmarks.AddMenuItem('-', '', nil);
+    BookmarksMenuItems.Add( MenuItem );
+  end;
+
+  for i:= 0 to Bookmarks.Count -1 do
+  begin
+    Bookmark := TBookmark(Bookmarks[i]);
+    MenuItem := miBookmarks.AddMenuItem(Bookmark.Name, '', @miBookmarksMenuItemClicked);
+    MenuItem.Tag:= i;
+    BookmarksMenuItems.Add( MenuItem );
+  end;
 end;
 
 procedure TMainForm.UpdateBookmarksDisplay;
@@ -3776,6 +3848,11 @@ Begin
   BookmarksListBox.Items.EndUpdate;
   UpdateControls;
 *)
+end;
+
+procedure TMainForm.NavigateToBookmark(Bookmark: TBookmark);
+begin
+  DisplayTopic(Bookmark.ContentsTopic);
 end;
 
 

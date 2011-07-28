@@ -34,6 +34,8 @@ const
   HELP_FILE_EXTENSION = ExtensionSeparator + 'hlp';
   INF_FILE_EXTENSION = ExtensionSeparator + 'inf';
   NOTES_FILE_EXTENSION = ExtensionSeparator + 'notes';
+  BOOKMARK_FILE_EXTENSION = ExtensionSeparator + 'bookmark';
+  BOOKMARK_SECTION = '[BOOKMARK]';
   cDocViewHelpFile = 'docview.inf';
 
 
@@ -52,6 +54,7 @@ resourcestring
   rsDVSearchSyntaxError = 'Error in search syntax: ';
   rsDVSearchFoundMsg = 'Found %d matches for ';
   rsDVCouldNotOpen = 'Could not open <%s>';
+  rsDVUntitled = '(Untitled)';
 
 const
   hcConfigGeneralTab               = 510;
