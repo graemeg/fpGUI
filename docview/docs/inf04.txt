@@ -1,5 +1,5 @@
   OS/2 2.0 Information Presentation Facility (IPF) Data Format - version 2
-  ----------------------------------------------------------------------- -
+  ------------------------------------------------------------------------
 
   *** introduction to version 1 ***
 
@@ -31,7 +31,7 @@
 
   The original document contained most of the real tricky stuff in the file
   format (especially the compression algorithm) so going on from there was
-  mainly a task of creating lots of help files using the IPFC and the
+  mainly a task of creating lots of help files using the IPFC and then
   decompiling them again to see what came out.
 
   I fixed a few minor bugs in the description of the header which was
@@ -61,13 +61,16 @@
 
   *** Version 4 ****
 
-  Further additions as found while writing NewView
+  Further additions was found while writing NewView
 
   -- Aaron Lawrence
 
+
+  *** Version 5 ****
+
   Some more info and corrections while writing fpGUI's DocView
 
-  -- Graeme Geldenhuys
+  -- Graeme Geldenhuys (graemeg@gmail.com)
 
 
   **** Types ****
