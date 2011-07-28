@@ -1265,14 +1265,15 @@ begin
   if lbSearchResults.Items.Count > 0 then
   begin
     lbSearchResults.FocusItem := 0;
+    SetStatus( Format(rsDVSearchFoundMsg, [lbSearchResults.Items.Count])
+        + StrInDoubleQuotes(SearchText));
   end
   else
   begin
     lbSearchResults.Items.Add( Format(rsDVNoMatchesFound, [SearchText]));
 //    RefreshWindows( Windows ); // update to remove old highlights
+    SetStatus('');
   end;
-  SetStatus( Format(rsDVSearchFoundMsg, [lbSearchResults.Items.Count])
-      + StrInDoubleQuotes(SearchText));
 
   ClearWaitCursor;
   DisplaySelectedSearchResultTopic;
