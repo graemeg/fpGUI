@@ -391,7 +391,7 @@ begin
                            + LineEnding + LineEnding
                            + 'fpGUI is an Object Pascal toolkit for cross-platform application development. '
                            + 'It provides single-source portability across Linux, MS Windows, *BSD '
-                           + 'and embedded operating systems like Embedded Linux and Windows CE.'
+                           + 'OpenSolaris and embedded operating systems like Embedded Linux and Windows CE.'
                            + LineEnding + LineEnding
                            + 'For more information, see the ' + fpGUIName + ' website at: '
                            + fpGUIWebsite;

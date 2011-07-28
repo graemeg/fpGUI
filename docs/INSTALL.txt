@@ -15,7 +15,7 @@ can be run from any location on your computer. I'll also assume your global
 fpc.cfg file has been setup correctly so the FPC compiler can find the RTL and
 FCL units.
 
-Under Linux run:
+Under Linux, *BSD, OpenSolaris and MacOSX run:
    cd <fpgui>/src
    build.sh
 

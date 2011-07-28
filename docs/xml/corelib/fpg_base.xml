@@ -6,8 +6,8 @@
 fpGUI uses the LGPL2 license with the static linking exception - the same as
 the Free Pascal Compiler's RTL.</p>
 <p>fpGUI is an Object Pascal toolkit for cross-platform application development.
-It provides single-source portability across Linux, MS Windows, *BSD and 
-embedded systems running Embedded Linux and Windows CE.</p>
+It provides single-source portability across Linux, MS Windows, *BSD, OpenSolaris and
+embedded / mobile systems running Embedded Linux and Windows CE.</p>
 <p>
 For more information, see the fpGUI Toolkit website at: <url href="http://fpgui.sourceforge.net" />
 </p>

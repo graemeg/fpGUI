@@ -47,6 +47,11 @@ required packages too.
 
 
 
+System requirements under *BSD, OpenSolaris
+===========================================
+Pretty much the same as under Linux.
+
+
 Regards,
  - Graeme Geldenhuys -
 
