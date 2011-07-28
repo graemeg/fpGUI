@@ -3366,7 +3366,7 @@ begin
     { Search for a string }
     edSearchText.Text := gCommandLineParams.GetParam('k');
     PageControl1.ActivePage := tsSearch;
-    btnSearch.Click;
+    DoSearch;
   end
   else if gCommandLineParams.IsParam('n') then
   begin
