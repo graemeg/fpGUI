@@ -16,6 +16,7 @@ type
     FContentsTopic: TTopic;
     FName: string;
   public
+    constructor Create;
     constructor Load(var F: TextFile; HelpFile: THelpFile);
     procedure   Save(var F: TextFile);
     property    Name: string read FName write FName;
@@ -26,6 +27,12 @@ type
 implementation
 
 { TBookmark }
+
+constructor TBookmark.Create;
+begin
+  inherited Create;
+  ContentsTopic:= nil;
+end;
 
 constructor TBookmark.Load(var F: TextFile; HelpFile: THelpFile);
 var
@@ -41,7 +48,8 @@ end;
 
 procedure TBookmark.Save(var F: TextFile);
 begin
-
+  writeLn( F, Name );
+  writeLn( F, IntToStr( ContentsTopic.Index ) );
 end;
 
 
