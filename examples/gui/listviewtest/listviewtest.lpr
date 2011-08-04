@@ -141,7 +141,7 @@ begin
   // invert the items for the 'selected' images
   for i := 0 to FImageList.Count-1 do
   begin
-    TmpImage := FImageList.Item[i].Image.ImageFromSource;
+    TmpImage := FImageList.Items[i].Image.ImageFromSource;
     TmpImage.Invert;
     FSelectedImageList.AddImage(TmpImage);
   end;

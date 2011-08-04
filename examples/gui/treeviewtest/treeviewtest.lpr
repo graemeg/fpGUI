@@ -213,8 +213,8 @@ begin
   if fpgFileExists('../../../images/menu_preferences_16.bmp') then
   begin
     FImagelist.AddItemFromFile(SetDirSeparators('../../../images/menu_preferences_16.bmp'), 1);
-    FImagelist.Item[1].Image.CreateMaskFromSample(0, 0);
-    FImagelist.Item[1].Image.UpdateImage;
+    FImagelist.Items[1].Image.CreateMaskFromSample(0, 0);
+    FImagelist.Items[1].Image.UpdateImage;
   end;
 end;
 
