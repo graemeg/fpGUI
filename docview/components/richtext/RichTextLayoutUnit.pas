@@ -293,6 +293,18 @@ Var
   DoWrap: boolean;
 
   // Nested procedure
+  procedure CreateDefaultCurrentLine;
+  begin
+    CurrentLine := TLayoutLine.Create;
+    CurrentLine.Style := Style;
+    CurrentLine.Height := 0;
+    CurrentLine.MaxDescender := 0;
+    CurrentLine.MaxTextHeight := 0;
+    CurrentLine.Width := 0;
+    CurrentLine.LinkIndex := CurrentLinkIndex;
+    CurrentLine.Wrapped := false;
+  end;
+
   Procedure DoLine( EndPoint: PChar; NextLine: PChar; EndX: longint );
   begin
     // check if the max font
@@ -306,15 +318,8 @@ Var
     Assert( CurrentLine.Height > 0 ); // we must have set the line height!
     AddLineStart( CurrentLine );
 
-    CurrentLine := TLayoutLine.Create;
+    CreateDefaultCurrentLine;
     CurrentLine.Text := NextLine;
-    CurrentLine.Style := Style;
-    CurrentLine.Height := 0;
-    CurrentLine.MaxDescender := 0;
-    CurrentLine.MaxTextHeight := 0;
-    CurrentLine.Width := 0;
-    CurrentLine.LinkIndex := CurrentLinkIndex;
-    CurrentLine.Wrapped := false;
 
     assert( CurrentLinkIndex >= -1 );
     assert( CurrentLinkIndex < FLinks.Count );
@@ -333,24 +338,19 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
   Style := GetDefaultStyle( FRichTextSettings );
   ApplyStyle( Style, FFontManager );
   CurrentLinkIndex := -1;
-  P := FText; // P is the current search position
-
-  CurrentLine := TLayoutLine.Create;
-  CurrentLine.Text := P;
-  CurrentLine.Style := Style;
-  CurrentLine.Height := 0;
-  CurrentLine.MaxDescender := 0;
-  CurrentLine.MaxTextHeight := 0;
-  CurrentLine.Width := 0;
-  CurrentLine.LinkIndex := -1;
-  CurrentLine.Wrapped := false;
-
   WordStartX := Style.LeftMargin;
   WordX := 0;
   WrapX := FLayoutWidth - FRichTextSettings.Margins.Right;
   LineWordsCompleted := 0;
   WordStarted := false;
   DisplayedCharsSinceFontChange := false;
+
+  P := FText; // P is the current search position
+
+  if FText = '' then
+    exit;
+  CreateDefaultCurrentLine;
+  CurrentLine.Text := P;
 
   repeat
     CurrentElement := ExtractNextTextElement( P, NextP );
