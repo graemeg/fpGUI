@@ -223,7 +223,7 @@ ProfileEvent('DEBUG:  DrawRichTextLine >>>');
           end;
           if Layout.IsValidBitmapIndex( BitmapIndex ) then
           begin
-            Bitmap := Layout.Images.Item[BitmapIndex].Image;
+            Bitmap := Layout.Images.Items[BitmapIndex].Image;
 
             BitmapRect.Left := X;
             BitmapRect.Top := Start.Y;

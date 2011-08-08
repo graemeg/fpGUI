@@ -395,7 +395,7 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
         Bitmap := nil;
         if IsValidBitmapIndex( BitmapIndex ) then
         begin
-          Bitmap := FImages.Item[BitmapIndex].Image;
+          Bitmap := FImages.Items[BitmapIndex].Image;
           CurrentCharWidth := Trunc(Bitmap.Width * FHorizontalImageScale);
           WordStarted := true;
           BitmapHeight := Trunc(Bitmap.Height * FVerticalImageScale);
@@ -953,7 +953,7 @@ begin
       end;
       if IsValidBitmapIndex( BitmapIndex ) then
       begin
-        Bitmap := FImages.Item[BitmapIndex].Image;
+        Bitmap := FImages.Items[BitmapIndex].Image;
         Result := Trunc(Bitmap.Width * FHorizontalImageScale);
       end;
     end;
