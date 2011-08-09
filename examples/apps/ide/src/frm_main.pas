@@ -629,19 +629,6 @@ begin
   WindowTitle := Format(cTitle, [GProject.ProjectName]);
 end;
 
-const
-  cReservedWords: array[1..50] of string =
-    ('begin', 'end', 'program', 'procedure', 'var',
-     'uses', 'type', 'const', 'if', 'then',
-     'for', 'do', 'unit', 'interface', 'implementation',
-     'initialization', 'finalization', 'with', 'case', 'private',
-     'protected', 'public', 'published', 'override', 'virtual',
-     'class', 'record', 'function', 'property', 'to',
-     'else', 'finally', 'while', 'except', 'try',
-     'constructor', 'destructor', 'read', 'write', 'out',
-     'default', 'not', 'and', 'in', 'raise',
-     'of', 'resourcestring', 'operator', 'inherited', 'array');
-
 procedure TMainForm.TextEditDrawLine(Sender: TObject; ALineText: TfpgString;
   ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
   var AllowSelfDraw: Boolean);
@@ -654,20 +641,6 @@ var
   r: TfpgRect;    // string rectangle to draw in
   edt: TfpgTextEdit;
   lMatchPos, lOffset: integer; // user for regex
-
-  procedure TestFurther(var AIndex: integer);
-  begin
-    if AIndex = 0 then
-    begin
-      AIndex := UTF8Pos(cReservedWords[w], s);
-      if (AIndex > 0) then
-      begin
-        if (AIndex+iLength-1 <> Length(s)) and not (s[AIndex+iLength] in [';', '.', '(', #10, #13]) then
-          AIndex := 0;
-      end;
-    end;
-  end;
-
 begin
 //  writeln('syntax highlight line: ', ALineIndex);
   edt := TfpgTextEdit(Sender);
