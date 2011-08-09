@@ -57,6 +57,7 @@ type
     miRecentProjects: TfpgMenuItem;
     FRecentFiles: TfpgMRU;
     FRegex: TRegExpr;
+    FKeywordFont: TfpgFont;
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure   btnQuitClicked(Sender: TObject);
@@ -633,7 +634,7 @@ procedure TMainForm.TextEditDrawLine(Sender: TObject; ALineText: TfpgString;
   ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
   var AllowSelfDraw: Boolean);
 var
-  oldfont, newfont: TfpgFont;
+  oldfont: TfpgFont;
   s: TfpgString;  // copy of ALineText we work with
   i, j, c: integer;  // i = position of reserved word; c = last character pos
   iLength: integer; // length of reserved word
@@ -657,8 +658,9 @@ begin
   lOffset := 0;
 
   { syntax highlighting for: keywords }
-  newfont := fpgGetFont(edt.FontDesc + ':bold');
-  ACanvas.Font := newfont;
+  if not Assigned(FKeywordFont) then
+    FKeywordFont := fpgGetFont(edt.FontDesc + ':bold');
+  ACanvas.Font := FKeywordFont;
   FRegex.Expression := cKeywords;
   FRegex.ModifierI := True;
   if FRegex.Exec(ALineText) then
@@ -710,7 +712,6 @@ begin
   end;
 
   ACanvas.Font := oldfont;
-  newfont.Free;
 //  writeln('------');
 end;
 
@@ -760,6 +761,7 @@ end;
 destructor TMainForm.Destroy;
 begin
   FRegex.Free;
+  FKeywordFont.Free;
   inherited Destroy;
 end;
 
