@@ -141,10 +141,12 @@ const
   cProjectFiles = '*.project';
 
   { nicely working so far }
-  cKeywords = '\s*(begin|end|read|write|try|finally|except|uses|interface'
-    + '|implementation|procedure|function|constructor|destructor|property'
-    + '|private|public|published|type|class|unit|program|if|then|for|downto|to'
-    + '|do|else|while|and|inherited|const|var|initialization|finalization)[^0-9a-zA-Z:=;\)\( ]*';
+  cKeywords = '\b(begin|end|read|write|with|try|finally|except|uses|interface'
+    + '|implementation|procedure|function|constructor|destructor|property|operator'
+    + '|private|protected|public|published|type|virtual|abstract|overload'
+    + '|override|class|unit|program|set|of|if|then|for|downto|to|as|div|mod'
+    + '|do|else|while|and|inherited|const|var|initialization|finalization'
+    + '|on|or|in|raise|not|case|record|array|out|resourcestring|default)\b'; //[^0-9a-zA-Z:=;\)\( ]*';
 
   cComments1 = '(\s*\/\/.*$)|(\s*\{.*\})';
 
