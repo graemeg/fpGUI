@@ -146,7 +146,7 @@ const
     + '|private|public|published|type|class|unit|program|if|then|for|downto|to'
     + '|do|else|while|and|inherited|const|var|initialization|finalization)[^0-9a-zA-Z:=;\)\( ]*';
 
-  cComments1 = '\s*\/\/.*$';
+  cComments1 = '(\s*\/\/.*$)|(\s*\{.*\})';
 
 {@VFD_NEWFORM_IMPL}
 
