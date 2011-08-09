@@ -660,19 +660,19 @@ begin
   newfont := fpgGetFont(edt.FontDesc + ':bold');
   ACanvas.Font := newfont;
   FRegex.Expression := cKeywords;
+  FRegex.ModifierI := True;
   if FRegex.Exec(ALineText) then
   begin
-    for i := 1 to FRegex.SubExprMatchCount do
-    begin
-      lMatchPos := FRegex.MatchPos[i];
-      lOffset := FRegex.MatchLen[i];
-      s := FRegex.Match[i];
-      j := Length(s);
-      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-          (edt.FontWidth * j), ATextRect.Height);
-      ACanvas.FillRectangle(r);
-      ACanvas.DrawText(r, s);
-    end;
+    repeat { process results }
+        lMatchPos := FRegex.MatchPos[1];
+        lOffset := FRegex.MatchLen[1];
+        s := FRegex.Match[1];
+        j := Length(s);
+        r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+            (edt.FontWidth * j), ATextRect.Height);
+        ACanvas.FillRectangle(r);
+        ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
   end;
 
   { syntax highlighting for: comments }
