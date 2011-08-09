@@ -285,9 +285,15 @@ begin
 end;
 
 procedure TMainForm.miConfigureIDE(Sender: TObject);
+var
+  i: integer;
 begin
   DisplayConfigureIDE;
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
+  FKeywordFont.Free;
+  FKeywordFont := nil;
+  for i := 0 to pcEditor.PageCount-1 do
+    TfpgTextEdit(pcEditor.Pages[i].Components[0]).FontDesc := gINI.ReadString(cEditor, 'Font', '#Edit2');
 end;
 
 procedure TMainForm.miViewDebug(Sender: TObject);
