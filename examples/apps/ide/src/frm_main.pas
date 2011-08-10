@@ -142,14 +142,23 @@ const
   cProjectFiles = '*.project';
 
   { nicely working so far }
-  cKeywords = '\b(begin|end|read|write|with|try|finally|except|uses|interface'
+  cKeywords1 = '\b(begin|end|read|write|with|try|finally|except|uses|interface'
     + '|implementation|procedure|function|constructor|destructor|property|operator'
     + '|private|protected|public|published|type|virtual|abstract|overload'
-    + '|override|class|unit|program|set|of|if|then|for|downto|to|as|div|mod'
+    + '|override|class|unit|program|library|set|of|if|then|for|downto|to|as|div|mod|shr|shl'
     + '|do|else|while|and|inherited|const|var|initialization|finalization'
-    + '|on|or|in|raise|not|case|record|array|out|resourcestring|default)\b'; //[^0-9a-zA-Z:=;\)\( ]*';
+    + '|on|or|in|raise|not|case|record|array|out|resourcestring|default'
+    + '|xor|repeat|until|constref|stdcall|cdecl|external)\b';
 
-  cComments1 = '(\s*\/\/.*$)|(\s*\{.*\})';
+  cComments1 = '(\s*\/\/.*$)|(\{[^\{]*\})';
+  cComments2 = '\{[^\{]*\}';
+
+  cDefines1 = '\{\$[^\{]*\}';
+
+  cString1 = '''.*''';
+
+  cDecimal = '\b(([0-9]+)|([0-9]+\.[0-9]+([Ee][-]?[0-9]+)?))\b';
+  cHexidecimal = '\b\$[0-9a-fA-F]*\b';
 
 {@VFD_NEWFORM_IMPL}
 
@@ -667,7 +676,7 @@ begin
   if not Assigned(FKeywordFont) then
     FKeywordFont := fpgGetFont(edt.FontDesc + ':bold');
   ACanvas.Font := FKeywordFont;
-  FRegex.Expression := cKeywords;
+  FRegex.Expression := cKeywords1;
   FRegex.ModifierI := True;
   if FRegex.Exec(ALineText) then
   begin
@@ -683,38 +692,89 @@ begin
     until not FRegex.ExecNext;
   end;
 
-  { syntax highlighting for: comments }
   ACanvas.Font := oldfont;
-  ACanvas.TextColor := clDarkCyan;
-  FRegex.Expression := cComments1;
+
+  { syntax highlighting for: cDecimal }
+  ACanvas.TextColor := clNavy;
+  FRegex.Expression := cDecimal;
   if FRegex.Exec(ALineText) then
   begin
-    if FRegex.SubExprMatchCount = 0 then
-    begin
-      i := 0;
-      lMatchPos := FRegex.MatchPos[i];
-      lOffset := FRegex.MatchLen[i];
-      s := FRegex.Match[i];
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
       j := Length(s);
       r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
           (edt.FontWidth * j), ATextRect.Height);
       ACanvas.FillRectangle(r);
       ACanvas.DrawText(r, s);
-    end
-    else
-    begin
-      for i := 1 to FRegex.SubExprMatchCount do
-      begin
-        lMatchPos := FRegex.MatchPos[i];
-        lOffset := FRegex.MatchLen[i];
-        s := FRegex.Match[i];
-        j := Length(s);
-        r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
-            (edt.FontWidth * j), ATextRect.Height);
-        ACanvas.FillRectangle(r);
-        ACanvas.DrawText(r, s);
-      end;
-    end;
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: comments2 }
+  ACanvas.TextColor := clDarkCyan;
+  FRegex.Expression := cComments2;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cDefines1 }
+  ACanvas.TextColor := clRed;
+  FRegex.Expression := cDefines1;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: cString1 }
+  ACanvas.TextColor := clOlive;
+  FRegex.Expression := cString1;
+  if FRegex.Exec(ALineText) then
+  begin
+    repeat
+      lMatchPos := FRegex.MatchPos[0];
+      lOffset := FRegex.MatchLen[0];
+      s := FRegex.Match[0];
+      j := Length(s);
+      r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+          (edt.FontWidth * j), ATextRect.Height);
+      ACanvas.FillRectangle(r);
+      ACanvas.DrawText(r, s);
+    until not FRegex.ExecNext;
+  end;
+
+  { syntax highlighting for: comments1 }
+  ACanvas.TextColor := clDarkCyan;
+  FRegex.Expression := cComments1;
+  if FRegex.Exec(ALineText) then
+  begin
+    lMatchPos := FRegex.MatchPos[1];
+    lOffset := FRegex.MatchLen[1];
+    s := FRegex.Match[1];
+    j := Length(s);
+    r.SetRect(ATextRect.Left + (edt.FontWidth * (lMatchPos-1)), ATextRect.Top,
+        (edt.FontWidth * j), ATextRect.Height);
+    ACanvas.FillRectangle(r);
+    ACanvas.DrawText(r, s);
   end;
 
   ACanvas.Font := oldfont;
@@ -738,7 +798,6 @@ begin
   // apply editor settings
   pcEditor.TabPosition := TfpgTabPosition(gINI.ReadInteger(cEditor, 'TabPosition', 0));
   FRegex := TRegExpr.Create;
-  FRegex.Expression := cKeywords;
 
   TextEditor.Clear;
   TextEditor.SetFocus;
