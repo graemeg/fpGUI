@@ -260,7 +260,7 @@ type
     FFontRes: TfpgFontResourceBase;
     function    GetIsFixedWidth: boolean; virtual;
   public
-    function    TextWidth(const txt: string): integer;
+    function    TextWidth(const txt: TfpgString): integer;
     function    Ascent: integer;
     function    Descent: integer;
     function    Height: integer;
@@ -1806,7 +1806,7 @@ begin
     Result := False;
 end;
 
-function TfpgFontBase.TextWidth(const txt: string): integer;
+function TfpgFontBase.TextWidth(const txt: TfpgString): integer;
 begin
   if Length(txt) = 0 then
     Result := 0
