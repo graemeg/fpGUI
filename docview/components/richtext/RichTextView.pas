@@ -717,7 +717,7 @@ ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
     CornerRect.Top := Height - 2 - FScrollBarWidth;
     CornerRect.Width := FScrollBarWidth;
     CornerRect.Height := FScrollBarWidth;
-    Canvas.Color := clButtonFace;
+    Canvas.Color := clWindowBackground;
     Canvas.FillRectangle(CornerRect);
   end;
 ProfileEvent('DEBUG:  TRichTextView.HandlePaint <<<');
