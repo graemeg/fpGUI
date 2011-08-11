@@ -269,7 +269,7 @@ Var
   CurrentLine: TLayoutLine;
   CurrentLinkIndex: longint;
   WrapX: longint; // X to wrap at
-  WordX: longint; // width of word so far
+  WordX: longint; // width of the current word so far
   P: PChar;
   NextP: PChar;
   NextP2: PChar;
@@ -362,20 +362,16 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
       teLineBreak:
       begin
         DoLine( P, NextP, WordStartX + WordX );
-
         // remember start of line
         WordStart := NextP;
         WordX := 0;
-
         P := NextP;
-
         continue;
       end;
 
       teTextEnd:
       begin
         DoLine( P, NextP, WordStartX + WordX );
-
         // end of text, done
         break;
       end;
@@ -396,7 +392,6 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
           WordStarted := true;
           BitmapHeight := Trunc(Bitmap.Height * FVerticalImageScale);
         end;
-
       end;
 
       teText:
@@ -457,7 +452,6 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
               // at least not for IPF  :)
 
             end;  { teSetLeftMargin }
-
           else
           begin
             // before processing the tag see if font height needs updating
@@ -480,11 +474,10 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
             P := NextP;
             continue; // continue loop
           end;
-        end;
+        end;  { case CurrentElement.Tag.TagType of... }
+      end  { teStyle }
 
-      end
-
-    end;
+    end;  { case CurrentElement.ElementType of... }
 
     if OnBreak then
     begin

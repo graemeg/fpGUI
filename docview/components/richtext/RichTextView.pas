@@ -673,16 +673,13 @@ begin
   ProfileEvent('TRichTextView.HandlePaint >>>');
   Canvas.ClearClipRect;
   DrawBorder;
-ProfileEvent('DEBUG:  TRichTextView.HandlePaint   1');
   DrawRect := GetDrawRect;
   Canvas.Color := BackgroundColor;
   Canvas.FillRectangle(DrawRect);
 
-ProfileEvent('DEBUG:  TRichTextView.HandlePaint   2');
   TextRect := GetTextAreaRect;
   Canvas.SetClipRect(TextRect);
 
-ProfileEvent('DEBUG:  TRichTextView.HandlePaint   3');
   if InDesigner then
   begin
     Canvas.TextColor := clInactiveWgFrame;
@@ -701,13 +698,11 @@ ProfileEvent('DEBUG:  TRichTextView.HandlePaint   3');
   if Length(FText) = 0 then
     exit;   // no need to paint anything further.
 
-ProfileEvent('DEBUG:  TRichTextView.HandlePaint   4');
   Assert(FLayout <> nil, 'FLayout may not be nil at this point!');
   if not Debug then
     Draw( 0, FLayout.FNumLines )
   else
     Canvas.DrawText(8, 8, GetTextAreaWidth, GetTextAreaHeight{1000}, FText, [txtLeft, txtTop, txtWrap]);
-ProfileEvent('DEBUG:  TRichTextView.HandlePaint   5');
   Canvas.ClearClipRect;
 
   if FHScrollbar.Visible and FVScrollbar.Visible then
