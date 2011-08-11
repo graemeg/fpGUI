@@ -45,7 +45,7 @@ type
     function    AverageCharWidth: longint;
     function    CharDescender: longint;
     function    CharHeight: longint;
-    function    CharWidth( const C: Char ): longint;  // Retrieve the width of the given char, in the current font
+    function    CharWidth( const C: TfpgChar ): longint;  // Retrieve the width of the given char, in the current font
     function    IsFixed: boolean;
     function    MaximumCharWidth: longint;
     procedure   DrawString(var Point: TPoint; const Length: longint; const S: PChar);
@@ -272,7 +272,7 @@ begin
   FCanvas.Font := fpgGetFont(AFontDesc);
 end;
 
-function TCanvasFontManager.CharWidth( const C: Char ): longint;
+function TCanvasFontManager.CharWidth( const C: TfpgChar ): longint;
 begin
   Result := FCanvas.Font.TextWidth(C);
 end;

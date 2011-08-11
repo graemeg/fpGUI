@@ -49,7 +49,7 @@ type
 
   TTextElement = record
     ElementType: TTextElementType;
-    Character: Char;
+    Character: TfpgChar;  // so we can support UTF-8 character
     Tag: TTag;
   end;
 
@@ -153,6 +153,7 @@ Implementation
 uses
   SysUtils
   ,ACLStringUtility
+  ,fpg_stringutils
   ;
 
 const
@@ -347,20 +348,29 @@ end;
 
 function ExtractNextTextElement( TextPointer: PChar; Var NextElement: PChar ): TTextElement;
 var
-  TheChar: Char;
-  NextChar: char;
+  TheChar: TfpgChar;
+  NextChar: TfpgChar;
+  CharLength: integer;
+  s1, s2: TfpgString;
+  c: Char;
 begin
   with Result do
   begin
-    TheChar := TextPointer^;
+    CharLength := UTF8CharacterLength(TextPointer);
+    s1 := TextPointer;
+    TheChar := UTF8Copy(s1, 1, 1);
+    c := TextPointer^;
     Character := TheChar;
-    inc( TextPointer );
+    inc( TextPointer, CharLength );
 
-    case TheChar of
-      ' ': // ---- Space (word break) found ----
-        ElementType := teWordBreak;
-
-      #10, #13: // ---- End of line found ----
+    if (TheChar = ' ') and (c <> #0) then
+    begin
+      // ---- Space (word break) found ----
+      ElementType := teWordBreak;
+    end
+    else if (TheChar = #10) or (TheChar = #13) then
+    begin
+      // ---- End of line found ----
       begin
         ElementType := teLineBreak;
         if TheChar = #13 then
@@ -371,41 +381,46 @@ begin
             inc( TextPointer );
         end;
       end;
-
-      #0: // ---- end of text found ----
-        ElementType := teTextEnd;
-
-      '<': // ---- tag found? ----
+    end
+    else if (TheChar = '') and (c = #0) then
+    begin
+      // ---- end of text found ----
+      ElementType := teTextEnd;
+    end
+    else if TheChar = '<' then
+    begin
+      // ---- tag found? ----
+      CharLength := UTF8CharacterLength(TextPointer);
+      s2 := TextPointer;
+      NextChar := UTF8Copy(s2, 1, 1);
+      if NextChar = '<' then
       begin
-        NextChar := TextPointer^;
-        if NextChar = '<' then
-        begin
-          // no. just a literal <
-          ElementType := teText;
-          inc( TextPointer );
-        end
+        // no, just a literal <
+        ElementType := teText;
+        inc( TextPointer );
+      end
+      else
+      begin
+        Tag := ExtractTag( TextPointer );
+        if Tag.TagType = ttImage then
+          ElementType := teImage
         else
-        begin
-          Tag := ExtractTag( TextPointer );
-          if Tag.TagType = ttImage then
-            ElementType := teImage
-          else
-            ElementType := teStyle;
-        end;
-
+          ElementType := teStyle;
       end;
-
-      '>': // check - should be double
+    end
+    else if TheChar = '>' then
+    begin
+      // check - should be double
       begin
         ElementType := teText;
         NextChar := TextPointer^;
         if NextChar = '>' then
           inc( TextPointer );
       end;
+    end
+    else
+      ElementType := teText;
 
-      else
-        ElementType := teText;
-    end;
   end; // with
   NextElement := TextPointer;
 end;
@@ -731,6 +746,7 @@ begin
   Result := true;
 end;
 
+// TODO: Rewrite this to work with fpGUI and AnsiString/TfpgString
 function CopyPlainTextToBuffer( StartP: PChar;
                                 EndP: PChar;
                                 Buffer: PChar;
@@ -742,6 +758,7 @@ var
   NextP: PChar;
   Element: TTextElement;
 begin
+ (*
   P := StartP;
   Q := Buffer;
   EndQ := Buffer + BufferLength;
@@ -780,6 +797,7 @@ begin
     P := NextP;
   end;
   result := PCharDiff( Q, Buffer );
+  *)
 end;
 
 Initialization

@@ -2350,19 +2350,19 @@ begin
     EndP := FText + FSelectionStart;
   end;
 
-  Result := CopyPlainTextToBuffer( P,
-                                   EndP,
-                                   Buffer,
-                                   BufferLength );
+  //Result := CopyPlainTextToBuffer( P,
+  //                                 EndP,
+  //                                 Buffer,
+  //                                 BufferLength );
 end;
 
 function TRichTextView.CopyTextToBuffer( Buffer: PChar;
                                          BufferLength: longint ): longint;
 begin
-  Result := CopyPlainTextToBuffer( FText,
-                                   FText + strlen( FText ),
-                                   Buffer,
-                                   BufferLength );
+  //Result := CopyPlainTextToBuffer( FText,
+  //                                 FText + strlen( FText ),
+  //                                 Buffer,
+  //                                 BufferLength );
 end;
 
 Function TRichTextView.SelectionLength: longint;
