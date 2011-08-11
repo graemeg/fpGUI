@@ -1279,24 +1279,10 @@ begin
   // Physical horizontal scroll setup
   FHScrollbar.Visible := FNeedHScroll;
   FHScrollbar.Enabled := FNeedHScroll;
-  FHScrollbar.Left := 2;
-  FHScrollbar.Top := Height - 2 - FScrollBarWidth;
-  FHScrollbar.Height := FScrollbarWidth;
-  if FNeedVScroll then
-    FHScrollbar.Width := Width - 4 - FScrollBarWidth
-  else
-    FHScrollbar.Width := Width - 4;
 
   // Physical vertical scroll setup
   FVScrollbar.Visible := FNeedVScroll;
   FVScrollbar.Enabled := FNeedVScroll;
-  FVScrollbar.Left := Width - 2 - FScrollbarWidth;
-  FVScrollbar.Top := 2;
-  FVScrollbar.Width := FScrollbarWidth;
-  if FNeedHScroll then
-    FVScrollbar.Height := Height - 4 - FScrollbarWidth
-  else
-    FVScrollbar.Height := Height - 4;
 
   // Initialise scroll
   FYScroll := FVScrollBar.Position;
@@ -1306,6 +1292,8 @@ begin
 
   FVScrollbar.OnScroll := @FVScrollbarScroll;
   FHScrollbar.OnScroll := @FHScrollbarScroll;
+
+  UpdateScrollBarCoords;
 End;
 
 Procedure TRichTextView.SetupCursor;
