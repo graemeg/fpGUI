@@ -1014,12 +1014,12 @@ begin
   if FHScrollBar.Visible then
     Dec(VHeight, FScrollbarWidth);
 
-  FHScrollBar.Top     := Height -FHScrollBar.Height - 2;
+  FHScrollBar.Top     := Height - 2 - FScrollbarWidth;
   FHScrollBar.Left    := 2;
   FHScrollBar.Width   := HWidth;
 
   FVScrollBar.Top     := 2;
-  FVScrollBar.Left    := Width - FVScrollBar.Width - 2;
+  FVScrollBar.Left    := Width - 2 - FScrollbarWidth;
   FVScrollBar.Height  := VHeight;
 
   FVScrollBar.UpdateWindowPosition;
