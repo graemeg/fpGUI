@@ -977,7 +977,6 @@ begin
     exit;
 
   RemoveCursor;
-  UpdateScrollbarCoords;
 
   if FVerticalPositionInitialised then
   begin
@@ -998,6 +997,7 @@ begin
   FLastYScroll := FYScroll;
   FVerticalPositionInitialised := true;
 
+  UpdateScrollbarCoords;
   SetupCursor;
 end;
 
