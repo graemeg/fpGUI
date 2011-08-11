@@ -1115,7 +1115,7 @@ begin
     begin
       CheckForAutoURL( AText, State );
       // supposed to turn word wrap on, default font
-      OutputString := '<align left><wrap yes>'; // I guess...
+      OutputString := {'<align left>}'<wrap yes>'; // I guess...
       State.Alignment := itaLeft;
     end;
 
