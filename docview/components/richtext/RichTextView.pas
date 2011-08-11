@@ -1235,14 +1235,29 @@ begin
   AvailableWidth := GetTextAreaWidth;
   MaxDisplayWidth := FLayout.Width;
 
+  { This might seem redundant, but the HScrollBar and VScrollBar are a bit
+    of "chicken vs egg" situation. This checked and the same check done a bit
+    later just makes the scrollbar calculation a bit more accurate }
+  AvailableHeight := GetTextAreaHeight; // this includes borders and scrollbars and small margin
+  if FLayout.Height > AvailableHeight then
+    FNeedVScroll := true;
+
   // Horizontal scroll setup
-  if MaxDisplayWidth > AvailableWidth then
-    FNeedHScroll := true;
+  if FNeedVScroll then
+  begin
+    if MaxDisplayWidth > (AvailableWidth - FScrollbarWidth) then
+      FNeedHScroll := true;
+  end
+  else
+  begin
+    if MaxDisplayWidth > AvailableWidth then
+      FNeedHScroll := true;
+  end;
 
 //  FHScrollbar.SliderSize := AvailableWidth div 2;
   FHScrollbar.Min := 0;
   if FNeedHScroll then
-    FHScrollbar.Max := (MaxDisplayWidth - AvailableWidth) + FScrollbarWidth
+    FHScrollbar.Max := (MaxDisplayWidth - AvailableWidth) + FScrollbarWidth + FRichTextSettings.Margins.Right
   else
   begin
     FHScrollBar.Position := 0;
