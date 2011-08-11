@@ -187,22 +187,18 @@ ProfileEvent('DEBUG:  TRichTextLayout.Create >>>>');
   FRichTextSettings := RichTextSettings;
   FImages := Images;
   FText := Text;
-ProfileEvent('DEBUG:  TRichTextLayout.Create   1 of 4');
   FLines := TLayoutLineList.Create;
   FNumLines := 0;
   FLinks := TStringList.Create;
   FLinks.Duplicates := dupIgnore;
   FFontManager := FontManager;
   FLayoutWidth := AWidth;
-ProfileEvent('DEBUG:  TRichTextLayout.Create   2');
   FHorizontalImageScale := 1;
   FVerticalImageScale := 1;
   //FHorizontalImageScale :=   FFontManager.Canvas.HorizontalResolution
   //                         / Screen.Canvas.HorizontalResolution;
   //FVerticalImageScale   :=   FFontManager.Canvas.VerticalResolution
   //                         / Screen.Canvas.VerticalResolution;
-
-ProfileEvent('DEBUG:  TRichTextLayout.Create   3');
   Layout;
 ProfileEvent('DEBUG:  TRichTextLayout.Create <<<<');
 end;
