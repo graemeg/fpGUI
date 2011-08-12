@@ -5,9 +5,9 @@
     <AddToProjectUsesSection Value="False"/>
     <Author Value="Graeme Geldenhuys"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <SearchPaths>
-        <OtherUnitFiles Value="../../src/"/>
+        <OtherUnitFiles Value="../../src"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -16,11 +16,10 @@
           <CStyleOperator Value="False"/>
           <AllowLabel Value="False"/>
           <CPPInline Value="False"/>
+          <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
       <CodeGeneration>
-        <TargetCPU Value="i386"/>
-        <TargetOS Value="Linux"/>
         <Optimizations>
           <OptimizationLevel Value="0"/>
         </Optimizations>
