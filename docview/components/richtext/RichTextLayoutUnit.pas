@@ -862,7 +862,11 @@ begin
   end;
 
   LineIndex := FNumLines - 1;
-  Remainder := FLines[LineIndex].Height;
+  { check for a valid range }
+  if (LineIndex < 0) or (LineIndex > FLines.Count-1) then
+    Remainder := 0
+  else
+    Remainder := FLines[LineIndex].Height;
 
   Result := tpBelowText;
 end;
