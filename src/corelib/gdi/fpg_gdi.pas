@@ -300,6 +300,12 @@ type
   end;
 
 
+  { TfpgGDITimer }
+
+  TfpgGDITimer = class(TfpgBaseTimer)
+  end;
+
+
 implementation
 
 uses
@@ -333,13 +339,14 @@ const
 
 // From Lazarus wince\winext.pas:
 function GET_X_LPARAM(lp : Windows.LParam) : longint;
-  begin
-    result:=smallint(LOWORD(lp));
-  end;
+begin
+  result:=smallint(LOWORD(lp));
+end;
+
 function GET_Y_LPARAM(lp : Windows.LParam) : longint;
-  begin
-    result:=smallint(HIWORD(lp));
-  end;
+begin
+  result:=smallint(HIWORD(lp));
+end;
 
 // *** copied from Lazarus
 function MulDiv(nNumber, nNumerator, nDenominator: Integer): Integer;

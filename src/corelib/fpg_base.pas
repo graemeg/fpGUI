@@ -684,6 +684,7 @@ type
     property    Count: integer read GetCount;
   end;
 
+
   TfpgDragBase = class(TObject)
   protected
     FDragging: Boolean;
@@ -693,6 +694,32 @@ type
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; virtual; abstract;
   end;
+  
+  
+  { TfpgBaseTimer }
+
+  TfpgBaseTimer = class(TObject)
+  private
+    FNextAlarm: TDateTime;
+    FInterval: integer;
+    FOnTimer: TNotifyEvent;
+    procedure   SetInterval(const AValue: integer);
+  protected
+    FEnabled: boolean;
+    procedure   SetEnabled(const AValue: boolean); virtual;
+  public
+    constructor Create(AInterval: integer); virtual;
+    destructor  Destroy; override;
+    procedure   CheckAlarm(ACurrentTime: TDateTime);
+    procedure   Reset;
+    procedure   Pause(ASeconds: integer);
+    property    Enabled: boolean read FEnabled write SetEnabled;
+    property    NextAlarm: TDateTime read FNextAlarm;
+    { Interval is in milliseconds. }
+    property    Interval: integer read FInterval write SetInterval;
+    property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
+  end;
+
 
 
 
@@ -729,7 +756,8 @@ uses
   fpg_constants,
   fpg_form,  // needed for fpgApplication.CreateForms()
   typinfo,
-  process;
+  process,
+  dateutils;
 
 
 const
@@ -3015,6 +3043,70 @@ begin
   FMimeData.Free;
   inherited Destroy;
 end;
+
+
+{ TfpgBaseTimer }
+
+procedure TfpgBaseTimer.SetInterval(const AValue: integer);
+begin
+  FInterval := AValue;
+  FNextAlarm := Now + (FInterval * ONE_MILISEC);
+end;
+
+procedure TfpgBaseTimer.SetEnabled(const AValue: boolean);
+begin
+  if AValue and (FInterval <= 0) then
+     Exit;
+  if (not FEnabled) and AValue then
+    FNextAlarm := now + (interval * ONE_MILISEC);
+  FEnabled := AValue;
+end;
+
+constructor TfpgBaseTimer.Create(AInterval: integer);
+begin
+  inherited Create;
+  FInterval := AInterval;
+  FEnabled  := False;
+  OnTimer   := nil;
+end;
+
+destructor TfpgBaseTimer.Destroy;
+begin
+  Enabled := False;
+  inherited Destroy;
+end;
+
+procedure TfpgBaseTimer.CheckAlarm(ACurrentTime: TDateTime);
+begin
+  if not FEnabled then
+    Exit; //==>
+
+  if FNextAlarm <= ACurrentTime then
+  begin
+    // set the next alarm point
+    if Interval > 0 then
+      while FNextAlarm <= ACurrentTime do
+        FNextAlarm += (Interval * ONE_MILISEC);
+
+    if Assigned(FOnTimer) then
+      FOnTimer(self);
+  end;
+end;
+
+procedure TfpgBaseTimer.Reset;
+begin
+  Enabled := False;
+  Enabled := True;
+end;
+
+procedure TfpgBaseTimer.Pause(ASeconds: integer);
+begin
+  if Enabled then
+  begin
+    FNextAlarm := IncSecond(Now, ASeconds);
+  end;
+end;
+
 
 
 end.

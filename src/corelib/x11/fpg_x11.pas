@@ -382,6 +382,10 @@ type
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
   end;
+  
+  
+  TfpgX11Timer = class(TfpgBaseTimer)
+  end;
 
 
 function fpgColorToX(col: TfpgColor): longword;

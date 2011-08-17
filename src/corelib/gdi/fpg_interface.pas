@@ -35,6 +35,7 @@ type
   TfpgFileListImpl      = TfpgGDIFileList;
   TfpgMimeDataImpl      = TfpgGDIMimeDataBase;
   TfpgDragImpl          = TfpgGDIDrag;
+  TfpgTimerImpl         = TfpgGDITimer;
 
 implementation
 

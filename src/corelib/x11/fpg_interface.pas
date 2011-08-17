@@ -35,6 +35,7 @@ type
   TfpgFileListImpl      = TfpgX11FileList;
   TfpgMimeDataImpl      = TfpgX11MimeData;
   TfpgDragImpl          = TfpgX11Drag;
+  TfpgTimerImpl         = TfpgX11Timer;
 
 implementation
 

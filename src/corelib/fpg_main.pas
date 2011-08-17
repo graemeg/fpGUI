@@ -295,26 +295,11 @@ type
   end;
 
 
-  TfpgTimer = class(TObject)
-  private
-    FEnabled: boolean;
-    FNextAlarm: TDateTime;
-    FInterval: integer;
-    FOnTimer: TNotifyEvent;
-    procedure   SetEnabled(const AValue: boolean);
-    procedure   SetInterval(const AValue: integer);
+  TfpgTimer = class(TfpgTimerImpl)
   public
     { AInterval is in milliseconds. }
-    constructor Create(ainterval: integer); virtual;
+    constructor Create(AInterval: integer); override;
     destructor  Destroy; override;
-    procedure   CheckAlarm(ctime: TDateTime);
-    procedure   Reset; virtual;
-    procedure   Pause(ASeconds: integer);
-    property    Enabled: boolean read FEnabled write SetEnabled;
-    property    NextAlarm: TDateTime read FNextAlarm;
-    { Interval is in milliseconds. }
-    property    Interval: integer read FInterval write SetInterval;
-    property    OnTimer: TNotifyEvent read FOnTimer write FOnTimer;
   end;
 
 
@@ -468,7 +453,6 @@ implementation
 uses
   strutils,
   math,
-  dateutils,
   fpg_imgfmt_bmp,
   fpg_stdimages,
   fpg_translations,
@@ -1071,24 +1055,9 @@ end;
 
 { TfpgTimer }
 
-procedure TfpgTimer.SetEnabled(const AValue: boolean);
+constructor TfpgTimer.Create(AInterval: integer);
 begin
-  if (not FEnabled) and AValue then
-    FNextAlarm := now + (interval * ONE_MILISEC);
-  FEnabled := AValue;
-end;
-
-procedure TfpgTimer.SetInterval(const AValue: integer);
-begin
-  FInterval := AValue;
-  FNextAlarm := now + (FInterval * ONE_MILISEC);
-end;
-
-constructor TfpgTimer.Create(ainterval: integer);
-begin
-  FInterval := ainterval;
-  OnTimer   := nil;
-  FEnabled  := False;
+  inherited Create(AInterval);
   fpgTimers.Add(self);
 end;
 
@@ -1102,36 +1071,6 @@ begin
   inherited Destroy;
 end;
 
-procedure TfpgTimer.CheckAlarm(ctime: TDateTime);
-begin
-  if not FEnabled then
-    Exit; //==>
-
-  if FNextAlarm <= ctime then
-  begin
-    // set the next alarm point
-    if interval > 0 then
-      while FNextAlarm <= ctime do
-        FNextAlarm += (interval * ONE_MILISEC);
-
-    if Assigned(FOnTimer) then
-      FOnTimer(self);
-  end;
-end;
-
-procedure TfpgTimer.Reset;
-begin
-  Enabled := False;
-  Enabled := True;
-end;
-
-procedure TfpgTimer.Pause(ASeconds: integer);
-begin
-  if Enabled then
-  begin
-    FNextAlarm := incSecond(Now, ASeconds);
-  end;
-end;
 
 function fpgApplication: TfpgApplication;
 begin
@@ -1140,12 +1079,14 @@ begin
   result := uApplication;
 end;
 
+
 function fpgClipboard: TfpgClipboard;
 begin
   if not Assigned(uClipboard) then
     uClipboard := TfpgClipboard.Create;
   Result := uClipboard;
 end;
+
 
 function fpgColorToRGB(col: TfpgColor): TfpgColor;
 begin
@@ -1154,6 +1095,7 @@ begin
   else
     Result := col;
 end;
+
 
 function fpgGetNamedColor(col: TfpgColor): TfpgColor;
 begin
