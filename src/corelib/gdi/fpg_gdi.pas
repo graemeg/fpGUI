@@ -303,6 +303,12 @@ type
   { TfpgGDITimer }
 
   TfpgGDITimer = class(TfpgBaseTimer)
+  private
+    FHandle: THandle;
+  protected
+    procedure   SetEnabled(const AValue: boolean); override;
+  public
+    constructor Create(AInterval: integer); override;
   end;
 
 
@@ -336,6 +342,7 @@ const
   WS_OVERLAPPEDWINDOW = WS_VISIBLE;
   WS_POPUPWINDOW = 0;
   WS_EX_APPWINDOW = 0;
+
 
 // From Lazarus wince\winext.pas:
 function GET_X_LPARAM(lp : Windows.LParam) : longint;
@@ -1283,24 +1290,12 @@ end;
 procedure TfpgGDIApplication.DoWaitWindowMessage(atimeoutms: integer);
 var
   Msg: TMsg;
-  timerid: longword;
-  ltimerWnd: HWND;
   mp: boolean;
 begin
-  timerid  := 0;
-  if Assigned(wapplication.MainForm) then
-    ltimerWnd := TfpgGDIWindow(wapplication.MainForm).WinHandle
-  else
-    ltimerWnd := 0;
-
   if (atimeoutms >= 0) and (not MessagesPending) then
   begin
     if Assigned(FOnIdle) then
       OnIdle(self);
-    if atimeoutms > 0 then
-      timerid := Windows.SetTimer(ltimerWnd, 1, atimeoutms, nil)
-    else
-      Exit;  // handling waiting timeout
   end;
 
   {$IFDEF WinCE}
@@ -1314,9 +1309,6 @@ begin
   {$ENDIF}
 
   Windows.DispatchMessage(@msg);
-
-  if timerid <> 0 then
-    Windows.KillTimer(ltimerWnd, 1);  // same IDEvent as used in SetTimer
 end;
 
 procedure TfpgGDIApplication.DoFlush;
@@ -3021,6 +3013,39 @@ procedure TGDIDragManager.RevokeDragDrop;
 begin
   ActiveX.RevokeDragDrop(TfpgWidget(FDropTarget).WinHandle);
 end;
+
+procedure TimerCallBackProc(window_hwnd : hwnd; msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;
+begin
+  { idEvent contains the handle to the timer that got triggered }
+  fpgCheckTimers;
+end;
+
+{ TfpgGDITimer }
+
+procedure TfpgGDITimer.SetEnabled(const AValue: boolean);
+begin
+  inherited SetEnabled(AValue);
+  if FEnabled then
+  begin
+//    FHandle := Windows.SetTimer(0, 0, Interval, nil);
+    FHandle := Windows.SetTimer(0, 0, Interval, @TimerCallBackProc);
+  end
+  else
+  begin
+    if FHandle <> 0 then
+    begin
+      Windows.KillTimer(FHandle, 0);
+      FHandle := 0;
+    end;
+  end;
+end;
+
+constructor TfpgGDITimer.Create(AInterval: integer);
+begin
+  inherited Create(AInterval);
+  FHandle := 0;
+end;
+
 
 initialization
   wapplication   := nil;
