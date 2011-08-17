@@ -38,14 +38,14 @@ type
     FShadow: Integer;
     FBorder: Integer;
     FMargin: Integer;
-    T_Chrono: TfpgTimer;
+    FTimer: TfpgTimer;
     FHintTextRec: TfpgRect;
     FText: TfpgString;
     procedure   FormShow(Sender: TObject);
     procedure   FormHide(Sender: TObject);
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
-    procedure   T_ChronoFini(Sender: TObject);
+    procedure   HintTimerFired(Sender: TObject);
     procedure   SetShadow(AValue: Integer);
     procedure   SetBorder(AValue: Integer);
     procedure   SetTime(AValue: Integer);
@@ -109,12 +109,11 @@ var
 
 procedure TfpgHintWindow.FormShow(Sender: TObject);
 begin
-  T_Chrono.Enabled:= True;
+  FTimer.Enabled:= True;
 end;
 
 procedure TfpgHintWindow.FormHide(Sender: TObject);
 begin
-  T_Chrono.Enabled := False;
   if Assigned(uShadowForm) then
     uShadowForm.Hide;
 end;
@@ -129,11 +128,12 @@ begin
   FText := AValue;
 end;
 
-procedure TfpgHintWindow.T_ChronoFini(Sender: TObject);
+procedure TfpgHintWindow.HintTimerFired(Sender: TObject);
 begin
   {$IFDEF DEBUG}
-  writeln('DEBUG:  TfpgHintWindow.T_ChronoFini timer fired');
+  DebugLn('DEBUG:  TfpgHintWindow.HintTimerFired timer fired');
   {$ENDIF}
+  FTimer.Enabled := False;
   Hide;
 end;
 
@@ -154,7 +154,7 @@ begin
   if FTime <> AValue then
   begin
     FTime := AValue;
-    T_Chrono.Interval := FTime;
+    FTimer.Interval := FTime;
   end;
 end;
 
@@ -232,18 +232,17 @@ begin
   FShadow := 0; // no shadow by default
   FTime := 5000; // show hint for 5 seconds then close
   FHintTextRec.SetRect(FBorder, FBorder, Width-(FBorder*2), Height-(FBorder*2));
-  T_Chrono := TfpgTimer.Create(FTime);
-  T_Chrono.OnTimer := @T_ChronoFini;
+  FTimer := TfpgTimer.Create(FTime);
+  FTimer.OnTimer := @HintTimerFired;
   uShadowForm:= TfpgHintShadow.Create(nil);
-  OnClick := @T_ChronoFini;
+  OnClick := @HintTimerFired;
   OnShow := @FormShow;
   OnHide := @FormHide;
 end;
 
 destructor TfpgHintWindow.Destroy;
 begin
-  T_Chrono.Enabled := False;
-  T_Chrono.Free;
+  FTimer.Free;
   FFont.Free;
   inherited Destroy;
   uShadowForm.Free;
