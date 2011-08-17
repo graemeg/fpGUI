@@ -812,6 +812,8 @@ var
   Position: TTextPosition;
 begin
   inherited HandleMouseMove(x, y, btnstate, shiftstate);
+  if FText = '' then
+    exit;
   Position := FindPoint(X, Y, Line, Offset, Link);
 
   if Link <> FLastLinkOver then
