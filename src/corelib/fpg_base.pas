@@ -790,9 +790,9 @@ begin
   if ssShift in AShiftState then
     Result := 'Shift+';
   if ssCtrl in AShiftState then
-    Result := 'Ctrl+';
+    Result := Result + 'Ctrl+';
   if ssAlt in AShiftState then
-    Result := 'Alt+';
+    Result := Result + 'Alt+';
 
   if (AKey > Ord(' ')) and (AKey < 255) then
   begin
