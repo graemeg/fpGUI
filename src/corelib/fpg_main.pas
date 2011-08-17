@@ -2341,7 +2341,6 @@ begin
   FHeight        := 8;
   FTimer         := TfpgTimer.Create(FInterval);
   FTimer.OnTimer := @OnTimerTime;
-  FTimer.Enabled := True;
 end;
 
 destructor TfpgCaret.Destroy;
