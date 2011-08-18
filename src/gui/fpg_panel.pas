@@ -228,6 +228,48 @@ type
   end;
 
 
+  { A panel that could replace a TfpgForm. Very handly for embedding
+    "forms" inside other forms. You should also be able to design such
+    frames with the UI designer too. }
+  TfpgFrame = class(TfpgAbstractPanel)
+  protected
+    WindowTitle: TfpgString;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure   AfterCreate; virtual;
+  published
+    property    AcceptDrops;
+    property    Align;
+    property    BackgroundColor;
+    property    BorderStyle;
+    property    Enabled;
+    property    Height;
+    property    Hint;
+    property    Left;
+    property    MaxHeight;
+    property    MaxWidth;
+    property    MinHeight;
+    property    MinWidth;
+    property    ParentBackgroundColor;
+    property    ParentShowHint;
+    property    ShowHint;
+    property    Style;
+    property    Top;
+    property    Width;
+    property    OnClick;
+    property    OnDoubleClick;
+    property    OnDragDrop;
+    property    OnDragEnter;
+    property    OnDragLeave;
+    property    OnDragStartDetected;
+    property    OnMouseDown;
+    property    OnMouseMove;
+    property    OnMouseUp;
+    property    OnPaint;
+    property    OnShowHint;
+  end;
+
+
 function CreateBevel(AOwner: TComponent; ALeft, ATop, AWidth, AHeight: TfpgCoord; AShape: TPanelShape;
          AStyle: TPanelStyle): TfpgBevel;
 
@@ -282,6 +324,19 @@ begin
   Result.Style      := AStyle;
   Result.FAlignment := AAlignment;
   Result.FMargin    := AMargin;
+end;
+
+{ TfpgFrame }
+
+constructor TfpgFrame.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  AfterCreate;
+end;
+
+procedure TfpgFrame.AfterCreate;
+begin
+  // do nothing here
 end;
 
 
