@@ -787,12 +787,13 @@ var
 begin
   SetLength(Result, 0);
 
-  if ssShift in AShiftState then
-    Result := 'Shift+';
+  { The order of these three are imprortant - don't change them }
   if ssCtrl in AShiftState then
     Result := Result + 'Ctrl+';
   if ssAlt in AShiftState then
     Result := Result + 'Alt+';
+  if ssShift in AShiftState then
+    Result := Result + 'Shift+';
 
   if (AKey > Ord(' ')) and (AKey < 255) then
   begin
