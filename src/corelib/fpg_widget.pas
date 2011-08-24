@@ -1188,6 +1188,7 @@ begin
     lasttaborder := High(integer);
 
   for n := 0 to ComponentCount - 1 do
+  begin
     if Components[n] is TfpgWidget then
     begin
       w := TfpgWidget(Components[n]);
@@ -1236,6 +1237,7 @@ begin
         end; { case }
       end; { if w.Enabled... }
     end;
+  end; { if }
 end;
 
 procedure TfpgWidget.MsgPaint(var msg: TfpgMessageRec);
