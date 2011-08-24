@@ -212,6 +212,10 @@ var
   uMouseDownSourceWidget: TfpgWidget; { widget Left MButton was pressed on }
 
 
+type
+  TfpgFormFriend = class(TfpgBaseForm)
+  end;
+
 function FindKeyboardFocus: TfpgWidget;
 begin
   Result := nil;
@@ -572,10 +576,17 @@ begin
   ss  := msg.params.keyboard.shiftstate;
   consumed := False;
 
+  { can we handle it ourselves? }
   HandleKeyPress(key, ss, consumed);
+
+  { process our children }
+  if not consumed then
+    DoKeyShortcut(self, key, ss, consumed, True);
+
   if not consumed then
   begin
-    { work it's way to one before top level form - forms are not focusable remember }
+    { Work its way to the top level form. The recursive calling of
+      HandleKeyPress() also gives tab-to-change-focus a chance to work. }
     wg := Parent;
     wlast := wg;
     while (not consumed) and (wg <> nil) do
@@ -584,18 +595,37 @@ begin
       wlast := wg;
       wg := wg.Parent;
     end;
+    wg := wlast;
   end;
-  { we should now be at the top level form }
-  if (not consumed) and (wlast <> nil) then
+
+
+  if not consumed then
   begin
-    if (wlast is TfpgForm) and Assigned(wlast.OnKeyPress) then
-      wlast.OnKeyPress(self, key, ss, consumed);
+    { Now let the top level form do keyboard shortcut processing. }
+    if Assigned(wg) then
+      wg.DoKeyShortcut(self, key, ss, consumed);
+
+    { Forms aren't focusable, so Form.HandleKeyPress() will not suffice. Give
+      the Form a chance to fire its OnKeyPress event. }
+    if not consumed then
+    begin
+      if (wg is TfpgForm) and Assigned(TfpgForm(wg).OnKeyPress) then
+        wg.OnKeyPress(self, key, ss, consumed);
+    end;
+
+    { now try the Application MainForm - if not the same as top-level form }
+    if not consumed then
+    begin
+      { only do this if the top-level form is not Modal }
+      if (wg is TfpgForm) and (TfpgForm(wg).WindowType <> wtModalForm) then
+        if wg <> fpgApplication.MainForm then
+          TfpgFormFriend(fpgApplication.MainForm).DoKeyShortcut(self, key, ss, consumed);
+    end;
   end;
+
   { now finaly, lets give fpgApplication a chance }
   if (not consumed) and Assigned(fpgApplication.OnKeyPress) then
-  begin
     fpgApplication.OnKeyPress(self, key, ss, consumed);
-  end;
 end;
 
 procedure TfpgWidget.MsgKeyRelease(var msg: TfpgMessageRec);
