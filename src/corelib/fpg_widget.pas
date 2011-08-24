@@ -117,6 +117,7 @@ type
     procedure   DoAlignment;
     procedure   DoResize;
     procedure   DoShowHint(var AHint: TfpgString);
+    procedure   DoKeyShortcut(const AOrigin: TfpgWidget; const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False); virtual;
     procedure   HandlePaint; virtual;
     procedure   HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean); virtual;
     procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); virtual;
@@ -1430,6 +1431,40 @@ begin
   if Assigned(FOnShowHint) then
   begin
     FOnShowHint(self, AHint);
+  end;
+end;
+
+procedure TfpgWidget.DoKeyShortcut(const AOrigin: TfpgWidget;
+  const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False);
+var
+  c: TfpgComponent;
+  wg: TfpgWidget;
+  i: integer;
+begin
+  //writeln(Classname, ' - ', Name, '.DoKeyShortcut() - ' + KeycodeToText(keycode, shiftstate));
+  { process children of self }
+  for i := 0 to ComponentCount-1 do
+  begin
+    c := TfpgComponent(Components[i]);
+    if not (c is TfpgWidget) then
+    begin
+      //writeln('** skipped ', Classname, ' - ', Name);
+      continue;
+    end
+    else
+      wg := TfpgWidget(c);
+    if (wg <> nil) and (wg <> self) and (wg <> AOrigin) then
+    begin
+      { ignore the MenuBar now, because it will be processed later by the top-level Form }
+      if IsChildOfOrigin and (wg is TfpgMenuBar) then
+      begin
+        continue;
+      end
+      else
+        wg.DoKeyShortcut(AOrigin, keycode, shiftstate, consumed);
+      if consumed then
+        Exit;
+    end;
   end;
 end;
 
