@@ -127,6 +127,7 @@ type
     procedure   DrawRow(line: integer; const AItemFocused: boolean); virtual;
     function    ItemHeight(mi: TfpgMenuItem): integer; virtual;
     procedure   PrepareToShow;
+    procedure   DoKeyShortcut(const AOrigin: TfpgWidget; const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False); override;
   public
     OpenerPopup: TfpgPopupMenu;
     OpenerMenuBar: TfpgMenuBar;
@@ -504,11 +505,11 @@ procedure TfpgMenuBar.HandleKeyPress(var keycode: word;
 var
   s: string;
   i: integer;
+  mi: TfpgMenuItem;
 begin
-//  writeln(Classname, '.Keypress');
   s := KeycodeToText(keycode, shiftstate);
-//  writeln('s: ', s);
-  // handle MenuBar (Alt+?) shortcuts only - for now!
+
+  // handle MenuBar (Alt+?) shortcuts only
   if (length(s) = 5) and (copy(s, 1, 4) = 'Alt+') then
   begin
     s := KeycodeToText(keycode, []);
@@ -516,12 +517,28 @@ begin
     if i <> -1 then
     begin
       consumed := True;
-//      writeln('Selected ', VisibleItem(i).Text);
       FFocusItem := i;
       DoSelect;
     end;
   end;
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
+
+  { now process sub-menus off the MenuBar }
+  for i := 0 to ComponentCount-1 do
+  begin
+    if Components[i] is TfpgMenuItem then     { these are main menu items }
+    begin
+      mi := TfpgMenuItem(Components[i]);
+      if mi.Visible and mi.Enabled then
+      begin
+        { process the sub menus }
+        if mi.SubMenu <> nil then
+          mi.SubMenu.DoKeyShortcut(nil, keycode, shiftstate, consumed);
+        if consumed then
+          Exit;
+      end;
+    end;
+  end;
+
 end;
 
 procedure TfpgMenuBar.HandlePaint;
@@ -1260,6 +1277,39 @@ begin
   FWidth  := ((FMargin+FTextMargin)*2) + FSymbolWidth + tw + hkw + (cImgWidth*2);
   
   uFocusedPopupMenu := self;
+end;
+
+procedure TfpgPopupMenu.DoKeyShortcut(const AOrigin: TfpgWidget;
+  const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False);
+var
+  s: TfpgString;
+  i: integer;
+  mi: TfpgMenuItem;
+begin
+  s := KeycodeToText(keycode, shiftstate);
+  for i := 0 to ComponentCount-1 do
+  begin
+    if Components[i] is TfpgMenuItem then
+    begin
+      mi := Components[i] as TfpgMenuItem;
+      if mi.Separator then
+        Continue;
+      if mi.Visible and mi.Enabled then
+      begin
+        { process the sub menus }
+        if mi.SubMenu <> nil then
+          mi.SubMenu.DoKeyShortcut(nil, keycode, shiftstate, consumed)
+        else if mi.HotKeyDef = s then
+        begin
+          consumed := True;
+          mi.Click;
+        end;
+        if consumed then
+          Exit;
+      end;
+    end;
+  end;
+
 end;
 
 function TfpgPopupMenu.CalcMouseRow(y: integer): integer;
