@@ -1140,8 +1140,6 @@ procedure TfpgPageControl.HandleKeyPress(var keycode: word;
 var
   i: integer;
 begin
-//  writeln(Classname, '.Keypress');
-  consumed := True;
   i := ActivePageIndex;
   if ssAlt in shiftstate then
   case keycode of
@@ -1150,6 +1148,7 @@ begin
           if ActivePage <> TfpgTabSheet(FPages.First) then
           begin
             ActivePage := TfpgTabSheet(FPages[i-1]);
+            consumed := True;
           end;
         end;
 
@@ -1158,13 +1157,12 @@ begin
           if ActivePage <> TfpgTabSheet(FPages.Last) then
           begin
             ActivePage := TfpgTabSheet(FPages[i+1]);
+            consumed := True;
           end;
         end;
-
-  else
-    consumed := False;
   end;  { case/else }
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  if not consumed then
+    inherited HandleKeyPress(keycode, shiftstate, consumed);
 end;
 
 procedure TfpgPageControl.RePaint;
