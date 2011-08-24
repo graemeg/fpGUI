@@ -774,6 +774,9 @@ var
   Shift: boolean;
 begin
   inherited HandleLMouseDown(x, y, shiftstate);
+  if FText = '' then
+    Exit; //==>   no need to do anything further
+
   Offset := 0;
   Position := FindPoint( X, Y, Line, Offset, Link );
   FClickedLink := Link;
