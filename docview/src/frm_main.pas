@@ -3034,15 +3034,15 @@ begin
   begin
     Name := 'miFile';
     SetPosition(292, 96, 132, 20);
-    AddMenuItem('Open...', '', @miFileOpenClicked);
-    AddMenuItem('Open additional file...', '', @miFileOpenAdditionalFileClicked);
-    AddMenuItem('Open Special...', '', @miFileOpenSpecialClicked);
-    AddMenuItem('Save current Topic to IPF...', '', @miFileSaveTopicAsIPF);
-    AddMenuItem('Close', '', @miFileCloseClicked);
+    AddMenuItem('Open...', 'Ctrl+O', @miFileOpenClicked);
+    AddMenuItem('Open additional file...', 'Ctrl+Shift+O', @miFileOpenAdditionalFileClicked);
+    AddMenuItem('Open Special...', 'Ctrl+L', @miFileOpenSpecialClicked);
+    AddMenuItem('Save current Topic to IPF...', 'Ctrl+S', @miFileSaveTopicAsIPF);
+    AddMenuItem('Close', 'Ctrl+W', @miFileCloseClicked);
     AddMenuitem('-', '', nil);
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
     AddMenuitem('-', '', nil);
-    AddMenuItem('Quit', '', @miFileQuitClicked);
+    AddMenuItem('Quit', 'Ctrl+Q', @miFileQuitClicked);
   end;
 
   miSettings := TfpgPopupMenu.Create(self);
