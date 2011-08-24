@@ -1316,7 +1316,7 @@ begin
   mainmenu.AddMenuItem('&Project', nil).SubMenu := mnuProject;
   mainmenu.AddMenuItem('&Run', nil).SubMenu := mnuRun;
   mainmenu.AddMenuItem('&Tools', nil).SubMenu := mnuTools;
-  mainmenu.AddMenuItem('&Settings', nil).SubMenu := mnuSettings;
+  mainmenu.AddMenuItem('Sett&ings', nil).SubMenu := mnuSettings;
   mainmenu.AddMenuItem('&Help', nil).SubMenu := mnuHelp;
 
   pmOpenRecentMenu := TfpgPopupMenu.Create(self);
