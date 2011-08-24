@@ -64,6 +64,7 @@ type
     procedure LoadSettings;
     procedure SaveSettings;
     procedure SaveToMacroList(AList: TIDEMacroList);
+    procedure FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -191,10 +192,17 @@ begin
   AList.SetValue(cMacro_Target, edtTarget.Text);
 end;
 
+procedure TConfigureIDEForm.FormKeyPressed(Sender: TObject; var KeyCode: word; var ShiftState: TShiftState; var Consumed: boolean);
+begin
+  if KeyCode = keyEscape then
+    Close;
+end;
+
 constructor TConfigureIDEForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FInternalMacroList := TIDEMacroList.Create;
+  OnKeyPress  := @FormKeyPressed;
 end;
 
 destructor TConfigureIDEForm.Destroy;
