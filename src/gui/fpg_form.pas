@@ -71,17 +71,17 @@ type
     procedure   HandleShow; override;
     procedure   HandleMove(x, y: TfpgCoord); override;
     procedure   HandleResize(awidth, aheight: TfpgCoord); override;
-    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean); override;
     procedure   DoOnClose(var CloseAction: TCloseAction); virtual;
     function    DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext; const AHelpKeyword: String; const AHelpFile: String; var AHandled: Boolean): Boolean; virtual;
-    // properties
+    procedure   DoKeyShortcut(const AOrigin: TfpgWidget; const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False); override;
+    { -- properties -- }
     property    DNDEnabled: boolean read FDNDEnabled write SetDNDEnabled default False;
     property    Sizeable: boolean read FSizeable write FSizeable;
     property    ModalResult: TfpgModalResult read FModalResult write FModalResult;
     property    FullScreen: boolean read FFullScreen write FFullScreen default False;
     property    WindowPosition: TWindowPosition read FWindowPosition write FWindowPosition default wpAuto;
     property    WindowTitle: string read FWindowTitle write SetWindowTitle;
-    // events
+    { -- events -- }
     property    OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
     property    OnClose: TFormCloseEvent read FOnClose write FOnClose;
     property    OnCloseQuery: TFormCloseQueryEvent read FOnCloseQuery write FOnCloseQuery;
@@ -168,6 +168,8 @@ type
   TfpgMenuBarFriend = class(TfpgMenuBar)
   end;
 
+  TfpgWidgetFriend = class(TfpgWidget)
+  end;
 
 
 function WidgetParentForm(wg: TfpgWidget): TfpgForm;
@@ -425,35 +427,6 @@ begin
   inherited HandleResize(awidth, aheight);
 end;
 
-procedure TfpgBaseForm.HandleKeyPress(var keycode: word;
-  var shiftstate: TShiftState; var consumed: boolean);
-var
-  i: integer;
-  wg: TfpgWidget;
-{$IFDEF CStackDebug}
-  itf: IInterface;
-{$ENDIF}
-begin
-  {$IFDEF CStackDebug}
-  itf := DebugMethodEnter('TfpgBaseForm.HandleKeyPress - ' + ClassName + ' ('+Name+')');
-  {$ENDIF}
-  // find the TfpgMenuBar
-  if not consumed then
-  begin
-    for i := 0 to ComponentCount-1 do
-    begin
-      wg := TfpgWidget(Components[i]);
-      if (wg <> nil) and (wg <> self) and (wg is TfpgMenuBar) then
-      begin
-        TfpgMenuBarFriend(wg).HandleKeyPress(keycode, shiftstate, consumed);
-        Break; //==>
-      end;
-    end;
-  end;  { if }
-
-  inherited HandleKeyPress(keycode, shiftstate, consumed);
-end;
-
 procedure TfpgBaseForm.AfterConstruction;
 begin
   AfterCreate;
@@ -480,6 +453,72 @@ function TfpgBaseForm.DoOnHelp(AHelpType: THelpType; AHelpContext: THelpContext;
 begin
   if Assigned(FOnHelp) then
     Result := FOnHelp(AHelpType, AHelpContext, AHelpKeyword, AHelpFile, AHandled);
+end;
+
+procedure TfpgBaseForm.DoKeyShortcut(const AOrigin: TfpgWidget;
+  const keycode: word; const shiftstate: TShiftState; var consumed: boolean; const IsChildOfOrigin: boolean = False);
+var
+  wg: TfpgWidget;
+  menu: TfpgMenuBar;
+  i: integer;
+  ss: TShiftState;
+  key: word;
+  c: TfpgComponent;
+
+  function FindMenuBar(AWidget: TfpgWidget): TfpgWidget;
+  var
+    n: integer;
+    w: TfpgWidget;
+  begin
+    Result := nil;
+    for n := 0 to AWidget.ComponentCount-1 do
+    begin
+      w := TfpgWidget(AWidget.Components[n]);
+      if (w <> nil) and (w <> self) and (w <> AOrigin) and (w is TfpgMenuBar) then
+      begin
+        Result := w;
+        exit;
+      end;
+      if w.ComponentCount > 0 then
+        Result := FindMenuBar(w);
+      if Result <> nil then
+        exit;
+    end;
+  end;
+
+begin
+  // find the first TfpgMenuBar - if it exits
+  wg := FindMenuBar(self);
+  if (wg <> nil) then
+  begin
+    menu := wg as TfpgMenuBar;
+    key := keycode;
+    ss := shiftstate;
+    TfpgMenuBarFriend(wg).HandleKeyPress(key, ss, consumed);
+  end;
+
+  if consumed then
+    Exit;
+  // now send to each widget on the form - excluding AOrigin and MenuBar widgets
+  for i := 0 to ComponentCount-1 do
+  begin
+    c := TfpgComponent(Components[i]);
+    if c is TfpgWidget then
+      wg := TfpgWidget(c)
+    else
+      wg := nil;
+    if (wg <> nil) and (wg <> self) and (wg <> AOrigin) and (wg <> menu) and (not (wg is TfpgPopupMenu)) then
+    begin
+      if (not wg.Visible) or (not wg.Enabled) then
+        continue
+      else
+      begin
+        TfpgWidgetFriend(wg).DoKeyShortcut(AOrigin, keycode, shiftstate, consumed);
+        if consumed then
+          Exit;
+      end;
+    end;
+  end;
 end;
 
 procedure TfpgBaseForm.Hide;
