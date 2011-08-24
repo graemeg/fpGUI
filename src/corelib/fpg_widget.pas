@@ -978,6 +978,7 @@ begin
         begin
           // ssExtra1 is a signal that keyMenu was used.
           HandleRMouseDown(Width div 2, Height div 2, [ssExtra1]);
+          consumed := True;
         end;
   end;
 
