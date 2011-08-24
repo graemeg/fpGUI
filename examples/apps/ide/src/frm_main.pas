@@ -611,7 +611,8 @@ begin
     if gINI.ReadBool(cEditor, 'SyntaxHighlighting', True) then
     begin
       ext := fpgExtractFileExt(AFilename);
-      if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') then
+      if (ext = '.pas') or (ext = '.pp') or (ext = '.inc') or (ext = '.lpr')
+         or (ext = '.dpr') then
         TfpgTextEdit(ts.Components[0]).OnDrawLine := @TextEditDrawLine;
     end;
     ts.Realign;
