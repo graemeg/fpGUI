@@ -1196,6 +1196,10 @@ begin
     AddMenuItem('Cut', '', nil).Enabled := False;
     AddMenuItem('Copy', '', nil).Enabled := False;
     AddMenuItem('Paste', '', nil).Enabled := False;
+    AddMenuItem('-', '', nil);
+    AddMenuItem('Indent selection', 'Ctrl+I', nil).Enabled := False;
+    AddMenuItem('Unindent selection', 'Ctrl+U', nil).Enabled := False;
+    AddMenuItem('Insert $IFDEF...', 'Ctrl+Shift+D', nil).Enabled := False;
   end;
 
   mnuSearch := TfpgPopupMenu.Create(self);
@@ -1204,7 +1208,11 @@ begin
     Name := 'mnuSearch';
     SetPosition(476, 98, 172, 20);
     AddMenuItem('Find...', 'Ctrl+F', nil).Enabled := False;
+    AddMenuItem('Find Next', 'F3', nil).Enabled := False;
+    AddMenuItem('Find Previous', 'Shift+F3', nil).Enabled := False;
     AddMenuItem('Find in Files...', 'Ctrl+Shift+F', nil).Enabled := False;
+    AddMenuItem('Replace...', 'Ctrl+R', nil).Enabled := False;
+    AddMenuItem('-', '', nil);
     AddMenuItem('Procedure List...', 'Ctrl+G', @miSearchProcedureList);
   end;
 
