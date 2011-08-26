@@ -1828,6 +1828,7 @@ begin
   CaretPos.X := 0;
   CaretPos.Y := ALine;
   ScrollPos_V := ALine-5;  // scrolling a few lines short so cursor is not on top line
+  UpdateScrollBars;
 end;
 
 procedure TfpgBaseTextEdit.DeleteSelection;
