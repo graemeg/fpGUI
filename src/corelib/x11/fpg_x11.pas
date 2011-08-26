@@ -3092,7 +3092,7 @@ begin
     XSetClipMask(xapplication.display, drawgc, msk);
     XSetClipOrigin(xapplication.display, drawgc, x, y);
 
-    XPutImage(xapplication.display, FDrawHandle, drawgc, TfpgImage(img).XImage, xi, yi, x, y, w, h);
+    XPutImage(xapplication.display, FDrawHandle, drawgc, TfpgX11Image(img).XImage, xi, yi, x, y, w, h);
     XFreePixmap(xapplication.display, msk);
     XFreeGc(xapplication.display, drawgc);
     XFreeGc(xapplication.display, gc2);
