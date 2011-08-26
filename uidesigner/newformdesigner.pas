@@ -389,17 +389,17 @@ begin
   begin
     Name := 'filemenu';
     SetPosition(464, 64, 120, 20);
-    AddMenuItem('Create New File...', '', @(maindsgn.OnNewFile));
-    AddMenuItem('Open...', '', @(maindsgn.OnLoadFile));
+    AddMenuItem('Create New File...', 'Ctrl+N', @(maindsgn.OnNewFile));
+    AddMenuItem('Open...', 'Ctrl+O', @(maindsgn.OnLoadFile));
     FFileOpenRecent := AddMenuItem('Open Recent...', '', nil);
     AddMenuItem('-', '', nil);
-    mi := AddMenuItem('Save', '', @(maindsgn.OnSaveFile));
+    mi := AddMenuItem('Save', 'Ctrl+S', @(maindsgn.OnSaveFile));
     mi.Tag := 10;
-    AddMenuItem('Save As New Template Unit...', '', @(maindsgn.OnSaveFile));
+    AddMenuItem('Save As New Template Unit...', 'Ctrl+Shift+S', @(maindsgn.OnSaveFile));
     AddMenuItem('-', '', nil);
     AddMenuItem('Add New Form to Unit...', '', @(maindsgn.OnNewForm));
     AddMenuItem('-', '', nil);
-    AddMenuItem('Exit', '', @(maindsgn.OnExit));
+    AddMenuItem('Exit', 'Ctrl+Q', @(maindsgn.OnExit));
   end;
 
   formmenu := TfpgPopupMenu.Create(self);
