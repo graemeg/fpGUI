@@ -40,7 +40,7 @@ uses
   fpg_netlayer_x11,
   fpg_base,
   fpg_impl;
-  
+
 const
   IconBitmapWidth = 16;
   IconBitmapHeight = 16;
@@ -89,8 +89,8 @@ type
     input_mode: longint;
     status: culong;
   end;
-  
-  
+
+
 const
 // Motif window hints
   MWM_HINTS_FUNCTIONS     = 1 shl 0;
@@ -122,14 +122,14 @@ const
 type
   TXWindowStateFlag = (xwsfMapped);
   TXWindowStateFlags = set of TXWindowStateFlag;
-  
+
   // Returns True if it 'ate' the event
   TX11EventFilter = function(const AEvent: TXEvent): Boolean of object;
 
   // forward declaration
   TfpgX11Window = class;
   TfpgX11Drag = class;
-  
+
 
   TfpgX11FontResource = class(TfpgFontResourceBase)
   private
@@ -338,8 +338,8 @@ type
     procedure   DoSetText(const AValue: TfpgString); override;
     procedure   InitClipboard; override;
   end;
-  
-  
+
+
   TfpgX11FileList = class(TfpgFileListBase)
   protected
     function    InitializeEntry(sr: TSearchRec): TFileEntry; override;
@@ -382,8 +382,8 @@ type
     destructor  Destroy; override;
     function    Execute(const ADropActions: TfpgDropActions; const ADefaultAction: TfpgDropAction = daCopy): TfpgDropAction; override;
   end;
-  
-  
+
+
   TfpgX11Timer = class(TfpgBaseTimer)
   end;
 
@@ -1522,7 +1522,7 @@ var
         IntToHex(event.xany.window, 9), '>');
     {$ENDIF}
   end;
-  
+
 begin
   xfd := XConnectionNumber(display);
   DoFlush;
@@ -1581,7 +1581,7 @@ begin
   // According to a comment in X.h, the valid event types start with 2!
   if ev._type < 2 then
     exit;
-    
+
 
   Popup := PopupListFirst;
 
@@ -1844,7 +1844,7 @@ begin
                 if (ew <> nil) and (TopModalForm <> ew) and (waUnblockableMessages in ew.WindowAttributes = False) then
                   blockmsg := true;
               end;
-          
+
               if not blockmsg then
                 fpgPostMessage(nil, FindWindowByHandle(ev.xclient.window), FPGM_CLOSE);
              end;
@@ -1937,7 +1937,7 @@ begin
           w := FindWindowByBackupHandle(ev.xconfigure.window);
           if not Assigned(w) then
             ReportLostWindow(ev);
-            
+
           if w <> nil then
           begin
             if w.FWindowType <> wtChild then
@@ -1991,7 +1991,7 @@ begin
             ProcessSelectionRequest(ev);
           end;
         end;
-        
+
     X.SelectionClear:
         begin
           { TODO : Not sure if I am handling this correctly? }
@@ -2010,7 +2010,7 @@ begin
 
     X.EnterNotify:
         fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEENTER);
-        
+
     X.LeaveNotify:
         fpgPostMessage(nil, FindWindowByHandle(ev.xcrossing.window), FPGM_MOUSEEXIT);
 
@@ -2142,7 +2142,7 @@ var
 
   IconPixmap: TPixmap;
   WMHints: PXWMHints;
-  
+
   prop: TAtom;
   mwmhints: TMWMHints;
 begin
@@ -2176,7 +2176,7 @@ begin
 
   FWinHandle := wh;
   FBackupWinHandle := wh;
-  
+
   // so newish window manager can close unresponsive programs
   if AParent = nil then // is a toplevel window
   begin
@@ -2306,7 +2306,7 @@ begin
       StructureNotifyMask);
 
   SetWindowParameters;
-  
+
   AddWindowLookup(self);
 end;
 
@@ -2373,7 +2373,7 @@ var
 begin
   if not TfpgX11Window(ASource).HandleIsValid then
     Exit; //==>
-    
+
   XTranslateCoordinates(xapplication.display, TfpgX11Window(ASource).WinHandle,
       XDefaultRootWindow(xapplication.display), AScreenPos.X, AScreenPos.Y, @dx, @dy, @cw);
 
@@ -2694,7 +2694,7 @@ begin
     if not TfpgX11Window(awin).HasHandle then
       raise Exception.Create('Window doesn''t have a Handle');
   end;
-  
+
   XGetGeometry(xapplication.display, TfpgX11Window(awin).FWinHandle, @rw, @x, @y, @w, @h, @bw, @d);
 
   if FDrawing and buffered and (FBufferPixmap > 0) then
@@ -2754,7 +2754,7 @@ begin
       TryFreePixmap;
       FDrawHandle   := FDrawWindow.FWinHandle;
     end;
-    
+
     Fgc := XCreateGc(xapplication.display, FDrawHandle, 0, @GcValues);
     // CapNotLast is so we get the same behavior as Windows. See documentation for more details.
     XSetLineAttributes(xapplication.display, Fgc, 0, LineSolid, CapNotLast, JoinMiter);
@@ -3017,7 +3017,7 @@ begin
   r.Height := ARect.Height;
 
   rg := XCreateRegion;
-  
+
   XUnionRectWithRegion(@r, rg, FClipRegion);
   XSetRegion(xapplication.display, Fgc, FClipRegion);
   XftDrawSetClip(FXftDraw, FClipRegion);
@@ -3049,7 +3049,7 @@ begin
 
   FClipRect    := ARect;    // Double check this, it might be wrong!!
   FClipRectSet := True;
-  
+
   XftDrawSetClip(FXftDraw, FClipRegion);
   XDestroyRegion(rg);
 end;
@@ -3305,7 +3305,7 @@ var
 begin
   FSpecialDirs.Clear;
   FSpecialDirs.Add(DirectorySeparator); // add root
-  
+
   ds := aDirectory;
   if Copy(ds, 1, 1) <> DirectorySeparator then
     ds := DirectorySeparator + ds;
