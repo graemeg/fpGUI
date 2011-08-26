@@ -185,6 +185,7 @@ begin
   s := pcEditor.ActivePage.Hint;
   if s <> '' then
     TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+  AddMessage('File saved');
 end;
 
 procedure TMainForm.miFileSaveAs(Sender: TObject);
