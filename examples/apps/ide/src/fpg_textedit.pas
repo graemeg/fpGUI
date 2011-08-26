@@ -106,7 +106,7 @@ type
     fmousewheeldeltamin: double;
     fmousewheeldeltamax: double;
     fmousewheelaccelerationmax: double;
-    
+
     fwheelsensitivity: double;
     function    GetFontDesc: string;
     function    GetGutterShowLineNumbers: Boolean;
@@ -136,7 +136,7 @@ type
     procedure   SetRightEdgeCol(const AValue: Integer);
     function    calcmousewheeldelta(var info: TfpgMsgParmMouse; const fmin,fmax,deltamin,deltamax: double): double;
     function    mousewheelacceleration(const avalue: double): double;
-    function    mousewheelacceleration(const avalue: integer): integer;  
+    function    mousewheelacceleration(const avalue: integer): integer;
   protected
     { -- internal events -- }
     procedure   HandleShow; override;
@@ -1279,13 +1279,13 @@ begin
   msg.mouse.x := x;
   msg.mouse.y := y;
   msg.mouse.shiftstate := shiftstate;
-  
+
   FLastScrollEventTimeBefore := FLastScrollEventTime;
   FLastScrollEventTime := Now;
 
   { calculate a modified delta based on mouse scroll sensitivity setting }
   ldelta := round(mousewheelacceleration(delta*fwheelsensitivity));
-  
+
   msg.mouse.delta := ldelta;
 
   fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
@@ -1682,14 +1682,14 @@ begin
   FRightEdge    := False;
   FRightEdgeCol := 80;
   FLineChanged := -1;
-  
+
   fmousewheelfrequmin := 1;
   fmousewheelfrequmax := 100;
   fmousewheeldeltamin := 0.05;
   fmousewheeldeltamax := 30;
   fmousewheelaccelerationmax := 30;
   fwheelsensitivity := 1.5;
-  
+
   FLastScrollEventTime := 0;
   FLastScrollEventTimeBefore := 0;
 
