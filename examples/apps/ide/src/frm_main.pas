@@ -148,7 +148,7 @@ const
     + '|override|class|unit|program|library|set|of|if|then|for|downto|to|as|div|mod|shr|shl'
     + '|do|else|while|and|inherited|const|var|initialization|finalization'
     + '|on|or|in|raise|not|case|record|array|out|resourcestring|default'
-    + '|xor|repeat|until|constref|stdcall|cdecl|external)\b';
+    + '|xor|repeat|until|constref|stdcall|cdecl|external|generic|specialize)\b';
 
   cComments1 = '(\s*\/\/.*$)|(\{[^\{]*\})';
   cComments2 = '\{[^\{]*\}';
