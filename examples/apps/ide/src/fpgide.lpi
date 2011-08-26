@@ -127,7 +127,7 @@
   <CompilerOptions>
     <Version Value="9"/>
     <Target>
-      <Filename Value="fpgide.elf32"/>
+      <Filename Value="fpgide"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
