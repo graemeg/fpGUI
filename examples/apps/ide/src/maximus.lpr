@@ -1,4 +1,4 @@
-program fpgide;
+program maximus;
 
 {$mode objfpc}{$H+}
 
@@ -8,7 +8,8 @@ uses
   {$ENDIF}
   Classes, fpg_base, fpg_main, frm_main, frm_configureide, ideconst, idemacros,
   frm_debug, project, unitlist, frm_projectoptions, ideutils, builderthread,
-  ideimages, stringhelpers, frm_procedurelist, mPasLex, filemonitor, SynRegExpr;
+  ideimages, stringhelpers, frm_procedurelist, mPasLex, filemonitor, SynRegExpr,
+  fpg_textedit;
 
 
 procedure MainProc;

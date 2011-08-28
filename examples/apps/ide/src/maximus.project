@@ -1,7 +1,7 @@
 [ProjectOptions]
-ProjectName=fpgide.project
-MainUnit=fpgide.lpr
-TargetFile=fpgide
+ProjectName=maximus.project
+MainUnit=maximus.lpr
+TargetFile=maximus${EXEEXT}
 DefaultMake=0
 MakeOptionsCount=5
 MakeOptionEnabled1=1,1,1,1,1,1
@@ -41,8 +41,8 @@ UnitDir7=${FPGUILIBDIR}
 
 [Units]
 UnitCount=12
-Unit1=fpg_textedit.pas,-1
-Unit2=fpgide.lpr,0
+Unit1=fpg_textedit.pas,0
+Unit2=maximus.lpr,0
 Unit3=frm_configureide.pas,0
 Unit4=frm_debug.pas,0
 Unit5=frm_main.pas,-1

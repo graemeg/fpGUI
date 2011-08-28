@@ -136,7 +136,7 @@ uses
 
 
 const
-  cTitle = 'fpGUI IDE - %s';
+  cTitle = 'Maximus IDE - %s';
   cFileFilterTemplate  = '%s (%s)|%s';
   cSourceFiles = '*.pas;*.pp;*.lpr;*.dpr;*.inc';
   cProjectFiles = '*.project';

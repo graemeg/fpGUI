@@ -141,7 +141,7 @@ usercolorcomment=30
  
  
  
-settingsfile=fpgide.prj
+settingsfile=maximus.prj
 settingseditor=0
 settingsdebugger=0
 settingsstorage=1

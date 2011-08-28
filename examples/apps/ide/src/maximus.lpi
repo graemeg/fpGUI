@@ -10,7 +10,9 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <Title Value="maximus"/>
       <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
     </General>
     <VersionInfo>
       <Language Value=""/>
@@ -36,11 +38,11 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="18">
       <Unit0>
-        <Filename Value="fpgide.lpr"/>
+        <Filename Value="maximus.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpgide"/>
+        <UnitName Value="maximus"/>
       </Unit0>
       <Unit1>
         <Filename Value="frm_main.pas"/>
@@ -122,12 +124,17 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="SynRegExpr"/>
       </Unit16>
+      <Unit17>
+        <Filename Value="fpg_textedit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fpg_textedit"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="9"/>
     <Target>
-      <Filename Value="fpgide"/>
+      <Filename Value="maximus"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
