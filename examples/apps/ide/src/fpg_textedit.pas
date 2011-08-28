@@ -203,7 +203,12 @@ type
 implementation
 
 uses
-  fpg_dialogs{, fpg_constants}, fpg_stringutils, fpg_utils, math;
+  fpg_dialogs,
+//  fpg_constants,
+  fpg_stringutils,
+  fpg_utils,
+  math,
+  dbugintf;
 
 
 function GetNextWord(SLine: TfpgString; var PosX: Integer): Boolean;
@@ -1299,11 +1304,31 @@ var
   Y: Integer;
   X: Integer;
   CaretScroll: Boolean;
+  HasChanged: boolean;
 begin
   {$IFDEF gDEBUG}
   writeln('>> TfpgBaseTextEdit.HandleKeyPress');
   {$ENDIF}
 //  inherited HandleKeyPress(keycode, shiftstate, consumed);
+  case CheckClipboardKey(keycode, shiftstate) of
+    ckCopy:
+      begin
+//        DoCopy;
+      end;
+
+    ckPaste:
+      begin
+//        DoPaste(fpgClipboard.Text);
+//        if not ReadOnly then
+//          HasChanged := True;
+      end;
+
+    ckCut:
+      begin
+//        DoCopy;
+//        DeleteSection;
+      end;
+  end;
 
   { Add lines as we go, so we can cursor past EOF. }
   { todo: This behaviour should be optional }
@@ -1359,6 +1384,15 @@ begin
 
     keyTab:
         begin
+          AddS := '  ';
+          SendDebug('b: ' + SLine);
+          UTF8Insert(AddS, SLine, CaretPos.X);
+          SendDebug('a: ' + SLine);
+          FLines[CaretPos.Y] := SLine;
+          CaretPos.X := CaretPos.X + 2;
+          FSelStartNo := CaretPos.Y;
+          FSelStartOffs := CaretPos.X;
+          consumed := True;
         end;
 
     keyReturn:
