@@ -139,7 +139,6 @@ Type
     FLastLinkOver: string;
     FClickedLink: string;
 
-    procedure DoAllocateWindowHandle(AParent: TfpgWindowBase); override;
     Procedure CreateWnd;
     procedure HandleResize(AWidth, AHeight: TfpgCoord); override;
     procedure UpdateScrollBarCoords;
@@ -646,6 +645,8 @@ begin
     FTopCharIndex := 0;
     FVerticalPositionInitialised := false;
   end;
+
+  CreateWnd;
 end;
 
 procedure TRichTextView.HandlePaint;
@@ -851,8 +852,7 @@ Begin
   // while the canvas is still valid
   // (it will be freed in TControl.DisposeWnd)
   // in order to release logical fonts
-  if FFontManager <> nil then
-    FFontManager.Free;
+  FFontManager.Free;
   if Assigned(FLayout) then
     FreeAndNil(FLayout);
 
@@ -932,15 +932,8 @@ begin
   FDefaultMenu.ShowAt(x, y);
 end;
 
-procedure TRichTextView.DoAllocateWindowHandle(AParent: TfpgWindowBase);
-begin
-  inherited DoAllocateWindowHandle(AParent);
-  CreateWnd;
-end;
-
 Procedure TRichTextView.CreateWnd;
 begin
-ProfileEvent('DEBUG:  TRichTextView.CreateWnd >>>>');
   if InDesigner then
     exit;
 
@@ -973,7 +966,6 @@ ProfileEvent('DEBUG:  TRichTextView.CreateWnd >>>>');
   if FLayoutRequired then
     // we haven't yet done a layout
     Layout;
-ProfileEvent('DEBUG:  TRichTextView.CreateWnd <<<<');
 end;
 
 procedure TRichTextView.HandleResize(AWidth, AHeight: TfpgCoord);
