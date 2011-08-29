@@ -364,7 +364,7 @@ Type
 
     function LinkFromIndex( const CharIndexToFind: longint): string;
 
-  Published
+  published
     property Align;
     property BackgroundColor default clBoxColor;
     //property ParentColor;
@@ -544,16 +544,20 @@ begin
   FDefaultMenu := TfpgPopupMenu.Create(nil);
   FDefaultMenu.OnShow := @DefaultMenuPopup;
 
-  FSelectAllMI := FDefaultMenu.AddMenuItem('Select &All', '', @SelectAllMIClick);
+  with FDefaultMenu do
+  begin
+    FSelectAllMI    := AddMenuItem('Select &All', '', @SelectAllMIClick);
+    FCopyMI         := AddMenuItem('&Copy', '', @CopyMIClick);
+    AddMenuItem('-', '', nil);
+    FRefreshMI      := AddMenuItem('&Refresh', '', @RefreshMIClick);
+    AddMenuItem('-', '', nil);
+    FSmoothScrollMI := AddMenuItem('&Smooth Scrolling', '', @SmoothScrollMIClick);
+    FWordWrapMI     := AddMenuItem('&Word Wrap', '', @WordWrapMIClick);
+    FDebugMI        := AddMenuItem('&Debug', '', @DebugMIClick);
+  end;
+
   FSelectAllMI.Enabled := False;  // TODO: implement me
-  FCopyMI := FDefaultMenu.AddMenuItem('&Copy', '', @CopyMIClick);
   FCopyMI.Enabled := False;  // TODO: implement me
-  FDefaultMenu.AddMenuItem('-', '', nil);
-  FRefreshMI := FDefaultMenu.AddMenuItem('&Refresh', '', @RefreshMIClick);
-  FDefaultMenu.AddMenuItem('-', '', nil);
-  FSmoothScrollMI := FDefaultMenu.AddMenuItem('&Smooth Scrolling', '', @SmoothScrollMIClick);
-  FWordWrapMI := FDefaultMenu.AddMenuItem('&Word Wrap', '', @WordWrapMIClick);
-  FDebugMI := FDefaultMenu.AddMenuItem('&Debug', '', @DebugMIClick);
 end;
 
 Procedure TRichTextView.SelectAllMIClick( Sender: TObject );
