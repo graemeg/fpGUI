@@ -1611,64 +1611,64 @@ begin
   { start drawing formatted text }
   R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
   AllowDraw := True;
+
   { end-user can hook in here to do syntax highlighting and other custom drawing }
   if Assigned(FOnDrawLine) then
     FOnDrawLine(self, S, ALineIndex, Canvas, R, AllowDraw);
+
   { Draw simple text line... }
   if AllowDraw then
-  begin
     Canvas.DrawText(R, S);
-  end;
-    if FSelected then
+
+  if FSelected then
+  begin
+    Canvas.TextColor := clWhite;
+    Canvas.Color :=  fpgColorToRGB(clSelection);
+    if (ALineIndex > StartNo) and (ALineIndex < EndNo) then     // whole line is selected
     begin
-      Canvas.TextColor := clWhite;
-      Canvas.Color :=  fpgColorToRGB(clSelection);
-      if (ALineIndex > StartNo) and (ALineIndex < EndNo) then     // whole line is selected
+      R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
+      Canvas.FillRectangle(R);
+      Canvas.DrawText(R, S);
+    end
+    else
+    begin
+      Ei := EndOffs;
+      Si := StartOffs;
+      if (ALineIndex = StartNo) and (ALineIndex = EndNo) then  // start/end selection on same line
       begin
-        R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
+        SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
+        if Ei > UTF8Length(S) then
+          SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si)
+        else
+          SS := UTF8Copy(S, Si + 1, Ei - Si);
+        R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
         Canvas.FillRectangle(R);
-        Canvas.DrawText(R, S);
+        Canvas.DrawText(R, SS);
       end
       else
       begin
-        Ei := EndOffs;
-        Si := StartOffs;
-        if (ALineIndex = StartNo) and (ALineIndex = EndNo) then  // start/end selection on same line
+        if (ALineIndex = StartNo) and (ALineIndex < EndNo) then
         begin
           SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
-          if Ei > UTF8Length(S) then
-            SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si)
-          else
-            SS := UTF8Copy(S, Si + 1, Ei - Si);
           R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
           Canvas.FillRectangle(R);
           Canvas.DrawText(R, SS);
         end
         else
         begin
-          if (ALineIndex = StartNo) and (ALineIndex < EndNo) then
+          if (ALineIndex > StartNo) and (ALineIndex = EndNo) then
           begin
-            SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
-            R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+            if Ei > UTF8Length(S) then
+              Ei := UTF8Length(S);
+            SS := UTF8Copy(S, 1, Ei);
+            R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
             Canvas.FillRectangle(R);
             Canvas.DrawText(R, SS);
-          end
-          else
-          begin
-            if (ALineIndex > StartNo) and (ALineIndex = EndNo) then
-            begin
-              if Ei > UTF8Length(S) then
-                Ei := UTF8Length(S);
-              SS := UTF8Copy(S, 1, Ei);
-              R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
-              Canvas.FillRectangle(R);
-              Canvas.DrawText(R, SS);
-            end;
           end;
         end;
       end;
-    end; { if FSelected... }
-//  end;  { if AllowDraw... }
+    end;
+  end; { if FSelected... }
 
   if UTF8Length(S) > FMaxScrollH then
   begin
