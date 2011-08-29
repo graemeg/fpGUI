@@ -879,7 +879,7 @@ begin
             // scroll text
             if FVScrollBar.Visible and (CaretPos.Y > FTopLine+FVisLines-2) then
               FVScrollBar.LineDown;
-              if FSelected then
+            if FSelected then
             begin
               FSelected := False;
               Exit;
@@ -1296,8 +1296,7 @@ begin
   fpgPostMessage(self, FVScrollBar, FPGM_SCROLL, msg);
 end;
 
-procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word;
-    var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgBaseTextEdit.HandleKeyPress(var keycode: word; var shiftstate: TShiftState; var consumed: boolean);
 var
   SLine: TfpgString;
   AddS: TfpgString;
@@ -1307,7 +1306,7 @@ var
   HasChanged: boolean;
 begin
   {$IFDEF gDEBUG}
-  writeln('>> TfpgBaseTextEdit.HandleKeyPress');
+  SendMethodEnter('TfpgBaseTextEdit.HandleKeyPress')
   {$ENDIF}
   CaretScroll := False;
 //  inherited HandleKeyPress(keycode, shiftstate, consumed);
@@ -1386,9 +1385,7 @@ begin
     keyTab:
         begin
           AddS := '  ';
-          SendDebug('b: ' + SLine);
           UTF8Insert(AddS, SLine, CaretPos.X);
-          SendDebug('a: ' + SLine);
           FLines[CaretPos.Y] := SLine;
           CaretPos.X := CaretPos.X + 2;
           FSelStartNo := CaretPos.Y;
@@ -1446,12 +1443,11 @@ begin
 
   Invalidate;
   {$IFDEF gDEBUG}
-  writeln('<< TfpgBaseTextEdit.HandleKeyPress');
+  SendMethodExit('TfpgBaseTextEdit.HandleKeyPress')
   {$ENDIF}
 end;
 
-procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar;
-  var shiftstate: TShiftState; var consumed: boolean);
+procedure TfpgBaseTextEdit.HandleKeyChar(var AText: TfpgChar; var shiftstate: TShiftState; var consumed: boolean);
 var
   SLine: TfpgString;
   Fill: Integer;
@@ -1877,6 +1873,7 @@ end;
 procedure TfpgBaseTextEdit.DeleteSelection;
 begin
   { TODO : Implement DeleteSelection }
+  SendDebug(' TODO: Implement DeleteSelection');
 end;
 
 procedure TfpgBaseTextEdit.SaveToFile(const AFileName: TfpgString);
