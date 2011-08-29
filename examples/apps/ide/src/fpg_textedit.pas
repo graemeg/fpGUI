@@ -1341,17 +1341,17 @@ begin
 //  if (keycode = keyEscape) or (ssCtrl in ShiftState) then
 //    Exit; //==>
 
-  if FSelected then
-  begin
-    DeleteSelection;
-    if keycode = keyBackSpace then
-      Exit; //==>
-  end;
   SLine := FLines[CaretPos.Y];
 
   case keycode of
     keyBackspace:
         begin
+          if FSelected then
+          begin
+            DeleteSelection;
+            consumed := True;
+            Exit;
+          end;
           if UTF8Length(SLine) >= CaretPos.X then
             X := CaretPos.X
           else
