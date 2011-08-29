@@ -1336,6 +1336,7 @@ begin
   begin
     FLines.Add('');
     FVScrollBar.Max := FVScrollBar.Max + 1;
+    consumed := True;
     Exit; //==>
   end;
 //  if (keycode = keyEscape) or (ssCtrl in ShiftState) then
@@ -1380,6 +1381,7 @@ begin
           end;
           FSelStartNo := CaretPos.Y;
           FSelStartOffs := CaretPos.X;
+          consumed := True
         end;
 
     keyTab:
@@ -1414,12 +1416,14 @@ begin
           CaretPos.X := 0;
           FSelStartNo := CaretPos.Y;
           FSelStartOffs := CaretPos.X;
+          consumed := True;
         end;
 
     keyLeft, keyRight, keyUp, keyDown, keyHome, keyEnd, keyPrior, keyNext:
         begin
           KeyboardCaretNav(ShiftState, keycode);
           CaretScroll := True;
+          consumed := True;
         end;
   end;
 
@@ -1441,7 +1445,8 @@ begin
       ScrollPos_V := CaretPos.Y - FVisLines + 2;
   end;
 
-  Invalidate;
+  if consumed then
+    Invalidate;
   {$IFDEF gDEBUG}
   SendMethodExit('TfpgBaseTextEdit.HandleKeyPress')
   {$ENDIF}
