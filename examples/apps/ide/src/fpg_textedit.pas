@@ -1425,12 +1425,36 @@ begin
           CaretScroll := True;
           consumed := True;
         end;
-  end;
 
-  if CaretPos.X > HPos + FVisCols then
-    ScrollPos_H := CaretPos.X - FVisCols
-  else if CaretPos.X < HPos then
-    ScrollPos_H := CaretPos.X;
+    keyDelete:
+        begin
+          if FSelected then
+          begin
+            DeleteSelection;
+            consumed := True;
+            Exit;
+          end;
+          if CaretPos.Y > pred(FLines.Count) then
+            Exit;
+          SLine := FLines[CaretPos.Y];
+          if Length(SLine) >= CaretPos.X + 1 then
+          begin
+            X := CaretPos.X + 1;
+            Delete(SLine, X, 1);
+            FLines[CaretPos.Y] := SLine;
+          end
+          else
+          begin
+            if CaretPos.Y + 1 > pred(FLines.Count) then
+              Exit;
+            AddS := FLines[CaretPos.Y + 1];
+            FLines[CaretPos.Y] := SLine + AddS;
+            FLines.Delete(CaretPos.Y + 1);
+            DrawVisible;
+          end;
+          consumed := True;
+        end;
+  end;
 
   if CaretScroll then
   begin
