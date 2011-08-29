@@ -1587,7 +1587,11 @@ begin
     Exit; //==>
   if (ALineIndex < 0) or (ALineIndex > FLines.Count-1) then
     Exit; //==>
+
   S := FLines[ALineIndex];
+  if Length(s) = 0 then
+    Exit; // no text to draw, so we are done
+
   if Pos(#9, S) > 0 then
   begin
     CorrectS := '';
