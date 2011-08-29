@@ -1309,6 +1309,7 @@ begin
   {$IFDEF gDEBUG}
   writeln('>> TfpgBaseTextEdit.HandleKeyPress');
   {$ENDIF}
+  CaretScroll := False;
 //  inherited HandleKeyPress(keycode, shiftstate, consumed);
   case CheckClipboardKey(keycode, shiftstate) of
     ckCopy:
@@ -1430,10 +1431,18 @@ begin
   else if CaretPos.X < HPos then
     ScrollPos_H := CaretPos.X;
 
-  if CaretPos.Y < (FTopLine+1) then
-    ScrollPos_V := CaretPos.Y
-  else if CaretPos.Y > (FTopLine + FVisLines - 2) then
-    ScrollPos_V := CaretPos.Y - FVisLines + 2;
+  if CaretScroll then
+  begin
+    if CaretPos.X > HPos + FVisCols then
+      ScrollPos_H := CaretPos.X - FVisCols
+    else if CaretPos.X < HPos then
+      ScrollPos_H := CaretPos.X;
+
+    if CaretPos.Y < (FTopLine+1) then
+      ScrollPos_V := CaretPos.Y
+    else if CaretPos.Y > (FTopLine + FVisLines - 2) then
+      ScrollPos_V := CaretPos.Y - FVisLines + 2;
+  end;
 
   Invalidate;
   {$IFDEF gDEBUG}
