@@ -375,7 +375,8 @@ ProfileEvent('DEBUG:  TRichTextLayout.Layout  >>>>');
       teTextEnd:
       begin
         DoLine( P, NextP, WordStartX + WordX );
-        // end of text, done
+        // end of text, so it is safe to free CurrentLine created in DoLine()
+        CurrentLine.Free;
         break;
       end;
 
