@@ -208,6 +208,9 @@ Begin
   ProfileEvent('TRichTextLayout.Destroy  ******* ');
   FreeAndNil(FLines);
   FLinks.Free;
+  FRichTextSettings := nil; // was a reference only
+  FImages := nil;  // was a reference only
+  FFontManager := nil;  // was a reference only
   inherited Destroy;
 End;
 
