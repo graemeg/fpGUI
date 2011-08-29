@@ -873,7 +873,7 @@ begin
         begin
           if CaretPos.Y >= FLines.Count then
             Exit;
-          if not (ssShift in ShiftState) and not (ssCtrl in ShiftState) then
+          if ShiftState = [] then
           begin
             CaretPos.Y := CaretPos.Y + 1;
             // scroll text
