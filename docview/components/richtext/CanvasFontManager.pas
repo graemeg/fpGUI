@@ -35,6 +35,7 @@ type
   private
     FWidget: TfpgWidget;
     FCanvas: TfpgCanvas;
+    FFont: TfpgFont;
     function    GetCurrentFont: TfpgFont;
     procedure   SetDefaultFont(const AValue: TfpgFont);
   protected
@@ -234,12 +235,14 @@ begin
   FWidget := AWidget;
   FDefaultFont := fpgGetFont(DefaultTopicFont);
   FCanvas.Font := FDefaultFont;
+  FFont := nil;
 end;
 
 destructor TCanvasFontManager.Destroy;
 begin
   FCanvas.Font := fpgApplication.DefaultFont;
   FDefaultFont.Free;
+  FFont.Free;
   inherited Destroy;
 end;
 
@@ -269,7 +272,10 @@ begin
     Exit;
   end;
 
-  FCanvas.Font := fpgGetFont(AFontDesc);
+  if Assigned(FFont) then
+    FFont.Free;
+  FFont := fpgGetFont(AFontDesc);
+  FCanvas.Font := FFont;
 end;
 
 function TCanvasFontManager.CharWidth( const C: TfpgChar ): longint;
