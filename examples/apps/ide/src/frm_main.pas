@@ -64,6 +64,7 @@ type
     procedure   btnOpenFileClicked(Sender: TObject);
     procedure   miFileSave(Sender: TObject);
     procedure   miFileSaveAs(Sender: TObject);
+    procedure   miFindClicked(Sender: TObject);
     procedure   miSearchProcedureList(Sender: TObject);
     procedure   miAboutFPGuiClicked(Sender: TObject);
     procedure   miAboutIDE(Sender: TObject);
@@ -122,6 +123,7 @@ uses
   ,frm_projectoptions
   ,frm_debug
   ,frm_procedurelist
+  ,frm_find
   ,fpg_basegrid
   ,ideconst
   ,idemacros
@@ -195,6 +197,18 @@ begin
   s := SelectFileDialog(sfdSave);
   if s <> '' then
     TfpgTextEdit(pcEditor.ActivePage.Components[0]).SaveToFile(s);
+end;
+
+procedure TMainForm.miFindClicked(Sender: TObject);
+var
+  s: TfpgString;
+  edt: TfpgTextEdit;
+begin
+  DisplayFindForm(s);
+  if s = '' then
+    exit;
+  edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
+  edt.FindText(s, [], False);
 end;
 
 procedure TMainForm.miSearchProcedureList(Sender: TObject);
@@ -1209,7 +1223,7 @@ begin
   begin
     Name := 'mnuSearch';
     SetPosition(476, 98, 172, 20);
-    AddMenuItem('Find...', 'Ctrl+F', nil).Enabled := False;
+    AddMenuItem('Find...', 'Ctrl+F', @miFindClicked);
     AddMenuItem('Find Next', 'F3', nil).Enabled := False;
     AddMenuItem('Find Previous', 'Shift+F3', nil).Enabled := False;
     AddMenuItem('Find in Files...', 'Ctrl+Shift+F', nil).Enabled := False;
