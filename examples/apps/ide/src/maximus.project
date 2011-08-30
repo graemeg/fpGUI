@@ -40,16 +40,17 @@ UnitDir6=${FPGUIDIR}src/gui/db/
 UnitDir7=${FPGUILIBDIR}
 
 [Units]
-UnitCount=12
+UnitCount=13
 Unit1=fpg_textedit.pas,0
-Unit2=maximus.lpr,0
-Unit3=frm_configureide.pas,0
-Unit4=frm_debug.pas,0
+Unit2=frm_configureide.pas,0
+Unit3=frm_debug.pas,0
+Unit4=frm_find.pas,-1
 Unit5=frm_main.pas,-1
 Unit6=frm_procedurelist.pas,0
 Unit7=frm_projectoptions.pas,0
 Unit8=ideconst.pas,0
 Unit9=idemacros.pas,0
 Unit10=ideutils.pas,0
-Unit11=project.pas,-1
-Unit12=unitlist.pas,0
+Unit11=maximus.lpr,0
+Unit12=project.pas,-1
+Unit13=unitlist.pas,0

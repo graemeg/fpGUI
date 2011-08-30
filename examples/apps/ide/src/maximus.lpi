@@ -38,7 +38,7 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="18">
+    <Units Count="19">
       <Unit0>
         <Filename Value="maximus.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -129,6 +129,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpg_textedit"/>
       </Unit17>
+      <Unit18>
+        <Filename Value="frm_find.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="frm_find"/>
+      </Unit18>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
