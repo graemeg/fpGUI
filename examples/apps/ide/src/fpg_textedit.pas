@@ -1893,6 +1893,7 @@ procedure TfpgBaseTextEdit.ScrollTo(X, Y: Integer);
 begin
   SetVPos(Y div FChrH);
   SetHPos(X div FChrW);
+  UpdateScrollBars;
 end;
 
 procedure TfpgBaseTextEdit.GotoLine(ALine: integer);
