@@ -33,6 +33,8 @@ type
   // forward declaration
   TfpgBaseTextEdit = class;
 
+  TfpgFindOptions = set of (foMatchCase, foWholeWords, foEntireScope);
+
   TfpgGutter = class(TfpgWidget)
   private
     FOwner: TfpgBaseTextEdit; // convenience reference variable
@@ -66,6 +68,12 @@ type
       ALineIndex: Integer; ACanvas: TfpgCanvas; ATextRect: TfpgRect;
       var AllowSelfDraw: Boolean) of object;
 
+  TfpgFindText = procedure(Sender: TObject; FindPos: TPoint; var ScrollToWord: Boolean) of object;
+
+  TfpgReplaceText = procedure(Sender: TObject; FindPos: TPoint; var ScrollToWord, ReplaceText: Boolean) of object;
+
+  TfpgOnSearchEnd = procedure(Sender: TObject; FindIt, ReplaceMode: Boolean) of object;
+
 
   TfpgBaseTextEdit = class(TfpgWidget)
   private
@@ -74,6 +82,9 @@ type
     FLines: TStrings;
     CaretPos: TPoint;
     FOnDrawLine: TfpgDrawLineEvent;
+    FOnFindText: TfpgFindText;
+    FOnReplaceText: TfpgReplaceText;
+    FOnSearchEnd: TfpgOnSearchEnd;
     FScrollBarStyle: TfpgScrollStyle;
     MousePos: TPoint;
     FChrW: Integer;
@@ -137,6 +148,7 @@ type
     function    calcmousewheeldelta(var info: TfpgMsgParmMouse; const fmin,fmax,deltamin,deltamax: double): double;
     function    mousewheelacceleration(const avalue: double): double;
     function    mousewheelacceleration(const avalue: integer): integer;
+    function    FindReplaceProc(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean; var ReplaceText: Boolean): Boolean;
   protected
     { -- internal events -- }
     procedure   HandleShow; override;
@@ -163,6 +175,9 @@ type
     property    TabWidth: Integer read FTabWidth write SetTabWidth default 8;
     property    Tracking: Boolean read FTracking write FTracking default True;
     property    OnDrawLine: TfpgDrawLineEvent read FOnDrawLine write FOnDrawLine;
+    property    OnFindText: TfpgFindText read FOnFindText write FOnFindText;
+    property    OnSearchEnd: TfpgOnSearchEnd read FOnSearchEnd write FOnSearchEnd;
+    property    OnReplaceText: TfpgReplaceText read FOnReplaceText write FOnReplaceText;
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -175,6 +190,7 @@ type
     procedure   DeleteSelection;
     procedure   SaveToFile(const AFileName: TfpgString);
     procedure   LoadFromFile(const AFileName: TfpgString);
+    procedure   FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean);
     property    FontHeight: Integer read FChrH;
     property    FontWidth: Integer read FChrW;
     property    ScrollPos_H: Integer read GetHScrollPos write SetHScrollPos;
@@ -197,6 +213,9 @@ type
     property    TabWidth;
     property    Tracking;
     property    OnDrawLine;
+    property    OnFindText;
+    property    OnSearchEnd;
+    property    OnReplaceText;
   end;
 
 
@@ -1273,6 +1292,199 @@ begin
   result:= round(mousewheelacceleration(avalue*1.0));
 end;
 
+function TfpgBaseTextEdit.FindReplaceProc(TextToFind: TfpgString;
+    FindOptions: TfpgFindOptions; Backward, ReplaceMode: Boolean;
+    var ReplaceText: Boolean): Boolean;
+var
+  SrcBegin, SrcEnd, I, WordPos, ScrollX, ScrollY, Fill: Integer;
+  SLine, SrcWord: TfpgString;
+  FindPos: TPoint;
+  AllowScroll, ContinueSrc: Boolean;
+begin
+  Result := False;
+  if foEntireScope in FindOptions then
+  begin
+    SrcBegin := 0;
+    SrcEnd := pred(FLines.Count);
+  end
+  else
+  begin
+    SrcBegin := CaretPos.Y;
+    if Backward then
+      SrcEnd := 0
+    else
+      SrcEnd := pred(FLines.Count);
+  end;
+  if not (foMatchCase in FindOptions) then
+    SrcWord := UpperCase(TextToFind)
+  else
+    SrcWord := TextToFind;
+  if SrcBegin <= SrcEnd then
+  begin
+    for I := SrcBegin to SrcEnd do
+    begin
+      SLine := FLines[I];
+      if not (foMatchCase in FindOptions) then
+        SLine := UpperCase(SLine);
+      FindPos.x := 0;
+      WordPos := Pos(SrcWord, SLine);
+      while WordPos > 0 do
+      begin
+        if (I = CaretPos.Y) and (WordPos < CaretPos.X) then
+        begin
+          for Fill := WordPos to WordPos + Length(SrcWord) do
+            SLine[Fill] := '*';
+          FindPos.x := FindPos.x + WordPos;
+          WordPos := Pos(SrcWord, SLine);
+          Continue;
+        end;
+        FindPos.x := WordPos;
+        FindPos.y := I;
+        AllowScroll := True;
+        ContinueSrc := False;
+        if foWholeWords in FindOptions then
+        begin
+          if WordPos > 1 then
+            if (SLine[WordPos - 1] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+          if WordPos + Length(SrcWord) <= Length(SLine) then
+            if (SLine[WordPos + Length(SrcWord)] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+        end;
+        FSelStartNo := I;
+        FSelEndNo := I;
+        Self.FSelStartOffs := FindPos.x - 1;
+        FSelEndOffs := FindPos.x + Length(SrcWord) - 1;
+        FSelected := True;
+        CaretPos.Y := I;
+        CaretPos.X := FindPos.x + Length(SrcWord) - 1;
+        if AllowScroll then
+        begin
+          ScrollX := 0;
+          ScrollY := (FTopLine * FChrH);
+          if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
+            ScrollX := (FindPos.x * FChrW) - 2 * FChrW;
+          if I > (FTopLine + FVisLines - 2) then
+            ScrollY := I * FChrH;
+          ScrollTo(ScrollX, ScrollY);
+        end;
+        Result := True;
+        Invalidate;
+        if ReplaceMode then
+        begin
+          if Assigned(FOnReplaceText) then
+            FOnReplaceText(Self, FindPos, AllowScroll, ReplaceText);
+//          RepPos := FindPos;
+        end
+        else
+        begin
+          if Assigned(FOnFindText) then
+            FOnFindText(Self, FindPos, AllowScroll);
+        end;
+        for Fill := WordPos to WordPos + Length(SrcWord) do
+          SLine[Fill] := '*';
+        WordPos := Pos(SrcWord, SLine);
+        if not ContinueSrc then
+          Exit;   //==>
+      end;  { while }
+    end;  { for I ... }
+  end { if..else }
+  else
+  begin
+    for I := SrcBegin downto SrcEnd do
+    begin
+      SLine := FLines[I];
+      if not (foMatchCase in FindOptions) then
+        SLine := UpperCase(SLine);
+      FindPos.x := 0;
+      WordPos := Pos(SrcWord, SLine);
+      while WordPos > 0 do
+      begin
+        if (I = CaretPos.Y) and (WordPos < CaretPos.X) then
+        begin
+          for Fill := WordPos to WordPos + Length(SrcWord) do
+            SLine[Fill] := '*';
+          FindPos.x := FindPos.x + WordPos;
+          WordPos := Pos(SrcWord, SLine);
+          Continue;
+        end;
+        FindPos.x := WordPos;
+        FindPos.y := I;
+        AllowScroll := True;
+        ContinueSrc := False;
+        if foWholeWords in FindOptions then
+        begin
+          if WordPos > 1 then
+            if (SLine[WordPos - 1] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+          if WordPos + Length(SrcWord) <= Length(SLine) then
+            if (SLine[WordPos + Length(SrcWord)] in ['a'..'z', 'A'..'Z']) then
+            begin
+              for Fill := WordPos to WordPos + Length(SrcWord) do
+                SLine[Fill] := '*';
+              FindPos.x := FindPos.x + WordPos;
+              WordPos := Pos(SrcWord, SLine);
+              Continue;
+            end;
+        end;
+        FSelStartNo := I;
+        FSelEndNo := I;
+        Self.FSelStartOffs := FindPos.x - 1;
+        FSelEndOffs := FindPos.x + Length(SrcWord) - 1;
+        FSelected := True;
+        CaretPos.Y := I;
+        CaretPos.X := FindPos.x + Length(SrcWord) - 1;
+        if AllowScroll then
+        begin
+          ScrollX := 0;
+          ScrollY := (FTopLine * FChrH);
+          if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
+            ScrollX := (FindPos.x * FChrW) - 2 * FChrW;
+          if I > FTopLine + FVisLines - 2 then
+            ScrollY := I * FChrH;
+          ScrollTo(ScrollX, ScrollY);
+        end;
+        Result := True;
+        Invalidate;
+        if ReplaceMode then
+        begin
+          if Assigned(FOnReplaceText) then
+            FOnReplaceText(Self, FindPos, AllowScroll, ReplaceText);
+//          RepPos := FindPos;
+        end
+        else
+        begin
+          if Assigned(FOnFindText) then
+            FOnFindText(Self, FindPos, AllowScroll);
+        end;
+        for Fill := WordPos to WordPos + Length(SrcWord) do
+          SLine[Fill] := '*';
+        WordPos := Pos(SrcWord, SLine);
+        if not ContinueSrc then
+          Exit;   //==>
+      end;  { while }
+    end;  { for I ... }
+  end;
+end;
+
 procedure TfpgBaseTextEdit.HandleMouseScroll(x, y: integer; shiftstate: TShiftState;
     delta: smallint);
 var
@@ -1949,6 +2161,15 @@ begin
   FLines.LoadFromFile(AFileName);
   HandleResize(Width, Height);
   Invalidate;
+end;
+
+procedure TfpgBaseTextEdit.FindText(TextToFind: TfpgString; FindOptions: TfpgFindOptions; Backward: Boolean);
+var
+  Rep, SrcRes: Boolean;
+begin
+  SrcRes := FindReplaceProc(TextToFind, FindOptions, Backward, False, Rep);
+  if Assigned(FOnSearchEnd) then
+    FOnSearchEnd(Self, SrcRes, False);
 end;
 
 
