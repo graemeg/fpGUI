@@ -33,6 +33,7 @@ type
     btnFind: TfpgButton;
     btnHelp: TfpgButton;
     {@VFD_HEAD_END: FindForm}
+    procedure chkReplaceChanged(Sender: TObject);
   public
     procedure AfterCreate; override;
   end;
@@ -75,6 +76,11 @@ end;
 
 {@VFD_NEWFORM_IMPL}
 
+procedure TFindForm.chkReplaceChanged(Sender: TObject);
+begin
+  edtReplaceText.Enabled := chkReplace.Checked;
+end;
+
 procedure TFindForm.AfterCreate;
 begin
   {%region 'Auto-generated GUI code' -fold}
@@ -116,6 +122,7 @@ begin
     Hint := '';
     TabOrder := 3;
     Text := 'Replace with';
+    OnChange := @chkReplaceChanged;
   end;
 
   edtReplaceText := TfpgEdit.Create(self);
@@ -124,6 +131,7 @@ begin
     Name := 'edtReplaceText';
     SetPosition(4, 70, 292, 24);
     Anchors := [anLeft,anRight,anTop];
+    Enabled := False;
     ExtraHint := '';
     FontDesc := '#Edit1';
     Hint := '';
