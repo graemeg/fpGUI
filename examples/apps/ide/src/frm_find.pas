@@ -26,8 +26,8 @@ type
     Label2: TfpgLabel;
     chkCaseSensitive: TfpgCheckBox;
     chkWholeWord: TfpgCheckBox;
-    CheckBox3: TfpgCheckBox;
-    CheckBox4: TfpgCheckBox;
+    chkGlobalScope: TfpgCheckBox;
+    chkSearchBackwards: TfpgCheckBox;
     btnCancel: TfpgButton;
     btnFind: TfpgButton;
     btnHelp: TfpgButton;
@@ -147,26 +147,26 @@ begin
     Text := 'Whole Words Only';
   end;
 
-  CheckBox3 := TfpgCheckBox.Create(self);
-  with CheckBox3 do
+  chkGlobalScope := TfpgCheckBox.Create(self);
+  with chkGlobalScope do
   begin
-    Name := 'CheckBox3';
+    Name := 'chkGlobalScope';
     SetPosition(16, 160, 160, 20);
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 8;
-    Text := 'CheckBox';
+    Text := 'Global Scope';
   end;
 
-  CheckBox4 := TfpgCheckBox.Create(self);
-  with CheckBox4 do
+  chkSearchBackwards := TfpgCheckBox.Create(self);
+  with chkSearchBackwards do
   begin
-    Name := 'CheckBox4';
+    Name := 'chkSearchBackwards';
     SetPosition(16, 180, 160, 20);
     FontDesc := '#Label1';
     Hint := '';
     TabOrder := 9;
-    Text := 'CheckBox';
+    Text := 'Search backwards';
   end;
 
   btnCancel := TfpgButton.Create(self);
@@ -179,8 +179,8 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 10;
     ModalResult := mrCancel;
+    TabOrder := 10;
   end;
 
   btnFind := TfpgButton.Create(self);
@@ -193,8 +193,8 @@ begin
     FontDesc := '#Label1';
     Hint := '';
     ImageName := '';
-    TabOrder := 11;
     ModalResult := mrOK;
+    TabOrder := 11;
   end;
 
   btnHelp := TfpgButton.Create(self);
