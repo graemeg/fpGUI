@@ -267,7 +267,7 @@ var
   f: TStream;
 begin
   if AFilename <> '' then
-    f := TFileStream.Create(AFilename, fmOpenRead);
+    f := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);
   try
     Self.Create(f);
   finally
@@ -418,7 +418,7 @@ begin
   // Now fpGUI translation
   if (AFilename = '') or (not fpgFileExists(AFilename)) then
     Exit;
-  f := TFileStream.Create(AFilename, fmOpenRead);
+  f := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);
   try
     s := '';
     Size := f.Size - f.Position;
