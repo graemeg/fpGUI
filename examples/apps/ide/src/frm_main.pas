@@ -1197,15 +1197,15 @@ begin
   begin
     Name := 'mnuFile';
     SetPosition(476, 61, 172, 20);
-    AddMenuItem('New...', 'Ctrl+N', nil).Enabled := False;
+    AddMenuItem('New...', rsKeyCtrl+'N', nil).Enabled := False;
     AddMenuItem('-', '', nil);
-    AddMenuItem('Open...', 'Ctrl+O', @btnOpenFileClicked);
+    AddMenuItem('Open...', rsKeyCtrl+'O', @btnOpenFileClicked);
     AddMenuItem('Open Recent', '', nil).Enabled := False;
-    AddMenuItem('Save', 'Ctrl+S', @miFileSave);
+    AddMenuItem('Save', rsKeyCtrl+'S', @miFileSave);
     AddMenuItem('Save As...', '', @miFileSaveAs);
-    AddMenuItem('Save All', 'Ctrl+Shift+S', nil).Enabled := False;
+    AddMenuItem('Save All', rsKeyCtrl+rsKeyShift+'S', nil).Enabled := False;
     AddMenuItem('-', '', nil);
-    AddMenuItem('Quit', 'Ctrl+Q', @btnQuitClicked);
+    AddMenuItem('Quit', rsKeyCtrl+'Q', @btnQuitClicked);
   end;
 
   mnuEdit := TfpgPopupMenu.Create(self);
@@ -1217,9 +1217,9 @@ begin
     AddMenuItem('Copy', '', nil).Enabled := False;
     AddMenuItem('Paste', '', nil).Enabled := False;
     AddMenuItem('-', '', nil);
-    AddMenuItem('Indent selection', 'Ctrl+I', nil).Enabled := False;
-    AddMenuItem('Unindent selection', 'Ctrl+U', nil).Enabled := False;
-    AddMenuItem('Insert $IFDEF...', 'Ctrl+Shift+D', nil).Enabled := False;
+    AddMenuItem('Indent selection', rsKeyCtrl+'I', nil).Enabled := False;
+    AddMenuItem('Unindent selection', rsKeyCtrl+'U', nil).Enabled := False;
+    AddMenuItem('Insert $IFDEF...', rsKeyCtrl+rsKeyShift+'D', nil).Enabled := False;
   end;
 
   mnuSearch := TfpgPopupMenu.Create(self);
@@ -1227,13 +1227,13 @@ begin
   begin
     Name := 'mnuSearch';
     SetPosition(476, 98, 172, 20);
-    AddMenuItem('Find...', 'Ctrl+F', @miFindClicked);
+    AddMenuItem('Find...', rsKeyCtrl+'F', @miFindClicked);
     AddMenuItem('Find Next', 'F3', nil).Enabled := False;
-    AddMenuItem('Find Previous', 'Shift+F3', nil).Enabled := False;
-    AddMenuItem('Find in Files...', 'Ctrl+Shift+F', nil).Enabled := False;
-    AddMenuItem('Replace...', 'Ctrl+R', nil).Enabled := False;
+    AddMenuItem('Find Previous', rsKeyShift+'F3', nil).Enabled := False;
+    AddMenuItem('Find in Files...', rsKeyCtrl+rsKeyShift+'F', nil).Enabled := False;
+    AddMenuItem('Replace...', rsKeyCtrl+'R', nil).Enabled := False;
     AddMenuItem('-', '', nil);
-    AddMenuItem('Procedure List...', 'Ctrl+G', @miSearchProcedureList);
+    AddMenuItem('Procedure List...', rsKeyCtrl+'G', @miSearchProcedureList);
   end;
 
   mnuView := TfpgPopupMenu.Create(self);
@@ -1241,7 +1241,7 @@ begin
   begin
     Name := 'mnuView';
     SetPosition(476, 119, 172, 20);
-    AddMenuItem('Todo List...', 'Ctrl+F2', nil).Enabled := False;
+    AddMenuItem('Todo List...', rsKeyCtrl+'F2', nil).Enabled := False;
     AddMenuItem('Debug Windows', '', @miViewDebug);
   end;
 
@@ -1250,17 +1250,17 @@ begin
   begin
     Name := 'mnuProject';
     SetPosition(476, 140, 172, 20);
-    AddMenuItem('Options...', 'Ctrl+Shift+O', @miProjectOptions);
+    AddMenuItem('Options...', rsKeyCtrl+rsKeyShift+'O', @miProjectOptions);
     AddMenuItem('-', '', nil);
     AddMenuItem('New (empty)...', '', @miProjectNew);
     AddMenuItem('New from Template...', '', @miProjectNewFromTemplate);
     AddMenuItem('Open...', '', @miProjectOpen);
     miRecentProjects := AddMenuItem('Open Recent', '', nil);
-    AddMenuItem('Save', 'Ctrl+Alt+S', @miProjectSave);
+    AddMenuItem('Save', rsKeyCtrl+rsKeyAlt+'S', @miProjectSave);
     AddMenuItem('Save As...', '', @miProjectSaveAs);
     AddMenuItem('-', '', nil);
     AddMenuItem('View Source', '', nil);
-    AddMenuItem('Add editor file to Project', 'Ctrl+Shift+A', @miProjectAddUnitToProject);
+    AddMenuItem('Add editor file to Project', rsKeyCtrl+rsKeyShift+'A', @miProjectAddUnitToProject);
   end;
 
   mnuRun := TfpgPopupMenu.Create(self);
@@ -1268,15 +1268,15 @@ begin
   begin
     Name := 'mnuRun';
     SetPosition(476, 161, 172, 20);
-    AddMenuItem('Make', 'Ctrl+F9', @miRunMake);
-    AddMenuItem('Build All', 'Ctrl+Shift+F9', @miRunBuild);
-    AddMenuItem('Make 1', 'Ctrl+Alt+1', @miRunMake1);
-    AddMenuItem('Make 2', 'Ctrl+Alt+2', @miRunMake2);
-    AddMenuItem('Make 3', 'Ctrl+Alt+3', @miRunMake3);
-    AddMenuItem('Make 4', 'Ctrl+Alt+4', @miRunMake4);
+    AddMenuItem('Make', rsKeyCtrl+'F9', @miRunMake);
+    AddMenuItem('Build All', rsKeyCtrl+rsKeyShift+'F9', @miRunBuild);
+    AddMenuItem('Make 1', rsKeyCtrl+rsKeyAlt+'1', @miRunMake1);
+    AddMenuItem('Make 2', rsKeyCtrl+rsKeyAlt+'2', @miRunMake2);
+    AddMenuItem('Make 3', rsKeyCtrl+rsKeyAlt+'3', @miRunMake3);
+    AddMenuItem('Make 4', rsKeyCtrl+rsKeyAlt+'4', @miRunMake4);
     AddMenuItem('-', '', nil);
     AddMenuItem('Run', 'F9', nil);
-    AddMenuItem('Run Parameters...', 'Shift+F9', nil);
+    AddMenuItem('Run Parameters...', rsKeyShift+'F9', nil);
   end;
 
   mnuTools := TfpgPopupMenu.Create(self);
@@ -1285,7 +1285,7 @@ begin
     Name := 'mnuTools';
     SetPosition(476, 182, 172, 20);
     AddMenuItem('fpGUI UI Designer...', 'F12', nil);
-    AddMenuItem('fpGUI DocView...', 'Ctrl+F1', nil);
+    AddMenuItem('fpGUI DocView...', rsKeyCtrl+'F1', nil);
   end;
 
   mnuSettings := TfpgPopupMenu.Create(self);
