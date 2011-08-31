@@ -1373,11 +1373,11 @@ begin
         if AllowScroll then
         begin
           ScrollX := 0;
-          ScrollY := (FTopLine * FChrH);
+          ScrollY := FTopLine * FChrH;
           if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
             ScrollX := (FindPos.x * FChrW) - 2 * FChrW;
           if I > (FTopLine + FVisLines - 2) then
-            ScrollY := I * FChrH;
+            ScrollY := (I-10) * FChrH;  // move selection more into the centre
           ScrollTo(ScrollX, ScrollY);
         end;
         Result := True;
@@ -1455,11 +1455,11 @@ begin
         if AllowScroll then
         begin
           ScrollX := 0;
-          ScrollY := (FTopLine * FChrH);
+          ScrollY := FTopLine * FChrH;
           if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
-            ScrollX := (FindPos.x * FChrW) - 2 * FChrW;
-          if I > FTopLine + FVisLines - 2 then
-            ScrollY := I * FChrH;
+            ScrollX := (FindPos.x * FChrW) - (2 * FChrW);
+          if I < (FTopLine -2 ) then
+            ScrollY := (I-10) * FChrH;   // move selection more into the centre
           ScrollTo(ScrollX, ScrollY);
         end;
         Result := True;
