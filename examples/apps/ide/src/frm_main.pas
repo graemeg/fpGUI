@@ -213,6 +213,7 @@ begin
     exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
   edt.FindText(s, lFindOptions, lBackward);
+  edt.SetFocus;
 end;
 
 procedure TMainForm.miSearchProcedureList(Sender: TObject);
