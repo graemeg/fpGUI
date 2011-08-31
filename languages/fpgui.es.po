@@ -44,6 +44,10 @@ msgstr "Todos los Archivos"
 msgid "All Fonts"
 msgstr "Todas las Fuentes"
 
+#: fpg_constants:rskeyalt
+msgid "Alt+"
+msgstr ""
+
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
 msgstr ""
@@ -66,6 +70,10 @@ msgstr ""
 
 #: fpg_constants:rslongaug
 msgid "August"
+msgstr ""
+
+#: fpg_constants:rskeybksp
+msgid "BkSp"
 msgstr ""
 
 #: fpg_constants:rsbold
@@ -132,6 +140,10 @@ msgstr "Crear carpeta"
 msgid "Critical Error"
 msgstr "Error Crítico"
 
+#: fpg_constants:rskeyctrl
+msgid "Ctrl+"
+msgstr ""
+
 #: fpg_constants:rscut
 msgid "Cut"
 msgstr "Cortar"
@@ -148,6 +160,10 @@ msgstr ""
 msgid "December"
 msgstr ""
 
+#: fpg_constants:rskeydel
+msgid "Del"
+msgstr ""
+
 #: fpg_constants:rsdelete
 msgid "Delete"
 msgstr "Borrar"
@@ -160,6 +176,10 @@ msgstr "Carpetas"
 msgid "Directory"
 msgstr ""
 
+#: fpg_constants:rskeydown
+msgid "Down"
+msgstr ""
+
 #: fpg_constants:rsdrive
 msgid "Drive"
 msgstr "Unidad"
@@ -168,9 +188,17 @@ msgstr "Unidad"
 msgid "Edit"
 msgstr "Editar"
 
+#: fpg_constants:rskeyend
+msgid "End"
+msgstr ""
+
 #: fpg_constants:rslanguage
 msgid "English"
 msgstr "Español"
+
+#: fpg_constants:rskeyenter
+msgid "Enter"
+msgstr ""
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
@@ -179,6 +207,10 @@ msgstr "Ingrese el nombre de la carpeta nueva"
 #: fpg_constants:rserror
 msgid "Error"
 msgstr "Error"
+
+#: fpg_constants:rskeyesc
+msgid "Esc"
+msgstr ""
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
@@ -248,6 +280,10 @@ msgstr "Grupo"
 msgid "Help"
 msgstr "Ayuda"
 
+#: fpg_constants:rskeyhome
+msgid "Home"
+msgstr ""
+
 #: fpg_constants:rsignore
 msgid "Ignore"
 msgstr "Ignorar"
@@ -255,6 +291,10 @@ msgstr "Ignorar"
 #: fpg_constants:rsinformation
 msgid "Information"
 msgstr "Información"
+
+#: fpg_constants:rskeyins
+msgid "Ins"
+msgstr ""
 
 #: fpg_constants:rsinsert
 msgid "Insert"
@@ -296,6 +336,10 @@ msgstr ""
 msgid "June"
 msgstr ""
 
+#: fpg_constants:rskeyleft
+msgid "Left"
+msgstr ""
+
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
 msgstr "La lista debe estar vacia"
@@ -315,6 +359,10 @@ msgstr ""
 #: fpg_constants:rsmessage
 msgid "Message"
 msgstr "Mensaje"
+
+#: fpg_constants:rskeymeta
+msgid "Meta+"
+msgstr ""
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
@@ -388,6 +436,14 @@ msgstr "Contraseña"
 msgid "Paste"
 msgstr "Pegar"
 
+#: fpg_constants:rskeypgdn
+msgid "PgDn"
+msgstr ""
+
+#: fpg_constants:rskeypgup
+msgid "PgUp"
+msgstr ""
+
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
 msgstr "Usados Recientemente"
@@ -399,6 +455,10 @@ msgstr "Reemplazar"
 #: fpg_constants:rsretry
 msgid "Retry"
 msgstr "Reintentar"
+
+#: fpg_constants:rskeyright
+msgid "Right"
+msgstr ""
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
@@ -452,6 +512,10 @@ msgstr ""
 msgid "Serif"
 msgstr ""
 
+#: fpg_constants:rskeyshift
+msgid "Shift+"
+msgstr ""
+
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
 msgstr "Mostrar archivos ocultos"
@@ -459,6 +523,10 @@ msgstr "Mostrar archivos ocultos"
 #: fpg_constants:rssize
 msgid "Size"
 msgstr "Tamaño"
+
+#: fpg_constants:rskeyspace
+msgid "Space"
+msgstr ""
 
 #: fpg_constants:rsstyle
 msgid "Style"
@@ -471,6 +539,10 @@ msgstr "Dom"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Domingo"
+
+#: fpg_constants:rskeytab
+msgid "Tab"
+msgstr ""
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
@@ -511,6 +583,10 @@ msgstr ""
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
 msgstr "Subrayado"
+
+#: fpg_constants:rskeyup
+msgid "Up"
+msgstr ""
 
 #: fpg_constants:rsusername
 msgid "User name"

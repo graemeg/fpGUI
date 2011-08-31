@@ -44,6 +44,10 @@ msgstr "Alle Lêers"
 msgid "All Fonts"
 msgstr "Alle Lettertipes"
 
+#: fpg_constants:rskeyalt
+msgid "Alt+"
+msgstr ""
+
 #: fpg_constants:rsantialiasing
 msgid "Anti aliasing"
 msgstr "Anti-aliasing"
@@ -67,6 +71,10 @@ msgstr "Aug"
 #: fpg_constants:rslongaug
 msgid "August"
 msgstr "Augustus"
+
+#: fpg_constants:rskeybksp
+msgid "BkSp"
+msgstr ""
 
 #: fpg_constants:rsbold
 msgid "Bold"
@@ -132,6 +140,10 @@ msgstr "Skep 'n lêergids"
 msgid "Critical Error"
 msgstr "Kritiese Fout"
 
+#: fpg_constants:rskeyctrl
+msgid "Ctrl+"
+msgstr ""
+
 #: fpg_constants:rscut
 msgid "Cut"
 msgstr "Sny"
@@ -148,6 +160,10 @@ msgstr "Des"
 msgid "December"
 msgstr "Desember"
 
+#: fpg_constants:rskeydel
+msgid "Del"
+msgstr ""
+
 #: fpg_constants:rsdelete
 msgid "Delete"
 msgstr "Skrap"
@@ -160,6 +176,10 @@ msgstr "Lêergidse"
 msgid "Directory"
 msgstr ""
 
+#: fpg_constants:rskeydown
+msgid "Down"
+msgstr ""
+
 #: fpg_constants:rsdrive
 msgid "Drive"
 msgstr "Dryf"
@@ -168,9 +188,17 @@ msgstr "Dryf"
 msgid "Edit"
 msgstr "Redigeer"
 
+#: fpg_constants:rskeyend
+msgid "End"
+msgstr ""
+
 #: fpg_constants:rslanguage
 msgid "English"
 msgstr "Afrikaans"
+
+#: fpg_constants:rskeyenter
+msgid "Enter"
+msgstr ""
 
 #: fpg_constants:rsenternewdirectory
 msgid "Enter new directory name"
@@ -179,6 +207,10 @@ msgstr "Geen 'n nuwe lêergids naam"
 #: fpg_constants:rserror
 msgid "Error"
 msgstr "Fout"
+
+#: fpg_constants:rskeyesc
+msgid "Esc"
+msgstr ""
 
 #: fpg_constants:rsexampletext
 msgid "Example Text"
@@ -248,6 +280,10 @@ msgstr "Groep"
 msgid "Help"
 msgstr "Help"
 
+#: fpg_constants:rskeyhome
+msgid "Home"
+msgstr ""
+
 #: fpg_constants:rsignore
 msgid "Ignore"
 msgstr "Ignoreer"
@@ -255,6 +291,10 @@ msgstr "Ignoreer"
 #: fpg_constants:rsinformation
 msgid "Information"
 msgstr "Informasie"
+
+#: fpg_constants:rskeyins
+msgid "Ins"
+msgstr ""
 
 #: fpg_constants:rsinsert
 msgid "Insert"
@@ -296,6 +336,10 @@ msgstr "Jun"
 msgid "June"
 msgstr "Junie"
 
+#: fpg_constants:rskeyleft
+msgid "Left"
+msgstr ""
+
 #: fpg_constants:rserrlistmustbeempty
 msgid "List must be empty"
 msgstr "Lys moet leeg wees"
@@ -315,6 +359,10 @@ msgstr "Mei"
 #: fpg_constants:rsmessage
 msgid "Message"
 msgstr "Boodskap"
+
+#: fpg_constants:rskeymeta
+msgid "Meta+"
+msgstr ""
 
 #: fpg_constants:rsfilemodifiedtime
 msgid "Mod. Time"
@@ -388,6 +436,14 @@ msgstr "Wagwoord"
 msgid "Paste"
 msgstr "Plak"
 
+#: fpg_constants:rskeypgdn
+msgid "PgDn"
+msgstr ""
+
+#: fpg_constants:rskeypgup
+msgid "PgUp"
+msgstr ""
+
 #: fpg_constants:rscollectionrecentlyused
 msgid "Recently Used"
 msgstr "Onlangs gebruik"
@@ -399,6 +455,10 @@ msgstr "Vervang"
 #: fpg_constants:rsretry
 msgid "Retry"
 msgstr "Herprobeer"
+
+#: fpg_constants:rskeyright
+msgid "Right"
+msgstr ""
 
 #: fpg_constants:rsfilerights
 msgid "Rights"
@@ -452,6 +512,10 @@ msgstr "September"
 msgid "Serif"
 msgstr "Serif"
 
+#: fpg_constants:rskeyshift
+msgid "Shift+"
+msgstr ""
+
 #: fpg_constants:rsshowhidden
 msgid "Show hidden files"
 msgstr "Wys versteekte lêers"
@@ -459,6 +523,10 @@ msgstr "Wys versteekte lêers"
 #: fpg_constants:rssize
 msgid "Size"
 msgstr "Groote"
+
+#: fpg_constants:rskeyspace
+msgid "Space"
+msgstr ""
 
 #: fpg_constants:rsstyle
 msgid "Style"
@@ -471,6 +539,10 @@ msgstr "So"
 #: fpg_constants:rslongsun
 msgid "Sunday"
 msgstr "Sondag"
+
+#: fpg_constants:rskeytab
+msgid "Tab"
+msgstr ""
 
 #: fpg_constants:rstexttoinsert
 msgid "Text to Insert"
@@ -511,6 +583,10 @@ msgstr "Letterbeeld"
 #: fpg_constants:rsunderscore
 msgid "UnderScore"
 msgstr "Onderstreep"
+
+#: fpg_constants:rskeyup
+msgid "Up"
+msgstr ""
 
 #: fpg_constants:rsusername
 msgid "User name"
