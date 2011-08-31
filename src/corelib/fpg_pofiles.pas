@@ -101,7 +101,8 @@ implementation
 
 uses
   fpg_main,
-  fpg_stringutils;
+  fpg_stringutils,
+  fpg_utils;
 
 
 function UTF8ToSystemCharSet(const s: string): string; {$ifndef MultiLocale} inline;
@@ -161,8 +162,8 @@ begin
   ToolkitOnly := False;
 
   // build correct filename for fpGUI Toolkit translations.
-  lPath := ExtractFilePath(AFilename);
-  lFile := ExtractFileName(AFilename);
+  lPath := fpgExtractFilePath(AFilename);
+  lFile := fpgExtractFileName(AFilename);
   lPos := Pos('.', lFile);
   lFile := lPath + 'fpgui' + Copy(lFile, lPos, Length(lFile)-lPos+1);
   {$IFDEF DEBUG}
@@ -171,14 +172,14 @@ begin
   writeln('  AFilename="', AFilename, '"');
   {$ENDIF}
 
-  if {(ResUnitName = '') or} (AFilename = '') or (not FileExists(AFilename)) then
+  if {(ResUnitName = '') or} (AFilename = '') or (not fpgFileExists(AFilename)) then
     ToolkitOnly := True;  // we don't have a application translation file
   try
     po := nil;
     // read .po file
     if ToolkitOnly then
     begin
-      if not FileExists(lFile) then
+      if not fpgFileExists(lFile) then
         Exit;
       {$IFDEF DEBUG}
       writeln('  ************  Only translating the toolkit   ***********');
@@ -415,7 +416,7 @@ var
   f: TStream;
 begin
   // Now fpGUI translation
-  if (AFilename = '') or (not FileExists(AFilename)) then
+  if (AFilename = '') or (not fpgFileExists(AFilename)) then
     Exit;
   f := TFileStream.Create(AFilename, fmOpenRead);
   try
