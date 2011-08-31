@@ -774,9 +774,8 @@ function KeycodeToText(AKey: Word; AShiftState: TShiftState): string;
     result := '';
     c := Chr(AKey and $ff);
     case c of
-      #13:  Result := Result + 'Enter';
-      #127: Result := Result + 'Del';
-      '+':  Result := Result + 'Plus'
+      #13:  Result := Result + rsKeyEnter;
+      #127: Result := Result + rsKeyDel;
       else
         Result := Result + c;
     end;
@@ -789,11 +788,13 @@ begin
 
   { The order of these three are imprortant - don't change them }
   if ssCtrl in AShiftState then
-    Result := Result + 'Ctrl+';
+    Result := Result + rsKeyCtrl;
   if ssAlt in AShiftState then
-    Result := Result + 'Alt+';
+    Result := Result + rsKeyAlt;
   if ssShift in AShiftState then
-    Result := Result + 'Shift+';
+    Result := Result + rsKeyShift;
+  if ssMeta in AShiftState then
+    Result := Result + rskeyMeta;
 
   if (AKey > Ord(' ')) and (AKey < 255) then
   begin
@@ -803,13 +804,13 @@ begin
 
   case AKey of
     keyNul:           s := 'Null';
-    keyBackSpace:     s := 'Backspace';
-    keyTab:           s := 'Tab';
+    keyBackSpace:     s := rsKeyBksp;
+    keyTab:           s := rsKeyTab;
     keyLinefeed:      s := 'Linefeed';
-    keyReturn:        s := 'Enter';
-    keyEscape:        s := 'Esc';
-    Ord(' '):         s := 'Space';
-    keyDelete:        s := 'Del';
+    keyReturn:        s := rsKeyEnter;
+    keyEscape:        s := rsKeyEsc;
+    Ord(' '):         s := rsKeySpace;
+    keyDelete:        s := rsKeyDel;
     keyVoid:          s := 'Void';
     keyBreak:         s := 'Break';
     keyScrollForw:    s := 'ScrollForw';
@@ -826,7 +827,7 @@ begin
     keyFind:          s := 'Find';
     keyBegin:         s := 'Begin';
     keyClear:         s := 'Clear';
-    keyInsert:        s := 'Ins';
+    keyInsert:        s := rsKeyIns;
     keySelect:        s := 'Select';
     keyMacro:         s := 'Macro';
     keyHelp:          s := 'Help';
@@ -834,14 +835,14 @@ begin
     keyPause:         s := 'Pause';
     keySysRq:         s := 'SysRq';
     keyModeSwitch:    s := 'ModeSw';
-    keyUp:            s := 'Up';
-    keyDown:          s := 'Down';
-    keyLeft:          s := 'Left';
-    keyRight:         s := 'Right';
-    keyPrior:         s := 'PgUp';
-    keyNext:          s := 'PgDown';
-    keyHome:          s := 'Home';
-    keyEnd:           s := 'End';
+    keyUp:            s := rsKeyUp;
+    keyDown:          s := rsKeyDown;
+    keyLeft:          s := rsKeyLeft;
+    keyRight:         s := rsKeyRight;
+    keyPrior:         s := rsKeyPgUp;
+    keyNext:          s := rsKeyPgDn;
+    keyHome:          s := rsKeyHome;
+    keyEnd:           s := rsKeyEnd;
     keyF0..keyF64:    s := 'F' + IntToStr(AKey - keyF0);
     keyP0..keyP9:     s := 'KP' + Chr(AKey - keyP0 + Ord('0'));
     keyPA..keyPF:     s := 'KP' + Chr(AKey - keyPA + Ord('A'));
