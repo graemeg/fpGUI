@@ -1376,8 +1376,8 @@ begin
           ScrollY := FTopLine * FChrH;
           if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
             ScrollX := (FindPos.x * FChrW) - 2 * FChrW;
-          if I > (FTopLine + FVisLines - 2) then
-            ScrollY := (I-10) * FChrH;  // move selection more into the centre
+          if (I < FTopLine) or (I > (FTopLine + FVisLines - 2)) then
+            ScrollY := (I-10) * FChrH;  // move selection into view
           ScrollTo(ScrollX, ScrollY);
         end;
         Result := True;
@@ -1458,8 +1458,8 @@ begin
           ScrollY := FTopLine * FChrH;
           if ((FindPos.x + Length(SrcWord)) * FChrW) - FChrW > GetClientRect.Width then
             ScrollX := (FindPos.x * FChrW) - (2 * FChrW);
-          if I < (FTopLine -2 ) then
-            ScrollY := (I-10) * FChrH;   // move selection more into the centre
+          if (I < FTopLine) or (I > (FTopLine + FVisLines - 2)) then
+            ScrollY := (I-10) * FChrH;  // move selection into view
           ScrollTo(ScrollX, ScrollY);
         end;
         Result := True;
