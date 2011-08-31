@@ -203,12 +203,16 @@ procedure TMainForm.miFindClicked(Sender: TObject);
 var
   s: TfpgString;
   edt: TfpgTextEdit;
+  lFindOptions: TfpgFindOptions;
+  lBackward: Boolean;
 begin
-  DisplayFindForm(s);
+  lBackward := False;
+  lFindOptions := [];
+  DisplayFindForm(s, lFindOptions, lBackward);
   if s = '' then
     exit;
   edt := TfpgTextEdit(pcEditor.ActivePage.Components[0]);
-  edt.FindText(s, [], False);
+  edt.FindText(s, lFindOptions, lBackward);
 end;
 
 procedure TMainForm.miSearchProcedureList(Sender: TObject);

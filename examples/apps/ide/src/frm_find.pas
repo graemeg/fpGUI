@@ -12,7 +12,8 @@ uses
   fpg_label,
   fpg_edit,
   fpg_button,
-  fpg_checkbox;
+  fpg_checkbox,
+  fpg_textedit;
 
 type
 
@@ -36,22 +37,37 @@ type
     procedure AfterCreate; override;
   end;
 
-procedure DisplayFindForm(var AFindText: TfpgString);
+procedure DisplayFindForm(var AFindText: TfpgString; var AOptions: TfpgFindOptions; var ABackward: Boolean);
 
 {@VFD_NEWFORM_DECL}
 
 implementation
 
-procedure DisplayFindForm(var AFindText: TfpgString);
+procedure DisplayFindForm(var AFindText: TfpgString; var AOptions: TfpgFindOptions; var ABackward: Boolean);
 var
   frm: TFindForm;
 begin
   frm := TFindForm.Create(nil);
   try
+    frm.chkCaseSensitive.Checked    := foMatchCase in AOptions;
+    frm.chkWholeWord.Checked        := foWholeWords in AOptions;
+    frm.chkGlobalScope.Checked      := foEntireScope in AOptions;
+    frm.chkSearchBackwards.Checked  := ABackward;
+
     if frm.ShowModal = mrCancel then
       AFindText := ''
     else
+    begin
       AFindText := frm.edtFindText.Text;
+      AOptions := [];
+      if frm.chkCaseSensitive.Checked then
+        include(AOptions, foMatchCase);
+      if frm.chkWholeWord.Checked then
+        include(AOptions, foWholeWords);
+      if frm.chkGlobalScope.Checked then
+        include(AOptions, foEntireScope);
+      ABackward := frm.chkSearchBackwards.Checked;
+    end;
   finally
     frm.Free;
   end;
