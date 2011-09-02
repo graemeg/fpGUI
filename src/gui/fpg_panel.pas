@@ -235,7 +235,7 @@ type
   protected
     WindowTitle: TfpgString;
   public
-    constructor Create(AOwner: TComponent); override;
+    procedure   AfterConstruction; override;
     procedure   AfterCreate; virtual;
   published
     property    AcceptDrops;
@@ -328,9 +328,9 @@ end;
 
 { TfpgFrame }
 
-constructor TfpgFrame.Create(AOwner: TComponent);
+procedure TfpgFrame.AfterConstruction;
 begin
-  inherited Create(AOwner);
+  inherited AfterConstruction;
   AfterCreate;
 end;
 
