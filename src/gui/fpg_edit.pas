@@ -385,6 +385,8 @@ const
   ipmClearAll   = 'miDefaultClearAll';
   ipmCharmap    = 'miDefaultCharmap';
 
+  cPasswordChar = #$E2#$97#$8F;    // U+25CF BLACK CIRCLE
+
 
 function CreateEdit(AOwner: TComponent; x, y, w, h: TfpgCoord): TfpgEdit;
 begin
@@ -1013,11 +1015,16 @@ begin
 end;
 
 function TfpgBaseEdit.GetDrawText: string;
+var
+  i: integer;
 begin
   if not PassWordMode then
     Result := FText
   else
-    Result := StringOfChar('*', UTF8Length(FText));
+  begin
+    for i := 1 to UTF8Length(FText) do
+      Result := Result + cPasswordChar;
+  end;
 end;
 
 constructor TfpgBaseEdit.Create(AOwner: TComponent);
