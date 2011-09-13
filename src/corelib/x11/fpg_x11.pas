@@ -278,6 +278,9 @@ type
     FLastDropTarget: TfpgWinHandle;
     FDropPos: TPoint;
     FDrag: TfpgX11Drag;
+    { X11 window grouping }
+    FLeaderWindow: TfpgWinHandle;
+    FClientLeaderAtom: TAtom;
     procedure   SetDrag(const AValue: TfpgX11Drag);
     function    ConvertShiftState(AState: Cardinal): TShiftState;
     function    KeySymToKeycode(KeySym: TKeySym): Word;
@@ -729,6 +732,17 @@ begin
   end
   else
     Result := None;
+end;
+
+procedure SetWindowGroup(AWindow: TfpgWinHandle);
+var
+  ClassHint: PXClassHint;
+begin
+  ClassHint := XAllocClassHint;
+  ClassHint^.res_name := PChar(fpgGetExecutableName);
+  ClassHint^.res_class := PChar(ApplicationName);
+  XSetClassHint(xapplication.display, AWindow, ClassHint);
+  XFree(ClassHint);
 end;
 
 // File utils
@@ -2139,10 +2153,8 @@ var
   attr: TXSetWindowAttributes;
   mask: longword;
   hints: TXSizeHints;
-
   IconPixmap: TPixmap;
   WMHints: PXWMHints;
-
   prop: TAtom;
   mwmhints: TMWMHints;
 begin
@@ -2164,6 +2176,17 @@ begin
 
   AdjustWindowStyle;
 
+  if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
+  begin
+    if xapplication.FLeaderWindow = 0 then
+    begin
+      xapplication.FLeaderWindow := XCreateSimpleWindow(xapplication.Display,
+          XDefaultRootWindow(xapplication.Display), 0, 0, 1, 1, 0, 0, 0);
+      SetWindowGroup(xapplication.FLeaderWindow);
+      xapplication.FClientLeaderAtom := XInternAtom(xapplication.Display, 'WM_CLIENT_LEADER', False);
+    end;
+  end;
+
   wh := XCreateWindow(xapplication.Display, pwh,
     FLeft, FTop, FWidth, FHeight, 0,
     CopyFromParent,
@@ -2177,9 +2200,9 @@ begin
   FWinHandle := wh;
   FBackupWinHandle := wh;
 
-  // so newish window manager can close unresponsive programs
   if AParent = nil then // is a toplevel window
   begin
+    { setup a window icon }
     IconPixMap := XCreateBitmapFromData(fpgApplication.Display, FWinHandle,
       @IconBitmapBits, IconBitmapWidth, IconBitmapHeight);
 
@@ -2187,8 +2210,25 @@ begin
     WMHints^.icon_pixmap := IconPixmap;
     WMHints^.flags := IconPixmapHint;
 
-//    XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, nil, nil);
+    { setup window grouping posibilities }
+    if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
+    begin
+      WMHints^.flags := WMHints^.flags or WindowGroupHint;
+      WMHints^.window_group := xapplication.FLeaderWindow;
+    end;
+
+
     XSetWMProperties(fpgApplication.Display, FWinHandle, nil, nil, nil, 0, nil, WMHints, nil);
+
+    if (not (waX11SkipWMHints in FWindowAttributes)) and (FWindowType = wtWindow) then
+    begin
+      { set class group hint per top-level window }
+      SetWindowGroup(FWinHandle);
+      XChangeProperty(xapplication.display, FWinHandle, xapplication.FClientLeaderAtom, 33, 32,
+        PropModeReplace, @xapplication.FLeaderWindow, 1);
+    end;
+
+    { so newish window manager can close unresponsive programs }
     fpgApplication.netlayer.WindowSetPID(FWinHandle, GetProcessID);
     fpgApplication.netlayer.WindowSetSupportPING(FWinHandle);
 
