@@ -67,6 +67,7 @@ function fpgForceDirectories(const ADirectory: TfpgString): Boolean;
 function fpgChangeFileExt(const FileName, Extension: TfpgString): TfpgString;
 function fpgGetAppConfigDir(const Global: Boolean): TfpgString;
 function fpgGetAppConfigFile(const Global: Boolean; const SubDir: Boolean): TfpgString;
+function fpgGetExecutableName: TfpgString;
 
 
 implementation
@@ -180,6 +181,11 @@ end;
 function fpgGetAppConfigFile(const Global: Boolean; const SubDir: Boolean): TfpgString;
 begin
   Result := fpgFromOSEncoding(GetAppConfigFile(Global, SubDir));
+end;
+
+function fpgGetExecutableName: TfpgString;
+begin
+  Result := fpgChangeFileExt(fpgExtractFileName(Paramstr(0)), '');
 end;
 
 function fpgAppendPathDelim(const Path: TfpgString): TfpgString;
