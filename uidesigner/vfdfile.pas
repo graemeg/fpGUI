@@ -25,6 +25,7 @@ interface
 uses
   SysUtils,
   Classes,
+  fpg_base,
   fpg_utils;
 
 type
@@ -65,7 +66,8 @@ type
 implementation
 
 uses
-  fpg_iniutils;
+  fpg_iniutils,
+  vfdutils;
 
 const
   cBlockPrefix = '{@VFD_';
@@ -89,14 +91,14 @@ var
   s: string;
 begin
   s :=
-      '  T' + formname + ' = class(TfpgForm)' + LineEnding +
-      '  private' + LineEnding +
-      '    {@VFD_HEAD_BEGIN: ' + formname + '}' + LineEnding
+      Ind(1) + 'T' + formname + ' = class(TfpgForm)' + LineEnding +
+      Ind(1) + 'private' + LineEnding +
+      Ind(2) + '{@VFD_HEAD_BEGIN: ' + formname + '}' + LineEnding
     + formheadblock +
-      '    {@VFD_HEAD_END: ' + formname + '}' + LineEnding +
-      '  public' + LineEnding +
-      '    procedure AfterCreate; override;' + LineEnding
-    + '  end;' + LineEnding + LineEnding;
+      Ind(2) + '{@VFD_HEAD_END: ' + formname + '}' + LineEnding +
+      Ind(1) + 'public' + LineEnding +
+      Ind(2) + 'procedure AfterCreate; override;' + LineEnding
+    + Ind(1) + 'end;' + LineEnding + LineEnding;
   NewFormsDecl := NewFormsDecl + s;
 end;
 
@@ -110,8 +112,8 @@ begin
   lUseRegions := gINI.ReadBool('Options', 'UseCodeRegions', True);
   if lUseRegions then
   begin
-    lRegionTop    := '  {%region ''Auto-generated GUI code'' -fold}' + LineEnding;
-    lRegionBottom := '  {%endregion}' + LineEnding;
+    lRegionTop    := Ind(1) + '{%region ''Auto-generated GUI code'' -fold}' + LineEnding;
+    lRegionBottom := Ind(1) + '{%endregion}' + LineEnding;
   end
   else
   begin
@@ -123,9 +125,9 @@ begin
     'procedure T' + formname + '.AfterCreate;' + LineEnding +
     'begin' + LineEnding +
     lRegionTop +
-    '  {@VFD_BODY_BEGIN: ' + formname + '}' + LineEnding +
+    Ind(1) + '{@VFD_BODY_BEGIN: ' + formname + '}' + LineEnding +
     formbody +
-    '  {@VFD_BODY_END: ' + formname + '}' + LineEnding +
+    Ind(1) + '{@VFD_BODY_END: ' + formname + '}' + LineEnding +
     lRegionBottom +
     'end;' + LineEnding;
   NewFormsImpl := NewFormsImpl + s;
@@ -312,9 +314,9 @@ begin
       startmarker := startmarker + ': ' + fb.FormName;
     startmarker := startmarker + '}';
     if fb.BlockID = 'VFD_HEAD_BEGIN' then
-      endmarker := '    {@VFD_HEAD_END: ' + fb.FormName + '}'
+      endmarker := Ind(2) + '{@VFD_HEAD_END: ' + fb.FormName + '}'
     else if fb.BlockID = 'VFD_BODY_BEGIN' then
-      endmarker := '  {@VFD_BODY_END: ' + fb.FormName + '}'
+      endmarker := Ind(1) + '{@VFD_BODY_END: ' + fb.FormName + '}'
     else
       endmarker := '';
 
@@ -348,7 +350,7 @@ begin
     '{$mode objfpc}{$H+}' + LineEnding + LineEnding +
     'interface' + LineEnding + LineEnding +
     'uses' + LineEnding +
-    '  SysUtils, Classes, fpg_base, fpg_main, fpg_form;' + LineEnding + LineEnding +
+    Ind(1) + 'SysUtils, Classes, fpg_base, fpg_main, fpg_form;' + LineEnding + LineEnding +
     'type' + LineEnding + LineEnding +
     '{@VFD_NEWFORM_DECL}' + LineEnding + LineEnding +
     'implementation' + LineEnding + LineEnding +

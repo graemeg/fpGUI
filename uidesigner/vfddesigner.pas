@@ -143,6 +143,7 @@ implementation
 
 uses
   vfdmain,
+  vfdutils,
   TypInfo,
   fpg_tree;
 
@@ -1123,7 +1124,7 @@ begin
       wgclass := TOtherWidget(wd.Widget).wgClassName
     else
       wgclass := wd.Widget.ClassName;
-    Result := Result + '    ' + wd.Widget.Name + ': ' + wgclass + ';' + LineEnding;
+    Result := Result + Ind(2) + wd.Widget.Name + ': ' + wgclass + ';' + LineEnding;
   end;
 end;
 
@@ -1143,9 +1144,9 @@ begin
   s := '';
 
   if maindsgn.SaveComponentNames then
-    s := s + '  Name := ' + QuotedStr(FForm.Name) + ';' + LineEnding;
+    s := s + Ind(1) + 'Name := ' + QuotedStr(FForm.Name) + ';' + LineEnding;
 
-  s := s + '  SetPosition('
+  s := s + Ind(1) + 'SetPosition('
       + IntToStr(FForm.Left) + ', '
       + IntToStr(FForm.Top) + ', '
       + IntToStr(FForm.Width) + ', '
@@ -1170,14 +1171,14 @@ begin
         end;
   end;
 }
-  s := s + '  WindowTitle := ' + QuotedStr(FForm.WindowTitle) + ';' + LineEnding;
+  s := s + Ind(1) + 'WindowTitle := ' + QuotedStr(FForm.WindowTitle) + ';' + LineEnding;
 
   // Hint property - This is ugly, Form's properties are not handled well!!
   PropInfo := GetPropInfo(FForm.ClassType, 'Hint');
   t := GetStrProp(FForm, 'Hint');
   if IsStoredProp(FForm, PropInfo) then
   begin
-    s := s + '  Hint := ' + QuotedStr(t) + ';' + LineEnding;
+    s := s + Ind(1) + 'Hint := ' + QuotedStr(t) + ';' + LineEnding;
   end;
 
   // ShowHint property - This is ugly, Form's properties are not handled well!!
@@ -1191,7 +1192,7 @@ begin
         t := 'True'
       else
         t := 'False';
-      s := s + '  ShowHint := ' + t + ';' + LineEnding;
+      s := s + Ind(1) + 'ShowHint := ' + t + ';' + LineEnding;
     end;
   end;
 
@@ -1199,7 +1200,7 @@ begin
   sl      := TStringList.Create;
   sl.Text := FFormOther;
   for n := 0 to sl.Count - 1 do
-    s := s + '  ' + sl.Strings[n] + LineEnding;
+    s := s + Ind(1) + sl.Strings[n] + LineEnding;
   sl.Free;
 
   s := s + LineEnding;
@@ -1219,9 +1220,11 @@ begin
     else
       wgclass := wg.ClassName;
 
-    s := s + '  ' + wg.Name + ' := ' + wgclass + '.Create(' + pwgname + ');' + LineEnding +
-      '  with ' + wg.Name + ' do' + LineEnding + '  begin' + LineEnding + GetWidgetSourceImpl(wd, '    ') +
-      '  end;' + LineEnding + LineEnding;
+    s := s + Ind(1) + wg.Name + ' := ' + wgclass + '.Create(' + pwgname + ');' + LineEnding +
+      Ind(1) + 'with ' + wg.Name + ' do' + LineEnding +
+      Ind(1) + 'begin' + LineEnding +
+      GetWidgetSourceImpl(wd, Ind(2)) +
+      Ind(1) + 'end;' + LineEnding + LineEnding;
   end;
 
   Result := s;

@@ -127,11 +127,10 @@ type
     lblName3: TfpgLabel;
     chkUndoOnExit: TfpgCheckBox;
     chkOneClick: TfpgCheckBox;
-    Bevel1: TfpgBevel;
-    Bevel2: TfpgBevel;
-    Bevel3: TfpgBevel;
     Label1: TfpgLabel;
     chkCodeRegions: TfpgCheckBox;
+    cbIndentationType: TfpgComboBox;
+    lblIndentType: TfpgLabel;
     {@VFD_HEAD_END: frmVFDSetup}
     constructor Create(AOwner: TComponent); override;
     procedure   AfterCreate; override;
@@ -357,7 +356,7 @@ begin
     TabOrder := 7;
   end;
 
-            {@VFD_BODY_END: WidgetOrderForm}
+  {@VFD_BODY_END: WidgetOrderForm}
 end;
 
 procedure TWidgetOrderForm.OnButtonClick(Sender: TObject);
@@ -419,6 +418,7 @@ begin
   chkUndoOnExit.Checked   := gINI.ReadBool('Options', 'UndoOnExit', UndoOnPropExit);
   chkOneClick.Checked     := gINI.ReadBool('Options', 'OneClickMove', True);
   chkCodeRegions.Checked  := gINI.ReadBool('Options', 'UseCodeRegions', True);
+  cbIndentationType.FocusItem := gINI.ReadInteger('Options', 'IndentationType', 0);
 end;
 
 procedure TfrmVFDSetup.SaveSettings;
@@ -431,6 +431,7 @@ begin
   gINI.WriteBool('Options', 'UndoOnExit', chkUndoOnExit.Checked);
   gINI.WriteBool('Options', 'OneClickMove', chkOneClick.Checked);
   gINI.WriteBool('Options', 'UseCodeRegions', chkCodeRegions.Checked);
+  gINI.WriteInteger('Options', 'IndentationType', cbIndentationType.FocusItem);
 end;
 
 procedure TfrmVFDSetup.btnOKClick(Sender: TObject);
@@ -449,7 +450,7 @@ procedure TfrmVFDSetup.AfterCreate;
 begin
   {@VFD_BODY_BEGIN: frmVFDSetup}
   Name := 'frmVFDSetup';
-  SetPosition(392, 386, 398, 306);
+  SetPosition(392, 386, 398, 346);
   WindowTitle := 'General settings';
   Hint := '';
   ShowHint := True;
@@ -473,12 +474,12 @@ begin
     Name := 'chlGrid';
     SetPosition(144, 28, 88, 24);
     ExtraHint := '';
-    FocusItem := -1;
     FontDesc := '#List';
     Hint := '';
     Items.Add('1');
     Items.Add('4');
     Items.Add('8');
+    FocusItem := -1;
     TabOrder := 1;
   end;
 
@@ -486,7 +487,7 @@ begin
   with btnOK do
   begin
     Name := 'btnOK';
-    SetPosition(238, 276, 75, 24);
+    SetPosition(238, 316, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'OK';
     FontDesc := '#Label1';
@@ -500,7 +501,7 @@ begin
   with btnCancel do
   begin
     Name := 'btnCancel';
-    SetPosition(317, 276, 75, 24);
+    SetPosition(317, 316, 75, 24);
     Anchors := [anRight,anBottom];
     Text := 'Cancel';
     FontDesc := '#Label1';
@@ -609,39 +610,6 @@ begin
     Text := 'One click select and move';
   end;
 
-  Bevel1 := TfpgBevel.Create(self);
-  with Bevel1 do
-  begin
-    Name := 'Bevel1';
-    SetPosition(108, 4, 280, 14);
-    Anchors := [anLeft,anRight,anTop];
-    Hint := '';
-    Shape := bsBottomLine;
-    Style := bsLowered;
-  end;
-
-  Bevel2 := TfpgBevel.Create(self);
-  with Bevel2 do
-  begin
-    Name := 'Bevel2';
-    SetPosition(192, 104, 196, 14);
-    Anchors := [anLeft,anRight,anTop];
-    Hint := '';
-    Shape := bsBottomLine;
-    Style := bsLowered;
-  end;
-
-  Bevel3 := TfpgBevel.Create(self);
-  with Bevel3 do
-  begin
-    Name := 'Bevel3';
-    SetPosition(72, 188, 316, 14);
-    Anchors := [anLeft,anRight,anTop];
-    Hint := '';
-    Shape := bsBottomLine;
-    Style := bsLowered;
-  end;
-
   Label1 := TfpgLabel.Create(self);
   with Label1 do
   begin
@@ -661,6 +629,30 @@ begin
     Hint := 'Applies to new form/dialogs only';
     TabOrder := 18;
     Text := 'Use code-folding regions in auto-generated code';
+  end;
+
+  cbIndentationType := TfpgComboBox.Create(self);
+  with cbIndentationType do
+  begin
+    Name := 'cbIndentationType';
+    SetPosition(216, 264, 152, 24);
+    ExtraHint := '';
+    FontDesc := '#List';
+    Hint := '';
+    Items.Add('Space characters');
+    Items.Add('Tab characters');
+    FocusItem := 0;
+    TabOrder := 16;
+  end;
+
+  lblIndentType := TfpgLabel.Create(self);
+  with lblIndentType do
+  begin
+    Name := 'lblIndentType';
+    SetPosition(24, 268, 192, 16);
+    FontDesc := '#Label1';
+    Hint := '';
+    Text := 'Indent Type for generated code:';
   end;
 
   {@VFD_BODY_END: frmVFDSetup}

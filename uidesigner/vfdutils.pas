@@ -34,10 +34,21 @@ uses
 
 
 procedure SetWidgetText(wg: TfpgWidget; txt: string);
-function  GetWidgetText(wg: TfpgWidget; out txt: string): boolean;
+function GetWidgetText(wg: TfpgWidget; out txt: string): boolean;
+{ generates a string based on Indentation Style specified in UI Designer }
+function Ind(const ACount: integer): string;
 
 
 implementation
+
+uses
+  fpg_base,
+  fpg_iniutils,
+  strutils;
+
+var
+  IndentCharacters: array[0..1] of TfpgString = ('  ', #9);
+
 
 procedure SetWidgetText(wg: TfpgWidget; txt: string);
 begin
@@ -77,6 +88,10 @@ begin
   end;
 end;
 
+function Ind(const ACount: integer): string;
+begin
+  Result := DupeString(IndentCharacters[gINI.ReadInteger('Options', 'IndentationType', 0)], ACount);
+end;
 
 end.
 
