@@ -55,6 +55,7 @@ type
     procedure DoFileChangeNotification;
   public
     constructor CreateCustom;
+    destructor Destroy; override;
     procedure Execute; override;
     property  Interval: LongWord read FInterval write FInterval;
     procedure AddFile(const AFilename: TfpgString);
@@ -154,8 +155,14 @@ end;
 constructor TFileMonitor.CreateCustom;
 begin
   Create(True);
-  FFileList := TObjectList.create;
+  FFileList := TObjectList.create(True);
   FInterval := 500;
+end;
+
+destructor TFileMonitor.Destroy;
+begin
+  FFileList.Free;
+  inherited Destroy;
 end;
 
 procedure TFileMonitor.Execute;
