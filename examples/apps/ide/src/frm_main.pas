@@ -7,7 +7,8 @@ interface
 uses
   SysUtils, Classes, fpg_base, fpg_main, fpg_form, fpg_menu, fpg_panel,
   fpg_button, fpg_splitter, fpg_tab, fpg_memo, fpg_label, fpg_grid,
-  fpg_tree, fpg_textedit, fpg_mru, synregexpr;
+  fpg_tree, fpg_textedit, fpg_mru, synregexpr,
+  filemonitor;
 
 type
 
@@ -58,6 +59,8 @@ type
     FRecentFiles: TfpgMRU;
     FRegex: TRegExpr;
     FKeywordFont: TfpgFont;
+    FFileMonitor: TFileMonitor;
+    procedure   MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
     procedure   FormShow(Sender: TObject);
     procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure   btnQuitClicked(Sender: TObject);
@@ -472,7 +475,10 @@ var
 begin
   u := TUnit(ATabSheet.TagPointer);
   if Assigned(u) then
+  begin
+    FFileMonitor.RemoveFile(u.FileName);
     u.Opened := False;
+  end;
 end;
 
 procedure TMainForm.BuildTerminated(Sender: TObject);
@@ -613,6 +619,7 @@ begin
     TfpgTextEdit(pcEditor.Pages[i].Components[0]).Lines.EndUpdate;
     pcEditor.ActivePageIndex := i;
     ts := pcEditor.ActivePage;
+    AddMessage('File reloaded: ' + s);
   end
   else
   begin
@@ -637,6 +644,7 @@ begin
     end;
     ts.Realign;
     pcEditor.ActivePage := ts;
+    FFileMonitor.AddFile(AFilename);
   end;
   ts.Hint := s;
   Result := ts;
@@ -802,6 +810,11 @@ begin
 //  writeln('------');
 end;
 
+procedure TMainForm.MonitoredFileChanged(Sender: TObject; AData: TFileMonitorEventData);
+begin
+  OpenEditorPage(AData.FileName);
+end;
+
 procedure TMainForm.FormShow(Sender: TObject);
 var
   lErrPos: integer;
@@ -822,6 +835,8 @@ begin
 
   TextEditor.Clear;
   TextEditor.SetFocus;
+
+  FFileMonitor.Resume;
   {$IFDEF DEBUGSVR}SendMethodExit('TMainForm.FormShow');{$ENDIF}
 end;
 
@@ -842,10 +857,14 @@ begin
   {$IFDEF DEBUGSVR}
   SendDebug('TMainForm.Create');
   {$ENDIF}
+  FFileMonitor := TFileMonitor.CreateCustom;
+  FFileMonitor.OnFileChanged  := @MonitoredFileChanged;
 end;
 
 destructor TMainForm.Destroy;
 begin
+  FFileMonitor.Terminate;
+  FFileMonitor.Free;
   FRegex.Free;
   FKeywordFont.Free;
   inherited Destroy;
