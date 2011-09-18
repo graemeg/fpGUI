@@ -48,7 +48,7 @@ type
   TFileMonitor = class(TThread)
   private
     FInterval: LongWord;
-    FFileList: TObjectList;
+    FFileList: TThreadList;
     FOnFileChanged: TFileChangedEvent;
     FCurrent: TMonitoredFile;
     FCurrentState: TFileMonitorEventType;
@@ -155,12 +155,27 @@ end;
 constructor TFileMonitor.CreateCustom;
 begin
   Create(True);
-  FFileList := TObjectList.create(True);
+  FFileList := TThreadList.Create;
   FInterval := 500;
 end;
 
 destructor TFileMonitor.Destroy;
+var
+  f: TMonitoredFile;
+  lst: TList;
+  i: integer;
 begin
+  try
+    lst := FFileList.LockList;
+    for i := lst.Count-1 downto 0 do
+    begin
+      f := TMonitoredFile(lst[i]);
+      lst.Remove(f);
+      f.Free;
+    end;
+  finally
+    FFileList.UnlockList;
+  end;
   FFileList.Free;
   inherited Destroy;
 end;
@@ -169,31 +184,37 @@ procedure TFileMonitor.Execute;
 var
   i: integer;
   lFile: TMonitoredFile;
+  lst: TList;
 begin
   while not Terminated do
   begin
     if Assigned(FOnFileChanged) then
     begin
-      for i := FFileList.Count-1 downto 0 do
-      begin
-        lFile := TMonitoredFile(FFileList[i]);
-        if fpgFileExists(lFile.Name) then
+      lst := FFileList.LockList;
+      try
+        for i := lst.Count-1 downto 0 do
         begin
-          if lFile.SHA1 <> lFile.GetNewSHA1 then
+          lFile := TMonitoredFile(lst[i]);
+          if fpgFileExists(lFile.Name) then
+          begin
+            if lFile.SHA1 <> lFile.GetNewSHA1 then
+            begin
+              FCurrent := lFile;
+              FCurrentState := fmeFileChanged;
+              Synchronize(@DoFileChangeNotification);
+              lFile.UpdateInfo;
+            end;
+          end
+          else
           begin
             FCurrent := lFile;
-            FCurrentState := fmeFileChanged;
+            FCurrentState := fmeFileDeleted;
             Synchronize(@DoFileChangeNotification);
-            lFile.UpdateInfo;
+            lst.Remove(lFile);
           end;
-        end
-        else
-        begin
-          FCurrent := lFile;
-          FCurrentState := fmeFileDeleted;
-          Synchronize(@DoFileChangeNotification);
-          FFileList.Remove(lFile);
         end;
+      finally
+        FFileList.UnlockList;
       end;
     end;
     sleep(FInterval);
