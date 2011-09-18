@@ -239,8 +239,26 @@ begin
 end;
 
 procedure TFileMonitor.RemoveFile(const AFilename: TfpgString);
+var
+  i: integer;
+  lFile: TMonitoredFile;
+  lst: TList;
 begin
-  //
+  lst := FFileList.LockList;
+  try
+    for i := 0 to lst.Count-1 do
+    begin
+      if AFilename = TMonitoredFile(lst[i]).Name then
+      begin
+        lFile := TMonitoredFile(lst[i]);
+        lst.Delete(i);
+        lFile.Free;
+        break;
+      end;
+    end;
+  finally
+    FFileList.UnlockList;
+  end;
 end;
 
 end.
