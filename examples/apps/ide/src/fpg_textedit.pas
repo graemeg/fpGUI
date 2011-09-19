@@ -754,7 +754,7 @@ begin
             begin
               if CaretPos.Y <= (FLines.Count-1) then
                 if CaretPos.X > UTF8Length(FLines[CaretPos.Y]) then
-                  CaretPos.Y := UTF8Length(FLines[CaretPos.Y]) - 1;
+                  CaretPos.X := UTF8Length(FLines[CaretPos.Y]) - 1;
               FSelected := True;
               FSelStartNo := CaretPos.Y;
               FSelStartOffs := CaretPos.X + 1;
