@@ -728,7 +728,7 @@ begin
             begin
               if CaretPos.Y <= (FLines.Count-1) then
               begin
-                if (ssCtrl in ShiftState) and (CaretPos.Y > 0) then
+                if (ssCtrl in ShiftState) then
                 begin
                   CaretPos.Y := CaretPos.Y - 1;
                   CaretPos.X := UTF8Length(FLines[CaretPos.Y]);
