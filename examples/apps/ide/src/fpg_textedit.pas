@@ -1837,11 +1837,11 @@ begin
 
   if FSelected then
   begin
-    Canvas.TextColor := clWhite;
-    Canvas.Color :=  fpgColorToRGB(clSelection);
     if (ALineIndex > StartNo) and (ALineIndex < EndNo) then     // whole line is selected
     begin
       R.SetRect(X, Y, UTF8Length(S) * FChrW, FChrH);
+      Canvas.TextColor := clWhite;
+      Canvas.Color := fpgColorToRGB(clSelection);
       Canvas.FillRectangle(R);
       Canvas.DrawText(R, S);
     end
@@ -1857,6 +1857,8 @@ begin
         else
           SS := UTF8Copy(S, Si + 1, Ei - Si);
         R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+        Canvas.TextColor := clWhite;
+        Canvas.Color := fpgColorToRGB(clSelection);
         Canvas.FillRectangle(R);
         Canvas.DrawText(R, SS);
       end
@@ -1866,6 +1868,8 @@ begin
         begin
           SS := UTF8Copy(S, Si + 1, UTF8Length(S) - Si);
           R.SetRect(X+(Si * FChrW), Y, (UTF8Length(SS) * FChrW), FChrH);
+          Canvas.TextColor := clWhite;
+          Canvas.Color := fpgColorToRGB(clSelection);
           Canvas.FillRectangle(R);
           Canvas.DrawText(R, SS);
         end
@@ -1877,6 +1881,8 @@ begin
               Ei := UTF8Length(S);
             SS := UTF8Copy(S, 1, Ei);
             R.SetRect(X, Y, (UTF8Length(SS) * FChrW), FChrH);
+            Canvas.TextColor := clWhite;
+            Canvas.Color := fpgColorToRGB(clSelection);
             Canvas.FillRectangle(R);
             Canvas.DrawText(R, SS);
           end;
