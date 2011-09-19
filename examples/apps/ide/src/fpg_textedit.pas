@@ -1830,7 +1830,10 @@ begin
 
   { Draw simple text line... }
   if AllowDraw then
+  begin
+    Canvas.TextColor := clBlack;
     Canvas.DrawText(R, S);
+  end;
 
   if FSelected then
   begin
