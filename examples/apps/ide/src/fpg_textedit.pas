@@ -1698,6 +1698,8 @@ begin
   {$ENDIF}
   if not consumed then
   begin
+    if FSelected then
+      DeleteSelection;
     // Handle only printable characters
     // UTF-8 characters beyond ANSI range are supposed to be printable
     if ((Ord(AText[1]) > 31) and (Ord(AText[1]) < 127)) or (Length(AText) > 1) then
@@ -2126,9 +2128,54 @@ begin
 end;
 
 procedure TfpgBaseTextEdit.DeleteSelection;
+var
+  FirstPart, LastPart, SLine: TfpgString;
+  StartLine, StartPos, EndLine, EndPos, I, DelLine: Integer;
 begin
-  { TODO : Implement DeleteSelection }
-  SendDebug(' TODO: Implement DeleteSelection');
+  if not FSelected then Exit;
+  if FSelStartNo > FSelEndNo then
+  begin
+    StartLine := FSelEndNo;
+    StartPos := FSelEndOffs;
+    EndLine := FSelStartNo;
+    EndPos := FSelStartOffs;
+  end
+  else if (FSelStartNo = FSelEndNo) and (FSelEndOffs < FSelStartOffs) then
+  begin
+    StartLine := FSelStartNo;
+    StartPos := FSelEndOffs;
+    EndLine := StartLine;
+    EndPos := FSelStartOffs;
+  end
+  else
+  begin
+    StartLine := FSelStartNo;
+    StartPos := FSelStartOffs;
+    EndLine := FSelEndNo;
+    EndPos := FSelEndOffs;
+  end;
+
+  if StartLine > (FLines.Count-1) then
+    Exit;
+  if EndLine > (FLines.Count-1) then
+    EndLine := (FLines.Count-1);
+  SLine := FLines[StartLine];
+  FirstPart := UTF8Copy(SLine, 1, StartPos);
+  SLine := FLines[EndLine];
+  if EndPos > UTF8Length(SLine) then
+    EndPos := UTF8Length(SLine);
+  LastPart := UTF8Copy(SLine, EndPos + 1, UTF8Length(SLine) - EndPos);
+  DelLine := StartLine + 1;
+  for I := DelLine to EndLine do
+    FLines.Delete(DelLine);
+  FLines[StartLine] := FirstPart + LastPart;
+
+  CaretPos.Y := StartLine;
+  CaretPos.X := StartPos;
+  FSelected := False;
+
+  UpdateScrollbars;
+  Invalidate;
 end;
 
 procedure TfpgBaseTextEdit.SaveToFile(const AFileName: TfpgString);
