@@ -133,6 +133,13 @@ not specified the caption of the message box will be 'Message'.
 </seealso>
 </element>
 
+<element name="SelectFileDialog">
+<short>A convenience function to show the file selection dialog.</short>
+<seealso>
+  <link id="fpg_dialogs.TfpgFileDialog">TfpgFileDialog</link>
+</seealso>
+</element>
+
 </module>
 
 </package>
