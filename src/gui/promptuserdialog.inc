@@ -7,11 +7,12 @@
   private
     lblTitle: TfpgLabel;
     lblTitlePw: TfpgLabel;
-    edUserID: TfpgEdit;
-    edPassword: TfpgEdit;
     function    GetUserID: TfpgString;
     function    GetUserPassword: TfpgString;
+    procedure SetUserID(const AValue: TfpgString);
   protected
+    edUserID: TfpgEdit;
+    edPassword: TfpgEdit;
     procedure   btnOKClick(Sender: TObject); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -19,7 +20,7 @@
     // Subclass will have to override and implement it. By default it returns True.
     function    Authenticate: boolean; virtual;
     procedure   Wiggle(const Seconds: integer = 1; const MovingPixels: integer = 5; const aSleep: integer = 75);
-    property    UserID: TfpgString read GetUserID;
+    property    UserID: TfpgString read GetUserID write SetUserID;
     property    Password: TfpgString read GetUserPassword;
   end;
 
@@ -56,6 +57,11 @@ end;
 function TfpgPromptUserDialog.GetUserPassword: TfpgString;
 begin
   Result := edPassword.Text;
+end;
+
+procedure TfpgPromptUserDialog.SetUserID(const AValue: TfpgString);
+begin
+  edUserID.Text := AValue;
 end;
 
 procedure TfpgPromptUserDialog.btnOKClick(Sender: TObject);
