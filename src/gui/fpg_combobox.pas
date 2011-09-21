@@ -87,6 +87,9 @@ type
     FFocusItem: integer;
     FItems: TStringList;
     FBtnPressed: Boolean;
+    FStoredShowHint: Boolean;
+    procedure   DisableShowHint;
+    procedure   RestoreShowHint;
     procedure   SetMargin(const AValue: integer); virtual;
     procedure   SetAutoSize(const AValue: Boolean); virtual;
     procedure   CalculateInternalButtonRect; virtual;
@@ -186,6 +189,7 @@ implementation
 
 uses
   fpg_listbox,
+  dbugintf,
   math;
   
 
@@ -268,6 +272,18 @@ begin
   Repaint;
 end;
 
+procedure TfpgBaseComboBox.DisableShowHint;
+begin
+  FStoredShowHint := ShowHint;
+  ShowHint := False;
+  fpgApplication.HideHint; // make sure Application hint timer doesn't fire
+end;
+
+procedure TfpgBaseComboBox.RestoreShowHint;
+begin
+  ShowHint := FStoredShowHint;
+end;
+
 procedure TfpgBaseComboBox.SetMargin(const AValue: integer);
 begin
   if (FMargin = AValue) or (AValue <= 0) then
@@ -302,6 +318,7 @@ end;
 procedure TfpgBaseComboBox.InternalOnClose(Sender: TObject);
 begin
   DoOnCloseUp;
+  RestoreShowHint;
 end;
 
 procedure TfpgBaseComboBox.InternalItemsChanged(Sender: TObject);
@@ -448,6 +465,7 @@ begin
   FBtnPressed := False;
   FOnChange := nil;
   FExtraHint := '';
+  FStoredShowHint := ShowHint;
 end;
 
 destructor TfpgBaseComboBox.Destroy;
@@ -556,14 +574,15 @@ var
   r: TfpgRect;
 begin
   {$IFDEF DEBUG}
-  write('DoDropDown');
+  SendMethodEnter('TfpgBaseStaticCombo.DoDropDown');
   {$ENDIF}
   if (not Assigned(FDropDown)) or (not FDropDown.HasHandle) then
   begin
     {$IFDEF DEBUG}
-    writeln('.... creating');
+    SendDebug('.... creating');
     {$ENDIF}
     FreeAndNil(FDropDown);
+    DisableShowHint;  // disable hints while dropdown is visible
 
     FDropDown := TComboboxDropdownWindow.Create(nil, self);
     ddw := TComboboxDropdownWindow(FDropDown);
@@ -590,7 +609,7 @@ begin
   else
   begin
     {$IFDEF DEBUG}
-    writeln('.... destroying');
+    SendDebug('.... destroying');
     {$ENDIF}
     FBtnPressed := False;
     ddw := TComboboxDropdownWindow(FDropDown);
