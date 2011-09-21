@@ -235,7 +235,7 @@ procedure ShowMessage(AMessage, ATitle: string; ACentreText: Boolean = False); o
 procedure ShowMessage(AMessage: string; ACentreText: Boolean = False); overload;
 
 function SelectFontDialog(var FontDesc: string): boolean;
-function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''): TfpgString;
+function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''; const AInitialDir: TfpgString = ''): TfpgString;
 function SelectDirDialog(const AStartDir: TfpgString = ''): TfpgString;
 function fpgShowCharMap: TfpgString;
 function fpgSelectColorDialog(APresetColor: TfpgColor = clBlack): TfpgColor;
@@ -375,7 +375,7 @@ begin
   frm.Free;
 end;
 
-function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''): TfpgString;
+function SelectFileDialog(const ADialogType: boolean = sfdOpen; const AFilter: TfpgString = ''; const AInitialDir: TfpgString = ''): TfpgString;
 var
   dlg: TfpgFileDialog;
   dres: boolean;
@@ -388,6 +388,9 @@ begin
       dlg.Filter := DefaultFilter
     else
       dlg.Filter := aFilter+'|'+DefaultFilter;
+
+    if AInitialDir <> '' then
+      dlg.InitialDir := AInitialDir;
 
     if aDialogType = sfdOpen then
       dres := dlg.RunOpenFile
