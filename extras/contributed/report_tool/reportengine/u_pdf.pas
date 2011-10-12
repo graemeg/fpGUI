@@ -965,10 +965,10 @@ Info.FObjet.AddElement('Title',Nom);
 Nom:= TPdfString.CreateString(Infos.Auteur);
 Info.FObjet.AddElement('Author',Nom);
 // add creator element to info dictionary
-Nom:= TPdfString.CreateString('FpGUI/FPC');
+Nom:= TPdfString.CreateString('fpGUI/FPC');
 Info.FObjet.AddElement('Creator',Nom);
 // add producer element to info dictionary
-Nom:= TPdfString.CreateString('FpGUI/FPC');
+Nom:= TPdfString.CreateString('fpGUI/FPC');
 Info.FObjet.AddElement('Producer',Nom);
 // add creationdate element to info dictionary
 Nom:= TPdfString.CreateString(DateToPdfDate(Now));
