@@ -26,11 +26,13 @@ uses
   shellapi,
   {$endif}
   fpg_base, fpg_main,
-  fpg_form, fpg_panel, fpg_label, fpg_button, fpg_edit, fpg_dialogs, fpg_utils;
+  fpg_form, fpg_panel, fpg_label, fpg_button, fpg_edit, fpg_dialogs, fpg_utils,
+  U_Imprime;
 
 type
   TF_Visu = class(TfpgForm)
     private
+      FImprime: T_Imprime;
       Bv_Commande: TfpgBevel;
       Bt_Fermer: TfpgButton;
       Bt_Imprimer: TfpgButton;
@@ -79,7 +81,7 @@ type
 //      procedure Bt_DernSectClick(Sender: TObject);
       procedure ChangeBoutons;
     public
-      constructor Create(AOwner: TComponent); override;
+      constructor Create(AOwner: TComponent; AImprime: T_Imprime); reintroduce;
     end;
 
 var
@@ -89,7 +91,7 @@ var
 implementation
 
 uses
-  U_Imprime, U_Commande, U_Pdf, U_ReportImages;
+  U_Commande, U_Pdf, U_ReportImages;
 
 procedure TF_Visu.FormShow(Sender: TObject);
 begin
@@ -97,7 +99,7 @@ L_Pages.Text:= 'Page';
 L_Sections.Text:= 'Section';
 L_PageSect.Text:= 'Page';
 L_DePage.Text:= 'of';
-with Imprime do
+with FImprime do
   begin
   if Sections.Count= 1
   then
@@ -142,7 +144,7 @@ Fd_SauvePdf:= TfpgFileDialog.Create(nil);
 Fd_SauvePdf.InitialDir:= ExtractFilePath(Paramstr(0));
 Fd_SauvePdf.FontDesc:= 'bitstream vera sans-9';
 Fd_SauvePdf.Filter:= 'Fichiers pdf |*.pdf';
-Fd_SauvePdf.FileName:= Imprime.DefaultFile;
+Fd_SauvePdf.FileName:= FImprime.DefaultFile;
 try
   if Fd_SauvePdf.RunSaveFile
   then
@@ -173,7 +175,7 @@ end;
 
 procedure TF_Visu.Bt_PremPageClick(Sender: TObject);
 begin
-with Imprime do
+with FImprime do
   begin
   NumeroPage:= 1;
   NumeroSection:= 1;
@@ -197,7 +199,7 @@ end;
 
 procedure TF_Visu.Bt_PrecPageClick(Sender: TObject);
 begin
-with Imprime do
+with FImprime do
   begin
   NumeroPage:= NumeroPage-1;
   if NumeroPageSection= 1
@@ -230,7 +232,7 @@ end;
 
 procedure TF_Visu.Bt_SuivPageClick(Sender: TObject);
 begin
-with Imprime do
+with FImprime do
   begin
   NumeroPage:= NumeroPage+1;
   if NumeroPageSection= T_Section(Sections[Pred(NumeroSection)]).NbPages
@@ -263,7 +265,7 @@ end;
 
 procedure TF_Visu.Bt_DernPageClick(Sender: TObject);
 begin
-with Imprime do
+with FImprime do
   begin
   NumeroPage:= T_Section(Sections[Pred(Sections.Count)]).TotPages;
   NumeroSection:= Sections.Count;
@@ -291,7 +293,7 @@ end;
 
 procedure TF_Visu.Bt_PrecSectClick(Sender: TObject);
 begin
-with Imprime do
+with FImprime do
   begin
   NumeroSection:= NumeroSection-1;
   NumeroPage:= T_Section(Sections[Pred(NumeroSection)]).FirstPage;
@@ -315,7 +317,7 @@ end;
 
 procedure TF_Visu.Bt_SuivSectClick(Sender: TObject);
 begin
-with Imprime do
+with FImprime do
   begin
   NumeroSection:= NumeroSection+1;
   NumeroPage:= T_Section(Sections[Pred(NumeroSection)]).FirstPage;
@@ -343,7 +345,7 @@ end;
 
 procedure TF_Visu.ChangeBoutons;
 begin
-with Imprime do
+with FImprime do
   if T_Section(Sections[Pred(Sections.Count)]).TotPages> 1
   then
     if NumeroPage= 1
@@ -425,7 +427,7 @@ var
 begin
 if (KeyCode= KeyReturn) or (KeyCode= KeyPEnter)
 then
-  with Imprime do
+  with FImprime do
     begin
     if E_NumPage.Value> T_Section(Sections[Pred(Sections.Count)]).TotPages
     then
@@ -462,7 +464,7 @@ procedure TF_Visu.E_NumSectKeyPress(Sender: TObject; var KeyCode: word; var Shif
 begin
 if (KeyCode= KeyReturn) or (KeyCode= KeyPEnter)
 then
-  with Imprime do
+  with FImprime do
     begin
     if E_NumSect.Value> Sections.Count
     then
@@ -484,9 +486,10 @@ then
     end;
 end;
 
-constructor TF_Visu.Create(AOwner: TComponent);
+constructor TF_Visu.Create(AOwner: TComponent; AImprime: T_Imprime);
 begin
 inherited Create(AOwner);
+FImprime := AImprime;
 Name := 'F_Visu';
 WindowTitle:= 'Preview';
 WindowPosition:= wpUser;

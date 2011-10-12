@@ -702,7 +702,7 @@ end;
 
 procedure T_Imprime.CreateVisu;
 begin
-F_Visu:= TF_Visu.Create(nil);
+F_Visu:= TF_Visu.Create(nil, self);
 with F_Visu do
   begin
   Bv_Visu:= CreateBevel(F_Visu,(F_Visu.Width-FPapier.W) div 2,60+((F_Visu.Height-FPapier.H) div 2),
