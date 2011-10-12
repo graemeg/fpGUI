@@ -435,7 +435,6 @@ const
   cnLeft= -2;
   cnCenter= -3;
   cnRight= -4;
-  PPI= 72;
 
 implementation
 
@@ -443,6 +442,7 @@ uses
   U_Visu;
 
 const
+  PPI= 72;
   InchToMM= 25.4;
   Cent= 100;
 
