@@ -413,8 +413,6 @@ type
     end;
 
 var
-  Imprime: T_Imprime;
-
   Infos: record
     Titre: string;
     Auteur: string;
@@ -444,7 +442,6 @@ uses
 const
   PPI= 72;
   InchToMM= 25.4;
-  Cent= 100;
 
 function T_Imprime.Dim2Pixels(Value: Single): Single;
 begin
@@ -710,48 +707,6 @@ with F_Visu do
   Bv_Visu.BackgroundColor:= clWhite;
   Bv_Visu.OnPaint:= @Bv_VisuPaint;
   end;
-end;
-
-procedure LibereCommandesPages(ACommandes: PPage);
-var
-  Cpt: Integer;
-begin
-with T_Page(ACommandes) do
-  if Commandes.Count> 0
-  then
-    begin
-    for Cpt:= 0 to Pred(Commandes.Count) do
-      T_Commande(Commandes[Cpt]).Free;
-    Commandes.Free;
-    end;
-end;
-
-procedure LiberePages(APageSect: PSection);
-var
-  Cpt: Integer;
-begin
-with T_Section(APageSect) do
-  if Pages.Count> 0
-  then
-    begin
-    for Cpt:= 0 to Pred(Pages.Count) do
-      LibereCommandesPages(Pages[Cpt]);
-    Pages.Free;
-    end;
-end;
-
-procedure LibereColonnes(AColSect: PSection);
-var
-  Cpt: Integer;
-begin
-with T_Section(AColSect) do
-  if Colonnes.Count> 0
-  then
-    begin
-    for Cpt:= 0 to Pred(Colonnes.Count) do
-      T_Colonne(Colonnes[Cpt]).Free;
-    Colonnes.Free;
-    end;
 end;
 
 procedure T_Imprime.ImprimePage(PageNumero: Integer);
@@ -2140,13 +2095,8 @@ var
 begin
 if Sections.Count> 0
 then
-  begin
   for Cpt:= 0 to Pred(Sections.Count) do
-    begin
-    LiberePages(Sections[Cpt]);
-    LibereColonnes(Sections[Cpt]);
-    end;
-  end;
+    T_Section(Sections[Cpt]).Free;
 Sections.Free;
 if Fontes.Count> 0
 then
@@ -2736,8 +2686,6 @@ then
 end;
 
 procedure T_Imprime.FinGroupe(SautPage: Boolean= False);
-var
-  Cpt: Integer;
 begin
 T_Section(Sections[Pred(Sections.Count)]).LoadCmdGroupeToPage;
 FGroupe:= False;

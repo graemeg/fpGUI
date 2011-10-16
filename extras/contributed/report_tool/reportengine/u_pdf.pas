@@ -251,7 +251,7 @@ type
       procedure CreatePreferences;
       function CreatePages(Parent: Integer): Integer;
       function CreatePage(Parent,Haut,Larg: Integer): Integer;
-      function CreateOutlines(Parent: Integer): Integer;
+      function CreateOutlines: Integer;
       function CreateOutline(Parent,SectNo,PageNo: Integer; SectTitre: string): Integer;
       procedure CreateFont(NomFonte: string; NumFonte: Integer);
       function CreateContents: Integer;
@@ -350,16 +350,6 @@ then
   Chaine1:= '-'+Chaine1;
   end;
 Result:= FontName+Chaine1;
-end;
-
-function ColorToString(Couleur: Integer): string;
-var
-  Red,Green,Blue: Integer;
-begin
-Red:= Couleur div 65535;
-Couleur:= Couleur mod 65535;
-Green:= Couleur div 255;
-Blue:= Couleur mod 255;
 end;
 
 // object methods
@@ -500,7 +490,13 @@ FArray:= TList.Create;
 end;
 
 destructor TPdfArray.Destroy;
+var
+  Cpt: Integer;
 begin
+if FArray.Count> 0
+then
+  for Cpt:= 0 to Pred(FArray.Count) do
+    TPdfObjet(FArray[Cpt]).Free;
 FArray.Free;
 inherited;
 end;
@@ -514,7 +510,7 @@ for Cpt:= 0 to Pred(FStream.Count) do
   if TPdfObjet(FStream[Cpt]) is TPdfFonte
   then
     TPdfFonte(FStream[Cpt]).WriteFonte(AFlux);
-  if TPdfColor(FStream[Cpt]) is TPdfColor
+  if TPdfObjet(FStream[Cpt]) is TPdfColor
   then
     TPdfColor(FStream[Cpt]).WriteColor(AFlux);
   if TPdfObjet(FStream[Cpt]) is TPdfText
@@ -547,7 +543,13 @@ FStream:= TList.Create;
 end;
 
 destructor TPdfStream.Destroy;
+var
+  Cpt: Integer;
 begin
+if FStream.Count> 0
+then
+  for Cpt:= 0 to Pred(FStream.Count) do
+    TPdfObjet(FStream[Cpt]).Free;
 FStream.Free;
 inherited;
 end;
@@ -876,9 +878,7 @@ end;
 
 procedure TPdfDocument.WriteObjet(const AObjet: Integer; const AFlux: TStream);
 var
-  Dictionaire: TPdfDictionary;
   Long: TPdfInteger;
-  Fin: Integer;
   Flux: TMemoryStream;
 begin
 WriteChaine(IntToStr(AObjet)+' 0 obj'+CRLF,AFlux);
@@ -1095,10 +1095,9 @@ TPdfArray(TPdfDicElement(Dictionaire.FElement[Dictionaire.ElementParCle('ProcSet
 Result:= Pred(FXRefObjets.Count);
 end;
 
-function TPdfDocument.CreateOutlines(Parent: Integer): Integer;
+function TPdfDocument.CreateOutlines: Integer;
 var
   Outlines: TPdfXRef;
-  XRefObjets: TPdfReference;
   Nom: TPdfName;
   Count: TPdfInteger;
 begin
@@ -1308,12 +1307,11 @@ end;
 
 constructor TPdfDocument.CreateDocument;
 var
-  Cpt,CptSect,CptPage,CptFont,NumFont,TreeRoot,ParentPage,PageNum,NumPage: Integer;
+  Cpt,CptSect,CptPage,NumFont,TreeRoot,ParentPage,PageNum,NumPage: Integer;
   OutlineRoot,ParentOutline,PageOutline,NextOutline,NextSect,NewPage: Integer;
   Dictionaire: TPdfDictionary;
   XRefObjets,PrevOutline,PrevSect: TPdfReference;
   Nom: TPdfName;
-  Trouve: Boolean;
   FontName: string;
 begin
 inherited Create;
@@ -1330,7 +1328,7 @@ then
   if Outline
   then
     begin
-    OutlineRoot:= CreateOutlines(ParentOutline);
+    OutlineRoot:= CreateOutlines;
     // add outline reference to catalog dictionary
     XRefObjets:= TPdfReference.CreateReference(Pred(FXRefObjets.Count));
     TPdfDictionary(TPdfXRef(FXRefObjets[Catalogue]).FObjet).AddElement('Outlines',XRefObjets);
@@ -1441,7 +1439,6 @@ then
 NumFont:= 0;
 for Cpt:= 0 to Pred(Fontes.Count) do
   begin
-  Trouve:= False;
   FontName:= ExtractBaseFontName(T_Fonte(Fontes[Cpt]).GetFonte.FontDesc);
   CreateFont(FontName,NumFont);
   Inc(NumFont);

@@ -10,11 +10,12 @@ uses
   ShellApi,
   {$endif}
   fpg_main, fpg_base,
-  fpg_form, fpg_button, fpg_label, fpg_dialogs, fpg_utils;
+  fpg_form, fpg_button, fpg_label, fpg_dialogs, fpg_utils, U_Imprime;
 
 type
   TF_Demo = class(TfpgForm)
     private
+      FImprime: T_Imprime;
       L_Pdf: TfpgLabel;
       Bt_PdfEmptyPage: TfpgButton;
       Bt_PdfSimpleText: TfpgButton;
@@ -107,7 +108,7 @@ var
 implementation
 
 uses
-  U_Imprime, U_Commande, U_Pdf, U_ReportImages;
+  U_Commande, U_Pdf, U_ReportImages;
 
 var
   ChartValues: array[0..18] of Integer;
@@ -121,8 +122,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeEmptyPage(False);
@@ -173,8 +174,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeSimpleText(False);
@@ -225,8 +226,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeMultiPages(False);
@@ -277,8 +278,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeMultiSections(False);
@@ -329,8 +330,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeOutlines(False);
@@ -381,8 +382,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeCadres(False);
@@ -433,8 +434,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeColor(False);
@@ -485,8 +486,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeLines(False);
@@ -537,8 +538,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeGrid(False);
@@ -589,8 +590,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeGraph(False);
@@ -641,8 +642,8 @@ var
   FichierPdf: string;
   FluxFichier: TFileStream;
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
 //  Langue:= Version;
   ImprimeSurf(False);
@@ -689,8 +690,8 @@ end;
 
 procedure TF_Demo.Bt_VisuEmptyPageClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'EmptyPage.pdf';
@@ -701,8 +702,8 @@ end;
 
 procedure TF_Demo.Bt_VisuSimpleTextClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'SimpleText.pdf';
@@ -713,8 +714,8 @@ end;
 
 procedure TF_Demo.Bt_VisuMultiPagesClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'MultiPages.pdf';
@@ -725,8 +726,8 @@ end;
 
 procedure TF_Demo.Bt_VisuMultiSectionsClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'MultiSections.pdf';
@@ -737,8 +738,8 @@ end;
 
 procedure TF_Demo.Bt_VisuOutlinesClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'Outlines.pdf';
@@ -749,8 +750,8 @@ end;
 
 procedure TF_Demo.Bt_VisuCadresClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'Cadres.pdf';
@@ -761,8 +762,8 @@ end;
 
 procedure TF_Demo.Bt_VisuColorClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'Color.pdf';
@@ -773,8 +774,8 @@ end;
 
 procedure TF_Demo.Bt_VisuLinesClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'Lines.pdf';
@@ -785,8 +786,8 @@ end;
 
 procedure TF_Demo.Bt_VisuGridClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'Grid.pdf';
@@ -797,8 +798,8 @@ end;
 
 procedure TF_Demo.Bt_VisuGraphClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'Graph.pdf';
@@ -809,8 +810,8 @@ end;
 
 procedure TF_Demo.Bt_VisuSurfClick(Sender: TObject);
 begin
-Imprime:= T_Imprime.Create;
-with Imprime do
+FImprime:= T_Imprime.Create;
+with FImprime do
   begin
   //Langue:= Version;
   DefaultFile:= 'Surface.pdf';
@@ -881,7 +882,7 @@ end;
 
 procedure TF_Demo.ImprimeEmptyPage(Preview: Boolean);
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -898,7 +899,7 @@ procedure TF_Demo.ImprimeSimpleText(Preview: Boolean);
 var
   FtTexte1,FtTexte2,FtTexte3: Integer;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -926,7 +927,7 @@ var
   FtTitre,FtTexte: Integer;
   Cpt: Integer;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -953,7 +954,7 @@ var
   ColDefSect2: Integer;
   Cpt: Integer;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -1019,7 +1020,7 @@ var
   ColDefSect2: Integer;
   Cpt: Integer;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -1085,7 +1086,7 @@ var
   TsFin,TsNorm,TsEpais: Integer;
   IlTitre,IlTexte: Integer;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -1126,7 +1127,7 @@ var
   Col1,Col2,Col3: Integer;
 
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -1186,7 +1187,7 @@ var
   Col1,Col2,Col3: Integer;
   BdRect,BdColn,BdFinCol: Integer;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -1253,7 +1254,7 @@ const
   Col5Pos= 165;
   Col5Wid= 35;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -1362,7 +1363,7 @@ var
 const
   Base= 150;
 begin
-with Imprime do
+with FImprime do
   begin
   // define orientation, page format, measurement unit, language, preview (true) or print (false)
   Debut(oPortrait,A4,msMM,Langue,Preview);
@@ -1413,29 +1414,29 @@ procedure TF_Demo.ImprimeSurf(Preview: Boolean);
 var
   FtTitre,FtTexte: Integer;
   IlTitre,IlTexte: Integer;
+begin
+with FImprime do
   begin
-  with Imprime do
-    begin
-    // define orientation, page format, measurement unit, language, preview (true) or print (false)
-    Debut(oPortrait,A4,msMM,Langue,Preview);
-    // create a new section and define the margins with an additional one due to frames drawing
-    Section(10,10,10,10);
-    // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
-    FtTitre:= Fonte('helvetica-15:bold',clBlack);
-    FtTexte:= Fonte('helvetica-7',clBlack);
-    // create line spacings to be used
-    IlTitre:= Interligne(3,0,3);
-    IlTexte:= Interligne(1,0,0);
-    EcritEnTete(cnCenter,lnFin,'SHOWING SURFACE',ColDefaut,FtTitre,IlTitre);
-    // write page number and total of pages on each page
-    NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
-    // paint some surfaces
-    SurfPage([40,40,100],[50,110,80],clGreen);
-    SurfPage([30,50,150,80,120,130],[120,180,180,160,140,120],clFuchsia);
-    // preparation is finished, so create PDF objects
-    Fin;
-    end;
+  // define orientation, page format, measurement unit, language, preview (true) or print (false)
+  Debut(oPortrait,A4,msMM,Langue,Preview);
+  // create a new section and define the margins with an additional one due to frames drawing
+  Section(10,10,10,10);
+  // create the fonts to be used (use one of the 14 Adobe PDF standard fonts)
+  FtTitre:= Fonte('helvetica-15:bold',clBlack);
+  FtTexte:= Fonte('helvetica-7',clBlack);
+  // create line spacings to be used
+  IlTitre:= Interligne(3,0,3);
+  IlTexte:= Interligne(1,0,0);
+  EcritEnTete(cnCenter,lnFin,'SHOWING SURFACE',ColDefaut,FtTitre,IlTitre);
+  // write page number and total of pages on each page
+  NumPagePied(cnRight,lnFin,'Page','of',True,ColDefaut,FtTexte,IlTexte);
+  // paint some surfaces
+  SurfPage([40,40,100],[50,110,80],clGreen);
+  SurfPage([30,50,150,80,120,130],[120,180,180,160,140,120],clFuchsia);
+  // preparation is finished, so create PDF objects
+  Fin;
   end;
+end;
 
 constructor TF_Demo.Create(AOwner: TComponent);
 var

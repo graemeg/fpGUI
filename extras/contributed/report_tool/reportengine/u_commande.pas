@@ -402,11 +402,33 @@ FColonnes:= TList.Create;
 end;
 
 destructor T_Section.Destroy;
+var
+  Cpt: Integer;
 begin
+if FPages.Count> 0
+then
+  for Cpt:= 0 to Pred(FPages.Count) do
+    T_Page(FPages[Cpt]).Free;
 FPages.Free;
+if FEntete.Count> 0
+then
+  for Cpt:= 0 to Pred(FEntete.Count) do
+    T_Commande(FEntete[Cpt]).Free;
 FEnTete.Free;
+if FPied.Count> 0
+then
+  for Cpt:= 0 to Pred(FPied.Count) do
+    T_Commande(FPied[Cpt]).Free;
 FPied.Free;
+if FCadres.Count> 0
+then
+  for Cpt:= 0 to Pred(FCadres.Count) do
+    T_Commande(FCadres[Cpt]).Free;
 FCadres.Free;
+if FColonnes.Count> 0
+then
+  for Cpt:= 0 to Pred(FColonnes.Count) do
+    T_Commande(FColonnes[Cpt]).Free;
 FColonnes.Free;
 inherited Destroy;
 end;
@@ -415,7 +437,7 @@ procedure T_Section.LoadPage(APageNum: Integer);
 begin
 Inc(FNbPages);
 APage:= T_Page.Create(FNbPages,APageNum);
-Pages.Add(APage);
+FPages.Add(APage);
 end;
 
 procedure T_Section.LoadCmdEnTete;
@@ -433,7 +455,7 @@ var
   Cpt: Integer;
 begin
 for Cpt:= 0 to Pred(ALigne.Commandes.Count) do
-  T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ALigne.Commandes.Items[Cpt]);
+  T_Page(Pages[Pred(FPages.Count)]).Commandes.Add(ALigne.Commandes.Items[Cpt]);
 ALigne.FHeight:= 0;
 ALigne.Commandes.Clear;
 end;
@@ -468,7 +490,7 @@ var
   Cpt: Integer;
 begin
 for Cpt:= 0 to Pred(AGroupe.Commandes.Count) do
-  T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(AGroupe.Commandes.Items[Cpt]);
+  T_Page(Pages[Pred(FPages.Count)]).Commandes.Add(AGroupe.Commandes.Items[Cpt]);
 AGroupe.FGroupeHeight:= 0;
 AGroupe.Commandes.Clear;
 end;
@@ -482,7 +504,7 @@ end;
 procedure T_Section.LoadEspacePage(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
 begin
 ACommande:= T_Espace.Create(APosY,AColonne,AHeight,AFond);
-T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
+T_Page(Pages[Pred(FPages.Count)]).Commandes.Add(ACommande);
 end;
 
 procedure T_Section.LoadEspacePied(APosY: Single; AColonne: Integer; AHeight: Single; AFond: Integer);
@@ -505,7 +527,7 @@ end;
 procedure T_Section.LoadTrait(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
 begin
 ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
-T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
+T_Page(Pages[Pred(FPages.Count)]).Commandes.Add(ACommande);
 end;
 
 procedure T_Section.LoadTraitHorizEnTete(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single;
@@ -518,7 +540,7 @@ end;
 procedure T_Section.LoadTraitHorizPage(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
 begin
 ACommande:= T_Trait.Create(APosXDeb,APosYDeb,AColonne,AStyle,APosXFin,APosYFin);
-T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
+T_Page(Pages[Pred(FPages.Count)]).Commandes.Add(ACommande);
 end;
 
 procedure T_Section.LoadTraitHorizPied(APosXDeb,APosYDeb: Single; AColonne: Integer; APosXFin,APosYFin: Single; AStyle: Integer);
@@ -535,7 +557,7 @@ end;
 procedure T_Section.LoadSurf(APos: T_Points; AColor: TfpgColor);
 begin
 Acommande:= T_Surface.Create(APos,AColor);
-T_Page(Pages[Pred(Pages.Count)]).Commandes.Add(ACommande);
+T_Page(Pages[Pred(FPages.Count)]).Commandes.Add(ACommande);
 end;
 
 function T_Section.GetCmdPage(NumPage: Integer): TList;
@@ -551,7 +573,13 @@ FCommandes:= TList.Create;
 end;
 
 destructor T_Page.Destroy;
+var
+  Cpt: Integer;
 begin
+if FCommandes.Count> 0
+then
+  for Cpt:= 0 to Pred(FCommandes.Count) do
+    T_Commande(FCommandes[Cpt]).Free;
 FCommandes.Free;
 inherited Destroy;
 end;
@@ -560,12 +588,18 @@ constructor T_Groupe.Create;
 begin
 FLineHeight:= 0;
 FGroupeHeight:= 0;
-Commandes:= TList.Create;
+FCommandes:= TList.Create;
 end;
 
 destructor T_Groupe.Destroy;
+var
+  Cpt: Integer;
 begin
-Commandes.Free;
+if FCommandes.Count> 0
+then
+  for Cpt:= 0 to Pred(FCommandes.Count) do
+    T_Commande(FCommandes[Cpt]).Free;
+FCommandes.Free;
 inherited Destroy;
 end;
 
@@ -576,7 +610,13 @@ FCommandes:= TList.Create;
 end;
 
 destructor T_Ligne.Destroy;
+var
+  Cpt: Integer;
 begin
+if FCommandes.Count> 0
+then
+  for Cpt:= 0 to Pred(FCommandes.Count) do
+    T_Commande(FCommandes[Cpt]).Free;
 FCommandes.Free;
 inherited Destroy;
 end;
