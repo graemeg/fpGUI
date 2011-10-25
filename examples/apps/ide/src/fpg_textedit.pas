@@ -1593,7 +1593,7 @@ begin
           end;
           FSelStartNo := CaretPos.Y;
           FSelStartOffs := CaretPos.X;
-          consumed := True
+          consumed := True;
         end;
 
     keyTab:
