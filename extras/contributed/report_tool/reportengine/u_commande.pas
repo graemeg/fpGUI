@@ -251,6 +251,7 @@ type
       FSize: string;
     public
       constructor Create(AFonte: string; AColor: TfpgColor); virtual;
+      destructor Destroy; override;
       function GetHeight: Integer;
       property GetFonte: TfpgFont read FFonte;
       property GetColor: TfpgColor read FColor;
@@ -734,6 +735,12 @@ inherited Create;
 FFonte:= fpgApplication.GetFont(AFonte);
 FColor:= AColor;
 FSize:= ExtractFontSize(AFonte);
+end;
+
+destructor T_Fonte.Destroy;
+begin
+  FFonte.Free;
+  inherited Destroy;
 end;
 
 function T_Fonte.GetHeight: Integer;
