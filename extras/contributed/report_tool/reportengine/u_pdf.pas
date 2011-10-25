@@ -1448,7 +1448,7 @@ if PdfPage.Count> 0
 then
   for CptPage:= 0 to Pred(PdfPage.Count) do
     TPdfElement(PdfPage[CptPage]).Free;
-PdfPage.Free;
+//PdfPage.Free;
 end;
 
 destructor TPdfDocument.Destroy;

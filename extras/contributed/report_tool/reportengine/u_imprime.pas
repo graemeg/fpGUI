@@ -2125,6 +2125,7 @@ then
 Bords.Free;
 Textes.Free;
 ALigne.Free;
+PdfPage.Free;
 DecimalSeparator:= OldSeparator;
 inherited;
 end;
@@ -2139,7 +2140,9 @@ FMesure:= IniMesure;
 FPreparation:= ppPrepare;
 FVisualisation:= IniVisu;
 PrepareFormat;
-CreateVisu;
+if IniVisu
+then
+  CreateVisu;
 FFonteCourante:= -1;
 FInterLCourante:= -1;
 FGroupe:= False;
