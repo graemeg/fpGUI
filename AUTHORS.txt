@@ -3,8 +3,8 @@
  the fpGUI project.
 
 
-Core Developer
---------------
+Lead Developer and Maintainer
+-----------------------------
 Graeme Geldenhuys <graemeg@gmail.com>
  
 
