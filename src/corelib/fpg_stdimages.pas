@@ -311,6 +311,21 @@ begin
             @stdimg_dialog_error_32,
       sizeof(stdimg_dialog_error_32), 0,0);
 
+  fpgImages.AddMaskedBMP(
+            'stdimg.print',
+            @stdimg_print,
+      sizeof(stdimg_print), 0,0);
+
+  fpgImages.AddMaskedBMP(
+            'stdimg.Adobe_pdf',
+            @stdimg_Adobe_pdf,
+      sizeof(stdimg_Adobe_pdf), 0,0);
+
+  fpgImages.AddMaskedBMP(
+            'stdimg.preview',
+            @stdimg_preview,
+      sizeof(stdimg_preview), 0,0);
+
 {
   Here is a template for more images
 

@@ -78,6 +78,7 @@ type
       procedure ChangeBoutons;
     public
       constructor Create(AOwner: TComponent; AImprime: T_Imprime); reintroduce;
+      destructor Destroy; override;
     end;
 
 var
@@ -487,9 +488,9 @@ BackgroundColor:= clMediumAquamarine;
 CreateReportImages;
 Bv_Commande:= CreateBevel(Self,0,0,Width,50,bsBox,bsRaised);
 Bv_Commande.BackgroundColor:= clBisque;
-Bt_Fermer:= CreateButton(Bv_Commande,10,10,26,'',@Bt_FermerClick,'repimg.Fermer');
+Bt_Fermer:= CreateButton(Bv_Commande,10,10,26,'',@Bt_FermerClick,'stdimg.exit');
 Bt_Fermer.BackgroundColor:= clOrangeRed;
-Bt_Imprimer:= CreateButton(Bv_Commande,50,10,26,'',@Bt_ImprimerClick,'repimg.Imprimer');
+Bt_Imprimer:= CreateButton(Bv_Commande,50,10,26,'',@Bt_ImprimerClick,'stdimg.print');
 Bt_Imprimer.BackgroundColor:= clGreen;
 Bt_Imprimer.Enabled:= False;
 Bt_Imprimante:= CreateButton(Bv_Commande,90,10,26,'',@Bt_ImprimanteClick,'repimg.Imprimante');
@@ -497,7 +498,7 @@ Bt_Imprimante.BackgroundColor:= clSilver;
 Bt_Imprimante.Enabled:= False;
 Bt_Arreter:= CreateButton(Bv_Commande,130,10,26,'',@Bt_ArreterClick,'repimg.Stop');
 Bt_Arreter.BackgroundColor:= clRed;
-Bt_Pdf:= CreateButton(Bv_Commande,170,10,26,'',@Bt_PdfClick,'repimg.Adobe_pdf');
+Bt_Pdf:= CreateButton(Bv_Commande,170,10,26,'',@Bt_PdfClick,'stdimg.Adobe_pdf');
 Bt_Pdf.BackgroundColor:= clWhite;
 Bt_Pdf.ImageMargin:= 0;
 Bv_Pages:= CreateBevel(Bv_Commande,220,5,300,40,bsBox,bsLowered);
@@ -525,6 +526,12 @@ L_NumPageSect:= CreateLabel(Bv_Sections,365,E_NumSect.Top,'-',0,E_NumSect.Height
 L_DePageSect:= CreateLabel(Bv_Sections,410,E_NumSect.Top,'of',0,E_NumSect.Height,taLeftJustify,tlcenter);
 L_NbrPageSect:= CreateLabel(Bv_Sections,440,E_NumSect.Top,'-',0,E_NumSect.Height,taLeftJustify,tlcenter);
 OnShow:= @FormShow;
+end;
+
+destructor TF_Visu.Destroy;
+begin
+DeleteReportImages;
+inherited Destroy;
 end;
 
 end.
