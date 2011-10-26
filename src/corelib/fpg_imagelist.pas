@@ -73,7 +73,7 @@ type
     procedure   RemoveIndex(AIndex: integer);
     function    GetMaxItem: integer;
     procedure   Clear;
-    property    Items[AIndex: integer]: TfpgImageItem read GetItem write SetItem;
+    property    Items[AIndex: integer]: TfpgImageItem read GetItem write SetItem; default;
     property    Count: integer read GetCount;
   end;
 
