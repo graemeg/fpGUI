@@ -1,7 +1,7 @@
 {
     fpGUI  -  Free Pascal GUI Toolkit
 
-    Copyright (C) 2006 - 2010 See the file AUTHORS.txt, included in this
+    Copyright (C) 2006 - 2011 See the file AUTHORS.txt, included in this
     distribution, for details of the copyright.
 
     See the file COPYING.modifiedLGPL, included in this distribution,
@@ -23,13 +23,11 @@ unit fpg_tree;
 
 {
   TODO:
-    * Lots!!
+    * Lots! :-)
     * Columns need to be reworked. We don't want coluns per node levels. Instead
       we want a main column covering the tree. Then extra columns for user
       text and data.
     * Implement event handlers the user can hook into and do custom drawing.
-    
-  WARNING:   This is still under heavy development. Use at own risk!
 }
 
 {.$Define Debug}
@@ -61,6 +59,8 @@ type
   TfpgTreeNode = class;
   
   TfpgTreeNodeFindMethod = procedure(ANode: TfpgTreeNode; var AFound: boolean) of object;
+  TfpgTreeExpandEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
+  TfpgStateImageClickedEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
 
 
   TfpgTreeNode = class(TObject)
@@ -77,6 +77,7 @@ type
     FPrev: TfpgTreeNode;
     FSelColor: TfpgColor;
     FSelTextColor: TfpgColor;
+    FStateImageIndex: integer;
     FText: TfpgString;
     FTextColor: TfpgColor;
     FHasChildren: Boolean;
@@ -92,6 +93,7 @@ type
     procedure   DoRePaint;
     procedure   SetHasChildren(const AValue: Boolean);
     procedure   DoTreeCheck(ANode: TfpgTreeNode);
+    procedure   SetStateImageIndex(const AValue: integer);
   public
     constructor Create;
     destructor  Destroy; override;
@@ -122,12 +124,13 @@ type
     property    Data: Pointer read FData write FData;
     property    FirstSubNode: TfpgTreeNode read FFirstSubNode;
     property    ImageIndex: integer read FImageIndex write FImageIndex;
+    property    StateImageIndex: integer read FStateImageIndex write SetStateImageIndex;
     property    LastSubNode: TfpgTreeNode read FLastSubNode;
     property    Next: TfpgTreeNode read FNext write FNext;
     property    Parent: TfpgTreeNode read FParent write SetParent;
     property    Prev: TfpgTreeNode read FPrev write FPrev;
     property    Text: TfpgString read FText write SetText;
-          { determines the + or - image in the treeview }
+    { determines the + or - image in the treeview }
     property    HasChildren: Boolean read FHasChildren write SetHasChildren;
     // color settings
     property    InactSelColor: TfpgColor read FInactSelColor write SetInactSelColor;
@@ -138,12 +141,10 @@ type
   end;
   
   
-  TfpgTreeExpandEvent = procedure(Sender: TObject; ANode: TfpgTreeNode) of object;
-  
-  
   TfpgTreeView = class(TfpgWidget)
   private
     FImageList: TfpgImageList;
+    FStateImageList: TfpgImageList;
     FColumnHeight: integer; // height of the column header
     FDefaultColumnWidth: word;
     FIndentNodeWithNoImage: boolean;
@@ -156,6 +157,7 @@ type
     FNoImageIndent: integer;
     FOnChange: TNotifyEvent;
     FOnExpand: TfpgTreeExpandEvent;
+    FOnStateImageClicked: TfpgStateImageClickedEvent;
     FRootNode: TfpgTreeNode;
     FScrollWheelDelta: integer;
     FSelection: TfpgTreeNode; // currently selected node
@@ -181,7 +183,7 @@ type
     function    GetNodeHeightSum: integer;
     function    MaxNodeWidth: integer;
     function    GetNodeHeight: integer;
-    // width of a node inclusive image
+    // width of a node inclusive of image and state image
     function    GetNodeWidth(ANode: TfpgTreeNode): integer;
     function    NodeIsVisible(ANode: TfpgTreeNode): boolean;
     // returns the node-top in pixels
@@ -233,6 +235,7 @@ type
     property    RootNode: TfpgTreeNode read GetRootNode;
     property    Selection: TfpgTreeNode read FSelection write SetSelection;
     property    ImageList: TfpgImageList read FImageList write FImageList;
+    property    StateImageList: TfpgImageList read FStateImageList write FStateImageList;
     property    PopupMenu: TfpgPopupMenu read FPopupMenu write FPopupMenu;
   published
     property    Align;
@@ -256,6 +259,7 @@ type
     property    OnExpand: TfpgTreeExpandEvent read FOnExpand write FOnExpand;
     property    OnDoubleClick;
     property    OnShowHint;
+    property    OnStateImageClicked: TfpgStateImageClickedEvent read FOnStateImageClicked write FOnStateImageClicked;
   end;
   
 
@@ -351,7 +355,7 @@ end;
 
 procedure TfpgTreeNode.DoRePaint;
 begin
-  // todo
+//  FTree.Invalidate;
 end;
 
 procedure TfpgTreeNode.SetHasChildren(const AValue: Boolean);
@@ -369,6 +373,14 @@ begin
     raise Exception.Create('Nodes must be of the same tree');
 end;
 
+procedure TfpgTreeNode.SetStateImageIndex(const AValue: integer);
+begin
+  if FStateImageIndex = AValue then
+    exit;
+  FStateImageIndex := AValue;
+  DoRepaint;
+end;
+
 constructor TfpgTreeNode.Create;
 begin
   FData           := nil;
@@ -376,6 +388,7 @@ begin
   FLastSubNode    := nil;
   FText           := '';
   FImageIndex     := -1;
+  FStateImageIndex := -1;
   FCollapsed      := True;
   FHasChildren    := False;
 
@@ -1051,7 +1064,7 @@ end;
 
 function TfpgTreeview.GetNodeWidth(ANode: TfpgTreeNode): integer;
 var
-  AImage: TfpgImageItem;
+  lImageItem: TfpgImageItem;
 begin
   {$IFDEF DEBUG}
   SendDebug(Classname + '.GetNodeWidth');
@@ -1061,16 +1074,33 @@ begin
   else
   begin
     Result := FFont.TextWidth(ANode.Text) + 2;
-    if ShowImages and (ImageList <> nil) then
+    if ShowImages and ((ImageList <> nil) or (StateImageList <> nil)) then
     begin
-      if ANode.ImageIndex > -1 then
+      if ImageList <> nil then
       begin
-        AImage := ImageList.Items[ANode.ImageIndex];
-        if AImage <> nil then
-          result := result + AImage.Image.Width + 2;
+        if ANode.ImageIndex > -1 then
+        begin
+          lImageItem := ImageList.Items[ANode.ImageIndex];
+          if lImageItem <> nil then
+            result += lImageItem.Image.Width + 2;
+        end
+        else if IndentNodeWithNoImage then
+          result += NoImageIndent + 2;
       end
       else if IndentNodeWithNoImage then
-        result := result + NoImageIndent + 2;
+        result += NoImageIndent + 2;
+
+      if StateImageList <> nil then
+      begin
+        if ANode.StateImageIndex > -1 then
+        begin
+          lImageItem := StateImageList.Items[ANode.StateImageIndex];
+          if lImageItem <> nil then
+            result += lImageItem.Image.Width + 2;
+        end
+        else if IndentNodeWithNoImage then
+          result += NoImageIndent + 2;
+      end;
     end;
   end;  { if/else }
 end;
@@ -1316,6 +1346,7 @@ var
   node: TfpgTreeNode;
   cancel: boolean;
   OldSel: TfpgTreeNode;
+  lNodeXOffset: integer;
 begin
   inherited HandleLMouseUp(x, y, shiftstate);
 
@@ -1376,8 +1407,20 @@ begin
       end
       else
       begin
-        if x > w - GetColumnWidth(i1) div 2 + 6 then
+        lNodeXOffset := w - GetColumnWidth(i1) div 2 + 6;
+        if x > lNodeXOffset then  { we clicked in the actual treenode area }
+        begin
           Selection := node;
+          if (StateImageList <> nil) and ShowImages then
+          begin
+            { did we click on the state image }
+            if (x > lNodeXOffset) and (x < (lNodeXOffset+18)) then
+            begin
+              if Assigned(OnStateImageClicked) then
+                FOnStateImageClicked(self, node);
+            end;
+          end;
+        end;
       end;
     end;
   end;
@@ -1459,6 +1502,7 @@ var
   col: integer;
   ACenterPos: integer;
   x: integer;
+  imgx: integer;
   y: integer;
   AImageItem: TfpgImageItem;
   AVisibleHeight: integer;
@@ -1541,10 +1585,46 @@ begin
     ACenterPos := YPos - FYOffset + col + (GetNodeHeight div 2);
     YPos := YPos + GetNodeHeight;
     i := GetColumnLeft(StepToRoot(h)) + GetNodeWidth(h);
+    imgx := 0;
 
     // only paint the node if it is fully visible
     if i > FXOffset then
     begin
+      // State images must always be 16x16 pixels
+      if (StateImageList <> nil) and ShowImages then
+      begin
+        AImageItem := StateImageList.Items[h.StateImageIndex];
+        if Assigned(AImageItem) then
+        begin
+          Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
+          imgx := 18; // 16px max image width + 2px spacing or right
+        end
+        else
+        begin
+          if FIndentNodeWithNoImage then
+            imgx := 18
+          else
+            imgx := 0;
+        end;
+      end;
+
+      if (ImageList <> nil) and ShowImages then
+      begin
+        AImageItem := ImageList.Items[h.ImageIndex];
+        if AImageItem <> nil then
+        begin
+          Canvas.DrawImagePart(w + imgx - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
+          imgx += AImageItem.Image.Width + 2; // 1px spacing on right before node text
+        end
+        else
+        begin
+          if FIndentNodeWithNoImage then
+            imgx += FNoImageIndent + 2
+          else
+            imgx += 2;
+        end;
+      end;
+
       if h = Selection then // draw the selection rectangle and text
       begin
         if Focused then
@@ -1558,50 +1638,14 @@ begin
           Canvas.SetTextColor(h.ParentInActSelTextColor);
         end;
         // draw selection rectangle
-        Canvas.FillRectangle(w - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h), GetNodeHeight);
-        if (ImageList <> nil) and ShowImages then
-        begin
-          AImageItem := ImageList.Items[h.ImageIndex];
-          if AImageItem <> nil then
-          begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
-            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - (GetNodeHeight div 2), h.text);
-          end
-          else
-          begin
-            if FIndentNodeWithNoImage then
-              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - (GetNodeHeight div 2), h.text)
-            else
-              Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
-          end;
-        end
-        else
-          Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
-        Canvas.SetTextColor(h.ParentTextColor);
-      end
-      else
-      begin
-        if (ImageList <> nil) and ShowImages then
-        begin
-          AImageItem := ImageList.Items[h.ImageIndex];
-          if AImageItem <> nil then
-          begin
-            Canvas.DrawImagePart(w - FXOffset + 1, ACenterPos - 8, AImageItem.Image, 0, 0, 16, 16);
-            Canvas.DrawString(w - FXOffset + 1 + AImageItem.Image.Width + 2, ACenterPos - (GetNodeHeight div 2), h.text);
-          end
-          else
-          begin
-            if FIndentNodeWithNoImage then
-              Canvas.DrawString(w - FXOffset + 1 + FNoImageIndent + 2 {spacer}, ACenterPos - (GetNodeHeight div 2), h.text)
-            else
-              Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
-          end
-        end
-        else
-          Canvas.DrawString(w - FXOffset + 1, ACenterPos - (GetNodeHeight div 2), h.text);
-      end;  { if/else }
+        Canvas.FillRectangle(w + imgx - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h) - imgx, GetNodeHeight);
+      end;
 
+      Canvas.DrawString(w + imgx - FXOffset, ACenterPos - (GetNodeHeight div 2), h.text);
+
+      Canvas.SetTextColor(h.ParentTextColor);
       Canvas.SetLineStyle(1, FTreeLineStyle);
+
       if (h.Count > 0) or h.HasChildren then   // do we have subnodes?
       begin
         // small horizontal line above rectangle for first subnode (with children) only
@@ -1869,7 +1913,7 @@ end;
 procedure TfpgTreeview.DoExpand(ANode: TfpgTreeNode);
 begin
   if Assigned(FOnExpand) then
-	  FOnExpand(self, ANode);
+    FOnExpand(self, ANode);
 end;
 
 function TfpgTreeview.NextVisualNode(ANode: TfpgTreeNode): TfpgTreeNode;
