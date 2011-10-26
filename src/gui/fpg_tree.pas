@@ -261,6 +261,11 @@ type
 
 implementation
 
+{.$IFDEF DEBUG}
+uses
+  dbugintf;
+{.$ENDIF}
+
 type
   PColumnLeft = ^integer;
 
@@ -449,7 +454,6 @@ begin
     h := FirstSubNode;
     while h <> nil do
     begin
-//      writeln('h.Text = ', h.Text);
       if h.Text = AText then
       begin
         result := h;
@@ -552,7 +556,7 @@ var
   h: TfpgTreeNode;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeNode.AppendText');
+  SendDebug(Classname + '.AppendText');
   {$ENDIF}
   h := TfpgTreeNode.Create;
   h.FTree := FTree;
@@ -568,7 +572,7 @@ var
   t: integer;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeNode.GetMaxDepth');
+  SendDebug(Classname + '.GetMaxDepth');
   {$ENDIF}
   h := FirstSubNode;
   result := 1;
@@ -590,7 +594,7 @@ var
   t: integer;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeNode.GetMaxVisibleDepth');
+  SendDebug(Classname + '.GetMaxVisibleDepth');
   {$ENDIF}
   result := 1;
   h := FirstSubNode;
@@ -811,7 +815,7 @@ end;
 procedure TfpgTreeview.VScrollbarScroll(Sender: TObject; position: integer);
 begin
   {$IFDEF DEBUG}
-  writeln(Classname, '.VScrollbarMove');
+  SendDebug(Classname + '.VScrollbarMove');
   {$ENDIF}
   FYOffset := Position;
   RePaint;
@@ -1007,7 +1011,7 @@ var
   r: integer;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeView.MaxNodeWidth');
+  SendDebug(Classname + '.MaxNodeWidth');
   {$ENDIF}
   result := 0;
   h := RootNode.FirstSubNode;
@@ -1050,7 +1054,7 @@ var
   AImage: TfpgImageItem;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeView.GetNodeWidth');
+  SendDebug(Classname + '.GetNodeWidth');
   {$ENDIF}
   if ANode = nil then
     Result := 0
@@ -1123,7 +1127,7 @@ var
   i: integer;
 begin
 {$IFDEF DEBUG}
-  writeln('TfpgTreeView.GetColumnWidth');
+  SendDebug(Classname + '.GetColumnWidth');
 {$ENDIF}
   h := FFirstColumn;
   i := 0;
@@ -1204,7 +1208,7 @@ var
   AColumnLeft: PColumnLeft;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeView.PreCalcColumnWidth');
+  SendDebug(Classname + '.PreCalcColumnLeft');
   {$ENDIf}
   if FColumnLeft = nil then
 	  FColumnLeft := TList.Create;
@@ -1230,7 +1234,7 @@ end;
 procedure TfpgTreeview.UpdateScrollbars;
 begin
   {$IFDEF DEBUG}
-  writeln(Classname, '.UpdateScrollbars');
+  SendDebug(Classname + '.UpdateScrollbars');
   {$ENDIF}
   FVScrollbar.Visible := VisibleHeight < (GetNodeHeightSum * GetNodeHeight);
   FVScrollbar.Min := 0;
@@ -1263,7 +1267,7 @@ end;
 procedure TfpgTreeview.ResetScrollbar;
 begin
   {$IFDEF DEBUG}
-  writeln(Classname, '.ResetScrollbar');
+  SendDebug(Classname + '.ResetScrollbar');
   {$ENDIF}
   UpdateScrollBars;
   if FHScrollbar.Visible then
@@ -1294,7 +1298,7 @@ end;
 procedure TfpgTreeview.HandleResize(awidth, aheight: TfpgCoord);
 begin
   {$IFDEF DEBUG}
-  writeln(Classname, '.HandleResize');
+  SendDebug(Classname + '.HandleResize');
   {$ENDIF}
   inherited HandleResize(awidth, aheight);
   if not (csLoading in ComponentState) then
@@ -1460,7 +1464,7 @@ var
   AVisibleHeight: integer;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeview.HandlePaint');
+  SendDebug(Classname + '.HandlePaint');
   {$ENDIF}
 //  inherited HandlePaint;
 
@@ -1541,7 +1545,6 @@ begin
     // only paint the node if it is fully visible
     if i > FXOffset then
     begin
-//      writeln('painting node: ', h.Text);
       if h = Selection then // draw the selection rectangle and text
       begin
         if Focused then
@@ -2082,7 +2085,7 @@ var
   i: word;
 begin
   {$IFDEF DEBUG}
-  writeln('TfpgTreeView.SetColumnWidth');
+  SendDebug(Classname + '.SetColumnWidth');
   {$ENDIF}
   h := FFirstColumn;
   if h = nil then
