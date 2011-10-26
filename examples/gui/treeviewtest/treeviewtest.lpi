@@ -1,19 +1,21 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
-    <Version Value="6"/>
+    <Version Value="9"/>
     <General>
       <Flags>
         <SaveOnlyProjectUnits Value="True"/>
+        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <TargetFileExt Value=""/>
     </General>
     <VersionInfo>
-      <ProjectVersion Value=""/>
+      <StringTable ProductVersion=""/>
     </VersionInfo>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
@@ -30,24 +32,32 @@
         <PackageName Value="fpgui_toolkit"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
         <Filename Value="treeviewtest.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="treeviewtest"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="stateimages.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="stateimages"/>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="8"/>
+    <Version Value="9"/>
     <Parsing>
       <SyntaxOptions>
         <CStyleOperator Value="False"/>
+        <UseAnsiStrings Value="False"/>
       </SyntaxOptions>
     </Parsing>
     <Other>
-      <CustomOptions Value="-FUunits
-"/>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
+      <CustomOptions Value="-FUunits"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

@@ -18,7 +18,8 @@ uses
   fpg_label,
   fpg_dialogs,
   fpg_combobox,
-  fpg_utils;
+  fpg_utils,
+  stateimages;
 
 type
 
@@ -45,8 +46,10 @@ type
     Label8: TfpgLabel;
     btnCollapseAll: TfpgButton;
     btnExpandAll: TfpgButton;
+    btnShowChecked: TfpgButton;
     {@VFD_HEAD_END: MainForm}
     FImagelist: TfpgImageList;
+    FStateImagelist: TfpgImageList;
     FSrcNode: TfpgTreeNode;
     FDestnode: TfpgTreeNode;
     procedure   cbShowImagesChange(Sender: TObject);
@@ -59,6 +62,8 @@ type
     procedure   btnMoveToClicked(Sender: TObject);
     procedure   btnCollapseAllClicked(Sender: TObject);
     procedure   btnExpandAllClicked(Sender: TObject);
+    procedure   StateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
+    procedure   btnShowCheckedClicked(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor  Destroy; override;
@@ -122,8 +127,13 @@ begin
   n := tree.RootNode.AppendText('Node 1');
 
   n.ImageIndex := 0;
-  n.AppendText('Node 1.1').ImageIndex := 1;
-  n.AppendText('Node 1.2').ImageIndex := 1;
+  n.StateImageIndex := 1;
+  n2 := n.AppendText('Node 1.1');
+  n2.ImageIndex := 1;
+  n2.StateImageIndex := 1;
+  n2 := n.AppendText('Node 1.2');
+  n2.ImageIndex := 1;
+  n2.StateImageIndex := 0;
   n := tree.RootNode.AppendText('Node 2');
   n.ImageIndex := 0;
   n.AppendText('Node 2.1').ImageIndex := 1;
@@ -137,7 +147,8 @@ begin
     else
       n.AppendText(s);
   end;
-  n.Parent.AppendText('Node 2.3');
+  n2 := n.Parent.AppendText('Node 2.3');
+  n2.StateImageIndex := 0;
   tree.RootNode.FirstSubNode.Next.Collapse;
   tree.RootNode.AppendText('Node 3').ImageIndex := 0;
   tree.Selection := n;
@@ -198,6 +209,31 @@ begin
   TreeNodeChanged(nil);
 end;
 
+procedure TMainForm.StateImageClicked(Sender: TObject; ANode: TfpgTreeNode);
+begin
+  case ANode.StateImageIndex of
+    0:  ANode.StateImageIndex := 1;
+    1:  ANode.StateImageIndex := 0;
+  end;
+  tree.Invalidate;
+end;
+
+procedure TMainForm.btnShowCheckedClicked(Sender: TObject);
+var
+  n: TfpgTreeNode;
+  s: string;
+begin
+  s := 'These are all the nodes that have checkboxes and are checked:' + LineEnding;
+  n := tree.RootNode;
+  while n <> nil do
+  begin
+    if n.StateImageIndex = 1 then
+      s += LineEnding + n.Text;
+    n := Tree.NextNode(n);
+  end;
+  ShowMessage(s);
+end;
+
 procedure TMainForm.cbShowImagesChange(Sender: TObject);
 begin
   tree.ShowImages := cbShowImages.Checked;
@@ -216,12 +252,24 @@ begin
     FImagelist.Items[1].Image.CreateMaskFromSample(0, 0);
     FImagelist.Items[1].Image.UpdateImage;
   end;
+
+  InitializeCustomImages;
+  FStateImagelist := TfpgImageList.Create;
+  FStateImagelist.AddImage(fpgImages.GetImage('usr.state0'));
+  FStateImagelist.AddImage(fpgImages.GetImage('usr.state1'));
+
 end;
 
 destructor TMainForm.Destroy;
+var
+  i: integer;
 begin
   tree.ImageList := nil;
+  tree.StateImageList := nil;
   FImagelist.Free;
+  for i := FStateImageList.Count-1 downto 0 do
+    FStateImageList[i].Image := nil;
+  FStateImageList.Free;
   inherited Destroy;
 end;
 
@@ -247,7 +295,9 @@ begin
     ShowImages := True;
     TabOrder := 0;
     ImageList := FImagelist;
+    StateImageList := FStateImagelist;
     OnChange  := @TreeNodeChanged;
+    OnStateImageClicked  := @StateImageClicked;
   end;
 
   cbShowImages := TfpgCheckBox.Create(self);
@@ -406,6 +456,7 @@ begin
   begin
     Name := 'cbMoveToTypes';
     SetPosition(612, 172, 96, 22);
+    ExtraHint := '';
     FontDesc := '#List';
     Hint := '';
     Items.Add('naAdd');
@@ -413,8 +464,8 @@ begin
     Items.Add('naAddChild');
     Items.Add('naAddChildFirst');
     Items.Add('naInsert');
-    TabOrder := 14;
     FocusItem := 0;
+    TabOrder := 14;
   end;
 
   Label6 := TfpgLabel.Create(self);
@@ -471,6 +522,19 @@ begin
     ImageName := '';
     TabOrder := 20;
     OnClick := @btnExpandAllClicked;
+  end;
+
+  btnShowChecked := TfpgButton.Create(self);
+  with btnShowChecked do
+  begin
+    Name := 'btnShowChecked';
+    SetPosition(160, 304, 100, 24);
+    Text := 'Show Checked';
+    FontDesc := '#Label1';
+    Hint := '';
+    ImageName := '';
+    TabOrder := 21;
+    OnClick  := @btnShowCheckedClicked;
   end;
 
   {@VFD_BODY_END: MainForm}
