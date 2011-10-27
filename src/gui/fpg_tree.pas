@@ -28,6 +28,9 @@ unit fpg_tree;
       we want a main column covering the tree. Then extra columns for user
       text and data.
     * Implement event handlers the user can hook into and do custom drawing.
+    * TfpgTreeNode.HasChildren property is not fully implemented yet. The
+      property is not update when you do .Append() or .AppendText() calls. It
+      such cases .Count is prefered.
 }
 
 {.$Define Debug}
@@ -455,6 +458,7 @@ begin
     FLastSubNode.Next := ANode;
 
   FLastSubNode := ANode;
+  FHasChildren := True;
 end;
 
 function TfpgTreeNode.FindSubNode(AText: string; ARecursive: Boolean): TfpgTreeNode;
@@ -756,6 +760,7 @@ begin
     Remove(tn);
     tn.Free;
   end;
+  FHasChildren := False;
 end;
 
 function TfpgTreeNode.ParentTextColor: TfpgColor;
