@@ -1078,7 +1078,7 @@ begin
     Result := 0
   else
   begin
-    Result := FFont.TextWidth(ANode.Text) + 2;
+    Result := FFont.TextWidth(ANode.Text) + 4;
     if ShowImages and ((ImageList <> nil) or (StateImageList <> nil)) then
     begin
       if ImageList <> nil then
@@ -1518,7 +1518,7 @@ begin
 //  inherited HandlePaint;
 
   Canvas.ClearClipRect;
-  Canvas.Clear(FBackgroundColor);
+  Canvas.Clear(BackgroundColor);
 
   // Limit painting in the UI Designer
   if csDesigning in ComponentState then
@@ -1646,7 +1646,7 @@ begin
         Canvas.FillRectangle(w + imgx - FXOffset, ACenterPos - (GetNodeHeight div 2), GetNodeWidth(h) - imgx, GetNodeHeight);
       end;
 
-      Canvas.DrawString(w + imgx - FXOffset, ACenterPos - (GetNodeHeight div 2), h.text);
+      Canvas.DrawString(w + imgx - FXOffset + 2 { small spacing }, ACenterPos - (GetNodeHeight div 2), h.text);
 
       Canvas.SetTextColor(h.ParentTextColor);
       Canvas.SetLineStyle(1, FTreeLineStyle);
